@@ -66,17 +66,40 @@ PluginInterface::SamplingDevices BladerfOutputPlugin::enumSampleSinks()
 	{
         for(int i = 0; i < count; i++)
         {
-            QString displayedName(QString("BladeRF[%1] %2").arg(devinfo[i].instance).arg(devinfo[i].serial));
+            struct bladerf *dev;
 
-            result.append(SamplingDevice(displayedName,
-                    m_hardwareID,
-                    m_deviceTypeID,
-                    QString(devinfo[i].serial),
-                    i,
-                    PluginInterface::SamplingDevice::PhysicalDevice,
-                    false,
-                    1,
-                    0));
+            int status = bladerf_open_with_devinfo(&dev, &devinfo[i]);
+
+            if (status == BLADERF_ERR_NODEV)
+            {
+                qCritical("BladerfOutputPlugin::enumSampleSinks: No device at index %d", i);
+                continue;
+            }
+            else if (status != 0)
+            {
+                qCritical("BladerfOutputPlugin::enumSampleSinks: Failed to open device at index %d", i);
+                continue;
+            }
+
+            const char *boardName = bladerf_get_board_name(dev);
+
+            if (strcmp(boardName, "bladerf1") == 0)
+            {
+                QString displayedName(QString("BladeRF1[%1] %2").arg(devinfo[i].instance).arg(devinfo[i].serial));
+
+                result.append(SamplingDevice(displayedName,
+                        m_hardwareID,
+                        m_deviceTypeID,
+                        QString(devinfo[i].serial),
+                        i,
+                        PluginInterface::SamplingDevice::PhysicalDevice,
+                        false,
+                        1,
+                        0));
+
+            }
+
+            bladerf_close(dev);
         }
 
 		bladerf_free_device_list(devinfo); // Valgrind memcheck
