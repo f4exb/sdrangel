@@ -14,41 +14,47 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_BLADERFINPUTPLUGIN_H
-#define INCLUDE_BLADERFINPUTPLUGIN_H
+#ifndef INCLUDE_BLADERFINPUTTHREAD_H
+#define INCLUDE_BLADERFINPUTTHREAD_H
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
+#include <libbladeRF.h>
+#include "dsp/samplesinkfifo.h"
+#include "dsp/decimators.h"
 
-class PluginAPI;
-class DeviceSourceAPI;
-class DeviceUISet;
+#define BLADERF_BLOCKSIZE (1<<14)
 
-#define BLADERF1INPUT_DEVICE_TYPE_ID "sdrangel.samplesource.bladerf1input"
-
-class BlderfInputPlugin : public QObject, public PluginInterface {
+class Bladerf1InputThread : public QThread {
 	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID BLADERF1INPUT_DEVICE_TYPE_ID)
 
 public:
-	explicit BlderfInputPlugin(QObject* parent = NULL);
+    Bladerf1InputThread(struct bladerf* dev, SampleSinkFifo* sampleFifo, QObject* parent = NULL);
+	~Bladerf1InputThread();
 
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
-
-	virtual SamplingDevices enumSampleSources();
-	virtual PluginInstanceGUI* createSampleSourcePluginInstanceGUI(
-	        const QString& sourceId,
-	        QWidget **widget,
-	        DeviceUISet *deviceUISet);
-	virtual DeviceSampleSource* createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI);
-
-	static const QString m_hardwareID;
-    static const QString m_deviceTypeID;
+	void startWork();
+	void stopWork();
+	void setLog2Decimation(unsigned int log2_decim);
+	void setFcPos(int fcPos);
 
 private:
-	static const PluginDescriptor m_pluginDescriptor;
+	QMutex m_startWaitMutex;
+	QWaitCondition m_startWaiter;
+	bool m_running;
+
+	struct bladerf* m_dev;
+	qint16 m_buf[2*BLADERF_BLOCKSIZE];
+	SampleVector m_convertBuffer;
+    SampleSinkFifo* m_sampleFifo;
+
+	unsigned int m_log2Decim;
+	int m_fcPos;
+
+	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators;
+
+	void run();
+	void callback(const qint16* buf, qint32 len);
 };
 
-#endif // INCLUDE_BLADERFINPUTPLUGIN_H
+#endif // INCLUDE_BLADERFINPUTTHREAD_H

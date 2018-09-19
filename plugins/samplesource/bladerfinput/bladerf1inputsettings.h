@@ -21,7 +21,7 @@
 #include <QString>
 #include <libbladeRF.h>
 
-struct BladeRFInputSettings {
+struct BladeRF1InputSettings {
 	typedef enum {
 		FC_POS_INFRA = 0,
 		FC_POS_SUPRA,
@@ -43,7 +43,7 @@ struct BladeRFInputSettings {
 	bool m_iqCorrection;
 	QString m_fileRecordName;
 
-	BladeRFInputSettings();
+	BladeRF1InputSettings();
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);

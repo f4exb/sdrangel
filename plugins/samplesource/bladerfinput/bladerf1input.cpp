@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "bladerfinput.h"
+#include "bladerf1input.h"
 
 #include <string.h>
 #include <errno.h>
@@ -30,13 +30,13 @@
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 
-#include "bladerfinputthread.h"
+#include "bladerf1inputthread.h"
 
-MESSAGE_CLASS_DEFINITION(BladerfInput::MsgConfigureBladerf, Message)
-MESSAGE_CLASS_DEFINITION(BladerfInput::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(BladerfInput::MsgFileRecord, Message)
+MESSAGE_CLASS_DEFINITION(Bladerf1Input::MsgConfigureBladerf1, Message)
+MESSAGE_CLASS_DEFINITION(Bladerf1Input::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(Bladerf1Input::MsgFileRecord, Message)
 
-BladerfInput::BladerfInput(DeviceSourceAPI *deviceAPI) :
+Bladerf1Input::Bladerf1Input(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),
@@ -51,7 +51,7 @@ BladerfInput::BladerfInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 }
 
-BladerfInput::~BladerfInput()
+Bladerf1Input::~Bladerf1Input()
 {
     if (m_running) stop();
     m_deviceAPI->removeSink(m_fileSink);
@@ -60,12 +60,12 @@ BladerfInput::~BladerfInput()
     m_deviceAPI->setBuddySharedPtr(0);
 }
 
-void BladerfInput::destroy()
+void Bladerf1Input::destroy()
 {
     delete this;
 }
 
-bool BladerfInput::openDevice()
+bool Bladerf1Input::openDevice()
 {
     if (m_dev != 0)
     {
@@ -127,12 +127,12 @@ bool BladerfInput::openDevice()
     return true;
 }
 
-void BladerfInput::init()
+void Bladerf1Input::init()
 {
     applySettings(m_settings, true);
 }
 
-bool BladerfInput::start()
+bool Bladerf1Input::start()
 {
 //	QMutexLocker mutexLocker(&m_mutex);
 
@@ -144,7 +144,7 @@ bool BladerfInput::start()
 
     if (m_running) stop();
 
-	m_bladerfThread = new BladerfInputThread(m_dev, &m_sampleFifo);
+	m_bladerfThread = new Bladerf1InputThread(m_dev, &m_sampleFifo);
 	m_bladerfThread->setLog2Decimation(m_settings.m_log2Decim);
 	m_bladerfThread->setFcPos((int) m_settings.m_fcPos);
 
@@ -159,7 +159,7 @@ bool BladerfInput::start()
 	return true;
 }
 
-void BladerfInput::closeDevice()
+void Bladerf1Input::closeDevice()
 {
     int res;
 
@@ -186,7 +186,7 @@ void BladerfInput::closeDevice()
     m_dev = 0;
 }
 
-void BladerfInput::stop()
+void Bladerf1Input::stop()
 {
 //	QMutexLocker mutexLocker(&m_mutex);
 
@@ -200,12 +200,12 @@ void BladerfInput::stop()
 	m_running = false;
 }
 
-QByteArray BladerfInput::serialize() const
+QByteArray Bladerf1Input::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool BladerfInput::deserialize(const QByteArray& data)
+bool Bladerf1Input::deserialize(const QByteArray& data)
 {
     bool success = true;
 
@@ -215,55 +215,55 @@ bool BladerfInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureBladerf* message = MsgConfigureBladerf::create(m_settings, true);
+    MsgConfigureBladerf1* message = MsgConfigureBladerf1::create(m_settings, true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureBladerf* messageToGUI = MsgConfigureBladerf::create(m_settings, true);
+        MsgConfigureBladerf1* messageToGUI = MsgConfigureBladerf1::create(m_settings, true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
     return success;
 }
 
-const QString& BladerfInput::getDeviceDescription() const
+const QString& Bladerf1Input::getDeviceDescription() const
 {
 	return m_deviceDescription;
 }
 
-int BladerfInput::getSampleRate() const
+int Bladerf1Input::getSampleRate() const
 {
 	int rate = m_settings.m_devSampleRate;
 	return (rate / (1<<m_settings.m_log2Decim));
 }
 
-quint64 BladerfInput::getCenterFrequency() const
+quint64 Bladerf1Input::getCenterFrequency() const
 {
 	return m_settings.m_centerFrequency;
 }
 
-void BladerfInput::setCenterFrequency(qint64 centerFrequency)
+void Bladerf1Input::setCenterFrequency(qint64 centerFrequency)
 {
-    BladeRFInputSettings settings = m_settings;
+    BladeRF1InputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureBladerf* message = MsgConfigureBladerf::create(settings, false);
+    MsgConfigureBladerf1* message = MsgConfigureBladerf1::create(settings, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureBladerf* messageToGUI = MsgConfigureBladerf::create(settings, false);
+        MsgConfigureBladerf1* messageToGUI = MsgConfigureBladerf1::create(settings, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
 
-bool BladerfInput::handleMessage(const Message& message)
+bool Bladerf1Input::handleMessage(const Message& message)
 {
-	if (MsgConfigureBladerf::match(message))
+	if (MsgConfigureBladerf1::match(message))
 	{
-		MsgConfigureBladerf& conf = (MsgConfigureBladerf&) message;
-		qDebug() << "BladerfInput::handleMessage: MsgConfigureBladerf";
+		MsgConfigureBladerf1& conf = (MsgConfigureBladerf1&) message;
+		qDebug() << "Bladerf1Input::handleMessage: MsgConfigureBladerf1";
 
 		if (!applySettings(conf.getSettings(), conf.getForce()))
 		{
@@ -319,7 +319,7 @@ bool BladerfInput::handleMessage(const Message& message)
 	}
 }
 
-bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool force)
+bool Bladerf1Input::applySettings(const BladeRF1InputSettings& settings, bool force)
 {
 	bool forwardChange = false;
 //	QMutexLocker mutexLocker(&m_mutex);
@@ -591,7 +591,7 @@ bool BladerfInput::applySettings(const BladeRFInputSettings& settings, bool forc
 	return true;
 }
 
-bladerf_lna_gain BladerfInput::getLnaGain(int lnaGain)
+bladerf_lna_gain Bladerf1Input::getLnaGain(int lnaGain)
 {
 	if (lnaGain == 2)
 	{
@@ -607,7 +607,7 @@ bladerf_lna_gain BladerfInput::getLnaGain(int lnaGain)
 	}
 }
 
-int BladerfInput::webapiSettingsGet(
+int Bladerf1Input::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
                 QString& errorMessage __attribute__((unused)))
 {
@@ -617,7 +617,7 @@ int BladerfInput::webapiSettingsGet(
     return 200;
 }
 
-void BladerfInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRFInputSettings& settings)
+void Bladerf1Input::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF1InputSettings& settings)
 {
     response.getBladeRf1InputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getBladeRf1InputSettings()->setDevSampleRate(settings.m_devSampleRate);
@@ -640,13 +640,13 @@ void BladerfInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     }
 }
 
-int BladerfInput::webapiSettingsPutPatch(
+int Bladerf1Input::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage __attribute__((unused)))
 {
-    BladeRFInputSettings settings = m_settings;
+    BladeRF1InputSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getBladeRf1InputSettings()->getCenterFrequency();
@@ -670,7 +670,7 @@ int BladerfInput::webapiSettingsPutPatch(
         settings.m_log2Decim = response.getBladeRf1InputSettings()->getLog2Decim();
     }
     if (deviceSettingsKeys.contains("fcPos")) {
-        settings.m_fcPos = static_cast<BladeRFInputSettings::fcPos_t>(response.getBladeRf1InputSettings()->getFcPos());
+        settings.m_fcPos = static_cast<BladeRF1InputSettings::fcPos_t>(response.getBladeRf1InputSettings()->getFcPos());
     }
     if (deviceSettingsKeys.contains("xb200")) {
         settings.m_xb200 = response.getBladeRf1InputSettings()->getXb200() == 0 ? 0 : 1;
@@ -691,12 +691,12 @@ int BladerfInput::webapiSettingsPutPatch(
         settings.m_fileRecordName = *response.getBladeRf1InputSettings()->getFileRecordName();
     }
 
-    MsgConfigureBladerf *msg = MsgConfigureBladerf::create(settings, force);
+    MsgConfigureBladerf1 *msg = MsgConfigureBladerf1::create(settings, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureBladerf *msgToGUI = MsgConfigureBladerf::create(settings, force);
+        MsgConfigureBladerf1 *msgToGUI = MsgConfigureBladerf1::create(settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -704,7 +704,7 @@ int BladerfInput::webapiSettingsPutPatch(
     return 200;
 }
 
-int BladerfInput::webapiRunGet(
+int Bladerf1Input::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage __attribute__((unused)))
 {
@@ -712,7 +712,7 @@ int BladerfInput::webapiRunGet(
     return 200;
 }
 
-int BladerfInput::webapiRun(
+int Bladerf1Input::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage __attribute__((unused)))

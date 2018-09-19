@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../bladerfinput/bladerfinputthread.h"
+#include "bladerf1inputthread.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -23,7 +23,7 @@
 
 
 
-BladerfInputThread::BladerfInputThread(struct bladerf* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
+Bladerf1InputThread::Bladerf1InputThread(struct bladerf* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),
@@ -35,12 +35,12 @@ BladerfInputThread::BladerfInputThread(struct bladerf* dev, SampleSinkFifo* samp
     std::fill(m_buf, m_buf + 2*BLADERF_BLOCKSIZE, 0);
 }
 
-BladerfInputThread::~BladerfInputThread()
+Bladerf1InputThread::~Bladerf1InputThread()
 {
 	stopWork();
 }
 
-void BladerfInputThread::startWork()
+void Bladerf1InputThread::startWork()
 {
 	m_startWaitMutex.lock();
 	start();
@@ -49,23 +49,23 @@ void BladerfInputThread::startWork()
 	m_startWaitMutex.unlock();
 }
 
-void BladerfInputThread::stopWork()
+void Bladerf1InputThread::stopWork()
 {
 	m_running = false;
 	wait();
 }
 
-void BladerfInputThread::setLog2Decimation(unsigned int log2_decim)
+void Bladerf1InputThread::setLog2Decimation(unsigned int log2_decim)
 {
 	m_log2Decim = log2_decim;
 }
 
-void BladerfInputThread::setFcPos(int fcPos)
+void Bladerf1InputThread::setFcPos(int fcPos)
 {
 	m_fcPos = fcPos;
 }
 
-void BladerfInputThread::run()
+void Bladerf1InputThread::run()
 {
 	int res;
 
@@ -85,7 +85,7 @@ void BladerfInputThread::run()
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void BladerfInputThread::callback(const qint16* buf, qint32 len)
+void Bladerf1InputThread::callback(const qint16* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 

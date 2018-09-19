@@ -14,18 +14,18 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "bladerfinputsettings.h"
+#include "bladerf1inputsettings.h"
 
 #include <QtGlobal>
 #include "util/simpleserializer.h"
 
 
-BladeRFInputSettings::BladeRFInputSettings()
+BladeRF1InputSettings::BladeRF1InputSettings()
 {
 	resetToDefaults();
 }
 
-void BladeRFInputSettings::resetToDefaults()
+void BladeRF1InputSettings::resetToDefaults()
 {
 	m_centerFrequency = 435000*1000;
     m_devSampleRate = 3072000;
@@ -43,7 +43,7 @@ void BladeRFInputSettings::resetToDefaults()
 	m_fileRecordName = "";
 }
 
-QByteArray BladeRFInputSettings::serialize() const
+QByteArray BladeRF1InputSettings::serialize() const
 {
 	SimpleSerializer s(1);
 
@@ -63,7 +63,7 @@ QByteArray BladeRFInputSettings::serialize() const
 	return s.final();
 }
 
-bool BladeRFInputSettings::deserialize(const QByteArray& data)
+bool BladeRF1InputSettings::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 

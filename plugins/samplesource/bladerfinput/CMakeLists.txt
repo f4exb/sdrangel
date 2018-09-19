@@ -3,19 +3,19 @@ project(bladerfinput)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(bladerfinput_SOURCES
-	bladerfinputgui.cpp
-	bladerfinput.cpp
-	bladerfinputplugin.cpp
-	bladerfinputsettings.cpp
-	bladerfinputthread.cpp
+	bladerf1inputgui.cpp
+	bladerf1input.cpp
+	bladerf1inputplugin.cpp
+	bladerf1inputsettings.cpp
+	bladerf1inputthread.cpp
 )
 
 set(bladerfinput_HEADERS
-	bladerfinputgui.h
-	bladerfinput.h
-	bladerfinputplugin.h
-	bladerfinputsettings.h
-	bladerfinputthread.h
+	bladerf1inputgui.h
+	bladerf1input.h
+	bladerf1inputplugin.h
+	bladerf1inputsettings.h
+	bladerf1inputthread.h
 )
 
 set(bladerfinput_FORMS

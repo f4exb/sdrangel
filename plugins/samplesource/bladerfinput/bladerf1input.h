@@ -25,31 +25,31 @@
 
 #include "../../../devices/bladerf1/devicebladerf1.h"
 #include "../../../devices/bladerf1/devicebladerf1param.h"
-#include "bladerfinputsettings.h"
+#include "bladerf1inputsettings.h"
 
 class DeviceSourceAPI;
-class BladerfInputThread;
+class Bladerf1InputThread;
 class FileRecord;
 
-class BladerfInput : public DeviceSampleSource {
+class Bladerf1Input : public DeviceSampleSource {
 public:
-	class MsgConfigureBladerf : public Message {
+	class MsgConfigureBladerf1 : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const BladeRFInputSettings& getSettings() const { return m_settings; }
+		const BladeRF1InputSettings& getSettings() const { return m_settings; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureBladerf* create(const BladeRFInputSettings& settings, bool force)
+		static MsgConfigureBladerf1* create(const BladeRF1InputSettings& settings, bool force)
 		{
-			return new MsgConfigureBladerf(settings, force);
+			return new MsgConfigureBladerf1(settings, force);
 		}
 
 	private:
-		BladeRFInputSettings m_settings;
+		BladeRF1InputSettings m_settings;
 		bool m_force;
 
-		MsgConfigureBladerf(const BladeRFInputSettings& settings, bool force) :
+		MsgConfigureBladerf1(const BladeRF1InputSettings& settings, bool force) :
 			Message(),
 			m_settings(settings),
 			m_force(force)
@@ -94,8 +94,8 @@ public:
         { }
     };
 
-    BladerfInput(DeviceSourceAPI *deviceAPI);
-	virtual ~BladerfInput();
+    Bladerf1Input(DeviceSourceAPI *deviceAPI);
+	virtual ~Bladerf1Input();
 	virtual void destroy();
 
     virtual void init();
@@ -135,15 +135,15 @@ public:
 private:
     bool openDevice();
     void closeDevice();
-	bool applySettings(const BladeRFInputSettings& settings, bool force);
+	bool applySettings(const BladeRF1InputSettings& settings, bool force);
 	bladerf_lna_gain getLnaGain(int lnaGain);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRFInputSettings& settings);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF1InputSettings& settings);
 
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
-	BladeRFInputSettings m_settings;
+	BladeRF1InputSettings m_settings;
 	struct bladerf* m_dev;
-	BladerfInputThread* m_bladerfThread;
+	Bladerf1InputThread* m_bladerfThread;
 	QString m_deviceDescription;
 	DeviceBladeRF1Params m_sharedParams;
 	bool m_running;

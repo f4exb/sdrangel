@@ -14,7 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "bladerfinputplugin.h"
+#include "bladerf1inputplugin.h"
 
 #include <QtPlugin>
 #include <libbladeRF.h>
@@ -23,12 +23,12 @@
 #include <device/devicesourceapi.h>
 
 #ifdef SERVER_MODE
-#include "bladerfinput.h"
+#include "bladerf1input.h"
 #else
-#include "bladerfinputgui.h"
+#include "bladerf1inputgui.h"
 #endif
 
-const PluginDescriptor BlderfInputPlugin::m_pluginDescriptor = {
+const PluginDescriptor Blderf1InputPlugin::m_pluginDescriptor = {
 	QString("BladeRF1 Input"),
 	QString("4.2.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
@@ -37,25 +37,25 @@ const PluginDescriptor BlderfInputPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString BlderfInputPlugin::m_hardwareID = "BladeRF1";
-const QString BlderfInputPlugin::m_deviceTypeID = BLADERF1INPUT_DEVICE_TYPE_ID;
+const QString Blderf1InputPlugin::m_hardwareID = "BladeRF1";
+const QString Blderf1InputPlugin::m_deviceTypeID = BLADERF1INPUT_DEVICE_TYPE_ID;
 
-BlderfInputPlugin::BlderfInputPlugin(QObject* parent) :
+Blderf1InputPlugin::Blderf1InputPlugin(QObject* parent) :
 	QObject(parent)
 {
 }
 
-const PluginDescriptor& BlderfInputPlugin::getPluginDescriptor() const
+const PluginDescriptor& Blderf1InputPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void BlderfInputPlugin::initPlugin(PluginAPI* pluginAPI)
+void Blderf1InputPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices BlderfInputPlugin::enumSampleSources()
+PluginInterface::SamplingDevices Blderf1InputPlugin::enumSampleSources()
 {
 	SamplingDevices result;
 	struct bladerf_devinfo *devinfo = 0;
@@ -108,7 +108,7 @@ PluginInterface::SamplingDevices BlderfInputPlugin::enumSampleSources()
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* BlderfInputPlugin::createSampleSourcePluginInstanceGUI(
+PluginInstanceGUI* Blderf1InputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId __attribute__((unused)),
         QWidget **widget __attribute__((unused)),
         DeviceUISet *deviceUISet __attribute__((unused)))
@@ -116,14 +116,14 @@ PluginInstanceGUI* BlderfInputPlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* BlderfInputPlugin::createSampleSourcePluginInstanceGUI(
+PluginInstanceGUI* Blderf1InputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
 {
 	if(sourceId == m_deviceTypeID)
 	{
-		BladerfInputGui* gui = new BladerfInputGui(deviceUISet);
+		Bladerf1InputGui* gui = new Bladerf1InputGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	}
@@ -134,11 +134,11 @@ PluginInstanceGUI* BlderfInputPlugin::createSampleSourcePluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSource *BlderfInputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
+DeviceSampleSource *Blderf1InputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
 {
     if (sourceId == m_deviceTypeID)
     {
-        BladerfInput *input = new BladerfInput(deviceAPI);
+        Bladerf1Input *input = new Bladerf1Input(deviceAPI);
         return input;
     }
     else

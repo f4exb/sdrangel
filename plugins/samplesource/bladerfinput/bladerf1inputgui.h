@@ -23,7 +23,7 @@
 
 #include "util/messagequeue.h"
 
-#include "bladerfinput.h"
+#include "bladerf1input.h"
 
 class DeviceUISet;
 
@@ -31,12 +31,12 @@ namespace Ui {
 	class Bladerf1InputGui;
 }
 
-class BladerfInputGui : public QWidget, public PluginInstanceGUI {
+class Bladerf1InputGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit BladerfInputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
-	virtual ~BladerfInputGui();
+	explicit Bladerf1InputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
+	virtual ~Bladerf1InputGui();
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -56,7 +56,7 @@ private:
 	DeviceUISet* m_deviceUISet;
 	bool m_forceSettings;
 	bool m_doApplySettings;
-	BladeRFInputSettings m_settings;
+	BladeRF1InputSettings m_settings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
 	std::vector<int> m_gains;

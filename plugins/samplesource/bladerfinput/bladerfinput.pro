@@ -30,17 +30,17 @@ INCLUDEPATH += $$LIBBLADERFSRC
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
-SOURCES += bladerfinputgui.cpp\
-    bladerfinput.cpp\
-    bladerfinputplugin.cpp\
-    bladerfinputsettings.cpp\
-    bladerfinputthread.cpp
+SOURCES += bladerf1inputgui.cpp\
+    bladerf1input.cpp\
+    bladerf1inputplugin.cpp\
+    bladerf1inputsettings.cpp\
+    bladerf1inputthread.cpp
 
-HEADERS += bladerfinputgui.h\
-    bladerfinput.h\
-    bladerfinputplugin.h\
-    bladerfinputsettings.h\
-    bladerfinputthread.h
+HEADERS += bladerf1inputgui.h\
+    bladerf1input.h\
+    bladerf1inputplugin.h\
+    bladerf1inputsettings.h\
+    bladerf1inputthread.h
 
 FORMS += bladerfinputgui.ui
 

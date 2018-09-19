@@ -4,17 +4,17 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(PLUGIN_PREFIX "../../../plugins/samplesource/bladerfinput")
 
 set(bladerfinput_SOURCES
-	${PLUGIN_PREFIX}/bladerfinput.cpp
-	${PLUGIN_PREFIX}/bladerfinputplugin.cpp
-	${PLUGIN_PREFIX}/bladerfinputsettings.cpp
-	${PLUGIN_PREFIX}/bladerfinputthread.cpp
+	${PLUGIN_PREFIX}/bladerf1input.cpp
+	${PLUGIN_PREFIX}/bladerf1inputplugin.cpp
+	${PLUGIN_PREFIX}/bladerf1inputsettings.cpp
+	${PLUGIN_PREFIX}/bladerf1inputthread.cpp
 )
 
 set(bladerfinput_HEADERS
-	${PLUGIN_PREFIX}/bladerfinput.h
-	${PLUGIN_PREFIX}/bladerfinputplugin.h
-	${PLUGIN_PREFIX}/bladerfinputsettings.h
-	${PLUGIN_PREFIX}/bladerfinputthread.h
+	${PLUGIN_PREFIX}/bladerf1input.h
+	${PLUGIN_PREFIX}/bladerf1inputplugin.h
+	${PLUGIN_PREFIX}/bladerf1inputsettings.h
+	${PLUGIN_PREFIX}/bladerf1inputthread.h
 )
 
 if (BUILD_DEBIAN)
