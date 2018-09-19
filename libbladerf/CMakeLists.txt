@@ -13,6 +13,8 @@ set(bladerf_SOURCES
     ${LIBBLADERFCOMMONSRC}/src/log.c
     ${LIBBLADERFCOMMONSRC}/src/str_queue.c
     ${LIBBLADERFSRC}/host/misc/dev/lms_freqsel/freqsel.c
+    ${LIBBLADERFSRC}/fpga_common/src/lms.c
+    ${LIBBLADERFSRC}/fpga_common/src/band_select.c
     ${LIBBLADERFLIBSRC}/src/helpers/interleave.c
     ${LIBBLADERFLIBSRC}/src/helpers/timeout.c
     ${LIBBLADERFLIBSRC}/src/helpers/wallclock.c
@@ -75,6 +77,8 @@ set(bladerf_HEADERS
     ${LIBBLADERFCOMMONSRC}/include/dc_calibration.h
     ${LIBBLADERFCOMMONSRC}/include/sha256.h
     ${LIBBLADERFCOMMONSRC}/include/conversions.h
+    ${LIBBLADERFSRC}/fpga_common/include/lms.h
+    ${LIBBLADERFSRC}/fpga_common/include/band_select.h
     ${LIBBLADERFLIBSRC}/src/helpers/interleave.h
     ${LIBBLADERFLIBSRC}/src/helpers/wallclock.h
     ${LIBBLADERFLIBSRC}/src/helpers/timeout.h
