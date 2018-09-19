@@ -4,7 +4,7 @@
  * This file is part of the bladeRF project:
  *   http://www.github.com/nuand/bladeRF
  *
- * Copyright (c) 2013 Nuand LLC.
+ * Copyright (c) 2013-2018 Nuand LLC.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,11 +27,12 @@
 #ifndef HOST_CONFIG_H__
 #define HOST_CONFIG_H__
 
-//#define  BLADERF_OS_LINUX 0
-//#define  BLADERF_OS_FREEBSD 0
-//#define  BLADERF_OS_OSX 0
-//#define  BLADERF_OS_WINDOWS 1
-//#define  BLADERF_BIG_ENDIAN 0
+#define  BLADERF_OS_LINUX 1
+#define  BLADERF_OS_FREEBSD 0
+#define  BLADERF_OS_OSX 0
+#define  BLADERF_OS_WINDOWS 0
+#define  BLADERF_BIG_ENDIAN 0
+#define  LIBBLADERF_SEARCH_PREFIX "/opt/install/libbladeRF"
 
 #if !(BLADERF_OS_LINUX || BLADERF_OS_OSX || BLADERF_OS_WINDOWS || BLADERF_OS_FREEBSD)
 #   error "Build not configured for any supported operating systems"
@@ -41,6 +42,7 @@
 #error "Build configured for multiple operating systems"
 #endif
 
+#define  HAVE_CLOCK_GETTIME 1
 
 /*******************************************************************************
  * Endianness conversions
@@ -153,6 +155,63 @@
 #endif
 
 /*******************************************************************************
+ * Endianness conversions for constants
+ *
+ * We shouldn't be using the above items for assigning constants because the
+ * implementations may be functions [1].
+ *
+ * [1] https://sourceware.org/bugzilla/show_bug.cgi?id=17679#c7
+ ******************************************************************************/
+
+#define BLADERF_BYTESWAP16(x) ((((x) & 0xff00) >> 8) | (((x) & 0x00ff) << 8))
+
+#define BLADERF_BYTESWAP32(x) ((((x) & 0xff000000) >> 24) | \
+                               (((x) & 0x00ff0000) >>  8) | \
+                               (((x) & 0x0000ff00) <<  8) | \
+                               (((x) & 0x000000ff) << 24) )
+
+#define BLADERF_BYTESWAP64(x) ((((x) & 0xff00000000000000llu) >> 56) | \
+                               (((x) & 0x00ff000000000000llu) >> 40) | \
+                               (((x) & 0x0000ff0000000000llu) >> 24) | \
+                               (((x) & 0x000000ff00000000llu) >>  8) | \
+                               (((x) & 0x00000000ff000000llu) <<  8) | \
+                               (((x) & 0x0000000000ff0000llu) << 24) | \
+                               (((x) & 0x000000000000ff00llu) << 40) | \
+                               (((x) & 0x00000000000000ffllu) << 56) | \
+
+#if BLADERF_BIG_ENDIAN
+#   define HOST_TO_LE16_CONST(x) (BLADERF_BYTESWAP16(x))
+#   define LE16_TO_HOST_CONST(x) (BLADERF_BYTESWAP16(x))
+#   define HOST_TO_BE16_CONST(x) (x)
+#   define BE16_TO_HOST_CONST(x) (x)
+
+#   define HOST_TO_LE32_CONST(x) (BLADERF_BYTESWAP32(x))
+#   define LE32_TO_HOST_CONST(x) (BLADERF_BYTESWAP32(x))
+#   define HOST_TO_BE32_CONST(x) (x)
+#   define BE32_TO_HOST_CONST(x) (x)
+
+#   define HOST_TO_LE64_CONST(x) (BLADERF_BYTESWAP64(x))
+#   define LE64_TO_HOST_CONST(x) (BLADERF_BYTESWAP64(x))
+#   define HOST_TO_BE64_CONST(x) (x)
+#   define BE64_TO_HOST_CONST(x) (x)
+#else
+#   define HOST_TO_LE16_CONST(x) (x)
+#   define LE16_TO_HOST_CONST(x) (x)
+#   define HOST_TO_BE16_CONST(x) (BLADERF_BYTESWAP16(x))
+#   define BE16_TO_HOST_CONST(x) (BLADERF_BYTESWAP16(x))
+
+#   define HOST_TO_LE32_CONST(x) (x)
+#   define LE32_TO_HOST_CONST(x) (x)
+#   define HOST_TO_BE32_CONST(x) (BLADERF_BYTESWAP32(x))
+#   define BE32_TO_HOST_CONST(x) (BLADERF_BYTESWAP32(x))
+
+#   define HOST_TO_LE64_CONST(x) (x)
+#   define LE64_TO_HOST_CONST(x) (x)
+#   define HOST_TO_BE64_CONST(x) (BLADERF_BYTESWAP64(x))
+#   define BE64_TO_HOST_CONST(x) (BLADERF_BYTESWAP64(x))
+#endif
+
+/*******************************************************************************
  * Miscellaneous Linux fixups
  ******************************************************************************/
 #if BLADERF_OS_LINUX
@@ -187,19 +246,29 @@
 /* Rename a few functions and types */
 #include <windows.h>
 #include <io.h>
+#include <direct.h>
 #define usleep(x)      Sleep((x+999)/1000)
 
 /* Changes specific to Microsoft Visual Studio and its C89-compliant ways */
 #if _MSC_VER
 #   define strtok_r    strtok_s
 #   define strtoull    _strtoui64
+#if _MSC_VER < 1900
 #   define snprintf    _snprintf
 #   define vsnprintf   _vsnprintf
+#else
+#define STDC99
+#endif
 #   define strcasecmp  _stricmp
 #   define strncasecmp _strnicmp
 #   define fileno      _fileno
 #   define strdup      _strdup
 #   define access      _access
+#   define chdir       _chdir
+#   define getcwd      _getcwd
+#   define rmdir       _rmdir
+#   define unlink      _unlink
+#   define mkdir(n, m) _mkdir(n)
 
 /* ssize_t lives elsewhere */
 #   include <BaseTsd.h>
@@ -209,6 +278,19 @@
  *  http://msdn.microsoft.com/en-us/library/z8y1yy88.aspx */
 #   if !defined(__cplusplus)
 #       define inline __inline
+#   endif
+
+/* Visual studio 2012 compiler (v17.00.XX) doesn't have round functions */
+#   if _MSC_VER <= 1700
+#       include <math.h>
+        static inline float roundf(float x)
+        {
+            return x >= 0.0f ? floorf(x + 0.5f) : ceilf(x - 0.5f);
+        }
+        static inline double round(double x)
+        {
+            return x >= 0.0 ? floor(x + 0.5) : ceil(x - 0.5);
+        }
 #   endif
 
 #endif // _MSC_VER
@@ -236,5 +318,17 @@
  * Miscellaneous utility macros
  ******************************************************************************/
 #define ARRAY_SIZE(n) (sizeof(n) / sizeof(n[0]))
+
+/**
+ * GCC 7+ warns on implicit fallthroughs in switch statements
+ * (-Wimplicit-fallthrough), which we use in a couple places for simplicity.
+ * The statement attribute syntax used to suppress this warning is not
+ * supported by anything else.
+ */
+#if __GNUC__ >= 7
+#define EXPLICIT_FALLTHROUGH __attribute__((fallthrough))
+#else
+#define EXPLICIT_FALLTHROUGH
+#endif  // __GNUC__ >= 7
 
 #endif

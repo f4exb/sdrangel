@@ -22,8 +22,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-#ifndef BLADERF_BACKEND_CONFIG_H__
-#define BLADERF_BACKEND_CONFIG_H__
+
+#ifndef BACKEND_BACKEND_CONFIG_H_
+#define BACKEND_BACKEND_CONFIG_H_
 
 #define ENABLE_BACKEND_USB
 #define ENABLE_BACKEND_LIBUSB
@@ -35,52 +36,53 @@
 #include "backend/usb/usb.h"
 
 #ifdef ENABLE_BACKEND_DUMMY
-    extern const struct backend_fns backend_fns_dummy;
-#   define BACKEND_DUMMY &backend_fns_dummy,
+extern const struct backend_fns backend_fns_dummy;
+#define BACKEND_DUMMY &backend_fns_dummy,
 #else
-#   define BACKEND_DUMMY
+#define BACKEND_DUMMY
 #endif
 
 #ifdef ENABLE_BACKEND_USB
-    extern const struct backend_fns backend_fns_usb;
-#   define BACKEND_USB  &backend_fns_usb,
+extern const struct backend_fns backend_fns_usb;
+#define BACKEND_USB &backend_fns_usb,
 
-#   ifdef ENABLE_BACKEND_LIBUSB
-        extern const struct usb_driver usb_driver_libusb;
-#       define BACKEND_USB_LIBUSB &usb_driver_libusb,
-#   else
-#       define BACKEND_USB_LIBUSB
-#   endif
-
-#   ifdef ENABLE_BACKEND_CYAPI
-        extern const struct usb_driver usb_driver_cypress;
-#       define BACKEND_USB_CYAPI &usb_driver_cypress,
-#   else
-#       define BACKEND_USB_CYAPI
-#   endif
-
-
-#   define BLADERF_USB_BACKEND_LIST { \
-            BACKEND_USB_LIBUSB \
-            BACKEND_USB_CYAPI \
-    }
-
-#   if !defined(ENABLE_BACKEND_LIBUSB) && !defined(ENABLE_BACKEND_CYAPI)
-#       error "No USB backends are enabled. One or more must be enabled."
-#   endif
+#ifdef ENABLE_BACKEND_LIBUSB
+extern const struct usb_driver usb_driver_libusb;
+#define BACKEND_USB_LIBUSB &usb_driver_libusb,
 #else
-#   define BACKEND_USB
+#define BACKEND_USB_LIBUSB
 #endif
 
-#if !defined(ENABLE_BACKEND_USB) && \
-    !defined(ENABLE_BACKEND_DUMMY)
-    #error "No backends are enabled. One more more must be enabled."
+#ifdef ENABLE_BACKEND_CYAPI
+extern const struct usb_driver usb_driver_cypress;
+#define BACKEND_USB_CYAPI &usb_driver_cypress,
+#else
+#define BACKEND_USB_CYAPI
+#endif
+
+#define BLADERF_USB_BACKEND_LIST \
+    {                            \
+        BACKEND_USB_LIBUSB       \
+        BACKEND_USB_CYAPI        \
+    }
+
+#if !defined(ENABLE_BACKEND_LIBUSB) && !defined(ENABLE_BACKEND_CYAPI)
+#error "No USB backends are enabled. One or more must be enabled."
+#endif
+
+#else
+#define BACKEND_USB
+#endif
+
+#if !defined(ENABLE_BACKEND_USB) && !defined(ENABLE_BACKEND_DUMMY)
+#error "No backends are enabled. One more more must be enabled."
 #endif
 
 /* This list should be ordered by preference (highest first) */
-#define BLADERF_BACKEND_LIST { \
-    BACKEND_USB \
-    BACKEND_DUMMY \
-}
+#define BLADERF_BACKEND_LIST \
+    {                        \
+        BACKEND_USB          \
+        BACKEND_DUMMY        \
+    }
 
 #endif
