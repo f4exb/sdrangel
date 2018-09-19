@@ -22,8 +22,9 @@
 
 #include <libbladeRF.h>
 #include <dsp/devicesamplesource.h>
-#include "bladerf/devicebladerf.h"
-#include "bladerf/devicebladerfparam.h"
+
+#include "../../../devices/bladerf1/devicebladerf1.h"
+#include "../../../devices/bladerf1/devicebladerf1param.h"
 #include "bladerfinputsettings.h"
 
 class DeviceSourceAPI;
@@ -144,7 +145,7 @@ private:
 	struct bladerf* m_dev;
 	BladerfInputThread* m_bladerfThread;
 	QString m_deviceDescription;
-	DeviceBladeRFParams m_sharedParams;
+	DeviceBladeRF1Params m_sharedParams;
 	bool m_running;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
 };

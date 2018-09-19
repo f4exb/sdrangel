@@ -14,57 +14,30 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "devicebladerfvalues.h"
+#ifndef DEVICES_BLADERF_DEVICESDBLADERF_H_
+#define DEVICES_BLADERF_DEVICESDBLADERF_H_
 
+#include <libbladeRF.h>
 
-unsigned int DeviceBladeRFBandwidths::m_nb_halfbw = 16;
-unsigned int DeviceBladeRFBandwidths::m_halfbw[] = {
-        750,
-        875,
-       1250,
-       1375,
-       1500,
-       1920,
-       2500,
-       2750,
-       3000,
-       3500,
-       4375,
-       5000,
-       6000,
-       7000,
-      10000,
-      14000};
+#include "export.h"
 
-unsigned int DeviceBladeRFBandwidths::getBandwidth(unsigned int bandwidth_index)
+class DEVICES_API DeviceBladeRF1
 {
-    if (bandwidth_index < m_nb_halfbw)
-    {
-        return m_halfbw[bandwidth_index] * 2;
-    }
-    else
-    {
-        return m_halfbw[0] * 2;
-    }
-}
+public:
+    static bool open_bladerf(struct bladerf **dev, const char *serial);
 
-unsigned int DeviceBladeRFBandwidths::getBandwidthIndex(unsigned int bandwidth)
-{
-    for (unsigned int i=0; i < m_nb_halfbw; i++)
-    {
-        if (bandwidth/2000 == m_halfbw[i])
-        {
-            return i;
-        }
-    }
+private:
+    static struct bladerf *open_bladerf_from_serial(const char *serial);
+};
 
-    return 0;
-}
+class BladerfBandwidths {
+public:
+    static unsigned int getBandwidth(unsigned int bandwidth_index);
+    static unsigned int getBandwidthIndex(unsigned int bandwidth);
+    static unsigned int getNbBandwidths();
+private:
+    static const unsigned int m_nb_halfbw;
+    static const unsigned int m_halfbw[];
+};
 
-unsigned int DeviceBladeRFBandwidths::getNbBandwidths()
-{
-    return DeviceBladeRFBandwidths::m_nb_halfbw;
-}
-
-
-
+#endif /* DEVICES_BLADERF_DEVICESDBLADERF_H_ */

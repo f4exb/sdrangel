@@ -14,19 +14,57 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DEVICES_BLADERF_DEVICEBLADERFVALUES_H_
-#define DEVICES_BLADERF_DEVICEBLADERFVALUES_H_
+#include "../bladerf1/devicebladerf1values.h"
 
-#include "export.h"
 
-class DEVICES_API DeviceBladeRFBandwidths {
-public:
-    static unsigned int getBandwidth(unsigned int bandwidth_index);
-    static unsigned int getBandwidthIndex(unsigned int bandwidth);
-    static unsigned int getNbBandwidths();
-private:
-    static unsigned int m_halfbw[];
-    static unsigned int m_nb_halfbw;
-};
+unsigned int DeviceBladeRF1Bandwidths::m_nb_halfbw = 16;
+unsigned int DeviceBladeRF1Bandwidths::m_halfbw[] = {
+        750,
+        875,
+       1250,
+       1375,
+       1500,
+       1920,
+       2500,
+       2750,
+       3000,
+       3500,
+       4375,
+       5000,
+       6000,
+       7000,
+      10000,
+      14000};
 
-#endif /* DEVICES_BLADERF_DEVICEBLADERFVALUES_H_ */
+unsigned int DeviceBladeRF1Bandwidths::getBandwidth(unsigned int bandwidth_index)
+{
+    if (bandwidth_index < m_nb_halfbw)
+    {
+        return m_halfbw[bandwidth_index] * 2;
+    }
+    else
+    {
+        return m_halfbw[0] * 2;
+    }
+}
+
+unsigned int DeviceBladeRF1Bandwidths::getBandwidthIndex(unsigned int bandwidth)
+{
+    for (unsigned int i=0; i < m_nb_halfbw; i++)
+    {
+        if (bandwidth/2000 == m_halfbw[i])
+        {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
+unsigned int DeviceBladeRF1Bandwidths::getNbBandwidths()
+{
+    return DeviceBladeRF1Bandwidths::m_nb_halfbw;
+}
+
+
+

@@ -1,16 +1,16 @@
-project(bladerfdevice)
+project(bladerf1device)
 
-set(bladerfdevice_SOURCES
-    devicebladerf.cpp
-    devicebladerfvalues.cpp
-    devicebladerfshared.cpp
+set(bladerf1device_SOURCES
+    devicebladerf1.cpp
+    devicebladerf1values.cpp
+    devicebladerf1shared.cpp
 )
 
-set(bladerfdevice_HEADERS
-    devicebladerf.h
-    devicebladerfvalues.h
-    devicebladerfparam.h
-    devicebladerfshared.h
+set(bladerf1device_HEADERS
+    devicebladerf1.h
+    devicebladerf1values.h
+    devicebladerf1param.h
+    devicebladerf1shared.h
 )
 
 if (BUILD_DEBIAN)
@@ -31,20 +31,20 @@ endif (BUILD_DEBIAN)
 #add_definitions(${QT_DEFINITIONS})
 #add_definitions(-DQT_SHARED)
 
-add_library(bladerfdevice SHARED
-    ${bladerfdevice_SOURCES}
+add_library(bladerf1device SHARED
+    ${bladerf1device_SOURCES}
 )
 
 if (BUILD_DEBIAN)
-target_link_libraries(bladerfdevice
+target_link_libraries(bladerf1device
     bladerf
     sdrbase
 )
 else (BUILD_DEBIAN)
-target_link_libraries(bladerfdevice
+target_link_libraries(bladerf1device
     ${LIBBLADERF_LIBRARIES}
     sdrbase
 )
 endif (BUILD_DEBIAN)
 
-install(TARGETS bladerfdevice DESTINATION lib)
+install(TARGETS bladerf1device DESTINATION lib)

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016-2017 Edouard Griffiths, F4EXB                              //
+// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,30 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DEVICES_BLADERF_DEVICESDBLADERF_H_
-#define DEVICES_BLADERF_DEVICESDBLADERF_H_
+#include "../bladerf1/devicebladerf1shared.h"
 
-#include <libbladeRF.h>
-
-#include "export.h"
-
-class DEVICES_API DeviceBladeRF
-{
-public:
-    static bool open_bladerf(struct bladerf **dev, const char *serial);
-
-private:
-    static struct bladerf *open_bladerf_from_serial(const char *serial);
-};
-
-class BladerfBandwidths {
-public:
-    static unsigned int getBandwidth(unsigned int bandwidth_index);
-    static unsigned int getBandwidthIndex(unsigned int bandwidth);
-    static unsigned int getNbBandwidths();
-private:
-    static const unsigned int m_nb_halfbw;
-    static const unsigned int m_halfbw[];
-};
-
-#endif /* DEVICES_BLADERF_DEVICESDBLADERF_H_ */
+const float  DeviceBladeRF1Shared::m_sampleFifoLengthInSeconds = 0.25;
+const int    DeviceBladeRF1Shared::m_sampleFifoMinSize = 75000; // 300 kS/s knee
+const int    DeviceBladeRF1Shared::m_sampleFifoMinSize32 = 150000; // Fixed for interpolation by 32

@@ -51,7 +51,7 @@ target_link_libraries(inputbladerfsrv
     bladerf
     sdrbase
     swagger
-    bladerfdevice
+    bladerf1device
 )
 else (BUILD_DEBIAN)
 target_link_libraries(inputbladerfsrv
@@ -59,7 +59,7 @@ target_link_libraries(inputbladerfsrv
 	${LIBBLADERF_LIBRARIES}
 	sdrbase
 	swagger
-	bladerfdevice
+	bladerf1device
 )
 endif (BUILD_DEBIAN)
 

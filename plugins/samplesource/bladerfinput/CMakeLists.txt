@@ -62,7 +62,7 @@ target_link_libraries(inputbladerf
     sdrbase
     sdrgui
     swagger
-    bladerfdevice
+    bladerf1device
 )
 else (BUILD_DEBIAN)
 target_link_libraries(inputbladerf
@@ -71,7 +71,7 @@ target_link_libraries(inputbladerf
 	sdrbase
 	sdrgui
 	swagger
-	bladerfdevice
+	bladerf1device
 )
 endif (BUILD_DEBIAN)
 

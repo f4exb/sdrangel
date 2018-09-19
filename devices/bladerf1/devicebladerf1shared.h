@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016-2017 Edouard Griffiths, F4EXB                              //
+// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,25 +14,19 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DEVICES_BLADERF_DEVICEBLADERFPARAM_H_
-#define DEVICES_BLADERF_DEVICEBLADERFPARAM_H_
+#ifndef DEVICES_BLADERF_DEVICEHACKRFSHARED_H_
+#define DEVICES_BLADERF_DEVICEHACKRFSHARED_H_
 
-#include <libbladeRF.h>
+#include "util/message.h"
+#include "export.h"
 
-/**
- * This structure is owned by each of the parties sharing the same physical device
- * It allows exchange of information on the common resources
- */
-struct DeviceBladeRFParams
+class DEVICES_API DeviceBladeRF1Shared
 {
-    struct bladerf *m_dev; //!< device handle if the party has ownership else 0
-    bool m_xb200Attached;  //!< true if XB200 is attached and owned by the party
-
-    DeviceBladeRFParams() :
-        m_dev(0),
-        m_xb200Attached(false)
-    {
-    }
+public:
+    static const float  m_sampleFifoLengthInSeconds;
+    static const int    m_sampleFifoMinSize;
+    static const int    m_sampleFifoMinSize32;
 };
 
-#endif /* DEVICES_BLADERF_DEVICEBLADERFPARAM_H_ */
+
+#endif /* DEVICES_BLADERF_DEVICEHACKRFSHARED_H_ */

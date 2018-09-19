@@ -26,9 +26,9 @@
 #include "dsp/dspengine.h"
 #include "device/devicesinkapi.h"
 #include "device/devicesourceapi.h"
-#include "bladerf/devicebladerfshared.h"
-
 #include "bladerfoutput.h"
+
+#include "../../../devices/bladerf1/devicebladerf1shared.h"
 #include "bladerfoutputthread.h"
 
 MESSAGE_CLASS_DEFINITION(BladerfOutput::MsgConfigureBladerf, Message)
@@ -74,7 +74,7 @@ bool BladerfOutput::openDevice()
     if (m_deviceAPI->getSourceBuddies().size() > 0)
     {
         DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
-        DeviceBladeRFParams *buddySharedParams = (DeviceBladeRFParams *) sourceBuddy->getBuddySharedPtr();
+        DeviceBladeRF1Params *buddySharedParams = (DeviceBladeRF1Params *) sourceBuddy->getBuddySharedPtr();
 
         if (buddySharedParams == 0)
         {
@@ -93,7 +93,7 @@ bool BladerfOutput::openDevice()
     }
     else
     {
-        if (!DeviceBladeRF::open_bladerf(&m_dev, qPrintable(m_deviceAPI->getSampleSinkSerial())))
+        if (!DeviceBladeRF1::open_bladerf(&m_dev, qPrintable(m_deviceAPI->getSampleSinkSerial())))
         {
             qCritical("BladerfOutput::start: could not open BladeRF %s", qPrintable(m_deviceAPI->getSampleSinkSerial()));
             return false;
@@ -318,13 +318,13 @@ bool BladerfOutput::applySettings(const BladeRFOutputSettings& settings, bool fo
 
 	    if (settings.m_log2Interp >= 5)
 	    {
-	        fifoSize = DeviceBladeRFShared::m_sampleFifoMinSize32;
+	        fifoSize = DeviceBladeRF1Shared::m_sampleFifoMinSize32;
 	    }
 	    else
 	    {
 	        fifoSize = std::max(
-	            (int) ((settings.m_devSampleRate/(1<<settings.m_log2Interp)) * DeviceBladeRFShared::m_sampleFifoLengthInSeconds),
-	            DeviceBladeRFShared::m_sampleFifoMinSize);
+	            (int) ((settings.m_devSampleRate/(1<<settings.m_log2Interp)) * DeviceBladeRF1Shared::m_sampleFifoLengthInSeconds),
+	            DeviceBladeRF1Shared::m_sampleFifoMinSize);
 	    }
 
         m_sampleSourceFifo.resize(fifoSize);

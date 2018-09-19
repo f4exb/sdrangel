@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2016-2017 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,19 +14,19 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DEVICES_BLADERF_DEVICEHACKRFSHARED_H_
-#define DEVICES_BLADERF_DEVICEHACKRFSHARED_H_
+#ifndef DEVICES_BLADERF1_DEVICEBLADERF1VALUES_H_
+#define DEVICES_BLADERF1_DEVICEBLADERF1VALUES_H_
 
-#include "util/message.h"
 #include "export.h"
 
-class DEVICES_API DeviceBladeRFShared
-{
+class DEVICES_API DeviceBladeRF1Bandwidths {
 public:
-    static const float  m_sampleFifoLengthInSeconds;
-    static const int    m_sampleFifoMinSize;
-    static const int    m_sampleFifoMinSize32;
+    static unsigned int getBandwidth(unsigned int bandwidth_index);
+    static unsigned int getBandwidthIndex(unsigned int bandwidth);
+    static unsigned int getNbBandwidths();
+private:
+    static unsigned int m_halfbw[];
+    static unsigned int m_nb_halfbw;
 };
 
-
-#endif /* DEVICES_BLADERF_DEVICEHACKRFSHARED_H_ */
+#endif /* DEVICES_BLADERF1_DEVICEBLADERF1VALUES_H_ */

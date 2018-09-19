@@ -18,12 +18,11 @@
 #define INCLUDE_BLADERFOUTPUT_H
 
 #include <dsp/devicesamplesink.h>
-#include "bladerf/devicebladerf.h"
-#include "bladerf/devicebladerfparam.h"
-
 #include <libbladeRF.h>
 #include <QString>
 
+#include "../../../devices/bladerf1/devicebladerf1.h"
+#include "../../../devices/bladerf1/devicebladerf1param.h"
 #include "bladerfoutputsettings.h"
 
 class DeviceSinkAPI;
@@ -140,7 +139,7 @@ private:
 	struct bladerf* m_dev;
 	BladerfOutputThread* m_bladerfThread;
 	QString m_deviceDescription;
-    DeviceBladeRFParams m_sharedParams;
+    DeviceBladeRF1Params m_sharedParams;
     bool m_running;
 };
 

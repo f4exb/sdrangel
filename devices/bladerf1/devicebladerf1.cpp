@@ -14,13 +14,14 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "../bladerf1/devicebladerf1.h"
+
 #include <QtGlobal>
 
 #include <cstdio>
 #include <cstring>
-#include "devicebladerf.h"
 
-bool DeviceBladeRF::open_bladerf(struct bladerf **dev, const char *serial)
+bool DeviceBladeRF1::open_bladerf(struct bladerf **dev, const char *serial)
 {
     int fpga_loaded;
 
@@ -47,7 +48,7 @@ bool DeviceBladeRF::open_bladerf(struct bladerf **dev, const char *serial)
     return true;
 }
 
-struct bladerf *DeviceBladeRF::open_bladerf_from_serial(const char *serial)
+struct bladerf *DeviceBladeRF1::open_bladerf_from_serial(const char *serial)
 {
     int status;
     struct bladerf *dev;

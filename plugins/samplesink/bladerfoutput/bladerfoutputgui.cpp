@@ -27,7 +27,8 @@
 #include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
 #include "bladerfoutputgui.h"
-#include "bladerf/devicebladerfvalues.h"
+
+#include "../../../devices/bladerf1/devicebladerf1values.h"
 
 BladerfOutputGui::BladerfOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),

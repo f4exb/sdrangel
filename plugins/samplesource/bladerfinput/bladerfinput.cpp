@@ -83,7 +83,7 @@ bool BladerfInput::openDevice()
     if (m_deviceAPI->getSinkBuddies().size() > 0)
     {
         DeviceSinkAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
-        DeviceBladeRFParams *buddySharedParams = (DeviceBladeRFParams *) sinkBuddy->getBuddySharedPtr();
+        DeviceBladeRF1Params *buddySharedParams = (DeviceBladeRF1Params *) sinkBuddy->getBuddySharedPtr();
 
         if (buddySharedParams == 0)
         {
@@ -102,7 +102,7 @@ bool BladerfInput::openDevice()
     }
     else
     {
-        if (!DeviceBladeRF::open_bladerf(&m_dev, qPrintable(m_deviceAPI->getSampleSourceSerial())))
+        if (!DeviceBladeRF1::open_bladerf(&m_dev, qPrintable(m_deviceAPI->getSampleSourceSerial())))
         {
             qCritical("BladerfInput::start: could not open BladeRF %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
             return false;
