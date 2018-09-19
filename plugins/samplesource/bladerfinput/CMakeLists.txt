@@ -19,7 +19,7 @@ set(bladerfinput_HEADERS
 )
 
 set(bladerfinput_FORMS
-	bladerfinputgui.ui
+	bladerf1inputgui.ui
 )
 
 if (BUILD_DEBIAN)

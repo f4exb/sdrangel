@@ -19,7 +19,7 @@
 
 #include <libbladeRF.h>
 
-#include "ui_bladerfoutputgui.h"
+#include "ui_bladerf1outputgui.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
@@ -28,11 +28,9 @@
 #include "device/deviceuiset.h"
 #include "bladerfoutputgui.h"
 
-#include "../../../devices/bladerf1/devicebladerf1values.h"
-
 BladerfOutputGui::BladerfOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
-	ui(new Ui::BladerfOutputGui),
+	ui(new Ui::Bladerf1OutputGui),
 	m_deviceUISet(deviceUISet),
 	m_doApplySettings(true),
 	m_forceSettings(true),

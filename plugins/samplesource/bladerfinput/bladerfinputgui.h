@@ -28,7 +28,7 @@
 class DeviceUISet;
 
 namespace Ui {
-	class BladerfInputGui;
+	class Bladerf1InputGui;
 }
 
 class BladerfInputGui : public QWidget, public PluginInstanceGUI {
@@ -51,7 +51,7 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	Ui::BladerfInputGui* ui;
+	Ui::Bladerf1InputGui* ui;
 
 	DeviceUISet* m_deviceUISet;
 	bool m_forceSettings;

@@ -29,7 +29,7 @@ class DeviceSampleSink;
 class DeviceUISet;
 
 namespace Ui {
-	class BladerfOutputGui;
+	class Bladerf1OutputGui;
 }
 
 class BladerfOutputGui : public QWidget, public PluginInstanceGUI {
@@ -52,7 +52,7 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	Ui::BladerfOutputGui* ui;
+	Ui::Bladerf1OutputGui* ui;
 
 	DeviceUISet* m_deviceUISet;
 	bool m_doApplySettings;

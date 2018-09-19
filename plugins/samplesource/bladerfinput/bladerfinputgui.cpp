@@ -14,14 +14,14 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../bladerfinput/bladerfinputgui.h"
+#include "bladerfinputgui.h"
 
 #include <QDebug>
 #include <QMessageBox>
 
 #include <libbladeRF.h>
 
-#include "ui_bladerfinputgui.h"
+#include "ui_bladerf1inputgui.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
@@ -31,7 +31,7 @@
 
 BladerfInputGui::BladerfInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
-	ui(new Ui::BladerfInputGui),
+	ui(new Ui::Bladerf1InputGui),
 	m_deviceUISet(deviceUISet),
 	m_forceSettings(true),
 	m_doApplySettings(true),

@@ -19,7 +19,7 @@ set(bladerfoutput_HEADERS
 )
 
 set(bladerfoutput_FORMS
-	bladerfoutputgui.ui
+	bladerf1outputgui.ui
 )
 
 if (BUILD_DEBIAN)

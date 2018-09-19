@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>BladerfOutputGui</class>
- <widget class="QWidget" name="BladerfOutputGui">
+ <class>Bladerf1OutputGui</class>
+ <widget class="QWidget" name="Bladerf1OutputGui">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -29,7 +29,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>BladeRF</string>
+   <string>BladeRF1</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
