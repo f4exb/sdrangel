@@ -119,7 +119,7 @@ def setupDevice(options):
     lpFIRBW = options.sample_rate / (1 << options.log2_interp)
     lpfBW = lpFIRBW * 1.2
 
-    if options.device_hwid == "BladeRF":
+    if options.device_hwid == "BladeRF1":
         settings['bladeRFOutputSettings']['centerFrequency'] = options.device_freq * 1000
         settings['bladeRFOutputSettings']['devSampleRate'] = options.sample_rate
         settings['bladeRFOutputSettings']['vga1'] = -20

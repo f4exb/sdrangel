@@ -14,17 +14,18 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "bladerf1outputsettings.h"
+
 #include <QtGlobal>
 #include "util/simpleserializer.h"
-#include "bladerfoutputsettings.h"
 
 
-BladeRFOutputSettings::BladeRFOutputSettings()
+BladeRF1OutputSettings::BladeRF1OutputSettings()
 {
 	resetToDefaults();
 }
 
-void BladeRFOutputSettings::resetToDefaults()
+void BladeRF1OutputSettings::resetToDefaults()
 {
 	m_centerFrequency = 435000*1000;
 	m_devSampleRate = 3072000;
@@ -37,7 +38,7 @@ void BladeRFOutputSettings::resetToDefaults()
 	m_xb200Filter = BLADERF_XB200_AUTO_1DB;
 }
 
-QByteArray BladeRFOutputSettings::serialize() const
+QByteArray BladeRF1OutputSettings::serialize() const
 {
 	SimpleSerializer s(1);
 
@@ -53,7 +54,7 @@ QByteArray BladeRFOutputSettings::serialize() const
 	return s.final();
 }
 
-bool BladeRFOutputSettings::deserialize(const QByteArray& data)
+bool BladeRF1OutputSettings::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 

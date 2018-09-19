@@ -26,9 +26,9 @@
 #include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
-#include "bladerfoutputgui.h"
+#include "bladerf1outputgui.h"
 
-BladerfOutputGui::BladerfOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
+Bladerf1OutputGui::Bladerf1OutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::Bladerf1OutputGui),
 	m_deviceUISet(deviceUISet),
@@ -39,7 +39,7 @@ BladerfOutputGui::BladerfOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_sampleRate(0),
 	m_lastEngineState(DSPDeviceSinkEngine::StNotStarted)
 {
-    m_deviceSampleSink = (BladerfOutput*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
+    m_deviceSampleSink = (Bladerf1Output*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
 
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -67,51 +67,51 @@ BladerfOutputGui::BladerfOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
-BladerfOutputGui::~BladerfOutputGui()
+Bladerf1OutputGui::~Bladerf1OutputGui()
 {
 	delete ui;
 }
 
-void BladerfOutputGui::destroy()
+void Bladerf1OutputGui::destroy()
 {
 	delete this;
 }
 
-void BladerfOutputGui::setName(const QString& name)
+void Bladerf1OutputGui::setName(const QString& name)
 {
 	setObjectName(name);
 }
 
-QString BladerfOutputGui::getName() const
+QString Bladerf1OutputGui::getName() const
 {
 	return objectName();
 }
 
-void BladerfOutputGui::resetToDefaults()
+void Bladerf1OutputGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
 	displaySettings();
 	sendSettings();
 }
 
-qint64 BladerfOutputGui::getCenterFrequency() const
+qint64 Bladerf1OutputGui::getCenterFrequency() const
 {
 	return m_settings.m_centerFrequency;
 }
 
-void BladerfOutputGui::setCenterFrequency(qint64 centerFrequency)
+void Bladerf1OutputGui::setCenterFrequency(qint64 centerFrequency)
 {
 	m_settings.m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }
 
-QByteArray BladerfOutputGui::serialize() const
+QByteArray Bladerf1OutputGui::serialize() const
 {
 	return m_settings.serialize();
 }
 
-bool BladerfOutputGui::deserialize(const QByteArray& data)
+bool Bladerf1OutputGui::deserialize(const QByteArray& data)
 {
 	if(m_settings.deserialize(data)) {
 		displaySettings();
@@ -124,25 +124,25 @@ bool BladerfOutputGui::deserialize(const QByteArray& data)
 	}
 }
 
-bool BladerfOutputGui::handleMessage(const Message& message)
+bool Bladerf1OutputGui::handleMessage(const Message& message)
 {
-    if (BladerfOutput::MsgConfigureBladerf::match(message))
+    if (Bladerf1Output::MsgConfigureBladerf1::match(message))
     {
-        const BladerfOutput::MsgConfigureBladerf& cfg = (BladerfOutput::MsgConfigureBladerf&) message;
+        const Bladerf1Output::MsgConfigureBladerf1& cfg = (Bladerf1Output::MsgConfigureBladerf1&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
         return true;
     }
-    else if (BladerfOutput::MsgReportBladerf::match(message))
+    else if (Bladerf1Output::MsgReportBladerf1::match(message))
 	{
 		displaySettings();
 		return true;
 	}
-    else if (BladerfOutput::MsgStartStop::match(message))
+    else if (Bladerf1Output::MsgStartStop::match(message))
     {
-        BladerfOutput::MsgStartStop& notif = (BladerfOutput::MsgStartStop&) message;
+        Bladerf1Output::MsgStartStop& notif = (Bladerf1Output::MsgStartStop&) message;
         blockApplySettings(true);
         ui->startStop->setChecked(notif.getStartStop());
         blockApplySettings(false);
@@ -154,7 +154,7 @@ bool BladerfOutputGui::handleMessage(const Message& message)
 	}
 }
 
-void BladerfOutputGui::handleInputMessages()
+void Bladerf1OutputGui::handleInputMessages()
 {
     Message* message;
 
@@ -182,14 +182,14 @@ void BladerfOutputGui::handleInputMessages()
     }
 }
 
-void BladerfOutputGui::updateSampleRateAndFrequency()
+void Bladerf1OutputGui::updateSampleRateAndFrequency()
 {
     m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
     m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateLabel->setText(QString("%1k").arg(QString::number(m_sampleRate/1000.0, 'g', 5)));
 }
 
-void BladerfOutputGui::displaySettings()
+void Bladerf1OutputGui::displaySettings()
 {
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 	ui->sampleRate->setValue(m_settings.m_devSampleRate);
@@ -208,32 +208,32 @@ void BladerfOutputGui::displaySettings()
 	ui->xb200->setCurrentIndex(getXb200Index(m_settings.m_xb200, m_settings.m_xb200Path, m_settings.m_xb200Filter));
 }
 
-void BladerfOutputGui::sendSettings()
+void Bladerf1OutputGui::sendSettings()
 {
 	if(!m_updateTimer.isActive())
 		m_updateTimer.start(100);
 }
 
-void BladerfOutputGui::on_centerFrequency_changed(quint64 value)
+void Bladerf1OutputGui::on_centerFrequency_changed(quint64 value)
 {
 	m_settings.m_centerFrequency = value * 1000;
 	sendSettings();
 }
 
-void BladerfOutputGui::on_sampleRate_changed(quint64 value)
+void Bladerf1OutputGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_devSampleRate = value;
     sendSettings();
 }
 
-void BladerfOutputGui::on_bandwidth_currentIndexChanged(int index)
+void Bladerf1OutputGui::on_bandwidth_currentIndexChanged(int index)
 {
 	int newbw = BladerfBandwidths::getBandwidth(index);
 	m_settings.m_bandwidth = newbw * 1000;
 	sendSettings();
 }
 
-void BladerfOutputGui::on_interp_currentIndexChanged(int index)
+void Bladerf1OutputGui::on_interp_currentIndexChanged(int index)
 {
 	if ((index <0) || (index > 6))
 		return;
@@ -241,7 +241,7 @@ void BladerfOutputGui::on_interp_currentIndexChanged(int index)
 	sendSettings();
 }
 
-void BladerfOutputGui::on_vga1_valueChanged(int value)
+void Bladerf1OutputGui::on_vga1_valueChanged(int value)
 {
 	if ((value < BLADERF_TXVGA1_GAIN_MIN) || (value > BLADERF_TXVGA1_GAIN_MAX))
 		return;
@@ -251,7 +251,7 @@ void BladerfOutputGui::on_vga1_valueChanged(int value)
 	sendSettings();
 }
 
-void BladerfOutputGui::on_vga2_valueChanged(int value)
+void Bladerf1OutputGui::on_vga2_valueChanged(int value)
 {
 	if ((value < BLADERF_TXVGA2_GAIN_MIN) || (value > BLADERF_TXVGA2_GAIN_MAX))
 		return;
@@ -261,7 +261,7 @@ void BladerfOutputGui::on_vga2_valueChanged(int value)
 	sendSettings();
 }
 
-void BladerfOutputGui::on_xb200_currentIndexChanged(int index)
+void Bladerf1OutputGui::on_xb200_currentIndexChanged(int index)
 {
 	if (index == 1) // bypass
 	{
@@ -321,25 +321,25 @@ void BladerfOutputGui::on_xb200_currentIndexChanged(int index)
 	sendSettings();
 }
 
-void BladerfOutputGui::on_startStop_toggled(bool checked)
+void Bladerf1OutputGui::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
     {
-        BladerfOutput::MsgStartStop *message = BladerfOutput::MsgStartStop::create(checked);
+        Bladerf1Output::MsgStartStop *message = Bladerf1Output::MsgStartStop::create(checked);
         m_deviceSampleSink->getInputMessageQueue()->push(message);
     }
 }
 
-void BladerfOutputGui::updateHardware()
+void Bladerf1OutputGui::updateHardware()
 {
 	qDebug() << "BladerfGui::updateHardware";
-	BladerfOutput::MsgConfigureBladerf* message = BladerfOutput::MsgConfigureBladerf::create( m_settings, m_forceSettings);
+	Bladerf1Output::MsgConfigureBladerf1* message = Bladerf1Output::MsgConfigureBladerf1::create( m_settings, m_forceSettings);
 	m_deviceSampleSink->getInputMessageQueue()->push(message);
 	m_forceSettings = false;
 	m_updateTimer.stop();
 }
 
-void BladerfOutputGui::updateStatus()
+void Bladerf1OutputGui::updateStatus()
 {
     int state = m_deviceUISet->m_deviceSinkAPI->state();
 
@@ -368,7 +368,7 @@ void BladerfOutputGui::updateStatus()
     }
 }
 
-unsigned int BladerfOutputGui::getXb200Index(bool xb_200, bladerf_xb200_path xb200Path, bladerf_xb200_filter xb200Filter)
+unsigned int Bladerf1OutputGui::getXb200Index(bool xb_200, bladerf_xb200_path xb200Path, bladerf_xb200_filter xb200Filter)
 {
 	if (xb_200)
 	{

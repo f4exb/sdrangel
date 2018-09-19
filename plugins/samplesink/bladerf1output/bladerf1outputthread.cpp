@@ -14,14 +14,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "bladerf1outputthread.h"
+
 #include <stdio.h>
 #include <errno.h>
 #include <algorithm>
-#include "bladerfoutputthread.h"
 
 
 
-BladerfOutputThread::BladerfOutputThread(struct bladerf* dev, SampleSourceFifo* sampleFifo, QObject* parent) :
+Bladerf1OutputThread::Bladerf1OutputThread(struct bladerf* dev, SampleSourceFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),
@@ -31,12 +32,12 @@ BladerfOutputThread::BladerfOutputThread(struct bladerf* dev, SampleSourceFifo* 
     std::fill(m_buf, m_buf + 2*BLADERFOUTPUT_BLOCKSIZE, 0);
 }
 
-BladerfOutputThread::~BladerfOutputThread()
+Bladerf1OutputThread::~Bladerf1OutputThread()
 {
 	stopWork();
 }
 
-void BladerfOutputThread::startWork()
+void Bladerf1OutputThread::startWork()
 {
 	m_startWaitMutex.lock();
 	start();
@@ -45,18 +46,18 @@ void BladerfOutputThread::startWork()
 	m_startWaitMutex.unlock();
 }
 
-void BladerfOutputThread::stopWork()
+void Bladerf1OutputThread::stopWork()
 {
 	m_running = false;
 	wait();
 }
 
-void BladerfOutputThread::setLog2Interpolation(unsigned int log2_interp)
+void Bladerf1OutputThread::setLog2Interpolation(unsigned int log2_interp)
 {
 	m_log2Interp = log2_interp;
 }
 
-void BladerfOutputThread::run()
+void Bladerf1OutputThread::run()
 {
 	int res;
 
@@ -78,7 +79,7 @@ void BladerfOutputThread::run()
 }
 
 //  Interpolate according to specified log2 (ex: log2=4 => decim=16)
-void BladerfOutputThread::callback(qint16* buf, qint32 len)
+void Bladerf1OutputThread::callback(qint16* buf, qint32 len)
 {
     SampleVector::iterator beginRead;
     m_sampleFifo->readAdvance(beginRead, len/(1<<m_log2Interp));

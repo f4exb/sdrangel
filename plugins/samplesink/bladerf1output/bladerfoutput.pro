@@ -9,7 +9,7 @@ CONFIG += plugin
 
 QT += core gui widgets multimedia opengl
 
-TARGET = outputbladerf
+TARGET = outputbladerf1
 
 DEFINES += USE_SSE2=1
 QMAKE_CXXFLAGS += -msse2
@@ -30,19 +30,19 @@ INCLUDEPATH += $$LIBBLADERFSRC
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
-SOURCES += bladerfoutputgui.cpp\
-    bladerfoutput.cpp\
-    bladerfoutputplugin.cpp\
-    bladerfoutputsettings.cpp\
-    bladerfoutputthread.cpp
+SOURCES += bladerf1outputgui.cpp\
+    bladerf1output.cpp\
+    bladerf1outputplugin.cpp\
+    bladerf1outputsettings.cpp\
+    bladerf1outputthread.cpp
 
-HEADERS += bladerfoutputgui.h\
-    bladerfoutput.h\
-    bladerfoutputplugin.h\
-    bladerfoutputsettings.h\
-    bladerfoutputthread.h
+HEADERS += bladerf1outputgui.h\
+    bladerf1output.h\
+    bladerf1outputplugin.h\
+    bladerf1outputsettings.h\
+    bladerf1outputthread.h
 
-FORMS += bladerfoutputgui.ui
+FORMS += bladerf1outputgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui

@@ -14,27 +14,46 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _BLADERF_BLADERFOUTPUTSETTINGS_H_
-#define _BLADERF_BLADERFOUTPUTSETTINGS_H_
+#ifndef INCLUDE_BLADERFOUTPUTTHREAD_H
+#define INCLUDE_BLADERFOUTPUTTHREAD_H
 
-#include <QtGlobal>
+#include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
 #include <libbladeRF.h>
+#include "dsp/samplesourcefifo.h"
+#include "dsp/interpolators.h"
 
-struct BladeRFOutputSettings {
-	quint64 m_centerFrequency;
-	qint32 m_devSampleRate;
-	qint32 m_vga1;
-	qint32 m_vga2;
-	qint32 m_bandwidth;
-	quint32 m_log2Interp;
-	bool m_xb200;
-	bladerf_xb200_path m_xb200Path;
-	bladerf_xb200_filter m_xb200Filter;
+#define BLADERFOUTPUT_BLOCKSIZE (1<<16)
 
-	BladeRFOutputSettings();
-	void resetToDefaults();
-	QByteArray serialize() const;
-	bool deserialize(const QByteArray& data);
+class Bladerf1OutputThread : public QThread {
+	Q_OBJECT
+
+public:
+	Bladerf1OutputThread(struct bladerf* dev, SampleSourceFifo* sampleFifo, QObject* parent = NULL);
+	~Bladerf1OutputThread();
+
+	void startWork();
+	void stopWork();
+	void setLog2Interpolation(unsigned int log2_interp);
+	void setFcPos(int fcPos);
+	bool isRunning() const { return m_running; }
+
+private:
+	QMutex m_startWaitMutex;
+	QWaitCondition m_startWaiter;
+	bool m_running;
+
+	struct bladerf* m_dev;
+	qint16 m_buf[2*BLADERFOUTPUT_BLOCKSIZE];
+    SampleSourceFifo* m_sampleFifo;
+
+	unsigned int m_log2Interp;
+
+	Interpolators<qint16, SDR_TX_SAMP_SZ, 12> m_interpolators;
+
+	void run();
+	void callback(qint16* buf, qint32 len);
 };
 
-#endif /* _BLADERF_BLADERFOUTPUTSETTINGS_H_ */
+#endif // INCLUDE_BLADERFOUTPUTTHREAD_H

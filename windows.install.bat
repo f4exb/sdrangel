@@ -65,7 +65,7 @@ copy plugins\samplesource\limesdrinput\%1\inputlimesdr.dll %2\plugins\samplesour
 copy plugins\samplesource\plutosdrinput\%1\inputplutosdr.dll %2\plugins\samplesource
 REM copy plugins\samplesource\sdrdaemonsource\%1\inputsdrdaemonsource.dll %2\plugins\samplesource
 copy plugins\samplesink\filesink\%1\outputfilesink.dll %2\plugins\samplesink
-copy plugins\samplesink\bladerfoutput\%1\outputbladerf.dll %2\plugins\samplesink
+copy plugins\samplesink\bladerf1output\%1\outputbladerf1.dll %2\plugins\samplesink
 copy plugins\samplesink\hackrfoutput\%1\outputhackrf.dll %2\plugins\samplesink
 copy plugins\samplesink\limesdroutput\%1\outputlimesdr.dll %2\plugins\samplesink
 copy plugins\samplesink\plutosdroutput\%1\outputplutosdr.dll %2\plugins\samplesink

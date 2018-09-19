@@ -23,30 +23,30 @@
 
 #include "../../../devices/bladerf1/devicebladerf1.h"
 #include "../../../devices/bladerf1/devicebladerf1param.h"
-#include "bladerfoutputsettings.h"
+#include "bladerf1outputsettings.h"
 
 class DeviceSinkAPI;
-class BladerfOutputThread;
+class Bladerf1OutputThread;
 
-class BladerfOutput : public DeviceSampleSink {
+class Bladerf1Output : public DeviceSampleSink {
 public:
-	class MsgConfigureBladerf : public Message {
+	class MsgConfigureBladerf1 : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const BladeRFOutputSettings& getSettings() const { return m_settings; }
+		const BladeRF1OutputSettings& getSettings() const { return m_settings; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureBladerf* create(const BladeRFOutputSettings& settings, bool force)
+		static MsgConfigureBladerf1* create(const BladeRF1OutputSettings& settings, bool force)
 		{
-			return new MsgConfigureBladerf(settings, force);
+			return new MsgConfigureBladerf1(settings, force);
 		}
 
 	private:
-		BladeRFOutputSettings m_settings;
+		BladeRF1OutputSettings m_settings;
 		bool m_force;
 
-		MsgConfigureBladerf(const BladeRFOutputSettings& settings, bool force) :
+		MsgConfigureBladerf1(const BladeRF1OutputSettings& settings, bool force) :
 			Message(),
 			m_settings(settings),
 			m_force(force)
@@ -72,25 +72,25 @@ public:
         { }
     };
 
-	class MsgReportBladerf : public Message {
+	class MsgReportBladerf1 : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 
-		static MsgReportBladerf* create()
+		static MsgReportBladerf1* create()
 		{
-			return new MsgReportBladerf();
+			return new MsgReportBladerf1();
 		}
 
 	protected:
 
-		MsgReportBladerf() :
+		MsgReportBladerf1() :
 			Message()
 		{ }
 	};
 
-	BladerfOutput(DeviceSinkAPI *deviceAPI);
-	virtual ~BladerfOutput();
+	Bladerf1Output(DeviceSinkAPI *deviceAPI);
+	virtual ~Bladerf1Output();
 	virtual void destroy();
 
     virtual void init();
@@ -130,14 +130,14 @@ public:
 private:
     bool openDevice();
     void closeDevice();
-	bool applySettings(const BladeRFOutputSettings& settings, bool force);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRFOutputSettings& settings);
+	bool applySettings(const BladeRF1OutputSettings& settings, bool force);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF1OutputSettings& settings);
 
 	DeviceSinkAPI *m_deviceAPI;
 	QMutex m_mutex;
-	BladeRFOutputSettings m_settings;
+	BladeRF1OutputSettings m_settings;
 	struct bladerf* m_dev;
-	BladerfOutputThread* m_bladerfThread;
+	Bladerf1OutputThread* m_bladerfThread;
 	QString m_deviceDescription;
     DeviceBladeRF1Params m_sharedParams;
     bool m_running;

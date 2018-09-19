@@ -4,7 +4,7 @@ find_package(LibUSB)
 
 find_package(LibBLADERF)
 if(LIBUSB_FOUND AND LIBBLADERF_FOUND)
-    add_subdirectory(bladerfoutput)
+    add_subdirectory(bladerf1output)
 endif(LIBUSB_FOUND AND LIBBLADERF_FOUND)
 
 find_package(LibHACKRF)
@@ -28,7 +28,7 @@ if(CM256CC_FOUND)
 endif(CM256CC_FOUND)
 
 if (BUILD_DEBIAN)
-    add_subdirectory(bladerfoutput)
+    add_subdirectory(bladerf1output)
     add_subdirectory(hackrfoutput)
     add_subdirectory(limesdroutput)
     add_subdirectory(plutosdroutput)

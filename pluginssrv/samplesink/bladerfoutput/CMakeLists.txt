@@ -1,20 +1,20 @@
-project(bladerfoutput)
+project(bladerf1output)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-set(PLUGIN_PREFIX "../../../plugins/samplesink/bladerfoutput")
+set(PLUGIN_PREFIX "../../../plugins/samplesink/bladerf1output")
 
-set(bladerfoutput_SOURCES
-	${PLUGIN_PREFIX}/bladerfoutput.cpp
-	${PLUGIN_PREFIX}/bladerfoutputplugin.cpp
-	${PLUGIN_PREFIX}/bladerfoutputsettings.cpp
-	${PLUGIN_PREFIX}/bladerfoutputthread.cpp
+set(bladerf1output_SOURCES
+	${PLUGIN_PREFIX}/bladerf1output.cpp
+	${PLUGIN_PREFIX}/bladerf1outputplugin.cpp
+	${PLUGIN_PREFIX}/bladerf1outputsettings.cpp
+	${PLUGIN_PREFIX}/bladerf1outputthread.cpp
 )
 
-set(bladerfoutput_HEADERS
-	${PLUGIN_PREFIX}/bladerfoutput.h
-	${PLUGIN_PREFIX}/bladerfoutputplugin.h
-	${PLUGIN_PREFIX}/bladerfoutputsettings.h
-	${PLUGIN_PREFIX}/bladerfoutputthread.h
+set(bladerf1output_HEADERS
+	${PLUGIN_PREFIX}/bladerf1output.h
+	${PLUGIN_PREFIX}/bladerf1outputplugin.h
+	${PLUGIN_PREFIX}/bladerf1outputsettings.h
+	${PLUGIN_PREFIX}/bladerf1outputthread.h
 )
 
 if (BUILD_DEBIAN)
@@ -40,13 +40,13 @@ add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 
-add_library(outputbladerfsrv SHARED
-	${bladerfoutput_SOURCES}
-	${bladerfoutput_HEADERS_MOC}
+add_library(outputbladerf1srv SHARED
+	${bladerf1output_SOURCES}
+	${bladerf1output_HEADERS_MOC}
 )
 
 if (BUILD_DEBIAN)
-target_link_libraries(outputbladerfsrv
+target_link_libraries(outputbladerf1srv
     ${QT_LIBRARIES}
     bladerf
     sdrbase
@@ -54,7 +54,7 @@ target_link_libraries(outputbladerfsrv
     bladerf1device
 )
 else (BUILD_DEBIAN)
-target_link_libraries(outputbladerfsrv
+target_link_libraries(outputbladerf1srv
 	${QT_LIBRARIES}
 	${LIBBLADERF_LIBRARIES}
 	sdrbase
@@ -63,6 +63,6 @@ target_link_libraries(outputbladerfsrv
 )
 endif (BUILD_DEBIAN)
 
-target_link_libraries(outputbladerfsrv Qt5::Core)
+target_link_libraries(outputbladerf1srv Qt5::Core)
 
-install(TARGETS outputbladerfsrv DESTINATION lib/pluginssrv/samplesink)
+install(TARGETS outputbladerf1srv DESTINATION lib/pluginssrv/samplesink)

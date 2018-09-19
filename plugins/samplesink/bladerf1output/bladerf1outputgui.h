@@ -23,7 +23,7 @@
 
 #include "util/messagequeue.h"
 
-#include "bladerfoutput.h"
+#include "bladerf1output.h"
 
 class DeviceSampleSink;
 class DeviceUISet;
@@ -32,12 +32,12 @@ namespace Ui {
 	class Bladerf1OutputGui;
 }
 
-class BladerfOutputGui : public QWidget, public PluginInstanceGUI {
+class Bladerf1OutputGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit BladerfOutputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
-	virtual ~BladerfOutputGui();
+	explicit Bladerf1OutputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
+	virtual ~Bladerf1OutputGui();
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -57,7 +57,7 @@ private:
 	DeviceUISet* m_deviceUISet;
 	bool m_doApplySettings;
 	bool m_forceSettings;
-	BladeRFOutputSettings m_settings;
+	BladeRF1OutputSettings m_settings;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
 	DeviceSampleSink* m_deviceSampleSink;

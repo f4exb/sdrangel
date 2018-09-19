@@ -14,41 +14,27 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_BLADERFOUTPUTPLUGIN_H
-#define INCLUDE_BLADERFOUTPUTPLUGIN_H
+#ifndef _BLADERF_BLADERFOUTPUTSETTINGS_H_
+#define _BLADERF_BLADERFOUTPUTSETTINGS_H_
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include <QtGlobal>
+#include <libbladeRF.h>
 
-class PluginAPI;
+struct BladeRF1OutputSettings {
+	quint64 m_centerFrequency;
+	qint32 m_devSampleRate;
+	qint32 m_vga1;
+	qint32 m_vga2;
+	qint32 m_bandwidth;
+	quint32 m_log2Interp;
+	bool m_xb200;
+	bladerf_xb200_path m_xb200Path;
+	bladerf_xb200_filter m_xb200Filter;
 
-#define BLADERF1OUTPUT_DEVICE_TYPE_ID "sdrangel.samplesource.bladerf1output"
-
-class BladerfOutputPlugin : public QObject, public PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID BLADERF1OUTPUT_DEVICE_TYPE_ID)
-
-public:
-	explicit BladerfOutputPlugin(QObject* parent = NULL);
-
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
-
-	virtual SamplingDevices enumSampleSinks();
-
-	virtual PluginInstanceGUI* createSampleSinkPluginInstanceGUI(
-	        const QString& sinkId,
-	        QWidget **widget,
-	        DeviceUISet *deviceUISet);
-
-	virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI);
-
-	static const QString m_hardwareID;
-    static const QString m_deviceTypeID;
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
+	BladeRF1OutputSettings();
+	void resetToDefaults();
+	QByteArray serialize() const;
+	bool deserialize(const QByteArray& data);
 };
 
-#endif // INCLUDE_BLADERFOUTPUTPLUGIN_H
+#endif /* _BLADERF_BLADERFOUTPUTSETTINGS_H_ */
