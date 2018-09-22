@@ -2,21 +2,22 @@
 
 This folder contains classes and methods that can be used by different plugins that work with a common physical device or via network. Thus this can be one of the following devices:
 
-  - BladeRF: one Rx and one Tx full duplex. Plugins are:
-    - bladerfinput
-    - bladerfoutput
+  - BladeRF1: one Rx and one Tx full duplex. Plugins are:
+    - bladerf1input
+    - bladerf1output
+    
+  - BladeRF2: 2 Rx and 2 Tx full duplex (BladeRF 2.0 micro). Plugins are:
+    - bladerf2input
+    - bladerf2output
     
   - HackRF: one Rx and one Tx half duplex. Plugins are:
     - hackrfinput
     - hackrfoutput
   
-  - LimeSDR: 2 Rx and 2 Tx full duplex. Plugins are
+  - LimeSDR: 2 Rx and 2 Tx full duplex (Lime-USB). 1 Rx and 1 Tx full duplex (Lime-Mini). Plugins are
     - limesdrinput
     - limesdroutput
     
   - PlutoSDR: one Rx and one Tx full duplex. Plugins are
     - plutosdrinput
     - plutosdroutput
-
-  - SDRdaemon: sends or receive samples to/from device remotely through the network. Used on the Tx plugin only
-    - sdrdaemonsink 

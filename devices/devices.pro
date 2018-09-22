@@ -18,8 +18,6 @@ QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
 macx:QMAKE_LFLAGS += -F/Library/Frameworks
 
-CONFIG(MINGW32):LIBBLADERFSRC = "C:\softs\bladeRF\host\libraries\libbladeRF\include"
-CONFIG(MINGW64):LIBBLADERFSRC = "C:\softs\bladeRF\host\libraries\libbladeRF\include"
 CONFIG(macx):LIBHACKRFSRC = "/opt/local/include"
 CONFIG(MINGW32):LIBHACKRFSRC = "C:\softs\hackrf\host"
 CONFIG(MINGW64):LIBHACKRFSRC = "C:\softs\hackrf\host"
@@ -34,7 +32,6 @@ CONFIG(MINGW64):LIBIIOSRC = "C:\softs\libiio"
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../exports
 INCLUDEPATH += ../sdrbase
-INCLUDEPATH += $$LIBBLADERFSRC
 INCLUDEPATH += $$LIBHACKRFSRC
 INCLUDEPATH += "C:\softs\boost_1_66_0"
 INCLUDEPATH += "C:\softs\libusb-1.0.20\include"
@@ -55,10 +52,6 @@ INCLUDEPATH += $$LIBPERSEUSSRC
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
-!macx:SOURCES += bladerf/devicebladerf.cpp\
-        bladerf/devicebladerfvalues.cpp\
-        bladerf/devicebladerfshared.cpp
-
 SOURCES += hackrf/devicehackrf.cpp\
         hackrf/devicehackrfvalues.cpp\
         hackrf/devicehackrfshared.cpp
@@ -72,11 +65,6 @@ SOURCES += limesdr/devicelimesdr.cpp\
         plutosdr/deviceplutosdrparams.cpp\
         plutosdr/deviceplutosdrscan.cpp\
         plutosdr/deviceplutosdrshared.cpp
-
-!macx:HEADERS -= bladerf/devicebladerf.h\
-        bladerf/devicebladerfparam.h\
-        bladerf/devicebladerfvalues.h\
-        bladerf/devicebladerfshared.h
 
 HEADERS  += hackrf/devicehackrf.h\
         hackrf/devicehackrfparam.h\
@@ -95,7 +83,6 @@ HEADERS += plutosdr/deviceplutosdr.h\
 
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
 !macx {
-    LIBS += -L../libbladerf/$${build_subdir} -llibbladerf
     LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
     LIBS += -L../liblimesuite/$${build_subdir} -lliblimesuite
     LIBS += -L../libiio/$${build_subdir} -llibiio

@@ -38,7 +38,7 @@ Since version 2 SDRangel can integrate more than one hardware device running con
 
 Since version 3 transmission or signal generation is supported for BladeRF, HackRF (since version 3.1), LimeSDR (since version 3.4) and PlutoSDR (since version 3.7.8) using a sample sink plugin. These plugins are:
 
-  - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput)
+  - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerf1output)
   - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
   - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput)
   - [PlutoSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/plutosdroutput)
@@ -55,7 +55,7 @@ Since version 4 the `sdrangelsrv` binary launches a server mode SDRangel instanc
 
 <h2>Detached RF head server (SDRdaemon)</h2>
 
-Since version 4.1 the previously separated project SDRdaemon has been modified and included in SDRangel. Another binary `sdrdaemonsrv` is provided for handling just the RF part of the SDRangel processing chain. The baseband samples are comunicated via UDP to/from a SDRangel instance. More details are provided in the server instance documentation in the `sdrdaemon` folder.
+Since version 4.1 the previously separated project SDRdaemon has been modified and included in SDRangel. The `sdrangelsrv` headless variant can be used for this purpose using the Daemon source or sink channels.
 
 <h1>Notes on pulseaudio setup</h1>
 
