@@ -27,7 +27,7 @@ endif (BUILD_DEBIAN)
 #add_definitions(-DQT_SHARED)
 
 add_library(bladerf2device SHARED
-    ${bladerf1device_SOURCES}
+    ${bladerf2device_SOURCES}
 )
 
 if (BUILD_DEBIAN)

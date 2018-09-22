@@ -14,37 +14,44 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DEVICES_BLADERF2_DEVICEBLADERF2_H_
-#define DEVICES_BLADERF2_DEVICEBLADERF2_H_
+#ifndef PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTPLUGIN_H_
+#define PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTPLUGIN_H_
 
-#include <stdint.h>
-#include <libbladeRF.h>
+#include <QObject>
+#include "plugin/plugininterface.h"
 
-#include "export.h"
+class PluginAPI;
+class DeviceSourceAPI;
+class DeviceUISet;
 
-class DEVICES_API DeviceBladeRF2
-{
+#define BLADERF2INPUT_DEVICE_TYPE_ID "sdrangel.samplesource.bladerf2input"
+
+class Blderf2InputPlugin : public QObject, public PluginInterface {
+    Q_OBJECT
+    Q_INTERFACES(PluginInterface)
+    Q_PLUGIN_METADATA(IID BLADERF2INPUT_DEVICE_TYPE_ID)
+
 public:
-    DeviceBladeRF2();
-    ~DeviceBladeRF2();
+    explicit Blderf2InputPlugin(QObject* parent = 0);
 
-    bool open(const char *serial);
-    void close();
+    const PluginDescriptor& getPluginDescriptor() const;
+    void initPlugin(PluginAPI* pluginAPI);
 
-    void getFrequencyRangeRx(int& min, int& max, int& step);
-    void getFrequencyRangeTx(int& min, int& max, int& step);
-    void getSampleRateRangeRx(int& min, int& max, int& step);
-    void getSampleRateRangeTx(int& min, int& max, int& step);
-    void getBandwidthRangeRx(int& min, int& max, int& step);
-    void getBandwidthRangeTx(int& min, int& max, int& step);
-    void getGlobalGainRangeRx(int& min, int& max, int& step);
-    void getGlobalGainRangeTx(int& min, int& max, int& step);
+    virtual SamplingDevices enumSampleSources();
+    virtual PluginInstanceGUI* createSampleSourcePluginInstanceGUI(
+            const QString& sourceId,
+            QWidget **widget,
+            DeviceUISet *deviceUISet);
+    virtual DeviceSampleSource* createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI);
+
+    static const QString m_hardwareID;
+    static const QString m_deviceTypeID;
 
 private:
-    bladerf *m_dev;
-    static struct bladerf *open_bladerf_from_serial(const char *serial);
+    static const PluginDescriptor m_pluginDescriptor;
 };
 
 
 
-#endif /* DEVICES_BLADERF2_DEVICEBLADERF2_H_ */
+
+#endif /* PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTPLUGIN_H_ */

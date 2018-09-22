@@ -27,7 +27,6 @@
 
 class DeviceSourceAPI;
 class LimeSDRInputThread;
-struct DeviceLimeSDRParams;
 class FileRecord;
 
 class LimeSDRInput : public DeviceSampleSource

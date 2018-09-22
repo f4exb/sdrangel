@@ -32,6 +32,8 @@
 #include "SWGBandwidth.h"
 #include "SWGBladeRF1InputSettings.h"
 #include "SWGBladeRF1OutputSettings.h"
+#include "SWGBladeRF2InputReport.h"
+#include "SWGBladeRF2InputSettings.h"
 #include "SWGCWKeyerSettings.h"
 #include "SWGChannel.h"
 #include "SWGChannelListItem.h"
@@ -89,6 +91,7 @@
 #include "SWGPresets.h"
 #include "SWGRDSReport.h"
 #include "SWGRDSReport_altFrequencies.h"
+#include "SWGRange.h"
 #include "SWGRtlSdrReport.h"
 #include "SWGRtlSdrSettings.h"
 #include "SWGSDRPlayReport.h"
@@ -170,6 +173,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGBladeRF1OutputSettings").compare(type) == 0) {
       return new SWGBladeRF1OutputSettings();
+    }
+    if(QString("SWGBladeRF2InputReport").compare(type) == 0) {
+      return new SWGBladeRF2InputReport();
+    }
+    if(QString("SWGBladeRF2InputSettings").compare(type) == 0) {
+      return new SWGBladeRF2InputSettings();
     }
     if(QString("SWGCWKeyerSettings").compare(type) == 0) {
       return new SWGCWKeyerSettings();
@@ -341,6 +350,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRDSReport_altFrequencies").compare(type) == 0) {
       return new SWGRDSReport_altFrequencies();
+    }
+    if(QString("SWGRange").compare(type) == 0) {
+      return new SWGRange();
     }
     if(QString("SWGRtlSdrReport").compare(type) == 0) {
       return new SWGRtlSdrReport();

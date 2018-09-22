@@ -1267,7 +1267,7 @@ margin-bottom: 20px;
       "type" : "string"
     }
   },
-  "description" : "BladeRF"
+  "description" : "BladeRF1"
 };
             defs.BladeRF1OutputSettings = {
   "properties" : {
@@ -1300,7 +1300,63 @@ margin-bottom: 20px;
       "type" : "integer"
     }
   },
-  "description" : "BladeRF"
+  "description" : "BladeRF1"
+};
+            defs.BladeRF2InputReport = {
+  "properties" : {
+    "frequencyRange" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "sampleRateRange" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "bandwidthRange" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "globalGainRange" : {
+      "$ref" : "#/definitions/Range"
+    }
+  },
+  "description" : "BladeRF2"
+};
+            defs.BladeRF2InputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "bandwidth" : {
+      "type" : "integer"
+    },
+    "gainMode" : {
+      "type" : "integer"
+    },
+    "globalGain" : {
+      "type" : "integer"
+    },
+    "biasTee" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "fcPos" : {
+      "type" : "integer"
+    },
+    "dcBlock" : {
+      "type" : "integer"
+    },
+    "iqCorrection" : {
+      "type" : "integer"
+    },
+    "fileRecordName" : {
+      "type" : "string"
+    }
+  },
+  "description" : "BladeRF2"
 };
             defs.CWKeyerSettings = {
   "properties" : {
@@ -1838,6 +1894,9 @@ margin-bottom: 20px;
     "airspyHFReport" : {
       "$ref" : "#/definitions/AirspyHFReport"
     },
+    "bladeRF2InputReport" : {
+      "$ref" : "#/definitions/BladeRF2InputReport"
+    },
     "fileSourceReport" : {
       "$ref" : "#/definitions/FileSourceReport"
     },
@@ -1931,6 +1990,9 @@ margin-bottom: 20px;
     },
     "bladeRF1InputSettings" : {
       "$ref" : "#/definitions/BladeRF1InputSettings"
+    },
+    "bladeRF2InputSettings" : {
+      "$ref" : "#/definitions/BladeRF2InputSettings"
     },
     "bladeRF1OutputSettings" : {
       "$ref" : "#/definitions/BladeRF1OutputSettings"
@@ -3147,6 +3209,20 @@ margin-bottom: 20px;
       "format" : "float"
     }
   }
+};
+            defs.Range = {
+  "properties" : {
+    "min" : {
+      "type" : "integer"
+    },
+    "max" : {
+      "type" : "integer"
+    },
+    "step" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "An arbitrary range of values"
 };
             defs.RtlSdrReport = {
   "properties" : {
@@ -23066,7 +23142,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-09-19T05:34:44.404+02:00
+              Generated 2018-09-22T10:27:51.856+02:00
             </div>
           </div>
       </div>

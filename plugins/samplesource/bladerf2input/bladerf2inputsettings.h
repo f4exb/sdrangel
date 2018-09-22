@@ -14,37 +14,39 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DEVICES_BLADERF2_DEVICEBLADERF2_H_
-#define DEVICES_BLADERF2_DEVICEBLADERF2_H_
+#ifndef PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTSETTINGS_H_
+#define PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTSETTINGS_H_
 
-#include <stdint.h>
+#include <QtGlobal>
+#include <QString>
 #include <libbladeRF.h>
 
-#include "export.h"
+struct BladeRF2InputSettings {
+    typedef enum {
+        FC_POS_INFRA = 0,
+        FC_POS_SUPRA,
+        FC_POS_CENTER
+    } fcPos_t;
 
-class DEVICES_API DeviceBladeRF2
-{
-public:
-    DeviceBladeRF2();
-    ~DeviceBladeRF2();
+    quint64 m_centerFrequency;
+    qint32 m_devSampleRate;
+    qint32 m_bandwidth;
+    int m_gainMode;
+    int m_globalGain;
+    bool m_biasTee;
+    quint32 m_log2Decim;
+    fcPos_t m_fcPos;
+    bool m_dcBlock;
+    bool m_iqCorrection;
+    QString m_fileRecordName;
 
-    bool open(const char *serial);
-    void close();
-
-    void getFrequencyRangeRx(int& min, int& max, int& step);
-    void getFrequencyRangeTx(int& min, int& max, int& step);
-    void getSampleRateRangeRx(int& min, int& max, int& step);
-    void getSampleRateRangeTx(int& min, int& max, int& step);
-    void getBandwidthRangeRx(int& min, int& max, int& step);
-    void getBandwidthRangeTx(int& min, int& max, int& step);
-    void getGlobalGainRangeRx(int& min, int& max, int& step);
-    void getGlobalGainRangeTx(int& min, int& max, int& step);
-
-private:
-    bladerf *m_dev;
-    static struct bladerf *open_bladerf_from_serial(const char *serial);
+    BladeRF2InputSettings();
+    void resetToDefaults();
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
 };
 
 
 
-#endif /* DEVICES_BLADERF2_DEVICEBLADERF2_H_ */
+
+#endif /* PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTSETTINGS_H_ */

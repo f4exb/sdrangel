@@ -14,34 +14,47 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "devicebladerf2.h"
-
-#include <QtGlobal>
-
 #include <cstdio>
 #include <cstring>
 
-bool DeviceBladeRF2::open_bladerf(struct bladerf **dev, const char *serial)
+#include <QtGlobal>
+
+#include "devicebladerf2.h"
+
+DeviceBladeRF2::DeviceBladeRF2() :
+    m_dev(0)
+{}
+
+DeviceBladeRF2::~DeviceBladeRF2()
+{
+    if (m_dev)
+    {
+        bladerf_close(m_dev);
+        m_dev = 0;
+    }
+}
+
+bool DeviceBladeRF2::open(const char *serial)
 {
     int fpga_loaded;
 
-    if ((*dev = open_bladerf_from_serial(serial)) == 0)
+    if ((m_dev = open_bladerf_from_serial(serial)) == 0)
     {
-        qCritical("DeviceBladeRF2::open_bladerf: could not open BladeRF");
+        qCritical("DeviceBladeRF2::open: could not open BladeRF");
         return false;
     }
 
-    fpga_loaded = bladerf_is_fpga_configured(*dev);
+    fpga_loaded = bladerf_is_fpga_configured(m_dev);
 
     if (fpga_loaded < 0)
     {
-        qCritical("DeviceBladeRF2::open_bladerf: failed to check FPGA state: %s",
+        qCritical("DeviceBladeRF2::open: failed to check FPGA state: %s",
                 bladerf_strerror(fpga_loaded));
         return false;
     }
     else if (fpga_loaded == 0)
     {
-        qCritical("DeviceBladeRF2::start: the device's FPGA is not loaded.");
+        qCritical("DeviceBladeRF2::open: the device's FPGA is not loaded.");
         return false;
     }
 
@@ -87,4 +100,187 @@ struct bladerf *DeviceBladeRF2::open_bladerf_from_serial(const char *serial)
     }
 }
 
+void DeviceBladeRF2::getFrequencyRangeRx(int& min, int& max, int& step)
+{
+    if (m_dev)
+    {
+        const struct bladerf_range *range;
+        int status;
 
+        status = bladerf_get_frequency_range(m_dev, BLADERF_CHANNEL_RX(0), &range);
+
+        if (status < 0)
+        {
+            qCritical("DeviceBladeRF2::getFrequencyRangeRx: Failed to get Rx frequency range: %s",
+                    bladerf_strerror(status));
+        }
+        else
+        {
+            min = range->min;
+            max = range->max;
+            step = range->step;
+        }
+    }
+}
+
+void DeviceBladeRF2::getFrequencyRangeTx(int& min, int& max, int& step)
+{
+    if (m_dev)
+    {
+        const struct bladerf_range *range;
+        int status;
+
+        status = bladerf_get_frequency_range(m_dev, BLADERF_CHANNEL_TX(0), &range);
+
+        if (status < 0)
+        {
+            qCritical("DeviceBladeRF2::getFrequencyRangeTx: Failed to get Tx frequency range: %s",
+                    bladerf_strerror(status));
+        }
+        else
+        {
+            min = range->min;
+            max = range->max;
+            step = range->step;
+        }
+    }
+}
+
+void DeviceBladeRF2::getSampleRateRangeRx(int& min, int& max, int& step)
+{
+    if (m_dev)
+    {
+        const struct bladerf_range *range;
+        int status;
+
+        status = bladerf_get_sample_rate_range(m_dev, BLADERF_CHANNEL_RX(0), &range);
+
+        if (status < 0)
+        {
+            qCritical("DeviceBladeRF2::getSampleRateRangeRx: Failed to get Rx sample rate range: %s",
+                    bladerf_strerror(status));
+        }
+        else
+        {
+            min = range->min;
+            max = range->max;
+            step = range->step;
+        }
+    }
+}
+
+void DeviceBladeRF2::getSampleRateRangeTx(int& min, int& max, int& step)
+{
+    if (m_dev)
+    {
+        const struct bladerf_range *range;
+        int status;
+
+        status = bladerf_get_sample_rate_range(m_dev, BLADERF_CHANNEL_TX(0), &range);
+
+        if (status < 0)
+        {
+            qCritical("DeviceBladeRF2::getSampleRateRangeTx: Failed to get Tx sample rate range: %s",
+                    bladerf_strerror(status));
+        }
+        else
+        {
+            min = range->min;
+            max = range->max;
+            step = range->step;
+        }
+    }
+
+}
+
+void DeviceBladeRF2::getBandwidthRangeRx(int& min, int& max, int& step)
+{
+    if (m_dev)
+    {
+        const struct bladerf_range *range;
+        int status;
+
+        status = bladerf_get_bandwidth_range(m_dev, BLADERF_CHANNEL_RX(0), &range);
+
+        if (status < 0)
+        {
+            qCritical("DeviceBladeRF2::getBandwidthRangeRx: Failed to get Rx bandwidth range: %s",
+                    bladerf_strerror(status));
+        }
+        else
+        {
+            min = range->min;
+            max = range->max;
+            step = range->step;
+        }
+    }
+}
+
+void DeviceBladeRF2::getBandwidthRangeTx(int& min, int& max, int& step)
+{
+    if (m_dev)
+    {
+        const struct bladerf_range *range;
+        int status;
+
+        status = bladerf_get_bandwidth_range(m_dev, BLADERF_CHANNEL_TX(0), &range);
+
+        if (status < 0)
+        {
+            qCritical("DeviceBladeRF2::getBandwidthRangeTx: Failed to get Tx bandwidth range: %s",
+                    bladerf_strerror(status));
+        }
+        else
+        {
+            min = range->min;
+            max = range->max;
+            step = range->step;
+        }
+    }
+}
+
+void DeviceBladeRF2::getGlobalGainRangeRx(int& min, int& max, int& step)
+{
+    if (m_dev)
+    {
+        const struct bladerf_range *range;
+        int status;
+
+        status = bladerf_get_gain_range(m_dev, BLADERF_CHANNEL_RX(0), &range);
+
+        if (status < 0)
+        {
+            qCritical("DeviceBladeRF2::getGlobalGainRangeRx: Failed to get Rx global gain range: %s",
+                    bladerf_strerror(status));
+        }
+        else
+        {
+            min = range->min;
+            max = range->max;
+            step = range->step;
+        }
+    }
+}
+
+void DeviceBladeRF2::getGlobalGainRangeTx(int& min, int& max, int& step)
+{
+    if (m_dev)
+    {
+        const struct bladerf_range *range;
+        int status;
+
+        status = bladerf_get_gain_range(m_dev, BLADERF_CHANNEL_TX(0), &range);
+
+        if (status < 0)
+        {
+            qCritical("DeviceBladeRF2::getGlobalGainRangeTx: Failed to get Tx global gain range: %s",
+                    bladerf_strerror(status));
+        }
+        else
+        {
+            min = range->min;
+            max = range->max;
+            step = range->step;
+        }
+    }
+}

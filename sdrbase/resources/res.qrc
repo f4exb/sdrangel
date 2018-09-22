@@ -9,6 +9,7 @@
         <file>webapi/doc/swagger/include/ATVMod.yaml</file>
         <file>webapi/doc/swagger/include/BFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/BladeRF1.yaml</file>
+        <file>webapi/doc/swagger/include/BladeRF2.yaml</file>
         <file>webapi/doc/swagger/include/CWKeyer.yaml</file>
         <file>webapi/doc/swagger/include/DSDDemod.yaml</file>
         <file>webapi/doc/swagger/include/FCDPro.yaml</file>

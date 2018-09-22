@@ -1,5 +1,5 @@
 BladeRF1InputSettings:
-  description: BladeRF
+  description: BladeRF1
   properties:
     centerFrequency:
       type: integer
@@ -32,7 +32,7 @@ BladeRF1InputSettings:
       type: string      
       
 BladeRF1OutputSettings:
-  description: BladeRF
+  description: BladeRF1
   properties:
     centerFrequency:
       type: integer

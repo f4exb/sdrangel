@@ -38,6 +38,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_airspy_hf_settings_isSet = false;
     blade_rf1_input_settings = nullptr;
     m_blade_rf1_input_settings_isSet = false;
+    blade_rf2_input_settings = nullptr;
+    m_blade_rf2_input_settings_isSet = false;
     blade_rf1_output_settings = nullptr;
     m_blade_rf1_output_settings_isSet = false;
     fcd_pro_settings = nullptr;
@@ -88,6 +90,8 @@ SWGDeviceSettings::init() {
     m_airspy_hf_settings_isSet = false;
     blade_rf1_input_settings = new SWGBladeRF1InputSettings();
     m_blade_rf1_input_settings_isSet = false;
+    blade_rf2_input_settings = new SWGBladeRF2InputSettings();
+    m_blade_rf2_input_settings_isSet = false;
     blade_rf1_output_settings = new SWGBladeRF1OutputSettings();
     m_blade_rf1_output_settings_isSet = false;
     fcd_pro_settings = new SWGFCDProSettings();
@@ -136,6 +140,9 @@ SWGDeviceSettings::cleanup() {
     }
     if(blade_rf1_input_settings != nullptr) { 
         delete blade_rf1_input_settings;
+    }
+    if(blade_rf2_input_settings != nullptr) { 
+        delete blade_rf2_input_settings;
     }
     if(blade_rf1_output_settings != nullptr) { 
         delete blade_rf1_output_settings;
@@ -208,6 +215,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&blade_rf1_input_settings, pJson["bladeRF1InputSettings"], "SWGBladeRF1InputSettings", "SWGBladeRF1InputSettings");
     
+    ::SWGSDRangel::setValue(&blade_rf2_input_settings, pJson["bladeRF2InputSettings"], "SWGBladeRF2InputSettings", "SWGBladeRF2InputSettings");
+    
     ::SWGSDRangel::setValue(&blade_rf1_output_settings, pJson["bladeRF1OutputSettings"], "SWGBladeRF1OutputSettings", "SWGBladeRF1OutputSettings");
     
     ::SWGSDRangel::setValue(&fcd_pro_settings, pJson["fcdProSettings"], "SWGFCDProSettings", "SWGFCDProSettings");
@@ -270,6 +279,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((blade_rf1_input_settings != nullptr) && (blade_rf1_input_settings->isSet())){
         toJsonValue(QString("bladeRF1InputSettings"), blade_rf1_input_settings, obj, QString("SWGBladeRF1InputSettings"));
+    }
+    if((blade_rf2_input_settings != nullptr) && (blade_rf2_input_settings->isSet())){
+        toJsonValue(QString("bladeRF2InputSettings"), blade_rf2_input_settings, obj, QString("SWGBladeRF2InputSettings"));
     }
     if((blade_rf1_output_settings != nullptr) && (blade_rf1_output_settings->isSet())){
         toJsonValue(QString("bladeRF1OutputSettings"), blade_rf1_output_settings, obj, QString("SWGBladeRF1OutputSettings"));
@@ -371,6 +383,16 @@ void
 SWGDeviceSettings::setBladeRf1InputSettings(SWGBladeRF1InputSettings* blade_rf1_input_settings) {
     this->blade_rf1_input_settings = blade_rf1_input_settings;
     this->m_blade_rf1_input_settings_isSet = true;
+}
+
+SWGBladeRF2InputSettings*
+SWGDeviceSettings::getBladeRf2InputSettings() {
+    return blade_rf2_input_settings;
+}
+void
+SWGDeviceSettings::setBladeRf2InputSettings(SWGBladeRF2InputSettings* blade_rf2_input_settings) {
+    this->blade_rf2_input_settings = blade_rf2_input_settings;
+    this->m_blade_rf2_input_settings_isSet = true;
 }
 
 SWGBladeRF1OutputSettings*
@@ -543,6 +565,7 @@ SWGDeviceSettings::isSet(){
         if(airspy_settings != nullptr && airspy_settings->isSet()){ isObjectUpdated = true; break;}
         if(airspy_hf_settings != nullptr && airspy_hf_settings->isSet()){ isObjectUpdated = true; break;}
         if(blade_rf1_input_settings != nullptr && blade_rf1_input_settings->isSet()){ isObjectUpdated = true; break;}
+        if(blade_rf2_input_settings != nullptr && blade_rf2_input_settings->isSet()){ isObjectUpdated = true; break;}
         if(blade_rf1_output_settings != nullptr && blade_rf1_output_settings->isSet()){ isObjectUpdated = true; break;}
         if(fcd_pro_settings != nullptr && fcd_pro_settings->isSet()){ isObjectUpdated = true; break;}
         if(fcd_pro_plus_settings != nullptr && fcd_pro_plus_settings->isSet()){ isObjectUpdated = true; break;}

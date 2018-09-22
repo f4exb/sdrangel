@@ -31,4 +31,13 @@ Gain:
   properties:
     gainCB:
       type: integer
-  
+
+Range:
+  description: An arbitrary range of values
+  properties:
+    min:
+      type: integer
+    max:
+      type: integer      
+    step:
+      type: integer      

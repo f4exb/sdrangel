@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGBladeRF1InputSettings.h
+ * SWGBladeRF2InputSettings.h
  *
- * BladeRF1
+ * BladeRF2
  */
 
-#ifndef SWGBladeRF1InputSettings_H_
-#define SWGBladeRF1InputSettings_H_
+#ifndef SWGBladeRF2InputSettings_H_
+#define SWGBladeRF2InputSettings_H_
 
 #include <QJsonObject>
 
@@ -29,18 +29,18 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGBladeRF1InputSettings: public SWGObject {
+class SWG_API SWGBladeRF2InputSettings: public SWGObject {
 public:
-    SWGBladeRF1InputSettings();
-    SWGBladeRF1InputSettings(QString* json);
-    virtual ~SWGBladeRF1InputSettings();
+    SWGBladeRF2InputSettings();
+    SWGBladeRF2InputSettings(QString* json);
+    virtual ~SWGBladeRF2InputSettings();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGBladeRF1InputSettings* fromJson(QString &jsonString) override;
+    virtual SWGBladeRF2InputSettings* fromJson(QString &jsonString) override;
 
     qint64 getCenterFrequency();
     void setCenterFrequency(qint64 center_frequency);
@@ -48,32 +48,23 @@ public:
     qint32 getDevSampleRate();
     void setDevSampleRate(qint32 dev_sample_rate);
 
-    qint32 getLnaGain();
-    void setLnaGain(qint32 lna_gain);
-
-    qint32 getVga1();
-    void setVga1(qint32 vga1);
-
-    qint32 getVga2();
-    void setVga2(qint32 vga2);
-
     qint32 getBandwidth();
     void setBandwidth(qint32 bandwidth);
+
+    qint32 getGainMode();
+    void setGainMode(qint32 gain_mode);
+
+    qint32 getGlobalGain();
+    void setGlobalGain(qint32 global_gain);
+
+    qint32 getBiasTee();
+    void setBiasTee(qint32 bias_tee);
 
     qint32 getLog2Decim();
     void setLog2Decim(qint32 log2_decim);
 
     qint32 getFcPos();
     void setFcPos(qint32 fc_pos);
-
-    qint32 getXb200();
-    void setXb200(qint32 xb200);
-
-    qint32 getXb200Path();
-    void setXb200Path(qint32 xb200_path);
-
-    qint32 getXb200Filter();
-    void setXb200Filter(qint32 xb200_filter);
 
     qint32 getDcBlock();
     void setDcBlock(qint32 dc_block);
@@ -94,32 +85,23 @@ private:
     qint32 dev_sample_rate;
     bool m_dev_sample_rate_isSet;
 
-    qint32 lna_gain;
-    bool m_lna_gain_isSet;
-
-    qint32 vga1;
-    bool m_vga1_isSet;
-
-    qint32 vga2;
-    bool m_vga2_isSet;
-
     qint32 bandwidth;
     bool m_bandwidth_isSet;
+
+    qint32 gain_mode;
+    bool m_gain_mode_isSet;
+
+    qint32 global_gain;
+    bool m_global_gain_isSet;
+
+    qint32 bias_tee;
+    bool m_bias_tee_isSet;
 
     qint32 log2_decim;
     bool m_log2_decim_isSet;
 
     qint32 fc_pos;
     bool m_fc_pos_isSet;
-
-    qint32 xb200;
-    bool m_xb200_isSet;
-
-    qint32 xb200_path;
-    bool m_xb200_path_isSet;
-
-    qint32 xb200_filter;
-    bool m_xb200_filter_isSet;
 
     qint32 dc_block;
     bool m_dc_block_isSet;
@@ -134,4 +116,4 @@ private:
 
 }
 
-#endif /* SWGBladeRF1InputSettings_H_ */
+#endif /* SWGBladeRF2InputSettings_H_ */

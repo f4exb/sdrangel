@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGBladeRF1OutputSettings.h
+ * SWGRange.h
  *
- * BladeRF1
+ * An arbitrary range of values
  */
 
-#ifndef SWGBladeRF1OutputSettings_H_
-#define SWGBladeRF1OutputSettings_H_
+#ifndef SWGRange_H_
+#define SWGRange_H_
 
 #include <QJsonObject>
 
@@ -28,79 +28,43 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGBladeRF1OutputSettings: public SWGObject {
+class SWG_API SWGRange: public SWGObject {
 public:
-    SWGBladeRF1OutputSettings();
-    SWGBladeRF1OutputSettings(QString* json);
-    virtual ~SWGBladeRF1OutputSettings();
+    SWGRange();
+    SWGRange(QString* json);
+    virtual ~SWGRange();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGBladeRF1OutputSettings* fromJson(QString &jsonString) override;
+    virtual SWGRange* fromJson(QString &jsonString) override;
 
-    qint64 getCenterFrequency();
-    void setCenterFrequency(qint64 center_frequency);
+    qint32 getMin();
+    void setMin(qint32 min);
 
-    qint32 getDevSampleRate();
-    void setDevSampleRate(qint32 dev_sample_rate);
+    qint32 getMax();
+    void setMax(qint32 max);
 
-    qint32 getVga1();
-    void setVga1(qint32 vga1);
-
-    qint32 getVga2();
-    void setVga2(qint32 vga2);
-
-    qint32 getBandwidth();
-    void setBandwidth(qint32 bandwidth);
-
-    qint32 getLog2Interp();
-    void setLog2Interp(qint32 log2_interp);
-
-    qint32 getXb200();
-    void setXb200(qint32 xb200);
-
-    qint32 getXb200Path();
-    void setXb200Path(qint32 xb200_path);
-
-    qint32 getXb200Filter();
-    void setXb200Filter(qint32 xb200_filter);
+    qint32 getStep();
+    void setStep(qint32 step);
 
 
     virtual bool isSet() override;
 
 private:
-    qint64 center_frequency;
-    bool m_center_frequency_isSet;
+    qint32 min;
+    bool m_min_isSet;
 
-    qint32 dev_sample_rate;
-    bool m_dev_sample_rate_isSet;
+    qint32 max;
+    bool m_max_isSet;
 
-    qint32 vga1;
-    bool m_vga1_isSet;
-
-    qint32 vga2;
-    bool m_vga2_isSet;
-
-    qint32 bandwidth;
-    bool m_bandwidth_isSet;
-
-    qint32 log2_interp;
-    bool m_log2_interp_isSet;
-
-    qint32 xb200;
-    bool m_xb200_isSet;
-
-    qint32 xb200_path;
-    bool m_xb200_path_isSet;
-
-    qint32 xb200_filter;
-    bool m_xb200_filter_isSet;
+    qint32 step;
+    bool m_step_isSet;
 
 };
 
 }
 
-#endif /* SWGBladeRF1OutputSettings_H_ */
+#endif /* SWGRange_H_ */

@@ -1,0 +1,39 @@
+BladeRF2InputSettings:
+  description: BladeRF2
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    devSampleRate:
+      type: integer
+    bandwidth:
+      type: integer
+    gainMode:
+      type: integer
+    globalGain:
+      type: integer
+    biasTee:
+      type: integer
+    log2Decim:
+      type: integer
+    fcPos:
+      type: integer
+    dcBlock:
+      type: integer
+    iqCorrection:
+      type: integer
+    fileRecordName:
+      type: string      
+      
+BladeRF2InputReport:
+  description: BladeRF2
+  properties:
+    frequencyRange:
+      $ref: "/doc/swagger/include/Structs.yaml#/Range"
+    sampleRateRange:
+      $ref: "/doc/swagger/include/Structs.yaml#/Range"
+    bandwidthRange:
+      $ref: "/doc/swagger/include/Structs.yaml#/Range"
+    globalGainRange:
+      $ref: "/doc/swagger/include/Structs.yaml#/Range"
+            
