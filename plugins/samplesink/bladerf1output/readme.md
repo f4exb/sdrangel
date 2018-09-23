@@ -1,20 +1,22 @@
-<h1>BladeRF output plugin</h1>
+<h1>BladeRF classic (v1) output plugin</h1>
 
 <h2>Introduction</h2>
 
-This output sample sink plugin sends its samples to a [BladeRF device](https://www.nuand.com/).
+This output sample sink plugin sends its samples to a [BladeRF1 device](https://www.nuand.com/bladerf-1).
 
-Warning to Windows users: concurrent use of Rx and Tx does not work correctly hence full duplex is not fully operational. For best results use BladeRF as a half duplex device like HackRF i.e. do not run Tx and Rx concurrently.
+Warning to Windows users: concurrent use of Rx and Tx does not work correctly hence full duplex is not fully operational. For best results use BladeRF as a half duplex device like HackRF i.e. do not run Tx and Rx concurrently. Anyway from version 4.2.0 using LibbladeRF v.2 this is available in Linux distributions only.
 
 <h2>Build</h2>
 
 The plugin will be built only if the [BladeRF host library](https://github.com/Nuand/bladeRF) is installed in your system. If you build it from source and install it in a custom location say: `/opt/install/libbladeRF` you will have to add `-DLIBBLADERF_INCLUDE_DIR=/opt/install/libbladeRF/include -DLIBBLADERF_LIBRARIES=/opt/install/libbladeRF/lib/libbladeRF.so` to the cmake command line.
 
-The BladeRF Host library is also provided by many Linux distributions and is built in the SDRangel binary releases.
+Note that since version 4.2.0 the libbladeRF v2 (specifically the git tag 2018.08) is used.
+
+The BladeRF Host library is also provided by many Linux distributions (check its version) and is built in the SDRangel binary releases.
 
 <h2>Interface</h2>
 
-![BladeRF output plugin GUI](../../../doc/img/BladeRFOutput_plugin.png)
+![BladeRF1 output plugin GUI](../../../doc/img/BladeRF1Output_plugin.png)
 
 <h3>1: Start/Stop</h3>
 
@@ -32,11 +34,11 @@ Transmission latency depends essentially in the delay in the sample FIFO. The FI
 
 For interpolation by 32 the size is fixed at 150000 samples, Delay is 150000 / B where B is the baseband sample rate. Below is the delay in seconds vs baseband sample rate in kS/s from 48 to 500 kS/s:
 
-![BladeRF output plugin FIFO delay 32](../../../doc/img/BladeRFOutput_plugin_fifodly_32.png)
+![BladeRF1 output plugin FIFO delay 32](../../../doc/img/BladeRF1Output_plugin_fifodly_32.png)
 
 For lower interpolation rates the size is calculated to give a fixed delay of 250 ms or 75000 samples whichever is bigger. Below is the delay in seconds vs baseband sample rate in kS/s from 48 to 400 kS/s. The 250 ms delay is reached at 300 kS/s:
 
-![BladeRF output plugin FIFO delay other](../../../doc/img/BladeRFOutput_plugin_fifodly_other.png) 
+![BladeRF1 output plugin FIFO delay other](../../../doc/img/BladeRF1Output_plugin_fifodly_other.png) 
   
 <h3>3: Frequency</h3>
 

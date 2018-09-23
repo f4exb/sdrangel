@@ -36,7 +36,7 @@ Since version 2 SDRangel can integrate more than one hardware device running con
 
 Since version 3 transmission or signal generation is supported for BladeRF, HackRF (since version 3.1), LimeSDR (since version 3.4) and PlutoSDR (since version 3.7.8) using a sample sink plugin. These plugins are:
 
-  - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerf1output)
+  - [BladeRF1 output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerf1output)
   - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
   - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput)
   - [PlutoSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/plutosdroutput)
@@ -96,15 +96,31 @@ It is recommended to add `-DRX_SAMPLE_24BIT=ON` on the cmake command line to act
 
 &#9758; From version 3.12.0 the Linux binaries are built with the 24 bit Rx option.
 
-<h2>BladeRF</h2>
+<h2>BladeRF classic (v.1)</h2>
 
-[BladeRF](https://www.nuand.com/) is supported through the libbladerf library that should be installed in your system for proper build of the software and operation support. Add `libbladerf-dev` to the list of dependencies to install.
+Linux only.
 
-If you use your own location for libbladeRF install directory you need to specify library and include locations. Example with `/opt/install/libbladerf` with the following defines on `cmake` command line:
+[BladeRF1](https://www.nuand.com/bladerf-1) is supported through the libbladeRF library that should be installed in your system for proper build of the software and operation support. Add `libbladerf-dev` to the list of dependencies to install. Note that libbladeRF v2 is used since version 4.2.0 (git tag 2018.08).
+
+If you compile and use your own location for libbladeRF install directory you need to specify library and include locations. Example with `/opt/install/libbladerf` with the following defines on `cmake` command line:
 
 `-DLIBBLADERF_LIBRARIES=/opt/install/libbladeRF/lib/libbladeRF.so -DLIBBLADERF_INCLUDE_DIR=/opt/install/libbladeRF/include`
 
-&#9758; Please note that if you use your own library the FPGA image `hostedx40.rbf` or `hostedx115.rbf` shoud be placed in e.g. `/opt/install/libbladeRF/share/Nuand/bladeRF`
+&#9758; Please note that if you use your own library the FPGA image `hostedx40.rbf` or `hostedx115.rbf` shoud be placed in e.g. `/opt/install/libbladeRF/share/Nuand/bladeRF` unless you have flashed the FPGA image inside the BladeRF.
+
+The plugins used to support BladeRF classic are specific to this version of the BladeRF:
+  - [BladeRF1 input](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/bladerf1input)
+  - [BladeRF1 output](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerf1output)
+
+<h2>BladeRF micro (v.2)</h2>
+
+Linux only. From version 4.2.0
+
+[BladeRF 2 micro](https://www.nuand.com/bladerf-2-0-micro/) is also supported using libbladeRF library that should be installed and configured in the same way as for BladeRF1.
+
+The plugins used to support BladeRF 2 micro are specific to this version of the BladeRF:
+  - [BladeRF2 input](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/bladerf2input)
+  - [BladeRF2 output](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerf2output)
 
 <h2>FunCube Dongle</h2>
 

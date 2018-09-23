@@ -1,18 +1,20 @@
-<h1>BladeRF input plugin</h1>
+<h1>BladeRF classic (v1) input plugin</h1>
 
 <h2>Introduction</h2>
 
-This input sample source plugin gets its samples from a [BladeRF device](https://www.nuand.com/). 
+This input sample source plugin gets its samples from a [BladeRF1 device](https://www.nuand.com/bladerf-1). From version 4.2.0 using LibbladeRF v.2 this is available in Linux distributions only.
 
 <h2>Build</h2>
 
 The plugin will be built only if the [BladeRF host library](https://github.com/Nuand/bladeRF) is installed in your system. If you build it from source and install it in a custom location say: `/opt/install/libbladeRF` you will have to add `-DLIBBLADERF_INCLUDE_DIR=/opt/install/libbladeRF/include -DLIBBLADERF_LIBRARIES=/opt/install/libbladeRF/lib/libbladeRF.so` to the cmake command line.
 
-The BladeRF Host library is also provided by many Linux distributions and is built in the SDRangel binary releases.
+Note that since version 4.2.0 the libbladeRF v2 (specifically the git tag 2018.08) is used.
+
+The BladeRF Host library is also provided by many Linux distributions (check its version) and is built in the SDRangel binary releases.
 
 <h2>Interface</h2>
 
-![BladeRF input plugin GUI](../../../doc/img/BladeRFInput_plugin.png)
+![BladeRF1 input plugin GUI](../../../doc/img/BladeRF1Input_plugin.png)
 
 <h3>1: Common stream parameters</h3>
 

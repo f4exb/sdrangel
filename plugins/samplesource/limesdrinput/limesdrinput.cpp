@@ -103,6 +103,13 @@ bool LimeSDRInput::openDevice()
         DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
         //m_deviceShared = *((DeviceLimeSDRShared *) sourceBuddy->getBuddySharedPtr()); // copy shared data
         DeviceLimeSDRShared *deviceLimeSDRShared = (DeviceLimeSDRShared*) sourceBuddy->getBuddySharedPtr();
+
+        if (deviceLimeSDRShared == 0)
+        {
+            qCritical("LimeSDRInput::openDevice: the source buddy shared pointer is null");
+            return false;
+        }
+
         m_deviceShared.m_deviceParams = deviceLimeSDRShared->m_deviceParams;
 
         DeviceLimeSDRParams *deviceParams = m_deviceShared.m_deviceParams; // get device parameters
@@ -152,6 +159,13 @@ bool LimeSDRInput::openDevice()
         DeviceSinkAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
         //m_deviceShared = *((DeviceLimeSDRShared *) sinkBuddy->getBuddySharedPtr()); // copy parameters
         DeviceLimeSDRShared *deviceLimeSDRShared = (DeviceLimeSDRShared*) sinkBuddy->getBuddySharedPtr();
+
+        if (deviceLimeSDRShared == 0)
+        {
+            qCritical("LimeSDRInput::openDevice: the sink buddy shared pointer is null");
+            return false;
+        }
+
         m_deviceShared.m_deviceParams = deviceLimeSDRShared->m_deviceParams;
 
         if (m_deviceShared.m_deviceParams == 0)

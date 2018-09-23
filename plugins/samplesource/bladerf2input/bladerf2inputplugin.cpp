@@ -85,17 +85,22 @@ PluginInterface::SamplingDevices Blderf2InputPlugin::enumSampleSources()
 
             if (strcmp(boardName, "bladerf2") == 0)
             {
-                QString displayedName(QString("BladeRF2[%1] %2").arg(devinfo[i].instance).arg(devinfo[i].serial));
+                unsigned int nbRxChannels = bladerf_get_channel_count(dev, BLADERF_RX);
 
-                result.append(SamplingDevice(displayedName,
-                        m_hardwareID,
-                        m_deviceTypeID,
-                        QString(devinfo[i].serial),
-                        i,
-                        PluginInterface::SamplingDevice::PhysicalDevice,
-                        true,
-                        1,
-                        0));
+                for (int j = 0; j < nbRxChannels; j++)
+                {
+                    qDebug("Blderf2InputPlugin::enumSampleSources: device #%d (%s) channel %u", i, devinfo[i].serial, j);
+                    QString displayedName(QString("BladeRF2[%1:%2] %3").arg(devinfo[i].instance).arg(j).arg(devinfo[i].serial));
+                    result.append(SamplingDevice(displayedName,
+                            m_hardwareID,
+                            m_deviceTypeID,
+                            QString(devinfo[i].serial),
+                            i,
+                            PluginInterface::SamplingDevice::PhysicalDevice,
+                            true,
+                            1,
+                            j));
+                }
             }
 
             bladerf_close(dev);

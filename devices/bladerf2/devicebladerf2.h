@@ -31,17 +31,31 @@ public:
     bool open(const char *serial);
     void close();
 
-    void getFrequencyRangeRx(int& min, int& max, int& step);
-    void getFrequencyRangeTx(int& min, int& max, int& step);
+    bool openRx(int channel);
+    bool openTx(int channel);
+    void closeRx(int channel);
+    void closeTx(int channel);
+
+    void getFrequencyRangeRx(uint64_t& min, uint64_t& max, int& step);
+    void getFrequencyRangeTx(uint64_t& min, uint64_t& max, int& step);
     void getSampleRateRangeRx(int& min, int& max, int& step);
     void getSampleRateRangeTx(int& min, int& max, int& step);
     void getBandwidthRangeRx(int& min, int& max, int& step);
     void getBandwidthRangeTx(int& min, int& max, int& step);
     void getGlobalGainRangeRx(int& min, int& max, int& step);
     void getGlobalGainRangeTx(int& min, int& max, int& step);
+    void setBiasTeeRx(bool enable);
+    void setBiasTeeTx(bool enable);
+
+    static const unsigned int blockSize = (1<<14);
 
 private:
     bladerf *m_dev;
+    int m_nbRxChannels;
+    int m_nbTxChannels;
+    bool *m_rxOpen;
+    bool *m_txOpen;
+
     static struct bladerf *open_bladerf_from_serial(const char *serial);
 };
 

@@ -2,10 +2,12 @@ project(bladerf2device)
 
 set(bladerf2device_SOURCES
     devicebladerf2.cpp
+    devicebladerf2shared.cpp
 )
 
 set(bladerf2device_HEADERS
     devicebladerf2.h
+    devicebladerf2shared.h
 )
 
 if (BUILD_DEBIAN)
