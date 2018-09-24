@@ -431,6 +431,24 @@ bool BladeRF2Input::handleMessage(const Message& message)
 
         return true;
     }
+    else if (DeviceBladeRF2Shared::MsgReportBuddyChange::match(message))
+    {
+        DeviceBladeRF2Shared::MsgReportBuddyChange& report = (DeviceBladeRF2Shared::MsgReportBuddyChange&) message;
+
+        if (report.getRxElseTx())
+        {
+            m_settings.m_biasTee   = report.getBiasTee();
+        }
+
+        if (getMessageQueueToGUI())
+        {
+            DeviceBladeRF2Shared::MsgReportBuddyChange *reportToGUI = DeviceBladeRF2Shared::MsgReportBuddyChange::create(
+                    m_settings.m_biasTee, true);
+            getMessageQueueToGUI()->push(reportToGUI);
+        }
+
+        return true;
+    }
     else if (MsgFileRecord::match(message))
     {
         MsgFileRecord& conf = (MsgFileRecord&) message;
@@ -480,7 +498,9 @@ bool BladeRF2Input::handleMessage(const Message& message)
 
 bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool force)
 {
-    bool forwardChange = false;
+    bool forwardChangeOwnDSP = false;
+    bool forwardChangeRxDSP  = false;
+    bool forwardChangeAllDSP __attribute__((unused)) = false;
 
     struct bladerf *dev = m_deviceShared.m_dev->getDev();
     qDebug() << "BladeRF2Input::applySettings: m_dev: " << dev;
@@ -493,7 +513,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
     {
-        forwardChange = true;
+        forwardChangeOwnDSP = true;
 
         if (dev != 0)
         {
@@ -542,7 +562,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
     if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
-        forwardChange = true;
+        forwardChangeOwnDSP = true;
 
         if (m_deviceShared.m_inputThread != 0)
         {
@@ -563,7 +583,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
                 (DeviceSampleSource::fcPos_t) settings.m_fcPos,
                 settings.m_devSampleRate);
 
-        forwardChange = true;
+        forwardChangeOwnDSP = true;
 
         if (dev != 0)
         {
@@ -578,12 +598,62 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         }
     }
 
-    if (forwardChange)
+    if ((m_settings.m_biasTee != settings.m_biasTee) || force)
+    {
+        m_deviceShared.m_dev->setBiasTeeRx(settings.m_biasTee);
+        forwardChangeRxDSP = true;
+    }
+
+    if ((m_settings.m_globalGain != settings.m_globalGain) || force)
+    {
+        if (dev)
+        {
+            int status = bladerf_set_gain(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), settings.m_globalGain);
+
+            if (status < 0) {
+                qWarning("BladeRF2Input::applySettings: bladerf_set_gain(%d) failed: %s",
+                        settings.m_globalGain, bladerf_strerror(status));
+            } else {
+                qDebug("BladeRF2Input::applySettings: bladerf_set_gain(%d)", settings.m_globalGain);
+            }
+        }
+    }
+
+    if ((m_settings.m_gainMode != settings.m_gainMode) || force)
+    {
+        if (dev)
+        {
+            int status = bladerf_set_gain_mode(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), (bladerf_gain_mode) settings.m_gainMode);
+
+            if (status < 0) {
+                qWarning("BladeRF2Input::applySettings: bladerf_set_gain_mode(%d) failed: %s",
+                        settings.m_gainMode, bladerf_strerror(status));
+            } else {
+                qDebug("BladeRF2Input::applySettings: bladerf_set_gain_mode(%d)", settings.m_gainMode);
+            }
+        }
+    }
+
+    if (forwardChangeOwnDSP)
     {
         int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
         m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+    }
+
+    if (forwardChangeRxDSP)
+    {
+        // send to source buddies
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+
+        for (; itSource != sourceBuddies.end(); ++itSource)
+        {
+            DeviceBladeRF2Shared::MsgReportBuddyChange *report = DeviceBladeRF2Shared::MsgReportBuddyChange::create(
+                    settings.m_biasTee, true);
+            (*itSource)->getSampleSourceInputMessageQueue()->push(report);
+        }
     }
 
     m_settings = settings;
@@ -594,8 +664,11 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
             << " m_log2Decim: " << m_settings.m_log2Decim
             << " m_fcPos: " << m_settings.m_fcPos
             << " m_devSampleRate: " << m_settings.m_devSampleRate
+            << " m_globalGain: " << m_settings.m_globalGain
+            << " m_gainMode: " << m_settings.m_gainMode
             << " m_dcBlock: " << m_settings.m_dcBlock
-            << " m_iqCorrection: " << m_settings.m_iqCorrection;
+            << " m_iqCorrection: " << m_settings.m_iqCorrection
+            << " m_biasTee: " << m_settings.m_biasTee;
 
     return true;
 }

@@ -16,6 +16,8 @@
 
 #include "devicebladerf2shared.h"
 
+MESSAGE_CLASS_DEFINITION(DeviceBladeRF2Shared::MsgReportBuddyChange, Message)
+
 DeviceBladeRF2Shared::DeviceBladeRF2Shared() :
     m_dev(0),
     m_channel(-1),

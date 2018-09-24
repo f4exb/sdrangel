@@ -17,6 +17,7 @@
 #ifndef DEVICES_BLADERF2_DEVICEBLADERF2SHARED_H_
 #define DEVICES_BLADERF2_DEVICEBLADERF2SHARED_H_
 
+#include "util/message.h"
 #include "devicebladerf2.h"
 
 class SampleSinkFifo;
@@ -54,6 +55,35 @@ public:
         virtual unsigned int getNbChannels() const = 0;
         virtual void setFifo(unsigned int channel, SampleSourceFifo *fifo) = 0;
         virtual SampleSourceFifo *getFifo(unsigned int channel) = 0;
+    };
+
+    class MsgReportBuddyChange : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getBiasTee() const { return m_biasTee; }
+        bool getRxElseTx() const { return m_rxElseTx; }
+
+        static MsgReportBuddyChange* create(
+                bool biasTee,
+                bool rxElseTx)
+        {
+            return new MsgReportBuddyChange(
+                    biasTee,
+                    rxElseTx);
+        }
+
+    private:
+        bool     m_biasTee;
+        bool     m_rxElseTx;            //!< tells which side initiated the message
+
+        MsgReportBuddyChange(
+                bool biasTee,
+                bool rxElseTx) :
+            Message(),
+            m_biasTee(biasTee),
+            m_rxElseTx(rxElseTx)
+        { }
     };
 
     DeviceBladeRF2Shared();

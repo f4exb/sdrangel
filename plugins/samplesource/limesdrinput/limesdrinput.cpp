@@ -590,9 +590,12 @@ bool LimeSDRInput::handleMessage(const Message& message)
                 m_settings.m_centerFrequency + ncoShift);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
-        DeviceLimeSDRShared::MsgReportBuddyChange *reportToGUI = DeviceLimeSDRShared::MsgReportBuddyChange::create(
-                m_settings.m_devSampleRate, m_settings.m_log2HardDecim, m_settings.m_centerFrequency, true);
-        getMessageQueueToGUI()->push(reportToGUI);
+        if (getMessageQueueToGUI())
+        {
+            DeviceLimeSDRShared::MsgReportBuddyChange *reportToGUI = DeviceLimeSDRShared::MsgReportBuddyChange::create(
+                    m_settings.m_devSampleRate, m_settings.m_log2HardDecim, m_settings.m_centerFrequency, true);
+            getMessageQueueToGUI()->push(reportToGUI);
+        }
 
         return true;
     }
@@ -603,9 +606,12 @@ bool LimeSDRInput::handleMessage(const Message& message)
         m_settings.m_extClock     = report.getExtClock();
         m_settings.m_extClockFreq = report.getExtClockFeq();
 
-        DeviceLimeSDRShared::MsgReportClockSourceChange *reportToGUI = DeviceLimeSDRShared::MsgReportClockSourceChange::create(
-                m_settings.m_extClock, m_settings.m_extClockFreq);
-        getMessageQueueToGUI()->push(reportToGUI);
+        if (getMessageQueueToGUI())
+        {
+            DeviceLimeSDRShared::MsgReportClockSourceChange *reportToGUI = DeviceLimeSDRShared::MsgReportClockSourceChange::create(
+                    m_settings.m_extClock, m_settings.m_extClockFreq);
+            getMessageQueueToGUI()->push(reportToGUI);
+        }
 
         return true;
     }
