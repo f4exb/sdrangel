@@ -14,8 +14,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "bladerf1inputgui.h"
-
 #include <QDebug>
 #include <QMessageBox>
 
@@ -26,8 +24,10 @@
 #include "gui/glspectrum.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-#include <device/devicesourceapi.h>
+#include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
+
+#include "bladerf1inputgui.h"
 
 Bladerf1InputGui::Bladerf1InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),

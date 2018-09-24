@@ -417,6 +417,34 @@ void BladeRF2Input::setCenterFrequency(qint64 centerFrequency)
     }
 }
 
+void BladeRF2Input::getFrequencyRange(uint64_t& min, uint64_t& max, int& step)
+{
+    if (m_deviceShared.m_dev) {
+        m_deviceShared.m_dev->getFrequencyRangeRx(min, max, step);
+    }
+}
+
+void BladeRF2Input::getSampleRateRange(int& min, int& max, int& step)
+{
+    if (m_deviceShared.m_dev) {
+        m_deviceShared.m_dev->getSampleRateRangeRx(min, max, step);
+    }
+}
+
+void BladeRF2Input::getBandwidthRange(int& min, int& max, int& step)
+{
+    if (m_deviceShared.m_dev) {
+        m_deviceShared.m_dev->getBandwidthRangeRx(min, max, step);
+    }
+}
+
+void BladeRF2Input::getGlobalGainRange(int& min, int& max, int& step)
+{
+    if (m_deviceShared.m_dev) {
+        m_deviceShared.m_dev->getGlobalGainRangeRx(min, max, step);
+    }
+}
+
 bool BladeRF2Input::handleMessage(const Message& message)
 {
     if (MsgConfigureBladeRF2::match(message))

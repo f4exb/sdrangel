@@ -3,17 +3,17 @@ project(bladerf2input)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(bladerf2input_SOURCES
-	#bladerf2inputgui.cpp
+	bladerf2inputgui.cpp
 	bladerf2input.cpp
-	#bladerf2inputplugin.cpp
+	bladerf2inputplugin.cpp
 	bladerf2inputsettings.cpp
 	bladerf2inputthread.cpp
 )
 
 set(bladerf2input_HEADERS
-	#bladerf2inputgui.h
+	bladerf2inputgui.h
 	bladerf2input.h
-	#bladerf2inputplugin.h
+	bladerf2inputplugin.h
 	bladerf2inputsettings.h
 	bladerf2inputthread.h
 )

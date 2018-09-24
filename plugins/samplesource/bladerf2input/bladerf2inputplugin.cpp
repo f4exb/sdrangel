@@ -87,7 +87,7 @@ PluginInterface::SamplingDevices Blderf2InputPlugin::enumSampleSources()
             {
                 unsigned int nbRxChannels = bladerf_get_channel_count(dev, BLADERF_RX);
 
-                for (int j = 0; j < nbRxChannels; j++)
+                for (unsigned int j = 0; j < nbRxChannels; j++)
                 {
                     qDebug("Blderf2InputPlugin::enumSampleSources: device #%d (%s) channel %u", i, devinfo[i].serial, j);
                     QString displayedName(QString("BladeRF2[%1:%2] %3").arg(devinfo[i].instance).arg(j).arg(devinfo[i].serial));
@@ -128,7 +128,7 @@ PluginInstanceGUI* Blderf2InputPlugin::createSampleSourcePluginInstanceGUI(
 {
     if(sourceId == m_deviceTypeID)
     {
-        Bladerf2InputGui* gui = new Bladerf2InputGui(deviceUISet);
+        BladeRF2InputGui* gui = new BladeRF2InputGui(deviceUISet);
         *widget = gui;
         return gui;
     }
@@ -143,7 +143,7 @@ DeviceSampleSource *Blderf2InputPlugin::createSampleSourcePluginInstanceInput(co
 {
     if (sourceId == m_deviceTypeID)
     {
-        Bladerf2Input *input = new Bladerf2Input(deviceAPI);
+        BladeRF2Input *input = new BladeRF2Input(deviceAPI);
         return input;
     }
     else

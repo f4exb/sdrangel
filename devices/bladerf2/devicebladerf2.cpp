@@ -79,6 +79,15 @@ bool DeviceBladeRF2::open(const char *serial)
     return true;
 }
 
+void DeviceBladeRF2::close()
+{
+    if (m_dev)
+    {
+        bladerf_close(m_dev);
+        m_dev = 0;
+    }
+}
+
 struct bladerf *DeviceBladeRF2::open_bladerf_from_serial(const char *serial)
 {
     int status;

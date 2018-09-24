@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>310</width>
-    <height>265</height>
+    <height>250</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -222,67 +222,59 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="4">
-      <widget class="QLabel" name="xb200Label">
+     <item row="0" column="6">
+      <widget class="QLabel" name="bandwidthUnit">
        <property name="text">
-        <string>xb200</string>
+        <string>kHz</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="4">
+      <widget class="QLabel" name="bandwidthLabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>BW  </string>
        </property>
       </widget>
      </item>
      <item row="0" column="5">
-      <widget class="QComboBox" name="xb200">
+      <widget class="ValueDial" name="bandwidth" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Liberation Mono</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="7">
+      <widget class="ButtonSwitch" name="biasTee">
        <property name="toolTip">
-        <string>XB200 board mode</string>
+        <string>Bias Tee</string>
        </property>
-       <property name="currentText">
-        <string>None</string>
+       <property name="text">
+        <string>BT</string>
        </property>
-       <property name="currentIndex">
-        <number>0</number>
-       </property>
-       <property name="maxVisibleItems">
-        <number>5</number>
-       </property>
-       <item>
-        <property name="text">
-         <string>None</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Bypass</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Auto 1dB</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Auto 3dB</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Custom</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>50M</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>144M</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>222M</string>
-        </property>
-       </item>
       </widget>
      </item>
     </layout>
@@ -361,6 +353,35 @@
       </spacer>
      </item>
      <item>
+      <widget class="QLabel" name="label_fcPos">
+       <property name="text">
+        <string>Fp</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="fcPos">
+       <property name="toolTip">
+        <string>Relative position of device center frequency</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>Inf</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Sup</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Cen</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="label_decim">
        <property name="text">
         <string>Dec</string>
@@ -421,145 +442,42 @@
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0,0,0,0,0,0,0,0,0,0">
+    <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0,0,0,0">
      <property name="spacing">
       <number>3</number>
      </property>
-     <item row="0" column="4">
-      <spacer name="fcPosRightSpacer">
+     <item row="0" column="2">
+      <widget class="QSlider" name="gain">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="0" column="5">
-      <widget class="QLabel" name="bandwidthLabel">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>BW  </string>
-       </property>
       </widget>
      </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="label_fcPos">
+     <item row="0" column="1">
+      <widget class="QComboBox" name="gainMode"/>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="gainLabel">
        <property name="text">
-        <string>Fp</string>
+        <string>Gain</string>
        </property>
       </widget>
      </item>
      <item row="0" column="3">
-      <widget class="QComboBox" name="fcPos">
-       <property name="toolTip">
-        <string>Relative position of device center frequency</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>Inf</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Sup</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Cen</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="0" column="9">
-      <widget class="QLabel" name="lnaGainLabel">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QLabel" name="gainText">
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>0</height>
+        </size>
        </property>
        <property name="text">
-        <string>LNA </string>
+        <string>000</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
-     </item>
-     <item row="0" column="10">
-      <widget class="QComboBox" name="lna">
-       <property name="maximumSize">
-        <size>
-         <width>40</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <item>
-        <property name="text">
-         <string>0</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>3</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>6</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="0" column="11">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>dB</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="7">
-      <widget class="QLabel" name="bandwidthUnit">
-       <property name="text">
-        <string>kHz</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="6">
-      <widget class="QComboBox" name="bandwidth">
-       <property name="maximumSize">
-        <size>
-         <width>70</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>IF bandwidth in kHz</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="8">
-      <spacer name="horizontalSpacer_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </item>
@@ -569,117 +487,6 @@
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout_vga1">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <item row="0" column="1">
-      <widget class="QSlider" name="vga1">
-       <property name="toolTip">
-        <string>Amplifier before filtering gain (dB)</string>
-       </property>
-       <property name="minimum">
-        <number>5</number>
-       </property>
-       <property name="maximum">
-        <number>30</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>20</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="vga1Text">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>20</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="vga1Label">
-       <property name="text">
-        <string>VGA1</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line_vga1">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout_vga2" columnstretch="0,0,0">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <item row="0" column="0">
-      <widget class="QLabel" name="vga2Label">
-       <property name="text">
-        <string>VGA2</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QSlider" name="vga2">
-       <property name="toolTip">
-        <string>Amplifier before ADC gain (dB)</string>
-       </property>
-       <property name="maximum">
-        <number>30</number>
-       </property>
-       <property name="singleStep">
-        <number>3</number>
-       </property>
-       <property name="pageStep">
-        <number>3</number>
-       </property>
-       <property name="value">
-        <number>9</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="vga2Text">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>9</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="padLayout">
@@ -697,13 +504,6 @@
       </spacer>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line_vga2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

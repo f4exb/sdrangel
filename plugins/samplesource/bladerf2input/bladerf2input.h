@@ -110,6 +110,11 @@ public:
     virtual quint64 getCenterFrequency() const;
     virtual void setCenterFrequency(qint64 centerFrequency);
 
+    void getFrequencyRange(uint64_t& min, uint64_t& max, int& step);
+    void getSampleRateRange(int& min, int& max, int& step);
+    void getBandwidthRange(int& min, int& max, int& step);
+    void getGlobalGainRange(int& min, int& max, int& step);
+
     virtual bool handleMessage(const Message& message);
 
     virtual int webapiSettingsGet(
