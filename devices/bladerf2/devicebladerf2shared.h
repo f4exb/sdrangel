@@ -61,27 +61,18 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        bool getBiasTee() const { return m_biasTee; }
         bool getRxElseTx() const { return m_rxElseTx; }
 
-        static MsgReportBuddyChange* create(
-                bool biasTee,
-                bool rxElseTx)
+        static MsgReportBuddyChange* create(bool rxElseTx)
         {
-            return new MsgReportBuddyChange(
-                    biasTee,
-                    rxElseTx);
+            return new MsgReportBuddyChange(rxElseTx);
         }
 
     private:
-        bool     m_biasTee;
-        bool     m_rxElseTx;            //!< tells which side initiated the message
+        bool m_rxElseTx;            //!< tells which side initiated the message
 
-        MsgReportBuddyChange(
-                bool biasTee,
-                bool rxElseTx) :
+        MsgReportBuddyChange(bool rxElseTx) :
             Message(),
-            m_biasTee(biasTee),
             m_rxElseTx(rxElseTx)
         { }
     };
