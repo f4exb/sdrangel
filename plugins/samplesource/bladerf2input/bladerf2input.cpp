@@ -773,3 +773,161 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
     return true;
 }
+
+int BladeRF2Input::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setBladeRf2InputSettings(new SWGSDRangel::SWGBladeRF2InputSettings());
+    response.getBladeRf2InputSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int BladeRF2Input::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    BladeRF2InputSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getBladeRf2InputSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("devSampleRate")) {
+        settings.m_devSampleRate = response.getBladeRf2InputSettings()->getDevSampleRate();
+    }
+    if (deviceSettingsKeys.contains("bandwidth")) {
+        settings.m_bandwidth = response.getBladeRf2InputSettings()->getBandwidth();
+    }
+    if (deviceSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getBladeRf2InputSettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("fcPos")) {
+        settings.m_fcPos = static_cast<BladeRF2InputSettings::fcPos_t>(response.getBladeRf2InputSettings()->getFcPos());
+    }
+    if (deviceSettingsKeys.contains("dcBlock")) {
+        settings.m_dcBlock = response.getBladeRf2InputSettings()->getDcBlock() != 0;
+    }
+    if (deviceSettingsKeys.contains("iqCorrection")) {
+        settings.m_iqCorrection = response.getBladeRf2InputSettings()->getIqCorrection() != 0;
+    }
+    if (deviceSettingsKeys.contains("biasTee")) {
+        settings.m_biasTee = response.getBladeRf2InputSettings()->getBiasTee() != 0;
+    }
+    if (deviceSettingsKeys.contains("gainMode")) {
+        settings.m_gainMode = response.getBladeRf2InputSettings()->getGainMode();
+    }
+    if (deviceSettingsKeys.contains("globalGain")) {
+        settings.m_globalGain = response.getBladeRf2InputSettings()->getGlobalGain();
+    }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getBladeRf1InputSettings()->getFileRecordName();
+    }
+
+    MsgConfigureBladeRF2 *msg = MsgConfigureBladeRF2::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureBladeRF2 *msgToGUI = MsgConfigureBladeRF2::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+int BladeRF2Input::webapiReportGet(SWGSDRangel::SWGDeviceReport& response, QString& errorMessage __attribute__((unused)))
+{
+    response.setBladeRf2InputReport(new SWGSDRangel::SWGBladeRF2InputReport());
+    response.getBladeRf2InputReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
+
+void BladeRF2Input::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF2InputSettings& settings)
+{
+    response.getBladeRf2InputSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getBladeRf2InputSettings()->setDevSampleRate(settings.m_devSampleRate);
+    response.getBladeRf2InputSettings()->setBandwidth(settings.m_bandwidth);
+    response.getBladeRf2InputSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getBladeRf2InputSettings()->setFcPos((int) settings.m_fcPos);
+    response.getBladeRf2InputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getBladeRf2InputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    response.getBladeRf2InputSettings()->setBiasTee(settings.m_biasTee ? 1 : 0);
+    response.getBladeRf2InputSettings()->setGainMode(settings.m_gainMode);
+    response.getBladeRf2InputSettings()->setGlobalGain(settings.m_globalGain);
+
+    if (response.getBladeRf2InputSettings()->getFileRecordName()) {
+        *response.getBladeRf2InputSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getBladeRf2InputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+}
+
+void BladeRF2Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    DeviceBladeRF2 *device = m_deviceShared.m_dev;
+
+    if (device)
+    {
+        int min, max, step;
+        uint64_t f_min, f_max;
+
+        device->getBandwidthRangeRx(min, max, step);
+
+        response.getBladeRf2InputReport()->setBandwidthRange(new SWGSDRangel::SWGRange);
+        response.getBladeRf2InputReport()->getBandwidthRange()->setMin(min);
+        response.getBladeRf2InputReport()->getBandwidthRange()->setMax(max);
+        response.getBladeRf2InputReport()->getBandwidthRange()->setStep(step);
+
+        device->getFrequencyRangeRx(f_min, f_max, step);
+
+        response.getBladeRf2InputReport()->setFrequencyRange(new SWGSDRangel::SWGRange);
+        response.getBladeRf2InputReport()->getFrequencyRange()->setMin(f_min);
+        response.getBladeRf2InputReport()->getFrequencyRange()->setMax(f_max);
+        response.getBladeRf2InputReport()->getFrequencyRange()->setStep(step);
+
+        device->getGlobalGainRangeRx(min, max, step);
+
+        response.getBladeRf2InputReport()->setGlobalGainRange(new SWGSDRangel::SWGRange);
+        response.getBladeRf2InputReport()->getGlobalGainRange()->setMin(min);
+        response.getBladeRf2InputReport()->getGlobalGainRange()->setMax(max);
+        response.getBladeRf2InputReport()->getGlobalGainRange()->setStep(step);
+
+        device->getSampleRateRangeRx(min, max, step);
+
+        response.getBladeRf2InputReport()->setSampleRateRange(new SWGSDRangel::SWGRange);
+        response.getBladeRf2InputReport()->getSampleRateRange()->setMin(min);
+        response.getBladeRf2InputReport()->getSampleRateRange()->setMax(max);
+        response.getBladeRf2InputReport()->getSampleRateRange()->setStep(step);
+    }
+}
+
+int BladeRF2Input::webapiRunGet(
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+
+int BladeRF2Input::webapiRun(
+        bool run,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    MsgStartStop *message = MsgStartStop::create(run);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgStartStop *msgToGUI = MsgStartStop::create(run);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    return 200;
+}
