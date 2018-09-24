@@ -42,8 +42,11 @@ public:
     virtual void startWork();
     virtual void stopWork();
     virtual bool isRunning() const { return m_running; }
-    void setLog2Decimation(unsigned int channel, unsigned int log2_decim);
-    void setFcPos(unsigned int channel, int fcPos);
+    virtual unsigned int getNbChannels() const { return m_nbChannels; }
+    virtual void setLog2Decimation(unsigned int channel, unsigned int log2_decim);
+    virtual unsigned int getLog2Decimation(unsigned int channel) const;
+    virtual void setFcPos(unsigned int channel, int fcPos);
+    virtual int getFcPos(unsigned int channel) const;
     virtual void setFifo(unsigned int channel, SampleSinkFifo *sampleFifo);
     virtual SampleSinkFifo *getFifo(unsigned int channel);
 

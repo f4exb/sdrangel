@@ -18,7 +18,9 @@
 
 DeviceBladeRF2Shared::DeviceBladeRF2Shared() :
     m_dev(0),
-    m_channel(-1)
+    m_channel(-1),
+    m_inputThread(0),
+    m_outputThread(0)
 {}
 
 DeviceBladeRF2Shared::~DeviceBladeRF2Shared()

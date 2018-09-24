@@ -63,11 +63,11 @@ void Bladerf2InputThread::run()
 
     unsigned int nbFifos = getNbFifos();
 
-    if (nbFifos > 0)
+    if ((m_nbChannels > 0) && (nbFifos > 0))
     {
         int status;
 
-        if (nbFifos > 1) {
+        if (m_nbChannels > 1) {
             status = bladerf_sync_config(m_dev, BLADERF_RX_X2, BLADERF_FORMAT_SC16_Q11, 64, 8192, 32, 10000);
         } else {
             status = bladerf_sync_config(m_dev, BLADERF_RX_X1, BLADERF_FORMAT_SC16_Q11, 64, 8192, 32, 10000);
@@ -99,7 +99,7 @@ void Bladerf2InputThread::run()
     }
     else
     {
-        qWarning("Bladerf2InputThread::run: no sample FIFOs registered. Aborting");
+        qWarning("Bladerf2InputThread::run: no channels or FIFO allocated. Aborting");
     }
 
 
@@ -110,7 +110,7 @@ unsigned int Bladerf2InputThread::getNbFifos()
 {
     unsigned int fifoCount = 0;
 
-    for (int i = 0; i < m_nbChannels; i++)
+    for (unsigned int i = 0; i < m_nbChannels; i++)
     {
         if (m_channels[i].m_sampleFifo) {
             fifoCount++;
@@ -122,28 +122,46 @@ unsigned int Bladerf2InputThread::getNbFifos()
 
 void Bladerf2InputThread::setLog2Decimation(unsigned int channel, unsigned int log2_decim)
 {
-    if ((channel >= 0) && (channel < m_nbChannels)) {
+    if (channel < m_nbChannels) {
         m_channels[channel].m_log2Decim = log2_decim;
+    }
+}
+
+unsigned int Bladerf2InputThread::getLog2Decimation(unsigned int channel) const
+{
+    if (channel < m_nbChannels) {
+        return m_channels[channel].m_log2Decim;
+    } else {
+        return 0;
     }
 }
 
 void Bladerf2InputThread::setFcPos(unsigned int channel, int fcPos)
 {
-    if ((channel >= 0) && (channel < m_nbChannels)) {
+    if (channel < m_nbChannels) {
         m_channels[channel].m_fcPos = fcPos;
+    }
+}
+
+int Bladerf2InputThread::getFcPos(unsigned int channel) const
+{
+    if (channel < m_nbChannels) {
+        return m_channels[channel].m_fcPos;
+    } else {
+        return 0;
     }
 }
 
 void Bladerf2InputThread::setFifo(unsigned int channel, SampleSinkFifo *sampleFifo)
 {
-    if ((channel >= 0) && (channel < m_nbChannels)) {
+    if (channel < m_nbChannels) {
         m_channels[channel].m_sampleFifo = sampleFifo;
     }
 }
 
 SampleSinkFifo *Bladerf2InputThread::getFifo(unsigned int channel)
 {
-    if ((channel >= 0) && (channel < m_nbChannels)) {
+    if (channel < m_nbChannels) {
         return m_channels[channel].m_sampleFifo;
     } else {
         return 0;

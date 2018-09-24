@@ -31,6 +31,8 @@ public:
     bool open(const char *serial);
     void close();
 
+    bladerf *getDev() { return m_dev; }
+
     bool openRx(int channel);
     bool openTx(int channel);
     void closeRx(int channel);

@@ -31,9 +31,15 @@ public:
     class InputThreadInterface
     {
     public:
+        virtual ~InputThreadInterface() = 0;
         virtual void startWork() = 0;
         virtual void stopWork() = 0;
         virtual bool isRunning() const = 0;
+        virtual unsigned int getNbChannels() const = 0;
+        virtual void setLog2Decimation(unsigned int channel, unsigned int log2_decim) = 0;
+        virtual unsigned int getLog2Decimation(unsigned int channel) const = 0;
+        virtual void setFcPos(unsigned int channel, int fcPos) = 0;
+        virtual int getFcPos(unsigned int channel) const = 0;
         virtual void setFifo(unsigned int channel, SampleSinkFifo *fifo) = 0;
         virtual SampleSinkFifo *getFifo(unsigned int channel) = 0;
     };
@@ -41,9 +47,11 @@ public:
     class OutputThreadInterface
     {
     public:
+        virtual ~OutputThreadInterface() = 0;
         virtual void startWork() = 0;
         virtual void stopWork() = 0;
         virtual bool isRunning() = 0;
+        virtual unsigned int getNbChannels() const = 0;
         virtual void setFifo(unsigned int channel, SampleSourceFifo *fifo) = 0;
         virtual SampleSourceFifo *getFifo(unsigned int channel) = 0;
     };

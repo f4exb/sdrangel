@@ -30,6 +30,7 @@
 
 #include "bladerf2/devicebladerf2shared.h"
 #include "bladerf2/devicebladerf2.h"
+#include "bladerf2inputthread.h"
 #include "bladerf2input.h"
 
 
@@ -218,3 +219,383 @@ void BladeRF2Input::init()
     applySettings(m_settings, true);
 }
 
+bool BladeRF2Input::start()
+{
+    if (!m_deviceShared.m_dev)
+    {
+        qDebug("BladerfInput::start: no device object");
+        return false;
+    }
+
+    Bladerf2InputThread *bladerf2InputThread = 0;
+    bool needsStart = false;
+
+    // find thread allocated by a buddy
+    const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+    std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+
+    for (; it != sourceBuddies.end(); ++it)
+    {
+        bladerf2InputThread = (Bladerf2InputThread*) ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_inputThread;
+
+        if (bladerf2InputThread) {
+            break;
+        }
+    }
+
+    if (bladerf2InputThread) // if thread was allocated by a buddy
+    {
+        DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
+        DeviceBladeRF2Shared *deviceBladeRF2Shared = (DeviceBladeRF2Shared*) sourceBuddy->getBuddySharedPtr();
+        bladerf2InputThread = (Bladerf2InputThread*) deviceBladeRF2Shared->m_inputThread;
+        int nbOriginalChannels = bladerf2InputThread->getNbChannels();
+
+        if (m_deviceShared.m_channel+1 > nbOriginalChannels) // expansion
+        {
+            SampleSinkFifo **fifos = new SampleSinkFifo*[nbOriginalChannels];
+            unsigned int *log2Decims = new unsigned int[nbOriginalChannels];
+            int *fcPoss = new int[nbOriginalChannels];
+
+            for (int i = 0; i < nbOriginalChannels; i++) { // save original FIFO references and data
+                fifos[i] = bladerf2InputThread->getFifo(i);
+                log2Decims[i] = bladerf2InputThread->getLog2Decimation(i);
+                fcPoss[i] = bladerf2InputThread->getFcPos(i);
+            }
+
+            bladerf2InputThread->stopWork();
+            delete bladerf2InputThread;
+            bladerf2InputThread = new Bladerf2InputThread(m_deviceShared.m_dev->getDev(), m_deviceShared.m_channel+1);
+
+            for (int i = 0; i < nbOriginalChannels; i++) { // restore original FIFO references
+                bladerf2InputThread->setFifo(i, fifos[i]);
+                bladerf2InputThread->setLog2Decimation(i, log2Decims[i]);
+                bladerf2InputThread->setFcPos(i, fcPoss[i]);
+            }
+
+            // propagate new thread address to buddies
+            const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+            std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+
+            for (; it != sourceBuddies.end(); ++it) {
+                ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_inputThread = bladerf2InputThread;
+            }
+
+            needsStart = true;
+        }
+    }
+    else // first allocation
+    {
+        bladerf2InputThread = new Bladerf2InputThread(m_deviceShared.m_dev->getDev(), m_deviceShared.m_channel+1);
+        needsStart = true;
+    }
+
+    bladerf2InputThread->setFifo(m_deviceShared.m_channel, &m_sampleFifo);
+    bladerf2InputThread->setLog2Decimation(m_deviceShared.m_channel, m_settings.m_log2Decim);
+    bladerf2InputThread->setFcPos(m_deviceShared.m_channel, (int) m_settings.m_fcPos);
+    m_deviceShared.m_inputThread = bladerf2InputThread;
+
+    if (needsStart) {
+        bladerf2InputThread->startWork();
+    }
+
+    applySettings(m_settings, true);
+
+    qDebug("BladerfInput::startInput: started");
+    m_running = true;
+
+    return true;
+}
+
+void BladeRF2Input::stop()
+{
+    if (!m_running) {
+        return;
+    }
+
+    int nbOriginalChannels = m_deviceShared.m_inputThread->getNbChannels();
+
+    if (nbOriginalChannels == 1) // SI mode
+    {
+        m_deviceShared.m_inputThread->stopWork();
+        delete m_deviceShared.m_inputThread;
+        m_deviceShared.m_inputThread = 0;
+        m_running = false;
+    }
+    else if (m_deviceShared.m_channel == nbOriginalChannels - 1) // remove last MI channel => reduce
+    {
+        m_deviceShared.m_inputThread->stopWork();
+        SampleSinkFifo **fifos = new SampleSinkFifo*[nbOriginalChannels-1];
+        unsigned int *log2Decims = new unsigned int[nbOriginalChannels-1];
+        int *fcPoss = new int[nbOriginalChannels-1];
+
+        for (int i = 0; i < nbOriginalChannels-1; i++) { // save original FIFO references
+            fifos[i] = m_deviceShared.m_inputThread->getFifo(i);
+            log2Decims[i] = m_deviceShared.m_inputThread->getLog2Decimation(i);
+            fcPoss[i] = m_deviceShared.m_inputThread->getFcPos(i);
+        }
+
+        delete m_deviceShared.m_inputThread;
+        m_deviceShared.m_inputThread = new Bladerf2InputThread(m_deviceShared.m_dev->getDev(), nbOriginalChannels-1);
+
+        for (int i = 0; i < nbOriginalChannels-1; i++) { // restore original FIFO references
+            m_deviceShared.m_inputThread->setFifo(i, fifos[i]);
+            m_deviceShared.m_inputThread->setLog2Decimation(i, log2Decims[i]);
+            m_deviceShared.m_inputThread->setFcPos(i, fcPoss[i]);
+        }
+
+        // propagate new thread address to buddies
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+
+        for (; it != sourceBuddies.end(); ++it) {
+            ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_inputThread = m_deviceShared.m_inputThread;
+        }
+
+        m_deviceShared.m_inputThread->startWork();
+    }
+    else
+    {
+        m_deviceShared.m_inputThread->setFifo(m_deviceShared.m_channel, 0); // remove FIFO
+    }
+}
+
+QByteArray BladeRF2Input::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool BladeRF2Input::deserialize(const QByteArray& data)
+{
+    bool success = true;
+
+    if (!m_settings.deserialize(data))
+    {
+        m_settings.resetToDefaults();
+        success = false;
+    }
+
+    MsgConfigureBladeRF2* message = MsgConfigureBladeRF2::create(m_settings, true);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureBladeRF2* messageToGUI = MsgConfigureBladeRF2::create(m_settings, true);
+        m_guiMessageQueue->push(messageToGUI);
+    }
+
+    return success;
+}
+
+const QString& BladeRF2Input::getDeviceDescription() const
+{
+    return m_deviceDescription;
+}
+
+int BladeRF2Input::getSampleRate() const
+{
+    int rate = m_settings.m_devSampleRate;
+    return (rate / (1<<m_settings.m_log2Decim));
+}
+
+quint64 BladeRF2Input::getCenterFrequency() const
+{
+    return m_settings.m_centerFrequency;
+}
+
+void BladeRF2Input::setCenterFrequency(qint64 centerFrequency)
+{
+    BladeRF2InputSettings settings = m_settings;
+    settings.m_centerFrequency = centerFrequency;
+
+    MsgConfigureBladeRF2* message = MsgConfigureBladeRF2::create(settings, false);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureBladeRF2* messageToGUI = MsgConfigureBladeRF2::create(settings, false);
+        m_guiMessageQueue->push(messageToGUI);
+    }
+}
+
+bool BladeRF2Input::handleMessage(const Message& message)
+{
+    if (MsgConfigureBladeRF2::match(message))
+    {
+        MsgConfigureBladeRF2& conf = (MsgConfigureBladeRF2&) message;
+        qDebug() << "BladeRF2Input::handleMessage: MsgConfigureBladeRF2";
+
+        if (!applySettings(conf.getSettings(), conf.getForce()))
+        {
+            qDebug("BladeRF2Input::handleMessage: MsgConfigureBladeRF2 config error");
+        }
+
+        return true;
+    }
+    else if (MsgFileRecord::match(message))
+    {
+        MsgFileRecord& conf = (MsgFileRecord&) message;
+        qDebug() << "BladeRF2Input::handleMessage: MsgFileRecord: " << conf.getStartStop();
+
+        if (conf.getStartStop())
+        {
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink->setFileName(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
+            }
+
+            m_fileSink->startRecording();
+        }
+        else
+        {
+            m_fileSink->stopRecording();
+        }
+
+        return true;
+    }
+    else if (MsgStartStop::match(message))
+    {
+        MsgStartStop& cmd = (MsgStartStop&) message;
+        qDebug() << "BladeRF2Input::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+
+        if (cmd.getStartStop())
+        {
+            if (m_deviceAPI->initAcquisition())
+            {
+                m_deviceAPI->startAcquisition();
+            }
+        }
+        else
+        {
+            m_deviceAPI->stopAcquisition();
+        }
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool force)
+{
+    bool forwardChange = false;
+
+    struct bladerf *dev = m_deviceShared.m_dev->getDev();
+    qDebug() << "BladeRF2Input::applySettings: m_dev: " << dev;
+
+    if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
+        (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    {
+        m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
+    }
+
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
+    {
+        forwardChange = true;
+
+        if (dev != 0)
+        {
+            unsigned int actualSamplerate;
+            int status = bladerf_set_sample_rate(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), settings.m_devSampleRate, &actualSamplerate);
+
+            if (status < 0)
+            {
+                qCritical("BladeRF2Input::applySettings: could not set sample rate: %d: %s",
+                        settings.m_devSampleRate, bladerf_strerror(status));
+            }
+            else
+            {
+                qDebug() << "BladeRF2Input::applySettings: bladerf_set_sample_rate(BLADERF_MODULE_RX) actual sample rate is " << actualSamplerate;
+            }
+        }
+    }
+
+    if ((m_settings.m_bandwidth != settings.m_bandwidth) || force)
+    {
+        if (dev != 0)
+        {
+            unsigned int actualBandwidth;
+            int status = bladerf_set_bandwidth(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), settings.m_bandwidth, &actualBandwidth);
+
+            if(status < 0)
+            {
+                qCritical("BladeRF2Input::applySettings: could not set bandwidth: %d: %s",
+                        settings.m_bandwidth, bladerf_strerror(status));
+            }
+            else
+            {
+                qDebug() << "BladeRF2Input::applySettings: bladerf_set_bandwidth(BLADERF_MODULE_RX) actual bandwidth is " << actualBandwidth;
+            }
+        }
+    }
+
+    if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+    {
+        if (m_deviceShared.m_inputThread != 0)
+        {
+            m_deviceShared.m_inputThread->setFcPos(m_deviceShared.m_channel, (int) settings.m_fcPos);
+            qDebug() << "BladeRF2Input::applySettings: set fc pos (enum) to " << (int) settings.m_fcPos;
+        }
+    }
+
+    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    {
+        forwardChange = true;
+
+        if (m_deviceShared.m_inputThread != 0)
+        {
+            m_deviceShared.m_inputThread->setLog2Decimation(m_deviceShared.m_channel, settings.m_log2Decim);
+            qDebug() << "BladeRF2Input::applySettings: set decimation to " << (1<<settings.m_log2Decim);
+        }
+    }
+
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+        || (m_settings.m_devSampleRate != settings.m_devSampleRate)
+        || (m_settings.m_fcPos != settings.m_fcPos)
+        || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    {
+        qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+                settings.m_centerFrequency,
+                0,
+                settings.m_log2Decim,
+                (DeviceSampleSource::fcPos_t) settings.m_fcPos,
+                settings.m_devSampleRate);
+
+        forwardChange = true;
+
+        if (dev != 0)
+        {
+            int status = bladerf_set_frequency(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), deviceCenterFrequency);
+
+            if (status < 0) {
+                qWarning("BladeRF2Input::applySettings: bladerf_set_frequency(%lld) failed: %s",
+                        settings.m_centerFrequency, bladerf_strerror(status));
+            } else {
+                qDebug("BladeRF2Input::applySettings: bladerf_set_frequency(%lld)", settings.m_centerFrequency);
+            }
+        }
+    }
+
+    if (forwardChange)
+    {
+        int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
+        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
+        m_fileSink->handleMessage(*notif); // forward to file sink
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+    }
+
+    m_settings = settings;
+
+    qDebug() << "BladeRF2Input::applySettings: "
+            << " m_centerFrequency: " << m_settings.m_centerFrequency << " Hz"
+            << " m_bandwidth: " << m_settings.m_bandwidth
+            << " m_log2Decim: " << m_settings.m_log2Decim
+            << " m_fcPos: " << m_settings.m_fcPos
+            << " m_devSampleRate: " << m_settings.m_devSampleRate
+            << " m_dcBlock: " << m_settings.m_dcBlock
+            << " m_iqCorrection: " << m_settings.m_iqCorrection;
+
+    return true;
+}
