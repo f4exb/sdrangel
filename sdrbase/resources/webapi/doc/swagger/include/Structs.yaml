@@ -3,19 +3,19 @@ SampleRate:
   properties:
     rate:
       type: integer
-      
+
 Bandwidth:
   description: A bandwidth expressed in Hertz (Hz)
   properties:
     bandwidth:
       type: integer
-      
+
 Frequency:
   description: A frequency expressed in Hertz (Hz)
   properties:
     frequency:
       type: integer
-      
+
 FrequencyBand:
   description: A band of frequencies given its boudaries in Hertz (Hz)
   properties:
@@ -38,6 +38,26 @@ Range:
     min:
       type: integer
     max:
-      type: integer      
+      type: integer
     step:
-      type: integer      
+      type: integer
+
+FrequencyRange:
+  description: An frequency range with 64 bit support for min and max
+  properties:
+    min:
+      type: integer
+      format: int64
+    max:
+      type: integer
+      format: int64
+    step:
+      type: integer
+
+NamedEnum:
+  description: Enumeration with name for values
+  properties:
+    name:
+      type: string
+    value:
+      type: integer

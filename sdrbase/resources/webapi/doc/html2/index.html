@@ -1305,7 +1305,7 @@ margin-bottom: 20px;
             defs.BladeRF2InputReport = {
   "properties" : {
     "frequencyRange" : {
-      "$ref" : "#/definitions/Range"
+      "$ref" : "#/definitions/FrequencyRange"
     },
     "sampleRateRange" : {
       "$ref" : "#/definitions/Range"
@@ -1315,6 +1315,12 @@ margin-bottom: 20px;
     },
     "globalGainRange" : {
       "$ref" : "#/definitions/Range"
+    },
+    "gainModes" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/NamedEnum"
+      }
     }
   },
   "description" : "BladeRF2"
@@ -2251,6 +2257,22 @@ margin-bottom: 20px;
   },
   "description" : "A band of frequencies given its boudaries in Hertz (Hz)"
 };
+            defs.FrequencyRange = {
+  "properties" : {
+    "min" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "max" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "step" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "An frequency range with 64 bit support for min and max"
+};
             defs.Gain = {
   "properties" : {
     "gainCB" : {
@@ -2811,6 +2833,17 @@ margin-bottom: 20px;
     }
   },
   "description" : "NFMMod"
+};
+            defs.NamedEnum = {
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "value" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "Enumeration with name for values"
 };
             defs.PerseusReport = {
   "properties" : {
@@ -23142,7 +23175,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-09-22T10:27:51.856+02:00
+              Generated 2018-09-25T16:51:16.493+02:00
             </div>
           </div>
       </div>

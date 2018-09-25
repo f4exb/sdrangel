@@ -23,17 +23,20 @@ BladeRF2InputSettings:
     iqCorrection:
       type: integer
     fileRecordName:
-      type: string      
-      
+      type: string
+
 BladeRF2InputReport:
   description: BladeRF2
   properties:
     frequencyRange:
-      $ref: "/doc/swagger/include/Structs.yaml#/Range"
+      $ref: "/doc/swagger/include/Structs.yaml#/FrequencyRange"
     sampleRateRange:
       $ref: "/doc/swagger/include/Structs.yaml#/Range"
     bandwidthRange:
       $ref: "/doc/swagger/include/Structs.yaml#/Range"
     globalGainRange:
       $ref: "/doc/swagger/include/Structs.yaml#/Range"
-            
+    gainModes:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/NamedEnum"

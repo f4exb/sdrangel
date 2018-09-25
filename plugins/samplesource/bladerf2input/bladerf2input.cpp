@@ -16,6 +16,8 @@
 
 #include <QDebug>
 
+#include "libbladeRF.h"
+
 #include "SWGDeviceSettings.h"
 #include "SWGBladeRF2InputSettings.h"
 #include "SWGDeviceState.h"
@@ -507,6 +509,19 @@ void BladeRF2Input::getGlobalGainRange(int& min, int& max, int& step)
     }
 }
 
+const bladerf_gain_modes *BladeRF2Input::getGainModes(int& nbGains)
+{
+    const bladerf_gain_modes *modes = 0;
+
+    if (m_deviceShared.m_dev) {
+        nbGains = m_deviceShared.m_dev->getGainModesRx(&modes);
+    } else {
+        nbGains = 0;
+    }
+
+    return modes;
+}
+
 bool BladeRF2Input::handleMessage(const Message& message)
 {
     if (MsgConfigureBladeRF2::match(message))
@@ -978,7 +993,7 @@ void BladeRF2Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
 
         device->getFrequencyRangeRx(f_min, f_max, step);
 
-        response.getBladeRf2InputReport()->setFrequencyRange(new SWGSDRangel::SWGRange);
+        response.getBladeRf2InputReport()->setFrequencyRange(new SWGSDRangel::SWGFrequencyRange);
         response.getBladeRf2InputReport()->getFrequencyRange()->setMin(f_min);
         response.getBladeRf2InputReport()->getFrequencyRange()->setMax(f_max);
         response.getBladeRf2InputReport()->getFrequencyRange()->setStep(step);
@@ -996,6 +1011,21 @@ void BladeRF2Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
         response.getBladeRf2InputReport()->getSampleRateRange()->setMin(min);
         response.getBladeRf2InputReport()->getSampleRateRange()->setMax(max);
         response.getBladeRf2InputReport()->getSampleRateRange()->setStep(step);
+
+        response.getBladeRf2InputReport()->setGainModes(new QList<SWGSDRangel::SWGNamedEnum*>);
+
+        int nbModes;
+        const bladerf_gain_modes *modes = getGainModes(nbModes);
+
+        if (modes)
+        {
+            for (int i = 0; i < nbModes; modes++)
+            {
+                response.getBladeRf2InputReport()->getGainModes()->append(new SWGSDRangel::SWGNamedEnum);
+                response.getBladeRf2InputReport()->getGainModes()->back()->setName(new QString(modes[i].name));
+                response.getBladeRf2InputReport()->getGainModes()->back()->setValue(modes[i].mode);
+            }
+        }
     }
 }
 

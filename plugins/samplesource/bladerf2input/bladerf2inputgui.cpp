@@ -58,6 +58,15 @@ BladeRF2InputGui::BladeRF2InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->bandwidth->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->bandwidth->setValueRange(6, min/1000, max/1000);
 
+    m_gainModes = m_sampleSource->getGainModes(m_nbGainModes);
+
+    if (m_gainModes)
+    {
+        for (int i = 0; i < m_nbGainModes; i++) {
+            ui->gainMode->addItem(tr("%1").arg(m_gainModes[i].name));
+        }
+    }
+
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(500);

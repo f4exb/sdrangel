@@ -462,6 +462,36 @@ void DeviceBladeRF2::getGlobalGainRangeTx(int& min, int& max, int& step)
     }
 }
 
+int DeviceBladeRF2::getGainModesRx(const bladerf_gain_modes **modes)
+{
+    if (m_dev)
+    {
+        int n = bladerf_get_gain_modes(m_dev, BLADERF_CHANNEL_RX(0), 0);
+
+        if (n < 0)
+        {
+            qCritical("DeviceBladeRF2::getGainModesRx: Failed to get the number of Rx gain modes: %s", bladerf_strerror(n));
+            return 0;
+        }
+
+        int status = bladerf_get_gain_modes(m_dev, BLADERF_CHANNEL_RX(0), modes);
+
+        if (status < 0)
+        {
+            qCritical("DeviceBladeRF2::getGainModesRx: Failed to get Rx gain modes: %s", bladerf_strerror(status));
+            return 0;
+        }
+        else
+        {
+            return n;
+        }
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 void DeviceBladeRF2::setBiasTeeRx(bool enable)
 {
     if (m_dev)

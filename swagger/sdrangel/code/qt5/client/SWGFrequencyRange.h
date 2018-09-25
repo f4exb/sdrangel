@@ -11,76 +11,60 @@
  */
 
 /*
- * SWGBladeRF2InputReport.h
+ * SWGFrequencyRange.h
  *
- * BladeRF2
+ * An frequency range with 64 bit support for min and max
  */
 
-#ifndef SWGBladeRF2InputReport_H_
-#define SWGBladeRF2InputReport_H_
+#ifndef SWGFrequencyRange_H_
+#define SWGFrequencyRange_H_
 
 #include <QJsonObject>
 
 
-#include "SWGFrequencyRange.h"
-#include "SWGNamedEnum.h"
-#include "SWGRange.h"
-#include <QList>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGBladeRF2InputReport: public SWGObject {
+class SWG_API SWGFrequencyRange: public SWGObject {
 public:
-    SWGBladeRF2InputReport();
-    SWGBladeRF2InputReport(QString* json);
-    virtual ~SWGBladeRF2InputReport();
+    SWGFrequencyRange();
+    SWGFrequencyRange(QString* json);
+    virtual ~SWGFrequencyRange();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGBladeRF2InputReport* fromJson(QString &jsonString) override;
+    virtual SWGFrequencyRange* fromJson(QString &jsonString) override;
 
-    SWGFrequencyRange* getFrequencyRange();
-    void setFrequencyRange(SWGFrequencyRange* frequency_range);
+    qint64 getMin();
+    void setMin(qint64 min);
 
-    SWGRange* getSampleRateRange();
-    void setSampleRateRange(SWGRange* sample_rate_range);
+    qint64 getMax();
+    void setMax(qint64 max);
 
-    SWGRange* getBandwidthRange();
-    void setBandwidthRange(SWGRange* bandwidth_range);
-
-    SWGRange* getGlobalGainRange();
-    void setGlobalGainRange(SWGRange* global_gain_range);
-
-    QList<SWGNamedEnum*>* getGainModes();
-    void setGainModes(QList<SWGNamedEnum*>* gain_modes);
+    qint32 getStep();
+    void setStep(qint32 step);
 
 
     virtual bool isSet() override;
 
 private:
-    SWGFrequencyRange* frequency_range;
-    bool m_frequency_range_isSet;
+    qint64 min;
+    bool m_min_isSet;
 
-    SWGRange* sample_rate_range;
-    bool m_sample_rate_range_isSet;
+    qint64 max;
+    bool m_max_isSet;
 
-    SWGRange* bandwidth_range;
-    bool m_bandwidth_range_isSet;
-
-    SWGRange* global_gain_range;
-    bool m_global_gain_range_isSet;
-
-    QList<SWGNamedEnum*>* gain_modes;
-    bool m_gain_modes_isSet;
+    qint32 step;
+    bool m_step_isSet;
 
 };
 
 }
 
-#endif /* SWGBladeRF2InputReport_H_ */
+#endif /* SWGFrequencyRange_H_ */

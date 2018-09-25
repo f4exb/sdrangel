@@ -28,6 +28,7 @@
 class DeviceSourceAPI;
 class BladeRF2InputThread;
 class FileRecord;
+struct bladerf_gain_modes;
 
 class BladeRF2Input : public DeviceSampleSource
 {
@@ -116,6 +117,7 @@ public:
     void getSampleRateRange(int& min, int& max, int& step);
     void getBandwidthRange(int& min, int& max, int& step);
     void getGlobalGainRange(int& min, int& max, int& step);
+    const bladerf_gain_modes *getGainModes(int& nbGains);
 
     virtual bool handleMessage(const Message& message);
 
@@ -151,6 +153,8 @@ private:
     DeviceBladeRF2Shared m_deviceShared;
     BladeRF2InputThread *m_thread;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
+    bladerf_gain_modes **m_gainModes;
+    int m_nbGainModes;
 
     bool openDevice();
     void closeDevice();

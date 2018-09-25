@@ -60,6 +60,7 @@
 #include "SWGFileSourceSettings.h"
 #include "SWGFrequency.h"
 #include "SWGFrequencyBand.h"
+#include "SWGFrequencyRange.h"
 #include "SWGGain.h"
 #include "SWGHackRFInputSettings.h"
 #include "SWGHackRFOutputSettings.h"
@@ -76,6 +77,7 @@
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModReport.h"
 #include "SWGNFMModSettings.h"
+#include "SWGNamedEnum.h"
 #include "SWGPerseusReport.h"
 #include "SWGPerseusSettings.h"
 #include "SWGPlutoSdrInputReport.h"
@@ -258,6 +260,9 @@ namespace SWGSDRangel {
     if(QString("SWGFrequencyBand").compare(type) == 0) {
       return new SWGFrequencyBand();
     }
+    if(QString("SWGFrequencyRange").compare(type) == 0) {
+      return new SWGFrequencyRange();
+    }
     if(QString("SWGGain").compare(type) == 0) {
       return new SWGGain();
     }
@@ -305,6 +310,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGNFMModSettings").compare(type) == 0) {
       return new SWGNFMModSettings();
+    }
+    if(QString("SWGNamedEnum").compare(type) == 0) {
+      return new SWGNamedEnum();
     }
     if(QString("SWGPerseusReport").compare(type) == 0) {
       return new SWGPerseusReport();

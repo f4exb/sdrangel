@@ -36,6 +36,8 @@ SWGBladeRF2InputReport::SWGBladeRF2InputReport() {
     m_bandwidth_range_isSet = false;
     global_gain_range = nullptr;
     m_global_gain_range_isSet = false;
+    gain_modes = nullptr;
+    m_gain_modes_isSet = false;
 }
 
 SWGBladeRF2InputReport::~SWGBladeRF2InputReport() {
@@ -44,7 +46,7 @@ SWGBladeRF2InputReport::~SWGBladeRF2InputReport() {
 
 void
 SWGBladeRF2InputReport::init() {
-    frequency_range = new SWGRange();
+    frequency_range = new SWGFrequencyRange();
     m_frequency_range_isSet = false;
     sample_rate_range = new SWGRange();
     m_sample_rate_range_isSet = false;
@@ -52,6 +54,8 @@ SWGBladeRF2InputReport::init() {
     m_bandwidth_range_isSet = false;
     global_gain_range = new SWGRange();
     m_global_gain_range_isSet = false;
+    gain_modes = new QList<SWGNamedEnum*>();
+    m_gain_modes_isSet = false;
 }
 
 void
@@ -68,6 +72,13 @@ SWGBladeRF2InputReport::cleanup() {
     if(global_gain_range != nullptr) { 
         delete global_gain_range;
     }
+    if(gain_modes != nullptr) { 
+        auto arr = gain_modes;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete gain_modes;
+    }
 }
 
 SWGBladeRF2InputReport*
@@ -81,7 +92,7 @@ SWGBladeRF2InputReport::fromJson(QString &json) {
 
 void
 SWGBladeRF2InputReport::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&frequency_range, pJson["frequencyRange"], "SWGRange", "SWGRange");
+    ::SWGSDRangel::setValue(&frequency_range, pJson["frequencyRange"], "SWGFrequencyRange", "SWGFrequencyRange");
     
     ::SWGSDRangel::setValue(&sample_rate_range, pJson["sampleRateRange"], "SWGRange", "SWGRange");
     
@@ -89,6 +100,8 @@ SWGBladeRF2InputReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&global_gain_range, pJson["globalGainRange"], "SWGRange", "SWGRange");
     
+    
+    ::SWGSDRangel::setValue(&gain_modes, pJson["gainModes"], "QList", "SWGNamedEnum");
 }
 
 QString
@@ -106,7 +119,7 @@ QJsonObject*
 SWGBladeRF2InputReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if((frequency_range != nullptr) && (frequency_range->isSet())){
-        toJsonValue(QString("frequencyRange"), frequency_range, obj, QString("SWGRange"));
+        toJsonValue(QString("frequencyRange"), frequency_range, obj, QString("SWGFrequencyRange"));
     }
     if((sample_rate_range != nullptr) && (sample_rate_range->isSet())){
         toJsonValue(QString("sampleRateRange"), sample_rate_range, obj, QString("SWGRange"));
@@ -117,16 +130,19 @@ SWGBladeRF2InputReport::asJsonObject() {
     if((global_gain_range != nullptr) && (global_gain_range->isSet())){
         toJsonValue(QString("globalGainRange"), global_gain_range, obj, QString("SWGRange"));
     }
+    if(gain_modes->size() > 0){
+        toJsonArray((QList<void*>*)gain_modes, obj, "gainModes", "SWGNamedEnum");
+    }
 
     return obj;
 }
 
-SWGRange*
+SWGFrequencyRange*
 SWGBladeRF2InputReport::getFrequencyRange() {
     return frequency_range;
 }
 void
-SWGBladeRF2InputReport::setFrequencyRange(SWGRange* frequency_range) {
+SWGBladeRF2InputReport::setFrequencyRange(SWGFrequencyRange* frequency_range) {
     this->frequency_range = frequency_range;
     this->m_frequency_range_isSet = true;
 }
@@ -161,6 +177,16 @@ SWGBladeRF2InputReport::setGlobalGainRange(SWGRange* global_gain_range) {
     this->m_global_gain_range_isSet = true;
 }
 
+QList<SWGNamedEnum*>*
+SWGBladeRF2InputReport::getGainModes() {
+    return gain_modes;
+}
+void
+SWGBladeRF2InputReport::setGainModes(QList<SWGNamedEnum*>* gain_modes) {
+    this->gain_modes = gain_modes;
+    this->m_gain_modes_isSet = true;
+}
+
 
 bool
 SWGBladeRF2InputReport::isSet(){
@@ -170,6 +196,7 @@ SWGBladeRF2InputReport::isSet(){
         if(sample_rate_range != nullptr && sample_rate_range->isSet()){ isObjectUpdated = true; break;}
         if(bandwidth_range != nullptr && bandwidth_range->isSet()){ isObjectUpdated = true; break;}
         if(global_gain_range != nullptr && global_gain_range->isSet()){ isObjectUpdated = true; break;}
+        if(gain_modes->size() > 0){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }
