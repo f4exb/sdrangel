@@ -26,7 +26,7 @@
 #include "bladerf2inputsettings.h"
 
 class DeviceSourceAPI;
-class LimeSDRInputThread;
+class BladeRF2InputThread;
 class FileRecord;
 
 class BladeRF2Input : public DeviceSampleSource
@@ -147,6 +147,7 @@ private:
     QString m_deviceDescription;
     bool m_running;
     DeviceBladeRF2Shared m_deviceShared;
+    BladeRF2InputThread *m_thread;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
 
     bool openDevice();

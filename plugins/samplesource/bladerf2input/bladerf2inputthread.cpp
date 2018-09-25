@@ -23,11 +23,18 @@ Bladerf2InputThread::Bladerf2InputThread(struct bladerf* dev, unsigned int nbRxC
     m_nbChannels(nbRxChannels)
 {
     m_channels = new Channel[nbRxChannels];
+
+    for (unsigned int i = 0; i < nbRxChannels; i++) {
+        m_channels[i].m_convertBuffer.resize(DeviceBladeRF2::blockSize, Sample{0,0});
+    }
+
     m_buf = new qint16[2*DeviceBladeRF2::blockSize*nbRxChannels];
 }
 
 Bladerf2InputThread::~Bladerf2InputThread()
 {
+    qDebug("Bladerf2InputThread::~Bladerf2InputThread");
+
     if (m_running) {
         stopWork();
     }

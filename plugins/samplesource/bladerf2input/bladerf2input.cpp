@@ -42,7 +42,8 @@ BladeRF2Input::BladeRF2Input(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
     m_deviceDescription("BladeRF2Input"),
-    m_running(false)
+    m_running(false),
+    m_thread(0)
 {
     openDevice();
 
@@ -313,11 +314,13 @@ void BladeRF2Input::stop()
     }
 
     int nbOriginalChannels = m_deviceShared.m_inputThread->getNbChannels();
+    Bladerf2InputThread *bladerf2InputThread = 0;
 
     if (nbOriginalChannels == 1) // SI mode
     {
         m_deviceShared.m_inputThread->stopWork();
-        delete m_deviceShared.m_inputThread;
+        bladerf2InputThread = (Bladerf2InputThread*) m_deviceShared.m_inputThread;
+        delete bladerf2InputThread;
         m_deviceShared.m_inputThread = 0;
         m_running = false;
     }
@@ -334,8 +337,10 @@ void BladeRF2Input::stop()
             fcPoss[i] = m_deviceShared.m_inputThread->getFcPos(i);
         }
 
-        delete m_deviceShared.m_inputThread;
-        m_deviceShared.m_inputThread = new Bladerf2InputThread(m_deviceShared.m_dev->getDev(), nbOriginalChannels-1);
+        bladerf2InputThread = (Bladerf2InputThread*) m_deviceShared.m_inputThread;
+        delete bladerf2InputThread;
+        bladerf2InputThread = new Bladerf2InputThread(m_deviceShared.m_dev->getDev(), nbOriginalChannels-1);
+        m_deviceShared.m_inputThread = bladerf2InputThread;
 
         for (int i = 0; i < nbOriginalChannels-1; i++) { // restore original FIFO references
             m_deviceShared.m_inputThread->setFifo(i, fifos[i]);

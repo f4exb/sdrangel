@@ -32,7 +32,7 @@ public:
     class InputThreadInterface
     {
     public:
-        virtual ~InputThreadInterface() = 0;
+        virtual ~InputThreadInterface() {}
         virtual void startWork() = 0;
         virtual void stopWork() = 0;
         virtual bool isRunning() const = 0;
@@ -48,7 +48,7 @@ public:
     class OutputThreadInterface
     {
     public:
-        virtual ~OutputThreadInterface() = 0;
+        virtual ~OutputThreadInterface() {}
         virtual void startWork() = 0;
         virtual void stopWork() = 0;
         virtual bool isRunning() = 0;

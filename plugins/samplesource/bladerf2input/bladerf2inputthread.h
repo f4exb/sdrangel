@@ -37,7 +37,7 @@ class Bladerf2InputThread : public QThread, public DeviceBladeRF2Shared::InputTh
 
 public:
     Bladerf2InputThread(struct bladerf* dev, unsigned int nbRxChannels, QObject* parent = NULL);
-    virtual ~Bladerf2InputThread();
+    ~Bladerf2InputThread();
 
     virtual void startWork();
     virtual void stopWork();
