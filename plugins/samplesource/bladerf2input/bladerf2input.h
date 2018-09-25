@@ -94,6 +94,31 @@ public:
         { }
     };
 
+    class MsgReportGainRange : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getMin() const { return m_min; }
+        int getMax() const { return m_max; }
+        int getStep() const { return m_step; }
+
+        static MsgReportGainRange* create(int min, int max, int step) {
+            return new MsgReportGainRange(min, max, step);
+        }
+
+    protected:
+        int m_min;
+        int m_max;
+        int m_step;
+
+        MsgReportGainRange(int min, int max, int step) :
+            Message(),
+            m_min(min),
+            m_max(max),
+            m_step(step)
+        {}
+    };
+
     BladeRF2Input(DeviceSourceAPI *deviceAPI);
     virtual ~BladeRF2Input();
     virtual void destroy();

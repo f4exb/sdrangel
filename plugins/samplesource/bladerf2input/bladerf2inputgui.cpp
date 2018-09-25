@@ -62,10 +62,20 @@ BladeRF2InputGui::BladeRF2InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     if (m_gainModes)
     {
+        ui->gainMode->blockSignals(true);
+
         for (int i = 0; i < m_nbGainModes; i++) {
             ui->gainMode->addItem(tr("%1").arg(m_gainModes[i].name));
         }
+
+        ui->gainMode->blockSignals(false);
     }
+
+    m_sampleSource->getGlobalGainRange(min, max, step);
+    ui->gain->setMinimum(min);
+    ui->gain->setMaximum(max);
+    ui->gain->setPageStep(step);
+    ui->gain->setSingleStep(step);
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -143,8 +153,25 @@ bool BladeRF2InputGui::handleMessage(const Message& message)
         const BladeRF2Input::MsgConfigureBladeRF2& cfg = (BladeRF2Input::MsgConfigureBladeRF2&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
+        int min, max, step;
+        m_sampleSource->getGlobalGainRange(min, max, step);
+        ui->gain->setMinimum(min);
+        ui->gain->setMaximum(max);
+        ui->gain->setPageStep(step);
+        ui->gain->setSingleStep(step);
         displaySettings();
         blockApplySettings(false);
+
+        return true;
+    }
+    else if (BladeRF2Input::MsgReportGainRange::match(message))
+    {
+        const BladeRF2Input::MsgReportGainRange& cfg = (BladeRF2Input::MsgReportGainRange&) message;
+        ui->gain->setMinimum(cfg.getMin());
+        ui->gain->setMaximum(cfg.getMax());
+        ui->gain->setSingleStep(cfg.getStep());
+        ui->gain->setPageStep(cfg.getStep());
+
         return true;
     }
     else if (BladeRF2Input::MsgStartStop::match(message))
@@ -211,6 +238,7 @@ void BladeRF2InputGui::displaySettings()
     ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
+    ui->gainText->setText(tr("%1").arg(m_settings.m_globalGain));
     ui->gain->setValue(m_settings.m_globalGain);
 
     blockApplySettings(false);
@@ -272,6 +300,22 @@ void BladeRF2InputGui::on_fcPos_currentIndexChanged(int index)
         m_settings.m_fcPos = BladeRF2InputSettings::FC_POS_CENTER;
         sendSettings();
     }
+}
+
+void BladeRF2InputGui::on_gainMode_currentIndexChanged(int index)
+{
+    if (index < m_nbGainModes)
+    {
+        m_settings.m_gainMode = m_gainModes[index].mode;
+        sendSettings();
+    }
+}
+
+void BladeRF2InputGui::on_gain_valueChanged(int value)
+{
+    ui->gainText->setText(tr("%1").arg(value));
+    m_settings.m_globalGain = value;
+    sendSettings();
 }
 
 void BladeRF2InputGui::on_startStop_toggled(bool checked)

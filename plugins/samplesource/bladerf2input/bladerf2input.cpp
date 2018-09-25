@@ -39,6 +39,7 @@
 MESSAGE_CLASS_DEFINITION(BladeRF2Input::MsgConfigureBladeRF2, Message)
 MESSAGE_CLASS_DEFINITION(BladeRF2Input::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(BladeRF2Input::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(BladeRF2Input::MsgReportGainRange, Message)
 
 BladeRF2Input::BladeRF2Input(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -688,7 +689,6 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
     bool forwardChangeTxBuddies = false;
 
     struct bladerf *dev = m_deviceShared.m_dev->getDev();
-    qDebug() << "BladeRF2Input::applySettings: m_dev: " << dev;
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
         (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
@@ -785,8 +785,18 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
             if (status < 0) {
                 qWarning("BladeRF2Input::applySettings: bladerf_set_frequency(%lld) failed: %s",
                         settings.m_centerFrequency, bladerf_strerror(status));
-            } else {
+            }
+            else
+            {
                 qDebug("BladeRF2Input::applySettings: bladerf_set_frequency(%lld)", settings.m_centerFrequency);
+
+                if (getMessageQueueToGUI())
+                {
+                    int min, max, step;
+                    getGlobalGainRange(min, max, step);
+                    MsgReportGainRange *msg = MsgReportGainRange::create(min, max, step);
+                    getMessageQueueToGUI()->push(msg);
+                }
             }
         }
     }
@@ -803,6 +813,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
         if (dev)
         {
+//            qDebug("BladeRF2Input::applySettings: channel: %d gain: %d", m_deviceShared.m_channel, settings.m_globalGain);
             int status = bladerf_set_gain(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), settings.m_globalGain);
 
             if (status < 0) {
