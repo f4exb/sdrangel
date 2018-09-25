@@ -204,6 +204,10 @@ void BladeRF2Input::closeDevice()
         stop();
     }
 
+    if (m_thread) { // stills own the thread => transfer to a buddy
+        moveThreadToBuddy();
+    }
+
     m_deviceShared.m_channel = -1;
     m_deviceShared.m_source = 0;
 
@@ -254,6 +258,23 @@ BladeRF2InputThread *BladeRF2Input::findThread()
     }
 }
 
+void BladeRF2Input::moveThreadToBuddy()
+{
+    const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+    std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+
+    for (; it != sourceBuddies.end(); ++it)
+    {
+        BladeRF2Input *buddySource = ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_source;
+
+        if (buddySource)
+        {
+            buddySource->setThread(m_thread);
+            m_thread = 0;  // zero for others
+        }
+    }
+}
+
 bool BladeRF2Input::start()
 {
     if (!m_deviceShared.m_dev)
@@ -299,7 +320,7 @@ bool BladeRF2Input::start()
             std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
 
             for (; it != sourceBuddies.end(); ++it) {
-                ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_source->resetThread();
+                ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
             }
 
             needsStart = true;
@@ -354,7 +375,7 @@ void BladeRF2Input::stop()
         std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
 
         for (; it != sourceBuddies.end(); ++it) {
-            ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_source->resetThread();
+            ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
         }
     }
     else if (m_deviceShared.m_channel == nbOriginalChannels - 1) // remove last MI channel => reduce by deleting and re-creating the thread
@@ -387,7 +408,7 @@ void BladeRF2Input::stop()
         std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
 
         for (; it != sourceBuddies.end(); ++it) {
-            ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_source->resetThread();
+            ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
         }
 
         bladerf2InputThread->startWork();
