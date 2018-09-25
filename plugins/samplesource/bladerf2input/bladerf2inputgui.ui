@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>310</width>
-    <height>250</height>
+    <width>350</width>
+    <height>200</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,8 +18,8 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>310</width>
-    <height>250</height>
+    <width>350</width>
+    <height>200</height>
    </size>
   </property>
   <property name="font">
@@ -265,6 +265,9 @@
        <property name="cursor">
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
+       <property name="toolTip">
+        <string>RF bandwidth</string>
+       </property>
       </widget>
      </item>
      <item row="0" column="7">
@@ -330,6 +333,9 @@
        <property name="cursor">
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
+       <property name="toolTip">
+        <string>Device sample rate</string>
+       </property>
       </widget>
      </item>
      <item>
@@ -384,7 +390,7 @@
      <item>
       <widget class="QLabel" name="label_decim">
        <property name="text">
-        <string>Dec</string>
+        <string>D</string>
        </property>
       </widget>
      </item>
@@ -442,19 +448,26 @@
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0,0,0,0">
+    <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0,0">
      <property name="spacing">
       <number>3</number>
      </property>
      <item row="0" column="2">
       <widget class="QSlider" name="gain">
+       <property name="toolTip">
+        <string>Gain value</string>
+       </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QComboBox" name="gainMode"/>
+      <widget class="QComboBox" name="gainMode">
+       <property name="toolTip">
+        <string>Gain mode</string>
+       </property>
+      </widget>
      </item>
      <item row="0" column="0">
       <widget class="QLabel" name="gainLabel">
@@ -467,12 +480,12 @@
       <widget class="QLabel" name="gainText">
        <property name="minimumSize">
         <size>
-         <width>25</width>
+         <width>45</width>
          <height>0</height>
         </size>
        </property>
        <property name="text">
-        <string>000</string>
+        <string>000 dB</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

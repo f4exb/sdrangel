@@ -65,8 +65,6 @@ private:
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
     MessageQueue m_inputMessageQueue;
-    const struct bladerf_gain_modes *m_gainModes;
-    int m_nbGainModes;
 
     void displaySettings();
     void sendSettings();

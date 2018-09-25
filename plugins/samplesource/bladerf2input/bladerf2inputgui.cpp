@@ -56,26 +56,26 @@ BladeRF2InputGui::BladeRF2InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     m_sampleSource->getBandwidthRange(min, max, step);
     ui->bandwidth->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
-    ui->bandwidth->setValueRange(6, min/1000, max/1000);
+    ui->bandwidth->setValueRange(5, min/1000, max/1000);
 
-    m_gainModes = m_sampleSource->getGainModes(m_nbGainModes);
+    const std::vector<BladeRF2Input::GainMode>& modes = m_sampleSource->getGainModes();
+    std::vector<BladeRF2Input::GainMode>::const_iterator it = modes.begin();
 
-    if (m_gainModes)
-    {
-        ui->gainMode->blockSignals(true);
+    ui->gainMode->blockSignals(true);
 
-        for (int i = 0; i < m_nbGainModes; i++) {
-            ui->gainMode->addItem(tr("%1").arg(m_gainModes[i].name));
-        }
-
-        ui->gainMode->blockSignals(false);
+    for (; it != modes.end(); ++it) {
+        ui->gainMode->addItem(it->m_name);
     }
+
+    ui->gainMode->blockSignals(false);
 
     m_sampleSource->getGlobalGainRange(min, max, step);
     ui->gain->setMinimum(min);
     ui->gain->setMaximum(max);
     ui->gain->setPageStep(step);
     ui->gain->setSingleStep(step);
+
+    ui->label_decim->setText(QString::fromUtf8("D\u2193"));
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -238,7 +238,7 @@ void BladeRF2InputGui::displaySettings()
     ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
-    ui->gainText->setText(tr("%1").arg(m_settings.m_globalGain));
+    ui->gainText->setText(tr("%1 dB").arg(m_settings.m_globalGain));
     ui->gain->setValue(m_settings.m_globalGain);
 
     blockApplySettings(false);
@@ -304,16 +304,20 @@ void BladeRF2InputGui::on_fcPos_currentIndexChanged(int index)
 
 void BladeRF2InputGui::on_gainMode_currentIndexChanged(int index)
 {
-    if (index < m_nbGainModes)
+    const std::vector<BladeRF2Input::GainMode>& modes = m_sampleSource->getGainModes();
+    unsigned int uindex = index < 0 ? 0 : (unsigned int) index;
+
+    if (uindex < modes.size())
     {
-        m_settings.m_gainMode = m_gainModes[index].mode;
+        BladeRF2Input::GainMode mode = modes[index];
+        m_settings.m_gainMode = mode.m_value;
         sendSettings();
     }
 }
 
 void BladeRF2InputGui::on_gain_valueChanged(int value)
 {
-    ui->gainText->setText(tr("%1").arg(value));
+    ui->gainText->setText(tr("%1 dB").arg(value));
     m_settings.m_globalGain = value;
     sendSettings();
 }

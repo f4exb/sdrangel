@@ -50,6 +50,19 @@ BladeRF2Input::BladeRF2Input(DeviceSourceAPI *deviceAPI) :
 {
     openDevice();
 
+    if (m_deviceShared.m_dev)
+    {
+        const bladerf_gain_modes *modes = 0;
+        int nbModes = m_deviceShared.m_dev->getGainModesRx(&modes);
+
+        if (modes)
+        {
+            for (int i = 0; i < nbModes; i++) {
+                m_gainModes.push_back(GainMode{QString(modes[i].name), modes[i].mode});
+            }
+        }
+    }
+
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
 }
@@ -508,19 +521,6 @@ void BladeRF2Input::getGlobalGainRange(int& min, int& max, int& step)
     if (m_deviceShared.m_dev) {
         m_deviceShared.m_dev->getGlobalGainRangeRx(min, max, step);
     }
-}
-
-const bladerf_gain_modes *BladeRF2Input::getGainModes(int& nbGains)
-{
-    const bladerf_gain_modes *modes = 0;
-
-    if (m_deviceShared.m_dev) {
-        nbGains = m_deviceShared.m_dev->getGainModesRx(&modes);
-    } else {
-        nbGains = 0;
-    }
-
-    return modes;
 }
 
 bool BladeRF2Input::handleMessage(const Message& message)
@@ -1025,17 +1025,14 @@ void BladeRF2Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
 
         response.getBladeRf2InputReport()->setGainModes(new QList<SWGSDRangel::SWGNamedEnum*>);
 
-        int nbModes;
-        const bladerf_gain_modes *modes = getGainModes(nbModes);
+        const std::vector<GainMode>& modes = getGainModes();
+        std::vector<GainMode>::const_iterator it = modes.begin();
 
-        if (modes)
+        for (; it != modes.end(); ++it)
         {
-            for (int i = 0; i < nbModes; modes++)
-            {
-                response.getBladeRf2InputReport()->getGainModes()->append(new SWGSDRangel::SWGNamedEnum);
-                response.getBladeRf2InputReport()->getGainModes()->back()->setName(new QString(modes[i].name));
-                response.getBladeRf2InputReport()->getGainModes()->back()->setValue(modes[i].mode);
-            }
+            response.getBladeRf2InputReport()->getGainModes()->append(new SWGSDRangel::SWGNamedEnum);
+            response.getBladeRf2InputReport()->getGainModes()->back()->setName(new QString(it->m_name));
+            response.getBladeRf2InputReport()->getGainModes()->back()->setValue(it->m_value);
         }
     }
 }
