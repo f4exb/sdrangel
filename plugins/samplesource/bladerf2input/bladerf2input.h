@@ -100,6 +100,8 @@ public:
     virtual void init();
     virtual bool start();
     virtual void stop();
+    BladeRF2InputThread *getThread() { return m_thread; }
+    void resetThread() { m_thread = 0; }
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
@@ -152,6 +154,7 @@ private:
 
     bool openDevice();
     void closeDevice();
+    BladeRF2InputThread *findThread();
     bool applySettings(const BladeRF2InputSettings& settings, bool force = false);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF2InputSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);

@@ -32,12 +32,12 @@
 #include "dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
 
-class Bladerf2InputThread : public QThread, public DeviceBladeRF2Shared::InputThreadInterface {
+class BladeRF2InputThread : public QThread {
     Q_OBJECT
 
 public:
-    Bladerf2InputThread(struct bladerf* dev, unsigned int nbRxChannels, QObject* parent = NULL);
-    ~Bladerf2InputThread();
+    BladeRF2InputThread(struct bladerf* dev, unsigned int nbRxChannels, QObject* parent = NULL);
+    ~BladeRF2InputThread();
 
     virtual void startWork();
     virtual void stopWork();

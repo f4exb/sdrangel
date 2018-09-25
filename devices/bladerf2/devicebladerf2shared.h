@@ -22,6 +22,7 @@
 
 class SampleSinkFifo;
 class SampleSourceFifo;
+class BladeRF2Input;
 
 /**
  * Structure shared by a buddy with other buddies
@@ -29,34 +30,6 @@ class SampleSourceFifo;
 class DEVICES_API DeviceBladeRF2Shared
 {
 public:
-    class InputThreadInterface
-    {
-    public:
-        virtual ~InputThreadInterface() {}
-        virtual void startWork() = 0;
-        virtual void stopWork() = 0;
-        virtual bool isRunning() const = 0;
-        virtual unsigned int getNbChannels() const = 0;
-        virtual void setLog2Decimation(unsigned int channel, unsigned int log2_decim) = 0;
-        virtual unsigned int getLog2Decimation(unsigned int channel) const = 0;
-        virtual void setFcPos(unsigned int channel, int fcPos) = 0;
-        virtual int getFcPos(unsigned int channel) const = 0;
-        virtual void setFifo(unsigned int channel, SampleSinkFifo *fifo) = 0;
-        virtual SampleSinkFifo *getFifo(unsigned int channel) = 0;
-    };
-
-    class OutputThreadInterface
-    {
-    public:
-        virtual ~OutputThreadInterface() {}
-        virtual void startWork() = 0;
-        virtual void stopWork() = 0;
-        virtual bool isRunning() = 0;
-        virtual unsigned int getNbChannels() const = 0;
-        virtual void setFifo(unsigned int channel, SampleSourceFifo *fifo) = 0;
-        virtual SampleSourceFifo *getFifo(unsigned int channel) = 0;
-    };
-
     class MsgReportBuddyChange : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -82,8 +55,7 @@ public:
 
     DeviceBladeRF2 *m_dev;
     int m_channel; //!< allocated channel (-1 if none)
-    InputThreadInterface *m_inputThread;   //!< The SISO/MIMO input thread
-    OutputThreadInterface *m_outputThread; //!< The SISO/MIMO output thread
+    BladeRF2Input *m_source;
 };
 
 

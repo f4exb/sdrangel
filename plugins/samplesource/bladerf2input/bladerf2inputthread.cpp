@@ -16,7 +16,7 @@
 
 #include "bladerf2inputthread.h"
 
-Bladerf2InputThread::Bladerf2InputThread(struct bladerf* dev, unsigned int nbRxChannels, QObject* parent) :
+BladeRF2InputThread::BladeRF2InputThread(struct bladerf* dev, unsigned int nbRxChannels, QObject* parent) :
     QThread(parent),
     m_running(false),
     m_dev(dev),
@@ -31,9 +31,9 @@ Bladerf2InputThread::Bladerf2InputThread(struct bladerf* dev, unsigned int nbRxC
     m_buf = new qint16[2*DeviceBladeRF2::blockSize*nbRxChannels];
 }
 
-Bladerf2InputThread::~Bladerf2InputThread()
+BladeRF2InputThread::~BladeRF2InputThread()
 {
-    qDebug("Bladerf2InputThread::~Bladerf2InputThread");
+    qDebug("BladeRF2InputThread::~BladeRF2InputThread");
 
     if (m_running) {
         stopWork();
@@ -43,7 +43,7 @@ Bladerf2InputThread::~Bladerf2InputThread()
     delete[] m_channels;
 }
 
-void Bladerf2InputThread::startWork()
+void BladeRF2InputThread::startWork()
 {
     m_startWaitMutex.lock();
     start();
@@ -55,13 +55,13 @@ void Bladerf2InputThread::startWork()
     m_startWaitMutex.unlock();
 }
 
-void Bladerf2InputThread::stopWork()
+void BladeRF2InputThread::stopWork()
 {
     m_running = false;
     wait();
 }
 
-void Bladerf2InputThread::run()
+void BladeRF2InputThread::run()
 {
     int res;
 
@@ -82,7 +82,7 @@ void Bladerf2InputThread::run()
 
         if (status < 0)
         {
-            qCritical("Bladerf2InputThread::run: cannot configure streams: %s", bladerf_strerror(status));
+            qCritical("BladeRF2InputThread::run: cannot configure streams: %s", bladerf_strerror(status));
         }
         else
         {
@@ -92,7 +92,7 @@ void Bladerf2InputThread::run()
 
                 if (res < 0)
                 {
-                    qCritical("BladerfThread::run sync Rx error: %s", bladerf_strerror(res));
+                    qCritical("BladeRF2InputThread::run sync Rx error: %s", bladerf_strerror(res));
                     break;
                 }
 
@@ -106,14 +106,14 @@ void Bladerf2InputThread::run()
     }
     else
     {
-        qWarning("Bladerf2InputThread::run: no channels or FIFO allocated. Aborting");
+        qWarning("BladeRF2InputThread::run: no channels or FIFO allocated. Aborting");
     }
 
 
     m_running = false;
 }
 
-unsigned int Bladerf2InputThread::getNbFifos()
+unsigned int BladeRF2InputThread::getNbFifos()
 {
     unsigned int fifoCount = 0;
 
@@ -127,14 +127,14 @@ unsigned int Bladerf2InputThread::getNbFifos()
     return fifoCount;
 }
 
-void Bladerf2InputThread::setLog2Decimation(unsigned int channel, unsigned int log2_decim)
+void BladeRF2InputThread::setLog2Decimation(unsigned int channel, unsigned int log2_decim)
 {
     if (channel < m_nbChannels) {
         m_channels[channel].m_log2Decim = log2_decim;
     }
 }
 
-unsigned int Bladerf2InputThread::getLog2Decimation(unsigned int channel) const
+unsigned int BladeRF2InputThread::getLog2Decimation(unsigned int channel) const
 {
     if (channel < m_nbChannels) {
         return m_channels[channel].m_log2Decim;
@@ -143,14 +143,14 @@ unsigned int Bladerf2InputThread::getLog2Decimation(unsigned int channel) const
     }
 }
 
-void Bladerf2InputThread::setFcPos(unsigned int channel, int fcPos)
+void BladeRF2InputThread::setFcPos(unsigned int channel, int fcPos)
 {
     if (channel < m_nbChannels) {
         m_channels[channel].m_fcPos = fcPos;
     }
 }
 
-int Bladerf2InputThread::getFcPos(unsigned int channel) const
+int BladeRF2InputThread::getFcPos(unsigned int channel) const
 {
     if (channel < m_nbChannels) {
         return m_channels[channel].m_fcPos;
@@ -159,14 +159,14 @@ int Bladerf2InputThread::getFcPos(unsigned int channel) const
     }
 }
 
-void Bladerf2InputThread::setFifo(unsigned int channel, SampleSinkFifo *sampleFifo)
+void BladeRF2InputThread::setFifo(unsigned int channel, SampleSinkFifo *sampleFifo)
 {
     if (channel < m_nbChannels) {
         m_channels[channel].m_sampleFifo = sampleFifo;
     }
 }
 
-SampleSinkFifo *Bladerf2InputThread::getFifo(unsigned int channel)
+SampleSinkFifo *BladeRF2InputThread::getFifo(unsigned int channel)
 {
     if (channel < m_nbChannels) {
         return m_channels[channel].m_sampleFifo;
@@ -175,14 +175,14 @@ SampleSinkFifo *Bladerf2InputThread::getFifo(unsigned int channel)
     }
 }
 
-void Bladerf2InputThread::callbackMI(const qint16* buf, qint32 samplesPerChannel)
+void BladeRF2InputThread::callbackMI(const qint16* buf, qint32 samplesPerChannel)
 {
     // TODO: write a set of decimators that can take interleaved samples in input directly
     int status = bladerf_deinterleave_stream_buffer(BLADERF_RX_X2, BLADERF_FORMAT_SC16_Q11 , samplesPerChannel*m_nbChannels, (void *) buf);
 
     if (status < 0)
     {
-        qCritical("Bladerf2InputThread::callbackMI: cannot de-interleave buffer: %s", bladerf_strerror(status));
+        qCritical("BladeRF2InputThread::callbackMI: cannot de-interleave buffer: %s", bladerf_strerror(status));
         return;
     }
 
@@ -194,7 +194,7 @@ void Bladerf2InputThread::callbackMI(const qint16* buf, qint32 samplesPerChannel
     }
 }
 
-void Bladerf2InputThread::callbackSI(const qint16* buf, qint32 len, unsigned int channel)
+void BladeRF2InputThread::callbackSI(const qint16* buf, qint32 len, unsigned int channel)
 {
     SampleVector::iterator it = m_channels[channel].m_convertBuffer.begin();
 

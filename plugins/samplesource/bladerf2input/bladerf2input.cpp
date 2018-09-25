@@ -189,6 +189,7 @@ bool BladeRF2Input::openDevice()
         }
     }
 
+    m_deviceShared.m_source = this;
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
     return true;
 }
@@ -204,6 +205,7 @@ void BladeRF2Input::closeDevice()
     }
 
     m_deviceShared.m_channel = -1;
+    m_deviceShared.m_source = 0;
 
     // No buddies so effectively close the device
 
@@ -220,6 +222,38 @@ void BladeRF2Input::init()
     applySettings(m_settings, true);
 }
 
+BladeRF2InputThread *BladeRF2Input::findThread()
+{
+    if (m_thread == 0) // this does not own the thread
+    {
+        BladeRF2InputThread *bladerf2InputThread = 0;
+
+        // find a buddy that has allocated the thread
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+
+        for (; it != sourceBuddies.end(); ++it)
+        {
+            BladeRF2Input *buddySource = ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_source;
+
+            if (buddySource)
+            {
+                bladerf2InputThread = buddySource->getThread();
+
+                if (bladerf2InputThread) {
+                    break;
+                }
+            }
+        }
+
+        return bladerf2InputThread;
+    }
+    else
+    {
+        return m_thread; // own thread
+    }
+}
+
 bool BladeRF2Input::start()
 {
     if (!m_deviceShared.m_dev)
@@ -228,36 +262,21 @@ bool BladeRF2Input::start()
         return false;
     }
 
-    Bladerf2InputThread *bladerf2InputThread = 0;
+    BladeRF2InputThread *bladerf2InputThread = findThread();
     bool needsStart = false;
 
-    // find thread allocated by a buddy
-    const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-    std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
-
-    for (; it != sourceBuddies.end(); ++it)
+    if (bladerf2InputThread) // if thread is already allocated
     {
-        bladerf2InputThread = (Bladerf2InputThread*) ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_inputThread;
-
-        if (bladerf2InputThread) {
-            break;
-        }
-    }
-
-    if (bladerf2InputThread) // if thread was allocated by a buddy
-    {
-        DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
-        DeviceBladeRF2Shared *deviceBladeRF2Shared = (DeviceBladeRF2Shared*) sourceBuddy->getBuddySharedPtr();
-        bladerf2InputThread = (Bladerf2InputThread*) deviceBladeRF2Shared->m_inputThread;
         int nbOriginalChannels = bladerf2InputThread->getNbChannels();
 
-        if (m_deviceShared.m_channel+1 > nbOriginalChannels) // expansion
+        if (m_deviceShared.m_channel+1 > nbOriginalChannels) // expansion by deleting and re-creating the thread
         {
             SampleSinkFifo **fifos = new SampleSinkFifo*[nbOriginalChannels];
             unsigned int *log2Decims = new unsigned int[nbOriginalChannels];
             int *fcPoss = new int[nbOriginalChannels];
 
-            for (int i = 0; i < nbOriginalChannels; i++) { // save original FIFO references and data
+            for (int i = 0; i < nbOriginalChannels; i++) // save original FIFO references and data
+            {
                 fifos[i] = bladerf2InputThread->getFifo(i);
                 log2Decims[i] = bladerf2InputThread->getLog2Decimation(i);
                 fcPoss[i] = bladerf2InputThread->getFcPos(i);
@@ -265,20 +284,22 @@ bool BladeRF2Input::start()
 
             bladerf2InputThread->stopWork();
             delete bladerf2InputThread;
-            bladerf2InputThread = new Bladerf2InputThread(m_deviceShared.m_dev->getDev(), m_deviceShared.m_channel+1);
+            bladerf2InputThread = new BladeRF2InputThread(m_deviceShared.m_dev->getDev(), m_deviceShared.m_channel+1);
+            m_thread = bladerf2InputThread; // take ownership
 
-            for (int i = 0; i < nbOriginalChannels; i++) { // restore original FIFO references
+            for (int i = 0; i < nbOriginalChannels; i++) // restore original FIFO references
+            {
                 bladerf2InputThread->setFifo(i, fifos[i]);
                 bladerf2InputThread->setLog2Decimation(i, log2Decims[i]);
                 bladerf2InputThread->setFcPos(i, fcPoss[i]);
             }
 
-            // propagate new thread address to buddies
+            // remove old thread address from buddies (reset in all buddies)
             const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
             std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
 
             for (; it != sourceBuddies.end(); ++it) {
-                ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_inputThread = bladerf2InputThread;
+                ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_source->resetThread();
             }
 
             needsStart = true;
@@ -286,14 +307,14 @@ bool BladeRF2Input::start()
     }
     else // first allocation
     {
-        bladerf2InputThread = new Bladerf2InputThread(m_deviceShared.m_dev->getDev(), m_deviceShared.m_channel+1);
+        bladerf2InputThread = new BladeRF2InputThread(m_deviceShared.m_dev->getDev(), m_deviceShared.m_channel+1);
+        m_thread = bladerf2InputThread; // take ownership
         needsStart = true;
     }
 
     bladerf2InputThread->setFifo(m_deviceShared.m_channel, &m_sampleFifo);
     bladerf2InputThread->setLog2Decimation(m_deviceShared.m_channel, m_settings.m_log2Decim);
     bladerf2InputThread->setFcPos(m_deviceShared.m_channel, (int) m_settings.m_fcPos);
-    m_deviceShared.m_inputThread = bladerf2InputThread;
 
     if (needsStart) {
         bladerf2InputThread->startWork();
@@ -301,7 +322,7 @@ bool BladeRF2Input::start()
 
     applySettings(m_settings, true);
 
-    qDebug("BladerfInput::startInput: started");
+    qDebug("BladeRF2Input::start: started");
     m_running = true;
 
     return true;
@@ -313,55 +334,70 @@ void BladeRF2Input::stop()
         return;
     }
 
-    int nbOriginalChannels = m_deviceShared.m_inputThread->getNbChannels();
-    Bladerf2InputThread *bladerf2InputThread = 0;
+    BladeRF2InputThread *bladerf2InputThread = findThread();
 
-    if (nbOriginalChannels == 1) // SI mode
+    if (bladerf2InputThread == 0) // no thread allocated
     {
-        m_deviceShared.m_inputThread->stopWork();
-        bladerf2InputThread = (Bladerf2InputThread*) m_deviceShared.m_inputThread;
-        delete bladerf2InputThread;
-        m_deviceShared.m_inputThread = 0;
-        m_running = false;
+        return;
     }
-    else if (m_deviceShared.m_channel == nbOriginalChannels - 1) // remove last MI channel => reduce
+
+    int nbOriginalChannels = bladerf2InputThread->getNbChannels();
+
+    if (nbOriginalChannels == 1) // SI mode => just stop and delete the thread
     {
-        m_deviceShared.m_inputThread->stopWork();
-        SampleSinkFifo **fifos = new SampleSinkFifo*[nbOriginalChannels-1];
-        unsigned int *log2Decims = new unsigned int[nbOriginalChannels-1];
-        int *fcPoss = new int[nbOriginalChannels-1];
-
-        for (int i = 0; i < nbOriginalChannels-1; i++) { // save original FIFO references
-            fifos[i] = m_deviceShared.m_inputThread->getFifo(i);
-            log2Decims[i] = m_deviceShared.m_inputThread->getLog2Decimation(i);
-            fcPoss[i] = m_deviceShared.m_inputThread->getFcPos(i);
-        }
-
-        bladerf2InputThread = (Bladerf2InputThread*) m_deviceShared.m_inputThread;
+        bladerf2InputThread->stopWork();
         delete bladerf2InputThread;
-        bladerf2InputThread = new Bladerf2InputThread(m_deviceShared.m_dev->getDev(), nbOriginalChannels-1);
-        m_deviceShared.m_inputThread = bladerf2InputThread;
+        m_thread = 0;
 
-        for (int i = 0; i < nbOriginalChannels-1; i++) { // restore original FIFO references
-            m_deviceShared.m_inputThread->setFifo(i, fifos[i]);
-            m_deviceShared.m_inputThread->setLog2Decimation(i, log2Decims[i]);
-            m_deviceShared.m_inputThread->setFcPos(i, fcPoss[i]);
-        }
-
-        // propagate new thread address to buddies
+        // remove old thread address from buddies (reset in all buddies)
         const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
         std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
 
         for (; it != sourceBuddies.end(); ++it) {
-            ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_inputThread = m_deviceShared.m_inputThread;
+            ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_source->resetThread();
+        }
+    }
+    else if (m_deviceShared.m_channel == nbOriginalChannels - 1) // remove last MI channel => reduce by deleting and re-creating the thread
+    {
+        bladerf2InputThread->stopWork();
+        SampleSinkFifo **fifos = new SampleSinkFifo*[nbOriginalChannels-1];
+        unsigned int *log2Decims = new unsigned int[nbOriginalChannels-1];
+        int *fcPoss = new int[nbOriginalChannels-1];
+
+        for (int i = 0; i < nbOriginalChannels-1; i++) // save original FIFO references
+        {
+            fifos[i] = bladerf2InputThread->getFifo(i);
+            log2Decims[i] = bladerf2InputThread->getLog2Decimation(i);
+            fcPoss[i] = bladerf2InputThread->getFcPos(i);
         }
 
-        m_deviceShared.m_inputThread->startWork();
+        delete bladerf2InputThread;
+        bladerf2InputThread = new BladeRF2InputThread(m_deviceShared.m_dev->getDev(), nbOriginalChannels-1);
+        m_thread = bladerf2InputThread; // take ownership
+
+        for (int i = 0; i < nbOriginalChannels-1; i++)  // restore original FIFO references
+        {
+            bladerf2InputThread->setFifo(i, fifos[i]);
+            bladerf2InputThread->setLog2Decimation(i, log2Decims[i]);
+            bladerf2InputThread->setFcPos(i, fcPoss[i]);
+        }
+
+        // remove old thread address from buddies (reset in all buddies)
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+
+        for (; it != sourceBuddies.end(); ++it) {
+            ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_source->resetThread();
+        }
+
+        bladerf2InputThread->startWork();
     }
-    else
+    else // remove channel from existing thread
     {
-        m_deviceShared.m_inputThread->setFifo(m_deviceShared.m_channel, 0); // remove FIFO
+        bladerf2InputThread->setFifo(m_deviceShared.m_channel, 0); // remove FIFO
     }
+
+    m_running = false;
 }
 
 QByteArray BladeRF2Input::serialize() const
@@ -670,9 +706,11 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
     if ((m_settings.m_fcPos != settings.m_fcPos) || force)
     {
-        if (m_deviceShared.m_inputThread != 0)
+        BladeRF2InputThread *inputThread = findThread();
+
+        if (inputThread != 0)
         {
-            m_deviceShared.m_inputThread->setFcPos(m_deviceShared.m_channel, (int) settings.m_fcPos);
+            inputThread->setFcPos(m_deviceShared.m_channel, (int) settings.m_fcPos);
             qDebug() << "BladeRF2Input::applySettings: set fc pos (enum) to " << (int) settings.m_fcPos;
         }
     }
@@ -680,10 +718,11 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
     if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
         forwardChangeOwnDSP = true;
+        BladeRF2InputThread *inputThread = findThread();
 
-        if (m_deviceShared.m_inputThread != 0)
+        if (inputThread != 0)
         {
-            m_deviceShared.m_inputThread->setLog2Decimation(m_deviceShared.m_channel, settings.m_log2Decim);
+            inputThread->setLog2Decimation(m_deviceShared.m_channel, settings.m_log2Decim);
             qDebug() << "BladeRF2Input::applySettings: set decimation to " << (1<<settings.m_log2Decim);
         }
     }
