@@ -98,7 +98,7 @@ PluginInterface::SamplingDevices Blderf2InputPlugin::enumSampleSources()
                             i,
                             PluginInterface::SamplingDevice::PhysicalDevice,
                             true,
-                            1,
+                            nbRxChannels,
                             j));
                 }
             }
