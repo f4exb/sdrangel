@@ -299,6 +299,7 @@ bool BladeRF2Input::start()
         return false;
     }
 
+    int requestedChannel = m_deviceAPI->getItemIndex();
     BladeRF2InputThread *bladerf2InputThread = findThread();
     bool needsStart = false;
 
@@ -308,7 +309,7 @@ bool BladeRF2Input::start()
 
         int nbOriginalChannels = bladerf2InputThread->getNbChannels();
 
-        if (m_deviceShared.m_channel+1 > nbOriginalChannels) // expansion by deleting and re-creating the thread
+        if (requestedChannel+1 > nbOriginalChannels) // expansion by deleting and re-creating the thread
         {
             qDebug("BladerfInput::start: expand channels. Re-allocate thread and take ownership");
 
@@ -325,7 +326,7 @@ bool BladeRF2Input::start()
 
             bladerf2InputThread->stopWork();
             delete bladerf2InputThread;
-            bladerf2InputThread = new BladeRF2InputThread(m_deviceShared.m_dev->getDev(), m_deviceShared.m_channel+1);
+            bladerf2InputThread = new BladeRF2InputThread(m_deviceShared.m_dev->getDev(), requestedChannel+1);
             m_thread = bladerf2InputThread; // take ownership
 
             for (int i = 0; i < nbOriginalChannels; i++) // restore original FIFO references
@@ -353,14 +354,14 @@ bool BladeRF2Input::start()
     else // first allocation
     {
         qDebug("BladerfInput::start: allocate thread and take ownership");
-        bladerf2InputThread = new BladeRF2InputThread(m_deviceShared.m_dev->getDev(), m_deviceShared.m_channel+1);
+        bladerf2InputThread = new BladeRF2InputThread(m_deviceShared.m_dev->getDev(), requestedChannel+1);
         m_thread = bladerf2InputThread; // take ownership
         needsStart = true;
     }
 
-    bladerf2InputThread->setFifo(m_deviceShared.m_channel, &m_sampleFifo);
-    bladerf2InputThread->setLog2Decimation(m_deviceShared.m_channel, m_settings.m_log2Decim);
-    bladerf2InputThread->setFcPos(m_deviceShared.m_channel, (int) m_settings.m_fcPos);
+    bladerf2InputThread->setFifo(requestedChannel, &m_sampleFifo);
+    bladerf2InputThread->setLog2Decimation(requestedChannel, m_settings.m_log2Decim);
+    bladerf2InputThread->setFcPos(requestedChannel, (int) m_settings.m_fcPos);
 
     if (needsStart) {
         bladerf2InputThread->startWork();
@@ -380,6 +381,7 @@ void BladeRF2Input::stop()
         return;
     }
 
+    int requestedChannel = m_deviceAPI->getItemIndex();
     BladeRF2InputThread *bladerf2InputThread = findThread();
 
     if (bladerf2InputThread == 0) // no thread allocated
@@ -404,7 +406,7 @@ void BladeRF2Input::stop()
             ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
         }
     }
-    else if (m_deviceShared.m_channel == nbOriginalChannels - 1) // remove last MI channel => reduce by deleting and re-creating the thread
+    else if (requestedChannel == nbOriginalChannels - 1) // remove last MI channel => reduce by deleting and re-creating the thread
     {
         qDebug("BladeRF2Input::stop: MI mode. Reduce by deleting and re-creating the thread");
         bladerf2InputThread->stopWork();
@@ -443,7 +445,7 @@ void BladeRF2Input::stop()
     else // remove channel from existing thread
     {
         qDebug("BladeRF2Input::stop: MI mode. Thread not owned by source. Just remove FIFO reference");
-        bladerf2InputThread->setFifo(m_deviceShared.m_channel, 0); // remove FIFO
+        bladerf2InputThread->setFifo(requestedChannel, 0); // remove FIFO
     }
 
     m_running = false;
@@ -565,9 +567,12 @@ bool BladeRF2Input::handleMessage(const Message& message)
 
         if (dev) // The BladeRF device must have been open to do so
         {
+            int requestedChannel = m_deviceAPI->getItemIndex();
+
             if (report.getRxElseTx()) // Rx buddy change: check for: frequency, gain mode and value, bias tee, sample rate, bandwidth
             {
-                status = bladerf_get_sample_rate(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), &tmp_uint);
+
+                status = bladerf_get_sample_rate(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_uint);
 
                 if (status < 0) {
                     qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_sample_rate error: %s", bladerf_strerror(status));
@@ -575,7 +580,7 @@ bool BladeRF2Input::handleMessage(const Message& message)
                     settings.m_devSampleRate = tmp_uint;
                 }
 
-                status = bladerf_get_frequency(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), &tmp_uint64);
+                status = bladerf_get_frequency(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_uint64);
 
                 if (status < 0) {
                     qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_frequency error: %s", bladerf_strerror(status));
@@ -583,7 +588,7 @@ bool BladeRF2Input::handleMessage(const Message& message)
                     settings.m_centerFrequency = tmp_uint64;
                 }
 
-                status = bladerf_get_bandwidth(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), &tmp_uint);
+                status = bladerf_get_bandwidth(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_uint);
 
                 if (status < 0) {
                     qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_bandwidth error: %s", bladerf_strerror(status));
@@ -591,7 +596,7 @@ bool BladeRF2Input::handleMessage(const Message& message)
                     settings.m_bandwidth = tmp_uint;
                 }
 
-                status = bladerf_get_gain_mode(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), &tmp_gain_mode);
+                status = bladerf_get_gain_mode(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_gain_mode);
 
                 if (status < 0) {
                     qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_gain_mode error: %s", bladerf_strerror(status));
@@ -599,7 +604,7 @@ bool BladeRF2Input::handleMessage(const Message& message)
                     settings.m_gainMode = (int) tmp_gain_mode;
                 }
 
-                status = bladerf_get_gain(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), &tmp_int);
+                status = bladerf_get_gain(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_int);
 
                 if (status < 0) {
                     qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_gain error: %s", bladerf_strerror(status));
@@ -607,7 +612,7 @@ bool BladeRF2Input::handleMessage(const Message& message)
                     settings.m_globalGain = tmp_int;
                 }
 
-                status = bladerf_get_bias_tee(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), &tmp_bool);
+                status = bladerf_get_bias_tee(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_bool);
 
                 if (status < 0) {
                     qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_bias_tee error: %s", bladerf_strerror(status));
@@ -617,7 +622,7 @@ bool BladeRF2Input::handleMessage(const Message& message)
             }
             else // Tx buddy change: check for sample rate change only
             {
-                status = bladerf_get_sample_rate(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), &tmp_uint);
+                status = bladerf_get_sample_rate(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_uint);
 
                 if (status < 0) {
                     qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_sample_rate error: %s", bladerf_strerror(status));
@@ -701,6 +706,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
     bool forwardChangeTxBuddies = false;
 
     struct bladerf *dev = m_deviceShared.m_dev->getDev();
+    int requestedChannel = m_deviceAPI->getItemIndex();
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
         (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
@@ -717,7 +723,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         if (dev != 0)
         {
             unsigned int actualSamplerate;
-            int status = bladerf_set_sample_rate(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), settings.m_devSampleRate, &actualSamplerate);
+            int status = bladerf_set_sample_rate(dev, BLADERF_CHANNEL_RX(requestedChannel), settings.m_devSampleRate, &actualSamplerate);
 
             if (status < 0)
             {
@@ -738,7 +744,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         if (dev != 0)
         {
             unsigned int actualBandwidth;
-            int status = bladerf_set_bandwidth(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), settings.m_bandwidth, &actualBandwidth);
+            int status = bladerf_set_bandwidth(dev, BLADERF_CHANNEL_RX(requestedChannel), settings.m_bandwidth, &actualBandwidth);
 
             if(status < 0)
             {
@@ -758,7 +764,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
         if (inputThread != 0)
         {
-            inputThread->setFcPos(m_deviceShared.m_channel, (int) settings.m_fcPos);
+            inputThread->setFcPos(requestedChannel, (int) settings.m_fcPos);
             qDebug() << "BladeRF2Input::applySettings: set fc pos (enum) to " << (int) settings.m_fcPos;
         }
     }
@@ -770,7 +776,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
         if (inputThread != 0)
         {
-            inputThread->setLog2Decimation(m_deviceShared.m_channel, settings.m_log2Decim);
+            inputThread->setLog2Decimation(requestedChannel, settings.m_log2Decim);
             qDebug() << "BladeRF2Input::applySettings: set decimation to " << (1<<settings.m_log2Decim);
         }
     }
@@ -792,7 +798,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
         if (dev != 0)
         {
-            int status = bladerf_set_frequency(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), deviceCenterFrequency);
+            int status = bladerf_set_frequency(dev, BLADERF_CHANNEL_RX(requestedChannel), deviceCenterFrequency);
 
             if (status < 0) {
                 qWarning("BladeRF2Input::applySettings: bladerf_set_frequency(%lld) failed: %s",
@@ -825,8 +831,8 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
         if (dev)
         {
-//            qDebug("BladeRF2Input::applySettings: channel: %d gain: %d", m_deviceShared.m_channel, settings.m_globalGain);
-            int status = bladerf_set_gain(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), settings.m_globalGain);
+//            qDebug("BladeRF2Input::applySettings: channel: %d gain: %d", requestedChannel, settings.m_globalGain);
+            int status = bladerf_set_gain(dev, BLADERF_CHANNEL_RX(requestedChannel), settings.m_globalGain);
 
             if (status < 0) {
                 qWarning("BladeRF2Input::applySettings: bladerf_set_gain(%d) failed: %s",
@@ -843,7 +849,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
         if (dev)
         {
-            int status = bladerf_set_gain_mode(dev, BLADERF_CHANNEL_RX(m_deviceShared.m_channel), (bladerf_gain_mode) settings.m_gainMode);
+            int status = bladerf_set_gain_mode(dev, BLADERF_CHANNEL_RX(requestedChannel), (bladerf_gain_mode) settings.m_gainMode);
 
             if (status < 0) {
                 qWarning("BladeRF2Input::applySettings: bladerf_set_gain_mode(%d) failed: %s",
