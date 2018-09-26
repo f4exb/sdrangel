@@ -251,6 +251,36 @@ void BladeRF2Input::moveThreadToBuddy()
 
 bool BladeRF2Input::start()
 {
+    // There is a single thread per physical device (Rx side). This thread is unique and referenced by a unique
+    // buddy in the group of source buddies associated with this physical device.
+    //
+    // This start method is responsible for managing the thread and channel enabling when the streaming of a Rx channel is started
+    //
+    // It checks the following conditions
+    //   - the thread is allocated or not (by itself or one of its buddies). If it is it grabs the thread pointer.
+    //   - the requested channel is the first (0) or the following (just 1 in BladeRF 2 case)
+    //
+    // The BladeRF support library lets you work in two possible modes:
+    //   - Single Input (SI) with only one channel streaming. This HAS to be channel 0.
+    //   - Multiple Input (MI) with two channels streaming using interleaved samples. It MUST be in this configuration if channel 1
+    //     is used irrespective of what you actually do with samples coming from channel 0. When we will run with only channel 1
+    //     streaming from the client perspective the channel 0 will actually be enabled and streaming but its samples will
+    //     just be disregarded.
+    //
+    // It manages the transition form SI where only one channel (the first or channel 0) should be running to the
+    // Multiple Input (MI) if the requested channel is 1. More generally it checks if the requested channel is within the current
+    // channel range allocated in the thread or past it. To perform the transition it stops the thread, deletes it and creates a new one.
+    // It marks the thread as needing start.
+    //
+    // If the requested channel is within the thread channel range (this thread being already allocated) it simply removes its FIFO reference
+    // so that the samples are not fed to the FIFO anymore and leaves the thread unchanged (no stop, no delete/new)
+    //
+    // If there is no thread allocated it creates a new one with a number of channels that fits the requested channel. That is
+    // 1 if channel 0 is requested (SI mode) and 2 if channel 1 is requested (MI mode). It marks the thread as needing start.
+    //
+    // Eventually it registers the FIFO in the thread. If the thread has to be started it enables the channels up to the number of channels
+    // allocated in the thread and starts the thread.
+
     if (!m_deviceShared.m_dev)
     {
         qDebug("BladerfInput::start: no device object");
@@ -347,6 +377,22 @@ bool BladeRF2Input::start()
 
 void BladeRF2Input::stop()
 {
+    // This stop method is responsible for managing the thread and channel disabling when the streaming of
+    // a Rx channel is stopped
+    //
+    // If the thread is currently managing only one channel (SI mode). The thread can be just stopped and deleted.
+    // Then the channel is closed (disabled).
+    //
+    // If the thread is currently managing many channels (MI mode) and we are removing the last channel. The transition
+    // from MI to SI or reduction of MI size is handled by stopping the thread, deleting it and creating a new one
+    // with one channel less. Then the channel is closed (disabled).
+    //
+    // If the thread is currently managing many channels (MI mode) but the channel being stopped is not the last
+    // channel then the FIFO reference is simply removed from the thread so that it will not stream into this FIFO
+    // anymore. In this case the channel is not closed (disabled) so that other channels can continue with the
+    // same configuration. The device continues streaming on this channel but the samples are simply dropped (by
+    // removing FIFO reference).
+
     if (!m_running) {
         return;
     }
@@ -416,7 +462,7 @@ void BladeRF2Input::stop()
     }
     else // remove channel from existing thread
     {
-        qDebug("BladeRF2Input::stop: MI mode. Thread not owned by source. Just remove FIFO reference");
+        qDebug("BladeRF2Input::stop: MI mode. Not changing MI configuration. Just remove FIFO reference");
         bladerf2InputThread->setFifo(requestedChannel, 0); // remove FIFO
     }
 
