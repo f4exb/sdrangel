@@ -304,10 +304,14 @@ bool BladeRF2Input::start()
 
     if (bladerf2InputThread) // if thread is already allocated
     {
+        qDebug("BladerfInput::start: thread is owned by a buddy");
+
         int nbOriginalChannels = bladerf2InputThread->getNbChannels();
 
         if (m_deviceShared.m_channel+1 > nbOriginalChannels) // expansion by deleting and re-creating the thread
         {
+            qDebug("BladerfInput::start: expand channels. Re-allocate thread and take ownership");
+
             SampleSinkFifo **fifos = new SampleSinkFifo*[nbOriginalChannels];
             unsigned int *log2Decims = new unsigned int[nbOriginalChannels];
             int *fcPoss = new int[nbOriginalChannels];
@@ -341,9 +345,14 @@ bool BladeRF2Input::start()
 
             needsStart = true;
         }
+        else
+        {
+            qDebug("BladerfInput::start: keep buddy thread");
+        }
     }
     else // first allocation
     {
+        qDebug("BladerfInput::start: allocate thread and take ownership");
         bladerf2InputThread = new BladeRF2InputThread(m_deviceShared.m_dev->getDev(), m_deviceShared.m_channel+1);
         m_thread = bladerf2InputThread; // take ownership
         needsStart = true;
@@ -382,6 +391,7 @@ void BladeRF2Input::stop()
 
     if (nbOriginalChannels == 1) // SI mode => just stop and delete the thread
     {
+        qDebug("BladeRF2Input::stop: SI mode. Just stop and delete the thread");
         bladerf2InputThread->stopWork();
         delete bladerf2InputThread;
         m_thread = 0;
@@ -396,6 +406,7 @@ void BladeRF2Input::stop()
     }
     else if (m_deviceShared.m_channel == nbOriginalChannels - 1) // remove last MI channel => reduce by deleting and re-creating the thread
     {
+        qDebug("BladeRF2Input::stop: MI mode. Reduce by deleting and re-creating the thread");
         bladerf2InputThread->stopWork();
         SampleSinkFifo **fifos = new SampleSinkFifo*[nbOriginalChannels-1];
         unsigned int *log2Decims = new unsigned int[nbOriginalChannels-1];
@@ -431,6 +442,7 @@ void BladeRF2Input::stop()
     }
     else // remove channel from existing thread
     {
+        qDebug("BladeRF2Input::stop: MI mode. Thread not owned by source. Just remove FIFO reference");
         bladerf2InputThread->setFifo(m_deviceShared.m_channel, 0); // remove FIFO
     }
 

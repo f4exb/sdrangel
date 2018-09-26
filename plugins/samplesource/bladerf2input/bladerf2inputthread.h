@@ -66,11 +66,7 @@ private:
         {}
 
         ~Channel()
-        {
-            if (m_sampleFifo) {
-                delete[] m_sampleFifo;
-            }
-        }
+        {}
     };
 
     QMutex m_startWaitMutex;
