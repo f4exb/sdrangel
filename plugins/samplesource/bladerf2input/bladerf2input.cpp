@@ -119,24 +119,6 @@ bool BladeRF2Input::openDevice()
         }
 
         m_deviceShared.m_dev = device;
-        int requestedChannel = m_deviceAPI->getItemIndex();
-
-        if (requestedChannel == deviceBladeRF2Shared->m_channel)
-        {
-            qCritical("BladeRF2Input::openDevice: channel %u already in use", requestedChannel);
-            return false;
-        }
-
-        if (!device->openRx(requestedChannel))
-        {
-            qCritical("BladeRF2Input::openDevice: channel %u cannot be enabled", requestedChannel);
-            return false;
-        }
-        else
-        {
-            m_deviceShared.m_channel = requestedChannel;
-            qDebug("BladeRF2Input::openDevice: channel %u enabled", requestedChannel);
-        }
     }
     // look for Tx buddies and get reference to the device object
     // allocate the Rx channel unconditionally
@@ -162,18 +144,6 @@ bool BladeRF2Input::openDevice()
         }
 
         m_deviceShared.m_dev = device;
-        int requestedChannel = m_deviceAPI->getItemIndex();
-
-        if (!device->openRx(requestedChannel))
-        {
-            qCritical("BladeRF2Input::openDevice: channel %u cannot be enabled", requestedChannel);
-            return false;
-        }
-        else
-        {
-            m_deviceShared.m_channel = requestedChannel;
-            qDebug("BladeRF2Input::openDevice: channel %u enabled", requestedChannel);
-        }
     }
     // There are no buddies then create the first BladeRF2 device
     // allocate the Rx channel unconditionally
@@ -190,21 +160,9 @@ bool BladeRF2Input::openDevice()
             qCritical("BladeRF2Input::openDevice: cannot open BladeRF2 device");
             return false;
         }
-
-        int requestedChannel = m_deviceAPI->getItemIndex();
-
-        if (!m_deviceShared.m_dev->openRx(requestedChannel))
-        {
-            qCritical("BladeRF2Input::openDevice: channel %u cannot be enabled", requestedChannel);
-            return false;
-        }
-        else
-        {
-            m_deviceShared.m_channel = requestedChannel;
-            qDebug("BladeRF2Input::openDevice: channel %u enabled", requestedChannel);
-        }
     }
 
+    m_deviceShared.m_channel = m_deviceAPI->getItemIndex(); // publicly allocate channel
     m_deviceShared.m_source = this;
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
     return true;
@@ -224,7 +182,7 @@ void BladeRF2Input::closeDevice()
         moveThreadToBuddy();
     }
 
-    m_deviceShared.m_channel = -1;
+    m_deviceShared.m_channel = -1; // publicly release channel
     m_deviceShared.m_source = 0;
 
     // No buddies so effectively close the device
@@ -305,7 +263,7 @@ bool BladeRF2Input::start()
 
     if (bladerf2InputThread) // if thread is already allocated
     {
-        qDebug("BladerfInput::start: thread is owned by a buddy");
+        qDebug("BladerfInput::start: thread is already allocated");
 
         int nbOriginalChannels = bladerf2InputThread->getNbChannels();
 
@@ -363,7 +321,19 @@ bool BladeRF2Input::start()
     bladerf2InputThread->setLog2Decimation(requestedChannel, m_settings.m_log2Decim);
     bladerf2InputThread->setFcPos(requestedChannel, (int) m_settings.m_fcPos);
 
-    if (needsStart) {
+    if (needsStart)
+    {
+        qDebug("BladerfInput::start: enabling channel(s) and (re)sart buddy thread");
+
+        int nbChannels = bladerf2InputThread->getNbChannels();
+
+        for (int i = 0; i < nbChannels; i++)
+        {
+            if (!m_deviceShared.m_dev->openRx(i)) {
+                qCritical("BladeRF2Input::start: channel %u cannot be enabled", i);
+            }
+        }
+
         bladerf2InputThread->startWork();
     }
 
@@ -384,8 +354,7 @@ void BladeRF2Input::stop()
     int requestedChannel = m_deviceAPI->getItemIndex();
     BladeRF2InputThread *bladerf2InputThread = findThread();
 
-    if (bladerf2InputThread == 0) // no thread allocated
-    {
+    if (bladerf2InputThread == 0) { // no thread allocated
         return;
     }
 
@@ -405,6 +374,8 @@ void BladeRF2Input::stop()
         for (; it != sourceBuddies.end(); ++it) {
             ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
         }
+
+        m_deviceShared.m_dev->closeRx(0); // close the unique channel
     }
     else if (requestedChannel == nbOriginalChannels - 1) // remove last MI channel => reduce by deleting and re-creating the thread
     {
@@ -440,6 +411,7 @@ void BladeRF2Input::stop()
             ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
         }
 
+        m_deviceShared.m_dev->closeRx(requestedChannel); // close the last channel
         bladerf2InputThread->startWork();
     }
     else // remove channel from existing thread
