@@ -17,15 +17,15 @@ DEFINES += USE_SSE4_1=1
 QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
 
-CONFIG(MINGW32):LIBBLADERFSRC = "C:\softs\bladeRF\host\libraries\libbladeRF\include"
-CONFIG(MINGW64):LIBBLADERFSRC = "C:\softs\bladeRF\host\libraries\libbladeRF\include"
+CONFIG(MINGW32):LIBBLADERF = "C:\Programs\bladeRF"
+CONFIG(MINGW64):LIBBLADERF = "C:\Programs\bladeRF"
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../exports
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
 INCLUDEPATH += ../../../devices
-INCLUDEPATH += $$LIBBLADERFSRC
+INCLUDEPATH += $$LIBBLADERF/include
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
@@ -47,7 +47,7 @@ FORMS += bladerf1outputgui.ui
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../swagger/$${build_subdir} -lswagger
-LIBS += -L../../../libbladerf/$${build_subdir} -llibbladerf
+LIBS += -L$$LIBBLADERF/lib -lbladeRF
 LIBS += -L../../../devices/$${build_subdir} -ldevices
 
 RESOURCES = ../../../sdrgui/resources/res.qrc
