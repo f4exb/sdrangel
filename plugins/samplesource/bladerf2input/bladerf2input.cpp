@@ -575,11 +575,8 @@ bool BladeRF2Input::handleMessage(const Message& message)
         struct bladerf *dev = m_deviceShared.m_dev->getDev();
         BladeRF2InputSettings settings = m_settings;
         int status;
-        int tmp_int;
         unsigned int tmp_uint;
-        uint64_t tmp_uint64;
         bool tmp_bool;
-        bladerf_gain_mode tmp_gain_mode;
 
         // evaluate changes that may have been introduced by changes in a buddy
 
@@ -589,22 +586,8 @@ bool BladeRF2Input::handleMessage(const Message& message)
 
             if (report.getRxElseTx()) // Rx buddy change: check for: frequency, gain mode and value, bias tee, sample rate, bandwidth
             {
-
-                status = bladerf_get_sample_rate(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_uint);
-
-                if (status < 0) {
-                    qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_sample_rate error: %s", bladerf_strerror(status));
-                } else {
-                    settings.m_devSampleRate = tmp_uint;
-                }
-
-                status = bladerf_get_frequency(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_uint64);
-
-                if (status < 0) {
-                    qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_frequency error: %s", bladerf_strerror(status));
-                } else {
-                    settings.m_centerFrequency = tmp_uint64;
-                }
+                settings.m_devSampleRate = report.getDevSampleRate();
+                settings.m_centerFrequency = report.getCenterFrequency();
 
                 status = bladerf_get_bandwidth(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_uint);
 
@@ -612,22 +595,6 @@ bool BladeRF2Input::handleMessage(const Message& message)
                     qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_bandwidth error: %s", bladerf_strerror(status));
                 } else {
                     settings.m_bandwidth = tmp_uint;
-                }
-
-                status = bladerf_get_gain_mode(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_gain_mode);
-
-                if (status < 0) {
-                    qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_gain_mode error: %s", bladerf_strerror(status));
-                } else {
-                    settings.m_gainMode = (int) tmp_gain_mode;
-                }
-
-                status = bladerf_get_gain(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_int);
-
-                if (status < 0) {
-                    qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_gain error: %s", bladerf_strerror(status));
-                } else {
-                    settings.m_globalGain = tmp_int;
                 }
 
                 status = bladerf_get_bias_tee(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_bool);
@@ -645,7 +612,7 @@ bool BladeRF2Input::handleMessage(const Message& message)
                 if (status < 0) {
                     qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_sample_rate error: %s", bladerf_strerror(status));
                 } else {
-                    settings.m_devSampleRate = tmp_uint;
+                    settings.m_devSampleRate = tmp_uint+1;
                 }
             }
 
@@ -894,7 +861,10 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
-            DeviceBladeRF2Shared::MsgReportBuddyChange *report = DeviceBladeRF2Shared::MsgReportBuddyChange::create(true);
+            DeviceBladeRF2Shared::MsgReportBuddyChange *report = DeviceBladeRF2Shared::MsgReportBuddyChange::create(
+                    settings.m_centerFrequency,
+                    settings.m_devSampleRate,
+                    true);
             (*itSource)->getSampleSourceInputMessageQueue()->push(report);
         }
     }
@@ -907,7 +877,10 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
-            DeviceBladeRF2Shared::MsgReportBuddyChange *report = DeviceBladeRF2Shared::MsgReportBuddyChange::create(true);
+            DeviceBladeRF2Shared::MsgReportBuddyChange *report = DeviceBladeRF2Shared::MsgReportBuddyChange::create(
+                    settings.m_centerFrequency,
+                    settings.m_devSampleRate,
+                    true);
             (*itSink)->getSampleSinkInputMessageQueue()->push(report);
         }
     }
