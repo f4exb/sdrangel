@@ -810,24 +810,6 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         m_deviceShared.m_dev->setBiasTeeRx(settings.m_biasTee);
     }
 
-    if ((m_settings.m_globalGain != settings.m_globalGain) || force)
-    {
-        forwardChangeRxBuddies = true;
-
-        if (dev)
-        {
-//            qDebug("BladeRF2Input::applySettings: channel: %d gain: %d", requestedChannel, settings.m_globalGain);
-            int status = bladerf_set_gain(dev, BLADERF_CHANNEL_RX(requestedChannel), settings.m_globalGain);
-
-            if (status < 0) {
-                qWarning("BladeRF2Input::applySettings: bladerf_set_gain(%d) failed: %s",
-                        settings.m_globalGain, bladerf_strerror(status));
-            } else {
-                qDebug("BladeRF2Input::applySettings: bladerf_set_gain(%d)", settings.m_globalGain);
-            }
-        }
-    }
-
     if ((m_settings.m_gainMode != settings.m_gainMode) || force)
     {
         forwardChangeRxBuddies = true;
@@ -841,6 +823,25 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
                         settings.m_gainMode, bladerf_strerror(status));
             } else {
                 qDebug("BladeRF2Input::applySettings: bladerf_set_gain_mode(%d)", settings.m_gainMode);
+            }
+        }
+    }
+
+    if ((m_settings.m_globalGain != settings.m_globalGain)
+       || ((m_settings.m_gainMode != settings.m_gainMode) && (settings.m_gainMode == BLADERF_GAIN_MANUAL)) || force)
+    {
+        forwardChangeRxBuddies = true;
+
+        if (dev)
+        {
+//            qDebug("BladeRF2Input::applySettings: channel: %d gain: %d", requestedChannel, settings.m_globalGain);
+            int status = bladerf_set_gain(dev, BLADERF_CHANNEL_RX(requestedChannel), settings.m_globalGain);
+
+            if (status < 0) {
+                qWarning("BladeRF2Input::applySettings: bladerf_set_gain(%d) failed: %s",
+                        settings.m_globalGain, bladerf_strerror(status));
+            } else {
+                qDebug("BladeRF2Input::applySettings: bladerf_set_gain(%d)", settings.m_globalGain);
             }
         }
     }

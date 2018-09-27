@@ -241,6 +241,12 @@ void BladeRF2InputGui::displaySettings()
     ui->gainText->setText(tr("%1 dB").arg(m_settings.m_globalGain));
     ui->gain->setValue(m_settings.m_globalGain);
 
+    if (m_settings.m_gainMode == BLADERF_GAIN_MANUAL) {
+        ui->gain->setEnabled(true);
+    } else {
+        ui->gain->setEnabled(false);
+    }
+
     blockApplySettings(false);
 }
 
@@ -310,6 +316,18 @@ void BladeRF2InputGui::on_gainMode_currentIndexChanged(int index)
     if (uindex < modes.size())
     {
         BladeRF2Input::GainMode mode = modes[index];
+
+        if (m_settings.m_gainMode != mode.m_value)
+        {
+            if (mode.m_value == BLADERF_GAIN_MANUAL)
+            {
+                m_settings.m_globalGain = ui->gain->value();
+                ui->gain->setEnabled(true);
+            } else {
+                ui->gain->setEnabled(false);
+            }
+        }
+
         m_settings.m_gainMode = mode.m_value;
         sendSettings();
     }
