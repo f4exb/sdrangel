@@ -280,6 +280,12 @@ void BladeRF2InputGui::on_iqImbalance_toggled(bool checked)
     sendSettings();
 }
 
+void BladeRF2InputGui::on_biasTee_toggled(bool checked)
+{
+    m_settings.m_biasTee = checked;
+    sendSettings();
+}
+
 void BladeRF2InputGui::on_bandwidth_changed(quint64 value)
 {
     m_settings.m_bandwidth = value * 1000;

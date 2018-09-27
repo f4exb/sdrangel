@@ -32,6 +32,7 @@ SUBDIRS += dsdcc
 SUBDIRS += plugins/samplesource/airspy
 SUBDIRS += plugins/samplesource/airspyhf
 SUBDIRS += plugins/samplesource/bladerf1input
+SUBDIRS += plugins/samplesource/bladerf2input
 SUBDIRS += plugins/samplesource/filesource
 SUBDIRS += plugins/samplesource/hackrfinput
 SUBDIRS += plugins/samplesource/limesdrinput

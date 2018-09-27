@@ -9,7 +9,7 @@ CONFIG += plugin
 
 QT += core gui widgets multimedia opengl
 
-TARGET = inputbladerf1
+TARGET = inputbladerf2
 
 DEFINES += USE_SSE2=1
 QMAKE_CXXFLAGS += -msse2
@@ -30,19 +30,19 @@ INCLUDEPATH += $$LIBBLADERF/include
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
-SOURCES += bladerf1inputgui.cpp\
-    bladerf1input.cpp\
-    bladerf1inputplugin.cpp\
-    bladerf1inputsettings.cpp\
-    bladerf1inputthread.cpp
+SOURCES += bladerf2inputgui.cpp\
+    bladerf2input.cpp\
+    bladerf2inputplugin.cpp\
+    bladerf2inputsettings.cpp\
+    bladerf2inputthread.cpp
 
-HEADERS += bladerf1inputgui.h\
-    bladerf1input.h\
-    bladerf1inputplugin.h\
-    bladerf1inputsettings.h\
-    bladerf1inputthread.h
+HEADERS += bladerf2inputgui.h\
+    bladerf2input.h\
+    bladerf2inputplugin.h\
+    bladerf2inputsettings.h\
+    bladerf2inputthread.h
 
-FORMS += bladerf1inputgui.ui
+FORMS += bladerf2inputgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui

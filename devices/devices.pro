@@ -59,6 +59,9 @@ CONFIG(Debug):build_subdir = debug
         bladerf1/devicebladerf1values.cpp\
         bladerf1/devicebladerf1shared.cpp
 
+!macx:SOURCES += bladerf2/devicebladerf2.cpp\
+        bladerf2/devicebladerf2shared.cpp
+
 SOURCES += hackrf/devicehackrf.cpp\
         hackrf/devicehackrfvalues.cpp\
         hackrf/devicehackrfshared.cpp
@@ -72,6 +75,9 @@ SOURCES += limesdr/devicelimesdr.cpp\
         plutosdr/deviceplutosdrparams.cpp\
         plutosdr/deviceplutosdrscan.cpp\
         plutosdr/deviceplutosdrshared.cpp
+
+!macx:HEADERS += bladerf2/devicebladerf2.h\
+        bladerf2/devicebladerf2shared.h
 
 !macx:HEADERS += bladerf1/devicebladerf1.h\
         bladerf1/devicebladerf1param.h\
