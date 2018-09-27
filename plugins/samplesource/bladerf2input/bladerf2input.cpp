@@ -602,6 +602,13 @@ bool BladeRF2Input::handleMessage(const Message& message)
             {
                 settings.m_devSampleRate = report.getDevSampleRate();
                 settings.m_centerFrequency = report.getCenterFrequency();
+                settings.m_fcPos = (BladeRF2InputSettings::fcPos_t) report.getFcPos();
+
+                BladeRF2InputThread *inputThread = findThread();
+
+                if (inputThread) {
+                    inputThread->setFcPos(requestedChannel, (int) settings.m_fcPos);
+                }
 
                 status = bladerf_get_bandwidth(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_uint);
 
@@ -878,6 +885,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         {
             DeviceBladeRF2Shared::MsgReportBuddyChange *report = DeviceBladeRF2Shared::MsgReportBuddyChange::create(
                     settings.m_centerFrequency,
+                    (int) settings.m_fcPos,
                     settings.m_devSampleRate,
                     true);
             (*itSource)->getSampleSourceInputMessageQueue()->push(report);
@@ -894,6 +902,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         {
             DeviceBladeRF2Shared::MsgReportBuddyChange *report = DeviceBladeRF2Shared::MsgReportBuddyChange::create(
                     settings.m_centerFrequency,
+                    (int) settings.m_fcPos,
                     settings.m_devSampleRate,
                     true);
             (*itSink)->getSampleSinkInputMessageQueue()->push(report);
