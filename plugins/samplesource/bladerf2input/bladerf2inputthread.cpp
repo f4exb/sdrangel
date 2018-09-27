@@ -22,6 +22,7 @@ BladeRF2InputThread::BladeRF2InputThread(struct bladerf* dev, unsigned int nbRxC
     m_dev(dev),
     m_nbChannels(nbRxChannels)
 {
+    qDebug("BladeRF2InputThread::BladeRF2InputThread");
     m_channels = new Channel[nbRxChannels];
 
     for (unsigned int i = 0; i < nbRxChannels; i++) {
@@ -86,6 +87,7 @@ void BladeRF2InputThread::run()
         }
         else
         {
+            qDebug("BladeRF2InputThread::run: start running loop");
             while (m_running)
             {
                 res = bladerf_sync_rx(m_dev, m_buf, DeviceBladeRF2::blockSize, NULL, 10000);
@@ -102,6 +104,7 @@ void BladeRF2InputThread::run()
                     callbackSI(m_buf, 2*DeviceBladeRF2::blockSize);
                 }
             }
+            qDebug("BladeRF2InputThread::run: stop running loop");
         }
     }
     else

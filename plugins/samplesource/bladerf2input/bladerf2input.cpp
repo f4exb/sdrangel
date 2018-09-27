@@ -385,7 +385,7 @@ void BladeRF2Input::stop()
     //
     // If the thread is currently managing many channels (MI mode) and we are removing the last channel. The transition
     // from MI to SI or reduction of MI size is handled by stopping the thread, deleting it and creating a new one
-    // with one channel less. Then the channel is closed (disabled).
+    // with one channel less if (and only if) there is still a channel active.
     //
     // If the thread is currently managing many channels (MI mode) but the channel being stopped is not the last
     // channel then the FIFO reference is simply removed from the thread so that it will not stream into this FIFO
@@ -430,23 +430,34 @@ void BladeRF2Input::stop()
         SampleSinkFifo **fifos = new SampleSinkFifo*[nbOriginalChannels-1];
         unsigned int *log2Decims = new unsigned int[nbOriginalChannels-1];
         int *fcPoss = new int[nbOriginalChannels-1];
+        bool stillActiveFIFO = false;
 
         for (int i = 0; i < nbOriginalChannels-1; i++) // save original FIFO references
         {
             fifos[i] = bladerf2InputThread->getFifo(i);
+            stillActiveFIFO = stillActiveFIFO || (bladerf2InputThread->getFifo(i) != 0);
             log2Decims[i] = bladerf2InputThread->getLog2Decimation(i);
             fcPoss[i] = bladerf2InputThread->getFcPos(i);
         }
 
         delete bladerf2InputThread;
-        bladerf2InputThread = new BladeRF2InputThread(m_deviceShared.m_dev->getDev(), nbOriginalChannels-1);
-        m_thread = bladerf2InputThread; // take ownership
+        m_thread = 0;
 
-        for (int i = 0; i < nbOriginalChannels-1; i++)  // restore original FIFO references
+        if (stillActiveFIFO)
         {
-            bladerf2InputThread->setFifo(i, fifos[i]);
-            bladerf2InputThread->setLog2Decimation(i, log2Decims[i]);
-            bladerf2InputThread->setFcPos(i, fcPoss[i]);
+            bladerf2InputThread = new BladeRF2InputThread(m_deviceShared.m_dev->getDev(), nbOriginalChannels-1);
+            m_thread = bladerf2InputThread; // take ownership
+
+            for (int i = 0; i < nbOriginalChannels-1; i++)  // restore original FIFO references
+            {
+                bladerf2InputThread->setFifo(i, fifos[i]);
+                bladerf2InputThread->setLog2Decimation(i, log2Decims[i]);
+                bladerf2InputThread->setFcPos(i, fcPoss[i]);
+            }
+        }
+        else
+        {
+            qDebug("BladeRF2Input::stop: do not re-create thread as there are no more FIFOs active");
         }
 
         // remove old thread address from buddies (reset in all buddies)
@@ -458,7 +469,10 @@ void BladeRF2Input::stop()
         }
 
         m_deviceShared.m_dev->closeRx(requestedChannel); // close the last channel
-        bladerf2InputThread->startWork();
+
+        if (stillActiveFIFO) {
+            bladerf2InputThread->startWork();
+        }
     }
     else // remove channel from existing thread
     {
