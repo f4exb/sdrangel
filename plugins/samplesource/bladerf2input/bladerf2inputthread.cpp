@@ -96,7 +96,7 @@ void BladeRF2InputThread::run()
                     break;
                 }
 
-                if (nbFifos > 1) {
+                if (m_nbChannels > 1) {
                     callbackMI(m_buf, DeviceBladeRF2::blockSize);
                 } else {
                     callbackSI(m_buf, 2*DeviceBladeRF2::blockSize);
