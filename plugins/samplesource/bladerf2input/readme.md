@@ -1,8 +1,8 @@
-<h1>BladeRF classic (v1) input plugin</h1>
+<h1>BladeRF 2.0 micro (v2) input plugin</h1>
 
 <h2>Introduction</h2>
 
-This input sample source plugin gets its samples from a [BladeRF1 device](https://www.nuand.com/bladerf-1) using LibbladeRF v.2. This is available in Linux distributions only.
+This input sample source plugin gets its samples from a [BladeRF 2.0 micro device](https://www.nuand.com/bladerf-2) using LibbladeRF v.2. This is available since v4.2.0 in Linux distributions only.
 
 <h2>Build</h2>
 
@@ -14,7 +14,7 @@ The BladeRF Host library is also provided by many Linux distributions (check its
 
 <h2>Interface</h2>
 
-![BladeRF1 input plugin GUI](../../../doc/img/BladeRF1Input_plugin.png)
+![BladeRF2 input plugin GUI](../../../doc/img/BladeRF2Input_plugin.png)
 
 <h3>1: Common stream parameters</h3>
 
@@ -22,7 +22,7 @@ The BladeRF Host library is also provided by many Linux distributions (check its
 
 <h4>1.1: Frequency</h4>
 
-This is the center frequency of reception in kHz.
+This is the center frequency of reception in kHz. The center frequency is the same for all Rx channels. The GUI of the sibling channel if present is adjusted automatically.
 
 <h4>1.2: Start/Stop</h4>
 
@@ -47,28 +47,21 @@ These buttons control the local DSP auto correction options:
   - **DC**: auto remove DC component
   - **IQ**: auto make I/Q balance. The DC correction must be enabled for this to be effective.
   
-<h3>3: XB-200 add-on control</h3>
+<h3>3: Rx filter bandwidth</h3>
 
-This controls the optional XB-200 add-on when it is fitted to the BladeRF main board. These controls have no effect if the XB-200 board is absent. Options are:
+This is the Rx filter bandwidth in kHz. Minimum and maximum values are adjusted automatically. Normal range is from 200 kHz to 56 MHz. The Rx filter bandwidth is the same for all Rx channels. The GUI of the sibling channel if present is adjusted automatically.
 
-  - **None**: XB-200 is ignored
-  - **Bypass**: XB-200 is passed through
-  - **Auto 1dB**: The 50, 144 and 220 MHz filters are switched on automatically according to the frequency of reception when it is within the -1 dB passband of the filters 
-  - **Auto 3dB**: The 50, 144 and 220 MHz filters are switched on automatically according to the frequency of reception when it is within the -3 dB passband of the filters
-  - **Custom**: The signal is routed through a custom filter
-  - **50M**: The signal is routed through the 50 MHz filter 
-  - **144M**: The signal is routed through the 144 MHz filter 
-  - **222M**: The signal is routed through the 222 MHz filter 
+<h3>4: Bias tee control</h3>
 
-<h3>4: Device sample rate</h3>
+Use this toggle button to activate or de-activate the bias tee. Note that according to BladeRF v2 specs the bias tee is simultanously present on all Rx RF ports. The GUI of the sibling channel if present is adjusted automatically.
+
+<h3>5: Device sample rate</h3>
 
 This is the BladeRF device ADC sample rate in S/s.
 
 Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
-<h3>5: Decimation factor</h3>
-
-The I/Q stream from the BladeRF ADC is downsampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32, 64.
+The ADC sample rate is the same for all Rx channels. The GUI of the sibling channel if present is adjusted automatically.
 
 <h3>6: Baseband center frequency position relative the the BladeRF Rx center frequency</h3>
 
@@ -83,22 +76,20 @@ With SR as the sample rate before decimation Fc is calculated as:
   - if decimation n is 4 or lower:  Fc = SR/2^(log2(n)-1). The device center frequency is on the side of the baseband. You need a RF filter bandwidth at least twice the baseband.
   - if decimation n is 8 or higher: Fc = SR/n. The device center frequency is half the baseband away from the side of the baseband. You need a RF filter bandwidth at least 3 times the baseband.
 
-<h3>7: Rx filter bandwidth</h3>
+<h3>7: Decimation factor</h3>
 
-This is the Rx filter bandwidth in kHz in the LMS6002D device. Possible values are: 1500, 1750, 2500, 2750, 3000, 3840, 5000, 5500, 6000, 7000, 8750, 10000, 12000, 14000, 20000, 28000 kHz.
+The I/Q stream from the BladeRF ADC is downsampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32, 64.
 
-<h3>8: LNA gain</h2>
+<h3>8: Gain mode</h2>
 
-This is the LNA gain in dB. LNA is inside the LMS6002D chip and is placed before the RF mixer. Possible values are:
+This selects the gain processing in use. Values are fetched automatically from the device. Normal values are
 
-  - **0dB**: no gain
-  - **3dB**
-  - **6dB**
-  
-<h3>9: Variable gain amplifier #1 gain</h3>
+  - **default**: AGC with default behavior
+  - **Manual**: Manual. Use control (9) to adjust gain
+  - **fast**: fast AGC
+  - **slow**: slow AGC
+  - **hybrid**: hybrid AGC
 
-The VGA1 gain can be adjusted from 5 dB to 30 dB in 1 dB steps. The VGA1 is inside the LMS6002D chip and is placed between the RF mixer and the baseband filter.
+<h3>9: Manual gain control</h3>
 
-<h3>10: Variable gain amplifier #2 gain</h3>
-
-The VGA2 gain can be adjusted from 0 dB to 30 dB in 3 dB steps. The VGA2 is inside the LMS6002D chip and is placed between the baseband filter and the ADC.
+Use this slider to adjust gain in manual mode. This control is disabled in non manual modes (all modes but manual). The minumum, maximum and step values are fetched automatically from the device and may vary depending on the center frequency. For frequencies around 400 MHz the gain varies from -16 to 60 dB in 1 dB steps.
