@@ -1,4 +1,4 @@
-SET libusbdir="C:\softs\libusb-1.0.20\MinGW32"
+SET libusbdir="C:\softs\libusb-1.0.22\MinGW32"
 SET opencvdir="C:\softs\opencv\build\mw32\install\x86\mingw\bin"
 SET libxml2dir="C:\softs\libxml2-2.7.8.win32"
 SET libiconvdir="C:\softs\iconv-1.9.2.win32"
@@ -21,7 +21,7 @@ copy libhackrf\%1\libhackrf.dll %2
 copy librtlsdr\%1\librtlsdr.dll %2
 copy libairspy\%1\libairspy.dll %2
 copy libairspyhf\%1\libairspyhf.dll %2
-copy libbladerf\%1\libbladerf.dll %2
+REM copy libbladerf\%1\libbladerf.dll %2
 REM copy libsqlite3\%1\libsqlite3.dll %2
 copy liblimesuite\%1\liblimesuite.dll %2
 copy libiio\%1\libiio.dll %2
@@ -60,7 +60,8 @@ copy plugins\samplesource\rtlsdr\%1\inputrtlsdr.dll %2\plugins\samplesource
 copy plugins\samplesource\hackrfinput\%1\inputhackrf.dll %2\plugins\samplesource
 copy plugins\samplesource\airspy\%1\inputairspy.dll %2\plugins\samplesource
 copy plugins\samplesource\airspyhf\%1\inputairspyhf.dll %2\plugins\samplesource
-copy plugins\samplesource\bladerfinput\%1\inputbladerf.dll %2\plugins\samplesource
+copy plugins\samplesource\bladerf1input\%1\inputbladerf1.dll %2\plugins\samplesource
+copy plugins\samplesource\bladerf2input\%1\inputbladerf2.dll %2\plugins\samplesource
 copy plugins\samplesource\limesdrinput\%1\inputlimesdr.dll %2\plugins\samplesource
 copy plugins\samplesource\plutosdrinput\%1\inputplutosdr.dll %2\plugins\samplesource
 REM copy plugins\samplesource\sdrdaemonsource\%1\inputsdrdaemonsource.dll %2\plugins\samplesource

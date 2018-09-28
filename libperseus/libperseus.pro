@@ -15,8 +15,8 @@ CONFIG(MINGW32):LIBPERSEUSSRC = "C:\softs\libperseus-sdr"
 CONFIG(MINGW64):LIBPERSEUSSRC = "C:\softs\libperseus-sdr"
 INCLUDEPATH += $$LIBPERSEUSSRC/src
 
-CONFIG(MINGW32):INCLUDEPATH += "C:\softs\libusb-1.0.20\include"
-CONFIG(MINGW64):INCLUDEPATH += "C:\softs\libusb-1.0.20\include"
+CONFIG(MINGW32):INCLUDEPATH += "C:\softs\libusb-1.0.22\include"
+CONFIG(MINGW64):INCLUDEPATH += "C:\softs\libusb-1.0.22\include"
 
 SOURCES = fpga_data.c\
   $$LIBPERSEUSSRC/fifo.c\
@@ -34,8 +34,8 @@ HEADERS = fpga_data.h\
   $$LIBPERSEUSSRC/perseus-in.h\
   $$LIBPERSEUSSRC/perseus-sdr.h
 
-CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.20\MinGW32\dll -llibusb-1.0
-CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.20\MinGW64\dll -llibusb-1.0
+CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.22\MinGW32\dll -llibusb-1.0
+CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.22\MinGW64\dll -llibusb-1.0
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =

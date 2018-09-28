@@ -18,8 +18,8 @@ QMAKE_CXXFLAGS += -std=c++11
 CONFIG(MINGW32):LIBLIMESUITESRC = "C:\softs\LimeSuite"
 CONFIG(MINGW64):LIBLIMESUITESRC = "C:\softs\LimeSuite"
 
-CONFIG(MINGW32):INCLUDEPATH += "C:\softs\libusb-1.0.20\include\libusb-1.0"
-CONFIG(MINGW64):INCLUDEPATH += "C:\softs\libusb-1.0.20\include"
+CONFIG(MINGW32):INCLUDEPATH += "C:\softs\libusb-1.0.22\include\libusb-1.0"
+CONFIG(MINGW64):INCLUDEPATH += "C:\softs\libusb-1.0.22\include"
 
 #CONFIG(MINGW32):INCLUDEPATH += "..\libsqlite3\src"
 #CONFIG(MINGW64):INCLUDEPATH += "..\libsqlite3\src"
@@ -88,8 +88,8 @@ HEADERS = $$LIBLIMESUITESRC/src/API/*.h\
     $$LIBLIMESUITESRC/src/FPGA_common/*.h\
     $$LIBLIMESUITESRC/src/HPM7/*.h
     
-CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.20\MinGW32\dll -llibusb-1.0
-CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.20\MinGW64\dll -llibusb-1.0
+CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.22\MinGW32\dll -llibusb-1.0
+CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.22\MinGW64\dll -llibusb-1.0
 
 #CONFIG(MINGW32):LIBS += -L../libsqlite3/release -llibsqlite3
 #CONFIG(MINGW64):LIBS += -L../libsqlite3/release -llibsqlite3

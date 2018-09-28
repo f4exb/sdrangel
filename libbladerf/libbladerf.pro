@@ -154,8 +154,8 @@ HEADERS = $$PWD/mingw/common/include/host_config.h\
     $$LIBBLADERFLIBSRC/include/libbladeRF.h\
     $$LIBBLADERFLIBSRC/include/bladeRF1.h
 
-CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.20\MinGW32\dll -llibusb-1.0
-CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.20\MinGW64\dll -llibusb-1.0
+CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.22\MinGW32\dll -llibusb-1.0
+CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.22\MinGW64\dll -llibusb-1.0
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =

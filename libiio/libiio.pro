@@ -17,8 +17,8 @@ DEFINES += LIBIIO_EXPORTS=1
 INCLUDEPATH += $$PWD/includemw
 INCLUDEPATH += $$LIBIIOSRC
 
-CONFIG(MINGW32):INCLUDEPATH += "C:\softs\libusb-1.0.20\include"
-CONFIG(MINGW64):INCLUDEPATH += "C:\softs\libusb-1.0.20\include"
+CONFIG(MINGW32):INCLUDEPATH += "C:\softs\libusb-1.0.22\include"
+CONFIG(MINGW64):INCLUDEPATH += "C:\softs\libusb-1.0.22\include"
 
 # LibXml2 Windows distribution from:
 # http://xmlsoft.org/sources/win32/
@@ -49,8 +49,8 @@ HEADERS = $$LIBIIOSRC/debug.h\
     $$LIBIIOSRC/iio-private.h\
     $$PWD/includemw/iio-config.h
     
-CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.20\MinGW32\dll -llibusb-1.0
-CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.20\MinGW64\dll -llibusb-1.0
+CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.22\MinGW32\dll -llibusb-1.0
+CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.22\MinGW64\dll -llibusb-1.0
 
 CONFIG(MINGW32):LIBS += -LC:\softs\libxml2-2.7.8.win32\bin -llibxml2
 CONFIG(MINGW64):LIBS += -LC:\softs\libxml2-2.9.3-win32-x86_64\bin -llibxml2-2
