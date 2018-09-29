@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,56 +14,47 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTTHREAD_H_
-#define PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTTHREAD_H_
-
-// BladerRF2 is a SISO/MIMO device with a single stream supporting one or two Rx
-// Therefore only one thread can be allocated for the Rx side
-// All FIFOs must be registered before calling startWork() else SISO/MIMO switch will not work properly
-// with unpredicatable results
+#ifndef PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTTHREAD_H_
+#define PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTTHREAD_H_
 
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
-
 #include <libbladeRF.h>
 
 #include "bladerf2/devicebladerf2shared.h"
-#include "dsp/decimators.h"
+#include "dsp/interpolators.h"
 
 class SampleSinkFifo;
 
-class BladeRF2InputThread : public QThread {
+class BladeRF2OutputThread : public QThread {
     Q_OBJECT
 
 public:
-    BladeRF2InputThread(struct bladerf* dev, unsigned int nbRxChannels, QObject* parent = NULL);
-    ~BladeRF2InputThread();
+    BladeRF2OutputThread(struct bladerf* dev, unsigned int nbTxChannels, QObject* parent = 0);
+    ~BladeRF2OutputThread();
 
     void startWork();
     void stopWork();
     bool isRunning() const { return m_running; }
     unsigned int getNbChannels() const { return m_nbChannels; }
-    void setLog2Decimation(unsigned int channel, unsigned int log2_decim);
-    unsigned int getLog2Decimation(unsigned int channel) const;
+    void setLog2Interpolation(unsigned int channel, unsigned int log2_interp);
+    unsigned int getLog2Interpolation(unsigned int channel) const;
     void setFcPos(unsigned int channel, int fcPos);
     int getFcPos(unsigned int channel) const;
-    void setFifo(unsigned int channel, SampleSinkFifo *sampleFifo);
-    SampleSinkFifo *getFifo(unsigned int channel);
+    void setFifo(unsigned int channel, SampleSourceFifo *sampleFifo);
+    SampleSourceFifo *getFifo(unsigned int channel);
 
 private:
     struct Channel
     {
-        SampleVector m_convertBuffer;
-        SampleSinkFifo* m_sampleFifo;
-        unsigned int m_log2Decim;
-        int m_fcPos;
-        Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators;
+        SampleSourceFifo* m_sampleFifo;
+        unsigned int m_log2Interp;
+        Interpolators<qint16, SDR_TX_SAMP_SZ, 12>  m_interpolators;
 
         Channel() :
             m_sampleFifo(0),
-            m_log2Decim(0),
-            m_fcPos(0)
+            m_log2Interp(0)
         {}
 
         ~Channel()
@@ -81,10 +72,10 @@ private:
 
     void run();
     unsigned int getNbFifos();
-    void callbackSI(const qint16* buf, qint32 len, unsigned int channel = 0);
-    void callbackMI(const qint16* buf, qint32 samplesPerChannel);
+    void callbackSO(qint16* buf, qint32 len, unsigned int channel = 0);
+    void callbackMO(qint16* buf, qint32 samplesPerChannel);
 };
 
 
 
-#endif /* PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTTHREAD_H_ */
+#endif /* PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTTHREAD_H_ */

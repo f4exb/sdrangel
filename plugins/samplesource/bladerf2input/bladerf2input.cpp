@@ -96,7 +96,6 @@ bool BladeRF2Input::openDevice()
     }
 
     // look for Rx buddies and get reference to the device object
-    // if there is a channel left take the first available
     if (m_deviceAPI->getSourceBuddies().size() > 0) // look source sibling first
     {
         qDebug("BladeRF2Input::openDevice: look in Rx buddies");
@@ -121,7 +120,6 @@ bool BladeRF2Input::openDevice()
         m_deviceShared.m_dev = device;
     }
     // look for Tx buddies and get reference to the device object
-    // allocate the Rx channel unconditionally
     else if (m_deviceAPI->getSinkBuddies().size() > 0) // then sink
     {
         qDebug("BladeRF2Input::openDevice: look in Tx buddies");
@@ -139,14 +137,13 @@ bool BladeRF2Input::openDevice()
 
         if (device == 0)
         {
-            qCritical("BladeRF2Input::openDevice: cannot get device pointer from Rx buddy");
+            qCritical("BladeRF2Input::openDevice: cannot get device pointer from Tx buddy");
             return false;
         }
 
         m_deviceShared.m_dev = device;
     }
     // There are no buddies then create the first BladeRF2 device
-    // allocate the Rx channel unconditionally
     else
     {
         qDebug("BladeRF2Input::openDevice: open device here");
@@ -283,7 +280,7 @@ bool BladeRF2Input::start()
 
     if (!m_deviceShared.m_dev)
     {
-        qDebug("BladerfInput::start: no device object");
+        qDebug("BladeRF2Input::start: no device object");
         return false;
     }
 
@@ -293,13 +290,13 @@ bool BladeRF2Input::start()
 
     if (bladerf2InputThread) // if thread is already allocated
     {
-        qDebug("BladerfInput::start: thread is already allocated");
+        qDebug("BladeRF2Input::start: thread is already allocated");
 
         int nbOriginalChannels = bladerf2InputThread->getNbChannels();
 
         if (requestedChannel+1 > nbOriginalChannels) // expansion by deleting and re-creating the thread
         {
-            qDebug("BladerfInput::start: expand channels. Re-allocate thread and take ownership");
+            qDebug("BladeRF2Input::start: expand channels. Re-allocate thread and take ownership");
 
             SampleSinkFifo **fifos = new SampleSinkFifo*[nbOriginalChannels];
             unsigned int *log2Decims = new unsigned int[nbOriginalChannels];
@@ -336,12 +333,12 @@ bool BladeRF2Input::start()
         }
         else
         {
-            qDebug("BladerfInput::start: keep buddy thread");
+            qDebug("BladeRF2Input::start: keep buddy thread");
         }
     }
     else // first allocation
     {
-        qDebug("BladerfInput::start: allocate thread and take ownership");
+        qDebug("BladeRF2Input::start: allocate thread and take ownership");
         bladerf2InputThread = new BladeRF2InputThread(m_deviceShared.m_dev->getDev(), requestedChannel+1);
         m_thread = bladerf2InputThread; // take ownership
         needsStart = true;
@@ -353,7 +350,7 @@ bool BladeRF2Input::start()
 
     if (needsStart)
     {
-        qDebug("BladerfInput::start: enabling channel(s) and (re)sart buddy thread");
+        qDebug("BladeRF2Input::start: enabling channel(s) and (re)sart buddy thread");
 
         int nbChannels = bladerf2InputThread->getNbChannels();
 

@@ -40,3 +40,38 @@ BladeRF2InputReport:
       type: array
       items:
         $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/NamedEnum"
+
+BladeRF2OutputSettings:
+  description: BladeRF2
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    devSampleRate:
+      type: integer
+    bandwidth:
+      type: integer
+    gainMode:
+      type: integer
+    globalGain:
+      type: integer
+    biasTee:
+      type: integer
+    log2Interp:
+      type: integer
+
+BladeRF2OutputReport:
+  description: BladeRF2
+  properties:
+    frequencyRange:
+      $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/FrequencyRange"
+    sampleRateRange:
+      $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Range"
+    bandwidthRange:
+      $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Range"
+    globalGainRange:
+      $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Range"
+    gainModes:
+      type: array
+      items:
+        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/NamedEnum"

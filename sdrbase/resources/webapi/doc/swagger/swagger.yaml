@@ -1769,6 +1769,8 @@ definitions:
         $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2InputSettings"
       bladeRF1OutputSettings:
         $ref: "/doc/swagger/include/BladeRF1.yaml#/BladeRF1OutputSettings"
+      bladeRF2OutputSettings:
+        $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2OutputSettings"
       fcdProSettings:
         $ref: "/doc/swagger/include/FCDPro.yaml#/FCDProSettings"
       fcdProPlusSettings:
@@ -1820,6 +1822,8 @@ definitions:
         $ref: "/doc/swagger/include/AirspyHF.yaml#/AirspyHFReport"
       bladeRF2InputReport:
         $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2InputReport"
+      bladeRF2OutputReport:
+        $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2OutputReport"
       fileSourceReport:
         $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceReport"
       limeSdrInputReport:

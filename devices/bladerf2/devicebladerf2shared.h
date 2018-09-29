@@ -23,6 +23,7 @@
 class SampleSinkFifo;
 class SampleSourceFifo;
 class BladeRF2Input;
+class BladeRF2Output;
 
 /**
  * Structure shared by a buddy with other buddies
@@ -77,6 +78,7 @@ public:
     DeviceBladeRF2 *m_dev;
     int m_channel; //!< allocated channel (-1 if none)
     BladeRF2Input *m_source;
+    BladeRF2Output *m_sink;
 };
 
 

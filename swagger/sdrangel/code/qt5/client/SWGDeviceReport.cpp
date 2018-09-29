@@ -38,6 +38,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_airspy_hf_report_isSet = false;
     blade_rf2_input_report = nullptr;
     m_blade_rf2_input_report_isSet = false;
+    blade_rf2_output_report = nullptr;
+    m_blade_rf2_output_report_isSet = false;
     file_source_report = nullptr;
     m_file_source_report_isSet = false;
     lime_sdr_input_report = nullptr;
@@ -76,6 +78,8 @@ SWGDeviceReport::init() {
     m_airspy_hf_report_isSet = false;
     blade_rf2_input_report = new SWGBladeRF2InputReport();
     m_blade_rf2_input_report_isSet = false;
+    blade_rf2_output_report = new SWGBladeRF2OutputReport();
+    m_blade_rf2_output_report_isSet = false;
     file_source_report = new SWGFileSourceReport();
     m_file_source_report_isSet = false;
     lime_sdr_input_report = new SWGLimeSdrInputReport();
@@ -112,6 +116,9 @@ SWGDeviceReport::cleanup() {
     }
     if(blade_rf2_input_report != nullptr) { 
         delete blade_rf2_input_report;
+    }
+    if(blade_rf2_output_report != nullptr) { 
+        delete blade_rf2_output_report;
     }
     if(file_source_report != nullptr) { 
         delete file_source_report;
@@ -166,6 +173,8 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&blade_rf2_input_report, pJson["bladeRF2InputReport"], "SWGBladeRF2InputReport", "SWGBladeRF2InputReport");
     
+    ::SWGSDRangel::setValue(&blade_rf2_output_report, pJson["bladeRF2OutputReport"], "SWGBladeRF2OutputReport", "SWGBladeRF2OutputReport");
+    
     ::SWGSDRangel::setValue(&file_source_report, pJson["fileSourceReport"], "SWGFileSourceReport", "SWGFileSourceReport");
     
     ::SWGSDRangel::setValue(&lime_sdr_input_report, pJson["limeSdrInputReport"], "SWGLimeSdrInputReport", "SWGLimeSdrInputReport");
@@ -216,6 +225,9 @@ SWGDeviceReport::asJsonObject() {
     }
     if((blade_rf2_input_report != nullptr) && (blade_rf2_input_report->isSet())){
         toJsonValue(QString("bladeRF2InputReport"), blade_rf2_input_report, obj, QString("SWGBladeRF2InputReport"));
+    }
+    if((blade_rf2_output_report != nullptr) && (blade_rf2_output_report->isSet())){
+        toJsonValue(QString("bladeRF2OutputReport"), blade_rf2_output_report, obj, QString("SWGBladeRF2OutputReport"));
     }
     if((file_source_report != nullptr) && (file_source_report->isSet())){
         toJsonValue(QString("fileSourceReport"), file_source_report, obj, QString("SWGFileSourceReport"));
@@ -299,6 +311,16 @@ void
 SWGDeviceReport::setBladeRf2InputReport(SWGBladeRF2InputReport* blade_rf2_input_report) {
     this->blade_rf2_input_report = blade_rf2_input_report;
     this->m_blade_rf2_input_report_isSet = true;
+}
+
+SWGBladeRF2OutputReport*
+SWGDeviceReport::getBladeRf2OutputReport() {
+    return blade_rf2_output_report;
+}
+void
+SWGDeviceReport::setBladeRf2OutputReport(SWGBladeRF2OutputReport* blade_rf2_output_report) {
+    this->blade_rf2_output_report = blade_rf2_output_report;
+    this->m_blade_rf2_output_report_isSet = true;
 }
 
 SWGFileSourceReport*
@@ -411,6 +433,7 @@ SWGDeviceReport::isSet(){
         if(airspy_report != nullptr && airspy_report->isSet()){ isObjectUpdated = true; break;}
         if(airspy_hf_report != nullptr && airspy_hf_report->isSet()){ isObjectUpdated = true; break;}
         if(blade_rf2_input_report != nullptr && blade_rf2_input_report->isSet()){ isObjectUpdated = true; break;}
+        if(blade_rf2_output_report != nullptr && blade_rf2_output_report->isSet()){ isObjectUpdated = true; break;}
         if(file_source_report != nullptr && file_source_report->isSet()){ isObjectUpdated = true; break;}
         if(lime_sdr_input_report != nullptr && lime_sdr_input_report->isSet()){ isObjectUpdated = true; break;}
         if(lime_sdr_output_report != nullptr && lime_sdr_output_report->isSet()){ isObjectUpdated = true; break;}

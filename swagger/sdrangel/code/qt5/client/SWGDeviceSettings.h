@@ -27,6 +27,7 @@
 #include "SWGBladeRF1InputSettings.h"
 #include "SWGBladeRF1OutputSettings.h"
 #include "SWGBladeRF2InputSettings.h"
+#include "SWGBladeRF2OutputSettings.h"
 #include "SWGFCDProPlusSettings.h"
 #include "SWGFCDProSettings.h"
 #include "SWGFileSourceSettings.h"
@@ -82,6 +83,9 @@ public:
 
     SWGBladeRF1OutputSettings* getBladeRf1OutputSettings();
     void setBladeRf1OutputSettings(SWGBladeRF1OutputSettings* blade_rf1_output_settings);
+
+    SWGBladeRF2OutputSettings* getBladeRf2OutputSettings();
+    void setBladeRf2OutputSettings(SWGBladeRF2OutputSettings* blade_rf2_output_settings);
 
     SWGFCDProSettings* getFcdProSettings();
     void setFcdProSettings(SWGFCDProSettings* fcd_pro_settings);
@@ -152,6 +156,9 @@ private:
 
     SWGBladeRF1OutputSettings* blade_rf1_output_settings;
     bool m_blade_rf1_output_settings_isSet;
+
+    SWGBladeRF2OutputSettings* blade_rf2_output_settings;
+    bool m_blade_rf2_output_settings_isSet;
 
     SWGFCDProSettings* fcd_pro_settings;
     bool m_fcd_pro_settings_isSet;

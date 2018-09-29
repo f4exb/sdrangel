@@ -1364,6 +1364,56 @@ margin-bottom: 20px;
   },
   "description" : "BladeRF2"
 };
+            defs.BladeRF2OutputReport = {
+  "properties" : {
+    "frequencyRange" : {
+      "$ref" : "#/definitions/FrequencyRange"
+    },
+    "sampleRateRange" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "bandwidthRange" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "globalGainRange" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "gainModes" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/NamedEnum"
+      }
+    }
+  },
+  "description" : "BladeRF2"
+};
+            defs.BladeRF2OutputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "bandwidth" : {
+      "type" : "integer"
+    },
+    "gainMode" : {
+      "type" : "integer"
+    },
+    "globalGain" : {
+      "type" : "integer"
+    },
+    "biasTee" : {
+      "type" : "integer"
+    },
+    "log2Interp" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "BladeRF2"
+};
             defs.CWKeyerSettings = {
   "properties" : {
     "sampleRate" : {
@@ -1903,6 +1953,9 @@ margin-bottom: 20px;
     "bladeRF2InputReport" : {
       "$ref" : "#/definitions/BladeRF2InputReport"
     },
+    "bladeRF2OutputReport" : {
+      "$ref" : "#/definitions/BladeRF2OutputReport"
+    },
     "fileSourceReport" : {
       "$ref" : "#/definitions/FileSourceReport"
     },
@@ -2002,6 +2055,9 @@ margin-bottom: 20px;
     },
     "bladeRF1OutputSettings" : {
       "$ref" : "#/definitions/BladeRF1OutputSettings"
+    },
+    "bladeRF2OutputSettings" : {
+      "$ref" : "#/definitions/BladeRF2OutputSettings"
     },
     "fcdProSettings" : {
       "$ref" : "#/definitions/FCDProSettings"
@@ -23175,7 +23231,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-09-25T16:51:16.493+02:00
+              Generated 2018-09-29T05:36:53.044+02:00
             </div>
           </div>
       </div>

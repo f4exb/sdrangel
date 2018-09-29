@@ -23,12 +23,11 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 
-#include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "device/devicesinkapi.h"
 #include "device/devicesourceapi.h"
-#include "../../../devices/bladerf1/devicebladerf1shared.h"
+#include "bladerf1/devicebladerf1shared.h"
 #include "bladerf1outputthread.h"
 
 MESSAGE_CLASS_DEFINITION(Bladerf1Output::MsgConfigureBladerf1, Message)

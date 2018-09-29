@@ -25,6 +25,7 @@
 #include "SWGAirspyHFReport.h"
 #include "SWGAirspyReport.h"
 #include "SWGBladeRF2InputReport.h"
+#include "SWGBladeRF2OutputReport.h"
 #include "SWGFileSourceReport.h"
 #include "SWGLimeSdrInputReport.h"
 #include "SWGLimeSdrOutputReport.h"
@@ -69,6 +70,9 @@ public:
 
     SWGBladeRF2InputReport* getBladeRf2InputReport();
     void setBladeRf2InputReport(SWGBladeRF2InputReport* blade_rf2_input_report);
+
+    SWGBladeRF2OutputReport* getBladeRf2OutputReport();
+    void setBladeRf2OutputReport(SWGBladeRF2OutputReport* blade_rf2_output_report);
 
     SWGFileSourceReport* getFileSourceReport();
     void setFileSourceReport(SWGFileSourceReport* file_source_report);
@@ -118,6 +122,9 @@ private:
 
     SWGBladeRF2InputReport* blade_rf2_input_report;
     bool m_blade_rf2_input_report_isSet;
+
+    SWGBladeRF2OutputReport* blade_rf2_output_report;
+    bool m_blade_rf2_output_report_isSet;
 
     SWGFileSourceReport* file_source_report;
     bool m_file_source_report_isSet;

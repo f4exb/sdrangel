@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "dsp/samplesinkfifo.h"
+
 #include "bladerf2inputthread.h"
 
 BladeRF2InputThread::BladeRF2InputThread(struct bladerf* dev, unsigned int nbRxChannels, QObject* parent) :

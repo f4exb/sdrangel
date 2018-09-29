@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,45 +14,27 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_BLADERFOUTPUTTHREAD_H
-#define INCLUDE_BLADERFOUTPUTTHREAD_H
+#ifndef PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTSETTINGS_H_
+#define PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTSETTINGS_H_
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QtGlobal>
 #include <libbladeRF.h>
-#include "dsp/samplesourcefifo.h"
-#include "dsp/interpolators.h"
 
-#define BLADERFOUTPUT_BLOCKSIZE (1<<16)
+struct BladeRF2OutputSettings {
+    quint64 m_centerFrequency;
+    qint32 m_devSampleRate;
+    qint32 m_bandwidth;
+    int m_gainMode;
+    int m_globalGain;
+    bool m_biasTee;
+    quint32 m_log2Interp;
 
-class Bladerf1OutputThread : public QThread {
-	Q_OBJECT
-
-public:
-	Bladerf1OutputThread(struct bladerf* dev, SampleSourceFifo* sampleFifo, QObject* parent = NULL);
-	~Bladerf1OutputThread();
-
-	void startWork();
-	void stopWork();
-	void setLog2Interpolation(unsigned int log2_interp);
-	bool isRunning() const { return m_running; }
-
-private:
-	QMutex m_startWaitMutex;
-	QWaitCondition m_startWaiter;
-	bool m_running;
-
-	struct bladerf* m_dev;
-	qint16 m_buf[2*BLADERFOUTPUT_BLOCKSIZE];
-    SampleSourceFifo* m_sampleFifo;
-
-	unsigned int m_log2Interp;
-
-	Interpolators<qint16, SDR_TX_SAMP_SZ, 12> m_interpolators;
-
-	void run();
-	void callback(qint16* buf, qint32 len);
+    BladeRF2OutputSettings();
+    void resetToDefaults();
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
 };
 
-#endif // INCLUDE_BLADERFOUTPUTTHREAD_H
+
+
+#endif /* PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTSETTINGS_H_ */
