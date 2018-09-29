@@ -645,6 +645,37 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
     struct bladerf *dev = m_deviceShared.m_dev->getDev();
     int requestedChannel = m_deviceAPI->getItemIndex();
 
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
+    {
+        BladeRF2OutputThread *bladeRF2OutputThread = findThread();
+        SampleSourceFifo *fifo = 0;
+
+        if (bladeRF2OutputThread)
+        {
+            fifo = bladeRF2OutputThread->getFifo(requestedChannel);
+            bladeRF2OutputThread->setFifo(requestedChannel, 0);
+        }
+
+        int fifoSize;
+
+        if (settings.m_log2Interp >= 5)
+        {
+            fifoSize = DeviceBladeRF2Shared::m_sampleFifoMinSize32;
+        }
+        else
+        {
+            fifoSize = std::max(
+                (int) ((settings.m_devSampleRate/(1<<settings.m_log2Interp)) * DeviceBladeRF2Shared::m_sampleFifoLengthInSeconds),
+                DeviceBladeRF2Shared::m_sampleFifoMinSize);
+        }
+
+        m_sampleSourceFifo.resize(fifoSize);
+
+        if (fifo) {
+            bladeRF2OutputThread->setFifo(requestedChannel, &m_sampleSourceFifo);
+        }
+    }
+
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
     {
         forwardChangeOwnDSP = true;
@@ -663,7 +694,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
             }
             else
             {
-                qDebug() << "BladeRF2Output::applySettings: bladerf_set_sample_rate(BLADERF_MODULE_RX) actual sample rate is " << actualSamplerate;
+                qDebug() << "BladeRF2Output::applySettings: bladerf_set_sample_rate: actual sample rate is " << actualSamplerate;
             }
         }
     }
@@ -684,7 +715,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
             }
             else
             {
-                qDebug() << "BladeRF2Output::applySettings: bladerf_set_bandwidth(BLADERF_MODULE_RX) actual bandwidth is " << actualBandwidth;
+                qDebug() << "BladeRF2Output::applySettings: bladerf_set_bandwidth: actual bandwidth is " << actualBandwidth;
             }
         }
     }
@@ -736,25 +767,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
         m_deviceShared.m_dev->setBiasTeeTx(settings.m_biasTee);
     }
 
-    if ((m_settings.m_gainMode != settings.m_gainMode) || force)
-    {
-        forwardChangeTxBuddies = true;
-
-        if (dev)
-        {
-            int status = bladerf_set_gain_mode(dev, BLADERF_CHANNEL_TX(requestedChannel), (bladerf_gain_mode) settings.m_gainMode);
-
-            if (status < 0) {
-                qWarning("BladeRF2Output::applySettings: bladerf_set_gain_mode(%d) failed: %s",
-                        settings.m_gainMode, bladerf_strerror(status));
-            } else {
-                qDebug("BladeRF2Output::applySettings: bladerf_set_gain_mode(%d)", settings.m_gainMode);
-            }
-        }
-    }
-
-    if ((m_settings.m_globalGain != settings.m_globalGain)
-       || ((m_settings.m_gainMode != settings.m_gainMode) && (settings.m_gainMode == BLADERF_GAIN_MANUAL)) || force)
+    if ((m_settings.m_globalGain != settings.m_globalGain) || force)
     {
         forwardChangeTxBuddies = true;
 
@@ -821,7 +834,6 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
             << " m_log2Interp: " << m_settings.m_log2Interp
             << " m_devSampleRate: " << m_settings.m_devSampleRate
             << " m_globalGain: " << m_settings.m_globalGain
-            << " m_gainMode: " << m_settings.m_gainMode
             << " m_biasTee: " << m_settings.m_biasTee;
 
     return true;
@@ -860,9 +872,6 @@ int BladeRF2Output::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("biasTee")) {
         settings.m_biasTee = response.getBladeRf2OutputSettings()->getBiasTee() != 0;
     }
-    if (deviceSettingsKeys.contains("gainMode")) {
-        settings.m_gainMode = response.getBladeRf2OutputSettings()->getGainMode();
-    }
     if (deviceSettingsKeys.contains("globalGain")) {
         settings.m_globalGain = response.getBladeRf2OutputSettings()->getGlobalGain();
     }
@@ -895,7 +904,6 @@ void BladeRF2Output::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& 
     response.getBladeRf2OutputSettings()->setBandwidth(settings.m_bandwidth);
     response.getBladeRf2OutputSettings()->setLog2Interp(settings.m_log2Interp);
     response.getBladeRf2OutputSettings()->setBiasTee(settings.m_biasTee ? 1 : 0);
-    response.getBladeRf2OutputSettings()->setGainMode(settings.m_gainMode);
     response.getBladeRf2OutputSettings()->setGlobalGain(settings.m_globalGain);
 }
 

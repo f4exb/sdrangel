@@ -79,6 +79,10 @@ public:
     int m_channel; //!< allocated channel (-1 if none)
     BladeRF2Input *m_source;
     BladeRF2Output *m_sink;
+
+    static const float m_sampleFifoLengthInSeconds;
+    static const int   m_sampleFifoMinSize;
+    static const int   m_sampleFifoMinSize32;
 };
 
 

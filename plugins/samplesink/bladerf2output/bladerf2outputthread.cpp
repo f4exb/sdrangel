@@ -92,10 +92,10 @@ void BladeRF2OutputThread::run()
                 if (m_nbChannels > 1) {
                     callbackMO(m_buf, DeviceBladeRF2::blockSize);
                 } else {
-                    callbackSO(m_buf, 2*DeviceBladeRF2::blockSize);
+                    callbackSO(m_buf, DeviceBladeRF2::blockSize);
                 }
 
-                res = bladerf_sync_tx(m_dev, m_buf, DeviceBladeRF2::blockSize, NULL, 10000);
+                res = bladerf_sync_tx(m_dev, m_buf, DeviceBladeRF2::blockSize, 0, 10000);
 
                 if (res < 0)
                 {
@@ -166,7 +166,7 @@ void BladeRF2OutputThread::callbackMO(qint16* buf, qint32 samplesPerChannel)
     for (unsigned int channel = 0; channel < m_nbChannels; channel++)
     {
         if (m_channels[channel].m_sampleFifo) {
-            callbackSO(&buf[2*samplesPerChannel*channel], 2*samplesPerChannel, channel);
+            callbackSO(&buf[2*samplesPerChannel*channel], samplesPerChannel, channel);
         } else {
             std::fill(&buf[2*samplesPerChannel*channel], &buf[2*samplesPerChannel*channel]+2*samplesPerChannel, 0); // fill with zero samples
         }
@@ -182,42 +182,57 @@ void BladeRF2OutputThread::callbackMO(qint16* buf, qint32 samplesPerChannel)
     }
 }
 
-//  Interpolate according to specified log2 (ex: log2=4 => decim=16)
+//  Interpolate according to specified log2 (ex: log2=4 => decim=16). len is a number of samples (not a number of I or Q)
 void BladeRF2OutputThread::callbackSO(qint16* buf, qint32 len, unsigned int channel)
 {
-    SampleVector::iterator beginRead;
-    m_channels[channel].m_sampleFifo->readAdvance(beginRead, len/(1<<m_channels[channel].m_log2Interp));
-    beginRead -= len;
-
-    if (m_channels[channel].m_log2Interp == 0)
+    if (m_channels[channel].m_sampleFifo)
     {
-        m_channels[channel].m_interpolators.interpolate1(&beginRead, buf, len*2);
+        float bal = m_channels[channel].m_sampleFifo->getRWBalance();
+
+        if (bal < -0.25) {
+            qDebug("BladeRF2OutputThread::callbackSO: read lags: %f", bal);
+        } else if (bal > 0.25) {
+            qDebug("BladeRF2OutputThread::callbackSO: read leads: %f", bal);
+        }
+
+        SampleVector::iterator beginRead;
+        m_channels[channel].m_sampleFifo->readAdvance(beginRead, len/(1<<m_channels[channel].m_log2Interp));
+        beginRead -= len;
+
+        if (m_channels[channel].m_log2Interp == 0)
+        {
+            m_channels[channel].m_interpolators.interpolate1(&beginRead, buf, len*2);
+        }
+        else
+        {
+            switch (m_channels[channel].m_log2Interp)
+            {
+            case 1:
+                m_channels[channel].m_interpolators.interpolate2_cen(&beginRead, buf, len*2);
+                break;
+            case 2:
+                m_channels[channel].m_interpolators.interpolate4_cen(&beginRead, buf, len*2);
+                break;
+            case 3:
+                m_channels[channel].m_interpolators.interpolate8_cen(&beginRead, buf, len*2);
+                break;
+            case 4:
+                m_channels[channel].m_interpolators.interpolate16_cen(&beginRead, buf, len*2);
+                break;
+            case 5:
+                m_channels[channel].m_interpolators.interpolate32_cen(&beginRead, buf, len*2);
+                break;
+            case 6:
+                m_channels[channel].m_interpolators.interpolate64_cen(&beginRead, buf, len*2);
+                break;
+            default:
+                break;
+            }
+        }
     }
     else
     {
-        switch (m_channels[channel].m_log2Interp)
-        {
-        case 1:
-            m_channels[channel].m_interpolators.interpolate2_cen(&beginRead, buf, len*2);
-            break;
-        case 2:
-            m_channels[channel].m_interpolators.interpolate4_cen(&beginRead, buf, len*2);
-            break;
-        case 3:
-            m_channels[channel].m_interpolators.interpolate8_cen(&beginRead, buf, len*2);
-            break;
-        case 4:
-            m_channels[channel].m_interpolators.interpolate16_cen(&beginRead, buf, len*2);
-            break;
-        case 5:
-            m_channels[channel].m_interpolators.interpolate32_cen(&beginRead, buf, len*2);
-            break;
-        case 6:
-            m_channels[channel].m_interpolators.interpolate64_cen(&beginRead, buf, len*2);
-            break;
-        default:
-            break;
-        }
+        std::fill(buf, buf+2*len, 0);
     }
 }
 

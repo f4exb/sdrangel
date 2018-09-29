@@ -18,6 +18,10 @@
 
 MESSAGE_CLASS_DEFINITION(DeviceBladeRF2Shared::MsgReportBuddyChange, Message)
 
+const float  DeviceBladeRF2Shared::m_sampleFifoLengthInSeconds = 0.25;
+const int    DeviceBladeRF2Shared::m_sampleFifoMinSize = 75000; // 300 kS/s knee
+const int    DeviceBladeRF2Shared::m_sampleFifoMinSize32 = 150000; // Fixed for interpolation by 32
+
 DeviceBladeRF2Shared::DeviceBladeRF2Shared() :
     m_dev(0),
     m_channel(-1),

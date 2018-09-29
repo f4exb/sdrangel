@@ -24,7 +24,6 @@ struct BladeRF2OutputSettings {
     quint64 m_centerFrequency;
     qint32 m_devSampleRate;
     qint32 m_bandwidth;
-    int m_gainMode;
     int m_globalGain;
     bool m_biasTee;
     quint32 m_log2Interp;

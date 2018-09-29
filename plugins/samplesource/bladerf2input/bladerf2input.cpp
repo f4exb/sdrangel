@@ -735,7 +735,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
             }
             else
             {
-                qDebug() << "BladeRF2Input::applySettings: bladerf_set_sample_rate(BLADERF_MODULE_RX) actual sample rate is " << actualSamplerate;
+                qDebug() << "BladeRF2Input::applySettings: bladerf_set_sample_rate: actual sample rate is " << actualSamplerate;
             }
         }
     }
@@ -756,7 +756,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
             }
             else
             {
-                qDebug() << "BladeRF2Input::applySettings: bladerf_set_bandwidth(BLADERF_MODULE_RX) actual bandwidth is " << actualBandwidth;
+                qDebug() << "BladeRF2Input::applySettings: bladerf_set_bandwidth: actual bandwidth is " << actualBandwidth;
             }
         }
     }

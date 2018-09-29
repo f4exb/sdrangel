@@ -30,8 +30,7 @@ void BladeRF2OutputSettings::resetToDefaults()
     m_centerFrequency = 435000*1000;
     m_devSampleRate = 3072000;
     m_bandwidth = 1500000;
-    m_gainMode = 0;
-    m_globalGain = -20;
+    m_globalGain = -3;
     m_biasTee = false;
     m_log2Interp = 0;
 }
@@ -42,7 +41,6 @@ QByteArray BladeRF2OutputSettings::serialize() const
 
     s.writeS32(1, m_devSampleRate);
     s.writeS32(2, m_bandwidth);
-    s.writeS32(3, m_gainMode);
     s.writeS32(4, m_globalGain);
     s.writeBool(5, m_biasTee);
     s.writeU32(6, m_log2Interp);
@@ -64,7 +62,6 @@ bool BladeRF2OutputSettings::deserialize(const QByteArray& data)
     {
         d.readS32(1, &m_devSampleRate);
         d.readS32(2, &m_bandwidth);
-        d.readS32(3, &m_gainMode);
         d.readS32(4, &m_globalGain);
         d.readBool(5, &m_biasTee);
         d.readU32(6, &m_log2Interp);

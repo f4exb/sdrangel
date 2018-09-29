@@ -51,8 +51,6 @@ BladeRF2OutputSettings:
       type: integer
     bandwidth:
       type: integer
-    gainMode:
-      type: integer
     globalGain:
       type: integer
     biasTee:

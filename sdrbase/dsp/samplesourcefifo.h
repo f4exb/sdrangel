@@ -43,7 +43,7 @@ public:
 
     void write(const Sample& sample);                        //!< write directly - phase 1 + phase 2
 
-    /** returns ratio of off center over buffer size with sign: negative real lags and positive read leads */
+    /** returns ratio of off center over buffer size with sign: negative read lags and positive read leads */
     float getRWBalance() const
     {
         int delta;
