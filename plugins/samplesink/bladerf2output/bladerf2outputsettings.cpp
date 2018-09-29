@@ -62,8 +62,6 @@ bool BladeRF2OutputSettings::deserialize(const QByteArray& data)
 
     if (d.getVersion() == 1)
     {
-        int intval;
-
         d.readS32(1, &m_devSampleRate);
         d.readS32(2, &m_bandwidth);
         d.readS32(3, &m_gainMode);

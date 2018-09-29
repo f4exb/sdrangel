@@ -61,9 +61,6 @@ Bladerf1OutputGui::Bladerf1OutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
 
 	displaySettings();
 
-	char recFileNameCStr[30];
-	sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceUISet->m_deviceSinkAPI->getDeviceUID());
-
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 

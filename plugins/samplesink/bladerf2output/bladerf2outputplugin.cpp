@@ -28,7 +28,7 @@
 #include "bladerf2outputgui.h"
 #endif
 
-const PluginDescriptor Bladerf2OutputPlugin::m_pluginDescriptor = {
+const PluginDescriptor BladeRF2OutputPlugin::m_pluginDescriptor = {
     QString("BladeRF2 Output"),
     QString("4.2.0"),
     QString("(c) Edouard Griffiths, F4EXB"),
@@ -37,25 +37,25 @@ const PluginDescriptor Bladerf2OutputPlugin::m_pluginDescriptor = {
     QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString Bladerf2OutputPlugin::m_hardwareID = "BladeRF2";
-const QString Bladerf2OutputPlugin::m_deviceTypeID = BLADERF2OUTPUT_DEVICE_TYPE_ID;
+const QString BladeRF2OutputPlugin::m_hardwareID = "BladeRF2";
+const QString BladeRF2OutputPlugin::m_deviceTypeID = BLADERF2OUTPUT_DEVICE_TYPE_ID;
 
-Bladerf2OutputPlugin::Bladerf1OutputPlugin(QObject* parent) :
+BladeRF2OutputPlugin::BladeRF2OutputPlugin(QObject* parent) :
     QObject(parent)
 {
 }
 
-const PluginDescriptor& Bladerf2OutputPlugin::getPluginDescriptor() const
+const PluginDescriptor& BladeRF2OutputPlugin::getPluginDescriptor() const
 {
     return m_pluginDescriptor;
 }
 
-void Bladerf2OutputPlugin::initPlugin(PluginAPI* pluginAPI)
+void BladeRF2OutputPlugin::initPlugin(PluginAPI* pluginAPI)
 {
     pluginAPI->registerSampleSink(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices Bladerf2OutputPlugin::enumSampleSinks()
+PluginInterface::SamplingDevices BladeRF2OutputPlugin::enumSampleSinks()
 {
     SamplingDevices result;
     struct bladerf_devinfo *devinfo = 0;
@@ -113,7 +113,7 @@ PluginInterface::SamplingDevices Bladerf2OutputPlugin::enumSampleSinks()
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* Bladerf2OutputPlugin::createSampleSinkPluginInstanceGUI(
+PluginInstanceGUI* BladeRF2OutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId __attribute__((unused)),
         QWidget **widget __attribute__((unused)),
         DeviceUISet *deviceUISet __attribute__((unused)))
@@ -121,14 +121,14 @@ PluginInstanceGUI* Bladerf2OutputPlugin::createSampleSinkPluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* Bladerf2OutputPlugin::createSampleSinkPluginInstanceGUI(
+PluginInstanceGUI* BladeRF2OutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
 {
     if(sinkId == m_deviceTypeID)
     {
-        Bladerf2OutputGui* gui = new Bladerf2OutputGui(deviceUISet);
+        BladeRF2OutputGui* gui = new BladeRF2OutputGui(deviceUISet);
         *widget = gui;
         return gui;
     }
@@ -139,11 +139,11 @@ PluginInstanceGUI* Bladerf2OutputPlugin::createSampleSinkPluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSink* Bladerf2OutputPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
+DeviceSampleSink* BladeRF2OutputPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
 {
     if(sinkId == m_deviceTypeID)
     {
-        Bladerf2Output* output = new Bladerf2Output(deviceAPI);
+        BladeRF2Output* output = new BladeRF2Output(deviceAPI);
         return output;
     }
     else

@@ -1,25 +1,20 @@
 project(bladerf2output)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(PLUGIN_PREFIX "../../../plugins/samplesink/bladerf2output")
 
 set(bladerf2output_SOURCES
-	bladerf2outputgui.cpp
-	bladerf2output.cpp
-	bladerf2outputplugin.cpp
-	bladerf2outputsettings.cpp
-	bladerf2outputthread.cpp
+	${PLUGIN_PREFIX}/bladerf2output.cpp
+	${PLUGIN_PREFIX}/bladerf2outputplugin.cpp
+	${PLUGIN_PREFIX}/bladerf2outputsettings.cpp
+	${PLUGIN_PREFIX}/bladerf2outputthread.cpp
 )
 
 set(bladerf2output_HEADERS
-	bladerf2outputgui.h
-	bladerf2output.h
-	bladerf1soutputplugin.h
-	bladerf2outputsettings.h
-	bladerf2outputthread.h
-)
-
-set(bladerf2output_FORMS
-	bladerf2outputgui.ui
+	${PLUGIN_PREFIX}/bladerf2output.h
+	${PLUGIN_PREFIX}/bladerf2outputplugin.h
+	${PLUGIN_PREFIX}/bladerf2outputsettings.h
+	${PLUGIN_PREFIX}/bladerf2outputthread.h
 )
 
 if (BUILD_DEBIAN)
@@ -41,40 +36,33 @@ include_directories(
 )
 endif (BUILD_DEBIAN)
 
-#include(${QT_USE_FILE})
 add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 
-#qt4_wrap_cpp(bladerf2output_HEADERS_MOC ${bladerf2output_HEADERS})
-qt5_wrap_ui(bladerf2output_FORMS_HEADERS ${bladerf2output_FORMS})
-
-add_library(outputbladerf2 SHARED
+add_library(outputbladerf2srv SHARED
 	${bladerf2output_SOURCES}
 	${bladerf2output_HEADERS_MOC}
-	${bladerf2output_FORMS_HEADERS}
 )
 
 if (BUILD_DEBIAN)
-target_link_libraries(outputbladerf2
+target_link_libraries(outputbladerf2srv
     ${QT_LIBRARIES}
     bladerf
     sdrbase
-    sdrgui
     swagger
     bladerf2device
 )
 else (BUILD_DEBIAN)
-target_link_libraries(outputbladerf2
+target_link_libraries(outputbladerf2srv
 	${QT_LIBRARIES}
 	${LIBBLADERF_LIBRARIES}
 	sdrbase
-	sdrgui
 	swagger
 	bladerf2device
 )
 endif (BUILD_DEBIAN)
 
-target_link_libraries(outputbladerf2 Qt5::Core Qt5::Widgets)
+target_link_libraries(outputbladerf2srv Qt5::Core)
 
-install(TARGETS outputbladerf2 DESTINATION lib/plugins/samplesink)
+install(TARGETS outputbladerf2srv DESTINATION lib/pluginssrv/samplesink)

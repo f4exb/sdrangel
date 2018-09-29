@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Bladerf2OutputGui</class>
- <widget class="QWidget" name="Bladerf2OutputGui">
+ <class>BladeRF2OutputGui</class>
+ <widget class="QWidget" name="BladeRF2OutputGui">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -324,7 +324,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="decim">
+      <widget class="QComboBox" name="interp">
        <property name="maximumSize">
         <size>
          <width>50</width>
