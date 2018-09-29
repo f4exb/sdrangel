@@ -36,8 +36,6 @@ SWGBladeRF2OutputReport::SWGBladeRF2OutputReport() {
     m_bandwidth_range_isSet = false;
     global_gain_range = nullptr;
     m_global_gain_range_isSet = false;
-    gain_modes = nullptr;
-    m_gain_modes_isSet = false;
 }
 
 SWGBladeRF2OutputReport::~SWGBladeRF2OutputReport() {
@@ -54,8 +52,6 @@ SWGBladeRF2OutputReport::init() {
     m_bandwidth_range_isSet = false;
     global_gain_range = new SWGRange();
     m_global_gain_range_isSet = false;
-    gain_modes = new QList<SWGNamedEnum*>();
-    m_gain_modes_isSet = false;
 }
 
 void
@@ -71,13 +67,6 @@ SWGBladeRF2OutputReport::cleanup() {
     }
     if(global_gain_range != nullptr) { 
         delete global_gain_range;
-    }
-    if(gain_modes != nullptr) { 
-        auto arr = gain_modes;
-        for(auto o: *arr) { 
-            delete o;
-        }
-        delete gain_modes;
     }
 }
 
@@ -100,8 +89,6 @@ SWGBladeRF2OutputReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&global_gain_range, pJson["globalGainRange"], "SWGRange", "SWGRange");
     
-    
-    ::SWGSDRangel::setValue(&gain_modes, pJson["gainModes"], "QList", "SWGNamedEnum");
 }
 
 QString
@@ -129,9 +116,6 @@ SWGBladeRF2OutputReport::asJsonObject() {
     }
     if((global_gain_range != nullptr) && (global_gain_range->isSet())){
         toJsonValue(QString("globalGainRange"), global_gain_range, obj, QString("SWGRange"));
-    }
-    if(gain_modes->size() > 0){
-        toJsonArray((QList<void*>*)gain_modes, obj, "gainModes", "SWGNamedEnum");
     }
 
     return obj;
@@ -177,16 +161,6 @@ SWGBladeRF2OutputReport::setGlobalGainRange(SWGRange* global_gain_range) {
     this->m_global_gain_range_isSet = true;
 }
 
-QList<SWGNamedEnum*>*
-SWGBladeRF2OutputReport::getGainModes() {
-    return gain_modes;
-}
-void
-SWGBladeRF2OutputReport::setGainModes(QList<SWGNamedEnum*>* gain_modes) {
-    this->gain_modes = gain_modes;
-    this->m_gain_modes_isSet = true;
-}
-
 
 bool
 SWGBladeRF2OutputReport::isSet(){
@@ -196,7 +170,6 @@ SWGBladeRF2OutputReport::isSet(){
         if(sample_rate_range != nullptr && sample_rate_range->isSet()){ isObjectUpdated = true; break;}
         if(bandwidth_range != nullptr && bandwidth_range->isSet()){ isObjectUpdated = true; break;}
         if(global_gain_range != nullptr && global_gain_range->isSet()){ isObjectUpdated = true; break;}
-        if(gain_modes->size() > 0){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

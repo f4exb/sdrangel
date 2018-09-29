@@ -46,33 +46,26 @@ BladeRF2OutputGui::BladeRF2OutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     ui->setupUi(this);
 
     m_sampleSink->getFrequencyRange(f_min, f_max, step);
+    qDebug("BladeRF2OutputGui::BladeRF2OutputGui: getFrequencyRange: [%lu,%lu] step: %d", f_min, f_max, step);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(7, f_min/1000, f_max/1000);
 
     m_sampleSink->getSampleRateRange(min, max, step);
+    qDebug("BladeRF2OutputGui::BladeRF2OutputGui: getSampleRateRange: [%d,%d] step: %d", min, max, step);
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(8, min, max);
 
     m_sampleSink->getBandwidthRange(min, max, step);
+    qDebug("BladeRF2OutputGui::BladeRF2OutputGui: getBandwidthRange: [%d,%d] step: %d", min, max, step);
     ui->bandwidth->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->bandwidth->setValueRange(5, min/1000, max/1000);
 
-    const std::vector<BladeRF2Output::GainMode>& modes = m_sampleSink->getGainModes();
-    std::vector<BladeRF2Output::GainMode>::const_iterator it = modes.begin();
-
-    ui->gainMode->blockSignals(true);
-
-    for (; it != modes.end(); ++it) {
-        ui->gainMode->addItem(it->m_name);
-    }
-
-    ui->gainMode->blockSignals(false);
-
     m_sampleSink->getGlobalGainRange(min, max, step);
-    ui->gain->setMinimum(min);
-    ui->gain->setMaximum(max);
-    ui->gain->setPageStep(step);
-    ui->gain->setSingleStep(step);
+    qDebug("BladeRF2OutputGui::BladeRF2OutputGui: getGlobalGainRange: [%d,%d] step: %d", min, max, step);
+    ui->gain->setMinimum((min-max)/1000);
+    ui->gain->setMaximum(0);
+    ui->gain->setPageStep(1);
+    ui->gain->setSingleStep(1);
 
     ui->label_decim->setText(QString::fromUtf8("I\u2191"));
 
@@ -152,10 +145,10 @@ bool BladeRF2OutputGui::handleMessage(const Message& message)
         blockApplySettings(true);
         int min, max, step;
         m_sampleSink->getGlobalGainRange(min, max, step);
-        ui->gain->setMinimum(min);
-        ui->gain->setMaximum(max);
-        ui->gain->setPageStep(step);
-        ui->gain->setSingleStep(step);
+        ui->gain->setMinimum((min-max)/1000);
+        ui->gain->setMaximum(0);
+        ui->gain->setPageStep(1);
+        ui->gain->setSingleStep(1);
         displaySettings();
         blockApplySettings(false);
 
@@ -164,10 +157,10 @@ bool BladeRF2OutputGui::handleMessage(const Message& message)
     else if (BladeRF2Output::MsgReportGainRange::match(message))
     {
         const BladeRF2Output::MsgReportGainRange& cfg = (BladeRF2Output::MsgReportGainRange&) message;
-        ui->gain->setMinimum(cfg.getMin());
-        ui->gain->setMaximum(cfg.getMax());
-        ui->gain->setSingleStep(cfg.getStep());
-        ui->gain->setPageStep(cfg.getStep());
+        ui->gain->setMinimum((cfg.getMin()-cfg.getMax())/1000);
+        ui->gain->setMaximum(0);
+        ui->gain->setSingleStep(1);
+        ui->gain->setPageStep(1);
 
         return true;
     }
@@ -234,12 +227,6 @@ void BladeRF2OutputGui::displaySettings()
     ui->gainText->setText(tr("%1 dB").arg(m_settings.m_globalGain));
     ui->gain->setValue(m_settings.m_globalGain);
 
-    if (m_settings.m_gainMode == BLADERF_GAIN_MANUAL) {
-        ui->gain->setEnabled(true);
-    } else {
-        ui->gain->setEnabled(false);
-    }
-
     blockApplySettings(false);
 }
 
@@ -279,31 +266,6 @@ void BladeRF2OutputGui::on_interp_currentIndexChanged(int index)
         return;
     m_settings.m_log2Interp = index;
     sendSettings();
-}
-
-void BladeRF2OutputGui::on_gainMode_currentIndexChanged(int index)
-{
-    const std::vector<BladeRF2Output::GainMode>& modes = m_sampleSink->getGainModes();
-    unsigned int uindex = index < 0 ? 0 : (unsigned int) index;
-
-    if (uindex < modes.size())
-    {
-        BladeRF2Output::GainMode mode = modes[index];
-
-        if (m_settings.m_gainMode != mode.m_value)
-        {
-            if (mode.m_value == BLADERF_GAIN_MANUAL)
-            {
-                m_settings.m_globalGain = ui->gain->value();
-                ui->gain->setEnabled(true);
-            } else {
-                ui->gain->setEnabled(false);
-            }
-        }
-
-        m_settings.m_gainMode = mode.m_value;
-        sendSettings();
-    }
 }
 
 void BladeRF2OutputGui::on_gain_valueChanged(int value)

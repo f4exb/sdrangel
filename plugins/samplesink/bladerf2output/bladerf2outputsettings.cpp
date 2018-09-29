@@ -31,7 +31,7 @@ void BladeRF2OutputSettings::resetToDefaults()
     m_devSampleRate = 3072000;
     m_bandwidth = 1500000;
     m_gainMode = 0;
-    m_globalGain = 0;
+    m_globalGain = -20;
     m_biasTee = false;
     m_log2Interp = 0;
 }

@@ -71,7 +71,3 @@ BladeRF2OutputReport:
       $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Range"
     globalGainRange:
       $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Range"
-    gainModes:
-      type: array
-      items:
-        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/NamedEnum"

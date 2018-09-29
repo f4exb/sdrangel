@@ -48,19 +48,6 @@ BladeRF2Output::BladeRF2Output(DeviceSinkAPI *deviceAPI) :
     m_running(false)
 {
     openDevice();
-
-    if (m_deviceShared.m_dev)
-    {
-        const bladerf_gain_modes *modes = 0;
-        int nbModes = m_deviceShared.m_dev->getGainModesRx(&modes);
-
-        if (modes)
-        {
-            for (int i = 0; i < nbModes; i++) {
-                m_gainModes.push_back(GainMode{QString(modes[i].name), modes[i].mode});
-            }
-        }
-    }
 }
 
 BladeRF2Output::~BladeRF2Output()
@@ -948,18 +935,6 @@ void BladeRF2Output::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
         response.getBladeRf2OutputReport()->getSampleRateRange()->setMin(min);
         response.getBladeRf2OutputReport()->getSampleRateRange()->setMax(max);
         response.getBladeRf2OutputReport()->getSampleRateRange()->setStep(step);
-
-        response.getBladeRf2OutputReport()->setGainModes(new QList<SWGSDRangel::SWGNamedEnum*>);
-
-        const std::vector<GainMode>& modes = getGainModes();
-        std::vector<GainMode>::const_iterator it = modes.begin();
-
-        for (; it != modes.end(); ++it)
-        {
-            response.getBladeRf2OutputReport()->getGainModes()->append(new SWGSDRangel::SWGNamedEnum);
-            response.getBladeRf2OutputReport()->getGainModes()->back()->setName(new QString(it->m_name));
-            response.getBladeRf2OutputReport()->getGainModes()->back()->setValue(it->m_value);
-        }
     }
 }
 

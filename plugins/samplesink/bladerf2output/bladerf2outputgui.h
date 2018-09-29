@@ -78,7 +78,6 @@ private slots:
     void on_sampleRate_changed(quint64 value);
     void on_bandwidth_changed(quint64 value);
     void on_interp_currentIndexChanged(int index);
-    void on_gainMode_currentIndexChanged(int index);
     void on_gain_valueChanged(int value);
     void on_startStop_toggled(bool checked);
     void updateHardware();

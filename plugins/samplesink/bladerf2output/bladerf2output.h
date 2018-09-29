@@ -97,12 +97,6 @@ public:
         {}
     };
 
-    struct GainMode
-    {
-        QString m_name;
-        int m_value;
-    };
-
     BladeRF2Output(DeviceSinkAPI *deviceAPI);
     virtual ~BladeRF2Output();
     virtual void destroy();
@@ -126,7 +120,6 @@ public:
     void getSampleRateRange(int& min, int& max, int& step);
     void getBandwidthRange(int& min, int& max, int& step);
     void getGlobalGainRange(int& min, int& max, int& step);
-    const std::vector<GainMode>& getGainModes() { return m_gainModes; }
 
     virtual bool handleMessage(const Message& message);
 
@@ -170,7 +163,6 @@ private:
     QString m_deviceDescription;
     DeviceBladeRF2Shared m_deviceShared;
     bool m_running;
-    std::vector<GainMode> m_gainModes;
 };
 
 #endif /* PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUT_H_ */

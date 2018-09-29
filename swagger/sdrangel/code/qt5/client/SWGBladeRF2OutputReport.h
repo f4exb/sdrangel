@@ -23,9 +23,7 @@
 
 
 #include "SWGFrequencyRange.h"
-#include "SWGNamedEnum.h"
 #include "SWGRange.h"
-#include <QList>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -57,9 +55,6 @@ public:
     SWGRange* getGlobalGainRange();
     void setGlobalGainRange(SWGRange* global_gain_range);
 
-    QList<SWGNamedEnum*>* getGainModes();
-    void setGainModes(QList<SWGNamedEnum*>* gain_modes);
-
 
     virtual bool isSet() override;
 
@@ -75,9 +70,6 @@ private:
 
     SWGRange* global_gain_range;
     bool m_global_gain_range_isSet;
-
-    QList<SWGNamedEnum*>* gain_modes;
-    bool m_gain_modes_isSet;
 
 };
 
