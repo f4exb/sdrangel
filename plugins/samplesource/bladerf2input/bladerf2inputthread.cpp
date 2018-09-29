@@ -92,7 +92,11 @@ void BladeRF2InputThread::run()
             qDebug("BladeRF2InputThread::run: start running loop");
             while (m_running)
             {
-                res = bladerf_sync_rx(m_dev, m_buf, DeviceBladeRF2::blockSize, NULL, 10000);
+                if (m_nbChannels > 1) {
+                    res = bladerf_sync_rx(m_dev, m_buf, DeviceBladeRF2::blockSize*m_nbChannels, NULL, 10000);
+                } else {
+                    res = bladerf_sync_rx(m_dev, m_buf, DeviceBladeRF2::blockSize, NULL, 10000);
+                }
 
                 if (res < 0)
                 {
