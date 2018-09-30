@@ -75,7 +75,7 @@ void BladeRF2OutputThread::run()
         int status;
 
         if (m_nbChannels > 1) {
-            status = bladerf_sync_config(m_dev, BLADERF_TX_X2, BLADERF_FORMAT_SC16_Q11, 64, 16384, 32, 1500);
+            status = bladerf_sync_config(m_dev, BLADERF_TX_X2, BLADERF_FORMAT_SC16_Q11, 128, 16384, 32, 1500);
         } else {
             status = bladerf_sync_config(m_dev, BLADERF_TX_X1, BLADERF_FORMAT_SC16_Q11, 64, 8192, 32, 1500);
         }

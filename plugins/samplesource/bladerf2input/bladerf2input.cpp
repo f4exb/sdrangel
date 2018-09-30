@@ -645,12 +645,31 @@ bool BladeRF2Input::handleMessage(const Message& message)
             }
             else // Tx buddy change: check for sample rate change only
             {
-                status = bladerf_get_sample_rate(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_uint);
+                settings.m_devSampleRate = report.getDevSampleRate();
+//                status = bladerf_get_sample_rate(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_uint);
+//
+//                if (status < 0) {
+//                    qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_sample_rate error: %s", bladerf_strerror(status));
+//                } else {
+//                    settings.m_devSampleRate = tmp_uint;
+//                }
 
-                if (status < 0) {
-                    qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_sample_rate error: %s", bladerf_strerror(status));
-                } else {
-                    settings.m_devSampleRate = tmp_uint+1;
+                qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+                        settings.m_centerFrequency,
+                        0,
+                        settings.m_log2Decim,
+                        (DeviceSampleSource::fcPos_t) settings.m_fcPos,
+                        settings.m_devSampleRate);
+
+                if (setDeviceCenterFrequency(dev, requestedChannel, deviceCenterFrequency))
+                {
+                    if (getMessageQueueToGUI())
+                    {
+                        int min, max, step;
+                        getGlobalGainRange(min, max, step);
+                        MsgReportGainRange *msg = MsgReportGainRange::create(min, max, step);
+                        getMessageQueueToGUI()->push(msg);
+                    }
                 }
             }
 

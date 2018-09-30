@@ -316,6 +316,8 @@ bool BladeRF2Output::start()
     bladeRF2OutputThread->setFifo(requestedChannel, &m_sampleSourceFifo);
     bladeRF2OutputThread->setLog2Interpolation(requestedChannel, m_settings.m_log2Interp);
 
+    applySettings(m_settings, true); // re-apply forcibly to set sample rate with the new number of channels
+
     if (needsStart)
     {
         qDebug("BladeRF2Output::start: enabling channel(s) and (re)sart buddy thread");
@@ -331,8 +333,6 @@ bool BladeRF2Output::start()
 
         bladeRF2OutputThread->startWork();
     }
-
-    applySettings(m_settings, true);
 
     qDebug("BladeRF2Output::start: started");
     m_running = true;
@@ -429,6 +429,13 @@ void BladeRF2Output::stop()
             ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_sink->setThread(0);
         }
 
+        for (int i = 0; i < nbOriginalChannels-1; i++) // close all inactive channels
+        {
+            if (fifos[i] == 0) {
+                m_deviceShared.m_dev->closeTx(i);
+            }
+        }
+
         m_deviceShared.m_dev->closeTx(requestedChannel); // close the last channel
 
         if (stillActiveFIFO) {
@@ -440,6 +447,8 @@ void BladeRF2Output::stop()
         qDebug("BladeRF2Output::stop: MO mode. Not changing MO configuration. Just remove FIFO reference");
         bladeRF2OutputThread->setFifo(requestedChannel, 0); // remove FIFO
     }
+
+    applySettings(m_settings, true); // re-apply forcibly to set sample rate with the new number of channels
 
     m_running = false;
 }
@@ -577,16 +586,19 @@ bool BladeRF2Output::handleMessage(const Message& message)
         if (dev) // The BladeRF device must have been open to do so
         {
             int requestedChannel = m_deviceAPI->getItemIndex();
+            int nbChannels = getNbChannels();
 
             if (report.getRxElseTx()) // Rx buddy change: check for sample rate change only
             {
-                status = bladerf_get_sample_rate(dev, BLADERF_CHANNEL_TX(requestedChannel), &tmp_uint);
-
-                if (status < 0) {
-                    qCritical("BladeRF2Output::handleMessage: MsgReportBuddyChange: bladerf_get_sample_rate error: %s", bladerf_strerror(status));
-                } else {
-                    settings.m_devSampleRate = tmp_uint+1;
-                }
+                tmp_uint = report.getDevSampleRate();
+                settings.m_devSampleRate = tmp_uint / (nbChannels == 0 ? 1 : nbChannels);
+//                status = bladerf_get_sample_rate(dev, BLADERF_CHANNEL_TX(requestedChannel), &tmp_uint);
+//
+//                if (status < 0) {
+//                    qCritical("BladeRF2Output::handleMessage: MsgReportBuddyChange: bladerf_get_sample_rate error: %s", bladerf_strerror(status));
+//                } else {
+//                    settings.m_devSampleRate = tmp_uint / (nbChannels == 0 ? 1 : nbChannels);
+//                }
             }
             else // Tx buddy change: check for: frequency, gain mode and value, bias tee, sample rate, bandwidth
             {
@@ -664,6 +676,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
 
     struct bladerf *dev = m_deviceShared.m_dev->getDev();
     int requestedChannel = m_deviceAPI->getItemIndex();
+    int nbChannels = getNbChannels();
 
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
     {
@@ -705,7 +718,10 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
         if (dev != 0)
         {
             unsigned int actualSamplerate;
-            int status = bladerf_set_sample_rate(dev, BLADERF_CHANNEL_TX(requestedChannel), settings.m_devSampleRate, &actualSamplerate);
+
+            int status = bladerf_set_sample_rate(dev, BLADERF_CHANNEL_TX(requestedChannel),
+                    settings.m_devSampleRate * (nbChannels == 0 ? 1 : nbChannels),
+                    &actualSamplerate);
 
             if (status < 0)
             {
@@ -817,7 +833,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
                     settings.m_centerFrequency,
                     settings.m_LOppmTenths,
                     2,
-                    settings.m_devSampleRate,
+                    settings.m_devSampleRate * (nbChannels == 0 ? 1 : nbChannels), // need to forward actual rate to the Rx side
                     false);
             (*itSource)->getSampleSourceInputMessageQueue()->push(report);
         }
@@ -849,10 +865,22 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
             << " m_bandwidth: " << m_settings.m_bandwidth
             << " m_log2Interp: " << m_settings.m_log2Interp
             << " m_devSampleRate: " << m_settings.m_devSampleRate
+            << " nbChannels: " << nbChannels
             << " m_globalGain: " << m_settings.m_globalGain
             << " m_biasTee: " << m_settings.m_biasTee;
 
     return true;
+}
+
+int BladeRF2Output::getNbChannels()
+{
+    BladeRF2OutputThread *bladeRF2OutputThread = findThread();
+
+    if (bladeRF2OutputThread) {
+        return bladeRF2OutputThread->getNbChannels();
+    } else {
+        return 0;
+    }
 }
 
 int BladeRF2Output::webapiSettingsGet(
