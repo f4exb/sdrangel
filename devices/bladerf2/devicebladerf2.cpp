@@ -16,6 +16,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <algorithm>
 
 #include <QtGlobal>
 
@@ -75,6 +76,8 @@ bool DeviceBladeRF2::open(const char *serial)
 
     m_rxOpen = new bool[m_nbRxChannels];
     m_txOpen = new bool[m_nbTxChannels];
+    std::fill(m_rxOpen, m_rxOpen + m_nbRxChannels, false);
+    std::fill(m_txOpen, m_txOpen + m_nbTxChannels, false);
 
     return true;
 }
