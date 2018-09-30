@@ -44,14 +44,14 @@ public:
     qint64 getCenterFrequency();
     void setCenterFrequency(qint64 center_frequency);
 
+    qint32 getLOppmTenths();
+    void setLOppmTenths(qint32 l_oppm_tenths);
+
     qint32 getDevSampleRate();
     void setDevSampleRate(qint32 dev_sample_rate);
 
     qint32 getBandwidth();
     void setBandwidth(qint32 bandwidth);
-
-    qint32 getGainMode();
-    void setGainMode(qint32 gain_mode);
 
     qint32 getGlobalGain();
     void setGlobalGain(qint32 global_gain);
@@ -69,14 +69,14 @@ private:
     qint64 center_frequency;
     bool m_center_frequency_isSet;
 
+    qint32 l_oppm_tenths;
+    bool m_l_oppm_tenths_isSet;
+
     qint32 dev_sample_rate;
     bool m_dev_sample_rate_isSet;
 
     qint32 bandwidth;
     bool m_bandwidth_isSet;
-
-    qint32 gain_mode;
-    bool m_gain_mode_isSet;
 
     qint32 global_gain;
     bool m_global_gain_isSet;

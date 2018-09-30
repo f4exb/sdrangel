@@ -30,6 +30,8 @@ SWGBladeRF2InputSettings::SWGBladeRF2InputSettings(QString* json) {
 SWGBladeRF2InputSettings::SWGBladeRF2InputSettings() {
     center_frequency = 0L;
     m_center_frequency_isSet = false;
+    l_oppm_tenths = 0;
+    m_l_oppm_tenths_isSet = false;
     dev_sample_rate = 0;
     m_dev_sample_rate_isSet = false;
     bandwidth = 0;
@@ -60,6 +62,8 @@ void
 SWGBladeRF2InputSettings::init() {
     center_frequency = 0L;
     m_center_frequency_isSet = false;
+    l_oppm_tenths = 0;
+    m_l_oppm_tenths_isSet = false;
     dev_sample_rate = 0;
     m_dev_sample_rate_isSet = false;
     bandwidth = 0;
@@ -94,6 +98,7 @@ SWGBladeRF2InputSettings::cleanup() {
 
 
 
+
     if(file_record_name != nullptr) { 
         delete file_record_name;
     }
@@ -111,6 +116,8 @@ SWGBladeRF2InputSettings::fromJson(QString &json) {
 void
 SWGBladeRF2InputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&l_oppm_tenths, pJson["LOppmTenths"], "qint32", "");
     
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
     
@@ -150,6 +157,9 @@ SWGBladeRF2InputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
+    }
+    if(m_l_oppm_tenths_isSet){
+        obj->insert("LOppmTenths", QJsonValue(l_oppm_tenths));
     }
     if(m_dev_sample_rate_isSet){
         obj->insert("devSampleRate", QJsonValue(dev_sample_rate));
@@ -193,6 +203,16 @@ void
 SWGBladeRF2InputSettings::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
     this->m_center_frequency_isSet = true;
+}
+
+qint32
+SWGBladeRF2InputSettings::getLOppmTenths() {
+    return l_oppm_tenths;
+}
+void
+SWGBladeRF2InputSettings::setLOppmTenths(qint32 l_oppm_tenths) {
+    this->l_oppm_tenths = l_oppm_tenths;
+    this->m_l_oppm_tenths_isSet = true;
 }
 
 qint32
@@ -301,6 +321,7 @@ SWGBladeRF2InputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
+        if(m_l_oppm_tenths_isSet){ isObjectUpdated = true; break;}
         if(m_dev_sample_rate_isSet){ isObjectUpdated = true; break;}
         if(m_bandwidth_isSet){ isObjectUpdated = true; break;}
         if(m_gain_mode_isSet){ isObjectUpdated = true; break;}

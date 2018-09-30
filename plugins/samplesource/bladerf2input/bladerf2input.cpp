@@ -960,6 +960,9 @@ int BladeRF2Input::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getBladeRf2InputSettings()->getCenterFrequency();
     }
+    if (deviceSettingsKeys.contains("LOppmTenths")) {
+        settings.m_LOppmTenths = response.getBladeRf2InputSettings()->getLOppmTenths();
+    }
     if (deviceSettingsKeys.contains("devSampleRate")) {
         settings.m_devSampleRate = response.getBladeRf2InputSettings()->getDevSampleRate();
     }
@@ -1015,6 +1018,7 @@ int BladeRF2Input::webapiReportGet(SWGSDRangel::SWGDeviceReport& response, QStri
 void BladeRF2Input::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF2InputSettings& settings)
 {
     response.getBladeRf2InputSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getBladeRf2InputSettings()->setLOppmTenths(settings.m_LOppmTenths);
     response.getBladeRf2InputSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getBladeRf2InputSettings()->setBandwidth(settings.m_bandwidth);
     response.getBladeRf2InputSettings()->setLog2Decim(settings.m_log2Decim);

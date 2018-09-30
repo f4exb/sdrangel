@@ -30,12 +30,12 @@ SWGBladeRF2OutputSettings::SWGBladeRF2OutputSettings(QString* json) {
 SWGBladeRF2OutputSettings::SWGBladeRF2OutputSettings() {
     center_frequency = 0L;
     m_center_frequency_isSet = false;
+    l_oppm_tenths = 0;
+    m_l_oppm_tenths_isSet = false;
     dev_sample_rate = 0;
     m_dev_sample_rate_isSet = false;
     bandwidth = 0;
     m_bandwidth_isSet = false;
-    gain_mode = 0;
-    m_gain_mode_isSet = false;
     global_gain = 0;
     m_global_gain_isSet = false;
     bias_tee = 0;
@@ -52,12 +52,12 @@ void
 SWGBladeRF2OutputSettings::init() {
     center_frequency = 0L;
     m_center_frequency_isSet = false;
+    l_oppm_tenths = 0;
+    m_l_oppm_tenths_isSet = false;
     dev_sample_rate = 0;
     m_dev_sample_rate_isSet = false;
     bandwidth = 0;
     m_bandwidth_isSet = false;
-    gain_mode = 0;
-    m_gain_mode_isSet = false;
     global_gain = 0;
     m_global_gain_isSet = false;
     bias_tee = 0;
@@ -90,11 +90,11 @@ void
 SWGBladeRF2OutputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
+    ::SWGSDRangel::setValue(&l_oppm_tenths, pJson["LOppmTenths"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&bandwidth, pJson["bandwidth"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&gain_mode, pJson["gainMode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&global_gain, pJson["globalGain"], "qint32", "");
     
@@ -121,14 +121,14 @@ SWGBladeRF2OutputSettings::asJsonObject() {
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
+    if(m_l_oppm_tenths_isSet){
+        obj->insert("LOppmTenths", QJsonValue(l_oppm_tenths));
+    }
     if(m_dev_sample_rate_isSet){
         obj->insert("devSampleRate", QJsonValue(dev_sample_rate));
     }
     if(m_bandwidth_isSet){
         obj->insert("bandwidth", QJsonValue(bandwidth));
-    }
-    if(m_gain_mode_isSet){
-        obj->insert("gainMode", QJsonValue(gain_mode));
     }
     if(m_global_gain_isSet){
         obj->insert("globalGain", QJsonValue(global_gain));
@@ -154,6 +154,16 @@ SWGBladeRF2OutputSettings::setCenterFrequency(qint64 center_frequency) {
 }
 
 qint32
+SWGBladeRF2OutputSettings::getLOppmTenths() {
+    return l_oppm_tenths;
+}
+void
+SWGBladeRF2OutputSettings::setLOppmTenths(qint32 l_oppm_tenths) {
+    this->l_oppm_tenths = l_oppm_tenths;
+    this->m_l_oppm_tenths_isSet = true;
+}
+
+qint32
 SWGBladeRF2OutputSettings::getDevSampleRate() {
     return dev_sample_rate;
 }
@@ -171,16 +181,6 @@ void
 SWGBladeRF2OutputSettings::setBandwidth(qint32 bandwidth) {
     this->bandwidth = bandwidth;
     this->m_bandwidth_isSet = true;
-}
-
-qint32
-SWGBladeRF2OutputSettings::getGainMode() {
-    return gain_mode;
-}
-void
-SWGBladeRF2OutputSettings::setGainMode(qint32 gain_mode) {
-    this->gain_mode = gain_mode;
-    this->m_gain_mode_isSet = true;
 }
 
 qint32
@@ -219,9 +219,9 @@ SWGBladeRF2OutputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
+        if(m_l_oppm_tenths_isSet){ isObjectUpdated = true; break;}
         if(m_dev_sample_rate_isSet){ isObjectUpdated = true; break;}
         if(m_bandwidth_isSet){ isObjectUpdated = true; break;}
-        if(m_gain_mode_isSet){ isObjectUpdated = true; break;}
         if(m_global_gain_isSet){ isObjectUpdated = true; break;}
         if(m_bias_tee_isSet){ isObjectUpdated = true; break;}
         if(m_log2_interp_isSet){ isObjectUpdated = true; break;}

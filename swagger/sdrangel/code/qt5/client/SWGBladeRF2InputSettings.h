@@ -45,6 +45,9 @@ public:
     qint64 getCenterFrequency();
     void setCenterFrequency(qint64 center_frequency);
 
+    qint32 getLOppmTenths();
+    void setLOppmTenths(qint32 l_oppm_tenths);
+
     qint32 getDevSampleRate();
     void setDevSampleRate(qint32 dev_sample_rate);
 
@@ -81,6 +84,9 @@ public:
 private:
     qint64 center_frequency;
     bool m_center_frequency_isSet;
+
+    qint32 l_oppm_tenths;
+    bool m_l_oppm_tenths_isSet;
 
     qint32 dev_sample_rate;
     bool m_dev_sample_rate_isSet;

@@ -4,6 +4,8 @@ BladeRF2InputSettings:
     centerFrequency:
       type: integer
       format: int64
+    LOppmTenths:
+      type: integer
     devSampleRate:
       type: integer
     bandwidth:
@@ -47,11 +49,11 @@ BladeRF2OutputSettings:
     centerFrequency:
       type: integer
       format: int64
+    LOppmTenths:
+      type: integer
     devSampleRate:
       type: integer
     bandwidth:
-      type: integer
-    gainMode:
       type: integer
     globalGain:
       type: integer
