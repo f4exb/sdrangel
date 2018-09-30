@@ -217,6 +217,8 @@ void BladeRF2OutputGui::displaySettings()
     blockApplySettings(true);
 
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+    ui->LOppm->setValue(m_settings.m_LOppmTenths);
+    ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
     ui->sampleRate->setValue(m_settings.m_devSampleRate);
     ui->bandwidth->setValue(m_settings.m_bandwidth / 1000);
 
@@ -237,6 +239,13 @@ void BladeRF2OutputGui::sendSettings()
 void BladeRF2OutputGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
+    sendSettings();
+}
+
+void BladeRF2OutputGui::on_LOppm_valueChanged(int value)
+{
+    ui->LOppmText->setText(QString("%1").arg(QString::number(value/10.0, 'f', 1)));
+    m_settings.m_LOppmTenths = value;
     sendSettings();
 }
 

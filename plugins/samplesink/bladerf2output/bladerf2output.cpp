@@ -502,6 +502,25 @@ void BladeRF2Output::setCenterFrequency(qint64 centerFrequency)
     }
 }
 
+bool BladeRF2Output::setDeviceCenterFrequency(struct bladerf *dev, int requestedChannel, quint64 freq_hz)
+{
+    qint64 df = ((qint64)freq_hz * m_settings.m_LOppmTenths) / 10000000LL;
+    freq_hz += df;
+
+    int status = bladerf_set_frequency(dev, BLADERF_CHANNEL_TX(requestedChannel), freq_hz);
+
+    if (status < 0) {
+        qWarning("BladeRF2Output::setDeviceCenterFrequency: bladerf_set_frequency(%lld) failed: %s",
+                freq_hz, bladerf_strerror(status));
+        return false;
+    }
+    else
+    {
+        qDebug("BladeRF2Output::setDeviceCenterFrequency: bladerf_set_frequency(%lld)", freq_hz);
+        return true;
+    }
+}
+
 void BladeRF2Output::getFrequencyRange(uint64_t& min, uint64_t& max, int& step)
 {
     if (m_deviceShared.m_dev) {
@@ -572,6 +591,7 @@ bool BladeRF2Output::handleMessage(const Message& message)
             else // Tx buddy change: check for: frequency, gain mode and value, bias tee, sample rate, bandwidth
             {
                 settings.m_devSampleRate = report.getDevSampleRate();
+                settings.m_LOppmTenths = report.getLOppmTenths();
                 settings.m_centerFrequency = report.getCenterFrequency();
 
                 status = bladerf_get_bandwidth(dev, BLADERF_CHANNEL_TX(requestedChannel), &tmp_uint);
@@ -733,6 +753,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
     }
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+        || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
         || (m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
     {
         forwardChangeOwnDSP = true;
@@ -740,16 +761,8 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
 
         if (dev != 0)
         {
-            int status = bladerf_set_frequency(dev, BLADERF_CHANNEL_TX(requestedChannel), settings.m_centerFrequency);
-
-            if (status < 0) {
-                qWarning("BladeRF2Output::applySettings: bladerf_set_frequency(%lld) failed: %s",
-                        settings.m_centerFrequency, bladerf_strerror(status));
-            }
-            else
+            if (setDeviceCenterFrequency(dev, requestedChannel, settings.m_centerFrequency))
             {
-                qDebug("BladeRF2Output::applySettings: bladerf_set_frequency(%lld)", settings.m_centerFrequency);
-
                 if (getMessageQueueToGUI())
                 {
                     int min, max, step;
@@ -802,8 +815,8 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
         {
             DeviceBladeRF2Shared::MsgReportBuddyChange *report = DeviceBladeRF2Shared::MsgReportBuddyChange::create(
                     settings.m_centerFrequency,
-                    0,
-                    0,
+                    settings.m_LOppmTenths,
+                    2,
                     settings.m_devSampleRate,
                     false);
             (*itSource)->getSampleSourceInputMessageQueue()->push(report);
@@ -820,8 +833,8 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
         {
             DeviceBladeRF2Shared::MsgReportBuddyChange *report = DeviceBladeRF2Shared::MsgReportBuddyChange::create(
                     settings.m_centerFrequency,
-                    0,
-                    0,
+                    settings.m_LOppmTenths,
+                    2,
                     settings.m_devSampleRate,
                     false);
             (*itSink)->getSampleSinkInputMessageQueue()->push(report);
@@ -832,6 +845,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
 
     qDebug() << "BladeRF2Output::applySettings: "
             << " m_centerFrequency: " << m_settings.m_centerFrequency << " Hz"
+            << " m_LOppmTenths: " << m_settings.m_LOppmTenths
             << " m_bandwidth: " << m_settings.m_bandwidth
             << " m_log2Interp: " << m_settings.m_log2Interp
             << " m_devSampleRate: " << m_settings.m_devSampleRate
