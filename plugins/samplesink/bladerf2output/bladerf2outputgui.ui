@@ -319,7 +319,7 @@
      <item>
       <widget class="QLabel" name="label_decim">
        <property name="text">
-        <string>I</string>
+        <string>Int</string>
        </property>
       </widget>
      </item>

@@ -74,6 +74,7 @@ private:
 private slots:
     void handleInputMessages();
     void on_centerFrequency_changed(quint64 value);
+    void on_LOppm_valueChanged(int value);
     void on_sampleRate_changed(quint64 value);
     void on_dcOffset_toggled(bool checked);
     void on_iqImbalance_toggled(bool checked);

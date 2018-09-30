@@ -29,6 +29,7 @@ class DeviceSourceAPI;
 class BladeRF2InputThread;
 class FileRecord;
 struct bladerf_gain_modes;
+struct bladerf;
 
 class BladeRF2Input : public DeviceSampleSource
 {
@@ -191,6 +192,7 @@ private:
     BladeRF2InputThread *findThread();
     void moveThreadToBuddy();
     bool applySettings(const BladeRF2InputSettings& settings, bool force = false);
+    bool setDeviceCenterFrequency(struct bladerf *dev, int requestedChannel, quint64 freq_hz);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF2InputSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 };

@@ -538,6 +538,25 @@ void BladeRF2Input::setCenterFrequency(qint64 centerFrequency)
     }
 }
 
+bool BladeRF2Input::setDeviceCenterFrequency(struct bladerf *dev, int requestedChannel, quint64 freq_hz)
+{
+    qint64 df = ((qint64)freq_hz * m_settings.m_LOppmTenths) / 10000000LL;
+    freq_hz += df;
+
+    int status = bladerf_set_frequency(dev, BLADERF_CHANNEL_RX(requestedChannel), freq_hz);
+
+    if (status < 0) {
+        qWarning("BladeRF2Input::setDeviceCenterFrequency: bladerf_set_frequency(%lld) failed: %s",
+                freq_hz, bladerf_strerror(status));
+        return false;
+    }
+    else
+    {
+        qDebug("BladeRF2Input::setDeviceCenterFrequency: bladerf_set_frequency(%lld)", freq_hz);
+        return true;
+    }
+}
+
 void BladeRF2Input::getFrequencyRange(uint64_t& min, uint64_t& max, int& step)
 {
     if (m_deviceShared.m_dev) {
@@ -595,9 +614,10 @@ bool BladeRF2Input::handleMessage(const Message& message)
         {
             int requestedChannel = m_deviceAPI->getItemIndex();
 
-            if (report.getRxElseTx()) // Rx buddy change: check for: frequency, gain mode and value, bias tee, sample rate, bandwidth
+            if (report.getRxElseTx()) // Rx buddy change: check for: frequency, LO correction, gain mode and value, bias tee, sample rate, bandwidth
             {
                 settings.m_devSampleRate = report.getDevSampleRate();
+                settings.m_LOppmTenths = report.getLOppmTenths();
                 settings.m_centerFrequency = report.getCenterFrequency();
                 settings.m_fcPos = (BladeRF2InputSettings::fcPos_t) report.getFcPos();
 
@@ -785,6 +805,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
     }
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+        || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
         || (m_settings.m_devSampleRate != settings.m_devSampleRate)
         || (m_settings.m_fcPos != settings.m_fcPos)
         || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
@@ -801,16 +822,8 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
         if (dev != 0)
         {
-            int status = bladerf_set_frequency(dev, BLADERF_CHANNEL_RX(requestedChannel), deviceCenterFrequency);
-
-            if (status < 0) {
-                qWarning("BladeRF2Input::applySettings: bladerf_set_frequency(%lld) failed: %s",
-                        settings.m_centerFrequency, bladerf_strerror(status));
-            }
-            else
+            if (setDeviceCenterFrequency(dev, requestedChannel, deviceCenterFrequency))
             {
-                qDebug("BladeRF2Input::applySettings: bladerf_set_frequency(%lld)", settings.m_centerFrequency);
-
                 if (getMessageQueueToGUI())
                 {
                     int min, max, step;
@@ -882,6 +895,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         {
             DeviceBladeRF2Shared::MsgReportBuddyChange *report = DeviceBladeRF2Shared::MsgReportBuddyChange::create(
                     settings.m_centerFrequency,
+                    settings.m_LOppmTenths,
                     (int) settings.m_fcPos,
                     settings.m_devSampleRate,
                     true);
@@ -899,6 +913,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         {
             DeviceBladeRF2Shared::MsgReportBuddyChange *report = DeviceBladeRF2Shared::MsgReportBuddyChange::create(
                     settings.m_centerFrequency,
+                    settings.m_LOppmTenths,
                     (int) settings.m_fcPos,
                     settings.m_devSampleRate,
                     true);
@@ -910,6 +925,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
     qDebug() << "BladeRF2Input::applySettings: "
             << " m_centerFrequency: " << m_settings.m_centerFrequency << " Hz"
+            << " m_LOppmTenths: " << m_settings.m_LOppmTenths
             << " m_bandwidth: " << m_settings.m_bandwidth
             << " m_log2Decim: " << m_settings.m_log2Decim
             << " m_fcPos: " << m_settings.m_fcPos

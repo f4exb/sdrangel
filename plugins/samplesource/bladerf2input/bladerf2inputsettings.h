@@ -29,6 +29,7 @@ struct BladeRF2InputSettings {
     } fcPos_t;
 
     quint64 m_centerFrequency;
+    qint32  m_LOppmTenths;
     qint32 m_devSampleRate;
     qint32 m_bandwidth;
     int m_gainMode;

@@ -803,6 +803,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
             DeviceBladeRF2Shared::MsgReportBuddyChange *report = DeviceBladeRF2Shared::MsgReportBuddyChange::create(
                     settings.m_centerFrequency,
                     0,
+                    0,
                     settings.m_devSampleRate,
                     false);
             (*itSource)->getSampleSourceInputMessageQueue()->push(report);
@@ -819,6 +820,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
         {
             DeviceBladeRF2Shared::MsgReportBuddyChange *report = DeviceBladeRF2Shared::MsgReportBuddyChange::create(
                     settings.m_centerFrequency,
+                    0,
                     0,
                     settings.m_devSampleRate,
                     false);

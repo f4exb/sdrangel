@@ -26,6 +26,7 @@ BladeRF2InputSettings::BladeRF2InputSettings()
 void BladeRF2InputSettings::resetToDefaults()
 {
     m_centerFrequency = 435000*1000;
+    m_LOppmTenths = 0;
     m_devSampleRate = 3072000;
     m_bandwidth = 1500000;
     m_gainMode = 0;
@@ -51,6 +52,7 @@ QByteArray BladeRF2InputSettings::serialize() const
     s.writeS32(7, (int) m_fcPos);
     s.writeBool(8, m_dcBlock);
     s.writeBool(9, m_iqCorrection);
+    s.writeS32(10, m_LOppmTenths);
 
     return s.final();
 }
@@ -79,6 +81,7 @@ bool BladeRF2InputSettings::deserialize(const QByteArray& data)
         m_fcPos = (fcPos_t) intval;
         d.readBool(8, &m_dcBlock);
         d.readBool(9, &m_iqCorrection);
+        d.readS32(10, &m_LOppmTenths);
 
         return true;
     }

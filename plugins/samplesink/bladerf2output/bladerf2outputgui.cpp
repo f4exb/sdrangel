@@ -67,8 +67,6 @@ BladeRF2OutputGui::BladeRF2OutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     ui->gain->setPageStep(1);
     ui->gain->setSingleStep(1);
 
-    ui->label_decim->setText(QString::fromUtf8("I\u2191"));
-
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(500);
