@@ -75,9 +75,9 @@ void BladeRF2OutputThread::run()
         int status;
 
         if (m_nbChannels > 1) {
-            status = bladerf_sync_config(m_dev, BLADERF_TX_X2, BLADERF_FORMAT_SC16_Q11, 64, 8192, 32, 10000);
+            status = bladerf_sync_config(m_dev, BLADERF_TX_X2, BLADERF_FORMAT_SC16_Q11, 64, 16384, 32, 1500);
         } else {
-            status = bladerf_sync_config(m_dev, BLADERF_TX_X1, BLADERF_FORMAT_SC16_Q11, 64, 8192, 32, 10000);
+            status = bladerf_sync_config(m_dev, BLADERF_TX_X1, BLADERF_FORMAT_SC16_Q11, 64, 8192, 32, 1500);
         }
 
         if (status < 0)
@@ -87,15 +87,19 @@ void BladeRF2OutputThread::run()
         else
         {
             qDebug("BladeRF2OutputThread::run: start running loop");
+
             while (m_running)
             {
-                if (m_nbChannels > 1) {
+                if (m_nbChannels > 1)
+                {
                     callbackMO(m_buf, DeviceBladeRF2::blockSize);
-                } else {
-                    callbackSO(m_buf, DeviceBladeRF2::blockSize);
+                    res = bladerf_sync_tx(m_dev, m_buf, DeviceBladeRF2::blockSize*m_nbChannels, 0, 1500);
                 }
-
-                res = bladerf_sync_tx(m_dev, m_buf, DeviceBladeRF2::blockSize, 0, 10000);
+                else
+                {
+                    callbackSO(m_buf, DeviceBladeRF2::blockSize);
+                    res = bladerf_sync_tx(m_dev, m_buf, DeviceBladeRF2::blockSize, 0, 1500);
+                }
 
                 if (res < 0)
                 {
@@ -103,6 +107,7 @@ void BladeRF2OutputThread::run()
                     break;
                 }
             }
+
             qDebug("BladeRF2OutputThread::run: stop running loop");
         }
     }
