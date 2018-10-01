@@ -42,6 +42,7 @@ SUBDIRS += plugins/samplesource/rtlsdr
 SUBDIRS += plugins/samplesource/testsource
 SUBDIRS += plugins/samplesink/filesink
 SUBDIRS += plugins/samplesink/bladerf1output
+SUBDIRS += plugins/samplesink/bladerf2output
 SUBDIRS += plugins/samplesink/hackrfoutput
 SUBDIRS += plugins/samplesink/limesdroutput
 SUBDIRS += plugins/samplesink/plutosdroutput
