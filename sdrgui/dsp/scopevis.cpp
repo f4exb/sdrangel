@@ -232,7 +232,13 @@ void ScopeVis::processMemoryTrace()
 {
     if ((m_currentTraceMemoryIndex > 0) && (m_currentTraceMemoryIndex < m_nbTraceMemories))
     {
-        SampleVector::const_iterator mend = m_traceDiscreteMemory.at(m_currentTraceMemoryIndex).m_endPoint;
+        int traceMemoryIndex = m_traceDiscreteMemory.currentIndex() - m_currentTraceMemoryIndex; // actual index in memory bank
+
+        if (traceMemoryIndex < 0) {
+            traceMemoryIndex += m_nbTraceMemories;
+        }
+
+        SampleVector::const_iterator mend = m_traceDiscreteMemory.at(traceMemoryIndex).m_endPoint;
         SampleVector::const_iterator mbegin = mend - m_traceSize;
         SampleVector::const_iterator mbegin_tb = mbegin - m_maxTraceDelay;
         m_nbSamples = m_traceSize + m_maxTraceDelay;
