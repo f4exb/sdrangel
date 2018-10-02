@@ -81,18 +81,23 @@ void FileSourceInput::openFileStream()
 
 	m_ifstream.open(m_fileName.toStdString().c_str(), std::ios::binary | std::ios::ate);
 	quint64 fileSize = m_ifstream.tellg();
-	m_ifstream.seekg(0,std::ios_base::beg);
-	FileRecord::Header header;
-	FileRecord::readHeader(m_ifstream, header);
 
-	m_sampleRate = header.sampleRate;
-	m_centerFrequency = header.centerFrequency;
-	m_startingTimeStamp = header.startTimeStamp;
-	m_sampleSize = header.sampleSize;
+	if (fileSize > sizeof(FileRecord::Header))
+	{
+        // TODO: add CRC
+	    m_ifstream.seekg(0,std::ios_base::beg);
+	    FileRecord::Header header;
+	    FileRecord::readHeader(m_ifstream, header);
 
-	if (fileSize > sizeof(FileRecord::Header)) {
-		m_recordLength = (fileSize - sizeof(FileRecord::Header)) / (4 * m_sampleRate);
-	} else {
+	    m_sampleRate = header.sampleRate;
+	    m_centerFrequency = header.centerFrequency;
+	    m_startingTimeStamp = header.startTimeStamp;
+	    m_sampleSize = header.sampleSize;
+
+	    m_recordLength = (fileSize - sizeof(FileRecord::Header)) / (4 * m_sampleRate);
+	}
+	else
+	{
 		m_recordLength = 0;
 	}
 
@@ -107,6 +112,10 @@ void FileSourceInput::openFileStream()
 	            m_startingTimeStamp,
 	            m_recordLength); // file stream data
 	    getMessageQueueToGUI()->push(report);
+	}
+
+	if (m_recordLength == 0) {
+	    m_ifstream.close();
 	}
 }
 
@@ -132,6 +141,12 @@ void FileSourceInput::init()
 
 bool FileSourceInput::start()
 {
+    if (!m_ifstream.is_open())
+    {
+        qWarning("FileSourceInput::start: file not open. not starting");
+        return false;
+    }
+
 	QMutexLocker mutexLocker(&m_mutex);
 	qDebug() << "FileSourceInput::start";
 
