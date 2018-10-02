@@ -298,6 +298,11 @@ bool BladeRF2Output::start()
                 ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_sink->setThread(0);
             }
 
+            // close all channels
+            for (int i = bladeRF2OutputThread->getNbChannels()-1; i >= 0; i--) {
+                m_deviceShared.m_dev->closeTx(i);
+            }
+
             needsStart = true;
         }
         else
@@ -320,11 +325,9 @@ bool BladeRF2Output::start()
 
     if (needsStart)
     {
-        qDebug("BladeRF2Output::start: enabling channel(s) and (re)sart buddy thread");
+        qDebug("BladeRF2Output::start: enabling channel(s) and (re)starting the thread");
 
-        int nbChannels = bladeRF2OutputThread->getNbChannels();
-
-        for (int i = 0; i < nbChannels; i++)
+        for (unsigned int i = 0; i < bladeRF2OutputThread->getNbChannels(); i++) // open all channels
         {
             if (!m_deviceShared.m_dev->openTx(i)) {
                 qCritical("BladeRF2Output::start: channel %u cannot be enabled", i);
@@ -429,16 +432,22 @@ void BladeRF2Output::stop()
             ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_sink->setThread(0);
         }
 
-        for (int i = 0; i < nbOriginalChannels-1; i++) // close all inactive channels
-        {
-            if (fifos[i] == 0) {
-                m_deviceShared.m_dev->closeTx(i);
-            }
+        // close all channels
+        for (int i = nbOriginalChannels-1; i >= 0; i--) {
+            m_deviceShared.m_dev->closeTx(i);
         }
 
-        m_deviceShared.m_dev->closeTx(requestedChannel); // close the last channel
+        if (stillActiveFIFO)
+        {
+            qDebug("BladeRF2Output::stop: enabling channel(s) and restarting the thread");
 
-        if (stillActiveFIFO) {
+            for (unsigned int i = 0; i < bladeRF2OutputThread->getNbChannels(); i++) // open all channels
+            {
+                if (!m_deviceShared.m_dev->openTx(i)) {
+                    qCritical("BladeRF2Output::start: channel %u cannot be enabled", i);
+                }
+            }
+
             bladeRF2OutputThread->startWork();
         }
     }

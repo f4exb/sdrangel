@@ -150,7 +150,7 @@ bool DeviceBladeRF2::openRx(int channel)
 
         if (status < 0)
         {
-            qCritical("DeviceBladeRF2::openRx: Failed to enable Rx channel %d: %s",
+            qCritical("DeviceBladeRF2::openRx: failed to enable Rx channel %d: %s",
                     channel, bladerf_strerror(status));
             return false;
         }
@@ -163,8 +163,8 @@ bool DeviceBladeRF2::openRx(int channel)
     }
     else
     {
-        qCritical("DeviceBladeRF2::openRx: Rx channel %d already opened", channel);
-        return false;
+        qDebug("DeviceBladeRF2::openRx: Rx channel %d already opened", channel);
+        return true;
     }
 }
 
@@ -201,8 +201,8 @@ bool DeviceBladeRF2::openTx(int channel)
     }
     else
     {
-        qCritical("DeviceBladeRF2::openTx: Tx channel %d already opened", channel);
-        return false;
+        qDebug("DeviceBladeRF2::openTx: Tx channel %d already opened", channel);
+        return true;
     }
 }
 
@@ -220,26 +220,18 @@ void DeviceBladeRF2::closeRx(int channel)
 
     if (m_rxOpen[channel])
     {
-        for (int i = 0; i < m_nbRxChannels; i++)
-        {
-            if ((i != channel) && (m_rxOpen[i]))
-            {
-                qDebug("DeviceBladeRF2::closeRx: not closing channel %d as %d is still open", channel, i);
-            }
-        }
-
         int status = bladerf_enable_module(m_dev, BLADERF_CHANNEL_RX(channel), false);
         m_rxOpen[channel] = false;
 
         if (status < 0) {
-            qCritical("DeviceBladeRF2::closeRx: cannot close channel %d: %s", channel, bladerf_strerror(status));
+            qCritical("DeviceBladeRF2::closeRx: failed to disable Rx channel %d: %s", channel, bladerf_strerror(status));
         } else {
-            qDebug("DeviceBladeRF2::closeRx: channel %d closed", channel);
+            qDebug("DeviceBladeRF2::closeRx: Rx channel %d disabled", channel);
         }
     }
     else
     {
-        qCritical("DeviceBladeRF2::closeRx: Rx channel %d already closed", channel);
+        qDebug("DeviceBladeRF2::closeRx: Rx channel %d already closed", channel);
     }
 }
 
@@ -257,26 +249,18 @@ void DeviceBladeRF2::closeTx(int channel)
 
     if (m_txOpen[channel])
     {
-        for (int i = 0; i < m_nbTxChannels; i++)
-        {
-            if ((i != channel) && (m_txOpen[i]))
-            {
-                qDebug("DeviceBladeRF2::closeTx: not closing channel %d as %d is still open", channel, i);
-            }
-        }
-
         int status = bladerf_enable_module(m_dev, BLADERF_CHANNEL_TX(channel), false);
         m_txOpen[channel] = false;
 
         if (status < 0) {
-            qCritical("DeviceBladeRF2::closeTx: cannot close channel %d: %s", channel, bladerf_strerror(status));
+            qCritical("DeviceBladeRF2::closeTx: failed to disable Tx channel %d: %s", channel, bladerf_strerror(status));
         } else {
-            qDebug("DeviceBladeRF2::closeTx: channel %d closed", channel);
+            qDebug("DeviceBladeRF2::closeTx: Tx channel %d disabled", channel);
         }
     }
     else
     {
-        qCritical("DeviceBladeRF2::closeTx: Rx channel %d already closed", channel);
+        qDebug("DeviceBladeRF2::closeTx: Rx channel %d already closed", channel);
     }
 }
 
