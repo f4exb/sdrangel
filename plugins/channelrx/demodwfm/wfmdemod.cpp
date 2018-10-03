@@ -289,9 +289,11 @@ void WFMDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffse
     if ((inputSampleRate != m_inputSampleRate) || force)
     {
         qDebug() << "WFMDemod::applyChannelSettings: m_interpolator.create";
+        m_settingsMutex.lock();
         m_interpolator.create(16, inputSampleRate, m_settings.m_afBandwidth);
         m_interpolatorDistanceRemain = (Real) inputSampleRate / (Real) m_audioSampleRate;
         m_interpolatorDistance =  (Real) inputSampleRate / (Real) m_audioSampleRate;
+        m_settingsMutex.unlock();
         qDebug() << "WFMDemod::applySettings: m_rfFilter->create_filter";
         Real lowCut = -(m_settings.m_rfBandwidth / 2.0) / inputSampleRate;
         Real hiCut  = (m_settings.m_rfBandwidth / 2.0) / inputSampleRate;
