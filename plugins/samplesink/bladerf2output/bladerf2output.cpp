@@ -686,6 +686,9 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
     struct bladerf *dev = m_deviceShared.m_dev->getDev();
     int requestedChannel = m_deviceAPI->getItemIndex();
     int nbChannels = getNbChannels();
+    qint64 deviceCenterFrequency = settings.m_centerFrequency;
+    deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
+    deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
 
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
     {
@@ -778,6 +781,8 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
     }
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+        || (m_settings.m_transverterMode != settings.m_transverterMode)
+        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency)
         || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
         || (m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
     {
@@ -786,7 +791,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
 
         if (dev != 0)
         {
-            if (setDeviceCenterFrequency(dev, requestedChannel, settings.m_centerFrequency))
+            if (setDeviceCenterFrequency(dev, requestedChannel, deviceCenterFrequency))
             {
                 if (getMessageQueueToGUI())
                 {
@@ -869,6 +874,9 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
     m_settings = settings;
 
     qDebug() << "BladeRF2Output::applySettings: "
+            << " m_transverterMode: " << m_settings.m_transverterMode
+            << " m_transverterDeltaFrequency: " << m_settings.m_transverterDeltaFrequency
+            << " deviceCenterFrequency: " << deviceCenterFrequency
             << " m_centerFrequency: " << m_settings.m_centerFrequency << " Hz"
             << " m_LOppmTenths: " << m_settings.m_LOppmTenths
             << " m_bandwidth: " << m_settings.m_bandwidth
@@ -931,6 +939,12 @@ int BladeRF2Output::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("globalGain")) {
         settings.m_globalGain = response.getBladeRf2OutputSettings()->getGlobalGain();
     }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
+        settings.m_transverterDeltaFrequency = response.getBladeRf2OutputSettings()->getTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("transverterMode")) {
+        settings.m_transverterMode = response.getBladeRf2OutputSettings()->getTransverterMode() != 0;
+    }
 
     MsgConfigureBladeRF2 *msg = MsgConfigureBladeRF2::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -962,6 +976,8 @@ void BladeRF2Output::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& 
     response.getBladeRf2OutputSettings()->setLog2Interp(settings.m_log2Interp);
     response.getBladeRf2OutputSettings()->setBiasTee(settings.m_biasTee ? 1 : 0);
     response.getBladeRf2OutputSettings()->setGlobalGain(settings.m_globalGain);
+    response.getBladeRf2OutputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    response.getBladeRf2OutputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
 }
 
 void BladeRF2Output::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)

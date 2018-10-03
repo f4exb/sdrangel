@@ -36,6 +36,8 @@ void BladeRF2InputSettings::resetToDefaults()
     m_fcPos = FC_POS_INFRA;
     m_dcBlock = false;
     m_iqCorrection = false;
+    m_transverterMode = false;
+    m_transverterDeltaFrequency = 0;
     m_fileRecordName = "";
 }
 
@@ -53,6 +55,8 @@ QByteArray BladeRF2InputSettings::serialize() const
     s.writeBool(8, m_dcBlock);
     s.writeBool(9, m_iqCorrection);
     s.writeS32(10, m_LOppmTenths);
+    s.writeBool(11, m_transverterMode);
+    s.writeS64(12, m_transverterDeltaFrequency);
 
     return s.final();
 }
@@ -82,6 +86,8 @@ bool BladeRF2InputSettings::deserialize(const QByteArray& data)
         d.readBool(8, &m_dcBlock);
         d.readBool(9, &m_iqCorrection);
         d.readS32(10, &m_LOppmTenths);
+        d.readBool(11, &m_transverterMode, false);
+        d.readS64(12, &m_transverterDeltaFrequency, 0);
 
         return true;
     }

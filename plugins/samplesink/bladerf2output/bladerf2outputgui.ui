@@ -261,16 +261,6 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="5">
-      <widget class="ButtonSwitch" name="biasTee">
-       <property name="toolTip">
-        <string>Bias Tee</string>
-       </property>
-       <property name="text">
-        <string>BT</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="4">
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
@@ -283,6 +273,22 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item row="0" column="5">
+      <widget class="TransverterButton" name="transverter">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Transverter frequency translation dialog</string>
+       </property>
+       <property name="text">
+        <string>X</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -411,7 +417,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_gain" columnstretch="0,0,0">
+    <layout class="QGridLayout" name="gridLayout_gain" columnstretch="0,0,0,0">
      <property name="spacing">
       <number>3</number>
      </property>
@@ -445,6 +451,16 @@
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="ButtonSwitch" name="biasTee">
+       <property name="toolTip">
+        <string>Bias Tee</string>
+       </property>
+       <property name="text">
+        <string>BT</string>
        </property>
       </widget>
      </item>
@@ -487,6 +503,11 @@
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TransverterButton</class>
+   <extends>QPushButton</extends>
+   <header>gui/transverterbutton.h</header>
   </customwidget>
  </customwidgets>
  <resources>

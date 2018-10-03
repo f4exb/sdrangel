@@ -62,6 +62,12 @@ public:
     qint32 getLog2Interp();
     void setLog2Interp(qint32 log2_interp);
 
+    qint32 getTransverterMode();
+    void setTransverterMode(qint32 transverter_mode);
+
+    qint64 getTransverterDeltaFrequency();
+    void setTransverterDeltaFrequency(qint64 transverter_delta_frequency);
+
 
     virtual bool isSet() override;
 
@@ -86,6 +92,12 @@ private:
 
     qint32 log2_interp;
     bool m_log2_interp_isSet;
+
+    qint32 transverter_mode;
+    bool m_transverter_mode_isSet;
+
+    qint64 transverter_delta_frequency;
+    bool m_transverter_delta_frequency_isSet;
 
 };
 

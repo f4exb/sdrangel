@@ -42,6 +42,10 @@ SWGBladeRF2OutputSettings::SWGBladeRF2OutputSettings() {
     m_bias_tee_isSet = false;
     log2_interp = 0;
     m_log2_interp_isSet = false;
+    transverter_mode = 0;
+    m_transverter_mode_isSet = false;
+    transverter_delta_frequency = 0L;
+    m_transverter_delta_frequency_isSet = false;
 }
 
 SWGBladeRF2OutputSettings::~SWGBladeRF2OutputSettings() {
@@ -64,10 +68,16 @@ SWGBladeRF2OutputSettings::init() {
     m_bias_tee_isSet = false;
     log2_interp = 0;
     m_log2_interp_isSet = false;
+    transverter_mode = 0;
+    m_transverter_mode_isSet = false;
+    transverter_delta_frequency = 0L;
+    m_transverter_delta_frequency_isSet = false;
 }
 
 void
 SWGBladeRF2OutputSettings::cleanup() {
+
+
 
 
 
@@ -101,6 +111,10 @@ SWGBladeRF2OutputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&bias_tee, pJson["biasTee"], "qint32", "");
     
     ::SWGSDRangel::setValue(&log2_interp, pJson["log2Interp"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
     
 }
 
@@ -138,6 +152,12 @@ SWGBladeRF2OutputSettings::asJsonObject() {
     }
     if(m_log2_interp_isSet){
         obj->insert("log2Interp", QJsonValue(log2_interp));
+    }
+    if(m_transverter_mode_isSet){
+        obj->insert("transverterMode", QJsonValue(transverter_mode));
+    }
+    if(m_transverter_delta_frequency_isSet){
+        obj->insert("transverterDeltaFrequency", QJsonValue(transverter_delta_frequency));
     }
 
     return obj;
@@ -213,6 +233,26 @@ SWGBladeRF2OutputSettings::setLog2Interp(qint32 log2_interp) {
     this->m_log2_interp_isSet = true;
 }
 
+qint32
+SWGBladeRF2OutputSettings::getTransverterMode() {
+    return transverter_mode;
+}
+void
+SWGBladeRF2OutputSettings::setTransverterMode(qint32 transverter_mode) {
+    this->transverter_mode = transverter_mode;
+    this->m_transverter_mode_isSet = true;
+}
+
+qint64
+SWGBladeRF2OutputSettings::getTransverterDeltaFrequency() {
+    return transverter_delta_frequency;
+}
+void
+SWGBladeRF2OutputSettings::setTransverterDeltaFrequency(qint64 transverter_delta_frequency) {
+    this->transverter_delta_frequency = transverter_delta_frequency;
+    this->m_transverter_delta_frequency_isSet = true;
+}
+
 
 bool
 SWGBladeRF2OutputSettings::isSet(){
@@ -225,6 +265,8 @@ SWGBladeRF2OutputSettings::isSet(){
         if(m_global_gain_isSet){ isObjectUpdated = true; break;}
         if(m_bias_tee_isSet){ isObjectUpdated = true; break;}
         if(m_log2_interp_isSet){ isObjectUpdated = true; break;}
+        if(m_transverter_mode_isSet){ isObjectUpdated = true; break;}
+        if(m_transverter_delta_frequency_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

@@ -50,6 +50,10 @@ SWGBladeRF2InputSettings::SWGBladeRF2InputSettings() {
     m_dc_block_isSet = false;
     iq_correction = 0;
     m_iq_correction_isSet = false;
+    transverter_mode = 0;
+    m_transverter_mode_isSet = false;
+    transverter_delta_frequency = 0L;
+    m_transverter_delta_frequency_isSet = false;
     file_record_name = nullptr;
     m_file_record_name_isSet = false;
 }
@@ -82,12 +86,18 @@ SWGBladeRF2InputSettings::init() {
     m_dc_block_isSet = false;
     iq_correction = 0;
     m_iq_correction_isSet = false;
+    transverter_mode = 0;
+    m_transverter_mode_isSet = false;
+    transverter_delta_frequency = 0L;
+    m_transverter_delta_frequency_isSet = false;
     file_record_name = new QString("");
     m_file_record_name_isSet = false;
 }
 
 void
 SWGBladeRF2InputSettings::cleanup() {
+
+
 
 
 
@@ -136,6 +146,10 @@ SWGBladeRF2InputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
     
     ::SWGSDRangel::setValue(&iq_correction, pJson["iqCorrection"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
@@ -187,6 +201,12 @@ SWGBladeRF2InputSettings::asJsonObject() {
     }
     if(m_iq_correction_isSet){
         obj->insert("iqCorrection", QJsonValue(iq_correction));
+    }
+    if(m_transverter_mode_isSet){
+        obj->insert("transverterMode", QJsonValue(transverter_mode));
+    }
+    if(m_transverter_delta_frequency_isSet){
+        obj->insert("transverterDeltaFrequency", QJsonValue(transverter_delta_frequency));
     }
     if(file_record_name != nullptr && *file_record_name != QString("")){
         toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
@@ -305,6 +325,26 @@ SWGBladeRF2InputSettings::setIqCorrection(qint32 iq_correction) {
     this->m_iq_correction_isSet = true;
 }
 
+qint32
+SWGBladeRF2InputSettings::getTransverterMode() {
+    return transverter_mode;
+}
+void
+SWGBladeRF2InputSettings::setTransverterMode(qint32 transverter_mode) {
+    this->transverter_mode = transverter_mode;
+    this->m_transverter_mode_isSet = true;
+}
+
+qint64
+SWGBladeRF2InputSettings::getTransverterDeltaFrequency() {
+    return transverter_delta_frequency;
+}
+void
+SWGBladeRF2InputSettings::setTransverterDeltaFrequency(qint64 transverter_delta_frequency) {
+    this->transverter_delta_frequency = transverter_delta_frequency;
+    this->m_transverter_delta_frequency_isSet = true;
+}
+
 QString*
 SWGBladeRF2InputSettings::getFileRecordName() {
     return file_record_name;
@@ -331,6 +371,8 @@ SWGBladeRF2InputSettings::isSet(){
         if(m_fc_pos_isSet){ isObjectUpdated = true; break;}
         if(m_dc_block_isSet){ isObjectUpdated = true; break;}
         if(m_iq_correction_isSet){ isObjectUpdated = true; break;}
+        if(m_transverter_mode_isSet){ isObjectUpdated = true; break;}
+        if(m_transverter_delta_frequency_isSet){ isObjectUpdated = true; break;}
         if(file_record_name != nullptr && *file_record_name != QString("")){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;

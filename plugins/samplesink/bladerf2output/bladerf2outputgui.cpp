@@ -134,6 +134,32 @@ bool BladeRF2OutputGui::deserialize(const QByteArray& data)
     }
 }
 
+void BladeRF2OutputGui::updateFrequencyLimits()
+{
+    // values in kHz
+    uint64_t f_min, f_max;
+    int step;
+    qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
+    m_sampleSink->getFrequencyRange(f_min, f_max, step);
+    qint64 minLimit = f_min/1000 + deltaFrequency;
+    qint64 maxLimit = f_max/1000 + deltaFrequency;
+
+    minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
+    maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+
+    qDebug("BladeRF2OutputGui::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
+
+    ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+}
+
+void BladeRF2OutputGui::setCenterFrequencySetting(uint64_t kHzValue)
+{
+    int64_t centerFrequency = kHzValue*1000;
+
+    m_settings.m_centerFrequency = centerFrequency < 0 ? 0 : (uint64_t) centerFrequency;
+    ui->centerFrequency->setToolTip(QString("Main center frequency in kHz (LO: %1 kHz)").arg(centerFrequency/1000));
+}
+
 bool BladeRF2OutputGui::handleMessage(const Message& message)
 {
     if (BladeRF2Output::MsgConfigureBladeRF2::match(message))
@@ -279,6 +305,16 @@ void BladeRF2OutputGui::on_gain_valueChanged(int value)
 {
     ui->gainText->setText(tr("%1 dB").arg(value));
     m_settings.m_globalGain = value;
+    sendSettings();
+}
+
+void BladeRF2OutputGui::on_transverter_clicked()
+{
+    m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
+    m_settings.m_transverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+    qDebug("LimeSDRInputGUI::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
+    updateFrequencyLimits();
+    setCenterFrequencySetting(ui->centerFrequency->getValueNew());
     sendSettings();
 }
 

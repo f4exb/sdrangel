@@ -39,6 +39,8 @@ struct BladeRF2InputSettings {
     fcPos_t m_fcPos;
     bool m_dcBlock;
     bool m_iqCorrection;
+    bool     m_transverterMode;
+    qint64   m_transverterDeltaFrequency;
     QString m_fileRecordName;
 
     BladeRF2InputSettings();

@@ -70,6 +70,8 @@ private:
     void displaySettings();
     void sendSettings();
     void updateSampleRateAndFrequency();
+    void updateFrequencyLimits();
+    void setCenterFrequencySetting(uint64_t kHzValue);
 
 private slots:
     void handleInputMessages();
@@ -81,6 +83,7 @@ private slots:
     void on_interp_currentIndexChanged(int index);
     void on_gain_valueChanged(int value);
     void on_startStop_toggled(bool checked);
+    void on_transverter_clicked();
     void updateHardware();
     void updateStatus();
 };

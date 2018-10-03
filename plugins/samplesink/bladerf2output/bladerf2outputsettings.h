@@ -28,6 +28,8 @@ struct BladeRF2OutputSettings {
     int m_globalGain;
     bool m_biasTee;
     quint32 m_log2Interp;
+    bool     m_transverterMode;
+    qint64   m_transverterDeltaFrequency;
 
     BladeRF2OutputSettings();
     void resetToDefaults();

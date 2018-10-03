@@ -24,6 +24,11 @@ BladeRF2InputSettings:
       type: integer
     iqCorrection:
       type: integer
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64            
     fileRecordName:
       type: string
 
@@ -61,6 +66,11 @@ BladeRF2OutputSettings:
       type: integer
     log2Interp:
       type: integer
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64            
 
 BladeRF2OutputReport:
   description: BladeRF2

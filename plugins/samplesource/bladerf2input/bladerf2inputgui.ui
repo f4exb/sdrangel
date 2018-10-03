@@ -310,12 +310,18 @@
       </widget>
      </item>
      <item row="0" column="7">
-      <widget class="ButtonSwitch" name="biasTee">
+      <widget class="TransverterButton" name="transverter">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
        <property name="toolTip">
-        <string>Bias Tee</string>
+        <string>Transverter frequency translation dialog</string>
        </property>
        <property name="text">
-        <string>BT</string>
+        <string>X</string>
        </property>
       </widget>
      </item>
@@ -487,7 +493,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0,0">
+    <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0,0,0">
      <property name="spacing">
       <number>3</number>
      </property>
@@ -531,6 +537,16 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="4">
+      <widget class="ButtonSwitch" name="biasTee">
+       <property name="toolTip">
+        <string>Bias Tee</string>
+       </property>
+       <property name="text">
+        <string>BT</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -570,6 +586,11 @@
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TransverterButton</class>
+   <extends>QPushButton</extends>
+   <header>gui/transverterbutton.h</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -34,6 +34,8 @@ void BladeRF2OutputSettings::resetToDefaults()
     m_globalGain = -3;
     m_biasTee = false;
     m_log2Interp = 0;
+    m_transverterMode = false;
+    m_transverterDeltaFrequency = 0;
 }
 
 QByteArray BladeRF2OutputSettings::serialize() const
@@ -46,6 +48,8 @@ QByteArray BladeRF2OutputSettings::serialize() const
     s.writeS32(4, m_globalGain);
     s.writeBool(5, m_biasTee);
     s.writeU32(6, m_log2Interp);
+    s.writeBool(7, m_transverterMode);
+    s.writeS64(8, m_transverterDeltaFrequency);
 
     return s.final();
 }
@@ -68,6 +72,8 @@ bool BladeRF2OutputSettings::deserialize(const QByteArray& data)
         d.readS32(4, &m_globalGain);
         d.readBool(5, &m_biasTee);
         d.readU32(6, &m_log2Interp);
+        d.readBool(7, &m_transverterMode, false);
+        d.readS64(8, &m_transverterDeltaFrequency, 0);
 
         return true;
     }

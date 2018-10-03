@@ -75,6 +75,12 @@ public:
     qint32 getIqCorrection();
     void setIqCorrection(qint32 iq_correction);
 
+    qint32 getTransverterMode();
+    void setTransverterMode(qint32 transverter_mode);
+
+    qint64 getTransverterDeltaFrequency();
+    void setTransverterDeltaFrequency(qint64 transverter_delta_frequency);
+
     QString* getFileRecordName();
     void setFileRecordName(QString* file_record_name);
 
@@ -114,6 +120,12 @@ private:
 
     qint32 iq_correction;
     bool m_iq_correction_isSet;
+
+    qint32 transverter_mode;
+    bool m_transverter_mode_isSet;
+
+    qint64 transverter_delta_frequency;
+    bool m_transverter_delta_frequency_isSet;
 
     QString* file_record_name;
     bool m_file_record_name_isSet;
