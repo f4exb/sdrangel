@@ -106,7 +106,7 @@ bool AudioOutput::start(int device, int rate)
 
         if (m_audioFormat.sampleSize() != 16)
         {
-            qWarning("AudioOutput::start: Audio device ( %s ) failed", qPrintable(devInfo.defaultOutputDevice().deviceName()));
+            qWarning("AudioOutput::start: Audio device '%s' failed", qPrintable(devInfo.defaultOutputDevice().deviceName()));
             return false;
         }
 
