@@ -669,18 +669,24 @@ void AudioDeviceManager::inputInfosCleanup()
     deviceNames.insert(m_defaultDeviceName);
     QList<QAudioDeviceInfo>::const_iterator itd = m_inputDevicesInfo.begin();
 
-    for (; itd != m_inputDevicesInfo.end(); ++itd) {
+    for (; itd != m_inputDevicesInfo.end(); ++itd)
+    {
+        qDebug("AudioDeviceManager::inputInfosCleanup: device: %s", qPrintable(itd->deviceName()));
         deviceNames.insert(itd->deviceName());
     }
 
     QMap<QString, InputDeviceInfo>::iterator itm = m_audioInputInfos.begin();
 
-    for (; itm != m_audioInputInfos.end(); ++itm)
+    for (; itm != m_audioInputInfos.end();)
     {
         if (!deviceNames.contains(itm.key()))
         {
             qDebug("AudioDeviceManager::inputInfosCleanup: removing key: %s", qPrintable(itm.key()));
-            m_audioInputInfos.remove(itm.key());
+            m_audioInputInfos.erase(itm++);
+        }
+        else
+        {
+            ++itm;
         }
     }
 }
@@ -691,18 +697,24 @@ void AudioDeviceManager::outputInfosCleanup()
     deviceNames.insert(m_defaultDeviceName);
     QList<QAudioDeviceInfo>::const_iterator itd = m_outputDevicesInfo.begin();
 
-    for (; itd != m_outputDevicesInfo.end(); ++itd) {
+    for (; itd != m_outputDevicesInfo.end(); ++itd)
+    {
+        qDebug("AudioDeviceManager::outputInfosCleanup: device: %s", qPrintable(itd->deviceName()));
         deviceNames.insert(itd->deviceName());
     }
 
     QMap<QString, OutputDeviceInfo>::iterator itm = m_audioOutputInfos.begin();
 
-    for (; itm != m_audioOutputInfos.end(); ++itm)
+    for (; itm != m_audioOutputInfos.end();)
     {
         if (!deviceNames.contains(itm.key()))
         {
             qDebug("AudioDeviceManager::outputInfosCleanup: removing key: %s", qPrintable(itm.key()));
-            m_audioOutputInfos.remove(itm.key());
+            m_audioOutputInfos.erase(itm++);
+        }
+        else
+        {
+            ++itm;
         }
     }
 }
