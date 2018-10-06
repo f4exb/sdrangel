@@ -56,12 +56,15 @@ QDataStream& operator>>(QDataStream& ds, AudioDeviceManager::OutputDeviceInfo& i
 
 AudioDeviceManager::AudioDeviceManager()
 {
+    qDebug("AudioDeviceManager::AudioDeviceManager: scan input devices");
     m_inputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
-    m_outputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
 
     for (int i = 0; i < m_inputDevicesInfo.size(); i++) {
         qDebug("AudioDeviceManager::AudioDeviceManager: input device #%d: %s", i, qPrintable(m_inputDevicesInfo[i].deviceName()));
     }
+
+    qDebug("AudioDeviceManager::AudioDeviceManager: scan output devices");
+    m_outputDevicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
 
     for (int i = 0; i < m_outputDevicesInfo.size(); i++) {
         qDebug("AudioDeviceManager::AudioDeviceManager: output device #%d: %s", i, qPrintable(m_outputDevicesInfo[i].deviceName()));
