@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifdef USE_SSE2
+#if 0 //def USE_SSE2
 #include <emmintrin.h>
 #endif
 
@@ -416,7 +416,7 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 
 	m_currentSpectrum = &spectrum; // Store spectrum for current spectrum line display
 
-#ifdef USE_SSE2
+#if 0 //def USE_SSE2
     if(m_decay >= 0) { // normal
         const __m128 refl = {m_referenceLevel, m_referenceLevel, m_referenceLevel, m_referenceLevel};
         const __m128 power = {m_powerRange, m_powerRange, m_powerRange, m_powerRange};
