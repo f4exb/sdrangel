@@ -100,8 +100,6 @@ It is recommended to add `-DRX_SAMPLE_24BIT=ON` on the cmake command line to act
 
 <h2>BladeRF classic (v.1)</h2>
 
-Linux only.
-
 [BladeRF1](https://www.nuand.com/bladerf-1) is supported through the libbladeRF library that should be installed in your system for proper build of the software and operation support. Add `libbladerf-dev` to the list of dependencies to install. Note that libbladeRF v2 is used since version 4.2.0 (git tag 2018.08).
 
 If you compile and use your own location for libbladeRF install directory you need to specify library and include locations. Example with `/opt/install/libbladerf` with the following defines on `cmake` command line:
@@ -116,7 +114,7 @@ The plugins used to support BladeRF classic are specific to this version of the 
 
 <h2>BladeRF micro (v.2)</h2>
 
-Linux only. From version 4.2.0
+From version 4.2.0. Output (Tx) for Linux only.
 
 [BladeRF 2 micro](https://www.nuand.com/bladerf-2-0-micro/) is also supported using libbladeRF library that should be installed and configured in the same way as for BladeRF1.
 
