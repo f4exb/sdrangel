@@ -13,6 +13,7 @@ sdrangelove.supp
 *.cs
 *.pro.user
 .idea/*
+rescuesdriq/rescuesdriq
 debian/sdrangel/*
 debian/sdrangel.substvars
 debian/files
