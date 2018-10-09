@@ -228,6 +228,25 @@ public:
 		{ }
 	};
 
+	class MsgReportHeaderCRC : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		bool isOK() const { return m_ok; }
+
+		static MsgReportHeaderCRC* create(bool ok) {
+			return new MsgReportHeaderCRC(ok);
+		}
+
+	protected:
+		bool m_ok;
+
+		MsgReportHeaderCRC(bool ok) :
+			Message(),
+			m_ok(ok)
+		{ }
+	};
+
 	FileSourceInput(DeviceSourceAPI *deviceAPI);
 	virtual ~FileSourceInput();
 	virtual void destroy();

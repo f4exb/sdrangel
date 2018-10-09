@@ -43,6 +43,7 @@ MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportHeaderCRC, Message)
 
 FileSourceInput::FileSourceInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -105,6 +106,11 @@ void FileSourceInput::openFileStream()
 	        qCritical("FileSourceInput::openFileStream: bad CRC32 for header: %s", qPrintable(crcHex));
 	        m_recordLength = 0;
 	    }
+
+		if (getMessageQueueToGUI()) {
+			MsgReportHeaderCRC *report = MsgReportHeaderCRC::create(crcOK);
+			getMessageQueueToGUI()->push(report);
+		}
 	}
 	else
 	{

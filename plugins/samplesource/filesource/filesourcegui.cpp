@@ -57,6 +57,7 @@ FileSourceGui::FileSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
 	ui->fileNameText->setText(m_fileName);
+	ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 
 	connect(&(m_deviceUISet->m_deviceSourceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -198,6 +199,17 @@ bool FileSourceGui::handleMessage(const Message& message)
 
         return true;
     }
+	else if (FileSourceInput::MsgReportHeaderCRC::match(message))
+	{
+		FileSourceInput::MsgReportHeaderCRC& notif = (FileSourceInput::MsgReportHeaderCRC&) message;
+		if (notif.isOK()) {
+			ui->crcLabel->setStyleSheet("QLabel { background-color : green; }");
+		} else {
+			ui->crcLabel->setStyleSheet("QLabel { background-color : red; }");
+		}
+
+		return true;
+	}
 	else
 	{
 		return false;
@@ -292,6 +304,7 @@ void FileSourceGui::on_showFileDialog_clicked(bool checked __attribute__((unused
 	{
 		m_fileName = fileName;
 		ui->fileNameText->setText(m_fileName);
+		ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 		configureFileName();
 	}
 }
