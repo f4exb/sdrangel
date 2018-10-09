@@ -1,3 +1,10 @@
+sdrangel (4.2.1-1) unstable; urgency=medium
+
+  * FileRecord improvement with robust header and some fixes. Fixes issue #206
+  * BladeRF2 MO Tx fix so that the two channels are used effectively
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 14 Oct 2018 21:14:18 +0200
+
 sdrangel (4.2.0-1) unstable; urgency=medium
 
   * LibbladeRF 2.0 support with BladeRF Micro

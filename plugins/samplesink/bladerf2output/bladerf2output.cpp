@@ -595,18 +595,16 @@ bool BladeRF2Output::handleMessage(const Message& message)
         if (dev) // The BladeRF device must have been open to do so
         {
             int requestedChannel = m_deviceAPI->getItemIndex();
-            int nbChannels = getNbChannels();
 
             if (report.getRxElseTx()) // Rx buddy change: check for sample rate change only
             {
-                tmp_uint = report.getDevSampleRate();
-                settings.m_devSampleRate = tmp_uint / (nbChannels == 0 ? 1 : nbChannels);
+                settings.m_devSampleRate = report.getDevSampleRate();
 //                status = bladerf_get_sample_rate(dev, BLADERF_CHANNEL_TX(requestedChannel), &tmp_uint);
 //
 //                if (status < 0) {
 //                    qCritical("BladeRF2Output::handleMessage: MsgReportBuddyChange: bladerf_get_sample_rate error: %s", bladerf_strerror(status));
 //                } else {
-//                    settings.m_devSampleRate = tmp_uint / (nbChannels == 0 ? 1 : nbChannels);
+//                    settings.m_devSampleRate = tmp_uint;
 //                }
             }
             else // Tx buddy change: check for: frequency, gain mode and value, bias tee, sample rate, bandwidth
@@ -732,7 +730,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
             unsigned int actualSamplerate;
 
             int status = bladerf_set_sample_rate(dev, BLADERF_CHANNEL_TX(requestedChannel),
-                    settings.m_devSampleRate * (nbChannels == 0 ? 1 : nbChannels),
+                    settings.m_devSampleRate,
                     &actualSamplerate);
 
             if (status < 0)
@@ -847,7 +845,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
                     settings.m_centerFrequency,
                     settings.m_LOppmTenths,
                     2,
-                    settings.m_devSampleRate * (nbChannels == 0 ? 1 : nbChannels), // need to forward actual rate to the Rx side
+                    settings.m_devSampleRate, // need to forward actual rate to the Rx side
                     false);
             (*itSource)->getSampleSourceInputMessageQueue()->push(report);
         }

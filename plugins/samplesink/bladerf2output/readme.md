@@ -8,18 +8,10 @@ This output sample sink plugin sends its samples to a [BladeRF2 device](https://
 
 The plugin will be built only if the [BladeRF host library](https://github.com/Nuand/bladeRF) is installed in your system. If you build it from source and install it in a custom location say: `/opt/install/libbladeRF` you will have to add `-DLIBBLADERF_INCLUDE_DIR=/opt/install/libbladeRF/include -DLIBBLADERF_LIBRARIES=/opt/install/libbladeRF/lib/libbladeRF.so` to the cmake command line.
 
-Note that the libbladeRF v2 (specifically the git tag 2018.08) is used.
+Note that the libbladeRF v2 (specifically the git tag 2018.08) is used. The FPGA image v0.7.3 should be used accordingly. The FPGA .rbf file should be copied to the folder where the `sdrangel` binary resides. You can download FPGA images from [here](https://www.nuand.com/fpga_images/)
 
 The BladeRF Host library is also provided by many Linux distributions (check its version) and is built in the SDRangel binary releases.
-
-<h2>Multiple Output (MO) mode</h2>
-
-If two device sets one for each Tx channel are opened then the SO/MO mode switch is governed by which channels are effectively streaming. As soon as the Tx2 (channel 1) is running then the MO mode is engaged.
-
-The MO mode triggers the doubling of the sample rate and since the sample rate is common to the DAC and ADC it is also doubled for Rx channels. If some device sets for Rx channels are present then the sample rate in these device sets is automatically adjusted.
-
-For example the channel 0 is started alone at a sample rate of 3 MS/s and a sibling Rx channel is also handled in another device set. Then the sample rate of this Rx channel is also 3 MS/s. If the second Tx channel is started then the sample rate is doubled to 6 MS/s for the Tx channels and also for the Rx channel. If the second Tx channel is stopped then a transistion from MO to SO (Single Output) occurs and the sample rate is returned to 3 MS/s for all Tx and Rx channels present. 
-
+ 
 <h2>Interface</h2>
 
 ![BladeRF2 output plugin GUI](../../../doc/img/BladeRF2Output_plugin.png)

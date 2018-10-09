@@ -184,7 +184,7 @@ bool DeviceBladeRF2::openTx(int channel)
 
     if (!m_txOpen[channel])
     {
-        status = bladerf_enable_module(m_dev, BLADERF_CHANNEL_TX(0), true);
+        status = bladerf_enable_module(m_dev, BLADERF_CHANNEL_TX(channel), true);
 
         if (status < 0)
         {
