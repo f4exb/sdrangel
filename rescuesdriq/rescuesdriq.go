@@ -1,41 +1,39 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
+	"encoding/binary"
 	"flag"
 	"fmt"
-    "bufio"
-    "io"
-    "os"
-    "bytes"
-    "encoding/binary"
-    "time"
-    "hash/crc32"
+	"hash/crc32"
+	"io"
+	"os"
+	"time"
 )
 
-
 type HeaderStd struct {
-    SampleRate      uint32
-    CenterFrequency uint64
-    StartTimestamp  int64
-    SampleSize      uint32
-    Filler          uint32
-    CRC32           uint32
+	SampleRate      uint32
+	CenterFrequency uint64
+	StartTimestamp  int64
+	SampleSize      uint32
+	Filler          uint32
+	CRC32           uint32
 }
 
-
 func check(e error) {
-    if e != nil {
-        panic(e)
-    }
+	if e != nil {
+		panic(e)
+	}
 }
 
 func analyze(r *bufio.Reader) HeaderStd {
-    headerbuf := make([]byte, 32) // This is a full header with CRC
+	headerbuf := make([]byte, 32) // This is a full header with CRC
 	n, err := r.Read(headerbuf)
 	if err != nil && err != io.EOF {
 		panic(err)
 	}
-	if (n != 32) {
+	if n != 32 {
 		panic("Header too small")
 	}
 
@@ -44,7 +42,7 @@ func analyze(r *bufio.Reader) HeaderStd {
 	err = binary.Read(headerr, binary.LittleEndian, &header)
 	check(err)
 
-    return header
+	return header
 }
 
 func writeHeader(writer *bufio.Writer, header *HeaderStd) {
@@ -62,7 +60,7 @@ func setCRC(header *HeaderStd) {
 	header.CRC32 = crc32.ChecksumIEEE(bin_buf.Bytes()[0:28])
 }
 
-func getCRC(header *HeaderStd) uint32 {
+func GetCRC(header *HeaderStd) uint32 {
 	var bin_buf bytes.Buffer
 	header.Filler = 0
 	binary.Write(&bin_buf, binary.LittleEndian, header)
@@ -70,13 +68,13 @@ func getCRC(header *HeaderStd) uint32 {
 }
 
 func printHeader(header *HeaderStd) {
-    fmt.Println("Sample rate:", header.SampleRate)
-    fmt.Println("Frequency  :", header.CenterFrequency)
-    fmt.Println("Sample Size:", header.SampleSize)
-    tm := time.Unix(header.StartTimestamp, 0)
-    fmt.Println("Start      :", tm)
+	fmt.Println("Sample rate:", header.SampleRate)
+	fmt.Println("Frequency  :", header.CenterFrequency)
+	fmt.Println("Sample Size:", header.SampleSize)
+	tm := time.Unix(header.StartTimestamp, 0)
+	fmt.Println("Start      :", tm)
 	fmt.Println("CRC32      :", header.CRC32)
-	fmt.Println("CRC32 OK   :", getCRC(header))
+	fmt.Println("CRC32 OK   :", GetCRC(header))
 }
 
 func copyContent(reader *bufio.Reader, writer *bufio.Writer, blockSize uint) {
@@ -97,7 +95,7 @@ func copyContent(reader *bufio.Reader, writer *bufio.Writer, blockSize uint) {
 			}
 		} else {
 			writer.Write(p)
-			sz += int64(blockSize)*4096
+			sz += int64(blockSize) * 4096
 		}
 
 		fmt.Printf("Wrote %d bytes\r", sz)
@@ -107,14 +105,14 @@ func copyContent(reader *bufio.Reader, writer *bufio.Writer, blockSize uint) {
 }
 
 func main() {
-	inFileStr  := flag.String("in", "foo", "input file")
+	inFileStr := flag.String("in", "foo", "input file")
 	outFileStr := flag.String("out", "foo", "output file")
 	sampleRate := flag.Uint("sr", 0, "Sample rate (S/s)")
 	centerFreq := flag.Uint64("cf", 0, "Center frequency (Hz)")
 	sampleSize := flag.Uint("sz", 16, "Sample size (16 or 24)")
-	timeStr    := flag.String("ts", "", "start time RFC3339 (ex: 2006-01-02T15:04:05Z)")
-	timeNow    := flag.Bool("now", false , "use now for start time")
-	blockSize  := flag.Uint("bz", 1, "Copy block size in multiple of 4k")
+	timeStr := flag.String("ts", "", "start time RFC3339 (ex: 2006-01-02T15:04:05Z)")
+	timeNow := flag.Bool("now", false, "use now for start time")
+	blockSize := flag.Uint("bz", 1, "Copy block size in multiple of 4k")
 
 	flag.Parse()
 	flagSeen := make(map[string]bool)
@@ -123,16 +121,16 @@ func main() {
 	if flagSeen["in"] {
 		fmt.Println("input file :", *inFileStr)
 
-	    // open input file
-	    fi, err := os.Open(*inFileStr)
-	    check(err)
-	    // close fi on exit and check for its returned error
-	    defer func() {
-	        err := fi.Close();
-	        check(err)
-	    }()
-	    // make a read buffer
-	    reader := bufio.NewReader(fi)
+		// open input file
+		fi, err := os.Open(*inFileStr)
+		check(err)
+		// close fi on exit and check for its returned error
+		defer func() {
+			err := fi.Close()
+			check(err)
+		}()
+		// make a read buffer
+		reader := bufio.NewReader(fi)
 		var headerOrigin HeaderStd = analyze(reader)
 		printHeader(&headerOrigin)
 
@@ -150,7 +148,7 @@ func main() {
 				}
 			} else if flagSeen["ts"] {
 				t, err := time.Parse(time.RFC3339, *timeStr)
-				if (err == nil) {
+				if err == nil {
 					headerOrigin.StartTimestamp = t.Unix()
 				} else {
 					fmt.Println("Incorrect time specified. Defaulting to now")
@@ -169,10 +167,10 @@ func main() {
 			fo, err := os.Create(*outFileStr)
 			check(err)
 
-		    defer func() {
-		        err := fo.Close();
-		        check(err)
-		    }()
+			defer func() {
+				err := fo.Close()
+				check(err)
+			}()
 
 			writer := bufio.NewWriter(fo)
 

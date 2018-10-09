@@ -12,9 +12,9 @@ The header is composed as follows:
   - Sample size as 16 or 24 bits (4 bytes, 32 bits)
   - filler with all zeroes (4 bytes, 32 bits)
   - CRC32 (IEEE) of the 28 bytes above (4 bytes, 32 bits)
-  
-The header size is 32 bytes in total which is a multiple of 8 bytes thus occupies an integer number of samples whether in 16 or 24 bits mode. When migrating from a pre version 4.2.1 header you may crunch a very small amount of samples. 
-  
+
+The header size is 32 bytes in total which is a multiple of 8 bytes thus occupies an integer number of samples whether in 16 or 24 bits mode. When migrating from a pre version 4.2.1 header you may crunch a very small amount of samples.
+
 You can replace values in the header with the following options:
 
   - -sr uint
@@ -28,21 +28,21 @@ You can replace values in the header with the following options:
   - -sz uint
     	Sample size (16 or 24) (default 16)
 
-You need to specify an input file. If no output file is specified the current header values are printed to the console and the program exits: 
- 
+You need to specify an input file. If no output file is specified the current header values are printed to the console and the program exits:
+
   - -in string
     	input file (default "foo")
-    	
+
 To convert to a new file you need to specify the output file:
 
   - -out string
     	output file (default "foo")
-    	
-You can specify a block size in multiples of 4k for the copy. Large blocks will yield a faster copy but a larger output file. With the default of 1 (4k) the copy does not take much time anyway:     	
-    	
+
+You can specify a block size in multiples of 4k for the copy. Large blocks will yield a faster copy but a larger output file. With the default of 1 (4k) the copy does not take much time anyway:
+
   - -bz uint
     	Copy block size in multiple of 4k (default 1)
-    	
+
 <h2>Build</h2>
 
 The program is written in go and is provided only in source code form. Compiling it is very easy:
@@ -55,5 +55,11 @@ You will usually find a `golang` package in your distribution. For example in Ub
 
 In this directory just do `go build`
 
- 
- 
+<h3>Unit testing</h3>
+
+Unit test (very simple) is located in `rescuesdriq_test.go`. It uses the [Go Convey](https://github.com/smartystreets/goconvey) framework. You should first install it with:
+`go get github.com/smartystreets/goconvey`
+
+You can run unit test from command line with: `go test`
+
+Or with the Go Convey server that you start from this directory with: `$GOPATH/bin/goconvey` where `$GOPATH` is the path to your go installation.
