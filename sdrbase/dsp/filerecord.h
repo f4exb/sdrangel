@@ -1,5 +1,21 @@
-#ifndef INCLUDE_FILESINK_H
-#define INCLUDE_FILESINK_H
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015-2018 Edouard Griffiths, F4EXB                              //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
+#ifndef INCLUDE_FILERECORD_H
+#define INCLUDE_FILERECORD_H
 
 #include <dsp/basebandsamplesink.h>
 #include <string>
@@ -16,10 +32,12 @@ public:
 
     struct Header
     {
-    	qint32      sampleRate;
-        quint64     centerFrequency;
-        std::time_t startTimeStamp;
-        quint32     sampleSize;
+    	quint32  sampleRate;
+        quint64 centerFrequency;
+        quint64 startTimeStamp;
+        quint32 sampleSize;
+        quint32 filler;
+        quint32 crc32;
     };
 
 	FileRecord();
@@ -37,11 +55,11 @@ public:
 	virtual bool handleMessage(const Message& message);
     void startRecording();
     void stopRecording();
-    static void readHeader(std::ifstream& samplefile, Header& header);
+    static bool readHeader(std::ifstream& samplefile, Header& header); //!< returns true if CRC checksum is correct else false
 
 private:
 	QString m_fileName;
-	qint32 m_sampleRate;
+	quint32 m_sampleRate;
 	quint64 m_centerFrequency;
 	bool m_recordOn;
     bool m_recordStart;
@@ -52,4 +70,4 @@ private:
     void writeHeader();
 };
 
-#endif // INCLUDE_FILESINK_H
+#endif // INCLUDE_FILERECORD_H

@@ -16,6 +16,7 @@
 
 #include <string.h>
 #include <errno.h>
+
 #include <QDebug>
 
 #include "SWGDeviceSettings.h"
@@ -87,14 +88,22 @@ void FileSourceInput::openFileStream()
         // TODO: add CRC
 	    m_ifstream.seekg(0,std::ios_base::beg);
 	    FileRecord::Header header;
-	    FileRecord::readHeader(m_ifstream, header);
 
-	    m_sampleRate = header.sampleRate;
-	    m_centerFrequency = header.centerFrequency;
-	    m_startingTimeStamp = header.startTimeStamp;
-	    m_sampleSize = header.sampleSize;
+	    if (FileRecord::readHeader(m_ifstream, header)) // CRC OK
+	    {
+	        m_sampleRate = header.sampleRate;
+	        m_centerFrequency = header.centerFrequency;
+	        m_startingTimeStamp = header.startTimeStamp;
+	        m_sampleSize = header.sampleSize;
 
-	    m_recordLength = (fileSize - sizeof(FileRecord::Header)) / (4 * m_sampleRate);
+	        m_recordLength = (fileSize - sizeof(FileRecord::Header)) / ((m_sampleSize == 24 ? 8 : 4) * m_sampleRate);
+	    }
+	    else
+	    {
+	        qCritical("FileSourceInput::openFileStream: bad CRC header");
+	        m_recordLength = 0;
+	    }
+
 	}
 	else
 	{
