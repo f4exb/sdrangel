@@ -86,24 +86,25 @@ void FileSourceInput::openFileStream()
 	if (fileSize > sizeof(FileRecord::Header))
 	{
         // TODO: add CRC
-	    m_ifstream.seekg(0,std::ios_base::beg);
 	    FileRecord::Header header;
+	    m_ifstream.seekg(0,std::ios_base::beg);
+		bool crcOK = FileRecord::readHeader(m_ifstream, header);
+		m_sampleRate = header.sampleRate;
+		m_centerFrequency = header.centerFrequency;
+		m_startingTimeStamp = header.startTimeStamp;
+		m_sampleSize = header.sampleSize;
+		QString crcHex = QString("%1").arg(header.crc32 , 0, 16);
 
-	    if (FileRecord::readHeader(m_ifstream, header)) // CRC OK
+	    if (crcOK)
 	    {
-	        m_sampleRate = header.sampleRate;
-	        m_centerFrequency = header.centerFrequency;
-	        m_startingTimeStamp = header.startTimeStamp;
-	        m_sampleSize = header.sampleSize;
-
+	        qDebug("FileSourceInput::openFileStream: CRC32 OK for header: %s", qPrintable(crcHex));
 	        m_recordLength = (fileSize - sizeof(FileRecord::Header)) / ((m_sampleSize == 24 ? 8 : 4) * m_sampleRate);
 	    }
 	    else
 	    {
-	        qCritical("FileSourceInput::openFileStream: bad CRC header");
+	        qCritical("FileSourceInput::openFileStream: bad CRC32 for header: %s", qPrintable(crcHex));
 	        m_recordLength = 0;
 	    }
-
 	}
 	else
 	{
@@ -111,8 +112,11 @@ void FileSourceInput::openFileStream()
 	}
 
 	qDebug() << "FileSourceInput::openFileStream: " << m_fileName.toStdString().c_str()
-			<< " fileSize: " << fileSize << "bytes"
-			<< " length: " << m_recordLength << " seconds";
+			<< " fileSize: " << fileSize << " bytes"
+			<< " length: " << m_recordLength << " seconds"
+			<< " sample rate: " << m_sampleRate << " S/s"
+			<< " center frequency: " << m_centerFrequency << " Hz"
+			<< " sample size: " << m_sampleSize << " bits";
 
 	if (getMessageQueueToGUI()) {
 	    MsgReportFileSourceStreamData *report = MsgReportFileSourceStreamData::create(m_sampleRate,

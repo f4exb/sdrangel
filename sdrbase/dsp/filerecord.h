@@ -30,15 +30,17 @@ class Message;
 class SDRBASE_API FileRecord : public BasebandSampleSink {
 public:
 
+#pragma pack(push, 1)
     struct Header
     {
-    	quint32  sampleRate;
+    	quint32 sampleRate;
         quint64 centerFrequency;
         quint64 startTimeStamp;
         quint32 sampleSize;
         quint32 filler;
         quint32 crc32;
     };
+#pragma pack(pop)
 
 	FileRecord();
     FileRecord(const QString& filename);

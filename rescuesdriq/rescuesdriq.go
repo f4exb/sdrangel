@@ -12,7 +12,7 @@ import (
     "hash/crc32"
 )
 
-	
+
 type HeaderStd struct {
     SampleRate      uint32
     CenterFrequency uint64
@@ -22,7 +22,7 @@ type HeaderStd struct {
     CRC32           uint32
 }
 
-	
+
 func check(e error) {
     if e != nil {
         panic(e)
@@ -38,12 +38,12 @@ func analyze(r *bufio.Reader) HeaderStd {
 	if (n != 32) {
 		panic("Header too small")
 	}
-		
+
 	var header HeaderStd
 	headerr := bytes.NewReader(headerbuf)
 	err = binary.Read(headerr, binary.LittleEndian, &header)
 	check(err)
-    
+
     return header
 }
 
@@ -55,14 +55,6 @@ func writeHeader(writer *bufio.Writer, header *HeaderStd) {
 	fmt.Printf("Wrote %d bytes header\n", noh)
 }
 
-func printHeader(header *HeaderStd) {
-    fmt.Println("Sample rate:", header.SampleRate)
-    fmt.Println("Frequency  :", header.CenterFrequency)
-    fmt.Println("Sample Size:", header.SampleSize)
-    tm := time.Unix(header.StartTimestamp, 0)
-    fmt.Println("Start      :", tm)	
-}
-
 func setCRC(header *HeaderStd) {
 	var bin_buf bytes.Buffer
 	header.Filler = 0
@@ -70,13 +62,30 @@ func setCRC(header *HeaderStd) {
 	header.CRC32 = crc32.ChecksumIEEE(bin_buf.Bytes()[0:28])
 }
 
+func getCRC(header *HeaderStd) uint32 {
+	var bin_buf bytes.Buffer
+	header.Filler = 0
+	binary.Write(&bin_buf, binary.LittleEndian, header)
+	return crc32.ChecksumIEEE(bin_buf.Bytes()[0:28])
+}
+
+func printHeader(header *HeaderStd) {
+    fmt.Println("Sample rate:", header.SampleRate)
+    fmt.Println("Frequency  :", header.CenterFrequency)
+    fmt.Println("Sample Size:", header.SampleSize)
+    tm := time.Unix(header.StartTimestamp, 0)
+    fmt.Println("Start      :", tm)
+	fmt.Println("CRC32      :", header.CRC32)
+	fmt.Println("CRC32 OK   :", getCRC(header))
+}
+
 func copyContent(reader *bufio.Reader, writer *bufio.Writer, blockSize uint) {
 	p := make([]byte, blockSize*4096) // buffer in 4k multiples
 	var sz int64 = 0
-	
+
 	for {
 		n, err := reader.Read(p)
-		
+
 		if err != nil {
 			if err == io.EOF {
 				writer.Write(p[0:n])
@@ -90,10 +99,10 @@ func copyContent(reader *bufio.Reader, writer *bufio.Writer, blockSize uint) {
 			writer.Write(p)
 			sz += int64(blockSize)*4096
 		}
-		
+
 		fmt.Printf("Wrote %d bytes\r", sz)
 	}
-	
+
 	fmt.Printf("Wrote %d bytes\r", sz)
 }
 
@@ -106,27 +115,27 @@ func main() {
 	timeStr    := flag.String("ts", "", "start time RFC3339 (ex: 2006-01-02T15:04:05Z)")
 	timeNow    := flag.Bool("now", false , "use now for start time")
 	blockSize  := flag.Uint("bz", 1, "Copy block size in multiple of 4k")
-	
+
 	flag.Parse()
 	flagSeen := make(map[string]bool)
 	flag.Visit(func(f *flag.Flag) { flagSeen[f.Name] = true })
-	
+
 	if flagSeen["in"] {
 		fmt.Println("input file :", *inFileStr)
-		
+
 	    // open input file
 	    fi, err := os.Open(*inFileStr)
 	    check(err)
 	    // close fi on exit and check for its returned error
 	    defer func() {
-	        err := fi.Close(); 
+	        err := fi.Close();
 	        check(err)
 	    }()
 	    // make a read buffer
-	    reader := bufio.NewReader(fi)	
+	    reader := bufio.NewReader(fi)
 		var headerOrigin HeaderStd = analyze(reader)
 		printHeader(&headerOrigin)
-		
+
 		if flagSeen["out"] {
 			if flagSeen["sr"] {
 				headerOrigin.SampleRate = uint32(*sampleRate)
@@ -134,7 +143,7 @@ func main() {
 				headerOrigin.CenterFrequency = *centerFreq
 			} else if flagSeen["sz"] {
 				if (*sampleSize == 16) || (*sampleSize == 24) {
-					headerOrigin.SampleSize = uint32(*sampleSize)					
+					headerOrigin.SampleSize = uint32(*sampleSize)
 				} else {
 					fmt.Println("Incorrect sample size specified. Defaulting to 16")
 					headerOrigin.SampleSize = 16
@@ -150,30 +159,30 @@ func main() {
 			} else if *timeNow {
 				headerOrigin.StartTimestamp = int64(time.Now().Unix())
 			}
-			
+
 			fmt.Println("\nHeader is now")
 			printHeader(&headerOrigin)
 			setCRC(&headerOrigin)
 			fmt.Println("CRC32      :", headerOrigin.CRC32)
 			fmt.Println("Output file:", *outFileStr)
-			
+
 			fo, err := os.Create(*outFileStr)
 			check(err)
-		    
+
 		    defer func() {
-		        err := fo.Close(); 
+		        err := fo.Close();
 		        check(err)
 		    }()
 
 			writer := bufio.NewWriter(fo)
-			
+
 			writeHeader(writer, &headerOrigin)
 			copyContent(reader, writer, *blockSize)
-			
+
 			fmt.Println("\nCopy done")
 			writer.Flush()
 		}
-		
+
 	} else {
 		fmt.Println("No input file given")
 	}
