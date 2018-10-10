@@ -155,11 +155,8 @@ void FileRecord::writeHeader()
     header.startTimeStamp = ts;
     header.sampleSize = SDR_RX_SAMP_SZ;
     header.filler = 0;
-    boost::crc_32_type crc32;
-    crc32.process_bytes(&header, 28);
-    header.crc32 = crc32.checksum();
 
-    m_sampleFile.write((const char *) &header, sizeof(Header));
+    writeHeader(m_sampleFile, header);
 }
 
 bool FileRecord::readHeader(std::ifstream& sampleFile, Header& header)
@@ -168,4 +165,12 @@ bool FileRecord::readHeader(std::ifstream& sampleFile, Header& header)
     boost::crc_32_type crc32;
     crc32.process_bytes(&header, 28);
     return header.crc32 == crc32.checksum();
+}
+
+void FileRecord::writeHeader(std::ofstream& sampleFile, Header& header)
+{
+    boost::crc_32_type crc32;
+    crc32.process_bytes(&header, 28);
+    header.crc32 = crc32.checksum();
+    sampleFile.write((const char *) &header, sizeof(Header));
 }

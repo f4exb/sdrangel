@@ -58,6 +58,7 @@ public:
     void startRecording();
     void stopRecording();
     static bool readHeader(std::ifstream& samplefile, Header& header); //!< returns true if CRC checksum is correct else false
+    static void writeHeader(std::ofstream& samplefile, Header& header);
 
 private:
 	QString m_fileName;
