@@ -39,6 +39,7 @@ Since version 2 SDRangel can integrate more than one hardware device running con
 Since version 3 transmission or signal generation is supported for BladeRF, HackRF (since version 3.1), LimeSDR (since version 3.4) and PlutoSDR (since version 3.7.8) using a sample sink plugin. These plugins are:
 
   - [BladeRF1 output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerf1output)
+  - [BladeRF2 output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerf2output)
   - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
   - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput)
   - [PlutoSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/plutosdroutput)
@@ -114,7 +115,7 @@ The plugins used to support BladeRF classic are specific to this version of the 
 
 <h2>BladeRF micro (v.2)</h2>
 
-From version 4.2.0. Output (Tx) for Linux only.
+From version 4.2.0.
 
 [BladeRF 2 micro](https://www.nuand.com/bladerf-2-0-micro/) is also supported using libbladeRF library that should be installed and configured in the same way as for BladeRF1.
 
