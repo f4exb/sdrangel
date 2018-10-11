@@ -164,7 +164,7 @@ def main():
         settings["NFMDemodSettings"]["rfBandwidth"] = 12500
         settings["NFMDemodSettings"]["fmDeviation"] = 3000
         settings["NFMDemodSettings"]["afBandwidth"] = 4000
-        settings["NFMDemodSettings"]["squelch"] = -700
+        settings["NFMDemodSettings"]["squelch"] = -70
         settings["NFMDemodSettings"]["volume"] = 2.0
 
         if options.udp_copy is not None:

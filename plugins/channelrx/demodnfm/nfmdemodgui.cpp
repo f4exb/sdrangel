@@ -182,12 +182,12 @@ void NFMDemodGUI::on_squelch_valueChanged(int value)
 {
     if (ui->deltaSquelch->isChecked())
     {
-        ui->squelchText->setText(QString("%1").arg(-value / 10.0, 0, 'f', 1));
+        ui->squelchText->setText(QString("%1").arg(-value / 1.0, 0, 'f', 0));
         ui->squelchText->setToolTip(tr("Squelch deviation threshold (%)"));
     }
     else
     {
-        ui->squelchText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+        ui->squelchText->setText(QString("%1").arg(value / 1.0, 0, 'f', 0));
         ui->squelchText->setToolTip(tr("Squelch power threshold (dB)"));
     }
     m_settings.m_squelch = value * 1.0;
@@ -368,13 +368,13 @@ void NFMDemodGUI::displaySettings()
 
     if (m_settings.m_deltaSquelch)
     {
-        ui->squelchText->setText(QString("%1").arg((-m_settings.m_squelch) / 10.0, 0, 'f', 1));
+        ui->squelchText->setText(QString("%1").arg((-m_settings.m_squelch) / 1.0, 0, 'f', 0));
         ui->squelchText->setToolTip(tr("Squelch AF balance threshold (%)"));
         ui->squelch->setToolTip(tr("Squelch AF balance threshold (%)"));
     }
     else
     {
-        ui->squelchText->setText(QString("%1").arg(m_settings.m_squelch / 10.0, 0, 'f', 1));
+        ui->squelchText->setText(QString("%1").arg(m_settings.m_squelch / 1.0, 0, 'f', 0));
         ui->squelchText->setToolTip(tr("Squelch power threshold (dB)"));
         ui->squelch->setToolTip(tr("Squelch AF balance threshold (%)"));
     }

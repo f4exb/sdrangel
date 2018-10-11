@@ -428,7 +428,7 @@
          <string>Squelch threshold (dB)</string>
         </property>
         <property name="minimum">
-         <number>-1000</number>
+         <number>-100</number>
         </property>
         <property name="maximum">
          <number>0</number>
@@ -440,7 +440,7 @@
          <number>1</number>
         </property>
         <property name="value">
-         <number>-150</number>
+         <number>-100</number>
         </property>
        </widget>
       </item>
@@ -448,21 +448,15 @@
        <widget class="QLabel" name="squelchText">
         <property name="minimumSize">
          <size>
-          <width>40</width>
+          <width>28</width>
           <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>16777215</height>
          </size>
         </property>
         <property name="toolTip">
          <string>Squelch threshold (dB)</string>
         </property>
         <property name="text">
-         <string>-15.0</string>
+         <string>-100</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

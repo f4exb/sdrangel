@@ -33,7 +33,7 @@ struct NFMDemodSettings
     int  m_fmDeviation;
     int  m_squelchGate;
     bool m_deltaSquelch;
-    Real m_squelch; //!< centi-Bels
+    Real m_squelch; //!< deci-Bels
     Real m_volume;
     bool m_ctcssOn;
     bool m_audioMute;

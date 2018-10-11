@@ -21,7 +21,7 @@ NFMDemodSettings:
     deltaSquelch:
       type: integer
     squelch:
-      description: power squelch threshold in centi-bels
+      description: power squelch threshold in deci-bels
       type: number
       format: float
     volume:

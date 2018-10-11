@@ -44,7 +44,7 @@ void NFMDemodSettings::resetToDefaults()
     m_fmDeviation = 2000;
     m_squelchGate = 5; // 10s of ms at 48000 Hz sample rate. Corresponds to 2400 for AGC attack
     m_deltaSquelch = false;
-    m_squelch = -300.0;
+    m_squelch = -30.0;
     m_volume = 1.0;
     m_ctcssOn = false;
     m_audioMute = false;
@@ -109,8 +109,8 @@ bool NFMDemodSettings::deserialize(const QByteArray& data)
         m_afBandwidth = tmp * 1000.0;
         d.readS32(4, &tmp, 20);
         m_volume = tmp / 10.0;
-        d.readS32(5, &tmp, -300);
-        m_squelch = tmp * 1.0;
+        d.readS32(5, &tmp, -30);
+        m_squelch = (tmp < -100 ? -100 : tmp) * 1.0;
         d.readU32(7, &m_rgbColor, QColor(255, 0, 0).rgb());
         d.readS32(8, &m_ctcssIndex, 0);
         d.readBool(9, &m_ctcssOn, false);

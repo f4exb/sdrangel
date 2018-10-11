@@ -191,7 +191,7 @@ def setupChannels(scan_control, options):
             settings["NFMDemodSettings"]["afBandwidth"] = options.af_bw * 1000
             settings["NFMDemodSettings"]["rfBandwidth"] = options.rf_bw
             settings["NFMDemodSettings"]["volume"] = options.volume
-            settings["NFMDemodSettings"]["squelch"] = options.squelch_db * 10  # centi-Bels
+            settings["NFMDemodSettings"]["squelch"] = options.squelch_db  # deci-Bels
             settings["NFMDemodSettings"]["squelchGate"] = options.squelch_gate / 10  # 10's of ms
             settings["NFMDemodSettings"]["title"] = "Channel %d" % i
         elif options.channel_id == "AMDemod":

@@ -46,7 +46,7 @@ Use this button to toggle between AF (on) and RF power (off) based squelch.
 
 <h4>Power threshold mode</h4>
 
-Case when the delta/Level squelch control (7) is off (power). This is the squelch threshold in dB. The average total power received in the signal bandwidth before demodulation is compared to this value and the squelch input is open above this value. It can be varied continuously in 0.1 dB steps from 0.0 to -100.0 dB using the dial button.
+Case when the delta/Level squelch control (7) is off (power). This is the squelch threshold in dB. The average total power received in the signal bandwidth before demodulation is compared to this value and the squelch input is open above this value. It can be varied continuously in 1 dB steps from 0 to -100 dB using the dial button.
 
 <h4>Audio frequency delta mode</h4>
 

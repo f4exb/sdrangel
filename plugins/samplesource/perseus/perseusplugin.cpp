@@ -81,7 +81,7 @@ PluginInterface::SamplingDevices PerseusPlugin::enumSampleSources()
                 1,
                 0));
 
-        qDebug("PerseusPlugin::enumSampleSources: enumerated PlutoSDR device #%d", i);
+        qDebug("PerseusPlugin::enumSampleSources: enumerated Perseus device #%d", i);
 	}
 
 	return result;

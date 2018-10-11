@@ -523,14 +523,14 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
         (settings.m_deltaSquelch != m_settings.m_deltaSquelch) || force)
     {
         if (settings.m_deltaSquelch)
-        { // input is a value in negative millis
-            m_squelchLevel = (- settings.m_squelch) / 1000.0;
+        { // input is a value in negative centis
+            m_squelchLevel = (- settings.m_squelch) / 100.0;
             m_afSquelch.setThreshold(m_squelchLevel);
             m_afSquelch.reset();
         }
         else
-        { // input is a value in centi-Bels
-            m_squelchLevel = std::pow(10.0, settings.m_squelch / 100.0);
+        { // input is a value in deci-Bels
+            m_squelchLevel = std::pow(10.0, settings.m_squelch / 10.0);
             m_movingAverage.reset();
         }
 
