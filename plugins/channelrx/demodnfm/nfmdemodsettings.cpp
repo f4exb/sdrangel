@@ -110,7 +110,7 @@ bool NFMDemodSettings::deserialize(const QByteArray& data)
         d.readS32(4, &tmp, 20);
         m_volume = tmp / 10.0;
         d.readS32(5, &tmp, -30);
-        m_squelch = (tmp < -100 ? -100 : tmp) * 1.0;
+        m_squelch = (tmp < -100 ? tmp/10 : tmp) * 1.0;
         d.readU32(7, &m_rgbColor, QColor(255, 0, 0).rgb());
         d.readS32(8, &m_ctcssIndex, 0);
         d.readBool(9, &m_ctcssOn, false);
