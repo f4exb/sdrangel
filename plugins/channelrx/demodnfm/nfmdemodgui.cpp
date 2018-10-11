@@ -164,15 +164,15 @@ void NFMDemodGUI::on_deltaSquelch_toggled(bool checked)
 {
     if (checked)
     {
-        ui->squelchText->setText(QString("%1").arg((-ui->squelch->value()) / 10.0, 0, 'f', 1));
+        ui->squelchText->setText(QString("%1").arg((-ui->squelch->value()) / 1.0, 0, 'f', 0));
         ui->squelchText->setToolTip(tr("Squelch AF balance threshold (%)"));
         ui->squelch->setToolTip(tr("Squelch AF balance threshold (%)"));
     }
     else
     {
-        ui->squelchText->setText(QString("%1").arg(ui->squelch->value() / 10.0, 0, 'f', 1));
+        ui->squelchText->setText(QString("%1").arg(ui->squelch->value() / 1.0, 0, 'f', 0));
         ui->squelchText->setToolTip(tr("Squelch power threshold (dB)"));
-        ui->squelch->setToolTip(tr("Squelch AF balance threshold (%)"));
+        ui->squelch->setToolTip(tr("Squelch power threshold (dB)"));
     }
     m_settings.m_deltaSquelch = checked;
     applySettings();
@@ -183,12 +183,14 @@ void NFMDemodGUI::on_squelch_valueChanged(int value)
     if (ui->deltaSquelch->isChecked())
     {
         ui->squelchText->setText(QString("%1").arg(-value / 1.0, 0, 'f', 0));
-        ui->squelchText->setToolTip(tr("Squelch deviation threshold (%)"));
+        ui->squelchText->setToolTip(tr("Squelch AF balance threshold (%)"));
+        ui->squelch->setToolTip(tr("Squelch AF balance threshold (%)"));
     }
     else
     {
         ui->squelchText->setText(QString("%1").arg(value / 1.0, 0, 'f', 0));
         ui->squelchText->setToolTip(tr("Squelch power threshold (dB)"));
+        ui->squelch->setToolTip(tr("Squelch power threshold (dB)"));
     }
     m_settings.m_squelch = value * 1.0;
 	applySettings();
@@ -376,7 +378,7 @@ void NFMDemodGUI::displaySettings()
     {
         ui->squelchText->setText(QString("%1").arg(m_settings.m_squelch / 1.0, 0, 'f', 0));
         ui->squelchText->setToolTip(tr("Squelch power threshold (dB)"));
-        ui->squelch->setToolTip(tr("Squelch AF balance threshold (%)"));
+        ui->squelch->setToolTip(tr("Squelch power threshold (dB)"));
     }
 
     ui->ctcssOn->setChecked(m_settings.m_ctcssOn);
