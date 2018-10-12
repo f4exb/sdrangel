@@ -424,9 +424,9 @@ int FileSourceInput::webapiReportGet(
 
 void FileSourceInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
-    int t_sec = 0;
-    int t_msec = 0;
-    std::size_t samplesCount = 0;
+    qint64 t_sec = 0;
+    qint64 t_msec = 0;
+    quint64 samplesCount = 0;
 
     if (m_fileSourceThread) {
         samplesCount = m_fileSourceThread->getSamplesCount();
@@ -443,10 +443,10 @@ void FileSourceInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& res
     t = t.addMSecs(t_msec);
     response.getFileSourceReport()->setElapsedTime(new QString(t.toString("HH:mm:ss.zzz")));
 
-    quint64 startingTimeStampMsec = (quint64) m_startingTimeStamp * 1000LL;
+    qint64 startingTimeStampMsec = m_startingTimeStamp * 1000LL;
     QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
-    dt = dt.addSecs((quint64) t_sec);
-    dt = dt.addMSecs((quint64) t_msec);
+    dt = dt.addSecs(t_sec);
+    dt = dt.addMSecs(t_msec);
     response.getFileSourceReport()->setAbsoluteTime(new QString(dt.toString("yyyy-MM-dd HH:mm:ss.zzz")));
 
     QTime recordLength(0, 0, 0, 0);
