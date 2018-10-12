@@ -141,7 +141,7 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 		Real waterfallShare;
 		d.readReal(18, &waterfallShare, 0.66);
 		d.readS32(19, &tmp, 0);
-		m_averagingMode = tmp < 0 ? AvgModeNone : tmp > 2 ? AvgModeFixed : (AveragingMode) tmp;
+		m_averagingMode = tmp < 0 ? AvgModeNone : tmp > 3 ? AvgModeMax : (AveragingMode) tmp;
 		d.readS32(20, &tmp, 0);
 		m_averagingIndex = getAveragingIndex(tmp);
 	    m_averagingNb = getAveragingValue(m_averagingIndex);
@@ -244,7 +244,7 @@ void GLSpectrumGUI::on_fftSize_currentIndexChanged(int index)
 
 void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
 {
-    m_averagingMode = index < 0 ? AvgModeNone : index > 2 ? AvgModeFixed : (AveragingMode) index;
+    m_averagingMode = index < 0 ? AvgModeNone : index > 3 ? AvgModeMax : (AveragingMode) index;
 
     if(m_spectrumVis != 0) {
         m_spectrumVis->configure(m_messageQueueToVis,
@@ -258,7 +258,7 @@ void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
 
     if (m_glSpectrum != 0)
     {
-        if (m_averagingMode == AvgModeFixed) {
+        if ((m_averagingMode == AvgModeFixed) || (m_averagingMode == AvgModeMax)) {
             m_glSpectrum->setTimingRate(m_averagingNb == 0 ? 1 : m_averagingNb);
         } else {
             m_glSpectrum->setTimingRate(1);
@@ -283,8 +283,10 @@ void GLSpectrumGUI::on_averaging_currentIndexChanged(int index)
 
     if (m_glSpectrum != 0)
     {
-        if (m_averagingMode == AvgModeFixed) {
+        if ((m_averagingMode == AvgModeFixed) || (m_averagingMode == AvgModeMax)) {
             m_glSpectrum->setTimingRate(m_averagingNb == 0 ? 1 : m_averagingNb);
+        } else {
+            m_glSpectrum->setTimingRate(1);
         }
     }
 

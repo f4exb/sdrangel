@@ -565,6 +565,11 @@
          <string>Fix</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Max</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>

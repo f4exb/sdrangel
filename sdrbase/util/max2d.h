@@ -15,21 +15,21 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_UTIL_FIXEDAVERAGE2D_H_
-#define SDRBASE_UTIL_FIXEDAVERAGE2D_H_
+#ifndef SDRBASE_UTIL_MAX2D_H_
+#define SDRBASE_UTIL_MAX2D_H_
 
 #include <algorithm>
 
 template<typename T>
-class FixedAverage2D
+class Max2D
 {
 public:
-    FixedAverage2D() : m_sum(0), m_maxSize(0), m_width(0), m_size(0), m_maxIndex(0) {}
+    Max2D() : m_max(0), m_maxSize(0), m_width(0), m_size(0), m_maxIndex(0) {}
 
-    ~FixedAverage2D()
+    ~Max2D()
     {
-        if (m_sum) {
-            delete[] m_sum;
+        if (m_max) {
+            delete[] m_max;
         }
     }
 
@@ -38,62 +38,46 @@ public:
         if (width > m_maxSize)
         {
             m_maxSize = width;
-            if (m_sum) {
-                delete[] m_sum;
+            if (m_max) {
+                delete[] m_max;
             }
-            m_sum = new T[m_maxSize];
+            m_max = new T[m_maxSize];
         }
 
         m_width = width;
         m_size = size;
 
-        std::fill(m_sum, m_sum+m_width, 0);
+        std::fill(m_max, m_max+m_width, 0);
         m_maxIndex = 0;
     }
 
-    bool storeAndGetAvg(T& avg, T v, unsigned int index)
+    bool storeAndGetMax(T& max, T v, unsigned int index)
     {
         if (m_size <= 1)
         {
-            avg = v;
+            max = v;
             return true;
         }
 
-        m_sum[index] += v;
-
-        if (m_maxIndex == m_size - 1)
+        if (m_maxIndex == 0)
         {
-            avg = m_sum[index]/m_size;
+            m_max[index] = v;
+            return false;
+        }
+        else if (m_maxIndex == m_size - 1)
+        {
+            m_max[index] = std::max(m_max[index], v);
+            max = m_max[index];
             return true;
         }
         else
         {
+            m_max[index] = std::max(m_max[index], v);
             return false;
         }
     }
 
-    bool storeAndGetSum(T& sum, T v, unsigned int index)
-    {
-        if (m_size <= 1)
-        {
-            sum = v;
-            return true;
-        }
-
-        m_sum[index] += v;
-
-        if (m_maxIndex < m_size - 1)
-        {
-            sum = m_sum[index];
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    bool nextAverage()
+    bool nextMax()
     {
         if (m_size <= 1) {
             return true;
@@ -102,7 +86,7 @@ public:
         if (m_maxIndex == m_size - 1)
         {
             m_maxIndex = 0;
-            std::fill(m_sum, m_sum+m_width, 0);
+            std::fill(m_max, m_max+m_width, 0);
             return true;
         }
         else
@@ -113,13 +97,11 @@ public:
     }
 
 private:
-    T *m_sum;
+    T *m_max;
     unsigned int m_maxSize;
     unsigned int m_width;
     unsigned int m_size;
     unsigned int m_maxIndex;
 };
 
-
-
-#endif /* SDRBASE_UTIL_FIXEDAVERAGE2D_H_ */
+#endif /* SDRBASE_UTIL_MAX2D_H_ */

@@ -9,6 +9,7 @@
 #include "util/message.h"
 #include "util/movingaverage2d.h"
 #include "util/fixedaverage2d.h"
+#include "util/max2d.h"
 
 class GLSpectrum;
 class MessageQueue;
@@ -16,11 +17,12 @@ class MessageQueue;
 class SDRGUI_API SpectrumVis : public BasebandSampleSink {
 
 public:
-    enum AveragingMode
+    enum AvgMode
     {
         AvgModeNone,
-        AvgModeMoving,
-        AvgModeFixed
+        AvgModeMovingAvg,
+        AvgModeFixedAvg,
+        AvgModeMax
     };
 
 	class MsgConfigureSpectrumVis : public Message {
@@ -31,7 +33,7 @@ public:
 		        int fftSize,
 		        int overlapPercent,
 		        unsigned int averageNb,
-		        int averagingMode,
+		        int preProcessMode,
 		        FFTWindow::Function window,
 		        bool linear) :
 			Message(),
@@ -41,13 +43,13 @@ public:
 			m_window(window),
 			m_linear(linear)
 		{
-		    m_averagingMode = averagingMode < 0 ? AvgModeNone : averagingMode > 2 ? AvgModeFixed : (SpectrumVis::AveragingMode) averagingMode;
+		    m_avgMode = preProcessMode < 0 ? AvgModeNone : preProcessMode > 3 ? AvgModeMax : (SpectrumVis::AvgMode) preProcessMode;
 		}
 
 		int getFFTSize() const { return m_fftSize; }
 		int getOverlapPercent() const { return m_overlapPercent; }
 		unsigned int getAverageNb() const { return m_averageNb; }
-		SpectrumVis::AveragingMode getAveragingMode() const { return m_averagingMode; }
+		SpectrumVis::AvgMode getAvgMode() const { return m_avgMode; }
 		FFTWindow::Function getWindow() const { return m_window; }
 		bool getLinear() const { return m_linear; }
 
@@ -55,7 +57,7 @@ public:
 		int m_fftSize;
 		int m_overlapPercent;
 		unsigned int m_averageNb;
-		SpectrumVis::AveragingMode m_averagingMode;
+		SpectrumVis::AvgMode m_avgMode;
 		FFTWindow::Function m_window;
 		bool m_linear;
 	};
@@ -95,8 +97,9 @@ private:
 	GLSpectrum* m_glSpectrum;
 	MovingAverage2D<double> m_movingAverage;
 	FixedAverage2D<double> m_fixedAverage;
+	Max2D<double> m_max;
 	unsigned int m_averageNb;
-	AveragingMode m_averagingMode;
+	AvgMode m_avgMode;
 	bool m_linear;
 
 	Real m_ofs;
@@ -108,7 +111,7 @@ private:
 	void handleConfigure(int fftSize,
 	        int overlapPercent,
 	        unsigned int averageNb,
-	        AveragingMode averagingMode,
+	        AvgMode averagingMode,
 	        FFTWindow::Function window,
 	        bool linear);
 };
