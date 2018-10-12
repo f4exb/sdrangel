@@ -175,14 +175,14 @@ public:
 		int getSampleRate() const { return m_sampleRate; }
 		quint32 getSampleSize() const { return m_sampleSize; }
 		quint64 getCenterFrequency() const { return m_centerFrequency; }
-		std::time_t getStartingTimeStamp() const { return m_startingTimeStamp; }
-		quint32 getRecordLength() const { return m_recordLength; }
+        quint64 getStartingTimeStamp() const { return m_startingTimeStamp; }
+        quint64 getRecordLength() const { return m_recordLength; }
 
 		static MsgReportFileSourceStreamData* create(int sampleRate,
 		        quint32 sampleSize,
 				quint64 centerFrequency,
-				std::time_t startingTimeStamp,
-				quint32 recordLength)
+                quint64 startingTimeStamp,
+                quint64 recordLength)
 		{
 			return new MsgReportFileSourceStreamData(sampleRate, sampleSize, centerFrequency, startingTimeStamp, recordLength);
 		}
@@ -191,14 +191,14 @@ public:
 		int m_sampleRate;
 		quint32 m_sampleSize;
 		quint64 m_centerFrequency;
-		std::time_t m_startingTimeStamp;
-		quint32 m_recordLength;
+        quint64 m_startingTimeStamp;
+        quint64 m_recordLength;
 
 		MsgReportFileSourceStreamData(int sampleRate,
 		        quint32 sampleSize,
 				quint64 centerFrequency,
-				std::time_t startingTimeStamp,
-				quint32 recordLength) :
+                quint64 startingTimeStamp,
+                quint64 recordLength) :
 			Message(),
 			m_sampleRate(sampleRate),
 			m_sampleSize(sampleSize),
@@ -212,17 +212,17 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		std::size_t getSamplesCount() const { return m_samplesCount; }
+        quint64 getSamplesCount() const { return m_samplesCount; }
 
-		static MsgReportFileSourceStreamTiming* create(std::size_t samplesCount)
+        static MsgReportFileSourceStreamTiming* create(quint64 samplesCount)
 		{
 			return new MsgReportFileSourceStreamTiming(samplesCount);
 		}
 
 	protected:
-		std::size_t m_samplesCount;
+        quint64 m_samplesCount;
 
-		MsgReportFileSourceStreamTiming(std::size_t samplesCount) :
+        MsgReportFileSourceStreamTiming(quint64 samplesCount) :
 			Message(),
 			m_samplesCount(samplesCount)
 		{ }
@@ -263,7 +263,7 @@ public:
 	virtual int getSampleRate() const;
 	virtual quint64 getCenterFrequency() const;
     virtual void setCenterFrequency(qint64 centerFrequency);
-	std::time_t getStartingTimeStamp() const;
+    quint64 getStartingTimeStamp() const;
 
 	virtual bool handleMessage(const Message& message);
 
@@ -295,8 +295,8 @@ public:
 	int m_sampleRate;
 	quint32 m_sampleSize;
 	quint64 m_centerFrequency;
-	quint32 m_recordLength; //!< record length in seconds computed from file size
-	std::time_t m_startingTimeStamp;
+    quint64 m_recordLength; //!< record length in seconds computed from file size
+    quint64 m_startingTimeStamp;
 	const QTimer& m_masterTimer;
 
 	void openFileStream();

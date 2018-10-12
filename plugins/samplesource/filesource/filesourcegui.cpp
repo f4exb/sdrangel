@@ -286,10 +286,6 @@ void FileSourceGui::on_navTimeSlider_valueChanged(int value)
 {
 	if (m_enableNavTime && ((value >= 0) && (value <= 100)))
 	{
-		int t_sec = (m_recordLength * value) / 100;
-		QTime t(0, 0, 0, 0);
-		t = t.addSecs(t_sec);
-
 		FileSourceInput::MsgConfigureFileSourceSeek* message = FileSourceInput::MsgConfigureFileSourceSeek::create(value);
 		m_sampleSource->getInputMessageQueue()->push(message);
 	}
@@ -338,12 +334,12 @@ void FileSourceGui::updateWithStreamData()
 
 void FileSourceGui::updateWithStreamTime()
 {
-	int t_sec = 0;
-	int t_msec = 0;
+    qint64 t_sec = 0;
+    qint64 t_msec = 0;
 
 	if (m_sampleRate > 0){
 		t_sec = m_samplesCount / m_sampleRate;
-		t_msec = (m_samplesCount - (t_sec * m_sampleRate)) * 1000 / m_sampleRate;
+        t_msec = (m_samplesCount - (t_sec * m_sampleRate)) * 1000LL / m_sampleRate;
 	}
 
 	QTime t(0, 0, 0, 0);
@@ -352,10 +348,10 @@ void FileSourceGui::updateWithStreamTime()
 	QString s_timems = t.toString("HH:mm:ss.zzz");
 	ui->relTimeText->setText(s_timems);
 
-    quint64 startingTimeStampMsec = (quint64) m_startingTimeStamp * 1000LL;
+    qint64 startingTimeStampMsec = m_startingTimeStamp * 1000LL;
 	QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
-    dt = dt.addSecs((quint64) t_sec);
-    dt = dt.addMSecs((quint64) t_msec);
+    dt = dt.addSecs(t_sec);
+    dt = dt.addMSecs(t_msec);
 	QString s_date = dt.toString("yyyy-MM-dd HH:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
 

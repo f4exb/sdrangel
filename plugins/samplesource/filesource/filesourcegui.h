@@ -65,9 +65,9 @@ private:
 	int m_sampleRate;
 	quint32 m_sampleSize;
 	quint64 m_centerFrequency;
-	quint32 m_recordLength;
-	std::time_t m_startingTimeStamp;
-	int m_samplesCount;
+    quint64 m_recordLength;
+    quint64 m_startingTimeStamp;
+    quint64 m_samplesCount;
 	std::size_t m_tickCount;
 	bool m_enableNavTime;
     int m_deviceSampleRate;

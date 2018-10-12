@@ -144,9 +144,9 @@ void FileSourceInput::seekFileStream(int seekPercentage)
 
 	if ((m_ifstream.is_open()) && m_fileSourceThread && !m_fileSourceThread->isRunning())
 	{
-		int seekPoint = ((m_recordLength * seekPercentage) / 100) * m_sampleRate;
+        quint64 seekPoint = ((m_recordLength * seekPercentage) / 100) * m_sampleRate;
 		m_fileSourceThread->setSamplesCount(seekPoint);
-		seekPoint *= 4; // + sizeof(FileSink::Header)
+        seekPoint *= (m_sampleSize == 24 ? 8 : 4); // + sizeof(FileSink::Header)
 		m_ifstream.clear();
 		m_ifstream.seekg(seekPoint + sizeof(FileRecord::Header), std::ios::beg);
 	}
@@ -276,7 +276,7 @@ void FileSourceInput::setCenterFrequency(qint64 centerFrequency)
     }
 }
 
-std::time_t FileSourceInput::getStartingTimeStamp() const
+quint64 FileSourceInput::getStartingTimeStamp() const
 {
 	return m_startingTimeStamp;
 }

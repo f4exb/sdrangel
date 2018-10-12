@@ -44,8 +44,11 @@ public:
 	void setSampleRateAndSize(int samplerate, quint32 samplesize);
     void setBuffers(std::size_t chunksize);
 	bool isRunning() const { return m_running; }
-	std::size_t getSamplesCount() const { return m_samplesCount; }
-	void setSamplesCount(int samplesCount) { m_samplesCount = samplesCount; }
+    quint64 getSamplesCount() const {
+        qDebug("FileSourceThread::getSamplesCount: m_samplesCount: %llu", m_samplesCount);
+        return m_samplesCount;
+    }
+    void setSamplesCount(quint64 samplesCount) { m_samplesCount = samplesCount; }
 
 	void connectTimer(const QTimer& timer);
 
@@ -58,14 +61,14 @@ private:
 	quint8  *m_fileBuf;
 	quint8  *m_convertBuf;
 	std::size_t m_bufsize;
-	std::size_t m_chunksize;
+    qint64 m_chunksize;
 	SampleSinkFifo* m_sampleFifo;
-	std::size_t m_samplesCount;
+    quint64 m_samplesCount;
 
 	int m_samplerate;      //!< File I/Q stream original sample rate
-	quint32 m_samplesize;  //!< File effective sample size in bits (I or Q). Ex: 16, 24.
-	quint32 m_samplebytes; //!< Number of bytes used to store a I or Q sample. Ex: 2. 4.
-    int m_throttlems;
+    quint64 m_samplesize;  //!< File effective sample size in bits (I or Q). Ex: 16, 24.
+    quint64 m_samplebytes; //!< Number of bytes used to store a I or Q sample. Ex: 2. 4.
+    qint64 m_throttlems;
     QElapsedTimer m_elapsedTimer;
     bool m_throttleToggle;
 
