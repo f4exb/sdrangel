@@ -1,7 +1,14 @@
+sdrangel (4.2.2-1) unstable; urgency=medium
+
+  * Spectrum: option to get max over a number of FFTs. Implements issue #207
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 14 Oct 2018 21:14:18 +0200
+
 sdrangel (4.2.1-1) unstable; urgency=medium
 
   * FileRecord improvement with robust header and some fixes. Fixes issue #206
   * BladeRF2 MO Tx fix so that the two channels are used effectively. Fixes issue #225
+  * NFM demod: set squelch step to 1 dB
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 10 Oct 2018 21:14:18 +0200
 

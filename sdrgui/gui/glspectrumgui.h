@@ -22,7 +22,8 @@ public:
     {
         AvgModeNone,
         AvgModeMoving,
-        AvgModeFixed
+        AvgModeFixed,
+        AvgModeMax
     };
 
 	explicit GLSpectrumGUI(QWidget* parent = NULL);
