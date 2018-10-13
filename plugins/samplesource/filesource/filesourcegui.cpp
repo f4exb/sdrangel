@@ -51,7 +51,8 @@ FileSourceGui::FileSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_samplesCount(0),
 	m_tickCount(0),
 	m_enableNavTime(false),
-	m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
+	m_lastEngineState(DSPDeviceSourceEngine::StNotStarted),
+	m_accelerationMaxScale(1)
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -64,8 +65,10 @@ FileSourceGui::FileSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_statusTimer.start(500);
 
 	displaySettings();
+	setAccelerationCombo();
 
 	ui->navTimeSlider->setEnabled(false);
+	ui->acceleration->setEnabled(false);
 	ui->playLoop->setChecked(true); // FIXME: always play in a loop
 	ui->playLoop->setEnabled(false);
 
@@ -279,6 +282,7 @@ void FileSourceGui::on_play_toggled(bool checked)
 	FileSourceInput::MsgConfigureFileSourceWork* message = FileSourceInput::MsgConfigureFileSourceWork::create(checked);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	ui->navTimeSlider->setEnabled(!checked);
+	ui->acceleration->setEnabled(!checked);
 	m_enableNavTime = !checked;
 }
 
@@ -303,6 +307,13 @@ void FileSourceGui::on_showFileDialog_clicked(bool checked __attribute__((unused
 		ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 		configureFileName();
 	}
+}
+
+void FileSourceGui::on_acceleration_currentIndexChanged(int index)
+{
+    m_settings.m_accelerationFactor = FileSourceSettings::getAccelerationValue(index);
+    FileSourceInput::MsgConfigureFileSource *message = FileSourceInput::MsgConfigureFileSource::create(m_settings);
+    m_sampleSource->getInputMessageQueue()->push(message);
 }
 
 void FileSourceGui::configureFileName()
@@ -368,4 +379,43 @@ void FileSourceGui::tick()
 		FileSourceInput::MsgConfigureFileSourceStreamTiming* message = FileSourceInput::MsgConfigureFileSourceStreamTiming::create();
 		m_sampleSource->getInputMessageQueue()->push(message);
 	}
+}
+
+void FileSourceGui::setAccelerationCombo()
+{
+    ui->acceleration->blockSignals(true);
+    ui->acceleration->clear();
+    ui->acceleration->addItem(QString("1"));
+
+    for (unsigned int i = 0; i <= m_accelerationMaxScale; i++)
+    {
+        QString s;
+        int m = pow(10.0, i);
+        int x = 2*m;
+        setNumberStr(x, s);
+        ui->acceleration->addItem(s);
+        x = 5*m;
+        setNumberStr(x, s);
+        ui->acceleration->addItem(s);
+        x = 10*m;
+        setNumberStr(x, s);
+        ui->acceleration->addItem(s);
+    }
+
+    ui->acceleration->blockSignals(false);
+}
+
+void FileSourceGui::setNumberStr(int n, QString& s)
+{
+    if (n < 1000) {
+        s = tr("%1").arg(n);
+    } else if (n < 100000) {
+        s = tr("%1k").arg(n/1000);
+    } else if (n < 1000000) {
+        s = tr("%1e5").arg(n/100000);
+    } else if (n < 1000000000) {
+        s = tr("%1M").arg(n/1000000);
+    } else {
+        s = tr("%1G").arg(n/1000000000);
+    }
 }

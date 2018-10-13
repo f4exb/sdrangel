@@ -27,16 +27,39 @@
 #include <cstdlib>
 
 #include "dsp/inthalfbandfilter.h"
+#include "util/message.h"
 
 #define FILESOURCE_THROTTLE_MS 50
 
 class SampleSinkFifo;
+class MessageQueue;
 
 class FileSourceThread : public QThread {
 	Q_OBJECT
 
 public:
-	FileSourceThread(std::ifstream *samplesStream, SampleSinkFifo* sampleFifo, QObject* parent = NULL);
+    class MsgReportEOF : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+
+        static MsgReportEOF* create()
+        {
+            return new MsgReportEOF();
+        }
+
+    private:
+
+        MsgReportEOF() :
+            Message()
+        { }
+    };
+
+	FileSourceThread(std::ifstream *samplesStream,
+	        SampleSinkFifo* sampleFifo,
+	        const QTimer& timer,
+	        MessageQueue *fileInputMessageQueue,
+	        QObject* parent = NULL);
 	~FileSourceThread();
 
 	void startWork();
@@ -44,13 +67,8 @@ public:
 	void setSampleRateAndSize(int samplerate, quint32 samplesize);
     void setBuffers(std::size_t chunksize);
 	bool isRunning() const { return m_running; }
-    quint64 getSamplesCount() const {
-        qDebug("FileSourceThread::getSamplesCount: m_samplesCount: %llu", m_samplesCount);
-        return m_samplesCount;
-    }
+    quint64 getSamplesCount() const { return m_samplesCount; }
     void setSamplesCount(quint64 samplesCount) { m_samplesCount = samplesCount; }
-
-	void connectTimer(const QTimer& timer);
 
 private:
 	QMutex m_startWaitMutex;
@@ -64,6 +82,8 @@ private:
     qint64 m_chunksize;
 	SampleSinkFifo* m_sampleFifo;
     quint64 m_samplesCount;
+    const QTimer& m_timer;
+    MessageQueue *m_fileInputMessageQueue;
 
 	int m_samplerate;      //!< File I/Q stream original sample rate
     quint64 m_samplesize;  //!< File effective sample size in bits (I or Q). Ex: 16, 24.

@@ -74,6 +74,7 @@ private:
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_lastEngineState;
 	MessageQueue m_inputMessageQueue;
+	unsigned int m_accelerationMaxScale;
 
 	void blockApplySettings(bool block) { m_doApplySettings = !block; }
 	void displaySettings();
@@ -84,6 +85,8 @@ private:
 	void updateWithAcquisition();
 	void updateWithStreamData();
 	void updateWithStreamTime();
+    void setAccelerationCombo();
+    void setNumberStr(int n, QString& s);
 
 private slots:
     void handleInputMessages();
@@ -92,6 +95,7 @@ private slots:
 	void on_play_toggled(bool checked);
 	void on_navTimeSlider_valueChanged(int value);
 	void on_showFileDialog_clicked(bool checked);
+	void on_acceleration_currentIndexChanged(int index);
     void updateStatus();
 	void tick();
 };

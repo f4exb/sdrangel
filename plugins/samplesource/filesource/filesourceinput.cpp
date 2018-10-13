@@ -86,7 +86,6 @@ void FileSourceInput::openFileStream()
 
 	if (fileSize > sizeof(FileRecord::Header))
 	{
-        // TODO: add CRC
 	    FileRecord::Header header;
 	    m_ifstream.seekg(0,std::ios_base::beg);
 		bool crcOK = FileRecord::readHeader(m_ifstream, header);
@@ -181,9 +180,8 @@ bool FileSourceInput::start()
 
 	//openFileStream();
 
-	m_fileSourceThread = new FileSourceThread(&m_ifstream, &m_sampleFifo);
-	m_fileSourceThread->setSampleRateAndSize(m_sampleRate, m_sampleSize);
-	m_fileSourceThread->connectTimer(m_masterTimer);
+	m_fileSourceThread = new FileSourceThread(&m_ifstream, &m_sampleFifo, m_masterTimer, &m_inputMessageQueue);
+	m_fileSourceThread->setSampleRateAndSize(m_settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
 	m_fileSourceThread->startWork();
 	m_deviceDescription = "FileSource";
 
@@ -361,6 +359,19 @@ bool FileSourceInput::handleMessage(const Message& message)
 
         return true;
     }
+    else if (FileSourceThread::MsgReportEOF::match(message))
+    {
+        qDebug() << "FileSourceInput::handleMessage: MsgReportEOF";
+        m_fileSourceThread->stopWork();
+
+        if (m_settings.m_loop)
+        {
+            seekFileStream(0);
+            m_fileSourceThread->startWork();
+        }
+
+        return true;
+    }
 	else
 	{
 		return false;
@@ -371,6 +382,12 @@ bool FileSourceInput::applySettings(const FileSourceSettings& settings, bool for
 {
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
         m_centerFrequency = settings.m_centerFrequency;
+    }
+
+    if ((m_settings.m_accelerationFactor != settings.m_accelerationFactor) || force)
+    {
+        QMutexLocker mutexLocker(&m_mutex);
+        m_fileSourceThread->setSampleRateAndSize(settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
     }
 
     m_settings = settings;

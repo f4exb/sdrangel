@@ -454,7 +454,7 @@ void GLSpectrumGUI::on_clearSpectrum_clicked(bool checked __attribute__((unused)
 
 int GLSpectrumGUI::getAveragingIndex(int averagingValue) const
 {
-    if (averagingValue <= 0) {
+    if (averagingValue <= 1) {
         return 0;
     }
 
@@ -487,7 +487,7 @@ int GLSpectrumGUI::getAveragingIndex(int averagingValue) const
 int GLSpectrumGUI::getAveragingValue(int averagingIndex) const
 {
     if (averagingIndex <= 0) {
-        return 0;
+        return 1;
     }
 
     int v = averagingIndex - 1;
@@ -508,7 +508,7 @@ int GLSpectrumGUI::getAveragingValue(int averagingIndex) const
 void GLSpectrumGUI::setAveragingCombo()
 {
     ui->averaging->clear();
-    ui->averaging->addItem(QString("0"));
+    ui->averaging->addItem(QString("1"));
 
     for (int i = 0; i <= m_averagingMaxScale; i++)
     {
@@ -530,8 +530,10 @@ void GLSpectrumGUI::setNumberStr(int n, QString& s)
 {
     if (n < 1000) {
         s = tr("%1").arg(n);
-    } else if (n < 1000000) {
+    } else if (n < 100000) {
         s = tr("%1k").arg(n/1000);
+    } else if (n < 1000000) {
+        s = tr("%1e5").arg(n/100000);
     } else if (n < 1000000000) {
         s = tr("%1M").arg(n/1000000);
     } else {
