@@ -40,6 +40,7 @@ MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceWork, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgPlayPause, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamTiming, Message)
@@ -332,7 +333,8 @@ bool FileSourceInput::handleMessage(const Message& message)
 
 		if (m_fileSourceThread != 0)
 		{
-			if (getMessageQueueToGUI()) {
+			if (getMessageQueueToGUI())
+			{
                 report = MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
                 getMessageQueueToGUI()->push(report);
 			}
@@ -364,10 +366,24 @@ bool FileSourceInput::handleMessage(const Message& message)
         qDebug() << "FileSourceInput::handleMessage: MsgReportEOF";
         m_fileSourceThread->stopWork();
 
+        if (getMessageQueueToGUI())
+        {
+            MsgReportFileSourceStreamTiming *report = MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
+            getMessageQueueToGUI()->push(report);
+        }
+
         if (m_settings.m_loop)
         {
             seekFileStream(0);
             m_fileSourceThread->startWork();
+        }
+        else
+        {
+            if (getMessageQueueToGUI())
+            {
+                MsgPlayPause *report = MsgPlayPause::create(false);
+                getMessageQueueToGUI()->push(report);
+            }
         }
 
         return true;

@@ -64,13 +64,11 @@ FileSourceGui::FileSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 
-	displaySettings();
 	setAccelerationCombo();
+	displaySettings();
 
 	ui->navTimeSlider->setEnabled(false);
 	ui->acceleration->setEnabled(false);
-	ui->playLoop->setChecked(true); // FIXME: always play in a loop
-	ui->playLoop->setEnabled(false);
 
     m_sampleSource = m_deviceUISet->m_deviceSourceAPI->getSampleSource();
 
@@ -202,6 +200,17 @@ bool FileSourceGui::handleMessage(const Message& message)
 
         return true;
     }
+	else if (FileSourceInput::MsgPlayPause::match(message))
+	{
+	    FileSourceInput::MsgPlayPause& notif = (FileSourceInput::MsgPlayPause&) message;
+	    bool checked = notif.getPlayPause();
+	    ui->play->setChecked(checked);
+	    ui->navTimeSlider->setEnabled(!checked);
+	    ui->acceleration->setEnabled(!checked);
+	    m_enableNavTime = !checked;
+
+	    return true;
+	}
 	else if (FileSourceInput::MsgReportHeaderCRC::match(message))
 	{
 		FileSourceInput::MsgReportHeaderCRC& notif = (FileSourceInput::MsgReportHeaderCRC&) message;
@@ -228,15 +237,23 @@ void FileSourceGui::updateSampleRateAndFrequency()
 
 void FileSourceGui::displaySettings()
 {
+    ui->playLoop->blockSignals(true);
+    ui->acceleration->blockSignals(true);
+    ui->playLoop->setChecked(m_settings.m_loop);
+    ui->acceleration->setCurrentIndex(FileSourceSettings::getAccelerationIndex(m_settings.m_accelerationFactor));
+    ui->acceleration->blockSignals(false);
+    ui->playLoop->blockSignals(false);
 }
 
 void FileSourceGui::sendSettings()
 {
 }
 
-void FileSourceGui::on_playLoop_toggled(bool checked __attribute__((unused)))
+void FileSourceGui::on_playLoop_toggled(bool checked)
 {
-	// TODO: do something about it!
+	m_settings.m_loop = checked;
+    FileSourceInput::MsgConfigureFileSource *message = FileSourceInput::MsgConfigureFileSource::create(m_settings);
+    m_sampleSource->getInputMessageQueue()->push(message);
 }
 
 void FileSourceGui::on_startStop_toggled(bool checked)

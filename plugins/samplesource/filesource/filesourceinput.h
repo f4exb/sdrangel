@@ -168,6 +168,25 @@ public:
         { }
     };
 
+    class MsgPlayPause : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getPlayPause() const { return m_playPause; }
+
+        static MsgPlayPause* create(bool playPause) {
+            return new MsgPlayPause(playPause);
+        }
+
+    protected:
+        bool m_playPause;
+
+        MsgPlayPause(bool playPause) :
+            Message(),
+            m_playPause(playPause)
+        { }
+    };
+
 	class MsgReportFileSourceStreamData : public Message {
 		MESSAGE_CLASS_DECLARATION
 
