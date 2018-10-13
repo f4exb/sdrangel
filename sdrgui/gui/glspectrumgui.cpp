@@ -30,7 +30,7 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 	m_invert(true),
 	m_averagingMode(AvgModeNone),
 	m_averagingIndex(0),
-	m_averagingMaxScale(2),
+	m_averagingMaxScale(5),
 	m_averagingNb(0)
 {
 	ui->setupUi(this);

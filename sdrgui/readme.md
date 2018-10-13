@@ -269,11 +269,14 @@ Use this combo to select which averaging mode is applied:
   - **No**: no averaging. Disables averaging regardless of the number of averaged samples (4.6). This is the default option
   - **Mov**: moving average. This is a sliding average over the amount of samples specified next (4.6). There is one complete FFT line produced at every FFT sampling period
   - **Fix**: fixed average. Average is done over the amount of samples specified next (4.6) and a result is produced at the end of the corresponding period then the next block of averaged samples is processed. There is one complete FFT line produced every FFT sampling period multiplied by the number of averaged samples (4.6). The time scale on the waterfall display is updated accordingly.
+  - **Max**: this is not an averaging but a max hold. It will retain the maximum value over the amount of samples specified next (4.6). Similarly to the fixed average a result is produced at the end of the corresponding period which results in slowing down the waterfall display. The point of this mode is to make outlying short bursts within the "averaging" period stand out. With averaging they would only cause a modest increase and could be missed out.   
 
 <h4>4.6. Number of averaged samples</h4>
   
-Each FFT bin (squared magnitude) is averaged over a number of samples. This combo allows selecting the number of samples between these values: 0 (no averaging), 2, 5, 10, 20, 50, 100, 200, 500, 1k (1000). The tooltip mentions the resulting averaging period considering the baseband sample rate and FFT size.
-Averaging reduces the noise variance and can be used to better detect weak continuous signals. The fixed averaging mode allows long time monitoring on the waterfall.
+Each FFT bin (squared magnitude) is averaged or max'ed over a number of samples. This combo allows selecting the number of samples between these values: 0 (no averaging), 2, 5, 10, 20, 50, 100, 200, 500, 1k (1000), 2k, 5k, 10k, 20k, 50k, 1e5 (100000), 2e5, 5e5, 1M (1000000). The tooltip mentions the resulting averaging period considering the baseband sample rate and FFT size.
+Averaging reduces the noise variance and can be used to better detect weak continuous signals. The fixed averaging mode allows long time monitoring on the waterfall. The max mode helps showing short bursts that may appear during the "averaging" period.
+
+&#9758; Note: The spectrum display is refreshed every 50ms (20 FPS). Setting an averaging time above this value will make sure that a short burst is not missed particularly when using the max mode.
 
 <h4>4.7. Phosphor display stroke decay</h4>
 

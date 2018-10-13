@@ -591,7 +591,7 @@
        </property>
        <item>
         <property name="text">
-         <string>0</string>
+         <string>1</string>
         </property>
        </item>
        <item>
@@ -637,6 +637,51 @@
        <item>
         <property name="text">
          <string>1k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>2k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>5k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>20k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>50k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1e5</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>2e5</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>5e5</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1M</string>
         </property>
        </item>
       </widget>
