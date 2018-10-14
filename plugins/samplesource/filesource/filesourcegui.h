@@ -74,7 +74,6 @@ private:
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_lastEngineState;
 	MessageQueue m_inputMessageQueue;
-	unsigned int m_accelerationMaxScale;
 
 	void blockApplySettings(bool block) { m_doApplySettings = !block; }
 	void displaySettings();

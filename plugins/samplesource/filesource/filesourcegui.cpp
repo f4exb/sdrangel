@@ -51,8 +51,7 @@ FileSourceGui::FileSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_samplesCount(0),
 	m_tickCount(0),
 	m_enableNavTime(false),
-	m_lastEngineState(DSPDeviceSourceEngine::StNotStarted),
-	m_accelerationMaxScale(1)
+	m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -164,9 +163,7 @@ bool FileSourceGui::handleMessage(const Message& message)
     {
         const FileSourceInput::MsgConfigureFileSource& cfg = (FileSourceInput::MsgConfigureFileSource&) message;
         m_settings = cfg.getSettings();
-        blockApplySettings(true);
         displaySettings();
-        blockApplySettings(false);
         return true;
     }
     else if (FileSourceInput::MsgReportFileSourceAcquisition::match(message))
@@ -237,12 +234,10 @@ void FileSourceGui::updateSampleRateAndFrequency()
 
 void FileSourceGui::displaySettings()
 {
-    ui->playLoop->blockSignals(true);
-    ui->acceleration->blockSignals(true);
+    blockApplySettings(true);
     ui->playLoop->setChecked(m_settings.m_loop);
     ui->acceleration->setCurrentIndex(FileSourceSettings::getAccelerationIndex(m_settings.m_accelerationFactor));
-    ui->acceleration->blockSignals(false);
-    ui->playLoop->blockSignals(false);
+    blockApplySettings(false);
 }
 
 void FileSourceGui::sendSettings()
@@ -251,9 +246,12 @@ void FileSourceGui::sendSettings()
 
 void FileSourceGui::on_playLoop_toggled(bool checked)
 {
-	m_settings.m_loop = checked;
-    FileSourceInput::MsgConfigureFileSource *message = FileSourceInput::MsgConfigureFileSource::create(m_settings);
-    m_sampleSource->getInputMessageQueue()->push(message);
+    if (m_doApplySettings)
+    {
+        m_settings.m_loop = checked;
+        FileSourceInput::MsgConfigureFileSource *message = FileSourceInput::MsgConfigureFileSource::create(m_settings);
+        m_sampleSource->getInputMessageQueue()->push(message);
+    }
 }
 
 void FileSourceGui::on_startStop_toggled(bool checked)
@@ -328,9 +326,12 @@ void FileSourceGui::on_showFileDialog_clicked(bool checked __attribute__((unused
 
 void FileSourceGui::on_acceleration_currentIndexChanged(int index)
 {
-    m_settings.m_accelerationFactor = FileSourceSettings::getAccelerationValue(index);
-    FileSourceInput::MsgConfigureFileSource *message = FileSourceInput::MsgConfigureFileSource::create(m_settings);
-    m_sampleSource->getInputMessageQueue()->push(message);
+    if (m_doApplySettings)
+    {
+        m_settings.m_accelerationFactor = FileSourceSettings::getAccelerationValue(index);
+        FileSourceInput::MsgConfigureFileSource *message = FileSourceInput::MsgConfigureFileSource::create(m_settings);
+        m_sampleSource->getInputMessageQueue()->push(message);
+    }
 }
 
 void FileSourceGui::configureFileName()
@@ -404,7 +405,7 @@ void FileSourceGui::setAccelerationCombo()
     ui->acceleration->clear();
     ui->acceleration->addItem(QString("1"));
 
-    for (unsigned int i = 0; i <= m_accelerationMaxScale; i++)
+    for (unsigned int i = 0; i <= FileSourceSettings::m_accelerationMaxScale; i++)
     {
         QString s;
         int m = pow(10.0, i);

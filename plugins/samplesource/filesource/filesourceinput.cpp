@@ -402,8 +402,11 @@ bool FileSourceInput::applySettings(const FileSourceSettings& settings, bool for
 
     if ((m_settings.m_accelerationFactor != settings.m_accelerationFactor) || force)
     {
-        QMutexLocker mutexLocker(&m_mutex);
-        m_fileSourceThread->setSampleRateAndSize(settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
+        if (m_fileSourceThread)
+        {
+            QMutexLocker mutexLocker(&m_mutex);
+            m_fileSourceThread->setSampleRateAndSize(settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
+        }
     }
 
     m_settings = settings;
