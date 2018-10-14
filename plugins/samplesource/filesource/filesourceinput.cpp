@@ -138,13 +138,13 @@ void FileSourceInput::openFileStream()
 	}
 }
 
-void FileSourceInput::seekFileStream(int seekPercentage)
+void FileSourceInput::seekFileStream(int seekMillis)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
 	if ((m_ifstream.is_open()) && m_fileSourceThread && !m_fileSourceThread->isRunning())
 	{
-        quint64 seekPoint = ((m_recordLength * seekPercentage) / 100) * m_sampleRate;
+        quint64 seekPoint = ((m_recordLength * seekMillis) / 1000) * m_sampleRate;
 		m_fileSourceThread->setSamplesCount(seekPoint);
         seekPoint *= (m_sampleSize == 24 ? 8 : 4); // + sizeof(FileSink::Header)
 		m_ifstream.clear();
@@ -322,8 +322,8 @@ bool FileSourceInput::handleMessage(const Message& message)
 	else if (MsgConfigureFileSourceSeek::match(message))
 	{
 		MsgConfigureFileSourceSeek& conf = (MsgConfigureFileSourceSeek&) message;
-		int seekPercentage = conf.getPercentage();
-		seekFileStream(seekPercentage);
+		int seekMillis = conf.getMillis();
+		seekFileStream(seekMillis);
 
 		return true;
 	}

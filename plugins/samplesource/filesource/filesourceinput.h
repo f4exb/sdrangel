@@ -113,19 +113,19 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		int getPercentage() const { return m_seekPercentage; }
+		int getMillis() const { return m_seekMillis; }
 
-		static MsgConfigureFileSourceSeek* create(int seekPercentage)
+		static MsgConfigureFileSourceSeek* create(int seekMillis)
 		{
-			return new MsgConfigureFileSourceSeek(seekPercentage);
+			return new MsgConfigureFileSourceSeek(seekMillis);
 		}
 
 	protected:
-		int m_seekPercentage; //!< percentage of seek position from the beginning 0..100
+		int m_seekMillis; //!< millis of seek position from the beginning 0..1000
 
-		MsgConfigureFileSourceSeek(int seekPercentage) :
+		MsgConfigureFileSourceSeek(int seekMillis) :
 			Message(),
-			m_seekPercentage(seekPercentage)
+			m_seekMillis(seekMillis)
 		{ }
 	};
 
@@ -319,7 +319,7 @@ public:
 	const QTimer& m_masterTimer;
 
 	void openFileStream();
-	void seekFileStream(int seekPercentage);
+	void seekFileStream(int seekMillis);
 	bool applySettings(const FileSourceSettings& settings, bool force = false);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 };

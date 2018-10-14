@@ -303,7 +303,7 @@ void FileSourceGui::on_play_toggled(bool checked)
 
 void FileSourceGui::on_navTimeSlider_valueChanged(int value)
 {
-	if (m_enableNavTime && ((value >= 0) && (value <= 100)))
+	if (m_enableNavTime && ((value >= 0) && (value <= 1000)))
 	{
 		FileSourceInput::MsgConfigureFileSourceSeek* message = FileSourceInput::MsgConfigureFileSourceSeek::create(value);
 		m_sampleSource->getInputMessageQueue()->push(message);
@@ -387,7 +387,7 @@ void FileSourceGui::updateWithStreamTime()
 	if (!m_enableNavTime)
 	{
 		float posRatio = (float) t_sec / (float) m_recordLength;
-		ui->navTimeSlider->setValue((int) (posRatio * 100.0));
+		ui->navTimeSlider->setValue((int) (posRatio * 1000.0));
 	}
 }
 
