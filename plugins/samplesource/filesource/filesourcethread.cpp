@@ -193,20 +193,10 @@ void FileSourceThread::tick()
         	writeToSampleFifo(m_fileBuf, (qint32) m_ifstream->gcount());
         	MsgReportEOF *message = MsgReportEOF::create();
         	m_fileInputMessageQueue->push(message);
-            //m_sampleFifo->write(m_buf, m_ifstream->gcount());
-            // TODO: handle loop playback situation
-
-//        	m_ifstream->clear();
-//            m_ifstream->seekg(sizeof(FileRecord::Header), std::ios::beg);
-//    		m_samplesCount = 0;
-
-    		//stopWork();
-            //m_ifstream->close();
         }
         else
         {
         	writeToSampleFifo(m_fileBuf, (qint32) m_chunksize);
-            //m_sampleFifo->write(m_buf, m_chunksize);
     		m_samplesCount += m_chunksize / (2 * m_samplebytes);
         }
 	}

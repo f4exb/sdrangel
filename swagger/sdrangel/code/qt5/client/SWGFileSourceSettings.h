@@ -45,12 +45,24 @@ public:
     QString* getFileName();
     void setFileName(QString* file_name);
 
+    qint32 getAccelerationFactor();
+    void setAccelerationFactor(qint32 acceleration_factor);
+
+    qint32 getLoop();
+    void setLoop(qint32 loop);
+
 
     virtual bool isSet() override;
 
 private:
     QString* file_name;
     bool m_file_name_isSet;
+
+    qint32 acceleration_factor;
+    bool m_acceleration_factor_isSet;
+
+    qint32 loop;
+    bool m_loop_isSet;
 
 };
 

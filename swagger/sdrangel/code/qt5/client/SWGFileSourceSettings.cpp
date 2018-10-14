@@ -30,6 +30,10 @@ SWGFileSourceSettings::SWGFileSourceSettings(QString* json) {
 SWGFileSourceSettings::SWGFileSourceSettings() {
     file_name = nullptr;
     m_file_name_isSet = false;
+    acceleration_factor = 0;
+    m_acceleration_factor_isSet = false;
+    loop = 0;
+    m_loop_isSet = false;
 }
 
 SWGFileSourceSettings::~SWGFileSourceSettings() {
@@ -40,6 +44,10 @@ void
 SWGFileSourceSettings::init() {
     file_name = new QString("");
     m_file_name_isSet = false;
+    acceleration_factor = 0;
+    m_acceleration_factor_isSet = false;
+    loop = 0;
+    m_loop_isSet = false;
 }
 
 void
@@ -47,6 +55,8 @@ SWGFileSourceSettings::cleanup() {
     if(file_name != nullptr) { 
         delete file_name;
     }
+
+
 }
 
 SWGFileSourceSettings*
@@ -61,6 +71,10 @@ SWGFileSourceSettings::fromJson(QString &json) {
 void
 SWGFileSourceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&file_name, pJson["fileName"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&acceleration_factor, pJson["accelerationFactor"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&loop, pJson["loop"], "qint32", "");
     
 }
 
@@ -81,6 +95,12 @@ SWGFileSourceSettings::asJsonObject() {
     if(file_name != nullptr && *file_name != QString("")){
         toJsonValue(QString("fileName"), file_name, obj, QString("QString"));
     }
+    if(m_acceleration_factor_isSet){
+        obj->insert("accelerationFactor", QJsonValue(acceleration_factor));
+    }
+    if(m_loop_isSet){
+        obj->insert("loop", QJsonValue(loop));
+    }
 
     return obj;
 }
@@ -95,12 +115,34 @@ SWGFileSourceSettings::setFileName(QString* file_name) {
     this->m_file_name_isSet = true;
 }
 
+qint32
+SWGFileSourceSettings::getAccelerationFactor() {
+    return acceleration_factor;
+}
+void
+SWGFileSourceSettings::setAccelerationFactor(qint32 acceleration_factor) {
+    this->acceleration_factor = acceleration_factor;
+    this->m_acceleration_factor_isSet = true;
+}
+
+qint32
+SWGFileSourceSettings::getLoop() {
+    return loop;
+}
+void
+SWGFileSourceSettings::setLoop(qint32 loop) {
+    this->loop = loop;
+    this->m_loop_isSet = true;
+}
+
 
 bool
 SWGFileSourceSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(file_name != nullptr && *file_name != QString("")){ isObjectUpdated = true; break;}
+        if(m_acceleration_factor_isSet){ isObjectUpdated = true; break;}
+        if(m_loop_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

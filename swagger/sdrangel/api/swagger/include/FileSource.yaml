@@ -2,7 +2,14 @@ FileSourceSettings:
   description: FileSource
   properties:
     fileName:
+      description: The name (path) of the file being read
       type: string
+    accelerationFactor:
+      description: Playback acceleration (1 if normal speed)
+      type: integer
+    loop:
+      description: 1 if playing in a loop else 0
+      type: integer
       
 FileSourceReport:
   description: FileSource

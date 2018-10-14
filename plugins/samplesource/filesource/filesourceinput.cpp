@@ -179,15 +179,12 @@ bool FileSourceInput::start()
 		return false;
 	}
 
-	//openFileStream();
-
 	m_fileSourceThread = new FileSourceThread(&m_ifstream, &m_sampleFifo, m_masterTimer, &m_inputMessageQueue);
 	m_fileSourceThread->setSampleRateAndSize(m_settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
 	m_fileSourceThread->startWork();
 	m_deviceDescription = "FileSource";
 
 	mutexLocker.unlock();
-	//applySettings(m_generalSettings, m_settings, true);
 	qDebug("FileSourceInput::startInput: started");
 
 	if (getMessageQueueToGUI()) {
@@ -233,12 +230,12 @@ bool FileSourceInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureFileSource* message = MsgConfigureFileSource::create(m_settings);
+    MsgConfigureFileSource* message = MsgConfigureFileSource::create(m_settings, true);
     m_inputMessageQueue.push(message);
 
     if (getMessageQueueToGUI())
     {
-        MsgConfigureFileSource* messageToGUI = MsgConfigureFileSource::create(m_settings);
+        MsgConfigureFileSource* messageToGUI = MsgConfigureFileSource::create(m_settings, true);
         getMessageQueueToGUI()->push(messageToGUI);
     }
 
@@ -265,12 +262,12 @@ void FileSourceInput::setCenterFrequency(qint64 centerFrequency)
     FileSourceSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureFileSource* message = MsgConfigureFileSource::create(m_settings);
+    MsgConfigureFileSource* message = MsgConfigureFileSource::create(m_settings, false);
     m_inputMessageQueue.push(message);
 
     if (getMessageQueueToGUI())
     {
-        MsgConfigureFileSource* messageToGUI = MsgConfigureFileSource::create(m_settings);
+        MsgConfigureFileSource* messageToGUI = MsgConfigureFileSource::create(m_settings, false);
         getMessageQueueToGUI()->push(messageToGUI);
     }
 }
@@ -303,16 +300,9 @@ bool FileSourceInput::handleMessage(const Message& message)
 
 		if (m_fileSourceThread != 0)
 		{
-			if (working)
-			{
+			if (working) {
 				m_fileSourceThread->startWork();
-				/*
-				MsgReportFileSourceStreamTiming *report =
-						MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
-				getOutputMessageQueueToGUI()->push(report);*/
-			}
-			else
-			{
+			} else {
 				m_fileSourceThread->stopWork();
 			}
 		}
@@ -422,7 +412,39 @@ int FileSourceInput::webapiSettingsGet(
                 QString& errorMessage __attribute__((unused)))
 {
     response.setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
-    response.getFileSourceSettings()->setFileName(new QString(m_settings.m_fileName));
+    response.getFileSourceSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int FileSourceInput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    FileSourceSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("fileName")) {
+        settings.m_fileName = *response.getFileSourceSettings()->getFileName();
+    }
+    if (deviceSettingsKeys.contains("accelerationFactor")) {
+        settings.m_accelerationFactor = response.getFileSourceSettings()->getAccelerationFactor();
+    }
+    if (deviceSettingsKeys.contains("loop")) {
+        settings.m_loop = response.getFileSourceSettings()->getLoop() != 0;
+    }
+
+    MsgConfigureFileSource *msg = MsgConfigureFileSource::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureFileSource *msgToGUI = MsgConfigureFileSource::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
     return 200;
 }
 
@@ -460,6 +482,14 @@ int FileSourceInput::webapiReportGet(
     response.getFileSourceReport()->init();
     webapiFormatDeviceReport(response);
     return 200;
+}
+
+void FileSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FileSourceSettings& settings)
+{
+    response.getFileSourceSettings()->setFileName(new QString(settings.m_fileName));
+    response.getFileSourceSettings()->setAccelerationFactor(settings.m_accelerationFactor);
+    response.getFileSourceSettings()->setLoop(settings.m_loop ? 1 : 0);
+
 }
 
 void FileSourceInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)

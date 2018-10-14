@@ -37,18 +37,21 @@ public:
 
 	public:
 		const FileSourceSettings& getSettings() const { return m_settings; }
+		bool getForce() const { return m_force; }
 
-		static MsgConfigureFileSource* create(const FileSourceSettings& settings)
+		static MsgConfigureFileSource* create(const FileSourceSettings& settings, bool force)
 		{
-			return new MsgConfigureFileSource(settings);
+			return new MsgConfigureFileSource(settings, force);
 		}
 
 	private:
 		FileSourceSettings m_settings;
+        bool m_force;
 
-		MsgConfigureFileSource(const FileSourceSettings& settings) :
+		MsgConfigureFileSource(const FileSourceSettings& settings, bool force) :
 			Message(),
-			m_settings(settings)
+			m_settings(settings),
+			m_force(force)
 		{ }
 	};
 
@@ -290,6 +293,12 @@ public:
 	            SWGSDRangel::SWGDeviceSettings& response,
 	            QString& errorMessage);
 
+	virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
     virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
@@ -321,6 +330,7 @@ public:
 	void openFileStream();
 	void seekFileStream(int seekMillis);
 	bool applySettings(const FileSourceSettings& settings, bool force = false);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FileSourceSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 };
 

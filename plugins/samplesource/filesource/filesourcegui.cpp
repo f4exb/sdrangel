@@ -249,7 +249,7 @@ void FileSourceGui::on_playLoop_toggled(bool checked)
     if (m_doApplySettings)
     {
         m_settings.m_loop = checked;
-        FileSourceInput::MsgConfigureFileSource *message = FileSourceInput::MsgConfigureFileSource::create(m_settings);
+        FileSourceInput::MsgConfigureFileSource *message = FileSourceInput::MsgConfigureFileSource::create(m_settings, false);
         m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
@@ -329,7 +329,7 @@ void FileSourceGui::on_acceleration_currentIndexChanged(int index)
     if (m_doApplySettings)
     {
         m_settings.m_accelerationFactor = FileSourceSettings::getAccelerationValue(index);
-        FileSourceInput::MsgConfigureFileSource *message = FileSourceInput::MsgConfigureFileSource::create(m_settings);
+        FileSourceInput::MsgConfigureFileSource *message = FileSourceInput::MsgConfigureFileSource::create(m_settings, false);
         m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
@@ -358,7 +358,7 @@ void FileSourceGui::updateWithStreamData()
 	recordLength = recordLength.addSecs(m_recordLength);
 	QString s_time = recordLength.toString("HH:mm:ss");
 	ui->recordLengthText->setText(s_time);
-	updateWithStreamTime(); // TODO: remove when time data is implemented
+	updateWithStreamTime();
 }
 
 void FileSourceGui::updateWithStreamTime()

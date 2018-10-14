@@ -2297,7 +2297,16 @@ margin-bottom: 20px;
             defs.FileSourceSettings = {
   "properties" : {
     "fileName" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "The name (path) of the file being read"
+    },
+    "accelerationFactor" : {
+      "type" : "integer",
+      "description" : "Playback acceleration (1 if normal speed)"
+    },
+    "loop" : {
+      "type" : "integer",
+      "description" : "1 if playing in a loop else 0"
     }
   },
   "description" : "FileSource"
@@ -23242,7 +23251,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-10-11T08:49:05.249+02:00
+              Generated 2018-10-14T10:07:16.959+02:00
             </div>
           </div>
       </div>
