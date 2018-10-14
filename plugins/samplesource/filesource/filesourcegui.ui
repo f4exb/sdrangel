@@ -475,6 +475,21 @@
          <string>100</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>200</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>500</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1k</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>

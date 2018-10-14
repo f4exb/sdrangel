@@ -18,7 +18,7 @@
 
 #include "filesourcesettings.h"
 
-const unsigned int FileSourceSettings::m_accelerationMaxScale = 1;
+const unsigned int FileSourceSettings::m_accelerationMaxScale = 2;
 
 FileSourceSettings::FileSourceSettings()
 {

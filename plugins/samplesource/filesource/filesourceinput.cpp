@@ -174,7 +174,7 @@ bool FileSourceInput::start()
 		m_ifstream.seekg(sizeof(FileRecord::Header), std::ios::beg);
 	}
 
-	if(!m_sampleFifo.setSize(m_sampleRate * sizeof(Sample))) {
+	if(!m_sampleFifo.setSize(m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample))) {
 		qCritical("Could not allocate SampleFifo");
 		return false;
 	}
@@ -405,6 +405,10 @@ bool FileSourceInput::applySettings(const FileSourceSettings& settings, bool for
         if (m_fileSourceThread)
         {
             QMutexLocker mutexLocker(&m_mutex);
+            if (!m_sampleFifo.setSize(m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample))) {
+                qCritical("FileSourceInput::applySettings: could not reallocate sample FIFO size to %lu",
+                        m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample));
+            }
             m_fileSourceThread->setSampleRateAndSize(settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
         }
     }
