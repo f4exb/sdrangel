@@ -2,6 +2,7 @@ sdrangel (4.2.2-1) unstable; urgency=medium
 
   * Spectrum: option to get max over a number of FFTs. Implements issue #207
   * File Input: fixed wrong times displays due to 32 bit integer ovevlow. Issue #206
+  * File Input: implemented play loop and playback acceleration
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 14 Oct 2018 21:14:18 +0200
 

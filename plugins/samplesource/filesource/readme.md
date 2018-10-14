@@ -96,11 +96,19 @@ Use this button to read in a loop or read only once
 
 This is the play/pause button
 
-<h3>12: Relative timestamp and record length</h3>
+<h3>12: Playback acceleration</h3>
+
+Use this combo to select play back acceleration to values of 1 (no acceleration), 2, 5, 10, 20, 50, 100, 200, 500, 1k (1000) times. This is useful on long recordings used in conjunction with the spectrum "Max" averaging mode in order to see the waterfall over a long period. Thus the waterfall will be filled much faster.
+
+&#9758; Note that this control is enabled only in paused mode.
+
+&#9888; The result when using channel plugins with acceleration is unpredictable. Use this tool to locate your signal of interest then play at normal speed to get proper demodulation or decoding.
+
+<h3>13: Relative timestamp and record length</h3>
 
 Left is the relative timestamp of the current pointer from the start of the record. Right is the total record time.
 
-<h3>13: Current pointer gauge</h3>
+<h3>14: Current pointer gauge</h3>
 
 This represents the position of the current pointer position in the complete recording. It can be used it paused mode to position the current pointer by moving the slider.
  
