@@ -152,7 +152,7 @@ public:
     ScopeVis(GLScope* glScope = 0);
     virtual ~ScopeVis();
 
-    void setSampleRate(int sampleRate);
+    void setLiveRate(int sampleRate);
     void configure(uint32_t traceSize, uint32_t timeBase, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun);
     void addTrace(const TraceData& traceData);
     void changeTrace(const TraceData& traceData, uint32_t traceIndex);
@@ -1049,7 +1049,9 @@ private:
     uint32_t m_timeOfsProMill;                     //!< Start trace shift in 1/1000 trace size
     bool m_traceStart;                             //!< Trace is at start point
     SampleVector::const_iterator m_triggerPoint;   //!< Trigger start location in the samples vector
-    int m_sampleRate;
+    int m_sampleRate;                              //!< Actual sample rate being used
+    int m_liveRate;                                //!< Sample rate in live mode
+    int m_memoryRate;                              //!< Sample rate in memory mode
     TraceBackDiscreteMemory m_traceDiscreteMemory; //!< Complex trace memory for triggered states TODO: vectorize when more than on input is allowed
     bool m_freeRun;                                //!< True if free running (trigger globally disabled)
     int m_maxTraceDelay;                           //!< Maximum trace delay
@@ -1109,6 +1111,11 @@ private:
      * - Trace in memory: call process memory trace
      */
     void updateGLScopeDisplay();
+
+    /**
+     * Set the actual sample rate
+     */
+    void setSampleRate(int sampleRate);
 };
 
 

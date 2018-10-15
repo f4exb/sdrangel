@@ -52,6 +52,8 @@ ScopeVis::ScopeVis(GLScope* glScope) :
     m_timeOfsProMill(0),
     m_traceStart(true),
     m_sampleRate(0),
+    m_liveRate(0),
+    m_memoryRate(0),
     m_traceDiscreteMemory(m_nbTraceMemories),
     m_freeRun(true),
     m_maxTraceDelay(0),
@@ -71,6 +73,15 @@ ScopeVis::~ScopeVis()
 {
     for (std::vector<TriggerCondition*>::iterator it = m_triggerConditions.begin(); it != m_triggerConditions.end(); ++ it) {
         delete *it;
+    }
+}
+
+void ScopeVis::setLiveRate(int sampleRate)
+{
+    m_liveRate = sampleRate;
+
+    if (m_currentTraceMemoryIndex == 0) { // update only in live mode
+        setSampleRate(m_liveRate);
     }
 }
 
@@ -589,7 +600,7 @@ bool ScopeVis::handleMessage(const Message& message)
     if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
-        setSampleRate(notif.getSampleRate());
+        setLiveRate(notif.getSampleRate());
         qDebug() << "ScopeVis::handleMessage: DSPSignalNotification: m_sampleRate: " << m_sampleRate;
         return true;
     }
@@ -827,9 +838,16 @@ bool ScopeVis::handleMessage(const Message& message)
 
         if (memoryIndex != m_currentTraceMemoryIndex)
         {
+            // on transition from live rate initialize memory rate to live rate
+            if (memoryIndex == 0) {
+                m_memoryRate = m_liveRate;
+            }
+
             m_currentTraceMemoryIndex = memoryIndex;
 
-            if (m_currentTraceMemoryIndex > 0) {
+            if (m_currentTraceMemoryIndex == 0) { // transition to live mode
+                setSampleRate(m_liveRate); // reset to live rate
+            } else {
                 processMemoryTrace();
             }
         }
