@@ -20,6 +20,8 @@
 
 #include <QDebug>
 #include <QColor>
+#include <QByteArray>
+
 #include <algorithm>
 #include <utility>
 #include <math.h>
@@ -599,6 +601,44 @@ private:
     	}
 
     	SampleVector::iterator current() { return m_traceBuffer.getCurrent(); }
+
+        QByteArray serialize() const
+        {
+            SimpleSerializer s(1);
+
+            QByteArray buffer = m_traceBuffer.serialize();
+            unsigned int endDelta = m_endPoint - m_traceBuffer.begin();
+            s.writeU32(1, endDelta);
+            s.writeBlob(2, buffer);
+
+            return s.final();
+        }
+
+        bool deserialize(const QByteArray& data)
+        {
+            SimpleDeserializer d(data);
+
+            if(!d.isValid()) {
+                return false;
+            }
+
+            if (d.getVersion() == 1)
+            {
+                unsigned int tmpUInt;
+                QByteArray buf;
+
+                d.readU32(1, &tmpUInt, 0);
+                d.readBlob(2, &buf);
+                m_traceBuffer.deserialize(buf);
+                m_endPoint = m_traceBuffer.begin() + tmpUInt;
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     };
 
     struct TraceBackDiscreteMemory
@@ -672,6 +712,60 @@ private:
     	 * Return current memory index
     	 */
     	uint32_t currentIndex() const { return m_currentMemIndex; }
+
+    	/**
+    	 * Serializer
+    	 */
+        QByteArray serialize() const
+        {
+            SimpleSerializer s(1);
+
+            s.writeU32(1, m_memSize);
+            s.writeU32(2, m_currentMemIndex);
+            s.writeU32(3, m_traceSize);
+
+            for (unsigned int i = 0; i < m_memSize; i++)
+            {
+                QByteArray buffer = m_traceBackBuffers[i].serialize();
+                s.writeBlob(100+i, buffer);
+            }
+
+            return s.final();
+        }
+
+        /**
+         * Deserializer
+         */
+        bool deserialize(const QByteArray& data)
+        {
+            SimpleDeserializer d(data);
+
+            if(!d.isValid()) {
+                return false;
+            }
+
+            if (d.getVersion() == 1)
+            {
+                d.readU32(1, &m_memSize, 0);
+                d.readU32(2, &m_currentMemIndex, 0);
+                d.readU32(3, &m_traceSize, 0);
+                m_traceBackBuffers.resize(m_memSize);
+                resize(m_traceSize);
+
+                for (unsigned int i = 0; i < m_memSize; i++)
+                {
+                    QByteArray buffer;
+                    d.readBlob(100+i, &buffer);
+                    m_traceBackBuffers[i].deserialize(buffer);
+                }
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     };
 
     /**
