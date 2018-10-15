@@ -462,7 +462,6 @@ void ChannelAnalyzerGUI::setNewFinalRate()
 	QString s = QString::number(m_rate/1000.0, 'f', 1);
 	ui->spanText->setText(tr("%1 kS/s").arg(s));
 
-	ui->glScope->setSampleRate(m_rate);
 	m_scopeVis->setSampleRate(m_rate);
 }
 

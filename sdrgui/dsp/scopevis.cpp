@@ -76,10 +76,10 @@ ScopeVis::~ScopeVis()
 
 void ScopeVis::setSampleRate(int sampleRate)
 {
-    if (sampleRate != m_sampleRate)
-    {
-        m_sampleRate = sampleRate;
-        if (m_glScope) m_glScope->setSampleRate(m_sampleRate);
+    m_sampleRate = sampleRate;
+
+    if (m_glScope) {
+        m_glScope->setSampleRate(m_sampleRate);
     }
 }
 
