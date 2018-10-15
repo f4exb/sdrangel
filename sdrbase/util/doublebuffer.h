@@ -90,7 +90,8 @@ public:
 	}
 
 	typename std::vector<T>::iterator getCurrent() const { return m_current + m_size; }
-	typename std::vector<T>::iterator begin() const { return m_data.begin(); }
+	typename std::vector<T>::const_iterator begin() const { return m_data.begin(); }
+    typename std::vector<T>::iterator begin() { return m_data.begin(); }
 	unsigned int absoluteFill() const { return m_current - m_data.begin(); }
 	void reset() { m_current = m_data.begin(); }
 
@@ -124,9 +125,7 @@ public:
             d.readU32(2, &tmpUInt, 0);
             m_current = m_data.begin() + tmpUInt;
             d.readBlob(3, &buf);
-            const T* begin = reinterpret_cast<T*>(buf.data());
-            const T* end = begin + (buf.length()/sizeof(T));
-            std::copy(m_data.begin(), begin, end);
+            std::copy(reinterpret_cast<char *>(m_data.data()), buf.data(), buf.data() + buf.size());
 
             return true;
         }
