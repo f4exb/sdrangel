@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QColorDialog>
+#include <QFileDialog>
 
 #include "glscopegui.h"
 #include "glscope.h"
@@ -768,12 +769,43 @@ void GLScopeGUI::on_traceColor_clicked()
     }
 }
 
+void GLScopeGUI::on_memorySave_clicked(bool checked __attribute__((unused)))
+{
+    qDebug("GLScopeGUI::on_memorySave_clicked");
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Open trace memory file"), ".", tr("Trace memory files (*.trcm)"), 0, QFileDialog::DontUseNativeDialog);
+
+    if (fileName != "")
+    {
+        QFileInfo fileInfo(fileName);
+
+        if (fileInfo.suffix() != "trcm") {
+            fileName += ".trcm";
+        }
+
+        qDebug("GLScopeGUI::on_memorySave_clicked: %s", qPrintable(fileName));
+    }
+}
+
+void GLScopeGUI::on_memoryLoad_clicked(bool checked __attribute__((unused)))
+{
+    qDebug("GLScopeGUI::on_memoryLoad_clicked");
+
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Open trace memory file"), ".", tr("Trace memory files (*.trcm)"), 0, QFileDialog::DontUseNativeDialog);
+
+    if (fileName != "")
+    {
+        qDebug("GLScopeGUI::on_memoryLoad_clicked: %s", qPrintable(fileName));
+    }
+}
+
 void GLScopeGUI::on_mem_valueChanged(int value)
 {
     QString text;
     text.sprintf("%02d", value);
     ui->memText->setText(text);
-   	disableLiveMode(value > 0); // block trigger UI line if memory is active
+   	disableLiveMode(value > 0); // live / memory mode toggle
    	m_scopeVis->setMemoryIndex(value);
 }
 
@@ -1224,6 +1256,8 @@ void GLScopeGUI::disableLiveMode(bool disable)
     ui->trigPre->setEnabled(!disable);
     ui->trigOneShot->setEnabled(!disable);
     ui->freerun->setEnabled(!disable);
+    ui->memorySave->setEnabled(disable);
+    ui->memoryLoad->setEnabled(disable);
 }
 
 void GLScopeGUI::fillTraceData(ScopeVis::TraceData& traceData)

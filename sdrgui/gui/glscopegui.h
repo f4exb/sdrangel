@@ -211,6 +211,8 @@ private slots:
     void on_traceDelayFine_valueChanged(int value);
     void on_traceView_toggled(bool checked);
     void on_traceColor_clicked();
+    void on_memorySave_clicked(bool checked);
+    void on_memoryLoad_clicked(bool checked);
     void on_mem_valueChanged(int value);
     // Third row
     void on_trig_valueChanged(int value);
