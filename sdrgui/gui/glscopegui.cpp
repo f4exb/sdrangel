@@ -17,6 +17,7 @@
 
 #include <QColorDialog>
 #include <QFileDialog>
+#include <QMessageBox>
 
 #include "glscopegui.h"
 #include "glscope.h"
@@ -771,7 +772,6 @@ void GLScopeGUI::on_traceColor_clicked()
 
 void GLScopeGUI::on_memorySave_clicked(bool checked __attribute__((unused)))
 {
-    qDebug("GLScopeGUI::on_memorySave_clicked");
     QString fileName = QFileDialog::getSaveFileName(this,
         tr("Open trace memory file"), ".", tr("Trace memory files (*.trcm)"), 0, QFileDialog::DontUseNativeDialog);
 
@@ -783,7 +783,20 @@ void GLScopeGUI::on_memorySave_clicked(bool checked __attribute__((unused)))
             fileName += ".trcm";
         }
 
-        qDebug("GLScopeGUI::on_memorySave_clicked: %s", qPrintable(fileName));
+        QFile exportFile(fileName);
+
+        if (exportFile.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            QString base64Str = m_scopeVis->serializeMemory().toBase64();
+            QTextStream outstream(&exportFile);
+            outstream << base64Str;
+            exportFile.close();
+            qDebug("GLScopeGUI::on_memorySave_clicked: saved to %s", qPrintable(fileName));
+        }
+        else
+        {
+            QMessageBox::information(this, tr("Message"), tr("Cannot open %1 file for writing").arg(fileName));
+        }
     }
 }
 
@@ -796,7 +809,21 @@ void GLScopeGUI::on_memoryLoad_clicked(bool checked __attribute__((unused)))
 
     if (fileName != "")
     {
-        qDebug("GLScopeGUI::on_memoryLoad_clicked: %s", qPrintable(fileName));
+        QFile exportFile(fileName);
+
+        if (exportFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            QByteArray base64Str;
+            QTextStream instream(&exportFile);
+            instream >> base64Str;
+            exportFile.close();
+            m_scopeVis->deserializeMemory(QByteArray::fromBase64(base64Str));
+            qDebug("GLScopeGUI::on_memoryLoad_clicked: loaded from %s", qPrintable(fileName));
+        }
+        else
+        {
+            QMessageBox::information(this, tr("Message"), tr("Cannot open file %1 for reading").arg(fileName));
+        }
     }
 }
 

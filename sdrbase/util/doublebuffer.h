@@ -125,7 +125,9 @@ public:
             d.readU32(2, &tmpUInt, 0);
             m_current = m_data.begin() + tmpUInt;
             d.readBlob(3, &buf);
-            std::copy(reinterpret_cast<char *>(m_data.data()), buf.data(), buf.data() + buf.size());
+            //qDebug("DoubleBufferSimple::deserialize: m_data.size(): %u buf.size(): %d", m_data.size(), buf.size());
+            //std::copy(reinterpret_cast<char *>(m_data.data()), buf.data(), buf.data() + buf.size()); // bug
+            memcpy(reinterpret_cast<char *>(m_data.data()), buf.data(), buf.size());
 
             return true;
         }

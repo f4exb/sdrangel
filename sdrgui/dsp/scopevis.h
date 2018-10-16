@@ -167,6 +167,52 @@ public:
     void setOneShot(bool oneShot);
     void setMemoryIndex(uint32_t memoryIndex);
 
+    QByteArray serializeMemory() const
+    {
+        SimpleSerializer s(1);
+
+        s.writeU32(1, m_traceSize);
+        s.writeS32(2, m_sampleRate);
+        QByteArray buffer = m_traceDiscreteMemory.serialize();
+        s.writeBlob(3, buffer);
+
+        return s.final();
+    }
+
+    bool deserializeMemory(const QByteArray& data)
+    {
+        SimpleDeserializer d(data);
+
+        if(!d.isValid()) {
+            return false;
+        }
+
+        if (d.getVersion() == 1)
+        {
+            uint32_t traceSize;
+            int sampleRate;
+            QByteArray buf;
+            bool traceDiscreteMemorySuccess;
+
+            d.readU32(1, &traceSize, m_traceChunkSize);
+            d.readS32(2, &sampleRate, 0);
+            setSampleRate(sampleRate);
+            setTraceSize(traceSize);
+            d.readBlob(3, &buf);
+            traceDiscreteMemorySuccess = m_traceDiscreteMemory.deserialize(buf);
+
+            if (traceDiscreteMemorySuccess && (m_glScope) && (m_currentTraceMemoryIndex > 0)) {
+                processMemoryTrace();
+            }
+
+            return traceDiscreteMemorySuccess;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     void getTriggerData(TriggerData& triggerData, uint32_t triggerIndex)
     {
         if (triggerIndex < m_triggerConditions.size())
@@ -665,7 +711,7 @@ private:
 
     		for (std::vector<TraceBackBuffer>::iterator it = m_traceBackBuffers.begin(); it != m_traceBackBuffers.end(); ++it)
     		{
-    			it->resize(4*m_traceSize);
+    			it->resize(4*m_traceSize); // TODO: why 4?
     		}
     	}
 
