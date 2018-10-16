@@ -47,13 +47,13 @@ ScopeVis::ScopeVis(GLScope* glScope) :
     m_triggerState(TriggerUntriggered),
     m_focusedTraceIndex(0),
     m_traceSize(m_traceChunkSize),
+    m_liveTraceSize(m_traceChunkSize),
     m_nbSamples(0),
     m_timeBase(1),
     m_timeOfsProMill(0),
     m_traceStart(true),
     m_sampleRate(0),
-    m_liveRate(0),
-    m_memoryRate(0),
+    m_liveSampleRate(0),
     m_traceDiscreteMemory(m_nbTraceMemories),
     m_freeRun(true),
     m_maxTraceDelay(0),
@@ -78,10 +78,10 @@ ScopeVis::~ScopeVis()
 
 void ScopeVis::setLiveRate(int sampleRate)
 {
-    m_liveRate = sampleRate;
+    m_liveSampleRate = sampleRate;
 
     if (m_currentTraceMemoryIndex == 0) { // update only in live mode
-        setSampleRate(m_liveRate);
+        setSampleRate(m_liveSampleRate);
     }
 }
 
@@ -91,6 +91,18 @@ void ScopeVis::setSampleRate(int sampleRate)
 
     if (m_glScope) {
         m_glScope->setSampleRate(m_sampleRate);
+    }
+}
+
+void ScopeVis::setTraceSize(uint32_t traceSize)
+{
+    m_traceSize = traceSize;
+    m_traces.resize(m_traceSize);
+    m_traceDiscreteMemory.resize(m_traceSize);
+    initTraceBuffers();
+
+    if (m_glScope) {
+        m_glScope->setTraceSize(m_traceSize);
     }
 }
 
@@ -617,14 +629,7 @@ bool ScopeVis::handleMessage(const Message& message)
 
         if (m_traceSize != traceSize)
         {
-            m_traceSize = traceSize;
-            m_traces.resize(m_traceSize);
-            m_traceDiscreteMemory.resize(m_traceSize);
-            initTraceBuffers();
-
-            if (m_glScope) {
-                m_glScope->setTraceSize(m_traceSize);
-            }
+            setTraceSize(traceSize);
         }
 
         if (m_timeBase != timeBase)
@@ -838,16 +843,20 @@ bool ScopeVis::handleMessage(const Message& message)
 
         if (memoryIndex != m_currentTraceMemoryIndex)
         {
-            // on transition from live rate initialize memory rate to live rate
+            // transition from live mode
             if (memoryIndex == 0) {
-                m_memoryRate = m_liveRate;
+                m_liveTraceSize = m_traceSize;
             }
 
             m_currentTraceMemoryIndex = memoryIndex;
 
-            if (m_currentTraceMemoryIndex == 0) { // transition to live mode
-                setSampleRate(m_liveRate); // reset to live rate
-            } else {
+            if (m_currentTraceMemoryIndex == 0) // transition to live mode
+            {
+                setSampleRate(m_liveSampleRate); // reset to live rate
+                setTraceSize(m_liveTraceSize); // reset to live trace size
+            }
+            else
+            {
                 processMemoryTrace();
             }
         }

@@ -748,9 +748,13 @@ private:
             {
                 d.readU32(1, &m_memSize, 0);
                 d.readU32(2, &m_currentMemIndex, 0);
-                d.readU32(3, &m_traceSize, 0);
+                uint32_t traceSize;
+                d.readU32(3, &traceSize, 0);
                 m_traceBackBuffers.resize(m_memSize);
-                resize(m_traceSize);
+
+                if (traceSize != m_traceSize) {
+                    resize(traceSize);
+                }
 
                 for (unsigned int i = 0; i < m_memSize; i++)
                 {
@@ -1044,14 +1048,14 @@ private:
     Traces m_traces;                               //!< Displayable traces
     int m_focusedTraceIndex;                       //!< Index of the trace that has focus
     uint32_t m_traceSize;                          //!< Size of traces in number of samples
+    uint32_t m_liveTraceSize;                      //!< Size of traces in number of samples in live mode
     int m_nbSamples;                               //!< Number of samples yet to process in one complex trace
     uint32_t m_timeBase;                           //!< Trace display time divisor
     uint32_t m_timeOfsProMill;                     //!< Start trace shift in 1/1000 trace size
     bool m_traceStart;                             //!< Trace is at start point
     SampleVector::const_iterator m_triggerPoint;   //!< Trigger start location in the samples vector
     int m_sampleRate;                              //!< Actual sample rate being used
-    int m_liveRate;                                //!< Sample rate in live mode
-    int m_memoryRate;                              //!< Sample rate in memory mode
+    int m_liveSampleRate;                          //!< Sample rate in live mode
     TraceBackDiscreteMemory m_traceDiscreteMemory; //!< Complex trace memory for triggered states TODO: vectorize when more than on input is allowed
     bool m_freeRun;                                //!< True if free running (trigger globally disabled)
     int m_maxTraceDelay;                           //!< Maximum trace delay
@@ -1116,6 +1120,11 @@ private:
      * Set the actual sample rate
      */
     void setSampleRate(int sampleRate);
+
+    /**
+     * Set the traces size
+     */
+    void setTraceSize(uint32_t traceSize);
 };
 
 
