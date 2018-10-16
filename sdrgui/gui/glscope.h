@@ -58,13 +58,13 @@ public:
     int getSampleRate() const { return m_sampleRate; }
     int getTraceSize() const { return m_traceSize; }
 
-    void setTriggerPre(uint32_t triggerPre); //!< number of samples
+    void setTriggerPre(uint32_t triggerPre, bool emitSignal = false); //!< number of samples
     void setTimeOfsProMill(int timeOfsProMill);
     void setSampleRate(int sampleRate);
     void setTimeBase(int timeBase);
     void setFocusedTraceIndex(uint32_t traceIndex);
     void setDisplayMode(DisplayMode displayMode);
-    void setTraceSize(int trceSize);
+    void setTraceSize(int trceSize, bool emitSignal = false);
     void updateDisplay();
     void setDisplayGridIntensity(int intensity);
     void setDisplayTraceIntensity(int intensity);
@@ -78,6 +78,8 @@ public:
 
 signals:
     void sampleRateChanged(int);
+    void traceSizeChanged(uint32_t);
+    void preTriggerChanged(uint32_t); //!< number of samples
 
 private:
     std::vector<ScopeVis::TraceData> *m_tracesData;

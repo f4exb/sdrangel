@@ -938,11 +938,15 @@ void GLScope::setTimeBase(int timeBase)
     update();
 }
 
-void GLScope::setTriggerPre(uint32_t triggerPre)
+void GLScope::setTriggerPre(uint32_t triggerPre, bool emitSignal)
 {
     m_triggerPre = triggerPre;
     m_configChanged = true;
     update();
+
+    if (emitSignal) {
+        emit preTriggerChanged(m_triggerPre);
+    }
 }
 
 void GLScope::setTimeOfsProMill(int timeOfsProMill)
@@ -966,11 +970,15 @@ void GLScope::setDisplayMode(DisplayMode displayMode)
     update();
 }
 
-void GLScope::setTraceSize(int traceSize)
+void GLScope::setTraceSize(int traceSize, bool emitSignal)
 {
     m_traceSize = traceSize;
     m_configChanged = true;
     update();
+
+    if (emitSignal) {
+        emit traceSizeChanged(m_traceSize);
+    }
 }
 
 void GLScope::updateDisplay()

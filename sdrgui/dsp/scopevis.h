@@ -172,9 +172,10 @@ public:
         SimpleSerializer s(1);
 
         s.writeU32(1, m_traceSize);
-        s.writeS32(2, m_sampleRate);
+        s.writeU32(2, m_preTriggerDelay);
+        s.writeS32(3, m_sampleRate);
         QByteArray buffer = m_traceDiscreteMemory.serialize();
-        s.writeBlob(3, buffer);
+        s.writeBlob(4, buffer);
 
         return s.final();
     }
@@ -189,16 +190,18 @@ public:
 
         if (d.getVersion() == 1)
         {
-            uint32_t traceSize;
+            uint32_t traceSize, preTriggerDelay;
             int sampleRate;
             QByteArray buf;
             bool traceDiscreteMemorySuccess;
 
             d.readU32(1, &traceSize, m_traceChunkSize);
-            d.readS32(2, &sampleRate, 0);
+            d.readU32(2, &preTriggerDelay, 0);
+            d.readS32(3, &sampleRate, 0);
             setSampleRate(sampleRate);
-            setTraceSize(traceSize);
-            d.readBlob(3, &buf);
+            setTraceSize(traceSize, true);
+            setPreTriggerDelay(preTriggerDelay, true);
+            d.readBlob(4, &buf);
             traceDiscreteMemorySuccess = m_traceDiscreteMemory.deserialize(buf);
 
             if (traceDiscreteMemorySuccess && (m_glScope) && (m_currentTraceMemoryIndex > 0)) {
@@ -1087,6 +1090,7 @@ private:
 
     GLScope* m_glScope;
     uint32_t m_preTriggerDelay;                    //!< Pre-trigger delay in number of samples
+    uint32_t m_livePreTriggerDelay;                //!< Pre-trigger delay in number of samples in live mode
     std::vector<TriggerCondition*> m_triggerConditions; //!< Chain of triggers
     uint32_t m_currentTriggerIndex;                //!< Index of current index in the chain
     uint32_t m_focusedTriggerIndex;                //!< Index of the trigger that has focus
@@ -1170,7 +1174,12 @@ private:
     /**
      * Set the traces size
      */
-    void setTraceSize(uint32_t traceSize);
+    void setTraceSize(uint32_t traceSize, bool emitSignal = false);
+
+    /**
+     * Set the pre trigger delay
+     */
+    void setPreTriggerDelay(uint32_t preTriggerDelay, bool emitSignal = false);
 };
 
 

@@ -185,6 +185,8 @@ private:
 
 private slots:
     void on_scope_sampleRateChanged(int value);
+    void on_scope_traceSizeChanged(uint32_t value);
+    void on_scope_preTriggerChanged(uint32_t value);
     // First row
     void on_onlyX_toggled(bool checked);
     void on_onlyY_toggled(bool checked);

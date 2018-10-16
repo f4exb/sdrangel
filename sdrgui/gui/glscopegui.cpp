@@ -104,6 +104,8 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLSc
 
     setEnabled(true);
     connect(m_glScope, SIGNAL(sampleRateChanged(int)), this, SLOT(on_scope_sampleRateChanged(int)));
+    connect(m_glScope, SIGNAL(traceSizeChanged(uint32_t)), this, SLOT(on_scope_traceSizeChanged(uint32_t)));
+    connect(m_glScope, SIGNAL(preTriggerChanged(uint32_t)), this, SLOT(on_scope_preTriggerChanged(uint32_t)));
 
     ui->traceMode->clear();
     fillProjectionCombo(ui->traceMode);
@@ -147,6 +149,21 @@ void GLScopeGUI::on_scope_sampleRateChanged(int sampleRate)
     setTraceDelayDisplay();
     setTrigPreDisplay();
     setTrigDelayDisplay();
+}
+
+void GLScopeGUI::on_scope_traceSizeChanged(uint32_t traceNbSamples)
+{
+    qDebug("GLScopeGUI::on_scope_traceSizeChanged: %u", traceNbSamples);
+    m_traceLenMult = traceNbSamples / ScopeVis::m_traceChunkSize;
+    ui->traceLen->setValue(m_traceLenMult);
+    setTraceLenDisplay();
+}
+
+void GLScopeGUI::on_scope_preTriggerChanged(uint32_t preTriggerNbSamples)
+{
+    qDebug("GLScopeGUI::on_scope_preTriggerChanged: %u", preTriggerNbSamples);
+    ui->trigPre->setValue(preTriggerNbSamples*100 / m_glScope->getTraceSize()); // slider position is a percentage value of the trace size
+    setTrigPreDisplay();
 }
 
 void GLScopeGUI::resetToDefaults()

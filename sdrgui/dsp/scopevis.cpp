@@ -42,6 +42,7 @@ const uint ScopeVis::m_traceChunkSize = 4800;
 ScopeVis::ScopeVis(GLScope* glScope) :
     m_glScope(glScope),
     m_preTriggerDelay(0),
+    m_livePreTriggerDelay(0),
     m_currentTriggerIndex(0),
     m_focusedTriggerIndex(0),
     m_triggerState(TriggerUntriggered),
@@ -94,7 +95,7 @@ void ScopeVis::setSampleRate(int sampleRate)
     }
 }
 
-void ScopeVis::setTraceSize(uint32_t traceSize)
+void ScopeVis::setTraceSize(uint32_t traceSize, bool emitSignal)
 {
     m_traceSize = traceSize;
     m_traces.resize(m_traceSize);
@@ -102,7 +103,16 @@ void ScopeVis::setTraceSize(uint32_t traceSize)
     initTraceBuffers();
 
     if (m_glScope) {
-        m_glScope->setTraceSize(m_traceSize);
+        m_glScope->setTraceSize(m_traceSize, emitSignal);
+    }
+}
+
+void ScopeVis::setPreTriggerDelay(uint32_t preTriggerDelay, bool emitSignal)
+{
+    m_preTriggerDelay = preTriggerDelay;
+
+    if (m_glScope) {
+        m_glScope->setTriggerPre(m_preTriggerDelay, emitSignal);
     }
 }
 
@@ -652,11 +662,7 @@ bool ScopeVis::handleMessage(const Message& message)
 
         if (m_preTriggerDelay != triggerPre)
         {
-            m_preTriggerDelay = triggerPre;
-
-            if (m_glScope) {
-                m_glScope->setTriggerPre(m_preTriggerDelay);
-            }
+            setPreTriggerDelay(triggerPre);
         }
 
         if (freeRun != m_freeRun)
@@ -844,16 +850,20 @@ bool ScopeVis::handleMessage(const Message& message)
         if (memoryIndex != m_currentTraceMemoryIndex)
         {
             // transition from live mode
-            if (memoryIndex == 0) {
+            if (m_currentTraceMemoryIndex == 0)
+            {
                 m_liveTraceSize = m_traceSize;
+                m_livePreTriggerDelay = m_preTriggerDelay;
             }
 
             m_currentTraceMemoryIndex = memoryIndex;
 
-            if (m_currentTraceMemoryIndex == 0) // transition to live mode
+            // transition to live mode
+            if (m_currentTraceMemoryIndex == 0)
             {
                 setSampleRate(m_liveSampleRate); // reset to live rate
-                setTraceSize(m_liveTraceSize); // reset to live trace size
+                setTraceSize(m_liveTraceSize, true); // reset to live trace size
+                setPreTriggerDelay(m_livePreTriggerDelay, true); // reset to live pre-trigger delay
             }
             else
             {
