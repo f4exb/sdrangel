@@ -1,6 +1,7 @@
 sdrangel (4.2.3-1) unstable; urgency=medium
 
   * Scope: fixed channel rate affecting scope in memory mode. Issue #227
+  * Spectrum: limit depth to 1000 when in moving average mode to avoid RAM exhaustion
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 21 Oct 2018 21:14:18 +0200
 

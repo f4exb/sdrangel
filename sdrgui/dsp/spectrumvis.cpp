@@ -364,7 +364,7 @@ void SpectrumVis::handleConfigure(int fftSize,
 	m_overlapSize = (m_fftSize * m_overlapPercent) / 100;
 	m_refillSize = m_fftSize - m_overlapSize;
 	m_fftBufferFill = m_overlapSize;
-	m_movingAverage.resize(fftSize, averageNb);
+	m_movingAverage.resize(fftSize, averageNb > 1000 ? 1000 : averageNb); // Capping to avoid out of memory condition
 	m_fixedAverage.resize(fftSize, averageNb);
 	m_max.resize(fftSize, averageNb);
 	m_averageNb = averageNb;

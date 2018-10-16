@@ -246,6 +246,18 @@ void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
 {
     m_averagingMode = index < 0 ? AvgModeNone : index > 3 ? AvgModeMax : (AveragingMode) index;
 
+    if (m_averagingMode == AvgModeMoving)
+    {
+        m_averagingMaxScale = 2;
+        setAveragingCombo();
+        m_averagingNb = m_averagingNb > 1000 ? 1000 : m_averagingNb;
+    }
+    else
+    {
+        m_averagingMaxScale = 5;
+        setAveragingCombo();
+    }
+
     if(m_spectrumVis != 0) {
         m_spectrumVis->configure(m_messageQueueToVis,
                 m_fftSize,
@@ -507,6 +519,7 @@ int GLSpectrumGUI::getAveragingValue(int averagingIndex) const
 
 void GLSpectrumGUI::setAveragingCombo()
 {
+    int index = ui->averaging->currentIndex();
     ui->averaging->clear();
     ui->averaging->addItem(QString("1"));
 
@@ -524,6 +537,8 @@ void GLSpectrumGUI::setAveragingCombo()
         setNumberStr(x, s);
         ui->averaging->addItem(s);
     }
+
+    ui->averaging->setCurrentIndex(index >= ui->averaging->count() ? ui->averaging->count() - 1 : index);
 }
 
 void GLSpectrumGUI::setNumberStr(int n, QString& s)
