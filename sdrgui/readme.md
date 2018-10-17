@@ -2,7 +2,7 @@
 
 <h2>Multi device support</h2>
 
-Starting with version 2 SDRangel supports running several sampling devices simultaneously. Each concurrent device is associated to a slot with a set of tabbed windows in the UI. These tabs are marked R0, R1, R2... 
+Starting with version 2 SDRangel supports running several sampling devices simultaneously. Each concurrent device is associated to a slot with a set of tabbed windows in the UI. These tabs are marked R0, R1, R2...
 
 The slots are arranged in a stacked fashion so that when a new device is added with the Acquisition -> Add device set menu a new slot is allocated in the last position and when a device is removed with the Acquisition -> Remove last device set menu the slot in the last position is deleted. Slot 0 (R0) receiver slot is created at initialization and cannot be deleted with the menu. The letter "R" in the tab names indicates that the slot is for a receiver (source) device while "T" designates a transmitter (sink) device.
 
@@ -52,7 +52,7 @@ The following items are presented hierarchically from left to right:
     - _My Position_: opens a dialog to enter your station ("My Position") coordinates in decimal degrees with north latitudes positive and east longitudes positive. This is used whenever positional data is to be displayed (APRS, DPRS, ...). For it now only works with D-Star $$CRC frames. See [DSD demod plugin](../plugins/channelrx/demoddsd/readme.md) for details on how to decode Digital Voice modes.
   - Help:
     - _Loaded Plugins_: shows details about the loaded plugins (see 1.3 below for details)
-    - _About_: current version and blah blah.    
+    - _About_: current version and blah blah.
 
 <h4>1.1. Preferences - Audio</h4>
 
@@ -151,12 +151,12 @@ This is where the plugin GUI specific to the device is displayed. Control of one
   - When a play icon (&#9654;) is displayed with a blue background the device is ready to start
   - When a stop icon (&#9632;) is displayed with a green background the device is currently running
   - When a play icon (&#9654;) is displayed with a red background there is an error and a popup displays the error message. An Error typically occurs when you try to start the same device in more than one tab.
-  
+
 <h4>2.2. Record I/Q</h4>
 
 This is the I/Q from device record toggle. When a red background is displayed the recording is currently active. The name of the file created is `test_n.sdriq` where `n` is the slot number.
 
-The format is S16LE I/Q samples. Thus there are 4 bytes per sample. I and Q values are 16 bit signed integers. The file starts with a context header containing information about center frequency, sample rate and timestamp of the start of the recording. This header has a length which is a multiple of a sample size (normally 24 bytes thus 6 samples). Thus this file can be used as a raw I/Q file with S16LE samples tolerating a glitch at the start corresponding to the 6 "random" samples. 
+The format is S16LE I/Q samples. Thus there are 4 bytes per sample. I and Q values are 16 bit signed integers. The file starts with a context header containing information about center frequency, sample rate and timestamp of the start of the recording. This header has a length which is a multiple of a sample size (normally 24 bytes thus 6 samples). Thus this file can be used as a raw I/Q file with S16LE samples tolerating a glitch at the start corresponding to the 6 "random" samples.
 
 You can also zap the 24 bytes header with this Linux command: `tail -c +25 myfile.sdriq > myfile.raw`
 
@@ -171,7 +171,7 @@ This is the sampling rate in kS/s of the I/Q stream extracted from the device af
 
 <h4>2.4. Center frequency</h4>
 
-This is the current center frequency in kHz with dot separated thousands (MHz, GHz). On devices for which frequency can be directly controlled (i.e. all except File Source and SDRdaemon) you can use the thumbwheels to set the frequency. Thumbwheels move with the mouse wheel when hovering over a digit. 
+This is the current center frequency in kHz with dot separated thousands (MHz, GHz). On devices for which frequency can be directly controlled (i.e. all except File Source and SDRdaemon) you can use the thumbwheels to set the frequency. Thumbwheels move with the mouse wheel when hovering over a digit.
 
 When left clicking on a digit a cursor is set on it and you can also use the arrows to move the corresponding thumbwheel.
 
@@ -244,7 +244,7 @@ Use this combo box to select which window is applied to the FFT:
   - **Ham**: Hamming (default)
   - **Han**: Hanning
   - **Rec**: Rectangular (no window)
-  
+
 <h4>4.2. FFT size</h4>
 
 Select the size of the FFT window among these values:
@@ -269,10 +269,10 @@ Use this combo to select which averaging mode is applied:
   - **No**: no averaging. Disables averaging regardless of the number of averaged samples (4.6). This is the default option
   - **Mov**: moving average. This is a sliding average over the amount of samples specified next (4.6). There is one complete FFT line produced at every FFT sampling period
   - **Fix**: fixed average. Average is done over the amount of samples specified next (4.6) and a result is produced at the end of the corresponding period then the next block of averaged samples is processed. There is one complete FFT line produced every FFT sampling period multiplied by the number of averaged samples (4.6). The time scale on the waterfall display is updated accordingly.
-  - **Max**: this is not an averaging but a max hold. It will retain the maximum value over the amount of samples specified next (4.6). Similarly to the fixed average a result is produced at the end of the corresponding period which results in slowing down the waterfall display. The point of this mode is to make outlying short bursts within the "averaging" period stand out. With averaging they would only cause a modest increase and could be missed out.   
+  - **Max**: this is not an averaging but a max hold. It will retain the maximum value over the amount of samples specified next (4.6). Similarly to the fixed average a result is produced at the end of the corresponding period which results in slowing down the waterfall display. The point of this mode is to make outlying short bursts within the "averaging" period stand out. With averaging they would only cause a modest increase and could be missed out.
 
 <h4>4.6. Number of averaged samples</h4>
-  
+
 Each FFT bin (squared magnitude) is averaged or max'ed over a number of samples. This combo allows selecting the number of samples between these values: 1 (no averaging), 2, 5, 10, 20, 50, 100, 200, 500, 1k (1000) for all modes and in addition 2k, 5k, 10k, 20k, 50k, 1e5 (100000), 2e5, 5e5, 1M (1000000) for "fixed" and "max" modes. The tooltip mentions the resulting averaging period considering the baseband sample rate and FFT size.
 Averaging reduces the noise variance and can be used to better detect weak continuous signals. The fixed averaging mode allows long time monitoring on the waterfall. The max mode helps showing short bursts that may appear during the "averaging" period.
 
@@ -280,15 +280,15 @@ Averaging reduces the noise variance and can be used to better detect weak conti
 
 <h4>4.7. Phosphor display stroke decay</h4>
 
-This controls the decay rate of the stroke when phosphor display is engaged (4.C)
+This controls the decay rate of the stroke when phosphor display is engaged (4.C). A value of zero means no decay and thus phosphor history and max hold (red line) will be kept until the clear button (4.B) is pressed.
 
 <h4>4.8. Phosphor display holdoff</h4>
 
-This controls the holdoff when phosphor display is engaged (4.C)
+This controls the holdoff value when phosphor display is engaged (4.C). The holdoff value will drive how much hits are needed before an even appears in the history. Practically you increase this value to trim larger transient signals. A value of 0 means no holdoff and all signals are contributing.
 
 <h4>4.9. Phosphor display stroke strength</h4>
 
-This controls the stroke strength when phosphor display is engaged (4.C)
+This controls the stroke strength when phosphor display is engaged (4.C).
 
 <h4>4.A. Trace intensity</h4>
 
@@ -334,7 +334,7 @@ When in linear mode the range control (4.4) has no effect because the actual ran
 
 <h3>5. Presets and commands</h3>
 
-The presets and commands tree view are by default stacked in tabs. The following sections describe the presets section 5A) and commands (section 5B) views successively 
+The presets and commands tree view are by default stacked in tabs. The following sections describe the presets section 5A) and commands (section 5B) views successively
 
 <h3>5A. Presets</h3>
 
@@ -364,7 +364,7 @@ You can give a name to your preset. Names need not to be unique.
 
 <h4>5A.6. Preset control or actions</h4>
 
-The controls are located as icons at the bottom of the window: 
+The controls are located as icons at the bottom of the window:
 
 ![Main Window presets](../doc/img/MainWindow_presets.png)
 
@@ -378,7 +378,7 @@ Click on this icon to create a update the selected preset with the current value
 
 <h5>5A.6.3. Edit preset</h5>
 
-Opens a new window where you can change the group name and description. 
+Opens a new window where you can change the group name and description.
 
   - for group items you can rename the group or merge all group presets into an existing group by selecting this existing group
   - for preset items you can:
@@ -400,12 +400,12 @@ This is the opposite of the previous operation. This will create a new preset in
 
 <h5>5A.6.7. Delete preset</h5>
 
-  - on a preset item: deletes the selected preset. 
+  - on a preset item: deletes the selected preset.
   - on a preset group: deletes the group and all its presets.
 
 <h5>5A.6.8. Load preset</h5>
 
-Applies the selected preset to the current device set (source and channel plugins).  
+Applies the selected preset to the current device set (source and channel plugins).
 
 <h3>5B. Commands</h3>
 
@@ -441,7 +441,7 @@ This is a descriptive text of the key sequence that is used for the key binding.
 
 <h4>5B.6. Command control or actions</h4>
 
-The controls are located as icons at the bottom of the window: 
+The controls are located as icons at the bottom of the window:
 
 ![Main Window commands](../doc/img/MainWindow_commands.png)
 
@@ -497,7 +497,7 @@ You can use special codes to insert information specific to the application cont
   - `%1`: the address of the web REST API
   - `%2`: the port of the web REST API
   - `%3`: the currently selected device set index
-  
+
 <h6>5B.6.3.6. Key binding</h6>
 
 Use this checkbox to enable or disable the command execution binding to a key or combination of keys press or release event
@@ -539,7 +539,7 @@ When the process is not running the stop icon (&#9632;) is displayed. The backgr
   - no color (same as background): the process has never run during this session
   - red: the process ended with error
   - green: the process ended successfully. This does not mean that there was no programmatic error.
-  
+
 When the process is running the play icon (&#9654;) is displayed with an orange background.
 
 <h6>5B.6.5.2. Refresh data</h6>
@@ -577,7 +577,7 @@ This is the translation of `QProcess::ProcessError`. Possible values are:
   - `Write error`: an error occurred when attempting to write to the process. For example, the process may not be running, or it may have closed its input channel.
   - `Read error`: an error occurred when attempting to read from the process. For example, the process may not be running.
   - `Unknown error`: an unknown error occurred.
-  
+
 <h6>5B.6.5.9. Exit code</h6>
 
 This is the program exit code. When the process crashes this is the signal by which the process end was caused. For example if you kill the process with button (6) it sends the process a SIGKILL (code 9) and therefore the value is 9.
@@ -632,7 +632,7 @@ When the mouse is over the channel window or over the central line in the spectr
   - Title: channel window title
   - AdSnd: UDP address and send port
   - AdRcv: UDP address and receive port
-  
+
 <h4>6.4: Validate and exit dialog</h4>
 
 Validates the data (saves it in the channel marker object) and exits the dialog
@@ -646,7 +646,7 @@ Do not make any changes and exit dialog
 This shows the spectrum in the passband returned from the sampling device possibly after decimation. The actual sample rate is shown in the device control at the left of the frequency display (2.3)
 
 The spectrum display is controlled by the display control (4).
- 
+
 <h3>8. Status</h3>
 
 ![Main Window status](../doc/img/MainWindow_status.png)
