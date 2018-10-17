@@ -17,7 +17,7 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 	m_refLevel(0),
 	m_powerRange(100),
 	m_decay(0),
-	m_histogramLateHoldoff(1),
+	m_histogramHoldoffBase(0),
 	m_histogramStroke(40),
 	m_displayGridIntensity(5),
 	m_displayTraceIntensity(50),
@@ -67,7 +67,7 @@ void GLSpectrumGUI::resetToDefaults()
 	m_refLevel = 0;
 	m_powerRange = 100;
 	m_decay = 0;
-	m_histogramLateHoldoff = 1;
+	m_histogramHoldoffBase = 0;
 	m_histogramStroke = 40;
 	m_displayGridIntensity = 5,
 	m_displayWaterfall = true;
@@ -98,7 +98,7 @@ QByteArray GLSpectrumGUI::serialize() const
 	s.writeBool(11, m_displayGrid);
 	s.writeBool(12, m_invert);
 	s.writeS32(13, m_displayGridIntensity);
-	s.writeS32(14, m_histogramLateHoldoff);
+	s.writeS32(14, m_histogramHoldoffBase);
 	s.writeS32(15, m_histogramStroke);
 	s.writeBool(16, m_displayCurrent);
 	s.writeS32(17, m_displayTraceIntensity);
@@ -134,7 +134,7 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 		d.readBool(11, &m_displayGrid, false);
 		d.readBool(12, &m_invert, true);
 		d.readS32(13, &m_displayGridIntensity, 5);
-		d.readS32(14, &m_histogramLateHoldoff, 1);
+		d.readS32(14, &m_histogramHoldoffBase, 0);
 		d.readS32(15, &m_histogramStroke, 40);
 		d.readBool(16, &m_displayCurrent, false);
 		d.readS32(17, &m_displayTraceIntensity, 50);
@@ -171,7 +171,7 @@ void GLSpectrumGUI::applySettings()
 	ui->averagingMode->setCurrentIndex((int) m_averagingMode);
 	ui->linscale->setChecked(m_linear);
 	ui->decay->setSliderPosition(m_decay);
-	ui->holdoff->setSliderPosition(m_histogramLateHoldoff);
+	ui->holdoff->setSliderPosition(m_histogramHoldoffBase);
 	ui->stroke->setSliderPosition(m_histogramStroke);
 	ui->waterfall->setChecked(m_displayWaterfall);
 	ui->maxHold->setChecked(m_displayMaxHold);
@@ -182,7 +182,7 @@ void GLSpectrumGUI::applySettings()
 	ui->gridIntensity->setSliderPosition(m_displayGridIntensity);
 
 	ui->decay->setToolTip(QString("Decay: %1").arg(m_decay));
-	ui->holdoff->setToolTip(QString("Holdoff: %1").arg(m_histogramLateHoldoff));
+	ui->holdoff->setToolTip(QString("Holdoff: %1").arg(m_histogramHoldoffBase));
 	ui->stroke->setToolTip(QString("Stroke: %1").arg(m_histogramStroke));
 	ui->gridIntensity->setToolTip(QString("Grid intensity: %1").arg(m_displayGridIntensity));
 	ui->traceIntensity->setToolTip(QString("Trace intensity: %1").arg(m_displayTraceIntensity));
@@ -193,7 +193,7 @@ void GLSpectrumGUI::applySettings()
 	m_glSpectrum->setDisplayCurrent(m_displayCurrent);
 	m_glSpectrum->setDisplayHistogram(m_displayHistogram);
 	m_glSpectrum->setDecay(m_decay);
-	m_glSpectrum->setHistoLateHoldoff(m_histogramLateHoldoff);
+	m_glSpectrum->setHistoHoldoffBase(m_histogramHoldoffBase);
 	m_glSpectrum->setHistoStroke(m_histogramStroke);
 	m_glSpectrum->setInvertedWaterfall(m_invert);
 	m_glSpectrum->setDisplayGrid(m_displayGrid);
@@ -372,8 +372,8 @@ void GLSpectrumGUI::on_holdoff_valueChanged(int index)
 	if (index < 0) {
 		return;
 	}
-	m_histogramLateHoldoff = index;
-	//ui->holdoff->setToolTip(QString("Holdoff: %1").arg(m_histogramLateHoldoff));
+	m_histogramHoldoffBase = index;
+	//ui->holdoff->setToolTip(QString("Holdoff: %1").arg(m_histogramHoldoffBase));
 	if(m_glSpectrum != 0) {
 		applySettings();
 	}

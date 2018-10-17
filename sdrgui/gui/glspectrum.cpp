@@ -104,9 +104,9 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 		((quint8*)&m_histogramPalette[i])[3] = c.alpha();
 	}
 
-	m_histogramHoldoffBase = 2; // was 4
+	m_histogramHoldoffBase = 4; // was 2
 	m_histogramHoldoffCount = m_histogramHoldoffBase;
-	m_histogramLateHoldoff = 1; // was 20
+	m_histogramLateHoldoff = 20; // was 1
 	m_histogramStroke = 40; // was 4
 
 	m_timeScale.setFont(font());
@@ -170,29 +170,17 @@ void GLSpectrum::setPowerRange(Real powerRange)
 
 void GLSpectrum::setDecay(int decay)
 {
-	m_decay = decay;
-	if(m_decay < 0)
-		m_decay = 0;
-	else if(m_decay > 10)
-		m_decay = 10;
+	m_decay = decay < 0 ? 0 : decay > 20 ? 20 : decay;
 }
 
-void GLSpectrum::setHistoLateHoldoff(int lateHoldoff)
+void GLSpectrum::setHistoHoldoffBase(int holdoffBase)
 {
-	m_histogramLateHoldoff = lateHoldoff;
-	if(m_histogramLateHoldoff < 0)
-		m_histogramLateHoldoff = 0;
-	else if(m_histogramLateHoldoff > 20)
-		m_histogramLateHoldoff = 20;
+	m_histogramHoldoffBase = holdoffBase < 0 ? 0 : holdoffBase > 20 ? 20 : holdoffBase;
 }
 
 void GLSpectrum::setHistoStroke(int stroke)
 {
-	m_histogramStroke = stroke;
-	if(m_histogramStroke < 4)
-		m_histogramStroke = 4;
-	else if(m_histogramStroke > 240)
-		m_histogramStroke = 240;
+	m_histogramStroke = stroke < 4 ? 4 : stroke > 240 ? 240 : stroke;
 }
 
 void GLSpectrum::setSampleRate(qint32 sampleRate)

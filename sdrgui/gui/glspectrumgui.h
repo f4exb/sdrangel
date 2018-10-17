@@ -49,7 +49,7 @@ private:
 	Real m_refLevel;
 	Real m_powerRange;
 	int m_decay;
-	int m_histogramLateHoldoff;
+	int m_histogramHoldoffBase;
 	int m_histogramStroke;
 	int m_displayGridIntensity;
 	int m_displayTraceIntensity;

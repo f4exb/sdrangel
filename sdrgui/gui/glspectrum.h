@@ -69,7 +69,7 @@ public:
 	void setReferenceLevel(Real referenceLevel);
 	void setPowerRange(Real powerRange);
 	void setDecay(int decay);
-	void setHistoLateHoldoff(int lateHoldoff);
+	void setHistoHoldoffBase(int holdoffBase);
 	void setHistoStroke(int stroke);
 	void setDisplayWaterfall(bool display);
 	void setSsbSpectrum(bool ssbSpectrum);

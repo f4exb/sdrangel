@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Oscilloscope</string>
+   <string>Spectrum</string>
   </property>
   <layout class="QGridLayout" name="gridLayout" columnstretch="1,0,0">
    <property name="leftMargin">
@@ -52,7 +52,7 @@
         <string>Decay:</string>
        </property>
        <property name="maximum">
-        <number>240</number>
+        <number>20</number>
        </property>
        <property name="pageStep">
         <number>1</number>
