@@ -704,31 +704,6 @@
        </property>
       </widget>
      </item>
-
-     <item>
-      <widget class="ButtonSwitch" name="testHold">
-       <property name="toolTip">
-        <string>Toggle test Hold</string>
-       </property>
-       <property name="text">
-        <string>Test Hold</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources/res.qrc">
-         <normaloff>:/testHold.png</normaloff>:/testHold.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">

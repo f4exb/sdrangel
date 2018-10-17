@@ -76,7 +76,6 @@ public:
 	void setLsbDisplay(bool lsbDisplay);
 	void setInvertedWaterfall(bool inv);
 	void setDisplayMaxHold(bool display);
-	void setDisplayTestHold(bool value); // test
 	void setDisplayCurrent(bool display);
 	void setDisplayHistogram(bool display);
 	void setDisplayGrid(bool display);
@@ -146,7 +145,6 @@ private:
 
 	std::vector<Real> m_maxHold;
 	bool m_displayMaxHold;
-	bool m_displayTestHold; // test
 	const std::vector<Real> *m_currentSpectrum;
 	bool m_displayCurrent;
 
