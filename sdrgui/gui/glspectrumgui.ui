@@ -93,10 +93,10 @@
         <string>Stroke:</string>
        </property>
        <property name="minimum">
-        <number>4</number>
+        <number>1</number>
        </property>
        <property name="maximum">
-        <number>240</number>
+        <number>40</number>
        </property>
        <property name="pageStep">
         <number>1</number>

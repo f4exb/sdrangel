@@ -107,7 +107,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_histogramHoldoffBase = 4; // was 2
 	m_histogramHoldoffCount = m_histogramHoldoffBase;
 	m_histogramLateHoldoff = 20; // was 1
-	m_histogramStroke = 40; // was 4
+	m_histogramStroke = 4;
 
 	m_timeScale.setFont(font());
 	m_timeScale.setOrientation(Qt::Vertical);
@@ -175,12 +175,12 @@ void GLSpectrum::setDecay(int decay)
 
 void GLSpectrum::setHistoHoldoffBase(int holdoffBase)
 {
-	m_histogramHoldoffBase = holdoffBase < 0 ? 0 : holdoffBase > 20 ? 20 : holdoffBase;
+	m_histogramHoldoffBase = holdoffBase < 0 ? 0 : holdoffBase > 240 ? 240 : holdoffBase;
 }
 
 void GLSpectrum::setHistoStroke(int stroke)
 {
-	m_histogramStroke = stroke < 4 ? 4 : stroke > 240 ? 240 : stroke;
+	m_histogramStroke = stroke < 1 ? 1 : stroke > 40 ? 40 : stroke;
 }
 
 void GLSpectrum::setSampleRate(qint32 sampleRate)
@@ -373,7 +373,7 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 		{
 			for (int i = 0; i < fftMulSize; i++)
 			{
-				if (*b > 16) // was 20
+				if (*b > 20) // must be more than max value of m_decay
 				{
 					*b = *b - sub;
 				}
@@ -470,15 +470,20 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
         }
     }
 #else
-    for(int i = 0; i < m_fftSize; i++) {
+    for (int i = 0; i < m_fftSize; i++)
+    {
         int v = (int)((spectrum[i] - m_referenceLevel) * 100.0 / m_powerRange + 100.0);
 
-        if ((v >= 0) && (v <= 99)) {
+        if ((v >= 0) && (v <= 99))
+        {
             b = m_histogram + i * 100 + v;
-            if(*b < 220)
+
+            // capping to 239 as palette values are [0..239]
+            if (*b + m_histogramStroke <= 239) {
                 *b += m_histogramStroke; // was 4
-            else if(*b < 239)
-                *b += 1;
+            } else {
+                *b = 239;
+            }
         }
     }
 #endif

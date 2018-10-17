@@ -68,7 +68,7 @@ void GLSpectrumGUI::resetToDefaults()
 	m_powerRange = 100;
 	m_decay = 0;
 	m_histogramHoldoffBase = 0;
-	m_histogramStroke = 40;
+	m_histogramStroke = 4;
 	m_displayGridIntensity = 5,
 	m_displayWaterfall = true;
 	m_invertedWaterfall = false;
@@ -135,7 +135,7 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 		d.readBool(12, &m_invert, true);
 		d.readS32(13, &m_displayGridIntensity, 5);
 		d.readS32(14, &m_histogramHoldoffBase, 0);
-		d.readS32(15, &m_histogramStroke, 40);
+		d.readS32(15, &m_histogramStroke, 4);
 		d.readBool(16, &m_displayCurrent, false);
 		d.readS32(17, &m_displayTraceIntensity, 50);
 		Real waterfallShare;
@@ -369,9 +369,6 @@ void GLSpectrumGUI::on_decay_valueChanged(int index)
 
 void GLSpectrumGUI::on_holdoff_valueChanged(int index)
 {
-	if (index < 0) {
-		return;
-	}
 	m_histogramHoldoffBase = index;
 	//ui->holdoff->setToolTip(QString("Holdoff: %1").arg(m_histogramHoldoffBase));
 	if(m_glSpectrum != 0) {
@@ -381,9 +378,6 @@ void GLSpectrumGUI::on_holdoff_valueChanged(int index)
 
 void GLSpectrumGUI::on_stroke_valueChanged(int index)
 {
-	if (index < 4) {
-		return;
-	}
 	m_histogramStroke = index;
 	//ui->stroke->setToolTip(QString("Stroke: %1").arg(m_histogramStroke));
 	if(m_glSpectrum != 0) {
