@@ -371,31 +371,31 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 {
 	quint8* b = m_histogram;
 	quint8* h = m_histogramHoldoff;
-	int sub = 1;
+	int sub = 0; // was 1;
 	int fftMulSize = 100 * m_fftSize;
 
-	if(m_decay > 0)
-		sub += m_decay;
+	//if(m_decay > 0)
+	sub += m_decay; // allow zero decay so history (including max hold) is kept forever
 
 	if (m_displayHistogram || m_displayMaxHold)
 	{
 		m_histogramHoldoffCount--;
 
-		if(m_histogramHoldoffCount <= 0)
+		if (m_histogramHoldoffCount <= 0)
 		{
-			for(int i = 0; i < fftMulSize; i++)
+			for (int i = 0; i < fftMulSize; i++)
 			{
-				if((*b>>4) > 0) // *b > 16
+				if (*b > 16) // was 20
 				{
 					*b = *b - sub;
 				}
-				else if(*b > 0)
+				else if (*b > 0)
 				{
-					if(*h >= sub)
+					if (*h >= sub)
 					{
 						*h = *h - sub;
 					}
-					else if(*h > 0)
+					else if (*h > 0)
 					{
 						*h = *h - 1;
 					}
