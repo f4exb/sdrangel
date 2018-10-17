@@ -49,6 +49,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_displayTraceIntensity(50),
 	m_invertedWaterfall(false),
 	m_displayMaxHold(false),
+	m_displayTestHold(false), // test
 	m_currentSpectrum(0),
 	m_displayCurrent(false),
 	m_waterfallBuffer(NULL),
@@ -248,6 +249,15 @@ void GLSpectrum::setDisplayMaxHold(bool display)
 	update();
 }
 
+// test
+void GLSpectrum::setDisplayTestHold(bool value)
+{
+	m_displayTestHold = value;
+	m_changesPending = true;
+	stopDrag();
+	update();
+}
+
 void GLSpectrum::setDisplayCurrent(bool display)
 {
 	m_displayCurrent = display;
@@ -395,14 +405,17 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 					{
 						*h = *h - sub;
 					}
-					else if(*h > 0)
+					else if(!m_displayTestHold)
 					{
-						*h = *h - 1;
-					}
-					else
-					{
-						*b = *b - 1;
-						*h = m_histogramLateHoldoff;
+						if(*h > 0)
+						{
+							*h = *h - 1;
+						}
+						else
+						{
+							*b = *b - 1;
+							*h = m_histogramLateHoldoff;
+						}
 					}
 				}
 

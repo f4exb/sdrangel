@@ -24,6 +24,7 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 	m_displayWaterfall(true),
 	m_invertedWaterfall(false),
 	m_displayMaxHold(false),
+	m_displayTestHold(false), // test
 	m_displayCurrent(false),
 	m_displayHistogram(false),
 	m_displayGrid(false),
@@ -73,6 +74,7 @@ void GLSpectrumGUI::resetToDefaults()
 	m_displayWaterfall = true;
 	m_invertedWaterfall = false;
 	m_displayMaxHold = false;
+	m_displayTestHold = false; // test
 	m_displayHistogram = false;
 	m_displayGrid = false;
 	m_invert = true;
@@ -93,6 +95,7 @@ QByteArray GLSpectrumGUI::serialize() const
 	s.writeBool(6, m_displayWaterfall);
 	s.writeBool(7, m_invertedWaterfall);
 	s.writeBool(8, m_displayMaxHold);
+	//s.writeBool(?, m_displayTestHold); // test
 	s.writeBool(9, m_displayHistogram);
 	s.writeS32(10, m_decay);
 	s.writeBool(11, m_displayGrid);
@@ -129,6 +132,7 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 		d.readBool(6, &m_displayWaterfall, true);
 		d.readBool(7, &m_invertedWaterfall, false);
 		d.readBool(8, &m_displayMaxHold, false);
+		m_displayTestHold = false; // test
 		d.readBool(9, &m_displayHistogram, false);
 		d.readS32(10, &m_decay, 0);
 		d.readBool(11, &m_displayGrid, false);
@@ -175,6 +179,7 @@ void GLSpectrumGUI::applySettings()
 	ui->stroke->setSliderPosition(m_histogramStroke);
 	ui->waterfall->setChecked(m_displayWaterfall);
 	ui->maxHold->setChecked(m_displayMaxHold);
+	ui->testHold->setChecked(m_displayTestHold); // test
 	ui->current->setChecked(m_displayCurrent);
 	ui->histogram->setChecked(m_displayHistogram);
 	ui->invert->setChecked(m_invert);
@@ -190,6 +195,7 @@ void GLSpectrumGUI::applySettings()
 	m_glSpectrum->setDisplayWaterfall(m_displayWaterfall);
 	m_glSpectrum->setInvertedWaterfall(m_invertedWaterfall);
 	m_glSpectrum->setDisplayMaxHold(m_displayMaxHold);
+	m_glSpectrum->setDisplayTestHold(m_displayTestHold); // test
 	m_glSpectrum->setDisplayCurrent(m_displayCurrent);
 	m_glSpectrum->setDisplayHistogram(m_displayHistogram);
 	m_glSpectrum->setDecay(m_decay);
@@ -412,6 +418,15 @@ void GLSpectrumGUI::on_maxHold_toggled(bool checked)
 	m_displayMaxHold = checked;
 	if(m_glSpectrum != 0) {
 	    m_glSpectrum->setDisplayMaxHold(m_displayMaxHold);
+	}
+}
+
+// test
+void GLSpectrumGUI::on_testHold_toggled(bool checked)
+{
+	m_displayTestHold = checked;
+	if(m_glSpectrum != 0) {
+	    m_glSpectrum->setDisplayTestHold(m_displayTestHold);
 	}
 }
 
