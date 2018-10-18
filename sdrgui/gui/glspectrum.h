@@ -69,7 +69,7 @@ public:
 	void setReferenceLevel(Real referenceLevel);
 	void setPowerRange(Real powerRange);
 	void setDecay(int decay);
-	void setHistoHoldoffBase(int holdoffBase);
+	void setDecayDivisor(int decayDivisor);
 	void setHistoStroke(int stroke);
 	void setDisplayWaterfall(bool display);
 	void setSsbSpectrum(bool ssbSpectrum);
@@ -171,11 +171,9 @@ private:
 
 	QRgb m_histogramPalette[240];
 	QImage* m_histogramBuffer;
-	quint8* m_histogram;
-	quint8* m_histogramHoldoff;
-	int m_histogramHoldoffBase;
-	int m_histogramHoldoffCount;
-	int m_histogramLateHoldoff;
+	quint8* m_histogram; //!< Spectrum phosphor matrix of FFT width and PSD height scaled to 100. values [0..239]
+	int m_decayDivisor;
+	int m_decayDivisorCount;
 	int m_histogramStroke;
 	QMatrix4x4 m_glHistogramSpectrumMatrix;
 	QMatrix4x4 m_glHistogramBoxMatrix;

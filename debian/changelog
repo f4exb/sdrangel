@@ -2,8 +2,9 @@ sdrangel (4.2.3-1) unstable; urgency=medium
 
   * Scope: fixed channel rate affecting scope in memory mode. Issue #227
   * Spectrum: limit depth to 1000 when in moving average mode to avoid RAM exhaustion
+  * Spectrum: reworked phosphor display controls. Re-implements issue #207
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 21 Oct 2018 21:14:18 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 19 Oct 2018 21:14:18 +0200
 
 sdrangel (4.2.2-1) unstable; urgency=medium
 

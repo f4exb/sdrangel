@@ -60,7 +60,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QDial" name="holdoff">
+      <widget class="QDial" name="decayDivisor">
        <property name="maximumSize">
         <size>
          <width>24</width>
@@ -68,10 +68,10 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Holdoff:</string>
+        <string>Decay divisor:</string>
        </property>
        <property name="minimum">
-        <number>0</number>
+        <number>1</number>
        </property>
        <property name="maximum">
         <number>20</number>
@@ -96,7 +96,7 @@
         <number>1</number>
        </property>
        <property name="maximum">
-        <number>40</number>
+        <number>60</number>
        </property>
        <property name="pageStep">
         <number>1</number>

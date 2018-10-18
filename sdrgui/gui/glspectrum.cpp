@@ -40,7 +40,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_referenceLevel(0),
 	m_powerRange(100),
 	m_linear(false),
-	m_decay(0),
+	m_decay(1),
 	m_sampleRate(500000),
 	m_timingRate(1),
 	m_fftSize(512),
@@ -51,16 +51,15 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_displayMaxHold(false),
 	m_currentSpectrum(0),
 	m_displayCurrent(false),
-	m_waterfallBuffer(NULL),
+	m_waterfallBuffer(0),
 	m_waterfallBufferPos(0),
     m_waterfallTextureHeight(-1),
     m_waterfallTexturePos(0),
     m_displayWaterfall(true),
     m_ssbSpectrum(false),
     m_lsbDisplay(false),
-    m_histogramBuffer(NULL),
-    m_histogram(NULL),
-    m_histogramHoldoff(NULL),
+    m_histogramBuffer(0),
+    m_histogram(0),
     m_displayHistogram(true),
     m_displayChanged(false),
     m_matrixLoc(0),
@@ -86,8 +85,8 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	}
 	m_waterfallPalette[239] = 0xffffffff;
 
-	m_histogramPalette[0] = m_waterfallPalette[0];
-	for(int i = 1; i < 240; i++) {
+	m_histogramPalette[0] = 0;
+	for(int i = 16; i < 240; i++) {
 		 QColor c;
 		 c.setHsv(239 - i, 255 - ((i < 200) ? 0 : (i - 200) * 3), 150 + ((i < 100) ? i : 100));
 		 ((quint8*)&m_histogramPalette[i])[0] = c.red();
@@ -97,17 +96,16 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	}
 	for(int i = 1; i < 16; i++) {
 		QColor c;
-		c.setHsv(270, 128, 48 + i * 4);
+		c.setHsv(255, 128, 48 + i * 4);
 		((quint8*)&m_histogramPalette[i])[0] = c.red();
 		((quint8*)&m_histogramPalette[i])[1] = c.green();
 		((quint8*)&m_histogramPalette[i])[2] = c.blue();
 		((quint8*)&m_histogramPalette[i])[3] = c.alpha();
 	}
 
-	m_histogramHoldoffBase = 4; // was 2
-	m_histogramHoldoffCount = m_histogramHoldoffBase;
-	m_histogramLateHoldoff = 20; // was 1
-	m_histogramStroke = 4;
+	m_decayDivisor = 1;
+	m_decayDivisorCount = m_decayDivisor;
+	m_histogramStroke = 30;
 
 	m_timeScale.setFont(font());
 	m_timeScale.setOrientation(Qt::Vertical);
@@ -141,10 +139,6 @@ GLSpectrum::~GLSpectrum()
 		delete[] m_histogram;
 		m_histogram = NULL;
 	}
-	if(m_histogramHoldoff != NULL) {
-		delete[] m_histogramHoldoff;
-		m_histogramHoldoff = NULL;
-	}
 }
 
 void GLSpectrum::setCenterFrequency(qint64 frequency)
@@ -173,14 +167,14 @@ void GLSpectrum::setDecay(int decay)
 	m_decay = decay < 0 ? 0 : decay > 20 ? 20 : decay;
 }
 
-void GLSpectrum::setHistoHoldoffBase(int holdoffBase)
+void GLSpectrum::setDecayDivisor(int decayDivisor)
 {
-	m_histogramHoldoffBase = holdoffBase < 0 ? 0 : holdoffBase > 240 ? 240 : holdoffBase;
+	m_decayDivisor = decayDivisor < 1 ? 1 : decayDivisor > 20 ? 20 : decayDivisor;
 }
 
 void GLSpectrum::setHistoStroke(int stroke)
 {
-	m_histogramStroke = stroke < 1 ? 1 : stroke > 40 ? 40 : stroke;
+	m_histogramStroke = stroke < 1 ? 1 : stroke > 60 ? 60 : stroke;
 }
 
 void GLSpectrum::setSampleRate(qint32 sampleRate)
@@ -358,7 +352,6 @@ void GLSpectrum::updateWaterfall(const std::vector<Real>& spectrum)
 void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 {
 	quint8* b = m_histogram;
-	quint8* h = m_histogramHoldoff;
 	int sub = 0; // was 1;
 	int fftMulSize = 100 * m_fftSize;
 
@@ -367,38 +360,22 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 
 	if (m_displayHistogram || m_displayMaxHold)
 	{
-		m_histogramHoldoffCount--;
+		m_decayDivisorCount--;
 
-		if (m_histogramHoldoffCount <= 0)
+		if ((m_decay > 1) || (m_decayDivisorCount <= 0))
 		{
 			for (int i = 0; i < fftMulSize; i++)
 			{
-				if (*b > 20) // must be more than max value of m_decay
-				{
-					*b = *b - sub;
-				}
-				else if (*b > 0)
-				{
-					if (*h >= sub)
-					{
-						*h = *h - sub;
-					}
-					else if (*h > 0)
-					{
-						*h = *h - 1;
-					}
-					else
-					{
-						*b = *b - 1;
-						*h = m_histogramLateHoldoff;
-					}
+				if (*b > m_decay) {
+					*b = *b - m_decay;
+				} else {
+				    *b = 0;
 				}
 
 				b++;
-				h++;
 			}
 
-			m_histogramHoldoffCount = m_histogramHoldoffBase;
+			m_decayDivisorCount = m_decayDivisor;
 		}
 	}
 
@@ -534,7 +511,6 @@ void GLSpectrum::clearSpectrumHistogram()
 		return;
 
 	memset(m_histogram, 0x00, 100 * m_fftSize);
-	memset(m_histogramHoldoff, 0x07, 100 * m_fftSize);
 
 	m_mutex.unlock();
 	update();
@@ -1577,10 +1553,6 @@ void GLSpectrum::applyChanges()
 			delete[] m_histogram;
 			m_histogram = NULL;
 		}
-		if(m_histogramHoldoff != NULL) {
-			delete[] m_histogramHoldoff;
-			m_histogramHoldoff = NULL;
-		}
 
 		m_histogramBuffer = new QImage(m_fftSize, 100, QImage::Format_RGB32);
 
@@ -1598,8 +1570,6 @@ void GLSpectrum::applyChanges()
 
 		m_histogram = new quint8[100 * m_fftSize];
 		memset(m_histogram, 0x00, 100 * m_fftSize);
-		m_histogramHoldoff = new quint8[100 * m_fftSize];
-		memset(m_histogramHoldoff, 0x07, 100 * m_fftSize);
 
 		m_q3FFT.allocate(2*m_fftSize);
 	}

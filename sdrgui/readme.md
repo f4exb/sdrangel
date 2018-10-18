@@ -280,11 +280,11 @@ Averaging reduces the noise variance and can be used to better detect weak conti
 
 <h4>4.7. Phosphor display stroke decay</h4>
 
-This controls the decay rate of the stroke when phosphor display is engaged (4.C). A value of zero means no decay and thus phosphor history and max hold (red line) will be kept until the clear button (4.B) is pressed.
+This controls the decay rate of the stroke when phosphor display is engaged (4.C). The histogram pixel value is diminished by this value each time a new FFT is produced. A value of zero means no decay and thus phosphor history and max hold (red line) will be kept until the clear button (4.B) is pressed.
 
-<h4>4.8. Phosphor display holdoff</h4>
+<h4>4.8. Phosphor display stroke decay divisor</h4>
 
-This controls the holdoff value when phosphor display is engaged (4.C). The holdoff value will drive how much hits are needed before an even appears in the history. Practically you increase this value to trim larger transient signals. A value of 0 means no holdoff and all signals are contributing.
+When phosphor display is engaged (4.C) and stroke decay is 1 (4.7) this divides the unit decay by this value by diminishing histogram pixel value by one each time a decay divisor of FFTs have been produced. So actual decay rate is 1 over this value.
 
 <h4>4.9. Phosphor display stroke strength</h4>
 

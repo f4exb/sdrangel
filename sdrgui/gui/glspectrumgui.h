@@ -49,7 +49,7 @@ private:
 	Real m_refLevel;
 	Real m_powerRange;
 	int m_decay;
-	int m_histogramHoldoffBase;
+	int m_decayDivisor;
 	int m_histogramStroke;
 	int m_displayGridIntensity;
 	int m_displayTraceIntensity;
@@ -81,7 +81,7 @@ private slots:
 	void on_refLevel_currentIndexChanged(int index);
 	void on_levelRange_currentIndexChanged(int index);
 	void on_decay_valueChanged(int index);
-	void on_holdoff_valueChanged(int index);
+	void on_decayDivisor_valueChanged(int index);
 	void on_stroke_valueChanged(int index);
 	void on_gridIntensity_valueChanged(int index);
 	void on_traceIntensity_valueChanged(int index);
