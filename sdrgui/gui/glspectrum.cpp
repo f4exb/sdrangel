@@ -352,13 +352,9 @@ void GLSpectrum::updateWaterfall(const std::vector<Real>& spectrum)
 void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 {
 	quint8* b = m_histogram;
-	int sub = 0; // was 1;
 	int fftMulSize = 100 * m_fftSize;
 
-	//if(m_decay > 0)
-	sub += m_decay; // allow zero decay so history (including max hold) is kept forever
-
-	if (m_displayHistogram || m_displayMaxHold)
+	if ((m_displayHistogram || m_displayMaxHold) && (m_decay != 0))
 	{
 		m_decayDivisorCount--;
 
@@ -795,25 +791,31 @@ void GLSpectrum::paintGL()
 		{
 			int j;
 			quint8* bs = m_histogram + i * 100;
-			for(j = 99; j > 1; j--) {
-				if(bs[j] > 0)
-					break;
+
+			for(j = 99; j > 1; j--)
+			{
+				if(bs[j] > 0) {
+				    break;
+				}
 			}
-			// TODO: ((bs[j] * (float)j) + (bs[j + 1] * (float)(j + 1))) / (bs[j] +  bs[j + 1])
+
 			j = j - 99;
 			m_maxHold[i] = (j * m_powerRange) / 99.0 + m_referenceLevel;
 		}
 		{
-			//GLfloat q3[2*m_fftSize];
 		    GLfloat *q3 = m_q3FFT.m_array;
 			Real bottom = -m_powerRange;
 
-			for(int i = 0; i < m_fftSize; i++) {
+			for(int i = 0; i < m_fftSize; i++)
+			{
 				Real v = m_maxHold[i] - m_referenceLevel;
-				if(v > 0)
-					v = 0;
-				else if(v < bottom)
-					v = bottom;
+
+				if(v > 0) {
+				    v = 0;
+				} else if(v < bottom) {
+				    v = bottom;
+				}
+
 				q3[2*i] = (Real) i;
 				q3[2*i+1] = v;
 			}
@@ -828,15 +830,18 @@ void GLSpectrum::paintGL()
 	{
 		{
 			Real bottom = -m_powerRange;
-			//GLfloat q3[2*m_fftSize];
 			GLfloat *q3 = m_q3FFT.m_array;
 
-			for(int i = 0; i < m_fftSize; i++) {
+			for(int i = 0; i < m_fftSize; i++)
+			{
 				Real v = (*m_currentSpectrum)[i] - m_referenceLevel;
-				if(v > 0)
-					v = 0;
-				else if(v < bottom)
-					v = bottom;
+
+				if(v > 0) {
+				    v = 0;
+				} else if(v < bottom) {
+				    v = bottom;
+				}
+
 				q3[2*i] = (Real) i;
 				q3[2*i+1] = v;
 			}
@@ -854,13 +859,13 @@ void GLSpectrum::paintGL()
 		tickList = &m_timeScale.getTickList();
 
 		{
-			//GLfloat q3[4*tickList->count()];
 			GLfloat *q3 = m_q3TickTime.m_array;
 			int effectiveTicks = 0;
 
 			for (int i= 0; i < tickList->count(); i++)
 			{
 				tick = &(*tickList)[i];
+
 				if (tick->major)
 				{
 					if(tick->textSize > 0)
@@ -882,13 +887,13 @@ void GLSpectrum::paintGL()
 		tickList = &m_frequencyScale.getTickList();
 
 		{
-			//GLfloat q3[4*tickList->count()];
 			GLfloat *q3 = m_q3TickFrequency.m_array;
 			int effectiveTicks = 0;
 
 			for (int i= 0; i < tickList->count(); i++)
 			{
 				tick = &(*tickList)[i];
+
 				if (tick->major)
 				{
 					if (tick->textSize > 0)
@@ -916,13 +921,13 @@ void GLSpectrum::paintGL()
 		tickList = &m_powerScale.getTickList();
 
 		{
-			//GLfloat q3[4*tickList->count()];
 		    GLfloat *q3 = m_q3TickPower.m_array;
 			int effectiveTicks = 0;
 
 			for(int i= 0; i < tickList->count(); i++)
 			{
 				tick = &(*tickList)[i];
+
 				if(tick->major)
 				{
 					if(tick->textSize > 0)
@@ -944,7 +949,6 @@ void GLSpectrum::paintGL()
 		tickList = &m_frequencyScale.getTickList();
 
 		{
-			//GLfloat q3[4*tickList->count()];
 			GLfloat *q3 = m_q3TickFrequency.m_array;
 			int effectiveTicks = 0;
 
