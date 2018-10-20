@@ -288,7 +288,7 @@ When phosphor display is engaged (4.C) and stroke decay is 1 (4.7) this divides 
 
 <h4>4.9. Phosphor display stroke strength</h4>
 
-This controls the stroke strength when phosphor display is engaged (4.C).
+This controls the stroke strength when phosphor display is engaged (4.C). The histogram value is incremented by this value at each new FFT until the maximum (red) is reached.
 
 <h4>4.A. Trace intensity</h4>
 
