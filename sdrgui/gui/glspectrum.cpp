@@ -86,22 +86,36 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_waterfallPalette[239] = 0xffffffff;
 
 	m_histogramPalette[0] = 0;
-	for(int i = 16; i < 240; i++) {
-		 QColor c;
-		 c.setHsv(239 - i, 255 - ((i < 200) ? 0 : (i - 200) * 3), 150 + ((i < 100) ? i : 100));
-		 ((quint8*)&m_histogramPalette[i])[0] = c.red();
-		 ((quint8*)&m_histogramPalette[i])[1] = c.green();
-		 ((quint8*)&m_histogramPalette[i])[2] = c.blue();
-		 ((quint8*)&m_histogramPalette[i])[3] = c.alpha();
+
+	for (int i = 1; i < 240; i++)
+	{
+	    QColor c;
+	    int val = i < 60 ? 255 : 200;
+	    int sat = i < 60 ? 128 : i < 180 ? 255 : 180;
+	    c.setHsv(239 - i, sat, val);
+        ((quint8*)&m_histogramPalette[i])[0] = c.red();
+        ((quint8*)&m_histogramPalette[i])[1] = c.green();
+        ((quint8*)&m_histogramPalette[i])[2] = c.blue();
+        ((quint8*)&m_histogramPalette[i])[3] = c.alpha();
 	}
-	for(int i = 1; i < 16; i++) {
-		QColor c;
-		c.setHsv(255, 128, 48 + i * 4);
-		((quint8*)&m_histogramPalette[i])[0] = c.red();
-		((quint8*)&m_histogramPalette[i])[1] = c.green();
-		((quint8*)&m_histogramPalette[i])[2] = c.blue();
-		((quint8*)&m_histogramPalette[i])[3] = c.alpha();
-	}
+
+	// Original palette:
+//	for(int i = 16; i < 240; i++) {
+//		 QColor c;
+//		 c.setHsv(239 - i, 255 - ((i < 200) ? 0 : (i - 200) * 3), 150 + ((i < 100) ? i : 100));
+//		 ((quint8*)&m_histogramPalette[i])[0] = c.red();
+//		 ((quint8*)&m_histogramPalette[i])[1] = c.green();
+//		 ((quint8*)&m_histogramPalette[i])[2] = c.blue();
+//		 ((quint8*)&m_histogramPalette[i])[3] = c.alpha();
+//	}
+//	for(int i = 1; i < 16; i++) {
+//		QColor c;
+//		c.setHsv(255, 128, 48 + i * 4);
+//		((quint8*)&m_histogramPalette[i])[0] = c.red();
+//		((quint8*)&m_histogramPalette[i])[1] = c.green();
+//		((quint8*)&m_histogramPalette[i])[2] = c.blue();
+//		((quint8*)&m_histogramPalette[i])[3] = c.alpha();
+//	}
 
 	m_decayDivisor = 1;
 	m_decayDivisorCount = m_decayDivisor;
