@@ -321,11 +321,21 @@ By default the trace display is enabled and this checkbox is checked. You can op
 
 This area shows the current trace color. When clicking on it a color chooser dialog appears that lets you change the color of the current trace
 
-<h3>11. Memory select</h3>
+<h3>11. Save traces in memory</h3>
 
-The last 15 traces are stored in memory and this button lets you browse through traces in memory. The memory index appears on the left of the button. Traces in memory are sorted from latest (1) to oldest (15). The memory index 0 is the current live trace. When indexes > 0 are selected the live trace is suspended.
+While in memory mode (see E.13 next) use this button to save the bank of traces in memory (50 last traces) to file. A file dialog will open to let you choose the file name and locaion. By default the file extension is `.trcm`.
+
+<h3>12. Load traces into memory</h3>
+
+While in memory mode (see E.13 next) use this button to load traces previously saved to file using the (E.11) button into the traces memory bank (50 traces). A file dialog will open to let you select the file. It will look for files with `.trcm` extension by default. 
+
+<h3>13. Memory select</h3>
+
+The last 50 traces are stored in memory and this button lets you browse through traces in memory. The memory index appears on the left of the button. Traces in memory are sorted from latest (1) to oldest (50). The memory index 0 is the current live trace. When indexes > 0 are selected the live trace is suspended.
 
 It is the complex signal that is memorized actually so when a trace in memory is selected you can still use the global and trace controls to change the display. In particular the projection mode and the number of traces can be changed. Only the full trace length cannot be modified. When in memory mode the triggers are disabled since they only apply to a live trace.
+
+While in memory trace the save (E.11) and load (E.12) traces to file buttons can be used.
 
 <h2>F. Trigger control line</h2>
  

@@ -55,6 +55,7 @@ ScopeVis::ScopeVis(GLScope* glScope) :
     m_traceStart(true),
     m_sampleRate(0),
     m_liveSampleRate(0),
+    m_liveLog2Decim(0),
     m_traceDiscreteMemory(m_nbTraceMemories),
     m_freeRun(true),
     m_maxTraceDelay(0),
@@ -82,12 +83,19 @@ void ScopeVis::setLiveRate(int sampleRate)
     m_liveSampleRate = sampleRate;
 
     if (m_currentTraceMemoryIndex == 0) { // update only in live mode
-        setSampleRate(m_liveSampleRate);
+        setSampleRate(m_liveSampleRate/(1<<m_liveLog2Decim));
     }
+}
+
+void ScopeVis::setLiveRateLog2Decim(int log2Decim)
+{
+    m_liveLog2Decim = log2Decim;
+    setLiveRate(m_liveSampleRate);
 }
 
 void ScopeVis::setSampleRate(int sampleRate)
 {
+    qDebug("ScopeVis::setSampleRate: %d S/s", sampleRate);
     m_sampleRate = sampleRate;
 
     if (m_glScope) {
@@ -861,7 +869,7 @@ bool ScopeVis::handleMessage(const Message& message)
             // transition to live mode
             if (m_currentTraceMemoryIndex == 0)
             {
-                setSampleRate(m_liveSampleRate); // reset to live rate
+                setLiveRate(m_liveSampleRate); // reset to live rate
                 setTraceSize(m_liveTraceSize, true); // reset to live trace size
                 setPreTriggerDelay(m_livePreTriggerDelay, true); // reset to live pre-trigger delay
             }

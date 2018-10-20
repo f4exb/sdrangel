@@ -284,7 +284,7 @@ This controls the decay rate of the stroke when phosphor display is engaged (4.C
 
 <h4>4.8. Phosphor display stroke decay divisor</h4>
 
-When phosphor display is engaged (4.C) and stroke decay is 1 (4.7) this divides the unit decay by this value by diminishing histogram pixel value by one each time a decay divisor of FFTs have been produced. So actual decay rate is 1 over this value.
+When phosphor display is engaged (4.C) and stroke decay is 1 (4.7) this divides the unit decay by this value by diminishing histogram pixel value by one each time a number of FFTs equal to this number have been produced. Thus the actual decay rate is 1 over this value. This allow setting a slower decay rate than one unit for each new FFT.
 
 <h4>4.9. Phosphor display stroke strength</h4>
 
