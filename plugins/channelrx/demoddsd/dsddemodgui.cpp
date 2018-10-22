@@ -236,8 +236,8 @@ void DSDDemodGUI::on_squelchGate_valueChanged(int value)
 
 void DSDDemodGUI::on_squelch_valueChanged(int value)
 {
-	ui->squelchText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
-	m_settings.m_squelch = value / 10.0;
+	ui->squelchText->setText(QString("%1").arg(value / 1.0, 0, 'f', 0));
+	m_settings.m_squelch = value;
 	applySettings();
 }
 
@@ -413,8 +413,8 @@ void DSDDemodGUI::displaySettings()
     ui->fmDeviation->setValue(m_settings.m_fmDeviation / 100.0);
     ui->fmDeviationText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(ui->fmDeviation->value() / 10.0, 0, 'f', 1));
 
-    ui->squelch->setValue(m_settings.m_squelch * 10.0);
-    ui->squelchText->setText(QString("%1").arg(ui->squelch->value() / 10.0, 0, 'f', 1));
+    ui->squelch->setValue(m_settings.m_squelch);
+    ui->squelchText->setText(QString("%1").arg(ui->squelch->value() / 1.0, 0, 'f', 0));
 
     ui->squelchGate->setValue(m_settings.m_squelchGate);
     ui->squelchGateText->setText(QString("%1").arg(ui->squelchGate->value() * 10.0, 0, 'f', 0));

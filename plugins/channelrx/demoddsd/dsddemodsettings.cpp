@@ -61,7 +61,7 @@ QByteArray DSDDemodSettings::serialize() const
     s.writeS32(2, m_rfBandwidth/100.0);
     s.writeS32(3, m_demodGain*100.0);
     s.writeS32(4, m_fmDeviation/100.0);
-    s.writeS32(5, m_squelch*10.0);
+    s.writeS32(5, m_squelch);
     s.writeU32(7, m_rgbColor);
     s.writeS32(8, m_squelchGate);
     s.writeS32(9, m_volume*10.0);
@@ -120,8 +120,8 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         m_demodGain = tmp / 100.0;
         d.readS32(4, &tmp, 50);
         m_fmDeviation = tmp * 100.0;
-        d.readS32(5, &tmp, -400);
-        m_squelch = tmp / 10.0;
+        d.readS32(5, &tmp, -40);
+        m_squelch = tmp < -100 ? tmp / 10.0 : tmp;
         d.readU32(7, &m_rgbColor);
         d.readS32(8, &m_squelchGate, 5);
         d.readS32(9, &tmp, 20);
