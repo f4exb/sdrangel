@@ -1,3 +1,10 @@
+sdrangel (4.2.4-1) unstable; urgency=medium
+
+  * LimeSDR: use LimeSuite 18.10.0 for builds
+  * DSD demod: use 1 dB steps for squelch
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 24 Oct 2018 21:14:18 +0200
+
 sdrangel (4.2.3-1) unstable; urgency=medium
 
   * Scope: fixed channel rate affecting scope in memory mode. Issue #227

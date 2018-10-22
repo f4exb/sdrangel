@@ -47,7 +47,8 @@ set(limesuite_SOURCES
 )
 
 set(limesuite_HEADERS
-	${LIBLIMESUITESRC}/src/API/*.h
+    ${LIBLIMESUITESRC}/src/lime/*.h
+    ${LIBLIMESUITESRC}/src/API/*.h
     ${LIBLIMESUITESRC}/src/GFIR/*.h
     ${LIBLIMESUITESRC}/src/protocols/*.h
     ${LIBLIMESUITESRC}/src/ConnectionRegistry/*.h
@@ -64,6 +65,7 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
     ${LIBUSB_INCLUDE_DIR}
     ${LIBLIMESUITESRC}/src
+    ${LIBLIMESUITESRC}/src/lime
     ${LIBLIMESUITESRC}/src/API
     ${LIBLIMESUITESRC}/src/GFIR
     ${LIBLIMESUITESRC}/src/protocols
