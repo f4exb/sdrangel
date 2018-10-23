@@ -480,6 +480,11 @@
          <string>FM</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Pul</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>

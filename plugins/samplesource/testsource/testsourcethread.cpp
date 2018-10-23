@@ -38,6 +38,11 @@ TestSourceThread::TestSourceThread(SampleSinkFifo* sampleFifo, QObject* parent) 
 	m_amModulation(0.5f),
 	m_fmDeviationUnit(0.0f),
 	m_fmPhasor(0.0f),
+    m_pulseWidth(150),
+    m_pulseSampleCount(0),
+    m_pulsePatternCount(0),
+    m_pulsePatternCycle(8),
+    m_pulsePatternPlaces(3),
 	m_samplerate(48000),
 	m_log2Decim(4),
 	m_fcPos(0),
@@ -260,6 +265,48 @@ void TestSourceThread::generate(quint32 chunksize)
             im = (c.real()*sin(m_fmPhasor*M_PI) + c.imag()*cos(m_fmPhasor*M_PI)) + m_phaseImbalance*re;
             m_buf[i++] = (int16_t) (re * (float) m_amplitudeBitsI) + m_amplitudeBitsDC;
             m_buf[i++] = (int16_t) (im * (float) m_amplitudeBitsQ);
+        }
+        break;
+        case TestSourceSettings::ModulationPulse:
+        {
+            if (m_pulseSampleCount < m_pulseWidth) // sync pattern: 0
+            {
+                m_buf[i++] = m_amplitudeBitsDC;
+                m_buf[i++] = 0;
+            }
+            else if (m_pulseSampleCount < 2*m_pulseWidth) // sync pattern: 1
+            {
+                m_buf[i++] = (int16_t) (m_amplitudeBitsI + m_amplitudeBitsDC);
+                m_buf[i++] = (int16_t) (m_phaseImbalance * (float) m_amplitudeBitsQ);
+            }
+            else if (m_pulseSampleCount < 3*m_pulseWidth) // sync pattern: 0
+            {
+                m_buf[i++] = m_amplitudeBitsDC;
+                m_buf[i++] = 0;
+            }
+            else if (m_pulseSampleCount < (3+m_pulsePatternPlaces)*m_pulseWidth) // binary pattern
+            {
+                uint32_t patPulseSampleCount = m_pulseSampleCount - 3*m_pulseWidth;
+                uint32_t patPulseIndex = patPulseSampleCount / m_pulseWidth;
+                float patFigure = (m_pulsePatternCount & (1<<patPulseIndex)) != 0 ? 0.1 : 0.0; // make binary pattern -20dB vs sync pattern
+                m_buf[i++] = (int16_t) (patFigure * (float) m_amplitudeBitsI) + m_amplitudeBitsDC;
+                m_buf[i++] = (int16_t) (patFigure * (float) m_phaseImbalance * m_amplitudeBitsQ);
+            }
+
+            if (m_pulseSampleCount < (4+m_pulsePatternPlaces)*m_pulseWidth - 1)
+            {
+                m_pulseSampleCount++;
+            }
+            else
+            {
+                if (m_pulsePatternCount < m_pulsePatternCycle - 1) {
+                    m_pulsePatternCount++;
+                } else {
+                    m_pulsePatternCount = 0;
+                }
+
+                m_pulseSampleCount = 0;
+            }
         }
         break;
         case TestSourceSettings::ModulationNone:

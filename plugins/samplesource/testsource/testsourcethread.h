@@ -94,6 +94,11 @@ private:
 	float m_amModulation;
 	float m_fmDeviationUnit;
 	float m_fmPhasor;
+    uint32_t m_pulseWidth; //!< pulse width in number of samples
+    uint32_t m_pulseSampleCount;
+    uint32_t m_pulsePatternCount;
+    uint32_t m_pulsePatternCycle;
+    uint32_t m_pulsePatternPlaces;
 
 	int m_samplerate;
     unsigned int m_log2Decim;
