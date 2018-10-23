@@ -798,36 +798,37 @@ void GLSpectrum::paintGL()
 	// paint max hold lines on top of histogram
 	if (m_displayMaxHold)
 	{
-		if (m_maxHold.size() < (uint)m_fftSize)
-			m_maxHold.resize(m_fftSize);
+		if (m_maxHold.size() < (uint) m_fftSize) {
+		    m_maxHold.resize(m_fftSize);
+		}
 
-		for(int i = 0; i < m_fftSize; i++)
+		for (int i = 0; i < m_fftSize; i++)
 		{
 			int j;
 			quint8* bs = m_histogram + i * 100;
 
-			for(j = 99; j > 1; j--)
+			for (j = 99; j >= 0; j--)
 			{
-				if(bs[j] > 0) {
+				if (bs[j] > 0) {
 				    break;
 				}
 			}
 
-			j = j - 99;
-			m_maxHold[i] = (j * m_powerRange) / 99.0 + m_referenceLevel;
+			// m_referenceLevel : top
+			// m_referenceLevel - m_powerRange : bottom
+			m_maxHold[i] = ((j - 99) * m_powerRange) / 99.0 + m_referenceLevel;
 		}
 		{
 		    GLfloat *q3 = m_q3FFT.m_array;
-			Real bottom = -m_powerRange;
 
-			for(int i = 0; i < m_fftSize; i++)
+			for (int i = 0; i < m_fftSize; i++)
 			{
 				Real v = m_maxHold[i] - m_referenceLevel;
 
-				if(v > 0) {
+				if (v >= 0) {
 				    v = 0;
-				} else if(v < bottom) {
-				    v = bottom;
+				} else if (v < -m_powerRange) {
+				    v = -m_powerRange;
 				}
 
 				q3[2*i] = (Real) i;
