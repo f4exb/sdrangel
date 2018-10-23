@@ -90,16 +90,29 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	for (int i = 1; i < 240; i++)
 	{
 	    QColor c;
-	    int val = i < 60 ? 255 : 200;
-	    int sat = i < 60 ? 128 : i < 180 ? 255 : 180;
-	    c.setHsv(239 - i, sat, val);
+	    int val = i < 60 ? 128 + (60-i) : 128;
+	    int sat = i < 60 ? 140 + i : i < 180 ? 200 : 200 - (i-180);
+	    c.setHsl(239 - i, sat, val);
         ((quint8*)&m_histogramPalette[i])[0] = c.red();
         ((quint8*)&m_histogramPalette[i])[1] = c.green();
         ((quint8*)&m_histogramPalette[i])[2] = c.blue();
         ((quint8*)&m_histogramPalette[i])[3] = c.alpha();
 	}
 
-	// Original palette:
+	// 4.2.3 palette
+//    for (int i = 1; i < 240; i++)
+//    {
+//        QColor c;
+//        int val = i < 60 ? 255 : 200;
+//        int sat = i < 60 ? 128 : i < 180 ? 255 : 180;
+//        c.setHsv(239 - i, sat, val);
+//        ((quint8*)&m_histogramPalette[i])[0] = c.red();
+//        ((quint8*)&m_histogramPalette[i])[1] = c.green();
+//        ((quint8*)&m_histogramPalette[i])[2] = c.blue();
+//        ((quint8*)&m_histogramPalette[i])[3] = c.alpha();
+//    }
+
+    // Original palette:
 //	for(int i = 16; i < 240; i++) {
 //		 QColor c;
 //		 c.setHsv(239 - i, 255 - ((i < 200) ? 0 : (i - 200) * 3), 150 + ((i < 100) ? i : 100));
