@@ -482,7 +482,12 @@
        </item>
        <item>
         <property name="text">
-         <string>Pul</string>
+         <string>P0</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>P1</string>
         </property>
        </item>
       </widget>

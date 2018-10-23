@@ -75,6 +75,8 @@ public:
     void setModulation(TestSourceSettings::Modulation modulation);
     void setAMModulation(float amModulation);
     void setFMDeviation(float deviation);
+    void setPattern0();
+    void setPattern1();
 
 private:
 	QMutex m_startWaitMutex;

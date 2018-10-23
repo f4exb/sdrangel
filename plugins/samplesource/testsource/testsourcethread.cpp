@@ -267,7 +267,7 @@ void TestSourceThread::generate(quint32 chunksize)
             m_buf[i++] = (int16_t) (im * (float) m_amplitudeBitsQ);
         }
         break;
-        case TestSourceSettings::ModulationPulse:
+        case TestSourceSettings::ModulationPattern0: // binary pattern
         {
             if (m_pulseSampleCount < m_pulseWidth) // sync pattern: 0
             {
@@ -288,7 +288,7 @@ void TestSourceThread::generate(quint32 chunksize)
             {
                 uint32_t patPulseSampleCount = m_pulseSampleCount - 3*m_pulseWidth;
                 uint32_t patPulseIndex = patPulseSampleCount / m_pulseWidth;
-                float patFigure = (m_pulsePatternCount & (1<<patPulseIndex)) != 0 ? 0.1 : 0.0; // make binary pattern -20dB vs sync pattern
+                float patFigure = (m_pulsePatternCount & (1<<patPulseIndex)) != 0 ? 0.3 : 0.0; // make binary pattern ~-10dB vs sync pattern
                 m_buf[i++] = (int16_t) (patFigure * (float) m_amplitudeBitsI) + m_amplitudeBitsDC;
                 m_buf[i++] = (int16_t) (patFigure * (float) m_phaseImbalance * m_amplitudeBitsQ);
             }
@@ -305,6 +305,21 @@ void TestSourceThread::generate(quint32 chunksize)
                     m_pulsePatternCount = 0;
                 }
 
+                m_pulseSampleCount = 0;
+            }
+        }
+        break;
+        case TestSourceSettings::ModulationPattern1: // sawtooth pattern
+        {
+            Real re, im;
+            re = (float) (m_pulseWidth - m_pulseSampleCount) / (float) m_pulseWidth;
+            im = m_phaseImbalance*re;
+            m_buf[i++] = (int16_t) (re * (float) m_amplitudeBitsI) + m_amplitudeBitsDC;
+            m_buf[i++] = (int16_t) (im * (float) m_amplitudeBitsQ);
+
+            if (m_pulseSampleCount < m_pulseWidth - 1) {
+                m_pulseSampleCount++;
+            } else {
                 m_pulseSampleCount = 0;
             }
         }
@@ -388,4 +403,19 @@ void TestSourceThread::handleInputMessages()
             delete message;
         }
     }
+}
+
+void TestSourceThread::setPattern0()
+{
+    m_pulseWidth = 150;
+    m_pulseSampleCount = 0;
+    m_pulsePatternCount = 0;
+    m_pulsePatternCycle = 8;
+    m_pulsePatternPlaces = 3;
+}
+
+void TestSourceThread::setPattern1()
+{
+    m_pulseWidth = 1000;
+    m_pulseSampleCount = 0;
 }
