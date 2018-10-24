@@ -368,7 +368,7 @@ void ScopeVis::processTrace(const SampleVector::const_iterator& cbegin, const Sa
                     }
                     else // this was the last trigger then start trace
                     {
-                        m_traceStart = true; // start trace processing
+                        m_traceStart = true; // start of trace processing
                         m_nbSamples = m_traceSize + m_maxTraceDelay;
                         m_triggerComparator.reset();
                         m_triggerState = TriggerTriggered;
@@ -378,15 +378,11 @@ void ScopeVis::processTrace(const SampleVector::const_iterator& cbegin, const Sa
                 }
 
                 ++begin;
-            }
-        }
-    }
+            } // look for trigger
+        } // untriggered or delayed
+    } // triggering active
 
     // trace process
-    if (m_glScope->getDataChanged()) // optimization: process trace only if required by glScope
-    {
-        m_triggerState = TriggerUntriggered;
-    }
 
     if (m_triggerState == TriggerTriggered)
     {
@@ -395,7 +391,7 @@ void ScopeVis::processTrace(const SampleVector::const_iterator& cbegin, const Sa
         SampleVector::iterator mend = m_traceDiscreteMemory.current().current();
         SampleVector::iterator mbegin = mend - count;
 
-        if (m_traceStart)
+        if (m_traceStart) // start of trace processing
         {
             // trace back
             if (m_maxTraceDelay > 0)
