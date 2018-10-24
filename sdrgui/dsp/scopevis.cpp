@@ -325,8 +325,8 @@ void ScopeVis::processTrace(const SampleVector::const_iterator& cbegin, const Sa
                 {
                     if (triggerCondition->m_triggerDelayCount > 0) // skip samples during delay period
                     {
-                        triggerCondition->m_triggerDelayCount--;
-                        ++begin;
+                        begin += triggerCondition->m_triggerDelayCount;
+                        triggerCondition->m_triggerDelayCount = 0;
                         continue;
                     }
                     else // process trigger
