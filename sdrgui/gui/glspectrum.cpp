@@ -90,9 +90,9 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	for (int i = 1; i < 240; i++)
 	{
 	    QColor c;
-	    int val = i < 60 ? 128 + (60-i) : 128;
-	    int sat = i < 60 ? 140 + i : i < 180 ? 200 : 200 - (i-180);
-	    c.setHsl(239 - i, sat, val);
+	    int light = i < 60 ? 128 + (60-i) : 128;
+	    int sat   = i < 60 ? 140 + i : i < 180 ? 200 : 200 - (i-180);
+	    c.setHsl(239 - i, sat, light);
         ((quint8*)&m_histogramPalette[i])[0] = c.red();
         ((quint8*)&m_histogramPalette[i])[1] = c.green();
         ((quint8*)&m_histogramPalette[i])[2] = c.blue();

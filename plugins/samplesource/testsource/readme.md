@@ -82,6 +82,13 @@ This controls the generator sample rate in samples per second.
   - **No**: No modulation
   - **AM**: Amplitude modulation (AM)
   - **FM**: Frequency modulation (FM)
+  - **P0**: Pattern 0 is a binary pattern
+    - Pulse width: 150 samples
+    - Sync pattern: 010 at full amplitude
+    - Binary pattern LSB first on 3 bits from 0 to 7 at 0.3 amplitude
+  - **P1**: Pattern 1 is a sawtooth pattern
+    - Pulse width: 1000 samples
+    - Starts at full amplitude then amplitude decreases linearly down to zero
   
 <h3>5: Modulating tone frequency</h3>
 
