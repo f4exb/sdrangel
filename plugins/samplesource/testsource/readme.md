@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This input sample source plugin is an internal continuous wave generator that can be used to carry out test of software internals. 
+This input sample source plugin is an internal continuous wave generator that can be used to carry out test of software internals.
 
 <h2>Build</h2>
 
@@ -22,19 +22,19 @@ This is the center frequency of reception in kHz.
 
 <h4>1.2: Start/Stop</h4>
 
-Device start / stop button. 
+Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
   - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
-  
+
 <h4>1.3: Record</h4>
 
 Record baseband I/Q stream toggle button
 
 <h4>1.4: Stream sample rate</h4>
 
-Baseband I/Q sample rate in kS/s. This is the device to host sample rate (3) divided by the decimation factor (4). 
+Baseband I/Q sample rate in kS/s. This is the device to host sample rate (3) divided by the decimation factor (4).
 
 <h3>2: Various options</h3>
 
@@ -57,10 +57,10 @@ This exercises the decimation chain.
 <h4>2.3: Baseband center frequency position relative the center frequency</h4>
 
   - **Cen**: the decimation operation takes place around the center frequency Fs
-  - **Inf**: the decimation operation takes place around Fs - Fc. 
+  - **Inf**: the decimation operation takes place around Fs - Fc.
   - **Sup**: the decimation operation takes place around Fs + Fc.
-  
-With SR as the sample rate before decimation Fc is calculated as: 
+
+With SR as the sample rate before decimation Fc is calculated as:
 
   - if decimation n is 4 or lower:  Fc = SR/2^(log2(n)-1). The device center frequency is on the side of the baseband. You need a RF filter bandwidth at least twice the baseband.
   - if decimation n is 8 or higher: Fc = SR/n. The device center frequency is half the baseband away from the side of the baseband. You need a RF filter bandwidth at least 3 times the baseband.
@@ -89,7 +89,10 @@ This controls the generator sample rate in samples per second.
   - **P1**: Pattern 1 is a sawtooth pattern
     - Pulse width: 1000 samples
     - Starts at full amplitude then amplitude decreases linearly down to zero
-  
+  - **P2**: Pattern 2 is a 50% duty cycle square pattern
+    - Pulse width: 1000 samples
+    - Starts with a full amplitude pulse then down to zero for the duration of one pulse
+
 <h3>5: Modulating tone frequency</h3>
 
 This controls the modulating tone frequency in kHz in 10 Hz steps.
@@ -97,23 +100,23 @@ This controls the modulating tone frequency in kHz in 10 Hz steps.
 <h3>6: Carrier shift from center frequency</h3>
 
 Use this control to set the offset of the carrier from the center frequency of reception.
-  
+
 <h3>7: AM modulation factor</h3>
 
 This controls the AM modulation factor from 0 to 99%
 
 <h3>8: FM deviation</h3>
 
-This controls the frequency modulation deviation in kHz in 100 Hz steps. It cannot exceed the sample rate.  
-  
+This controls the frequency modulation deviation in kHz in 100 Hz steps. It cannot exceed the sample rate.
+
 <h3>9: Amplitude coarse control</h3>
 
 This slider controls the number of amplitude bits by steps of 100 bits. The total number of amplitude bits appear on the right.
-  
+
 <h3>10: Amplitude fine control</h3>
 
 This slider controls the number of amplitude bits by steps of 1 bit. The signal power in dB relative to the maximum power (full bit range) appear on the right.
-  
+
 <h3>11: DC bias</h3>
 
 Use this slider to give a DC component in percentage of maximum amplitude.

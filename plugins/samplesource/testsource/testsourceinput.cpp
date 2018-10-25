@@ -362,6 +362,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
                 m_testSourceThread->setPattern0();
             } else if (settings.m_modulation == TestSourceSettings::ModulationPattern1) {
                 m_testSourceThread->setPattern1();
+            } else if (settings.m_modulation == TestSourceSettings::ModulationPattern2) {
+                m_testSourceThread->setPattern2();
             }
         }
     }

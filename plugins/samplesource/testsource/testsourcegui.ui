@@ -490,6 +490,11 @@
          <string>P1</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>P2</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>

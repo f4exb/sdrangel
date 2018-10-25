@@ -77,6 +77,7 @@ public:
     void setFMDeviation(float deviation);
     void setPattern0();
     void setPattern1();
+    void setPattern2();
 
 private:
 	QMutex m_startWaitMutex;

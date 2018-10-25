@@ -39,6 +39,7 @@ struct TestSourceSettings {
         ModulationFM,
         ModulationPattern0,
         ModulationPattern1,
+        ModulationPattern2,
         ModulationLast
     } Modulation;
 

@@ -324,6 +324,24 @@ void TestSourceThread::generate(quint32 chunksize)
             }
         }
         break;
+        case TestSourceSettings::ModulationPattern2: // 50% duty cycle square pattern
+        {
+            if (m_pulseSampleCount < m_pulseWidth) // 1
+            {
+                m_buf[i++] = (int16_t) (m_amplitudeBitsI + m_amplitudeBitsDC);
+                m_buf[i++] = (int16_t) (m_phaseImbalance * (float) m_amplitudeBitsQ);
+            } else { // 0
+                m_buf[i++] = m_amplitudeBitsDC;
+                m_buf[i++] = 0;
+            }
+
+            if (m_pulseSampleCount < 2*m_pulseWidth - 1) {
+                m_pulseSampleCount++;
+            } else {
+                m_pulseSampleCount = 0;
+            }
+        }
+        break;
         case TestSourceSettings::ModulationNone:
         default:
         {
@@ -415,6 +433,12 @@ void TestSourceThread::setPattern0()
 }
 
 void TestSourceThread::setPattern1()
+{
+    m_pulseWidth = 1000;
+    m_pulseSampleCount = 0;
+}
+
+void TestSourceThread::setPattern2()
 {
     m_pulseWidth = 1000;
     m_pulseSampleCount = 0;
