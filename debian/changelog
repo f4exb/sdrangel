@@ -2,6 +2,7 @@ sdrangel (4.2.4-1) unstable; urgency=medium
 
   * LimeSDR: use LimeSuite 18.10.0 for builds
   * DSD demod: use 1 dB steps for squelch
+  * Scope: fixed some trigger issues. Fixes issue #233
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 24 Oct 2018 21:14:18 +0200
 

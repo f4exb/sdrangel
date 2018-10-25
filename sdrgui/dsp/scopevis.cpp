@@ -313,62 +313,32 @@ void ScopeVis::processTrace(const SampleVector::const_iterator& cbegin, const Sa
             m_triggerState = TriggerTriggered;
         }
     }
-    else
+    else if ((m_triggerState == TriggerUntriggered) || (m_triggerState == TriggerDelay)) // look for trigger or past trigger in delay mode
     {
-        if ((m_triggerState == TriggerUntriggered) || (m_triggerState == TriggerDelay))
+        TriggerCondition* triggerCondition = m_triggerConditions[m_currentTriggerIndex]; // current trigger condition
+
+        while (begin < end)
         {
-            TriggerCondition* triggerCondition = m_triggerConditions[m_currentTriggerIndex]; // current trigger condition
-
-            while (begin < end)
+            if (m_triggerState == TriggerDelay) // delayed trigger
             {
-                if (m_triggerState == TriggerDelay)
+                if (triggerCondition->m_triggerDelayCount > 0) // skip samples during delay period
                 {
-                    if (triggerCondition->m_triggerDelayCount > 0) // skip samples during delay period
-                    {
-                        begin += triggerCondition->m_triggerDelayCount;
-                        triggerCondition->m_triggerDelayCount = 0;
-                        continue;
-                    }
-                    else // process trigger
-                    {
-                        if (nextTrigger()) // move to next trigger and keep going
-                        {
-                            m_triggerComparator.reset();
-                            m_triggerState = TriggerUntriggered;
-                            ++begin;
-                            continue;
-                        }
-                        else // this was the last trigger then start trace
-                        {
-                            m_traceStart = true; // start trace processing
-                            m_nbSamples = m_traceSize + m_maxTraceDelay;
-                            m_triggerComparator.reset();
-                            m_triggerState = TriggerTriggered;
-                            triggerPointToEnd = end - begin;
-                            break;
-                        }
-                    }
+                    begin += triggerCondition->m_triggerDelayCount;
+                    triggerCondition->m_triggerDelayCount = 0;
+                    continue;
                 }
-
-                // look for trigger
-                if (m_triggerComparator.triggered(*begin, *triggerCondition))
+                else // process trigger
                 {
-                    if (triggerCondition->m_triggerData.m_triggerDelay > 0)
-                    {
-                        triggerCondition->m_triggerDelayCount = triggerCondition->m_triggerData.m_triggerDelay; // initialize delayed samples counter
-                        m_triggerState = TriggerDelay;
-                        ++begin;
-                        continue;
-                    }
-
                     if (nextTrigger()) // move to next trigger and keep going
                     {
                         m_triggerComparator.reset();
                         m_triggerState = TriggerUntriggered;
+                        ++begin;
+                        continue;
                     }
                     else // this was the last trigger then start trace
                     {
-                        m_traceStart = true; // start of trace processing
+                        m_traceStart = true; // start trace processing
                         m_nbSamples = m_traceSize + m_maxTraceDelay;
                         m_triggerComparator.reset();
                         m_triggerState = TriggerTriggered;
@@ -376,11 +346,37 @@ void ScopeVis::processTrace(const SampleVector::const_iterator& cbegin, const Sa
                         break;
                     }
                 }
+            }
 
-                ++begin;
-            } // look for trigger
-        } // untriggered or delayed
-    } // triggering active
+            if (m_triggerComparator.triggered(*begin, *triggerCondition)) // matched the current trigger
+            {
+                if (triggerCondition->m_triggerData.m_triggerDelay > 0)
+                {
+                    triggerCondition->m_triggerDelayCount = triggerCondition->m_triggerData.m_triggerDelay; // initialize delayed samples counter
+                    m_triggerState = TriggerDelay;
+                    ++begin;
+                    continue;
+                }
+
+                if (nextTrigger()) // move to next trigger and keep going
+                {
+                    m_triggerComparator.reset();
+                    m_triggerState = TriggerUntriggered;
+                }
+                else // this was the last trigger then start trace
+                {
+                    m_traceStart = true; // start of trace processing
+                    m_nbSamples = m_traceSize + m_maxTraceDelay;
+                    m_triggerComparator.reset();
+                    m_triggerState = TriggerTriggered;
+                    triggerPointToEnd = end - begin;
+                    break;
+                }
+            }
+
+            ++begin;
+        } // look for trigger
+    } // untriggered or delayed
 
     // trace process
 
