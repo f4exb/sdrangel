@@ -382,32 +382,30 @@ void ScopeVis::processTrace(const SampleVector::const_iterator& cbegin, const Sa
 
     if (m_triggerState == TriggerTriggered)
     {
-        int remainder = -1;
+        int remainder;
         int count = end - begin; // number of samples in traceback buffer past the current point
         SampleVector::iterator mend = m_traceDiscreteMemory.current().current();
         SampleVector::iterator mbegin = mend - count;
 
         if (m_traceStart) // start of trace processing
         {
-            // trace back
-            if (m_maxTraceDelay > 0)
-            {
+            // process until begin point
+
+            if (m_maxTraceDelay > 0) { // trace back
                 processTraces(mbegin - m_preTriggerDelay - m_maxTraceDelay, mbegin - m_preTriggerDelay, true);
             }
 
-            // pre-trigger
-            if (m_preTriggerDelay > 0)
-            {
-                remainder = processTraces(mbegin - m_preTriggerDelay, mbegin);
+            if (m_preTriggerDelay > 0) { // pre-trigger
+                processTraces(mbegin - m_preTriggerDelay, mbegin);
             }
 
+            // process the rest of the trace
+
+            remainder = processTraces(mbegin, mend);
             m_traceStart = false;
         }
-
-
-        if (remainder < 0)
+        else // process the current trace
         {
-            // live trace
             remainder = processTraces(mbegin, mend);
         }
 
