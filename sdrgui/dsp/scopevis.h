@@ -727,8 +727,9 @@ private:
     	{
     	    uint32_t nextMemIndex = m_currentMemIndex < (m_memSize-1) ? m_currentMemIndex+1 : 0;
             m_traceBackBuffers[nextMemIndex].reset();
-            m_traceBackBuffers[nextMemIndex].write(m_traceBackBuffers[m_currentMemIndex].m_endPoint - m_traceSize,
-                    m_traceBackBuffers[m_currentMemIndex].m_endPoint);
+            // Removed in 4.2.4 may cause trigger bug
+            // m_traceBackBuffers[nextMemIndex].write(m_traceBackBuffers[m_currentMemIndex].m_endPoint - m_traceSize,
+            //         m_traceBackBuffers[m_currentMemIndex].m_endPoint);
     	    m_currentMemIndex = nextMemIndex;
     		return m_traceBackBuffers[m_currentMemIndex]; // new trace
     	}

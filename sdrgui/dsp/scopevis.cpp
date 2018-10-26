@@ -297,10 +297,11 @@ void ScopeVis::processTrace(const SampleVector::const_iterator& cbegin, const Sa
 
     m_traceDiscreteMemory.current().write(cbegin, end);
 
-    if (m_traceDiscreteMemory.current().absoluteFill() < m_traceSize)
-    {
-        return; // not enough samples in memory
-    }
+    // Removed in 4.2.4 may cause trigger bug
+    // if (m_traceDiscreteMemory.current().absoluteFill() < m_traceSize)
+    // {
+    //     return; // not enough samples in memory
+    // }
 
     // trigger process
 
