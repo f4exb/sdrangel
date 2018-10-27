@@ -414,7 +414,7 @@ void ScopeVis::processTrace(const SampleVector::const_iterator& cbegin, const Sa
         {
             mbegin = mend - remainder;
             m_traceDiscreteMemory.current().m_endPoint = mbegin;
-            m_traceDiscreteMemory.store(); // next memory trace
+            m_traceDiscreteMemory.store(m_preTriggerDelay+remainder); // next memory trace.
             m_triggerState = TriggerUntriggered;
             m_triggerWaitForReset = m_triggerOneShot;
 

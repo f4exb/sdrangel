@@ -721,12 +721,13 @@ private:
     	/**
     	 * Move index forward by one position and return reference to the trace at this position
     	 * Copy a trace length of samples into the new memory slot
+         * samplesToReport are the number of samples to report on the next trace
     	 */
-    	TraceBackBuffer &store()
+        TraceBackBuffer &store(int samplesToReport)
     	{
     	    uint32_t nextMemIndex = m_currentMemIndex < (m_memSize-1) ? m_currentMemIndex+1 : 0;
             m_traceBackBuffers[nextMemIndex].reset();
-            m_traceBackBuffers[nextMemIndex].write(m_traceBackBuffers[m_currentMemIndex].m_endPoint - m_traceSize,
+            m_traceBackBuffers[nextMemIndex].write(m_traceBackBuffers[m_currentMemIndex].m_endPoint - samplesToReport,
                     m_traceBackBuffers[m_currentMemIndex].m_endPoint);
     	    m_currentMemIndex = nextMemIndex;
     		return m_traceBackBuffers[m_currentMemIndex]; // new trace
