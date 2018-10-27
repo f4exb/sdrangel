@@ -390,6 +390,14 @@ void ScopeVis::processTrace(const SampleVector::const_iterator& cbegin, const Sa
 
         if (m_traceStart) // start of trace processing
         {
+            // if trace time is 1s or more the display is progressive so we have to clear it first
+
+            float traceTime = ((float) m_traceSize) / m_sampleRate;
+
+            if (traceTime >= 1.0f) {
+                initTraceBuffers();
+            }
+
             // process until begin point
 
             if (m_maxTraceDelay > 0) { // trace back
