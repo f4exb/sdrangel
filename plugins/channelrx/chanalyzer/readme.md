@@ -386,7 +386,17 @@ This button selects the negative edge triggering. Trigger is raised only of the 
 
 This button selects both signal edges triggering. Trigger is raised if the signal crosses threshold in any direction. This actually combines the positive and negative edge testing with an or condition.
 
-<h3>9. Trigger level adjustment</h3>
+<h3>9. Trigger holdoff</h3>
+
+Use this button to control the trigger holdoff in a number of samples from 1 to 12.
+
+The above level condition is counted for a number of samples and if it is has been true for the holdoff number of samples the condition is declared true. A similar count is used for the false condition (below level).
+
+When the condition is declared true the counter of false conditions is reset and accordingly when the condition is declared false the counter of true conditions is reset.
+
+A value above 1 helps eliminating false triggers when small spikes appear on the leading or falling edge of a larger pulse. A value of 1 (minimum) means that the holdoff is not active.
+
+<h3>10. Trigger level adjustment</h3>
 
 This pair of sliders let you adjust the trigger level, The level appears on the left of the sliders. 
 
@@ -406,26 +416,26 @@ The bottom slider is a fine adjustment. Each step moves the trigger level by an 
   - MagDB: 0.01 dB
   - Phi, dPhi: 20.0E-6
   
-<h3>10: Trigger delay</h3>
+<h3>11: Trigger delay</h3>
 
 The actual trigger top can be moved forward by a number of samples. This pair of slider lets you adjust this delay. The delay in time units appears at the left of the sliders and the amount of samples as a tooltip
 
 The top slider is a coarse adjustment. Each step moves the delay by a trace length. The bottom slider is a fine adjustment. Each step moves the delay by 20 samples
 
-<h3>11. Pre-trigger delay</h3>
+<h3>12. Pre-trigger delay</h3>
 
 The trace can start an amount of time before the trigger top. This pair of sliders let you adjust this amount of time which is displayed at the left of the sliders. The corresponding number of samples appear as a tooltip.
 
 The top slider is a coarse adjustment. Each step moves the delay by a hundreth of the trace length. The bottom slider is a fine adjustment. Each step moves the delay by 20 samples.
 
-<h3>12. Trigger line color</h3>
+<h3>13. Trigger line color</h3>
 
 This area shows the current trigger line color. When clicking on it a color chooser dialog appears that lets you change the color of the current trigger line color. This line appears when the selected trace projection matches the trigger projection.
 
-<h3>13. One-shot trigger</h3>
+<h3>14. One-shot trigger</h3>
 
 This button toggles a one shot trigger. When the (final) trigger is raised only one trace is processed until the button is released.
 
-<h3>14. Freerun</h3>
+<h3>15. Freerun</h3>
 
 When active the triggers are disabled and traces are processed continuously. This is the default at plugin start time. 

@@ -227,6 +227,7 @@ private slots:
     void on_trigPos_toggled(bool checked);
     void on_trigNeg_toggled(bool checked);
     void on_trigBoth_toggled(bool checked);
+    void on_trigHoldoff_valueChanged(int value);
     void on_trigLevelCoarse_valueChanged(int value);
     void on_trigLevelFine_valueChanged(int value);
     void on_trigDelayCoarse_valueChanged(int value);

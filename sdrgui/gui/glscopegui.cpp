@@ -220,6 +220,7 @@ QByteArray GLScopeGUI::serialize() const
         s.writeFloat(218 + 16*i, triggerData.m_triggerColorR);
         s.writeFloat(219 + 16*i, triggerData.m_triggerColorG);
         s.writeFloat(220 + 16*i, triggerData.m_triggerColorB);
+        s.writeU32(221 + 16*i, triggerData.m_triggerHoldoff);
     }
 
     return s.final();
@@ -402,6 +403,9 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
             d.readFloat(219 + 16*iTrigger, &g, 1.0f);
             d.readFloat(220 + 16*iTrigger, &b, 1.0f);
             m_focusedTriggerColor.setRgbF(r, g, b);
+            d.readU32(221 + 16*iTrigger, &uintValue, 1);
+            ui->trigHoldoff->setValue(uintValue);
+            ui->trigHoldoffText->setText(tr("%1").arg(uintValue));
 
             fillTriggerData(triggerData);
 
@@ -895,6 +899,12 @@ void GLScopeGUI::on_trigBoth_toggled(bool checked)
     changeCurrentTrigger();
 }
 
+void GLScopeGUI::on_trigHoldoff_valueChanged(int value)
+{
+    ui->trigHoldoffText->setText(tr("%1").arg(value));
+    changeCurrentTrigger();
+}
+
 void GLScopeGUI::on_trigLevelCoarse_valueChanged(int value __attribute__((unused)))
 {
     setTrigLevelDisplay();
@@ -1338,6 +1348,7 @@ void GLScopeGUI::fillTriggerData(ScopeVis::TriggerData& triggerData)
     triggerData.m_triggerLevelFine = ui->trigLevelFine->value();
     triggerData.m_triggerPositiveEdge = ui->trigPos->isChecked();
     triggerData.m_triggerBothEdges = ui->trigBoth->isChecked();
+    triggerData.m_triggerHoldoff = ui->trigHoldoff->value();
     triggerData.m_triggerRepeat = ui->trigCount->value();
     triggerData.m_triggerDelayMult = ui->trigDelayCoarse->value() + ui->trigDelayFine->value() / (ScopeVis::m_traceChunkSize / 10.0);
     triggerData.m_triggerDelay = (int) (m_traceLenMult * ScopeVis::m_traceChunkSize * triggerData.m_triggerDelayMult);
@@ -1404,6 +1415,8 @@ void GLScopeGUI::setTriggerUI(const ScopeVis::TriggerData& triggerData)
             ui->trigNeg->doToggle(true);
         }
     }
+
+    ui->trigHoldoffText->setText(tr("%1").arg(triggerData.m_triggerHoldoff));
 
     ui->trigLevelCoarse->setValue(triggerData.m_triggerLevelCoarse);
     ui->trigLevelFine->setValue(triggerData.m_triggerLevelFine);

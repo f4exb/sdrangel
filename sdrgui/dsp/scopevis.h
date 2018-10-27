@@ -105,6 +105,7 @@ public:
         int  m_triggerLevelFine;
         bool m_triggerPositiveEdge;      //!< Trigger on the positive edge (else negative)
         bool m_triggerBothEdges;         //!< Trigger on both edges (else only one)
+        uint32_t m_triggerHoldoff;       //!< Trigger holdoff in number of samples
         uint32_t m_triggerDelay;         //!< Delay before the trigger is kicked off in number of samples (trigger delay)
         double m_triggerDelayMult;       //!< Trigger delay as a multiplier of trace length
         int m_triggerDelayCoarse;
@@ -123,6 +124,7 @@ public:
             m_triggerLevelFine(0),
             m_triggerPositiveEdge(true),
             m_triggerBothEdges(false),
+            m_triggerHoldoff(1),
             m_triggerDelay(0),
             m_triggerDelayMult(0.0),
             m_triggerDelayCoarse(0),
@@ -572,13 +574,18 @@ private:
         bool m_prevCondition;         //!< Condition (above threshold) at previous sample
         uint32_t m_triggerDelayCount; //!< Counter of samples for delay
         uint32_t m_triggerCounter;    //!< Counter of trigger occurences
+        uint32_t m_trues;             //!< Count of true conditions for holdoff processing
+        uint32_t m_falses;            //!< Count of false conditions for holdoff processing
+
 
         TriggerCondition(const TriggerData& triggerData) :
             m_projector(Projector::ProjectionReal),
             m_triggerData(triggerData),
             m_prevCondition(false),
             m_triggerDelayCount(0),
-            m_triggerCounter(0)
+            m_triggerCounter(0),
+            m_trues(0),
+            m_falses(0)
         {
         }
 
@@ -607,6 +614,8 @@ private:
             m_prevCondition = false;
             m_triggerDelayCount = 0;
             m_triggerCounter = 0;
+            m_trues = 0;
+            m_falses = 0;
         }
 
         void operator=(const TriggerCondition& other)
@@ -1021,7 +1030,7 @@ private:
     class TriggerComparator
     {
     public:
-        TriggerComparator() : m_level(0), m_reset(true), m_holdoff(2), m_trues(0), m_falses(0)
+        TriggerComparator() : m_level(0), m_reset(true)
         {
             computeLevels();
         }
@@ -1046,20 +1055,20 @@ private:
 
             if (condition)
             {
-                if (m_trues < m_holdoff) {
+                if (triggerCondition.m_trues < triggerCondition.m_triggerData.m_triggerHoldoff) {
                     condition = false;
-                    m_trues++;
+                    triggerCondition.m_trues++;
                 } else {
-                    m_falses = 0;
+                    triggerCondition.m_falses = 0;
                 }
             }
             else
             {
-                if (m_falses < m_holdoff) {
+                if (triggerCondition.m_falses < triggerCondition.m_triggerData.m_triggerHoldoff) {
                     condition = true;
-                    m_falses++;
+                    triggerCondition.m_falses++;
                 } else {
-                    m_trues = 0;
+                    triggerCondition.m_trues = 0;
                 }
             }
 
@@ -1106,9 +1115,6 @@ private:
         Real m_levelPowerDB;
         Real m_levelPowerLin;
         bool m_reset;
-        uint32_t m_holdoff;
-        uint32_t m_trues;
-        uint32_t m_falses;
     };
 
     GLScope* m_glScope;
