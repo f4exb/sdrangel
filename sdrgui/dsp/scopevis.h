@@ -562,7 +562,6 @@ private:
         TriggerUntriggered, //!< Trigger is not kicked off yet (or trigger list is empty)
         TriggerTriggered,   //!< Trigger has been kicked off
         TriggerDelay,       //!< Trigger conditions have been kicked off but it is waiting for delay before final kick off
-        TriggerNewConfig,   //!< Special condition when a new configuration has been received
     };
 
     struct TriggerCondition

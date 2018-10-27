@@ -32,7 +32,9 @@ The interface is essentially divided in the following sections
   4. Scope trace control
   5. Scope trigger control
   
-Note: the spectrum view (Channel spectrum) is not presented here.  
+Note 1: the scope trace is updated continuously for sweep times of 1 second or more else the display is refreshed only when the trace finishes.
+
+Note 2: the spectrum view (Channel spectrum) is not presented here.  
 
 <h2>C. Channel controls</h2>
 
