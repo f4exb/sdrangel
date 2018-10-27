@@ -1021,7 +1021,7 @@ private:
     class TriggerComparator
     {
     public:
-        TriggerComparator() : m_level(0), m_reset(true)
+        TriggerComparator() : m_level(0), m_reset(true), m_holdoff(2), m_trues(0), m_falses(0)
         {
             computeLevels();
         }
@@ -1042,6 +1042,25 @@ private:
                 condition = triggerCondition.m_projector.run(s) > m_levelPowerLin;
             } else {
                 condition = triggerCondition.m_projector.run(s) > m_level;
+            }
+
+            if (condition)
+            {
+                if (m_trues < m_holdoff) {
+                    condition = false;
+                    m_trues++;
+                } else {
+                    m_falses = 0;
+                }
+            }
+            else
+            {
+                if (m_falses < m_holdoff) {
+                    condition = true;
+                    m_falses++;
+                } else {
+                    m_trues = 0;
+                }
             }
 
             if (m_reset)
@@ -1087,6 +1106,9 @@ private:
         Real m_levelPowerDB;
         Real m_levelPowerLin;
         bool m_reset;
+        uint32_t m_holdoff;
+        uint32_t m_trues;
+        uint32_t m_falses;
     };
 
     GLScope* m_glScope;
