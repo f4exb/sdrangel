@@ -723,7 +723,7 @@ private:
 
     		for (std::vector<TraceBackBuffer>::iterator it = m_traceBackBuffers.begin(); it != m_traceBackBuffers.end(); ++it)
     		{
-    			it->resize(4*m_traceSize); // TODO: why 4?
+                it->resize(m_traceSize); // was multiplied by 4
     		}
     	}
 
