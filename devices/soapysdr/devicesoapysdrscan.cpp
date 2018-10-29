@@ -60,33 +60,35 @@ void DeviceSoapySDRScan::scan()
         {
             m_deviceEnums.push_back(SoapySDRDeviceEnum());
             m_deviceEnums.back().m_driverName = QString(it.first.c_str());
+            m_deviceEnums.back().m_sequence = deviceSeq;
 
             // collect identification information
-            for (SoapySDR::Kwargs::const_iterator kargIt = kit->begin(); kargIt != kit->end(); ++kargIt)
+
+            SoapySDR::Kwargs::const_iterator kargIt;
+
+            if ((kargIt = kit->find("label")) != kit->end())
             {
-                if (kargIt->first == "label")
-                {
-                    m_deviceEnums.back().m_label = QString(kargIt->second.c_str());
-                    qDebug("DeviceSoapySDRScan::scan: %s #%u %s",
-                            m_deviceEnums.back().m_driverName.toStdString().c_str(),
-                            deviceSeq,
-                            kargIt->second.c_str());
-                }
-                else if ((m_deviceEnums.back().m_idKey.size() == 0) && (kargIt->first == "serial"))
-                {
-                    m_deviceEnums.back().m_idKey = QString(kargIt->first.c_str());
-                    m_deviceEnums.back().m_idValue = QString(kargIt->second.c_str());
-                }
-                else if ((m_deviceEnums.back().m_idKey.size() == 0) && (kargIt->first == "device_id"))
-                {
-                    m_deviceEnums.back().m_idKey = QString(kargIt->first.c_str());
-                    m_deviceEnums.back().m_idValue = QString(kargIt->second.c_str());
-                }
-                else if ((m_deviceEnums.back().m_idKey.size() == 0) && (kargIt->first == "addr"))
-                {
-                    m_deviceEnums.back().m_idKey = QString(kargIt->first.c_str());
-                    m_deviceEnums.back().m_idValue = QString(kargIt->second.c_str());
-                }
+                m_deviceEnums.back().m_label = QString(kargIt->second.c_str());
+                qDebug("DeviceSoapySDRScan::scan: %s #%u %s",
+                        m_deviceEnums.back().m_driverName.toStdString().c_str(),
+                        deviceSeq,
+                        kargIt->second.c_str());
+            }
+
+            if ((kargIt = kit->find("serial")) != kit->end())
+            {
+                m_deviceEnums.back().m_idKey = QString(kargIt->first.c_str());
+                m_deviceEnums.back().m_idValue = QString(kargIt->second.c_str());
+            }
+            else if ((kargIt = kit->find("device_id")) != kit->end())
+            {
+                m_deviceEnums.back().m_idKey = QString(kargIt->first.c_str());
+                m_deviceEnums.back().m_idValue = QString(kargIt->second.c_str());
+            }
+            else if ((kargIt = kit->find("addr")) != kit->end())
+            {
+                m_deviceEnums.back().m_idKey = QString(kargIt->first.c_str());
+                m_deviceEnums.back().m_idValue = QString(kargIt->second.c_str());
             }
 
             // access the device to get the number of Rx and Tx channels and at the same time probe

@@ -29,13 +29,14 @@ public:
     struct SoapySDRDeviceEnum
     {
         QString m_driverName;
-        QString m_label;   //!< the label key for display should always be present
-        QString m_idKey;   //!< key to uniquely identify device
-        QString m_idValue; //!< value for the above key
+        uint32_t m_sequence; //!< device sequence for this driver
+        QString m_label;     //!< the label key for display should always be present
+        QString m_idKey;     //!< key to uniquely identify device
+        QString m_idValue;   //!< value for the above key
         uint32_t m_nbRx;
         uint32_t m_nbTx;
 
-        SoapySDRDeviceEnum() : m_nbRx(0), m_nbTx(0)
+        SoapySDRDeviceEnum() : m_sequence(0), m_nbRx(0), m_nbTx(0)
         {}
     };
 
