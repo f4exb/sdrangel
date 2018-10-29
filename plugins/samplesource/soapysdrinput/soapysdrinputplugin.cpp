@@ -18,7 +18,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "device/devicesourceapi.h"
-#include "soapysdr/devicesoapysdrscan.h"
+#include "soapysdr/devicesoapysdr.h"
 
 #include "soapysdrinputplugin.h"
 
@@ -58,9 +58,8 @@ void SoapySDRInputPlugin::initPlugin(PluginAPI* pluginAPI)
 PluginInterface::SamplingDevices SoapySDRInputPlugin::enumSampleSources()
 {
     SamplingDevices result;
-    DeviceSoapySDRScan scanner;
-    scanner.scan();
-    const std::vector<DeviceSoapySDRScan::SoapySDRDeviceEnum>& devicesEnumeration = scanner.getDevicesEnumeration();
+    DeviceSoapySDR& deviceSoapySDR = DeviceSoapySDR::instance();
+    const std::vector<DeviceSoapySDRScan::SoapySDRDeviceEnum>& devicesEnumeration = deviceSoapySDR.getDevicesEnumeration();
     qDebug("SoapySDRInputPlugin::enumSampleSources: found %lu devices", devicesEnumeration.size());
     std::vector<DeviceSoapySDRScan::SoapySDRDeviceEnum>::const_iterator it = devicesEnumeration.begin();
 
