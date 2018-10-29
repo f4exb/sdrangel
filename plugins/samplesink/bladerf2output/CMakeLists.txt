@@ -13,7 +13,7 @@ set(bladerf2output_SOURCES
 set(bladerf2output_HEADERS
 	bladerf2outputgui.h
 	bladerf2output.h
-	bladerf1soutputplugin.h
+	bladerf2outputplugin.h
 	bladerf2outputsettings.h
 	bladerf2outputthread.h
 )

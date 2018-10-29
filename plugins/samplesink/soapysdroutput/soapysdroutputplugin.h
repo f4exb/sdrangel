@@ -14,23 +14,23 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTPLUGIN_H_
-#define PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTPLUGIN_H_
+#ifndef PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTPLUGIN_H_
+#define PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTPLUGIN_H_
 
 #include <QObject>
 #include "plugin/plugininterface.h"
 
 class PluginAPI;
 
-#define BLADERF2OUTPUT_DEVICE_TYPE_ID "sdrangel.samplesink.bladerf2output"
+#define SOAPYSDROUTPUT_DEVICE_TYPE_ID "sdrangel.samplesink.soapysdroutput"
 
-class BladeRF2OutputPlugin : public QObject, public PluginInterface {
+class SoapySDROutputPlugin : public QObject, public PluginInterface {
     Q_OBJECT
     Q_INTERFACES(PluginInterface)
-    Q_PLUGIN_METADATA(IID BLADERF2OUTPUT_DEVICE_TYPE_ID)
+    Q_PLUGIN_METADATA(IID SOAPYSDROUTPUT_DEVICE_TYPE_ID)
 
 public:
-    explicit BladeRF2OutputPlugin(QObject* parent = 0);
+    explicit SoapySDROutputPlugin(QObject* parent = 0);
 
     const PluginDescriptor& getPluginDescriptor() const;
     void initPlugin(PluginAPI* pluginAPI);
@@ -51,4 +51,4 @@ private:
     static const PluginDescriptor m_pluginDescriptor;
 };
 
-#endif /* PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTPLUGIN_H_ */
+#endif /* PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTPLUGIN_H_ */

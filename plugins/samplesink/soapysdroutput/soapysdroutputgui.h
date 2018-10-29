@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTGUI_H_
-#define PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTGUI_H_
+#ifndef PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTGUI_H_
+#define PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTGUI_H_
 
 #include <QTimer>
 #include <QWidget>
@@ -23,21 +23,21 @@
 #include "plugin/plugininstancegui.h"
 #include "util/messagequeue.h"
 
-#include "bladerf2output.h"
+#include "soapysdroutput.h"
 
 class DeviceSampleSink;
 class DeviceUISet;
 
 namespace Ui {
-    class BladeRF2OutputGui;
+    class SoapySDROutputGui;
 }
 
-class BladeRF2OutputGui : public QWidget, public PluginInstanceGUI {
+class SoapySDROutputGui : public QWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    explicit BladeRF2OutputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
-    virtual ~BladeRF2OutputGui();
+    explicit SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
+    virtual ~SoapySDROutputGui();
     virtual void destroy();
 
     void setName(const QString& name);
@@ -52,42 +52,18 @@ public:
     virtual bool handleMessage(const Message& message);
 
 private:
-    Ui::BladeRF2OutputGui* ui;
+    Ui::SoapySDROutputGui* ui;
 
     DeviceUISet* m_deviceUISet;
-    bool m_doApplySettings;
     bool m_forceSettings;
-    BladeRF2OutputSettings m_settings;
+    bool m_doApplySettings;
     QTimer m_updateTimer;
     QTimer m_statusTimer;
-    BladeRF2Output* m_sampleSink;
+    SoapySDROutput* m_sampleSink;
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
     MessageQueue m_inputMessageQueue;
-
-    void blockApplySettings(bool block) { m_doApplySettings = !block; }
-    void displaySettings();
-    void sendSettings();
-    void updateSampleRateAndFrequency();
-    void updateFrequencyLimits();
-    void setCenterFrequencySetting(uint64_t kHzValue);
-
-private slots:
-    void handleInputMessages();
-    void on_centerFrequency_changed(quint64 value);
-    void on_LOppm_valueChanged(int value);
-    void on_biasTee_toggled(bool checked);
-    void on_sampleRate_changed(quint64 value);
-    void on_bandwidth_changed(quint64 value);
-    void on_interp_currentIndexChanged(int index);
-    void on_gain_valueChanged(int value);
-    void on_startStop_toggled(bool checked);
-    void on_transverter_clicked();
-    void updateHardware();
-    void updateStatus();
 };
 
-
-
-#endif /* PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTGUI_H_ */
+#endif /* PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTGUI_H_ */

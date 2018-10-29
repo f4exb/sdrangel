@@ -14,41 +14,71 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTPLUGIN_H_
-#define PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTPLUGIN_H_
+#include "util/simpleserializer.h"
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include "soapysdroutput.h"
 
-class PluginAPI;
+SoapySDROutput::SoapySDROutput(DeviceSinkAPI *deviceAPI __attribute__((unused))) :
+    m_deviceDescription("SoapySDROutput")
+{
+}
 
-#define BLADERF2OUTPUT_DEVICE_TYPE_ID "sdrangel.samplesink.bladerf2output"
+SoapySDROutput::~SoapySDROutput()
+{
+}
 
-class BladeRF2OutputPlugin : public QObject, public PluginInterface {
-    Q_OBJECT
-    Q_INTERFACES(PluginInterface)
-    Q_PLUGIN_METADATA(IID BLADERF2OUTPUT_DEVICE_TYPE_ID)
+void SoapySDROutput::destroy()
+{
+    delete this;
+}
 
-public:
-    explicit BladeRF2OutputPlugin(QObject* parent = 0);
+void SoapySDROutput::init()
+{
+}
 
-    const PluginDescriptor& getPluginDescriptor() const;
-    void initPlugin(PluginAPI* pluginAPI);
+bool SoapySDROutput::start()
+{
+    return false;
+}
 
-    virtual SamplingDevices enumSampleSinks();
+void SoapySDROutput::stop()
+{
+}
 
-    virtual PluginInstanceGUI* createSampleSinkPluginInstanceGUI(
-            const QString& sinkId,
-            QWidget **widget,
-            DeviceUISet *deviceUISet);
+QByteArray SoapySDROutput::serialize() const
+{
+    SimpleSerializer s(1);
+    return s.final();
+}
 
-    virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI);
+bool SoapySDROutput::deserialize(const QByteArray& data __attribute__((unused)))
+{
+    return false;
+}
 
-    static const QString m_hardwareID;
-    static const QString m_deviceTypeID;
+const QString& SoapySDROutput::getDeviceDescription() const
+{
+    return m_deviceDescription;
+}
 
-private:
-    static const PluginDescriptor m_pluginDescriptor;
-};
+int SoapySDROutput::getSampleRate() const
+{
+    return 0;
+}
 
-#endif /* PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTPLUGIN_H_ */
+quint64 SoapySDROutput::getCenterFrequency() const
+{
+    return 0;
+}
+
+void SoapySDROutput::setCenterFrequency(qint64 centerFrequency __attribute__((unused)))
+{
+}
+
+bool SoapySDROutput::handleMessage(const Message& message __attribute__((unused)))
+{
+    return false;
+}
+
+
+

@@ -14,68 +14,76 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
+#include "device/devicesinkapi.h"
+#include "device/deviceuiset.h"
 #include "util/simpleserializer.h"
 
-#include "soapysdrinput.h"
+#include "soapysdroutputgui.h"
 
-SoapySDRInput::SoapySDRInput(DeviceSourceAPI *deviceAPI __attribute__((unused))) :
-    m_deviceDescription("SoapySDRInput")
+SoapySDROutputGui::SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
+    QWidget(parent),
+    ui(0),
+    m_deviceUISet(deviceUISet),
+    m_forceSettings(true),
+    m_doApplySettings(true),
+    m_sampleSink(0),
+    m_sampleRate(0),
+    m_lastEngineState(DSPDeviceSinkEngine::StNotStarted)
 {
 }
 
-SoapySDRInput::~SoapySDRInput()
+SoapySDROutputGui::~SoapySDROutputGui()
 {
 }
 
-void SoapySDRInput::destroy()
+void SoapySDROutputGui::destroy()
 {
     delete this;
 }
 
-void SoapySDRInput::init()
+void SoapySDROutputGui::setName(const QString& name)
+{
+    setObjectName(name);
+}
+
+QString SoapySDROutputGui::getName() const
+{
+    return objectName();
+}
+
+void SoapySDROutputGui::resetToDefaults()
 {
 }
 
-bool SoapySDRInput::start()
+qint64 SoapySDROutputGui::getCenterFrequency() const
 {
-    return false;
+    return 0;
 }
 
-void SoapySDRInput::stop()
+void SoapySDROutputGui::setCenterFrequency(qint64 centerFrequency __attribute__((unused)))
 {
 }
 
-QByteArray SoapySDRInput::serialize() const
+QByteArray SoapySDROutputGui::serialize() const
 {
     SimpleSerializer s(1);
     return s.final();
 }
 
-bool SoapySDRInput::deserialize(const QByteArray& data __attribute__((unused)))
+bool SoapySDROutputGui::deserialize(const QByteArray& data __attribute__((unused)))
 {
     return false;
 }
 
-const QString& SoapySDRInput::getDeviceDescription() const
-{
-    return m_deviceDescription;
-}
 
-int SoapySDRInput::getSampleRate() const
-{
-    return 0;
-}
-
-quint64 SoapySDRInput::getCenterFrequency() const
-{
-    return 0;
-}
-
-void SoapySDRInput::setCenterFrequency(qint64 centerFrequency __attribute__((unused)))
-{
-}
-
-bool SoapySDRInput::handleMessage(const Message& message __attribute__((unused)))
+bool SoapySDROutputGui::handleMessage(const Message& message __attribute__((unused)))
 {
     return false;
 }
+
+
+
+
+

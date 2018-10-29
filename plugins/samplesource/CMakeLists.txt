@@ -97,6 +97,7 @@ if (BUILD_DEBIAN)
     add_subdirectory(rtlsdr)
     add_subdirectory(sdrdaemonsource)
     add_subdirectory(sdrplay)
+    add_subdirectory(soapysdrinput)
 endif (BUILD_DEBIAN)
 
 add_subdirectory(filesource)

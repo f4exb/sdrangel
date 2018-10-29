@@ -14,41 +14,39 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTPLUGIN_H_
-#define PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTPLUGIN_H_
+#ifndef PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUT_H_
+#define PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUT_H_
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include <QString>
 
-class PluginAPI;
+#include "dsp/devicesamplesink.h"
 
-#define BLADERF2OUTPUT_DEVICE_TYPE_ID "sdrangel.samplesink.bladerf2output"
+class DeviceSinkAPI;
 
-class BladeRF2OutputPlugin : public QObject, public PluginInterface {
-    Q_OBJECT
-    Q_INTERFACES(PluginInterface)
-    Q_PLUGIN_METADATA(IID BLADERF2OUTPUT_DEVICE_TYPE_ID)
-
+class SoapySDROutput : public DeviceSampleSink {
 public:
-    explicit BladeRF2OutputPlugin(QObject* parent = 0);
+    SoapySDROutput(DeviceSinkAPI *deviceAPI);
+    virtual ~SoapySDROutput();
+    virtual void destroy();
 
-    const PluginDescriptor& getPluginDescriptor() const;
-    void initPlugin(PluginAPI* pluginAPI);
+    virtual void init();
+    virtual bool start();
+    virtual void stop();
 
-    virtual SamplingDevices enumSampleSinks();
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
 
-    virtual PluginInstanceGUI* createSampleSinkPluginInstanceGUI(
-            const QString& sinkId,
-            QWidget **widget,
-            DeviceUISet *deviceUISet);
+    virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
+    virtual const QString& getDeviceDescription() const;
+    virtual int getSampleRate() const;
+    virtual quint64 getCenterFrequency() const;
+    virtual void setCenterFrequency(qint64 centerFrequency);
 
-    virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI);
-
-    static const QString m_hardwareID;
-    static const QString m_deviceTypeID;
+    virtual bool handleMessage(const Message& message);
 
 private:
-    static const PluginDescriptor m_pluginDescriptor;
+    QString m_deviceDescription;
 };
 
-#endif /* PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTPLUGIN_H_ */
+
+#endif /* PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUT_H_ */
