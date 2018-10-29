@@ -35,7 +35,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 */
 	QCoreApplication::setOrganizationName("f4exb");
 	QCoreApplication::setApplicationName("SDRangel");
-    QCoreApplication::setApplicationVersion("4.2.4");
+    QCoreApplication::setApplicationVersion("4.3.0");
 #if QT_VERSION >= 0x050600
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling); // DPI support
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps); //HiDPI pixmaps

@@ -1,3 +1,9 @@
+sdrangel (4.3.0-1) unstable; urgency=medium
+
+  * SoapySDR support
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 04 Nov 2018 21:14:18 +0200
+
 sdrangel (4.2.4-1) unstable; urgency=medium
 
   * LimeSDR: use LimeSuite 18.10.0 for builds
