@@ -6,16 +6,16 @@ set(soapysdrinput_SOURCES
 	soapysdrinputgui.cpp
 	soapysdrinput.cpp
 	soapysdrinputplugin.cpp
-#	soapysdrinputsettings.cpp
-#	soapysdrinputthread.cpp
+	soapysdrinputsettings.cpp
+	soapysdrinputthread.cpp
 )
 
 set(soapysdrinput_HEADERS
 	soapysdrinputgui.h
 	soapysdrinput.h
 	soapysdrinputplugin.h
-#	soapysdrinputsettings.h
-#	soapysdrinputthread.h
+	soapysdrinputsettings.h
+	soapysdrinputthread.h
 )
 
 set(soapysdrinput_FORMS

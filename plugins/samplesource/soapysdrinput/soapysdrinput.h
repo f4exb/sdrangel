@@ -25,6 +25,7 @@
 #include "dsp/devicesamplesource.h"
 
 class DeviceSourceAPI;
+class SoapySDRInputThread;
 
 class SoapySDRInput : public DeviceSampleSource
 {
@@ -36,6 +37,8 @@ public:
     virtual void init();
     virtual bool start();
     virtual void stop();
+    SoapySDRInputThread *getThread() { return m_thread; }
+    void setThread(SoapySDRInputThread *thread) { m_thread = thread; }
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
@@ -51,11 +54,13 @@ public:
 private:
     DeviceSourceAPI *m_deviceAPI;
     DeviceSoapySDRShared m_deviceShared;
+    SoapySDRInputThread *m_thread;
     QString m_deviceDescription;
     bool m_running;
 
     bool openDevice();
     void closeDevice();
+    void moveThreadToBuddy();
 };
 
 

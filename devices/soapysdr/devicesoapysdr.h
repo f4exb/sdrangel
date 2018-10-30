@@ -33,6 +33,8 @@ public:
     uint32_t getNbDevices() const { return m_scanner.getNbDevices(); }
     const std::vector<DeviceSoapySDRScan::SoapySDRDeviceEnum>& getDevicesEnumeration() const { return m_scanner.getDevicesEnumeration(); }
 
+    static const unsigned int blockSize = (1<<14);
+
 protected:
     DeviceSoapySDR();
     DeviceSoapySDR(const DeviceSoapySDR&) {}

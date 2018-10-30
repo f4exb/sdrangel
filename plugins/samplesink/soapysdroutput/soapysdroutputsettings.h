@@ -14,41 +14,23 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTSETTINGS_H_
-#define PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTSETTINGS_H_
+#ifndef PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTSETTINGS_H_
+#define PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTSETTINGS_H_
 
 #include <QtGlobal>
-#include <QString>
 
-struct BladeRF2InputSettings {
-    typedef enum {
-        FC_POS_INFRA = 0,
-        FC_POS_SUPRA,
-        FC_POS_CENTER
-    } fcPos_t;
-
+struct SoapySDROutputSettings {
     quint64 m_centerFrequency;
-    qint32  m_LOppmTenths;
+    int m_LOppmTenths;
     qint32 m_devSampleRate;
-    qint32 m_bandwidth;
-    int m_gainMode;
-    int m_globalGain;
-    bool m_biasTee;
-    quint32 m_log2Decim;
-    fcPos_t m_fcPos;
-    bool m_dcBlock;
-    bool m_iqCorrection;
+    quint32 m_log2Interp;
     bool     m_transverterMode;
     qint64   m_transverterDeltaFrequency;
-    QString m_fileRecordName;
 
-    BladeRF2InputSettings();
+    SoapySDROutputSettings();
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 };
 
-
-
-
-#endif /* PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTSETTINGS_H_ */
+#endif /* PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTSETTINGS_H_ */

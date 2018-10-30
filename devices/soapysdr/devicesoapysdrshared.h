@@ -14,41 +14,30 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTSETTINGS_H_
-#define PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTSETTINGS_H_
+#ifndef DEVICES_SOAPYSDR_DEVICESOAPYSDRSHARED_H_
+#define DEVICES_SOAPYSDR_DEVICESOAPYSDRSHARED_H_
 
-#include <QtGlobal>
-#include <QString>
+#include <SoapySDR/Device.hpp>
 
-struct BladeRF2InputSettings {
-    typedef enum {
-        FC_POS_INFRA = 0,
-        FC_POS_SUPRA,
-        FC_POS_CENTER
-    } fcPos_t;
+#include "export.h"
 
-    quint64 m_centerFrequency;
-    qint32  m_LOppmTenths;
-    qint32 m_devSampleRate;
-    qint32 m_bandwidth;
-    int m_gainMode;
-    int m_globalGain;
-    bool m_biasTee;
-    quint32 m_log2Decim;
-    fcPos_t m_fcPos;
-    bool m_dcBlock;
-    bool m_iqCorrection;
-    bool     m_transverterMode;
-    qint64   m_transverterDeltaFrequency;
-    QString m_fileRecordName;
+class SoapySDRInput;
+class SoapySDROutput;
 
-    BladeRF2InputSettings();
-    void resetToDefaults();
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+/**
+ * Structure shared by a buddy with other buddies
+ */
+class DEVICES_API DeviceSoapySDRShared
+{
+public:
+    DeviceSoapySDRShared();
+    ~DeviceSoapySDRShared();
+
+    SoapySDR::Device *m_device;
+    int m_channel; //!< allocated channel (-1 if none)
+    SoapySDRInput *m_source;
+    SoapySDROutput *m_sink;
 };
 
 
-
-
-#endif /* PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTSETTINGS_H_ */
+#endif /* DEVICES_SOAPYSDR_DEVICESOAPYSDRSHARED_H_ */

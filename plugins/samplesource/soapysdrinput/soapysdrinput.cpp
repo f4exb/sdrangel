@@ -23,10 +23,12 @@
 #include "dsp/dspengine.h"
 #include "soapysdr/devicesoapysdr.h"
 
+#include "soapysdrinputthread.h"
 #include "soapysdrinput.h"
 
 SoapySDRInput::SoapySDRInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_thread(0),
     m_deviceDescription("SoapySDRInput"),
     m_running(false)
 {
@@ -131,9 +133,9 @@ void SoapySDRInput::closeDevice()
         stop();
     }
 
-//    if (m_thread) { // stills own the thread => transfer to a buddy
-//        moveThreadToBuddy();
-//    }
+    if (m_thread) { // stills own the thread => transfer to a buddy
+        moveThreadToBuddy();
+    }
 
     m_deviceShared.m_channel = -1; // publicly release channel
     m_deviceShared.m_source = 0;
@@ -150,6 +152,23 @@ void SoapySDRInput::closeDevice()
 
 void SoapySDRInput::init()
 {
+}
+
+void SoapySDRInput::moveThreadToBuddy()
+{
+    const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+    std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+
+    for (; it != sourceBuddies.end(); ++it)
+    {
+        SoapySDRInput *buddySource = ((DeviceSoapySDRShared*) (*it)->getBuddySharedPtr())->m_source;
+
+        if (buddySource)
+        {
+            buddySource->setThread(m_thread);
+            m_thread = 0;  // zero for others
+        }
+    }
 }
 
 bool SoapySDRInput::start()

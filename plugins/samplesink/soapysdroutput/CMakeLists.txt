@@ -6,7 +6,7 @@ set(soapysdroutput_SOURCES
 	soapysdroutputgui.cpp
 	soapysdroutput.cpp
 	soapysdroutputplugin.cpp
-#	soapysdroutputsettings.cpp
+	soapysdroutputsettings.cpp
 #	soapysdroutputthread.cpp
 )
 
@@ -14,7 +14,7 @@ set(soapysdroutput_HEADERS
 	soapysdroutputgui.h
 	soapysdroutput.h
 	soapysdroutputplugin.h
-#	soapysdroutputsettings.h
+	soapysdroutputsettings.h
 #	soapysdroutputthread.h
 )
 

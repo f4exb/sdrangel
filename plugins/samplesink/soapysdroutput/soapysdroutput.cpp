@@ -41,7 +41,7 @@ void SoapySDROutput::destroy()
 
 bool SoapySDROutput::openDevice()
 {
-    m_sampleSourceFifo.resize(96000 * 4);
+    m_sampleSourceFifo.resize(m_settings.m_devSampleRate/(1<<(m_settings.m_log2Interp <= 4 ? m_settings.m_log2Interp : 4)));
 
     // look for Tx buddies and get reference to the device object
     if (m_deviceAPI->getSinkBuddies().size() > 0) // look sink sibling first

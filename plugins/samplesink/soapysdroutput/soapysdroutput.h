@@ -22,6 +22,8 @@
 #include "dsp/devicesamplesink.h"
 #include "soapysdr/devicesoapysdrshared.h"
 
+#include "soapysdroutputsettings.h"
+
 class DeviceSinkAPI;
 
 class SoapySDROutput : public DeviceSampleSink {
@@ -47,6 +49,7 @@ public:
 
 private:
     DeviceSinkAPI *m_deviceAPI;
+    SoapySDROutputSettings m_settings;
     QString m_deviceDescription;
     DeviceSoapySDRShared m_deviceShared;
     bool m_running;

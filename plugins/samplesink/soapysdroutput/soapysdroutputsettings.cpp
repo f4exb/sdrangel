@@ -14,41 +14,62 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTSETTINGS_H_
-#define PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTSETTINGS_H_
-
 #include <QtGlobal>
-#include <QString>
+#include "util/simpleserializer.h"
 
-struct BladeRF2InputSettings {
-    typedef enum {
-        FC_POS_INFRA = 0,
-        FC_POS_SUPRA,
-        FC_POS_CENTER
-    } fcPos_t;
+#include "soapysdroutputsettings.h"
 
-    quint64 m_centerFrequency;
-    qint32  m_LOppmTenths;
-    qint32 m_devSampleRate;
-    qint32 m_bandwidth;
-    int m_gainMode;
-    int m_globalGain;
-    bool m_biasTee;
-    quint32 m_log2Decim;
-    fcPos_t m_fcPos;
-    bool m_dcBlock;
-    bool m_iqCorrection;
-    bool     m_transverterMode;
-    qint64   m_transverterDeltaFrequency;
-    QString m_fileRecordName;
+SoapySDROutputSettings::SoapySDROutputSettings()
+{
+    resetToDefaults();
+}
 
-    BladeRF2InputSettings();
-    void resetToDefaults();
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
-};
+void SoapySDROutputSettings::resetToDefaults()
+{
+    m_centerFrequency = 435000*1000;
+    m_LOppmTenths = 0;
+    m_devSampleRate = 1024000;
+    m_log2Interp = 0;
+    m_transverterMode = false;
+    m_transverterDeltaFrequency = 0;
+}
 
+QByteArray SoapySDROutputSettings::serialize() const
+{
+    SimpleSerializer s(1);
 
+    s.writeS32(1, m_devSampleRate);
+    s.writeS32(2, m_LOppmTenths);
+    s.writeU32(3, m_log2Interp);
+    s.writeBool(4, m_transverterMode);
+    s.writeS64(5, m_transverterDeltaFrequency);
 
+    return s.final();
+}
 
-#endif /* PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTSETTINGS_H_ */
+bool SoapySDROutputSettings::deserialize(const QByteArray& data)
+{
+    SimpleDeserializer d(data);
+
+    if (!d.isValid())
+    {
+        resetToDefaults();
+        return false;
+    }
+
+    if (d.getVersion() == 1)
+    {
+        d.readS32(1, &m_devSampleRate);
+        d.readS32(2, &m_LOppmTenths);
+        d.readU32(3, &m_log2Interp);
+        d.readBool(4, &m_transverterMode, false);
+        d.readS64(5, &m_transverterDeltaFrequency, 0);
+
+        return true;
+    }
+    else
+    {
+        resetToDefaults();
+        return false;
+    }
+}

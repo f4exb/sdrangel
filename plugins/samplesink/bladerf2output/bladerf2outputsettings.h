@@ -18,7 +18,6 @@
 #define PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTSETTINGS_H_
 
 #include <QtGlobal>
-#include <libbladeRF.h>
 
 struct BladeRF2OutputSettings {
     quint64 m_centerFrequency;
