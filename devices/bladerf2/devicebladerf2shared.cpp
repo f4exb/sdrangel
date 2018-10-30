@@ -25,7 +25,8 @@ const int    DeviceBladeRF2Shared::m_sampleFifoMinSize32 = 150000; // Fixed for 
 DeviceBladeRF2Shared::DeviceBladeRF2Shared() :
     m_dev(0),
     m_channel(-1),
-    m_source(0)
+    m_source(0),
+    m_sink(0)
 {}
 
 DeviceBladeRF2Shared::~DeviceBladeRF2Shared()

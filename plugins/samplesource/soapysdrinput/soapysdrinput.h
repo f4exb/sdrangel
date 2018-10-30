@@ -21,6 +21,7 @@
 #include <QByteArray>
 #include <stdint.h>
 
+#include "soapysdr/devicesoapysdrshared.h"
 #include "dsp/devicesamplesource.h"
 
 class DeviceSourceAPI;
@@ -48,7 +49,13 @@ public:
     virtual bool handleMessage(const Message& message);
 
 private:
+    DeviceSourceAPI *m_deviceAPI;
+    DeviceSoapySDRShared m_deviceShared;
     QString m_deviceDescription;
+    bool m_running;
+
+    bool openDevice();
+    void closeDevice();
 };
 
 

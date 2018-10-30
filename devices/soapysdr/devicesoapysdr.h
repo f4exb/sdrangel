@@ -28,6 +28,7 @@ class DEVICES_API DeviceSoapySDR
 public:
     static DeviceSoapySDR& instance();
     SoapySDR::Device *openSoapySDR(uint32_t sequence);
+    void closeSoapySdr(SoapySDR::Device *device);
 
     uint32_t getNbDevices() const { return m_scanner.getNbDevices(); }
     const std::vector<DeviceSoapySDRScan::SoapySDRDeviceEnum>& getDevicesEnumeration() const { return m_scanner.getDevicesEnumeration(); }

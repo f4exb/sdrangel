@@ -36,6 +36,11 @@ SoapySDR::Device *DeviceSoapySDR::openSoapySDR(uint32_t sequence)
     return openopenSoapySDRFromSequence(sequence);
 }
 
+void DeviceSoapySDR::closeSoapySdr(SoapySDR::Device *device)
+{
+    SoapySDR::Device::unmake(device);
+}
+
 SoapySDR::Device *DeviceSoapySDR::openopenSoapySDRFromSequence(uint32_t sequence)
 {
     if (sequence > m_scanner.getNbDevices())

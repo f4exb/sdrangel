@@ -5,11 +5,13 @@ set (CMAKE_CXX_STANDARD 11)
 set(soapysdrdevice_SOURCES
 	devicesoapysdr.cpp
     devicesoapysdrscan.cpp
+    devicesoapysdrshared.cpp
 )
 
 set(soapysdrdevice_HEADERS
 	devicesoapysdr.h
     devicesoapysdrscan.h
+    devicesoapysdrshared.h
 )
 
 if (BUILD_DEBIAN)
