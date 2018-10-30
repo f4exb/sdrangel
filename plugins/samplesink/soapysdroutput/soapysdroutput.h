@@ -20,6 +20,7 @@
 #include <QString>
 
 #include "dsp/devicesamplesink.h"
+#include "soapysdr/devicesoapysdrshared.h"
 
 class DeviceSinkAPI;
 
@@ -45,7 +46,13 @@ public:
     virtual bool handleMessage(const Message& message);
 
 private:
+    DeviceSinkAPI *m_deviceAPI;
     QString m_deviceDescription;
+    DeviceSoapySDRShared m_deviceShared;
+    bool m_running;
+
+    bool openDevice();
+    void closeDevice();
 };
 
 
