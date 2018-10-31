@@ -14,12 +14,18 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <sstream>
+#include <iostream>
+
+#include <QDebug>
+
 #include "devicesoapysdrparams.h"
 
 DeviceSoapySDRParams::DeviceSoapySDRParams(SoapySDR::Device *device) :
     m_device(device)
 {
     fillParams();
+    printParams();
 }
 
 DeviceSoapySDRParams::~DeviceSoapySDRParams()
@@ -84,4 +90,173 @@ void DeviceSoapySDRParams::fillChannelParams(std::vector<ChannelSetting>& channe
     // bandwidths
 
     channelSettings.back().m_bandwidthsRanges = m_device->getBandwidthRange(direction, ichan);
+}
+
+void DeviceSoapySDRParams::printParams()
+{
+    qDebug() << "DeviceSoapySDRParams::printParams: m_deviceSettingsArgs:\n" << argInfoListToString(m_deviceSettingsArgs).c_str();
+    int ichan = 0;
+
+    for (const auto &it : m_RxChannelsSettings)
+    {
+        qDebug() << "DeviceSoapySDRParams::printParams: Rx channel " << ichan;
+        printChannelParams(it);
+        ichan++;
+    }
+
+    ichan = 0;
+
+    for (const auto &it : m_TxChannelsSettings)
+    {
+        qDebug() << "DeviceSoapySDRParams::printParams: Tx channel " << ichan;
+        printChannelParams(it);
+        ichan++;
+    }
+}
+
+void DeviceSoapySDRParams::printChannelParams(const ChannelSetting& channelSetting)
+{
+    qDebug() << "DeviceSoapySDRParams::printParams: m_streamSettingsArgs:\n" << argInfoListToString(channelSetting.m_streamSettingsArgs).c_str();
+    qDebug() << "DeviceSoapySDRParams::printParams:"
+            << " m_hasDCAutoCorrection: " << channelSetting.m_hasDCAutoCorrection
+            << " m_hasDCOffsetValue: " << channelSetting.m_hasDCOffsetValue
+            << " m_hasIQBalanceValue: " << channelSetting.m_hasIQBalanceValue
+            << " m_hasFrequencyCorrectionValue: " << channelSetting.m_hasFrequencyCorrectionValue
+            << " m_hasAGC: " << channelSetting.m_hasAGC;
+    qDebug() << "DeviceSoapySDRParams::printParams: m_antennas: " << vectorToString(channelSetting.m_antennas).c_str();
+    qDebug() << "DeviceSoapySDRParams::printParams: m_gainRange: " << rangeToString(channelSetting.m_gainRange).c_str();
+
+    qDebug() << "DeviceSoapySDRParams::printParams: individual gains...";
+
+    for (const auto &gainIt : channelSetting.m_gainSettings)
+    {
+        qDebug() << "DeviceSoapySDRParams::printParams: m_name: " << gainIt.m_name.c_str();
+        qDebug() << "DeviceSoapySDRParams::printParams: m_range: " << rangeToString(gainIt.m_range).c_str();
+    }
+
+    qDebug() << "DeviceSoapySDRParams::printParams: tunable elements...";
+
+    for (const auto &freqIt : channelSetting.m_frequencySettings)
+    {
+        qDebug() << "DeviceSoapySDRParams::printParams: m_name: " << freqIt.m_name.c_str();
+        qDebug() << "DeviceSoapySDRParams::printParams: m_range (kHz): " << rangeListToString(freqIt.m_ranges, 1e3).c_str();
+    }
+
+    qDebug() << "DeviceSoapySDRParams::printParams: m_frequencySettingsArgs:\n" << argInfoListToString(channelSetting.m_frequencySettingsArgs).c_str();
+    qDebug() << "DeviceSoapySDRParams::printParams: m_ratesRanges (kHz): " << rangeListToString(channelSetting.m_ratesRanges, 1e3).c_str();
+    qDebug() << "DeviceSoapySDRParams::printParams: m_bandwidthsRanges (kHz): " << rangeListToString(channelSetting.m_bandwidthsRanges, 1e3).c_str();
+}
+
+std::string DeviceSoapySDRParams::argInfoToString(const SoapySDR::ArgInfo &argInfo, const std::string indent)
+{
+    std::stringstream ss;
+
+    //name, or use key if missing
+    std::string name = argInfo.name;
+    if (argInfo.name.empty()) name = argInfo.key;
+    ss << indent << " * " << name;
+
+    //optional description
+    std::string desc = argInfo.description;
+    const std::string replace("\n"+indent+"   ");
+
+    for (std::size_t pos = 0; (pos=desc.find("\n", pos)) != std::string::npos; pos+=replace.size()) {
+        desc.replace(pos, 1, replace);
+    }
+
+    if (not desc.empty()) {
+        ss << " - " << desc << std::endl << indent << "  ";
+    }
+
+    //other fields
+    ss << " [key=" << argInfo.key;
+
+    if (not argInfo.units.empty()) {
+        ss << ", units=" << argInfo.units;
+    }
+
+    if (not argInfo.value.empty()) {
+        ss << ", default=" << argInfo.value;
+    }
+
+    //type
+    switch (argInfo.type)
+    {
+    case SoapySDR::ArgInfo::BOOL:
+        ss << ", type=bool";
+        break;
+    case SoapySDR::ArgInfo::INT:
+        ss << ", type=int";
+        break;
+    case SoapySDR::ArgInfo::FLOAT:
+        ss << ", type=float";
+        break;
+    case SoapySDR::ArgInfo::STRING:
+        ss << ", type=string";
+        break;
+    }
+
+    //optional range/enumeration
+    if (argInfo.range.minimum() < argInfo.range.maximum()) {
+        ss << ", range=" << rangeToString(argInfo.range);
+    }
+
+    if (not argInfo.options.empty()) {
+        ss << ", options=(" << vectorToString(argInfo.options) << ")";
+    }
+
+    ss << "]";
+
+    return ss.str();
+}
+
+std::string DeviceSoapySDRParams::argInfoListToString(const SoapySDR::ArgInfoList &argInfos)
+{
+    std::stringstream ss;
+
+    for (std::size_t i = 0; i < argInfos.size(); i++) {
+        ss << argInfoToString(argInfos[i]) << std::endl;
+    }
+
+    return ss.str();
+}
+
+std::string DeviceSoapySDRParams::rangeToString(const SoapySDR::Range &range)
+{
+    std::stringstream ss;
+    ss << "[" << range.minimum() << ", " << range.maximum();
+
+    if (range.step() != 0.0) {
+        ss << ", " << range.step();
+    }
+
+    ss << "]";
+    return ss.str();
+}
+
+std::string DeviceSoapySDRParams::rangeListToString(const SoapySDR::RangeList &range, const double scale)
+{
+    const std::size_t MAXRLEN = 10; //for abbreviating long lists
+    std::stringstream ss;
+
+    for (std::size_t i = 0; i < range.size(); i++)
+    {
+        if (range.size() >= MAXRLEN and i >= MAXRLEN/2 and i < (range.size()-MAXRLEN/2))
+        {
+            if (i == MAXRLEN) ss << ", ...";
+            continue;
+        }
+
+        if (not ss.str().empty()) {
+            ss << ", ";
+        }
+
+        if (range[i].minimum() == range[i].maximum()) {
+            ss << (range[i].minimum()/scale);
+        } else {
+            ss << "[" << (range[i].minimum()/scale) << ", " << (range[i].maximum()/scale) << "]";
+        }
+    }
+
+    return ss.str();
 }

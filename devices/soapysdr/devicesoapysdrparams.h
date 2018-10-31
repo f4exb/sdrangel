@@ -18,6 +18,9 @@
 #define DEVICES_SOAPYSDR_DEVICESOAPYSDRPARAMS_H_
 
 #include <stdint.h>
+#include <string>
+#include <vector>
+
 #include <SoapySDR/Device.hpp>
 
 #include "export.h"
@@ -68,6 +71,36 @@ public:
 private:
     void fillParams();
     void fillChannelParams(std::vector<ChannelSetting>& channelSettings, int direction, unsigned int ichan);
+    void printParams();
+    void printChannelParams(const ChannelSetting& channelSetting);
+
+    // Printing functions copied from SoapySDR's SoapySDRProbe.cpp
+    std::string argInfoToString(const SoapySDR::ArgInfo &argInfo, const std::string indent = "    ");
+    std::string argInfoListToString(const SoapySDR::ArgInfoList &argInfos);
+    std::string rangeToString(const SoapySDR::Range &range);
+    std::string rangeListToString(const SoapySDR::RangeList &range, const double scale);
+
+    template <typename Type>
+    std::string vectorToString(const std::vector<Type> &options)
+    {
+        std::stringstream ss;
+
+        if (options.empty()) {
+            return "";
+        }
+
+        for (std::size_t i = 0; i < options.size(); i++)
+        {
+            if (not ss.str().empty()) {
+                ss << ", ";
+            }
+
+            ss << options[i];
+        }
+
+        return ss.str();
+    }
+
     SoapySDR::Device *m_device;
     SoapySDR::ArgInfoList m_deviceSettingsArgs; //!< list (vector) of device settings arguments
     uint32_t m_nbRx; //!< number of Rx channels

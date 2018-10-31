@@ -32,6 +32,7 @@ SoapySDRInput::SoapySDRInput(DeviceSourceAPI *deviceAPI) :
     m_deviceDescription("SoapySDRInput"),
     m_running(false)
 {
+    openDevice();
 }
 
 SoapySDRInput::~SoapySDRInput()
@@ -78,6 +79,7 @@ bool SoapySDRInput::openDevice()
         }
 
         m_deviceShared.m_device = device;
+        m_deviceShared.m_deviceParams = deviceSoapySDRShared->m_deviceParams;
     }
     // look for Tx buddies and get reference to the device object
     else if (m_deviceAPI->getSinkBuddies().size() > 0) // then sink
@@ -102,6 +104,7 @@ bool SoapySDRInput::openDevice()
         }
 
         m_deviceShared.m_device = device;
+        m_deviceShared.m_deviceParams = deviceSoapySDRShared->m_deviceParams;
     }
     // There are no buddies then create the first SoapySDR device
     else
@@ -115,6 +118,8 @@ bool SoapySDRInput::openDevice()
             qCritical("BladeRF2Input::openDevice: cannot open BladeRF2 device");
             return false;
         }
+
+        m_deviceShared.m_deviceParams = new DeviceSoapySDRParams(m_deviceShared.m_device);
     }
 
     m_deviceShared.m_channel = m_deviceAPI->getItemIndex(); // publicly allocate channel
@@ -140,10 +145,12 @@ void SoapySDRInput::closeDevice()
     m_deviceShared.m_channel = -1; // publicly release channel
     m_deviceShared.m_source = 0;
 
-    // No buddies so effectively close the device
+    // No buddies so effectively close the device and delete parameters
 
     if ((m_deviceAPI->getSinkBuddies().size() == 0) && (m_deviceAPI->getSourceBuddies().size() == 0))
     {
+        delete m_deviceShared.m_deviceParams;
+        m_deviceShared.m_deviceParams = 0;
         DeviceSoapySDR& deviceSoapySDR = DeviceSoapySDR::instance();
         deviceSoapySDR.closeSoapySdr(m_deviceShared.m_device);
         m_deviceShared.m_device = 0;

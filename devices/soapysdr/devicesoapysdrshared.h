@@ -20,6 +20,7 @@
 #include <SoapySDR/Device.hpp>
 
 #include "export.h"
+#include "devicesoapysdrparams.h"
 
 class SoapySDRInput;
 class SoapySDROutput;
@@ -34,6 +35,7 @@ public:
     ~DeviceSoapySDRShared();
 
     SoapySDR::Device *m_device;
+    DeviceSoapySDRParams *m_deviceParams;
     int m_channel; //!< allocated channel (-1 if none)
     SoapySDRInput *m_source;
     SoapySDROutput *m_sink;

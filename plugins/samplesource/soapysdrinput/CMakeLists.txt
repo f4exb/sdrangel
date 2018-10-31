@@ -19,7 +19,7 @@ set(soapysdrinput_HEADERS
 )
 
 set(soapysdrinput_FORMS
-#	soapysdrinputgui.ui
+	soapysdrinputgui.ui
 )
 
 if (BUILD_DEBIAN)

@@ -20,22 +20,28 @@
 #include "device/deviceuiset.h"
 #include "util/simpleserializer.h"
 
+#include "ui_soapysdrinputgui.h"
 #include "soapysdrinputgui.h"
 
 SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     QWidget(parent),
-    ui(0),
+    ui(new Ui::SoapySDRInputGui),
     m_deviceUISet(deviceUISet),
     m_forceSettings(true),
     m_doApplySettings(true),
     m_sampleSource(0),
     m_sampleRate(0),
+    m_deviceCenterFrequency(0),
     m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
 {
+    m_sampleSource = (SoapySDRInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
+    ui->setupUi(this);
+    ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 }
 
 SoapySDRInputGui::~SoapySDRInputGui()
 {
+    delete ui;
 }
 
 void SoapySDRInputGui::destroy()
