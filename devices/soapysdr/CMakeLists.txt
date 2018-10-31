@@ -6,12 +6,14 @@ set(soapysdrdevice_SOURCES
 	devicesoapysdr.cpp
     devicesoapysdrscan.cpp
     devicesoapysdrshared.cpp
+    devicesoapysdrparams.cpp
 )
 
 set(soapysdrdevice_HEADERS
 	devicesoapysdr.h
     devicesoapysdrscan.h
     devicesoapysdrshared.h
+    devicesoapysdrparams.h
 )
 
 if (BUILD_DEBIAN)
