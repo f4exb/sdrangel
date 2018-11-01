@@ -9,6 +9,7 @@ set(soapysdrinput_SOURCES
 	soapysdrinputsettings.cpp
 	soapysdrinputthread.cpp
 	discreterangegui.cpp
+	intervalrangegui.cpp
 )
 
 set(soapysdrinput_HEADERS
@@ -18,11 +19,13 @@ set(soapysdrinput_HEADERS
 	soapysdrinputsettings.h
 	soapysdrinputthread.h
 	discreterangegui.h
+	intervalrangegui.h
 )
 
 set(soapysdrinput_FORMS
 	soapysdrinputgui.ui
 	discreterangegui.ui
+	intervalrangegui.ui
 )
 
 if (BUILD_DEBIAN)

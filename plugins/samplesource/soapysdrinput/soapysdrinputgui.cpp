@@ -22,6 +22,7 @@
 
 #include "ui_soapysdrinputgui.h"
 #include "discreterangegui.h"
+#include "intervalrangegui.h"
 #include "soapysdrinputgui.h"
 
 SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
@@ -43,7 +44,7 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource->getFrequencyRange(f_min, f_max);
     ui->centerFrequency->setValueRange(7, f_min/1000, f_max/1000);
 
-    createRangesControl(m_sampleSource->getRateRanges(), "Sample Rate", "kS/s");
+    createRangesControl(m_sampleSource->getRateRanges(), "SR", "kS/s");
 }
 
 SoapySDRInputGui::~SoapySDRInputGui()
@@ -108,6 +109,18 @@ void SoapySDRInputGui::createRangesControl(const SoapySDR::RangeList& rangeList,
 //        window->setContentsMargins(0,0,0,0);
 //        //window->setStyleSheet("background-color:black;");
 //        window->setLayout(layout);
+    }
+    else if (rangeInterval)
+    {
+        IntervalRangeGUI *rangeGUI = new IntervalRangeGUI(ui->scrollAreaWidgetContents);
+        rangeGUI->setLabel(text);
+        rangeGUI->setUnits(unit);
+
+        for (const auto &it : rangeList) {
+            rangeGUI->addInterval(it.minimum(), it.maximum());
+        }
+
+        rangeGUI->reset();
     }
 }
 
