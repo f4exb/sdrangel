@@ -14,39 +14,26 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_DISCRETERANGEGUI_H_
-#define PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_DISCRETERANGEGUI_H_
+// This is an interface to an elementary GUI item used to get/set setting from the GUI
+
+#ifndef PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_ITEMSETTINGGUI_H_
+#define PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_ITEMSETTINGGUI_H_
 
 #include <QWidget>
-#include <QString>
 
-#include "itemsettinggui.h"
-
-namespace Ui {
-    class DiscreteRangeGUI;
-}
-
-class DiscreteRangeGUI : public ItemSettingGUI
+class ItemSettingGUI : public QWidget
 {
     Q_OBJECT
 public:
-    explicit DiscreteRangeGUI(QWidget* parent = 0);
-    virtual ~DiscreteRangeGUI();
+    explicit ItemSettingGUI(QWidget *parent = 0);
+    virtual ~ItemSettingGUI() {}
+    virtual double getCurrentValue() = 0;
+    virtual void setValue(double value) = 0;
 
-    void setLabel(const QString& text);
-    void setUnits(const QString& units);
-    void addItem(const QString& itemStr, double itemValue);
-    virtual double getCurrentValue();
-    virtual void setValue(double value);
-
-private slots:
-    void on_rangeCombo_currentIndexChanged(int index);
-
-private:
-    Ui::DiscreteRangeGUI* ui;
-    std::vector<double> itemValues;
+signals:
+    void valueChanged(double value);
 };
 
 
 
-#endif /* PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_DISCRETERANGEGUI_H_ */
+#endif /* PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_ITEMSETTINGGUI_H_ */

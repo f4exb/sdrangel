@@ -20,7 +20,7 @@
 #include "intervalrangegui.h"
 
 IntervalRangeGUI::IntervalRangeGUI(QWidget* parent) :
-    QWidget(parent),
+    ItemSettingGUI(parent),
     ui(new Ui::IntervalRangeGUI),
     m_nbDigits(7)
 {
@@ -83,9 +83,14 @@ double IntervalRangeGUI::getCurrentValue()
     return ui->value->getValue();
 }
 
+void IntervalRangeGUI::setValue(double value)
+{
+    ui->value->setValue(value);
+}
+
 void IntervalRangeGUI::on_value_changed(quint64 value)
 {
-    emit valueChanged(value);
+    emit ItemSettingGUI::valueChanged(value);
 }
 
 void IntervalRangeGUI::on_rangeInterval_currentIndexChanged(int index)

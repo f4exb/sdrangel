@@ -21,25 +21,25 @@
 #include <QWidget>
 #include <QString>
 
+#include "itemsettinggui.h"
+
 namespace Ui {
     class IntervalRangeGUI;
 }
 
-class IntervalRangeGUI : public QWidget
+class IntervalRangeGUI : public ItemSettingGUI
 {
     Q_OBJECT
 public:
     explicit IntervalRangeGUI(QWidget* parent = 0);
-    ~IntervalRangeGUI();
+    virtual ~IntervalRangeGUI();
 
     void setLabel(const QString& text);
     void setUnits(const QString& units);
     void addInterval(double minimum, double maximum);
     void reset();
-    double getCurrentValue();
-
-signals:
-    void valueChanged(double value);
+    virtual double getCurrentValue();
+    virtual void setValue(double value);
 
 private slots:
     void on_value_changed(quint64 value);

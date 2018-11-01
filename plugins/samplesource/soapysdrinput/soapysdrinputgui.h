@@ -28,6 +28,7 @@
 #include "soapysdrinput.h"
 
 class DeviceUISet;
+class ItemSettingGUI;
 
 namespace Ui {
     class SoapySDRInputGui;
@@ -66,6 +67,11 @@ private:
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
     MessageQueue m_inputMessageQueue;
+
+    ItemSettingGUI *m_sampleRateGUI;
+
+private slots:
+    void sampleRateChanged(double sampleRate);
 };
 
 

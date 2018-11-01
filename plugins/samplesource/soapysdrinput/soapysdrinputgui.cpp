@@ -34,7 +34,8 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource(0),
     m_sampleRate(0),
     m_deviceCenterFrequency(0),
-    m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
+    m_lastEngineState(DSPDeviceSourceEngine::StNotStarted),
+    m_sampleRateGUI(0)
 {
     m_sampleSource = (SoapySDRInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
     ui->setupUi(this);
@@ -85,6 +86,8 @@ void SoapySDRInputGui::createRangesControl(const SoapySDR::RangeList& rangeList,
             rangeGUI->addItem(QString("%1").arg(QString::number(it.minimum()/1000.0, 'f', 0)), it.minimum());
         }
 
+        m_sampleRateGUI = rangeGUI;
+        connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
 //        QHBoxLayout *layout = new QHBoxLayout();
 //        QLabel *rangeLabel = new QLabel();
 //        rangeLabel->setText(text);
@@ -121,6 +124,9 @@ void SoapySDRInputGui::createRangesControl(const SoapySDR::RangeList& rangeList,
         }
 
         rangeGUI->reset();
+
+        m_sampleRateGUI = rangeGUI;
+        connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
     }
 }
 
@@ -164,4 +170,7 @@ bool SoapySDRInputGui::handleMessage(const Message& message __attribute__((unuse
     return false;
 }
 
-
+void SoapySDRInputGui::sampleRateChanged(double sampleRate)
+{
+    qDebug("SoapySDRInputGui::sampleRateChanged: %lf", sampleRate);
+}

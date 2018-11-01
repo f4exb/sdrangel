@@ -8,6 +8,7 @@ set(soapysdrinput_SOURCES
 	soapysdrinputplugin.cpp
 	soapysdrinputsettings.cpp
 	soapysdrinputthread.cpp
+	itemsettinggui.cpp
 	discreterangegui.cpp
 	intervalrangegui.cpp
 )
@@ -18,6 +19,7 @@ set(soapysdrinput_HEADERS
 	soapysdrinputplugin.h
 	soapysdrinputsettings.h
 	soapysdrinputthread.h
+	itemsettinggui.h
 	discreterangegui.h
 	intervalrangegui.h
 )

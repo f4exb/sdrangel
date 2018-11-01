@@ -18,7 +18,7 @@
 #include "discreterangegui.h"
 
 DiscreteRangeGUI::DiscreteRangeGUI(QWidget* parent) :
-    QWidget(parent),
+    ItemSettingGUI(parent),
     ui(new Ui::DiscreteRangeGUI)
 {
     ui->setupUi(this);
@@ -52,8 +52,26 @@ double DiscreteRangeGUI::getCurrentValue()
     return itemValues[ui->rangeCombo->currentIndex()];
 }
 
+void DiscreteRangeGUI::setValue(double value)
+{
+    int index = 0;
+
+    for (const auto &it : itemValues)
+    {
+        if (it >= value)
+        {
+            ui->rangeCombo->blockSignals(true);
+            ui->rangeCombo->setCurrentIndex(index);
+            ui->rangeCombo->blockSignals(false);
+            break;
+        }
+
+        index++;
+    }
+}
+
 void DiscreteRangeGUI::on_rangeCombo_currentIndexChanged(int index)
 {
     double newRange = itemValues[index];
-    emit rangeChanged(newRange);
+    emit ItemSettingGUI::valueChanged(newRange);
 }
