@@ -32,26 +32,64 @@ class SoapySDRInputThread;
 class SoapySDRInput : public DeviceSampleSource
 {
 public:
-    class MsgConfigureSoapySDR : public Message {
+    class MsgConfigureSoapySDRInput : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
         const SoapySDRInputSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureSoapySDR* create(const SoapySDRInputSettings& settings, bool force)
+        static MsgConfigureSoapySDRInput* create(const SoapySDRInputSettings& settings, bool force)
         {
-            return new MsgConfigureSoapySDR(settings, force);
+            return new MsgConfigureSoapySDRInput(settings, force);
         }
 
     private:
         SoapySDRInputSettings m_settings;
         bool m_force;
 
-        MsgConfigureSoapySDR(const SoapySDRInputSettings& settings, bool force) :
+        MsgConfigureSoapySDRInput(const SoapySDRInputSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
+        { }
+    };
+
+    class MsgFileRecord : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgFileRecord* create(bool startStop) {
+            return new MsgFileRecord(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgFileRecord(bool startStop) :
+            Message(),
+            m_startStop(startStop)
+        { }
+    };
+
+    class MsgStartStop : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgStartStop* create(bool startStop) {
+            return new MsgStartStop(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgStartStop(bool startStop) :
+            Message(),
+            m_startStop(startStop)
         { }
     };
 

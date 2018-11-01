@@ -385,7 +385,7 @@ void BladeRF2InputGui::on_transverter_clicked()
 {
     m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
     m_settings.m_transverterDeltaFrequency = ui->transverter->getDeltaFrequency();
-    qDebug("LimeSDRInputGUI::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
+    qDebug("BladeRF2InputGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     updateFrequencyLimits();
     setCenterFrequencySetting(ui->centerFrequency->getValueNew());
     sendSettings();

@@ -60,6 +60,7 @@ private:
     DeviceUISet* m_deviceUISet;
     bool m_forceSettings;
     bool m_doApplySettings;
+    SoapySDRInputSettings m_settings;
     QTimer m_updateTimer;
     QTimer m_statusTimer;
     SoapySDRInput* m_sampleSource;
@@ -70,8 +71,25 @@ private:
 
     ItemSettingGUI *m_sampleRateGUI;
 
+    void displaySettings();
+    void sendSettings();
+    void updateSampleRateAndFrequency();
+    void updateFrequencyLimits();
+    void setCenterFrequencySetting(uint64_t kHzValue);
+    void blockApplySettings(bool block);
+
 private slots:
+    void on_centerFrequency_changed(quint64 value);
     void sampleRateChanged(double sampleRate);
+    void on_dcOffset_toggled(bool checked);
+    void on_iqImbalance_toggled(bool checked);
+    void on_decim_currentIndexChanged(int index);
+    void on_fcPos_currentIndexChanged(int index);
+    void on_transverter_clicked();
+    void on_startStop_toggled(bool checked);
+    void on_record_toggled(bool checked);
+    void updateHardware();
+    void updateStatus();
 };
 
 

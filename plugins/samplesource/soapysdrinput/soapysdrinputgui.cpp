@@ -14,11 +14,14 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QMessageBox>
+
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
 #include "util/simpleserializer.h"
+#include "gui/glspectrum.h"
 
 #include "ui_soapysdrinputgui.h"
 #include "discreterangegui.h"
@@ -174,3 +177,175 @@ void SoapySDRInputGui::sampleRateChanged(double sampleRate)
 {
     qDebug("SoapySDRInputGui::sampleRateChanged: %lf", sampleRate);
 }
+
+void SoapySDRInputGui::on_centerFrequency_changed(quint64 value)
+{
+    qDebug("SoapySDRInputGui::on_centerFrequency_changed: %llu", value);
+}
+
+void SoapySDRInputGui::on_dcOffset_toggled(bool checked)
+{
+    m_settings.m_dcBlock = checked;
+    sendSettings();
+}
+
+void SoapySDRInputGui::on_iqImbalance_toggled(bool checked)
+{
+    m_settings.m_iqCorrection = checked;
+    sendSettings();
+}
+
+void SoapySDRInputGui::on_decim_currentIndexChanged(int index)
+{
+    if ((index <0) || (index > 6))
+        return;
+    m_settings.m_log2Decim = index;
+    sendSettings();
+}
+
+void SoapySDRInputGui::on_fcPos_currentIndexChanged(int index)
+{
+    if (index == 0) {
+        m_settings.m_fcPos = SoapySDRInputSettings::FC_POS_INFRA;
+        sendSettings();
+    } else if (index == 1) {
+        m_settings.m_fcPos = SoapySDRInputSettings::FC_POS_SUPRA;
+        sendSettings();
+    } else if (index == 2) {
+        m_settings.m_fcPos = SoapySDRInputSettings::FC_POS_CENTER;
+        sendSettings();
+    }
+}
+
+void SoapySDRInputGui::on_transverter_clicked()
+{
+    m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
+    m_settings.m_transverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+    qDebug("SoapySDRInputGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
+    updateFrequencyLimits();
+    setCenterFrequencySetting(ui->centerFrequency->getValueNew());
+    sendSettings();
+}
+
+void SoapySDRInputGui::on_startStop_toggled(bool checked)
+{
+    if (m_doApplySettings)
+    {
+        SoapySDRInput::MsgStartStop *message = SoapySDRInput::MsgStartStop::create(checked);
+        m_sampleSource->getInputMessageQueue()->push(message);
+    }
+}
+
+void SoapySDRInputGui::on_record_toggled(bool checked)
+{
+    if (checked) {
+        ui->record->setStyleSheet("QToolButton { background-color : red; }");
+    } else {
+        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+    }
+
+    SoapySDRInput::MsgFileRecord* message = SoapySDRInput::MsgFileRecord::create(checked);
+    m_sampleSource->getInputMessageQueue()->push(message);
+}
+
+void SoapySDRInputGui::displaySettings()
+{
+    blockApplySettings(true);
+
+    ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+    m_sampleRateGUI->setValue(m_settings.m_devSampleRate);
+
+    ui->dcOffset->setChecked(m_settings.m_dcBlock);
+    ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
+
+    ui->decim->setCurrentIndex(m_settings.m_log2Decim);
+    ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
+
+    blockApplySettings(false);
+}
+
+void SoapySDRInputGui::sendSettings()
+{
+    if (!m_updateTimer.isActive()) {
+        m_updateTimer.start(100);
+    }
+}
+
+void SoapySDRInputGui::updateSampleRateAndFrequency()
+{
+    m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    ui->deviceRateText->setText(tr("%1k").arg(QString::number(m_sampleRate / 1000.0f, 'g', 5)));
+}
+
+void SoapySDRInputGui::updateFrequencyLimits()
+{
+    // values in kHz
+    uint64_t f_min, f_max;
+    qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
+    m_sampleSource->getFrequencyRange(f_min, f_max);
+    qint64 minLimit = f_min/1000 + deltaFrequency;
+    qint64 maxLimit = f_max/1000 + deltaFrequency;
+
+    minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
+    maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+
+    qDebug("SoapySDRInputGui::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
+
+    ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+}
+
+void SoapySDRInputGui::setCenterFrequencySetting(uint64_t kHzValue)
+{
+    int64_t centerFrequency = kHzValue*1000;
+
+    m_settings.m_centerFrequency = centerFrequency < 0 ? 0 : (uint64_t) centerFrequency;
+    ui->centerFrequency->setToolTip(QString("Main center frequency in kHz (LO: %1 kHz)").arg(centerFrequency/1000));
+}
+
+void SoapySDRInputGui::blockApplySettings(bool block)
+{
+    m_doApplySettings = !block;
+}
+
+void SoapySDRInputGui::updateHardware()
+{
+    if (m_doApplySettings)
+    {
+        qDebug() << "SoapySDRInputGui::updateHardware";
+        SoapySDRInput::MsgConfigureSoapySDRInput* message = SoapySDRInput::MsgConfigureSoapySDRInput::create(m_settings, m_forceSettings);
+        m_sampleSource->getInputMessageQueue()->push(message);
+        m_forceSettings = false;
+        m_updateTimer.stop();
+    }
+}
+
+void SoapySDRInputGui::updateStatus()
+{
+    int state = m_deviceUISet->m_deviceSourceAPI->state();
+
+    if(m_lastEngineState != state)
+    {
+        switch(state)
+        {
+            case DSPDeviceSourceEngine::StNotStarted:
+                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+                break;
+            case DSPDeviceSourceEngine::StIdle:
+                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
+                break;
+            case DSPDeviceSourceEngine::StRunning:
+                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+                break;
+            case DSPDeviceSourceEngine::StError:
+                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSourceAPI->errorMessage());
+                break;
+            default:
+                break;
+        }
+
+        m_lastEngineState = state;
+    }
+}
+
