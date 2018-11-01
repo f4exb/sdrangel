@@ -20,6 +20,8 @@
 #include <QTimer>
 #include <QWidget>
 
+#include <SoapySDR/Types.hpp>
+
 #include "plugin/plugininstancegui.h"
 #include "util/messagequeue.h"
 
@@ -51,6 +53,7 @@ public:
     virtual bool handleMessage(const Message& message);
 
 private:
+    void createRangesControl(const SoapySDR::RangeList& rangeList, const QString& text, const QString& unit);
     Ui::SoapySDRInputGui* ui;
 
     DeviceUISet* m_deviceUISet;

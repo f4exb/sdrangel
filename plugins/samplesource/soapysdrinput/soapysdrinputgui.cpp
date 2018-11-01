@@ -21,6 +21,7 @@
 #include "util/simpleserializer.h"
 
 #include "ui_soapysdrinputgui.h"
+#include "discreterangegui.h"
 #include "soapysdrinputgui.h"
 
 SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
@@ -36,7 +37,13 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 {
     m_sampleSource = (SoapySDRInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
     ui->setupUi(this);
+
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    uint64_t f_min, f_max;
+    m_sampleSource->getFrequencyRange(f_min, f_max);
+    ui->centerFrequency->setValueRange(7, f_min/1000, f_max/1000);
+
+    createRangesControl(m_sampleSource->getRateRanges(), "Sample Rate", "kS/s");
 }
 
 SoapySDRInputGui::~SoapySDRInputGui()
@@ -47,6 +54,61 @@ SoapySDRInputGui::~SoapySDRInputGui()
 void SoapySDRInputGui::destroy()
 {
     delete this;
+}
+
+void SoapySDRInputGui::createRangesControl(const SoapySDR::RangeList& rangeList, const QString& text, const QString& unit)
+{
+    if (rangeList.size() == 0) { // return early if the range list is empty
+        return;
+    }
+
+    bool rangeDiscrete = true; // discretes values
+    bool rangeInterval = true; // intervals
+
+    for (const auto &it : rangeList)
+    {
+        if (it.minimum() != it.maximum()) {
+            rangeDiscrete = false;
+        } else {
+            rangeInterval = false;
+        }
+    }
+
+    if (rangeDiscrete)
+    {
+        DiscreteRangeGUI *rangeGUI = new DiscreteRangeGUI(ui->scrollAreaWidgetContents);
+        rangeGUI->setLabel(text);
+        rangeGUI->setUnits(unit);
+
+        for (const auto &it : rangeList) {
+            rangeGUI->addItem(QString("%1").arg(QString::number(it.minimum()/1000.0, 'f', 0)), it.minimum());
+        }
+
+//        QHBoxLayout *layout = new QHBoxLayout();
+//        QLabel *rangeLabel = new QLabel();
+//        rangeLabel->setText(text);
+//        QLabel *rangeUnit = new QLabel();
+//        rangeUnit->setText(unit);
+//        QComboBox *rangeCombo = new QComboBox();
+//
+//        for (const auto &it : rangeList) {
+//            rangeCombo->addItem(QString("%1").arg(QString::number(it.minimum()/1000.0, 'f', 0)));
+//        }
+//
+//        layout->addWidget(rangeLabel);
+//        layout->addWidget(rangeCombo);
+//        layout->addWidget(rangeUnit);
+//        layout->setMargin(0);
+//        layout->setSpacing(6);
+//        rangeLabel->show();
+//        rangeCombo->show();
+//        QWidget *window = new QWidget(ui->scrollAreaWidgetContents);
+//        window->setFixedWidth(300);
+//        window->setFixedHeight(30);
+//        window->setContentsMargins(0,0,0,0);
+//        //window->setStyleSheet("background-color:black;");
+//        window->setLayout(layout);
+    }
 }
 
 void SoapySDRInputGui::setName(const QString& name)

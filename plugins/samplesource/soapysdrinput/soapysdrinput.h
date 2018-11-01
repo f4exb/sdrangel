@@ -24,12 +24,37 @@
 #include "soapysdr/devicesoapysdrshared.h"
 #include "dsp/devicesamplesource.h"
 
+#include "soapysdrinputsettings.h"
+
 class DeviceSourceAPI;
 class SoapySDRInputThread;
 
 class SoapySDRInput : public DeviceSampleSource
 {
 public:
+    class MsgConfigureSoapySDR : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const SoapySDRInputSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureSoapySDR* create(const SoapySDRInputSettings& settings, bool force)
+        {
+            return new MsgConfigureSoapySDR(settings, force);
+        }
+
+    private:
+        SoapySDRInputSettings m_settings;
+        bool m_force;
+
+        MsgConfigureSoapySDR(const SoapySDRInputSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
     SoapySDRInput(DeviceSourceAPI *deviceAPI);
     virtual ~SoapySDRInput();
     virtual void destroy();
@@ -50,6 +75,9 @@ public:
     virtual void setCenterFrequency(qint64 centerFrequency);
 
     virtual bool handleMessage(const Message& message);
+
+    void getFrequencyRange(uint64_t& min, uint64_t& max);
+    const SoapySDR::RangeList& getRateRanges();
 
 private:
     DeviceSourceAPI *m_deviceAPI;

@@ -48,7 +48,7 @@ public:
         SoapySDR::RangeList m_ranges; //!< List of ranges of the tunable element
     };
 
-    struct ChannelSetting
+    struct ChannelSettings
     {
         SoapySDR::ArgInfoList m_streamSettingsArgs;        //!< common stream parameters
         bool m_hasDCAutoCorrection;                        //!< DC offset auto correction flag
@@ -68,11 +68,29 @@ public:
     DeviceSoapySDRParams(SoapySDR::Device *device);
     ~DeviceSoapySDRParams();
 
+    const ChannelSettings* getRxChannelSettings(uint32_t index)
+    {
+        if (index < m_nbRx) {
+            return &m_RxChannelsSettings[index];
+        } else {
+            return 0;
+        }
+    }
+
+    const ChannelSettings* getTxChannelSettings(uint32_t index)
+    {
+        if (index < m_nbTx) {
+            return &m_TxChannelsSettings[index];
+        } else {
+            return 0;
+        }
+    }
+
 private:
     void fillParams();
-    void fillChannelParams(std::vector<ChannelSetting>& channelSettings, int direction, unsigned int ichan);
+    void fillChannelParams(std::vector<ChannelSettings>& channelSettings, int direction, unsigned int ichan);
     void printParams();
-    void printChannelParams(const ChannelSetting& channelSetting);
+    void printChannelParams(const ChannelSettings& channelSetting);
 
     // Printing functions copied from SoapySDR's SoapySDRProbe.cpp
     std::string argInfoToString(const SoapySDR::ArgInfo &argInfo, const std::string indent = "    ");
@@ -105,8 +123,8 @@ private:
     SoapySDR::ArgInfoList m_deviceSettingsArgs; //!< list (vector) of device settings arguments
     uint32_t m_nbRx; //!< number of Rx channels
     uint32_t m_nbTx; //!< number of Tx channels
-    std::vector<ChannelSetting> m_RxChannelsSettings;
-    std::vector<ChannelSetting> m_TxChannelsSettings;
+    std::vector<ChannelSettings> m_RxChannelsSettings;
+    std::vector<ChannelSettings> m_TxChannelsSettings;
 };
 
 

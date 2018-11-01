@@ -46,9 +46,9 @@ void DeviceSoapySDRParams::fillParams()
     }
 }
 
-void DeviceSoapySDRParams::fillChannelParams(std::vector<ChannelSetting>& channelSettings, int direction, unsigned int ichan)
+void DeviceSoapySDRParams::fillChannelParams(std::vector<ChannelSettings>& channelSettings, int direction, unsigned int ichan)
 {
-    channelSettings.push_back(ChannelSetting());
+    channelSettings.push_back(ChannelSettings());
 
     channelSettings.back().m_streamSettingsArgs = m_device->getStreamArgsInfo(direction, ichan);
     channelSettings.back().m_antennas = m_device->listAntennas(direction, ichan);
@@ -114,7 +114,7 @@ void DeviceSoapySDRParams::printParams()
     }
 }
 
-void DeviceSoapySDRParams::printChannelParams(const ChannelSetting& channelSetting)
+void DeviceSoapySDRParams::printChannelParams(const ChannelSettings& channelSetting)
 {
     qDebug() << "DeviceSoapySDRParams::printParams: m_streamSettingsArgs:\n" << argInfoListToString(channelSetting.m_streamSettingsArgs).c_str();
     qDebug() << "DeviceSoapySDRParams::printParams:"
@@ -236,25 +236,27 @@ std::string DeviceSoapySDRParams::rangeToString(const SoapySDR::Range &range)
 
 std::string DeviceSoapySDRParams::rangeListToString(const SoapySDR::RangeList &range, const double scale)
 {
-    const std::size_t MAXRLEN = 10; //for abbreviating long lists
     std::stringstream ss;
 
     for (std::size_t i = 0; i < range.size(); i++)
     {
-        if (range.size() >= MAXRLEN and i >= MAXRLEN/2 and i < (range.size()-MAXRLEN/2))
-        {
-            if (i == MAXRLEN) ss << ", ...";
-            continue;
-        }
-
         if (not ss.str().empty()) {
             ss << ", ";
         }
 
-        if (range[i].minimum() == range[i].maximum()) {
+        if (range[i].minimum() == range[i].maximum())
+        {
             ss << (range[i].minimum()/scale);
-        } else {
-            ss << "[" << (range[i].minimum()/scale) << ", " << (range[i].maximum()/scale) << "]";
+        }
+        else
+        {
+            ss << "[" << (range[i].minimum()/scale) << ", " << (range[i].maximum()/scale);
+
+            if (range[i].step() != 0.0) {
+                ss << ", " << (range[i].step()/scale);
+            }
+
+            ss << "]";
         }
     }
 

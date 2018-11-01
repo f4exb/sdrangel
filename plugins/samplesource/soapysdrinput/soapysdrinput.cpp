@@ -157,6 +157,40 @@ void SoapySDRInput::closeDevice()
     }
 }
 
+void SoapySDRInput::getFrequencyRange(uint64_t& min, uint64_t& max)
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getRxChannelSettings(m_deviceShared.m_channel);
+
+    if (channelSettings && (channelSettings->m_frequencySettings.size() > 0))
+    {
+        DeviceSoapySDRParams::FrequencySetting freqSettings = channelSettings->m_frequencySettings[0];
+        SoapySDR::RangeList rangeList = freqSettings.m_ranges;
+
+        if (rangeList.size() > 0) // TODO: handle multiple ranges
+        {
+            SoapySDR::Range range = rangeList[0];
+            min = range.minimum();
+            max = range.maximum();
+        }
+        else
+        {
+            min = 0;
+            max = 0;
+        }
+    }
+    else
+    {
+        min = 0;
+        max = 0;
+    }
+}
+
+const SoapySDR::RangeList& SoapySDRInput::getRateRanges()
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getRxChannelSettings(m_deviceShared.m_channel);
+    return channelSettings->m_ratesRanges;
+}
+
 void SoapySDRInput::init()
 {
 }
