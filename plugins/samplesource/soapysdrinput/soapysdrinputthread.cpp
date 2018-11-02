@@ -150,24 +150,24 @@ void SoapySDRInputThread::run()
 
             if (m_nbChannels > 1)
             {
-                callbackMI(buffs, (elemSize/2)*numElems);
+                callbackMI(buffs, numElems*2); // size given in number of I or Q samples (2 items per sample)
             }
             else
             {
                 switch (m_decimatorType)
                 {
                 case Decimator8:
-                    callbackSI8((const qint8*) buffs[0], (elemSize/2)*numElems);
+                    callbackSI8((const qint8*) buffs[0], numElems*2);
                     break;
                 case Decimator12:
-                    callbackSI12((const qint16*) buffs[0], (elemSize/2)*numElems);
+                    callbackSI12((const qint16*) buffs[0], numElems*2);
                     break;
                 case Decimator16:
-                    callbackSI16((const qint16*) buffs[0], (elemSize/2)*numElems);
+                    callbackSI16((const qint16*) buffs[0], numElems*2);
                     break;
                 case DecimatorFloat:
                 default:
-                    callbackSIF((const float*) buffs[0], (elemSize/2)*numElems);
+                    callbackSIF((const float*) buffs[0], numElems*2);
                 }
             }
         }
