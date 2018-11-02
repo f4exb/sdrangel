@@ -54,6 +54,10 @@ set(sdrgui_SOURCES
     
     device/deviceuiset.cpp
     
+    soapygui/discreterangegui.cpp
+    soapygui/intervalrangegui.cpp
+    soapygui/itemsettinggui.cpp
+    
     webapi/webapiadaptergui.cpp
 )
 
@@ -111,6 +115,10 @@ set(sdrgui_HEADERS
     
     device/deviceuiset.h
     
+    soapygui/discreterangegui.h
+    soapygui/intervalrangegui.h
+    soapygui/itemsettinggui.h
+    
     webapi/webapiadaptergui.h
 )
 
@@ -139,6 +147,8 @@ set(sdrgui_FORMS
     gui/myposdialog.ui
     gui/transverterdialog.ui
     gui/loggingdialog.ui
+    soapygui/discreterangegui.ui
+    soapygui/intervalrangegui.ui
 )
 
 set(sdrgui_RESOURCES

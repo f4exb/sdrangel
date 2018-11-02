@@ -22,10 +22,10 @@
 #include "device/deviceuiset.h"
 #include "util/simpleserializer.h"
 #include "gui/glspectrum.h"
+#include "soapygui/discreterangegui.h"
+#include "soapygui/intervalrangegui.h"
 
 #include "ui_soapysdrinputgui.h"
-#include "discreterangegui.h"
-#include "intervalrangegui.h"
 #include "soapysdrinputgui.h"
 
 SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
