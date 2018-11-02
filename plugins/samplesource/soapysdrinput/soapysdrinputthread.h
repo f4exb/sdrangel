@@ -90,7 +90,6 @@ private:
 
     Channel *m_channels; //!< Array of channels dynamically allocated for the given number of Rx channels
     unsigned int m_sampleRate;
-    qint16 *m_buf; //!< Full buffer for SISO or MIMO operation
     unsigned int m_nbChannels;
     DecimatorType m_decimatorType;
 
