@@ -16,6 +16,8 @@
 
 #include "devicesoapysdrshared.h"
 
+MESSAGE_CLASS_DEFINITION(DeviceSoapySDRShared::MsgReportBuddyChange, Message)
+
 DeviceSoapySDRShared::DeviceSoapySDRShared() :
     m_device(0),
     m_channel(-1),

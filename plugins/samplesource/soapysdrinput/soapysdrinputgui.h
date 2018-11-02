@@ -79,7 +79,9 @@ private:
     void blockApplySettings(bool block);
 
 private slots:
+    void handleInputMessages();
     void on_centerFrequency_changed(quint64 value);
+    void on_LOppm_valueChanged(int value);
     void sampleRateChanged(double sampleRate);
     void on_dcOffset_toggled(bool checked);
     void on_iqImbalance_toggled(bool checked);

@@ -86,6 +86,9 @@ public:
         }
     }
 
+    std::string getRxChannelMainTunableElementName(uint32_t index);
+    std::string getTxChannelMainTunableElementName(uint32_t index);
+
 private:
     void fillParams();
     void fillChannelParams(std::vector<ChannelSettings>& channelSettings, int direction, unsigned int ichan);

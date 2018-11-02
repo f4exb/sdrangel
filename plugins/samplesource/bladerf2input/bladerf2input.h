@@ -192,7 +192,7 @@ private:
     BladeRF2InputThread *findThread();
     void moveThreadToBuddy();
     bool applySettings(const BladeRF2InputSettings& settings, bool force = false);
-    bool setDeviceCenterFrequency(struct bladerf *dev, int requestedChannel, quint64 freq_hz);
+    bool setDeviceCenterFrequency(struct bladerf *dev, int requestedChannel, quint64 freq_hz, int loPpmTenths);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF2InputSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 };

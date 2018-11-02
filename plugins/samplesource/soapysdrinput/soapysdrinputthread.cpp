@@ -57,6 +57,10 @@ SoapySDRInputThread::~SoapySDRInputThread()
 
 void SoapySDRInputThread::startWork()
 {
+    if (m_running) {
+        return;
+    }
+
     m_startWaitMutex.lock();
     start();
 
@@ -69,6 +73,10 @@ void SoapySDRInputThread::startWork()
 
 void SoapySDRInputThread::stopWork()
 {
+    if (!m_running) {
+        return;
+    }
+
     m_running = false;
     wait();
 }

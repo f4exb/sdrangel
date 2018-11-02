@@ -31,6 +31,42 @@ DeviceSoapySDRParams::DeviceSoapySDRParams(SoapySDR::Device *device) :
 DeviceSoapySDRParams::~DeviceSoapySDRParams()
 {}
 
+std::string DeviceSoapySDRParams::getRxChannelMainTunableElementName(uint32_t index)
+{
+    if (index < m_nbRx)
+    {
+        return std::string("RF");
+    }
+    else
+    {
+        const ChannelSettings& channelSettings = m_RxChannelsSettings[index];
+
+        if (channelSettings.m_frequencySettings.size() > 0) {
+            return channelSettings.m_frequencySettings.front().m_name;
+        } else {
+            return std::string("RF");
+        }
+    }
+}
+
+std::string DeviceSoapySDRParams::getTxChannelMainTunableElementName(uint32_t index)
+{
+    if (index < m_nbRx)
+    {
+        return std::string("RF");
+    }
+    else
+    {
+        const ChannelSettings& channelSettings = m_RxChannelsSettings[index];
+
+        if (channelSettings.m_frequencySettings.size() > 0) {
+            return channelSettings.m_frequencySettings.front().m_name;
+        } else {
+            return std::string("RF");
+        }
+    }
+}
+
 void DeviceSoapySDRParams::fillParams()
 {
     m_deviceSettingsArgs = m_device->getSettingInfo();

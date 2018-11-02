@@ -538,9 +538,9 @@ void BladeRF2Input::setCenterFrequency(qint64 centerFrequency)
     }
 }
 
-bool BladeRF2Input::setDeviceCenterFrequency(struct bladerf *dev, int requestedChannel, quint64 freq_hz)
+bool BladeRF2Input::setDeviceCenterFrequency(struct bladerf *dev, int requestedChannel, quint64 freq_hz, int loPpmTenths)
 {
-    qint64 df = ((qint64)freq_hz * m_settings.m_LOppmTenths) / 10000000LL;
+    qint64 df = ((qint64)freq_hz * loPpmTenths) / 10000000LL;
     freq_hz += df;
 
     int status = bladerf_set_frequency(dev, BLADERF_CHANNEL_RX(requestedChannel), freq_hz);
@@ -661,7 +661,7 @@ bool BladeRF2Input::handleMessage(const Message& message)
                         (DeviceSampleSource::fcPos_t) settings.m_fcPos,
                         settings.m_devSampleRate);
 
-                if (setDeviceCenterFrequency(dev, requestedChannel, deviceCenterFrequency))
+                if (setDeviceCenterFrequency(dev, requestedChannel, deviceCenterFrequency, settings.m_LOppmTenths))
                 {
                     if (getMessageQueueToGUI())
                     {
@@ -846,7 +846,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
         if (dev != 0)
         {
-            if (setDeviceCenterFrequency(dev, requestedChannel, deviceCenterFrequency))
+            if (setDeviceCenterFrequency(dev, requestedChannel, deviceCenterFrequency, settings.m_LOppmTenths))
             {
                 if (getMessageQueueToGUI())
                 {

@@ -28,6 +28,12 @@
 
 class DeviceSourceAPI;
 class SoapySDRInputThread;
+class FileRecord;
+
+namespace SoapySDR
+{
+    class Device;
+}
 
 class SoapySDRInput : public DeviceSampleSource
 {
@@ -119,14 +125,20 @@ public:
 
 private:
     DeviceSourceAPI *m_deviceAPI;
-    DeviceSoapySDRShared m_deviceShared;
-    SoapySDRInputThread *m_thread;
+    QMutex m_mutex;
+    SoapySDRInputSettings m_settings;
     QString m_deviceDescription;
     bool m_running;
+    SoapySDRInputThread *m_thread;
+    DeviceSoapySDRShared m_deviceShared;
+    FileRecord *m_fileSink; //!< File sink to record device I/Q output
 
     bool openDevice();
     void closeDevice();
+    SoapySDRInputThread *findThread();
     void moveThreadToBuddy();
+    bool applySettings(const SoapySDRInputSettings& settings, bool force = false);
+    bool setDeviceCenterFrequency(SoapySDR::Device *dev, int requestedChannel, quint64 freq_hz, int loPpmTenths);
 };
 
 

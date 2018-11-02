@@ -49,6 +49,17 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->centerFrequency->setValueRange(7, f_min/1000, f_max/1000);
 
     createRangesControl(m_sampleSource->getRateRanges(), "SR", "kS/s");
+
+    connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
+    connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
+    m_statusTimer.start(500);
+
+    displaySettings();
+
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+    m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
+
+    sendSettings();
 }
 
 SoapySDRInputGui::~SoapySDRInputGui()
@@ -170,17 +181,59 @@ bool SoapySDRInputGui::deserialize(const QByteArray& data __attribute__((unused)
 
 bool SoapySDRInputGui::handleMessage(const Message& message __attribute__((unused)))
 {
-    return false;
+    if (SoapySDRInput::MsgStartStop::match(message))
+    {
+        SoapySDRInput::MsgStartStop& notif = (SoapySDRInput::MsgStartStop&) message;
+        blockApplySettings(true);
+        ui->startStop->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void SoapySDRInputGui::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = m_inputMessageQueue.pop()) != 0)
+    {
+        qDebug("SoapySDRInputGui::handleInputMessages: message: %s", message->getIdentifier());
+
+        if (DSPSignalNotification::match(*message))
+        {
+            DSPSignalNotification* notif = (DSPSignalNotification*) message;
+            m_sampleRate = notif->getSampleRate();
+            m_deviceCenterFrequency = notif->getCenterFrequency();
+            qDebug("SoapySDRInputGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            updateSampleRateAndFrequency();
+
+            delete message;
+        }
+        else
+        {
+            if (handleMessage(*message))
+            {
+                delete message;
+            }
+        }
+    }
 }
 
 void SoapySDRInputGui::sampleRateChanged(double sampleRate)
 {
-    qDebug("SoapySDRInputGui::sampleRateChanged: %lf", sampleRate);
+    m_settings.m_devSampleRate = sampleRate;
+    sendSettings();
 }
 
 void SoapySDRInputGui::on_centerFrequency_changed(quint64 value)
 {
-    qDebug("SoapySDRInputGui::on_centerFrequency_changed: %llu", value);
+    m_settings.m_centerFrequency = value * 1000;
+    sendSettings();
 }
 
 void SoapySDRInputGui::on_dcOffset_toggled(bool checked)
@@ -227,6 +280,13 @@ void SoapySDRInputGui::on_transverter_clicked()
     sendSettings();
 }
 
+void SoapySDRInputGui::on_LOppm_valueChanged(int value)
+{
+    ui->LOppmText->setText(QString("%1").arg(QString::number(value/10.0, 'f', 1)));
+    m_settings.m_LOppmTenths = value;
+    sendSettings();
+}
+
 void SoapySDRInputGui::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
@@ -260,6 +320,9 @@ void SoapySDRInputGui::displaySettings()
 
     ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
+
+    ui->LOppm->setValue(m_settings.m_LOppmTenths);
+    ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 
     blockApplySettings(false);
 }

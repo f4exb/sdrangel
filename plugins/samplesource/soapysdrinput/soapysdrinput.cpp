@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
+
 #include "util/simpleserializer.h"
 
 #include "device/devicesourceapi.h"
@@ -26,17 +28,27 @@
 #include "soapysdrinputthread.h"
 #include "soapysdrinput.h"
 
+MESSAGE_CLASS_DEFINITION(SoapySDRInput::MsgConfigureSoapySDRInput, Message)
+MESSAGE_CLASS_DEFINITION(SoapySDRInput::MsgFileRecord, Message)
+MESSAGE_CLASS_DEFINITION(SoapySDRInput::MsgStartStop, Message)
+
 SoapySDRInput::SoapySDRInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_thread(0),
+    m_settings(),
     m_deviceDescription("SoapySDRInput"),
-    m_running(false)
+    m_running(false),
+    m_thread(0)
 {
     openDevice();
+
+    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
+    m_deviceAPI->addSink(m_fileSink);
 }
 
 SoapySDRInput::~SoapySDRInput()
 {
+    m_deviceAPI->removeSink(m_fileSink);
+    delete m_fileSink;
 }
 
 void SoapySDRInput::destroy()
@@ -195,6 +207,38 @@ void SoapySDRInput::init()
 {
 }
 
+SoapySDRInputThread *SoapySDRInput::findThread()
+{
+    if (m_thread == 0) // this does not own the thread
+    {
+        SoapySDRInputThread *soapySDRInputThread = 0;
+
+        // find a buddy that has allocated the thread
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+
+        for (; it != sourceBuddies.end(); ++it)
+        {
+            SoapySDRInput *buddySource = ((DeviceSoapySDRShared*) (*it)->getBuddySharedPtr())->m_source;
+
+            if (buddySource)
+            {
+                soapySDRInputThread = buddySource->getThread();
+
+                if (soapySDRInputThread) {
+                    break;
+                }
+            }
+        }
+
+        return soapySDRInputThread;
+    }
+    else
+    {
+        return m_thread; // own thread
+    }
+}
+
 void SoapySDRInput::moveThreadToBuddy()
 {
     const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
@@ -251,7 +295,256 @@ void SoapySDRInput::setCenterFrequency(qint64 centerFrequency __attribute__((unu
 {
 }
 
+bool SoapySDRInput::setDeviceCenterFrequency(SoapySDR::Device *dev, int requestedChannel, quint64 freq_hz, int loPpmTenths)
+{
+    qint64 df = ((qint64)freq_hz * loPpmTenths) / 10000000LL;
+    freq_hz += df;
+
+    try
+    {
+        dev->setFrequency(SOAPY_SDR_RX,
+                requestedChannel,
+                m_deviceShared.m_deviceParams->getRxChannelMainTunableElementName(requestedChannel),
+                freq_hz);
+        qDebug("SoapySDRInput::setDeviceCenterFrequency: setFrequency(%llu)", freq_hz);
+        return true;
+    }
+    catch (const std::exception &ex)
+    {
+        qCritical("SoapySDRInput::applySettings: could not set frequency: %llu: %s", freq_hz, ex.what());
+        return false;
+    }
+}
+
 bool SoapySDRInput::handleMessage(const Message& message __attribute__((unused)))
 {
-    return false;
+    if (MsgConfigureSoapySDRInput::match(message))
+    {
+        MsgConfigureSoapySDRInput& conf = (MsgConfigureSoapySDRInput&) message;
+        qDebug() << "SoapySDRInput::handleMessage: MsgConfigureSoapySDRInput";
+
+        if (!applySettings(conf.getSettings(), conf.getForce())) {
+            qDebug("SoapySDRInput::handleMessage: MsgConfigureSoapySDRInput config error");
+        }
+
+        return true;
+    }
+    else if (MsgFileRecord::match(message))
+    {
+        MsgFileRecord& conf = (MsgFileRecord&) message;
+        qDebug() << "SoapySDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
+
+        if (conf.getStartStop())
+        {
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink->setFileName(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
+            }
+
+            m_fileSink->startRecording();
+        }
+        else
+        {
+            m_fileSink->stopRecording();
+        }
+
+        return true;
+    }
+    else if (MsgStartStop::match(message))
+    {
+        MsgStartStop& cmd = (MsgStartStop&) message;
+        qDebug() << "SoapySDRInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+
+        if (cmd.getStartStop())
+        {
+            if (m_deviceAPI->initAcquisition())
+            {
+                m_deviceAPI->startAcquisition();
+            }
+        }
+        else
+        {
+            m_deviceAPI->stopAcquisition();
+        }
+
+        return true;
+    }
+    else if (DeviceSoapySDRShared::MsgReportBuddyChange::match(message))
+    {
+        int requestedChannel = m_deviceAPI->getItemIndex();
+        DeviceSoapySDRShared::MsgReportBuddyChange& report = (DeviceSoapySDRShared::MsgReportBuddyChange&) message;
+        SoapySDRInputSettings settings = m_settings;
+        settings.m_fcPos = (SoapySDRInputSettings::fcPos_t) report.getFcPos();
+
+        settings.m_centerFrequency = m_deviceShared.m_device->getFrequency(
+                SOAPY_SDR_RX,
+                requestedChannel,
+                m_deviceShared.m_deviceParams->getRxChannelMainTunableElementName(requestedChannel));
+
+        settings.m_devSampleRate = m_deviceShared.m_device->getSampleRate(SOAPY_SDR_RX, requestedChannel);
+
+        SoapySDRInputThread *inputThread = findThread();
+
+        if (inputThread)
+        {
+            inputThread->setFcPos(requestedChannel, (int) settings.m_fcPos);
+        }
+
+        m_settings = settings;
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool force)
+{
+    bool forwardChangeOwnDSP = false;
+    bool forwardChangeToBuddies  = false;
+
+    SoapySDR::Device *dev = m_deviceShared.m_device;
+    SoapySDRInputThread *inputThread = findThread();
+    int requestedChannel = m_deviceAPI->getItemIndex();
+    qint64 xlatedDeviceCenterFrequency = settings.m_centerFrequency;
+    xlatedDeviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
+    xlatedDeviceCenterFrequency = xlatedDeviceCenterFrequency < 0 ? 0 : xlatedDeviceCenterFrequency;
+
+    if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
+        (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    {
+        m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
+    }
+
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
+    {
+        forwardChangeOwnDSP = true;
+        forwardChangeToBuddies = true;
+
+        if (dev != 0)
+        {
+            try
+            {
+                dev->setSampleRate(SOAPY_SDR_RX, requestedChannel, settings.m_devSampleRate);
+                qDebug() << "SoapySDRInput::applySettings: setSampleRate OK: " << settings.m_devSampleRate;
+
+                if (inputThread)
+                {
+                    bool wasRunning = inputThread->isRunning();
+                    inputThread->stopWork();
+                    inputThread->setSampleRate(settings.m_devSampleRate);
+
+                    if (wasRunning) {
+                        inputThread->startWork();
+                    }
+                }
+            }
+            catch (const std::exception &ex)
+            {
+                qCritical("SoapySDRInput::applySettings: could not set sample rate: %d: %s",
+                        settings.m_devSampleRate, ex.what());
+            }
+        }
+    }
+
+    if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+    {
+        SoapySDRInputThread *inputThread = findThread();
+
+        if (inputThread != 0)
+        {
+            inputThread->setFcPos(requestedChannel, (int) settings.m_fcPos);
+            qDebug() << "SoapySDRInput::applySettings: set fc pos (enum) to " << (int) settings.m_fcPos;
+        }
+    }
+
+    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    {
+        forwardChangeOwnDSP = true;
+        SoapySDRInputThread *inputThread = findThread();
+
+        if (inputThread != 0)
+        {
+            inputThread->setLog2Decimation(requestedChannel, settings.m_log2Decim);
+            qDebug() << "SoapySDRInput::applySettings: set decimation to " << (1<<settings.m_log2Decim);
+        }
+    }
+
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+        || (m_settings.m_transverterMode != settings.m_transverterMode)
+        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency)
+        || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
+        || (m_settings.m_devSampleRate != settings.m_devSampleRate)
+        || (m_settings.m_fcPos != settings.m_fcPos)
+        || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    {
+        qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+                xlatedDeviceCenterFrequency,
+                0,
+                settings.m_log2Decim,
+                (DeviceSampleSource::fcPos_t) settings.m_fcPos,
+                settings.m_devSampleRate);
+
+        forwardChangeOwnDSP = true;
+        forwardChangeToBuddies = true;
+
+        if (dev != 0) {
+            setDeviceCenterFrequency(dev, requestedChannel, deviceCenterFrequency, settings.m_LOppmTenths);
+        }
+    }
+
+    if (forwardChangeOwnDSP)
+    {
+        int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
+        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
+        m_fileSink->handleMessage(*notif); // forward to file sink
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+    }
+
+    if (forwardChangeToBuddies)
+    {
+        // send to source buddies
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+
+        for (const auto &itSource : sourceBuddies)
+        {
+            DeviceSoapySDRShared::MsgReportBuddyChange *report = DeviceSoapySDRShared::MsgReportBuddyChange::create(
+                    settings.m_centerFrequency,
+                    settings.m_LOppmTenths,
+                    (int) settings.m_fcPos,
+                    settings.m_devSampleRate,
+                    true);
+            itSource->getSampleSourceInputMessageQueue()->push(report);
+        }
+
+        for (const auto &itSink : sinkBuddies)
+        {
+            DeviceSoapySDRShared::MsgReportBuddyChange *report = DeviceSoapySDRShared::MsgReportBuddyChange::create(
+                    settings.m_centerFrequency,
+                    settings.m_LOppmTenths,
+                    (int) settings.m_fcPos,
+                    settings.m_devSampleRate,
+                    true);
+            itSink->getSampleSinkInputMessageQueue()->push(report);
+        }
+    }
+
+    m_settings = settings;
+
+    qDebug() << "SoapySDRInput::applySettings: "
+            << " m_transverterMode: " << m_settings.m_transverterMode
+            << " m_transverterDeltaFrequency: " << m_settings.m_transverterDeltaFrequency
+            << " m_centerFrequency: " << m_settings.m_centerFrequency << " Hz"
+            << " m_LOppmTenths: " << m_settings.m_LOppmTenths
+            << " m_log2Decim: " << m_settings.m_log2Decim
+            << " m_fcPos: " << m_settings.m_fcPos
+            << " m_devSampleRate: " << m_settings.m_devSampleRate
+            << " m_dcBlock: " << m_settings.m_dcBlock
+            << " m_iqCorrection: " << m_settings.m_iqCorrection;
+
+    return true;
 }
