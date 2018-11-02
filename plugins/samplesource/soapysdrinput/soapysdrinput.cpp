@@ -258,11 +258,233 @@ void SoapySDRInput::moveThreadToBuddy()
 
 bool SoapySDRInput::start()
 {
-    return false;
+    // There is a single thread per physical device (Rx side). This thread is unique and referenced by a unique
+    // buddy in the group of source buddies associated with this physical device.
+    //
+    // This start method is responsible for managing the thread and number of channels when the streaming of a Rx channel is started
+    //
+    // It checks the following conditions
+    //   - the thread is allocated or not (by itself or one of its buddies). If it is it grabs the thread pointer.
+    //   - the requested channel is the first (0) or the following
+    //
+    // There are two possible working modes:
+    //   - Single Input (SI) with only one channel streaming. This HAS to be channel 0.
+    //   - Multiple Input (MI) with two or more channels. It MUST be in this configuration if any channel other than 0
+    //     is used irrespective of what you actually do with samples coming from ignored channels.
+    //     For example When we will run with only channel 2 streaming from the client perspective the channels 0 amnd 1 will actually
+    //     be enabled and streaming but its samples will just be disregarded.
+    //     This means that all channels up to the highest in index being used are activated.
+    //
+    // It manages the transition form SI where only one channel (the first or channel 0) should be running to the
+    // Multiple Input (MI) if the requested channel is 1 or more. More generally it checks if the requested channel is within the current
+    // channel range allocated in the thread or past it. To perform the transition it stops the thread, deletes it and creates a new one.
+    // It marks the thread as needing start.
+    //
+    // If the requested channel is within the thread channel range (this thread being already allocated) it simply adds its FIFO reference
+    // so that the samples are fed to the FIFO and leaves the thread unchanged (no stop, no delete/new)
+    //
+    // If there is no thread allocated it creates a new one with a number of channels that fits the requested channel. That is
+    // 1 if channel 0 is requested (SI mode) and 3 if channel 2 is requested (MI mode). It marks the thread as needing start.
+    //
+    // Eventually it registers the FIFO in the thread. If the thread has to be started it enables the channels up to the number of channels
+    // allocated in the thread and starts the thread.
+    //
+    // Note: this is quite similar to the BladeRF2 start handling. The main difference is that the channel allocation (enabling) process is
+    // done in the thread object.
+
+    if (!m_deviceShared.m_device)
+    {
+        qDebug("SoapySDRInput::start: no device object");
+        return false;
+    }
+
+    int requestedChannel = m_deviceAPI->getItemIndex();
+    SoapySDRInputThread *soapySDRInputThread = findThread();
+    bool needsStart = false;
+
+    if (soapySDRInputThread) // if thread is already allocated
+    {
+        qDebug("SoapySDRInput::start: thread is already allocated");
+
+        int nbOriginalChannels = soapySDRInputThread->getNbChannels();
+
+        if (requestedChannel+1 > nbOriginalChannels) // expansion by deleting and re-creating the thread
+        {
+            qDebug("SoapySDRInput::start: expand channels. Re-allocate thread and take ownership");
+
+            SampleSinkFifo **fifos = new SampleSinkFifo*[nbOriginalChannels];
+            unsigned int *log2Decims = new unsigned int[nbOriginalChannels];
+            int *fcPoss = new int[nbOriginalChannels];
+
+            for (int i = 0; i < nbOriginalChannels; i++) // save original FIFO references and data
+            {
+                fifos[i] = soapySDRInputThread->getFifo(i);
+                log2Decims[i] = soapySDRInputThread->getLog2Decimation(i);
+                fcPoss[i] = soapySDRInputThread->getFcPos(i);
+            }
+
+            soapySDRInputThread->stopWork();
+            delete soapySDRInputThread;
+            soapySDRInputThread = new SoapySDRInputThread(m_deviceShared.m_device, requestedChannel+1);
+            m_thread = soapySDRInputThread; // take ownership
+
+            for (int i = 0; i < nbOriginalChannels; i++) // restore original FIFO references
+            {
+                soapySDRInputThread->setFifo(i, fifos[i]);
+                soapySDRInputThread->setLog2Decimation(i, log2Decims[i]);
+                soapySDRInputThread->setFcPos(i, fcPoss[i]);
+            }
+
+            // remove old thread address from buddies (reset in all buddies). The address being held only in the owning source.
+            const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+            std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+
+            for (; it != sourceBuddies.end(); ++it) {
+                ((DeviceSoapySDRShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
+            }
+
+            needsStart = true;
+        }
+        else
+        {
+            qDebug("SoapySDRInput::start: keep buddy thread");
+        }
+    }
+    else // first allocation
+    {
+        qDebug("SoapySDRInput::start: allocate thread and take ownership");
+        soapySDRInputThread = new SoapySDRInputThread(m_deviceShared.m_device, requestedChannel+1);
+        m_thread = soapySDRInputThread; // take ownership
+        needsStart = true;
+    }
+
+    soapySDRInputThread->setFifo(requestedChannel, &m_sampleFifo);
+    soapySDRInputThread->setLog2Decimation(requestedChannel, m_settings.m_log2Decim);
+    soapySDRInputThread->setFcPos(requestedChannel, (int) m_settings.m_fcPos);
+
+    if (needsStart)
+    {
+        qDebug("SoapySDRInput::start: (re)sart buddy thread");
+        soapySDRInputThread->startWork();
+    }
+
+    applySettings(m_settings, true);
+
+    qDebug("SoapySDRInput::start: started");
+    m_running = true;
+
+    return true;
 }
 
 void SoapySDRInput::stop()
 {
+    // This stop method is responsible for managing the thread and channel disabling when the streaming of
+    // a Rx channel is stopped
+    //
+    // If the thread is currently managing only one channel (SI mode). The thread can be just stopped and deleted.
+    // Then the channel is closed (disabled).
+    //
+    // If the thread is currently managing many channels (MI mode) and we are removing the last channel. The transition
+    // or reduction of MI size is handled by stopping the thread, deleting it and creating a new one
+    // with one channel less if (and only if) there is still a channel active.
+    //
+    // If the thread is currently managing many channels (MI mode) but the channel being stopped is not the last
+    // channel then the FIFO reference is simply removed from the thread so that it will not stream into this FIFO
+    // anymore. In this case the channel is not closed (this is managed in the thread object) so that other channels
+    // can continue with the same configuration. The device continues streaming on this channel but the samples are simply
+    // dropped (by removing FIFO reference).
+    //
+    // Note: this is quite similar to the BladeRF2 stop handling. The main difference is that the channel allocation (enabling) process is
+    // done in the thread object.
+
+    if (!m_running) {
+        return;
+    }
+
+    int requestedChannel = m_deviceAPI->getItemIndex();
+    SoapySDRInputThread *soapySDRInputThread = findThread();
+
+    if (soapySDRInputThread == 0) { // no thread allocated
+        return;
+    }
+
+    int nbOriginalChannels = soapySDRInputThread->getNbChannels();
+
+    if (nbOriginalChannels == 1) // SI mode => just stop and delete the thread
+    {
+        qDebug("SoapySDRInput::stop: SI mode. Just stop and delete the thread");
+        soapySDRInputThread->stopWork();
+        delete soapySDRInputThread;
+        m_thread = 0;
+
+        // remove old thread address from buddies (reset in all buddies)
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+
+        for (; it != sourceBuddies.end(); ++it) {
+            ((DeviceSoapySDRShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
+        }
+    }
+    else if (requestedChannel == nbOriginalChannels - 1) // remove last MI channel => reduce by deleting and re-creating the thread
+    {
+        qDebug("SoapySDRInput::stop: MI mode. Reduce by deleting and re-creating the thread");
+        soapySDRInputThread->stopWork();
+        SampleSinkFifo **fifos = new SampleSinkFifo*[nbOriginalChannels-1];
+        unsigned int *log2Decims = new unsigned int[nbOriginalChannels-1];
+        int *fcPoss = new int[nbOriginalChannels-1];
+        int highestActiveChannelIndex = -1;
+
+        for (int i = 0; i < nbOriginalChannels-1; i++) // save original FIFO references and get the channel with highest index
+        {
+            fifos[i] = soapySDRInputThread->getFifo(i);
+
+            if ((soapySDRInputThread->getFifo(i) != 0) && (i > highestActiveChannelIndex)) {
+                highestActiveChannelIndex = i;
+            }
+
+            log2Decims[i] = soapySDRInputThread->getLog2Decimation(i);
+            fcPoss[i] = soapySDRInputThread->getFcPos(i);
+        }
+
+        delete soapySDRInputThread;
+        m_thread = 0;
+
+        if (highestActiveChannelIndex >= 0) // there is at least one channel still active
+        {
+            soapySDRInputThread = new SoapySDRInputThread(m_deviceShared.m_device, highestActiveChannelIndex+1);
+            m_thread = soapySDRInputThread; // take ownership
+
+            for (int i = 0; i < highestActiveChannelIndex; i++)  // restore original FIFO references
+            {
+                soapySDRInputThread->setFifo(i, fifos[i]);
+                soapySDRInputThread->setLog2Decimation(i, log2Decims[i]);
+                soapySDRInputThread->setFcPos(i, fcPoss[i]);
+            }
+        }
+        else
+        {
+            qDebug("SoapySDRInput::stop: do not re-create thread as there are no more FIFOs active");
+        }
+
+        // remove old thread address from buddies (reset in all buddies). The address being held only in the owning source.
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+
+        for (; it != sourceBuddies.end(); ++it) {
+            ((DeviceSoapySDRShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
+        }
+
+        if (highestActiveChannelIndex >= 0) {
+            soapySDRInputThread->startWork();
+        }
+    }
+    else // remove channel from existing thread
+    {
+        qDebug("SoapySDRInput::stop: MI mode. Not changing MI configuration. Just remove FIFO reference");
+        soapySDRInputThread->setFifo(requestedChannel, 0); // remove FIFO
+    }
+
+    m_running = false;
 }
 
 QByteArray SoapySDRInput::serialize() const

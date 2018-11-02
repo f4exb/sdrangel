@@ -269,8 +269,8 @@ bool BladeRF2Input::start()
     // channel range allocated in the thread or past it. To perform the transition it stops the thread, deletes it and creates a new one.
     // It marks the thread as needing start.
     //
-    // If the requested channel is within the thread channel range (this thread being already allocated) it simply removes its FIFO reference
-    // so that the samples are not fed to the FIFO anymore and leaves the thread unchanged (no stop, no delete/new)
+    // If the requested channel is within the thread channel range (this thread being already allocated) it simply adds its FIFO reference
+    // so that the samples are fed to the FIFO and leaves the thread unchanged (no stop, no delete/new)
     //
     // If there is no thread allocated it creates a new one with a number of channels that fits the requested channel. That is
     // 1 if channel 0 is requested (SI mode) and 2 if channel 1 is requested (MI mode). It marks the thread as needing start.
@@ -321,7 +321,7 @@ bool BladeRF2Input::start()
                 bladerf2InputThread->setFcPos(i, fcPoss[i]);
             }
 
-            // remove old thread address from buddies (reset in all buddies)
+            // remove old thread address from buddies (reset in all buddies). The address being held only in the owning source.
             const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
             std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
 
@@ -457,7 +457,7 @@ void BladeRF2Input::stop()
             qDebug("BladeRF2Input::stop: do not re-create thread as there are no more FIFOs active");
         }
 
-        // remove old thread address from buddies (reset in all buddies)
+        // remove old thread address from buddies (reset in all buddies). The address being held only in the owning source.
         const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
         std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
 
