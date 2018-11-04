@@ -18,6 +18,10 @@
 
 MESSAGE_CLASS_DEFINITION(DeviceSoapySDRShared::MsgReportBuddyChange, Message)
 
+const float  DeviceSoapySDRShared::m_sampleFifoLengthInSeconds = 0.25;
+const int    DeviceSoapySDRShared::m_sampleFifoMinSize = 75000; // 300 kS/s knee
+const int    DeviceSoapySDRShared::m_sampleFifoMinSize32 = 150000; // Fixed for interpolation by 32
+
 DeviceSoapySDRShared::DeviceSoapySDRShared() :
     m_device(0),
     m_channel(-1),

@@ -87,6 +87,10 @@ public:
     int m_channel; //!< allocated channel (-1 if none)
     SoapySDRInput *m_source;
     SoapySDROutput *m_sink;
+
+    static const float m_sampleFifoLengthInSeconds;
+    static const int   m_sampleFifoMinSize;
+    static const int   m_sampleFifoMinSize32;
 };
 
 

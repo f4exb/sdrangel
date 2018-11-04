@@ -621,6 +621,38 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
     xlatedDeviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
     xlatedDeviceCenterFrequency = xlatedDeviceCenterFrequency < 0 ? 0 : xlatedDeviceCenterFrequency;
 
+    // resize FIFO
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
+    {
+        SoapySDROutputThread *soapySDROutputThread = findThread();
+        SampleSourceFifo *fifo = 0;
+
+        if (soapySDROutputThread)
+        {
+            fifo = soapySDROutputThread->getFifo(requestedChannel);
+            soapySDROutputThread->setFifo(requestedChannel, 0);
+        }
+
+        int fifoSize;
+
+        if (settings.m_log2Interp >= 5)
+        {
+            fifoSize = DeviceSoapySDRShared::m_sampleFifoMinSize32;
+        }
+        else
+        {
+            fifoSize = std::max(
+                (int) ((settings.m_devSampleRate/(1<<settings.m_log2Interp)) * DeviceSoapySDRShared::m_sampleFifoLengthInSeconds),
+                DeviceSoapySDRShared::m_sampleFifoMinSize);
+        }
+
+        m_sampleSourceFifo.resize(fifoSize);
+
+        if (fifo) {
+            soapySDROutputThread->setFifo(requestedChannel, &m_sampleSourceFifo);
+        }
+    }
+
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
     {
         forwardChangeOwnDSP = true;
