@@ -47,8 +47,14 @@ SoapySDRInput::SoapySDRInput(DeviceSourceAPI *deviceAPI) :
 
 SoapySDRInput::~SoapySDRInput()
 {
+    if (m_running) {
+        stop();
+    }
+
     m_deviceAPI->removeSink(m_fileSink);
     delete m_fileSink;
+
+    closeDevice();
 }
 
 void SoapySDRInput::destroy()
@@ -205,6 +211,7 @@ const SoapySDR::RangeList& SoapySDRInput::getRateRanges()
 
 void SoapySDRInput::init()
 {
+    applySettings(m_settings, true);
 }
 
 SoapySDRInputThread *SoapySDRInput::findThread()
@@ -271,7 +278,7 @@ bool SoapySDRInput::start()
     //   - Single Input (SI) with only one channel streaming. This HAS to be channel 0.
     //   - Multiple Input (MI) with two or more channels. It MUST be in this configuration if any channel other than 0
     //     is used irrespective of what you actually do with samples coming from ignored channels.
-    //     For example When we will run with only channel 2 streaming from the client perspective the channels 0 amnd 1 will actually
+    //     For example When we will run with only channel 2 streaming from the client perspective the channels 0 and 1 will actually
     //     be enabled and streaming but its samples will just be disregarded.
     //     This means that all channels up to the highest in index being used are activated.
     //
@@ -386,7 +393,7 @@ void SoapySDRInput::stop()
     //
     // If the thread is currently managing many channels (MI mode) and we are removing the last channel. The transition
     // or reduction of MI size is handled by stopping the thread, deleting it and creating a new one
-    // with one channel less if (and only if) there is still a channel active.
+    // with the maximum number of channels needed if (and only if) there is still a channel active.
     //
     // If the thread is currently managing many channels (MI mode) but the channel being stopped is not the last
     // channel then the FIFO reference is simply removed from the thread so that it will not stream into this FIFO
@@ -474,7 +481,9 @@ void SoapySDRInput::stop()
             ((DeviceSoapySDRShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
         }
 
-        if (highestActiveChannelIndex >= 0) {
+        if (highestActiveChannelIndex >= 0)
+        {
+            qDebug("SoapySDRInput::stop: restarting the thread");
             soapySDRInputThread->startWork();
         }
     }

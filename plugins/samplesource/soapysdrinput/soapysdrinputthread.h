@@ -37,7 +37,7 @@ class SoapySDRInputThread : public QThread {
     Q_OBJECT
 
 public:
-    SoapySDRInputThread(SoapySDR::Device* dev, unsigned int nbRxChannels, QObject* parent = NULL);
+    SoapySDRInputThread(SoapySDR::Device* dev, unsigned int nbRxChannels, QObject* parent = 0);
     ~SoapySDRInputThread();
 
     void startWork();

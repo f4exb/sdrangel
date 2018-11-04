@@ -24,9 +24,11 @@
 #include "util/messagequeue.h"
 
 #include "soapysdroutput.h"
+#include "soapysdroutputsettings.h"
 
 class DeviceSampleSink;
 class DeviceUISet;
+class ItemSettingGUI;
 
 namespace Ui {
     class SoapySDROutputGui;
@@ -52,11 +54,13 @@ public:
     virtual bool handleMessage(const Message& message);
 
 private:
+    void createRangesControl(const SoapySDR::RangeList& rangeList, const QString& text, const QString& unit);
     Ui::SoapySDROutputGui* ui;
 
     DeviceUISet* m_deviceUISet;
     bool m_forceSettings;
     bool m_doApplySettings;
+    SoapySDROutputSettings m_settings;
     QTimer m_updateTimer;
     QTimer m_statusTimer;
     SoapySDROutput* m_sampleSink;
@@ -64,6 +68,26 @@ private:
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
     MessageQueue m_inputMessageQueue;
+
+    ItemSettingGUI *m_sampleRateGUI;
+
+    void blockApplySettings(bool block) { m_doApplySettings = !block; }
+    void displaySettings();
+    void sendSettings();
+    void updateSampleRateAndFrequency();
+    void updateFrequencyLimits();
+    void setCenterFrequencySetting(uint64_t kHzValue);
+
+private slots:
+    void handleInputMessages();
+    void on_centerFrequency_changed(quint64 value);
+    void on_LOppm_valueChanged(int value);
+    void sampleRateChanged(double sampleRate);
+    void on_interp_currentIndexChanged(int index);
+    void on_transverter_clicked();
+    void on_startStop_toggled(bool checked);
+    void updateHardware();
+    void updateStatus();
 };
 
 #endif /* PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTGUI_H_ */

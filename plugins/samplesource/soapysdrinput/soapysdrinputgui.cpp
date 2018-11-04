@@ -156,30 +156,43 @@ QString SoapySDRInputGui::getName() const
 
 void SoapySDRInputGui::resetToDefaults()
 {
+    m_settings.resetToDefaults();
+    displaySettings();
+    sendSettings();
 }
 
 qint64 SoapySDRInputGui::getCenterFrequency() const
 {
-    return 0;
+    return m_settings.m_centerFrequency;
 }
 
-void SoapySDRInputGui::setCenterFrequency(qint64 centerFrequency __attribute__((unused)))
+void SoapySDRInputGui::setCenterFrequency(qint64 centerFrequency)
 {
+    m_settings.m_centerFrequency = centerFrequency;
+    displaySettings();
+    sendSettings();
 }
 
 QByteArray SoapySDRInputGui::serialize() const
 {
-    SimpleSerializer s(1);
-    return s.final();
+    return m_settings.serialize();
 }
 
-bool SoapySDRInputGui::deserialize(const QByteArray& data __attribute__((unused)))
+bool SoapySDRInputGui::deserialize(const QByteArray& data)
 {
-    return false;
+    if(m_settings.deserialize(data)) {
+        displaySettings();
+        m_forceSettings = true;
+        sendSettings();
+        return true;
+    } else {
+        resetToDefaults();
+        return false;
+    }
 }
 
 
-bool SoapySDRInputGui::handleMessage(const Message& message __attribute__((unused)))
+bool SoapySDRInputGui::handleMessage(const Message& message)
 {
     if (SoapySDRInput::MsgStartStop::match(message))
     {

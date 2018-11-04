@@ -18,6 +18,8 @@
 #define PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUT_H_
 
 #include <QString>
+#include <QByteArray>
+#include <stdint.h>
 
 #include "dsp/devicesamplesink.h"
 #include "soapysdr/devicesoapysdrshared.h"
@@ -25,9 +27,57 @@
 #include "soapysdroutputsettings.h"
 
 class DeviceSinkAPI;
+class SoapySDROutputThread;
+
+namespace SoapySDR
+{
+    class Device;
+}
 
 class SoapySDROutput : public DeviceSampleSink {
 public:
+    class MsgConfigureSoapySDROutput : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const SoapySDROutputSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureSoapySDROutput* create(const SoapySDROutputSettings& settings, bool force)
+        {
+            return new MsgConfigureSoapySDROutput(settings, force);
+        }
+
+    private:
+        SoapySDROutputSettings m_settings;
+        bool m_force;
+
+        MsgConfigureSoapySDROutput(const SoapySDROutputSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
+    class MsgStartStop : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgStartStop* create(bool startStop) {
+            return new MsgStartStop(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgStartStop(bool startStop) :
+            Message(),
+            m_startStop(startStop)
+        { }
+    };
+
     SoapySDROutput(DeviceSinkAPI *deviceAPI);
     virtual ~SoapySDROutput();
     virtual void destroy();
@@ -35,6 +85,8 @@ public:
     virtual void init();
     virtual bool start();
     virtual void stop();
+    SoapySDROutputThread *getThread() { return m_thread; }
+    void setThread(SoapySDROutputThread *thread) { m_thread = thread; }
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
@@ -47,15 +99,24 @@ public:
 
     virtual bool handleMessage(const Message& message);
 
+    void getFrequencyRange(uint64_t& min, uint64_t& max);
+    const SoapySDR::RangeList& getRateRanges();
+
 private:
     DeviceSinkAPI *m_deviceAPI;
+    QMutex m_mutex;
     SoapySDROutputSettings m_settings;
     QString m_deviceDescription;
-    DeviceSoapySDRShared m_deviceShared;
     bool m_running;
+    SoapySDROutputThread *m_thread;
+    DeviceSoapySDRShared m_deviceShared;
 
     bool openDevice();
     void closeDevice();
+    SoapySDROutputThread *findThread();
+    void moveThreadToBuddy();
+    bool applySettings(const SoapySDROutputSettings& settings, bool force = false);
+    bool setDeviceCenterFrequency(SoapySDR::Device *dev, int requestedChannel, quint64 freq_hz, int loPpmTenths);
 };
 
 

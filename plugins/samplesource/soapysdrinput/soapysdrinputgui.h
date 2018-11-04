@@ -20,8 +20,6 @@
 #include <QTimer>
 #include <QWidget>
 
-#include <SoapySDR/Types.hpp>
-
 #include "plugin/plugininstancegui.h"
 #include "util/messagequeue.h"
 

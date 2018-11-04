@@ -14,25 +14,27 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTTHREAD_H_
-#define PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTTHREAD_H_
+#ifndef PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTTHREAD_H_
+#define PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTTHREAD_H_
+
 
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
-#include <libbladeRF.h>
 
-#include "bladerf2/devicebladerf2shared.h"
+#include <SoapySDR/Device.hpp>
+
+#include "soapysdr/devicesoapysdrshared.h"
 #include "dsp/interpolators.h"
 
-class SampleSinkFifo;
+class SampleSourceFifo;
 
-class BladeRF2OutputThread : public QThread {
+class SoapySDROutputThread : public QThread {
     Q_OBJECT
 
 public:
-    BladeRF2OutputThread(struct bladerf* dev, unsigned int nbTxChannels, QObject* parent = 0);
-    ~BladeRF2OutputThread();
+    SoapySDROutputThread(SoapySDR::Device* dev, unsigned int nbTxChannels, QObject* parent = 0);
+    ~SoapySDROutputThread();
 
     void startWork();
     void stopWork();
@@ -48,7 +50,9 @@ private:
     {
         SampleSourceFifo* m_sampleFifo;
         unsigned int m_log2Interp;
-        Interpolators<qint16, SDR_TX_SAMP_SZ, 12>  m_interpolators;
+        Interpolators<qint8, SDR_TX_SAMP_SZ, 8> m_interpolators8;
+        Interpolators<qint16, SDR_TX_SAMP_SZ, 12> m_interpolators12;
+        Interpolators<qint16, SDR_TX_SAMP_SZ, 16> m_interpolators16;
 
         Channel() :
             m_sampleFifo(0),
@@ -59,21 +63,32 @@ private:
         {}
     };
 
+    enum InterpolatorType
+    {
+        Interpolator8,
+        Interpolator12,
+        Interpolator16,
+        InterpolatorFloat
+    };
+
+
     QMutex m_startWaitMutex;
     QWaitCondition m_startWaiter;
     bool m_running;
-    struct bladerf* m_dev;
+    SoapySDR::Device* m_dev;
 
     Channel *m_channels; //!< Array of channels dynamically allocated for the given number of Tx channels
-    qint16 *m_buf; //!< Full buffer for SISO or MIMO operation
+    unsigned int m_sampleRate;
     unsigned int m_nbChannels;
+    InterpolatorType m_interpolatorType;
 
     void run();
     unsigned int getNbFifos();
-    void callbackSO(qint16* buf, qint32 len, unsigned int channel = 0);
-    void callbackMO(qint16* buf, qint32 samplesPerChannel);
+    void callbackSO8(qint8* buf, qint32 len, unsigned int channel = 0);
+    void callbackSO12(qint16* buf, qint32 len, unsigned int channel = 0);
+    void callbackSO16(qint16* buf, qint32 len, unsigned int channel = 0);
+    void callbackMO(std::vector<void *>& buffs, qint32 samplesPerChannel);
 };
 
 
-
-#endif /* PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTTHREAD_H_ */
+#endif /* PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTTHREAD_H_ */

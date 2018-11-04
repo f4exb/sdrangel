@@ -174,7 +174,7 @@ BladeRF2OutputThread *BladeRF2Output::findThread()
 {
     if (m_thread == 0) // this does not own the thread
     {
-        BladeRF2OutputThread *BladeRF2OutputThread = 0;
+        BladeRF2OutputThread *bladeRF2OutputThread = 0;
 
         // find a buddy that has allocated the thread
         const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
@@ -186,15 +186,15 @@ BladeRF2OutputThread *BladeRF2Output::findThread()
 
             if (buddySink)
             {
-                BladeRF2OutputThread = buddySink->getThread();
+                bladeRF2OutputThread = buddySink->getThread();
 
-                if (BladeRF2OutputThread) {
+                if (bladeRF2OutputThread) {
                     break;
                 }
             }
         }
 
-        return BladeRF2OutputThread;
+        return bladeRF2OutputThread;
     }
     else
     {

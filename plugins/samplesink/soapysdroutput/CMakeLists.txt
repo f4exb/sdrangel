@@ -7,7 +7,7 @@ set(soapysdroutput_SOURCES
 	soapysdroutput.cpp
 	soapysdroutputplugin.cpp
 	soapysdroutputsettings.cpp
-#	soapysdroutputthread.cpp
+	soapysdroutputthread.cpp
 )
 
 set(soapysdroutput_HEADERS
@@ -15,11 +15,11 @@ set(soapysdroutput_HEADERS
 	soapysdroutput.h
 	soapysdroutputplugin.h
 	soapysdroutputsettings.h
-#	soapysdroutputthread.h
+	soapysdroutputthread.h
 )
 
 set(soapysdroutput_FORMS
-#	soapysdroutputgui.ui
+	soapysdroutputgui.ui
 )
 
 if (BUILD_DEBIAN)

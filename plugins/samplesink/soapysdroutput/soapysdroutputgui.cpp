@@ -14,17 +14,23 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QMessageBox>
+
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
 #include "util/simpleserializer.h"
+#include "ui_soapysdroutputgui.h"
+#include "gui/glspectrum.h"
+#include "soapygui/discreterangegui.h"
+#include "soapygui/intervalrangegui.h"
 
 #include "soapysdroutputgui.h"
 
 SoapySDROutputGui::SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     QWidget(parent),
-    ui(0),
+    ui(new Ui::SoapySDROutputGui),
     m_deviceUISet(deviceUISet),
     m_forceSettings(true),
     m_doApplySettings(true),
@@ -32,15 +38,84 @@ SoapySDROutputGui::SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     m_sampleRate(0),
     m_lastEngineState(DSPDeviceSinkEngine::StNotStarted)
 {
+    m_sampleSink = (SoapySDROutput*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
+    ui->setupUi(this);
+
+    ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    uint64_t f_min, f_max;
+    m_sampleSink->getFrequencyRange(f_min, f_max);
+    ui->centerFrequency->setValueRange(7, f_min/1000, f_max/1000);
+
+    createRangesControl(m_sampleSink->getRateRanges(), "SR", "kS/s");
+
+    connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
+    connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
+    m_statusTimer.start(500);
+
+    displaySettings();
+
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+    m_sampleSink->setMessageQueueToGUI(&m_inputMessageQueue);
+
+    sendSettings();
 }
 
 SoapySDROutputGui::~SoapySDROutputGui()
 {
+    delete ui;
 }
 
 void SoapySDROutputGui::destroy()
 {
     delete this;
+}
+
+void SoapySDROutputGui::createRangesControl(const SoapySDR::RangeList& rangeList, const QString& text, const QString& unit)
+{
+    if (rangeList.size() == 0) { // return early if the range list is empty
+        return;
+    }
+
+    bool rangeDiscrete = true; // discretes values
+    bool rangeInterval = true; // intervals
+
+    for (const auto &it : rangeList)
+    {
+        if (it.minimum() != it.maximum()) {
+            rangeDiscrete = false;
+        } else {
+            rangeInterval = false;
+        }
+    }
+
+    if (rangeDiscrete)
+    {
+        DiscreteRangeGUI *rangeGUI = new DiscreteRangeGUI(ui->scrollAreaWidgetContents);
+        rangeGUI->setLabel(text);
+        rangeGUI->setUnits(unit);
+
+        for (const auto &it : rangeList) {
+            rangeGUI->addItem(QString("%1").arg(QString::number(it.minimum()/1000.0, 'f', 0)), it.minimum());
+        }
+
+        m_sampleRateGUI = rangeGUI;
+        connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
+    }
+    else if (rangeInterval)
+    {
+        IntervalRangeGUI *rangeGUI = new IntervalRangeGUI(ui->scrollAreaWidgetContents);
+        rangeGUI->setLabel(text);
+        rangeGUI->setUnits(unit);
+
+        for (const auto &it : rangeList) {
+            rangeGUI->addInterval(it.minimum(), it.maximum());
+        }
+
+        rangeGUI->reset();
+
+        m_sampleRateGUI = rangeGUI;
+        connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
+    }
 }
 
 void SoapySDROutputGui::setName(const QString& name)
@@ -55,35 +130,225 @@ QString SoapySDROutputGui::getName() const
 
 void SoapySDROutputGui::resetToDefaults()
 {
+    m_settings.resetToDefaults();
+    displaySettings();
+    sendSettings();
 }
 
 qint64 SoapySDROutputGui::getCenterFrequency() const
 {
-    return 0;
+    return m_settings.m_centerFrequency;
 }
 
-void SoapySDROutputGui::setCenterFrequency(qint64 centerFrequency __attribute__((unused)))
+void SoapySDROutputGui::setCenterFrequency(qint64 centerFrequency)
 {
+    m_settings.m_centerFrequency = centerFrequency;
+    displaySettings();
+    sendSettings();
 }
 
 QByteArray SoapySDROutputGui::serialize() const
 {
-    SimpleSerializer s(1);
-    return s.final();
+    return m_settings.serialize();
 }
 
-bool SoapySDROutputGui::deserialize(const QByteArray& data __attribute__((unused)))
+bool SoapySDROutputGui::deserialize(const QByteArray& data)
 {
-    return false;
+    if(m_settings.deserialize(data)) {
+        displaySettings();
+        m_forceSettings = true;
+        sendSettings();
+        return true;
+    } else {
+        resetToDefaults();
+        return false;
+    }
 }
 
 
-bool SoapySDROutputGui::handleMessage(const Message& message __attribute__((unused)))
+bool SoapySDROutputGui::handleMessage(const Message& message)
 {
-    return false;
+    if (SoapySDROutput::MsgStartStop::match(message))
+    {
+        SoapySDROutput::MsgStartStop& notif = (SoapySDROutput::MsgStartStop&) message;
+        blockApplySettings(true);
+        ui->startStop->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
+void SoapySDROutputGui::handleInputMessages()
+{
+    Message* message;
 
+    while ((message = m_inputMessageQueue.pop()) != 0)
+    {
+        qDebug("SoapySDROutputGui::handleInputMessages: message: %s", message->getIdentifier());
 
+        if (DSPSignalNotification::match(*message))
+        {
+            DSPSignalNotification* notif = (DSPSignalNotification*) message;
+            m_sampleRate = notif->getSampleRate();
+            m_deviceCenterFrequency = notif->getCenterFrequency();
+            qDebug("SoapySDROutputGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            updateSampleRateAndFrequency();
 
+            delete message;
+        }
+        else
+        {
+            if (handleMessage(*message))
+            {
+                delete message;
+            }
+        }
+    }
+}
+
+void SoapySDROutputGui::sampleRateChanged(double sampleRate)
+{
+    m_settings.m_devSampleRate = sampleRate;
+    sendSettings();
+}
+
+void SoapySDROutputGui::on_centerFrequency_changed(quint64 value)
+{
+    m_settings.m_centerFrequency = value * 1000;
+    sendSettings();
+}
+
+void SoapySDROutputGui::on_interp_currentIndexChanged(int index)
+{
+    if ((index <0) || (index > 6))
+        return;
+    m_settings.m_log2Interp = index;
+    sendSettings();
+}
+
+void SoapySDROutputGui::on_transverter_clicked()
+{
+    m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
+    m_settings.m_transverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+    qDebug("SoapySDROutputGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
+    updateFrequencyLimits();
+    setCenterFrequencySetting(ui->centerFrequency->getValueNew());
+    sendSettings();
+}
+
+void SoapySDROutputGui::on_LOppm_valueChanged(int value)
+{
+    ui->LOppmText->setText(QString("%1").arg(QString::number(value/10.0, 'f', 1)));
+    m_settings.m_LOppmTenths = value;
+    sendSettings();
+}
+
+void SoapySDROutputGui::on_startStop_toggled(bool checked)
+{
+    if (m_doApplySettings)
+    {
+        SoapySDROutput::MsgStartStop *message = SoapySDROutput::MsgStartStop::create(checked);
+        m_sampleSink->getInputMessageQueue()->push(message);
+    }
+}
+
+void SoapySDROutputGui::displaySettings()
+{
+    blockApplySettings(true);
+
+    ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+    m_sampleRateGUI->setValue(m_settings.m_devSampleRate);
+
+    ui->interp->setCurrentIndex(m_settings.m_log2Interp);
+
+    ui->LOppm->setValue(m_settings.m_LOppmTenths);
+    ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
+
+    blockApplySettings(false);
+}
+
+void SoapySDROutputGui::sendSettings()
+{
+    if (!m_updateTimer.isActive()) {
+        m_updateTimer.start(100);
+    }
+}
+
+void SoapySDROutputGui::updateSampleRateAndFrequency()
+{
+    m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    ui->deviceRateText->setText(tr("%1k").arg(QString::number(m_sampleRate / 1000.0f, 'g', 5)));
+}
+
+void SoapySDROutputGui::updateFrequencyLimits()
+{
+    // values in kHz
+    uint64_t f_min, f_max;
+    qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
+    m_sampleSink->getFrequencyRange(f_min, f_max);
+    qint64 minLimit = f_min/1000 + deltaFrequency;
+    qint64 maxLimit = f_max/1000 + deltaFrequency;
+
+    minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
+    maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+
+    qDebug("SoapySDRInputGui::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
+
+    ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+}
+
+void SoapySDROutputGui::setCenterFrequencySetting(uint64_t kHzValue)
+{
+    int64_t centerFrequency = kHzValue*1000;
+
+    m_settings.m_centerFrequency = centerFrequency < 0 ? 0 : (uint64_t) centerFrequency;
+    ui->centerFrequency->setToolTip(QString("Main center frequency in kHz (LO: %1 kHz)").arg(centerFrequency/1000));
+}
+
+void SoapySDROutputGui::updateHardware()
+{
+    if (m_doApplySettings)
+    {
+        qDebug() << "SoapySDROutputGui::updateHardware";
+        SoapySDROutput::MsgConfigureSoapySDROutput* message = SoapySDROutput::MsgConfigureSoapySDROutput::create(m_settings, m_forceSettings);
+        m_sampleSink->getInputMessageQueue()->push(message);
+        m_forceSettings = false;
+        m_updateTimer.stop();
+    }
+}
+
+void SoapySDROutputGui::updateStatus()
+{
+    int state = m_deviceUISet->m_deviceSinkAPI->state();
+
+    if(m_lastEngineState != state)
+    {
+        switch(state)
+        {
+            case DSPDeviceSinkEngine::StNotStarted:
+                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+                break;
+            case DSPDeviceSinkEngine::StIdle:
+                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
+                break;
+            case DSPDeviceSinkEngine::StRunning:
+                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+                break;
+            case DSPDeviceSinkEngine::StError:
+                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSinkAPI->errorMessage());
+                break;
+            default:
+                break;
+        }
+
+        m_lastEngineState = state;
+    }
+}
 
