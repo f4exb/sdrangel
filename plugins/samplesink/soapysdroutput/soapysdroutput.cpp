@@ -189,6 +189,12 @@ const SoapySDR::RangeList& SoapySDROutput::getRateRanges()
     return channelSettings->m_ratesRanges;
 }
 
+const std::vector<std::string>& SoapySDROutput::getAntennas()
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getTxChannelSettings(m_deviceShared.m_channel);
+    return channelSettings->m_antennas;
+}
+
 void SoapySDROutput::init()
 {
     applySettings(m_settings, true);

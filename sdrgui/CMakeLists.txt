@@ -57,6 +57,7 @@ set(sdrgui_SOURCES
     soapygui/discreterangegui.cpp
     soapygui/intervalrangegui.cpp
     soapygui/itemsettinggui.cpp
+    soapygui/stringrangegui.cpp
     
     webapi/webapiadaptergui.cpp
 )
@@ -118,6 +119,7 @@ set(sdrgui_HEADERS
     soapygui/discreterangegui.h
     soapygui/intervalrangegui.h
     soapygui/itemsettinggui.h
+    soapygui/stringrangegui.h
     
     webapi/webapiadaptergui.h
 )

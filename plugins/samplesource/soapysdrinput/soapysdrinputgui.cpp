@@ -49,6 +49,7 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->centerFrequency->setValueRange(7, f_min/1000, f_max/1000);
 
     createRangesControl(m_sampleSource->getRateRanges(), "SR", "kS/s");
+    createAntennasControl(m_sampleSource->getAntennas());
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -92,7 +93,7 @@ void SoapySDRInputGui::createRangesControl(const SoapySDR::RangeList& rangeList,
 
     if (rangeDiscrete)
     {
-        DiscreteRangeGUI *rangeGUI = new DiscreteRangeGUI(ui->scrollAreaWidgetContents);
+        DiscreteRangeGUI *rangeGUI = new DiscreteRangeGUI(this);
         rangeGUI->setLabel(text);
         rangeGUI->setUnits(unit);
 
@@ -101,6 +102,9 @@ void SoapySDRInputGui::createRangesControl(const SoapySDR::RangeList& rangeList,
         }
 
         m_sampleRateGUI = rangeGUI;
+        QVBoxLayout *layout = (QVBoxLayout *) ui->scrollAreaWidgetContents->layout();
+        layout->addWidget(rangeGUI);
+
         connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
 //        QHBoxLayout *layout = new QHBoxLayout();
 //        QLabel *rangeLabel = new QLabel();
@@ -140,8 +144,27 @@ void SoapySDRInputGui::createRangesControl(const SoapySDR::RangeList& rangeList,
         rangeGUI->reset();
 
         m_sampleRateGUI = rangeGUI;
+        QVBoxLayout *layout = (QVBoxLayout *) ui->scrollAreaWidgetContents->layout();
+        layout->addWidget(rangeGUI);
+
         connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
     }
+}
+
+void SoapySDRInputGui::createAntennasControl(const std::vector<std::string>& antennaList)
+{
+    m_antennas = new StringRangeGUI(this);
+    m_antennas->setLabel(QString("Antenna"));
+    m_antennas->setUnits(QString("Port"));
+
+    for (const auto &it : antennaList) {
+        m_antennas->addItem(QString(it.c_str()), it);
+    }
+
+    QVBoxLayout *layout = (QVBoxLayout *) ui->scrollAreaWidgetContents->layout();
+    layout->addWidget(m_antennas);
+
+    connect(m_antennas, SIGNAL(valueChanged()), this, SLOT(antennasChanged()));
 }
 
 void SoapySDRInputGui::setName(const QString& name)
@@ -252,6 +275,14 @@ void SoapySDRInputGui::sampleRateChanged(double sampleRate)
     sendSettings();
 }
 
+void SoapySDRInputGui::antennasChanged()
+{
+    const std::string& antennaStr = m_antennas->getCurrentValue();
+    m_settings.m_antenna = QString(antennaStr.c_str());
+
+    sendSettings();
+}
+
 void SoapySDRInputGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
@@ -345,6 +376,8 @@ void SoapySDRInputGui::displaySettings()
 
     ui->LOppm->setValue(m_settings.m_LOppmTenths);
     ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
+
+    m_antennas->setValue(m_settings.m_antenna.toStdString());
 
     blockApplySettings(false);
 }

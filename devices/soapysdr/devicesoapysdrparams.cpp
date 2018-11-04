@@ -120,11 +120,9 @@ void DeviceSoapySDRParams::fillChannelParams(std::vector<ChannelSettings>& chann
     channelSettings.back().m_frequencySettingsArgs = m_device->getFrequencyArgsInfo(direction, ichan);
 
     // sample rates
-
     channelSettings.back().m_ratesRanges = m_device->getSampleRateRange(direction, ichan);
 
     // bandwidths
-
     channelSettings.back().m_bandwidthsRanges = m_device->getBandwidthRange(direction, ichan);
 }
 

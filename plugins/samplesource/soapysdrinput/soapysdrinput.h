@@ -122,6 +122,8 @@ public:
 
     void getFrequencyRange(uint64_t& min, uint64_t& max);
     const SoapySDR::RangeList& getRateRanges();
+    const std::vector<std::string>& getAntennas();
+    int getAntennaIndex(const std::string& antenna);
 
 private:
     DeviceSourceAPI *m_deviceAPI;

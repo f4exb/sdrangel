@@ -35,6 +35,7 @@ void SoapySDRInputSettings::resetToDefaults()
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
     m_fileRecordName = "";
+    m_antenna = "NONE";
 }
 
 QByteArray SoapySDRInputSettings::serialize() const
@@ -49,6 +50,7 @@ QByteArray SoapySDRInputSettings::serialize() const
     s.writeS32(6, m_LOppmTenths);
     s.writeBool(7, m_transverterMode);
     s.writeS64(8, m_transverterDeltaFrequency);
+    s.writeString(9, m_antenna);
 
     return s.final();
 }
@@ -76,6 +78,7 @@ bool SoapySDRInputSettings::deserialize(const QByteArray& data)
         d.readS32(6, &m_LOppmTenths);
         d.readBool(7, &m_transverterMode, false);
         d.readS64(8, &m_transverterDeltaFrequency, 0);
+        d.readString(9, &m_antenna, "NONE");
 
         return true;
     }

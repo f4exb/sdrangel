@@ -209,6 +209,24 @@ const SoapySDR::RangeList& SoapySDRInput::getRateRanges()
     return channelSettings->m_ratesRanges;
 }
 
+const std::vector<std::string>& SoapySDRInput::getAntennas()
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getRxChannelSettings(m_deviceShared.m_channel);
+    return channelSettings->m_antennas;
+}
+
+int SoapySDRInput::getAntennaIndex(const std::string& antenna)
+{
+    const std::vector<std::string>& antennaList = getAntennas();
+    std::vector<std::string>::const_iterator it = std::find(antennaList.begin(), antennaList.end(), antenna);
+
+    if (it == antennaList.end()) {
+        return -1;
+    } else {
+        return it - antennaList.begin();
+    }
+}
+
 void SoapySDRInput::init()
 {
     applySettings(m_settings, true);
@@ -745,6 +763,23 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
         }
     }
 
+    if ((m_settings.m_antenna != settings.m_antenna) || force)
+    {
+        if (dev != 0)
+        {
+            try
+            {
+                dev->setAntenna(SOAPY_SDR_RX, requestedChannel, settings.m_antenna.toStdString());
+                qDebug("SoapySDRInput::applySettings: set antenna to %s", settings.m_antenna.toStdString().c_str());
+            }
+            catch (const std::exception &ex)
+            {
+                qCritical("SoapySDRInput::applySettings: cannot set antenna to %s: %s",
+                        settings.m_antenna.toStdString().c_str(), ex.what());
+            }
+        }
+    }
+
     if (forwardChangeOwnDSP)
     {
         int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
@@ -793,7 +828,8 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
             << " m_fcPos: " << m_settings.m_fcPos
             << " m_devSampleRate: " << m_settings.m_devSampleRate
             << " m_dcBlock: " << m_settings.m_dcBlock
-            << " m_iqCorrection: " << m_settings.m_iqCorrection;
+            << " m_iqCorrection: " << m_settings.m_iqCorrection
+            << " m_antenna: " << m_settings.m_antenna;
 
     return true;
 }

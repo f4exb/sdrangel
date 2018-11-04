@@ -17,12 +17,13 @@
 #ifndef PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTGUI_H_
 #define PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTGUI_H_
 
+#include <soapygui/stringrangegui.h>
 #include <QTimer>
 #include <QWidget>
+#include <QComboBox>
 
 #include "plugin/plugininstancegui.h"
 #include "util/messagequeue.h"
-
 #include "soapysdrinput.h"
 
 class DeviceUISet;
@@ -53,6 +54,8 @@ public:
 
 private:
     void createRangesControl(const SoapySDR::RangeList& rangeList, const QString& text, const QString& unit);
+    void createAntennasControl(const std::vector<std::string>& antennaList);
+
     Ui::SoapySDRInputGui* ui;
 
     DeviceUISet* m_deviceUISet;
@@ -68,6 +71,7 @@ private:
     MessageQueue m_inputMessageQueue;
 
     ItemSettingGUI *m_sampleRateGUI;
+    StringRangeGUI *m_antennas;
 
     void displaySettings();
     void sendSettings();
@@ -81,6 +85,7 @@ private slots:
     void on_centerFrequency_changed(quint64 value);
     void on_LOppm_valueChanged(int value);
     void sampleRateChanged(double sampleRate);
+    void antennasChanged();
     void on_dcOffset_toggled(bool checked);
     void on_iqImbalance_toggled(bool checked);
     void on_decim_currentIndexChanged(int index);

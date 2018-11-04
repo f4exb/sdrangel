@@ -14,35 +14,39 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTSETTINGS_H_
-#define PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTSETTINGS_H_
+#ifndef SDRGUI_SOAPYGUI_STRINGRANGEGUI_H_
+#define SDRGUI_SOAPYGUI_STRINGRANGEGUI_H_
 
-#include <QtGlobal>
-#include <QString>
+#include <QWidget>
 
-struct SoapySDRInputSettings {
-    typedef enum {
-        FC_POS_INFRA = 0,
-        FC_POS_SUPRA,
-        FC_POS_CENTER
-    } fcPos_t;
+namespace Ui {
+    class DiscreteRangeGUI;
+}
 
-    quint64 m_centerFrequency;
-    qint32 m_LOppmTenths;
-    qint32 m_devSampleRate;
-    quint32 m_log2Decim;
-    fcPos_t m_fcPos;
-    bool m_dcBlock;
-    bool m_iqCorrection;
-    bool m_transverterMode;
-    qint64 m_transverterDeltaFrequency;
-    QString m_fileRecordName;
-    QString m_antenna;
+class StringRangeGUI : public QWidget
+{
+    Q_OBJECT
+public:
+    explicit StringRangeGUI(QWidget* parent = 0);
+    virtual ~StringRangeGUI();
 
-    SoapySDRInputSettings();
-    void resetToDefaults();
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+    void setLabel(const QString& text);
+    void setUnits(const QString& units);
+    void addItem(const QString& itemStr, const std::string& itemValue);
+    const std::string& getCurrentValue();
+    void setValue(const std::string& value);
+
+signals:
+    void valueChanged();
+
+private slots:
+    void on_rangeCombo_currentIndexChanged(int index);
+
+private:
+    Ui::DiscreteRangeGUI* ui;
+    std::vector<std::string> itemValues;
 };
 
-#endif /* PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTSETTINGS_H_ */
+
+
+#endif /* SDRGUI_SOAPYGUI_STRINGRANGEGUI_H_ */
