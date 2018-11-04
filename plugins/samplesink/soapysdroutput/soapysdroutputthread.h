@@ -42,6 +42,8 @@ public:
     unsigned int getNbChannels() const { return m_nbChannels; }
     void setLog2Interpolation(unsigned int channel, unsigned int log2_interp);
     unsigned int getLog2Interpolation(unsigned int channel) const;
+    void setSampleRate(unsigned int sampleRate) { m_sampleRate = sampleRate; }
+    unsigned int getSampleRate() const { return m_sampleRate; }
     void setFifo(unsigned int channel, SampleSourceFifo *sampleFifo);
     SampleSourceFifo *getFifo(unsigned int channel);
 

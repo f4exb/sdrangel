@@ -1,8 +1,9 @@
 sdrangel (4.3.0-1) unstable; urgency=medium
 
   * SoapySDR support
+  * BladeRF2 corrections
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 04 Nov 2018 21:14:18 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 18 Nov 2018 21:14:18 +0100
 
 sdrangel (4.2.4-1) unstable; urgency=medium
 

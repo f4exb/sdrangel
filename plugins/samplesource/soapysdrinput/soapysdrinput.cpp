@@ -372,10 +372,9 @@ bool SoapySDRInput::start()
     if (needsStart)
     {
         qDebug("SoapySDRInput::start: (re)sart buddy thread");
+        soapySDRInputThread->setSampleRate(m_settings.m_devSampleRate);
         soapySDRInputThread->startWork();
     }
-
-    applySettings(m_settings, true);
 
     qDebug("SoapySDRInput::start: started");
     m_running = true;
@@ -514,16 +513,28 @@ const QString& SoapySDRInput::getDeviceDescription() const
 
 int SoapySDRInput::getSampleRate() const
 {
-    return 0;
+    int rate = m_settings.m_devSampleRate;
+    return (rate / (1<<m_settings.m_log2Decim));
 }
 
 quint64 SoapySDRInput::getCenterFrequency() const
 {
-    return 0;
+    return m_settings.m_centerFrequency;
 }
 
 void SoapySDRInput::setCenterFrequency(qint64 centerFrequency __attribute__((unused)))
 {
+    SoapySDRInputSettings settings = m_settings;
+    settings.m_centerFrequency = centerFrequency;
+
+    MsgConfigureSoapySDRInput *message = MsgConfigureSoapySDRInput::create(settings, false);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureSoapySDRInput* messageToGUI = MsgConfigureSoapySDRInput::create(settings, false);
+        m_guiMessageQueue->push(messageToGUI);
+    }
 }
 
 bool SoapySDRInput::setDeviceCenterFrequency(SoapySDR::Device *dev, int requestedChannel, quint64 freq_hz, int loPpmTenths)
@@ -607,6 +618,7 @@ bool SoapySDRInput::handleMessage(const Message& message __attribute__((unused))
         DeviceSoapySDRShared::MsgReportBuddyChange& report = (DeviceSoapySDRShared::MsgReportBuddyChange&) message;
         SoapySDRInputSettings settings = m_settings;
         settings.m_fcPos = (SoapySDRInputSettings::fcPos_t) report.getFcPos();
+        //bool fromRxBuddy = report.getRxElseTx();
 
         settings.m_centerFrequency = m_deviceShared.m_device->getFrequency(
                 SOAPY_SDR_RX,
@@ -623,6 +635,13 @@ bool SoapySDRInput::handleMessage(const Message& message __attribute__((unused))
         }
 
         m_settings = settings;
+
+        // propagate settings to GUI if any
+        if (getMessageQueueToGUI())
+        {
+            MsgConfigureSoapySDRInput *reportToGUI = MsgConfigureSoapySDRInput::create(m_settings, false);
+            getMessageQueueToGUI()->push(reportToGUI);
+        }
 
         return true;
     }
@@ -683,8 +702,6 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
 
     if ((m_settings.m_fcPos != settings.m_fcPos) || force)
     {
-        SoapySDRInputThread *inputThread = findThread();
-
         if (inputThread != 0)
         {
             inputThread->setFcPos(requestedChannel, (int) settings.m_fcPos);

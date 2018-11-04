@@ -86,6 +86,7 @@ void SoapySDROutputThread::run()
         std::iota(channels.begin(), channels.end(), 0); // Fill with 0, 1, ..., m_nbChannels-1.
 
         //initialize the sample rate for all channels
+        qDebug("SoapySDROutputThread::run: m_sampleRate: %u", m_sampleRate);
         for (const auto &it : channels) {
             m_dev->setSampleRate(SOAPY_SDR_TX, it, m_sampleRate);
         }
@@ -144,20 +145,20 @@ void SoapySDROutputThread::run()
 
             if (m_nbChannels > 1)
             {
-                callbackMO(buffs, numElems*2); // size given in number of I or Q samples (2 items per sample)
+                callbackMO(buffs, numElems); // size given in number of samples (1 item per sample)
             }
             else
             {
                 switch (m_interpolatorType)
                 {
                 case Interpolator8:
-                    callbackSO8((qint8*) buffs[0], numElems*2);
+                    callbackSO8((qint8*) buffs[0], numElems);
                     break;
                 case Interpolator12:
-                    callbackSO12((qint16*) buffs[0], numElems*2);
+                    callbackSO12((qint16*) buffs[0], numElems);
                     break;
                 case Interpolator16:
-                    callbackSO16((qint16*) buffs[0], numElems*2);
+                    callbackSO16((qint16*) buffs[0], numElems);
                     break;
                 case InterpolatorFloat:
                 default:
@@ -230,21 +231,41 @@ void SoapySDROutputThread::callbackMO(std::vector<void *>& buffs, qint32 samples
 {
     for(unsigned int ichan = 0; ichan < m_nbChannels; ichan++)
     {
-        switch (m_interpolatorType)
+        if (m_channels[ichan].m_sampleFifo)
         {
-        case Interpolator8:
-            callbackSO8((qint8*) buffs[ichan], samplesPerChannel, ichan);
-            break;
-        case Interpolator12:
-            callbackSO12((qint16*) buffs[ichan], samplesPerChannel, ichan);
-            break;
-        case Interpolator16:
-            callbackSO16((qint16*) buffs[ichan], samplesPerChannel, ichan);
-            break;
-        case InterpolatorFloat:
-        default:
-            // TODO
-            break;
+            switch (m_interpolatorType)
+            {
+            case Interpolator8:
+                callbackSO8((qint8*) buffs[ichan], samplesPerChannel, ichan);
+                break;
+            case Interpolator12:
+                callbackSO12((qint16*) buffs[ichan], samplesPerChannel, ichan);
+                break;
+            case Interpolator16:
+                callbackSO16((qint16*) buffs[ichan], samplesPerChannel, ichan);
+                break;
+            case InterpolatorFloat:
+            default:
+                // TODO
+                break;
+            }
+        }
+        else // no FIFO for this channel means channel is unused: fill with zeros
+        {
+            switch (m_interpolatorType)
+            {
+            case Interpolator8:
+                std::fill((qint8*) buffs[ichan], (qint8*) buffs[ichan] + 2*samplesPerChannel, 0);
+                break;
+            case Interpolator12:
+            case Interpolator16:
+                std::fill((qint16*) buffs[ichan], (qint16*) buffs[ichan] + 2*samplesPerChannel, 0);
+                break;
+            case InterpolatorFloat:
+            default:
+                // TODO
+                break;
+            }
         }
     }
 }
