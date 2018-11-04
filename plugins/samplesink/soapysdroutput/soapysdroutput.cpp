@@ -583,12 +583,13 @@ bool SoapySDROutput::handleMessage(const Message& message)
         SoapySDROutputSettings settings = m_settings;
         //bool fromRxBuddy = report.getRxElseTx();
 
-        settings.m_centerFrequency = m_deviceShared.m_device->getFrequency(
+        double centerFrequency = m_deviceShared.m_device->getFrequency(
                 SOAPY_SDR_TX,
                 requestedChannel,
                 m_deviceShared.m_deviceParams->getTxChannelMainTunableElementName(requestedChannel));
 
-        settings.m_devSampleRate = m_deviceShared.m_device->getSampleRate(SOAPY_SDR_TX, requestedChannel);
+        settings.m_centerFrequency = round(centerFrequency/1000.0) * 1000;
+        settings.m_devSampleRate = round(m_deviceShared.m_device->getSampleRate(SOAPY_SDR_TX, requestedChannel));
 
         //SoapySDROutputThread *outputThread = findThread();
 

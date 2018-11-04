@@ -168,7 +168,17 @@ bool SoapySDROutputGui::deserialize(const QByteArray& data)
 
 bool SoapySDROutputGui::handleMessage(const Message& message)
 {
-    if (SoapySDROutput::MsgStartStop::match(message))
+    if (SoapySDROutput::MsgConfigureSoapySDROutput::match(message))
+    {
+        const SoapySDROutput::MsgConfigureSoapySDROutput& cfg = (SoapySDROutput::MsgConfigureSoapySDROutput&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+
+        return true;
+    }
+    else if (SoapySDROutput::MsgStartStop::match(message))
     {
         SoapySDROutput::MsgStartStop& notif = (SoapySDROutput::MsgStartStop&) message;
         blockApplySettings(true);

@@ -191,10 +191,19 @@ bool SoapySDRInputGui::deserialize(const QByteArray& data)
     }
 }
 
-
 bool SoapySDRInputGui::handleMessage(const Message& message)
 {
-    if (SoapySDRInput::MsgStartStop::match(message))
+    if (SoapySDRInput::MsgConfigureSoapySDRInput::match(message))
+    {
+        const SoapySDRInput::MsgConfigureSoapySDRInput& cfg = (SoapySDRInput::MsgConfigureSoapySDRInput&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+
+        return true;
+    }
+    else if (SoapySDRInput::MsgStartStop::match(message))
     {
         SoapySDRInput::MsgStartStop& notif = (SoapySDRInput::MsgStartStop&) message;
         blockApplySettings(true);
