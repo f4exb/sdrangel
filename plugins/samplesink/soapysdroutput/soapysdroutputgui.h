@@ -55,7 +55,11 @@ public:
     virtual bool handleMessage(const Message& message);
 
 private:
-    void createRangesControl(const SoapySDR::RangeList& rangeList, const QString& text, const QString& unit);
+    void createRangesControl(
+            ItemSettingGUI **settingGUI,
+            const SoapySDR::RangeList& rangeList,
+            const QString& text,
+            const QString& unit);
     void createAntennasControl(const std::vector<std::string>& antennaList);
 
     Ui::SoapySDROutputGui* ui;
@@ -74,6 +78,7 @@ private:
 
     ItemSettingGUI *m_sampleRateGUI;
     StringRangeGUI *m_antennas;
+    ItemSettingGUI *m_bandwidthGUI;
 
     void blockApplySettings(bool block) { m_doApplySettings = !block; }
     void displaySettings();
@@ -84,10 +89,11 @@ private:
 
 private slots:
     void handleInputMessages();
-    void on_centerFrequency_changed(quint64 value);
-    void on_LOppm_valueChanged(int value);
     void sampleRateChanged(double sampleRate);
     void antennasChanged();
+    void bandwidthChanged(double bandwidth);
+    void on_centerFrequency_changed(quint64 value);
+    void on_LOppm_valueChanged(int value);
     void on_interp_currentIndexChanged(int index);
     void on_transverter_clicked();
     void on_startStop_toggled(bool checked);

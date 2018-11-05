@@ -96,5 +96,6 @@ void IntervalRangeGUI::on_value_changed(quint64 value)
 void IntervalRangeGUI::on_rangeInterval_currentIndexChanged(int index)
 {
     ui->value->setValueRange(m_nbDigits, m_minima[index], m_maxima[index]);
+    emit ItemSettingGUI::valueChanged(ui->value->getValueNew());
 }
 

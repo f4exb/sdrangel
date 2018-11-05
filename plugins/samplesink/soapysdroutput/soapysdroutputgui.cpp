@@ -48,7 +48,15 @@ SoapySDROutputGui::SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     ui->centerFrequency->setValueRange(7, f_min/1000, f_max/1000);
 
     createAntennasControl(m_sampleSink->getAntennas());
-    createRangesControl(m_sampleSink->getRateRanges(), "SR", "kS/s");
+    createRangesControl(&m_sampleRateGUI, m_sampleSink->getRateRanges(), "SR", "S/s");
+    createRangesControl(&m_bandwidthGUI, m_sampleSink->getBandwidthRanges(), "BW", "Hz");
+
+    if (m_sampleRateGUI) {
+        connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
+    }
+    if (m_bandwidthGUI) {
+        connect(m_bandwidthGUI, SIGNAL(valueChanged(double)), this, SLOT(bandwidthChanged(double)));
+    }
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -72,7 +80,11 @@ void SoapySDROutputGui::destroy()
     delete this;
 }
 
-void SoapySDROutputGui::createRangesControl(const SoapySDR::RangeList& rangeList, const QString& text, const QString& unit)
+void SoapySDROutputGui::createRangesControl(
+        ItemSettingGUI **settingGUI,
+        const SoapySDR::RangeList& rangeList,
+        const QString& text,
+        const QString& unit)
 {
     if (rangeList.size() == 0) { // return early if the range list is empty
         return;
@@ -94,17 +106,15 @@ void SoapySDROutputGui::createRangesControl(const SoapySDR::RangeList& rangeList
     {
         DiscreteRangeGUI *rangeGUI = new DiscreteRangeGUI(this);
         rangeGUI->setLabel(text);
-        rangeGUI->setUnits(unit);
+        rangeGUI->setUnits(QString("k%1").arg(unit));
 
         for (const auto &it : rangeList) {
             rangeGUI->addItem(QString("%1").arg(QString::number(it.minimum()/1000.0, 'f', 0)), it.minimum());
         }
 
-        m_sampleRateGUI = rangeGUI;
+        *settingGUI = rangeGUI;
         QVBoxLayout *layout = (QVBoxLayout *) ui->scrollAreaWidgetContents->layout();
         layout->addWidget(rangeGUI);
-
-        connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
     }
     else if (rangeInterval)
     {
@@ -118,11 +128,9 @@ void SoapySDROutputGui::createRangesControl(const SoapySDR::RangeList& rangeList
 
         rangeGUI->reset();
 
-        m_sampleRateGUI = rangeGUI;
+        *settingGUI = rangeGUI;
         QVBoxLayout *layout = (QVBoxLayout *) ui->scrollAreaWidgetContents->layout();
         layout->addWidget(rangeGUI);
-
-        connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
     }
 }
 
@@ -259,9 +267,15 @@ void SoapySDROutputGui::antennasChanged()
 {
     const std::string& antennaStr = m_antennas->getCurrentValue();
     m_settings.m_antenna = QString(antennaStr.c_str());
-
     sendSettings();
 }
+
+void SoapySDROutputGui::bandwidthChanged(double bandwidth)
+{
+    m_settings.m_bandwidth = bandwidth;
+    sendSettings();
+}
+
 
 void SoapySDROutputGui::on_centerFrequency_changed(quint64 value)
 {

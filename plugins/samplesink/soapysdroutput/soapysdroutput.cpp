@@ -195,6 +195,12 @@ const std::vector<std::string>& SoapySDROutput::getAntennas()
     return channelSettings->m_antennas;
 }
 
+const SoapySDR::RangeList& SoapySDROutput::getBandwidthRanges()
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getTxChannelSettings(m_deviceShared.m_channel);
+    return channelSettings->m_bandwidthsRanges;
+}
+
 void SoapySDROutput::init()
 {
     applySettings(m_settings, true);
@@ -596,6 +602,7 @@ bool SoapySDROutput::handleMessage(const Message& message)
 
         settings.m_centerFrequency = round(centerFrequency/1000.0) * 1000;
         settings.m_devSampleRate = round(m_deviceShared.m_device->getSampleRate(SOAPY_SDR_TX, requestedChannel));
+        settings.m_bandwidth = round(m_deviceShared.m_device->getBandwidth(SOAPY_SDR_TX, requestedChannel));
 
         //SoapySDROutputThread *outputThread = findThread();
 
@@ -734,6 +741,25 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
         }
     }
 
+    if ((m_settings.m_bandwidth != settings.m_bandwidth) || force)
+    {
+        forwardChangeToBuddies = true;
+
+        if (dev != 0)
+        {
+            try
+            {
+                dev->setBandwidth(SOAPY_SDR_TX, requestedChannel, settings.m_bandwidth);
+                qDebug("SoapySDROutput::applySettings: bandwidth set to %u", settings.m_bandwidth);
+            }
+            catch (const std::exception &ex)
+            {
+                qCritical("SoapySDROutput::applySettings: cannot set bandwidth to %u: %s",
+                        settings.m_bandwidth, ex.what());
+            }
+        }
+    }
+
     if (forwardChangeOwnDSP)
     {
         int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Interp);
@@ -778,7 +804,8 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
             << " m_centerFrequency: " << m_settings.m_centerFrequency << " Hz"
             << " m_LOppmTenths: " << m_settings.m_LOppmTenths
             << " m_log2Interp: " << m_settings.m_log2Interp
-            << " m_devSampleRate: " << m_settings.m_devSampleRate;
+            << " m_devSampleRate: " << m_settings.m_devSampleRate
+            << " m_bandwidth: " << m_settings.m_bandwidth;
 
     return true;
 }

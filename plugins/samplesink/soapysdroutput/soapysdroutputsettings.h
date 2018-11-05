@@ -27,6 +27,7 @@ struct SoapySDROutputSettings {
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
     QString m_antenna;
+    quint32 m_bandwidth;
 
     SoapySDROutputSettings();
     void resetToDefaults();
