@@ -38,7 +38,8 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleRate(0),
     m_deviceCenterFrequency(0),
     m_lastEngineState(DSPDeviceSourceEngine::StNotStarted),
-    m_sampleRateGUI(0)
+    m_sampleRateGUI(0),
+    m_bandwidthGUI(0)
 {
     m_sampleSource = (SoapySDRInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
     ui->setupUi(this);
@@ -48,8 +49,16 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource->getFrequencyRange(f_min, f_max);
     ui->centerFrequency->setValueRange(7, f_min/1000, f_max/1000);
 
-    createRangesControl(m_sampleSource->getRateRanges(), "SR", "kS/s");
     createAntennasControl(m_sampleSource->getAntennas());
+    createRangesControl(&m_sampleRateGUI, m_sampleSource->getRateRanges(), "SR", "S/s");
+    createRangesControl(&m_bandwidthGUI, m_sampleSource->getBandwidthRanges(), "BW", "Hz");
+
+    if (m_sampleRateGUI) {
+        connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
+    }
+    if (m_bandwidthGUI) {
+        connect(m_bandwidthGUI,  SIGNAL(valueChanged(double)), this, SLOT(bandwidthChanged(double)));
+    }
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -73,7 +82,11 @@ void SoapySDRInputGui::destroy()
     delete this;
 }
 
-void SoapySDRInputGui::createRangesControl(const SoapySDR::RangeList& rangeList, const QString& text, const QString& unit)
+void SoapySDRInputGui::createRangesControl(
+        ItemSettingGUI **settingGUI,
+        const SoapySDR::RangeList& rangeList,
+        const QString& text,
+        const QString& unit)
 {
     if (rangeList.size() == 0) { // return early if the range list is empty
         return;
@@ -95,41 +108,15 @@ void SoapySDRInputGui::createRangesControl(const SoapySDR::RangeList& rangeList,
     {
         DiscreteRangeGUI *rangeGUI = new DiscreteRangeGUI(this);
         rangeGUI->setLabel(text);
-        rangeGUI->setUnits(unit);
+        rangeGUI->setUnits(QString("k%1").arg(unit));
 
         for (const auto &it : rangeList) {
             rangeGUI->addItem(QString("%1").arg(QString::number(it.minimum()/1000.0, 'f', 0)), it.minimum());
         }
 
-        m_sampleRateGUI = rangeGUI;
+        *settingGUI = rangeGUI;
         QVBoxLayout *layout = (QVBoxLayout *) ui->scrollAreaWidgetContents->layout();
         layout->addWidget(rangeGUI);
-
-        connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
-//        QHBoxLayout *layout = new QHBoxLayout();
-//        QLabel *rangeLabel = new QLabel();
-//        rangeLabel->setText(text);
-//        QLabel *rangeUnit = new QLabel();
-//        rangeUnit->setText(unit);
-//        QComboBox *rangeCombo = new QComboBox();
-//
-//        for (const auto &it : rangeList) {
-//            rangeCombo->addItem(QString("%1").arg(QString::number(it.minimum()/1000.0, 'f', 0)));
-//        }
-//
-//        layout->addWidget(rangeLabel);
-//        layout->addWidget(rangeCombo);
-//        layout->addWidget(rangeUnit);
-//        layout->setMargin(0);
-//        layout->setSpacing(6);
-//        rangeLabel->show();
-//        rangeCombo->show();
-//        QWidget *window = new QWidget(ui->scrollAreaWidgetContents);
-//        window->setFixedWidth(300);
-//        window->setFixedHeight(30);
-//        window->setContentsMargins(0,0,0,0);
-//        //window->setStyleSheet("background-color:black;");
-//        window->setLayout(layout);
     }
     else if (rangeInterval)
     {
@@ -143,16 +130,18 @@ void SoapySDRInputGui::createRangesControl(const SoapySDR::RangeList& rangeList,
 
         rangeGUI->reset();
 
-        m_sampleRateGUI = rangeGUI;
+        *settingGUI = rangeGUI;
         QVBoxLayout *layout = (QVBoxLayout *) ui->scrollAreaWidgetContents->layout();
         layout->addWidget(rangeGUI);
-
-        connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
     }
 }
 
 void SoapySDRInputGui::createAntennasControl(const std::vector<std::string>& antennaList)
 {
+    if (antennaList.size() == 0) { // return early if the antenna list is empty
+        return;
+    }
+
     m_antennas = new StringRangeGUI(this);
     m_antennas->setLabel(QString("Antenna"));
     m_antennas->setUnits(QString("Port"));
@@ -269,17 +258,23 @@ void SoapySDRInputGui::handleInputMessages()
     }
 }
 
+void SoapySDRInputGui::antennasChanged()
+{
+    const std::string& antennaStr = m_antennas->getCurrentValue();
+    m_settings.m_antenna = QString(antennaStr.c_str());
+
+    sendSettings();
+}
+
 void SoapySDRInputGui::sampleRateChanged(double sampleRate)
 {
     m_settings.m_devSampleRate = sampleRate;
     sendSettings();
 }
 
-void SoapySDRInputGui::antennasChanged()
+void SoapySDRInputGui::bandwidthChanged(double bandwidth)
 {
-    const std::string& antennaStr = m_antennas->getCurrentValue();
-    m_settings.m_antenna = QString(antennaStr.c_str());
-
+    m_settings.m_bandwidth = bandwidth;
     sendSettings();
 }
 
@@ -366,7 +361,9 @@ void SoapySDRInputGui::displaySettings()
     blockApplySettings(true);
 
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+    m_antennas->setValue(m_settings.m_antenna.toStdString());
     m_sampleRateGUI->setValue(m_settings.m_devSampleRate);
+    m_bandwidthGUI->setValue(m_settings.m_bandwidth);
 
     ui->dcOffset->setChecked(m_settings.m_dcBlock);
     ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
@@ -376,8 +373,6 @@ void SoapySDRInputGui::displaySettings()
 
     ui->LOppm->setValue(m_settings.m_LOppmTenths);
     ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
-
-    m_antennas->setValue(m_settings.m_antenna.toStdString());
 
     blockApplySettings(false);
 }

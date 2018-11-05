@@ -24,8 +24,9 @@ struct SoapySDROutputSettings {
     int m_LOppmTenths;
     qint32 m_devSampleRate;
     quint32 m_log2Interp;
-    bool     m_transverterMode;
-    qint64   m_transverterDeltaFrequency;
+    bool m_transverterMode;
+    qint64 m_transverterDeltaFrequency;
+    QString m_antenna;
 
     SoapySDROutputSettings();
     void resetToDefaults();

@@ -203,16 +203,22 @@ void SoapySDRInput::getFrequencyRange(uint64_t& min, uint64_t& max)
     }
 }
 
+const std::vector<std::string>& SoapySDRInput::getAntennas()
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getRxChannelSettings(m_deviceShared.m_channel);
+    return channelSettings->m_antennas;
+}
+
 const SoapySDR::RangeList& SoapySDRInput::getRateRanges()
 {
     const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getRxChannelSettings(m_deviceShared.m_channel);
     return channelSettings->m_ratesRanges;
 }
 
-const std::vector<std::string>& SoapySDRInput::getAntennas()
+const SoapySDR::RangeList& SoapySDRInput::getBandwidthRanges()
 {
     const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getRxChannelSettings(m_deviceShared.m_channel);
-    return channelSettings->m_antennas;
+    return channelSettings->m_bandwidthsRanges;
 }
 
 int SoapySDRInput::getAntennaIndex(const std::string& antenna)
@@ -645,6 +651,7 @@ bool SoapySDRInput::handleMessage(const Message& message __attribute__((unused))
 
         settings.m_centerFrequency = round(centerFrequency/1000.0) * 1000;
         settings.m_devSampleRate = round(m_deviceShared.m_device->getSampleRate(SOAPY_SDR_RX, requestedChannel));
+        settings.m_bandwidth = round(m_deviceShared.m_device->getBandwidth(SOAPY_SDR_RX, requestedChannel));
 
         SoapySDRInputThread *inputThread = findThread();
 
@@ -780,6 +787,25 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
         }
     }
 
+    if ((m_settings.m_bandwidth != settings.m_bandwidth) || force)
+    {
+        forwardChangeToBuddies = true;
+
+        if (dev != 0)
+        {
+            try
+            {
+                dev->setBandwidth(SOAPY_SDR_RX, requestedChannel, settings.m_bandwidth);
+                qDebug("SoapySDRInput::applySettings: bandwidth set to %u", settings.m_bandwidth);
+            }
+            catch (const std::exception &ex)
+            {
+                qCritical("SoapySDRInput::applySettings: cannot set bandwidth to %u: %s",
+                        settings.m_bandwidth, ex.what());
+            }
+        }
+    }
+
     if (forwardChangeOwnDSP)
     {
         int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
@@ -829,7 +855,8 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
             << " m_devSampleRate: " << m_settings.m_devSampleRate
             << " m_dcBlock: " << m_settings.m_dcBlock
             << " m_iqCorrection: " << m_settings.m_iqCorrection
-            << " m_antenna: " << m_settings.m_antenna;
+            << " m_antenna: " << m_settings.m_antenna
+            << " m_bandwidth: " << m_settings.m_bandwidth;
 
     return true;
 }

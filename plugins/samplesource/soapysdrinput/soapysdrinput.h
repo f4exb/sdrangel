@@ -121,8 +121,9 @@ public:
     virtual bool handleMessage(const Message& message);
 
     void getFrequencyRange(uint64_t& min, uint64_t& max);
-    const SoapySDR::RangeList& getRateRanges();
     const std::vector<std::string>& getAntennas();
+    const SoapySDR::RangeList& getRateRanges();
+    const SoapySDR::RangeList& getBandwidthRanges();
     int getAntennaIndex(const std::string& antenna);
 
 private:

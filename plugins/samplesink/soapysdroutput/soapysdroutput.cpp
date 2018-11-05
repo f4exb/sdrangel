@@ -717,6 +717,23 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
         }
     }
 
+    if ((m_settings.m_antenna != settings.m_antenna) || force)
+    {
+        if (dev != 0)
+        {
+            try
+            {
+                dev->setAntenna(SOAPY_SDR_TX, requestedChannel, settings.m_antenna.toStdString());
+                qDebug("SoapySDROutput::applySettings: set antenna to %s", settings.m_antenna.toStdString().c_str());
+            }
+            catch (const std::exception &ex)
+            {
+                qCritical("SoapySDROutput::applySettings: cannot set antenna to %s: %s",
+                        settings.m_antenna.toStdString().c_str(), ex.what());
+            }
+        }
+    }
+
     if (forwardChangeOwnDSP)
     {
         int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Interp);

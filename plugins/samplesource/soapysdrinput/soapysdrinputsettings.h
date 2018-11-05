@@ -38,6 +38,7 @@ struct SoapySDRInputSettings {
     qint64 m_transverterDeltaFrequency;
     QString m_fileRecordName;
     QString m_antenna;
+    quint32 m_bandwidth;
 
     SoapySDRInputSettings();
     void resetToDefaults();

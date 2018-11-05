@@ -29,6 +29,7 @@
 class DeviceSampleSink;
 class DeviceUISet;
 class ItemSettingGUI;
+class StringRangeGUI;
 
 namespace Ui {
     class SoapySDROutputGui;
@@ -55,6 +56,8 @@ public:
 
 private:
     void createRangesControl(const SoapySDR::RangeList& rangeList, const QString& text, const QString& unit);
+    void createAntennasControl(const std::vector<std::string>& antennaList);
+
     Ui::SoapySDROutputGui* ui;
 
     DeviceUISet* m_deviceUISet;
@@ -70,6 +73,7 @@ private:
     MessageQueue m_inputMessageQueue;
 
     ItemSettingGUI *m_sampleRateGUI;
+    StringRangeGUI *m_antennas;
 
     void blockApplySettings(bool block) { m_doApplySettings = !block; }
     void displaySettings();
@@ -83,6 +87,7 @@ private slots:
     void on_centerFrequency_changed(quint64 value);
     void on_LOppm_valueChanged(int value);
     void sampleRateChanged(double sampleRate);
+    void antennasChanged();
     void on_interp_currentIndexChanged(int index);
     void on_transverter_clicked();
     void on_startStop_toggled(bool checked);

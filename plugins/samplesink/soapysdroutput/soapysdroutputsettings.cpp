@@ -32,6 +32,7 @@ void SoapySDROutputSettings::resetToDefaults()
     m_log2Interp = 0;
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_antenna = "NONE";
 }
 
 QByteArray SoapySDROutputSettings::serialize() const
@@ -43,6 +44,7 @@ QByteArray SoapySDROutputSettings::serialize() const
     s.writeU32(3, m_log2Interp);
     s.writeBool(4, m_transverterMode);
     s.writeS64(5, m_transverterDeltaFrequency);
+    s.writeString(6, m_antenna);
 
     return s.final();
 }
@@ -64,6 +66,7 @@ bool SoapySDROutputSettings::deserialize(const QByteArray& data)
         d.readU32(3, &m_log2Interp);
         d.readBool(4, &m_transverterMode, false);
         d.readS64(5, &m_transverterDeltaFrequency, 0);
+        d.readString(6, &m_antenna, "NONE");
 
         return true;
     }
