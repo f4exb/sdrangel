@@ -24,6 +24,8 @@
 #include "gui/glspectrum.h"
 #include "soapygui/discreterangegui.h"
 #include "soapygui/intervalrangegui.h"
+#include "soapygui/stringrangegui.h"
+#include "soapygui/dynamicitemsettinggui.h"
 
 #include "ui_soapysdrinputgui.h"
 #include "soapysdrinputgui.h"
@@ -52,6 +54,7 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     createAntennasControl(m_sampleSource->getAntennas());
     createRangesControl(&m_sampleRateGUI, m_sampleSource->getRateRanges(), "SR", "S/s");
     createRangesControl(&m_bandwidthGUI, m_sampleSource->getBandwidthRanges(), "BW", "Hz");
+    createTunableElementsControl(m_sampleSource->getTunableElements());
 
     if (m_sampleRateGUI) {
         connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
@@ -154,6 +157,24 @@ void SoapySDRInputGui::createAntennasControl(const std::vector<std::string>& ant
     layout->addWidget(m_antennas);
 
     connect(m_antennas, SIGNAL(valueChanged()), this, SLOT(antennasChanged()));
+}
+
+void SoapySDRInputGui::createTunableElementsControl(const std::vector<DeviceSoapySDRParams::FrequencySetting>& tunableElementsList)
+{
+    if (tunableElementsList.size() <= 1) { // This list is created for other elements than the main one (RF) which is always at index 0
+        return;
+    }
+
+    std::vector<DeviceSoapySDRParams::FrequencySetting>::const_iterator it = tunableElementsList.begin() + 1;
+
+    for (int i = 0; it != tunableElementsList.end(); ++it, i++)
+    {
+        ItemSettingGUI *rangeGUI;
+        createRangesControl(&rangeGUI, it->m_ranges, QString("%1 freq").arg(it->m_name.c_str()), QString("Hz"));
+        DynamicItemSettingGUI *gui = new DynamicItemSettingGUI(rangeGUI, QString(it->m_name.c_str()));
+        m_tunableElementsGUIs.push_back(gui);
+        connect(m_tunableElementsGUIs.back(), SIGNAL(valueChanged(QString, double)), this, SLOT(tunableElementChanged(QString, double)));
+    }
 }
 
 void SoapySDRInputGui::setName(const QString& name)
@@ -276,6 +297,11 @@ void SoapySDRInputGui::bandwidthChanged(double bandwidth)
 {
     m_settings.m_bandwidth = bandwidth;
     sendSettings();
+}
+
+void SoapySDRInputGui::tunableElementChanged(QString name, double value)
+{
+    qDebug("SoapySDRInputGui::tunableElementChanged: name: %s value: %lf", name.toStdString().c_str(), value);
 }
 
 void SoapySDRInputGui::on_centerFrequency_changed(quint64 value)

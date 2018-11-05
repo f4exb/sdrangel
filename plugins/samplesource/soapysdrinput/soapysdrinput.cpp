@@ -233,6 +233,12 @@ int SoapySDRInput::getAntennaIndex(const std::string& antenna)
     }
 }
 
+const std::vector<DeviceSoapySDRParams::FrequencySetting>& SoapySDRInput::getTunableElements()
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getRxChannelSettings(m_deviceShared.m_channel);
+    return channelSettings->m_frequencySettings;
+}
+
 void SoapySDRInput::init()
 {
     applySettings(m_settings, true);

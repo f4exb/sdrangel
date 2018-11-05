@@ -201,6 +201,12 @@ const SoapySDR::RangeList& SoapySDROutput::getBandwidthRanges()
     return channelSettings->m_bandwidthsRanges;
 }
 
+const std::vector<DeviceSoapySDRParams::FrequencySetting>& SoapySDROutput::getTunableElements()
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getTxChannelSettings(m_deviceShared.m_channel);
+    return channelSettings->m_frequencySettings;
+}
+
 void SoapySDROutput::init()
 {
     applySettings(m_settings, true);

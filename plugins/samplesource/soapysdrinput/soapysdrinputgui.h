@@ -17,18 +17,19 @@
 #ifndef PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTGUI_H_
 #define PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTGUI_H_
 
-#include <soapygui/stringrangegui.h>
 #include <QTimer>
 #include <QWidget>
 #include <QComboBox>
 
 #include "plugin/plugininstancegui.h"
 #include "util/messagequeue.h"
+
 #include "soapysdrinput.h"
 
 class DeviceUISet;
 class ItemSettingGUI;
 class StringRangeGUI;
+class DynamicItemSettingGUI;
 
 namespace Ui {
     class SoapySDRInputGui;
@@ -60,6 +61,7 @@ private:
             const QString& text,
             const QString& unit);
     void createAntennasControl(const std::vector<std::string>& antennaList);
+    void createTunableElementsControl(const std::vector<DeviceSoapySDRParams::FrequencySetting>& tunableElementsList);
 
     Ui::SoapySDRInputGui* ui;
 
@@ -78,6 +80,7 @@ private:
     StringRangeGUI *m_antennas;
     ItemSettingGUI *m_sampleRateGUI;
     ItemSettingGUI *m_bandwidthGUI;
+    std::vector<DynamicItemSettingGUI*> m_tunableElementsGUIs;
 
     void displaySettings();
     void sendSettings();
@@ -90,6 +93,7 @@ private slots:
     void handleInputMessages();
     void sampleRateChanged(double sampleRate);
     void antennasChanged();
+    void tunableElementChanged(QString name, double value);
     void bandwidthChanged(double bandwidth);
     void on_centerFrequency_changed(quint64 value);
     void on_LOppm_valueChanged(int value);

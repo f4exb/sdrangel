@@ -14,42 +14,28 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTSETTINGS_H_
-#define PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTSETTINGS_H_
-
-#include <QtGlobal>
+#include <QObject>
 #include <QString>
-#include <QMap>
 
-struct SoapySDRInputSettings {
-    typedef enum {
-        FC_POS_INFRA = 0,
-        FC_POS_SUPRA,
-        FC_POS_CENTER
-    } fcPos_t;
+#include "itemsettinggui.h"
 
-    quint64 m_centerFrequency;
-    qint32 m_LOppmTenths;
-    qint32 m_devSampleRate;
-    quint32 m_log2Decim;
-    fcPos_t m_fcPos;
-    bool m_dcBlock;
-    bool m_iqCorrection;
-    bool m_transverterMode;
-    qint64 m_transverterDeltaFrequency;
-    QString m_fileRecordName;
-    QString m_antenna;
-    quint32 m_bandwidth;
-    QMap<QString, double> m_tunableElements;
+class DynamicItemSettingGUI : public QObject
+{
+    Q_OBJECT
+public:
+    DynamicItemSettingGUI(ItemSettingGUI *itemSettingGUI, const QString& name, QObject *parent = 0);
+    ~DynamicItemSettingGUI();
 
-    SoapySDRInputSettings();
-    void resetToDefaults();
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+    const QString& getName() const { return m_name; }
+    double getValue() const { return m_itemSettingGUI->getCurrentValue(); }
+
+signals:
+    void valueChanged(QString itemName, double value);
+
+private slots:
+    void processValueChanged(double value);
 
 private:
-    QByteArray serializeNamedElementMap(const QMap<QString, double>& map) const;
-    void deserializeNamedElementMap(const QByteArray& data, QMap<QString, double>& map);
+    ItemSettingGUI *m_itemSettingGUI;
+    QString m_name;
 };
-
-#endif /* PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTSETTINGS_H_ */

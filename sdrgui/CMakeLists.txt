@@ -45,20 +45,21 @@ set(sdrgui_SOURCES
     gui/tvscreen.cpp
     gui/valuedial.cpp
     gui/valuedialz.cpp
-    
+
     dsp/scopevis.cpp
     dsp/scopevismulti.cpp
     dsp/scopevisxy.cpp
     dsp/spectrumvis.cpp
     dsp/spectrumscopecombovis.cpp
-    
+
     device/deviceuiset.cpp
-    
+
     soapygui/discreterangegui.cpp
     soapygui/intervalrangegui.cpp
     soapygui/itemsettinggui.cpp
     soapygui/stringrangegui.cpp
-    
+    soapygui/dynamicitemsettinggui.cpp
+
     webapi/webapiadaptergui.cpp
 )
 
@@ -92,7 +93,7 @@ set(sdrgui_HEADERS
     gui/glspectrumgui.h
     gui/indicator.h
     gui/levelmeter.h
-    gui/loggingdialog.h    
+    gui/loggingdialog.h
     gui/mypositiondialog.h
     gui/physicalunit.h
     gui/pluginsdialog.h
@@ -104,23 +105,24 @@ set(sdrgui_HEADERS
     gui/tickedslider.h
     gui/transverterbutton.h
     gui/transverterdialog.h
-    gui/tvscreen.h    
+    gui/tvscreen.h
     gui/valuedial.h
     gui/valuedialz.h
-    
+
     dsp/scopevis.h
     dsp/scopevismulti.h
-    dsp/scopevisxy.h    
+    dsp/scopevisxy.h
     dsp/spectrumvis.h
     dsp/spectrumscopecombovis.h
-    
+
     device/deviceuiset.h
-    
+
     soapygui/discreterangegui.h
     soapygui/intervalrangegui.h
     soapygui/itemsettinggui.h
     soapygui/stringrangegui.h
-    
+    soapygui/dynamicitemsettinggui.h
+
     webapi/webapiadaptergui.h
 )
 
@@ -180,7 +182,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/sdrbase
     ${CMAKE_SOURCE_DIR}/logging
     ${CMAKE_SOURCE_DIR}/httpserver
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${CMAKE_CURRENT_BINARY_DIR}
     ${OPENGL_INCLUDE_DIR}
 )

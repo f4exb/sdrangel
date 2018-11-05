@@ -103,6 +103,7 @@ public:
     const SoapySDR::RangeList& getRateRanges();
     const std::vector<std::string>& getAntennas();
     const SoapySDR::RangeList& getBandwidthRanges();
+    const std::vector<DeviceSoapySDRParams::FrequencySetting>& getTunableElements();
 
 private:
     DeviceSinkAPI *m_deviceAPI;
