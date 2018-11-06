@@ -42,7 +42,7 @@ public:
     virtual void setValue(double value);
 
 private slots:
-    void on_value_changed(quint64 value);
+    void on_value_changed(qint64 value);
     void on_rangeInterval_currentIndexChanged(int index);
 
 private:

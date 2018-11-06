@@ -37,7 +37,10 @@ SoapySDROutputGui::SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     m_doApplySettings(true),
     m_sampleSink(0),
     m_sampleRate(0),
-    m_lastEngineState(DSPDeviceSinkEngine::StNotStarted)
+    m_lastEngineState(DSPDeviceSinkEngine::StNotStarted),
+    m_antennas(0),
+    m_sampleRateGUI(0),
+    m_bandwidthGUI(0)
 {
     m_sampleSink = (SoapySDROutput*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
     ui->setupUi(this);
@@ -322,7 +325,16 @@ void SoapySDROutputGui::displaySettings()
     blockApplySettings(true);
 
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
-    m_sampleRateGUI->setValue(m_settings.m_devSampleRate);
+
+    if (m_antennas) {
+        m_antennas->setValue(m_settings.m_antenna.toStdString());
+    }
+    if (m_sampleRateGUI) {
+        m_sampleRateGUI->setValue(m_settings.m_devSampleRate);
+    }
+    if (m_bandwidthGUI) {
+        m_bandwidthGUI->setValue(m_settings.m_bandwidth);
+    }
 
     ui->interp->setCurrentIndex(m_settings.m_log2Interp);
 

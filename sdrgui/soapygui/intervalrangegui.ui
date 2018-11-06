@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>263</width>
-    <height>30</height>
+    <width>295</width>
+    <height>33</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -30,7 +30,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>262</width>
+     <width>292</width>
      <height>29</height>
     </rect>
    </property>
@@ -43,7 +43,7 @@
      </widget>
     </item>
     <item>
-     <widget class="ValueDial" name="value" native="true">
+     <widget class="ValueDialZ" name="value" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
         <horstretch>0</horstretch>
@@ -52,7 +52,7 @@
       </property>
       <property name="minimumSize">
        <size>
-        <width>120</width>
+        <width>150</width>
         <height>16</height>
        </size>
       </property>
@@ -92,9 +92,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ValueDial</class>
+   <class>ValueDialZ</class>
    <extends>QWidget</extends>
-   <header>gui/valuedial.h</header>
+   <header>gui/valuedialz.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -76,8 +76,8 @@ private:
     int m_lastEngineState;
     MessageQueue m_inputMessageQueue;
 
-    ItemSettingGUI *m_sampleRateGUI;
     StringRangeGUI *m_antennas;
+    ItemSettingGUI *m_sampleRateGUI;
     ItemSettingGUI *m_bandwidthGUI;
 
     void blockApplySettings(bool block) { m_doApplySettings = !block; }

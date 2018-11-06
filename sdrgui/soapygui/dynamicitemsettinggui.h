@@ -28,6 +28,7 @@ public:
 
     const QString& getName() const { return m_name; }
     double getValue() const { return m_itemSettingGUI->getCurrentValue(); }
+    void setValue(double value) { m_itemSettingGUI->setValue(value); }
 
 signals:
     void valueChanged(QString itemName, double value);

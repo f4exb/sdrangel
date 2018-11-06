@@ -83,6 +83,7 @@ private:
     std::vector<DynamicItemSettingGUI*> m_tunableElementsGUIs;
 
     void displaySettings();
+    void displayTunableElementsControlSettings();
     void sendSettings();
     void updateSampleRateAndFrequency();
     void updateFrequencyLimits();

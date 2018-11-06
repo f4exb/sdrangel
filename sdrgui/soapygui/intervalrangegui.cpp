@@ -70,7 +70,7 @@ void IntervalRangeGUI::reset()
         ui->rangeInterval->blockSignals(true);
         ui->rangeInterval->setCurrentIndex(0);
         ui->rangeInterval->blockSignals(false);
-        ui->value->setValueRange(m_nbDigits, m_minima[0], m_maxima[0]);
+        ui->value->setValueRange(m_minima[0] >= 0, m_nbDigits, m_minima[0], m_maxima[0]);
     }
 
     if (m_minima.size() == 1) {
@@ -88,14 +88,14 @@ void IntervalRangeGUI::setValue(double value)
     ui->value->setValue(value);
 }
 
-void IntervalRangeGUI::on_value_changed(quint64 value)
+void IntervalRangeGUI::on_value_changed(qint64 value)
 {
     emit ItemSettingGUI::valueChanged(value);
 }
 
 void IntervalRangeGUI::on_rangeInterval_currentIndexChanged(int index)
 {
-    ui->value->setValueRange(m_nbDigits, m_minima[index], m_maxima[index]);
+    ui->value->setValueRange(m_minima[index] >= 0, m_nbDigits, m_minima[index], m_maxima[index]);
     emit ItemSettingGUI::valueChanged(ui->value->getValueNew());
 }
 

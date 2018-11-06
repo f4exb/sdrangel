@@ -40,6 +40,7 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleRate(0),
     m_deviceCenterFrequency(0),
     m_lastEngineState(DSPDeviceSourceEngine::StNotStarted),
+    m_antennas(0),
     m_sampleRateGUI(0),
     m_bandwidthGUI(0)
 {
@@ -170,7 +171,11 @@ void SoapySDRInputGui::createTunableElementsControl(const std::vector<DeviceSoap
     for (int i = 0; it != tunableElementsList.end(); ++it, i++)
     {
         ItemSettingGUI *rangeGUI;
-        createRangesControl(&rangeGUI, it->m_ranges, QString("%1 freq").arg(it->m_name.c_str()), QString("Hz"));
+        createRangesControl(
+                &rangeGUI,
+                it->m_ranges,
+                QString("%1 freq").arg(it->m_name.c_str()),
+                QString((it->m_name == "CORR") ? "ppm" : "Hz"));
         DynamicItemSettingGUI *gui = new DynamicItemSettingGUI(rangeGUI, QString(it->m_name.c_str()));
         m_tunableElementsGUIs.push_back(gui);
         connect(m_tunableElementsGUIs.back(), SIGNAL(valueChanged(QString, double)), this, SLOT(tunableElementChanged(QString, double)));
@@ -302,6 +307,8 @@ void SoapySDRInputGui::bandwidthChanged(double bandwidth)
 void SoapySDRInputGui::tunableElementChanged(QString name, double value)
 {
     qDebug("SoapySDRInputGui::tunableElementChanged: name: %s value: %lf", name.toStdString().c_str(), value);
+    m_settings.m_tunableElements[name] = value;
+    sendSettings();
 }
 
 void SoapySDRInputGui::on_centerFrequency_changed(quint64 value)
@@ -387,9 +394,16 @@ void SoapySDRInputGui::displaySettings()
     blockApplySettings(true);
 
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
-    m_antennas->setValue(m_settings.m_antenna.toStdString());
-    m_sampleRateGUI->setValue(m_settings.m_devSampleRate);
-    m_bandwidthGUI->setValue(m_settings.m_bandwidth);
+
+    if (m_antennas) {
+        m_antennas->setValue(m_settings.m_antenna.toStdString());
+    }
+    if (m_sampleRateGUI) {
+        m_sampleRateGUI->setValue(m_settings.m_devSampleRate);
+    }
+    if (m_bandwidthGUI) {
+        m_bandwidthGUI->setValue(m_settings.m_bandwidth);
+    }
 
     ui->dcOffset->setChecked(m_settings.m_dcBlock);
     ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
@@ -400,7 +414,21 @@ void SoapySDRInputGui::displaySettings()
     ui->LOppm->setValue(m_settings.m_LOppmTenths);
     ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 
+    displayTunableElementsControlSettings();
+
     blockApplySettings(false);
+}
+
+void SoapySDRInputGui::displayTunableElementsControlSettings()
+{
+    for (const auto &it : m_tunableElementsGUIs)
+    {
+        QMap<QString, double>::const_iterator elIt = m_settings.m_tunableElements.find(it->getName());
+
+        if (elIt != m_settings.m_tunableElements.end()) {
+            it->setValue(*elIt);
+        }
+    }
 }
 
 void SoapySDRInputGui::sendSettings()
