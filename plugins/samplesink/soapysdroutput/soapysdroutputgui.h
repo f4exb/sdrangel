@@ -30,6 +30,7 @@ class DeviceSampleSink;
 class DeviceUISet;
 class ItemSettingGUI;
 class StringRangeGUI;
+class DynamicItemSettingGUI;
 
 namespace Ui {
     class SoapySDROutputGui;
@@ -61,6 +62,7 @@ private:
             const QString& text,
             const QString& unit);
     void createAntennasControl(const std::vector<std::string>& antennaList);
+    void createTunableElementsControl(const std::vector<DeviceSoapySDRParams::FrequencySetting>& tunableElementsList);
 
     Ui::SoapySDROutputGui* ui;
 
@@ -79,9 +81,11 @@ private:
     StringRangeGUI *m_antennas;
     ItemSettingGUI *m_sampleRateGUI;
     ItemSettingGUI *m_bandwidthGUI;
+    std::vector<DynamicItemSettingGUI*> m_tunableElementsGUIs;
 
     void blockApplySettings(bool block) { m_doApplySettings = !block; }
     void displaySettings();
+    void displayTunableElementsControlSettings();
     void sendSettings();
     void updateSampleRateAndFrequency();
     void updateFrequencyLimits();
@@ -89,9 +93,10 @@ private:
 
 private slots:
     void handleInputMessages();
-    void sampleRateChanged(double sampleRate);
     void antennasChanged();
+    void sampleRateChanged(double sampleRate);
     void bandwidthChanged(double bandwidth);
+    void tunableElementChanged(QString name, double value);
     void on_centerFrequency_changed(quint64 value);
     void on_LOppm_valueChanged(int value);
     void on_interp_currentIndexChanged(int index);

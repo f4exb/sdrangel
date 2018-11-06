@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtGlobal>
+#include <QDataStream>
+
 #include "util/simpleserializer.h"
 
 #include "soapysdroutputsettings.h"
@@ -47,6 +49,7 @@ QByteArray SoapySDROutputSettings::serialize() const
     s.writeS64(5, m_transverterDeltaFrequency);
     s.writeString(6, m_antenna);
     s.writeU32(7, m_bandwidth);
+    s.writeBlob(8, serializeNamedElementMap(m_tunableElements));
 
     return s.final();
 }
@@ -63,6 +66,8 @@ bool SoapySDROutputSettings::deserialize(const QByteArray& data)
 
     if (d.getVersion() == 1)
     {
+        QByteArray blob;
+
         d.readS32(1, &m_devSampleRate);
         d.readS32(2, &m_LOppmTenths);
         d.readU32(3, &m_log2Interp);
@@ -70,6 +75,8 @@ bool SoapySDROutputSettings::deserialize(const QByteArray& data)
         d.readS64(5, &m_transverterDeltaFrequency, 0);
         d.readString(6, &m_antenna, "NONE");
         d.readU32(7, &m_bandwidth, 1000000);
+        d.readBlob(8, &blob);
+        deserializeNamedElementMap(blob, m_tunableElements);
 
         return true;
     }
@@ -78,4 +85,21 @@ bool SoapySDROutputSettings::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+QByteArray SoapySDROutputSettings::serializeNamedElementMap(const QMap<QString, double>& map) const
+{
+    QByteArray data;
+    QDataStream *stream = new QDataStream(&data, QIODevice::WriteOnly);
+    (*stream) << map;
+    delete stream;
+
+    return data;
+}
+
+void SoapySDROutputSettings::deserializeNamedElementMap(const QByteArray& data, QMap<QString, double>& map)
+{
+    QDataStream *stream = new QDataStream(data);
+    (*stream) >> map;
+    delete stream;
 }

@@ -306,7 +306,6 @@ void SoapySDRInputGui::bandwidthChanged(double bandwidth)
 
 void SoapySDRInputGui::tunableElementChanged(QString name, double value)
 {
-    qDebug("SoapySDRInputGui::tunableElementChanged: name: %s value: %lf", name.toStdString().c_str(), value);
     m_settings.m_tunableElements[name] = value;
     sendSettings();
 }

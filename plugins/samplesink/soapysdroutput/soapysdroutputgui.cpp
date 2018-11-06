@@ -26,6 +26,7 @@
 #include "soapygui/discreterangegui.h"
 #include "soapygui/intervalrangegui.h"
 #include "soapygui/stringrangegui.h"
+#include "soapygui/dynamicitemsettinggui.h"
 
 #include "soapysdroutputgui.h"
 
@@ -157,6 +158,28 @@ void SoapySDROutputGui::createAntennasControl(const std::vector<std::string>& an
     connect(m_antennas, SIGNAL(valueChanged()), this, SLOT(antennasChanged()));
 }
 
+void SoapySDROutputGui::createTunableElementsControl(const std::vector<DeviceSoapySDRParams::FrequencySetting>& tunableElementsList)
+{
+    if (tunableElementsList.size() <= 1) { // This list is created for other elements than the main one (RF) which is always at index 0
+        return;
+    }
+
+    std::vector<DeviceSoapySDRParams::FrequencySetting>::const_iterator it = tunableElementsList.begin() + 1;
+
+    for (int i = 0; it != tunableElementsList.end(); ++it, i++)
+    {
+        ItemSettingGUI *rangeGUI;
+        createRangesControl(
+                &rangeGUI,
+                it->m_ranges,
+                QString("%1 freq").arg(it->m_name.c_str()),
+                QString((it->m_name == "CORR") ? "ppm" : "Hz"));
+        DynamicItemSettingGUI *gui = new DynamicItemSettingGUI(rangeGUI, QString(it->m_name.c_str()));
+        m_tunableElementsGUIs.push_back(gui);
+        connect(m_tunableElementsGUIs.back(), SIGNAL(valueChanged(QString, double)), this, SLOT(tunableElementChanged(QString, double)));
+    }
+}
+
 void SoapySDROutputGui::setName(const QString& name)
 {
     setObjectName(name);
@@ -279,6 +302,11 @@ void SoapySDROutputGui::bandwidthChanged(double bandwidth)
     sendSettings();
 }
 
+void SoapySDROutputGui::tunableElementChanged(QString name, double value)
+{
+    m_settings.m_tunableElements[name] = value;
+    sendSettings();
+}
 
 void SoapySDROutputGui::on_centerFrequency_changed(quint64 value)
 {
@@ -341,7 +369,21 @@ void SoapySDROutputGui::displaySettings()
     ui->LOppm->setValue(m_settings.m_LOppmTenths);
     ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 
+    displayTunableElementsControlSettings();
+
     blockApplySettings(false);
+}
+
+void SoapySDROutputGui::displayTunableElementsControlSettings()
+{
+    for (const auto &it : m_tunableElementsGUIs)
+    {
+        QMap<QString, double>::const_iterator elIt = m_settings.m_tunableElements.find(it->getName());
+
+        if (elIt != m_settings.m_tunableElements.end()) {
+            it->setValue(*elIt);
+        }
+    }
 }
 
 void SoapySDROutputGui::sendSettings()

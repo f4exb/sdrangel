@@ -92,10 +92,10 @@ private:
 
 private slots:
     void handleInputMessages();
-    void sampleRateChanged(double sampleRate);
     void antennasChanged();
-    void tunableElementChanged(QString name, double value);
+    void sampleRateChanged(double sampleRate);
     void bandwidthChanged(double bandwidth);
+    void tunableElementChanged(QString name, double value);
     void on_centerFrequency_changed(quint64 value);
     void on_LOppm_valueChanged(int value);
     void on_dcOffset_toggled(bool checked);

@@ -18,6 +18,7 @@
 #define PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTSETTINGS_H_
 
 #include <QtGlobal>
+#include <QMap>
 
 struct SoapySDROutputSettings {
     quint64 m_centerFrequency;
@@ -28,11 +29,16 @@ struct SoapySDROutputSettings {
     qint64 m_transverterDeltaFrequency;
     QString m_antenna;
     quint32 m_bandwidth;
+    QMap<QString, double> m_tunableElements;
 
     SoapySDROutputSettings();
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+
+private:
+    QByteArray serializeNamedElementMap(const QMap<QString, double>& map) const;
+    void deserializeNamedElementMap(const QByteArray& data, QMap<QString, double>& map);
 };
 
 #endif /* PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTSETTINGS_H_ */

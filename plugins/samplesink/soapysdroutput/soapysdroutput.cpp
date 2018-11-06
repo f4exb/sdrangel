@@ -766,6 +766,31 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
         }
     }
 
+    for (const auto &oname : m_settings.m_tunableElements.keys())
+    {
+        auto nvalue = settings.m_tunableElements.find(oname);
+
+        if (nvalue != settings.m_tunableElements.end() && (m_settings.m_tunableElements[oname] != *nvalue))
+        {
+            if (dev != 0)
+            {
+                try
+                {
+                    dev->setFrequency(SOAPY_SDR_TX, requestedChannel, oname.toStdString(), *nvalue);
+                    qDebug("SoapySDROutput::applySettings: tunable element %s frequency set to %lf",
+                            oname.toStdString().c_str(), *nvalue);
+                }
+                catch (const std::exception &ex)
+                {
+                    qCritical("SoapySDROutput::applySettings: cannot set tunable element %s to %lf: %s",
+                            oname.toStdString().c_str(), *nvalue, ex.what());
+                }
+            }
+
+            m_settings.m_tunableElements[oname] = *nvalue;
+        }
+    }
+
     if (forwardChangeOwnDSP)
     {
         int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Interp);
