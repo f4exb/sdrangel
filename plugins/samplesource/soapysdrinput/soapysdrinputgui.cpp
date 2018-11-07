@@ -26,6 +26,7 @@
 #include "soapygui/intervalrangegui.h"
 #include "soapygui/stringrangegui.h"
 #include "soapygui/dynamicitemsettinggui.h"
+#include "soapygui/intervalslidergui.h"
 
 #include "ui_soapysdrinputgui.h"
 #include "soapysdrinputgui.h"
@@ -42,7 +43,8 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_lastEngineState(DSPDeviceSourceEngine::StNotStarted),
     m_antennas(0),
     m_sampleRateGUI(0),
-    m_bandwidthGUI(0)
+    m_bandwidthGUI(0),
+    m_gainSliderGUI(0)
 {
     m_sampleSource = (SoapySDRInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
     ui->setupUi(this);
@@ -56,6 +58,7 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     createRangesControl(&m_sampleRateGUI, m_sampleSource->getRateRanges(), "SR", "S/s");
     createRangesControl(&m_bandwidthGUI, m_sampleSource->getBandwidthRanges(), "BW", "Hz");
     createTunableElementsControl(m_sampleSource->getTunableElements());
+    createGlobalGainControl();
 
     if (m_sampleRateGUI) {
         connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
@@ -180,6 +183,21 @@ void SoapySDRInputGui::createTunableElementsControl(const std::vector<DeviceSoap
         m_tunableElementsGUIs.push_back(gui);
         connect(m_tunableElementsGUIs.back(), SIGNAL(valueChanged(QString, double)), this, SLOT(tunableElementChanged(QString, double)));
     }
+}
+
+void SoapySDRInputGui::createGlobalGainControl()
+{
+    m_gainSliderGUI = new IntervalSliderGUI(this);
+    int min, max;
+    m_sampleSource->getGlobalGainRange(min, max);
+    m_gainSliderGUI->setInterval(min, max);
+    m_gainSliderGUI->setLabel(QString("Global gain"));
+    m_gainSliderGUI->setUnits(QString(""));
+
+    QVBoxLayout *layout = (QVBoxLayout *) ui->scrollAreaWidgetContents->layout();
+    layout->addWidget(m_gainSliderGUI);
+
+    connect(m_gainSliderGUI, SIGNAL(valueChanged(double)), this, SLOT(globalGainChanged(double)));
 }
 
 void SoapySDRInputGui::setName(const QString& name)
@@ -310,6 +328,12 @@ void SoapySDRInputGui::tunableElementChanged(QString name, double value)
     sendSettings();
 }
 
+void SoapySDRInputGui::globalGainChanged(double gain)
+{
+    m_settings.m_globalGain = round(gain);
+    sendSettings();
+}
+
 void SoapySDRInputGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
@@ -402,6 +426,9 @@ void SoapySDRInputGui::displaySettings()
     }
     if (m_bandwidthGUI) {
         m_bandwidthGUI->setValue(m_settings.m_bandwidth);
+    }
+    if (m_gainSliderGUI) {
+        m_gainSliderGUI->setValue(m_settings.m_globalGain);
     }
 
     ui->dcOffset->setChecked(m_settings.m_dcBlock);

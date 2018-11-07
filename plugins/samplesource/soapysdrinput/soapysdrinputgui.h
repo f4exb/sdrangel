@@ -30,6 +30,7 @@ class DeviceUISet;
 class ItemSettingGUI;
 class StringRangeGUI;
 class DynamicItemSettingGUI;
+class IntervalSliderGUI;
 
 namespace Ui {
     class SoapySDRInputGui;
@@ -62,6 +63,7 @@ private:
             const QString& unit);
     void createAntennasControl(const std::vector<std::string>& antennaList);
     void createTunableElementsControl(const std::vector<DeviceSoapySDRParams::FrequencySetting>& tunableElementsList);
+    void createGlobalGainControl();
 
     Ui::SoapySDRInputGui* ui;
 
@@ -81,6 +83,7 @@ private:
     ItemSettingGUI *m_sampleRateGUI;
     ItemSettingGUI *m_bandwidthGUI;
     std::vector<DynamicItemSettingGUI*> m_tunableElementsGUIs;
+    IntervalSliderGUI *m_gainSliderGUI;
 
     void displaySettings();
     void displayTunableElementsControlSettings();
@@ -96,6 +99,7 @@ private slots:
     void sampleRateChanged(double sampleRate);
     void bandwidthChanged(double bandwidth);
     void tunableElementChanged(QString name, double value);
+    void globalGainChanged(double gain);
     void on_centerFrequency_changed(quint64 value);
     void on_LOppm_valueChanged(int value);
     void on_dcOffset_toggled(bool checked);

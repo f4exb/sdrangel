@@ -14,43 +14,39 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTSETTINGS_H_
-#define PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTSETTINGS_H_
+#ifndef SDRGUI_SOAPYGUI_INTERVALSLIDERGUI_H_
+#define SDRGUI_SOAPYGUI_INTERVALSLIDERGUI_H_
 
-#include <QtGlobal>
+#include <QWidget>
 #include <QString>
-#include <QMap>
 
-struct SoapySDRInputSettings {
-    typedef enum {
-        FC_POS_INFRA = 0,
-        FC_POS_SUPRA,
-        FC_POS_CENTER
-    } fcPos_t;
+namespace Ui {
+    class IntervalSliderGUI;
+}
 
-    quint64 m_centerFrequency;
-    qint32 m_LOppmTenths;
-    qint32 m_devSampleRate;
-    quint32 m_log2Decim;
-    fcPos_t m_fcPos;
-    bool m_dcBlock;
-    bool m_iqCorrection;
-    bool m_transverterMode;
-    qint64 m_transverterDeltaFrequency;
-    QString m_fileRecordName;
-    QString m_antenna;
-    quint32 m_bandwidth;
-    QMap<QString, double> m_tunableElements;
-    qint32 m_globalGain;
+class IntervalSliderGUI : public QWidget
+{
+    Q_OBJECT
+public:
+    explicit IntervalSliderGUI(QWidget* parent = 0);
+    virtual ~IntervalSliderGUI();
 
-    SoapySDRInputSettings();
-    void resetToDefaults();
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+    void setLabel(const QString& text);
+    void setUnits(const QString& units);
+    void setInterval(double minimum, double maximum);
+    virtual double getCurrentValue();
+    virtual void setValue(double value);
+
+signals:
+    void valueChanged(double value);
+
+private slots:
+    void on_intervalSlider_valueChanged(int value);
 
 private:
-    QByteArray serializeNamedElementMap(const QMap<QString, double>& map) const;
-    void deserializeNamedElementMap(const QByteArray& data, QMap<QString, double>& map);
+    Ui::IntervalSliderGUI* ui;
+    double m_minimum;
+    double m_maximum;
 };
 
-#endif /* PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTSETTINGS_H_ */
+#endif /* SDRGUI_SOAPYGUI_INTERVALSLIDERGUI_H_ */

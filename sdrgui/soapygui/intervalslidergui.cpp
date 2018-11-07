@@ -14,43 +14,58 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTSETTINGS_H_
-#define PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTSETTINGS_H_
+#include <math.h>
 
-#include <QtGlobal>
-#include <QString>
-#include <QMap>
+#include "ui_intervalslidergui.h"
+#include "intervalslidergui.h"
 
-struct SoapySDRInputSettings {
-    typedef enum {
-        FC_POS_INFRA = 0,
-        FC_POS_SUPRA,
-        FC_POS_CENTER
-    } fcPos_t;
+IntervalSliderGUI::IntervalSliderGUI(QWidget* parent) :
+    QWidget(parent),
+    ui(new Ui::IntervalSliderGUI),
+    m_minimum(0),
+    m_maximum(0)
+{
+    ui->setupUi(this);
+}
 
-    quint64 m_centerFrequency;
-    qint32 m_LOppmTenths;
-    qint32 m_devSampleRate;
-    quint32 m_log2Decim;
-    fcPos_t m_fcPos;
-    bool m_dcBlock;
-    bool m_iqCorrection;
-    bool m_transverterMode;
-    qint64 m_transverterDeltaFrequency;
-    QString m_fileRecordName;
-    QString m_antenna;
-    quint32 m_bandwidth;
-    QMap<QString, double> m_tunableElements;
-    qint32 m_globalGain;
+IntervalSliderGUI::~IntervalSliderGUI()
+{
+    delete ui;
+}
 
-    SoapySDRInputSettings();
-    void resetToDefaults();
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+void IntervalSliderGUI::setLabel(const QString& text)
+{
+    ui->intervalLabel->setText(text);
+}
 
-private:
-    QByteArray serializeNamedElementMap(const QMap<QString, double>& map) const;
-    void deserializeNamedElementMap(const QByteArray& data, QMap<QString, double>& map);
-};
+void IntervalSliderGUI::setUnits(const QString& units)
+{
+    ui->intervalUnits->setText(units);
+}
 
-#endif /* PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTSETTINGS_H_ */
+void IntervalSliderGUI::setInterval(double minimum, double maximum)
+{
+    ui->intervalSlider->blockSignals(true);
+    ui->intervalSlider->setMinimum(minimum);
+    ui->intervalSlider->setMaximum(maximum);
+    ui->intervalSlider->blockSignals(false);
+    m_minimum = minimum;
+    m_maximum = maximum;
+}
+
+double IntervalSliderGUI::getCurrentValue()
+{
+    return ui->intervalSlider->value();
+}
+
+void IntervalSliderGUI::setValue(double value)
+{
+    ui->intervalSlider->setValue(value);
+    ui->valueText->setText(QString("%1").arg(ui->intervalSlider->value()));
+}
+
+void IntervalSliderGUI::on_intervalSlider_valueChanged(int value)
+{
+    ui->valueText->setText(QString("%1").arg(value));
+    emit valueChanged(value);
+}
