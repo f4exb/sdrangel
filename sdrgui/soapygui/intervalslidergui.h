@@ -20,13 +20,14 @@
 #include <QWidget>
 #include <QString>
 
+#include "export.h"
 #include "itemsettinggui.h"
 
 namespace Ui {
     class IntervalSliderGUI;
 }
 
-class IntervalSliderGUI : public ItemSettingGUI
+class SDRGUI_API IntervalSliderGUI : public ItemSettingGUI
 {
     Q_OBJECT
 public:

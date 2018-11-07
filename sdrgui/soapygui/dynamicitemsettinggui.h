@@ -17,9 +17,10 @@
 #include <QObject>
 #include <QString>
 
+#include "export.h"
 #include "itemsettinggui.h"
 
-class DynamicItemSettingGUI : public QObject
+class SDRGUI_API DynamicItemSettingGUI : public QObject
 {
     Q_OBJECT
 public:

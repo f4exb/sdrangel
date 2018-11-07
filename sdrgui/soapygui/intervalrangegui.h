@@ -21,13 +21,14 @@
 #include <QWidget>
 #include <QString>
 
+#include "export.h"
 #include "itemsettinggui.h"
 
 namespace Ui {
     class IntervalRangeGUI;
 }
 
-class IntervalRangeGUI : public ItemSettingGUI
+class SDRGUI_API IntervalRangeGUI : public ItemSettingGUI
 {
     Q_OBJECT
 public:

@@ -19,11 +19,13 @@
 
 #include <QWidget>
 
+#include "export.h"
+
 namespace Ui {
     class DiscreteRangeGUI;
 }
 
-class StringRangeGUI : public QWidget
+class SDRGUI_API StringRangeGUI : public QWidget
 {
     Q_OBJECT
 public:

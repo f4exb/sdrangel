@@ -21,7 +21,9 @@
 
 #include <QWidget>
 
-class ItemSettingGUI : public QWidget
+#include "export.h"
+
+class SDRGUI_API ItemSettingGUI : public QWidget
 {
     Q_OBJECT
 public:

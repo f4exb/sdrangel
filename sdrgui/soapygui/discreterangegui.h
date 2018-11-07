@@ -20,13 +20,14 @@
 #include <QWidget>
 #include <QString>
 
+#include "export.h"
 #include "itemsettinggui.h"
 
 namespace Ui {
     class DiscreteRangeGUI;
 }
 
-class DiscreteRangeGUI : public ItemSettingGUI
+class SDRGUI_API DiscreteRangeGUI : public ItemSettingGUI
 {
     Q_OBJECT
 public:
