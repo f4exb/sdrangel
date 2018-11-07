@@ -52,6 +52,7 @@ QByteArray SoapySDROutputSettings::serialize() const
     s.writeU32(7, m_bandwidth);
     s.writeBlob(8, serializeNamedElementMap(m_tunableElements));
     s.writeS32(12, m_globalGain);
+    s.writeBlob(13, serializeNamedElementMap(m_individualGains));
 
     return s.final();
 }
@@ -80,6 +81,8 @@ bool SoapySDROutputSettings::deserialize(const QByteArray& data)
         d.readBlob(8, &blob);
         deserializeNamedElementMap(blob, m_tunableElements);
         d.readS32(12, &m_globalGain, 0);
+        d.readBlob(13, &blob);
+        deserializeNamedElementMap(blob, m_individualGains);
 
         return true;
     }

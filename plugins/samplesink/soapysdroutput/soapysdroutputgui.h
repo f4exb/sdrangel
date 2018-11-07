@@ -65,6 +65,7 @@ private:
     void createAntennasControl(const std::vector<std::string>& antennaList);
     void createTunableElementsControl(const std::vector<DeviceSoapySDRParams::FrequencySetting>& tunableElementsList);
     void createGlobalGainControl();
+    void createIndividualGainsControl(const std::vector<DeviceSoapySDRParams::GainSetting>& individualGainsList);
 
     Ui::SoapySDROutputGui* ui;
 
@@ -85,10 +86,12 @@ private:
     ItemSettingGUI *m_bandwidthGUI;
     std::vector<DynamicItemSettingGUI*> m_tunableElementsGUIs;
     IntervalSliderGUI *m_gainSliderGUI;
+    std::vector<DynamicItemSettingGUI*> m_individualGainsGUIs;
 
     void blockApplySettings(bool block) { m_doApplySettings = !block; }
     void displaySettings();
     void displayTunableElementsControlSettings();
+    void displayIndividualGainsControlSettings();
     void sendSettings();
     void updateSampleRateAndFrequency();
     void updateFrequencyLimits();
@@ -101,6 +104,7 @@ private slots:
     void bandwidthChanged(double bandwidth);
     void tunableElementChanged(QString name, double value);
     void globalGainChanged(double gain);
+    void individualGainChanged(QString name, double value);
     void on_centerFrequency_changed(quint64 value);
     void on_LOppm_valueChanged(int value);
     void on_interp_currentIndexChanged(int index);

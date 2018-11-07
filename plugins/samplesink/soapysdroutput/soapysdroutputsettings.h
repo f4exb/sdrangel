@@ -31,6 +31,7 @@ struct SoapySDROutputSettings {
     quint32 m_bandwidth;
     QMap<QString, double> m_tunableElements;
     qint32 m_globalGain;
+    QMap<QString, double> m_individualGains;
 
     SoapySDROutputSettings();
     void resetToDefaults();
