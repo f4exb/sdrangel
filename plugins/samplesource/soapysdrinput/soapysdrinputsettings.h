@@ -42,6 +42,7 @@ struct SoapySDRInputSettings {
     quint32 m_bandwidth;
     QMap<QString, double> m_tunableElements;
     qint32 m_globalGain;
+    QMap<QString, double> m_individualGains;
 
     SoapySDRInputSettings();
     void resetToDefaults();

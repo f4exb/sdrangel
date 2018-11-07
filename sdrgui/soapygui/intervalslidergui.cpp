@@ -20,7 +20,7 @@
 #include "intervalslidergui.h"
 
 IntervalSliderGUI::IntervalSliderGUI(QWidget* parent) :
-    QWidget(parent),
+    ItemSettingGUI(parent),
     ui(new Ui::IntervalSliderGUI),
     m_minimum(0),
     m_maximum(0)
@@ -67,5 +67,5 @@ void IntervalSliderGUI::setValue(double value)
 void IntervalSliderGUI::on_intervalSlider_valueChanged(int value)
 {
     ui->valueText->setText(QString("%1").arg(value));
-    emit valueChanged(value);
+    emit ItemSettingGUI::valueChanged(value);
 }

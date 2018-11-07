@@ -20,11 +20,13 @@
 #include <QWidget>
 #include <QString>
 
+#include "itemsettinggui.h"
+
 namespace Ui {
     class IntervalSliderGUI;
 }
 
-class IntervalSliderGUI : public QWidget
+class IntervalSliderGUI : public ItemSettingGUI
 {
     Q_OBJECT
 public:
@@ -36,9 +38,6 @@ public:
     void setInterval(double minimum, double maximum);
     virtual double getCurrentValue();
     virtual void setValue(double value);
-
-signals:
-    void valueChanged(double value);
 
 private slots:
     void on_intervalSlider_valueChanged(int value);

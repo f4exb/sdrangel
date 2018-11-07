@@ -200,6 +200,26 @@ void SoapySDRInputGui::createGlobalGainControl()
     connect(m_gainSliderGUI, SIGNAL(valueChanged(double)), this, SLOT(globalGainChanged(double)));
 }
 
+void SoapySDRInputGui::createIndividualGainsControl(const std::vector<DeviceSoapySDRParams::GainSetting>& individualGainsList)
+{
+    if (individualGainsList.size() == 0) { // Leave early if list of individual gains is empty
+        return;
+    }
+
+    std::vector<DeviceSoapySDRParams::GainSetting>::const_iterator it = individualGainsList.begin();
+
+    for (int i = 0; it != individualGainsList.end(); ++it, i++)
+    {
+        IntervalSliderGUI *gainGUI = new IntervalSliderGUI(this);
+        gainGUI->setInterval(it->m_range.minimum(), it->m_range.maximum());
+        gainGUI->setLabel(QString("%1 gain").arg(it->m_name.c_str()));
+        gainGUI->setUnits(QString(""));
+        DynamicItemSettingGUI *gui = new DynamicItemSettingGUI(gainGUI, QString(it->m_name.c_str()));
+        m_individualGainsGUIs.push_back(gui);
+        connect(m_individualGainsGUIs.back(), SIGNAL(valueChanged(QString, double)), this, SLOT(individualGainChanged(QString, double)));
+    }
+}
+
 void SoapySDRInputGui::setName(const QString& name)
 {
     setObjectName(name);
@@ -334,6 +354,12 @@ void SoapySDRInputGui::globalGainChanged(double gain)
     sendSettings();
 }
 
+void SoapySDRInputGui::individualGainChanged(QString name, double value)
+{
+    m_settings.m_individualGains[name] = value;
+    sendSettings();
+}
+
 void SoapySDRInputGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
@@ -441,6 +467,7 @@ void SoapySDRInputGui::displaySettings()
     ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 
     displayTunableElementsControlSettings();
+    displayIndividualGainsControlSettings();
 
     blockApplySettings(false);
 }
@@ -452,6 +479,18 @@ void SoapySDRInputGui::displayTunableElementsControlSettings()
         QMap<QString, double>::const_iterator elIt = m_settings.m_tunableElements.find(it->getName());
 
         if (elIt != m_settings.m_tunableElements.end()) {
+            it->setValue(*elIt);
+        }
+    }
+}
+
+void SoapySDRInputGui::displayIndividualGainsControlSettings()
+{
+    for (const auto &it : m_individualGainsGUIs)
+    {
+        QMap<QString, double>::const_iterator elIt = m_settings.m_individualGains.find(it->getName());
+
+        if (elIt != m_settings.m_individualGains.end()) {
             it->setValue(*elIt);
         }
     }

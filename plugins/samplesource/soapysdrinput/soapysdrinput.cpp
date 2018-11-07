@@ -876,6 +876,31 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
         }
     }
 
+    for (const auto &oname : m_settings.m_individualGains.keys())
+    {
+        auto nvalue = settings.m_individualGains.find(oname);
+
+        if (nvalue != settings.m_individualGains.end() && (m_settings.m_individualGains[oname] != *nvalue))
+        {
+            if (dev != 0)
+            {
+                try
+                {
+                    dev->setGain(SOAPY_SDR_RX, requestedChannel, oname.toStdString(), *nvalue);
+                    qDebug("SoapySDRInput::applySettings: individual gain %s set to %lf",
+                            oname.toStdString().c_str(), *nvalue);
+                }
+                catch (const std::exception &ex)
+                {
+                    qCritical("SoapySDRInput::applySettings: cannot set individual gain %s to %lf: %s",
+                            oname.toStdString().c_str(), *nvalue, ex.what());
+                }
+            }
+
+            m_settings.m_individualGains[oname] = *nvalue;
+        }
+    }
+
     if (forwardChangeOwnDSP)
     {
         int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
