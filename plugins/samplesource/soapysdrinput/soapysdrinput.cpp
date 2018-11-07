@@ -31,6 +31,7 @@
 MESSAGE_CLASS_DEFINITION(SoapySDRInput::MsgConfigureSoapySDRInput, Message)
 MESSAGE_CLASS_DEFINITION(SoapySDRInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(SoapySDRInput::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(SoapySDRInput::MsgReportGainChange, Message)
 
 SoapySDRInput::SoapySDRInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -40,6 +41,7 @@ SoapySDRInput::SoapySDRInput(DeviceSourceAPI *deviceAPI) :
     m_thread(0)
 {
     openDevice();
+    initGainSettings(m_settings);
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
@@ -259,6 +261,19 @@ const std::vector<DeviceSoapySDRParams::GainSetting>& SoapySDRInput::getIndividu
 {
     const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getRxChannelSettings(m_deviceShared.m_channel);
     return channelSettings->m_gainSettings;
+}
+
+void SoapySDRInput::initGainSettings(SoapySDRInputSettings& settings)
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getRxChannelSettings(m_deviceShared.m_channel);
+    settings.m_individualGains.clear();
+    settings.m_globalGain = 0;
+
+    for (const auto &it : channelSettings->m_gainSettings) {
+        settings.m_individualGains[QString(it.m_name.c_str())] = 0.0;
+    }
+
+    updateGains(m_deviceShared.m_device, m_deviceShared.m_channel, settings);
 }
 
 void SoapySDRInput::init()
@@ -610,6 +625,19 @@ bool SoapySDRInput::setDeviceCenterFrequency(SoapySDR::Device *dev, int requeste
     }
 }
 
+void SoapySDRInput::updateGains(SoapySDR::Device *dev, int requestedChannel, SoapySDRInputSettings& settings)
+{
+    if (dev == 0) {
+        return;
+    }
+
+    settings.m_globalGain = round(dev->getGain(SOAPY_SDR_RX, requestedChannel));
+
+    for (const auto &name : settings.m_individualGains.keys()) {
+        settings.m_individualGains[name] = dev->getGain(SOAPY_SDR_RX, requestedChannel, name.toStdString());
+    }
+}
+
 bool SoapySDRInput::handleMessage(const Message& message __attribute__((unused)))
 {
     if (MsgConfigureSoapySDRInput::match(message))
@@ -709,6 +737,8 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
 {
     bool forwardChangeOwnDSP = false;
     bool forwardChangeToBuddies  = false;
+    bool globalGainChanged = false;
+    bool individualGainsChanged = false;
 
     SoapySDR::Device *dev = m_deviceShared.m_device;
     SoapySDRInputThread *inputThread = findThread();
@@ -867,6 +897,7 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
             {
                 dev->setGain(SOAPY_SDR_RX, requestedChannel, settings.m_globalGain);
                 qDebug("SoapySDRInput::applySettings: set global gain to %d", settings.m_globalGain);
+                globalGainChanged = true;
             }
             catch (const std::exception &ex)
             {
@@ -880,7 +911,7 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
     {
         auto nvalue = settings.m_individualGains.find(oname);
 
-        if (nvalue != settings.m_individualGains.end() && (m_settings.m_individualGains[oname] != *nvalue))
+        if (nvalue != settings.m_individualGains.end() && ((m_settings.m_individualGains[oname] != *nvalue) || force))
         {
             if (dev != 0)
             {
@@ -889,6 +920,7 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
                     dev->setGain(SOAPY_SDR_RX, requestedChannel, oname.toStdString(), *nvalue);
                     qDebug("SoapySDRInput::applySettings: individual gain %s set to %lf",
                             oname.toStdString().c_str(), *nvalue);
+                    individualGainsChanged = true;
                 }
                 catch (const std::exception &ex)
                 {
@@ -939,6 +971,19 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
     }
 
     m_settings = settings;
+
+    if (globalGainChanged || individualGainsChanged)
+    {
+        if (dev) {
+            updateGains(dev, requestedChannel, m_settings);
+        }
+
+        if (getMessageQueueToGUI())
+        {
+            MsgReportGainChange *report = MsgReportGainChange::create(m_settings, individualGainsChanged, globalGainChanged);
+            getMessageQueueToGUI()->push(report);
+        }
+    }
 
     qDebug() << "SoapySDRInput::applySettings: "
             << " m_transverterMode: " << m_settings.m_transverterMode

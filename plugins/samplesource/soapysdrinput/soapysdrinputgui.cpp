@@ -60,6 +60,7 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     createTunableElementsControl(m_sampleSource->getTunableElements());
     createGlobalGainControl();
     createIndividualGainsControl(m_sampleSource->getIndividualGainsRanges());
+    m_sampleSource->initGainSettings(m_settings);
 
     if (m_sampleRateGUI) {
         connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
@@ -276,6 +277,24 @@ bool SoapySDRInputGui::handleMessage(const Message& message)
     {
         const SoapySDRInput::MsgConfigureSoapySDRInput& cfg = (SoapySDRInput::MsgConfigureSoapySDRInput&) message;
         m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+
+        return true;
+    }
+    else if (SoapySDRInput::MsgReportGainChange::match(message))
+    {
+        const SoapySDRInput::MsgReportGainChange& report = (SoapySDRInput::MsgReportGainChange&) message;
+        const SoapySDRInputSettings& gainSettings = report.getSettings();
+
+        if (report.getGlobalGain()) {
+            m_settings.m_globalGain = gainSettings.m_globalGain;
+        }
+        if (report.getIndividualGains()) {
+            m_settings.m_individualGains = gainSettings.m_individualGains;
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);

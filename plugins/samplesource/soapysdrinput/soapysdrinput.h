@@ -99,6 +99,32 @@ public:
         { }
     };
 
+    class MsgReportGainChange : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const SoapySDRInputSettings& getSettings() const { return m_settings; }
+        bool getGlobalGain() const { return m_globalGain; }
+        bool getIndividualGains() const { return m_individualGains; }
+
+        static MsgReportGainChange* create(const SoapySDRInputSettings& settings, bool globalGain, bool individualGains)
+        {
+            return new MsgReportGainChange(settings, globalGain, individualGains);
+        }
+
+    private:
+        SoapySDRInputSettings m_settings;
+        bool m_globalGain;
+        bool m_individualGains;
+
+        MsgReportGainChange(const SoapySDRInputSettings& settings, bool globalGain, bool individualGains) :
+            Message(),
+            m_settings(settings),
+            m_globalGain(globalGain),
+            m_individualGains(individualGains)
+        { }
+    };
+
     SoapySDRInput(DeviceSourceAPI *deviceAPI);
     virtual ~SoapySDRInput();
     virtual void destroy();
@@ -128,6 +154,7 @@ public:
     int getAntennaIndex(const std::string& antenna);
     const std::vector<DeviceSoapySDRParams::FrequencySetting>& getTunableElements();
     const std::vector<DeviceSoapySDRParams::GainSetting>& getIndividualGainsRanges();
+    void initGainSettings(SoapySDRInputSettings& settings);
 
 private:
     DeviceSourceAPI *m_deviceAPI;
@@ -145,6 +172,7 @@ private:
     void moveThreadToBuddy();
     bool applySettings(const SoapySDRInputSettings& settings, bool force = false);
     bool setDeviceCenterFrequency(SoapySDR::Device *dev, int requestedChannel, quint64 freq_hz, int loPpmTenths);
+    void updateGains(SoapySDR::Device *dev, int requestedChannel, SoapySDRInputSettings& settings);
 };
 
 
