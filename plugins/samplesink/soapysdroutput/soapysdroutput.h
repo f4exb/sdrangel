@@ -100,10 +100,12 @@ public:
     virtual bool handleMessage(const Message& message);
 
     void getFrequencyRange(uint64_t& min, uint64_t& max);
+    void getGlobalGainRange(int& min, int& max);
     const SoapySDR::RangeList& getRateRanges();
     const std::vector<std::string>& getAntennas();
     const SoapySDR::RangeList& getBandwidthRanges();
     const std::vector<DeviceSoapySDRParams::FrequencySetting>& getTunableElements();
+    const std::vector<DeviceSoapySDRParams::GainSetting>& getIndividualGainsRanges();
 
 private:
     DeviceSinkAPI *m_deviceAPI;

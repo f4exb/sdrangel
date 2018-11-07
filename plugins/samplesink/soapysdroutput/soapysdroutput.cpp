@@ -164,7 +164,7 @@ void SoapySDROutput::getFrequencyRange(uint64_t& min, uint64_t& max)
         DeviceSoapySDRParams::FrequencySetting freqSettings = channelSettings->m_frequencySettings[0];
         SoapySDR::RangeList rangeList = freqSettings.m_ranges;
 
-        if (rangeList.size() > 0) // TODO: handle multiple ranges
+        if (rangeList.size() > 0)
         {
             SoapySDR::Range range = rangeList[0];
             min = range.minimum();
@@ -182,6 +182,23 @@ void SoapySDROutput::getFrequencyRange(uint64_t& min, uint64_t& max)
         max = 0;
     }
 }
+
+void SoapySDROutput::getGlobalGainRange(int& min, int& max)
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getTxChannelSettings(m_deviceShared.m_channel);
+
+    if (channelSettings)
+    {
+        min = channelSettings->m_gainRange.minimum();
+        max = channelSettings->m_gainRange.maximum();
+    }
+    else
+    {
+        min = 0;
+        max = 0;
+    }
+}
+
 
 const SoapySDR::RangeList& SoapySDROutput::getRateRanges()
 {
@@ -205,6 +222,12 @@ const std::vector<DeviceSoapySDRParams::FrequencySetting>& SoapySDROutput::getTu
 {
     const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getTxChannelSettings(m_deviceShared.m_channel);
     return channelSettings->m_frequencySettings;
+}
+
+const std::vector<DeviceSoapySDRParams::GainSetting>& SoapySDROutput::getIndividualGainsRanges()
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getTxChannelSettings(m_deviceShared.m_channel);
+    return channelSettings->m_gainSettings;
 }
 
 void SoapySDROutput::init()
@@ -791,6 +814,23 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
         }
     }
 
+    if ((m_settings.m_globalGain != settings.m_globalGain) || force)
+    {
+        if (dev != 0)
+        {
+            try
+            {
+                dev->setGain(SOAPY_SDR_TX, requestedChannel, settings.m_globalGain);
+                qDebug("SoapySDROutput::applySettings: set global gain to %d", settings.m_globalGain);
+            }
+            catch (const std::exception &ex)
+            {
+                qCritical("SoapySDROutput::applySettings: cannot set global gain to %d: %s",
+                        settings.m_globalGain, ex.what());
+            }
+        }
+    }
+
     if (forwardChangeOwnDSP)
     {
         int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Interp);
@@ -836,7 +876,8 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
             << " m_LOppmTenths: " << m_settings.m_LOppmTenths
             << " m_log2Interp: " << m_settings.m_log2Interp
             << " m_devSampleRate: " << m_settings.m_devSampleRate
-            << " m_bandwidth: " << m_settings.m_bandwidth;
+            << " m_bandwidth: " << m_settings.m_bandwidth
+            << " m_globalGain: " << m_settings.m_globalGain;
 
     return true;
 }

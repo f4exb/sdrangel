@@ -866,11 +866,11 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
             try
             {
                 dev->setGain(SOAPY_SDR_RX, requestedChannel, settings.m_globalGain);
-                qDebug("SoapySDRInput::applySettings: set gain to %d", settings.m_globalGain);
+                qDebug("SoapySDRInput::applySettings: set global gain to %d", settings.m_globalGain);
             }
             catch (const std::exception &ex)
             {
-                qCritical("SoapySDRInput::applySettings: cannot set gain to %d: %s",
+                qCritical("SoapySDRInput::applySettings: cannot set global gain to %d: %s",
                         settings.m_globalGain, ex.what());
             }
         }
