@@ -59,6 +59,7 @@ SoapySDROutputGui::SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     createTunableElementsControl(m_sampleSink->getTunableElements());
     createGlobalGainControl();
     createIndividualGainsControl(m_sampleSink->getIndividualGainsRanges());
+    m_sampleSink->initGainSettings(m_settings);
 
     if (m_sampleRateGUI) {
         connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
@@ -276,6 +277,24 @@ bool SoapySDROutputGui::handleMessage(const Message& message)
     {
         const SoapySDROutput::MsgConfigureSoapySDROutput& cfg = (SoapySDROutput::MsgConfigureSoapySDROutput&) message;
         m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+
+        return true;
+    }
+    else if (SoapySDROutput::MsgReportGainChange::match(message))
+    {
+        const SoapySDROutput::MsgReportGainChange& report = (SoapySDROutput::MsgReportGainChange&) message;
+        const SoapySDROutputSettings& gainSettings = report.getSettings();
+
+        if (report.getGlobalGain()) {
+            m_settings.m_globalGain = gainSettings.m_globalGain;
+        }
+        if (report.getIndividualGains()) {
+            m_settings.m_individualGains = gainSettings.m_individualGains;
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
