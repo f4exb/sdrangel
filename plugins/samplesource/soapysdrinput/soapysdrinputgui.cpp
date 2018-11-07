@@ -59,6 +59,7 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     createRangesControl(&m_bandwidthGUI, m_sampleSource->getBandwidthRanges(), "BW", "Hz");
     createTunableElementsControl(m_sampleSource->getTunableElements());
     createGlobalGainControl();
+    createIndividualGainsControl(m_sampleSource->getIndividualGainsRanges());
 
     if (m_sampleRateGUI) {
         connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
@@ -206,6 +207,7 @@ void SoapySDRInputGui::createIndividualGainsControl(const std::vector<DeviceSoap
         return;
     }
 
+    QVBoxLayout *layout = (QVBoxLayout *) ui->scrollAreaWidgetContents->layout();
     std::vector<DeviceSoapySDRParams::GainSetting>::const_iterator it = individualGainsList.begin();
 
     for (int i = 0; it != individualGainsList.end(); ++it, i++)
@@ -215,6 +217,7 @@ void SoapySDRInputGui::createIndividualGainsControl(const std::vector<DeviceSoap
         gainGUI->setLabel(QString("%1 gain").arg(it->m_name.c_str()));
         gainGUI->setUnits(QString(""));
         DynamicItemSettingGUI *gui = new DynamicItemSettingGUI(gainGUI, QString(it->m_name.c_str()));
+        layout->addWidget(gainGUI);
         m_individualGainsGUIs.push_back(gui);
         connect(m_individualGainsGUIs.back(), SIGNAL(valueChanged(QString, double)), this, SLOT(individualGainChanged(QString, double)));
     }

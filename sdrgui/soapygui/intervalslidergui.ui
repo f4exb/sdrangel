@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>203</width>
+    <width>266</width>
     <height>30</height>
    </rect>
   </property>
@@ -30,13 +30,19 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>179</width>
-     <height>29</height>
+     <width>256</width>
+     <height>21</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
      <widget class="QLabel" name="intervalLabel">
+      <property name="minimumSize">
+       <size>
+        <width>80</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="text">
        <string>Label</string>
       </property>
