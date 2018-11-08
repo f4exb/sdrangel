@@ -37,6 +37,7 @@ void SoapySDROutputSettings::resetToDefaults()
     m_antenna = "NONE";
     m_bandwidth = 1000000;
     m_globalGain = 0;
+    m_autoGain = false;
 }
 
 QByteArray SoapySDROutputSettings::serialize() const
@@ -53,6 +54,7 @@ QByteArray SoapySDROutputSettings::serialize() const
     s.writeBlob(8, serializeNamedElementMap(m_tunableElements));
     s.writeS32(12, m_globalGain);
     s.writeBlob(13, serializeNamedElementMap(m_individualGains));
+    s.writeBool(14, m_autoGain);
 
     return s.final();
 }
@@ -83,6 +85,7 @@ bool SoapySDROutputSettings::deserialize(const QByteArray& data)
         d.readS32(12, &m_globalGain, 0);
         d.readBlob(13, &blob);
         deserializeNamedElementMap(blob, m_individualGains);
+        d.readBool(14, &m_autoGain, false);
 
         return true;
     }

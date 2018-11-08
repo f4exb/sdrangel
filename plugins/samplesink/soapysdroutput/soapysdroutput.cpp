@@ -201,6 +201,11 @@ void SoapySDROutput::getGlobalGainRange(int& min, int& max)
     }
 }
 
+bool SoapySDROutput::isAGCSupported()
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getTxChannelSettings(m_deviceShared.m_channel);
+    return channelSettings->m_hasAGC;
+}
 
 const SoapySDR::RangeList& SoapySDROutput::getRateRanges()
 {
@@ -885,6 +890,22 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
             }
 
             m_settings.m_individualGains[oname] = *nvalue;
+        }
+    }
+
+    if ((m_settings.m_autoGain != settings.m_autoGain) || force)
+    {
+        if (dev != 0)
+        {
+            try
+            {
+                dev->setGainMode(SOAPY_SDR_TX, requestedChannel, settings.m_autoGain);
+                qDebug("SoapySDROutput::applySettings: %s AGC", settings.m_autoGain ? "set" : "unset");
+            }
+            catch (const std::exception &ex)
+            {
+                qCritical("SoapySDROutput::applySettings: cannot %s AGC", settings.m_autoGain ? "set" : "unset");
+            }
         }
     }
 

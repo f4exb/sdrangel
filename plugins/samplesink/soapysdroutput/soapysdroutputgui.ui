@@ -290,13 +290,6 @@
     </layout>
    </item>
    <item>
-    <widget class="Line" name="line_freq">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QScrollArea" name="scrollArea">
      <property name="widgetResizable">
       <bool>true</bool>
@@ -307,7 +300,7 @@
         <x>0</x>
         <y>0</y>
         <width>318</width>
-        <height>51</height>
+        <height>53</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">

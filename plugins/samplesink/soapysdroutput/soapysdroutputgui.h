@@ -32,6 +32,7 @@ class ItemSettingGUI;
 class StringRangeGUI;
 class DynamicItemSettingGUI;
 class IntervalSliderGUI;
+class QCheckBox;
 
 namespace Ui {
     class SoapySDROutputGui;
@@ -87,6 +88,7 @@ private:
     std::vector<DynamicItemSettingGUI*> m_tunableElementsGUIs;
     IntervalSliderGUI *m_gainSliderGUI;
     std::vector<DynamicItemSettingGUI*> m_individualGainsGUIs;
+    QCheckBox *m_autoGain;
 
     void blockApplySettings(bool block) { m_doApplySettings = !block; }
     void displaySettings();
@@ -104,6 +106,7 @@ private slots:
     void bandwidthChanged(double bandwidth);
     void tunableElementChanged(QString name, double value);
     void globalGainChanged(double gain);
+    void autoGainChanged(bool set);
     void individualGainChanged(QString name, double value);
     void on_centerFrequency_changed(quint64 value);
     void on_LOppm_valueChanged(int value);

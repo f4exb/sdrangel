@@ -127,6 +127,7 @@ public:
 
     void getFrequencyRange(uint64_t& min, uint64_t& max);
     void getGlobalGainRange(int& min, int& max);
+    bool isAGCSupported();
     const SoapySDR::RangeList& getRateRanges();
     const std::vector<std::string>& getAntennas();
     const SoapySDR::RangeList& getBandwidthRanges();
