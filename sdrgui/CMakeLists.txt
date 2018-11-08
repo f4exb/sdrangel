@@ -60,6 +60,7 @@ set(sdrgui_SOURCES
     soapygui/stringrangegui.cpp
     soapygui/dynamicitemsettinggui.cpp
     soapygui/intervalslidergui.cpp
+    soapygui/complexfactorgui.cpp
 
     webapi/webapiadaptergui.cpp
 )
@@ -124,6 +125,7 @@ set(sdrgui_HEADERS
     soapygui/stringrangegui.h
     soapygui/dynamicitemsettinggui.h
     soapygui/intervalslidergui.h
+    soapygui/complexfactorgui.h
 
     webapi/webapiadaptergui.h
 )
@@ -156,6 +158,7 @@ set(sdrgui_FORMS
     soapygui/discreterangegui.ui
     soapygui/intervalrangegui.ui
     soapygui/intervalslidergui.ui
+    soapygui/complexfactorgui.ui
 )
 
 set(sdrgui_RESOURCES
