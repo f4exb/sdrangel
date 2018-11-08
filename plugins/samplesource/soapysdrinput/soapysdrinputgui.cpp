@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QMessageBox>
+#include <QCheckBox>
 
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -44,7 +45,8 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_antennas(0),
     m_sampleRateGUI(0),
     m_bandwidthGUI(0),
-    m_gainSliderGUI(0)
+    m_gainSliderGUI(0),
+    m_autoGain(0)
 {
     m_sampleSource = (SoapySDRInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
     ui->setupUi(this);
@@ -197,6 +199,21 @@ void SoapySDRInputGui::createGlobalGainControl()
     m_gainSliderGUI->setUnits(QString(""));
 
     QVBoxLayout *layout = (QVBoxLayout *) ui->scrollAreaWidgetContents->layout();
+
+    QFrame *line = new QFrame(this);
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    layout->addWidget(line);
+
+    if (m_sampleSource->isAGCSupported())
+    {
+        m_autoGain = new QCheckBox(this);
+        m_autoGain->setText(QString("AGC"));
+        layout->addWidget(m_autoGain);
+
+        connect(m_autoGain, SIGNAL(toggled(bool)), this, SLOT(autoGainChanged(bool)));
+    }
+
     layout->addWidget(m_gainSliderGUI);
 
     connect(m_gainSliderGUI, SIGNAL(valueChanged(double)), this, SLOT(globalGainChanged(double)));
@@ -376,6 +393,12 @@ void SoapySDRInputGui::globalGainChanged(double gain)
     sendSettings();
 }
 
+void SoapySDRInputGui::autoGainChanged(bool set)
+{
+    m_settings.m_autoGain = set;
+    sendSettings();
+}
+
 void SoapySDRInputGui::individualGainChanged(QString name, double value)
 {
     m_settings.m_individualGains[name] = value;
@@ -477,6 +500,9 @@ void SoapySDRInputGui::displaySettings()
     }
     if (m_gainSliderGUI) {
         m_gainSliderGUI->setValue(m_settings.m_globalGain);
+    }
+    if (m_autoGain) {
+        m_autoGain->setChecked(m_settings.m_autoGain);
     }
 
     ui->dcOffset->setChecked(m_settings.m_dcBlock);

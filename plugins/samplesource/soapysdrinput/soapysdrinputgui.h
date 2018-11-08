@@ -19,7 +19,6 @@
 
 #include <QTimer>
 #include <QWidget>
-#include <QComboBox>
 
 #include "plugin/plugininstancegui.h"
 #include "util/messagequeue.h"
@@ -31,6 +30,7 @@ class ItemSettingGUI;
 class StringRangeGUI;
 class DynamicItemSettingGUI;
 class IntervalSliderGUI;
+class QCheckBox;
 
 namespace Ui {
     class SoapySDRInputGui;
@@ -86,6 +86,7 @@ private:
     std::vector<DynamicItemSettingGUI*> m_tunableElementsGUIs;
     IntervalSliderGUI *m_gainSliderGUI;
     std::vector<DynamicItemSettingGUI*> m_individualGainsGUIs;
+    QCheckBox *m_autoGain;
 
     void displaySettings();
     void displayTunableElementsControlSettings();
@@ -103,6 +104,7 @@ private slots:
     void bandwidthChanged(double bandwidth);
     void tunableElementChanged(QString name, double value);
     void globalGainChanged(double gain);
+    void autoGainChanged(bool set);
     void individualGainChanged(QString name, double value);
     void on_centerFrequency_changed(quint64 value);
     void on_LOppm_valueChanged(int value);
