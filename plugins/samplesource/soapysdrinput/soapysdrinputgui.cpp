@@ -160,7 +160,7 @@ void SoapySDRInputGui::createAntennasControl(const std::vector<std::string>& ant
     }
 
     m_antennas = new StringRangeGUI(this);
-    m_antennas->setLabel(QString("Antenna"));
+    m_antennas->setLabel(QString("RF in"));
     m_antennas->setUnits(QString("Port"));
 
     for (const auto &it : antennaList) {
@@ -183,6 +183,10 @@ void SoapySDRInputGui::createTunableElementsControl(const std::vector<DeviceSoap
 
     for (int i = 0; it != tunableElementsList.end(); ++it, i++)
     {
+        if (it->m_ranges.size() == 0) { // skip empty ranges lists
+            continue;
+        }
+
         ItemSettingGUI *rangeGUI;
         createRangesControl(
                 &rangeGUI,

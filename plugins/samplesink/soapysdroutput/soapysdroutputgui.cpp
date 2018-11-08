@@ -159,7 +159,7 @@ void SoapySDROutputGui::createAntennasControl(const std::vector<std::string>& an
     }
 
     m_antennas = new StringRangeGUI(this);
-    m_antennas->setLabel(QString("Antenna"));
+    m_antennas->setLabel(QString("RF out"));
     m_antennas->setUnits(QString("Port"));
 
     for (const auto &it : antennaList) {
@@ -182,6 +182,10 @@ void SoapySDROutputGui::createTunableElementsControl(const std::vector<DeviceSoa
 
     for (int i = 0; it != tunableElementsList.end(); ++it, i++)
     {
+        if (it->m_ranges.size() == 0) { // skip empty ranges lists
+            continue;
+        }
+
         ItemSettingGUI *rangeGUI;
         createRangesControl(
                 &rangeGUI,
