@@ -46,8 +46,8 @@ struct SoapySDRInputSettings {
     bool m_autoGain;
     bool m_autoDCCorrection;
     bool m_autoIQCorrection;
-    std::complex<float> m_dcCorrection;
-    std::complex<float> m_iqCorrection;
+    std::complex<double> m_dcCorrection;
+    std::complex<double> m_iqCorrection;
 
     SoapySDRInputSettings();
     void resetToDefaults();

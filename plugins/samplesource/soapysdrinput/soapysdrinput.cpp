@@ -973,6 +973,54 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
         }
     }
 
+    if ((m_settings.m_autoDCCorrection != settings.m_autoDCCorrection) || force)
+    {
+        if ((dev != 0) && hasDCAutoCorrection())
+        {
+            try
+            {
+                dev->setDCOffsetMode(SOAPY_SDR_RX, requestedChannel, settings.m_autoDCCorrection);
+                qDebug("SoapySDRInput::applySettings: %s DC auto correction", settings.m_autoGain ? "set" : "unset");
+            }
+            catch (const std::exception &ex)
+            {
+                qCritical("SoapySDRInput::applySettings: cannot %s DC auto correction", settings.m_autoGain ? "set" : "unset");
+            }
+        }
+    }
+
+    if ((m_settings.m_dcCorrection != settings.m_dcCorrection) || force)
+    {
+        if ((dev != 0) && hasDCCorrectionValue())
+        {
+            try
+            {
+                dev->setDCOffset(SOAPY_SDR_RX, requestedChannel, settings.m_dcCorrection);
+                qDebug("SoapySDRInput::applySettings: DC offset correction set to (%lf, %lf)", settings.m_dcCorrection.real(), settings.m_dcCorrection.imag());
+            }
+            catch (const std::exception &ex)
+            {
+                qCritical("SoapySDRInput::applySettings: cannot set DC offset correction to (%lf, %lf)", settings.m_dcCorrection.real(), settings.m_dcCorrection.imag());
+            }
+        }
+    }
+
+    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    {
+        if ((dev != 0) && hasIQCorrectionValue())
+        {
+            try
+            {
+                dev->setIQBalance(SOAPY_SDR_RX, requestedChannel, settings.m_iqCorrection);
+                qDebug("SoapySDRInput::applySettings: IQ balance correction set to (%lf, %lf)", settings.m_iqCorrection.real(), settings.m_iqCorrection.imag());
+            }
+            catch (const std::exception &ex)
+            {
+                qCritical("SoapySDRInput::applySettings: cannot set IQ balance correction to (%lf, %lf)", settings.m_iqCorrection.real(), settings.m_iqCorrection.imag());
+            }
+        }
+    }
+
     if (forwardChangeOwnDSP)
     {
         int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);

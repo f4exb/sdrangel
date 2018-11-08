@@ -43,6 +43,8 @@ void SoapySDRInputSettings::resetToDefaults()
     m_autoGain = false;
     m_autoDCCorrection = false;
     m_autoIQCorrection = false;
+    m_dcCorrection = std::complex<double>{0,0};
+    m_iqCorrection = std::complex<double>{0,0};
 }
 
 QByteArray SoapySDRInputSettings::serialize() const
@@ -65,6 +67,10 @@ QByteArray SoapySDRInputSettings::serialize() const
     s.writeBool(14, m_autoGain);
     s.writeBool(15, m_autoDCCorrection);
     s.writeBool(16, m_autoIQCorrection);
+    s.writeDouble(17, m_dcCorrection.real());
+    s.writeDouble(18, m_dcCorrection.imag());
+    s.writeDouble(19, m_iqCorrection.real());
+    s.writeDouble(20, m_iqCorrection.imag());
 
     return s.final();
 }
@@ -83,6 +89,7 @@ bool SoapySDRInputSettings::deserialize(const QByteArray& data)
     {
         int intval;
         QByteArray blob;
+        double realval, imagval;
 
         d.readS32(1, &m_devSampleRate, 1024000);
         d.readU32(2, &m_log2Decim, 0);
@@ -103,6 +110,12 @@ bool SoapySDRInputSettings::deserialize(const QByteArray& data)
         d.readBool(14, &m_autoGain, false);
         d.readBool(15, &m_autoDCCorrection, false);
         d.readBool(16, &m_autoIQCorrection, false);
+        d.readDouble(17, &realval, 0);
+        d.readDouble(18, &imagval, 0);
+        m_dcCorrection = std::complex<double>{realval, imagval};
+        d.readDouble(19, &realval, 0);
+        d.readDouble(20, &imagval, 0);
+        m_iqCorrection = std::complex<double>{realval, imagval};
 
         return true;
     }
