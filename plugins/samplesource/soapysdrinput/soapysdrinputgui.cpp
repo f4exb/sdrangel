@@ -61,6 +61,7 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource->getFrequencyRange(f_min, f_max);
     ui->centerFrequency->setValueRange(7, f_min/1000, f_max/1000);
 
+    createCorrectionsControl();
     createAntennasControl(m_sampleSource->getAntennas());
     createRangesControl(&m_sampleRateGUI, m_sampleSource->getRateRanges(), "SR", "S/s");
     createRangesControl(&m_bandwidthGUI, m_sampleSource->getBandwidthRanges(), "BW", "Hz");

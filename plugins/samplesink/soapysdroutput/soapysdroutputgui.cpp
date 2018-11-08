@@ -29,6 +29,7 @@
 #include "soapygui/stringrangegui.h"
 #include "soapygui/dynamicitemsettinggui.h"
 #include "soapygui/intervalslidergui.h"
+#include "soapygui/complexfactorgui.h"
 
 #include "soapysdroutputgui.h"
 
@@ -45,7 +46,11 @@ SoapySDROutputGui::SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     m_sampleRateGUI(0),
     m_bandwidthGUI(0),
     m_gainSliderGUI(0),
-    m_autoGain(0)
+    m_autoGain(0),
+    m_dcCorrectionGUI(0),
+    m_iqCorrectionGUI(0),
+    m_autoDCCorrection(0),
+    m_autoIQCorrection(0)
 {
     m_sampleSink = (SoapySDROutput*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
     ui->setupUi(this);
@@ -55,6 +60,7 @@ SoapySDROutputGui::SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     m_sampleSink->getFrequencyRange(f_min, f_max);
     ui->centerFrequency->setValueRange(7, f_min/1000, f_max/1000);
 
+    createCorrectionsControl();
     createAntennasControl(m_sampleSink->getAntennas());
     createRangesControl(&m_sampleRateGUI, m_sampleSink->getRateRanges(), "SR", "S/s");
     createRangesControl(&m_bandwidthGUI, m_sampleSink->getBandwidthRanges(), "BW", "Hz");
@@ -240,6 +246,57 @@ void SoapySDROutputGui::createIndividualGainsControl(const std::vector<DeviceSoa
     }
 }
 
+void SoapySDROutputGui::createCorrectionsControl()
+{
+    QVBoxLayout *layout = (QVBoxLayout *) ui->scrollAreaWidgetContents->layout();
+
+    if (m_sampleSink->hasDCCorrectionValue()) // complex GUI
+    {
+        m_dcCorrectionGUI = new ComplexFactorGUI(this);
+        m_dcCorrectionGUI->setLabel(QString("DC"));
+        m_dcCorrectionGUI->setAutomaticEnable(m_sampleSink->hasDCAutoCorrection());
+        layout->addWidget(m_dcCorrectionGUI);
+
+        connect(m_dcCorrectionGUI, SIGNAL(moduleChanged(double)), this, SLOT(dcCorrectionModuleChanged(double)));
+        connect(m_dcCorrectionGUI, SIGNAL(argumentChanged(double)), this, SLOT(dcCorrectionArgumentChanged(double)));
+
+        if (m_sampleSink->hasDCAutoCorrection()) {
+            connect(m_dcCorrectionGUI, SIGNAL(automaticChanged(bool)), this, SLOT(autoDCCorrectionChanged(bool)));
+        }
+    }
+    else if (m_sampleSink->hasDCAutoCorrection()) // simple checkbox
+    {
+        m_autoDCCorrection = new QCheckBox(this);
+        m_autoDCCorrection->setText(QString("DC corr"));
+        layout->addWidget(m_autoDCCorrection);
+
+        connect(m_autoDCCorrection, SIGNAL(toggled(bool)), this, SLOT(autoDCCorrectionChanged(bool)));
+    }
+
+    if (m_sampleSink->hasIQCorrectionValue()) // complex GUI
+    {
+        m_iqCorrectionGUI = new ComplexFactorGUI(this);
+        m_iqCorrectionGUI->setLabel(QString("IQ"));
+        m_iqCorrectionGUI->setAutomaticEnable(m_sampleSink->hasIQAutoCorrection());
+        layout->addWidget(m_iqCorrectionGUI);
+
+        connect(m_iqCorrectionGUI, SIGNAL(moduleChanged(double)), this, SLOT(iqCorrectionModuleChanged(double)));
+        connect(m_iqCorrectionGUI, SIGNAL(argumentChanged(double)), this, SLOT(iqCorrectionArgumentChanged(double)));
+
+        if (m_sampleSink->hasIQAutoCorrection()) {
+            connect(m_iqCorrectionGUI, SIGNAL(automaticChanged(bool)), this, SLOT(autoIQCorrectionChanged(bool)));
+        }
+    }
+    else if (m_sampleSink->hasIQAutoCorrection()) // simple checkbox
+    {
+        m_autoIQCorrection = new QCheckBox(this);
+        m_autoIQCorrection->setText(QString("IQ corr"));
+        layout->addWidget(m_autoIQCorrection);
+
+        connect(m_autoIQCorrection, SIGNAL(toggled(bool)), this, SLOT(autoIQCorrectionChanged(bool)));
+    }
+}
+
 void SoapySDROutputGui::setName(const QString& name)
 {
     setObjectName(name);
@@ -404,6 +461,48 @@ void SoapySDROutputGui::individualGainChanged(QString name, double value)
     sendSettings();
 }
 
+void SoapySDROutputGui::autoDCCorrectionChanged(bool set)
+{
+    m_settings.m_autoDCCorrection = set;
+    sendSettings();
+}
+
+void SoapySDROutputGui::autoIQCorrectionChanged(bool set)
+{
+    m_settings.m_autoIQCorrection = set;
+    sendSettings();
+}
+
+void SoapySDROutputGui::dcCorrectionModuleChanged(double value)
+{
+    std::complex<double> dcCorrection = std::polar<double>(value, arg(m_settings.m_dcCorrection));
+    m_settings.m_dcCorrection = dcCorrection;
+    sendSettings();
+}
+
+void SoapySDROutputGui::dcCorrectionArgumentChanged(double value)
+{
+    double angleInRadians = (value / 180.0) * M_PI;
+    std::complex<double> dcCorrection = std::polar<double>(abs(m_settings.m_dcCorrection), angleInRadians);
+    m_settings.m_dcCorrection = dcCorrection;
+    sendSettings();
+}
+
+void SoapySDROutputGui::iqCorrectionModuleChanged(double value)
+{
+    std::complex<double> iqCorrection = std::polar<double>(value, arg(m_settings.m_iqCorrection));
+    m_settings.m_iqCorrection = iqCorrection;
+    sendSettings();
+}
+
+void SoapySDROutputGui::iqCorrectionArgumentChanged(double value)
+{
+    double angleInRadians = (value / 180.0) * M_PI;
+    std::complex<double> iqCorrection = std::polar<double>(abs(m_settings.m_iqCorrection), angleInRadians);
+    m_settings.m_iqCorrection = iqCorrection;
+    sendSettings();
+}
+
 void SoapySDROutputGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
@@ -473,6 +572,7 @@ void SoapySDROutputGui::displaySettings()
 
     displayTunableElementsControlSettings();
     displayIndividualGainsControlSettings();
+    displayCorrectionsSettings();
 
     blockApplySettings(false);
 }
@@ -498,6 +598,31 @@ void SoapySDROutputGui::displayIndividualGainsControlSettings()
         if (elIt != m_settings.m_individualGains.end()) {
             it->setValue(*elIt);
         }
+    }
+}
+
+void SoapySDROutputGui::displayCorrectionsSettings()
+{
+    if (m_dcCorrectionGUI)
+    {
+        m_dcCorrectionGUI->setAutomatic(m_settings.m_autoDCCorrection);
+        m_dcCorrectionGUI->setModule(abs(m_settings.m_dcCorrection));
+        m_dcCorrectionGUI->setArgument(arg(m_settings.m_dcCorrection)*(180.0/M_PI));
+    }
+
+    if (m_iqCorrectionGUI)
+    {
+        m_iqCorrectionGUI->setAutomatic(m_settings.m_autoIQCorrection);
+        m_iqCorrectionGUI->setModule(abs(m_settings.m_iqCorrection));
+        m_iqCorrectionGUI->setArgument(arg(m_settings.m_iqCorrection)*(180.0/M_PI));
+    }
+
+    if (m_autoDCCorrection) {
+        m_autoDCCorrection->setChecked(m_settings.m_autoDCCorrection);
+    }
+
+    if (m_autoIQCorrection) {
+        m_autoIQCorrection->setChecked(m_settings.m_autoIQCorrection);
     }
 }
 

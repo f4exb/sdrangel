@@ -38,6 +38,10 @@ void SoapySDROutputSettings::resetToDefaults()
     m_bandwidth = 1000000;
     m_globalGain = 0;
     m_autoGain = false;
+    m_autoDCCorrection = false;
+    m_autoIQCorrection = false;
+    m_dcCorrection = std::complex<double>{0,0};
+    m_iqCorrection = std::complex<double>{0,0};
 }
 
 QByteArray SoapySDROutputSettings::serialize() const
@@ -55,6 +59,12 @@ QByteArray SoapySDROutputSettings::serialize() const
     s.writeS32(12, m_globalGain);
     s.writeBlob(13, serializeNamedElementMap(m_individualGains));
     s.writeBool(14, m_autoGain);
+    s.writeBool(15, m_autoDCCorrection);
+    s.writeBool(16, m_autoIQCorrection);
+    s.writeDouble(17, m_dcCorrection.real());
+    s.writeDouble(18, m_dcCorrection.imag());
+    s.writeDouble(19, m_iqCorrection.real());
+    s.writeDouble(20, m_iqCorrection.imag());
 
     return s.final();
 }
@@ -72,10 +82,11 @@ bool SoapySDROutputSettings::deserialize(const QByteArray& data)
     if (d.getVersion() == 1)
     {
         QByteArray blob;
+        double realval, imagval;
 
-        d.readS32(1, &m_devSampleRate);
-        d.readS32(2, &m_LOppmTenths);
-        d.readU32(3, &m_log2Interp);
+        d.readS32(1, &m_devSampleRate, 1024000);
+        d.readS32(2, &m_LOppmTenths, 0);
+        d.readU32(3, &m_log2Interp, 0);
         d.readBool(4, &m_transverterMode, false);
         d.readS64(5, &m_transverterDeltaFrequency, 0);
         d.readString(6, &m_antenna, "NONE");
@@ -86,6 +97,14 @@ bool SoapySDROutputSettings::deserialize(const QByteArray& data)
         d.readBlob(13, &blob);
         deserializeNamedElementMap(blob, m_individualGains);
         d.readBool(14, &m_autoGain, false);
+        d.readBool(15, &m_autoDCCorrection, false);
+        d.readBool(16, &m_autoIQCorrection, false);
+        d.readDouble(17, &realval, 0);
+        d.readDouble(18, &imagval, 0);
+        m_dcCorrection = std::complex<double>{realval, imagval};
+        d.readDouble(19, &realval, 0);
+        d.readDouble(20, &imagval, 0);
+        m_iqCorrection = std::complex<double>{realval, imagval};
 
         return true;
     }

@@ -33,6 +33,7 @@ class StringRangeGUI;
 class DynamicItemSettingGUI;
 class IntervalSliderGUI;
 class QCheckBox;
+class ComplexFactorGUI;
 
 namespace Ui {
     class SoapySDROutputGui;
@@ -67,6 +68,7 @@ private:
     void createTunableElementsControl(const std::vector<DeviceSoapySDRParams::FrequencySetting>& tunableElementsList);
     void createGlobalGainControl();
     void createIndividualGainsControl(const std::vector<DeviceSoapySDRParams::GainSetting>& individualGainsList);
+    void createCorrectionsControl();
 
     Ui::SoapySDROutputGui* ui;
 
@@ -89,11 +91,16 @@ private:
     IntervalSliderGUI *m_gainSliderGUI;
     std::vector<DynamicItemSettingGUI*> m_individualGainsGUIs;
     QCheckBox *m_autoGain;
+    ComplexFactorGUI *m_dcCorrectionGUI;
+    ComplexFactorGUI *m_iqCorrectionGUI;
+    QCheckBox *m_autoDCCorrection;
+    QCheckBox *m_autoIQCorrection;
 
     void blockApplySettings(bool block) { m_doApplySettings = !block; }
     void displaySettings();
     void displayTunableElementsControlSettings();
     void displayIndividualGainsControlSettings();
+    void displayCorrectionsSettings();
     void sendSettings();
     void updateSampleRateAndFrequency();
     void updateFrequencyLimits();
@@ -101,6 +108,7 @@ private:
 
 private slots:
     void handleInputMessages();
+
     void antennasChanged();
     void sampleRateChanged(double sampleRate);
     void bandwidthChanged(double bandwidth);
@@ -108,6 +116,13 @@ private slots:
     void globalGainChanged(double gain);
     void autoGainChanged(bool set);
     void individualGainChanged(QString name, double value);
+    void autoDCCorrectionChanged(bool set);
+    void autoIQCorrectionChanged(bool set);
+    void dcCorrectionModuleChanged(double value);
+    void dcCorrectionArgumentChanged(double value);
+    void iqCorrectionModuleChanged(double value);
+    void iqCorrectionArgumentChanged(double value);
+
     void on_centerFrequency_changed(quint64 value);
     void on_LOppm_valueChanged(int value);
     void on_interp_currentIndexChanged(int index);

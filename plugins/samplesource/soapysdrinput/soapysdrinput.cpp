@@ -980,11 +980,11 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
             try
             {
                 dev->setDCOffsetMode(SOAPY_SDR_RX, requestedChannel, settings.m_autoDCCorrection);
-                qDebug("SoapySDRInput::applySettings: %s DC auto correction", settings.m_autoGain ? "set" : "unset");
+                qDebug("SoapySDRInput::applySettings: %s DC auto correction", settings.m_autoDCCorrection ? "set" : "unset");
             }
             catch (const std::exception &ex)
             {
-                qCritical("SoapySDRInput::applySettings: cannot %s DC auto correction", settings.m_autoGain ? "set" : "unset");
+                qCritical("SoapySDRInput::applySettings: cannot %s DC auto correction", settings.m_autoDCCorrection ? "set" : "unset");
             }
         }
     }

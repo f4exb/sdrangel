@@ -250,6 +250,24 @@ void SoapySDROutput::initGainSettings(SoapySDROutputSettings& settings)
     updateGains(m_deviceShared.m_device, m_deviceShared.m_channel, settings);
 }
 
+bool SoapySDROutput::hasDCAutoCorrection()
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getTxChannelSettings(m_deviceShared.m_channel);
+    return channelSettings->m_hasDCAutoCorrection;
+}
+
+bool SoapySDROutput::hasDCCorrectionValue()
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getTxChannelSettings(m_deviceShared.m_channel);
+    return channelSettings->m_hasDCOffsetValue;
+}
+
+bool SoapySDROutput::hasIQCorrectionValue()
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getTxChannelSettings(m_deviceShared.m_channel);
+    return channelSettings->m_hasIQBalanceValue;
+}
+
 void SoapySDROutput::init()
 {
     applySettings(m_settings, true);
@@ -905,6 +923,54 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
             catch (const std::exception &ex)
             {
                 qCritical("SoapySDROutput::applySettings: cannot %s AGC", settings.m_autoGain ? "set" : "unset");
+            }
+        }
+    }
+
+    if ((m_settings.m_autoDCCorrection != settings.m_autoDCCorrection) || force)
+    {
+        if ((dev != 0) && hasDCAutoCorrection())
+        {
+            try
+            {
+                dev->setDCOffsetMode(SOAPY_SDR_TX, requestedChannel, settings.m_autoDCCorrection);
+                qDebug("SoapySDROutput::applySettings: %s DC auto correction", settings.m_autoDCCorrection ? "set" : "unset");
+            }
+            catch (const std::exception &ex)
+            {
+                qCritical("SoapySDROutput::applySettings: cannot %s DC auto correction", settings.m_autoDCCorrection ? "set" : "unset");
+            }
+        }
+    }
+
+    if ((m_settings.m_dcCorrection != settings.m_dcCorrection) || force)
+    {
+        if ((dev != 0) && hasDCCorrectionValue())
+        {
+            try
+            {
+                dev->setDCOffset(SOAPY_SDR_TX, requestedChannel, settings.m_dcCorrection);
+                qDebug("SoapySDROutput::applySettings: DC offset correction set to (%lf, %lf)", settings.m_dcCorrection.real(), settings.m_dcCorrection.imag());
+            }
+            catch (const std::exception &ex)
+            {
+                qCritical("SoapySDROutput::applySettings: cannot set DC offset correction to (%lf, %lf)", settings.m_dcCorrection.real(), settings.m_dcCorrection.imag());
+            }
+        }
+    }
+
+    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    {
+        if ((dev != 0) && hasIQCorrectionValue())
+        {
+            try
+            {
+                dev->setIQBalance(SOAPY_SDR_TX, requestedChannel, settings.m_iqCorrection);
+                qDebug("SoapySDROutput::applySettings: IQ balance correction set to (%lf, %lf)", settings.m_iqCorrection.real(), settings.m_iqCorrection.imag());
+            }
+            catch (const std::exception &ex)
+            {
+                qCritical("SoapySDROutput::applySettings: cannot set IQ balance correction to (%lf, %lf)", settings.m_iqCorrection.real(), settings.m_iqCorrection.imag());
             }
         }
     }

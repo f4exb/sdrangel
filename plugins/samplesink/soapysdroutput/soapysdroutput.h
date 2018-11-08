@@ -134,6 +134,10 @@ public:
     const std::vector<DeviceSoapySDRParams::FrequencySetting>& getTunableElements();
     const std::vector<DeviceSoapySDRParams::GainSetting>& getIndividualGainsRanges();
     void initGainSettings(SoapySDROutputSettings& settings);
+    bool hasDCAutoCorrection();
+    bool hasDCCorrectionValue();
+    bool hasIQAutoCorrection() { return false; } // not in SoapySDR interface
+    bool hasIQCorrectionValue();
 
 private:
     DeviceSinkAPI *m_deviceAPI;

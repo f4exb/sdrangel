@@ -33,6 +33,10 @@ struct SoapySDROutputSettings {
     qint32 m_globalGain;
     QMap<QString, double> m_individualGains;
     bool m_autoGain;
+    bool m_autoDCCorrection;
+    bool m_autoIQCorrection;
+    std::complex<double> m_dcCorrection;
+    std::complex<double> m_iqCorrection;
 
     SoapySDROutputSettings();
     void resetToDefaults();
