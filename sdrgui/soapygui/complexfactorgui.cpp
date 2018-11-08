@@ -70,6 +70,11 @@ void ComplexFactorGUI::setLabel(const QString& text)
     ui->label->setText(text);
 }
 
+void ComplexFactorGUI::setToolTip(const QString& text)
+{
+    ui->label->setToolTip(text);
+}
+
 void ComplexFactorGUI::on_automatic_toggled(bool set)
 {
     ui->module->setEnabled(!set);

@@ -258,7 +258,8 @@ void SoapySDRInputGui::createCorrectionsControl()
     if (m_sampleSource->hasDCCorrectionValue()) // complex GUI
     {
         m_dcCorrectionGUI = new ComplexFactorGUI(this);
-        m_dcCorrectionGUI->setLabel(QString("DC"));
+        m_dcCorrectionGUI->setLabel(QString("DC corr"));
+        m_dcCorrectionGUI->setToolTip(QString("Hardware DC offset correction"));
         m_dcCorrectionGUI->setAutomaticEnable(m_sampleSource->hasDCAutoCorrection());
         layout->addWidget(m_dcCorrectionGUI);
 
@@ -272,7 +273,8 @@ void SoapySDRInputGui::createCorrectionsControl()
     else if (m_sampleSource->hasDCAutoCorrection()) // simple checkbox
     {
         m_autoDCCorrection = new QCheckBox(this);
-        m_autoDCCorrection->setText(QString("DC corr"));
+        m_autoDCCorrection->setText(QString("Auto DC corr"));
+        m_autoDCCorrection->setToolTip(QString("Automatic hardware DC offset correction"));
         layout->addWidget(m_autoDCCorrection);
 
         connect(m_autoDCCorrection, SIGNAL(toggled(bool)), this, SLOT(autoDCCorrectionChanged(bool)));
@@ -281,7 +283,8 @@ void SoapySDRInputGui::createCorrectionsControl()
     if (m_sampleSource->hasIQCorrectionValue()) // complex GUI
     {
         m_iqCorrectionGUI = new ComplexFactorGUI(this);
-        m_iqCorrectionGUI->setLabel(QString("IQ"));
+        m_iqCorrectionGUI->setLabel(QString("IQ corr"));
+        m_iqCorrectionGUI->setToolTip(QString("Hardware IQ imbalance correction"));
         m_iqCorrectionGUI->setAutomaticEnable(m_sampleSource->hasIQAutoCorrection());
         layout->addWidget(m_iqCorrectionGUI);
 
@@ -295,7 +298,8 @@ void SoapySDRInputGui::createCorrectionsControl()
     else if (m_sampleSource->hasIQAutoCorrection()) // simple checkbox
     {
         m_autoIQCorrection = new QCheckBox(this);
-        m_autoIQCorrection->setText(QString("IQ corr"));
+        m_autoIQCorrection->setText(QString("Auto IQ corr"));
+        m_autoIQCorrection->setToolTip(QString("Automatic hardware IQ imbalance correction"));
         layout->addWidget(m_autoIQCorrection);
 
         connect(m_autoIQCorrection, SIGNAL(toggled(bool)), this, SLOT(autoIQCorrectionChanged(bool)));

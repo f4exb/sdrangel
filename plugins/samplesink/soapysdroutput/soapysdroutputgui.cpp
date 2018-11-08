@@ -271,7 +271,8 @@ void SoapySDROutputGui::createCorrectionsControl()
     else if (m_sampleSink->hasDCAutoCorrection()) // simple checkbox
     {
         m_autoDCCorrection = new QCheckBox(this);
-        m_autoDCCorrection->setText(QString("DC corr"));
+        m_autoDCCorrection->setText(QString("Auto DC corr"));
+        m_autoDCCorrection->setToolTip(QString("Automatic hardware DC offset correction"));
         layout->addWidget(m_autoDCCorrection);
 
         connect(m_autoDCCorrection, SIGNAL(toggled(bool)), this, SLOT(autoDCCorrectionChanged(bool)));
@@ -294,7 +295,8 @@ void SoapySDROutputGui::createCorrectionsControl()
     else if (m_sampleSink->hasIQAutoCorrection()) // simple checkbox
     {
         m_autoIQCorrection = new QCheckBox(this);
-        m_autoIQCorrection->setText(QString("IQ corr"));
+        m_autoIQCorrection->setText(QString("Auto IQ corr"));
+        m_autoIQCorrection->setToolTip(QString("Automatic hardware IQ imbalance correction"));
         layout->addWidget(m_autoIQCorrection);
 
         connect(m_autoIQCorrection, SIGNAL(toggled(bool)), this, SLOT(autoIQCorrectionChanged(bool)));

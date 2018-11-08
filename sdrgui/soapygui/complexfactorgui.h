@@ -47,6 +47,7 @@ public:
     void setAutomaticEnable(bool enable);
 
     void setLabel(const QString& text);
+    void setToolTip(const QString& text);
 
 signals:
     void moduleChanged(double value);
