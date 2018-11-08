@@ -28,6 +28,7 @@
 #include "soapygui/stringrangegui.h"
 #include "soapygui/dynamicitemsettinggui.h"
 #include "soapygui/intervalslidergui.h"
+#include "soapygui/complexfactorgui.h"
 
 #include "ui_soapysdrinputgui.h"
 #include "soapysdrinputgui.h"
@@ -46,7 +47,11 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleRateGUI(0),
     m_bandwidthGUI(0),
     m_gainSliderGUI(0),
-    m_autoGain(0)
+    m_autoGain(0),
+    m_dcCorrectionGUI(0),
+    m_iqCorrectionGUI(0),
+    m_autoDCCorrection(0),
+    m_autoIQCorrection(0)
 {
     m_sampleSource = (SoapySDRInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
     ui->setupUi(this);
@@ -241,6 +246,57 @@ void SoapySDRInputGui::createIndividualGainsControl(const std::vector<DeviceSoap
     }
 }
 
+void SoapySDRInputGui::createCorrectionsControl()
+{
+    QVBoxLayout *layout = (QVBoxLayout *) ui->scrollAreaWidgetContents->layout();
+
+    if (m_sampleSource->hasDCCorrectionValue()) // complex GUI
+    {
+        m_dcCorrectionGUI = new ComplexFactorGUI(this);
+        m_dcCorrectionGUI->setLabel(QString("DC"));
+        m_dcCorrectionGUI->setAutomaticEnable(m_sampleSource->hasDCAutoCorrection());
+        layout->addWidget(m_dcCorrectionGUI);
+
+        connect(m_dcCorrectionGUI, SIGNAL(moduleChanged(double)), this, SLOT(dcCorrectionModuleChanged(double)));
+        connect(m_dcCorrectionGUI, SIGNAL(argumentChanged(double)), this, SLOT(dcCorrectionArgumentChanged(double)));
+
+        if (m_sampleSource->hasDCAutoCorrection()) {
+            connect(m_dcCorrectionGUI, SIGNAL(automaticChanged(bool)), this, SLOT(autoDCCorrectionChanged(bool)));
+        }
+    }
+    else if (m_sampleSource->hasDCAutoCorrection()) // simple checkbox
+    {
+        m_autoDCCorrection = new QCheckBox(this);
+        m_autoDCCorrection->setText(QString("DC corr"));
+        layout->addWidget(m_autoDCCorrection);
+
+        connect(m_autoDCCorrection, SIGNAL(toggled(bool)), this, SLOT(autoDCCorrectionChanged(bool)));
+    }
+
+    if (m_sampleSource->hasIQCorrectionValue()) // complex GUI
+    {
+        m_iqCorrectionGUI = new ComplexFactorGUI(this);
+        m_iqCorrectionGUI->setLabel(QString("IQ"));
+        m_iqCorrectionGUI->setAutomaticEnable(m_sampleSource->hasIQAutoCorrection());
+        layout->addWidget(m_iqCorrectionGUI);
+
+        connect(m_iqCorrectionGUI, SIGNAL(moduleChanged(double)), this, SLOT(iqCorrectionModuleChanged(double)));
+        connect(m_iqCorrectionGUI, SIGNAL(argumentChanged(double)), this, SLOT(iqCorrectionArgumentChanged(double)));
+
+        if (m_sampleSource->hasIQAutoCorrection()) {
+            connect(m_iqCorrectionGUI, SIGNAL(automaticChanged(bool)), this, SLOT(autoIQCorrectionChanged(bool)));
+        }
+    }
+    else if (m_sampleSource->hasIQAutoCorrection()) // simple checkbox
+    {
+        m_autoIQCorrection = new QCheckBox(this);
+        m_autoIQCorrection->setText(QString("IQ corr"));
+        layout->addWidget(m_autoIQCorrection);
+
+        connect(m_autoIQCorrection, SIGNAL(toggled(bool)), this, SLOT(autoIQCorrectionChanged(bool)));
+    }
+}
+
 void SoapySDRInputGui::setName(const QString& name)
 {
     setObjectName(name);
@@ -413,13 +469,13 @@ void SoapySDRInputGui::on_centerFrequency_changed(quint64 value)
 
 void SoapySDRInputGui::on_dcOffset_toggled(bool checked)
 {
-    m_settings.m_dcBlock = checked;
+    m_settings.m_softDCCorrection = checked;
     sendSettings();
 }
 
 void SoapySDRInputGui::on_iqImbalance_toggled(bool checked)
 {
-    m_settings.m_iqCorrection = checked;
+    m_settings.m_softIQCorrection = checked;
     sendSettings();
 }
 
@@ -506,8 +562,8 @@ void SoapySDRInputGui::displaySettings()
         m_autoGain->setChecked(m_settings.m_autoGain);
     }
 
-    ui->dcOffset->setChecked(m_settings.m_dcBlock);
-    ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
+    ui->dcOffset->setChecked(m_settings.m_softDCCorrection);
+    ui->iqImbalance->setChecked(m_settings.m_softIQCorrection);
 
     ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);

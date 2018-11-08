@@ -32,8 +32,8 @@ void SoapySDRInputSettings::resetToDefaults()
     m_devSampleRate = 1024000;
     m_log2Decim = 0;
     m_fcPos = FC_POS_CENTER;
-    m_dcBlock = false;
-    m_iqCorrection = false;
+    m_softDCCorrection = false;
+    m_softIQCorrection = false;
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
     m_fileRecordName = "";
@@ -41,6 +41,8 @@ void SoapySDRInputSettings::resetToDefaults()
     m_bandwidth = 1000000;
     m_globalGain = 0;
     m_autoGain = false;
+    m_autoDCCorrection = false;
+    m_autoIQCorrection = false;
 }
 
 QByteArray SoapySDRInputSettings::serialize() const
@@ -50,8 +52,8 @@ QByteArray SoapySDRInputSettings::serialize() const
     s.writeS32(1, m_devSampleRate);
     s.writeU32(2, m_log2Decim);
     s.writeS32(3, (int) m_fcPos);
-    s.writeBool(4, m_dcBlock);
-    s.writeBool(5, m_iqCorrection);
+    s.writeBool(4, m_softDCCorrection);
+    s.writeBool(5, m_softIQCorrection);
     s.writeS32(6, m_LOppmTenths);
     s.writeBool(7, m_transverterMode);
     s.writeS64(8, m_transverterDeltaFrequency);
@@ -61,6 +63,8 @@ QByteArray SoapySDRInputSettings::serialize() const
     s.writeS32(12, m_globalGain);
     s.writeBlob(13, serializeNamedElementMap(m_individualGains));
     s.writeBool(14, m_autoGain);
+    s.writeBool(15, m_autoDCCorrection);
+    s.writeBool(16, m_autoIQCorrection);
 
     return s.final();
 }
@@ -81,12 +85,12 @@ bool SoapySDRInputSettings::deserialize(const QByteArray& data)
         QByteArray blob;
 
         d.readS32(1, &m_devSampleRate, 1024000);
-        d.readU32(2, &m_log2Decim);
+        d.readU32(2, &m_log2Decim, 0);
         d.readS32(3, &intval, (int) FC_POS_CENTER);
         m_fcPos = (fcPos_t) intval;
-        d.readBool(4, &m_dcBlock);
-        d.readBool(5, &m_iqCorrection);
-        d.readS32(6, &m_LOppmTenths);
+        d.readBool(4, &m_softDCCorrection, false);
+        d.readBool(5, &m_softIQCorrection, false);
+        d.readS32(6, &m_LOppmTenths, 0);
         d.readBool(7, &m_transverterMode, false);
         d.readS64(8, &m_transverterDeltaFrequency, 0);
         d.readString(9, &m_antenna, "NONE");
@@ -97,6 +101,8 @@ bool SoapySDRInputSettings::deserialize(const QByteArray& data)
         d.readBlob(13, &blob);
         deserializeNamedElementMap(blob, m_individualGains);
         d.readBool(14, &m_autoGain, false);
+        d.readBool(15, &m_autoDCCorrection, false);
+        d.readBool(16, &m_autoIQCorrection, false);
 
         return true;
     }

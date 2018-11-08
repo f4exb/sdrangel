@@ -282,6 +282,24 @@ void SoapySDRInput::initGainSettings(SoapySDRInputSettings& settings)
     updateGains(m_deviceShared.m_device, m_deviceShared.m_channel, settings);
 }
 
+bool SoapySDRInput::hasDCAutoCorrection()
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getRxChannelSettings(m_deviceShared.m_channel);
+    return channelSettings->m_hasDCAutoCorrection;
+}
+
+bool SoapySDRInput::hasDCCorrectionValue()
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getRxChannelSettings(m_deviceShared.m_channel);
+    return channelSettings->m_hasDCOffsetValue;
+}
+
+bool SoapySDRInput::hasIQCorrectionValue()
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getRxChannelSettings(m_deviceShared.m_channel);
+    return channelSettings->m_hasIQBalanceValue;
+}
+
 void SoapySDRInput::init()
 {
     applySettings(m_settings, true);
@@ -753,10 +771,10 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
     xlatedDeviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
     xlatedDeviceCenterFrequency = xlatedDeviceCenterFrequency < 0 ? 0 : xlatedDeviceCenterFrequency;
 
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
-        (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    if ((m_settings.m_softDCCorrection != settings.m_softDCCorrection) ||
+        (m_settings.m_softIQCorrection != settings.m_softIQCorrection) || force)
     {
-        m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
+        m_deviceAPI->configureCorrections(settings.m_softDCCorrection, settings.m_softIQCorrection);
     }
 
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
@@ -1015,8 +1033,8 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
             << " m_log2Decim: " << m_settings.m_log2Decim
             << " m_fcPos: " << m_settings.m_fcPos
             << " m_devSampleRate: " << m_settings.m_devSampleRate
-            << " m_dcBlock: " << m_settings.m_dcBlock
-            << " m_iqCorrection: " << m_settings.m_iqCorrection
+            << " m_softDCCorrection: " << m_settings.m_softDCCorrection
+            << " m_softIQCorrection: " << m_settings.m_softIQCorrection
             << " m_antenna: " << m_settings.m_antenna
             << " m_bandwidth: " << m_settings.m_bandwidth
             << " m_globalGain: " << m_settings.m_globalGain;

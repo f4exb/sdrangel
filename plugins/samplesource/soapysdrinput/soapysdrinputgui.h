@@ -31,6 +31,7 @@ class StringRangeGUI;
 class DynamicItemSettingGUI;
 class IntervalSliderGUI;
 class QCheckBox;
+class ComplexFactorGUI;
 
 namespace Ui {
     class SoapySDRInputGui;
@@ -65,6 +66,7 @@ private:
     void createTunableElementsControl(const std::vector<DeviceSoapySDRParams::FrequencySetting>& tunableElementsList);
     void createGlobalGainControl();
     void createIndividualGainsControl(const std::vector<DeviceSoapySDRParams::GainSetting>& individualGainsList);
+    void createCorrectionsControl();
 
     Ui::SoapySDRInputGui* ui;
 
@@ -87,6 +89,10 @@ private:
     IntervalSliderGUI *m_gainSliderGUI;
     std::vector<DynamicItemSettingGUI*> m_individualGainsGUIs;
     QCheckBox *m_autoGain;
+    ComplexFactorGUI *m_dcCorrectionGUI;
+    ComplexFactorGUI *m_iqCorrectionGUI;
+    QCheckBox *m_autoDCCorrection;
+    QCheckBox *m_autoIQCorrection;
 
     void displaySettings();
     void displayTunableElementsControlSettings();
@@ -106,6 +112,13 @@ private slots:
     void globalGainChanged(double gain);
     void autoGainChanged(bool set);
     void individualGainChanged(QString name, double value);
+    void autoDCCorrectionChanged(bool set);
+    void autoIQCorrectionChanged(bool set);
+    void dcCorrectionModuleChanged(double value);
+    void dcCorrectionArgumentChanged(double value);
+    void iqCorrectionModuleChanged(double value);
+    void iqCorrectionArgumentChanged(double value);
+
     void on_centerFrequency_changed(quint64 value);
     void on_LOppm_valueChanged(int value);
     void on_dcOffset_toggled(bool checked);

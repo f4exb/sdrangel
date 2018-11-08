@@ -33,8 +33,8 @@ struct SoapySDRInputSettings {
     qint32 m_devSampleRate;
     quint32 m_log2Decim;
     fcPos_t m_fcPos;
-    bool m_dcBlock;
-    bool m_iqCorrection;
+    bool m_softDCCorrection;
+    bool m_softIQCorrection;
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
     QString m_fileRecordName;
@@ -44,6 +44,10 @@ struct SoapySDRInputSettings {
     qint32 m_globalGain;
     QMap<QString, double> m_individualGains;
     bool m_autoGain;
+    bool m_autoDCCorrection;
+    bool m_autoIQCorrection;
+    std::complex<float> m_dcCorrection;
+    std::complex<float> m_iqCorrection;
 
     SoapySDRInputSettings();
     void resetToDefaults();
