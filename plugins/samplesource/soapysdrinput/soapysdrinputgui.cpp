@@ -461,6 +461,48 @@ void SoapySDRInputGui::individualGainChanged(QString name, double value)
     sendSettings();
 }
 
+void SoapySDRInputGui::autoDCCorrectionChanged(bool set)
+{
+    m_settings.m_autoDCCorrection = set;
+    sendSettings();
+}
+
+void SoapySDRInputGui::autoIQCorrectionChanged(bool set)
+{
+    m_settings.m_autoIQCorrection = set;
+    sendSettings();
+}
+
+void SoapySDRInputGui::dcCorrectionModuleChanged(double value)
+{
+    std::complex<float> dcCorrection = std::polar<float>(value, arg(m_settings.m_dcCorrection));
+    m_settings.m_dcCorrection = dcCorrection;
+    sendSettings();
+}
+
+void SoapySDRInputGui::dcCorrectionArgumentChanged(double value)
+{
+    double angleInRadians = (value / 180.0) * M_PI;
+    std::complex<float> dcCorrection = std::polar<float>(abs(m_settings.m_dcCorrection), angleInRadians);
+    m_settings.m_dcCorrection = dcCorrection;
+    sendSettings();
+}
+
+void SoapySDRInputGui::iqCorrectionModuleChanged(double value)
+{
+    std::complex<float> iqCorrection = std::polar<float>(value, arg(m_settings.m_iqCorrection));
+    m_settings.m_iqCorrection = iqCorrection;
+    sendSettings();
+}
+
+void SoapySDRInputGui::iqCorrectionArgumentChanged(double value)
+{
+    double angleInRadians = (value / 180.0) * M_PI;
+    std::complex<float> iqCorrection = std::polar<float>(abs(m_settings.m_iqCorrection), angleInRadians);
+    m_settings.m_iqCorrection = iqCorrection;
+    sendSettings();
+}
+
 void SoapySDRInputGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
@@ -573,6 +615,7 @@ void SoapySDRInputGui::displaySettings()
 
     displayTunableElementsControlSettings();
     displayIndividualGainsControlSettings();
+    displayCorrectionsSettings();
 
     blockApplySettings(false);
 }
@@ -598,6 +641,31 @@ void SoapySDRInputGui::displayIndividualGainsControlSettings()
         if (elIt != m_settings.m_individualGains.end()) {
             it->setValue(*elIt);
         }
+    }
+}
+
+void SoapySDRInputGui::displayCorrectionsSettings()
+{
+    if (m_dcCorrectionGUI)
+    {
+        m_dcCorrectionGUI->setAutomatic(m_settings.m_autoDCCorrection);
+        m_dcCorrectionGUI->setModule(abs(m_settings.m_dcCorrection));
+        m_dcCorrectionGUI->setArgument(arg(m_settings.m_dcCorrection)*(180.0/M_PI));
+    }
+
+    if (m_iqCorrectionGUI)
+    {
+        m_iqCorrectionGUI->setAutomatic(m_settings.m_autoIQCorrection);
+        m_iqCorrectionGUI->setModule(abs(m_settings.m_iqCorrection));
+        m_iqCorrectionGUI->setArgument(arg(m_settings.m_iqCorrection)*(180.0/M_PI));
+    }
+
+    if (m_autoDCCorrection) {
+        m_autoDCCorrection->setChecked(m_settings.m_autoDCCorrection);
+    }
+
+    if (m_autoIQCorrection) {
+        m_autoIQCorrection->setChecked(m_settings.m_autoIQCorrection);
     }
 }
 

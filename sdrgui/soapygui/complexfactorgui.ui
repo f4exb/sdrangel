@@ -90,7 +90,7 @@
            <string>Normalized module</string>
           </property>
           <property name="minimum">
-           <number>-100</number>
+           <number>0</number>
           </property>
           <property name="maximum">
            <number>100</number>
@@ -112,7 +112,7 @@
            </size>
           </property>
           <property name="text">
-           <string>-1.00</string>
+           <string>1.00</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

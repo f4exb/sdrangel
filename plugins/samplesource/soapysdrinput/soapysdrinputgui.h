@@ -97,6 +97,7 @@ private:
     void displaySettings();
     void displayTunableElementsControlSettings();
     void displayIndividualGainsControlSettings();
+    void displayCorrectionsSettings();
     void sendSettings();
     void updateSampleRateAndFrequency();
     void updateFrequencyLimits();
