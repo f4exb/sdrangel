@@ -490,6 +490,7 @@ void SoapySDRInputGui::displaySettings()
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 
     if (m_antennas) {
+        qDebug("SoapySDRInputGui::displaySettings: m_antenna: %s", m_settings.m_antenna.toStdString().c_str());
         m_antennas->setValue(m_settings.m_antenna.toStdString());
     }
     if (m_sampleRateGUI) {

@@ -59,7 +59,7 @@ void StringRangeGUI::setValue(const std::string& value)
 
     for (const auto &it : itemValues)
     {
-        if (it >= value)
+        if (it == value)
         {
             ui->rangeCombo->blockSignals(true);
             ui->rangeCombo->setCurrentIndex(index);
