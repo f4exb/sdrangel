@@ -40,7 +40,7 @@ CONFIG(MINGW64):INCLUDEPATH += "C:\softs\serialDV"
 
 CONFIG(macx):INCLUDEPATH += "../../../boost_1_64_0"
 
-win32 {
+MINGW32 || MINGW64 {
     HEADERS += \
         dsp/dvserialengine.h \
         dsp/dvserialworker.h

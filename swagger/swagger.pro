@@ -23,6 +23,8 @@ QMAKE_CXXFLAGS += -msse4.1
 
 QMAKE_CXXFLAGS += -std=c++11
 
+CONFIG(MSVC):DEFINES += swagger_EXPORTS
+
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
