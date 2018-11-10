@@ -436,13 +436,13 @@ void SoapySDRInputGui::antennasChanged()
 
 void SoapySDRInputGui::sampleRateChanged(double sampleRate)
 {
-    m_settings.m_devSampleRate = sampleRate;
+    m_settings.m_devSampleRate = round(sampleRate);
     sendSettings();
 }
 
 void SoapySDRInputGui::bandwidthChanged(double bandwidth)
 {
-    m_settings.m_bandwidth = bandwidth;
+    m_settings.m_bandwidth = round(bandwidth);
     sendSettings();
 }
 
@@ -600,14 +600,20 @@ void SoapySDRInputGui::displaySettings()
         qDebug("SoapySDRInputGui::displaySettings: m_antenna: %s", m_settings.m_antenna.toStdString().c_str());
         m_antennas->setValue(m_settings.m_antenna.toStdString());
     }
-    if (m_sampleRateGUI) {
+    if (m_sampleRateGUI)
+    {
         m_sampleRateGUI->setValue(m_settings.m_devSampleRate);
+        m_settings.m_devSampleRate = m_sampleRateGUI->getCurrentValue();
     }
-    if (m_bandwidthGUI) {
+    if (m_bandwidthGUI)
+    {
         m_bandwidthGUI->setValue(m_settings.m_bandwidth);
+        m_settings.m_bandwidth = m_bandwidthGUI->getCurrentValue();
     }
-    if (m_gainSliderGUI) {
+    if (m_gainSliderGUI)
+    {
         m_gainSliderGUI->setValue(m_settings.m_globalGain);
+        m_settings.m_globalGain = m_gainSliderGUI->getCurrentValue();
     }
     if (m_autoGain) {
         m_autoGain->setChecked(m_settings.m_autoGain);
@@ -645,10 +651,12 @@ void SoapySDRInputGui::displayIndividualGainsControlSettings()
 {
     for (const auto &it : m_individualGainsGUIs)
     {
-        QMap<QString, double>::const_iterator elIt = m_settings.m_individualGains.find(it->getName());
+        QMap<QString, double>::iterator elIt = m_settings.m_individualGains.find(it->getName());
 
-        if (elIt != m_settings.m_individualGains.end()) {
+        if (elIt != m_settings.m_individualGains.end())
+        {
             it->setValue(*elIt);
+            *elIt = it->getValue();
         }
     }
 }

@@ -892,7 +892,7 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
     {
         auto nvalue = settings.m_tunableElements.find(oname);
 
-        if (nvalue != settings.m_tunableElements.end() && (m_settings.m_tunableElements[oname] != *nvalue))
+        if (nvalue != settings.m_tunableElements.end() && ((m_settings.m_tunableElements[oname] != *nvalue) ||force))
         {
             if (dev != 0)
             {
@@ -1085,7 +1085,8 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
             << " m_softIQCorrection: " << m_settings.m_softIQCorrection
             << " m_antenna: " << m_settings.m_antenna
             << " m_bandwidth: " << m_settings.m_bandwidth
-            << " m_globalGain: " << m_settings.m_globalGain;
+            << " m_globalGain: " << m_settings.m_globalGain
+            << " force: " << force;
 
     return true;
 }

@@ -846,7 +846,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
     {
         auto nvalue = settings.m_tunableElements.find(oname);
 
-        if (nvalue != settings.m_tunableElements.end() && (m_settings.m_tunableElements[oname] != *nvalue))
+        if (nvalue != settings.m_tunableElements.end() && ((m_settings.m_tunableElements[oname] != *nvalue) || force))
         {
             if (dev != 0)
             {
@@ -1034,7 +1034,8 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
             << " m_log2Interp: " << m_settings.m_log2Interp
             << " m_devSampleRate: " << m_settings.m_devSampleRate
             << " m_bandwidth: " << m_settings.m_bandwidth
-            << " m_globalGain: " << m_settings.m_globalGain;
+            << " m_globalGain: " << m_settings.m_globalGain
+            << " force: " << force;
 
     return true;
 }
