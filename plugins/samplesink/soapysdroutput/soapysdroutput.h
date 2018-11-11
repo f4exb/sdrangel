@@ -133,7 +133,9 @@ public:
     const SoapySDR::RangeList& getBandwidthRanges();
     const std::vector<DeviceSoapySDRParams::FrequencySetting>& getTunableElements();
     const std::vector<DeviceSoapySDRParams::GainSetting>& getIndividualGainsRanges();
+    const SoapySDR::ArgInfoList& getStreamArgInfoList();
     void initGainSettings(SoapySDROutputSettings& settings);
+    void initStreamArgSettings(SoapySDROutputSettings& settings);
     bool hasDCAutoCorrection();
     bool hasDCCorrectionValue();
     bool hasIQAutoCorrection() { return false; } // not in SoapySDR interface

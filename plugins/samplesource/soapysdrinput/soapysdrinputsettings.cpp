@@ -156,7 +156,7 @@ QByteArray SoapySDRInputSettings::serializeArgumentMap(const QMap<QString, QVari
     return data;
 }
 
-void deserializeArgumentMap(const QByteArray& data, QMap<QString, QVariant>& map)
+void SoapySDRInputSettings::deserializeArgumentMap(const QByteArray& data, QMap<QString, QVariant>& map)
 {
     QDataStream *stream = new QDataStream(data);
     (*stream) >> map;
