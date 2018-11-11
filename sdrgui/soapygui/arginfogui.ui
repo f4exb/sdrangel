@@ -56,10 +56,24 @@
      </widget>
     </item>
     <item>
-     <widget class="QLineEdit" name="argEdit"/>
+     <widget class="QLineEdit" name="argEdit">
+      <property name="maximumSize">
+       <size>
+        <width>120</width>
+        <height>16777215</height>
+       </size>
+      </property>
+     </widget>
     </item>
     <item>
-     <widget class="QComboBox" name="argCombo"/>
+     <widget class="QComboBox" name="argCombo">
+      <property name="maximumSize">
+       <size>
+        <width>120</width>
+        <height>16777215</height>
+       </size>
+      </property>
+     </widget>
     </item>
     <item>
      <widget class="QLabel" name="argUnits">

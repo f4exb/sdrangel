@@ -155,7 +155,9 @@ public:
     int getAntennaIndex(const std::string& antenna);
     const std::vector<DeviceSoapySDRParams::FrequencySetting>& getTunableElements();
     const std::vector<DeviceSoapySDRParams::GainSetting>& getIndividualGainsRanges();
+    const SoapySDR::ArgInfoList& getStreamArgInfoList();
     void initGainSettings(SoapySDRInputSettings& settings);
+    void initStreamArgSettings(SoapySDRInputSettings& settings);
     bool hasDCAutoCorrection();
     bool hasDCCorrectionValue();
     bool hasIQAutoCorrection() { return false; } // not in SoapySDR interface

@@ -29,6 +29,7 @@ class DeviceUISet;
 class ItemSettingGUI;
 class StringRangeGUI;
 class DynamicItemSettingGUI;
+class DynamicArgSettingGUI;
 class IntervalSliderGUI;
 class QCheckBox;
 class ComplexFactorGUI;
@@ -67,6 +68,7 @@ private:
     void createGlobalGainControl();
     void createIndividualGainsControl(const std::vector<DeviceSoapySDRParams::GainSetting>& individualGainsList);
     void createCorrectionsControl();
+    void createStreamArgumentsControl(const SoapySDR::ArgInfoList& argInfoList);
 
     Ui::SoapySDRInputGui* ui;
 
@@ -93,11 +95,13 @@ private:
     ComplexFactorGUI *m_iqCorrectionGUI;
     QCheckBox *m_autoDCCorrection;
     QCheckBox *m_autoIQCorrection;
+    std::vector<DynamicArgSettingGUI*> m_streamArgsGUIs;
 
     void displaySettings();
     void displayTunableElementsControlSettings();
     void displayIndividualGainsControlSettings();
     void displayCorrectionsSettings();
+    void displayStreamArgsSettings();
     void sendSettings();
     void updateSampleRateAndFrequency();
     void updateFrequencyLimits();
@@ -119,6 +123,7 @@ private slots:
     void dcCorrectionArgumentChanged(double value);
     void iqCorrectionModuleChanged(double value);
     void iqCorrectionArgumentChanged(double value);
+    void streamArgChanged(QString itemName, QVariant value);
 
     void on_centerFrequency_changed(quint64 value);
     void on_LOppm_valueChanged(int value);

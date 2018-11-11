@@ -49,9 +49,11 @@ public:
     ~ArgInfoGUI();
 
     void setLabel(const QString& text);
+    void setToolTip(const QString& text);
     void setUnits(const QString& units);
 
     ArgInfoType getType() const { return m_type; }
+    ArgInfoValueType getValueType() const { return m_valueType; }
     void setRange(double min, double max);
 
     bool getBoolValue() const { return m_boolValue; }

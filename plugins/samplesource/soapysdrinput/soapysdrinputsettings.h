@@ -19,6 +19,7 @@
 
 #include <QtGlobal>
 #include <QString>
+#include <QVariant>
 #include <QMap>
 
 struct SoapySDRInputSettings {
@@ -48,6 +49,7 @@ struct SoapySDRInputSettings {
     bool m_autoIQCorrection;
     std::complex<double> m_dcCorrection;
     std::complex<double> m_iqCorrection;
+    QMap<QString, QVariant> m_streamArgSettings;
 
     SoapySDRInputSettings();
     void resetToDefaults();
@@ -57,6 +59,8 @@ struct SoapySDRInputSettings {
 private:
     QByteArray serializeNamedElementMap(const QMap<QString, double>& map) const;
     void deserializeNamedElementMap(const QByteArray& data, QMap<QString, double>& map);
+    QByteArray serializeArgumentMap(const QMap<QString, QVariant>& map) const;
+    void deserializeArgumentMap(const QByteArray& data, QMap<QString, QVariant>& map);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_SOAPYSDRINPUT_SOAPYSDRINPUTSETTINGS_H_ */

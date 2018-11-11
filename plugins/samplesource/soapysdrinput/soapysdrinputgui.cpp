@@ -29,6 +29,8 @@
 #include "soapygui/dynamicitemsettinggui.h"
 #include "soapygui/intervalslidergui.h"
 #include "soapygui/complexfactorgui.h"
+#include "soapygui/arginfogui.h"
+#include "soapygui/dynamicargsettinggui.h"
 
 #include "ui_soapysdrinputgui.h"
 #include "soapysdrinputgui.h"
@@ -68,7 +70,9 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     createTunableElementsControl(m_sampleSource->getTunableElements());
     createGlobalGainControl();
     createIndividualGainsControl(m_sampleSource->getIndividualGainsRanges());
+    createStreamArgumentsControl(m_sampleSource->getStreamArgInfoList());
     m_sampleSource->initGainSettings(m_settings);
+    m_sampleSource->initStreamArgSettings(m_settings);
 
     if (m_sampleRateGUI) {
         connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
@@ -306,6 +310,86 @@ void SoapySDRInputGui::createCorrectionsControl()
     }
 }
 
+void SoapySDRInputGui::createStreamArgumentsControl(const SoapySDR::ArgInfoList& argInfoList)
+{
+    if (argInfoList.size() == 0) { // return early if list is empty
+        return;
+    }
+
+    QVBoxLayout *layout = (QVBoxLayout *) ui->scrollAreaWidgetContents->layout();
+
+    QFrame *line = new QFrame(this);
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    layout->addWidget(line);
+
+    std::vector<SoapySDR::ArgInfo>::const_iterator it = argInfoList.begin();
+
+    for (; it != argInfoList.end(); ++it)
+    {
+        ArgInfoGUI::ArgInfoValueType valueType;
+        ArgInfoGUI *argGUI;
+
+        if (it->type == SoapySDR::ArgInfo::BOOL) {
+            valueType = ArgInfoGUI::ArgInfoValueBool;
+        } else if (it->type == SoapySDR::ArgInfo::INT) {
+            valueType = ArgInfoGUI::ArgInfoValueInt;
+        } else if (it->type == SoapySDR::ArgInfo::FLOAT) {
+            valueType = ArgInfoGUI::ArgInfoValueFloat;
+        } else if (it->type == SoapySDR::ArgInfo::STRING) {
+            valueType = ArgInfoGUI::ArgInfoValueString;
+        } else {
+            continue;
+        }
+
+        if (valueType == ArgInfoGUI::ArgInfoValueBool)
+        {
+            argGUI = new ArgInfoGUI(ArgInfoGUI::ArgInfoBinary, ArgInfoGUI::ArgInfoValueBool, this);
+        }
+        else if (it->options.size() == 0)
+        {
+            argGUI = new ArgInfoGUI(ArgInfoGUI::ArgInfoContinuous, valueType, this);
+        }
+        else
+        {
+            argGUI = new ArgInfoGUI(ArgInfoGUI::ArgInfoDiscrete, valueType, this);
+            std::vector<std::string>::const_iterator optionIt = it->options.begin();
+            std::vector<std::string>::const_iterator optionNameIt = it->optionNames.begin();
+
+            for (int i = 0; optionIt != it->options.end(); ++optionIt, i++)
+            {
+                QString name(optionNameIt == it->optionNames.end() ? optionIt->c_str() : optionNameIt->c_str());
+                ++optionNameIt;
+
+                if (valueType == ArgInfoGUI::ArgInfoValueInt) {
+                    argGUI->addIntValue(name, atoi(optionIt->c_str()));
+                } else if (valueType == ArgInfoGUI::ArgInfoValueFloat) {
+                    argGUI->addFloatValue(name, atof(optionIt->c_str()));
+                } else if (valueType == ArgInfoGUI::ArgInfoValueString) {
+                    argGUI->addStringValue(name, QString(optionIt->c_str()));
+                }
+            }
+        }
+
+        if ((it->range.minimum() != 0) || (it->range.maximum() != 0)) {
+            argGUI->setRange(it->range.minimum(), it->range.maximum());
+        }
+
+        argGUI->setLabel(QString(it->name.size() == 0 ? it->key.c_str() : it->name.c_str()));
+        argGUI->setUnits(QString(it->units.c_str()));
+
+        if (it->description.size() != 0) {
+            argGUI->setToolTip(QString(it->description.c_str()));
+        }
+
+        layout->addWidget(argGUI);
+
+        DynamicArgSettingGUI *gui = new DynamicArgSettingGUI(argGUI, QString(it->key.c_str()));
+        m_streamArgsGUIs.push_back(gui);
+        connect(gui, SIGNAL(valueChanged(QString, value)), this, SLOT(streamArgChanged(QString, QVariant)));
+    }
+}
+
 void SoapySDRInputGui::setName(const QString& name)
 {
     setObjectName(name);
@@ -512,6 +596,12 @@ void SoapySDRInputGui::iqCorrectionArgumentChanged(double value)
     sendSettings();
 }
 
+void SoapySDRInputGui::streamArgChanged(QString itemName, QVariant value)
+{
+    m_settings.m_streamArgSettings[itemName] = value;
+    sendSettings();
+}
+
 void SoapySDRInputGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
@@ -631,6 +721,7 @@ void SoapySDRInputGui::displaySettings()
     displayTunableElementsControlSettings();
     displayIndividualGainsControlSettings();
     displayCorrectionsSettings();
+    displayStreamArgsSettings();
 
     blockApplySettings(false);
 }
@@ -683,6 +774,20 @@ void SoapySDRInputGui::displayCorrectionsSettings()
 
     if (m_autoIQCorrection) {
         m_autoIQCorrection->setChecked(m_settings.m_autoIQCorrection);
+    }
+}
+
+void SoapySDRInputGui::displayStreamArgsSettings()
+{
+    for (const auto &it : m_streamArgsGUIs)
+    {
+        QMap<QString, QVariant>::iterator elIt = m_settings.m_streamArgSettings.find(it->getName());
+
+        if (elIt != m_settings.m_streamArgSettings.end())
+        {
+            it->setValue(*elIt);
+            *elIt = it->getValue();
+        }
     }
 }
 

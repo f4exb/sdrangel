@@ -269,6 +269,12 @@ const std::vector<DeviceSoapySDRParams::GainSetting>& SoapySDRInput::getIndividu
     return channelSettings->m_gainSettings;
 }
 
+const SoapySDR::ArgInfoList& SoapySDRInput::getStreamArgInfoList()
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getRxChannelSettings(m_deviceShared.m_channel);
+    return channelSettings->m_streamSettingsArgs;
+}
+
 void SoapySDRInput::initGainSettings(SoapySDRInputSettings& settings)
 {
     const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getRxChannelSettings(m_deviceShared.m_channel);
@@ -280,6 +286,25 @@ void SoapySDRInput::initGainSettings(SoapySDRInputSettings& settings)
     }
 
     updateGains(m_deviceShared.m_device, m_deviceShared.m_channel, settings);
+}
+
+void SoapySDRInput::initStreamArgSettings(SoapySDRInputSettings& settings)
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getRxChannelSettings(m_deviceShared.m_channel);
+    settings.m_streamArgSettings.clear();
+
+    for (const auto &it : channelSettings->m_streamSettingsArgs)
+    {
+        if (it.type == SoapySDR::ArgInfo::BOOL) {
+            settings.m_streamArgSettings[QString(it.key.c_str())] = QVariant(it.value == "true");
+        } else if (it.type == SoapySDR::ArgInfo::INT) {
+            settings.m_streamArgSettings[QString(it.key.c_str())] = QVariant(atoi(it.value.c_str()));
+        } else if (it.type == SoapySDR::ArgInfo::FLOAT) {
+            settings.m_streamArgSettings[QString(it.key.c_str())] = QVariant(atof(it.value.c_str()));
+        } else if (it.type == SoapySDR::ArgInfo::STRING) {
+            settings.m_streamArgSettings[QString(it.key.c_str())] = QVariant(it.value.c_str());
+        }
+    }
 }
 
 bool SoapySDRInput::hasDCAutoCorrection()

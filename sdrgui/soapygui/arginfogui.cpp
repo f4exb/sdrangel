@@ -35,14 +35,31 @@ ArgInfoGUI::ArgInfoGUI(ArgInfoType type, ArgInfoValueType valueType, QWidget *pa
     ui->setupUi(this);
     QHBoxLayout *layout = ui->argLayout;
 
-    if (m_type != ArgInfoBinary) {
+    if (m_type != ArgInfoBinary)
+    {
         layout->removeWidget(ui->argCheck);
+        delete ui->argCheck;
     }
-    if (m_type != ArgInfoContinuous) {
+
+    if (m_type != ArgInfoContinuous)
+    {
         layout->removeWidget(ui->argEdit);
+        delete ui->argEdit;
     }
-    if (m_type != ArgInfoDiscrete) {
+
+    if (m_type != ArgInfoDiscrete)
+    {
         layout->removeWidget(ui->argCombo);
+        delete ui->argCombo;
+    }
+
+    if ((m_valueType == ArgInfoValueInt) || (m_valueType == ArgInfoValueFloat))
+    {
+        if (m_type == ArgInfoContinuous) {
+            ui->argEdit->setAlignment(Qt::AlignRight);
+        } else if (m_type == ArgInfoDiscrete) {
+            ui->argCombo->setLayoutDirection(Qt::RightToLeft);
+        }
     }
 }
 
@@ -61,6 +78,17 @@ void ArgInfoGUI::setRange(double min, double max)
 void ArgInfoGUI::setLabel(const QString& text)
 {
     ui->argLabel->setText(text);
+}
+
+void ArgInfoGUI::setToolTip(const QString& text)
+{
+    if (m_type == ArgInfoBinary) {
+        ui->argCheck->setToolTip(text);
+    } else if (m_type == ArgInfoContinuous) {
+        ui->argEdit->setToolTip(text);
+    } else if (m_type == ArgInfoDiscrete) {
+        ui->argCombo->setToolTip(text);
+    }
 }
 
 void ArgInfoGUI::setUnits(const QString& units)
