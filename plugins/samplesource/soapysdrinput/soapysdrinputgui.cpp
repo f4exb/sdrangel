@@ -386,7 +386,7 @@ void SoapySDRInputGui::createStreamArgumentsControl(const SoapySDR::ArgInfoList&
 
         DynamicArgSettingGUI *gui = new DynamicArgSettingGUI(argGUI, QString(it->key.c_str()));
         m_streamArgsGUIs.push_back(gui);
-        connect(gui, SIGNAL(valueChanged(QString, value)), this, SLOT(streamArgChanged(QString, QVariant)));
+        connect(gui, SIGNAL(valueChanged(QString, QVariant)), this, SLOT(streamArgChanged(QString, QVariant)));
     }
 }
 

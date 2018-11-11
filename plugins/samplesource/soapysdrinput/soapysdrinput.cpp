@@ -42,6 +42,7 @@ SoapySDRInput::SoapySDRInput(DeviceSourceAPI *deviceAPI) :
 {
     openDevice();
     initGainSettings(m_settings);
+    initStreamArgSettings(m_settings);
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
@@ -1043,6 +1044,32 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
             {
                 qCritical("SoapySDRInput::applySettings: cannot set IQ balance correction to (%lf, %lf)", settings.m_iqCorrection.real(), settings.m_iqCorrection.imag());
             }
+        }
+    }
+
+    for (const auto &oname : m_settings.m_streamArgSettings.keys())
+    {
+        auto nvalue = settings.m_streamArgSettings.find(oname);
+
+        if (nvalue != settings.m_streamArgSettings.end() && ((m_settings.m_streamArgSettings[oname] != *nvalue) || force))
+        {
+            if (dev != 0)
+            {
+                try
+                {
+                    dev->writeSetting(SOAPY_SDR_RX, requestedChannel, oname.toStdString(), nvalue->toString().toStdString());
+                    qDebug("SoapySDRInput::applySettings: stream argument %s set to %s",
+                            oname.toStdString().c_str(), nvalue->toString().toStdString().c_str());
+                    individualGainsChanged = true;
+                }
+                catch (const std::exception &ex)
+                {
+                    qCritical("SoapySDRInput::applySettings: cannot set stream argument %s to %s: %s",
+                            oname.toStdString().c_str(), nvalue->toString().toStdString().c_str(), ex.what());
+                }
+            }
+
+            m_settings.m_streamArgSettings[oname] = *nvalue;
         }
     }
 
