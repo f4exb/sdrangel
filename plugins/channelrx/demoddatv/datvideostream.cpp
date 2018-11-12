@@ -224,12 +224,16 @@ qint64 DATVideostream::readData(char *data, qint64 len)
     return (qint64)intEffectiveLen;
 }
 
-qint64 DATVideostream::writeData(const char *data __attribute__((unused)), qint64 len __attribute__((unused)))
+qint64 DATVideostream::writeData(const char *data, qint64 len)
 {
+    (void) data;
+    (void) len;
     return 0;
 }
 
-qint64 	DATVideostream::readLineData(char *data __attribute__((unused)), qint64 maxSize __attribute__((unused)))
+qint64 	DATVideostream::readLineData(char *data, qint64 maxSize)
 {
+    (void) data;
+    (void) maxSize;
     return 0;
 }

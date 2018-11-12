@@ -71,8 +71,9 @@ void StringRangeGUI::setValue(const std::string& value)
     }
 }
 
-void StringRangeGUI::on_rangeCombo_currentIndexChanged(int index __attribute__((unused)))
+void StringRangeGUI::on_rangeCombo_currentIndexChanged(int index)
 {
+    (void) index;
     emit valueChanged();
 }
 

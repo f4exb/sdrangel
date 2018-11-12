@@ -764,8 +764,9 @@ void DATVDemod::InitDATVFramework()
     m_blnDVBInitialized=true;
 }
 
-void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
+void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
+    (void) firstOfBurst;
     float fltI;
     float fltQ;
     leansdr::cf32 objIQ;

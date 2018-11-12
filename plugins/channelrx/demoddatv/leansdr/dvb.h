@@ -404,7 +404,9 @@ private:
                 for (int im_pos = 0; im_pos <= 1; ++im_pos)
                 {
                     int re_neg = !re_pos;
+#if 0
                     int im_neg __attribute__((unused)) = !im_pos;
+#endif
                     int I, Q;
                     switch (sync_id)
                     {

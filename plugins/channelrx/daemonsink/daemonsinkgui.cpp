@@ -48,8 +48,9 @@ qint64 DaemonSinkGUI::getCenterFrequency() const {
     return 0;
 }
 
-void DaemonSinkGUI::setCenterFrequency(qint64 centerFrequency __attribute__((unused)))
+void DaemonSinkGUI::setCenterFrequency(qint64 centerFrequency)
 {
+    (void) centerFrequency;
 }
 
 void DaemonSinkGUI::resetToDefaults()
@@ -207,8 +208,10 @@ void DaemonSinkGUI::handleSourceMessages()
     }
 }
 
-void DaemonSinkGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void DaemonSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 }
 
 void DaemonSinkGUI::onMenuDialogCalled(const QPoint &p)
@@ -249,8 +252,9 @@ void DaemonSinkGUI::on_dataPort_returnPressed()
     applySettings();
 }
 
-void DaemonSinkGUI::on_dataApplyButton_clicked(bool checked __attribute__((unused)))
+void DaemonSinkGUI::on_dataApplyButton_clicked(bool checked)
 {
+    (void) checked;
     m_settings.m_dataAddress = ui->dataAddress->text();
 
     bool dataOk;

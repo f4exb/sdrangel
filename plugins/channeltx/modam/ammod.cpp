@@ -513,8 +513,9 @@ bool AMMod::deserialize(const QByteArray& data)
 
 int AMMod::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setAmModSettings(new SWGSDRangel::SWGAMModSettings());
     response.getAmModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
@@ -525,8 +526,9 @@ int AMMod::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& channelSettingsKeys,
                 SWGSDRangel::SWGChannelSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     AMModSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
@@ -623,8 +625,9 @@ int AMMod::webapiSettingsPutPatch(
 
 int AMMod::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setAmModReport(new SWGSDRangel::SWGAMModReport());
     response.getAmModReport()->init();
     webapiFormatChannelReport(response);

@@ -98,8 +98,9 @@ AMDemod::~AMDemod()
     delete SSBFilter;
 }
 
-void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
+void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
+    (void) firstOfBurst;
 	Complex ci;
 
 	if (!m_running) {
@@ -502,8 +503,9 @@ bool AMDemod::deserialize(const QByteArray& data)
 
 int AMDemod::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
     response.getAmDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
@@ -514,8 +516,9 @@ int AMDemod::webapiSettingsPutPatch(
         bool force,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     AMDemodSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
@@ -584,8 +587,9 @@ int AMDemod::webapiSettingsPutPatch(
 
 int AMDemod::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setAmDemodReport(new SWGSDRangel::SWGAMDemodReport());
     response.getAmDemodReport()->init();
     webapiFormatChannelReport(response);

@@ -644,8 +644,9 @@ bool UDPSink::deserialize(const QByteArray& data)
 
 int UDPSink::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setUdpSinkSettings(new SWGSDRangel::SWGUDPSinkSettings());
     response.getUdpSinkSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
@@ -656,8 +657,9 @@ int UDPSink::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& channelSettingsKeys,
                 SWGSDRangel::SWGChannelSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     UDPSinkSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
@@ -746,8 +748,9 @@ int UDPSink::webapiSettingsPutPatch(
 
 int UDPSink::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setUdpSinkReport(new SWGSDRangel::SWGUDPSinkReport());
     response.getUdpSinkReport()->init();
     webapiFormatChannelReport(response);

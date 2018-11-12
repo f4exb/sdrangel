@@ -225,8 +225,9 @@ void BFMDemodGUI::on_rds_clicked()
 	applySettings();
 }
 
-void BFMDemodGUI::on_clearData_clicked(bool checked __attribute__((unused)))
+void BFMDemodGUI::on_clearData_clicked(bool checked)
 {
+    (void) checked;
 	if (ui->rds->isChecked())
 	{
 		m_bfmDemod->getRDSParser().clearAllFields();
@@ -288,26 +289,31 @@ void BFMDemodGUI::on_g14ProgServiceNames_currentIndexChanged(int _index)
 	}
 }
 
-void BFMDemodGUI::on_g00AltFrequenciesBox_activated(int index __attribute__((unused)))
+void BFMDemodGUI::on_g00AltFrequenciesBox_activated(int index)
 {
+    (void) index;
 	qint64 f = (qint64) ((ui->g00AltFrequenciesBox->currentText()).toDouble() * 1e6);
 	changeFrequency(f);
 }
 
-void BFMDemodGUI::on_g14MappedFrequencies_activated(int index __attribute__((unused)))
+void BFMDemodGUI::on_g14MappedFrequencies_activated(int index)
 {
+    (void) index;
 	qint64 f = (qint64) ((ui->g14MappedFrequencies->currentText()).toDouble() * 1e6);
 	changeFrequency(f);
 }
 
-void BFMDemodGUI::on_g14AltFrequencies_activated(int index __attribute__((unused)))
+void BFMDemodGUI::on_g14AltFrequencies_activated(int index)
 {
+    (void) index;
 	qint64 f = (qint64) ((ui->g14AltFrequencies->currentText()).toDouble() * 1e6);
 	changeFrequency(f);
 }
 
-void BFMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void BFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 }
 
 void BFMDemodGUI::onMenuDialogCalled(const QPoint &p)

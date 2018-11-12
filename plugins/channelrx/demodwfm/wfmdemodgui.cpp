@@ -75,8 +75,9 @@ bool WFMDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool WFMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
+bool WFMDemodGUI::handleMessage(const Message& message)
 {
+    (void) message;
     if (WFMDemod::MsgConfigureWFMDemod::match(message))
     {
         qDebug("WFMDemodGUI::handleMessage: WFMDemod::MsgConfigureWFMDemod");
@@ -159,8 +160,10 @@ void WFMDemodGUI::on_audioMute_toggled(bool checked)
     applySettings();
 }
 
-void WFMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void WFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 }
 
 void WFMDemodGUI::onMenuDialogCalled(const QPoint &p)

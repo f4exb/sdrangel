@@ -137,8 +137,9 @@ Real angleDist(Real a, Real b)
 	return dist;
 }
 
-void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
+void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
+    (void) firstOfBurst;
 	Complex ci;
 
 	if (!m_running) {
@@ -585,8 +586,9 @@ bool NFMDemod::deserialize(const QByteArray& data)
 
 int NFMDemod::webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
-            QString& errorMessage __attribute__((unused)))
+            QString& errorMessage)
 {
+    (void) errorMessage;
     response.setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
     response.getNfmDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
@@ -597,8 +599,9 @@ int NFMDemod::webapiSettingsPutPatch(
             bool force,
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response,
-            QString& errorMessage  __attribute__((unused)))
+            QString& errorMessage)
 {
+    (void) errorMessage;
     NFMDemodSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
@@ -670,8 +673,9 @@ int NFMDemod::webapiSettingsPutPatch(
 
 int NFMDemod::webapiReportGet(
             SWGSDRangel::SWGChannelReport& response,
-            QString& errorMessage __attribute__((unused)))
+            QString& errorMessage)
 {
+    (void) errorMessage;
     response.setNfmDemodReport(new SWGSDRangel::SWGNFMDemodReport());
     response.getNfmDemodReport()->init();
     webapiFormatChannelReport(response);

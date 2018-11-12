@@ -48,8 +48,9 @@ qint64 DaemonSourceGUI::getCenterFrequency() const {
     return 0;
 }
 
-void DaemonSourceGUI::setCenterFrequency(qint64 centerFrequency __attribute__((unused)))
+void DaemonSourceGUI::setCenterFrequency(qint64 centerFrequency)
 {
+    (void) centerFrequency;
 }
 
 void DaemonSourceGUI::resetToDefaults()
@@ -152,7 +153,7 @@ bool DaemonSourceGUI::handleMessage(const Message& message)
     }
 }
 
-DaemonSourceGUI::DaemonSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx __attribute__((unused)), QWidget* parent) :
+DaemonSourceGUI::DaemonSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
         RollupWidget(parent),
         ui(new Ui::DaemonSourceGUI),
         m_pluginAPI(pluginAPI),
@@ -166,6 +167,7 @@ DaemonSourceGUI::DaemonSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
         m_resetCounts(true),
         m_tickCount(0)
 {
+    (void) channelTx;
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
@@ -262,8 +264,10 @@ void DaemonSourceGUI::handleSourceMessages()
     }
 }
 
-void DaemonSourceGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void DaemonSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 }
 
 void DaemonSourceGUI::onMenuDialogCalled(const QPoint &p)
@@ -304,8 +308,9 @@ void DaemonSourceGUI::on_dataPort_returnPressed()
     applySettings();
 }
 
-void DaemonSourceGUI::on_dataApplyButton_clicked(bool checked __attribute__((unused)))
+void DaemonSourceGUI::on_dataApplyButton_clicked(bool checked)
 {
+    (void) checked;
     m_settings.m_dataAddress = ui->dataAddress->text();
 
     bool dataOk;
@@ -319,8 +324,9 @@ void DaemonSourceGUI::on_dataApplyButton_clicked(bool checked __attribute__((unu
     applySettings();
 }
 
-void DaemonSourceGUI::on_eventCountsReset_clicked(bool checked __attribute__((unused)))
+void DaemonSourceGUI::on_eventCountsReset_clicked(bool checked)
 {
+    (void) checked;
     m_countUnrecoverable = 0;
     m_countRecovered = 0;
     m_time.start();

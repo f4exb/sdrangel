@@ -46,8 +46,9 @@ struct pipebuf_common
         return 0;
     }
 
-    virtual void dump(std::size_t *total_bufs __attribute__((unused)))
+    virtual void dump(std::size_t *total_bufs)
     {
+        (void) total_bufs;
     }
 
     pipebuf_common(const char *_name) :

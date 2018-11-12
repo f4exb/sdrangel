@@ -252,8 +252,9 @@ void NFMModGUI::on_navTimeSlider_valueChanged(int value)
     }
 }
 
-void NFMModGUI::on_showFileDialog_clicked(bool checked __attribute__((unused)))
+void NFMModGUI::on_showFileDialog_clicked(bool checked)
 {
+    (void) checked;
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"), 0, QFileDialog::DontUseNativeDialog);
 
@@ -286,8 +287,10 @@ void NFMModGUI::configureFileName()
     m_nfmMod->getInputMessageQueue()->push(message);
 }
 
-void NFMModGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void NFMModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 }
 
 void NFMModGUI::onMenuDialogCalled(const QPoint &p)

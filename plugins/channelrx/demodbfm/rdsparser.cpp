@@ -828,19 +828,25 @@ void RDSParser::decode_type4(unsigned int *group, bool B)
 	//send_message(5,time);
 }
 
-void RDSParser::decode_type5(unsigned int *group __attribute__((unused)), bool B __attribute__((unused))) {
+void RDSParser::decode_type5(unsigned int *group, bool B) {
+    (void) group;
+    (void) B;
 	qDebug() << "RDSParser::decode_type5: type5 not implemented yet";
 	m_g5_updated = true;
 	m_g5_count++;
 }
 
-void RDSParser::decode_type6(unsigned int *group __attribute__((unused)), bool B __attribute__((unused))) {
+void RDSParser::decode_type6(unsigned int *group, bool B) {
+    (void) group;
+    (void) B;
 	qDebug() << "RDSParser::decode_type6: type 6 not implemented yet";
 	m_g6_updated = true;
 	m_g6_count++;
 }
 
-void RDSParser::decode_type7(unsigned int *group __attribute__((unused)), bool B __attribute__((unused))) {
+void RDSParser::decode_type7(unsigned int *group, bool B) {
+    (void) group;
+    (void) B;
 	qDebug() << "RDSParser::decode_type7: type 7 not implemented yet";
 	m_g7_updated = true;
 	m_g7_count++;
@@ -971,29 +977,37 @@ void RDSParser::decode_type9(unsigned int *group, bool B){
 	m_g9_count++;
 }
 
-void RDSParser::decode_type10(unsigned int *group __attribute__((unused)), bool B __attribute__((unused)))
+void RDSParser::decode_type10(unsigned int *group, bool B)
 {
+    (void) group;
+    (void) B;
 	qDebug() << "RDSParser::decode_type10: type 10 not implemented yet";
 	m_g10_updated = true;
 	m_g10_count++;
 }
 
-void RDSParser::decode_type11(unsigned int *group __attribute__((unused)), bool B __attribute__((unused)))
+void RDSParser::decode_type11(unsigned int *group, bool B)
 {
+    (void) group;
+    (void) B;
 	qDebug() << "RDSParser::decode_type11: type 11 not implemented yet";
 	m_g11_updated = true;
 	m_g11_count++;
 }
 
-void RDSParser::decode_type12(unsigned int *group __attribute__((unused)), bool B __attribute__((unused)))
+void RDSParser::decode_type12(unsigned int *group, bool B)
 {
+    (void) group;
+    (void) B;
 	qDebug() << "RDSParser::decode_type12: type 12 not implemented yet";
 	m_g12_updated = true;
 	m_g12_count++;
 }
 
-void RDSParser::decode_type13(unsigned int *group __attribute__((unused)), bool B __attribute__((unused)))
+void RDSParser::decode_type13(unsigned int *group, bool B)
 {
+    (void) group;
+    (void) B;
 	qDebug() << "RDSParser::decode_type13: type 13 not implemented yet";
 	m_g13_updated = true;
 	m_g13_count++;
@@ -1180,8 +1194,10 @@ void RDSParser::decode_type14(unsigned int *group, bool B)
 	}*/
 }
 
-void RDSParser::decode_type15(unsigned int *group __attribute__((unused)), bool B __attribute__((unused)))
+void RDSParser::decode_type15(unsigned int *group, bool B)
 {
+    (void) group;
+    (void) B;
 	qDebug() << "RDSParser::decode_type5: type 15 not implemented yet";
 	m_g15_updated = true;
 	m_g15_count++;

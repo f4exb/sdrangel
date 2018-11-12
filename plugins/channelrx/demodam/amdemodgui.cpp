@@ -92,8 +92,9 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool AMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
+bool AMDemodGUI::handleMessage(const Message& message)
 {
+    (void) message;
     if (AMDemod::MsgConfigureAMDemod::match(message))
     {
         qDebug("AMDemodGUI::handleMessage: AMDemod::MsgConfigureAMDemod");
@@ -192,8 +193,10 @@ void AMDemodGUI::on_audioMute_toggled(bool checked)
 	applySettings();
 }
 
-void AMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void AMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 	/*
 	if((widget == ui->spectrumContainer) && (m_nfmDemod != NULL))
 		m_nfmDemod->setSpectrum(m_threadedSampleSink->getMessageQueue(), rollDown);

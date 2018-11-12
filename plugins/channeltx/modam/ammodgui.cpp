@@ -248,8 +248,9 @@ void AMModGUI::on_navTimeSlider_valueChanged(int value)
     }
 }
 
-void AMModGUI::on_showFileDialog_clicked(bool checked __attribute__((unused)))
+void AMModGUI::on_showFileDialog_clicked(bool checked)
 {
+    (void) checked;
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"), 0, QFileDialog::DontUseNativeDialog);
 
@@ -269,8 +270,10 @@ void AMModGUI::configureFileName()
     m_amMod->getInputMessageQueue()->push(message);
 }
 
-void AMModGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void AMModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 }
 
 void AMModGUI::onMenuDialogCalled(const QPoint &p)
@@ -363,8 +366,9 @@ void AMModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void AMModGUI::applySettings(bool force __attribute((unused)))
+void AMModGUI::applySettings(bool force)
 {
+    (void) force;
 	if (m_doApplySettings)
 	{
 		setTitleColor(m_channelMarker.getColor());
