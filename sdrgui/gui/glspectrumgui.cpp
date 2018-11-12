@@ -451,8 +451,9 @@ void GLSpectrumGUI::on_traceIntensity_valueChanged(int index)
 	}
 }
 
-void GLSpectrumGUI::on_clearSpectrum_clicked(bool checked __attribute__((unused)))
+void GLSpectrumGUI::on_clearSpectrum_clicked(bool checked)
 {
+    (void) checked;
 	if(m_glSpectrum != 0) {
 	    m_glSpectrum->clearSpectrumHistogram();
 	}

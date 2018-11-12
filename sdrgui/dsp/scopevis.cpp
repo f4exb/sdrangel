@@ -216,8 +216,9 @@ void ScopeVis::setMemoryIndex(uint32_t memoryIndex)
     getInputMessageQueue()->push(cmd);
 }
 
-void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly __attribute__((unused)))
+void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
+    (void) positiveOnly;
     if (m_freeRun) {
         m_triggerPoint = cbegin;
     }

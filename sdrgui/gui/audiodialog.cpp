@@ -159,14 +159,16 @@ void AudioDialogX::on_inputVolume_valueChanged(int value)
     ui->inputVolumeText->setText(QString("%1").arg(volume, 0, 'f', 2));
 }
 
-void AudioDialogX::on_inputReset_clicked(bool checked __attribute__((unused)))
+void AudioDialogX::on_inputReset_clicked(bool checked)
 {
+    (void) checked;
     m_inputDeviceInfo.resetToDefaults();
     updateInputDisplay();
 }
 
-void AudioDialogX::on_inputCleanup_clicked(bool checked __attribute__((unused)))
+void AudioDialogX::on_inputCleanup_clicked(bool checked)
 {
+    (void) checked;
     m_audioDeviceManager->inputInfosCleanup();
 }
 
@@ -196,14 +198,16 @@ void AudioDialogX::on_outputUDPPort_editingFinished()
     ui->outputUDPPort->setText(tr("%1").arg(m_outputDeviceInfo.udpPort));
 }
 
-void AudioDialogX::on_outputReset_clicked(bool checked __attribute__((unused)))
+void AudioDialogX::on_outputReset_clicked(bool checked)
 {
+    (void) checked;
     m_outputDeviceInfo.resetToDefaults();
     updateOutputDisplay();
 }
 
-void AudioDialogX::on_outputCleanup_clicked(bool checked __attribute__((unused)))
+void AudioDialogX::on_outputCleanup_clicked(bool checked)
 {
+    (void) checked;
     m_audioDeviceManager->outputInfosCleanup();
 }
 

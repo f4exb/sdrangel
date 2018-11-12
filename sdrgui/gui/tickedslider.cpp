@@ -28,9 +28,9 @@ TickedSlider::TickedSlider(QWidget* parent) :
     m_tickColor(Qt::white)
 { }
 
-void TickedSlider::paintEvent(QPaintEvent *ev __attribute__((unused)))
+void TickedSlider::paintEvent(QPaintEvent *ev)
 {
-
+    (void) ev;
     QStylePainter p(this);
     QStyleOptionSlider opt;
     initStyleOption(&opt);

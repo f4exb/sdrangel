@@ -15,9 +15,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <chrono>
+#include <thread>
+
 #include "scopevisxy.h"
 #include "gui/tvscreen.h"
-#include <unistd.h>
 
 ScopeVisXY::ScopeVisXY(TVScreen *tvScreen) :
 	m_tvScreen(tvScreen),
@@ -47,9 +49,9 @@ void ScopeVisXY::setPixelsPerFrame(int pixelsPerFrame)
    m_tvScreen->setAlphaReset();
 }
 
-void ScopeVisXY::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end,
-		bool positiveOnly __attribute__((unused)))
+void ScopeVisXY::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
+    (void) positiveOnly;
 	SampleVector::const_iterator begin(cbegin);
 
 	while (begin < end)
@@ -83,7 +85,7 @@ void ScopeVisXY::feed(const SampleVector::const_iterator& cbegin, const SampleVe
 
 			m_tvScreen->renderImage(0);
 			m_tvScreen->update();
-			usleep(5000);
+            std::this_thread::sleep_for(std::chrono::microseconds(5000));
 			m_tvScreen->resetImage(m_alphaReset);
             drawGraticule();
 			m_pixelCount = 0;
@@ -99,8 +101,9 @@ void ScopeVisXY::stop()
 {
 }
 
-bool ScopeVisXY::handleMessage(const Message& message __attribute__((unused)))
+bool ScopeVisXY::handleMessage(const Message& message)
 {
+    (void) message;
 	return false;
 }
 
