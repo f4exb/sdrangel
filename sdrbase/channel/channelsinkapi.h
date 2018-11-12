@@ -46,41 +46,33 @@ public:
     virtual QByteArray serialize() const = 0;
     virtual bool deserialize(const QByteArray& data) = 0;
 
-#ifdef _MSC_VER
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage)
-    { errorMessage = "Not implemented"; return 501; }
+    {
+        (void) response;
+        errorMessage = "Not implemented"; return 501;
+    }
 
     virtual int webapiSettingsPutPatch(
             bool force,
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage)
-    { errorMessage = "Not implemented"; return 501; }
+    {
+        (void) force;
+        (void) channelSettingsKeys;
+        (void) response;
+        errorMessage = "Not implemented"; return 501;
+    }
 
     virtual int webapiReportGet(
             SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage)
-    { errorMessage = "Not implemented"; return 501; }
-#else
-    virtual int webapiSettingsGet(
-            SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
-            QString& errorMessage)
-    { errorMessage = "Not implemented"; return 501; }
-
-    virtual int webapiSettingsPutPatch(
-            bool force __attribute__((unused)),
-            const QStringList& channelSettingsKeys __attribute__((unused)),
-            SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
-            QString& errorMessage)
-    { errorMessage = "Not implemented"; return 501; }
-
-    virtual int webapiReportGet(
-            SWGSDRangel::SWGChannelReport& response __attribute__((unused)),
-            QString& errorMessage)
-    { errorMessage = "Not implemented"; return 501; }
-#endif
+    {
+        (void) response;
+        errorMessage = "Not implemented"; return 501;
+    }
 
     int getIndexInDeviceSet() const { return m_indexInDeviceSet; }
     void setIndexInDeviceSet(int indexInDeviceSet) { m_indexInDeviceSet = indexInDeviceSet; }

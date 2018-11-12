@@ -38,29 +38,40 @@ public:
 
     virtual void getIdentifier(QString& id) = 0;
     virtual void getTitle(QString& title) = 0;
-    virtual void setName(const QString& name) { m_name = name; };
-    virtual QString getName() const { return m_name; };
+    virtual void setName(const QString& name) { m_name = name; }
+    virtual QString getName() const { return m_name; }
     virtual qint64 getCenterFrequency() const = 0;
 
     virtual QByteArray serialize() const = 0;
     virtual bool deserialize(const QByteArray& data) = 0;
 
     virtual int webapiSettingsGet(
-            SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
+            SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage)
-    { errorMessage = "Not implemented"; return 501; }
+    {
+        (void) response;
+        errorMessage = "Not implemented"; return 501;
+    }
 
     virtual int webapiSettingsPutPatch(
-            bool force __attribute__((unused)),
-            const QStringList& channelSettingsKeys __attribute__((unused)),
-            SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage)
-    { errorMessage = "Not implemented"; return 501; }
+    {
+        (void) force;
+        (void) channelSettingsKeys;
+        (void) response;
+        errorMessage = "Not implemented"; return 501;
+    }
 
     virtual int webapiReportGet(
-            SWGSDRangel::SWGChannelReport& response __attribute__((unused)),
+            SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage)
-    { errorMessage = "Not implemented"; return 501; }
+    {
+        (void) response;
+        errorMessage = "Not implemented"; return 501;
+    }
 
     int getIndexInDeviceSet() const { return m_indexInDeviceSet; }
     void setIndexInDeviceSet(int indexInDeviceSet) { m_indexInDeviceSet = indexInDeviceSet; }

@@ -95,7 +95,7 @@ protected:
      * Callback method to produce multiple outputs from the current phase value in m_phase
      * and/or the sin and cos values in m_psin and m_pcos
      */
-    virtual void processPhase(Real *samples_out __attribute__((unused))) const {};
+    virtual void processPhase(Real *samples_out) const { (void) samples_out; }
 
 private:
     Real    m_minfreq, m_maxfreq;

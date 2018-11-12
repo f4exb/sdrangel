@@ -23,7 +23,7 @@
 #include <QMetaType>
 #include <QObject>
 #include <QProcess>
-#include <sys/time.h>
+#include <time.h>
 
 #include "export.h"
 
@@ -63,8 +63,8 @@ public:
     bool getLastProcessError(QProcess::ProcessError& error) const;
     bool getLastProcessExit(int& exitCode, QProcess::ExitStatus& exitStatus) const;
     const QString& getLastProcessLog() const;
-    struct timeval getLastProcessStartTimestamp() const { return m_currentProcessStartTimeStamp; }
-    struct timeval getLastProcessFinishTimestamp() const { return m_currentProcessFinishTimeStamp; }
+    clock_t  getLastProcessStartTimestamp() const { return m_currentProcessStartTimeStamp; }
+    clock_t  getLastProcessFinishTimestamp() const { return m_currentProcessFinishTimeStamp; }
     const QString& getLastProcessCommandLine() const { return m_currentProcessCommandLine; }
     qint64 getLastProcessPid() const { return m_currentProcessPid; }
 
@@ -107,8 +107,8 @@ private:
     int m_currentProcessExitCode;
     QProcess::ExitStatus m_currentProcessExitStatus;
     QString m_log;
-    struct timeval m_currentProcessStartTimeStamp;
-    struct timeval m_currentProcessFinishTimeStamp;
+    clock_t  m_currentProcessStartTimeStamp;
+    clock_t  m_currentProcessFinishTimeStamp;
     QString m_currentProcessCommandLine;
     qint64 m_currentProcessPid;
 

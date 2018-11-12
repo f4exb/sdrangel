@@ -143,7 +143,7 @@ public:
 
     bool IsZero() const
     {
-        return m_t == 0;
+        return m_t == 0.0;
     }
 private:
 #ifdef RTP_HAVE_QUERYPERFORMANCECOUNTER

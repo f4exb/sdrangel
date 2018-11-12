@@ -38,7 +38,11 @@ struct SDRBASE_API HBFIRFilterTraits<16>
     static const int32_t hbOrder = 16;
     static const int32_t hbShift = 12;
     static const int16_t hbMod[16+6];
+#ifdef _MSC_VER
+    __declspec(align(16)) static const int32_t hbCoeffs[4];
+#else
     static const int32_t hbCoeffs[4] __attribute__ ((aligned (16)));
+#endif
     static const double  hbCoeffsF[4];
 };
 
@@ -48,7 +52,11 @@ struct SDRBASE_API HBFIRFilterTraits<32>
     static const int32_t hbOrder = 32;
     static const int32_t hbShift = 12;
     static const int16_t hbMod[32+6];
+#ifdef _MSC_VER
+    __declspec(align(32)) static const int32_t hbCoeffs[8];
+#else
     static const int32_t hbCoeffs[8] __attribute__ ((aligned (32)));
+#endif
     static const double  hbCoeffsF[8];
 };
 
@@ -58,7 +66,11 @@ struct SDRBASE_API HBFIRFilterTraits<48>
     static const int32_t hbOrder = 48;
     static const int32_t hbShift = 12;
     static const int16_t hbMod[48+6];
+#ifdef _MSC_VER
+    __declspec(align(16)) static const int32_t hbCoeffs[12];
+#else
     static const int32_t hbCoeffs[12] __attribute__ ((aligned (16)));
+#endif
     static const double  hbCoeffsF[12];
 };
 
@@ -68,7 +80,11 @@ struct SDRBASE_API HBFIRFilterTraits<64>
     static const int32_t hbOrder = 64;
     static const int32_t hbShift = 12;
     static const int16_t hbMod[64+6];
+#ifdef _MSC_VER
+    __declspec(align(32)) static const int32_t hbCoeffs[16];
+#else
     static const int32_t hbCoeffs[16] __attribute__ ((aligned (32)));
+#endif
     static const float  hbCoeffsF[16];
 };
 
@@ -78,7 +94,11 @@ struct SDRBASE_API HBFIRFilterTraits<80>
     static const int32_t hbOrder = 80;
     static const int32_t hbShift = 14;
     static const int16_t hbMod[80+6];
+#ifdef _MSC_VER
+    __declspec(align(16)) static const int32_t hbCoeffs[20];
+#else
     static const int32_t hbCoeffs[20] __attribute__ ((aligned (16)));
+#endif
     static const double  hbCoeffsF[20];
 };
 
@@ -88,7 +108,11 @@ struct SDRBASE_API HBFIRFilterTraits<96>
     static const int32_t hbOrder = 96;
     static const int32_t hbShift = 16;
     static const int16_t hbMod[96+6];
+#ifdef _MSC_VER
+    __declspec(align(32)) static const int32_t hbCoeffs[24];
+#else
     static const int32_t hbCoeffs[24] __attribute__ ((aligned (32)));
+#endif
     static const double  hbCoeffsF[24];
 };
 
@@ -98,7 +122,11 @@ struct SDRBASE_API HBFIRFilterTraits<112>
     static const int32_t hbOrder = 112;
     static const int32_t hbShift = 18;
     static const int16_t hbMod[112+6];
+#ifdef _MSC_VER
+    __declspec(align(16)) static const int32_t hbCoeffs[28];
+#else
     static const int32_t hbCoeffs[28] __attribute__ ((aligned (16)));
+#endif
     static const double  hbCoeffsF[28];
 };
 
@@ -108,7 +136,11 @@ struct SDRBASE_API HBFIRFilterTraits<128>
     static const int32_t hbOrder = 128;
     static const int32_t hbShift = 20;
     static const int16_t hbMod[128+6];
+#ifdef _MSC_VER
+    __declspec(align(16)) static const int32_t hbCoeffs[32];
+#else
     static const int32_t hbCoeffs[32] __attribute__ ((aligned (16)));
+#endif
     static const double  hbCoeffsF[32];
 };
 

@@ -11,8 +11,9 @@ NullSink::~NullSink()
 {
 }
 
-bool NullSink::init(const Message& message __attribute__((unused)))
+bool NullSink::init(const Message& message)
 {
+    (void) message
 	return false;
 }
 
