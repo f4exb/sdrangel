@@ -363,12 +363,9 @@ void ArgInfoGUI::on_argEdit_editingFinished()
     emit valueChanged();
 }
 
-#ifdef _MSC_VER
 void ArgInfoGUI::on_argCombo_currentIndexChanged(int index)
-#else
-void ArgInfoGUI::on_argCombo_currentIndexChanged(int index __attribute__((unused)))
-#endif
 {
+    (void) index;
     QVariant v = ui->argCombo->currentData();
     bool ok = false;
 
