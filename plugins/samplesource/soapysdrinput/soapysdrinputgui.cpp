@@ -70,9 +70,11 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     createTunableElementsControl(m_sampleSource->getTunableElements());
     createGlobalGainControl();
     createIndividualGainsControl(m_sampleSource->getIndividualGainsRanges());
-    createStreamArgumentsControl(m_sampleSource->getStreamArgInfoList());
+    createArgumentsControl(m_sampleSource->getDeviceArgInfoList(), true);
+    createArgumentsControl(m_sampleSource->getStreamArgInfoList(), false);
     m_sampleSource->initGainSettings(m_settings);
     m_sampleSource->initStreamArgSettings(m_settings);
+    m_sampleSource->initDeviceArgSettings(m_settings);
 
     if (m_sampleRateGUI) {
         connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
@@ -310,7 +312,7 @@ void SoapySDRInputGui::createCorrectionsControl()
     }
 }
 
-void SoapySDRInputGui::createStreamArgumentsControl(const SoapySDR::ArgInfoList& argInfoList)
+void SoapySDRInputGui::createArgumentsControl(const SoapySDR::ArgInfoList& argInfoList, bool deviceArguments)
 {
     if (argInfoList.size() == 0) { // return early if list is empty
         return;
@@ -359,7 +361,10 @@ void SoapySDRInputGui::createStreamArgumentsControl(const SoapySDR::ArgInfoList&
             for (int i = 0; optionIt != it->options.end(); ++optionIt, i++)
             {
                 QString name(optionNameIt == it->optionNames.end() ? optionIt->c_str() : optionNameIt->c_str());
-                ++optionNameIt;
+
+                if (optionNameIt != it->optionNames.end()) {
+                    ++optionNameIt;
+                }
 
                 if (valueType == ArgInfoGUI::ArgInfoValueInt) {
                     argGUI->addIntValue(name, atoi(optionIt->c_str()));
@@ -385,8 +390,18 @@ void SoapySDRInputGui::createStreamArgumentsControl(const SoapySDR::ArgInfoList&
         layout->addWidget(argGUI);
 
         DynamicArgSettingGUI *gui = new DynamicArgSettingGUI(argGUI, QString(it->key.c_str()));
-        m_streamArgsGUIs.push_back(gui);
-        connect(gui, SIGNAL(valueChanged(QString, QVariant)), this, SLOT(streamArgChanged(QString, QVariant)));
+
+        // This could be made more elegant but let's make it more simple
+        if (deviceArguments)
+        {
+            m_deviceArgsGUIs.push_back(gui);
+            connect(gui, SIGNAL(valueChanged(QString, QVariant)), this, SLOT(deviceArgChanged(QString, QVariant)));
+        }
+        else
+        {
+            m_streamArgsGUIs.push_back(gui);
+            connect(gui, SIGNAL(valueChanged(QString, QVariant)), this, SLOT(streamArgChanged(QString, QVariant)));
+        }
     }
 }
 
@@ -464,6 +479,14 @@ bool SoapySDRInputGui::handleMessage(const Message& message)
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
+
+        return true;
+    }
+    else if (DeviceSoapySDRShared::MsgReportDeviceArgsChange::match(message))
+    {
+        DeviceSoapySDRShared::MsgReportDeviceArgsChange& notif = (DeviceSoapySDRShared::MsgReportDeviceArgsChange&) message;
+        m_settings.m_deviceArgSettings = notif.getDeviceArgSettings();
+        displayDeviceArgsSettings();
 
         return true;
     }
@@ -602,6 +625,12 @@ void SoapySDRInputGui::streamArgChanged(QString itemName, QVariant value)
     sendSettings();
 }
 
+void SoapySDRInputGui::deviceArgChanged(QString itemName, QVariant value)
+{
+    m_settings.m_deviceArgSettings[itemName] = value;
+    sendSettings();
+}
+
 void SoapySDRInputGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
@@ -722,6 +751,7 @@ void SoapySDRInputGui::displaySettings()
     displayIndividualGainsControlSettings();
     displayCorrectionsSettings();
     displayStreamArgsSettings();
+    displayDeviceArgsSettings();
 
     blockApplySettings(false);
 }
@@ -784,6 +814,20 @@ void SoapySDRInputGui::displayStreamArgsSettings()
         QMap<QString, QVariant>::iterator elIt = m_settings.m_streamArgSettings.find(it->getName());
 
         if (elIt != m_settings.m_streamArgSettings.end())
+        {
+            it->setValue(*elIt);
+            *elIt = it->getValue();
+        }
+    }
+}
+
+void SoapySDRInputGui::displayDeviceArgsSettings()
+{
+    for (const auto &it : m_deviceArgsGUIs)
+    {
+        QMap<QString, QVariant>::iterator elIt = m_settings.m_deviceArgSettings.find(it->getName());
+
+        if (elIt != m_settings.m_deviceArgSettings.end())
         {
             it->setValue(*elIt);
             *elIt = it->getValue();

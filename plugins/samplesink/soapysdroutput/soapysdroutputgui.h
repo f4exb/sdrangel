@@ -70,7 +70,7 @@ private:
     void createGlobalGainControl();
     void createIndividualGainsControl(const std::vector<DeviceSoapySDRParams::GainSetting>& individualGainsList);
     void createCorrectionsControl();
-    void createStreamArgumentsControl(const SoapySDR::ArgInfoList& argInfoList);
+    void createArgumentsControl(const SoapySDR::ArgInfoList& argInfoList, bool deviceArguments);
 
     Ui::SoapySDROutputGui* ui;
 
@@ -98,6 +98,7 @@ private:
     QCheckBox *m_autoDCCorrection;
     QCheckBox *m_autoIQCorrection;
     std::vector<DynamicArgSettingGUI*> m_streamArgsGUIs;
+    std::vector<DynamicArgSettingGUI*> m_deviceArgsGUIs;
 
     void blockApplySettings(bool block) { m_doApplySettings = !block; }
     void displaySettings();
@@ -105,6 +106,7 @@ private:
     void displayIndividualGainsControlSettings();
     void displayCorrectionsSettings();
     void displayStreamArgsSettings();
+    void displayDeviceArgsSettings();
     void sendSettings();
     void updateSampleRateAndFrequency();
     void updateFrequencyLimits();
@@ -127,6 +129,7 @@ private slots:
     void iqCorrectionModuleChanged(double value);
     void iqCorrectionArgumentChanged(double value);
     void streamArgChanged(QString itemName, QVariant value);
+    void deviceArgChanged(QString itemName, QVariant value);
 
     void on_centerFrequency_changed(quint64 value);
     void on_LOppm_valueChanged(int value);

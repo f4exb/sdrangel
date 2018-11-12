@@ -43,6 +43,7 @@ SoapySDRInput::SoapySDRInput(DeviceSourceAPI *deviceAPI) :
     openDevice();
     initGainSettings(m_settings);
     initStreamArgSettings(m_settings);
+    initDeviceArgSettings(m_settings);
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
@@ -276,6 +277,11 @@ const SoapySDR::ArgInfoList& SoapySDRInput::getStreamArgInfoList()
     return channelSettings->m_streamSettingsArgs;
 }
 
+const SoapySDR::ArgInfoList& SoapySDRInput::getDeviceArgInfoList()
+{
+    return  m_deviceShared.m_deviceParams->getDeviceArgs();
+}
+
 void SoapySDRInput::initGainSettings(SoapySDRInputSettings& settings)
 {
     const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getRxChannelSettings(m_deviceShared.m_channel);
@@ -304,6 +310,24 @@ void SoapySDRInput::initStreamArgSettings(SoapySDRInputSettings& settings)
             settings.m_streamArgSettings[QString(it.key.c_str())] = QVariant(atof(it.value.c_str()));
         } else if (it.type == SoapySDR::ArgInfo::STRING) {
             settings.m_streamArgSettings[QString(it.key.c_str())] = QVariant(it.value.c_str());
+        }
+    }
+}
+
+void SoapySDRInput::initDeviceArgSettings(SoapySDRInputSettings& settings)
+{
+    settings.m_deviceArgSettings.clear();
+
+    for (const auto &it : m_deviceShared.m_deviceParams->getDeviceArgs())
+    {
+        if (it.type == SoapySDR::ArgInfo::BOOL) {
+            settings.m_deviceArgSettings[QString(it.key.c_str())] = QVariant(it.value == "true");
+        } else if (it.type == SoapySDR::ArgInfo::INT) {
+            settings.m_deviceArgSettings[QString(it.key.c_str())] = QVariant(atoi(it.value.c_str()));
+        } else if (it.type == SoapySDR::ArgInfo::FLOAT) {
+            settings.m_deviceArgSettings[QString(it.key.c_str())] = QVariant(atof(it.value.c_str()));
+        } else if (it.type == SoapySDR::ArgInfo::STRING) {
+            settings.m_deviceArgSettings[QString(it.key.c_str())] = QVariant(it.value.c_str());
         }
     }
 }
@@ -777,6 +801,33 @@ bool SoapySDRInput::handleMessage(const Message& message __attribute__((unused))
 
         return true;
     }
+    else if (DeviceSoapySDRShared::MsgReportDeviceArgsChange::match(message))
+    {
+        DeviceSoapySDRShared::MsgReportDeviceArgsChange& report = (DeviceSoapySDRShared::MsgReportDeviceArgsChange&) message;
+        QMap<QString, QVariant> deviceArgSettings = report.getDeviceArgSettings();
+
+        for (const auto &oname : m_settings.m_deviceArgSettings.keys())
+        {
+            auto nvalue = deviceArgSettings.find(oname);
+
+            if (nvalue != deviceArgSettings.end() && (m_settings.m_deviceArgSettings[oname] != *nvalue))
+            {
+                m_settings.m_deviceArgSettings[oname] = *nvalue;
+                qDebug("SoapySDRInput::handleMessage: MsgReportDeviceArgsChange: device argument %s set to %s",
+                        oname.toStdString().c_str(), nvalue->toString().toStdString().c_str());
+            }
+        }
+
+        // propagate settings to GUI if any
+        if (getMessageQueueToGUI())
+        {
+            DeviceSoapySDRShared::MsgReportDeviceArgsChange *reportToGUI = DeviceSoapySDRShared::MsgReportDeviceArgsChange::create(
+                    m_settings.m_deviceArgSettings);
+            getMessageQueueToGUI()->push(reportToGUI);
+        }
+
+        return true;
+    }
     else
     {
         return false;
@@ -789,6 +840,7 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
     bool forwardChangeToBuddies  = false;
     bool globalGainChanged = false;
     bool individualGainsChanged = false;
+    bool deviceArgsChanged = false;
 
     SoapySDR::Device *dev = m_deviceShared.m_device;
     SoapySDRInputThread *inputThread = findThread();
@@ -1060,7 +1112,6 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
                     dev->writeSetting(SOAPY_SDR_RX, requestedChannel, oname.toStdString(), nvalue->toString().toStdString());
                     qDebug("SoapySDRInput::applySettings: stream argument %s set to %s",
                             oname.toStdString().c_str(), nvalue->toString().toStdString().c_str());
-                    individualGainsChanged = true;
                 }
                 catch (const std::exception &ex)
                 {
@@ -1070,6 +1121,32 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
             }
 
             m_settings.m_streamArgSettings[oname] = *nvalue;
+        }
+    }
+
+    for (const auto &oname : m_settings.m_deviceArgSettings.keys())
+    {
+        auto nvalue = settings.m_deviceArgSettings.find(oname);
+
+        if (nvalue != settings.m_deviceArgSettings.end() && ((m_settings.m_deviceArgSettings[oname] != *nvalue) || force))
+        {
+            if (dev != 0)
+            {
+                try
+                {
+                    dev->writeSetting(oname.toStdString(), nvalue->toString().toStdString());
+                    qDebug("SoapySDRInput::applySettings: device argument %s set to %s",
+                            oname.toStdString().c_str(), nvalue->toString().toStdString().c_str());
+                }
+                catch (const std::exception &ex)
+                {
+                    qCritical("SoapySDRInput::applySettings: cannot set device argument %s to %s: %s",
+                            oname.toStdString().c_str(), nvalue->toString().toStdString().c_str(), ex.what());
+                }
+            }
+
+            m_settings.m_deviceArgSettings[oname] = *nvalue;
+            deviceArgsChanged = true;
         }
     }
 
@@ -1083,7 +1160,7 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
 
     if (forwardChangeToBuddies)
     {
-        // send to source buddies
+        // send to buddies
         const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
         const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
 
@@ -1106,6 +1183,27 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
                     (int) settings.m_fcPos,
                     settings.m_devSampleRate,
                     true);
+            itSink->getSampleSinkInputMessageQueue()->push(report);
+        }
+    }
+
+    if (deviceArgsChanged)
+    {
+        // send to buddies
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+
+        for (const auto &itSource : sourceBuddies)
+        {
+            DeviceSoapySDRShared::MsgReportDeviceArgsChange *report = DeviceSoapySDRShared::MsgReportDeviceArgsChange::create(
+                    settings.m_deviceArgSettings);
+            itSource->getSampleSourceInputMessageQueue()->push(report);
+        }
+
+        for (const auto &itSink : sinkBuddies)
+        {
+            DeviceSoapySDRShared::MsgReportDeviceArgsChange *report = DeviceSoapySDRShared::MsgReportDeviceArgsChange::create(
+                    settings.m_deviceArgSettings);
             itSink->getSampleSinkInputMessageQueue()->push(report);
         }
     }

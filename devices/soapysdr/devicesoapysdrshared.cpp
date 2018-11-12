@@ -17,6 +17,7 @@
 #include "devicesoapysdrshared.h"
 
 MESSAGE_CLASS_DEFINITION(DeviceSoapySDRShared::MsgReportBuddyChange, Message)
+MESSAGE_CLASS_DEFINITION(DeviceSoapySDRShared::MsgReportDeviceArgsChange, Message)
 
 const float  DeviceSoapySDRShared::m_sampleFifoLengthInSeconds = 0.25;
 const int    DeviceSoapySDRShared::m_sampleFifoMinSize = 75000; // 300 kS/s knee
@@ -24,6 +25,7 @@ const int    DeviceSoapySDRShared::m_sampleFifoMinSize32 = 150000; // Fixed for 
 
 DeviceSoapySDRShared::DeviceSoapySDRShared() :
     m_device(0),
+    m_deviceParams(0),
     m_channel(-1),
     m_source(0),
     m_sink(0)

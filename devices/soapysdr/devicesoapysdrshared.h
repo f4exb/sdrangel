@@ -17,6 +17,9 @@
 #ifndef DEVICES_SOAPYSDR_DEVICESOAPYSDRSHARED_H_
 #define DEVICES_SOAPYSDR_DEVICESOAPYSDRSHARED_H_
 
+#include <QMap>
+#include <QVariant>
+
 #include <SoapySDR/Device.hpp>
 
 #include "util/message.h"
@@ -76,6 +79,24 @@ public:
             m_fcPos(fcPos),
             m_devSampleRate(devSampleRate),
             m_rxElseTx(rxElseTx)
+        { }
+    };
+
+    class MsgReportDeviceArgsChange : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QMap<QString, QVariant>& getDeviceArgSettings() const { return m_deviceArgSettings; }
+
+        static MsgReportDeviceArgsChange* create(const QMap<QString, QVariant>& deviceArgSettings) {
+            return new MsgReportDeviceArgsChange(deviceArgSettings);
+        }
+
+    private:
+        QMap<QString, QVariant> m_deviceArgSettings;
+
+        MsgReportDeviceArgsChange(const QMap<QString, QVariant>& deviceArgSettings) :
+            m_deviceArgSettings(deviceArgSettings)
         { }
     };
 

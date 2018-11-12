@@ -50,6 +50,7 @@ struct SoapySDRInputSettings {
     std::complex<double> m_dcCorrection;
     std::complex<double> m_iqCorrection;
     QMap<QString, QVariant> m_streamArgSettings;
+    QMap<QString, QVariant> m_deviceArgSettings;
 
     SoapySDRInputSettings();
     void resetToDefaults();

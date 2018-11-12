@@ -68,6 +68,8 @@ public:
     DeviceSoapySDRParams(SoapySDR::Device *device);
     ~DeviceSoapySDRParams();
 
+    const SoapySDR::ArgInfoList& getDeviceArgs() const { return m_deviceSettingsArgs; }
+
     const ChannelSettings* getRxChannelSettings(uint32_t index)
     {
         if (index < m_nbRx) {

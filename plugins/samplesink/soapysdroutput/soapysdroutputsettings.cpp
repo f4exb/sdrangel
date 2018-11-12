@@ -66,6 +66,7 @@ QByteArray SoapySDROutputSettings::serialize() const
     s.writeDouble(19, m_iqCorrection.real());
     s.writeDouble(20, m_iqCorrection.imag());
     s.writeBlob(21, serializeArgumentMap(m_streamArgSettings));
+    s.writeBlob(22, serializeArgumentMap(m_deviceArgSettings));
 
     return s.final();
 }
@@ -108,6 +109,8 @@ bool SoapySDROutputSettings::deserialize(const QByteArray& data)
         m_iqCorrection = std::complex<double>{realval, imagval};
         d.readBlob(21, &blob);
         deserializeArgumentMap(blob, m_streamArgSettings);
+        d.readBlob(22, &blob);
+        deserializeArgumentMap(blob, m_deviceArgSettings);
 
         return true;
     }
