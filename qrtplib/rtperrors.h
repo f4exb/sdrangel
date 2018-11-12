@@ -38,6 +38,7 @@
 
 #define RTPERRORS_H
 
+#include "export.h"
 #include "rtpconfig.h"
 #include <string>
 
@@ -45,7 +46,7 @@ namespace qrtplib
 {
 
 /** Returns a string describing the error code \c errcode. */
-std::string RTPGetErrorString(int errcode);
+QRTPLIB_API std::string RTPGetErrorString(int errcode);
 
 } // end namespace
 
