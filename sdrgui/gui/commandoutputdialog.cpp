@@ -39,24 +39,22 @@ void CommandOutputDialog::refresh()
     ui->commandText->setText(m_command.getLastProcessCommandLine());
     ui->processPid->setText(QString("%1").arg(m_command.getLastProcessPid()));
 
-    if (m_command.getLastProcessStartTimestamp() == 0) {
+    if (m_command.getLastProcessStartTimestampms() == 0) {
         ui->startTime->setText(("..."));
     }
     else
     {
-        clock_t tv = m_command.getLastProcessStartTimestamp();
-        QDateTime dt = QDateTime::fromMSecsSinceEpoch((tv * 1000LL) / CLOCKS_PER_SEC);
+        QDateTime dt = QDateTime::fromMSecsSinceEpoch(m_command.getLastProcessStartTimestampms());
         QString dateStr = dt.toString("yyyy-MM-dd HH:mm:ss.zzz");
         ui->startTime->setText(dateStr);
     }
 
-    if (m_command.getLastProcessFinishTimestamp() == 0) {
+    if (m_command.getLastProcessFinishTimestampms() == 0) {
         ui->endTime->setText(("..."));
     }
     else
     {
-        clock_t tv = m_command.getLastProcessFinishTimestamp();
-        QDateTime dt = QDateTime::fromMSecsSinceEpoch((tv * 1000LL) / CLOCKS_PER_SEC);
+        QDateTime dt = QDateTime::fromMSecsSinceEpoch(m_command.getLastProcessFinishTimestampms());
         QString dateStr = dt.toString("yyyy-MM-dd HH:mm:ss.zzz");
         ui->endTime->setText(dateStr);
     }
@@ -64,7 +62,7 @@ void CommandOutputDialog::refresh()
     ui->runningState->setChecked(m_command.getLastProcessState() == QProcess::Running);
     QProcess::ProcessError processError;
 
-    if (m_command.getLastProcessStartTimestamp() == 0) // not started
+    if (m_command.getLastProcessStartTimestampms() == 0) // not started
     {
         ui->errorText->setText("...");
         ui->exitCode->setText("-");

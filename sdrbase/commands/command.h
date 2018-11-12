@@ -63,8 +63,8 @@ public:
     bool getLastProcessError(QProcess::ProcessError& error) const;
     bool getLastProcessExit(int& exitCode, QProcess::ExitStatus& exitStatus) const;
     const QString& getLastProcessLog() const;
-    clock_t  getLastProcessStartTimestamp() const { return m_currentProcessStartTimeStamp; }
-    clock_t  getLastProcessFinishTimestamp() const { return m_currentProcessFinishTimeStamp; }
+    uint64_t  getLastProcessStartTimestampms() const { return m_currentProcessStartTimeStampms; }
+    uint64_t  getLastProcessFinishTimestampms() const { return m_currentProcessFinishTimeStampms; }
     const QString& getLastProcessCommandLine() const { return m_currentProcessCommandLine; }
     qint64 getLastProcessPid() const { return m_currentProcessPid; }
 
@@ -91,6 +91,8 @@ public:
     }
 
 private:
+    uint64_t nowms(); //!< Get now time in milliseconds
+
     QString m_group;
     QString m_description;
     QString m_command;
@@ -107,8 +109,8 @@ private:
     int m_currentProcessExitCode;
     QProcess::ExitStatus m_currentProcessExitStatus;
     QString m_log;
-    clock_t  m_currentProcessStartTimeStamp;
-    clock_t  m_currentProcessFinishTimeStamp;
+    uint64_t  m_currentProcessStartTimeStampms;
+    uint64_t  m_currentProcessFinishTimeStampms;
     QString m_currentProcessCommandLine;
     qint64 m_currentProcessPid;
 
