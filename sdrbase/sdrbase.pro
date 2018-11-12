@@ -224,7 +224,9 @@ HEADERS  += audio/audiodevicemanager.h\
         webapi/webapiserver.h\
         mainparser.h
 
-!macx:LIBS += -L../serialdv/$${build_subdir} -lserialdv
+MINGW32 || MINGW64 {
+    LIBS += -L../serialdv/$${build_subdir} -lserialdv
+}
 LIBS += -L../httpserver/$${build_subdir} -lhttpserver
 LIBS += -L../qrtplib/$${build_subdir} -lqrtplib
 LIBS += -L../swagger/$${build_subdir} -lswagger

@@ -64,9 +64,10 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceSummary(
-            SWGSDRangel::SWGInstanceSummaryResponse& response __attribute__((unused)),
+            SWGSDRangel::SWGInstanceSummaryResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -77,9 +78,10 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceDelete(
-            SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
+            SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -90,10 +92,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceDevices(
-            bool tx __attribute__((unused)),
-            SWGSDRangel::SWGInstanceDevicesResponse& response __attribute__((unused)),
+            bool tx,
+            SWGSDRangel::SWGInstanceDevicesResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) tx;
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -104,10 +108,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceChannels(
-            bool tx __attribute__((unused)),
-            SWGSDRangel::SWGInstanceChannelsResponse& response __attribute__((unused)),
+            bool tx,
+            SWGSDRangel::SWGInstanceChannelsResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) tx;
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -118,9 +124,10 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceLoggingGet(
-            SWGSDRangel::SWGLoggingInfo& response __attribute__((unused)),
+            SWGSDRangel::SWGLoggingInfo& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -131,10 +138,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceLoggingPut(
-            SWGSDRangel::SWGLoggingInfo& query __attribute__((unused)),
-            SWGSDRangel::SWGLoggingInfo& response __attribute__((unused)),
+            SWGSDRangel::SWGLoggingInfo& query,
+            SWGSDRangel::SWGLoggingInfo& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) query;
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -145,9 +154,10 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceAudioGet(
-            SWGSDRangel::SWGAudioDevices& response __attribute__((unused)),
+            SWGSDRangel::SWGAudioDevices& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -158,10 +168,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceAudioInputPatch(
-            SWGSDRangel::SWGAudioInputDevice& response __attribute__((unused)),
-            const QStringList& audioInputKeys __attribute__((unused)),
+            SWGSDRangel::SWGAudioInputDevice& response,
+            const QStringList& audioInputKeys,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
+        (void) audioInputKeys;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -172,10 +184,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceAudioOutputPatch(
-            SWGSDRangel::SWGAudioOutputDevice& response __attribute__((unused)),
-            const QStringList& audioOutputKeys __attribute__((unused)),
+            SWGSDRangel::SWGAudioOutputDevice& response,
+            const QStringList& audioOutputKeys,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
+        (void) audioOutputKeys;
         error.init();
         *error.getMessage() = QString("Function not implemented");
         return 501;
@@ -186,9 +200,10 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceAudioInputDelete(
-            SWGSDRangel::SWGAudioInputDevice& response __attribute__((unused)),
+            SWGSDRangel::SWGAudioInputDevice& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
         error.init();
         *error.getMessage() = QString("Function not implemented");
         return 501;
@@ -199,9 +214,10 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceAudioOutputDelete(
-            SWGSDRangel::SWGAudioOutputDevice& response __attribute__((unused)),
+            SWGSDRangel::SWGAudioOutputDevice& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
         error.init();
         *error.getMessage() = QString("Function not implemented");
         return 501;
@@ -212,9 +228,10 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceAudioInputCleanupPatch(
-            SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
+            SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
         error.init();
         *error.getMessage() = QString("Function not implemented");
         return 501;
@@ -225,9 +242,10 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceAudioOutputCleanupPatch(
-            SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
+            SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
         error.init();
         *error.getMessage() = QString("Function not implemented");
         return 501;
@@ -238,9 +256,10 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceLocationGet(
-            SWGSDRangel::SWGLocationInformation& response __attribute__((unused)),
+            SWGSDRangel::SWGLocationInformation& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -251,9 +270,10 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceLocationPut(
-            SWGSDRangel::SWGLocationInformation& response __attribute__((unused)),
+            SWGSDRangel::SWGLocationInformation& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -264,9 +284,10 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceDVSerialGet(
-            SWGSDRangel::SWGDVSeralDevices& response __attribute__((unused)),
+            SWGSDRangel::SWGDVSeralDevices& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -277,10 +298,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceDVSerialPatch(
-            bool dvserial __attribute__((unused)),
-            SWGSDRangel::SWGDVSeralDevices& response __attribute__((unused)),
+            bool dvserial,
+            SWGSDRangel::SWGDVSeralDevices& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) dvserial;
+        (void) response;
         error.init();
         *error.getMessage() = QString("Function not implemented");
         return 501;
@@ -291,9 +314,10 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instancePresetsGet(
-            SWGSDRangel::SWGPresets& response __attribute__((unused)),
+            SWGSDRangel::SWGPresets& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -304,10 +328,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instancePresetPatch(
-            SWGSDRangel::SWGPresetTransfer& query __attribute__((unused)),
-            SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
+            SWGSDRangel::SWGPresetTransfer& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) query;
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -318,10 +344,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instancePresetPut(
-            SWGSDRangel::SWGPresetTransfer& query __attribute__((unused)),
-            SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
+            SWGSDRangel::SWGPresetTransfer& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) query;
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -332,10 +360,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instancePresetPost(
-            SWGSDRangel::SWGPresetTransfer& query __attribute__((unused)),
-            SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
+            SWGSDRangel::SWGPresetTransfer& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) query;
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -346,9 +376,10 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instancePresetDelete(
-            SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
+            SWGSDRangel::SWGPresetIdentifier& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -359,10 +390,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instancePresetFilePut(
-            SWGSDRangel::SWGPresetImport& query __attribute__((unused)),
-            SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
+            SWGSDRangel::SWGPresetImport& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) query;
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -373,10 +406,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instancePresetFilePost(
-            SWGSDRangel::SWGPresetExport& query __attribute__((unused)),
-            SWGSDRangel::SWGPresetIdentifier& response __attribute__((unused)),
+            SWGSDRangel::SWGPresetExport& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) query;
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -387,9 +422,10 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceDeviceSetsGet(
-            SWGSDRangel::SWGDeviceSetList& response __attribute__((unused)),
+            SWGSDRangel::SWGDeviceSetList& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -400,10 +436,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceDeviceSetPost(
-            bool tx __attribute__((unused)),
-            SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
+            bool tx,
+            SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) tx;
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -414,9 +452,10 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceDeviceSetDelete(
-            SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
+            SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -427,10 +466,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetGet(
-            int deviceSetIndex __attribute__((unused)),
-            SWGSDRangel::SWGDeviceSet& response __attribute__((unused)),
+            int deviceSetIndex,
+            SWGSDRangel::SWGDeviceSet& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) deviceSetIndex;
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -441,10 +482,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetFocusPatch(
-            int deviceSetIndex __attribute__((unused)),
-            SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
+            int deviceSetIndex,
+            SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) deviceSetIndex;
+        (void) response;
         error.init();
         *error.getMessage() = QString("Function not implemented");
         return 501;
@@ -455,11 +498,14 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetDevicePut(
-            int deviceSetIndex __attribute__((unused)),
-            SWGSDRangel::SWGDeviceListItem& query __attribute__((unused)),
-            SWGSDRangel::SWGDeviceListItem& response __attribute__((unused)),
+            int deviceSetIndex,
+            SWGSDRangel::SWGDeviceListItem& query,
+            SWGSDRangel::SWGDeviceListItem& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) deviceSetIndex;
+        (void) query;
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -470,10 +516,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetDeviceSettingsGet(
-            int deviceSetIndex __attribute__((unused)),
-            SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
+            int deviceSetIndex,
+            SWGSDRangel::SWGDeviceSettings& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) deviceSetIndex;
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -484,12 +532,16 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetDeviceSettingsPutPatch(
-            int deviceSetIndex __attribute__((unused)),
-            bool force __attribute__((unused)), //!< true to force settings = put else patch
-            const QStringList& channelSettingsKeys __attribute__((unused)),
-            SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
+            int deviceSetIndex,
+            bool force, //!< true to force settings = put else patch
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGDeviceSettings& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) deviceSetIndex;
+        (void) force;
+        (void) channelSettingsKeys;
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -500,10 +552,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetDeviceRunGet(
-            int deviceSetIndex __attribute__((unused)),
-            SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
+            int deviceSetIndex,
+            SWGSDRangel::SWGDeviceState& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) deviceSetIndex;
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -514,10 +568,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetDeviceRunPost(
-            int deviceSetIndex __attribute__((unused)),
-            SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
+            int deviceSetIndex,
+            SWGSDRangel::SWGDeviceState& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) deviceSetIndex;
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
@@ -528,11 +584,13 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetDeviceRunDelete(
-            int deviceSetIndex __attribute__((unused)),
-            SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
+            int deviceSetIndex,
+            SWGSDRangel::SWGDeviceState& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
+        (void) deviceSetIndex;
+        (void) response;
+        error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -542,10 +600,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetDeviceReportGet(
-            int deviceSetIndex __attribute__((unused)),
-            SWGSDRangel::SWGDeviceReport& response __attribute__((unused)),
+            int deviceSetIndex,
+            SWGSDRangel::SWGDeviceReport& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) deviceSetIndex;
+        (void) response;
         error.init();
         *error.getMessage() = QString("Function not implemented");
         return 501;
@@ -556,10 +616,12 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetChannelsReportGet(
-            int deviceSetIndex __attribute__((unused)),
-            SWGSDRangel::SWGChannelsDetail& response __attribute__((unused)),
+            int deviceSetIndex,
+            SWGSDRangel::SWGChannelsDetail& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) deviceSetIndex;
+        (void) response;
         error.init();
         *error.getMessage() = QString("Function not implemented");
         return 501;
@@ -570,12 +632,15 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetChannelPost(
-            int deviceSetIndex __attribute__((unused)),
-            SWGSDRangel::SWGChannelSettings& query __attribute__((unused)),
-			SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
+            int deviceSetIndex,
+            SWGSDRangel::SWGChannelSettings& query,
+            SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
+        (void) deviceSetIndex;
+        (void) query;
+        (void) response;
+        error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -585,11 +650,15 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetChannelDelete(
-            int deviceSetIndex __attribute__((unused)),
-            int channelIndex __attribute__((unused)),
-            SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
-            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) deviceSetIndex;
+        (void) channelIndex;
+        (void) response;
+        (void) error;
         error.init();
         *error.getMessage() = QString("Function not implemented");
         return 501;
@@ -600,12 +669,15 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetChannelSettingsGet(
-            int deviceSetIndex __attribute__((unused)),
-            int channelIndex __attribute__((unused)),
-            SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGChannelSettings& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
+        (void) deviceSetIndex;
+        (void) channelIndex;
+        (void) response;
+        error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -615,14 +687,19 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetChannelSettingsPutPatch(
-            int deviceSetIndex __attribute__((unused)),
-            int channelIndex __attribute__((unused)),
-            bool force __attribute__((unused)),
-            const QStringList& channelSettingsKeys __attribute__((unused)),
-            SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
+            int deviceSetIndex,
+            int channelIndex,
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
-    	error.init();
+        (void) deviceSetIndex;
+        (void) channelIndex;
+        (void) force;
+        (void) channelSettingsKeys;
+        (void) response;
+        error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
     }
@@ -633,11 +710,14 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetChannelReportGet(
-            int deviceSetIndex __attribute__((unused)),
-            int channelIndex __attribute__((unused)),
-            SWGSDRangel::SWGChannelReport& response __attribute__((unused)),
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGChannelReport& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) deviceSetIndex;
+        (void) channelIndex;
+        (void) response;
         error.init();
         *error.getMessage() = QString("Function not implemented");
         return 501;

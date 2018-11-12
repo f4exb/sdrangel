@@ -68,8 +68,9 @@ void FileRecord::genUniqueFileName(uint deviceUID)
     setFileName(QString("rec%1_%2.sdriq").arg(deviceUID).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz")));
 }
 
-void FileRecord::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly __attribute__((unused)))
+void FileRecord::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
+    (void) positiveOnly;
     // if no recording is active, send the samples to /dev/null
     if(!m_recordOn)
         return;

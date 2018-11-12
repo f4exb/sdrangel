@@ -18,7 +18,6 @@
 #include "audionetsink.h"
 #include "util/rtpsink.h"
 
-#include <unistd.h>
 #include <QUdpSocket>
 
 const int AudioNetSink::m_udpBlockSize = 512;

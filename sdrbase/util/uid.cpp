@@ -23,7 +23,7 @@
 #include <QHostInfo>
 #include <QCryptographicHash>
 
-#ifdef _WIN32_
+#if (defined _WIN32_) || (defined _MSC_VER)
 #include <windows.h>
 #else
 #include <sys/time.h>
@@ -67,7 +67,7 @@ uint32_t UidCalculator::getNewInstanceId()
 
 uint64_t UidCalculator::getCurrentMiroseconds()
 {
-#ifdef _WIN32_
+#if (defined _WIN32_) || (defined _MSC_VER)
     LARGE_INTEGER tickPerSecond;
     LARGE_INTEGER tick; // a point in time
 
