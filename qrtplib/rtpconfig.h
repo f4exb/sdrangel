@@ -84,7 +84,11 @@
 
 // No SRTP support
 
+#ifdef _MSC_VER
+#define RTP_HAVE_QUERYPERFORMANCECOUNTER
+#else
 #define RTP_HAVE_CLOCK_GETTIME
+#endif
 
 #define RTP_HAVE_POLL
 

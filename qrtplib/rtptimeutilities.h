@@ -44,6 +44,8 @@
 #include <sys/time.h>
 #include <time.h>
 #include <errno.h>
+#else
+#include "Windows.h"
 #endif // RTP_HAVE_QUERYPERFORMANCECOUNTER
 
 #include "export.h"

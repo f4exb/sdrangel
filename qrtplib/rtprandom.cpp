@@ -40,7 +40,11 @@
 #include "rtprandomrand48.h"
 
 #include <time.h>
+#ifdef _MSC_VER
+#include "Windows.h"
+#else
 #include <unistd.h>
+#endif
 
 #include <QDateTime>
 
@@ -50,7 +54,11 @@ namespace qrtplib
 uint32_t RTPRandom::PickSeed()
 {
     uint32_t x;
+#ifdef _MSC_VER
+    x = GetCurrentProcessId();
+#else
     x = (uint32_t) getpid();
+#endif
     QDateTime currentDateTime = QDateTime::currentDateTime();
     x += currentDateTime.toTime_t();
 #if defined(WIN32)

@@ -49,7 +49,6 @@
 #endif // RTP_SUPPORT_SENDAPP
 #include "rtpinternalutils.h"
 
-#include <unistd.h>
 #include <stdlib.h>
 
 #include <QHostInfo>
@@ -1143,8 +1142,9 @@ int RTPSession::ProcessPolledData()
     return 0;
 }
 
-int RTPSession::CreateCNAME(uint8_t *buffer, std::size_t *bufferlength, bool resolve __attribute__((unused)))
+int RTPSession::CreateCNAME(uint8_t *buffer, std::size_t *bufferlength, bool resolve)
 {
+    (void) resolve;
     buffer[*bufferlength - 1] = 0;
 
     std::size_t offset = strlen((const char *) buffer);
