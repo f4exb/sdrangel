@@ -40,10 +40,11 @@ CONFIG(MSVC):INCLUDEPATH += "C:\softs\boost_1_66_0"
 
 CONFIG(MINGW32):INCLUDEPATH += "C:\softs\serialDV"
 CONFIG(MINGW64):INCLUDEPATH += "C:\softs\serialDV"
+CONFIG(MSVC):INCLUDEPATH += "C:\softs\serialDV"
 
 CONFIG(macx):INCLUDEPATH += "../../../boost_1_64_0"
 
-MINGW32 || MINGW64 {
+MINGW32 || MINGW64 || MSVC {
     HEADERS += \
         dsp/dvserialengine.h \
         dsp/dvserialworker.h
@@ -224,7 +225,7 @@ HEADERS  += audio/audiodevicemanager.h\
         webapi/webapiserver.h\
         mainparser.h
 
-MINGW32 || MINGW64 {
+MINGW32 || MINGW64 || MSVC {
     LIBS += -L../serialdv/$${build_subdir} -lserialdv
 }
 LIBS += -L../httpserver/$${build_subdir} -lhttpserver
