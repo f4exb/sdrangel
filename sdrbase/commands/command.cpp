@@ -21,6 +21,7 @@
 
 #include "command.h"
 #include "util/simpleserializer.h"
+#include "util/timeutil.h"
 
 Command::Command() :
     m_currentProcess(nullptr),
@@ -200,7 +201,7 @@ void Command::run(const QString& apiAddress, int apiPort, int deviceSetIndex)
     connect(m_currentProcess, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(processStateChanged(QProcess::ProcessState)));
 
     m_currentProcess->setProcessChannelMode(QProcess::MergedChannels);
-    m_currentProcessStartTimeStampms = nowms();
+    m_currentProcessStartTimeStampms = TimeUtil::nowms();
     m_currentProcess->start(m_currentProcessCommandLine);
 }
 
@@ -256,7 +257,7 @@ void Command::processStateChanged(QProcess::ProcessState newState)
 void Command::processError(QProcess::ProcessError error)
 {
     //qDebug("Command::processError: %d state: %d", error, m_currentProcessState);
-    m_currentProcessFinishTimeStampms = nowms();
+    m_currentProcessFinishTimeStampms = TimeUtil::nowms();
     m_currentProcessError = error;
     m_isInError = true;
 
@@ -280,7 +281,7 @@ void Command::processError(QProcess::ProcessError error)
 void Command::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     //qDebug("Command::processFinished: (%d) %d", exitCode, exitStatus);
-    m_currentProcessFinishTimeStampms = nowms();
+    m_currentProcessFinishTimeStampms = TimeUtil::nowms();
     m_currentProcessExitCode = exitCode;
     m_currentProcessExitStatus = exitStatus;
     m_hasExited = true;
@@ -296,14 +297,4 @@ void Command::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 
     m_currentProcess->deleteLater(); // make sure other threads can still access it until all events have been processed
     m_currentProcess = nullptr; // for this thread it can assume it was deleted
-}
-
-uint64_t Command::nowms()
-{
-    auto now = std::chrono::system_clock::now();
-    auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
-    auto epoch = now_ms.time_since_epoch();
-    auto value = std::chrono::duration_cast<std::chrono::milliseconds>(epoch);
-
-    return value.count();
 }

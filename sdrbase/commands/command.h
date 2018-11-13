@@ -91,8 +91,6 @@ public:
     }
 
 private:
-    uint64_t nowms(); //!< Get now time in milliseconds
-
     QString m_group;
     QString m_description;
     QString m_command;

@@ -81,6 +81,7 @@ set(sdrbase_SOURCES
     util/simpleserializer.cpp
     #util/spinlock.cpp
     util/uid.cpp
+    util/timeutil.cpp
 
     plugin/plugininterface.cpp
     plugin/pluginapi.cpp
@@ -204,6 +205,7 @@ set(sdrbase_HEADERS
     util/simpleserializer.h
     #util/spinlock.h
     util/uid.h
+    util/timeutil.h
 
     webapi/webapiadapterinterface.h
     webapi/webapirequestmapper.h
