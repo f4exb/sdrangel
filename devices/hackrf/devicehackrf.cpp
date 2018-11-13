@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <stdio.h>
+#include <QtGlobal>
 #include "devicehackrf.h"
 
 DeviceHackRF::DeviceHackRF()
@@ -22,7 +23,7 @@ DeviceHackRF::DeviceHackRF()
     hackrf_error rc = (hackrf_error) hackrf_init();
 
     if (rc != HACKRF_SUCCESS) {
-        fprintf(stderr, "DeviceHackRF::open_hackrf: failed to initiate HackRF library %s\n", hackrf_error_name(rc));
+        qCritical("DeviceHackRF::open_hackrf: failed to initiate HackRF library %s", hackrf_error_name(rc));
     }
 }
 
@@ -59,6 +60,7 @@ hackrf_device *DeviceHackRF::open_hackrf(const char * const serial)
     }
     else
     {
+        qCritical("DeviceHackRF::open_hackrf: error #%d: %s", (int) rc, hackrf_error_name(rc));
         return 0;
     }
 }
@@ -79,6 +81,7 @@ hackrf_device *DeviceHackRF::open_hackrf_from_sequence(int sequence)
     }
     else
     {
+        qCritical("DeviceHackRF::open_hackrf_from_sequence: error #%d: %s", (int) rc, hackrf_error_name(rc));
         return 0;
     }
 }
