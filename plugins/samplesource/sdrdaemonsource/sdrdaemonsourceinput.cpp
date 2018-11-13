@@ -16,7 +16,6 @@
 
 #include <string.h>
 #include <errno.h>
-#include <sys/time.h>
 #include <QDebug>
 
 #include "SWGDeviceSettings.h"

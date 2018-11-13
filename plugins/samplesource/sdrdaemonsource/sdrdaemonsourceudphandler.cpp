@@ -17,7 +17,6 @@
 #include <QUdpSocket>
 #include <QDebug>
 #include <QTimer>
-#include <unistd.h>
 
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
