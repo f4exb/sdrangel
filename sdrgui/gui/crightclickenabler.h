@@ -21,7 +21,9 @@
 #include <QAbstractButton>
 #include <QMouseEvent>
 
-class CRightClickEnabler : public QObject {
+#include "export.h"
+
+class SDRGUI_API CRightClickEnabler : public QObject {
     Q_OBJECT
 public:
     CRightClickEnabler(QAbstractButton *button);

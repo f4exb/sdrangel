@@ -30,7 +30,7 @@ class SDRBASE_API BasebandSampleSink : public QObject {
 	Q_OBJECT
 public:
 	/** Used to notify on which thread the sample sink is now running (with ThreadedSampleSink) */
-    class MsgThreadedSink : public Message {
+    class SDRBASE_API MsgThreadedSink : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:

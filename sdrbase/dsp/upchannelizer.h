@@ -36,7 +36,7 @@ class MessageQueue;
 class SDRBASE_API UpChannelizer : public BasebandSampleSource {
     Q_OBJECT
 public:
-    class MsgChannelizerNotification : public Message {
+    class SDRBASE_API MsgChannelizerNotification : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
