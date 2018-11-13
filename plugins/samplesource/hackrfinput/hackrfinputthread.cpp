@@ -18,7 +18,6 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include <unistd.h>
 #include <algorithm>
 
 #include "dsp/samplesinkfifo.h"
