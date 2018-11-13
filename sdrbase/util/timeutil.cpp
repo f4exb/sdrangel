@@ -25,3 +25,13 @@ uint64_t TimeUtil::nowms()
 
     return value.count();
 }
+
+uint64_t TimeUtil::nowus()
+{
+    auto now = std::chrono::system_clock::now();
+    auto now_ms = std::chrono::time_point_cast<std::chrono::microseconds>(now);
+    auto epoch = now_ms.time_since_epoch();
+    auto value = std::chrono::duration_cast<std::chrono::microseconds>(epoch);
+
+    return value.count();
+}

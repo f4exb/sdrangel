@@ -14,7 +14,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <sys/time.h>
 #include <stdio.h>
 #include <errno.h>
 #include <assert.h>
@@ -22,6 +21,7 @@
 #include <QDebug>
 
 #include "dsp/samplesourcefifo.h"
+#include "util/timeutil.h"
 #include "sdrdaemonsinkthread.h"
 
 SDRdaemonSinkThread::SDRdaemonSinkThread(SampleSourceFifo* sampleFifo, QObject* parent) :
@@ -140,8 +140,8 @@ void SDRdaemonSinkThread::tick()
 	}
 }
 
-uint32_t SDRdaemonSinkThread::getSamplesCount(struct timeval& tv) const
+uint32_t SDRdaemonSinkThread::getSamplesCount(uint64_t& ts_usecs) const
 {
-    gettimeofday(&tv, 0);
+    ts_usecs = TimeUtil::nowus();
     return m_samplesCount;
 }

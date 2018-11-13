@@ -14,7 +14,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <sys/time.h>
 #include <string.h>
 #include <errno.h>
 #include <QDebug>
@@ -420,9 +419,9 @@ void SDRdaemonSinkOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSetti
 
 void SDRdaemonSinkOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
-    struct timeval tv;
+    uint64_t ts_usecs;
     response.getSdrDaemonSinkReport()->setBufferRwBalance(m_sampleSourceFifo.getRWBalance());
-    response.getSdrDaemonSinkReport()->setSampleCount(m_sdrDaemonSinkThread ? (int) m_sdrDaemonSinkThread->getSamplesCount(tv) : 0);
+    response.getSdrDaemonSinkReport()->setSampleCount(m_sdrDaemonSinkThread ? (int) m_sdrDaemonSinkThread->getSamplesCount(ts_usecs) : 0);
 }
 
 void SDRdaemonSinkOutput::tick()
@@ -504,16 +503,14 @@ void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject)
         }
 
         uint32_t sampleCountDelta, sampleCount;
-        struct timeval tv;
-        sampleCount = m_sdrDaemonSinkThread->getSamplesCount(tv);
+        uint64_t timestampUs;
+        sampleCount = m_sdrDaemonSinkThread->getSamplesCount(timestampUs);
 
         if (sampleCount < m_lastSampleCount) {
             sampleCountDelta = (0xFFFFFFFFU - m_lastSampleCount) + sampleCount + 1;
         } else {
             sampleCountDelta = sampleCount - m_lastSampleCount;
         }
-
-        uint64_t timestampUs = tv.tv_sec*1000000ULL + tv.tv_usec;
 
         // on initial state wait for queue stabilization
         if ((m_lastRemoteTimestampRateCorrection == 0) && (queueLength >= m_lastQueueLength-1) && (queueLength <= m_lastQueueLength+1))

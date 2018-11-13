@@ -23,4 +23,5 @@ class SDRBASE_API TimeUtil
 {
 public:
     static uint64_t nowms(); //!< returns the current epoch in milliseconds
+    static uint64_t nowus(); //!< returns the current epoch in microseconds
 };

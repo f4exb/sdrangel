@@ -55,7 +55,7 @@ public:
 
     bool isRunning() const { return m_running; }
 
-    uint32_t getSamplesCount(struct timeval& tv) const;
+    uint32_t getSamplesCount(uint64_t& ts_usecs) const;
     void setSamplesCount(int samplesCount) { m_samplesCount = samplesCount; }
     void setChunkCorrection(int chunkCorrection) { m_chunkCorrection = chunkCorrection; }
 
