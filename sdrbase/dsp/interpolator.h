@@ -7,9 +7,6 @@
 #include "dsp/dsptypes.h"
 #include "export.h"
 #include <stdio.h>
-#ifndef __WINDOWS__
-#include <unistd.h>
-#endif
 
 class SDRBASE_API Interpolator {
 public:

@@ -32,7 +32,7 @@ class MessageQueue;
 class SDRBASE_API DownChannelizer : public BasebandSampleSink {
 	Q_OBJECT
 public:
-	class MsgChannelizerNotification : public Message {
+    class SDRBASE_API MsgChannelizerNotification : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
