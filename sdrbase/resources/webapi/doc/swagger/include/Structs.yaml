@@ -33,7 +33,7 @@ Gain:
       type: integer
 
 Range:
-  description: An arbitrary range of values
+  description: An arbitrary range of integer values
   properties:
     min:
       type: integer
@@ -41,6 +41,19 @@ Range:
       type: integer
     step:
       type: integer
+
+RangeFloat:
+  description: An arbitrary range of floating point values
+  properties:
+    min:
+      type: number
+      format: float
+    max:
+      type: number
+      format: float
+    step:
+      type: number
+      format: float  
 
 FrequencyRange:
   description: An frequency range with 64 bit support for min and max
@@ -61,3 +74,25 @@ NamedEnum:
       type: string
     value:
       type: integer
+      
+ArgInfo:
+  descripion: Argument information used in SoapySDR
+  properties:
+    key:
+      type: string
+    valueType:
+      type: string
+      enum: [bool, int, float, string]
+    valueString:
+      type: string
+      
+Complex:
+  description: A complex number
+  properties:
+    real:
+      type: number
+      format: float
+    imag:
+      type: number
+      format: float
+      

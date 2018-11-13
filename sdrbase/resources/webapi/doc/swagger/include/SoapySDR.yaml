@@ -1,0 +1,191 @@
+SoapySDRInputSettings:
+  description: SoapySDR
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64      
+    LOppmTenths:
+      type: integer
+    devSampleRate:
+      type: integer
+    log2Decim:
+      type: integer
+    fcPos:
+      type: integer
+    softDCCorrection:
+      description: boolean not zero for true    
+      type: integer
+    softIQCorrection:
+      description: boolean not zero for true    
+      type: integer
+    transverterMode:
+      description: boolean not zero for true    
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64      
+    fileRecordName:
+      type: string
+    antenna:
+      type: string
+    bandwidth:
+      type: integer
+    tunableElements:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/ArgInfo" 
+    globalGain:
+      type: integer
+    individualGains:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/ArgInfo" 
+    autoGain:
+      description: boolean not zero for true    
+      type: integer
+    autoDCCorrection:
+      description: boolean not zero for true    
+      type: integer
+    autoIQCorrection:
+      description: boolean not zero for true    
+      type: integer
+    dcCorrection:
+      $ref: "/doc/swagger/include/Structs.yaml#/Complex"
+    iqCorrection:
+      $ref: "/doc/swagger/include/Structs.yaml#/Complex"
+    streamArgSettings:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/ArgInfo" 
+    deviceArgSettings:    
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/ArgInfo" 
+
+SoapySDROutputSettings:
+  description: SoapySDR
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64      
+    LOppmTenths:
+      type: integer
+    devSampleRate:
+      type: integer
+    log2Interp:
+      type: integer
+    transverterMode:
+      description: boolean not zero for true    
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64      
+    antenna:
+      type: string
+    bandwidth:
+      type: integer
+    tunableElements:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/ArgInfo" 
+    globalGain:
+      type: integer
+    individualGains:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/ArgInfo" 
+    autoGain:
+      description: boolean not zero for true    
+      type: integer
+    autoDCCorrection:
+      description: boolean not zero for true    
+      type: integer
+    autoIQCorrection:
+      description: boolean not zero for true    
+      type: integer
+    dcCorrection:
+      $ref: "/doc/swagger/include/Structs.yaml#/Complex"
+    iqCorrection:
+      $ref: "/doc/swagger/include/Structs.yaml#/Complex"
+    streamArgSettings:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/ArgInfo" 
+    deviceArgSettings:    
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/ArgInfo" 
+      
+SoapySDRReport:
+  description: SoapySDR
+  properties:
+    deviceSettingsArgs:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/ArgInfo"
+    streamSettingsArgs:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/ArgInfo"
+    hasDCAutoCorrection:
+      description: boolean not zero for true
+      type: integer
+    hasDCOffsetValue:
+      description: boolean not zero for true
+      type: integer
+    hasIQBalanceValue:
+      description: boolean not zero for true
+      type: integer
+    hasFrequencyCorrectionValue:
+      description: boolean not zero for true
+      type: integer
+    antennas:
+      type: array
+      items:
+        type: string
+    hasAGC:    
+      description: boolean not zero for true
+      type: integer
+    gainRange:
+      $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
+    gainSettings:
+      type: array
+      items:
+        $ref: "#/definitions/SoapySDRGainSetting"
+    frequencySettings:
+      type: array
+      items:
+        $ref: "#/definitions/SoapySDRFrequencySetting"
+    frequencySettingsArgs:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/ArgInfo"
+    ratesRanges:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
+    bandwidthsRanges:        
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
+
+definitions:
+        
+  SoapySDRGainSetting:
+    description: A named gain setting specified by its range
+    properties:
+      name:
+        type: string
+      range:
+        $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
+          
+  SoapySDRFrequencySetting:
+    description: A named frequency setting specified by a range list
+    properties:
+      name:
+        type: string
+      ranges:
+        type: array
+        items:
+          $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
+ 

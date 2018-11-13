@@ -1032,6 +1032,20 @@ margin-bottom: 20px;
   },
   "description" : "Airspy"
 };
+            defs.ArgInfo = {
+  "properties" : {
+    "key" : {
+      "type" : "string"
+    },
+    "valueType" : {
+      "type" : "string",
+      "enum" : [ "bool", "int", "float", "string" ]
+    },
+    "valueString" : {
+      "type" : "string"
+    }
+  }
+};
             defs.AudioDevices = {
   "required" : [ "nbInputDevices", "nbOutputDevices" ],
   "properties" : {
@@ -1637,6 +1651,19 @@ margin-bottom: 20px;
   },
   "description" : "All channels detailed information"
 };
+            defs.Complex = {
+  "properties" : {
+    "real" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "imag" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "A complex number"
+};
             defs.DSDDemodReport = {
   "properties" : {
     "channelPowerDB" : {
@@ -1996,6 +2023,12 @@ margin-bottom: 20px;
     },
     "sdrPlayReport" : {
       "$ref" : "#/definitions/SDRPlayReport"
+    },
+    "soapySDRInputReport" : {
+      "$ref" : "#/definitions/SoapySDRReport"
+    },
+    "soapySDROutputReport" : {
+      "$ref" : "#/definitions/SoapySDRReport"
     }
   },
   "description" : "Base device report. Only the device report corresponding to the device specified in the deviceHwType is or should be present."
@@ -2111,6 +2144,12 @@ margin-bottom: 20px;
     },
     "sdrPlaySettings" : {
       "$ref" : "#/definitions/SDRPlaySettings"
+    },
+    "soapySDRInputSettings" : {
+      "$ref" : "#/definitions/SoapySDRInputSettings"
+    },
+    "soapySDROutputSettings" : {
+      "$ref" : "#/definitions/SoapySDROutputSettings"
     },
     "testSourceSettings" : {
       "$ref" : "#/definitions/TestSourceSettings"
@@ -3331,7 +3370,24 @@ margin-bottom: 20px;
       "type" : "integer"
     }
   },
-  "description" : "An arbitrary range of values"
+  "description" : "An arbitrary range of integer values"
+};
+            defs.RangeFloat = {
+  "properties" : {
+    "min" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "max" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "step" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "An arbitrary range of floating point values"
 };
             defs.RtlSdrReport = {
   "properties" : {
@@ -3828,6 +3884,275 @@ margin-bottom: 20px;
     }
   },
   "description" : "Information about a logical device available from an attached hardware device that can be used as a sampling device"
+};
+            defs.SoapySDRFrequencySetting = {
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "ranges" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/RangeFloat"
+      }
+    }
+  },
+  "description" : "A named frequency setting specified by a range list"
+};
+            defs.SoapySDRGainSetting = {
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "range" : {
+      "$ref" : "#/definitions/RangeFloat"
+    }
+  },
+  "description" : "A named gain setting specified by its range"
+};
+            defs.SoapySDRInputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "LOppmTenths" : {
+      "type" : "integer"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "fcPos" : {
+      "type" : "integer"
+    },
+    "softDCCorrection" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "softIQCorrection" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "transverterMode" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "transverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "fileRecordName" : {
+      "type" : "string"
+    },
+    "antenna" : {
+      "type" : "string"
+    },
+    "bandwidth" : {
+      "type" : "integer"
+    },
+    "tunableElements" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ArgInfo"
+      }
+    },
+    "globalGain" : {
+      "type" : "integer"
+    },
+    "individualGains" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ArgInfo"
+      }
+    },
+    "autoGain" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "autoDCCorrection" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "autoIQCorrection" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "dcCorrection" : {
+      "$ref" : "#/definitions/Complex"
+    },
+    "iqCorrection" : {
+      "$ref" : "#/definitions/Complex"
+    },
+    "streamArgSettings" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ArgInfo"
+      }
+    },
+    "deviceArgSettings" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ArgInfo"
+      }
+    }
+  },
+  "description" : "SoapySDR"
+};
+            defs.SoapySDROutputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "LOppmTenths" : {
+      "type" : "integer"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "log2Interp" : {
+      "type" : "integer"
+    },
+    "transverterMode" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "transverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "antenna" : {
+      "type" : "string"
+    },
+    "bandwidth" : {
+      "type" : "integer"
+    },
+    "tunableElements" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ArgInfo"
+      }
+    },
+    "globalGain" : {
+      "type" : "integer"
+    },
+    "individualGains" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ArgInfo"
+      }
+    },
+    "autoGain" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "autoDCCorrection" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "autoIQCorrection" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "dcCorrection" : {
+      "$ref" : "#/definitions/Complex"
+    },
+    "iqCorrection" : {
+      "$ref" : "#/definitions/Complex"
+    },
+    "streamArgSettings" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ArgInfo"
+      }
+    },
+    "deviceArgSettings" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ArgInfo"
+      }
+    }
+  },
+  "description" : "SoapySDR"
+};
+            defs.SoapySDRReport = {
+  "properties" : {
+    "deviceSettingsArgs" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ArgInfo"
+      }
+    },
+    "streamSettingsArgs" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ArgInfo"
+      }
+    },
+    "hasDCAutoCorrection" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "hasDCOffsetValue" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "hasIQBalanceValue" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "hasFrequencyCorrectionValue" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "antennas" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "hasAGC" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "gainRange" : {
+      "$ref" : "#/definitions/RangeFloat"
+    },
+    "gainSettings" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/SoapySDRGainSetting"
+      }
+    },
+    "frequencySettings" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/SoapySDRFrequencySetting"
+      }
+    },
+    "frequencySettingsArgs" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ArgInfo"
+      }
+    },
+    "ratesRanges" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/RangeFloat"
+      }
+    },
+    "bandwidthsRanges" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/RangeFloat"
+      }
+    }
+  },
+  "description" : "SoapySDR"
 };
             defs.SuccessResponse = {
   "required" : [ "message" ],
@@ -4383,7 +4708,7 @@ margin-bottom: 20px;
         <div id="header">
           <div id="api-_">
             <h2 id="welcome-to-apidoc">API and SDK Documentation</h2>
-              <div class="app-desc">Version: 4.2.0</div>
+              <div class="app-desc">Version: 4.3.0</div>
             <hr>
             <div><p>This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube</p>
 <hr />
@@ -23251,7 +23576,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-10-14T10:07:16.959+02:00
+              Generated 2018-11-13T23:30:05.952+01:00
             </div>
           </div>
       </div>
