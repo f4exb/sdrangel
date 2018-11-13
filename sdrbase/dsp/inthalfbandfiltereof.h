@@ -29,7 +29,7 @@
 #include "export.h"
 
 template<uint32_t HBFilterOrder>
-class SDRBASE_API IntHalfbandFilterEOF {
+class IntHalfbandFilterEOF {
 public:
     IntHalfbandFilterEOF();
 
