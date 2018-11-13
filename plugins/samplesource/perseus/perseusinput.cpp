@@ -402,8 +402,9 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
 
 int PerseusInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -411,8 +412,9 @@ int PerseusInput::webapiRunGet(
 int PerseusInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
@@ -428,8 +430,9 @@ int PerseusInput::webapiRun(
 
 int PerseusInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setPerseusSettings(new SWGSDRangel::SWGPerseusSettings());
     response.getPerseusSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -440,8 +443,9 @@ int PerseusInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     PerseusSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("centerFrequency")) {
@@ -495,8 +499,9 @@ int PerseusInput::webapiSettingsPutPatch(
 
 int PerseusInput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setPerseusReport(new SWGSDRangel::SWGPerseusReport());
     response.getPerseusReport()->init();
     webapiFormatDeviceReport(response);

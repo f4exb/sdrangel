@@ -134,8 +134,8 @@ void DSPEngine::setDVSerialSupport(bool support)
     }
 }
 #else
-void DSPEngine::setDVSerialSupport(bool support __attribute__((unused)))
-{}
+void DSPEngine::setDVSerialSupport(bool support)
+{ (void) support; }
 #endif
 
 bool DSPEngine::hasDVSerialSupport()
@@ -153,8 +153,8 @@ void DSPEngine::getDVSerialNames(std::vector<std::string>& deviceNames)
     m_dvSerialEngine.getDevicesNames(deviceNames);
 }
 #else
-void DSPEngine::getDVSerialNames(std::vector<std::string>& deviceNames __attribute((unused)))
-{}
+void DSPEngine::getDVSerialNames(std::vector<std::string>& deviceNames)
+{ (void) deviceNames; }
 #endif
 
 #ifdef DSD_USE_SERIALDV
@@ -171,12 +171,20 @@ void DSPEngine::pushMbeFrame(
 }
 #else
 void DSPEngine::pushMbeFrame(
-        const unsigned char *mbeFrame __attribute((unused)),
-        int mbeRateIndex __attribute((unused)),
-        int mbeVolumeIndex __attribute((unused)),
-        unsigned char channels __attribute((unused)),
-        bool useHP __attribute((unused)),
-        int upsampling __attribute((unused)),
-        AudioFifo *audioFifo __attribute((unused)))
-{}
+        const unsigned char *mbeFrame,
+        int mbeRateIndex,
+        int mbeVolumeIndex,
+        unsigned char channels,
+        bool useHP,
+        int upsampling,
+        AudioFifo *audioFifo)
+{
+    (void) mbeFrame;
+    (void) mbeRateIndex;
+    (void) mbeVolumeIndex;
+    (void) channels;
+    (void) useHP;
+    (void) upsampling;
+    (void) audioFifo;
+}
 #endif

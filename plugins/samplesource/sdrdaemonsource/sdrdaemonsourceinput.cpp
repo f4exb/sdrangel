@@ -134,8 +134,9 @@ quint64 SDRdaemonSourceInput::getCenterFrequency() const
     return m_SDRdaemonUDPHandler->getCenterFrequency();
 }
 
-void SDRdaemonSourceInput::setCenterFrequency(qint64 centerFrequency __attribute__((unused)))
+void SDRdaemonSourceInput::setCenterFrequency(qint64 centerFrequency)
 {
+    (void) centerFrequency;
 }
 
 std::time_t SDRdaemonSourceInput::getStartingTimeStamp() const
@@ -241,8 +242,9 @@ void SDRdaemonSourceInput::applySettings(const SDRdaemonSourceSettings& settings
 
 int SDRdaemonSourceInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -250,8 +252,9 @@ int SDRdaemonSourceInput::webapiRunGet(
 int SDRdaemonSourceInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
@@ -267,8 +270,9 @@ int SDRdaemonSourceInput::webapiRun(
 
 int SDRdaemonSourceInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setSdrDaemonSourceSettings(new SWGSDRangel::SWGSDRdaemonSourceSettings());
     response.getSdrDaemonSourceSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -279,8 +283,9 @@ int SDRdaemonSourceInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     SDRdaemonSourceSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("apiAddress")) {
@@ -336,8 +341,9 @@ void SDRdaemonSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSett
 
 int SDRdaemonSourceInput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setSdrDaemonSourceReport(new SWGSDRangel::SWGSDRdaemonSourceReport());
     response.getSdrDaemonSourceReport()->init();
     webapiFormatDeviceReport(response);

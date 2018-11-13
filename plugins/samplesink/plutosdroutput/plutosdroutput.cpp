@@ -549,8 +549,9 @@ float PlutoSDROutput::getTemperature()
 
 int PlutoSDROutput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -558,8 +559,9 @@ int PlutoSDROutput::webapiRunGet(
 int PlutoSDROutput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
@@ -575,8 +577,9 @@ int PlutoSDROutput::webapiRun(
 
 int PlutoSDROutput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setPlutoSdrOutputSettings(new SWGSDRangel::SWGPlutoSdrOutputSettings());
     response.getPlutoSdrOutputSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -587,8 +590,9 @@ int PlutoSDROutput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     PlutoSDROutputSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("centerFrequency")) {
@@ -648,8 +652,9 @@ int PlutoSDROutput::webapiSettingsPutPatch(
 
 int PlutoSDROutput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setPlutoSdrOutputReport(new SWGSDRangel::SWGPlutoSdrOutputReport());
     response.getPlutoSdrOutputReport()->init();
     webapiFormatDeviceReport(response);

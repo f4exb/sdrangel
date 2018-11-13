@@ -254,8 +254,9 @@ void WFMModGUI::on_navTimeSlider_valueChanged(int value)
     }
 }
 
-void WFMModGUI::on_showFileDialog_clicked(bool checked __attribute__((unused)))
+void WFMModGUI::on_showFileDialog_clicked(bool checked)
 {
+    (void) checked;
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"), 0, QFileDialog::DontUseNativeDialog);
 
@@ -275,8 +276,10 @@ void WFMModGUI::configureFileName()
     m_wfmMod->getInputMessageQueue()->push(message);
 }
 
-void WFMModGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void WFMModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 }
 
 void WFMModGUI::onMenuDialogCalled(const QPoint &p)

@@ -460,8 +460,9 @@ void FCDProPlusInput::set_lo_ppm()
 
 int FCDProPlusInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -469,8 +470,9 @@ int FCDProPlusInput::webapiRunGet(
 int FCDProPlusInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
@@ -486,8 +488,9 @@ int FCDProPlusInput::webapiRun(
 
 int FCDProPlusInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setFcdProPlusSettings(new SWGSDRangel::SWGFCDProPlusSettings());
     response.getFcdProPlusSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -498,8 +501,9 @@ int FCDProPlusInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     FCDProPlusSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("centerFrequency")) {

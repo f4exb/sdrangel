@@ -163,8 +163,9 @@ qint64 SDRdaemonSourceGui::getCenterFrequency() const
     return m_streamCenterFrequency;
 }
 
-void SDRdaemonSourceGui::setCenterFrequency(qint64 centerFrequency __attribute__((unused)))
+void SDRdaemonSourceGui::setCenterFrequency(qint64 centerFrequency)
 {
+    (void) centerFrequency;
 }
 
 bool SDRdaemonSourceGui::handleMessage(const Message& message)
@@ -308,8 +309,9 @@ void SDRdaemonSourceGui::sendSettings()
         m_updateTimer.start(100);
 }
 
-void SDRdaemonSourceGui::on_apiApplyButton_clicked(bool checked __attribute__((unused)))
+void SDRdaemonSourceGui::on_apiApplyButton_clicked(bool checked)
 {
+    (void) checked;
     m_settings.m_apiAddress = ui->apiAddress->text();
 
     bool ctlOk;
@@ -326,8 +328,9 @@ void SDRdaemonSourceGui::on_apiApplyButton_clicked(bool checked __attribute__((u
     m_networkManager->get(m_networkRequest);
 }
 
-void SDRdaemonSourceGui::on_dataApplyButton_clicked(bool checked __attribute__((unused)))
+void SDRdaemonSourceGui::on_dataApplyButton_clicked(bool checked)
 {
+    (void) checked;
     m_settings.m_dataAddress = ui->dataAddress->text();
 
     bool dataOk;
@@ -427,8 +430,9 @@ void SDRdaemonSourceGui::on_record_toggled(bool checked)
     m_sampleSource->getInputMessageQueue()->push(message);
 }
 
-void SDRdaemonSourceGui::on_eventCountsReset_clicked(bool checked __attribute__((unused)))
+void SDRdaemonSourceGui::on_eventCountsReset_clicked(bool checked)
 {
+    (void) checked;
     m_countUnrecoverable = 0;
     m_countRecovered = 0;
     m_eventsTime.start();

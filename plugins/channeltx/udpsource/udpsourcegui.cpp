@@ -316,8 +316,9 @@ void UDPSourceGUI::on_localUDPPort_editingFinished()
     ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
-void UDPSourceGUI::on_sampleRate_textEdited(const QString& arg1 __attribute__((unused)))
+void UDPSourceGUI::on_sampleRate_textEdited(const QString& arg1)
 {
+    (void) arg1;
     bool ok;
     Real inputSampleRate = ui->sampleRate->text().toDouble(&ok);
 
@@ -332,8 +333,9 @@ void UDPSourceGUI::on_sampleRate_textEdited(const QString& arg1 __attribute__((u
     ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
-void UDPSourceGUI::on_rfBandwidth_textEdited(const QString& arg1 __attribute__((unused)))
+void UDPSourceGUI::on_rfBandwidth_textEdited(const QString& arg1)
 {
+    (void) arg1;
     bool ok;
     Real rfBandwidth = ui->rfBandwidth->text().toDouble(&ok);
 
@@ -353,8 +355,9 @@ void UDPSourceGUI::on_rfBandwidth_textEdited(const QString& arg1 __attribute__((
     ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
-void UDPSourceGUI::on_fmDeviation_textEdited(const QString& arg1 __attribute__((unused)))
+void UDPSourceGUI::on_fmDeviation_textEdited(const QString& arg1)
 {
+    (void) arg1;
     bool ok;
     int fmDeviation = ui->fmDeviation->text().toInt(&ok);
 
@@ -369,8 +372,9 @@ void UDPSourceGUI::on_fmDeviation_textEdited(const QString& arg1 __attribute__((
     ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
-void UDPSourceGUI::on_amModPercent_textEdited(const QString& arg1 __attribute__((unused)))
+void UDPSourceGUI::on_amModPercent_textEdited(const QString& arg1)
 {
+    (void) arg1;
     bool ok;
     int amModPercent = ui->amModPercent->text().toInt(&ok);
 

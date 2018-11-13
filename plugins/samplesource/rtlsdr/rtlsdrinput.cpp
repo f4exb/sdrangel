@@ -536,8 +536,9 @@ void RTLSDRInput::set_ds_mode(int on)
 
 int RTLSDRInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setRtlSdrSettings(new SWGSDRangel::SWGRtlSdrSettings());
     response.getRtlSdrSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -548,8 +549,9 @@ int RTLSDRInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     RTLSDRSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("agc")) {
@@ -638,8 +640,9 @@ void RTLSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
 
 int RTLSDRInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -647,8 +650,9 @@ int RTLSDRInput::webapiRunGet(
 int RTLSDRInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
@@ -664,8 +668,9 @@ int RTLSDRInput::webapiRun(
 
 int RTLSDRInput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setRtlSdrReport(new SWGSDRangel::SWGRtlSdrReport());
     response.getRtlSdrReport()->init();
     webapiFormatDeviceReport(response);

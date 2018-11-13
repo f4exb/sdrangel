@@ -129,8 +129,9 @@ bool PlutoSDROutputGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool PlutoSDROutputGUI::handleMessage(const Message& message __attribute__((unused)))
+bool PlutoSDROutputGUI::handleMessage(const Message& message)
 {
+    (void) message;
     if (PlutoSDROutput::MsgConfigurePlutoSDR::match(message))
     {
         const PlutoSDROutput::MsgConfigurePlutoSDR& cfg = (PlutoSDROutput::MsgConfigurePlutoSDR&) message;

@@ -625,8 +625,9 @@ bool SDRPlayInput::setDeviceCenterFrequency(quint64 freq_hz)
 
 int SDRPlayInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -634,8 +635,9 @@ int SDRPlayInput::webapiRunGet(
 int SDRPlayInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
@@ -651,8 +653,9 @@ int SDRPlayInput::webapiRun(
 
 int SDRPlayInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setSdrPlaySettings(new SWGSDRangel::SWGSDRPlaySettings());
     response.getSdrPlaySettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -663,8 +666,9 @@ int SDRPlayInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     SDRPlaySettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("centerFrequency")) {
@@ -759,8 +763,9 @@ void SDRPlayInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
 
 int SDRPlayInput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setSdrPlayReport(new SWGSDRangel::SWGSDRPlayReport());
     response.getSdrPlayReport()->init();
     webapiFormatDeviceReport(response);

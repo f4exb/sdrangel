@@ -306,8 +306,9 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 
 int SDRdaemonSinkOutput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -315,8 +316,9 @@ int SDRdaemonSinkOutput::webapiRunGet(
 int SDRdaemonSinkOutput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
@@ -332,8 +334,9 @@ int SDRdaemonSinkOutput::webapiRun(
 
 int SDRdaemonSinkOutput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setSdrDaemonSinkSettings(new SWGSDRangel::SWGSDRdaemonSinkSettings());
     response.getSdrDaemonSinkSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -344,8 +347,9 @@ int SDRdaemonSinkOutput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     SDRdaemonSinkSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("sampleRate")) {
@@ -391,8 +395,9 @@ int SDRdaemonSinkOutput::webapiSettingsPutPatch(
 
 int SDRdaemonSinkOutput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setSdrDaemonSinkReport(new SWGSDRangel::SWGSDRdaemonSinkReport());
     response.getSdrDaemonSinkReport()->init();
     webapiFormatDeviceReport(response);

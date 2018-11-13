@@ -32,7 +32,7 @@ public:
 protected:
     DevicePerseus();
     DevicePerseus(const DevicePerseus&) : m_nbDevices(0) {}
-    DevicePerseus& operator=(const DevicePerseus& other __attribute__((unused))) { return *this; }
+    DevicePerseus& operator=(const DevicePerseus& other) { (void) other; return *this; }
     ~DevicePerseus();
 
 private:

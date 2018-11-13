@@ -198,16 +198,18 @@ void TestSourceGui::on_sampleSize_currentIndexChanged(int index)
     sendSettings();
 }
 
-void TestSourceGui::on_amplitudeCoarse_valueChanged(int value __attribute__((unused)))
+void TestSourceGui::on_amplitudeCoarse_valueChanged(int value)
 {
+    (void) value;
     updateAmpFineLimit();
     displayAmplitude();
     m_settings.m_amplitudeBits = ui->amplitudeCoarse->value() * 100 + ui->amplitudeFine->value();
     sendSettings();
 }
 
-void TestSourceGui::on_amplitudeFine_valueChanged(int value __attribute__((unused)))
+void TestSourceGui::on_amplitudeFine_valueChanged(int value)
 {
+    (void) value;
     displayAmplitude();
     m_settings.m_amplitudeBits = ui->amplitudeCoarse->value() * 100 + ui->amplitudeFine->value();
     sendSettings();

@@ -1280,8 +1280,9 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
 int LimeSDRInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setLimeSdrInputSettings(new SWGSDRangel::SWGLimeSdrInputSettings());
     response.getLimeSdrInputSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -1292,8 +1293,9 @@ int LimeSDRInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     LimeSDRInputSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("antennaPath")) {
@@ -1409,8 +1411,9 @@ void LimeSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
 
 int LimeSDRInput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setLimeSdrInputReport(new SWGSDRangel::SWGLimeSdrInputReport());
     response.getLimeSdrInputReport()->init();
     webapiFormatDeviceReport(response);
@@ -1419,8 +1422,9 @@ int LimeSDRInput::webapiReportGet(
 
 int LimeSDRInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -1428,8 +1432,9 @@ int LimeSDRInput::webapiRunGet(
 int LimeSDRInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);

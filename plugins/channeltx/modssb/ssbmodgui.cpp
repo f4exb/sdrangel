@@ -341,7 +341,7 @@ void SSBModGUI::on_navTimeSlider_valueChanged(int value)
     }
 }
 
-void SSBModGUI::on_showFileDialog_clicked(bool checked __attribute__((unused)))
+void SSBModGUI::on_showFileDialog_clicked(bool checked)
 {
     (void) checked;
     QString fileName = QFileDialog::getOpenFileName(this,

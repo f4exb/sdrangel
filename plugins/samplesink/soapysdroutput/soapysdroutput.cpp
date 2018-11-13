@@ -599,7 +599,7 @@ QByteArray SoapySDROutput::serialize() const
     return m_settings.serialize();
 }
 
-bool SoapySDROutput::deserialize(const QByteArray& data __attribute__((unused)))
+bool SoapySDROutput::deserialize(const QByteArray& data)
 {
     bool success = true;
 

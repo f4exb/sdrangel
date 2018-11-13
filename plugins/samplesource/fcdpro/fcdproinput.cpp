@@ -493,8 +493,9 @@ void FCDProInput::set_center_freq(double freq)
 
 }
 
-void FCDProInput::set_bias_t(bool on __attribute__((unused)))
+void FCDProInput::set_bias_t(bool on)
 {
+    (void) on;
 	//quint8 cmd = on ? 1 : 0;
 
 	// TODO: use FCD Pro controls
@@ -749,8 +750,9 @@ void FCDProInput::set_lo_ppm()
 
 int FCDProInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -758,8 +760,9 @@ int FCDProInput::webapiRunGet(
 int FCDProInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
@@ -775,8 +778,9 @@ int FCDProInput::webapiRun(
 
 int FCDProInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setFcdProSettings(new SWGSDRangel::SWGFCDProSettings());
     response.getFcdProSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -787,8 +791,9 @@ int FCDProInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     FCDProSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("centerFrequency")) {

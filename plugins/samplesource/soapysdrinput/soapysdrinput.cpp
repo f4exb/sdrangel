@@ -642,8 +642,9 @@ QByteArray SoapySDRInput::serialize() const
     return s.final();
 }
 
-bool SoapySDRInput::deserialize(const QByteArray& data __attribute__((unused)))
+bool SoapySDRInput::deserialize(const QByteArray& data)
 {
+    (void) data;
     return false;
 }
 
@@ -663,7 +664,7 @@ quint64 SoapySDRInput::getCenterFrequency() const
     return m_settings.m_centerFrequency;
 }
 
-void SoapySDRInput::setCenterFrequency(qint64 centerFrequency __attribute__((unused)))
+void SoapySDRInput::setCenterFrequency(qint64 centerFrequency)
 {
     SoapySDRInputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
@@ -712,7 +713,7 @@ void SoapySDRInput::updateGains(SoapySDR::Device *dev, int requestedChannel, Soa
     }
 }
 
-bool SoapySDRInput::handleMessage(const Message& message __attribute__((unused)))
+bool SoapySDRInput::handleMessage(const Message& message)
 {
     if (MsgConfigureSoapySDRInput::match(message))
     {
