@@ -27,10 +27,9 @@
 #include "dsp/dsptypes.h"
 #include "dsp/hbfiltertraits.h"
 //#include "dsp/inthalfbandfiltereo1i.h"
-#include "export.h"
 
 template<uint32_t HBFilterOrder>
-class SDRBASE_API IntHalfbandFilterEO1 {
+class IntHalfbandFilterEO1 {
 public:
     IntHalfbandFilterEO1();
 
