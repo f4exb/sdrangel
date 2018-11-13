@@ -184,6 +184,42 @@ struct decimation_shifts<24, 8>
     static const uint post64 = 0;
 };
 
+#ifdef _MSC_VER
+#pragma pack(push,1)
+template<typename T>
+struct TripleByteLE
+{
+    uint8_t b0;
+    uint8_t b1;
+    uint8_t b2;
+
+    typedef union {
+#pragma pack(push,1)
+        struct {
+            int32_t i;
+        };
+#pragma pack(pop)
+#pragma pack(push, 1)
+        struct {
+            uint8_t i0;
+            uint8_t i1;
+            uint8_t i2;
+            uint8_t i3;
+        };
+#pragma pack(pop)
+    } isample;
+
+    operator T() const {
+        isample s;
+        s.i0 = 0;
+        s.i1 = b0;
+        s.i2 = b1;
+        s.i3 = b2;
+        return s.i;
+    }
+};
+#pragma pack(pop)
+#else
 template<typename T>
 struct TripleByteLE
 {
@@ -212,7 +248,44 @@ struct TripleByteLE
         return s.i;
     }
 } __attribute__((__packed__));
+#endif
 
+#ifdef _MSC_VER
+#pragma pack(push, 1)
+template<>
+struct TripleByteLE<qint32>
+{
+    uint8_t b0;
+    uint8_t b1;
+    uint8_t b2;
+
+    typedef union {
+#pragma pack(push, 1)
+        struct {
+            qint32 i;
+        };
+#pragma pack(pop)
+#pragma pack(push, 1)
+        struct {
+            uint8_t i0;
+            uint8_t i1;
+            uint8_t i2;
+            uint8_t i3;
+        };
+#pragma pack(pop)
+    } isample;
+
+    operator qint32() const {
+        isample s;
+        s.i0 = 0;
+        s.i1 = b0;
+        s.i2 = b1;
+        s.i3 = b2;
+        return s.i >> 8;
+    }
+};
+#pragma pack(pop)
+#else
 template<>
 struct TripleByteLE<qint32>
 {
@@ -241,7 +314,46 @@ struct TripleByteLE<qint32>
         return s.i >> 8;
     }
 } __attribute__((__packed__));
+#endif
 
+#ifdef _MSC_VER
+#pragma pack(push, 1)
+template<>
+struct TripleByteLE<qint64>
+{
+    uint8_t b0;
+    uint8_t b1;
+    uint8_t b2;
+
+    typedef union {
+#pragma pack(push, 1)
+        struct {
+            qint64 i;
+        };
+#pragma pack(pop)
+#pragma pack(push, 1)
+        struct {
+            uint32_t ia;
+            uint8_t i0;
+            uint8_t i1;
+            uint8_t i2;
+            uint8_t i3;
+        };
+#pragma pack(pop)
+    } isample;
+
+    operator qint64() const {
+        isample s;
+        s.ia = 0;
+        s.i0 = 0;
+        s.i1 = b0;
+        s.i2 = b1;
+        s.i3 = b2;
+        return s.i >> 40;
+    }
+};
+#pragma pack(pop)
+#else
 template<>
 struct TripleByteLE<qint64>
 {
@@ -272,7 +384,7 @@ struct TripleByteLE<qint64>
         return s.i >> 40;
     }
 } __attribute__((__packed__));
-
+#endif
 
 /** Decimators with integer input and integer output */
 template<typename StorageType, typename T, uint SdrBits, uint InputBits>

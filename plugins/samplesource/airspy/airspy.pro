@@ -13,6 +13,8 @@ TARGET = inputairspy
 
 CONFIG(MINGW32):LIBAIRSPYSRC = "C:\softs\libairspy"
 CONFIG(MINGW64):LIBAIRSPYSRC = "C:\softs\libairspy"
+CONFIG(MSVC):LIBAIRSPYSRC = "C:\softs\libairspy"
+
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../exports
 INCLUDEPATH += ../../../sdrbase
