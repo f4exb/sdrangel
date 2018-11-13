@@ -355,8 +355,7 @@ void SDRdaemonSourceInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport
     response.getSdrDaemonSourceReport()->setSampleRate(m_SDRdaemonUDPHandler->getSampleRate());
     response.getSdrDaemonSourceReport()->setBufferRwBalance(m_SDRdaemonUDPHandler->getBufferGauge());
 
-    quint64 startingTimeStampMsec = ((quint64) m_SDRdaemonUDPHandler->getTVSec() * 1000LL) + ((quint64) m_SDRdaemonUDPHandler->getTVuSec() / 1000LL);
-    QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
+    QDateTime dt = QDateTime::fromMSecsSinceEpoch(m_SDRdaemonUDPHandler->getTVmSec());
     response.getSdrDaemonSourceReport()->setDaemonTimestamp(new QString(dt.toString("yyyy-MM-dd  HH:mm:ss.zzz")));
 
     response.getSdrDaemonSourceReport()->setMinNbBlocks(m_SDRdaemonUDPHandler->getMinNbBlocks());

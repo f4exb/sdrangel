@@ -99,26 +99,23 @@ public:
 	public:
 		int getSampleRate() const { return m_sampleRate; }
 		quint64 getCenterFrequency() const { return m_centerFrequency; }
-		uint32_t get_tv_sec() const { return m_tv_sec; }
-		uint32_t get_tv_usec() const { return m_tv_usec; }
+		uint32_t get_tv_msec() const { return m_tv_msec; }
 
-		static MsgReportSDRdaemonSourceStreamData* create(int sampleRate, quint64 centerFrequency, uint32_t tv_sec, uint32_t tv_usec)
+		static MsgReportSDRdaemonSourceStreamData* create(int sampleRate, quint64 centerFrequency, uint64_t tv_msec)
 		{
-			return new MsgReportSDRdaemonSourceStreamData(sampleRate, centerFrequency, tv_sec, tv_usec);
+			return new MsgReportSDRdaemonSourceStreamData(sampleRate, centerFrequency, tv_msec);
 		}
 
 	protected:
 		int m_sampleRate;
 		quint64 m_centerFrequency;
-		uint32_t m_tv_sec;
-		uint32_t m_tv_usec;
+		uint64_t m_tv_msec;
 
-		MsgReportSDRdaemonSourceStreamData(int sampleRate, quint64 centerFrequency, uint32_t tv_sec, uint32_t tv_usec) :
+		MsgReportSDRdaemonSourceStreamData(int sampleRate, quint64 centerFrequency, uint64_t tv_msec) :
 			Message(),
 			m_sampleRate(sampleRate),
 			m_centerFrequency(centerFrequency),
-			m_tv_sec(tv_sec),
-			m_tv_usec(tv_usec)
+			m_tv_msec(tv_msec)
 		{ }
 	};
 
@@ -126,8 +123,7 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		uint32_t get_tv_sec() const { return m_tv_sec; }
-		uint32_t get_tv_usec() const { return m_tv_usec; }
+		uint64_t get_tv_msec() const { return m_tv_msec; }
 		int getFramesDecodingStatus() const { return m_framesDecodingStatus; }
 		bool allBlocksReceived() const { return m_allBlocksReceived; }
 		float getBufferLengthInSecs() const { return m_bufferLenSec; }
@@ -143,8 +139,7 @@ public:
         int getSampleBits() const { return m_sampleBits; }
         int getSampleBytes() const { return m_sampleBytes; }
 
-		static MsgReportSDRdaemonSourceStreamTiming* create(uint32_t tv_sec,
-				uint32_t tv_usec,
+		static MsgReportSDRdaemonSourceStreamTiming* create(uint64_t tv_msec,
 				float bufferLenSec,
                 int32_t bufferGauge,
                 int framesDecodingStatus,
@@ -160,8 +155,7 @@ public:
                 int sampleBits,
                 int sampleBytes)
 		{
-			return new MsgReportSDRdaemonSourceStreamTiming(tv_sec,
-					tv_usec,
+			return new MsgReportSDRdaemonSourceStreamTiming(tv_msec,
 					bufferLenSec,
                     bufferGauge,
                     framesDecodingStatus,
@@ -179,8 +173,7 @@ public:
 		}
 
 	protected:
-		uint32_t m_tv_sec;
-		uint32_t m_tv_usec;
+		uint64_t m_tv_msec;
 		int      m_framesDecodingStatus;
 		bool     m_allBlocksReceived;
 		float    m_bufferLenSec;
@@ -196,8 +189,7 @@ public:
         int      m_sampleBits;
         int      m_sampleBytes;
 
-		MsgReportSDRdaemonSourceStreamTiming(uint32_t tv_sec,
-				uint32_t tv_usec,
+		MsgReportSDRdaemonSourceStreamTiming(uint64_t tv_msec,
 				float bufferLenSec,
                 int32_t bufferGauge,
                 int framesDecodingStatus,
@@ -213,8 +205,7 @@ public:
                 int sampleBits,
                 int sampleBytes) :
 			Message(),
-			m_tv_sec(tv_sec),
-			m_tv_usec(tv_usec),
+			m_tv_msec(tv_msec),
 			m_framesDecodingStatus(framesDecodingStatus),
 			m_allBlocksReceived(allBlocksReceived),
 			m_bufferLenSec(bufferLenSec),

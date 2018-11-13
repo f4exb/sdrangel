@@ -48,8 +48,7 @@ public:
     int getSampleRate() const { return m_samplerate; }
     int getCenterFrequency() const { return m_centerFrequency * 1000; }
     int getBufferGauge() const { return m_sdrDaemonBuffer.getBufferGauge(); }
-    uint32_t getTVSec() const { return m_tv_sec; }
-    uint32_t getTVuSec() const { return m_tv_usec; }
+    uint64_t getTVmSec() const { return m_tv_msec; }
     int getMinNbBlocks() { return m_sdrDaemonBuffer.getMinNbBlocks(); }
     int getMaxNbRecovery() { return m_sdrDaemonBuffer.getMaxNbRecovery(); }
 public slots:
@@ -72,8 +71,7 @@ private:
 	SampleSinkFifo *m_sampleFifo;
 	uint32_t m_samplerate;
 	uint32_t m_centerFrequency;
-	uint32_t m_tv_sec;
-	uint32_t m_tv_usec;
+	uint64_t m_tv_msec;
 	MessageQueue *m_outputMessageQueueToGUI;
 	uint32_t m_tickCount;
 	std::size_t m_samplesCount;

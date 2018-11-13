@@ -71,8 +71,7 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceUISet *deviceUISet, QWidget* parent
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
 
-	m_startingTimeStamp.tv_sec = 0;
-	m_startingTimeStamp.tv_usec = 0;
+	m_startingTimeStampms = 0;
 	ui->setupUi(this);
 
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -187,20 +186,17 @@ bool SDRdaemonSourceGui::handleMessage(const Message& message)
 	}
 	else if (SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData::match(message))
 	{
-        m_startingTimeStamp.tv_sec = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData&)message).get_tv_sec();
-        m_startingTimeStamp.tv_usec = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData&)message).get_tv_usec();
+        m_startingTimeStampms = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData&)message).get_tv_msec();
 
         qDebug() << "SDRdaemonSourceGui::handleMessage: SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData: "
-                << " : " << m_startingTimeStamp.tv_sec
-                << " : " << m_startingTimeStamp.tv_usec;
+                << " : " << m_startingTimeStampms << " ms";
 
         updateWithStreamTime();
         return true;
 	}
 	else if (SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming::match(message))
 	{
-		m_startingTimeStamp.tv_sec = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).get_tv_sec();
-		m_startingTimeStamp.tv_usec = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).get_tv_usec();
+		m_startingTimeStampms = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).get_tv_msec();
 		m_framesDecodingStatus = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getFramesDecodingStatus();
 		m_allBlocksReceived = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).allBlocksReceived();
 		m_bufferLengthInSecs = ((SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming&)message).getBufferLengthInSecs();
@@ -464,8 +460,7 @@ void SDRdaemonSourceGui::updateWithAcquisition()
 void SDRdaemonSourceGui::updateWithStreamTime()
 {
 	bool updateEventCounts = false;
-    quint64 startingTimeStampMsec = ((quint64) m_startingTimeStamp.tv_sec * 1000LL) + ((quint64) m_startingTimeStamp.tv_usec / 1000LL);
-    QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
+    QDateTime dt = QDateTime::fromMSecsSinceEpoch(m_startingTimeStampms);
     QString s_date = dt.toString("yyyy-MM-dd  HH:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
 
