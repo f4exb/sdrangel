@@ -4,6 +4,7 @@ SET libxml2dir="C:\softs\libxml2-2.7.8.win32"
 SET libiconvdir="C:\softs\iconv-1.9.2.win32"
 SET libzlib1dir="C:\softs\zlib-1.2.5"
 SET pothosdir="C:\Programs\PothosSDR"
+SET pthreadsdir="C:\softs\pthreads-w32"
 
 copy app\%1\sdrangel.exe %2
 copy sdrbase\%1\sdrbase.dll %2
@@ -26,8 +27,10 @@ copy libairspyhf\%1\libairspyhf.dll %2
 REM copy libbladerf\%1\libbladerf.dll %2
 REM copy libiio\%1\libiio.dll %2
 copy %pothosdir%\bin\LimeSuite.dll %2
+copy %pothosdir%\bin\SoapySDR.dll %2
 
 copy %libusbdir%\dll\libusb-1.0.dll %2
+copy %pthreadsdir%\dll\x64\pthreadVC2.dll %2
 REM copy libsqlite3\%1\libsqlite3.dll %2
 REM copy %libxml2dir%\bin\libxml2.dll %2
 REM copy %libiconvdir%\bin\iconv.dll %2
