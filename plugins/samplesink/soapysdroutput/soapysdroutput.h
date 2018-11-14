@@ -32,6 +32,13 @@ class SoapySDROutputThread;
 namespace SoapySDR
 {
     class Device;
+    class ArgInfo;
+}
+
+namespace SWGSDRangel
+{
+    class SWGArgValue;
+    class SWGArgInfo;
 }
 
 class SoapySDROutput : public DeviceSampleSink {
@@ -159,6 +166,10 @@ private:
     bool applySettings(const SoapySDROutputSettings& settings, bool force = false);
     bool setDeviceCenterFrequency(SoapySDR::Device *dev, int requestedChannel, quint64 freq_hz, int loPpmTenths);
     void updateGains(SoapySDR::Device *dev, int requestedChannel, SoapySDROutputSettings& settings);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SoapySDROutputSettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+    void webapiFormatArgValue(const QVariant& v, SWGSDRangel::SWGArgValue *argValue);
+    void webapiFormatArgInfo(const SoapySDR::ArgInfo& arg, SWGSDRangel::SWGArgInfo *argInfo);
 };
 
 
