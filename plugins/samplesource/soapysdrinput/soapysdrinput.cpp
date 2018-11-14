@@ -1468,7 +1468,7 @@ void SoapySDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     for (const auto itName : settings.m_tunableElements.keys())
     {
         response.getSoapySdrInputSettings()->getTunableElements()->append(new SWGSDRangel::SWGArgValue);
-        response.getSoapySdrInputSettings()->getTunableElements()->back()->setKey(new QString(  itName));
+        response.getSoapySdrInputSettings()->getTunableElements()->back()->setKey(new QString(itName));
         double value = settings.m_tunableElements.value(itName);
         response.getSoapySdrInputSettings()->getTunableElements()->back()->setValueString(new QString(tr("%1").arg(value)));
         response.getSoapySdrInputSettings()->getTunableElements()->back()->setValueType(new QString("float"));
@@ -1547,7 +1547,7 @@ void SoapySDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
 
     for (const auto itArg : m_deviceShared.m_deviceParams->getDeviceArgs())
     {
-        response.getSoapySdrInputReport()->getDeviceSettingsArgs()->append(new SWGSDRangel::SWGArgInfo);
+        response.getSoapySdrInputReport()->getDeviceSettingsArgs()->append(new SWGSDRangel::SWGArgInfo());
         webapiFormatArgInfo(itArg, response.getSoapySdrInputReport()->getDeviceSettingsArgs()->back());
     }
 
@@ -1555,7 +1555,7 @@ void SoapySDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
 
     for (const auto itArg : channelSettings->m_streamSettingsArgs)
     {
-        response.getSoapySdrInputReport()->getStreamSettingsArgs()->append(new SWGSDRangel::SWGArgInfo);
+        response.getSoapySdrInputReport()->getStreamSettingsArgs()->append(new SWGSDRangel::SWGArgInfo());
         webapiFormatArgInfo(itArg, response.getSoapySdrInputReport()->getStreamSettingsArgs()->back());
     }
 
@@ -1563,7 +1563,7 @@ void SoapySDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
 
     for (const auto itArg : channelSettings->m_frequencySettingsArgs)
     {
-        response.getSoapySdrInputReport()->getFrequencySettingsArgs()->append(new SWGSDRangel::SWGArgInfo);
+        response.getSoapySdrInputReport()->getFrequencySettingsArgs()->append(new SWGSDRangel::SWGArgInfo());
         webapiFormatArgInfo(itArg, response.getSoapySdrInputReport()->getFrequencySettingsArgs()->back());
     }
 
@@ -1687,4 +1687,26 @@ void SoapySDRInput::webapiFormatArgInfo(const SoapySDR::ArgInfo& arg, SWGSDRange
     }
 
     argInfo->setValueString(new QString(arg.value.c_str()));
+    argInfo->setName(new QString(arg.name.c_str()));
+    argInfo->setDescription(new QString(arg.description.c_str()));
+    argInfo->setUnits(new QString(arg.units.c_str()));
+
+    if ((arg.range.minimum() != 0.0) || (arg.range.maximum() != 0.0))
+    {
+        argInfo->setRange(new SWGSDRangel::SWGRangeFloat());
+        argInfo->getRange()->setMin(arg.range.minimum());
+        argInfo->getRange()->setMax(arg.range.maximum());
+    }
+
+    argInfo->setValueOptions(new QList<QString*>);
+
+    for (const auto itOpt : arg.options) {
+        argInfo->getValueOptions()->append(new QString(itOpt.c_str()));
+    }
+
+    argInfo->setOptionNames(new QList<QString*>);
+
+    for (const auto itOpt : arg.optionNames) {
+        argInfo->getOptionNames()->append(new QString(itOpt.c_str()));
+    }
 }

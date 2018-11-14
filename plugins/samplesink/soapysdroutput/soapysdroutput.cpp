@@ -1614,4 +1614,26 @@ void SoapySDROutput::webapiFormatArgInfo(const SoapySDR::ArgInfo& arg, SWGSDRang
     }
 
     argInfo->setValueString(new QString(arg.value.c_str()));
+    argInfo->setName(new QString(arg.name.c_str()));
+    argInfo->setDescription(new QString(arg.description.c_str()));
+    argInfo->setUnits(new QString(arg.units.c_str()));
+
+    if ((arg.range.minimum() != 0.0) || (arg.range.maximum() != 0.0))
+    {
+        argInfo->setRange(new SWGSDRangel::SWGRangeFloat());
+        argInfo->getRange()->setMin(arg.range.minimum());
+        argInfo->getRange()->setMax(arg.range.maximum());
+    }
+
+    argInfo->setValueOptions(new QList<QString*>);
+
+    for (const auto itOpt : arg.options) {
+        argInfo->getValueOptions()->append(new QString(itOpt.c_str()));
+    }
+
+    argInfo->setOptionNames(new QList<QString*>);
+
+    for (const auto itOpt : arg.optionNames) {
+        argInfo->getOptionNames()->append(new QString(itOpt.c_str()));
+    }
 }
