@@ -34,6 +34,18 @@ SWGArgInfo::SWGArgInfo() {
     m_value_type_isSet = false;
     value_string = nullptr;
     m_value_string_isSet = false;
+    name = nullptr;
+    m_name_isSet = false;
+    description = nullptr;
+    m_description_isSet = false;
+    units = nullptr;
+    m_units_isSet = false;
+    range = nullptr;
+    m_range_isSet = false;
+    value_options = nullptr;
+    m_value_options_isSet = false;
+    option_names = nullptr;
+    m_option_names_isSet = false;
 }
 
 SWGArgInfo::~SWGArgInfo() {
@@ -48,6 +60,18 @@ SWGArgInfo::init() {
     m_value_type_isSet = false;
     value_string = new QString("");
     m_value_string_isSet = false;
+    name = new QString("");
+    m_name_isSet = false;
+    description = new QString("");
+    m_description_isSet = false;
+    units = new QString("");
+    m_units_isSet = false;
+    range = new SWGRangeFloat();
+    m_range_isSet = false;
+    value_options = new QList<QString*>();
+    m_value_options_isSet = false;
+    option_names = new QList<QString*>();
+    m_option_names_isSet = false;
 }
 
 void
@@ -60,6 +84,32 @@ SWGArgInfo::cleanup() {
     }
     if(value_string != nullptr) { 
         delete value_string;
+    }
+    if(name != nullptr) { 
+        delete name;
+    }
+    if(description != nullptr) { 
+        delete description;
+    }
+    if(units != nullptr) { 
+        delete units;
+    }
+    if(range != nullptr) { 
+        delete range;
+    }
+    if(value_options != nullptr) { 
+        auto arr = value_options;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete value_options;
+    }
+    if(option_names != nullptr) { 
+        auto arr = option_names;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete option_names;
     }
 }
 
@@ -80,6 +130,18 @@ SWGArgInfo::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&value_string, pJson["valueString"], "QString", "QString");
     
+    ::SWGSDRangel::setValue(&name, pJson["name"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&description, pJson["description"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&units, pJson["units"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&range, pJson["range"], "SWGRangeFloat", "SWGRangeFloat");
+    
+    
+    ::SWGSDRangel::setValue(&value_options, pJson["valueOptions"], "QList", "QString");
+    
+    ::SWGSDRangel::setValue(&option_names, pJson["optionNames"], "QList", "QString");
 }
 
 QString
@@ -104,6 +166,24 @@ SWGArgInfo::asJsonObject() {
     }
     if(value_string != nullptr && *value_string != QString("")){
         toJsonValue(QString("valueString"), value_string, obj, QString("QString"));
+    }
+    if(name != nullptr && *name != QString("")){
+        toJsonValue(QString("name"), name, obj, QString("QString"));
+    }
+    if(description != nullptr && *description != QString("")){
+        toJsonValue(QString("description"), description, obj, QString("QString"));
+    }
+    if(units != nullptr && *units != QString("")){
+        toJsonValue(QString("units"), units, obj, QString("QString"));
+    }
+    if((range != nullptr) && (range->isSet())){
+        toJsonValue(QString("range"), range, obj, QString("SWGRangeFloat"));
+    }
+    if(value_options->size() > 0){
+        toJsonArray((QList<void*>*)value_options, obj, "valueOptions", "QString");
+    }
+    if(option_names->size() > 0){
+        toJsonArray((QList<void*>*)option_names, obj, "optionNames", "QString");
     }
 
     return obj;
@@ -139,6 +219,66 @@ SWGArgInfo::setValueString(QString* value_string) {
     this->m_value_string_isSet = true;
 }
 
+QString*
+SWGArgInfo::getName() {
+    return name;
+}
+void
+SWGArgInfo::setName(QString* name) {
+    this->name = name;
+    this->m_name_isSet = true;
+}
+
+QString*
+SWGArgInfo::getDescription() {
+    return description;
+}
+void
+SWGArgInfo::setDescription(QString* description) {
+    this->description = description;
+    this->m_description_isSet = true;
+}
+
+QString*
+SWGArgInfo::getUnits() {
+    return units;
+}
+void
+SWGArgInfo::setUnits(QString* units) {
+    this->units = units;
+    this->m_units_isSet = true;
+}
+
+SWGRangeFloat*
+SWGArgInfo::getRange() {
+    return range;
+}
+void
+SWGArgInfo::setRange(SWGRangeFloat* range) {
+    this->range = range;
+    this->m_range_isSet = true;
+}
+
+QList<QString*>*
+SWGArgInfo::getValueOptions() {
+    return value_options;
+}
+void
+SWGArgInfo::setValueOptions(QList<QString*>* value_options) {
+    this->value_options = value_options;
+    this->m_value_options_isSet = true;
+}
+
+QList<QString*>*
+SWGArgInfo::getOptionNames() {
+    return option_names;
+}
+void
+SWGArgInfo::setOptionNames(QList<QString*>* option_names) {
+    this->option_names = option_names;
+    this->m_option_names_isSet = true;
+}
+
 
 bool
 SWGArgInfo::isSet(){
@@ -147,6 +287,12 @@ SWGArgInfo::isSet(){
         if(key != nullptr && *key != QString("")){ isObjectUpdated = true; break;}
         if(value_type != nullptr && *value_type != QString("")){ isObjectUpdated = true; break;}
         if(value_string != nullptr && *value_string != QString("")){ isObjectUpdated = true; break;}
+        if(name != nullptr && *name != QString("")){ isObjectUpdated = true; break;}
+        if(description != nullptr && *description != QString("")){ isObjectUpdated = true; break;}
+        if(units != nullptr && *units != QString("")){ isObjectUpdated = true; break;}
+        if(range != nullptr && range->isSet()){ isObjectUpdated = true; break;}
+        if(value_options->size() > 0){ isObjectUpdated = true; break;}
+        if(option_names->size() > 0){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

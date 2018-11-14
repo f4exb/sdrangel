@@ -33,13 +33,13 @@ SoapySDRInputSettings:
     tunableElements:
       type: array
       items:
-        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/ArgInfo" 
+        $ref: "#/definitions/ArgValue" 
     globalGain:
       type: integer
     individualGains:
       type: array
       items:
-        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/ArgInfo" 
+        $ref: "#/definitions/ArgValue" 
     autoGain:
       description: boolean not zero for true    
       type: integer
@@ -56,11 +56,11 @@ SoapySDRInputSettings:
     streamArgSettings:
       type: array
       items:
-        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/ArgInfo" 
+        $ref: "#/definitions/ArgValue" 
     deviceArgSettings:    
       type: array
       items:
-        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/ArgInfo" 
+        $ref: "#/definitions/ArgValue" 
 
 SoapySDROutputSettings:
   description: SoapySDR
@@ -87,13 +87,13 @@ SoapySDROutputSettings:
     tunableElements:
       type: array
       items:
-        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/ArgInfo" 
+        $ref: "#/definitions/ArgValue" 
     globalGain:
       type: integer
     individualGains:
       type: array
       items:
-        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/ArgInfo" 
+        $ref: "#/definitions/ArgValue" 
     autoGain:
       description: boolean not zero for true    
       type: integer
@@ -110,11 +110,11 @@ SoapySDROutputSettings:
     streamArgSettings:
       type: array
       items:
-        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/ArgInfo" 
+        $ref: "#/definitions/ArgValue" 
     deviceArgSettings:    
       type: array
       items:
-        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/ArgInfo" 
+        $ref: "#/definitions/ArgValue" 
       
 SoapySDRReport:
   description: SoapySDR
@@ -122,11 +122,11 @@ SoapySDRReport:
     deviceSettingsArgs:
       type: array
       items:
-        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/ArgInfo"
+        $ref: "#/definitions/ArgInfo"
     streamSettingsArgs:
       type: array
       items:
-        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/ArgInfo"
+        $ref: "#/definitions/ArgInfo"
     hasDCAutoCorrection:
       description: boolean not zero for true
       type: integer
@@ -159,7 +159,7 @@ SoapySDRReport:
     frequencySettingsArgs:
       type: array
       items:
-        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/ArgInfo"
+        $ref: "#/definitions/ArgInfo"
     ratesRanges:
       type: array
       items:
@@ -188,4 +188,44 @@ definitions:
         type: array
         items:
           $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/RangeFloat"
+ 
+  ArgValue:
+    descripion: Generic argument value
+    properties:
+      key:
+        type: string
+      valueType:
+        type: string
+        enum: [bool, int, float, string]
+      valueString:
+        type: string
+  
+  ArgInfo:
+    descripion: Generic argument information
+    properties:
+      key:
+        type: string
+      valueType:
+        type: string
+        enum: [bool, int, float, string]
+      valueString:
+        type: string
+      name:
+        type: string
+      description:
+        type: string
+      units:
+        type: string
+      range:
+        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/RangeFloat"
+      valueOptions:
+        type: array
+        items:
+          type: string
+      optionNames:
+        type: array
+        items:
+          type: string
+      
+      
  

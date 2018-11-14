@@ -104,11 +104,11 @@ SWGSoapySDRInputSettings::init() {
     m_antenna_isSet = false;
     bandwidth = 0;
     m_bandwidth_isSet = false;
-    tunable_elements = new QList<SWGArgInfo*>();
+    tunable_elements = new QList<SWGArgValue*>();
     m_tunable_elements_isSet = false;
     global_gain = 0;
     m_global_gain_isSet = false;
-    individual_gains = new QList<SWGArgInfo*>();
+    individual_gains = new QList<SWGArgValue*>();
     m_individual_gains_isSet = false;
     auto_gain = 0;
     m_auto_gain_isSet = false;
@@ -120,9 +120,9 @@ SWGSoapySDRInputSettings::init() {
     m_dc_correction_isSet = false;
     iq_correction = new SWGComplex();
     m_iq_correction_isSet = false;
-    stream_arg_settings = new QList<SWGArgInfo*>();
+    stream_arg_settings = new QList<SWGArgValue*>();
     m_stream_arg_settings_isSet = false;
-    device_arg_settings = new QList<SWGArgInfo*>();
+    device_arg_settings = new QList<SWGArgValue*>();
     m_device_arg_settings_isSet = false;
 }
 
@@ -220,11 +220,11 @@ SWGSoapySDRInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&bandwidth, pJson["bandwidth"], "qint32", "");
     
     
-    ::SWGSDRangel::setValue(&tunable_elements, pJson["tunableElements"], "QList", "SWGArgInfo");
+    ::SWGSDRangel::setValue(&tunable_elements, pJson["tunableElements"], "QList", "SWGArgValue");
     ::SWGSDRangel::setValue(&global_gain, pJson["globalGain"], "qint32", "");
     
     
-    ::SWGSDRangel::setValue(&individual_gains, pJson["individualGains"], "QList", "SWGArgInfo");
+    ::SWGSDRangel::setValue(&individual_gains, pJson["individualGains"], "QList", "SWGArgValue");
     ::SWGSDRangel::setValue(&auto_gain, pJson["autoGain"], "qint32", "");
     
     ::SWGSDRangel::setValue(&auto_dc_correction, pJson["autoDCCorrection"], "qint32", "");
@@ -236,9 +236,9 @@ SWGSoapySDRInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&iq_correction, pJson["iqCorrection"], "SWGComplex", "SWGComplex");
     
     
-    ::SWGSDRangel::setValue(&stream_arg_settings, pJson["streamArgSettings"], "QList", "SWGArgInfo");
+    ::SWGSDRangel::setValue(&stream_arg_settings, pJson["streamArgSettings"], "QList", "SWGArgValue");
     
-    ::SWGSDRangel::setValue(&device_arg_settings, pJson["deviceArgSettings"], "QList", "SWGArgInfo");
+    ::SWGSDRangel::setValue(&device_arg_settings, pJson["deviceArgSettings"], "QList", "SWGArgValue");
 }
 
 QString
@@ -292,13 +292,13 @@ SWGSoapySDRInputSettings::asJsonObject() {
         obj->insert("bandwidth", QJsonValue(bandwidth));
     }
     if(tunable_elements->size() > 0){
-        toJsonArray((QList<void*>*)tunable_elements, obj, "tunableElements", "SWGArgInfo");
+        toJsonArray((QList<void*>*)tunable_elements, obj, "tunableElements", "SWGArgValue");
     }
     if(m_global_gain_isSet){
         obj->insert("globalGain", QJsonValue(global_gain));
     }
     if(individual_gains->size() > 0){
-        toJsonArray((QList<void*>*)individual_gains, obj, "individualGains", "SWGArgInfo");
+        toJsonArray((QList<void*>*)individual_gains, obj, "individualGains", "SWGArgValue");
     }
     if(m_auto_gain_isSet){
         obj->insert("autoGain", QJsonValue(auto_gain));
@@ -316,10 +316,10 @@ SWGSoapySDRInputSettings::asJsonObject() {
         toJsonValue(QString("iqCorrection"), iq_correction, obj, QString("SWGComplex"));
     }
     if(stream_arg_settings->size() > 0){
-        toJsonArray((QList<void*>*)stream_arg_settings, obj, "streamArgSettings", "SWGArgInfo");
+        toJsonArray((QList<void*>*)stream_arg_settings, obj, "streamArgSettings", "SWGArgValue");
     }
     if(device_arg_settings->size() > 0){
-        toJsonArray((QList<void*>*)device_arg_settings, obj, "deviceArgSettings", "SWGArgInfo");
+        toJsonArray((QList<void*>*)device_arg_settings, obj, "deviceArgSettings", "SWGArgValue");
     }
 
     return obj;
@@ -445,12 +445,12 @@ SWGSoapySDRInputSettings::setBandwidth(qint32 bandwidth) {
     this->m_bandwidth_isSet = true;
 }
 
-QList<SWGArgInfo*>*
+QList<SWGArgValue*>*
 SWGSoapySDRInputSettings::getTunableElements() {
     return tunable_elements;
 }
 void
-SWGSoapySDRInputSettings::setTunableElements(QList<SWGArgInfo*>* tunable_elements) {
+SWGSoapySDRInputSettings::setTunableElements(QList<SWGArgValue*>* tunable_elements) {
     this->tunable_elements = tunable_elements;
     this->m_tunable_elements_isSet = true;
 }
@@ -465,12 +465,12 @@ SWGSoapySDRInputSettings::setGlobalGain(qint32 global_gain) {
     this->m_global_gain_isSet = true;
 }
 
-QList<SWGArgInfo*>*
+QList<SWGArgValue*>*
 SWGSoapySDRInputSettings::getIndividualGains() {
     return individual_gains;
 }
 void
-SWGSoapySDRInputSettings::setIndividualGains(QList<SWGArgInfo*>* individual_gains) {
+SWGSoapySDRInputSettings::setIndividualGains(QList<SWGArgValue*>* individual_gains) {
     this->individual_gains = individual_gains;
     this->m_individual_gains_isSet = true;
 }
@@ -525,22 +525,22 @@ SWGSoapySDRInputSettings::setIqCorrection(SWGComplex* iq_correction) {
     this->m_iq_correction_isSet = true;
 }
 
-QList<SWGArgInfo*>*
+QList<SWGArgValue*>*
 SWGSoapySDRInputSettings::getStreamArgSettings() {
     return stream_arg_settings;
 }
 void
-SWGSoapySDRInputSettings::setStreamArgSettings(QList<SWGArgInfo*>* stream_arg_settings) {
+SWGSoapySDRInputSettings::setStreamArgSettings(QList<SWGArgValue*>* stream_arg_settings) {
     this->stream_arg_settings = stream_arg_settings;
     this->m_stream_arg_settings_isSet = true;
 }
 
-QList<SWGArgInfo*>*
+QList<SWGArgValue*>*
 SWGSoapySDRInputSettings::getDeviceArgSettings() {
     return device_arg_settings;
 }
 void
-SWGSoapySDRInputSettings::setDeviceArgSettings(QList<SWGArgInfo*>* device_arg_settings) {
+SWGSoapySDRInputSettings::setDeviceArgSettings(QList<SWGArgValue*>* device_arg_settings) {
     this->device_arg_settings = device_arg_settings;
     this->m_device_arg_settings_isSet = true;
 }

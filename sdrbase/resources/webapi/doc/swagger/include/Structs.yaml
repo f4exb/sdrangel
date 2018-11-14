@@ -75,17 +75,6 @@ NamedEnum:
     value:
       type: integer
       
-ArgInfo:
-  descripion: Argument information used in SoapySDR
-  properties:
-    key:
-      type: string
-    valueType:
-      type: string
-      enum: [bool, int, float, string]
-    valueString:
-      type: string
-      
 Complex:
   description: A complex number
   properties:

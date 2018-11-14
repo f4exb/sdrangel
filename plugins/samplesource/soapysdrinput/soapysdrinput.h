@@ -33,6 +33,13 @@ class FileRecord;
 namespace SoapySDR
 {
     class Device;
+    class ArgInfo;
+}
+
+namespace SWGSDRangel
+{
+    class SWGArgValue;
+    class SWGArgInfo;
 }
 
 class SoapySDRInput : public DeviceSampleSource
@@ -182,6 +189,10 @@ private:
     bool applySettings(const SoapySDRInputSettings& settings, bool force = false);
     bool setDeviceCenterFrequency(SoapySDR::Device *dev, int requestedChannel, quint64 freq_hz, int loPpmTenths);
     void updateGains(SoapySDR::Device *dev, int requestedChannel, SoapySDRInputSettings& settings);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SoapySDRInputSettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+    void webapiFormatArgValue(const QVariant& v, SWGSDRangel::SWGArgValue *argValue);
+    void webapiFormatArgInfo(const SoapySDR::ArgInfo& arg, SWGSDRangel::SWGArgInfo *argInfo);
 };
 
 

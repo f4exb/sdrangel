@@ -11,19 +11,17 @@
  */
 
 /*
- * SWGArgInfo.h
+ * SWGArgValue.h
  *
  * 
  */
 
-#ifndef SWGArgInfo_H_
-#define SWGArgInfo_H_
+#ifndef SWGArgValue_H_
+#define SWGArgValue_H_
 
 #include <QJsonObject>
 
 
-#include "SWGRangeFloat.h"
-#include <QList>
 #include <QString>
 
 #include "SWGObject.h"
@@ -31,18 +29,18 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGArgInfo: public SWGObject {
+class SWG_API SWGArgValue: public SWGObject {
 public:
-    SWGArgInfo();
-    SWGArgInfo(QString* json);
-    virtual ~SWGArgInfo();
+    SWGArgValue();
+    SWGArgValue(QString* json);
+    virtual ~SWGArgValue();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGArgInfo* fromJson(QString &jsonString) override;
+    virtual SWGArgValue* fromJson(QString &jsonString) override;
 
     QString* getKey();
     void setKey(QString* key);
@@ -52,24 +50,6 @@ public:
 
     QString* getValueString();
     void setValueString(QString* value_string);
-
-    QString* getName();
-    void setName(QString* name);
-
-    QString* getDescription();
-    void setDescription(QString* description);
-
-    QString* getUnits();
-    void setUnits(QString* units);
-
-    SWGRangeFloat* getRange();
-    void setRange(SWGRangeFloat* range);
-
-    QList<QString*>* getValueOptions();
-    void setValueOptions(QList<QString*>* value_options);
-
-    QList<QString*>* getOptionNames();
-    void setOptionNames(QList<QString*>* option_names);
 
 
     virtual bool isSet() override;
@@ -84,26 +64,8 @@ private:
     QString* value_string;
     bool m_value_string_isSet;
 
-    QString* name;
-    bool m_name_isSet;
-
-    QString* description;
-    bool m_description_isSet;
-
-    QString* units;
-    bool m_units_isSet;
-
-    SWGRangeFloat* range;
-    bool m_range_isSet;
-
-    QList<QString*>* value_options;
-    bool m_value_options_isSet;
-
-    QList<QString*>* option_names;
-    bool m_option_names_isSet;
-
 };
 
 }
 
-#endif /* SWGArgInfo_H_ */
+#endif /* SWGArgValue_H_ */

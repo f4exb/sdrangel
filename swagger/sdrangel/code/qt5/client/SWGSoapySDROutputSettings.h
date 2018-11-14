@@ -22,7 +22,7 @@
 #include <QJsonObject>
 
 
-#include "SWGArgInfo.h"
+#include "SWGArgValue.h"
 #include "SWGComplex.h"
 #include <QList>
 #include <QString>
@@ -69,14 +69,14 @@ public:
     qint32 getBandwidth();
     void setBandwidth(qint32 bandwidth);
 
-    QList<SWGArgInfo*>* getTunableElements();
-    void setTunableElements(QList<SWGArgInfo*>* tunable_elements);
+    QList<SWGArgValue*>* getTunableElements();
+    void setTunableElements(QList<SWGArgValue*>* tunable_elements);
 
     qint32 getGlobalGain();
     void setGlobalGain(qint32 global_gain);
 
-    QList<SWGArgInfo*>* getIndividualGains();
-    void setIndividualGains(QList<SWGArgInfo*>* individual_gains);
+    QList<SWGArgValue*>* getIndividualGains();
+    void setIndividualGains(QList<SWGArgValue*>* individual_gains);
 
     qint32 getAutoGain();
     void setAutoGain(qint32 auto_gain);
@@ -93,11 +93,11 @@ public:
     SWGComplex* getIqCorrection();
     void setIqCorrection(SWGComplex* iq_correction);
 
-    QList<SWGArgInfo*>* getStreamArgSettings();
-    void setStreamArgSettings(QList<SWGArgInfo*>* stream_arg_settings);
+    QList<SWGArgValue*>* getStreamArgSettings();
+    void setStreamArgSettings(QList<SWGArgValue*>* stream_arg_settings);
 
-    QList<SWGArgInfo*>* getDeviceArgSettings();
-    void setDeviceArgSettings(QList<SWGArgInfo*>* device_arg_settings);
+    QList<SWGArgValue*>* getDeviceArgSettings();
+    void setDeviceArgSettings(QList<SWGArgValue*>* device_arg_settings);
 
 
     virtual bool isSet() override;
@@ -127,13 +127,13 @@ private:
     qint32 bandwidth;
     bool m_bandwidth_isSet;
 
-    QList<SWGArgInfo*>* tunable_elements;
+    QList<SWGArgValue*>* tunable_elements;
     bool m_tunable_elements_isSet;
 
     qint32 global_gain;
     bool m_global_gain_isSet;
 
-    QList<SWGArgInfo*>* individual_gains;
+    QList<SWGArgValue*>* individual_gains;
     bool m_individual_gains_isSet;
 
     qint32 auto_gain;
@@ -151,10 +151,10 @@ private:
     SWGComplex* iq_correction;
     bool m_iq_correction_isSet;
 
-    QList<SWGArgInfo*>* stream_arg_settings;
+    QList<SWGArgValue*>* stream_arg_settings;
     bool m_stream_arg_settings_isSet;
 
-    QList<SWGArgInfo*>* device_arg_settings;
+    QList<SWGArgValue*>* device_arg_settings;
     bool m_device_arg_settings_isSet;
 
 };

@@ -1043,6 +1043,44 @@ margin-bottom: 20px;
     },
     "valueString" : {
       "type" : "string"
+    },
+    "name" : {
+      "type" : "string"
+    },
+    "description" : {
+      "type" : "string"
+    },
+    "units" : {
+      "type" : "string"
+    },
+    "range" : {
+      "$ref" : "#/definitions/RangeFloat"
+    },
+    "valueOptions" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "optionNames" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    }
+  }
+};
+            defs.ArgValue = {
+  "properties" : {
+    "key" : {
+      "type" : "string"
+    },
+    "valueType" : {
+      "type" : "string",
+      "enum" : [ "bool", "int", "float", "string" ]
+    },
+    "valueString" : {
+      "type" : "string"
     }
   }
 };
@@ -3956,7 +3994,7 @@ margin-bottom: 20px;
     "tunableElements" : {
       "type" : "array",
       "items" : {
-        "$ref" : "#/definitions/ArgInfo"
+        "$ref" : "#/definitions/ArgValue"
       }
     },
     "globalGain" : {
@@ -3965,7 +4003,7 @@ margin-bottom: 20px;
     "individualGains" : {
       "type" : "array",
       "items" : {
-        "$ref" : "#/definitions/ArgInfo"
+        "$ref" : "#/definitions/ArgValue"
       }
     },
     "autoGain" : {
@@ -3989,13 +4027,13 @@ margin-bottom: 20px;
     "streamArgSettings" : {
       "type" : "array",
       "items" : {
-        "$ref" : "#/definitions/ArgInfo"
+        "$ref" : "#/definitions/ArgValue"
       }
     },
     "deviceArgSettings" : {
       "type" : "array",
       "items" : {
-        "$ref" : "#/definitions/ArgInfo"
+        "$ref" : "#/definitions/ArgValue"
       }
     }
   },
@@ -4033,7 +4071,7 @@ margin-bottom: 20px;
     "tunableElements" : {
       "type" : "array",
       "items" : {
-        "$ref" : "#/definitions/ArgInfo"
+        "$ref" : "#/definitions/ArgValue"
       }
     },
     "globalGain" : {
@@ -4042,7 +4080,7 @@ margin-bottom: 20px;
     "individualGains" : {
       "type" : "array",
       "items" : {
-        "$ref" : "#/definitions/ArgInfo"
+        "$ref" : "#/definitions/ArgValue"
       }
     },
     "autoGain" : {
@@ -4066,13 +4104,13 @@ margin-bottom: 20px;
     "streamArgSettings" : {
       "type" : "array",
       "items" : {
-        "$ref" : "#/definitions/ArgInfo"
+        "$ref" : "#/definitions/ArgValue"
       }
     },
     "deviceArgSettings" : {
       "type" : "array",
       "items" : {
-        "$ref" : "#/definitions/ArgInfo"
+        "$ref" : "#/definitions/ArgValue"
       }
     }
   },
@@ -23576,7 +23614,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-11-13T23:30:05.952+01:00
+              Generated 2018-11-14T01:13:54.986+01:00
             </div>
           </div>
       </div>
