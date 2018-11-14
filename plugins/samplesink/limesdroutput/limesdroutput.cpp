@@ -772,7 +772,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
        || (m_settings.m_log2SoftInterp != settings.m_log2SoftInterp) || force)
     {
-        int fifoSize = std::max(
+        int fifoSize = (std::max)(
                 (int) ((settings.m_devSampleRate/(1<<settings.m_log2SoftInterp)) * DeviceLimeSDRShared::m_sampleFifoLengthInSeconds),
                 DeviceLimeSDRShared::m_sampleFifoMinSize);
         qDebug("LimeSDROutput::applySettings: resize FIFO: %d", fifoSize);

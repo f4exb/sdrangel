@@ -61,7 +61,7 @@ MINGW32 || MINGW64 || macx {
 }
 
 MSVC {
-    INCLUDEPATH += "C:\softs\PothosSDR\include"
+    INCLUDEPATH += "C:\Programs\PothosSDR\include"
 }
 
 INCLUDEPATH += $$LIBPERSEUSSRC
@@ -144,6 +144,11 @@ MSVC {
             limesdr/devicelimesdrparam.cpp\
             limesdr/devicelimesdrshared.cpp
 
+    SOURCES += soapysdr/devicesoapysdr.cpp\
+            soapysdr/devicesoapysdrparams.cpp\
+            soapysdr/devicesoapysdrscan.cpp\
+            soapysdr/devicesoapysdrshared.cpp
+
     HEADERS  += hackrf/devicehackrf.h\
             hackrf/devicehackrfparam.h\
             hackrf/devicehackrfvalues.h\
@@ -152,6 +157,11 @@ MSVC {
     HEADERS += limesdr/devicelimesdr.h\
             limesdr/devicelimesdrparam.h\
             limesdr/devicelimesdrshared.h
+
+    HEADERS += soapysdr/devicesoapysdr.h\
+            soapysdr/devicesoapysdrparams.h\
+            soapysdr/devicesoapysdrscan.h\
+            soapysdr/devicesoapysdrshared.h
 }
 
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
@@ -171,5 +181,6 @@ macx {
 
 MSVC {
     LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
-    LIBS += -LC:\softs\PothosSDR\lib -lLimeSuite
+    LIBS += -LC:\Programs\PothosSDR\bin -LC:\Programs\PothosSDR\lib -lLimeSuite
+    LIBS += -LC:\Programs\PothosSDR\bin -lSoapySDR
 }
