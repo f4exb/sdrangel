@@ -150,6 +150,29 @@ public:
     bool hasIQAutoCorrection() { return false; } // not in SoapySDR interface
     bool hasIQCorrectionValue();
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            QString& errorMessage);
+
+    virtual int webapiRunGet(
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
+    virtual int webapiRun(
+            bool run,
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
 private:
     DeviceSinkAPI *m_deviceAPI;
     QMutex m_mutex;
