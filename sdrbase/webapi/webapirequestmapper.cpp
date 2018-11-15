@@ -2000,6 +2000,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             QJsonObject soapySdrInputSettingsJsonObject = jsonObject["soapySDRInputSettings"].toObject();
             deviceSettingsKeys = soapySdrInputSettingsJsonObject.keys();
             deviceSettings.setSoapySdrInputSettings(new SWGSDRangel::SWGSoapySDRInputSettings());
+            deviceSettings.getSoapySdrInputSettings()->init(); // contains complex objects
             deviceSettings.getSoapySdrInputSettings()->fromJsonObject(soapySdrInputSettingsJsonObject);
             return true;
         }
@@ -2015,6 +2016,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             QJsonObject soapySdrOutputSettingsJsonObject = jsonObject["soapySDROutputSettings"].toObject();
             deviceSettingsKeys = soapySdrOutputSettingsJsonObject.keys();
             deviceSettings.setSoapySdrOutputSettings(new SWGSDRangel::SWGSoapySDROutputSettings());
+            deviceSettings.getSoapySdrInputSettings()->init(); // contains complex objects
             deviceSettings.getSoapySdrOutputSettings()->fromJsonObject(soapySdrOutputSettingsJsonObject);
             return true;
         }
