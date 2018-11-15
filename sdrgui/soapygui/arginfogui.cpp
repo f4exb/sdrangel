@@ -349,6 +349,24 @@ void ArgInfoGUI::updateUIFromString()
         ui->argEdit->setText(m_stringValue);
         ui->argEdit->blockSignals(false);
     }
+    else if (m_type == ArgInfoDiscrete)
+    {
+        for (int i = 0; i < ui->argCombo->count(); i++)
+        {
+            if (ui->argCombo->itemData(i).type() == QVariant::String)
+            {
+                QVariant v = ui->argCombo->itemData(i);
+
+                if (m_stringValue == v.toString())
+                {
+                    ui->argCombo->blockSignals(true);
+                    ui->argCombo->setCurrentIndex(i);
+                    ui->argCombo->blockSignals(false);
+                    break;
+                }
+            }
+        }
+    }
 }
 
 void ArgInfoGUI::on_argCheck_toggled(bool checked)
