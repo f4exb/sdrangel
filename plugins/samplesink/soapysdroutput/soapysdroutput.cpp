@@ -44,6 +44,7 @@ SoapySDROutput::SoapySDROutput(DeviceSinkAPI *deviceAPI) :
 {
     openDevice();
     initGainSettings(m_settings);
+    initTunableElementsSettings(m_settings);
     initStreamArgSettings(m_settings);
     initDeviceArgSettings(m_settings);
 }
@@ -261,6 +262,26 @@ void SoapySDROutput::initGainSettings(SoapySDROutputSettings& settings)
     }
 
     updateGains(m_deviceShared.m_device, m_deviceShared.m_channel, settings);
+}
+
+void SoapySDROutput::initTunableElementsSettings(SoapySDROutputSettings& settings)
+{
+    const DeviceSoapySDRParams::ChannelSettings* channelSettings = m_deviceShared.m_deviceParams->getTxChannelSettings(m_deviceShared.m_channel);
+    settings.m_tunableElements.clear();
+    bool first = true;
+
+    for (const auto &it : channelSettings->m_frequencySettings)
+    {
+        if (first)
+        {
+            first = false;
+            continue;
+        }
+
+        settings.m_tunableElements[QString(it.m_name.c_str())] = 0.0;
+    }
+
+    updateTunableElements(m_deviceShared.m_device, m_deviceShared.m_channel, settings);
 }
 
 const SoapySDR::ArgInfoList& SoapySDROutput::getStreamArgInfoList()
@@ -689,6 +710,17 @@ void SoapySDROutput::updateGains(SoapySDR::Device *dev, int requestedChannel, So
 
     for (const auto &name : settings.m_individualGains.keys()) {
         settings.m_individualGains[name] = dev->getGain(SOAPY_SDR_TX, requestedChannel, name.toStdString());
+    }
+}
+
+void SoapySDROutput::updateTunableElements(SoapySDR::Device *dev, int requestedChannel, SoapySDROutputSettings& settings)
+{
+    if (dev == 0) {
+        return;
+    }
+
+    for (const auto &name : settings.m_tunableElements.keys()) {
+        settings.m_tunableElements[name] = dev->getFrequency(SOAPY_SDR_TX, requestedChannel, name.toStdString());
     }
 }
 

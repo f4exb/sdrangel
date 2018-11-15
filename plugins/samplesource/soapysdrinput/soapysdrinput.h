@@ -165,6 +165,7 @@ public:
     const SoapySDR::ArgInfoList& getStreamArgInfoList();
     const SoapySDR::ArgInfoList& getDeviceArgInfoList();
     void initGainSettings(SoapySDRInputSettings& settings);
+    void initTunableElementsSettings(SoapySDRInputSettings& settings);
     void initStreamArgSettings(SoapySDRInputSettings& settings);
     void initDeviceArgSettings(SoapySDRInputSettings& settings);
     bool hasDCAutoCorrection();
@@ -212,6 +213,7 @@ private:
     bool applySettings(const SoapySDRInputSettings& settings, bool force = false);
     bool setDeviceCenterFrequency(SoapySDR::Device *dev, int requestedChannel, quint64 freq_hz, int loPpmTenths);
     void updateGains(SoapySDR::Device *dev, int requestedChannel, SoapySDRInputSettings& settings);
+    void updateTunableElements(SoapySDR::Device *dev, int requestedChannel, SoapySDRInputSettings& settings);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SoapySDRInputSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     QVariant webapiVariantFromArgValue(SWGSDRangel::SWGArgValue *argValue);

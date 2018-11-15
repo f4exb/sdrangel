@@ -73,6 +73,7 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     createArgumentsControl(m_sampleSource->getDeviceArgInfoList(), true);
     createArgumentsControl(m_sampleSource->getStreamArgInfoList(), false);
     m_sampleSource->initGainSettings(m_settings);
+    m_sampleSource->initTunableElementsSettings(m_settings);
     m_sampleSource->initStreamArgSettings(m_settings);
     m_sampleSource->initDeviceArgSettings(m_settings);
 
