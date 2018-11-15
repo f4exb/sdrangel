@@ -1373,12 +1373,14 @@ int SoapySDRInput::webapiSettingsPutPatch(
     {
         QList<SWGSDRangel::SWGArgValue*> *tunableElements = response.getSoapySdrInputSettings()->getTunableElements();
 
-        for (const auto itArg : *tunableElements)
+        for (const auto &itArg : *tunableElements)
         {
-            auto ovalue = settings.m_tunableElements.find(*itArg->getKey());
+            QMap<QString, double>::iterator itSettings = settings.m_tunableElements.find(*(itArg->getKey()));
 
-            if ((ovalue != settings.m_tunableElements.end()) && (atof(itArg->getValueString()->toStdString().c_str()) != *ovalue)) {
-                m_settings.m_tunableElements[*itArg->getKey()] = atof(itArg->getValueString()->toStdString().c_str());
+            if (itSettings != settings.m_tunableElements.end())
+            {
+                QVariant v = webapiVariantFromArgValue(itArg);
+                itSettings.value() = v.toDouble();
             }
         }
     }
@@ -1391,12 +1393,14 @@ int SoapySDRInput::webapiSettingsPutPatch(
     {
         QList<SWGSDRangel::SWGArgValue*> *individualGains = response.getSoapySdrInputSettings()->getIndividualGains();
 
-        for (const auto itArg : *individualGains)
+        for (const auto &itArg : *individualGains)
         {
-            auto ovalue = settings.m_individualGains.find(*itArg->getKey());
+            QMap<QString, double>::iterator itSettings = settings.m_individualGains.find(*(itArg->getKey()));
 
-            if ((ovalue != settings.m_individualGains.end()) && (atof(itArg->getValueString()->toStdString().c_str()) != *ovalue)) {
-                m_settings.m_individualGains[*itArg->getKey()] = atof(itArg->getValueString()->toStdString().c_str());
+            if (itSettings != settings.m_individualGains.end())
+            {
+                QVariant v = webapiVariantFromArgValue(itArg);
+                itSettings.value() = v.toDouble();
             }
         }
     }
