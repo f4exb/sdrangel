@@ -1993,6 +1993,36 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
+    else if ((*deviceHwType == "SoapySDR")  && (deviceSettings.getTx() == 0))
+    {
+        if (jsonObject.contains("soapySDRInputSettings") && jsonObject["soapySDRInputSettings"].isObject())
+        {
+            QJsonObject soapySdrInputSettingsJsonObject = jsonObject["soapySDRInputSettings"].toObject();
+            deviceSettingsKeys = soapySdrInputSettingsJsonObject.keys();
+            deviceSettings.setSoapySdrInputSettings(new SWGSDRangel::SWGSoapySDRInputSettings());
+            deviceSettings.getSoapySdrInputSettings()->fromJsonObject(soapySdrInputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if ((*deviceHwType == "SoapySDR")  && (deviceSettings.getTx() != 0))
+    {
+        if (jsonObject.contains("soapySDROutputSettings") && jsonObject["soapySDROutputSettings"].isObject())
+        {
+            QJsonObject soapySdrOutputSettingsJsonObject = jsonObject["soapySDROutputSettings"].toObject();
+            deviceSettingsKeys = soapySdrOutputSettingsJsonObject.keys();
+            deviceSettings.setSoapySdrOutputSettings(new SWGSDRangel::SWGSoapySDROutputSettings());
+            deviceSettings.getSoapySdrOutputSettings()->fromJsonObject(soapySdrOutputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     else if (*deviceHwType == "TestSource")
     {
         if (jsonObject.contains("testSourceSettings") && jsonObject["testSourceSettings"].isObject())
