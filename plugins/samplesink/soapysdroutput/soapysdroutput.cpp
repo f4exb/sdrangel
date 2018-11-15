@@ -1193,6 +1193,38 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
             << " m_globalGain: " << m_settings.m_globalGain
             << " force: " << force;
 
+    QMap<QString, double>::const_iterator doubleIt = m_settings.m_individualGains.begin();
+
+    for(; doubleIt != m_settings.m_individualGains.end(); ++doubleIt) {
+        qDebug("SoapySDROutput::applySettings: m_individualGains[%s]: %lf", doubleIt.key().toStdString().c_str(), doubleIt.value());
+    }
+
+    doubleIt = m_settings.m_tunableElements.begin();
+
+    for(; doubleIt != m_settings.m_tunableElements.end(); ++doubleIt) {
+        qDebug("SoapySDROutput::applySettings: m_tunableElements[%s]: %lf", doubleIt.key().toStdString().c_str(), doubleIt.value());
+    }
+
+    QMap<QString, QVariant>::const_iterator varIt = m_settings.m_deviceArgSettings.begin();
+
+    for(; varIt != m_settings.m_deviceArgSettings.end(); ++varIt)
+    {
+        qDebug("SoapySDROutput::applySettings: m_deviceArgSettings[%s] (type %d): %s",
+            varIt.key().toStdString().c_str(),
+            (int) varIt.value().type(), // bool: 1, int: 2, double: 6, string: 10 (http://doc.qt.io/archives/qt-4.8/qvariant.html)
+            varIt.value().toString().toStdString().c_str());
+    }
+
+    varIt = m_settings.m_streamArgSettings.begin();
+
+    for(; varIt != m_settings.m_streamArgSettings.end(); ++varIt)
+    {
+        qDebug("SoapySDROutput::applySettings: m_streamArgSettings[%s] (type %d): %s",
+            varIt.key().toStdString().c_str(),
+            (int) varIt.value().type(),
+            varIt.value().toString().toStdString().c_str());
+    }
+
     return true;
 }
 
