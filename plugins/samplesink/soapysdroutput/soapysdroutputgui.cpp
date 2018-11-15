@@ -438,12 +438,15 @@ QByteArray SoapySDROutputGui::serialize() const
 
 bool SoapySDROutputGui::deserialize(const QByteArray& data)
 {
-    if(m_settings.deserialize(data)) {
+    if(m_settings.deserialize(data))
+    {
         displaySettings();
         m_forceSettings = true;
         sendSettings();
         return true;
-    } else {
+    }
+    else
+    {
         resetToDefaults();
         return false;
     }
@@ -769,7 +772,7 @@ void SoapySDROutputGui::displayStreamArgsSettings()
 
         if (elIt != m_settings.m_streamArgSettings.end())
         {
-            it->setValue(*elIt);
+            it->setValue(elIt.value());
             *elIt = it->getValue();
         }
     }
@@ -783,7 +786,7 @@ void SoapySDROutputGui::displayDeviceArgsSettings()
 
         if (elIt != m_settings.m_deviceArgSettings.end())
         {
-            it->setValue(*elIt);
+            it->setValue(elIt.value());
             *elIt = it->getValue();
         }
     }

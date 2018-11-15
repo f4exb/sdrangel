@@ -441,12 +441,15 @@ QByteArray SoapySDRInputGui::serialize() const
 
 bool SoapySDRInputGui::deserialize(const QByteArray& data)
 {
-    if(m_settings.deserialize(data)) {
+    if (m_settings.deserialize(data))
+    {
         displaySettings();
         m_forceSettings = true;
         sendSettings();
         return true;
-    } else {
+    }
+    else
+    {
         resetToDefaults();
         return false;
     }
@@ -716,7 +719,6 @@ void SoapySDRInputGui::displaySettings()
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 
     if (m_antennas) {
-        qDebug("SoapySDRInputGui::displaySettings: m_antenna: %s", m_settings.m_antenna.toStdString().c_str());
         m_antennas->setValue(m_settings.m_antenna.toStdString());
     }
     if (m_sampleRateGUI)
@@ -815,7 +817,7 @@ void SoapySDRInputGui::displayStreamArgsSettings()
 
         if (elIt != m_settings.m_streamArgSettings.end())
         {
-            it->setValue(*elIt);
+            it->setValue(elIt.value());
             *elIt = it->getValue();
         }
     }
@@ -829,7 +831,7 @@ void SoapySDRInputGui::displayDeviceArgsSettings()
 
         if (elIt != m_settings.m_deviceArgSettings.end())
         {
-            it->setValue(*elIt);
+            it->setValue(elIt.value());
             *elIt = it->getValue();
         }
     }
