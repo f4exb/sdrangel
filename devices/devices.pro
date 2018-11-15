@@ -182,5 +182,5 @@ macx {
 MSVC {
     LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
     LIBS += -LC:\Programs\PothosSDR\bin -LC:\Programs\PothosSDR\lib -lLimeSuite
-    LIBS += -LC:\Programs\PothosSDR\bin -lSoapySDR
+    LIBS += -LC:\Programs\PothosSDR\bin -LC:\Programs\PothosSDR\lib -lSoapySDR
 }

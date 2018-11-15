@@ -594,7 +594,7 @@ void SoapySDRInputGui::autoIQCorrectionChanged(bool set)
 
 void SoapySDRInputGui::dcCorrectionModuleChanged(double value)
 {
-    std::complex<float> dcCorrection = std::polar<float>(value, arg(m_settings.m_dcCorrection));
+    std::complex<double> dcCorrection = std::polar<double>(value, arg(m_settings.m_dcCorrection));
     m_settings.m_dcCorrection = dcCorrection;
     sendSettings();
 }
@@ -602,14 +602,14 @@ void SoapySDRInputGui::dcCorrectionModuleChanged(double value)
 void SoapySDRInputGui::dcCorrectionArgumentChanged(double value)
 {
     double angleInRadians = (value / 180.0) * M_PI;
-    std::complex<float> dcCorrection = std::polar<float>(abs(m_settings.m_dcCorrection), angleInRadians);
+    std::complex<double> dcCorrection = std::polar<double>(abs(m_settings.m_dcCorrection), angleInRadians);
     m_settings.m_dcCorrection = dcCorrection;
     sendSettings();
 }
 
 void SoapySDRInputGui::iqCorrectionModuleChanged(double value)
 {
-    std::complex<float> iqCorrection = std::polar<float>(value, arg(m_settings.m_iqCorrection));
+    std::complex<double> iqCorrection = std::polar<double>(value, arg(m_settings.m_iqCorrection));
     m_settings.m_iqCorrection = iqCorrection;
     sendSettings();
 }
@@ -617,7 +617,7 @@ void SoapySDRInputGui::iqCorrectionModuleChanged(double value)
 void SoapySDRInputGui::iqCorrectionArgumentChanged(double value)
 {
     double angleInRadians = (value / 180.0) * M_PI;
-    std::complex<float> iqCorrection = std::polar<float>(abs(m_settings.m_iqCorrection), angleInRadians);
+    std::complex<double> iqCorrection = std::polar<double>(abs(m_settings.m_iqCorrection), angleInRadians);
     m_settings.m_iqCorrection = iqCorrection;
     sendSettings();
 }

@@ -35,7 +35,7 @@ class SoapySDROutput;
 class DEVICES_API DeviceSoapySDRShared
 {
 public:
-    class MsgReportBuddyChange : public Message {
+    class DEVICES_API MsgReportBuddyChange : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -82,7 +82,7 @@ public:
         { }
     };
 
-    class MsgReportDeviceArgsChange : public Message {
+    class DEVICES_API MsgReportDeviceArgsChange : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:

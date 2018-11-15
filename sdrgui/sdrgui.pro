@@ -86,6 +86,15 @@ SOURCES += mainwindow.cpp\
         gui/tvscreen.cpp\
         gui/valuedial.cpp\
         gui/valuedialz.cpp\
+        soapygui/arginfogui.cpp\
+        soapygui/complexfactorgui.cpp\
+        soapygui/discreterangegui.cpp\
+        soapygui/dynamicargsettinggui.cpp\
+        soapygui/dynamicitemsettinggui.cpp\
+        soapygui/intervalrangegui.cpp\
+        soapygui/intervalslidergui.cpp\
+        soapygui/itemsettinggui.cpp\
+        soapygui/stringrangegui.cpp\
         webapi/webapiadaptergui.cpp
 
 HEADERS  += mainwindow.h\
@@ -135,6 +144,15 @@ HEADERS  += mainwindow.h\
         gui/tvscreen.h\
         gui/valuedial.h\
         gui/valuedialz.h\
+        soapygui/arginfogui.h\
+        soapygui/complexfactorgui.h\
+        soapygui/discreterangegui.h\
+        soapygui/dynamicargsettinggui.h\
+        soapygui/dynamicitemsettinggui.h\
+        soapygui/intervalrangegui.h\
+        soapygui/intervalslidergui.h\
+        soapygui/itemsettinggui.h\
+        soapygui/stringrangegui.h\
         webapi/webapiadaptergui.h
 
 FORMS    += mainwindow.ui\
@@ -156,6 +174,11 @@ FORMS    += mainwindow.ui\
         gui/loggingdialog.ui\
         gui/glspectrumgui.ui\
         gui/transverterdialog.ui\
+        soapygui/arginfogui.ui\
+        soapygui/complexfactorgui.ui\
+        soapygui/discreterangegui.ui\
+        soapygui/intervalrangegui.ui\
+        soapygui/intervalslidergui.ui\
         mainwindow.ui
 
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
