@@ -1281,8 +1281,8 @@ int SoapySDROutput::webapiSettingsPutPatch(
         {
             auto ovalue = settings.m_tunableElements.find(*itArg->getKey());
 
-            if ((ovalue != settings.m_tunableElements.end()) && (m_settings.m_tunableElements[*itArg->getKey()] != *ovalue)) {
-                m_settings.m_tunableElements[*itArg->getKey()] = *ovalue;
+            if ((ovalue != settings.m_tunableElements.end()) && (atof(itArg->getValueString()->toStdString().c_str()) != *ovalue)) {
+                m_settings.m_tunableElements[*itArg->getKey()] = atof(itArg->getValueString()->toStdString().c_str());
             }
         }
     }
@@ -1299,8 +1299,8 @@ int SoapySDROutput::webapiSettingsPutPatch(
         {
             auto ovalue = settings.m_individualGains.find(*itArg->getKey());
 
-            if ((ovalue != settings.m_individualGains.end()) && (m_settings.m_individualGains[*itArg->getKey()] != *ovalue)) {
-                m_settings.m_individualGains[*itArg->getKey()] = *ovalue;
+            if ((ovalue != settings.m_individualGains.end()) && (atof(itArg->getValueString()->toStdString().c_str()) != *ovalue)) {
+                m_settings.m_individualGains[*itArg->getKey()] = atof(itArg->getValueString()->toStdString().c_str());
             }
         }
     }
@@ -1331,10 +1331,10 @@ int SoapySDROutput::webapiSettingsPutPatch(
 
         for (const auto itArg : *streamArgSettings)
         {
-            auto ovalue = settings.m_streamArgSettings.find(*itArg->getKey());
+            QMap<QString, QVariant>::iterator itSettings = settings.m_streamArgSettings.find(*itArg->getKey());
 
-            if ((ovalue != settings.m_streamArgSettings.end()) && (m_settings.m_streamArgSettings[*itArg->getKey()] != *ovalue)) {
-                m_settings.m_streamArgSettings[*itArg->getKey()] = *ovalue;
+            if (itSettings != settings.m_streamArgSettings.end()) {
+                itSettings.value() = webapiVariantFromArgValue(itArg);
             }
         }
     }
@@ -1345,10 +1345,10 @@ int SoapySDROutput::webapiSettingsPutPatch(
 
         for (const auto itArg : *deviceArgSettings)
         {
-            auto ovalue = settings.m_deviceArgSettings.find(*itArg->getKey());
+            QMap<QString, QVariant>::iterator itSettings = settings.m_deviceArgSettings.find(*itArg->getKey());
 
-            if ((ovalue != settings.m_deviceArgSettings.end()) && (m_settings.m_deviceArgSettings[*itArg->getKey()] != *ovalue)) {
-                m_settings.m_deviceArgSettings[*itArg->getKey()] = *ovalue;
+            if (itSettings != settings.m_deviceArgSettings.end()) {
+                itSettings.value() = webapiVariantFromArgValue(itArg);
             }
         }
     }

@@ -191,6 +191,7 @@ private:
     void updateGains(SoapySDR::Device *dev, int requestedChannel, SoapySDROutputSettings& settings);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SoapySDROutputSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+    QVariant webapiVariantFromArgValue(SWGSDRangel::SWGArgValue *argValue);
     void webapiFormatArgValue(const QVariant& v, SWGSDRangel::SWGArgValue *argValue);
     void webapiFormatArgInfo(const SoapySDR::ArgInfo& arg, SWGSDRangel::SWGArgInfo *argInfo);
 };

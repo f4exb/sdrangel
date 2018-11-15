@@ -1345,8 +1345,8 @@ int SoapySDRInput::webapiSettingsPutPatch(
         {
             auto ovalue = settings.m_tunableElements.find(*itArg->getKey());
 
-            if ((ovalue != settings.m_tunableElements.end()) && (m_settings.m_tunableElements[*itArg->getKey()] != *ovalue)) {
-                m_settings.m_tunableElements[*itArg->getKey()] = *ovalue;
+            if ((ovalue != settings.m_tunableElements.end()) && (atof(itArg->getValueString()->toStdString().c_str()) != *ovalue)) {
+                m_settings.m_tunableElements[*itArg->getKey()] = atof(itArg->getValueString()->toStdString().c_str());
             }
         }
     }
@@ -1363,8 +1363,8 @@ int SoapySDRInput::webapiSettingsPutPatch(
         {
             auto ovalue = settings.m_individualGains.find(*itArg->getKey());
 
-            if ((ovalue != settings.m_individualGains.end()) && (m_settings.m_individualGains[*itArg->getKey()] != *ovalue)) {
-                m_settings.m_individualGains[*itArg->getKey()] = *ovalue;
+            if ((ovalue != settings.m_individualGains.end()) && (atof(itArg->getValueString()->toStdString().c_str()) != *ovalue)) {
+                m_settings.m_individualGains[*itArg->getKey()] = atof(itArg->getValueString()->toStdString().c_str());
             }
         }
     }
@@ -1395,10 +1395,10 @@ int SoapySDRInput::webapiSettingsPutPatch(
 
         for (const auto itArg : *streamArgSettings)
         {
-            auto ovalue = settings.m_streamArgSettings.find(*itArg->getKey());
+            QMap<QString, QVariant>::iterator itSettings = settings.m_streamArgSettings.find(*itArg->getKey());
 
-            if ((ovalue != settings.m_streamArgSettings.end()) && (m_settings.m_streamArgSettings[*itArg->getKey()] != *ovalue)) {
-                m_settings.m_streamArgSettings[*itArg->getKey()] = *ovalue;
+            if (itSettings != settings.m_streamArgSettings.end()) {
+                itSettings.value() = webapiVariantFromArgValue(itArg);
             }
         }
     }
@@ -1409,10 +1409,10 @@ int SoapySDRInput::webapiSettingsPutPatch(
 
         for (const auto itArg : *deviceArgSettings)
         {
-            auto ovalue = settings.m_deviceArgSettings.find(*itArg->getKey());
+            QMap<QString, QVariant>::iterator itSettings = settings.m_deviceArgSettings.find(*itArg->getKey());
 
-            if ((ovalue != settings.m_deviceArgSettings.end()) && (m_settings.m_deviceArgSettings[*itArg->getKey()] != *ovalue)) {
-                m_settings.m_deviceArgSettings[*itArg->getKey()] = *ovalue;
+            if (itSettings != settings.m_deviceArgSettings.end()) {
+                itSettings.value() = webapiVariantFromArgValue(itArg);
             }
         }
     }
@@ -1677,6 +1677,19 @@ void SoapySDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
             response.getSoapySdrInputReport()->getBandwidthsRanges()->back()->setMin(itBandwidth.minimum());
             response.getSoapySdrInputReport()->getBandwidthsRanges()->back()->setMax(itBandwidth.maximum());
         }
+    }
+}
+
+QVariant SoapySDRInput::webapiVariantFromArgValue(SWGSDRangel::SWGArgValue *argValue)
+{
+    if (*argValue->getValueType() == "bool") {
+        return QVariant((bool) (*argValue->getValueString() == "1"));
+    } else if (*argValue->getValueType() == "int") {
+        return QVariant((int) (atoi(argValue->getValueString()->toStdString().c_str())));
+    } else if (*argValue->getValueType() == "float") {
+        return QVariant((double) (atof(argValue->getValueString()->toStdString().c_str())));
+    } else {
+        return QVariant(QString(*argValue->getValueString()));
     }
 }
 
