@@ -707,7 +707,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
         }
         else
         {
-            fifoSize = std::max(
+            fifoSize = (std::max)(
                 (int) ((settings.m_devSampleRate/(1<<settings.m_log2Interp)) * DeviceBladeRF2Shared::m_sampleFifoLengthInSeconds),
                 DeviceBladeRF2Shared::m_sampleFifoMinSize);
         }

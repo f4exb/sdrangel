@@ -31,7 +31,7 @@ class BladeRF2Output;
 class DEVICES_API DeviceBladeRF2Shared
 {
 public:
-    class MsgReportBuddyChange : public Message {
+    class DEVICES_API MsgReportBuddyChange : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:

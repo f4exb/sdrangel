@@ -136,6 +136,13 @@ macx {
 }
 
 MSVC {
+    SOURCES += bladerf1/devicebladerf1.cpp\
+            bladerf1/devicebladerf1values.cpp\
+            bladerf1/devicebladerf1shared.cpp
+
+    SOURCES += bladerf2/devicebladerf2.cpp\
+            bladerf2/devicebladerf2shared.cpp
+
     SOURCES += hackrf/devicehackrf.cpp\
             hackrf/devicehackrfvalues.cpp\
             hackrf/devicehackrfshared.cpp
@@ -148,6 +155,14 @@ MSVC {
             soapysdr/devicesoapysdrparams.cpp\
             soapysdr/devicesoapysdrscan.cpp\
             soapysdr/devicesoapysdrshared.cpp
+
+    HEADERS += bladerf1/devicebladerf1.h\
+            bladerf1/devicebladerf1param.h\
+            bladerf1/devicebladerf1values.h\
+            bladerf1/devicebladerf1shared.h
+
+    HEADERS += bladerf2/devicebladerf2.h\
+            bladerf2/devicebladerf2shared.h
 
     HEADERS  += hackrf/devicehackrf.h\
             hackrf/devicehackrfparam.h\
@@ -181,6 +196,7 @@ macx {
 
 MSVC {
     LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
+    LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lbladeRF
     LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lLimeSuite
     LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lSoapySDR
 }
