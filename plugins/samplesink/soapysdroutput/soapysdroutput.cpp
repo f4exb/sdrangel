@@ -1643,6 +1643,19 @@ void SoapySDROutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
     }
 }
 
+QVariant SoapySDROutput::webapiVariantFromArgValue(SWGSDRangel::SWGArgValue *argValue)
+{
+    if (*argValue->getValueType() == "bool") {
+        return QVariant((bool) (*argValue->getValueString() == "1"));
+    } else if (*argValue->getValueType() == "int") {
+        return QVariant((int) (atoi(argValue->getValueString()->toStdString().c_str())));
+    } else if (*argValue->getValueType() == "float") {
+        return QVariant((double) (atof(argValue->getValueString()->toStdString().c_str())));
+    } else {
+        return QVariant(QString(*argValue->getValueString()));
+    }
+}
+
 void SoapySDROutput::webapiFormatArgValue(const QVariant& v, SWGSDRangel::SWGArgValue *argValue)
 {
     if (v.type() == QVariant::Bool)

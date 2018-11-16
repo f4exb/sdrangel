@@ -75,6 +75,7 @@ REM copy plugins\samplesource\bladerf2input\%1\inputbladerf2.dll %2\plugins\samp
 copy plugins\samplesource\limesdrinput\%1\inputlimesdr.dll %2\plugins\samplesource
 REM copy plugins\samplesource\plutosdrinput\%1\inputplutosdr.dll %2\plugins\samplesource
 copy plugins\samplesource\sdrdaemonsource\%1\inputsdrdaemonsource.dll %2\plugins\samplesource
+copy plugins\samplesource\soapysdrinput\%1\inputsoapysdr.dll %2\plugins\samplesource
 
 copy plugins\samplesink\filesink\%1\outputfilesink.dll %2\plugins\samplesink
 REM copy plugins\samplesink\bladerf1output\%1\outputbladerf1.dll %2\plugins\samplesink
@@ -83,3 +84,4 @@ copy plugins\samplesink\hackrfoutput\%1\outputhackrf.dll %2\plugins\samplesink
 copy plugins\samplesink\limesdroutput\%1\outputlimesdr.dll %2\plugins\samplesink
 REM copy plugins\samplesink\plutosdroutput\%1\outputplutosdr.dll %2\plugins\samplesink
 copy plugins\samplesink\sdrdaemonsink\%1\outputsdrdaemonsink.dll %2\plugins\samplesink
+copy plugins\samplesink\soapysdroutput\%1\outputsoapysdr.dll %2\plugins\samplesink

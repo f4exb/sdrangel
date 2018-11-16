@@ -9,7 +9,7 @@ CONFIG += plugin
 
 QT += core gui multimedia opengl
 
-TARGET = inputsoapysdr
+TARGET = outputsoapysdr
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../exports
@@ -22,19 +22,19 @@ INCLUDEPATH += "C:\Programs\PothosSDR\include"
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
-SOURCES += soapysdrinput.cpp\
-    soapysdrinputgui.cpp\
-    soapysdrinputplugin.cpp\
-    soapysdrinputsettings.cpp\
-    soapysdrinputthread.cpp
+SOURCES += soapysdroutput.cpp\
+    soapysdroutputgui.cpp\
+    soapysdroutputplugin.cpp\
+    soapysdroutputsettings.cpp\
+    soapysdroutputthread.cpp
 
-HEADERS += soapysdrinput.h\
-    soapysdrinputgui.h\
-    soapysdrinputplugin.h\
-    soapysdrinputsettings.h\
-    soapysdrinputthread.h
+HEADERS += soapysdroutput.h\
+    soapysdroutputgui.h\
+    soapysdroutputplugin.h\
+    soapysdroutputsettings.h\
+    soapysdroutputthread.h
 
-FORMS += soapysdrinputgui.ui
+FORMS += soapysdroutputgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
