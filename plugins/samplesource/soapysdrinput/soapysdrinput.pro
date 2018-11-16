@@ -17,7 +17,7 @@ INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../devices
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
-INCLUDEPATH += "C:\Programs\PothosSDR\include"
+INCLUDEPATH += "C:\Program Files\PothosSDR\include"
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
@@ -40,4 +40,4 @@ LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../swagger/$${build_subdir} -lswagger
 LIBS += -L../../../devices/$${build_subdir} -ldevices
-LIBS += -LC:\Programs\PothosSDR\bin -LC:\Programs\PothosSDR\lib -lSoapySDR
+LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lSoapySDR

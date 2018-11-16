@@ -61,7 +61,7 @@ MINGW32 || MINGW64 || macx {
 }
 
 MSVC {
-    INCLUDEPATH += "C:\Programs\PothosSDR\include"
+    INCLUDEPATH += "C:\Program Files\PothosSDR\include"
 }
 
 INCLUDEPATH += $$LIBPERSEUSSRC
@@ -181,6 +181,6 @@ macx {
 
 MSVC {
     LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
-    LIBS += -LC:\Programs\PothosSDR\bin -LC:\Programs\PothosSDR\lib -lLimeSuite
-    LIBS += -LC:\Programs\PothosSDR\bin -LC:\Programs\PothosSDR\lib -lSoapySDR
+    LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lLimeSuite
+    LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lSoapySDR
 }
