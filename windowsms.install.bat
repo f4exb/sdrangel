@@ -27,7 +27,7 @@ copy libairspyhf\%1\libairspyhf.dll %2
 REM copy libbladerf\%1\libbladerf.dll %2
 REM copy libiio\%1\libiio.dll %2
 copy %pothosdir%\bin\LimeSuite.dll %2
-REM copy %pothosdir%\bin\SoapySDR.dll %2
+copy %pothosdir%\bin\SoapySDR.dll %2
 
 copy %libusbdir%\dll\libusb-1.0.dll %2
 copy %pthreadsdir%\dll\x64\pthreadVC2.dll %2
