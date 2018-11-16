@@ -42,7 +42,7 @@ MINGW32 || MINGW64 || macx {
 }
 
 MSVC {
-    INCLUDEPATH += "C:\Programs\PothosSDR\include"
+    INCLUDEPATH += "C:\Program Files\PothosSDR\include"
 }
 
 CONFIG(Release):build_subdir = release
@@ -71,7 +71,7 @@ MINGW32 || MINGW64 || macx {
     LIBS += -L../../../liblimesuite/$${build_subdir} -lliblimesuite
 }
 MSVC {
-    LIBS += -LC:\Programs\PothosSDR\bin -LC:\Programs\PothosSDR\lib -lLimeSuite
+    LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lLimeSuite
 }
 
 RESOURCES = ../../../sdrgui/resources/res.qrc
