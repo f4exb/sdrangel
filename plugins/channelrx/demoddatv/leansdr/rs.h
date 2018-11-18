@@ -162,7 +162,7 @@ struct rs_engine
     {
         // TBD Avoid copying
         u8 p[204];
-        memcpy(p, msg, 188);
+        memcpy(p, msg, 204); // was 188 but causing underflow (PVS https://www.viva64.com/en/w/v512/)
         memset(p + 188, 0, 16);
         // p = msg*X^16
 #if DEBUG_RS

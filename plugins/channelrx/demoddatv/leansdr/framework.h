@@ -2,6 +2,8 @@
 #define LEANSDR_FRAMEWORK_H
 
 #include <cstddef>
+#include <algorithm>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -106,9 +108,10 @@ struct scheduler
     bool verbose, debug;
 
     scheduler() :
-            npipes(0), nrunnables(0), windows(NULL), verbose(false), debug(
-                    false)
+            npipes(0), nrunnables(0), windows(nullptr), verbose(false), debug(false)
     {
+        std::fill(pipes, pipes + MAX_PIPES, nullptr);
+        std::fill(runnables, runnables + MAX_RUNNABLES, nullptr);
     }
 
     void add_pipe(pipebuf_common *p)

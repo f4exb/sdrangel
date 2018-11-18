@@ -38,13 +38,15 @@
 
 #define RTCPCOMPOUNDPACKETBUILDER_H
 
+#include <list>
+#include <algorithm>
+
 #include "rtpconfig.h"
 #include "rtcpcompoundpacket.h"
 #include "rtptimeutilities.h"
 #include "rtcpsdespacket.h"
 #include "rtperrors.h"
 #include "rtpendian.h"
-#include <list>
 
 #include "export.h"
 
@@ -151,6 +153,7 @@ private:
         Report()
         {
             headerdata = (uint8_t *) headerdata32;
+            std::fill(&headerdata32[0], &headerdata32[0] + ((sizeof(uint32_t) + sizeof(RTCPSenderReport)) / sizeof(uint32_t)), 0U);
             isSR = false;
             headerlength = 0;
         }

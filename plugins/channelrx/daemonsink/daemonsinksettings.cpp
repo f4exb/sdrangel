@@ -39,6 +39,7 @@ void DaemonSinkSettings::resetToDefaults()
     m_dataPort = 9090;
     m_rgbColor = QColor(140, 4, 4).rgb();
     m_title = "Daemon sink";
+    m_channelMarker = nullptr;
 }
 
 QByteArray DaemonSinkSettings::serialize() const

@@ -182,13 +182,16 @@ void ValueDial::paintEvent(QPaintEvent*)
 
 	painter.setPen(m_colorMapper.getBoundaryColor());
 	painter.setBrush(Qt::NoBrush);
-	for(int i = 1; i < m_numDigits + m_numDecimalPoints; i++) {
+
+	for (int i = 1; i < m_numDigits + m_numDecimalPoints; i++)
+	{
 		painter.setPen(m_colorMapper.getBoundaryColor());
 		painter.drawLine(1 + i * m_digitWidth, 1, 1 + i * m_digitWidth, height() - 1);
 		painter.setPen(m_colorMapper.getBoundaryAlphaColor());
 		painter.drawLine(0 + i * m_digitWidth, 1, 0 + i * m_digitWidth, height() - 1);
 		painter.drawLine(2 + i * m_digitWidth, 1, 2 + i * m_digitWidth, height() - 1);
 	}
+
 	painter.setPen(m_colorMapper.getBoundaryAlphaColor());
 	painter.drawLine(1, 1, 1, height() - 1);
 	painter.drawLine(width() - 2, 1, width() - 2, height() - 1);
@@ -201,13 +204,15 @@ void ValueDial::paintEvent(QPaintEvent*)
     painter.drawLine(1, height() - 1, width() - 1, height() - 1);
     painter.drawLine(width() - 1, height() - 1, width() - 1, 0);
 
-	if(m_hightlightedDigit >= 0) {
+	if (m_hightlightedDigit >= 0)
+	{
 		painter.setPen(Qt::NoPen);
 		painter.setBrush(m_colorMapper.getHighlightColor());
 		painter.drawRect(2 + m_hightlightedDigit * m_digitWidth, 1, m_digitWidth - 1, height() - 1);
 	}
 
-	if(m_animationState == 0) {
+	if (m_animationState == 0)
+	{
 		for(int i = 0; i < m_text.length(); i++) {
 			painter.setClipRect(1 + i * m_digitWidth, 1, m_digitWidth, m_digitHeight * 2);
 			painter.setPen(m_colorMapper.getSecondaryForegroundColor());
@@ -224,31 +229,39 @@ void ValueDial::paintEvent(QPaintEvent*)
 			painter.setBrush(m_colorMapper.getSecondaryForegroundColor());
 			painter.drawRect(4 + m_cursor * m_digitWidth, 1 + m_digitHeight * 1.5, m_digitWidth - 5, m_digitHeight / 6);
 		}
-	} else {
-		if(m_animationState != 0) {
-			for(int i = 0; i < m_text.length(); i++) {
-				if(m_text[i] == m_textNew[i]) {
-					painter.setClipRect(1 + i * m_digitWidth, 1, m_digitWidth, m_digitHeight * 2);
-					painter.setPen(m_colorMapper.getSecondaryForegroundColor());
-					painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * 0.6, m_digitWidth, m_digitHeight), Qt::AlignCenter, m_text.mid(i, 1));
-					if(m_text[i] != m_groupSeparator) {
-						painter.setPen(m_colorMapper.getForegroundColor());
-						painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * -0.7, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], true));
-						painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * 1.9, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], false));
-					}
-				} else {
-					int h = m_digitHeight * 0.6 + m_digitHeight * m_animationState / 2.0;
-					painter.setClipRect(1 + i * m_digitWidth, 1, m_digitWidth, m_digitHeight * 2);
-					painter.setPen(m_colorMapper.getSecondaryForegroundColor());
-					painter.drawText(QRect(1 + i * m_digitWidth, h, m_digitWidth, m_digitHeight), Qt::AlignCenter, m_text.mid(i, 1));
-					if(m_text[i] != m_groupSeparator) {
-						painter.setPen(m_colorMapper.getForegroundColor());
-						painter.drawText(QRect(1 + i * m_digitWidth, h + m_digitHeight * -0.7, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], true));
-						painter.drawText(QRect(1 + i * m_digitWidth, h + m_digitHeight * 1.9, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], false));
-					}
-				}
-			}
-		}
+	}
+	else
+	{
+        for (int i = 0; i < m_text.length(); i++)
+        {
+            if (m_text[i] == m_textNew[i])
+            {
+                painter.setClipRect(1 + i * m_digitWidth, 1, m_digitWidth, m_digitHeight * 2);
+                painter.setPen(m_colorMapper.getSecondaryForegroundColor());
+                painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * 0.6, m_digitWidth, m_digitHeight), Qt::AlignCenter, m_text.mid(i, 1));
+
+                if (m_text[i] != m_groupSeparator)
+                {
+                    painter.setPen(m_colorMapper.getForegroundColor());
+                    painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * -0.7, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], true));
+                    painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * 1.9, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], false));
+                }
+            }
+            else
+            {
+                int h = m_digitHeight * 0.6 + m_digitHeight * m_animationState / 2.0;
+                painter.setClipRect(1 + i * m_digitWidth, 1, m_digitWidth, m_digitHeight * 2);
+                painter.setPen(m_colorMapper.getSecondaryForegroundColor());
+                painter.drawText(QRect(1 + i * m_digitWidth, h, m_digitWidth, m_digitHeight), Qt::AlignCenter, m_text.mid(i, 1));
+
+                if (m_text[i] != m_groupSeparator)
+                {
+                    painter.setPen(m_colorMapper.getForegroundColor());
+                    painter.drawText(QRect(1 + i * m_digitWidth, h + m_digitHeight * -0.7, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], true));
+                    painter.drawText(QRect(1 + i * m_digitWidth, h + m_digitHeight * 1.9, m_digitWidth, m_digitHeight), Qt::AlignCenter, digitNeigh(m_text[i], false));
+                }
+            }
+        }
 	}
 }
 

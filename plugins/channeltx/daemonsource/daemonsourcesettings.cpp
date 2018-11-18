@@ -31,6 +31,7 @@ void DaemonSourceSettings::resetToDefaults()
     m_dataPort = 9090;
     m_rgbColor = QColor(140, 4, 4).rgb();
     m_title = "Daemon source";
+    m_channelMarker = nullptr;
 }
 
 QByteArray DaemonSourceSettings::serialize() const

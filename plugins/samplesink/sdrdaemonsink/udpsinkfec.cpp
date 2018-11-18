@@ -141,7 +141,10 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
             m_superBlock.m_header.m_blockIndex = m_txBlockIndex;
             m_superBlock.m_header.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
             m_superBlock.m_header.m_sampleBits = SDR_RX_SAMP_SZ;
-            memcpy((char *) &m_superBlock.m_protectedBlock, (const char *) &metaData, sizeof(SDRDaemonMetaDataFEC));
+
+            SDRDaemonMetaDataFEC *destMeta = (SDRDaemonMetaDataFEC *) &m_superBlock.m_protectedBlock;
+            *destMeta = metaData;
+            //memcpy((char *) &m_superBlock.m_protectedBlock, (const char *) &metaData, sizeof(SDRDaemonMetaDataFEC));
 
             if (!(metaData == m_currentMetaFEC))
             {

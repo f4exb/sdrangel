@@ -69,12 +69,8 @@ template<typename T> struct datvconstellation: runnable
 
                 for (; p < pend; ++p)
                 {
-                    if (m_objDATVScreen != 0)
-                    {
-                        m_objDATVScreen->selectRow(256 * (p->re - xymin) / (xymax - xymin));
-                        m_objDATVScreen->setDataColor(256 - 256 * ((p->im - xymin) / (xymax - xymin)), 255, 0, 255);
-                    }
-
+                    m_objDATVScreen->selectRow(256 * (p->re - xymin) / (xymax - xymin));
+                    m_objDATVScreen->setDataColor(256 - 256 * ((p->im - xymin) / (xymax - xymin)), 255, 0, 255);
                 }
 
                 if (cstln && (*cstln))

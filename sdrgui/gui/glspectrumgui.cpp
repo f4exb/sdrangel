@@ -499,7 +499,7 @@ int GLSpectrumGUI::getAveragingValue(int averagingIndex) const
 
     int v = averagingIndex - 1;
     int m = pow(10.0, v/3 > m_averagingMaxScale ? m_averagingMaxScale : v/3);
-    int x;
+    int x = 1;
 
     if (v % 3 == 0) {
         x = 2;

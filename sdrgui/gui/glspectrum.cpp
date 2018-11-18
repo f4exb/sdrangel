@@ -1561,18 +1561,9 @@ void GLSpectrum::applyChanges()
 
 		m_waterfallBuffer = new QImage(m_fftSize, waterfallHeight, QImage::Format_ARGB32);
 
-		if(m_waterfallBuffer != 0)
-		{
-			m_waterfallBuffer->fill(qRgb(0x00, 0x00, 0x00));
-			m_glShaderWaterfall.initTexture(*m_waterfallBuffer);
-			m_waterfallBufferPos = 0;
-		}
-		else
-		{
-			m_fftSize = 0;
-			m_changesPending = true;
-			return;
-		}
+        m_waterfallBuffer->fill(qRgb(0x00, 0x00, 0x00));
+        m_glShaderWaterfall.initTexture(*m_waterfallBuffer);
+        m_waterfallBufferPos = 0;
 	}
 
 	if(fftSizeChanged)
@@ -1588,17 +1579,8 @@ void GLSpectrum::applyChanges()
 
 		m_histogramBuffer = new QImage(m_fftSize, 100, QImage::Format_RGB32);
 
-		if(m_histogramBuffer != 0)
-		{
-			m_histogramBuffer->fill(qRgb(0x00, 0x00, 0x00));
-			m_glShaderHistogram.initTexture(*m_histogramBuffer, QOpenGLTexture::ClampToEdge);
-		}
-		else
-		{
-			m_fftSize = 0;
-			m_changesPending = true;
-			return;
-		}
+        m_histogramBuffer->fill(qRgb(0x00, 0x00, 0x00));
+        m_glShaderHistogram.initTexture(*m_histogramBuffer, QOpenGLTexture::ClampToEdge);
 
 		m_histogram = new quint8[100 * m_fftSize];
 		memset(m_histogram, 0x00, 100 * m_fftSize);
