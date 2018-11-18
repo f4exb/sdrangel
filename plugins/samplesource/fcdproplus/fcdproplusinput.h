@@ -21,6 +21,8 @@
 #include <QByteArray>
 #include <inttypes.h>
 
+#include <alsa/asoundlib.h>
+
 #include <dsp/devicesamplesource.h>
 #include "fcdproplussettings.h"
 #include "fcdhid.h"
@@ -147,11 +149,14 @@ public:
 private:
     bool openDevice();
     void closeDevice();
+    bool openSource(const char *filename);
+    void closeSource();
 	void applySettings(const FCDProPlusSettings& settings, bool force);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FCDProPlusSettings& settings);
 
 	DeviceSourceAPI *m_deviceAPI;
 	hid_device *m_dev;
+	snd_pcm_t* fcd_handle;
 	QMutex m_mutex;
 	FCDProPlusSettings m_settings;
 	FCDProPlusThread* m_FCDThread;

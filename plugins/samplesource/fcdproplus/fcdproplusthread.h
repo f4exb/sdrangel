@@ -21,24 +21,23 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
-#include "dsp/inthalfbandfilter.h"
 #include <alsa/asoundlib.h>
+
+#include "dsp/inthalfbandfilter.h"
 #include "dsp/samplesinkfifo.h"
 
 class FCDProPlusThread : public QThread {
 	Q_OBJECT
 
 public:
-	FCDProPlusThread(SampleSinkFifo* sampleFifo, QObject* parent = NULL);
+	FCDProPlusThread(SampleSinkFifo* sampleFifo, snd_pcm_t *fcd_handle, QObject* parent = nullptr);
 	~FCDProPlusThread();
 
 	void startWork();
 	void stopWork();
-	bool OpenSource(const char *filename);
-	void CloseSource();
 
 private:
-	snd_pcm_t* fcd_handle;
+	snd_pcm_t* m_fcd_handle;
 
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;

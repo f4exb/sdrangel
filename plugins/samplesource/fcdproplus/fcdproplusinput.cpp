@@ -41,6 +41,7 @@ MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgFileRecord, Message)
 FCDProPlusInput::FCDProPlusInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_dev(0),
+	fcd_handle(0),
 	m_settings(),
 	m_FCDThread(0),
 	m_deviceDescription(fcd_traits<ProPlus>::displayedName),
@@ -87,14 +88,15 @@ void FCDProPlusInput::init()
 
 bool FCDProPlusInput::start()
 {
-
 //	QMutexLocker mutexLocker(&m_mutex);
 
     if (!m_dev) {
         return false;
     }
 
-    if (m_running) stop();
+    if (m_running) {
+        stop();
+    }
 
     qDebug() << "FCDProPlusInput::start";
 
@@ -105,13 +107,23 @@ bool FCDProPlusInput::start()
 
 	//applySettings(m_settings, true);
 
-	if(!m_sampleFifo.setSize(96000*4))
+	if (!m_sampleFifo.setSize(96000*4))
 	{
-		qCritical("Could not allocate SampleFifo");
+		qCritical("FCDProPlusInput::start: could not allocate SampleFifo");
 		return false;
 	}
 
-	m_FCDThread = new FCDProPlusThread(&m_sampleFifo);
+	if (!openSource(fcd_traits<ProPlus>::alsaDeviceName))
+	{
+        qCritical("FCDProPlusInput::start: could not open source");
+        return false;
+	}
+    else
+    {
+        qDebug("FCDProPlusInput::start: source opened");
+    }
+
+	m_FCDThread = new FCDProPlusThread(&m_sampleFifo, fcd_handle);
 	m_FCDThread->startWork();
 
 //	mutexLocker.unlock();
@@ -133,6 +145,75 @@ void FCDProPlusInput::closeDevice()
     m_dev = 0;
 }
 
+bool FCDProPlusInput::openSource(const char* cardname)
+{
+    bool fail = false;
+    snd_pcm_hw_params_t* params;
+    //fcd_rate = FCDPP_RATE;
+    //fcd_channels =2;
+    //fcd_format = SND_PCM_SFMT_U16_LE;
+    snd_pcm_stream_t fcd_stream = SND_PCM_STREAM_CAPTURE;
+
+    if (fcd_handle)
+    {
+        qDebug("FCDProPlusInput::OpenSource: already opened");
+        return false;
+    }
+
+    if (snd_pcm_open(&fcd_handle, cardname, fcd_stream, 0) < 0)
+    {
+        qCritical("FCDProPlusInput::OpenSource: cannot open %s", cardname);
+        return false;
+    }
+
+    snd_pcm_hw_params_alloca(&params);
+
+    if (snd_pcm_hw_params_any(fcd_handle, params) < 0)
+    {
+        qCritical("FCDProPlusInput::OpenSource: snd_pcm_hw_params_any failed");
+        fail = true;
+    }
+    else if (snd_pcm_hw_params(fcd_handle, params) < 0)
+    {
+        qCritical("FCDProPlusInput::OpenSource: snd_pcm_hw_params failed");
+        fail = true;
+        // TODO: check actual samplerate, may be crippled firmware
+    }
+    else
+    {
+        if (snd_pcm_start(fcd_handle) < 0)
+        {
+            qCritical("FCDProPlusInput::OpenSource: snd_pcm_start failed");
+            fail = true;
+        }
+        else
+        {
+            qDebug("FCDProPlusInput::OpenSource: snd_pcm_start OK");
+        }
+    }
+
+    if (fail)
+    {
+        snd_pcm_close(fcd_handle);
+        return false;
+    }
+    else
+    {
+        qDebug("FCDProPlusInput::OpenSource: Funcube stream started");
+    }
+
+    return true;
+}
+
+void FCDProPlusInput::closeSource()
+{
+    if (fcd_handle) {
+        snd_pcm_close(fcd_handle);
+    }
+
+    fcd_handle = nullptr;
+}
+
 void FCDProPlusInput::stop()
 {
 	QMutexLocker mutexLocker(&m_mutex);
@@ -142,7 +223,8 @@ void FCDProPlusInput::stop()
 		m_FCDThread->stopWork();
 		// wait for thread to quit ?
 		delete m_FCDThread;
-		m_FCDThread = 0;
+		m_FCDThread = nullptr;
+		closeSource();
 	}
 
 	m_running = false;
@@ -217,7 +299,7 @@ bool FCDProPlusInput::handleMessage(const Message& message)
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
-        qDebug() << "BladerfInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+        qDebug() << "FCDProPlusInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
 
         if (cmd.getStartStop())
         {
