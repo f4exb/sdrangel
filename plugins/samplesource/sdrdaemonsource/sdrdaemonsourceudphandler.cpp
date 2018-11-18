@@ -262,13 +262,7 @@ void SDRdaemonSourceUDPHandler::tick()
     const SDRDaemonMetaDataFEC& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
     m_readLength = m_readLengthSamples * (metaData.m_sampleBytes & 0xF) * 2;
 
-    if (SDR_RX_SAMP_SZ == metaData.m_sampleBits) // same sample size
-    {
-        // read samples directly feeding the SampleFifo (no callback)
-        m_sampleFifo->write(reinterpret_cast<quint8*>(m_sdrDaemonBuffer.readData(m_readLength)), m_readLength);
-        m_samplesCount += m_readLengthSamples;
-    }
-    else if (metaData.m_sampleBits == 16) // 16 -> 24 bits
+    if ((metaData.m_sampleBits == 16) && (SDR_RX_SAMP_SZ == 24)) // 16 -> 24 bits
     {
         if (m_readLengthSamples > m_converterBufferNbSamples)
         {
@@ -288,7 +282,7 @@ void SDRdaemonSourceUDPHandler::tick()
 
         m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*sizeof(Sample));
     }
-    else if (metaData.m_sampleBits == 24) // 24 -> 16 bits
+    else if ((metaData.m_sampleBits == 24) && (SDR_RX_SAMP_SZ == 16)) // 24 -> 16 bits
     {
         if (m_readLengthSamples > m_converterBufferNbSamples)
         {
@@ -307,7 +301,13 @@ void SDRdaemonSourceUDPHandler::tick()
 
         m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*sizeof(Sample));
     }
-    else
+    else if ((metaData.m_sampleBits == 16) || (metaData.m_sampleBits == 24)) // same sample size and valid size
+    {
+        // read samples directly feeding the SampleFifo (no callback)
+        m_sampleFifo->write(reinterpret_cast<quint8*>(m_sdrDaemonBuffer.readData(m_readLength)), m_readLength);
+        m_samplesCount += m_readLengthSamples;
+    }
+    else // invalid size
     {
         qWarning("SDRdaemonSourceUDPHandler::tick: unexpected sample size in stream: %d bits", (int) metaData.m_sampleBits);
     }

@@ -65,7 +65,8 @@ public:
 	    ATV_FM3,  //!< Classical frequency modulation with phase derivative discriminator
         ATV_AM,   //!< Classical amplitude modulation
         ATV_USB,  //!< AM with vestigial lower side band (main signal is in the upper side)
-        ATV_LSB   //!< AM with vestigial upper side band (main signal is in the lower side)
+        ATV_LSB,  //!< AM with vestigial upper side band (main signal is in the lower side)
+        ATV_NONE  //!< No modulation just produces zeros
 	};
 
 	struct ATVConfig

@@ -46,9 +46,13 @@ void UDPSinkFECWorker::startWork()
     qDebug("UDPSinkFECWorker::startWork");
     m_startWaitMutex.lock();
     m_udpSocket = new QUdpSocket(this);
+
     start();
-    while(!m_running)
+
+    while(!m_running) {
         m_startWaiter.wait(&m_startWaitMutex, 100);
+    }
+
     m_startWaitMutex.unlock();
 }
 

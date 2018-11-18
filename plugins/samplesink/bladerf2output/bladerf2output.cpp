@@ -303,6 +303,10 @@ bool BladeRF2Output::start()
                 m_deviceShared.m_dev->closeTx(i);
             }
 
+            // was used as temporary storage:
+            delete[] fifos;
+            delete[] log2Interps;
+
             needsStart = true;
         }
         else
@@ -450,6 +454,10 @@ void BladeRF2Output::stop()
 
             bladeRF2OutputThread->startWork();
         }
+
+        // was used as temporary storage:
+        delete[] fifos;
+        delete[] log2Interps;
     }
     else // remove channel from existing thread
     {

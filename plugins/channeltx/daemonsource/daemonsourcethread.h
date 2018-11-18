@@ -83,7 +83,7 @@ public:
 private:
     QMutex m_startWaitMutex;
     QWaitCondition m_startWaiter;
-    bool m_running;
+    volatile bool m_running;
 
     MessageQueue m_inputMessageQueue;
     SDRDaemonDataQueue *m_dataQueue;

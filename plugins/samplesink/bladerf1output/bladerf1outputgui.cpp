@@ -395,13 +395,9 @@ unsigned int Bladerf1OutputGui::getXb200Index(bool xb_200, bladerf_xb200_path xb
 			{
 				return 6;
 			}
-			else if (xb200Filter == BLADERF_XB200_222M)
+			else // xb200Filter == BLADERF_XB200_222M
 			{
 				return 7;
-			}
-			else
-			{
-				return 0;
 			}
 		}
 	}

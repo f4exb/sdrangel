@@ -329,6 +329,11 @@ bool BladeRF2Input::start()
                 ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
             }
 
+            // was used as temporary storage:
+            delete[] fifos;
+            delete[] log2Decims;
+            delete[] fcPoss;
+
             needsStart = true;
         }
         else
@@ -470,6 +475,11 @@ void BladeRF2Input::stop()
         if (stillActiveFIFO) {
             bladerf2InputThread->startWork();
         }
+
+        // was used as temporary storage:
+        delete[] fifos;
+        delete[] log2Decims;
+        delete[] fcPoss;
     }
     else // remove channel from existing thread
     {
