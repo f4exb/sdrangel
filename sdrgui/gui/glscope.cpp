@@ -30,6 +30,7 @@ GLScope::GLScope(QWidget* parent) :
     QGLWidget(parent),
     m_tracesData(0),
     m_traces(0),
+    m_processingTraceIndex(-1),
     m_bufferIndex(0),
     m_displayMode(DisplayX),
     m_dataChanged(false),
@@ -112,6 +113,21 @@ void GLScope::newTraces(std::vector<float *>* traces)
     }
 }
 
+void GLScope::newTraces(std::vector<float *>* traces, int traceIndex)
+{
+    if (traces->size() > 0)
+    {
+        if(!m_mutex.tryLock(2))
+            return;
+
+        m_processingTraceIndex.store(traceIndex);
+        m_traces = &traces[traceIndex];
+        m_dataChanged = true;
+
+        m_mutex.unlock();
+    }
+}
+
 void GLScope::initializeGL()
 {
     QOpenGLContext *glCurrentContext =  QOpenGLContext::currentContext();
@@ -176,11 +192,15 @@ void GLScope::resizeGL(int width, int height)
 
 void GLScope::paintGL()
 {
-    if(!m_mutex.tryLock(2))
+    if (!m_mutex.tryLock(2))
+    {
+        m_processingTraceIndex.store(-1);
         return;
+    }
 
-    if(m_configChanged)
+    if (m_configChanged) {
         applyConfig();
+    }
 
 //    qDebug("GLScope::paintGL: m_traceCounter: %d", m_traceCounter);
 //    m_traceCounter = 0;
@@ -920,6 +940,7 @@ void GLScope::paintGL()
         } // trace length > 0
     } // XY mixed + polar display
 
+    m_processingTraceIndex.store(-1);
     m_mutex.unlock();
 }
 
