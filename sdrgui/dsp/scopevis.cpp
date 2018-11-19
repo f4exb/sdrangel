@@ -621,7 +621,7 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, const Sa
         }
 
         // switch to next buffer only if it is not being processed by the scope
-        if (m_glScope->getProcessingTraceIndex().load() != ((m_traces.currentBufferIndex() + 1) % 2)) {
+        if (m_glScope->getProcessingTraceIndex().load() != (((int) m_traces.currentBufferIndex() + 1) % 2)) {
             m_traces.switchBuffer();
         }
 
