@@ -1,9 +1,18 @@
-/*
- * fcdtraits.h
- *
- *  Created on: 3 Sep 2015
- *      Author: egriffiths
- */
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015-2018 Edouard Griffiths, F4EXB                              //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
 
 #ifndef FCDLIB_FCDTRAITS_H_
 #define FCDLIB_FCDTRAITS_H_
@@ -25,6 +34,7 @@ struct fcd_traits
 	static const int convBufSize = (1<<11);
 	static const int fcdBufSize = (1<<12);
 	static const char *alsaDeviceName;
+	static const char *qtDeviceName;
     static const char *hardwareID;
     static const char *interfaceIID;
     static const char *displayedName;
@@ -43,6 +53,7 @@ struct fcd_traits<Pro>
 	static const int convBufSize = (1<<11);
 	static const int fcdBufSize = (1<<12);
 	static const char *alsaDeviceName;
+    static const char *qtDeviceName;
     static const char *hardwareID;
     static const char *interfaceIID;
     static const char *displayedName;
@@ -58,9 +69,10 @@ struct fcd_traits<ProPlus>
 	static const uint16_t vendorId = 0x04D8;
 	static const uint16_t productId = 0xFB31;
 	static const int sampleRate = 192000;
-	static const int convBufSize = (1<<12);
-	static const int fcdBufSize = (1<<18);
+	static const int convBufSize = (1<<10);
+	static const int fcdBufSize = (1<<18); // used in FCDProPlusReader
 	static const char *alsaDeviceName;
+    static const char *qtDeviceName;
     static const char *hardwareID;
     static const char *interfaceIID;
     static const char *displayedName;

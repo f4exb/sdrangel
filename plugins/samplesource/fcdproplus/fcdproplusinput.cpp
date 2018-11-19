@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2016-2018 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -13,8 +13,6 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
-
-// FIXME: FCD is handled very badly!
 
 #include <QDebug>
 #include <string.h>
@@ -47,6 +45,7 @@ FCDProPlusInput::FCDProPlusInput(DeviceSourceAPI *deviceAPI) :
 	m_deviceDescription(fcd_traits<ProPlus>::displayedName),
 	m_running(false)
 {
+    m_fcdFIFO.setSize(4*fcd_traits<ProPlus>::convBufSize);
     openDevice();
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
@@ -113,17 +112,17 @@ bool FCDProPlusInput::start()
 		return false;
 	}
 
-	if (!openSource(fcd_traits<ProPlus>::alsaDeviceName))
+	if (!openFCDAudio(fcd_traits<ProPlus>::qtDeviceName))
 	{
-        qCritical("FCDProPlusInput::start: could not open source");
+        qCritical("FCDProPlusInput::start: could not open FCD audio source");
         return false;
 	}
     else
     {
-        qDebug("FCDProPlusInput::start: source opened");
+        qDebug("FCDProPlusInput::start: FCD audio source opened");
     }
 
-	m_FCDThread = new FCDProPlusThread(&m_sampleFifo, fcd_handle);
+	m_FCDThread = new FCDProPlusThread(&m_sampleFifo, &m_fcdFIFO);
 	m_FCDThread->startWork();
 
 //	mutexLocker.unlock();
@@ -145,73 +144,33 @@ void FCDProPlusInput::closeDevice()
     m_dev = 0;
 }
 
-bool FCDProPlusInput::openSource(const char* cardname)
+bool FCDProPlusInput::openFCDAudio(const char* cardname)
 {
-    bool fail = false;
-    snd_pcm_hw_params_t* params;
-    //fcd_rate = FCDPP_RATE;
-    //fcd_channels =2;
-    //fcd_format = SND_PCM_SFMT_U16_LE;
-    snd_pcm_stream_t fcd_stream = SND_PCM_STREAM_CAPTURE;
+    AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+    const QList<QAudioDeviceInfo>& audioList = audioDeviceManager->getInputDevices();
 
-    if (fcd_handle)
+    for (const auto &itAudio : audioList)
     {
-        qDebug("FCDProPlusInput::OpenSource: already opened");
-        return false;
-    }
-
-    if (snd_pcm_open(&fcd_handle, cardname, fcd_stream, 0) < 0)
-    {
-        qCritical("FCDProPlusInput::OpenSource: cannot open %s", cardname);
-        return false;
-    }
-
-    snd_pcm_hw_params_alloca(&params);
-
-    if (snd_pcm_hw_params_any(fcd_handle, params) < 0)
-    {
-        qCritical("FCDProPlusInput::OpenSource: snd_pcm_hw_params_any failed");
-        fail = true;
-    }
-    else if (snd_pcm_hw_params(fcd_handle, params) < 0)
-    {
-        qCritical("FCDProPlusInput::OpenSource: snd_pcm_hw_params failed");
-        fail = true;
-        // TODO: check actual samplerate, may be crippled firmware
-    }
-    else
-    {
-        if (snd_pcm_start(fcd_handle) < 0)
+        if (itAudio.deviceName().contains(QString(cardname)))
         {
-            qCritical("FCDProPlusInput::OpenSource: snd_pcm_start failed");
-            fail = true;
-        }
-        else
-        {
-            qDebug("FCDProPlusInput::OpenSource: snd_pcm_start OK");
+            int fcdDeviceIndex = audioDeviceManager->getInputDeviceIndex(itAudio.deviceName());
+            m_fcdAudioInput.start(fcdDeviceIndex, fcd_traits<ProPlus>::sampleRate);
+            int fcdSampleRate = m_fcdAudioInput.getRate();
+            qDebug("FCDProPlusInput::openFCDAudio: %s index %d at %d S/s",
+                    itAudio.deviceName().toStdString().c_str(), fcdDeviceIndex, fcdSampleRate);
+            m_fcdAudioInput.addFifo(&m_fcdFIFO);
+            return true;
         }
     }
 
-    if (fail)
-    {
-        snd_pcm_close(fcd_handle);
-        return false;
-    }
-    else
-    {
-        qDebug("FCDProPlusInput::OpenSource: Funcube stream started");
-    }
-
-    return true;
+    qCritical("FCDProPlusInput::openFCDAudio: device with name %s not found", cardname);
+    return false;
 }
 
-void FCDProPlusInput::closeSource()
+void FCDProPlusInput::closeFCDAudio()
 {
-    if (fcd_handle) {
-        snd_pcm_close(fcd_handle);
-    }
-
-    fcd_handle = nullptr;
+    m_fcdAudioInput.removeFifo(&m_fcdFIFO);
+    m_fcdAudioInput.stop();
 }
 
 void FCDProPlusInput::stop()
@@ -224,7 +183,7 @@ void FCDProPlusInput::stop()
 		// wait for thread to quit ?
 		delete m_FCDThread;
 		m_FCDThread = nullptr;
-		closeSource();
+		closeFCDAudio();
 	}
 
 	m_running = false;

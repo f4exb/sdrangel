@@ -23,7 +23,10 @@
 
 #include <alsa/asoundlib.h>
 
-#include <dsp/devicesamplesource.h>
+#include "dsp/devicesamplesource.h"
+#include "audio/audioinput.h"
+#include "audio/audiofifo.h"
+
 #include "fcdproplussettings.h"
 #include "fcdhid.h"
 
@@ -149,13 +152,15 @@ public:
 private:
     bool openDevice();
     void closeDevice();
-    bool openSource(const char *filename);
-    void closeSource();
+    bool openFCDAudio(const char *filename);
+    void closeFCDAudio();
 	void applySettings(const FCDProPlusSettings& settings, bool force);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FCDProPlusSettings& settings);
 
 	DeviceSourceAPI *m_deviceAPI;
 	hid_device *m_dev;
+	AudioInput m_fcdAudioInput;
+	AudioFifo m_fcdFIFO;
 	snd_pcm_t* fcd_handle;
 	QMutex m_mutex;
 	FCDProPlusSettings m_settings;

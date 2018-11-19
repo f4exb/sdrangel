@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
+// Copyright (C) 2016-2018 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -21,13 +20,13 @@
 #include "fcdproplusthread.h"
 
 #include "dsp/samplesinkfifo.h"
-#include "fcdtraits.h"
+#include "audio/audiofifo.h"
 
-FCDProPlusThread::FCDProPlusThread(SampleSinkFifo* sampleFifo, snd_pcm_t *fcd_handle, QObject* parent) :
+FCDProPlusThread::FCDProPlusThread(SampleSinkFifo* sampleFifo, AudioFifo *fcdFIFO, QObject* parent) :
 	QThread(parent),
-	m_fcd_handle(fcd_handle),
+	m_fcdFIFO(fcdFIFO),
 	m_running(false),
-	m_convertBuffer(fcd_traits<ProPlus>::convBufSize),
+	m_convertBuffer(fcd_traits<ProPlus>::convBufSize), // nb samples
 	m_sampleFifo(sampleFifo)
 {
 	start();
@@ -62,43 +61,18 @@ void FCDProPlusThread::run()
 	m_running = true;
 	qDebug("FCDThread::run: start running loop");
 
-	while (m_running)
-	{
-		if (work(fcd_traits<ProPlus>::convBufSize) < 0) {
-			break;
-		}
+	while (m_running) {
+	    work(fcd_traits<ProPlus>::convBufSize);
 	}
 
 	qDebug("FCDThread::run: running loop stopped");
+	m_running = false;
 }
 
-int FCDProPlusThread::work(int n_items)
+void FCDProPlusThread::work(unsigned int n_items)
 {
-	int l;
-	SampleVector::iterator it;
-	void *out;
-
-	it = m_convertBuffer.begin();
-	out = (void *)&it[0];
-
-	l = snd_pcm_mmap_readi(m_fcd_handle, out, (snd_pcm_uframes_t)n_items);
-
-	if (l > 0)
-	{
-	    m_sampleFifo->write(it, it + l);
-	}
-	else
-	{
-	    if (l == -EPIPE) {
-	        qDebug("FCDProPlusThread::work: Overrun detected");
-	    } else if (l < 0) {
-	        qDebug("FCDProPlusThread::work: snd_pcm_mmap_readi failed with code %d", l);
-	    } else {
-	        qDebug("FCDProPlusThread::work: snd_pcm_mmap_readi empty");
-	    }
-
-	    return 0;
-	}
-
-	return l;
+    uint32_t nbRead = m_fcdFIFO->read((unsigned char *) m_buf, n_items); // number of samples
+    SampleVector::iterator it = m_convertBuffer.begin();
+    m_decimators.decimate1(&it, m_buf, 2*nbRead);
+    m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
