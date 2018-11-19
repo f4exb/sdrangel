@@ -32,7 +32,6 @@ struct fcd_traits
 	static const uint16_t productId = 0x0;
 	static const int sampleRate = 48000;
 	static const int convBufSize = (1<<11);
-	static const int fcdBufSize = (1<<12);
 	static const char *alsaDeviceName;
 	static const char *qtDeviceName;
     static const char *hardwareID;
@@ -51,7 +50,6 @@ struct fcd_traits<Pro>
 	static const uint16_t productId = 0xFB56;
 	static const int sampleRate = 96000;
 	static const int convBufSize = (1<<11);
-	static const int fcdBufSize = (1<<12);
 	static const char *alsaDeviceName;
     static const char *qtDeviceName;
     static const char *hardwareID;
@@ -70,7 +68,6 @@ struct fcd_traits<ProPlus>
 	static const uint16_t productId = 0xFB31;
 	static const int sampleRate = 192000;
 	static const int convBufSize = (1<<10);
-	static const int fcdBufSize = (1<<18); // used in FCDProPlusReader
 	static const char *alsaDeviceName;
     static const char *qtDeviceName;
     static const char *hardwareID;
