@@ -45,7 +45,7 @@ FCDProPlusInput::FCDProPlusInput(DeviceSourceAPI *deviceAPI) :
 	m_deviceDescription(fcd_traits<ProPlus>::displayedName),
 	m_running(false)
 {
-    m_fcdFIFO.setSize(4*fcd_traits<ProPlus>::convBufSize);
+    m_fcdFIFO.setSize(20*fcd_traits<ProPlus>::convBufSize);
     openDevice();
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
