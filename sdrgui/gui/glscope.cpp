@@ -103,7 +103,7 @@ void GLScope::newTraces(std::vector<float *>* traces)
 {
     if (traces->size() > 0)
     {
-        if (!m_mutex.tryLock(2)) {
+        if (!m_mutex.tryLock(0)) {
             return;
         }
 
@@ -119,7 +119,7 @@ void GLScope::newTraces(std::vector<float *>* traces, int traceIndex)
 {
     if (traces->size() > 0)
     {
-        if(!m_mutex.tryLock(2)) {
+        if(!m_mutex.tryLock(0)) {
             return;
         }
 
@@ -197,7 +197,7 @@ void GLScope::resizeGL(int width, int height)
 
 void GLScope::paintGL()
 {
-    if (!m_mutex.tryLock(2)) {
+    if (!m_mutex.tryLock(0)) {
         return;
     }
 
