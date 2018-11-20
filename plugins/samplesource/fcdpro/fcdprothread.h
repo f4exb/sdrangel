@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2015-2018 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -20,33 +20,37 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
-#include "dsp/inthalfbandfilter.h"
-#include <alsa/asoundlib.h>
+
 #include "dsp/samplesinkfifo.h"
+#include "dsp/decimators.h"
+#include "fcdtraits.h"
+
+class AudioFifo;
 
 class FCDProThread : public QThread {
 	Q_OBJECT
 
 public:
-	FCDProThread(SampleSinkFifo* sampleFifo, QObject* parent = NULL);
+	FCDProThread(SampleSinkFifo* sampleFifo, AudioFifo *fcdFIFO, QObject* parent = nullptr);
 	~FCDProThread();
 
 	void startWork();
 	void stopWork();
-	bool OpenSource(const char *filename);
-	void CloseSource();
 
 private:
-	snd_pcm_t* fcd_handle;
+	AudioFifo* m_fcdFIFO;
 
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
 	bool m_running;
 
+    qint16 m_buf[fcd_traits<Pro>::convBufSize*2]; // stereo (I, Q)
 	SampleVector m_convertBuffer;
 	SampleSinkFifo* m_sampleFifo;
+	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16> m_decimators;
 
 	void run();
-	int work(int n_items);
+	void work(unsigned int n_items);
 };
+
 #endif // INCLUDE_FCDPROTHREAD_H

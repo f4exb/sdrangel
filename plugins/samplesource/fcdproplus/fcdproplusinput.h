@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2016-2018 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -20,8 +20,6 @@
 #include <QString>
 #include <QByteArray>
 #include <inttypes.h>
-
-#include <alsa/asoundlib.h>
 
 #include "dsp/devicesamplesource.h"
 #include "audio/audioinput.h"
@@ -161,7 +159,6 @@ private:
 	hid_device *m_dev;
 	AudioInput m_fcdAudioInput;
 	AudioFifo m_fcdFIFO;
-	snd_pcm_t* fcd_handle;
 	QMutex m_mutex;
 	FCDProPlusSettings m_settings;
 	FCDProPlusThread* m_FCDThread;

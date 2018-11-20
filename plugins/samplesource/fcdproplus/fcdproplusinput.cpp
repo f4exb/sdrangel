@@ -23,11 +23,10 @@
 
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include <dsp/filerecord.h>
+#include "dsp/filerecord.h"
+#include "device/devicesourceapi.h"
+
 #include "fcdproplusinput.h"
-
-#include <device/devicesourceapi.h>
-
 #include "fcdproplusthread.h"
 #include "fcdtraits.h"
 #include "fcdproplusconst.h"
@@ -39,7 +38,6 @@ MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgFileRecord, Message)
 FCDProPlusInput::FCDProPlusInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_dev(0),
-	fcd_handle(0),
 	m_settings(),
 	m_FCDThread(0),
 	m_deviceDescription(fcd_traits<ProPlus>::displayedName),
@@ -53,9 +51,13 @@ FCDProPlusInput::FCDProPlusInput(DeviceSourceAPI *deviceAPI) :
 
 FCDProPlusInput::~FCDProPlusInput()
 {
-    if (m_running) stop();
+    if (m_running) {
+        stop();
+    }
+
     m_deviceAPI->removeSink(m_fileSink);
     delete m_fileSink;
+
     closeDevice();
 }
 
@@ -66,9 +68,12 @@ void FCDProPlusInput::destroy()
 
 bool FCDProPlusInput::openDevice()
 {
+    if (m_dev != 0) {
+        closeDevice();
+    }
+
     int device = m_deviceAPI->getSampleSourceSequence();
     qDebug() << "FCDProPlusInput::openDevice with device #" << device;
-
     m_dev = fcdOpen(fcd_traits<ProPlus>::vendorId, fcd_traits<ProPlus>::productId, device);
 
     if (m_dev == 0)

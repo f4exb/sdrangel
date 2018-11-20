@@ -17,10 +17,13 @@
 #include <QDebug>
 #include <stdio.h>
 #include <errno.h>
-#include "fcdproplusthread.h"
+#include <chrono>
+#include <thread>
 
 #include "dsp/samplesinkfifo.h"
 #include "audio/audiofifo.h"
+
+#include "fcdproplusthread.h"
 
 FCDProPlusThread::FCDProPlusThread(SampleSinkFifo* sampleFifo, AudioFifo *fcdFIFO, QObject* parent) :
 	QThread(parent),
@@ -61,8 +64,10 @@ void FCDProPlusThread::run()
 	m_running = true;
 	qDebug("FCDThread::run: start running loop");
 
-	while (m_running) {
+	while (m_running)
+	{
 	    work(fcd_traits<ProPlus>::convBufSize);
+	    std::this_thread::sleep_for(std::chrono::microseconds(100));
 	}
 
 	qDebug("FCDThread::run: running loop stopped");
