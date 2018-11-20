@@ -219,6 +219,15 @@ void ScopeVis::setMemoryIndex(uint32_t memoryIndex)
 void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
     (void) positiveOnly;
+
+    if (m_currentTraceMemoryIndex > 0) { // in memory mode live trace is suspended
+        return;
+    }
+
+    if (!m_mutex.tryLock(0)) { // prevent conflicts with configuration process
+        return;
+    }
+
     if (m_freeRun) {
         m_triggerPoint = cbegin;
     }
@@ -228,41 +237,36 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
     else if (m_triggerState == TriggerUntriggered) {
         m_triggerPoint = end;
     }
-    else if ((m_triggerWaitForReset) || (m_currentTraceMemoryIndex > 0)) {
+    else if (m_triggerWaitForReset) {
         m_triggerPoint = end;
     }
     else {
         m_triggerPoint = cbegin;
     }
 
-    if ((m_triggerWaitForReset) || (m_currentTraceMemoryIndex > 0)) {
-        return;
-    }
-
-    if(!m_mutex.tryLock(2)) // prevent conflicts with configuration process
-        return;
-
     SampleVector::const_iterator begin(cbegin);
     int triggerPointToEnd;
 
     while (begin < end)
     {
-        if (begin + m_traceSize > end)
+        if (begin + m_traceSize > end) // buffer smaller than trace size (end - bagin) < m_traceSize
         {
             triggerPointToEnd = -1;
-            processTrace(begin, end, triggerPointToEnd);
+            processTrace(begin, end, triggerPointToEnd); // use all buffer
             if (triggerPointToEnd >= 0) {
                 m_triggerPoint = end - triggerPointToEnd;
             }
-            begin = end;
+
+            begin = end; // effectively breaks out the loop
         }
-        else
+        else // trace size fits in buffer
         {
             triggerPointToEnd = -1;
-            processTrace(begin, begin + m_traceSize, triggerPointToEnd);
+            processTrace(begin, begin + m_traceSize, triggerPointToEnd); // use part of buffer to fit trace size
             if (triggerPointToEnd >= 0) {
                 m_triggerPoint = begin + m_traceSize -triggerPointToEnd;
             }
+
             begin += m_traceSize;
         }
     }
