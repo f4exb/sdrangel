@@ -95,7 +95,7 @@ private:
     DisplayMode m_displayMode;
     QTimer m_timer;
     QMutex m_mutex;
-    bool m_dataChanged;
+    QAtomicInt m_dataChanged;
     bool m_configChanged;
     int m_sampleRate;
     int m_timeOfsProMill;
