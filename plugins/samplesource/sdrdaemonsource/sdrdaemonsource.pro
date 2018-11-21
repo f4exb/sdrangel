@@ -61,7 +61,7 @@ LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../swagger/$${build_subdir} -lswagger
 !macx:LIBS += -L../../../nanomsg/$${build_subdir} -lnanomsg
-macx:LIBS += -L/opt/local/lib -lnanomsg
+macx:LIBS += -L/usr/local/lib -lnanomsg
 LIBS += -L../../../cm256cc/$${build_subdir} -lcm256cc
 
 RESOURCES = ../../../sdrgui/resources/res.qrc
