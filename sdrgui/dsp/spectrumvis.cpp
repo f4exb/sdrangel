@@ -78,10 +78,13 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 {
 	// if no visualisation is set, send the samples to /dev/null
 
-	if(m_glSpectrum == 0)
-	{
+	if (m_glSpectrum == 0) {
 		return;
 	}
+
+    if (!m_mutex.tryLock(0)) { // prevent conflicts with configuration process
+        return;
+    }
 
 	SampleVector::const_iterator begin(cbegin);
 
@@ -92,8 +95,6 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 
 		if (todo >= samplesNeeded)
 		{
-			QMutexLocker mutexLocker(&m_mutex);
-
 			// fill up the buffer
 			std::vector<Complex>::iterator it = m_fftBuffer.begin() + m_fftBufferFill;
 
@@ -296,6 +297,8 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 			m_needMoreSamples = true;
 		}
 	}
+
+	 m_mutex.unlock();
 }
 
 void SpectrumVis::start()

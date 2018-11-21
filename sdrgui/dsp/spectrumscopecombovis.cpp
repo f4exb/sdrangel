@@ -18,8 +18,14 @@ void SpectrumScopeComboVis::feed(const SampleVector::const_iterator& begin, cons
 {
     (void) positiveOnly;
 	m_scopeVis->feed(begin, end, false);
-	SampleVector::const_iterator triggerPoint = m_scopeVis->getTriggerPoint();
-	m_spectrumVis->feedTriggered(triggerPoint, end, positiveOnly);
+	//SampleVector::const_iterator triggerPoint = m_scopeVis->getTriggerPoint();
+	//m_spectrumVis->feedTriggered(triggerPoint, end, positiveOnly);
+	int triggerPointLocation = m_scopeVis->getTriggerLocation();
+	if ((triggerPointLocation >= 0) && (triggerPointLocation < end - begin)) {
+	    m_spectrumVis->feedTriggered(end - triggerPointLocation, end, positiveOnly);
+	} else {
+	    m_spectrumVis->feedTriggered(begin, end, positiveOnly);
+	}
 }
 
 void SpectrumScopeComboVis::start()

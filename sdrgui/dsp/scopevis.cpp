@@ -229,19 +229,19 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
     }
 
     if (m_freeRun) {
-        m_triggerPoint = cbegin;
+        m_triggerLocation = end - cbegin;
     }
     else if (m_triggerState == TriggerTriggered) {
-        m_triggerPoint = cbegin;
+        m_triggerLocation = end - cbegin;
     }
     else if (m_triggerState == TriggerUntriggered) {
-        m_triggerPoint = end;
+        m_triggerLocation = 0;
     }
     else if (m_triggerWaitForReset) {
-        m_triggerPoint = end;
+        m_triggerLocation = 0;
     }
     else {
-        m_triggerPoint = cbegin;
+        m_triggerLocation = end - cbegin;
     }
 
     SampleVector::const_iterator begin(cbegin);
@@ -254,7 +254,7 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
             triggerPointToEnd = -1;
             processTrace(begin, end, triggerPointToEnd); // use all buffer
             if (triggerPointToEnd >= 0) {
-                m_triggerPoint = end - triggerPointToEnd;
+                m_triggerLocation = triggerPointToEnd;
             }
 
             begin = end; // effectively breaks out the loop
@@ -264,7 +264,8 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
             triggerPointToEnd = -1;
             processTrace(begin, begin + m_traceSize, triggerPointToEnd); // use part of buffer to fit trace size
             if (triggerPointToEnd >= 0) {
-                m_triggerPoint = begin + m_traceSize -triggerPointToEnd;
+                //m_triggerPoint = begin + m_traceSize - triggerPointToEnd;
+                m_triggerLocation = triggerPointToEnd - m_traceSize;
             }
 
             begin += m_traceSize;

@@ -243,7 +243,7 @@ public:
     virtual void start();
     virtual void stop();
     virtual bool handleMessage(const Message& message);
-    SampleVector::const_iterator getTriggerPoint() const { return m_triggerPoint; }
+    int getTriggerLocation() const { return m_triggerLocation; }
 
 private:
     // === messages ===
@@ -1132,7 +1132,7 @@ private:
     uint32_t m_timeBase;                           //!< Trace display time divisor
     uint32_t m_timeOfsProMill;                     //!< Start trace shift in 1/1000 trace size
     bool m_traceStart;                             //!< Trace is at start point
-    SampleVector::const_iterator m_triggerPoint;   //!< Trigger start location in the samples vector
+    int m_triggerLocation;                         //!< Trigger location from end point
     int m_sampleRate;                              //!< Actual sample rate being used
     int m_liveSampleRate;                          //!< Sample rate in live mode
     int m_liveLog2Decim;                           //!< Sample rate decimation log2 in live mode
