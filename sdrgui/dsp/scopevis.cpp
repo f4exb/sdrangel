@@ -253,9 +253,8 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
         {
             triggerPointToEnd = -1;
             processTrace(begin, end, triggerPointToEnd); // use all buffer
-            if (triggerPointToEnd >= 0) {
-                m_triggerLocation = triggerPointToEnd;
-            }
+            m_triggerLocation = triggerPointToEnd < 0 ? 0 : triggerPointToEnd; // trim negative values
+            m_triggerLocation = m_triggerLocation > end - begin ? end - begin : m_triggerLocation; // trim past begin values
 
             begin = end; // effectively breaks out the loop
         }
@@ -263,10 +262,10 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
         {
             triggerPointToEnd = -1;
             processTrace(begin, begin + m_traceSize, triggerPointToEnd); // use part of buffer to fit trace size
-            if (triggerPointToEnd >= 0) {
-                //m_triggerPoint = begin + m_traceSize - triggerPointToEnd;
-                m_triggerLocation = triggerPointToEnd - m_traceSize;
-            }
+            //m_triggerPoint = begin + m_traceSize - triggerPointToEnd;
+            m_triggerLocation = end - begin + m_traceSize - triggerPointToEnd; // should always refer to end iterator
+            m_triggerLocation = m_triggerLocation < 0 ? 0 : m_triggerLocation; // trim negative values
+            m_triggerLocation = m_triggerLocation > end - begin ? end - begin : m_triggerLocation; // trim past begin values
 
             begin += m_traceSize;
         }
