@@ -168,6 +168,10 @@ For AGC, Auto DC and Auto IQ corrections the checkbox has its text label on the 
 
 ![SoapySDR input plugin GUI](../../../doc/img/SoapySDR_arg_bool1.png)
 
+When set (true) a checkbox is lit in orange:
+
+![SoapySDR input plugin GUI](../../../doc/img/SoapySDR_arg_bool3.png)
+
 <h3>A.5: Int, Float and String arguments</h3>
 
 For all these types of values a line editor is used. Numerical values are parsed from string:

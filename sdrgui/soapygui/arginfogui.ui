@@ -67,6 +67,9 @@ QCheckBox::indicator::checked {background: rgb(255, 157, 38);}</string>
         <height>16777215</height>
        </size>
       </property>
+      <property name="styleSheet">
+       <string notr="true">QLineEdit { background: rgb(50, 50, 50); border: 1px solid rgb(79, 79, 79) }</string>
+      </property>
      </widget>
     </item>
     <item>
