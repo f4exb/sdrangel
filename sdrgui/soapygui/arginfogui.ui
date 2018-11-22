@@ -50,6 +50,10 @@
     </item>
     <item>
      <widget class="QCheckBox" name="argCheck">
+      <property name="styleSheet">
+       <string notr="true">QCheckBox::indicator::unchecked {background: rgb(79,79,79);}
+QCheckBox::indicator::checked {background: rgb(255, 157, 38);}</string>
+      </property>
       <property name="text">
        <string/>
       </property>

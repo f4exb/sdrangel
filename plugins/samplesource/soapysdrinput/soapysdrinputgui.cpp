@@ -226,6 +226,7 @@ void SoapySDRInputGui::createGlobalGainControl()
     {
         m_autoGain = new QCheckBox(this);
         m_autoGain->setText(QString("AGC"));
+        m_autoGain->setStyleSheet("QCheckBox::indicator::unchecked {background: rgb(79,79,79);} QCheckBox::indicator::checked {background: rgb(255, 157, 38);}");
         layout->addWidget(m_autoGain);
 
         connect(m_autoGain, SIGNAL(toggled(bool)), this, SLOT(autoGainChanged(bool)));
@@ -282,6 +283,7 @@ void SoapySDRInputGui::createCorrectionsControl()
         m_autoDCCorrection = new QCheckBox(this);
         m_autoDCCorrection->setText(QString("Auto DC corr"));
         m_autoDCCorrection->setToolTip(QString("Automatic hardware DC offset correction"));
+        m_autoDCCorrection->setStyleSheet("QCheckBox::indicator::unchecked {background: rgb(79,79,79);} QCheckBox::indicator::checked {background: rgb(255, 157, 38);}");
         layout->addWidget(m_autoDCCorrection);
 
         connect(m_autoDCCorrection, SIGNAL(toggled(bool)), this, SLOT(autoDCCorrectionChanged(bool)));
@@ -307,6 +309,7 @@ void SoapySDRInputGui::createCorrectionsControl()
         m_autoIQCorrection = new QCheckBox(this);
         m_autoIQCorrection->setText(QString("Auto IQ corr"));
         m_autoIQCorrection->setToolTip(QString("Automatic hardware IQ imbalance correction"));
+        m_autoIQCorrection->setStyleSheet("QCheckBox::indicator::unchecked {background: rgb(79,79,79);} QCheckBox::indicator::checked {background: rgb(255, 157, 38);}");
         layout->addWidget(m_autoIQCorrection);
 
         connect(m_autoIQCorrection, SIGNAL(toggled(bool)), this, SLOT(autoIQCorrectionChanged(bool)));
