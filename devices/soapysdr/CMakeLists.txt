@@ -20,7 +20,7 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${SOAPYSDRSRC}
+    ${LIBSOAPYSDRSRC}
 )
 else (BUILD_DEBIAN)
 include_directories(

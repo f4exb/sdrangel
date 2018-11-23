@@ -28,8 +28,8 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
     ${CMAKE_SOURCE_DIR}/devices
-    ${SOAPYSDRSRC}/include
-    ${SOAPYSDRSRC}/src
+    ${LIBSOAPYSDRSRC}/include
+    ${LIBSOAPYSDRSRC}/src
 )
 else (BUILD_DEBIAN)
 include_directories(
@@ -56,7 +56,7 @@ add_library(outputsoapysdr SHARED
 if (BUILD_DEBIAN)
 target_link_libraries(outputsoapysdr
     ${QT_LIBRARIES}
-    bladerf
+    soapysdr
     sdrbase
     sdrgui
     swagger
