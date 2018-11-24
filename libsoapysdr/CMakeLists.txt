@@ -1,5 +1,7 @@
 project(soapysdr)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 ########################################################################
 # gather version information
 # packagers may specify -DSOAPY_SDR_EXTVER="foo" to replace the git hash

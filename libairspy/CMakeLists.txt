@@ -1,5 +1,7 @@
 project(airspy)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 find_package(LibUSB)
 
 remove_definitions(-DUSE_SSE2)

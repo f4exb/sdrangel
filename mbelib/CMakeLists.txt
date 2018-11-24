@@ -1,5 +1,7 @@
 project(mbelib)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(mbelib_SOURCES
     ${LIBMBELIBSRC}/ambe3600x2400.c
     ${LIBMBELIBSRC}/ambe3600x2450.c
