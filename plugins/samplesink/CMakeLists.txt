@@ -40,7 +40,6 @@ if (BUILD_DEBIAN)
     add_subdirectory(limesdroutput)
     add_subdirectory(plutosdroutput)
     add_subdirectory(sdrdaemonsink)
-    add_subdirectory(soapysdroutput)
 endif (BUILD_DEBIAN)
 
 add_subdirectory(filesink)
