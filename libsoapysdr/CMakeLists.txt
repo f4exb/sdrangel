@@ -72,6 +72,20 @@ option(CMAKE_INSTALL_RPATH_USE_LINK_PATH "build with automatic rpath" TRUE)
 
 ########################################################################
 
+list(APPEND SOAPY_SDR_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/Modules.cpp)
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/Modules.in.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/Modules.cpp
+@ONLY)
+
+list(APPEND SOAPY_SDR_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/Version.cpp)
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/Version.in.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/Version.cpp
+@ONLY)
+
+########################################################################
+
 file(GLOB soapysdr_SOURCES
 	${LIBSOAPYSDRSRC}/lib/*.cpp
 )
