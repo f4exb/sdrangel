@@ -494,6 +494,16 @@
       </spacer>
      </item>
      <item>
+      <widget class="QCheckBox" name="offsetTuning">
+       <property name="toolTip">
+        <string>Offset tuning</string>
+       </property>
+       <property name="text">
+        <string>Ofs</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="rfBWabel">
        <property name="text">
         <string>RFBW</string>

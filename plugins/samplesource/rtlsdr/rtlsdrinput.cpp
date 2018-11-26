@@ -507,13 +507,24 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
 
         if (m_dev != 0)
         {
-            if (rtlsdr_set_tuner_bandwidth( m_dev, m_settings.m_rfBandwidth) != 0)
-            {
+            if (rtlsdr_set_tuner_bandwidth( m_dev, m_settings.m_rfBandwidth) != 0) {
                 qCritical("RTLSDRInput::applySettings: could not set RF bandwidth to %u", m_settings.m_rfBandwidth);
-            }
-            else
-            {
+            } else {
                 qDebug() << "RTLSDRInput::applySettings: set RF bandwidth to " << m_settings.m_rfBandwidth;
+            }
+        }
+    }
+
+    if ((m_settings.m_offsetTuning != settings.m_offsetTuning) || force)
+    {
+        m_settings.m_offsetTuning = settings.m_offsetTuning;
+
+        if (m_dev != 0)
+        {
+            if (rtlsdr_set_offset_tuning(m_dev, m_settings.m_offsetTuning ? 0 : 1) != 0) {
+                qCritical("RTLSDRInput::applySettings: could not set offset tuning to %s", m_settings.m_offsetTuning ? "on" : "off");
+            } else {
+                qDebug("RTLSDRInput::applySettings: offset tuning set to %s", m_settings.m_offsetTuning ? "on" : "off");
             }
         }
     }
