@@ -496,7 +496,7 @@
      <item>
       <widget class="QCheckBox" name="offsetTuning">
        <property name="toolTip">
-        <string>Offset tuning</string>
+        <string>Offset tuning (applies to some tuners only incl. E4000)</string>
        </property>
        <property name="text">
         <string>Ofs</string>

@@ -75,6 +75,9 @@ public:
     qint32 getNoModMode();
     void setNoModMode(qint32 no_mod_mode);
 
+    qint32 getOffsetTuning();
+    void setOffsetTuning(qint32 offset_tuning);
+
     qint32 getTransverterMode();
     void setTransverterMode(qint32 transverter_mode);
 
@@ -123,6 +126,9 @@ private:
 
     qint32 no_mod_mode;
     bool m_no_mod_mode_isSet;
+
+    qint32 offset_tuning;
+    bool m_offset_tuning_isSet;
 
     qint32 transverter_mode;
     bool m_transverter_mode_isSet;

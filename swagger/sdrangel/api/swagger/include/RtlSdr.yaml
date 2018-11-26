@@ -24,11 +24,13 @@ RtlSdrSettings:
       type: integer
     noModMode:
       type: integer
+    offsetTuning:
+      type: integer
     transverterMode:
       type: integer
     transverterDeltaFrequency:
       type: integer
-      format: int64      
+      format: int64
     rfBandwidth:
       type: integer
     fileRecordName:

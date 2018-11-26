@@ -50,6 +50,8 @@ SWGRtlSdrSettings::SWGRtlSdrSettings() {
     m_agc_isSet = false;
     no_mod_mode = 0;
     m_no_mod_mode_isSet = false;
+    offset_tuning = 0;
+    m_offset_tuning_isSet = false;
     transverter_mode = 0;
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
@@ -88,6 +90,8 @@ SWGRtlSdrSettings::init() {
     m_agc_isSet = false;
     no_mod_mode = 0;
     m_no_mod_mode_isSet = false;
+    offset_tuning = 0;
+    m_offset_tuning_isSet = false;
     transverter_mode = 0;
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
@@ -100,6 +104,7 @@ SWGRtlSdrSettings::init() {
 
 void
 SWGRtlSdrSettings::cleanup() {
+
 
 
 
@@ -151,6 +156,8 @@ SWGRtlSdrSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&agc, pJson["agc"], "qint32", "");
     
     ::SWGSDRangel::setValue(&no_mod_mode, pJson["noModMode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&offset_tuning, pJson["offsetTuning"], "qint32", "");
     
     ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
     
@@ -208,6 +215,9 @@ SWGRtlSdrSettings::asJsonObject() {
     }
     if(m_no_mod_mode_isSet){
         obj->insert("noModMode", QJsonValue(no_mod_mode));
+    }
+    if(m_offset_tuning_isSet){
+        obj->insert("offsetTuning", QJsonValue(offset_tuning));
     }
     if(m_transverter_mode_isSet){
         obj->insert("transverterMode", QJsonValue(transverter_mode));
@@ -336,6 +346,16 @@ SWGRtlSdrSettings::setNoModMode(qint32 no_mod_mode) {
 }
 
 qint32
+SWGRtlSdrSettings::getOffsetTuning() {
+    return offset_tuning;
+}
+void
+SWGRtlSdrSettings::setOffsetTuning(qint32 offset_tuning) {
+    this->offset_tuning = offset_tuning;
+    this->m_offset_tuning_isSet = true;
+}
+
+qint32
 SWGRtlSdrSettings::getTransverterMode() {
     return transverter_mode;
 }
@@ -391,6 +411,7 @@ SWGRtlSdrSettings::isSet(){
         if(m_iq_imbalance_isSet){ isObjectUpdated = true; break;}
         if(m_agc_isSet){ isObjectUpdated = true; break;}
         if(m_no_mod_mode_isSet){ isObjectUpdated = true; break;}
+        if(m_offset_tuning_isSet){ isObjectUpdated = true; break;}
         if(m_transverter_mode_isSet){ isObjectUpdated = true; break;}
         if(m_transverter_delta_frequency_isSet){ isObjectUpdated = true; break;}
         if(m_rf_bandwidth_isSet){ isObjectUpdated = true; break;}

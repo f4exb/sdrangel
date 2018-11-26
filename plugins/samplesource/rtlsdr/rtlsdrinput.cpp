@@ -598,6 +598,9 @@ int RTLSDRInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("noModMode")) {
         settings.m_noModMode = response.getRtlSdrSettings()->getNoModMode() != 0;
     }
+    if (deviceSettingsKeys.contains("offsetTuning")) {
+        settings.m_offsetTuning = response.getRtlSdrSettings()->getOffsetTuning() != 0;
+    }
     if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
         settings.m_transverterDeltaFrequency = response.getRtlSdrSettings()->getTransverterDeltaFrequency();
     }
@@ -638,6 +641,7 @@ void RTLSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getRtlSdrSettings()->setLog2Decim(settings.m_log2Decim);
     response.getRtlSdrSettings()->setLowSampleRate(settings.m_lowSampleRate ? 1 : 0);
     response.getRtlSdrSettings()->setNoModMode(settings.m_noModMode ? 1 : 0);
+    response.getRtlSdrSettings()->setOffsetTuning(settings.m_offsetTuning ? 1 : 0);
     response.getRtlSdrSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getRtlSdrSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
     response.getRtlSdrSettings()->setRfBandwidth(settings.m_rfBandwidth);
