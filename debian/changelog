@@ -1,6 +1,7 @@
 sdrangel (4.3.1-1) unstable; urgency=medium
 
   * RTL-SDR: offset tuning support
+  * SoapySDR support: 250 ms minimum timeout
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 02 Dec 2018 21:14:18 +0100
 
