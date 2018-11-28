@@ -14,7 +14,7 @@ copy sdrbase\res.qrb %2\sdrbase.rcc
 copy sdrgui\%1\sdrgui.dll %2
 copy devices\%1\devices.dll %2
 copy mbelib\%1\mbelib.dll %2
-REM copy dsdcc\%1\dsdcc.dll %2
+copy dsdcc\%1\dsdcc.dll %2
 copy serialdv\%1\serialdv.dll %2
 copy httpserver\%1\httpserver.dll %2
 copy qrtplib\%1\qrtplib.dll %2
@@ -55,7 +55,7 @@ copy plugins\channelrx\demodam\%1\demodam.dll %2\plugins\channelrx
 copy plugins\channelrx\demodatv\%1\demodatv.dll %2\plugins\channelrx
 copy plugins\channelrx\demodbfm\%1\demodbfm.dll %2\plugins\channelrx
 copy plugins\channelrx\demoddatv\%1\demoddatv.dll %2\plugins\channelrx
-REM copy plugins\channelrx\demoddsd\%1\demoddsd.dll %2\plugins\channelrx
+copy plugins\channelrx\demoddsd\%1\demoddsd.dll %2\plugins\channelrx
 REM copy plugins\channelrx\demodlora\%1\demodlora.dll %2\plugins\channelrx
 copy plugins\channelrx\demodnfm\%1\demodnfm.dll %2\plugins\channelrx
 copy plugins\channelrx\demodssb\%1\demodssb.dll %2\plugins\channelrx

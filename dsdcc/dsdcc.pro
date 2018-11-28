@@ -9,6 +9,8 @@ QT += core
 TEMPLATE = lib
 TARGET = dsdcc
 
+CONFIG(MSVC):DEFINES += dsdcc_EXPORTS
+
 CONFIG(MINGW32):LIBDSDCCSRC = "C:\softs\dsdcc"
 CONFIG(MINGW64):LIBDSDCCSRC = "C:\softs\dsdcc"
 CONFIG(MSVC):LIBDSDCCSRC = "C:\softs\dsdcc"
@@ -52,7 +54,8 @@ $$LIBDSDCCSRC/viterbi5.cpp\
 $$LIBDSDCCSRC/pn.cpp\
 $$LIBDSDCCSRC/mbefec.cpp\
 $$LIBDSDCCSRC/phaselock.cpp\
-$$LIBDSDCCSRC/locator.cpp
+$$LIBDSDCCSRC/locator.cpp\
+$$LIBDSDCCSRC/timeutil.cpp
 
 HEADERS = $$LIBDSDCCSRC/descramble.h\
 $$LIBDSDCCSRC/dmr.h\
@@ -82,6 +85,8 @@ $$LIBDSDCCSRC/viterbi5.h\
 $$LIBDSDCCSRC/pn.h\
 $$LIBDSDCCSRC/mbefec.h\
 $$LIBDSDCCSRC/phaselock.h\
-$$LIBDSDCCSRC/locator.h
+$$LIBDSDCCSRC/locator.h\
+$$LIBDSDCCSRC/timeutil.h\
+$$LIBDSDCCSRC/export.h
 
 LIBS += -L../mbelib/$${build_subdir} -lmbelib
