@@ -2,7 +2,13 @@
 #define LEANSDR_GENERIC_H
 
 #include <sys/types.h>
+
+#ifdef _MSC_VER
+#include <stdlib.h>
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 #include "leansdr/math.h"
 
@@ -29,7 +35,11 @@ struct file_reader: runnable
         if (!size)
             return;
 
+#ifdef _MSC_VER
+        again: ssize_t nr = _read(fdin, out.wr(), size);
+#else
         again: ssize_t nr = read(fdin, out.wr(), size);
+#endif
         if (nr < 0)
         {
             fatal("leansdr::file_reader::run: read");
@@ -41,7 +51,11 @@ struct file_reader: runnable
                 return;
             if (sch->debug)
                 fprintf(stderr, "leansdr::file_reader::run: %s looping\n", name);
+#ifdef _MSC_VER
+            off_t res = _lseek(fdin, 0, SEEK_SET);
+#else
             off_t res = lseek(fdin, 0, SEEK_SET);
+#endif
             if (res == (off_t) -1)
             {
                 fatal("leansdr::file_reader::run: lseek");
@@ -57,7 +71,11 @@ struct file_reader: runnable
         {
             if (sch->debug)
                 fprintf(stderr, "+");
+#ifdef _MSC_VER
+            ssize_t nr2 = _read(fdin, (char*) out.wr() + nr, remain);
+#else
             ssize_t nr2 = read(fdin, (char*) out.wr() + nr, remain);
+#endif
             if (nr2 <= 0)
             {
                 fatal("leansdr::file_reader::run: partial read");
@@ -89,7 +107,11 @@ struct file_writer: runnable
         int size = in.readable() * sizeof(T);
         if (!size)
             return;
+#ifdef _MSC_VER
+        int nw = _write(fdout, in.rd(), size);
+#else
         int nw = write(fdout, in.rd(), size);
+#endif
         if (!nw)
         {
             fatal("leansdr::file_writer::run: pipe");
@@ -138,7 +160,11 @@ struct file_printer: runnable
                     fatal("leansdr::file_printer::run: obsolete glibc");
                     return;
                 }
+#ifdef _MSC_VER
+                int nw = _write(fdout, buf, len);
+#else
                 int nw = write(fdout, buf, len);
+#endif
                 if (nw != len)
                 {
                     fatal("leansdr::file_printer::run: partial write");

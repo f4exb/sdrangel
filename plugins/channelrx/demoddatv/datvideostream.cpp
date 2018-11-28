@@ -49,8 +49,6 @@ void DATVideostream::cleanUp()
         m_objeventLoop.exit();
     }
 
-    m_objMutex.unlock();
-
     m_intBytesAvailable=0;
     m_intBytesWaiting=0;
     m_intQueueWaiting=0;

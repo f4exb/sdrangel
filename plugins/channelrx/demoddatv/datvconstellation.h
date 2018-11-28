@@ -19,7 +19,6 @@
 #ifndef DATVCONSTELLATION_H
 #define DATVCONSTELLATION_H
 
-#include <sys/time.h>
 #include <vector>
 
 #include "leansdr/framework.h"
