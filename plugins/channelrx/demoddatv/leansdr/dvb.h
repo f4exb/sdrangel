@@ -671,13 +671,13 @@ static struct fec_spec
 }
 
 fec_specs[FEC_MAX] = {
-    [FEC12] = { 1, 2, polys_fec12 },
-    [FEC23] = { 2, 3, polys_fec23 },
-    [FEC46] = { 4, 6, polys_fec46 },
-    [FEC34] = { 3, 4, polys_fec34 },
-    [FEC56] = { 5, 6, polys_fec56 },
-    [FEC78] = { 7, 8, polys_fec78 },
-    [FEC45] = { 4, 5, polys_fec45 },  // Non-standard
+    { 1, 2, polys_fec12 },
+    { 2, 3, polys_fec23 },
+    { 4, 6, polys_fec46 },
+    { 3, 4, polys_fec34 },
+    { 5, 6, polys_fec56 },
+    { 7, 8, polys_fec78 },
+    { 4, 5, polys_fec45 },  // Non-standard
 };
 
 struct dvb_convol: runnable

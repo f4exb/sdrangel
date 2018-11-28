@@ -5,6 +5,8 @@ SET libiconvdir="C:\softs\iconv-1.9.2.win32"
 SET libzlib1dir="C:\softs\zlib-1.2.5"
 SET pothosdir="C:\Program Files\PothosSDR"
 SET pthreadsdir="C:\softs\pthreads-w32"
+SET ffmpegdir="C:\softs\ffmpeg-20181127-1035206-win64-shared\bin"
+SET qt5dir="C:\Qt\5.11.1\msvc2017_64\bin"
 
 copy app\%1\sdrangel.exe %2
 copy sdrbase\%1\sdrbase.dll %2
@@ -39,6 +41,8 @@ REM copy %opencvdir%\opencv_ffmpeg2413.dll %2
 REM copy %opencvdir%\libopencv_imgproc2413.dll %2
 REM copy %opencvdir%\libopencv_highgui2413.dll %2
 REM copy %opencvdir%\libopencv_core2413.dll %2
+copy %ffmpegdir%\*.dll %2
+copy %qt5dir%\Qt5Qml.dll %2
 
 mkdir %2\plugins
 mkdir %2\plugins\channelrx
@@ -50,6 +54,7 @@ copy plugins\channelrx\chanalyzer\%1\chanalyzer.dll %2\plugins\channelrx
 copy plugins\channelrx\demodam\%1\demodam.dll %2\plugins\channelrx
 copy plugins\channelrx\demodatv\%1\demodatv.dll %2\plugins\channelrx
 copy plugins\channelrx\demodbfm\%1\demodbfm.dll %2\plugins\channelrx
+copy plugins\channelrx\demoddatv\%1\demoddatv.dll %2\plugins\channelrx
 REM copy plugins\channelrx\demoddsd\%1\demoddsd.dll %2\plugins\channelrx
 REM copy plugins\channelrx\demodlora\%1\demodlora.dll %2\plugins\channelrx
 copy plugins\channelrx\demodnfm\%1\demodnfm.dll %2\plugins\channelrx
