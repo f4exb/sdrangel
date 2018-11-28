@@ -156,6 +156,12 @@ MSVC {
             soapysdr/devicesoapysdrscan.cpp\
             soapysdr/devicesoapysdrshared.cpp
 
+    SOURCES += plutosdr/deviceplutosdr.cpp\
+            plutosdr/deviceplutosdrbox.cpp\
+            plutosdr/deviceplutosdrparams.cpp\
+            plutosdr/deviceplutosdrscan.cpp\
+            plutosdr/deviceplutosdrshared.cpp
+
     HEADERS += bladerf1/devicebladerf1.h\
             bladerf1/devicebladerf1param.h\
             bladerf1/devicebladerf1values.h\
@@ -177,6 +183,12 @@ MSVC {
             soapysdr/devicesoapysdrparams.h\
             soapysdr/devicesoapysdrscan.h\
             soapysdr/devicesoapysdrshared.h
+
+    HEADERS += plutosdr/deviceplutosdr.h\
+            plutosdr/deviceplutosdrbox.h\
+            plutosdr/deviceplutosdrparams.h\
+            plutosdr/deviceplutosdrscan.h\
+            plutosdr/deviceplutosdrshared.h
 }
 
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
@@ -199,4 +211,5 @@ MSVC {
     LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lbladeRF
     LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lLimeSuite
     LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lSoapySDR
+    LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -llibiio
 }

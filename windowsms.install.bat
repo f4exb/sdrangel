@@ -27,7 +27,7 @@ copy librtlsdr\%1\librtlsdr.dll %2
 copy libairspy\%1\libairspy.dll %2
 copy libairspyhf\%1\libairspyhf.dll %2
 copy %pothosdir%\bin\bladeRF.dll %2
-REM copy libiio\%1\libiio.dll %2
+copy %pothosdir%\bin\libiio.dll %2
 copy %pothosdir%\bin\LimeSuite.dll %2
 copy %pothosdir%\bin\SoapySDR.dll %2
 
@@ -78,7 +78,7 @@ copy plugins\samplesource\airspyhf\%1\inputairspyhf.dll %2\plugins\samplesource
 copy plugins\samplesource\bladerf1input\%1\inputbladerf1.dll %2\plugins\samplesource
 copy plugins\samplesource\bladerf2input\%1\inputbladerf2.dll %2\plugins\samplesource
 copy plugins\samplesource\limesdrinput\%1\inputlimesdr.dll %2\plugins\samplesource
-REM copy plugins\samplesource\plutosdrinput\%1\inputplutosdr.dll %2\plugins\samplesource
+copy plugins\samplesource\plutosdrinput\%1\inputplutosdr.dll %2\plugins\samplesource
 copy plugins\samplesource\sdrdaemonsource\%1\inputsdrdaemonsource.dll %2\plugins\samplesource
 copy plugins\samplesource\soapysdrinput\%1\inputsoapysdr.dll %2\plugins\samplesource
 
@@ -87,6 +87,6 @@ copy plugins\samplesink\bladerf1output\%1\outputbladerf1.dll %2\plugins\samplesi
 copy plugins\samplesink\bladerf2output\%1\outputbladerf2.dll %2\plugins\samplesink
 copy plugins\samplesink\hackrfoutput\%1\outputhackrf.dll %2\plugins\samplesink
 copy plugins\samplesink\limesdroutput\%1\outputlimesdr.dll %2\plugins\samplesink
-REM copy plugins\samplesink\plutosdroutput\%1\outputplutosdr.dll %2\plugins\samplesink
+copy plugins\samplesink\plutosdroutput\%1\outputplutosdr.dll %2\plugins\samplesink
 copy plugins\samplesink\sdrdaemonsink\%1\outputsdrdaemonsink.dll %2\plugins\samplesink
 copy plugins\samplesink\soapysdroutput\%1\outputsoapysdr.dll %2\plugins\samplesink
