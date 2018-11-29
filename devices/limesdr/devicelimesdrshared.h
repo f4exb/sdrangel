@@ -103,18 +103,21 @@ public:
 
     public:
         float getTemperature() const { return m_temperature; }
+        uint8_t getGPIOPins() const { return m_gpioPins; }
 
-        static MsgReportDeviceInfo* create(float temperature)
+        static MsgReportDeviceInfo* create(float temperature, uint8_t gpioPins)
         {
-            return new MsgReportDeviceInfo(temperature);
+            return new MsgReportDeviceInfo(temperature, gpioPins);
         }
 
     private:
         float    m_temperature;
+        uint8_t  m_gpioPins;
 
-        MsgReportDeviceInfo(float temperature) :
+        MsgReportDeviceInfo(float temperature, uint8_t gpioPins) :
             Message(),
-            m_temperature(temperature)
+            m_temperature(temperature),
+            m_gpioPins(gpioPins)
         { }
     };
 

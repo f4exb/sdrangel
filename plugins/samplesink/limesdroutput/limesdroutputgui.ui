@@ -881,6 +881,23 @@ QToolTip{background-color: white; color: black;}</string>
       </widget>
      </item>
      <item>
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="gpioText">
+       <property name="toolTip">
+        <string>GPIO bits as hex value (LSB first)</string>
+       </property>
+       <property name="text">
+        <string>00</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -951,6 +968,39 @@ QToolTip{background-color: white; color: black;}</string>
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
   <include location="../../../sdrgui/resources/res.qrc"/>
  </resources>
  <connections/>

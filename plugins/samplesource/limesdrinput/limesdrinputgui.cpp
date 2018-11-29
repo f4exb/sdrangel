@@ -226,6 +226,7 @@ bool LimeSDRInputGUI::handleMessage(const Message& message)
     {
         DeviceLimeSDRShared::MsgReportDeviceInfo& report = (DeviceLimeSDRShared::MsgReportDeviceInfo&) message;
         ui->temperatureText->setText(tr("%1C").arg(QString::number(report.getTemperature(), 'f', 0)));
+        ui->gpioText->setText(tr("%1").arg(report.getGPIOPins(), 2, 16, QChar('0')));
         return true;
     }
     else if (LimeSDRInput::MsgStartStop::match(message))

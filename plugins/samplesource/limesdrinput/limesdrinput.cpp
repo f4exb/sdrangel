@@ -671,19 +671,20 @@ bool LimeSDRInput::handleMessage(const Message& message)
     else if (MsgGetDeviceInfo::match(message))
     {
         double temp = 0.0;
+        uint8_t gpioPins = 0;        
 
-        if (m_deviceShared.m_deviceParams->getDevice() && (LMS_GetChipTemperature(m_deviceShared.m_deviceParams->getDevice(), 0, &temp) == 0))
-        {
-            //qDebug("LimeSDRInput::handleMessage: MsgGetDeviceInfo: temperature: %f", temp);
+        if (m_deviceShared.m_deviceParams->getDevice() && (LMS_GetChipTemperature(m_deviceShared.m_deviceParams->getDevice(), 0, &temp) != 0)) {
+            qWarning("LimeSDRInput::handleMessage: MsgGetDeviceInfo: cannot get temperature");
         }
-        else
-        {
-            qDebug("LimeSDRInput::handleMessage: MsgGetDeviceInfo: cannot get temperature");
+
+        if (m_deviceShared.m_deviceParams->getDevice() && (LMS_GPIORead(m_deviceShared.m_deviceParams->getDevice(), &gpioPins, 1) != 0)) {
+            qWarning("LimeSDROutput::handleMessage: MsgGetDeviceInfo: cannot get GPIO pins values");
         }
 
         // send to oneself
-        if (m_deviceAPI->getSampleSourceGUIMessageQueue()) {
-            DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
+        if (m_deviceAPI->getSampleSourceGUIMessageQueue()) 
+        {
+            DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp, gpioPins);
             m_deviceAPI->getSampleSourceGUIMessageQueue()->push(report);
         }
 
@@ -695,7 +696,7 @@ bool LimeSDRInput::handleMessage(const Message& message)
         {
             if ((*itSource)->getSampleSourceGUIMessageQueue())
             {
-                DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
+                DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp, gpioPins);
                 (*itSource)->getSampleSourceGUIMessageQueue()->push(report);
             }
         }
@@ -708,7 +709,7 @@ bool LimeSDRInput::handleMessage(const Message& message)
         {
             if ((*itSink)->getSampleSinkGUIMessageQueue())
             {
-                DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
+                DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp, gpioPins);
                 (*itSink)->getSampleSinkGUIMessageQueue()->push(report);
             }
         }
@@ -1107,7 +1108,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
     if ((m_settings.m_gpioDir != settings.m_gpioDir) || force)
     {
-        if (LMS_GPIODirWrite(m_deviceShared.m_deviceParams->getDevice(), &settings.m_gpioDir, 1) < 0)
+        if (LMS_GPIODirWrite(m_deviceShared.m_deviceParams->getDevice(), &settings.m_gpioDir, 1) != 0)
         {
             qCritical("LimeSDROutput::applySettings: could not set GPIO directions to %u", settings.m_gpioDir);
         }
@@ -1120,7 +1121,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
     if ((m_settings.m_gpioPins != settings.m_gpioPins) || force)
     {
-        if (LMS_GPIOWrite(m_deviceShared.m_deviceParams->getDevice(), &settings.m_gpioPins, 1) < 0)
+        if (LMS_GPIOWrite(m_deviceShared.m_deviceParams->getDevice(), &settings.m_gpioPins, 1) != 0)
         {
             qCritical("LimeSDROutput::applySettings: could not set GPIO pins to %u", settings.m_gpioPins);
         }
