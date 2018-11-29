@@ -48,6 +48,10 @@ SWGLimeSdrInputReport::SWGLimeSdrInputReport() {
     m_hw_timestamp_isSet = false;
     temperature = 0.0f;
     m_temperature_isSet = false;
+    gpio_dir = 0;
+    m_gpio_dir_isSet = false;
+    gpio_pins = 0;
+    m_gpio_pins_isSet = false;
 }
 
 SWGLimeSdrInputReport::~SWGLimeSdrInputReport() {
@@ -76,10 +80,16 @@ SWGLimeSdrInputReport::init() {
     m_hw_timestamp_isSet = false;
     temperature = 0.0f;
     m_temperature_isSet = false;
+    gpio_dir = 0;
+    m_gpio_dir_isSet = false;
+    gpio_pins = 0;
+    m_gpio_pins_isSet = false;
 }
 
 void
 SWGLimeSdrInputReport::cleanup() {
+
+
 
 
 
@@ -122,6 +132,10 @@ SWGLimeSdrInputReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&hw_timestamp, pJson["hwTimestamp"], "qint32", "");
     
     ::SWGSDRangel::setValue(&temperature, pJson["temperature"], "float", "");
+    
+    ::SWGSDRangel::setValue(&gpio_dir, pJson["gpioDir"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&gpio_pins, pJson["gpioPins"], "qint32", "");
     
 }
 
@@ -168,6 +182,12 @@ SWGLimeSdrInputReport::asJsonObject() {
     }
     if(m_temperature_isSet){
         obj->insert("temperature", QJsonValue(temperature));
+    }
+    if(m_gpio_dir_isSet){
+        obj->insert("gpioDir", QJsonValue(gpio_dir));
+    }
+    if(m_gpio_pins_isSet){
+        obj->insert("gpioPins", QJsonValue(gpio_pins));
     }
 
     return obj;
@@ -273,6 +293,26 @@ SWGLimeSdrInputReport::setTemperature(float temperature) {
     this->m_temperature_isSet = true;
 }
 
+qint32
+SWGLimeSdrInputReport::getGpioDir() {
+    return gpio_dir;
+}
+void
+SWGLimeSdrInputReport::setGpioDir(qint32 gpio_dir) {
+    this->gpio_dir = gpio_dir;
+    this->m_gpio_dir_isSet = true;
+}
+
+qint32
+SWGLimeSdrInputReport::getGpioPins() {
+    return gpio_pins;
+}
+void
+SWGLimeSdrInputReport::setGpioPins(qint32 gpio_pins) {
+    this->gpio_pins = gpio_pins;
+    this->m_gpio_pins_isSet = true;
+}
+
 
 bool
 SWGLimeSdrInputReport::isSet(){
@@ -288,6 +328,8 @@ SWGLimeSdrInputReport::isSet(){
         if(m_link_rate_isSet){ isObjectUpdated = true; break;}
         if(m_hw_timestamp_isSet){ isObjectUpdated = true; break;}
         if(m_temperature_isSet){ isObjectUpdated = true; break;}
+        if(m_gpio_dir_isSet){ isObjectUpdated = true; break;}
+        if(m_gpio_pins_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

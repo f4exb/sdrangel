@@ -86,6 +86,12 @@ public:
     qint64 getTransverterDeltaFrequency();
     void setTransverterDeltaFrequency(qint64 transverter_delta_frequency);
 
+    qint32 getGpioDir();
+    void setGpioDir(qint32 gpio_dir);
+
+    qint32 getGpioPins();
+    void setGpioPins(qint32 gpio_pins);
+
 
     virtual bool isSet() override;
 
@@ -134,6 +140,12 @@ private:
 
     qint64 transverter_delta_frequency;
     bool m_transverter_delta_frequency_isSet;
+
+    qint32 gpio_dir;
+    bool m_gpio_dir_isSet;
+
+    qint32 gpio_pins;
+    bool m_gpio_pins_isSet;
 
 };
 

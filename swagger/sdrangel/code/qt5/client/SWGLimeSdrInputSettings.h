@@ -108,6 +108,12 @@ public:
     QString* getFileRecordName();
     void setFileRecordName(QString* file_record_name);
 
+    qint32 getGpioDir();
+    void setGpioDir(qint32 gpio_dir);
+
+    qint32 getGpioPins();
+    void setGpioPins(qint32 gpio_pins);
+
 
     virtual bool isSet() override;
 
@@ -177,6 +183,12 @@ private:
 
     QString* file_record_name;
     bool m_file_record_name_isSet;
+
+    qint32 gpio_dir;
+    bool m_gpio_dir_isSet;
+
+    qint32 gpio_pins;
+    bool m_gpio_pins_isSet;
 
 };
 

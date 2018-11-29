@@ -47,6 +47,12 @@ LimeSdrInputSettings:
       format: int64      
     fileRecordName:
       type: string
+    gpioDir:
+      type: integer
+      format: int8
+    gpioPins:
+      type: integer
+      format: int8
       
 LimeSdrOutputSettings:
   description: LimeSDR
@@ -83,6 +89,12 @@ LimeSdrOutputSettings:
     transverterDeltaFrequency:
       type: integer
       format: int64      
+    gpioDir:
+      type: integer
+      format: int8
+    gpioPins:
+      type: integer
+      format: int8
 
 LimeSdrInputReport:
   description: LimeSDR
@@ -112,7 +124,13 @@ LimeSdrInputReport:
       format: uint64
     temperature:
       type: number
-      format: float                        
+      format: float
+    gpioDir:
+      type: integer
+      format: int8                              
+    gpioPins:
+      type: integer
+      format: int8
 
 LimeSdrOutputReport:
   description: LimeSDR
@@ -142,5 +160,11 @@ LimeSdrOutputReport:
       format: uint64
     temperature:
       type: number
-      format: float                        
+      format: float   
+    gpioDir:
+      type: integer
+      format: int8                           
+    gpioPins:
+      type: integer
+      format: int8
       

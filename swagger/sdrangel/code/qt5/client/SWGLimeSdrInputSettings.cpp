@@ -72,6 +72,10 @@ SWGLimeSdrInputSettings::SWGLimeSdrInputSettings() {
     m_transverter_delta_frequency_isSet = false;
     file_record_name = nullptr;
     m_file_record_name_isSet = false;
+    gpio_dir = 0;
+    m_gpio_dir_isSet = false;
+    gpio_pins = 0;
+    m_gpio_pins_isSet = false;
 }
 
 SWGLimeSdrInputSettings::~SWGLimeSdrInputSettings() {
@@ -124,6 +128,10 @@ SWGLimeSdrInputSettings::init() {
     m_transverter_delta_frequency_isSet = false;
     file_record_name = new QString("");
     m_file_record_name_isSet = false;
+    gpio_dir = 0;
+    m_gpio_dir_isSet = false;
+    gpio_pins = 0;
+    m_gpio_pins_isSet = false;
 }
 
 void
@@ -152,6 +160,8 @@ SWGLimeSdrInputSettings::cleanup() {
     if(file_record_name != nullptr) { 
         delete file_record_name;
     }
+
+
 }
 
 SWGLimeSdrInputSettings*
@@ -208,6 +218,10 @@ SWGLimeSdrInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&gpio_dir, pJson["gpioDir"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&gpio_pins, pJson["gpioPins"], "qint32", "");
     
 }
 
@@ -290,6 +304,12 @@ SWGLimeSdrInputSettings::asJsonObject() {
     }
     if(file_record_name != nullptr && *file_record_name != QString("")){
         toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
+    }
+    if(m_gpio_dir_isSet){
+        obj->insert("gpioDir", QJsonValue(gpio_dir));
+    }
+    if(m_gpio_pins_isSet){
+        obj->insert("gpioPins", QJsonValue(gpio_pins));
     }
 
     return obj;
@@ -515,6 +535,26 @@ SWGLimeSdrInputSettings::setFileRecordName(QString* file_record_name) {
     this->m_file_record_name_isSet = true;
 }
 
+qint32
+SWGLimeSdrInputSettings::getGpioDir() {
+    return gpio_dir;
+}
+void
+SWGLimeSdrInputSettings::setGpioDir(qint32 gpio_dir) {
+    this->gpio_dir = gpio_dir;
+    this->m_gpio_dir_isSet = true;
+}
+
+qint32
+SWGLimeSdrInputSettings::getGpioPins() {
+    return gpio_pins;
+}
+void
+SWGLimeSdrInputSettings::setGpioPins(qint32 gpio_pins) {
+    this->gpio_pins = gpio_pins;
+    this->m_gpio_pins_isSet = true;
+}
+
 
 bool
 SWGLimeSdrInputSettings::isSet(){
@@ -542,6 +582,8 @@ SWGLimeSdrInputSettings::isSet(){
         if(m_transverter_mode_isSet){ isObjectUpdated = true; break;}
         if(m_transverter_delta_frequency_isSet){ isObjectUpdated = true; break;}
         if(file_record_name != nullptr && *file_record_name != QString("")){ isObjectUpdated = true; break;}
+        if(m_gpio_dir_isSet){ isObjectUpdated = true; break;}
+        if(m_gpio_pins_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

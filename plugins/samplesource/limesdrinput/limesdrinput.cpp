@@ -615,6 +615,17 @@ bool LimeSDRInput::handleMessage(const Message& message)
 
         return true;
     }
+    else if (DeviceLimeSDRShared::MsgReportGPIOChange::match(message))
+    {
+        DeviceLimeSDRShared::MsgReportGPIOChange& report = (DeviceLimeSDRShared::MsgReportGPIOChange&) message;
+
+        m_settings.m_gpioDir     = report.getGPIODir();
+        m_settings.m_gpioPins = report.getGPIOPins();
+
+        // no GUI for the moment only REST API
+
+        return true;
+    }
     else if (MsgGetStreamInfo::match(message))
     {
 //        qDebug() << "LimeSDRInput::handleMessage: MsgGetStreamInfo";
@@ -757,6 +768,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
     bool forwardChangeRxDSP  = false;
     bool forwardChangeAllDSP = false;
     bool forwardClockSource  = false;
+    bool forwardGPIOChange   = false;
     bool ownThreadWasRunning = false;
     bool doCalibration = false;
     bool doLPCalibration = false;
@@ -1093,6 +1105,32 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         }
     }
 
+    if ((m_settings.m_gpioDir != settings.m_gpioDir) || force)
+    {
+        if (LMS_GPIODirWrite(m_deviceShared.m_deviceParams->getDevice(), &settings.m_gpioDir, 1) < 0)
+        {
+            qCritical("LimeSDROutput::applySettings: could not set GPIO directions to %u", settings.m_gpioDir);
+        }
+        else
+        {
+            forwardGPIOChange = true;
+            qDebug("LimeSDROutput::applySettings: GPIO directions set to %u", settings.m_gpioDir);
+        }
+    }
+
+    if ((m_settings.m_gpioPins != settings.m_gpioPins) || force)
+    {
+        if (LMS_GPIOWrite(m_deviceShared.m_deviceParams->getDevice(), &settings.m_gpioPins, 1) < 0)
+        {
+            qCritical("LimeSDROutput::applySettings: could not set GPIO pins to %u", settings.m_gpioPins);
+        }
+        else
+        {
+            forwardGPIOChange = true;
+            qDebug("LimeSDROutput::applySettings: GPIO pins set to %u", settings.m_gpioPins);
+        }
+    }
+
     m_settings = settings;
     double clockGenFreqAfter;
 
@@ -1250,6 +1288,31 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         }
     }
 
+    if (forwardGPIOChange)
+    {
+        // send to source buddies
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+
+        for (; itSource != sourceBuddies.end(); ++itSource)
+        {
+            DeviceLimeSDRShared::MsgReportClockSourceChange *report = DeviceLimeSDRShared::MsgReportClockSourceChange::create(
+                    m_settings.m_extClock, m_settings.m_extClockFreq);
+            (*itSource)->getSampleSourceInputMessageQueue()->push(report);
+        }
+
+        // send to sink buddies
+        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+
+        for (; itSink != sinkBuddies.end(); ++itSink)
+        {
+            DeviceLimeSDRShared::MsgReportClockSourceChange *report = DeviceLimeSDRShared::MsgReportClockSourceChange::create(
+                    m_settings.m_extClock, m_settings.m_extClockFreq);
+            (*itSink)->getSampleSinkInputMessageQueue()->push(report);
+        }
+    }
+
     QLocale loc;
 
     qDebug().noquote() << "LimeSDRInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
@@ -1270,6 +1333,8 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             << " m_antennaPath: " << m_settings.m_antennaPath
             << " m_extClock: " << m_settings.m_extClock
             << " m_extClockFreq: " << loc.toString(m_settings.m_extClockFreq)
+            << " m_gpioDir: " << m_settings.m_gpioDir
+            << " m_gpioPins: " << m_settings.m_gpioPins
             << " force: " << force
             << " forceNCOFrequency: " << forceNCOFrequency
             << " doCalibration: " << doCalibration
@@ -1364,6 +1429,12 @@ int LimeSDRInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("fileRecordName")) {
         settings.m_fileRecordName = *response.getLimeSdrInputSettings()->getFileRecordName();
     }
+    if (deviceSettingsKeys.contains("gpioDir")) {
+        settings.m_gpioDir = response.getLimeSdrInputSettings()->getGpioDir() & 0xFF;
+    }
+    if (deviceSettingsKeys.contains("gpioPins")) {
+        settings.m_gpioPins = response.getLimeSdrInputSettings()->getGpioPins() & 0xFF;
+    }
 
     MsgConfigureLimeSDR *msg = MsgConfigureLimeSDR::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -1407,6 +1478,9 @@ void LimeSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     } else {
         response.getLimeSdrInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
+
+    response.getLimeSdrInputSettings()->setGpioDir(settings.m_gpioDir);
+    response.getLimeSdrInputSettings()->setGpioPins(settings.m_gpioPins);
 }
 
 int LimeSDRInput::webapiReportGet(
@@ -1452,6 +1526,8 @@ void LimeSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respon
 {
     bool success = false;
     double temp = 0.0;
+    uint8_t gpioDir = 0;
+    uint8_t gpioPins = 0;
     lms_stream_status_t status;
     status.active = false;
     status.fifoFilledCount = 0;
@@ -1474,9 +1550,14 @@ void LimeSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respon
     response.getLimeSdrInputReport()->setLinkRate(status.linkRate);
     response.getLimeSdrInputReport()->setHwTimestamp(status.timestamp);
 
-    if (m_deviceShared.m_deviceParams->getDevice()) {
+    if (m_deviceShared.m_deviceParams->getDevice())
+    {
         LMS_GetChipTemperature(m_deviceShared.m_deviceParams->getDevice(), 0, &temp);
+        LMS_GPIODirRead(m_deviceShared.m_deviceParams->getDevice(), &gpioDir, 1);
+        LMS_GPIORead(m_deviceShared.m_deviceParams->getDevice(), &gpioPins, 1);
     }
 
     response.getLimeSdrInputReport()->setTemperature(temp);
+    response.getLimeSdrInputReport()->setGpioDir(gpioDir);
+    response.getLimeSdrInputReport()->setGpioPins(gpioPins);
 }

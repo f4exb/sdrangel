@@ -118,6 +118,28 @@ public:
         { }
     };
 
+    class DEVICES_API MsgReportGPIOChange : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        uint8_t getGPIODir() const { return m_gpioDir; }
+        uint8_t getGPIOPins() const { return m_gpioPins; }
+
+        static MsgReportGPIOChange* create(uint8_t gpioDir, uint8_t gpioPins)
+        {
+            return new MsgReportGPIOChange(gpioDir, gpioPins);
+        }
+
+    private:
+        uint8_t m_gpioDir;
+        uint8_t m_gpioPins;
+
+        MsgReportGPIOChange(uint8_t gpioDir, uint8_t gpioPins) :
+            m_gpioDir(gpioDir),
+            m_gpioPins(gpioPins)
+        {}
+    };
+
     class DEVICES_API ThreadInterface
     {
     public:

@@ -71,6 +71,12 @@ public:
     float getTemperature();
     void setTemperature(float temperature);
 
+    qint32 getGpioDir();
+    void setGpioDir(qint32 gpio_dir);
+
+    qint32 getGpioPins();
+    void setGpioPins(qint32 gpio_pins);
+
 
     virtual bool isSet() override;
 
@@ -104,6 +110,12 @@ private:
 
     float temperature;
     bool m_temperature_isSet;
+
+    qint32 gpio_dir;
+    bool m_gpio_dir_isSet;
+
+    qint32 gpio_pins;
+    bool m_gpio_pins_isSet;
 
 };
 
