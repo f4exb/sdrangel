@@ -4,7 +4,7 @@ sdrangel (4.3.1-1) unstable; urgency=medium
   * SoapySDR support: 250 ms minimum timeout
   * LimeSDR REST API: support GPIO
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 02 Dec 2018 21:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 30 Nov 2018 21:14:18 +0100
 
 sdrangel (4.3.0-1) unstable; urgency=medium
 
