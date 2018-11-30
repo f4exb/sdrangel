@@ -346,6 +346,7 @@ if (BUILD_DEBIAN)
     add_subdirectory(libmirisdr)
     add_subdirectory(libperseus)
     add_subdirectory(libiio)
+	add_subdirectory(libsoapysdr)
 endif (BUILD_DEBIAN)
 
 add_subdirectory(devices)
