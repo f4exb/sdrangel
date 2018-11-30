@@ -24,7 +24,7 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -110,7 +110,7 @@
           </property>
           <property name="font">
            <font>
-            <family>DejaVu Sans Mono</family>
+            <family>Liberation Mono</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -172,7 +172,7 @@
         <item>
          <widget class="QToolButton" name="audioStereo">
           <property name="toolTip">
-           <string>Mono/Stereo toggle and pilot lock indicator</string>
+           <string>Light: Pilot lock indicator Left: Mono/Stereo toggle Right: select audio device</string>
           </property>
           <property name="autoFillBackground">
            <bool>true</bool>
@@ -299,25 +299,12 @@
         </property>
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>Liberation Mono</family>
           <pointsize>8</pointsize>
          </font>
         </property>
         <property name="toolTip">
          <string>Level meter (dB) top trace: average, bottom trace: instantaneous peak, tip: peak hold</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="ButtonSwitch" name="copyAudioToUDP">
-        <property name="toolTip">
-         <string>Copy audio to UDP</string>
-        </property>
-        <property name="text">
-         <string>U</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -547,8 +534,8 @@
      <widget class="GLSpectrum" name="glSpectrum" native="true">
       <property name="font">
        <font>
-        <family>Sans Serif</family>
-        <pointsize>9</pointsize>
+        <family>Liberation Mono</family>
+        <pointsize>8</pointsize>
        </font>
       </property>
      </widget>
@@ -648,7 +635,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if synchronized</string>
+         <string>Lights if synchronized</string>
         </property>
         <property name="text">
          <string>Dec</string>
@@ -1122,7 +1109,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if PI is updated</string>
+         <string>Lights if PI is updated</string>
         </property>
         <property name="text">
          <string>PI</string>
@@ -1254,7 +1241,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if group 1 is updated</string>
+         <string>Lights if group 1 is updated</string>
         </property>
         <property name="text">
          <string>G01</string>
@@ -1353,7 +1340,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if group 0 is updated</string>
+         <string>Lights if group 0 is updated</string>
         </property>
         <property name="text">
          <string>G00</string>
@@ -1477,7 +1464,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Alternalte frequencies (MHz)</string>
+         <string>Alternate frequencies (MHz)</string>
         </property>
        </widget>
       </item>
@@ -1510,7 +1497,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if group 3 updated is updated</string>
+         <string>Lights if group 3 updated is updated</string>
         </property>
         <property name="text">
          <string>G03</string>
@@ -1556,7 +1543,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if group 9 is updated</string>
+         <string>Lights if group 9 is updated</string>
         </property>
         <property name="text">
          <string>G09</string>
@@ -1599,7 +1586,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if group 2 is updated</string>
+         <string>Lights if group 2 is updated</string>
         </property>
         <property name="text">
          <string>G02</string>
@@ -1633,7 +1620,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if group 4 is updated</string>
+         <string>Lights if group 4 is updated</string>
         </property>
         <property name="text">
          <string>G04</string>
@@ -1701,7 +1688,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if group 14 is updated</string>
+         <string>Lights if group 14 is updated</string>
         </property>
         <property name="text">
          <string>G14</string>
@@ -1750,7 +1737,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Station altermate freqiuencies</string>
+         <string>Station alternate frequencies</string>
         </property>
        </widget>
       </item>
@@ -1767,7 +1754,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lits if group 8 is updated</string>
+         <string>Lights if group 8 is updated</string>
         </property>
         <property name="text">
          <string>G08</string>

@@ -49,9 +49,7 @@ HackRFInput::HackRFInput(DeviceSourceAPI *deviceAPI) :
 {
     openDevice();
 
-    char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
+    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
 
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
@@ -132,12 +130,7 @@ bool HackRFInput::start()
 
     if (m_running) stop();
 
-	if ((m_hackRFThread = new HackRFInputThread(m_dev, &m_sampleFifo)) == 0)
-	{
-	    qCritical("HackRFInput::start: out of memory");
-		stop();
-		return false;
-	}
+    m_hackRFThread = new HackRFInputThread(m_dev, &m_sampleFifo);
 
 //	mutexLocker.unlock();
 
@@ -265,9 +258,18 @@ bool HackRFInput::handleMessage(const Message& message)
         MsgFileRecord& conf = (MsgFileRecord&) message;
         qDebug() << "HackRFInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
 
-        if (conf.getStartStop()) {
+        if (conf.getStartStop())
+        {
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink->setFileName(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
+            }
+
             m_fileSink->startRecording();
-        } else {
+        }
+        else
+        {
             m_fileSink->stopRecording();
         }
 
@@ -283,13 +285,11 @@ bool HackRFInput::handleMessage(const Message& message)
             if (m_deviceAPI->initAcquisition())
             {
                 m_deviceAPI->startAcquisition();
-                DSPEngine::instance()->startAudioOutput();
             }
         }
         else
         {
             m_deviceAPI->stopAcquisition();
-            DSPEngine::instance()->stopAudioOutput();
         }
 
         return true;
@@ -366,10 +366,6 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		}
 	}
 
-	qint64 deviceCenterFrequency = settings.m_centerFrequency;
-	qint64 f_img = deviceCenterFrequency;
-	quint32 devSampleRate = settings.m_devSampleRate;
-
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)) // forward delta to buddy if necessary
 	{
 	    if (m_settings.m_linkTxFrequency && (m_deviceAPI->getSinkBuddies().size() > 0))
@@ -389,38 +385,20 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 	}
 
 	if ((m_settings.m_centerFrequency != settings.m_centerFrequency) ||
+	    (m_settings.m_devSampleRate != settings.m_devSampleRate) ||
         (m_settings.m_LOppmTenths != settings.m_LOppmTenths) ||
         (m_settings.m_log2Decim != settings.m_log2Decim) ||
         (m_settings.m_fcPos != settings.m_fcPos) || force)
 	{
-		if ((settings.m_log2Decim == 0) || (settings.m_fcPos == HackRFInputSettings::FC_POS_CENTER))
-		{
-			deviceCenterFrequency = settings.m_centerFrequency;
-			f_img = deviceCenterFrequency;
-		}
-		else
-		{
-			if (settings.m_fcPos == HackRFInputSettings::FC_POS_INFRA)
-			{
-				deviceCenterFrequency = settings.m_centerFrequency + (devSampleRate / 4);
-				f_img = deviceCenterFrequency + devSampleRate/2;
-			}
-			else if (settings.m_fcPos == HackRFInputSettings::FC_POS_SUPRA)
-			{
-				deviceCenterFrequency = settings.m_centerFrequency - (devSampleRate / 4);
-				f_img = deviceCenterFrequency - devSampleRate/2;
-			}
-		}
+        qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+                settings.m_centerFrequency,
+                0,
+                settings.m_log2Decim,
+                (DeviceSampleSource::fcPos_t) settings.m_fcPos,
+                settings.m_devSampleRate);
 
-		if (m_dev != 0)
-		{
+		if (m_dev != 0) {
 			setDeviceCenterFrequency(deviceCenterFrequency);
-
-			qDebug() << "HackRFInput::applySettings: center freq: " << settings.m_centerFrequency << " Hz"
-					<< " device center freq: " << deviceCenterFrequency << " Hz"
-					<< " device sample rate: " << devSampleRate << "Hz"
-					<< " Actual sample rate: " << devSampleRate/(1<<settings.m_log2Decim) << "Hz"
-					<< " img: " << f_img << "Hz";
 		}
 
 		forwardChange = true;
@@ -523,7 +501,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	if (forwardChange)
 	{
-		int sampleRate = devSampleRate/(1<<settings.m_log2Decim);
+		int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
         m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
@@ -584,6 +562,12 @@ int HackRFInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getHackRfInputSettings()->getLog2Decim();
     }
+    if (deviceSettingsKeys.contains("fcPos"))
+    {
+        int fcPos = response.getHackRfInputSettings()->getFcPos();
+        fcPos = fcPos < 0 ? 0 : fcPos > 2 ? 2 : fcPos;
+        settings.m_fcPos = (HackRFInputSettings::fcPos_t) fcPos;
+    }
     if (deviceSettingsKeys.contains("devSampleRate")) {
         settings.m_devSampleRate = response.getHackRfInputSettings()->getDevSampleRate();
     }
@@ -601,6 +585,9 @@ int HackRFInput::webapiSettingsPutPatch(
     }
     if (deviceSettingsKeys.contains("linkTxFrequency")) {
         settings.m_linkTxFrequency = response.getHackRfInputSettings()->getLinkTxFrequency() != 0;
+    }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getHackRfInputSettings()->getFileRecordName();
     }
 
     MsgConfigureHackRF *msg = MsgConfigureHackRF::create(settings, force);
@@ -631,6 +618,12 @@ void HackRFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getHackRfInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getHackRfInputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     response.getHackRfInputSettings()->setLinkTxFrequency(settings.m_linkTxFrequency ? 1 : 0);
+
+    if (response.getHackRfInputSettings()->getFileRecordName()) {
+        *response.getHackRfInputSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getHackRfInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
 }
 
 int HackRFInput::webapiRunGet(

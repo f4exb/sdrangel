@@ -1,0 +1,66 @@
+ATVModSettings:
+  description: ATVMod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    rfOppBandwidth:
+      type: number
+      format: float
+    atvStd:
+      type: integer
+    nbLines:
+      type: integer
+    fps:
+      type: integer
+    atvModInput:
+      type: integer
+    uniformLevel:
+      type: number
+      format: float
+    atvModulation:
+      type: integer
+    videoPlayLoop:
+      type: integer
+    videoPlay:
+      type: integer
+    cameraPlay:
+      type: integer
+    channelMute:
+      type: integer
+    invertedVideo:
+      type: integer
+    rfScalingFactor:
+      type: number
+      format: float
+    fmExcursion:
+      type: number
+      format: float
+    forceDecimator:
+      type: integer
+    showOverlayText:
+      type: integer
+    overlayText:
+      type: string
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    imageFileName:
+      type: string
+    videoFileName:
+      type: string
+     
+ATVModReport:
+  description: ATVMod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+   

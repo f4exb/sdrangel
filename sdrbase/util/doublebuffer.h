@@ -20,6 +20,10 @@
 #include <vector>
 #include <algorithm>
 
+#include <QByteArray>
+
+#include "simpleserializer.h"
+
 template<typename T>
 class DoubleBufferSimple
 {
@@ -31,6 +35,25 @@ public:
 	}
 
 	~DoubleBufferSimple() {}
+
+	DoubleBufferSimple(const DoubleBufferSimple& other)
+	{
+	    m_size = other.m_size;
+	    m_data = other.m_data;
+	    m_current = m_data.begin();
+	}
+
+    DoubleBufferSimple& operator=(const DoubleBufferSimple& other)
+    {
+        if (&other == this) {
+            return *this;
+        }
+
+        m_size = other.m_size;
+        m_data = other.m_data;
+        m_current = m_data.begin();
+        return *this;
+    }
 
 	void resize(int size)
 	{
@@ -67,8 +90,52 @@ public:
 	}
 
 	typename std::vector<T>::iterator getCurrent() const { return m_current + m_size; }
+	typename std::vector<T>::const_iterator begin() const { return m_data.begin(); }
+    typename std::vector<T>::iterator begin() { return m_data.begin(); }
 	unsigned int absoluteFill() const { return m_current - m_data.begin(); }
 	void reset() { m_current = m_data.begin(); }
+
+    QByteArray serialize() const
+    {
+        SimpleSerializer s(1);
+
+        QByteArray buf(reinterpret_cast<const char*>(m_data.data()), m_data.size()*sizeof(T));
+        s.writeS32(1, m_size);
+        s.writeU32(2, m_current - m_data.begin());
+        s.writeBlob(3, buf);
+
+        return s.final();
+    }
+
+    bool deserialize(const QByteArray& data)
+    {
+        SimpleDeserializer d(data);
+
+        if(!d.isValid()) {
+            return false;
+        }
+
+        if (d.getVersion() == 1)
+        {
+            unsigned int tmpUInt;
+            QByteArray buf;
+
+            d.readS32(1, &m_size, m_data.size()/2);
+            m_data.resize(2*m_size);
+            d.readU32(2, &tmpUInt, 0);
+            m_current = m_data.begin() + tmpUInt;
+            d.readBlob(3, &buf);
+            //qDebug("DoubleBufferSimple::deserialize: m_data.size(): %u buf.size(): %d", m_data.size(), buf.size());
+            //std::copy(reinterpret_cast<char *>(m_data.data()), buf.data(), buf.data() + buf.size()); // bug
+            memcpy(reinterpret_cast<char *>(m_data.data()), buf.data(), buf.size());
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
 private:
 	int m_size;

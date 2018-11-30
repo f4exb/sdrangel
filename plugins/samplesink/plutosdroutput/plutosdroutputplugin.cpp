@@ -15,20 +15,22 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtPlugin>
-#include <QAction>
 
 #include "plugin/pluginapi.h"
 #include "plutosdr/deviceplutosdr.h"
 
-#include "plutosdroutputgui.h"
+#ifdef SERVER_MODE
 #include "plutosdroutput.h"
+#else
+#include "plutosdroutputgui.h"
+#endif
 #include "plutosdroutputplugin.h"
 
 class DeviceSourceAPI;
 
 const PluginDescriptor PlutoSDROutputPlugin::m_pluginDescriptor = {
 	QString("PlutoSDR Output"),
-	QString("3.10.1"),
+	QString("4.0.4"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -85,6 +87,15 @@ PluginInterface::SamplingDevices PlutoSDROutputPlugin::enumSampleSinks()
 	return result;
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(
+        const QString& sinkId __attribute((unused)),
+        QWidget **widget __attribute((unused)),
+        DeviceUISet *deviceUISet __attribute((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
@@ -101,6 +112,7 @@ PluginInstanceGUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(
 		return 0;
 	}
 }
+#endif
 
 DeviceSampleSink *PlutoSDROutputPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
 {

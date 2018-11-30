@@ -1,5 +1,7 @@
 project(ssb)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(ssb_SOURCES
 	ssbdemod.cpp
 	ssbdemodgui.cpp
@@ -21,6 +23,7 @@ set(ssb_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client	
 )
 
 #include(${QT_USE_FILE})
@@ -43,6 +46,6 @@ target_link_libraries(demodssb
 	sdrgui
 )
 
-qt5_use_modules(demodssb Core Widgets)
+target_link_libraries(demodssb Qt5::Core Qt5::Widgets)
 
 install(TARGETS demodssb DESTINATION lib/plugins/channelrx)

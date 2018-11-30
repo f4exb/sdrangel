@@ -37,7 +37,7 @@ AudioInput::~AudioInput()
 
 	QMutexLocker mutexLocker(&m_mutex);
 
-	for (AudioFifos::iterator it = m_audioFifos.begin(); it != m_audioFifos.end(); ++it)
+	for (std::list<AudioFifo*>::iterator it = m_audioFifos.begin(); it != m_audioFifos.end(); ++it)
 	{
 		delete *it;
 	}
@@ -94,7 +94,7 @@ bool AudioInput::start(int device, int rate)
 
         if (m_audioFormat.sampleSize() != 16)
         {
-            qWarning("AudioInput::start: Audio device ( %s ) failed", qPrintable(devInfo.defaultInputDevice().deviceName()));
+            qWarning("AudioInput::start: Audio device '%s' failed", qPrintable(devInfo.defaultInputDevice().deviceName()));
             return false;
         }
 
@@ -116,79 +116,6 @@ bool AudioInput::start(int device, int rate)
 	return true;
 }
 
-bool AudioInput::startImmediate(int device, int rate)
-{
-
-    if (QIODevice::isOpen())
-    {
-        qInfo("AudioInput::startImmediate: already started");
-        return true;
-    }
-
-    QAudioDeviceInfo devInfo;
-    QMutexLocker mutexLocker(&m_mutex);
-
-    if (device < 0)
-    {
-        devInfo = QAudioDeviceInfo::defaultInputDevice();
-        qWarning("AudioInput::startImmediate: using default device %s", qPrintable(devInfo.defaultInputDevice().deviceName()));
-    }
-    else
-    {
-        QList<QAudioDeviceInfo> devicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
-
-        if (device < devicesInfo.size())
-        {
-            devInfo = devicesInfo[device];
-            qWarning("AudioInput::startImmediate: using audio device #%d: %s", device, qPrintable(devInfo.defaultInputDevice().deviceName()));
-        }
-        else
-        {
-            devInfo = QAudioDeviceInfo::defaultInputDevice();
-            qWarning("AudioInput::startImmediate: audio device #%d does not exist. Using default device %s", device, qPrintable(devInfo.defaultInputDevice().deviceName()));
-        }
-    }
-
-    //QAudioDeviceInfo devInfo(QAudioDeviceInfo::defaultOutputDevice());
-
-    m_audioFormat.setSampleRate(rate);
-    m_audioFormat.setChannelCount(2);
-    m_audioFormat.setSampleSize(16);
-    m_audioFormat.setCodec("audio/pcm");
-    m_audioFormat.setByteOrder(QAudioFormat::LittleEndian);
-    m_audioFormat.setSampleType(QAudioFormat::SignedInt);
-
-    if (!devInfo.isFormatSupported(m_audioFormat))
-    {
-        m_audioFormat = devInfo.nearestFormat(m_audioFormat);
-        qWarning("AudioInput::startImmediate: %d Hz S16_LE audio format not supported. New rate: %d", rate, m_audioFormat.sampleRate());
-    }
-    else
-    {
-        qInfo("AudioInput::startImmediate: audio format OK");
-    }
-
-    if (m_audioFormat.sampleSize() != 16)
-    {
-        qWarning("AudioInput::startImmediate: Audio device ( %s ) failed", qPrintable(devInfo.defaultInputDevice().deviceName()));
-        return false;
-    }
-
-    m_audioInput = new QAudioInput(devInfo, m_audioFormat);
-    m_audioInput->setVolume(m_volume);
-
-    QIODevice::open(QIODevice::ReadWrite);
-
-    m_audioInput->start(this);
-
-    if (m_audioInput->state() != QAudio::ActiveState)
-    {
-        qWarning("AudioInput::startImmediate: cannot start");
-    }
-
-    return true;
-}
-
 void AudioInput::stop()
 {
     qDebug("AudioInput::stop");
@@ -207,21 +134,6 @@ void AudioInput::stop()
                 delete m_audioInput;
             }
         }
-    }
-}
-
-void AudioInput::stopImmediate()
-{
-    if (!QIODevice::isOpen())
-    {
-        qInfo("AudioInput::stopImmediate: already stopped");
-    }
-    else
-    {
-        qDebug("AudioInput::stopImmediate");
-        QMutexLocker mutexLocker(&m_mutex);
-        QIODevice::close();
-        delete m_audioInput;
     }
 }
 
@@ -267,9 +179,9 @@ qint64 AudioInput::writeData(const char *data, qint64 len)
     	return 0;
     }
 
-	for (AudioFifos::iterator it = m_audioFifos.begin(); it != m_audioFifos.end(); ++it)
+	for (std::list<AudioFifo*>::iterator it = m_audioFifos.begin(); it != m_audioFifos.end(); ++it)
 	{
-		(*it)->write(reinterpret_cast<const quint8*>(data), len/4, 10);
+		(*it)->write(reinterpret_cast<const quint8*>(data), len/4);
 	}
 
 	return len;

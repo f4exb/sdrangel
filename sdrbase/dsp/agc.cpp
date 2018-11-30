@@ -10,8 +10,6 @@
 
 #include "util/stepfunctions.h"
 
-#define StepLengthMax 2400 // 50ms
-
 AGC::AGC(int historySize, double R) :
 	m_u0(1.0),
 	m_R(R),
@@ -49,7 +47,7 @@ MagAGC::MagAGC(int historySize, double R, double threshold) :
 	m_threshold(threshold),
 	m_thresholdEnable(true),
 	m_gate(0),
-	m_stepLength(std::min(StepLengthMax, historySize/2)),
+	m_stepLength(std::min(2400, historySize/2)), // max 50 ms (at 48 kHz)
     m_stepDelta(1.0/m_stepLength),
 	m_stepUpCounter(0),
     m_stepDownCounter(m_stepLength),
@@ -63,10 +61,10 @@ MagAGC::MagAGC(int historySize, double R, double threshold) :
 MagAGC::~MagAGC()
 {}
 
-void MagAGC::resize(int historySize, Real R)
+void MagAGC::resize(int historySize, int stepLength, Real R)
 {
     m_R2 = R*R;
-    m_stepLength = std::min(StepLengthMax, historySize/2);
+    m_stepLength = stepLength;
     m_stepDelta = 1.0 / m_stepLength;
     m_stepUpCounter = 0;
     m_stepDownCounter = m_stepLength;
@@ -106,13 +104,19 @@ double MagAGC::feedAndGetValue(const Complex& ci)
     {
         if (m_squared)
         {
-            double u0 = m_R / m_moving_average.average();
-            m_u0 = (u0 * m_magsq > m_clampMax) ? m_clampMax / m_magsq : u0;
+            if (m_magsq > m_clampMax) {
+                m_u0 = m_clampMax / m_magsq;
+            } else {
+                m_u0 = m_R / m_moving_average.average();
+            }
         }
         else
         {
-            double u02 = m_R2 / m_moving_average.average();
-            m_u0 = (u02 * m_magsq > m_clampMax) ? sqrt(m_clampMax / m_magsq) : sqrt(u02);
+            if (sqrt(m_magsq) > m_clampMax) {
+                m_u0 = m_clampMax / sqrt(m_magsq);
+            } else {
+                m_u0 = m_R / sqrt(m_moving_average.average());
+            }
         }
     }
     else
@@ -174,5 +178,29 @@ double MagAGC::feedAndGetValue(const Complex& ci)
     else
     {
         return m_u0;
+    }
+}
+
+float MagAGC::getStepDownValue() const
+{
+    if (m_count <  m_stepDownDelay)
+    {
+        return 1.0f;
+    }
+    else
+    {
+        return StepFunctions::smootherstep(m_stepDownCounter * m_stepDelta);
+    }
+}
+
+float MagAGC::getStepValue() const
+{
+    if (m_count <  m_stepDownDelay)
+    {
+        return StepFunctions::smootherstep(m_stepUpCounter * m_stepDelta); // step up
+    }
+    else
+    {
+        return StepFunctions::smootherstep(m_stepDownCounter * m_stepDelta); // step down
     }
 }

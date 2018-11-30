@@ -17,6 +17,8 @@
 #ifndef _FCDPROPLUS_FCDPROPLUSSETTINGS_H_
 #define _FCDPROPLUS_FCDPROPLUSSETTINGS_H_
 
+#include <QString>
+
 struct FCDProPlusSettings {
 	quint64 m_centerFrequency;
 	bool m_rangeLow;
@@ -31,6 +33,7 @@ struct FCDProPlusSettings {
 	bool m_iqImbalance;
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
+    QString m_fileRecordName;
 
 	FCDProPlusSettings();
 	void resetToDefaults();

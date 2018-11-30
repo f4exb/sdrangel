@@ -1,0 +1,52 @@
+FCDProSettings:
+  description: FCDPro
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    LOppmTenths:
+      type: integer
+    lnaGainIndex:
+      type: integer
+    rfFilterIndex:
+      type: integer
+    lnaEnhanceIndex:
+      type: integer
+    bandIndex:
+      type: integer
+    mixerGainIndex:
+      type: integer
+    mixerFilterIndex:
+      type: integer
+    biasCurrentIndex:
+      type: integer
+    modeIndex:
+      type: integer
+    gain1Index:
+      type: integer
+    rcFilterIndex:
+      type: integer
+    gain2Index:
+      type: integer
+    gain3Index:
+      type: integer
+    gain4Index:
+      type: integer
+    ifFilterIndex:
+      type: integer
+    gain5Index:
+      type: integer
+    gain6Index:
+      type: integer
+    dcBlock:
+      type: integer
+    iqCorrection:
+      type: integer
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64      
+    fileRecordName:
+      type: string
+

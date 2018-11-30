@@ -23,7 +23,7 @@
 
 #include "dsp/dspdevicesourceengine.h"
 
-#include "util/export.h"
+#include "export.h"
 
 class BasebandSampleSink;
 class ThreadedBasebandSampleSink;
@@ -35,7 +35,7 @@ class Preset;
 class DeviceSinkAPI;
 class ChannelSinkAPI;
 
-class SDRANGEL_API DeviceSourceAPI : public QObject {
+class SDRBASE_API DeviceSourceAPI : public QObject {
     Q_OBJECT
 
 public:

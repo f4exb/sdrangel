@@ -19,14 +19,13 @@
 #include <QTime>
 #include <QDateTime>
 #include <QString>
-#include <QFileDialog>
 #include <QMessageBox>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QJsonParseError>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-
-#include <nanomsg/nn.h>
-#include <nanomsg/pair.h>
 
 #include "ui_sdrdaemonsinkgui.h"
 #include "plugin/pluginapi.h"
@@ -39,6 +38,8 @@
 
 #include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
+#include "channel/sdrdaemondatablock.h"
+#include "udpsinkfec.h"
 #include "sdrdaemonsinkgui.h"
 
 SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
@@ -47,25 +48,20 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_deviceUISet(deviceUISet),
 	m_settings(),
 	m_deviceSampleSink(0),
-	m_sampleRate(0),
+	m_deviceCenterFrequency(0),
 	m_samplesCount(0),
 	m_tickCount(0),
 	m_nbSinceLastFlowCheck(0),
-	m_lastEngineState((DSPDeviceSinkEngine::State)-1),
+	m_lastEngineState(DSPDeviceSinkEngine::StNotStarted),
 	m_doApplySettings(true),
 	m_forceSettings(true)
 {
-    m_nnSender = nn_socket(AF_SP, NN_PAIR);
-    assert(m_nnSender != -1);
-    int millis = 500;
-    int rc = nn_setsockopt(m_nnSender, NN_SOL_SOCKET, NN_SNDTIMEO, &millis, sizeof (millis));
-
-    if (rc != 0) {
-        qCritical("SDRdaemonSinkGui::SDRdaemonSinkGui: nn_setsockopt failed with rc %d", rc);
-    }
-
     m_countUnrecoverable = 0;
     m_countRecovered = 0;
+    m_lastCountUnrecoverable = 0;
+    m_lastCountRecovered = 0;
+    m_lastSampleCount = 0;
+    m_resetCounts = true;
 
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
     m_paletteRedText.setColor(QPalette::WindowText, Qt::red);
@@ -79,6 +75,8 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(7, 32000U, 9000000U);
 
+    ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+
 	connect(&(m_deviceUISet->m_deviceSinkAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -88,17 +86,23 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 
+	m_networkManager = new QNetworkAccessManager();
+	connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+
+	m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+
     m_time.start();
     displayEventCounts();
     displayEventTimer();
 
     displaySettings();
-    sendControl(true);
     sendSettings();
 }
 
 SDRdaemonSinkGui::~SDRdaemonSinkGui()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
 	delete ui;
 }
 
@@ -131,19 +135,6 @@ void SDRdaemonSinkGui::resetToDefaults()
 	sendSettings();
 }
 
-qint64 SDRdaemonSinkGui::getCenterFrequency() const
-{
-	return m_settings.m_centerFrequency;
-}
-
-void SDRdaemonSinkGui::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_centerFrequency = centerFrequency;
-	displaySettings();
-	sendControl();
-	sendSettings();
-}
-
 QByteArray SDRdaemonSinkGui::serialize() const
 {
 	return m_settings.serialize();
@@ -157,7 +148,6 @@ bool SDRdaemonSinkGui::deserialize(const QByteArray& data)
 	{
 		displaySettings();
 	    blockApplySettings(false);
-		sendControl(true);
 		m_forceSettings = true;
 		sendSettings();
 		return true;
@@ -180,12 +170,6 @@ bool SDRdaemonSinkGui::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
-    else if (SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming::match(message))
-	{
-		m_samplesCount = ((SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming&)message).getSamplesCount();
-		updateWithStreamTime();
-		return true;
-	}
     else if (SDRdaemonSinkOutput::MsgStartStop::match(message))
     {
         SDRdaemonSinkOutput::MsgStartStop& notif = (SDRdaemonSinkOutput::MsgStartStop&) message;
@@ -206,15 +190,12 @@ void SDRdaemonSinkGui::handleInputMessages()
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("SDRdaemonSinkGui::handleInputMessages: message: %s", message->getIdentifier());
-
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
-            qDebug("SDRdaemonSinkGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             m_sampleRate = notif->getSampleRate();
-            m_deviceCenterFrequency = notif->getCenterFrequency();
-            updateSampleRateAndFrequency();
+            qDebug("SDRdaemonSinkGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            updateSampleRate();
 
             delete message;
         }
@@ -227,25 +208,24 @@ void SDRdaemonSinkGui::handleInputMessages()
     }
 }
 
-void SDRdaemonSinkGui::updateSampleRateAndFrequency()
+void SDRdaemonSinkGui::updateSampleRate()
 {
     m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
-    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-    ui->deviceRateText->setText(tr("%1k").arg((float)(m_sampleRate*(1<<m_settings.m_log2Interp)) / 1000));
+    ui->deviceRateText->setText(tr("%1k").arg((float)(m_sampleRate) / 1000));
 }
 
 void SDRdaemonSinkGui::updateTxDelayTooltip()
 {
-    double delay = ((127*127*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
+    int samplesPerBlock = SDRDaemonNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8);
+    double delay = ((127*samplesPerBlock*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
     ui->txDelayText->setToolTip(tr("%1 us").arg(QString::number(delay*1e6, 'f', 0)));
 }
 
 void SDRdaemonSinkGui::displaySettings()
 {
-    ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+    blockApplySettings(true);
+    ui->centerFrequency->setValue(m_deviceCenterFrequency / 1000);
     ui->sampleRate->setValue(m_settings.m_sampleRate);
-    ui->deviceRateText->setText(tr("%1k").arg((float)(m_sampleRate*(1<<m_settings.m_log2Interp)) / 1000));
-    ui->interp->setCurrentIndex(m_settings.m_log2Interp);
     ui->txDelay->setValue(m_settings.m_txDelay*100);
     ui->txDelayText->setText(tr("%1").arg(m_settings.m_txDelay*100));
     ui->nbFECBlocks->setValue(m_settings.m_nbFECBlocks);
@@ -254,100 +234,13 @@ void SDRdaemonSinkGui::displaySettings()
     QString s1 = QString::number(m_settings.m_nbFECBlocks, 'f', 0);
     ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s0).arg(s1));
 
-    ui->address->setText(m_settings.m_address);
+    ui->deviceIndex->setText(tr("%1").arg(m_settings.m_deviceIndex));
+    ui->channelIndex->setText(tr("%1").arg(m_settings.m_channelIndex));
+    ui->apiAddress->setText(m_settings.m_apiAddress);
+    ui->apiPort->setText(tr("%1").arg(m_settings.m_apiPort));
+    ui->dataAddress->setText(m_settings.m_dataAddress);
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
-    ui->controlPort->setText(tr("%1").arg(m_settings.m_controlPort));
-    ui->specificParms->setText(m_settings.m_specificParameters);
-}
-
-void SDRdaemonSinkGui::sendControl(bool force)
-{
-    if ((m_settings.m_address != m_controlSettings.m_address) ||
-        (m_settings.m_controlPort != m_controlSettings.m_controlPort) || force)
-    {
-        int rc = nn_shutdown(m_nnSender, 0);
-
-        if (rc < 0) {
-            qDebug() << "SDRdaemonSinkGui::sendControl: disconnection failed";
-        } else {
-            qDebug() << "SDRdaemonSinkGui::sendControl: disconnection successful";
-        }
-
-        std::ostringstream os;
-        os << "tcp://" << m_settings.m_address.toStdString() << ":" << m_settings.m_controlPort;
-        std::string addrstrng = os.str();
-        rc = nn_connect(m_nnSender, addrstrng.c_str());
-
-        if (rc < 0)
-        {
-            qDebug() << "SDRdaemonSinkGui::sendControl: connection to " << addrstrng.c_str() << " failed";
-            QMessageBox::information(this, tr("Message"), tr("Cannot connect to remote control port"));
-            return;
-        }
-        else
-        {
-            qDebug() << "SDRdaemonSinkGui::sendControl: connection to " << addrstrng.c_str() << " successful";
-            force = true;
-        }
-    }
-
-    std::ostringstream os;
-    int nbArgs = 0;
-
-    if ((m_settings.m_centerFrequency != m_controlSettings.m_centerFrequency) || force)
-    {
-        os << "freq=" << m_settings.m_centerFrequency;
-        nbArgs++;
-    }
-
-    if ((m_settings.m_sampleRate != m_controlSettings.m_sampleRate) || (m_settings.m_log2Interp != m_controlSettings.m_log2Interp) || force)
-    {
-        if (nbArgs > 0) os << ",";
-        os << "srate=" << m_settings.m_sampleRate * (1<<m_settings.m_log2Interp);
-        nbArgs++;
-
-        if ((m_settings.m_log2Interp != m_controlSettings.m_log2Interp) || force)
-        {
-            os << ",interp=" << m_settings.m_log2Interp;
-            nbArgs++;
-        }
-    }
-
-    if ((m_settings.m_specificParameters != m_controlSettings.m_specificParameters) || force)
-    {
-        if (nbArgs > 0) os << ",";
-        os << m_settings.m_specificParameters.toStdString();
-        nbArgs++;
-    }
-
-    if (nbArgs > 0)
-    {
-        int config_size = os.str().size();
-        int rc = nn_send(m_nnSender, (void *) os.str().c_str(), config_size, 0);
-
-        if (rc != config_size)
-        {
-            //QMessageBox::information(this, tr("Message"), tr("Cannot send message to remote control port"));
-            qDebug() << "SDRdaemonSinkGui::sendControl: Cannot send message to remote control port."
-                << " remoteAddress: " << m_settings.m_address
-                << " remotePort: " << m_settings.m_controlPort
-                << " message: " << os.str().c_str();
-        }
-        else
-        {
-            qDebug() << "SDRdaemonSinkGui::sendControl:"
-                << "remoteAddress:" << m_settings.m_address
-                << "remotePort:" << m_settings.m_controlPort
-                << "message:" << os.str().c_str();
-        }
-    }
-
-    m_controlSettings.m_address = m_settings.m_address;
-    m_controlSettings.m_controlPort = m_settings.m_controlPort;
-    m_controlSettings.m_centerFrequency = m_settings.m_centerFrequency;
-    m_controlSettings.m_sampleRate = m_settings.m_sampleRate;
-    m_controlSettings.m_log2Interp = m_settings.m_log2Interp;
-    m_controlSettings.m_specificParameters = m_settings.m_specificParameters;
+    blockApplySettings(false);
 }
 
 void SDRdaemonSinkGui::sendSettings()
@@ -395,30 +288,11 @@ void SDRdaemonSinkGui::updateStatus()
     }
 }
 
-void SDRdaemonSinkGui::on_centerFrequency_changed(quint64 value)
-{
-    m_settings.m_centerFrequency = value * 1000;
-    sendControl();
-    sendSettings();
-}
-
 void SDRdaemonSinkGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_sampleRate = value;
     updateTxDelayTooltip();
-    sendControl();
     sendSettings();
-}
-
-void SDRdaemonSinkGui::on_interp_currentIndexChanged(int index)
-{
-    if (index < 0) {
-        return;
-    }
-
-    m_settings.m_log2Interp = index;
-    updateSampleRateAndFrequency();
-    sendControl();
 }
 
 void SDRdaemonSinkGui::on_txDelay_valueChanged(int value)
@@ -441,64 +315,104 @@ void SDRdaemonSinkGui::on_nbFECBlocks_valueChanged(int value)
     sendSettings();
 }
 
-void SDRdaemonSinkGui::on_address_returnPressed()
+void SDRdaemonSinkGui::on_deviceIndex_returnPressed()
 {
-    m_settings.m_address = ui->address->text();
-    sendControl();
+    bool dataOk;
+    int deviceIndex = ui->deviceIndex->text().toInt(&dataOk);
+
+    if ((!dataOk) || (deviceIndex < 0)) {
+        return;
+    } else {
+        m_settings.m_deviceIndex = deviceIndex;
+    }
+
+    sendSettings();
+}
+
+void SDRdaemonSinkGui::on_channelIndex_returnPressed()
+{
+    bool dataOk;
+    int channelIndex = ui->channelIndex->text().toInt(&dataOk);
+
+    if ((!dataOk) || (channelIndex < 0)) {
+        return;
+    } else {
+        m_settings.m_channelIndex = channelIndex;
+    }
+
+    sendSettings();
+}
+
+void SDRdaemonSinkGui::on_apiAddress_returnPressed()
+{
+    m_settings.m_apiAddress = ui->apiAddress->text();
+    sendSettings();
+
+    QString infoURL = QString("http://%1:%2/sdrangel").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
+    m_networkRequest.setUrl(QUrl(infoURL));
+    m_networkManager->get(m_networkRequest);
+}
+
+void SDRdaemonSinkGui::on_apiPort_returnPressed()
+{
+    bool dataOk;
+    int apiPort = ui->apiPort->text().toInt(&dataOk);
+
+    if((!dataOk) || (apiPort < 1024) || (apiPort > 65535)) {
+        return;
+    } else {
+        m_settings.m_apiPort = apiPort;
+    }
+
+    sendSettings();
+
+    QString infoURL = QString("http://%1:%2/sdrangel").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
+    m_networkRequest.setUrl(QUrl(infoURL));
+    m_networkManager->get(m_networkRequest);
+}
+
+void SDRdaemonSinkGui::on_dataAddress_returnPressed()
+{
+    m_settings.m_dataAddress = ui->dataAddress->text();
     sendSettings();
 }
 
 void SDRdaemonSinkGui::on_dataPort_returnPressed()
 {
     bool dataOk;
-    int udpDataPort = ui->dataPort->text().toInt(&dataOk);
+    int dataPort = ui->dataPort->text().toInt(&dataOk);
 
-    if((!dataOk) || (udpDataPort < 1024) || (udpDataPort > 65535))
-    {
+    if((!dataOk) || (dataPort < 1024) || (dataPort > 65535)) {
         return;
-    }
-    else
-    {
-        m_settings.m_dataPort = udpDataPort;
+    } else {
+        m_settings.m_dataPort = dataPort;
     }
 
     sendSettings();
 }
 
-void SDRdaemonSinkGui::on_controlPort_returnPressed()
+void SDRdaemonSinkGui::on_apiApplyButton_clicked(bool checked __attribute__((unused)))
 {
-    bool ctlOk;
-    int udpCtlPort = ui->controlPort->text().toInt(&ctlOk);
+    m_settings.m_apiAddress = ui->apiAddress->text();
 
-    if((!ctlOk) || (udpCtlPort < 1024) || (udpCtlPort > 65535))
+    bool apiOk;
+    int apiPort = ui->apiPort->text().toInt(&apiOk);
+
+    if((apiOk) && (apiPort >= 1024) && (apiPort < 65535))
     {
-        return;
-    }
-    else
-    {
-        m_settings.m_controlPort = udpCtlPort;
+        m_settings.m_apiPort = apiPort;
     }
 
-    sendControl();
+    sendSettings();
+
+    QString infoURL = QString("http://%1:%2/sdrangel").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
+    m_networkRequest.setUrl(QUrl(infoURL));
+    m_networkManager->get(m_networkRequest);
 }
 
-void SDRdaemonSinkGui::on_specificParms_returnPressed()
+void SDRdaemonSinkGui::on_dataApplyButton_clicked(bool checked __attribute__((unused)))
 {
-    m_settings.m_specificParameters = ui->specificParms->text();
-    sendControl();
-}
-
-void SDRdaemonSinkGui::on_applyButton_clicked(bool checked __attribute__((unused)))
-{
-    m_settings.m_address = ui->address->text();
-
-    bool ctlOk;
-    int udpCtlPort = ui->controlPort->text().toInt(&ctlOk);
-
-    if((ctlOk) && (udpCtlPort >= 1024) && (udpCtlPort < 65535))
-    {
-        m_settings.m_controlPort = udpCtlPort;
-    }
+    m_settings.m_dataAddress = ui->dataAddress->text();
 
     bool dataOk;
     int udpDataPort = ui->dataPort->text().toInt(&dataOk);
@@ -507,11 +421,8 @@ void SDRdaemonSinkGui::on_applyButton_clicked(bool checked __attribute__((unused
     {
         m_settings.m_dataPort = udpDataPort;
     }
-}
 
-void SDRdaemonSinkGui::on_sendButton_clicked(bool checked __attribute__((unused)))
-{
-    sendControl(true);
+    sendSettings();
 }
 
 void SDRdaemonSinkGui::on_startStop_toggled(bool checked)
@@ -540,135 +451,173 @@ void SDRdaemonSinkGui::displayEventCounts()
     ui->eventRecText->setText(nstr);
 }
 
+void SDRdaemonSinkGui::displayEventStatus(int recoverableCount, int unrecoverableCount)
+{
+
+    if (unrecoverableCount == 0)
+    {
+        if (recoverableCount == 0) {
+            ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : green; }");
+        } else {
+            ui->allFramesDecoded->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        }
+    }
+    else
+    {
+        ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : red; }");
+    }
+}
+
 void SDRdaemonSinkGui::displayEventTimer()
 {
     int elapsedTimeMillis = m_time.elapsed();
     QTime recordLength(0, 0, 0, 0);
     recordLength = recordLength.addSecs(elapsedTimeMillis/1000);
-    QString s_time = recordLength.toString("hh:mm:ss");
+    QString s_time = recordLength.toString("HH:mm:ss");
     ui->eventCountsTimeText->setText(s_time);
-}
-
-void SDRdaemonSinkGui::updateWithStreamTime()
-{
-	int t_sec = 0;
-	int t_msec = 0;
-
-	if (m_settings.m_sampleRate > 0){
-		t_msec = ((m_samplesCount * 1000) / m_settings.m_sampleRate) % 1000;
-		t_sec = m_samplesCount / m_settings.m_sampleRate;
-	}
-
-	QTime t(0, 0, 0, 0);
-	t = t.addSecs(t_sec);
-	t = t.addMSecs(t_msec);
-	QString s_timems = t.toString("hh:mm:ss.zzz");
-	//ui->relTimeText->setText(s_timems); TODO with absolute time
 }
 
 void SDRdaemonSinkGui::tick()
 {
-	if ((++m_tickCount & 0xf) == 0) // 16*50ms ~800ms
+    if (++m_tickCount == 20) // once per second
 	{
-	    void *msgBuf = 0;
+        QString reportURL;
 
-		SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming::create();
-		m_deviceSampleSink->getInputMessageQueue()->push(message);
-
-		int len = nn_recv(m_nnSender, &msgBuf, NN_MSG, NN_DONTWAIT);
-
-        if ((len > 0) && msgBuf)
-        {
-            std::string msg((char *) msgBuf, len);
-            std::vector<std::string> strs;
-            boost::split(strs, msg, boost::is_any_of(":"));
-            unsigned int nbTokens = strs.size();
-            unsigned int status = 0;
-            bool updateEventCounts = false;
-
-            if (nbTokens > 0) // at least the queue length is given
-            {
-                try
-                {
-                    int queueLength = boost::lexical_cast<int>(strs[0]);
-                    ui->queueLengthText->setText(QString::fromStdString(strs[0]));
-                    m_nbSinceLastFlowCheck++;
-                    int samplesCorr = 0;
-                    bool quickStart = false;
-
-                    if (queueLength < 2)
-                    {
-                        samplesCorr = 127*8;
-                        quickStart = true;
-                    }
-                    else if (queueLength < 8)
-                    {
-                        samplesCorr = ((8 - queueLength)*16)/m_nbSinceLastFlowCheck;
-                    }
-                    else if (queueLength > 8)
-                    {
-                        samplesCorr = ((8 - queueLength)*16)/m_nbSinceLastFlowCheck;
-                    }
-                    else if (queueLength > 16)
-                    {
-                        samplesCorr = -127*16;
-                        quickStart = true;
-                    }
-
-                    if (samplesCorr != 0)
-                    {
-                        samplesCorr = quickStart ? samplesCorr : samplesCorr <= -50 ? -50 : samplesCorr >= 50 ? 50 : samplesCorr;
-                        SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection::create(samplesCorr);
-                        m_deviceSampleSink->getInputMessageQueue()->push(message);
-                        m_nbSinceLastFlowCheck = 0;
-                    }
-                }
-                catch(const boost::bad_lexical_cast &)
-                {
-                    qDebug("SDRdaemonSinkGui::tick: queue length invalid: %s", strs[0].c_str());
-                }
-            }
-
-            if (nbTokens > 1) // the quality status is given also
-            {
-                if (strs[1] == "2")
-                {
-                    status = 2;
-                }
-                else if (strs[1] == "1")
-                {
-                    status = 1;
-                    if (m_countUnrecoverable < 999) m_countUnrecoverable++;
-                    updateEventCounts = true;
-                    qDebug("SDRdaemonSinkGui::tick: %s", msg.c_str());
-                }
-                else
-                {
-                    if (m_countRecovered < 999) m_countRecovered++;
-                    updateEventCounts = true;
-                    qDebug("SDRdaemonSinkGui::tick: %s", msg.c_str());
-                }
-            }
-
-            if (nbTokens > 2) // the quality indicator message is given also
-            {
-                ui->qualityStatusText->setText(QString::fromStdString(strs[2]));
-            }
-
-            if (status == 2) { // all OK
-                ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : green; }");
-            } else if (status == 1) { // unrecoverable errors
-                ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : red; }");
-            } else { // recoverable errors or unknown status
-                ui->allFramesDecoded->setStyleSheet("QToolButton { background:rgb(56,56,56); }");
-            }
-
-            if (updateEventCounts)
-            {
-                displayEventCounts();
-            }
-        }
+        reportURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/report")
+                .arg(m_settings.m_apiAddress)
+                .arg(m_settings.m_apiPort)
+                .arg(m_settings.m_deviceIndex)
+                .arg(m_settings.m_channelIndex);
+	    m_networkRequest.setUrl(QUrl(reportURL));
+	    m_networkManager->get(m_networkRequest);
 
         displayEventTimer();
+
+        m_tickCount = 0;
 	}
+}
+
+void SDRdaemonSinkGui::networkManagerFinished(QNetworkReply *reply)
+{
+    if (reply->error())
+    {
+        ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+        ui->statusText->setText(reply->errorString());
+        return;
+    }
+
+    QString answer = reply->readAll();
+
+    try
+    {
+        QByteArray jsonBytes(answer.toStdString().c_str());
+        QJsonParseError error;
+        QJsonDocument doc = QJsonDocument::fromJson(jsonBytes, &error);
+
+        if (error.error == QJsonParseError::NoError)
+        {
+            ui->apiAddressLabel->setStyleSheet("QLabel { background-color : green; }");
+            ui->statusText->setText(QString("API OK"));
+            analyzeApiReply(doc.object());
+        }
+        else
+        {
+            ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+            QString errorMsg = QString("Reply JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
+            ui->statusText->setText(QString("JSON error. See log"));
+            qInfo().noquote() << "SDRdaemonSinkGui::networkManagerFinished" << errorMsg;
+        }
+    }
+    catch (const std::exception& ex)
+    {
+        ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+        QString errorMsg = QString("Error parsing request: ") + ex.what();
+        ui->statusText->setText("Error parsing request. See log for details");
+        qInfo().noquote() << "SDRdaemonSinkGui::networkManagerFinished" << errorMsg;
+    }
+}
+
+void SDRdaemonSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
+{
+    QString infoLine;
+
+    if (jsonObject.contains("DaemonSourceReport"))
+    {
+        QJsonObject report = jsonObject["DaemonSourceReport"].toObject();
+        m_deviceCenterFrequency = report["deviceCenterFreq"].toInt() * 1000;
+        m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+        ui->centerFrequency->setValue(m_deviceCenterFrequency/1000);
+        int remoteRate = report["deviceSampleRate"].toInt();
+        ui->remoteRateText->setText(tr("%1k").arg((float)(remoteRate) / 1000));
+        int queueSize = report["queueSize"].toInt();
+        queueSize = queueSize == 0 ? 10 : queueSize;
+        int queueLength = report["queueLength"].toInt();
+        QString queueLengthText = QString("%1/%2").arg(queueLength).arg(queueSize);
+        ui->queueLengthText->setText(queueLengthText);
+        int queueLengthPercent = (queueLength*100)/queueSize;
+        ui->queueLengthGauge->setValue(queueLengthPercent);
+        int unrecoverableCount = report["uncorrectableErrorsCount"].toInt();
+        int recoverableCount = report["correctableErrorsCount"].toInt();
+        uint64_t timestampUs = report["tvSec"].toInt()*1000000ULL + report["tvUSec"].toInt();
+
+        if (!m_resetCounts)
+        {
+            int recoverableCountDelta = recoverableCount - m_lastCountRecovered;
+            int unrecoverableCountDelta = unrecoverableCount - m_lastCountUnrecoverable;
+            displayEventStatus(recoverableCountDelta, unrecoverableCountDelta);
+            m_countRecovered += recoverableCountDelta;
+            m_countUnrecoverable += unrecoverableCountDelta;
+            displayEventCounts();
+        }
+
+        uint32_t sampleCountDelta, sampleCount;
+        sampleCount = report["samplesCount"].toInt();
+
+        if (sampleCount < m_lastSampleCount) {
+            sampleCountDelta = (0xFFFFFFFFU - m_lastSampleCount) + sampleCount + 1;
+        } else {
+            sampleCountDelta = sampleCount - m_lastSampleCount;
+        }
+
+        if (sampleCountDelta == 0)
+        {
+            ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : blue; }");
+        }
+
+        double remoteStreamRate = sampleCountDelta*1e6 / (double) (timestampUs - m_lastTimestampUs);
+
+        if (remoteStreamRate != 0) {
+            ui->remoteStreamRateText->setText(QString("%1").arg(remoteStreamRate, 0, 'f', 0));
+        }
+
+        m_resetCounts = false;
+        m_lastCountRecovered = recoverableCount;
+        m_lastCountUnrecoverable = unrecoverableCount;
+        m_lastSampleCount = sampleCount;
+        m_lastTimestampUs = timestampUs;
+    }
+
+    if (jsonObject.contains("version")) {
+        infoLine = "v" + jsonObject["version"].toString();
+    }
+
+    if (jsonObject.contains("qtVersion")) {
+        infoLine += " Qt" + jsonObject["qtVersion"].toString();
+    }
+
+    if (jsonObject.contains("architecture")) {
+        infoLine += " " + jsonObject["architecture"].toString();
+    }
+
+    if (jsonObject.contains("os")) {
+        infoLine += " " + jsonObject["os"].toString();
+    }
+
+    if (jsonObject.contains("dspRxBits") && jsonObject.contains("dspTxBits")) {
+        infoLine +=  QString(" %1/%2b").arg(jsonObject["dspRxBits"].toInt()).arg(jsonObject["dspTxBits"].toInt());
+    }
+
+    if (infoLine.size() > 0) {
+        ui->infoText->setText(infoLine);
+    }
 }

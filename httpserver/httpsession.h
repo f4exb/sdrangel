@@ -11,6 +11,8 @@
 #include <QReadWriteLock>
 #include "httpglobal.h"
 
+#include "export.h"
+
 namespace qtwebapp {
 
 /**
@@ -20,7 +22,7 @@ namespace qtwebapp {
   @see HttpSessionStore should be used to create and get instances of this class.
 */
 
-class DECLSPEC HttpSession {
+class HTTPSERVER_API HttpSession {
 
 public:
 
@@ -53,7 +55,7 @@ public:
     QByteArray getId() const;
 
     /**
-      Null sessions cannot store data. All calls to set() and remove() 
+      Null sessions cannot store data. All calls to set() and remove()
       do not have any effect.This method is thread safe.
     */
     bool isNull() const;

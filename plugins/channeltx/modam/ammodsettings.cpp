@@ -34,12 +34,13 @@ void AMModSettings::resetToDefaults()
     m_rfBandwidth = 12500.0;
     m_modFactor = 0.2f;
     m_toneFrequency = 1000.0f;
-    m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
     m_volumeFactor = 1.0f;
     m_channelMute = false;
     m_playLoop = false;
     m_rgbColor = QColor(255, 255, 0).rgb();
     m_title = "AM Modulator";
+    m_modAFInput = AMModInputAF::AMModInputNone;
+    m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
 }
 
 QByteArray AMModSettings::serialize() const
@@ -62,6 +63,8 @@ QByteArray AMModSettings::serialize() const
     }
 
     s.writeString(9, m_title);
+    s.writeString(10, m_audioDeviceName);
+    s.writeS32(11, (int) m_modAFInput);
 
     return s.final();
 }
@@ -100,6 +103,14 @@ bool AMModSettings::deserialize(const QByteArray& data)
         }
 
         d.readString(9, &m_title, "AM Modulator");
+        d.readString(10, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
+
+        d.readS32(11, &tmp, 0);
+        if ((tmp < 0) || (tmp > (int) AMModInputAF::AMModInputTone)) {
+            m_modAFInput = AMModInputNone;
+        } else {
+            m_modAFInput = (AMModInputAF) tmp;
+        }
 
         return true;
     }

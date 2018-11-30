@@ -54,11 +54,7 @@ private:
 	unsigned int m_log2Decim;
 	int m_fcPos;
 
-#ifdef SDR_RX_SAMPLE_24BIT
-    Decimators<qint64, qint8, SDR_RX_SAMP_SZ, 8> m_decimators;
-#else
 	Decimators<qint32, qint8, SDR_RX_SAMP_SZ, 8> m_decimators;
-#endif
 
 	void run();
 	void callback(const qint8* buf, qint32 len);

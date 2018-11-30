@@ -362,7 +362,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoRunning()
 
 	if(!m_deviceSampleSink->start())
 	{
-		return gotoError("DSPDeviceSinkEngine::gotoRunning: Could not start sample source");
+		return gotoError("DSPDeviceSinkEngine::gotoRunning: Could not start sample sink");
 	}
 
 	for(BasebandSampleSources::const_iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); it++)
@@ -592,7 +592,7 @@ void DSPDeviceSinkEngine::checkNumberOfBasebandSources()
         if (m_threadedBasebandSampleSources.size() == 1) {
             m_threadedBasebandSampleSources.back()->setDeviceSampleSourceFifo(sampleFifo);
         } else if (m_basebandSampleSources.size() == 1) {
-            m_threadedBasebandSampleSources.back()->setDeviceSampleSourceFifo(sampleFifo);
+            m_basebandSampleSources.back()->setDeviceSampleSourceFifo(sampleFifo);
         }
 
         m_multipleSourcesDivisionFactor = 1; // for consistency but it is not used in this case

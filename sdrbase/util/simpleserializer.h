@@ -4,9 +4,9 @@
 #include <QString>
 #include <QMap>
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 
-class SDRANGEL_API SimpleSerializer {
+class SDRBASE_API SimpleSerializer {
 public:
 	SimpleSerializer(quint32 version);
 
@@ -48,7 +48,7 @@ protected:
 	bool writeTag(Type type, quint32 id, quint32 length);
 };
 
-class SDRANGEL_API SimpleDeserializer {
+class SDRBASE_API SimpleDeserializer {
 public:
 	SimpleDeserializer(const QByteArray& data);
 

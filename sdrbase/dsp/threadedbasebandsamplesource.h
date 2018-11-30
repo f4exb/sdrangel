@@ -22,7 +22,7 @@
 
 #include "dsp/basebandsamplesource.h"
 #include "util/messagequeue.h"
-#include "util/export.h"
+#include "export.h"
 
 class BasebandSampleSource;
 class QThread;
@@ -30,7 +30,7 @@ class QThread;
 /**
  * This class is a wrapper for BasebandSampleSource that runs the BasebandSampleSource object in its own thread
  */
-class SDRANGEL_API ThreadedBasebandSampleSource : public QObject {
+class SDRBASE_API ThreadedBasebandSampleSource : public QObject {
 	Q_OBJECT
 
 public:

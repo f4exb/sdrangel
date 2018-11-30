@@ -16,7 +16,6 @@ SDRangel-3.x:
     + cm256cc
     + dsdcc
     + mbelib
-    + nanomsg
 + boost_1_64_0/
 
 ### Environment preparation
@@ -47,13 +46,6 @@ git clone https://github.com/f4exb/dsdcc.git
 
 ```
 
-##### nanomsg:
-```
-git clone https://github.com/nanomsg/nanomsg.git
-mkdir build && cd build
-cmake -DCMAKE_INSTALL_PREFIX=/opt/local ..
-cmake --build . && sudo cmake --build . --target install
-```
 
 ## Build
 Release build configuration with QT Creator

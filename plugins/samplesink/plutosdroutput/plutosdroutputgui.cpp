@@ -37,7 +37,7 @@ PlutoSDROutputGUI::PlutoSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
     m_sampleSink(0),
     m_sampleRate(0),
     m_deviceCenterFrequency(0),
-    m_lastEngineState((DSPDeviceSinkEngine::State)-1),
+    m_lastEngineState(DSPDeviceSinkEngine::StNotStarted),
     m_doApplySettings(true),
     m_statusCounter(0)
 {

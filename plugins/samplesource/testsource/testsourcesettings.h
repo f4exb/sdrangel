@@ -17,6 +17,8 @@
 #ifndef _TESTSOURCE_TESTSOURCESETTINGS_H_
 #define _TESTSOURCE_TESTSOURCESETTINGS_H_
 
+#include <QString>
+
 struct TestSourceSettings {
     typedef enum {
         FC_POS_INFRA = 0,
@@ -35,6 +37,9 @@ struct TestSourceSettings {
         ModulationNone,
         ModulationAM,
         ModulationFM,
+        ModulationPattern0,
+        ModulationPattern1,
+        ModulationPattern2,
         ModulationLast
     } Modulation;
 
@@ -54,6 +59,7 @@ struct TestSourceSettings {
     float m_iFactor;        //!< -1.0 < x < 1.0
     float m_qFactor;        //!< -1.0 < x < 1.0
     float m_phaseImbalance; //!< -1.0 < x < 1.0
+    QString m_fileRecordName;
 
 	TestSourceSettings();
 	void resetToDefaults();

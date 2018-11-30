@@ -18,14 +18,18 @@
 #ifndef SDRBASE_AUDIO_AUDIONETSINK_H_
 #define SDRBASE_AUDIO_AUDIONETSINK_H_
 
-#include <QObject>
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 
-template<typename T> class UDPSink;
+#include <QObject>
+#include <QHostAddress>
+#include <stdint.h>
+
+class QUdpSocket;
 class RTPSink;
+class QThread;
 
-class SDRANGEL_API AudioNetSink {
+class SDRBASE_API AudioNetSink {
 public:
     typedef enum
     {
@@ -33,26 +37,34 @@ public:
         SinkRTP
     } SinkType;
 
-    AudioNetSink(QObject *parent, bool stereo = false);
+    AudioNetSink(QObject *parent); //!< without RTP
+    AudioNetSink(QObject *parent, int sampleRate, bool stereo); //!< with RTP
     ~AudioNetSink();
 
     void setDestination(const QString& address, uint16_t port);
     void addDestination(const QString& address, uint16_t port);
     void deleteDestination(const QString& address, uint16_t port);
+    void setParameters(bool stereo, int sampleRate);
 
     void write(qint16 sample);
-    void write(const AudioSample& sample);
+    void write(qint16 lSample, qint16 rSample);
+    void write(AudioSample* samples, uint32_t numSamples);
 
     bool isRTPCapable() const;
     bool selectType(SinkType type);
+
+    void moveToThread(QThread *thread);
 
     static const int m_udpBlockSize;
 
 protected:
     SinkType m_type;
-    UDPSink<qint16> *m_udpBufferAudioMono;
-    UDPSink<AudioSample> *m_udpBufferAudioStereo;
+    QUdpSocket *m_udpSocket;
     RTPSink *m_rtpBufferAudio;
+    char m_data[65536];
+    unsigned int m_bufferIndex;
+    QHostAddress m_address;
+    unsigned int m_port;
 };
 
 

@@ -52,7 +52,7 @@ void FileLogger::refreshQtSettings()
     maxSize = settings->value("maxSize", 0).toLongLong();
     maxBackups = settings->value("maxBackups", 0).toInt();
     msgFormat = settings->value("msgFormat", "{timestamp} {type} {msg}").toString();
-    timestampFormat = settings->value("timestampFormat", "yyyy-MM-dd hh:mm:ss.zzz").toString();
+    timestampFormat = settings->value("timestampFormat", "yyyy-MM-dd HH:mm:ss.zzz").toString();
     minLevel = static_cast<QtMsgType>(settings->value("minLevel", 0).toInt());
     bufferSize = settings->value("bufferSize", 0).toInt();
 

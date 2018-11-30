@@ -1,3 +1,4 @@
+
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
@@ -31,6 +32,7 @@ AirspyHFThread::AirspyHFThread(airspyhf_device_t* dev, SampleSinkFifo* sampleFif
 	m_samplerate(10),
 	m_log2Decim(0)
 {
+    memset((char*) m_buf, 0, 2*AIRSPYHF_BLOCKSIZE*sizeof(qint16));
 	m_this = this;
 }
 

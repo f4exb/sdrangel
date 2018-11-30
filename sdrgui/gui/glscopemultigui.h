@@ -22,7 +22,7 @@
 #include <QComboBox>
 
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 #include "util/message.h"
 #include "dsp/scopevismulti.h"
 
@@ -33,7 +33,7 @@ namespace Ui {
 class MessageQueue;
 class GLScopeMulti;
 
-class SDRANGEL_API GLScopeMultiGUI : public QWidget {
+class SDRGUI_API GLScopeMultiGUI : public QWidget {
     Q_OBJECT
 
 public:

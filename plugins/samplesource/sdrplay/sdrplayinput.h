@@ -148,6 +148,20 @@ public:
 
     virtual bool handleMessage(const Message& message);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            QString& errorMessage);
+
     virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
@@ -164,6 +178,8 @@ private:
     void closeDevice();
     bool applySettings(const SDRPlaySettings& settings, bool forwardChange, bool force);
     bool setDeviceCenterFrequency(quint64 freq);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRPlaySettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 
     DeviceSourceAPI *m_deviceAPI;
     QMutex m_mutex;
@@ -175,6 +191,51 @@ private:
     int m_devNumber;
     bool m_running;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
+};
+
+// ====================================================================
+
+class SDRPlaySampleRates {
+public:
+    static unsigned int getRate(unsigned int rate_index);
+    static unsigned int getRateIndex(unsigned int rate);
+    static unsigned int getNbRates();
+private:
+    static const unsigned int m_nb_rates = 18;
+    static unsigned int m_rates[m_nb_rates];
+};
+
+class SDRPlayBandwidths {
+public:
+    static unsigned int getBandwidth(unsigned int bandwidth_index);
+    static unsigned int getBandwidthIndex(unsigned int bandwidth);
+    static unsigned int getNbBandwidths();
+private:
+    static const unsigned int m_nb_bw = 8;
+    static unsigned int m_bw[m_nb_bw];
+};
+
+class SDRPlayIF {
+public:
+    static unsigned int getIF(unsigned int if_index);
+    static unsigned int getIFIndex(unsigned int iff);
+    static unsigned int getNbIFs();
+private:
+    static const unsigned int m_nb_if = 4;
+    static unsigned int m_if[m_nb_if];
+};
+
+class SDRPlayBands {
+public:
+    static QString getBandName(unsigned int band_index);
+    static unsigned int getBandLow(unsigned int band_index);
+    static unsigned int getBandHigh(unsigned int band_index);
+    static unsigned int getNbBands();
+private:
+    static const unsigned int m_nb_bands = 8;
+    static unsigned int m_bandLow[m_nb_bands];
+    static unsigned int m_bandHigh[m_nb_bands];
+    static const char* m_bandName[m_nb_bands];
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYINPUT_H_ */

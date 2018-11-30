@@ -29,14 +29,14 @@
 #include "dsp/fftwindow.h"
 #include "util/messagequeue.h"
 #include "util/syncmessenger.h"
-#include "util/export.h"
+#include "export.h"
 
 class DeviceSampleSink;
 class BasebandSampleSource;
 class ThreadedBasebandSampleSource;
 class BasebandSampleSink;
 
-class SDRANGEL_API DSPDeviceSinkEngine : public QThread {
+class SDRBASE_API DSPDeviceSinkEngine : public QThread {
 	Q_OBJECT
 
 public:

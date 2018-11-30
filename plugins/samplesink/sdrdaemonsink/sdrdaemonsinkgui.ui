@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>SDRdaemonSinkGui</class>
  <widget class="QWidget" name="SDRdaemonSinkGui">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>411</width>
-    <height>217</height>
+    <width>360</width>
+    <height>270</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,13 +21,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>380</width>
-    <height>190</height>
+    <width>360</width>
+    <height>270</height>
    </size>
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -114,7 +117,7 @@
      <item>
       <widget class="ValueDial" name="centerFrequency" native="true">
        <property name="enabled">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -130,7 +133,7 @@
        </property>
        <property name="font">
         <font>
-         <family>DejaVu Sans Mono</family>
+         <family>Liberation Mono</family>
          <pointsize>20</pointsize>
         </font>
        </property>
@@ -146,24 +149,42 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="freqUnits">
-       <property name="text">
-        <string> kHz</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="freqRightlSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-      </spacer>
+      <layout class="QVBoxLayout" name="freqRightLayout">
+       <item>
+        <layout class="QHBoxLayout" name="freqRightTopLayout">
+         <item>
+          <widget class="QLabel" name="freqUnits">
+           <property name="text">
+            <string> kHz</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="freqRightBotLayout">
+         <item>
+          <widget class="QLabel" name="remoteRateText">
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Remote baseband sample rate</string>
+           </property>
+           <property name="text">
+            <string>00000k</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
@@ -202,7 +223,7 @@
        </property>
        <property name="font">
         <font>
-         <family>DejaVu Sans Mono</family>
+         <family>Liberation Mono</family>
          <pointsize>12</pointsize>
         </font>
        </property>
@@ -219,55 +240,6 @@
        <property name="text">
         <string>S/s</string>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="interpLabel">
-       <property name="text">
-        <string>Int</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="interp">
-       <property name="toolTip">
-        <string>Interpolation</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>1</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>2</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>4</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>8</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>16</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>32</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>64</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item>
@@ -302,7 +274,7 @@
         <number>90</number>
        </property>
        <property name="pageStep">
-        <number>0</number>
+        <number>1</number>
        </property>
        <property name="value">
         <number>50</number>
@@ -343,6 +315,58 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="deviceIndexLabel">
+       <property name="text">
+        <string>Dev</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="deviceIndex">
+       <property name="maximumSize">
+        <size>
+         <width>40</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Device index (for SDRangel server)</string>
+       </property>
+       <property name="inputMask">
+        <string>00</string>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="channelIndexLabel">
+       <property name="text">
+        <string>Ch</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="channelIndex">
+       <property name="maximumSize">
+        <size>
+         <width>40</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Channel index (for SDRangel)</string>
+       </property>
+       <property name="inputMask">
+        <string>00</string>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -395,32 +419,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="queueLengthLabel">
-       <property name="text">
-        <string>QL:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="queueLengthText">
-       <property name="minimumSize">
-        <size>
-         <width>18</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Current transmitter queue length in number of vectors</string>
-       </property>
-       <property name="text">
-        <string>00</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="Line" name="line_3">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -433,7 +431,7 @@
         <bool>false</bool>
        </property>
        <property name="toolTip">
-        <string>Frames status: green = all original received, none = some recovered by FEC, red = some lost</string>
+        <string>Frames status: green = all original received, none = some recovered by FEC, red = some lost, blue = remote not streaming</string>
        </property>
        <property name="text">
         <string/>
@@ -445,18 +443,34 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="qualityStatusText">
+      <widget class="QLabel" name="remoteStreamRateText">
        <property name="minimumSize">
         <size>
-         <width>52</width>
+         <width>50</width>
          <height>0</height>
         </size>
        </property>
        <property name="toolTip">
-        <string>Tx status since last poll: minimum of blocks received / maximum number of blocks used for recovery</string>
+        <string>Remote stream rate (S/s)</string>
        </property>
        <property name="text">
-        <string>100/100</string>
+        <string>0000000</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="remoteStreamRateUnits">
+       <property name="minimumSize">
+        <size>
+         <width>20</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>S/s</string>
        </property>
       </widget>
      </item>
@@ -485,7 +499,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Number of uncrecoverable errors since event counts reset</string>
+        <string>Number of unrecoverable errors since event counts reset</string>
        </property>
        <property name="text">
         <string>000</string>
@@ -534,16 +548,71 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="addressLayout">
+    <layout class="QHBoxLayout" name="queueLengthLayout">
      <item>
-      <widget class="QLabel" name="addressLabel">
+      <widget class="QLabel" name="queueLengthLabel">
        <property name="text">
-        <string>Addr:</string>
+        <string>QL</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="address">
+      <widget class="QProgressBar" name="queueLengthGauge">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>14</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Queue length gauge</string>
+       </property>
+       <property name="value">
+        <number>50</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="queueLengthText">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Queue length / Queue size</string>
+       </property>
+       <property name="text">
+        <string>000/000</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="apiAddressLayout">
+     <item>
+      <widget class="QLabel" name="apiAddressLabel">
+       <property name="minimumSize">
+        <size>
+         <width>30</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Green if communication OK else KO</string>
+       </property>
+       <property name="text">
+        <string>API</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="apiAddress">
        <property name="minimumSize">
         <size>
          <width>120</width>
@@ -551,7 +620,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Remote data connection IP address</string>
+        <string>Remote API IPv4 address</string>
        </property>
        <property name="inputMask">
         <string>000.000.000.000</string>
@@ -562,16 +631,22 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="dataPortLabel">
+      <widget class="QLabel" name="apiPortSeparator">
        <property name="text">
-        <string>D:</string>
+        <string>:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="dataPort">
+      <widget class="QLineEdit" name="apiPort">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="toolTip">
-        <string>Remote data connection port</string>
+        <string>Remote API port</string>
        </property>
        <property name="inputMask">
         <string>00000</string>
@@ -579,41 +654,31 @@
        <property name="text">
         <string>0</string>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="controlPortLabel">
-       <property name="text">
-        <string>C:</string>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
-      </widget>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
-      <widget class="QLineEdit" name="controlPort">
-       <property name="toolTip">
-        <string>Remote control port</string>
-       </property>
-       <property name="inputMask">
-        <string>00000</string>
-       </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="applyButton">
+      <widget class="QPushButton" name="apiApplyButton">
        <property name="maximumSize">
         <size>
          <width>30</width>
          <height>16777215</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Set API address and port</string>
        </property>
        <property name="text">
         <string>Set</string>
@@ -623,27 +688,113 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="controlLayout">
+    <layout class="QHBoxLayout" name="dataAddressLayout">
      <item>
-      <widget class="QLabel" name="specificParmsLAbel">
+      <widget class="QLabel" name="dataAddressLabel">
+       <property name="minimumSize">
+        <size>
+         <width>30</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
-        <string>Sp:</string>
+        <string>Data</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="specificParms"/>
+      <widget class="QLineEdit" name="dataAddress">
+       <property name="minimumSize">
+        <size>
+         <width>120</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Remote data connection IPv4 address</string>
+       </property>
+       <property name="inputMask">
+        <string>000.000.000.000</string>
+       </property>
+       <property name="text">
+        <string>0...</string>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="sendButton">
+      <widget class="QLabel" name="dataPortSeparator">
+       <property name="text">
+        <string>:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="dataPort">
        <property name="maximumSize">
         <size>
          <width>50</width>
          <height>16777215</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Remote data connection port</string>
+       </property>
+       <property name="inputMask">
+        <string>00000</string>
+       </property>
        <property name="text">
-        <string>Send</string>
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="dataApplyButton">
+       <property name="maximumSize">
+        <size>
+         <width>30</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Set data address and port</string>
+       </property>
+       <property name="text">
+        <string>Set</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="statusLayout">
+     <item>
+      <widget class="QLabel" name="statusText">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="infoLayout">
+     <item>
+      <widget class="QLabel" name="infoText">
+       <property name="text">
+        <string>...</string>
        </property>
       </widget>
      </item>

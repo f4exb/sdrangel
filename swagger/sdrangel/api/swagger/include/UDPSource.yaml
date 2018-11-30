@@ -1,0 +1,72 @@
+UDPSourceSettings:
+  description: UDPSource
+  properties:
+    sampleFormat:
+      type: integer
+    inputSampleRate:
+      type: number
+      format: float
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    lowCutoff:
+      type: number
+      format: float
+    fmDeviation:
+      type: integer
+    amModFactor:
+      type: number
+      format: float
+    channelMute:
+      type: integer
+    gainIn:
+      type: number
+      format: float
+    gainOut:
+      type: number
+      format: float
+    squelch:
+      type: number
+      format: float
+    squelchGate:
+      type: number
+      format: float
+    squelchEnabled:
+      type: integer      
+    autoRWBalance:
+      type: integer            
+    stereoInput:
+      type: integer            
+    rgbColor:
+      type: integer            
+    udpAddress:
+      type: string
+    udpPort:
+      type: integer
+      format: uint16            
+    title:
+      type: string
+
+UDPSourceReport:
+  description: UDPSource
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    inputPowerDB:
+      description: power received from UDP stream (dB)
+      type: number
+      format: float
+    squelch:
+      description: squelch status (1 if open else 0)
+      type: integer
+    bufferGauge:
+      description: buffer R/W balance indicator
+      type: integer
+    channelSampleRate:
+      type: integer
+ 

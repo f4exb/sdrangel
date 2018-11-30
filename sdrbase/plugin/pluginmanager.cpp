@@ -55,9 +55,15 @@ PluginManager::~PluginManager()
 
 void PluginManager::loadPlugins(const QString& pluginsSubDir)
 {
-	QString applicationDirPath = QCoreApplication::instance()->applicationDirPath();
-	QString applicationLibPath = applicationDirPath + "/../lib/" + pluginsSubDir;
-	QString applicationBuildPath = applicationDirPath + "/" + pluginsSubDir;
+    loadPluginsPart(pluginsSubDir);
+    loadPluginsFinal();
+}
+
+void PluginManager::loadPluginsPart(const QString& pluginsSubDir)
+{
+    QString applicationDirPath = QCoreApplication::instance()->applicationDirPath();
+    QString applicationLibPath = applicationDirPath + "/../lib/" + pluginsSubDir;
+    QString applicationBuildPath = applicationDirPath + "/" + pluginsSubDir;
     qDebug() << "PluginManager::loadPlugins: " << qPrintable(applicationLibPath) << "," << qPrintable(applicationBuildPath);
 
     QDir pluginsLibDir = QDir(applicationLibPath);
@@ -65,16 +71,19 @@ void PluginManager::loadPlugins(const QString& pluginsSubDir)
 
     loadPluginsDir(pluginsLibDir);
     loadPluginsDir(pluginsBuildDir);
+}
 
-	qSort(m_plugins);
+void PluginManager::loadPluginsFinal()
+{
+    qSort(m_plugins);
 
-	for (Plugins::const_iterator it = m_plugins.begin(); it != m_plugins.end(); ++it)
-	{
-		it->pluginInterface->initPlugin(&m_pluginAPI);
-	}
+    for (Plugins::const_iterator it = m_plugins.begin(); it != m_plugins.end(); ++it)
+    {
+        it->pluginInterface->initPlugin(&m_pluginAPI);
+    }
 
-	DeviceEnumerator::instance()->enumerateRxDevices(this);
-	DeviceEnumerator::instance()->enumerateTxDevices(this);
+    DeviceEnumerator::instance()->enumerateRxDevices(this);
+    DeviceEnumerator::instance()->enumerateTxDevices(this);
 }
 
 void PluginManager::registerRxChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin)

@@ -68,12 +68,15 @@ void FileSinkOutput::openFileStream()
 
 	m_ofstream.open(m_fileName.toStdString().c_str(), std::ios::binary);
 
+    FileRecord::Header header;
 	int actualSampleRate = m_settings.m_sampleRate * (1<<m_settings.m_log2Interp);
-	m_ofstream.write((const char *) &actualSampleRate, sizeof(int));
-    //m_ofstream.write((const char *) &m_settings.m_sampleRate, sizeof(int));
-	m_ofstream.write((const char *) &m_settings.m_centerFrequency, sizeof(quint64));
+    header.sampleRate = actualSampleRate;
+    header.centerFrequency = m_settings.m_centerFrequency;
     m_startingTimeStamp = time(0);
-    m_ofstream.write((const char *) &m_startingTimeStamp, sizeof(std::time_t));
+    header.startTimeStamp = m_startingTimeStamp;
+    header.sampleSize = SDR_RX_SAMP_SZ;
+
+    FileRecord::writeHeader(m_ofstream, header);
 
 	qDebug() << "FileSinkOutput::openFileStream: " << m_fileName.toStdString().c_str();
 }
@@ -90,13 +93,7 @@ bool FileSinkOutput::start()
 
 	openFileStream();
 
-	if((m_fileSinkThread = new FileSinkThread(&m_ofstream, &m_sampleSourceFifo)) == 0)
-	{
-	    qCritical("out of memory");
-		stop();
-		return false;
-	}
-
+	m_fileSinkThread = new FileSinkThread(&m_ofstream, &m_sampleSourceFifo);
 	m_fileSinkThread->setSamplerate(m_settings.m_sampleRate);
 	m_fileSinkThread->setLog2Interpolation(m_settings.m_log2Interp);
 	m_fileSinkThread->connectTimer(m_masterTimer);
@@ -219,13 +216,11 @@ bool FileSinkOutput::handleMessage(const Message& message)
             if (m_deviceAPI->initGeneration())
             {
                 m_deviceAPI->startGeneration();
-                DSPEngine::instance()->startAudioInput();
             }
         }
         else
         {
             m_deviceAPI->stopGeneration();
-            DSPEngine::instance()->stopAudioInput();
         }
 
         return true;

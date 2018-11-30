@@ -52,13 +52,14 @@
 
 #include "dsp/dsptypes.h"
 #include "gui/scaleengine.h"
+#include "export.h"
 
 /**
  * Widget which displays a vertical audio level meter, indicating the
  * RMS and peak levels of the window of audio samples most recently analyzed
  * by the Engine.
  */
-class LevelMeter : public QWidget
+class SDRGUI_API LevelMeter : public QWidget
 {
     Q_OBJECT
 

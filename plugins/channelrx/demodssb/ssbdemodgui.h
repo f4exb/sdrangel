@@ -70,9 +70,8 @@ private:
 
     bool blockApplySettings(bool block);
 	void applySettings(bool force = false);
-	void applyBandwidths(bool force = false);
+	void applyBandwidths(int spanLog2, bool force = false);
 	void displaySettings();
-    void displayUDPAddress();
 
 	void displayAGCPowerThreshold(int value);
 
@@ -95,9 +94,10 @@ private slots:
 	void on_audioMute_toggled(bool checked);
 	void on_spanLog2_valueChanged(int value);
 	void on_flipSidebands_clicked(bool checked);
-	void on_copyAudioToUDP_toggled(bool copy);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
+    void handleInputMessages();
+    void audioSelect();
 	void tick();
 };
 

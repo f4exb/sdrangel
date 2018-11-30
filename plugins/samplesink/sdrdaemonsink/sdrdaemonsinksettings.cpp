@@ -25,28 +25,31 @@ SDRdaemonSinkSettings::SDRdaemonSinkSettings()
 void SDRdaemonSinkSettings::resetToDefaults()
 {
     m_centerFrequency = 435000*1000;
-    m_sampleRate = 192000;
-    m_log2Interp = 4;
-    m_txDelay = 0.5;
+    m_sampleRate = 48000;
+    m_txDelay = 0.35;
     m_nbFECBlocks = 0;
-    m_address = "127.0.0.1";
-    m_dataPort = 9092;
-    m_controlPort = 9093;
-    m_specificParameters = "";
+    m_apiAddress = "127.0.0.1";
+    m_apiPort = 9091;
+    m_dataAddress = "127.0.0.1";
+    m_dataPort = 9090;
+    m_deviceIndex = 0;
+    m_channelIndex = 0;
 }
 
 QByteArray SDRdaemonSinkSettings::serialize() const
 {
     SimpleSerializer s(1);
 
-    s.writeU64(1, m_sampleRate);
-    s.writeU32(2, m_log2Interp);
+    s.writeU64(1, m_centerFrequency);
+    s.writeU32(2, m_sampleRate);
     s.writeFloat(3, m_txDelay);
     s.writeU32(4, m_nbFECBlocks);
-    s.writeString(5, m_address);
-    s.writeU32(6, m_dataPort);
-    s.writeU32(7, m_controlPort);
-    s.writeString(8, m_specificParameters);
+    s.writeString(5, m_apiAddress);
+    s.writeU32(6, m_apiPort);
+    s.writeString(7, m_dataAddress);
+    s.writeU32(8, m_dataPort);
+    s.writeU32(10, m_deviceIndex);
+    s.writeU32(11, m_channelIndex);
 
     return s.final();
 }
@@ -64,16 +67,20 @@ bool SDRdaemonSinkSettings::deserialize(const QByteArray& data)
     if (d.getVersion() == 1)
     {
         quint32 uintval;
-        d.readU64(1, &m_sampleRate, 48000);
-        d.readU32(2, &m_log2Interp, 0);
+
+        d.readU64(1, &m_centerFrequency, 435000*1000);
+        d.readU32(2, &m_sampleRate, 48000);
         d.readFloat(3, &m_txDelay, 0.5);
         d.readU32(4, &m_nbFECBlocks, 0);
-        d.readString(5, &m_address, "127.0.0.1");
+        d.readString(5, &m_apiAddress, "127.0.0.1");
         d.readU32(6, &uintval, 9090);
+        m_apiPort = uintval % (1<<16);
+        d.readString(7, &m_dataAddress, "127.0.0.1");
+        d.readU32(8, &uintval, 9090);
         m_dataPort = uintval % (1<<16);
-        d.readU32(7, &uintval, 9090);
-        m_controlPort = uintval % (1<<16);
-        d.readString(8, &m_specificParameters, "");
+        d.readU32(10, &m_deviceIndex, 0);
+        d.readU32(11, &m_channelIndex, 0);
+
         return true;
     }
     else

@@ -20,6 +20,7 @@ set(filesink_HEADERS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+	${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
 )
 
@@ -38,6 +39,6 @@ target_link_libraries(outputfilesinksrv
 	swagger
 )
 
-qt5_use_modules(outputfilesinksrv Core)
+target_link_libraries(outputfilesinksrv Qt5::Core)
 
 install(TARGETS outputfilesinksrv DESTINATION lib/pluginssrv/samplesink)

@@ -2,9 +2,9 @@
 #define INCLUDE_FFTENGINE_H
 
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 
-class SDRANGEL_API FFTEngine {
+class SDRBASE_API FFTEngine {
 public:
 	virtual ~FFTEngine();
 

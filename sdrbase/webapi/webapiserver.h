@@ -19,6 +19,8 @@
 #ifndef SDRBASE_WEBAPI_WEBAPISERVER_H_
 #define SDRBASE_WEBAPI_WEBAPISERVER_H_
 
+#include "export.h"
+
 namespace qtwebapp
 {
     class HttpListener;
@@ -27,7 +29,7 @@ namespace qtwebapp
 
 class WebAPIRequestMapper;
 
-class WebAPIServer
+class SDRBASE_API WebAPIServer
 {
 public:
     WebAPIServer(const QString& host, uint16_t port, WebAPIRequestMapper *requestMapper);

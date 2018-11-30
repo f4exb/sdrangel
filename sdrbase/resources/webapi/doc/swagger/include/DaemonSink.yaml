@@ -1,0 +1,19 @@
+DaemonSinkSettings:
+  description: "Daemon channel sink settings"
+  properties:
+    nbFECBlocks:
+      description: "Number of FEC blocks per frame"
+      type: integer
+    dataAddress:
+      description: "Receiving USB data address"
+      type: string
+    dataPort:
+      description: "Receiving USB data port"
+      type: integer
+    txDelay:
+      description: "Minimum delay in ms between consecutive USB blocks transmissions"
+      type: integer
+    rgbColor:
+      type: integer                  
+    title:
+      type: string      

@@ -28,8 +28,9 @@ class ChannelSinkAPI;
 class ChannelSourceAPI;
 class Preset;
 
-struct DeviceSet
+class DeviceSet
 {
+public:
     DSPDeviceSourceEngine *m_deviceSourceEngine;
     DeviceSourceAPI *m_deviceSourceAPI;
     DSPDeviceSinkEngine *m_deviceSinkEngine;
@@ -91,6 +92,8 @@ private:
 
     void renameRxChannelInstances();
     void renameTxChannelInstances();
+    /** Use this function to support possible older identifiers in presets */
+    bool compareRxChannelURIs(const QString& registerdChannelURI, const QString& xChannelURI);
 };
 
 #endif /* SDRSRV_DEVICE_DEVICESET_H_ */

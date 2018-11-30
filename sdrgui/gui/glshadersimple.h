@@ -21,17 +21,20 @@
 #include <QString>
 #include <QOpenGLFunctions>
 
+#include "export.h"
+
 class QOpenGLShaderProgram;
 class QMatrix4x4;
 class QVector4D;
 
-class GLShaderSimple
+class SDRGUI_API GLShaderSimple
 {
 public:
 	GLShaderSimple();
 	~GLShaderSimple();
 
 	void initializeGL();
+    void drawPoints(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices);
 	void drawPolyline(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices);
 	void drawSegments(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices);
 	void drawContour(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices);

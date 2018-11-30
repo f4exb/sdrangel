@@ -116,12 +116,7 @@ bool HackRFOutput::start()
 
     if (m_running) stop();
 
-	if((m_hackRFThread = new HackRFOutputThread(m_dev, &m_sampleSourceFifo)) == 0)
-	{
-	    qCritical("HackRFOutput::start: out of memory");
-		stop();
-		return false;
-	}
+    m_hackRFThread = new HackRFOutputThread(m_dev, &m_sampleSourceFifo);
 
 //	mutexLocker.unlock();
 
@@ -262,13 +257,11 @@ bool HackRFOutput::handleMessage(const Message& message)
             if (m_deviceAPI->initGeneration())
             {
                 m_deviceAPI->startGeneration();
-                DSPEngine::instance()->startAudioInput();
             }
         }
         else
         {
             m_deviceAPI->stopGeneration();
-            DSPEngine::instance()->stopAudioInput();
         }
 
         return true;

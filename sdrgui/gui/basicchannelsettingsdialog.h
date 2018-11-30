@@ -3,13 +3,15 @@
 
 #include <QDialog>
 
+#include "export.h"
+
 namespace Ui {
     class BasicChannelSettingsDialog;
 }
 
 class ChannelMarker;
 
-class BasicChannelSettingsDialog : public QDialog
+class SDRGUI_API BasicChannelSettingsDialog : public QDialog
 {
     Q_OBJECT
 

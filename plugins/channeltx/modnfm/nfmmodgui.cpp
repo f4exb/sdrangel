@@ -26,6 +26,9 @@
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "dsp/dspengine.h"
+#include "gui/crightclickenabler.h"
+#include "gui/audioselectdialog.h"
+#include "gui/basicchannelsettingsdialog.h"
 #include "mainwindow.h"
 
 #include "ui_nfmmodgui.h"
@@ -252,7 +255,7 @@ void NFMModGUI::on_navTimeSlider_valueChanged(int value)
 void NFMModGUI::on_showFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"));
+        tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"), 0, QFileDialog::DontUseNativeDialog);
 
     if (fileName != "")
     {
@@ -287,6 +290,22 @@ void NFMModGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rol
 {
 }
 
+void NFMModGUI::onMenuDialogCalled(const QPoint &p)
+{
+    BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.move(p);
+    dialog.exec();
+
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+    m_settings.m_title = m_channelMarker.getTitle();
+
+    setWindowTitle(m_settings.m_title);
+    setTitleColor(m_settings.m_rgbColor);
+
+    applySettings();
+}
+
 NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::NFMModGUI),
@@ -314,11 +333,15 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     blockApplySettings(false);
 
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_nfmMod = (NFMMod*) channelTx; //new NFMMod(m_deviceUISet->m_deviceSinkAPI);
 	m_nfmMod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+
+    CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->mic);
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -329,8 +352,6 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_channelMarker.setBandwidth(12500);
     m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle("NFM Modulator");
-    m_channelMarker.setUDPAddress("127.0.0.1");
-    m_channelMarker.setUDPSendPort(9999);
     m_channelMarker.blockSignals(false);
 	m_channelMarker.setVisible(true); // activate signal on the last setting only
 
@@ -391,6 +412,7 @@ void NFMModGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setTitle(m_settings.m_title);
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
@@ -446,6 +468,19 @@ void NFMModGUI::enterEvent(QEvent*)
 	m_channelMarker.setHighlighted(true);
 }
 
+void NFMModGUI::audioSelect()
+{
+    qDebug("NFMModGUI::audioSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName, true); // true for input
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
+}
+
 void NFMModGUI::tick()
 {
     double powDb = CalcDb::dbPower(m_nfmMod->getMagSq());
@@ -463,7 +498,7 @@ void NFMModGUI::updateWithStreamData()
 {
     QTime recordLength(0, 0, 0, 0);
     recordLength = recordLength.addSecs(m_recordLength);
-    QString s_time = recordLength.toString("hh:mm:ss");
+    QString s_time = recordLength.toString("HH:mm:ss");
     ui->recordLengthText->setText(s_time);
     updateWithStreamTime();
 }
@@ -482,8 +517,8 @@ void NFMModGUI::updateWithStreamTime()
     QTime t(0, 0, 0, 0);
     t = t.addSecs(t_sec);
     t = t.addMSecs(t_msec);
-    QString s_timems = t.toString("hh:mm:ss.zzz");
-    QString s_time = t.toString("hh:mm:ss");
+    QString s_timems = t.toString("HH:mm:ss.zzz");
+    QString s_time = t.toString("HH:mm:ss");
     ui->relTimeText->setText(s_timems);
 
     if (!m_enableNavTime)

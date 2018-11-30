@@ -29,6 +29,8 @@ HackRFInputSettings:
       type: integer
     linkTxFrequency:
       type: integer
+    fileRecordName:
+      type: string
 
 HackRFOutputSettings:
   description: HackRF

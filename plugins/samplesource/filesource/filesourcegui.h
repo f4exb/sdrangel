@@ -65,9 +65,9 @@ private:
 	int m_sampleRate;
 	quint32 m_sampleSize;
 	quint64 m_centerFrequency;
-	quint32 m_recordLength;
-	std::time_t m_startingTimeStamp;
-	int m_samplesCount;
+    quint64 m_recordLength;
+    quint64 m_startingTimeStamp;
+    quint64 m_samplesCount;
 	std::size_t m_tickCount;
 	bool m_enableNavTime;
     int m_deviceSampleRate;
@@ -84,6 +84,8 @@ private:
 	void updateWithAcquisition();
 	void updateWithStreamData();
 	void updateWithStreamTime();
+    void setAccelerationCombo();
+    void setNumberStr(int n, QString& s);
 
 private slots:
     void handleInputMessages();
@@ -92,6 +94,7 @@ private slots:
 	void on_play_toggled(bool checked);
 	void on_navTimeSlider_valueChanged(int value);
 	void on_showFileDialog_clicked(bool checked);
+	void on_acceleration_currentIndexChanged(int index);
     void updateStatus();
 	void tick();
 };

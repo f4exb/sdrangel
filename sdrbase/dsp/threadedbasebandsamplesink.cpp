@@ -76,6 +76,9 @@ ThreadedBasebandSampleSink::ThreadedBasebandSampleSink(BasebandSampleSink* sampl
 	//moveToThread(m_thread); // FIXME: Fixed? the intermediate FIFO should be handled within the sink. Define a new type of sink that is compatible with threading
 	m_basebandSampleSink->moveToThread(m_thread);
 	m_threadedBasebandSampleSinkFifo->moveToThread(m_thread);
+	BasebandSampleSink::MsgThreadedSink *msg = BasebandSampleSink::MsgThreadedSink::create(m_thread); // inform of the new thread
+	m_basebandSampleSink->handleMessage(*msg);
+	delete msg;
 	//m_sampleFifo.moveToThread(m_thread);
 	//connect(&m_sampleFifo, SIGNAL(dataReady()), this, SLOT(handleData()));
 	//m_sampleFifo.setSize(262144);
@@ -85,7 +88,11 @@ ThreadedBasebandSampleSink::ThreadedBasebandSampleSink(BasebandSampleSink* sampl
 
 ThreadedBasebandSampleSink::~ThreadedBasebandSampleSink()
 {
-	delete m_threadedBasebandSampleSinkFifo; // Valgrind memcheck
+    if (m_thread->isRunning()) {
+        stop();
+    }
+
+    delete m_threadedBasebandSampleSinkFifo; // Valgrind memcheck
 	delete m_thread;
 }
 

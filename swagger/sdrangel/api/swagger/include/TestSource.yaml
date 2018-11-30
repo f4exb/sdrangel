@@ -1,0 +1,43 @@
+TestSourceSettings:
+  description: TestSource
+  properties:
+    centerFrequency:
+      type: integer
+      format: uint64
+    frequencyShift:
+      type: integer
+    sampleRate:
+      type: integer
+    log2Decim:
+      type: integer
+    fcPos:
+      type: integer
+    sampleSizeIndex:
+      type: integer
+    amplitudeBits:
+      type: integer
+    autoCorrOptions:
+      type: integer
+    modulation:
+      type: integer
+    modulationTone:
+      type: integer
+    amModulation:
+      type: integer
+    fmDeviation:
+      type: integer
+    dcFactor:
+      type: number
+      format: float  
+    iFactor:
+      type: number
+      format: float
+    qFactor:
+      type: number
+      format: float
+    phaseImbalance:
+      type: number
+      format: float
+    fileRecordName:
+      type: string
+              

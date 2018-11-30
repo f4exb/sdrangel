@@ -15,17 +15,20 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtPlugin>
-#include <QAction>
 #include <mirisdr.h>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#ifdef SERVER_MODE
+#include "sdrplayinput.h"
+#else
 #include "sdrplaygui.h"
+#endif
 #include "sdrplayplugin.h"
 #include <device/devicesourceapi.h>
 
 const PluginDescriptor SDRPlayPlugin::m_pluginDescriptor = {
     QString("SDRPlay RSP1 Input"),
-    QString("3.11.0"),
+    QString("4.0.0"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -87,6 +90,15 @@ PluginInterface::SamplingDevices SDRPlayPlugin::enumSampleSources()
     return result;
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* SDRPlayPlugin::createSampleSourcePluginInstanceGUI(
+        const QString& sourceId __attribute((unused)),
+        QWidget **widget __attribute((unused)),
+        DeviceUISet *deviceUISet __attribute((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* SDRPlayPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
@@ -103,6 +115,7 @@ PluginInstanceGUI* SDRPlayPlugin::createSampleSourcePluginInstanceGUI(
         return 0;
     }
 }
+#endif
 
 DeviceSampleSource *SDRPlayPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
 {

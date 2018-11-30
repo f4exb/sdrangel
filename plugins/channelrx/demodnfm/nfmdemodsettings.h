@@ -27,24 +27,20 @@ struct NFMDemodSettings
     static const int m_rfBW[];
     static const int m_fmDev[];
 
-    int64_t m_inputFrequencyOffset;
+    int32_t m_inputFrequencyOffset;
     Real m_rfBandwidth;
     Real m_afBandwidth;
     int  m_fmDeviation;
     int  m_squelchGate;
     bool m_deltaSquelch;
-    Real m_squelch; //!< centi-Bels
+    Real m_squelch; //!< deci-Bels
     Real m_volume;
     bool m_ctcssOn;
     bool m_audioMute;
     int  m_ctcssIndex;
-    uint32_t m_audioSampleRate;
-    bool m_copyAudioToUDP;
-    bool m_copyAudioUseRTP;
-    QString m_udpAddress;
-    uint16_t m_udpPort;
     quint32 m_rgbColor;
     QString m_title;
+    QString m_audioDeviceName;
 
     Serializable *m_channelMarker;
 

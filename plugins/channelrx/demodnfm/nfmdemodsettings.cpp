@@ -25,8 +25,8 @@
 const int NFMDemodSettings::m_rfBW[] = {
     5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
 };
-const int NFMDemodSettings::m_fmDev[] = { // corresponding FM deviations
-    1000, 1500, 2000, 2000,  2000,  2500,  3000,  3500,  5000
+const int NFMDemodSettings::m_fmDev[] = { // corresponding single side FM deviations at 0.4 * BW
+    2000, 2500, 3330, 4000,  5000,  6000,  8000,  10000,  16000
 };
 const int NFMDemodSettings::m_nbRfBW = 9;
 
@@ -44,18 +44,14 @@ void NFMDemodSettings::resetToDefaults()
     m_fmDeviation = 2000;
     m_squelchGate = 5; // 10s of ms at 48000 Hz sample rate. Corresponds to 2400 for AGC attack
     m_deltaSquelch = false;
-    m_squelch = -300.0;
+    m_squelch = -30.0;
     m_volume = 1.0;
     m_ctcssOn = false;
     m_audioMute = false;
     m_ctcssIndex = 0;
-    m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
-    m_copyAudioToUDP = false;
-    m_copyAudioUseRTP = false;
-    m_udpAddress = "127.0.0.1";
-    m_udpPort = 9998;
     m_rgbColor = QColor(255, 0, 0).rgb();
     m_title = "NFM Demodulator";
+    m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
 }
 
 QByteArray NFMDemodSettings::serialize() const
@@ -78,7 +74,7 @@ QByteArray NFMDemodSettings::serialize() const
     }
 
     s.writeString(14, m_title);
-    s.writeBool(15, m_copyAudioUseRTP);
+    s.writeString(15, m_audioDeviceName);
 
     return s.final();
 }
@@ -113,8 +109,8 @@ bool NFMDemodSettings::deserialize(const QByteArray& data)
         m_afBandwidth = tmp * 1000.0;
         d.readS32(4, &tmp, 20);
         m_volume = tmp / 10.0;
-        d.readS32(5, &tmp, -300);
-        m_squelch = tmp * 1.0;
+        d.readS32(5, &tmp, -30);
+        m_squelch = (tmp < -100 ? tmp/10 : tmp) * 1.0;
         d.readU32(7, &m_rgbColor, QColor(255, 0, 0).rgb());
         d.readS32(8, &m_ctcssIndex, 0);
         d.readBool(9, &m_ctcssOn, false);
@@ -122,7 +118,7 @@ bool NFMDemodSettings::deserialize(const QByteArray& data)
         d.readS32(11, &m_squelchGate, 5);
         d.readBool(12, &m_deltaSquelch, false);
         d.readString(14, &m_title, "NFM Demodulator");
-        d.readBool(15, &m_copyAudioUseRTP, false);
+        d.readString(15, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
 
         return true;
     }

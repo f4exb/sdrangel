@@ -24,7 +24,7 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -86,7 +86,7 @@
           </property>
           <property name="font">
            <font>
-            <family>DejaVu Sans Mono</family>
+            <family>Liberation Mono</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -265,7 +265,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Channel power</string>
+         <string>Channel power (dB)</string>
         </property>
         <property name="text">
          <string>-100.0 dB</string>
@@ -377,7 +377,7 @@
       <item>
        <widget class="ButtonSwitch" name="rfFiltering">
         <property name="toolTip">
-         <string>Engage asymmertical bandpass FFT filter</string>
+         <string>Engage asymmetrical bandpass FFT filter</string>
         </property>
         <property name="text">
          <string/>
@@ -1037,7 +1037,7 @@
        <enum>QLayout::SetMinimumSize</enum>
       </property>
       <item>
-       <widget class="ATVScreen" name="screenTV" native="true">
+       <widget class="TVScreen" name="screenTV" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -1088,17 +1088,23 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="GLScopeNG" name="glScope" native="true">
+      <widget class="GLScope" name="glScope" native="true">
        <property name="minimumSize">
         <size>
          <width>0</width>
          <height>312</height>
         </size>
        </property>
+       <property name="font">
+        <font>
+         <family>Liberation Mono</family>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
       </widget>
      </item>
      <item>
-      <widget class="GLScopeNGGUI" name="scopeGUI" native="true"/>
+      <widget class="GLScopeGUI" name="scopeGUI" native="true"/>
      </item>
     </layout>
    </widget>
@@ -1117,27 +1123,27 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
-   <class>ATVScreen</class>
+   <class>GLScope</class>
    <extends>QWidget</extends>
-   <header>atvscreen.h</header>
+   <header>gui/glscope.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>GLScopeNG</class>
+   <class>GLScopeGUI</class>
    <extends>QWidget</extends>
-   <header>gui/glscopeng.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>GLScopeNGGUI</class>
-   <extends>QWidget</extends>
-   <header>gui/glscopenggui.h</header>
+   <header>gui/glscopegui.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ValueDialZ</class>
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TVScreen</class>
+   <extends>QWidget</extends>
+   <header>gui/tvscreen.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

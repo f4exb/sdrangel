@@ -1,5 +1,6 @@
 #include "dsp/spectrumscopecombovis.h"
 #include "dsp/dspcommands.h"
+#include "dsp/scopevis.h"
 #include "util/messagequeue.h"
 
 SpectrumScopeComboVis::SpectrumScopeComboVis(SpectrumVis* spectrumVis, ScopeVis* scopeVis) :

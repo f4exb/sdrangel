@@ -23,37 +23,53 @@
 #include <QAudioFormat>
 #include <list>
 #include <vector>
-#include "util/export.h"
+#include <stdint.h>
+#include "export.h"
 
 class QAudioOutput;
 class AudioFifo;
 class AudioOutputPipe;
+class AudioNetSink;
 
-class SDRANGEL_API AudioOutput : QIODevice {
+class SDRBASE_API AudioOutput : QIODevice {
 public:
+    enum UDPChannelMode
+    {
+        UDPChannelLeft,
+        UDPChannelRight,
+        UDPChannelMixed,
+        UDPChannelStereo
+    };
+
 	AudioOutput();
 	virtual ~AudioOutput();
 
 	bool start(int device, int rate);
 	void stop();
 
-    bool startImmediate(int device, int rate);
-    void stopImmediate();
-
 	void addFifo(AudioFifo* audioFifo);
 	void removeFifo(AudioFifo* audioFifo);
+	int getNbFifos() const { return m_audioFifos.size(); }
 
-	uint getRate() const { return m_audioFormat.sampleRate(); }
+	unsigned int getRate() const { return m_audioFormat.sampleRate(); }
 	void setOnExit(bool onExit) { m_onExit = onExit; }
+
+	void setUdpDestination(const QString& address, uint16_t port);
+	void setUdpCopyToUDP(bool copyToUDP);
+	void setUdpUseRTP(bool useRTP);
+	void setUdpChannelMode(UDPChannelMode udpChannelMode);
+	void setUdpChannelFormat(bool stereo, int sampleRate);
 
 private:
 	QMutex m_mutex;
 	QAudioOutput* m_audioOutput;
+	AudioNetSink* m_audioNetSink;
+	bool m_copyAudioToUdp;
+	UDPChannelMode m_udpChannelMode;
 	uint m_audioUsageCount;
 	bool m_onExit;
 
-	typedef std::list<AudioFifo*> AudioFifos;
-	AudioFifos m_audioFifos;
+	std::list<AudioFifo*> m_audioFifos;
 	std::vector<qint32> m_mixBuffer;
 
 	QAudioFormat m_audioFormat;

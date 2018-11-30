@@ -21,6 +21,7 @@ add_library(swagger SHARED
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
     .
+    ${CMAKE_SOURCE_DIR}/exports    
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
@@ -32,6 +33,6 @@ target_link_libraries(swagger
 
 set_target_properties(swagger PROPERTIES DEFINE_SYMBOL "sdrangel_EXPORTS")
 
-qt5_use_modules(swagger Core Network)
+target_link_libraries(swagger Qt5::Core Qt5::Network)
 
 install(TARGETS swagger DESTINATION lib)

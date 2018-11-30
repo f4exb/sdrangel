@@ -21,7 +21,9 @@
 #include <vector>
 #include <map>
 
-class DevicePlutoSDRScan
+#include "export.h"
+
+class DEVICES_API DevicePlutoSDRScan
 {
 public:
     struct DeviceScan

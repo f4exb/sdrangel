@@ -18,6 +18,8 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGPlutoSdrInputReport.h"
 
 #include "dsp/filerecord.h"
 #include "dsp/dspcommands.h"
@@ -44,13 +46,18 @@ PlutoSDRInput::PlutoSDRInput(DeviceSourceAPI *deviceAPI) :
     m_plutoRxBuffer(0),
     m_plutoSDRInputThread(0)
 {
+    m_deviceSampleRates.m_addaConnvRate = 0;
+    m_deviceSampleRates.m_bbRateHz = 0;
+    m_deviceSampleRates.m_firRate = 0;
+    m_deviceSampleRates.m_hb1Rate = 0;
+    m_deviceSampleRates.m_hb2Rate = 0;
+    m_deviceSampleRates.m_hb3Rate = 0;
+
     suspendBuddies();
     openDevice();
     resumeBuddies();
 
-    char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
+    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
 }
 
@@ -81,20 +88,12 @@ bool PlutoSDRInput::start()
 
     if (m_running) stop();
 
-    applySettings(m_settings, true);
-
     // start / stop streaming is done in the thread.
 
-    if ((m_plutoSDRInputThread = new PlutoSDRInputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleFifo)) == 0)
-    {
-        qCritical("PlutoSDRInput::start: cannot create thread");
-        stop();
-        return false;
-    }
-    else
-    {
-        qDebug("PlutoSDRInput::start: thread created");
-    }
+    m_plutoSDRInputThread = new PlutoSDRInputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleFifo);
+    qDebug("PlutoSDRInput::start: thread created");
+
+    applySettings(m_settings, true);
 
     m_plutoSDRInputThread->setLog2Decimation(m_settings.m_log2Decim);
     m_plutoSDRInputThread->startWork();
@@ -193,9 +192,18 @@ bool PlutoSDRInput::handleMessage(const Message& message)
         MsgFileRecord& conf = (MsgFileRecord&) message;
         qDebug() << "PlutoSDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
 
-        if (conf.getStartStop()) {
+        if (conf.getStartStop())
+        {
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink->setFileName(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
+            }
+
             m_fileSink->startRecording();
-        } else {
+        }
+        else
+        {
             m_fileSink->stopRecording();
         }
 
@@ -211,13 +219,11 @@ bool PlutoSDRInput::handleMessage(const Message& message)
             if (m_deviceAPI->initAcquisition())
             {
                 m_deviceAPI->startAcquisition();
-                DSPEngine::instance()->startAudioOutput();
             }
         }
         else
         {
             m_deviceAPI->stopAcquisition();
-            DSPEngine::instance()->stopAudioOutput();
         }
 
         return true;
@@ -287,11 +293,9 @@ bool PlutoSDRInput::openDevice()
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
 
     // acquire the channel
-    suspendBuddies();
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
     plutoBox->openRx();
     m_plutoRxBuffer = plutoBox->createRxBuffer(PLUTOSDR_BLOCKSIZE_SAMPLES, false);
-    resumeBuddies();
 
     return true;
 }
@@ -347,6 +351,23 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
     bool ownThreadWasRunning    = false;
     bool suspendAllOtherThreads = false; // All others means Tx in fact
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
+    QLocale loc;
+
+    qDebug().noquote() << "PlutoSDRInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+            << " m_devSampleRate: " << loc.toString(m_settings.m_devSampleRate) << "S/s"
+            << " m_LOppmTenths: " << m_settings.m_LOppmTenths
+            << " m_lpfFIREnable: " << m_settings.m_lpfFIREnable
+            << " m_lpfFIRBW: " << loc.toString(m_settings.m_lpfFIRBW)
+            << " m_lpfFIRlog2Decim: " << m_settings.m_lpfFIRlog2Decim
+            << " m_lpfFIRGain: " << m_settings.m_lpfFIRGain
+            << " m_log2Decim: " << loc.toString(1<<m_settings.m_log2Decim)
+            << " m_lpfBW: " << loc.toString(m_settings.m_lpfBW)
+            << " m_gain: " << m_settings.m_gain
+            << " m_antennaPath: " << (int) m_settings.m_antennaPath
+            << " m_gainMode: " << (int) m_settings.m_gainMode
+            << " m_transverterMode: " << m_settings.m_transverterMode
+            << " m_transverterDeltaFrequency: " << m_settings.m_transverterDeltaFrequency
+            << " force: " << force;
 
     // determine if buddies threads or own thread need to be suspended
 
@@ -445,42 +466,21 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
         || (m_settings.m_fcPos != settings.m_fcPos)
         || (m_settings.m_log2Decim != settings.m_log2Decim)
+        || (m_settings.m_devSampleRate != settings.m_devSampleRate)
         || (m_settings.m_transverterMode != settings.m_transverterMode)
         || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force)
     {
-        qint64 deviceCenterFrequency = settings.m_centerFrequency;
-        deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
-        qint64 f_img = deviceCenterFrequency;
-        quint32 devSampleRate = settings.m_devSampleRate;
+        qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+                settings.m_centerFrequency,
+                settings.m_transverterDeltaFrequency,
+                settings.m_log2Decim,
+                (DeviceSampleSource::fcPos_t) settings.m_fcPos,
+                settings.m_devSampleRate,
+                settings.m_transverterMode);
 
-        if ((settings.m_log2Decim == 0) || (settings.m_fcPos == PlutoSDRInputSettings::FC_POS_CENTER))
-        {
-            f_img = deviceCenterFrequency;
-        }
-        else
-        {
-            if (settings.m_fcPos == PlutoSDRInputSettings::FC_POS_INFRA)
-            {
-                deviceCenterFrequency += (devSampleRate / 4);
-                f_img = deviceCenterFrequency + devSampleRate/2;
-            }
-            else if (settings.m_fcPos == PlutoSDRInputSettings::FC_POS_SUPRA)
-            {
-                deviceCenterFrequency -= (devSampleRate / 4);
-                f_img = deviceCenterFrequency - devSampleRate/2;
-            }
-        }
-
-        deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
-
-        if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
-                || (m_settings.m_transverterMode != settings.m_transverterMode)
-                || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))
-        {
-            params.push_back(QString(tr("out_altvoltage0_RX_LO_frequency=%1").arg(deviceCenterFrequency)).toStdString());
-            paramsToSet = true;
-            forwardChangeOwnDSP = true;
-        }
+        params.push_back(QString(tr("out_altvoltage0_RX_LO_frequency=%1").arg(deviceCenterFrequency)).toStdString());
+        paramsToSet = true;
+        forwardChangeOwnDSP = true;
 
         if ((m_settings.m_fcPos != settings.m_fcPos) || force)
         {
@@ -490,12 +490,6 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
                 qDebug() << "PlutoSDRInput::applySettings: set fcPos to " << settings.m_fcPos;
             }
         }
-
-        qDebug() << "PlutoSDRInput::applySettings: center freq: " << settings.m_centerFrequency << " Hz"
-                << " device center freq: " << deviceCenterFrequency << " Hz"
-                << " device sample rate: " << devSampleRate << "S/s"
-                << " Actual sample rate: " << devSampleRate/(1<<settings.m_log2Decim) << "S/s"
-                << " img: " << f_img << "Hz";
     }
 
     if ((m_settings.m_lpfBW != settings.m_lpfBW) || force)
@@ -649,3 +643,144 @@ int PlutoSDRInput::webapiRun(
     return 200;
 }
 
+int PlutoSDRInput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setPlutoSdrInputSettings(new SWGSDRangel::SWGPlutoSdrInputSettings());
+    response.getPlutoSdrInputSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int PlutoSDRInput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    PlutoSDRInputSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getPlutoSdrInputSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("devSampleRate")) {
+        settings.m_devSampleRate = response.getPlutoSdrInputSettings()->getDevSampleRate();
+    }
+    if (deviceSettingsKeys.contains("LOppmTenths")) {
+        settings.m_LOppmTenths = response.getPlutoSdrInputSettings()->getLOppmTenths();
+    }
+    if (deviceSettingsKeys.contains("lpfFIREnable")) {
+        settings.m_lpfFIREnable = response.getPlutoSdrInputSettings()->getLpfFirEnable() != 0;
+    }
+    if (deviceSettingsKeys.contains("lpfFIRBW")) {
+        settings.m_lpfFIRBW = response.getPlutoSdrInputSettings()->getLpfFirbw();
+    }
+    if (deviceSettingsKeys.contains("lpfFIRlog2Decim")) {
+        settings.m_lpfFIRlog2Decim = response.getPlutoSdrInputSettings()->getLpfFiRlog2Decim();
+    }
+    if (deviceSettingsKeys.contains("lpfFIRGain")) {
+        settings.m_lpfFIRGain = response.getPlutoSdrInputSettings()->getLpfFirGain();
+    }
+    if (deviceSettingsKeys.contains("fcPos")) {
+        int fcPos = response.getPlutoSdrInputSettings()->getFcPos();
+        fcPos = fcPos < 0 ? 0 : fcPos > 2 ? 2 : fcPos;
+        settings.m_fcPos = (PlutoSDRInputSettings::fcPos_t) fcPos;
+    }
+    if (deviceSettingsKeys.contains("dcBlock")) {
+        settings.m_dcBlock = response.getPlutoSdrInputSettings()->getDcBlock() != 0;
+    }
+    if (deviceSettingsKeys.contains("iqCorrection")) {
+        settings.m_iqCorrection = response.getPlutoSdrInputSettings()->getIqCorrection() != 0;
+    }
+    if (deviceSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getPlutoSdrInputSettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("lpfBW")) {
+        settings.m_lpfBW = response.getPlutoSdrInputSettings()->getLpfBw();
+    }
+    if (deviceSettingsKeys.contains("gain")) {
+        settings.m_gain = response.getPlutoSdrInputSettings()->getGain();
+    }
+    if (deviceSettingsKeys.contains("antennaPath")) {
+        int antennaPath = response.getPlutoSdrInputSettings()->getAntennaPath();
+        antennaPath = antennaPath < 0 ? 0 : antennaPath >= PlutoSDRInputSettings::RFPATH_END ? PlutoSDRInputSettings::RFPATH_END-1 : antennaPath;
+        settings.m_antennaPath = (PlutoSDRInputSettings::RFPath) antennaPath;
+    }
+    if (deviceSettingsKeys.contains("gainMode")) {
+        int gainMode = response.getPlutoSdrInputSettings()->getGainMode();
+        gainMode = gainMode < 0 ? 0 : gainMode >= PlutoSDRInputSettings::GAIN_END ? PlutoSDRInputSettings::GAIN_END-1 : gainMode;
+        settings.m_gainMode = (PlutoSDRInputSettings::GainMode) gainMode;
+    }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
+        settings.m_transverterDeltaFrequency = response.getPlutoSdrInputSettings()->getTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("transverterMode")) {
+        settings.m_transverterMode = response.getPlutoSdrInputSettings()->getTransverterMode() != 0;
+    }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getPlutoSdrInputSettings()->getFileRecordName();
+    }
+
+    MsgConfigurePlutoSDR *msg = MsgConfigurePlutoSDR::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigurePlutoSDR *msgToGUI = MsgConfigurePlutoSDR::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+int PlutoSDRInput::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setPlutoSdrInputReport(new SWGSDRangel::SWGPlutoSdrInputReport());
+    response.getPlutoSdrInputReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
+
+void PlutoSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const PlutoSDRInputSettings& settings)
+{
+    response.getPlutoSdrInputSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getPlutoSdrInputSettings()->setDevSampleRate(settings.m_devSampleRate);
+    response.getPlutoSdrInputSettings()->setLOppmTenths(settings.m_LOppmTenths);
+    response.getPlutoSdrInputSettings()->setLpfFirEnable(settings.m_lpfFIREnable ? 1 : 0);
+    response.getPlutoSdrInputSettings()->setLpfFirbw(settings.m_lpfFIRBW);
+    response.getPlutoSdrInputSettings()->setLpfFiRlog2Decim(settings.m_lpfFIRlog2Decim);
+    response.getPlutoSdrInputSettings()->setLpfFirGain(settings.m_lpfFIRGain);
+    response.getPlutoSdrInputSettings()->setFcPos((int) settings.m_fcPos);
+    response.getPlutoSdrInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getPlutoSdrInputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    response.getPlutoSdrInputSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getPlutoSdrInputSettings()->setLpfBw(settings.m_lpfBW);
+    response.getPlutoSdrInputSettings()->setGain(settings.m_gain);
+    response.getPlutoSdrInputSettings()->setAntennaPath((int) m_settings.m_antennaPath);
+    response.getPlutoSdrInputSettings()->setGainMode((int) settings.m_gainMode);
+    response.getPlutoSdrInputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    response.getPlutoSdrInputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+
+    if (response.getPlutoSdrInputSettings()->getFileRecordName()) {
+        *response.getPlutoSdrInputSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getPlutoSdrInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+}
+
+void PlutoSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    response.getPlutoSdrInputReport()->setAdcRate(getADCSampleRate());
+    std::string rssiStr;
+    getRSSI(rssiStr);
+    response.getPlutoSdrInputReport()->setRssi(new QString(rssiStr.c_str()));
+    int gainDB;
+    getGain(gainDB);
+    response.getPlutoSdrInputReport()->setGainDb(gainDB);
+    fetchTemperature();
+    response.getPlutoSdrInputReport()->setTemperature(getTemperature());
+}

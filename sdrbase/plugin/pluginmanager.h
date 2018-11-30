@@ -9,7 +9,7 @@
 
 #include "plugin/plugininterface.h"
 #include "plugin/pluginapi.h"
-#include "util/export.h"
+#include "export.h"
 
 class QComboBox;
 class QPluginLoader;
@@ -19,7 +19,7 @@ class MessageQueue;
 class DeviceSourceAPI;
 class DeviceSinkAPI;
 
-class SDRANGEL_API PluginManager : public QObject {
+class SDRBASE_API PluginManager : public QObject {
 	Q_OBJECT
 
 public:
@@ -43,6 +43,8 @@ public:
 
 	PluginAPI *getPluginAPI() { return &m_pluginAPI; }
 	void loadPlugins(const QString& pluginsSubDir);
+	void loadPluginsPart(const QString& pluginsSubDir);
+	void loadPluginsFinal();
 	const Plugins& getPlugins() const { return m_plugins; }
 
 	// Callbacks from the plugins

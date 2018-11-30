@@ -38,6 +38,8 @@ void LimeSDROutputSettings::resetToDefaults()
     m_antennaPath = PATH_RFE_NONE;
     m_extClock = false;
     m_extClockFreq = 10000000; // 10 MHz
+    m_transverterMode = false;
+    m_transverterDeltaFrequency = 0;
 }
 
 QByteArray LimeSDROutputSettings::serialize() const
@@ -56,6 +58,8 @@ QByteArray LimeSDROutputSettings::serialize() const
     s.writeS32(13, (int) m_antennaPath);
     s.writeBool(14, m_extClock);
     s.writeU32(15, m_extClockFreq);
+    s.writeBool(16, m_transverterMode);
+    s.writeS64(17, m_transverterDeltaFrequency);
 
     return s.final();
 }
@@ -87,6 +91,8 @@ bool LimeSDROutputSettings::deserialize(const QByteArray& data)
         m_antennaPath = (PathRFE) intval;
         d.readBool(14, &m_extClock, false);
         d.readU32(15, &m_extClockFreq, 10000000);
+        d.readBool(16, &m_transverterMode, false);
+        d.readS64(17, &m_transverterDeltaFrequency, 0);
 
         return true;
     }

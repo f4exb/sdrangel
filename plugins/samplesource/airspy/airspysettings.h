@@ -17,6 +17,8 @@
 #ifndef _AIRSPY_AIRSPYSETTINGS_H_
 #define _AIRSPY_AIRSPYSETTINGS_H_
 
+#include <QString>
+
 struct AirspySettings {
 	typedef enum {
 		FC_POS_INFRA = 0,
@@ -39,6 +41,7 @@ struct AirspySettings {
 	bool m_iqCorrection;
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
+    QString m_fileRecordName;
 
 	AirspySettings();
 	void resetToDefaults();

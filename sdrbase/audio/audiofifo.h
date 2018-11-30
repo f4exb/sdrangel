@@ -23,10 +23,9 @@
 #include <QWaitCondition>
 
 #include "dsp/dsptypes.h"
-#include "util/export.h"
-#include "util/udpsink.h"
+#include "export.h"
 
-class SDRANGEL_API AudioFifo : public QObject {
+class SDRBASE_API AudioFifo : public QObject {
 	Q_OBJECT
 public:
 	AudioFifo();
@@ -35,8 +34,8 @@ public:
 
 	bool setSize(uint32_t numSamples);
 
-	uint32_t write(const quint8* data, uint32_t numSamples, int timeout_ms = INT_MAX);
-	uint32_t read(quint8* data, uint32_t numSamples, int timeout_ms = INT_MAX);
+	uint32_t write(const quint8* data, uint32_t numSamples);
+	uint32_t read(quint8* data, uint32_t numSamples);
 
 	uint32_t drain(uint32_t numSamples);
 	void clear();
@@ -46,9 +45,6 @@ public:
 	inline bool isEmpty() const { return m_fill == 0; }
 	inline bool isFull() const { return m_fill == m_size; }
 	inline uint32_t size() const { return m_size; }
-
-	void setUDPSink(UDPSink<AudioSample> *udpSink) { m_udpSink = udpSink; }
-	void setCopyToUDP(bool copyToUDP) { m_copyToUDP = copyToUDP; }
 
 private:
 	QMutex m_mutex;
@@ -61,14 +57,6 @@ private:
 	uint32_t m_fill;
 	uint32_t m_head;
 	uint32_t m_tail;
-
-	QMutex m_writeWaitLock;
-	QMutex m_readWaitLock;
-	QWaitCondition m_writeWaitCondition;
-	QWaitCondition m_readWaitCondition;
-
-	UDPSink<AudioSample> *m_udpSink;
-	bool m_copyToUDP;
 
 	bool create(uint32_t numSamples);
 };

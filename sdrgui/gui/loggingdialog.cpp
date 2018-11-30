@@ -50,7 +50,7 @@ void LoggingDialog::accept()
 void LoggingDialog::on_showFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Save log file"), ".", tr("Log Files (*.log)"));
+        tr("Save log file"), ".", tr("Log Files (*.log)"), 0, QFileDialog::DontUseNativeDialog);
 
     if (fileName != "")
     {

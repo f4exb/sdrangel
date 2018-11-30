@@ -29,16 +29,14 @@ add_definitions(-DQT_SHARED)
 add_library(demodnfmsrv SHARED
 	${nfm_SOURCES}
 	${nfm_HEADERS_MOC}
-	${nfm_FORMS_HEADERS}
 )
 
 target_link_libraries(demodnfmsrv
 	${QT_LIBRARIES}
 	sdrbase
-	sdrgui
 	swagger
 )
 
-qt5_use_modules(demodnfmsrv Core)
+target_link_libraries(demodnfmsrv Qt5::Core)
 
 install(TARGETS demodnfmsrv DESTINATION lib/pluginssrv/channelrx)

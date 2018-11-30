@@ -19,61 +19,51 @@
 #include "dsp/dsptypes.h"
 #include <algorithm>
 
-RTPSink::RTPSink(const QString& address, uint16_t port, PayloadType payloadType) :
-    m_payloadType(payloadType),
-    m_sampleRate(48000),
+RTPSink::RTPSink(QUdpSocket *udpSocket, int sampleRate, bool stereo) :
+    m_payloadType(stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Mono),
+    m_sampleRate(sampleRate),
     m_sampleBytes(0),
     m_packetSamples(0),
     m_bufferSize(0),
     m_sampleBufferIndex(0),
     m_byteBuffer(0),
-    m_destport(port),
-    m_rtpTransmitter(&m_rtpMemoryManager),
+    m_destport(9998),
     m_mutex(QMutex::Recursive)
 {
-	// Here we use JRTPLIB in a bit funny way since we do not want the socket to bind because we are only sending
-	// data to a remote party and we don't want to waste a port on the local machine for each possible connection that may not be used.
-	// Therefore we create a socket and assign it through the SetUseExistingSockets method of the RTPUDPv4TransmissionParams object
-	// By doing this the socket is left unbound but sending RTP packets with the library is still possible. Other functions may
-	// not work but we don't care
-
 	m_rtpSessionParams.SetOwnTimestampUnit(1.0 / (double) m_sampleRate);
     m_rtpTransmissionParams.SetRTCPMultiplexing(true); // do not allocate another socket for RTCP
+    m_rtpTransmissionParams.SetUseExistingSockets(udpSocket, udpSocket);
 
-    int status = m_rtpTransmitter.Init(false);
+    int status = m_rtpTransmitter.Init();
     if (status < 0) {
-        qCritical("RTPSink::RTPSink: cannot initialize transmitter: %s", jrtplib::RTPGetErrorString(status).c_str());
+        qCritical("RTPSink::RTPSink: cannot initialize transmitter: %s", qrtplib::RTPGetErrorString(status).c_str());
         m_valid = false;
     } else {
-        qDebug("RTPSink::RTPSink: initialized transmitter: %s", jrtplib::RTPGetErrorString(status).c_str());
+        qDebug("RTPSink::RTPSink: initialized transmitter: %s", qrtplib::RTPGetErrorString(status).c_str());
     }
 
     m_rtpTransmitter.Create(m_rtpSessionParams.GetMaximumPacketSize(), &m_rtpTransmissionParams);
-    qDebug("RTPSink::RTPSink: created transmitter: %s", jrtplib::RTPGetErrorString(status).c_str());
+    qDebug("RTPSink::RTPSink: created transmitter: %s", qrtplib::RTPGetErrorString(status).c_str());
 
     status = m_rtpSession.Create(m_rtpSessionParams, &m_rtpTransmitter);
     if (status < 0) {
-        qCritical("RTPSink::RTPSink: cannot create session: %s", jrtplib::RTPGetErrorString(status).c_str());
+        qCritical("RTPSink::RTPSink: cannot create session: %s", qrtplib::RTPGetErrorString(status).c_str());
         m_valid = false;
     } else {
-        qDebug("RTPSink::RTPSink: created session: %s", jrtplib::RTPGetErrorString(status).c_str());
+        qDebug("RTPSink::RTPSink: created session: %s", qrtplib::RTPGetErrorString(status).c_str());
     }
 
-    setPayloadType(payloadType);
+    setPayloadInformation(m_payloadType, m_sampleRate);
     m_valid = true;
 
     uint32_t endianTest32 = 1;
     uint8_t *ptr = (uint8_t*) &endianTest32;
     m_endianReverse = (*ptr == 1);
-
-    m_destip = inet_addr(address.toStdString().c_str());
-    m_destip = ntohl(m_destip);
-
 }
 
 RTPSink::~RTPSink()
 {
-    jrtplib::RTPTime delay = jrtplib::RTPTime(10.0);
+    qrtplib::RTPTime delay = qrtplib::RTPTime(10.0);
     m_rtpSession.BYEDestroy(delay, "Time's up", 9);
 
     if (m_byteBuffer) {
@@ -81,24 +71,25 @@ RTPSink::~RTPSink()
     }
 }
 
-void RTPSink::setPayloadType(PayloadType payloadType)
+void RTPSink::setPayloadInformation(PayloadType payloadType, int sampleRate)
 {
+    uint32_t timestampinc;
     QMutexLocker locker(&m_mutex);
 
-    qDebug("RTPSink::setPayloadType: %d", payloadType);
+    qDebug("RTPSink::setPayloadInformation: %d sampleRate: %d", payloadType, sampleRate);
 
     switch (payloadType)
     {
     case PayloadL16Stereo:
-        m_sampleRate = 48000;
-        m_sampleBytes = sizeof(AudioSample);
+        m_sampleBytes = 4;
         m_rtpSession.SetDefaultPayloadType(96);
+        timestampinc = m_sampleRate / 100;
         break;
     case PayloadL16Mono:
     default:
-        m_sampleRate = 48000;
-        m_sampleBytes = sizeof(int16_t);
+        m_sampleBytes = 2;
         m_rtpSession.SetDefaultPayloadType(96);
+        timestampinc = m_sampleRate / 50;
         break;
     }
 
@@ -116,79 +107,82 @@ void RTPSink::setPayloadType(PayloadType payloadType)
     int status = m_rtpSession.SetTimestampUnit(1.0 / (double) m_sampleRate);
 
     if (status < 0) {
-        qCritical("RTPSink::setPayloadType: cannot set timestamp unit: %s", jrtplib::RTPGetErrorString(status).c_str());
+        qCritical("RTPSink::setPayloadInformation: cannot set timestamp unit: %s", qrtplib::RTPGetErrorString(status).c_str());
     } else {
-        qDebug("RTPSink::setPayloadType: timestamp unit set to %f: %s",
+        qDebug("RTPSink::setPayloadInformation: timestamp unit set to %f: %s",
                1.0 / (double) m_sampleRate,
-               jrtplib::RTPGetErrorString(status).c_str());
+               qrtplib::RTPGetErrorString(status).c_str());
     }
 
     status = m_rtpSession.SetDefaultMark(false);
 
     if (status < 0) {
-        qCritical("RTPSink::setPayloadType: cannot set default mark: %s", jrtplib::RTPGetErrorString(status).c_str());
+        qCritical("RTPSink::setPayloadInformation: cannot set default mark: %s", qrtplib::RTPGetErrorString(status).c_str());
     } else {
-        qDebug("RTPSink::setPayloadType: set default mark to false: %s", jrtplib::RTPGetErrorString(status).c_str());
+        qDebug("RTPSink::setPayloadInformation: set default mark to false: %s", qrtplib::RTPGetErrorString(status).c_str());
     }
 
-    status = m_rtpSession.SetDefaultTimestampIncrement(m_packetSamples);
+    status = m_rtpSession.SetDefaultTimestampIncrement(timestampinc);
 
     if (status < 0) {
-        qCritical("RTPSink::setPayloadType: cannot set default timestamp increment: %s", jrtplib::RTPGetErrorString(status).c_str());
+        qCritical("RTPSink::setPayloadInformation: cannot set default timestamp increment: %s", qrtplib::RTPGetErrorString(status).c_str());
     } else {
-        qDebug("RTPSink::setPayloadType: set default timestamp increment to %d: %s", m_packetSamples, jrtplib::RTPGetErrorString(status).c_str());
+        qDebug("RTPSink::setPayloadInformation: set default timestamp increment to %d: %s", timestampinc, qrtplib::RTPGetErrorString(status).c_str());
     }
 
-    status = m_rtpSession.SetMaximumPacketSize(m_bufferSize+40);
+    int maximumPacketSize = m_bufferSize+20; // was +40
+
+    while (maximumPacketSize < RTP_MINPACKETSIZE) {
+        maximumPacketSize += m_bufferSize;
+    }
+
+    status = m_rtpSession.SetMaximumPacketSize(maximumPacketSize);
 
     if (status < 0) {
-        qCritical("RTPSink::setPayloadType: cannot set maximum packet size: %s", jrtplib::RTPGetErrorString(status).c_str());
+        qCritical("RTPSink::setPayloadInformation: cannot set maximum packet size: %s", qrtplib::RTPGetErrorString(status).c_str());
     } else {
-        qDebug("RTPSink::setPayloadType: set maximum packet size to %d bytes: %s", m_bufferSize+40, jrtplib::RTPGetErrorString(status).c_str());
+        qDebug("RTPSink::setPayloadInformation: set maximum packet size to %d bytes: %s", maximumPacketSize, qrtplib::RTPGetErrorString(status).c_str());
     }
 }
 
 void RTPSink::setDestination(const QString& address, uint16_t port)
 {
     m_rtpSession.ClearDestinations();
-    m_rtpSession.DeleteDestination(jrtplib::RTPIPv4Address(m_destip, m_destport));
-    m_destip = inet_addr(address.toStdString().c_str());
-    m_destip = ntohl(m_destip);
+    m_rtpSession.DeleteDestination(qrtplib::RTPAddress(m_destip, m_destport));
+    m_destip.setAddress(address);
     m_destport = port;
 
-    int status = m_rtpSession.AddDestination(jrtplib::RTPIPv4Address(m_destip, m_destport));
+    int status = m_rtpSession.AddDestination(qrtplib::RTPAddress(m_destip, m_destport));
 
     if (status < 0) {
-        qCritical("RTPSink::setDestination: cannot set destination address: %s", jrtplib::RTPGetErrorString(status).c_str());
+        qCritical("RTPSink::setDestination: cannot set destination address: %s", qrtplib::RTPGetErrorString(status).c_str());
     }
 }
 
 void RTPSink::deleteDestination(const QString& address, uint16_t port)
 {
-    uint32_t destip = inet_addr(address.toStdString().c_str());
-    destip = ntohl(m_destip);
+    QHostAddress destip(address);
 
-    int status =  m_rtpSession.DeleteDestination(jrtplib::RTPIPv4Address(destip, port));
+    int status =  m_rtpSession.DeleteDestination(qrtplib::RTPAddress(destip, port));
 
     if (status < 0) {
-        qCritical("RTPSink::deleteDestination: cannot delete destination address: %s", jrtplib::RTPGetErrorString(status).c_str());
+        qCritical("RTPSink::deleteDestination: cannot delete destination address: %s", qrtplib::RTPGetErrorString(status).c_str());
     }
 }
 
 void RTPSink::addDestination(const QString& address, uint16_t port)
 {
-    uint32_t destip = inet_addr(address.toStdString().c_str());
-    destip = ntohl(m_destip);
+    QHostAddress destip(address);
 
-    int status = m_rtpSession.AddDestination(jrtplib::RTPIPv4Address(destip, port));
+    int status = m_rtpSession.AddDestination(qrtplib::RTPAddress(destip, port));
 
     if (status < 0) {
-        qCritical("RTPSink::addDestination: cannot add destination address: %s", jrtplib::RTPGetErrorString(status).c_str());
+        qCritical("RTPSink::addDestination: cannot add destination address: %s", qrtplib::RTPGetErrorString(status).c_str());
     } else {
         qDebug("RTPSink::addDestination: destination address set to %s:%d: %s",
                 address.toStdString().c_str(),
                 port,
-                jrtplib::RTPGetErrorString(status).c_str());
+                qrtplib::RTPGetErrorString(status).c_str());
     }
 }
 
@@ -210,12 +204,45 @@ void RTPSink::write(const uint8_t *sampleByte)
         int status = m_rtpSession.SendPacket((const void *) m_byteBuffer, (std::size_t) m_bufferSize);
 
         if (status < 0) {
-            qCritical("RTPSink::write: cannot write packet: %s", jrtplib::RTPGetErrorString(status).c_str());
+            qCritical("RTPSink::write: cannot write packet: %s", qrtplib::RTPGetErrorString(status).c_str());
         }
 
         writeNetBuf(&m_byteBuffer[0], sampleByte,  elemLength(m_payloadType), m_sampleBytes, m_endianReverse);
         m_sampleBufferIndex = 1;
     }
+}
+
+void RTPSink::write(const uint8_t *sampleByteL, const uint8_t *sampleByteR)
+{
+    QMutexLocker locker(&m_mutex);
+
+    if (m_sampleBufferIndex < m_packetSamples)
+    {
+        writeNetBuf(&m_byteBuffer[m_sampleBufferIndex*m_sampleBytes],
+                sampleByteL,
+                elemLength(m_payloadType),
+                m_sampleBytes,
+                m_endianReverse);
+        writeNetBuf(&m_byteBuffer[m_sampleBufferIndex*m_sampleBytes + elemLength(m_payloadType)],
+                sampleByteR,
+                elemLength(m_payloadType),
+                m_sampleBytes,
+                m_endianReverse);
+        m_sampleBufferIndex++;
+    }
+    else
+    {
+        int status = m_rtpSession.SendPacket((const void *) m_byteBuffer, (std::size_t) m_bufferSize);
+
+        if (status < 0) {
+            qCritical("RTPSink::write: cannot write packet: %s", qrtplib::RTPGetErrorString(status).c_str());
+        }
+
+        writeNetBuf(&m_byteBuffer[0], sampleByteL,  elemLength(m_payloadType), m_sampleBytes, m_endianReverse);
+        writeNetBuf(&m_byteBuffer[2], sampleByteR,  elemLength(m_payloadType), m_sampleBytes, m_endianReverse);
+        m_sampleBufferIndex = 1;
+    }
+
 }
 
 void RTPSink::write(const uint8_t *samples, int nbSamples)

@@ -65,12 +65,15 @@ public:
     const DSDcc::DSDDstar& getDStarDecoder() const { return m_decoder.getDStarDecoder(); }
     const DSDcc::DSDdPMR& getDPMRDecoder() const { return m_decoder.getDPMRDecoder(); }
     const DSDcc::DSDYSF& getYSFDecoder() const { return m_decoder.getYSFDecoder(); }
+    const DSDcc::DSDNXDN& getNXDNDecoder() const { return m_decoder.getNXDNDecoder(); }
 
     void setMyPoint(float lat, float lon) { m_decoder.setMyPoint(lat, lon); }
     void setAudioGain(float gain) { m_decoder.setAudioGain(gain); }
     void setBaudRate(int baudRate);
     void setSymbolPLLLock(bool pllLock) { m_decoder.setSymbolPLLLock(pllLock); }
     void useHPMbelib(bool useHP) { m_decoder.useHPMbelib(useHP); }
+    void set48k(bool to48k);
+    void setUpsampling(int upsampling);
 
 private:
     DSDcc::DSDDecoder m_decoder;

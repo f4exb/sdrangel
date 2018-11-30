@@ -28,11 +28,13 @@
 #include "util/messagequeue.h"
 
 #include "dsddemodsettings.h"
+#include "dsdstatustextdialog.h"
 
 class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
 class ScopeVis;
+class ScopeVisXY;
 class DSDDemod;
 
 namespace Ui {
@@ -62,14 +64,14 @@ public slots:
     void channelMarkerHighlightedByCursor();
 
 private:
-	typedef enum
-	{
-	    signalFormatNone,
-	    signalFormatDMR,
-	    signalFormatDStar,
-	    signalFormatDPMR,
-		signalFormatYSF
-	} SignalFormat;
+//	typedef enum
+//	{
+//	    signalFormatNone,
+//	    signalFormatDMR,
+//	    signalFormatDStar,
+//	    signalFormatDPMR,
+//		signalFormatYSF
+//	} SignalFormat;
 
 	Ui::DSDDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
@@ -77,10 +79,8 @@ private:
 	ChannelMarker m_channelMarker;
 	DSDDemodSettings m_settings;
 	bool m_doApplySettings;
-	char m_formatStatusText[82+1]; //!< Fixed signal format dependent status text
-	SignalFormat m_signalFormat;
 
-    ScopeVis* m_scopeVis;
+    ScopeVisXY* m_scopeVisXY;
 
 	DSDDemod* m_dsdDemod;
 	bool m_enableCosineFiltering;
@@ -97,6 +97,8 @@ private:
 
 	MessageQueue m_inputMessageQueue;
 
+	DSDStatusTextDialog m_dsdStatusTextDialog;
+
 	explicit DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~DSDDemodGUI();
 
@@ -104,13 +106,11 @@ private:
 	void applySettings(bool force = false);
     void displaySettings();
 	void updateMyPosition();
-	void displayUDPAddress();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
 
 private slots:
-    void formatStatusText();
     void on_deltaFrequency_changed(qint64 value);
     void on_rfBW_valueChanged(int index);
     void on_demodGain_valueChanged(int value);
@@ -118,6 +118,9 @@ private slots:
     void on_baudRate_currentIndexChanged(int index);
     void on_enableCosineFiltering_toggled(bool enable);
     void on_syncOrConstellation_toggled(bool checked);
+	void on_traceLength_valueChanged(int value);
+    void on_traceStroke_valueChanged(int value);
+    void on_traceDecay_valueChanged(int value);
     void on_slot1On_toggled(bool checked);
     void on_slot2On_toggled(bool checked);
     void on_tdmaStereoSplit_toggled(bool checked);
@@ -127,9 +130,11 @@ private slots:
     void on_highPassFilter_toggled(bool checked);
     void on_audioMute_toggled(bool checked);
     void on_symbolPLLLock_toggled(bool checked);
-    void on_udpOutput_toggled(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
+    void on_viewStatusLog_clicked();
+    void handleInputMessages();
+    void audioSelect();
     void tick();
 };
 

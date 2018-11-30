@@ -121,7 +121,6 @@ void CSocket::BindLocalAddressAndPort( const string &localAddress, unsigned shor
 
 void CSocket::FillAddr( const string & localAddress, unsigned short localPort, sockaddr_in& localAddr )
 {
-    ////cout<<"\n Inside Fille addr:"<<localAddress <<" port:"<<localPort;
     memset(&localAddr, 0, sizeof(localAddr));  // Zero out address structure
     localAddr.sin_family = AF_INET;       // Internet address
 
@@ -134,7 +133,6 @@ void CSocket::FillAddr( const string & localAddress, unsigned short localPort, s
     localAddr.sin_addr.s_addr = *((unsigned long *) host->h_addr_list[0]);
 
     localAddr.sin_port = htons(localPort);     // Assign port in network byte order
-    ////cout<<"\n returning from  Fille addr";
 }
 
 unsigned long int CSocket::GetReadBufferSize()
@@ -175,19 +173,14 @@ void CSocket::SetNonBlocking( bool bBlocking )
 
 void CSocket::ConnectToHost( const string &foreignAddress, unsigned short foreignPort )
 {
-    //cout<<"\nstart Connect to host";
     // Get the address of the requested host
     sockaddr_in destAddr;
-    //cout<<"\ninside Connect to host";
     FillAddr(foreignAddress, foreignPort, destAddr);
 
-    //cout<<"trying to connect to host";
     // Try to connect to the given port
     if (::connect(m_sockDesc, (sockaddr *) &destAddr, sizeof(destAddr)) < 0) {
         throw CSocketException("Connect failed (connect())", true);
     }
-    //cout<<"\n after connecting";
-
 }
 
 void CSocket::Send( const void *buffer, int bufferLen )
@@ -249,7 +242,6 @@ int CSocket::OnDataRead(unsigned long timeToWait)
 {
     /* master file descriptor list */
     fd_set master;
-    //struct timeval      *ptimeout = NULL;
 
     /* temp file descriptor list for select() */
     fd_set read_fds;
@@ -268,8 +260,8 @@ int CSocket::OnDataRead(unsigned long timeToWait)
 
     /* copy it */
     read_fds = master;
-    //cout<<"Waiting for select";
     int nRet;
+
     if (timeToWait == ULONG_MAX)
     {
         nRet  = select(fdmax+1, &read_fds, NULL, NULL, NULL);
@@ -300,13 +292,6 @@ void CSocket::SetBindToDevice( const string& sInterface )
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
     snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s", sInterface.c_str());
-    //Todo:SO_BINDTODEVICE not declared error comes in CygWin, need to compile in Linux.
-    /*int nRet = ::setsockopt(m_sockDesc, SOL_SOCKET, SO_BINDTODEVICE, (void*)&ifr, sizeof(ifr));
-
-    if (nRet < 0)
-    {
-        throw CSocketException("Error in binding to device ", true);
-    }*/
 }
 
 UDPSocket::UDPSocket():CSocket(UdpSocket,IPv4Protocol)
@@ -346,10 +331,8 @@ void UDPSocket::DisconnectFromHost()
 void UDPSocket::SendDataGram( const void *buffer, int bufferLen, const string &foreignAddress,
     unsigned short foreignPort )
 {
-    //cout<<"Befor Fill addr";
     sockaddr_in destAddr;
     FillAddr(foreignAddress, foreignPort, destAddr);
-    //cout<<"Befor socket send";
     // Write out the whole buffer as a single message.
     if (sendto(m_sockDesc, (void *) buffer, bufferLen, 0,(sockaddr *) &destAddr, sizeof(destAddr)) != bufferLen)
     {

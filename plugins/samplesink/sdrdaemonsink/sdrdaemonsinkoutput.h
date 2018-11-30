@@ -17,11 +17,14 @@
 #ifndef INCLUDE_SDRDAEMONSINKOUTPUT_H
 #define INCLUDE_SDRDAEMONSINKOUTPUT_H
 
-#include <QString>
-#include <QTimer>
 #include <ctime>
 #include <iostream>
 #include <fstream>
+
+#include <QObject>
+#include <QString>
+#include <QTimer>
+#include <QNetworkRequest>
 
 #include "dsp/devicesamplesink.h"
 
@@ -29,8 +32,12 @@
 
 class SDRdaemonSinkThread;
 class DeviceSinkAPI;
+class QNetworkAccessManager;
+class QNetworkReply;
+class QJsonObject;
 
 class SDRdaemonSinkOutput : public DeviceSampleSink {
+    Q_OBJECT
 public:
 	class MsgConfigureSDRdaemonSink : public Message {
 		MESSAGE_CLASS_DECLARATION
@@ -114,43 +121,6 @@ public:
         { }
     };
 
-	class MsgConfigureSDRdaemonSinkStreamTiming : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-
-		static MsgConfigureSDRdaemonSinkStreamTiming* create()
-		{
-			return new MsgConfigureSDRdaemonSinkStreamTiming();
-		}
-
-	private:
-
-		MsgConfigureSDRdaemonSinkStreamTiming() :
-			Message()
-		{ }
-	};
-
-	class MsgReportSDRdaemonSinkStreamTiming : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		std::size_t getSamplesCount() const { return m_samplesCount; }
-
-		static MsgReportSDRdaemonSinkStreamTiming* create(std::size_t samplesCount)
-		{
-			return new MsgReportSDRdaemonSinkStreamTiming(samplesCount);
-		}
-
-	protected:
-		std::size_t m_samplesCount;
-
-		MsgReportSDRdaemonSinkStreamTiming(std::size_t samplesCount) :
-			Message(),
-			m_samplesCount(samplesCount)
-		{ }
-	};
-
 	SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI);
 	virtual ~SDRdaemonSinkOutput();
 	virtual void destroy();
@@ -166,10 +136,24 @@ public:
 	virtual const QString& getDeviceDescription() const;
 	virtual int getSampleRate() const;
 	virtual quint64 getCenterFrequency() const;
-    virtual void setCenterFrequency(qint64 centerFrequency);
+    virtual void setCenterFrequency(qint64 centerFrequency __attribute__((unused))) {}
 	std::time_t getStartingTimeStamp() const;
 
 	virtual bool handleMessage(const Message& message);
+
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            QString& errorMessage);
 
     virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,
@@ -184,12 +168,37 @@ private:
     DeviceSinkAPI *m_deviceAPI;
 	QMutex m_mutex;
 	SDRdaemonSinkSettings m_settings;
+	uint64_t m_centerFrequency;
 	SDRdaemonSinkThread* m_sdrDaemonSinkThread;
 	QString m_deviceDescription;
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
+	uint32_t m_tickCount;
+    uint32_t m_tickMultiplier;
+
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
+    uint32_t m_lastRemoteSampleCount;
+    uint32_t m_lastSampleCount;
+    uint64_t m_lastRemoteTimestampRateCorrection;
+    uint64_t m_lastTimestampRateCorrection;
+    int m_lastQueueLength;
+    uint32_t m_nbRemoteSamplesSinceRateCorrection;
+    uint32_t m_nbSamplesSinceRateCorrection;
+    int m_chunkSizeCorrection;
+    static const uint32_t NbSamplesForRateCorrection;
 
 	void applySettings(const SDRdaemonSinkSettings& settings, bool force = false);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRdaemonSinkSettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+
+    void analyzeApiReply(const QJsonObject& jsonObject);
+    void sampleRateCorrection(double remoteTimeDeltaUs, double timeDeltaUs, uint32_t remoteSampleCount, uint32_t sampleCount);
+
+private slots:
+    void tick();
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_SDRDAEMONSINKOUTPUT_H

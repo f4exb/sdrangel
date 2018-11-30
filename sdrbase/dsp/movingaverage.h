@@ -8,7 +8,7 @@
 
 template<typename Type> class MovingAverage {
 public:
-	MovingAverage(int historySize, Type initial)
+	MovingAverage(int historySize, Type initial) : m_index(0)
 	{
 	    resize(historySize, initial);
 	}

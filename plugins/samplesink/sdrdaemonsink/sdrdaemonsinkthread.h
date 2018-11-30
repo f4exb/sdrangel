@@ -17,15 +17,16 @@
 #ifndef INCLUDE_SDRDAEMONSINKTHREAD_H
 #define INCLUDE_SDRDAEMONSINKTHREAD_H
 
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <stdint.h>
+
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
 #include <QTimer>
 #include <QElapsedTimer>
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-#include <stdint.h>
 
 #include "dsp/inthalfbandfilter.h"
 #include "dsp/interpolators.h"
@@ -35,6 +36,7 @@
 #define SDRDAEMONSINK_THROTTLE_MS 50
 
 class SampleSourceFifo;
+struct timeval;
 
 class SDRdaemonSinkThread : public QThread {
 	Q_OBJECT
@@ -46,15 +48,14 @@ public:
 	void startWork();
 	void stopWork();
 
-    void setCenterFrequency(uint64_t centerFrequency) { m_udpSinkFEC.setCenterFrequency(centerFrequency); }
 	void setSamplerate(int samplerate);
     void setNbBlocksFEC(uint32_t nbBlocksFEC) { m_udpSinkFEC.setNbBlocksFEC(nbBlocksFEC); };
-    void setTxDelay(uint32_t txDelay) { m_udpSinkFEC.setTxDelay(txDelay); };
-    void setRemoteAddress(const QString& address, uint16_t port) { m_udpSinkFEC.setRemoteAddress(address, port); }
+    void setTxDelay(float txDelay) { m_udpSinkFEC.setTxDelay(txDelay); };
+    void setDataAddress(const QString& address, uint16_t port) { m_udpSinkFEC.setRemoteAddress(address, port); }
 
     bool isRunning() const { return m_running; }
 
-    std::size_t getSamplesCount() const { return m_samplesCount; }
+    uint32_t getSamplesCount(struct timeval& tv) const;
     void setSamplesCount(int samplesCount) { m_samplesCount = samplesCount; }
     void setChunkCorrection(int chunkCorrection) { m_chunkCorrection = chunkCorrection; }
 
@@ -63,11 +64,11 @@ public:
 private:
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
-	bool m_running;
+	volatile bool m_running;
 
 	int m_samplesChunkSize;
 	SampleSourceFifo* m_sampleFifo;
-    std::size_t m_samplesCount;
+    uint32_t m_samplesCount;
     int m_chunkCorrection;
 
 	int m_samplerate;

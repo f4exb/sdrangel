@@ -18,28 +18,24 @@ QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
 
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../../../exports
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
-CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_58_0"
-CONFIG(MINGW64):INCLUDEPATH += "D:\boost_1_58_0"
+CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
+CONFIG(MINGW64):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(macx):INCLUDEPATH += "../../../../../boost_1_64_0"
 
 SOURCES += atvdemod.cpp\
 	atvdemodgui.cpp\
-	atvdemodplugin.cpp\
-    atvscreen.cpp\
-    glshaderarray.cpp
+	atvdemodplugin.cpp
 
 HEADERS += atvdemod.h\
 	atvdemodgui.h\
-	atvdemodplugin.h\
-    atvscreen.h\
-    atvscreeninterface.h\
-    glshaderarray.h
+	atvdemodplugin.h
 
 FORMS += atvdemodgui.ui
 

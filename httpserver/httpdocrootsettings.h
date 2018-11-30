@@ -12,8 +12,9 @@
 
 namespace qtwebapp {
 
-struct HttpDocrootSettings
+class HttpDocrootSettings
 {
+public:
     QString path;
     QString encoding;
     int maxAge;

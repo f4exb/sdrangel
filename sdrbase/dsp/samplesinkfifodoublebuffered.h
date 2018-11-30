@@ -21,10 +21,10 @@
 #include <QMutex>
 #include <stdint.h>
 #include <assert.h>
-#include "util/export.h"
+#include "export.h"
 #include "dsp/dsptypes.h"
 
-class SDRANGEL_API SampleSinkFifoDoubleBuffered : public QObject {
+class SDRBASE_API SampleSinkFifoDoubleBuffered : public QObject {
     Q_OBJECT
 
 public:

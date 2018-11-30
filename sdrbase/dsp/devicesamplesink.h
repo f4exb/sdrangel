@@ -23,15 +23,16 @@
 #include "samplesourcefifo.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
-#include "util/export.h"
+#include "export.h"
 
 namespace SWGSDRangel
 {
     class SWGDeviceSettings;
     class SWGDeviceState;
+    class SWGDeviceReport;
 }
 
-class SDRANGEL_API DeviceSampleSink : public QObject {
+class SDRBASE_API DeviceSampleSink : public QObject {
 	Q_OBJECT
 public:
 	DeviceSampleSink();
@@ -71,6 +72,11 @@ public:
 
     virtual int webapiRun(bool run __attribute__((unused)),
             SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
+            QString& errorMessage)
+    { errorMessage = "Not implemented"; return 501; }
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response __attribute__((unused)),
             QString& errorMessage)
     { errorMessage = "Not implemented"; return 501; }
 

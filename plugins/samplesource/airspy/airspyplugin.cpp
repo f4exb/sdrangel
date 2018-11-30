@@ -15,10 +15,13 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtPlugin>
-#include <QAction>
 #include <libairspy/airspy.h>
 
+#ifdef SERVER_MODE
+#include "airspyinput.h"
+#else
 #include "airspygui.h"
+#endif
 #include "airspyplugin.h"
 
 #include <device/devicesourceapi.h>
@@ -29,7 +32,7 @@ const int AirspyPlugin::m_maxDevices = 32;
 
 const PluginDescriptor AirspyPlugin::m_pluginDescriptor = {
 	QString("Airspy Input"),
-	QString("3.11.0"),
+	QString("4.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -125,6 +128,15 @@ PluginInterface::SamplingDevices AirspyPlugin::enumSampleSources()
 	return result;
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* AirspyPlugin::createSampleSourcePluginInstanceGUI(
+        const QString& sourceId __attribute__((unused)),
+        QWidget **widget __attribute__((unused)),
+        DeviceUISet *deviceUISet __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* AirspyPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
@@ -141,6 +153,7 @@ PluginInstanceGUI* AirspyPlugin::createSampleSourcePluginInstanceGUI(
 		return 0;
 	}
 }
+#endif
 
 DeviceSampleSource *AirspyPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
 {

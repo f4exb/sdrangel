@@ -26,8 +26,6 @@
 DSPEngine::DSPEngine() :
     m_deviceSourceEnginesUIDSequence(0),
     m_deviceSinkEnginesUIDSequence(0),
-	m_audioOutputSampleRate(48000), // Use default output device at 48 kHz
-    m_audioInputSampleRate(48000),  // Use default input device at 48 kHz
     m_audioInputDeviceIndex(-1),    // default device
     m_audioOutputDeviceIndex(-1)    // default device
 {
@@ -37,9 +35,6 @@ DSPEngine::DSPEngine() :
 
 DSPEngine::~DSPEngine()
 {
-    m_audioOutput.setOnExit(true);
-    m_audioInput.setOnExit(true);
-
     std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceSourceEngines.begin();
 
     while (it != m_deviceSourceEngines.end())
@@ -89,74 +84,6 @@ void DSPEngine::removeLastDeviceSinkEngine()
         m_deviceSinkEngines.pop_back();
         m_deviceSinkEnginesUIDSequence--;
     }
-}
-
-void DSPEngine::startAudioOutput()
-{
-    m_audioOutput.start(m_audioOutputDeviceIndex, m_audioOutputSampleRate);
-    m_audioOutputSampleRate = m_audioOutput.getRate(); // update with actual rate
-}
-
-void DSPEngine::stopAudioOutput()
-{
-    m_audioOutput.stop();
-}
-
-void DSPEngine::startAudioOutputImmediate()
-{
-    m_audioOutput.startImmediate(m_audioOutputDeviceIndex, m_audioOutputSampleRate);
-    m_audioOutputSampleRate = m_audioOutput.getRate(); // update with actual rate
-}
-
-void DSPEngine::stopAudioOutputImmediate()
-{
-    m_audioOutput.stopImmediate();
-}
-
-void DSPEngine::startAudioInput()
-{
-    m_audioInput.start(m_audioInputDeviceIndex, m_audioInputSampleRate);
-    m_audioInputSampleRate = m_audioInput.getRate(); // update with actual rate
-}
-
-void DSPEngine::stopAudioInput()
-{
-    m_audioInput.stop();
-}
-
-void DSPEngine::startAudioInputImmediate()
-{
-    m_audioInput.startImmediate(m_audioInputDeviceIndex, m_audioInputSampleRate);
-    m_audioInputSampleRate = m_audioInput.getRate(); // update with actual rate
-}
-
-void DSPEngine::stopAudioInputImmediate()
-{
-    m_audioInput.stopImmediate();
-}
-
-void DSPEngine::addAudioSink(AudioFifo* audioFifo)
-{
-	qDebug("DSPEngine::addAudioSink");
-	m_audioOutput.addFifo(audioFifo);
-}
-
-void DSPEngine::removeAudioSink(AudioFifo* audioFifo)
-{
-	qDebug("DSPEngine::removeAudioSink");
-	m_audioOutput.removeFifo(audioFifo);
-}
-
-void DSPEngine::addAudioSource(AudioFifo* audioFifo)
-{
-    qDebug("DSPEngine::addAudioSource");
-    m_audioInput.addFifo(audioFifo);
-}
-
-void DSPEngine::removeAudioSource(AudioFifo* audioFifo)
-{
-    qDebug("DSPEngine::removeAudioSource");
-    m_audioInput.removeFifo(audioFifo);
 }
 
 DSPDeviceSourceEngine *DSPEngine::getDeviceSourceEngineByUID(uint uid)
@@ -237,9 +164,10 @@ void DSPEngine::pushMbeFrame(
         int mbeVolumeIndex,
         unsigned char channels,
         bool useHP,
+        int upsampling,
         AudioFifo *audioFifo)
 {
-    m_dvSerialEngine.pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useHP, audioFifo);
+    m_dvSerialEngine.pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useHP, upsampling, audioFifo);
 }
 #else
 void DSPEngine::pushMbeFrame(
@@ -248,6 +176,7 @@ void DSPEngine::pushMbeFrame(
         int mbeVolumeIndex __attribute((unused)),
         unsigned char channels __attribute((unused)),
         bool useHP __attribute((unused)),
+        int upsampling __attribute((unused)),
         AudioFifo *audioFifo __attribute((unused)))
 {}
 #endif

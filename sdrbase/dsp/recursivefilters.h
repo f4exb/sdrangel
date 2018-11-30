@@ -17,11 +17,13 @@
 #ifndef SDRBASE_DSP_RECURSIVEFILTERS_H_
 #define SDRBASE_DSP_RECURSIVEFILTERS_H_
 
+#include "export.h"
+
 /**
  * \Brief: This is a second order bandpass filter using recursive method. r is in range ]0..1[ the higher the steeper the filter.
  * inspired by:http://www.ece.umd.edu/~tretter/commlab/c6713slides/FSKSlides.pdf
  */
-class SecondOrderRecursiveFilter
+class SDRBASE_API SecondOrderRecursiveFilter
 {
 public:
     SecondOrderRecursiveFilter(float samplingFrequency, float centerFrequency, float r);
@@ -37,6 +39,7 @@ private:
 
     float m_r;
     float m_frequencyRatio;
+    float m_f;
     float m_v[3];
 };
 

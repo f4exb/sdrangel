@@ -40,6 +40,7 @@ void AirspySettings::resetToDefaults()
 	m_iqCorrection = false;
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_fileRecordName = "";
 }
 
 QByteArray AirspySettings::serialize() const

@@ -1,0 +1,110 @@
+PlutoSdrInputSettings:
+  description: PlutoSDR
+  properties:  
+    centerFrequency:
+      type: integer
+      format: int64
+    devSampleRate:
+      type: integer
+    LOppmTenths:
+      type: integer
+    lpfFIREnable:
+      description: Low pass FIR filter enable (1 if enabled else 0)
+      type: integer
+    lpfFIRBW:      
+      description: digital lowpass FIR filter bandwidth (Hz)
+      type: integer
+    lpfFIRlog2Decim:
+      description: digital lowpass FIR filter log2 of decimation factor (0..2)
+      type: integer
+    lpfFIRGain:
+      description: digital lowpass FIR filter gain (dB)
+      type: integer
+    fcPos:
+      description: 0=Infra 1=Supra 2=Center
+      type: integer
+    dcBlock:
+      type: integer
+    iqCorrection:
+      type: integer
+    log2Decim:
+      type: integer
+    lpfBW:
+      description: Analog lowpass filter bandwidth (Hz)      
+      type: integer
+    gain:
+      description: Hardware gain
+      type: integer
+    antennaPath:
+      type: integer
+    gainMode:
+      type: integer
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64      
+    fileRecordName:
+      type: string
+      
+PlutoSdrOutputSettings:
+  description: PlutoSDR
+  properties:  
+    centerFrequency:
+      type: integer
+      format: int64
+    devSampleRate:
+      type: integer
+    LOppmTenths:
+      type: integer
+    lpfFIREnable:
+      description: Low pass FIR filter enable (1 if enabled else 0)
+      type: integer
+    lpfFIRBW:      
+      description: digital lowpass FIR filter bandwidth (Hz)
+      type: integer
+    lpfFIRlog2Interp:
+      description: digital lowpass FIR filter log2 of interpolation factor (0..2)
+      type: integer
+    lpfFIRGain:
+      description: digital lowpass FIR filter gain (dB)
+      type: integer
+    log2Interp:
+      type: integer
+    lpfBW:
+      description: Analog lowpass filter bandwidth (Hz)      
+      type: integer
+    att:
+      description: Hardware attenuator gain in decibel fourths (negative)
+      type: integer
+    antennaPath:
+      type: integer
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64      
+
+PlutoSdrInputReport:
+  description: PlutoSDR
+  properties:  
+    adcRate:
+      type: integer
+    rssi:
+      type: string
+    gainDB:
+      type: integer
+    temperature:
+      type: number
+      format: float                        
+
+PlutoSdrOutputReport:
+  description: PlutoSDR
+  properties:  
+    dacRate:
+      type: integer
+    rssi:
+      type: string
+    temperature:
+      type: number
+      format: float                              

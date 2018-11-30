@@ -10,7 +10,7 @@ class BasebandSampleSink;
 class LoRaPlugin : public QObject, PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "de.maintech.sdrangelove.channel.lora")
+	Q_PLUGIN_METADATA(IID "sdrangel.channel.lorademod")
 
 public:
 	explicit LoRaPlugin(QObject* parent = NULL);

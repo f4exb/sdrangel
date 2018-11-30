@@ -23,17 +23,21 @@
 #include <stdio.h>
 #include <complex.h>
 
+#include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGAMModReport.h"
+
 #include "dsp/upchannelizer.h"
 #include "dsp/dspengine.h"
 #include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
+#include "util/db.h"
 
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureAMMod, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceSeek, Message)
-MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureAFInput, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamTiming, Message)
@@ -53,7 +57,6 @@ AMMod::AMMod(DeviceSinkAPI *deviceAPI) :
 	m_fileSize(0),
 	m_recordLength(0),
 	m_sampleRate(48000),
-	m_afInput(AMModInputNone),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f)
@@ -65,21 +68,22 @@ AMMod::AMMod(DeviceSinkAPI *deviceAPI) :
 
 	m_magsq = 0.0;
 
-	m_toneNco.setFreq(1000.0, m_settings.m_audioSampleRate);
-	DSPEngine::instance()->addAudioSource(&m_audioFifo);
+	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo, getInputMessageQueue());
+	m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getInputSampleRate();
+	m_toneNco.setFreq(1000.0, m_audioSampleRate);
 
 	// CW keyer
-	m_cwKeyer.setSampleRate(m_settings.m_audioSampleRate);
+	m_cwKeyer.setSampleRate(m_audioSampleRate);
 	m_cwKeyer.setWPM(13);
 	m_cwKeyer.setMode(CWKeyerSettings::CWNone);
+
+    applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
+    applySettings(m_settings, true);
 
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
-
-    applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
-    applySettings(m_settings, true);
 }
 
 AMMod::~AMMod()
@@ -88,7 +92,7 @@ AMMod::~AMMod()
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
-    DSPEngine::instance()->removeAudioSource(&m_audioFifo);
+    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(&m_audioFifo);
 }
 
 void AMMod::pull(Sample& sample)
@@ -139,14 +143,14 @@ void AMMod::pull(Sample& sample)
 void AMMod::pullAudio(int nbSamples)
 {
 //    qDebug("AMMod::pullAudio: %d", nbSamples);
-    unsigned int nbAudioSamples = nbSamples * ((Real) m_settings.m_audioSampleRate / (Real) m_basebandSampleRate);
+    unsigned int nbAudioSamples = nbSamples * ((Real) m_audioSampleRate / (Real) m_basebandSampleRate);
 
     if (nbAudioSamples > m_audioBuffer.size())
     {
         m_audioBuffer.resize(nbAudioSamples);
     }
 
-    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbAudioSamples, 10);
+    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbAudioSamples);
     m_audioBufferFill = 0;
 }
 
@@ -164,12 +168,12 @@ void AMMod::modulateSample()
 
 void AMMod::pullAF(Real& sample)
 {
-    switch (m_afInput)
+    switch (m_settings.m_modAFInput)
     {
-    case AMModInputTone:
+    case AMModSettings::AMModInputTone:
         sample = m_toneNco.next();
         break;
-    case AMModInputFile:
+    case AMModSettings::AMModInputFile:
         // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
         // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
         if (m_ifstream.is_open())
@@ -198,10 +202,10 @@ void AMMod::pullAF(Real& sample)
             sample = 0.0f;
         }
         break;
-    case AMModInputAudio:
+    case AMModSettings::AMModInputAudio:
         sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_settings.m_volumeFactor;
         break;
-    case AMModInputCWTone:
+    case AMModSettings::AMModInputCWTone:
         Real fadeFactor;
 
         if (m_cwKeyer.getSample())
@@ -222,7 +226,7 @@ void AMMod::pullAF(Real& sample)
             }
         }
         break;
-    case AMModInputNone:
+    case AMModSettings::AMModInputNone:
     default:
         sample = 0.0f;
         break;
@@ -312,13 +316,6 @@ bool AMMod::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgConfigureAFInput::match(cmd))
-    {
-        MsgConfigureAFInput& conf = (MsgConfigureAFInput&) cmd;
-        m_afInput = conf.getAFInput();
-
-        return true;
-    }
     else if (MsgConfigureFileSourceStreamTiming::match(cmd))
     {
     	std::size_t samplesCount;
@@ -332,6 +329,20 @@ bool AMMod::handleMessage(const Message& cmd)
     	MsgReportFileSourceStreamTiming *report;
         report = MsgReportFileSourceStreamTiming::create(samplesCount);
         getMessageQueueToGUI()->push(report);
+
+        return true;
+    }
+    else if (DSPConfigureAudio::match(cmd))
+    {
+        DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
+        uint32_t sampleRate = cfg.getSampleRate();
+
+        qDebug() << "AMMod::handleMessage: DSPConfigureAudio:"
+                << " sampleRate: " << sampleRate;
+
+        if (sampleRate != m_audioSampleRate) {
+            applyAudioSampleRate(sampleRate);
+        }
 
         return true;
     }
@@ -380,6 +391,28 @@ void AMMod::seekFileStream(int seekPercentage)
     }
 }
 
+void AMMod::applyAudioSampleRate(int sampleRate)
+{
+    qDebug("AMMod::applyAudioSampleRate: %d", sampleRate);
+
+    MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
+            sampleRate, m_settings.m_inputFrequencyOffset);
+    m_inputMessageQueue.push(channelConfigMsg);
+
+    m_settingsMutex.lock();
+
+    m_interpolatorDistanceRemain = 0;
+    m_interpolatorConsumed = false;
+    m_interpolatorDistance = (Real) sampleRate / (Real) m_outputSampleRate;
+    m_interpolator.create(48, sampleRate, m_settings.m_rfBandwidth / 2.2, 3.0);
+    m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
+    m_cwKeyer.setSampleRate(sampleRate);
+
+    m_settingsMutex.unlock();
+
+    m_audioSampleRate = sampleRate;
+}
+
 void AMMod::applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force)
 {
     qDebug() << "AMMod::applyChannelSettings:"
@@ -400,8 +433,8 @@ void AMMod::applyChannelSettings(int basebandSampleRate, int outputSampleRate, i
         m_settingsMutex.lock();
         m_interpolatorDistanceRemain = 0;
         m_interpolatorConsumed = false;
-        m_interpolatorDistance = (Real) m_settings.m_audioSampleRate / (Real) outputSampleRate;
-        m_interpolator.create(48, m_settings.m_audioSampleRate, m_settings.m_rfBandwidth / 2.2, 3.0);
+        m_interpolatorDistance = (Real) m_audioSampleRate / (Real) outputSampleRate;
+        m_interpolator.create(48, m_audioSampleRate, m_settings.m_rfBandwidth / 2.2, 3.0);
         m_settingsMutex.unlock();
     }
 
@@ -419,30 +452,38 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
             << " m_toneFrequency: " << settings.m_toneFrequency
             << " m_volumeFactor: " << settings.m_volumeFactor
             << " m_audioMute: " << settings.m_channelMute
-            << " m_playLoop: " << settings.m_playLoop;
+            << " m_playLoop: " << settings.m_playLoop
+            << " m_modAFInput " << settings.m_modAFInput
+            << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " force: " << force;
 
-    if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
-       (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
         m_settingsMutex.lock();
         m_interpolatorDistanceRemain = 0;
         m_interpolatorConsumed = false;
-        m_interpolatorDistance = (Real) settings.m_audioSampleRate / (Real) m_outputSampleRate;
-        m_interpolator.create(48, settings.m_audioSampleRate, settings.m_rfBandwidth / 2.2, 3.0);
+        m_interpolatorDistance = (Real) m_audioSampleRate / (Real) m_outputSampleRate;
+        m_interpolator.create(48, m_audioSampleRate, settings.m_rfBandwidth / 2.2, 3.0);
         m_settingsMutex.unlock();
     }
 
-    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) ||
-        (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force)
     {
         m_settingsMutex.lock();
-        m_toneNco.setFreq(settings.m_toneFrequency, settings.m_audioSampleRate);
+        m_toneNco.setFreq(settings.m_toneFrequency, m_audioSampleRate);
         m_settingsMutex.unlock();
     }
 
-    if ((settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
-        m_cwKeyer.setSampleRate(settings.m_audioSampleRate);
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
+        audioDeviceManager->addAudioSource(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
+        uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
+
+        if (m_audioSampleRate != audioSampleRate) {
+            applyAudioSampleRate(audioSampleRate);
+        }
     }
 
     m_settings = settings;
@@ -468,4 +509,175 @@ bool AMMod::deserialize(const QByteArray& data)
         m_inputMessageQueue.push(msg);
         return false;
     }
+}
+
+int AMMod::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setAmModSettings(new SWGSDRangel::SWGAMModSettings());
+    response.getAmModSettings()->init();
+    webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int AMMod::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& channelSettingsKeys,
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    AMModSettings settings = m_settings;
+    bool frequencyOffsetChanged = false;
+
+    if (channelSettingsKeys.contains("channelMute")) {
+        settings.m_channelMute = response.getAmModSettings()->getChannelMute() != 0;
+    }
+    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    {
+        settings.m_inputFrequencyOffset = response.getAmModSettings()->getInputFrequencyOffset();
+        frequencyOffsetChanged = true;
+    }
+    if (channelSettingsKeys.contains("modAFInput")) {
+        settings.m_modAFInput = (AMModSettings::AMModInputAF) response.getAmModSettings()->getModAfInput();
+    }
+    if (channelSettingsKeys.contains("audioDeviceName")) {
+        settings.m_audioDeviceName = *response.getAmModSettings()->getAudioDeviceName();
+    }
+    if (channelSettingsKeys.contains("playLoop")) {
+        settings.m_playLoop = response.getAmModSettings()->getPlayLoop() != 0;
+    }
+    if (channelSettingsKeys.contains("rfBandwidth")) {
+        settings.m_rfBandwidth = response.getAmModSettings()->getRfBandwidth();
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getAmModSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getAmModSettings()->getTitle();
+    }
+    if (channelSettingsKeys.contains("toneFrequency")) {
+        settings.m_toneFrequency = response.getAmModSettings()->getToneFrequency();
+    }
+    if (channelSettingsKeys.contains("volumeFactor")) {
+        settings.m_volumeFactor = response.getAmModSettings()->getVolumeFactor();
+    }
+    if (channelSettingsKeys.contains("modFactor")) {
+        settings.m_modFactor = response.getAmModSettings()->getModFactor();
+    }
+
+    if (channelSettingsKeys.contains("cwKeyer"))
+    {
+        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getAmModSettings()->getCwKeyer();
+        CWKeyerSettings cwKeyerSettings = m_cwKeyer.getSettings();
+
+        if (channelSettingsKeys.contains("cwKeyer.loop")) {
+            cwKeyerSettings.m_loop = apiCwKeyerSettings->getLoop() != 0;
+        }
+        if (channelSettingsKeys.contains("cwKeyer.mode")) {
+            cwKeyerSettings.m_mode = (CWKeyerSettings::CWMode) apiCwKeyerSettings->getMode();
+        }
+        if (channelSettingsKeys.contains("cwKeyer.text")) {
+            cwKeyerSettings.m_text = *apiCwKeyerSettings->getText();
+        }
+        if (channelSettingsKeys.contains("cwKeyer.sampleRate")) {
+            cwKeyerSettings.m_sampleRate = apiCwKeyerSettings->getSampleRate();
+        }
+        if (channelSettingsKeys.contains("cwKeyer.wpm")) {
+            cwKeyerSettings.m_wpm = apiCwKeyerSettings->getWpm();
+        }
+
+        m_cwKeyer.setLoop(cwKeyerSettings.m_loop);
+        m_cwKeyer.setMode(cwKeyerSettings.m_mode);
+        m_cwKeyer.setSampleRate(cwKeyerSettings.m_sampleRate);
+        m_cwKeyer.setText(cwKeyerSettings.m_text);
+        m_cwKeyer.setWPM(cwKeyerSettings.m_wpm);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+            m_guiMessageQueue->push(msgCwKeyer);
+        }
+    }
+
+    if (frequencyOffsetChanged)
+    {
+        AMMod::MsgConfigureChannelizer *msgChan = AMMod::MsgConfigureChannelizer::create(
+                m_audioSampleRate, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(msgChan);
+    }
+
+    MsgConfigureAMMod *msg = MsgConfigureAMMod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureAMMod *msgToGUI = MsgConfigureAMMod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+int AMMod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setAmModReport(new SWGSDRangel::SWGAMModReport());
+    response.getAmModReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void AMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const AMModSettings& settings)
+{
+    response.getAmModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
+    response.getAmModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getAmModSettings()->setModAfInput((int) settings.m_modAFInput);
+    response.getAmModSettings()->setPlayLoop(settings.m_playLoop ? 1 : 0);
+    response.getAmModSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getAmModSettings()->setModFactor(settings.m_modFactor);
+    response.getAmModSettings()->setRgbColor(settings.m_rgbColor);
+
+    if (response.getAmModSettings()->getTitle()) {
+        *response.getAmModSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getAmModSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    response.getAmModSettings()->setToneFrequency(settings.m_toneFrequency);
+    response.getAmModSettings()->setVolumeFactor(settings.m_volumeFactor);
+
+    if (!response.getAmModSettings()->getCwKeyer()) {
+        response.getAmModSettings()->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings);
+    }
+
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getAmModSettings()->getCwKeyer();
+    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
+    apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
+    apiCwKeyerSettings->setMode((int) cwKeyerSettings.m_mode);
+    apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
+
+    if (apiCwKeyerSettings->getText()) {
+        *apiCwKeyerSettings->getText() = cwKeyerSettings.m_text;
+    } else {
+        apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
+    }
+
+    apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+
+    if (response.getAmModSettings()->getAudioDeviceName()) {
+        *response.getAmModSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        response.getAmModSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+}
+
+void AMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    response.getAmModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
+    response.getAmModReport()->setAudioSampleRate(m_audioSampleRate);
+    response.getAmModReport()->setChannelSampleRate(m_outputSampleRate);
 }

@@ -6,7 +6,7 @@ This plugin supports input from SDRplay RSP1 devices. SDRplay is based on the MS
 
 <b>No Windows support</b> 
 
-Driver is too unstable in Windows randomly stopping the appication and causing BSOD.
+Driver is too unstable in Windows randomly stopping the application and causing BSOD.
 
 <h2>Build</h2>
 
@@ -75,13 +75,16 @@ You have the choice between various sample rates from 1536 to 8192 kHz. Some val
 
 Decimation in powers of two from 1 (no decimation) to 64.
 
-<h3>9. Center frequency position</h3>
+<h3>9: Decimated bandpass center frequency position relative the SDRplay center frequency</h3>
 
-Relative position of center frequency of decimated baseband relative to the original:
+  - **Cen**: the decimation operation takes place around the SDRplay center frequency Fs
+  - **Inf**: the decimation operation takes place around Fs - Fc. 
+  - **Sup**: the decimation operation takes place around Fs + Fc.
+  
+With SR as the sample rate before decimation Fc is calculated as: 
 
-  - Inf: infradyne i.e. in the lower half of original baseband: to be used with non zero IFs
-  - Cen: Centered i.e. around the center of the original baseband
-  - Sup: Supradyne i.e. in the upper half of original baseband
+  - if decimation n is 4 or lower:  Fc = SR/2^(log2(n)-1). The device center frequency is on the side of the baseband. You need a RF filter bandwidth at least twice the baseband.
+  - if decimation n is 8 or higher: Fc = SR/n. The device center frequency is half the baseband away from the side of the baseband. You need a RF filter bandwidth at least 3 times the baseband.
   
 <h3>10. Tuner gain mode</h3>
 

@@ -17,7 +17,9 @@
 
 #include <QTreeWidgetItem>
 
-class PresetItem : public QTreeWidgetItem {
+#include "export.h"
+
+class SDRGUI_API PresetItem : public QTreeWidgetItem {
 public:
 	PresetItem(QTreeWidgetItem* parent, const QStringList& strings, quint64 frequency, int type);
 	bool operator<(const QTreeWidgetItem& other) const;

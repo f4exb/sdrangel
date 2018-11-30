@@ -4,12 +4,14 @@ set(chanalyzer_SOURCES
 	chanalyzer.cpp
 	chanalyzergui.cpp
 	chanalyzerplugin.cpp
+	chanalyzersettings.cpp
 )
 
 set(chanalyzer_HEADERS
 	chanalyzer.h
 	chanalyzergui.h
 	chanalyzerplugin.h
+	chanalyzersettings.h
 )
 
 set(chanalyzer_FORMS
@@ -41,6 +43,6 @@ target_link_libraries(chanalyzer
 	sdrgui
 )
 
-qt5_use_modules(chanalyzer Core Widgets )
+target_link_libraries(chanalyzer Qt5::Core Qt5::Widgets)
 
 install(TARGETS chanalyzer DESTINATION lib/plugins/channelrx)

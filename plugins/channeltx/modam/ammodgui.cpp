@@ -20,18 +20,21 @@
 #include <QTime>
 #include <QDebug>
 
-#include "ammodgui.h"
-
 #include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
 #include "dsp/upchannelizer.h"
 
-#include "ui_ammodgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "dsp/dspengine.h"
+#include "gui/crightclickenabler.h"
+#include "gui/audioselectdialog.h"
+#include "gui/basicchannelsettingsdialog.h"
 #include "mainwindow.h"
+
+#include "ui_ammodgui.h"
+#include "ammodgui.h"
 
 AMModGUI* AMModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
 {
@@ -102,6 +105,21 @@ bool AMModGUI::handleMessage(const Message& message)
     {
         m_samplesCount = ((AMMod::MsgReportFileSourceStreamTiming&)message).getSamplesCount();
         updateWithStreamTime();
+        return true;
+    }
+    else if (AMMod::MsgConfigureAMMod::match(message))
+    {
+        const AMMod::MsgConfigureAMMod& cfg = (AMMod::MsgConfigureAMMod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (CWKeyer::MsgConfigureCWKeyer::match(message))
+    {
+        const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) message;
+        ui->cwKeyerGUI->displaySettings(cfg.getSettings());
         return true;
     }
     else
@@ -184,9 +202,8 @@ void AMModGUI::on_play_toggled(bool checked)
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->morseKeyer->setEnabled(!checked);
     ui->mic->setEnabled(!checked);
-    m_modAFInput = checked ? AMMod::AMModInputFile : AMMod::AMModInputNone;
-    AMMod::MsgConfigureAFInput* message = AMMod::MsgConfigureAFInput::create(m_modAFInput);
-    m_amMod->getInputMessageQueue()->push(message);
+    m_settings.m_modAFInput = checked ? AMModSettings::AMModInputFile : AMModSettings::AMModInputNone;
+    applySettings();
     ui->navTimeSlider->setEnabled(!checked);
     m_enableNavTime = !checked;
 }
@@ -196,9 +213,8 @@ void AMModGUI::on_tone_toggled(bool checked)
     ui->play->setEnabled(!checked); // release other source inputs
     ui->morseKeyer->setEnabled(!checked);
     ui->mic->setEnabled(!checked);
-    m_modAFInput = checked ? AMMod::AMModInputTone : AMMod::AMModInputNone;
-    AMMod::MsgConfigureAFInput* message = AMMod::MsgConfigureAFInput::create(m_modAFInput);
-    m_amMod->getInputMessageQueue()->push(message);
+    m_settings.m_modAFInput = checked ? AMModSettings::AMModInputTone : AMModSettings::AMModInputNone;
+    applySettings();
 }
 
 void AMModGUI::on_morseKeyer_toggled(bool checked)
@@ -206,9 +222,8 @@ void AMModGUI::on_morseKeyer_toggled(bool checked)
     ui->play->setEnabled(!checked); // release other source inputs
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->mic->setEnabled(!checked);
-    m_modAFInput = checked ? AMMod::AMModInputCWTone : AMMod::AMModInputNone;
-    AMMod::MsgConfigureAFInput* message = AMMod::MsgConfigureAFInput::create(m_modAFInput);
-    m_amMod->getInputMessageQueue()->push(message);
+    m_settings.m_modAFInput = checked ? AMModSettings::AMModInputCWTone : AMModSettings::AMModInputNone;
+    applySettings();
 }
 
 void AMModGUI::on_mic_toggled(bool checked)
@@ -216,9 +231,8 @@ void AMModGUI::on_mic_toggled(bool checked)
     ui->play->setEnabled(!checked); // release other source inputs
     ui->morseKeyer->setEnabled(!checked);
     ui->tone->setEnabled(!checked); // release other source inputs
-    m_modAFInput = checked ? AMMod::AMModInputAudio : AMMod::AMModInputNone;
-    AMMod::MsgConfigureAFInput* message = AMMod::MsgConfigureAFInput::create(m_modAFInput);
-    m_amMod->getInputMessageQueue()->push(message);
+    m_settings.m_modAFInput = checked ? AMModSettings::AMModInputAudio : AMModSettings::AMModInputNone;
+    applySettings();
 }
 
 void AMModGUI::on_navTimeSlider_valueChanged(int value)
@@ -237,7 +251,7 @@ void AMModGUI::on_navTimeSlider_valueChanged(int value)
 void AMModGUI::on_showFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"));
+        tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"), 0, QFileDialog::DontUseNativeDialog);
 
     if (fileName != "")
     {
@@ -259,6 +273,22 @@ void AMModGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool roll
 {
 }
 
+void AMModGUI::onMenuDialogCalled(const QPoint &p)
+{
+    BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.move(p);
+    dialog.exec();
+
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+    m_settings.m_title = m_channelMarker.getTitle();
+
+    setWindowTitle(m_settings.m_title);
+    setTitleColor(m_settings.m_rgbColor);
+
+    applySettings();
+}
+
 AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::AMModGUI),
@@ -270,17 +300,20 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampl
     m_recordSampleRate(48000),
     m_samplesCount(0),
     m_tickCount(0),
-    m_enableNavTime(false),
-    m_modAFInput(AMMod::AMModInputNone)
+    m_enableNavTime(false)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_amMod = (AMMod*) channelTx; //new AMMod(m_deviceUISet->m_deviceSinkAPI);
 	m_amMod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+
+    CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->mic);
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -291,8 +324,6 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampl
     m_channelMarker.setBandwidth(5000);
     m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle("AM Modulator");
-    m_channelMarker.setUDPAddress("127.0.0.1");
-    m_channelMarker.setUDPSendPort(9999);
     m_channelMarker.blockSignals(false);
 	m_channelMarker.setVisible(true); // activate signal on the last setting only
 
@@ -351,6 +382,7 @@ void AMModGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setTitle(m_settings.m_title);
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
@@ -378,6 +410,16 @@ void AMModGUI::displaySettings()
     ui->channelMute->setChecked(m_settings.m_channelMute);
     ui->playLoop->setChecked(m_settings.m_playLoop);
 
+    ui->tone->setEnabled((m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputTone) || (m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputNone));
+    ui->mic->setEnabled((m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputAudio) || (m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputNone));
+    ui->play->setEnabled((m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputFile) || (m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputNone));
+    ui->morseKeyer->setEnabled((m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputCWTone) || (m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputNone));
+
+    ui->tone->setChecked(m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputTone);
+    ui->mic->setChecked(m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputAudio);
+    ui->play->setChecked(m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputFile);
+    ui->morseKeyer->setChecked(m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputCWTone);
+
     blockApplySettings(false);
 }
 
@@ -391,13 +433,26 @@ void AMModGUI::enterEvent(QEvent*)
 	m_channelMarker.setHighlighted(true);
 }
 
+void AMModGUI::audioSelect()
+{
+    qDebug("AMModGUI::audioSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName, true); // true for input
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
+}
+
 void AMModGUI::tick()
 {
     double powDb = CalcDb::dbPower(m_amMod->getMagSq());
 	m_channelPowerDbAvg(powDb);
 	ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
 
-    if (((++m_tickCount & 0xf) == 0) && (m_modAFInput == AMMod::AMModInputFile))
+    if (((++m_tickCount & 0xf) == 0) && (m_settings.m_modAFInput == AMModSettings::AMModInputFile))
     {
         AMMod::MsgConfigureFileSourceStreamTiming* message = AMMod::MsgConfigureFileSourceStreamTiming::create();
         m_amMod->getInputMessageQueue()->push(message);
@@ -408,7 +463,7 @@ void AMModGUI::updateWithStreamData()
 {
     QTime recordLength(0, 0, 0, 0);
     recordLength = recordLength.addSecs(m_recordLength);
-    QString s_time = recordLength.toString("hh:mm:ss");
+    QString s_time = recordLength.toString("HH:mm:ss");
     ui->recordLengthText->setText(s_time);
     updateWithStreamTime();
 }
@@ -427,8 +482,8 @@ void AMModGUI::updateWithStreamTime()
     QTime t(0, 0, 0, 0);
     t = t.addSecs(t_sec);
     t = t.addMSecs(t_msec);
-    QString s_timems = t.toString("hh:mm:ss.zzz");
-    QString s_time = t.toString("hh:mm:ss");
+    QString s_timems = t.toString("HH:mm:ss.zzz");
+    QString s_time = t.toString("HH:mm:ss");
     ui->relTimeText->setText(s_timems);
 
     if (!m_enableNavTime)

@@ -21,12 +21,12 @@
 #include <QObject>
 #include "dsp/dsptypes.h"
 #include "dsp/samplesourcefifo.h"
-#include "util/export.h"
+#include "export.h"
 #include "util/messagequeue.h"
 
 class Message;
 
-class SDRANGEL_API BasebandSampleSource : public QObject {
+class SDRBASE_API BasebandSampleSource : public QObject {
 	Q_OBJECT
 public:
 	BasebandSampleSource();

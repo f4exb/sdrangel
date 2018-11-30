@@ -1,10 +1,13 @@
 project(am)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(am_SOURCES
 	amdemod.cpp
 	amdemodgui.cpp
 	amdemodsettings.cpp
 	amdemodplugin.cpp
+	amdemodssbdialog.cpp
 )
 
 set(am_HEADERS
@@ -12,15 +15,18 @@ set(am_HEADERS
 	amdemodgui.h
 	amdemodsettings.h
 	amdemodplugin.h
+	amdemodssbdialog.h
 )
 
 set(am_FORMS
 	amdemodgui.ui
+	amdemodssb.ui
 )
 
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client	
 )
 
 #include(${QT_USE_FILE})
@@ -43,6 +49,6 @@ target_link_libraries(demodam
 	sdrgui
 )
 
-qt5_use_modules(demodam Core Widgets)
+target_link_libraries(demodam Qt5::Core Qt5::Widgets)
 
 install(TARGETS demodam DESTINATION lib/plugins/channelrx)

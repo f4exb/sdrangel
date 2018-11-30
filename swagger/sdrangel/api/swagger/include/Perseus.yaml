@@ -1,0 +1,40 @@
+PerseusSettings:
+  description: Perseus
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    LOppmTenths:
+      type: integer
+    devSampleRateIndex:
+      type: integer
+    log2Decim:
+      type: integer
+    adcDither:
+      description: ADC dithering (1 if active else 0)
+      type: integer
+    adcPreamp:
+      description: ADC preamplifier (1 if active else 0)
+      type: integer
+    wideBand:
+      description: Wideband mode i.e. bypass automatic RF filter (1 if active else 0)
+      type: integer
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64      
+    fileRecordName:
+      type: string
+    attenuator:
+      description: Attenuator setting in Bels (0, 10, 20 30 dB) 
+      type: integer
+
+PerseusReport:
+  description: Perseus
+  properties:
+    sampleRates:
+      type: array
+      items:
+        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/SampleRate"  
+            

@@ -19,7 +19,9 @@
 
 #include "libhackrf/hackrf.h"
 
-class DeviceHackRF
+#include "export.h"
+
+class DEVICES_API DeviceHackRF
 {
 public:
     static DeviceHackRF& instance();
@@ -28,7 +30,11 @@ public:
 protected:
     DeviceHackRF();
     DeviceHackRF(const DeviceHackRF&) {}
+#ifdef _MSC_VER
+    DeviceHackRF& operator=(const DeviceHackRF& other) { return *this; }
+#else
     DeviceHackRF& operator=(const DeviceHackRF& other __attribute__((unused))) { return *this; }
+#endif
     ~DeviceHackRF();
 private:
     static hackrf_device *open_hackrf_from_sequence(int sequence);

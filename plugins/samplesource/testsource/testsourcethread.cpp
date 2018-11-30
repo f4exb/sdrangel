@@ -22,6 +22,8 @@
 
 #define TESTSOURCE_BLOCKSIZE 16384
 
+MESSAGE_CLASS_DEFINITION(TestSourceThread::MsgStartStop, Message)
+
 TestSourceThread::TestSourceThread(SampleSinkFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
@@ -36,6 +38,11 @@ TestSourceThread::TestSourceThread(SampleSinkFifo* sampleFifo, QObject* parent) 
 	m_amModulation(0.5f),
 	m_fmDeviationUnit(0.0f),
 	m_fmPhasor(0.0f),
+    m_pulseWidth(150),
+    m_pulseSampleCount(0),
+    m_pulsePatternCount(0),
+    m_pulsePatternCycle(8),
+    m_pulsePatternPlaces(3),
 	m_samplerate(48000),
 	m_log2Decim(4),
 	m_fcPos(0),
@@ -55,15 +62,17 @@ TestSourceThread::TestSourceThread(SampleSinkFifo* sampleFifo, QObject* parent) 
     m_throttleToggle(false),
     m_mutex(QMutex::Recursive)
 {
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
 TestSourceThread::~TestSourceThread()
 {
-	stopWork();
 }
 
 void TestSourceThread::startWork()
 {
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+    m_timer.start(50);
 	m_startWaitMutex.lock();
 	m_elapsedTimer.start();
 	start();
@@ -76,6 +85,8 @@ void TestSourceThread::stopWork()
 {
 	m_running = false;
 	wait();
+    m_timer.stop();
+    disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
 void TestSourceThread::setSamplerate(int samplerate)
@@ -177,6 +188,12 @@ void TestSourceThread::setFMDeviation(float deviation)
     qDebug("TestSourceThread::setFMDeviation: m_fmDeviationUnit: %f", m_fmDeviationUnit);
 }
 
+void TestSourceThread::startStop(bool start)
+{
+    MsgStartStop *msg = MsgStartStop::create(start);
+    m_inputMessageQueue.push(msg);
+}
+
 void TestSourceThread::run()
 {
     m_running = true;
@@ -250,6 +267,81 @@ void TestSourceThread::generate(quint32 chunksize)
             m_buf[i++] = (int16_t) (im * (float) m_amplitudeBitsQ);
         }
         break;
+        case TestSourceSettings::ModulationPattern0: // binary pattern
+        {
+            if (m_pulseSampleCount < m_pulseWidth) // sync pattern: 0
+            {
+                m_buf[i++] = m_amplitudeBitsDC;
+                m_buf[i++] = 0;
+            }
+            else if (m_pulseSampleCount < 2*m_pulseWidth) // sync pattern: 1
+            {
+                m_buf[i++] = (int16_t) (m_amplitudeBitsI + m_amplitudeBitsDC);
+                m_buf[i++] = (int16_t) (m_phaseImbalance * (float) m_amplitudeBitsQ);
+            }
+            else if (m_pulseSampleCount < 3*m_pulseWidth) // sync pattern: 0
+            {
+                m_buf[i++] = m_amplitudeBitsDC;
+                m_buf[i++] = 0;
+            }
+            else if (m_pulseSampleCount < (3+m_pulsePatternPlaces)*m_pulseWidth) // binary pattern
+            {
+                uint32_t patPulseSampleCount = m_pulseSampleCount - 3*m_pulseWidth;
+                uint32_t patPulseIndex = patPulseSampleCount / m_pulseWidth;
+                float patFigure = (m_pulsePatternCount & (1<<patPulseIndex)) != 0 ? 0.3 : 0.0; // make binary pattern ~-10dB vs sync pattern
+                m_buf[i++] = (int16_t) (patFigure * (float) m_amplitudeBitsI) + m_amplitudeBitsDC;
+                m_buf[i++] = (int16_t) (patFigure * (float) m_phaseImbalance * m_amplitudeBitsQ);
+            }
+
+            if (m_pulseSampleCount < (4+m_pulsePatternPlaces)*m_pulseWidth - 1)
+            {
+                m_pulseSampleCount++;
+            }
+            else
+            {
+                if (m_pulsePatternCount < m_pulsePatternCycle - 1) {
+                    m_pulsePatternCount++;
+                } else {
+                    m_pulsePatternCount = 0;
+                }
+
+                m_pulseSampleCount = 0;
+            }
+        }
+        break;
+        case TestSourceSettings::ModulationPattern1: // sawtooth pattern
+        {
+            Real re, im;
+            re = (float) (m_pulseWidth - m_pulseSampleCount) / (float) m_pulseWidth;
+            im = m_phaseImbalance*re;
+            m_buf[i++] = (int16_t) (re * (float) m_amplitudeBitsI) + m_amplitudeBitsDC;
+            m_buf[i++] = (int16_t) (im * (float) m_amplitudeBitsQ);
+
+            if (m_pulseSampleCount < m_pulseWidth - 1) {
+                m_pulseSampleCount++;
+            } else {
+                m_pulseSampleCount = 0;
+            }
+        }
+        break;
+        case TestSourceSettings::ModulationPattern2: // 50% duty cycle square pattern
+        {
+            if (m_pulseSampleCount < m_pulseWidth) // 1
+            {
+                m_buf[i++] = (int16_t) (m_amplitudeBitsI + m_amplitudeBitsDC);
+                m_buf[i++] = (int16_t) (m_phaseImbalance * (float) m_amplitudeBitsQ);
+            } else { // 0
+                m_buf[i++] = m_amplitudeBitsDC;
+                m_buf[i++] = 0;
+            }
+
+            if (m_pulseSampleCount < 2*m_pulseWidth - 1) {
+                m_pulseSampleCount++;
+            } else {
+                m_pulseSampleCount = 0;
+            }
+        }
+        break;
         case TestSourceSettings::ModulationNone:
         default:
         {
@@ -291,19 +383,13 @@ void TestSourceThread::callback(const qint16* buf, qint32 len)
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
-void TestSourceThread::connectTimer(const QTimer& timer)
-{
-    qDebug() << "TestSourceThread::connectTimer";
-    connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
-}
-
 void TestSourceThread::tick()
 {
     if (m_running)
     {
         qint64 throttlems = m_elapsedTimer.restart();
 
-        if (throttlems != m_throttlems)
+        if ((throttlems > 45) && (throttlems < 55) && (throttlems != m_throttlems))
         {
             QMutexLocker mutexLocker(&m_mutex);
             m_throttlems = throttlems;
@@ -315,3 +401,45 @@ void TestSourceThread::tick()
     }
 }
 
+void TestSourceThread::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = m_inputMessageQueue.pop()) != 0)
+    {
+        if (MsgStartStop::match(*message))
+        {
+            MsgStartStop* notif = (MsgStartStop*) message;
+            qDebug("TestSourceThread::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
+
+            if (notif->getStartStop()) {
+                startWork();
+            } else {
+                stopWork();
+            }
+
+            delete message;
+        }
+    }
+}
+
+void TestSourceThread::setPattern0()
+{
+    m_pulseWidth = 150;
+    m_pulseSampleCount = 0;
+    m_pulsePatternCount = 0;
+    m_pulsePatternCycle = 8;
+    m_pulsePatternPlaces = 3;
+}
+
+void TestSourceThread::setPattern1()
+{
+    m_pulseWidth = 1000;
+    m_pulseSampleCount = 0;
+}
+
+void TestSourceThread::setPattern2()
+{
+    m_pulseWidth = 1000;
+    m_pulseSampleCount = 0;
+}

@@ -140,6 +140,8 @@ public:
         float getAvgNbRecovery() const { return m_avgNbRecovery; }
         int getNbOriginalBlocksPerFrame() const { return m_nbOriginalBlocksPerFrame; }
         int getNbFECBlocksPerFrame() const { return m_nbFECBlocksPerFrame; }
+        int getSampleBits() const { return m_sampleBits; }
+        int getSampleBytes() const { return m_sampleBytes; }
 
 		static MsgReportSDRdaemonSourceStreamTiming* create(uint32_t tv_sec,
 				uint32_t tv_usec,
@@ -154,7 +156,9 @@ public:
                 float avgNbOriginalBlocks,
                 float avgNbRecovery,
                 int nbOriginalBlocksPerFrame,
-                int nbFECBlocksPerFrame)
+                int nbFECBlocksPerFrame,
+                int sampleBits,
+                int sampleBytes)
 		{
 			return new MsgReportSDRdaemonSourceStreamTiming(tv_sec,
 					tv_usec,
@@ -169,7 +173,9 @@ public:
                     avgNbOriginalBlocks,
                     avgNbRecovery,
                     nbOriginalBlocksPerFrame,
-                    nbFECBlocksPerFrame);
+                    nbFECBlocksPerFrame,
+                    sampleBits,
+                    sampleBytes);
 		}
 
 	protected:
@@ -187,6 +193,8 @@ public:
         float    m_avgNbRecovery;
         int      m_nbOriginalBlocksPerFrame;
         int      m_nbFECBlocksPerFrame;
+        int      m_sampleBits;
+        int      m_sampleBytes;
 
 		MsgReportSDRdaemonSourceStreamTiming(uint32_t tv_sec,
 				uint32_t tv_usec,
@@ -201,7 +209,9 @@ public:
                 float avgNbOriginalBlocks,
                 float avgNbRecovery,
                 int nbOriginalBlocksPerFrame,
-                int nbFECBlocksPerFrame) :
+                int nbFECBlocksPerFrame,
+                int sampleBits,
+                int sampleBytes) :
 			Message(),
 			m_tv_sec(tv_sec),
 			m_tv_usec(tv_usec),
@@ -216,7 +226,9 @@ public:
             m_avgNbOriginalBlocks(avgNbOriginalBlocks),
             m_avgNbRecovery(avgNbRecovery),
             m_nbOriginalBlocksPerFrame(nbOriginalBlocksPerFrame),
-            m_nbFECBlocksPerFrame(nbFECBlocksPerFrame)
+            m_nbFECBlocksPerFrame(nbFECBlocksPerFrame),
+            m_sampleBits(sampleBits),
+            m_sampleBytes(sampleBytes)
 		{ }
 	};
 
@@ -279,6 +291,20 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            QString& errorMessage);
+
     virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
@@ -294,14 +320,13 @@ private:
 	SDRdaemonSourceSettings m_settings;
 	SDRdaemonSourceUDPHandler* m_SDRdaemonUDPHandler;
     QString m_remoteAddress;
-	int m_sender;
 	QString m_deviceDescription;
 	std::time_t m_startingTimeStamp;
-    bool m_autoFollowRate;
-    bool m_autoCorrBuffer;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
 
     void applySettings(const SDRdaemonSourceSettings& settings, bool force = false);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRdaemonSourceSettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 };
 
 #endif // INCLUDE_SDRDAEMONSOURCEINPUT_H

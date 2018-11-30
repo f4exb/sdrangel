@@ -40,7 +40,7 @@ HackRFOutputGui::HackRFOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_forceSettings(true),
 	m_settings(),
 	m_deviceSampleSink(0),
-	m_lastEngineState((DSPDeviceSinkEngine::State)-1),
+	m_lastEngineState(DSPDeviceSinkEngine::StNotStarted),
 	m_doApplySettings(true)
 {
     m_deviceSampleSink = (HackRFOutput*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
@@ -50,7 +50,7 @@ HackRFOutputGui::HackRFOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	ui->centerFrequency->setValueRange(7, 0U, 7250000U);
 
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
-    ui->sampleRate->setValueRange(8, 2400000U, 20000000U);
+    ui->sampleRate->setValueRange(8, 1000000U, 20000000U);
 
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));

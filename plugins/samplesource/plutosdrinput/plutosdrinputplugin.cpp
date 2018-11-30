@@ -15,20 +15,22 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtPlugin>
-#include <QAction>
 
 #include "plugin/pluginapi.h"
 #include "plutosdr/deviceplutosdr.h"
 
-#include "plutosdrinputgui.h"
+#ifdef SERVER_MODE
 #include "plutosdrinput.h"
+#else
+#include "plutosdrinputgui.h"
+#endif
 #include "plutosdrinputplugin.h"
 
 class DeviceSourceAPI;
 
 const PluginDescriptor PlutoSDRInputPlugin::m_pluginDescriptor = {
 	QString("PlutoSDR Input"),
-	QString("3.11.1"),
+	QString("4.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -85,6 +87,15 @@ PluginInterface::SamplingDevices PlutoSDRInputPlugin::enumSampleSources()
 	return result;
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* PlutoSDRInputPlugin::createSampleSourcePluginInstanceGUI(
+        const QString& sourceId __attribute__((unused)),
+        QWidget **widget __attribute__((unused)),
+        DeviceUISet *deviceUISet __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* PlutoSDRInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
@@ -101,6 +112,7 @@ PluginInstanceGUI* PlutoSDRInputPlugin::createSampleSourcePluginInstanceGUI(
 		return 0;
 	}
 }
+#endif
 
 DeviceSampleSource *PlutoSDRInputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
 {

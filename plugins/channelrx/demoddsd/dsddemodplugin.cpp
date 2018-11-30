@@ -20,12 +20,14 @@
 #include <device/devicesourceapi.h>
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
+#ifndef SERVER_MODE
 #include "dsddemodgui.h"
+#endif
 #include "dsddemod.h"
 
 const PluginDescriptor DSDDemodPlugin::m_pluginDescriptor = {
 	QString("DSD Demodulator"),
-	QString("3.12.0"),
+	QString("4.2.4"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -51,10 +53,19 @@ void DSDDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(DSDDemod::m_channelIdURI, DSDDemod::m_channelId, this);
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* DSDDemodPlugin::createRxChannelGUI(
+        DeviceUISet *deviceUISet __attribute__((unused)),
+        BasebandSampleSink *rxChannel __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* DSDDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
 	return DSDDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
+#endif
 
 BasebandSampleSink* DSDDemodPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
 {

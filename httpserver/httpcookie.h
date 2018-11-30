@@ -10,6 +10,8 @@
 #include <QByteArray>
 #include "httpglobal.h"
 
+#include "export.h"
+
 namespace qtwebapp {
 
 /**
@@ -18,7 +20,7 @@ namespace qtwebapp {
   2109.
 */
 
-class DECLSPEC HttpCookie
+class HTTPSERVER_API HttpCookie
 {
 public:
 

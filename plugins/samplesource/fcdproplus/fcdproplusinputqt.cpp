@@ -28,7 +28,7 @@
 #include "fcdtraits.h"
 #include "fcdproplusconst.h"
 
-MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgConfigureFCD, Message)
+MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgConfigureFCDProPlus, Message)
 
 FCDProPlusInput::FCDProPlusInput() :
 	m_dev(0),
@@ -115,10 +115,10 @@ quint64 FCDProPlusInput::getCenterFrequency() const
 
 bool FCDProPlusInput::handleMessage(const Message& message)
 {
-	if(MsgConfigureFCD::match(message))
+	if(MsgConfigureFCDProPlus::match(message))
 	{
 		qDebug() << "FCDProPlusInput::handleMessage: MsgConfigureFCD";
-		MsgConfigureFCD& conf = (MsgConfigureFCD&) message;
+		MsgConfigureFCDProPlus& conf = (MsgConfigureFCDProPlus&) message;
 		applySettings(conf.getSettings(), false);
 		return true;
 	}

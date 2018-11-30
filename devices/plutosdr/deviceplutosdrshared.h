@@ -20,13 +20,14 @@
 #include <stdint.h>
 
 #include "util/message.h"
+#include "export.h"
 
 class DevicePlutoSDRParams;
 
 /**
  * Structure shared by a buddy with other buddies
  */
-class DevicePlutoSDRShared
+class DEVICES_API DevicePlutoSDRShared
 {
 public:
     /**

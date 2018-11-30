@@ -1,13 +1,34 @@
-#include <dsp/filerecord.h>
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015-2018 Edouard Griffiths, F4EXB                              //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
+#include <boost/crc.hpp>
+#include <boost/cstdint.hpp>
+
+#include <QDebug>
+#include <QDateTime>
+
 #include "dsp/dspcommands.h"
 #include "util/simpleserializer.h"
 #include "util/message.h"
 
-#include <QDebug>
+#include "filerecord.h"
 
 FileRecord::FileRecord() :
 	BasebandSampleSink(),
-    m_fileName(std::string("test.sdriq")),
+    m_fileName("test.sdriq"),
     m_sampleRate(0),
     m_centerFrequency(0),
 	m_recordOn(false),
@@ -17,9 +38,9 @@ FileRecord::FileRecord() :
 	setObjectName("FileSink");
 }
 
-FileRecord::FileRecord(const std::string& filename) :
+FileRecord::FileRecord(const QString& filename) :
     BasebandSampleSink(),
-    m_fileName(std::string(filename)),
+    m_fileName(filename),
     m_sampleRate(0),
     m_centerFrequency(0),
     m_recordOn(false),
@@ -34,12 +55,17 @@ FileRecord::~FileRecord()
     stopRecording();
 }
 
-void FileRecord::setFileName(const std::string& filename)
+void FileRecord::setFileName(const QString& filename)
 {
     if (!m_recordOn)
     {
         m_fileName = filename;
     }
+}
+
+void FileRecord::genUniqueFileName(uint deviceUID)
+{
+    setFileName(QString("rec%1_%2.sdriq").arg(deviceUID).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz")));
 }
 
 void FileRecord::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly __attribute__((unused)))
@@ -75,7 +101,7 @@ void FileRecord::startRecording()
     if (!m_sampleFile.is_open())
     {
     	qDebug() << "FileRecord::startRecording";
-        m_sampleFile.open(m_fileName.c_str(), std::ios::binary);
+        m_sampleFile.open(m_fileName.toStdString().c_str(), std::ios::binary);
         m_recordOn = true;
         m_recordStart = true;
         m_byteCount = 0;
@@ -110,7 +136,7 @@ bool FileRecord::handleMessage(const Message& message)
     }
 }
 
-void FileRecord::handleConfigure(const std::string& fileName)
+void FileRecord::handleConfigure(const QString& fileName)
 {
     if (fileName != m_fileName)
     {
@@ -122,21 +148,29 @@ void FileRecord::handleConfigure(const std::string& fileName)
 
 void FileRecord::writeHeader()
 {
-    m_sampleFile.write((const char *) &m_sampleRate, sizeof(qint32));         // 4 bytes
-    m_sampleFile.write((const char *) &m_centerFrequency, sizeof(quint64));   // 8 bytes
+    Header header;
+    header.sampleRate = m_sampleRate;
+    header.centerFrequency = m_centerFrequency;
     std::time_t ts = time(0);
-    m_sampleFile.write((const char *) &ts, sizeof(std::time_t));              // 8 bytes
-    quint32 sampleSize = SDR_RX_SAMP_SZ;
-    m_sampleFile.write((const char *) &sampleSize, sizeof(int));              // 4 bytes
+    header.startTimeStamp = ts;
+    header.sampleSize = SDR_RX_SAMP_SZ;
+    header.filler = 0;
+
+    writeHeader(m_sampleFile, header);
 }
 
-void FileRecord::readHeader(std::ifstream& sampleFile, Header& header)
+bool FileRecord::readHeader(std::ifstream& sampleFile, Header& header)
 {
-    sampleFile.read((char *) &(header.sampleRate), sizeof(qint32));
-    sampleFile.read((char *) &(header.centerFrequency), sizeof(quint64));
-    sampleFile.read((char *) &(header.startTimeStamp), sizeof(std::time_t));
-    sampleFile.read((char *) &(header.sampleSize), sizeof(quint32));
-    if ((header.sampleSize != 16) && (header.sampleSize != 24)) { // assume 16 bits if garbage (old I/Q file)
-    	header.sampleSize = 16;
-    }
+    sampleFile.read((char *) &header, sizeof(Header));
+    boost::crc_32_type crc32;
+    crc32.process_bytes(&header, 28);
+    return header.crc32 == crc32.checksum();
+}
+
+void FileRecord::writeHeader(std::ofstream& sampleFile, Header& header)
+{
+    boost::crc_32_type crc32;
+    crc32.process_bytes(&header, 28);
+    header.crc32 = crc32.checksum();
+    sampleFile.write((const char *) &header, sizeof(Header));
 }

@@ -32,23 +32,44 @@
 #include "gui/glshadersimple.h"
 #include "gui/glshadertextured.h"
 #include "dsp/channelmarker.h"
-#include "util/export.h"
+#include "export.h"
+#include "util/incrementalarray.h"
+#include "util/message.h"
 
 class QOpenGLShaderProgram;
+class MessageQueue;
 
-class SDRANGEL_API GLSpectrum : public QGLWidget {
+class SDRGUI_API GLSpectrum : public QGLWidget {
 	Q_OBJECT
 
 public:
+    class MsgReportSampleRate : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        MsgReportSampleRate(quint32 sampleRate) :
+            Message(),
+            m_sampleRate(sampleRate)
+        {
+            m_sampleRate = sampleRate;
+        }
+
+        quint32 getSampleRate() const { return m_sampleRate; }
+
+    private:
+        quint32 m_sampleRate;
+    };
+
 	GLSpectrum(QWidget* parent = NULL);
 	~GLSpectrum();
 
 	void setCenterFrequency(qint64 frequency);
 	void setSampleRate(qint32 sampleRate);
+	void setTimingRate(qint32 timingRate);
 	void setReferenceLevel(Real referenceLevel);
 	void setPowerRange(Real powerRange);
 	void setDecay(int decay);
-	void setHistoLateHoldoff(int lateHoldoff);
+	void setDecayDivisor(int decayDivisor);
 	void setHistoStroke(int stroke);
 	void setDisplayWaterfall(bool display);
 	void setSsbSpectrum(bool ssbSpectrum);
@@ -60,9 +81,12 @@ public:
 	void setDisplayGrid(bool display);
 	void setDisplayGridIntensity(int intensity);
 	void setDisplayTraceIntensity(int intensity);
+	void setLinear(bool linear);
+	qint32 getSampleRate() const { return m_sampleRate; }
 
 	void addChannelMarker(ChannelMarker* channelMarker);
 	void removeChannelMarker(ChannelMarker* channelMarker);
+	void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
 
 	void newSpectrum(const std::vector<Real>& spectrum, int fftSize);
 	void clearSpectrumHistogram();
@@ -107,8 +131,10 @@ private:
 	qint64 m_centerFrequency;
 	Real m_referenceLevel;
 	Real m_powerRange;
+	bool m_linear;
 	int m_decay;
 	quint32 m_sampleRate;
+	quint32 m_timingRate;
 
 	int m_fftSize;
 
@@ -145,11 +171,9 @@ private:
 
 	QRgb m_histogramPalette[240];
 	QImage* m_histogramBuffer;
-	quint8* m_histogram;
-	quint8* m_histogramHoldoff;
-	int m_histogramHoldoffBase;
-	int m_histogramHoldoffCount;
-	int m_histogramLateHoldoff;
+	quint8* m_histogram; //!< Spectrum phosphor matrix of FFT width and PSD height scaled to 100. values [0..239]
+	int m_decayDivisor;
+	int m_decayDivisorCount;
 	int m_histogramStroke;
 	QMatrix4x4 m_glHistogramSpectrumMatrix;
 	QMatrix4x4 m_glHistogramBoxMatrix;
@@ -164,6 +188,12 @@ private:
 	GLShaderTextured m_glShaderHistogram;
 	int m_matrixLoc;
 	int m_colorLoc;
+	IncrementalArray<GLfloat> m_q3TickTime;
+	IncrementalArray<GLfloat> m_q3TickFrequency;
+	IncrementalArray<GLfloat> m_q3TickPower;
+	IncrementalArray<GLfloat> m_q3FFT;
+
+	MessageQueue *m_messageQueueToGUI;
 
 	static const int m_waterfallBufferHeight = 256;
 

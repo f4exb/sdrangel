@@ -34,13 +34,13 @@
 #include "audio/audiofifo.h"
 #include "util/message.h"
 #include "util/movingaverage.h"
+#include "util/doublebufferfifo.h"
 
 #include "nfmdemodsettings.h"
 
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
-class AudioNetSink;
 
 class NFMDemod : public BasebandSampleSink, public ChannelSinkAPI {
 public:
@@ -136,6 +136,10 @@ public:
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage);
+
 	const Real *getCtcssToneSet(int& nbTones) const {
 		nbTones = m_ctcssDetector.getNTones();
 		return m_ctcssDetector.getToneSet();
@@ -150,21 +154,36 @@ public:
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
-        avg = m_magsqCount == 0 ? 1e-10 : m_magsqSum / m_magsqCount;
-        m_magsq = avg;
-        peak = m_magsqPeak == 0.0 ? 1e-10 : m_magsqPeak;
+        if (m_magsqCount > 0)
+        {
+            m_magsq = m_magsqSum / m_magsqCount;
+            m_magSqLevelStore.m_magsq = m_magsq;
+            m_magSqLevelStore.m_magsqPeak = m_magsqPeak;
+        }
+
+        avg = m_magSqLevelStore.m_magsq;
+        peak = m_magSqLevelStore.m_magsqPeak;
         nbSamples = m_magsqCount == 0 ? 1 : m_magsqCount;
+
         m_magsqSum = 0.0f;
         m_magsqPeak = 0.0f;
         m_magsqCount = 0;
     }
 
-    bool isAudioNetSinkRTPCapable() const;
-
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
 private:
+    struct MagSqLevelsStore
+    {
+        MagSqLevelsStore() :
+            m_magsq(1e-12),
+            m_magsqPeak(1e-12)
+        {}
+        double m_magsq;
+        double m_magsqPeak;
+    };
+
 	enum RateState {
 		RSInitialFill,
 		RSRunning
@@ -177,6 +196,8 @@ private:
     int m_inputSampleRate;
     int m_inputFrequencyOffset;
 	NFMDemodSettings m_settings;
+	uint32_t m_audioSampleRate;
+	float m_discriCompensation; //!< compensation factor that depends on audio rate (1 for 48 kS/s)
 	bool m_running;
 
 	NCO m_nco;
@@ -191,7 +212,6 @@ private:
 	int m_sampleCount;
 	int m_squelchCount;
 	int m_squelchGate;
-	bool m_audioMute;
 
 	Real m_squelchLevel;
 	bool m_squelchOpen;
@@ -200,23 +220,16 @@ private:
 	double m_magsqSum;
 	double m_magsqPeak;
     int  m_magsqCount;
+    MagSqLevelsStore m_magSqLevelStore;
 
-	Real m_lastArgument;
-	//Complex m_m1Sample;
-	//Complex m_m2Sample;
 	MovingAverageUtil<Real, double, 32> m_movingAverage;
 	AFSquelch m_afSquelch;
 	Real m_agcLevel; // AGC will aim to  this level
-	Real m_agcFloor; // AGC will not go below this level
-
-	Real m_fmExcursion;
-	//Real m_fmScaling;
+	DoubleBufferFIFO<Real> m_squelchDelayLine;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
-
 	AudioFifo m_audioFifo;
-    AudioNetSink *m_audioNetSink;
 
 	QMutex m_settingsMutex;
 
@@ -227,7 +240,9 @@ private:
 //    void apply(bool force = false);
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const NFMDemodSettings& settings, bool force = false);
+    void applyAudioSampleRate(int sampleRate);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMDemodSettings& settings);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 };
 
 #endif // INCLUDE_NFMDEMOD_H

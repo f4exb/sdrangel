@@ -1,7 +1,9 @@
 #ifndef INCLUDE_AMDEMODGUI_H
 #define INCLUDE_AMDEMODGUI_H
 
-#include <plugin/plugininstancegui.h>
+#include <QIcon>
+
+#include "plugin/plugininstancegui.h"
 #include "gui/rollupwidget.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
@@ -50,8 +52,12 @@ private:
 
 	AMDemod* m_amDemod;
 	bool m_squelchOpen;
+	bool m_samUSB;
 	uint32_t m_tickCount;
 	MessageQueue m_inputMessageQueue;
+
+    QIcon m_iconDSBUSB;
+    QIcon m_iconDSBLSB;
 
 	explicit AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~AMDemodGUI();
@@ -59,21 +65,24 @@ private:
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
 	void displaySettings();
-	void displayUDPAddress();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
 
 private slots:
 	void on_deltaFrequency_changed(qint64 value);
+	void on_pll_toggled(bool checked);
+	void on_ssb_toggled(bool checked);
 	void on_bandpassEnable_toggled(bool checked);
 	void on_rfBW_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
 	void on_audioMute_toggled(bool checked);
-    void on_copyAudioToUDP_toggled(bool copy);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
+    void handleInputMessages();
+    void audioSelect();
+    void samSSBSelect();
 	void tick();
 };
 

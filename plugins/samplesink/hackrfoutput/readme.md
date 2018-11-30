@@ -20,7 +20,7 @@ Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Red square icon: device is running and can be stopped
-  - Magenta (or pink) square icon: an error occured. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
+  - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
 
 If you have the Rx open in another tab and it is running then it will be stopped automatically before the Tx starts. In a similar manner the Tx will be stopped before the Rx is started from the Rx tab.
 
@@ -52,6 +52,7 @@ The baseband stream is interpolated by this value before being sent to the HackR
   - **8**: multiply baseband stream sample rate by 8
   - **16**: multiply baseband stream sample rate by 16
   - **32**: multiply baseband stream sample rate by 32
+  - **64**: multiply baseband stream sample rate by 64
 
 The main samples buffer is based on the baseband sample rate and will introduce ~500ms delay for interpolation by 16 or lower and ~1s for interpolation by 32.  
 
@@ -74,7 +75,7 @@ According to HackRF documentation the output power when the PA is engaged and th
 
 This is the HackRF device DAC sample rate in S/s.
 
-Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>9: Tx filter bandwidth</h3>
 

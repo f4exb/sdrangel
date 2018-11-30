@@ -150,7 +150,7 @@ void DVSerialEngine::getComList()
     const char* sysdir = "/sys/class/tty/";
 
     // Scan through /sys/class/tty - it contains all tty-devices in the system
-    n = scandir(sysdir, &namelist, NULL, NULL);
+    n = scandir(sysdir, &namelist, NULL, alphasort);
     if (n < 0)
         perror("scandir");
     else
@@ -253,6 +253,7 @@ void DVSerialEngine::pushMbeFrame(
         int mbeVolumeIndex,
         unsigned char channels,
         bool useLP,
+        int upsampling,
         AudioFifo *audioFifo)
 {
     std::vector<DVSerialController>::iterator it = m_controllers.begin();
@@ -264,7 +265,7 @@ void DVSerialEngine::pushMbeFrame(
     {
         if (it->worker->hasFifo(audioFifo))
         {
-            it->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useLP, audioFifo);
+            it->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useLP, upsampling, audioFifo);
             done = true;
         }
         else if (it->worker->isAvailable())
@@ -282,7 +283,7 @@ void DVSerialEngine::pushMbeFrame(
             int wNum = itAvail - m_controllers.begin();
 
             qDebug("DVSerialEngine::pushMbeFrame: push %p on empty queue %d", audioFifo, wNum);
-            itAvail->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useLP, audioFifo);
+            itAvail->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useLP, upsampling, audioFifo);
         }
         else
         {

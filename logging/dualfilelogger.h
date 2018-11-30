@@ -13,6 +13,8 @@
 #include "logger.h"
 #include "filelogger.h"
 
+#include "export.h"
+
 namespace qtwebapp {
 
 /**
@@ -21,7 +23,7 @@ namespace qtwebapp {
   @see FileLogger for a description of the two underlying loggers.
 */
 
-class DECLSPEC DualFileLogger : public Logger {
+class LOGGING_API DualFileLogger : public Logger {
     Q_OBJECT
     Q_DISABLE_COPY(DualFileLogger)
 public:

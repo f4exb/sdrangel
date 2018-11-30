@@ -49,7 +49,7 @@ FileSinkGui::FileSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_startingTimeStamp(0),
 	m_samplesCount(0),
 	m_tickCount(0),
-	m_lastEngineState((DSPDeviceSinkEngine::State)-1)
+	m_lastEngineState(DSPDeviceSinkEngine::StNotStarted)
 {
 	ui->setupUi(this);
 
@@ -287,7 +287,7 @@ void FileSinkGui::on_startStop_toggled(bool checked)
 void FileSinkGui::on_showFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Save I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"));
+        tr("Save I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"), 0, QFileDialog::DontUseNativeDialog);
 
 	if (fileName != "")
 	{
@@ -322,7 +322,7 @@ void FileSinkGui::updateWithStreamTime()
 	QTime t(0, 0, 0, 0);
 	t = t.addSecs(t_sec);
 	t = t.addMSecs(t_msec);
-	QString s_timems = t.toString("hh:mm:ss.zzz");
+	QString s_timems = t.toString("HH:mm:ss.zzz");
 	ui->relTimeText->setText(s_timems);
 }
 

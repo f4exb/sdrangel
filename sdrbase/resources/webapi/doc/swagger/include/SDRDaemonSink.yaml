@@ -1,0 +1,40 @@
+SDRdaemonSinkSettings:
+  description: SDRdaemonSink
+  properties:
+    centerFrequency:
+      type: integer
+      format: uint64
+    sampleRate:
+      type: integer
+    txDelay:
+      description: minimum delay in ms between two consecutive packets sending
+      type: number
+      format: float
+    nbFECBlocks:
+      type: integer
+    apiAddress:
+      type: string
+    apiPort:
+      type: integer
+    dataAddress:
+      type: string
+    dataPort:
+      type: integer
+    deviceIndex:
+      device: remote SDRangel instance deviceset index
+      type: integer
+    channelIndex:
+      device: remote SDRangel instance channel index
+      type: integer
+
+SDRdaemonSinkReport:
+  description: SDRdaemonSource
+  properties:
+    bufferRWBalance:
+      description: ratio off the mid buffer (positive read leads)
+      type: number
+      format: float
+    sampleCount:
+      description: count of samples that have been sent
+      type: integer
+ 

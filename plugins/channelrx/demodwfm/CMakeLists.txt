@@ -1,5 +1,7 @@
 project(wfm)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(wfm_SOURCES
 	wfmdemod.cpp
 	wfmdemodgui.cpp
@@ -21,6 +23,7 @@ set(wfm_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client		
 )
 
 #include(${QT_USE_FILE})
@@ -43,6 +46,6 @@ target_link_libraries(demodwfm
 	sdrgui
 )
 
-qt5_use_modules(demodwfm Core Widgets)
+target_link_libraries(demodwfm Qt5::Core Qt5::Widgets)
 
 install(TARGETS demodwfm DESTINATION lib/plugins/channelrx)

@@ -82,6 +82,6 @@ target_link_libraries(inputlimesdr
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputlimesdr Core Widgets)
+target_link_libraries(inputlimesdr Qt5::Core Qt5::Widgets)
 
 install(TARGETS inputlimesdr DESTINATION lib/plugins/samplesource)

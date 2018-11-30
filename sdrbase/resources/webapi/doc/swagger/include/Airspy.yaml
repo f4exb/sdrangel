@@ -1,0 +1,50 @@
+AirspySettings:
+  description: Airspy
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    LOppmTenths:
+      type: integer
+    devSampleRateIndex:
+      type: integer
+    lnaGain:
+      type: integer
+    mixerGain:
+      type: integer
+    vgaGain:
+      type: integer
+    lnaAGC:
+      description: LNA AGC (1 if active else 0)
+      type: integer
+    mixerAGC:
+      description: Mixer AGC (1 if active else 0)
+      type: integer
+    log2Decim:
+      type: integer
+    fcPos:
+      description: 0=Infra 1=Supra 2=Center
+      type: integer
+    biasT:
+      description: Bias tee (1 if active else 0)
+      type: integer
+    dcBlock:
+      type: integer
+    iqCorrection:
+      type: integer
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64      
+    fileRecordName:
+      type: string
+      
+AirspyReport:
+  description: Airspy
+  properties:
+    sampleRates:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/SampleRate"  
+      

@@ -14,12 +14,18 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <sys/time.h>
 #include <string.h>
 #include <errno.h>
 #include <QDebug>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QJsonParseError>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGSDRdaemonSinkReport.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -28,30 +34,45 @@
 
 #include "device/devicesinkapi.h"
 
-#include "sdrdaemonsinkgui.h"
 #include "sdrdaemonsinkoutput.h"
 #include "sdrdaemonsinkthread.h"
 
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkWork, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgReportSDRdaemonSinkStreamTiming, Message)
+
+const uint32_t SDRdaemonSinkOutput::NbSamplesForRateCorrection = 5000000;
 
 SDRdaemonSinkOutput::SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
+	m_centerFrequency(0),
     m_sdrDaemonSinkThread(0),
 	m_deviceDescription("SDRdaemonSink"),
     m_startingTimeStamp(0),
-	m_masterTimer(deviceAPI->getMasterTimer())
+	m_masterTimer(deviceAPI->getMasterTimer()),
+	m_tickCount(0),
+    m_tickMultiplier(20),
+	m_lastRemoteSampleCount(0),
+	m_lastSampleCount(0),
+	m_lastRemoteTimestampRateCorrection(0),
+	m_lastTimestampRateCorrection(0),
+	m_lastQueueLength(-2),
+	m_nbRemoteSamplesSinceRateCorrection(0),
+	m_nbSamplesSinceRateCorrection(0),
+	m_chunkSizeCorrection(0)
 {
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    connect(&m_masterTimer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
 SDRdaemonSinkOutput::~SDRdaemonSinkOutput()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 	stop();
+	delete m_networkManager;
 }
 
 void SDRdaemonSinkOutput::destroy()
@@ -64,21 +85,20 @@ bool SDRdaemonSinkOutput::start()
 	QMutexLocker mutexLocker(&m_mutex);
 	qDebug() << "SDRdaemonSinkOutput::start";
 
-	if((m_sdrDaemonSinkThread = new SDRdaemonSinkThread(&m_sampleSourceFifo)) == 0)
-	{
-	    qCritical("out of memory");
-		stop();
-		return false;
-	}
-	m_sdrDaemonSinkThread->setRemoteAddress(m_settings.m_address, m_settings.m_dataPort);
-	m_sdrDaemonSinkThread->setCenterFrequency(m_settings.m_centerFrequency);
+	m_sdrDaemonSinkThread = new SDRdaemonSinkThread(&m_sampleSourceFifo);
+	m_sdrDaemonSinkThread->setDataAddress(m_settings.m_dataAddress, m_settings.m_dataPort);
 	m_sdrDaemonSinkThread->setSamplerate(m_settings.m_sampleRate);
 	m_sdrDaemonSinkThread->setNbBlocksFEC(m_settings.m_nbFECBlocks);
 	m_sdrDaemonSinkThread->connectTimer(m_masterTimer);
 	m_sdrDaemonSinkThread->startWork();
 
-    double delay = ((127*127*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
-    m_sdrDaemonSinkThread->setTxDelay((int) (delay*1e6));
+	// restart auto rate correction
+	m_lastRemoteTimestampRateCorrection = 0;
+	m_lastTimestampRateCorrection = 0;
+	m_lastQueueLength = -2; // set first value out of bounds
+	m_chunkSizeCorrection = 0;
+
+    m_sdrDaemonSinkThread->setTxDelay(m_settings.m_txDelay);
 
 	mutexLocker.unlock();
 	//applySettings(m_generalSettings, m_settings, true);
@@ -144,22 +164,7 @@ int SDRdaemonSinkOutput::getSampleRate() const
 
 quint64 SDRdaemonSinkOutput::getCenterFrequency() const
 {
-	return m_settings.m_centerFrequency;
-}
-
-void SDRdaemonSinkOutput::setCenterFrequency(qint64 centerFrequency)
-{
-    SDRdaemonSinkSettings settings = m_settings;
-    settings.m_centerFrequency = centerFrequency;
-
-    MsgConfigureSDRdaemonSink* message = MsgConfigureSDRdaemonSink::create(settings, false);
-    m_inputMessageQueue.push(message);
-
-    if (m_guiMessageQueue)
-    {
-        MsgConfigureSDRdaemonSink* messageToGUI = MsgConfigureSDRdaemonSink::create(settings, false);
-        m_guiMessageQueue->push(messageToGUI);
-    }
+	return m_centerFrequency;
 }
 
 std::time_t SDRdaemonSinkOutput::getStartingTimeStamp() const
@@ -206,29 +211,15 @@ bool SDRdaemonSinkOutput::handleMessage(const Message& message)
             if (m_deviceAPI->initGeneration())
             {
                 m_deviceAPI->startGeneration();
-                DSPEngine::instance()->startAudioInput();
             }
         }
         else
         {
             m_deviceAPI->stopGeneration();
-            DSPEngine::instance()->stopAudioInput();
         }
 
         return true;
     }
-	else if (MsgConfigureSDRdaemonSinkStreamTiming::match(message))
-	{
-        MsgReportSDRdaemonSinkStreamTiming *report;
-
-		if (m_sdrDaemonSinkThread != 0 && getMessageQueueToGUI())
-		{
-			report = MsgReportSDRdaemonSinkStreamTiming::create(m_sdrDaemonSinkThread->getSamplesCount());
-			getMessageQueueToGUI()->push(report);
-		}
-
-		return true;
-	}
 	else if (MsgConfigureSDRdaemonSinkChunkCorrection::match(message))
 	{
 	    MsgConfigureSDRdaemonSinkChunkCorrection& conf = (MsgConfigureSDRdaemonSinkChunkCorrection&) message;
@@ -252,55 +243,30 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
     bool forwardChange = false;
     bool changeTxDelay = false;
 
-    if (force || (m_settings.m_address != settings.m_address) || (m_settings.m_dataPort != settings.m_dataPort))
+    if (force || (m_settings.m_dataAddress != settings.m_dataAddress) || (m_settings.m_dataPort != settings.m_dataPort))
     {
-        m_settings.m_address = settings.m_address;
-        m_settings.m_dataPort = settings.m_dataPort;
-
-        if (m_sdrDaemonSinkThread != 0)
-        {
-            m_sdrDaemonSinkThread->setRemoteAddress(m_settings.m_address, m_settings.m_dataPort);
+        if (m_sdrDaemonSinkThread != 0) {
+            m_sdrDaemonSinkThread->setDataAddress(settings.m_dataAddress, settings.m_dataPort);
         }
-    }
-
-    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency))
-    {
-        m_settings.m_centerFrequency = settings.m_centerFrequency;
-
-        if (m_sdrDaemonSinkThread != 0)
-        {
-            m_sdrDaemonSinkThread->setCenterFrequency(m_settings.m_centerFrequency);
-        }
-
-        forwardChange = true;
     }
 
     if (force || (m_settings.m_sampleRate != settings.m_sampleRate))
     {
-        m_settings.m_sampleRate = settings.m_sampleRate;
-
-        if (m_sdrDaemonSinkThread != 0)
-        {
-            m_sdrDaemonSinkThread->setSamplerate(m_settings.m_sampleRate);
+        if (m_sdrDaemonSinkThread != 0) {
+            m_sdrDaemonSinkThread->setSamplerate(settings.m_sampleRate);
         }
+
+        m_tickMultiplier = (21*NbSamplesForRateCorrection) / (2*settings.m_sampleRate); // two times per sample filling period plus small extension
+        m_tickMultiplier = m_tickMultiplier < 20 ? 20 : m_tickMultiplier; // not below half a second
 
         forwardChange = true;
         changeTxDelay = true;
     }
 
-    if (force || (m_settings.m_log2Interp != settings.m_log2Interp))
-    {
-        m_settings.m_log2Interp = settings.m_log2Interp;
-        forwardChange = true;
-    }
-
     if (force || (m_settings.m_nbFECBlocks != settings.m_nbFECBlocks))
     {
-        m_settings.m_nbFECBlocks = settings.m_nbFECBlocks;
-
-        if (m_sdrDaemonSinkThread != 0)
-        {
-            m_sdrDaemonSinkThread->setNbBlocksFEC(m_settings.m_nbFECBlocks);
+        if (m_sdrDaemonSinkThread != 0) {
+            m_sdrDaemonSinkThread->setNbBlocksFEC(settings.m_nbFECBlocks);
         }
 
         changeTxDelay = true;
@@ -308,40 +274,34 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 
     if (force || (m_settings.m_txDelay != settings.m_txDelay))
     {
-        m_settings.m_txDelay = settings.m_txDelay;
         changeTxDelay = true;
     }
 
     if (changeTxDelay)
     {
-        double delay = ((127*127*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
-        qDebug("SDRdaemonSinkOutput::applySettings: Tx delay: %f us", delay*1e6);
-
-        if (m_sdrDaemonSinkThread != 0)
-        {
-            // delay is calculated as a fraction of the nominal UDP block process time
-            // frame size: 127 * 127 samples
-            // divided by sample rate gives the frame process time
-            // divided by the number of actual blocks including FEC blocks gives the block (i.e. UDP block) process time
-            m_sdrDaemonSinkThread->setTxDelay((int) (delay*1e6));
+        if (m_sdrDaemonSinkThread != 0) {
+            m_sdrDaemonSinkThread->setTxDelay(settings.m_txDelay);
         }
     }
 
     mutexLocker.unlock();
 
-    qDebug("SDRdaemonSinkOutput::applySettings: %s m_centerFrequency: %llu m_sampleRate: %llu m_log2Interp: %d m_txDelay: %f m_nbFECBlocks: %d",
-            forwardChange ? "forward change" : "",
-            m_settings.m_centerFrequency,
-            m_settings.m_sampleRate,
-            m_settings.m_log2Interp,
-            m_settings.m_txDelay,
-            m_settings.m_nbFECBlocks);
+    qDebug() << "SDRdaemonSinkOutput::applySettings:"
+            << " m_sampleRate: " << settings.m_sampleRate
+            << " m_txDelay: " << settings.m_txDelay
+            << " m_nbFECBlocks: " << settings.m_nbFECBlocks
+            << " m_apiAddress: " << settings.m_apiAddress
+            << " m_apiPort: " << settings.m_apiPort
+            << " m_dataAddress: " << settings.m_dataAddress
+            << " m_dataPort: " << settings.m_dataPort;
 
     if (forwardChange)
     {
-        DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate, m_settings.m_centerFrequency);
+        DSPSignalNotification *notif = new DSPSignalNotification(settings.m_sampleRate, m_centerFrequency);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
+
+    m_settings = settings;
 }
 
 int SDRdaemonSinkOutput::webapiRunGet(
@@ -370,4 +330,230 @@ int SDRdaemonSinkOutput::webapiRun(
     return 200;
 }
 
+int SDRdaemonSinkOutput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setSdrDaemonSinkSettings(new SWGSDRangel::SWGSDRdaemonSinkSettings());
+    response.getSdrDaemonSinkSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
 
+int SDRdaemonSinkOutput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    SDRdaemonSinkSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("sampleRate")) {
+        settings.m_sampleRate = response.getSdrDaemonSinkSettings()->getSampleRate();
+    }
+    if (deviceSettingsKeys.contains("txDelay")) {
+        settings.m_txDelay = response.getSdrDaemonSinkSettings()->getTxDelay();
+    }
+    if (deviceSettingsKeys.contains("nbFECBlocks")) {
+        settings.m_nbFECBlocks = response.getSdrDaemonSinkSettings()->getNbFecBlocks();
+    }
+    if (deviceSettingsKeys.contains("apiAddress")) {
+        settings.m_apiAddress = *response.getSdrDaemonSinkSettings()->getApiAddress();
+    }
+    if (deviceSettingsKeys.contains("apiPort")) {
+        settings.m_apiPort = response.getSdrDaemonSinkSettings()->getApiPort();
+    }
+    if (deviceSettingsKeys.contains("dataAddress")) {
+        settings.m_dataAddress = *response.getSdrDaemonSinkSettings()->getDataAddress();
+    }
+    if (deviceSettingsKeys.contains("dataPort")) {
+        settings.m_dataPort = response.getSdrDaemonSinkSettings()->getDataPort();
+    }
+    if (deviceSettingsKeys.contains("deviceIndex")) {
+        settings.m_deviceIndex = response.getSdrDaemonSinkSettings()->getDeviceIndex();
+    }
+    if (deviceSettingsKeys.contains("channelIndex")) {
+        settings.m_channelIndex = response.getSdrDaemonSinkSettings()->getChannelIndex();
+    }
+
+    MsgConfigureSDRdaemonSink *msg = MsgConfigureSDRdaemonSink::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureSDRdaemonSink *msgToGUI = MsgConfigureSDRdaemonSink::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+int SDRdaemonSinkOutput::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setSdrDaemonSinkReport(new SWGSDRangel::SWGSDRdaemonSinkReport());
+    response.getSdrDaemonSinkReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
+
+void SDRdaemonSinkOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRdaemonSinkSettings& settings)
+{
+    response.getSdrDaemonSinkSettings()->setCenterFrequency(m_centerFrequency);
+    response.getSdrDaemonSinkSettings()->setSampleRate(settings.m_sampleRate);
+    response.getSdrDaemonSinkSettings()->setTxDelay(settings.m_txDelay);
+    response.getSdrDaemonSinkSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
+    response.getSdrDaemonSinkSettings()->setApiAddress(new QString(settings.m_apiAddress));
+    response.getSdrDaemonSinkSettings()->setApiPort(settings.m_apiPort);
+    response.getSdrDaemonSinkSettings()->setDataAddress(new QString(settings.m_dataAddress));
+    response.getSdrDaemonSinkSettings()->setDataPort(settings.m_dataPort);
+    response.getSdrDaemonSinkSettings()->setDeviceIndex(settings.m_deviceIndex);
+    response.getSdrDaemonSinkSettings()->setChannelIndex(settings.m_channelIndex);
+}
+
+void SDRdaemonSinkOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    struct timeval tv;
+    response.getSdrDaemonSinkReport()->setBufferRwBalance(m_sampleSourceFifo.getRWBalance());
+    response.getSdrDaemonSinkReport()->setSampleCount(m_sdrDaemonSinkThread ? (int) m_sdrDaemonSinkThread->getSamplesCount(tv) : 0);
+}
+
+void SDRdaemonSinkOutput::tick()
+{
+    if (++m_tickCount == m_tickMultiplier)
+    {
+        QString reportURL;
+
+        reportURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/report")
+                .arg(m_settings.m_apiAddress)
+                .arg(m_settings.m_apiPort)
+                .arg(m_settings.m_deviceIndex)
+                .arg(m_settings.m_channelIndex);
+
+        m_networkRequest.setUrl(QUrl(reportURL));
+        m_networkManager->get(m_networkRequest);
+
+        m_tickCount = 0;
+    }
+}
+
+void SDRdaemonSinkOutput::networkManagerFinished(QNetworkReply *reply)
+{
+    if (reply->error())
+    {
+        qInfo("SDRdaemonSinkOutput::networkManagerFinished: error: %s", qPrintable(reply->errorString()));
+        return;
+    }
+
+    QString answer = reply->readAll();
+
+    try
+    {
+        QByteArray jsonBytes(answer.toStdString().c_str());
+        QJsonParseError error;
+        QJsonDocument doc = QJsonDocument::fromJson(jsonBytes, &error);
+
+        if (error.error == QJsonParseError::NoError)
+        {
+            analyzeApiReply(doc.object());
+        }
+        else
+        {
+            QString errorMsg = QString("Reply JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
+            qInfo().noquote() << "SDRdaemonSinkOutput::networkManagerFinished" << errorMsg;
+        }
+    }
+    catch (const std::exception& ex)
+    {
+        QString errorMsg = QString("Error parsing request: ") + ex.what();
+        qInfo().noquote() << "SDRdaemonSinkOutput::networkManagerFinished" << errorMsg;
+    }
+}
+
+void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject)
+{
+    if (jsonObject.contains("DaemonSourceReport"))
+    {
+        QJsonObject report = jsonObject["DaemonSourceReport"].toObject();
+        m_centerFrequency = report["deviceCenterFreq"].toInt() * 1000;
+
+        if (!m_sdrDaemonSinkThread) {
+            return;
+        }
+
+        int queueSize = report["queueSize"].toInt();
+        queueSize = queueSize == 0 ? 10 : queueSize;
+        int queueLength = report["queueLength"].toInt();
+        int queueLengthPercent = (queueLength*100)/queueSize;
+        uint64_t remoteTimestampUs = report["tvSec"].toInt()*1000000ULL + report["tvUSec"].toInt();
+
+        uint32_t remoteSampleCountDelta, remoteSampleCount;
+        remoteSampleCount = report["samplesCount"].toInt();
+
+        if (remoteSampleCount < m_lastRemoteSampleCount) {
+            remoteSampleCountDelta = (0xFFFFFFFFU - m_lastRemoteSampleCount) + remoteSampleCount + 1;
+        } else {
+            remoteSampleCountDelta = remoteSampleCount - m_lastRemoteSampleCount;
+        }
+
+        uint32_t sampleCountDelta, sampleCount;
+        struct timeval tv;
+        sampleCount = m_sdrDaemonSinkThread->getSamplesCount(tv);
+
+        if (sampleCount < m_lastSampleCount) {
+            sampleCountDelta = (0xFFFFFFFFU - m_lastSampleCount) + sampleCount + 1;
+        } else {
+            sampleCountDelta = sampleCount - m_lastSampleCount;
+        }
+
+        uint64_t timestampUs = tv.tv_sec*1000000ULL + tv.tv_usec;
+
+        // on initial state wait for queue stabilization
+        if ((m_lastRemoteTimestampRateCorrection == 0) && (queueLength >= m_lastQueueLength-1) && (queueLength <= m_lastQueueLength+1))
+        {
+            m_lastRemoteTimestampRateCorrection = remoteTimestampUs;
+            m_lastTimestampRateCorrection = timestampUs;
+            m_nbRemoteSamplesSinceRateCorrection = 0;
+            m_nbSamplesSinceRateCorrection = 0;
+        }
+        else
+        {
+            m_nbRemoteSamplesSinceRateCorrection += remoteSampleCountDelta;
+            m_nbSamplesSinceRateCorrection += sampleCountDelta;
+
+            qDebug("SDRdaemonSinkOutput::analyzeApiReply: queueLengthPercent: %d m_nbSamplesSinceRateCorrection: %u",
+                queueLengthPercent,
+                m_nbRemoteSamplesSinceRateCorrection);
+
+            if (m_nbRemoteSamplesSinceRateCorrection > NbSamplesForRateCorrection)
+            {
+                sampleRateCorrection(remoteTimestampUs - m_lastRemoteTimestampRateCorrection,
+                        timestampUs - m_lastTimestampRateCorrection,
+                        m_nbRemoteSamplesSinceRateCorrection,
+                        m_nbSamplesSinceRateCorrection);
+                m_lastRemoteTimestampRateCorrection = remoteTimestampUs;
+                m_lastTimestampRateCorrection = timestampUs;
+                m_nbRemoteSamplesSinceRateCorrection = 0;
+                m_nbSamplesSinceRateCorrection = 0;
+            }
+        }
+
+        m_lastRemoteSampleCount = remoteSampleCount;
+        m_lastSampleCount = sampleCount;
+        m_lastQueueLength = queueLength;
+    }
+}
+
+void SDRdaemonSinkOutput::sampleRateCorrection(double remoteTimeDeltaUs, double timeDeltaUs, uint32_t remoteSampleCount, uint32_t sampleCount)
+{
+    double deltaSR = (remoteSampleCount/remoteTimeDeltaUs) - (sampleCount/timeDeltaUs);
+    double chunkCorr = 50000 * deltaSR; // for 50ms chunk intervals (50000us)
+    m_chunkSizeCorrection += roundf(chunkCorr);
+
+    qDebug("SDRdaemonSinkOutput::sampleRateCorrection: %d (%f) samples", m_chunkSizeCorrection, chunkCorr);
+
+    MsgConfigureSDRdaemonSinkChunkCorrection* message = MsgConfigureSDRdaemonSinkChunkCorrection::create(m_chunkSizeCorrection);
+    getInputMessageQueue()->push(message);
+}

@@ -27,13 +27,18 @@
 #include "util/movingaverage.h"
 #include "dsp/agc.h"
 #include "dsp/bandpass.h"
+#include "dsp/lowpass.h"
+#include "dsp/phaselockcomplex.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
+#include "util/doublebufferfifo.h"
+
 #include "amdemodsettings.h"
 
 class DeviceSourceAPI;
 class DownChannelizer;
 class ThreadedBasebandSampleSink;
+class fftfilt;
 
 class AMDemod : public BasebandSampleSink, public ChannelSinkAPI {
 	Q_OBJECT
@@ -100,23 +105,58 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage);
+
+    uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
 	double getMagSq() const { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }
+	bool getPllLocked() const { return m_settings.m_pll && m_pll.locked(); }
+	Real getPllFrequency() const { return m_pll.getFreq(); }
 
-	void getMagSqLevels(double& avg, double& peak, int& nbSamples)
-	{
-	    avg = m_magsqCount == 0 ? 1e-10 : m_magsqSum / m_magsqCount;
-	    peak = m_magsqPeak == 0.0 ? 1e-10 : m_magsqPeak;
-	    nbSamples = m_magsqCount == 0 ? 1 : m_magsqCount;
-	    m_magsqSum = 0.0f;
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
+    {
+        if (m_magsqCount > 0)
+        {
+            m_magsq = m_magsqSum / m_magsqCount;
+            m_magSqLevelStore.m_magsq = m_magsq;
+            m_magSqLevelStore.m_magsqPeak = m_magsqPeak;
+        }
+
+        avg = m_magSqLevelStore.m_magsq;
+        peak = m_magSqLevelStore.m_magsqPeak;
+        nbSamples = m_magsqCount == 0 ? 1 : m_magsqCount;
+
+        m_magsqSum = 0.0f;
         m_magsqPeak = 0.0f;
         m_magsqCount = 0;
-	}
+    }
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
 private:
+    struct MagSqLevelsStore
+    {
+        MagSqLevelsStore() :
+            m_magsq(1e-12),
+            m_magsqPeak(1e-12)
+        {}
+        double m_magsq;
+        double m_magsqPeak;
+    };
+
 	enum RateState {
 		RSInitialFill,
 		RSRunning
@@ -129,6 +169,7 @@ private:
     int m_inputSampleRate;
     int m_inputFrequencyOffset;
     AMDemodSettings m_settings;
+    uint32_t m_audioSampleRate;
     bool m_running;
 
 	NCO m_nco;
@@ -139,19 +180,27 @@ private:
 	Real m_squelchLevel;
 	uint32_t m_squelchCount;
 	bool m_squelchOpen;
+	DoubleBufferFIFO<Real> m_squelchDelayLine;
 	double m_magsq;
 	double m_magsqSum;
 	double m_magsqPeak;
 	int  m_magsqCount;
+	MagSqLevelsStore m_magSqLevelStore;
 
 	MovingAverageUtil<Real, double, 16> m_movingAverage;
-	SimpleAGC<4096> m_volumeAGC;
+	SimpleAGC<4800> m_volumeAGC;
     Bandpass<Real> m_bandpass;
+    Lowpass<std::complex<float> > m_pllFilt;
+    PhaseLockComplex m_pll;
+    fftfilt* DSBFilter;
+    fftfilt* SSBFilter;
+    Real m_syncAMBuff[2*1024];
+    uint32_t m_syncAMBuffIndex;
+    MagAGC m_syncAMAGC;
 
 	AudioVector m_audioBuffer;
 	uint32_t m_audioBufferFill;
 	AudioFifo m_audioFifo;
-    UDPSink<qint16> *m_udpBufferAudio;
 
     static const int m_udpBlockSize;
 
@@ -159,83 +208,11 @@ private:
 
 	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const AMDemodSettings& settings, bool force = false);
+    void applyAudioSampleRate(int sampleRate);
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const AMDemodSettings& settings);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 
-	void processOneSample(Complex &ci)
-	{
-	    Real re = ci.real() / SDR_RX_SCALED;
-	    Real im = ci.imag() / SDR_RX_SCALED;
-        Real magsq = re*re + im*im;
-        m_movingAverage(magsq);
-        m_magsq = m_movingAverage.asDouble();
-        m_magsqSum += magsq;
-
-        if (magsq > m_magsqPeak)
-        {
-            m_magsqPeak = magsq;
-        }
-
-        m_magsqCount++;
-
-        if (m_magsq >= m_squelchLevel)
-        {
-            if (m_squelchCount <= m_settings.m_audioSampleRate / 10)
-            {
-                m_squelchCount++;
-            }
-        }
-        else
-        {
-            if (m_squelchCount > 1)
-            {
-                m_squelchCount -= 2;
-            }
-        }
-
-        qint16 sample;
-
-        if ((m_squelchCount >= m_settings.m_audioSampleRate / 20) && !m_settings.m_audioMute)
-        {
-            Real demod = sqrt(magsq);
-            m_volumeAGC.feed(demod);
-            demod = (demod - m_volumeAGC.getValue()) / m_volumeAGC.getValue();
-
-            if (m_settings.m_bandpassEnable)
-            {
-                demod = m_bandpass.filter(demod);
-                demod /= 301.0f;
-            }
-
-            Real attack = (m_squelchCount - 0.05f * m_settings.m_audioSampleRate) / (0.05f * m_settings.m_audioSampleRate);
-            sample = demod * attack * 2048 * m_settings.m_volume;
-            if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(demod * attack * SDR_RX_SCALEF);
-
-            m_squelchOpen = true;
-        }
-        else
-        {
-            sample = 0;
-            if (m_settings.m_copyAudioToUDP) m_udpBufferAudio->write(0);
-            m_squelchOpen = false;
-        }
-
-        m_audioBuffer[m_audioBufferFill].l = sample;
-        m_audioBuffer[m_audioBufferFill].r = sample;
-        ++m_audioBufferFill;
-
-        if (m_audioBufferFill >= m_audioBuffer.size())
-        {
-            uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill, 10);
-
-            if (res != m_audioBufferFill)
-            {
-                qDebug("AMDemod::processOneSample: %u/%u audio samples written", res, m_audioBufferFill);
-                m_audioFifo.clear();
-            }
-
-            m_audioBufferFill = 0;
-        }
-	}
-
+    void processOneSample(Complex &ci);
 };
 
 #endif // INCLUDE_AMDEMOD_H

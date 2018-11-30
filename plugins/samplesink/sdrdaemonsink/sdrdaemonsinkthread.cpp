@@ -14,6 +14,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <sys/time.h>
 #include <stdio.h>
 #include <errno.h>
 #include <assert.h>
@@ -47,6 +48,7 @@ SDRdaemonSinkThread::~SDRdaemonSinkThread()
 void SDRdaemonSinkThread::startWork()
 {
 	qDebug() << "SDRdaemonSinkThread::startWork: ";
+	m_udpSinkFEC.start();
     m_maxThrottlems = 0;
     m_startWaitMutex.lock();
     m_elapsedTimer.start();
@@ -61,6 +63,7 @@ void SDRdaemonSinkThread::stopWork()
 	qDebug() << "SDRdaemonSinkThread::stopWork";
 	m_running = false;
 	wait();
+	m_udpSinkFEC.stop();
 }
 
 void SDRdaemonSinkThread::setSamplerate(int samplerate)
@@ -86,6 +89,7 @@ void SDRdaemonSinkThread::setSamplerate(int samplerate)
 
         m_samplerate = samplerate;
         m_samplesChunkSize = (m_samplerate * m_throttlems) / 1000;
+        m_udpSinkFEC.setSampleRate(m_samplerate);
 
         if (wasRunning) {
             startWork();
@@ -126,12 +130,6 @@ void SDRdaemonSinkThread::tick()
             m_throttleToggle = !m_throttleToggle;
         }
 
-//        if (m_throttlems > m_maxThrottlems)
-//        {
-//            qDebug("FileSinkThread::tick: m_maxThrottlems: %d", m_maxThrottlems);
-//            m_maxThrottlems = m_throttlems;
-//        }
-
         SampleVector::iterator readUntil;
 
         m_sampleFifo->readAdvance(readUntil, m_samplesChunkSize); // pull samples
@@ -139,43 +137,11 @@ void SDRdaemonSinkThread::tick()
         m_samplesCount += m_samplesChunkSize;
 
         m_udpSinkFEC.write(beginRead, m_samplesChunkSize);
-//        m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), m_samplesChunkSize*sizeof(Sample)); // send samples
-
-        // interpolation is done on the far side
-//        if (m_log2Interpolation == 0)
-//        {
-//            m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), m_samplesChunkSize*sizeof(Sample)); // send samples
-//        }
-//        else
-//        {
-//            int chunkSize = std::min((int) m_samplesChunkSize, m_samplerate);
-//
-//            switch (m_log2Interpolation)
-//            {
-//            case 1:
-//                m_interpolators.interpolate2_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-//                break;
-//            case 2:
-//                m_interpolators.interpolate4_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-//                break;
-//            case 3:
-//                m_interpolators.interpolate8_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-//                break;
-//            case 4:
-//                m_interpolators.interpolate16_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-//                break;
-//            case 5:
-//                m_interpolators.interpolate32_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-//                break;
-//            case 6:
-//                m_interpolators.interpolate64_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-//                break;
-//            default:
-//                break;
-//            }
-//
-//            m_ofstream->write(reinterpret_cast<char*>(m_buf), m_samplesChunkSize*(1<<m_log2Interpolation)*2*sizeof(int16_t)); // send samples
-//        }
-
 	}
+}
+
+uint32_t SDRdaemonSinkThread::getSamplesCount(struct timeval& tv) const
+{
+    gettimeofday(&tv, 0);
+    return m_samplesCount;
 }

@@ -23,6 +23,8 @@
 #include "SWGDeviceSettings.h"
 #include "SWGLimeSdrOutputSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGLimeSdrOutputReport.h"
 
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
@@ -111,9 +113,6 @@ bool LimeSDROutput::openDevice()
 
         // check if the requested channel is busy and abort if so (should not happen if device management is working correctly)
 
-        char *busyChannels = new char[deviceParams->m_nbTxChannels];
-        memset(busyChannels, 0, deviceParams->m_nbTxChannels);
-
         for (unsigned int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
         {
             DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
@@ -122,13 +121,11 @@ bool LimeSDROutput::openDevice()
             if (buddyShared->m_channel == requestedChannel)
             {
                 qCritical("LimeSDROutput::openDevice: cannot open busy channel %u", requestedChannel);
-                delete[] busyChannels;
                 return false;
             }
         }
 
         m_deviceShared.m_channel = requestedChannel; // acknowledge the requested channel
-        delete[] busyChannels;
     }
     // look for Rx buddies and get reference to common parameters
     // take the first Rx channel
@@ -370,20 +367,12 @@ bool LimeSDROutput::start()
         return false;
     }
 
-    applySettings(m_settings, true);
-
     // start / stop streaming is done in the thread.
 
-    if ((m_limeSDROutputThread = new LimeSDROutputThread(&m_streamId, &m_sampleSourceFifo)) == 0)
-    {
-        qCritical("LimeSDROutput::start: cannot create thread");
-        stop();
-        return false;
-    }
-    else
-    {
-        qDebug("LimeSDROutput::start: thread created");
-    }
+    m_limeSDROutputThread = new LimeSDROutputThread(&m_streamId, &m_sampleSourceFifo);
+    qDebug("LimeSDROutput::start: thread created");
+
+    applySettings(m_settings, true);
 
     m_limeSDROutputThread->setLog2Interpolation(m_settings.m_log2SoftInterp);
 
@@ -452,13 +441,13 @@ int LimeSDROutput::getSampleRate() const
 
 quint64 LimeSDROutput::getCenterFrequency() const
 {
-    return m_settings.m_centerFrequency;
+    return m_settings.m_centerFrequency + (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
 }
 
 void LimeSDROutput::setCenterFrequency(qint64 centerFrequency)
 {
     LimeSDROutputSettings settings = m_settings;
-    settings.m_centerFrequency = centerFrequency;
+    settings.m_centerFrequency = centerFrequency - (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
 
     MsgConfigureLimeSDR* message = MsgConfigureLimeSDR::create(settings, false);
     m_inputMessageQueue.push(message);
@@ -475,31 +464,28 @@ std::size_t LimeSDROutput::getChannelIndex()
     return m_deviceShared.m_channel;
 }
 
-void LimeSDROutput::getLORange(float& minF, float& maxF, float& stepF) const
+void LimeSDROutput::getLORange(float& minF, float& maxF) const
 {
     lms_range_t range = m_deviceShared.m_deviceParams->m_loRangeTx;
     minF = range.min;
     maxF = range.max;
-    stepF = range.step;
-    qDebug("LimeSDROutput::getLORange: min: %f max: %f step: %f", range.min, range.max, range.step);
+    qDebug("LimeSDROutput::getLORange: min: %f max: %f", range.min, range.max);
 }
 
-void LimeSDROutput::getSRRange(float& minF, float& maxF, float& stepF) const
+void LimeSDROutput::getSRRange(float& minF, float& maxF) const
 {
     lms_range_t range = m_deviceShared.m_deviceParams->m_srRangeTx;
     minF = range.min;
     maxF = range.max;
-    stepF = range.step;
-    qDebug("LimeSDROutput::getSRRange: min: %f max: %f step: %f", range.min, range.max, range.step);
+    qDebug("LimeSDROutput::getSRRange: min: %f max: %f", range.min, range.max);
 }
 
-void LimeSDROutput::getLPRange(float& minF, float& maxF, float& stepF) const
+void LimeSDROutput::getLPRange(float& minF, float& maxF) const
 {
     lms_range_t range = m_deviceShared.m_deviceParams->m_lpfRangeTx;
     minF = range.min;
     maxF = range.max;
-    stepF = range.step;
-    qDebug("LimeSDROutput::getLPRange: min: %f max: %f step: %f", range.min, range.max, range.step);
+    qDebug("LimeSDROutput::getLPRange: min: %f max: %f", range.min, range.max);
 }
 
 uint32_t LimeSDROutput::getHWLog2Interp() const
@@ -531,13 +517,11 @@ bool LimeSDROutput::handleMessage(const Message& message)
             if (m_deviceAPI->initGeneration())
             {
                 m_deviceAPI->startGeneration();
-                DSPEngine::instance()->startAudioInput();
             }
         }
         else
         {
             m_deviceAPI->stopGeneration();
-            DSPEngine::instance()->stopAudioInput();
         }
 
         return true;
@@ -606,9 +590,12 @@ bool LimeSDROutput::handleMessage(const Message& message)
         m_settings.m_extClock     = report.getExtClock();
         m_settings.m_extClockFreq = report.getExtClockFeq();
 
-        DeviceLimeSDRShared::MsgReportClockSourceChange *reportToGUI = DeviceLimeSDRShared::MsgReportClockSourceChange::create(
-                m_settings.m_extClock, m_settings.m_extClockFreq);
-        getMessageQueueToGUI()->push(reportToGUI);
+        if (getMessageQueueToGUI())
+        {
+            DeviceLimeSDRShared::MsgReportClockSourceChange *reportToGUI = DeviceLimeSDRShared::MsgReportClockSourceChange::create(
+                    m_settings.m_extClock, m_settings.m_extClockFreq);
+            getMessageQueueToGUI()->push(reportToGUI);
+        }
 
         return true;
     }
@@ -718,6 +705,10 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     bool doLPCalibration     = false;
     double clockGenFreq      = 0.0;
 //  QMutexLocker mutexLocker(&m_mutex);
+
+    qint64 deviceCenterFrequency = settings.m_centerFrequency;
+    deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
+    deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
 
     if (LMS_GetClockFreq(m_deviceShared.m_deviceParams->getDevice(), LMS_CLOCK_CGEN, &clockGenFreq) != 0)
     {
@@ -870,35 +861,35 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
                     settings.m_antennaPath))
             {
                 doCalibration = true;
-                qDebug("LimeSDRInput::applySettings: set antenna path to %d",
+                qDebug("LimeSDROutput::applySettings: set antenna path to %d",
                         (int) settings.m_antennaPath);
             }
             else
             {
-                qCritical("LimeSDRInput::applySettings: could not set antenna path to %d",
+                qCritical("LimeSDROutput::applySettings: could not set antenna path to %d",
                         (int) settings.m_antennaPath);
             }
         }
     }
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+        || (m_settings.m_transverterMode != settings.m_transverterMode)
+        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency)
+        || force)
     {
         forwardChangeTxDSP = true;
 
         if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
         {
-            if (LMS_SetLOFrequency(m_deviceShared.m_deviceParams->getDevice(),
-                    LMS_CH_TX,
-                    m_deviceShared.m_channel, // same for both channels anyway but switches antenna port automatically
-                    settings.m_centerFrequency) < 0)
+            if (LMS_SetClockFreq(m_deviceShared.m_deviceParams->getDevice(), LMS_CLOCK_SXT, deviceCenterFrequency) < 0)
             {
-                qCritical("LimeSDROutput::applySettings: could not set frequency to %lu", settings.m_centerFrequency);
+                qCritical("LimeSDROutput::applySettings: could not set frequency to %lld", deviceCenterFrequency);
             }
             else
             {
                 doCalibration = true;
-                m_deviceShared.m_centerFrequency = settings.m_centerFrequency; // for buddies
-                qDebug("LimeSDROutput::applySettings: frequency set to %lu", settings.m_centerFrequency);
+                m_deviceShared.m_centerFrequency = deviceCenterFrequency; // for buddies
+                qDebug("LimeSDROutput::applySettings: frequency set to %lld", deviceCenterFrequency);
             }
         }
     }
@@ -1084,6 +1075,9 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     QLocale loc;
 
     qDebug().noquote() << "LimeSDROutput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+            << " m_transverterMode: " << m_settings.m_transverterMode
+            << " m_transverterDeltaFrequency: " << m_settings.m_transverterDeltaFrequency
+            << " deviceCenterFrequency: " << deviceCenterFrequency
             << " device stream sample rate: " << loc.toString(m_settings.m_devSampleRate) << "S/s"
             << " sample rate with soft interpolation: " << loc.toString( m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp)) << "S/s"
             << " DAC sample rate with hard interpolation: " << loc.toString(m_settings.m_devSampleRate*(1<<m_settings.m_log2HardInterp)) << "S/s"
@@ -1163,6 +1157,12 @@ int LimeSDROutput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("ncoFrequency")) {
         settings.m_ncoFrequency = response.getLimeSdrOutputSettings()->getNcoFrequency();
     }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
+        settings.m_transverterDeltaFrequency = response.getLimeSdrOutputSettings()->getTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("transverterMode")) {
+        settings.m_transverterMode = response.getLimeSdrOutputSettings()->getTransverterMode() != 0;
+    }
 
     MsgConfigureLimeSDR *msg = MsgConfigureLimeSDR::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -1177,6 +1177,15 @@ int LimeSDROutput::webapiSettingsPutPatch(
     return 200;
 }
 
+int LimeSDROutput::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setLimeSdrOutputReport(new SWGSDRangel::SWGLimeSdrOutputReport());
+    response.getLimeSdrOutputReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
 void LimeSDROutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const LimeSDROutputSettings& settings)
 {
     response.getLimeSdrOutputSettings()->setAntennaPath((int) settings.m_antennaPath);
@@ -1192,6 +1201,8 @@ void LimeSDROutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     response.getLimeSdrOutputSettings()->setLpfFirbw(settings.m_lpfFIRBW);
     response.getLimeSdrOutputSettings()->setNcoEnable(settings.m_ncoEnable ? 1 : 0);
     response.getLimeSdrOutputSettings()->setNcoFrequency(settings.m_ncoFrequency);
+    response.getLimeSdrOutputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    response.getLimeSdrOutputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
 }
 
 int LimeSDROutput::webapiRunGet(
@@ -1218,4 +1229,37 @@ int LimeSDROutput::webapiRun(
     }
 
     return 200;
+}
+
+void LimeSDROutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    bool success = false;
+    double temp = 0.0;
+    lms_stream_status_t status;
+    status.active = false;
+    status.fifoFilledCount = 0;
+    status.fifoSize = 1;
+    status.underrun = 0;
+    status.overrun = 0;
+    status.droppedPackets = 0;
+    status.linkRate = 0.0;
+    status.timestamp = 0;
+
+    success = (m_streamId.handle && (LMS_GetStreamStatus(&m_streamId, &status) == 0));
+
+    response.getLimeSdrOutputReport()->setSuccess(success ? 1 : 0);
+    response.getLimeSdrOutputReport()->setStreamActive(status.active ? 1 : 0);
+    response.getLimeSdrOutputReport()->setFifoSize(status.fifoSize);
+    response.getLimeSdrOutputReport()->setFifoFill(status.fifoFilledCount);
+    response.getLimeSdrOutputReport()->setUnderrunCount(status.underrun);
+    response.getLimeSdrOutputReport()->setOverrunCount(status.overrun);
+    response.getLimeSdrOutputReport()->setDroppedPacketsCount(status.droppedPackets);
+    response.getLimeSdrOutputReport()->setLinkRate(status.linkRate);
+    response.getLimeSdrOutputReport()->setHwTimestamp(status.timestamp);
+
+    if (m_deviceShared.m_deviceParams->getDevice()) {
+        LMS_GetChipTemperature(m_deviceShared.m_deviceParams->getDevice(), 0, &temp);
+    }
+
+    response.getLimeSdrOutputReport()->setTemperature(temp);
 }

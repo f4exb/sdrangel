@@ -20,6 +20,8 @@
 #include <QDialog>
 #include <vector>
 
+#include "export.h"
+
 namespace Ui {
     class EditCommandDialog;
 }
@@ -27,7 +29,7 @@ namespace Ui {
 class Command;
 class CommandKeyReceiver;
 
-class EditCommandDialog : public QDialog {
+class SDRGUI_API EditCommandDialog : public QDialog {
     Q_OBJECT
 
 public:

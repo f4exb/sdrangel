@@ -24,7 +24,7 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -50,16 +50,7 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>2</number>
     </property>
     <item>
@@ -98,7 +89,7 @@
           </property>
           <property name="font">
            <font>
-            <family>DejaVu Sans Mono</family>
+            <family>Liberation Mono</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -130,7 +121,7 @@
         <item>
          <widget class="ButtonSwitch" name="forceDecimator">
           <property name="toolTip">
-           <string>Force decimaor usage</string>
+           <string>Force decimator usage</string>
           </property>
           <property name="text">
            <string/>
@@ -502,6 +493,12 @@
           <width>0</width>
           <height>32</height>
          </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>8</pointsize>
+         </font>
         </property>
         <property name="toolTip">
          <string>video signal level in % of 0:1 range</string>

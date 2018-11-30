@@ -4,8 +4,6 @@ set(datv_SOURCES
 	datvdemod.cpp
 	datvdemodgui.cpp
 	datvdemodplugin.cpp
-	datvscreen.cpp
-	glshaderarray.cpp
 	datvideostream.cpp
 	datvideorender.cpp
 )
@@ -14,8 +12,6 @@ set(datv_HEADERS
 	datvdemod.h
 	datvdemodgui.h
 	datvdemodplugin.h
-	datvscreen.h
-	glshaderarray.h
 	datvideostream.h
 	datvideorender.h
 )
@@ -24,11 +20,13 @@ set(datv_FORMS
 	datvdemodgui.ui
 )
 
-set (CMAKE_CXX_FLAGS "-Wno-unused-variable -Wno-deprecated-declarations")
-
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+	${AVCODEC_INCLUDE_DIRS}
+	${AVFORMAT_INCLUDE_DIRS}
+	${AVUTIL_INCLUDE_DIRS}
+	${SWSCALE_INCLUDE_DIRS}
 )
 
 #include(${QT_USE_FILE})
@@ -49,11 +47,13 @@ target_link_libraries(demoddatv
 	${QT_LIBRARIES}
 	sdrbase
 	sdrgui
-	avcodec
-	avformat
-	swscale
+	${AVCODEC_LIBRARIES}
+	${AVFORMAT_LIBRARIES}
+	${AVUTIL_LIBRARIES}
+	${SWSCALE_LIBRARIES}
 )
 
-qt5_use_modules(demoddatv Core Widgets Multimedia MultimediaWidgets)
+find_package(Qt5MultimediaWidgets 5.0 REQUIRED)
+target_link_libraries(demoddatv Qt5::Core Qt5::Widgets Qt5::Multimedia Qt5::MultimediaWidgets)
 
 install(TARGETS demoddatv DESTINATION lib/plugins/channelrx)

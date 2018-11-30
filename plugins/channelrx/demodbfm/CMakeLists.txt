@@ -1,5 +1,7 @@
 project(bfm)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(bfm_SOURCES
 	bfmdemod.cpp
 	bfmdemodgui.cpp
@@ -22,7 +24,9 @@ set(bfm_HEADERS
 	rdstmc.h
 )
 
-set_source_files_properties(rdstmc.cpp PROPERTIES COMPILE_FLAGS -fno-var-tracking-assignments)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set_source_files_properties(rdstmc.cpp PROPERTIES COMPILE_FLAGS -fno-var-tracking-assignments)
+endif()
 
 set(bfm_FORMS
 	bfmdemodgui.ui
@@ -31,6 +35,7 @@ set(bfm_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client	
 )
 
 #include(${QT_USE_FILE})
@@ -52,6 +57,6 @@ target_link_libraries(demodbfm
 	sdrgui
 )
 
-qt5_use_modules(demodbfm Core Widgets)
+target_link_libraries(demodbfm Qt5::Core Qt5::Widgets)
 
 install(TARGETS demodbfm DESTINATION lib/plugins/channelrx)

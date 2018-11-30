@@ -30,6 +30,10 @@
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
+#include "gui/crightclickenabler.h"
+#include "gui/audioselectdialog.h"
+#include "gui/basicchannelsettingsdialog.h"
 #include "mainwindow.h"
 
 SSBModGUI* SSBModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
@@ -80,14 +84,14 @@ bool SSBModGUI::deserialize(const QByteArray& data)
     {
         qDebug("SSBModGUI::deserialize");
         displaySettings();
-        applyBandwidths(true); // does applySettings(true)
+        applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
         displaySettings();
-        applyBandwidths(true); // does applySettings(true)
+        applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
         return false;
     }
 }
@@ -108,6 +112,27 @@ bool SSBModGUI::handleMessage(const Message& message)
         updateWithStreamTime();
         return true;
     }
+    else if (DSPConfigureAudio::match(message))
+    {
+        qDebug("SSBModGUI::handleMessage: DSPConfigureAudio: %d", m_ssbMod->getAudioSampleRate());
+        applyBandwidths(5 - ui->spanLog2->value()); // will update spectrum details with new sample rate
+        return true;
+    }
+    else if (SSBMod::MsgConfigureSSBMod::match(message))
+    {
+        const SSBMod::MsgConfigureSSBMod& cfg = (SSBMod::MsgConfigureSSBMod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (CWKeyer::MsgConfigureCWKeyer::match(message))
+    {
+        const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) message;
+        ui->cwKeyerGUI->displaySettings(cfg.getSettings());
+        return true;
+    }
     else
     {
         return false;
@@ -124,8 +149,6 @@ void SSBModGUI::channelMarkerChangedByCursor()
 void SSBModGUI::channelMarkerUpdate()
 {
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
-    m_settings.m_udpAddress = m_channelMarker.getUDPAddress();
-    m_settings.m_udpPort = m_channelMarker.getUDPReceivePort();
     displaySettings();
     applySettings();
 }
@@ -161,7 +184,7 @@ void SSBModGUI::on_flipSidebands_clicked(bool checked __attribute__((unused)))
 void SSBModGUI::on_dsb_toggled(bool dsb)
 {
     ui->flipSidebands->setEnabled(!dsb);
-    applyBandwidths();
+    applyBandwidths(5 - ui->spanLog2->value());
 }
 
 void SSBModGUI::on_audioBinaural_toggled(bool checked)
@@ -178,21 +201,21 @@ void SSBModGUI::on_audioFlipChannels_toggled(bool checked)
 
 void SSBModGUI::on_spanLog2_valueChanged(int value)
 {
-    if ((value < 1) || (value > 5)) {
+    if ((value < 0) || (value > 4)) {
         return;
     }
 
-    applyBandwidths();
+    applyBandwidths(5 - value);
 }
 
 void SSBModGUI::on_BW_valueChanged(int value __attribute__((unused)))
 {
-    applyBandwidths();
+    applyBandwidths(5 - ui->spanLog2->value());
 }
 
 void SSBModGUI::on_lowCut_valueChanged(int value __attribute__((unused)))
 {
-    applyBandwidths();
+    applyBandwidths(5 - ui->spanLog2->value());
 }
 
 void SSBModGUI::on_toneFrequency_valueChanged(int value)
@@ -226,9 +249,8 @@ void SSBModGUI::on_play_toggled(bool checked)
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->morseKeyer->setEnabled(!checked);
     ui->mic->setEnabled(!checked);
-    m_modAFInput = checked ? SSBMod::SSBModInputFile : SSBMod::SSBModInputNone;
-    SSBMod::MsgConfigureAFInput* message = SSBMod::MsgConfigureAFInput::create(m_modAFInput);
-    m_ssbMod->getInputMessageQueue()->push(message);
+    m_settings.m_modAFInput = checked ? SSBModSettings::SSBModInputFile : SSBModSettings::SSBModInputNone;
+    applySettings();
     ui->navTimeSlider->setEnabled(!checked);
     m_enableNavTime = !checked;
 }
@@ -238,9 +260,8 @@ void SSBModGUI::on_tone_toggled(bool checked)
     ui->play->setEnabled(!checked); // release other source inputs
     ui->morseKeyer->setEnabled(!checked);
     ui->mic->setEnabled(!checked);
-    m_modAFInput = checked ? SSBMod::SSBModInputTone : SSBMod::SSBModInputNone;
-    SSBMod::MsgConfigureAFInput* message = SSBMod::MsgConfigureAFInput::create(m_modAFInput);
-    m_ssbMod->getInputMessageQueue()->push(message);
+    m_settings.m_modAFInput = checked ? SSBModSettings::SSBModInputTone : SSBModSettings::SSBModInputNone;
+    applySettings();
 }
 
 void SSBModGUI::on_morseKeyer_toggled(bool checked)
@@ -248,9 +269,8 @@ void SSBModGUI::on_morseKeyer_toggled(bool checked)
     ui->play->setEnabled(!checked); // release other source inputs
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->mic->setEnabled(!checked);
-    m_modAFInput = checked ? SSBMod::SSBModInputCWTone : SSBMod::SSBModInputNone;
-    SSBMod::MsgConfigureAFInput* message = SSBMod::MsgConfigureAFInput::create(m_modAFInput);
-    m_ssbMod->getInputMessageQueue()->push(message);
+    m_settings.m_modAFInput = checked ? SSBModSettings::SSBModInputCWTone : SSBModSettings::SSBModInputNone;
+    applySettings();
 }
 
 void SSBModGUI::on_mic_toggled(bool checked)
@@ -258,9 +278,8 @@ void SSBModGUI::on_mic_toggled(bool checked)
     ui->play->setEnabled(!checked); // release other source inputs
     ui->morseKeyer->setEnabled(!checked);
     ui->tone->setEnabled(!checked); // release other source inputs
-    m_modAFInput = checked ? SSBMod::SSBModInputAudio : SSBMod::SSBModInputNone;
-    SSBMod::MsgConfigureAFInput* message = SSBMod::MsgConfigureAFInput::create(m_modAFInput);
-    m_ssbMod->getInputMessageQueue()->push(message);
+    m_settings.m_modAFInput = checked ? SSBModSettings::SSBModInputAudio : SSBModSettings::SSBModInputNone;
+    applySettings();
 }
 
 void SSBModGUI::on_agc_toggled(bool checked)
@@ -322,7 +341,7 @@ void SSBModGUI::on_navTimeSlider_valueChanged(int value)
 void SSBModGUI::on_showFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"));
+        tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"), 0, QFileDialog::DontUseNativeDialog);
 
     if (fileName != "")
     {
@@ -344,6 +363,22 @@ void SSBModGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rol
 {
 }
 
+void SSBModGUI::onMenuDialogCalled(const QPoint &p)
+{
+    BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.move(p);
+    dialog.exec();
+
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+    m_settings.m_title = m_channelMarker.getTitle();
+
+    setWindowTitle(m_settings.m_title);
+    setTitleColor(m_settings.m_rgbColor);
+
+    applySettings();
+}
+
 SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::SSBModGUI),
@@ -356,12 +391,12 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_recordSampleRate(48000),
     m_samplesCount(0),
     m_tickCount(0),
-    m_enableNavTime(false),
-    m_modAFInput(SSBMod::SSBModInputNone)
+    m_enableNavTime(false)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_spectrumVis = new SpectrumVis(SDR_TX_SCALEF, ui->glSpectrum);
 	m_ssbMod = (SSBMod*) channelTx; //new SSBMod(m_deviceUISet->m_deviceSinkAPI);
@@ -379,6 +414,9 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
+    CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->mic);
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
+
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
@@ -389,8 +427,6 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_channelMarker.setSidebands(ChannelMarker::usb);
 	m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle("SSB Modulator");
-    m_channelMarker.setUDPAddress("127.0.0.1");
-    m_channelMarker.setUDPSendPort(9999);
     m_channelMarker.blockSignals(false);
 	m_channelMarker.setVisible(true);
 
@@ -418,12 +454,12 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_iconDSBLSB.addPixmap(QPixmap("://lsb.png"), QIcon::Normal, QIcon::Off);
 
     displaySettings();
-    applyBandwidths(true); // does applySettings(true)
+    applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
 }
 
 SSBModGUI::~SSBModGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
+    m_deviceUISet->removeTxChannelInstance(this);
 	delete m_ssbMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete m_spectrumVis;
 	delete ui;
@@ -449,14 +485,13 @@ void SSBModGUI::applySettings(bool force)
 	}
 }
 
-void SSBModGUI::applyBandwidths(bool force)
+void SSBModGUI::applyBandwidths(int spanLog2, bool force)
 {
     bool dsb = ui->dsb->isChecked();
-    int spanLog2 = ui->spanLog2->value();
-    m_spectrumRate = 48000 / (1<<spanLog2);
+    m_spectrumRate = m_ssbMod->getAudioSampleRate() / (1<<spanLog2);
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
-    int bwMax = 480/(1<<spanLog2);
+    int bwMax = m_ssbMod->getAudioSampleRate() / (100*(1<<spanLog2));
     int tickInterval = m_spectrumRate / 1200;
     tickInterval = tickInterval == 0 ? 1 : tickInterval;
 
@@ -558,6 +593,7 @@ void SSBModGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setTitle(m_settings.m_title);
     m_channelMarker.setBandwidth(m_settings.m_bandwidth * 2);
     m_channelMarker.setLowCutoff(m_settings.m_lowCutoff);
 
@@ -609,7 +645,7 @@ void SSBModGUI::displaySettings()
     ui->BW->blockSignals(true);
 
     ui->dsb->setChecked(m_settings.m_dsb);
-    ui->spanLog2->setValue(m_settings.m_spanLog2);
+    ui->spanLog2->setValue(5 - m_settings.m_spanLog2);
 
     ui->BW->setValue(roundf(m_settings.m_bandwidth/100.0));
     s = QString::number(m_settings.m_bandwidth/1000.0, 'f', 1);
@@ -640,6 +676,20 @@ void SSBModGUI::displaySettings()
     ui->volume->setValue(m_settings.m_volumeFactor * 10.0);
     ui->volumeText->setText(QString("%1").arg(m_settings.m_volumeFactor, 0, 'f', 1));
 
+    ui->tone->setEnabled((m_settings.m_modAFInput == SSBModSettings::SSBModInputAF::SSBModInputTone)
+            || (m_settings.m_modAFInput == SSBModSettings::SSBModInputAF::SSBModInputNone));
+    ui->mic->setEnabled((m_settings.m_modAFInput == SSBModSettings::SSBModInputAF::SSBModInputAudio)
+            || (m_settings.m_modAFInput == SSBModSettings::SSBModInputAF::SSBModInputNone));
+    ui->play->setEnabled((m_settings.m_modAFInput == SSBModSettings::SSBModInputAF::SSBModInputFile)
+            || (m_settings.m_modAFInput == SSBModSettings::SSBModInputAF::SSBModInputNone));
+    ui->morseKeyer->setEnabled((m_settings.m_modAFInput == SSBModSettings::SSBModInputAF::SSBModInputCWTone)
+            || (m_settings.m_modAFInput == SSBModSettings::SSBModInputAF::SSBModInputNone));
+
+    ui->tone->setChecked(m_settings.m_modAFInput == SSBModSettings::SSBModInputAF::SSBModInputTone);
+    ui->mic->setChecked(m_settings.m_modAFInput == SSBModSettings::SSBModInputAF::SSBModInputAudio);
+    ui->play->setChecked(m_settings.m_modAFInput == SSBModSettings::SSBModInputAF::SSBModInputFile);
+    ui->morseKeyer->setChecked(m_settings.m_modAFInput == SSBModSettings::SSBModInputAF::SSBModInputCWTone);
+
     blockApplySettings(false);
 }
 
@@ -668,13 +718,26 @@ void SSBModGUI::enterEvent(QEvent*)
 	m_channelMarker.setHighlighted(true);
 }
 
+void SSBModGUI::audioSelect()
+{
+    qDebug("SSBModGUI::audioSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName, true); // true for input
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
+}
+
 void SSBModGUI::tick()
 {
     double powDb = CalcDb::dbPower(m_ssbMod->getMagSq());
 	m_channelPowerDbAvg(powDb);
 	ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
 
-    if (((++m_tickCount & 0xf) == 0) && (m_modAFInput == SSBMod::SSBModInputFile))
+    if (((++m_tickCount & 0xf) == 0) && (m_settings.m_modAFInput == SSBModSettings::SSBModInputFile))
     {
         SSBMod::MsgConfigureFileSourceStreamTiming* message = SSBMod::MsgConfigureFileSourceStreamTiming::create();
         m_ssbMod->getInputMessageQueue()->push(message);
@@ -685,7 +748,7 @@ void SSBModGUI::updateWithStreamData()
 {
     QTime recordLength(0, 0, 0, 0);
     recordLength = recordLength.addSecs(m_recordLength);
-    QString s_time = recordLength.toString("hh:mm:ss");
+    QString s_time = recordLength.toString("HH:mm:ss");
     ui->recordLengthText->setText(s_time);
     updateWithStreamTime();
 }
@@ -704,8 +767,8 @@ void SSBModGUI::updateWithStreamTime()
     QTime t(0, 0, 0, 0);
     t = t.addSecs(t_sec);
     t = t.addMSecs(t_msec);
-    QString s_timems = t.toString("hh:mm:ss.zzz");
-    QString s_time = t.toString("hh:mm:ss");
+    QString s_timems = t.toString("HH:mm:ss.zzz");
+    QString s_time = t.toString("HH:mm:ss");
     ui->relTimeText->setText(s_timems);
 
     if (!m_enableNavTime)

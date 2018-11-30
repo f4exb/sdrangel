@@ -28,6 +28,9 @@
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "dsp/dspengine.h"
+#include "gui/crightclickenabler.h"
+#include "gui/audioselectdialog.h"
+#include "gui/basicchannelsettingsdialog.h"
 #include "mainwindow.h"
 
 #include "ui_wfmmodgui.h"
@@ -102,6 +105,21 @@ bool WFMModGUI::handleMessage(const Message& message)
     {
         m_samplesCount = ((WFMMod::MsgReportFileSourceStreamTiming&)message).getSamplesCount();
         updateWithStreamTime();
+        return true;
+    }
+    else if (WFMMod::MsgConfigureWFMMod::match(message))
+    {
+        const WFMMod::MsgConfigureWFMMod& cfg = (WFMMod::MsgConfigureWFMMod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (CWKeyer::MsgConfigureCWKeyer::match(message))
+    {
+        const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) message;
+        ui->cwKeyerGUI->displaySettings(cfg.getSettings());
         return true;
     }
     else
@@ -190,9 +208,8 @@ void WFMModGUI::on_play_toggled(bool checked)
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->mic->setEnabled(!checked);
     ui->morseKeyer->setEnabled(!checked);
-    m_modAFInput = checked ? WFMMod::WFMModInputFile : WFMMod::WFMModInputNone;
-    WFMMod::MsgConfigureAFInput* message = WFMMod::MsgConfigureAFInput::create(m_modAFInput);
-    m_wfmMod->getInputMessageQueue()->push(message);
+    m_settings.m_modAFInput = checked ? WFMModSettings::WFMModInputFile : WFMModSettings::WFMModInputNone;
+    applySettings();
     ui->navTimeSlider->setEnabled(!checked);
     m_enableNavTime = !checked;
 }
@@ -202,9 +219,8 @@ void WFMModGUI::on_tone_toggled(bool checked)
     ui->play->setEnabled(!checked); // release other source inputs
     ui->mic->setEnabled(!checked);
     ui->morseKeyer->setEnabled(!checked);
-    m_modAFInput = checked ? WFMMod::WFMModInputTone : WFMMod::WFMModInputNone;
-    WFMMod::MsgConfigureAFInput* message = WFMMod::MsgConfigureAFInput::create(m_modAFInput);
-    m_wfmMod->getInputMessageQueue()->push(message);
+    m_settings.m_modAFInput = checked ? WFMModSettings::WFMModInputTone : WFMModSettings::WFMModInputNone;
+    applySettings();
 }
 
 void WFMModGUI::on_morseKeyer_toggled(bool checked)
@@ -212,9 +228,8 @@ void WFMModGUI::on_morseKeyer_toggled(bool checked)
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->mic->setEnabled(!checked);
     ui->play->setEnabled(!checked);
-    m_modAFInput = checked ? WFMMod::WFMModInputCWTone : WFMMod::WFMModInputNone;
-    WFMMod::MsgConfigureAFInput* message = WFMMod::MsgConfigureAFInput::create(m_modAFInput);
-    m_wfmMod->getInputMessageQueue()->push(message);
+    m_settings.m_modAFInput = checked ? WFMModSettings::WFMModInputCWTone : WFMModSettings::WFMModInputNone;
+    applySettings();
 }
 
 void WFMModGUI::on_mic_toggled(bool checked)
@@ -222,9 +237,8 @@ void WFMModGUI::on_mic_toggled(bool checked)
     ui->play->setEnabled(!checked); // release other source inputs
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->morseKeyer->setEnabled(!checked);
-    m_modAFInput = checked ? WFMMod::WFMModInputAudio : WFMMod::WFMModInputNone;
-    WFMMod::MsgConfigureAFInput* message = WFMMod::MsgConfigureAFInput::create(m_modAFInput);
-    m_wfmMod->getInputMessageQueue()->push(message);
+    m_settings.m_modAFInput = checked ? WFMModSettings::WFMModInputAudio : WFMModSettings::WFMModInputNone;
+    applySettings();
 }
 
 void WFMModGUI::on_navTimeSlider_valueChanged(int value)
@@ -243,7 +257,7 @@ void WFMModGUI::on_navTimeSlider_valueChanged(int value)
 void WFMModGUI::on_showFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"));
+        tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"), 0, QFileDialog::DontUseNativeDialog);
 
     if (fileName != "")
     {
@@ -265,6 +279,22 @@ void WFMModGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rol
 {
 }
 
+void WFMModGUI::onMenuDialogCalled(const QPoint &p)
+{
+    BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.move(p);
+    dialog.exec();
+
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+    m_settings.m_title = m_channelMarker.getTitle();
+
+    setWindowTitle(m_settings.m_title);
+    setTitleColor(m_settings.m_rgbColor);
+
+    applySettings();
+}
+
 WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::WFMModGUI),
@@ -276,8 +306,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_recordSampleRate(48000),
     m_samplesCount(0),
     m_tickCount(0),
-    m_enableNavTime(false),
-    m_modAFInput(WFMMod::WFMModInputNone)
+    m_enableNavTime(false)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -293,11 +322,15 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     blockApplySettings(false);
 
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_wfmMod = (WFMMod*) channelTx; //new WFMMod(m_deviceUISet->m_deviceSinkAPI);
 	m_wfmMod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+
+    CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->mic);
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -308,8 +341,6 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_channelMarker.setBandwidth(125000);
     m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle("WFM Modulator");
-    m_channelMarker.setUDPAddress("127.0.0.1");
-    m_channelMarker.setUDPSendPort(9999);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
@@ -370,6 +401,7 @@ void WFMModGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setTitle(m_settings.m_title);
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
@@ -398,6 +430,16 @@ void WFMModGUI::displaySettings()
     ui->channelMute->setChecked(m_settings.m_channelMute);
     ui->playLoop->setChecked(m_settings.m_playLoop);
 
+    ui->tone->setEnabled((m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputTone) || (m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputNone));
+    ui->mic->setEnabled((m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputAudio) || (m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputNone));
+    ui->play->setEnabled((m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputFile) || (m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputNone));
+    ui->morseKeyer->setEnabled((m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputCWTone) || (m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputNone));
+
+    ui->tone->setChecked(m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputTone);
+    ui->mic->setChecked(m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputAudio);
+    ui->play->setChecked(m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputFile);
+    ui->morseKeyer->setChecked(m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputCWTone);
+
     blockApplySettings(false);
 }
 
@@ -411,13 +453,26 @@ void WFMModGUI::enterEvent(QEvent*)
 	m_channelMarker.setHighlighted(true);
 }
 
+void WFMModGUI::audioSelect()
+{
+    qDebug("WFMModGUI::audioSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName, true); // true for input
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
+}
+
 void WFMModGUI::tick()
 {
     double powDb = CalcDb::dbPower(m_wfmMod->getMagSq());
 	m_channelPowerDbAvg(powDb);
 	ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
 
-    if (((++m_tickCount & 0xf) == 0) && (m_modAFInput == WFMMod::WFMModInputFile))
+    if (((++m_tickCount & 0xf) == 0) && (m_settings.m_modAFInput == WFMModSettings::WFMModInputFile))
     {
         WFMMod::MsgConfigureFileSourceStreamTiming* message = WFMMod::MsgConfigureFileSourceStreamTiming::create();
         m_wfmMod->getInputMessageQueue()->push(message);
@@ -428,7 +483,7 @@ void WFMModGUI::updateWithStreamData()
 {
     QTime recordLength(0, 0, 0, 0);
     recordLength = recordLength.addSecs(m_recordLength);
-    QString s_time = recordLength.toString("hh:mm:ss");
+    QString s_time = recordLength.toString("HH:mm:ss");
     ui->recordLengthText->setText(s_time);
     updateWithStreamTime();
 }
@@ -447,8 +502,8 @@ void WFMModGUI::updateWithStreamTime()
     QTime t(0, 0, 0, 0);
     t = t.addSecs(t_sec);
     t = t.addMSecs(t_msec);
-    QString s_timems = t.toString("hh:mm:ss.zzz");
-    QString s_time = t.toString("hh:mm:ss");
+    QString s_timems = t.toString("HH:mm:ss.zzz");
+    QString s_time = t.toString("HH:mm:ss");
     ui->relTimeText->setText(s_timems);
 
     if (!m_enableNavTime)

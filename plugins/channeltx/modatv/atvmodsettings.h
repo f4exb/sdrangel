@@ -21,7 +21,7 @@
 #include <QString>
 #include <stdint.h>
 
-struct Serializable;
+class Serializable;
 
 struct ATVModSettings
 {
@@ -75,12 +75,10 @@ struct ATVModSettings
     float         m_rfScalingFactor;      //!< Scaling factor from +/-1 to +/-2^15
     float         m_fmExcursion;          //!< FM excursion factor relative to full bandwidth
     bool          m_forceDecimator;       //!< Forces decimator even when channel and source sample rates are equal
+    bool          m_showOverlayText;      //!< Show overlay text on image
     QString       m_overlayText;
     quint32       m_rgbColor;
     QString       m_title;
-
-    QString m_udpAddress;
-    uint16_t m_udpPort;
 
     Serializable *m_channelMarker;
 

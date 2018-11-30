@@ -43,10 +43,15 @@ public:
 	void stop();
 	void configureUDPLink(const QString& address, quint16 port);
 	void getRemoteAddress(QString& s) const { s = m_remoteAddress.toString(); }
-    int getNbOriginalBlocks() const { return SDRdaemonSourceBuffer::m_nbOriginalBlocks; }
+    int getNbOriginalBlocks() const { return SDRDaemonNbOrginalBlocks; }
     bool isStreaming() const { return m_masterTimerConnected; }
     int getSampleRate() const { return m_samplerate; }
     int getCenterFrequency() const { return m_centerFrequency * 1000; }
+    int getBufferGauge() const { return m_sdrDaemonBuffer.getBufferGauge(); }
+    uint32_t getTVSec() const { return m_tv_sec; }
+    uint32_t getTVuSec() const { return m_tv_usec; }
+    int getMinNbBlocks() { return m_sdrDaemonBuffer.getMinNbBlocks(); }
+    int getMaxNbRecovery() { return m_sdrDaemonBuffer.getMaxNbRecovery(); }
 public slots:
 	void dataReadyRead();
 
@@ -55,6 +60,7 @@ private:
 	const QTimer& m_masterTimer;
 	bool m_masterTimerConnected;
 	bool m_running;
+    uint32_t m_rateDivider;
 	SDRdaemonSourceBuffer m_sdrDaemonBuffer;
 	QUdpSocket *m_dataSocket;
 	QHostAddress m_dataAddress;
@@ -80,7 +86,6 @@ private:
     int32_t *m_converterBuffer;
     uint32_t m_converterBufferNbSamples;
     bool m_throttleToggle;
-    uint32_t m_rateDivider;
     bool m_autoCorrBuffer;
 
 	void connectTimer();

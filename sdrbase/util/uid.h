@@ -21,7 +21,9 @@
 
 #include <stdint.h>
 
-class UidCalculator
+#include "export.h"
+
+class SDRBASE_API UidCalculator
 {
 public:
     /**

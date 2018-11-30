@@ -24,17 +24,24 @@
 #include "samplesinkfifo.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
-#include "util/export.h"
+#include "export.h"
 
 namespace SWGSDRangel
 {
     class SWGDeviceSettings;
     class SWGDeviceState;
+    class SWGDeviceReport;
 }
 
-class SDRANGEL_API DeviceSampleSource : public QObject {
+class SDRBASE_API DeviceSampleSource : public QObject {
 	Q_OBJECT
 public:
+    typedef enum {
+        FC_POS_INFRA = 0,
+        FC_POS_SUPRA,
+        FC_POS_CENTER
+    } fcPos_t;
+
 	DeviceSampleSource();
 	virtual ~DeviceSampleSource();
 	virtual void destroy() = 0;
@@ -75,10 +82,28 @@ public:
             QString& errorMessage)
     { errorMessage = "Not implemented"; return 501; }
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response __attribute__((unused)),
+            QString& errorMessage)
+    { errorMessage = "Not implemented"; return 501; }
+
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual void setMessageQueueToGUI(MessageQueue *queue) = 0; // pure virtual so that child classes must have to deal with this
 	MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
     SampleSinkFifo* getSampleFifo() { return &m_sampleFifo; }
+
+    static qint64 calculateDeviceCenterFrequency(
+            quint64 centerFrequency,
+            qint64 transverterDeltaFrequency,
+            int log2Decim,
+            fcPos_t fcPos,
+            quint32 devSampleRate,
+            bool transverterMode = false);
+
+    static qint32 calculateFrequencyShift(
+            int log2Decim,
+            fcPos_t fcPos,
+            quint32 devSampleRate);
 
 protected slots:
 	void handleInputMessages();

@@ -17,10 +17,11 @@ DEFINES += USE_SSE4_1=1
 QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
 
-CONFIG(MINGW32):LIBLIMESUITESRC = "D:\softs\LimeSuite"
-CONFIG(MINGW64):LIBLIMESUITESRC = "D:\softs\LimeSuite"
+CONFIG(MINGW32):LIBLIMESUITESRC = "C:\softs\LimeSuite"
+CONFIG(MINGW64):LIBLIMESUITESRC = "C:\softs\LimeSuite"
 
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../../../exports
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client

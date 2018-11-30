@@ -38,7 +38,7 @@ RTLSDRGui::RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_forceSettings(true),
 	m_settings(),
 	m_sampleSource(0),
-	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
+	m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
 {
     m_sampleSource = (RTLSDRInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
 
@@ -62,6 +62,7 @@ RTLSDRGui::RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	displayGains();
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+    m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 }
 
 RTLSDRGui::~RTLSDRGui()
@@ -259,6 +260,7 @@ void RTLSDRGui::displaySettings()
 	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 	ui->checkBox->setChecked(m_settings.m_noModMode);
 	ui->agc->setChecked(m_settings.m_agc);
+	ui->lowSampleRate->setChecked(m_settings.m_lowSampleRate);
 }
 
 void RTLSDRGui::sendSettings()
@@ -277,7 +279,7 @@ void RTLSDRGui::on_centerFrequency_changed(quint64 value)
 
 void RTLSDRGui::on_decim_currentIndexChanged(int index)
 {
-	if ((index <0) || (index > 5))
+	if ((index <0) || (index > 6))
 	{
 		return;
 	}
@@ -447,7 +449,9 @@ void RTLSDRGui::on_rfBW_changed(quint64 value)
 
 void RTLSDRGui::on_lowSampleRate_toggled(bool checked)
 {
-    if (checked) {
+    m_settings.m_lowSampleRate = checked;
+
+    if (m_settings.m_lowSampleRate) {
         ui->sampleRate->setValueRange(7, RTLSDRInput::sampleRateLowRangeMin, RTLSDRInput::sampleRateLowRangeMax);
     } else {
         ui->sampleRate->setValueRange(7, RTLSDRInput::sampleRateHighRangeMin, RTLSDRInput::sampleRateHighRangeMax);

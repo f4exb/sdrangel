@@ -3,11 +3,13 @@
 
 #include <QDialog>
 
+#include "export.h"
+
 namespace Ui {
 	class AddPresetDialog;
 }
 
-class AddPresetDialog : public QDialog {
+class SDRGUI_API AddPresetDialog : public QDialog {
 	Q_OBJECT
 
 public:

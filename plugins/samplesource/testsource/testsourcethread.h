@@ -27,6 +27,8 @@
 #include "dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
 #include "dsp/ncof.h"
+#include "util/message.h"
+#include "util/messagequeue.h"
 
 #include "testsourcesettings.h"
 
@@ -36,11 +38,29 @@ class TestSourceThread : public QThread {
 	Q_OBJECT
 
 public:
+    class MsgStartStop : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgStartStop* create(bool startStop) {
+            return new MsgStartStop(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgStartStop(bool startStop) :
+            Message(),
+            m_startStop(startStop)
+        { }
+    };
+
 	TestSourceThread(SampleSinkFifo* sampleFifo, QObject* parent = 0);
 	~TestSourceThread();
 
-	void startWork();
-	void stopWork();
+    void startStop(bool start);
 	void setSamplerate(int samplerate);
     void setLog2Decimation(unsigned int log2_decim);
     void setFcPos(int fcPos);
@@ -55,8 +75,9 @@ public:
     void setModulation(TestSourceSettings::Modulation modulation);
     void setAMModulation(float amModulation);
     void setFMDeviation(float deviation);
-
-    void connectTimer(const QTimer& timer);
+    void setPattern0();
+    void setPattern1();
+    void setPattern2();
 
 private:
 	QMutex m_startWaitMutex;
@@ -76,6 +97,11 @@ private:
 	float m_amModulation;
 	float m_fmDeviationUnit;
 	float m_fmPhasor;
+    uint32_t m_pulseWidth; //!< pulse width in number of samples
+    uint32_t m_pulseSampleCount;
+    uint32_t m_pulsePatternCount;
+    uint32_t m_pulsePatternCycle;
+    uint32_t m_pulsePatternPlaces;
 
 	int m_samplerate;
     unsigned int m_log2Decim;
@@ -95,20 +121,19 @@ private:
     int m_fcPosShift;
 
     int m_throttlems;
+    QTimer m_timer;
     QElapsedTimer m_elapsedTimer;
     bool m_throttleToggle;
     QMutex m_mutex;
 
-#ifdef SDR_RX_SAMPLE_24BIT
-    Decimators<qint64, qint16, SDR_RX_SAMP_SZ, 8> m_decimators_8;
-    Decimators<qint64, qint16, SDR_RX_SAMP_SZ, 12> m_decimators_12;
-    Decimators<qint64, qint16, SDR_RX_SAMP_SZ, 16> m_decimators_16;
-#else
+    MessageQueue m_inputMessageQueue;
+
 	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 8> m_decimators_8;
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators_12;
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16> m_decimators_16;
-#endif
 
+	void startWork();
+	void stopWork();
 	void run();
 	void callback(const qint16* buf, qint32 len);
 	void setBuffers(quint32 chunksize);
@@ -353,6 +378,7 @@ private:
 
 private slots:
     void tick();
+    void handleInputMessages();
 };
 
 #endif // _TESTSOURCE_TESTSOURCETHREAD_H_

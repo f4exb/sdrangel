@@ -931,21 +931,24 @@ void RDSParser::decode_optional_content(int no_groups, unsigned long int *free_f
 	int content_length = 0;
 	int ff_pointer     = 0;
 
-	for (int i = no_groups; i == 0; i--)
+	if (no_groups == 0)
 	{
+        int i = 0;
+//	for (int i = no_groups; i == 0; i--) i is always 0 if no_groups is 0 and exit else skip
+//	{
 		ff_pointer = 12 + 16;
 
-		while(ff_pointer > 0)
+		while(ff_pointer >= 7) // ff_pointer must be >= 0 and is decreased by 7 in the loop
 		{
 			ff_pointer -= 4;
-			m_g8_label_index = (free_format[i] & (0xf << ff_pointer));
-			content_length = optional_content_lengths[m_g8_label_index];
+			m_g8_label_index = (free_format[i] && ((0xf << ff_pointer) != 0)) ? 1 : 0;
+			content_length = 3; // optional_content_lengths[m_g8_label_index]; // always 3
 			ff_pointer -= content_length;
-			m_g8_content = (free_format[i] & (int(std::pow(2, content_length) - 1) << ff_pointer));
+			m_g8_content = (free_format[i] && ((int(std::pow(2, content_length) - 1) << ff_pointer) != 0)) ? 1 : 0;
 
-			/*
-			qDebug() << "RDSParser::decode_optional_content: TMC optional content (" << label_descriptions[m_g8_label_index].c_str()
-				<< "):" << m_g8_content;*/
+			qDebug() << "RDSParser::decode_optional_content:"
+			        << " TMC optional content (" << label_descriptions[m_g8_label_index].c_str() << ")"
+			        << ": " << m_g8_content;
 		}
 	}
 }

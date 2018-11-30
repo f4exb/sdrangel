@@ -19,9 +19,9 @@
 #define INCLUDE_MESSAGE_H
 
 #include <stdlib.h>
-#include "util/export.h"
+#include "export.h"
 
-class SDRANGEL_API Message {
+class SDRBASE_API Message {
 public:
 	Message();
 	virtual ~Message();

@@ -24,10 +24,10 @@
 #include <stdint.h>
 #include "dsp/dsptypes.h"
 #include "dsp/hbfiltertraits.h"
-#include "util/export.h"
+#include "export.h"
 
 template<typename AccuType, uint32_t HBFilterOrder>
-class SDRANGEL_API IntHalfbandFilterDB {
+class SDRBASE_API IntHalfbandFilterDB {
 public:
     IntHalfbandFilterDB();
 

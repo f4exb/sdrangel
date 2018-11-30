@@ -5,7 +5,9 @@
 #include <QList>
 #include <QMetaType>
 
-class Preset {
+#include "export.h"
+
+class SDRBASE_API Preset {
 public:
 	struct ChannelConfig {
 		QString m_channelIdURI; //!< Channel type ID in URI form

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>352</width>
+    <width>396</width>
     <height>170</height>
    </rect>
   </property>
@@ -24,7 +24,7 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -42,7 +42,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>350</width>
+     <width>390</width>
      <height>131</height>
     </rect>
    </property>
@@ -107,7 +107,7 @@
           </property>
           <property name="font">
            <font>
-            <family>DejaVu Sans Mono</family>
+            <family>Liberation Mono</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -126,6 +126,49 @@
          <widget class="QLabel" name="deltaUnits">
           <property name="text">
            <string>Hz </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="pll">
+          <property name="toolTip">
+           <string>PLL for synchronous AM</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/unlocked.png</normaloff>
+            <normalon>:/locked.png</normalon>:/unlocked.png</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="ssb">
+          <property name="toolTip">
+           <string>Synchronous AM SSB/DSB toggle right click to select side band</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/dsb.png</normaloff>
+            <normalon>:/usb.png</normalon>:/dsb.png</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -171,7 +214,7 @@
       <item>
        <widget class="QToolButton" name="audioMute">
         <property name="toolTip">
-         <string>Mute/Unmute audio</string>
+         <string>Left: Mute/Unmute audio Right: view/select audio device</string>
         </property>
         <property name="text">
          <string>...</string>
@@ -180,19 +223,6 @@
          <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/sound_on.png</normaloff>
           <normalon>:/sound_off.png</normalon>:/sound_on.png</iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="ButtonSwitch" name="copyAudioToUDP">
-        <property name="toolTip">
-         <string>Copy audio to UDP</string>
-        </property>
-        <property name="text">
-         <string>U</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -226,7 +256,7 @@
         </property>
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>Liberation Mono</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -249,7 +279,7 @@
       <item>
        <widget class="ButtonSwitch" name="bandpassEnable">
         <property name="toolTip">
-         <string>Toggle boxcar bandpass filter with 300 Hz low cuttof</string>
+         <string>Toggle boxcar bandpass filter with 300 Hz low cutoff</string>
         </property>
         <property name="icon">
          <iconset resource="../../../sdrgui/resources/res.qrc">

@@ -15,16 +15,17 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtPlugin>
-#include <QAction>
 #include "plugin/pluginapi.h"
 
+#ifndef SERVER_MODE
 #include "ssbmodgui.h"
+#endif
 #include "ssbmod.h"
 #include "ssbmodplugin.h"
 
 const PluginDescriptor SSBModPlugin::m_pluginDescriptor = {
     QString("SSB Modulator"),
-    QString("3.12.0"),
+    QString("4.1.0"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -50,10 +51,19 @@ void SSBModPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerTxChannel(SSBMod::m_channelIdURI, SSBMod::m_channelId, this);
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* SSBModPlugin::createTxChannelGUI(
+        DeviceUISet *deviceUISet __attribute__((unused)),
+        BasebandSampleSource *txChannel __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* SSBModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
 {
     return SSBModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
+#endif
 
 BasebandSampleSource* SSBModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
 {

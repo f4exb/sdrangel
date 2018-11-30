@@ -94,7 +94,6 @@ void PlutoSDROutputThread::run()
         for (p_dat = m_plutoBox->txBufferFirst(), ihs = 0; p_dat < p_end; p_dat += p_inc, ihs += 2)
         {
             m_plutoBox->txChannelConvert((int16_t*) p_dat, &m_buf[ihs]);
-            //*((int16_t*)p_dat) = m_buf[ihs] << 4;
         }
 
         // Schedule TX buffer for sending
@@ -102,7 +101,7 @@ void PlutoSDROutputThread::run()
 
         if (nbytes_tx != 4*m_blockSizeSamples)
         {
-            qDebug("PlutoSDROutputThread::run: error pushing buf %d / %d\n", (int) nbytes_tx, (int) 4*m_blockSizeSamples);
+            qDebug("PlutoSDROutputThread::run: error pushing buf %d / %d", (int) nbytes_tx, (int) 4*m_blockSizeSamples);
             usleep(200000);
             continue;
         }

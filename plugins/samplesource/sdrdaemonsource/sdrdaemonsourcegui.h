@@ -17,16 +17,21 @@
 #ifndef INCLUDE_SDRDAEMONSOURCEGUI_H
 #define INCLUDE_SDRDAEMONSOURCEGUI_H
 
-#include <plugin/plugininstancegui.h>
-#include <QTimer>
-#include <QWidget>
 #include <sys/time.h>
 
+#include <QTimer>
+#include <QWidget>
+#include <QNetworkRequest>
+
+#include "plugin/plugininstancegui.h"
 #include "util/messagequeue.h"
 
 #include "sdrdaemonsourceinput.h"
 
 class DeviceUISet;
+class QNetworkAccessManager;
+class QNetworkReply;
+class QJsonObject;
 
 namespace Ui {
 	class SDRdaemonSourceGui;
@@ -80,6 +85,8 @@ private:
     float m_avgNbRecovery;
     int m_nbOriginalBlocks;
     int m_nbFECBlocks;
+    int m_sampleBits;
+    int m_sampleBytes;
 
 	int m_samplesCount;
 	std::size_t m_tickCount;
@@ -98,39 +105,36 @@ private:
     QPalette m_paletteGreenText;
     QPalette m_paletteWhiteText;
 
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
     void blockApplySettings(bool block);
 	void displaySettings();
 	void displayTime();
     void sendSettings();
 	void updateWithAcquisition();
 	void updateWithStreamTime();
-    void updateSampleRateAndFrequency();
-    void updateTxDelay();
+	void updateSampleRateAndFrequency();
 	void displayEventCounts();
     void displayEventTimer();
+    void analyzeApiReply(const QJsonObject& jsonObject);
 
 private slots:
     void handleInputMessages();
-	void on_applyButton_clicked(bool checked);
+	void on_apiApplyButton_clicked(bool checked);
+    void on_dataApplyButton_clicked(bool checked);
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);
-	void on_address_returnPressed();
+	void on_apiAddress_returnPressed();
+	void on_apiPort_returnPressed();
+    void on_dataAddress_returnPressed();
 	void on_dataPort_returnPressed();
-	void on_controlPort_returnPressed();
-	void on_sendButton_clicked(bool checked);
-	void on_freq_changed(quint64 value);
-	void on_sampleRate_changed(quint64 value);
-	void on_specificParms_returnPressed();
-	void on_decim_currentIndexChanged(int index);
-	void on_fcPos_currentIndexChanged(int index);
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
     void on_eventCountsReset_clicked(bool checked);
-    void on_txDelay_valueChanged(int value);
-    void on_nbFECBlocks_valueChanged(int value);
     void updateHardware();
 	void updateStatus();
-	void tick();
+	void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_SDRDAEMONSOURCEGUI_H

@@ -18,6 +18,7 @@
 #define _PLUTOSDR_PLUTOSDRINPUTSETTINGS_H_
 
 #include <QtGlobal>
+#include <QString>
 #include <stdint.h>
 
 struct PlutoSDRInputSettings {
@@ -73,7 +74,7 @@ struct PlutoSDRInputSettings {
     GainMode m_gainMode;
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
-
+    QString m_fileRecordName;
 
 	PlutoSDRInputSettings();
 	void resetToDefaults();

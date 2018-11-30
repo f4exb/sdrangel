@@ -23,7 +23,9 @@
 
 #include <QPushButton>
 
-class ExternalClockButton : public QPushButton {
+#include "export.h"
+
+class SDRGUI_API ExternalClockButton : public QPushButton {
     Q_OBJECT
 
 public:

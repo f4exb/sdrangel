@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>750</width>
-    <height>120</height>
+    <height>121</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -18,6 +18,7 @@
   </property>
   <property name="font">
    <font>
+    <family>Liberation Sans</family>
     <pointsize>8</pointsize>
    </font>
   </property>
@@ -1158,7 +1159,7 @@ kS/s</string>
         </size>
        </property>
        <property name="toolTip">
-        <string>Sellect triggger in trigger chain</string>
+        <string>Select trigger in trigger chain</string>
        </property>
        <property name="maximum">
         <number>0</number>
@@ -1532,7 +1533,7 @@ kS/s</string>
      <item>
       <widget class="QLabel" name="trigLevelLabel">
        <property name="toolTip">
-        <string>Triger level</string>
+        <string>Trigger level</string>
        </property>
        <property name="text">
         <string>L:</string>

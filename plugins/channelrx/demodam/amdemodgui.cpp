@@ -18,11 +18,12 @@
 #include <QMainWindow>
 
 #include "amdemodgui.h"
+#include "amdemodssbdialog.h"
 
 #include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
 #include "dsp/downchannelizer.h"
-
+#include "dsp/dspengine.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "ui_amdemodgui.h"
 #include "plugin/pluginapi.h"
@@ -31,6 +32,8 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
+#include "gui/crightclickenabler.h"
+#include "gui/audioselectdialog.h"
 
 #include "amdemod.h"
 
@@ -91,7 +94,31 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 
 bool AMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 {
+    if (AMDemod::MsgConfigureAMDemod::match(message))
+    {
+        qDebug("AMDemodGUI::handleMessage: AMDemod::MsgConfigureAMDemod");
+        const AMDemod::MsgConfigureAMDemod& cfg = (AMDemod::MsgConfigureAMDemod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+
 	return false;
+}
+
+void AMDemodGUI::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = getInputMessageQueue()->pop()) != 0)
+    {
+        if (handleMessage(*message))
+        {
+            delete message;
+        }
+    }
 }
 
 void AMDemodGUI::channelMarkerChangedByCursor()
@@ -110,6 +137,24 @@ void AMDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    applySettings();
+}
+
+void AMDemodGUI::on_pll_toggled(bool checked)
+{
+    if (!checked)
+    {
+        ui->pll->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        ui->pll->setToolTip(tr("PLL for synchronous AM"));
+    }
+
+    m_settings.m_pll = checked;
+    applySettings();
+}
+
+void AMDemodGUI::on_ssb_toggled(bool checked)
+{
+    m_settings.m_syncAMOperation = checked ? m_samUSB ? AMDemodSettings::SyncAMUSB : AMDemodSettings::SyncAMLSB : AMDemodSettings::SyncAMDSB;
     applySettings();
 }
 
@@ -147,12 +192,6 @@ void AMDemodGUI::on_audioMute_toggled(bool checked)
 	applySettings();
 }
 
-void AMDemodGUI::on_copyAudioToUDP_toggled(bool checked)
-{
-    m_settings.m_copyAudioToUDP = checked;
-    applySettings();
-}
-
 void AMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 	/*
@@ -168,14 +207,11 @@ void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
     dialog.exec();
 
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
-    m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     m_settings.m_title = m_channelMarker.getTitle();
 
     setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);
-    displayUDPAddress();
 
     applySettings();
 }
@@ -188,6 +224,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	m_channelMarker(this),
 	m_doApplySettings(true),
 	m_squelchOpen(false),
+	m_samUSB(true),
 	m_tickCount(0)
 {
 	ui->setupUi(this);
@@ -195,9 +232,16 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_amDemod = (AMDemod*) rxChannel; //new AMDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_amDemod = reinterpret_cast<AMDemod*>(rxChannel); //new AMDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_amDemod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
+
+	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
+	connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
+
+	CRightClickEnabler *samSidebandRightClickEnabler = new CRightClickEnabler(ui->ssb);
+    connect(samSidebandRightClickEnabler, SIGNAL(rightClick()), this, SLOT(samSSBSelect()));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -209,8 +253,6 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	m_channelMarker.setBandwidth(5000);
 	m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle("AM Demodulator");
-    m_channelMarker.setUDPAddress("127.0.0.1");
-    m_channelMarker.setUDPSendPort(9999);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
@@ -223,6 +265,12 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
+    connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+
+    m_iconDSBUSB.addPixmap(QPixmap("://dsb.png"), QIcon::Normal, QIcon::Off);
+    m_iconDSBUSB.addPixmap(QPixmap("://usb.png"), QIcon::Normal, QIcon::On);
+    m_iconDSBLSB.addPixmap(QPixmap("://dsb.png"), QIcon::Normal, QIcon::Off);
+    m_iconDSBLSB.addPixmap(QPixmap("://lsb.png"), QIcon::Normal, QIcon::On);
 
 	displaySettings();
 	applySettings(true);
@@ -245,7 +293,7 @@ void AMDemodGUI::applySettings(bool force)
 	if (m_doApplySettings)
 	{
 		AMDemod::MsgConfigureChannelizer* channelConfigMsg = AMDemod::MsgConfigureChannelizer::create(
-		        48000, m_channelMarker.getCenterFrequency());
+		        m_amDemod->getAudioSampleRate(), m_channelMarker.getCenterFrequency());
 		m_amDemod->getInputMessageQueue()->push(channelConfigMsg);
 
 
@@ -265,7 +313,6 @@ void AMDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
-    displayUDPAddress();
 
     blockApplySettings(true);
 
@@ -283,14 +330,23 @@ void AMDemodGUI::displaySettings()
 
     ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->bandpassEnable->setChecked(m_settings.m_bandpassEnable);
-    ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
+    ui->pll->setChecked(m_settings.m_pll);
+
+    if (m_settings.m_pll) {
+        if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMLSB) {
+            m_samUSB = false;
+            ui->ssb->setIcon(m_iconDSBLSB);
+        } else {
+            m_samUSB = true;
+            ui->ssb->setIcon(m_iconDSBUSB);
+        }
+    }
+    else
+    {
+        ui->ssb->setIcon(m_iconDSBUSB);
+    }
 
     blockApplySettings(false);
-}
-
-void AMDemodGUI::displayUDPAddress()
-{
-    ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_settings.m_udpAddress).arg(m_settings.m_udpPort));
 }
 
 void AMDemodGUI::leaveEvent(QEvent*)
@@ -301,6 +357,39 @@ void AMDemodGUI::leaveEvent(QEvent*)
 void AMDemodGUI::enterEvent(QEvent*)
 {
 	m_channelMarker.setHighlighted(true);
+}
+
+void AMDemodGUI::audioSelect()
+{
+    qDebug("AMDemodGUI::audioSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
+}
+
+void AMDemodGUI::samSSBSelect()
+{
+    AMDemodSSBDialog ssbSelect(m_samUSB);
+    ssbSelect.exec();
+
+    ui->ssb->setIcon(ssbSelect.isUsb() ? m_iconDSBUSB : m_iconDSBLSB);
+
+    if (ssbSelect.isUsb() != m_samUSB)
+    {
+        qDebug("AMDemodGUI::samSSBSelect: %s", ssbSelect.isUsb() ? "usb" : "lsb");
+        m_samUSB = ssbSelect.isUsb();
+
+        if (m_settings.m_syncAMOperation != AMDemodSettings::SyncAMDSB)
+        {
+            m_settings.m_syncAMOperation = m_samUSB ? AMDemodSettings::SyncAMUSB : AMDemodSettings::SyncAMLSB;
+            applySettings();
+        }
+    }
 }
 
 void AMDemodGUI::tick()
@@ -331,6 +420,18 @@ void AMDemodGUI::tick()
 		} else {
 			ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 		}
+	}
+
+	if (m_settings.m_pll)
+	{
+	    if (m_amDemod->getPllLocked()) {
+	        ui->pll->setStyleSheet("QToolButton { background-color : green; }");
+	    } else {
+	        ui->pll->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+	    }
+
+        int freq = (m_amDemod->getPllFrequency() * m_amDemod->getAudioSampleRate()) / (2.0*M_PI);
+        ui->pll->setToolTip(tr("PLL for synchronous AM. Freq = %1 Hz").arg(freq));
 	}
 
 	m_tickCount++;

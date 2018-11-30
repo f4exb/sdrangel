@@ -1,0 +1,46 @@
+AMModSettings:
+  description: AMMod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    modFactor:
+      description: modulation factor from 0.0 to 1.0
+      type: number
+      format: float
+    toneFrequency:
+      type: number
+      format: float
+    volumeFactor:
+      type: number
+      format: float
+    channelMute:
+      type: integer
+    playLoop:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    audioDeviceName:
+      type: string
+    modAFInput:
+      type: integer
+    cwKeyer:
+      $ref: "http://localhost:8081/api/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
+     
+AMModReport:
+  description: AMMod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    audioSampleRate:
+      type: integer
+    channelSampleRate:
+      type: integer
+   

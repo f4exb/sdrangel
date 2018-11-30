@@ -29,6 +29,7 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspengine.h"
 #include "util/db.h"
+#include "gui/basicchannelsettingsdialog.h"
 #include "mainwindow.h"
 
 #include "ui_atvmodgui.h"
@@ -147,6 +148,27 @@ bool ATVModGUI::handleMessage(const Message& message)
         ui->channelSampleRateText->setText(tr("%1k").arg(sampleRate/1000.0f, 0, 'f', 2));
         ui->nbPointsPerLineText->setText(tr("%1p").arg(nbPointsPerLine));
         setRFFiltersSlidersRange(sampleRate);
+        return true;
+    }
+    else if (ATVMod::MsgConfigureATVMod::match(message))
+    {
+        const ATVMod::MsgConfigureATVMod& cfg = (ATVMod::MsgConfigureATVMod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (ATVMod::MsgConfigureImageFileName::match(message))
+    {
+        const ATVMod::MsgConfigureImageFileName& cfg = (ATVMod::MsgConfigureImageFileName&) message;
+        ui->imageFileText->setText(cfg.getFileName());
+        return true;
+    }
+    else if (ATVMod::MsgConfigureVideoFileName::match(message))
+    {
+        const ATVMod::MsgConfigureVideoFileName& cfg = (ATVMod::MsgConfigureVideoFileName&) message;
+        ui->videoFileText->setText(cfg.getFileName());
         return true;
     }
     else
@@ -475,7 +497,7 @@ void ATVModGUI::on_forceDecimator_toggled(bool checked)
 void ATVModGUI::on_imageFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open image file"), ".", tr("Image Files (*.png *.jpg *.bmp *.gif *.tiff)"));
+        tr("Open image file"), ".", tr("Image Files (*.png *.jpg *.bmp *.gif *.tiff)"), 0, QFileDialog::DontUseNativeDialog);
 
     if (fileName != "")
     {
@@ -488,7 +510,7 @@ void ATVModGUI::on_imageFileDialog_clicked(bool checked __attribute__((unused)))
 void ATVModGUI::on_videoFileDialog_clicked(bool checked __attribute__((unused)))
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open video file"), ".", tr("Video Files (*.avi *.mpg *.mp4 *.mov *.m4v *.mkv *.vob *.wmv)"));
+        tr("Open video file"), ".", tr("Video Files (*.avi *.mpg *.mp4 *.mov *.m4v *.mkv *.vob *.wmv)"), 0, QFileDialog::DontUseNativeDialog);
 
     if (fileName != "")
     {
@@ -554,15 +576,14 @@ void ATVModGUI::on_cameraManualFPS_valueChanged(int value)
 
 void ATVModGUI::on_overlayTextShow_toggled(bool checked)
 {
-    ATVMod::MsgConfigureShowOverlayText* message = ATVMod::MsgConfigureShowOverlayText::create(checked);
-    m_atvMod->getInputMessageQueue()->push(message);
+    m_settings.m_showOverlayText = checked;
+    applySettings();
 }
 
 void ATVModGUI::on_overlayText_textEdited(const QString& arg1 __attribute__((unused)))
 {
     m_settings.m_overlayText = arg1;
-    ATVMod::MsgConfigureOverlayText* message = ATVMod::MsgConfigureOverlayText::create(ui->overlayText->text());
-    m_atvMod->getInputMessageQueue()->push(message);
+    applySettings();
 }
 
 void ATVModGUI::configureImageFileName()
@@ -583,6 +604,22 @@ void ATVModGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rol
 {
 }
 
+void ATVModGUI::onMenuDialogCalled(const QPoint &p)
+{
+    BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.move(p);
+    dialog.exec();
+
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+    m_settings.m_title = m_channelMarker.getTitle();
+
+    setWindowTitle(m_settings.m_title);
+    setTitleColor(m_settings.m_rgbColor);
+
+    applySettings();
+}
+
 ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::ATVModGUI),
@@ -601,6 +638,7 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_atvMod = (ATVMod*) channelTx; //new ATVMod(m_deviceUISet->m_deviceSinkAPI);
 	m_atvMod->setMessageQueueToGUI(getInputMessageQueue());
@@ -616,8 +654,6 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_channelMarker.setBandwidth(5000);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setTitle("ATV Modulator");
-    m_channelMarker.setUDPAddress("127.0.0.1");
-    m_channelMarker.setUDPSendPort(9999);
 	m_channelMarker.blockSignals(false);
 	m_channelMarker.setVisible(true); // activate signal on the last setting only
 
@@ -678,6 +714,7 @@ void ATVModGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setTitle(m_settings.m_title);
     setChannelMarkerBandwidth();
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
@@ -724,9 +761,11 @@ void ATVModGUI::displaySettings()
     ui->uniformLevelText->setText(QString("%1").arg(ui->uniformLevel->value()));
 
     ui->overlayText->setText(m_settings.m_overlayText);
+    ui->overlayTextShow->setChecked(m_settings.m_showOverlayText);
 
-    ATVMod::MsgConfigureOverlayText* message = ATVMod::MsgConfigureOverlayText::create(ui->overlayText->text());
-    m_atvMod->getInputMessageQueue()->push(message);
+    ui->playCamera->setChecked(m_settings.m_cameraPlay);
+    ui->playVideo->setChecked(m_settings.m_videoPlay);
+    ui->playLoop->setChecked(m_settings.m_videoPlayLoop);
 
     blockApplySettings(false);
 }
@@ -758,7 +797,7 @@ void ATVModGUI::updateWithStreamData()
 {
     QTime recordLength(0, 0, 0, 0);
     recordLength = recordLength.addSecs(m_videoLength / m_videoFrameRate);
-    QString s_time = recordLength.toString("hh:mm:ss");
+    QString s_time = recordLength.toString("HH:mm:ss");
     ui->recordLengthText->setText(s_time);
     updateWithStreamTime();
 }
@@ -778,8 +817,8 @@ void ATVModGUI::updateWithStreamTime()
     QTime t(0, 0, 0, 0);
     t = t.addSecs(t_sec);
     t = t.addMSecs(t_msec);
-    QString s_timems = t.toString("hh:mm:ss.zzz");
-    QString s_time = t.toString("hh:mm:ss");
+    QString s_timems = t.toString("HH:mm:ss.zzz");
+    QString s_time = t.toString("HH:mm:ss");
     ui->relTimeText->setText(s_timems);
 
     if (!m_enableNavTime)

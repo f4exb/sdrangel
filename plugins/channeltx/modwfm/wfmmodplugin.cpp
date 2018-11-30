@@ -15,16 +15,17 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtPlugin>
-#include <QAction>
 #include "plugin/pluginapi.h"
 
+#ifndef SERVER_MODE
 #include "wfmmodgui.h"
+#endif
 #include "wfmmod.h"
 #include "wfmmodplugin.h"
 
 const PluginDescriptor WFMModPlugin::m_pluginDescriptor = {
     QString("WFM Modulator"),
-    QString("3.12.0"),
+    QString("4.1.0"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -50,10 +51,19 @@ void WFMModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerTxChannel(WFMMod::m_channelIdURI, WFMMod::m_channelId, this);
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* WFMModPlugin::createTxChannelGUI(
+        DeviceUISet *deviceUISet __attribute__((unused)),
+        BasebandSampleSource *txChannel __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* WFMModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
 {
     return WFMModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
+#endif
 
 BasebandSampleSource* WFMModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
 {

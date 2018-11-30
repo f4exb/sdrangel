@@ -20,23 +20,27 @@
 #include <device/devicesourceapi.h>
 #include "device/deviceuiset.h"
 #include <dsp/downchannelizer.h>
-#include <QDockWidget>
-#include <QMainWindow>
-#include <QDebug>
 
 #include "dsp/threadedbasebandsamplesink.h"
 #include "ui_dsddemodgui.h"
-#include "dsp/scopevis.h"
-#include "gui/glscope.h"
+#include "dsp/scopevisxy.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "gui/crightclickenabler.h"
+#include "gui/audioselectdialog.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 
 #include "dsddemodbaudrates.h"
 #include "dsddemod.h"
+
+#include <QDockWidget>
+#include <QMainWindow>
+#include <QDebug>
+
+#include <complex>
 
 DSDDemodGUI* DSDDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
@@ -99,9 +103,35 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool DSDDemodGUI::handleMessage(const Message& message __attribute__((unused)))
+bool DSDDemodGUI::handleMessage(const Message& message)
 {
-	return false;
+    if (DSDDemod::MsgConfigureDSDDemod::match(message))
+    {
+        qDebug("DSDDemodGUI::handleMessage: DSDDemod::MsgConfigureDSDDemod");
+        const DSDDemod::MsgConfigureDSDDemod& cfg = (DSDDemod::MsgConfigureDSDDemod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void DSDDemodGUI::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = getInputMessageQueue()->pop()) != 0)
+    {
+        if (handleMessage(*message))
+        {
+            delete message;
+        }
+    }
 }
 
 void DSDDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -129,7 +159,7 @@ void DSDDemodGUI::on_demodGain_valueChanged(int value)
 void DSDDemodGUI::on_fmDeviation_valueChanged(int value)
 {
     m_settings.m_fmDeviation = value * 100.0;
-    ui->fmDeviationText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
+    ui->fmDeviationText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(value / 10.0, 0, 'f', 1));
 	applySettings();
 }
 
@@ -156,6 +186,27 @@ void DSDDemodGUI::on_syncOrConstellation_toggled(bool checked)
 {
     m_settings.m_syncOrConstellation = checked;
     applySettings();
+}
+
+void DSDDemodGUI::on_traceLength_valueChanged(int value)
+{
+    m_settings.m_traceLengthMutliplier = value;
+    ui->traceLengthText->setText(QString("%1").arg(m_settings.m_traceLengthMutliplier*50));
+    m_scopeVisXY->setPixelsPerFrame(m_settings.m_traceLengthMutliplier*960); // 48000 / 50. Chunks of 50 ms.
+}
+
+void DSDDemodGUI::on_traceStroke_valueChanged(int value)
+{
+    m_settings.m_traceStroke = value;
+    ui->traceStrokeText->setText(QString("%1").arg(m_settings.m_traceStroke));
+    m_scopeVisXY->setStroke(m_settings.m_traceStroke);
+}
+
+void DSDDemodGUI::on_traceDecay_valueChanged(int value)
+{
+    m_settings.m_traceDecay = value;
+    ui->traceDecayText->setText(QString("%1").arg(m_settings.m_traceDecay));
+    m_scopeVisXY->setDecay(m_settings.m_traceDecay);
 }
 
 void DSDDemodGUI::on_slot1On_toggled(bool checked)
@@ -185,8 +236,8 @@ void DSDDemodGUI::on_squelchGate_valueChanged(int value)
 
 void DSDDemodGUI::on_squelch_valueChanged(int value)
 {
-	ui->squelchText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
-	m_settings.m_squelch = value / 10.0;
+	ui->squelchText->setText(QString("%1").arg(value / 1.0, 0, 'f', 0));
+	m_settings.m_squelch = value;
 	applySettings();
 }
 
@@ -213,18 +264,8 @@ void DSDDemodGUI::on_symbolPLLLock_toggled(bool checked)
     applySettings();
 }
 
-void DSDDemodGUI::on_udpOutput_toggled(bool checked)
-{
-    m_settings.m_copyAudioToUDP = checked;
-    applySettings();
-}
-
 void DSDDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
-	/*
-	if((widget == ui->spectrumContainer) && (DSDDemodGUI != NULL))
-		m_dsdDemod->setSpectrum(m_threadedSampleSink->getMessageQueue(), rollDown);
-	*/
 }
 
 void DSDDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -235,16 +276,19 @@ void DSDDemodGUI::onMenuDialogCalled(const QPoint &p)
     dialog.exec();
 
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
-    m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     m_settings.m_title = m_channelMarker.getTitle();
 
     setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);
-    displayUDPAddress();
 
     applySettings();
+}
+
+void DSDDemodGUI::on_viewStatusLog_clicked()
+{
+    qDebug("DSDDemodGUI::on_viewStatusLog_clicked");
+    m_dsdStatusTextDialog.exec();
 }
 
 DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
@@ -254,30 +298,46 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_doApplySettings(true),
-	m_signalFormat(signalFormatNone),
 	m_enableCosineFiltering(false),
 	m_syncOrConstellation(false),
 	m_slot1On(false),
 	m_slot2On(false),
 	m_tdmaStereo(false),
 	m_squelchOpen(false),
-	m_tickCount(0)
+	m_tickCount(0),
+	m_dsdStatusTextDialog(0)
 {
 	ui->setupUi(this);
+	ui->screenTV->setColor(true);
+	ui->screenTV->resizeTVScreen(200,200);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
+    connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
-	m_scopeVis = new ScopeVis(SDR_RX_SCALEF, ui->glScope);
+    CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
+
+	m_scopeVisXY = new ScopeVisXY(ui->screenTV);
+	m_scopeVisXY->setScale(2.0);
+	m_scopeVisXY->setPixelsPerFrame(4001);
+	m_scopeVisXY->setPlotRGB(qRgb(0, 220, 250));
+	m_scopeVisXY->setGridRGB(qRgb(255, 255, 128));
+
+	for (float x = -0.84; x < 1.0; x += 0.56)
+	{
+		for (float y = -0.84; y < 1.0; y += 0.56)
+		{
+			m_scopeVisXY->addGraticulePoint(std::complex<float>(x, y));
+		}
+	}
+
+	m_scopeVisXY->calculateGraticule(200,200);
+
 	m_dsdDemod = (DSDDemod*) rxChannel; //new DSDDemod(m_deviceUISet->m_deviceSourceAPI);
-	m_dsdDemod->setScopeSink(m_scopeVis);
+	m_dsdDemod->setScopeXYSink(m_scopeVisXY);
 	m_dsdDemod->setMessageQueueToGUI(getInputMessageQueue());
-
-    ui->glScope->setSampleRate(48000);
-    m_scopeVis->setSampleRate(48000);
-
-	ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -293,8 +353,6 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_channelMarker.setBandwidth(10000);
 	m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle("DSD Demodulator");
-    m_channelMarker.setUDPAddress("127.0.0.1");
-    m_channelMarker.setUDPSendPort(9999);
     m_channelMarker.blockSignals(false);
 	m_channelMarker.setVisible(true); // activate signal on the last setting only
 
@@ -305,10 +363,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
 
-	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
-
 	m_settings.setChannelMarker(&m_channelMarker);
-	m_settings.setScopeGUI(ui->scopeGUI);
 
 	updateMyPosition();
 	displaySettings();
@@ -319,7 +374,7 @@ DSDDemodGUI::~DSDDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
 	delete m_dsdDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
-	delete m_scopeVis;
+	delete m_scopeVisXY;
 	delete ui;
 }
 
@@ -336,11 +391,6 @@ void DSDDemodGUI::updateMyPosition()
     }
 }
 
-void DSDDemodGUI::displayUDPAddress()
-{
-    ui->udpOutput->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_settings.m_udpAddress).arg(m_settings.m_udpPort));
-}
-
 void DSDDemodGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
@@ -352,7 +402,6 @@ void DSDDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
-    displayUDPAddress();
 
     blockApplySettings(true);
 
@@ -362,10 +411,10 @@ void DSDDemodGUI::displaySettings()
     ui->rfBWText->setText(QString("%1k").arg(ui->rfBW->value() / 10.0, 0, 'f', 1));
 
     ui->fmDeviation->setValue(m_settings.m_fmDeviation / 100.0);
-    ui->fmDeviationText->setText(QString("%1k").arg(ui->fmDeviation->value() / 10.0, 0, 'f', 1));
+    ui->fmDeviationText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(ui->fmDeviation->value() / 10.0, 0, 'f', 1));
 
-    ui->squelch->setValue(m_settings.m_squelch * 10.0);
-    ui->squelchText->setText(QString("%1").arg(ui->squelch->value() / 10.0, 0, 'f', 1));
+    ui->squelch->setValue(m_settings.m_squelch);
+    ui->squelchText->setText(QString("%1").arg(ui->squelch->value() / 1.0, 0, 'f', 0));
 
     ui->squelchGate->setValue(m_settings.m_squelchGate);
     ui->squelchGateText->setText(QString("%1").arg(ui->squelchGate->value() * 10.0, 0, 'f', 0));
@@ -382,10 +431,22 @@ void DSDDemodGUI::displaySettings()
     ui->slot2On->setChecked(m_settings.m_slot2On);
     ui->tdmaStereoSplit->setChecked(m_settings.m_tdmaStereo);
     ui->audioMute->setChecked(m_settings.m_audioMute);
-    ui->udpOutput->setChecked(m_settings.m_copyAudioToUDP);
     ui->symbolPLLLock->setChecked(m_settings.m_pllLock);
+    ui->highPassFilter->setChecked(m_settings.m_highPassFilter);
 
     ui->baudRate->setCurrentIndex(DSDDemodBaudRates::getRateIndex(m_settings.m_baudRate));
+
+    ui->traceLength->setValue(m_settings.m_traceLengthMutliplier);
+    ui->traceLengthText->setText(QString("%1").arg(m_settings.m_traceLengthMutliplier*50));
+    m_scopeVisXY->setPixelsPerFrame(m_settings.m_traceLengthMutliplier*960); // 48000 / 50. Chunks of 50 ms.
+
+    ui->traceStroke->setValue(m_settings.m_traceStroke);
+    ui->traceStrokeText->setText(QString("%1").arg(m_settings.m_traceStroke));
+    m_scopeVisXY->setStroke(m_settings.m_traceStroke);
+
+    ui->traceDecay->setValue(m_settings.m_traceDecay);
+    ui->traceDecayText->setText(QString("%1").arg(m_settings.m_traceDecay));
+    m_scopeVisXY->setDecay(m_settings.m_traceDecay);
 
     blockApplySettings(false);
 }
@@ -420,145 +481,6 @@ void DSDDemodGUI::blockApplySettings(bool block)
 	m_doApplySettings = !block;
 }
 
-void DSDDemodGUI::formatStatusText()
-{
-    switch (m_dsdDemod->getDecoder().getSyncType())
-    {
-    case DSDcc::DSDDecoder::DSDSyncDMRDataMS:
-    case DSDcc::DSDDecoder::DSDSyncDMRDataP:
-    case DSDcc::DSDDecoder::DSDSyncDMRVoiceMS:
-    case DSDcc::DSDDecoder::DSDSyncDMRVoiceP:
-        if (m_signalFormat != signalFormatDMR)
-        {
-            strcpy(m_formatStatusText, "Sta: __ S1: __________________________ S2: __________________________");
-        }
-
-        switch (m_dsdDemod->getDecoder().getStationType())
-        {
-        case DSDcc::DSDDecoder::DSDBaseStation:
-            memcpy(&m_formatStatusText[5], "BS ", 3);
-            break;
-        case DSDcc::DSDDecoder::DSDMobileStation:
-            memcpy(&m_formatStatusText[5], "MS ", 3);
-            break;
-        default:
-            memcpy(&m_formatStatusText[5], "NA ", 3);
-            break;
-        }
-
-        memcpy(&m_formatStatusText[12], m_dsdDemod->getDecoder().getDMRDecoder().getSlot0Text(), 26);
-        memcpy(&m_formatStatusText[43], m_dsdDemod->getDecoder().getDMRDecoder().getSlot1Text(), 26);
-        m_signalFormat = signalFormatDMR;
-        break;
-    case DSDcc::DSDDecoder::DSDSyncDStarHeaderN:
-    case DSDcc::DSDDecoder::DSDSyncDStarHeaderP:
-    case DSDcc::DSDDecoder::DSDSyncDStarN:
-    case DSDcc::DSDDecoder::DSDSyncDStarP:
-        if (m_signalFormat != signalFormatDStar)
-        {
-                                     //           1    1    2    2    3    3    4    4    5    5    6    6    7    7    8
-                                     // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0..
-            strcpy(m_formatStatusText, "________/____>________|________>________|____________________|______:___/_____._");
-                                     // MY            UR       RPT1     RPT2     Info                 Loc    Target
-        }
-
-        {
-            const std::string& rpt1 = m_dsdDemod->getDecoder().getDStarDecoder().getRpt1();
-            const std::string& rpt2 = m_dsdDemod->getDecoder().getDStarDecoder().getRpt2();
-            const std::string& mySign = m_dsdDemod->getDecoder().getDStarDecoder().getMySign();
-            const std::string& yrSign = m_dsdDemod->getDecoder().getDStarDecoder().getYourSign();
-
-            if (rpt1.length() > 0) { // 0 or 8
-                memcpy(&m_formatStatusText[23], rpt1.c_str(), 8);
-            }
-            if (rpt2.length() > 0) { // 0 or 8
-                memcpy(&m_formatStatusText[32], rpt2.c_str(), 8);
-            }
-            if (yrSign.length() > 0) { // 0 or 8
-                memcpy(&m_formatStatusText[14], yrSign.c_str(), 8);
-            }
-            if (mySign.length() > 0) { // 0 or 13
-                memcpy(&m_formatStatusText[0], mySign.c_str(), 13);
-            }
-            memcpy(&m_formatStatusText[41], m_dsdDemod->getDecoder().getDStarDecoder().getInfoText(), 20);
-            memcpy(&m_formatStatusText[62], m_dsdDemod->getDecoder().getDStarDecoder().getLocator(), 6);
-            snprintf(&m_formatStatusText[69], 82-69, "%03d/%07.1f",
-                    m_dsdDemod->getDecoder().getDStarDecoder().getBearing(),
-                    m_dsdDemod->getDecoder().getDStarDecoder().getDistance());
-        }
-
-        m_formatStatusText[82] = '\0';
-        m_signalFormat = signalFormatDStar;
-        break;
-    case DSDcc::DSDDecoder::DSDSyncDPMR:
-        snprintf(m_formatStatusText, 82, "%s CC: %04d OI: %08d CI: %08d",
-                DSDcc::DSDdPMR::dpmrFrameTypes[(int) m_dsdDemod->getDecoder().getDPMRDecoder().getFrameType()],
-                m_dsdDemod->getDecoder().getDPMRDecoder().getColorCode(),
-                m_dsdDemod->getDecoder().getDPMRDecoder().getOwnId(),
-                m_dsdDemod->getDecoder().getDPMRDecoder().getCalledId());
-        m_signalFormat = signalFormatDPMR;
-        break;
-    case DSDcc::DSDDecoder::DSDSyncYSF:
-        //           1    1    2    2    3    3    4    4    5    5    6    6    7    7    8
-        // 0....5....0....5....0....5....0....5....0....5....0....5....0....5....0....5....0..
-        // C V2 RI 0:7 WL000|ssssssssss>dddddddddd |UUUUUUUUUU>DDDDDDDDDD|44444
-    	if (m_dsdDemod->getDecoder().getYSFDecoder().getFICHError() == DSDcc::DSDYSF::FICHNoError)
-    	{
-            snprintf(m_formatStatusText, 82, "%s ", DSDcc::DSDYSF::ysfChannelTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameInformation()]);
-    	}
-    	else
-    	{
-            snprintf(m_formatStatusText, 82, "%d ", (int) m_dsdDemod->getDecoder().getYSFDecoder().getFICHError());
-    	}
-
-        snprintf(&m_formatStatusText[2], 80, "%s %s %d:%d %c%c",
-                DSDcc::DSDYSF::ysfDataTypeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getDataType()],
-                DSDcc::DSDYSF::ysfCallModeText[(int) m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getCallMode()],
-				m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getBlockTotal(),
-				m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getFrameTotal(),
-				(m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isNarrowMode() ? 'N' : 'W'),
-				(m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isInternetPath() ? 'I' : 'L'));
-
-        if (m_dsdDemod->getDecoder().getYSFDecoder().getFICH().isSquelchCodeEnabled())
-    	{
-            snprintf(&m_formatStatusText[14], 82-14, "%03d", m_dsdDemod->getDecoder().getYSFDecoder().getFICH().getSquelchCode());
-    	}
-    	else
-    	{
-            strncpy(&m_formatStatusText[14], "---", 82-14);
-    	}
-
-        char dest[13];
-
-        if ( m_dsdDemod->getDecoder().getYSFDecoder().radioIdMode())
-        {
-            snprintf(dest, 12, "%-5s:%-5s",
-                    m_dsdDemod->getDecoder().getYSFDecoder().getDestId(),
-                    m_dsdDemod->getDecoder().getYSFDecoder().getSrcId());
-        }
-        else
-        {
-            snprintf(dest, 11, "%-10s", m_dsdDemod->getDecoder().getYSFDecoder().getDest());
-        }
-
-        snprintf(&m_formatStatusText[17], 82-17, "|%-10s>%s|%-10s>%-10s|%-5s",
-                m_dsdDemod->getDecoder().getYSFDecoder().getSrc(),
-                dest,
-                m_dsdDemod->getDecoder().getYSFDecoder().getUplink(),
-                m_dsdDemod->getDecoder().getYSFDecoder().getDownlink(),
-                m_dsdDemod->getDecoder().getYSFDecoder().getRem4());
-
-        m_signalFormat = signalFormatYSF;
-    	break;
-    default:
-        m_signalFormat = signalFormatNone;
-        m_formatStatusText[0] = '\0';
-        break;
-    }
-
-    m_formatStatusText[82] = '\0'; // guard
-}
-
 void DSDDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
@@ -569,6 +491,19 @@ void DSDDemodGUI::channelMarkerChangedByCursor()
 void DSDDemodGUI::channelMarkerHighlightedByCursor()
 {
     setHighlighted(m_channelMarker.getHighlighted());
+}
+
+void DSDDemodGUI::audioSelect()
+{
+    qDebug("DSDDemodGUI::audioSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
 }
 
 void DSDDemodGUI::tick()
@@ -632,10 +567,14 @@ void DSDDemodGUI::tick()
 
 	    ui->syncText->setText(QString(frameTypeText));
 
-	    formatStatusText();
-	    ui->formatStatusText->setText(QString(m_formatStatusText));
+	    const char *formatStatusText = m_dsdDemod->updateAndGetStatusText();
+	    ui->formatStatusText->setText(QString(formatStatusText));
 
-	    if (m_formatStatusText[0] == '\0') {
+	    if (ui->activateStatusLog->isChecked()) {
+	        m_dsdStatusTextDialog.addLine(QString(formatStatusText));
+	    }
+
+	    if (formatStatusText[0] == '\0') {
 	        ui->formatStatusText->setStyleSheet("QLabel { background:rgb(53,53,53); }"); // turn off background
 	    } else {
             ui->formatStatusText->setStyleSheet("QLabel { background:rgb(37,53,39); }"); // turn on background

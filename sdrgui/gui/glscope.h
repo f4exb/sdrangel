@@ -1,9 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 F4EXB                                                      //
+// Copyright (C) 2017 F4EXB                                                      //
 // written by Edouard Griffiths                                                  //
-//                                                                               //
-// OpenGL interface modernization.                                               //
-// See: http://doc.qt.io/qt-5/qopenglshaderprogram.html                          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_GLSCOPE_H
-#define INCLUDE_GLSCOPE_H
+#ifndef SDRBASE_GUI_GLSCOPENG_H_
+#define SDRBASE_GUI_GLSCOPENG_H_
 
 #include <QGLWidget>
 #include <QPen>
@@ -32,154 +29,145 @@
 #include "gui/scaleengine.h"
 #include "gui/glshadersimple.h"
 #include "gui/glshadertextured.h"
-#include "util/export.h"
+#include "export.h"
 #include "util/bitfieldindex.h"
+#include "util/incrementalarray.h"
 
-class ScopeVis;
 class QPainter;
 
-class SDRANGEL_API GLScope: public QGLWidget {
-	Q_OBJECT
+class SDRGUI_API GLScope: public QGLWidget {
+    Q_OBJECT
 
 public:
-	enum Mode {
-		ModeIQ,
-		ModeMagLinPha,
-		ModeMagdBPha,
-		ModeMagLinDPha,
-		ModeMagdBDPha,
-		ModeDerived12,
-		ModeCyclostationary,
-		ModeIQPolar
-	};
+    enum DisplayMode {
+        DisplayXYH,
+        DisplayXYV,
+        DisplayX,
+        DisplayY,
+        DisplayPol
+    };
 
-	enum Displays {
-		DisplayBoth,
-		DisplayFirstOnly,
-		DisplaySecondOnly
-	};
+    GLScope(QWidget* parent = 0);
+    virtual ~GLScope();
 
-	GLScope(QWidget* parent = NULL);
-	~GLScope();
+    void connectTimer(const QTimer& timer);
 
-//	void setDSPEngine(DSPEngine* dspEngine);
-	void setAmp1(Real amp);
-	void setAmp1Ofs(Real ampOfs);
-	void setAmp2(Real amp);
-	void setAmp2Ofs(Real ampOfs);
-	void setTimeBase(int timeBase);
-	void setTimeOfsProMill(int timeOfsProMill);
-	void setMode(Mode mode);
-	void setDisplays(Displays displays);
-	void setOrientation(Qt::Orientation orientation);
-	void setDisplayGridIntensity(int intensity);
-	void setDisplayTraceIntensity(int intensity);
-	void setTriggerChannel(ScopeVis::TriggerChannel triggerChannel);
-	void setTriggerLevel(Real triggerLevel);
-	void setTriggerPre(Real triggerPre);
-	void setMemHistoryShift(int value);
+    void setTraces(std::vector<ScopeVis::TraceData>* tracesData, std::vector<float *>* traces);
+    void newTraces(std::vector<float *>* traces);
 
-	void newTrace(const std::vector<Complex>& trace, int sampleRate);
-	int getTraceSize() const { return m_rawTrace[m_memTraceIndex - m_memTraceHistory].size(); }
+    int getSampleRate() const { return m_sampleRate; }
+    int getTraceSize() const { return m_traceSize; }
 
-	void setSampleRate(int sampleRate);
-	int getSampleRate() const {	return m_sampleRates[m_memTraceIndex - m_memTraceHistory]; }
-	Mode getDataMode() const { return m_mode; }
-	void connectTimer(const QTimer& timer);
+    void setTriggerPre(uint32_t triggerPre, bool emitSignal = false); //!< number of samples
+    void setTimeOfsProMill(int timeOfsProMill);
+    void setSampleRate(int sampleRate);
+    void setTimeBase(int timeBase);
+    void setFocusedTraceIndex(uint32_t traceIndex);
+    void setDisplayMode(DisplayMode displayMode);
+    void setTraceSize(int trceSize, bool emitSignal = false);
+    void updateDisplay();
+    void setDisplayGridIntensity(int intensity);
+    void setDisplayTraceIntensity(int intensity);
+    void setFocusedTriggerData(ScopeVis::TriggerData& triggerData) { m_focusedTriggerData = triggerData; }
+    void setConfigChanged() { m_configChanged = true; }
+    //void incrementTraceCounter() { m_traceCounter++; }
 
-	static const int m_memHistorySizeLog2 = 5;
+    bool getDataChanged() const { return m_dataChanged; }
+    DisplayMode getDisplayMode() const { return m_displayMode; }
+    void setDisplayXYPoints(bool value) { m_displayXYPoints = value; }
 
 signals:
-	void traceSizeChanged(int);
-	void sampleRateChanged(int);
+    void sampleRateChanged(int);
+    void traceSizeChanged(uint32_t);
+    void preTriggerChanged(uint32_t); //!< number of samples
 
 private:
-	// state
-	QTimer m_timer;
-	QMutex m_mutex;
-	bool m_dataChanged;
-	bool m_configChanged;
-	Mode m_mode;
-	Displays m_displays;
-	Qt::Orientation m_orientation;
+    std::vector<ScopeVis::TraceData> *m_tracesData;
+    std::vector<float *> *m_traces;
+    ScopeVis::TriggerData m_focusedTriggerData;
+    //int m_traceCounter;
+    uint32_t m_bufferIndex;
+    DisplayMode m_displayMode;
+    QTimer m_timer;
+    QMutex m_mutex;
+    bool m_dataChanged;
+    bool m_configChanged;
+    int m_sampleRate;
+    int m_timeOfsProMill;
+    uint32_t m_triggerPre;
+    int m_traceSize;
+    int m_timeBase;
+    int m_timeOffset;
+    uint32_t m_focusedTraceIndex;
 
-	// traces
-	std::vector<Complex> m_rawTrace[1<<m_memHistorySizeLog2];
-	int m_sampleRates[1<<m_memHistorySizeLog2];
-	BitfieldIndex<m_memHistorySizeLog2> m_memTraceIndex;   //!< current index of trace being written
-	BitfieldIndex<m_memHistorySizeLog2> m_memTraceHistory; //!< trace index shift into history
-	int m_memTraceIndexMax;
-	bool m_memTraceRecall;
-	std::vector<Complex> m_mathTrace;
-	std::vector<Complex>* m_displayTrace;
-	std::vector<Real> m_powTrace;
-	Real m_maxPow;
-	Real m_sumPow;
-	int m_oldTraceSize;
-	int m_sampleRate;
-	Real m_amp1;
-	Real m_amp2;
-	Real m_ofs1;
-	Real m_ofs2;
+    // graphics stuff
+    QRectF m_glScopeRect1;
+    QRectF m_glScopeRect2;
+    QMatrix4x4 m_glScopeMatrix1;
+    QMatrix4x4 m_glScopeMatrix2;
+    QMatrix4x4 m_glLeft1ScaleMatrix;
+    QMatrix4x4 m_glRight1ScaleMatrix;
+    QMatrix4x4 m_glLeft2ScaleMatrix;
+    QMatrix4x4 m_glBot1ScaleMatrix;
+    QMatrix4x4 m_glBot2ScaleMatrix;
 
-	// config
-	int m_timeBase;
-	int m_timeOfsProMill;
-	ScopeVis::TriggerChannel m_triggerChannel;
-	Real m_triggerLevel;
-	Real m_triggerPre;
-	Real m_triggerLevelDis1;
-	Real m_triggerLevelDis2;
-	int m_nbPow;
-	Real m_prevArg;
+    QPixmap m_left1ScalePixmap;
+    QPixmap m_left2ScalePixmap;
+    QPixmap m_bot1ScalePixmap;
+    QPixmap m_bot2ScalePixmap;
+    QPixmap m_channelOverlayPixmap1;
+    QPixmap m_channelOverlayPixmap2;
 
-	// graphics stuff
-	QRectF m_glScopeRect1;
-	QRectF m_glScopeRect2;
-	QMatrix4x4 m_glScopeMatrix1;
-	QMatrix4x4 m_glScopeMatrix2;
-	QMatrix4x4 m_glLeft1ScaleMatrix;
-	QMatrix4x4 m_glRight1ScaleMatrix;
-	QMatrix4x4 m_glLeft2ScaleMatrix;
-	QMatrix4x4 m_glBot1ScaleMatrix;
-	QMatrix4x4 m_glBot2ScaleMatrix;
+    int m_displayGridIntensity;
+    int m_displayTraceIntensity;
+    bool m_displayXYPoints;
 
-	QPixmap m_left1ScalePixmap;
-	QPixmap m_left2ScalePixmap;
-	QPixmap m_bot1ScalePixmap;
-	QPixmap m_bot2ScalePixmap;
-	QPixmap m_powerOverlayPixmap1;
+    ScaleEngine m_x1Scale; //!< Display #1 X scale. Time scale
+    ScaleEngine m_x2Scale; //!< Display #2 X scale. Time scale
+    ScaleEngine m_y1Scale; //!< Display #1 Y scale. Always connected to trace #0 (X trace)
+    ScaleEngine m_y2Scale; //!< Display #2 Y scale. Connected to highlighted Y trace (#1..n)
 
-	int m_displayGridIntensity;
-	int m_displayTraceIntensity;
+    QFont m_channelOverlayFont;
 
-	ScaleEngine m_x1Scale;
-	ScaleEngine m_x2Scale;
-	ScaleEngine m_y1Scale;
-	ScaleEngine m_y2Scale;
+    GLShaderSimple m_glShaderSimple;
+    GLShaderTextured m_glShaderLeft1Scale;
+    GLShaderTextured m_glShaderBottom1Scale;
+    GLShaderTextured m_glShaderLeft2Scale;
+    GLShaderTextured m_glShaderBottom2Scale;
+    GLShaderTextured m_glShaderPowerOverlay;
 
-	QFont m_powerOverlayFont;
+    IncrementalArray<GLfloat> m_q3Polar;
+    IncrementalArray<GLfloat> m_q3TickY1;
+    IncrementalArray<GLfloat> m_q3TickY2;
+    IncrementalArray<GLfloat> m_q3TickX1;
+    IncrementalArray<GLfloat> m_q3TickX2;
 
-	GLShaderSimple m_glShaderSimple;
-	GLShaderTextured m_glShaderLeft1Scale;
-	GLShaderTextured m_glShaderBottom1Scale;
-	GLShaderTextured m_glShaderLeft2Scale;
-	GLShaderTextured m_glShaderBottom2Scale;
-	GLShaderTextured m_glShaderPowerOverlay;
+    static const int m_topMargin = 5;
+    static const int m_botMargin = 20;
+    static const int m_leftMargin = 35;
+    static const int m_rightMargin = 5;
 
-	void initializeGL();
-	void resizeGL(int width, int height);
-	void paintGL();
+    void initializeGL();
+    void resizeGL(int width, int height);
+    void paintGL();
 
-	void mousePressEvent(QMouseEvent*);
+    void applyConfig();
+    void setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex);
+    void setUniqueDisplays();     //!< Arrange displays when X and Y are unique on screen
+    void setVerticalDisplays();   //!< Arrange displays when X and Y are stacked vertically
+    void setHorizontalDisplays(); //!< Arrange displays when X and Y are stacked horizontally
+    void setPolarDisplays();      //!< Arrange displays when X and Y are stacked over on the left and polar display is on the right
 
-	void handleMode();
-	void applyConfig();
-	void drawPowerOverlay();
+    void drawChannelOverlay(      //!< Draws a text overlay
+            const QString& text,
+            const QColor& color,
+            QPixmap& channelOverlayPixmap,
+            const QRectF& glScopeRect);
 
 protected slots:
-	void cleanup();
-	void tick();
+    void cleanup();
+    void tick();
+
 };
 
-#endif // INCLUDE_GLSCOPE_H
+#endif /* SDRBASE_GUI_GLSCOPENG_H_ */

@@ -21,10 +21,19 @@
 #include <QString>
 #include <stdint.h>
 
-struct Serializable;
+class Serializable;
 
 struct SSBModSettings
 {
+    typedef enum
+    {
+        SSBModInputNone,
+        SSBModInputTone,
+        SSBModInputFile,
+        SSBModInputAudio,
+        SSBModInputCWTone
+    } SSBModInputAF;
+
     static const int m_nbAGCTimeConstants;
     static const int m_agcTimeConstant[];
 
@@ -34,7 +43,6 @@ struct SSBModSettings
     bool m_usb;
     float m_toneFrequency;
     float m_volumeFactor;
-    quint32 m_audioSampleRate;
     int  m_spanLog2;
     bool m_audioBinaural;
     bool m_audioFlipChannels;
@@ -50,10 +58,9 @@ struct SSBModSettings
     int m_agcThresholdDelay;
     quint32 m_rgbColor;
 
-    QString m_udpAddress;
-    uint16_t m_udpPort;
-
     QString m_title;
+    SSBModInputAF m_modAFInput;
+    QString m_audioDeviceName;
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;

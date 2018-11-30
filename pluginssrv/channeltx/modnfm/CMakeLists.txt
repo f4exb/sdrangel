@@ -28,16 +28,14 @@ add_definitions(-DQT_SHARED)
 add_library(modnfmsrv SHARED
 	${modnfm_SOURCES}
 	${modnfm_HEADERS_MOC}
-	${modnfm_FORMS_HEADERS}
 )
 
 target_link_libraries(modnfmsrv
 	${QT_LIBRARIES}
 	sdrbase
-	sdrgui
 	swagger
 )
 
-qt5_use_modules(modnfmsrv Core)
+target_link_libraries(modnfmsrv Qt5::Core)
 
 install(TARGETS modnfmsrv DESTINATION lib/pluginssrv/channeltx)

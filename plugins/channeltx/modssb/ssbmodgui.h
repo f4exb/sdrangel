@@ -77,7 +77,6 @@ private:
     int m_samplesCount;
     std::size_t m_tickCount;
     bool m_enableNavTime;
-    SSBMod::SSBModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
     QIcon m_iconDSBUSB;
@@ -88,7 +87,7 @@ private:
 
     bool blockApplySettings(bool block);
     void applySettings(bool force = false);
-    void applyBandwidths(bool force = false);
+    void applyBandwidths(int spanLog2, bool force = false);
     void displaySettings();
     void displayAGCPowerThreshold();
     void updateWithStreamData();
@@ -127,8 +126,10 @@ private slots:
     void on_showFileDialog_clicked(bool checked);
 
     void onWidgetRolled(QWidget* widget, bool rollDown);
+    void onMenuDialogCalled(const QPoint& p);
 
     void configureFileName();
+    void audioSelect();
     void tick();
 };
 

@@ -31,4 +31,13 @@ RtlSdrSettings:
       format: int64      
     rfBandwidth:
       type: integer
-    
+    fileRecordName:
+      type: string
+
+RtlSdrReport:
+  description: RTLSDR
+  properties:
+    gains:
+      type: array
+      items:
+        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Gain"

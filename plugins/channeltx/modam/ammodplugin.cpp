@@ -15,16 +15,17 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtPlugin>
-#include <QAction>
 #include "plugin/pluginapi.h"
 
+#ifndef SERVER_MODE
 #include "ammodgui.h"
+#endif
 #include "ammod.h"
 #include "ammodplugin.h"
 
 const PluginDescriptor AMModPlugin::m_pluginDescriptor = {
     QString("AM Modulator"),
-    QString("3.12.0"),
+    QString("4.1.0"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -50,10 +51,19 @@ void AMModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerTxChannel(AMMod::m_channelIdURI, AMMod::m_channelId, this);
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* AMModPlugin::createTxChannelGUI(
+        DeviceUISet *deviceUISet __attribute__((unused)),
+        BasebandSampleSource *txChannel __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* AMModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
 {
 	return AMModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
+#endif
 
 BasebandSampleSource* AMModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
 {

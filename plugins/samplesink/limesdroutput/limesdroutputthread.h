@@ -42,7 +42,6 @@ public:
     virtual void setDeviceSampleRate(int __attribute__((unused)) sampleRate) {}
     virtual bool isRunning() { return m_running; }
     void setLog2Interpolation(unsigned int log2_ioterp);
-    void setFcPos(int fcPos);
 
 private:
     QMutex m_startWaitMutex;
@@ -54,7 +53,6 @@ private:
     SampleSourceFifo* m_sampleFifo;
 
     unsigned int m_log2Interp; // soft decimation
-    int m_fcPos;
 
     Interpolators<qint16, SDR_TX_SAMP_SZ, 12> m_interpolators;
 

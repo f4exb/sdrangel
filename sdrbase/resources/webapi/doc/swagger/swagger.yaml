@@ -1,29 +1,28 @@
 swagger: "2.0"
 info:
   description: >
-    This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube 
-    
+    This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube
+
       ---
-      Limitations and specifcities: 
-      
+      Limitations and specifcities:
+
       * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.
-      * Stopping instance i.e. /sdrangel with DELETE method is a server only feature. It allows stopping the instance nicely.
       * Preset import and export from/to file is a server only feature.
       * Device set focus is a GUI only feature.
-      * The following channels are not implemented (status 501 is returned): ATV demodulator, Channel Analyzer, Channel Analyzer NG, LoRa demodulator, TCP source
-      * The content type returned is always application/json except in the following cases:
-        * An incorrect URL was specified: this document is returned as text/html with a status 400
+      * The following channels are not implemented (status 501 is returned): ATV and DATV demodulators, Channel Analyzer NG, LoRa demodulator
+      * The device settings and report structures contains only the sub-structure corresponding to the device type. The DeviceSettings and DeviceReport structures documented here shows all of them but only one will be or should be present at a time
+      * The channel settings and report structures contains only the sub-structure corresponding to the channel type. The ChannelSettings and ChannelReport structures documented here shows all of them but only one will be or should be present at a time
 
       ---
 
-  version: "4.0.0"
+  version: "4.2.0"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
     email: "f4exb06@gmail.com"
-# basePath prefixes all resource paths 
+# basePath prefixes all resource paths
 basePath: /
-# 
+#
 schemes:
   # tip: remove http to make production-grade
   - http
@@ -33,7 +32,7 @@ consumes:
 # format of the responses to the client (Accepts)
 produces:
   - application/json
-  
+
 paths:
 
   /sdrangel:
@@ -75,7 +74,7 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
   /sdrangel/devices:
     x-swagger-router-controller: instance
     get:
@@ -98,7 +97,7 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
   /sdrangel/channels:
     x-swagger-router-controller: instance
     get:
@@ -121,7 +120,7 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
   /sdrangel/logging:
     x-swagger-router-controller: instance
     get:
@@ -143,7 +142,7 @@ paths:
       operationId: instanceLoggingPut
       tags:
         - Instance
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: body
@@ -165,7 +164,7 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
   /sdrangel/audio:
     x-swagger-router-controller: instance
     get:
@@ -182,30 +181,156 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
+
+  /sdrangel/audio/input/parameters:
+    x-swagger-router-controller: instance
     patch:
-      description: Set audio devices
-      operationId: instanceAudioPatch
+      description: Set audio input device paramaters
+      operationId: instanceAudioInputPatch
       tags:
         - Instance
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: body
           in: body
-          description: Select audio devices to use for this instance
+          description: Audio input parameters. Index is used to identify the device. Only settable fields are considered.
           required: true
           schema:
-            $ref: "#/definitions/AudioDevicesSelect"
+            $ref: "#/definitions/AudioInputDevice"
       responses:
         "200":
-          description: Success
+          description: Success. Returns actual data in particular the actual sample rate.
           schema:
-            $ref: "#/definitions/AudioDevicesSelect"
+            $ref: "#/definitions/AudioInputDevice"
+        "404":
+          description: Audio input device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "500":
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+    delete:
+      description: Delete audio input device paramaters and return to defaults
+      operationId: instanceAudioInputDelete
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Audio input parameters. Index is used to identify the device.
+          required: true
+          schema:
+            $ref: "#/definitions/AudioInputDevice"
+      responses:
+        "200":
+          description: Success. Returns default parameters.
+          schema:
+            $ref: "#/definitions/AudioInputDevice"
+        "404":
+          description: Audio input device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+
+  /sdrangel/audio/input/cleanup:
+    x-swagger-router-controller: instance
+    patch:
+      description: Remove registered parameters for devices not in  list of available input devices for this instance
+      operationId: instanceAudioInputCleanupPatch
+      tags:
+        - Instance
+      responses:
+        "200":
+          description: Success.
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/audio/output/parameters:
+    x-swagger-router-controller: instance
+    patch:
+      description: Set audio output device parameters
+      operationId: instanceAudioOutputPatch
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Audio output parameters. Index is used to identify the device. Only settable fields are considered.
+          required: true
+          schema:
+            $ref: "#/definitions/AudioOutputDevice"
+      responses:
+        "200":
+          description: Success. Returns actual data in particular the actual sample rate.
+          schema:
+            $ref: "#/definitions/AudioOutputDevice"
+        "404":
+          description: Audio output device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    delete:
+      description: Delete audio output device paramaters and return to defaults
+      operationId: instanceAudioOutputDelete
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Audio output parameters. Index is used to identify the device.
+          required: true
+          schema:
+            $ref: "#/definitions/AudioOutputDevice"
+      responses:
+        "200":
+          description: Success. Returns actual data in particular the actual sample rate.
+          schema:
+            $ref: "#/definitions/AudioOutputDevice"
+        "404":
+          description: Audio output device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/audio/output/cleanup:
+    x-swagger-router-controller: instance
+    patch:
+      description: Remove registered parameters for devices not in  list of available output devices for this instance
+      operationId: instanceAudioOutputCleanupPatch
+      tags:
+        - Instance
+      responses:
+        "200":
+          description: Success.
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
   /sdrangel/location:
     x-swagger-router-controller: instance
     get:
@@ -227,7 +352,7 @@ paths:
       operationId: instanceLocationPut
       tags:
         - Instance
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: body
@@ -247,9 +372,23 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
   /sdrangel/dvserial:
     x-swagger-router-controller: instance
+    get:
+      description: Get DV serial processing parameters for AMBE frames decoding in digital voice modes
+      operationId: instanceDVSerialGet
+      tags:
+        - Instance
+      responses:
+        "200":
+          description: On success return list of devices or empty list if unset
+          schema:
+            $ref: "#/definitions/DVSeralDevices"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
     patch:
       description: Set or reset DV serial processing for AMBE frames decoding in digital voice modes
       operationId: instanceDVSerialPatch
@@ -270,7 +409,7 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
   /sdrangel/presets:
     x-swagger-router-controller: instance
     get:
@@ -287,7 +426,7 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
   /sdrangel/preset:
     x-swagger-router-controller: instance
     patch:
@@ -295,7 +434,7 @@ paths:
       operationId: instancePresetPatch
       tags:
         - Instance
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: body
@@ -326,7 +465,7 @@ paths:
       operationId: instancePresetPut
       tags:
         - Instance
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: body
@@ -357,7 +496,7 @@ paths:
       operationId: instancePresetPost
       tags:
         - Instance
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: body
@@ -392,7 +531,7 @@ paths:
       operationId: instancePresetDelete
       tags:
         - Instance
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: body
@@ -418,7 +557,7 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
   /sdrangel/preset/file:
     x-swagger-router-controller: instance
     put:
@@ -426,7 +565,7 @@ paths:
       operationId: instancePresetFilePut
       tags:
         - Instance
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: body
@@ -457,7 +596,7 @@ paths:
       operationId: instancePresetFilePost
       tags:
         - Instance
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: body
@@ -483,7 +622,7 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
   /sdrangel/devicesets:
     x-swagger-router-controller: instance
     get:
@@ -541,7 +680,7 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
   /sdrangel/deviceset/{deviceSetIndex}:
     x-swagger-router-controller: deviceset
     get:
@@ -568,7 +707,7 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
   /sdrangel/deviceset/{deviceSetIndex}/focus:
     x-swagger-router-controller: deviceset
     patch:
@@ -599,7 +738,7 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
   /sdrangel/deviceset/{deviceSetIndex}/device:
     x-swagger-router-controller: deviceset
     put:
@@ -636,7 +775,7 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
   /sdrangel/deviceset/{deviceSetIndex}/device/settings:
     x-swagger-router-controller: deviceset
     get:
@@ -723,7 +862,7 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
   /sdrangel/deviceset/{deviceSetIndex}/device/run:
     x-swagger-router-controller: deviceset
     get:
@@ -810,7 +949,71 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
+  /sdrangel/deviceset/{deviceSetIndex}/device/report:
+    x-swagger-router-controller: deviceset
+    get:
+      description: get the device report
+      operationId: devicesetDeviceReportGet
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+      responses:
+        "200":
+          description: On success return device report
+          schema:
+            $ref: "#/definitions/DeviceReport"
+        "400":
+          description: Invalid device set
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+
+  /sdrangel/deviceset/{deviceSetIndex}/channels/report:
+    x-swagger-router-controller: deviceset
+    get:
+      description: get channels report
+      operationId: devicesetChannelsReportGet
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+      responses:
+        "200":
+          description: On success return channels report information
+          schema:
+            $ref: "#/definitions/ChannelsDetail"
+        "400":
+          description: Invalid device set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+
   /sdrangel/deviceset/{deviceSetIndex}/channel:
     x-swagger-router-controller: deviceset
     post:
@@ -847,7 +1050,7 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
   /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}:
     delete:
       description: delete channel (server only)
@@ -882,7 +1085,7 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
   /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings:
     x-swagger-router-controller: deviceset
     get:
@@ -996,10 +1199,46 @@ paths:
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
-          
+
+  /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/report:
+    x-swagger-router-controller: deviceset
+    get:
+      description: get a channel report
+      operationId: devicesetChannelReportGet
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - in: path
+          name: channelIndex
+          type: integer
+          required: true
+          description: Index of the channel in the channels list for this device set
+      responses:
+        "200":
+          description: On success return channel report
+          schema:
+            $ref: "#/definitions/ChannelReport"
+        "400":
+          description: Invalid device set or channel index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device or channel not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
   /swagger:
     x-swagger-pipe: swagger_raw
-    
+
 # complex objects have schema definitions
 definitions:
 
@@ -1013,6 +1252,8 @@ definitions:
       - pid
       - appname
       - devicesetlist
+      - architecture
+      - os
     properties:
       version:
         description: "Current software version"
@@ -1042,7 +1283,7 @@ definitions:
         $ref: "#/definitions/LoggingInfo"
       devicesetlist:
         $ref: "#/definitions/DeviceSetList"
-        
+
   InstanceDevicesResponse:
     description: "Summarized information about logical devices from hardware devices attached to this SDRangel instance"
     required:
@@ -1055,7 +1296,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/DeviceListItem"
-          
+
   InstanceChannelsResponse:
     description: "Summarized information about channel plugins available in this SDRangel instance"
     required:
@@ -1068,7 +1309,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/ChannelListItem"
-          
+
   ErrorResponse:
     required:
       - message
@@ -1076,14 +1317,14 @@ definitions:
       message:
         type: string
         example: "KO"
-        
+
   SuccessResponse:
     required:
       - message
     properties:
       message:
         type: string
-        
+
   LoggingInfo:
     description: "Logging parameters setting"
     properties:
@@ -1099,7 +1340,7 @@ definitions:
       fileName:
         description: "Name of the log file"
         type: string
-        
+
   DeviceListItem:
     description: "Summarized information about attached hardware device"
     properties:
@@ -1118,19 +1359,19 @@ definitions:
       tx:
         description: "Set to not zero (true) if this is a Tx device"
         type: integer
-      nbStreams: 
+      nbStreams:
         description: "Number of channels or streams in the device"
         type: integer
       streamIndex:
         description: "Index of the channel in the device"
         type: integer
-      deviceSetIndex: 
+      deviceSetIndex:
         description: "Index of the device set that claimed this device (-1 if not claimed)"
         type: integer
-      index: 
+      index:
         description: "Index of the device in the list of registered devices"
         type: integer
-        
+
   ChannelListItem:
     description: "Summarized information about channel plugin"
     required:
@@ -1154,7 +1395,7 @@ definitions:
       index:
         description: "Index of the channel in the list of registered channels"
         type: integer
-        
+
   DeviceSet:
     description: "Sampling device and its associated channels"
     required:
@@ -1186,7 +1427,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/DeviceSet"
-          
+
   DeviceState:
     description: "Device running state"
     required:
@@ -1195,7 +1436,7 @@ definitions:
       state:
         description: "State: notStarted, idle, ready, running, error"
         type: string
-        
+
   SamplingDevice:
     description: "Information about a logical device available from an attached hardware device that can be used as a sampling device"
     required:
@@ -1217,7 +1458,7 @@ definitions:
       tx:
         description: "Not zero (true) if this is a Tx device"
         type: integer
-      nbStreams: 
+      nbStreams:
         description: "Number of channels or streams in the device"
         type: integer
       streamIndex:
@@ -1239,7 +1480,7 @@ definitions:
       state:
         description: "State: notStarted, idle, ready, running, error"
         type: string
-        
+
   Channel:
     description: "Channel summarized information"
     required:
@@ -1265,68 +1506,104 @@ definitions:
       deltaFrequency:
         description: "Channel shift frequency in Hz from the center of baseband"
         type: integer
-        
+      report:
+        $ref: "#/definitions/ChannelReport"
+
+  ChannelsDetail:
+    description: "All channels detailed information"
+    required:
+      - channelcount
+    properties:
+      channelcount:
+        description: "Number of channels in the set"
+        type: integer
+      channels:
+        description: "Channels list"
+        type: array
+        items:
+          $ref:  "#/definitions/Channel"
+
+
   AudioDevices:
     description: "List of audio devices available in the system"
     required:
-      - inputVolume
       - nbInputDevices
-      - inputDeviceSelectedIndex
       - nbOutputDevices
-      - outputDeviceSelectedIndex
     properties:
-      inputVolume:
-        description: "Audio input volume [0.0..1.0]"
-        type: number
-        format: float
       nbInputDevices:
         description: "Number of input audio devices"
-        type: integer
-      inputDeviceSelectedIndex:
-        description: "Index of selected input audio devices (-1 if default)"
         type: integer
       inputDevices:
         description: "List of input devices"
         type: array
         items:
-          $ref: "#/definitions/AudioDevice"        
+          $ref: "#/definitions/AudioInputDevice"
       nbOutputDevices:
         description: "Number of output audio devices"
-        type: integer
-      outputDeviceSelectedIndex:
-        description: "Index of selected output audio devices (-1 if default)"
         type: integer
       outputDevices:
         description: "List of output devices"
         type: array
         items:
-          $ref: "#/definitions/AudioDevice"
-          
-  AudioDevice:
-    description: "Audio device"
+          $ref: "#/definitions/AudioOutputDevice"
+
+  AudioInputDevice:
+    description: "Audio input device"
     properties:
-      name: 
+      name:
         description: "Displayable name of the device"
         type: string
-        
-  AudioDevicesSelect:
-    description: "Audio devices selected"
-    required:
-      - inputVolume
-      - inputIndex
-      - outputIndex
-    properties:
-      inputVolume:
+      index:
+        description: "Index in attached devices list. -1 for system default"
+        type: integer
+      sampleRate:
+        description: "Device sample rate in S/s"
+        type: integer
+      isSystemDefault:
+        description: "1 if this device is the system default else 0"
+        type: integer
+      defaultUnregistered:
+        description: "1 if this device is unregistered and therefore will inherit default values else 0"
+        type: integer
+      volume:
         description: "Audio input volume [0.0..1.0]"
         type: number
         format: float
-      inputIndex:
-        description: "Index of the audio input device (-1 for default)"
+
+  AudioOutputDevice:
+    description: "Audio output device"
+    properties:
+      name:
+        description: "Displayable name of the device"
+        type: string
+      index:
+        description: "Index in attached devices list. -1 for system default"
         type: integer
-      outputIndex:
-        description: "Index of the audio output device (-1 for default)"
+      sampleRate:
+        description: "Device sample rate in S/s"
         type: integer
-        
+      isSystemDefault:
+        description: "1 if this device is the system default else 0"
+        type: integer
+      defaultUnregistered:
+        description: "1 if this device is unregistered and therefore will inherit default values else 0"
+        type: integer
+      copyToUDP:
+        description: '1 if audio is copied to UDP else 0'
+        type: integer
+      udpUsesRTP:
+        description: '1 if RTP protocol is used over UDP else 0'
+        type: integer
+      udpChannelMode:
+        description: 'How audio data is copied to UDP: 0: left 1: right 2: mixed 3: stereo'
+        type: integer
+      udpAddress:
+        description: "UDP destination address"
+        type: string
+      udpPort:
+        description: "UDP destination port"
+        type: integer
+
   LocationInformation:
     description: "Instance geolocation information"
     required:
@@ -1341,7 +1618,7 @@ definitions:
         description: "Longitude in decimal degrees positive to the east"
         type: number
         format: float
-        
+
   DVSeralDevices:
     description: "List of DV serial devices available in the system"
     required:
@@ -1355,14 +1632,14 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/DVSerialDevice"
-          
+
   DVSerialDevice:
     description: "DV serial device details"
     properties:
       deviceName:
         description: "Name of the serial device in the system"
         type: string
-        
+
   Presets:
     description: "Settings presets"
     required:
@@ -1373,9 +1650,9 @@ definitions:
         type: integer
       groups:
         type: array
-        items: 
+        items:
           $ref: "#/definitions/PresetGroup"
-          
+
   PresetGroup:
     description: "Group of presets"
     required:
@@ -1392,7 +1669,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/PresetItem"
-          
+
   PresetIdentifier:
     description: "Settings preset item"
     required:
@@ -1414,7 +1691,7 @@ definitions:
       name:
         description: "Descriptive name of the preset"
         type: string
-        
+
   PresetItem:
     description: "Settings preset item"
     required:
@@ -1432,7 +1709,7 @@ definitions:
       name:
         description: "Descriptive name of the preset"
         type: string
-        
+
   PresetTransfer:
     description: "Preset transfer to or from a device set"
     required:
@@ -1440,11 +1717,11 @@ definitions:
       - preset
     properties:
       deviceSetIndex:
-        description: "Index of the device set" 
+        description: "Index of the device set"
         type: integer
       preset:
         $ref: "#/definitions/PresetIdentifier"
-        
+
   PresetImport:
     description: "Details to import preset from file in preset list"
     required:
@@ -1459,7 +1736,7 @@ definitions:
       filePath:
         description: "Path of the import file"
         type: string
-        
+
   PresetExport:
     description: "Details to export a preset to file"
     properties:
@@ -1468,9 +1745,9 @@ definitions:
         type: string
       preset:
         $ref: "#/definitions/PresetIdentifier"
-        
+
   DeviceSettings:
-    description: Base device settings
+    description: Base device settings. Only the device settings corresponding to the device specified in the deviceHwType field is or should be present.
     discriminator: deviceHwType
     required:
       - deviceHwType
@@ -1482,6 +1759,22 @@ definitions:
       tx:
         description: Not zero if it is a tx device else it is a rx device
         type: integer
+      airspySettings:
+        $ref: "/doc/swagger/include/Airspy.yaml#/AirspySettings"
+      airspyHFSettings:
+        $ref: "/doc/swagger/include/AirspyHF.yaml#/AirspyHFSettings"
+      bladeRF1InputSettings:
+        $ref: "/doc/swagger/include/BladeRF1.yaml#/BladeRF1InputSettings"
+      bladeRF2InputSettings:
+        $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2InputSettings"
+      bladeRF1OutputSettings:
+        $ref: "/doc/swagger/include/BladeRF1.yaml#/BladeRF1OutputSettings"
+      bladeRF2OutputSettings:
+        $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2OutputSettings"
+      fcdProSettings:
+        $ref: "/doc/swagger/include/FCDPro.yaml#/FCDProSettings"
+      fcdProPlusSettings:
+        $ref: "/doc/swagger/include/FCDProPlus.yaml#/FCDProPlusSettings"
       fileSourceSettings:
         $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceSettings"
       hackRFInputSettings:
@@ -1492,11 +1785,68 @@ definitions:
         $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrInputSettings"
       limeSdrOutputSettings:
         $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrOutputSettings"
+      perseusSettings:
+        $ref: "/doc/swagger/include/Perseus.yaml#/PerseusSettings"
+      plutoSdrInputSettings:
+        $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrInputSettings"
+      plutoSdrOutputSettings:
+        $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputSettings"
       rtlSdrSettings:
         $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
-        
+      sdrDaemonSinkSettings:
+        $ref: "/doc/swagger/include/SDRDaemonSink.yaml#/SDRdaemonSinkSettings"
+      sdrDaemonSourceSettings:
+        $ref: "/doc/swagger/include/SDRDaemonSource.yaml#/SDRdaemonSourceSettings"
+      sdrPlaySettings:
+        $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
+      testSourceSettings:
+        $ref: "/doc/swagger/include/TestSource.yaml#/TestSourceSettings"
+
+
+  DeviceReport:
+    description: Base device report. Only the device report corresponding to the device specified in the deviceHwType is or should be present.
+    discriminator: deviceHwType
+    required:
+      - deviceHwType
+      - tx
+    properties:
+      deviceHwType:
+        description: Device hardware type code
+        type: string
+      tx:
+        description: Not zero if it is a tx device else it is a rx device
+        type: integer
+      airspyReport:
+        $ref: "/doc/swagger/include/Airspy.yaml#/AirspyReport"
+      airspyHFReport:
+        $ref: "/doc/swagger/include/AirspyHF.yaml#/AirspyHFReport"
+      bladeRF2InputReport:
+        $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2InputReport"
+      bladeRF2OutputReport:
+        $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2OutputReport"
+      fileSourceReport:
+        $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceReport"
+      limeSdrInputReport:
+        $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
+      limeSdrOutputReport:
+        $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
+      perseusReport:
+        $ref: "/doc/swagger/include/Perseus.yaml#/PerseusReport"
+      plutoSdrInputReport:
+        $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrInputReport"
+      plutoSdrOutputReport:
+        $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputReport"
+      rtlSdrReport:
+        $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrReport"
+      sdrDaemonSinkReport:
+        $ref: "/doc/swagger/include/SDRDaemonSink.yaml#/SDRdaemonSinkReport"
+      sdrDaemonSourceReport:
+        $ref: "/doc/swagger/include/SDRDaemonSource.yaml#/SDRdaemonSourceReport"
+      sdrPlayReport:
+        $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlayReport"
+
   ChannelSettings:
-    description: Base channel settings
+    description: Base channel settings. Only the channel settings corresponding to the channel specified in the channelType field is or should be present.
     discriminator: channelType
     required:
       - channelType
@@ -1508,20 +1858,85 @@ definitions:
       tx:
         description: Not zero if it is a tx channel else it is a rx channel
         type: integer
+      AMDemodSettings:
+        $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodSettings"
+      AMModSettings:
+        $ref: "/doc/swagger/include/AMMod.yaml#/AMModSettings"
+      ATVModSettings:
+        $ref: "/doc/swagger/include/ATVMod.yaml#/ATVModSettings"
+      BFMDemodSettings:
+        $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
+      DSDDemodSettings:
+        $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodSettings"
       NFMDemodSettings:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
         $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModSettings"
-        
+      DaemonSinkSettings:
+        $ref: "/doc/swagger/include/DaemonSink.yaml#/DaemonSinkSettings"
+      DaemonSourceSettings:
+        $ref: "/doc/swagger/include/DaemonSource.yaml#/DaemonSourceSettings"
+      SSBModSettings:
+        $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModSettings"
+      SSBDemodSettings:
+        $ref: "/doc/swagger/include/SSBDemod.yaml#/SSBDemodSettings"
+      UDPSourceSettings:
+        $ref: "/doc/swagger/include/UDPSource.yaml#/UDPSourceSettings"
+      UDPSinkSettings:
+        $ref: "/doc/swagger/include/UDPSink.yaml#/UDPSinkSettings"
+      WFMDemodSettings:
+        $ref: "/doc/swagger/include/WFMDemod.yaml#/WFMDemodSettings"
+      WFMModSettings:
+        $ref: "/doc/swagger/include/WFMMod.yaml#/WFMModSettings"
+
+  ChannelReport:
+    description: Base channel report. Only the channel report corresponding to the channel specified in the channelType field is or should be present.
+    discriminator: channelType
+    properties:
+      channelType:
+        description: Channel type code
+        type: string
+      tx:
+        description: Not zero if it is a tx channel else it is a rx channel
+        type: integer
+      AMDemodReport:
+        $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodReport"
+      AMModReport:
+        $ref: "/doc/swagger/include/AMMod.yaml#/AMModReport"
+      ATVModReport:
+        $ref: "/doc/swagger/include/ATVMod.yaml#/ATVModReport"
+      BFMDemodReport:
+        $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodReport"
+      DSDDemodReport:
+        $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodReport"
+      NFMDemodReport:
+        $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
+      NFMModReport:
+        $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModReport"
+      SSBDemodReport:
+        $ref: "/doc/swagger/include/SSBDemod.yaml#/SSBDemodReport"
+      DaemonSourceReport:
+        $ref: "/doc/swagger/include/DaemonSource.yaml#/DaemonSourceReport"
+      SSBModReport:
+        $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModReport"
+      UDPSourceReport:
+        $ref: "/doc/swagger/include/UDPSource.yaml#/UDPSourceReport"
+      UDPSinkReport:
+        $ref: "/doc/swagger/include/UDPSink.yaml#/UDPSinkReport"
+      WFMDemodReport:
+        $ref: "/doc/swagger/include/WFMDemod.yaml#/WFMDemodReport"
+      WFMModReport:
+        $ref: "/doc/swagger/include/WFMMod.yaml#/WFMModReport"
+
 responses:
 
   Response_500:
     description: Error
     schema:
       $ref: "#/definitions/ErrorResponse"
-      
+
   Response_501:
     description: Function not implemented
     schema:
       $ref: "#/definitions/ErrorResponse"
-    
+

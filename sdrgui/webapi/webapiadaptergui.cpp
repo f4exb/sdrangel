@@ -42,7 +42,6 @@
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGDeviceListItem.h"
 #include "SWGAudioDevices.h"
-#include "SWGAudioDevicesSelect.h"
 #include "SWGLocationInformation.h"
 #include "SWGDVSeralDevices.h"
 #include "SWGDVSerialDevice.h"
@@ -53,7 +52,10 @@
 #include "SWGPresetIdentifier.h"
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGChannelsDetail.h"
 #include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
 #include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
 #include "SWGDeviceState.h"
@@ -103,7 +105,7 @@ int WebAPIAdapterGUI::instanceSummary(
 }
 
 int WebAPIAdapterGUI::instanceDelete(
-        SWGSDRangel::SWGInstanceSummaryResponse& response __attribute__((unused)),
+        SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
         SWGSDRangel::SWGErrorResponse& error)
 {
     *error.getMessage() = QString("Not supported in GUI instance");
@@ -225,66 +227,251 @@ int WebAPIAdapterGUI::instanceAudioGet(
         SWGSDRangel::SWGAudioDevices& response,
         SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
-    const QList<QAudioDeviceInfo>& audioInputDevices = m_mainWindow.m_audioDeviceInfo.getInputDevices();
-    const QList<QAudioDeviceInfo>& audioOutputDevices = m_mainWindow.m_audioDeviceInfo.getOutputDevices();
+    const QList<QAudioDeviceInfo>& audioInputDevices = m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDevices();
+    const QList<QAudioDeviceInfo>& audioOutputDevices = m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDevices();
     int nbInputDevices = audioInputDevices.size();
     int nbOutputDevices = audioOutputDevices.size();
 
     response.init();
     response.setNbInputDevices(nbInputDevices);
-    response.setInputDeviceSelectedIndex(m_mainWindow.m_audioDeviceInfo.getInputDeviceIndex());
     response.setNbOutputDevices(nbOutputDevices);
-    response.setOutputDeviceSelectedIndex(m_mainWindow.m_audioDeviceInfo.getOutputDeviceIndex());
-    response.setInputVolume(m_mainWindow.m_audioDeviceInfo.getInputVolume());
-    QList<SWGSDRangel::SWGAudioDevice*> *inputDevices = response.getInputDevices();
-    QList<SWGSDRangel::SWGAudioDevice*> *outputDevices = response.getOutputDevices();
+    QList<SWGSDRangel::SWGAudioInputDevice*> *inputDevices = response.getInputDevices();
+    QList<SWGSDRangel::SWGAudioOutputDevice*> *outputDevices = response.getOutputDevices();
+    AudioDeviceManager::InputDeviceInfo inputDeviceInfo;
+    AudioDeviceManager::OutputDeviceInfo outputDeviceInfo;
 
+    // system default input device
+    inputDevices->append(new SWGSDRangel::SWGAudioInputDevice);
+    inputDevices->back()->init();
+    bool found = m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceInfo(AudioDeviceManager::m_defaultDeviceName, inputDeviceInfo);
+    *inputDevices->back()->getName() = AudioDeviceManager::m_defaultDeviceName;
+    inputDevices->back()->setIndex(-1);
+    inputDevices->back()->setSampleRate(inputDeviceInfo.sampleRate);
+    inputDevices->back()->setIsSystemDefault(0);
+    inputDevices->back()->setDefaultUnregistered(found ? 0 : 1);
+    inputDevices->back()->setVolume(inputDeviceInfo.volume);
+
+    // real input devices
     for (int i = 0; i < nbInputDevices; i++)
     {
-        inputDevices->append(new SWGSDRangel::SWGAudioDevice);
+        inputDevices->append(new SWGSDRangel::SWGAudioInputDevice);
         inputDevices->back()->init();
+        inputDeviceInfo.resetToDefaults();
+        found = m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceInfo(audioInputDevices.at(i).deviceName(), inputDeviceInfo);
         *inputDevices->back()->getName() = audioInputDevices.at(i).deviceName();
+        inputDevices->back()->setIndex(i);
+        inputDevices->back()->setSampleRate(inputDeviceInfo.sampleRate);
+        inputDevices->back()->setIsSystemDefault(audioInputDevices.at(i).deviceName() == QAudioDeviceInfo::defaultInputDevice().deviceName() ? 1 : 0);
+        inputDevices->back()->setDefaultUnregistered(found ? 0 : 1);
+        inputDevices->back()->setVolume(inputDeviceInfo.volume);
     }
 
+    // system default output device
+    outputDevices->append(new SWGSDRangel::SWGAudioOutputDevice);
+    outputDevices->back()->init();
+    found = m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(AudioDeviceManager::m_defaultDeviceName, outputDeviceInfo);
+    *outputDevices->back()->getName() = AudioDeviceManager::m_defaultDeviceName;
+    outputDevices->back()->setIndex(-1);
+    outputDevices->back()->setSampleRate(outputDeviceInfo.sampleRate);
+    inputDevices->back()->setIsSystemDefault(0);
+    outputDevices->back()->setDefaultUnregistered(found ? 0 : 1);
+    outputDevices->back()->setCopyToUdp(outputDeviceInfo.copyToUDP ? 1 : 0);
+    outputDevices->back()->setUdpUsesRtp(outputDeviceInfo.udpUseRTP ? 1 : 0);
+    outputDevices->back()->setUdpChannelMode((int) outputDeviceInfo.udpChannelMode);
+    *outputDevices->back()->getUdpAddress() = outputDeviceInfo.udpAddress;
+    outputDevices->back()->setUdpPort(outputDeviceInfo.udpPort);
+
+    // real output devices
     for (int i = 0; i < nbOutputDevices; i++)
     {
-        outputDevices->append(new SWGSDRangel::SWGAudioDevice);
+        outputDevices->append(new SWGSDRangel::SWGAudioOutputDevice);
         outputDevices->back()->init();
+        outputDeviceInfo.resetToDefaults();
+        found = m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(audioOutputDevices.at(i).deviceName(), outputDeviceInfo);
         *outputDevices->back()->getName() = audioOutputDevices.at(i).deviceName();
+        outputDevices->back()->setIndex(i);
+        outputDevices->back()->setSampleRate(outputDeviceInfo.sampleRate);
+        outputDevices->back()->setIsSystemDefault(audioOutputDevices.at(i).deviceName() == QAudioDeviceInfo::defaultOutputDevice().deviceName() ? 1 : 0);
+        outputDevices->back()->setDefaultUnregistered(found ? 0 : 1);
+        outputDevices->back()->setCopyToUdp(outputDeviceInfo.copyToUDP ? 1 : 0);
+        outputDevices->back()->setUdpUsesRtp(outputDeviceInfo.udpUseRTP ? 1 : 0);
+        outputDevices->back()->setUdpChannelMode((int) outputDeviceInfo.udpChannelMode);
+        *outputDevices->back()->getUdpAddress() = outputDeviceInfo.udpAddress;
+        outputDevices->back()->setUdpPort(outputDeviceInfo.udpPort);
     }
 
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceAudioPatch(
-        SWGSDRangel::SWGAudioDevicesSelect& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+int WebAPIAdapterGUI::instanceAudioInputPatch(
+        SWGSDRangel::SWGAudioInputDevice& response,
+        const QStringList& audioInputKeys,
+        SWGSDRangel::SWGErrorResponse& error)
 {
-    // response input is the query actually
-    float inputVolume = response.getInputVolume();
-    int inputIndex = response.getInputIndex();
-    int outputIndex = response.getOutputIndex();
+    // TODO
+    AudioDeviceManager::InputDeviceInfo inputDeviceInfo;
+    QString deviceName;
+    int deviceIndex = response.getIndex();
 
-    const QList<QAudioDeviceInfo>& audioInputDevices = m_mainWindow.m_audioDeviceInfo.getInputDevices();
-    const QList<QAudioDeviceInfo>& audioOutputDevices = m_mainWindow.m_audioDeviceInfo.getOutputDevices();
-    int nbInputDevices = audioInputDevices.size();
-    int nbOutputDevices = audioOutputDevices.size();
+    if (!m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceName(deviceIndex, deviceName))
+    {
+        error.init();
+        *error.getMessage() = QString("There is no audio input device at index %1").arg(deviceIndex);
+        return 404;
+    }
 
-    inputVolume = inputVolume < 0.0 ? 0.0 : inputVolume > 1.0 ? 1.0 : inputVolume;
-    inputIndex = inputIndex < -1 ? -1 : inputIndex > nbInputDevices ? nbInputDevices-1 : inputIndex;
-    outputIndex = outputIndex < -1 ? -1 : outputIndex > nbOutputDevices ? nbOutputDevices-1 : outputIndex;
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceInfo(deviceName, inputDeviceInfo);
 
-    m_mainWindow.m_audioDeviceInfo.setInputVolume(inputVolume);
-    m_mainWindow.m_audioDeviceInfo.setInputDeviceIndex(inputIndex);
-    m_mainWindow.m_audioDeviceInfo.setOutputDeviceIndex(outputIndex);
+    if (audioInputKeys.contains("sampleRate")) {
+        inputDeviceInfo.sampleRate = response.getSampleRate();
+    }
+    if (audioInputKeys.contains("volume")) {
+        inputDeviceInfo.volume = response.getVolume();
+    }
 
-    m_mainWindow.m_dspEngine->setAudioInputVolume(inputVolume);
-    m_mainWindow.m_dspEngine->setAudioInputDeviceIndex(inputIndex);
-    m_mainWindow.m_dspEngine->setAudioOutputDeviceIndex(outputIndex);
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->setInputDeviceInfo(deviceIndex, inputDeviceInfo);
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceInfo(deviceName, inputDeviceInfo);
 
-    response.setInputVolume(m_mainWindow.m_audioDeviceInfo.getInputVolume());
-    response.setInputIndex(m_mainWindow.m_audioDeviceInfo.getInputDeviceIndex());
-    response.setOutputIndex(m_mainWindow.m_audioDeviceInfo.getOutputDeviceIndex());
+    response.setSampleRate(inputDeviceInfo.sampleRate);
+    response.setVolume(inputDeviceInfo.volume);
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceAudioOutputPatch(
+        SWGSDRangel::SWGAudioOutputDevice& response,
+        const QStringList& audioOutputKeys,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    AudioDeviceManager::OutputDeviceInfo outputDeviceInfo;
+    QString deviceName;
+    int deviceIndex = response.getIndex();
+
+    if (!m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceName(deviceIndex, deviceName))
+    {
+        error.init();
+        *error.getMessage() = QString("There is no audio output device at index %1").arg(deviceIndex);
+        return 404;
+    }
+
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
+
+    if (audioOutputKeys.contains("sampleRate")) {
+        outputDeviceInfo.sampleRate = response.getSampleRate();
+    }
+    if (audioOutputKeys.contains("copyToUDP")) {
+        outputDeviceInfo.copyToUDP = response.getCopyToUdp() == 0 ? 0 : 1;
+    }
+    if (audioOutputKeys.contains("udpUsesRTP")) {
+        outputDeviceInfo.udpUseRTP = response.getUdpUsesRtp() == 0 ? 0 : 1;
+    }
+    if (audioOutputKeys.contains("udpChannelMode")) {
+        outputDeviceInfo.udpChannelMode = static_cast<AudioOutput::UDPChannelMode>(response.getUdpChannelMode() % 4);
+    }
+    if (audioOutputKeys.contains("udpAddress")) {
+        outputDeviceInfo.udpAddress = *response.getUdpAddress();
+    }
+    if (audioOutputKeys.contains("udpPort")) {
+        outputDeviceInfo.udpPort = response.getUdpPort() % (1<<16);
+    }
+
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->setOutputDeviceInfo(deviceIndex, outputDeviceInfo);
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
+
+    response.setSampleRate(outputDeviceInfo.sampleRate);
+    response.setCopyToUdp(outputDeviceInfo.copyToUDP == 0 ? 0 : 1);
+    response.setUdpUsesRtp(outputDeviceInfo.udpUseRTP == 0 ? 0 : 1);
+    response.setUdpChannelMode(outputDeviceInfo.udpChannelMode % 4);
+
+    if (response.getUdpAddress()) {
+        *response.getUdpAddress() = outputDeviceInfo.udpAddress;
+    } else {
+        response.setUdpAddress(new QString(outputDeviceInfo.udpAddress));
+    }
+
+    response.setUdpPort(outputDeviceInfo.udpPort % (1<<16));
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceAudioInputDelete(
+            SWGSDRangel::SWGAudioInputDevice& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    AudioDeviceManager::InputDeviceInfo inputDeviceInfo;
+    QString deviceName;
+    int deviceIndex = response.getIndex();
+
+    if (!m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceName(deviceIndex, deviceName))
+    {
+        error.init();
+        *error.getMessage() = QString("There is no audio input device at index %1").arg(deviceIndex);
+        return 404;
+    }
+
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->unsetInputDeviceInfo(deviceIndex);
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceInfo(deviceName, inputDeviceInfo);
+
+    response.setSampleRate(inputDeviceInfo.sampleRate);
+    response.setVolume(inputDeviceInfo.volume);
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceAudioOutputDelete(
+            SWGSDRangel::SWGAudioOutputDevice& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    AudioDeviceManager::OutputDeviceInfo outputDeviceInfo;
+    QString deviceName;
+    int deviceIndex = response.getIndex();
+
+    if (!m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceName(deviceIndex, deviceName))
+    {
+        error.init();
+        *error.getMessage() = QString("There is no audio output device at index %1").arg(deviceIndex);
+        return 404;
+    }
+
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->unsetInputDeviceInfo(deviceIndex);
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
+
+    response.setSampleRate(outputDeviceInfo.sampleRate);
+    response.setCopyToUdp(outputDeviceInfo.copyToUDP == 0 ? 0 : 1);
+    response.setUdpUsesRtp(outputDeviceInfo.udpUseRTP == 0 ? 0 : 1);
+    response.setUdpChannelMode(outputDeviceInfo.udpChannelMode % 4);
+
+    if (response.getUdpAddress()) {
+        *response.getUdpAddress() = outputDeviceInfo.udpAddress;
+    } else {
+        response.setUdpAddress(new QString(outputDeviceInfo.udpAddress));
+    }
+
+    response.setUdpPort(outputDeviceInfo.udpPort % (1<<16));
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceAudioInputCleanupPatch(
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+{
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->inputInfosCleanup();
+
+    response.init();
+    *response.getMessage() = QString("Unregistered parameters for devices not in list of available input devices for this instance");
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceAudioOutputCleanupPatch(
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+{
+    m_mainWindow.m_dspEngine->getAudioDeviceManager()->outputInfosCleanup();
+
+    response.init();
+    *response.getMessage() = QString("Unregistered parameters for devices not in list of available output devices for this instance");
 
     return 200;
 }
@@ -319,6 +506,30 @@ int WebAPIAdapterGUI::instanceLocationPut(
     return 200;
 }
 
+int WebAPIAdapterGUI::instanceDVSerialGet(
+            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+{
+    response.init();
+
+    std::vector<std::string> deviceNames;
+    m_mainWindow.m_dspEngine->getDVSerialNames(deviceNames);
+    response.setNbDevices((int) deviceNames.size());
+    QList<SWGSDRangel::SWGDVSerialDevice*> *deviceNamesList = response.getDvSerialDevices();
+
+    std::vector<std::string>::iterator it = deviceNames.begin();
+
+    while (it != deviceNames.end())
+    {
+        deviceNamesList->append(new SWGSDRangel::SWGDVSerialDevice);
+        deviceNamesList->back()->init();
+        *deviceNamesList->back()->getDeviceName() = QString::fromStdString(*it);
+        ++it;
+    }
+
+    return 200;
+}
+
 int WebAPIAdapterGUI::instanceDVSerialPatch(
             bool dvserial,
             SWGSDRangel::SWGDVSeralDevices& response,
@@ -336,7 +547,6 @@ int WebAPIAdapterGUI::instanceDVSerialPatch(
         QList<SWGSDRangel::SWGDVSerialDevice*> *deviceNamesList = response.getDvSerialDevices();
 
         std::vector<std::string>::iterator it = deviceNames.begin();
-        std::string deviceNamesStr = "DV Serial devices found: ";
 
         while (it != deviceNames.end())
         {
@@ -982,6 +1192,66 @@ int WebAPIAdapterGUI::devicesetDeviceRunDelete(
     }
 }
 
+
+int WebAPIAdapterGUI::devicesetDeviceReportGet(
+        int deviceSetIndex,
+        SWGSDRangel::SWGDeviceReport& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+
+        if (deviceSet->m_deviceSourceEngine) // Rx
+        {
+            response.setDeviceHwType(new QString(deviceSet->m_deviceSourceAPI->getHardwareId()));
+            response.setTx(0);
+            DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
+            return source->webapiReportGet(response, *error.getMessage());
+        }
+        else if (deviceSet->m_deviceSinkEngine) // Tx
+        {
+            response.setDeviceHwType(new QString(deviceSet->m_deviceSinkAPI->getHardwareId()));
+            response.setTx(1);
+            DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
+            return sink->webapiReportGet(response, *error.getMessage());
+        }
+        else
+        {
+            *error.getMessage() = QString("DeviceSet error");
+            return 500;
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapterGUI::devicesetChannelsReportGet(
+        int deviceSetIndex,
+        SWGSDRangel::SWGChannelsDetail& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        const DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        getChannelsDetail(&response, deviceSet);
+
+        return 200;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
 int WebAPIAdapterGUI::devicesetChannelPost(
             int deviceSetIndex,
             SWGSDRangel::SWGChannelSettings& query,
@@ -1199,6 +1469,66 @@ int WebAPIAdapterGUI::devicesetChannelSettingsGet(
     }
 }
 
+
+int WebAPIAdapterGUI::devicesetChannelReportGet(
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGChannelReport& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+
+        if (deviceSet->m_deviceSourceEngine) // Rx
+        {
+            ChannelSinkAPI *channelAPI = deviceSet->m_deviceSourceAPI->getChanelAPIAt(channelIndex);
+
+            if (channelAPI == 0)
+            {
+                *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
+                return 404;
+            }
+            else
+            {
+                response.setChannelType(new QString());
+                channelAPI->getIdentifier(*response.getChannelType());
+                response.setTx(0);
+                return channelAPI->webapiReportGet(response, *error.getMessage());
+            }
+        }
+        else if (deviceSet->m_deviceSinkEngine) // Tx
+        {
+            ChannelSourceAPI *channelAPI = deviceSet->m_deviceSinkAPI->getChanelAPIAt(channelIndex);
+
+            if (channelAPI == 0)
+            {
+                *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
+                return 404;
+            }
+            else
+            {
+                response.setChannelType(new QString());
+                channelAPI->getIdentifier(*response.getChannelType());
+                response.setTx(1);
+                return channelAPI->webapiReportGet(response, *error.getMessage());
+            }
+        }
+        else
+        {
+            *error.getMessage() = QString("DeviceSet error");
+            return 500;
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+        return 404;
+    }
+}
+
 int WebAPIAdapterGUI::devicesetChannelSettingsPutPatch(
         int deviceSetIndex,
         int channelIndex,
@@ -1370,6 +1700,65 @@ void WebAPIAdapterGUI::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const 
             channels->back()->setUid(channel->getUID());
             channel->getIdentifier(*channels->back()->getId());
             channel->getTitle(*channels->back()->getTitle());
+        }
+    }
+}
+
+void WebAPIAdapterGUI::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceUISet* deviceUISet)
+{
+    channelsDetail->init();
+    SWGSDRangel::SWGChannelReport *channelReport;
+    QString channelReportError;
+
+    if (deviceUISet->m_deviceSinkEngine) // Tx data
+    {
+        channelsDetail->setChannelcount(deviceUISet->m_deviceSinkAPI->getNbChannels());
+        QList<SWGSDRangel::SWGChannel*> *channels = channelsDetail->getChannels();
+
+        for (int i = 0; i <  channelsDetail->getChannelcount(); i++)
+        {
+            channels->append(new SWGSDRangel::SWGChannel);
+            channels->back()->init();
+            ChannelSourceAPI *channel = deviceUISet->m_deviceSinkAPI->getChanelAPIAt(i);
+            channels->back()->setDeltaFrequency(channel->getCenterFrequency());
+            channels->back()->setIndex(channel->getIndexInDeviceSet());
+            channels->back()->setUid(channel->getUID());
+            channel->getIdentifier(*channels->back()->getId());
+            channel->getTitle(*channels->back()->getTitle());
+
+            channelReport = new SWGSDRangel::SWGChannelReport();
+
+            if (channel->webapiReportGet(*channelReport, channelReportError) != 501) {
+                channels->back()->setReport(channelReport);
+            } else {
+                delete channelReport;
+            }
+        }
+    }
+
+    if (deviceUISet->m_deviceSourceEngine) // Rx data
+    {
+        channelsDetail->setChannelcount(deviceUISet->m_deviceSourceAPI->getNbChannels());
+        QList<SWGSDRangel::SWGChannel*> *channels = channelsDetail->getChannels();
+
+        for (int i = 0; i <  channelsDetail->getChannelcount(); i++)
+        {
+            channels->append(new SWGSDRangel::SWGChannel);
+            channels->back()->init();
+            ChannelSinkAPI *channel = deviceUISet->m_deviceSourceAPI->getChanelAPIAt(i);
+            channels->back()->setDeltaFrequency(channel->getCenterFrequency());
+            channels->back()->setIndex(channel->getIndexInDeviceSet());
+            channels->back()->setUid(channel->getUID());
+            channel->getIdentifier(*channels->back()->getId());
+            channel->getTitle(*channels->back()->getTitle());
+
+            channelReport = new SWGSDRangel::SWGChannelReport();
+
+            if (channel->webapiReportGet(*channelReport, channelReportError) != 501) {
+                channels->back()->setReport(channelReport);
+            } else {
+                delete channelReport;
+            }
         }
     }
 }

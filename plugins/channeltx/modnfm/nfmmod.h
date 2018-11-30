@@ -91,15 +91,6 @@ public:
         { }
     };
 
-    typedef enum
-    {
-        NFMModInputNone,
-        NFMModInputTone,
-        NFMModInputFile,
-        NFMModInputAudio,
-        NFMModInputCWTone
-    } NFMModInputAF;
-
     class MsgConfigureFileSourceName : public Message
     {
         MESSAGE_CLASS_DECLARATION
@@ -219,8 +210,6 @@ public:
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
-    virtual void setName(const QString& name) { setObjectName(name); }
-    virtual QString getName() const { return objectName(); }
     virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
 
     virtual QByteArray serialize() const;
@@ -234,6 +223,10 @@ public:
                 bool force,
                 const QStringList& channelSettingsKeys,
                 SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiReportGet(
+                SWGSDRangel::SWGChannelReport& response,
                 QString& errorMessage);
 
     double getMagSq() const { return m_magsq; }
@@ -267,6 +260,7 @@ private:
     int m_outputSampleRate;
     int m_inputFrequencyOffset;
     NFMModSettings m_settings;
+    quint32 m_audioSampleRate;
 
     NCO m_carrierNco;
     NCOF m_toneNco;
@@ -296,13 +290,14 @@ private:
     quint32 m_recordLength; //!< record length in seconds computed from file size
     int m_sampleRate;
 
-    NFMModInputAF m_afInput;
+    NFMModSettings::NFMModInputAF m_afInput;
     quint32 m_levelCalcCount;
     Real m_peakLevel;
     Real m_levelSum;
     CWKeyer m_cwKeyer;
     static const int m_levelNbSamples;
 
+    void applyAudioSampleRate(int sampleRate);
     void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const NFMModSettings& settings, bool force = false);
     void pullAF(Real& sample);
@@ -311,6 +306,7 @@ private:
     void openFileStream();
     void seekFileStream(int seekPercentage);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMModSettings& settings);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 };
 
 

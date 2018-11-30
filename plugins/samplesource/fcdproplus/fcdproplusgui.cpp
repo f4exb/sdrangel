@@ -36,7 +36,7 @@ FCDProPlusGui::FCDProPlusGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_forceSettings(true),
 	m_settings(),
 	m_sampleSource(NULL),
-	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
+	m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
 {
     m_sampleSource = (FCDProPlusInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
 
@@ -64,6 +64,7 @@ FCDProPlusGui::FCDProPlusGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	displaySettings();
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+    m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 }
 
 FCDProPlusGui::~FCDProPlusGui()
@@ -128,9 +129,9 @@ bool FCDProPlusGui::deserialize(const QByteArray& data)
 
 bool FCDProPlusGui::handleMessage(const Message& message __attribute__((unused)))
 {
-    if (FCDProPlusInput::MsgConfigureFCD::match(message))
+    if (FCDProPlusInput::MsgConfigureFCDProPlus::match(message))
     {
-        const FCDProPlusInput::MsgConfigureFCD& cfg = (FCDProPlusInput::MsgConfigureFCD&) message;
+        const FCDProPlusInput::MsgConfigureFCDProPlus& cfg = (FCDProPlusInput::MsgConfigureFCDProPlus&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
@@ -240,7 +241,7 @@ void FCDProPlusGui::on_iqImbalance_toggled(bool checked)
 
 void FCDProPlusGui::updateHardware()
 {
-	FCDProPlusInput::MsgConfigureFCD* message = FCDProPlusInput::MsgConfigureFCD::create(m_settings, m_forceSettings);
+	FCDProPlusInput::MsgConfigureFCDProPlus* message = FCDProPlusInput::MsgConfigureFCDProPlus::create(m_settings, m_forceSettings);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	m_forceSettings = false;
 	m_updateTimer.stop();

@@ -15,18 +15,21 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtPlugin>
-#include <QAction>
+
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "device/devicesourceapi.h"
 
-#include <device/devicesourceapi.h>
-
+#ifdef SERVER_MODE
+#include "sdrdaemonsourceinput.h"
+#else
 #include "sdrdaemonsourcegui.h"
+#endif
 #include "sdrdaemonsourceplugin.h"
 
 const PluginDescriptor SDRdaemonSourcePlugin::m_pluginDescriptor = {
 	QString("SDRdaemon source input"),
-	QString("3.11.1"),
+	QString("4.1.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -69,6 +72,15 @@ PluginInterface::SamplingDevices SDRdaemonSourcePlugin::enumSampleSources()
 	return result;
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* SDRdaemonSourcePlugin::createSampleSourcePluginInstanceGUI(
+        const QString& sourceId __attribute((unused)),
+        QWidget **widget __attribute((unused)),
+        DeviceUISet *deviceUISet __attribute((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* SDRdaemonSourcePlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
@@ -85,6 +97,7 @@ PluginInstanceGUI* SDRdaemonSourcePlugin::createSampleSourcePluginInstanceGUI(
 		return 0;
 	}
 }
+#endif
 
 DeviceSampleSource *SDRdaemonSourcePlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
 {

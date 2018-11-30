@@ -37,7 +37,7 @@ PlutoSDRInputGui::PlutoSDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource(NULL),
     m_sampleRate(0),
     m_deviceCenterFrequency(0),
-    m_lastEngineState((DSPDeviceSourceEngine::State)-1),
+    m_lastEngineState(DSPDeviceSourceEngine::StNotStarted),
     m_doApplySettings(true),
     m_statusCounter(0)
 {
@@ -68,6 +68,7 @@ PlutoSDRInputGui::PlutoSDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_statusTimer.start(500);
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+    m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 }
 
 PlutoSDRInputGui::~PlutoSDRInputGui()
@@ -310,6 +311,7 @@ void PlutoSDRInputGui::displaySettings()
     ui->loPPMText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 
     ui->swDecim->setCurrentIndex(m_settings.m_log2Decim);
+    ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
     ui->lpf->setValue(m_settings.m_lpfBW / 1000);
 

@@ -22,14 +22,14 @@
 #include <QWaitCondition>
 #include <QMutex>
 #include <QAtomicInt>
-#include "util/export.h"
+#include "export.h"
 
 class Message;
 
 /**
  * This class is responsible of managing the synchronous processing of a message across threads
  */
-class SDRANGEL_API SyncMessenger : public QObject {
+class SDRBASE_API SyncMessenger : public QObject {
 	Q_OBJECT
 
 public:

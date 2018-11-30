@@ -29,6 +29,7 @@
 #include "dsp/agc.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
+#include "util/doublebufferfifo.h"
 
 #include "ssbdemodsettings.h"
 
@@ -119,24 +120,56 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
+    uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
     double getMagSq() const { return m_magsq; }
 	bool getAudioActive() const { return m_audioActive; }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
-        avg = m_magsqCount == 0 ? 1e-10 : m_magsqSum / m_magsqCount;
-        m_magsq = avg;
-        peak = m_magsqPeak == 0.0 ? 1e-10 : m_magsqPeak;
+        if (m_magsqCount > 0)
+        {
+            m_magsq = m_magsqSum / m_magsqCount;
+            m_magSqLevelStore.m_magsq = m_magsq;
+            m_magSqLevelStore.m_magsqPeak = m_magsqPeak;
+        }
+
+        avg = m_magSqLevelStore.m_magsq;
+        peak = m_magSqLevelStore.m_magsqPeak;
         nbSamples = m_magsqCount == 0 ? 1 : m_magsqCount;
+
         m_magsqSum = 0.0f;
         m_magsqPeak = 0.0f;
         m_magsqCount = 0;
     }
 
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage);
+
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
 private:
+    struct MagSqLevelsStore
+    {
+        MagSqLevelsStore() :
+            m_magsq(1e-12),
+            m_magsqPeak(1e-12)
+        {}
+        double m_magsq;
+        double m_magsqPeak;
+    };
+
 	class MsgConfigureSSBDemodPrivate : public Message {
 		MESSAGE_CLASS_DECLARATION
 
@@ -252,12 +285,14 @@ private:
 	double m_magsqSum;
 	double m_magsqPeak;
     int  m_magsqCount;
+    MagSqLevelsStore m_magSqLevelStore;
     MagAGC m_agc;
     bool m_agcActive;
     bool m_agcClamping;
     int m_agcNbSamples;         //!< number of audio (48 kHz) samples for AGC averaging
     double m_agcPowerThreshold; //!< AGC power threshold (linear)
     int m_agcThresholdGate;     //!< Gate length in number of samples befor threshold triggers
+    DoubleBufferFIFO<fftfilt::cmplx> m_squelchDelayLine;
     bool m_audioActive;         //!< True if an audio signal is produced (no AGC or AGC and above threshold)
 
 	NCOF m_nco;
@@ -274,13 +309,14 @@ private:
 	uint m_audioBufferFill;
 	AudioFifo m_audioFifo;
 	quint32 m_audioSampleRate;
-	UDPSink<qint16> *m_udpBufferAudio;
-	static const int m_udpBlockSize;
 
 	QMutex m_settingsMutex;
 
 	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const SSBDemodSettings& settings, bool force = false);
+    void applyAudioSampleRate(int sampleRate);
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SSBDemodSettings& settings);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 };
 
 #endif // INCLUDE_SSBDEMOD_H

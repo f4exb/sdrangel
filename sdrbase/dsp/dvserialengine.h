@@ -24,11 +24,13 @@
 #include <string>
 #include <list>
 
+#include "export.h"
+
 class QThread;
 class DVSerialWorker;
 class AudioFifo;
 
-class DVSerialEngine : public QObject
+class SDRBASE_API DVSerialEngine : public QObject
 {
     Q_OBJECT
 public:
@@ -47,6 +49,7 @@ public:
             int mbeVolumeIndex,
             unsigned char channels,
             bool useHP,
+            int upsampling,
             AudioFifo *audioFifo);
 
 private:

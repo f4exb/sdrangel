@@ -4,7 +4,9 @@
 
 This input sample source plugin gets its samples from a [LimeSDR device](https://myriadrf.org/projects/limesdr/).
 
-&#9888; LimeSuite library is difficult to implement due to the lack of documentation. The plugins should work normally when running as single instances. Support of both Rx and/or both Rx running concurrently is experimental.
+<p>&#9888; Version 18.04.1 of LimeSuite is used in the builds and corresponding gateware loaded in the LimeSDR should be is used (2.16 for LimeSDR-USB and 1.24 for LimeSDR-Mini). If you compile from source version 18.04.1 of LimeSuite must be used.</p>
+
+<p>&#9888; LimeSDR-Mini seems to have problems with Zadig driver therefore it is supported in Linux only.</p>
 
 LimeSDR is a 2x2 MIMO device so it has two receiving channels that can run concurrently. To activate the second channel when the first is already active just open a new source tab in the main window (Devices -> Add source device) and select the same LimeSDR device.
 
@@ -47,7 +49,7 @@ Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
-  - Magenta (or pink) square icon: an error occured. In the case the device was accidentally disconnected you may click on the icon to stop, plug back in, check the source on the sampling devices control panel and start again.
+  - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon to stop, plug back in, check the source on the sampling devices control panel and start again.
   
 <h4>1.3: Record</h4>
 
@@ -77,23 +79,49 @@ The button is lit when NCO is active and dark when inactive.
 
 Use this button to activate/deactivate the TSP NCO. The LMS7002M chip has an independent NCO in each Rx channel that can span the bandwidth received by the ADC. This effectively allows non zero digital IF.
 
-<h4>2.2: Zero (reset) NCO frequency</h4>
+<h4>2.2: NCO frequency shift</h4>
 
-USe this push button to reset the NCO frequency to 0 and thus center on the main passband of the ADC.
+This is the frequency shift applied when the NCO is engaged thus the actual LO frequency is the center frequency of reception minus this value. Use the thumbwheels to adjust frequency as done with the LO (1.1). Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2. The boundaries are dynamically calculated from the LO center frequency, sample rate and hardware decimation factor.
 
-<h4>2.3: Center frequency with NCO engaged</h4>
+&#9758; In the LMS7002M TSP block the NCO sits before the decimator (see Fig.14 of the [datasheet](http://www.limemicro.com/wp-content/uploads/2015/09/LMS7002M-Data-Sheet-v2.8.0.pdf) p.7) so it runs at the actual ADC rate. Hence the NCO limits are calculated as +/- half the device to host sample rate multiplied by the hardware decimation factor. For example with a 4 MS/s device to host sample rate (5) and a hardware decimation of 16 (3) you have +/- 32 MHz span around the LO for the NCO. In this example you can tune all HF frequencies with the center frequency set at its lowest (30 MHz). 
 
-This is the center frequency of the mix of LO and NCO combined and is the source passband center frequency when the NCO is engaged. Use the thumbwheels to adjust frequency as done with the LO (1.1). Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. The boundaries are dynamically calculated from the LO center frequency, sample rate and hardware decimation factor.
-
-&#9758; In the LMS7002M TSP block the NCO sits before the decimator (see Fig.14 of the [datasheet](http://www.limemicro.com/wp-content/uploads/2015/09/LMS7002M-Data-Sheet-v2.8.0.pdf) p.7) so it runs at the actual ADC rate. Hence the NCO limits are calculated as +/- half the device to host sample rate multiplied by the hardware decimation factor. For example with a 4 MS/s device to host sample rate (5) and a hadrware decimation of 16 (3) you have +/- 32 MHz span around the LO for the NCO. In this example you can tune all HF frequencies with the center frequency set at its lowest (30 MHz). 
-
-<h4>2.4: DC component auto correction</h4>
+<h4>2.3: DC component auto correction</h4>
 
 Enables or disables the auto remove DC component
 
-<h4>2.5: I/Q balance auto correction</h4>
+<h4>2.4: I/Q balance auto correction</h4>
 
 Enables or disables the auto I/Q balance correction. The DC correction must be enabled for this to be effective.
+
+<h4>2.5: Transverter mode open dialog</h4>
+
+This button opens a dialog to set the transverter mode frequency translation options:
+
+![SDR Daemon source input stream transverter dialog](../../../doc/img/RTLSDR_plugin_xvrt.png)
+
+Note that if you mouse over the button a tooltip appears that displays the translating frequency and if translation is enabled or disabled. When the frequency translation is enabled the button is lit.
+
+<h5>2.5.1: Translating frequency</h5>
+
+You can set the translating frequency in Hz with this dial. Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
+
+The frequency set in the device is the frequency on the main dial (1) minus this frequency. Thus it is positive for down converters and negative for up converters. 
+
+For example a mixer at 120 MHz for HF operation you would set the value to -120,000,000 Hz so that if the main dial frequency is set at 7,130 kHz the PlutoSDR will be set to 127.130 MHz.
+
+If you use a down converter to receive the 6 cm band narrowband center frequency of 5670 MHz at 432 MHz you would set the translating frequency to 5760 - 432 = 5328 MHz thus dial +5,328,000,000 Hz.
+
+For bands even higher in the frequency spectrum the GHz digits are not really significant so you can have them set at 1 GHz. Thus to receive the 10368 MHz frequency at 432 MHz you would set the translating frequency to 1368 - 432 = 936 MHz. Note that in this case the frequency of the LO used in the mixer of the transverter is set at 9936 MHz.
+
+The Hz precision allows a fine tuning of the transverter LO offset
+
+<h5>2.5.2: Translating frequency enable/disable</h5>
+
+Use this toggle button to activate or deactivate the frequency translation
+
+<h5>2.5.3: Confirmation buttons</h5>
+
+Use these buttons to confirm ("OK") or dismiss ("Cancel") your changes. 
 
 <h4>2.6: External clock control</h4>
 
@@ -101,11 +129,11 @@ Use this button to open a dialog that lets you choose the external clock frequen
 
 ![LimeSDR input plugin gain GUI](../../../doc/img/LimeSDR_plugin_extclock.png)
 
-<h5>2.6.1: Exrernal clock frequency</h5>
+<h5>2.6.1: External clock frequency</h5>
 
 Can be varied from 5 to 300 MHz
 
-Use the thumbwheels to adjust frequency as done with the LO (1.1). Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. The boundaries are dynamically calculated from the LO center frequency, sample rate and hardware decimation factor.
+Use the thumbwheels to adjust frequency as done with the LO (1.1). Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2. The boundaries are dynamically calculated from the LO center frequency, sample rate and hardware decimation factor.
 
 <h5>2.6.2: Enable/disable external clock input</h5>
 
@@ -127,19 +155,19 @@ Thus the actual sample rate of the ADC is the stream sample rate (5) multiplied 
 
 <h3>4: Software decimation factor</h3>
 
-The I/Q stream from the LimeSDR is doensampled by a power of two by software inside the plugin before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32.
+The I/Q stream from the LimeSDR is downsampled by a power of two by software inside the plugin before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32.
 
 <h3>5: Device to host stream sample rate</h3>
 
 This is the LMS7002M device to/from host stream sample rate in S/s. It is the same for the Rx and Tx systems.
 
-Use the wheels to adjust the sample rate. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews.
+Use the wheels to adjust the sample rate. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows.
 
 The LMS7002M uses the same clock for both the ADCs and DACs therefore this sample rate affects all of the 2x2 MIMO channels.
 
 <h3>6: Rx hardware filter bandwidth</h3>
 
-This is the Rx hardware filter bandwidth in kHz in the LMS7002M device for the given channel. Boundaries are updated automatically but generally are from 1.4 to 130 MHz in 1 kHz steps. Use the wheels to adjust the value. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+This is the Rx hardware filter bandwidth in kHz in the LMS7002M device for the given channel. Boundaries are updated automatically but generally are from 1.4 to 130 MHz in 1 kHz steps. Use the wheels to adjust the value. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>7: TSP FIR filter toggle</h3>
 
@@ -147,7 +175,7 @@ The TSP in the LMS7002M chip has a FIR filter chain per channel. Use this button
 
 <h3>8: TSP FIR filter bandwidth</h3>
 
-USe the wheels to adjust the bandwidth of the hardware TSP FIR filter. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the bandwidth of the hardware TSP FIR filter. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>9: Gain settings</h2>
 
@@ -155,17 +183,17 @@ USe the wheels to adjust the bandwidth of the hardware TSP FIR filter. Pressing 
 
 <h4>9.1: Gain mode</h2>
 
-Use this combo to select either the automatic gain (Aut) or the manual (Man) gain setting. Autonatic gain sets the global gain using a predefined table for LNA, TIA and PGA gain blocks. This global gain is set with button 9.2. When manual gain is engaged the LNA, TIA and PGA gains can be set independently with the 9.3, 9.4 and 9.5 buttons respectively.
+Use this combo to select either the automatic gain (Aut) or the manual (Man) gain setting. Automatic gain sets the global gain using a predefined table for LNA, TIA and PGA gain blocks. This global gain is set with button 9.2. When manual gain is engaged the LNA, TIA and PGA gains can be set independently with the 9.3, 9.4 and 9.5 buttons respectively.
 
 Please refer to [LMS7002M documentation](http://www.limemicro.com/wp-content/uploads/2015/09/LMS7002M-Data-Sheet-v2.8.0.pdf) for a precise description of LNA, TIA and PGA and their location in the Rx chain. To summarize these blocks are placed in this order from antenna to ADC.
 
 <h4>9.2: Global automatic gain</h4>
 
-Use this button to adjust the global gain of the LNA, TIA and PGA. LimeSuite software automatically set optimal values of the amplifiers to achive this global gain. This gain can be set between 0 and 70 dB in 1 dB steps. The value in dB appears at the right of the button.
+Use this button to adjust the global gain of the LNA, TIA and PGA. LimeSuite software automatically set optimal values of the amplifiers to achieve this global gain. This gain can be set between 0 and 70 dB in 1 dB steps. The value in dB appears at the right of the button.
 
 <h4>9.3: LNA manual gain</h4>
 
-Use this button to adjust the gain of tha LNA when manual gain mode is set (9.1). Gain can be set between 1 and 30 dB in 1 dB steps. However the hardware has 3 dB steps for the lower gain values so increasing or decerasing by one step does not always produce a change. The value in dB appears at the right of the button.
+Use this button to adjust the gain of tha LNA when manual gain mode is set (9.1). Gain can be set between 1 and 30 dB in 1 dB steps. However the hardware has 3 dB steps for the lower gain values so increasing or decreasing by one step does not always produce a change. The value in dB appears at the right of the button.
 
 <h4>9.4: TIA manual gain</h4>
 
@@ -181,7 +209,7 @@ Use this combo box to select the antenna input:
 
   - **No**: None
   - **Lo**: Selects the low frequency input (700 to 900 MHz nominally)
-  - **Hi**: Selects the high frequncy input (2 to 2.6 GHz)
+  - **Hi**: Selects the high frequency input (2 to 2.6 GHz)
   - **Wo**: Selects the wideband input
   - **T1**: Selects loopback from TX #1 (experimental)
   - **T1**: Selects loopback from TX #2 (experimental)

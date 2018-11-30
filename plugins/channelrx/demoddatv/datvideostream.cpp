@@ -26,6 +26,7 @@ DATVideostream::DATVideostream():
     m_intPacketReceived=0;
     m_intMemoryLimit = DefaultMemoryLimit;
     MultiThreaded=false;
+    ThreadTimeOut=-1;
 
     m_objeventLoop.connect(this,SIGNAL(onDataAvailable()), &m_objeventLoop, SLOT(quit()),Qt::QueuedConnection);
 }
@@ -115,7 +116,7 @@ int DATVideostream::pushData(const char * chrData, int intSize)
 }
 
 bool DATVideostream::isSequential() const
-{    
+{
     return true;
 }
 
@@ -139,10 +140,11 @@ bool  DATVideostream::open(OpenMode mode)
 //PROTECTED
 
 qint64 DATVideostream::readData(char *data, qint64 len)
-{    
+{
     QByteArray objCurrentArray;
     int intEffectiveLen=0;
     int intExpectedLen=0;
+    int intThreadLoop=0;
 
     intExpectedLen = (int) len;
 
@@ -160,15 +162,25 @@ qint64 DATVideostream::readData(char *data, qint64 len)
 
     //DATA in FIFO ? -> Waiting for DATA
     if((m_objFIFO.isEmpty()) || (m_objFIFO.count()<MinStackSize))
-       //|| (m_intBytesWaiting<10*len))
     {
         m_objMutex.unlock();
 
         if(MultiThreaded==true)
         {
+
+            intThreadLoop=0;
             while((m_objFIFO.isEmpty()) || (m_objFIFO.count()<MinStackSize))
             {
                 QThread::msleep(5);
+                intThreadLoop ++;
+
+                if(ThreadTimeOut>=0)
+                {
+                    if(intThreadLoop*5>ThreadTimeOut)
+                    {
+                        return -1;
+                    }
+                }
             }
         }
         else
@@ -212,12 +224,12 @@ qint64 DATVideostream::readData(char *data, qint64 len)
     return (qint64)intEffectiveLen;
 }
 
-qint64 DATVideostream::writeData(const char *data, qint64 len)
+qint64 DATVideostream::writeData(const char *data __attribute__((unused)), qint64 len __attribute__((unused)))
 {
     return 0;
 }
 
-qint64 	DATVideostream::readLineData(char *data, qint64 maxSize)
-{   
+qint64 	DATVideostream::readLineData(char *data __attribute__((unused)), qint64 maxSize __attribute__((unused)))
+{
     return 0;
 }

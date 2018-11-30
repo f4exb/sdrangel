@@ -1,0 +1,65 @@
+SSBDemodSettings:
+  description: SSBDemod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float    
+    lowCutoff:
+      type: number
+      format: float
+    volume:
+      type: number
+      format: float
+    spanLog2:
+      type: integer
+    audioBinaural:
+      description: Audio binaural mode (1 if active else 0)
+      type: integer
+    audioFlipChannels:
+      description: Flip audio channels (1 if flipped else 0)
+      type: integer
+    dsb:
+      description: Double sidebands mode (1 if DSB else 0)
+      type: integer
+    audioMute:
+      description: Mute audio (1 if muted else 0)
+      type: integer
+    agc:
+      description: AGC (1 if AGC active else 0)
+      type: integer
+    agcClamping:
+      description: AGC clamping (1 if AGC clampingactive else 0)
+      type: integer
+    agcTimeLog2:
+      description: AGC averaging time log2 in milliseconds
+      type: integer
+    agcPowerThreshold:
+      description: Audio open RF threshold (dB)
+      type: integer
+    agcThresholdGate:
+      description: Audio squelch gate in ms
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    audioDeviceName:
+      type: string
+      
+SSBDemodReport:
+  description: SSBDemod
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    squelch:
+      description: Audio squelch status (1 if open else 0)
+      type: integer
+    audioSampleRate:
+      type: integer
+    channelSampleRate:
+      type: integer

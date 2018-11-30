@@ -37,14 +37,11 @@ ChannelMarker::ChannelMarker(QObject* parent) :
 	m_highlighted(false),
 	m_color(m_colorTable[m_nextColor]),
 	m_movable(true),
-	m_udpReceivePort(9999),
-	m_udpSendPort(9998),
 	m_fScaleDisplayType(FScaleDisplay_freq)
 {
 	++m_nextColor;
 	if(m_colorTable[m_nextColor] == 0)
 		m_nextColor = 0;
-	setUDPAddress("127.0.0.1");
 }
 
 void ChannelMarker::emitChangedByAPI()
@@ -118,36 +115,11 @@ void ChannelMarker::setColor(const QColor& color)
 	emit changedByAPI();
 }
 
-void ChannelMarker::setUDPAddress(const QString& udpAddress)
-{
-    m_udpAddress = udpAddress;
-    m_displayAddressReceive = QString(tr("%1:%2").arg(getUDPAddress()).arg(getUDPSendPort()));
-    m_displayAddressReceive = QString(tr("%1:%2").arg(getUDPAddress()).arg(getUDPReceivePort()));
-    emit changedByAPI();
-}
-
-void ChannelMarker::setUDPReceivePort(quint16 port)
-{
-    m_udpReceivePort = port;
-    m_displayAddressReceive = QString(tr("%1:%2").arg(getUDPAddress()).arg(getUDPReceivePort()));
-    emit changedByAPI();
-}
-
-void ChannelMarker::setUDPSendPort(quint16 port)
-{
-    m_udpSendPort = port;
-    m_displayAddressSend = QString(tr("%1:%2").arg(getUDPAddress()).arg(getUDPSendPort()));
-    emit changedByAPI();
-}
-
 void ChannelMarker::resetToDefaults()
 {
     setTitle("Channel");
     setCenterFrequency(0);
     setColor(Qt::white);
-    setUDPAddress("127.0.0.1");
-    setUDPSendPort(9999);
-    setUDPReceivePort(9999);
     setFrequencyScaleDisplayType(FScaleDisplay_freq);
 }
 
@@ -157,9 +129,6 @@ QByteArray ChannelMarker::serialize() const
     s.writeS32(1, getCenterFrequency());
     s.writeU32(2, getColor().rgb());
     s.writeString(3, getTitle());
-    s.writeString(4, getUDPAddress());
-    s.writeU32(5, (quint32) getUDPReceivePort());
-    s.writeU32(6, (quint32) getUDPSendPort());
     s.writeS32(7, (int) getFrequencyScaleDisplayType());
     return s.final();
 }
@@ -189,12 +158,6 @@ bool ChannelMarker::deserialize(const QByteArray& data)
         }
         d.readString(3, &strtmp, "Channel");
         setTitle(strtmp);
-        d.readString(4, &strtmp, "127.0.0.1");
-        setUDPAddress(strtmp);
-        d.readU32(5, &u32tmp, 9999);
-        setUDPReceivePort(u32tmp);
-        d.readU32(6, &u32tmp, 9999);
-        setUDPSendPort(u32tmp);
         d.readS32(7, &tmp, 0);
         if ((tmp >= 0) && (tmp < FScaleDisplay_none)) {
             setFrequencyScaleDisplayType((frequencyScaleDisplay_t) tmp);

@@ -27,7 +27,6 @@
 
 class DeviceSourceAPI;
 class LimeSDRInputThread;
-struct DeviceLimeSDRParams;
 class FileRecord;
 
 class LimeSDRInput : public DeviceSampleSource
@@ -228,6 +227,10 @@ public:
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            QString& errorMessage);
+
     virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
@@ -238,9 +241,9 @@ public:
             QString& errorMessage);
 
     std::size_t getChannelIndex();
-    void getLORange(float& minF, float& maxF, float& stepF) const;
-    void getSRRange(float& minF, float& maxF, float& stepF) const;
-    void getLPRange(float& minF, float& maxF, float& stepF) const;
+    void getLORange(float& minF, float& maxF) const;
+    void getSRRange(float& minF, float& maxF) const;
+    void getLPRange(float& minF, float& maxF) const;
     uint32_t getHWLog2Decim() const;
 
 private:
@@ -265,6 +268,7 @@ private:
     void resumeTxBuddies();
     bool applySettings(const LimeSDRInputSettings& settings, bool force = false, bool forceNCOFrequency = false);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const LimeSDRInputSettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUT_H_ */

@@ -59,19 +59,9 @@ private:
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
 	void displaySettings();
-    void displayUDPAddress();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
-
-	static int requiredBW(int rfBW)
-	{
-	    if (rfBW <= 48000) {
-	        return 48000;
-	    } else {
-	        return (3*rfBW)/2;
-	    }
-	}
 
 private slots:
 	void on_deltaFrequency_changed(qint64 value);
@@ -80,9 +70,10 @@ private slots:
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
     void on_audioMute_toggled(bool checked);
-    void on_copyAudioToUDP_toggled(bool copy);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
+    void handleInputMessages();
+    void audioSelect();
 	void tick();
 };
 

@@ -18,6 +18,8 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGPlutoSdrOutputReport.h"
 
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -42,6 +44,13 @@ PlutoSDROutput::PlutoSDROutput(DeviceSinkAPI *deviceAPI) :
     m_plutoTxBuffer(0),
     m_plutoSDROutputThread(0)
 {
+    m_deviceSampleRates.m_addaConnvRate = 0;
+    m_deviceSampleRates.m_bbRateHz = 0;
+    m_deviceSampleRates.m_firRate = 0;
+    m_deviceSampleRates.m_hb1Rate = 0;
+    m_deviceSampleRates.m_hb2Rate = 0;
+    m_deviceSampleRates.m_hb3Rate = 0;
+
     suspendBuddies();
     openDevice();
     resumeBuddies();
@@ -72,20 +81,12 @@ bool PlutoSDROutput::start()
 
     if (m_running) stop();
 
-    applySettings(m_settings, true);
-
     // start / stop streaming is done in the thread.
 
-    if ((m_plutoSDROutputThread = new PlutoSDROutputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleSourceFifo)) == 0)
-    {
-        qCritical("PlutoSDROutput::start: cannot create thread");
-        stop();
-        return false;
-    }
-    else
-    {
-        qDebug("PlutoSDROutput::start: thread created");
-    }
+    m_plutoSDROutputThread = new PlutoSDROutputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleSourceFifo);
+    qDebug("PlutoSDROutput::start: thread created");
+
+    applySettings(m_settings, true);
 
     m_plutoSDROutputThread->setLog2Interpolation(m_settings.m_log2Interp);
     m_plutoSDROutputThread->startWork();
@@ -202,13 +203,11 @@ bool PlutoSDROutput::handleMessage(const Message& message)
             if (m_deviceAPI->initGeneration())
             {
                 m_deviceAPI->startGeneration();
-                DSPEngine::instance()->startAudioInput();
             }
         }
         else
         {
             m_deviceAPI->stopGeneration();
-            DSPEngine::instance()->stopAudioInput();
         }
 
         return true;
@@ -257,11 +256,9 @@ bool PlutoSDROutput::openDevice()
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
 
     // acquire the channel
-    suspendBuddies();
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
     plutoBox->openTx();
     m_plutoTxBuffer = plutoBox->createTxBuffer(PLUTOSDR_BLOCKSIZE_SAMPLES, false); // PlutoSDR buffer size is counted in number of (I,Q) samples
-    resumeBuddies();
 
     return true;
 }
@@ -317,6 +314,22 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
     bool ownThreadWasRunning    = false;
     bool suspendAllOtherThreads = false; // All others means Rx in fact
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
+    QLocale loc;
+
+    qDebug().noquote() << "PlutoSDROutput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+            << " m_devSampleRate: " << loc.toString(m_settings.m_devSampleRate) << "S/s"
+            << " m_LOppmTenths: " << m_settings.m_LOppmTenths
+            << " m_lpfFIREnable: " << m_settings.m_lpfFIREnable
+            << " m_lpfFIRBW: " << loc.toString(m_settings.m_lpfFIRBW)
+            << " m_lpfFIRlog2Interp: " << m_settings.m_lpfFIRlog2Interp
+            << " m_lpfFIRGain: " << m_settings.m_lpfFIRGain
+            << " m_log2Interp: " << loc.toString(1<<m_settings.m_log2Interp)
+            << " m_lpfBW: " << loc.toString(m_settings.m_lpfBW)
+            << " m_att: " << m_settings.m_att
+            << " m_antennaPath: " << (int) m_settings.m_antennaPath
+            << " m_transverterMode: " << m_settings.m_transverterMode
+            << " m_transverterDeltaFrequency: " << m_settings.m_transverterDeltaFrequency
+            << " force: " << force;
 
     // determine if buddies threads or own thread need to be suspended
 
@@ -560,3 +573,112 @@ int PlutoSDROutput::webapiRun(
     return 200;
 }
 
+int PlutoSDROutput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setPlutoSdrOutputSettings(new SWGSDRangel::SWGPlutoSdrOutputSettings());
+    response.getPlutoSdrOutputSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int PlutoSDROutput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    PlutoSDROutputSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getPlutoSdrOutputSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("devSampleRate")) {
+        settings.m_devSampleRate = response.getPlutoSdrOutputSettings()->getDevSampleRate();
+    }
+    if (deviceSettingsKeys.contains("LOppmTenths")) {
+        settings.m_LOppmTenths = response.getPlutoSdrOutputSettings()->getLOppmTenths();
+    }
+    if (deviceSettingsKeys.contains("lpfFIREnable")) {
+        settings.m_lpfFIREnable = response.getPlutoSdrOutputSettings()->getLpfFirEnable() != 0;
+    }
+    if (deviceSettingsKeys.contains("lpfFIRBW")) {
+        settings.m_lpfFIRBW = response.getPlutoSdrOutputSettings()->getLpfFirbw();
+    }
+    if (deviceSettingsKeys.contains("lpfFIRlog2Interp")) {
+        settings.m_lpfFIRlog2Interp = response.getPlutoSdrOutputSettings()->getLpfFiRlog2Interp();
+    }
+    if (deviceSettingsKeys.contains("lpfFIRGain")) {
+        settings.m_lpfFIRGain = response.getPlutoSdrOutputSettings()->getLpfFirGain();
+    }
+    if (deviceSettingsKeys.contains("log2Interp")) {
+        settings.m_log2Interp = response.getPlutoSdrOutputSettings()->getLog2Interp();
+    }
+    if (deviceSettingsKeys.contains("lpfBW")) {
+        settings.m_lpfBW = response.getPlutoSdrOutputSettings()->getLpfBw();
+    }
+    if (deviceSettingsKeys.contains("att")) {
+        settings.m_att = response.getPlutoSdrOutputSettings()->getAtt();
+    }
+    if (deviceSettingsKeys.contains("antennaPath")) {
+        int antennaPath = response.getPlutoSdrOutputSettings()->getAntennaPath();
+        antennaPath = antennaPath < 0 ? 0 : antennaPath >= PlutoSDROutputSettings::RFPATH_END ? PlutoSDROutputSettings::RFPATH_END-1 : antennaPath;
+        settings.m_antennaPath = (PlutoSDROutputSettings::RFPath) antennaPath;
+    }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
+        settings.m_transverterDeltaFrequency = response.getPlutoSdrOutputSettings()->getTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("transverterMode")) {
+        settings.m_transverterMode = response.getPlutoSdrOutputSettings()->getTransverterMode() != 0;
+    }
+
+    MsgConfigurePlutoSDR *msg = MsgConfigurePlutoSDR::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigurePlutoSDR *msgToGUI = MsgConfigurePlutoSDR::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+int PlutoSDROutput::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setPlutoSdrOutputReport(new SWGSDRangel::SWGPlutoSdrOutputReport());
+    response.getPlutoSdrOutputReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
+
+void PlutoSDROutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const PlutoSDROutputSettings& settings)
+{
+    response.getPlutoSdrOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getPlutoSdrOutputSettings()->setDevSampleRate(settings.m_devSampleRate);
+    response.getPlutoSdrOutputSettings()->setLOppmTenths(settings.m_LOppmTenths);
+    response.getPlutoSdrOutputSettings()->setLpfFirEnable(settings.m_lpfFIREnable ? 1 : 0);
+    response.getPlutoSdrOutputSettings()->setLpfFirbw(settings.m_lpfFIRBW);
+    response.getPlutoSdrOutputSettings()->setLpfFiRlog2Interp(settings.m_lpfFIRlog2Interp);
+    response.getPlutoSdrOutputSettings()->setLpfFirGain(settings.m_lpfFIRGain);
+    response.getPlutoSdrOutputSettings()->setLog2Interp(settings.m_log2Interp);
+    response.getPlutoSdrOutputSettings()->setLpfBw(settings.m_lpfBW);
+    response.getPlutoSdrOutputSettings()->setAtt(settings.m_att);
+    response.getPlutoSdrOutputSettings()->setAntennaPath((int) settings.m_antennaPath);
+    response.getPlutoSdrOutputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    response.getPlutoSdrOutputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+}
+
+void PlutoSDROutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    response.getPlutoSdrOutputReport()->setDacRate(getDACSampleRate());
+    std::string rssiStr;
+    getRSSI(rssiStr);
+    response.getPlutoSdrOutputReport()->setRssi(new QString(rssiStr.c_str()));
+    fetchTemperature();
+    response.getPlutoSdrOutputReport()->setTemperature(getTemperature());
+}

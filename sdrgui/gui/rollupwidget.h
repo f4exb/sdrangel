@@ -2,9 +2,9 @@
 #define INCLUDE_ROLLUPWIDGET_H
 
 #include <QWidget>
-#include "util/export.h"
+#include "export.h"
 
-class SDRANGEL_API RollupWidget : public QWidget {
+class SDRGUI_API RollupWidget : public QWidget {
 	Q_OBJECT
 
 public:

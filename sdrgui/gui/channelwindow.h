@@ -3,11 +3,13 @@
 
 #include <QScrollArea>
 
+#include "export.h"
+
 class QBoxLayout;
 class QSpacerItem;
 class RollupWidget;
 
-class ChannelWindow : public QScrollArea {
+class SDRGUI_API ChannelWindow : public QScrollArea {
 	Q_OBJECT
 
 public:

@@ -18,16 +18,16 @@
 #include "dsp/afsquelch.h"
 
 #undef M_PI
-#define M_PI		3.14159265358979323846
+#define M_PI 3.14159265358979323846
 
-AFSquelch::AFSquelch(unsigned int nbTones, const double *tones) :
+AFSquelch::AFSquelch() :
             m_nbAvg(128),
-			m_N(0),
-			m_sampleRate(0),
+			m_N(24),
+			m_sampleRate(48000),
 			m_samplesProcessed(0),
             m_samplesAvgProcessed(0),
 			m_maxPowerIndex(0),
-			m_nTones(nbTones),
+			m_nTones(2),
 			m_samplesAttack(0),
 			m_attackCount(0),
 			m_samplesDecay(0),
@@ -46,9 +46,9 @@ AFSquelch::AFSquelch(unsigned int nbTones, const double *tones) :
 
     for (unsigned int j = 0; j < m_nTones; ++j)
 	{
-		m_toneSet[j] = tones[j];
-        m_k[j] = ((double)m_N * m_toneSet[j]) / (double)m_sampleRate;
-        m_coef[j] = 2.0 * cos((2.0 * M_PI * m_toneSet[j])/(double)m_sampleRate);
+		m_toneSet[j] = j == 0 ? 1000.0 : 6000.0;
+        m_k[j] = ((double)m_N * m_toneSet[j]) / (double) m_sampleRate;
+        m_coef[j] = 2.0 * cos((2.0 * M_PI * m_toneSet[j])/(double) m_sampleRate);
         m_u0[j] = 0.0;
         m_u1[j] = 0.0;
         m_power[j] = 0.0;
@@ -67,19 +67,19 @@ AFSquelch::~AFSquelch()
 	delete[] m_power;
 }
 
-
 void AFSquelch::setCoefficients(
         unsigned int N,
         unsigned int nbAvg,
-        unsigned int _samplerate,
-        unsigned int _samplesAttack,
-        unsigned int _samplesDecay)
+        unsigned int sampleRate,
+        unsigned int samplesAttack,
+        unsigned int samplesDecay,
+        const double *tones)
 {
 	m_N = N;                   // save the basic parameters for use during analysis
 	m_nbAvg = nbAvg;
-	m_sampleRate = _samplerate;
-	m_samplesAttack = _samplesAttack;
-	m_samplesDecay = _samplesDecay;
+	m_sampleRate = sampleRate;
+	m_samplesAttack = samplesAttack;
+	m_samplesDecay = samplesDecay;
 	m_movingAverages.resize(m_nTones, MovingAverage<double>(m_nbAvg, 0.0));
 	m_samplesProcessed = 0;
     m_samplesAvgProcessed = 0;
@@ -97,8 +97,10 @@ void AFSquelch::setCoefficients(
 	// for later display. The tone set is specified in the
 	// constructor. Notice that the resulting coefficients are
 	// independent of N.
+
     for (unsigned int j = 0; j < m_nTones; ++j)
 	{
+        m_toneSet[j] = tones[j] < ((double) m_sampleRate) * 0.4 ? tones[j] : ((double) m_sampleRate) * 0.4; // guarantee 80% Nyquist rate
 		m_k[j] = ((double)m_N * m_toneSet[j]) / (double)m_sampleRate;
 		m_coef[j] = 2.0 * cos((2.0 * M_PI * m_toneSet[j])/(double)m_sampleRate);
 		m_u0[j] = 0.0;

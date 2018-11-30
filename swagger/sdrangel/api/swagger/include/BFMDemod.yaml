@@ -1,0 +1,105 @@
+BFMDemodSettings:
+  description: BFMDemod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    afBandwidth:
+      type: number
+      format: float
+    volume:
+      type: number
+      format: float
+    squelch:
+      type: number
+      format: float
+    audioStereo:
+      type: integer
+    lsbStereo:
+      type: integer
+    showPilot:
+      type: integer
+    rdsActive:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    audioDeviceName:
+      type: string
+
+BFMDemodReport:
+  description: BFMDemod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    squelch:
+      description: squelch status (1 if open else 0)
+      type: integer
+    audioSampleRate:
+      type: integer
+    channelSampleRate:
+      type: integer
+    pilotLocked:
+      description: pilot locked status (1 if open else 0)
+      type: integer
+    pilotPowerDB:
+      description: power of stereo pilot (dB)
+      type: number
+      format: float
+    rdsReport:
+      $ref: "#/RDSReport"
+      
+RDSReport:
+  description: RDS information
+  properties:
+    demodStatus:
+      description: Demodulation success  (%)
+      type: integer
+    decodStatus:
+      description: Decoding success  (%)
+      type: integer
+    rdsDemodAccumDB:
+      description: RDS demodulator accumulator level (dB)
+      type: number
+      format: float
+    rdsDemodFrequency:
+      description: RDS demodulator clock frequency
+      type: number
+      format: float
+    pid:
+      description: Program information (PI) ID in string format (hex)
+      type: string
+    piType:
+      description: Program information (PI) type information
+      type: string
+    piCoverage:
+      description: Program information (PI) coverage information
+      type: string
+    progServiceName:
+      description: Program service name
+      type: string
+    musicSpeech:
+      description: Music or speech
+      type: string
+    monoStereo:
+      description: Mono or stereo
+      type: string
+    radioText:
+      description: Freeflow text
+      type: string
+    time:
+      description: Timestamp in string format ~ISO
+      type: string
+    altFrequencies:
+      type: array
+      items:
+        properties:
+          frequency:
+            type: number
+            format: float

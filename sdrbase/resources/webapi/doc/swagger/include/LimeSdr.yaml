@@ -40,6 +40,13 @@ LimeSdrInputSettings:
       type: integer
     extClockFreq: 
       type: integer
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64      
+    fileRecordName:
+      type: string
       
 LimeSdrOutputSettings:
   description: LimeSDR
@@ -71,4 +78,69 @@ LimeSdrOutputSettings:
       type: integer
     extClockFreq: 
       type: integer
-            
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64      
+
+LimeSdrInputReport:
+  description: LimeSDR
+  properties:  
+    success:
+      description: 1 if info was successfullt retrieved else 0
+      type: integer
+    streamActive:
+      description: 1 if active else 0
+      type: integer
+    fifoSize:
+      type: integer
+    fifoFill:
+      type: integer
+    underrunCount:  
+      type: integer
+    overrunCount:  
+      type: integer
+    droppedPacketsCount:  
+      type: integer
+    linkRate:
+      type: number
+      format: float
+    hwTimestamp:
+      description: Hardware timestamp
+      type: integer
+      format: uint64
+    temperature:
+      type: number
+      format: float                        
+
+LimeSdrOutputReport:
+  description: LimeSDR
+  properties:  
+    success:
+      description: 1 if info was successfullt retrieved else 0
+      type: integer
+    streamActive:
+      description: 1 if active else 0
+      type: integer
+    fifoSize:
+      type: integer
+    fifoFill:
+      type: integer
+    underrunCount:  
+      type: integer
+    overrunCount:  
+      type: integer
+    droppedPacketsCount:  
+      type: integer
+    linkRate:
+      type: number
+      format: float
+    hwTimestamp:
+      description: Hardware timestamp
+      type: integer
+      format: uint64
+    temperature:
+      type: number
+      format: float                        
+      

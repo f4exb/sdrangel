@@ -12,6 +12,8 @@
 #include "httpglobal.h"
 #include "httpcookie.h"
 
+#include "export.h"
+
 namespace qtwebapp {
 
 /**
@@ -33,7 +35,7 @@ namespace qtwebapp {
   before calling write(). Web Browsers use that information to display a progress bar.
 */
 
-class DECLSPEC HttpResponse {
+class HTTPSERVER_API HttpResponse {
     Q_DISABLE_COPY(HttpResponse)
 public:
 

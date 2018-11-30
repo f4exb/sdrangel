@@ -109,19 +109,59 @@ public:
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
-        avg = m_magsqCount == 0 ? 1e-10 : m_magsqSum / m_magsqCount;
-        m_magsq = avg;
-        peak = m_magsqPeak == 0.0 ? 1e-10 : m_magsqPeak;
+        if (m_magsqCount > 0)
+        {
+            m_magsq = m_magsqSum / m_magsqCount;
+            m_magSqLevelStore.m_magsq = m_magsq;
+            m_magSqLevelStore.m_magsqPeak = m_magsqPeak;
+        }
+
+        avg = m_magSqLevelStore.m_magsq;
+        peak = m_magSqLevelStore.m_magsqPeak;
         nbSamples = m_magsqCount == 0 ? 1 : m_magsqCount;
+
         m_magsqSum = 0.0f;
         m_magsqPeak = 0.0f;
         m_magsqCount = 0;
+    }
+
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage);
+
+    static int requiredBW(int rfBW)
+    {
+        if (rfBW <= 48000) {
+            return 48000;
+        } else {
+            return (3*rfBW)/2;
+        }
     }
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
 private:
+    struct MagSqLevelsStore
+    {
+        MagSqLevelsStore() :
+            m_magsq(1e-12),
+            m_magsqPeak(1e-12)
+        {}
+        double m_magsq;
+        double m_magsqPeak;
+    };
+
 	enum RateState {
 		RSInitialFill,
 		RSRunning
@@ -134,6 +174,7 @@ private:
     int m_inputSampleRate;
     int m_inputFrequencyOffset;
     WFMDemodSettings m_settings;
+    quint32 m_audioSampleRate;
 
 	NCO m_nco;
 	Interpolator m_interpolator; //!< Interpolator between sample rate sent from DSP engine and requested RF bandwidth (rational)
@@ -148,14 +189,13 @@ private:
     double m_magsqSum;
     double m_magsqPeak;
     int  m_magsqCount;
+    MagSqLevelsStore m_magSqLevelStore;
 
-	Real m_lastArgument;
 	MovingAverageUtil<Real, double, 16> m_movingAverage;
 	Real m_fmExcursion;
 
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
-    UDPSink<qint16> *m_udpBufferAudio;
 
 	AudioFifo m_audioFifo;
 	SampleVector m_sampleBuffer;
@@ -165,8 +205,12 @@ private:
 
     static const int m_udpBlockSize;
 
+    void applyAudioSampleRate(int sampleRate);
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const WFMDemodSettings& settings, bool force = false);
+
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const WFMDemodSettings& settings);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 };
 
 #endif // INCLUDE_WFMDEMOD_H

@@ -1,0 +1,57 @@
+DaemonSourceSettings:
+  description: "Daemon channel source settings"
+  properties:
+    dataAddress:
+      description: "Remote USB data address"
+      type: string
+    dataPort:
+      description: "Remote USB data port"
+      type: integer
+    rgbColor:
+      type: integer                  
+    title:
+      type: string      
+ 
+DaemonSourceReport:
+  description: "Daemon channel source report"
+  properties:
+    queueLength:
+      description: "Data read/write queue length in number of data frames"
+      type: integer
+    queueSize:
+      description: "Data read/write queue size in number of data frames"
+      type: integer
+    samplesCount:
+      description: "Absolute consumed samples count"
+      type: integer
+    correctableErrorsCount:
+      description: "Absolute number of correctable errors"
+      type: integer
+    uncorrectableErrorsCount:
+      description: "Absolute number of uncorrectable errors"
+      type: integer
+    tvSec:
+      description: "Counts timestamp seconds"
+      type: integer
+    tvUSec:
+      description: "Counts timestamp microseconds"
+      type: integer     
+    nbOriginalBlocks:
+      description: "Number of original blocks per frame"
+      type: integer
+    nbFECBlocks:
+      description: "Number of FEC blocks per frame"
+      type: integer
+    centerFreq:
+      description: "Stream center frequency setting in kHz"
+      type: integer
+    sampleRate:
+      description: "Stream nominal sample rate in S/s"
+      type: integer     
+    deviceCenterFreq:
+      description: "Device center frequency in kHz"
+      type: integer
+    deviceSampleRate:
+      description: "Device baseband sample rate in S/s"
+      type: integer     
+      

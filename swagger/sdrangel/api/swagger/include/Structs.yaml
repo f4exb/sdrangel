@@ -1,0 +1,63 @@
+SampleRate:
+  description: A sample rate expressed in samples per second (S/s)
+  properties:
+    rate:
+      type: integer
+
+Bandwidth:
+  description: A bandwidth expressed in Hertz (Hz)
+  properties:
+    bandwidth:
+      type: integer
+
+Frequency:
+  description: A frequency expressed in Hertz (Hz)
+  properties:
+    frequency:
+      type: integer
+
+FrequencyBand:
+  description: A band of frequencies given its boudaries in Hertz (Hz)
+  properties:
+    name:
+      type: string
+    lowerBound:
+      type: integer
+    higherBound:
+      type: integer
+
+Gain:
+  description: A gain expressed in centi-Bels (tenths of dB)
+  properties:
+    gainCB:
+      type: integer
+
+Range:
+  description: An arbitrary range of values
+  properties:
+    min:
+      type: integer
+    max:
+      type: integer
+    step:
+      type: integer
+
+FrequencyRange:
+  description: An frequency range with 64 bit support for min and max
+  properties:
+    min:
+      type: integer
+      format: int64
+    max:
+      type: integer
+      format: int64
+    step:
+      type: integer
+
+NamedEnum:
+  description: Enumeration with name for values
+  properties:
+    name:
+      type: string
+    value:
+      type: integer

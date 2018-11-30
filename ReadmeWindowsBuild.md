@@ -8,7 +8,7 @@ You should take note that the Windows scheduler is just a piece of crap and not 
 
 There are no plugins for both flavours of Funcubes since it uses Alsa interface which is Linux exclusively. Changing for the Qt audio portable interface instead could be a solution that will be investigated in the future.
 
-The SDRdaemon plug-in is present only in the 64 bit build version since version 1.1.4. The messaging system based on nanomsg works only in the 64 bit environment. However please be aware that the SDRdaemon plugin is not working well mainly due to the fact that it needs an OS with a decent scheduler and Windows is definitely not this sort of OS (see my previous warning). In fact depending on the case your mileage may vary however the Linux version works always beautifully so you know the options if you really want to use it!
+Please be aware that the SDRdaemon plugin is not working well mainly due to the fact that it needs an OS with a decent scheduler and Windows is definitely not this sort of OS (see my previous warning). In fact depending on the case your mileage may vary however the Linux version works always beautifully so you know the options if you really want to use it!
 
 <h3>Build environment</h3>
 

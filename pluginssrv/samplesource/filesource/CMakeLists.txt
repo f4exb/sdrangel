@@ -19,6 +19,7 @@ set(filesource_HEADERS
 
 include_directories(
 	.
+	${CMAKE_SOURCE_DIR}/exports
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
@@ -39,6 +40,6 @@ target_link_libraries(inputfilesourcesrv
 	swagger
 )
 
-qt5_use_modules(inputfilesourcesrv Core)
+target_link_libraries(inputfilesourcesrv Qt5::Core)
 
 install(TARGETS inputfilesourcesrv DESTINATION lib/pluginssrv/samplesource)

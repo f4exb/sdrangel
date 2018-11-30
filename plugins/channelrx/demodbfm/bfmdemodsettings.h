@@ -28,16 +28,13 @@ struct BFMDemodSettings
     Real m_afBandwidth;
     Real m_volume;
     Real m_squelch;
-    quint32 m_audioSampleRate;
     bool m_audioStereo;
     bool m_lsbStereo;
     bool m_showPilot;
     bool m_rdsActive;
-    bool m_copyAudioToUDP;
-    QString m_udpAddress;
-    quint16 m_udpPort;
     quint32 m_rgbColor;
     QString m_title;
+    QString m_audioDeviceName;
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;

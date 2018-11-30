@@ -35,15 +35,15 @@ class FCDProPlusReader;
 
 class FCDProPlusInput : public DeviceSampleSource {
 public:
-	class MsgConfigureFCD : public Message {
+	class MsgConfigureFCDProPlus : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 		const FCDProPlusSettings& getSettings() const { return m_settings; }
 
-		static MsgConfigureFCD* create(const FCDProPlusSettings& settings)
+		static MsgConfigureFCDProPlus* create(const FCDProPlusSettings& settings)
 		{
-			return new MsgConfigureFCD(settings);
+			return new MsgConfigureFCDProPlus(settings);
 		}
 
 	private:

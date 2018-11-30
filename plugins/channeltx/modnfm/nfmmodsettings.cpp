@@ -50,7 +50,6 @@ void NFMModSettings::resetToDefaults()
     m_rfBandwidth = 12500.0f;
     m_fmDeviation = 5000.0f;
     m_toneFrequency = 1000.0f;
-    m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
     m_volumeFactor = 1.0f;
     m_channelMute = false;
     m_playLoop = false;
@@ -59,6 +58,7 @@ void NFMModSettings::resetToDefaults()
     m_rgbColor = QColor(255, 0, 0).rgb();
     m_title = "NFM Modulator";
     m_modAFInput = NFMModInputAF::NFMModInputNone;
+    m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
 }
 
 QByteArray NFMModSettings::serialize() const
@@ -85,6 +85,7 @@ QByteArray NFMModSettings::serialize() const
     s.writeS32(10, m_ctcssIndex);
     s.writeString(12, m_title);
     s.writeS32(13, (int) m_modAFInput);
+    s.writeString(14, m_audioDeviceName);
 
     return s.final();
 }
@@ -134,6 +135,8 @@ bool NFMModSettings::deserialize(const QByteArray& data)
         } else {
             m_modAFInput = (NFMModInputAF) tmp;
         }
+
+        d.readString(14, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
 
         return true;
     }

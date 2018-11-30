@@ -22,8 +22,15 @@
 #include "dsp/filerecord.h"
 #include "filesourcethread.h"
 #include "dsp/samplesinkfifo.h"
+#include "util/messagequeue.h"
 
-FileSourceThread::FileSourceThread(std::ifstream *samplesStream, SampleSinkFifo* sampleFifo, QObject* parent) :
+MESSAGE_CLASS_DEFINITION(FileSourceThread::MsgReportEOF, Message)
+
+FileSourceThread::FileSourceThread(std::ifstream *samplesStream,
+        SampleSinkFifo* sampleFifo,
+        const QTimer& timer,
+        MessageQueue *fileInputMessageQueue,
+        QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_ifstream(samplesStream),
@@ -33,6 +40,8 @@ FileSourceThread::FileSourceThread(std::ifstream *samplesStream, SampleSinkFifo*
 	m_chunksize(0),
 	m_sampleFifo(sampleFifo),
 	m_samplesCount(0),
+	m_timer(timer),
+	m_fileInputMessageQueue(fileInputMessageQueue),
     m_samplerate(0),
 	m_samplesize(0),
 	m_samplebytes(0),
@@ -70,6 +79,7 @@ void FileSourceThread::startWork()
         while(!m_running)
             m_startWaiter.wait(&m_startWaitMutex, 100);
         m_startWaitMutex.unlock();
+        connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
     }
     else
     {
@@ -80,6 +90,7 @@ void FileSourceThread::startWork()
 void FileSourceThread::stopWork()
 {
 	qDebug() << "FileSourceThread::stopWork";
+	disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 	m_running = false;
 	wait();
 }
@@ -101,7 +112,6 @@ void FileSourceThread::setSampleRateAndSize(int samplerate, quint32 samplesize)
 		m_samplerate = samplerate;
 		m_samplesize = samplesize;
 		m_samplebytes = m_samplesize > 16 ? sizeof(int32_t) : sizeof(int16_t);
-        // TODO: implement FF and slow motion here. 2 corresponds to live. 1 is half speed, 4 is double speed
         m_chunksize = (m_samplerate * 2 * m_samplebytes * m_throttlems) / 1000;
 
         setBuffers(m_chunksize);
@@ -161,12 +171,6 @@ void FileSourceThread::run()
 	m_running = false;
 }
 
-void FileSourceThread::connectTimer(const QTimer& timer)
-{
-	qDebug() << "FileSourceThread::connectTimer";
-	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
-}
-
 void FileSourceThread::tick()
 {
 	if (m_running)
@@ -187,18 +191,12 @@ void FileSourceThread::tick()
         if (m_ifstream->eof())
         {
         	writeToSampleFifo(m_fileBuf, (qint32) m_ifstream->gcount());
-            //m_sampleFifo->write(m_buf, m_ifstream->gcount());
-            // TODO: handle loop playback situation
-    		m_ifstream->clear();
-            m_ifstream->seekg(sizeof(FileRecord::Header), std::ios::beg);
-    		m_samplesCount = 0;
-            //stopWork();
-            //m_ifstream->close();
+        	MsgReportEOF *message = MsgReportEOF::create();
+        	m_fileInputMessageQueue->push(message);
         }
         else
         {
         	writeToSampleFifo(m_fileBuf, (qint32) m_chunksize);
-            //m_sampleFifo->write(m_buf, m_chunksize);
     		m_samplesCount += m_chunksize / (2 * m_samplebytes);
         }
 	}

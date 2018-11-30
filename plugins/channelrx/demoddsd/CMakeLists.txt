@@ -1,5 +1,7 @@
 project(dsddemod)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(dsddemod_SOURCES
     dsddemod.cpp
     dsddemodgui.cpp
@@ -7,6 +9,7 @@ set(dsddemod_SOURCES
     dsddemodbaudrates.cpp
     dsddemodsettings.cpp
     dsddecoder.cpp
+    dsdstatustextdialog.cpp
 )
 
 set(dsddemod_HEADERS
@@ -16,16 +19,19 @@ set(dsddemod_HEADERS
     dsddemodbaudrates.h
     dsddemodsettings.h
     dsddecoder.h
+    dsdstatustextdialog.h
 )
 
 set(dsddemod_FORMS
     dsddemodgui.ui
+    dsdstatustextdialog.ui
 )
 
 if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client	
     ${LIBDSDCCSRC}
     ${LIBMBELIBSRC}
 )
@@ -33,6 +39,7 @@ else (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client	
     ${LIBDSDCC_INCLUDE_DIR}
     ${LIBMBE_INCLUDE_DIR}
 )
@@ -70,6 +77,6 @@ target_link_libraries(demoddsd
 endif (BUILD_DEBIAN)
 
 
-qt5_use_modules(demoddsd Core Widgets)
+target_link_libraries(demoddsd Qt5::Core Qt5::Widgets)
 
 install(TARGETS demoddsd DESTINATION lib/plugins/channelrx)

@@ -14,9 +14,6 @@ BasicChannelSettingsDialog::BasicChannelSettingsDialog(ChannelMarker* marker, QW
     ui->setupUi(this);
     ui->title->setText(m_channelMarker->getTitle());
     m_color = m_channelMarker->getColor();
-    ui->udpAddress->setText(m_channelMarker->getUDPAddress());
-    ui->udpPortReceive->setText(QString("%1").arg(m_channelMarker->getUDPReceivePort()));
-    ui->udpPortSend->setText(QString("%1").arg(m_channelMarker->getUDPSendPort()));
     ui->fScaleDisplayType->setCurrentIndex((int) m_channelMarker->getFrequencyScaleDisplayType());
     paintColor();
 }
@@ -40,7 +37,7 @@ void BasicChannelSettingsDialog::paintColor()
 void BasicChannelSettingsDialog::on_colorBtn_clicked()
 {
     QColor c = m_color;
-    c = QColorDialog::getColor(c, this, tr("Select Color for Channel"));
+    c = QColorDialog::getColor(c, this, tr("Select Color for Channel"), QColorDialog::DontUseNativeDialog);
     if(c.isValid()) {
         m_color = c;
         paintColor();
@@ -56,28 +53,8 @@ void BasicChannelSettingsDialog::accept()
         m_channelMarker->setColor(m_color);
     }
 
-    m_channelMarker->setUDPAddress(ui->udpAddress->text());
-
-    bool ok;
-    int udpPort = ui->udpPortReceive->text().toInt(&ok);
-
-    if((!ok) || (udpPort < 1024) || (udpPort > 65535))
-    {
-        udpPort = 9999;
-    }
-
-    m_channelMarker->setUDPReceivePort(udpPort);
-
-    udpPort = ui->udpPortSend->text().toInt(&ok);
-
-    if((!ok) || (udpPort < 1024) || (udpPort > 65535))
-    {
-        udpPort = 9999;
-    }
-
     m_channelMarker->setFrequencyScaleDisplayType((ChannelMarker::frequencyScaleDisplay_t) ui->fScaleDisplayType->currentIndex());
     m_channelMarker->blockSignals(false);
-    m_channelMarker->setUDPSendPort(udpPort); // activate signal on the last setting only
 
     m_hasChanged = true;
     QDialog::accept();

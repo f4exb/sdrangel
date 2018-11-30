@@ -20,6 +20,8 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGAirspyHFReport.h"
 
 #include <device/devicesourceapi.h>
 #include <dsp/filerecord.h>
@@ -28,7 +30,6 @@
 
 #include "airspyhfinput.h"
 
-#include "airspyhfgui.h"
 #include "airspyhfplugin.h"
 #include "airspyhfsettings.h"
 #include "airspyhfthread.h"
@@ -51,10 +52,7 @@ AirspyHFInput::AirspyHFInput(DeviceSourceAPI *deviceAPI) :
 	m_running(false)
 {
     openDevice();
-
-    char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
+    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
 }
 
@@ -156,13 +154,7 @@ bool AirspyHFInput::start()
 
     if (m_running) { stop(); }
 
-	if ((m_airspyHFThread = new AirspyHFThread(m_dev, &m_sampleFifo)) == 0)
-	{
-	    qCritical("AirspyHFInput::start: out of memory");
-		stop();
-		return false;
-	}
-
+	m_airspyHFThread = new AirspyHFThread(m_dev, &m_sampleFifo);
 	int sampleRateIndex = m_settings.m_devSampleRateIndex;
 
     if (m_settings.m_devSampleRateIndex >= m_sampleRates.size()) {
@@ -310,13 +302,11 @@ bool AirspyHFInput::handleMessage(const Message& message)
             if (m_deviceAPI->initAcquisition())
             {
                 m_deviceAPI->startAcquisition();
-                DSPEngine::instance()->startAudioOutput();
             }
         }
         else
         {
             m_deviceAPI->stopAcquisition();
-            DSPEngine::instance()->stopAudioOutput();
         }
 
         return true;
@@ -326,9 +316,18 @@ bool AirspyHFInput::handleMessage(const Message& message)
         MsgFileRecord& conf = (MsgFileRecord&) message;
         qDebug() << "AirspyHFInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
 
-        if (conf.getStartStop()) {
+        if (conf.getStartStop())
+        {
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink->setFileName(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
+            }
+
             m_fileSink->startRecording();
-        } else {
+        }
+        else
+        {
             m_fileSink->stopRecording();
         }
 
@@ -483,6 +482,100 @@ airspyhf_device_t *AirspyHFInput::open_airspyhf_from_serial(const QString& seria
             return 0;
         }
     }
+}
+
+int AirspyHFInput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
+    response.getAirspyHfSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int AirspyHFInput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    AirspyHFSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getAirspyHfSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("devSampleRateIndex")) {
+        settings.m_devSampleRateIndex = response.getAirspyHfSettings()->getDevSampleRateIndex();
+    }
+    if (deviceSettingsKeys.contains("LOppmTenths")) {
+        settings.m_LOppmTenths = response.getAirspyHfSettings()->getLOppmTenths();
+    }
+    if (deviceSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getAirspyHfSettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
+        settings.m_transverterDeltaFrequency = response.getAirspyHfSettings()->getTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("transverterMode")) {
+        settings.m_transverterMode = response.getAirspyHfSettings()->getTransverterMode() != 0;
+    }
+    if (deviceSettingsKeys.contains("bandIndex")) {
+        settings.m_bandIndex = response.getAirspyHfSettings()->getBandIndex() != 0;
+    }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getAirspyHfSettings()->getFileRecordName();
+    }
+
+    MsgConfigureAirspyHF *msg = MsgConfigureAirspyHF::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureAirspyHF *msgToGUI = MsgConfigureAirspyHF::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void AirspyHFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AirspyHFSettings& settings)
+{
+    response.getAirspyHfSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getAirspyHfSettings()->setDevSampleRateIndex(settings.m_devSampleRateIndex);
+    response.getAirspyHfSettings()->setLOppmTenths(settings.m_LOppmTenths);
+    response.getAirspyHfSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getAirspyHfSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    response.getAirspyHfSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+    response.getAirspyHfSettings()->setBandIndex(settings.m_bandIndex ? 1 : 0);
+
+    if (response.getAirspyHfSettings()->getFileRecordName()) {
+        *response.getAirspyHfSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getAirspyHfSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+}
+
+void AirspyHFInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    response.getAirspyHfReport()->setSampleRates(new QList<SWGSDRangel::SWGSampleRate*>);
+
+    for (std::vector<uint32_t>::const_iterator it = getSampleRates().begin(); it != getSampleRates().end(); ++it)
+    {
+        response.getAirspyHfReport()->getSampleRates()->append(new SWGSDRangel::SWGSampleRate);
+        response.getAirspyHfReport()->getSampleRates()->back()->setRate(*it);
+    }
+}
+
+int AirspyHFInput::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setAirspyHfReport(new SWGSDRangel::SWGAirspyHFReport());
+    response.getAirspyHfReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
 }
 
 int AirspyHFInput::webapiRunGet(

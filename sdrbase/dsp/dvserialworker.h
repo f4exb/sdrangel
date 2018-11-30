@@ -29,12 +29,14 @@
 #include "util/message.h"
 #include "util/syncmessenger.h"
 #include "util/messagequeue.h"
+#include "export.h"
 #include "dsp/filtermbe.h"
 #include "dsp/dsptypes.h"
+#include "audio/audiocompressor.h"
 
 class AudioFifo;
 
-class DVSerialWorker : public QObject {
+class SDRBASE_API DVSerialWorker : public QObject {
     Q_OBJECT
 public:
     class MsgTest : public Message
@@ -55,6 +57,7 @@ public:
         int getVolumeIndex() const { return m_volumeIndex; }
         unsigned char getChannels() const { return m_channels % 4; }
         bool getUseHP() const { return m_useHP; }
+        int getUpsampling() const { return m_upsampling; }
         AudioFifo *getAudioFifo() { return m_audioFifo; }
 
         static MsgMbeDecode* create(
@@ -63,9 +66,10 @@ public:
                 int volumeIndex,
                 unsigned char channels,
                 bool useHP,
+                int upsampling,
                 AudioFifo *audioFifo)
         {
-            return new MsgMbeDecode(mbeFrame, (SerialDV::DVRate) mbeRateIndex, volumeIndex, channels, useHP, audioFifo);
+            return new MsgMbeDecode(mbeFrame, (SerialDV::DVRate) mbeRateIndex, volumeIndex, channels, useHP, upsampling, audioFifo);
         }
 
     private:
@@ -74,6 +78,7 @@ public:
         int m_volumeIndex;
         unsigned char m_channels;
         bool m_useHP;
+        int m_upsampling;
         AudioFifo *m_audioFifo;
 
         MsgMbeDecode(const unsigned char *mbeFrame,
@@ -81,12 +86,14 @@ public:
                 int volumeIndex,
                 unsigned char channels,
                 bool useHP,
+                int upsampling,
                 AudioFifo *audioFifo) :
             Message(),
             m_mbeRate(mbeRate),
             m_volumeIndex(volumeIndex),
             m_channels(channels),
             m_useHP(useHP),
+            m_upsampling(upsampling),
             m_audioFifo(audioFifo)
         {
             memcpy((void *) m_mbeFrame, (const void *) mbeFrame, SerialDV::DVController::getNbMbeBytes(m_mbeRate));
@@ -101,6 +108,7 @@ public:
             int mbeVolumeIndex,
             unsigned char channels,
             bool useHP,
+            int upsampling,
             AudioFifo *audioFifo);
 
     bool open(const std::string& serialDevice);
@@ -127,20 +135,26 @@ public slots:
     void handleInputMessages();
 
 private:
-    void upsample6(short *in, short *out, int nbSamplesIn);
-    void upsample6(short *in, int nbSamplesIn, unsigned char channels);
+    //void upsample6(short *in, short *out, int nbSamplesIn);
+    void upsample(int upsampling, short *in, int nbSamplesIn, unsigned char channels);
+    void noUpsample(short *in, int nbSamplesIn, unsigned char channels);
+    void setVolumeFactors();
 
     SerialDV::DVController m_dvController;
-    bool m_running;
+    volatile bool m_running;
     int m_currentGainIn;
     int m_currentGainOut;
     short m_dvAudioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE];
     //short m_audioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE * 6 * 2]; // upsample to 48k and duplicate channel
     AudioVector m_audioBuffer;
     uint m_audioBufferFill;
-    short m_upsamplerLastValue;
+    float m_upsamplerLastValue;
     float m_phase;
     MBEAudioInterpolatorFilter m_upsampleFilter;
+    int m_upsampling;
+    float m_volume;
+    float m_upsamplingFactors[7];
+    AudioCompressor m_compressor;
 };
 
 #endif /* SDRBASE_DSP_DVSERIALWORKER_H_ */

@@ -21,6 +21,7 @@ if (BUILD_DEBIAN)
 include_directories(
         .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
     ${CMAKE_SOURCE_DIR}/devices    
     ${LIBLIMESUITESRC}/src
@@ -37,6 +38,7 @@ else (BUILD_DEBIAN)
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 	${CMAKE_SOURCE_DIR}/devices
 	${LIMESUITE_INCLUDE_DIR}
@@ -71,6 +73,6 @@ target_link_libraries(outputlimesdrsrv
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(outputlimesdrsrv Core)
+target_link_libraries(outputlimesdrsrv Qt5::Core)
 
 install(TARGETS outputlimesdrsrv DESTINATION lib/pluginssrv/samplesink)

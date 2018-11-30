@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QList>
 
-#include "util/export.h"
+#include "export.h"
 #include "plugin/plugininterface.h"
 
 class QString;
@@ -13,7 +13,7 @@ class PluginManager;
 class MessageQueue;
 class PluginInstanceGUI;
 
-class SDRANGEL_API PluginAPI : public QObject {
+class SDRBASE_API PluginAPI : public QObject {
 	Q_OBJECT
 
 public:

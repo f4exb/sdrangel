@@ -1,76 +1,136 @@
 <h1>DATV demodulator plugin</h1>
 
-<h2>Dependencies</h2>
+<h2>Specific dependencies</h2>
 
   - ffmpeg
   - libavcodec-dev
   - libavformat-dev
 
+[LeanSDR](https://github.com/pabr/leansdr) framework from F4DAV is intensively used. It has been integrated in the source tree and modified to suit SDRangel specific needs. 
+
 <h2>Introduction</h2>
 
-TBD...
+This plugin can be used to view digital amateur analog television transmissions a.k.a DATV. The only supported standard for now is DVB-S in various modulations. The standard modulation is QPSK but experimental configurations with other PSK modulations (BPSK, 8PSK, QAMn) can be selected.  
 
-This plugin can be used to view amateur analog television transmissions a.k.a ATV. The video signal is in fact a 625 lines standard signal black and white or color (PAL, NTSC) but only the black and white levels (luminance) is retained. There is no provision to demodulate the audio subcarrier either. The modulation can be either AM or FM.
-
-The whole bandwidth available to the channel is used. That is it runs at the device sample rate possibly downsampled by a power of two in the source plugin. It expects an integer number of MS/s and acceptable results require a sample rate of at least 6 MS/s (Airspy Mini, Airspy, BladerRF, HackRF).
+The whole bandwidth available to the channel is used. That is it runs at the device sample rate possibly downsampled by a power of two in the source plugin.
 
 <h2>Interface</h2>
 
-![ATV Demodulator plugin GUI](../../../doc/img/ATVDemod_plugin.png)
+![DATV Demodulator plugin GUI](../../../doc/img/DATVDemod_plugin.png)
 
-<h3>1: Image</h3>
+<h3>A: RF settings</h3>
 
-This is where the TV image appears.
+![DATV Demodulator plugin RF GUI](../../../doc/img/DATVDemod_pluginRF.png)
 
-<h3>2: Modulation</h3>
+<h4>A.1: Channel frequency shift</h4>
 
-  - FM1: this is Frequency Modulation with approximative demodulation algorithm not using atan2
-  - FM2: this is Frequency Modulation with less approximative demodulation algorithm still not using atan2
-  - AM: this is Amplitude Modulation
+This is the shift of channel center frequency from RF passband center frequency
+
+<h4>A.2: RF bandwidth</h4>
+
+Sets the bandwidth of the channel filter
+
+<h4>A.3: Channel power</h4>
+
+Power of signal received in the channel (dB)
+
+<h3>B: DATV section</h3>
+
+![DATV Demodulator plugin DATV GUI](../../../doc/img/DATVDemod_pluginDATV.png)
+
+<h4>B.1: Symbol constellation</h4>
+
+This is the constellation of the PSK or QAM synchronized signal. When the demodulation parameters are set correctly (modulation type, symbol rate and filtering) and signal is strong enough to recover symbol synchronization the purple dots appear close to the white crosses. White crosses represent the ideal symbols positions in the I/Q plane.
+
+<h4>B.2a: DATV signal settings</h4>
+
+![DATV Demodulator plugin DATV2 GUI](../../../doc/img/DATVDemod_pluginDATV2.png)
+
+<h5>B.2a.1: DATV standard</h5>
+
+For now only the DVB-S standard is available
+
+<h5>B.2a.2: Modulation type</h5>
+
+  - BPSK: binary phase shift keying. Symbols are in &#960;/4 and -3&#960;/4 positions.
+  - QPSK: quadrature phase shift keying. Symbols are in &#960;/4, 3&#960;/4, -3&#960;/4 and -&#960;/4 positions.
+  - 8PSK: 8 phase shift keying a.k.a. &#960;/4 QPSK. Symbols are in 0, &#960;/4, &#960;/2, 3&#960;/4, &#960;, -3&#960;/4, -&#960;/2 and -&#960;/4 positions
+  - APSK16: amplitude and phase shift keying with 16 symbols
+  - APSK32: amplitude and phase shift keying with 32 symbols
+  - APSK64e: amplitude and phase shift keying with 64 symbols
+  - QAM16: quadrature amplitude modulation with 16 symbols
+  - QAM64: quadrature amplitude modulation with 64 symbols
+  - QAM256: quadrature amplitude modulation with 256 symbols  
   
-For FM choose the algorithm that best suits your conditions.
+<h5>B.2a.3: Symbol rate</h5>
 
-<h3>3: Frames Per Second</h3>
+This controls the expected symbol rate
 
-This combo lets you chose between a 25 FPS or 30 FPS standard.
+<h5>B.2a.4: FEC rate</h5>
 
-<h3>4: Horizontal sync</h3>
+Choice between 1/2 , 2/3 , 3/4, 5/6 and 7/8.
 
-Use this button to toggle horizontal synchronization processing.
+<h5>B.2a.5: Notch filter</h5>
 
-<h3>5: Vertical sync</h3>
+LeanSDR feature: attempts to fix signal spectrum shape by eliminating peaks. This is the number of peaks to be tracked. It is safer to keep the 0 default (no notch).
 
-Use this button to toggle vertical synchronization processing.
+<h5>B.2a.6: Fast lock</h5>
 
-<h3>6: Half image</h3>
+Faster signal decode but may yield more errors at startup.
 
-Use this button to disable (on) or enable interlacing of the two half images (off).
+<h5>B.2a.7: Allow drift</h5>
 
-<h3>7: Reset defaults</h3>
+Small frequency drift compensation.
 
-Use this push button to reset values to a standard setting:
+<h5>B.2a.8: Hard metric</h5>
 
-  - FM1 modulation
-  - 25 FPS
-  - Horizontal and vertical syncs active
-  - Interlacing
-  - 100 mV sync level
-  - 310 mV black level
-  - 64 microsecond line length
-  - 3 microsecond sync length
+Constellation hardening (LeanSDR feature).
+
+<h5>B.2a.9: Viterbi</h5>
+
+Viterbi decoding. Be aware that this is CPU intensive. Should be limited to FEC 1/2 , 2/3 and 3/4 in practice.
+
+<h5>B.2a.10: Reset to defaults</h5>
+
+Push this button when you are lost...
+
+<h5>B.2a.11: Filter</h5>
+
+  - FIR Linear
+  - FIR Nearest
+  - RRC (Root Raised Cosine): when selected additional controls for roll-off factor (%) and excursion (dB) are provided.
+
+<h5>B.2a.12: Amount of data decoded</h5>
+
+Automatically adjusts unit (kB, MB, ...)
+
+<h5>B.2a.13: Stream speed</h5>
+
+<h5>B.2a.14: Buffer status</h5>
+
+Gauge that shows percentage of buffer queue length
+
+<h4>B.2b: DATV video stream</h4>
+
+![DATV Demodulator plugin video GUI](../../../doc/img/DATVDemod_pluginVideo.png)
+
+<h5>B.2b.1: Image thumbnail</h4>
+
+Use full screen button (5) to switch to full screen video
+
+<h5>B.2b.2: Stream information</h4>
+
+<h5>B.2b.3: Stream decoding status</h4>
+
+These non clickable checkboxes report the decoding status (checked when OK):
+
+  - data: reception on going
+  - transport: transport stream detected
+  - video: video data detected
+  - decoding: video being decoded
   
-<h3>8: Synchronization level</h3>
+<h5>B.2b.4: Play/pause video playback</h4>
+  
+<h5>B.2b.4: Full screen mode</h4>
 
-Use this slider to adjust the top level of the synchronization pulse on a 0 to 1V scale. The value in mV appears on the right of the slider. Nominal value: 100 mV.
-
-<h3>9: Black level</h3>
-
-Use this slider to adjust the black level of the video signal on a 0 to 1V scale. The value in mV appears on the right of the slider. Nominal value: 310 mV.
-
-<h3>10: Line length</h3>
-
-This is the line length in time units. The value in microseconds appears on the right of the slider. Nominal value: 64 microseconds.
-
-<h3>10: Top length</h3>
-
-This is the length in time units of a synchronization top. The value in microseconds appears on the right of the slider. Nominal value 3 microseconds.
+Click on this button to see video in full screen mode then click anywhere on the screen to exit full screen mode

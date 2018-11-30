@@ -14,7 +14,7 @@ This plugin can be used to generate a single sideband or double sidebands modula
 
 <h3>1: Frequency shift from center frequency of transmission</h3>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of transmission. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the frequency shift in Hz from the center frequency of transmission. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>2: Channel power</h3>
 
@@ -53,7 +53,7 @@ The span value display is set as follows depending on the SSB or DSB mode:
   - In SSB mode: the span goes from zero to the upper (USB: positive frequencies) or lower (LSB: negative frequencies) limit and the absolute value of the limit is displayed.
   - In DSB mode: the span goes from the lower to the upper limit of same absolute value and &#177; the absolute value of the limit is displayed.
 
-This is how the Span (7) and bandpass (8, 9) fitler controls look like in the 3 possible modes:
+This is how the Span (7) and bandpass (8, 9) filter controls look like in the 3 possible modes:
 
 **DSB**:
 
@@ -92,7 +92,7 @@ Values are expressed in kHz and step is 100 Hz.
 
 Values are expressed in kHz and step is 100 Hz.
 
-  - In SSB mode this is the lower cutoff (USB: positive frequencies) or higher cutoff (LSB: negative frequencies) of the in channel signe side band bandpass filter.
+  - In SSB mode this is the lower cutoff (USB: positive frequencies) or higher cutoff (LSB: negative frequencies) of the in channel single side band bandpass filter.
   - In DSB mode it is inactive and set to zero (double side band filter).
 
 <h3>10: Volume</h3>
@@ -105,7 +105,7 @@ This is the volume of the audio signal from 0.0 (mute) to 2.0 (maximum). It can 
   - bottom bar (brown): instantaneous peak value
   - tip vertical bar (bright red): peak hold value
 
-You should aim at keepimg the peak value below 100% using the volume control
+You should aim at keeping the peak value below 100% using the volume control
 
 <h3>12: Audio compression</h3>
 
@@ -125,7 +125,7 @@ Use this button to toggle audio compressor on and off. In "on" mode the button i
 
 <h4>12.2: AGC magnitude order</h4>
 
-This is the ratio to maximum signal magnitude aimed by the AGC. The higher the stronger is the compression but the signal will have more chances to get clamped and therefore will get more severly distorted.
+This is the ratio to maximum signal magnitude aimed by the AGC. The higher the stronger is the compression but the signal will have more chances to get clamped and therefore will get more severely distorted.
 
 The default value is 0.2 which is rather mild. For normal voice you should not exceed 0.4 however the criteria is rather subjective. It is flexible enough to be tuned between 0 and 1 in 0.01 increments.
 
@@ -137,7 +137,7 @@ The default value is 200 ms which is relatively "soft". Most practically useful 
 
 <h4>12.4: Power threshold</h4>
 
-in order to avoid small signals due to background noise or power wiggle to enter the system and raise to normal voice level a power based squelch is in place. This control allows to select a threshold in dB above which a signal will open the squalch if it lasts longer than the squelch gate (2.5). Default is -40 dB.
+in order to avoid small signals due to background noise or power wiggle to enter the system and raise to normal voice level a power based squelch is in place. This control allows to select a threshold in dB above which a signal will open the squelch if it lasts longer than the squelch gate (2.5). Default is -40 dB.
 
 <h4>12.5: Squelch gate</h4>
 
@@ -163,9 +163,11 @@ Switches to the Morse keyer input. You must switch it off to make other inputs a
 
 Adjusts the tone frequency from 0.1 to 2.5 kHz in 0.01 kHz steps
 
-<h4>13.4: Audio input select</h4>
+<h4>13.4: Audio input select and select audio input device</h4>
 
-Switches to the audio input. You must switch it off to make other inputs available.
+Left click to switch to the audio input. You must switch it off to make other inputs available.
+
+Right click to select audio input device. See [audio management documentation](../../../sdrgui/audio.md) for details.
 
 <h3>14: CW (Morse) text</h3>
 
@@ -238,7 +240,7 @@ This is the audio file play length in time units
 
 <h3>21: Play file position slider</h3>
 
-This slider can be used to randomly set the currennt position in the file when file play is in pause state (button 17.3)
+This slider can be used to randomly set the current position in the file when file play is in pause state (button 17.3)
 
 <h3>22: Channel spectrum display</h3>
 

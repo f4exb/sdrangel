@@ -29,12 +29,13 @@
 #include "gui/scaleengine.h"
 #include "gui/glshadersimple.h"
 #include "gui/glshadertextured.h"
-#include "util/export.h"
+#include "export.h"
 #include "util/bitfieldindex.h"
+#include "util/incrementalarray.h"
 
 class QPainter;
 
-class SDRANGEL_API GLScopeMulti: public QGLWidget {
+class SDRGUI_API GLScopeMulti: public QGLWidget {
     Q_OBJECT
 
 public:
@@ -130,6 +131,12 @@ private:
     GLShaderTextured m_glShaderLeft2Scale;
     GLShaderTextured m_glShaderBottom2Scale;
     GLShaderTextured m_glShaderPowerOverlay;
+
+    IncrementalArray<GLfloat> m_q3Polar;
+    IncrementalArray<GLfloat> m_q3TickY1;
+    IncrementalArray<GLfloat> m_q3TickY2;
+    IncrementalArray<GLfloat> m_q3TickX1;
+    IncrementalArray<GLfloat> m_q3TickX2;
 
     static const int m_topMargin = 5;
     static const int m_botMargin = 20;

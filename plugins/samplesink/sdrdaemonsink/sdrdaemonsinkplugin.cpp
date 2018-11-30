@@ -15,18 +15,21 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtPlugin>
-#include <QAction>
+
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
-
 #include "device/devicesinkapi.h"
 
+#ifdef SERVER_MODE
+#include "sdrdaemonsinkoutput.h"
+#else
 #include "sdrdaemonsinkgui.h"
+#endif
 #include "sdrdaemonsinkplugin.h"
 
 const PluginDescriptor SDRdaemonSinkPlugin::m_pluginDescriptor = {
 	QString("SDRdaemon sink output"),
-	QString("3.9.0"),
+	QString("4.1.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -69,6 +72,15 @@ PluginInterface::SamplingDevices SDRdaemonSinkPlugin::enumSampleSinks()
 	return result;
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* SDRdaemonSinkPlugin::createSampleSinkPluginInstanceGUI(
+        const QString& sinkId __attribute((unused)),
+        QWidget **widget __attribute((unused)),
+        DeviceUISet *deviceUISet __attribute((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* SDRdaemonSinkPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
@@ -85,6 +97,7 @@ PluginInstanceGUI* SDRdaemonSinkPlugin::createSampleSinkPluginInstanceGUI(
 		return 0;
 	}
 }
+#endif
 
 DeviceSampleSink* SDRdaemonSinkPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
 {

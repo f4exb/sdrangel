@@ -32,7 +32,7 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_deviceUISet(deviceUISet),
     m_settings(),
     m_sampleRate(0),
-    m_lastEngineState((DSPDeviceSinkEngine::State)-1),
+    m_lastEngineState(DSPDeviceSinkEngine::StNotStarted),
     m_doApplySettings(true),
     m_forceSettings(true),
     m_statusCounter(0),
@@ -42,17 +42,17 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->setupUi(this);
 
-    float minF, maxF, stepF;
+    float minF, maxF;
 
-    m_limeSDROutput->getLORange(minF, maxF, stepF);
+    m_limeSDROutput->getLORange(minF, maxF);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(7, ((uint32_t) minF)/1000, ((uint32_t) maxF)/1000); // frequency dial is in kHz
 
-    m_limeSDROutput->getSRRange(minF, maxF, stepF);
+    m_limeSDROutput->getSRRange(minF, maxF);
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(8, (uint32_t) minF, (uint32_t) maxF);
 
-    m_limeSDROutput->getLPRange(minF, maxF, stepF);
+    m_limeSDROutput->getLPRange(minF, maxF);
     ui->lpf->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->lpf->setValueRange(6, (minF/1000)+1, maxF/1000);
 
@@ -109,12 +109,12 @@ void LimeSDROutputGUI::resetToDefaults()
 
 qint64 LimeSDROutputGUI::getCenterFrequency() const
 {
-    return m_settings.m_centerFrequency;
+    return m_settings.m_centerFrequency + (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
 }
 
 void LimeSDROutputGUI::setCenterFrequency(qint64 centerFrequency)
 {
-    m_settings.m_centerFrequency = centerFrequency;
+    m_settings.m_centerFrequency = centerFrequency - (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
     displaySettings();
     sendSettings();
 }
@@ -138,6 +138,23 @@ bool LimeSDROutputGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void LimeSDROutputGUI::updateFrequencyLimits()
+{
+    // values in kHz
+    float minF, maxF;
+    qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
+    m_limeSDROutput->getLORange(minF, maxF);
+    qint64 minLimit = minF/1000 + deltaFrequency;
+    qint64 maxLimit = maxF/1000 + deltaFrequency;
+
+    minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
+    maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+
+    qDebug("LimeSDROutputGUI::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
+
+    ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
 }
 
 bool LimeSDROutputGUI::handleMessage(const Message& message)
@@ -298,7 +315,7 @@ void LimeSDROutputGUI::displaySettings()
     ui->extClock->setExternalClockFrequency(m_settings.m_extClockFreq);
     ui->extClock->setExternalClockActive(m_settings.m_extClock);
 
-    ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+    setCenterFrequencyDisplay();
     ui->sampleRate->setValue(m_settings.m_devSampleRate);
 
     ui->hwInterp->setCurrentIndex(m_settings.m_log2HardInterp);
@@ -324,11 +341,42 @@ void LimeSDROutputGUI::displaySettings()
 void LimeSDROutputGUI::setNCODisplay()
 {
     int ncoHalfRange = (m_settings.m_devSampleRate * (1<<(m_settings.m_log2HardInterp)))/2;
-    int lowBoundary = std::max(0, (int) m_settings.m_centerFrequency - ncoHalfRange);
-    ui->ncoFrequency->setValueRange(7,
-            lowBoundary/1000,
-            (m_settings.m_centerFrequency + ncoHalfRange)/1000); // frequency dial is in kHz
-    ui->ncoFrequency->setValue((m_settings.m_centerFrequency + m_settings.m_ncoFrequency)/1000);
+    ui->ncoFrequency->setValueRange(
+            false,
+            8,
+            -ncoHalfRange,
+            ncoHalfRange);
+
+    ui->ncoFrequency->blockSignals(true);
+    ui->ncoFrequency->setToolTip(QString("NCO frequency shift in Hz (Range: +/- %1 kHz)").arg(ncoHalfRange/1000));
+    ui->ncoFrequency->setValue(m_settings.m_ncoFrequency);
+    ui->ncoFrequency->blockSignals(false);
+}
+
+void LimeSDROutputGUI::setCenterFrequencyDisplay()
+{
+    int64_t centerFrequency = m_settings.m_centerFrequency;
+    ui->centerFrequency->setToolTip(QString("Main center frequency in kHz (LO: %1 kHz)").arg(centerFrequency/1000));
+
+    if (m_settings.m_ncoEnable) {
+        centerFrequency += m_settings.m_ncoFrequency;
+    }
+
+    ui->centerFrequency->blockSignals(true);
+    ui->centerFrequency->setValue(centerFrequency < 0 ? 0 : (uint64_t) centerFrequency/1000); // kHz
+    ui->centerFrequency->blockSignals(false);
+}
+
+void LimeSDROutputGUI::setCenterFrequencySetting(uint64_t kHzValue)
+{
+    int64_t centerFrequency = kHzValue*1000;
+
+    if (m_settings.m_ncoEnable) {
+        centerFrequency -= m_settings.m_ncoFrequency;
+    }
+
+    m_settings.m_centerFrequency = centerFrequency < 0 ? 0 : (uint64_t) centerFrequency;
+    ui->centerFrequency->setToolTip(QString("Main center frequency in kHz (LO: %1 kHz)").arg(centerFrequency/1000));
 }
 
 void LimeSDROutputGUI::sendSettings()
@@ -420,28 +468,21 @@ void LimeSDROutputGUI::on_startStop_toggled(bool checked)
 
 void LimeSDROutputGUI::on_centerFrequency_changed(quint64 value)
 {
-    m_settings.m_centerFrequency = value * 1000;
-    setNCODisplay();
+    setCenterFrequencySetting(value);
     sendSettings();
 }
 
-void LimeSDROutputGUI::on_ncoFrequency_changed(quint64 value)
+void LimeSDROutputGUI::on_ncoFrequency_changed(qint64 value)
 {
-    m_settings.m_ncoFrequency = (int64_t) value - (int64_t) m_settings.m_centerFrequency/1000;
-    m_settings.m_ncoFrequency *= 1000;
+    m_settings.m_ncoFrequency = value;
+    setCenterFrequencyDisplay();
     sendSettings();
 }
 
 void LimeSDROutputGUI::on_ncoEnable_toggled(bool checked)
 {
     m_settings.m_ncoEnable = checked;
-    sendSettings();
-}
-
-void LimeSDROutputGUI::on_ncoReset_clicked(bool checked __attribute__((unused)))
-{
-    m_settings.m_ncoFrequency = 0;
-    ui->ncoFrequency->setValue(m_settings.m_centerFrequency/1000);
+    setCenterFrequencyDisplay();
     sendSettings();
 }
 
@@ -485,10 +526,7 @@ void LimeSDROutputGUI::on_lpFIREnable_toggled(bool checked)
 void LimeSDROutputGUI::on_lpFIR_changed(quint64 value)
 {
     m_settings.m_lpfFIRBW = value * 1000;
-
-    if (m_settings.m_lpfFIREnable) { // do not send the update if the FIR is disabled
-        sendSettings();
-    }
+    sendSettings();
 }
 
 void LimeSDROutputGUI::on_gain_valueChanged(int value)
@@ -511,4 +549,15 @@ void LimeSDROutputGUI::on_extClock_clicked()
     qDebug("LimeSDROutputGUI::on_extClock_clicked: %u Hz %s", m_settings.m_extClockFreq, m_settings.m_extClock ? "on" : "off");
     sendSettings();
 }
+
+void LimeSDROutputGUI::on_transverter_clicked()
+{
+    m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
+    m_settings.m_transverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+    qDebug("LimeSDRInputGUI::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
+    updateFrequencyLimits();
+    setCenterFrequencySetting(ui->centerFrequency->getValueNew());
+    sendSettings();
+}
+
 

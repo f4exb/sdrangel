@@ -1,5 +1,7 @@
 project(modatv)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(modatv_SOURCES
 	atvmod.cpp
 	atvmodgui.cpp
@@ -24,6 +26,7 @@ include_directories(
 	.
 	${OpenCV_INCLUDE_DIRS}
 	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client	
 )
 
 add_definitions(${QT_DEFINITIONS})
@@ -43,8 +46,9 @@ target_link_libraries(modatv
 	${QT_LIBRARIES}
 	sdrbase
 	sdrgui
+	swagger
 )
 
-qt5_use_modules(modatv Core Widgets)
+target_link_libraries(modatv Qt5::Core Qt5::Widgets)
 
 install(TARGETS modatv DESTINATION lib/plugins/channeltx)

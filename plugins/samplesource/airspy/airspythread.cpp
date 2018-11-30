@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <algorithm>
 
 #include "airspythread.h"
 
@@ -34,6 +35,7 @@ AirspyThread::AirspyThread(struct airspy_device* dev, SampleSinkFifo* sampleFifo
 	m_fcPos(0)
 {
 	m_this = this;
+	std::fill(m_buf, m_buf + 2*AIRSPY_BLOCKSIZE, 0);
 }
 
 AirspyThread::~AirspyThread()

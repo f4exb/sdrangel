@@ -21,7 +21,7 @@
 #include <dsp/basebandsamplesource.h>
 #include <vector>
 #include <QMutex>
-#include "util/export.h"
+#include "export.h"
 #include "util/message.h"
 #ifdef USE_SSE4_1
 #include "dsp/inthalfbandfiltereo1.h"
@@ -33,10 +33,10 @@
 
 class MessageQueue;
 
-class SDRANGEL_API UpChannelizer : public BasebandSampleSource {
+class SDRBASE_API UpChannelizer : public BasebandSampleSource {
     Q_OBJECT
 public:
-    class SDRANGEL_API MsgChannelizerNotification : public Message {
+    class MsgChannelizerNotification : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:

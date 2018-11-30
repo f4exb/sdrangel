@@ -17,6 +17,8 @@
 #ifndef _AIRSPYHFF_AIRSPYHFSETTINGS_H_
 #define _AIRSPYHFF_AIRSPYHFSETTINGS_H_
 
+#include <QString>
+
 struct AirspyHFSettings
 {
 	quint64 m_centerFrequency;
@@ -26,6 +28,7 @@ struct AirspyHFSettings
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
     quint32 m_bandIndex;
+    QString m_fileRecordName;
 
     AirspyHFSettings();
 	void resetToDefaults();

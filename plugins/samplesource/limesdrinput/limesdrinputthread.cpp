@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <errno.h>
+#include <algorithm>
 
 #include "limesdrinputsettings.h"
 #include "limesdrinputthread.h"
@@ -27,6 +28,7 @@ LimeSDRInputThread::LimeSDRInputThread(lms_stream_t* stream, SampleSinkFifo* sam
     m_sampleFifo(sampleFifo),
     m_log2Decim(0)
 {
+    std::fill(m_buf, m_buf + 2*LIMESDR_BLOCKSIZE, 0);
 }
 
 LimeSDRInputThread::~LimeSDRInputThread()

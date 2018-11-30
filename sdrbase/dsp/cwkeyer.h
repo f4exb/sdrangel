@@ -21,14 +21,14 @@
 #include <QObject>
 #include <QMutex>
 
-#include "util/export.h"
+#include "export.h"
 #include "util/message.h"
 #include "cwkeyersettings.h"
 
 /**
  * Ancillary class to smooth out CW transitions with a sine shape
  */
-class CWSmoother
+class SDRBASE_API CWSmoother
 {
 public:
     CWSmoother();
@@ -46,7 +46,7 @@ private:
     float *m_fadeOutSamples;
 };
 
-class SDRANGEL_API CWKeyer : public QObject {
+class SDRBASE_API CWKeyer : public QObject {
     Q_OBJECT
 
 public:
@@ -127,7 +127,7 @@ private:
     bool m_dot;
     bool m_dash;
     bool m_elementOn;
-    char m_asciiChar;
+    signed char m_asciiChar;
     CWKeyIambicState m_keyIambicState;
     CWTextState m_textState;
     CWSmoother m_cwSmoother;

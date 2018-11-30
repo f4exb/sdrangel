@@ -4,17 +4,17 @@
  **********************************************************************/
 
 /* #undef ENABLE_EVB7COM */
-#define ENABLE_STREAM
+#define ENABLE_FX3
 /* #undef ENABLE_STREAM_UNITE */
 /* #undef ENABLE_NOVENARF7 */
-#define ENABLE_uLimeSDR
-#define ENABLE_PCIE_XILLYBUS
+#define ENABLE_FTDI
+/* #undef ENABLE_PCIE_XILLYBUS */
 
 void __loadConnectionEVB7COMEntry(void);
-void __loadConnectionSTREAMEntry(void);
+void __loadConnectionFX3Entry(void);
 void __loadConnectionSTREAM_UNITEEntry(void);
 void __loadConnectionNovenaRF7Entry(void);
-void __loadConnection_uLimeSDREntry(void);
+void __loadConnectionFT601Entry(void);
 void __loadConnectionXillybusEntry(void);
 
 void __loadAllConnections(void)
@@ -23,16 +23,16 @@ void __loadAllConnections(void)
     __loadConnectionEVB7COMEntry();
     #endif
 
-    #ifdef ENABLE_STREAM
-    __loadConnectionSTREAMEntry();
+    #ifdef ENABLE_FX3
+    __loadConnectionFX3Entry();
     #endif
 
     #ifdef ENABLE_STREAM_UNITE
     __loadConnectionSTREAM_UNITEEntry();
     #endif
 
-    #ifdef ENABLE_uLimeSDR
-    __loadConnection_uLimeSDREntry();
+    #ifdef ENABLE_FTDI
+    __loadConnectionFT601Entry();
     #endif
 
     #ifdef ENABLE_NOVENARF7

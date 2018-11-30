@@ -16,11 +16,14 @@
 
 #include <string.h>
 #include <errno.h>
+
 #include <QDebug>
 
 #include "SWGDeviceSettings.h"
 #include "SWGFileSourceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGFileSourceSettings.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -37,9 +40,11 @@ MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceWork, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgPlayPause, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportHeaderCRC, Message)
 
 FileSourceInput::FileSourceInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -79,24 +84,45 @@ void FileSourceInput::openFileStream()
 
 	m_ifstream.open(m_fileName.toStdString().c_str(), std::ios::binary | std::ios::ate);
 	quint64 fileSize = m_ifstream.tellg();
-	m_ifstream.seekg(0,std::ios_base::beg);
-	FileRecord::Header header;
-	FileRecord::readHeader(m_ifstream, header);
 
-	m_sampleRate = header.sampleRate;
-	m_centerFrequency = header.centerFrequency;
-	m_startingTimeStamp = header.startTimeStamp;
-	m_sampleSize = header.sampleSize;
+	if (fileSize > sizeof(FileRecord::Header))
+	{
+	    FileRecord::Header header;
+	    m_ifstream.seekg(0,std::ios_base::beg);
+		bool crcOK = FileRecord::readHeader(m_ifstream, header);
+		m_sampleRate = header.sampleRate;
+		m_centerFrequency = header.centerFrequency;
+		m_startingTimeStamp = header.startTimeStamp;
+		m_sampleSize = header.sampleSize;
+		QString crcHex = QString("%1").arg(header.crc32 , 0, 16);
 
-	if (fileSize > sizeof(FileRecord::Header)) {
-		m_recordLength = (fileSize - sizeof(FileRecord::Header)) / (4 * m_sampleRate);
-	} else {
+	    if (crcOK)
+	    {
+	        qDebug("FileSourceInput::openFileStream: CRC32 OK for header: %s", qPrintable(crcHex));
+	        m_recordLength = (fileSize - sizeof(FileRecord::Header)) / ((m_sampleSize == 24 ? 8 : 4) * m_sampleRate);
+	    }
+	    else
+	    {
+	        qCritical("FileSourceInput::openFileStream: bad CRC32 for header: %s", qPrintable(crcHex));
+	        m_recordLength = 0;
+	    }
+
+		if (getMessageQueueToGUI()) {
+			MsgReportHeaderCRC *report = MsgReportHeaderCRC::create(crcOK);
+			getMessageQueueToGUI()->push(report);
+		}
+	}
+	else
+	{
 		m_recordLength = 0;
 	}
 
 	qDebug() << "FileSourceInput::openFileStream: " << m_fileName.toStdString().c_str()
-			<< " fileSize: " << fileSize << "bytes"
-			<< " length: " << m_recordLength << " seconds";
+			<< " fileSize: " << fileSize << " bytes"
+			<< " length: " << m_recordLength << " seconds"
+			<< " sample rate: " << m_sampleRate << " S/s"
+			<< " center frequency: " << m_centerFrequency << " Hz"
+			<< " sample size: " << m_sampleSize << " bits";
 
 	if (getMessageQueueToGUI()) {
 	    MsgReportFileSourceStreamData *report = MsgReportFileSourceStreamData::create(m_sampleRate,
@@ -106,17 +132,21 @@ void FileSourceInput::openFileStream()
 	            m_recordLength); // file stream data
 	    getMessageQueueToGUI()->push(report);
 	}
+
+	if (m_recordLength == 0) {
+	    m_ifstream.close();
+	}
 }
 
-void FileSourceInput::seekFileStream(int seekPercentage)
+void FileSourceInput::seekFileStream(int seekMillis)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
 	if ((m_ifstream.is_open()) && m_fileSourceThread && !m_fileSourceThread->isRunning())
 	{
-		int seekPoint = ((m_recordLength * seekPercentage) / 100) * m_sampleRate;
+        quint64 seekPoint = ((m_recordLength * seekMillis) / 1000) * m_sampleRate;
 		m_fileSourceThread->setSamplesCount(seekPoint);
-		seekPoint *= 4; // + sizeof(FileSink::Header)
+        seekPoint *= (m_sampleSize == 24 ? 8 : 4); // + sizeof(FileSink::Header)
 		m_ifstream.clear();
 		m_ifstream.seekg(seekPoint + sizeof(FileRecord::Header), std::ios::beg);
 	}
@@ -130,6 +160,12 @@ void FileSourceInput::init()
 
 bool FileSourceInput::start()
 {
+    if (!m_ifstream.is_open())
+    {
+        qWarning("FileSourceInput::start: file not open. not starting");
+        return false;
+    }
+
 	QMutexLocker mutexLocker(&m_mutex);
 	qDebug() << "FileSourceInput::start";
 
@@ -138,26 +174,17 @@ bool FileSourceInput::start()
 		m_ifstream.seekg(sizeof(FileRecord::Header), std::ios::beg);
 	}
 
-	if(!m_sampleFifo.setSize(m_sampleRate * sizeof(Sample))) {
+	if(!m_sampleFifo.setSize(m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample))) {
 		qCritical("Could not allocate SampleFifo");
 		return false;
 	}
 
-	//openFileStream();
-
-	if((m_fileSourceThread = new FileSourceThread(&m_ifstream, &m_sampleFifo)) == NULL) {
-	    qCritical("out of memory");
-		stop();
-		return false;
-	}
-
-	m_fileSourceThread->setSampleRateAndSize(m_sampleRate, m_sampleSize);
-	m_fileSourceThread->connectTimer(m_masterTimer);
+	m_fileSourceThread = new FileSourceThread(&m_ifstream, &m_sampleFifo, m_masterTimer, &m_inputMessageQueue);
+	m_fileSourceThread->setSampleRateAndSize(m_settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
 	m_fileSourceThread->startWork();
 	m_deviceDescription = "FileSource";
 
 	mutexLocker.unlock();
-	//applySettings(m_generalSettings, m_settings, true);
 	qDebug("FileSourceInput::startInput: started");
 
 	if (getMessageQueueToGUI()) {
@@ -203,12 +230,12 @@ bool FileSourceInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureFileSource* message = MsgConfigureFileSource::create(m_settings);
+    MsgConfigureFileSource* message = MsgConfigureFileSource::create(m_settings, true);
     m_inputMessageQueue.push(message);
 
     if (getMessageQueueToGUI())
     {
-        MsgConfigureFileSource* messageToGUI = MsgConfigureFileSource::create(m_settings);
+        MsgConfigureFileSource* messageToGUI = MsgConfigureFileSource::create(m_settings, true);
         getMessageQueueToGUI()->push(messageToGUI);
     }
 
@@ -235,17 +262,17 @@ void FileSourceInput::setCenterFrequency(qint64 centerFrequency)
     FileSourceSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureFileSource* message = MsgConfigureFileSource::create(m_settings);
+    MsgConfigureFileSource* message = MsgConfigureFileSource::create(m_settings, false);
     m_inputMessageQueue.push(message);
 
     if (getMessageQueueToGUI())
     {
-        MsgConfigureFileSource* messageToGUI = MsgConfigureFileSource::create(m_settings);
+        MsgConfigureFileSource* messageToGUI = MsgConfigureFileSource::create(m_settings, false);
         getMessageQueueToGUI()->push(messageToGUI);
     }
 }
 
-std::time_t FileSourceInput::getStartingTimeStamp() const
+quint64 FileSourceInput::getStartingTimeStamp() const
 {
 	return m_startingTimeStamp;
 }
@@ -273,16 +300,9 @@ bool FileSourceInput::handleMessage(const Message& message)
 
 		if (m_fileSourceThread != 0)
 		{
-			if (working)
-			{
+			if (working) {
 				m_fileSourceThread->startWork();
-				/*
-				MsgReportFileSourceStreamTiming *report =
-						MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
-				getOutputMessageQueueToGUI()->push(report);*/
-			}
-			else
-			{
+			} else {
 				m_fileSourceThread->stopWork();
 			}
 		}
@@ -292,8 +312,8 @@ bool FileSourceInput::handleMessage(const Message& message)
 	else if (MsgConfigureFileSourceSeek::match(message))
 	{
 		MsgConfigureFileSourceSeek& conf = (MsgConfigureFileSourceSeek&) message;
-		int seekPercentage = conf.getPercentage();
-		seekFileStream(seekPercentage);
+		int seekMillis = conf.getMillis();
+		seekFileStream(seekMillis);
 
 		return true;
 	}
@@ -303,7 +323,8 @@ bool FileSourceInput::handleMessage(const Message& message)
 
 		if (m_fileSourceThread != 0)
 		{
-			if (getMessageQueueToGUI()) {
+			if (getMessageQueueToGUI())
+			{
                 report = MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
                 getMessageQueueToGUI()->push(report);
 			}
@@ -321,13 +342,38 @@ bool FileSourceInput::handleMessage(const Message& message)
             if (m_deviceAPI->initAcquisition())
             {
                 m_deviceAPI->startAcquisition();
-                DSPEngine::instance()->startAudioOutput();
             }
         }
         else
         {
             m_deviceAPI->stopAcquisition();
-            DSPEngine::instance()->stopAudioOutput();
+        }
+
+        return true;
+    }
+    else if (FileSourceThread::MsgReportEOF::match(message))
+    {
+        qDebug() << "FileSourceInput::handleMessage: MsgReportEOF";
+        m_fileSourceThread->stopWork();
+
+        if (getMessageQueueToGUI())
+        {
+            MsgReportFileSourceStreamTiming *report = MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
+            getMessageQueueToGUI()->push(report);
+        }
+
+        if (m_settings.m_loop)
+        {
+            seekFileStream(0);
+            m_fileSourceThread->startWork();
+        }
+        else
+        {
+            if (getMessageQueueToGUI())
+            {
+                MsgPlayPause *report = MsgPlayPause::create(false);
+                getMessageQueueToGUI()->push(report);
+            }
         }
 
         return true;
@@ -344,6 +390,19 @@ bool FileSourceInput::applySettings(const FileSourceSettings& settings, bool for
         m_centerFrequency = settings.m_centerFrequency;
     }
 
+    if ((m_settings.m_accelerationFactor != settings.m_accelerationFactor) || force)
+    {
+        if (m_fileSourceThread)
+        {
+            QMutexLocker mutexLocker(&m_mutex);
+            if (!m_sampleFifo.setSize(m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample))) {
+                qCritical("FileSourceInput::applySettings: could not reallocate sample FIFO size to %lu",
+                        m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample));
+            }
+            m_fileSourceThread->setSampleRateAndSize(settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
+        }
+    }
+
     m_settings = settings;
     return true;
 }
@@ -353,7 +412,39 @@ int FileSourceInput::webapiSettingsGet(
                 QString& errorMessage __attribute__((unused)))
 {
     response.setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
-    response.getFileSourceSettings()->setFileName(new QString(m_settings.m_fileName));
+    response.getFileSourceSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int FileSourceInput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    FileSourceSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("fileName")) {
+        settings.m_fileName = *response.getFileSourceSettings()->getFileName();
+    }
+    if (deviceSettingsKeys.contains("accelerationFactor")) {
+        settings.m_accelerationFactor = response.getFileSourceSettings()->getAccelerationFactor();
+    }
+    if (deviceSettingsKeys.contains("loop")) {
+        settings.m_loop = response.getFileSourceSettings()->getLoop() != 0;
+    }
+
+    MsgConfigureFileSource *msg = MsgConfigureFileSource::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureFileSource *msgToGUI = MsgConfigureFileSource::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
     return 200;
 }
 
@@ -382,4 +473,59 @@ int FileSourceInput::webapiRun(
 
     return 200;
 }
+
+int FileSourceInput::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setFileSourceReport(new SWGSDRangel::SWGFileSourceReport());
+    response.getFileSourceReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
+
+void FileSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FileSourceSettings& settings)
+{
+    response.getFileSourceSettings()->setFileName(new QString(settings.m_fileName));
+    response.getFileSourceSettings()->setAccelerationFactor(settings.m_accelerationFactor);
+    response.getFileSourceSettings()->setLoop(settings.m_loop ? 1 : 0);
+
+}
+
+void FileSourceInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    qint64 t_sec = 0;
+    qint64 t_msec = 0;
+    quint64 samplesCount = 0;
+
+    if (m_fileSourceThread) {
+        samplesCount = m_fileSourceThread->getSamplesCount();
+    }
+
+    if (m_sampleRate > 0)
+    {
+        t_sec = samplesCount / m_sampleRate;
+        t_msec = (samplesCount - (t_sec * m_sampleRate)) * 1000 / m_sampleRate;
+    }
+
+    QTime t(0, 0, 0, 0);
+    t = t.addSecs(t_sec);
+    t = t.addMSecs(t_msec);
+    response.getFileSourceReport()->setElapsedTime(new QString(t.toString("HH:mm:ss.zzz")));
+
+    qint64 startingTimeStampMsec = m_startingTimeStamp * 1000LL;
+    QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
+    dt = dt.addSecs(t_sec);
+    dt = dt.addMSecs(t_msec);
+    response.getFileSourceReport()->setAbsoluteTime(new QString(dt.toString("yyyy-MM-dd HH:mm:ss.zzz")));
+
+    QTime recordLength(0, 0, 0, 0);
+    recordLength = recordLength.addSecs(m_recordLength);
+    response.getFileSourceReport()->setDurationTime(new QString(recordLength.toString("HH:mm:ss")));
+
+    response.getFileSourceReport()->setFileName(new QString(m_fileName));
+    response.getFileSourceReport()->setSampleRate(m_sampleRate);
+    response.getFileSourceReport()->setSampleSize(m_sampleSize);
+}
+
 

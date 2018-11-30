@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
-    <height>814</height>
+    <width>739</width>
+    <height>778</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>640</width>
+    <width>720</width>
     <height>0</height>
    </size>
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -30,8 +30,8 @@
     <rect>
      <x>0</x>
      <y>10</y>
-     <width>301</width>
-     <height>131</height>
+     <width>631</width>
+     <height>81</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -41,37 +41,40 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="DeltaFreqPowLayout">
+     <layout class="QHBoxLayout" name="HeaderLayout">
+      <property name="topMargin">
+       <number>2</number>
+      </property>
       <item>
        <layout class="QHBoxLayout" name="DeltaFrequencyLayout">
         <item>
-         <widget class="QToolButton" name="deltaMinus">
-          <property name="toolTip">
-           <string>Frequency shift direction</string>
+         <widget class="QLabel" name="deltaFrequencyLabel">
+          <property name="minimumSize">
+           <size>
+            <width>16</width>
+            <height>0</height>
+           </size>
           </property>
           <property name="text">
-           <string>...</string>
-          </property>
-          <property name="icon">
-           <iconset>
-            <selectedoff>:/plus.png</selectedoff>
-            <selectedon>:/minus.png</selectedon>
-           </iconset>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-          <property name="checked">
-           <bool>false</bool>
+           <string>Df</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="ValueDial" name="deltaFrequency" native="true">
+         <widget class="ValueDialZ" name="deltaFrequency" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
             <horstretch>0</horstretch>
@@ -86,12 +89,12 @@
           </property>
           <property name="font">
            <font>
-            <family>Monospace</family>
+            <family>Liberation Mono</family>
             <pointsize>12</pointsize>
            </font>
           </property>
           <property name="cursor">
-           <cursorShape>SizeVerCursor</cursorShape>
+           <cursorShape>PointingHandCursor</cursorShape>
           </property>
           <property name="focusPolicy">
            <enum>Qt::StrongFocus</enum>
@@ -175,6 +178,209 @@
        </layout>
       </item>
       <item>
+       <layout class="QHBoxLayout" name="ChannelSamplingLayout">
+        <item>
+         <widget class="QToolButton" name="pll">
+          <property name="toolTip">
+           <string>PLL lock</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/unlocked.png</normaloff>
+            <normalon>:/locked.png</normalon>:/unlocked.png</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="pllPskOrder">
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>PLL PSK order (1 for CW)</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>4</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>8</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>16</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>F</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="ButtonSwitch" name="useRationalDownsampler">
+          <property name="toolTip">
+           <string>Use rational downsampler</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/arrow_down.png</normaloff>:/arrow_down.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ValueDial" name="channelSampleRate" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>32</width>
+            <height>16</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Liberation Mono</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+          <property name="toolTip">
+           <string>Rational downsampler output rate</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="channelSampleRateUnits">
+          <property name="text">
+           <string>S/s</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="spanLog2">
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Channel decimation</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>4</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>8</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>16</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>32</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>64</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="spanText">
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Channel final sample rate</string>
+          </property>
+          <property name="text">
+           <string>00000.0 kS/s</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="signalSelect">
+          <property name="toolTip">
+           <string>Select input signal</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Sig</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Lock</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ACorr</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -188,88 +394,24 @@
        </spacer>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="ChannelPowerLayout">
-        <item>
-         <widget class="QLabel" name="channelPower">
-          <property name="toolTip">
-           <string>Channel power</string>
-          </property>
-          <property name="layoutDirection">
-           <enum>Qt::LeftToRight</enum>
-          </property>
-          <property name="text">
-           <string>0.0</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="channelPowerUnits">
-          <property name="text">
-           <string> dB</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="SpanLayout">
-      <item>
-       <widget class="QLabel" name="spanLabel">
-        <property name="text">
-         <string>Rate</string>
+       <widget class="QLabel" name="channelPower">
+        <property name="minimumSize">
+         <size>
+          <width>52</width>
+          <height>0</height>
+         </size>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSlider" name="spanLog2">
         <property name="toolTip">
-         <string>Channel sample rate</string>
+         <string>Channel power</string>
         </property>
-        <property name="minimum">
-         <number>0</number>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
         </property>
-        <property name="maximum">
-         <number>6</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>3</number>
-        </property>
-        <property name="sliderPosition">
-         <number>3</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="invertedAppearance">
-         <bool>true</bool>
-        </property>
-        <property name="invertedControls">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="spanText">
         <property name="text">
-         <string>6.0k</string>
+         <string>-100.0 dB</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="ssb">
-        <property name="toolTip">
-         <string>SSB/DSB togggle</string>
-        </property>
-        <property name="text">
-         <string>SSB</string>
         </property>
        </widget>
       </item>
@@ -278,9 +420,67 @@
     <item>
      <layout class="QHBoxLayout" name="BWLayout">
       <item>
-       <widget class="QLabel" name="BWLabel">
+       <widget class="ButtonSwitch" name="rrcFilter">
+        <property name="toolTip">
+         <string>Toggle RRC filter</string>
+        </property>
         <property name="text">
-         <string>BW</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/dsb.png</normaloff>:/dsb.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="rrcRolloff">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Tune RRC filter rolloff factor</string>
+        </property>
+        <property name="minimum">
+         <number>10</number>
+        </property>
+        <property name="maximum">
+         <number>70</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>35</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="rrcRolloffText">
+        <property name="toolTip">
+         <string>RRC filter rolloff factor value</string>
+        </property>
+        <property name="text">
+         <string>0.00</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="BWLabel">
+        <property name="minimumSize">
+         <size>
+          <width>15</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>BP</string>
         </property>
        </widget>
       </item>
@@ -322,14 +522,33 @@
         </property>
        </widget>
       </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="LowCutLayout">
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="ssb">
+        <property name="toolTip">
+         <string>SSB/DSB toggle</string>
+        </property>
+        <property name="text">
+         <string>SSB</string>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QLabel" name="lowCutLabel">
+        <property name="minimumSize">
+         <size>
+          <width>15</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
-         <string>Low cut.</string>
+         <string>HP</string>
         </property>
        </widget>
       </item>
@@ -378,15 +597,15 @@
   <widget class="QWidget" name="spectrumContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>180</y>
-     <width>636</width>
+     <x>0</x>
+     <y>98</y>
+     <width>720</width>
      <height>284</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>636</width>
+     <width>716</width>
      <height>0</height>
     </size>
    </property>
@@ -397,7 +616,16 @@
     <property name="spacing">
      <number>2</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <item>
@@ -410,7 +638,7 @@
       </property>
       <property name="font">
        <font>
-        <family>Monospace</family>
+        <family>Liberation Mono</family>
         <pointsize>8</pointsize>
        </font>
       </property>
@@ -425,14 +653,14 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>470</y>
-     <width>636</width>
-     <height>284</height>
+     <y>390</y>
+     <width>720</width>
+     <height>334</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>636</width>
+     <width>716</width>
      <height>0</height>
     </size>
    </property>
@@ -443,7 +671,16 @@
     <property name="spacing">
      <number>2</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
      <number>3</number>
     </property>
     <item>
@@ -451,12 +688,12 @@
       <property name="minimumSize">
        <size>
         <width>200</width>
-        <height>250</height>
+        <height>300</height>
        </size>
       </property>
       <property name="font">
        <font>
-        <family>Monospace</family>
+        <family>Liberation Mono</family>
         <pointsize>8</pointsize>
        </font>
       </property>
@@ -476,12 +713,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDial</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedial.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>GLSpectrum</class>
    <extends>QWidget</extends>
    <header>gui/glspectrum.h</header>
@@ -492,6 +723,23 @@
    <extends>QWidget</extends>
    <header>gui/glspectrumgui.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDial</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedial.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>GLScope</class>

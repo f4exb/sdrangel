@@ -110,8 +110,6 @@ void DownChannelizer::stop()
 
 bool DownChannelizer::handleMessage(const Message& cmd)
 {
-	qDebug() << "DownChannelizer::handleMessage: " << cmd.getIdentifier();
-
 	// TODO: apply changes only if input sample rate or requested output sample rate change. Change of center frequency has no impact.
 
 	if (DSPSignalNotification::match(cmd))
@@ -144,17 +142,15 @@ bool DownChannelizer::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (BasebandSampleSink::MsgThreadedSink::match(cmd))
+    {
+        qDebug() << "DownChannelizer::handleMessage: MsgThreadedSink: forwarded to demod";
+        return m_sampleSink->handleMessage(cmd); // this message is passed to the demod
+    }
 	else
 	{
+        qDebug() << "DownChannelizer::handleMessage: " << cmd.getIdentifier() << " unhandled";
 	    return false;
-//		if (m_sampleSink != 0)
-//		{
-//			return m_sampleSink->handleMessage(cmd);
-//		}
-//		else
-//		{
-//			return false;
-//		}
 	}
 }
 
@@ -194,70 +190,48 @@ void DownChannelizer::applyConfiguration()
 
 #ifdef SDR_RX_SAMPLE_24BIT
 DownChannelizer::FilterStage::FilterStage(Mode mode) :
-    m_filter(new IntHalfbandFilterDB<qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>),
+    m_filter(new IntHalfbandFilterEO<qint64, qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>),
     m_workFunction(0),
     m_mode(mode),
-    m_sse(false)
+    m_sse(true)
 {
     switch(mode) {
         case ModeCenter:
-            m_workFunction = &IntHalfbandFilterDB<qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateCenter;
+            m_workFunction = &IntHalfbandFilterEO<qint64, qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateCenter;
             break;
 
         case ModeLowerHalf:
-            m_workFunction = &IntHalfbandFilterDB<qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateLowerHalf;
+            m_workFunction = &IntHalfbandFilterEO<qint64, qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateLowerHalf;
             break;
 
         case ModeUpperHalf:
-            m_workFunction = &IntHalfbandFilterDB<qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateUpperHalf;
+            m_workFunction = &IntHalfbandFilterEO<qint64, qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateUpperHalf;
             break;
     }
 }
 #else
-#ifdef USE_SSE4_1
 DownChannelizer::FilterStage::FilterStage(Mode mode) :
-	m_filter(new IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>),
-	m_workFunction(0),
-	m_mode(mode),
-	m_sse(true)
+    m_filter(new IntHalfbandFilterEO<qint32, qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>),
+    m_workFunction(0),
+    m_mode(mode),
+    m_sse(true)
 {
-	switch(mode) {
-		case ModeCenter:
-			m_workFunction = &IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateCenter;
-			break;
+    switch(mode) {
+        case ModeCenter:
+            m_workFunction = &IntHalfbandFilterEO<qint32, qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateCenter;
+            break;
 
-		case ModeLowerHalf:
-			m_workFunction = &IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateLowerHalf;
-			break;
+        case ModeLowerHalf:
+            m_workFunction = &IntHalfbandFilterEO<qint32, qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateLowerHalf;
+            break;
 
-		case ModeUpperHalf:
-			m_workFunction = &IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateUpperHalf;
-			break;
-	}
-}
-#else
-DownChannelizer::FilterStage::FilterStage(Mode mode) :
-	m_filter(new IntHalfbandFilterDB<qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>),
-	m_workFunction(0),
-	m_mode(mode),
-	m_sse(false)
-{
-	switch(mode) {
-		case ModeCenter:
-			m_workFunction = &IntHalfbandFilterDB<qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateCenter;
-			break;
-
-		case ModeLowerHalf:
-			m_workFunction = &IntHalfbandFilterDB<qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateLowerHalf;
-			break;
-
-		case ModeUpperHalf:
-			m_workFunction = &IntHalfbandFilterDB<qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateUpperHalf;
-			break;
-	}
+        case ModeUpperHalf:
+            m_workFunction = &IntHalfbandFilterEO<qint32, qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>::workDecimateUpperHalf;
+            break;
+    }
 }
 #endif
-#endif
+
 DownChannelizer::FilterStage::~FilterStage()
 {
 	delete m_filter;

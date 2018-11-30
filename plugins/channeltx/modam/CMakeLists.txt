@@ -1,5 +1,7 @@
 project(modam)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(modam_SOURCES
 	ammod.cpp
 	ammodgui.cpp
@@ -21,6 +23,7 @@ set(modam_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
 add_definitions(${QT_DEFINITIONS})
@@ -39,8 +42,10 @@ target_link_libraries(modam
 	${QT_LIBRARIES}
 	sdrbase
 	sdrgui
+	swagger
 )
 
-qt5_use_modules(modam Core Widgets)
+target_link_libraries(modam Qt5::Core Qt5::Widgets)
 
 install(TARGETS modam DESTINATION lib/plugins/channeltx)
+

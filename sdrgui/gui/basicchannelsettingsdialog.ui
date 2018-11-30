@@ -10,6 +10,12 @@
     <height>131</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Basic channel settings</string>
   </property>
@@ -89,16 +95,6 @@
          <string>Title</string>
         </property>
        </item>
-       <item>
-        <property name="text">
-         <string>AdSnd</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>AdRcv</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item>
@@ -113,79 +109,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="udpAddressLayout">
-     <item>
-      <widget class="QLabel" name="udpAddressLabel">
-       <property name="text">
-        <string>Addr</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="udpAddress">
-       <property name="toolTip">
-        <string>UDP address</string>
-       </property>
-       <property name="inputMask">
-        <string>000.000.000.000</string>
-       </property>
-       <property name="text">
-        <string>127.0.0.1</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="udpPortReceiveLabel">
-       <property name="text">
-        <string>Recv</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="udpPortReceive">
-       <property name="maximumSize">
-        <size>
-         <width>60</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>UDP port</string>
-       </property>
-       <property name="inputMask">
-        <string>00000</string>
-       </property>
-       <property name="text">
-        <string>9999</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="udpPortSendLabel">
-       <property name="text">
-        <string>Send</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="udpPortSend">
-       <property name="maximumSize">
-        <size>
-         <width>60</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="inputMask">
-        <string>00000</string>
-       </property>
-       <property name="text">
-        <string>9998</string>
-       </property>
-      </widget>
      </item>
     </layout>
    </item>

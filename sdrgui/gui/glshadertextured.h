@@ -25,11 +25,13 @@
 #include <QOpenGLTexture>
 #include <QOpenGLFunctions>
 
+#include "export.h"
+
 class QOpenGLShaderProgram;
 class QMatrix4x4;
 class QImage;
 
-class GLShaderTextured
+class SDRGUI_API GLShaderTextured
 {
 public:
 	GLShaderTextured();

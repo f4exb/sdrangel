@@ -63,8 +63,30 @@ public:
             SWGSDRangel::SWGAudioDevices& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-    virtual int instanceAudioPatch(
-            SWGSDRangel::SWGAudioDevicesSelect& response,
+    virtual int instanceAudioInputPatch(
+            SWGSDRangel::SWGAudioInputDevice& response,
+            const QStringList& audioInputKeys,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceAudioOutputPatch(
+            SWGSDRangel::SWGAudioOutputDevice& response,
+            const QStringList& audioOutputKeys,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceAudioInputDelete(
+            SWGSDRangel::SWGAudioInputDevice& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceAudioOutputDelete(
+            SWGSDRangel::SWGAudioOutputDevice& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceAudioInputCleanupPatch(
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceAudioOutputCleanupPatch(
+            SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceLocationGet(
@@ -73,6 +95,10 @@ public:
 
     virtual int instanceLocationPut(
             SWGSDRangel::SWGLocationInformation& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceDVSerialGet(
+            SWGSDRangel::SWGDVSeralDevices& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceDVSerialPatch(
@@ -169,6 +195,16 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetDeviceReportGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGDeviceReport& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetChannelsReportGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGChannelsDetail& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int devicesetChannelPost(
             int deviceSetIndex,
             SWGSDRangel::SWGChannelSettings& query,
@@ -195,11 +231,18 @@ public:
             SWGSDRangel::SWGChannelSettings& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetChannelReportGet(
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGChannelReport& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore& m_mainCore;
 
     void getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList);
     void getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, const DeviceSet* deviceSet, int deviceUISetIndex);
+    void getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceSet* deviceSet);
     static QtMsgType getMsgTypeFromString(const QString& msgTypeString);
     static void getMsgTypeString(const QtMsgType& msgType, QString& level);
 };

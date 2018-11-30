@@ -75,8 +75,6 @@ private:
 
 	int m_srate;
 
-	//UDPSink<Real> m_udpDebug; // UDP debug
-
 	static const Real m_pllBeta;
 	static const Real m_fsc;
 };

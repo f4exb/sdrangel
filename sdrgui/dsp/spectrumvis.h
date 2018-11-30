@@ -5,40 +5,73 @@
 #include <QMutex>
 #include "dsp/fftengine.h"
 #include "dsp/fftwindow.h"
-#include "util/export.h"
+#include "export.h"
 #include "util/message.h"
+#include "util/movingaverage2d.h"
+#include "util/fixedaverage2d.h"
+#include "util/max2d.h"
 
 class GLSpectrum;
 class MessageQueue;
 
-class SDRANGEL_API SpectrumVis : public BasebandSampleSink {
+class SDRGUI_API SpectrumVis : public BasebandSampleSink {
 
 public:
-	class SDRANGEL_API MsgConfigureSpectrumVis : public Message {
+    enum AvgMode
+    {
+        AvgModeNone,
+        AvgModeMovingAvg,
+        AvgModeFixedAvg,
+        AvgModeMax
+    };
+
+	class MsgConfigureSpectrumVis : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		MsgConfigureSpectrumVis(int fftSize, int overlapPercent, FFTWindow::Function window) :
+		MsgConfigureSpectrumVis(
+		        int fftSize,
+		        int overlapPercent,
+		        unsigned int averageNb,
+		        int preProcessMode,
+		        FFTWindow::Function window,
+		        bool linear) :
 			Message(),
 			m_fftSize(fftSize),
 			m_overlapPercent(overlapPercent),
-			m_window(window)
-		{ }
+			m_averageNb(averageNb),
+			m_window(window),
+			m_linear(linear)
+		{
+		    m_avgMode = preProcessMode < 0 ? AvgModeNone : preProcessMode > 3 ? AvgModeMax : (SpectrumVis::AvgMode) preProcessMode;
+		}
 
 		int getFFTSize() const { return m_fftSize; }
 		int getOverlapPercent() const { return m_overlapPercent; }
+		unsigned int getAverageNb() const { return m_averageNb; }
+		SpectrumVis::AvgMode getAvgMode() const { return m_avgMode; }
 		FFTWindow::Function getWindow() const { return m_window; }
+		bool getLinear() const { return m_linear; }
 
 	private:
 		int m_fftSize;
 		int m_overlapPercent;
+		unsigned int m_averageNb;
+		SpectrumVis::AvgMode m_avgMode;
 		FFTWindow::Function m_window;
+		bool m_linear;
 	};
 
 	SpectrumVis(Real scalef, GLSpectrum* glSpectrum = 0);
 	virtual ~SpectrumVis();
 
-	void configure(MessageQueue* msgQueue, int fftSize, int overlapPercent, FFTWindow::Function window);
+	void configure(MessageQueue* msgQueue,
+	        int fftSize,
+	        int overlapPercent,
+	        unsigned int averagingNb,
+	        int averagingMode,
+	        FFTWindow::Function window,
+	        bool m_linear);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	void feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& end, bool positiveOnly);
@@ -51,7 +84,7 @@ private:
 	FFTWindow m_window;
 
 	std::vector<Complex> m_fftBuffer;
-	std::vector<Real> m_logPowerSpectrum;
+	std::vector<Real> m_powerSpectrum;
 
 	std::size_t m_fftSize;
 	std::size_t m_overlapPercent;
@@ -62,10 +95,25 @@ private:
 
 	Real m_scalef;
 	GLSpectrum* m_glSpectrum;
+	MovingAverage2D<double> m_movingAverage;
+	FixedAverage2D<double> m_fixedAverage;
+	Max2D<double> m_max;
+	unsigned int m_averageNb;
+	AvgMode m_avgMode;
+	bool m_linear;
+
+	Real m_ofs;
+	Real m_powFFTDiv;
+	static const Real m_mult;
 
 	QMutex m_mutex;
 
-	void handleConfigure(int fftSize, int overlapPercent, FFTWindow::Function window);
+	void handleConfigure(int fftSize,
+	        int overlapPercent,
+	        unsigned int averageNb,
+	        AvgMode averagingMode,
+	        FFTWindow::Function window,
+	        bool linear);
 };
 
 #endif // INCLUDE_SPECTRUMVIS_H

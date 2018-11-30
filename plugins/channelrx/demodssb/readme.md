@@ -14,7 +14,7 @@ This plugin can be used to listen to a single sideband or double sidebands modul
 
 <h3>1: Frequency shift from center frequency of reception</h3>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>2: Channel power</h3>
 
@@ -45,20 +45,20 @@ Toggles between SSB (icon with one sideband signal) and DSB (icon with double si
 
 <h3>8: Spectrum display frequency span</h3>
 
-The 48 kHz channel sample rate is further decimated by powers of two for the spectrum display and in channel filter limits. This effectively sets the total available bandwidth depending on the decimation:
+The audio sample rate SR is further decimated by powers of two for the spectrum display and in channel filter limits. This effectively sets the total available bandwidth depending on the decimation:
 
-  - 1 (no decimation): 24 kHz (SSB) or 48 kHz (DSB)
-  - 2: 12 kHz (SSB) or 24 kHz (DSB)
-  - 4: 6 kHz (SSB) or 12 kHz (DSB)
-  - 8: 3 kHz (SSB) or 6 kHz (DSB)
-  - 16: 1.5 kHz (SSB) or 3 kHz (DSB)
+  - 1 (no decimation): SR/2 (SSB) or SR (DSB)
+  - 2: SR/4 (SSB) or SR/2 (DSB)
+  - 4: SR/8 (SSB) or SR/4 (DSB)
+  - 8: SR/16 (SSB) or SR/8 (DSB)
+  - 16: SR/32 (SSB) or SR/16 (DSB)
 
 The span value display is set as follows depending on the SSB or DSB mode:
 
   - In SSB mode: the span goes from zero to the upper (USB: positive frequencies) or lower (LSB: negative frequencies) limit and the absolute value of the limit is displayed.
   - In DSB mode: the span goes from the lower to the upper limit of same absolute value and &#177; the absolute value of the limit is displayed.
 
-This is how the Span (8) and bandpass (9, 10) fitler controls look like in the 3 possible modes:
+This is how the Span (8) and bandpass (9, 10) filter controls look like in the 3 possible modes:
 
 **DSB**:
 
@@ -97,7 +97,7 @@ Values are expressed in kHz and step is 100 Hz.
 
 Values are expressed in kHz and step is 100 Hz.
 
-  - In SSB mode this is the lower cutoff (USB: positive frequencies) or higher cutoff (LSB: negative frequencies) of the in channel signe side band bandpass filter.
+  - In SSB mode this is the lower cutoff (USB: positive frequencies) or higher cutoff (LSB: negative frequencies) of the in channel single side band bandpass filter.
   - In DSB mode it is inactive and set to zero (double side band filter).
 
 <h3>11: Volume and AGC</h3>
@@ -112,7 +112,7 @@ This is the volume of the audio signal from 0.0 (mute) to 10.0 (maximum). It can
 
 Use this checkbox to toggle AGC on and off.
 
-If you are into digging weak signals out of the noise you probably will not turn the AGC on. AGC is intended for medium and large signals and help accomodate the signal power variations from a station to another or due to QSB.
+If you are into digging weak signals out of the noise you probably will not turn the AGC on. AGC is intended for medium and large signals and help accommodate the signal power variations from a station to another or due to QSB.
 
 This AGC is based on the calculated magnitude (square root of power of the filtered signal as I² + Q²) and will try to adjust audio volume as if a -20dB power signal was received.
 
@@ -140,17 +140,15 @@ The signal power is calculated as the moving average over the AGC time constant 
 
 Active only in AGC mode with squelch enabled.
 
-To avoid unwanted squelch opening on short transient bursts only signals wilth power above threshold during this period in milliseconds will open the squelch.It can be varied from 0 to 20 ms in 1 ms steps.
+To avoid unwanted squelch opening on short transient bursts only signals with power above threshold during this period in milliseconds will open the squelch.It can be varied from 0 to 20 ms in 1 ms steps.
 
 When the power threshold is close to the noise floor a few milliseconds help in preventing noise power wiggle to open the squelch.
 
-<h3>12: Copy audio to UDP</h3>
+<h3>13: Audio mute and audio output select</h3>
 
-Copies audio output to UDP. Output is mono S16LE samples regardless of binaural/monaural operation.
+Left click on this button to toggle audio mute for this channel.
 
-<h3>13: Audio mute</h3>
-
-Use this button to toggle audio mute for this channel.
+If you right click on it a dialog will open to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
 
 <h3>14: Spectrum display</h3>
 

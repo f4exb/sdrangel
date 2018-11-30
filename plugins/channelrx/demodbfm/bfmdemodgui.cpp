@@ -36,6 +36,8 @@
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "gui/crightclickenabler.h"
+#include "gui/audioselectdialog.h"
 #include "mainwindow.h"
 
 #include "bfmdemodsettings.h"
@@ -115,6 +117,16 @@ bool BFMDemodGUI::handleMessage(const Message& message)
         qDebug("BFMDemodGUI::handleMessage: MsgReportChannelSampleRateChanged: %d S/s", m_rate);
         ui->glSpectrum->setCenterFrequency(m_rate / 4);
         ui->glSpectrum->setSampleRate(m_rate / 2);
+        return true;
+    }
+    else if (BFMDemod::MsgConfigureBFMDemod::match(message))
+    {
+        qDebug("BFMDemodGUI::handleMessage: BFMDemod::MsgConfigureBFMDemod");
+        const BFMDemod::MsgConfigureBFMDemod& cfg = (BFMDemod::MsgConfigureBFMDemod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
         return true;
     }
     else
@@ -199,12 +211,6 @@ void BFMDemodGUI::on_lsbStereo_toggled(bool lsb)
 {
     m_settings.m_lsbStereo = lsb;
 	applySettings();
-}
-
-void BFMDemodGUI::on_copyAudioToUDP_toggled(bool copy)
-{
-    m_settings.m_copyAudioToUDP = copy;
-    applySettings();
 }
 
 void BFMDemodGUI::on_showPilot_clicked()
@@ -311,14 +317,11 @@ void BFMDemodGUI::onMenuDialogCalled(const QPoint &p)
     dialog.exec();
 
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
-    m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     m_settings.m_title = m_channelMarker.getTitle();
 
     setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);
-    displayUDPAddress();
 
     applySettings();
 }
@@ -338,6 +341,9 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
+    CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioStereo);
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
+
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
@@ -353,7 +359,14 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	ui->glSpectrum->setDisplayWaterfall(false);
 	ui->glSpectrum->setDisplayMaxHold(false);
 	ui->glSpectrum->setSsbSpectrum(true);
-	m_spectrumVis->configure(m_spectrumVis->getInputMessageQueue(), 64, 10, FFTWindow::BlackmanHarris);
+	m_spectrumVis->configure(
+	        m_spectrumVis->getInputMessageQueue(),
+            64, // FFT size
+            10, // overlapping %
+            0,  // number of averaging samples
+            0,  // no averaging
+	        FFTWindow::BlackmanHarris,
+	        false); // logarithmic scale
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	m_channelMarker.blockSignals(true);
@@ -361,8 +374,6 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_channelMarker.setBandwidth(12500);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setTitle("Broadcast FM Demod");
-	m_channelMarker.setUDPAddress("127.0.0.1");
-	m_channelMarker.setUDPSendPort(9999);
 	m_channelMarker.blockSignals(false);
 	m_channelMarker.setVisible(true); // activate signal on the last setting only
 
@@ -394,12 +405,8 @@ BFMDemodGUI::~BFMDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
 	delete m_bfmDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
+	delete m_spectrumVis;
 	delete ui;
-}
-
-void BFMDemodGUI::displayUDPAddress()
-{
-    ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_settings.m_udpAddress).arg(m_settings.m_udpPort));
 }
 
 void BFMDemodGUI::blockApplySettings(bool block)
@@ -412,7 +419,7 @@ void BFMDemodGUI::applySettings(bool force)
 	if (m_doApplySettings)
 	{
 	    BFMDemod::MsgConfigureChannelizer *msgChan = BFMDemod::MsgConfigureChannelizer::create(
-	            requiredBW(m_settings.m_rfBandwidth),
+	            BFMDemod::requiredBW(m_settings.m_rfBandwidth),
 	            m_settings.m_inputFrequencyOffset);
 	    m_bfmDemod->getInputMessageQueue()->push(msgChan);
 
@@ -432,7 +439,6 @@ void BFMDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
-    displayUDPAddress();
 
     blockApplySettings(true);
 
@@ -454,7 +460,6 @@ void BFMDemodGUI::displaySettings()
     ui->lsbStereo->setChecked(m_settings.m_lsbStereo);
     ui->showPilot->setChecked(m_settings.m_showPilot);
     ui->rds->setChecked(m_settings.m_rdsActive);
-    ui->copyAudioToUDP->setChecked(m_settings.m_copyAudioToUDP);
 
     blockApplySettings(false);
 }
@@ -467,6 +472,19 @@ void BFMDemodGUI::leaveEvent(QEvent*)
 void BFMDemodGUI::enterEvent(QEvent*)
 {
 	m_channelMarker.setHighlighted(true);
+}
+
+void BFMDemodGUI::audioSelect()
+{
+    qDebug("BFMDemodGUI::audioSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
 }
 
 void BFMDemodGUI::tick()
@@ -670,8 +688,8 @@ void BFMDemodGUI::rdsUpdate(bool force)
 	{
 		ui->g04Label->setStyleSheet("QLabel { background-color : green; }");
 		ui->g04CountText->setNum((int) m_bfmDemod->getRDSParser().m_g4_count);
-		std::string time = str(boost::format("%02i.%02i.%4i, %02i:%02i (%+.1fh)")\
-			% m_bfmDemod->getRDSParser().m_g4_day % m_bfmDemod->getRDSParser().m_g4_month % (1900 + m_bfmDemod->getRDSParser().m_g4_year) % m_bfmDemod->getRDSParser().m_g4_hours % m_bfmDemod->getRDSParser().m_g4_minutes % m_bfmDemod->getRDSParser().m_g4_local_time_offset);
+		std::string time = str(boost::format("%4i-%02i-%02i %02i:%02i (%+.1fh)")\
+			% (1900 + m_bfmDemod->getRDSParser().m_g4_year) % m_bfmDemod->getRDSParser().m_g4_month % m_bfmDemod->getRDSParser().m_g4_day % m_bfmDemod->getRDSParser().m_g4_hours % m_bfmDemod->getRDSParser().m_g4_minutes % m_bfmDemod->getRDSParser().m_g4_local_time_offset);
 	    ui->g04Time->setText(QString(time.c_str()));
 	}
 	else

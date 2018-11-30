@@ -10,8 +10,9 @@
 
 namespace qtwebapp {
 
-struct HttpListenerSettings
+class HttpListenerSettings
 {
+public:
     QString host;
     int port;
     int minThreads;

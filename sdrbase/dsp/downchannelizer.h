@@ -21,26 +21,18 @@
 #include <dsp/basebandsamplesink.h>
 #include <list>
 #include <QMutex>
-#include "util/export.h"
+#include "export.h"
 #include "util/message.h"
-#ifdef SDR_RX_SAMPLE_24BIT
-#include "dsp/inthalfbandfilterdb.h"
-#else
-#ifdef USE_SSE4_1
-#include "dsp/inthalfbandfiltereo1.h"
-#else
-#include "dsp/inthalfbandfilterdb.h"
-#endif
-#endif
+#include "dsp/inthalfbandfiltereo.h"
 
 #define DOWNCHANNELIZER_HB_FILTER_ORDER 48
 
 class MessageQueue;
 
-class SDRANGEL_API DownChannelizer : public BasebandSampleSink {
+class SDRBASE_API DownChannelizer : public BasebandSampleSink {
 	Q_OBJECT
 public:
-	class SDRANGEL_API MsgChannelizerNotification : public Message {
+	class MsgChannelizerNotification : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
@@ -68,6 +60,7 @@ public:
 
 	void configure(MessageQueue* messageQueue, int sampleRate, int centerFrequency);
 	int getInputSampleRate() const { return m_inputSampleRate; }
+	int getRequestedCenterFrequency() const { return m_requestedCenterFrequency; }
 
 	virtual void start();
 	virtual void stop();
@@ -83,17 +76,13 @@ protected:
 		};
 
 #ifdef SDR_RX_SAMPLE_24BIT
-        typedef bool (IntHalfbandFilterDB<qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* s);
-        IntHalfbandFilterDB<qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
+        typedef bool (IntHalfbandFilterEO<qint64, qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* s);
+        IntHalfbandFilterEO<qint64, qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
 #else
-#ifdef USE_SSE4_1
-		typedef bool (IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* s);
-		IntHalfbandFilterEO1<DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
-#else
-		typedef bool (IntHalfbandFilterDB<qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* s);
-		IntHalfbandFilterDB<qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
+        typedef bool (IntHalfbandFilterEO<qint32, qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* s);
+        IntHalfbandFilterEO<qint32, qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>* m_filter;
 #endif
-#endif
+
 		WorkFunction m_workFunction;
 		Mode m_mode;
 		bool m_sse;

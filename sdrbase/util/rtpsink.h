@@ -21,45 +21,19 @@
 #include <QString>
 #include <QMutex>
 #include <QDebug>
+#include <QHostAddress>
 #include <stdint.h>
 
-// jrtplib includes
+// qrtplib includes
 #include "rtpsession.h"
-#include "rtpudpv4transmitternobind.h"
-#include "rtpipv4address.h"
+#include "rtpudptransmitter.h"
+#include "rtpaddress.h"
 #include "rtpsessionparams.h"
 #include "rtperrors.h"
-#include "rtplibraryversion.h"
 
-class RTPSinkMemoryManager : public jrtplib::RTPMemoryManager
-{
-public:
-    RTPSinkMemoryManager()
-    {
-        alloccount = 0;
-        freecount = 0;
-    }
-    ~RTPSinkMemoryManager()
-    {
-        qDebug() << "RTPSinkMemoryManager::~RTPSinkMemoryManager: alloc: " << alloccount << " free: " << freecount;
-    }
-    void *AllocateBuffer(size_t numbytes, int memtype)
-    {
-        void *buf = malloc(numbytes);
-        qDebug() << "RTPSinkMemoryManager::AllocateBuffer: Allocated " << numbytes << " bytes at location " << buf << " (memtype = " << memtype << ")";
-        alloccount++;
-        return buf;
-    }
+#include "export.h"
 
-    void FreeBuffer(void *p)
-    {
-        qDebug() << "RTPSinkMemoryManager::FreeBuffer: Freeing block " << p;
-        freecount++;
-        free(p);
-    }
-private:
-    int alloccount,freecount;
-};
+class QUdpSocket;
 
 class RTPSink
 {
@@ -70,17 +44,18 @@ public:
         PayloadL16Stereo,
     } PayloadType;
 
-    RTPSink(const QString& address, uint16_t port, PayloadType payloadType = PayloadL16Mono);
+    RTPSink(QUdpSocket *udpSocket, int sampleRate, bool stereo);
     ~RTPSink();
 
     bool isValid() const { return m_valid; }
-    void setPayloadType(PayloadType payloadType);
+    void setPayloadInformation(PayloadType payloadType, int sampleRate);
 
     void setDestination(const QString& address, uint16_t port);
     void deleteDestination(const QString& address, uint16_t port);
     void addDestination(const QString& address, uint16_t port);
 
     void write(const uint8_t *sampleByte);
+    void write(const uint8_t *sampleByteL, const uint8_t *sampleByteR);
     void write(const uint8_t *sampleByte, int nbSamples);
 
 protected:
@@ -96,13 +71,12 @@ protected:
     int m_bufferSize;
     int m_sampleBufferIndex;
     uint8_t *m_byteBuffer;
-    uint32_t m_destip;
+    QHostAddress m_destip;
     uint16_t m_destport;
-    jrtplib::RTPSession m_rtpSession;
-    jrtplib::RTPSessionParams m_rtpSessionParams;
-    jrtplib::RTPUDPv4TransmissionNoBindParams m_rtpTransmissionParams;
-    jrtplib::RTPUDPv4TransmitterNoBind m_rtpTransmitter;
-    RTPSinkMemoryManager m_rtpMemoryManager;
+    qrtplib::RTPSession m_rtpSession;
+    qrtplib::RTPSessionParams m_rtpSessionParams;
+    qrtplib::RTPUDPTransmissionParams m_rtpTransmissionParams;
+    qrtplib::RTPUDPTransmitter m_rtpTransmitter;
     bool m_endianReverse;
     QMutex m_mutex;
 };

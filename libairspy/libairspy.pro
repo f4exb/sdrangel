@@ -9,12 +9,18 @@ QT += core
 TEMPLATE = lib
 TARGET = libairspy
 
-CONFIG(MINGW32):LIBAIRSPYSRC = "D:\softs\libairspy\libairspy"
-CONFIG(MINGW64):LIBAIRSPYSRC = "D:\softs\libairspy\libairspy"
+CONFIG(MINGW32):LIBAIRSPYSRC = "C:\softs\libairspy\libairspy"
+CONFIG(MINGW64):LIBAIRSPYSRC = "C:\softs\libairspy\libairspy"
+CONFIG(MSVC):LIBAIRSPYSRC = "C:\softs\libairspy\libairspy"
+
 INCLUDEPATH += $$LIBAIRSPYSRC/src
 
-CONFIG(MINGW32):INCLUDEPATH += "D:\softs\libusb-1.0.20\include\libusb-1.0"
-CONFIG(MINGW64):INCLUDEPATH += "D:\softs\libusb-1.0.20\include\libusb-1.0"
+CONFIG(MINGW32):INCLUDEPATH += "C:\softs\libusb-1.0.22\include\libusb-1.0"
+CONFIG(MINGW64):INCLUDEPATH += "C:\softs\libusb-1.0.22\include\libusb-1.0"
+CONFIG(MSVC):INCLUDEPATH += "C:\softs\libusb-1.0.22\include\libusb-1.0"
+CONFIG(MSVC):INCLUDEPATH += "C:\softs\pthreads-w32\include"
+
+CONFIG(MSVC):DEFINES += _TIMESPEC_DEFINED
 
 SOURCES = $$LIBAIRSPYSRC/src/airspy.c\
   $$LIBAIRSPYSRC/src/iqconverter_float.c\
@@ -26,8 +32,10 @@ HEADERS = $$LIBAIRSPYSRC/src/airspy.h\
   $$LIBAIRSPYSRC/src/iqconverter_int16.h\
   $$LIBAIRSPYSRC/src/filters.h
 
-CONFIG(MINGW32):LIBS += -LD:\softs\libusb-1.0.20\MinGW32\dll -llibusb-1.0
-CONFIG(MINGW64):LIBS += -LD:\softs\libusb-1.0.20\MinGW64\dll -llibusb-1.0
+CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.22\MinGW32\dll -llibusb-1.0
+CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.22\MinGW64\dll -llibusb-1.0
+CONFIG(MSVC):LIBS += -LC:\softs\libusb-1.0.22\MS64\dll -llibusb-1.0
+CONFIG(MSVC):LIBS += -LC:\softs\pthreads-w32\lib\x64 -lpthreadVC2
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =

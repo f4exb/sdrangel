@@ -24,7 +24,7 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -135,7 +135,7 @@
        </property>
        <property name="font">
         <font>
-         <family>DejaVu Sans Mono</family>
+         <family>Liberation Mono</family>
          <pointsize>20</pointsize>
         </font>
        </property>
@@ -269,7 +269,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Relative postion of device center frequency</string>
+        <string>Relative position of device center frequency</string>
        </property>
        <property name="currentIndex">
         <number>2</number>
@@ -376,7 +376,7 @@
        </property>
        <property name="font">
         <font>
-         <family>DejaVu Sans Mono</family>
+         <family>Liberation Mono</family>
          <pointsize>12</pointsize>
         </font>
        </property>
@@ -459,6 +459,11 @@
          <string>32</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>64</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>
@@ -511,7 +516,7 @@
        </property>
        <property name="font">
         <font>
-         <family>DejaVu Sans Mono</family>
+         <family>Liberation Mono</family>
          <pointsize>12</pointsize>
         </font>
        </property>

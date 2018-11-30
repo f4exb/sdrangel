@@ -29,7 +29,9 @@ namespace Unit {
 		DecibelMicroVolt,
 		AngleDegrees,
 		Time,
-		Volt
+		TimeHMS,
+		Volt,
+		Scientific
 	};
 };
 

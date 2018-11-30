@@ -19,6 +19,8 @@
 
 #include "lime/LimeSuite.h"
 
+#include "export.h"
+
 /**
  * This structure refers to one physical device shared among parties (logical devices represented by
  * the DeviceSinkAPI or DeviceSourceAPI).
@@ -26,7 +28,7 @@
  * There is only one copy that is constructed by the first participant and destroyed by the last.
  * A participant knows it is the first or last by checking the lists of buddies (Rx + Tx).
  */
-struct DeviceLimeSDRParams
+struct DEVICES_API DeviceLimeSDRParams
 {
     lms_device_t *m_dev;         //!< device handle
     uint32_t     m_nbRxChannels; //!< number of Rx channels (normally 2, we'll see if we really use it...)
@@ -53,6 +55,29 @@ struct DeviceLimeSDRParams
         m_rxFrequency(1e6),
         m_txFrequency(1e6)
     {
+        m_lpfRangeRx.max = 0.0f;
+        m_lpfRangeRx.min = 0.0f;
+        m_lpfRangeRx.step = 0.0f;
+
+        m_lpfRangeTx.max = 0.0f;
+        m_lpfRangeTx.min = 0.0f;
+        m_lpfRangeTx.step = 0.0f;
+
+        m_loRangeRx.max = 0.0f;
+        m_loRangeRx.min = 0.0f;
+        m_loRangeRx.step = 0.0f;
+
+        m_loRangeTx.max = 0.0f;
+        m_loRangeTx.min = 0.0f;
+        m_loRangeTx.step = 0.0f;
+
+        m_srRangeRx.max = 0.0f;
+        m_srRangeRx.min = 0.0f;
+        m_srRangeRx.step = 0.0f;
+
+        m_srRangeTx.max = 0.0f;
+        m_srRangeTx.min = 0.0f;
+        m_srRangeTx.step = 0.0f;
     }
 
     /**

@@ -21,8 +21,11 @@
 #include <QString>
 #include <QByteArray>
 
-struct CWKeyerSettings
+#include "export.h"
+
+class SDRBASE_API CWKeyerSettings
 {
+public:
     typedef enum
     {
         CWNone,

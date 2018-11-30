@@ -20,6 +20,7 @@ set(hackrfinput_HEADERS
 if (BUILD_DEBIAN)
 include_directories(
         .
+    ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
     ${CMAKE_SOURCE_DIR}/devices    
@@ -29,6 +30,7 @@ include_directories(
 else (BUILD_DEBIAN)
 include_directories(
         .
+    ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
     ${CMAKE_SOURCE_DIR}/devices    
@@ -63,6 +65,6 @@ target_link_libraries(inputhackrfsrv
 )
 endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputhackrfsrv Core)
+target_link_libraries(inputhackrfsrv Qt5::Core)
 
 install(TARGETS inputhackrfsrv DESTINATION lib/pluginssrv/samplesource)

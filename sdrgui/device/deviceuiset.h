@@ -20,6 +20,8 @@
 #include <QTimer>
 #include <QByteArray>
 
+#include "export.h"
+
 class SpectrumVis;
 class GLSpectrum;
 class GLSpectrumGUI;
@@ -32,8 +34,9 @@ class DeviceSinkAPI;
 class ChannelMarker;
 class PluginAPI;
 
-struct DeviceUISet
+class SDRGUI_API DeviceUISet
 {
+public:
     SpectrumVis *m_spectrumVis;
     GLSpectrum *m_spectrum;
     GLSpectrumGUI *m_spectrumGUI;
@@ -94,6 +97,8 @@ private:
 
     void renameRxChannelInstances();
     void renameTxChannelInstances();
+    /** Use this function to support possible older identifiers in presets */
+    bool compareRxChannelURIs(const QString& registerdChannelURI, const QString& xChannelURI);
 };
 
 

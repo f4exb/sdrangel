@@ -25,7 +25,7 @@
 #include "dsp/dsptypes.h"
 #include "dsp/hbfiltertraits.h"
 #include "dsp/inthalfbandfiltersti.h"
-#include "util/export.h"
+#include "export.h"
 
 template<uint32_t HBFilterOrder>
 class SDRANGEL_API IntHalfbandFilterST {

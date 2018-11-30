@@ -1,5 +1,6 @@
-#include <dsp/basebandsamplesink.h>
-#include "util/message.h"
+#include "basebandsamplesink.h"
+
+MESSAGE_CLASS_DEFINITION(BasebandSampleSink::MsgThreadedSink, Message)
 
 BasebandSampleSink::BasebandSampleSink() :
     m_guiMessageQueue(0)

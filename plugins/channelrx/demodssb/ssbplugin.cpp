@@ -3,12 +3,14 @@
 #include <device/devicesourceapi.h>
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
+#ifndef SERVER_MODE
 #include "ssbdemodgui.h"
+#endif
 #include "ssbdemod.h"
 
 const PluginDescriptor SSBPlugin::m_pluginDescriptor = {
 	QString("SSB Demodulator"),
-	QString("3.12.0"),
+	QString("4.1.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -34,10 +36,19 @@ void SSBPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(SSBDemod::m_channelIdURI, SSBDemod::m_channelId, this);
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* SSBPlugin::createRxChannelGUI(
+        DeviceUISet *deviceUISet __attribute__((unused)),
+        BasebandSampleSink *rxChannel __attribute__((unused)))
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* SSBPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
 	return SSBDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
+#endif
 
 BasebandSampleSink* SSBPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
 {

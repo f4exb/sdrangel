@@ -26,7 +26,7 @@ class BasebandSampleSink;
 class AMDemodPlugin : public QObject, PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "de.maintech.sdrangelove.channel.am")
+	Q_PLUGIN_METADATA(IID "sdrangel.channel.amdemod")
 
 public:
 	explicit AMDemodPlugin(QObject* parent = NULL);

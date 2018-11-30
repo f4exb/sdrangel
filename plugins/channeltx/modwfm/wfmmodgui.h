@@ -76,7 +76,6 @@ private:
     int m_samplesCount;
     std::size_t m_tickCount;
     bool m_enableNavTime;
-    WFMMod::WFMModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
 
     explicit WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
@@ -120,8 +119,10 @@ private slots:
     void on_showFileDialog_clicked(bool checked);
 
     void onWidgetRolled(QWidget* widget, bool rollDown);
+    void onMenuDialogCalled(const QPoint& p);
 
     void configureFileName();
+    void audioSelect();
     void tick();
 };
 

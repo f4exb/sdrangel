@@ -11,9 +11,10 @@ QT += core gui widgets multimedia opengl
 
 TARGET = inputairspy
 
-CONFIG(MINGW32):LIBAIRSPYSRC = "D:\softs\libairspy"
-CONFIG(MINGW64):LIBAIRSPYSRC = "D:\softs\libairspy"
+CONFIG(MINGW32):LIBAIRSPYSRC = "C:\softs\libairspy"
+CONFIG(MINGW64):LIBAIRSPYSRC = "C:\softs\libairspy"
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../../../exports
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client

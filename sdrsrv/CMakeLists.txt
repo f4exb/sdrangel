@@ -27,6 +27,7 @@ add_library(sdrsrv SHARED
 
 include_directories(
     .
+    ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/sdrbase
     ${CMAKE_SOURCE_DIR}/logging
     ${CMAKE_SOURCE_DIR}/httpserver
@@ -41,10 +42,9 @@ target_link_libraries(sdrsrv
     logging
 )
 
-set_target_properties(sdrsrv PROPERTIES DEFINE_SYMBOL "sdrangel_EXPORTS")
 target_compile_features(sdrsrv PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
 
-qt5_use_modules(sdrsrv Core Multimedia)
+target_link_libraries(sdrsrv Qt5::Core Qt5::Multimedia)
 
 install(TARGETS sdrsrv DESTINATION lib)
 

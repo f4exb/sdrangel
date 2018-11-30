@@ -51,26 +51,28 @@ FileSourceGui::FileSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_samplesCount(0),
 	m_tickCount(0),
 	m_enableNavTime(false),
-	m_lastEngineState((DSPDeviceSourceEngine::State)-1)
+	m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
 	ui->fileNameText->setText(m_fileName);
+	ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 
 	connect(&(m_deviceUISet->m_deviceSourceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 
+	setAccelerationCombo();
 	displaySettings();
 
 	ui->navTimeSlider->setEnabled(false);
-	ui->playLoop->setChecked(true); // FIXME: always play in a loop
-	ui->playLoop->setEnabled(false);
+	ui->acceleration->setEnabled(false);
 
     m_sampleSource = m_deviceUISet->m_deviceSourceAPI->getSampleSource();
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+    m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 }
 
 FileSourceGui::~FileSourceGui()
@@ -161,9 +163,7 @@ bool FileSourceGui::handleMessage(const Message& message)
     {
         const FileSourceInput::MsgConfigureFileSource& cfg = (FileSourceInput::MsgConfigureFileSource&) message;
         m_settings = cfg.getSettings();
-        blockApplySettings(true);
         displaySettings();
-        blockApplySettings(false);
         return true;
     }
     else if (FileSourceInput::MsgReportFileSourceAcquisition::match(message))
@@ -197,6 +197,28 @@ bool FileSourceGui::handleMessage(const Message& message)
 
         return true;
     }
+	else if (FileSourceInput::MsgPlayPause::match(message))
+	{
+	    FileSourceInput::MsgPlayPause& notif = (FileSourceInput::MsgPlayPause&) message;
+	    bool checked = notif.getPlayPause();
+	    ui->play->setChecked(checked);
+	    ui->navTimeSlider->setEnabled(!checked);
+	    ui->acceleration->setEnabled(!checked);
+	    m_enableNavTime = !checked;
+
+	    return true;
+	}
+	else if (FileSourceInput::MsgReportHeaderCRC::match(message))
+	{
+		FileSourceInput::MsgReportHeaderCRC& notif = (FileSourceInput::MsgReportHeaderCRC&) message;
+		if (notif.isOK()) {
+			ui->crcLabel->setStyleSheet("QLabel { background-color : green; }");
+		} else {
+			ui->crcLabel->setStyleSheet("QLabel { background-color : red; }");
+		}
+
+		return true;
+	}
 	else
 	{
 		return false;
@@ -212,15 +234,24 @@ void FileSourceGui::updateSampleRateAndFrequency()
 
 void FileSourceGui::displaySettings()
 {
+    blockApplySettings(true);
+    ui->playLoop->setChecked(m_settings.m_loop);
+    ui->acceleration->setCurrentIndex(FileSourceSettings::getAccelerationIndex(m_settings.m_accelerationFactor));
+    blockApplySettings(false);
 }
 
 void FileSourceGui::sendSettings()
 {
 }
 
-void FileSourceGui::on_playLoop_toggled(bool checked __attribute__((unused)))
+void FileSourceGui::on_playLoop_toggled(bool checked)
 {
-	// TODO: do something about it!
+    if (m_doApplySettings)
+    {
+        m_settings.m_loop = checked;
+        FileSourceInput::MsgConfigureFileSource *message = FileSourceInput::MsgConfigureFileSource::create(m_settings, false);
+        m_sampleSource->getInputMessageQueue()->push(message);
+    }
 }
 
 void FileSourceGui::on_startStop_toggled(bool checked)
@@ -266,17 +297,14 @@ void FileSourceGui::on_play_toggled(bool checked)
 	FileSourceInput::MsgConfigureFileSourceWork* message = FileSourceInput::MsgConfigureFileSourceWork::create(checked);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	ui->navTimeSlider->setEnabled(!checked);
+	ui->acceleration->setEnabled(!checked);
 	m_enableNavTime = !checked;
 }
 
 void FileSourceGui::on_navTimeSlider_valueChanged(int value)
 {
-	if (m_enableNavTime && ((value >= 0) && (value <= 100)))
+	if (m_enableNavTime && ((value >= 0) && (value <= 1000)))
 	{
-		int t_sec = (m_recordLength * value) / 100;
-		QTime t(0, 0, 0, 0);
-		t = t.addSecs(t_sec);
-
 		FileSourceInput::MsgConfigureFileSourceSeek* message = FileSourceInput::MsgConfigureFileSourceSeek::create(value);
 		m_sampleSource->getInputMessageQueue()->push(message);
 	}
@@ -285,14 +313,25 @@ void FileSourceGui::on_navTimeSlider_valueChanged(int value)
 void FileSourceGui::on_showFileDialog_clicked(bool checked __attribute__((unused)))
 {
 	QString fileName = QFileDialog::getOpenFileName(this,
-	    tr("Open I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"));
+	    tr("Open I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"), 0, QFileDialog::DontUseNativeDialog);
 
 	if (fileName != "")
 	{
 		m_fileName = fileName;
 		ui->fileNameText->setText(m_fileName);
+		ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 		configureFileName();
 	}
+}
+
+void FileSourceGui::on_acceleration_currentIndexChanged(int index)
+{
+    if (m_doApplySettings)
+    {
+        m_settings.m_accelerationFactor = FileSourceSettings::getAccelerationValue(index);
+        FileSourceInput::MsgConfigureFileSource *message = FileSourceInput::MsgConfigureFileSource::create(m_settings, false);
+        m_sampleSource->getInputMessageQueue()->push(message);
+    }
 }
 
 void FileSourceGui::configureFileName()
@@ -317,39 +356,38 @@ void FileSourceGui::updateWithStreamData()
 	ui->play->setEnabled(m_acquisition);
 	QTime recordLength(0, 0, 0, 0);
 	recordLength = recordLength.addSecs(m_recordLength);
-	QString s_time = recordLength.toString("hh:mm:ss");
+	QString s_time = recordLength.toString("HH:mm:ss");
 	ui->recordLengthText->setText(s_time);
-	updateWithStreamTime(); // TODO: remove when time data is implemented
+	updateWithStreamTime();
 }
 
 void FileSourceGui::updateWithStreamTime()
 {
-	int t_sec = 0;
-	int t_msec = 0;
+    qint64 t_sec = 0;
+    qint64 t_msec = 0;
 
 	if (m_sampleRate > 0){
-		t_msec = ((m_samplesCount * 1000) / m_sampleRate) % 1000;
 		t_sec = m_samplesCount / m_sampleRate;
+        t_msec = (m_samplesCount - (t_sec * m_sampleRate)) * 1000LL / m_sampleRate;
 	}
 
 	QTime t(0, 0, 0, 0);
 	t = t.addSecs(t_sec);
 	t = t.addMSecs(t_msec);
-	QString s_timems = t.toString("hh:mm:ss.zzz");
-	QString s_time = t.toString("hh:mm:ss");
+	QString s_timems = t.toString("HH:mm:ss.zzz");
 	ui->relTimeText->setText(s_timems);
 
-    quint64 startingTimeStampMsec = (quint64) m_startingTimeStamp * 1000LL;
+    qint64 startingTimeStampMsec = m_startingTimeStamp * 1000LL;
 	QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
-    dt = dt.addSecs((quint64) t_sec);
-    dt = dt.addMSecs((quint64) t_msec);
-	QString s_date = dt.toString("yyyy-MM-dd hh:mm:ss.zzz");
+    dt = dt.addSecs(t_sec);
+    dt = dt.addMSecs(t_msec);
+	QString s_date = dt.toString("yyyy-MM-dd HH:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
 
 	if (!m_enableNavTime)
 	{
 		float posRatio = (float) t_sec / (float) m_recordLength;
-		ui->navTimeSlider->setValue((int) (posRatio * 100.0));
+		ui->navTimeSlider->setValue((int) (posRatio * 1000.0));
 	}
 }
 
@@ -359,4 +397,43 @@ void FileSourceGui::tick()
 		FileSourceInput::MsgConfigureFileSourceStreamTiming* message = FileSourceInput::MsgConfigureFileSourceStreamTiming::create();
 		m_sampleSource->getInputMessageQueue()->push(message);
 	}
+}
+
+void FileSourceGui::setAccelerationCombo()
+{
+    ui->acceleration->blockSignals(true);
+    ui->acceleration->clear();
+    ui->acceleration->addItem(QString("1"));
+
+    for (unsigned int i = 0; i <= FileSourceSettings::m_accelerationMaxScale; i++)
+    {
+        QString s;
+        int m = pow(10.0, i);
+        int x = 2*m;
+        setNumberStr(x, s);
+        ui->acceleration->addItem(s);
+        x = 5*m;
+        setNumberStr(x, s);
+        ui->acceleration->addItem(s);
+        x = 10*m;
+        setNumberStr(x, s);
+        ui->acceleration->addItem(s);
+    }
+
+    ui->acceleration->blockSignals(false);
+}
+
+void FileSourceGui::setNumberStr(int n, QString& s)
+{
+    if (n < 1000) {
+        s = tr("%1").arg(n);
+    } else if (n < 100000) {
+        s = tr("%1k").arg(n/1000);
+    } else if (n < 1000000) {
+        s = tr("%1e5").arg(n/100000);
+    } else if (n < 1000000000) {
+        s = tr("%1M").arg(n/1000000);
+    } else {
+        s = tr("%1G").arg(n/1000000000);
+    }
 }

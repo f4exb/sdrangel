@@ -14,19 +14,26 @@ inline double log2f(double n)
 
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureSpectrumVis, Message)
 
+const Real SpectrumVis::m_mult = (10.0f / log2f(10.0f));
+
 SpectrumVis::SpectrumVis(Real scalef, GLSpectrum* glSpectrum) :
 	BasebandSampleSink(),
 	m_fft(FFTEngine::create()),
 	m_fftBuffer(MAX_FFT_SIZE),
-	m_logPowerSpectrum(MAX_FFT_SIZE),
+	m_powerSpectrum(MAX_FFT_SIZE),
 	m_fftBufferFill(0),
 	m_needMoreSamples(false),
 	m_scalef(scalef),
 	m_glSpectrum(glSpectrum),
+	m_averageNb(0),
+	m_avgMode(AvgModeNone),
+	m_linear(false),
+	m_ofs(0),
+    m_powFFTDiv(1.0),
 	m_mutex(QMutex::Recursive)
 {
 	setObjectName("SpectrumVis");
-	handleConfigure(1024, 0, FFTWindow::BlackmanHarris);
+	handleConfigure(1024, 0, 0, AvgModeNone, FFTWindow::BlackmanHarris, false);
 }
 
 SpectrumVis::~SpectrumVis()
@@ -34,9 +41,15 @@ SpectrumVis::~SpectrumVis()
 	delete m_fft;
 }
 
-void SpectrumVis::configure(MessageQueue* msgQueue, int fftSize, int overlapPercent, FFTWindow::Function window)
+void SpectrumVis::configure(MessageQueue* msgQueue,
+        int fftSize,
+        int overlapPercent,
+        unsigned int averagingNb,
+        int averagingMode,
+        FFTWindow::Function window,
+        bool linear)
 {
-	MsgConfigureSpectrumVis* cmd = new MsgConfigureSpectrumVis(fftSize, overlapPercent, window);
+	MsgConfigureSpectrumVis* cmd = new MsgConfigureSpectrumVis(fftSize, overlapPercent, averagingNb, averagingMode, window, linear);
 	msgQueue->push(cmd);
 }
 
@@ -96,42 +109,173 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 			m_fft->transform();
 
 			// extract power spectrum and reorder buckets
-			Real ofs = 20.0f * log10f(1.0f / m_fftSize);
-			Real mult = (10.0f / log2f(10.0f));
 			const Complex* fftOut = m_fft->out();
 			Complex c;
 			Real v;
 			std::size_t halfSize = m_fftSize / 2;
 
-			if ( positiveOnly )
+			if (m_avgMode == AvgModeNone)
 			{
-				for (std::size_t i = 0; i < halfSize; i++)
-				{
-					c = fftOut[i];
-					v = c.real() * c.real() + c.imag() * c.imag();
-					v = mult * log2f(v) + ofs;
-					m_logPowerSpectrum[i * 2] = v;
-					m_logPowerSpectrum[i * 2 + 1] = v;
-				}
+                if ( positiveOnly )
+                {
+                    for (std::size_t i = 0; i < halfSize; i++)
+                    {
+                        c = fftOut[i];
+                        v = c.real() * c.real() + c.imag() * c.imag();
+                        v = m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
+                        m_powerSpectrum[i * 2] = v;
+                        m_powerSpectrum[i * 2 + 1] = v;
+                    }
+                }
+                else
+                {
+                    for (std::size_t i = 0; i < halfSize; i++)
+                    {
+                        c = fftOut[i + halfSize];
+                        v = c.real() * c.real() + c.imag() * c.imag();
+                        v = m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
+                        m_powerSpectrum[i] = v;
+
+                        c = fftOut[i];
+                        v = c.real() * c.real() + c.imag() * c.imag();
+                        v = m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
+                        m_powerSpectrum[i + halfSize] = v;
+                    }
+                }
+
+                // send new data to visualisation
+                m_glSpectrum->newSpectrum(m_powerSpectrum, m_fftSize);
 			}
-			else
+			else if (m_avgMode == AvgModeMovingAvg)
 			{
-				for (std::size_t i = 0; i < halfSize; i++)
-				{
-					c = fftOut[i + halfSize];
-					v = c.real() * c.real() + c.imag() * c.imag();
-					v = mult * log2f(v) + ofs;
-					m_logPowerSpectrum[i] = v;
+	            if ( positiveOnly )
+	            {
+	                for (std::size_t i = 0; i < halfSize; i++)
+	                {
+	                    c = fftOut[i];
+	                    v = c.real() * c.real() + c.imag() * c.imag();
+	                    v = m_movingAverage.storeAndGetAvg(v, i);
+	                    v = m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
+	                    m_powerSpectrum[i * 2] = v;
+	                    m_powerSpectrum[i * 2 + 1] = v;
+	                }
+	            }
+	            else
+	            {
+	                for (std::size_t i = 0; i < halfSize; i++)
+	                {
+	                    c = fftOut[i + halfSize];
+	                    v = c.real() * c.real() + c.imag() * c.imag();
+	                    v = m_movingAverage.storeAndGetAvg(v, i+halfSize);
+	                    v = m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
+	                    m_powerSpectrum[i] = v;
 
-					c = fftOut[i];
-					v = c.real() * c.real() + c.imag() * c.imag();
-					v = mult * log2f(v) + ofs;
-					m_logPowerSpectrum[i + halfSize] = v;
-				}
+	                    c = fftOut[i];
+	                    v = c.real() * c.real() + c.imag() * c.imag();
+	                    v = m_movingAverage.storeAndGetAvg(v, i);
+	                    v = m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
+	                    m_powerSpectrum[i + halfSize] = v;
+	                }
+	            }
+
+	            // send new data to visualisation
+	            m_glSpectrum->newSpectrum(m_powerSpectrum, m_fftSize);
+	            m_movingAverage.nextAverage();
 			}
+			else if (m_avgMode == AvgModeFixedAvg)
+			{
+			    double avg;
 
-			// send new data to visualisation
-			m_glSpectrum->newSpectrum(m_logPowerSpectrum, m_fftSize);
+                if ( positiveOnly )
+                {
+                    for (std::size_t i = 0; i < halfSize; i++)
+                    {
+                        c = fftOut[i];
+                        v = c.real() * c.real() + c.imag() * c.imag();
+
+                        if (m_fixedAverage.storeAndGetAvg(avg, v, i))
+                        {
+                            avg = m_linear ? avg/m_powFFTDiv : m_mult * log2f(avg) + m_ofs;
+                            m_powerSpectrum[i * 2] = avg;
+                            m_powerSpectrum[i * 2 + 1] = avg;
+                        }
+                    }
+                }
+                else
+                {
+                    for (std::size_t i = 0; i < halfSize; i++)
+                    {
+                        c = fftOut[i + halfSize];
+                        v = c.real() * c.real() + c.imag() * c.imag();
+
+                        if (m_fixedAverage.storeAndGetAvg(avg, v, i+halfSize))
+                        { // result available
+                            avg = m_linear ? avg/m_powFFTDiv : m_mult * log2f(avg) + m_ofs;
+                            m_powerSpectrum[i] = avg;
+                        }
+
+                        c = fftOut[i];
+                        v = c.real() * c.real() + c.imag() * c.imag();
+
+                        if (m_fixedAverage.storeAndGetAvg(avg, v, i))
+                        { // result available
+                            avg = m_linear ? avg/m_powFFTDiv : m_mult * log2f(avg) + m_ofs;
+                            m_powerSpectrum[i + halfSize] = avg;
+                        }
+                    }
+                }
+
+                if (m_fixedAverage.nextAverage()) { // result available
+                    m_glSpectrum->newSpectrum(m_powerSpectrum, m_fftSize); // send new data to visualisation
+                }
+			}
+			else if (m_avgMode == AvgModeMax)
+			{
+			    double max;
+
+                if ( positiveOnly )
+                {
+                    for (std::size_t i = 0; i < halfSize; i++)
+                    {
+                        c = fftOut[i];
+                        v = c.real() * c.real() + c.imag() * c.imag();
+
+                        if (m_max.storeAndGetMax(max, v, i))
+                        {
+                            max = m_linear ? max/m_powFFTDiv : m_mult * log2f(max) + m_ofs;
+                            m_powerSpectrum[i * 2] = max;
+                            m_powerSpectrum[i * 2 + 1] = max;
+                        }
+                    }
+                }
+                else
+                {
+                    for (std::size_t i = 0; i < halfSize; i++)
+                    {
+                        c = fftOut[i + halfSize];
+                        v = c.real() * c.real() + c.imag() * c.imag();
+
+                        if (m_max.storeAndGetMax(max, v, i+halfSize))
+                        { // result available
+                            max = m_linear ? max/m_powFFTDiv : m_mult * log2f(max) + m_ofs;
+                            m_powerSpectrum[i] = max;
+                        }
+
+                        c = fftOut[i];
+                        v = c.real() * c.real() + c.imag() * c.imag();
+
+                        if (m_max.storeAndGetMax(max, v, i))
+                        { // result available
+                            max = m_linear ? max/m_powFFTDiv : m_mult * log2f(max) + m_ofs;
+                            m_powerSpectrum[i + halfSize] = max;
+                        }
+                    }
+                }
+
+                if (m_max.nextMax()) { // result available
+                    m_glSpectrum->newSpectrum(m_powerSpectrum, m_fftSize); // send new data to visualisation
+                }
+			}
 
 			// advance buffer respecting the fft overlap factor
 			std::copy(m_fftBuffer.begin() + m_refillSize, m_fftBuffer.end(), m_fftBuffer.begin());
@@ -167,7 +311,12 @@ bool SpectrumVis::handleMessage(const Message& message)
 	if (MsgConfigureSpectrumVis::match(message))
 	{
 		MsgConfigureSpectrumVis& conf = (MsgConfigureSpectrumVis&) message;
-		handleConfigure(conf.getFFTSize(), conf.getOverlapPercent(), conf.getWindow());
+		handleConfigure(conf.getFFTSize(),
+		        conf.getOverlapPercent(),
+		        conf.getAverageNb(),
+		        conf.getAvgMode(),
+		        conf.getWindow(),
+		        conf.getLinear());
 		return true;
 	}
 	else
@@ -176,8 +325,15 @@ bool SpectrumVis::handleMessage(const Message& message)
 	}
 }
 
-void SpectrumVis::handleConfigure(int fftSize, int overlapPercent, FFTWindow::Function window)
+void SpectrumVis::handleConfigure(int fftSize,
+        int overlapPercent,
+        unsigned int averageNb,
+        AvgMode averagingMode,
+        FFTWindow::Function window,
+        bool linear)
 {
+//    qDebug("SpectrumVis::handleConfigure, fftSize: %d overlapPercent: %d averageNb: %u averagingMode: %d window: %d linear: %s",
+//            fftSize, overlapPercent, averageNb, (int) averagingMode, (int) window, linear ? "true" : "false");
 	QMutexLocker mutexLocker(&m_mutex);
 
 	if (fftSize > MAX_FFT_SIZE)
@@ -208,4 +364,12 @@ void SpectrumVis::handleConfigure(int fftSize, int overlapPercent, FFTWindow::Fu
 	m_overlapSize = (m_fftSize * m_overlapPercent) / 100;
 	m_refillSize = m_fftSize - m_overlapSize;
 	m_fftBufferFill = m_overlapSize;
+	m_movingAverage.resize(fftSize, averageNb > 1000 ? 1000 : averageNb); // Capping to avoid out of memory condition
+	m_fixedAverage.resize(fftSize, averageNb);
+	m_max.resize(fftSize, averageNb);
+	m_averageNb = averageNb;
+	m_avgMode = averagingMode;
+	m_linear = linear;
+	m_ofs = 20.0f * log10f(1.0f / m_fftSize);
+	m_powFFTDiv = m_fftSize*m_fftSize;
 }

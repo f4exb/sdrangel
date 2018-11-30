@@ -17,12 +17,17 @@
 #include <QDebug>
 #include <time.h>
 
+#include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGATVModReport.h"
+
 #include "opencv2/imgproc/imgproc.hpp"
 
 #include "dsp/upchannelizer.h"
 #include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
+#include "util/db.h"
 
 #include "atvmod.h"
 
@@ -37,8 +42,6 @@ MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportVideoFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureCameraIndex, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureCameraData, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportCameraData, Message)
-MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureOverlayText, Message)
-MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureShowOverlayText, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgReportEffectiveSampleRate, Message)
 
 const QString ATVMod::m_channelIdURI = "sdrangel.channeltx.modatv";
@@ -68,7 +71,7 @@ ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
 	m_videoEOF(false),
 	m_videoOK(false),
 	m_cameraIndex(-1),
-	m_showOverlayText(false),
+	//m_showOverlayText(false),
     m_SSBFilter(0),
     m_SSBFilterBuffer(0),
     m_SSBFilterBufferIndex(0),
@@ -90,13 +93,13 @@ ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
     m_interpolatorDistanceRemain = 0.0f;
     m_interpolatorDistance = 1.0f;
 
+    applyChannelSettings(m_outputSampleRate, m_inputFrequencyOffset, true);
+    applySettings(m_settings, true); // does applyStandard() too;
+
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
-
-    applyChannelSettings(m_outputSampleRate, m_inputFrequencyOffset, true);
-    applySettings(m_settings, true); // does applyStandard() too;
 }
 
 ATVMod::~ATVMod()
@@ -107,6 +110,10 @@ ATVMod::~ATVMod()
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+    delete m_SSBFilter;
+    delete m_DSBFilter;
+    delete[] m_SSBFilterBuffer;
+    delete[] m_DSBFilterBuffer;
 }
 
 void ATVMod::pullAudio(int nbSamples __attribute__((unused)))
@@ -320,7 +327,7 @@ void ATVMod::pullVideo(Real& sample)
 
             		if (!colorFrame.empty()) // some frames may not come out properly
             		{
-            		    if (m_showOverlayText) {
+            		    if (m_settings.m_showOverlayText) {
             		        mixImageAndText(colorFrame);
             		    }
 
@@ -440,7 +447,7 @@ void ATVMod::pullVideo(Real& sample)
 
                 if (!colorFrame.empty()) // some frames may not come out properly
                 {
-                    if (m_showOverlayText) {
+                    if (m_settings.m_showOverlayText) {
                         mixImageAndText(colorFrame);
                     }
 
@@ -448,7 +455,7 @@ void ATVMod::pullVideo(Real& sample)
                     resizeCamera();
                 }
 
-                if (camera.m_videoFPSCount < camera.m_videoFPSManualEnable ? camera.m_videoFPSManual : camera.m_videoFPS)
+                if (camera.m_videoFPSCount < (camera.m_videoFPSManualEnable ? camera.m_videoFPSManual : camera.m_videoFPS))
                 {
                     camera.m_videoPrevFPSCount = (int) camera.m_videoFPSCount;
                     camera.m_videoFPSCount += (camera.m_videoFPSManualEnable ? camera.m_videoFPSqManual : camera.m_videoFPSq);
@@ -456,7 +463,7 @@ void ATVMod::pullVideo(Real& sample)
                 else
                 {
                     camera.m_videoPrevFPSCount = 0;
-                    camera.m_videoFPSCount = camera.m_videoFPSManualEnable ? camera.m_videoFPSqManual : camera.m_videoFPSq;
+                    camera.m_videoFPSCount = (camera.m_videoFPSManualEnable ? camera.m_videoFPSqManual : camera.m_videoFPSq);
                 }
             }
         }
@@ -608,34 +615,6 @@ bool ATVMod::handleMessage(const Message& cmd)
     	}
 
     	return true;
-    }
-    else if (MsgConfigureOverlayText::match(cmd))
-    {
-        MsgConfigureOverlayText& cfg = (MsgConfigureOverlayText&) cmd;
-        m_overlayText = cfg.getOverlayText().toStdString();
-        return true;
-    }
-    else if (MsgConfigureShowOverlayText::match(cmd))
-    {
-        MsgConfigureShowOverlayText& cfg = (MsgConfigureShowOverlayText&) cmd;
-        bool showOverlayText = cfg.getShowOverlayText();
-
-        if (!m_imageFromFile.empty())
-        {
-            m_imageFromFile.copyTo(m_imageOriginal);
-
-            if (showOverlayText) {
-                qDebug("ATVMod::handleMessage: overlay text");
-                mixImageAndText(m_imageOriginal);
-            } else{
-                qDebug("ATVMod::handleMessage: clear text");
-            }
-
-            resizeImage();
-        }
-
-        m_showOverlayText = showOverlayText;
-        return true;
     }
     else if (DSPSignalNotification::match(cmd))
     {
@@ -818,13 +797,19 @@ void ATVMod::openImage(const QString& fileName)
 
 	if (m_imageOK)
 	{
+        m_imageFileName = fileName;
         m_imageFromFile.copyTo(m_imageOriginal);
 
-        if (m_showOverlayText) {
+        if (m_settings.m_showOverlayText) {
             mixImageAndText(m_imageOriginal);
 	    }
 
 	    resizeImage();
+	}
+	else
+	{
+	    m_imageFileName.clear();
+        qDebug("ATVMod::openImage: cannot open image file %s", qPrintable(fileName));
 	}
 }
 
@@ -836,6 +821,7 @@ void ATVMod::openVideo(const QString& fileName)
 
     if (m_videoOK)
     {
+        m_videoFileName = fileName;
         m_videoFPS = m_video.get(CV_CAP_PROP_FPS);
         m_videoWidth = (int) m_video.get(CV_CAP_PROP_FRAME_WIDTH);
         m_videoHeight = (int) m_video.get(CV_CAP_PROP_FRAME_HEIGHT);
@@ -863,7 +849,8 @@ void ATVMod::openVideo(const QString& fileName)
     }
     else
     {
-        qDebug("ATVMod::openVideo: cannot open video file");
+        m_videoFileName.clear();
+        qDebug("ATVMod::openVideo: cannot open video file %s", qPrintable(fileName));
     }
 }
 
@@ -1019,13 +1006,13 @@ void ATVMod::mixImageAndText(cv::Mat& image)
     int baseline=0;
 
     fontScale = fontScale < 4.0f ? 4.0f : fontScale; // minimum size
-    cv::Size textSize = cv::getTextSize(m_overlayText, fontFace, fontScale, thickness, &baseline);
+    cv::Size textSize = cv::getTextSize(m_settings.m_overlayText.toStdString(), fontFace, fontScale, thickness, &baseline);
     baseline += thickness;
 
     // position the text in the top left corner
     cv::Point textOrg(6, textSize.height+10);
     // then put the text itself
-    cv::putText(image, m_overlayText, textOrg, fontFace, fontScale, cv::Scalar::all(255*m_settings.m_uniformLevel), thickness, CV_AA);
+    cv::putText(image, m_settings.m_overlayText.toStdString(), textOrg, fontFace, fontScale, cv::Scalar::all(255*m_settings.m_uniformLevel), thickness, CV_AA);
 }
 
 void ATVMod::applyChannelSettings(int outputSampleRate, int inputFrequencyOffset, bool force)
@@ -1101,6 +1088,7 @@ void ATVMod::applySettings(const ATVModSettings& settings, bool force)
             << " m_rfScalingFactor: " << settings.m_rfScalingFactor
             << " m_fmExcursion: " << settings.m_fmExcursion
             << " m_forceDecimator: " << settings.m_forceDecimator
+            << " m_showOverlayText: " << settings.m_showOverlayText
             << " force: " << force;
 
     if ((settings.m_atvStd != m_settings.m_atvStd)
@@ -1153,6 +1141,23 @@ void ATVMod::applySettings(const ATVModSettings& settings, bool force)
         m_settingsMutex.unlock();
     }
 
+    if ((settings.m_showOverlayText != m_settings.m_showOverlayText) || force)
+    {
+        if (!m_imageFromFile.empty())
+        {
+            m_imageFromFile.copyTo(m_imageOriginal);
+
+            if (settings.m_showOverlayText) {
+                qDebug("ATVMod::applySettings: set overlay text");
+                mixImageAndText(m_imageOriginal);
+            } else{
+                qDebug("ATVMod::applySettings: clear overlay text");
+            }
+
+            resizeImage();
+        }
+    }
+
     m_settings = settings;
 }
 
@@ -1176,4 +1181,202 @@ bool ATVMod::deserialize(const QByteArray& data)
         m_inputMessageQueue.push(msg);
         return false;
     }
+}
+
+int ATVMod::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setAtvModSettings(new SWGSDRangel::SWGATVModSettings());
+    response.getAtvModSettings()->init();
+    webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int ATVMod::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& channelSettingsKeys,
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    ATVModSettings settings = m_settings;
+    bool frequencyOffsetChanged = false;
+
+    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    {
+        settings.m_inputFrequencyOffset = response.getAtvModSettings()->getInputFrequencyOffset();
+        frequencyOffsetChanged = true;
+    }
+    if (channelSettingsKeys.contains("rfBandwidth")) {
+        settings.m_rfBandwidth = response.getAtvModSettings()->getRfBandwidth();
+    }
+    if (channelSettingsKeys.contains("rfOppBandwidth")) {
+        settings.m_rfOppBandwidth = response.getAtvModSettings()->getRfBandwidth();
+    }
+    if (channelSettingsKeys.contains("atvStd")) {
+        settings.m_atvStd = (ATVModSettings::ATVStd) response.getAtvModSettings()->getAtvStd();
+    }
+    if (channelSettingsKeys.contains("nbLines")) {
+        settings.m_nbLines = response.getAtvModSettings()->getNbLines();
+    }
+    if (channelSettingsKeys.contains("fps")) {
+        settings.m_fps = response.getAtvModSettings()->getFps();
+    }
+    if (channelSettingsKeys.contains("atvModInput")) {
+        settings.m_atvModInput = (ATVModSettings::ATVModInput) response.getAtvModSettings()->getAtvModInput();
+    }
+    if (channelSettingsKeys.contains("uniformLevel")) {
+        settings.m_uniformLevel = response.getAtvModSettings()->getUniformLevel();
+    }
+    if (channelSettingsKeys.contains("atvModulation")) {
+        settings.m_atvModulation = (ATVModSettings::ATVModulation) response.getAtvModSettings()->getAtvModulation();
+    }
+    if (channelSettingsKeys.contains("videoPlayLoop")) {
+        settings.m_videoPlayLoop = response.getAtvModSettings()->getVideoPlayLoop() != 0;
+    }
+    if (channelSettingsKeys.contains("videoPlay")) {
+        settings.m_videoPlay = response.getAtvModSettings()->getVideoPlay() != 0;
+    }
+    if (channelSettingsKeys.contains("cameraPlay")) {
+        settings.m_cameraPlay = response.getAtvModSettings()->getCameraPlay() != 0;
+    }
+    if (channelSettingsKeys.contains("channelMute")) {
+        settings.m_channelMute = response.getAtvModSettings()->getChannelMute() != 0;
+    }
+    if (channelSettingsKeys.contains("invertedVideo")) {
+        settings.m_invertedVideo = response.getAtvModSettings()->getInvertedVideo() != 0;
+    }
+    if (channelSettingsKeys.contains("rfScalingFactor")) {
+        settings.m_rfScalingFactor = response.getAtvModSettings()->getRfScalingFactor();
+    }
+    if (channelSettingsKeys.contains("fmExcursion")) {
+        settings.m_fmExcursion = response.getAtvModSettings()->getFmExcursion();
+    }
+    if (channelSettingsKeys.contains("forceDecimator")) {
+        settings.m_forceDecimator = response.getAtvModSettings()->getForceDecimator() != 0;
+    }
+    if (channelSettingsKeys.contains("showOverlayText")) {
+        settings.m_showOverlayText = response.getAtvModSettings()->getShowOverlayText() != 0;
+    }
+    if (channelSettingsKeys.contains("overlayText")) {
+        settings.m_overlayText = *response.getAtvModSettings()->getOverlayText();
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getAtvModSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getAtvModSettings()->getTitle();
+    }
+
+    if (frequencyOffsetChanged)
+    {
+        ATVMod::MsgConfigureChannelizer *msgChan = ATVMod::MsgConfigureChannelizer::create(
+                settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(msgChan);
+    }
+
+    MsgConfigureATVMod *msg = MsgConfigureATVMod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureATVMod *msgToGUI = MsgConfigureATVMod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    if (channelSettingsKeys.contains("imageFileName"))
+    {
+        MsgConfigureImageFileName *msg = MsgConfigureImageFileName::create(
+                *response.getAtvModSettings()->getImageFileName());
+        m_inputMessageQueue.push(msg);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            MsgConfigureImageFileName *msgToGUI = MsgConfigureImageFileName::create(
+                    *response.getAtvModSettings()->getImageFileName());
+            m_guiMessageQueue->push(msgToGUI);
+        }
+    }
+
+    if (channelSettingsKeys.contains("videoFileName"))
+    {
+        MsgConfigureVideoFileName *msg = MsgConfigureVideoFileName::create(
+                *response.getAtvModSettings()->getVideoFileName());
+        m_inputMessageQueue.push(msg);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            MsgConfigureVideoFileName *msgToGUI = MsgConfigureVideoFileName::create(
+                    *response.getAtvModSettings()->getVideoFileName());
+            m_guiMessageQueue->push(msgToGUI);
+        }
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+int ATVMod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setAtvModReport(new SWGSDRangel::SWGATVModReport());
+    response.getAtvModReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void ATVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const ATVModSettings& settings)
+{
+    response.getAtvModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getAtvModSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getAtvModSettings()->setRfOppBandwidth(settings.m_rfOppBandwidth);
+    response.getAtvModSettings()->setAtvStd(settings.m_atvStd);
+    response.getAtvModSettings()->setNbLines(settings.m_nbLines);
+    response.getAtvModSettings()->setFps(settings.m_fps);
+    response.getAtvModSettings()->setAtvModInput(settings.m_atvModInput);
+    response.getAtvModSettings()->setUniformLevel(settings.m_uniformLevel);
+    response.getAtvModSettings()->setAtvModulation(settings.m_atvModulation);
+    response.getAtvModSettings()->setVideoPlayLoop(settings.m_videoPlayLoop ? 1 : 0);
+    response.getAtvModSettings()->setVideoPlay(settings.m_videoPlay ? 1 : 0);
+    response.getAtvModSettings()->setCameraPlay(settings.m_cameraPlay ? 1 : 0);
+    response.getAtvModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
+    response.getAtvModSettings()->setInvertedVideo(settings.m_invertedVideo ? 1 : 0);
+    response.getAtvModSettings()->setRfScalingFactor(settings.m_rfScalingFactor);
+    response.getAtvModSettings()->setFmExcursion(settings.m_fmExcursion);
+    response.getAtvModSettings()->setForceDecimator(settings.m_forceDecimator ? 1 : 0);
+    response.getAtvModSettings()->setShowOverlayText(settings.m_showOverlayText ? 1 : 0);
+
+    if (response.getAtvModSettings()->getOverlayText()) {
+        *response.getAtvModSettings()->getOverlayText() = settings.m_overlayText;
+    } else {
+        response.getAtvModSettings()->setOverlayText(new QString(settings.m_overlayText));
+    }
+
+    response.getAtvModSettings()->setRgbColor(settings.m_rgbColor);
+
+    if (response.getAtvModSettings()->getTitle()) {
+        *response.getAtvModSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getAtvModSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    if (response.getAtvModSettings()->getImageFileName()) {
+        *response.getAtvModSettings()->getImageFileName() = m_imageFileName;
+    } else {
+        response.getAtvModSettings()->setImageFileName(new QString(m_imageFileName));
+    }
+
+    if (response.getAtvModSettings()->getVideoFileName()) {
+        *response.getAtvModSettings()->getVideoFileName() = m_videoFileName;
+    } else {
+        response.getAtvModSettings()->setVideoFileName(new QString(m_videoFileName));
+    }
+}
+
+void ATVMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    response.getAtvModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
+    response.getAtvModReport()->setChannelSampleRate(m_outputSampleRate);
 }

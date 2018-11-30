@@ -21,6 +21,7 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${LIBRTLSDRSRC}/include
     ${LIBRTLSDRSRC}/src
@@ -29,6 +30,7 @@ else (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${LIBRTLSDR_INCLUDE_DIR}
 )
@@ -61,6 +63,6 @@ target_link_libraries(inputrtlsdrsrv
 endif (BUILD_DEBIAN)
 
 
-qt5_use_modules(inputrtlsdrsrv Core)
+target_link_libraries(inputrtlsdrsrv Qt5::Core)
 
 install(TARGETS inputrtlsdrsrv DESTINATION lib/pluginssrv/samplesource)

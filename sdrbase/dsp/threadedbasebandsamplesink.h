@@ -23,7 +23,7 @@
 
 #include "samplesinkfifo.h"
 #include "util/messagequeue.h"
-#include "util/export.h"
+#include "export.h"
 
 class BasebandSampleSink;
 class QThread;
@@ -32,7 +32,7 @@ class QThread;
  * Because Qt is a piece of shit this class cannot be a nested protected class of ThreadedSampleSink
  * So let's make everything public
  */
-class ThreadedBasebandSampleSinkFifo : public QObject {
+class SDRBASE_API ThreadedBasebandSampleSinkFifo : public QObject {
 	Q_OBJECT
 
 public:
@@ -50,7 +50,7 @@ public slots:
 /**
  * This class is a wrapper for SampleSink that runs the SampleSink object in its own thread
  */
-class SDRANGEL_API ThreadedBasebandSampleSink : public QObject {
+class SDRBASE_API ThreadedBasebandSampleSink : public QObject {
 	Q_OBJECT
 
 public:
@@ -66,6 +66,7 @@ public:
 	void feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly); //!< Feed sink with samples
 
 	QString getSampleSinkObjectName() const;
+    const QThread *getThread() const { return m_thread; }
 
 protected:
 

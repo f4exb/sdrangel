@@ -27,16 +27,39 @@
 #include <cstdlib>
 
 #include "dsp/inthalfbandfilter.h"
+#include "util/message.h"
 
 #define FILESOURCE_THROTTLE_MS 50
 
 class SampleSinkFifo;
+class MessageQueue;
 
 class FileSourceThread : public QThread {
 	Q_OBJECT
 
 public:
-	FileSourceThread(std::ifstream *samplesStream, SampleSinkFifo* sampleFifo, QObject* parent = NULL);
+    class MsgReportEOF : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+
+        static MsgReportEOF* create()
+        {
+            return new MsgReportEOF();
+        }
+
+    private:
+
+        MsgReportEOF() :
+            Message()
+        { }
+    };
+
+	FileSourceThread(std::ifstream *samplesStream,
+	        SampleSinkFifo* sampleFifo,
+	        const QTimer& timer,
+	        MessageQueue *fileInputMessageQueue,
+	        QObject* parent = NULL);
 	~FileSourceThread();
 
 	void startWork();
@@ -44,10 +67,8 @@ public:
 	void setSampleRateAndSize(int samplerate, quint32 samplesize);
     void setBuffers(std::size_t chunksize);
 	bool isRunning() const { return m_running; }
-	std::size_t getSamplesCount() const { return m_samplesCount; }
-	void setSamplesCount(int samplesCount) { m_samplesCount = samplesCount; }
-
-	void connectTimer(const QTimer& timer);
+    quint64 getSamplesCount() const { return m_samplesCount; }
+    void setSamplesCount(quint64 samplesCount) { m_samplesCount = samplesCount; }
 
 private:
 	QMutex m_startWaitMutex;
@@ -58,14 +79,16 @@ private:
 	quint8  *m_fileBuf;
 	quint8  *m_convertBuf;
 	std::size_t m_bufsize;
-	std::size_t m_chunksize;
+    qint64 m_chunksize;
 	SampleSinkFifo* m_sampleFifo;
-	std::size_t m_samplesCount;
+    quint64 m_samplesCount;
+    const QTimer& m_timer;
+    MessageQueue *m_fileInputMessageQueue;
 
 	int m_samplerate;      //!< File I/Q stream original sample rate
-	quint32 m_samplesize;  //!< File effective sample size in bits (I or Q). Ex: 16, 24.
-	quint32 m_samplebytes; //!< Number of bytes used to store a I or Q sample. Ex: 2. 4.
-    int m_throttlems;
+    quint64 m_samplesize;  //!< File effective sample size in bits (I or Q). Ex: 16, 24.
+    quint64 m_samplebytes; //!< Number of bytes used to store a I or Q sample. Ex: 2. 4.
+    qint64 m_throttlems;
     QElapsedTimer m_elapsedTimer;
     bool m_throttleToggle;
 

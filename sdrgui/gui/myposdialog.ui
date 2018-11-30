@@ -7,12 +7,12 @@
     <x>0</x>
     <y>0</y>
     <width>324</width>
-    <height>127</height>
+    <height>147</height>
    </rect>
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>

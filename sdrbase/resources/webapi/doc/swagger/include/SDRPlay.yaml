@@ -1,0 +1,57 @@
+SDRPlaySettings:
+  description: SDRplay1
+  properties:
+    centerFrequency:
+      type: integer
+      format: uint64
+    tunerGain:
+      type: integer
+    LOppmTenths:
+      type: integer
+    frequencyBandIndex:    
+      type: integer
+    ifFrequencyIndex:    
+      type: integer
+    bandwidthIndex:    
+      type: integer
+    devSampleRateIndex:    
+      type: integer
+    log2Decim:    
+      type: integer
+    fcPos:    
+      type: integer
+    dcBlock:
+      type: integer
+    iqCorrection:
+      type: integer
+    tunerGainMode:
+      description: 1 tuner (table) gain, 0 manual (LNA, Mixer, BB) gain
+      type: integer
+    lnaOn:
+      type: integer
+    mixerAmpOn:
+      type: integer
+    basebandGain:
+      type: integer
+    fileRecordName:
+      type: string
+
+SDRPlayReport:
+  description: SDRplay1
+  properties:
+    sampleRates:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/SampleRate"
+    bandwidths:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/Bandwidth"
+    intermediateFrequencies:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/Frequency"
+    frequencyBands:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/FrequencyBand"

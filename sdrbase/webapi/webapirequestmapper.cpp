@@ -28,7 +28,6 @@
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGAudioDevices.h"
-#include "SWGAudioDevicesSelect.h"
 #include "SWGLocationInformation.h"
 #include "SWGDVSeralDevices.h"
 #include "SWGPresets.h"
@@ -38,7 +37,10 @@
 #include "SWGPresetExport.h"
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGChannelsDetail.h"
 #include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
 #include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
 
@@ -62,6 +64,7 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
     {
         SWGSDRangel::SWGErrorResponse errorResponse;
         response.setHeader("Content-Type", "application/json");
+        response.setHeader("Access-Control-Allow-Origin", "*");
         response.setStatus(500,"Service not available");
 
         errorResponse.init();
@@ -71,6 +74,27 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
     else // normal processing
     {
         QByteArray path=request.getPath();
+
+        // Handle pre-flight requests
+        if (request.getMethod() == "OPTIONS")
+        {
+            qDebug("WebAPIRequestMapper::service: method OPTIONS: assume pre-flight");
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            response.setHeader("Access-Control-Allow-Headers", "*");
+            response.setHeader("Access-Control-Allow-Methods", "*");
+            response.setStatus(200, "OK");
+            return;
+        }
+
+        if (path.startsWith("/sdrdaemon"))
+        {
+            SWGSDRangel::SWGErrorResponse errorResponse;
+            response.setStatus(501,"Not implemented");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Not implemented";
+            response.write(errorResponse.asJson().toUtf8());
+            return;
+        }
 
         if (path == WebAPIAdapterInterface::instanceSummaryURL) {
             instanceSummaryService(request, response);
@@ -82,6 +106,14 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instanceLoggingService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceAudioURL) {
             instanceAudioService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceAudioInputParametersURL) {
+            instanceAudioInputParametersService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceAudioOutputParametersURL) {
+            instanceAudioOutputParametersService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceAudioInputCleanupURL) {
+            instanceAudioInputCleanupService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceAudioOutputCleanupURL) {
+            instanceAudioOutputCleanupService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceLocationURL) {
             instanceLocationService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceDVSerialURL) {
@@ -112,12 +144,18 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 devicesetDeviceSettingsService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceRunURLRe)) {
                 devicesetDeviceRunService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceReportURLRe)) {
+                devicesetDeviceReportService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelsReportURLRe)) {
+                devicesetChannelsReportService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelURLRe)) {
                 devicesetChannelService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelIndexURLRe)) {
                 devicesetChannelIndexService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelSettingsURLRe)) {
                 devicesetChannelSettingsService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelReportURLRe)) {
+                devicesetChannelReportService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
             }
             else // serve static documentation pages
             {
@@ -137,6 +175,7 @@ void WebAPIRequestMapper::instanceSummaryService(qtwebapp::HttpRequest& request,
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -178,6 +217,7 @@ void WebAPIRequestMapper::instanceDevicesService(qtwebapp::HttpRequest& request,
     SWGSDRangel::SWGInstanceDevicesResponse normalResponse;
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -211,6 +251,7 @@ void WebAPIRequestMapper::instanceChannelsService(qtwebapp::HttpRequest& request
     SWGSDRangel::SWGInstanceChannelsResponse normalResponse;
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -245,6 +286,7 @@ void WebAPIRequestMapper::instanceLoggingService(qtwebapp::HttpRequest& request,
     SWGSDRangel::SWGLoggingInfo normalResponse;
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -295,6 +337,7 @@ void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, q
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -309,29 +352,198 @@ void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, q
             response.write(errorResponse.asJson().toUtf8());
         }
     }
-    else if (request.getMethod() == "PATCH")
+    else
     {
-        SWGSDRangel::SWGAudioDevicesSelect normalResponse;
-        QString jsonStr = request.getBody();
-        QJsonObject jsonObject;
+        response.setStatus(405,"Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
 
-        if (parseJsonBody(jsonStr, jsonObject, response))
+void WebAPIRequestMapper::instanceAudioInputParametersService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    // TODO
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    QString jsonStr = request.getBody();
+    QJsonObject jsonObject;
+
+    if (parseJsonBody(jsonStr, jsonObject, response))
+    {
+        SWGSDRangel::SWGAudioInputDevice normalResponse;
+        resetAudioInputDevice(normalResponse);
+        QStringList audioInputDeviceKeys;
+
+        if (validateAudioInputDevice(normalResponse, jsonObject, audioInputDeviceKeys))
         {
-            normalResponse.fromJson(jsonStr);
-            int status = m_adapter->instanceAudioPatch(normalResponse, errorResponse);
-            response.setStatus(status);
+            if (request.getMethod() == "PATCH")
+            {
+                int status = m_adapter->instanceAudioInputPatch(
+                        normalResponse,
+                        audioInputDeviceKeys,
+                        errorResponse);
+                response.setStatus(status);
 
-            if (status/100 == 2) {
-                response.write(normalResponse.asJson().toUtf8());
-            } else {
+                if (status/100 == 2) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else if (request.getMethod() == "DELETE")
+            {
+                int status = m_adapter->instanceAudioInputDelete(
+                        normalResponse,
+                        errorResponse);
+                response.setStatus(status);
+
+                if (status/100 == 2) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(405,"Invalid HTTP method");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid HTTP method";
                 response.write(errorResponse.asJson().toUtf8());
             }
         }
         else
         {
-            response.setStatus(400,"Invalid JSON format");
+            response.setStatus(400,"Invalid JSON request");
             errorResponse.init();
-            *errorResponse.getMessage() = "Invalid JSON format";
+            *errorResponse.getMessage() = "Invalid JSON request";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(400,"Invalid JSON format");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid JSON format";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::instanceAudioOutputParametersService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    QString jsonStr = request.getBody();
+    QJsonObject jsonObject;
+
+    if (parseJsonBody(jsonStr, jsonObject, response))
+    {
+        SWGSDRangel::SWGAudioOutputDevice normalResponse;
+        resetAudioOutputDevice(normalResponse);
+        QStringList audioOutputDeviceKeys;
+
+        if (validateAudioOutputDevice(normalResponse, jsonObject, audioOutputDeviceKeys))
+        {
+            if (request.getMethod() == "PATCH")
+            {
+                int status = m_adapter->instanceAudioOutputPatch(
+                        normalResponse,
+                        audioOutputDeviceKeys,
+                        errorResponse);
+                response.setStatus(status);
+
+                if (status/100 == 2) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else if (request.getMethod() == "DELETE")
+            {
+                int status = m_adapter->instanceAudioOutputDelete(
+                        normalResponse,
+                        errorResponse);
+                response.setStatus(status);
+
+                if (status/100 == 2) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(405,"Invalid HTTP method");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid HTTP method";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else
+        {
+            response.setStatus(400,"Invalid JSON request");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid JSON request";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(400,"Invalid JSON format");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid JSON format";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::instanceAudioInputCleanupService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    if (request.getMethod() == "PATCH")
+    {
+        SWGSDRangel::SWGSuccessResponse normalResponse;
+
+        int status = m_adapter->instanceAudioInputCleanupPatch(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status/100 == 2) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::instanceAudioOutputCleanupService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    if (request.getMethod() == "PATCH")
+    {
+        SWGSDRangel::SWGSuccessResponse normalResponse;
+
+        int status = m_adapter->instanceAudioOutputCleanupPatch(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status/100 == 2) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
             response.write(errorResponse.asJson().toUtf8());
         }
     }
@@ -348,6 +560,7 @@ void WebAPIRequestMapper::instanceLocationService(qtwebapp::HttpRequest& request
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -401,8 +614,22 @@ void WebAPIRequestMapper::instanceDVSerialService(qtwebapp::HttpRequest& request
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
-    if (request.getMethod() == "PATCH")
+    if (request.getMethod() == "GET")
+    {
+        SWGSDRangel::SWGDVSeralDevices normalResponse;
+
+        int status = m_adapter->instanceDVSerialGet(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status/100 == 2) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else if (request.getMethod() == "PATCH")
     {
         QByteArray dvserialStr = request.getParameter("dvserial");
         bool dvserial = false;
@@ -435,6 +662,7 @@ void WebAPIRequestMapper::instancePresetsService(qtwebapp::HttpRequest& request,
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -454,6 +682,7 @@ void WebAPIRequestMapper::instancePresetService(qtwebapp::HttpRequest& request, 
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "PATCH")
     {
@@ -619,6 +848,7 @@ void WebAPIRequestMapper::instancePresetFileService(qtwebapp::HttpRequest& reque
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "PUT")
     {
@@ -709,6 +939,7 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -735,6 +966,7 @@ void WebAPIRequestMapper::instanceDeviceSetService(qtwebapp::HttpRequest& reques
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "POST")
     {
@@ -780,6 +1012,7 @@ void WebAPIRequestMapper::devicesetService(const std::string& indexStr, qtwebapp
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     if (request.getMethod() == "GET")
     {
@@ -817,6 +1050,7 @@ void WebAPIRequestMapper::devicesetFocusService(const std::string& indexStr, qtw
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     try
     {
@@ -856,6 +1090,7 @@ void WebAPIRequestMapper::devicesetDeviceService(const std::string& indexStr, qt
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     try
     {
@@ -919,6 +1154,7 @@ void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& inde
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     try
     {
@@ -1001,6 +1237,7 @@ void WebAPIRequestMapper::devicesetDeviceRunService(const std::string& indexStr,
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     try
     {
@@ -1062,6 +1299,83 @@ void WebAPIRequestMapper::devicesetDeviceRunService(const std::string& indexStr,
     }
 }
 
+void WebAPIRequestMapper::devicesetDeviceReportService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    if (request.getMethod() == "GET")
+    {
+        try
+        {
+            SWGSDRangel::SWGDeviceReport normalResponse;
+            resetDeviceReport(normalResponse);
+            int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+            int status = m_adapter->devicesetDeviceReportGet(deviceSetIndex, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status/100 == 2) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        catch (const boost::bad_lexical_cast &e)
+        {
+            errorResponse.init();
+            *errorResponse.getMessage() = "Wrong integer conversion on device set index";
+            response.setStatus(400,"Invalid data");
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::devicesetChannelsReportService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    if (request.getMethod() == "GET")
+    {
+        try
+        {
+            SWGSDRangel::SWGChannelsDetail normalResponse;
+            int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+            int status = m_adapter->devicesetChannelsReportGet(deviceSetIndex, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status/100 == 2) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        catch (const boost::bad_lexical_cast &e)
+        {
+            errorResponse.init();
+            *errorResponse.getMessage() = "Wrong integer conversion on device set index";
+            response.setStatus(400,"Invalid data");
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
 void WebAPIRequestMapper::devicesetChannelService(
         const std::string& deviceSetIndexStr,
         qtwebapp::HttpRequest& request,
@@ -1069,6 +1383,7 @@ void WebAPIRequestMapper::devicesetChannelService(
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     try
     {
@@ -1146,6 +1461,7 @@ void WebAPIRequestMapper::devicesetChannelIndexService(
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     try
     {
@@ -1190,6 +1506,7 @@ void WebAPIRequestMapper::devicesetChannelSettingsService(
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
 
     try
     {
@@ -1259,6 +1576,44 @@ void WebAPIRequestMapper::devicesetChannelSettingsService(
             errorResponse.init();
             *errorResponse.getMessage() = "Invalid HTTP method";
             response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion on index";
+        response.setStatus(400,"Invalid data");
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::devicesetChannelReportService(
+        const std::string& deviceSetIndexStr,
+        const std::string& channelIndexStr,
+        qtwebapp::HttpRequest& request,
+        qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(deviceSetIndexStr);
+        int channelIndex = boost::lexical_cast<int>(channelIndexStr);
+
+        if (request.getMethod() == "GET")
+        {
+            SWGSDRangel::SWGChannelReport normalResponse;
+            resetChannelReport(normalResponse);
+            int status = m_adapter->devicesetChannelReportGet(deviceSetIndex, channelIndex, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status/100 == 2) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
         }
     }
     catch (const boost::bad_lexical_cast &e)
@@ -1413,7 +1768,97 @@ bool WebAPIRequestMapper::validateDeviceSettings(
 
     QString *deviceHwType = deviceSettings.getDeviceHwType();
 
-    if (*deviceHwType == "FileSource")
+    if ((*deviceHwType == "Airspy") && (deviceSettings.getTx() == 0))
+    {
+        if (jsonObject.contains("airspySettings") && jsonObject["airspySettings"].isObject())
+        {
+            QJsonObject airspySettingsJsonObject = jsonObject["airspySettings"].toObject();
+            deviceSettingsKeys = airspySettingsJsonObject.keys();
+            deviceSettings.setAirspySettings(new SWGSDRangel::SWGAirspySettings());
+            deviceSettings.getAirspySettings()->fromJsonObject(airspySettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if ((*deviceHwType == "AirspyHF") && (deviceSettings.getTx() == 0))
+    {
+        if (jsonObject.contains("airspyHFSettings") && jsonObject["airspyHFSettings"].isObject())
+        {
+            QJsonObject airspyHFSettingsJsonObject = jsonObject["airspyHFSettings"].toObject();
+            deviceSettingsKeys = airspyHFSettingsJsonObject.keys();
+            deviceSettings.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
+            deviceSettings.getAirspyHfSettings()->fromJsonObject(airspyHFSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if ((*deviceHwType == "BladeRF1") && (deviceSettings.getTx() == 0))
+    {
+        if (jsonObject.contains("bladeRFInputSettings") && jsonObject["bladeRFInputSettings"].isObject())
+        {
+            QJsonObject bladeRFInputSettingsJsonObject = jsonObject["bladeRFInputSettings"].toObject();
+            deviceSettingsKeys = bladeRFInputSettingsJsonObject.keys();
+            deviceSettings.setBladeRf1InputSettings(new SWGSDRangel::SWGBladeRF1InputSettings());
+            deviceSettings.getBladeRf1InputSettings()->fromJsonObject(bladeRFInputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if ((*deviceHwType == "BladeRF1") && (deviceSettings.getTx() != 0))
+    {
+        if (jsonObject.contains("bladeRFOutputSettings") && jsonObject["bladeRFOutputSettings"].isObject())
+        {
+            QJsonObject bladeRFOutputSettingsJsonObject = jsonObject["bladeRFOutputSettings"].toObject();
+            deviceSettingsKeys = bladeRFOutputSettingsJsonObject.keys();
+            deviceSettings.setBladeRf1OutputSettings(new SWGSDRangel::SWGBladeRF1OutputSettings());
+            deviceSettings.getBladeRf1OutputSettings()->fromJsonObject(bladeRFOutputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (*deviceHwType == "FCDPro")
+    {
+        if (jsonObject.contains("fcdProSettings") && jsonObject["fcdProSettings"].isObject())
+        {
+            QJsonObject fcdProSettingsJsonObject = jsonObject["fcdProSettings"].toObject();
+            deviceSettingsKeys = fcdProSettingsJsonObject.keys();
+            deviceSettings.setFcdProSettings(new SWGSDRangel::SWGFCDProSettings());
+            deviceSettings.getFcdProSettings()->fromJsonObject(fcdProSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (*deviceHwType == "FCDProPlus")
+    {
+        if (jsonObject.contains("fcdProPlusSettings") && jsonObject["fcdProPlusSettings"].isObject())
+        {
+            QJsonObject fcdProPlusSettingsJsonObject = jsonObject["fcdProPlusSettings"].toObject();
+            deviceSettingsKeys = fcdProPlusSettingsJsonObject.keys();
+            deviceSettings.setFcdProPlusSettings(new SWGSDRangel::SWGFCDProPlusSettings());
+            deviceSettings.getFcdProPlusSettings()->fromJsonObject(fcdProPlusSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (*deviceHwType == "FileSource")
     {
         if (jsonObject.contains("fileSourceSettings") && jsonObject["fileSourceSettings"].isObject())
         {
@@ -1488,6 +1933,51 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
+    else if (*deviceHwType == "Perseus")
+    {
+        if (jsonObject.contains("perseusSettings") && jsonObject["perseusSettings"].isObject())
+        {
+            QJsonObject perseusSettingsJsonObject = jsonObject["perseusSettings"].toObject();
+            deviceSettingsKeys = perseusSettingsJsonObject.keys();
+            deviceSettings.setPerseusSettings(new SWGSDRangel::SWGPerseusSettings());
+            deviceSettings.getPerseusSettings()->fromJsonObject(perseusSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if ((*deviceHwType == "PlutoSDR") && (deviceSettings.getTx() == 0))
+    {
+        if (jsonObject.contains("plutoSdrInputSettings") && jsonObject["plutoSdrInputSettings"].isObject())
+        {
+            QJsonObject plutoSdrInputSettingsJsonObject = jsonObject["plutoSdrInputSettings"].toObject();
+            deviceSettingsKeys = plutoSdrInputSettingsJsonObject.keys();
+            deviceSettings.setPlutoSdrInputSettings(new SWGSDRangel::SWGPlutoSdrInputSettings());
+            deviceSettings.getPlutoSdrInputSettings()->fromJsonObject(plutoSdrInputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if ((*deviceHwType == "PlutoSDR") && (deviceSettings.getTx() != 0))
+    {
+        if (jsonObject.contains("plutoSdrOutputSettings") && jsonObject["plutoSdrOutputSettings"].isObject())
+        {
+            QJsonObject plutoSdrOutputSettingsJsonObject = jsonObject["plutoSdrOutputSettings"].toObject();
+            deviceSettingsKeys = plutoSdrOutputSettingsJsonObject.keys();
+            deviceSettings.setPlutoSdrOutputSettings(new SWGSDRangel::SWGPlutoSdrOutputSettings());
+            deviceSettings.getPlutoSdrOutputSettings()->fromJsonObject(plutoSdrOutputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     else if (*deviceHwType == "RTLSDR")
     {
         if (jsonObject.contains("rtlSdrSettings") && jsonObject["rtlSdrSettings"].isObject())
@@ -1496,6 +1986,21 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             deviceSettingsKeys = rtlSdrSettingsJsonObject.keys();
             deviceSettings.setRtlSdrSettings(new SWGSDRangel::SWGRtlSdrSettings());
             deviceSettings.getRtlSdrSettings()->fromJsonObject(rtlSdrSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (*deviceHwType == "TestSource")
+    {
+        if (jsonObject.contains("testSourceSettings") && jsonObject["testSourceSettings"].isObject())
+        {
+            QJsonObject testSourceSettingsJsonObject = jsonObject["testSourceSettings"].toObject();
+            deviceSettingsKeys = testSourceSettingsJsonObject.keys();
+            deviceSettings.setTestSourceSettings(new SWGSDRangel::SWGTestSourceSettings());
+            deviceSettings.getTestSourceSettings()->fromJsonObject(testSourceSettingsJsonObject);
             return true;
         }
         else
@@ -1528,7 +2033,84 @@ bool WebAPIRequestMapper::validateChannelSettings(
 
     QString *channelType = channelSettings.getChannelType();
 
-    if (*channelType == "NFMDemod")
+    if (*channelType == "AMDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject amDemodSettingsJsonObject = jsonObject["AMDemodSettings"].toObject();
+            channelSettingsKeys = amDemodSettingsJsonObject.keys();
+            channelSettings.setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
+            channelSettings.getAmDemodSettings()->fromJsonObject(amDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "AMMod")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject amModSettingsJsonObject = jsonObject["AMModSettings"].toObject();
+            channelSettingsKeys = amModSettingsJsonObject.keys();
+
+            if (channelSettingsKeys.contains("cwKeyer"))
+            {
+                QJsonObject cwKeyerSettingsJsonObject;
+                appendSettingsSubKeys(amModSettingsJsonObject, cwKeyerSettingsJsonObject, "cwKeyer", channelSettingsKeys);
+            }
+
+            channelSettings.setAmModSettings(new SWGSDRangel::SWGAMModSettings());
+            channelSettings.getAmModSettings()->fromJsonObject(amModSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "ATVMod")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject atvModSettingsJsonObject = jsonObject["ATVModSettings"].toObject();
+            channelSettingsKeys = atvModSettingsJsonObject.keys();
+            channelSettings.setAtvModSettings(new SWGSDRangel::SWGATVModSettings());
+            channelSettings.getAtvModSettings()->fromJsonObject(atvModSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "BFMDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject bfmDemodSettingsJsonObject = jsonObject["BFMDemodSettings"].toObject();
+            channelSettingsKeys = bfmDemodSettingsJsonObject.keys();
+            channelSettings.setBfmDemodSettings(new SWGSDRangel::SWGBFMDemodSettings());
+            channelSettings.getBfmDemodSettings()->fromJsonObject(bfmDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "DSDDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject dsdDemodSettingsJsonObject = jsonObject["DSDDemodSettings"].toObject();
+            channelSettingsKeys = dsdDemodSettingsJsonObject.keys();
+            channelSettings.setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());
+            channelSettings.getDsdDemodSettings()->fromJsonObject(dsdDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "NFMDemod")
     {
         if (channelSettings.getTx() == 0)
         {
@@ -1563,10 +2145,202 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
+    else if (*channelType == "DaemonSink")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject daemonChannelSinkSettingsJsonObject = jsonObject["DaemonSinkSettings"].toObject();
+            channelSettingsKeys = daemonChannelSinkSettingsJsonObject.keys();
+            channelSettings.setDaemonSinkSettings(new SWGSDRangel::SWGDaemonSinkSettings());
+            channelSettings.getDaemonSinkSettings()->fromJsonObject(daemonChannelSinkSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "DaemonSource")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject daemonChannelSourceSettingsJsonObject = jsonObject["DaemonSourceSettings"].toObject();
+            channelSettingsKeys = daemonChannelSourceSettingsJsonObject.keys();
+            channelSettings.setDaemonSourceSettings(new SWGSDRangel::SWGDaemonSourceSettings());
+            channelSettings.getDaemonSourceSettings()->fromJsonObject(daemonChannelSourceSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "SSBDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject ssbDemodSettingsJsonObject = jsonObject["SSBDemodSettings"].toObject();
+            channelSettingsKeys = ssbDemodSettingsJsonObject.keys();
+            channelSettings.setSsbDemodSettings(new SWGSDRangel::SWGSSBDemodSettings());
+            channelSettings.getSsbDemodSettings()->fromJsonObject(ssbDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "SSBMod")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject ssbModSettingsJsonObject = jsonObject["SSBModSettings"].toObject();
+            channelSettingsKeys = ssbModSettingsJsonObject.keys();
+
+            if (channelSettingsKeys.contains("cwKeyer"))
+            {
+                QJsonObject cwKeyerSettingsJsonObject;
+                appendSettingsSubKeys(ssbModSettingsJsonObject, cwKeyerSettingsJsonObject, "cwKeyer", channelSettingsKeys);
+            }
+
+            channelSettings.setSsbModSettings(new SWGSDRangel::SWGSSBModSettings());
+            channelSettings.getSsbModSettings()->fromJsonObject(ssbModSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "UDPSource")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject udpSourceSettingsJsonObject = jsonObject["UDPSourceSettings"].toObject();
+            channelSettingsKeys = udpSourceSettingsJsonObject.keys();
+            channelSettings.setUdpSourceSettings(new SWGSDRangel::SWGUDPSourceSettings());
+            channelSettings.getUdpSourceSettings()->fromJsonObject(udpSourceSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "UDPSink")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject udpSinkSettingsJsonObject = jsonObject["UDPSinkSettings"].toObject();
+            channelSettingsKeys = udpSinkSettingsJsonObject.keys();
+            channelSettings.setUdpSinkSettings(new SWGSDRangel::SWGUDPSinkSettings());
+            channelSettings.getUdpSinkSettings()->fromJsonObject(udpSinkSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "WFMDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject wfmDemodSettingsJsonObject = jsonObject["WFMDemodSettings"].toObject();
+            channelSettingsKeys = wfmDemodSettingsJsonObject.keys();
+            channelSettings.setWfmDemodSettings(new SWGSDRangel::SWGWFMDemodSettings());
+            channelSettings.getWfmDemodSettings()->fromJsonObject(wfmDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "WFMMod")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject wfmModSettingsJsonObject = jsonObject["WFMModSettings"].toObject();
+            channelSettingsKeys = wfmModSettingsJsonObject.keys();
+
+            if (channelSettingsKeys.contains("cwKeyer"))
+            {
+                QJsonObject cwKeyerSettingsJsonObject;
+                appendSettingsSubKeys(wfmModSettingsJsonObject, cwKeyerSettingsJsonObject, "cwKeyer", channelSettingsKeys);
+            }
+
+            channelSettings.setWfmModSettings(new SWGSDRangel::SWGWFMModSettings());
+            channelSettings.getWfmModSettings()->fromJsonObject(wfmModSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     else
     {
         return false;
     }
+}
+
+bool WebAPIRequestMapper::validateAudioInputDevice(
+        SWGSDRangel::SWGAudioInputDevice& audioInputDevice,
+        QJsonObject& jsonObject,
+        QStringList& audioInputDeviceKeys)
+{
+    if (jsonObject.contains("index")) {
+        audioInputDevice.setIndex(jsonObject["index"].toInt());
+    } else {
+        audioInputDevice.setIndex(-1); // assume systam default
+    }
+    if (jsonObject.contains("sampleRate"))
+    {
+        audioInputDevice.setSampleRate(jsonObject["sampleRate"].toInt());
+        audioInputDeviceKeys.append("sampleRate");
+    }
+    if (jsonObject.contains("volume"))
+    {
+        audioInputDevice.setVolume(jsonObject["volume"].toDouble());
+        audioInputDeviceKeys.append("volume");
+    }
+    return true;
+}
+
+bool WebAPIRequestMapper::validateAudioOutputDevice(
+        SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice,
+        QJsonObject& jsonObject,
+        QStringList& audioOutputDeviceKeys)
+{
+    if (jsonObject.contains("index")) {
+        audioOutputDevice.setIndex(jsonObject["index"].toInt());
+    } else {
+        audioOutputDevice.setIndex(-1); // assume systam default
+    }
+    if (jsonObject.contains("sampleRate"))
+    {
+        audioOutputDevice.setSampleRate(jsonObject["sampleRate"].toInt());
+        audioOutputDeviceKeys.append("sampleRate");
+    }
+    if (jsonObject.contains("copyToUDP"))
+    {
+        audioOutputDevice.setCopyToUdp(jsonObject["copyToUDP"].toInt() == 0 ? 0 : 1);
+        audioOutputDeviceKeys.append("copyToUDP");
+    }
+    if (jsonObject.contains("udpUsesRTP"))
+    {
+        audioOutputDevice.setUdpUsesRtp(jsonObject["udpUsesRTP"].toInt() == 0 ? 0 : 1);
+        audioOutputDeviceKeys.append("udpUsesRTP");
+    }
+    if (jsonObject.contains("udpChannelMode"))
+    {
+        audioOutputDevice.setUdpChannelMode(jsonObject["udpChannelMode"].toInt());
+        audioOutputDeviceKeys.append("udpChannelMode");
+    }
+    if (jsonObject.contains("udpAddress"))
+    {
+        audioOutputDevice.setUdpAddress(new QString(jsonObject["udpAddress"].toString()));
+        audioOutputDeviceKeys.append("udpAddress");
+    }
+    if (jsonObject.contains("udpPort"))
+    {
+        audioOutputDevice.setUdpPort(jsonObject["udpPort"].toInt());
+        audioOutputDeviceKeys.append("udpPort");
+    }
+    return true;
 }
 
 void WebAPIRequestMapper::appendSettingsSubKeys(
@@ -1587,19 +2361,95 @@ void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& de
 {
     deviceSettings.cleanup();
     deviceSettings.setDeviceHwType(0);
+    deviceSettings.setAirspySettings(0);
+    deviceSettings.setAirspyHfSettings(0);
+    deviceSettings.setBladeRf1InputSettings(0);
+    deviceSettings.setBladeRf1OutputSettings(0);
+    deviceSettings.setFcdProPlusSettings(0);
+    deviceSettings.setFcdProSettings(0);
     deviceSettings.setFileSourceSettings(0);
     deviceSettings.setHackRfInputSettings(0);
     deviceSettings.setHackRfOutputSettings(0);
     deviceSettings.setLimeSdrInputSettings(0);
     deviceSettings.setLimeSdrOutputSettings(0);
+    deviceSettings.setPerseusSettings(0);
+    deviceSettings.setPlutoSdrInputSettings(0);
+    deviceSettings.setPlutoSdrOutputSettings(0);
     deviceSettings.setRtlSdrSettings(0);
+    deviceSettings.setSdrDaemonSinkSettings(0);
+    deviceSettings.setSdrDaemonSourceSettings(0);
+    deviceSettings.setSdrPlaySettings(0);
+    deviceSettings.setTestSourceSettings(0);
+}
+
+void WebAPIRequestMapper::resetDeviceReport(SWGSDRangel::SWGDeviceReport& deviceReport)
+{
+    deviceReport.cleanup();
+    deviceReport.setDeviceHwType(0);
+    deviceReport.setAirspyHfReport(0);
+    deviceReport.setAirspyReport(0);
+    deviceReport.setFileSourceReport(0);
+    deviceReport.setLimeSdrInputReport(0);
+    deviceReport.setLimeSdrOutputReport(0);
+    deviceReport.setPerseusReport(0);
+    deviceReport.setPlutoSdrInputReport(0);
+    deviceReport.setPlutoSdrOutputReport(0);
+    deviceReport.setRtlSdrReport(0);
+    deviceReport.setSdrDaemonSinkReport(0);
+    deviceReport.setSdrDaemonSourceReport(0);
+    deviceReport.setSdrPlayReport(0);
 }
 
 void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings)
 {
     channelSettings.cleanup();
     channelSettings.setChannelType(0);
+    channelSettings.setAmDemodSettings(0);
+    channelSettings.setAmModSettings(0);
+    channelSettings.setAtvModSettings(0);
+    channelSettings.setBfmDemodSettings(0);
+    channelSettings.setDsdDemodSettings(0);
     channelSettings.setNfmDemodSettings(0);
     channelSettings.setNfmModSettings(0);
+    channelSettings.setDaemonSinkSettings(0);
+    channelSettings.setDaemonSourceSettings(0);
+    channelSettings.setSsbDemodSettings(0);
+    channelSettings.setSsbModSettings(0);
+    channelSettings.setUdpSourceSettings(0);
+    channelSettings.setUdpSinkSettings(0);
+    channelSettings.setWfmDemodSettings(0);
+    channelSettings.setWfmModSettings(0);
 }
 
+void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& channelReport)
+{
+    channelReport.cleanup();
+    channelReport.setChannelType(0);
+    channelReport.setAmDemodReport(0);
+    channelReport.setAmModReport(0);
+    channelReport.setAtvModReport(0);
+    channelReport.setBfmDemodReport(0);
+    channelReport.setDsdDemodReport(0);
+    channelReport.setNfmDemodReport(0);
+    channelReport.setNfmModReport(0);
+    channelReport.setDaemonSourceReport(0);
+    channelReport.setSsbDemodReport(0);
+    channelReport.setSsbModReport(0);
+    channelReport.setUdpSourceReport(0);
+    channelReport.setUdpSinkReport(0);
+    channelReport.setWfmDemodReport(0);
+    channelReport.setWfmModReport(0);
+}
+
+void WebAPIRequestMapper::resetAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice)
+{
+    audioInputDevice.cleanup();
+    audioInputDevice.setName(0);
+}
+
+void WebAPIRequestMapper::resetAudioOutputDevice(SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice)
+{
+    audioOutputDevice.cleanup();
+    audioOutputDevice.setName(0);
+    audioOutputDevice.setUdpAddress(0);
+}

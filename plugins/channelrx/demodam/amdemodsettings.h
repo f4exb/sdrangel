@@ -23,19 +23,25 @@ class Serializable;
 
 struct AMDemodSettings
 {
+    enum SyncAMOperation
+    {
+        SyncAMDSB,
+        SyncAMUSB,
+        SyncAMLSB
+    };
+
     qint32 m_inputFrequencyOffset;
     Real m_rfBandwidth;
     Real m_squelch;
     Real m_volume;
-    quint32 m_audioSampleRate;
     bool m_audioMute;
     bool m_bandpassEnable;
-    bool m_copyAudioToUDP;
-    QString m_udpAddress;
-    quint16 m_udpPort;
     quint32 m_rgbColor;
     QString m_title;
     Serializable *m_channelMarker;
+    QString m_audioDeviceName;
+    bool m_pll;
+    SyncAMOperation m_syncAMOperation;
 
     AMDemodSettings();
     void resetToDefaults();

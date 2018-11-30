@@ -9,6 +9,8 @@
 #include "httpconnectionhandler.h"
 #include "httplistenersettings.h"
 
+#include "export.h"
+
 namespace qtwebapp {
 
 /**
@@ -46,7 +48,7 @@ namespace qtwebapp {
   @see HttpRequest for description of config settings maxRequestSize and maxMultiPartSize
 */
 
-class DECLSPEC HttpConnectionHandlerPool : public QObject {
+class HTTPSERVER_API HttpConnectionHandlerPool : public QObject {
     Q_OBJECT
     Q_DISABLE_COPY(HttpConnectionHandlerPool)
 public:

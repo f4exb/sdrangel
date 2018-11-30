@@ -37,7 +37,7 @@
 #include "dsp/phasediscri.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
-#include "atvscreeninterface.h"
+#include "gui/tvscreen.h"
 
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
@@ -231,7 +231,7 @@ public:
     virtual QByteArray serialize() const { return QByteArray(); }
     virtual bool deserialize(const QByteArray& data __attribute__((unused))) { return false; }
 
-    void setATVScreen(ATVScreenInterface *objScreen);
+    void setTVScreen(TVScreen *objScreen); //!< set by the GUI
     int getSampleRate();
     int getEffectiveSampleRate();
     double getMagSq() const { return m_objMagSqAverage; } //!< Beware this is scaled to 2^30
@@ -413,7 +413,7 @@ private:
     SampleVector m_scopeSampleBuffer;
 
     //*************** ATV PARAMETERS  ***************
-    ATVScreenInterface * m_registeredATVScreen;
+    TVScreen *m_registeredTVScreen;
 
     //int m_intNumberSamplePerLine;
     int m_intNumberSamplePerTop;
@@ -497,7 +497,7 @@ private:
 
     inline void processHSkip(float& fltVal, int& intVal)
     {
-        m_registeredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop, intVal, intVal, intVal);
+        m_registeredTVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop, intVal, intVal, intVal);
 
         // Horizontal Synchro detection
 
@@ -522,7 +522,7 @@ private:
             {
                 //qDebug("VSync: %d %d %d", m_intColIndex, m_intSampleIndex, m_intLineIndex);
                 m_intAvgColIndex = m_intColIndex;
-                m_registeredATVScreen->renderImage(0);
+                m_registeredTVScreen->renderImage(0);
 
                 m_intImageIndex++;
                 m_intLineIndex = 0;
@@ -570,7 +570,7 @@ private:
                 m_fltEffMax = -2000000.0f;
             }
 
-            m_registeredATVScreen->selectRow(m_intRowIndex);
+            m_registeredTVScreen->selectRow(m_intRowIndex);
             m_intLineIndex++;
             m_intRowIndex++;
         }
@@ -658,7 +658,7 @@ private:
 
             if (m_intRowIndex < m_intNumberOfLines)
             {
-                m_registeredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
+                m_registeredTVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
             }
 
             m_intLineIndex++;
@@ -667,7 +667,7 @@ private:
         // Filling pixels
 
         // +4 is to compensate shift due to hsync amortizing factor of 1/4
-        m_registeredATVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop + 4, intVal, intVal, intVal);
+        m_registeredTVScreen->setDataColor(m_intColIndex - m_intNumberSaplesPerHSync + m_intNumberSamplePerTop + 4, intVal, intVal, intVal);
         m_intColIndex++;
 
         // Vertical sync and image rendering
@@ -686,7 +686,7 @@ private:
 
                         if ((m_intLineIndex % 2 == 0) || !m_interleaved) // even => odd image
                         {
-                            m_registeredATVScreen->renderImage(0);
+                            m_registeredTVScreen->renderImage(0);
                             m_intRowIndex = 1;
                         }
                         else
@@ -694,7 +694,7 @@ private:
                             m_intRowIndex = 0;
                         }
 
-                        m_registeredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
+                        m_registeredTVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
                         m_intLineIndex = 0;
                         m_intImageIndex++;
                     }
@@ -711,7 +711,7 @@ private:
             {
                 if (m_intImageIndex % 2 == 1) // odd image
                 {
-                    m_registeredATVScreen->renderImage(0);
+                    m_registeredTVScreen->renderImage(0);
 
                     if (m_rfRunning.m_enmModulation == ATV_AM)
                     {
@@ -736,7 +736,7 @@ private:
                     m_intRowIndex = 0;
                 }
 
-                m_registeredATVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
+                m_registeredTVScreen->selectRow(m_intRowIndex - m_intNumberOfSyncLines);
                 m_intLineIndex = 0;
                 m_intImageIndex++;
             }

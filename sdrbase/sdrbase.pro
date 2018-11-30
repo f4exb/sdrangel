@@ -10,7 +10,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TEMPLATE = lib
 TARGET = sdrbase
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../exports
 INCLUDEPATH += ../httpserver
+INCLUDEPATH += ../qrtplib
 INCLUDEPATH += ../swagger/sdrangel/code/qt5/client
 
 DEFINES += USE_KISSFFT=1
@@ -30,15 +32,15 @@ CONFIG(Debug):build_subdir = debug
 
 CONFIG(ANDROID):INCLUDEPATH += /opt/softs/boost_1_60_0
 
-CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_58_0"
-CONFIG(MINGW64):INCLUDEPATH += "D:\boost_1_58_0"
+CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
+CONFIG(MINGW64):INCLUDEPATH += "C:\softs\boost_1_66_0"
 
-CONFIG(MINGW32):INCLUDEPATH += "D:\softs\serialDV"
-CONFIG(MINGW64):INCLUDEPATH += "D:\softs\serialDV"
+CONFIG(MINGW32):INCLUDEPATH += "C:\softs\serialDV"
+CONFIG(MINGW64):INCLUDEPATH += "C:\softs\serialDV"
 
 CONFIG(macx):INCLUDEPATH += "../../../boost_1_64_0"
 
-win32 {
+MINGW32 || MINGW64 {
     HEADERS += \
         dsp/dvserialengine.h \
         dsp/dvserialworker.h
@@ -47,13 +49,16 @@ win32 {
         dsp/dvserialworker.cpp
 }
 
-SOURCES += audio/audiodeviceinfo.cpp\
+SOURCES += audio/audiodevicemanager.cpp\
+        audio/audiocompressor.cpp\
         audio/audiofifo.cpp\
         audio/audiooutput.cpp\
         audio/audioinput.cpp\
         audio/audionetsink.cpp\
         channel/channelsinkapi.cpp\
         channel/channelsourceapi.cpp\
+        channel/sdrdaemondataqueue.cpp\
+        channel/sdrdaemondatareadqueue.cpp\
         commands/command.cpp\
         device/devicesourceapi.cpp\
         device/devicesinkapi.cpp\
@@ -66,24 +71,28 @@ SOURCES += audio/audiodeviceinfo.cpp\
         dsp/ctcssdetector.cpp\
         dsp/cwkeyer.cpp\
         dsp/cwkeyersettings.cpp\
-        dsp/decimatorsf.cpp\
+        dsp/decimatorsfi.cpp\
         dsp/dspcommands.cpp\
         dsp/dspengine.cpp\
         dsp/dspdevicesourceengine.cpp\
         dsp/dspdevicesinkengine.cpp\
         dsp/fftengine.cpp\
         dsp/kissengine.cpp\
-        dsp/fftfilt.cxx\
+        dsp/fftcorr.cpp\
+        dsp/fftfilt.cpp\
         dsp/fftwindow.cpp\
         dsp/filterrc.cpp\
         dsp/filtermbe.cpp\
         dsp/filerecord.cpp\
+        dsp/freqlockcomplex.cpp\
         dsp/interpolator.cpp\
         dsp/hbfiltertraits.cpp\
         dsp/lowpass.cpp\
         dsp/nco.cpp\
         dsp/ncof.cpp\
         dsp/phaselock.cpp\
+        dsp/phaselockcomplex.cpp\
+        dsp/projector.cpp\
         dsp/recursivefilters.cpp\
         dsp/samplesinkfifo.cpp\
         dsp/samplesourcefifo.cpp\
@@ -104,30 +113,36 @@ SOURCES += audio/audiodeviceinfo.cpp\
         util/message.cpp\
         util/messagequeue.cpp\
         util/prettyprint.cpp\
+        util/rtpsink.cpp\
         util/syncmessenger.cpp\
         util/samplesourceserializer.cpp\
         util/simpleserializer.cpp\
         util/uid.cpp\
         plugin/plugininterface.cpp\
-        plugin/pluginapi.cpp\        
+        plugin/pluginapi.cpp\
         plugin/pluginmanager.cpp\
         webapi/webapiadapterinterface.cpp\
         webapi/webapirequestmapper.cpp\
         webapi/webapiserver.cpp\
         mainparser.cpp
 
-HEADERS  += audio/audiodeviceinfo.h\
+HEADERS  += audio/audiodevicemanager.h\
+        audio/audiocompressor.h\
         audio/audiofifo.h\
         audio/audiooutput.h\
         audio/audioinput.h\
         audio/audionetsink.h\
         channel/channelsinkapi.h\
-        channel/channelsourceapi.h\ 
-        commands/command.h\       
+        channel/channelsourceapi.h\
+        channel/sdrdaemondataqueue.h\
+        channel/sdrdaemondatareadqueue.h\
+        channel/sdrdaemondatablock.h\
+        commands/command.h\
         device/devicesourceapi.h\
         device/devicesinkapi.h\
         device/deviceenumerator.h\
         dsp/afsquelch.h\
+        dsp/decimatorsfi.h\
         dsp/downchannelizer.h\
         dsp/upchannelizer.h\
         dsp/channelmarker.h\
@@ -135,13 +150,13 @@ HEADERS  += audio/audiodeviceinfo.h\
         dsp/cwkeyersettings.h\
         dsp/complex.h\
         dsp/decimators.h\
-        dsp/decimatorsf.h\
         dsp/interpolators.h\
         dsp/dspcommands.h\
         dsp/dspengine.h\
         dsp/dspdevicesourceengine.h\
         dsp/dspdevicesinkengine.h\
         dsp/dsptypes.h\
+        dsp/fftcorr.h\
         dsp/fftengine.h\
         dsp/fftfilt.h\
         dsp/fftwengine.h\
@@ -149,6 +164,7 @@ HEADERS  += audio/audiodeviceinfo.h\
         dsp/filterrc.h\
         dsp/filtermbe.h\
         dsp/filerecord.h\
+        dsp/freqlockcomplex.h\
         dsp/gfft.h\
         dsp/hbfiltertraits.h\
         dsp/iirfilter.h\
@@ -168,6 +184,8 @@ HEADERS  += audio/audiodeviceinfo.h\
         dsp/ncof.h\
         dsp/phasediscri.h\
         dsp/phaselock.h\
+        dsp/phaselockcomplex.h\
+        dsp/projector.h\
         dsp/recursivefilters.h\
         dsp/samplesinkfifo.h\
         dsp/samplesourcefifo.h\
@@ -182,18 +200,18 @@ HEADERS  += audio/audiodeviceinfo.h\
         dsp/devicesamplesource.h\
         dsp/devicesamplesink.h\
         plugin/plugininstancegui.h\
-        plugin/plugininterface.h\   
-        plugin/pluginapi.h\   
-        plugin/pluginmanager.h\   
+        plugin/plugininterface.h\
+        plugin/pluginapi.h\
+        plugin/pluginmanager.h\
         settings/preferences.h\
         settings/preset.h\
         settings/mainsettings.h\
         util/CRC64.h\
         util/db.h\
-        util/export.h\
         util/message.h\
         util/messagequeue.h\
         util/prettyprint.h\
+        util/rtpsink.h\
         util/syncmessenger.h\
         util/samplesourceserializer.h\
         util/simpleserializer.h\
@@ -205,6 +223,7 @@ HEADERS  += audio/audiodeviceinfo.h\
 
 !macx:LIBS += -L../serialdv/$${build_subdir} -lserialdv
 LIBS += -L../httpserver/$${build_subdir} -lhttpserver
+LIBS += -L../qrtplib/$${build_subdir} -lqrtplib
 LIBS += -L../swagger/$${build_subdir} -lswagger
 
 RCC_BINARY_SOURCES += resources/res.qrc

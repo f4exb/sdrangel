@@ -1,0 +1,100 @@
+DSDDemodSettings:
+  description: DSDDemod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    fmDeviation:
+      type: number
+      format: float
+    demodGain:
+      type: number
+      format: float
+    volume:
+      type: number
+      format: float
+    baudRate:
+      type: integer
+    squelchGate:
+      type: integer
+    squelch:
+      type: number
+      format: float
+    audioMute:
+      type: integer
+    enableCosineFiltering:
+      type: integer
+    syncOrConstellation:
+      type: integer
+    slot1On:
+      type: integer
+    slot2On:
+      type: integer
+    tdmaStereo:
+      type: integer
+    pllLock:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    audioDeviceName:
+      type: string
+    highPassFilter:
+      type: integer
+    traceLengthMutliplier:
+      description: multiply by 50ms
+      type: integer
+    traceStroke:
+      description: 0 to 255
+      type: integer
+    traceDecay:
+      description: 0 to 255
+      type: integer
+
+DSDDemodReport:
+  description: DSDDemod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    audioSampleRate:
+      type: integer
+    channelSampleRate:
+      type: integer
+    squelch:
+      description: squelch status (1 if open else 0)
+      type: integer
+    pllLocked:
+      description: symbol PLL status (1 if locked else 0)
+      type: integer
+    slot1On:
+      description: slot 1 status (1 if voice active else 0)
+      type: integer
+    slot2On:
+      description: slot 2 status (1 if voice active else 0)
+      type: integer
+    syncType:
+      description: type of frame synchronized
+      type: string
+    inLevel:
+      description: decoder input level after discriminator. Percent of mid scale (aim 100).
+      type: integer
+    carierPosition:
+      description: position of carrier relative to discriminator center. Percent of scale (aim 0).
+      type: integer
+    zeroCrossingPosition:
+      description: position of symbol synchronizer zero crossing in number of samples (aim 0).
+      type: integer
+    syncRate:
+      description: successful synchronization rate. Percent of expected symbols (aim 100).
+      type: integer
+    statusText:
+      description: mode dependent status messages (ref UI documentation)
+      type: string
+  
+  

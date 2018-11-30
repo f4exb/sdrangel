@@ -21,10 +21,10 @@
 #include <QMutex>
 #include <stdint.h>
 #include <assert.h>
-#include "util/export.h"
+#include "export.h"
 #include "dsp/dsptypes.h"
 
-class SDRANGEL_API SampleSourceFifo : public QObject {
+class SDRBASE_API SampleSourceFifo : public QObject {
     Q_OBJECT
 
 public:
@@ -42,6 +42,18 @@ public:
     void bumpIndex(SampleVector::iterator& writeAt);         //!< copy current item to second buffer and bump write index - write phase 2
 
     void write(const Sample& sample);                        //!< write directly - phase 1 + phase 2
+
+    /** returns ratio of off center over buffer size with sign: negative read lags and positive read leads */
+    float getRWBalance() const
+    {
+        int delta;
+        if (m_iw > m_ir) {
+            delta = (m_size/2) - (m_iw - m_ir);
+        } else {
+            delta = (m_ir - m_iw) - (m_size/2);
+        }
+        return delta / (float) m_size;
+    }
 
 private:
     uint32_t m_size;

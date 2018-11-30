@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
+#include <algorithm>
 
 #include "dsp/samplesinkfifo.h"
 
@@ -32,6 +33,7 @@ HackRFInputThread::HackRFInputThread(hackrf_device* dev, SampleSinkFifo* sampleF
 	m_log2Decim(0),
 	m_fcPos(0)
 {
+    std::fill(m_buf, m_buf + 2*HACKRF_BLOCKSIZE, 0);
 }
 
 HackRFInputThread::~HackRFInputThread()

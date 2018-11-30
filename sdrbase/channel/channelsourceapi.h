@@ -22,14 +22,15 @@
 #include <QString>
 #include <stdint.h>
 
-#include "util/export.h"
+#include "export.h"
 
 namespace SWGSDRangel
 {
     class SWGChannelSettings;
+    class SWGChannelReport;
 }
 
-class SDRANGEL_API ChannelSourceAPI {
+class SDRBASE_API ChannelSourceAPI {
 public:
     ChannelSourceAPI(const QString& name);
     virtual ~ChannelSourceAPI() {}
@@ -37,8 +38,8 @@ public:
 
     virtual void getIdentifier(QString& id) = 0;
     virtual void getTitle(QString& title) = 0;
-    virtual void setName(const QString& name) = 0;
-    virtual QString getName() const = 0;
+    virtual void setName(const QString& name) { m_name = name; };
+    virtual QString getName() const { return m_name; };
     virtual qint64 getCenterFrequency() const = 0;
 
     virtual QByteArray serialize() const = 0;
@@ -53,6 +54,11 @@ public:
             bool force __attribute__((unused)),
             const QStringList& channelSettingsKeys __attribute__((unused)),
             SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
+            QString& errorMessage)
+    { errorMessage = "Not implemented"; return 501; }
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response __attribute__((unused)),
             QString& errorMessage)
     { errorMessage = "Not implemented"; return 501; }
 

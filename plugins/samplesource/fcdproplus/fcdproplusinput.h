@@ -36,23 +36,23 @@ class FileRecord;
 
 class FCDProPlusInput : public DeviceSampleSource {
 public:
-	class MsgConfigureFCD : public Message {
+	class MsgConfigureFCDProPlus : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 		const FCDProPlusSettings& getSettings() const { return m_settings; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureFCD* create(const FCDProPlusSettings& settings, bool force)
+		static MsgConfigureFCDProPlus* create(const FCDProPlusSettings& settings, bool force)
 		{
-			return new MsgConfigureFCD(settings, force);
+			return new MsgConfigureFCDProPlus(settings, force);
 		}
 
 	private:
 		FCDProPlusSettings m_settings;
 		bool m_force;
 
-		MsgConfigureFCD(const FCDProPlusSettings& settings, bool force) :
+		MsgConfigureFCDProPlus(const FCDProPlusSettings& settings, bool force) :
 			Message(),
 			m_settings(settings),
 			m_force(force)
@@ -125,6 +125,16 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
     void set_center_freq(double freq);
 	void set_bias_t(bool on);
 	void set_lna_gain(bool on);
@@ -138,6 +148,7 @@ private:
     bool openDevice();
     void closeDevice();
 	void applySettings(const FCDProPlusSettings& settings, bool force);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FCDProPlusSettings& settings);
 
 	DeviceSourceAPI *m_deviceAPI;
 	hid_device *m_dev;

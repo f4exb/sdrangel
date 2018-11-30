@@ -30,12 +30,9 @@ struct WFMDemodSettings
     Real m_volume;
     Real m_squelch;
     bool m_audioMute;
-    quint32 m_audioSampleRate;
-    bool m_copyAudioToUDP;
-    QString m_udpAddress;
-    quint16 m_udpPort;
     quint32 m_rgbColor;
     QString m_title;
+    QString m_audioDeviceName;
 
     Serializable *m_channelMarker;
 

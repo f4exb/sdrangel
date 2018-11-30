@@ -20,7 +20,7 @@
 
 #include <QWidget>
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 #include "settings/serializable.h"
 
 namespace Ui {
@@ -31,7 +31,7 @@ class MessageQueue;
 class CWKeyer;
 class CWKeyerSettings;
 
-class SDRANGEL_API CWKeyerGUI : public QWidget, public Serializable {
+class SDRGUI_API CWKeyerGUI : public QWidget, public Serializable {
     Q_OBJECT
 
 public:

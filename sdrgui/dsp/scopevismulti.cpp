@@ -61,6 +61,9 @@ ScopeVisMulti::ScopeVisMulti(GLScopeMulti* glScope) :
 {
     setObjectName("ScopeVisNG");
     m_glScope->setTraces(&m_traces.m_tracesData, &m_traces.m_traces[0]);
+    for (int i = 0; i < (int) nbProjectionTypes; i++) {
+        m_projectorCache[i] = 0.0;
+    }
 }
 
 ScopeVisMulti::~ScopeVisMulti()

@@ -18,6 +18,7 @@
 #define _HACKRF_HACKRFINPUTSETTINGS_H_
 
 #include <QtGlobal>
+#include <QString>
 
 struct HackRFInputSettings {
 	typedef enum {
@@ -39,6 +40,7 @@ struct HackRFInputSettings {
 	bool m_dcBlock;
 	bool m_iqCorrection;
 	bool m_linkTxFrequency;
+	QString m_fileRecordName;
 
 	HackRFInputSettings();
 	void resetToDefaults();

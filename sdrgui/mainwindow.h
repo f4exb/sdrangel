@@ -25,7 +25,7 @@
 #include "settings/mainsettings.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
-#include "util/export.h"
+#include "export.h"
 #include "mainparser.h"
 
 class QLabel;
@@ -33,7 +33,6 @@ class QTreeWidgetItem;
 class QDir;
 class SamplingDeviceControl;
 
-class AudioDeviceInfo;
 class DSPEngine;
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
@@ -66,7 +65,7 @@ namespace Ui {
 	class MainWindow;
 }
 
-class SDRANGEL_API MainWindow : public QMainWindow {
+class SDRGUI_API MainWindow : public QMainWindow {
 	Q_OBJECT
 
 public:
@@ -303,7 +302,6 @@ private:
 
 	static MainWindow *m_instance;
 	Ui::MainWindow* ui;
-	AudioDeviceInfo m_audioDeviceInfo;
 	MessageQueue m_inputMessageQueue;
 	MainSettings m_settings;
 	std::vector<DeviceUISet*> m_deviceUIs;

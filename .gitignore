@@ -8,10 +8,12 @@ sdrangelove.supp
 .cproject
 .project
 .pydevproject
+.vscode/
 .settings/
 *.cs
 *.pro.user
 .idea/*
+rescuesdriq/rescuesdriq
 debian/sdrangel/*
 debian/sdrangel.substvars
 debian/files

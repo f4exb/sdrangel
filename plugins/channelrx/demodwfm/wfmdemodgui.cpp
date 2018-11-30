@@ -13,6 +13,8 @@
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "gui/crightclickenabler.h"
+#include "gui/audioselectdialog.h"
 #include "mainwindow.h"
 
 #include "wfmdemod.h"
@@ -75,7 +77,33 @@ bool WFMDemodGUI::deserialize(const QByteArray& data)
 
 bool WFMDemodGUI::handleMessage(const Message& message __attribute__((unused)))
 {
-	return false;
+    if (WFMDemod::MsgConfigureWFMDemod::match(message))
+    {
+        qDebug("WFMDemodGUI::handleMessage: WFMDemod::MsgConfigureWFMDemod");
+        const WFMDemod::MsgConfigureWFMDemod& cfg = (WFMDemod::MsgConfigureWFMDemod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void WFMDemodGUI::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = getInputMessageQueue()->pop()) != 0)
+    {
+        if (handleMessage(*message))
+        {
+            delete message;
+        }
+    }
 }
 
 void WFMDemodGUI::channelMarkerChangedByCursor()
@@ -131,12 +159,6 @@ void WFMDemodGUI::on_audioMute_toggled(bool checked)
     applySettings();
 }
 
-void WFMDemodGUI::on_copyAudioToUDP_toggled(bool checked)
-{
-    m_settings.m_copyAudioToUDP = checked;
-    applySettings();
-}
-
 void WFMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
 {
 }
@@ -148,14 +170,11 @@ void WFMDemodGUI::onMenuDialogCalled(const QPoint &p)
     dialog.exec();
 
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    m_settings.m_udpAddress = m_channelMarker.getUDPAddress(),
-    m_settings.m_udpPort =  m_channelMarker.getUDPSendPort(),
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     m_settings.m_title = m_channelMarker.getTitle();
 
     setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);
-    displayUDPAddress();
 
     applySettings();
 }
@@ -172,10 +191,15 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
+    connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
 	m_wfmDemod = (WFMDemod*) rxChannel; //new WFMDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_wfmDemod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+
+    CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
 
 	ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -194,8 +218,6 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_channelMarker.setBandwidth(WFMDemodSettings::getRFBW(4));
 	m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle("WFM Demodulator");
-    m_channelMarker.setUDPAddress("127.0.0.1");
-    m_channelMarker.setUDPSendPort(9999);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     m_channelMarker.blockSignals(false);
 	m_channelMarker.setVisible(true); // activate signal on the last setting only
@@ -232,7 +254,7 @@ void WFMDemodGUI::applySettings(bool force)
 	if (m_doApplySettings)
 	{
         WFMDemod::MsgConfigureChannelizer *msgChan = WFMDemod::MsgConfigureChannelizer::create(
-                requiredBW(WFMDemodSettings::getRFBW(ui->rfBW->currentIndex())),
+                WFMDemod::requiredBW(WFMDemodSettings::getRFBW(ui->rfBW->currentIndex())),
                 m_channelMarker.getCenterFrequency());
         m_wfmDemod->getInputMessageQueue()->push(msgChan);
 
@@ -252,7 +274,6 @@ void WFMDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
-    displayUDPAddress();
 
     blockApplySettings(true);
 
@@ -269,12 +290,9 @@ void WFMDemodGUI::displaySettings()
     ui->squelch->setValue(m_settings.m_squelch);
     ui->squelchText->setText(QString("%1 dB").arg(m_settings.m_squelch));
 
-    blockApplySettings(false);
-}
+    ui->audioMute->setChecked(m_settings.m_audioMute);
 
-void WFMDemodGUI::displayUDPAddress()
-{
-    ui->copyAudioToUDP->setToolTip(QString("Copy audio output to UDP %1:%2").arg(m_settings.m_udpAddress).arg(m_settings.m_udpPort));
+    blockApplySettings(false);
 }
 
 void WFMDemodGUI::leaveEvent(QEvent*)
@@ -285,6 +303,19 @@ void WFMDemodGUI::leaveEvent(QEvent*)
 void WFMDemodGUI::enterEvent(QEvent*)
 {
 	m_channelMarker.setHighlighted(true);
+}
+
+void WFMDemodGUI::audioSelect()
+{
+    qDebug("WFMDemodGUI::audioSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
 }
 
 void WFMDemodGUI::tick()

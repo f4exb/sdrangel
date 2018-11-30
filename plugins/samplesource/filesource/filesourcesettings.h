@@ -24,6 +24,9 @@ struct FileSourceSettings {
     quint64 m_centerFrequency;
     qint32  m_sampleRate;
     QString m_fileName;
+    quint32 m_accelerationFactor;
+    bool m_loop;
+    static const unsigned int m_accelerationMaxScale; //!< Max power of 10 multiplier to 2,5,10 base ex: 2 -> 2,5,10,20,50,100,200,500,1000
 
     FileSourceSettings();
     ~FileSourceSettings() {}
@@ -31,6 +34,8 @@ struct FileSourceSettings {
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    static int getAccelerationIndex(int averaging);
+    static int getAccelerationValue(int averagingIndex);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_FILESOURCE_FILESOURCESETTINGS_H_ */

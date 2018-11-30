@@ -18,9 +18,9 @@
 #define INCLUDE_NCOF_H
 
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 
-class SDRANGEL_API NCOF {
+class SDRBASE_API NCOF {
 private:
 	enum {
 		TableSize = (1 << 12),

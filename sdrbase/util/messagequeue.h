@@ -21,11 +21,11 @@
 #include <QObject>
 #include <QQueue>
 #include <QMutex>
-#include "util/export.h"
+#include "export.h"
 
 class Message;
 
-class SDRANGEL_API MessageQueue : public QObject {
+class SDRBASE_API MessageQueue : public QObject {
 	Q_OBJECT
 
 public:

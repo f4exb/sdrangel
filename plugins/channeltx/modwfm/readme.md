@@ -10,7 +10,7 @@ This plugin can be used to generate a wideband frequency modulated signal. "Wide
 
 <h3>1: Frequency shift from center frequency of transmission</h3>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of transmission. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arroews. Pressing shift simultanoeusly moves digit by 5 and pressing control moves it by 2.
+Use the wheels to adjust the frequency shift in Hz from the center frequency of transmission. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>3: Channel power</h3>
 
@@ -42,7 +42,7 @@ This is the volume of the audio signal from 0.0 (mute) to 2.0 (maximum). It can 
   - bottom bar (brown): instantaneous peak value
   - tip vertical bar (bright red): peak hold value
 
-You should aim at keepimg the peak value below 100% using the volume control
+You should aim at keeping the peak value below 100% using the volume control
 
 <h3>10: Input source control</h3>
 
@@ -60,9 +60,11 @@ Switches to the Morse keyer input. You must switch it off to make other inputs a
 
 Adjusts the tone frequency from 0.1 to 2.5 kHz in 0.01 kHz steps
 
-<h4>10.4: Audio input select</h4>
+<h4>10.4: Audio input select and select audio input device</h4>
 
-Switches to the audio input. You must switch it off to make other inputs available.
+Left click to switch to the audio input. You must switch it off to make other inputs available.
+
+Right click to select audio input device. See [audio management documentation](../../../sdrgui/audio.md) for details.
 
 <h3>11: CW (Morse) text</h3>
 
@@ -135,4 +137,4 @@ This is the audio file play length in time units
 
 <h3>18: Play file position slider</h3>
 
-This slider can be used to randomly set the currennt position in the file when file play is in pause state (button 15.3)
+This slider can be used to randomly set the current position in the file when file play is in pause state (button 15.3)

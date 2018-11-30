@@ -24,7 +24,7 @@
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -101,7 +101,7 @@
           </property>
           <property name="font">
            <font>
-            <family>DejaVu Sans Mono</family>
+            <family>Liberation Mono</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -190,7 +190,7 @@
         </property>
         <property name="font">
          <font>
-          <family>Monospace</family>
+          <family>Liberation Mono</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -339,13 +339,13 @@
          <string>Sound volume</string>
         </property>
         <property name="maximum">
-         <number>100</number>
+         <number>40</number>
         </property>
         <property name="pageStep">
          <number>1</number>
         </property>
         <property name="value">
-         <number>20</number>
+         <number>10</number>
         </property>
        </widget>
       </item>
@@ -367,7 +367,7 @@
          <string>Sound volume</string>
         </property>
         <property name="text">
-         <string>2.0</string>
+         <string>1.0</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -428,7 +428,7 @@
          <string>Squelch threshold (dB)</string>
         </property>
         <property name="minimum">
-         <number>-1000</number>
+         <number>-100</number>
         </property>
         <property name="maximum">
          <number>0</number>
@@ -440,7 +440,7 @@
          <number>1</number>
         </property>
         <property name="value">
-         <number>-150</number>
+         <number>-100</number>
         </property>
        </widget>
       </item>
@@ -448,21 +448,15 @@
        <widget class="QLabel" name="squelchText">
         <property name="minimumSize">
          <size>
-          <width>40</width>
+          <width>28</width>
           <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>16777215</height>
          </size>
         </property>
         <property name="toolTip">
          <string>Squelch threshold (dB)</string>
         </property>
         <property name="text">
-         <string>-15.0</string>
+         <string>-100</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -583,7 +577,7 @@
       <item>
        <widget class="QToolButton" name="audioMute">
         <property name="toolTip">
-         <string>Mute/Unmute audio</string>
+         <string>Left: Mute/Unmute audio Right: Select audio output device</string>
         </property>
         <property name="text">
          <string>...</string>
@@ -592,32 +586,6 @@
          <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/sound_on.png</normaloff>
           <normalon>:/sound_off.png</normalon>:/sound_on.png</iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="ButtonSwitch" name="copyAudioToUDP">
-        <property name="toolTip">
-         <string>Copy audio to UDP</string>
-        </property>
-        <property name="text">
-         <string>U</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="ButtonSwitch" name="useRTP">
-        <property name="toolTip">
-         <string>Use RTP protocol for sending audio via UDP</string>
-        </property>
-        <property name="text">
-         <string>R</string>
         </property>
         <property name="checkable">
          <bool>true</bool>

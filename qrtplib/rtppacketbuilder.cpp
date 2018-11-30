@@ -1,36 +1,34 @@
 /*
-  Rewritten to fit into the Qt Network framework
-  Copyright (c) 2018 Edouard Griffiths, F4EXB
 
-  This file is a part of JRTPLIB
-  Copyright (c) 1999-2017 Jori Liesenborgs
+ This file is a part of JRTPLIB
+ Copyright (c) 1999-2017 Jori Liesenborgs
 
-  Contact: jori.liesenborgs@gmail.com
+ Contact: jori.liesenborgs@gmail.com
 
-  This library was developed at the Expertise Centre for Digital Media
-  (http://www.edm.uhasselt.be), a research center of the Hasselt University
-  (http://www.uhasselt.be). The library is based upon work done for 
-  my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
+ This library was developed at the Expertise Centre for Digital Media
+ (http://www.edm.uhasselt.be), a research center of the Hasselt University
+ (http://www.uhasselt.be). The library is based upon work done for
+ my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
 
-  Permission is hereby granted, free of charge, to any person obtaining a
-  copy of this software and associated documentation files (the "Software"),
-  to deal in the Software without restriction, including without limitation
-  the rights to use, copy, modify, merge, publish, distribute, sublicense,
-  and/or sell copies of the Software, and to permit persons to whom the
-  Software is furnished to do so, subject to the following conditions:
+ Permission is hereby granted, free of charge, to any person obtaining a
+ copy of this software and associated documentation files (the "Software"),
+ to deal in the Software without restriction, including without limitation
+ the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ and/or sell copies of the Software, and to permit persons to whom the
+ Software is furnished to do so, subject to the following conditions:
 
-  The above copyright notice and this permission notice shall be included
-  in all copies or substantial portions of the Software.
+ The above copyright notice and this permission notice shall be included
+ in all copies or substantial portions of the Software.
 
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-  IN THE SOFTWARE.
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ IN THE SOFTWARE.
 
-*/
+ */
 
 #include "rtppacketbuilder.h"
 #include "rtperrors.h"
@@ -38,92 +36,102 @@
 #include "rtpsources.h"
 #include <time.h>
 #include <stdlib.h>
-//#include "rtpdebug.h"
 
 namespace qrtplib
 {
 
-RTPPacketBuilder::RTPPacketBuilder(RTPRandom &r) : rtprnd(r), lastwallclocktime(0,0)
+RTPPacketBuilder::RTPPacketBuilder(RTPRandom &r) :
+        rtprnd(r),
+        maxpacksize(0),
+        buffer(0),
+        packetlength(0),
+        lastwallclocktime(0, 0)
 {
-	init = false;
+    init = false;
+    deftsset = false;
+    defptset = false;
+    defmarkset = false;
+    defaultmark = false;
+    defaulttimestampinc = 0;
+    ssrc = 0;
+    timestamp = 0;
+    seqnr = 0;
+    prevrtptimestamp = 0;
+    lastrtptimestamp = 0;
+    defaultpayloadtype = 0;
+    numcsrcs = 0;
+    numpayloadbytes = 0;
+    numpackets = 0;
+    memset((char *) csrcs, 0, RTP_MAXCSRCS*sizeof(uint32_t));
+    timeinit.Dummy();
+
+    //std::cout << (void *)(&rtprnd) << std::endl;
 }
 
 RTPPacketBuilder::~RTPPacketBuilder()
 {
-	Destroy();
+    Destroy();
 }
 
-int RTPPacketBuilder::Init(std::size_t max)
+int RTPPacketBuilder::Init(unsigned int max)
 {
-	if (init) {
-		return ERR_RTP_PACKBUILD_ALREADYINIT;
-	}
+    if (init)
+        return ERR_RTP_PACKBUILD_ALREADYINIT;
+    if (max <= 0)
+        return ERR_RTP_PACKBUILD_INVALIDMAXPACKETSIZE;
 
-	if (max <= 0) {
-		return ERR_RTP_PACKBUILD_INVALIDMAXPACKETSIZE;
-	}
-	
-	maxpacksize = max;
-	buffer = new uint8_t[max];
-	if (buffer == 0) {
-		return ERR_RTP_OUTOFMEM;
-	}
-	packetlength = 0;
-	
-	CreateNewSSRC();
+    maxpacksize = max;
+    buffer = new uint8_t[max];
+    packetlength = 0;
+    numpackets = 0;
 
-	deftsset = false;
-	defptset = false;
-	defmarkset = false;
-		
-	numcsrcs = 0;
-	
-	init = true;
-	return 0;
+    CreateNewSSRC();
+
+    deftsset = false;
+    defptset = false;
+    defmarkset = false;
+
+    numcsrcs = 0;
+
+    init = true;
+    return 0;
 }
 
 void RTPPacketBuilder::Destroy()
 {
-	if (!init) {
-		return;
-	}
-	delete[] buffer;
-	init = false;
+    if (!init)
+        return;
+    delete[] buffer;
+    init = false;
 }
 
-int RTPPacketBuilder::SetMaximumPacketSize(std::size_t max)
+int RTPPacketBuilder::SetMaximumPacketSize(unsigned int max)
 {
-	uint8_t *newbuf;
+    uint8_t *newbuf;
 
-	if (max <= 0) {
-		return ERR_RTP_PACKBUILD_INVALIDMAXPACKETSIZE;
-	}
-	newbuf = new uint8_t[max];
-	if (newbuf == 0) {
-		return ERR_RTP_OUTOFMEM;
-	}
-	
-	delete[] buffer;
-	buffer = newbuf;
-	maxpacksize = max;
-	return 0;
+    if (max <= 0)
+        return ERR_RTP_PACKBUILD_INVALIDMAXPACKETSIZE;
+    newbuf = new uint8_t[max];
+
+    delete[] buffer;
+    buffer = newbuf;
+    maxpacksize = max;
+    return 0;
 }
 
 int RTPPacketBuilder::AddCSRC(uint32_t csrc)
 {
-    if (!init) {
+    if (!init)
         return ERR_RTP_PACKBUILD_NOTINIT;
-    }
-    if (numcsrcs >= RTP_MAXCSRCS) {
+    if (numcsrcs >= RTP_MAXCSRCS)
         return ERR_RTP_PACKBUILD_CSRCLISTFULL;
-    }
 
     int i;
 
-    for (i = 0; i < numcsrcs; i++) {
-        if (csrcs[i] == csrc) {
+    for (i = 0; i < numcsrcs; i++)
+    {
+        if (csrcs[i] == csrc)
             return ERR_RTP_PACKBUILD_CSRCALREADYINLIST;
-        }
     }
     csrcs[numcsrcs] = csrc;
     numcsrcs++;
@@ -132,154 +140,142 @@ int RTPPacketBuilder::AddCSRC(uint32_t csrc)
 
 int RTPPacketBuilder::DeleteCSRC(uint32_t csrc)
 {
-	if (!init) {
-		return ERR_RTP_PACKBUILD_NOTINIT;
-	}
-	
-	int i = 0;
-	bool found = false;
+    if (!init)
+        return ERR_RTP_PACKBUILD_NOTINIT;
 
-	while (!found && i < numcsrcs)
-	{
-		if (csrcs[i] == csrc) {
-			found = true;
-		} else {
-			i++;
-		}
-	}
+    int i = 0;
+    bool found = false;
 
-	if (!found) {
-		return ERR_RTP_PACKBUILD_CSRCNOTINLIST;
-	}
-	
-	// move the last csrc in the place of the deleted one
-	numcsrcs--;
-	if (numcsrcs > 0 && numcsrcs != i) {
-		csrcs[i] = csrcs[numcsrcs];
-	}
+    while (!found && i < numcsrcs)
+    {
+        if (csrcs[i] == csrc)
+            found = true;
+        else
+            i++;
+    }
 
-	return 0;
+    if (!found)
+        return ERR_RTP_PACKBUILD_CSRCNOTINLIST;
+
+    // move the last csrc in the place of the deleted one
+    numcsrcs--;
+    if (numcsrcs > 0 && numcsrcs != i)
+        csrcs[i] = csrcs[numcsrcs];
+    return 0;
 }
 
 void RTPPacketBuilder::ClearCSRCList()
 {
-	if (!init) {
-		return;
-	}
-	numcsrcs = 0;
+    if (!init)
+        return;
+    numcsrcs = 0;
 }
 
 uint32_t RTPPacketBuilder::CreateNewSSRC()
 {
-	ssrc = rtprnd.GetRandom32();
-	timestamp = rtprnd.GetRandom32();
-	seqnr = rtprnd.GetRandom16();
+    ssrc = rtprnd.GetRandom32();
+    timestamp = rtprnd.GetRandom32();
+    seqnr = rtprnd.GetRandom16();
 
-	// p 38: the count SHOULD be reset if the sender changes its SSRC identifier
-	numpayloadbytes = 0;
-	numpackets = 0;
-	return ssrc;
+    qDebug("RTPPacketBuilder::CreateNewSSRC: timestamp: %u", timestamp);
+
+    // p 38: the count SHOULD be reset if the sender changes its SSRC identifier
+    numpayloadbytes = 0;
+    numpackets = 0;
+    return ssrc;
 }
 
 uint32_t RTPPacketBuilder::CreateNewSSRC(RTPSources &sources)
 {
-	bool found;
-	
-	do
-	{
-		ssrc = rtprnd.GetRandom32();
-		found = sources.GotEntry(ssrc);
-	} while (found);
-	
-	timestamp = rtprnd.GetRandom32();
-	seqnr = rtprnd.GetRandom16();
+    bool found;
 
-	// p 38: the count SHOULD be reset if the sender changes its SSRC identifier
-	numpayloadbytes = 0;
-	numpackets = 0;
-	return ssrc;
+    do
+    {
+        ssrc = rtprnd.GetRandom32();
+        found = sources.GotEntry(ssrc);
+    } while (found);
+
+    timestamp = rtprnd.GetRandom32();
+    seqnr = rtprnd.GetRandom16();
+
+    // p 38: the count SHOULD be reset if the sender changes its SSRC identifier
+    numpayloadbytes = 0;
+    numpackets = 0;
+    return ssrc;
 }
 
-int RTPPacketBuilder::BuildPacket(const void *data, std::size_t len)
+int RTPPacketBuilder::BuildPacket(const void *data, unsigned int len)
 {
-	if (!init)
-		return ERR_RTP_PACKBUILD_NOTINIT;
-	if (!defptset)
-		return ERR_RTP_PACKBUILD_DEFAULTPAYLOADTYPENOTSET;
-	if (!defmarkset)
-		return ERR_RTP_PACKBUILD_DEFAULTMARKNOTSET;
-	if (!deftsset)
-		return ERR_RTP_PACKBUILD_DEFAULTTSINCNOTSET;
-	return PrivateBuildPacket(data,len,defaultpayloadtype,defaultmark,defaulttimestampinc,false);
+    if (!init)
+        return ERR_RTP_PACKBUILD_NOTINIT;
+    if (!defptset)
+        return ERR_RTP_PACKBUILD_DEFAULTPAYLOADTYPENOTSET;
+    if (!defmarkset)
+        return ERR_RTP_PACKBUILD_DEFAULTMARKNOTSET;
+    if (!deftsset)
+        return ERR_RTP_PACKBUILD_DEFAULTTSINCNOTSET;
+    return PrivateBuildPacket(data, len, defaultpayloadtype, defaultmark, defaulttimestampinc, false);
 }
 
-int RTPPacketBuilder::BuildPacket(const void *data, std::size_t len,
-                uint8_t pt,bool mark,uint32_t timestampinc)
+int RTPPacketBuilder::BuildPacket(const void *data, unsigned int len, uint8_t pt, bool mark, uint32_t timestampinc)
 {
-	if (!init) {
-		return ERR_RTP_PACKBUILD_NOTINIT;
-	}
-
-	return PrivateBuildPacket(data,len,pt,mark,timestampinc,false);
+    if (!init)
+        return ERR_RTP_PACKBUILD_NOTINIT;
+    return PrivateBuildPacket(data, len, pt, mark, timestampinc, false);
 }
 
-int RTPPacketBuilder::BuildPacketEx(const void *data, std::size_t len,
-                  uint16_t hdrextID, const void *hdrextdata, std::size_t numhdrextwords)
+int RTPPacketBuilder::BuildPacketEx(const void *data, unsigned int len, uint16_t hdrextID, const void *hdrextdata, unsigned int numhdrextwords)
 {
-	if (!init)
-		return ERR_RTP_PACKBUILD_NOTINIT;
-	if (!defptset)
-		return ERR_RTP_PACKBUILD_DEFAULTPAYLOADTYPENOTSET;
-	if (!defmarkset)
-		return ERR_RTP_PACKBUILD_DEFAULTMARKNOTSET;
-	if (!deftsset)
-		return ERR_RTP_PACKBUILD_DEFAULTTSINCNOTSET;
-	return PrivateBuildPacket(data,len,defaultpayloadtype,defaultmark,defaulttimestampinc,true,hdrextID,hdrextdata,numhdrextwords);
+    if (!init)
+        return ERR_RTP_PACKBUILD_NOTINIT;
+    if (!defptset)
+        return ERR_RTP_PACKBUILD_DEFAULTPAYLOADTYPENOTSET;
+    if (!defmarkset)
+        return ERR_RTP_PACKBUILD_DEFAULTMARKNOTSET;
+    if (!deftsset)
+        return ERR_RTP_PACKBUILD_DEFAULTTSINCNOTSET;
+    return PrivateBuildPacket(data, len, defaultpayloadtype, defaultmark, defaulttimestampinc, true, hdrextID, hdrextdata, numhdrextwords);
 }
 
-int RTPPacketBuilder::BuildPacketEx(const void *data, std::size_t len,
-                  uint8_t pt, bool mark, uint32_t timestampinc,
-		  uint16_t hdrextID, const void *hdrextdata, std::size_t numhdrextwords)
+int RTPPacketBuilder::BuildPacketEx(const void *data, unsigned int len, uint8_t pt, bool mark, uint32_t timestampinc, uint16_t hdrextID, const void *hdrextdata, unsigned int numhdrextwords)
 {
-	if (!init) {
-		return ERR_RTP_PACKBUILD_NOTINIT;
-	}
-	return PrivateBuildPacket(data,len,pt,mark,timestampinc,true,hdrextID,hdrextdata,numhdrextwords);
+    if (!init)
+        return ERR_RTP_PACKBUILD_NOTINIT;
+    return PrivateBuildPacket(data, len, pt, mark, timestampinc, true, hdrextID, hdrextdata, numhdrextwords);
 
 }
 
-int RTPPacketBuilder::PrivateBuildPacket(const void *data, std::size_t len,
-	                  uint8_t pt, bool mark, uint32_t timestampinc, bool gotextension,
-	                  uint16_t hdrextID, const void *hdrextdata, std::size_t numhdrextwords)
+int RTPPacketBuilder::PrivateBuildPacket(const void *data, unsigned int len, uint8_t pt, bool mark, uint32_t timestampinc, bool gotextension, uint16_t hdrextID, const void *hdrextdata,
+        unsigned int numhdrextwords)
 {
-	RTPPacket p(pt,data,len,seqnr,timestamp,ssrc,mark,numcsrcs,csrcs,gotextension,hdrextID,
-	            (uint16_t)numhdrextwords,hdrextdata,buffer,maxpacksize,GetMemoryManager());
-	int status = p.GetCreationError();
+    RTPPacket p(pt, data, len, seqnr, timestamp, ssrc, mark, numcsrcs, csrcs, gotextension, hdrextID, (uint16_t) numhdrextwords, hdrextdata, buffer, maxpacksize);
+    int status = p.GetCreationError();
 
-	if (status < 0) {
-		return status
-	};
-	packetlength = p.GetPacketLength();
+    if (status < 0)
+        return status;
+    packetlength = p.GetPacketLength();
 
-	if (numpackets == 0) // first packet
-	{
-		lastwallclocktime = RTPTime::CurrentTime();
-		lastrtptimestamp = timestamp;
-		prevrtptimestamp = timestamp;
-	}
-	else if (timestamp != prevrtptimestamp)
-	{
-		lastwallclocktime = RTPTime::CurrentTime();
-		lastrtptimestamp = timestamp;
-		prevrtptimestamp = timestamp;
-	}
-	
-	numpayloadbytes += (uint32_t)p.GetPayloadLength();
-	numpackets++;
-	timestamp += timestampinc;
-	seqnr++;
+    if (numpackets == 0) // first packet
+    {
+        lastwallclocktime = RTPTime::CurrentTime();
+        lastrtptimestamp = timestamp;
+        prevrtptimestamp = timestamp;
+    }
+    else if (timestamp != prevrtptimestamp)
+    {
+        lastwallclocktime = RTPTime::CurrentTime();
+        lastrtptimestamp = timestamp;
+        prevrtptimestamp = timestamp;
+    }
 
-	return 0;
+    numpayloadbytes += (uint32_t) p.GetPayloadLength();
+    numpackets++;
+    timestamp += timestampinc;
+    seqnr++;
+
+    //qDebug("RTPPacketBuilder::PrivateBuildPacket: numpackets: %u timestamp: %u timestampinc: %u seqnr: %u", numpackets, timestamp, timestampinc, seqnr);
+
+    return 0;
 }
 
 } // end namespace

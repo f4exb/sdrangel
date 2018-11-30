@@ -43,41 +43,36 @@ class DownChannelizer;
 
 #endif
 
-
-
 #include "datvconstellation.h"
 #include "datvvideoplayer.h"
 
 #include "channel/channelsinkapi.h"
-#include <dsp/basebandsamplesink.h>
-#include <dsp/devicesamplesource.h>
-#include <dsp/dspcommands.h>
-#include <dsp/downchannelizer.h>
-#include <dsp/fftfilt.h>
-#include <QMutex>
-#include <QElapsedTimer>
-#include <vector>
+#include "dsp/basebandsamplesink.h"
+#include "dsp/devicesamplesource.h"
+#include "dsp/dspcommands.h"
+#include "dsp/downchannelizer.h"
+#include "dsp/fftfilt.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
-#include <QBuffer>
+#include "util/movingaverage.h"
 
 #include "datvideostream.h"
 #include "datvideorender.h"
 
-using namespace leansdr;
+#include <QMutex>
 
 enum DATVModulation { BPSK, QPSK, PSK8, APSK16, APSK32, APSK64E, QAM16, QAM64, QAM256 };
 enum dvb_version { DVB_S, DVB_S2 };
 enum dvb_sampler { SAMP_NEAREST, SAMP_LINEAR, SAMP_RRC };
 
-inline int decimation(float Fin, float Fout) { int d = Fin / Fout; return max(d, 1); }
+inline int decimation(float Fin, float Fout) { int d = Fin / Fout; return std::max(d, 1); }
 
 struct config
-{  
+{
   dvb_version  standard;
   dvb_sampler sampler;
 
@@ -88,8 +83,8 @@ struct config
   bool cnr;            // Measure CNR
   unsigned int decim;  // Decimation, 0=auto
   float Fm;            // QPSK symbol rate (Hz)
-  cstln_lut<256>::predef constellation;
-  code_rate fec;
+  leansdr::cstln_lut<256>::predef constellation;
+  leansdr::code_rate fec;
   float Ftune;         // Bias frequency for the QPSK demodulator (Hz)
   bool allow_drift;
   bool fastlock;
@@ -104,30 +99,31 @@ struct config
   bool packetized;     // Output frames with 16-bit BE length
   float Finfo;         // Desired refresh rate on fd_info (Hz)
 
-  config() :  buf_factor(4),
-              Fs(2.4e6),
-              Fderot(0),
-              anf(1),
-              cnr(false),
-              decim(0),
-              Fm(2e6),
-              standard(DVB_S),
-              constellation(cstln_lut<256>::QPSK),
-              fec(FEC12),
-              Ftune(0),
-              allow_drift(false),
-              fastlock(true),
-              viterbi(false),
-              hard_metric(false),
-              resample(false),
-              resample_rej(10),
-              sampler(SAMP_LINEAR),
-              rrc_steps(0),
-              rrc_rej(10),
-              rolloff(0.35),
-              hdlc(false),
-              packetized(false),
-              Finfo(5)
+  config() :
+      standard(DVB_S),
+      sampler(SAMP_LINEAR),
+      buf_factor(4),
+      Fs(2.4e6),
+      Fderot(0),
+      anf(0),
+      cnr(false),
+      decim(0),
+      Fm(2e6),
+      constellation(leansdr::cstln_lut<256>::QPSK),
+      fec(leansdr::FEC12),
+      Ftune(0),
+      allow_drift(false),
+      fastlock(true),
+      viterbi(false),
+      hard_metric(false),
+      resample(false),
+      resample_rej(10),
+      rrc_steps(0),
+      rrc_rej(10),
+      rolloff(0.35),
+      hdlc(false),
+      packetized(false),
+      Finfo(5)
   {
   }
 };
@@ -140,16 +136,17 @@ struct DATVConfig
     int intCenterFrequency;
     dvb_version enmStandard;
     DATVModulation enmModulation;
-    code_rate enmFEC;
+    leansdr::code_rate enmFEC;
     int intSampleRate;
     int intSymbolRate;
     int intNotchFilters;
     bool blnAllowDrift;
     bool blnFastLock;
-    bool blnHDLC;
+    dvb_sampler enmFilter;
     bool blnHardMetric;
-    bool blnResample;
+    float fltRollOff;
     bool blnViterbi;
+    int intExcursion;
 
     DATVConfig() :
         intMsps(1024000),
@@ -157,16 +154,17 @@ struct DATVConfig
         intCenterFrequency(0),
         enmStandard(DVB_S),
         enmModulation(BPSK),
-        enmFEC(FEC12),
+        enmFEC(leansdr::FEC12),
         intSampleRate(1024000),
         intSymbolRate(250000),
         intNotchFilters(1),
         blnAllowDrift(false),
         blnFastLock(false),
-        blnHDLC(false),
+        enmFilter(SAMP_LINEAR),
         blnHardMetric(false),
-        blnResample(false),
-        blnViterbi(false)
+        fltRollOff(0.35),
+        blnViterbi(false),
+        intExcursion(10)
     {
     }
 };
@@ -189,52 +187,55 @@ public:
     virtual QByteArray serialize() const { return QByteArray(); }
     virtual bool deserialize(const QByteArray& data __attribute__((unused))) { return false; }
 
-
-
-    void configure(MessageQueue* objMessageQueue,
-                   int intRFBandwidth,
-                   int intCenterFrequency,
-                   dvb_version enmStandard,
-                   DATVModulation enmModulation,
-                   code_rate enmFEC,
-                   int intSymbolRate,
-                   int intNotchFilters,
-                   bool blnAllowDrift,
-                   bool blnFastLock,
-                   bool blnHDLC,
-                   bool blnHardMetric,
-                   bool blnResample,
-                   bool blnViterbi);
+    void configure(
+        MessageQueue* objMessageQueue,
+        int intRFBandwidth,
+        int intCenterFrequency,
+        dvb_version enmStandard,
+        DATVModulation enmModulation,
+        leansdr::code_rate enmFEC,
+        int intSymbolRate,
+        int intNotchFilters,
+        bool blnAllowDrift,
+        bool blnFastLock,
+        dvb_sampler enmFilter,
+        bool blnHardMetric,
+        float fltRollOff,
+        bool blnViterbi,
+        int intfltExcursion);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
-    bool SetDATVScreen(DATVScreen *objScreen);
+    bool SetTVScreen(TVScreen *objScreen);
     DATVideostream * SetVideoRender(DATVideoRender *objScreen);
 
     bool PlayVideo(bool blnStartStop);
 
-    void InitDATVParameters(int intMsps,
-                            int intRFBandwidth,
-                            int intCenterFrequency,
-                            dvb_version enmStandard,
-                            DATVModulation enmModulation,
-                            code_rate enmFEC,
-                            int intSampleRate,
-                            int intSymbolRate,
-                            int intNotchFilters,
-                            bool blnAllowDrift,
-                            bool blnFastLock,
-                            bool blnHDLC,
-                            bool blnHardMetric,
-                            bool blnResample,
-                            bool blnViterbi);
+    void InitDATVParameters(
+        int intMsps,
+        int intRFBandwidth,
+        int intCenterFrequency,
+        dvb_version enmStandard,
+        DATVModulation enmModulation,
+        leansdr::code_rate enmFEC,
+        int intSampleRate,
+        int intSymbolRate,
+        int intNotchFilters,
+        bool blnAllowDrift,
+        bool blnFastLock,
+        dvb_sampler enmFilter,
+        bool blnHardMetric,
+        float fltRollOff,
+        bool blnViterbi,
+        int intEExcursion);
 
     void CleanUpDATVFramework(bool blnRelease);
     int GetSampleRate();
     void InitDATVFramework();
+    double getMagSq() const { return m_objMagSqAverage; } //!< Beware this is scaled to 2^30
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
@@ -261,9 +262,67 @@ public:
             { }
     };
 
-
-
 private:
+    class MsgConfigureDATVDemod : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+        public:
+            static MsgConfigureDATVDemod* create(
+                int intRFBandwidth,
+                int intCenterFrequency,
+                dvb_version enmStandard,
+                DATVModulation enmModulation,
+                leansdr::code_rate enmFEC,
+                int intSymbolRate,
+                int intNotchFilters,
+                bool blnAllowDrift,
+                bool blnFastLock,
+                dvb_sampler enmFilter,
+                bool blnHardMetric,
+                float fltRollOff,
+                bool blnViterbi,
+                int intExcursion)
+            {
+                return new MsgConfigureDATVDemod(intRFBandwidth,intCenterFrequency,enmStandard, enmModulation, enmFEC, intSymbolRate, intNotchFilters, blnAllowDrift,blnFastLock,enmFilter,blnHardMetric,fltRollOff, blnViterbi, intExcursion);
+            }
+
+            DATVConfig m_objMsgConfig;
+
+        private:
+            MsgConfigureDATVDemod(
+                    int intRFBandwidth,
+                    int intCenterFrequency,
+                    dvb_version enmStandard,
+                    DATVModulation enmModulation,
+                    leansdr::code_rate enmFEC,
+                    int intSymbolRate,
+                    int intNotchFilters,
+                    bool blnAllowDrift,
+                    bool blnFastLock,
+                    dvb_sampler enmFilter,
+                    bool blnHardMetric,
+                    float fltRollOff,
+                    bool blnViterbi,
+                    int intExcursion) :
+                Message()
+            {
+                m_objMsgConfig.intRFBandwidth = intRFBandwidth;
+                m_objMsgConfig.intCenterFrequency = intCenterFrequency;
+                m_objMsgConfig.enmStandard = enmStandard;
+                m_objMsgConfig.enmModulation = enmModulation;
+                m_objMsgConfig.enmFEC = enmFEC;
+                m_objMsgConfig.intSymbolRate = intSymbolRate;
+                m_objMsgConfig.intNotchFilters = intNotchFilters;
+                m_objMsgConfig.blnAllowDrift = blnAllowDrift;
+                m_objMsgConfig.blnFastLock = blnFastLock;
+                m_objMsgConfig.enmFilter= enmFilter;
+                m_objMsgConfig.blnHardMetric = blnHardMetric;
+                m_objMsgConfig.fltRollOff = fltRollOff;
+                m_objMsgConfig.blnViterbi = blnViterbi;
+                m_objMsgConfig.intExcursion = intExcursion;
+            }
+    };
 
     unsigned long m_lngExpectedReadIQ;
     unsigned long m_lngReadIQ;
@@ -279,7 +338,7 @@ private:
 
     //************** LEANDBV Scheduler ***************
 
-    scheduler * m_objScheduler;
+    leansdr::scheduler * m_objScheduler;
     struct config m_objCfg;
 
     bool m_blnDVBInitialized;
@@ -288,179 +347,117 @@ private:
     //LeanSDR Pipe Buffer
     // INPUT
 
-    pipebuf<cf32> *p_rawiq;
-    pipewriter<cf32> *p_rawiq_writer;
-    pipebuf<cf32> *p_preprocessed;
+    leansdr::pipebuf<leansdr::cf32> *p_rawiq;
+    leansdr::pipewriter<leansdr::cf32> *p_rawiq_writer;
+    leansdr::pipebuf<leansdr::cf32> *p_preprocessed;
 
     // NOTCH FILTER
-    auto_notch<f32> *r_auto_notch;
-    pipebuf<cf32> *p_autonotched;
+    leansdr::auto_notch<leansdr::f32> *r_auto_notch;
+    leansdr::pipebuf<leansdr::cf32> *p_autonotched;
 
     // FREQUENCY CORRECTION : DEROTATOR
-    pipebuf<cf32> *p_derot;
-    rotator<f32> *r_derot;
+    leansdr::pipebuf<leansdr::cf32> *p_derot;
+    leansdr::rotator<leansdr::f32> *r_derot;
 
     // CNR ESTIMATION
-    pipebuf<f32> *p_cnr;
-    cnr_fft<f32> *r_cnr;
+    leansdr::pipebuf<leansdr::f32> *p_cnr;
+    leansdr::cnr_fft<leansdr::f32> *r_cnr;
 
     //FILTERING
-    fir_filter<cf32,float> *r_resample;
-    pipebuf<cf32> *p_resampled;
+    leansdr::fir_filter<leansdr::cf32,float> *r_resample;
+    leansdr::pipebuf<leansdr::cf32> *p_resampled;
     float *coeffs;
     int ncoeffs;
 
     // OUTPUT PREPROCESSED DATA
-    sampler_interface<f32> *sampler;
+    leansdr::sampler_interface<leansdr::f32> *sampler;
     float *coeffs_sampler;
     int ncoeffs_sampler;
 
-    pipebuf<softsymbol> *p_symbols;
-    pipebuf<f32> *p_freq;
-    pipebuf<f32> *p_ss;
-    pipebuf<f32> *p_mer;
-    pipebuf<cf32> *p_sampled;
+    leansdr::pipebuf<leansdr::softsymbol> *p_symbols;
+    leansdr::pipebuf<leansdr::f32> *p_freq;
+    leansdr::pipebuf<leansdr::f32> *p_ss;
+    leansdr::pipebuf<leansdr::f32> *p_mer;
+    leansdr::pipebuf<leansdr::cf32> *p_sampled;
 
     //DECIMATION
-    pipebuf<cf32> *p_decimated;
-    decimator<cf32> *p_decim;
+    leansdr::pipebuf<leansdr::cf32> *p_decimated;
+    leansdr::decimator<leansdr::cf32> *p_decim;
 
     //PROCESSED DATA MONITORING
-    file_writer<cf32> *r_ppout;
+    leansdr::file_writer<leansdr::cf32> *r_ppout;
 
     //GENERIC CONSTELLATION RECEIVER
-    cstln_receiver<f32> *m_objDemodulator;
+    leansdr::cstln_receiver<leansdr::f32> *m_objDemodulator;
 
     // DECONVOLUTION AND SYNCHRONIZATION
-    pipebuf<u8> *p_bytes;
-    deconvol_sync_simple *r_deconv;
-    viterbi_sync *r;
-    pipebuf<u8> *p_descrambled;
-    pipebuf<u8> *p_frames;
+    leansdr::pipebuf<leansdr::u8> *p_bytes;
+    leansdr::deconvol_sync_simple *r_deconv;
+    leansdr::viterbi_sync *r;
+    leansdr::pipebuf<leansdr::u8> *p_descrambled;
+    leansdr::pipebuf<leansdr::u8> *p_frames;
 
-    etr192_descrambler * r_etr192_descrambler;
-    hdlc_sync *r_sync;
+    leansdr::etr192_descrambler * r_etr192_descrambler;
+    leansdr::hdlc_sync *r_sync;
 
-    pipebuf<u8> *p_mpegbytes;
-    pipebuf<int> *p_lock;
-    pipebuf<u32> *p_locktime;
-    mpeg_sync<u8,0> *r_sync_mpeg;
+    leansdr::pipebuf<leansdr::u8> *p_mpegbytes;
+    leansdr::pipebuf<int> *p_lock;
+    leansdr::pipebuf<leansdr::u32> *p_locktime;
+    leansdr::mpeg_sync<leansdr::u8, 0> *r_sync_mpeg;
 
 
     // DEINTERLEAVING
-    pipebuf< rspacket<u8> > *p_rspackets;
-    deinterleaver<u8> *r_deinter;
+    leansdr::pipebuf<leansdr::rspacket<leansdr::u8> > *p_rspackets;
+    leansdr::deinterleaver<leansdr::u8> *r_deinter;
 
     // REED-SOLOMON
-    pipebuf<int> *p_vbitcount;
-    pipebuf<int> *p_verrcount;
-    pipebuf<tspacket> *p_rtspackets;
-    rs_decoder<u8,0> *r_rsdec;
+    leansdr::pipebuf<int> *p_vbitcount;
+    leansdr::pipebuf<int> *p_verrcount;
+    leansdr::pipebuf<leansdr::tspacket> *p_rtspackets;
+    leansdr::rs_decoder<leansdr::u8, 0> *r_rsdec;
 
     // BER ESTIMATION
-    pipebuf<float> *p_vber;
-    rate_estimator<float> *r_vber;
+    leansdr::pipebuf<float> *p_vber;
+    leansdr::rate_estimator<float> *r_vber;
 
     // DERANDOMIZATION
-    pipebuf<tspacket> *p_tspackets;
-    derandomizer *r_derand;
+    leansdr::pipebuf<leansdr::tspacket> *p_tspackets;
+    leansdr::derandomizer *r_derand;
 
 
     //OUTPUT
-    file_writer<tspacket> *r_stdout;
-    datvvideoplayer<tspacket> *r_videoplayer;
+    leansdr::file_writer<leansdr::tspacket> *r_stdout;
+    leansdr::datvvideoplayer<leansdr::tspacket> *r_videoplayer;
 
     //CONSTELLATION
-    datvconstellation<f32> *r_scope_symbols;
+    leansdr::datvconstellation<leansdr::f32> *r_scope_symbols;
 
+    DeviceSourceAPI* m_deviceAPI;
 
-private:
+    ThreadedBasebandSampleSink* m_threadedChannelizer;
+    DownChannelizer* m_channelizer;
 
-       DeviceSourceAPI* m_deviceAPI;
+    //*************** DATV PARAMETERS  ***************
+    TVScreen * m_objRegisteredTVScreen;
+    DATVideoRender * m_objRegisteredVideoRender;
+    DATVideostream * m_objVideoStream;
+    DATVideoRenderThread * m_objRenderThread;
 
-       ThreadedBasebandSampleSink* m_threadedChannelizer;
-       DownChannelizer* m_channelizer;
+    fftfilt * m_objRFFilter;
+    NCO m_objNCO;
 
-       //*************** DATV PARAMETERS  ***************
-       DATVScreen * m_objRegisteredDATVScreen;
-       DATVideoRender * m_objRegisteredVideoRender;
-       DATVideostream * m_objVideoStream;
-       DATVideoRenderThread * m_objRenderThread;
+    bool m_blnInitialized;
+    bool m_blnRenderingVideo;
+    bool m_blnStartStopVideo;
 
-       fftfilt * m_objRFFilter;
-       NCO m_objNCO;
-
-       bool m_blnInitialized;
-       bool m_blnRenderingVideo;
-
-       DATVModulation m_enmModulation;
-
-       //QElapsedTimer m_objTimer;
-private:
-
-    class MsgConfigureDATVDemod : public Message
-    {
-		MESSAGE_CLASS_DECLARATION
-
-        public:
-            static MsgConfigureDATVDemod* create(int intRFBandwidth,
-                                                 int intCenterFrequency,
-                                                 dvb_version enmStandard,
-                                                 DATVModulation enmModulation,
-                                                 code_rate enmFEC,                                                 
-                                                 int intSymbolRate,
-                                                 int intNotchFilters,
-                                                 bool blnAllowDrift,
-                                                 bool blnFastLock,
-                                                 bool blnHDLC,
-                                                 bool blnHardMetric,
-                                                 bool blnResample,
-                                                 bool blnViterbi)
-            {
-                return new MsgConfigureDATVDemod(intRFBandwidth,intCenterFrequency,enmStandard, enmModulation, enmFEC, intSymbolRate, intNotchFilters, blnAllowDrift,blnFastLock,blnHDLC,blnHardMetric,blnResample, blnViterbi);
-            }
-
-            DATVConfig m_objMsgConfig;
-
-        private:
-            MsgConfigureDATVDemod(int intRFBandwidth,
-                                  int intCenterFrequency,
-                                  dvb_version enmStandard,
-                                  DATVModulation enmModulation,
-                                  code_rate enmFEC,
-                                  int intSymbolRate,
-                                  int intNotchFilters,
-                                  bool blnAllowDrift,
-                                  bool blnFastLock,
-                                  bool blnHDLC,
-                                  bool blnHardMetric,
-                                  bool blnResample,
-                                  bool blnViterbi) :
-                                  Message()
-                                  {
-                                        m_objMsgConfig.intRFBandwidth = intRFBandwidth;
-                                        m_objMsgConfig.intCenterFrequency = intCenterFrequency;
-                                        m_objMsgConfig.enmStandard = enmStandard;
-                                        m_objMsgConfig.enmModulation = enmModulation;
-                                        m_objMsgConfig.enmFEC = enmFEC;                                       
-                                        m_objMsgConfig.intSymbolRate = intSymbolRate;
-                                        m_objMsgConfig.intNotchFilters = intNotchFilters;
-                                        m_objMsgConfig.blnAllowDrift = blnAllowDrift;
-                                        m_objMsgConfig.blnFastLock = blnFastLock;
-                                        m_objMsgConfig.blnHDLC = blnHDLC;
-                                        m_objMsgConfig.blnHardMetric = blnHardMetric;
-                                        m_objMsgConfig.blnResample = blnResample;
-                                        m_objMsgConfig.blnViterbi = blnViterbi;
-                                  }
-    };
-
+    DATVModulation m_enmModulation;
 
     DATVConfig m_objRunning;
+    MovingAverageUtil<double, double, 32> m_objMagSqAverage;
 
     QMutex m_objSettingsMutex;
 
     void ApplySettings();
-
 };
 
 #endif // INCLUDE_DATVDEMOD_H

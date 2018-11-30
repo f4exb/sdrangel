@@ -1,10 +1,16 @@
 ![SDR Angel banner](doc/img/sdrangel_banner.png)
 
-**SDRangel** is an Open Source Qt5 / OpenGL 3.0+ (Linux) SDR and signal analyzer frontend to various hardware.
+**SDRangel** is an Open Source Qt5 / OpenGL 3.0+ SDR and signal analyzer frontend to various hardware.
 
 **Check the discussion group** [here](https://groups.io/g/sdrangel)
 
-**&#9888; Warning**: Windows distribution is provided as a by product of the Qt toolchain. The platform of choice to run SDRangel is definitely Linux. You are encouraged to use the group to seek help from other Windows users but the author cannot give help or any support for problems related to running the software on Windows. Issues specific to Windows problems opened on Github will be closed systematically. Windows distribution may be discontinued in the future. 
+&#9888; SDRangel is intended for the power user. We expect you to already have some experience with SDR applications and digital signal processing in general. SDRangel might be a bit overwhelming for you however you are encouraged to use the discussion group above to look for help. You can also find more information in the [Wiki](https://github.com/f4exb/sdrangel/wiki).
+
+<h1>Hardware requirements</h1>
+
+SDRangel is a near real time application that is demanding on CPU power and clock speeds for low latency. Recent (2015 or later) Core i7 class CPU is recommended preferably with 4 HT CPU cores (8 logical CPUs or more) with nominal clock over 2 GHz and at least 8 GB RAM. Modern Intel processors will include a GPU suitable for proper OpenGL support. On the other hand SDRangel is not as demanding as recent computer games for graphics and CPU integrated graphics are perfectly fine. USB-3 ports are also preferable for high speed, low latency USB communication. It may run on beefy SBCs and was tested successfully on a Udoo Ultra.
+
+The server variant does not need a graphical display and therefore OpenGL support. It can run on smaller devices check the Wiki for hardware requirements and a list of successful cases.
 
 <h1>Source code</h1>
 
@@ -12,7 +18,7 @@
 
 - master: the production branch
 - dev: the development branch
-- legacy: the modified code from the parent application [hexameron rtl-sdrangelove](https://github.com/hexameron/rtl-sdrangelove) before a major redeisign of the code was carried out and sync was lost.
+- legacy: the modified code from the parent application [hexameron rtl-sdrangelove](https://github.com/hexameron/rtl-sdrangelove) before a major redesign of the code was carried out and sync was lost.
 
 <h2>Untested plugins</h2>
 
@@ -21,30 +27,36 @@ These plugins come from the parent code base and have been maintained so that th
 channelrx:
 
   - demodlora
-  - tcpsrc (although it has evolved please use the udpsrc plugin instead)
-
-<h2>Deprecated plugins</h2>
-
-These plugins are still present at least in the code but have been superceded:
-
-  - chanalyzer: the Channel Analyzer channel plugin is superceded by the "new generation" Channel Analyzer NG (chanalyzerng)
 
 <h1>Specific features</h1>
 
 <h2>Multiple device support</h2>
 
-From version 2 SDRangel can integrate more than one hardware device running concurrently.
+Since version 2 SDRangel can integrate more than one hardware device running concurrently.
 
 <h2>Transmission support</h2>
 
-From version 3 transmission or signal generation is supported for BladeRF, HackRF (since version 3.1), LimeSDR (since version 3.4) and PlutoSDR (since version 3.7.8) using a sample sink plugin. These plugins are:
+Since version 3 transmission or signal generation is supported for BladeRF, HackRF (since version 3.1), LimeSDR (since version 3.4) and PlutoSDR (since version 3.7.8) using a sample sink plugin. These plugins are:
 
-  - [BladeRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerfoutput) limited support in Windows
+  - [BladeRF1 output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerf1output)
+  - [BladeRF2 output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerf2output)
   - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
   - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput)
   - [PlutoSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/plutosdroutput)
   - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
   - [Remote device via Network with SDRdaemon](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink) Linux only
+
+<h2>REST API</h2>
+
+Since version 4 a REST API is available to interact with the SDRangel application. More details are provided in the server instance documentation in the `sdrsrv` folder.
+
+<h2>Server instance</h2>
+
+Since version 4 the `sdrangelsrv` binary launches a server mode SDRangel instance that runs wihout the GUI. More information is provided in the Readme file of the `sdrsrv` folder.
+
+<h2>Detached RF head server (SDRdaemon)</h2>
+
+Since version 4.1 the previously separated project SDRdaemon has been modified and included in SDRangel. The `sdrangelsrv` headless variant can be used for this purpose using the Daemon source or sink channels.
 
 <h1>Notes on pulseaudio setup</h1>
 
@@ -58,7 +70,7 @@ The audio devices with Qt are supported through pulseaudio and unless you are us
   - Select HDMI from the profiles list in the 'Configuration' tab
   - Then in the 'Output devices' tab the HDMI / display port is selected as it is normally the only one. Just double check this
   - In SDRangel's Preferences/Audio menu make sure something like `alsa_output.pci-0000_00_1b.0.hdmi-stereo` is selected. The default might also work after the pulseaudio configuration you just made.
-  
+
 In case you cannot see anything related to HDMI or your desired audio device in pavucontrol just restart pulseaudio with `pulseaudio -k` (`-k` kills the previous instance before restarting) and do the above steps again.
 
 <h1>Supported hardware</h1>
@@ -87,13 +99,29 @@ It is recommended to add `-DRX_SAMPLE_24BIT=ON` on the cmake command line to act
 
 &#9758; From version 3.12.0 the Linux binaries are built with the 24 bit Rx option.
 
-<h2>BladeRF</h2>
+<h2>BladeRF classic (v.1)</h2>
 
-[BladeRF](https://www.nuand.com/) is supported through the libbladerf library that should be installed in your system for proper build of the software and operation support. Add `libbladerf-dev` to the list of dependencies to install.
+[BladeRF1](https://www.nuand.com/bladerf-1) is supported through the libbladeRF library that should be installed in your system for proper build of the software and operation support. Add `libbladerf-dev` to the list of dependencies to install. Note that libbladeRF v2 is used since version 4.2.0 (git tag 2018.08).
 
-If you use your own location for libbladeRF install directory you need to specify library and include locations. Example with `/opt/install/libbladerf` with the following defines on `cmake` command line:
+If you compile and use your own location for libbladeRF install directory you need to specify library and include locations. Example with `/opt/install/libbladerf` with the following defines on `cmake` command line:
 
 `-DLIBBLADERF_LIBRARIES=/opt/install/libbladeRF/lib/libbladeRF.so -DLIBBLADERF_INCLUDE_DIR=/opt/install/libbladeRF/include`
+
+&#9758; Please note that if you use your own library the FPGA image `hostedx40.rbf` or `hostedx115.rbf` shoud be placed in e.g. `/opt/install/libbladeRF/share/Nuand/bladeRF` unless you have flashed the FPGA image inside the BladeRF.
+
+The plugins used to support BladeRF classic are specific to this version of the BladeRF:
+  - [BladeRF1 input](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/bladerf1input)
+  - [BladeRF1 output](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerf1output)
+
+<h2>BladeRF micro (v.2)</h2>
+
+From version 4.2.0.
+
+[BladeRF 2 micro](https://www.nuand.com/bladerf-2-0-micro/) is also supported using libbladeRF library that should be installed and configured in the same way as for BladeRF1.
+
+The plugins used to support BladeRF 2 micro are specific to this version of the BladeRF:
+  - [BladeRF2 input](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/bladerf2input)
+  - [BladeRF2 output](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerf2output)
 
 <h2>FunCube Dongle</h2>
 
@@ -119,11 +147,9 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 [LimeSDR](https://myriadrf.org/projects/limesdr/) and its smaller clone LimeSDR Mini are supported using LimeSuite library (see next).
 
-<p><b>&#9888; The plugins should work normally when running as single instances. Support of many Rx and/or Tx instances running concurrently is considered experimental. At least you should always have one of the streams running.</b></p>
+<p>&#9888; Version 18.10.0 of LimeSuite is used in the builds and corresponding gateware loaded in the LimeSDR should be is used. If you compile from source version 18.10.0 of LimeSuite must be used.</p>
 
-<p>&#9888; It seems LimeSDR mini has trouble working with host sample rates lower than 2.5 MS/s particularly in Tx mode.</p>
-
-You will need a minimal installation of LimeSuite. Presently commit 04b57e0 or later should be used with its corresponding firmware (v4) and gateware (v2.12) installed in the LimeSDR device:
+<p>&#9888; LimeSDR-Mini seems to have problems with Zadig driver therefore it is supported in Linux only.</p>
 
   - `sudo apt-get install libsqlite3-dev`
   - `git clone https://github.com/myriadrf/LimeSuite.git`
@@ -154,7 +180,7 @@ If you use your own location for libperseus-sdr install directory you need to sp
 
 [PlutoSDR](https://wiki.analog.com/university/tools/pluto) is supported with the libiio interface. This library should be installed in your system for proper build of the software and operation support. Add `libiio-dev` to the list of dependencies to install. Be aware that version 0.10 is needed and is not available yet in all distributions. You may have to compile it from source instead.
 
-If you use your own location for libiio install directory you need to specify library and include locations. Example with `/opt/install/libiio` with the following defines on `cmake` command line: `-DLIBIIO_INCLUDE_DIR=/opt/install/libiio/include -DLIBIIO_LIBRARY=/opt/install/libiio/lib/libiio.so`. In openSuse the lib directory path would be: `-DLIBIIO_LIBRARY=/opt/install/libiio/lib64/libiio.so`.
+If you use your own location for libiio install directory you need to specify library and include locations. Example with `/opt/install/libiio` with the following defines on `cmake` command line: `-DLIBIIO_INCLUDE_DIR=/opt/install/libiio/include -DLIBIIO_LIBRARY=/opt/install/libiio/lib/libiio.so`. In openSUSE the lib directory path would be: `-DLIBIIO_LIBRARY=/opt/install/libiio/lib64/libiio.so`.
 
 <h2>RTL-SDR</h2>
 
@@ -184,9 +210,9 @@ These plugins do not use any hardware device connected to your system.
 
 The [File source plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/filesource) allows the playback of a recorded IQ file. Such a file is obtained using the recording feature. Click on the record button on the left of the main frequency dial to toggle recording. The file has a fixed name `test_<n>.sdriq` created in the current directory where `<n>` is the device tab index.
 
-Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is alwasys available in the list of devices as `FileSource[0]` even if no physical device is connected.
+Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `FileSource[0]` even if no physical device is connected.
 
-The `.sdriq` format produced are the 2x2 bytes I/Q samples with a header containing the center frequency of the baseband, the sample rate and the timestamp of the recording start. Note that this header length is a multiple of the sample size so the file can be read with a simple 2x2 bytes I/Q reader such as a GNU Radio file source block. It will just produce a short glitch at the beginning corresponding to the header data. 
+The `.sdriq` format produced are the 2x2 bytes I/Q samples with a header containing the center frequency of the baseband, the sample rate and the timestamp of the recording start. Note that this header length is a multiple of the sample size so the file can be read with a simple 2x2 bytes I/Q reader such as a GNU Radio file source block. It will just produce a short glitch at the beginning corresponding to the header data.
 
 <h2>File output</h2>
 
@@ -196,19 +222,19 @@ Note that this plugin does not require any of the hardware support libraries nor
 
 <h2>Test source</h2>
 
-The [Test source plugin](https://github.com/f4exb/sdrangel/tree/master/plugins/samplesource/testsource) is an internal continuous wave generator that can be used to carry out test of software internals. 
+The [Test source plugin](https://github.com/f4exb/sdrangel/tree/master/plugins/samplesource/testsource) is an internal continuous wave generator that can be used to carry out test of software internals.
 
 <h2>SDRdaemon receiver input</h2>
 
 Linux only.
 
-The [SDRdaemon source input plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/sdrdaemonsource) is the client side of the SDRdaemon receiver server `sdrdaemonrx`. See the [SDRdaemon](https://github.com/f4exb/sdrdaemon) project in this Github repository. You must specify the local address and UDP port to which the remote server connects and samples will flow into the SDRangel application (default is `127.0.0.1`port `9090`). It uses the meta data to retrieve the sample flow characteristics such as sample rate and receiveng center frequency. It also opens a TCP link to another port to send service messages such as setting parameters specific to the hadrware device connected to the server (default port is `9091`). The `libnanomsg` library is used to support this messaging.
+The [SDRdaemon source input plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/sdrdaemonsource) is the client side of an instance of SDRangel running the Daemon Sink channel plugin. On the "Data" line you must specify the local address and UDP port to which the remote server connects and samples will flow into the SDRangel application (default is `127.0.0.1`port `9090`). It uses the meta data to retrieve the sample flow characteristics such as sample rate and receiving center frequency. The remote is entirely controlled by the REST API. On the "API" line you can specify the address and port at which the remote REST API listens. However it is used just to display basic information about the remote.
 
 The data blocks transmitted via UDP are protected against loss with a Cauchy MDS block erasure codec. This makes the transmission more robust in particular with WiFi links.
 
-There is an automated skew rate compensation in place. During rate readjustemnt streaming can be suspended or signal glitches can occur for about one second.
+There is an automated skew rate compensation in place. During rate readjustment streaming can be suspended or signal glitches can occur for about one second.
 
-This plugin will be built only if the libnanomsg and the [CM256cc library](https://github.com/f4exb/cm256cc) are installed in your system. libnanomsg is available as a dev package in most distributions For CM256cc if you install it in a non standard directory you will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
+This plugin will be built only if the [CM256cc library](https://github.com/f4exb/cm256cc) is installed in your system. For CM256cc if you install it in a non standard directory you will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
 
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `SDRdaemonSource[0]` even if no physical device is connected.
 
@@ -216,13 +242,11 @@ Note that this plugin does not require any of the hardware support libraries nor
 
 Linux only.
 
-The [SDRdaemon sink output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink) is the client side of the SDRdaemon transmitter server `sdrdaemontx`. See the [SDRdaemon](https://github.com/f4exb/sdrdaemon) project in this Github repository. You must specify the distant address and UDP port to which the plugin connects and samples from the SDRangel application will flow into the transmitter server (default is `127.0.0.1`port `9092`). It also opens a TCP link to another port to exchange service messages such as setting the center frequency or getting status information from the server (default port is `9093`). The `libnanomsg` library is used to support this messaging.
+The [SDRdaemon sink output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink) is the client side of and instance of SDRangel running the Daemon Source channel plugin. On the "Data" line you must specify the distant address and UDP port to which the plugin connects and samples from the SDRangel application will flow into the transmitter server (default is `127.0.0.1`port `9090`). The remote is entirely controlled by the REST API. On the "API" line you can specify the address and port at which the remote REST API listens. The API is pinged regularly to retrieve the status of the data blocks queue and allow rate control to stabilize the queue length. Therefore it is important to connect to the API properly (The status line must return "API OK" and the API label should be lit in green).
 
 The data blocks sent via UDP are protected against loss with a Cauchy MDS block erasure codec. This makes the transmission more robust in particular with WiFi links.
 
-There is an automated skew rate compensation in place so that the generator throttling is adjusted to match the actual sample rate of the distant device. This is based on the number of buffer blocks sent back from the distant server using the TCP link. 
-
-This plugin will be built only if the libnanomsg and the [CM256cc library](https://github.com/f4exb/cm256cc) are installed in your system. libnanomsg is available as a dev package in most distributions For CM256cc if you install it in a non standard directory you will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
+This plugin will be built only if the [CM256cc library](https://github.com/f4exb/cm256cc) IS installed in your system. For CM256cc if you install it in a non standard directory you will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
 
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `SDRdaemonSink[0]` even if no physical device is connected.
 
@@ -236,21 +260,13 @@ This is the `demoddsd` plugin. At present it can be used to decode the following
   - dPMR
   - D-Star
   - Yaesu System Fusion (YSF)
+  - NXDN
 
 It is based on the [DSDcc](https://github.com/f4exb/dsdcc) C++ library which is a rewrite of the original [DSD](https://github.com/szechyjs/dsd) program. So you will need to have DSDcc installed in your system. Please follow instructions in [DSDcc readme](https://github.com/f4exb/dsdcc/blob/master/Readme.md) to build and install DSDcc. If you install it in a custom location say `/opt/install/dsdcc` you will need to add these defines to the cmake command: `-DLIBDSDCC_INCLUDE_DIR=/opt/install/dsdcc/include/dsdcc -DLIBDSDCC_LIBRARIES=/opt/install/dsdcc/lib/libdsdcc.so`
 
-If you have one or more serial devices interfacing the AMBE3000 chip in packet mode you can use them to decode AMBE voice frames. For that purpose you will need to compile with [SerialDV](https://github.com/f4exb/serialDV) support. Please refer to this project Readme.md to compile and install SerialDV. If you install it in a custom location say `/opt/install/serialdv` you will need to add these defines to the cmake command: `-DLIBSERIALDV_INCLUDE_DIR=/opt/install/serialdv/include/serialdv -DLIBSERIALDV_LIBRARY=/opt/install/serialdv/lib/libserialdv.so` Also your user must be a member of group `dialout` to be able to use the dongle.
+If you have one or more serial devices interfacing the AMBE3000 chip in packet mode you can use them to decode AMBE voice frames. For that purpose you will need to compile with [SerialDV](https://github.com/f4exb/serialDV) support. Please refer to this project Readme.md to compile and install SerialDV. If you install it in a custom location say `/opt/install/serialdv` you will need to add these defines to the cmake command: `-DLIBSERIALDV_INCLUDE_DIR=/opt/install/serialdv/include/serialdv -DLIBSERIALDV_LIBRARY=/opt/install/serialdv/lib/libserialdv.so` Also your user must be a member of group `dialout` (Ubuntu/Debian) or `uucp` (Arch) to be able to use the dongle.
 
-Although such serial devices work with a serial interface at 400 kb in practice maybe for other reasons they are capable of handling only one conversation at a time. The software will allocate the device dynamically to a conversation with an inactivity timeout of 1 second so that conversations do not get interrupted constantly making the audio output too choppy. In practice you will have to have as many devices connected to your system as the number of conversations you would like to be handled in parallel. 
-
-Note that this is not supported in Windows because of trouble with COM port support (contributors welcome!).
-
----
-&#9888; Since kernel 4.4.52 the default for FTDI devices (that is in the ftdi_sio kernel module) is not to set it as low latency. This results in the ThumbDV dongle not working anymore because its response is too slow to sustain the normal AMBE packets flow. The solution is to force low latency by changing the variable for your device (ex: /dev/ttyUSB0) as follows:
-
-`echo 1 | sudo tee /sys/bus/usb-serial/devices/ttyUSB0/latency_timer` or `sudo setserial /dev/ttyUSB0 low_latency`
-
----
+Although such serial devices work with a serial interface at 400 kb in practice maybe for other reasons they are capable of handling only one conversation at a time. The software will allocate the device dynamically to a conversation with an inactivity timeout of 1 second so that conversations do not get interrupted constantly making the audio output too choppy. In practice you will have to have as many devices connected to your system as the number of conversations you would like to be handled in parallel.
 
 Alternatively you can use [mbelib](https://github.com/szechyjs/mbelib) but mbelib comes with some copyright issues (see next). If you have mbelib installed in a custom location, say `/opt/install/mbelib` you will need to add these defines to the cmake command: `-DLIBMBE_INCLUDE_DIR=/opt/install/mbelib/include -DLIBMBE_LIBRARY=/opt/install/mbelib/lib/libmbe.so`
 
@@ -267,14 +283,15 @@ If you are not comfortable with this just do not install DSDcc and/or mbelib and
 
 <h1>Software distributions</h1>
 
-In the [releases](https://github.com/f4exb/sdrangel/releases) section one can find binary distributions for some common systems:
+In the [releases](https://github.com/f4exb/sdrangel/releases) section one can find binary distributions for some Debian based distributions:
 
-  - Debian x86_64 (Ubuntu 16.04, Ubuntu 17.10, Debian Stretch)
-  - Windows 32 bit (runs also in 64 bit Windows) 
+  - Ubuntu 18.04 (Bionic)
+  - Ubuntu 16.04 (Xenial)
+  - Debian Stretch
 
 <h2>Debian distributions</h2>
 
-It is provided in the form of .deb packages for x86_64 architectures with SSE 4.1 support. 
+It is provided in the form of .deb packages for x86_64 architectures with SSE 4.1 support.
 
 Install it as usual for .deb packages:
 
@@ -286,20 +303,27 @@ Prior to apt-get v 1.1 (before Ubuntu 16.04) in a terminal do:
   - `sudo apt-get upgrade`
   - `sudo dpkg -i sdrangel_vx.y.z-1_amd64.deb` where x.y.z is the version number
   - `sudo apt-get -f install` this will install missing dependencies
-    
+
 Since apt-get v 1.1 installation is possible from a local file:
 
   - cd to where the archive has been downloaded
-  - `sudo apt-get install ./sdrangel_vx.y.z-1_amd64.deb` where x.y.z is the version number 
-    
+  - `sudo apt-get install ./sdrangel_vx.y.z-1_amd64.deb` where x.y.z is the version number
+  - `sudo apt-get -f install` this will install missing dependencies
+
 The software is installed in `/opt/sdrangel` you can start it from the command line with:
   - `/opt/sdrangel/bin/sdrangel`
-  
+
+**&#9888;** The udev rules are not set by the package installation so you will have to set it manually in order to be able to access the various SDR hardware. The `udev-rules` folder contains the rules file and the `install.sh` script that you can run as sudo to install all rules files. You may also adapt the script to copy only the required files.
+
+<h3>Ubuntu 18.04</h2>
+
+The default CPU governor is now `powersave` which exhibits excessive CPU usage when running SDRangel. In the case of benchmarking and maybe high throughput usage it is recommended to switch to `performance` before running SDRangel by running the command: `sudo cpupower frequency-set --governor performance`. You can turn it back to `powersave` any time by running: `sudo cpupower frequency-set --governor powersave`. It is normal that with a lower CPU frequency the relative CPU usage rises for the same actual load. If not impairing operation this is normal and overall beneficial for heat and power consumption.
+
 <h2>Windows distribution</h2>
 
 This is the archive of the complete binary distribution that expands to the `sdrangel` directory. You can install it anywhere you like and click on `sdrangel.exe` to start.
 
-<b>&#9888; Windows distribution is provided as a by product thanks to the Qt toolchain. The platform of choice to run SDRangel is definitely Linux and very little support can be given for the Windows distribution.</b>
+<b>&#9888; Windows distribution is provided as a by product thanks to the Qt toolchain. The platform of choice to run SDRangel is definitely Linux and very little support can be given for this Windows distribution.</b>
 
 <h1>Software build</h1>
 
@@ -307,7 +331,7 @@ This is the archive of the complete binary distribution that expands to the `sdr
 
 To be sure you will need at least Qt version 5.5. It definitely does not work with versions earlier than 5.3 but neither 5.3 nor 5.4 were tested.
 
-  - Linux builds are made with 5.5.1 (Xenial) and 5.9 (Artful, Stretch)
+  - Linux builds are made with 5.5.1 (Xenial), 5.9 (Artful, Stretch, Bionic) and 5.11 (Cosmic)
   - Windows build is made with 5.10.1 in 32 bit mode and has Qt ANGLE support (OpenGL emulation with DirectX)
 
 <h2>24 bit DSP</h2>
@@ -336,16 +360,23 @@ Install cmake version 3:
   - `sudo apt-get remove cmake` (if already installed)
   - `sudo apt-get install cmake`
 
+<h3>Prerequisites for 16.04 LTS</h3>
+
+For DATV demodulator support you need to install the ffmpeg v.3 suite. Therefore you will need to add this PPA to the sources list using this command:
+`sudo add-apt-repository ppa:jonathonf/ffmpeg-3`
+
+Then do `sudo apt-get update` and go to the next step. Alternatively if you have an older version of ffmpeg suite already installed just do `sudo apt-get dist-upgrde`.
+
 <h3>With newer versions just do:</h3>
 
-  - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libnanomsg-dev libopencv-dev libsqlite3-dev libxml2-dev bison flex`
+  - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libsqlite3-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev`
   - `mkdir build && cd build && cmake ../ && make`
 
 `librtlsdr-dev` is in the `universe` repo. (utopic 14.10 amd64.)
 
 <h2>Mint</h2>
 
-Tested with Cinnamon 17.2. Since it is based on Ubuntu 14.04 LTS pleae follow instructions for this distribution (paragraph just above).
+Tested with Cinnamon 17.2. Since it is based on Ubuntu 14.04 LTS please follow instructions for this distribution (paragraph just above).
 
 <h2>Debian</h2>
 
@@ -355,24 +386,25 @@ Debian 7 "wheezy" uses Qt4. Qt5 is available from the "wheezy-backports" repo, b
 
 For Debian Jessie or Stretch:
 
-`sudo apt-get install cmake g++ pkg-config libfftw3-dev libusb-1.0-0-dev libusb-dev qt5-default qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libsqlite3-dev libxml2-dev bison flex`
+`sudo apt-get install cmake g++ pkg-config libfftw3-dev libusb-1.0-0-dev libusb-dev qt5-default qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libsqlite3-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev`
 
 `mkdir build && cd build && cmake ../ && make`
 
 <h2>openSUSE</h2>
 
-This has been tested with the bleeding edge "Thumbleweed" distribution:
+This has been tested with the Leap 42.3 distribution:
 
-`sudo zypper install Mesa-libGL1 Mesa-libEGL-devel Mesa-libGL-devel Mesa-libGLESv1_CM-devel Mesa-libGLESv2-devel Mesa-libGLESv3-devel Mesa-libglapi-devel libOSMesa-devel` 
+`sudo zypper install Mesa-libGL1 Mesa-libEGL-devel Mesa-libGL-devel Mesa-libGLESv1_CM-devel Mesa-libGLESv2-devel Mesa-libGLESv3-devel Mesa-libglapi-devel libOSMesa-devel`
 
 `sudo zypper install cmake fftw3-devel gcc-c++ libusb-1_0-devel libqt5-qtbase-devel libQt5OpenGL-devel libqt5-qtmultimedia-devel libqt5-qttools-devel libQt5Network-devel libQt5Widgets-devel boost-devel alsa-devel pulseaudio opencv-devel`
 
 Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
 
-  - Note1: if you are on Leap you will need a more recent g++ compiler so in place of `gcc-c++` use `gcc5-c++` or `gcc6-c++` then add the following in the cmake command: `-DCMAKE_C_COMPILER=/usr/bin/gcc-6 -DCMAKE_CXX_COMPILER=/usr/bin/g++-6` (for gcc 6) and then `-DCMAKE_INSTALL_PREFIX:PATH=...` for the custom install path (not `-DCMAKE_INSTALL_PREFIX=...`)
-  - Note2: On Leap and aarch64 architectures you will need to build and install `libnanomsg` from [source](https://github.com/nanomsg/nanomsg)
-  - Note3 for udev rules: installed udev rules for BladeRF and HackRF are targetted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in openSUSE. To make the udev rules file compatible just remove the `GROUP` parameter on all lines and change `MODE` parameter to `666`.
-  - Note4: A package has been created in OpenSUSE thanks to Martin, see: [sdrangel](https://build.opensuse.org/package/show/hardware:sdr/sdrangel). It is based on the latest release on master branch.
+  - Note1: if you are on Leap you will need a more recent g++ compiler so in place of `gcc-c++` use `gcc6-c++` or `gcc7-c++` then add the following in the cmake command: `-DCMAKE_C_COMPILER=/usr/bin/gcc-7 -DCMAKE_CXX_COMPILER=/usr/bin/g++-7` (for gcc 7) and then `-DCMAKE_INSTALL_PREFIX:PATH=...` for the custom install path (not `-DCMAKE_INSTALL_PREFIX=...`)
+  - Note2 for udev rules: installed udev rules for BladeRF and HackRF are targeted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in openSUSE. To fix it you can either:
+    - make the udev rules file compatible just remove the `GROUP` parameter on all lines and change `MODE` parameter to `666`.
+    - create a `plugdev` group and add it tou your user group list: `sudo groupadd plugdev` then `sudo usermod -G plugdev -a <user>`
+  - Note3: A package has been created in openSUSE thanks to Martin, see: [sdrangel](https://build.opensuse.org/package/show/hardware:sdr/sdrangel). It is based on the latest release on master branch.
 
 <h2>Fedora</h2>
 
@@ -386,16 +418,16 @@ Then you should be all set to build the software with `cmake` and `make` as disc
 
   - Note for udev rules: the same as for openSUSE applies. This is detailed in the previous paragraph for openSUSE.
 
-<h2>Manjaro</h2>
+<h2>Arch Linux / Manjaro</h2>
 
-Tested with the 15.09 version with LXDE desktop (community supported). The exact desktop environment should not matter anyway. Since Manjaro is Arch Linux based prerequisites should be similar for Arch and all derivatives.
+Tested with the 15.09 version with LXDE desktop (community supported). The exact desktop environment should not matter anyway. Prerequisites should be similar for Arch and all derivatives.
 
 `sudo pacman -S cmake pkg-config fftw qt5-multimedia qt5-tools qt5-base libusb boost boost-libs pulseaudio`
 
 Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
 
   - Note1 for udev rules: the same as for openSUSE and Fedora applies.
-  - Note2: A package has been created in the AUR (thanks Mikos!), see: [sdrangel-git](https://aur.archlinux.org/packages/sdrangel-git). It is based on the `205fee6` commit of 8th December 2015.
+  - Note2: Two package are avaliable in the AUR (thanks Mikos!), [sdrangel](https://aur.archlinux.org/packages/sdrangel), which provides the lastest tagged release (stable), and [sdrangel-git](https://aur.archlinux.org/packages/sdrangel-git), which builds the latest commit from this repository (unstable).
 
 <h2>Windows</h2>
 
@@ -428,14 +460,13 @@ You can uninstall the software with `make uninstall` or `sudo make uninstall` fr
 <h1>Limitations</h1>
 
   - Your hardware. Still SDRangel is relatively conservative on computer resources.
-  - OpenGL 3+ (Linux)
-  - OpenGL 4.3+ (Windows) for OpenGL native support however the Qt Angle framework may be able to make it work on systems supporting Direct-X only.
+  - OpenGL 3+
 
 <h1>Features</h1>
 
 <h2>Changes from SDRangelove</h2>
 
-See the v1.0.1 first official relase [release notes](https://github.com/f4exb/sdrangel/releases/tag/v1.0.1)
+See the v1.0.1 first official release [release notes](https://github.com/f4exb/sdrangel/releases/tag/v1.0.1)
 
 <h2>To Do</h2>
 
@@ -451,4 +482,4 @@ Other ideas:
 
 <h1>Developer's notes</h1>
 
-Please check the developper's specific [readme](./ReadmeDeveloper.md)
+Please check the developer's specific [readme](./ReadmeDeveloper.md)

@@ -30,14 +30,14 @@
 #include <vector>
 #include <boost/circular_buffer.hpp>
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "util/doublebuffer.h"
 
 class GLScopeMulti;
 
-class SDRANGEL_API ScopeVisMulti : public QObject {
+class SDRGUI_API ScopeVisMulti : public QObject {
     Q_OBJECT
 public:
     enum ProjectionType

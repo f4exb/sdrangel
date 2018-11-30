@@ -5,13 +5,13 @@
 #include <emmintrin.h>
 #endif
 #include "dsp/dsptypes.h"
-#include "util/export.h"
+#include "export.h"
 #include <stdio.h>
 #ifndef __WINDOWS__
 #include <unistd.h>
 #endif
 
-class SDRANGEL_API Interpolator {
+class SDRBASE_API Interpolator {
 public:
 	Interpolator();
 	~Interpolator();

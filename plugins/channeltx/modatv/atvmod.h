@@ -324,48 +324,6 @@ public:
         { }
     };
 
-    class MsgConfigureOverlayText : public Message
-    {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        const QString& getOverlayText() const { return m_overlayText; }
-
-        static MsgConfigureOverlayText* create(const QString& overlayText)
-        {
-            return new MsgConfigureOverlayText(overlayText);
-        }
-
-    private:
-        QString m_overlayText;
-
-        MsgConfigureOverlayText(const QString& overlayText) :
-            Message(),
-            m_overlayText(overlayText)
-        { }
-    };
-
-    class MsgConfigureShowOverlayText : public Message
-    {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        bool getShowOverlayText() const { return m_showOverlayText; }
-
-        static MsgConfigureShowOverlayText* create(bool showOverlayText)
-        {
-            return new MsgConfigureShowOverlayText(showOverlayText);
-        }
-
-    private:
-        bool m_showOverlayText;
-
-        MsgConfigureShowOverlayText(bool showOverlayText) :
-            Message(),
-            m_showOverlayText(showOverlayText)
-        { }
-    };
-
     class MsgReportEffectiveSampleRate : public Message
     {
         MESSAGE_CLASS_DECLARATION
@@ -404,12 +362,24 @@ public:
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
-    virtual void setName(const QString& name) { setObjectName(name); }
-    virtual QString getName() const { return objectName(); }
     virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& channelSettingsKeys,
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiReportGet(
+                SWGSDRangel::SWGChannelReport& response,
+                QString& errorMessage);
 
     int getEffectiveSampleRate() const { return m_tvSampleRate; };
     double getMagSq() const { return m_movingAverage.asDouble(); }
@@ -541,7 +511,8 @@ private:
     int m_cameraIndex;           //!< curent camera index in list of available cameras
 
     std::string m_overlayText;
-    bool m_showOverlayText;
+    QString m_imageFileName;
+    QString m_videoFileName;
 
     // Used for standard SSB
     fftfilt* m_SSBFilter;
@@ -582,6 +553,9 @@ private:
     void resizeCameras();
     void resizeCamera();
     void mixImageAndText(cv::Mat& image);
+
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const ATVModSettings& settings);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 
     inline void pullImageLine(Real& sample, bool noHSync = false)
     {

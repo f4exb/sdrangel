@@ -73,6 +73,6 @@ target_link_libraries(inputairspy
 endif (BUILD_DEBIAN)
 
 
-qt5_use_modules(inputairspy Core Widgets)
+target_link_libraries(inputairspy Qt5::Core Qt5::Widgets)
 
 install(TARGETS inputairspy DESTINATION lib/plugins/samplesource)

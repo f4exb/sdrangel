@@ -96,7 +96,7 @@ void PlutoSDRInputThread::run()
 
         if (nbytes_rx != m_blockSizeSamples*2)
         {
-            qWarning("PlutoSDRInputThread::run: error refilling buf (1) %d / %d\n",(int) nbytes_rx, (int)  m_blockSizeSamples*2);
+            qWarning("PlutoSDRInputThread::run: error refilling buf (1) %d / %d",(int) nbytes_rx, (int)  m_blockSizeSamples*2);
             usleep(200000);
             continue;
         }
@@ -121,7 +121,7 @@ void PlutoSDRInputThread::run()
 
         if (nbytes_rx != m_blockSizeSamples*2)
         {
-            qWarning("PlutoSDRInputThread::run: error refilling buf (2) %d / %d\n",(int) nbytes_rx, (int)  m_blockSizeSamples*2);
+            qWarning("PlutoSDRInputThread::run: error refilling buf (2) %d / %d",(int) nbytes_rx, (int)  m_blockSizeSamples*2);
             usleep(200000);
             continue;
         }

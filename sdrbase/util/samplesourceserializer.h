@@ -18,8 +18,9 @@
 #define INCLUDE_UTIL_SAMPLESOURCESERIALIZER_H_
 
 #include "util/simpleserializer.h"
+#include "export.h"
 
-class SampleSourceSerializer
+class SDRBASE_API SampleSourceSerializer
 {
 public:
 	struct Data

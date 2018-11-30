@@ -32,7 +32,7 @@
 MESSAGE_CLASS_DEFINITION(LoRaDemod::MsgConfigureLoRaDemod, Message)
 MESSAGE_CLASS_DEFINITION(LoRaDemod::MsgConfigureChannelizer, Message)
 
-const QString LoRaDemod::m_channelIdURI = "de.maintech.sdrangelove.channel.lora";
+const QString LoRaDemod::m_channelIdURI = "sdrangel.channel.lorademod";
 const QString LoRaDemod::m_channelId = "LoRaDemod";
 
 LoRaDemod::LoRaDemod(DeviceSourceAPI* deviceAPI) :

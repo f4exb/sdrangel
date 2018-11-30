@@ -30,7 +30,6 @@ copy cm256cc\%1\cm256cc.dll %2
 copy mbelib\%1\mbelib.dll %2
 copy dsdcc\%1\dsdcc.dll %2
 copy serialdv\%1\serialdv.dll %2
-copy nanomsg\%1\nanomsg.dll %2
 copy httpserver\%1\httpserver.dll %2
 copy logging\%1\logging.dll %2
 copy swagger\%1\swagger.dll %2

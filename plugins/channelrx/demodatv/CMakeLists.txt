@@ -5,8 +5,6 @@ set(atv_SOURCES
 	atvdemodsettings.cpp
 	atvdemodgui.cpp
 	atvdemodplugin.cpp
-	atvscreen.cpp
-	glshaderarray.cpp
 )
 
 set(atv_HEADERS
@@ -14,9 +12,6 @@ set(atv_HEADERS
     atvdemodsettings.h
 	atvdemodgui.h
 	atvdemodplugin.h
-	atvscreen.h
-	atvscreeninterface.h
-	glshaderarray.h
 )
 
 set(atv_FORMS
@@ -48,6 +43,6 @@ target_link_libraries(demodatv
 	sdrgui
 )
 
-qt5_use_modules(demodatv Core Widgets)
+target_link_libraries(demodatv Qt5::Core Qt5::Widgets)
 
 install(TARGETS demodatv DESTINATION lib/plugins/channelrx)

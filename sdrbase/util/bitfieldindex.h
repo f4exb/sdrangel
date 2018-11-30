@@ -45,9 +45,19 @@ struct BitfieldIndex
 };
 
 template <unsigned int size>
-BitfieldIndex<size> operator+(const BitfieldIndex<size> &a, const BitfieldIndex<size> &b) { BitfieldIndex<size> x; x.v = x.a + x.b; return x; }
+BitfieldIndex<size> operator+(const BitfieldIndex<size> &a, const BitfieldIndex<size> &b)
+{
+    BitfieldIndex<size> x;
+    x.v = a.v + b.v;
+    return x;
+}
 
 template <unsigned int size>
-BitfieldIndex<size> operator-(const BitfieldIndex<size> &a, const BitfieldIndex<size> &b) { BitfieldIndex<size> x; x.v = x.a - x.b; return x; }
+BitfieldIndex<size> operator-(const BitfieldIndex<size> &a, const BitfieldIndex<size> &b)
+{
+    BitfieldIndex<size> x;
+    x.v = a.v - b.v;
+    return x;
+}
 
 #endif // _UTIL_BITFIELDINDEX_H_

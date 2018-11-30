@@ -32,19 +32,19 @@ struct DSDDemodSettings
     int  m_squelchGate;
     Real m_squelch;
     bool m_audioMute;
-    quint32 m_audioSampleRate;
     bool m_enableCosineFiltering;
     bool m_syncOrConstellation;
     bool m_slot1On;
     bool m_slot2On;
     bool m_tdmaStereo;
     bool m_pllLock;
-    bool m_copyAudioToUDP;
-    QString m_udpAddress;
-    quint16 m_udpPort;
     quint32 m_rgbColor;
     QString m_title;
     bool m_highPassFilter;
+    int m_traceLengthMutliplier; // x 50ms
+    int m_traceStroke; // [0..255]
+    int m_traceDecay; // [0..255]
+    QString m_audioDeviceName;
 
     Serializable *m_channelMarker;
     Serializable *m_scopeGUI;

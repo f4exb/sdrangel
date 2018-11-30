@@ -23,14 +23,15 @@
 #include <QByteArray>
 #include <stdint.h>
 
-#include "util/export.h"
+#include "export.h"
 
 namespace SWGSDRangel
 {
     class SWGChannelSettings;
+    class SWGChannelReport;
 }
 
-class SDRANGEL_API ChannelSinkAPI {
+class SDRBASE_API ChannelSinkAPI {
 public:
     ChannelSinkAPI(const QString& name);
     virtual ~ChannelSinkAPI() {}
@@ -45,6 +46,24 @@ public:
     virtual QByteArray serialize() const = 0;
     virtual bool deserialize(const QByteArray& data) = 0;
 
+#ifdef _MSC_VER
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage)
+    { errorMessage = "Not implemented"; return 501; }
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage)
+    { errorMessage = "Not implemented"; return 501; }
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage)
+    { errorMessage = "Not implemented"; return 501; }
+#else
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
             QString& errorMessage)
@@ -56,6 +75,12 @@ public:
             SWGSDRangel::SWGChannelSettings& response __attribute__((unused)),
             QString& errorMessage)
     { errorMessage = "Not implemented"; return 501; }
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response __attribute__((unused)),
+            QString& errorMessage)
+    { errorMessage = "Not implemented"; return 501; }
+#endif
 
     int getIndexInDeviceSet() const { return m_indexInDeviceSet; }
     void setIndexInDeviceSet(int indexInDeviceSet) { m_indexInDeviceSet = indexInDeviceSet; }

@@ -2,12 +2,14 @@
 #include "plugin/pluginapi.h"
 
 #include "nfmplugin.h"
+#ifndef SERVER_MODE
 #include "nfmdemodgui.h"
+#endif
 #include "nfmdemod.h"
 
 const PluginDescriptor NFMPlugin::m_pluginDescriptor = {
 	QString("NFM Demodulator"),
-	QString("3.12.0"),
+	QString("4.2.1"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

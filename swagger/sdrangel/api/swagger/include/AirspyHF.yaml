@@ -1,0 +1,30 @@
+AirspyHFSettings:
+  description: AirspyHF
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    LOppmTenths:
+      type: integer
+    devSampleRateIndex:
+      type: integer
+    log2Decim:
+      type: integer
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64      
+    bandIndex:
+      type: integer
+    fileRecordName:
+      type: string
+       
+AirspyHFReport:
+  description: AirspyHF
+  properties:
+    sampleRates:
+      type: array
+      items:
+        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/SampleRate"  
+ 

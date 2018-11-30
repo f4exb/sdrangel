@@ -31,7 +31,7 @@ SDRdaemonSourceUDPHandler::SDRdaemonSourceUDPHandler(SampleSinkFifo *sampleFifo,
     m_masterTimer(deviceAPI->getMasterTimer()),
     m_masterTimerConnected(false),
     m_running(false),
-	m_sdrDaemonBuffer(m_rateDivider),
+    m_rateDivider(1000/SDRDAEMONSOURCE_THROTTLE_MS),
 	m_dataSocket(0),
 	m_dataAddress(QHostAddress::LocalHost),
 	m_remoteAddress(QHostAddress::LocalHost),
@@ -54,10 +54,9 @@ SDRdaemonSourceUDPHandler::SDRdaemonSourceUDPHandler(SampleSinkFifo *sampleFifo,
     m_converterBuffer(0),
     m_converterBufferNbSamples(0),
     m_throttleToggle(false),
-    m_rateDivider(1000/SDRDAEMONSOURCE_THROTTLE_MS),
 	m_autoCorrBuffer(true)
 {
-    m_udpBuf = new char[SDRdaemonSourceBuffer::m_udpPayloadSize];
+    m_udpBuf = new char[SDRDaemonUdpSize];
 
 #ifdef USE_INTERNAL_TIMER
 #warning "Uses internal timer"
@@ -97,7 +96,7 @@ void SDRdaemonSourceUDPHandler::start()
 
     if (!m_dataConnected)
 	{
-        connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()), Qt::QueuedConnection); // , Qt::QueuedConnection
+        connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead())); //, Qt::QueuedConnection);
 
         if (m_dataSocket->bind(m_dataAddress, m_dataPort))
 		{
@@ -168,7 +167,7 @@ void SDRdaemonSourceUDPHandler::dataReadyRead()
 		qint64 pendingDataSize = m_dataSocket->pendingDatagramSize();
 		m_udpReadBytes += m_dataSocket->readDatagram(&m_udpBuf[m_udpReadBytes], pendingDataSize, &m_remoteAddress, 0);
 
-		if (m_udpReadBytes == SDRdaemonSourceBuffer::m_udpPayloadSize) {
+		if (m_udpReadBytes == SDRDaemonUdpSize) {
 		    processData();
 		    m_udpReadBytes = 0;
 		}
@@ -178,7 +177,7 @@ void SDRdaemonSourceUDPHandler::dataReadyRead()
 void SDRdaemonSourceUDPHandler::processData()
 {
     m_sdrDaemonBuffer.writeData(m_udpBuf);
-    const SDRdaemonSourceBuffer::MetaDataFEC& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
+    const SDRDaemonMetaDataFEC& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
     bool change = false;
 
     m_tv_sec = m_sdrDaemonBuffer.getTVOutSec();
@@ -196,7 +195,7 @@ void SDRdaemonSourceUDPHandler::processData()
         change = true;
     }
 
-    if (change && (m_samplerate != 0) && (m_centerFrequency != 0))
+    if (change && (m_samplerate != 0))
     {
         qDebug("SDRdaemonSourceUDPHandler::processData: m_samplerate: %u m_centerFrequency: %u kHz", m_samplerate, m_centerFrequency);
 
@@ -264,15 +263,16 @@ void SDRdaemonSourceUDPHandler::tick()
         m_readLengthSamples += m_sdrDaemonBuffer.getRWBalanceCorrection();
     }
 
-    m_readLength = m_readLengthSamples * SDRdaemonSourceBuffer::m_iqSampleSize;
+    const SDRDaemonMetaDataFEC& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
+    m_readLength = m_readLengthSamples * (metaData.m_sampleBytes & 0xF) * 2;
 
-    if (SDR_RX_SAMP_SZ == 16)
+    if (SDR_RX_SAMP_SZ == metaData.m_sampleBits) // same sample size
     {
         // read samples directly feeding the SampleFifo (no callback)
         m_sampleFifo->write(reinterpret_cast<quint8*>(m_sdrDaemonBuffer.readData(m_readLength)), m_readLength);
         m_samplesCount += m_readLengthSamples;
     }
-    else if (SDR_RX_SAMP_SZ == 24)
+    else if (metaData.m_sampleBits == 16) // 16 -> 24 bits
     {
         if (m_readLengthSamples > m_converterBufferNbSamples)
         {
@@ -284,13 +284,36 @@ void SDRdaemonSourceUDPHandler::tick()
 
         for (unsigned int is = 0; is < m_readLengthSamples; is++)
         {
-            m_converterBuffer[2*is] = ((int16_t*)buf)[2*is];
+            m_converterBuffer[2*is] = ((int16_t*)buf)[2*is]; // I
             m_converterBuffer[2*is]<<=8;
-            m_converterBuffer[2*is+1] = ((int16_t*)buf)[2*is+1];
+            m_converterBuffer[2*is+1] = ((int16_t*)buf)[2*is+1]; // Q
             m_converterBuffer[2*is+1]<<=8;
         }
 
         m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*sizeof(Sample));
+    }
+    else if (metaData.m_sampleBits == 24) // 24 -> 16 bits
+    {
+        if (m_readLengthSamples > m_converterBufferNbSamples)
+        {
+            if (m_converterBuffer) { delete[] m_converterBuffer; }
+            m_converterBuffer = new int32_t[m_readLengthSamples];
+        }
+
+        uint8_t *buf = m_sdrDaemonBuffer.readData(m_readLength);
+
+        for (unsigned int is = 0; is < m_readLengthSamples; is++)
+        {
+            m_converterBuffer[is] =  ((int32_t *)buf)[2*is+1]>>8; // Q -> MSB
+            m_converterBuffer[is] <<=16;
+            m_converterBuffer[is] += ((int32_t *)buf)[2*is]>>8; // I -> LSB
+        }
+
+        m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*sizeof(Sample));
+    }
+    else
+    {
+        qWarning("SDRdaemonSourceUDPHandler::tick: unexpected sample size in stream: %d bits", (int) metaData.m_sampleBits);
     }
 
 	if (m_tickCount < m_rateDivider)
@@ -308,6 +331,8 @@ void SDRdaemonSourceUDPHandler::tick()
 	        int minNbOriginalBlocks = m_sdrDaemonBuffer.getMinOriginalBlocks();
 	        int nbOriginalBlocks = m_sdrDaemonBuffer.getCurrentMeta().m_nbOriginalBlocks;
 	        int nbFECblocks = m_sdrDaemonBuffer.getCurrentMeta().m_nbFECBlocks;
+	        int sampleBits = m_sdrDaemonBuffer.getCurrentMeta().m_sampleBits;
+	        int sampleBytes = m_sdrDaemonBuffer.getCurrentMeta().m_sampleBytes;
 
 	        //framesDecodingStatus = (minNbOriginalBlocks == nbOriginalBlocks ? 2 : (minNbOriginalBlocks < nbOriginalBlocks - nbFECblocks ? 0 : 1));
 	        if (minNbBlocks < nbOriginalBlocks) {
@@ -332,7 +357,9 @@ void SDRdaemonSourceUDPHandler::tick()
 	            m_sdrDaemonBuffer.getAvgOriginalBlocks(),
 	            m_sdrDaemonBuffer.getAvgNbRecovery(),
 	            nbOriginalBlocks,
-	            nbFECblocks);
+	            nbFECblocks,
+	            sampleBits,
+	            sampleBytes);
 
 	            m_outputMessageQueueToGUI->push(report);
 		}

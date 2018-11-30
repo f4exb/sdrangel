@@ -22,9 +22,9 @@
 #include <QString>
 #include <QList>
 #include "physicalunit.h"
-#include "util/export.h"
+#include "export.h"
 
-class SDRANGEL_API ScaleEngine {
+class SDRGUI_API ScaleEngine {
 public:
 	struct Tick {
 		float pos;
@@ -56,13 +56,14 @@ private:
 	double m_firstMajorTickValue;
 	int m_numMinorTicks;
 	int m_decimalPlaces;
+	int m_fixedDecimalPlaces;
 	bool m_makeOpposite; // will show -value instead of value
 
-	QString formatTick(double value, int decimalPlaces, bool fancyTime = true);
+	QString formatTick(double value, int decimalPlaces);
 	void calcCharSize();
 	void calcScaleFactor();
 	double calcMajorTickUnits(double distance, int* retDecimalPlaces);
-	int calcTickTextSize();
+	int calcTickTextSize(double distance);
 	void forceTwoTicks();
 	void reCalc();
 
@@ -78,6 +79,7 @@ public:
 	float getSize() { return m_size; }
 	void setRange(Unit::Physical physicalUnit, float rangeMin, float rangeMax);
 	void setMakeOpposite(bool makeOpposite) { m_makeOpposite = makeOpposite; }
+	void setFixedDecimalPlaces(int decimalPlaces) { m_fixedDecimalPlaces =decimalPlaces; }
 
 	float getPosFromValue(double value);
 	float getValueFromPos(double pos);

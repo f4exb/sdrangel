@@ -33,7 +33,7 @@
 #include "dsp/afsquelch.h"
 #include "audio/audiofifo.h"
 #include "util/message.h"
-#include "util/udpsink.h"
+#include "util/doublebufferfifo.h"
 
 #include "dsddemodsettings.h"
 #include "dsddecoder.h"
@@ -93,7 +93,7 @@ public:
     DSDDemod(DeviceSourceAPI *deviceAPI);
 	~DSDDemod();
 	virtual void destroy() { delete this; }
-	void setScopeSink(BasebandSampleSink* sampleSink) { m_scope = sampleSink; }
+	void setScopeXYSink(BasebandSampleSink* sampleSink) { m_scopeXY = sampleSink; }
 
 	void configureMyPosition(MessageQueue* messageQueue, float myLatitude, float myLongitude);
 
@@ -116,19 +116,62 @@ public:
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
-        avg = m_magsqCount == 0 ? 1e-10 : m_magsqSum / m_magsqCount;
-        m_magsq = avg;
-        peak = m_magsqPeak == 0.0 ? 1e-10 : m_magsqPeak;
+        if (m_magsqCount > 0)
+        {
+            m_magsq = m_magsqSum / m_magsqCount;
+            m_magSqLevelStore.m_magsq = m_magsq;
+            m_magSqLevelStore.m_magsqPeak = m_magsqPeak;
+        }
+
+        avg = m_magSqLevelStore.m_magsq;
+        peak = m_magSqLevelStore.m_magsqPeak;
         nbSamples = m_magsqCount == 0 ? 1 : m_magsqCount;
+
         m_magsqSum = 0.0f;
         m_magsqPeak = 0.0f;
         m_magsqCount = 0;
     }
 
+    const char *updateAndGetStatusText();
+
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage);
+
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
 private:
+    struct MagSqLevelsStore
+    {
+        MagSqLevelsStore() :
+            m_magsq(1e-12),
+            m_magsqPeak(1e-12)
+        {}
+        double m_magsq;
+        double m_magsqPeak;
+    };
+
+    typedef enum
+    {
+        signalFormatNone,
+        signalFormatDMR,
+        signalFormatDStar,
+        signalFormatDPMR,
+        signalFormatYSF,
+        signalFormatNXDN
+    } SignalFormat; //!< Used for status text formatting
+
 	class MsgConfigureMyPosition : public Message {
 		MESSAGE_CLASS_DECLARATION
 
@@ -163,6 +206,7 @@ private:
     int m_inputSampleRate;
 	int m_inputFrequencyOffset;
 	DSDDemodSettings m_settings;
+    quint32 m_audioSampleRate;
 
 	NCO m_nco;
 	Interpolator m_interpolator;
@@ -171,17 +215,16 @@ private:
 	int m_sampleCount;
 	int m_squelchCount;
 	int m_squelchGate;
-
 	double m_squelchLevel;
 	bool m_squelchOpen;
+    DoubleBufferFIFO<Real> m_squelchDelayLine;
 
     MovingAverageUtil<Real, double, 16> m_movingAverage;
     double m_magsq;
     double m_magsqSum;
     double m_magsqPeak;
     int  m_magsqCount;
-
-	Real m_fmExcursion;
+    MagSqLevelsStore m_magSqLevelStore;
 
 	SampleVector m_scopeSampleBuffer;
 	AudioVector m_audioBuffer;
@@ -192,19 +235,26 @@ private:
 
 	AudioFifo m_audioFifo1;
     AudioFifo m_audioFifo2;
-	BasebandSampleSink* m_scope;
+	BasebandSampleSink* m_scopeXY;
 	bool m_scopeEnabled;
 
 	DSDDecoder m_dsdDecoder;
-	QMutex m_settingsMutex;
 
+	char m_formatStatusText[82+1]; //!< Fixed signal format dependent status text
+    SignalFormat m_signalFormat;   //!< Used to keep formatting during successive calls for the same standard type
     PhaseDiscriminators m_phaseDiscri;
-    UDPSink<AudioSample> *m_udpBufferAudio;
+
+    QMutex m_settingsMutex;
 
     static const int m_udpBlockSize;
 
+    void applyAudioSampleRate(int sampleRate);
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const DSDDemodSettings& settings, bool force = false);
+	void formatStatusText();
+
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DSDDemodSettings& settings);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 };
 
 #endif // INCLUDE_DSDDEMOD_H

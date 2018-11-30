@@ -599,12 +599,17 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
     {
         int d = c.toLatin1() - '0';
         quint64 e = findExponent(m_cursor);
-        quint64 v = (m_value / e) % 10;
-        if(m_animationState != 0)
+        quint64 value = abs(m_value);
+        int sign = m_value < 0 ? -1 : 1;
+        quint64 v = (value / e) % 10;
+
+        if(m_animationState != 0) {
             m_value = m_valueNew;
-        v = m_value - v * e;
+        }
+
+        v = value - v * e;
         v += d * e;
-        setValue(v);
+        setValue(sign*v);
         emit changed(m_valueNew);
         m_cursor++;
 

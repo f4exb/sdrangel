@@ -27,43 +27,52 @@ static double trunc(double d)
 }
 */
 
-QString ScaleEngine::formatTick(double value, int decimalPlaces, bool fancyTime)
+QString ScaleEngine::formatTick(double value, int decimalPlaces)
 {
-	if((m_physicalUnit != Unit::Time) || (!fancyTime) || 1)
+	if (m_physicalUnit != Unit::TimeHMS)
 	{
-		return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'f', decimalPlaces);
+	    if (m_physicalUnit == Unit::Scientific) {
+            return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'e', m_fixedDecimalPlaces);
+	    } else {
+	        return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'f', decimalPlaces);
+	    }
 	}
 	else
 	{
+	    if (m_scale < 1.0f) { // sub second prints just as is
+	        return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'f', decimalPlaces);
+	    }
+
 		QString str;
-		double orig = fabs(value);
+		double actual = value * m_scale; // this is the actual value in seconds
+		double orig = fabs(actual);
 		double tmp;
 
 		if(orig >= 86400.0) {
-			tmp = floor(value / 86400.0);
+			tmp = floor(actual / 86400.0);
 			str = QString("%1.").arg(tmp, 0, 'f', 0);
-			value -= tmp * 86400.0;
-			if(value < 0.0)
-				value *= -1.0;
+			actual -= tmp * 86400.0;
+			if(actual < 0.0)
+			    actual *= -1.0;
 		}
 
 		if(orig >= 3600.0) {
-			tmp = floor(value / 3600.0);
+			tmp = floor(actual / 3600.0);
 			str += QString("%1:").arg(tmp, 2, 'f', 0, QChar('0'));
-			value -= tmp * 3600.0;
-			if(value < 0.0)
-				value *= -1.0;
+			actual -= tmp * 3600.0;
+			if(actual < 0.0)
+			    actual *= -1.0;
 		}
 
 		if(orig >= 60.0) {
-			tmp = floor(value / 60.0);
+			tmp = floor(actual / 60.0);
 			str += QString("%1:").arg(tmp, 2, 'f', 0, QChar('0'));
-			value -= tmp * 60.0;
-			if(value < 0.0)
-				value *= -1.0;
+			actual -= tmp * 60.0;
+			if(actual < 0.0)
+			    actual *= -1.0;
 		}
 
-		tmp = m_makeOpposite ? -value : value;
+		tmp = m_makeOpposite ? -actual : actual;
 		str += QString("%1").arg(tmp, 2, 'f', decimalPlaces, QChar('0'));
 
 		return str;
@@ -101,6 +110,7 @@ void ScaleEngine::calcScaleFactor()
 
 	switch(m_physicalUnit) {
 		case Unit::None:
+		case Unit::Scientific:
 			m_unitStr.clear();
 			break;
 
@@ -164,14 +174,18 @@ void ScaleEngine::calcScaleFactor()
 			break;
 
 		case Unit::Time:
-			if(median < 0.001) {
+        case Unit::TimeHMS:
+			if (median < 0.001) {
 				m_unitStr = QString("µs");
 				m_scale = 0.000001;
-			} else if(median < 1.0) {
+			} else if (median < 1.0) {
 				m_unitStr = QString("ms");
 				m_scale = 0.001;
-			} else {
+			} else if (median < 1000.0) {
 				m_unitStr = QString("s");
+			} else {
+			    m_unitStr = QString("ks");
+			    m_scale = 1000.0;
 			}
 			break;
 
@@ -256,21 +270,21 @@ double ScaleEngine::calcMajorTickUnits(double distance, int* retDecimalPlaces)
 		else if(distance < 30.0 * 86000.0)
 			return 30.0 * 86000.0;
 		else return 90.0 * 86000.0;
-	} else {*/
-		if(base <= 1.0) {
-			base = 1.0;
-		} else if(base <= 2.0) {
-			base = 2.0;
-		} else if(base <= 2.5) {
-			base = 2.5;
-			if(decimalPlaces >= 0)
-				decimalPlaces++;
-		} else if(base <= 5.0) {
-			base = 5.0;
-		} else {
-			base = 10.0;
-		}/*
-	}*/
+	} */
+
+	if(base <= 1.0) {
+        base = 1.0;
+    } else if(base <= 2.0) {
+        base = 2.0;
+    } else if(base <= 2.5) {
+        base = 2.5;
+        if(decimalPlaces >= 0)
+            decimalPlaces++;
+    } else if(base <= 5.0) {
+        base = 5.0;
+    } else {
+        base = 10.0;
+    }
 
 	if(retDecimalPlaces != 0) {
 		if(decimalPlaces < 0)
@@ -281,7 +295,7 @@ double ScaleEngine::calcMajorTickUnits(double distance, int* retDecimalPlaces)
 	return sign * base * pow(10.0, exponent);
 }
 
-int ScaleEngine::calcTickTextSize()
+int ScaleEngine::calcTickTextSize(double distance)
 {
 	int tmp;
 	int tickLen;
@@ -295,7 +309,7 @@ int ScaleEngine::calcTickTextSize()
 	if(tmp > tickLen)
 		tickLen = tmp;
 
-	calcMajorTickUnits((m_rangeMax - m_rangeMin) / m_scale, &decimalPlaces);
+	calcMajorTickUnits(distance, &decimalPlaces);
 
 	return tickLen + decimalPlaces + 1;
 }
@@ -356,16 +370,24 @@ void ScaleEngine::reCalc()
 	rangeMinScaled = m_rangeMin / m_scale;
 	rangeMaxScaled = m_rangeMax / m_scale;
 
-	if(m_orientation == Qt::Vertical) {
+	if(m_orientation == Qt::Vertical)
+	{
 		maxNumMajorTicks = (int)(m_size / (fontMetrics.lineSpacing() * 1.3f));
-	} else {
-		majorTickSize = (calcTickTextSize() + 2) * m_charSize;
-		if(majorTickSize != 0.0)
-			maxNumMajorTicks = (int)(m_size / majorTickSize);
-			else maxNumMajorTicks = 20;
+		m_majorTickValueDistance = calcMajorTickUnits((rangeMaxScaled - rangeMinScaled) / maxNumMajorTicks, &m_decimalPlaces);
+	}
+	else
+	{
+		majorTickSize = (calcTickTextSize((rangeMaxScaled - rangeMinScaled) / 20) + 2) * m_charSize;
+
+		if(majorTickSize != 0.0) {
+		    maxNumMajorTicks = (int)(m_size / majorTickSize);
+		} else {
+		    maxNumMajorTicks = 20;
+		}
+
+		m_majorTickValueDistance = calcMajorTickUnits((rangeMaxScaled - rangeMinScaled) / maxNumMajorTicks, &m_decimalPlaces);
 	}
 
-	m_majorTickValueDistance = calcMajorTickUnits((rangeMaxScaled - rangeMinScaled) / maxNumMajorTicks, &m_decimalPlaces);
 	numMajorTicks = (int)((rangeMaxScaled - rangeMinScaled) / m_majorTickValueDistance);
 
 	if(numMajorTicks == 0) {
@@ -500,6 +522,7 @@ ScaleEngine::ScaleEngine() :
     m_firstMajorTickValue(1.0),
     m_numMinorTicks(1),
     m_decimalPlaces(1),
+    m_fixedDecimalPlaces(2),
     m_makeOpposite(false)
 {
 }
@@ -573,15 +596,15 @@ const ScaleEngine::TickList& ScaleEngine::getTickList()
 QString ScaleEngine::getRangeMinStr()
 {
 	if(m_unitStr.length() > 0)
-		return QString("%1 %2").arg(formatTick(m_rangeMin / m_scale, m_decimalPlaces, false)).arg(m_unitStr);
-		else return QString("%1").arg(formatTick(m_rangeMin / m_scale, m_decimalPlaces, false));
+		return QString("%1 %2").arg(formatTick(m_rangeMin / m_scale, m_decimalPlaces)).arg(m_unitStr);
+		else return QString("%1").arg(formatTick(m_rangeMin / m_scale, m_decimalPlaces));
 }
 
 QString ScaleEngine::getRangeMaxStr()
 {
 	if(m_unitStr.length() > 0)
-		return QString("%1 %2").arg(formatTick(m_rangeMax / m_scale, m_decimalPlaces, false)).arg(m_unitStr);
-		else return QString("%1").arg(formatTick(m_rangeMax / m_scale, m_decimalPlaces, false));
+		return QString("%1 %2").arg(formatTick(m_rangeMax / m_scale, m_decimalPlaces)).arg(m_unitStr);
+		else return QString("%1").arg(formatTick(m_rangeMax / m_scale, m_decimalPlaces));
 }
 
 float ScaleEngine::getScaleWidth()

@@ -22,6 +22,11 @@
 
 #include <stdio.h>
 #include <complex.h>
+#include <algorithm>
+
+#include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGSSBModReport.h"
 
 #include "dsp/upchannelizer.h"
 #include "dsp/dspengine.h"
@@ -34,7 +39,6 @@ MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureSSBMod, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureFileSourceSeek, Message)
-MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureAFInput, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgReportFileSourceStreamTiming, Message)
@@ -62,20 +66,25 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
 	m_fileSize(0),
 	m_recordLength(0),
 	m_sampleRate(48000),
-	m_afInput(SSBModInputNone),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
-	m_inAGC(9600, 0.2, 1e-4)
+	m_inAGC(9600, 0.2, 1e-4),
+	m_agcStepLength(2400)
 {
 	setObjectName(m_channelId);
 
-    m_SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_settings.m_audioSampleRate, m_settings.m_bandwidth / m_settings.m_audioSampleRate, m_ssbFftLen);
-    m_DSBFilter = new fftfilt((2.0f * m_settings.m_bandwidth) / m_settings.m_audioSampleRate, 2 * m_ssbFftLen);
+	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo, getInputMessageQueue());
+    m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getInputSampleRate();
+
+    m_SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_audioSampleRate, m_settings.m_bandwidth / m_audioSampleRate, m_ssbFftLen);
+    m_DSBFilter = new fftfilt((2.0f * m_settings.m_bandwidth) / m_audioSampleRate, 2 * m_ssbFftLen);
     m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
     m_DSBFilterBuffer = new Complex[m_ssbFftLen];
-    memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
-    memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
+    std::fill(m_SSBFilterBuffer, m_SSBFilterBuffer+(m_ssbFftLen>>1), Complex{0,0});
+    std::fill(m_DSBFilterBuffer, m_DSBFilterBuffer+m_ssbFftLen, Complex{0,0});
+//    memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
+//    memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
@@ -87,11 +96,10 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
 
 	m_magsq = 0.0;
 
-	m_toneNco.setFreq(1000.0, m_settings.m_audioSampleRate);
-	DSPEngine::instance()->addAudioSource(&m_audioFifo);
+	m_toneNco.setFreq(1000.0, m_audioSampleRate);
 
 	// CW keyer
-	m_cwKeyer.setSampleRate(m_settings.m_audioSampleRate);
+	m_cwKeyer.setSampleRate(48000);
 	m_cwKeyer.setWPM(13);
 	m_cwKeyer.setMode(CWKeyerSettings::CWNone);
 
@@ -99,39 +107,28 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
 	m_inAGC.setStepDownDelay(m_settings.m_agcThresholdDelay);
 	m_inAGC.setClamping(true);
 
+    applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
+    applySettings(m_settings, true);
+
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
-
-    applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
-    applySettings(m_settings, true);
 }
 
 SSBMod::~SSBMod()
 {
-    if (m_SSBFilter) {
-        delete m_SSBFilter;
-    }
-
-    if (m_DSBFilter) {
-        delete m_DSBFilter;
-    }
-
-    if (m_SSBFilterBuffer) {
-        delete m_SSBFilterBuffer;
-    }
-
-    if (m_DSBFilterBuffer) {
-        delete m_DSBFilterBuffer;
-    }
-
-    DSPEngine::instance()->removeAudioSource(&m_audioFifo);
+    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(&m_audioFifo);
 
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+
+    delete m_SSBFilter;
+    delete m_DSBFilter;
+    delete[] m_SSBFilterBuffer;
+    delete[] m_DSBFilterBuffer;
 }
 
 void SSBMod::pull(Sample& sample)
@@ -175,14 +172,14 @@ void SSBMod::pull(Sample& sample)
 
 void SSBMod::pullAudio(int nbSamples)
 {
-    unsigned int nbSamplesAudio = nbSamples * ((Real) m_settings.m_audioSampleRate / (Real) m_basebandSampleRate);
+    unsigned int nbSamplesAudio = nbSamples * ((Real) m_audioSampleRate / (Real) m_basebandSampleRate);
 
     if (nbSamplesAudio > m_audioBuffer.size())
     {
         m_audioBuffer.resize(nbSamplesAudio);
     }
 
-    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbSamplesAudio, 10);
+    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbSamplesAudio);
     m_audioBufferFill = 0;
 }
 
@@ -209,9 +206,9 @@ void SSBMod::pullAF(Complex& sample)
     int decim = 1<<(m_settings.m_spanLog2 - 1);
     unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
 
-    switch (m_afInput)
+    switch (m_settings.m_modAFInput)
     {
-    case SSBModInputTone:
+    case SSBModSettings::SSBModInputTone:
     	if (m_settings.m_dsb)
     	{
     		Real t = m_toneNco.next()/1.25;
@@ -227,7 +224,7 @@ void SSBMod::pullAF(Complex& sample)
     		}
     	}
         break;
-    case SSBModInputFile:
+    case SSBModSettings::SSBModInputFile:
     	// Monaural (mono):
         // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
         // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
@@ -293,7 +290,7 @@ void SSBMod::pullAF(Complex& sample)
             ci.imag(0.0f);
         }
         break;
-    case SSBModInputAudio:
+    case SSBModSettings::SSBModInputAudio:
         if (m_settings.m_audioBinaural)
     	{
         	if (m_settings.m_audioFlipChannels)
@@ -324,7 +321,7 @@ void SSBMod::pullAF(Complex& sample)
         }
 
         break;
-    case SSBModInputCWTone:
+    case SSBModSettings::SSBModInputCWTone:
     	Real fadeFactor;
 
         if (m_cwKeyer.getSample())
@@ -374,12 +371,15 @@ void SSBMod::pullAF(Complex& sample)
         }
 
         break;
-    case SSBModInputNone:
+    case SSBModSettings::SSBModInputNone:
     default:
+        sample.real(0.0f);
+        sample.imag(0.0f);
         break;
     }
 
-    if ((m_afInput == SSBModInputFile) || (m_afInput == SSBModInputAudio)) // real audio
+    if ((m_settings.m_modAFInput == SSBModSettings::SSBModInputFile)
+       || (m_settings.m_modAFInput == SSBModSettings::SSBModInputAudio)) // real audio
     {
     	if (m_settings.m_dsb)
     	{
@@ -437,7 +437,8 @@ void SSBMod::pullAF(Complex& sample)
             }
     	}
     } // Real audio
-    else if ((m_afInput == SSBModInputTone) || (m_afInput == SSBModInputCWTone)) // tone
+    else if ((m_settings.m_modAFInput == SSBModSettings::SSBModInputTone)
+          || (m_settings.m_modAFInput == SSBModSettings::SSBModInputCWTone)) // tone
     {
         m_sum += sample;
 
@@ -563,13 +564,6 @@ bool SSBMod::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgConfigureAFInput::match(cmd))
-    {
-        MsgConfigureAFInput& conf = (MsgConfigureAFInput&) cmd;
-        m_afInput = conf.getAFInput();
-
-        return true;
-    }
     else if (MsgConfigureFileSourceStreamTiming::match(cmd))
     {
     	std::size_t samplesCount;
@@ -580,9 +574,26 @@ bool SSBMod::handleMessage(const Message& cmd)
     		samplesCount = m_ifstream.tellg() / sizeof(Real);
     	}
 
-    	MsgReportFileSourceStreamTiming *report;
-        report = MsgReportFileSourceStreamTiming::create(samplesCount);
-        getMessageQueueToGUI()->push(report);
+        if (getMessageQueueToGUI())
+        {
+            MsgReportFileSourceStreamTiming *report;
+            report = MsgReportFileSourceStreamTiming::create(samplesCount);
+            getMessageQueueToGUI()->push(report);
+        }
+
+        return true;
+    }
+    else if (DSPConfigureAudio::match(cmd))
+    {
+        DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
+        uint32_t sampleRate = cfg.getSampleRate();
+
+        qDebug() << "SSBMod::handleMessage: DSPConfigureAudio:"
+                << " sampleRate: " << sampleRate;
+
+        if (sampleRate != m_audioSampleRate) {
+            applyAudioSampleRate(sampleRate);
+        }
 
         return true;
     }
@@ -613,9 +624,12 @@ void SSBMod::openFileStream()
             << " fileSize: " << m_fileSize << "bytes"
             << " length: " << m_recordLength << " seconds";
 
-    MsgReportFileSourceStreamData *report;
-    report = MsgReportFileSourceStreamData::create(m_sampleRate, m_recordLength);
-    getMessageQueueToGUI()->push(report);
+    if (getMessageQueueToGUI())
+    {
+        MsgReportFileSourceStreamData *report;
+        report = MsgReportFileSourceStreamData::create(m_sampleRate, m_recordLength);
+        getMessageQueueToGUI()->push(report);
+    }
 }
 
 void SSBMod::seekFileStream(int seekPercentage)
@@ -628,6 +642,70 @@ void SSBMod::seekFileStream(int seekPercentage)
         seekPoint *= sizeof(Real);
         m_ifstream.clear();
         m_ifstream.seekg(seekPoint, std::ios::beg);
+    }
+}
+
+void SSBMod::applyAudioSampleRate(int sampleRate)
+{
+    qDebug("SSBMod::applyAudioSampleRate: %d", sampleRate);
+
+
+    MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
+            sampleRate, m_settings.m_inputFrequencyOffset);
+    m_inputMessageQueue.push(channelConfigMsg);
+
+    m_settingsMutex.lock();
+
+    m_interpolatorDistanceRemain = 0;
+    m_interpolatorConsumed = false;
+    m_interpolatorDistance = (Real) sampleRate / (Real) m_outputSampleRate;
+    m_interpolator.create(48, sampleRate, m_settings.m_bandwidth, 3.0);
+
+    float band = m_settings.m_bandwidth;
+    float lowCutoff = m_settings.m_lowCutoff;
+    bool usb = m_settings.m_usb;
+
+    if (band < 0) // negative means LSB
+    {
+        band = -band;            // turn to positive
+        lowCutoff = -lowCutoff;
+        usb = false;  // and take note of side band
+    }
+    else
+    {
+        usb = true;
+    }
+
+    if (band < 100.0f) // at least 100 Hz
+    {
+        band = 100.0f;
+        lowCutoff = 0;
+    }
+
+    if (band - lowCutoff < 100.0f) {
+        lowCutoff = band - 100.0f;
+    }
+
+    m_SSBFilter->create_filter(lowCutoff / sampleRate, band / sampleRate);
+    m_DSBFilter->create_dsb_filter((2.0f * band) / sampleRate);
+
+    m_settings.m_bandwidth = band;
+    m_settings.m_lowCutoff = lowCutoff;
+    m_settings.m_usb = usb;
+
+    m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
+    m_cwKeyer.setSampleRate(sampleRate);
+
+    m_agcStepLength = std::min(sampleRate/20, m_settings.m_agcTime/2); // 50 ms or half the AGC length whichever is smaller
+
+    m_settingsMutex.unlock();
+
+    m_audioSampleRate = sampleRate;
+
+    if (getMessageQueueToGUI())
+    {
+        DSPConfigureAudio *cfg = new DSPConfigureAudio(m_audioSampleRate);
+        getMessageQueueToGUI()->push(cfg);
     }
 }
 
@@ -651,8 +729,8 @@ void SSBMod::applyChannelSettings(int basebandSampleRate, int outputSampleRate, 
         m_settingsMutex.lock();
         m_interpolatorDistanceRemain = 0;
         m_interpolatorConsumed = false;
-        m_interpolatorDistance = (Real) m_settings.m_audioSampleRate / (Real) outputSampleRate;
-        m_interpolator.create(48, m_settings.m_audioSampleRate, m_settings.m_bandwidth, 3.0);
+        m_interpolatorDistance = (Real) m_audioSampleRate / (Real) outputSampleRate;
+        m_interpolator.create(48, m_audioSampleRate, m_settings.m_bandwidth, 3.0);
         m_settingsMutex.unlock();
     }
 
@@ -668,8 +746,7 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
     bool usb = settings.m_usb;
 
     if ((settings.m_bandwidth != m_settings.m_bandwidth) ||
-        (settings.m_lowCutoff != m_settings.m_lowCutoff) ||
-        (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+        (settings.m_lowCutoff != m_settings.m_lowCutoff) || force)
     {
         if (band < 0) // negative means LSB
         {
@@ -695,25 +772,17 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
         m_settingsMutex.lock();
         m_interpolatorDistanceRemain = 0;
         m_interpolatorConsumed = false;
-        m_interpolatorDistance = (Real) settings.m_audioSampleRate / (Real) m_outputSampleRate;
-        m_interpolator.create(48, settings.m_audioSampleRate, band, 3.0);
-        m_SSBFilter->create_filter(lowCutoff / settings.m_audioSampleRate, band / settings.m_audioSampleRate);
-        m_DSBFilter->create_dsb_filter((2.0f * band) / settings.m_audioSampleRate);
+        m_interpolatorDistance = (Real) m_audioSampleRate / (Real) m_outputSampleRate;
+        m_interpolator.create(48, m_audioSampleRate, band, 3.0);
+        m_SSBFilter->create_filter(lowCutoff / m_audioSampleRate, band / m_audioSampleRate);
+        m_DSBFilter->create_dsb_filter((2.0f * band) / m_audioSampleRate);
         m_settingsMutex.unlock();
     }
 
-    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) ||
-        (settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
+    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force)
     {
         m_settingsMutex.lock();
-        m_toneNco.setFreq(settings.m_toneFrequency, settings.m_audioSampleRate);
-        m_settingsMutex.unlock();
-    }
-
-    if ((settings.m_audioSampleRate != m_settings.m_audioSampleRate) || force)
-    {
-        m_settingsMutex.lock();
-        m_cwKeyer.setSampleRate(settings.m_audioSampleRate);
+        m_toneNco.setFreq(settings.m_toneFrequency, m_audioSampleRate);
         m_settingsMutex.unlock();
     }
 
@@ -721,12 +790,14 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
     {
         if (settings.m_dsb)
         {
-            memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
+            std::fill(m_DSBFilterBuffer, m_DSBFilterBuffer+m_ssbFftLen, Complex{0,0});
+            //memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
             m_DSBFilterBufferIndex = 0;
         }
         else
         {
-            memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
+            std::fill(m_SSBFilterBuffer, m_SSBFilterBuffer+(m_ssbFftLen>>1), Complex{0,0});
+            //memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
             m_SSBFilterBufferIndex = 0;
         }
     }
@@ -735,7 +806,7 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
         (settings.m_agcOrder != m_settings.m_agcOrder) || force)
     {
         m_settingsMutex.lock();
-        m_inAGC.resize(settings.m_agcTime, settings.m_agcOrder);
+        m_inAGC.resize(settings.m_agcTime, m_agcStepLength, settings.m_agcOrder);
         m_settingsMutex.unlock();
     }
 
@@ -757,6 +828,18 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
     if ((settings.m_agcThresholdDelay != m_settings.m_agcThresholdDelay) || force)
     {
         m_inAGC.setStepDownDelay(settings.m_agcThresholdDelay);
+    }
+
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
+        audioDeviceManager->addAudioSource(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
+        uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
+
+        if (m_audioSampleRate != audioSampleRate) {
+            applyAudioSampleRate(audioSampleRate);
+        }
     }
 
     m_settings = settings;
@@ -786,3 +869,223 @@ bool SSBMod::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+int SSBMod::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setSsbModSettings(new SWGSDRangel::SWGSSBModSettings());
+    response.getSsbModSettings()->init();
+    webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int SSBMod::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& channelSettingsKeys,
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    SSBModSettings settings = m_settings;
+    bool frequencyOffsetChanged = false;
+
+    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    {
+        settings.m_inputFrequencyOffset = response.getSsbModSettings()->getInputFrequencyOffset();
+        frequencyOffsetChanged = true;
+    }
+    if (channelSettingsKeys.contains("bandwidth")) {
+        settings.m_bandwidth = response.getSsbModSettings()->getBandwidth();
+    }
+    if (channelSettingsKeys.contains("lowCutoff")) {
+        settings.m_lowCutoff = response.getSsbModSettings()->getLowCutoff();
+    }
+    if (channelSettingsKeys.contains("usb")) {
+        settings.m_usb = response.getSsbModSettings()->getUsb() != 0;
+    }
+    if (channelSettingsKeys.contains("toneFrequency")) {
+        settings.m_toneFrequency = response.getSsbModSettings()->getToneFrequency();
+    }
+    if (channelSettingsKeys.contains("volumeFactor")) {
+        settings.m_volumeFactor = response.getSsbModSettings()->getVolumeFactor();
+    }
+    if (channelSettingsKeys.contains("spanLog2")) {
+        settings.m_spanLog2 = response.getSsbModSettings()->getSpanLog2();
+    }
+    if (channelSettingsKeys.contains("audioBinaural")) {
+        settings.m_audioBinaural = response.getSsbModSettings()->getAudioBinaural() != 0;
+    }
+    if (channelSettingsKeys.contains("audioFlipChannels")) {
+        settings.m_audioFlipChannels = response.getSsbModSettings()->getAudioFlipChannels() != 0;
+    }
+    if (channelSettingsKeys.contains("dsb")) {
+        settings.m_dsb = response.getSsbModSettings()->getDsb() != 0;
+    }
+    if (channelSettingsKeys.contains("audioMute")) {
+        settings.m_audioMute = response.getSsbModSettings()->getAudioMute() != 0;
+    }
+    if (channelSettingsKeys.contains("playLoop")) {
+        settings.m_playLoop = response.getSsbModSettings()->getPlayLoop() != 0;
+    }
+    if (channelSettingsKeys.contains("agc")) {
+        settings.m_agc = response.getSsbModSettings()->getAgc() != 0;
+    }
+    if (channelSettingsKeys.contains("agcOrder")) {
+        settings.m_agcOrder = response.getSsbModSettings()->getAgcOrder();
+    }
+    if (channelSettingsKeys.contains("agcTime")) {
+        settings.m_agcTime = response.getSsbModSettings()->getAgcTime();
+    }
+    if (channelSettingsKeys.contains("agcThresholdEnable")) {
+        settings.m_agcThresholdEnable = response.getSsbModSettings()->getAgcThresholdEnable() != 0;
+    }
+    if (channelSettingsKeys.contains("agcThreshold")) {
+        settings.m_agcThreshold = response.getSsbModSettings()->getAgcThreshold();
+    }
+    if (channelSettingsKeys.contains("agcThresholdGate")) {
+        settings.m_agcThresholdGate = response.getSsbModSettings()->getAgcThresholdGate();
+    }
+    if (channelSettingsKeys.contains("agcThresholdDelay")) {
+        settings.m_agcThresholdDelay = response.getSsbModSettings()->getAgcThresholdDelay();
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getSsbModSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getSsbModSettings()->getTitle();
+    }
+    if (channelSettingsKeys.contains("modAFInput")) {
+        settings.m_modAFInput = (SSBModSettings::SSBModInputAF) response.getSsbModSettings()->getModAfInput();
+    }
+    if (channelSettingsKeys.contains("audioDeviceName")) {
+        settings.m_audioDeviceName = *response.getSsbModSettings()->getAudioDeviceName();
+    }
+
+    if (channelSettingsKeys.contains("cwKeyer"))
+    {
+        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getSsbModSettings()->getCwKeyer();
+        CWKeyerSettings cwKeyerSettings = m_cwKeyer.getSettings();
+
+        if (channelSettingsKeys.contains("cwKeyer.loop")) {
+            cwKeyerSettings.m_loop = apiCwKeyerSettings->getLoop() != 0;
+        }
+        if (channelSettingsKeys.contains("cwKeyer.mode")) {
+            cwKeyerSettings.m_mode = (CWKeyerSettings::CWMode) apiCwKeyerSettings->getMode();
+        }
+        if (channelSettingsKeys.contains("cwKeyer.text")) {
+            cwKeyerSettings.m_text = *apiCwKeyerSettings->getText();
+        }
+        if (channelSettingsKeys.contains("cwKeyer.sampleRate")) {
+            cwKeyerSettings.m_sampleRate = apiCwKeyerSettings->getSampleRate();
+        }
+        if (channelSettingsKeys.contains("cwKeyer.wpm")) {
+            cwKeyerSettings.m_wpm = apiCwKeyerSettings->getWpm();
+        }
+
+        m_cwKeyer.setLoop(cwKeyerSettings.m_loop);
+        m_cwKeyer.setMode(cwKeyerSettings.m_mode);
+        m_cwKeyer.setSampleRate(cwKeyerSettings.m_sampleRate);
+        m_cwKeyer.setText(cwKeyerSettings.m_text);
+        m_cwKeyer.setWPM(cwKeyerSettings.m_wpm);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+            m_guiMessageQueue->push(msgCwKeyer);
+        }
+    }
+
+    if (frequencyOffsetChanged)
+    {
+        SSBMod::MsgConfigureChannelizer *msgChan = SSBMod::MsgConfigureChannelizer::create(
+                m_audioSampleRate, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(msgChan);
+    }
+
+    MsgConfigureSSBMod *msg = MsgConfigureSSBMod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureSSBMod *msgToGUI = MsgConfigureSSBMod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+int SSBMod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setSsbModReport(new SWGSDRangel::SWGSSBModReport());
+    response.getSsbModReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void SSBMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SSBModSettings& settings)
+{
+    response.getSsbModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getSsbModSettings()->setBandwidth(settings.m_bandwidth);
+    response.getSsbModSettings()->setLowCutoff(settings.m_lowCutoff);
+    response.getSsbModSettings()->setUsb(settings.m_usb ? 1 : 0);
+    response.getSsbModSettings()->setToneFrequency(settings.m_toneFrequency);
+    response.getSsbModSettings()->setVolumeFactor(settings.m_volumeFactor);
+    response.getSsbModSettings()->setSpanLog2(settings.m_spanLog2);
+    response.getSsbModSettings()->setAudioBinaural(settings.m_audioBinaural ? 1 : 0);
+    response.getSsbModSettings()->setAudioFlipChannels(settings.m_audioFlipChannels ? 1 : 0);
+    response.getSsbModSettings()->setDsb(settings.m_dsb ? 1 : 0);
+    response.getSsbModSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
+    response.getSsbModSettings()->setPlayLoop(settings.m_playLoop ? 1 : 0);
+    response.getSsbModSettings()->setAgc(settings.m_agc ? 1 : 0);
+    response.getSsbModSettings()->setAgcOrder(settings.m_agcOrder);
+    response.getSsbModSettings()->setAgcTime(settings.m_agcTime);
+    response.getSsbModSettings()->setAgcThresholdEnable(settings.m_agcThresholdEnable ? 1 : 0);
+    response.getSsbModSettings()->setAgcThreshold(settings.m_agcThreshold);
+    response.getSsbModSettings()->setAgcThresholdGate(settings.m_agcThresholdGate);
+    response.getSsbModSettings()->setAgcThresholdDelay(settings.m_agcThresholdDelay);
+    response.getSsbModSettings()->setRgbColor(settings.m_rgbColor);
+
+    if (response.getSsbModSettings()->getTitle()) {
+        *response.getSsbModSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getSsbModSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    response.getSsbModSettings()->setModAfInput((int) settings.m_modAFInput);
+
+    if (response.getSsbModSettings()->getAudioDeviceName()) {
+        *response.getSsbModSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        response.getSsbModSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+
+    if (!response.getSsbModSettings()->getCwKeyer()) {
+        response.getSsbModSettings()->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings);
+    }
+
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getSsbModSettings()->getCwKeyer();
+    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
+    apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
+    apiCwKeyerSettings->setMode((int) cwKeyerSettings.m_mode);
+    apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
+
+    if (apiCwKeyerSettings->getText()) {
+        *apiCwKeyerSettings->getText() = cwKeyerSettings.m_text;
+    } else {
+        apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
+    }
+
+    apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+}
+
+void SSBMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    response.getSsbModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
+    response.getSsbModReport()->setAudioSampleRate(m_audioSampleRate);
+    response.getSsbModReport()->setChannelSampleRate(m_outputSampleRate);
+}
+

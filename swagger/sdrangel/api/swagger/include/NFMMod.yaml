@@ -19,8 +19,6 @@ NFMModSettings:
     volumeFactor:
       type: number
       format: float
-    audioSampleRate:
-      type: integer
     channelMute:
       type: integer
     playLoop:
@@ -33,8 +31,22 @@ NFMModSettings:
       type: integer
     title:
       type: string
+    audioDeviceName:
+      type: string      
     modAFInput:
       type: integer
     cwKeyer:
       $ref: "http://localhost:8081/api/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
+    
+NFMModReport:
+  description: NFMMod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    audioSampleRate:
+      type: integer
+    channelSampleRate:
+      type: integer
     

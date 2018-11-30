@@ -9,99 +9,153 @@ QT += core
 TEMPLATE = lib
 TARGET = libbladerf
 
-DEFINES += BLADERF_OS_WINDOWS=1
+#DEFINES += BLADERF_OS_WINDOWS=1
 
-CONFIG(MINGW32):LIBBLADERFSRC = "D:\softs\bladeRF"
-CONFIG(MINGW32):LIBBLADERFCOMMONSRC = "D:\softs\bladeRF\host\common"
-CONFIG(MINGW32):LIBBLADERFLIBSRC = "D:\softs\bladeRF\host\libraries\libbladeRF"
-CONFIG(MINGW64):LIBBLADERFSRC = "D:\softs\bladeRF"
-CONFIG(MINGW64):LIBBLADERFCOMMONSRC = "D:\softs\bladeRF\host\common"
-CONFIG(MINGW64):LIBBLADERFLIBSRC = "D:\softs\bladeRF\host\libraries\libbladeRF"
+CONFIG(MINGW32):LIBBLADERFSRC = "C:\softs\bladeRF"
+CONFIG(MINGW32):LIBBLADERFCOMMONSRC = "C:\softs\bladeRF\host\common"
+CONFIG(MINGW32):LIBBLADERFLIBSRC = "C:\softs\bladeRF\host\libraries\libbladeRF"
+CONFIG(MINGW64):LIBBLADERFSRC = "C:\softs\bladeRF"
+CONFIG(MINGW64):LIBBLADERFCOMMONSRC = "C:\softs\bladeRF\host\common"
+CONFIG(MINGW64):LIBBLADERFLIBSRC = "C:\softs\bladeRF\host\libraries\libbladeRF"
+INCLUDEPATH += $$PWD/mingw/include
+INCLUDEPATH += $$PWD/mingw/common/include
+INCLUDEPATH += $$PWD/mingw/libraries/libbladeRF/src
+INCLUDEPATH += $$PWD/mingw/libraries/libbladeRF/src/backend
 INCLUDEPATH += $$LIBBLADERFLIBSRC/include
 INCLUDEPATH += $$LIBBLADERFLIBSRC/src
 INCLUDEPATH += $$LIBBLADERFSRC/firmware_common
 INCLUDEPATH += $$LIBBLADERFSRC/fpga_common/include
 INCLUDEPATH += $$LIBBLADERFCOMMONSRC/include
 INCLUDEPATH += $$LIBBLADERFCOMMONSRC/include/windows
-INCLUDEPATH += $$PWD/include
 
-CONFIG(MINGW32):INCLUDEPATH += "D:\softs\libusb-1.0.20\include\libusb-1.0"
-CONFIG(MINGW64):INCLUDEPATH += "D:\softs\libusb-1.0.20\include\libusb-1.0"
+CONFIG(MINGW32):INCLUDEPATH += "C:\softs\libusb-1.0.19\include\libusb-1.0"
+CONFIG(MINGW64):INCLUDEPATH += "C:\softs\libusb-1.0.19\include\libusb-1.0"
 
-SOURCES = $$LIBBLADERFLIBSRC/src/async.c\
-    $$LIBBLADERFLIBSRC/src/bladerf_priv.c\
-    $$LIBBLADERFLIBSRC/src/config.c\
-    $$LIBBLADERFLIBSRC/src/device_identifier.c\
-    $$PWD/src/file_ops.c\
-    $$LIBBLADERFLIBSRC/src/flash_fields.c\
-    $$LIBBLADERFLIBSRC/src/fx3_fw.c\
-    $$LIBBLADERFLIBSRC/src/gain.c\
-    $$LIBBLADERFLIBSRC/src/init_fini.c\
-    $$LIBBLADERFLIBSRC/src/sync.c\
-    $$LIBBLADERFLIBSRC/src/smb_clock.c\
-    $$LIBBLADERFLIBSRC/src/tuning.c\
-    $$LIBBLADERFLIBSRC/src/xb.c\
+SOURCES = $$LIBBLADERFCOMMONSRC/src/sha256.c\
+    $$LIBBLADERFCOMMONSRC/src/dc_calibration.c\
+    $$LIBBLADERFCOMMONSRC/src/parse.c\
+    $$LIBBLADERFCOMMONSRC/src/devcfg.c\
+    $$LIBBLADERFCOMMONSRC/src/conversions.c\
+    $$LIBBLADERFCOMMONSRC/src/log.c\
+    $$LIBBLADERFCOMMONSRC/src/str_queue.c\
+#    $$LIBBLADERFCOMMONSRC/src/windows/clock_gettime.c\
+#    $$LIBBLADERFCOMMONSRC/src/windows/getopt_long.c\
+#    $$LIBBLADERFCOMMONSRC/src/windows/mkdtemp.c\
+#    $$LIBBLADERFCOMMONSRC/src/windows/nanosleep.c\
+#    $$LIBBLADERFCOMMONSRC/src/windows/setenv.c\
+    $$LIBBLADERFSRC/host/misc/dev/lms_freqsel/freqsel.c\
+    $$LIBBLADERFSRC/fpga_common/src/lms.c\
+    $$LIBBLADERFSRC/fpga_common/src/band_select.c\
+    $$LIBBLADERFLIBSRC/src/helpers/interleave.c\
+    $$LIBBLADERFLIBSRC/src/helpers/timeout.c\
+    $$LIBBLADERFLIBSRC/src/helpers/wallclock.c\
+    $$LIBBLADERFLIBSRC/src/helpers/configfile.c\
+    $$LIBBLADERFLIBSRC/src/helpers/file.c\
+    $$LIBBLADERFLIBSRC/src/helpers/version.c\
+    $$LIBBLADERFLIBSRC/src/driver/fpga_trigger.c\
+    $$LIBBLADERFLIBSRC/src/driver/si5338.c\
+    $$LIBBLADERFLIBSRC/src/driver/dac161s055.c\
+    $$LIBBLADERFLIBSRC/src/driver/fx3_fw.c\
+    $$LIBBLADERFLIBSRC/src/driver/smb_clock.c\
+    $$LIBBLADERFLIBSRC/src/driver/thirdparty/adi/dac_core.c\
+    $$LIBBLADERFLIBSRC/src/driver/thirdparty/adi/ad9361.c\
+    $$LIBBLADERFLIBSRC/src/driver/thirdparty/adi/util.c\
+    $$LIBBLADERFLIBSRC/src/driver/thirdparty/adi/platform.c\
+    $$LIBBLADERFLIBSRC/src/driver/thirdparty/adi/ad9361_api.c\
+    $$LIBBLADERFLIBSRC/src/driver/thirdparty/adi/adc_core.c\
+    $$LIBBLADERFLIBSRC/src/driver/thirdparty/adi/ad9361_conv.c\
+    $$LIBBLADERFLIBSRC/src/driver/spi_flash.c\
+    $$LIBBLADERFLIBSRC/src/driver/ina219.c\
+    $$LIBBLADERFLIBSRC/src/board/bladerf2/compatibility.c\
+    $$LIBBLADERFLIBSRC/src/board/bladerf2/capabilities.c\
+    $$LIBBLADERFLIBSRC/src/board/bladerf2/params.c\
+    $$LIBBLADERFLIBSRC/src/board/bladerf2/bladerf2.c\
+    $$LIBBLADERFLIBSRC/src/board/board.c\
+    $$LIBBLADERFLIBSRC/src/board/bladerf1/flash.c\
+    $$LIBBLADERFLIBSRC/src/board/bladerf1/bladerf1.c\
+    $$LIBBLADERFLIBSRC/src/board/bladerf1/image.c\
+    $$LIBBLADERFLIBSRC/src/board/bladerf1/compatibility.c\
+    $$LIBBLADERFLIBSRC/src/board/bladerf1/calibration.c\
+    $$LIBBLADERFLIBSRC/src/board/bladerf1/capabilities.c\
+    $$LIBBLADERFLIBSRC/src/expansion/xb100.c\
+    $$LIBBLADERFLIBSRC/src/expansion/xb200.c\
+    $$LIBBLADERFLIBSRC/src/expansion/xb300.c\
+    $$LIBBLADERFLIBSRC/src/streaming/async.c\
+    $$LIBBLADERFLIBSRC/src/streaming/sync_worker.c\
+    $$LIBBLADERFLIBSRC/src/streaming/sync.c\
     $$LIBBLADERFLIBSRC/src/bladerf.c\
-    $$LIBBLADERFLIBSRC/src/capabilities.c\
-    $$LIBBLADERFLIBSRC/src/dc_cal_table.c\
-    $$LIBBLADERFLIBSRC/src/devinfo.c\
-    $$LIBBLADERFLIBSRC/src/flash.c\
-    $$LIBBLADERFLIBSRC/src/fpga.c\
-    $$LIBBLADERFLIBSRC/src/fx3_fw_log.c\
-    $$LIBBLADERFLIBSRC/src/image.c\
-    $$LIBBLADERFLIBSRC/src/si5338.c\
-    $$LIBBLADERFLIBSRC/src/sync_worker.c\
-    $$LIBBLADERFLIBSRC/src/trigger.c\
-    $$LIBBLADERFLIBSRC/src/version_compat.c\
+    $$LIBBLADERFLIBSRC/src/init_fini.c\
+    $$LIBBLADERFLIBSRC/src/backend/dummy/dummy.c\
     $$LIBBLADERFLIBSRC/src/backend/backend.c\
-    $$LIBBLADERFLIBSRC/src/backend/dummy.c\
-    $$LIBBLADERFLIBSRC/src/backend/usb/libusb.c\
     $$LIBBLADERFLIBSRC/src/backend/usb/usb.c\
+    $$LIBBLADERFLIBSRC/src/backend/usb/libusb.c\
     $$LIBBLADERFLIBSRC/src/backend/usb/nios_access.c\
     $$LIBBLADERFLIBSRC/src/backend/usb/nios_legacy_access.c\
-    $$LIBBLADERFSRC/fpga_common/src/band_select.c\
-    $$LIBBLADERFSRC/fpga_common/src/lms.c\
-    $$LIBBLADERFCOMMONSRC/src/conversions.c\
-    $$LIBBLADERFCOMMONSRC/src/devcfg.c\
-    $$LIBBLADERFCOMMONSRC/src/sha256.c
+    $$LIBBLADERFLIBSRC/src/devinfo.c
 
-HEADERS = $$LIBBLADERFLIBSRC/src/async.h\
-    $$LIBBLADERFLIBSRC/src/capabilities.h\
-    $$LIBBLADERFLIBSRC/src/dc_cal_table.h\
-    $$LIBBLADERFLIBSRC/src/devinfo.h\
-    $$LIBBLADERFLIBSRC/src/flash.h\
-    $$LIBBLADERFLIBSRC/src/fpga.h\
-    $$LIBBLADERFLIBSRC/src/fx3_fw_log.h\
-    $$LIBBLADERFLIBSRC/src/metadata.h\
-    $$LIBBLADERFLIBSRC/src/sync.h\
-    $$LIBBLADERFLIBSRC/src/smb_clock.h\
-    $$LIBBLADERFLIBSRC/src/tuning.h\
-    $$LIBBLADERFLIBSRC/src/xb.h\
-    $$LIBBLADERFLIBSRC/src/bladerf_priv.h\
-    $$LIBBLADERFLIBSRC/src/config.h\
-    $$LIBBLADERFLIBSRC/src/device_identifier.h\
-    $$LIBBLADERFLIBSRC/src/file_ops.h\
-    $$LIBBLADERFLIBSRC/src/flash_fields.h\
-    $$LIBBLADERFLIBSRC/src/fx3_fw.h\
-    $$LIBBLADERFLIBSRC/src/gain.h\
-    $$LIBBLADERFLIBSRC/src/si5338.h\
-    $$LIBBLADERFLIBSRC/src/sync_worker.h\
-    $$LIBBLADERFLIBSRC/src/trigger.h\
-    $$LIBBLADERFLIBSRC/src/version_compat.h\
-    $$LIBBLADERFLIBSRC/src/backend/backend.h\
-    $$LIBBLADERFLIBSRC/src/backend/dummy.h\
-    $$LIBBLADERFLIBSRC/src/backend/usb/usb.h\
-    $$LIBBLADERFLIBSRC/src/backend/usb/nios_access.h\
-    $$LIBBLADERFLIBSRC/src/backend/usb/nios_legacy_access.h\
-    $$LIBBLADERFSRC/fpga_common/include/band_select.h\
-    $$LIBBLADERFSRC/fpga_common/include/lms.h\
+HEADERS = $$PWD/mingw/common/include/host_config.h\
+    $$PWD/mingw/libraries/libbladeRF/src/version.h\
+    $$PWD/mingw/libraries/libbladeRF/src/backend/backend_config.h\
+    $$LIBBLADERFCOMMONSRC/include/thread.h\
+    $$LIBBLADERFCOMMONSRC/include/parse.h\
+    $$LIBBLADERFCOMMONSRC/include/minmax.h\
+    $$LIBBLADERFCOMMONSRC/include/rel_assert.h\
+    $$LIBBLADERFCOMMONSRC/include/devcfg.h\
+    $$LIBBLADERFCOMMONSRC/include/str_queue.h\
+    $$LIBBLADERFCOMMONSRC/include/log.h\
+    $$LIBBLADERFCOMMONSRC/include/dc_calibration.h\
     $$LIBBLADERFCOMMONSRC/include/sha256.h\
-    $$PWD/include/host_config.h\
-    $$PWD/include/backend/backend_config.h\
-    $$PWD/include/version.h
+    $$LIBBLADERFCOMMONSRC/include/conversions.h\
+    $$LIBBLADERFSRC/fpga_common/include/lms.h\
+    $$LIBBLADERFSRC/fpga_common/include/band_select.h\
+    $$LIBBLADERFLIBSRC/src/helpers/interleave.h\
+    $$LIBBLADERFLIBSRC/src/helpers/wallclock.h\
+    $$LIBBLADERFLIBSRC/src/helpers/timeout.h\
+    $$LIBBLADERFLIBSRC/src/helpers/version.h\
+    $$LIBBLADERFLIBSRC/src/helpers/configfile.h\
+    $$LIBBLADERFLIBSRC/src/helpers/file.h\
+    $$LIBBLADERFLIBSRC/src/driver/dac161s055.h\
+    $$LIBBLADERFLIBSRC/src/driver/fpga_trigger.h\
+    $$LIBBLADERFLIBSRC/src/driver/si5338.h\
+    $$LIBBLADERFLIBSRC/src/driver/ina219.h\
+    $$LIBBLADERFLIBSRC/src/driver/thirdparty/adi/platform.h\
+    $$LIBBLADERFLIBSRC/src/driver/thirdparty/adi/util.h\
+    $$LIBBLADERFLIBSRC/src/driver/thirdparty/adi/dac_core.h\
+    $$LIBBLADERFLIBSRC/src/driver/thirdparty/adi/config.h\
+    $$LIBBLADERFLIBSRC/src/driver/thirdparty/adi/adc_core.h\
+    $$LIBBLADERFLIBSRC/src/driver/thirdparty/adi/common.h\
+    $$LIBBLADERFLIBSRC/src/driver/thirdparty/adi/ad9361.h\
+    $$LIBBLADERFLIBSRC/src/driver/thirdparty/adi/ad9361_api.h\
+    $$LIBBLADERFLIBSRC/src/driver/spi_flash.h\
+    $$LIBBLADERFLIBSRC/src/driver/fx3_fw.h\
+    $$LIBBLADERFLIBSRC/src/driver/smb_clock.h\
+    $$LIBBLADERFLIBSRC/src/board/bladerf2/capabilities.h\
+    $$LIBBLADERFLIBSRC/src/board/bladerf2/compatibility.h\
+    $$LIBBLADERFLIBSRC/src/board/board.h\
+    $$LIBBLADERFLIBSRC/src/board/bladerf1/calibration.h\
+    $$LIBBLADERFLIBSRC/src/board/bladerf1/capabilities.h\
+    $$LIBBLADERFLIBSRC/src/board/bladerf1/compatibility.h\
+    $$LIBBLADERFLIBSRC/src/board/bladerf1/flash.h\
+    $$LIBBLADERFLIBSRC/src/expansion/xb300.h\
+    $$LIBBLADERFLIBSRC/src/expansion/xb100.h\
+    $$LIBBLADERFLIBSRC/src/expansion/xb200.h\
+    $$LIBBLADERFLIBSRC/src/streaming/sync.h\
+    $$LIBBLADERFLIBSRC/src/streaming/sync_worker.h\
+    $$LIBBLADERFLIBSRC/src/streaming/metadata.h\
+    $$LIBBLADERFLIBSRC/src/streaming/format.h\
+    $$LIBBLADERFLIBSRC/src/streaming/async.h\
+    $$LIBBLADERFLIBSRC/src/backend/backend.h\
+    $$LIBBLADERFLIBSRC/src/backend/dummy/dummy.h\
+    $$LIBBLADERFLIBSRC/src/backend/usb/nios_legacy_access.h\
+    $$LIBBLADERFLIBSRC/src/backend/usb/nios_access.h\
+    $$LIBBLADERFLIBSRC/src/backend/usb/usb.h\
+    $$LIBBLADERFLIBSRC/src/devinfo.h\
+    $$LIBBLADERFLIBSRC/include/bladeRF2.h\
+    $$LIBBLADERFLIBSRC/include/libbladeRF.h\
+    $$LIBBLADERFLIBSRC/include/bladeRF1.h
 
-CONFIG(MINGW32):LIBS += -LD:\softs\libusb-1.0.20\MinGW32\dll -llibusb-1.0
-CONFIG(MINGW64):LIBS += -LD:\softs\libusb-1.0.20\MinGW64\dll -llibusb-1.0
+CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.22\MinGW32\dll -llibusb-1.0
+CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.22\MinGW64\dll -llibusb-1.0
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =

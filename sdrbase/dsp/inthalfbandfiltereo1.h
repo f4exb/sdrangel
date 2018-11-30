@@ -19,18 +19,18 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_DSP_INTHALFBANDFILTEREO_H_
-#define SDRBASE_DSP_INTHALFBANDFILTEREO_H_
+#ifndef SDRBASE_DSP_INTHALFBANDFILTEREO1_H_
+#define SDRBASE_DSP_INTHALFBANDFILTEREO1_H_
 
 #include <stdint.h>
 #include <cstdlib>
 #include "dsp/dsptypes.h"
 #include "dsp/hbfiltertraits.h"
-#include "dsp/inthalfbandfiltereo1i.h"
-#include "util/export.h"
+//#include "dsp/inthalfbandfiltereo1i.h"
+#include "export.h"
 
 template<uint32_t HBFilterOrder>
-class SDRANGEL_API IntHalfbandFilterEO1 {
+class SDRBASE_API IntHalfbandFilterEO1 {
 public:
     IntHalfbandFilterEO1();
 
@@ -681,15 +681,15 @@ protected:
         int32_t iAcc = 0;
         int32_t qAcc = 0;
 
-#ifdef USE_SSE4_1
-        IntHalfbandFilterEO1Intrisics<HBFilterOrder>::work(
-                m_ptr,
-                m_even,
-                m_odd,
-                iAcc,
-                qAcc
-        );
-#else
+//#if defined(USE_SSE4_1) && !defined(NO_DSP_SIMD)
+//        IntHalfbandFilterEO1Intrisics<HBFilterOrder>::work(
+//                m_ptr,
+//                m_even,
+//                m_odd,
+//                iAcc,
+//                qAcc
+//        );
+//#else
         int a = m_ptr/2 + m_size; // tip pointer
         int b = m_ptr/2 + 1; // tail pointer
 
@@ -709,7 +709,7 @@ protected:
             a -= 1;
             b += 1;
         }
-#endif
+//#endif
 
         if ((m_ptr % 2) == 0)
         {
@@ -731,15 +731,15 @@ protected:
         int32_t iAcc = 0;
         int32_t qAcc = 0;
 
-#ifdef USE_SSE4_1
-        IntHalfbandFilterEO1Intrisics<HBFilterOrder>::work(
-                m_ptr,
-                m_even,
-                m_odd,
-                iAcc,
-                qAcc
-        );
-#else
+//#if defined(USE_SSE4_1) && !defined(NO_DSP_SIMD)
+//        IntHalfbandFilterEO1Intrisics<HBFilterOrder>::work(
+//                m_ptr,
+//                m_even,
+//                m_odd,
+//                iAcc,
+//                qAcc
+//        );
+//#else
         int a = m_ptr/2 + m_size; // tip pointer
         int b = m_ptr/2 + 1; // tail pointer
 
@@ -759,7 +759,7 @@ protected:
             a -= 1;
             b += 1;
         }
-#endif
+//#endif
         if ((m_ptr % 2) == 0)
         {
             iAcc += ((int32_t)m_odd[0][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
@@ -837,4 +837,4 @@ IntHalfbandFilterEO1<HBFilterOrder>::IntHalfbandFilterEO1()
     m_state = 0;
 }
 
-#endif /* SDRBASE_DSP_INTHALFBANDFILTEREO_H_ */
+#endif /* SDRBASE_DSP_INTHALFBANDFILTEREO1_H_ */

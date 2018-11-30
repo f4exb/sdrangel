@@ -41,9 +41,7 @@ TestSourceInput::TestSourceInput(DeviceSourceAPI *deviceAPI) :
 	m_running(false),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
-    char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
+    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
 
     if (!m_sampleFifo.setSize(96000 * 4)) {
@@ -74,16 +72,9 @@ bool TestSourceInput::start()
 
     if (m_running) stop();
 
-	if ((m_testSourceThread = new TestSourceThread(&m_sampleFifo)) == 0)
-	{
-	    qCritical("TestSourceInput::start: out of memory");
-		stop();
-		return false;
-	}
-
+    m_testSourceThread = new TestSourceThread(&m_sampleFifo);
 	m_testSourceThread->setSamplerate(m_settings.m_sampleRate);
-	m_testSourceThread->connectTimer(m_masterTimer);
-	m_testSourceThread->startWork();
+	m_testSourceThread->startStop(true);
 
 	mutexLocker.unlock();
 
@@ -99,8 +90,8 @@ void TestSourceInput::stop()
 
 	if (m_testSourceThread != 0)
 	{
-	    m_testSourceThread->stopWork();
-		delete m_testSourceThread;
+	    m_testSourceThread->startStop(false);
+        m_testSourceThread->deleteLater();
 		m_testSourceThread = 0;
 	}
 
@@ -141,7 +132,7 @@ const QString& TestSourceInput::getDeviceDescription() const
 
 int TestSourceInput::getSampleRate() const
 {
-	return m_settings.m_sampleRate;
+	return m_settings.m_sampleRate/(1<<m_settings.m_log2Decim);
 }
 
 quint64 TestSourceInput::getCenterFrequency() const
@@ -183,11 +174,20 @@ bool TestSourceInput::handleMessage(const Message& message)
     else if (MsgFileRecord::match(message))
     {
         MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "RTLSDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
+        qDebug() << "TestSourceInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
 
-        if (conf.getStartStop()) {
+        if (conf.getStartStop())
+        {
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink->setFileName(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
+            }
+
             m_fileSink->startRecording();
-        } else {
+        }
+        else
+        {
             m_fileSink->stopRecording();
         }
 
@@ -196,20 +196,18 @@ bool TestSourceInput::handleMessage(const Message& message)
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
-        qDebug() << "RTLSDRInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+        qDebug() << "TestSourceInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
 
         if (cmd.getStartStop())
         {
             if (m_deviceAPI->initAcquisition())
             {
                 m_deviceAPI->startAcquisition();
-                DSPEngine::instance()->startAudioOutput();
             }
         }
         else
         {
             m_deviceAPI->stopAcquisition();
-            DSPEngine::instance()->stopAudioOutput();
         }
 
         return true;
@@ -260,27 +258,25 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
         || (m_settings.m_fcPos != settings.m_fcPos)
         || (m_settings.m_frequencyShift != settings.m_frequencyShift)
+        || (m_settings.m_sampleRate != settings.m_sampleRate)
         || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
-        qint64 deviceCenterFrequency = settings.m_centerFrequency;
+        qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+                settings.m_centerFrequency,
+                0, // no transverter mode
+                settings.m_log2Decim,
+                (DeviceSampleSource::fcPos_t) settings.m_fcPos,
+                settings.m_sampleRate);
+
         int frequencyShift = settings.m_frequencyShift;
-        qint64 f_img = deviceCenterFrequency;
         quint32 devSampleRate = settings.m_sampleRate;
 
         if (settings.m_log2Decim != 0)
         {
-            if (settings.m_fcPos == TestSourceSettings::FC_POS_INFRA)
-            {
-                deviceCenterFrequency += (devSampleRate / 4);
-                frequencyShift -= (devSampleRate / 4);
-                f_img = deviceCenterFrequency + devSampleRate/2;
-            }
-            else if (settings.m_fcPos == TestSourceSettings::FC_POS_SUPRA)
-            {
-                deviceCenterFrequency -= (devSampleRate / 4);
-                frequencyShift += (devSampleRate / 4);
-                f_img = deviceCenterFrequency - devSampleRate/2;
-            }
+            frequencyShift += DeviceSampleSource::calculateFrequencyShift(
+                    settings.m_log2Decim,
+                    (DeviceSampleSource::fcPos_t) settings.m_fcPos,
+                    settings.m_sampleRate);
         }
 
         if (m_testSourceThread != 0)
@@ -292,7 +288,6 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
                     << " device center freq: " << deviceCenterFrequency << " Hz"
                     << " device sample rate: " << devSampleRate << "Hz"
                     << " Actual sample rate: " << devSampleRate/(1<<m_settings.m_log2Decim) << "Hz"
-                    << " fc shift: " << f_img << "Hz"
                     << " f shift: " << settings.m_frequencyShift;
         }
     }
@@ -359,8 +354,17 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
     if ((m_settings.m_modulation != settings.m_modulation) || force)
     {
-        if (m_testSourceThread != 0) {
+        if (m_testSourceThread != 0)
+        {
             m_testSourceThread->setModulation(settings.m_modulation);
+
+            if (settings.m_modulation == TestSourceSettings::ModulationPattern0) {
+                m_testSourceThread->setPattern0();
+            } else if (settings.m_modulation == TestSourceSettings::ModulationPattern1) {
+                m_testSourceThread->setPattern1();
+            } else if (settings.m_modulation == TestSourceSettings::ModulationPattern2) {
+                m_testSourceThread->setPattern2();
+            }
         }
     }
 
@@ -407,3 +411,121 @@ int TestSourceInput::webapiRun(
 
     return 200;
 }
+
+int TestSourceInput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setTestSourceSettings(new SWGSDRangel::SWGTestSourceSettings());
+    response.getTestSourceSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int TestSourceInput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    TestSourceSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getTestSourceSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("frequencyShift")) {
+        settings.m_frequencyShift = response.getTestSourceSettings()->getFrequencyShift();
+    }
+    if (deviceSettingsKeys.contains("sampleRate")) {
+        settings.m_sampleRate = response.getTestSourceSettings()->getSampleRate();
+    }
+    if (deviceSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getTestSourceSettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("fcPos")) {
+        int fcPos = response.getTestSourceSettings()->getFcPos();
+        fcPos = fcPos < 0 ? 0 : fcPos > 2 ? 2 : fcPos;
+        settings.m_fcPos = (TestSourceSettings::fcPos_t) fcPos;
+    }
+    if (deviceSettingsKeys.contains("sampleSizeIndex")) {
+        int sampleSizeIndex = response.getTestSourceSettings()->getSampleSizeIndex();
+        sampleSizeIndex = sampleSizeIndex < 0 ? 0 : sampleSizeIndex > 1 ? 2 : sampleSizeIndex;
+        settings.m_sampleSizeIndex = sampleSizeIndex;
+    }
+    if (deviceSettingsKeys.contains("amplitudeBits")) {
+        settings.m_amplitudeBits = response.getTestSourceSettings()->getAmplitudeBits();
+    }
+    if (deviceSettingsKeys.contains("autoCorrOptions")) {
+        int autoCorrOptions = response.getTestSourceSettings()->getAutoCorrOptions();
+        autoCorrOptions = autoCorrOptions < 0 ? 0 : autoCorrOptions >= TestSourceSettings::AutoCorrLast ? TestSourceSettings::AutoCorrLast-1 : autoCorrOptions;
+        settings.m_sampleSizeIndex = (TestSourceSettings::AutoCorrOptions) autoCorrOptions;
+    }
+    if (deviceSettingsKeys.contains("modulation")) {
+        int modulation = response.getTestSourceSettings()->getModulation();
+        modulation = modulation < 0 ? 0 : modulation >= TestSourceSettings::ModulationLast ? TestSourceSettings::ModulationLast-1 : modulation;
+        settings.m_modulation = (TestSourceSettings::Modulation) modulation;
+    }
+    if (deviceSettingsKeys.contains("modulationTone")) {
+        settings.m_modulationTone = response.getTestSourceSettings()->getModulationTone();
+    }
+    if (deviceSettingsKeys.contains("amModulation")) {
+        settings.m_amModulation = response.getTestSourceSettings()->getAmModulation();
+    };
+    if (deviceSettingsKeys.contains("fmDeviation")) {
+        settings.m_fmDeviation = response.getTestSourceSettings()->getFmDeviation();
+    };
+    if (deviceSettingsKeys.contains("dcFactor")) {
+        settings.m_dcFactor = response.getTestSourceSettings()->getDcFactor();
+    };
+    if (deviceSettingsKeys.contains("iFactor")) {
+        settings.m_iFactor = response.getTestSourceSettings()->getIFactor();
+    };
+    if (deviceSettingsKeys.contains("qFactor")) {
+        settings.m_qFactor = response.getTestSourceSettings()->getQFactor();
+    };
+    if (deviceSettingsKeys.contains("phaseImbalance")) {
+        settings.m_phaseImbalance = response.getTestSourceSettings()->getPhaseImbalance();
+    };
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getTestSourceSettings()->getFileRecordName();
+    }
+
+    MsgConfigureTestSource *msg = MsgConfigureTestSource::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureTestSource *msgToGUI = MsgConfigureTestSource::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void TestSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const TestSourceSettings& settings)
+{
+    response.getTestSourceSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getTestSourceSettings()->setFrequencyShift(settings.m_frequencyShift);
+    response.getTestSourceSettings()->setSampleRate(settings.m_sampleRate);
+    response.getTestSourceSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getTestSourceSettings()->setFcPos((int) settings.m_fcPos);
+    response.getTestSourceSettings()->setSampleSizeIndex((int) settings.m_sampleSizeIndex);
+    response.getTestSourceSettings()->setAmplitudeBits(settings.m_amplitudeBits);
+    response.getTestSourceSettings()->setAutoCorrOptions((int) settings.m_autoCorrOptions);
+    response.getTestSourceSettings()->setModulation((int) settings.m_modulation);
+    response.getTestSourceSettings()->setModulationTone(settings.m_modulationTone);
+    response.getTestSourceSettings()->setAmModulation(settings.m_amModulation);
+    response.getTestSourceSettings()->setFmDeviation(settings.m_fmDeviation);
+    response.getTestSourceSettings()->setDcFactor(settings.m_dcFactor);
+    response.getTestSourceSettings()->setIFactor(settings.m_iFactor);
+    response.getTestSourceSettings()->setQFactor(settings.m_qFactor);
+    response.getTestSourceSettings()->setPhaseImbalance(settings.m_phaseImbalance);
+
+    if (response.getTestSourceSettings()->getFileRecordName()) {
+        *response.getTestSourceSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getTestSourceSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+}
+

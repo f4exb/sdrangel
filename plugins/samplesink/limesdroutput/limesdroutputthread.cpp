@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <errno.h>
+#include <algorithm>
 
 #include "limesdroutputthread.h"
 #include "limesdroutputsettings.h"
@@ -24,9 +25,9 @@ LimeSDROutputThread::LimeSDROutputThread(lms_stream_t* stream, SampleSourceFifo*
     m_running(false),
     m_stream(stream),
     m_sampleFifo(sampleFifo),
-    m_log2Interp(0),
-    m_fcPos(LimeSDROutputSettings::FC_POS_CENTER)
+    m_log2Interp(0)
 {
+    std::fill(m_buf, m_buf + 2*LIMESDROUTPUT_BLOCKSIZE, 0);
 }
 
 LimeSDROutputThread::~LimeSDROutputThread()
@@ -70,11 +71,6 @@ void LimeSDROutputThread::stopWork()
 void LimeSDROutputThread::setLog2Interpolation(unsigned int log2_interp)
 {
     m_log2Interp = log2_interp;
-}
-
-void LimeSDROutputThread::setFcPos(int fcPos)
-{
-    m_fcPos = fcPos;
 }
 
 void LimeSDROutputThread::run()

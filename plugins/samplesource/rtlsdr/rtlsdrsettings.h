@@ -17,6 +17,8 @@
 #ifndef _RTLSDR_RTLSDRSETTINGS_H_
 #define _RTLSDR_RTLSDRSETTINGS_H_
 
+#include <QString>
+
 struct RTLSDRSettings {
 	typedef enum {
 		FC_POS_INFRA = 0,
@@ -38,6 +40,7 @@ struct RTLSDRSettings {
     bool m_transverterMode;
 	qint64 m_transverterDeltaFrequency;
 	quint32 m_rfBandwidth; //!< RF filter bandwidth in Hz
+	QString m_fileRecordName;
 
 	RTLSDRSettings();
 	void resetToDefaults();

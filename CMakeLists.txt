@@ -13,7 +13,7 @@ set(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
 # when building, don't use the install RPATH already
 # (but later on when installing)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
@@ -30,6 +30,7 @@ option(DEBUG_OUTPUT "Print debug messages" OFF)
 option(SANITIZE_ADDRESS "Activate memory address sanitization" OFF)
 option(HOST_RPI "Compiling on RPi" OFF)
 option(RX_SAMPLE_24BIT "Internal 24 bit Rx DSP" OFF)
+option(NO_DSP_SIMD "Do not use SIMD instructions for DSP even if available" OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
@@ -55,12 +56,11 @@ set(CMAKE_AUTOMOC ON)
 find_package(Qt5Core 5.0 REQUIRED)
 find_package(Qt5Widgets 5.0 REQUIRED)
 find_package(Qt5Multimedia 5.0 REQUIRED)
-#find_package(QT5OpenGL 5.0 REQUIRED)
+find_package(Qt5OpenGL 5.0 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(PkgConfig)
 find_package(Boost REQUIRED)
 find_package(FFTW3F)
-find_package(JRTPLib)
 
 if (NOT BUILD_DEBIAN)
     find_package(LibDSDcc)
@@ -106,7 +106,7 @@ if (${ARCHITECTURE} MATCHES "x86_64|AMD64|x86")
     EXECUTE_PROCESS( COMMAND grep flags /proc/cpuinfo OUTPUT_VARIABLE CPU_FLAGS )
 #    if (${CPU_FLAGS} MATCHES "avx2")
 #        set(HAS_AVX2 ON CACHE BOOL "Architecture has AVX2 SIMD enabled")
-#        if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
+#        if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
 #            set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mavx2" )
 #            set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mavx2" )
 #            message(STATUS "Use AVX2 SIMD instructions")
@@ -117,7 +117,7 @@ if (${ARCHITECTURE} MATCHES "x86_64|AMD64|x86")
 #    endif()
     if (${CPU_FLAGS} MATCHES "sse4_1")
         set(HAS_SSE4_1 ON CACHE BOOL "Architecture has SSE 4.1 SIMD enabled")
-        if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
+        if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
             set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -msse4.1" )
             set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -msse4.1" )
             message(STATUS "Use SSE 4.1 SIMD instructions")
@@ -134,7 +134,7 @@ if (${ARCHITECTURE} MATCHES "x86_64|AMD64|x86")
     endif()
     if (${CPU_FLAGS} MATCHES "ssse3")
         set(HAS_SSSE3 ON CACHE BOOL "Architecture has SSSE3 SIMD enabled")
-        if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
+        if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
             set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mssse3" )
             set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mssse3" )
             message(STATUS "Use SSSE3 SIMD instructions")
@@ -151,7 +151,7 @@ if (${ARCHITECTURE} MATCHES "x86_64|AMD64|x86")
     endif()
     if (${CPU_FLAGS} MATCHES "sse2")
         set(HAS_SSE2 ON CACHE BOOL "Architecture has SSE2 SIMD enabled")
-        if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
+        if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
             set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -msse2" )
             set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -msse2" )
             message(STATUS "Use SSE2 SIMD instructions")
@@ -170,7 +170,7 @@ elseif (${ARCHITECTURE} MATCHES "armv7l")
     EXECUTE_PROCESS( COMMAND grep Features /proc/cpuinfo OUTPUT_VARIABLE CPU_FLAGS )
     if (${CPU_FLAGS} MATCHES "neon")
         set(HAS_NEON ON CACHE BOOL "Architecture has NEON SIMD enabled")
-        if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
+        if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
             set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mfpu=neon" )
             set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mfpu=neon" )
             message(STATUS "Use NEON SIMD instructions")
@@ -181,7 +181,7 @@ elseif (${ARCHITECTURE} MATCHES "armv7l")
     endif()
 elseif (${ARCHITECTURE} MATCHES "aarch64")
     set(HAS_NEON ON CACHE BOOL FORCE "Architecture has NEON SIMD enabled")
-    if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
+    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
         message(STATUS "Aarch64 always has NEON SIMD instructions")
         add_definitions(-DUSE_NEON)
     endif()
@@ -204,13 +204,29 @@ if (SANITIZE_ADDRESS)
     set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -fsanitize=address")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fmax-errors=10 -ffast-math -ftree-vectorize ${EXTRA_FLAGS}")
+if (NO_DSP_SIMD)
+    message(STATUS "Not compiling with SIMD instructions for DSP even if available")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_DSP_SIMD")
+else()
+    message(STATUS "Compiling with SIMD instructions for DSP if available")
+endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wvla -Woverloaded-virtual -ffast-math -ftree-vectorize ${EXTRA_FLAGS}")
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if (BUILD_DEBIAN)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=1")
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=10")
+    endif()
+endif()
 
 ##############################################################################
 # base libraries
 add_subdirectory(sdrbase)
 add_subdirectory(sdrgui)
 add_subdirectory(sdrsrv)
+add_subdirectory(sdrbench)
 add_subdirectory(httpserver)
 add_subdirectory(logging)
 add_subdirectory(qrtplib)
@@ -218,6 +234,7 @@ add_subdirectory(swagger)
 
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/sdrbase
     ${CMAKE_SOURCE_DIR}/sdrgui
     ${CMAKE_SOURCE_DIR}/logging
@@ -239,7 +256,7 @@ set(sdrangel_SOURCES
 )
 
 if(WIN32)
-    SET(sdrangel_SOURCES ${sdrangel_SOURCES} sdrbase/resources/sdrangel.rc)
+    SET(sdrangel_SOURCES ${sdrangel_SOURCES} sdrgui/resources/sdrangel.rc)
 endif(WIN32)
 
 add_executable(sdrangel
@@ -263,7 +280,7 @@ if(WIN32)
     set_target_properties(sdrangel PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 endif(WIN32)
 
-qt5_use_modules(sdrangel Widgets Multimedia)
+target_link_libraries(sdrangel Qt5::Widgets Qt5::Multimedia)
 
 ##############################################################################
 # main server application
@@ -287,7 +304,31 @@ target_link_libraries(sdrangelsrv
     ${QT_LIBRARIES}
 )
 
-qt5_use_modules(sdrangelsrv Multimedia)
+target_link_libraries(sdrangelsrv Qt5::Multimedia)
+
+##############################################################################
+# main benchmark application
+
+set(sdrangelbench_SOURCES
+    appbench/main.cpp
+)
+
+add_executable(sdrangelbench
+    ${sdrangelbench_SOURCES}
+)
+
+target_include_directories(sdrangelbench
+    PUBLIC ${CMAKE_SOURCE_DIR}/sdrbench
+)
+
+target_link_libraries(sdrangelbench
+    sdrbench
+    logging
+    ${QT_LIBRARIES}
+)
+
+target_compile_features(sdrangelbench PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
+target_link_libraries(sdrangelbench Qt5::Multimedia)
 
 ##############################################################################
 
@@ -321,6 +362,7 @@ endif(LIBUSB_FOUND AND UNIX)
 #install targets
 install(TARGETS sdrangel DESTINATION bin)
 install(TARGETS sdrangelsrv DESTINATION bin)
+install(TARGETS sdrangelbench DESTINATION bin)
 #install(TARGETS sdrbase DESTINATION lib)
 
 #install files and directories

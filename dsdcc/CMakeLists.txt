@@ -12,8 +12,11 @@ set(dsdcc_SOURCES
     ${LIBDSDCCSRC}/dsd_symbol.cpp
     ${LIBDSDCCSRC}/dstar.cpp
     ${LIBDSDCCSRC}/ysf.cpp
-    ${LIBDSDCCSRC}/nxdn.cpp
     ${LIBDSDCCSRC}/dpmr.cpp
+    ${LIBDSDCCSRC}/nxdn.cpp
+    ${LIBDSDCCSRC}/nxdnconvolution.cpp
+    ${LIBDSDCCSRC}/nxdncrc.cpp
+    ${LIBDSDCCSRC}/nxdnmessage.cpp
     ${LIBDSDCCSRC}/p25p1_heuristics.cpp
     ${LIBDSDCCSRC}/fec.cpp
     ${LIBDSDCCSRC}/crc.cpp
@@ -39,8 +42,11 @@ set(dsdcc_HEADERS
     ${LIBDSDCCSRC}/dsd_symbol.h
     ${LIBDSDCCSRC}/dstar.h
     ${LIBDSDCCSRC}/ysf.h
-    ${LIBDSDCCSRC}/nxdn.h
     ${LIBDSDCCSRC}/dpmr.h
+    ${LIBDSDCCSRC}/nxdn.h
+    ${LIBDSDCCSRC}/nxdnconvolution.h
+    ${LIBDSDCCSRC}/nxdncrc.h
+    ${LIBDSDCCSRC}/nxdnmessage.h
     ${LIBDSDCCSRC}/p25p1_heuristics.h
     ${LIBDSDCCSRC}/runningmaxmin.h
     ${LIBDSDCCSRC}/doublebuffer.h

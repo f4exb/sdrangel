@@ -25,7 +25,7 @@
 #include "dsp/downchannelizer.h"
 
 #include "dsp/threadedbasebandsamplesink.h"
-#include "dsp/scopevisng.h"
+#include "dsp/scopevis.h"
 #include "ui_atvdemodgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -211,7 +211,7 @@ bool ATVDemodGUI::handleMessage(const Message& objMessage)
         int nbPointsPerLine =  ((ATVDemod::MsgReportEffectiveSampleRate&)objMessage).getNbPointsPerLine();
         ui->channelSampleRateText->setText(tr("%1k").arg(sampleRate/1000.0f, 0, 'f', 2));
         ui->nbPointsPerLineText->setText(tr("%1p").arg(nbPointsPerLine));
-        m_scopeVis->setSampleRate(sampleRate);
+        m_scopeVis->setLiveRate(sampleRate);
         setRFFiltersSlidersRange(sampleRate);
         lineTimeUpdate();
         topTimeUpdate();
@@ -278,14 +278,15 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
         m_inputSampleRate(48000)
 {
     ui->setupUi(this);
+    ui->screenTV->setColor(false);
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
-    m_scopeVis = new ScopeVisNG(ui->glScope);
+    m_scopeVis = new ScopeVis(ui->glScope);
     m_atvDemod = (ATVDemod*) rxChannel; //new ATVDemod(m_deviceUISet->m_deviceSourceAPI);
     m_atvDemod->setMessageQueueToGUI(getInputMessageQueue());
     m_atvDemod->setScopeSink(m_scopeVis);
-    m_atvDemod->setATVScreen(ui->screenTV);
+    m_atvDemod->setTVScreen(ui->screenTV);
 
     ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
     connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
@@ -312,14 +313,14 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     resetToDefaults(); // does applySettings()
 
     ui->scopeGUI->setPreTrigger(1);
-    ScopeVisNG::TraceData traceData;
+    ScopeVis::TraceData traceData;
     traceData.m_amp = 2.0;      // amplification factor
     traceData.m_ampIndex = 1;   // this is second step
     traceData.m_ofs = 0.5;      // direct offset
     traceData.m_ofsCoarse = 50; // this is 50 coarse steps
     ui->scopeGUI->changeTrace(0, traceData);
     ui->scopeGUI->focusOnTrace(0); // re-focus to take changes into account in the GUI
-    ScopeVisNG::TriggerData triggerData;
+    ScopeVis::TriggerData triggerData;
     triggerData.m_triggerLevel = 0.1;
     triggerData.m_triggerLevelCoarse = 10;
     triggerData.m_triggerPositiveEdge = false;

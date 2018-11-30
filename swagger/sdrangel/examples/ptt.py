@@ -16,27 +16,29 @@ from optparse import OptionParser
 
 base_url = "http://127.0.0.1:8091/sdrangel"
 
+
 # ======================================================================
 def getInputOptions():
 
     parser = OptionParser(usage="usage: %prog [-a address:port] [-d index][-t]\n")
-    parser.add_option("-a", "--address", dest="address", help="address and port", metavar="ADDRESS", type="string") 
+    parser.add_option("-a", "--address", dest="address", help="address and port", metavar="ADDRESS", type="string")
     parser.add_option("-t", "--transmit", dest="transmit", help="transmit", metavar="TRANSMIT", action="store_true", default=False)
     parser.add_option("-d", "--deviceset-index", dest="deviceset_index", help="index of currently active device set (Rx or Tx)", metavar="INDEX", type="int")
 
     (options, args) = parser.parse_args()
-    
+
     if options.address == None:
         options.address = "127.0.0.1:8091"
-    
+
     if options.deviceset_index == None:
         options.deviceset_index = 0
-    
+
     return options
+
 
 # ======================================================================
 def startDevice(deviceIndex):
-    dev_run_url = base_url+("/deviceset/%d/device/run" % deviceIndex)
+    dev_run_url = base_url + ("/deviceset/%d/device/run" % deviceIndex)
     r = requests.get(url=dev_run_url)
     if r.status_code / 100 == 2:
         rj = r.json()
@@ -55,9 +57,10 @@ def startDevice(deviceIndex):
     else:
         print("Error getting device %d running state" % deviceIndex)
 
+
 # ======================================================================
 def stopDevice(deviceIndex):
-    dev_run_url = base_url+("/deviceset/%d/device/run" % deviceIndex)
+    dev_run_url = base_url + ("/deviceset/%d/device/run" % deviceIndex)
     r = requests.get(url=dev_run_url)
     if r.status_code / 100 == 2:
         rj = r.json()
@@ -75,10 +78,11 @@ def stopDevice(deviceIndex):
             print("Cannot get device %d running state" % deviceIndex)
     else:
         print("Error getting device %d running state" % deviceIndex)
-        
+
+
 # ======================================================================
 def setFocus(deviceIndex):
-    dev_focus_url = base_url+("/deviceset/%d/focus" % deviceIndex)
+    dev_focus_url = base_url + ("/deviceset/%d/focus" % deviceIndex)
     r = requests.patch(url=dev_focus_url)
     if r.status_code / 100 == 2:
         print("Focus set on device set %d" % deviceIndex)
@@ -86,43 +90,44 @@ def setFocus(deviceIndex):
         print("Set focus on device set is not supported in a server instance")
     else:
         print("Error setting focus on device set %d" % deviceIndex)
-        
+
+
 # ======================================================================
 def main():
     try:
         options = getInputOptions()
         global base_url
         base_url = "http://%s/sdrangel" % options.address
-        r = requests.get(url=base_url+"/devicesets")
+        r = requests.get(url=base_url + "/devicesets")
         if r.status_code / 100 == 2:
             rj = r.json()
             deviceSets = rj.get("deviceSets", None)
             if deviceSets is not None:
                 if len(deviceSets) > 1:
                     if options.transmit:
-                        if deviceSets[options.deviceset_index]["samplingDevice"]["tx"] == 0 and deviceSets[options.deviceset_index+1]["samplingDevice"]["tx"] == 1:
+                        if deviceSets[options.deviceset_index]["samplingDevice"]["tx"] == 0 and deviceSets[options.deviceset_index + 1]["samplingDevice"]["tx"] == 1:
                             stopDevice(options.deviceset_index)
                             time.sleep(1)
-                            startDevice(options.deviceset_index+1)
-                            setFocus(options.deviceset_index+1)
+                            startDevice(options.deviceset_index + 1)
+                            setFocus(options.deviceset_index + 1)
                         else:
-                            print("Incorrect configuration expecting Rx%d and Tx%d" % (options.deviceset_index, options.deviceset_index+1))
+                            print("Incorrect configuration expecting Rx%d and Tx%d" % (options.deviceset_index, options.deviceset_index + 1))
                     else:
-                        if deviceSets[options.deviceset_index-1]["samplingDevice"]["tx"] == 0 and deviceSets[options.deviceset_index]["samplingDevice"]["tx"] == 1:
+                        if deviceSets[options.deviceset_index - 1]["samplingDevice"]["tx"] == 0 and deviceSets[options.deviceset_index]["samplingDevice"]["tx"] == 1:
                             stopDevice(options.deviceset_index)
                             time.sleep(1)
-                            startDevice(options.deviceset_index-1)
-                            setFocus(options.deviceset_index-1)
+                            startDevice(options.deviceset_index - 1)
+                            setFocus(options.deviceset_index - 1)
                         else:
-                            print("Incorrect configuration expecting Rx%d and Tx%d" % (options.deviceset_index-1, options.deviceset_index))
+                            print("Incorrect configuration expecting Rx%d and Tx%d" % (options.deviceset_index - 1, options.deviceset_index))
                 else:
                     print("Need at least a Rx and a Tx device set")
             else:
-                print("Cannot get device sets configuration") 
+                print("Cannot get device sets configuration")
         else:
             print("Error getting device sets configuration")
-                        
-    except Exception, msg:
+
+    except Exception as ex:
         tb = traceback.format_exc()
         print >> sys.stderr, tb
 

@@ -44,15 +44,6 @@ class SSBMod : public BasebandSampleSource, public ChannelSourceAPI {
     Q_OBJECT
 
 public:
-    typedef enum
-    {
-        SSBModInputNone,
-        SSBModInputTone,
-        SSBModInputFile,
-        SSBModInputAudio,
-        SSBModInputCWTone
-    } SSBModInputAF;
-
     class MsgConfigureSSBMod : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -158,27 +149,6 @@ public:
         { }
     };
 
-    class MsgConfigureAFInput : public Message
-    {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        SSBModInputAF getAFInput() const { return m_afInput; }
-
-        static MsgConfigureAFInput* create(SSBModInputAF afInput)
-        {
-            return new MsgConfigureAFInput(afInput);
-        }
-
-    private:
-        SSBModInputAF m_afInput;
-
-        MsgConfigureAFInput(SSBModInputAF afInput) :
-            Message(),
-            m_afInput(afInput)
-        { }
-    };
-
     class MsgReportFileSourceStreamTiming : public Message
     {
         MESSAGE_CLASS_DECLARATION
@@ -241,13 +211,26 @@ public:
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
-    virtual void setName(const QString& name) { setObjectName(name); }
-    virtual QString getName() const { return objectName(); }
     virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& channelSettingsKeys,
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiReportGet(
+                SWGSDRangel::SWGChannelReport& response,
+                QString& errorMessage);
+
+    uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
     double getMagSq() const { return m_magsq; }
 
     CWKeyer *getCWKeyer() { return &m_cwKeyer; }
@@ -279,6 +262,7 @@ private:
     int m_outputSampleRate;
     int m_inputFrequencyOffset;
     SSBModSettings m_settings;
+    quint32 m_audioSampleRate;
 
     NCOF m_carrierNco;
     NCOF m_toneNco;
@@ -317,16 +301,17 @@ private:
     quint32 m_recordLength; //!< record length in seconds computed from file size
     int m_sampleRate;
 
-    SSBModInputAF m_afInput;
     quint32 m_levelCalcCount;
     Real m_peakLevel;
     Real m_levelSum;
     CWKeyer m_cwKeyer;
 
     MagAGC m_inAGC;
+    int m_agcStepLength;
 
     static const int m_levelNbSamples;
 
+    void applyAudioSampleRate(int sampleRate);
     void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const SSBModSettings& settings, bool force = false);
     void pullAF(Complex& sample);
@@ -334,6 +319,8 @@ private:
     void modulateSample();
     void openFileStream();
     void seekFileStream(int seekPercentage);
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SSBModSettings& settings);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 };
 
 

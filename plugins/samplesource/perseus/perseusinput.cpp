@@ -18,6 +18,8 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGPerseusReport.h"
 
 #include "dsp/filerecord.h"
 #include "dsp/dspcommands.h"
@@ -41,9 +43,7 @@ PerseusInput::PerseusInput(DeviceSourceAPI *deviceAPI) :
     m_perseusDescriptor(0)
 {
     openDevice();
-    char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceAPI->getDeviceUID());
-    m_fileSink = new FileRecord(std::string(recFileNameCStr));
+    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
 }
 
@@ -68,20 +68,12 @@ bool PerseusInput::start()
 {
     if (m_running) stop();
 
-    applySettings(m_settings, true);
-
     // start / stop streaming is done in the thread.
 
-    if ((m_perseusThread = new PerseusThread(m_perseusDescriptor, &m_sampleFifo)) == 0)
-    {
-        qCritical("PerseusInput::start: cannot create thread");
-        stop();
-        return false;
-    }
-    else
-    {
-        qDebug("PerseusInput::start: thread created");
-    }
+    m_perseusThread = new PerseusThread(m_perseusDescriptor, &m_sampleFifo);
+    qDebug("PerseusInput::start: thread created");
+
+    applySettings(m_settings, true);
 
     m_perseusThread->setLog2Decimation(m_settings.m_log2Decim);
     m_perseusThread->startWork();
@@ -188,13 +180,11 @@ bool PerseusInput::handleMessage(const Message& message)
             if (m_deviceAPI->initAcquisition())
             {
                 m_deviceAPI->startAcquisition();
-                DSPEngine::instance()->startAudioOutput();
             }
         }
         else
         {
             m_deviceAPI->stopAcquisition();
-            DSPEngine::instance()->stopAudioOutput();
         }
 
         return true;
@@ -204,9 +194,18 @@ bool PerseusInput::handleMessage(const Message& message)
         MsgFileRecord& conf = (MsgFileRecord&) message;
         qDebug() << "PerseusInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
 
-        if (conf.getStartStop()) {
+        if (conf.getStartStop())
+        {
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink->setFileName(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
+            }
+
             m_fileSink->startRecording();
-        } else {
+        }
+        else
+        {
             m_fileSink->stopRecording();
         }
 
@@ -426,3 +425,112 @@ int PerseusInput::webapiRun(
 
     return 200;
 }
+
+int PerseusInput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage __attribute__((unused)))
+{
+    response.setPerseusSettings(new SWGSDRangel::SWGPerseusSettings());
+    response.getPerseusSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int PerseusInput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage __attribute__((unused)))
+{
+    PerseusSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getPerseusSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("LOppmTenths")) {
+        settings.m_LOppmTenths = response.getPerseusSettings()->getLOppmTenths();
+    }
+    if (deviceSettingsKeys.contains("devSampleRateIndex")) {
+        settings.m_devSampleRateIndex = response.getPerseusSettings()->getDevSampleRateIndex();
+    }
+    if (deviceSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getPerseusSettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("adcDither")) {
+        settings.m_adcDither = response.getPerseusSettings()->getAdcDither() != 0;
+    }
+    if (deviceSettingsKeys.contains("adcPreamp")) {
+        settings.m_adcPreamp = response.getPerseusSettings()->getAdcPreamp() != 0;
+    }
+    if (deviceSettingsKeys.contains("wideBand")) {
+        settings.m_wideBand = response.getPerseusSettings()->getWideBand() != 0;
+    }
+    if (deviceSettingsKeys.contains("attenuator")) {
+        int attenuator = response.getPerseusSettings()->getAttenuator();
+        attenuator = attenuator < 0 ? 0 : attenuator > 3 ? 3 : attenuator;
+        settings.m_attenuator = (PerseusSettings::Attenuator) attenuator;
+    }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
+        settings.m_transverterDeltaFrequency = response.getPerseusSettings()->getTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("transverterMode")) {
+        settings.m_transverterMode = response.getPerseusSettings()->getTransverterMode() != 0;
+    }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getPerseusSettings()->getFileRecordName();
+    }
+
+    MsgConfigurePerseus *msg = MsgConfigurePerseus::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigurePerseus *msgToGUI = MsgConfigurePerseus::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+int PerseusInput::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage __attribute__((unused)))
+{
+    response.setPerseusReport(new SWGSDRangel::SWGPerseusReport());
+    response.getPerseusReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
+
+void PerseusInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const PerseusSettings& settings)
+{
+    response.getPerseusSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getPerseusSettings()->setLOppmTenths(settings.m_LOppmTenths);
+    response.getPerseusSettings()->setDevSampleRateIndex(settings.m_devSampleRateIndex);
+    response.getPerseusSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getPerseusSettings()->setAdcDither(settings.m_adcDither ? 1 : 0);
+    response.getPerseusSettings()->setAdcPreamp(settings.m_adcPreamp ? 1 : 0);
+    response.getPerseusSettings()->setWideBand(settings.m_wideBand ? 1 : 0);
+    response.getPerseusSettings()->setAttenuator((int) settings.m_attenuator);
+    response.getPerseusSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    response.getPerseusSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+
+    if (response.getPerseusSettings()->getFileRecordName()) {
+        *response.getPerseusSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getPerseusSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+}
+
+void PerseusInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    response.getPerseusReport()->setSampleRates(new QList<SWGSDRangel::SWGSampleRate*>);
+
+    for (std::vector<uint32_t>::const_iterator it = getSampleRates().begin(); it != getSampleRates().end(); ++it)
+    {
+        response.getPerseusReport()->getSampleRates()->append(new SWGSDRangel::SWGSampleRate);
+        response.getPerseusReport()->getSampleRates()->back()->setRate(*it);
+    }
+}
+

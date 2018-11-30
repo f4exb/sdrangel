@@ -19,6 +19,7 @@
 #define SDRBASE_DSP_HBFILTERTRAITS_H_
 
 #include <stdint.h>
+#include "export.h"
 
 // uses Q1.14 format internally, input and output are S16
 
@@ -32,7 +33,7 @@ struct HBFIRFilterTraits
 };
 
 template<>
-struct HBFIRFilterTraits<16>
+struct SDRBASE_API HBFIRFilterTraits<16>
 {
     static const int32_t hbOrder = 16;
     static const int32_t hbShift = 12;
@@ -42,7 +43,7 @@ struct HBFIRFilterTraits<16>
 };
 
 template<>
-struct HBFIRFilterTraits<32>
+struct SDRBASE_API HBFIRFilterTraits<32>
 {
     static const int32_t hbOrder = 32;
     static const int32_t hbShift = 12;
@@ -52,7 +53,7 @@ struct HBFIRFilterTraits<32>
 };
 
 template<>
-struct HBFIRFilterTraits<48>
+struct SDRBASE_API HBFIRFilterTraits<48>
 {
     static const int32_t hbOrder = 48;
     static const int32_t hbShift = 12;
@@ -62,17 +63,17 @@ struct HBFIRFilterTraits<48>
 };
 
 template<>
-struct HBFIRFilterTraits<64>
+struct SDRBASE_API HBFIRFilterTraits<64>
 {
     static const int32_t hbOrder = 64;
     static const int32_t hbShift = 12;
     static const int16_t hbMod[64+6];
     static const int32_t hbCoeffs[16] __attribute__ ((aligned (32)));
-    static const double  hbCoeffsF[16];
+    static const float  hbCoeffsF[16];
 };
 
 template<>
-struct HBFIRFilterTraits<80>
+struct SDRBASE_API HBFIRFilterTraits<80>
 {
     static const int32_t hbOrder = 80;
     static const int32_t hbShift = 14;
@@ -82,7 +83,7 @@ struct HBFIRFilterTraits<80>
 };
 
 template<>
-struct HBFIRFilterTraits<96>
+struct SDRBASE_API HBFIRFilterTraits<96>
 {
     static const int32_t hbOrder = 96;
     static const int32_t hbShift = 16;
@@ -92,7 +93,7 @@ struct HBFIRFilterTraits<96>
 };
 
 template<>
-struct HBFIRFilterTraits<112>
+struct SDRBASE_API HBFIRFilterTraits<112>
 {
     static const int32_t hbOrder = 112;
     static const int32_t hbShift = 18;
@@ -102,7 +103,7 @@ struct HBFIRFilterTraits<112>
 };
 
 template<>
-struct HBFIRFilterTraits<128>
+struct SDRBASE_API HBFIRFilterTraits<128>
 {
     static const int32_t hbOrder = 128;
     static const int32_t hbShift = 20;

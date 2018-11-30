@@ -42,12 +42,13 @@ void WFMModSettings::resetToDefaults()
     m_afBandwidth = 15000.0f;
     m_fmDeviation = 50000.0f;
     m_toneFrequency = 1000.0f;
-    m_audioSampleRate = DSPEngine::instance()->getAudioSampleRate();
     m_volumeFactor = 1.0f;
     m_channelMute = false;
     m_playLoop = false;
     m_rgbColor = QColor(0, 0, 255).rgb();
     m_title = "WFM Modulator";
+    m_modAFInput = WFMModInputNone;
+    m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
 }
 
 QByteArray WFMModSettings::serialize() const
@@ -71,6 +72,8 @@ QByteArray WFMModSettings::serialize() const
     }
 
     s.writeString(10, m_title);
+    s.writeString(11, m_audioDeviceName);
+    s.writeS32(12, (int) m_modAFInput);
 
     return s.final();
 }
@@ -110,6 +113,14 @@ bool WFMModSettings::deserialize(const QByteArray& data)
         }
 
         d.readString(10, &m_title, "WFM Modulator");
+        d.readString(11, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
+
+        d.readS32(12, &tmp, 0);
+        if ((tmp < 0) || (tmp > (int) WFMModInputAF::WFMModInputTone)) {
+            m_modAFInput = WFMModInputNone;
+        } else {
+            m_modAFInput = (WFMModInputAF) tmp;
+        }
 
         return true;
     }

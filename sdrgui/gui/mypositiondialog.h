@@ -23,12 +23,13 @@
 
 #include <QDialog>
 #include "settings/mainsettings.h"
+#include "export.h"
 
 namespace Ui {
 	class MyPositionDialog;
 }
 
-class MyPositionDialog : public QDialog {
+class SDRGUI_API MyPositionDialog : public QDialog {
 	Q_OBJECT
 
 public:

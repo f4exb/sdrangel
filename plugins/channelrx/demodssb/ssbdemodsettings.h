@@ -24,7 +24,6 @@ class Serializable;
 struct SSBDemodSettings
 {
     qint32 m_inputFrequencyOffset;
-    quint32 m_audioSampleRate;
     Real m_rfBandwidth;
     Real m_lowCutoff;
     Real m_volume;
@@ -33,16 +32,14 @@ struct SSBDemodSettings
     bool m_audioFlipChannels;
     bool m_dsb;
     bool m_audioMute;
-    bool m_copyAudioToUDP;
     bool m_agc;
     bool m_agcClamping;
     int  m_agcTimeLog2;
     int  m_agcPowerThreshold;
     int  m_agcThresholdGate;
-    QString m_udpAddress;
-    quint16 m_udpPort;
     quint32 m_rgbColor;
     QString m_title;
+    QString m_audioDeviceName;
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;

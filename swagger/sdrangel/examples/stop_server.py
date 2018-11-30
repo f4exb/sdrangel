@@ -13,18 +13,20 @@ requests_methods = {
     "DELETE": requests.delete
 }
 
+
 # ======================================================================
 def getInputOptions():
 
     parser = OptionParser(usage="usage: %%prog [-t]\n")
-    parser.add_option("-a", "--address", dest="address", help="address and port", metavar="ADDRESS", type="string") 
+    parser.add_option("-a", "--address", dest="address", help="address and port", metavar="ADDRESS", type="string")
 
     (options, args) = parser.parse_args()
-    
+
     if (options.address == None):
         options.address = "127.0.0.1:8091"
 
     return options
+
 
 # ======================================================================
 def printResponse(response):
@@ -35,25 +37,27 @@ def printResponse(response):
         elif "text/plain" in content_type:
             print(response.text)
 
+
 # ======================================================================
 def callAPI(url, method, params, json, text):
     request_method = requests_methods.get(method, None)
     if request_method is not None:
-        r = request_method(url=base_url+url, params=params, json=json)
-        if r.status_code / 100  == 2:
+        r = request_method(url=base_url + url, params=params, json=json)
+        if r.status_code / 100 == 2:
             print(text + " succeeded")
             printResponse(r)
-            return r.json() # all 200 yield application/json response
+            return r.json()  # all 200 yield application/json response
         else:
             print(text + " failed")
             printResponse(r)
             return None
 
+
 # ======================================================================
 def main():
     try:
         options = getInputOptions()
-        
+
         global base_url
         base_url = "http://%s/sdrangel" % options.address
 
@@ -61,7 +65,7 @@ def main():
         if settings is None:
             exit(-1)
 
-    except Exception, msg:
+    except Exception as ex:
         tb = traceback.format_exc()
         print >> sys.stderr, tb
 

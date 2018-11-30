@@ -31,7 +31,7 @@ struct FileLoggerSettings
         maxSize = 1000000;
         maxBackups = 2;
         msgFormat = "{timestamp} {type} {msg}";
-        timestampFormat = "dd.MM.yyyy hh:mm:ss.zzz";
+        timestampFormat = "yyyy-MM-dd HH:mm:ss.zzz";
         minLevel = QtDebugMsg;
         bufferSize = 100;
     }

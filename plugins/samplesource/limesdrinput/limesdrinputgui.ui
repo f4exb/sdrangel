@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>374</width>
+    <width>360</width>
     <height>290</height>
    </rect>
   </property>
@@ -18,13 +18,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>350</width>
+    <width>360</width>
     <height>290</height>
    </size>
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -142,7 +142,7 @@
        </property>
        <property name="font">
         <font>
-         <family>DejaVu Sans Mono</family>
+         <family>Liberation Mono</family>
          <pointsize>20</pointsize>
          <weight>50</weight>
          <bold>false</bold>
@@ -240,23 +240,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="ncoReset">
-       <property name="maximumSize">
-        <size>
-         <width>22</width>
-         <height>22</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Reset the NCO to zero frequency</string>
-       </property>
-       <property name="text">
-        <string>R</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="ValueDial" name="ncoFrequency" native="true">
+      <widget class="ValueDialZ" name="ncoFrequency" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
          <horstretch>0</horstretch>
@@ -271,7 +255,7 @@
        </property>
        <property name="font">
         <font>
-         <family>DejaVu Sans Mono</family>
+         <family>Liberation Mono</family>
          <pointsize>12</pointsize>
          <weight>50</weight>
          <bold>false</bold>
@@ -281,14 +265,14 @@
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="toolTip">
-        <string>Center frequency with NCO engaged (kHz)</string>
+        <string>NCO frequency shift in Hz</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QLabel" name="ncoUnits">
        <property name="text">
-        <string>kHz</string>
+        <string>Hz</string>
        </property>
       </widget>
      </item>
@@ -322,6 +306,22 @@
        </property>
        <property name="text">
         <string>IQ</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="TransverterButton" name="transverter">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Transverter frequency translation dialog</string>
+       </property>
+       <property name="text">
+        <string>X</string>
        </property>
       </widget>
      </item>
@@ -512,7 +512,7 @@
        </property>
        <property name="font">
         <font>
-         <family>DejaVu Sans Mono</family>
+         <family>Liberation Mono</family>
          <pointsize>12</pointsize>
          <weight>50</weight>
          <bold>false</bold>
@@ -573,7 +573,7 @@
        </property>
        <property name="font">
         <font>
-         <family>DejaVu Sans Mono</family>
+         <family>Liberation Mono</family>
          <pointsize>12</pointsize>
          <weight>50</weight>
          <bold>false</bold>
@@ -593,6 +593,19 @@
         <string>kHz</string>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="ButtonSwitch" name="lpFIREnable">
@@ -620,7 +633,7 @@
        </property>
        <property name="font">
         <font>
-         <family>DejaVu Sans Mono</family>
+         <family>Liberation Mono</family>
          <pointsize>12</pointsize>
         </font>
        </property>
@@ -1165,6 +1178,17 @@ QToolTip{background-color: white; color: black;}</string>
    <class>ExternalClockButton</class>
    <extends>QToolButton</extends>
    <header>gui/externalclockbutton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TransverterButton</class>
+   <extends>QPushButton</extends>
+   <header>gui/transverterbutton.h</header>
   </customwidget>
  </customwidgets>
  <resources>
