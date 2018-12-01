@@ -56,7 +56,7 @@ add_library(outputsoapysdr SHARED
 if (BUILD_DEBIAN)
 target_link_libraries(outputsoapysdr
     ${QT_LIBRARIES}
-    soapysdr
+    SoapySDR
     sdrbase
     sdrgui
     swagger

@@ -40,7 +40,7 @@ add_library(soapysdrdevice SHARED
 
 if (BUILD_DEBIAN)
 target_link_libraries(soapysdrdevice
-    soapysdr
+    SoapySDR
     sdrbase
 )
 else (BUILD_DEBIAN)
