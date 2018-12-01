@@ -28,8 +28,8 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
     ${CMAKE_SOURCE_DIR}/devices
-    ${LIBSOAPYSDRSRC}/include
-    ${LIBSOAPYSDRSRC}/src
+    ${SOAPYSDR_SOURCE_DIR}/include
+    ${SOAPYSDR_SOURCE_DIR}/src
 )
 else (BUILD_DEBIAN)
 include_directories(
