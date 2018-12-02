@@ -38,6 +38,8 @@ add_library(soapysdrdevice SHARED
     ${soapysdrdevice_SOURCES}
 )
 
+set_target_properties(soapysdrdevice PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
+
 if (BUILD_DEBIAN)
 target_link_libraries(soapysdrdevice
     SoapySDR

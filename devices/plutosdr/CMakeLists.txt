@@ -39,6 +39,8 @@ add_library(plutosdrdevice SHARED
     ${plutosdrdevice_SOURCES}
 )
 
+set_target_properties(plutosdrdevice PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
+
 if (BUILD_DEBIAN)
 target_link_libraries(plutosdrdevice
     iio

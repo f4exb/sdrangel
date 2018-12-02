@@ -34,6 +34,8 @@ add_library(hackrfdevice SHARED
     ${hackrfdevice_SOURCES}
 )
 
+set_target_properties(hackrfdevice PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
+
 if (BUILD_DEBIAN)
 target_link_libraries(hackrfdevice
     hackrf

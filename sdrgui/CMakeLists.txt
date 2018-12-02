@@ -16,7 +16,7 @@ set(sdrgui_SOURCES
     gui/commanditem.cpp
     gui/commandkeyreceiver.cpp
     gui/commandoutputdialog.cpp
-    gui/comboboxnoarrow.cpp
+#   gui/comboboxnoarrow.cpp
     gui/crightclickenabler.cpp
     gui/cwkeyergui.cpp
     gui/editcommanddialog.cpp
@@ -25,7 +25,7 @@ set(sdrgui_SOURCES
     gui/glscope.cpp
     gui/glscopemulti.cpp
     gui/glscopegui.cpp
-    gui/glscopemultigui.cpp
+#   gui/glscopemultigui.cpp
     gui/glshadersimple.cpp
     gui/glshadertextured.cpp
     gui/glshadertvarray.cpp
@@ -49,7 +49,7 @@ set(sdrgui_SOURCES
     gui/valuedialz.cpp
 
     dsp/scopevis.cpp
-    dsp/scopevismulti.cpp
+#   dsp/scopevismulti.cpp
     dsp/scopevisxy.cpp
     dsp/spectrumvis.cpp
     dsp/spectrumscopecombovis.cpp
@@ -82,7 +82,7 @@ set(sdrgui_HEADERS
     gui/commanditem.h
     gui/commandkeyreceiver.h
     gui/commandoutputdialog.h
-    gui/comboboxnoarrow.h
+#   gui/comboboxnoarrow.h
     gui/crightclickenabler.h
     gui/cwkeyergui.h
     gui/editcommanddialog.h
@@ -91,7 +91,7 @@ set(sdrgui_HEADERS
     gui/glscope.h
     gui/glscopemulti.h
     gui/glscopegui.h
-    gui/glscopemultigui.h
+#   gui/glscopemultigui.h
     gui/glshadersimple.h
     gui/glshadertvarray.h
     gui/glshadertextured.h
@@ -116,7 +116,7 @@ set(sdrgui_HEADERS
     gui/valuedialz.h
 
     dsp/scopevis.h
-    dsp/scopevismulti.h
+#   dsp/scopevismulti.h
     dsp/scopevisxy.h
     dsp/spectrumvis.h
     dsp/spectrumscopecombovis.h
@@ -198,6 +198,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${CMAKE_CURRENT_BINARY_DIR}
     ${OPENGL_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIRS}
 )
 
 target_link_libraries(sdrgui

@@ -88,6 +88,8 @@ add_library(qrtplib SHARED
     ${qrtplib_HEADERS_MOC}
 )
 
+set_target_properties(qrtplib PROPERTIES DEFINE_SYMBOL "qrtplib_EXPORTS")
+
 target_link_libraries(qrtplib
     ${QT_LIBRARIES}
 )

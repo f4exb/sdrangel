@@ -34,6 +34,8 @@ add_library(logging SHARED
 	${logging_HEADERS_MOC}
 )
 
+set_target_properties(logging PROPERTIES DEFINE_SYMBOL "logging_EXPORTS")
+
 target_link_libraries(logging
 	${QT_LIBRARIES}
 )
