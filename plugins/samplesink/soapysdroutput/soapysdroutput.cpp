@@ -482,6 +482,9 @@ bool SoapySDROutput::start()
                 ((DeviceSoapySDRShared*) (*it)->getBuddySharedPtr())->m_sink->setThread(0);
             }
 
+            delete[] log2Interps;
+            delete[] fifos;
+
             needsStart = true;
         }
         else
@@ -609,6 +612,9 @@ void SoapySDROutput::stop()
             qDebug("SoapySDROutput::stop: restarting the thread");
             soapySDROutputThread->startWork();
         }
+
+        delete[] log2Interps;
+        delete[] fifos;
     }
     else // remove channel from existing thread
     {

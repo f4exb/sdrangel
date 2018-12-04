@@ -518,6 +518,10 @@ bool SoapySDRInput::start()
                 ((DeviceSoapySDRShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
             }
 
+            delete[] fcPoss;
+            delete[] log2Decims;
+            delete[] fifos;
+
             needsStart = true;
         }
         else
@@ -653,6 +657,10 @@ void SoapySDRInput::stop()
             qDebug("SoapySDRInput::stop: restarting the thread");
             soapySDRInputThread->startWork();
         }
+
+        delete[] fcPoss;
+        delete[] log2Decims;
+        delete[] fifos;
     }
     else // remove channel from existing thread
     {
@@ -1257,7 +1265,7 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
 
         if (getMessageQueueToGUI())
         {
-            MsgReportGainChange *report = MsgReportGainChange::create(m_settings, individualGainsChanged, globalGainChanged);
+            MsgReportGainChange *report = MsgReportGainChange::create(m_settings, globalGainChanged, individualGainsChanged);
             getMessageQueueToGUI()->push(report);
         }
     }
