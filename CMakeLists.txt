@@ -31,6 +31,8 @@ option(SANITIZE_ADDRESS "Activate memory address sanitization" OFF)
 option(HOST_RPI "Compiling on RPi" OFF)
 option(RX_SAMPLE_24BIT "Internal 24 bit Rx DSP" OFF)
 option(NO_DSP_SIMD "Do not use SIMD instructions for DSP even if available" OFF)
+option(BUILD_SERVER "Build Server" ON)
+option(BUILD_GUI "Build GUI" ON)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
@@ -228,8 +230,12 @@ endif()
 ##############################################################################
 # base libraries
 add_subdirectory(sdrbase)
+if (BUILD_GUI)
 add_subdirectory(sdrgui)
+endif()
+if (BUILD_SERVER)
 add_subdirectory(sdrsrv)
+endif()
 add_subdirectory(sdrbench)
 add_subdirectory(httpserver)
 add_subdirectory(logging)
@@ -254,6 +260,7 @@ qt5_add_external_resources(sdrbase.rcc sdrbase/resources/res.qrc)
 
 ##############################################################################
 # main GUI application
+if (BUILD_GUI)
 
 set(sdrangel_SOURCES
     app/main.cpp
@@ -285,9 +292,11 @@ if(WIN32)
 endif(WIN32)
 
 target_link_libraries(sdrangel Qt5::Widgets Qt5::Multimedia)
+endif()
 
 ##############################################################################
 # main server application
+if (BUILD_SERVER)
 
 set(sdrangelsrv_SOURCES
     appsrv/main.cpp
@@ -309,6 +318,7 @@ target_link_libraries(sdrangelsrv
 )
 
 target_link_libraries(sdrangelsrv Qt5::Multimedia)
+endif()
 
 ##############################################################################
 # main benchmark application
@@ -354,8 +364,12 @@ if (BUILD_DEBIAN)
 endif (BUILD_DEBIAN)
 
 add_subdirectory(devices)
+if (BUILD_GUI)
 add_subdirectory(plugins)
+endif()
+if (BUILD_SERVER)
 add_subdirectory(pluginssrv)
+endif()
 
 if(LIBUSB_FOUND AND UNIX)
     add_subdirectory(fcdhid)
@@ -365,8 +379,12 @@ endif(LIBUSB_FOUND AND UNIX)
 ##############################################################################
 
 #install targets
+if (BUILD_GUI)
 install(TARGETS sdrangel DESTINATION bin)
+endif()
+if (BUILD_SERVER)
 install(TARGETS sdrangelsrv DESTINATION bin)
+endif()
 install(TARGETS sdrangelbench DESTINATION bin)
 #install(TARGETS sdrbase DESTINATION lib)
 
