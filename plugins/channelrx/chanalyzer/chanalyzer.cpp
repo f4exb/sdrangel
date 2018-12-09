@@ -219,14 +219,16 @@ bool ChannelAnalyzer::handleMessage(const Message& cmd)
     }
 	else
 	{
-		if (m_sampleSink != 0)
-		{
-		   return m_sampleSink->handleMessage(cmd);
-		}
-		else
-		{
-			return false;
-		}
+	    // Processed through GUI
+//		if (m_sampleSink != 0)
+//		{
+//		   return m_sampleSink->handleMessage(cmd);
+//		}
+//		else
+//		{
+//			return false;
+//		}
+	    return false;
 	}
 }
 

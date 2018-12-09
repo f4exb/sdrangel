@@ -14,25 +14,25 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <device/devicesourceapi.h>
-#include "device/deviceuiset.h"
-#include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
 
+#include "device/devicesourceapi.h"
+#include "device/deviceuiset.h"
+#include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
-#include "ui_chanalyzergui.h"
 #include "dsp/spectrumscopecombovis.h"
 #include "dsp/spectrumvis.h"
+#include "dsp/dspengine.h"
 #include "gui/glspectrum.h"
 #include "gui/glscope.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
-#include "dsp/dspengine.h"
 #include "mainwindow.h"
 
+#include "ui_chanalyzergui.h"
 #include "chanalyzer.h"
 #include "chanalyzergui.h"
 
