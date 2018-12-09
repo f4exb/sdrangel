@@ -101,10 +101,12 @@ void ChannelAnalyzerGUI::displaySettings()
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
 
+    ui->channelSampleRate->setValueRange(7, 0.501*m_channelAnalyzer->getInputSampleRate(), m_channelAnalyzer->getInputSampleRate());
+    ui->channelSampleRate->setValue(m_settings.m_downSampleRate);
+
     blockApplySettings(true);
 
     ui->useRationalDownsampler->setChecked(m_settings.m_downSample);
-    ui->channelSampleRate->setValue(m_settings.m_downSampleRate);
     setNewFinalRate();
     if (m_settings.m_ssb) {
         ui->BWLabel->setText("LP");
@@ -187,7 +189,7 @@ bool ChannelAnalyzerGUI::handleMessage(const Message& message)
     if (ChannelAnalyzer::MsgReportChannelSampleRateChanged::match(message))
     {
         qDebug() << "ChannelAnalyzerGUI::handleMessage: MsgReportChannelSampleRateChanged";
-        ui->channelSampleRate->setValueRange(7, 2000U, m_channelAnalyzer->getInputSampleRate());
+        ui->channelSampleRate->setValueRange(7, 0.501*m_channelAnalyzer->getInputSampleRate(), m_channelAnalyzer->getInputSampleRate());
         ui->channelSampleRate->setValue(m_settings.m_downSampleRate);
         setNewFinalRate();
 
@@ -401,7 +403,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
 	ui->channelSampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
-	ui->channelSampleRate->setValueRange(7, 2000U, 9999999U);
+	ui->channelSampleRate->setValueRange(7, 0.501*m_rate, m_rate);
 
 	ui->glSpectrum->setCenterFrequency(m_rate/2);
 	ui->glSpectrum->setSampleRate(m_rate);
