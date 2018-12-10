@@ -188,9 +188,10 @@ bool ChannelAnalyzerGUI::handleMessage(const Message& message)
 {
     if (ChannelAnalyzer::MsgReportChannelSampleRateChanged::match(message))
     {
-        qDebug() << "ChannelAnalyzerGUI::handleMessage: MsgReportChannelSampleRateChanged";
+        qDebug() << "ChannelAnalyzerGUI::handleMessage: MsgReportChannelSampleRateChanged:" << m_channelAnalyzer->getInputSampleRate();
         ui->channelSampleRate->setValueRange(7, 0.501*m_channelAnalyzer->getInputSampleRate(), m_channelAnalyzer->getInputSampleRate());
         ui->channelSampleRate->setValue(m_settings.m_downSampleRate);
+        m_settings.m_downSampleRate = ui->channelSampleRate->getValueNew();
         setNewFinalRate();
 
         return true;
