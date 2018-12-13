@@ -551,8 +551,8 @@ void ChannelAnalyzerGUI::applySettings(bool force)
                 ChannelAnalyzer::MsgConfigureChannelAnalyzer::create( m_settings, force);
         m_channelAnalyzer->getInputMessageQueue()->push(message);
 
-        m_scopeVis->setLiveRateLog2Decim(m_settings.m_spanLog2);
         m_scopeVis->setLiveRate(sampleRate);
+        m_scopeVis->setLiveRateLog2Decim(m_settings.m_spanLog2);
 	}
 }
 
