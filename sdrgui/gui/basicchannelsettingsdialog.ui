@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>131</height>
+    <height>135</height>
    </rect>
   </property>
   <property name="font">
@@ -99,6 +99,78 @@
      </item>
      <item>
       <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="reverseAPILayout">
+     <item>
+      <widget class="QCheckBox" name="reverseAPI">
+       <property name="toolTip">
+        <string>Sychronize with reverse API </string>
+       </property>
+       <property name="text">
+        <string>reverse API</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="reverseAPIAddress">
+       <property name="minimumSize">
+        <size>
+         <width>120</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Reverse API address</string>
+       </property>
+       <property name="inputMask">
+        <string>000.000.000.000</string>
+       </property>
+       <property name="text">
+        <string>127.0.0.1</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="reverseAPISeparator">
+       <property name="text">
+        <string>:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="reverseAPIPort">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Reverse API port</string>
+       </property>
+       <property name="inputMask">
+        <string>00000</string>
+       </property>
+       <property name="text">
+        <string>8888</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>

@@ -42,6 +42,9 @@ struct AMDemodSettings
     QString m_audioDeviceName;
     bool m_pll;
     SyncAMOperation m_syncAMOperation;
+    bool m_useReverseAPI;
+    QString m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
 
     AMDemodSettings();
     void resetToDefaults();

@@ -40,6 +40,9 @@ void AMDemodSettings::resetToDefaults()
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_pll = false;
     m_syncAMOperation = SyncAMDSB;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
 }
 
 QByteArray AMDemodSettings::serialize() const
@@ -60,6 +63,9 @@ QByteArray AMDemodSettings::serialize() const
     s.writeString(11, m_audioDeviceName);
     s.writeBool(12, m_pll);
     s.writeS32(13, (int) m_syncAMOperation);
+    s.writeBool(14, m_useReverseAPI);
+    s.writeString(15, m_reverseAPIAddress);
+    s.writeU32(16, m_reverseAPIPort);
 
     return s.final();
 }
@@ -78,6 +84,7 @@ bool AMDemodSettings::deserialize(const QByteArray& data)
     {
         QByteArray bytetmp;
         qint32 tmp;
+        uint32_t utmp;
         QString strtmp;
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
@@ -100,6 +107,15 @@ bool AMDemodSettings::deserialize(const QByteArray& data)
         d.readBool(12, &m_pll, false);
         d.readS32(13, &tmp, 0);
         m_syncAMOperation = tmp < 0 ? SyncAMDSB : tmp > 2 ? SyncAMDSB : (SyncAMOperation) tmp;
+        d.readBool(14, &m_useReverseAPI, false);
+        d.readString(15, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(16, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
 
         return true;
     }

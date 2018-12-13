@@ -15,12 +15,38 @@ BasicChannelSettingsDialog::BasicChannelSettingsDialog(ChannelMarker* marker, QW
     ui->title->setText(m_channelMarker->getTitle());
     m_color = m_channelMarker->getColor();
     ui->fScaleDisplayType->setCurrentIndex((int) m_channelMarker->getFrequencyScaleDisplayType());
+    setUseReverseAPI(false);
+    setReverseAPIAddress("127.0.0.1");
+    setReverseAPIPort(8888);
     paintColor();
 }
 
 BasicChannelSettingsDialog::~BasicChannelSettingsDialog()
 {
     delete ui;
+}
+
+void BasicChannelSettingsDialog::setUseReverseAPI(bool useReverseAPI)
+{
+    m_useReverseAPI = useReverseAPI;
+    ui->reverseAPI->setChecked(m_useReverseAPI);
+}
+
+void BasicChannelSettingsDialog::setReverseAPIAddress(const QString& address)
+{
+    m_reverseAPIAddress = address;
+    ui->reverseAPIAddress->setText(m_reverseAPIAddress);
+}
+
+void BasicChannelSettingsDialog::setReverseAPIPort(uint16_t port)
+{
+    if (port < 1024) {
+        return;
+    } else {
+        m_reverseAPIPort = port;
+    }
+
+    ui->reverseAPIPort->setText(tr("%1").arg(m_reverseAPIPort));
 }
 
 void BasicChannelSettingsDialog::paintColor()
@@ -38,9 +64,33 @@ void BasicChannelSettingsDialog::on_colorBtn_clicked()
 {
     QColor c = m_color;
     c = QColorDialog::getColor(c, this, tr("Select Color for Channel"), QColorDialog::DontUseNativeDialog);
-    if(c.isValid()) {
+
+    if (c.isValid())
+    {
         m_color = c;
         paintColor();
+    }
+}
+
+void BasicChannelSettingsDialog::on_reverseAPI_toggled(bool checked)
+{
+    m_useReverseAPI = checked;
+}
+
+void BasicChannelSettingsDialog::on_reverseAPIAddress_returnPressed()
+{
+    m_reverseAPIAddress = ui->reverseAPIAddress->text();
+}
+
+void BasicChannelSettingsDialog::on_reverseAPIPort_returnPressed()
+{
+    bool dataOk;
+    int reverseAPIPort = ui->reverseAPIPort->text().toInt(&dataOk);
+
+    if((!dataOk) || (reverseAPIPort < 1024) || (reverseAPIPort > 65535)) {
+        return;
+    } else {
+        m_reverseAPIPort = reverseAPIPort;
     }
 }
 
