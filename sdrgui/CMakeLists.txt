@@ -49,7 +49,7 @@ set(sdrgui_SOURCES
     gui/valuedialz.cpp
 
     dsp/scopevis.cpp
-#   dsp/scopevismulti.cpp
+    dsp/scopevismulti.cpp
     dsp/scopevisxy.cpp
     dsp/spectrumvis.cpp
     dsp/spectrumscopecombovis.cpp
@@ -116,7 +116,7 @@ set(sdrgui_HEADERS
     gui/valuedialz.h
 
     dsp/scopevis.h
-#   dsp/scopevismulti.h
+    dsp/scopevismulti.h
     dsp/scopevisxy.h
     dsp/spectrumvis.h
     dsp/spectrumscopecombovis.h

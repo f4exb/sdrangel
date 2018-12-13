@@ -40,7 +40,7 @@ else(BUILD_DEBIAN)
     endif()
     
     find_package(SoapySDR)
-    if(LIBUSB_FOUND AND SOAPYSDR_FOUND)
+    if(SOAPYSDR_FOUND)
         add_subdirectory(soapysdr)
     endif()
 endif (BUILD_DEBIAN)
