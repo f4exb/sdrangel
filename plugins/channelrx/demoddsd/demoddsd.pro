@@ -18,17 +18,14 @@ QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
 
 CONFIG(MINGW32):LIBDSDCCSRC = "C:\softs\dsdcc"
-CONFIG(MINGW64):LIBDSDCCSRC = "C:\softs\dsdcc"
 CONFIG(MSVC):LIBDSDCCSRC = "C:\softs\dsdcc"
 CONFIG(macx):LIBDSDCCSRC = "../../../../deps/dsdcc"
 
 CONFIG(MINGW32):LIBMBELIBSRC = "C:\softs\mbelib"
-CONFIG(MINGW64):LIBMBELIBSRC = "C:\softs\mbelib"
 CONFIG(MSVC):LIBMBELIBSRC = "C:\softs\mbelib"
 CONFIG(macx):LIBMBELIBSRC = "../../../../deps/mbelib"
 
 CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
-CONFIG(MINGW64):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(MSVC):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(macx):INCLUDEPATH += "../../../../../boost_1_64_0"
 

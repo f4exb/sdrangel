@@ -24,7 +24,7 @@ INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
 INCLUDEPATH += ../../../devices
 
-MINGW32 || MINGW64 {
+MINGW32 {
     LIBIIOSRC = "C:\softs\libiio"
     INCLUDEPATH += ../../../libiio/includemw
     INCLUDEPATH += $$LIBIIOSRC
@@ -56,7 +56,7 @@ LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../swagger/$${build_subdir} -lswagger
 LIBS += -L../../../devices/$${build_subdir} -ldevices
 
-MINGW32 || MINGW64 {
+MINGW32 {
     LIBS += -L../../../libiio/$${build_subdir} -llibiio
 }
 

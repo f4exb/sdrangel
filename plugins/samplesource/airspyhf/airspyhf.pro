@@ -12,7 +12,6 @@ QT += core gui widgets multimedia opengl
 TARGET = inputairspyhf
 
 CONFIG(MINGW32):LIBAIRSPYHFSRC = "C:\softs\airspyhf"
-CONFIG(MINGW64):LIBAIRSPYHFSRC = "C:\softs\airspyhf"
 CONFIG(MSVC):LIBAIRSPYHFSRC = "C:\softs\airspyhf"
 
 INCLUDEPATH += $$PWD
