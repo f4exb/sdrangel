@@ -43,6 +43,8 @@ void AMDemodSettings::resetToDefaults()
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
+    m_reverseAPIChannelIndex = 0;
 }
 
 QByteArray AMDemodSettings::serialize() const
@@ -66,6 +68,8 @@ QByteArray AMDemodSettings::serialize() const
     s.writeBool(14, m_useReverseAPI);
     s.writeString(15, m_reverseAPIAddress);
     s.writeU32(16, m_reverseAPIPort);
+    s.writeU32(17, m_reverseAPIDeviceIndex);
+    s.writeU32(18, m_reverseAPIChannelIndex);
 
     return s.final();
 }
@@ -116,6 +120,11 @@ bool AMDemodSettings::deserialize(const QByteArray& data)
         } else {
             m_reverseAPIPort = 8888;
         }
+
+        d.readU32(17, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(18, &utmp, 0);
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
 
         return true;
     }

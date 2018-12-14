@@ -49,6 +49,18 @@ void BasicChannelSettingsDialog::setReverseAPIPort(uint16_t port)
     ui->reverseAPIPort->setText(tr("%1").arg(m_reverseAPIPort));
 }
 
+void BasicChannelSettingsDialog::setReverseAPIDeviceIndex(uint16_t deviceIndex)
+{
+    m_reverseAPIDeviceIndex = deviceIndex > 99 ? 99 : deviceIndex;
+    ui->reverseAPIDeviceIndex->setText(tr("%1").arg(m_reverseAPIDeviceIndex));
+}
+
+void BasicChannelSettingsDialog::setReverseAPIChannelIndex(uint16_t channelIndex)
+{
+    m_reverseAPIChannelIndex = channelIndex > 99 ? 99 : channelIndex;
+    ui->reverseAPIDeviceIndex->setText(tr("%1").arg(m_reverseAPIChannelIndex));
+}
+
 void BasicChannelSettingsDialog::paintColor()
 {
     QPixmap pm(24, 24);

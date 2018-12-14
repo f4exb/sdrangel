@@ -209,6 +209,8 @@ void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
     dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
     dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
     dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+    dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
     dialog.move(p);
     dialog.exec();
 
@@ -218,6 +220,8 @@ void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
     m_settings.m_useReverseAPI = dialog.useReverseAPI();
     m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
     m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+    m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
     setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);

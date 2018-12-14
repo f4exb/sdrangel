@@ -427,7 +427,10 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_pll: " << settings.m_pll
             << " m_syncAMOperation: " << (int) settings.m_syncAMOperation
+            << " m_useReverseAPI" << settings.m_useReverseAPI
             << " force: " << force;
+
+    QList<QString> reverseAPIKeys;
 
     if((m_settings.m_rfBandwidth != settings.m_rfBandwidth) ||
         (m_settings.m_bandpassEnable != settings.m_bandpassEnable) || force)
@@ -439,11 +442,19 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         m_bandpass.create(301, m_audioSampleRate, 300.0, settings.m_rfBandwidth / 2.0f);
         DSBFilter->create_dsb_filter((2.0f * settings.m_rfBandwidth) / (float) m_audioSampleRate);
         m_settingsMutex.unlock();
+
+        if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth) || force) {
+            reverseAPIKeys.append("rfBandwidth");
+        }
+        if ((m_settings.m_bandpassEnable != settings.m_bandpassEnable) || force) {
+            reverseAPIKeys.append("bandpassEnable");
+        }
     }
 
     if ((m_settings.m_squelch != settings.m_squelch) || force)
     {
         m_squelchLevel = CalcDb::powerFromdB(settings.m_squelch);
+        reverseAPIKeys.append("squelchLevel");
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
@@ -457,6 +468,8 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         if (m_audioSampleRate != audioSampleRate) {
             applyAudioSampleRate(audioSampleRate);
         }
+
+        reverseAPIKeys.append("audioDeviceName");
     }
 
     if ((m_settings.m_pll != settings.m_pll) || force)
@@ -470,13 +483,21 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         {
             m_volumeAGC.resizeNew(m_audioSampleRate/10, 0.003);
         }
+
+        reverseAPIKeys.append("pll");
     }
 
-    if ((m_settings.m_syncAMOperation != settings.m_syncAMOperation) || force) {
+    if ((m_settings.m_syncAMOperation != settings.m_syncAMOperation) || force)
+    {
         m_syncAMBuffIndex = 0;
+        reverseAPIKeys.append("syncAMOperation");
     }
 
     m_settings = settings;
+
+    if (m_settings.m_useReverseAPI) {
+        webapiReverseSendSettings(reverseAPIKeys, m_settings, force);
+    }
 }
 
 QByteArray AMDemod::serialize() const
@@ -632,5 +653,13 @@ void AMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     response.getAmDemodReport()->setSquelch(m_squelchOpen ? 1 : 0);
     response.getAmDemodReport()->setAudioSampleRate(m_audioSampleRate);
     response.getAmDemodReport()->setChannelSampleRate(m_inputSampleRate);
+}
+
+void AMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, AMDemodSettings& settings, bool force)
+{
+    (void) channelSettingsKeys;
+    (void) settings;
+    (void) force;
+    // TODO
 }
 
