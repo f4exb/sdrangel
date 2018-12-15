@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2015-2018 Edouard Griffiths, F4EXB.                             //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,6 +18,10 @@
 
 #include <QTime>
 #include <QDebug>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QBuffer>
+#include <QJsonParseError>
 
 #include <stdio.h>
 #include <complex.h>
@@ -85,10 +89,15 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
     m_pllFilt.create(101, m_audioSampleRate, 200.0);
     m_pll.computeCoefficients(0.05, 0.707, 1000);
     m_syncAMBuffIndex = 0;
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 AMDemod::~AMDemod()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
@@ -506,13 +515,13 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
     }
 
     if ((m_settings.m_useReverseAPI != settings.m_useReverseAPI))
-    {
+    { // Full synchronization (PUT) when switching on the reverse API
         if (settings.m_useReverseAPI) {
             webapiReverseSendSettings(reverseAPIKeys, settings, true);
         }
     }
     else if (m_settings.m_useReverseAPI)
-    {
+    { // For subsequent updates rely on the force variable to select PUT or PATCH
         webapiReverseSendSettings(reverseAPIKeys, settings, force);
     }
 
@@ -683,11 +692,12 @@ void AMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, con
     swgChannelSettings->setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
     SWGSDRangel::SWGAMDemodSettings *swgAMDemodSettings = swgChannelSettings->getAmDemodSettings();
 
+    // transfer data that has been modified. When force is on transfer all data
+
     if (channelSettingsKeys.contains("audioMute") || force) {
         swgAMDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
     }
     if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
-        qDebug() << "AMDemod::webapiReverseSendSettings: inputFrequencyOffset";
         swgAMDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     }
     if (channelSettingsKeys.contains("rfBandwidth") || force) {
@@ -718,8 +728,35 @@ void AMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, con
         swgAMDemodSettings->setSyncAmOperation((int) settings.m_syncAMOperation);
     }
 
-    qDebug("AMDemod::webapiReverseSendSettings: \n%s", swgChannelSettings->asJson().toStdString().c_str());
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    if (force) {
+        m_networkManager->sendCustomRequest(m_networkRequest, "PUT", buffer);
+    } else {
+        m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    }
 
     delete swgChannelSettings;
 }
 
+void AMDemod::networkManagerFinished(QNetworkReply *reply)
+{
+    if (reply->error())
+    {
+        qDebug() << "AMDemod::networkManagerFinished: error: " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    qDebug("AMDemod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+}

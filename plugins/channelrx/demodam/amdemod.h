@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2015-2018 Edouard Griffiths, F4EXB.                             //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -17,8 +17,10 @@
 #ifndef INCLUDE_AMDEMOD_H
 #define INCLUDE_AMDEMOD_H
 
-#include <QMutex>
 #include <vector>
+
+#include <QNetworkRequest>
+#include <QMutex>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelsinkapi.h"
@@ -35,6 +37,8 @@
 
 #include "amdemodsettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSourceAPI;
 class DownChannelizer;
 class ThreadedBasebandSampleSink;
@@ -204,6 +208,9 @@ private:
 
     static const int m_udpBlockSize;
 
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
 	QMutex m_settingsMutex;
 
 	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
@@ -214,6 +221,10 @@ private:
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AMDemodSettings& settings, bool force);
 
     void processOneSample(Complex &ci);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
+
 };
 
 #endif // INCLUDE_AMDEMOD_H
