@@ -454,7 +454,7 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
     if ((m_settings.m_squelch != settings.m_squelch) || force)
     {
         m_squelchLevel = CalcDb::powerFromdB(settings.m_squelch);
-        reverseAPIKeys.append("squelchLevel");
+        reverseAPIKeys.append("squelch");
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
@@ -493,11 +493,31 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         reverseAPIKeys.append("syncAMOperation");
     }
 
+    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+
+    if ((m_settings.m_audioMute != settings.m_audioMute) || force) {
+        reverseAPIKeys.append("audioMute");
+    }
+
+    if ((m_settings.m_volume != settings.m_volume) || force) {
+        reverseAPIKeys.append("volume");
+    }
+
+    if ((m_settings.m_useReverseAPI != settings.m_useReverseAPI))
+    {
+        if (settings.m_useReverseAPI) {
+            webapiReverseSendSettings(reverseAPIKeys, settings, true);
+        }
+    }
+    else if (m_settings.m_useReverseAPI)
+    {
+        webapiReverseSendSettings(reverseAPIKeys, settings, force);
+    }
+
     m_settings = settings;
 
-    if (m_settings.m_useReverseAPI) {
-        webapiReverseSendSettings(reverseAPIKeys, m_settings, force);
-    }
 }
 
 QByteArray AMDemod::serialize() const
@@ -655,11 +675,51 @@ void AMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     response.getAmDemodReport()->setChannelSampleRate(m_inputSampleRate);
 }
 
-void AMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, AMDemodSettings& settings, bool force)
+void AMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AMDemodSettings& settings, bool force)
 {
-    (void) channelSettingsKeys;
-    (void) settings;
-    (void) force;
-    // TODO
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(0);
+    swgChannelSettings->setChannelType(new QString("AMDemod"));
+    swgChannelSettings->setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
+    SWGSDRangel::SWGAMDemodSettings *swgAMDemodSettings = swgChannelSettings->getAmDemodSettings();
+
+    if (channelSettingsKeys.contains("audioMute") || force) {
+        swgAMDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+        qDebug() << "AMDemod::webapiReverseSendSettings: inputFrequencyOffset";
+        swgAMDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("rfBandwidth") || force) {
+        swgAMDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgAMDemodSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("squelch") || force) {
+        swgAMDemodSettings->setSquelch(settings.m_squelch);
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swgAMDemodSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("volume") || force) {
+        swgAMDemodSettings->setVolume(settings.m_volume);
+    }
+    if (channelSettingsKeys.contains("bandpassEnable") || force) {
+        swgAMDemodSettings->setBandpassEnable(settings.m_bandpassEnable ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("audioDeviceName") || force) {
+        swgAMDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+    if (channelSettingsKeys.contains("pll") || force) {
+        swgAMDemodSettings->setPll(settings.m_pll);
+    }
+    if (channelSettingsKeys.contains("syncAMOperation") || force) {
+        swgAMDemodSettings->setSyncAmOperation((int) settings.m_syncAMOperation);
+    }
+
+    qDebug("AMDemod::webapiReverseSendSettings: \n%s", swgChannelSettings->asJson().toStdString().c_str());
+
+    delete swgChannelSettings;
 }
 

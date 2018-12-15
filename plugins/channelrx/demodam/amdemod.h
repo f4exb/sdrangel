@@ -211,7 +211,7 @@ private:
     void applyAudioSampleRate(int sampleRate);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const AMDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, AMDemodSettings& settings, bool force);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AMDemodSettings& settings, bool force);
 
     void processOneSample(Complex &ci);
 };
