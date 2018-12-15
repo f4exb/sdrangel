@@ -547,10 +547,6 @@ void ChannelAnalyzerGUI::applySettings(bool force)
                 ChannelAnalyzer::MsgConfigureChannelizer::create(sampleRate, m_channelMarker.getCenterFrequency());
         m_channelAnalyzer->getInputMessageQueue()->push(msgChannelizer);
 
-        ChannelAnalyzer::MsgConfigureChannelizer *msg =
-                ChannelAnalyzer::MsgConfigureChannelizer::create(sampleRate, m_channelMarker.getCenterFrequency());
-        m_channelAnalyzer->getInputMessageQueue()->push(msg);
-
         ChannelAnalyzer::MsgConfigureChannelAnalyzer* message =
                 ChannelAnalyzer::MsgConfigureChannelAnalyzer::create( m_settings, force);
         m_channelAnalyzer->getInputMessageQueue()->push(message);
