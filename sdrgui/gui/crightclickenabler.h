@@ -29,20 +29,22 @@ public:
     CRightClickEnabler(QAbstractButton *button);
 
 signals:
-    void rightClick();
+    void rightClick(const QPoint&);
 
 protected:
     inline bool eventFilter(QObject *watched, QEvent *event) override
     {
         (void) watched;
+
         if (event->type() == QEvent::MouseButtonPress)
         {
-            auto mouseEvent = (QMouseEvent*)event;
+            auto mouseEvent = (QMouseEvent*) event;
+
             if (mouseEvent->button() == Qt::RightButton) {
-                //_button->click();
-                emit rightClick();
+                emit rightClick(mouseEvent->globalPos());
             }
         }
+
         return false;
     }
 

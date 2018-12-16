@@ -251,10 +251,10 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
 	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
-	connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
+	connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
 
 	CRightClickEnabler *samSidebandRightClickEnabler = new CRightClickEnabler(ui->ssb);
-    connect(samSidebandRightClickEnabler, SIGNAL(rightClick()), this, SLOT(samSSBSelect()));
+    connect(samSidebandRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(samSSBSelect()));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

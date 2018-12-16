@@ -26,6 +26,7 @@
 #include "ui_rtlsdrgui.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
+#include "gui/crightclickenabler.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 
@@ -63,6 +64,9 @@ RTLSDRGui::RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
+
+    CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
+    connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 }
 
 RTLSDRGui::~RTLSDRGui()
@@ -467,4 +471,11 @@ void RTLSDRGui::on_lowSampleRate_toggled(bool checked)
     m_settings.m_devSampleRate = ui->sampleRate->getValueNew();
     qDebug("RTLSDRGui::on_lowSampleRate_toggled: %d S/s", m_settings.m_devSampleRate);
     sendSettings();
+}
+
+void RTLSDRGui::openDeviceSettingsDialog(const QPoint& p)
+{
+    QMessageBox m(QMessageBox::Information, tr("Message"), tr("RTLSDRGui::openDeviceSettingsDialog"));
+    m.move(p);
+    m.exec();
 }
