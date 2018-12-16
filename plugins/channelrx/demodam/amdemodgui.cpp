@@ -16,6 +16,7 @@
 
 #include <QDockWidget>
 #include <QMainWindow>
+#include <QDebug>
 
 #include "amdemodgui.h"
 #include "amdemodssbdialog.h"
@@ -94,7 +95,6 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 
 bool AMDemodGUI::handleMessage(const Message& message)
 {
-    (void) message;
     if (AMDemod::MsgConfigureAMDemod::match(message))
     {
         qDebug("AMDemodGUI::handleMessage: AMDemod::MsgConfigureAMDemod");
@@ -345,21 +345,32 @@ void AMDemodGUI::displaySettings()
     ui->bandpassEnable->setChecked(m_settings.m_bandpassEnable);
     ui->pll->setChecked(m_settings.m_pll);
 
+    qDebug() << "AMDemodGUI::displaySettings:"
+            << " m_pll: " << m_settings.m_pll
+            << " m_syncAMOperation: " << m_settings.m_syncAMOperation;
+
     if (m_settings.m_pll)
     {
         if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMLSB)
         {
             m_samUSB = false;
+            ui->ssb->setChecked(true);
             ui->ssb->setIcon(m_iconDSBLSB);
+        }
+        else if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMUSB)
+        {
+            m_samUSB = true;
+            ui->ssb->setChecked(true);
+            ui->ssb->setIcon(m_iconDSBUSB);
         }
         else
         {
-            m_samUSB = true;
-            ui->ssb->setIcon(m_iconDSBUSB);
+            ui->ssb->setChecked(false);
         }
     }
     else
     {
+        ui->ssb->setChecked(false);
         ui->ssb->setIcon(m_iconDSBUSB);
     }
 
