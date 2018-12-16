@@ -436,7 +436,11 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_pll: " << settings.m_pll
             << " m_syncAMOperation: " << (int) settings.m_syncAMOperation
-            << " m_useReverseAPI" << settings.m_useReverseAPI
+            << " m_useReverseAPI: " << settings.m_useReverseAPI
+            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
+            << " m_reverseAPIAddress: " << settings.m_reverseAPIPort
+            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
+            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
@@ -494,11 +498,13 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         }
 
         reverseAPIKeys.append("pll");
+        reverseAPIKeys.append("syncAMOperation");
     }
 
     if ((m_settings.m_syncAMOperation != settings.m_syncAMOperation) || force)
     {
         m_syncAMBuffIndex = 0;
+        reverseAPIKeys.append("pll");
         reverseAPIKeys.append("syncAMOperation");
     }
 
@@ -514,19 +520,17 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         reverseAPIKeys.append("volume");
     }
 
-    if ((m_settings.m_useReverseAPI != settings.m_useReverseAPI))
-    { // Full synchronization (PUT) when switching on the reverse API
-        if (settings.m_useReverseAPI) {
-            webapiReverseSendSettings(reverseAPIKeys, settings, true);
-        }
-    }
-    else if (m_settings.m_useReverseAPI)
-    { // For subsequent updates rely on the force variable to select PUT or PATCH
-        webapiReverseSendSettings(reverseAPIKeys, settings, force);
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
-
 }
 
 QByteArray AMDemod::serialize() const
@@ -610,7 +614,23 @@ int AMDemod::webapiSettingsPutPatch(
         qint32 syncAMOperationCode = response.getAmDemodSettings()->getSyncAmOperation();
         settings.m_syncAMOperation = syncAMOperationCode < 0 ?
                 AMDemodSettings::SyncAMDSB : syncAMOperationCode > 2 ?
-                        AMDemodSettings::SyncAMDSB : (AMDemodSettings::SyncAMOperation) syncAMOperationCode;
+                        AMDemodSettings::SyncAMLSB : (AMDemodSettings::SyncAMOperation) syncAMOperationCode;
+    }
+
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getAmDemodSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getAmDemodSettings()->getReverseApiAddress() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getAmDemodSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getAmDemodSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getAmDemodSettings()->getReverseApiChannelIndex();
     }
 
     if (frequencyOffsetChanged)
@@ -670,6 +690,17 @@ void AMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
 
     response.getAmDemodSettings()->setPll(settings.m_pll ? 1 : 0);
     response.getAmDemodSettings()->setSyncAmOperation((int) m_settings.m_syncAMOperation);
+    response.getAmDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getAmDemodSettings()->getReverseApiAddress()) {
+        *response.getAmDemodSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getAmDemodSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getAmDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getAmDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getAmDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void AMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -692,7 +723,7 @@ void AMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, con
     swgChannelSettings->setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
     SWGSDRangel::SWGAMDemodSettings *swgAMDemodSettings = swgChannelSettings->getAmDemodSettings();
 
-    // transfer data that has been modified. When force is on transfer all data
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
 
     if (channelSettingsKeys.contains("audioMute") || force) {
         swgAMDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
@@ -740,11 +771,8 @@ void AMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, con
     buffer->write(swgChannelSettings->asJson().toUtf8());
     buffer->seek(0);
 
-    if (force) {
-        m_networkManager->sendCustomRequest(m_networkRequest, "PUT", buffer);
-    } else {
-        m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
-    }
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
 
     delete swgChannelSettings;
 }

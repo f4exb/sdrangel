@@ -33,6 +33,17 @@ AMDemodSettings:
     syncAMOperation:
       description: Synchronous AM sidebands mode (DSB, USB, LSB)
       type: integer
+    useReverseAPI:
+      description: Synchronizw with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer      
+    reverseAPIChannelIndex:
+      type: integer      
 
 AMDemodReport:
   description: AMDemod

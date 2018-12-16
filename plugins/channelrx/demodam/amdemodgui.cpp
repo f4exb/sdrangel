@@ -345,11 +345,15 @@ void AMDemodGUI::displaySettings()
     ui->bandpassEnable->setChecked(m_settings.m_bandpassEnable);
     ui->pll->setChecked(m_settings.m_pll);
 
-    if (m_settings.m_pll) {
-        if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMLSB) {
+    if (m_settings.m_pll)
+    {
+        if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMLSB)
+        {
             m_samUSB = false;
             ui->ssb->setIcon(m_iconDSBLSB);
-        } else {
+        }
+        else
+        {
             m_samUSB = true;
             ui->ssb->setIcon(m_iconDSBUSB);
         }
