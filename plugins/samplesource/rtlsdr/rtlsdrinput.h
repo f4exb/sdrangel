@@ -20,6 +20,7 @@
 
 #include <QString>
 #include <QByteArray>
+#include <QNetworkRequest>
 
 #include <dsp/devicesamplesource.h>
 #include "rtlsdrsettings.h"
@@ -28,6 +29,8 @@
 class DeviceSourceAPI;
 class RTLSDRThread;
 class FileRecord;
+class QNetworkAccessManager;
+class QNetworkReply;
 
 class RTLSDRInput : public DeviceSampleSource {
 public:
@@ -156,12 +159,18 @@ private:
 	QString m_deviceDescription;
 	std::vector<int> m_gains;
 	bool m_running;
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
 
 	bool openDevice();
 	void closeDevice();
 	bool applySettings(const RTLSDRSettings& settings, bool force);
 	void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RTLSDRSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RTLSDRSettings& settings, bool force);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_RTLSDRINPUT_H

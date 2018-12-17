@@ -477,6 +477,18 @@ void RTLSDRGui::on_lowSampleRate_toggled(bool checked)
 void RTLSDRGui::openDeviceSettingsDialog(const QPoint& p)
 {
     BasicDeviceSettingsDialog dialog(this);
+    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+
     dialog.move(p);
     dialog.exec();
+
+    m_settings.m_useReverseAPI = dialog.useReverseAPI();
+    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+
+    sendSettings();
 }
