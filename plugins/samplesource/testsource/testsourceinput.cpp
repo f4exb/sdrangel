@@ -14,9 +14,13 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QDebug>
 #include <string.h>
 #include <errno.h>
+
+#include <QDebug>
+#include <QNetworkReply>
+#include <QNetworkAccessManager>
+#include <QBuffer>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -47,11 +51,20 @@ TestSourceInput::TestSourceInput(DeviceSourceAPI *deviceAPI) :
     if (!m_sampleFifo.setSize(96000 * 4)) {
         qCritical("TestSourceInput::TestSourceInput: Could not allocate SampleFifo");
     }
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));    
 }
 
 TestSourceInput::~TestSourceInput()
 {
-    if (m_running) { stop(); }
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
+
+    if (m_running) { 
+        stop(); 
+    }
+    
     m_deviceAPI->removeSink(m_fileSink);
     delete m_fileSink;
 }
@@ -210,6 +223,10 @@ bool TestSourceInput::handleMessage(const Message& message)
             m_deviceAPI->stopAcquisition();
         }
 
+        if (m_settings.m_useReverseAPI) {
+            webapiReverseSendStartStop(cmd.getStartStop());
+        }        
+
         return true;
     }
     else
@@ -220,6 +237,8 @@ bool TestSourceInput::handleMessage(const Message& message)
 
 bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool force)
 {
+    QList<QString> reverseAPIKeys;
+
     if ((m_settings.m_autoCorrOptions != settings.m_autoCorrOptions) || force)
     {
         switch(settings.m_autoCorrOptions)
@@ -261,6 +280,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
         || (m_settings.m_sampleRate != settings.m_sampleRate)
         || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
+        reverseAPIKeys.append("centerFrequency");
+
         qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
                 settings.m_centerFrequency,
                 0, // no transverter mode
@@ -380,6 +401,15 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
         if (m_testSourceThread != 0) {
             m_testSourceThread->setFMDeviation(settings.m_fmDeviation * 100.0f);
         }
+    }
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -533,3 +563,110 @@ void TestSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings&
     }
 }
 
+void TestSourceInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const TestSourceSettings& settings, bool force)
+{
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDeviceHwType(new QString("TestSource"));
+    swgDeviceSettings->setTestSourceSettings(new SWGSDRangel::SWGTestSourceSettings());
+    SWGSDRangel::SWGTestSourceSettings *swgTestSourceSettings = swgDeviceSettings->getTestSourceSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (deviceSettingsKeys.contains("centerFrequency") || force) {
+        swgTestSourceSettings->setCenterFrequency(settings.m_centerFrequency);
+    }
+    if (deviceSettingsKeys.contains("frequencyShift")) {
+        swgTestSourceSettings->setFrequencyShift(settings.m_frequencyShift);
+    }
+    if (deviceSettingsKeys.contains("sampleRate")) {
+        swgTestSourceSettings->setSampleRate(settings.m_sampleRate);
+    }
+    if (deviceSettingsKeys.contains("log2Decim")) {
+        swgTestSourceSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("fcPos")) {
+        swgTestSourceSettings->setFcPos((int) settings.m_fcPos);
+    }
+    if (deviceSettingsKeys.contains("sampleSizeIndex")) {
+        swgTestSourceSettings->setSampleSizeIndex(settings.m_sampleSizeIndex);
+    }
+    if (deviceSettingsKeys.contains("amplitudeBits")) {
+        swgTestSourceSettings->setAmplitudeBits(settings.m_amplitudeBits);
+    }
+    if (deviceSettingsKeys.contains("autoCorrOptions")) {
+        swgTestSourceSettings->setAutoCorrOptions((int) settings.m_sampleSizeIndex);
+    }
+    if (deviceSettingsKeys.contains("modulation")) {
+        swgTestSourceSettings->setModulation((int) settings.m_modulation);
+    }
+    if (deviceSettingsKeys.contains("modulationTone")) {
+        swgTestSourceSettings->setModulationTone(settings.m_modulationTone);
+    }
+    if (deviceSettingsKeys.contains("amModulation")) {
+        swgTestSourceSettings->setAmModulation(settings.m_amModulation);
+    };
+    if (deviceSettingsKeys.contains("fmDeviation")) {
+        swgTestSourceSettings->setFmDeviation(settings.m_fmDeviation);
+    };
+    if (deviceSettingsKeys.contains("dcFactor")) {
+        swgTestSourceSettings->setDcFactor(settings.m_dcFactor);
+    };
+    if (deviceSettingsKeys.contains("iFactor")) {
+        swgTestSourceSettings->setIFactor(settings.m_iFactor);
+    };
+    if (deviceSettingsKeys.contains("qFactor")) {
+        swgTestSourceSettings->setQFactor(settings.m_qFactor);
+    };
+    if (deviceSettingsKeys.contains("phaseImbalance")) {
+        swgTestSourceSettings->setPhaseImbalance(settings.m_phaseImbalance);
+    };
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        swgTestSourceSettings->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    qDebug("TestSourceInput::webapiReverseSendSettings: %s", channelSettingsURL.toStdString().c_str());
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgDeviceSettings;    
+}
+
+void TestSourceInput::webapiReverseSendStartStop(bool start)
+{
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));    
+
+    if (start) {
+        m_networkManager->sendCustomRequest(m_networkRequest, "POST");
+    } else {
+        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE");
+    }
+}
+
+void TestSourceInput::networkManagerFinished(QNetworkReply *reply)
+{
+    if (reply->error())
+    {
+        qDebug() << "TestSourceInput::networkManagerFinished: error: " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    qDebug("TestSourceInput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+}

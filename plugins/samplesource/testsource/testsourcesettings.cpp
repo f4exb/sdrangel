@@ -42,6 +42,10 @@ void TestSourceSettings::resetToDefaults()
     m_qFactor = 0.0f;
     m_phaseImbalance = 0.0f;
     m_fileRecordName = "";
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;    
 }
 
 QByteArray TestSourceSettings::serialize() const
@@ -63,7 +67,10 @@ QByteArray TestSourceSettings::serialize() const
     s.writeS32(15, m_modulationTone);
     s.writeS32(16, m_amModulation);
     s.writeS32(17, m_fmDeviation);
-
+    s.writeBool(18, m_useReverseAPI);
+    s.writeString(19, m_reverseAPIAddress);
+    s.writeU32(20, m_reverseAPIPort);
+    s.writeU32(21, m_reverseAPIDeviceIndex);
     return s.final();
 }
 
@@ -80,6 +87,7 @@ bool TestSourceSettings::deserialize(const QByteArray& data)
     if (d.getVersion() == 1)
     {
         int intval;
+        uint32_t utmp;
 
         d.readS32(2, &m_frequencyShift, 0);
         d.readU32(3, &m_sampleRate, 768*1000);
@@ -111,6 +119,19 @@ bool TestSourceSettings::deserialize(const QByteArray& data)
         d.readS32(15, &m_modulationTone, 44);
         d.readS32(16, &m_amModulation, 50);
         d.readS32(17, &m_fmDeviation, 50);
+
+        d.readBool(18, &m_useReverseAPI, false);
+        d.readString(19, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(20, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(21, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
 
         return true;
     }

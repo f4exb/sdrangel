@@ -20,6 +20,7 @@
 #include <QString>
 #include <QByteArray>
 #include <QTimer>
+#include <QNetworkRequest>
 
 #include <dsp/devicesamplesource.h>
 #include "testsourcesettings.h"
@@ -27,6 +28,8 @@
 class DeviceSourceAPI;
 class TestSourceThread;
 class FileRecord;
+class QNetworkAccessManager;
+class QNetworkReply;
 
 class TestSourceInput : public DeviceSampleSource {
 public:
@@ -138,9 +141,16 @@ private:
 	QString m_deviceDescription;
 	bool m_running;
     const QTimer& m_masterTimer;
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
 
 	bool applySettings(const TestSourceSettings& settings, bool force);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const TestSourceSettings& settings);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const TestSourceSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // _TESTSOURCE_TESTSOURCEINPUT_H_
