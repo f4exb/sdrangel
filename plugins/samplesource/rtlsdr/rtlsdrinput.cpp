@@ -333,14 +333,17 @@ bool RTLSDRInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initAcquisition())
-            {
+            if (m_deviceAPI->initAcquisition()) {
                 m_deviceAPI->startAcquisition();
             }
         }
         else
         {
             m_deviceAPI->stopAcquisition();
+        }
+
+        if (m_settings.m_useReverseAPI) {
+            webapiReverseSendStartStop(cmd.getStartStop());
         }
 
         return true;
@@ -810,6 +813,21 @@ void RTLSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
 
     delete swgDeviceSettings;
+}
+
+void RTLSDRInput::webapiReverseSendStartStop(bool start)
+{
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));    
+
+    if (start) {
+        m_networkManager->sendCustomRequest(m_networkRequest, "POST");
+    } else {
+        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE");
+    }
 }
 
 void RTLSDRInput::networkManagerFinished(QNetworkReply *reply)

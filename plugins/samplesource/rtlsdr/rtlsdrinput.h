@@ -168,6 +168,7 @@ private:
 	void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RTLSDRSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RTLSDRSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
