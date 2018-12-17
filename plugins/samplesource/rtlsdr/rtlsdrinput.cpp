@@ -60,13 +60,23 @@ RTLSDRInput::RTLSDRInput(DeviceSourceAPI *deviceAPI) :
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));    
 }
 
 RTLSDRInput::~RTLSDRInput()
 {
-    if (m_running) stop();
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
+
+    if (m_running) {
+        stop();
+    }
+    
     m_deviceAPI->removeSink(m_fileSink);
     delete m_fileSink;
+    
     closeDevice();
 }
 
@@ -798,7 +808,7 @@ void RTLSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
         swgRtlSdrSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
-    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/settings")
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
             .arg(settings.m_reverseAPIAddress)
             .arg(settings.m_reverseAPIPort)
             .arg(settings.m_reverseAPIDeviceIndex);
