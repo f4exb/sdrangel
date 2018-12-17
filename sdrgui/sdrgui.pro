@@ -49,6 +49,7 @@ SOURCES += mainwindow.cpp\
         gui/aboutdialog.cpp\
         gui/addpresetdialog.cpp\
         gui/basicchannelsettingsdialog.cpp\
+        gui/basicdevicesettingsdialog.cpp\
         gui/buttonswitch.cpp\
         gui/channelwindow.cpp\
         gui/clickablelabel.cpp\
@@ -108,6 +109,7 @@ HEADERS  += mainwindow.h\
         gui/audiodialog.h\
         gui/audioselectdialog.h\
         gui/basicchannelsettingsdialog.h\
+        gui/basicdevicesettingsdialog.h\
         gui/buttonswitch.h\
         gui/channelwindow.h\
         gui/clickablelabel.h\
@@ -159,6 +161,7 @@ FORMS    += mainwindow.ui\
         gui/scopewindow.ui\
         gui/addpresetdialog.ui\
         gui/basicchannelsettingsdialog.ui\
+        gui/basicdevicesettingsdialog.ui\
         gui/commandoutputdialog.ui\
         gui/cwkeyergui.ui\
         gui/editcommanddialog.ui\
