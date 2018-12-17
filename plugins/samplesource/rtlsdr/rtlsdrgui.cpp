@@ -27,6 +27,7 @@
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/crightclickenabler.h"
+#include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 
@@ -475,7 +476,7 @@ void RTLSDRGui::on_lowSampleRate_toggled(bool checked)
 
 void RTLSDRGui::openDeviceSettingsDialog(const QPoint& p)
 {
-    QMessageBox m(QMessageBox::Information, tr("Message"), tr("RTLSDRGui::openDeviceSettingsDialog"));
-    m.move(p);
-    m.exec();
+    BasicDeviceSettingsDialog dialog(this);
+    dialog.move(p);
+    dialog.exec();
 }

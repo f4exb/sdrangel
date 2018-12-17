@@ -18,6 +18,8 @@ BasicChannelSettingsDialog::BasicChannelSettingsDialog(ChannelMarker* marker, QW
     setUseReverseAPI(false);
     setReverseAPIAddress("127.0.0.1");
     setReverseAPIPort(8888);
+    setReverseAPIDeviceIndex(0);
+    setReverseAPIChannelIndex(0);
     paintColor();
 }
 
@@ -103,6 +105,30 @@ void BasicChannelSettingsDialog::on_reverseAPIPort_returnPressed()
         return;
     } else {
         m_reverseAPIPort = reverseAPIPort;
+    }
+}
+
+void BasicChannelSettingsDialog::on_reverseAPIDeviceIndex_returnPressed()
+{
+    bool dataOk;
+    int reverseAPIDeviceIndex = ui->reverseAPIDeviceIndex->text().toInt(&dataOk);
+
+    if ((!dataOk) || (reverseAPIDeviceIndex < 0)) {
+        return;
+    } else {
+        m_reverseAPIDeviceIndex = reverseAPIDeviceIndex;
+    }
+}
+
+void BasicChannelSettingsDialog::on_reverseAPIChannelIndex_returnPressed()
+{
+    bool dataOk;
+    int reverseAPIChannelIndex = ui->reverseAPIChannelIndex->text().toInt(&dataOk);
+
+    if ((!dataOk) || (reverseAPIChannelIndex < 0)) {
+        return;
+    } else {
+        m_reverseAPIChannelIndex = reverseAPIChannelIndex;
     }
 }
 

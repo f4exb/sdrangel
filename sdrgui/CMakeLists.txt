@@ -9,6 +9,7 @@ set(sdrgui_SOURCES
     gui/audiodialog.cpp
     gui/audioselectdialog.cpp
     gui/basicchannelsettingsdialog.cpp
+    gui/basicdevicesettingsdialog.cpp
     gui/buttonswitch.cpp
     gui/channelwindow.cpp
     gui/clickablelabel.cpp
@@ -76,6 +77,7 @@ set(sdrgui_HEADERS
     gui/audiodialog.h
     gui/audioselectdialog.h
     gui/basicchannelsettingsdialog.h
+    gui/basicdevicesettingsdialog.h
     gui/buttonswitch.h
     gui/channelwindow.h
     gui/colormapper.h
@@ -146,6 +148,7 @@ set(sdrgui_FORMS
     gui/aboutdialog.ui
     gui/addpresetdialog.ui
     gui/basicchannelsettingsdialog.ui
+    gui/basicdevicesettingsdialog.ui
     gui/commandoutputdialog.ui
     gui/cwkeyergui.ui
     gui/editcommanddialog.ui
