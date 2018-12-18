@@ -659,6 +659,18 @@ int RTLSDRInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("fileRecordName")) {
         settings.m_fileRecordName = *response.getRtlSdrSettings()->getFileRecordName();
     }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getRtlSdrSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getRtlSdrSettings()->getReverseApiAddress() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getRtlSdrSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getRtlSdrSettings()->getReverseApiDeviceIndex();
+    }
 
     MsgConfigureRTLSDR *msg = MsgConfigureRTLSDR::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -697,6 +709,17 @@ void RTLSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     } else {
         response.getRtlSdrSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
+
+    response.getRtlSdrSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getRtlSdrSettings()->getReverseApiAddress()) {
+        *response.getRtlSdrSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getRtlSdrSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getRtlSdrSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getRtlSdrSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 int RTLSDRInput::webapiRunGet(
