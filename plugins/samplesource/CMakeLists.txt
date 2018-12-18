@@ -78,7 +78,7 @@ else(LIBUSB_FOUND AND LIBMIRISDR_FOUND)
 endif(LIBUSB_FOUND AND LIBMIRISDR_FOUND)
 
 find_package(SoapySDR)
-if(LIBUSB_FOUND AND SOAPYSDR_FOUND)
+if(SOAPYSDR_FOUND)
 	add_subdirectory(soapysdrinput)
 	message(STATUS "SoapySDR found")
 else()
