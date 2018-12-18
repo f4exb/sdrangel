@@ -94,6 +94,7 @@ private slots:
     void on_antenna_currentIndexChanged(int index);
     void on_extClock_clicked();
     void on_transverter_clicked();
+    void openDeviceSettingsDialog(const QPoint& p);
 
     void updateHardware();
     void updateStatus();
