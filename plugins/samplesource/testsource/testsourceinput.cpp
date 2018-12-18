@@ -53,7 +53,7 @@ TestSourceInput::TestSourceInput(DeviceSourceAPI *deviceAPI) :
     }
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));    
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 TestSourceInput::~TestSourceInput()
@@ -61,10 +61,10 @@ TestSourceInput::~TestSourceInput()
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
 
-    if (m_running) { 
-        stop(); 
+    if (m_running) {
+        stop();
     }
-    
+
     m_deviceAPI->removeSink(m_fileSink);
     delete m_fileSink;
 }
@@ -225,7 +225,7 @@ bool TestSourceInput::handleMessage(const Message& message)
 
         if (m_settings.m_useReverseAPI) {
             webapiReverseSendStartStop(cmd.getStartStop());
-        }        
+        }
 
         return true;
     }
@@ -241,6 +241,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
     if ((m_settings.m_autoCorrOptions != settings.m_autoCorrOptions) || force)
     {
+        reverseAPIKeys.append("autoCorrOptions");
+
         switch(settings.m_autoCorrOptions)
         {
         case TestSourceSettings::AutoCorrDC:
@@ -258,6 +260,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
     if ((m_settings.m_sampleRate != settings.m_sampleRate) || force)
     {
+        reverseAPIKeys.append("sampleRate");
+
         if (m_testSourceThread != 0)
         {
             m_testSourceThread->setSamplerate(settings.m_sampleRate);
@@ -267,6 +271,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
     if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
+        reverseAPIKeys.append("log2Decim");
+
         if (m_testSourceThread != 0)
         {
             m_testSourceThread->setLog2Decimation(settings.m_log2Decim);
@@ -281,6 +287,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
         || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
         reverseAPIKeys.append("centerFrequency");
+        reverseAPIKeys.append("fcPos");
+        reverseAPIKeys.append("frequencyShift");
 
         qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
                 settings.m_centerFrequency,
@@ -315,6 +323,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
     if ((m_settings.m_amplitudeBits != settings.m_amplitudeBits) || force)
     {
+        reverseAPIKeys.append("amplitudeBits");
+
         if (m_testSourceThread != 0) {
             m_testSourceThread->setAmplitudeBits(settings.m_amplitudeBits);
         }
@@ -322,6 +332,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
     if ((m_settings.m_dcFactor != settings.m_dcFactor) || force)
     {
+        reverseAPIKeys.append("dcFactor");
+
         if (m_testSourceThread != 0) {
             m_testSourceThread->setDCFactor(settings.m_dcFactor);
         }
@@ -329,6 +341,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
     if ((m_settings.m_iFactor != settings.m_iFactor) || force)
     {
+        reverseAPIKeys.append("iFactor");
+
         if (m_testSourceThread != 0) {
             m_testSourceThread->setIFactor(settings.m_iFactor);
         }
@@ -336,6 +350,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
     if ((m_settings.m_qFactor != settings.m_qFactor) || force)
     {
+        reverseAPIKeys.append("qFactor");
+
         if (m_testSourceThread != 0) {
             m_testSourceThread->setQFactor(settings.m_qFactor);
         }
@@ -343,6 +359,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
     if ((m_settings.m_phaseImbalance != settings.m_phaseImbalance) || force)
     {
+        reverseAPIKeys.append("phaseImbalance");
+
         if (m_testSourceThread != 0) {
             m_testSourceThread->setPhaseImbalance(settings.m_phaseImbalance);
         }
@@ -350,6 +368,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
     if ((m_settings.m_sampleSizeIndex != settings.m_sampleSizeIndex) || force)
     {
+        reverseAPIKeys.append("sampleSizeIndex");
+
         if (m_testSourceThread != 0) {
             m_testSourceThread->setBitSize(settings.m_sampleSizeIndex);
         }
@@ -368,6 +388,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
     if ((m_settings.m_modulationTone != settings.m_modulationTone) || force)
     {
+        reverseAPIKeys.append("modulationTone");
+
         if (m_testSourceThread != 0) {
             m_testSourceThread->setToneFrequency(settings.m_modulationTone * 10);
         }
@@ -375,6 +397,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
     if ((m_settings.m_modulation != settings.m_modulation) || force)
     {
+        reverseAPIKeys.append("modulation");
+
         if (m_testSourceThread != 0)
         {
             m_testSourceThread->setModulation(settings.m_modulation);
@@ -391,6 +415,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
     if ((m_settings.m_amModulation != settings.m_amModulation) || force)
     {
+        reverseAPIKeys.append("amModulation");
+
         if (m_testSourceThread != 0) {
             m_testSourceThread->setAMModulation(settings.m_amModulation / 100.0f);
         }
@@ -398,6 +424,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
     if ((m_settings.m_fmDeviation != settings.m_fmDeviation) || force)
     {
+        reverseAPIKeys.append("fmDeviation");
+
         if (m_testSourceThread != 0) {
             m_testSourceThread->setFMDeviation(settings.m_fmDeviation * 100.0f);
         }
@@ -405,6 +433,7 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
     if (settings.m_useReverseAPI)
     {
+        qDebug("TestSourceInput::applySettings: call webapiReverseSendSettings");
         bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
                 (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
                 (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
@@ -635,13 +664,13 @@ void TestSourceInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKe
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
-
-    qDebug("TestSourceInput::webapiReverseSendSettings: %s", channelSettingsURL.toStdString().c_str());
+//    qDebug("TestSourceInput::webapiReverseSendSettings: %s", channelSettingsURL.toStdString().c_str());
+//    qDebug("TestSourceInput::webapiReverseSendSettings: query:\n%s", swgDeviceSettings->asJson().toStdString().c_str());
 
     // Always use PATCH to avoid passing reverse API settings
     m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
 
-    delete swgDeviceSettings;    
+    delete swgDeviceSettings;
 }
 
 void TestSourceInput::webapiReverseSendStartStop(bool start)
@@ -650,7 +679,7 @@ void TestSourceInput::webapiReverseSendStartStop(bool start)
             .arg(m_settings.m_reverseAPIAddress)
             .arg(m_settings.m_reverseAPIPort)
             .arg(m_settings.m_reverseAPIDeviceIndex);
-    m_networkRequest.setUrl(QUrl(channelSettingsURL));    
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
 
     if (start) {
         m_networkManager->sendCustomRequest(m_networkRequest, "POST");
@@ -661,9 +690,14 @@ void TestSourceInput::webapiReverseSendStartStop(bool start)
 
 void TestSourceInput::networkManagerFinished(QNetworkReply *reply)
 {
-    if (reply->error())
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
     {
-        qDebug() << "TestSourceInput::networkManagerFinished: error: " << reply->errorString();
+        qWarning() << "TestSourceInput::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
         return;
     }
 

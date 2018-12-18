@@ -62,7 +62,7 @@ RTLSDRInput::RTLSDRInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI->addSink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));    
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 RTLSDRInput::~RTLSDRInput()
@@ -73,10 +73,10 @@ RTLSDRInput::~RTLSDRInput()
     if (m_running) {
         stop();
     }
-    
+
     m_deviceAPI->removeSink(m_fileSink);
     delete m_fileSink;
-    
+
     closeDevice();
 }
 
@@ -831,7 +831,7 @@ void RTLSDRInput::webapiReverseSendStartStop(bool start)
             .arg(m_settings.m_reverseAPIAddress)
             .arg(m_settings.m_reverseAPIPort)
             .arg(m_settings.m_reverseAPIDeviceIndex);
-    m_networkRequest.setUrl(QUrl(channelSettingsURL));    
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
 
     if (start) {
         m_networkManager->sendCustomRequest(m_networkRequest, "POST");
@@ -842,9 +842,14 @@ void RTLSDRInput::webapiReverseSendStartStop(bool start)
 
 void RTLSDRInput::networkManagerFinished(QNetworkReply *reply)
 {
-    if (reply->error())
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
     {
-        qDebug() << "RTLSDRInput::networkManagerFinished: error: " << reply->errorString();
+        qWarning() << "TestSourceInput::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
         return;
     }
 

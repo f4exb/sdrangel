@@ -33,6 +33,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 
 class RTLSDRInput : public DeviceSampleSource {
+    Q_OBJECT
 public:
 	class MsgConfigureRTLSDR : public Message {
 		MESSAGE_CLASS_DECLARATION

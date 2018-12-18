@@ -32,6 +32,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 
 class TestSourceInput : public DeviceSampleSource {
+    Q_OBJECT
 public:
 	class MsgConfigureTestSource : public Message {
 		MESSAGE_CLASS_DECLARATION

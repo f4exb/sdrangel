@@ -779,9 +779,14 @@ void AMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, con
 
 void AMDemod::networkManagerFinished(QNetworkReply *reply)
 {
-    if (reply->error())
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
     {
-        qDebug() << "AMDemod::networkManagerFinished: error: " << reply->errorString();
+        qWarning() << "AMDemod::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
         return;
     }
 
