@@ -14,18 +14,22 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "ammod.h"
+#include <stdio.h>
+#include <complex.h>
 
 #include <QTime>
 #include <QDebug>
 #include <QMutexLocker>
-
-#include <stdio.h>
-#include <complex.h>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QBuffer>
+#include <QJsonParseError>
 
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGAMModReport.h"
+
+#include "ammod.h"
 
 #include "dsp/upchannelizer.h"
 #include "dsp/dspengine.h"
@@ -84,10 +88,15 @@ AMMod::AMMod(DeviceSinkAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 AMMod::~AMMod()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
@@ -332,6 +341,16 @@ bool AMMod::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (CWKeyer::MsgConfigureCWKeyer::match(cmd))
+    {
+        const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) cmd;
+
+        if (m_settings.m_useReverseAPI) {
+            webapiReverseSendCWSettings(cfg.getSettings());
+        }
+
+        return true;
+    }
     else if (DSPConfigureAudio::match(cmd))
     {
         DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
@@ -451,14 +470,46 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
             << " m_modFactor: " << settings.m_modFactor
             << " m_toneFrequency: " << settings.m_toneFrequency
             << " m_volumeFactor: " << settings.m_volumeFactor
-            << " m_audioMute: " << settings.m_channelMute
+            << " m_channelMute: " << settings.m_channelMute
             << " m_playLoop: " << settings.m_playLoop
             << " m_modAFInput " << settings.m_modAFInput
             << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_useReverseAPI: " << settings.m_useReverseAPI
+            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
+            << " m_reverseAPIAddress: " << settings.m_reverseAPIPort
+            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
+            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
 
-    if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    QList<QString> reverseAPIKeys;
+
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+
+    if ((settings.m_modFactor != m_settings.m_modFactor) || force) {
+        reverseAPIKeys.append("modFactor");
+    }
+
+    if ((settings.m_volumeFactor != m_settings.m_volumeFactor) || force) {
+        reverseAPIKeys.append("volumeFactor");
+    }
+
+    if ((settings.m_channelMute != m_settings.m_channelMute) || force) {
+        reverseAPIKeys.append("channelMute");
+    }
+
+    if ((settings.m_playLoop != m_settings.m_playLoop) || force) {
+        reverseAPIKeys.append("playLoop");
+    }
+
+    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force) {
+        reverseAPIKeys.append("modAFInput");
+    }
+
+    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
+        reverseAPIKeys.append("rfBandwidth");
         m_settingsMutex.lock();
         m_interpolatorDistanceRemain = 0;
         m_interpolatorConsumed = false;
@@ -469,6 +520,7 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
 
     if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force)
     {
+        reverseAPIKeys.append("toneFrequency");
         m_settingsMutex.lock();
         m_toneNco.setFreq(settings.m_toneFrequency, m_audioSampleRate);
         m_settingsMutex.unlock();
@@ -476,14 +528,26 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
+        reverseAPIKeys.append("audioDeviceName");
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
         audioDeviceManager->addAudioSource(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
         uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
 
         if (m_audioSampleRate != audioSampleRate) {
+            reverseAPIKeys.append("audioSampleRate");
             applyAudioSampleRate(audioSampleRate);
         }
+    }
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -683,4 +747,132 @@ void AMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     response.getAmModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
     response.getAmModReport()->setAudioSampleRate(m_audioSampleRate);
     response.getAmModReport()->setChannelSampleRate(m_outputSampleRate);
+}
+
+void AMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AMModSettings& settings, bool force)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(1);
+    swgChannelSettings->setChannelType(new QString("AMMod"));
+    swgChannelSettings->setAmModSettings(new SWGSDRangel::SWGAMModSettings());
+    SWGSDRangel::SWGAMModSettings *swgAMModSettings = swgChannelSettings->getAmModSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (channelSettingsKeys.contains("channelMute") || force) {
+        swgAMModSettings->setChannelMute(settings.m_channelMute ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+        swgAMModSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("modAFInput") || force) {
+        swgAMModSettings->setModAfInput((int) settings.m_modAFInput);
+    }
+    if (channelSettingsKeys.contains("audioDeviceName") || force) {
+        swgAMModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+    if (channelSettingsKeys.contains("playLoop") || force) {
+        swgAMModSettings->setPlayLoop(settings.m_playLoop ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("rfBandwidth") || force) {
+        swgAMModSettings->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgAMModSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swgAMModSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("toneFrequency") || force) {
+        swgAMModSettings->setToneFrequency(settings.m_toneFrequency);
+    }
+    if (channelSettingsKeys.contains("volumeFactor") || force) {
+        swgAMModSettings->setVolumeFactor(settings.m_volumeFactor);
+    }
+    if (channelSettingsKeys.contains("modFactor") || force) {
+        swgAMModSettings->setModFactor(settings.m_modFactor);
+    }
+
+    if (force)
+    {
+        const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
+        swgAMModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
+        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgAMModSettings->getCwKeyer();
+        apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
+        apiCwKeyerSettings->setMode(cwKeyerSettings.m_mode);
+        apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
+        apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
+        apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+    }
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void AMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(1);
+    swgChannelSettings->setChannelType(new QString("AMMod"));
+    swgChannelSettings->setAmModSettings(new SWGSDRangel::SWGAMModSettings());
+    SWGSDRangel::SWGAMModSettings *swgAMModSettings = swgChannelSettings->getAmModSettings();
+
+    swgAMModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgAMModSettings->getCwKeyer();
+    apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
+    apiCwKeyerSettings->setMode(cwKeyerSettings.m_mode);
+    apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
+    apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
+    apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex)
+            .arg(m_settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void AMMod::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "AMMod::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("AMMod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }
