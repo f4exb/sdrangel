@@ -24,9 +24,7 @@ set(sdrgui_SOURCES
     gui/externalclockbutton.cpp
     gui/externalclockdialog.cpp
     gui/glscope.cpp
-    gui/glscopemulti.cpp
     gui/glscopegui.cpp
-#   gui/glscopemultigui.cpp
     gui/glshadersimple.cpp
     gui/glshadertextured.cpp
     gui/glshadertvarray.cpp
@@ -50,7 +48,6 @@ set(sdrgui_SOURCES
     gui/valuedialz.cpp
 
     dsp/scopevis.cpp
-#   dsp/scopevismulti.cpp
     dsp/scopevisxy.cpp
     dsp/spectrumvis.cpp
     dsp/spectrumscopecombovis.cpp
@@ -91,9 +88,7 @@ set(sdrgui_HEADERS
     gui/externalclockbutton.h
     gui/externalclockdialog.h
     gui/glscope.h
-    gui/glscopemulti.h
     gui/glscopegui.h
-#   gui/glscopemultigui.h
     gui/glshadersimple.h
     gui/glshadertvarray.h
     gui/glshadertextured.h
@@ -118,7 +113,6 @@ set(sdrgui_HEADERS
     gui/valuedialz.h
 
     dsp/scopevis.h
-#   dsp/scopevismulti.h
     dsp/scopevisxy.h
     dsp/spectrumvis.h
     dsp/spectrumscopecombovis.h
@@ -154,7 +148,6 @@ set(sdrgui_FORMS
     gui/editcommanddialog.ui
     gui/externalclockdialog.ui
     gui/glscopegui.ui
-    gui/glscopemultigui.ui
     gui/glspectrumgui.ui
     gui/pluginsdialog.ui
     gui/audiodialog.ui
