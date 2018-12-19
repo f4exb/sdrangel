@@ -1742,6 +1742,7 @@ void LimeSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
             .arg(settings.m_reverseAPIPort)
             .arg(settings.m_reverseAPIDeviceIndex);
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
     QBuffer *buffer=new QBuffer();
     buffer->open((QBuffer::ReadWrite));

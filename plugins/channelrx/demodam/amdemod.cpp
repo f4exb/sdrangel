@@ -765,6 +765,7 @@ void AMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, con
             .arg(settings.m_reverseAPIDeviceIndex)
             .arg(settings.m_reverseAPIChannelIndex);
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
     QBuffer *buffer=new QBuffer();
     buffer->open((QBuffer::ReadWrite));
