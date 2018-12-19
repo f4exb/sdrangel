@@ -54,6 +54,7 @@ SOURCES += mainwindow.cpp\
         gui/channelwindow.cpp\
         gui/clickablelabel.cpp\
         gui/colormapper.cpp\
+        gui/comboboxnoarrow.cpp\
         gui/commanditem.cpp\
         gui/commandkeyreceiver.cpp\
         gui/commandoutputdialog.cpp\
@@ -114,6 +115,7 @@ HEADERS  += mainwindow.h\
         gui/channelwindow.h\
         gui/clickablelabel.h\
         gui/colormapper.h\
+        gui/comboboxnoarrow.h\
         gui/commanditem.h\
         gui/commandkeyreceiver.h\
         gui/commandoutputdialog.h\
