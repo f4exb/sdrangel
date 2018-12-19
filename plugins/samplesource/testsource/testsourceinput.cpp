@@ -628,52 +628,52 @@ void TestSourceInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKe
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgTestSourceSettings->setCenterFrequency(settings.m_centerFrequency);
     }
-    if (deviceSettingsKeys.contains("frequencyShift")) {
+    if (deviceSettingsKeys.contains("frequencyShift") || force) {
         swgTestSourceSettings->setFrequencyShift(settings.m_frequencyShift);
     }
-    if (deviceSettingsKeys.contains("sampleRate")) {
+    if (deviceSettingsKeys.contains("sampleRate") || force) {
         swgTestSourceSettings->setSampleRate(settings.m_sampleRate);
     }
-    if (deviceSettingsKeys.contains("log2Decim")) {
+    if (deviceSettingsKeys.contains("log2Decim") || force) {
         swgTestSourceSettings->setLog2Decim(settings.m_log2Decim);
     }
-    if (deviceSettingsKeys.contains("fcPos")) {
+    if (deviceSettingsKeys.contains("fcPos") || force) {
         swgTestSourceSettings->setFcPos((int) settings.m_fcPos);
     }
-    if (deviceSettingsKeys.contains("sampleSizeIndex")) {
+    if (deviceSettingsKeys.contains("sampleSizeIndex") || force) {
         swgTestSourceSettings->setSampleSizeIndex(settings.m_sampleSizeIndex);
     }
-    if (deviceSettingsKeys.contains("amplitudeBits")) {
+    if (deviceSettingsKeys.contains("amplitudeBits") || force) {
         swgTestSourceSettings->setAmplitudeBits(settings.m_amplitudeBits);
     }
-    if (deviceSettingsKeys.contains("autoCorrOptions")) {
+    if (deviceSettingsKeys.contains("autoCorrOptions") || force) {
         swgTestSourceSettings->setAutoCorrOptions((int) settings.m_sampleSizeIndex);
     }
-    if (deviceSettingsKeys.contains("modulation")) {
+    if (deviceSettingsKeys.contains("modulation") || force) {
         swgTestSourceSettings->setModulation((int) settings.m_modulation);
     }
     if (deviceSettingsKeys.contains("modulationTone")) {
         swgTestSourceSettings->setModulationTone(settings.m_modulationTone);
     }
-    if (deviceSettingsKeys.contains("amModulation")) {
+    if (deviceSettingsKeys.contains("amModulation") || force) {
         swgTestSourceSettings->setAmModulation(settings.m_amModulation);
     };
-    if (deviceSettingsKeys.contains("fmDeviation")) {
+    if (deviceSettingsKeys.contains("fmDeviation") || force) {
         swgTestSourceSettings->setFmDeviation(settings.m_fmDeviation);
     };
-    if (deviceSettingsKeys.contains("dcFactor")) {
+    if (deviceSettingsKeys.contains("dcFactor") || force) {
         swgTestSourceSettings->setDcFactor(settings.m_dcFactor);
     };
-    if (deviceSettingsKeys.contains("iFactor")) {
+    if (deviceSettingsKeys.contains("iFactor") || force) {
         swgTestSourceSettings->setIFactor(settings.m_iFactor);
     };
-    if (deviceSettingsKeys.contains("qFactor")) {
+    if (deviceSettingsKeys.contains("qFactor") || force) {
         swgTestSourceSettings->setQFactor(settings.m_qFactor);
     };
-    if (deviceSettingsKeys.contains("phaseImbalance")) {
+    if (deviceSettingsKeys.contains("phaseImbalance") || force) {
         swgTestSourceSettings->setPhaseImbalance(settings.m_phaseImbalance);
     };
-    if (deviceSettingsKeys.contains("fileRecordName")) {
+    if (deviceSettingsKeys.contains("fileRecordName") || force) {
         swgTestSourceSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
@@ -726,5 +726,6 @@ void TestSourceInput::networkManagerFinished(QNetworkReply *reply)
     }
 
     QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
     qDebug("TestSourceInput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }

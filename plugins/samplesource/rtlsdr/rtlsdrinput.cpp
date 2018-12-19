@@ -785,49 +785,49 @@ void RTLSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     if (deviceSettingsKeys.contains("agc") || force) {
         swgRtlSdrSettings->setAgc(settings.m_agc ? 1 : 0);
     }
-    if (deviceSettingsKeys.contains("centerFrequency")) {
+    if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgRtlSdrSettings->setCenterFrequency(settings.m_centerFrequency);
     }
-    if (deviceSettingsKeys.contains("dcBlock")) {
+    if (deviceSettingsKeys.contains("dcBlock") || force) {
         swgRtlSdrSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
     }
-    if (deviceSettingsKeys.contains("devSampleRate")) {
+    if (deviceSettingsKeys.contains("devSampleRate") || force) {
         swgRtlSdrSettings->setDevSampleRate(settings.m_devSampleRate);
     }
-    if (deviceSettingsKeys.contains("fcPos")) {
+    if (deviceSettingsKeys.contains("fcPos") || force) {
         swgRtlSdrSettings->setFcPos(settings.m_fcPos);
     }
-    if (deviceSettingsKeys.contains("gain")) {
+    if (deviceSettingsKeys.contains("gain") || force) {
         swgRtlSdrSettings->setGain(settings.m_gain);
     }
-    if (deviceSettingsKeys.contains("iqImbalance")) {
+    if (deviceSettingsKeys.contains("iqImbalance") || force) {
         swgRtlSdrSettings->setIqImbalance(settings.m_iqImbalance ? 1 : 0);
     }
-    if (deviceSettingsKeys.contains("loPpmCorrection")) {
+    if (deviceSettingsKeys.contains("loPpmCorrection") || force) {
         swgRtlSdrSettings->setLoPpmCorrection(settings.m_loPpmCorrection);
     }
-    if (deviceSettingsKeys.contains("log2Decim")) {
+    if (deviceSettingsKeys.contains("log2Decim") || force) {
         swgRtlSdrSettings->setLog2Decim(settings.m_log2Decim);
     }
-    if (deviceSettingsKeys.contains("lowSampleRate")) {
+    if (deviceSettingsKeys.contains("lowSampleRate") || force) {
         swgRtlSdrSettings->setLowSampleRate(settings.m_lowSampleRate);
     }
-    if (deviceSettingsKeys.contains("noModMode")) {
+    if (deviceSettingsKeys.contains("noModMode") || force) {
         swgRtlSdrSettings->setNoModMode(settings.m_noModMode ? 1 : 0);
     }
-    if (deviceSettingsKeys.contains("offsetTuning")) {
+    if (deviceSettingsKeys.contains("offsetTuning") || force) {
         swgRtlSdrSettings->setOffsetTuning(settings.m_offsetTuning ? 1 : 0);
     }
-    if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency") || force) {
         swgRtlSdrSettings->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     }
-    if (deviceSettingsKeys.contains("transverterMode")) {
+    if (deviceSettingsKeys.contains("transverterMode") || force) {
         swgRtlSdrSettings->setTransverterMode(settings.m_transverterMode ? 1 : 0);
     }
-    if (deviceSettingsKeys.contains("rfBandwidth")) {
+    if (deviceSettingsKeys.contains("rfBandwidth") || force) {
         swgRtlSdrSettings->setRfBandwidth(settings.m_rfBandwidth);
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
+    if (deviceSettingsKeys.contains("fileRecordName") || force) {
         swgRtlSdrSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
@@ -878,5 +878,6 @@ void RTLSDRInput::networkManagerFinished(QNetworkReply *reply)
     }
 
     QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
     qDebug("RTLSDRInput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }

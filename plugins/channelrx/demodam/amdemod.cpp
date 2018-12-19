@@ -792,5 +792,6 @@ void AMDemod::networkManagerFinished(QNetworkReply *reply)
     }
 
     QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
     qDebug("AMDemod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }

@@ -1667,73 +1667,73 @@ void LimeSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
     if (deviceSettingsKeys.contains("antennaPath") || force) {
         swgLimeSdrInputSettings->setAntennaPath((int) settings.m_antennaPath);
     }
-    if (deviceSettingsKeys.contains("centerFrequency")) {
+    if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgLimeSdrInputSettings->setCenterFrequency(settings.m_centerFrequency);
     }
-    if (deviceSettingsKeys.contains("dcBlock")) {
+    if (deviceSettingsKeys.contains("dcBlock") || force) {
         swgLimeSdrInputSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
     }
-    if (deviceSettingsKeys.contains("devSampleRate")) {
+    if (deviceSettingsKeys.contains("devSampleRate") || force) {
         swgLimeSdrInputSettings->setDevSampleRate(settings.m_devSampleRate);
     }
-    if (deviceSettingsKeys.contains("extClock")) {
+    if (deviceSettingsKeys.contains("extClock") || force) {
         swgLimeSdrInputSettings->setExtClock(settings.m_extClock ? 1 : 0);
     }
-    if (deviceSettingsKeys.contains("extClockFreq")) {
+    if (deviceSettingsKeys.contains("extClockFreq") || force) {
         swgLimeSdrInputSettings->setExtClockFreq(settings.m_extClockFreq);
     }
-    if (deviceSettingsKeys.contains("gain")) {
+    if (deviceSettingsKeys.contains("gain") || force) {
         swgLimeSdrInputSettings->setGain(settings.m_gain);
     }
-    if (deviceSettingsKeys.contains("gainMode")) {
+    if (deviceSettingsKeys.contains("gainMode") || force) {
         swgLimeSdrInputSettings->setGainMode((int) settings.m_gainMode);
     }
-    if (deviceSettingsKeys.contains("iqCorrection")) {
+    if (deviceSettingsKeys.contains("iqCorrection") || force) {
         swgLimeSdrInputSettings->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     }
-    if (deviceSettingsKeys.contains("lnaGain")) {
+    if (deviceSettingsKeys.contains("lnaGain") || force) {
         swgLimeSdrInputSettings->setLnaGain(settings.m_lnaGain);
     }
-    if (deviceSettingsKeys.contains("log2HardDecim")) {
+    if (deviceSettingsKeys.contains("log2HardDecim") || force) {
         swgLimeSdrInputSettings->setLog2HardDecim(settings.m_log2HardDecim);
     }
-    if (deviceSettingsKeys.contains("log2SoftDecim")) {
+    if (deviceSettingsKeys.contains("log2SoftDecim") || force) {
         swgLimeSdrInputSettings->setLog2SoftDecim(settings.m_log2SoftDecim);
     }
-    if (deviceSettingsKeys.contains("lpfBW")) {
+    if (deviceSettingsKeys.contains("lpfBW") || force) {
         swgLimeSdrInputSettings->setLpfBw(settings.m_lpfBW);
     }
-    if (deviceSettingsKeys.contains("lpfFIREnable")) {
+    if (deviceSettingsKeys.contains("lpfFIREnable") || force) {
         swgLimeSdrInputSettings->setLpfFirEnable(settings.m_lpfFIREnable ? 1 : 0);
     }
-    if (deviceSettingsKeys.contains("lpfFIRBW")) {
+    if (deviceSettingsKeys.contains("lpfFIRBW") || force) {
         swgLimeSdrInputSettings->setLpfFirbw(settings.m_lpfFIRBW);
     }
-    if (deviceSettingsKeys.contains("ncoEnable")) {
+    if (deviceSettingsKeys.contains("ncoEnable") || force) {
         swgLimeSdrInputSettings->setNcoEnable(settings.m_ncoEnable ? 1 : 0);
     }
-    if (deviceSettingsKeys.contains("ncoFrequency")) {
+    if (deviceSettingsKeys.contains("ncoFrequency") || force) {
         swgLimeSdrInputSettings->setNcoFrequency(settings.m_ncoFrequency);
     }
-    if (deviceSettingsKeys.contains("pgaGain")) {
+    if (deviceSettingsKeys.contains("pgaGain") || force) {
         swgLimeSdrInputSettings->setPgaGain(settings.m_pgaGain);
     }
-    if (deviceSettingsKeys.contains("tiaGain")) {
+    if (deviceSettingsKeys.contains("tiaGain") || force) {
         swgLimeSdrInputSettings->setTiaGain(settings.m_tiaGain);
     }
-    if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency") || force) {
         swgLimeSdrInputSettings->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     }
-    if (deviceSettingsKeys.contains("transverterMode")) {
+    if (deviceSettingsKeys.contains("transverterMode") || force) {
         swgLimeSdrInputSettings->setTransverterMode(settings.m_transverterMode ? 1 : 0);
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
+    if (deviceSettingsKeys.contains("fileRecordName") || force) {
         swgLimeSdrInputSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
-    if (deviceSettingsKeys.contains("gpioDir")) {
+    if (deviceSettingsKeys.contains("gpioDir") || force) {
         swgLimeSdrInputSettings->setGpioDir(settings.m_gpioDir & 0xFF);
     }
-    if (deviceSettingsKeys.contains("gpioPins")) {
+    if (deviceSettingsKeys.contains("gpioPins") || force) {
         swgLimeSdrInputSettings->setGpioPins(settings.m_gpioPins & 0xFF);
     }
 
@@ -1784,5 +1784,6 @@ void LimeSDRInput::networkManagerFinished(QNetworkReply *reply)
     }
 
     QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
     qDebug("LimeSDRInput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }
