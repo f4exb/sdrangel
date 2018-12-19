@@ -17,7 +17,7 @@ set(sdrgui_SOURCES
     gui/commanditem.cpp
     gui/commandkeyreceiver.cpp
     gui/commandoutputdialog.cpp
-#   gui/comboboxnoarrow.cpp
+    gui/comboboxnoarrow.cpp
     gui/crightclickenabler.cpp
     gui/cwkeyergui.cpp
     gui/editcommanddialog.cpp
@@ -81,7 +81,7 @@ set(sdrgui_HEADERS
     gui/commanditem.h
     gui/commandkeyreceiver.h
     gui/commandoutputdialog.h
-#   gui/comboboxnoarrow.h
+    gui/comboboxnoarrow.h
     gui/crightclickenabler.h
     gui/cwkeyergui.h
     gui/editcommanddialog.h
