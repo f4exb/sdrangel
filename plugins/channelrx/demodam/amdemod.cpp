@@ -21,7 +21,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QBuffer>
-#include <QJsonParseError>
 
 #include <stdio.h>
 #include <complex.h>
