@@ -837,6 +837,22 @@ margin-bottom: 20px;
     "modAFInput" : {
       "type" : "integer"
     },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
     "cwKeyer" : {
       "$ref" : "#/definitions/CWKeyerSettings"
     }
@@ -3053,6 +3069,22 @@ margin-bottom: 20px;
       "type" : "string"
     },
     "modAFInput" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
       "type" : "integer"
     },
     "cwKeyer" : {
@@ -23717,7 +23749,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-12-18T23:38:18.118+01:00
+              Generated 2018-12-20T08:23:16.509+01:00
             </div>
           </div>
       </div>

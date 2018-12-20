@@ -686,6 +686,21 @@ int NFMMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("volumeFactor")) {
         settings.m_volumeFactor = response.getNfmModSettings()->getVolumeFactor();
     }
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getNfmModSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getNfmModSettings()->getReverseApiAddress() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getNfmModSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getNfmModSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getNfmModSettings()->getReverseApiChannelIndex();
+    }
 
     if (channelSettingsKeys.contains("cwKeyer"))
     {
@@ -798,6 +813,18 @@ void NFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     }
 
     apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+
+    response.getNfmModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getNfmModSettings()->getReverseApiAddress()) {
+        *response.getNfmModSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getNfmModSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getNfmModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getNfmModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getNfmModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void NFMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)

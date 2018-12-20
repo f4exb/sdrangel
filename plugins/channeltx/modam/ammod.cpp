@@ -630,6 +630,21 @@ int AMMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("modFactor")) {
         settings.m_modFactor = response.getAmModSettings()->getModFactor();
     }
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getAmModSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getAmModSettings()->getReverseApiAddress() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getAmModSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getAmModSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getAmModSettings()->getReverseApiChannelIndex();
+    }
 
     if (channelSettingsKeys.contains("cwKeyer"))
     {
@@ -739,6 +754,18 @@ void AMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respons
     } else {
         response.getAmModSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
+
+    response.getAmModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getAmModSettings()->getReverseApiAddress()) {
+        *response.getAmModSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getAmModSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getAmModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getAmModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getAmModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void AMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
