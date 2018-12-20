@@ -23,7 +23,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QBuffer>
-#include <QJsonParseError>
 
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
