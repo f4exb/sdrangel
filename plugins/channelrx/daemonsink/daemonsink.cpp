@@ -25,6 +25,10 @@
 #include <boost/crc.hpp>
 #include <boost/cstdint.hpp>
 
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QBuffer>
+
 #include "SWGChannelSettings.h"
 
 #include "util/simpleserializer.h"
@@ -63,14 +67,21 @@ DaemonSink::DaemonSink(DeviceSourceAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 DaemonSink::~DaemonSink()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
     m_dataBlockMutex.lock();
+
     if (m_dataBlock && !m_dataBlock->m_txControlBlock.m_complete) {
         delete m_dataBlock;
     }
+
     m_dataBlockMutex.unlock();
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
@@ -325,21 +336,41 @@ void DaemonSink::applySettings(const DaemonSinkSettings& settings, bool force)
             << " m_dataPort: " << settings.m_dataPort
             << " force: " << force;
 
-    if ((m_settings.m_nbFECBlocks != settings.m_nbFECBlocks) || force) {
+    QList<QString> reverseAPIKeys;
+
+    if ((m_settings.m_nbFECBlocks != settings.m_nbFECBlocks) || force)
+    {
+        reverseAPIKeys.append("nbFECBlocks");
         setNbBlocksFEC(settings.m_nbFECBlocks);
         setTxDelay(settings.m_txDelay, settings.m_nbFECBlocks);
     }
 
-    if ((m_settings.m_txDelay != settings.m_txDelay) || force) {
+    if ((m_settings.m_txDelay != settings.m_txDelay) || force)
+    {
+        reverseAPIKeys.append("txDelay");
         setTxDelay(settings.m_txDelay, settings.m_nbFECBlocks);
     }
 
-    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
+    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force)
+    {
+        reverseAPIKeys.append("dataAddress");
         m_dataAddress = settings.m_dataAddress;
     }
 
-    if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
+    if ((m_settings.m_dataPort != settings.m_dataPort) || force)
+    {
+        reverseAPIKeys.append("dataPort");
         m_dataPort = settings.m_dataPort;
+    }
+
+    if ((settings.m_useReverseAPI) && (reverseAPIKeys.size() != 0))
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -408,7 +439,21 @@ int DaemonSink::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getDaemonSinkSettings()->getTitle();
     }
-
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getDaemonSinkSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getDaemonSinkSettings()->getReverseApiAddress() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getDaemonSinkSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getDaemonSinkSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getDaemonSinkSettings()->getReverseApiChannelIndex();
+    }
 
     MsgConfigureDaemonSink *msg = MsgConfigureDaemonSink::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -445,4 +490,82 @@ void DaemonSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
         response.getDaemonSinkSettings()->setTitle(new QString(settings.m_title));
     }
 
+    response.getDaemonSinkSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getDaemonSinkSettings()->getReverseApiAddress()) {
+        *response.getDaemonSinkSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getDaemonSinkSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getDaemonSinkSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getDaemonSinkSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getDaemonSinkSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+}
+
+void DaemonSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DaemonSinkSettings& settings, bool force)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(0);
+    swgChannelSettings->setChannelType(new QString("DaemonSink"));
+    swgChannelSettings->setDaemonSinkSettings(new SWGSDRangel::SWGDaemonSinkSettings());
+    SWGSDRangel::SWGDaemonSinkSettings *swgDaemonSinkSettings = swgChannelSettings->getDaemonSinkSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (channelSettingsKeys.contains("nbFECBlocks") || force) {
+        swgDaemonSinkSettings->setNbFecBlocks(settings.m_nbFECBlocks);
+    }
+    if (channelSettingsKeys.contains("txDelay") || force)
+    {
+        swgDaemonSinkSettings->setTxDelay(settings.m_txDelay);
+    }
+    if (channelSettingsKeys.contains("dataAddress") || force) {
+        swgDaemonSinkSettings->setDataAddress(new QString(settings.m_dataAddress));
+    }
+    if (channelSettingsKeys.contains("dataPort") || force) {
+        swgDaemonSinkSettings->setDataPort(settings.m_dataPort);
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgDaemonSinkSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swgDaemonSinkSettings->setTitle(new QString(settings.m_title));
+    }
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void DaemonSink::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "DaemonSink::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("DaemonSink::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }
