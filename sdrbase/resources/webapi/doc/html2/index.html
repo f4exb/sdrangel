@@ -4016,6 +4016,22 @@ margin-bottom: 20px;
     "modAFInput" : {
       "type" : "integer"
     },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
     "cwKeyer" : {
       "$ref" : "#/definitions/CWKeyerSettings"
     }
@@ -23781,7 +23797,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-12-21T01:11:45.184+01:00
+              Generated 2018-12-21T01:58:52.307+01:00
             </div>
           </div>
       </div>
