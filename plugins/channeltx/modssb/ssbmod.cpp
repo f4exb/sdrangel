@@ -1334,7 +1334,7 @@ void SSBMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setTx(1);
-    swgChannelSettings->setChannelType(new QString("AMMod"));
+    swgChannelSettings->setChannelType(new QString("SSBMod"));
     swgChannelSettings->setSsbModSettings(new SWGSDRangel::SWGSSBModSettings());
     SWGSDRangel::SWGSSBModSettings *swgSSBModSettings = swgChannelSettings->getSsbModSettings();
 
