@@ -15,6 +15,9 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
@@ -78,10 +81,15 @@ UDPSource::UDPSource(DeviceSinkAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 UDPSource::~UDPSource()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
@@ -489,6 +497,7 @@ void UDPSource::applySettings(const UDPSourceSettings& settings, bool force)
             << " m_rfBandwidth: " << settings.m_rfBandwidth
             << " m_lowCutoff: " << settings.m_lowCutoff
             << " m_fmDeviation: " << settings.m_fmDeviation
+            << " m_amModFactor: " << settings.m_amModFactor
             << " m_udpAddressStr: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
             << " m_channelMute: " << settings.m_channelMute
@@ -500,6 +509,60 @@ void UDPSource::applySettings(const UDPSourceSettings& settings, bool force)
             << " m_autoRWBalance: " << settings.m_autoRWBalance
             << " m_stereoInput: " << settings.m_stereoInput
             << " force: " << force;
+
+    QList<QString> reverseAPIKeys;
+
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+    if ((settings.m_sampleFormat != m_settings.m_sampleFormat) || force) {
+        reverseAPIKeys.append("sampleFormat");
+    }
+    if ((settings.m_inputSampleRate != m_settings.m_inputSampleRate) || force) {
+        reverseAPIKeys.append("inputSampleRate");
+    }
+    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
+        reverseAPIKeys.append("rfBandwidth");
+    }
+    if ((settings.m_lowCutoff != m_settings.m_lowCutoff) || force) {
+        reverseAPIKeys.append("lowCutoff");
+    }
+    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
+        reverseAPIKeys.append("fmDeviation");
+    }
+    if ((settings.m_amModFactor != m_settings.m_amModFactor) || force) {
+        reverseAPIKeys.append("amModFactor");
+    }
+    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
+        reverseAPIKeys.append("udpAddress");
+    }
+    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
+        reverseAPIKeys.append("udpPort");
+    }
+    if ((settings.m_channelMute != m_settings.m_channelMute) || force) {
+        reverseAPIKeys.append("channelMute");
+    }
+    if ((settings.m_gainIn != m_settings.m_gainIn) || force) {
+        reverseAPIKeys.append("gainIn");
+    }
+    if ((settings.m_gainOut != m_settings.m_gainOut) || force) {
+        reverseAPIKeys.append("gainOut");
+    }
+    if ((settings.m_squelchGate != m_settings.m_squelchGate) || force) {
+        reverseAPIKeys.append("squelchGate");
+    }
+    if ((settings.m_squelch != m_settings.m_squelch) || force) {
+        reverseAPIKeys.append("squelch");
+    }
+    if ((settings.m_squelchEnabled != m_settings.m_squelchEnabled) || force) {
+        reverseAPIKeys.append("squelchEnabled");
+    }
+    if ((settings.m_autoRWBalance != m_settings.m_autoRWBalance) || force) {
+        reverseAPIKeys.append("autoRWBalance");
+    }
+    if ((settings.m_stereoInput != m_settings.m_stereoInput) || force) {
+        reverseAPIKeys.append("stereoInput");
+    }
 
     if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
        (settings.m_lowCutoff != m_settings.m_lowCutoff) ||
@@ -570,6 +633,16 @@ void UDPSource::applySettings(const UDPSourceSettings& settings, bool force)
         }
 
         m_settingsMutex.unlock();
+    }
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -677,6 +750,21 @@ int UDPSource::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getUdpSourceSettings()->getTitle();
     }
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getUdpSourceSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getUdpSourceSettings()->getReverseApiAddress() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getUdpSourceSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getUdpSourceSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getUdpSourceSettings()->getReverseApiChannelIndex();
+    }
 
     if (frequencyOffsetChanged)
     {
@@ -743,6 +831,18 @@ void UDPSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     } else {
         response.getUdpSourceSettings()->setTitle(new QString(settings.m_title));
     }
+
+    response.getUdpSourceSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getUdpSourceSettings()->getReverseApiAddress()) {
+        *response.getUdpSourceSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getUdpSourceSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getUdpSourceSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getUdpSourceSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getUdpSourceSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void UDPSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -752,4 +852,109 @@ void UDPSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
     response.getUdpSourceReport()->setSquelch(m_squelchOpen ? 1 : 0);
     response.getUdpSourceReport()->setBufferGauge(getBufferGauge());
     response.getUdpSourceReport()->setChannelSampleRate(m_outputSampleRate);
+}
+
+void UDPSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const UDPSourceSettings& settings, bool force)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(1);
+    swgChannelSettings->setChannelType(new QString("UDPSource"));
+    swgChannelSettings->setUdpSourceSettings(new SWGSDRangel::SWGUDPSourceSettings());
+    SWGSDRangel::SWGUDPSourceSettings *swgUDPSourceSettings = swgChannelSettings->getUdpSourceSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (channelSettingsKeys.contains("sampleFormat") || force) {
+        swgUDPSourceSettings->setSampleFormat((int) settings.m_sampleFormat);
+    }
+    if (channelSettingsKeys.contains("inputSampleRate") || force) {
+        swgUDPSourceSettings->setInputSampleRate(settings.m_inputSampleRate);
+    }
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+        swgUDPSourceSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("rfBandwidth") || force) {
+        swgUDPSourceSettings->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (channelSettingsKeys.contains("lowCutoff") || force) {
+        swgUDPSourceSettings->setLowCutoff(settings.m_lowCutoff);
+    }
+    if (channelSettingsKeys.contains("fmDeviation") || force) {
+        swgUDPSourceSettings->setFmDeviation(settings.m_fmDeviation);
+    }
+    if (channelSettingsKeys.contains("amModFactor") || force) {
+        swgUDPSourceSettings->setAmModFactor(settings.m_amModFactor);
+    }
+    if (channelSettingsKeys.contains("channelMute") || force) {
+        swgUDPSourceSettings->setChannelMute(settings.m_channelMute ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("gainIn") || force) {
+        swgUDPSourceSettings->setGainIn(settings.m_gainIn);
+    }
+    if (channelSettingsKeys.contains("gainOut") || force) {
+        swgUDPSourceSettings->setGainOut(settings.m_gainOut);
+    }
+    if (channelSettingsKeys.contains("squelch") || force) {
+        swgUDPSourceSettings->setSquelch(settings.m_squelch);
+    }
+    if (channelSettingsKeys.contains("squelchGate") || force) {
+        swgUDPSourceSettings->setSquelchGate(settings.m_squelchGate);
+    }
+    if (channelSettingsKeys.contains("squelchEnabled") || force) {
+        swgUDPSourceSettings->setSquelchEnabled(settings.m_squelchEnabled ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("autoRWBalance") || force) {
+        swgUDPSourceSettings->setAutoRwBalance(settings.m_autoRWBalance ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("stereoInput") || force) {
+        swgUDPSourceSettings->setStereoInput(settings.m_stereoInput ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgUDPSourceSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("udpAddress") || force) {
+        swgUDPSourceSettings->setUdpAddress(new QString(settings.m_udpAddress));
+    }
+    if (channelSettingsKeys.contains("udpPort") || force) {
+        swgUDPSourceSettings->setUdpPort(settings.m_udpPort);
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swgUDPSourceSettings->setTitle(new QString(settings.m_title));
+    }
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void UDPSource::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "UDPSource::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("UDPSource::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }
