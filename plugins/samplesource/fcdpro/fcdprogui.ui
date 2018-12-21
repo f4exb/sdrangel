@@ -31,9 +31,6 @@
   <property name="windowTitle">
    <string>FunCubeDongle</string>
   </property>
-  <property name="toolTip">
-   <string>start/stop acquisition</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
     <number>3</number>
@@ -61,6 +58,9 @@
         <layout class="QHBoxLayout" name="deviceButtonsLayout">
          <item>
           <widget class="ButtonSwitch" name="startStop">
+           <property name="toolTip">
+            <string>start/stop acquisition</string>
+           </property>
            <property name="text">
             <string/>
            </property>
@@ -287,7 +287,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="lnaEnhance"/>
+      <widget class="QComboBox" name="lnaEnhance">
+       <property name="toolTip">
+        <string>LNA enhancement</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="bandLabel">
@@ -297,7 +301,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="band"/>
+      <widget class="QComboBox" name="band">
+       <property name="toolTip">
+        <string>Band optimizations</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -311,7 +319,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="bias"/>
+      <widget class="QComboBox" name="bias">
+       <property name="toolTip">
+        <string>Band bias</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="label_2">
@@ -321,7 +333,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="mode"/>
+      <widget class="QComboBox" name="mode">
+       <property name="toolTip">
+        <string>Mode ?</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -335,7 +351,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="lnaGain"/>
+      <widget class="QComboBox" name="lnaGain">
+       <property name="toolTip">
+        <string>LNA gain</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="rfFilterLabel">
@@ -345,7 +365,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="rfFilter"/>
+      <widget class="QComboBox" name="rfFilter">
+       <property name="toolTip">
+        <string>RF filter selection</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -359,7 +383,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="mixGain"/>
+      <widget class="QComboBox" name="mixGain">
+       <property name="toolTip">
+        <string>Mixer gain</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="mixFilterLabel">
@@ -369,7 +397,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="mixFilter"/>
+      <widget class="QComboBox" name="mixFilter">
+       <property name="toolTip">
+        <string>Mixer filter selection</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -383,7 +415,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="gain1"/>
+      <widget class="QComboBox" name="gain1">
+       <property name="toolTip">
+        <string>Gain block #1</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="rcFilterLabel">
@@ -393,7 +429,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="rcFilter"/>
+      <widget class="QComboBox" name="rcFilter">
+       <property name="toolTip">
+        <string>Baseband RC filter selection</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -407,7 +447,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="gain2"/>
+      <widget class="QComboBox" name="gain2">
+       <property name="toolTip">
+        <string>Gain block #2</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="gain3Label">
@@ -417,7 +461,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="gain3"/>
+      <widget class="QComboBox" name="gain3">
+       <property name="toolTip">
+        <string>Gain block #3</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -431,7 +479,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="gain4"/>
+      <widget class="QComboBox" name="gain4">
+       <property name="toolTip">
+        <string>Gain block #4</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="label_3">
@@ -441,7 +493,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="ifFilter"/>
+      <widget class="QComboBox" name="ifFilter">
+       <property name="toolTip">
+        <string>IF filter selection</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -455,7 +511,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="gain5"/>
+      <widget class="QComboBox" name="gain5">
+       <property name="toolTip">
+        <string>Gain block #5</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="gain6Label">
@@ -465,7 +525,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="gain6"/>
+      <widget class="QComboBox" name="gain6">
+       <property name="toolTip">
+        <string>Gain block #6</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

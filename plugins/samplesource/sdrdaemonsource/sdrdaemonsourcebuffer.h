@@ -45,6 +45,7 @@ public:
 	// samples timestamp
 	uint32_t getTVOutSec() const { return m_tvOut_sec; }
 	uint32_t getTVOutUsec() const { return m_tvOut_usec; }
+    uint64_t getTVOutMSec() const { return (m_tvOut_sec * 1000LL) + (m_tvOut_usec/ 1000LL); }
 
     // stats
 

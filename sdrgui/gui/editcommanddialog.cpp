@@ -122,8 +122,9 @@ void EditCommandDialog::setRelease(bool release)
     ui->keyRelease->setChecked(release);
 }
 
-void EditCommandDialog::on_showFileDialog_clicked(bool checked __attribute__((unused)))
+void EditCommandDialog::on_showFileDialog_clicked(bool checked)
 {
+    (void) checked;
     QString commandFileName = ui->command->text();
     QFileInfo commandFileInfo(commandFileName);
     QString commandFolderName = commandFileInfo.baseName();
@@ -224,8 +225,9 @@ void EditCommandDialog::setKeyAssociate()
     }
 }
 
-void EditCommandDialog::commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release __attribute__((unused)))
+void EditCommandDialog::commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release)
 {
+    (void) release;
 //    qDebug("EditCommandDialog::commandKeyPressed: key: %x", m_key);
 //    qDebug("EditCommandDialog::commandKeyPressed: has modifiers: %x", QFlags<Qt::KeyboardModifier>::Int(keyModifiers));
     m_key = key;

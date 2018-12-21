@@ -20,8 +20,6 @@
 #include <QList>
 #include <QSysInfo>
 
-#include <unistd.h>
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "loggerwithfile.h"
@@ -73,8 +71,9 @@ WebAPIAdapterGUI::~WebAPIAdapterGUI()
 
 int WebAPIAdapterGUI::instanceSummary(
         SWGSDRangel::SWGInstanceSummaryResponse& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) error;
     response.init();
     *response.getAppname() = qApp->applicationName();
     *response.getVersion() = qApp->applicationVersion();
@@ -105,9 +104,10 @@ int WebAPIAdapterGUI::instanceSummary(
 }
 
 int WebAPIAdapterGUI::instanceDelete(
-        SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
+        SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) response;
     *error.getMessage() = QString("Not supported in GUI instance");
     return 400;
 }
@@ -115,8 +115,9 @@ int WebAPIAdapterGUI::instanceDelete(
 int WebAPIAdapterGUI::instanceDevices(
             bool tx,
             SWGSDRangel::SWGInstanceDevicesResponse& response,
-            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) error;
     response.init();
     int nbSamplingDevices = tx ? DeviceEnumerator::instance()->getNbTxSamplingDevices() : DeviceEnumerator::instance()->getNbRxSamplingDevices();
     response.setDevicecount(nbSamplingDevices);
@@ -143,8 +144,9 @@ int WebAPIAdapterGUI::instanceDevices(
 int WebAPIAdapterGUI::instanceChannels(
             bool tx,
             SWGSDRangel::SWGInstanceChannelsResponse& response,
-            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) error;
     response.init();
     PluginAPI::ChannelRegistrations *channelRegistrations = tx ? m_mainWindow.m_pluginManager->getTxChannelRegistrations() : m_mainWindow.m_pluginManager->getRxChannelRegistrations();
     int nbChannelDevices = channelRegistrations->size();
@@ -170,8 +172,9 @@ int WebAPIAdapterGUI::instanceChannels(
 
 int WebAPIAdapterGUI::instanceLoggingGet(
         SWGSDRangel::SWGLoggingInfo& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) error;
     response.init();
     response.setDumpToFile(m_mainWindow.m_logger->getUseFileLogger() ? 1 : 0);
 
@@ -188,8 +191,9 @@ int WebAPIAdapterGUI::instanceLoggingGet(
 int WebAPIAdapterGUI::instanceLoggingPut(
         SWGSDRangel::SWGLoggingInfo& query,
         SWGSDRangel::SWGLoggingInfo& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) error;
     // response input is the query actually
     bool dumpToFile = (query.getDumpToFile() != 0);
     QString* consoleLevel = query.getConsoleLevel();
@@ -225,8 +229,9 @@ int WebAPIAdapterGUI::instanceLoggingPut(
 
 int WebAPIAdapterGUI::instanceAudioGet(
         SWGSDRangel::SWGAudioDevices& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) error;
     const QList<QAudioDeviceInfo>& audioInputDevices = m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDevices();
     const QList<QAudioDeviceInfo>& audioOutputDevices = m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDevices();
     int nbInputDevices = audioInputDevices.size();
@@ -454,8 +459,9 @@ int WebAPIAdapterGUI::instanceAudioOutputDelete(
 
 int WebAPIAdapterGUI::instanceAudioInputCleanupPatch(
             SWGSDRangel::SWGSuccessResponse& response,
-            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) error;
     m_mainWindow.m_dspEngine->getAudioDeviceManager()->inputInfosCleanup();
 
     response.init();
@@ -466,8 +472,9 @@ int WebAPIAdapterGUI::instanceAudioInputCleanupPatch(
 
 int WebAPIAdapterGUI::instanceAudioOutputCleanupPatch(
             SWGSDRangel::SWGSuccessResponse& response,
-            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) error;
     m_mainWindow.m_dspEngine->getAudioDeviceManager()->outputInfosCleanup();
 
     response.init();
@@ -478,8 +485,9 @@ int WebAPIAdapterGUI::instanceAudioOutputCleanupPatch(
 
 int WebAPIAdapterGUI::instanceLocationGet(
         SWGSDRangel::SWGLocationInformation& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) error;
     response.init();
     response.setLatitude(m_mainWindow.m_settings.getLatitude());
     response.setLongitude(m_mainWindow.m_settings.getLongitude());
@@ -489,8 +497,9 @@ int WebAPIAdapterGUI::instanceLocationGet(
 
 int WebAPIAdapterGUI::instanceLocationPut(
         SWGSDRangel::SWGLocationInformation& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) error;
     float latitude = response.getLatitude();
     float longitude = response.getLongitude();
 
@@ -508,8 +517,9 @@ int WebAPIAdapterGUI::instanceLocationPut(
 
 int WebAPIAdapterGUI::instanceDVSerialGet(
             SWGSDRangel::SWGDVSeralDevices& response,
-            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) error;
     response.init();
 
     std::vector<std::string> deviceNames;
@@ -533,8 +543,9 @@ int WebAPIAdapterGUI::instanceDVSerialGet(
 int WebAPIAdapterGUI::instanceDVSerialPatch(
             bool dvserial,
             SWGSDRangel::SWGDVSeralDevices& response,
-            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) error;
     m_mainWindow.m_dspEngine->setDVSerialSupport(dvserial);
     m_mainWindow.ui->action_DV_Serial->setChecked(dvserial);
     response.init();
@@ -566,8 +577,9 @@ int WebAPIAdapterGUI::instanceDVSerialPatch(
 
 int WebAPIAdapterGUI::instancePresetsGet(
         SWGSDRangel::SWGPresets& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) error;
     int nbPresets = m_mainWindow.m_settings.getPresetCount();
     int nbGroups = 0;
     int nbPresetsThisGroup = 0;
@@ -816,8 +828,9 @@ int WebAPIAdapterGUI::instancePresetDelete(
 
 int WebAPIAdapterGUI::instanceDeviceSetsGet(
         SWGSDRangel::SWGDeviceSetList& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) error;
     getDeviceSetList(&response);
     return 200;
 }
@@ -825,8 +838,9 @@ int WebAPIAdapterGUI::instanceDeviceSetsGet(
 int WebAPIAdapterGUI::instanceDeviceSetPost(
         bool tx,
         SWGSDRangel::SWGSuccessResponse& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) error;
     MainWindow::MsgAddDeviceSet *msg = MainWindow::MsgAddDeviceSet::create(tx);
     m_mainWindow.m_inputMessageQueue.push(msg);
 

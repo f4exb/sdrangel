@@ -35,7 +35,7 @@
 
 class QPainter;
 
-class TVScreen: public QGLWidget
+class SDRGUI_API TVScreen: public QGLWidget
 {
 	Q_OBJECT
 

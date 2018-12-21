@@ -17,8 +17,6 @@
 #ifndef INCLUDE_SDRDAEMONSOURCEGUI_H
 #define INCLUDE_SDRDAEMONSOURCEGUI_H
 
-#include <sys/time.h>
-
 #include <QTimer>
 #include <QWidget>
 #include <QNetworkRequest>
@@ -72,7 +70,7 @@ private:
 
     //	int m_sampleRate;
     //	quint64 m_centerFrequency;
-	struct timeval m_startingTimeStamp;
+	uint64_t m_startingTimeStampms;
 	int m_framesDecodingStatus;
 	bool m_allBlocksReceived;
 	float m_bufferLengthInSecs;

@@ -872,8 +872,9 @@ bool SSBMod::deserialize(const QByteArray& data)
 
 int SSBMod::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setSsbModSettings(new SWGSDRangel::SWGSSBModSettings());
     response.getSsbModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
@@ -884,8 +885,9 @@ int SSBMod::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& channelSettingsKeys,
                 SWGSDRangel::SWGChannelSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     SSBModSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
@@ -1018,8 +1020,9 @@ int SSBMod::webapiSettingsPutPatch(
 
 int SSBMod::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setSsbModReport(new SWGSDRangel::SWGSSBModReport());
     response.getSsbModReport()->init();
     webapiFormatChannelReport(response);

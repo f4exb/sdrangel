@@ -17,9 +17,16 @@
 
 #include "gui/clickablelabel.h"
 
+ClickableLabel::ClickableLabel()
+    : QLabel(nullptr)
+{
+    setText("");
+}
+
 ClickableLabel::ClickableLabel(QWidget* parent)
     : QLabel(parent)
 {
+    setText("");
 }
 
 ClickableLabel::ClickableLabel(const QString& text, QWidget* parent)
@@ -32,8 +39,9 @@ ClickableLabel::~ClickableLabel()
 {
 }
 
-void ClickableLabel::mousePressEvent(QMouseEvent* event __attribute__((unused)))
+void ClickableLabel::mousePressEvent(QMouseEvent* event)
 {
+    (void) event;
     emit clicked();
 }
 

@@ -1,5 +1,7 @@
 project(logging)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(logging_SOURCES
    dualfilelogger.cpp
    loggerwithfile.cpp

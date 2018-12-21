@@ -40,6 +40,8 @@ void LimeSDROutputSettings::resetToDefaults()
     m_extClockFreq = 10000000; // 10 MHz
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_gpioDir = 0;
+    m_gpioPins = 0;
 }
 
 QByteArray LimeSDROutputSettings::serialize() const
@@ -60,6 +62,8 @@ QByteArray LimeSDROutputSettings::serialize() const
     s.writeU32(15, m_extClockFreq);
     s.writeBool(16, m_transverterMode);
     s.writeS64(17, m_transverterDeltaFrequency);
+    s.writeU32(18, m_gpioDir);
+    s.writeU32(19, m_gpioPins);
 
     return s.final();
 }
@@ -77,6 +81,7 @@ bool LimeSDROutputSettings::deserialize(const QByteArray& data)
     if (d.getVersion() == 1)
     {
         int intval;
+        uint32_t uintval;
 
         d.readS32(1, &m_devSampleRate, 5000000);
         d.readU32(2, &m_log2HardInterp, 2);
@@ -93,6 +98,10 @@ bool LimeSDROutputSettings::deserialize(const QByteArray& data)
         d.readU32(15, &m_extClockFreq, 10000000);
         d.readBool(16, &m_transverterMode, false);
         d.readS64(17, &m_transverterDeltaFrequency, 0);
+        d.readU32(18, &uintval, 0);
+        m_gpioDir = uintval & 0xFF;
+        d.readU32(19, &uintval, 0);
+        m_gpioPins = uintval & 0xFF;
 
         return true;
     }

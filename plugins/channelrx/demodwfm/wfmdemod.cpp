@@ -87,8 +87,9 @@ WFMDemod::~WFMDemod()
     delete m_rfFilter;
 }
 
-void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
+void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
+    (void) firstOfBurst;
 	Complex ci;
 	fftfilt::cmplx *rf;
 	int rf_out;
@@ -382,8 +383,9 @@ bool WFMDemod::deserialize(const QByteArray& data)
 
 int WFMDemod::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setWfmDemodSettings(new SWGSDRangel::SWGWFMDemodSettings());
     response.getWfmDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
@@ -394,8 +396,9 @@ int WFMDemod::webapiSettingsPutPatch(
         bool force,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     WFMDemodSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
@@ -453,8 +456,9 @@ int WFMDemod::webapiSettingsPutPatch(
 
 int WFMDemod::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setWfmDemodReport(new SWGSDRangel::SWGWFMDemodReport());
     response.getWfmDemodReport()->init();
     webapiFormatChannelReport(response);

@@ -31,7 +31,7 @@
      <x>0</x>
      <y>0</y>
      <width>301</width>
-     <height>48</height>
+     <height>58</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -55,6 +55,10 @@
      <widget class="QCheckBox" name="automatic">
       <property name="layoutDirection">
        <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QCheckBox::indicator::unchecked {background: rgb(79,79,79);}
+QCheckBox::indicator::checked {background: rgb(255, 157, 38);}</string>
       </property>
       <property name="text">
        <string>Auto</string>

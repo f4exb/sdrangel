@@ -42,7 +42,7 @@ public:
         virtual bool isRunning() = 0;
     };
 
-    class MsgCrossReportToBuddy : public Message {
+    class DEVICES_API MsgCrossReportToBuddy : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
         uint64_t getDevSampleRate() const { return m_devSampleRate; }

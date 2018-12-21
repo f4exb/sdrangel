@@ -7,7 +7,7 @@
 TEMPLATE = lib
 CONFIG += plugin
 
-QT += core gui multimedia multimediawidgets widgets opengl
+QT += core gui multimedia multimediawidgets widgets opengl qml
 
 TARGET = demoddatv
 
@@ -18,25 +18,26 @@ QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
 
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../../../exports
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
-CONFIG(MINGW32):INCLUDEPATH += "D:\boost_1_58_0"
-CONFIG(MINGW64):INCLUDEPATH += "D:\boost_1_58_0"
+CONFIG(MSVC):INCLUDEPATH += "C:\softs\boost_1_66_0"
+CONFIG(MSVC):INCLUDEPATH += "C:\softs\ffmpeg-20181127-1035206-win64-dev\include"
 CONFIG(macx):INCLUDEPATH += "../../../../../boost_1_64_0"
 
 SOURCES += datvdemod.cpp\
-	datvdemodgui.cpp\
-	datvdemodplugin.cpp\
+    datvdemodgui.cpp\
+    datvdemodplugin.cpp\
     datvideostream.cpp \
     datvideorender.cpp
 
 HEADERS += datvdemod.h\
-	datvdemodgui.h\
-	datvdemodplugin.h\
+    datvdemodgui.h\
+    datvdemodplugin.h\
     leansdr/convolutional.h \
     leansdr/dsp.h \
     leansdr/dvb.h \
@@ -58,6 +59,7 @@ FORMS += datvdemodgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
-LIBS += -lavutil -lswscale -lavdevice -lavformat -lavcodec -lswresample
+#LIBS += -lavutil -lswscale -lavdevice -lavformat -lavcodec -lswresample
+LIBS += -L"C:\softs\ffmpeg-20181127-1035206-win64-dev\lib" -lavutil -lswscale -lavdevice -lavformat -lavcodec -lswresample
 
 RESOURCES = ../../../sdrbase/resources/res.qrc

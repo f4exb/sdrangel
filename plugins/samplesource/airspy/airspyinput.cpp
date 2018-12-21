@@ -594,8 +594,9 @@ struct airspy_device *AirspyInput::open_airspy_from_sequence(int sequence)
 
 int AirspyInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -603,8 +604,9 @@ int AirspyInput::webapiRunGet(
 int AirspyInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
@@ -620,8 +622,9 @@ int AirspyInput::webapiRun(
 
 int AirspyInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setAirspySettings(new SWGSDRangel::SWGAirspySettings());
     response.getAirspySettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -632,8 +635,9 @@ int AirspyInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     AirspySettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("centerFrequency")) {
@@ -702,8 +706,9 @@ int AirspyInput::webapiSettingsPutPatch(
 
 int AirspyInput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setAirspyReport(new SWGSDRangel::SWGAirspyReport());
     response.getAirspyReport()->init();
     webapiFormatDeviceReport(response);

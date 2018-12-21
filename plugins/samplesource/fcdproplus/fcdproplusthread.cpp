@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
+// Copyright (C) 2016-2018 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,16 +17,19 @@
 #include <QDebug>
 #include <stdio.h>
 #include <errno.h>
-#include "fcdproplusthread.h"
+#include <chrono>
+#include <thread>
 
 #include "dsp/samplesinkfifo.h"
-#include "fcdtraits.h"
+#include "audio/audiofifo.h"
 
-FCDProPlusThread::FCDProPlusThread(SampleSinkFifo* sampleFifo, QObject* parent) :
+#include "fcdproplusthread.h"
+
+FCDProPlusThread::FCDProPlusThread(SampleSinkFifo* sampleFifo, AudioFifo *fcdFIFO, QObject* parent) :
 	QThread(parent),
-	fcd_handle(NULL),
+	m_fcdFIFO(fcdFIFO),
 	m_running(false),
-	m_convertBuffer(fcd_traits<ProPlus>::convBufSize),
+	m_convertBuffer(fcd_traits<ProPlus>::convBufSize), // nb samples
 	m_sampleFifo(sampleFifo)
 {
 	start();
@@ -59,107 +61,23 @@ void FCDProPlusThread::stopWork()
 
 void FCDProPlusThread::run()
 {
-	if ( !OpenSource(fcd_traits<ProPlus>::alsaDeviceName) )
-	{
-		qCritical() << "FCDThread::run: cannot open FCD sound card";
-		return;
-	}
-	// TODO: fallback to original fcd
-
 	m_running = true;
+	qDebug("FCDThread::run: start running loop");
 
-	while(m_running)
+	while (m_running)
 	{
-		if (work(fcd_traits<ProPlus>::convBufSize) < 0)
-		{
-			break;
-		}
+	    work(fcd_traits<ProPlus>::convBufSize);
+	    std::this_thread::sleep_for(std::chrono::microseconds(100));
 	}
 
-	CloseSource();
+	qDebug("FCDThread::run: running loop stopped");
+	m_running = false;
 }
 
-bool FCDProPlusThread::OpenSource(const char* cardname)
+void FCDProPlusThread::work(unsigned int n_items)
 {
-	bool fail = false;
-	snd_pcm_hw_params_t* params;
-	//fcd_rate = FCDPP_RATE;
-	//fcd_channels =2;
-	//fcd_format = SND_PCM_SFMT_U16_LE;
-	snd_pcm_stream_t fcd_stream = SND_PCM_STREAM_CAPTURE;
-
-	if (fcd_handle)
-	{
-		return false;
-	}
-
-	if (snd_pcm_open(&fcd_handle, cardname, fcd_stream, 0) < 0)
-	{
-		qCritical("FCDThread::OpenSource: cannot open %s", cardname);
-		return false;
-	}
-
-	snd_pcm_hw_params_alloca(&params);
-
-	if (snd_pcm_hw_params_any(fcd_handle, params) < 0)
-	{
-		qCritical("FCDProPlusThread::OpenSource: snd_pcm_hw_params_any failed");
-		fail = true;
-	}
-	else if (snd_pcm_hw_params(fcd_handle, params) < 0)
-	{
-		qCritical("FCDProPlusThread::OpenSource: snd_pcm_hw_params failed");
-		fail = true;
-		// TODO: check actual samplerate, may be crippled firmware
-	}
-	else
-	{
-		if (snd_pcm_start(fcd_handle) < 0)
-		{
-			qCritical("FCDProPlusThread::OpenSource: snd_pcm_start failed");
-			fail = true;
-		}
-	}
-
-	if (fail)
-	{
-		snd_pcm_close( fcd_handle );
-		return false;
-	}
-	else
-	{
-		qDebug("FCDProPlusThread::OpenSource: Funcube stream started");
-	}
-
-	return true;
+    uint32_t nbRead = m_fcdFIFO->read((unsigned char *) m_buf, n_items); // number of samples
+    SampleVector::iterator it = m_convertBuffer.begin();
+    m_decimators.decimate1(&it, m_buf, 2*nbRead);
+    m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
-
-void FCDProPlusThread::CloseSource()
-{
-	if (fcd_handle)
-	{
-		snd_pcm_close( fcd_handle );
-	}
-
-	fcd_handle = NULL;
-}
-
-int FCDProPlusThread::work(int n_items)
-{
-	int l;
-	SampleVector::iterator it;
-	void *out;
-
-	it = m_convertBuffer.begin();
-	out = (void *)&it[0];
-	l = snd_pcm_mmap_readi(fcd_handle, out, (snd_pcm_uframes_t)n_items);
-	if (l > 0)
-		m_sampleFifo->write(it, it + l);
-	if (l == -EPIPE) {
-		qDebug("FCDProPlusThread::work: Overrun detected");
-		return 0;
-	}
-	return l;
-}
-
-

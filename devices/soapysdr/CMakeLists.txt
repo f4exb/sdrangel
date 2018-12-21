@@ -20,7 +20,8 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${SOAPYSDRSRC}
+    ${SOAPYSDR_SOURCE_DIR}/include
+    ${SOAPYSDR_SOURCE_DIR}/src
 )
 else (BUILD_DEBIAN)
 include_directories(
@@ -39,7 +40,7 @@ add_library(soapysdrdevice SHARED
 
 if (BUILD_DEBIAN)
 target_link_libraries(soapysdrdevice
-    soapysdr
+    SoapySDR
     sdrbase
 )
 else (BUILD_DEBIAN)

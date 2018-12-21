@@ -209,7 +209,7 @@ bool FCDProGui::deserialize(const QByteArray& data)
 	}
 }
 
-bool FCDProGui::handleMessage(const Message& message __attribute__((unused)))
+bool FCDProGui::handleMessage(const Message& message)
 {
     if (FCDProInput::MsgConfigureFCDPro::match(message))
     {
@@ -434,8 +434,9 @@ void FCDProGui::on_gain6_currentIndexChanged(int index)
 	sendSettings();
 }
 
-void FCDProGui::on_setDefaults_clicked(bool checked __attribute__((unused)))
+void FCDProGui::on_setDefaults_clicked(bool checked)
 {
+    (void) checked;
 	m_settings.m_lnaGainIndex = 8;        // +15 dB
 	//m_settings.rfFilterIndex = 0;
 	m_settings.m_mixerGainIndex = 1;      // +12 dB

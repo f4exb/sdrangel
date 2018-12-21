@@ -180,8 +180,9 @@ void TVScreen::paintGL()
     m_objMutex.unlock();
 }
 
-void TVScreen::mousePressEvent(QMouseEvent* event __attribute__((unused)))
+void TVScreen::mousePressEvent(QMouseEvent* event)
 {
+    (void) event;
 }
 
 void TVScreen::tick()

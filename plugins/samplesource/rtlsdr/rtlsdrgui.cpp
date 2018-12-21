@@ -261,6 +261,7 @@ void RTLSDRGui::displaySettings()
 	ui->checkBox->setChecked(m_settings.m_noModMode);
 	ui->agc->setChecked(m_settings.m_agc);
 	ui->lowSampleRate->setChecked(m_settings.m_lowSampleRate);
+	ui->offsetTuning->setChecked(m_settings.m_offsetTuning);
 }
 
 void RTLSDRGui::sendSettings()
@@ -438,6 +439,12 @@ void RTLSDRGui::on_agc_stateChanged(int state)
 void RTLSDRGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_devSampleRate = value;
+    sendSettings();
+}
+
+void RTLSDRGui::on_offsetTuning_toggled(bool checked)
+{
+    m_settings.m_offsetTuning = checked;
     sendSettings();
 }
 

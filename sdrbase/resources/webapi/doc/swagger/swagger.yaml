@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.2.0"
+  version: "4.3.0"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -1799,6 +1799,10 @@ definitions:
         $ref: "/doc/swagger/include/SDRDaemonSource.yaml#/SDRdaemonSourceSettings"
       sdrPlaySettings:
         $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
+      soapySDRInputSettings:
+        $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRInputSettings"
+      soapySDROutputSettings:
+        $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDROutputSettings"
       testSourceSettings:
         $ref: "/doc/swagger/include/TestSource.yaml#/TestSourceSettings"
 
@@ -1844,6 +1848,10 @@ definitions:
         $ref: "/doc/swagger/include/SDRDaemonSource.yaml#/SDRdaemonSourceReport"
       sdrPlayReport:
         $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlayReport"
+      soapySDRInputReport:
+        $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRReport"
+      soapySDROutputReport:
+        $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRReport"
 
   ChannelSettings:
     description: Base channel settings. Only the channel settings corresponding to the channel specified in the channelType field is or should be present.

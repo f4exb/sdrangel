@@ -1,5 +1,7 @@
 project(httpserver)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(httpserver_SOURCES
    httpglobal.cpp
    httplistener.cpp

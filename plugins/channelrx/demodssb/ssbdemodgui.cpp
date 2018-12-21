@@ -156,13 +156,15 @@ void SSBDemodGUI::on_deltaFrequency_changed(qint64 value)
     applySettings();
 }
 
-void SSBDemodGUI::on_BW_valueChanged(int value __attribute__((unused)))
+void SSBDemodGUI::on_BW_valueChanged(int value)
 {
+    (void) value;
     applyBandwidths(5 - ui->spanLog2->value());
 }
 
-void SSBDemodGUI::on_lowCut_valueChanged(int value __attribute__((unused)))
+void SSBDemodGUI::on_lowCut_valueChanged(int value)
 {
+    (void) value;
     applyBandwidths(5 - ui->spanLog2->value());
 }
 
@@ -224,8 +226,9 @@ void SSBDemodGUI::on_spanLog2_valueChanged(int value)
     applyBandwidths(5 - ui->spanLog2->value());
 }
 
-void SSBDemodGUI::on_flipSidebands_clicked(bool checked __attribute__((unused)))
+void SSBDemodGUI::on_flipSidebands_clicked(bool checked)
 {
+    (void) checked;
     int bwValue = ui->BW->value();
     int lcValue = ui->lowCut->value();
     ui->BW->setValue(-bwValue);
@@ -248,8 +251,10 @@ void SSBDemodGUI::onMenuDialogCalled(const QPoint &p)
     applySettings();
 }
 
-void SSBDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void SSBDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 }
 
 SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :

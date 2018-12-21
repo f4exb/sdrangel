@@ -27,8 +27,9 @@ class SDRGUI_API ClickableLabel : public QLabel
 {
 Q_OBJECT
 public:
-    explicit ClickableLabel( QWidget* parent=0 );
-    explicit ClickableLabel( const QString& text="", QWidget* parent=0 );
+    explicit ClickableLabel();
+    explicit ClickableLabel(QWidget* parent);
+    explicit ClickableLabel(const QString& text, QWidget* parent=nullptr);
     ~ClickableLabel();
 signals:
     void clicked();

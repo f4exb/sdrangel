@@ -17,6 +17,8 @@ QMAKE_CXXFLAGS += -std=c++11
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
+CONFIG(MSVC):DEFINES += httpserver_EXPORTS
+
 # Enable very detailed debug messages when compiling the debug version
 CONFIG(debug, debug|release) {
     DEFINES += SUPERVERBOSE

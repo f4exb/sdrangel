@@ -111,8 +111,9 @@ void ThreadedBasebandSampleSink::stop()
 	m_thread->wait();
 }
 
-void ThreadedBasebandSampleSink::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly __attribute__((unused)))
+void ThreadedBasebandSampleSink::feed(SampleVector::const_iterator begin, SampleVector::const_iterator end, bool positiveOnly)
 {
+    (void) positiveOnly;
 	//m_sampleSink->feed(begin, end, positiveOnly);
 	//m_sampleFifo.write(begin, end);
 	m_threadedBasebandSampleSinkFifo->writeToFifo(begin, end);

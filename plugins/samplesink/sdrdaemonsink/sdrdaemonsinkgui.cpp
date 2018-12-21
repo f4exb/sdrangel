@@ -391,8 +391,9 @@ void SDRdaemonSinkGui::on_dataPort_returnPressed()
     sendSettings();
 }
 
-void SDRdaemonSinkGui::on_apiApplyButton_clicked(bool checked __attribute__((unused)))
+void SDRdaemonSinkGui::on_apiApplyButton_clicked(bool checked)
 {
+    (void) checked;
     m_settings.m_apiAddress = ui->apiAddress->text();
 
     bool apiOk;
@@ -410,8 +411,9 @@ void SDRdaemonSinkGui::on_apiApplyButton_clicked(bool checked __attribute__((unu
     m_networkManager->get(m_networkRequest);
 }
 
-void SDRdaemonSinkGui::on_dataApplyButton_clicked(bool checked __attribute__((unused)))
+void SDRdaemonSinkGui::on_dataApplyButton_clicked(bool checked)
 {
+    (void) checked;
     m_settings.m_dataAddress = ui->dataAddress->text();
 
     bool dataOk;
@@ -434,8 +436,9 @@ void SDRdaemonSinkGui::on_startStop_toggled(bool checked)
     }
 }
 
-void SDRdaemonSinkGui::on_eventCountsReset_clicked(bool checked __attribute__((unused)))
+void SDRdaemonSinkGui::on_eventCountsReset_clicked(bool checked)
 {
+    (void) checked;
     m_countUnrecoverable = 0;
     m_countRecovered = 0;
     m_time.start();

@@ -30,6 +30,14 @@
  */
 struct DEVICES_API DeviceLimeSDRParams
 {
+    enum LimeType
+    {
+        LimeSPI,
+        LimeMini,
+        LimeUSB,
+        LimeUndefined
+    };
+
     lms_device_t *m_dev;         //!< device handle
     uint32_t     m_nbRxChannels; //!< number of Rx channels (normally 2, we'll see if we really use it...)
     uint32_t     m_nbTxChannels; //!< number of Tx channels (normally 2, we'll see if we really use it...)
@@ -44,6 +52,7 @@ struct DEVICES_API DeviceLimeSDRParams
     int          m_log2OvSRTx;   //!< log2 of Tx oversampling (0..5)
     float        m_rxFrequency;  //!< Rx frequency
     float        m_txFrequency;  //!< Tx frequency
+    LimeType     m_type;         //!< Hardware type
 
     DeviceLimeSDRParams() :
         m_dev(0),
@@ -53,7 +62,8 @@ struct DEVICES_API DeviceLimeSDRParams
         m_log2OvSRRx(0),
         m_log2OvSRTx(0),
         m_rxFrequency(1e6),
-        m_txFrequency(1e6)
+        m_txFrequency(1e6),
+        m_type(LimeUndefined)
     {
         m_lpfRangeRx.max = 0.0f;
         m_lpfRangeRx.min = 0.0f;
@@ -90,6 +100,9 @@ struct DEVICES_API DeviceLimeSDRParams
     ~DeviceLimeSDRParams()
     {
     }
+
+private:
+    void getHardwareType(const char *device_str);
 };
 
 #endif /* DEVICES_LIMESDR_DEVICELIMESDRPARAM_H_ */

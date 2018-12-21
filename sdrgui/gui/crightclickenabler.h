@@ -21,7 +21,9 @@
 #include <QAbstractButton>
 #include <QMouseEvent>
 
-class CRightClickEnabler : public QObject {
+#include "export.h"
+
+class SDRGUI_API CRightClickEnabler : public QObject {
     Q_OBJECT
 public:
     CRightClickEnabler(QAbstractButton *button);
@@ -30,7 +32,9 @@ signals:
     void rightClick();
 
 protected:
-    inline bool eventFilter(QObject *watched __attribute__((unused)), QEvent *event) override {
+    inline bool eventFilter(QObject *watched, QEvent *event) override
+    {
+        (void) watched;
         if (event->type() == QEvent::MouseButtonPress)
         {
             auto mouseEvent = (QMouseEvent*)event;

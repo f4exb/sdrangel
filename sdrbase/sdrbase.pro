@@ -30,17 +30,21 @@ QMAKE_CXXFLAGS += -std=c++11
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
+CONFIG(MSVC):DEFINES += sdrbase_EXPORTS
+
 CONFIG(ANDROID):INCLUDEPATH += /opt/softs/boost_1_60_0
 
 CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(MINGW64):INCLUDEPATH += "C:\softs\boost_1_66_0"
+CONFIG(MSVC):INCLUDEPATH += "C:\softs\boost_1_66_0"
 
 CONFIG(MINGW32):INCLUDEPATH += "C:\softs\serialDV"
 CONFIG(MINGW64):INCLUDEPATH += "C:\softs\serialDV"
+CONFIG(MSVC):INCLUDEPATH += "C:\softs\serialDV"
 
 CONFIG(macx):INCLUDEPATH += "../../../boost_1_64_0"
 
-MINGW32 || MINGW64 {
+MINGW32 || MINGW64 || MSVC {
     HEADERS += \
         dsp/dvserialengine.h \
         dsp/dvserialworker.h
@@ -118,6 +122,7 @@ SOURCES += audio/audiodevicemanager.cpp\
         util/samplesourceserializer.cpp\
         util/simpleserializer.cpp\
         util/uid.cpp\
+        util/timeutil.cpp\
         plugin/plugininterface.cpp\
         plugin/pluginapi.cpp\
         plugin/pluginmanager.cpp\
@@ -216,12 +221,15 @@ HEADERS  += audio/audiodevicemanager.h\
         util/samplesourceserializer.h\
         util/simpleserializer.h\
         util/uid.h\
+        util/timeutil.h\
         webapi/webapiadapterinterface.h\
         webapi/webapirequestmapper.h\
         webapi/webapiserver.h\
         mainparser.h
 
-!macx:LIBS += -L../serialdv/$${build_subdir} -lserialdv
+MINGW32 || MINGW64 || MSVC {
+    LIBS += -L../serialdv/$${build_subdir} -lserialdv
+}
 LIBS += -L../httpserver/$${build_subdir} -lhttpserver
 LIBS += -L../qrtplib/$${build_subdir} -lqrtplib
 LIBS += -L../swagger/$${build_subdir} -lswagger

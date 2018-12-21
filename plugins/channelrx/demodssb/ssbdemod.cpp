@@ -144,8 +144,9 @@ void SSBDemod::configure(MessageQueue* messageQueue,
 	messageQueue->push(cmd);
 }
 
-void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly __attribute__((unused)))
+void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
+    (void) positiveOnly;
 	Complex ci;
 	fftfilt::cmplx *sideband;
 	int n_out;
@@ -585,8 +586,9 @@ bool SSBDemod::deserialize(const QByteArray& data)
 
 int SSBDemod::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setSsbDemodSettings(new SWGSDRangel::SWGSSBDemodSettings());
     response.getSsbDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
@@ -597,8 +599,9 @@ int SSBDemod::webapiSettingsPutPatch(
         bool force,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     SSBDemodSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
@@ -680,8 +683,9 @@ int SSBDemod::webapiSettingsPutPatch(
 
 int SSBDemod::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setSsbDemodReport(new SWGSDRangel::SWGSSBDemodReport());
     response.getSsbDemodReport()->init();
     webapiFormatChannelReport(response);

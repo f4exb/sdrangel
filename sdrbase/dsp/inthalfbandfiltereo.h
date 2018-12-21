@@ -26,12 +26,27 @@
 #include <cstdlib>
 #include "dsp/dsptypes.h"
 #include "dsp/hbfiltertraits.h"
-#include "export.h"
 
 template<typename EOStorageType, typename AccuType, uint32_t HBFilterOrder>
-class SDRBASE_API IntHalfbandFilterEO {
+class IntHalfbandFilterEO {
 public:
-    IntHalfbandFilterEO();
+    IntHalfbandFilterEO()
+    {
+        m_size = HBFIRFilterTraits<HBFilterOrder>::hbOrder/2;
+
+        for (int i = 0; i < 2*m_size; i++)
+        {
+            m_even[0][i] = 0;
+            m_even[1][i] = 0;
+            m_odd[0][i] = 0;
+            m_odd[1][i] = 0;
+            m_samples[i][0] = 0;
+            m_samples[i][1] = 0;
+        }
+
+        m_ptr = 0;
+        m_state = 0;
+    }
 
     // downsample by 2, return center part of original spectrum
     bool workDecimateCenter(Sample* sample)
@@ -912,23 +927,23 @@ protected:
     }
 };
 
-template<typename EOStorageType, typename AccuType, uint32_t HBFilterOrder>
-IntHalfbandFilterEO<EOStorageType, AccuType, HBFilterOrder>::IntHalfbandFilterEO()
-{
-    m_size = HBFIRFilterTraits<HBFilterOrder>::hbOrder/2;
+//template<typename EOStorageType, typename AccuType, uint32_t HBFilterOrder>
+//IntHalfbandFilterEO<EOStorageType, AccuType, HBFilterOrder>::IntHalfbandFilterEO()
+//{
+//    m_size = HBFIRFilterTraits<HBFilterOrder>::hbOrder/2;
 
-    for (int i = 0; i < 2*m_size; i++)
-    {
-        m_even[0][i] = 0;
-        m_even[1][i] = 0;
-        m_odd[0][i] = 0;
-        m_odd[1][i] = 0;
-        m_samples[i][0] = 0;
-        m_samples[i][1] = 0;
-    }
+//    for (int i = 0; i < 2*m_size; i++)
+//    {
+//        m_even[0][i] = 0;
+//        m_even[1][i] = 0;
+//        m_odd[0][i] = 0;
+//        m_odd[1][i] = 0;
+//        m_samples[i][0] = 0;
+//        m_samples[i][1] = 0;
+//    }
 
-    m_ptr = 0;
-    m_state = 0;
-}
+//    m_ptr = 0;
+//    m_state = 0;
+//}
 
 #endif /* SDRBASE_DSP_INTHALFBANDFILTEREO_H_ */

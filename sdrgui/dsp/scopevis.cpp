@@ -216,52 +216,57 @@ void ScopeVis::setMemoryIndex(uint32_t memoryIndex)
     getInputMessageQueue()->push(cmd);
 }
 
-void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly __attribute__((unused)))
+void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
+    (void) positiveOnly;
+
+    if (m_currentTraceMemoryIndex > 0) { // in memory mode live trace is suspended
+        return;
+    }
+
+    if (!m_mutex.tryLock(0)) { // prevent conflicts with configuration process
+        return;
+    }
+
     if (m_freeRun) {
-        m_triggerPoint = cbegin;
+        m_triggerLocation = end - cbegin;
     }
     else if (m_triggerState == TriggerTriggered) {
-        m_triggerPoint = cbegin;
+        m_triggerLocation = end - cbegin;
     }
     else if (m_triggerState == TriggerUntriggered) {
-        m_triggerPoint = end;
+        m_triggerLocation = 0;
     }
-    else if ((m_triggerWaitForReset) || (m_currentTraceMemoryIndex > 0)) {
-        m_triggerPoint = end;
+    else if (m_triggerWaitForReset) {
+        m_triggerLocation = 0;
     }
     else {
-        m_triggerPoint = cbegin;
+        m_triggerLocation = end - cbegin;
     }
-
-    if ((m_triggerWaitForReset) || (m_currentTraceMemoryIndex > 0)) {
-        return;
-    }
-
-    if(!m_mutex.tryLock(2)) // prevent conflicts with configuration process
-        return;
 
     SampleVector::const_iterator begin(cbegin);
     int triggerPointToEnd;
 
     while (begin < end)
     {
-        if (begin + m_traceSize > end)
+        if (begin + m_traceSize > end) // buffer smaller than trace size (end - bagin) < m_traceSize
         {
             triggerPointToEnd = -1;
-            processTrace(begin, end, triggerPointToEnd);
-            if (triggerPointToEnd >= 0) {
-                m_triggerPoint = end - triggerPointToEnd;
-            }
-            begin = end;
+            processTrace(begin, end, triggerPointToEnd); // use all buffer
+            m_triggerLocation = triggerPointToEnd < 0 ? 0 : triggerPointToEnd; // trim negative values
+            m_triggerLocation = m_triggerLocation > end - begin ? end - begin : m_triggerLocation; // trim past begin values
+
+            begin = end; // effectively breaks out the loop
         }
-        else
+        else // trace size fits in buffer
         {
             triggerPointToEnd = -1;
-            processTrace(begin, begin + m_traceSize, triggerPointToEnd);
-            if (triggerPointToEnd >= 0) {
-                m_triggerPoint = begin + m_traceSize -triggerPointToEnd;
-            }
+            processTrace(begin, begin + m_traceSize, triggerPointToEnd); // use part of buffer to fit trace size
+            //m_triggerPoint = begin + m_traceSize - triggerPointToEnd;
+            m_triggerLocation = end - begin + m_traceSize - triggerPointToEnd; // should always refer to end iterator
+            m_triggerLocation = m_triggerLocation < 0 ? 0 : m_triggerLocation; // trim negative values
+            m_triggerLocation = m_triggerLocation > end - begin ? end - begin : m_triggerLocation; // trim past begin values
+
             begin += m_traceSize;
         }
     }
@@ -606,15 +611,24 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, const Sa
     float traceTime = ((float) m_traceSize) / m_sampleRate;
 
     if (traceTime >= 1.0f) { // display continuously if trace time is 1 second or more
-        m_glScope->newTraces(&m_traces.m_traces[m_traces.currentBufferIndex()]);
+        m_glScope->newTraces(m_traces.m_traces, m_traces.currentBufferIndex());
     }
 
     if (m_nbSamples == 0) // finished
     {
-        if (traceTime < 1.0f) { // display only at trace end if trace time is less than 1 second
-            m_glScope->newTraces(&m_traces.m_traces[m_traces.currentBufferIndex()]);
+        // display only at trace end if trace time is less than 1 second
+        if (traceTime < 1.0f)
+        {
+            if (m_glScope->getProcessingTraceIndex().load() < 0) {
+                m_glScope->newTraces(m_traces.m_traces, m_traces.currentBufferIndex());
+            }
         }
-        m_traces.switchBuffer();
+
+        // switch to next buffer only if it is not being processed by the scope
+        if (m_glScope->getProcessingTraceIndex().load() != (((int) m_traces.currentBufferIndex() + 1) % 2)) {
+            m_traces.switchBuffer();
+        }
+
         return end - begin; // return remainder count
     }
     else

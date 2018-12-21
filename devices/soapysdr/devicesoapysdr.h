@@ -38,7 +38,7 @@ public:
 protected:
     DeviceSoapySDR();
     DeviceSoapySDR(const DeviceSoapySDR&) {}
-    DeviceSoapySDR& operator=(const DeviceSoapySDR& other __attribute__((unused))) { return *this; }
+    DeviceSoapySDR& operator=(const DeviceSoapySDR& other) { (void) other; return *this; }
     ~DeviceSoapySDR();
 
 private:

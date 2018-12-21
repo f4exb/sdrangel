@@ -136,7 +136,7 @@ public:
 	virtual const QString& getDeviceDescription() const;
 	virtual int getSampleRate() const;
 	virtual quint64 getCenterFrequency() const;
-    virtual void setCenterFrequency(qint64 centerFrequency __attribute__((unused))) {}
+    virtual void setCenterFrequency(qint64 centerFrequency) { (void) centerFrequency; }
 	std::time_t getStartingTimeStamp() const;
 
 	virtual bool handleMessage(const Message& message);

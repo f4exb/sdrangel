@@ -15,9 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "export.h"
 #include "dsptypes.h"
 
-class Projector
+class SDRBASE_API Projector
 {
 public:
     enum ProjectionType

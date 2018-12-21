@@ -472,8 +472,9 @@ void UDPSinkGUI::on_inputUDPAudioPort_editingFinished()
     ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
-void UDPSinkGUI::on_sampleRate_textEdited(const QString& arg1 __attribute__((unused)))
+void UDPSinkGUI::on_sampleRate_textEdited(const QString& arg1)
 {
+    (void) arg1;
     bool ok;
     Real outputSampleRate = ui->sampleRate->text().toDouble(&ok);
 
@@ -491,8 +492,9 @@ void UDPSinkGUI::on_sampleRate_textEdited(const QString& arg1 __attribute__((unu
 	ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
-void UDPSinkGUI::on_rfBandwidth_textEdited(const QString& arg1 __attribute__((unused)))
+void UDPSinkGUI::on_rfBandwidth_textEdited(const QString& arg1)
 {
+    (void) arg1;
     bool ok;
     Real rfBandwidth = ui->rfBandwidth->text().toDouble(&ok);
 
@@ -512,8 +514,9 @@ void UDPSinkGUI::on_rfBandwidth_textEdited(const QString& arg1 __attribute__((un
 	ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
 
-void UDPSinkGUI::on_fmDeviation_textEdited(const QString& arg1 __attribute__((unused)))
+void UDPSinkGUI::on_fmDeviation_textEdited(const QString& arg1)
 {
+    (void) arg1;
     bool ok;
     int fmDeviation = ui->fmDeviation->text().toInt(&ok);
 

@@ -111,8 +111,9 @@ void PerseusThread::callback(const uint8_t* buf, qint32 len)
     m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
-int PerseusThread::rx_callback(void *buf, int buf_size, void *extra __attribute__((unused)))
+int PerseusThread::rx_callback(void *buf, int buf_size, void *extra)
 {
+    (void) extra;
 	qint32 nbIAndQ = buf_size / 3; // 3 bytes per I or Q
 	m_this->callback((uint8_t*) buf, nbIAndQ);
 	return 0;

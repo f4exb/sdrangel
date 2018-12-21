@@ -30,10 +30,13 @@ QMAKE_CXXFLAGS += -std=c++11
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
+CONFIG(MSVC):DEFINES += sdrgui_EXPORTS
+
 CONFIG(ANDROID):INCLUDEPATH += /opt/softs/boost_1_60_0
 
 CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(MINGW64):INCLUDEPATH += "C:\softs\boost_1_66_0"
+CONFIG(MSVC):INCLUDEPATH += "C:\softs\boost_1_66_0"
 
 CONFIG(macx):INCLUDEPATH += "../../../boost_1_64_0"
 
@@ -83,6 +86,15 @@ SOURCES += mainwindow.cpp\
         gui/tvscreen.cpp\
         gui/valuedial.cpp\
         gui/valuedialz.cpp\
+        soapygui/arginfogui.cpp\
+        soapygui/complexfactorgui.cpp\
+        soapygui/discreterangegui.cpp\
+        soapygui/dynamicargsettinggui.cpp\
+        soapygui/dynamicitemsettinggui.cpp\
+        soapygui/intervalrangegui.cpp\
+        soapygui/intervalslidergui.cpp\
+        soapygui/itemsettinggui.cpp\
+        soapygui/stringrangegui.cpp\
         webapi/webapiadaptergui.cpp
 
 HEADERS  += mainwindow.h\
@@ -132,6 +144,15 @@ HEADERS  += mainwindow.h\
         gui/tvscreen.h\
         gui/valuedial.h\
         gui/valuedialz.h\
+        soapygui/arginfogui.h\
+        soapygui/complexfactorgui.h\
+        soapygui/discreterangegui.h\
+        soapygui/dynamicargsettinggui.h\
+        soapygui/dynamicitemsettinggui.h\
+        soapygui/intervalrangegui.h\
+        soapygui/intervalslidergui.h\
+        soapygui/itemsettinggui.h\
+        soapygui/stringrangegui.h\
         webapi/webapiadaptergui.h
 
 FORMS    += mainwindow.ui\
@@ -153,6 +174,11 @@ FORMS    += mainwindow.ui\
         gui/loggingdialog.ui\
         gui/glspectrumgui.ui\
         gui/transverterdialog.ui\
+        soapygui/arginfogui.ui\
+        soapygui/complexfactorgui.ui\
+        soapygui/discreterangegui.ui\
+        soapygui/intervalrangegui.ui\
+        soapygui/intervalslidergui.ui\
         mainwindow.ui
 
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase

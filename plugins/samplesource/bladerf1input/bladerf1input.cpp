@@ -609,8 +609,9 @@ bladerf_lna_gain Bladerf1Input::getLnaGain(int lnaGain)
 
 int Bladerf1Input::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setBladeRf1InputSettings(new SWGSDRangel::SWGBladeRF1InputSettings());
     response.getBladeRf1InputSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -644,8 +645,9 @@ int Bladerf1Input::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     BladeRF1InputSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("centerFrequency")) {
@@ -706,8 +708,9 @@ int Bladerf1Input::webapiSettingsPutPatch(
 
 int Bladerf1Input::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -715,8 +718,9 @@ int Bladerf1Input::webapiRunGet(
 int Bladerf1Input::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);

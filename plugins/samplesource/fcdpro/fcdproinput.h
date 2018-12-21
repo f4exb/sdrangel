@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
+// Copyright (C) 2015-2018 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -22,7 +21,10 @@
 #include <QByteArray>
 #include <inttypes.h>
 
-#include <dsp/devicesamplesource.h>
+#include "dsp/devicesamplesource.h"
+#include "audio/audioinput.h"
+#include "audio/audiofifo.h"
+
 #include "fcdprosettings.h"
 #include "fcdhid.h"
 
@@ -158,6 +160,8 @@ public:
 private:
     bool openDevice();
     void closeDevice();
+    bool openFCDAudio(const char *filename);
+    void closeFCDAudio();
 	void applySettings(const FCDProSettings& settings, bool force);
 	void set_lo_ppm();
 
@@ -165,6 +169,8 @@ private:
 
 	DeviceSourceAPI *m_deviceAPI;
 	hid_device *m_dev;
+    AudioInput m_fcdAudioInput;
+    AudioFifo m_fcdFIFO;
 	QMutex m_mutex;
 	FCDProSettings m_settings;
 	FCDProThread* m_FCDThread;

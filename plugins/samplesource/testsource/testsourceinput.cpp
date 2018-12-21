@@ -388,8 +388,9 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
 
 int TestSourceInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -397,8 +398,9 @@ int TestSourceInput::webapiRunGet(
 int TestSourceInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
@@ -414,8 +416,9 @@ int TestSourceInput::webapiRun(
 
 int TestSourceInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setTestSourceSettings(new SWGSDRangel::SWGTestSourceSettings());
     response.getTestSourceSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -426,8 +429,9 @@ int TestSourceInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     TestSourceSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("centerFrequency")) {

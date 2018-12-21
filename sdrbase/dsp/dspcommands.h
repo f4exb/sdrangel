@@ -256,27 +256,6 @@ private:
 	AudioFifo* m_audioFifo;
 };
 
-class SDRBASE_API DSPConfigureSpectrumVis : public Message {
-	MESSAGE_CLASS_DECLARATION
-
-public:
-	DSPConfigureSpectrumVis(int fftSize, int overlapPercent, FFTWindow::Function window) :
-		Message(),
-		m_fftSize(fftSize),
-		m_overlapPercent(overlapPercent),
-		m_window(window)
-	{ }
-
-	int getFFTSize() const { return m_fftSize; }
-	int getOverlapPercent() const { return m_overlapPercent; }
-	FFTWindow::Function getWindow() const { return m_window; }
-
-private:
-	int m_fftSize;
-	int m_overlapPercent;
-	FFTWindow::Function m_window;
-};
-
 class SDRBASE_API DSPConfigureCorrection : public Message {
 	MESSAGE_CLASS_DECLARATION
 

@@ -103,7 +103,7 @@ int FileSourceSettings::getAccelerationValue(int accelerationIndex)
 
     unsigned int v = accelerationIndex - 1;
     int m = pow(10.0, v/3 > m_accelerationMaxScale ? m_accelerationMaxScale : v/3);
-    int x;
+    int x = 1;
 
     if (v % 3 == 0) {
         x = 2;

@@ -387,7 +387,7 @@ void DecimatorsU<StorageType, T, SdrBits, InputBits, Shift>::decimate4_sup(Sampl
 }
 
 template<typename StorageType, typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<StorageType, T, SdrBits, InputBits, Shift>::decimate8_inf(SampleVector::iterator* it, const T* buf __attribute__((unused)), qint32 len)
+void DecimatorsU<StorageType, T, SdrBits, InputBits, Shift>::decimate8_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[16], buf4[8], buf8[4];
 
@@ -463,7 +463,7 @@ void DecimatorsU<StorageType, T, SdrBits, InputBits, Shift>::decimate8_inf(Sampl
 }
 
 template<typename StorageType, typename T, uint SdrBits, uint InputBits, int Shift>
-void DecimatorsU<StorageType, T, SdrBits, InputBits, Shift>::decimate8_sup(SampleVector::iterator* it, const T* buf __attribute__((unused)), qint32 len)
+void DecimatorsU<StorageType, T, SdrBits, InputBits, Shift>::decimate8_sup(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[16], buf4[8], buf8[4];
 

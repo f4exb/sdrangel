@@ -130,14 +130,11 @@ void SDRDaemonDataReadQueue::readSample(Sample& s, bool scaleForTx)
         }
         else
         {
-            if (m_dataBlock)
-            {
-                delete m_dataBlock;
-                m_dataBlock = 0;
+            delete m_dataBlock;
+            m_dataBlock = 0;
 
-                if (length() == 0) {
-                    qWarning("SDRDaemonDataReadQueue::readSample: try to pop new block but queue is empty");
-                }
+            if (length() == 0) {
+                qWarning("SDRDaemonDataReadQueue::readSample: try to pop new block but queue is empty");
             }
 
             if (length() > 0)

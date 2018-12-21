@@ -80,7 +80,7 @@ void IntervalRangeGUI::reset()
 
 double IntervalRangeGUI::getCurrentValue()
 {
-    return ui->value->getValue();
+    return ui->value->getValueNew();
 }
 
 void IntervalRangeGUI::setValue(double value)

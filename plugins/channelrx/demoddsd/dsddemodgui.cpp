@@ -264,8 +264,10 @@ void DSDDemodGUI::on_symbolPLLLock_toggled(bool checked)
     applySettings();
 }
 
-void DSDDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void DSDDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 }
 
 void DSDDemodGUI::onMenuDialogCalled(const QPoint &p)

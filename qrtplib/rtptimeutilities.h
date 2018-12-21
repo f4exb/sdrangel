@@ -44,6 +44,8 @@
 #include <sys/time.h>
 #include <time.h>
 #include <errno.h>
+#else
+#include "Windows.h"
 #endif // RTP_HAVE_QUERYPERFORMANCECOUNTER
 
 #include "export.h"
@@ -143,7 +145,7 @@ public:
 
     bool IsZero() const
     {
-        return m_t == 0;
+        return m_t == 0.0;
     }
 private:
 #ifdef RTP_HAVE_QUERYPERFORMANCECOUNTER

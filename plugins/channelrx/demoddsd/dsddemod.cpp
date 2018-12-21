@@ -112,8 +112,9 @@ void DSDDemod::configureMyPosition(MessageQueue* messageQueue, float myLatitude,
 	messageQueue->push(cmd);
 }
 
-void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
+void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
+    (void) firstOfBurst;
 	Complex ci;
 	int samplesPerSymbol = m_dsdDecoder.getSamplesPerSymbol();
 
@@ -767,8 +768,9 @@ void DSDDemod::formatStatusText()
 
 int DSDDemod::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());
     response.getDsdDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
@@ -779,8 +781,9 @@ int DSDDemod::webapiSettingsPutPatch(
         bool force,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     DSDDemodSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
@@ -877,8 +880,9 @@ int DSDDemod::webapiSettingsPutPatch(
 
 int DSDDemod::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setDsdDemodReport(new SWGSDRangel::SWGDSDDemodReport());
     response.getDsdDemodReport()->init();
     webapiFormatChannelReport(response);

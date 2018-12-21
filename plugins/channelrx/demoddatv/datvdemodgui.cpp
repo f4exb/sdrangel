@@ -219,8 +219,9 @@ bool DATVDemodGUI::deserialize(const QByteArray& arrData)
     }
 }
 
-bool DATVDemodGUI::handleMessage(const Message& objMessage __attribute__((unused)))
+bool DATVDemodGUI::handleMessage(const Message& objMessage)
 {
+    (void) objMessage;
     return false;
 }
 
@@ -241,8 +242,10 @@ void DATVDemodGUI::channelMarkerHighlightedByCursor()
 }
 
 
-void DATVDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void DATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 }
 
 void DATVDemodGUI::onMenuDoubleClicked()
@@ -526,13 +529,15 @@ void DATVDemodGUI::tick()
     return;
 }
 
-void DATVDemodGUI::on_cmbStandard_currentIndexChanged(const QString &arg1 __attribute__((unused)))
+void DATVDemodGUI::on_cmbStandard_currentIndexChanged(const QString &arg1)
 {
+    (void) arg1;
     applySettings();
 }
 
-void DATVDemodGUI::on_cmbModulation_currentIndexChanged(const QString &arg1 __attribute__((unused)))
+void DATVDemodGUI::on_cmbModulation_currentIndexChanged(const QString &arg1)
 {
+    (void) arg1;
     QString strModulation;
     QString strFEC;
 
@@ -583,8 +588,9 @@ void DATVDemodGUI::on_cmbModulation_currentIndexChanged(const QString &arg1 __at
 
 }
 
-void DATVDemodGUI::on_cmbFEC_currentIndexChanged(const QString &arg1 __attribute__((unused)))
+void DATVDemodGUI::on_cmbFEC_currentIndexChanged(const QString &arg1)
 {
+    (void) arg1;
     QString strFEC;
 
     strFEC = ui->cmbFEC->currentText();
@@ -647,13 +653,15 @@ void DATVDemodGUI::on_pushButton_2_clicked()
     resetToDefaults();
 }
 
-void DATVDemodGUI::on_spiSymbolRate_valueChanged(int arg1 __attribute__((unused)))
+void DATVDemodGUI::on_spiSymbolRate_valueChanged(int arg1)
 {
+    (void) arg1;
     applySettings();
 }
 
-void DATVDemodGUI::on_spiNotchFilters_valueChanged(int arg1 __attribute__((unused)))
+void DATVDemodGUI::on_spiNotchFilters_valueChanged(int arg1)
 {
+    (void) arg1;
     applySettings();
 }
 
@@ -680,8 +688,9 @@ void DATVDemodGUI::on_pushButton_4_clicked()
 
 }
 
-void DATVDemodGUI::on_mouseEvent(QMouseEvent* obj __attribute__((unused)))
+void DATVDemodGUI::on_mouseEvent(QMouseEvent* obj)
 {
+    (void) obj;
 }
 
 QString DATVDemodGUI::formatBytes(qint64 intBytes)
@@ -703,8 +712,9 @@ QString DATVDemodGUI::formatBytes(qint64 intBytes)
 }
 
 
-void DATVDemodGUI::on_StreamDataAvailable(int *intPackets __attribute__((unused)), int *intBytes, int *intPercent, qint64 *intTotalReceived)
+void DATVDemodGUI::on_StreamDataAvailable(int *intPackets, int *intBytes, int *intPercent, qint64 *intTotalReceived)
 {
+    (void) intPackets;
     ui->lblStatus->setText(QString("Data: %1B").arg(formatBytes(*intTotalReceived)));
     m_intLastDecodedData = *intTotalReceived;
 
@@ -721,18 +731,21 @@ void DATVDemodGUI::on_StreamDataAvailable(int *intPackets __attribute__((unused)
 
 }
 
-void DATVDemodGUI::on_spiBandwidth_valueChanged(int arg1 __attribute__((unused)))
+void DATVDemodGUI::on_spiBandwidth_valueChanged(int arg1)
 {
+    (void) arg1;
     applySettings();
 }
 
-void DATVDemodGUI::on_deltaFrequency_changed(qint64 value __attribute__((unused)))
+void DATVDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
+    (void) value;
     applySettings();
 }
 
-void DATVDemodGUI::on_rfBandwidth_changed(qint64 value __attribute__((unused)))
+void DATVDemodGUI::on_rfBandwidth_changed(qint64 value)
 {
+    (void) value;
     applySettings();
 }
 
@@ -789,19 +802,22 @@ void DATVDemodGUI::displayRRCParameters(bool blnVisible)
     ui->label_6->setVisible(blnVisible);
 }
 
-void DATVDemodGUI::on_cmbFilter_currentIndexChanged(int index __attribute__((unused)))
+void DATVDemodGUI::on_cmbFilter_currentIndexChanged(int index)
 {
+    (void) index;
     displayRRCParameters((ui->cmbFilter->currentIndex()==2));
 
     applySettings();
 }
 
-void DATVDemodGUI::on_spiRollOff_valueChanged(int arg1 __attribute__((unused)))
+void DATVDemodGUI::on_spiRollOff_valueChanged(int arg1)
 {
+    (void) arg1;
     applySettings();
 }
 
-void DATVDemodGUI::on_spiExcursion_valueChanged(int arg1 __attribute__((unused)))
+void DATVDemodGUI::on_spiExcursion_valueChanged(int arg1)
 {
+    (void) arg1;
     applySettings();
 }

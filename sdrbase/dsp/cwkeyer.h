@@ -50,7 +50,7 @@ class SDRBASE_API CWKeyer : public QObject {
     Q_OBJECT
 
 public:
-    class MsgConfigureCWKeyer : public Message {
+    class SDRBASE_API MsgConfigureCWKeyer : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:

@@ -23,7 +23,7 @@
 class DEVICES_API DeviceHackRFShared
 {
 public:
-    class MsgConfigureFrequencyDelta : public Message
+    class DEVICES_API MsgConfigureFrequencyDelta : public Message
     {
         MESSAGE_CLASS_DECLARATION
 

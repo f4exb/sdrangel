@@ -251,8 +251,9 @@ int LoRaDemod::detect(Complex c, Complex a)
 	return m_result;
 }
 
-void LoRaDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool pO __attribute__((unused)))
+void LoRaDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool pO)
 {
+    (void) pO;
 	int newangle;
 	Complex ci;
 

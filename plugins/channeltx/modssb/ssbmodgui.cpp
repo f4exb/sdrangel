@@ -173,8 +173,9 @@ void SSBModGUI::on_deltaFrequency_changed(qint64 value)
     applySettings();
 }
 
-void SSBModGUI::on_flipSidebands_clicked(bool checked __attribute__((unused)))
+void SSBModGUI::on_flipSidebands_clicked(bool checked)
 {
+    (void) checked;
     int bwValue = ui->BW->value();
     int lcValue = ui->lowCut->value();
     ui->BW->setValue(-bwValue);
@@ -208,13 +209,15 @@ void SSBModGUI::on_spanLog2_valueChanged(int value)
     applyBandwidths(5 - value);
 }
 
-void SSBModGUI::on_BW_valueChanged(int value __attribute__((unused)))
+void SSBModGUI::on_BW_valueChanged(int value)
 {
+    (void) value;
     applyBandwidths(5 - ui->spanLog2->value());
 }
 
-void SSBModGUI::on_lowCut_valueChanged(int value __attribute__((unused)))
+void SSBModGUI::on_lowCut_valueChanged(int value)
 {
+    (void) value;
     applyBandwidths(5 - ui->spanLog2->value());
 }
 
@@ -338,8 +341,9 @@ void SSBModGUI::on_navTimeSlider_valueChanged(int value)
     }
 }
 
-void SSBModGUI::on_showFileDialog_clicked(bool checked __attribute__((unused)))
+void SSBModGUI::on_showFileDialog_clicked(bool checked)
 {
+    (void) checked;
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open raw audio file"), ".", tr("Raw audio Files (*.raw)"), 0, QFileDialog::DontUseNativeDialog);
 
@@ -359,8 +363,10 @@ void SSBModGUI::configureFileName()
     m_ssbMod->getInputMessageQueue()->push(message);
 }
 
-void SSBModGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void SSBModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 }
 
 void SSBModGUI::onMenuDialogCalled(const QPoint &p)

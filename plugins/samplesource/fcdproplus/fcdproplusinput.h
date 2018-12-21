@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2016-2018 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -21,7 +21,10 @@
 #include <QByteArray>
 #include <inttypes.h>
 
-#include <dsp/devicesamplesource.h>
+#include "dsp/devicesamplesource.h"
+#include "audio/audioinput.h"
+#include "audio/audiofifo.h"
+
 #include "fcdproplussettings.h"
 #include "fcdhid.h"
 
@@ -147,11 +150,15 @@ public:
 private:
     bool openDevice();
     void closeDevice();
+    bool openFCDAudio(const char *filename);
+    void closeFCDAudio();
 	void applySettings(const FCDProPlusSettings& settings, bool force);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FCDProPlusSettings& settings);
 
 	DeviceSourceAPI *m_deviceAPI;
 	hid_device *m_dev;
+	AudioInput m_fcdAudioInput;
+	AudioFifo m_fcdFIFO;
 	QMutex m_mutex;
 	FCDProPlusSettings m_settings;
 	FCDProPlusThread* m_FCDThread;

@@ -486,8 +486,9 @@ airspyhf_device_t *AirspyHFInput::open_airspyhf_from_serial(const QString& seria
 
 int AirspyHFInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
     response.getAirspyHfSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -498,8 +499,9 @@ int AirspyHFInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     AirspyHFSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("centerFrequency")) {
@@ -570,8 +572,9 @@ void AirspyHFInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
 
 int AirspyHFInput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setAirspyHfReport(new SWGSDRangel::SWGAirspyHFReport());
     response.getAirspyHfReport()->init();
     webapiFormatDeviceReport(response);
@@ -580,8 +583,9 @@ int AirspyHFInput::webapiReportGet(
 
 int AirspyHFInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -589,8 +593,9 @@ int AirspyHFInput::webapiRunGet(
 int AirspyHFInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);

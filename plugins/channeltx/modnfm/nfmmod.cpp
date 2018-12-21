@@ -553,8 +553,9 @@ bool NFMMod::deserialize(const QByteArray& data)
 
 int NFMMod::webapiSettingsGet(
                 SWGSDRangel::SWGChannelSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
     response.getNfmModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
@@ -565,8 +566,9 @@ int NFMMod::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& channelSettingsKeys,
                 SWGSDRangel::SWGChannelSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     NFMModSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
@@ -673,8 +675,9 @@ int NFMMod::webapiSettingsPutPatch(
 
 int NFMMod::webapiReportGet(
                 SWGSDRangel::SWGChannelReport& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setNfmModReport(new SWGSDRangel::SWGNFMModReport());
     response.getNfmModReport()->init();
     webapiFormatChannelReport(response);

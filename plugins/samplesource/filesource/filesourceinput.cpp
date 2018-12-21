@@ -409,8 +409,9 @@ bool FileSourceInput::applySettings(const FileSourceSettings& settings, bool for
 
 int FileSourceInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
     response.getFileSourceSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -421,8 +422,9 @@ int FileSourceInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     FileSourceSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("fileName")) {
@@ -450,8 +452,9 @@ int FileSourceInput::webapiSettingsPutPatch(
 
 int FileSourceInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -459,8 +462,9 @@ int FileSourceInput::webapiRunGet(
 int FileSourceInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
@@ -476,8 +480,9 @@ int FileSourceInput::webapiRun(
 
 int FileSourceInput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setFileSourceReport(new SWGSDRangel::SWGFileSourceReport());
     response.getFileSourceReport()->init();
     webapiFormatDeviceReport(response);

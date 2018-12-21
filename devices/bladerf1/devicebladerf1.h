@@ -30,7 +30,7 @@ private:
     static struct bladerf *open_bladerf_from_serial(const char *serial);
 };
 
-class BladerfBandwidths {
+class DEVICES_API BladerfBandwidths {
 public:
     static unsigned int getBandwidth(unsigned int bandwidth_index);
     static unsigned int getBandwidthIndex(unsigned int bandwidth);

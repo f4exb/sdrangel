@@ -599,8 +599,9 @@ bool UDPSource::deserialize(const QByteArray& data)
 
 int UDPSource::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setUdpSourceSettings(new SWGSDRangel::SWGUDPSourceSettings());
     response.getUdpSourceSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
@@ -611,8 +612,9 @@ int UDPSource::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& channelSettingsKeys,
                 SWGSDRangel::SWGChannelSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     UDPSourceSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
@@ -700,8 +702,9 @@ int UDPSource::webapiSettingsPutPatch(
 
 int UDPSource::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setUdpSourceReport(new SWGSDRangel::SWGUDPSourceReport());
     response.getUdpSourceReport()->init();
     webapiFormatChannelReport(response);

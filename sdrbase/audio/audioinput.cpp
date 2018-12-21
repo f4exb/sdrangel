@@ -64,12 +64,12 @@ bool AudioInput::start(int device, int rate)
             if (device < devicesInfo.size())
             {
                 devInfo = devicesInfo[device];
-                qWarning("AudioInput::start: using audio device #%d: %s", device, qPrintable(devInfo.defaultInputDevice().deviceName()));
+                qWarning("AudioInput::start: using audio device #%d: %s", device, qPrintable(devInfo.deviceName()));
             }
             else
             {
                 devInfo = QAudioDeviceInfo::defaultInputDevice();
-                qWarning("AudioInput::start: audio device #%d does not exist. Using default device %s", device, qPrintable(devInfo.defaultInputDevice().deviceName()));
+                qWarning("AudioInput::start: audio device #%d does not exist. Using default device %s", device, qPrintable(devInfo.deviceName()));
             }
         }
 
@@ -80,12 +80,13 @@ bool AudioInput::start(int device, int rate)
         m_audioFormat.setSampleSize(16);
         m_audioFormat.setCodec("audio/pcm");
         m_audioFormat.setByteOrder(QAudioFormat::LittleEndian);
-        m_audioFormat.setSampleType(QAudioFormat::SignedInt);
+        m_audioFormat.setSampleType(QAudioFormat::SignedInt); // Unknown, SignedInt, UnSignedInt, Float
 
         if (!devInfo.isFormatSupported(m_audioFormat))
         {
             m_audioFormat = devInfo.nearestFormat(m_audioFormat);
-            qWarning("AudioInput::start: %d Hz S16_LE audio format not supported. New rate: %d", rate, m_audioFormat.sampleRate());
+            qWarning("AudioInput::start: %d Hz S16_LE audio format not supported. Nearest is sampleRate: %d channelCount: %d sampleSize: %d sampleType: %d",
+                    rate, m_audioFormat.sampleRate(), m_audioFormat.channelCount(), m_audioFormat.sampleSize(), (int) m_audioFormat.sampleType());
         }
         else
         {

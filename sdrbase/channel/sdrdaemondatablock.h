@@ -42,13 +42,20 @@ struct SDRDaemonMetaDataFEC
     uint8_t  m_sampleBits;        //!< 10 number of effective bits per sample (deprecated)
     uint8_t  m_nbOriginalBlocks;  //!< 11 number of blocks with original (protected) data
     uint8_t  m_nbFECBlocks;       //!< 12 number of blocks carrying FEC
+
     uint32_t m_tv_sec;            //!< 16 seconds of timestamp at start time of super-frame processing
     uint32_t m_tv_usec;           //!< 20 microseconds of timestamp at start time of super-frame processing
     uint32_t m_crc32;             //!< 24 CRC32 of the above
 
     bool operator==(const SDRDaemonMetaDataFEC& rhs)
     {
-        return (memcmp((const void *) this, (const void *) &rhs, 12) == 0); // Only the 12 first bytes are relevant
+        // Only the first 6 fields are relevant
+        return (m_centerFrequency == rhs.m_centerFrequency)
+            && (m_sampleRate == rhs.m_sampleRate)
+            && (m_sampleBytes == rhs.m_sampleBytes)
+            && (m_sampleBits == rhs.m_sampleBits)
+            && (m_nbOriginalBlocks == rhs.m_nbOriginalBlocks)
+            && (m_nbFECBlocks == rhs.m_nbFECBlocks);
     }
 
     void init()

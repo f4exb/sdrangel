@@ -616,15 +616,17 @@ void GLScopeGUI::on_trace_valueChanged(int value)
     m_scopeVis->focusOnTrace(value);
 }
 
-void GLScopeGUI::on_traceAdd_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_traceAdd_clicked(bool checked)
 {
+    (void) checked;
     ScopeVis::TraceData traceData;
     fillTraceData(traceData);
     addTrace(traceData);
 }
 
-void GLScopeGUI::on_traceDel_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_traceDel_clicked(bool checked)
 {
+    (void) checked;
     if (ui->trace->value() > 0) // not the X trace
     {
         ui->trace->setMaximum(ui->trace->maximum() - 1);
@@ -644,8 +646,9 @@ void GLScopeGUI::on_traceDel_clicked(bool checked __attribute__((unused)))
     }
 }
 
-void GLScopeGUI::on_traceUp_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_traceUp_clicked(bool checked)
 {
+    (void) checked;
     if (ui->trace->maximum() > 0) // more than one trace
     {
         int newTraceIndex = (ui->trace->value() + 1) % (ui->trace->maximum()+1);
@@ -658,8 +661,9 @@ void GLScopeGUI::on_traceUp_clicked(bool checked __attribute__((unused)))
     }
 }
 
-void GLScopeGUI::on_traceDown_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_traceDown_clicked(bool checked)
 {
+    (void) checked;
     if (ui->trace->value() > 0) // not the X (lowest) trace
     {
         int newTraceIndex = (ui->trace->value() - 1) % (ui->trace->maximum()+1);
@@ -691,15 +695,17 @@ void GLScopeGUI::on_trig_valueChanged(int value)
     m_scopeVis->focusOnTrigger(value);
 }
 
-void GLScopeGUI::on_trigAdd_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_trigAdd_clicked(bool checked)
 {
+    (void) checked;
     ScopeVis::TriggerData triggerData;
     fillTriggerData(triggerData);
     addTrigger(triggerData);
 }
 
-void GLScopeGUI::on_trigDel_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_trigDel_clicked(bool checked)
 {
+    (void) checked;
     if (ui->trig->value() > 0)
     {
         m_scopeVis->removeTrigger(ui->trig->value());
@@ -707,8 +713,9 @@ void GLScopeGUI::on_trigDel_clicked(bool checked __attribute__((unused)))
     }
 }
 
-void GLScopeGUI::on_trigUp_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_trigUp_clicked(bool checked)
 {
+    (void) checked;
     if (ui->trig->maximum() > 0) // more than one trigger
     {
         int newTriggerIndex = (ui->trig->value() + 1) % (ui->trig->maximum()+1);
@@ -721,8 +728,9 @@ void GLScopeGUI::on_trigUp_clicked(bool checked __attribute__((unused)))
     }
 }
 
-void GLScopeGUI::on_trigDown_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_trigDown_clicked(bool checked)
 {
+    (void) checked;
     if (ui->trig->value() > 0) // not the 0 (lowest) trigger
     {
         int newTriggerIndex = (ui->trig->value() - 1) % (ui->trig->maximum()+1);
@@ -735,45 +743,52 @@ void GLScopeGUI::on_trigDown_clicked(bool checked __attribute__((unused)))
     }
 }
 
-void GLScopeGUI::on_traceMode_currentIndexChanged(int index __attribute__((unused)))
+void GLScopeGUI::on_traceMode_currentIndexChanged(int index)
 {
+    (void) index;
     setAmpScaleDisplay();
     setAmpOfsDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeGUI::on_amp_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_amp_valueChanged(int value)
 {
+    (void) value;
     setAmpScaleDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeGUI::on_ofsCoarse_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_ofsCoarse_valueChanged(int value)
 {
+    (void) value;
     setAmpOfsDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeGUI::on_ofsFine_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_ofsFine_valueChanged(int value)
 {
+    (void) value;
     setAmpOfsDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeGUI::on_traceDelayCoarse_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_traceDelayCoarse_valueChanged(int value)
 {
+    (void) value;
     setTraceDelayDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeGUI::on_traceDelayFine_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_traceDelayFine_valueChanged(int value)
 {
+    (void) value;
     setTraceDelayDisplay();
     changeCurrentTrace();
 }
 
-void GLScopeGUI::on_traceView_toggled(bool checked __attribute__((unused)))
+void GLScopeGUI::on_traceView_toggled(bool checked)
 {
+    (void) checked;
     changeCurrentTrace();
 }
 
@@ -791,8 +806,9 @@ void GLScopeGUI::on_traceColor_clicked()
     }
 }
 
-void GLScopeGUI::on_memorySave_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_memorySave_clicked(bool checked)
 {
+    (void) checked;
     QString fileName = QFileDialog::getSaveFileName(this,
         tr("Open trace memory file"), ".", tr("Trace memory files (*.trcm)"), 0, QFileDialog::DontUseNativeDialog);
 
@@ -821,8 +837,9 @@ void GLScopeGUI::on_memorySave_clicked(bool checked __attribute__((unused)))
     }
 }
 
-void GLScopeGUI::on_memoryLoad_clicked(bool checked __attribute__((unused)))
+void GLScopeGUI::on_memoryLoad_clicked(bool checked)
 {
+    (void) checked;
     qDebug("GLScopeGUI::on_memoryLoad_clicked");
 
     QString fileName = QFileDialog::getOpenFileName(this,
@@ -857,14 +874,16 @@ void GLScopeGUI::on_mem_valueChanged(int value)
    	m_scopeVis->setMemoryIndex(value);
 }
 
-void GLScopeGUI::on_trigMode_currentIndexChanged(int index __attribute__((unused)))
+void GLScopeGUI::on_trigMode_currentIndexChanged(int index)
 {
+    (void) index;
     setTrigLevelDisplay();
     changeCurrentTrigger();
 }
 
-void GLScopeGUI::on_trigCount_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_trigCount_valueChanged(int value)
 {
+    (void) value;
     setTrigCountDisplay();
     changeCurrentTrigger();
 }
@@ -905,32 +924,37 @@ void GLScopeGUI::on_trigHoldoff_valueChanged(int value)
     changeCurrentTrigger();
 }
 
-void GLScopeGUI::on_trigLevelCoarse_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_trigLevelCoarse_valueChanged(int value)
 {
+    (void) value;
     setTrigLevelDisplay();
     changeCurrentTrigger();
 }
 
-void GLScopeGUI::on_trigLevelFine_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_trigLevelFine_valueChanged(int value)
 {
+    (void) value;
     setTrigLevelDisplay();
     changeCurrentTrigger();
 }
 
-void GLScopeGUI::on_trigDelayCoarse_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_trigDelayCoarse_valueChanged(int value)
 {
+    (void) value;
     setTrigDelayDisplay();
     changeCurrentTrigger();
 }
 
-void GLScopeGUI::on_trigDelayFine_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_trigDelayFine_valueChanged(int value)
 {
+    (void) value;
     setTrigDelayDisplay();
     changeCurrentTrigger();
 }
 
-void GLScopeGUI::on_trigPre_valueChanged(int value __attribute__((unused)))
+void GLScopeGUI::on_trigPre_valueChanged(int value)
 {
+    (void) value;
     setTrigPreDisplay();
     m_scopeVis->configure(m_traceLenMult*ScopeVis::m_traceChunkSize,
             m_timeBase,
@@ -1436,8 +1460,9 @@ void GLScopeGUI::applySettings()
 {
 }
 
-bool GLScopeGUI::handleMessage(Message* message __attribute__((unused)))
+bool GLScopeGUI::handleMessage(Message* message)
 {
+    (void) message;
     return false;
 }
 

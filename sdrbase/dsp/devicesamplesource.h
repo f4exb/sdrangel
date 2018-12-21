@@ -61,31 +61,54 @@ public:
 	virtual bool handleMessage(const Message& message) = 0;
 
 	virtual int webapiSettingsGet(
-	        SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
+            SWGSDRangel::SWGDeviceSettings& response,
 	        QString& errorMessage)
-	{ errorMessage = "Not implemented"; return 501; }
+    {
+        (void) response;
+        errorMessage = "Not implemented";
+        return 501;
+    }
 
     virtual int webapiSettingsPutPatch(
-            bool force __attribute__((unused)), //!< true to force settings = put
-            const QStringList& deviceSettingsKeys __attribute__((unused)),
-            SWGSDRangel::SWGDeviceSettings& response __attribute__((unused)),
+            bool force, //!< true to force settings = put
+            const QStringList& deviceSettingsKeys,
+            SWGSDRangel::SWGDeviceSettings& response,
             QString& errorMessage)
-    { errorMessage = "Not implemented"; return 501; }
+    {
+        (void) force;
+        (void) deviceSettingsKeys;
+        (void) response;
+        errorMessage = "Not implemented";
+        return 501;
+    }
 
     virtual int webapiRunGet(
-            SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
+            SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage)
-    { errorMessage = "Not implemented"; return 501; }
+    {
+        (void) response;
+        errorMessage = "Not implemented";
+        return 501;
+    }
 
-    virtual int webapiRun(bool run __attribute__((unused)),
-            SWGSDRangel::SWGDeviceState& response __attribute__((unused)),
+    virtual int webapiRun(bool run,
+            SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage)
-    { errorMessage = "Not implemented"; return 501; }
+    {
+        (void) run;
+        (void) response;
+        errorMessage = "Not implemented";
+        return 501;
+    }
 
     virtual int webapiReportGet(
-            SWGSDRangel::SWGDeviceReport& response __attribute__((unused)),
+            SWGSDRangel::SWGDeviceReport& response,
             QString& errorMessage)
-    { errorMessage = "Not implemented"; return 501; }
+    {
+        (void) response;
+        errorMessage = "Not implemented";
+        return 501;
+    }
 
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual void setMessageQueueToGUI(MessageQueue *queue) = 0; // pure virtual so that child classes must have to deal with this

@@ -29,6 +29,8 @@
 #include "soapygui/dynamicitemsettinggui.h"
 #include "soapygui/intervalslidergui.h"
 #include "soapygui/complexfactorgui.h"
+#include "soapygui/arginfogui.h"
+#include "soapygui/dynamicargsettinggui.h"
 
 #include "ui_soapysdrinputgui.h"
 #include "soapysdrinputgui.h"
@@ -68,7 +70,12 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     createTunableElementsControl(m_sampleSource->getTunableElements());
     createGlobalGainControl();
     createIndividualGainsControl(m_sampleSource->getIndividualGainsRanges());
+    createArgumentsControl(m_sampleSource->getDeviceArgInfoList(), true);
+    createArgumentsControl(m_sampleSource->getStreamArgInfoList(), false);
     m_sampleSource->initGainSettings(m_settings);
+    m_sampleSource->initTunableElementsSettings(m_settings);
+    m_sampleSource->initStreamArgSettings(m_settings);
+    m_sampleSource->initDeviceArgSettings(m_settings);
 
     if (m_sampleRateGUI) {
         connect(m_sampleRateGUI, SIGNAL(valueChanged(double)), this, SLOT(sampleRateChanged(double)));
@@ -219,6 +226,7 @@ void SoapySDRInputGui::createGlobalGainControl()
     {
         m_autoGain = new QCheckBox(this);
         m_autoGain->setText(QString("AGC"));
+        m_autoGain->setStyleSheet("QCheckBox::indicator::unchecked {background: rgb(79,79,79);} QCheckBox::indicator::checked {background: rgb(255, 157, 38);}");
         layout->addWidget(m_autoGain);
 
         connect(m_autoGain, SIGNAL(toggled(bool)), this, SLOT(autoGainChanged(bool)));
@@ -275,6 +283,7 @@ void SoapySDRInputGui::createCorrectionsControl()
         m_autoDCCorrection = new QCheckBox(this);
         m_autoDCCorrection->setText(QString("Auto DC corr"));
         m_autoDCCorrection->setToolTip(QString("Automatic hardware DC offset correction"));
+        m_autoDCCorrection->setStyleSheet("QCheckBox::indicator::unchecked {background: rgb(79,79,79);} QCheckBox::indicator::checked {background: rgb(255, 157, 38);}");
         layout->addWidget(m_autoDCCorrection);
 
         connect(m_autoDCCorrection, SIGNAL(toggled(bool)), this, SLOT(autoDCCorrectionChanged(bool)));
@@ -300,9 +309,103 @@ void SoapySDRInputGui::createCorrectionsControl()
         m_autoIQCorrection = new QCheckBox(this);
         m_autoIQCorrection->setText(QString("Auto IQ corr"));
         m_autoIQCorrection->setToolTip(QString("Automatic hardware IQ imbalance correction"));
+        m_autoIQCorrection->setStyleSheet("QCheckBox::indicator::unchecked {background: rgb(79,79,79);} QCheckBox::indicator::checked {background: rgb(255, 157, 38);}");
         layout->addWidget(m_autoIQCorrection);
 
         connect(m_autoIQCorrection, SIGNAL(toggled(bool)), this, SLOT(autoIQCorrectionChanged(bool)));
+    }
+}
+
+void SoapySDRInputGui::createArgumentsControl(const SoapySDR::ArgInfoList& argInfoList, bool deviceArguments)
+{
+    if (argInfoList.size() == 0) { // return early if list is empty
+        return;
+    }
+
+    QVBoxLayout *layout = (QVBoxLayout *) ui->scrollAreaWidgetContents->layout();
+
+    QFrame *line = new QFrame(this);
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    layout->addWidget(line);
+
+    std::vector<SoapySDR::ArgInfo>::const_iterator it = argInfoList.begin();
+
+    for (; it != argInfoList.end(); ++it)
+    {
+        ArgInfoGUI::ArgInfoValueType valueType;
+        ArgInfoGUI *argGUI;
+
+        if (it->type == SoapySDR::ArgInfo::BOOL) {
+            valueType = ArgInfoGUI::ArgInfoValueBool;
+        } else if (it->type == SoapySDR::ArgInfo::INT) {
+            valueType = ArgInfoGUI::ArgInfoValueInt;
+        } else if (it->type == SoapySDR::ArgInfo::FLOAT) {
+            valueType = ArgInfoGUI::ArgInfoValueFloat;
+        } else if (it->type == SoapySDR::ArgInfo::STRING) {
+            valueType = ArgInfoGUI::ArgInfoValueString;
+        } else {
+            continue;
+        }
+
+        if (valueType == ArgInfoGUI::ArgInfoValueBool)
+        {
+            argGUI = new ArgInfoGUI(ArgInfoGUI::ArgInfoBinary, ArgInfoGUI::ArgInfoValueBool, this);
+        }
+        else if (it->options.size() == 0)
+        {
+            argGUI = new ArgInfoGUI(ArgInfoGUI::ArgInfoContinuous, valueType, this);
+        }
+        else
+        {
+            argGUI = new ArgInfoGUI(ArgInfoGUI::ArgInfoDiscrete, valueType, this);
+            std::vector<std::string>::const_iterator optionIt = it->options.begin();
+            std::vector<std::string>::const_iterator optionNameIt = it->optionNames.begin();
+
+            for (int i = 0; optionIt != it->options.end(); ++optionIt, i++)
+            {
+                QString name(optionNameIt == it->optionNames.end() ? optionIt->c_str() : optionNameIt->c_str());
+
+                if (optionNameIt != it->optionNames.end()) {
+                    ++optionNameIt;
+                }
+
+                if (valueType == ArgInfoGUI::ArgInfoValueInt) {
+                    argGUI->addIntValue(name, atoi(optionIt->c_str()));
+                } else if (valueType == ArgInfoGUI::ArgInfoValueFloat) {
+                    argGUI->addFloatValue(name, atof(optionIt->c_str()));
+                } else if (valueType == ArgInfoGUI::ArgInfoValueString) {
+                    argGUI->addStringValue(name, QString(optionIt->c_str()));
+                }
+            }
+        }
+
+        if ((it->range.minimum() != 0) || (it->range.maximum() != 0)) {
+            argGUI->setRange(it->range.minimum(), it->range.maximum());
+        }
+
+        argGUI->setLabel(QString(it->name.size() == 0 ? it->key.c_str() : it->name.c_str()));
+        argGUI->setUnits(QString(it->units.c_str()));
+
+        if (it->description.size() != 0) {
+            argGUI->setToolTip(QString(it->description.c_str()));
+        }
+
+        layout->addWidget(argGUI);
+
+        DynamicArgSettingGUI *gui = new DynamicArgSettingGUI(argGUI, QString(it->key.c_str()));
+
+        // This could be made more elegant but let's make it more simple
+        if (deviceArguments)
+        {
+            m_deviceArgsGUIs.push_back(gui);
+            connect(gui, SIGNAL(valueChanged(QString, QVariant)), this, SLOT(deviceArgChanged(QString, QVariant)));
+        }
+        else
+        {
+            m_streamArgsGUIs.push_back(gui);
+            connect(gui, SIGNAL(valueChanged(QString, QVariant)), this, SLOT(streamArgChanged(QString, QVariant)));
+        }
     }
 }
 
@@ -342,12 +445,15 @@ QByteArray SoapySDRInputGui::serialize() const
 
 bool SoapySDRInputGui::deserialize(const QByteArray& data)
 {
-    if(m_settings.deserialize(data)) {
+    if (m_settings.deserialize(data))
+    {
         displaySettings();
         m_forceSettings = true;
         sendSettings();
         return true;
-    } else {
+    }
+    else
+    {
         resetToDefaults();
         return false;
     }
@@ -380,6 +486,14 @@ bool SoapySDRInputGui::handleMessage(const Message& message)
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
+
+        return true;
+    }
+    else if (DeviceSoapySDRShared::MsgReportDeviceArgsChange::match(message))
+    {
+        DeviceSoapySDRShared::MsgReportDeviceArgsChange& notif = (DeviceSoapySDRShared::MsgReportDeviceArgsChange&) message;
+        m_settings.m_deviceArgSettings = notif.getDeviceArgSettings();
+        displayDeviceArgsSettings();
 
         return true;
     }
@@ -436,13 +550,13 @@ void SoapySDRInputGui::antennasChanged()
 
 void SoapySDRInputGui::sampleRateChanged(double sampleRate)
 {
-    m_settings.m_devSampleRate = sampleRate;
+    m_settings.m_devSampleRate = round(sampleRate);
     sendSettings();
 }
 
 void SoapySDRInputGui::bandwidthChanged(double bandwidth)
 {
-    m_settings.m_bandwidth = bandwidth;
+    m_settings.m_bandwidth = round(bandwidth);
     sendSettings();
 }
 
@@ -484,7 +598,7 @@ void SoapySDRInputGui::autoIQCorrectionChanged(bool set)
 
 void SoapySDRInputGui::dcCorrectionModuleChanged(double value)
 {
-    std::complex<float> dcCorrection = std::polar<float>(value, arg(m_settings.m_dcCorrection));
+    std::complex<double> dcCorrection = std::polar<double>(value, arg(m_settings.m_dcCorrection));
     m_settings.m_dcCorrection = dcCorrection;
     sendSettings();
 }
@@ -492,14 +606,14 @@ void SoapySDRInputGui::dcCorrectionModuleChanged(double value)
 void SoapySDRInputGui::dcCorrectionArgumentChanged(double value)
 {
     double angleInRadians = (value / 180.0) * M_PI;
-    std::complex<float> dcCorrection = std::polar<float>(abs(m_settings.m_dcCorrection), angleInRadians);
+    std::complex<double> dcCorrection = std::polar<double>(abs(m_settings.m_dcCorrection), angleInRadians);
     m_settings.m_dcCorrection = dcCorrection;
     sendSettings();
 }
 
 void SoapySDRInputGui::iqCorrectionModuleChanged(double value)
 {
-    std::complex<float> iqCorrection = std::polar<float>(value, arg(m_settings.m_iqCorrection));
+    std::complex<double> iqCorrection = std::polar<double>(value, arg(m_settings.m_iqCorrection));
     m_settings.m_iqCorrection = iqCorrection;
     sendSettings();
 }
@@ -507,8 +621,20 @@ void SoapySDRInputGui::iqCorrectionModuleChanged(double value)
 void SoapySDRInputGui::iqCorrectionArgumentChanged(double value)
 {
     double angleInRadians = (value / 180.0) * M_PI;
-    std::complex<float> iqCorrection = std::polar<float>(abs(m_settings.m_iqCorrection), angleInRadians);
+    std::complex<double> iqCorrection = std::polar<double>(abs(m_settings.m_iqCorrection), angleInRadians);
     m_settings.m_iqCorrection = iqCorrection;
+    sendSettings();
+}
+
+void SoapySDRInputGui::streamArgChanged(QString itemName, QVariant value)
+{
+    m_settings.m_streamArgSettings[itemName] = value;
+    sendSettings();
+}
+
+void SoapySDRInputGui::deviceArgChanged(QString itemName, QVariant value)
+{
+    m_settings.m_deviceArgSettings[itemName] = value;
     sendSettings();
 }
 
@@ -597,17 +723,22 @@ void SoapySDRInputGui::displaySettings()
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 
     if (m_antennas) {
-        qDebug("SoapySDRInputGui::displaySettings: m_antenna: %s", m_settings.m_antenna.toStdString().c_str());
         m_antennas->setValue(m_settings.m_antenna.toStdString());
     }
-    if (m_sampleRateGUI) {
+    if (m_sampleRateGUI)
+    {
         m_sampleRateGUI->setValue(m_settings.m_devSampleRate);
+        m_settings.m_devSampleRate = m_sampleRateGUI->getCurrentValue();
     }
-    if (m_bandwidthGUI) {
+    if (m_bandwidthGUI)
+    {
         m_bandwidthGUI->setValue(m_settings.m_bandwidth);
+        m_settings.m_bandwidth = m_bandwidthGUI->getCurrentValue();
     }
-    if (m_gainSliderGUI) {
+    if (m_gainSliderGUI)
+    {
         m_gainSliderGUI->setValue(m_settings.m_globalGain);
+        m_settings.m_globalGain = m_gainSliderGUI->getCurrentValue();
     }
     if (m_autoGain) {
         m_autoGain->setChecked(m_settings.m_autoGain);
@@ -625,6 +756,8 @@ void SoapySDRInputGui::displaySettings()
     displayTunableElementsControlSettings();
     displayIndividualGainsControlSettings();
     displayCorrectionsSettings();
+    displayStreamArgsSettings();
+    displayDeviceArgsSettings();
 
     blockApplySettings(false);
 }
@@ -645,10 +778,12 @@ void SoapySDRInputGui::displayIndividualGainsControlSettings()
 {
     for (const auto &it : m_individualGainsGUIs)
     {
-        QMap<QString, double>::const_iterator elIt = m_settings.m_individualGains.find(it->getName());
+        QMap<QString, double>::iterator elIt = m_settings.m_individualGains.find(it->getName());
 
-        if (elIt != m_settings.m_individualGains.end()) {
+        if (elIt != m_settings.m_individualGains.end())
+        {
             it->setValue(*elIt);
+            *elIt = it->getValue();
         }
     }
 }
@@ -675,6 +810,34 @@ void SoapySDRInputGui::displayCorrectionsSettings()
 
     if (m_autoIQCorrection) {
         m_autoIQCorrection->setChecked(m_settings.m_autoIQCorrection);
+    }
+}
+
+void SoapySDRInputGui::displayStreamArgsSettings()
+{
+    for (const auto &it : m_streamArgsGUIs)
+    {
+        QMap<QString, QVariant>::iterator elIt = m_settings.m_streamArgSettings.find(it->getName());
+
+        if (elIt != m_settings.m_streamArgSettings.end())
+        {
+            it->setValue(elIt.value());
+            *elIt = it->getValue();
+        }
+    }
+}
+
+void SoapySDRInputGui::displayDeviceArgsSettings()
+{
+    for (const auto &it : m_deviceArgsGUIs)
+    {
+        QMap<QString, QVariant>::iterator elIt = m_settings.m_deviceArgSettings.find(it->getName());
+
+        if (elIt != m_settings.m_deviceArgSettings.end())
+        {
+            it->setValue(elIt.value());
+            *elIt = it->getValue();
+        }
     }
 }
 

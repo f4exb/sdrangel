@@ -1,5 +1,7 @@
 project(chanalyzer)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(chanalyzer_SOURCES
 	chanalyzer.cpp
 	chanalyzergui.cpp

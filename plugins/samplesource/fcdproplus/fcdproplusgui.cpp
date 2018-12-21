@@ -127,7 +127,7 @@ bool FCDProPlusGui::deserialize(const QByteArray& data)
 	}
 }
 
-bool FCDProPlusGui::handleMessage(const Message& message __attribute__((unused)))
+bool FCDProPlusGui::handleMessage(const Message& message)
 {
     if (FCDProPlusInput::MsgConfigureFCDProPlus::match(message))
     {
@@ -159,17 +159,19 @@ void FCDProPlusGui::handleInputMessages()
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("RTLSDRGui::handleInputMessages: message: %s", message->getIdentifier());
-
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
-            qDebug("RTLSDRGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("FCDProPlusGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
 
             delete message;
+        }
+        else
+        {
+            qWarning("FCDProPlusGui::handleInputMessages: message: %s. No action.", message->getIdentifier());
         }
     }
 }
@@ -322,11 +324,8 @@ void FCDProPlusGui::on_ppm_valueChanged(int value)
 
 void FCDProPlusGui::on_startStop_toggled(bool checked)
 {
-    if (m_doApplySettings)
-    {
-        FCDProPlusInput::MsgStartStop *message = FCDProPlusInput::MsgStartStop::create(checked);
-        m_sampleSource->getInputMessageQueue()->push(message);
-    }
+    FCDProPlusInput::MsgStartStop *message = FCDProPlusInput::MsgStartStop::create(checked);
+    m_sampleSource->getInputMessageQueue()->push(message);
 }
 
 void FCDProPlusGui::on_record_toggled(bool checked)

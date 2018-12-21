@@ -1,5 +1,7 @@
 project(datv)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(datv_SOURCES
 	datvdemod.cpp
 	datvdemodgui.cpp

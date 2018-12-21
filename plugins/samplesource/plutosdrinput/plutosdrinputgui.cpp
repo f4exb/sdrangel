@@ -130,7 +130,7 @@ bool PlutoSDRInputGui::deserialize(const QByteArray& data)
     }
 }
 
-bool PlutoSDRInputGui::handleMessage(const Message& message __attribute__((unused)))
+bool PlutoSDRInputGui::handleMessage(const Message& message)
 {
     if (PlutoSDRInput::MsgConfigurePlutoSDR::match(message))
     {

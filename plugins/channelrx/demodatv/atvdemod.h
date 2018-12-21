@@ -65,7 +65,8 @@ public:
 	    ATV_FM3,  //!< Classical frequency modulation with phase derivative discriminator
         ATV_AM,   //!< Classical amplitude modulation
         ATV_USB,  //!< AM with vestigial lower side band (main signal is in the upper side)
-        ATV_LSB   //!< AM with vestigial upper side band (main signal is in the lower side)
+        ATV_LSB,  //!< AM with vestigial upper side band (main signal is in the lower side)
+        ATV_NONE  //!< No modulation just produces zeros
 	};
 
 	struct ATVConfig
@@ -229,7 +230,7 @@ public:
     virtual qint64 getCenterFrequency() const { return m_rfRunning.m_intFrequencyOffset; }
 
     virtual QByteArray serialize() const { return QByteArray(); }
-    virtual bool deserialize(const QByteArray& data __attribute__((unused))) { return false; }
+    virtual bool deserialize(const QByteArray& data) { (void) data; return false; }
 
     void setTVScreen(TVScreen *objScreen); //!< set by the GUI
     int getSampleRate();

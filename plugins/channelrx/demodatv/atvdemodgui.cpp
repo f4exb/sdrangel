@@ -263,8 +263,10 @@ void ATVDemodGUI::handleSourceMessages()
     }
 }
 
-void ATVDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void ATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 }
 
 ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent) :
@@ -534,32 +536,37 @@ void ATVDemodGUI::on_halfImage_clicked()
     applySettings();
 }
 
-void ATVDemodGUI::on_nbLines_currentIndexChanged(int index __attribute__((unused)))
+void ATVDemodGUI::on_nbLines_currentIndexChanged(int index)
 {
+    (void) index;
     lineTimeUpdate();
     topTimeUpdate();
     applySettings();
 }
 
-void ATVDemodGUI::on_fps_currentIndexChanged(int index __attribute__((unused)))
+void ATVDemodGUI::on_fps_currentIndexChanged(int index)
 {
+    (void) index;
     lineTimeUpdate();
     topTimeUpdate();
     applySettings();
 }
 
-void ATVDemodGUI::on_standard_currentIndexChanged(int index __attribute__((unused)))
+void ATVDemodGUI::on_standard_currentIndexChanged(int index)
 {
+    (void) index;
     applySettings();
 }
 
-void ATVDemodGUI::on_reset_clicked(bool checked __attribute__((unused)))
+void ATVDemodGUI::on_reset_clicked(bool checked)
 {
+    (void) checked;
     resetToDefaults();
 }
 
-void ATVDemodGUI::on_modulation_currentIndexChanged(int index __attribute__((unused)))
+void ATVDemodGUI::on_modulation_currentIndexChanged(int index)
 {
+    (void) index;
     setRFFiltersSlidersRange(m_atvDemod->getEffectiveSampleRate());
     setChannelMarkerBandwidth();
     applyRFSettings();
@@ -579,15 +586,17 @@ void ATVDemodGUI::on_rfOppBW_valueChanged(int value)
     applyRFSettings();
 }
 
-void ATVDemodGUI::on_rfFiltering_toggled(bool checked __attribute__((unused)))
+void ATVDemodGUI::on_rfFiltering_toggled(bool checked)
 {
+    (void) checked;
     setRFFiltersSlidersRange(m_atvDemod->getEffectiveSampleRate());
     setChannelMarkerBandwidth();
     applyRFSettings();
 }
 
-void ATVDemodGUI::on_decimatorEnable_toggled(bool checked __attribute__((unused)))
+void ATVDemodGUI::on_decimatorEnable_toggled(bool checked)
 {
+    (void) checked;
     setChannelMarkerBandwidth();
     applyRFSettings();
 }
@@ -610,8 +619,9 @@ void ATVDemodGUI::on_fmDeviation_valueChanged(int value)
     applyRFSettings();
 }
 
-void ATVDemodGUI::on_screenTabWidget_currentChanged(int index __attribute__((unused)))
+void ATVDemodGUI::on_screenTabWidget_currentChanged(int index)
 {
+    (void) index;
 	applySettings();
 }
 

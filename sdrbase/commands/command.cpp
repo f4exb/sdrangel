@@ -14,14 +14,17 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "command.h"
-#include "util/simpleserializer.h"
+#include <chrono>
 
 #include <QKeySequence>
 #include <QProcess>
 
+#include "command.h"
+#include "util/simpleserializer.h"
+#include "util/timeutil.h"
+
 Command::Command() :
-    m_currentProcess(0),
+    m_currentProcess(nullptr),
     m_currentProcessState(QProcess::NotRunning),
     m_isInError(false),
     m_currentProcessError(QProcess::UnknownError),
@@ -30,10 +33,8 @@ Command::Command() :
     m_currentProcessExitStatus(QProcess::NormalExit),
     m_currentProcessPid(0)
 {
-    m_currentProcessStartTimeStamp.tv_sec = 0;
-    m_currentProcessStartTimeStamp.tv_usec = 0;
-    m_currentProcessFinishTimeStamp.tv_sec = 0;
-    m_currentProcessFinishTimeStamp.tv_usec = 0;
+    m_currentProcessStartTimeStampms = 0;
+    m_currentProcessFinishTimeStampms = 0;
 
     resetToDefaults();
 }
@@ -48,7 +49,7 @@ Command::Command(const Command& command) :
         m_keyModifiers(command.m_keyModifiers),
         m_associateKey(command.m_associateKey),
         m_release(command.m_release),
-        m_currentProcess(0),
+        m_currentProcess(nullptr),
         m_currentProcessState(QProcess::NotRunning),
         m_isInError(false),
         m_currentProcessError(QProcess::UnknownError),
@@ -57,10 +58,8 @@ Command::Command(const Command& command) :
         m_currentProcessExitStatus(QProcess::NormalExit),
         m_currentProcessPid(0)
 {
-    m_currentProcessStartTimeStamp.tv_sec = 0;
-    m_currentProcessStartTimeStamp.tv_usec = 0;
-    m_currentProcessFinishTimeStamp.tv_sec = 0;
-    m_currentProcessFinishTimeStamp.tv_usec = 0;
+    m_currentProcessStartTimeStampms = 0;
+    m_currentProcessFinishTimeStampms = 0;
 }
 
 Command::~Command()
@@ -85,7 +84,7 @@ void Command::resetToDefaults()
     m_command = "";
     m_argString = "";
     m_key = static_cast<Qt::Key>(0);
-    m_keyModifiers = Qt::NoModifier,
+    m_keyModifiers = Qt::NoModifier;
     m_associateKey = false;
     m_release = false;
 }
@@ -202,7 +201,7 @@ void Command::run(const QString& apiAddress, int apiPort, int deviceSetIndex)
     connect(m_currentProcess, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(processStateChanged(QProcess::ProcessState)));
 
     m_currentProcess->setProcessChannelMode(QProcess::MergedChannels);
-    gettimeofday(&m_currentProcessStartTimeStamp, 0);
+    m_currentProcessStartTimeStampms = TimeUtil::nowms();
     m_currentProcess->start(m_currentProcessCommandLine);
 }
 
@@ -258,7 +257,7 @@ void Command::processStateChanged(QProcess::ProcessState newState)
 void Command::processError(QProcess::ProcessError error)
 {
     //qDebug("Command::processError: %d state: %d", error, m_currentProcessState);
-    gettimeofday(&m_currentProcessFinishTimeStamp, 0);
+    m_currentProcessFinishTimeStampms = TimeUtil::nowms();
     m_currentProcessError = error;
     m_isInError = true;
 
@@ -275,14 +274,14 @@ void Command::processError(QProcess::ProcessError error)
         disconnect(m_currentProcess, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(processStateChanged(QProcess::ProcessState)));
 
         m_currentProcess->deleteLater(); // make sure other threads can still access it until all events have been processed
-        m_currentProcess = 0; // for this thread it can assume it was deleted
+        m_currentProcess = nullptr; // for this thread it can assume it was deleted
     }
 }
 
 void Command::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     //qDebug("Command::processFinished: (%d) %d", exitCode, exitStatus);
-    gettimeofday(&m_currentProcessFinishTimeStamp, 0);
+    m_currentProcessFinishTimeStampms = TimeUtil::nowms();
     m_currentProcessExitCode = exitCode;
     m_currentProcessExitStatus = exitStatus;
     m_hasExited = true;
@@ -297,5 +296,5 @@ void Command::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
     disconnect(m_currentProcess, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(processStateChanged(QProcess::ProcessState)));
 
     m_currentProcess->deleteLater(); // make sure other threads can still access it until all events have been processed
-    m_currentProcess = 0; // for this thread it can assume it was deleted
+    m_currentProcess = nullptr; // for this thread it can assume it was deleted
 }

@@ -528,8 +528,9 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 int HackRFInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setHackRfInputSettings(new SWGSDRangel::SWGHackRFInputSettings());
     response.getHackRfInputSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -540,8 +541,9 @@ int HackRFInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     HackRFInputSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("centerFrequency")) {
@@ -628,8 +630,9 @@ void HackRFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
 
 int HackRFInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -637,8 +640,9 @@ int HackRFInput::webapiRunGet(
 int HackRFInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);

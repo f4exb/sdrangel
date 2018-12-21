@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2016-2018 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,8 +14,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-// FIXME: FCD is handled very badly!
-
 #include <QDebug>
 #include <string.h>
 #include <errno.h>
@@ -25,11 +23,10 @@
 
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include <dsp/filerecord.h>
+#include "dsp/filerecord.h"
+#include "device/devicesourceapi.h"
+
 #include "fcdproplusinput.h"
-
-#include <device/devicesourceapi.h>
-
 #include "fcdproplusthread.h"
 #include "fcdtraits.h"
 #include "fcdproplusconst.h"
@@ -46,6 +43,7 @@ FCDProPlusInput::FCDProPlusInput(DeviceSourceAPI *deviceAPI) :
 	m_deviceDescription(fcd_traits<ProPlus>::displayedName),
 	m_running(false)
 {
+    m_fcdFIFO.setSize(20*fcd_traits<ProPlus>::convBufSize);
     openDevice();
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
@@ -53,9 +51,13 @@ FCDProPlusInput::FCDProPlusInput(DeviceSourceAPI *deviceAPI) :
 
 FCDProPlusInput::~FCDProPlusInput()
 {
-    if (m_running) stop();
+    if (m_running) {
+        stop();
+    }
+
     m_deviceAPI->removeSink(m_fileSink);
     delete m_fileSink;
+
     closeDevice();
 }
 
@@ -66,9 +68,12 @@ void FCDProPlusInput::destroy()
 
 bool FCDProPlusInput::openDevice()
 {
+    if (m_dev != 0) {
+        closeDevice();
+    }
+
     int device = m_deviceAPI->getSampleSourceSequence();
     qDebug() << "FCDProPlusInput::openDevice with device #" << device;
-
     m_dev = fcdOpen(fcd_traits<ProPlus>::vendorId, fcd_traits<ProPlus>::productId, device);
 
     if (m_dev == 0)
@@ -87,14 +92,15 @@ void FCDProPlusInput::init()
 
 bool FCDProPlusInput::start()
 {
-
 //	QMutexLocker mutexLocker(&m_mutex);
 
     if (!m_dev) {
         return false;
     }
 
-    if (m_running) stop();
+    if (m_running) {
+        stop();
+    }
 
     qDebug() << "FCDProPlusInput::start";
 
@@ -105,13 +111,23 @@ bool FCDProPlusInput::start()
 
 	//applySettings(m_settings, true);
 
-	if(!m_sampleFifo.setSize(96000*4))
+	if (!m_sampleFifo.setSize(96000*4))
 	{
-		qCritical("Could not allocate SampleFifo");
+		qCritical("FCDProPlusInput::start: could not allocate SampleFifo");
 		return false;
 	}
 
-	m_FCDThread = new FCDProPlusThread(&m_sampleFifo);
+	if (!openFCDAudio(fcd_traits<ProPlus>::qtDeviceName))
+	{
+        qCritical("FCDProPlusInput::start: could not open FCD audio source");
+        return false;
+	}
+    else
+    {
+        qDebug("FCDProPlusInput::start: FCD audio source opened");
+    }
+
+	m_FCDThread = new FCDProPlusThread(&m_sampleFifo, &m_fcdFIFO);
 	m_FCDThread->startWork();
 
 //	mutexLocker.unlock();
@@ -133,6 +149,35 @@ void FCDProPlusInput::closeDevice()
     m_dev = 0;
 }
 
+bool FCDProPlusInput::openFCDAudio(const char* cardname)
+{
+    AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+    const QList<QAudioDeviceInfo>& audioList = audioDeviceManager->getInputDevices();
+
+    for (const auto &itAudio : audioList)
+    {
+        if (itAudio.deviceName().contains(QString(cardname)))
+        {
+            int fcdDeviceIndex = audioDeviceManager->getInputDeviceIndex(itAudio.deviceName());
+            m_fcdAudioInput.start(fcdDeviceIndex, fcd_traits<ProPlus>::sampleRate);
+            int fcdSampleRate = m_fcdAudioInput.getRate();
+            qDebug("FCDProPlusInput::openFCDAudio: %s index %d at %d S/s",
+                    itAudio.deviceName().toStdString().c_str(), fcdDeviceIndex, fcdSampleRate);
+            m_fcdAudioInput.addFifo(&m_fcdFIFO);
+            return true;
+        }
+    }
+
+    qCritical("FCDProPlusInput::openFCDAudio: device with name %s not found", cardname);
+    return false;
+}
+
+void FCDProPlusInput::closeFCDAudio()
+{
+    m_fcdAudioInput.removeFifo(&m_fcdFIFO);
+    m_fcdAudioInput.stop();
+}
+
 void FCDProPlusInput::stop()
 {
 	QMutexLocker mutexLocker(&m_mutex);
@@ -142,7 +187,8 @@ void FCDProPlusInput::stop()
 		m_FCDThread->stopWork();
 		// wait for thread to quit ?
 		delete m_FCDThread;
-		m_FCDThread = 0;
+		m_FCDThread = nullptr;
+		closeFCDAudio();
 	}
 
 	m_running = false;
@@ -217,7 +263,7 @@ bool FCDProPlusInput::handleMessage(const Message& message)
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
-        qDebug() << "BladerfInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+        qDebug() << "FCDProPlusInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
 
         if (cmd.getStartStop())
         {
@@ -460,8 +506,9 @@ void FCDProPlusInput::set_lo_ppm()
 
 int FCDProPlusInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -469,8 +516,9 @@ int FCDProPlusInput::webapiRunGet(
 int FCDProPlusInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
@@ -486,8 +534,9 @@ int FCDProPlusInput::webapiRun(
 
 int FCDProPlusInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setFcdProPlusSettings(new SWGSDRangel::SWGFCDProPlusSettings());
     response.getFcdProPlusSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -498,8 +547,9 @@ int FCDProPlusInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     FCDProPlusSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("centerFrequency")) {

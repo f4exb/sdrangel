@@ -30,9 +30,10 @@ GLScope::GLScope(QWidget* parent) :
     QGLWidget(parent),
     m_tracesData(0),
     m_traces(0),
+    m_processingTraceIndex(-1),
     m_bufferIndex(0),
     m_displayMode(DisplayX),
-    m_dataChanged(false),
+    m_dataChanged(0),
     m_configChanged(false),
     m_sampleRate(0),
     m_timeOfsProMill(0),
@@ -102,11 +103,31 @@ void GLScope::newTraces(std::vector<float *>* traces)
 {
     if (traces->size() > 0)
     {
-        if(!m_mutex.tryLock(2))
+        if (!m_mutex.tryLock(0)) {
             return;
+        }
 
-        m_traces = traces;
-        m_dataChanged = true;
+        if (m_dataChanged.testAndSetOrdered(0, 1)) {
+            m_traces = traces;
+        }
+
+        m_mutex.unlock();
+    }
+}
+
+void GLScope::newTraces(std::vector<float *>* traces, int traceIndex)
+{
+    if (traces->size() > 0)
+    {
+        if(!m_mutex.tryLock(0)) {
+            return;
+        }
+
+        if (m_dataChanged.testAndSetOrdered(0, 1))
+        {
+            m_processingTraceIndex.store(traceIndex);
+            m_traces = &traces[traceIndex];
+        }
 
         m_mutex.unlock();
     }
@@ -176,16 +197,16 @@ void GLScope::resizeGL(int width, int height)
 
 void GLScope::paintGL()
 {
-    if(!m_mutex.tryLock(2))
+    if (!m_mutex.tryLock(0)) {
         return;
+    }
 
-    if(m_configChanged)
+    if (m_configChanged) {
         applyConfig();
+    }
 
 //    qDebug("GLScope::paintGL: m_traceCounter: %d", m_traceCounter);
 //    m_traceCounter = 0;
-
-    m_dataChanged = false;
 
     QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
     glFunctions->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -920,6 +941,8 @@ void GLScope::paintGL()
         } // trace length > 0
     } // XY mixed + polar display
 
+    m_dataChanged.store(0);
+    m_processingTraceIndex.store(-1);
     m_mutex.unlock();
 }
 
@@ -1974,7 +1997,7 @@ void GLScope::drawChannelOverlay(
 
 void GLScope::tick()
 {
-    if(m_dataChanged) {
+    if (m_dataChanged.load()) {
         update();
     }
 }

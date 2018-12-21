@@ -81,7 +81,7 @@ public:
 
 	void resetToDefaults();
 	virtual qint64 getCenterFrequency() const { return m_deviceCenterFrequency; }
-	virtual void setCenterFrequency(qint64 centerFrequency __attribute__((unused))) {}
+	virtual void setCenterFrequency(qint64 centerFrequency) { (void) centerFrequency; }
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }

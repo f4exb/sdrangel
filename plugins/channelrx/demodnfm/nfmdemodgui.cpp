@@ -214,8 +214,10 @@ void NFMDemodGUI::on_ctcss_currentIndexChanged(int index)
 	applySettings();
 }
 
-void NFMDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void NFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 	/*
 	if((widget == ui->spectrumContainer) && (m_nfmDemod != NULL))
 		m_nfmDemod->setSpectrum(m_threadedSampleSink->getMessageQueue(), rollDown);

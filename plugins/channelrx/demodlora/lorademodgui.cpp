@@ -70,8 +70,9 @@ bool LoRaDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool LoRaDemodGUI::handleMessage(const Message& message __attribute__((unused)))
+bool LoRaDemodGUI::handleMessage(const Message& message)
 {
+    (void) message;
 	return false;
 }
 
@@ -97,12 +98,15 @@ void LoRaDemodGUI::on_BW_valueChanged(int value)
 	applySettings();
 }
 
-void LoRaDemodGUI::on_Spread_valueChanged(int value __attribute__((unused)))
+void LoRaDemodGUI::on_Spread_valueChanged(int value)
 {
+    (void) value;
 }
 
-void LoRaDemodGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void LoRaDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 }
 
 LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :

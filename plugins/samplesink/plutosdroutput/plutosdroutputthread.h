@@ -37,7 +37,7 @@ public:
 
     virtual void startWork();
     virtual void stopWork();
-    virtual void setDeviceSampleRate(int sampleRate __attribute__((unused))) {}
+    virtual void setDeviceSampleRate(int sampleRate) { (void) sampleRate; }
     virtual bool isRunning() { return m_running; }
     void setLog2Interpolation(unsigned int log2_interp);
 

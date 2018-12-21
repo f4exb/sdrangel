@@ -37,7 +37,6 @@
 
 #include <stdio.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <memory.h>
 
 #include <dsp/misc.h>

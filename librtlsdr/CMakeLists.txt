@@ -1,5 +1,7 @@
 project(rtlsdr)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 add_definitions(-DDETACH_KERNEL_DRIVER=ON)
 
 find_package(LibUSB)

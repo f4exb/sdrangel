@@ -507,13 +507,24 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
 
         if (m_dev != 0)
         {
-            if (rtlsdr_set_tuner_bandwidth( m_dev, m_settings.m_rfBandwidth) != 0)
-            {
+            if (rtlsdr_set_tuner_bandwidth( m_dev, m_settings.m_rfBandwidth) != 0) {
                 qCritical("RTLSDRInput::applySettings: could not set RF bandwidth to %u", m_settings.m_rfBandwidth);
-            }
-            else
-            {
+            } else {
                 qDebug() << "RTLSDRInput::applySettings: set RF bandwidth to " << m_settings.m_rfBandwidth;
+            }
+        }
+    }
+
+    if ((m_settings.m_offsetTuning != settings.m_offsetTuning) || force)
+    {
+        m_settings.m_offsetTuning = settings.m_offsetTuning;
+
+        if (m_dev != 0)
+        {
+            if (rtlsdr_set_offset_tuning(m_dev, m_settings.m_offsetTuning ? 0 : 1) != 0) {
+                qCritical("RTLSDRInput::applySettings: could not set offset tuning to %s", m_settings.m_offsetTuning ? "on" : "off");
+            } else {
+                qDebug("RTLSDRInput::applySettings: offset tuning set to %s", m_settings.m_offsetTuning ? "on" : "off");
             }
         }
     }
@@ -536,8 +547,9 @@ void RTLSDRInput::set_ds_mode(int on)
 
 int RTLSDRInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setRtlSdrSettings(new SWGSDRangel::SWGRtlSdrSettings());
     response.getRtlSdrSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -548,8 +560,9 @@ int RTLSDRInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     RTLSDRSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("agc")) {
@@ -584,6 +597,9 @@ int RTLSDRInput::webapiSettingsPutPatch(
     }
     if (deviceSettingsKeys.contains("noModMode")) {
         settings.m_noModMode = response.getRtlSdrSettings()->getNoModMode() != 0;
+    }
+    if (deviceSettingsKeys.contains("offsetTuning")) {
+        settings.m_offsetTuning = response.getRtlSdrSettings()->getOffsetTuning() != 0;
     }
     if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
         settings.m_transverterDeltaFrequency = response.getRtlSdrSettings()->getTransverterDeltaFrequency();
@@ -625,6 +641,7 @@ void RTLSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getRtlSdrSettings()->setLog2Decim(settings.m_log2Decim);
     response.getRtlSdrSettings()->setLowSampleRate(settings.m_lowSampleRate ? 1 : 0);
     response.getRtlSdrSettings()->setNoModMode(settings.m_noModMode ? 1 : 0);
+    response.getRtlSdrSettings()->setOffsetTuning(settings.m_offsetTuning ? 1 : 0);
     response.getRtlSdrSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getRtlSdrSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
     response.getRtlSdrSettings()->setRfBandwidth(settings.m_rfBandwidth);
@@ -638,8 +655,9 @@ void RTLSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
 
 int RTLSDRInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -647,8 +665,9 @@ int RTLSDRInput::webapiRunGet(
 int RTLSDRInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
@@ -664,8 +683,9 @@ int RTLSDRInput::webapiRun(
 
 int RTLSDRInput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setRtlSdrReport(new SWGSDRangel::SWGRtlSdrReport());
     response.getRtlSdrReport()->init();
     webapiFormatDeviceReport(response);

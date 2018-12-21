@@ -1404,13 +1404,17 @@ void MainWindow::on_presetDelete_clicked()
 	}
 }
 
-void MainWindow::on_presetTree_currentItemChanged(QTreeWidgetItem *current __attribute__((unused)), QTreeWidgetItem *previous __attribute__((unused)))
+void MainWindow::on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
 {
+    (void) current;
+    (void) previous;
 	updatePresetControls();
 }
 
-void MainWindow::on_presetTree_itemActivated(QTreeWidgetItem *item __attribute__((unused)), int column __attribute__((unused)))
+void MainWindow::on_presetTree_itemActivated(QTreeWidgetItem *item, int column)
 {
+    (void) item;
+    (void) column;
 	on_presetLoad_clicked();
 }
 
@@ -1644,8 +1648,9 @@ void MainWindow::sampleSinkChanged()
     }
 }
 
-void MainWindow::channelAddClicked(bool checked __attribute__((unused)))
+void MainWindow::channelAddClicked(bool checked)
 {
+    (void) checked;
     // Do it in the currently selected source tab
     int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
 
@@ -1778,8 +1783,9 @@ void MainWindow::setLoggingOptions()
     }
 }
 
-void MainWindow::focusHasChanged(QWidget *oldWidget __attribute__((unused)), QWidget *newWidget)
+void MainWindow::focusHasChanged(QWidget *oldWidget, QWidget *newWidget)
 {
+    (void) oldWidget;
     // this is the hard way:
 //    if (ui->commandKeyboardConnect->isChecked() && (newWidget != this)) {
 //        setFocus();

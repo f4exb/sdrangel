@@ -138,7 +138,7 @@ protected:
     }
 };
 
-class LevelMeterVU : public LevelMeter
+class SDRGUI_API LevelMeterVU : public LevelMeter
 {
 public:
     LevelMeterVU(QWidget *parent = 0);
@@ -148,7 +148,7 @@ protected:
     virtual void resized();
 };
 
-class LevelMeterSignalDB : public LevelMeter
+class SDRGUI_API LevelMeterSignalDB : public LevelMeter
 {
 public:
     typedef enum

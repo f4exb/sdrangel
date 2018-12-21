@@ -76,8 +76,12 @@ private:
     IIRFilter<float, 2> m_filterLP;
     IIRFilter<float, 2> m_filterHP;
     bool m_useHP;
-    static const float m_lpa[3], m_lpb[3]; // low pass coefficients
-    static const float m_hpa[3], m_hpb[3]; // band pass coefficients
+    // low pass coefficients
+    static const float m_lpa[3];
+    static const float m_lpb[3];
+    // band pass coefficients
+    static const float m_hpa[3];
+    static const float m_hpb[3];
 };
 
 

@@ -444,14 +444,16 @@ void ATVModGUI::setChannelMarkerBandwidth()
     }
 }
 
-void ATVModGUI::on_nbLines_currentIndexChanged(int index __attribute__((unused)))
+void ATVModGUI::on_nbLines_currentIndexChanged(int index)
 {
+    (void) index;
     m_settings.m_nbLines = getNbLines();
     applySettings();
 }
 
-void ATVModGUI::on_fps_currentIndexChanged(int index __attribute__((unused)))
+void ATVModGUI::on_fps_currentIndexChanged(int index)
 {
+    (void) index;
     m_settings.m_fps = getFPS();
     applySettings();
 }
@@ -494,8 +496,9 @@ void ATVModGUI::on_forceDecimator_toggled(bool checked)
     applySettings();
 }
 
-void ATVModGUI::on_imageFileDialog_clicked(bool checked __attribute__((unused)))
+void ATVModGUI::on_imageFileDialog_clicked(bool checked)
 {
+    (void) checked;
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open image file"), ".", tr("Image Files (*.png *.jpg *.bmp *.gif *.tiff)"), 0, QFileDialog::DontUseNativeDialog);
 
@@ -507,8 +510,9 @@ void ATVModGUI::on_imageFileDialog_clicked(bool checked __attribute__((unused)))
     }
 }
 
-void ATVModGUI::on_videoFileDialog_clicked(bool checked __attribute__((unused)))
+void ATVModGUI::on_videoFileDialog_clicked(bool checked)
 {
+    (void) checked;
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open video file"), ".", tr("Video Files (*.avi *.mpg *.mp4 *.mov *.m4v *.mkv *.vob *.wmv)"), 0, QFileDialog::DontUseNativeDialog);
 
@@ -580,8 +584,9 @@ void ATVModGUI::on_overlayTextShow_toggled(bool checked)
     applySettings();
 }
 
-void ATVModGUI::on_overlayText_textEdited(const QString& arg1 __attribute__((unused)))
+void ATVModGUI::on_overlayText_textEdited(const QString& arg1)
 {
+    (void) arg1;
     m_settings.m_overlayText = arg1;
     applySettings();
 }
@@ -600,8 +605,10 @@ void ATVModGUI::configureVideoFileName()
     m_atvMod->getInputMessageQueue()->push(message);
 }
 
-void ATVModGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void ATVModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 }
 
 void ATVModGUI::onMenuDialogCalled(const QPoint &p)

@@ -312,16 +312,18 @@ void ChannelAnalyzerGUI::on_rrcRolloff_valueChanged(int value)
     applySettings();
 }
 
-void ChannelAnalyzerGUI::on_BW_valueChanged(int value __attribute__((unused)))
+void ChannelAnalyzerGUI::on_BW_valueChanged(int value)
 {
+    (void) value;
     setFiltersUIBoundaries();
     m_settings.m_bandwidth = ui->BW->value() * 100;
     m_settings.m_lowCutoff = ui->lowCut->value() * 100;
 	applySettings();
 }
 
-void ChannelAnalyzerGUI::on_lowCut_valueChanged(int value __attribute__((unused)))
+void ChannelAnalyzerGUI::on_lowCut_valueChanged(int value)
 {
+    (void) value;
 	setFiltersUIBoundaries();
 	m_settings.m_bandwidth = ui->BW->value() * 100;
 	m_settings.m_lowCutoff = ui->lowCut->value() * 100;
@@ -351,8 +353,10 @@ void ChannelAnalyzerGUI::on_ssb_toggled(bool checked)
     applySettings();
 }
 
-void ChannelAnalyzerGUI::onWidgetRolled(QWidget* widget __attribute__((unused)), bool rollDown __attribute__((unused)))
+void ChannelAnalyzerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
 }
 
 void ChannelAnalyzerGUI::onMenuDialogCalled(const QPoint& p)

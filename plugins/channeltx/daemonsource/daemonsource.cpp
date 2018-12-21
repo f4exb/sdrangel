@@ -74,8 +74,9 @@ void DaemonSource::pull(Sample& sample)
     m_dataReadQueue.readSample(sample, true); // true is scale for Tx
 }
 
-void DaemonSource::pullAudio(int nbSamples __attribute__((unused)))
+void DaemonSource::pullAudio(int nbSamples)
 {
+    (void) nbSamples;
 }
 
 void DaemonSource::start()
@@ -174,8 +175,9 @@ QByteArray DaemonSource::serialize() const
     return m_settings.serialize();
 }
 
-bool DaemonSource::deserialize(const QByteArray& data __attribute__((unused)))
+bool DaemonSource::deserialize(const QByteArray& data)
 {
+    (void) data;
     if (m_settings.deserialize(data))
     {
         MsgConfigureDaemonSource *msg = MsgConfigureDaemonSource::create(m_settings, true);
@@ -215,8 +217,9 @@ void DaemonSource::applySettings(const DaemonSourceSettings& settings, bool forc
     m_settings = settings;
 }
 
-void DaemonSource::handleDataBlock(SDRDaemonDataBlock* dataBlock __attribute__((unused)))
+void DaemonSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
 {
+    (void) dataBlock;
     if (dataBlock->m_rxControlBlock.m_blockCount < SDRDaemonNbOrginalBlocks)
     {
         qWarning("DaemonSource::handleDataBlock: incomplete data block: not processing");
@@ -352,8 +355,9 @@ uint32_t DaemonSource::calculateDataReadQueueSize(int sampleRate)
 
 int DaemonSource::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setDaemonSourceSettings(new SWGSDRangel::SWGDaemonSourceSettings());
     response.getDaemonSourceSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
@@ -364,8 +368,9 @@ int DaemonSource::webapiSettingsPutPatch(
         bool force,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     DaemonSourceSettings settings = m_settings;
 
     if (channelSettingsKeys.contains("dataAddress")) {
@@ -405,8 +410,9 @@ int DaemonSource::webapiSettingsPutPatch(
 
 int DaemonSource::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setDaemonSourceReport(new SWGSDRangel::SWGDaemonSourceReport());
     response.getDaemonSourceReport()->init();
     webapiFormatChannelReport(response);

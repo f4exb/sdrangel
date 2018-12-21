@@ -24,12 +24,23 @@
 #include <stdint.h>
 #include "dsp/dsptypes.h"
 #include "dsp/hbfiltertraits.h"
-#include "export.h"
 
 template<typename AccuType, uint32_t HBFilterOrder>
-class SDRBASE_API IntHalfbandFilterDB {
+class IntHalfbandFilterDB {
 public:
-    IntHalfbandFilterDB();
+    IntHalfbandFilterDB()
+    {
+        m_size = HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1;
+
+        for (int i = 0; i < m_size; i++)
+        {
+            m_samplesDB[i][0] = 0;
+            m_samplesDB[i][1] = 0;
+        }
+
+        m_ptr = 0;
+        m_state = 0;
+    }
 
 	// downsample by 2, return center part of original spectrum
 	bool workDecimateCenter(Sample* sample)
@@ -753,20 +764,5 @@ protected:
         *y = qAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1);
     }
 };
-
-template<typename AccuType, uint32_t HBFilterOrder>
-IntHalfbandFilterDB<AccuType, HBFilterOrder>::IntHalfbandFilterDB()
-{
-    m_size = HBFIRFilterTraits<HBFilterOrder>::hbOrder - 1;
-
-    for (int i = 0; i < m_size; i++)
-    {
-        m_samplesDB[i][0] = 0;
-        m_samplesDB[i][1] = 0;
-    }
-
-    m_ptr = 0;
-    m_state = 0;
-}
 
 #endif // INCLUDE_INTHALFBANDFILTER_DB_H

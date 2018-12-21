@@ -16,14 +16,16 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <stdlib.h>
-#include <dirent.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#ifndef _MSC_VER
+#include <dirent.h>
+#include <unistd.h>
 #include <libgen.h>
+#endif
 
 #ifndef __WINDOWS__
 #include <termios.h>

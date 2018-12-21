@@ -329,6 +329,11 @@ bool BladeRF2Input::start()
                 ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
             }
 
+            // was used as temporary storage:
+            delete[] fifos;
+            delete[] log2Decims;
+            delete[] fcPoss;
+
             needsStart = true;
         }
         else
@@ -470,6 +475,11 @@ void BladeRF2Input::stop()
         if (stillActiveFIFO) {
             bladerf2InputThread->startWork();
         }
+
+        // was used as temporary storage:
+        delete[] fifos;
+        delete[] log2Decims;
+        delete[] fcPoss;
     }
     else // remove channel from existing thread
     {
@@ -967,8 +977,9 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
 int BladeRF2Input::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setBladeRf2InputSettings(new SWGSDRangel::SWGBladeRF2InputSettings());
     response.getBladeRf2InputSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -979,8 +990,9 @@ int BladeRF2Input::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     BladeRF2InputSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("centerFrequency")) {
@@ -1039,8 +1051,9 @@ int BladeRF2Input::webapiSettingsPutPatch(
     return 200;
 }
 
-int BladeRF2Input::webapiReportGet(SWGSDRangel::SWGDeviceReport& response, QString& errorMessage __attribute__((unused)))
+int BladeRF2Input::webapiReportGet(SWGSDRangel::SWGDeviceReport& response, QString& errorMessage)
 {
+    (void) errorMessage;
     response.setBladeRf2InputReport(new SWGSDRangel::SWGBladeRF2InputReport());
     response.getBladeRf2InputReport()->init();
     webapiFormatDeviceReport(response);
@@ -1123,8 +1136,9 @@ void BladeRF2Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
 
 int BladeRF2Input::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -1132,8 +1146,9 @@ int BladeRF2Input::webapiRunGet(
 int BladeRF2Input::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);

@@ -15,7 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <unistd.h>
+#include <chrono>
+#include <thread>
 
 #include "dsp/dvserialworker.h"
 #include "audio/audiofifo.h"
@@ -60,7 +61,7 @@ void DVSerialWorker::process()
 
     while (m_running)
     {
-        sleep(1);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
     qDebug("DVSerialWorker::process: stopped");

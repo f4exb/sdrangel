@@ -185,7 +185,7 @@ public:
     virtual qint64 getCenterFrequency() const { return m_objRunning.intCenterFrequency; }
 
     virtual QByteArray serialize() const { return QByteArray(); }
-    virtual bool deserialize(const QByteArray& data __attribute__((unused))) { return false; }
+    virtual bool deserialize(const QByteArray& data) { (void) data; return false; }
 
     void configure(
         MessageQueue* objMessageQueue,

@@ -16,11 +16,10 @@
 
 #include <QDebug>
 
-#include <sys/time.h>
-#include <unistd.h>
 #include <boost/crc.hpp>
 #include <boost/cstdint.hpp>
 
+#include "util/timeutil.h"
 #include "udpsinkfec.h"
 #include "udpsinkfecworker.h"
 
@@ -118,10 +117,9 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
 
         if (m_txBlockIndex == 0) // Tx block index 0 is a block with only meta data
         {
-            struct timeval tv;
             SDRDaemonMetaDataFEC metaData;
 
-            gettimeofday(&tv, 0);
+            uint64_t ts_usecs = TimeUtil::nowus();
 
             metaData.m_centerFrequency = 0; // frequency not set by stream
             metaData.m_sampleRate = m_sampleRate;
@@ -129,8 +127,8 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
             metaData.m_sampleBits = SDR_RX_SAMP_SZ;
             metaData.m_nbOriginalBlocks = m_nbOriginalBlocks;
             metaData.m_nbFECBlocks = m_nbBlocksFEC;
-            metaData.m_tv_sec = tv.tv_sec;
-            metaData.m_tv_usec = tv.tv_usec;
+            metaData.m_tv_sec = ts_usecs / 1000000UL;
+            metaData.m_tv_usec = ts_usecs % 1000000UL;
 
             boost::crc_32_type crc32;
             crc32.process_bytes(&metaData, 20);
@@ -143,7 +141,10 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
             m_superBlock.m_header.m_blockIndex = m_txBlockIndex;
             m_superBlock.m_header.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
             m_superBlock.m_header.m_sampleBits = SDR_RX_SAMP_SZ;
-            memcpy((char *) &m_superBlock.m_protectedBlock, (const char *) &metaData, sizeof(SDRDaemonMetaDataFEC));
+
+            SDRDaemonMetaDataFEC *destMeta = (SDRDaemonMetaDataFEC *) &m_superBlock.m_protectedBlock;
+            *destMeta = metaData;
+            //memcpy((char *) &m_superBlock.m_protectedBlock, (const char *) &metaData, sizeof(SDRDaemonMetaDataFEC));
 
             if (!(metaData == m_currentMetaFEC))
             {

@@ -32,6 +32,13 @@ class SoapySDROutputThread;
 namespace SoapySDR
 {
     class Device;
+    class ArgInfo;
+}
+
+namespace SWGSDRangel
+{
+    class SWGArgValue;
+    class SWGArgInfo;
 }
 
 class SoapySDROutput : public DeviceSampleSink {
@@ -133,11 +140,39 @@ public:
     const SoapySDR::RangeList& getBandwidthRanges();
     const std::vector<DeviceSoapySDRParams::FrequencySetting>& getTunableElements();
     const std::vector<DeviceSoapySDRParams::GainSetting>& getIndividualGainsRanges();
+    const SoapySDR::ArgInfoList& getStreamArgInfoList();
+    const SoapySDR::ArgInfoList& getDeviceArgInfoList();
     void initGainSettings(SoapySDROutputSettings& settings);
+    void initTunableElementsSettings(SoapySDROutputSettings& settings);
+    void initStreamArgSettings(SoapySDROutputSettings& settings);
+    void initDeviceArgSettings(SoapySDROutputSettings& settings);
     bool hasDCAutoCorrection();
     bool hasDCCorrectionValue();
     bool hasIQAutoCorrection() { return false; } // not in SoapySDR interface
     bool hasIQCorrectionValue();
+
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            QString& errorMessage);
+
+    virtual int webapiRunGet(
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
+    virtual int webapiRun(
+            bool run,
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
 
 private:
     DeviceSinkAPI *m_deviceAPI;
@@ -155,6 +190,12 @@ private:
     bool applySettings(const SoapySDROutputSettings& settings, bool force = false);
     bool setDeviceCenterFrequency(SoapySDR::Device *dev, int requestedChannel, quint64 freq_hz, int loPpmTenths);
     void updateGains(SoapySDR::Device *dev, int requestedChannel, SoapySDROutputSettings& settings);
+    void updateTunableElements(SoapySDR::Device *dev, int requestedChannel, SoapySDROutputSettings& settings);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SoapySDROutputSettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+    QVariant webapiVariantFromArgValue(SWGSDRangel::SWGArgValue *argValue);
+    void webapiFormatArgValue(const QVariant& v, SWGSDRangel::SWGArgValue *argValue);
+    void webapiFormatArgInfo(const SoapySDR::ArgInfo& arg, SWGSDRangel::SWGArgInfo *argInfo);
 };
 
 

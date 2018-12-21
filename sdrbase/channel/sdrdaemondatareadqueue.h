@@ -59,11 +59,7 @@ private:
         int samplebits = m_dataBlock->m_superBlocks[blockIndex].m_header.m_sampleBits;      // I or Q sample size in bits
         int32_t iconv, qconv;
 
-        if (sizeof(Sample) == sampleSize) // generally 16->16 or 24->24 bits
-        {
-            s = *((Sample*) &(m_dataBlock->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]));
-        }
-        else if ((sizeof(Sample) == 4) && (sampleSize == 8)) // generally 24->16 bits
+        if ((sizeof(Sample) == 4) && (sampleSize == 8)) // generally 24->16 bits
         {
             iconv = ((int32_t*) &(m_dataBlock->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0];
             qconv = ((int32_t*) &(m_dataBlock->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+4]))[0];
@@ -81,7 +77,11 @@ private:
             s.setReal(iconv);
             s.setImag(qconv);
         }
-        else
+        else if ((sampleSize == 4) || (sampleSize == 8)) // generally 16->16 or 24->24 bits
+        {
+            s = *((Sample*) &(m_dataBlock->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]));
+        }
+        else // invalid size
         {
             s = Sample{0, 0};
         }

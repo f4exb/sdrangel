@@ -71,6 +71,8 @@ QByteArray SoapySDRInputSettings::serialize() const
     s.writeDouble(18, m_dcCorrection.imag());
     s.writeDouble(19, m_iqCorrection.real());
     s.writeDouble(20, m_iqCorrection.imag());
+    s.writeBlob(21, serializeArgumentMap(m_streamArgSettings));
+    s.writeBlob(22, serializeArgumentMap(m_deviceArgSettings));
 
     return s.final();
 }
@@ -116,6 +118,10 @@ bool SoapySDRInputSettings::deserialize(const QByteArray& data)
         d.readDouble(19, &realval, 0);
         d.readDouble(20, &imagval, 0);
         m_iqCorrection = std::complex<double>{realval, imagval};
+        d.readBlob(21, &blob);
+        deserializeArgumentMap(blob, m_streamArgSettings);
+        d.readBlob(22, &blob);
+        deserializeArgumentMap(blob, m_deviceArgSettings);
 
         return true;
     }
@@ -142,3 +148,21 @@ void SoapySDRInputSettings::deserializeNamedElementMap(const QByteArray& data, Q
     (*stream) >> map;
     delete stream;
 }
+
+QByteArray SoapySDRInputSettings::serializeArgumentMap(const QMap<QString, QVariant>& map) const
+{
+    QByteArray data;
+    QDataStream *stream = new QDataStream(&data, QIODevice::WriteOnly);
+    (*stream) << map;
+    delete stream;
+
+    return data;
+}
+
+void SoapySDRInputSettings::deserializeArgumentMap(const QByteArray& data, QMap<QString, QVariant>& map)
+{
+    QDataStream *stream = new QDataStream(data);
+    (*stream) >> map;
+    delete stream;
+}
+

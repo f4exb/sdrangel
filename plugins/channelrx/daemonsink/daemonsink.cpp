@@ -97,8 +97,9 @@ void DaemonSink::setNbBlocksFEC(int nbBlocksFEC)
     m_nbBlocksFEC = nbBlocksFEC;
 }
 
-void DaemonSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
+void DaemonSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
+    (void) firstOfBurst;
     SampleVector::const_iterator it = begin;
 
     while (it != end)
@@ -134,7 +135,10 @@ void DaemonSink::feed(const SampleVector::const_iterator& begin, const SampleVec
             superBlock.m_header.m_blockIndex = m_txBlockIndex;
             superBlock.m_header.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
             superBlock.m_header.m_sampleBits = SDR_RX_SAMP_SZ;
-            memcpy((void *) &superBlock.m_protectedBlock, (const void *) &metaData, sizeof(SDRDaemonMetaDataFEC));
+
+            SDRDaemonMetaDataFEC *destMeta = (SDRDaemonMetaDataFEC *) &superBlock.m_protectedBlock;
+            *destMeta = metaData;
+            //memcpy((void *) &superBlock.m_protectedBlock, (const void *) &metaData, sizeof(SDRDaemonMetaDataFEC));
 
             if (!(metaData == m_currentMetaFEC))
             {
@@ -238,8 +242,9 @@ void DaemonSink::stop()
     m_running = false;
 }
 
-bool DaemonSink::handleMessage(const Message& cmd __attribute__((unused)))
+bool DaemonSink::handleMessage(const Message& cmd)
 {
+    (void) cmd;
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
@@ -293,8 +298,9 @@ QByteArray DaemonSink::serialize() const
     return m_settings.serialize();
 }
 
-bool DaemonSink::deserialize(const QByteArray& data __attribute__((unused)))
+bool DaemonSink::deserialize(const QByteArray& data)
 {
+    (void) data;
     if (m_settings.deserialize(data))
     {
         MsgConfigureDaemonSink *msg = MsgConfigureDaemonSink::create(m_settings, true);
@@ -341,8 +347,9 @@ void DaemonSink::applySettings(const DaemonSinkSettings& settings, bool force)
 
 int DaemonSink::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setDaemonSinkSettings(new SWGSDRangel::SWGDaemonSinkSettings());
     response.getDaemonSinkSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
@@ -353,8 +360,9 @@ int DaemonSink::webapiSettingsPutPatch(
         bool force,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     DaemonSinkSettings settings = m_settings;
 
     if (channelSettingsKeys.contains("nbFECBlocks"))

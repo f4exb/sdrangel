@@ -1,5 +1,7 @@
 project (sdrgui)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(sdrgui_SOURCES
     mainwindow.cpp
     gui/aboutdialog.cpp
@@ -59,8 +61,10 @@ set(sdrgui_SOURCES
     soapygui/itemsettinggui.cpp
     soapygui/stringrangegui.cpp
     soapygui/dynamicitemsettinggui.cpp
+    soapygui/dynamicargsettinggui.cpp
     soapygui/intervalslidergui.cpp
     soapygui/complexfactorgui.cpp
+    soapygui/arginfogui.cpp
 
     webapi/webapiadaptergui.cpp
 )
@@ -124,8 +128,10 @@ set(sdrgui_HEADERS
     soapygui/itemsettinggui.h
     soapygui/stringrangegui.h
     soapygui/dynamicitemsettinggui.h
+    soapygui/dynamicargsettinggui.h
     soapygui/intervalslidergui.h
     soapygui/complexfactorgui.h
+    soapygui/arginfogui.h
 
     webapi/webapiadaptergui.h
 )
@@ -159,6 +165,7 @@ set(sdrgui_FORMS
     soapygui/intervalrangegui.ui
     soapygui/intervalslidergui.ui
     soapygui/complexfactorgui.ui
+    soapygui/arginfogui.ui
 )
 
 set(sdrgui_RESOURCES

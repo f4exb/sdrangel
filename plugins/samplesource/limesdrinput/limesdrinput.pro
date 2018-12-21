@@ -28,17 +28,24 @@ INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
 INCLUDEPATH += ../../../devices
-INCLUDEPATH += ../../../liblimesuite/srcmw
-INCLUDEPATH += $$LIBLIMESUITESRC/src
-INCLUDEPATH += $$LIBLIMESUITESRC/src/ADF4002
-INCLUDEPATH += $$LIBLIMESUITESRC/src/ConnectionRegistry
-INCLUDEPATH += $$LIBLIMESUITESRC/src/FPGA_common
-INCLUDEPATH += $$LIBLIMESUITESRC/src/GFIR
-INCLUDEPATH += $$LIBLIMESUITESRC/src/lms7002m
-INCLUDEPATH += $$LIBLIMESUITESRC/src/lms7002m_mcu
-INCLUDEPATH += $$LIBLIMESUITESRC/src/Si5351C
-INCLUDEPATH += $$LIBLIMESUITESRC/src/protocols
-INCLUDEPATH += $$LIBLIMESUITESRC/external/cpp-feather-ini-parser
+
+MINGW32 || MINGW64 || macx {
+    INCLUDEPATH += ../../../liblimesuite/srcmw
+    INCLUDEPATH += $$LIBLIMESUITESRC/src
+    INCLUDEPATH += $$LIBLIMESUITESRC/src/ADF4002
+    INCLUDEPATH += $$LIBLIMESUITESRC/src/ConnectionRegistry
+    INCLUDEPATH += $$LIBLIMESUITESRC/src/FPGA_common
+    INCLUDEPATH += $$LIBLIMESUITESRC/src/GFIR
+    INCLUDEPATH += $$LIBLIMESUITESRC/src/lms7002m
+    INCLUDEPATH += $$LIBLIMESUITESRC/src/lms7002m_mcu
+    INCLUDEPATH += $$LIBLIMESUITESRC/src/Si5351C
+    INCLUDEPATH += $$LIBLIMESUITESRC/src/protocols
+    INCLUDEPATH += $$LIBLIMESUITESRC/external/cpp-feather-ini-parser
+}
+
+MSVC {
+    INCLUDEPATH += "C:\Program Files\PothosSDR\include"
+}
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
@@ -60,7 +67,12 @@ FORMS += limesdrinputgui.ui
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../swagger/$${build_subdir} -lswagger
-LIBS += -L../../../liblimesuite/$${build_subdir} -lliblimesuite
 LIBS += -L../../../devices/$${build_subdir} -ldevices
+MINGW32 || MINGW64 || macx {
+    LIBS += -L../../../liblimesuite/$${build_subdir} -lliblimesuite
+}
+MSVC {
+    LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lLimeSuite
+}
 
 RESOURCES = ../../../sdrgui/resources/res.qrc

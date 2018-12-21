@@ -93,8 +93,9 @@ bool CWKeyerGUI::deserialize(const QByteArray& data)
 
 // === SLOTS ==================================================================
 
-void CWKeyerGUI::on_cwTextClear_clicked(bool checked __attribute__((unused)))
+void CWKeyerGUI::on_cwTextClear_clicked(bool checked)
 {
+    (void) checked;
     ui->cwTextEdit->clear();
     m_cwKeyer->setText("");
 }

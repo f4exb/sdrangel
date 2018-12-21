@@ -124,9 +124,11 @@ void SoapySDROutputThread::run()
         int flags(0);
         long long timeNs(0);
         float blockTime = ((float) numElems) / (m_sampleRate <= 0 ? 1024000 : m_sampleRate);
-        long timeoutUs = 2000000 * blockTime; // 10 times the block time
+        long initialTtimeoutUs = 10000000 * blockTime; // 10 times the block time
+        long timeoutUs = initialTtimeoutUs < 250000 ? 250000 : initialTtimeoutUs; // 250ms minimum
 
-        qDebug("SoapySDROutputThread::run: numElems: %u elemSize: %u timeoutUs: %ld", numElems, elemSize, timeoutUs);
+        qDebug("SoapySDROutputThread::run: numElems: %u elemSize: %u initialTtimeoutUs: %ld  timeoutUs: %ld",
+                numElems, elemSize, initialTtimeoutUs, timeoutUs);
         qDebug("SoapySDROutputThread::run: start running loop");
 
         while (m_running)
@@ -136,6 +138,10 @@ void SoapySDROutputThread::run()
             if (ret == SOAPY_SDR_TIMEOUT)
             {
                 qWarning("SoapySDROutputThread::run: timeout: flags: %d timeNs: %lld timeoutUs: %ld", flags, timeNs, timeoutUs);
+            }
+            else if (ret == SOAPY_SDR_OVERFLOW)
+            {
+                qWarning("SoapySDROutputThread::run: overflow: flags: %d timeNs: %lld timeoutUs: %ld", flags, timeNs, timeoutUs);
             }
             else if (ret < 0)
             {

@@ -14,12 +14,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../bladerf1/devicebladerf1.h"
-
 #include <QtGlobal>
 
 #include <cstdio>
 #include <cstring>
+
+#include "devicebladerf1.h"
 
 bool DeviceBladeRF1::open_bladerf(struct bladerf **dev, const char *serial)
 {

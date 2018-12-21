@@ -25,7 +25,15 @@ INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
 INCLUDEPATH += ../../../devices
-INCLUDEPATH += $$LIBBLADERF/include
+
+MINGW32 || MINGW64 {
+    LIBBLADERF = "C:\Programs\bladeRF"
+    INCLUDEPATH += $$LIBBLADERF/include
+}
+
+MSVC {
+    INCLUDEPATH += "C:\Program Files\PothosSDR\include"
+}
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
@@ -47,7 +55,14 @@ FORMS += bladerf1outputgui.ui
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../swagger/$${build_subdir} -lswagger
-LIBS += -L$$LIBBLADERF/lib -lbladeRF
 LIBS += -L../../../devices/$${build_subdir} -ldevices
+
+MINGW32 || MINGW64 {
+    LIBS += -L$$LIBBLADERF/lib -lbladeRF
+}
+
+MSVC {
+    LIBS += -L"C:\Program Files\PothosSDR\lib" -L"C:\Program Files\PothosSDR\bin" -lbladeRF
+}
 
 RESOURCES = ../../../sdrgui/resources/res.qrc

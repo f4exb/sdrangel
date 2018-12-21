@@ -61,7 +61,7 @@ MINGW32 || MINGW64 || macx {
 }
 
 MSVC {
-    INCLUDEPATH += "C:\softs\PothosSDR\include"
+    INCLUDEPATH += "C:\Program Files\PothosSDR\include"
 }
 
 INCLUDEPATH += $$LIBPERSEUSSRC
@@ -136,6 +136,13 @@ macx {
 }
 
 MSVC {
+    SOURCES += bladerf1/devicebladerf1.cpp\
+            bladerf1/devicebladerf1values.cpp\
+            bladerf1/devicebladerf1shared.cpp
+
+    SOURCES += bladerf2/devicebladerf2.cpp\
+            bladerf2/devicebladerf2shared.cpp
+
     SOURCES += hackrf/devicehackrf.cpp\
             hackrf/devicehackrfvalues.cpp\
             hackrf/devicehackrfshared.cpp
@@ -143,6 +150,25 @@ MSVC {
     SOURCES += limesdr/devicelimesdr.cpp\
             limesdr/devicelimesdrparam.cpp\
             limesdr/devicelimesdrshared.cpp
+
+    SOURCES += soapysdr/devicesoapysdr.cpp\
+            soapysdr/devicesoapysdrparams.cpp\
+            soapysdr/devicesoapysdrscan.cpp\
+            soapysdr/devicesoapysdrshared.cpp
+
+    SOURCES += plutosdr/deviceplutosdr.cpp\
+            plutosdr/deviceplutosdrbox.cpp\
+            plutosdr/deviceplutosdrparams.cpp\
+            plutosdr/deviceplutosdrscan.cpp\
+            plutosdr/deviceplutosdrshared.cpp
+
+    HEADERS += bladerf1/devicebladerf1.h\
+            bladerf1/devicebladerf1param.h\
+            bladerf1/devicebladerf1values.h\
+            bladerf1/devicebladerf1shared.h
+
+    HEADERS += bladerf2/devicebladerf2.h\
+            bladerf2/devicebladerf2shared.h
 
     HEADERS  += hackrf/devicehackrf.h\
             hackrf/devicehackrfparam.h\
@@ -152,6 +178,17 @@ MSVC {
     HEADERS += limesdr/devicelimesdr.h\
             limesdr/devicelimesdrparam.h\
             limesdr/devicelimesdrshared.h
+
+    HEADERS += soapysdr/devicesoapysdr.h\
+            soapysdr/devicesoapysdrparams.h\
+            soapysdr/devicesoapysdrscan.h\
+            soapysdr/devicesoapysdrshared.h
+
+    HEADERS += plutosdr/deviceplutosdr.h\
+            plutosdr/deviceplutosdrbox.h\
+            plutosdr/deviceplutosdrparams.h\
+            plutosdr/deviceplutosdrscan.h\
+            plutosdr/deviceplutosdrshared.h
 }
 
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
@@ -171,5 +208,8 @@ macx {
 
 MSVC {
     LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
-    LIBS += -LC:\softs\PothosSDR\lib -lLimeSuite
+    LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lbladeRF
+    LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lLimeSuite
+    LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lSoapySDR
+    LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -llibiio
 }

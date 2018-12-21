@@ -2,6 +2,8 @@
 #define LEANSDR_FRAMEWORK_H
 
 #include <cstddef>
+#include <algorithm>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,8 +48,9 @@ struct pipebuf_common
         return 0;
     }
 
-    virtual void dump(std::size_t *total_bufs __attribute__((unused)))
+    virtual void dump(std::size_t *total_bufs)
     {
+        (void) total_bufs;
     }
 
     pipebuf_common(const char *_name) :
@@ -105,9 +108,10 @@ struct scheduler
     bool verbose, debug;
 
     scheduler() :
-            npipes(0), nrunnables(0), windows(NULL), verbose(false), debug(
-                    false)
+            npipes(0), nrunnables(0), windows(nullptr), verbose(false), debug(false)
     {
+        std::fill(pipes, pipes + MAX_PIPES, nullptr);
+        std::fill(runnables, runnables + MAX_RUNNABLES, nullptr);
     }
 
     void add_pipe(pipebuf_common *p)

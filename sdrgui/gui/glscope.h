@@ -24,6 +24,8 @@
 #include <QMutex>
 #include <QFont>
 #include <QMatrix4x4>
+#include <QAtomicInt>
+
 #include "dsp/dsptypes.h"
 #include "dsp/scopevis.h"
 #include "gui/scaleengine.h"
@@ -54,6 +56,7 @@ public:
 
     void setTraces(std::vector<ScopeVis::TraceData>* tracesData, std::vector<float *>* traces);
     void newTraces(std::vector<float *>* traces);
+    void newTraces(std::vector<float *>* traces, int traceIndex);
 
     int getSampleRate() const { return m_sampleRate; }
     int getTraceSize() const { return m_traceSize; }
@@ -75,6 +78,7 @@ public:
     bool getDataChanged() const { return m_dataChanged; }
     DisplayMode getDisplayMode() const { return m_displayMode; }
     void setDisplayXYPoints(bool value) { m_displayXYPoints = value; }
+    const QAtomicInt& getProcessingTraceIndex() const { return m_processingTraceIndex; }
 
 signals:
     void sampleRateChanged(int);
@@ -84,13 +88,14 @@ signals:
 private:
     std::vector<ScopeVis::TraceData> *m_tracesData;
     std::vector<float *> *m_traces;
+    QAtomicInt m_processingTraceIndex;
     ScopeVis::TriggerData m_focusedTriggerData;
     //int m_traceCounter;
     uint32_t m_bufferIndex;
     DisplayMode m_displayMode;
     QTimer m_timer;
     QMutex m_mutex;
-    bool m_dataChanged;
+    QAtomicInt m_dataChanged;
     bool m_configChanged;
     int m_sampleRate;
     int m_timeOfsProMill;

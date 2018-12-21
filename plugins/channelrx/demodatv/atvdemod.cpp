@@ -164,8 +164,9 @@ void ATVDemod::configureRF(
     objMessageQueue->push(msgCmd);
 }
 
-void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst __attribute__((unused)))
+void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
+    (void) firstOfBurst;
     float fltI;
     float fltQ;
     Complex ci;

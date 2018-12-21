@@ -116,8 +116,9 @@ ATVMod::~ATVMod()
     delete[] m_DSBFilterBuffer;
 }
 
-void ATVMod::pullAudio(int nbSamples __attribute__((unused)))
+void ATVMod::pullAudio(int nbSamples)
 {
+    (void) nbSamples;
 }
 
 void ATVMod::pull(Sample& sample)
@@ -1185,8 +1186,9 @@ bool ATVMod::deserialize(const QByteArray& data)
 
 int ATVMod::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setAtvModSettings(new SWGSDRangel::SWGATVModSettings());
     response.getAtvModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
@@ -1197,8 +1199,9 @@ int ATVMod::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& channelSettingsKeys,
                 SWGSDRangel::SWGChannelSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     ATVModSettings settings = m_settings;
     bool frequencyOffsetChanged = false;
 
@@ -1319,8 +1322,9 @@ int ATVMod::webapiSettingsPutPatch(
 
 int ATVMod::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setAtvModReport(new SWGSDRangel::SWGATVModReport());
     response.getAtvModReport()->init();
     webapiFormatChannelReport(response);

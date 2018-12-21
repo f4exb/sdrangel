@@ -205,7 +205,7 @@ public:
     virtual qint64 getCenterFrequency() const { return m_settings.m_frequency; }
 
     virtual QByteArray serialize() const { return QByteArray(); }
-    virtual bool deserialize(const QByteArray& data __attribute__((unused))) { return false; }
+    virtual bool deserialize(const QByteArray& data) { (void) data; return false; }
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

@@ -700,8 +700,9 @@ struct sampler_interface
 {
     virtual complex<T> interp(const complex<T> *pin, float mu, float phase) = 0;
 
-    virtual void update_freq(float freqw __attribute__((unused)))
+    virtual void update_freq(float freqw)
     {
+        (void) freqw;
     }  // 65536 = 1 Hz
 
     virtual int readahead()
@@ -725,8 +726,9 @@ struct nearest_sampler: sampler_interface<T>
         return 0;
     }
 
-    complex<T> interp(const complex<T> *pin, float mu __attribute__((unused)), float phase)
+    complex<T> interp(const complex<T> *pin, float mu, float phase)
     {
+        (void) mu;
         return pin[0] * trig.expi(-phase);
     }
 

@@ -19,7 +19,9 @@
 
 bool DeviceLimeSDRParams::open(lms_info_str_t deviceStr)
 {
-    qDebug("DeviceLimeSDRParams::open: serial: %s", (const char *) deviceStr);
+    getHardwareType((const char *) deviceStr);
+
+    qDebug("DeviceLimeSDRParams::open: serial: %s type: %d", (const char *) deviceStr, (int) m_type);
 
     if (LMS_Open(&m_dev, deviceStr, 0) < 0)
     {
@@ -102,6 +104,21 @@ void DeviceLimeSDRParams::close()
     {
         LMS_Close(m_dev);
         m_dev = 0;
+    }
+}
+
+void DeviceLimeSDRParams::getHardwareType(const char *device_str)
+{
+    QString deviceStr(device_str);
+
+    if (deviceStr.contains(QString("LimeSDR Mini"))) {
+        m_type = LimeMini;
+    } else if (deviceStr.contains(QString("LimeSDR-USB"))) {
+        m_type = LimeUSB;
+    } else if (deviceStr.contains(QString("media=SPI"))) {
+        m_type = LimeSPI;
+    } else {
+        m_type = LimeUndefined;
     }
 }
 

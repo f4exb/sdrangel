@@ -28,6 +28,11 @@ if(CM256CC_FOUND)
     add_subdirectory(sdrdaemonsink)
 endif(CM256CC_FOUND)
 
+find_package(SoapySDR)
+if(LIBUSB_FOUND AND SOAPYSDR_FOUND)
+	add_subdirectory(soapysdroutput)
+endif()
+
 if (BUILD_DEBIAN)
     add_subdirectory(bladerf1output)
     add_subdirectory(bladerf2output)

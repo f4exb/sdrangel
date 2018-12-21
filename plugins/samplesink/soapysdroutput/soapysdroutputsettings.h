@@ -18,6 +18,7 @@
 #define PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTSETTINGS_H_
 
 #include <QtGlobal>
+#include <QVariant>
 #include <QMap>
 
 struct SoapySDROutputSettings {
@@ -37,6 +38,8 @@ struct SoapySDROutputSettings {
     bool m_autoIQCorrection;
     std::complex<double> m_dcCorrection;
     std::complex<double> m_iqCorrection;
+    QMap<QString, QVariant> m_streamArgSettings;
+    QMap<QString, QVariant> m_deviceArgSettings;
 
     SoapySDROutputSettings();
     void resetToDefaults();
@@ -46,6 +49,9 @@ struct SoapySDROutputSettings {
 private:
     QByteArray serializeNamedElementMap(const QMap<QString, double>& map) const;
     void deserializeNamedElementMap(const QByteArray& data, QMap<QString, double>& map);
+    QByteArray serializeArgumentMap(const QMap<QString, QVariant>& map) const;
+    void deserializeArgumentMap(const QByteArray& data, QMap<QString, QVariant>& map);
+
 };
 
 #endif /* PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTSETTINGS_H_ */

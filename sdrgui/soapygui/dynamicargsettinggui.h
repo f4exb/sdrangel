@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,46 +14,39 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FCDPROPLUSREADER_H
-#define INCLUDE_FCDPROPLUSREADER_H
+#ifndef SDRGUI_SOAPYGUI_DYNAMICARGSETTINGGUI_H_
+#define SDRGUI_SOAPYGUI_DYNAMICARGSETTINGGUI_H_
 
 #include <QObject>
-#include <QMutex>
-#include <QWaitCondition>
-#include <QByteArray>
+#include <QString>
+#include <QVariant>
 
-#include "dsp/samplesinkfifo.h"
-#include "dsp/inthalfbandfilter.h"
+#include "export.h"
+#include "arginfogui.h"
 
-class QAudioInput;
-class QIODevice;
-class QAudioDeviceInfo;
-
-class FCDProPlusReader : public QObject {
-	Q_OBJECT
-
+class SDRGUI_API DynamicArgSettingGUI : public QObject
+{
+    Q_OBJECT
 public:
-	FCDProPlusReader(SampleSinkFifo* sampleFifo, QObject* parent = NULL);
-	~FCDProPlusReader();
+    DynamicArgSettingGUI(ArgInfoGUI *argSettingGUI, const QString& name, QObject *parent = 0);
+    ~DynamicArgSettingGUI();
 
-	void startWork();
-	void stopWork();
+    const QString& getName() const { return m_name; }
+    QVariant getValue() const;
+    void setValue(const QVariant& value);
 
-private:
-	QAudioInput *m_fcdAudioInput;
-	QIODevice *m_fcdInput;
-
-	QMutex m_startWaitMutex;
-	QWaitCondition m_startWaiter;
-	bool m_running;
-
-	SampleVector m_convertBuffer;
-	QByteArray m_fcdBuffer;
-	SampleSinkFifo* m_sampleFifo;
-
-	void openFcdAudio(const QAudioDeviceInfo& fcdAudioDeviceInfo);
+signals:
+    void valueChanged(QString itemName, QVariant value);
 
 private slots:
-	void readFcdAudio();
+    void processValueChanged();
+
+private:
+    ArgInfoGUI *m_argSettingGUI;
+    QString m_name;
 };
-#endif // INCLUDE_FCDPROPLUSREADER_H
+
+
+
+
+#endif /* SDRGUI_SOAPYGUI_DYNAMICARGSETTINGGUI_H_ */

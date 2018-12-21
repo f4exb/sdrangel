@@ -28,7 +28,7 @@
 class DEVICES_API DeviceLimeSDRShared
 {
 public:
-    class MsgReportBuddyChange : public Message {
+    class DEVICES_API MsgReportBuddyChange : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -69,7 +69,7 @@ public:
         { }
     };
 
-    class MsgReportClockSourceChange : public Message {
+    class DEVICES_API MsgReportClockSourceChange : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -98,27 +98,52 @@ public:
         { }
     };
 
-    class MsgReportDeviceInfo : public Message {
+    class DEVICES_API MsgReportDeviceInfo : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
         float getTemperature() const { return m_temperature; }
+        uint8_t getGPIOPins() const { return m_gpioPins; }
 
-        static MsgReportDeviceInfo* create(float temperature)
+        static MsgReportDeviceInfo* create(float temperature, uint8_t gpioPins)
         {
-            return new MsgReportDeviceInfo(temperature);
+            return new MsgReportDeviceInfo(temperature, gpioPins);
         }
 
     private:
         float    m_temperature;
+        uint8_t  m_gpioPins;
 
-        MsgReportDeviceInfo(float temperature) :
+        MsgReportDeviceInfo(float temperature, uint8_t gpioPins) :
             Message(),
-            m_temperature(temperature)
+            m_temperature(temperature),
+            m_gpioPins(gpioPins)
         { }
     };
 
-    class ThreadInterface
+    class DEVICES_API MsgReportGPIOChange : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        uint8_t getGPIODir() const { return m_gpioDir; }
+        uint8_t getGPIOPins() const { return m_gpioPins; }
+
+        static MsgReportGPIOChange* create(uint8_t gpioDir, uint8_t gpioPins)
+        {
+            return new MsgReportGPIOChange(gpioDir, gpioPins);
+        }
+
+    private:
+        uint8_t m_gpioDir;
+        uint8_t m_gpioPins;
+
+        MsgReportGPIOChange(uint8_t gpioDir, uint8_t gpioPins) :
+            m_gpioDir(gpioDir),
+            m_gpioPins(gpioPins)
+        {}
+    };
+
+    class DEVICES_API ThreadInterface
     {
     public:
         virtual void startWork() = 0;

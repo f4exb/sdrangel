@@ -599,6 +599,17 @@ bool LimeSDROutput::handleMessage(const Message& message)
 
         return true;
     }
+    else if (DeviceLimeSDRShared::MsgReportGPIOChange::match(message))
+    {
+        DeviceLimeSDRShared::MsgReportGPIOChange& report = (DeviceLimeSDRShared::MsgReportGPIOChange&) message;
+
+        m_settings.m_gpioDir     = report.getGPIODir();
+        m_settings.m_gpioPins = report.getGPIOPins();
+
+        // no GUI for the moment only REST API
+
+        return true;
+    }
     else if (MsgGetStreamInfo::match(message))
     {
 //        qDebug() << "LimeSDROutput::handleMessage: MsgGetStreamInfo";
@@ -644,19 +655,24 @@ bool LimeSDROutput::handleMessage(const Message& message)
     else if (MsgGetDeviceInfo::match(message))
     {
         double temp = 0.0;
+        uint8_t gpioPins = 0;
 
-        if (m_deviceShared.m_deviceParams->getDevice() && (LMS_GetChipTemperature(m_deviceShared.m_deviceParams->getDevice(), 0, &temp) == 0))
-        {
-            //qDebug("LimeSDROutput::handleMessage: MsgGetDeviceInfo: temperature: %f", temp);
-        }
-        else
-        {
+        if (m_deviceShared.m_deviceParams->getDevice() && (LMS_GetChipTemperature(m_deviceShared.m_deviceParams->getDevice(), 0, &temp) != 0)) {
             qDebug("LimeSDROutput::handleMessage: MsgGetDeviceInfo: cannot get temperature");
         }
 
+        if ((m_deviceShared.m_deviceParams->m_type != DeviceLimeSDRParams::LimeMini)
+            && (m_deviceShared.m_deviceParams->m_type != DeviceLimeSDRParams::LimeUndefined))
+        {
+            if (m_deviceShared.m_deviceParams->getDevice() && (LMS_GPIORead(m_deviceShared.m_deviceParams->getDevice(), &gpioPins, 1) != 0)) {
+                qDebug("LimeSDROutput::handleMessage: MsgGetDeviceInfo: cannot get GPIO pins values");
+            }
+        }
+
         // send to oneself
-        if (getMessageQueueToGUI()) {
-            DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
+        if (getMessageQueueToGUI())
+        {
+            DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp, gpioPins);
             getMessageQueueToGUI()->push(report);
         }
 
@@ -668,7 +684,7 @@ bool LimeSDROutput::handleMessage(const Message& message)
         {
             if ((*itSource)->getSampleSourceGUIMessageQueue())
             {
-                DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
+                DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp, gpioPins);
                 (*itSource)->getSampleSourceGUIMessageQueue()->push(report);
             }
         }
@@ -681,7 +697,7 @@ bool LimeSDROutput::handleMessage(const Message& message)
         {
             if ((*itSink)->getSampleSinkGUIMessageQueue())
             {
-                DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp);
+                DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp, gpioPins);
                 (*itSink)->getSampleSinkGUIMessageQueue()->push(report);
             }
         }
@@ -700,6 +716,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     bool forwardChangeTxDSP  = false;
     bool forwardChangeAllDSP = false;
     bool forwardClockSource  = false;
+    bool forwardGPIOChange   = false;
     bool ownThreadWasRunning = false;
     bool doCalibration       = false;
     bool doLPCalibration     = false;
@@ -772,7 +789,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
        || (m_settings.m_log2SoftInterp != settings.m_log2SoftInterp) || force)
     {
-        int fifoSize = std::max(
+        int fifoSize = (std::max)(
                 (int) ((settings.m_devSampleRate/(1<<settings.m_log2SoftInterp)) * DeviceLimeSDRShared::m_sampleFifoLengthInSeconds),
                 DeviceLimeSDRShared::m_sampleFifoMinSize);
         qDebug("LimeSDROutput::applySettings: resize FIFO: %d", fifoSize);
@@ -913,6 +930,36 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
             qCritical("LimeSDROutput::applySettings: could not set clock to %s (Ext: %d Hz)",
                     settings.m_extClock ? "external" : "internal",
                     settings.m_extClockFreq);
+        }
+    }
+
+    if ((m_deviceShared.m_deviceParams->m_type != DeviceLimeSDRParams::LimeMini)
+        && (m_deviceShared.m_deviceParams->m_type != DeviceLimeSDRParams::LimeUndefined))
+    {
+        if ((m_settings.m_gpioDir != settings.m_gpioDir) || force)
+        {
+            if (LMS_GPIODirWrite(m_deviceShared.m_deviceParams->getDevice(), &settings.m_gpioDir, 1) != 0)
+            {
+                qCritical("LimeSDROutput::applySettings: could not set GPIO directions to %u", settings.m_gpioDir);
+            }
+            else
+            {
+                forwardGPIOChange = true;
+                qDebug("LimeSDROutput::applySettings: GPIO directions set to %u", settings.m_gpioDir);
+            }
+        }
+
+        if ((m_settings.m_gpioPins != settings.m_gpioPins) || force)
+        {
+            if (LMS_GPIOWrite(m_deviceShared.m_deviceParams->getDevice(), &settings.m_gpioPins, 1) != 0)
+            {
+                qCritical("LimeSDROutput::applySettings: could not set GPIO pins to %u", settings.m_gpioPins);
+            }
+            else
+            {
+                forwardGPIOChange = true;
+                qDebug("LimeSDROutput::applySettings: GPIO pins set to %u", settings.m_gpioPins);
+            }
         }
     }
 
@@ -1072,6 +1119,30 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         }
     }
 
+    if (forwardGPIOChange)
+    {
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+
+        for (; itSource != sourceBuddies.end(); ++itSource)
+        {
+            DeviceLimeSDRShared::MsgReportGPIOChange *report = DeviceLimeSDRShared::MsgReportGPIOChange::create(
+                    m_settings.m_gpioDir, m_settings.m_gpioPins);
+            (*itSource)->getSampleSourceInputMessageQueue()->push(report);
+        }
+
+        // send to sink buddies
+        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+
+        for (; itSink != sinkBuddies.end(); ++itSink)
+        {
+            DeviceLimeSDRShared::MsgReportGPIOChange *report = DeviceLimeSDRShared::MsgReportGPIOChange::create(
+                    m_settings.m_gpioDir, m_settings.m_gpioPins);
+            (*itSink)->getSampleSinkInputMessageQueue()->push(report);
+        }
+    }
+
     QLocale loc;
 
     qDebug().noquote() << "LimeSDROutput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
@@ -1092,6 +1163,8 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
             << " m_antennaPath: " << m_settings.m_antennaPath
             << " m_extClock: " << m_settings.m_extClock
             << " m_extClockFreq: " << loc.toString(m_settings.m_extClockFreq)
+            << " m_gpioDir: " << m_settings.m_gpioDir
+            << " m_gpioPins: " << m_settings.m_gpioPins
             << " force: " << force
             << " forceNCOFrequency: " << forceNCOFrequency
             << " doCalibration: " << doCalibration
@@ -1102,8 +1175,9 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
 
 int LimeSDROutput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setLimeSdrOutputSettings(new SWGSDRangel::SWGLimeSdrOutputSettings());
     response.getLimeSdrOutputSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -1114,8 +1188,9 @@ int LimeSDROutput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     LimeSDROutputSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("antennaPath")) {
@@ -1163,6 +1238,12 @@ int LimeSDROutput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("transverterMode")) {
         settings.m_transverterMode = response.getLimeSdrOutputSettings()->getTransverterMode() != 0;
     }
+    if (deviceSettingsKeys.contains("gpioDir")) {
+        settings.m_gpioDir = response.getLimeSdrOutputSettings()->getGpioDir() & 0xFF;
+    }
+    if (deviceSettingsKeys.contains("gpioPins")) {
+        settings.m_gpioPins = response.getLimeSdrOutputSettings()->getGpioPins() & 0xFF;
+    }
 
     MsgConfigureLimeSDR *msg = MsgConfigureLimeSDR::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -1179,8 +1260,9 @@ int LimeSDROutput::webapiSettingsPutPatch(
 
 int LimeSDROutput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setLimeSdrOutputReport(new SWGSDRangel::SWGLimeSdrOutputReport());
     response.getLimeSdrOutputReport()->init();
     webapiFormatDeviceReport(response);
@@ -1203,12 +1285,15 @@ void LimeSDROutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     response.getLimeSdrOutputSettings()->setNcoFrequency(settings.m_ncoFrequency);
     response.getLimeSdrOutputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getLimeSdrOutputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+    response.getLimeSdrOutputSettings()->setGpioDir(settings.m_gpioDir);
+    response.getLimeSdrOutputSettings()->setGpioPins(settings.m_gpioPins);
 }
 
 int LimeSDROutput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -1216,8 +1301,9 @@ int LimeSDROutput::webapiRunGet(
 int LimeSDROutput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
@@ -1235,6 +1321,8 @@ void LimeSDROutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
 {
     bool success = false;
     double temp = 0.0;
+    uint8_t gpioDir = 0;
+    uint8_t gpioPins = 0;
     lms_stream_status_t status;
     status.active = false;
     status.fifoFilledCount = 0;
@@ -1257,9 +1345,14 @@ void LimeSDROutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
     response.getLimeSdrOutputReport()->setLinkRate(status.linkRate);
     response.getLimeSdrOutputReport()->setHwTimestamp(status.timestamp);
 
-    if (m_deviceShared.m_deviceParams->getDevice()) {
+    if (m_deviceShared.m_deviceParams->getDevice())
+    {
         LMS_GetChipTemperature(m_deviceShared.m_deviceParams->getDevice(), 0, &temp);
+        LMS_GPIODirRead(m_deviceShared.m_deviceParams->getDevice(), &gpioDir, 1);
+        LMS_GPIORead(m_deviceShared.m_deviceParams->getDevice(), &gpioPins, 1);
     }
 
     response.getLimeSdrOutputReport()->setTemperature(temp);
+    response.getLimeSdrOutputReport()->setGpioDir(gpioDir);
+    response.getLimeSdrOutputReport()->setGpioPins(gpioPins);
 }

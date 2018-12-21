@@ -546,8 +546,9 @@ bool WFMMod::deserialize(const QByteArray& data)
 
 int WFMMod::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setWfmModSettings(new SWGSDRangel::SWGWFMModSettings());
     response.getWfmModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
@@ -558,8 +559,9 @@ int WFMMod::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& channelSettingsKeys,
                 SWGSDRangel::SWGChannelSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     WFMModSettings settings = m_settings;
     bool channelizerChange = false;
 
@@ -657,8 +659,9 @@ int WFMMod::webapiSettingsPutPatch(
 
 int WFMMod::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setWfmModReport(new SWGSDRangel::SWGWFMModReport());
     response.getWfmModReport()->init();
     webapiFormatChannelReport(response);

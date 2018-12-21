@@ -16,7 +16,6 @@
 
 #include <string.h>
 #include <errno.h>
-#include <sys/time.h>
 #include <QDebug>
 
 #include "SWGDeviceSettings.h"
@@ -134,8 +133,9 @@ quint64 SDRdaemonSourceInput::getCenterFrequency() const
     return m_SDRdaemonUDPHandler->getCenterFrequency();
 }
 
-void SDRdaemonSourceInput::setCenterFrequency(qint64 centerFrequency __attribute__((unused)))
+void SDRdaemonSourceInput::setCenterFrequency(qint64 centerFrequency)
 {
+    (void) centerFrequency;
 }
 
 std::time_t SDRdaemonSourceInput::getStartingTimeStamp() const
@@ -241,8 +241,9 @@ void SDRdaemonSourceInput::applySettings(const SDRdaemonSourceSettings& settings
 
 int SDRdaemonSourceInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;
 }
@@ -250,8 +251,9 @@ int SDRdaemonSourceInput::webapiRunGet(
 int SDRdaemonSourceInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     MsgStartStop *message = MsgStartStop::create(run);
     m_inputMessageQueue.push(message);
@@ -267,8 +269,9 @@ int SDRdaemonSourceInput::webapiRun(
 
 int SDRdaemonSourceInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     response.setSdrDaemonSourceSettings(new SWGSDRangel::SWGSDRdaemonSourceSettings());
     response.getSdrDaemonSourceSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
@@ -279,8 +282,9 @@ int SDRdaemonSourceInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage __attribute__((unused)))
+                QString& errorMessage)
 {
+    (void) errorMessage;
     SDRdaemonSourceSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("apiAddress")) {
@@ -336,8 +340,9 @@ void SDRdaemonSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSett
 
 int SDRdaemonSourceInput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
-        QString& errorMessage __attribute__((unused)))
+        QString& errorMessage)
 {
+    (void) errorMessage;
     response.setSdrDaemonSourceReport(new SWGSDRangel::SWGSDRdaemonSourceReport());
     response.getSdrDaemonSourceReport()->init();
     webapiFormatDeviceReport(response);
@@ -350,8 +355,7 @@ void SDRdaemonSourceInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport
     response.getSdrDaemonSourceReport()->setSampleRate(m_SDRdaemonUDPHandler->getSampleRate());
     response.getSdrDaemonSourceReport()->setBufferRwBalance(m_SDRdaemonUDPHandler->getBufferGauge());
 
-    quint64 startingTimeStampMsec = ((quint64) m_SDRdaemonUDPHandler->getTVSec() * 1000LL) + ((quint64) m_SDRdaemonUDPHandler->getTVuSec() / 1000LL);
-    QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
+    QDateTime dt = QDateTime::fromMSecsSinceEpoch(m_SDRdaemonUDPHandler->getTVmSec());
     response.getSdrDaemonSourceReport()->setDaemonTimestamp(new QString(dt.toString("yyyy-MM-dd  HH:mm:ss.zzz")));
 
     response.getSdrDaemonSourceReport()->setMinNbBlocks(m_SDRdaemonUDPHandler->getMinNbBlocks());
