@@ -17,6 +17,8 @@
 #ifndef PLUGINS_CHANNELRX_DAEMONSINK_DAEMONSINKGUI_H_
 #define PLUGINS_CHANNELRX_DAEMONSINK_DAEMONSINKGUI_H_
 
+#include <stdint.h>
+
 #include <QObject>
 #include <QTime>
 

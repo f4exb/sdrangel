@@ -78,7 +78,7 @@ private:
 
         ChannelInstanceRegistration() :
             m_channelName(),
-            m_gui(NULL)
+            m_gui(nullptr)
         { }
 
         ChannelInstanceRegistration(const QString& channelName, PluginInstanceGUI* pluginGUI) :

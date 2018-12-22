@@ -30,6 +30,17 @@ BFMDemodSettings:
       type: string
     audioDeviceName:
       type: string
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
 
 BFMDemodReport:
   description: BFMDemod
@@ -54,7 +65,7 @@ BFMDemodReport:
       format: float
     rdsReport:
       $ref: "#/RDSReport"
-      
+
 RDSReport:
   description: RDS information
   properties:
