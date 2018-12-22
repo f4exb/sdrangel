@@ -16,11 +16,15 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-#include <QTime>
-#include <QDebug>
 #include <string.h>
 #include <stdio.h>
 #include <complex.h>
+
+#include <QTime>
+#include <QDebug>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGChannelSettings.h"
 #include "SWGDSDDemodSettings.h"
@@ -92,10 +96,15 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 DSDDemod::~DSDDemod()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
     delete[] m_sampleBuffer;
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo1);
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo2);
@@ -479,10 +488,41 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
             << " m_pllLock: " << settings.m_pllLock
             << " m_highPassFilter: "<< settings.m_highPassFilter
             << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_traceLengthMutliplier: " << settings.m_traceLengthMutliplier
+            << " m_traceStroke: " << settings.m_traceStroke
+            << " m_traceDecay: " << settings.m_traceDecay
             << " force: " << force;
+
+    QList<QString> reverseAPIKeys;
+
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+    if ((settings.m_demodGain != m_settings.m_demodGain) || force) {
+        reverseAPIKeys.append("demodGain");
+    }
+    if ((settings.m_audioMute != m_settings.m_audioMute) || force) {
+        reverseAPIKeys.append("audioMute");
+    }
+    if ((settings.m_syncOrConstellation != m_settings.m_syncOrConstellation) || force) {
+        reverseAPIKeys.append("syncOrConstellation");
+    }
+    if ((settings.m_slot1On != m_settings.m_slot1On) || force) {
+        reverseAPIKeys.append("slot1On");
+    }
+    if ((settings.m_slot2On != m_settings.m_slot2On) || force) {
+        reverseAPIKeys.append("slot2On");
+    }
+    if ((settings.m_demodGain != m_settings.m_demodGain) || force) {
+        reverseAPIKeys.append("demodGain");
+    }
+    if ((settings.m_traceLengthMutliplier != m_settings.m_traceLengthMutliplier) || force) {
+        reverseAPIKeys.append("traceLengthMutliplier");
+    }
 
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
+        reverseAPIKeys.append("rfBandwidth");
         m_settingsMutex.lock();
         m_interpolator.create(16, m_inputSampleRate, (settings.m_rfBandwidth) / 2.2);
         m_interpolatorDistanceRemain = 0;
@@ -493,53 +533,63 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
 
     if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
     {
+        reverseAPIKeys.append("fmDeviation");
         m_phaseDiscri.setFMScaling(48000.0f / (2.0f*settings.m_fmDeviation));
     }
 
     if ((settings.m_squelchGate != m_settings.m_squelchGate) || force)
     {
+        reverseAPIKeys.append("squelchGate");
         m_squelchGate = 480 * settings.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
         m_squelchCount = 0; // reset squelch open counter
     }
 
     if ((settings.m_squelch != m_settings.m_squelch) || force)
     {
+        reverseAPIKeys.append("squelch");
         // input is a value in dB
         m_squelchLevel = std::pow(10.0, settings.m_squelch / 10.0);
     }
 
     if ((settings.m_volume != m_settings.m_volume) || force)
     {
+        reverseAPIKeys.append("volume");
         m_dsdDecoder.setAudioGain(settings.m_volume);
     }
 
     if ((settings.m_baudRate != m_settings.m_baudRate) || force)
     {
+        reverseAPIKeys.append("baudRate");
         m_dsdDecoder.setBaudRate(settings.m_baudRate);
     }
 
     if ((settings.m_enableCosineFiltering != m_settings.m_enableCosineFiltering) || force)
     {
+        reverseAPIKeys.append("enableCosineFiltering");
         m_dsdDecoder.enableCosineFiltering(settings.m_enableCosineFiltering);
     }
 
     if ((settings.m_tdmaStereo != m_settings.m_tdmaStereo) || force)
     {
+        reverseAPIKeys.append("tdmaStereo");
         m_dsdDecoder.setTDMAStereo(settings.m_tdmaStereo);
     }
 
     if ((settings.m_pllLock != m_settings.m_pllLock) || force)
     {
+        reverseAPIKeys.append("pllLock");
         m_dsdDecoder.setSymbolPLLLock(settings.m_pllLock);
     }
 
     if ((settings.m_highPassFilter != m_settings.m_highPassFilter) || force)
     {
+        reverseAPIKeys.append("highPassFilter");
         m_dsdDecoder.useHPMbelib(settings.m_highPassFilter);
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
+        reverseAPIKeys.append("audioDeviceName");
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
         //qDebug("AMDemod::applySettings: audioDeviceName: %s audioDeviceIndex: %d", qPrintable(settings.m_audioDeviceName), audioDeviceIndex);
@@ -550,6 +600,16 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
         if (m_audioSampleRate != audioSampleRate) {
             applyAudioSampleRate(audioSampleRate);
         }
+    }
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -855,6 +915,21 @@ int DSDDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("traceDecay")) {
         settings.m_traceDecay = response.getDsdDemodSettings()->getTraceDecay();
     }
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getDsdDemodSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getDsdDemodSettings()->getReverseApiAddress() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getDsdDemodSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getDsdDemodSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getDsdDemodSettings()->getReverseApiChannelIndex();
+    }
 
     if (frequencyOffsetChanged)
     {
@@ -924,6 +999,18 @@ void DSDDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getDsdDemodSettings()->setTraceLengthMutliplier(settings.m_traceLengthMutliplier);
     response.getDsdDemodSettings()->setTraceStroke(settings.m_traceStroke);
     response.getDsdDemodSettings()->setTraceDecay(settings.m_traceDecay);
+    response.getDsdDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getDsdDemodSettings()->getReverseApiAddress()) {
+        *response.getDsdDemodSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getDsdDemodSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getDsdDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getDsdDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getDsdDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
 }
 
 void DSDDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -945,4 +1032,118 @@ void DSDDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     response.getDsdDemodReport()->setZeroCrossingPosition(getDecoder().getZeroCrossingPos());
     response.getDsdDemodReport()->setSyncRate(getDecoder().getSymbolSyncQuality());
     response.getDsdDemodReport()->setStatusText(new QString(updateAndGetStatusText()));
+}
+
+void DSDDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DSDDemodSettings& settings, bool force)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(0);
+    swgChannelSettings->setChannelType(new QString("DSDDemod"));
+    swgChannelSettings->setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());
+    SWGSDRangel::SWGDSDDemodSettings *swgDSDDemodSettings = swgChannelSettings->getDsdDemodSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+        swgDSDDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("rfBandwidth") || force) {
+        swgDSDDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (channelSettingsKeys.contains("fmDeviation") || force) {
+        swgDSDDemodSettings->setFmDeviation(settings.m_fmDeviation);
+    }
+    if (channelSettingsKeys.contains("demodGain") || force) {
+        swgDSDDemodSettings->setDemodGain(settings.m_demodGain);
+    }
+    if (channelSettingsKeys.contains("volume") || force) {
+        swgDSDDemodSettings->setVolume(settings.m_volume);
+    }
+    if (channelSettingsKeys.contains("baudRate") || force) {
+        swgDSDDemodSettings->setBaudRate(settings.m_baudRate);
+    }
+    if (channelSettingsKeys.contains("squelchGate") || force) {
+        swgDSDDemodSettings->setSquelchGate(settings.m_squelchGate);
+    }
+    if (channelSettingsKeys.contains("squelch") || force) {
+        swgDSDDemodSettings->setSquelch(settings.m_squelch);
+    }
+    if (channelSettingsKeys.contains("audioMute") || force) {
+        swgDSDDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("enableCosineFiltering") || force) {
+        swgDSDDemodSettings->setEnableCosineFiltering(settings.m_enableCosineFiltering ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("syncOrConstellation") || force) {
+        swgDSDDemodSettings->setSyncOrConstellation(settings.m_syncOrConstellation ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("slot1On") || force) {
+        swgDSDDemodSettings->setSlot1On(settings.m_slot1On ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("slot2On") || force) {
+        swgDSDDemodSettings->setSlot2On(settings.m_slot2On ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("tdmaStereo") || force) {
+        swgDSDDemodSettings->setTdmaStereo(settings.m_tdmaStereo ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("pllLock") || force) {
+        swgDSDDemodSettings->setPllLock(settings.m_pllLock ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgDSDDemodSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swgDSDDemodSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("audioDeviceName") || force) {
+        swgDSDDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+    if (channelSettingsKeys.contains("highPassFilter") || force) {
+        swgDSDDemodSettings->setHighPassFilter(settings.m_highPassFilter ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("traceLengthMutliplier") || force) {
+        swgDSDDemodSettings->setTraceLengthMutliplier(settings.m_traceLengthMutliplier);
+    }
+    if (channelSettingsKeys.contains("traceStroke") || force) {
+        swgDSDDemodSettings->setTraceStroke(settings.m_traceStroke);
+    }
+    if (channelSettingsKeys.contains("traceDecay") || force) {
+        swgDSDDemodSettings->setTraceDecay(settings.m_traceDecay);
+    }
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void DSDDemod::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "DSDDemod::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("DSDDemod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }
