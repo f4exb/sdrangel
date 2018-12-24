@@ -18,8 +18,10 @@
 #ifndef INCLUDE_WFMDEMOD_H
 #define INCLUDE_WFMDEMOD_H
 
-#include <QMutex>
 #include <vector>
+
+#include <QMutex>
+#include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelsinkapi.h"
@@ -36,11 +38,14 @@
 
 #define rfFilterFftLength 1024
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class DeviceSourceAPI;
 
 class WFMDemod : public BasebandSampleSink, public ChannelSinkAPI {
+    Q_OBJECT
 public:
     class MsgConfigureWFMDemod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -203,6 +208,9 @@ private:
 
 	PhaseDiscriminators m_phaseDiscri;
 
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
     static const int m_udpBlockSize;
 
     void applyAudioSampleRate(int sampleRate);
@@ -211,6 +219,10 @@ private:
 
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const WFMDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const WFMDemodSettings& settings, bool force);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_WFMDEMOD_H

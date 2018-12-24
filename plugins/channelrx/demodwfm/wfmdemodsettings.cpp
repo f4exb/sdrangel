@@ -45,6 +45,11 @@ void WFMDemodSettings::resetToDefaults()
     m_rgbColor = QColor(0, 0, 255).rgb();
     m_title = "WFM Demodulator";
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
+    m_reverseAPIChannelIndex = 0;
 }
 
 QByteArray WFMDemodSettings::serialize() const
@@ -63,6 +68,11 @@ QByteArray WFMDemodSettings::serialize() const
         s.writeBlob(11, m_channelMarker->serialize());
     }
 
+    s.writeBool(12, m_useReverseAPI);
+    s.writeString(13, m_reverseAPIAddress);
+    s.writeU32(14, m_reverseAPIPort);
+    s.writeU32(15, m_reverseAPIDeviceIndex);
+    s.writeU32(16, m_reverseAPIChannelIndex);
 
     return s.final();
 }
@@ -81,6 +91,7 @@ bool WFMDemodSettings::deserialize(const QByteArray& data)
     {
         QByteArray bytetmp;
         qint32 tmp;
+        uint32_t utmp;
         QString strtmp;
 
         d.readS32(1, &tmp, 0);
@@ -102,6 +113,21 @@ bool WFMDemodSettings::deserialize(const QByteArray& data)
         if (m_channelMarker) {
             m_channelMarker->deserialize(bytetmp);
         }
+
+        d.readBool(12, &m_useReverseAPI, false);
+        d.readString(13, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(14, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(15, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(16, &utmp, 0);
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
 
         return true;
     }
