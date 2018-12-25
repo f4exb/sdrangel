@@ -42,6 +42,10 @@ struct BladeRF1InputSettings {
 	bool m_dcBlock;
 	bool m_iqCorrection;
 	QString m_fileRecordName;
+    bool     m_useReverseAPI;
+    QString  m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
 
 	BladeRF1InputSettings();
 	void resetToDefaults();

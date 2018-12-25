@@ -30,7 +30,7 @@
 
 const PluginDescriptor Blderf1InputPlugin::m_pluginDescriptor = {
 	QString("BladeRF1 Input"),
-	QString("4.2.0"),
+	QString("4.3.2"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

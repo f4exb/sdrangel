@@ -39,6 +39,10 @@ void BladeRF2InputSettings::resetToDefaults()
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
     m_fileRecordName = "";
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray BladeRF2InputSettings::serialize() const
@@ -57,6 +61,10 @@ QByteArray BladeRF2InputSettings::serialize() const
     s.writeS32(10, m_LOppmTenths);
     s.writeBool(11, m_transverterMode);
     s.writeS64(12, m_transverterDeltaFrequency);
+    s.writeBool(13, m_useReverseAPI);
+    s.writeString(14, m_reverseAPIAddress);
+    s.writeU32(15, m_reverseAPIPort);
+    s.writeU32(16, m_reverseAPIDeviceIndex);
 
     return s.final();
 }
@@ -74,6 +82,7 @@ bool BladeRF2InputSettings::deserialize(const QByteArray& data)
     if (d.getVersion() == 1)
     {
         int intval;
+        uint32_t uintval;
 
         d.readS32(1, &m_devSampleRate, 3072000);
         d.readS32(2, &m_bandwidth);
@@ -88,6 +97,18 @@ bool BladeRF2InputSettings::deserialize(const QByteArray& data)
         d.readS32(10, &m_LOppmTenths);
         d.readBool(11, &m_transverterMode, false);
         d.readS64(12, &m_transverterDeltaFrequency, 0);
+        d.readBool(13, &m_useReverseAPI, false);
+        d.readString(14, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(15, &uintval, 0);
+
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(16, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
         return true;
     }
