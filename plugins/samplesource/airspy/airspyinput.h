@@ -25,11 +25,11 @@
 #include <dsp/devicesamplesource.h>
 #include "airspysettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSourceAPI;
 class AirspyThread;
 class FileRecord;
-class QNetworkAccessManager;
-class QNetworkReply;
 
 class AirspyInput : public DeviceSampleSource {
     Q_OBJECT
