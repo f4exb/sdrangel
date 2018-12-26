@@ -18,6 +18,7 @@
 #define _HACKRF_HACKRFOUTPUTSETTINGS_H_
 
 #include <QtGlobal>
+#include <QString>
 
 struct HackRFOutputSettings {
 	quint64 m_centerFrequency;
@@ -28,6 +29,10 @@ struct HackRFOutputSettings {
 	quint64 m_devSampleRate;
 	bool m_biasT;
 	bool m_lnaExt;
+    bool     m_useReverseAPI;
+    QString  m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
 
 	HackRFOutputSettings();
 	void resetToDefaults();

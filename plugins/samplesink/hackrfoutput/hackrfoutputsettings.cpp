@@ -35,6 +35,10 @@ void HackRFOutputSettings::resetToDefaults()
 	m_vgaGain = 22;
 	m_bandwidth = 1750000;
 	m_devSampleRate = 2400000;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray HackRFOutputSettings::serialize() const
@@ -48,6 +52,10 @@ QByteArray HackRFOutputSettings::serialize() const
 	s.writeU32(6, m_vgaGain);
 	s.writeU32(7, m_bandwidth);
 	s.writeU64(8, m_devSampleRate);
+    s.writeBool(9, m_useReverseAPI);
+    s.writeString(10, m_reverseAPIAddress);
+    s.writeU32(11, m_reverseAPIPort);
+    s.writeU32(12, m_reverseAPIDeviceIndex);
 
 	return s.final();
 }
@@ -64,6 +72,8 @@ bool HackRFOutputSettings::deserialize(const QByteArray& data)
 
 	if (d.getVersion() == 1)
 	{
+		uint32_t uintval;
+
 		d.readS32(1, &m_LOppmTenths, 0);
 		d.readBool(3, &m_biasT, false);
 		d.readU32(4, &m_log2Interp, 0);
@@ -71,6 +81,18 @@ bool HackRFOutputSettings::deserialize(const QByteArray& data)
 		d.readU32(6, &m_vgaGain, 30);
 		d.readU32(7, &m_bandwidth, 1750000);
 		d.readU64(8, &m_devSampleRate, 2400000);
+        d.readBool(9, &m_useReverseAPI, false);
+        d.readString(10, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(11, &uintval, 0);
+
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(12, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
 		return true;
 	}

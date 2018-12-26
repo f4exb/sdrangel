@@ -17,18 +17,22 @@
 #ifndef INCLUDE_HACKRFOUTPUT_H
 #define INCLUDE_HACKRFOUTPUT_H
 
+#include <QString>
+#include <QNetworkRequest>
+
 #include "dsp/devicesamplesink.h"
 #include "libhackrf/hackrf.h"
-#include <QString>
-
 #include "hackrf/devicehackrf.h"
 #include "hackrf/devicehackrfparam.h"
 #include "hackrfoutputsettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSinkAPI;
 class HackRFOutputThread;
 
 class HackRFOutput : public DeviceSampleSink {
+	Q_OBJECT
 public:
 
 	class MsgConfigureHackRF : public Message {
@@ -129,13 +133,6 @@ public:
             QString& errorMessage);
 
 private:
-    bool openDevice();
-    void closeDevice();
-	bool applySettings(const HackRFOutputSettings& settings, bool force);
-//	hackrf_device *open_hackrf_from_sequence(int sequence);
-	void setDeviceCenterFrequency(quint64 freq_hz, qint32 LOppmTenths);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const HackRFOutputSettings& settings);
-
 	DeviceSinkAPI *m_deviceAPI;
 	QMutex m_mutex;
 	HackRFOutputSettings m_settings;
@@ -143,7 +140,21 @@ private:
 	HackRFOutputThread* m_hackRFThread;
 	QString m_deviceDescription;
 	DeviceHackRFParams m_sharedParams;
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
 	bool m_running;
+    bool openDevice();
+    void closeDevice();
+	bool applySettings(const HackRFOutputSettings& settings, bool force);
+//	hackrf_device *open_hackrf_from_sequence(int sequence);
+	void setDeviceCenterFrequency(quint64 freq_hz, qint32 LOppmTenths);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const HackRFOutputSettings& settings);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const HackRFOutputSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_HACKRFINPUT_H
