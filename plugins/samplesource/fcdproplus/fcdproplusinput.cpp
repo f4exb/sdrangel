@@ -90,6 +90,16 @@ bool FCDProPlusInput::openDevice()
         return false;
     }
 
+	if (!openFCDAudio(fcd_traits<ProPlus>::qtDeviceName))
+	{
+        qCritical("FCDProPlusInput::start: could not open FCD audio source");
+        return false;
+	}
+    else
+    {
+        qDebug("FCDProPlusInput::start: FCD audio source opened");
+    }
+
     return true;
 }
 
@@ -125,16 +135,6 @@ bool FCDProPlusInput::start()
 		return false;
 	}
 
-	if (!openFCDAudio(fcd_traits<ProPlus>::qtDeviceName))
-	{
-        qCritical("FCDProPlusInput::start: could not open FCD audio source");
-        return false;
-	}
-    else
-    {
-        qDebug("FCDProPlusInput::start: FCD audio source opened");
-    }
-
 	m_FCDThread = new FCDProPlusThread(&m_sampleFifo, &m_fcdFIFO);
 	m_FCDThread->startWork();
 
@@ -155,6 +155,8 @@ void FCDProPlusInput::closeDevice()
 
     fcdClose(m_dev);
     m_dev = 0;
+
+   	closeFCDAudio();
 }
 
 bool FCDProPlusInput::openFCDAudio(const char* cardname)
@@ -196,7 +198,6 @@ void FCDProPlusInput::stop()
 		// wait for thread to quit ?
 		delete m_FCDThread;
 		m_FCDThread = nullptr;
-		closeFCDAudio();
 	}
 
 	m_running = false;
