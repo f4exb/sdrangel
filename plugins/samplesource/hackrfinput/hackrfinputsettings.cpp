@@ -41,6 +41,10 @@ void HackRFInputSettings::resetToDefaults()
 	m_devSampleRate = 2400000;
 	m_linkTxFrequency = false;
 	m_fileRecordName = "";
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray HackRFInputSettings::serialize() const
@@ -59,6 +63,10 @@ QByteArray HackRFInputSettings::serialize() const
 	s.writeBool(11, m_iqCorrection);
 	s.writeU64(12, m_devSampleRate);
     s.writeBool(13, m_linkTxFrequency);
+    s.writeBool(14, m_useReverseAPI);
+    s.writeString(15, m_reverseAPIAddress);
+    s.writeU32(16, m_reverseAPIPort);
+    s.writeU32(17, m_reverseAPIDeviceIndex);
 
 	return s.final();
 }
@@ -76,6 +84,7 @@ bool HackRFInputSettings::deserialize(const QByteArray& data)
 	if (d.getVersion() == 1)
 	{
 		int intval;
+		uint32_t uintval;
 
 		d.readS32(1, &m_LOppmTenths, 0);
 		d.readBool(3, &m_biasT, false);
@@ -89,7 +98,19 @@ bool HackRFInputSettings::deserialize(const QByteArray& data)
 		d.readBool(10, &m_dcBlock, false);
 		d.readBool(11, &m_iqCorrection, false);
 		d.readU64(12, &m_devSampleRate, 2400000U);
-        d.readBool(11, &m_linkTxFrequency, false);
+        d.readBool(13, &m_linkTxFrequency, false);
+        d.readBool(14, &m_useReverseAPI, false);
+        d.readString(15, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(16, &uintval, 0);
+
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(17, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
 		return true;
 	}
