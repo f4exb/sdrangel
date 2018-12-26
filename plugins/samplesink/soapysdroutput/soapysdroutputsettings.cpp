@@ -42,6 +42,10 @@ void SoapySDROutputSettings::resetToDefaults()
     m_autoIQCorrection = false;
     m_dcCorrection = std::complex<double>{0,0};
     m_iqCorrection = std::complex<double>{0,0};
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray SoapySDROutputSettings::serialize() const
@@ -67,6 +71,10 @@ QByteArray SoapySDROutputSettings::serialize() const
     s.writeDouble(20, m_iqCorrection.imag());
     s.writeBlob(21, serializeArgumentMap(m_streamArgSettings));
     s.writeBlob(22, serializeArgumentMap(m_deviceArgSettings));
+    s.writeBool(23, m_useReverseAPI);
+    s.writeString(24, m_reverseAPIAddress);
+    s.writeU32(25, m_reverseAPIPort);
+    s.writeU32(26, m_reverseAPIDeviceIndex);
 
     return s.final();
 }
@@ -85,6 +93,7 @@ bool SoapySDROutputSettings::deserialize(const QByteArray& data)
     {
         QByteArray blob;
         double realval, imagval;
+        uint32_t uintval;
 
         d.readS32(1, &m_devSampleRate, 1024000);
         d.readS32(2, &m_LOppmTenths, 0);
@@ -111,6 +120,18 @@ bool SoapySDROutputSettings::deserialize(const QByteArray& data)
         deserializeArgumentMap(blob, m_streamArgSettings);
         d.readBlob(22, &blob);
         deserializeArgumentMap(blob, m_deviceArgSettings);
+        d.readBool(23, &m_useReverseAPI, false);
+        d.readString(24, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(25, &uintval, 0);
+
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(26, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
         return true;
     }
