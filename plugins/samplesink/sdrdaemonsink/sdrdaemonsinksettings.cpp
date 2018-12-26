@@ -34,6 +34,10 @@ void SDRdaemonSinkSettings::resetToDefaults()
     m_dataPort = 9090;
     m_deviceIndex = 0;
     m_channelIndex = 0;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray SDRdaemonSinkSettings::serialize() const
@@ -50,6 +54,10 @@ QByteArray SDRdaemonSinkSettings::serialize() const
     s.writeU32(8, m_dataPort);
     s.writeU32(10, m_deviceIndex);
     s.writeU32(11, m_channelIndex);
+    s.writeBool(12, m_useReverseAPI);
+    s.writeString(13, m_reverseAPIAddress);
+    s.writeU32(14, m_reverseAPIPort);
+    s.writeU32(15, m_reverseAPIDeviceIndex);
 
     return s.final();
 }
@@ -80,6 +88,18 @@ bool SDRdaemonSinkSettings::deserialize(const QByteArray& data)
         m_dataPort = uintval % (1<<16);
         d.readU32(10, &m_deviceIndex, 0);
         d.readU32(11, &m_channelIndex, 0);
+        d.readBool(12, &m_useReverseAPI, false);
+        d.readString(13, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(14, &uintval, 0);
+
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(15, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
         return true;
     }

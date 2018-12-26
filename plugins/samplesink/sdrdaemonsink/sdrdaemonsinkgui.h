@@ -154,6 +154,7 @@ private slots:
     void updateStatus();
 	void tick();
 	void networkManagerFinished(QNetworkReply *reply);
+    void openDeviceSettingsDialog(const QPoint& p);
 };
 
 #endif // INCLUDE_FILESINKGUI_H
