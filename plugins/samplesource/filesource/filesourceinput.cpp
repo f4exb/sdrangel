@@ -18,6 +18,8 @@
 #include <errno.h>
 
 #include <QDebug>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGDeviceSettings.h"
 #include "SWGFileSourceSettings.h"
@@ -62,10 +64,15 @@ FileSourceInput::FileSourceInput(DeviceSourceAPI *deviceAPI) :
     qDebug("FileSourceInput::FileSourceInput: device source engine: %p", m_deviceAPI->getDeviceSourceEngine());
     qDebug("FileSourceInput::FileSourceInput: device source engine message queue: %p", m_deviceAPI->getDeviceEngineInputMessageQueue());
     qDebug("FileSourceInput::FileSourceInput: device source: %p", m_deviceAPI->getDeviceSourceEngine()->getSource());
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 FileSourceInput::~FileSourceInput()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
+
 	stop();
 }
 
@@ -349,6 +356,10 @@ bool FileSourceInput::handleMessage(const Message& message)
             m_deviceAPI->stopAcquisition();
         }
 
+        if (m_settings.m_useReverseAPI) {
+            webapiReverseSendStartStop(cmd.getStartStop());
+        }
+
         return true;
     }
     else if (FileSourceThread::MsgReportEOF::match(message))
@@ -386,12 +397,16 @@ bool FileSourceInput::handleMessage(const Message& message)
 
 bool FileSourceInput::applySettings(const FileSourceSettings& settings, bool force)
 {
+    QList<QString> reverseAPIKeys;
+
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
         m_centerFrequency = settings.m_centerFrequency;
     }
 
     if ((m_settings.m_accelerationFactor != settings.m_accelerationFactor) || force)
     {
+        reverseAPIKeys.append("accelerationFactor");
+
         if (m_fileSourceThread)
         {
             QMutexLocker mutexLocker(&m_mutex);
@@ -401,6 +416,22 @@ bool FileSourceInput::applySettings(const FileSourceSettings& settings, bool for
             }
             m_fileSourceThread->setSampleRateAndSize(settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
         }
+    }
+
+    if ((m_settings.m_loop != settings.m_loop)) {
+        reverseAPIKeys.append("loop");
+    }
+    if ((m_settings.m_fileName != settings.m_fileName)) {
+        reverseAPIKeys.append("fileName");
+    }
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -533,4 +564,73 @@ void FileSourceInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& res
     response.getFileSourceReport()->setSampleSize(m_sampleSize);
 }
 
+void FileSourceInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FileSourceSettings& settings, bool force)
+{
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDeviceHwType(new QString("FileSource"));
+    swgDeviceSettings->setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
+    SWGSDRangel::SWGFileSourceSettings *swgFileSourceSettings = swgDeviceSettings->getFileSourceSettings();
 
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (deviceSettingsKeys.contains("accelerationFactor") || force) {
+        swgFileSourceSettings->setAccelerationFactor(settings.m_accelerationFactor);
+    }
+    if (deviceSettingsKeys.contains("loop") || force) {
+        swgFileSourceSettings->setLoop(settings.m_loop);
+    }
+    if (deviceSettingsKeys.contains("fileName") || force) {
+        swgFileSourceSettings->setFileName(new QString(settings.m_fileName));
+    }
+
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgDeviceSettings;
+}
+
+void FileSourceInput::webapiReverseSendStartStop(bool start)
+{
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+
+    if (start) {
+        m_networkManager->sendCustomRequest(m_networkRequest, "POST");
+    } else {
+        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE");
+    }
+}
+
+void FileSourceInput::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "FileSourceInput::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("FileSourceInput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+}
