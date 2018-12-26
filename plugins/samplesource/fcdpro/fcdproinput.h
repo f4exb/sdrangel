@@ -17,9 +17,11 @@
 #ifndef INCLUDE_FCDPROINPUT_H
 #define INCLUDE_FCDPROINPUT_H
 
+#include <inttypes.h>
+
 #include <QString>
 #include <QByteArray>
-#include <inttypes.h>
+#include <QNetworkRequest>
 
 #include "dsp/devicesamplesource.h"
 #include "audio/audioinput.h"
@@ -33,11 +35,14 @@ struct fcd_buffer {
 	std::size_t length;
 };
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSourceAPI;
 class FCDProThread;
 class FileRecord;
 
 class FCDProInput : public DeviceSampleSource {
+    Q_OBJECT
 public:
 	class MsgConfigureFCDPro : public Message {
 		MESSAGE_CLASS_DECLARATION
@@ -158,15 +163,6 @@ public:
 	void set_gain6(int index);
 
 private:
-    bool openDevice();
-    void closeDevice();
-    bool openFCDAudio(const char *filename);
-    void closeFCDAudio();
-	void applySettings(const FCDProSettings& settings, bool force);
-	void set_lo_ppm();
-
-	void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FCDProSettings& settings);
-
 	DeviceSourceAPI *m_deviceAPI;
 	hid_device *m_dev;
     AudioInput m_fcdAudioInput;
@@ -177,6 +173,22 @@ private:
 	QString m_deviceDescription;
 	bool m_running;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
+    bool openDevice();
+    void closeDevice();
+    bool openFCDAudio(const char *filename);
+    void closeFCDAudio();
+	void applySettings(const FCDProSettings& settings, bool force);
+	void set_lo_ppm();
+
+	void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FCDProSettings& settings);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FCDProSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_FCDPROINPUT_H

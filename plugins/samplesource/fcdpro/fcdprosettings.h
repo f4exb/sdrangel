@@ -43,6 +43,10 @@ struct FCDProSettings {
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
     QString m_fileRecordName;
+    bool     m_useReverseAPI;
+    QString  m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
 
 	FCDProSettings();
 	void resetToDefaults();

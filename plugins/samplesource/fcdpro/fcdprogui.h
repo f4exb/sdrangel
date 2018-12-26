@@ -102,6 +102,7 @@ private slots:
     void on_transverter_clicked();
 	void updateHardware();
 	void updateStatus();
+    void openDeviceSettingsDialog(const QPoint& p);
 };
 
 #endif // INCLUDE_FCDPROGUI_H

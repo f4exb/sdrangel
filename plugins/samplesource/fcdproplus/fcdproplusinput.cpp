@@ -14,9 +14,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QDebug>
 #include <string.h>
 #include <errno.h>
+
+#include <QDebug>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -47,10 +50,15 @@ FCDProPlusInput::FCDProPlusInput(DeviceSourceAPI *deviceAPI) :
     openDevice();
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 FCDProPlusInput::~FCDProPlusInput()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
+
     if (m_running) {
         stop();
     }
@@ -277,6 +285,10 @@ bool FCDProPlusInput::handleMessage(const Message& message)
             m_deviceAPI->stopAcquisition();
         }
 
+        if (m_settings.m_useReverseAPI) {
+            webapiReverseSendStartStop(cmd.getStartStop());
+        }
+
         return true;
     }
     else if (MsgFileRecord::match(message))
@@ -310,6 +322,17 @@ bool FCDProPlusInput::handleMessage(const Message& message)
 void FCDProPlusInput::applySettings(const FCDProPlusSettings& settings, bool force)
 {
 	bool forwardChange = false;
+    QList<QString> reverseAPIKeys;
+
+    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)) {
+        reverseAPIKeys.append("centerFrequency");
+    }
+    if (force || (m_settings.m_transverterMode != settings.m_transverterMode)) {
+        reverseAPIKeys.append("transverterMode");
+    }
+    if (force || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency)) {
+        reverseAPIKeys.append("transverterDeltaFrequency");
+    }
 
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
             || (m_settings.m_transverterMode != settings.m_transverterMode)
@@ -319,8 +342,7 @@ void FCDProPlusInput::applySettings(const FCDProPlusSettings& settings, bool for
         deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
         deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
 
-        if (m_dev != 0)
-        {
+        if (m_dev != 0) {
             set_center_freq((double) deviceCenterFrequency);
         }
 
@@ -334,85 +356,88 @@ void FCDProPlusInput::applySettings(const FCDProPlusSettings& settings, bool for
 
 	if ((m_settings.m_lnaGain != settings.m_lnaGain) || force)
 	{
-		m_settings.m_lnaGain = settings.m_lnaGain;
+        reverseAPIKeys.append("lnaGain");
 
-		if (m_dev != 0)
-		{
+		if (m_dev != 0) {
 			set_lna_gain(settings.m_lnaGain);
 		}
 	}
 
 	if ((m_settings.m_biasT != settings.m_biasT) || force)
 	{
-		m_settings.m_biasT = settings.m_biasT;
+        reverseAPIKeys.append("biasT");
 
-		if (m_dev != 0)
-		{
+		if (m_dev != 0) {
 			set_bias_t(settings.m_biasT);
 		}
 	}
 
 	if ((m_settings.m_mixGain != settings.m_mixGain) || force)
 	{
-		m_settings.m_mixGain = settings.m_mixGain;
+        reverseAPIKeys.append("mixGain");
 
-		if (m_dev != 0)
-		{
+		if (m_dev != 0) {
 			set_mixer_gain(settings.m_mixGain);
 		}
 	}
 
 	if ((m_settings.m_ifGain != settings.m_ifGain) || force)
 	{
-		m_settings.m_ifGain = settings.m_ifGain;
+        reverseAPIKeys.append("ifGain");
 
-		if (m_dev != 0)
-		{
+		if (m_dev != 0) {
 			set_if_gain(settings.m_ifGain);
 		}
 	}
 
 	if ((m_settings.m_ifFilterIndex != settings.m_ifFilterIndex) || force)
 	{
-		m_settings.m_ifFilterIndex = settings.m_ifFilterIndex;
+        reverseAPIKeys.append("ifFilterIndex");
 
-		if (m_dev != 0)
-		{
+		if (m_dev != 0) {
 			set_if_filter(settings.m_ifFilterIndex);
 		}
 	}
 
 	if ((m_settings.m_rfFilterIndex != settings.m_rfFilterIndex) || force)
 	{
-		m_settings.m_rfFilterIndex = settings.m_rfFilterIndex;
-
-		if (m_dev != 0)
-		{
+		if (m_dev != 0) {
 			set_rf_filter(settings.m_rfFilterIndex);
 		}
 	}
 
 	if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
 	{
+        reverseAPIKeys.append("LOppmTenths");
 		m_settings.m_LOppmTenths = settings.m_LOppmTenths;
 
-		if (m_dev != 0)
-		{
+		if (m_dev != 0) {
 			set_lo_ppm();
 		}
 	}
 
 	if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
 	{
-		m_settings.m_dcBlock = settings.m_dcBlock;
-		m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqImbalance);
+        reverseAPIKeys.append("dcBlock");
+		m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqImbalance);
 	}
 
 	if ((m_settings.m_iqImbalance != settings.m_iqImbalance) || force)
 	{
-		m_settings.m_iqImbalance = settings.m_iqImbalance;
-		m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqImbalance);
+        reverseAPIKeys.append("iqImbalance");
+		m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqImbalance);
 	}
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+    }
+
+    m_settings = settings;
 
 	if (forwardChange)
     {
@@ -631,4 +656,103 @@ void FCDProPlusInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings&
     }
 }
 
+void FCDProPlusInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FCDProPlusSettings& settings, bool force)
+{
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDeviceHwType(new QString("FCDPro+"));
+    swgDeviceSettings->setFcdProPlusSettings(new SWGSDRangel::SWGFCDProPlusSettings());
+    SWGSDRangel::SWGFCDProPlusSettings *swgFCDProPlusSettings = swgDeviceSettings->getFcdProPlusSettings();
 
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (deviceSettingsKeys.contains("centerFrequency") || force) {
+        swgFCDProPlusSettings->setCenterFrequency(settings.m_centerFrequency);
+    }
+    if (deviceSettingsKeys.contains("rangeLow") || force) {
+        swgFCDProPlusSettings->setRangeLow(settings.m_rangeLow ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("lnaGain") || force) {
+        swgFCDProPlusSettings->setLnaGain(settings.m_lnaGain ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("mixGain") || force) {
+        swgFCDProPlusSettings->setMixGain(settings.m_mixGain ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("biasT") || force) {
+        swgFCDProPlusSettings->setBiasT(settings.m_biasT ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("ifGain") || force) {
+        swgFCDProPlusSettings->setIfGain(settings.m_ifGain);
+    }
+    if (deviceSettingsKeys.contains("ifFilterIndex") || force) {
+        swgFCDProPlusSettings->setIfFilterIndex(settings.m_ifFilterIndex);
+    }
+    if (deviceSettingsKeys.contains("LOppmTenths") || force) {
+        swgFCDProPlusSettings->setLOppmTenths(settings.m_LOppmTenths);
+    }
+    if (deviceSettingsKeys.contains("dcBlock") || force) {
+        swgFCDProPlusSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("iqImbalance") || force) {
+        swgFCDProPlusSettings->setIqImbalance(settings.m_iqImbalance ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency") || force) {
+        swgFCDProPlusSettings->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    }
+    if (deviceSettingsKeys.contains("transverterMode") || force) {
+        swgFCDProPlusSettings->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("fileRecordName") || force) {
+        swgFCDProPlusSettings->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgDeviceSettings;
+}
+
+void FCDProPlusInput::webapiReverseSendStartStop(bool start)
+{
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+
+    if (start) {
+        m_networkManager->sendCustomRequest(m_networkRequest, "POST");
+    } else {
+        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE");
+    }
+}
+
+void FCDProPlusInput::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "FCDProPlusInput::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("FCDProPlusInput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+}
