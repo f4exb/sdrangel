@@ -31,6 +31,10 @@ void SDRdaemonSourceSettings::resetToDefaults()
     m_dcBlock = false;
     m_iqCorrection = false;
     m_fileRecordName = "";
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray SDRdaemonSourceSettings::serialize() const
@@ -43,6 +47,10 @@ QByteArray SDRdaemonSourceSettings::serialize() const
     s.writeString(8, m_dataAddress);
     s.writeBool(9, m_dcBlock);
     s.writeBool(10, m_iqCorrection);
+    s.writeBool(11, m_useReverseAPI);
+    s.writeString(12, m_reverseAPIAddress);
+    s.writeU32(13, m_reverseAPIPort);
+    s.writeU32(14, m_reverseAPIDeviceIndex);
 
     return s.final();
 }
@@ -60,6 +68,7 @@ bool SDRdaemonSourceSettings::deserialize(const QByteArray& data)
     if (d.getVersion() == 1)
     {
         quint32 uintval;
+
         d.readString(5, &m_apiAddress, "127.0.0.1");
         d.readU32(6, &uintval, 9090);
         m_apiPort = uintval % (1<<16);
@@ -68,6 +77,18 @@ bool SDRdaemonSourceSettings::deserialize(const QByteArray& data)
         d.readString(8, &m_dataAddress, "127.0.0.1");
         d.readBool(9, &m_dcBlock, false);
         d.readBool(10, &m_iqCorrection, false);
+        d.readBool(11, &m_useReverseAPI, false);
+        d.readString(12, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(13, &uintval, 0);
+
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(14, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
         return true;
     }
     else

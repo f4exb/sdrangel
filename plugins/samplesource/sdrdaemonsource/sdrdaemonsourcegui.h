@@ -133,6 +133,7 @@ private slots:
     void updateHardware();
 	void updateStatus();
 	void networkManagerFinished(QNetworkReply *reply);
+    void openDeviceSettingsDialog(const QPoint& p);
 };
 
 #endif // INCLUDE_SDRDAEMONSOURCEGUI_H
