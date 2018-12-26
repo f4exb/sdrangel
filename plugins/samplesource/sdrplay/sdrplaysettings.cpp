@@ -42,6 +42,10 @@ void SDRPlaySettings::resetToDefaults()
     m_mixerAmpOn = false;
     m_basebandGain = 29;
     m_fileRecordName = "";
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray SDRPlaySettings::serialize() const
@@ -62,6 +66,10 @@ QByteArray SDRPlaySettings::serialize() const
 	s.writeBool(12, m_lnaOn);
 	s.writeBool(13, m_mixerAmpOn);
 	s.writeS32(14, m_basebandGain);
+    s.writeBool(15, m_useReverseAPI);
+    s.writeString(16, m_reverseAPIAddress);
+    s.writeU32(17, m_reverseAPIPort);
+    s.writeU32(18, m_reverseAPIDeviceIndex);
 
 	return s.final();
 }
@@ -79,6 +87,7 @@ bool SDRPlaySettings::deserialize(const QByteArray& data)
 	if (d.getVersion() == 1)
 	{
 		int intval;
+		uint32_t uintval;
 
 		d.readS32(1, &m_LOppmTenths, 0);
         d.readU32(2, &m_frequencyBandIndex, 0);
@@ -95,6 +104,18 @@ bool SDRPlaySettings::deserialize(const QByteArray& data)
 		d.readBool(12, &m_lnaOn, false);
 		d.readBool(13, &m_mixerAmpOn, false);
 		d.readS32(14, &m_basebandGain, 29);
+        d.readBool(15, &m_useReverseAPI, false);
+        d.readString(16, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(17, &uintval, 0);
+
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(18, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
 		return true;
 	}

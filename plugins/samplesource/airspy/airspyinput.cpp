@@ -30,8 +30,8 @@
 #include "airspyinput.h"
 #include "airspyplugin.h"
 
-#include <device/devicesourceapi.h>
-#include <dsp/filerecord.h>
+#include "device/devicesourceapi.h"
+#include "dsp/filerecord.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "airspysettings.h"
