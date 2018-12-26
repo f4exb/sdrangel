@@ -402,6 +402,8 @@ void FCDProPlusInput::applySettings(const FCDProPlusSettings& settings, bool for
 
 	if ((m_settings.m_rfFilterIndex != settings.m_rfFilterIndex) || force)
 	{
+        reverseAPIKeys.append("rfFilterIndex");
+
 		if (m_dev != 0) {
 			set_rf_filter(settings.m_rfFilterIndex);
 		}
@@ -687,6 +689,9 @@ void FCDProPlusInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKe
     }
     if (deviceSettingsKeys.contains("ifFilterIndex") || force) {
         swgFCDProPlusSettings->setIfFilterIndex(settings.m_ifFilterIndex);
+    }
+    if (deviceSettingsKeys.contains("rfFilterIndex") || force) {
+        swgFCDProPlusSettings->setRfFilterIndex(settings.m_rfFilterIndex);
     }
     if (deviceSettingsKeys.contains("LOppmTenths") || force) {
         swgFCDProPlusSettings->setLOppmTenths(settings.m_LOppmTenths);
