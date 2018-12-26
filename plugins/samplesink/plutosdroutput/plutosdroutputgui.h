@@ -92,6 +92,7 @@ private slots:
     void updateHardware();
     void updateStatus();
     void handleInputMessages();
+    void openDeviceSettingsDialog(const QPoint& p);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_PLUTOSDROUTPUT_PLUTOSDROUTPUTGUI_H_ */

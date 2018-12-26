@@ -18,18 +18,22 @@
 #define PLUGINS_SAMPLESOURCE_PLUTOSDROUTPUT_PLUTOSDRINPUT_H_
 
 #include <QString>
+#include <QNetworkRequest>
 
 #include "iio.h"
-#include <dsp/devicesamplesink.h>
+#include "dsp/devicesamplesink.h"
 #include "util/message.h"
 #include "plutosdr/deviceplutosdrshared.h"
 #include "plutosdr/deviceplutosdrbox.h"
 #include "plutosdroutputsettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSinkAPI;
 class PlutoSDROutputThread;
 
 class PlutoSDROutput : public DeviceSampleSink {
+    Q_OBJECT
 public:
     class MsgConfigurePlutoSDR : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -131,6 +135,8 @@ public:
     PlutoSDROutputThread *m_plutoSDROutputThread;
     DevicePlutoSDRBox::SampleRates m_deviceSampleRates;
     QMutex m_mutex;
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
 
     bool openDevice();
     void closeDevice();
@@ -139,6 +145,11 @@ public:
     bool applySettings(const PlutoSDROutputSettings& settings, bool force = false);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const PlutoSDROutputSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const PlutoSDROutputSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 

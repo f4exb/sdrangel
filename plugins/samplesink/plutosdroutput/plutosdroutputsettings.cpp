@@ -39,6 +39,10 @@ void PlutoSDROutputSettings::resetToDefaults()
 	m_antennaPath = RFPATH_A;
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray PlutoSDROutputSettings::serialize() const
@@ -57,6 +61,10 @@ QByteArray PlutoSDROutputSettings::serialize() const
     s.writeS32(14, (int) m_antennaPath);
     s.writeBool(15, m_transverterMode);
     s.writeS64(16, m_transverterDeltaFrequency);
+    s.writeBool(17, m_useReverseAPI);
+    s.writeString(18, m_reverseAPIAddress);
+    s.writeU32(19, m_reverseAPIPort);
+    s.writeU32(20, m_reverseAPIDeviceIndex);
 
 	return s.final();
 }
@@ -98,6 +106,18 @@ bool PlutoSDROutputSettings::deserialize(const QByteArray& data)
         }
         d.readBool(15, &m_transverterMode, false);
         d.readS64(16, &m_transverterDeltaFrequency, 0);
+        d.readBool(17, &m_useReverseAPI, false);
+        d.readString(18, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(19, &uintval, 0);
+
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(20, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
 		return true;
 	}
