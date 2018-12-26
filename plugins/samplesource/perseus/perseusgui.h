@@ -91,6 +91,7 @@ private slots:
 	void updateHardware();
     void updateStatus();
 	void handleInputMessages();
+    void openDeviceSettingsDialog(const QPoint& p);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_PERSEUS_PERSEUSGUI_H_ */

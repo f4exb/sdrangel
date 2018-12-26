@@ -18,17 +18,22 @@
 #define PLUGINS_SAMPLESOURCE_PERSEUS_PERSEUSINPUT_H_
 
 #include <vector>
-#include "perseus-sdr.h"
 
+#include <QNetworkRequest>
+
+#include "perseus-sdr.h"
 #include "dsp/devicesamplesource.h"
 #include "util/message.h"
 #include "perseussettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSourceAPI;
 class FileRecord;
 class PerseusThread;
 
 class PerseusInput : public DeviceSampleSource {
+    Q_OBJECT
 public:
     class MsgConfigurePerseus : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -144,6 +149,8 @@ private:
     PerseusThread *m_perseusThread;
     perseus_descr *m_perseusDescriptor;
     std::vector<uint32_t> m_sampleRates;
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
 
     bool openDevice();
     void closeDevice();
@@ -151,6 +158,11 @@ private:
     bool applySettings(const PerseusSettings& settings, bool force = false);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const PerseusSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const PerseusSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_PERSEUS_PERSEUSINPUT_H_ */

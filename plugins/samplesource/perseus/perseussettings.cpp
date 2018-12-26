@@ -36,6 +36,10 @@ void PerseusSettings::resetToDefaults()
     m_wideBand = false;
     m_attenuator = Attenuator_None;
     m_fileRecordName = "";
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray PerseusSettings::serialize() const
@@ -51,6 +55,10 @@ QByteArray PerseusSettings::serialize() const
     s.writeBool(7, m_adcPreamp);
     s.writeBool(8, m_wideBand);
     s.writeS32(9, (int) m_attenuator);
+    s.writeBool(10, m_useReverseAPI);
+    s.writeString(11, m_reverseAPIAddress);
+    s.writeU32(12, m_reverseAPIPort);
+    s.writeU32(13, m_reverseAPIDeviceIndex);
 
     return s.final();
 }
@@ -68,6 +76,7 @@ bool PerseusSettings::deserialize(const QByteArray& data)
     if (d.getVersion() == 1)
     {
         int intval;
+        uint32_t uintval;
 
         d.readU32(1, &m_devSampleRateIndex, 0);
         d.readS32(2, &m_LOppmTenths, 0);
@@ -84,6 +93,19 @@ bool PerseusSettings::deserialize(const QByteArray& data)
         } else {
             m_attenuator = Attenuator_None;
         }
+
+        d.readBool(10, &m_useReverseAPI, false);
+        d.readString(11, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(12, &uintval, 0);
+
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(13, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
         return true;
     }
