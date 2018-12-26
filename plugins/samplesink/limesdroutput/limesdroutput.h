@@ -26,11 +26,11 @@
 #include "limesdr/devicelimesdrshared.h"
 #include "limesdroutputsettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSinkAPI;
 class LimeSDROutputThread;
 struct DeviceLimeSDRParams;
-class QNetworkAccessManager;
-class QNetworkReply;
 
 class LimeSDROutput : public DeviceSampleSink
 {

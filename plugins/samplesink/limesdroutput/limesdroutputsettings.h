@@ -17,8 +17,10 @@
 #ifndef PLUGINS_SAMPLESOURCE_LIMESDROUTPUT_LIMESDROUTPUTSETTINGS_H_
 #define PLUGINS_SAMPLESOURCE_LIMESDROUTPUT_LIMESDROUTPUTSETTINGS_H_
 
-#include <QByteArray>
 #include <stdint.h>
+
+#include <QByteArray>
+#include <QString>
 
 /**
  * These are the settings individual to each hardware channel or software Tx chain
