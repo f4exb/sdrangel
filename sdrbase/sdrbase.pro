@@ -42,7 +42,7 @@ CONFIG(MINGW32):INCLUDEPATH += "C:\softs\serialDV"
 CONFIG(MINGW64):INCLUDEPATH += "C:\softs\serialDV"
 CONFIG(MSVC):INCLUDEPATH += "C:\softs\serialDV"
 
-CONFIG(macx):INCLUDEPATH += "../../../boost_1_64_0"
+CONFIG(macx):INCLUDEPATH += "../../../boost_1_69_0"
 
 MINGW32 || MINGW64 || MSVC {
     HEADERS += \
@@ -233,6 +233,10 @@ MINGW32 || MINGW64 || MSVC {
 LIBS += -L../httpserver/$${build_subdir} -lhttpserver
 LIBS += -L../qrtplib/$${build_subdir} -lqrtplib
 LIBS += -L../swagger/$${build_subdir} -lswagger
+
+macx {
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}
 
 RCC_BINARY_SOURCES += resources/res.qrc
 

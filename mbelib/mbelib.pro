@@ -16,6 +16,10 @@ CONFIG(MINGW64):LIBMBELIBSRC = "C:\softs\mbelib"
 CONFIG(MSVC):LIBMBELIBSRC = "C:\softs\mbelib"
 CONFIG(macx):LIBMBELIBSRC = "../../deps/mbelib"
 
+macx {
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}
+
 INCLUDEPATH += $$LIBMBELIBSRC
 
 SOURCES = $$LIBMBELIBSRC/ambe3600x2400.c\

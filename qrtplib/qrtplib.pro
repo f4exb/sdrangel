@@ -13,6 +13,9 @@ INCLUDEPATH += $$PWD
 INCLUDEPATH += ../exports
 
 QMAKE_CXXFLAGS += -std=c++11
+macx {
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}
 
 CONFIG(MSVC):DEFINES += qrtplib_EXPORTS
 

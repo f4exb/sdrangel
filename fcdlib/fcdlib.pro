@@ -24,3 +24,7 @@ HEADERS = $$PWD/fcdtraits.h\
 CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.22\MinGW32\dll -llibusb-1.0
 CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.22\MinGW64\dll -llibusb-1.0
 CONFIG(MSVC):LIBS += -LC:\softs\libusb-1.0.22\MS64\dll -llibusb-1.0
+
+macx {
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}

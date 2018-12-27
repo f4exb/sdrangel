@@ -204,6 +204,7 @@ macx {
     LIBS += -L/opt/local/lib -lhackrf
     LIBS += -L/usr/local/lib -lLimeSuite
     LIBS += -framework iio
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
 }
 
 MSVC {

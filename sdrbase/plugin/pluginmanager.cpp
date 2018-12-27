@@ -63,6 +63,10 @@ void PluginManager::loadPluginsPart(const QString& pluginsSubDir)
 {
     QString applicationDirPath = QCoreApplication::instance()->applicationDirPath();
     QString applicationLibPath = applicationDirPath + "/../lib/" + pluginsSubDir;
+#ifdef __APPLE__
+    applicationLibPath.clear();
+    applicationLibPath.append(applicationDirPath + "/../Frameworks/" + pluginsSubDir);
+#endif
     QString applicationBuildPath = applicationDirPath + "/" + pluginsSubDir;
     qDebug() << "PluginManager::loadPlugins: " << qPrintable(applicationLibPath) << "," << qPrintable(applicationBuildPath);
 

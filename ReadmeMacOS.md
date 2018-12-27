@@ -1,7 +1,7 @@
 # MacOS
 
 ## Prerequisites for OSX (Sierra):
-- Qt (used 5.6.2)
+- Qt (used 5.12)
 - XCode with MacPorts
 - HackRF One
 
@@ -9,17 +9,18 @@ We are only covering HackRF One, since is only the hardware I own.
 In the future we will test RTL based: NooElec NESDR Nano 3(RTL2832U & R820T2).
 
 ### Project dir structure:
-SDRangel-3.x:
-  + build-sdrangel.macos-Desktop_Qt_5_6_2_clang_64bit-Release
+SDRangel-4.x:
+  + build-sdrangel.macos-Desktop_Qt_5_12_0_clang_64bit-Release
   + sdrangel
   + deps
     + cm256cc
     + dsdcc
     + mbelib
-+ boost_1_64_0/
+    + nanomsg
++ boost_1_69_0/
 
 ### Environment preparation
-Boost 1.64: Download and unpack
+Boost 1.69: Download and unpack
 There are a few dependencies which can be installed through MacPorts:
 ```
 sudo port install cmake hackrf-devel bladeRF rtl-sdr opencv

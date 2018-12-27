@@ -22,6 +22,10 @@ INCLUDEPATH += $$LIBCM256CCSRC
 DEFINES += USE_SSSE3=1
 QMAKE_CXXFLAGS += -mssse3
 
+macx {
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}
+
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 

@@ -90,3 +90,7 @@ $$LIBDSDCCSRC/timeutil.h\
 $$LIBDSDCCSRC/export.h
 
 LIBS += -L../mbelib/$${build_subdir} -lmbelib
+
+macx {
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}

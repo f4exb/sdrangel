@@ -1,38 +1,54 @@
 #!/bin/bash
 
-# Run from build directory
-test -d "app/sdrangel.app/Contents" || { echo "Please build first or chdir to proper folder!"; exit 1; }
+# Run from build directory after build
+APP_PATH="app/sdrangel.app"
+test -d "${APP_PATH}/Contents" || { echo "Please build first or chdir to proper folder!"; exit 1; }
 
-APP_LIB="app/sdrangel.app/Contents/lib"
+APP_LIB="${APP_PATH}/Contents/Frameworks"
 APP_PLUGINS="${APP_LIB}/plugins"
 
-mkdir -p "${APP_PLUGINS}/channeltx"
-mkdir -p "${APP_PLUGINS}/channelrx"
-mkdir -p "${APP_PLUGINS}/samplesink"
-mkdir -p "${APP_PLUGINS}/samplesource"
+mkdir -p $APP_PLUGINS
 
-cp -v fcdhid/libfcdhid.dylib $APP_LIB
-cp -v fcdlib/libfcdlib.dylib $APP_LIB
-cp -v mbelib/libmbelib.dylib $APP_LIB
-cp -v sdrbase/libsdrbase.dylib $APP_LIB
-cp -v sdrgui/libsdrgui.dylib $APP_LIB
-cp -v devices/libdevices.dylib $APP_LIB
-cp -v cm256cc/libcm256cc.dylib $APP_LIB
-cp -v httpserver/libhttpserver.dylib $APP_LIB
-cp -v swagger/libswagger.dylib $APP_LIB
-cp -v logging/liblogging.dylib $APP_LIB
+dply_lib()
+{
+	cp -f $1 $APP_LIB
+	echo "DeployLIB: `basename $1` to ${APP_LIB}"
+}
 
-for f in `find plugins/channelrx/ -name '*.dylib'`; do cp -v $f "${APP_PLUGINS}/channelrx/"; done
-for f in `find plugins/channeltx/ -name '*.dylib'`; do cp -v $f "${APP_PLUGINS}/channeltx/"; done
-for f in `find plugins/samplesink/ -name '*.dylib'`; do cp -v $f "${APP_PLUGINS}/samplesink/"; done
-for f in `find plugins/samplesource/ -name '*.dylib'`; do cp -v $f "${APP_PLUGINS}/samplesource/"; done
+dply_plugin()
+{
+	tmp=`dirname $1`
+	tmp=`dirname $tmp`
+	plugin_type=`basename $tmp`
+	plugin_path="${APP_PLUGINS}/${plugin_type}"
+	mkdir -p $plugin_path
+	cp -f $1 $plugin_path
+	echo "DeployPLUGIN: `basename $1` to ${plugin_path}"
+}
 
+# 1st-pass: Gather libs & plugins
+for i in `find . -name '*.dylib' -type f -not -path "./${APP_PATH}/*"`; do 
+	if [[ $i == *"plugins/"* ]]; then
+		dply_plugin $i
+	else
+		dply_lib $i
+	fi
+done
+
+# 2nd-pass: Symlink libs
 cd $APP_LIB
-ln -s libdsdcc.dylib libdsdcc.1.dylib
-ln -s libdevices.dylib libdevices.1.dylib
-ln -s libsdrbase.dylib libsdrbase.1.dylib
-ln -s libsdrgui.dylib libsdrgui.1.dylib
-ln -s libmbelib.dylib libmbelib.1.dylib
-ln -s liblogging.dylib liblogging.1.dylib
-ln -s libhttpserver.dylib libhttpserver.1.dylib
-ln -s libswagger.dylib libswagger.1.dylib
+for i in `find . -name '*.1.0.0.dylib' -type f -not -path "./plugins/*"`; do
+	ln -sf $i "${i/.1.0.0.dylib/.1.0.dylib}"
+	ln -sf $i "${i/.1.0.0.dylib/.1.dylib}"
+	ln -sf $i "${i/.1.0.0.dylib/.dylib}"
+done
+cd ../../..
+pwd
+
+# Deploy DMG
+/Applications/Qt/5.12.0/clang_64/bin/macdeployqt ./sdrangel.app \
+	-always-overwrite \
+	-dmg \
+	-libpath=sdrangel.app/Contents/Frameworks \
+	-verbose=1
+
