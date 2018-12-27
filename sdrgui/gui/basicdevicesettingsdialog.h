@@ -28,9 +28,9 @@ public:
 
 private slots:
     void on_reverseAPI_toggled(bool checked);
-    void on_reverseAPIAddress_returnPressed();
-    void on_reverseAPIPort_returnPressed();
-    void on_reverseAPIDeviceIndex_returnPressed();
+    void on_reverseAPIAddress_editingFinished();
+    void on_reverseAPIPort_editingFinished();
+    void on_reverseAPIDeviceIndex_editingFinished();
     void accept();
 
 private:

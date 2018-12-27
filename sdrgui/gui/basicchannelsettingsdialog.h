@@ -33,10 +33,10 @@ public:
 private slots:
     void on_colorBtn_clicked();
     void on_reverseAPI_toggled(bool checked);
-    void on_reverseAPIAddress_returnPressed();
-    void on_reverseAPIPort_returnPressed();
-    void on_reverseAPIDeviceIndex_returnPressed();
-    void on_reverseAPIChannelIndex_returnPressed();
+    void on_reverseAPIAddress_editingFinished();
+    void on_reverseAPIPort_editingFinished();
+    void on_reverseAPIDeviceIndex_editingFinished();
+    void on_reverseAPIChannelIndex_editingFinished();
     void accept();
 
 private:

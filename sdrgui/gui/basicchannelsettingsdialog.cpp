@@ -91,12 +91,12 @@ void BasicChannelSettingsDialog::on_reverseAPI_toggled(bool checked)
     m_useReverseAPI = checked;
 }
 
-void BasicChannelSettingsDialog::on_reverseAPIAddress_returnPressed()
+void BasicChannelSettingsDialog::on_reverseAPIAddress_editingFinished()
 {
     m_reverseAPIAddress = ui->reverseAPIAddress->text();
 }
 
-void BasicChannelSettingsDialog::on_reverseAPIPort_returnPressed()
+void BasicChannelSettingsDialog::on_reverseAPIPort_editingFinished()
 {
     bool dataOk;
     int reverseAPIPort = ui->reverseAPIPort->text().toInt(&dataOk);
@@ -108,7 +108,7 @@ void BasicChannelSettingsDialog::on_reverseAPIPort_returnPressed()
     }
 }
 
-void BasicChannelSettingsDialog::on_reverseAPIDeviceIndex_returnPressed()
+void BasicChannelSettingsDialog::on_reverseAPIDeviceIndex_editingFinished()
 {
     bool dataOk;
     int reverseAPIDeviceIndex = ui->reverseAPIDeviceIndex->text().toInt(&dataOk);
@@ -120,7 +120,7 @@ void BasicChannelSettingsDialog::on_reverseAPIDeviceIndex_returnPressed()
     }
 }
 
-void BasicChannelSettingsDialog::on_reverseAPIChannelIndex_returnPressed()
+void BasicChannelSettingsDialog::on_reverseAPIChannelIndex_editingFinished()
 {
     bool dataOk;
     int reverseAPIChannelIndex = ui->reverseAPIChannelIndex->text().toInt(&dataOk);
