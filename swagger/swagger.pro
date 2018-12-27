@@ -23,6 +23,10 @@ QMAKE_CXXFLAGS += -msse4.1
 
 QMAKE_CXXFLAGS += -std=c++11
 
+macx {
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}
+
 CONFIG(MSVC):DEFINES += swagger_EXPORTS
 
 CONFIG(Release):build_subdir = release

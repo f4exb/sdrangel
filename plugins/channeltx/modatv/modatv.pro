@@ -18,6 +18,7 @@ QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
 
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
 INCLUDEPATH += ../../../exports
 INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
@@ -43,6 +44,11 @@ FORMS += atvmodgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
+LIBS += -L../../../swagger/$${build_subdir} -lswagger
+
+macx {
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}
 
 CONFIG(MINGW32):LIBS += -LD:\softs\opencv\build\mw32\install\x86\mingw\bin -llibopencv_core2413 -llibopencv_highgui2413 -llibopencv_imgproc2413
 CONFIG(MINGW64):LIBS += -LD:\softs\opencv\build\mw64\install\x64\mingw\bin -llibopencv_core2413 -llibopencv_highgui2413 -llibopencv_imgproc2413

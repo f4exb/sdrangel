@@ -13,6 +13,9 @@ INCLUDEPATH += $$PWD
 INCLUDEPATH += ../exports
 
 QMAKE_CXXFLAGS += -std=c++11
+macx {
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug

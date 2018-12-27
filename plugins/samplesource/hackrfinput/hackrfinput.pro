@@ -54,4 +54,8 @@ LIBS += -L../../../swagger/$${build_subdir} -lswagger
 macx:LIBS += -L/opt/local/lib -lhackrf
 LIBS += -L../../../devices/$${build_subdir} -ldevices
 
+macx {
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}
+
 RESOURCES = ../../../sdrgui/resources/res.qrc

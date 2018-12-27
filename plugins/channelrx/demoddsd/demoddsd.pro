@@ -30,7 +30,7 @@ CONFIG(macx):LIBMBELIBSRC = "../../../../deps/mbelib"
 CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(MINGW64):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(MSVC):INCLUDEPATH += "C:\softs\boost_1_66_0"
-CONFIG(macx):INCLUDEPATH += "../../../../../boost_1_64_0"
+CONFIG(macx):INCLUDEPATH += "../../../../../boost_1_69_0"
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../exports
@@ -66,5 +66,9 @@ LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../swagger/$${build_subdir} -lswagger
 LIBS += -L../../../dsdcc/$${build_subdir} -ldsdcc
+
+macx {
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}
 
 RESOURCES = ../../../sdrgui/resources/res.qrc

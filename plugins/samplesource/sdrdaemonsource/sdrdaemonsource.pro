@@ -38,7 +38,7 @@ CONFIG(Debug):build_subdir = debug
 CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(MINGW64):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(MSVC):INCLUDEPATH += "C:\softs\boost_1_66_0"
-CONFIG(macx):INCLUDEPATH += "../../../boost_1_64_0"
+CONFIG(macx):INCLUDEPATH += "../../../boost_1_69_0"
 
 SOURCES += sdrdaemonsourcebuffer.cpp\
 sdrdaemonsourcegui.cpp\
@@ -63,6 +63,10 @@ LIBS += -L../../../swagger/$${build_subdir} -lswagger
 !macx:LIBS += -L../../../nanomsg/$${build_subdir} -lnanomsg
 macx:LIBS += -L/usr/local/lib -lnanomsg
 LIBS += -L../../../cm256cc/$${build_subdir} -lcm256cc
+
+macx {
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}
 
 RESOURCES = ../../../sdrgui/resources/res.qrc
 

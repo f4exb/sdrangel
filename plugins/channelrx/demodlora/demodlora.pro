@@ -40,4 +40,8 @@ FORMS += lorademodgui.ui
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 
+macx {
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}
+
 RESOURCES = ../../../sdrgui/resources/res.qrc

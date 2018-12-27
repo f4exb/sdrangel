@@ -29,3 +29,7 @@ HEADERS = $$PWD/fcdhid.h\
 CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.22\MinGW32\dll -llibusb-1.0 -liconv
 CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.22\MinGW64\dll -llibusb-1.0 -liconv
 CONFIG(macx):LIBS += -L/opt/local/lib -lusb-1.0 -liconv
+
+macx {
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}

@@ -53,4 +53,8 @@ LIBS += -L../../../swagger/$${build_subdir} -lswagger
 !macx:LIBS += -L../../../librtlsdr/$${build_subdir} -llibrtlsdr
 macx:LIBS += -L/opt/local/lib -lrtlsdr
 
+macx {
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}
+
 RESOURCES = ../../../sdrgui/resources/res.qrc
