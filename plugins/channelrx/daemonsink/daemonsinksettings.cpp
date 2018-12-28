@@ -40,6 +40,11 @@ void DaemonSinkSettings::resetToDefaults()
     m_rgbColor = QColor(140, 4, 4).rgb();
     m_title = "Daemon sink";
     m_channelMarker = nullptr;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
+    m_reverseAPIChannelIndex = 0;
 }
 
 QByteArray DaemonSinkSettings::serialize() const
@@ -51,6 +56,11 @@ QByteArray DaemonSinkSettings::serialize() const
     s.writeU32(4, m_dataPort);
     s.writeU32(5, m_rgbColor);
     s.writeString(6, m_title);
+    s.writeBool(7, m_useReverseAPI);
+    s.writeString(8, m_reverseAPIAddress);
+    s.writeU32(9, m_reverseAPIPort);
+    s.writeU32(10, m_reverseAPIDeviceIndex);
+    s.writeU32(11, m_reverseAPIChannelIndex);
 
     return s.final();
 }
@@ -90,6 +100,20 @@ bool DaemonSinkSettings::deserialize(const QByteArray& data)
 
         d.readU32(5, &m_rgbColor, QColor(0, 255, 255).rgb());
         d.readString(6, &m_title, "Daemon sink");
+        d.readBool(7, &m_useReverseAPI, false);
+        d.readString(8, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(9, &tmp, 0);
+
+        if ((tmp > 1023) && (tmp < 65535)) {
+            m_reverseAPIPort = tmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(10, &tmp, 0);
+        m_reverseAPIDeviceIndex = tmp > 99 ? 99 : tmp;
+        d.readU32(11, &tmp, 0);
+        m_reverseAPIChannelIndex = tmp > 99 ? 99 : tmp;
 
         return true;
     }

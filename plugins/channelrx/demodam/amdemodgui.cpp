@@ -16,6 +16,7 @@
 
 #include <QDockWidget>
 #include <QMainWindow>
+#include <QDebug>
 
 #include "amdemodgui.h"
 #include "amdemodssbdialog.h"
@@ -94,7 +95,6 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 
 bool AMDemodGUI::handleMessage(const Message& message)
 {
-    (void) message;
     if (AMDemod::MsgConfigureAMDemod::match(message))
     {
         qDebug("AMDemodGUI::handleMessage: AMDemod::MsgConfigureAMDemod");
@@ -206,12 +206,22 @@ void AMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
 {
     BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+    dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
     dialog.move(p);
     dialog.exec();
 
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     m_settings.m_title = m_channelMarker.getTitle();
+    m_settings.m_useReverseAPI = dialog.useReverseAPI();
+    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+    m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
     setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);
@@ -241,10 +251,10 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
 	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
-	connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
+	connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
 
 	CRightClickEnabler *samSidebandRightClickEnabler = new CRightClickEnabler(ui->ssb);
-    connect(samSidebandRightClickEnabler, SIGNAL(rightClick()), this, SLOT(samSSBSelect()));
+    connect(samSidebandRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(samSSBSelect()));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -335,17 +345,32 @@ void AMDemodGUI::displaySettings()
     ui->bandpassEnable->setChecked(m_settings.m_bandpassEnable);
     ui->pll->setChecked(m_settings.m_pll);
 
-    if (m_settings.m_pll) {
-        if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMLSB) {
+    qDebug() << "AMDemodGUI::displaySettings:"
+            << " m_pll: " << m_settings.m_pll
+            << " m_syncAMOperation: " << m_settings.m_syncAMOperation;
+
+    if (m_settings.m_pll)
+    {
+        if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMLSB)
+        {
             m_samUSB = false;
+            ui->ssb->setChecked(true);
             ui->ssb->setIcon(m_iconDSBLSB);
-        } else {
+        }
+        else if (m_settings.m_syncAMOperation == AMDemodSettings::SyncAMUSB)
+        {
             m_samUSB = true;
+            ui->ssb->setChecked(true);
             ui->ssb->setIcon(m_iconDSBUSB);
+        }
+        else
+        {
+            ui->ssb->setChecked(false);
         }
     }
     else
     {
+        ui->ssb->setChecked(false);
         ui->ssb->setIcon(m_iconDSBUSB);
     }
 

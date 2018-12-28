@@ -41,6 +41,8 @@ add_library(limesdrdevice SHARED
     ${limesdrdevice_SOURCES}
 )
 
+set_target_properties(limesdrdevice PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
+
 if (BUILD_DEBIAN)
 target_link_libraries(limesdrdevice
     limesuite

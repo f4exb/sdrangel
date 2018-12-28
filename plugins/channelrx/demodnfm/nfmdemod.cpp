@@ -15,10 +15,14 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QTime>
-#include <QDebug>
 #include <stdio.h>
 #include <complex.h>
+
+#include <QTime>
+#include <QDebug>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGChannelSettings.h"
 #include "SWGNFMDemodSettings.h"
@@ -94,10 +98,15 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 NFMDemod::~NFMDemod()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
@@ -491,10 +500,33 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
             << " m_ctcssOn: " << settings.m_ctcssOn
             << " m_audioMute: " << settings.m_audioMute
             << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " force: " << force;
+
+    QList<QString> reverseAPIKeys;
+
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+    if ((settings.m_volume != m_settings.m_volume) || force) {
+        reverseAPIKeys.append("volume");
+    }
+    if ((settings.m_ctcssOn != m_settings.m_ctcssOn) || force) {
+        reverseAPIKeys.append("ctcssOn");
+    }
+    if ((settings.m_audioMute != m_settings.m_audioMute) || force) {
+        reverseAPIKeys.append("audioMute");
+    }
+    if ((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
+        reverseAPIKeys.append("rgbColor");
+    }
+    if ((settings.m_title != m_settings.m_title) || force) {
+        reverseAPIKeys.append("title");
+    }
 
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
+        reverseAPIKeys.append("rfBandwidth");
         m_settingsMutex.lock();
         m_interpolator.create(16, m_inputSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistanceRemain = 0;
@@ -504,11 +536,13 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
 
     if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
     {
+        reverseAPIKeys.append("fmDeviation");
         m_phaseDiscri.setFMScaling((8.0f*m_audioSampleRate) / static_cast<float>(settings.m_fmDeviation)); // integrate 4x factor
     }
 
     if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
     {
+        reverseAPIKeys.append("afBandwidth");
         m_settingsMutex.lock();
         m_bandpass.create(301, m_audioSampleRate, 300.0, settings.m_afBandwidth);
         m_settingsMutex.unlock();
@@ -516,8 +550,16 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
 
     if ((settings.m_squelchGate != m_settings.m_squelchGate) || force)
     {
+        reverseAPIKeys.append("squelchGate");
         m_squelchGate = (m_audioSampleRate / 100) * settings.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
         m_squelchCount = 0; // reset squelch open counter
+    }
+
+    if ((settings.m_squelch != m_settings.m_squelch) || force) {
+        reverseAPIKeys.append("squelch");
+    }
+    if ((settings.m_deltaSquelch != m_settings.m_deltaSquelch) || force) {
+        reverseAPIKeys.append("deltaSquelch");
     }
 
     if ((settings.m_squelch != m_settings.m_squelch) ||
@@ -540,11 +582,13 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
 
     if ((settings.m_ctcssIndex != m_settings.m_ctcssIndex) || force)
     {
+        reverseAPIKeys.append("ctcssIndex");
         setSelectedCtcssIndex(settings.m_ctcssIndex);
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
+        reverseAPIKeys.append("audioDeviceName");
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
         //qDebug("AMDemod::applySettings: audioDeviceName: %s audioDeviceIndex: %d", qPrintable(settings.m_audioDeviceName), audioDeviceIndex);
@@ -554,6 +598,16 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
         if (m_audioSampleRate != audioSampleRate) {
             applyAudioSampleRate(audioSampleRate);
         }
+    }
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -721,4 +775,94 @@ void NFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     response.getNfmDemodReport()->setSquelch(m_squelchOpen ? 1 : 0);
     response.getNfmDemodReport()->setAudioSampleRate(m_audioSampleRate);
     response.getNfmDemodReport()->setChannelSampleRate(m_inputSampleRate);
+}
+
+void NFMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NFMDemodSettings& settings, bool force)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(0);
+    swgChannelSettings->setChannelType(new QString("NFMDemod"));
+    swgChannelSettings->setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
+    SWGSDRangel::SWGNFMDemodSettings *swgNFMDemodSettings = swgChannelSettings->getNfmDemodSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (channelSettingsKeys.contains("afBandwidth") || force) {
+        swgNFMDemodSettings->setAfBandwidth(settings.m_afBandwidth);
+    }
+    if (channelSettingsKeys.contains("audioMute") || force) {
+        swgNFMDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("ctcssIndex") || force) {
+        swgNFMDemodSettings->setCtcssIndex(settings.m_ctcssIndex);
+    }
+    if (channelSettingsKeys.contains("ctcssOn") || force) {
+        swgNFMDemodSettings->setCtcssOn(settings.m_ctcssOn ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("deltaSquelch") || force) {
+        swgNFMDemodSettings->setDeltaSquelch(settings.m_deltaSquelch ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("fmDeviation") || force) {
+        swgNFMDemodSettings->setFmDeviation(settings.m_fmDeviation);
+    }
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+        swgNFMDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("rfBandwidth") || force) {
+        swgNFMDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgNFMDemodSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("squelch") || force) {
+        swgNFMDemodSettings->setSquelch(settings.m_squelch);
+    }
+    if (channelSettingsKeys.contains("squelchGate") || force) {
+        swgNFMDemodSettings->setSquelchGate(settings.m_squelchGate);
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swgNFMDemodSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("volume") || force) {
+        swgNFMDemodSettings->setVolume(settings.m_volume);
+    }
+    if (channelSettingsKeys.contains("audioDeviceName") || force) {
+        swgNFMDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void NFMDemod::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "NFMDemod::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("NFMDemod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }

@@ -49,10 +49,12 @@ SOURCES += mainwindow.cpp\
         gui/aboutdialog.cpp\
         gui/addpresetdialog.cpp\
         gui/basicchannelsettingsdialog.cpp\
+        gui/basicdevicesettingsdialog.cpp\
         gui/buttonswitch.cpp\
         gui/channelwindow.cpp\
         gui/clickablelabel.cpp\
         gui/colormapper.cpp\
+        gui/comboboxnoarrow.cpp\
         gui/commanditem.cpp\
         gui/commandkeyreceiver.cpp\
         gui/commandoutputdialog.cpp\
@@ -108,10 +110,12 @@ HEADERS  += mainwindow.h\
         gui/audiodialog.h\
         gui/audioselectdialog.h\
         gui/basicchannelsettingsdialog.h\
+        gui/basicdevicesettingsdialog.h\
         gui/buttonswitch.h\
         gui/channelwindow.h\
         gui/clickablelabel.h\
         gui/colormapper.h\
+        gui/comboboxnoarrow.h\
         gui/commanditem.h\
         gui/commandkeyreceiver.h\
         gui/commandoutputdialog.h\
@@ -159,6 +163,7 @@ FORMS    += mainwindow.ui\
         gui/scopewindow.ui\
         gui/addpresetdialog.ui\
         gui/basicchannelsettingsdialog.ui\
+        gui/basicdevicesettingsdialog.ui\
         gui/commandoutputdialog.ui\
         gui/cwkeyergui.ui\
         gui/editcommanddialog.ui\

@@ -45,6 +45,10 @@ void PlutoSDRInputSettings::resetToDefaults()
 	m_transverterMode = false;
 	m_transverterDeltaFrequency = 0;
 	m_fileRecordName = "";
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray PlutoSDRInputSettings::serialize() const
@@ -67,6 +71,10 @@ QByteArray PlutoSDRInputSettings::serialize() const
     s.writeS32(15, (int) m_gainMode);
     s.writeBool(16, m_transverterMode);
     s.writeS64(17, m_transverterDeltaFrequency);
+    s.writeBool(18, m_useReverseAPI);
+    s.writeString(19, m_reverseAPIAddress);
+    s.writeU32(20, m_reverseAPIPort);
+    s.writeU32(21, m_reverseAPIDeviceIndex);
 
 	return s.final();
 }
@@ -122,6 +130,18 @@ bool PlutoSDRInputSettings::deserialize(const QByteArray& data)
         }
         d.readBool(16, &m_transverterMode, false);
         d.readS64(17, &m_transverterDeltaFrequency, 0);
+        d.readBool(18, &m_useReverseAPI, false);
+        d.readString(19, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(20, &uintval, 0);
+
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(21, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
 		return true;
 	}

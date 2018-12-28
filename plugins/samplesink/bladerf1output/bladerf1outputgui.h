@@ -84,6 +84,7 @@ private slots:
 	void on_startStop_toggled(bool checked);
 	void updateHardware();
 	void updateStatus();
+    void openDeviceSettingsDialog(const QPoint& p);
 };
 
 #endif // INCLUDE_BLADERFOUTPUTGUI_H

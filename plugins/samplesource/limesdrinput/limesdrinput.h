@@ -17,9 +17,11 @@
 #ifndef PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUT_H_
 #define PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUT_H_
 
+#include <stdint.h>
+
 #include <QString>
 #include <QByteArray>
-#include <stdint.h>
+#include <QNetworkRequest>
 
 #include "dsp/devicesamplesource.h"
 #include "limesdr/devicelimesdrshared.h"
@@ -28,9 +30,12 @@
 class DeviceSourceAPI;
 class LimeSDRInputThread;
 class FileRecord;
+class QNetworkAccessManager;
+class QNetworkReply;
 
 class LimeSDRInput : public DeviceSampleSource
 {
+    Q_OBJECT
 public:
     class MsgConfigureLimeSDR : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -257,6 +262,8 @@ private:
     bool m_channelAcquired;
     lms_stream_t m_streamId;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
 
     bool openDevice();
     void closeDevice();
@@ -269,6 +276,11 @@ private:
     bool applySettings(const LimeSDRInputSettings& settings, bool force = false, bool forceNCOFrequency = false);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const LimeSDRInputSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const LimeSDRInputSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_LIMESDRINPUT_LIMESDRINPUT_H_ */

@@ -65,71 +65,6 @@ public:
         { }
     };
 
-    class MsgConfigureChannelAnalyzerOld : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int  getChannelSampleRate() const { return m_channelSampleRate; }
-        Real getBandwidth() const { return m_Bandwidth; }
-        Real getLoCutoff() const { return m_LowCutoff; }
-        int  getSpanLog2() const { return m_spanLog2; }
-        bool getSSB() const { return m_ssb; }
-        bool getPLL() const { return m_pll; }
-        bool getFLL() const { return m_fll; }
-        unsigned int getPLLPSKOrder() const { return m_pllPskOrder; }
-
-        static MsgConfigureChannelAnalyzerOld* create(
-                int channelSampleRate,
-                Real Bandwidth,
-                Real LowCutoff,
-                int spanLog2,
-                bool ssb,
-                bool pll,
-                bool fll,
-				unsigned int pllPskOrder)
-        {
-            return new MsgConfigureChannelAnalyzerOld(
-                    channelSampleRate,
-                    Bandwidth,
-                    LowCutoff,
-                    spanLog2,
-                    ssb,
-                    pll,
-                    fll,
-					pllPskOrder);
-        }
-
-    private:
-        int  m_channelSampleRate;
-        Real m_Bandwidth;
-        Real m_LowCutoff;
-        int  m_spanLog2;
-        bool m_ssb;
-        bool m_pll;
-        bool m_fll;
-        unsigned int m_pllPskOrder;
-
-        MsgConfigureChannelAnalyzerOld(
-                int channelSampleRate,
-                Real Bandwidth,
-                Real LowCutoff,
-                int spanLog2,
-                bool ssb,
-                bool pll,
-                bool fll,
-				unsigned int pllPskOrder) :
-            Message(),
-            m_channelSampleRate(channelSampleRate),
-            m_Bandwidth(Bandwidth),
-            m_LowCutoff(LowCutoff),
-            m_spanLog2(spanLog2),
-            m_ssb(ssb),
-            m_pll(pll),
-            m_fll(fll),
-			m_pllPskOrder(pllPskOrder)
-        { }
-    };
-
     class MsgConfigureChannelizer : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -175,15 +110,15 @@ public:
 	virtual void destroy() { delete this; }
 	void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
 
-	void configure(MessageQueue* messageQueue,
-			int channelSampleRate,
-			Real Bandwidth,
-			Real LowCutoff,
-			int spanLog2,
-			bool ssb,
-			bool pll,
-			bool fll,
-			unsigned int pllPskOrder);
+//	void configure(MessageQueue* messageQueue,
+//			int channelSampleRate,
+//			Real Bandwidth,
+//			Real LowCutoff,
+//			int spanLog2,
+//			bool ssb,
+//			bool pll,
+//			bool fll,
+//			unsigned int pllPskOrder);
 
 	DownChannelizer *getChannelizer() { return m_channelizer; }
 	int getInputSampleRate() const { return m_inputSampleRate; }

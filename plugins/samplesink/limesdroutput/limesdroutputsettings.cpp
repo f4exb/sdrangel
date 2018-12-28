@@ -42,6 +42,10 @@ void LimeSDROutputSettings::resetToDefaults()
     m_transverterDeltaFrequency = 0;
     m_gpioDir = 0;
     m_gpioPins = 0;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray LimeSDROutputSettings::serialize() const
@@ -64,6 +68,10 @@ QByteArray LimeSDROutputSettings::serialize() const
     s.writeS64(17, m_transverterDeltaFrequency);
     s.writeU32(18, m_gpioDir);
     s.writeU32(19, m_gpioPins);
+    s.writeBool(20, m_useReverseAPI);
+    s.writeString(21, m_reverseAPIAddress);
+    s.writeU32(22, m_reverseAPIPort);
+    s.writeU32(23, m_reverseAPIDeviceIndex);
 
     return s.final();
 }
@@ -102,6 +110,18 @@ bool LimeSDROutputSettings::deserialize(const QByteArray& data)
         m_gpioDir = uintval & 0xFF;
         d.readU32(19, &uintval, 0);
         m_gpioPins = uintval & 0xFF;
+        d.readBool(20, &m_useReverseAPI, false);
+        d.readString(21, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(22, &uintval, 0);
+
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(23, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
         return true;
     }

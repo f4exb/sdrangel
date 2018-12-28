@@ -18,7 +18,6 @@ QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
 
 CONFIG(MINGW32):LIBBLADERF = "C:\Programs\bladeRF"
-CONFIG(MINGW64):LIBBLADERF = "C:\Programs\bladeRF"
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../exports
 INCLUDEPATH += ../../../sdrbase
@@ -26,7 +25,7 @@ INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
 INCLUDEPATH += ../../../devices
 
-MINGW32 || MINGW64 {
+MINGW32 {
     LIBBLADERF = "C:\Programs\bladeRF"
     INCLUDEPATH += $$LIBBLADERF/include
 }
@@ -57,7 +56,7 @@ LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../swagger/$${build_subdir} -lswagger
 LIBS += -L../../../devices/$${build_subdir} -ldevices
 
-MINGW32 || MINGW64 {
+MINGW32 {
     LIBS += -L$$LIBBLADERF/lib -lbladeRF
 }
 

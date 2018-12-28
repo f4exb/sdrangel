@@ -274,12 +274,23 @@ void DSDDemodGUI::onMenuDialogCalled(const QPoint &p)
 {
     //qDebug("DSDDemodGUI::onMenuDialogCalled: x: %d y: %d", p.x(), p.y());
     BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+    dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+
     dialog.move(p);
     dialog.exec();
 
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     m_settings.m_title = m_channelMarker.getTitle();
+    m_settings.m_useReverseAPI = dialog.useReverseAPI();
+    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+    m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
     setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);
@@ -319,7 +330,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
     CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
-    connect(audioMuteRightClickEnabler, SIGNAL(rightClick()), this, SLOT(audioSelect()));
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
 
 	m_scopeVisXY = new ScopeVisXY(ui->screenTV);
 	m_scopeVisXY->setScale(2.0);

@@ -50,6 +50,11 @@ void ATVModSettings::resetToDefaults()
     m_overlayText = "ATV";
     m_rgbColor = QColor(255, 255, 255).rgb();
     m_title = "ATV Modulator";
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
+    m_reverseAPIChannelIndex = 0;
 }
 
 QByteArray ATVModSettings::serialize() const
@@ -76,6 +81,11 @@ QByteArray ATVModSettings::serialize() const
     }
 
     s.writeString(16, m_title);
+    s.writeBool(17, m_useReverseAPI);
+    s.writeString(18, m_reverseAPIAddress);
+    s.writeU32(19, m_reverseAPIPort);
+    s.writeU32(20, m_reverseAPIDeviceIndex);
+    s.writeU32(21, m_reverseAPIChannelIndex);
 
     return s.final();
 }
@@ -94,6 +104,7 @@ bool ATVModSettings::deserialize(const QByteArray& data)
     {
         QByteArray bytetmp;
         qint32 tmp;
+        uint32_t utmp;
 
         d.readS32(1, &tmp, 0);
         m_inputFrequencyOffset = tmp;
@@ -124,7 +135,20 @@ bool ATVModSettings::deserialize(const QByteArray& data)
         }
 
         d.readString(16, &m_title, "ATV Modulator");
+        d.readBool(17, &m_useReverseAPI, false);
+        d.readString(18, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(19, &utmp, 0);
 
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(20, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(21, &utmp, 0);
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         return true;
     }
     else

@@ -18,6 +18,7 @@
 #define PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRC_H_
 
 #include <QObject>
+#include <QNetworkRequest>
 
 #include "cm256.h"
 
@@ -35,6 +36,8 @@ class UpChannelizer;
 class DeviceSinkAPI;
 class DaemonSourceThread;
 class SDRDaemonDataBlock;
+class QNetworkAccessManager;
+class QNetworkReply;
 
 class DaemonSource : public BasebandSampleSource, public ChannelSourceAPI {
     Q_OBJECT
@@ -233,14 +236,19 @@ private:
     uint32_t m_nbCorrectableErrors;   //!< count of correctable errors in number of blocks
     uint32_t m_nbUncorrectableErrors; //!< count of uncorrectable errors in number of blocks
 
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
     void applySettings(const DaemonSourceSettings& settings, bool force = false);
     void handleDataBlock(SDRDaemonDataBlock *dataBlock);
     void printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData);
     uint32_t calculateDataReadQueueSize(int sampleRate);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DaemonSourceSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DaemonSourceSettings& settings, bool force);
 
 private slots:
+    void networkManagerFinished(QNetworkReply *reply);
     void handleData();
 };
 

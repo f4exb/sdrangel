@@ -68,6 +68,10 @@ struct LimeSDRInputSettings
     QString  m_fileRecordName;
     uint8_t  m_gpioDir;      //!< GPIO pin direction LSB first; 0 input, 1 output
     uint8_t  m_gpioPins;     //!< GPIO pins to write; LSB first
+    bool     m_useReverseAPI;
+    QString  m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
 
     LimeSDRInputSettings();
     void resetToDefaults();

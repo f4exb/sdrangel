@@ -23,6 +23,7 @@ set(chanalyzer_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+	${Boost_INCLUDE_DIRS}
 )
 
 #include(${QT_USE_FILE})

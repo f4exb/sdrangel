@@ -113,6 +113,7 @@ DaemonSinkGUI::DaemonSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_daemonSink = (DaemonSink*) channelrx;
     m_daemonSink->setMessageQueueToGUI(getInputMessageQueue());
@@ -217,11 +218,22 @@ void DaemonSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 void DaemonSinkGUI::onMenuDialogCalled(const QPoint &p)
 {
     BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+    dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+
     dialog.move(p);
     dialog.exec();
 
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     m_settings.m_title = m_channelMarker.getTitle();
+    m_settings.m_useReverseAPI = dialog.useReverseAPI();
+    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+    m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
     setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);

@@ -41,6 +41,10 @@ struct HackRFInputSettings {
 	bool m_iqCorrection;
 	bool m_linkTxFrequency;
 	QString m_fileRecordName;
+    bool     m_useReverseAPI;
+    QString  m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
 
 	HackRFInputSettings();
 	void resetToDefaults();

@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015 Edouard Griffiths, F4EXB.                                  //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
 #ifndef INCLUDE_INTERPOLATOR_H
 #define INCLUDE_INTERPOLATOR_H
 
@@ -17,13 +33,13 @@ public:
 	void free();
 
 	// Original code allowed for upsampling, but was never used that way
+	// The decimation factor should always be lower than 2 for proper work
 	bool decimate(Real *distance, const Complex& next, Complex* result)
 	{
 		advanceFilter(next);
 		*distance -= 1.0;
 
-		if (*distance >= 1.0)
-		{
+		if (*distance >= 1.0) {
 			return false;
 		}
 
@@ -53,9 +69,9 @@ public:
 	// sampling frequency must be the highest of the two
 	bool resample(Real* distance, const Complex& next, bool* consumed, Complex* result)
 	{
-		while(*distance >= 1.0)
+		while (*distance >= 1.0)
 		{
-			if(!(*consumed))
+			if (!(*consumed))
 			{
 				advanceFilter(next);
 				*distance -= 1.0;
@@ -104,24 +120,31 @@ private:
 	void advanceFilter(const Complex& next)
 	{
 		m_ptr--;
-		if(m_ptr < 0)
-			m_ptr = m_nTaps - 1;
+
+		if (m_ptr < 0) {
+		    m_ptr = m_nTaps - 1;
+		}
+
 		m_samples[m_ptr] = next;
 	}
 
     void advanceFilter()
     {
         m_ptr--;
-        if(m_ptr < 0)
+
+        if (m_ptr < 0) {
             m_ptr = m_nTaps - 1;
+        }
+
         m_samples[m_ptr].real(0.0);
         m_samples[m_ptr].imag(0.0);
     }
 
 	void doInterpolate(int phase, Complex* result)
 	{
-		if (phase < 0)
-			phase = 0;
+		if (phase < 0) {
+		    phase = 0;
+		}
 #if USE_SSE2
 		// beware of the ringbuffer
 		if(m_ptr == 0) {
@@ -182,12 +205,13 @@ private:
 		Real rAcc = 0;
 		Real iAcc = 0;
 
-		for(int i = 0; i < m_nTaps; i++) {
+		for (int i = 0; i < m_nTaps; i++) {
 			rAcc += *coeff * m_samples[sample].real();
 			iAcc += *coeff * m_samples[sample].imag();
 			sample = (sample + 1) % m_nTaps;
 			coeff += 2;
 		}
+
 		*result = Complex(rAcc, iAcc);
 #endif
 

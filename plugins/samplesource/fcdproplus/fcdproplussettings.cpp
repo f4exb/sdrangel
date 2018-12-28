@@ -39,6 +39,10 @@ void FCDProPlusSettings::resetToDefaults()
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
     m_fileRecordName = "";
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray FCDProPlusSettings::serialize() const
@@ -56,6 +60,10 @@ QByteArray FCDProPlusSettings::serialize() const
 	s.writeU32(9, m_ifGain);
     s.writeBool(10, m_transverterMode);
     s.writeS64(11, m_transverterDeltaFrequency);
+    s.writeBool(12, m_useReverseAPI);
+    s.writeString(13, m_reverseAPIAddress);
+    s.writeU32(14, m_reverseAPIPort);
+    s.writeU32(15, m_reverseAPIDeviceIndex);
 
 	return s.final();
 }
@@ -72,6 +80,8 @@ bool FCDProPlusSettings::deserialize(const QByteArray& data)
 
 	if (d.getVersion() == 1)
 	{
+		uint32_t uintval;
+
 		d.readBool(1, &m_biasT, false);
 		d.readBool(2, &m_rangeLow, false);
 		d.readBool(3, &m_mixGain, true);
@@ -83,7 +93,18 @@ bool FCDProPlusSettings::deserialize(const QByteArray& data)
 		d.readU32(9, &m_ifGain, 0);
         d.readBool(10, &m_transverterMode, false);
         d.readS64(11, &m_transverterDeltaFrequency, 0);
+        d.readBool(12, &m_useReverseAPI, false);
+        d.readString(13, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(14, &uintval, 0);
 
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(15, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 		return true;
 	}
 	else

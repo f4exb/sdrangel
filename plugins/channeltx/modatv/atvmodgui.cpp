@@ -207,8 +207,8 @@ void ATVModGUI::setRFFiltersSlidersRange(int sampleRate)
         ui->rfOppBW->setMaximum((sampleRate) / m_rfSliderDivisor);
     }
 
-    ui->rfBWText->setText(QString("%1k").arg((ui->rfBW->value()*m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
-    ui->rfOppBWText->setText(QString("%1k").arg((ui->rfOppBW->value()*m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
+    ui->rfBWText->setText(QString("%1k").arg((ui->rfBW->value()*m_rfSliderDivisor) / 1000.0, 0, 'f', 1));
+    ui->rfOppBWText->setText(QString("%1k").arg((ui->rfOppBW->value()*m_rfSliderDivisor) / 1000.0, 0, 'f', 1));
 }
 
 int ATVModGUI::getNbLines()
@@ -372,6 +372,7 @@ void ATVModGUI::handleSourceMessages()
 void ATVModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
+    m_settings.m_inputFrequencyOffset = value;
     applySettings();
 }
 
@@ -399,7 +400,7 @@ void ATVModGUI::on_fmExcursion_valueChanged(int value)
 
 void ATVModGUI::on_rfBW_valueChanged(int value)
 {
-	ui->rfBWText->setText(QString("%1k").arg((value*m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
+	ui->rfBWText->setText(QString("%1k").arg((value*m_rfSliderDivisor) / 1000.0, 0, 'f', 1));
 	m_settings.m_rfBandwidth = value * m_rfSliderDivisor * 1.0f;
 	setChannelMarkerBandwidth();
 	applySettings();
@@ -407,7 +408,7 @@ void ATVModGUI::on_rfBW_valueChanged(int value)
 
 void ATVModGUI::on_rfOppBW_valueChanged(int value)
 {
-    ui->rfOppBWText->setText(QString("%1k").arg((value*m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
+    ui->rfOppBWText->setText(QString("%1k").arg((value*m_rfSliderDivisor) / 1000.0, 0, 'f', 1));
     m_settings.m_rfOppBandwidth = value * m_rfSliderDivisor * 1.0f;
     setChannelMarkerBandwidth();
     applySettings();
@@ -614,12 +615,23 @@ void ATVModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 void ATVModGUI::onMenuDialogCalled(const QPoint &p)
 {
     BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+    dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+
     dialog.move(p);
     dialog.exec();
 
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     m_settings.m_title = m_channelMarker.getTitle();
+    m_settings.m_useReverseAPI = dialog.useReverseAPI();
+    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+    m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
     setWindowTitle(m_settings.m_title);
     setTitleColor(m_settings.m_rgbColor);
@@ -737,11 +749,10 @@ void ATVModGUI::displaySettings()
     setRFFiltersSlidersRange(m_atvMod->getEffectiveSampleRate());
 
     ui->rfBW->setValue(roundf(m_settings.m_rfBandwidth / m_rfSliderDivisor));
-    ui->rfBWText->setText(QString("%1k").arg((ui->rfBW->value()*m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
+    ui->rfBWText->setText(QString("%1k").arg((ui->rfBW->value()*m_rfSliderDivisor) / 1000.0, 0, 'f', 1));
 
     ui->rfOppBW->setValue(roundf(m_settings.m_rfOppBandwidth / m_rfSliderDivisor));
-    ui->rfOppBWText->setText(QString("%1k").arg((ui->rfOppBW->value()*m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
-
+    ui->rfOppBWText->setText(QString("%1k").arg((ui->rfOppBW->value()*m_rfSliderDivisor) / 1000.0, 0, 'f', 1));
 
     ui->forceDecimator->setChecked(m_settings.m_forceDecimator);
     ui->channelMute->setChecked(m_settings.m_channelMute);

@@ -54,6 +54,17 @@ DSDDemodSettings:
     traceDecay:
       description: 0 to 255
       type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
 
 DSDDemodReport:
   description: DSDDemod
@@ -96,5 +107,4 @@ DSDDemodReport:
     statusText:
       description: mode dependent status messages (ref UI documentation)
       type: string
-  
-  
+

@@ -32,6 +32,8 @@ add_library(bladerf2device SHARED
     ${bladerf2device_SOURCES}
 )
 
+set_target_properties(bladerf2device PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
+
 if (BUILD_DEBIAN)
 target_link_libraries(bladerf2device
     bladerf

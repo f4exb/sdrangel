@@ -28,19 +28,19 @@ else(BUILD_DEBIAN)
     if(LIBUSB_FOUND AND LIMESUITE_FOUND)
         add_subdirectory(limesdr)
     endif(LIBUSB_FOUND AND LIMESUITE_FOUND)
-    
+
     find_package(LibIIO)
     if(LIBUSB_FOUND AND LIBIIO_FOUND)
         add_subdirectory(plutosdr)
     endif(LIBUSB_FOUND AND LIBIIO_FOUND)
-    
+
     find_package(LibPerseus)
     if(LIBUSB_FOUND AND LIBPERSEUS_FOUND)
         add_subdirectory(perseus)
     endif()
-    
+
     find_package(SoapySDR)
-    if(LIBUSB_FOUND AND SOAPYSDR_FOUND)
+    if(SOAPYSDR_FOUND)
         add_subdirectory(soapysdr)
     endif()
 endif (BUILD_DEBIAN)

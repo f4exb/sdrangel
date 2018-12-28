@@ -19,6 +19,7 @@
 
 #include <QString>
 #include <QByteArray>
+#include <QNetworkRequest>
 
 #include <libbladeRF.h>
 #include <dsp/devicesamplesource.h>
@@ -27,11 +28,14 @@
 #include "../../../devices/bladerf1/devicebladerf1param.h"
 #include "bladerf1inputsettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSourceAPI;
 class Bladerf1InputThread;
 class FileRecord;
 
 class Bladerf1Input : public DeviceSampleSource {
+    Q_OBJECT
 public:
 	class MsgConfigureBladerf1 : public Message {
 		MESSAGE_CLASS_DECLARATION
@@ -133,12 +137,6 @@ public:
             QString& errorMessage);
 
 private:
-    bool openDevice();
-    void closeDevice();
-	bool applySettings(const BladeRF1InputSettings& settings, bool force);
-	bladerf_lna_gain getLnaGain(int lnaGain);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF1InputSettings& settings);
-
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	BladeRF1InputSettings m_settings;
@@ -148,6 +146,19 @@ private:
 	DeviceBladeRF1Params m_sharedParams;
 	bool m_running;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
+    bool openDevice();
+    void closeDevice();
+	bool applySettings(const BladeRF1InputSettings& settings, bool force);
+	bladerf_lna_gain getLnaGain(int lnaGain);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF1InputSettings& settings);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const BladeRF1InputSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_BLADERFINPUT_H

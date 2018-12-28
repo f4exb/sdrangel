@@ -33,6 +33,8 @@ add_library(perseusdevice SHARED
     ${perseusdevice_SOURCES}
 )
 
+set_target_properties(perseusdevice PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
+
 if (BUILD_DEBIAN)
 target_link_libraries(perseusdevice
     perseus

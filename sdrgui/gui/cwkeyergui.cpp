@@ -22,6 +22,7 @@
 #include "ui_cwkeyergui.h"
 #include "dsp/cwkeyer.h"
 #include "util/simpleserializer.h"
+#include "util/messagequeue.h"
 
 CWKeyerGUI::CWKeyerGUI(QWidget* parent) :
     QWidget(parent),
@@ -44,6 +45,7 @@ void CWKeyerGUI::setBuddies(MessageQueue* messageQueue, CWKeyer* cwKeyer)
     m_messageQueue = messageQueue;
     m_cwKeyer = cwKeyer;
     applySettings();
+    sendSettings();
 }
 
 void CWKeyerGUI::resetToDefaults()
@@ -83,6 +85,8 @@ bool CWKeyerGUI::deserialize(const QByteArray& data)
         ui->cwSpeed->setValue(aValue);
 
         applySettings();
+        sendSettings();
+
         return true;
     }
     else
@@ -102,13 +106,22 @@ void CWKeyerGUI::on_cwTextClear_clicked(bool checked)
 
 void CWKeyerGUI::on_cwTextEdit_editingFinished()
 {
-    if (m_doApplySettings) { m_cwKeyer->setText(ui->cwTextEdit->text()); }
+    if (m_doApplySettings)
+    {
+        m_cwKeyer->setText(ui->cwTextEdit->text());
+        sendSettings();
+    }
 }
 
 void CWKeyerGUI::on_cwSpeed_valueChanged(int value)
 {
     ui->cwSpeedText->setText(QString("%1").arg(value));
-    if (m_doApplySettings) { m_cwKeyer->setWPM(value); }
+
+    if (m_doApplySettings)
+    {
+        m_cwKeyer->setWPM(value);
+        sendSettings();
+    }
 }
 
 void CWKeyerGUI::on_playDots_toggled(bool checked)
@@ -117,7 +130,11 @@ void CWKeyerGUI::on_playDots_toggled(bool checked)
     ui->playDashes->setEnabled(!checked);
     ui->playText->setEnabled(!checked);
 
-    if (m_doApplySettings) { m_cwKeyer->setMode(checked ? CWKeyerSettings::CWDots : CWKeyerSettings::CWNone); }
+    if (m_doApplySettings)
+    {
+        m_cwKeyer->setMode(checked ? CWKeyerSettings::CWDots : CWKeyerSettings::CWNone);
+        sendSettings();
+    }
 }
 
 void CWKeyerGUI::on_playDashes_toggled(bool checked)
@@ -126,7 +143,11 @@ void CWKeyerGUI::on_playDashes_toggled(bool checked)
     //ui->playDashes->setEnabled(!checked);
     ui->playText->setEnabled(!checked);
 
-    if (m_doApplySettings) { m_cwKeyer->setMode(checked ? CWKeyerSettings::CWDashes : CWKeyerSettings::CWNone); }
+    if (m_doApplySettings)
+    {
+        m_cwKeyer->setMode(checked ? CWKeyerSettings::CWDashes : CWKeyerSettings::CWNone);
+        sendSettings();
+    }
 }
 
 void CWKeyerGUI::on_playText_toggled(bool checked)
@@ -135,7 +156,11 @@ void CWKeyerGUI::on_playText_toggled(bool checked)
     ui->playDashes->setEnabled(!checked);
     //ui->playText->setEnabled(!checked);
 
-    if (m_doApplySettings) { m_cwKeyer->setMode(checked ? CWKeyerSettings::CWText : CWKeyerSettings::CWNone); }
+    if (m_doApplySettings)
+    {
+        m_cwKeyer->setMode(checked ? CWKeyerSettings::CWText : CWKeyerSettings::CWNone);
+        sendSettings();
+    }
 
     if (checked) {
         ui->playStop->setChecked(true);
@@ -146,17 +171,18 @@ void CWKeyerGUI::on_playText_toggled(bool checked)
 
 void CWKeyerGUI::on_playLoopCW_toggled(bool checked)
 {
-    if (m_doApplySettings) { m_cwKeyer->setLoop(checked); }
+    if (m_doApplySettings)
+    {
+        m_cwKeyer->setLoop(checked);
+        sendSettings();
+    }
 }
 
 void CWKeyerGUI::on_playStop_toggled(bool checked)
 {
-    if (checked)
-    {
+    if (checked) {
         m_cwKeyer->resetText();
-    }
-    else
-    {
+    } else {
         m_cwKeyer->stopText();
     }
 }
@@ -199,4 +225,13 @@ void CWKeyerGUI::displaySettings(const CWKeyerSettings& settings)
 void CWKeyerGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
+}
+
+void CWKeyerGUI::sendSettings()
+{
+    if (m_cwKeyer && m_messageQueue)
+    {
+        CWKeyer::MsgConfigureCWKeyer *msg = CWKeyer::MsgConfigureCWKeyer::create(m_cwKeyer->getSettings(), false);
+        m_messageQueue->push(msg);
+    }
 }

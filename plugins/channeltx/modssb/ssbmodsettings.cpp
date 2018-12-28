@@ -68,6 +68,11 @@ void SSBModSettings::resetToDefaults()
     m_title = "SSB Modulator";
     m_modAFInput = SSBModInputAF::SSBModInputNone;
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
+    m_reverseAPIChannelIndex = 0;
 }
 
 QByteArray SSBModSettings::serialize() const
@@ -107,6 +112,11 @@ QByteArray SSBModSettings::serialize() const
     s.writeString(19, m_title);
     s.writeString(20, m_audioDeviceName);
     s.writeS32(21, (int) m_modAFInput);
+    s.writeBool(22, m_useReverseAPI);
+    s.writeString(23, m_reverseAPIAddress);
+    s.writeU32(24, m_reverseAPIPort);
+    s.writeU32(25, m_reverseAPIDeviceIndex);
+    s.writeU32(26, m_reverseAPIChannelIndex);
 
     return s.final();
 }
@@ -125,6 +135,7 @@ bool SSBModSettings::deserialize(const QByteArray& data)
     {
         QByteArray bytetmp;
         qint32 tmp;
+        uint32_t utmp;
 
         d.readS32(1, &tmp, 0);
         m_inputFrequencyOffset = tmp;
@@ -180,6 +191,21 @@ bool SSBModSettings::deserialize(const QByteArray& data)
         } else {
             m_modAFInput = (SSBModInputAF) tmp;
         }
+
+        d.readBool(22, &m_useReverseAPI, false);
+        d.readString(23, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(24, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(25, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(26, &utmp, 0);
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
 
         return true;
     }

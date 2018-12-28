@@ -102,6 +102,21 @@ It uses the following APIs:
     - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/run`
     - HTTP method: `DELETE`
 
+<h2>reverseapi.py</h2>
+
+This script runs continuously to act as the server side of SDRangel reverse API feature. It will respond with a copy of the settings when forwarding channel or device settings which is a valid reply and will also send back a valid reply when forwarding the device start/stop actions. The reverse API feature was implemented in version 4.3.2 and you can learn more about it in the Wiki.
+
+It uses Python flask package for the server so you will need to either install it system wide or better create your own virtual environment and use the `pip install flask` command once your virtual environment is activated. If you know Python then you know what a virtual environment is about.
+
+Then in the virtual environment do:
+
+```
+export FLASK_APP=reverseapi.py
+export FLASK_ENV=development
+flask run
+```
+By default the server will listen on port 5000. It was used to conveniently test the reverse API but actually does not do much. It can serve as a base to implement more complex scenarios to control other devices or software or other instances of SDRangel.
+
 <h2>rtlsdr_settings.py</h2>
 
 Make sure a RTLSDR device is selected on device set #0. Get and change the settings of this RTLSDR device.

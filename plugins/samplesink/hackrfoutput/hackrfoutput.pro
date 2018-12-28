@@ -18,7 +18,6 @@ QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
 
 CONFIG(MINGW32):LIBHACKRFSRC = "C:\softs\hackrf\host"
-CONFIG(MINGW64):LIBHACKRFSRC = "C:\softs\hackrf\host"
 CONFIG(MSVC):LIBHACKRFSRC = "C:\softs\hackrf\host"
 
 INCLUDEPATH += $$PWD

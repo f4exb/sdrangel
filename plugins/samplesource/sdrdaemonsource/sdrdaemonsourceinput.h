@@ -17,21 +17,26 @@
 #ifndef INCLUDE_SDRDAEMONSOURCEINPUT_H
 #define INCLUDE_SDRDAEMONSOURCEINPUT_H
 
-#include <QString>
-#include <QByteArray>
-#include <QTimer>
 #include <ctime>
 #include <iostream>
 #include <stdint.h>
 
+#include <QString>
+#include <QByteArray>
+#include <QTimer>
+#include <QNetworkRequest>
+
 #include <dsp/devicesamplesource.h>
 #include "sdrdaemonsourcesettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSourceAPI;
 class SDRdaemonSourceUDPHandler;
 class FileRecord;
 
 class SDRdaemonSourceInput : public DeviceSampleSource {
+    Q_OBJECT
 public:
     class MsgConfigureSDRdaemonSource : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -314,10 +319,17 @@ private:
 	QString m_deviceDescription;
 	std::time_t m_startingTimeStamp;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
 
     void applySettings(const SDRdaemonSourceSettings& settings, bool force = false);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRdaemonSourceSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SDRdaemonSourceSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_SDRDAEMONSOURCEINPUT_H

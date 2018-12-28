@@ -19,16 +19,20 @@
 
 #include <QString>
 #include <QByteArray>
+#include <QNetworkRequest>
 
 #include <libairspy/airspy.h>
 #include <dsp/devicesamplesource.h>
 #include "airspysettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSourceAPI;
 class AirspyThread;
 class FileRecord;
 
 class AirspyInput : public DeviceSampleSource {
+    Q_OBJECT
 public:
 	class MsgConfigureAirspy : public Message {
 		MESSAGE_CLASS_DECLARATION
@@ -138,14 +142,6 @@ public:
 	static const qint64 loHighLimitFreq;
 
 private:
-	bool openDevice();
-	void closeDevice();
-	bool applySettings(const AirspySettings& settings, bool force);
-	struct airspy_device *open_airspy_from_sequence(int sequence);
-	void setDeviceCenterFrequency(quint64 freq);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AirspySettings& settings);
-    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	AirspySettings m_settings;
@@ -155,6 +151,21 @@ private:
 	std::vector<uint32_t> m_sampleRates;
 	bool m_running;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
+	bool openDevice();
+	void closeDevice();
+	bool applySettings(const AirspySettings& settings, bool force);
+	struct airspy_device *open_airspy_from_sequence(int sequence);
+	void setDeviceCenterFrequency(quint64 freq);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AirspySettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const AirspySettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_AIRSPYINPUT_H

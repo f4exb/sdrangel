@@ -17,6 +17,9 @@
 #include <QTime>
 #include <QDebug>
 #include <QMutexLocker>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGChannelSettings.h"
 #include "SWGCWKeyerSettings.h"
@@ -90,10 +93,15 @@ NFMMod::NFMMod(DeviceSinkAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 NFMMod::~NFMMod()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(&m_audioFifo);
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
@@ -348,6 +356,16 @@ bool NFMMod::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (CWKeyer::MsgConfigureCWKeyer::match(cmd))
+    {
+        const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) cmd;
+
+        if (m_settings.m_useReverseAPI) {
+            webapiReverseSendCWSettings(cfg.getSettings());
+        }
+
+        return true;
+    }
     else if (DSPConfigureAudio::match(cmd))
     {
         DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
@@ -475,12 +493,48 @@ void NFMMod::applySettings(const NFMModSettings& settings, bool force)
             << " m_ctcssOn: " << settings.m_ctcssOn
             << " m_channelMute: " << settings.m_channelMute
             << " m_playLoop: " << settings.m_playLoop
-            << " m_modAFInout " << settings.m_modAFInput
+            << " m_modAFInput " << settings.m_modAFInput
             << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_useReverseAPI: " << settings.m_useReverseAPI
+            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
+            << " m_reverseAPIAddress: " << settings.m_reverseAPIPort
+            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
+            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
+
+    QList<QString> reverseAPIKeys;
+
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+
+    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
+        reverseAPIKeys.append("fmDeviation");
+    }
+
+    if ((settings.m_volumeFactor != m_settings.m_volumeFactor) || force) {
+        reverseAPIKeys.append("volumeFactor");
+    }
+
+    if ((settings.m_ctcssOn != m_settings.m_ctcssOn) || force) {
+        reverseAPIKeys.append("ctcssOn");
+    }
+
+    if ((settings.m_channelMute != m_settings.m_channelMute) || force) {
+        reverseAPIKeys.append("channelMute");
+    }
+
+    if ((settings.m_playLoop != m_settings.m_playLoop) || force) {
+        reverseAPIKeys.append("playLoop");
+    }
+
+    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force) {
+        reverseAPIKeys.append("modAFInput");
+    }
 
     if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
+        reverseAPIKeys.append("rfBandwidth");
         m_settingsMutex.lock();
         m_interpolatorDistanceRemain = 0;
         m_interpolatorConsumed = false;
@@ -491,6 +545,7 @@ void NFMMod::applySettings(const NFMModSettings& settings, bool force)
 
     if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
     {
+        reverseAPIKeys.append("afBandwidth");
         m_settingsMutex.lock();
         m_lowpass.create(301, m_audioSampleRate, 250.0);
         m_bandpass.create(301, m_audioSampleRate, 300.0, settings.m_afBandwidth);
@@ -499,6 +554,7 @@ void NFMMod::applySettings(const NFMModSettings& settings, bool force)
 
     if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force)
     {
+        reverseAPIKeys.append("toneFrequency");
         m_settingsMutex.lock();
         m_toneNco.setFreq(settings.m_toneFrequency, m_audioSampleRate);
         m_settingsMutex.unlock();
@@ -506,6 +562,7 @@ void NFMMod::applySettings(const NFMModSettings& settings, bool force)
 
     if ((settings.m_ctcssIndex != m_settings.m_ctcssIndex) || force)
     {
+        reverseAPIKeys.append("ctcssIndex");
         m_settingsMutex.lock();
         m_ctcssNco.setFreq(NFMModSettings::getCTCSSFreq(settings.m_ctcssIndex), m_audioSampleRate);
         m_settingsMutex.unlock();
@@ -513,14 +570,26 @@ void NFMMod::applySettings(const NFMModSettings& settings, bool force)
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
+        reverseAPIKeys.append("audioDeviceName");
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
         audioDeviceManager->addAudioSource(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
         uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
 
         if (m_audioSampleRate != audioSampleRate) {
+            reverseAPIKeys.append("audioSampleRate");
             applyAudioSampleRate(audioSampleRate);
         }
+    }
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -616,6 +685,21 @@ int NFMMod::webapiSettingsPutPatch(
     }
     if (channelSettingsKeys.contains("volumeFactor")) {
         settings.m_volumeFactor = response.getNfmModSettings()->getVolumeFactor();
+    }
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getNfmModSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getNfmModSettings()->getReverseApiAddress() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getNfmModSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getNfmModSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getNfmModSettings()->getReverseApiChannelIndex();
     }
 
     if (channelSettingsKeys.contains("cwKeyer"))
@@ -729,6 +813,18 @@ void NFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     }
 
     apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+
+    response.getNfmModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getNfmModSettings()->getReverseApiAddress()) {
+        *response.getNfmModSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getNfmModSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getNfmModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getNfmModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getNfmModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void NFMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -737,3 +833,141 @@ void NFMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     response.getNfmModReport()->setAudioSampleRate(m_audioSampleRate);
     response.getNfmModReport()->setChannelSampleRate(m_outputSampleRate);
 }
+
+void NFMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NFMModSettings& settings, bool force)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(1);
+    swgChannelSettings->setChannelType(new QString("NFMMod"));
+    swgChannelSettings->setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
+    SWGSDRangel::SWGNFMModSettings *swgNFMModSettings = swgChannelSettings->getNfmModSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (channelSettingsKeys.contains("channelMute") || force) {
+        swgNFMModSettings->setChannelMute(settings.m_channelMute ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+        swgNFMModSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("modAFInput") || force) {
+        swgNFMModSettings->setModAfInput((int) settings.m_modAFInput);
+    }
+    if (channelSettingsKeys.contains("audioDeviceName") || force) {
+        swgNFMModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+    if (channelSettingsKeys.contains("playLoop") || force) {
+        swgNFMModSettings->setPlayLoop(settings.m_playLoop ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("afBandwidth") || force) {
+        swgNFMModSettings->setAfBandwidth(settings.m_afBandwidth);
+    }
+    if (channelSettingsKeys.contains("fmDeviation") || force) {
+        swgNFMModSettings->setFmDeviation(settings.m_fmDeviation);
+    }
+    if (channelSettingsKeys.contains("rfBandwidth") || force) {
+        swgNFMModSettings->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgNFMModSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swgNFMModSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("toneFrequency") || force) {
+        swgNFMModSettings->setToneFrequency(settings.m_toneFrequency);
+    }
+    if (channelSettingsKeys.contains("volumeFactor") || force) {
+        swgNFMModSettings->setVolumeFactor(settings.m_volumeFactor);
+    }
+    if (channelSettingsKeys.contains("ctcssOn") || force) {
+        swgNFMModSettings->setCtcssOn(settings.m_ctcssOn ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("ctcssIndex") || force) {
+        swgNFMModSettings->setCtcssIndex(settings.m_ctcssIndex);
+    }
+
+    if (force)
+    {
+        const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
+        swgNFMModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
+        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgNFMModSettings->getCwKeyer();
+        apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
+        apiCwKeyerSettings->setMode(cwKeyerSettings.m_mode);
+        apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
+        apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
+        apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+    }
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void NFMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(1);
+    swgChannelSettings->setChannelType(new QString("AMMod"));
+    swgChannelSettings->setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
+    SWGSDRangel::SWGNFMModSettings *swgNFModSettings = swgChannelSettings->getNfmModSettings();
+
+    swgNFModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgNFModSettings->getCwKeyer();
+    apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
+    apiCwKeyerSettings->setMode(cwKeyerSettings.m_mode);
+    apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
+    apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
+    apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex)
+            .arg(m_settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void NFMMod::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "NFMMod::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("NFMMod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+}
+

@@ -9,6 +9,7 @@ set(sdrgui_SOURCES
     gui/audiodialog.cpp
     gui/audioselectdialog.cpp
     gui/basicchannelsettingsdialog.cpp
+    gui/basicdevicesettingsdialog.cpp
     gui/buttonswitch.cpp
     gui/channelwindow.cpp
     gui/clickablelabel.cpp
@@ -23,9 +24,7 @@ set(sdrgui_SOURCES
     gui/externalclockbutton.cpp
     gui/externalclockdialog.cpp
     gui/glscope.cpp
-    gui/glscopemulti.cpp
     gui/glscopegui.cpp
-    gui/glscopemultigui.cpp
     gui/glshadersimple.cpp
     gui/glshadertextured.cpp
     gui/glshadertvarray.cpp
@@ -49,7 +48,6 @@ set(sdrgui_SOURCES
     gui/valuedialz.cpp
 
     dsp/scopevis.cpp
-    dsp/scopevismulti.cpp
     dsp/scopevisxy.cpp
     dsp/spectrumvis.cpp
     dsp/spectrumscopecombovis.cpp
@@ -76,6 +74,7 @@ set(sdrgui_HEADERS
     gui/audiodialog.h
     gui/audioselectdialog.h
     gui/basicchannelsettingsdialog.h
+    gui/basicdevicesettingsdialog.h
     gui/buttonswitch.h
     gui/channelwindow.h
     gui/colormapper.h
@@ -89,9 +88,7 @@ set(sdrgui_HEADERS
     gui/externalclockbutton.h
     gui/externalclockdialog.h
     gui/glscope.h
-    gui/glscopemulti.h
     gui/glscopegui.h
-    gui/glscopemultigui.h
     gui/glshadersimple.h
     gui/glshadertvarray.h
     gui/glshadertextured.h
@@ -116,7 +113,6 @@ set(sdrgui_HEADERS
     gui/valuedialz.h
 
     dsp/scopevis.h
-    dsp/scopevismulti.h
     dsp/scopevisxy.h
     dsp/spectrumvis.h
     dsp/spectrumscopecombovis.h
@@ -146,12 +142,12 @@ set(sdrgui_FORMS
     gui/aboutdialog.ui
     gui/addpresetdialog.ui
     gui/basicchannelsettingsdialog.ui
+    gui/basicdevicesettingsdialog.ui
     gui/commandoutputdialog.ui
     gui/cwkeyergui.ui
     gui/editcommanddialog.ui
     gui/externalclockdialog.ui
     gui/glscopegui.ui
-    gui/glscopemultigui.ui
     gui/glspectrumgui.ui
     gui/pluginsdialog.ui
     gui/audiodialog.ui
@@ -198,6 +194,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${CMAKE_CURRENT_BINARY_DIR}
     ${OPENGL_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIRS}
 )
 
 target_link_libraries(sdrgui

@@ -36,6 +36,10 @@ void BladeRF1OutputSettings::resetToDefaults()
 	m_xb200 = false;
 	m_xb200Path = BLADERF_XB200_MIX;
 	m_xb200Filter = BLADERF_XB200_AUTO_1DB;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray BladeRF1OutputSettings::serialize() const
@@ -50,6 +54,10 @@ QByteArray BladeRF1OutputSettings::serialize() const
 	s.writeBool(6, m_xb200);
 	s.writeS32(7, (int) m_xb200Path);
 	s.writeS32(8, (int) m_xb200Filter);
+    s.writeBool(9, m_useReverseAPI);
+    s.writeString(10, m_reverseAPIAddress);
+    s.writeU32(11, m_reverseAPIPort);
+    s.writeU32(12, m_reverseAPIDeviceIndex);
 
 	return s.final();
 }
@@ -67,6 +75,7 @@ bool BladeRF1OutputSettings::deserialize(const QByteArray& data)
 	if (d.getVersion() == 1)
 	{
 		int intval;
+		uint32_t uintval;
 
 		d.readS32(1, &m_devSampleRate);
 		d.readS32(2, &m_vga1);
@@ -78,6 +87,18 @@ bool BladeRF1OutputSettings::deserialize(const QByteArray& data)
 		m_xb200Path = (bladerf_xb200_path) intval;
 		d.readS32(8, &intval);
 		m_xb200Filter = (bladerf_xb200_filter) intval;
+        d.readBool(9, &m_useReverseAPI, false);
+        d.readString(10, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(11, &uintval, 0);
+
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(12, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
 		return true;
 	}

@@ -147,10 +147,71 @@ This is where the plugin GUI specific to the device is displayed. Control of one
 
 <h4>2.1. Start or stop acquisition</h4>
 
+<h5>2.1.1 left click</h5>
+
+Left click to start or stop streaming
+
   - When a play icon (&#9654;) is displayed with a grey background the device is not operational
   - When a play icon (&#9654;) is displayed with a blue background the device is ready to start
   - When a stop icon (&#9632;) is displayed with a green background the device is currently running
   - When a play icon (&#9654;) is displayed with a red background there is an error and a popup displays the error message. An Error typically occurs when you try to start the same device in more than one tab.
+
+<h5>2.1.2 right click</h5>
+
+Right click to control device reverse API. This dialog opens:
+
+![Basic device settings](../doc/img/BasicDeviceSettings.png)
+
+<h6>2.1.2.1: Toggle reverse API feature</h6>
+
+Use this checkbox to toggle on/off the reverse API feature. With reverse API engaged the changes in the device settings are forwarded to an API endpoint given by address (2.1.2.2), port (2.1.2.3) and device index (2.1.2.4) in the same format as the SDRangel REST API device settings endpoint. With the values of the screenshot the API URL is: `http://127.0.0.1:8888/sdrangel/deviceset/0/device/settings` The JSON payload follows the same format as the SDRangel REST API device settings. For example with HachRF Rx this would be something like:
+
+```
+{
+  "deviceHwType": "HackRF", 
+  "hackRFInputSettings": {
+    "LOppmTenths": 0, 
+    "bandwidth": 1750000, 
+    "biasT": 0, 
+    "centerFrequency": 435000000, 
+    "dcBlock": 0, 
+    "devSampleRate": 2400000, 
+    "fcPos": 2, 
+    "iqCorrection": 0, 
+    "linkTxFrequency": 0, 
+    "lnaExt": 0, 
+    "lnaGain": 16, 
+    "log2Decim": 0, 
+    "vgaGain": 16
+  }, 
+  "tx": 0
+}
+```
+Note that the PATCH method is used. The full set of parameters is sent only when the reverse API is toggled on or a full settings update is done.
+
+The start and stop actions are also forwarded with the `/sdrangel/deviceset/{deviceSetIndex}/device/run` API endpoint using POST (start) or DELETE (stop) methods.
+
+More details on this feature can be found on the corresponding Wiki page.
+
+<h6>2.1.2.2: API address</h6>
+
+This is the IP address of the API endpoint
+
+<h6>2.1.2.3: API port</h6>
+
+This is the IP port of the API endpoint
+
+<h6>2.1.2.4: Device index</h6>
+
+This is the targeted device index
+
+<h6>2.1.2.5: Cancel changes and exit dialog</h6>
+
+Do not make any changes and exit dialog
+
+<h6>2.1.2.6: Validate and exit dialog</h6>
+
+Validates the data (saves it in the channel marker object) and exits the dialog
 
 <h4>2.2. Record I/Q</h4>
 
@@ -612,7 +673,7 @@ This area shows the control GUIs of the channels currently active for the device
 
 Details about the GUIs can be found in the channel plugins documentation which consists of a readme.md file in each of the channel plugins folder (done partially).
 
-With these channels: AM demod, BFM demod, DSD demod, NFM demod, UDP source, UDP sink some common basic settings can be set with a popup dialog. This dialog is opened by clicking on the small grey square on the top left of the channel window. The settings are as follows:
+With most channel types some common basic settings can be set with a popup dialog. This dialog is opened by clicking on the small grey square on the top left of the channel window. The settings are as follows:
 
 ![Basic channel settings](../doc/img/BasicChannelSettings.png)
 
@@ -633,13 +694,62 @@ When the mouse is over the channel window or over the central line in the spectr
   - AdSnd: UDP address and send port
   - AdRcv: UDP address and receive port
 
-<h4>6.4: Validate and exit dialog</h4>
+<h4>6.4: Toggle reverse API feature</h4>
 
-Validates the data (saves it in the channel marker object) and exits the dialog
+Use this checkbox to toggle on/off the reverse API feature. With reverse API engaged the changes in the channel settings are forwarded to an API endpoint given by address (6.5), port (6.6), device index (6.7) and channel index (6.8) in the same format as the SDRangel REST API channel settings endpoint. With the values of the screenshot the API URL is: `http://127.0.0.1:8888/sdrangel/deviceset/0/channel/0/settings` The JSON payload follows the same format as the SDRangel REST API channel settings. Using the same example this would be:
 
-<h4>6.5: Cancel changes and exit dialog</h4>
+```
+{
+  "SSBDemodSettings": {
+    "agc": 0, 
+    "agcClamping": 0, 
+    "agcPowerThreshold": -40, 
+    "agcThresholdGate": 4, 
+    "agcTimeLog2": 7, 
+    "audioBinaural": 0, 
+    "audioDeviceName": "System default device", 
+    "audioFlipChannels": 0, 
+    "audioMute": 0, 
+    "dsb": 0, 
+    "inputFrequencyOffset": 0, 
+    "lowCutoff": 300, 
+    "rfBandwidth": 3000, 
+    "rgbColor": -16711936, 
+    "spanLog2": 3, 
+    "title": "SSB Demodulator", 
+    "volume": 3
+  }, 
+  "channelType": "SSBDemod", 
+  "tx": 0
+}
+```
+Note that the PATCH method is used. The full set of parameters is sent only when the reverse API is toggled on or a full settings update is done.
+
+More details on this feature can be found on the corresponding Wiki page.
+
+<h4>6.5: API address</h4>
+
+This is the IP address of the API endpoint
+
+<h4>6.6: API port</h4>
+
+This is the IP port of the API endpoint
+
+<h4>6.7: Device index</h4>
+
+This is the targeted device index
+
+<h4>6.8: Channel index</h4>
+
+This is the targeted channel index
+
+<h4>6.9: Cancel changes and exit dialog</h4>
 
 Do not make any changes and exit dialog
+
+<h4>6.10: Validate and exit dialog</h4>
+
+Validates the data (saves it in the channel marker object) and exits the dialog
 
 <h3>7. Spectrum from device</h3>
 

@@ -20,6 +20,9 @@
 #include <boost/cstdint.hpp>
 
 #include <QDebug>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
@@ -59,10 +62,15 @@ DaemonSource::DaemonSource(DeviceSinkAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 DaemonSource::~DaemonSource()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
@@ -201,17 +209,34 @@ void DaemonSource::applySettings(const DaemonSourceSettings& settings, bool forc
             << " force: " << force;
 
     bool change = false;
+    QList<QString> reverseAPIKeys;
 
-    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
+    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force)
+    {
+        reverseAPIKeys.append("dataAddress");
         change = true;
     }
 
-    if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
+    if ((m_settings.m_dataPort != settings.m_dataPort) || force)
+    {
+        reverseAPIKeys.append("dataPort");
         change = true;
     }
 
-    if (change && m_sourceThread) {
+    if (change && m_sourceThread)
+    {
+        reverseAPIKeys.append("sourceThread");
         m_sourceThread->dataBind(settings.m_dataAddress, settings.m_dataPort);
+    }
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -392,6 +417,21 @@ int DaemonSource::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getDaemonSourceSettings()->getTitle();
     }
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getDaemonSourceSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getDaemonSourceSettings()->getReverseApiAddress() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getDaemonSourceSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getDaemonSourceSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getDaemonSourceSettings()->getReverseApiChannelIndex();
+    }
 
     MsgConfigureDaemonSource *msg = MsgConfigureDaemonSource::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -435,6 +475,18 @@ void DaemonSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& 
     } else {
         response.getDaemonSourceSettings()->setTitle(new QString(settings.m_title));
     }
+
+    response.getDaemonSourceSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getDaemonSourceSettings()->getReverseApiAddress()) {
+        *response.getDaemonSourceSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getDaemonSourceSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getDaemonSourceSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getDaemonSourceSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getDaemonSourceSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void DaemonSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -457,3 +509,62 @@ void DaemonSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& resp
     response.getDaemonSourceReport()->setDeviceSampleRate(m_deviceAPI->getSampleSink()->getSampleRate());
 }
 
+void DaemonSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DaemonSourceSettings& settings, bool force)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(1);
+    swgChannelSettings->setChannelType(new QString("DaemonSource"));
+    swgChannelSettings->setDaemonSourceSettings(new SWGSDRangel::SWGDaemonSourceSettings());
+    SWGSDRangel::SWGDaemonSourceSettings *swgDaemonSourceSettings = swgChannelSettings->getDaemonSourceSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (channelSettingsKeys.contains("dataAddress") || force) {
+        swgDaemonSourceSettings->setDataAddress(new QString(settings.m_dataAddress));
+    }
+    if (channelSettingsKeys.contains("dataPort") || force) {
+        swgDaemonSourceSettings->setDataPort(settings.m_dataPort);
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgDaemonSourceSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swgDaemonSourceSettings->setTitle(new QString(settings.m_title));
+    }
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void DaemonSource::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "DaemonSource::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("DaemonSource::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+}

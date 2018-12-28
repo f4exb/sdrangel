@@ -48,6 +48,8 @@ add_library(httpserver SHARED
 	${httpserver_HEADERS_MOC}
 )
 
+set_target_properties(httpserver PROPERTIES DEFINE_SYMBOL "httpserver_EXPORTS")
+
 target_link_libraries(httpserver
 	${QT_LIBRARIES}
 )

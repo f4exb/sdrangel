@@ -18,6 +18,7 @@
 #define PLUGINS_CHANNELTX_UDPSINK_UDPSOURCE_H_
 
 #include <QObject>
+#include <QNetworkRequest>
 
 #include "dsp/basebandsamplesource.h"
 #include "channel/channelsourceapi.h"
@@ -31,6 +32,8 @@
 #include "udpsourcesettings.h"
 #include "udpsourceudphandler.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSinkAPI;
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
@@ -138,6 +141,9 @@ signals:
      */
     void levelChanged(qreal rmsLevel, qreal peakLevel, int numSamples);
 
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
+
 private:
     class MsgUDPSourceSpectrum : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -226,6 +232,9 @@ private:
     Complex* m_SSBFilterBuffer;
     int m_SSBFilterBufferIndex;
 
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
     QMutex m_settingsMutex;
 
     static const int m_sampleRateAverageItems = 17;
@@ -239,6 +248,7 @@ private:
 
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const UDPSourceSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const UDPSourceSettings& settings, bool force);
 
     inline void calculateSquelch(double value)
     {

@@ -17,19 +17,24 @@
 #ifndef PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYINPUT_H_
 #define PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYINPUT_H_
 
-#include <QString>
-#include <QByteArray>
 #include <stdint.h>
 
+#include <QString>
+#include <QByteArray>
+#include <QNetworkRequest>
+
 #include <mirisdr.h>
-#include <dsp/devicesamplesource.h>
+#include "dsp/devicesamplesource.h"
 #include "sdrplaysettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSourceAPI;
 class SDRPlayThread;
 class FileRecord;
 
 class SDRPlayInput : public DeviceSampleSource {
+    Q_OBJECT
 public:
     enum SDRPlayVariant
     {
@@ -174,13 +179,6 @@ public:
     SDRPlayVariant getVariant() const { return m_variant; }
 
 private:
-    bool openDevice();
-    void closeDevice();
-    bool applySettings(const SDRPlaySettings& settings, bool forwardChange, bool force);
-    bool setDeviceCenterFrequency(quint64 freq);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRPlaySettings& settings);
-    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-
     DeviceSourceAPI *m_deviceAPI;
     QMutex m_mutex;
     SDRPlayVariant m_variant;
@@ -191,6 +189,20 @@ private:
     int m_devNumber;
     bool m_running;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
+    bool openDevice();
+    void closeDevice();
+    bool applySettings(const SDRPlaySettings& settings, bool forwardChange, bool force);
+    bool setDeviceCenterFrequency(quint64 freq);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRPlaySettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SDRPlaySettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 // ====================================================================

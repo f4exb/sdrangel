@@ -17,10 +17,12 @@
 #ifndef PLUGINS_CHANNELTX_MODWFM_WFMMOD_H_
 #define PLUGINS_CHANNELTX_MODWFM_WFMMOD_H_
 
-#include <QMutex>
 #include <vector>
 #include <iostream>
 #include <fstream>
+
+#include <QMutex>
+#include <QNetworkRequest>
 
 #include "dsp/basebandsamplesource.h"
 #include "channel/channelsourceapi.h"
@@ -36,6 +38,8 @@
 
 #include "wfmmodsettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSinkAPI;
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
@@ -295,6 +299,10 @@ private:
     Real m_peakLevel;
     Real m_levelSum;
     CWKeyer m_cwKeyer;
+
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
     static const int m_levelNbSamples;
 
     void applyAudioSampleRate(int sampleRate);
@@ -306,6 +314,11 @@ private:
     void seekFileStream(int seekPercentage);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const WFMModSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const WFMModSettings& settings, bool force);
+    void webapiReverseSendCWSettings(const CWKeyerSettings& settings);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 

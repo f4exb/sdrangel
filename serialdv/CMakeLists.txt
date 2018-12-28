@@ -22,6 +22,8 @@ add_library(serialdv SHARED
     ${serialdv_SOURCES}
 )
 
+set_target_properties(serialdv PROPERTIES DEFINE_SYMBOL "serialdv_EXPORTS")
+
 target_link_libraries(serialdv
     ${LIBUSB_LIBRARIES}
 )

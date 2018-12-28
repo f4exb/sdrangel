@@ -55,6 +55,11 @@ void SSBDemodSettings::resetToDefaults()
     m_rgbColor = QColor(0, 255, 0).rgb();
     m_title = "SSB Demodulator";
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
+    m_reverseAPIChannelIndex = 0;
 }
 
 QByteArray SSBDemodSettings::serialize() const
@@ -81,6 +86,11 @@ QByteArray SSBDemodSettings::serialize() const
     s.writeBool(15, m_agcClamping);
     s.writeString(16, m_title);
     s.writeString(17, m_audioDeviceName);
+    s.writeBool(18, m_useReverseAPI);
+    s.writeString(19, m_reverseAPIAddress);
+    s.writeU32(20, m_reverseAPIPort);
+    s.writeU32(21, m_reverseAPIDeviceIndex);
+    s.writeU32(22, m_reverseAPIChannelIndex);
 
     return s.final();
 }
@@ -99,6 +109,7 @@ bool SSBDemodSettings::deserialize(const QByteArray& data)
     {
         QByteArray bytetmp;
         qint32 tmp;
+        uint32_t utmp;
         QString strtmp;
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
@@ -126,6 +137,20 @@ bool SSBDemodSettings::deserialize(const QByteArray& data)
         d.readBool(15, &m_agcClamping, false);
         d.readString(16, &m_title, "SSB Demodulator");
         d.readString(17, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
+        d.readBool(18, &m_useReverseAPI, false);
+        d.readString(19, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(20, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(21, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(22, &utmp, 0);
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
 
         return true;
     }

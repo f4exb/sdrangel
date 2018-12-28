@@ -17,22 +17,26 @@
 #ifndef PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUT_H_
 #define PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUT_H_
 
+#include <stdint.h>
+
 #include <QString>
 #include <QByteArray>
-#include <stdint.h>
+#include <QNetworkRequest>
 
 #include "dsp/devicesamplesource.h"
 #include "bladerf2/devicebladerf2shared.h"
 #include "bladerf2inputsettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSourceAPI;
 class BladeRF2InputThread;
 class FileRecord;
 struct bladerf_gain_modes;
 struct bladerf;
 
-class BladeRF2Input : public DeviceSampleSource
-{
+class BladeRF2Input : public DeviceSampleSource {
+    Q_OBJECT
 public:
     class MsgConfigureBladeRF2 : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -186,6 +190,8 @@ private:
     BladeRF2InputThread *m_thread;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
     std::vector<GainMode> m_gainModes;
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
 
     bool openDevice();
     void closeDevice();
@@ -195,6 +201,11 @@ private:
     bool setDeviceCenterFrequency(struct bladerf *dev, int requestedChannel, quint64 freq_hz, int loPpmTenths);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF2InputSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const BladeRF2InputSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUT_H_ */

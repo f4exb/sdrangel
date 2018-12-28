@@ -92,6 +92,7 @@ private slots:
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
     void on_transverter_clicked();
+    void openDeviceSettingsDialog(const QPoint& p);
 	void updateHardware();
 	void updateStatus();
 };

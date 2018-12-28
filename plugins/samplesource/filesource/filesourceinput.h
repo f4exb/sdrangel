@@ -17,20 +17,25 @@
 #ifndef INCLUDE_FILESOURCEINPUT_H
 #define INCLUDE_FILESOURCEINPUT_H
 
-#include <QString>
-#include <QByteArray>
-#include <QTimer>
 #include <ctime>
 #include <iostream>
 #include <fstream>
 
-#include <dsp/devicesamplesource.h>
+#include <QString>
+#include <QByteArray>
+#include <QTimer>
+#include <QNetworkRequest>
+
+#include "dsp/devicesamplesource.h"
 #include "filesourcesettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class FileSourceThread;
 class DeviceSourceAPI;
 
 class FileSourceInput : public DeviceSampleSource {
+	Q_OBJECT
 public:
 	class MsgConfigureFileSource : public Message {
 		MESSAGE_CLASS_DECLARATION
@@ -326,12 +331,19 @@ public:
     quint64 m_recordLength; //!< record length in seconds computed from file size
     quint64 m_startingTimeStamp;
 	const QTimer& m_masterTimer;
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
 
 	void openFileStream();
 	void seekFileStream(int seekMillis);
 	bool applySettings(const FileSourceSettings& settings, bool force = false);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FileSourceSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FileSourceSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_FILESOURCEINPUT_H

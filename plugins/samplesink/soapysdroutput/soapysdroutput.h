@@ -17,15 +17,19 @@
 #ifndef PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUT_H_
 #define PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUT_H_
 
+#include <stdint.h>
+
 #include <QString>
 #include <QByteArray>
-#include <stdint.h>
+#include <QNetworkRequest>
 
 #include "dsp/devicesamplesink.h"
 #include "soapysdr/devicesoapysdrshared.h"
 
 #include "soapysdroutputsettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSinkAPI;
 class SoapySDROutputThread;
 
@@ -42,6 +46,7 @@ namespace SWGSDRangel
 }
 
 class SoapySDROutput : public DeviceSampleSink {
+    Q_OBJECT
 public:
     class MsgConfigureSoapySDROutput : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -182,6 +187,8 @@ private:
     bool m_running;
     SoapySDROutputThread *m_thread;
     DeviceSoapySDRShared m_deviceShared;
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
 
     bool openDevice();
     void closeDevice();
@@ -196,6 +203,11 @@ private:
     QVariant webapiVariantFromArgValue(SWGSDRangel::SWGArgValue *argValue);
     void webapiFormatArgValue(const QVariant& v, SWGSDRangel::SWGArgValue *argValue);
     void webapiFormatArgInfo(const SoapySDR::ArgInfo& arg, SWGSDRangel::SWGArgInfo *argInfo);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SoapySDROutputSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 

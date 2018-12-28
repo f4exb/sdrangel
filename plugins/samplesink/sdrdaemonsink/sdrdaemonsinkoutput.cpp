@@ -20,6 +20,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QJsonParseError>
+#include <QBuffer>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -217,6 +218,10 @@ bool SDRdaemonSinkOutput::handleMessage(const Message& message)
             m_deviceAPI->stopGeneration();
         }
 
+        if (m_settings.m_useReverseAPI) {
+            webapiReverseSendStartStop(cmd.getStartStop());
+        }
+
         return true;
     }
 	else if (MsgConfigureSDRdaemonSinkChunkCorrection::match(message))
@@ -241,6 +246,20 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
     QMutexLocker mutexLocker(&m_mutex);
     bool forwardChange = false;
     bool changeTxDelay = false;
+    QList<QString> reverseAPIKeys;
+
+    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
+        reverseAPIKeys.append("dataAddress");
+    }
+    if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
+        reverseAPIKeys.append("dataPort");
+    }
+    if ((m_settings.m_apiAddress != settings.m_apiAddress) || force) {
+        reverseAPIKeys.append("apiAddress");
+    }
+    if ((m_settings.m_apiPort != settings.m_apiPort) || force) {
+        reverseAPIKeys.append("apiPort");
+    }
 
     if (force || (m_settings.m_dataAddress != settings.m_dataAddress) || (m_settings.m_dataPort != settings.m_dataPort))
     {
@@ -251,6 +270,8 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 
     if (force || (m_settings.m_sampleRate != settings.m_sampleRate))
     {
+        reverseAPIKeys.append("sampleRate");
+
         if (m_sdrDaemonSinkThread != 0) {
             m_sdrDaemonSinkThread->setSamplerate(settings.m_sampleRate);
         }
@@ -264,6 +285,8 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 
     if (force || (m_settings.m_nbFECBlocks != settings.m_nbFECBlocks))
     {
+        reverseAPIKeys.append("nbFECBlocks");
+
         if (m_sdrDaemonSinkThread != 0) {
             m_sdrDaemonSinkThread->setNbBlocksFEC(settings.m_nbFECBlocks);
         }
@@ -273,6 +296,7 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 
     if (force || (m_settings.m_txDelay != settings.m_txDelay))
     {
+        reverseAPIKeys.append("txDelay");
         changeTxDelay = true;
     }
 
@@ -298,6 +322,15 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
     {
         DSPSignalNotification *notif = new DSPSignalNotification(settings.m_sampleRate, m_centerFrequency);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+    }
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -461,7 +494,7 @@ void SDRdaemonSinkOutput::networkManagerFinished(QNetworkReply *reply)
 
         if (error.error == QJsonParseError::NoError)
         {
-            analyzeApiReply(doc.object());
+            analyzeApiReply(doc.object(), answer);
         }
         else
         {
@@ -476,7 +509,7 @@ void SDRdaemonSinkOutput::networkManagerFinished(QNetworkReply *reply)
     }
 }
 
-void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject)
+void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString& answer)
 {
     if (jsonObject.contains("DaemonSourceReport"))
     {
@@ -546,6 +579,10 @@ void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject)
         m_lastSampleCount = sampleCount;
         m_lastQueueLength = queueLength;
     }
+    else if (jsonObject.contains("sdrDaemonSinkSettings"))
+    {
+        qDebug("SDRdaemonSinkOutput::analyzeApiReply: reply:\n%s", answer.toStdString().c_str());
+    }
 }
 
 void SDRdaemonSinkOutput::sampleRateCorrection(double remoteTimeDeltaUs, double timeDeltaUs, uint32_t remoteSampleCount, uint32_t sampleCount)
@@ -558,4 +595,75 @@ void SDRdaemonSinkOutput::sampleRateCorrection(double remoteTimeDeltaUs, double 
 
     MsgConfigureSDRdaemonSinkChunkCorrection* message = MsgConfigureSDRdaemonSinkChunkCorrection::create(m_chunkSizeCorrection);
     getInputMessageQueue()->push(message);
+}
+
+void SDRdaemonSinkOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SDRdaemonSinkSettings& settings, bool force)
+{
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setTx(1);
+    swgDeviceSettings->setDeviceHwType(new QString("SDRdaemonSink"));
+    swgDeviceSettings->setSdrDaemonSinkSettings(new SWGSDRangel::SWGSDRdaemonSinkSettings());
+    SWGSDRangel::SWGSDRdaemonSinkSettings *swgSdrDaemonSinkSettings = swgDeviceSettings->getSdrDaemonSinkSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (deviceSettingsKeys.contains("sampleRate") || force) {
+        swgSdrDaemonSinkSettings->setSampleRate(settings.m_sampleRate);
+    }
+    if (deviceSettingsKeys.contains("txDelay") || force) {
+        swgSdrDaemonSinkSettings->setTxDelay(settings.m_txDelay);
+    }
+    if (deviceSettingsKeys.contains("nbFECBlocks") || force) {
+        swgSdrDaemonSinkSettings->setNbFecBlocks(settings.m_nbFECBlocks);
+    }
+    if (deviceSettingsKeys.contains("apiAddress") || force) {
+        swgSdrDaemonSinkSettings->setApiAddress(new QString(settings.m_apiAddress));
+    }
+    if (deviceSettingsKeys.contains("apiPort") || force) {
+        swgSdrDaemonSinkSettings->setApiPort(settings.m_apiPort);
+    }
+    if (deviceSettingsKeys.contains("dataAddress") || force) {
+        swgSdrDaemonSinkSettings->setDataAddress(new QString(settings.m_dataAddress));
+    }
+    if (deviceSettingsKeys.contains("dataPort") || force) {
+        swgSdrDaemonSinkSettings->setDataPort(settings.m_dataPort);
+    }
+    if (deviceSettingsKeys.contains("deviceIndex") || force) {
+        swgSdrDaemonSinkSettings->setDeviceIndex(settings.m_deviceIndex);
+    }
+    if (deviceSettingsKeys.contains("channelIndex") || force) {
+        swgSdrDaemonSinkSettings->setChannelIndex(settings.m_channelIndex);
+    }
+
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgDeviceSettings;
+}
+
+void SDRdaemonSinkOutput::webapiReverseSendStartStop(bool start)
+{
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+
+    if (start) {
+        m_networkManager->sendCustomRequest(m_networkRequest, "POST");
+    } else {
+        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE");
+    }
 }

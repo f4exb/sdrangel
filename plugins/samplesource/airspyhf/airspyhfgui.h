@@ -89,6 +89,7 @@ private slots:
 	void updateHardware();
     void updateStatus();
 	void handleInputMessages();
+    void openDeviceSettingsDialog(const QPoint& p);
 };
 
 #endif // INCLUDE_AIRSPYHFGUI_H

@@ -65,4 +65,4 @@ endif (BUILD_DEBIAN)
 
 target_link_libraries(outputsoapysdrsrv Qt5::Core)
 
-install(TARGETS outputsoapysdrsrv DESTINATION lib/plugins/samplesink)
+install(TARGETS outputsoapysdrsrv DESTINATION lib/pluginssrv/samplesink)

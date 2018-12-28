@@ -32,6 +32,10 @@ void FileSourceSettings::resetToDefaults()
     m_fileName = "./test.sdriq";
     m_accelerationFactor = 1;
     m_loop = true;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray FileSourceSettings::serialize() const
@@ -40,6 +44,11 @@ QByteArray FileSourceSettings::serialize() const
     s.writeString(1, m_fileName);
     s.writeU32(2, m_accelerationFactor);
     s.writeBool(3, m_loop);
+    s.writeBool(4, m_useReverseAPI);
+    s.writeString(5, m_reverseAPIAddress);
+    s.writeU32(6, m_reverseAPIPort);
+    s.writeU32(7, m_reverseAPIDeviceIndex);
+
     return s.final();
 }
 
@@ -52,12 +61,30 @@ bool FileSourceSettings::deserialize(const QByteArray& data)
         return false;
     }
 
-    if(d.getVersion() == 1) {
+    if (d.getVersion() == 1)
+    {
+        uint32_t uintval;
+
         d.readString(1, &m_fileName, "./test.sdriq");
         d.readU32(2, &m_accelerationFactor, 1);
         d.readBool(3, &m_loop, true);
+        d.readBool(4, &m_useReverseAPI, false);
+        d.readString(5, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(6, &uintval, 0);
+
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(7, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+
         return true;
-    } else {
+    }
+    else
+    {
         resetToDefaults();
         return false;
     }

@@ -25,13 +25,15 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
-set_target_properties(swagger PROPERTIES COMPILE_FLAGS "-Wno-conversion-null -Wno-unused-variable -Wno-unused-parameter")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	set_target_properties(swagger PROPERTIES COMPILE_FLAGS "-Wno-conversion-null -Wno-unused-variable -Wno-unused-parameter")
+endif()
 
 target_link_libraries(swagger
     ${QT_LIBRARIES}
 )
 
-set_target_properties(swagger PROPERTIES DEFINE_SYMBOL "sdrangel_EXPORTS")
+set_target_properties(swagger PROPERTIES DEFINE_SYMBOL "swagger_EXPORTS")
 
 target_link_libraries(swagger Qt5::Core Qt5::Network)
 

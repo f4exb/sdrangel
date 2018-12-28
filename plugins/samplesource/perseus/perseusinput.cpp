@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -45,10 +47,15 @@ PerseusInput::PerseusInput(DeviceSourceAPI *deviceAPI) :
     openDevice();
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 PerseusInput::~PerseusInput()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
     m_deviceAPI->removeSink(m_fileSink);
     delete m_fileSink;
     closeDevice();
@@ -187,6 +194,10 @@ bool PerseusInput::handleMessage(const Message& message)
             m_deviceAPI->stopAcquisition();
         }
 
+        if (m_settings.m_useReverseAPI) {
+            webapiReverseSendStartStop(cmd.getStartStop());
+        }
+
         return true;
     }
     else if (MsgFileRecord::match(message))
@@ -287,9 +298,11 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
 {
     bool forwardChange = false;
     int sampleRateIndex = settings.m_devSampleRateIndex;
+    QList<QString> reverseAPIKeys;
 
     if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
     {
+        reverseAPIKeys.append("devSampleRateIndex");
         forwardChange = true;
 
         if (settings.m_devSampleRateIndex >= m_sampleRates.size()) {
@@ -321,6 +334,7 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
 
     if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
+        reverseAPIKeys.append("log2Decim");
         forwardChange = true;
 
         if (m_perseusThread != 0)
@@ -328,6 +342,22 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
             m_perseusThread->setLog2Decimation(settings.m_log2Decim);
             qDebug("PerseusInput: set decimation to %d", (1<<settings.m_log2Decim));
         }
+    }
+
+    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)) {
+        reverseAPIKeys.append("centerFrequency");
+    }
+    if (force || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)) {
+        reverseAPIKeys.append("LOppmTenths");
+    }
+    if (force || (m_settings.m_wideBand != settings.m_wideBand)) {
+        reverseAPIKeys.append("wideBand");
+    }
+    if (force || (m_settings.m_transverterMode != settings.m_transverterMode)) {
+        reverseAPIKeys.append("transverterMode");
+    }
+    if (force || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency)) {
+        reverseAPIKeys.append("transverterDeltaFrequency");
     }
 
     if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
@@ -352,6 +382,7 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
 
     if ((m_settings.m_attenuator != settings.m_attenuator) || force)
     {
+        reverseAPIKeys.append("attenuator");
         int rc = perseus_set_attenuator_n(m_perseusDescriptor, (int) settings.m_attenuator);
 
         if (rc < 0) {
@@ -359,6 +390,13 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
         } else {
             qDebug("PerseusInput::applySettings: attenuator set to %d dB", (int) settings.m_attenuator*10);
         }
+    }
+
+    if (force || (m_settings.m_adcDither != settings.m_adcDither)) {
+        reverseAPIKeys.append("adcDither");
+    }
+    if (force || (m_settings.m_adcPreamp != settings.m_adcPreamp)) {
+        reverseAPIKeys.append("adcPreamp");
     }
 
     if ((m_settings.m_adcDither != settings.m_adcDither)
@@ -381,6 +419,15 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
         m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+    }
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -539,3 +586,97 @@ void PerseusInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respon
     }
 }
 
+void PerseusInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const PerseusSettings& settings, bool force)
+{
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDeviceHwType(new QString("Perseus"));
+    swgDeviceSettings->setPerseusSettings(new SWGSDRangel::SWGPerseusSettings());
+    SWGSDRangel::SWGPerseusSettings *swgPerseusSettings = swgDeviceSettings->getPerseusSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (deviceSettingsKeys.contains("centerFrequency") || force) {
+        swgPerseusSettings->setCenterFrequency(settings.m_centerFrequency);
+    }
+    if (deviceSettingsKeys.contains("LOppmTenths") || force) {
+        swgPerseusSettings->setLOppmTenths(settings.m_LOppmTenths);
+    }
+    if (deviceSettingsKeys.contains("devSampleRateIndex") || force) {
+        swgPerseusSettings->setDevSampleRateIndex(settings.m_devSampleRateIndex);
+    }
+    if (deviceSettingsKeys.contains("log2Decim") || force) {
+        swgPerseusSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("adcDither") || force) {
+        swgPerseusSettings->setAdcDither(settings.m_adcDither ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("adcPreamp") || force) {
+        swgPerseusSettings->setAdcPreamp(settings.m_adcPreamp ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("wideBand") || force) {
+        swgPerseusSettings->setWideBand(settings.m_wideBand ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("attenuator") || force) {
+        swgPerseusSettings->setAttenuator((int) settings.m_attenuator);
+    }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency") || force) {
+        swgPerseusSettings->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    }
+    if (deviceSettingsKeys.contains("transverterMode") || force) {
+        swgPerseusSettings->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("fileRecordName") || force) {
+        swgPerseusSettings->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgDeviceSettings;
+}
+
+void PerseusInput::webapiReverseSendStartStop(bool start)
+{
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+
+    if (start) {
+        m_networkManager->sendCustomRequest(m_networkRequest, "POST");
+    } else {
+        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE");
+    }
+}
+
+void PerseusInput::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "PerseusInput::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("PerseusInput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+}

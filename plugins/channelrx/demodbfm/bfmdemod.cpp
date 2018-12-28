@@ -15,11 +15,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QTime>
-#include <QDebug>
 #include "boost/format.hpp"
 #include <stdio.h>
 #include <complex.h>
+
+#include <QTime>
+#include <QDebug>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGChannelSettings.h"
 #include "SWGBFMDemodSettings.h"
@@ -100,10 +104,16 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 BFMDemod::~BFMDemod()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
+
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
 
 	m_deviceAPI->removeChannelAPI(this);
@@ -449,15 +459,38 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
             << " m_showPilot: " << settings.m_showPilot
             << " m_rdsActive: " << settings.m_rdsActive
             << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " force: " << force;
+
+    QList<QString> reverseAPIKeys;
+
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+    if ((settings.m_volume != m_settings.m_volume) || force) {
+        reverseAPIKeys.append("volume");
+    }
+    if ((settings.m_audioStereo != m_settings.m_audioStereo) || force) {
+        reverseAPIKeys.append("audioStereo");
+    }
+    if ((settings.m_lsbStereo != m_settings.m_lsbStereo) || force) {
+        reverseAPIKeys.append("lsbStereo");
+    }
+    if ((settings.m_showPilot != m_settings.m_showPilot) || force) {
+        reverseAPIKeys.append("showPilot");
+    }
+    if ((settings.m_rdsActive != m_settings.m_rdsActive) || force) {
+        reverseAPIKeys.append("rdsActive");
+    }
 
     if ((settings.m_audioStereo && (settings.m_audioStereo != m_settings.m_audioStereo)) || force)
     {
         m_pilotPLL.configure(19000.0/m_inputSampleRate, 50.0/m_inputSampleRate, 0.01);
     }
 
-    if((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
+    if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
     {
+        reverseAPIKeys.append("afBandwidth");
         m_settingsMutex.lock();
 
         m_interpolator.create(16, m_inputSampleRate, settings.m_afBandwidth);
@@ -472,11 +505,14 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
         m_interpolatorRDSDistanceRemain = (Real) m_inputSampleRate / 250000.0;
         m_interpolatorRDSDistance =  (Real) m_inputSampleRate / 250000.0;
 
+        m_lowpass.create(21, m_audioSampleRate, settings.m_afBandwidth);
+
         m_settingsMutex.unlock();
     }
 
-    if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
+        reverseAPIKeys.append("rfBandwidth");
         m_settingsMutex.lock();
         Real lowCut = -(settings.m_rfBandwidth / 2.0) / m_inputSampleRate;
         Real hiCut  = (settings.m_rfBandwidth / 2.0) / m_inputSampleRate;
@@ -485,22 +521,15 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
         m_settingsMutex.unlock();
     }
 
-    if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
-    {
-        m_settingsMutex.lock();
-        qDebug() << "BFMDemod::handleMessage: m_lowpass.create";
-        m_lowpass.create(21, m_audioSampleRate, settings.m_afBandwidth);
-        m_settingsMutex.unlock();
-    }
-
     if ((settings.m_squelch != m_settings.m_squelch) || force)
     {
-        qDebug() << "BFMDemod::handleMessage: set m_squelchLevel";
+        reverseAPIKeys.append("squelch");
         m_squelchLevel = std::pow(10.0, settings.m_squelch / 10.0);
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
+        reverseAPIKeys.append("audioDeviceName");
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
         //qDebug("AMDemod::applySettings: audioDeviceName: %s audioDeviceIndex: %d", qPrintable(settings.m_audioDeviceName), audioDeviceIndex);
@@ -510,6 +539,16 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
         if (m_audioSampleRate != audioSampleRate) {
             applyAudioSampleRate(audioSampleRate);
         }
+    }
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -596,6 +635,21 @@ int BFMDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("audioDeviceName")) {
         settings.m_audioDeviceName = *response.getBfmDemodSettings()->getAudioDeviceName();
     }
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getBfmDemodSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getBfmDemodSettings()->getReverseApiAddress() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getBfmDemodSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getBfmDemodSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getBfmDemodSettings()->getReverseApiChannelIndex();
+    }
 
     if (frequencyOffsetChanged)
     {
@@ -654,6 +708,18 @@ void BFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     } else {
         response.getBfmDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
+
+    response.getBfmDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getBfmDemodSettings()->getReverseApiAddress()) {
+        *response.getBfmDemodSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getBfmDemodSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getBfmDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getBfmDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getBfmDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void BFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -706,4 +772,88 @@ void BFMDemod::webapiFormatRDSReport(SWGSDRangel::SWGRDSReport *report)
             report->getAltFrequencies()->back()->setFrequency(*it);
         }
     }
+}
+
+void BFMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const BFMDemodSettings& settings, bool force)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(0);
+    swgChannelSettings->setChannelType(new QString("BFMDemod"));
+    swgChannelSettings->setBfmDemodSettings(new SWGSDRangel::SWGBFMDemodSettings());
+    SWGSDRangel::SWGBFMDemodSettings *swgBFMDemodSettings = swgChannelSettings->getBfmDemodSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+        swgBFMDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("rfBandwidth") || force) {
+        swgBFMDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (channelSettingsKeys.contains("afBandwidth") || force) {
+        swgBFMDemodSettings->setAfBandwidth(settings.m_afBandwidth);
+    }
+    if (channelSettingsKeys.contains("volume") || force) {
+        swgBFMDemodSettings->setVolume(settings.m_volume);
+    }
+    if (channelSettingsKeys.contains("squelch") || force) {
+        swgBFMDemodSettings->setSquelch(settings.m_squelch);
+    }
+    if (channelSettingsKeys.contains("audioStereo") || force) {
+        swgBFMDemodSettings->setAudioStereo(settings.m_audioStereo ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("lsbStereo") || force) {
+        swgBFMDemodSettings->setLsbStereo(settings.m_lsbStereo ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("showPilot") || force) {
+        swgBFMDemodSettings->setShowPilot(settings.m_showPilot ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("rdsActive") || force) {
+        swgBFMDemodSettings->setRdsActive(settings.m_rdsActive ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgBFMDemodSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swgBFMDemodSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("audioDeviceName") || force) {
+        swgBFMDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void BFMDemod::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "BFMDemod::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("BFMDemod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }

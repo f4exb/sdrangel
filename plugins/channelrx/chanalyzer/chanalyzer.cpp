@@ -25,7 +25,6 @@
 #include "chanalyzer.h"
 
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelAnalyzer, Message)
-MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelAnalyzerOld, Message)
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgReportChannelSampleRateChanged, Message)
 
@@ -73,20 +72,6 @@ ChannelAnalyzer::~ChannelAnalyzer()
     delete SSBFilter;
     delete DSBFilter;
     delete RRCFilter;
-}
-
-void ChannelAnalyzer::configure(MessageQueue* messageQueue,
-		int channelSampleRate,
-		Real Bandwidth,
-		Real LowCutoff,
-		int  spanLog2,
-		bool ssb,
-		bool pll,
-		bool fll,
-		unsigned int pllPskOrder)
-{
-    Message* cmd = MsgConfigureChannelAnalyzerOld::create(channelSampleRate, Bandwidth, LowCutoff, spanLog2, ssb, pll, fll, pllPskOrder);
-	messageQueue->push(cmd);
 }
 
 void ChannelAnalyzer::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
@@ -234,14 +219,16 @@ bool ChannelAnalyzer::handleMessage(const Message& cmd)
     }
 	else
 	{
-		if (m_sampleSink != 0)
-		{
-		   return m_sampleSink->handleMessage(cmd);
-		}
-		else
-		{
-			return false;
-		}
+	    // Processed through GUI
+//		if (m_sampleSink != 0)
+//		{
+//		   return m_sampleSink->handleMessage(cmd);
+//		}
+//		else
+//		{
+//			return false;
+//		}
+	    return false;
 	}
 }
 
