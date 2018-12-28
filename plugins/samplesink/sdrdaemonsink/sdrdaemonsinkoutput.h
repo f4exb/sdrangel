@@ -193,8 +193,10 @@ private:
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRdaemonSinkSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 
-    void analyzeApiReply(const QJsonObject& jsonObject);
+    void analyzeApiReply(const QJsonObject& jsonObject, const QString& answer);
     void sampleRateCorrection(double remoteTimeDeltaUs, double timeDeltaUs, uint32_t remoteSampleCount, uint32_t sampleCount);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SDRdaemonSinkSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
 
 private slots:
     void tick();

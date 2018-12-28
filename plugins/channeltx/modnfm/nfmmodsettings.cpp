@@ -59,6 +59,11 @@ void NFMModSettings::resetToDefaults()
     m_title = "NFM Modulator";
     m_modAFInput = NFMModInputAF::NFMModInputNone;
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
+    m_reverseAPIChannelIndex = 0;
 }
 
 QByteArray NFMModSettings::serialize() const
@@ -86,6 +91,11 @@ QByteArray NFMModSettings::serialize() const
     s.writeString(12, m_title);
     s.writeS32(13, (int) m_modAFInput);
     s.writeString(14, m_audioDeviceName);
+    s.writeBool(15, m_useReverseAPI);
+    s.writeString(16, m_reverseAPIAddress);
+    s.writeU32(17, m_reverseAPIPort);
+    s.writeU32(18, m_reverseAPIDeviceIndex);
+    s.writeU32(19, m_reverseAPIChannelIndex);
 
     return s.final();
 }
@@ -104,6 +114,7 @@ bool NFMModSettings::deserialize(const QByteArray& data)
     {
         QByteArray bytetmp;
         qint32 tmp;
+        uint32_t utmp;
 
         d.readS32(1, &tmp, 0);
         m_inputFrequencyOffset = tmp;
@@ -137,6 +148,21 @@ bool NFMModSettings::deserialize(const QByteArray& data)
         }
 
         d.readString(14, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
+
+        d.readBool(15, &m_useReverseAPI, false);
+        d.readString(16, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(17, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(18, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(19, &utmp, 0);
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
 
         return true;
     }

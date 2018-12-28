@@ -15,6 +15,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "util/simpleserializer.h"
 
@@ -54,10 +56,16 @@ SoapySDRInput::SoapySDRInput(DeviceSourceAPI *deviceAPI) :
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 SoapySDRInput::~SoapySDRInput()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
+
     if (m_running) {
         stop();
     }
@@ -518,6 +526,10 @@ bool SoapySDRInput::start()
                 ((DeviceSoapySDRShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
             }
 
+            delete[] fcPoss;
+            delete[] log2Decims;
+            delete[] fifos;
+
             needsStart = true;
         }
         else
@@ -653,6 +665,10 @@ void SoapySDRInput::stop()
             qDebug("SoapySDRInput::stop: restarting the thread");
             soapySDRInputThread->startWork();
         }
+
+        delete[] fcPoss;
+        delete[] log2Decims;
+        delete[] fifos;
     }
     else // remove channel from existing thread
     {
@@ -803,6 +819,10 @@ bool SoapySDRInput::handleMessage(const Message& message)
             m_deviceAPI->stopAcquisition();
         }
 
+        if (m_settings.m_useReverseAPI) {
+            webapiReverseSendStartStop(cmd.getStartStop());
+        }
+
         return true;
     }
     else if (DeviceSoapySDRShared::MsgReportBuddyChange::match(message))
@@ -880,6 +900,7 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
     bool globalGainChanged = false;
     bool individualGainsChanged = false;
     bool deviceArgsChanged = false;
+    QList<QString> reverseAPIKeys;
 
     SoapySDR::Device *dev = m_deviceShared.m_device;
     SoapySDRInputThread *inputThread = findThread();
@@ -887,6 +908,13 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
     qint64 xlatedDeviceCenterFrequency = settings.m_centerFrequency;
     xlatedDeviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
     xlatedDeviceCenterFrequency = xlatedDeviceCenterFrequency < 0 ? 0 : xlatedDeviceCenterFrequency;
+
+    if ((m_settings.m_softDCCorrection != settings.m_softDCCorrection) || force) {
+        reverseAPIKeys.append("softDCCorrection");
+    }
+    if ((m_settings.m_softIQCorrection != settings.m_softIQCorrection) || force) {
+        reverseAPIKeys.append("softIQCorrection");
+    }
 
     if ((m_settings.m_softDCCorrection != settings.m_softDCCorrection) ||
         (m_settings.m_softIQCorrection != settings.m_softIQCorrection) || force)
@@ -896,6 +924,7 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
 
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
     {
+        reverseAPIKeys.append("devSampleRate");
         forwardChangeOwnDSP = true;
         forwardChangeToBuddies = true;
 
@@ -927,6 +956,8 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
 
     if ((m_settings.m_fcPos != settings.m_fcPos) || force)
     {
+        reverseAPIKeys.append("fcPos");
+
         if (inputThread != 0)
         {
             inputThread->setFcPos(requestedChannel, (int) settings.m_fcPos);
@@ -936,6 +967,7 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
 
     if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
+        reverseAPIKeys.append("log2Decim");
         forwardChangeOwnDSP = true;
         SoapySDRInputThread *inputThread = findThread();
 
@@ -944,6 +976,19 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
             inputThread->setLog2Decimation(requestedChannel, settings.m_log2Decim);
             qDebug() << "SoapySDRInput::applySettings: set decimation to " << (1<<settings.m_log2Decim);
         }
+    }
+
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
+        reverseAPIKeys.append("centerFrequency");
+    }
+    if ((m_settings.m_transverterMode != settings.m_transverterMode) || force) {
+        reverseAPIKeys.append("transverterMode");
+    }
+    if ((m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force) {
+        reverseAPIKeys.append("transverterDeltaFrequency");
+    }
+    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
+        reverseAPIKeys.append("LOppmTenths");
     }
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
@@ -971,6 +1016,8 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
 
     if ((m_settings.m_antenna != settings.m_antenna) || force)
     {
+        reverseAPIKeys.append("antenna");
+
         if (dev != 0)
         {
             try
@@ -988,6 +1035,7 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
 
     if ((m_settings.m_bandwidth != settings.m_bandwidth) || force)
     {
+        reverseAPIKeys.append("bandwidth");
         forwardChangeToBuddies = true;
 
         if (dev != 0)
@@ -1032,6 +1080,8 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
 
     if ((m_settings.m_globalGain != settings.m_globalGain) || force)
     {
+        reverseAPIKeys.append("globalGain");
+
         if (dev != 0)
         {
             try
@@ -1076,6 +1126,8 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
 
     if ((m_settings.m_autoGain != settings.m_autoGain) || force)
     {
+        reverseAPIKeys.append("autoGain");
+
         if (dev != 0)
         {
             try
@@ -1092,6 +1144,8 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
 
     if ((m_settings.m_autoDCCorrection != settings.m_autoDCCorrection) || force)
     {
+        reverseAPIKeys.append("autoDCCorrection");
+
         if ((dev != 0) && hasDCAutoCorrection())
         {
             try
@@ -1108,6 +1162,8 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
 
     if ((m_settings.m_dcCorrection != settings.m_dcCorrection) || force)
     {
+        reverseAPIKeys.append("dcCorrection");
+
         if ((dev != 0) && hasDCCorrectionValue())
         {
             try
@@ -1124,6 +1180,8 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
 
     if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
     {
+        reverseAPIKeys.append("iqCorrection");
+
         if ((dev != 0) && hasIQCorrectionValue())
         {
             try
@@ -1247,6 +1305,20 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
         }
     }
 
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
+
+        if (fullUpdate || force) {
+            webapiReverseSendSettings(reverseAPIKeys, settings, true);
+        } else if (reverseAPIKeys.size() != 0) {
+            webapiReverseSendSettings(reverseAPIKeys, settings, false);
+        }
+    }
+
     m_settings = settings;
 
     if (globalGainChanged || individualGainsChanged)
@@ -1257,7 +1329,7 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
 
         if (getMessageQueueToGUI())
         {
-            MsgReportGainChange *report = MsgReportGainChange::create(m_settings, individualGainsChanged, globalGainChanged);
+            MsgReportGainChange *report = MsgReportGainChange::create(m_settings, globalGainChanged, individualGainsChanged);
             getMessageQueueToGUI()->push(report);
         }
     }
@@ -1790,4 +1862,127 @@ void SoapySDRInput::webapiFormatArgInfo(const SoapySDR::ArgInfo& arg, SWGSDRange
     for (const auto itOpt : arg.optionNames) {
         argInfo->getOptionNames()->append(new QString(itOpt.c_str()));
     }
+}
+
+void SoapySDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SoapySDRInputSettings& settings, bool force)
+{
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDeviceHwType(new QString("SoapySDR"));
+    swgDeviceSettings->setSoapySdrInputSettings(new SWGSDRangel::SWGSoapySDRInputSettings());
+    swgDeviceSettings->getSoapySdrInputSettings()->init();
+    SWGSDRangel::SWGSoapySDRInputSettings *swgSoapySDRInputSettings = swgDeviceSettings->getSoapySdrInputSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (deviceSettingsKeys.contains("centerFrequency") || force) {
+        swgSoapySDRInputSettings->setCenterFrequency(settings.m_centerFrequency);
+    }
+    if (deviceSettingsKeys.contains("LOppmTenths") || force) {
+        swgSoapySDRInputSettings->setLOppmTenths(settings.m_LOppmTenths);
+    }
+    if (deviceSettingsKeys.contains("devSampleRate") || force) {
+        swgSoapySDRInputSettings->setDevSampleRate(settings.m_devSampleRate);
+    }
+    if (deviceSettingsKeys.contains("bandwidth") || force) {
+        swgSoapySDRInputSettings->setBandwidth(settings.m_bandwidth);
+    }
+    if (deviceSettingsKeys.contains("log2Decim") || force) {
+        swgSoapySDRInputSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("fcPos") || force) {
+        swgSoapySDRInputSettings->setFcPos((int) settings.m_fcPos);
+    }
+    if (deviceSettingsKeys.contains("softDCCorrection") || force) {
+        swgSoapySDRInputSettings->setSoftDcCorrection(settings.m_softDCCorrection ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("softIQCorrection") || force) {
+        swgSoapySDRInputSettings->setSoftIqCorrection(settings.m_softIQCorrection ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency") || force) {
+        swgSoapySDRInputSettings->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    }
+    if (deviceSettingsKeys.contains("transverterMode") || force) {
+        swgSoapySDRInputSettings->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("fileRecordName") || force) {
+        swgSoapySDRInputSettings->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+    if (deviceSettingsKeys.contains("antenna") || force) {
+        swgSoapySDRInputSettings->setAntenna(new QString(settings.m_antenna));
+    }
+    if (deviceSettingsKeys.contains("globalGain") || force) {
+        swgSoapySDRInputSettings->setGlobalGain(settings.m_globalGain);
+    }
+    if (deviceSettingsKeys.contains("autoGain") || force) {
+        swgSoapySDRInputSettings->setAutoGain(settings.m_autoGain ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("autoDCCorrection") || force) {
+        swgSoapySDRInputSettings->setAutoDcCorrection(settings.m_autoDCCorrection ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("autoIQCorrection") || force) {
+        swgSoapySDRInputSettings->setAutoIqCorrection(settings.m_autoIQCorrection ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("dcCorrection") || force)
+    {
+        swgSoapySDRInputSettings->setDcCorrection(new SWGSDRangel::SWGComplex());
+        swgSoapySDRInputSettings->getDcCorrection()->setReal(settings.m_dcCorrection.real());
+        swgSoapySDRInputSettings->getDcCorrection()->setImag(settings.m_dcCorrection.imag());
+    }
+    if (deviceSettingsKeys.contains("iqCorrection") || force)
+    {
+        swgSoapySDRInputSettings->setIqCorrection(new SWGSDRangel::SWGComplex());
+        swgSoapySDRInputSettings->getIqCorrection()->setReal(settings.m_iqCorrection.real());
+        swgSoapySDRInputSettings->getIqCorrection()->setImag(settings.m_iqCorrection.imag());
+    }
+
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgDeviceSettings;
+}
+
+void SoapySDRInput::webapiReverseSendStartStop(bool start)
+{
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+
+    if (start) {
+        m_networkManager->sendCustomRequest(m_networkRequest, "POST");
+    } else {
+        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE");
+    }
+}
+
+void SoapySDRInput::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "SoapySDRInput::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("SoapySDRInput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }

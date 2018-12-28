@@ -20,6 +20,7 @@
 
 #include <QMutex>
 #include <QHostAddress>
+#include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelsinkapi.h"
@@ -36,6 +37,8 @@
 
 #include "udpsinksettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class QUdpSocket;
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
@@ -135,6 +138,9 @@ public:
 public slots:
     void audioReadyRead();
 
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
+
 protected:
 	class MsgUDPSinkSpectrum : public Message {
 		MESSAGE_CLASS_DECLARATION
@@ -227,6 +233,9 @@ protected:
     MagAGC m_agc;
     Bandpass<double> m_bandpass;
 
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
 	QMutex m_settingsMutex;
 
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = true);
@@ -234,6 +243,7 @@ protected:
 
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const UDPSinkSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const UDPSinkSettings& settings, bool force);
 
     inline void calculateSquelch(double value)
     {

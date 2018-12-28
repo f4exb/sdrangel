@@ -49,6 +49,11 @@ void UDPSinkSettings::resetToDefaults()
     m_audioPort = 9997;
     m_rgbColor = QColor(225, 25, 99).rgb();
     m_title = "UDP Sample Sink";
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
+    m_reverseAPIChannelIndex = 0;
 }
 
 QByteArray UDPSinkSettings::serialize() const
@@ -80,6 +85,11 @@ QByteArray UDPSinkSettings::serialize() const
     s.writeString(20, m_udpAddress);
     s.writeU32(21, m_udpPort);
     s.writeU32(22, m_audioPort);
+    s.writeBool(23, m_useReverseAPI);
+    s.writeString(24, m_reverseAPIAddress);
+    s.writeU32(25, m_reverseAPIPort);
+    s.writeU32(26, m_reverseAPIDeviceIndex);
+    s.writeU32(27, m_reverseAPIChannelIndex);
 
     return s.final();
 
@@ -154,6 +164,21 @@ bool UDPSinkSettings::deserialize(const QByteArray& data)
         } else {
             m_audioPort = 9997;
         }
+
+        d.readBool(23, &m_useReverseAPI, false);
+        d.readString(24, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(25, &u32tmp, 0);
+
+        if ((u32tmp > 1023) && (u32tmp < 65535)) {
+            m_reverseAPIPort = u32tmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(26, &u32tmp, 0);
+        m_reverseAPIDeviceIndex = u32tmp > 99 ? 99 : u32tmp;
+        d.readU32(27, &u32tmp, 0);
+        m_reverseAPIChannelIndex = u32tmp > 99 ? 99 : u32tmp;
 
         return true;
     }

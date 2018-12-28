@@ -49,6 +49,11 @@ void WFMModSettings::resetToDefaults()
     m_title = "WFM Modulator";
     m_modAFInput = WFMModInputNone;
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
+    m_reverseAPIChannelIndex = 0;
 }
 
 QByteArray WFMModSettings::serialize() const
@@ -74,6 +79,11 @@ QByteArray WFMModSettings::serialize() const
     s.writeString(10, m_title);
     s.writeString(11, m_audioDeviceName);
     s.writeS32(12, (int) m_modAFInput);
+    s.writeBool(13, m_useReverseAPI);
+    s.writeString(14, m_reverseAPIAddress);
+    s.writeU32(15, m_reverseAPIPort);
+    s.writeU32(16, m_reverseAPIDeviceIndex);
+    s.writeU32(17, m_reverseAPIChannelIndex);
 
     return s.final();
 }
@@ -92,6 +102,7 @@ bool WFMModSettings::deserialize(const QByteArray& data)
     {
         QByteArray bytetmp;
         qint32 tmp;
+        uint32_t utmp;
 
         d.readS32(1, &tmp, 0);
         m_inputFrequencyOffset = tmp;
@@ -121,6 +132,21 @@ bool WFMModSettings::deserialize(const QByteArray& data)
         } else {
             m_modAFInput = (WFMModInputAF) tmp;
         }
+
+        d.readBool(13, &m_useReverseAPI, false);
+        d.readString(14, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(15, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(16, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(17, &utmp, 0);
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
 
         return true;
     }

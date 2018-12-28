@@ -138,6 +138,7 @@ private slots:
     void on_startStop_toggled(bool checked);
     void updateHardware();
     void updateStatus();
+    void openDeviceSettingsDialog(const QPoint& p);
 };
 
 #endif /* PLUGINS_SAMPLESINK_SOAPYSDROUTPUT_SOAPYSDROUTPUTGUI_H_ */

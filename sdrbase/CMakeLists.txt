@@ -289,6 +289,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/httpserver
     ${CMAKE_SOURCE_DIR}/qrtplib
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${Boost_INCLUDE_DIRS}
 )
 
 target_link_libraries(sdrbase

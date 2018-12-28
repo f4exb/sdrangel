@@ -14,8 +14,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "hackrfoutputgui.h"
-
 #include <QDebug>
 #include <QMessageBox>
 
@@ -23,6 +21,8 @@
 
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
+#include "gui/crightclickenabler.h"
+#include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesinkapi.h"
@@ -31,6 +31,7 @@
 #include "hackrf/devicehackrfvalues.h"
 #include "hackrf/devicehackrfshared.h"
 
+#include "hackrfoutputgui.h"
 #include "ui_hackrfoutputgui.h"
 
 HackRFOutputGui::HackRFOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
@@ -55,6 +56,9 @@ HackRFOutputGui::HackRFOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
+
+    CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
+    connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
 	displaySettings();
 	displayBandwidths();
@@ -329,7 +333,7 @@ void HackRFOutputGui::updateHardware()
         qDebug() << "HackRFOutputGui::updateHardware";
         HackRFOutput::MsgConfigureHackRF* message = HackRFOutput::MsgConfigureHackRF::create(m_settings, m_forceSettings);
         m_deviceSampleSink->getInputMessageQueue()->push(message);
-        m_forceSettings = true;
+        m_forceSettings = false;
         m_updateTimer.stop();
     }
 }
@@ -362,4 +366,23 @@ void HackRFOutputGui::updateStatus()
 
         m_lastEngineState = state;
     }
+}
+
+void HackRFOutputGui::openDeviceSettingsDialog(const QPoint& p)
+{
+    BasicDeviceSettingsDialog dialog(this);
+    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+
+    dialog.move(p);
+    dialog.exec();
+
+    m_settings.m_useReverseAPI = dialog.useReverseAPI();
+    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+
+    sendSettings();
 }

@@ -25,12 +25,15 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelsinkapi.h"
 #include "channel/sdrdaemondatablock.h"
 #include "daemonsinksettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
@@ -148,9 +151,15 @@ private:
     int m_txDelay;
     QString m_dataAddress;
     uint16_t m_dataPort;
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
 
     void applySettings(const DaemonSinkSettings& settings, bool force = false);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DaemonSinkSettings& settings);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DaemonSinkSettings& settings, bool force);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif /* INCLUDE_DAEMONSINK_H_ */

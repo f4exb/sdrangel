@@ -19,17 +19,21 @@
 
 #include <QString>
 #include <QByteArray>
+#include <QNetworkRequest>
 
 #include <libairspyhf/airspyhf.h>
 #include <dsp/devicesamplesource.h>
 
 #include "airspyhfsettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSourceAPI;
 class AirspyHFThread;
 class FileRecord;
 
 class AirspyHFInput : public DeviceSampleSource {
+    Q_OBJECT
 public:
 	class MsgConfigureAirspyHF : public Message {
 		MESSAGE_CLASS_DECLARATION
@@ -141,14 +145,6 @@ public:
     static const qint64 loHighLimitFreqVHF;
 
 private:
-	bool openDevice();
-	void closeDevice();
-	bool applySettings(const AirspyHFSettings& settings, bool force);
-	airspyhf_device_t *open_airspyhf_from_serial(const QString& serialStr);
-	void setDeviceCenterFrequency(quint64 freq, const AirspyHFSettings& settings);
-	void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AirspyHFSettings& settings);
-    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	AirspyHFSettings m_settings;
@@ -158,6 +154,21 @@ private:
 	std::vector<uint32_t> m_sampleRates;
 	bool m_running;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
+	bool openDevice();
+	void closeDevice();
+	bool applySettings(const AirspyHFSettings& settings, bool force);
+	airspyhf_device_t *open_airspyhf_from_serial(const QString& serialStr);
+	void setDeviceCenterFrequency(quint64 freq, const AirspyHFSettings& settings);
+	void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AirspyHFSettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const AirspyHFSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_AIRSPYHFINPUT_H

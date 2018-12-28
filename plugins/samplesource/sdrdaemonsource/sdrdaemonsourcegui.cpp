@@ -32,6 +32,8 @@
 #include "ui_sdrdaemonsourcegui.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
+#include "gui/crightclickenabler.h"
+#include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "mainwindow.h"
@@ -76,6 +78,9 @@ SDRdaemonSourceGui::SDRdaemonSourceGui(DeviceUISet *deviceUISet, QWidget* parent
 
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 0, 9999999U);
+
+    CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
+    connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
 	displaySettings();
 
@@ -630,4 +635,23 @@ void SDRdaemonSourceGui::analyzeApiReply(const QJsonObject& jsonObject)
     if (infoLine.size() > 0) {
         ui->infoText->setText(infoLine);
     }
+}
+
+void SDRdaemonSourceGui::openDeviceSettingsDialog(const QPoint& p)
+{
+    BasicDeviceSettingsDialog dialog(this);
+    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+
+    dialog.move(p);
+    dialog.exec();
+
+    m_settings.m_useReverseAPI = dialog.useReverseAPI();
+    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+
+    sendSettings();
 }

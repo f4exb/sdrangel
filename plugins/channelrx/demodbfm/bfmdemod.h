@@ -18,8 +18,10 @@
 #ifndef INCLUDE_BFMDEMOD_H
 #define INCLUDE_BFMDEMOD_H
 
-#include <QMutex>
 #include <vector>
+
+#include <QMutex>
+#include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelsinkapi.h"
@@ -39,6 +41,8 @@
 #include "rdsdemod.h"
 #include "bfmdemodsettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
@@ -48,6 +52,7 @@ namespace SWGSDRangel {
 }
 
 class BFMDemod : public BasebandSampleSink, public ChannelSinkAPI {
+    Q_OBJECT
 public:
     class MsgConfigureBFMDemod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -117,7 +122,7 @@ public:
 
 	BFMDemod(DeviceSourceAPI *deviceAPI);
 	virtual ~BFMDemod();
-	virtual void destroy() { delete this; }
+    virtual void destroy() { delete this; }
 	void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
 
 	int getSampleRate() const { return m_inputSampleRate; }
@@ -269,6 +274,9 @@ private:
 
     static const int m_udpBlockSize;
 
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
 	void applyAudioSampleRate(int sampleRate);
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const BFMDemodSettings& settings, bool force = false);
@@ -276,6 +284,10 @@ private:
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const BFMDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiFormatRDSReport(SWGSDRangel::SWGRDSReport *report);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const BFMDemodSettings& settings, bool force);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_BFMDEMOD_H

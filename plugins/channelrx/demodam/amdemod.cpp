@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2015-2018 Edouard Griffiths, F4EXB.                             //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,6 +18,9 @@
 
 #include <QTime>
 #include <QDebug>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include <stdio.h>
 #include <complex.h>
@@ -85,10 +88,15 @@ AMDemod::AMDemod(DeviceSourceAPI *deviceAPI) :
     m_pllFilt.create(101, m_audioSampleRate, 200.0);
     m_pll.computeCoefficients(0.05, 0.707, 1000);
     m_syncAMBuffIndex = 0;
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 AMDemod::~AMDemod()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
     m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
@@ -427,7 +435,14 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_pll: " << settings.m_pll
             << " m_syncAMOperation: " << (int) settings.m_syncAMOperation
+            << " m_useReverseAPI: " << settings.m_useReverseAPI
+            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
+            << " m_reverseAPIAddress: " << settings.m_reverseAPIPort
+            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
+            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
+
+    QList<QString> reverseAPIKeys;
 
     if((m_settings.m_rfBandwidth != settings.m_rfBandwidth) ||
         (m_settings.m_bandpassEnable != settings.m_bandpassEnable) || force)
@@ -439,11 +454,19 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         m_bandpass.create(301, m_audioSampleRate, 300.0, settings.m_rfBandwidth / 2.0f);
         DSBFilter->create_dsb_filter((2.0f * settings.m_rfBandwidth) / (float) m_audioSampleRate);
         m_settingsMutex.unlock();
+
+        if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth) || force) {
+            reverseAPIKeys.append("rfBandwidth");
+        }
+        if ((m_settings.m_bandpassEnable != settings.m_bandpassEnable) || force) {
+            reverseAPIKeys.append("bandpassEnable");
+        }
     }
 
     if ((m_settings.m_squelch != settings.m_squelch) || force)
     {
         m_squelchLevel = CalcDb::powerFromdB(settings.m_squelch);
+        reverseAPIKeys.append("squelch");
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
@@ -457,6 +480,8 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         if (m_audioSampleRate != audioSampleRate) {
             applyAudioSampleRate(audioSampleRate);
         }
+
+        reverseAPIKeys.append("audioDeviceName");
     }
 
     if ((m_settings.m_pll != settings.m_pll) || force)
@@ -470,10 +495,38 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         {
             m_volumeAGC.resizeNew(m_audioSampleRate/10, 0.003);
         }
+
+        reverseAPIKeys.append("pll");
+        reverseAPIKeys.append("syncAMOperation");
     }
 
-    if ((m_settings.m_syncAMOperation != settings.m_syncAMOperation) || force) {
+    if ((m_settings.m_syncAMOperation != settings.m_syncAMOperation) || force)
+    {
         m_syncAMBuffIndex = 0;
+        reverseAPIKeys.append("pll");
+        reverseAPIKeys.append("syncAMOperation");
+    }
+
+    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+
+    if ((m_settings.m_audioMute != settings.m_audioMute) || force) {
+        reverseAPIKeys.append("audioMute");
+    }
+
+    if ((m_settings.m_volume != settings.m_volume) || force) {
+        reverseAPIKeys.append("volume");
+    }
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -560,7 +613,23 @@ int AMDemod::webapiSettingsPutPatch(
         qint32 syncAMOperationCode = response.getAmDemodSettings()->getSyncAmOperation();
         settings.m_syncAMOperation = syncAMOperationCode < 0 ?
                 AMDemodSettings::SyncAMDSB : syncAMOperationCode > 2 ?
-                        AMDemodSettings::SyncAMDSB : (AMDemodSettings::SyncAMOperation) syncAMOperationCode;
+                        AMDemodSettings::SyncAMLSB : (AMDemodSettings::SyncAMOperation) syncAMOperationCode;
+    }
+
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getAmDemodSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getAmDemodSettings()->getReverseApiAddress() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getAmDemodSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getAmDemodSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getAmDemodSettings()->getReverseApiChannelIndex();
     }
 
     if (frequencyOffsetChanged)
@@ -620,6 +689,17 @@ void AMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
 
     response.getAmDemodSettings()->setPll(settings.m_pll ? 1 : 0);
     response.getAmDemodSettings()->setSyncAmOperation((int) m_settings.m_syncAMOperation);
+    response.getAmDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getAmDemodSettings()->getReverseApiAddress()) {
+        *response.getAmDemodSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getAmDemodSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getAmDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getAmDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getAmDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void AMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -634,3 +714,83 @@ void AMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     response.getAmDemodReport()->setChannelSampleRate(m_inputSampleRate);
 }
 
+void AMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AMDemodSettings& settings, bool force)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(0);
+    swgChannelSettings->setChannelType(new QString("AMDemod"));
+    swgChannelSettings->setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
+    SWGSDRangel::SWGAMDemodSettings *swgAMDemodSettings = swgChannelSettings->getAmDemodSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (channelSettingsKeys.contains("audioMute") || force) {
+        swgAMDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+        swgAMDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("rfBandwidth") || force) {
+        swgAMDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgAMDemodSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("squelch") || force) {
+        swgAMDemodSettings->setSquelch(settings.m_squelch);
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swgAMDemodSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("volume") || force) {
+        swgAMDemodSettings->setVolume(settings.m_volume);
+    }
+    if (channelSettingsKeys.contains("bandpassEnable") || force) {
+        swgAMDemodSettings->setBandpassEnable(settings.m_bandpassEnable ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("audioDeviceName") || force) {
+        swgAMDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+    if (channelSettingsKeys.contains("pll") || force) {
+        swgAMDemodSettings->setPll(settings.m_pll);
+    }
+    if (channelSettingsKeys.contains("syncAMOperation") || force) {
+        swgAMDemodSettings->setSyncAmOperation((int) settings.m_syncAMOperation);
+    }
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void AMDemod::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "AMDemod::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("AMDemod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+}

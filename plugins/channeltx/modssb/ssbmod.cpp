@@ -19,6 +19,9 @@
 #include <QTime>
 #include <QDebug>
 #include <QMutexLocker>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include <stdio.h>
 #include <complex.h>
@@ -114,10 +117,16 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 SSBMod::~SSBMod()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
+
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(&m_audioFifo);
 
     m_deviceAPI->removeChannelAPI(this);
@@ -583,6 +592,16 @@ bool SSBMod::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (CWKeyer::MsgConfigureCWKeyer::match(cmd))
+    {
+        const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) cmd;
+
+        if (m_settings.m_useReverseAPI) {
+            webapiReverseSendCWSettings(cfg.getSettings());
+        }
+
+        return true;
+    }
     else if (DSPConfigureAudio::match(cmd))
     {
         DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
@@ -744,6 +763,77 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
     float band = settings.m_bandwidth;
     float lowCutoff = settings.m_lowCutoff;
     bool usb = settings.m_usb;
+    QList<QString> reverseAPIKeys;
+
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+    if ((settings.m_bandwidth != m_settings.m_bandwidth) || force) {
+        reverseAPIKeys.append("bandwidth");
+    }
+    if ((settings.m_lowCutoff != m_settings.m_lowCutoff) || force) {
+        reverseAPIKeys.append("lowCutoff");
+    }
+    if ((settings.m_usb != m_settings.m_usb) || force) {
+        reverseAPIKeys.append("usb");
+    }
+    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
+        reverseAPIKeys.append("toneFrequency");
+    }
+    if ((settings.m_volumeFactor != m_settings.m_volumeFactor) || force) {
+        reverseAPIKeys.append("volumeFactor");
+    }
+    if ((settings.m_spanLog2 != m_settings.m_spanLog2) || force) {
+        reverseAPIKeys.append("spanLog2");
+    }
+    if ((settings.m_audioBinaural != m_settings.m_audioBinaural) || force) {
+        reverseAPIKeys.append("audioBinaural");
+    }
+    if ((settings.m_audioFlipChannels != m_settings.m_audioFlipChannels) || force) {
+        reverseAPIKeys.append("audioFlipChannels");
+    }
+    if ((settings.m_dsb != m_settings.m_dsb) || force) {
+        reverseAPIKeys.append("dsb");
+    }
+    if ((settings.m_audioMute != m_settings.m_audioMute) || force) {
+        reverseAPIKeys.append("audioMute");
+    }
+    if ((settings.m_playLoop != m_settings.m_playLoop) || force) {
+        reverseAPIKeys.append("playLoop");
+    }
+    if ((settings.m_agc != m_settings.m_agc) || force) {
+        reverseAPIKeys.append("agc");
+    }
+    if ((settings.m_agcOrder != m_settings.m_agcOrder) || force) {
+        reverseAPIKeys.append("agcOrder");
+    }
+    if ((settings.m_agcTime != m_settings.m_agcTime) || force) {
+        reverseAPIKeys.append("agcTime");
+    }
+    if ((settings.m_agcThresholdEnable != m_settings.m_agcThresholdEnable) || force) {
+        reverseAPIKeys.append("agcThresholdEnable");
+    }
+    if ((settings.m_agcThreshold != m_settings.m_agcThreshold) || force) {
+        reverseAPIKeys.append("agcThreshold");
+    }
+    if ((settings.m_agcThresholdGate != m_settings.m_agcThresholdGate) || force) {
+        reverseAPIKeys.append("agcThresholdGate");
+    }
+    if ((settings.m_agcThresholdDelay != m_settings.m_agcThresholdDelay) || force) {
+        reverseAPIKeys.append("agcThresholdDelay");
+    }
+    if ((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
+        reverseAPIKeys.append("rgbColor");
+    }
+    if ((settings.m_title != m_settings.m_title) || force) {
+        reverseAPIKeys.append("title");
+    }
+    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force) {
+        reverseAPIKeys.append("modAFInput");
+    }
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
+        reverseAPIKeys.append("audioDeviceName");
+    }
 
     if ((settings.m_bandwidth != m_settings.m_bandwidth) ||
         (settings.m_lowCutoff != m_settings.m_lowCutoff) || force)
@@ -840,6 +930,16 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
         if (m_audioSampleRate != audioSampleRate) {
             applyAudioSampleRate(audioSampleRate);
         }
+    }
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -962,6 +1062,21 @@ int SSBMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("audioDeviceName")) {
         settings.m_audioDeviceName = *response.getSsbModSettings()->getAudioDeviceName();
     }
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getSsbModSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getSsbModSettings()->getReverseApiAddress() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getSsbModSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getSsbModSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getSsbModSettings()->getReverseApiChannelIndex();
+    }
 
     if (channelSettingsKeys.contains("cwKeyer"))
     {
@@ -1083,6 +1198,18 @@ void SSBMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     }
 
     apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+
+    response.getAmModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getAmModSettings()->getReverseApiAddress()) {
+        *response.getAmModSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getAmModSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getAmModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getAmModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getAmModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void SSBMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -1092,3 +1219,166 @@ void SSBMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     response.getSsbModReport()->setChannelSampleRate(m_outputSampleRate);
 }
 
+void SSBMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SSBModSettings& settings, bool force)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(1);
+    swgChannelSettings->setChannelType(new QString("SSBMod"));
+    swgChannelSettings->setSsbModSettings(new SWGSDRangel::SWGSSBModSettings());
+    SWGSDRangel::SWGSSBModSettings *swgSSBModSettings = swgChannelSettings->getSsbModSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+        swgSSBModSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("bandwidth") || force) {
+        swgSSBModSettings->setBandwidth(settings.m_bandwidth);
+    }
+    if (channelSettingsKeys.contains("lowCutoff") || force) {
+        swgSSBModSettings->setLowCutoff(settings.m_lowCutoff);
+    }
+    if (channelSettingsKeys.contains("usb") || force) {
+        swgSSBModSettings->setUsb(settings.m_usb ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("toneFrequency") || force) {
+        swgSSBModSettings->setToneFrequency(settings.m_toneFrequency);
+    }
+    if (channelSettingsKeys.contains("volumeFactor") || force) {
+        swgSSBModSettings->setVolumeFactor(settings.m_volumeFactor);
+    }
+    if (channelSettingsKeys.contains("spanLog2") || force) {
+        swgSSBModSettings->setSpanLog2(settings.m_spanLog2);
+    }
+    if (channelSettingsKeys.contains("audioBinaural") || force) {
+        swgSSBModSettings->setAudioBinaural(settings.m_audioBinaural ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("audioFlipChannels") || force) {
+        swgSSBModSettings->setAudioFlipChannels(settings.m_audioFlipChannels ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("dsb") || force) {
+        swgSSBModSettings->setDsb(settings.m_dsb ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("audioMute") || force) {
+        swgSSBModSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("playLoop") || force) {
+        swgSSBModSettings->setPlayLoop(settings.m_playLoop ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("agc") || force) {
+        swgSSBModSettings->setAgc(settings.m_agc ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("agcOrder") || force) {
+        swgSSBModSettings->setAgcOrder(settings.m_agcOrder);
+    }
+    if (channelSettingsKeys.contains("agcTime") || force) {
+        swgSSBModSettings->setAgcTime(settings.m_agcTime);
+    }
+    if (channelSettingsKeys.contains("agcThresholdEnable") || force) {
+        swgSSBModSettings->setAgcThresholdEnable(settings.m_agcThresholdEnable ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("agcThreshold") || force) {
+        swgSSBModSettings->setAgcThreshold(settings.m_agcThreshold);
+    }
+    if (channelSettingsKeys.contains("agcThresholdGate") || force) {
+        swgSSBModSettings->setAgcThresholdGate(settings.m_agcThresholdGate);
+    }
+    if (channelSettingsKeys.contains("agcThresholdDelay") || force) {
+        swgSSBModSettings->setAgcThresholdDelay(settings.m_agcThresholdDelay);
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgSSBModSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swgSSBModSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("modAFInput") || force) {
+        swgSSBModSettings->setModAfInput((int) settings.m_modAFInput);
+    }
+    if (channelSettingsKeys.contains("audioDeviceName") || force) {
+        swgSSBModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+
+    if (force)
+    {
+        const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
+        swgSSBModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
+        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgSSBModSettings->getCwKeyer();
+        apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
+        apiCwKeyerSettings->setMode(cwKeyerSettings.m_mode);
+        apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
+        apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
+        apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+    }
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void SSBMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(1);
+    swgChannelSettings->setChannelType(new QString("SSBMod"));
+    swgChannelSettings->setSsbModSettings(new SWGSDRangel::SWGSSBModSettings());
+    SWGSDRangel::SWGSSBModSettings *swgSSBModSettings = swgChannelSettings->getSsbModSettings();
+
+    swgSSBModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgSSBModSettings->getCwKeyer();
+    apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
+    apiCwKeyerSettings->setMode(cwKeyerSettings.m_mode);
+    apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
+    apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
+    apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex)
+            .arg(m_settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void SSBMod::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "SSBMod::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("SSBMod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+}

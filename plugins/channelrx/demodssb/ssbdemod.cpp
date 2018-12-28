@@ -17,9 +17,13 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
+#include <stdio.h>
+
 #include <QTime>
 #include <QDebug>
-#include <stdio.h>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGChannelSettings.h"
 #include "SWGSSBDemodSettings.h"
@@ -98,10 +102,15 @@ SSBDemod::SSBDemod(DeviceSourceAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 SSBDemod::~SSBDemod()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
 
 	m_deviceAPI->removeChannelAPI(this);
@@ -455,6 +464,18 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " force: " << force;
 
+    QList<QString> reverseAPIKeys;
+
+    if((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+    if((m_settings.m_rfBandwidth != settings.m_rfBandwidth) || force) {
+        reverseAPIKeys.append("rfBandwidth");
+    }
+    if((m_settings.m_lowCutoff != settings.m_lowCutoff) || force) {
+        reverseAPIKeys.append("lowCutoff");
+    }
+
     if((m_settings.m_rfBandwidth != settings.m_rfBandwidth) ||
         (m_settings.m_lowCutoff != settings.m_lowCutoff) || force)
     {
@@ -491,8 +512,22 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
 
     if ((m_settings.m_volume != settings.m_volume) || force)
     {
+        reverseAPIKeys.append("volume");
         m_volume = settings.m_volume;
         m_volume /= 4.0; // for 3276.8
+    }
+
+    if ((m_settings.m_agcTimeLog2 != settings.m_agcTimeLog2) || force) {
+        reverseAPIKeys.append("agcTimeLog2");
+    }
+    if ((m_settings.m_agcPowerThreshold != settings.m_agcPowerThreshold) || force) {
+        reverseAPIKeys.append("agcPowerThreshold");
+    }
+    if ((m_settings.m_agcThresholdGate != settings.m_agcThresholdGate) || force) {
+        reverseAPIKeys.append("agcThresholdGate");
+    }
+    if ((m_settings.m_agcClamping != settings.m_agcClamping) || force) {
+        reverseAPIKeys.append("agcClamping");
     }
 
     if ((m_settings.m_agcTimeLog2 != settings.m_agcTimeLog2) ||
@@ -542,6 +577,7 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
+        reverseAPIKeys.append("audioDeviceName");
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
         audioDeviceManager->addAudioSink(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
@@ -552,12 +588,41 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
         }
     }
 
+    if ((m_settings.m_spanLog2 != settings.m_spanLog2) || force) {
+        reverseAPIKeys.append("spanLog2");
+    }
+    if ((m_settings.m_audioBinaural != settings.m_audioBinaural) || force) {
+        reverseAPIKeys.append("audioBinaural");
+    }
+    if ((m_settings.m_audioFlipChannels != settings.m_audioFlipChannels) || force) {
+        reverseAPIKeys.append("audioFlipChannels");
+    }
+    if ((m_settings.m_dsb != settings.m_dsb) || force) {
+        reverseAPIKeys.append("dsb");
+    }
+    if ((m_settings.m_audioMute != settings.m_audioMute) || force) {
+        reverseAPIKeys.append("audioMute");
+    }
+    if ((m_settings.m_agc != settings.m_agc) || force) {
+        reverseAPIKeys.append("agc");
+    }
+
     m_spanLog2 = settings.m_spanLog2;
     m_audioBinaual = settings.m_audioBinaural;
     m_audioFlipChannels = settings.m_audioFlipChannels;
     m_dsb = settings.m_dsb;
     m_audioMute = settings.m_audioMute;
     m_agcActive = settings.m_agc;
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+    }
 
     m_settings = settings;
 }
@@ -736,3 +801,101 @@ void SSBDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     response.getSsbDemodReport()->setChannelSampleRate(m_inputSampleRate);
 }
 
+void SSBDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SSBDemodSettings& settings, bool force)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(0);
+    swgChannelSettings->setChannelType(new QString("SSBDemod"));
+    swgChannelSettings->setSsbDemodSettings(new SWGSDRangel::SWGSSBDemodSettings());
+    SWGSDRangel::SWGSSBDemodSettings *swgSSBDemodSettings = swgChannelSettings->getSsbDemodSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+        swgSSBDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("rfBandwidth") || force) {
+        swgSSBDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (channelSettingsKeys.contains("lowCutoff") || force) {
+        swgSSBDemodSettings->setLowCutoff(settings.m_lowCutoff);
+    }
+    if (channelSettingsKeys.contains("volume") || force) {
+        swgSSBDemodSettings->setVolume(settings.m_volume);
+    }
+    if (channelSettingsKeys.contains("spanLog2") || force) {
+        swgSSBDemodSettings->setSpanLog2(settings.m_spanLog2);
+    }
+    if (channelSettingsKeys.contains("audioBinaural") || force) {
+        swgSSBDemodSettings->setAudioBinaural(settings.m_audioBinaural ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("audioFlipChannels") || force) {
+        swgSSBDemodSettings->setAudioFlipChannels(settings.m_audioFlipChannels ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("dsb") || force) {
+        swgSSBDemodSettings->setDsb(settings.m_dsb ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("audioMute") || force) {
+        swgSSBDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("agc") || force) {
+        swgSSBDemodSettings->setAgc(settings.m_agc ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("agcClamping") || force) {
+        swgSSBDemodSettings->setAgcClamping(settings.m_agcClamping ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("agcTimeLog2") || force) {
+        swgSSBDemodSettings->setAgcTimeLog2(settings.m_agcTimeLog2);
+    }
+    if (channelSettingsKeys.contains("agcPowerThreshold") || force) {
+        swgSSBDemodSettings->setAgcPowerThreshold(settings.m_agcPowerThreshold);
+    }
+    if (channelSettingsKeys.contains("agcThresholdGate") || force) {
+        swgSSBDemodSettings->setAgcThresholdGate(settings.m_agcThresholdGate);
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgSSBDemodSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swgSSBDemodSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("audioDeviceName") || force) {
+        swgSSBDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void SSBDemod::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "SSBDemod::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("SSBDemod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+}

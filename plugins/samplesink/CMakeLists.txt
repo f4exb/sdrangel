@@ -29,7 +29,7 @@ if(CM256CC_FOUND)
 endif(CM256CC_FOUND)
 
 find_package(SoapySDR)
-if(LIBUSB_FOUND AND SOAPYSDR_FOUND)
+if(SOAPYSDR_FOUND)
 	add_subdirectory(soapysdroutput)
 endif()
 

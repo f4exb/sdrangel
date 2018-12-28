@@ -21,6 +21,8 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "gui/glspectrum.h"
+#include "gui/crightclickenabler.h"
+#include "gui/basicdevicesettingsdialog.h"
 #include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
 #include "plutosdr/deviceplutosdr.h"
@@ -58,6 +60,9 @@ PlutoSDRInputGui::PlutoSDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->swDecimLabel->setText(QString::fromUtf8("S\u2193"));
     ui->lpFIRDecimationLabel->setText(QString::fromUtf8("\u2193"));
+
+    CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
+    connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
     blockApplySettings(true);
     displaySettings();
@@ -480,4 +485,23 @@ void PlutoSDRInputGui::updateSampleRateAndFrequency()
     m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
     m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateLabel->setText(tr("%1k").arg(QString::number(m_sampleRate / 1000.0f, 'g', 5)));
+}
+
+void PlutoSDRInputGui::openDeviceSettingsDialog(const QPoint& p)
+{
+    BasicDeviceSettingsDialog dialog(this);
+    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+
+    dialog.move(p);
+    dialog.exec();
+
+    m_settings.m_useReverseAPI = dialog.useReverseAPI();
+    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+
+    sendSettings();
 }

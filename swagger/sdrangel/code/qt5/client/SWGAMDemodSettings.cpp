@@ -50,6 +50,16 @@ SWGAMDemodSettings::SWGAMDemodSettings() {
     m_pll_isSet = false;
     sync_am_operation = 0;
     m_sync_am_operation_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = nullptr;
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_device_index = 0;
+    m_reverse_api_device_index_isSet = false;
+    reverse_api_channel_index = 0;
+    m_reverse_api_channel_index_isSet = false;
 }
 
 SWGAMDemodSettings::~SWGAMDemodSettings() {
@@ -80,6 +90,16 @@ SWGAMDemodSettings::init() {
     m_pll_isSet = false;
     sync_am_operation = 0;
     m_sync_am_operation_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = new QString("");
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_device_index = 0;
+    m_reverse_api_device_index_isSet = false;
+    reverse_api_channel_index = 0;
+    m_reverse_api_channel_index_isSet = false;
 }
 
 void
@@ -97,6 +117,13 @@ SWGAMDemodSettings::cleanup() {
     if(audio_device_name != nullptr) { 
         delete audio_device_name;
     }
+
+
+
+    if(reverse_api_address != nullptr) { 
+        delete reverse_api_address;
+    }
+
 
 
 }
@@ -133,6 +160,16 @@ SWGAMDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&pll, pJson["pll"], "qint32", "");
     
     ::SWGSDRangel::setValue(&sync_am_operation, pJson["syncAMOperation"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_address, pJson["reverseAPIAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&reverse_api_port, pJson["reverseAPIPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
     
 }
 
@@ -182,6 +219,21 @@ SWGAMDemodSettings::asJsonObject() {
     }
     if(m_sync_am_operation_isSet){
         obj->insert("syncAMOperation", QJsonValue(sync_am_operation));
+    }
+    if(m_use_reverse_api_isSet){
+        obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
+    }
+    if(reverse_api_address != nullptr && *reverse_api_address != QString("")){
+        toJsonValue(QString("reverseAPIAddress"), reverse_api_address, obj, QString("QString"));
+    }
+    if(m_reverse_api_port_isSet){
+        obj->insert("reverseAPIPort", QJsonValue(reverse_api_port));
+    }
+    if(m_reverse_api_device_index_isSet){
+        obj->insert("reverseAPIDeviceIndex", QJsonValue(reverse_api_device_index));
+    }
+    if(m_reverse_api_channel_index_isSet){
+        obj->insert("reverseAPIChannelIndex", QJsonValue(reverse_api_channel_index));
     }
 
     return obj;
@@ -297,6 +349,56 @@ SWGAMDemodSettings::setSyncAmOperation(qint32 sync_am_operation) {
     this->m_sync_am_operation_isSet = true;
 }
 
+qint32
+SWGAMDemodSettings::getUseReverseApi() {
+    return use_reverse_api;
+}
+void
+SWGAMDemodSettings::setUseReverseApi(qint32 use_reverse_api) {
+    this->use_reverse_api = use_reverse_api;
+    this->m_use_reverse_api_isSet = true;
+}
+
+QString*
+SWGAMDemodSettings::getReverseApiAddress() {
+    return reverse_api_address;
+}
+void
+SWGAMDemodSettings::setReverseApiAddress(QString* reverse_api_address) {
+    this->reverse_api_address = reverse_api_address;
+    this->m_reverse_api_address_isSet = true;
+}
+
+qint32
+SWGAMDemodSettings::getReverseApiPort() {
+    return reverse_api_port;
+}
+void
+SWGAMDemodSettings::setReverseApiPort(qint32 reverse_api_port) {
+    this->reverse_api_port = reverse_api_port;
+    this->m_reverse_api_port_isSet = true;
+}
+
+qint32
+SWGAMDemodSettings::getReverseApiDeviceIndex() {
+    return reverse_api_device_index;
+}
+void
+SWGAMDemodSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
+    this->reverse_api_device_index = reverse_api_device_index;
+    this->m_reverse_api_device_index_isSet = true;
+}
+
+qint32
+SWGAMDemodSettings::getReverseApiChannelIndex() {
+    return reverse_api_channel_index;
+}
+void
+SWGAMDemodSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
+    this->reverse_api_channel_index = reverse_api_channel_index;
+    this->m_reverse_api_channel_index_isSet = true;
+}
+
 
 bool
 SWGAMDemodSettings::isSet(){
@@ -313,6 +415,11 @@ SWGAMDemodSettings::isSet(){
         if(audio_device_name != nullptr && *audio_device_name != QString("")){ isObjectUpdated = true; break;}
         if(m_pll_isSet){ isObjectUpdated = true; break;}
         if(m_sync_am_operation_isSet){ isObjectUpdated = true; break;}
+        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
+        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
+        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
+        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
+        if(m_reverse_api_channel_index_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

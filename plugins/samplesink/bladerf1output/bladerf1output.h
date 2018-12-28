@@ -17,18 +17,22 @@
 #ifndef INCLUDE_BLADERFOUTPUT_H
 #define INCLUDE_BLADERFOUTPUT_H
 
-#include <dsp/devicesamplesink.h>
-#include <libbladeRF.h>
 #include <QString>
+#include <QNetworkRequest>
 
-#include "../../../devices/bladerf1/devicebladerf1.h"
-#include "../../../devices/bladerf1/devicebladerf1param.h"
+#include "libbladeRF.h"
+#include "dsp/devicesamplesink.h"
+#include "bladerf1/devicebladerf1.h"
+#include "bladerf1/devicebladerf1param.h"
 #include "bladerf1outputsettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSinkAPI;
 class Bladerf1OutputThread;
 
 class Bladerf1Output : public DeviceSampleSink {
+	Q_OBJECT
 public:
 	class MsgConfigureBladerf1 : public Message {
 		MESSAGE_CLASS_DECLARATION
@@ -128,11 +132,6 @@ public:
             QString& errorMessage);
 
 private:
-    bool openDevice();
-    void closeDevice();
-	bool applySettings(const BladeRF1OutputSettings& settings, bool force);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF1OutputSettings& settings);
-
 	DeviceSinkAPI *m_deviceAPI;
 	QMutex m_mutex;
 	BladeRF1OutputSettings m_settings;
@@ -141,6 +140,18 @@ private:
 	QString m_deviceDescription;
     DeviceBladeRF1Params m_sharedParams;
     bool m_running;
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
+    bool openDevice();
+    void closeDevice();
+	bool applySettings(const BladeRF1OutputSettings& settings, bool force);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF1OutputSettings& settings);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const BladeRF1OutputSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_BLADERFOUTPUT_H

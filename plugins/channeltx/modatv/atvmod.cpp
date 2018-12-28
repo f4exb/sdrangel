@@ -14,8 +14,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QDebug>
 #include <time.h>
+
+#include <QDebug>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
@@ -100,12 +104,21 @@ ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 ATVMod::~ATVMod()
 {
-	if (m_video.isOpened()) m_video.release();
-	releaseCameras();
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
+
+    if (m_video.isOpened()) {
+	    m_video.release();
+	}
+
+    releaseCameras();
 	m_deviceAPI->removeChannelAPI(this);
     m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
@@ -1090,7 +1103,71 @@ void ATVMod::applySettings(const ATVModSettings& settings, bool force)
             << " m_fmExcursion: " << settings.m_fmExcursion
             << " m_forceDecimator: " << settings.m_forceDecimator
             << " m_showOverlayText: " << settings.m_showOverlayText
+            << " m_overlayText: " << settings.m_overlayText
             << " force: " << force;
+
+    QList<QString> reverseAPIKeys;
+
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
+        reverseAPIKeys.append("rfBandwidth");
+    }
+    if ((settings.m_rfOppBandwidth != m_settings.m_rfOppBandwidth) || force) {
+        reverseAPIKeys.append("rfOppBandwidth");
+    }
+    if ((settings.m_atvStd != m_settings.m_atvStd) || force) {
+        reverseAPIKeys.append("atvStd");
+    }
+    if ((settings.m_nbLines != m_settings.m_nbLines) || force) {
+        reverseAPIKeys.append("nbLines");
+    }
+    if ((settings.m_fps != m_settings.m_fps) || force) {
+        reverseAPIKeys.append("fps");
+    }
+    if ((settings.m_atvModInput != m_settings.m_atvModInput) || force) {
+        reverseAPIKeys.append("atvModInput");
+    }
+    if ((settings.m_uniformLevel != m_settings.m_uniformLevel) || force) {
+        reverseAPIKeys.append("uniformLevel");
+    }
+    if ((settings.m_uniformLevel != m_settings.m_uniformLevel) || force) {
+        reverseAPIKeys.append("uniformLevel");
+    }
+    if ((settings.m_atvModulation != m_settings.m_atvModulation) || force) {
+        reverseAPIKeys.append("atvModulation");
+    }
+    if ((settings.m_videoPlayLoop != m_settings.m_videoPlayLoop) || force) {
+        reverseAPIKeys.append("videoPlayLoop");
+    }
+    if ((settings.m_videoPlay != m_settings.m_videoPlay) || force) {
+        reverseAPIKeys.append("videoPlay");
+    }
+    if ((settings.m_cameraPlay != m_settings.m_cameraPlay) || force) {
+        reverseAPIKeys.append("cameraPlay");
+    }
+    if ((settings.m_channelMute != m_settings.m_channelMute) || force) {
+        reverseAPIKeys.append("channelMute");
+    }
+    if ((settings.m_invertedVideo != m_settings.m_invertedVideo) || force) {
+        reverseAPIKeys.append("invertedVideo");
+    }
+    if ((settings.m_rfScalingFactor != m_settings.m_rfScalingFactor) || force) {
+        reverseAPIKeys.append("rfScalingFactor");
+    }
+    if ((settings.m_fmExcursion != m_settings.m_fmExcursion) || force) {
+        reverseAPIKeys.append("fmExcursion");
+    }
+    if ((settings.m_forceDecimator != m_settings.m_forceDecimator) || force) {
+        reverseAPIKeys.append("forceDecimator");
+    }
+    if ((settings.m_showOverlayText != m_settings.m_showOverlayText) || force) {
+        reverseAPIKeys.append("showOverlayText");
+    }
+    if ((settings.m_overlayText != m_settings.m_overlayText) || force) {
+        reverseAPIKeys.append("overlayText");
+    }
 
     if ((settings.m_atvStd != m_settings.m_atvStd)
         || (settings.m_nbLines != m_settings.m_nbLines)
@@ -1159,6 +1236,16 @@ void ATVMod::applySettings(const ATVModSettings& settings, bool force)
         }
     }
 
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+    }
+
     m_settings = settings;
 }
 
@@ -1214,7 +1301,7 @@ int ATVMod::webapiSettingsPutPatch(
         settings.m_rfBandwidth = response.getAtvModSettings()->getRfBandwidth();
     }
     if (channelSettingsKeys.contains("rfOppBandwidth")) {
-        settings.m_rfOppBandwidth = response.getAtvModSettings()->getRfBandwidth();
+        settings.m_rfOppBandwidth = response.getAtvModSettings()->getRfOppBandwidth();
     }
     if (channelSettingsKeys.contains("atvStd")) {
         settings.m_atvStd = (ATVModSettings::ATVStd) response.getAtvModSettings()->getAtvStd();
@@ -1270,7 +1357,21 @@ int ATVMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getAtvModSettings()->getTitle();
     }
-
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getAtvModSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getAtvModSettings()->getReverseApiAddress() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getAtvModSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getAtvModSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getAtvModSettings()->getReverseApiChannelIndex();
+    }
     if (frequencyOffsetChanged)
     {
         ATVMod::MsgConfigureChannelizer *msgChan = ATVMod::MsgConfigureChannelizer::create(
@@ -1377,10 +1478,133 @@ void ATVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     } else {
         response.getAtvModSettings()->setVideoFileName(new QString(m_videoFileName));
     }
+
+    response.getAtvModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getAtvModSettings()->getReverseApiAddress()) {
+        *response.getAtvModSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getAtvModSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getAtvModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getAtvModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getAtvModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void ATVMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
     response.getAtvModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
     response.getAtvModReport()->setChannelSampleRate(m_outputSampleRate);
+}
+
+void ATVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ATVModSettings& settings, bool force)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(1);
+    swgChannelSettings->setChannelType(new QString("ATVMod"));
+    swgChannelSettings->setAtvModSettings(new SWGSDRangel::SWGATVModSettings());
+    SWGSDRangel::SWGATVModSettings *swgATVModSettings = swgChannelSettings->getAtvModSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+        swgATVModSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("rfBandwidth") || force) {
+        swgATVModSettings->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (channelSettingsKeys.contains("rfOppBandwidth") || force) {
+        swgATVModSettings->setRfOppBandwidth(settings.m_rfOppBandwidth);
+    }
+    if (channelSettingsKeys.contains("atvStd") || force) {
+        swgATVModSettings->setAtvStd((int) settings.m_atvStd);
+    }
+    if (channelSettingsKeys.contains("nbLines") || force) {
+        swgATVModSettings->setNbLines(settings.m_nbLines);
+    }
+    if (channelSettingsKeys.contains("fps") || force) {
+        swgATVModSettings->setFps(settings.m_fps);
+    }
+    if (channelSettingsKeys.contains("atvModInput") || force) {
+        swgATVModSettings->setAtvModInput((int) settings.m_atvModInput);
+    }
+    if (channelSettingsKeys.contains("uniformLevel") || force) {
+        swgATVModSettings->setUniformLevel(settings.m_uniformLevel);
+    }
+    if (channelSettingsKeys.contains("atvModulation") || force) {
+        swgATVModSettings->setAtvModulation((int) settings.m_atvModulation);
+    }
+    if (channelSettingsKeys.contains("videoPlayLoop") || force) {
+        swgATVModSettings->setVideoPlayLoop(settings.m_videoPlayLoop ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("videoPlay") || force) {
+        swgATVModSettings->setVideoPlay(settings.m_videoPlay ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("cameraPlay") || force) {
+        swgATVModSettings->setCameraPlay(settings.m_cameraPlay ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("channelMute") || force) {
+        swgATVModSettings->setChannelMute(settings.m_channelMute ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("invertedVideo") || force) {
+        swgATVModSettings->setInvertedVideo(settings.m_invertedVideo ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("rfScalingFactor") || force) {
+        swgATVModSettings->setRfScalingFactor(settings.m_rfScalingFactor);
+    }
+    if (channelSettingsKeys.contains("fmExcursion") || force) {
+        swgATVModSettings->setFmExcursion(settings.m_fmExcursion);
+    }
+    if (channelSettingsKeys.contains("forceDecimator") || force) {
+        swgATVModSettings->setForceDecimator(settings.m_forceDecimator ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("showOverlayText") || force) {
+        swgATVModSettings->setShowOverlayText(settings.m_showOverlayText ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("overlayText") || force) {
+        swgATVModSettings->setOverlayText(new QString(settings.m_overlayText));
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgATVModSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swgATVModSettings->setTitle(new QString(settings.m_title));
+    }
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void ATVMod::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "ATVMod::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("ATVMod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }

@@ -14,11 +14,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "hackrfoutput.h"
-
 #include <string.h>
 #include <errno.h>
+
 #include <QDebug>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -29,8 +30,8 @@
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include "hackrf/devicehackrfshared.h"
-
 #include "hackrfoutputthread.h"
+#include "hackrfoutput.h"
 
 MESSAGE_CLASS_DEFINITION(HackRFOutput::MsgConfigureHackRF, Message)
 MESSAGE_CLASS_DEFINITION(HackRFOutput::MsgStartStop, Message)
@@ -46,11 +47,19 @@ HackRFOutput::HackRFOutput(DeviceSinkAPI *deviceAPI) :
 {
     openDevice();
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 HackRFOutput::~HackRFOutput()
 {
-    if (m_running) stop();
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
+
+    if (m_running) {
+        stop();
+    }
+
     closeDevice();
 	m_deviceAPI->setBuddySharedPtr(0);
 }
@@ -264,6 +273,10 @@ bool HackRFOutput::handleMessage(const Message& message)
             m_deviceAPI->stopGeneration();
         }
 
+        if (m_settings.m_useReverseAPI) {
+            webapiReverseSendStartStop(cmd.getStartStop());
+        }
+
         return true;
     }
 	else
@@ -297,8 +310,26 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 	bool suspendThread    = false;
 	bool threadWasRunning = false;
 	hackrf_error rc;
+    QList<QString> reverseAPIKeys;
 
-	qDebug() << "HackRFOutput::applySettings";
+	qDebug() << "HackRFOutput::applySettings"
+        << " m_centerFrequency: " << m_settings.m_centerFrequency
+        << " m_LOppmTenths: " << m_settings.m_LOppmTenths
+        << " m_bandwidth: " << m_settings.m_bandwidth
+        << " m_devSampleRate: " << m_settings.m_devSampleRate
+        << " m_log2Interp: " << m_settings.m_log2Interp
+        << " m_biasT: " << m_settings.m_biasT
+        << " m_lnaExt: " << m_settings.m_lnaExt
+        << " m_vgaGain: " << m_settings.m_vgaGain
+        << " m_useReverseAPI: " << m_settings.m_useReverseAPI
+        << " m_reverseAPIAddress: " << m_settings.m_reverseAPIAddress
+        << " m_reverseAPIPort: " << m_settings.m_reverseAPIPort
+        << " m_reverseAPIDeviceIndex: " << m_settings.m_reverseAPIDeviceIndex
+        << " force: " << force;
+
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force) {
+        reverseAPIKeys.append("devSampleRate");
+    }
 
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
         (m_settings.m_log2Interp != settings.m_log2Interp) || force)
@@ -349,12 +380,21 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 
 	if ((m_settings.m_log2Interp != settings.m_log2Interp) || force)
 	{
+        reverseAPIKeys.append("log2Interp");
+
 		if (m_hackRFThread != 0)
 		{
 			m_hackRFThread->setLog2Interpolation(settings.m_log2Interp);
 			qDebug() << "HackRFOutput: set interpolation to " << (1<<settings.m_log2Interp);
 		}
 	}
+
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
+        reverseAPIKeys.append("centerFrequency");
+    }
+    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
+        reverseAPIKeys.append("LOppmTenths");
+    }
 
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency) ||
 			(m_settings.m_LOppmTenths != settings.m_LOppmTenths))
@@ -370,16 +410,15 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 
 	if ((m_settings.m_vgaGain != settings.m_vgaGain) || force)
 	{
+        reverseAPIKeys.append("vgaGain");
+
 		if (m_dev != 0)
 		{
 			rc = (hackrf_error) hackrf_set_txvga_gain(m_dev, settings.m_vgaGain);
 
-			if(rc != HACKRF_SUCCESS)
-			{
+			if (rc != HACKRF_SUCCESS) {
 				qDebug("HackRFOutput::applySettings: hackrf_set_txvga_gain failed: %s", hackrf_error_name(rc));
-			}
-			else
-			{
+			} else {
 				qDebug() << "HackRFOutput:applySettings: TxVGA gain set to " << settings.m_vgaGain;
 			}
 		}
@@ -387,17 +426,16 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 
 	if ((m_settings.m_bandwidth != settings.m_bandwidth) || force)
 	{
+        reverseAPIKeys.append("bandwidth");
+
 		if (m_dev != 0)
 		{
 			uint32_t bw_index = hackrf_compute_baseband_filter_bw_round_down_lt(settings.m_bandwidth + 1); // +1 so the round down to lower than yields desired bandwidth
 			rc = (hackrf_error) hackrf_set_baseband_filter_bandwidth(m_dev, bw_index);
 
-			if (rc != HACKRF_SUCCESS)
-			{
+			if (rc != HACKRF_SUCCESS) {
 				qDebug("HackRFInput::applySettings: hackrf_set_baseband_filter_bandwidth failed: %s", hackrf_error_name(rc));
-			}
-			else
-			{
+			} else {
 				qDebug() << "HackRFInput:applySettings: Baseband BW filter set to " << settings.m_bandwidth << " Hz";
 			}
 		}
@@ -405,16 +443,15 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 
 	if ((m_settings.m_biasT != settings.m_biasT) || force)
 	{
+        reverseAPIKeys.append("biasT");
+
 		if (m_dev != 0)
 		{
 			rc = (hackrf_error) hackrf_set_antenna_enable(m_dev, (settings.m_biasT ? 1 : 0));
 
-			if(rc != HACKRF_SUCCESS)
-			{
+			if (rc != HACKRF_SUCCESS) {
 				qDebug("HackRFInput::applySettings: hackrf_set_antenna_enable failed: %s", hackrf_error_name(rc));
-			}
-			else
-			{
+			} else {
 				qDebug() << "HackRFInput:applySettings: bias tee set to " << settings.m_biasT;
 			}
 		}
@@ -422,16 +459,15 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 
 	if ((m_settings.m_lnaExt != settings.m_lnaExt) || force)
 	{
+        reverseAPIKeys.append("lnaExt");
+
 		if (m_dev != 0)
 		{
 			rc = (hackrf_error) hackrf_set_amp_enable(m_dev, (settings.m_lnaExt ? 1 : 0));
 
-			if(rc != HACKRF_SUCCESS)
-			{
+			if (rc != HACKRF_SUCCESS) {
 				qDebug("HackRFInput::applySettings: hackrf_set_amp_enable failed: %s", hackrf_error_name(rc));
-			}
-			else
-			{
+			} else {
 				qDebug() << "HackRFInput:applySettings: extra LNA set to " << settings.m_lnaExt;
 			}
 		}
@@ -442,14 +478,16 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 	    m_hackRFThread->startWork();
 	}
 
-    m_settings.m_devSampleRate = settings.m_devSampleRate;
-    m_settings.m_log2Interp = settings.m_log2Interp;
-    m_settings.m_centerFrequency = settings.m_centerFrequency;
-    m_settings.m_LOppmTenths = settings.m_LOppmTenths;
-    m_settings.m_vgaGain = settings.m_vgaGain;
-    m_settings.m_bandwidth = settings.m_bandwidth;
-    m_settings.m_biasT = settings.m_biasT;
-    m_settings.m_lnaExt = settings.m_lnaExt;
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+    }
+
+    m_settings = settings;
 
 	if (forwardChange)
 	{
@@ -559,3 +597,88 @@ int HackRFOutput::webapiRun(
     return 200;
 }
 
+void HackRFOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const HackRFOutputSettings& settings, bool force)
+{
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setTx(1);
+    swgDeviceSettings->setDeviceHwType(new QString("HackRF"));
+    swgDeviceSettings->setHackRfOutputSettings(new SWGSDRangel::SWGHackRFOutputSettings());
+    SWGSDRangel::SWGHackRFOutputSettings *swgHackRFOutputSettings = swgDeviceSettings->getHackRfOutputSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (deviceSettingsKeys.contains("centerFrequency") || force) {
+        swgHackRFOutputSettings->setCenterFrequency(settings.m_centerFrequency);
+    }
+    if (deviceSettingsKeys.contains("LOppmTenths") || force) {
+        swgHackRFOutputSettings->setLOppmTenths(settings.m_LOppmTenths);
+    }
+    if (deviceSettingsKeys.contains("bandwidth") || force) {
+        swgHackRFOutputSettings->setBandwidth(settings.m_bandwidth);
+    }
+    if (deviceSettingsKeys.contains("vgaGain") || force) {
+        swgHackRFOutputSettings->setVgaGain(settings.m_vgaGain);
+    }
+    if (deviceSettingsKeys.contains("log2Interp") || force) {
+        swgHackRFOutputSettings->setLog2Interp(settings.m_log2Interp);
+    }
+    if (deviceSettingsKeys.contains("devSampleRate") || force) {
+        swgHackRFOutputSettings->setDevSampleRate(settings.m_devSampleRate);
+    }
+    if (deviceSettingsKeys.contains("biasT") || force) {
+        swgHackRFOutputSettings->setBiasT(settings.m_biasT ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("lnaExt") || force) {
+        swgHackRFOutputSettings->setLnaExt(settings.m_lnaExt ? 1 : 0);
+    }
+
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgDeviceSettings;
+}
+
+void HackRFOutput::webapiReverseSendStartStop(bool start)
+{
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+
+    if (start) {
+        m_networkManager->sendCustomRequest(m_networkRequest, "POST");
+    } else {
+        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE");
+    }
+}
+
+void HackRFOutput::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "HackRFOutput::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("HackRFOutput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+}

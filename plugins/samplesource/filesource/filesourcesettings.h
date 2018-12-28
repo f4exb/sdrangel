@@ -26,6 +26,11 @@ struct FileSourceSettings {
     QString m_fileName;
     quint32 m_accelerationFactor;
     bool m_loop;
+    bool     m_useReverseAPI;
+    QString  m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
+
     static const unsigned int m_accelerationMaxScale; //!< Max power of 10 multiplier to 2,5,10 base ex: 2 -> 2,5,10,20,50,100,200,500,1000
 
     FileSourceSettings();

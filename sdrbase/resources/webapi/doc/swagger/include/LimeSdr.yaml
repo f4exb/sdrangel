@@ -53,7 +53,16 @@ LimeSdrInputSettings:
     gpioPins:
       type: integer
       format: int8
-      
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer  
+            
 LimeSdrOutputSettings:
   description: LimeSDR
   properties:  
@@ -95,6 +104,15 @@ LimeSdrOutputSettings:
     gpioPins:
       type: integer
       format: int8
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer  
 
 LimeSdrInputReport:
   description: LimeSDR

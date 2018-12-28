@@ -17,10 +17,10 @@
 #ifndef INCLUDE_HACKRFOUTPUTGUI_H
 #define INCLUDE_HACKRFOUTPUTGUI_H
 
-#include <plugin/plugininstancegui.h>
 #include <QTimer>
 #include <QWidget>
 
+#include "plugin/plugininstancegui.h"
 #include "util/messagequeue.h"
 
 #include "hackrfoutput.h"
@@ -95,6 +95,7 @@ private slots:
 	void on_startStop_toggled(bool checked);
 	void updateHardware();
 	void updateStatus();
+    void openDeviceSettingsDialog(const QPoint& p);
 };
 
 #endif // INCLUDE_HACKRFOUTPUTGUI_H

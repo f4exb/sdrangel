@@ -35,20 +35,31 @@ UDPSourceSettings:
       type: number
       format: float
     squelchEnabled:
-      type: integer      
+      type: integer
     autoRWBalance:
-      type: integer            
+      type: integer
     stereoInput:
-      type: integer            
+      type: integer
     rgbColor:
-      type: integer            
+      type: integer
     udpAddress:
       type: string
     udpPort:
       type: integer
-      format: uint16            
+      format: uint16
     title:
       type: string
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
 
 UDPSourceReport:
   description: UDPSource
@@ -69,4 +80,3 @@ UDPSourceReport:
       type: integer
     channelSampleRate:
       type: integer
- 

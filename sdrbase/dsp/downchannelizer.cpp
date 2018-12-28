@@ -295,7 +295,7 @@ void DownChannelizer::freeFilterChain()
 
 void DownChannelizer::debugFilterChain()
 {
-    qDebug("DownChannelizer::debugFilterChain: %u stages", m_filterStages.size());
+    qDebug("DownChannelizer::debugFilterChain: %lu stages", m_filterStages.size());
 
     for(FilterStages::iterator it = m_filterStages.begin(); it != m_filterStages.end(); ++it)
     {

@@ -17,10 +17,11 @@
 #ifndef PLUGINS_CHANNELTX_MODATV_ATVMOD_H_
 #define PLUGINS_CHANNELTX_MODATV_ATVMOD_H_
 
+#include <vector>
+
 #include <QObject>
 #include <QMutex>
-
-#include <vector>
+#include <QNetworkRequest>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -37,6 +38,8 @@
 
 #include "atvmodsettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSinkAPI;
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
@@ -400,6 +403,9 @@ signals:
      */
     void levelChanged(qreal rmsLevel, qreal peakLevel, int numSamples);
 
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
+
 private:
     struct ATVCamera
     {
@@ -524,8 +530,10 @@ private:
     Complex* m_DSBFilterBuffer;
     int m_DSBFilterBufferIndex;
 
-    static const int m_ssbFftLen;
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
 
+    static const int m_ssbFftLen;
     static const float m_blackLevel;
     static const float m_spanLevel;
     static const int m_levelNbSamples;
@@ -556,6 +564,7 @@ private:
 
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const ATVModSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ATVModSettings& settings, bool force);
 
     inline void pullImageLine(Real& sample, bool noHSync = false)
     {

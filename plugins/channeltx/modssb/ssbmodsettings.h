@@ -62,6 +62,12 @@ struct SSBModSettings
     SSBModInputAF m_modAFInput;
     QString m_audioDeviceName;
 
+    bool m_useReverseAPI;
+    QString m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
+    uint16_t m_reverseAPIChannelIndex;
+
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
     Serializable *m_cwKeyerGUI;

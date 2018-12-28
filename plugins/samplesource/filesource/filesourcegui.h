@@ -97,6 +97,7 @@ private slots:
 	void on_acceleration_currentIndexChanged(int index);
     void updateStatus();
 	void tick();
+    void openDeviceSettingsDialog(const QPoint& p);
 };
 
 #endif // INCLUDE_FILESOURCEGUI_H

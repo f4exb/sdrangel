@@ -97,6 +97,7 @@ private slots:
     void on_qBias_valueChanged(int value);
     void on_phaseImbalance_valueChanged(int value);
     void on_record_toggled(bool checked);
+    void openDeviceSettingsDialog(const QPoint& p);
     void updateStatus();
     void updateHardware();
 };

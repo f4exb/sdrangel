@@ -14,25 +14,25 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <device/devicesourceapi.h>
-#include "device/deviceuiset.h"
-#include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
 
+#include "device/devicesourceapi.h"
+#include "device/deviceuiset.h"
+#include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
-#include "ui_chanalyzergui.h"
 #include "dsp/spectrumscopecombovis.h"
 #include "dsp/spectrumvis.h"
+#include "dsp/dspengine.h"
 #include "gui/glspectrum.h"
 #include "gui/glscope.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
-#include "dsp/dspengine.h"
 #include "mainwindow.h"
 
+#include "ui_chanalyzergui.h"
 #include "chanalyzer.h"
 #include "chanalyzergui.h"
 
@@ -101,10 +101,12 @@ void ChannelAnalyzerGUI::displaySettings()
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
 
+    ui->channelSampleRate->setValueRange(7, 0.501*m_channelAnalyzer->getInputSampleRate(), m_channelAnalyzer->getInputSampleRate());
+    ui->channelSampleRate->setValue(m_settings.m_downSampleRate);
+
     blockApplySettings(true);
 
     ui->useRationalDownsampler->setChecked(m_settings.m_downSample);
-    ui->channelSampleRate->setValue(m_settings.m_downSampleRate);
     setNewFinalRate();
     if (m_settings.m_ssb) {
         ui->BWLabel->setText("LP");
@@ -186,9 +188,10 @@ bool ChannelAnalyzerGUI::handleMessage(const Message& message)
 {
     if (ChannelAnalyzer::MsgReportChannelSampleRateChanged::match(message))
     {
-        qDebug() << "ChannelAnalyzerGUI::handleMessage: MsgReportChannelSampleRateChanged";
-        ui->channelSampleRate->setValueRange(7, 2000U, m_channelAnalyzer->getInputSampleRate());
+        qDebug() << "ChannelAnalyzerGUI::handleMessage: MsgReportChannelSampleRateChanged:" << m_channelAnalyzer->getInputSampleRate();
+        ui->channelSampleRate->setValueRange(7, 0.501*m_channelAnalyzer->getInputSampleRate(), m_channelAnalyzer->getInputSampleRate());
         ui->channelSampleRate->setValue(m_settings.m_downSampleRate);
+        m_settings.m_downSampleRate = ui->channelSampleRate->getValueNew();
         setNewFinalRate();
 
         return true;
@@ -401,7 +404,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
 	ui->channelSampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
-	ui->channelSampleRate->setValueRange(7, 2000U, 9999999U);
+	ui->channelSampleRate->setValueRange(7, 0.501*m_rate, m_rate);
 
 	ui->glSpectrum->setCenterFrequency(m_rate/2);
 	ui->glSpectrum->setSampleRate(m_rate);
@@ -543,10 +546,6 @@ void ChannelAnalyzerGUI::applySettings(bool force)
         ChannelAnalyzer::MsgConfigureChannelizer *msgChannelizer =
                 ChannelAnalyzer::MsgConfigureChannelizer::create(sampleRate, m_channelMarker.getCenterFrequency());
         m_channelAnalyzer->getInputMessageQueue()->push(msgChannelizer);
-
-        ChannelAnalyzer::MsgConfigureChannelizer *msg =
-                ChannelAnalyzer::MsgConfigureChannelizer::create(sampleRate, m_channelMarker.getCenterFrequency());
-        m_channelAnalyzer->getInputMessageQueue()->push(msg);
 
         ChannelAnalyzer::MsgConfigureChannelAnalyzer* message =
                 ChannelAnalyzer::MsgConfigureChannelAnalyzer::create( m_settings, force);

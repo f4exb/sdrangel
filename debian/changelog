@@ -1,3 +1,12 @@
+sdrangel (4.3.2-1) unstable; urgency=medium
+
+  * Reverse API to forward device and channel changes to external application
+  * Funcube dongle: fixed segfault when stopping device
+  * Channel analzyer: fixed rational downsampler range
+  * SoapySDR support: fixed memory leaks
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 09 Dec 2018 21:14:18 +0100
+
 sdrangel (4.3.1-1) unstable; urgency=medium
 
   * RTL-SDR: offset tuning support

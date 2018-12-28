@@ -54,6 +54,7 @@ private:
     bool m_doApplySettings;
 
     void applySettings();
+    void sendSettings();
     void blockApplySettings(bool block);
 
 private slots:

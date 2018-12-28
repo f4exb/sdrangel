@@ -41,6 +41,10 @@ void RTLSDRSettings::resetToDefaults()
 	m_rfBandwidth = 2500 * 1000; // Hz
 	m_fileRecordName = "";
 	m_offsetTuning = false;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray RTLSDRSettings::serialize() const
@@ -61,6 +65,10 @@ QByteArray RTLSDRSettings::serialize() const
     s.writeS64(13, m_transverterDeltaFrequency);
     s.writeU32(14, m_rfBandwidth);
     s.writeBool(15, m_offsetTuning);
+    s.writeBool(16, m_useReverseAPI);
+    s.writeString(17, m_reverseAPIAddress);
+    s.writeU32(18, m_reverseAPIPort);
+    s.writeU32(19, m_reverseAPIDeviceIndex);
 
 	return s.final();
 }
@@ -78,6 +86,7 @@ bool RTLSDRSettings::deserialize(const QByteArray& data)
 	if (d.getVersion() == 1)
 	{
 		int intval;
+		uint32_t utmp;
 
 		d.readS32(2, &m_gain, 0);
 		d.readS32(3, &m_loPpmCorrection, 0);
@@ -94,6 +103,18 @@ bool RTLSDRSettings::deserialize(const QByteArray& data)
         d.readS64(13, &m_transverterDeltaFrequency, 0);
         d.readU32(4, &m_rfBandwidth, 2500 * 1000);
         d.readBool(15, &m_offsetTuning, false);
+        d.readBool(16, &m_useReverseAPI, false);
+        d.readString(17, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(18, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(19, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
 
 		return true;
 	}

@@ -30,6 +30,10 @@ struct SDRdaemonSinkSettings {
     quint16 m_dataPort;
     quint32 m_deviceIndex;
     quint32 m_channelIndex;
+    bool     m_useReverseAPI;
+    QString  m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
 
     SDRdaemonSinkSettings();
     void resetToDefaults();

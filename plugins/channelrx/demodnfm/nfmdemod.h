@@ -18,8 +18,10 @@
 #ifndef INCLUDE_NFMDEMOD_H
 #define INCLUDE_NFMDEMOD_H
 
-#include <QMutex>
 #include <vector>
+
+#include <QMutex>
+#include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelsinkapi.h"
@@ -38,11 +40,14 @@
 
 #include "nfmdemodsettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
 class NFMDemod : public BasebandSampleSink, public ChannelSinkAPI {
+    Q_OBJECT
 public:
     class MsgConfigureNFMDemod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -235,6 +240,9 @@ private:
 
     PhaseDiscriminators m_phaseDiscri;
 
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
     static const int m_udpBlockSize;
 
 //    void apply(bool force = false);
@@ -243,6 +251,10 @@ private:
     void applyAudioSampleRate(int sampleRate);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NFMDemodSettings& settings, bool force);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_NFMDEMOD_H

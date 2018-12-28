@@ -18,7 +18,6 @@ QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
 
 CONFIG(MINGW32):LIBRTLSDRSRC = "C:\softs\librtlsdr"
-CONFIG(MINGW64):LIBRTLSDRSRC = "C:\softs\librtlsdr"
 CONFIG(MSVC):LIBRTLSDRSRC = "C:\softs\librtlsdr"
 
 INCLUDEPATH += $$PWD

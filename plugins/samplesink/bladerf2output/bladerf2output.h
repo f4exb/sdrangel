@@ -18,17 +18,22 @@
 #define PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUT_H_
 
 #include <QString>
+#include <QNetworkRequest>
+
 #include <libbladeRF.h>
 
 #include "dsp/devicesamplesink.h"
 #include "bladerf2/devicebladerf2shared.h"
 #include "bladerf2outputsettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSinkAPI;
 class BladeRF2OutputThread;
 struct bladerf_gain_modes;
 
 class BladeRF2Output : public DeviceSampleSink {
+    Q_OBJECT
 public:
     class MsgConfigureBladeRF2 : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -147,6 +152,17 @@ public:
             QString& errorMessage);
 
 private:
+    DeviceSinkAPI *m_deviceAPI;
+    QMutex m_mutex;
+    BladeRF2OutputSettings m_settings;
+    struct bladerf* m_dev;
+    BladeRF2OutputThread* m_thread;
+    QString m_deviceDescription;
+    DeviceBladeRF2Shared m_deviceShared;
+    bool m_running;
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
     bool openDevice();
     void closeDevice();
     BladeRF2OutputThread *findThread();
@@ -156,15 +172,11 @@ private:
     bool setDeviceCenterFrequency(struct bladerf *dev, int requestedChannel, quint64 freq_hz, int loPpmTenths);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF2OutputSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const BladeRF2OutputSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
 
-    DeviceSinkAPI *m_deviceAPI;
-    QMutex m_mutex;
-    BladeRF2OutputSettings m_settings;
-    struct bladerf* m_dev;
-    BladeRF2OutputThread* m_thread;
-    QString m_deviceDescription;
-    DeviceBladeRF2Shared m_deviceShared;
-    bool m_running;
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif /* PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUT_H_ */

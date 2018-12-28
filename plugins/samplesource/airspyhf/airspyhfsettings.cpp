@@ -34,6 +34,10 @@ void AirspyHFSettings::resetToDefaults()
     m_transverterDeltaFrequency = 0;
     m_bandIndex = 0;
     m_fileRecordName = "";
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray AirspyHFSettings::serialize() const
@@ -46,6 +50,10 @@ QByteArray AirspyHFSettings::serialize() const
     s.writeBool(7, m_transverterMode);
     s.writeS64(8, m_transverterDeltaFrequency);
     s.writeU32(9, m_bandIndex);
+    s.writeBool(10, m_useReverseAPI);
+    s.writeString(11, m_reverseAPIAddress);
+    s.writeU32(12, m_reverseAPIPort);
+    s.writeU32(13, m_reverseAPIDeviceIndex);
 
 	return s.final();
 }
@@ -73,7 +81,18 @@ bool AirspyHFSettings::deserialize(const QByteArray& data)
         d.readS64(8, &m_transverterDeltaFrequency, 0);
         d.readU32(9, &uintval, 0);
         m_bandIndex = uintval > 1 ? 1 : uintval;
+        d.readBool(10, &m_useReverseAPI, false);
+        d.readString(11, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(12, &uintval, 0);
 
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(13, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 		return true;
 	}
 	else

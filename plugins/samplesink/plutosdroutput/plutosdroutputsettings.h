@@ -17,8 +17,10 @@
 #ifndef _PLUTOSDR_PLUTOSDROUTPUTSETTINGS_H_
 #define _PLUTOSDR_PLUTOSDROUTPUTSETTINGS_H_
 
-#include <QtGlobal>
 #include <stdint.h>
+
+#include <QtGlobal>
+#include <QString>
 
 struct PlutoSDROutputSettings {
     enum RFPath
@@ -44,7 +46,10 @@ struct PlutoSDROutputSettings {
     RFPath  m_antennaPath;
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
-
+    bool     m_useReverseAPI;
+    QString  m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
 
     PlutoSDROutputSettings();
 	void resetToDefaults();

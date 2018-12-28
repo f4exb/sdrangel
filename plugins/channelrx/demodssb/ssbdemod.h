@@ -18,8 +18,10 @@
 #ifndef INCLUDE_SSBDEMOD_H
 #define INCLUDE_SSBDEMOD_H
 
-#include <QMutex>
 #include <vector>
+
+#include <QMutex>
+#include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelsinkapi.h"
@@ -36,11 +38,14 @@
 #define ssbFftLen 1024
 #define agcTarget 3276.8 // -10 dB amplitude => -20 dB power: center of normal signal
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
 class SSBDemod : public BasebandSampleSink, public ChannelSinkAPI {
+	Q_OBJECT
 public:
     class MsgConfigureSSBDemod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -310,6 +315,9 @@ private:
 	AudioFifo m_audioFifo;
 	quint32 m_audioSampleRate;
 
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
 	QMutex m_settingsMutex;
 
 	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
@@ -317,6 +325,10 @@ private:
     void applyAudioSampleRate(int sampleRate);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SSBDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SSBDemodSettings& settings, bool force);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_SSBDEMOD_H

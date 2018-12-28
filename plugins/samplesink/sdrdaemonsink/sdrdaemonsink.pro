@@ -12,7 +12,6 @@ QT += core gui widgets multimedia network opengl
 TARGET = outputsdrdaemonsink
 
 CONFIG(MINGW32):LIBCM256CCSRC = "C:\softs\cm256cc"
-CONFIG(MINGW64):LIBCM256CCSRC = "C:\softs\cm256cc"
 CONFIG(MSVC):LIBCM256CCSRC = "C:\softs\cm256cc"
 CONFIG(macx):LIBCM256CCSRC = "../../../../deps/cm256cc"
 
@@ -36,7 +35,6 @@ CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
 CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
-CONFIG(MINGW64):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(MSVC):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(macx):INCLUDEPATH += "../../../boost_1_69_0"
 

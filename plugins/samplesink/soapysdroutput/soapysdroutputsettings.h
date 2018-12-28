@@ -40,6 +40,10 @@ struct SoapySDROutputSettings {
     std::complex<double> m_iqCorrection;
     QMap<QString, QVariant> m_streamArgSettings;
     QMap<QString, QVariant> m_deviceArgSettings;
+    bool     m_useReverseAPI;
+    QString  m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
 
     SoapySDROutputSettings();
     void resetToDefaults();

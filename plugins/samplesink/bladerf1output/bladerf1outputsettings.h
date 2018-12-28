@@ -18,6 +18,8 @@
 #define _BLADERF_BLADERFOUTPUTSETTINGS_H_
 
 #include <QtGlobal>
+#include <QString>
+
 #include <libbladeRF.h>
 
 struct BladeRF1OutputSettings {
@@ -30,6 +32,10 @@ struct BladeRF1OutputSettings {
 	bool m_xb200;
 	bladerf_xb200_path m_xb200Path;
 	bladerf_xb200_filter m_xb200Filter;
+    bool     m_useReverseAPI;
+    QString  m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
 
 	BladeRF1OutputSettings();
 	void resetToDefaults();

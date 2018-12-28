@@ -18,8 +18,10 @@
 #ifndef INCLUDE_DSDDEMOD_H
 #define INCLUDE_DSDDEMOD_H
 
-#include <QMutex>
 #include <vector>
+
+#include <QMutex>
+#include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelsinkapi.h"
@@ -38,11 +40,14 @@
 #include "dsddemodsettings.h"
 #include "dsddecoder.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
 class DSDDemod : public BasebandSampleSink, public ChannelSinkAPI {
+    Q_OBJECT
 public:
     class MsgConfigureDSDDemod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -244,6 +249,9 @@ private:
     SignalFormat m_signalFormat;   //!< Used to keep formatting during successive calls for the same standard type
     PhaseDiscriminators m_phaseDiscri;
 
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
     QMutex m_settingsMutex;
 
     static const int m_udpBlockSize;
@@ -255,6 +263,11 @@ private:
 
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DSDDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DSDDemodSettings& settings, bool force);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
+
 };
 
 #endif // INCLUDE_DSDDEMOD_H

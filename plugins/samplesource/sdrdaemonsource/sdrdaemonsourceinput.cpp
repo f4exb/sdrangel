@@ -16,7 +16,10 @@
 
 #include <string.h>
 #include <errno.h>
+
 #include <QDebug>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -26,8 +29,8 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include <device/devicesourceapi.h>
-#include <dsp/filerecord.h>
+#include "device/devicesourceapi.h"
+#include "dsp/filerecord.h"
 
 #include "sdrdaemonsourceinput.h"
 #include "sdrdaemonsourceudphandler.h"
@@ -52,10 +55,15 @@ SDRdaemonSourceInput::SDRdaemonSourceInput(DeviceSourceAPI *deviceAPI) :
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 SDRdaemonSourceInput::~SDRdaemonSourceInput()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
 	stop();
     m_deviceAPI->removeSink(m_fileSink);
     delete m_fileSink;
@@ -194,6 +202,10 @@ bool SDRdaemonSourceInput::handleMessage(const Message& message)
             m_deviceAPI->stopAcquisition();
         }
 
+        if (m_settings.m_useReverseAPI) {
+            webapiReverseSendStartStop(cmd.getStartStop());
+        }
+
         return true;
     }
     else if (MsgConfigureSDRdaemonSource::match(message))
@@ -215,6 +227,29 @@ void SDRdaemonSourceInput::applySettings(const SDRdaemonSourceSettings& settings
     std::ostringstream os;
     QString remoteAddress;
     m_SDRdaemonUDPHandler->getRemoteAddress(remoteAddress);
+    QList<QString> reverseAPIKeys;
+
+    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force) {
+        reverseAPIKeys.append("dcBlock");
+    }
+    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force) {
+        reverseAPIKeys.append("iqCorrection");
+    }
+    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
+        reverseAPIKeys.append("dataAddress");
+    }
+    if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
+        reverseAPIKeys.append("dataPort");
+    }
+    if ((m_settings.m_apiAddress != settings.m_apiAddress) || force) {
+        reverseAPIKeys.append("apiAddress");
+    }
+    if ((m_settings.m_apiPort != settings.m_apiPort) || force) {
+        reverseAPIKeys.append("apiPort");
+    }
+    if ((m_settings.m_fileRecordName != settings.m_fileRecordName) || force) {
+        reverseAPIKeys.append("fileRecordName");
+    }
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
     {
@@ -228,6 +263,16 @@ void SDRdaemonSourceInput::applySettings(const SDRdaemonSourceSettings& settings
     m_SDRdaemonUDPHandler->getRemoteAddress(remoteAddress);
 
     mutexLocker.unlock();
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+    }
+
     m_settings = settings;
     m_remoteAddress = remoteAddress;
 
@@ -360,4 +405,87 @@ void SDRdaemonSourceInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport
 
     response.getSdrDaemonSourceReport()->setMinNbBlocks(m_SDRdaemonUDPHandler->getMinNbBlocks());
     response.getSdrDaemonSourceReport()->setMaxNbRecovery(m_SDRdaemonUDPHandler->getMaxNbRecovery());
+}
+
+void SDRdaemonSourceInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SDRdaemonSourceSettings& settings, bool force)
+{
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDeviceHwType(new QString("SDRdaemonSource"));
+    swgDeviceSettings->setSdrDaemonSourceSettings(new SWGSDRangel::SWGSDRdaemonSourceSettings());
+    SWGSDRangel::SWGSDRdaemonSourceSettings *swgSDRDaemonSourceSettings = swgDeviceSettings->getSdrDaemonSourceSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (deviceSettingsKeys.contains("apiAddress") || force) {
+        swgSDRDaemonSourceSettings->setApiAddress(new QString(settings.m_apiAddress));
+    }
+    if (deviceSettingsKeys.contains("apiPort") || force) {
+        swgSDRDaemonSourceSettings->setApiPort(settings.m_apiPort);
+    }
+    if (deviceSettingsKeys.contains("dataAddress") || force) {
+        swgSDRDaemonSourceSettings->setDataAddress(new QString(settings.m_dataAddress));
+    }
+    if (deviceSettingsKeys.contains("dataPort") || force) {
+        swgSDRDaemonSourceSettings->setDataPort(settings.m_dataPort);
+    }
+    if (deviceSettingsKeys.contains("dcBlock") || force) {
+        swgSDRDaemonSourceSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("iqCorrection") || force) {
+        swgSDRDaemonSourceSettings->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("fileRecordName") || force) {
+        swgSDRDaemonSourceSettings->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgDeviceSettings;
+}
+
+void SDRdaemonSourceInput::webapiReverseSendStartStop(bool start)
+{
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+
+    if (start) {
+        m_networkManager->sendCustomRequest(m_networkRequest, "POST");
+    } else {
+        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE");
+    }
+}
+
+void SDRdaemonSourceInput::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "SDRdaemonSourceInput::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("SDRdaemonSourceInput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }

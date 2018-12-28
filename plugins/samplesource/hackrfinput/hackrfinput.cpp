@@ -14,11 +14,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "hackrfinput.h"
-
 #include <string.h>
 #include <errno.h>
+
 #include <QDebug>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -32,6 +33,7 @@
 #include "hackrf/devicehackrfvalues.h"
 #include "hackrf/devicehackrfshared.h"
 
+#include "hackrfinput.h"
 #include "hackrfinputthread.h"
 
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgConfigureHackRF, Message)
@@ -53,11 +55,20 @@ HackRFInput::HackRFInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI->addSink(m_fileSink);
 
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 HackRFInput::~HackRFInput()
 {
-    if (m_running) stop();
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
+
+    if (m_running) {
+        stop();
+    }
+
     m_deviceAPI->removeSink(m_fileSink);
     delete m_fileSink;
     closeDevice();
@@ -292,6 +303,10 @@ bool HackRFInput::handleMessage(const Message& message)
             m_deviceAPI->stopAcquisition();
         }
 
+        if (m_settings.m_useReverseAPI) {
+            webapiReverseSendStartStop(cmd.getStartStop());
+        }
+
         return true;
     }
 	else
@@ -323,8 +338,19 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	bool forwardChange = false;
 	hackrf_error rc;
+    QList<QString> reverseAPIKeys;
 
 	qDebug() << "HackRFInput::applySettings";
+
+    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force) {
+        reverseAPIKeys.append("dcBlock");
+    }
+    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force) {
+        reverseAPIKeys.append("iqCorrection");
+    }
+    if ((m_settings.m_linkTxFrequency != settings.m_linkTxFrequency) || force) {
+        reverseAPIKeys.append("linkTxFrequency");
+    }
 
 	if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
 	    (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
@@ -334,6 +360,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
 	{
+        reverseAPIKeys.append("devSampleRate");
         forwardChange = true;
 
         if (m_dev != 0)
@@ -357,6 +384,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
 	{
+        reverseAPIKeys.append("log2Decim");
 		forwardChange = true;
 
 		if (m_hackRFThread != 0)
@@ -368,7 +396,9 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)) // forward delta to buddy if necessary
 	{
-	    if (m_settings.m_linkTxFrequency && (m_deviceAPI->getSinkBuddies().size() > 0))
+        reverseAPIKeys.append("centerFrequency");
+
+        if (m_settings.m_linkTxFrequency && (m_deviceAPI->getSinkBuddies().size() > 0))
 	    {
 	        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
             DeviceHackRFShared::MsgConfigureFrequencyDelta *deltaMsg = DeviceHackRFShared::MsgConfigureFrequencyDelta::create(
@@ -383,6 +413,13 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 	        buddy->getSampleSinkInputMessageQueue()->push(deltaMsg);
 	    }
 	}
+
+    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
+        reverseAPIKeys.append("LOppmTenths");
+    }
+    if ((m_settings.m_fcPos != settings.m_fcPos) || force) {
+        reverseAPIKeys.append("fcPos");
+    }
 
 	if ((m_settings.m_centerFrequency != settings.m_centerFrequency) ||
 	    (m_settings.m_devSampleRate != settings.m_devSampleRate) ||
@@ -415,16 +452,15 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	if ((m_settings.m_lnaGain != settings.m_lnaGain) || force)
 	{
+        reverseAPIKeys.append("lnaGain");
+
 		if (m_dev != 0)
 		{
 			rc = (hackrf_error) hackrf_set_lna_gain(m_dev, settings.m_lnaGain);
 
-			if(rc != HACKRF_SUCCESS)
-			{
+			if (rc != HACKRF_SUCCESS) {
 				qDebug("HackRFInput::applySettings: airspy_set_lna_gain failed: %s", hackrf_error_name(rc));
-			}
-			else
-			{
+			} else {
 				qDebug() << "HackRFInput:applySettings: LNA gain set to " << settings.m_lnaGain;
 			}
 		}
@@ -432,16 +468,15 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	if ((m_settings.m_vgaGain != settings.m_vgaGain) || force)
 	{
+        reverseAPIKeys.append("vgaGain");
+
 		if (m_dev != 0)
 		{
 			rc = (hackrf_error) hackrf_set_vga_gain(m_dev, settings.m_vgaGain);
 
-			if (rc != HACKRF_SUCCESS)
-			{
+			if (rc != HACKRF_SUCCESS) {
 				qDebug("HackRFInput::applySettings: hackrf_set_vga_gain failed: %s", hackrf_error_name(rc));
-			}
-			else
-			{
+			} else {
 				qDebug() << "HackRFInput:applySettings: VGA gain set to " << settings.m_vgaGain;
 			}
 		}
@@ -449,17 +484,16 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	if ((m_settings.m_bandwidth != settings.m_bandwidth) || force)
 	{
+        reverseAPIKeys.append("bandwidth");
+
         if (m_dev != 0)
 		{
 	        uint32_t bw_index = hackrf_compute_baseband_filter_bw_round_down_lt(settings.m_bandwidth + 1); // +1 so the round down to lower than yields desired bandwidth
 			rc = (hackrf_error) hackrf_set_baseband_filter_bandwidth(m_dev, bw_index);
 
-			if (rc != HACKRF_SUCCESS)
-			{
+			if (rc != HACKRF_SUCCESS) {
 				qDebug("HackRFInput::applySettings: hackrf_set_baseband_filter_bandwidth failed: %s", hackrf_error_name(rc));
-			}
-			else
-			{
+			} else {
 				qDebug() << "HackRFInput:applySettings: Baseband BW filter set to " << settings.m_bandwidth << " Hz";
 			}
 		}
@@ -467,16 +501,15 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	if ((m_settings.m_biasT != settings.m_biasT) || force)
 	{
+        reverseAPIKeys.append("biasT");
+
 		if (m_dev != 0)
 		{
 			rc = (hackrf_error) hackrf_set_antenna_enable(m_dev, (settings.m_biasT ? 1 : 0));
 
-			if(rc != HACKRF_SUCCESS)
-			{
+			if (rc != HACKRF_SUCCESS) {
 				qDebug("HackRFInput::applySettings: hackrf_set_antenna_enable failed: %s", hackrf_error_name(rc));
-			}
-			else
-			{
+			} else {
 				qDebug() << "HackRFInput:applySettings: bias tee set to " << settings.m_biasT;
 			}
 		}
@@ -484,16 +517,15 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	if ((m_settings.m_lnaExt != settings.m_lnaExt) || force)
 	{
+        reverseAPIKeys.append("lnaExt");
+
 		if (m_dev != 0)
 		{
 			rc = (hackrf_error) hackrf_set_amp_enable(m_dev, (settings.m_lnaExt ? 1 : 0));
 
-			if(rc != HACKRF_SUCCESS)
-			{
+			if (rc != HACKRF_SUCCESS) {
 				qDebug("HackRFInput::applySettings: hackrf_set_amp_enable failed: %s", hackrf_error_name(rc));
-			}
-			else
-			{
+			} else {
 				qDebug() << "HackRFInput:applySettings: extra LNA set to " << settings.m_lnaExt;
 			}
 		}
@@ -506,6 +538,15 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
         m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+    }
 
 	m_settings = settings;
 
@@ -656,20 +697,106 @@ int HackRFInput::webapiRun(
     return 200;
 }
 
-//hackrf_device *HackRFInput::open_hackrf_from_sequence(int sequence)
-//{
-//	hackrf_device_list_t *hackrf_devices = hackrf_device_list();
-//	hackrf_device *hackrf_ptr;
-//	hackrf_error rc;
-//
-//	rc = (hackrf_error) hackrf_device_list_open(hackrf_devices, sequence, &hackrf_ptr);
-//
-//	if (rc == HACKRF_SUCCESS)
-//	{
-//		return hackrf_ptr;
-//	}
-//	else
-//	{
-//		return 0;
-//	}
-//}
+void HackRFInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const HackRFInputSettings& settings, bool force)
+{
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDeviceHwType(new QString("HackRF"));
+    swgDeviceSettings->setHackRfInputSettings(new SWGSDRangel::SWGHackRFInputSettings());
+    SWGSDRangel::SWGHackRFInputSettings *swgHackRFInputSettings = swgDeviceSettings->getHackRfInputSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (deviceSettingsKeys.contains("centerFrequency") || force) {
+        swgHackRFInputSettings->setCenterFrequency(settings.m_centerFrequency);
+    }
+    if (deviceSettingsKeys.contains("LOppmTenths") || force) {
+        swgHackRFInputSettings->setLOppmTenths(settings.m_LOppmTenths);
+    }
+    if (deviceSettingsKeys.contains("bandwidth") || force) {
+        swgHackRFInputSettings->setBandwidth(settings.m_bandwidth);
+    }
+    if (deviceSettingsKeys.contains("lnaGain") || force) {
+        swgHackRFInputSettings->setLnaGain(settings.m_lnaGain);
+    }
+    if (deviceSettingsKeys.contains("vgaGain") || force) {
+        swgHackRFInputSettings->setVgaGain(settings.m_vgaGain);
+    }
+    if (deviceSettingsKeys.contains("log2Decim") || force) {
+        swgHackRFInputSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("fcPos") || force) {
+        swgHackRFInputSettings->setFcPos((int) settings.m_fcPos);
+    }
+    if (deviceSettingsKeys.contains("devSampleRate") || force) {
+        swgHackRFInputSettings->setDevSampleRate(settings.m_devSampleRate);
+    }
+    if (deviceSettingsKeys.contains("biasT") || force) {
+        swgHackRFInputSettings->setBiasT(settings.m_biasT ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("lnaExt") || force) {
+        swgHackRFInputSettings->setLnaExt(settings.m_lnaExt ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("dcBlock") || force) {
+        swgHackRFInputSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("iqCorrection") || force) {
+        swgHackRFInputSettings->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("linkTxFrequency") || force) {
+        swgHackRFInputSettings->setLinkTxFrequency(settings.m_linkTxFrequency ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("fileRecordName") || force) {
+        swgHackRFInputSettings->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgDeviceSettings;
+}
+
+void HackRFInput::webapiReverseSendStartStop(bool start)
+{
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+
+    if (start) {
+        m_networkManager->sendCustomRequest(m_networkRequest, "POST");
+    } else {
+        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE");
+    }
+}
+
+void HackRFInput::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "HackRFInput::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("HackRFInput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+}

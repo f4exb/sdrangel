@@ -35,6 +35,11 @@ struct DaemonSinkSettings
     uint16_t m_dataPort;
     quint32 m_rgbColor;
     QString m_title;
+    bool m_useReverseAPI;
+    QString m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
+    uint16_t m_reverseAPIChannelIndex;
 
     Serializable *m_channelMarker;
 

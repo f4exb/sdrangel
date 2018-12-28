@@ -18,6 +18,7 @@
 #define PLUGINS_SAMPLESINK_BLADERF2OUTPUT_BLADERF2OUTPUTSETTINGS_H_
 
 #include <QtGlobal>
+#include <QString>
 
 struct BladeRF2OutputSettings {
     quint64 m_centerFrequency;
@@ -29,6 +30,10 @@ struct BladeRF2OutputSettings {
     quint32 m_log2Interp;
     bool     m_transverterMode;
     qint64   m_transverterDeltaFrequency;
+    bool     m_useReverseAPI;
+    QString  m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
 
     BladeRF2OutputSettings();
     void resetToDefaults();

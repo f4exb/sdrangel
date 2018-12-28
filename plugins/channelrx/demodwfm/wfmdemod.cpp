@@ -16,10 +16,14 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-#include <QTime>
-#include <QDebug>
 #include <stdio.h>
 #include <complex.h>
+
+#include <QTime>
+#include <QDebug>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGChannelSettings.h"
 #include "SWGWFMDemodSettings.h"
@@ -74,10 +78,15 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 WFMDemod::~WFMDemod()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
 
 	m_deviceAPI->removeChannelAPI(this);
@@ -317,7 +326,38 @@ void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
             << " m_volume: " << settings.m_volume
             << " m_squelch: " << settings.m_squelch
             << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_audioMute: " << settings.m_audioMute
             << " force: " << force;
+
+    QList<QString> reverseAPIKeys;
+
+    if((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+    if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
+        reverseAPIKeys.append("rfBandwidth");
+    }
+    if((settings.m_afBandwidth != m_settings.m_afBandwidth) || force) {
+        reverseAPIKeys.append("afBandwidth");
+    }
+    if((settings.m_volume != m_settings.m_volume) || force) {
+        reverseAPIKeys.append("volume");
+    }
+    if((settings.m_squelch != m_settings.m_squelch) || force) {
+        reverseAPIKeys.append("squelch");
+    }
+    if((settings.m_audioMute != m_settings.m_audioMute) || force) {
+        reverseAPIKeys.append("audioMute");
+    }
+    if((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
+        reverseAPIKeys.append("audioDeviceName");
+    }
+    if((settings.m_title != m_settings.m_title) || force) {
+        reverseAPIKeys.append("title");
+    }
+    if((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
+        reverseAPIKeys.append("rgbColor");
+    }
 
     if((settings.m_afBandwidth != m_settings.m_afBandwidth) ||
        (settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
@@ -354,6 +394,16 @@ void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
         if (m_audioSampleRate != audioSampleRate) {
             applyAudioSampleRate(audioSampleRate);
         }
+    }
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -500,3 +550,77 @@ void WFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     response.getWfmDemodReport()->setChannelSampleRate(m_inputSampleRate);
 }
 
+void WFMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const WFMDemodSettings& settings, bool force)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(0);
+    swgChannelSettings->setChannelType(new QString("WFMDemod"));
+    swgChannelSettings->setWfmDemodSettings(new SWGSDRangel::SWGWFMDemodSettings());
+    SWGSDRangel::SWGWFMDemodSettings *swgWFMDemodSettings = swgChannelSettings->getWfmDemodSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+        swgWFMDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("rfBandwidth") || force) {
+        swgWFMDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (channelSettingsKeys.contains("afBandwidth") || force) {
+        swgWFMDemodSettings->setAfBandwidth(settings.m_afBandwidth);
+    }
+    if (channelSettingsKeys.contains("volume") || force) {
+        swgWFMDemodSettings->setVolume(settings.m_volume);
+    }
+    if (channelSettingsKeys.contains("squelch") || force) {
+        swgWFMDemodSettings->setSquelch(settings.m_squelch);
+    }
+    if (channelSettingsKeys.contains("audioMute") || force) {
+        swgWFMDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgWFMDemodSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swgWFMDemodSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("audioDeviceName") || force) {
+        swgWFMDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void WFMDemod::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "WFMDemod::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("WFMDemod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+}

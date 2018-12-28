@@ -17,6 +17,9 @@
 
 #include <QUdpSocket>
 #include <QHostAddress>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGChannelSettings.h"
 #include "SWGUDPSinkSettings.h"
@@ -110,10 +113,15 @@ UDPSink::UDPSink(DeviceSourceAPI *deviceAPI) :
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 UDPSink::~UDPSink()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
 	delete m_audioSocket;
 	delete m_udpBuffer24;
     delete m_udpBuffer16;
@@ -505,6 +513,57 @@ void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
             << " m_audioPort: " << settings.m_audioPort
             << " force: " << force;
 
+    QList<QString> reverseAPIKeys;
+
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+    if ((settings.m_audioActive != m_settings.m_audioActive) || force) {
+        reverseAPIKeys.append("audioActive");
+    }
+    if ((settings.m_audioStereo != m_settings.m_audioStereo) || force) {
+        reverseAPIKeys.append("audioStereo");
+    }
+    if ((settings.m_gain != m_settings.m_gain) || force) {
+        reverseAPIKeys.append("gain");
+    }
+    if ((settings.m_volume != m_settings.m_volume) || force) {
+        reverseAPIKeys.append("volume");
+    }
+    if ((settings.m_squelchEnabled != m_settings.m_squelchEnabled) || force) {
+        reverseAPIKeys.append("squelchEnabled");
+    }
+    if ((settings.m_squelchdB != m_settings.m_squelchdB) || force) {
+        reverseAPIKeys.append("squelchDB");
+    }
+    if ((settings.m_squelchGate != m_settings.m_squelchGate) || force) {
+        reverseAPIKeys.append("squelchGate");
+    }
+    if ((settings.m_agc != m_settings.m_agc) || force) {
+        reverseAPIKeys.append("agc");
+    }
+    if ((settings.m_sampleFormat != m_settings.m_sampleFormat) || force) {
+        reverseAPIKeys.append("sampleFormat");
+    }
+    if ((settings.m_outputSampleRate != m_settings.m_outputSampleRate) || force) {
+        reverseAPIKeys.append("outputSampleRate");
+    }
+    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
+        reverseAPIKeys.append("rfBandwidth");
+    }
+    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
+        reverseAPIKeys.append("fmDeviation");
+    }
+    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
+        reverseAPIKeys.append("udpAddress");
+    }
+    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
+        reverseAPIKeys.append("udpPort");
+    }
+    if ((settings.m_audioPort != m_settings.m_audioPort) || force) {
+        reverseAPIKeys.append("audioPort");
+    }
+
     m_settingsMutex.lock();
 
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
@@ -616,6 +675,16 @@ void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
     }
 
     m_settingsMutex.unlock();
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+    }
 
     m_settings = settings;
 }
@@ -797,4 +866,109 @@ void UDPSink::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     response.getUdpSinkReport()->setOutputPowerDb(CalcDb::dbPower(getMagSq()));
     response.getUdpSinkReport()->setSquelch(m_squelchOpen ? 1 : 0);
     response.getUdpSinkReport()->setInputSampleRate(m_inputSampleRate);
+}
+
+void UDPSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const UDPSinkSettings& settings, bool force)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    swgChannelSettings->setTx(0);
+    swgChannelSettings->setChannelType(new QString("UDPSink"));
+    swgChannelSettings->setUdpSinkSettings(new SWGSDRangel::SWGUDPSinkSettings());
+    SWGSDRangel::SWGUDPSinkSettings *swgUDPSinkSettings = swgChannelSettings->getUdpSinkSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (channelSettingsKeys.contains("outputSampleRate") || force) {
+        swgUDPSinkSettings->setOutputSampleRate(settings.m_outputSampleRate);
+    }
+    if (channelSettingsKeys.contains("sampleFormat") || force) {
+        swgUDPSinkSettings->setSampleFormat((int) settings.m_sampleFormat);
+    }
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+        swgUDPSinkSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("rfBandwidth") || force) {
+        swgUDPSinkSettings->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (channelSettingsKeys.contains("fmDeviation") || force) {
+        swgUDPSinkSettings->setFmDeviation(settings.m_fmDeviation);
+    }
+    if (channelSettingsKeys.contains("channelMute") || force) {
+        swgUDPSinkSettings->setChannelMute(settings.m_channelMute ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("gain") || force) {
+        swgUDPSinkSettings->setGain(settings.m_gain);
+    }
+    if (channelSettingsKeys.contains("squelchDB") || force) {
+        swgUDPSinkSettings->setSquelchDb(settings.m_squelchdB);
+    }
+    if (channelSettingsKeys.contains("squelchGate") || force) {
+        swgUDPSinkSettings->setSquelchGate(settings.m_squelchGate);
+    }
+    if (channelSettingsKeys.contains("squelchEnabled") || force) {
+        swgUDPSinkSettings->setSquelchEnabled(settings.m_squelchEnabled ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("agc") || force) {
+        swgUDPSinkSettings->setAgc(settings.m_agc ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("audioActive") || force) {
+        swgUDPSinkSettings->setAudioActive(settings.m_audioActive ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("audioStereo") || force) {
+        swgUDPSinkSettings->setAudioStereo(settings.m_audioStereo ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("volume") || force) {
+        swgUDPSinkSettings->setVolume(settings.m_volume);
+    }
+    if (channelSettingsKeys.contains("udpAddress") || force) {
+        swgUDPSinkSettings->setUdpAddress(new QString(settings.m_udpAddress));
+    }
+    if (channelSettingsKeys.contains("udpPort") || force) {
+        swgUDPSinkSettings->setUdpPort(settings.m_udpPort);
+    }
+    if (channelSettingsKeys.contains("audioPort") || force) {
+        swgUDPSinkSettings->setAudioPort(settings.m_audioPort);
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgUDPSinkSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swgUDPSinkSettings->setTitle(new QString(settings.m_title));
+    }
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgChannelSettings;
+}
+
+void UDPSink::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "UDPSink::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+        return;
+    }
+
+    QString answer = reply->readAll();
+    answer.chop(1); // remove last \n
+    qDebug("UDPSink::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }

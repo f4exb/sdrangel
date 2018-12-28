@@ -53,7 +53,18 @@ ATVModSettings:
       type: string
     videoFileName:
       type: string
-     
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer      
+    reverseAPIChannelIndex:
+      type: integer 
+           
 ATVModReport:
   description: ATVMod
   properties:
