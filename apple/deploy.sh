@@ -1,7 +1,9 @@
 #!/bin/bash
+QT_VERSION="5.12.0"
+QT_HOME="/Applications/Qt/${QT_VERSION}"
 
 # Run from build directory after build
-APP_PATH="app/sdrangel.app"
+APP_PATH="app/SDRangel.app"
 test -d "${APP_PATH}/Contents" || { echo "Please build first or chdir to proper folder!"; exit 1; }
 
 APP_LIB="${APP_PATH}/Contents/Frameworks"
@@ -46,9 +48,12 @@ cd ../../..
 pwd
 
 # Deploy DMG
-/Applications/Qt/5.12.0/clang_64/bin/macdeployqt ./sdrangel.app \
+"${QT_HOME}/clang_64/bin/macdeployqt" ./SDRangel.app \
 	-always-overwrite \
 	-dmg \
-	-libpath=sdrangel.app/Contents/Frameworks \
+	-libpath=SDRangel.app/Contents/Frameworks \
 	-verbose=1
 
+# Publish DMG
+
+# ...

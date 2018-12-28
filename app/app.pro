@@ -26,3 +26,10 @@ LIBS += -L../logging/$${build_subdir} -llogging
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =
+
+macx {
+    QMAKE_TARGET_BUNDLE_PREFIX = org.f4exb
+    QMAKE_BUNDLE = SDRangel
+    TARGET = SDRangel
+    ICON = sdrangel.apple.icns
+}
