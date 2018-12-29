@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>423</width>
+    <width>373</width>
     <height>290</height>
    </rect>
   </property>
@@ -18,13 +18,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>350</width>
+    <width>360</width>
     <height>290</height>
    </size>
   </property>
   <property name="font">
    <font>
-    <family>Sans Serif</family>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -533,62 +533,6 @@
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QComboBox" name="pwrmode">
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string/>
-       </property>
-       <property name="currentIndex">
-        <number>4</number>
-       </property>
-       <item>
-        <property name="text">
-         <string>0 - Save Max</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>1</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>2</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>3 - Economy</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>4 - Optimal</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>5</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>6</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>7 - Perf Max</string>
-        </property>
-       </item>
-      </widget>
-     </item>
     </layout>
    </item>
    <item>
@@ -970,6 +914,89 @@
         </property>
        </item>
       </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="pwrLayout">
+     <property name="topMargin">
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="pwrmodeLabel">
+       <property name="text">
+        <string>Pwr mode</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="pwrmode">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Power mode</string>
+       </property>
+       <property name="currentIndex">
+        <number>4</number>
+       </property>
+       <item>
+        <property name="text">
+         <string>0 - Save Max</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>3 - Economy</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>4 - Optimal</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>5</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>6</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>7 - Perf Max</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
