@@ -183,26 +183,6 @@ bool XTRXInputGUI::handleMessage(const Message& message)
                 ui->streamStatusLabel->setStyleSheet("QLabel { background-color : blue; }");
             }
 
-            ui->streamLinkRateText->setText(tr("%1 MB/s").arg(QString::number(report.getLinkRate() / 1000000.0f, 'f', 3)));
-
-            if (report.getUnderrun() > 0) {
-                ui->underrunLabel->setStyleSheet("QLabel { background-color : red; }");
-            } else {
-                ui->underrunLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-            }
-
-            if (report.getOverrun() > 0) {
-                ui->overrunLabel->setStyleSheet("QLabel { background-color : red; }");
-            } else {
-                ui->overrunLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-            }
-
-            if (report.getDroppedPackets() > 0) {
-                ui->droppedLabel->setStyleSheet("QLabel { background-color : red; }");
-            } else {
-                ui->droppedLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-            }
-
             ui->fifoBar->setMaximum(report.getFifoSize());
             ui->fifoBar->setValue(report.getFifoFilledCount());
             ui->fifoBar->setToolTip(tr("FIFO fill %1/%2 samples").arg(QString::number(report.getFifoFilledCount())).arg(QString::number(report.getFifoSize())));
@@ -218,6 +198,13 @@ bool XTRXInputGUI::handleMessage(const Message& message)
     {
         DeviceXTRXShared::MsgReportDeviceInfo& report = (DeviceXTRXShared::MsgReportDeviceInfo&) message;
         ui->temperatureText->setText(tr("%1C").arg(QString::number(report.getTemperature(), 'f', 0)));
+
+        if (report.getGPSLocked()) {
+            ui->gpsStatusLabel->setStyleSheet("QLabel { background-color : green; }");
+        } else {
+            ui->gpsStatusLabel->setStyleSheet("QLabel { background:rgb(48,48,48); }");
+        }
+
         return true;
     }
     else if (XTRXInput::MsgStartStop::match(message))

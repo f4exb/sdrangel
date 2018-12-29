@@ -102,18 +102,21 @@ public:
 
     public:
         float getTemperature() const { return m_temperature; }
+        bool getGPSLocked() const { return m_gpsLocked; }
 
-        static MsgReportDeviceInfo* create(float temperature)
+        static MsgReportDeviceInfo* create(float temperature, bool gpsLocked)
         {
-            return new MsgReportDeviceInfo(temperature);
+            return new MsgReportDeviceInfo(temperature, gpsLocked);
         }
 
     private:
-        float    m_temperature;
+        float m_temperature;
+        bool  m_gpsLocked;
 
-        MsgReportDeviceInfo(float temperature) :
+        MsgReportDeviceInfo(float temperature, bool gpsLocked) :
             Message(),
-            m_temperature(temperature)
+            m_temperature(temperature),
+            m_gpsLocked(gpsLocked)
         { }
     };
 
@@ -159,7 +162,8 @@ public:
 
     double set_samplerate(double rate, double master, bool output);
 
-    double get_temperature();
+    double get_board_temperature();
+    bool get_gps_status();
 };
 
 #endif /* DEVICES_LIMESDR_DEVICELIMESDRSHARED_H_ */

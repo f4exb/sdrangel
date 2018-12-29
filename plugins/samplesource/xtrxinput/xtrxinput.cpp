@@ -537,7 +537,7 @@ bool XTRXInput::handleMessage(const Message& message)
     {
         if (m_deviceAPI->getSampleSourceGUIMessageQueue())
         {
-            uint64_t fifolevel;
+            uint64_t fifolevel = 0;
 
             xtrx_val_get(m_deviceShared.m_deviceParams->getDevice(),
                          XTRX_RX, XTRX_CH_AB, XTRX_PERF_LLFIFO, &fifolevel);
@@ -546,30 +546,34 @@ bool XTRXInput::handleMessage(const Message& message)
                         true,
                         true,
                         fifolevel,
-                        65536,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0);
-            m_deviceAPI->getSampleSourceGUIMessageQueue()->push(report);
+                        65536);
+
+            if (m_deviceAPI->getSampleSourceGUIMessageQueue()) {
+                m_deviceAPI->getSampleSourceGUIMessageQueue()->push(report);
+            }
         }
 
         return true;
     }
     else if (MsgGetDeviceInfo::match(message))
     {
-        double temp = 0.0;
+        double board_temp = 0.0;
+        bool gps_locked = false;
 
-        if (!m_deviceShared.m_deviceParams->getDevice() || ((temp = m_deviceShared.get_temperature() / 256.0) == 0.0)) {
-            qDebug("XTRXInput::handleMessage: MsgGetDeviceInfo: cannot get temperature");
+        if (!m_deviceShared.m_deviceParams->getDevice() || ((board_temp = m_deviceShared.get_board_temperature() / 256.0) == 0.0)) {
+            qDebug("XTRXInput::handleMessage: MsgGetDeviceInfo: cannot get board temperature");
+        }
+
+        if (!m_deviceShared.m_deviceParams->getDevice()) {
+            qDebug("XTRXInput::handleMessage: MsgGetDeviceInfo: cannot get GPS lock status");
+        } else {
+            gps_locked = m_deviceShared.get_gps_status();
         }
 
         // send to oneself
         if (m_deviceAPI->getSampleSourceGUIMessageQueue())
         {
-            DeviceXTRXShared::MsgReportDeviceInfo *report = DeviceXTRXShared::MsgReportDeviceInfo::create(temp);
+            DeviceXTRXShared::MsgReportDeviceInfo *report = DeviceXTRXShared::MsgReportDeviceInfo::create(board_temp, gps_locked);
             m_deviceAPI->getSampleSourceGUIMessageQueue()->push(report);
         }
 
@@ -581,7 +585,7 @@ bool XTRXInput::handleMessage(const Message& message)
         {
             if ((*itSource)->getSampleSourceGUIMessageQueue())
             {
-                DeviceXTRXShared::MsgReportDeviceInfo *report = DeviceXTRXShared::MsgReportDeviceInfo::create(temp);
+                DeviceXTRXShared::MsgReportDeviceInfo *report = DeviceXTRXShared::MsgReportDeviceInfo::create(board_temp, gps_locked);
                 (*itSource)->getSampleSourceGUIMessageQueue()->push(report);
             }
         }
@@ -594,7 +598,7 @@ bool XTRXInput::handleMessage(const Message& message)
         {
             if ((*itSink)->getSampleSinkGUIMessageQueue())
             {
-                DeviceXTRXShared::MsgReportDeviceInfo *report = DeviceXTRXShared::MsgReportDeviceInfo::create(temp);
+                DeviceXTRXShared::MsgReportDeviceInfo *report = DeviceXTRXShared::MsgReportDeviceInfo::create(board_temp, gps_locked);
                 (*itSink)->getSampleSinkGUIMessageQueue()->push(report);
             }
         }

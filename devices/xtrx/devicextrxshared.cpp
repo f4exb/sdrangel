@@ -67,17 +67,28 @@ double DeviceXTRXShared::set_samplerate(double rate,
     return m_inputRate;
 }
 
-double DeviceXTRXShared::get_temperature()
+double DeviceXTRXShared::get_board_temperature()
 {
     uint64_t val = 0;
 
-    int res = xtrx_val_get(m_deviceParams->getDevice(),
-                  XTRX_TRX, XTRX_CH_AB, XTRX_BOARD_TEMP, &val);
+    int res = xtrx_val_get(m_deviceParams->getDevice(), XTRX_TRX, XTRX_CH_AB, XTRX_BOARD_TEMP, &val);
 
     if (res) {
-        //fprintf(stderr, "Unable to set samplerate, error=%d\n", res);
         return 0;
     }
 
     return val;
+}
+
+bool DeviceXTRXShared::get_gps_status()
+{
+    uint64_t val = 0;
+
+    int res = xtrx_val_get(m_deviceParams->getDevice(), XTRX_TRX, XTRX_CH_AB, XTRX_WAIT_1PPS, &val);
+
+    if (res) {
+        return false;
+    }
+
+    return val != 0;
 }

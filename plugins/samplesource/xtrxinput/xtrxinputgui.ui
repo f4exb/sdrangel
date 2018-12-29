@@ -1041,87 +1041,27 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="underrunLabel">
+      <widget class="QLabel" name="gpsStatusLabel">
        <property name="minimumSize">
         <size>
-         <width>12</width>
-         <height>0</height>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="toolTip">
-        <string>Red if underruns</string>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background:rgb(79,79,79);</string>
+        <string>Green when GPS is locked</string>
        </property>
        <property name="text">
-        <string>U</string>
+        <string/>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="overrunLabel">
-       <property name="minimumSize">
-        <size>
-         <width>12</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Red if overruns</string>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background:rgb(79,79,79);</string>
-       </property>
-       <property name="text">
-        <string>O</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="droppedLabel">
-       <property name="minimumSize">
-        <size>
-         <width>12</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Red if dropped packets</string>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background:rgb(79,79,79);</string>
-       </property>
-       <property name="text">
-        <string>D</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="streamLinkRateText">
-       <property name="minimumSize">
-        <size>
-         <width>90</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Stream link rate (MB/s)</string>
-       </property>
-       <property name="text">
-        <string>000.000 MB/s</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       <property name="pixmap">
+        <pixmap resource="../../../sdrgui/resources/res.qrc">:/gps.png</pixmap>
        </property>
       </widget>
      </item>

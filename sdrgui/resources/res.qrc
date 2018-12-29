@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
+    <file>gps.png</file>
     <file>linear.png</file>
     <file>logarithmic.png</file>
     <file>pin_last.png</file>
