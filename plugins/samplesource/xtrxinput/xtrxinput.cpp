@@ -535,8 +535,6 @@ bool XTRXInput::handleMessage(const Message& message)
     }
     else if (MsgGetStreamInfo::match(message))
     {
-        qDebug() << "XTRXInput::handleMessage: MsgGetStreamInfo";
-
         if (m_deviceAPI->getSampleSourceGUIMessageQueue())
         {
             uint64_t fifolevel;
@@ -557,23 +555,20 @@ bool XTRXInput::handleMessage(const Message& message)
                         0);
             m_deviceAPI->getSampleSourceGUIMessageQueue()->push(report);
         }
+
         return true;
     }
     else if (MsgGetDeviceInfo::match(message))
     {
         double temp = 0.0;
-        if (m_deviceShared.m_deviceParams->getDevice() && (
-                    (temp = m_deviceShared.get_temperature() / 256.0) != 0.0))
-        {
-            qDebug("XTRXInput::handleMessage: MsgGetDeviceInfo: temperature: %f", temp);
-        }
-        else
-        {
+
+        if (!m_deviceShared.m_deviceParams->getDevice() || ((temp = m_deviceShared.get_temperature() / 256.0) == 0.0)) {
             qDebug("XTRXInput::handleMessage: MsgGetDeviceInfo: cannot get temperature");
         }
 
         // send to oneself
-        if (m_deviceAPI->getSampleSourceGUIMessageQueue()) {
+        if (m_deviceAPI->getSampleSourceGUIMessageQueue())
+        {
             DeviceXTRXShared::MsgReportDeviceInfo *report = DeviceXTRXShared::MsgReportDeviceInfo::create(temp);
             m_deviceAPI->getSampleSourceGUIMessageQueue()->push(report);
         }
