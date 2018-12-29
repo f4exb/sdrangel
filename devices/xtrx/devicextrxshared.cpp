@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
+
 #include "devicextrxshared.h"
 
 MESSAGE_CLASS_DEFINITION(DeviceXTRXShared::MsgReportBuddyChange, Message)
@@ -46,18 +48,35 @@ double DeviceXTRXShared::set_samplerate(double rate,
         }
     }
 
+    double actualcgen;
+    double actualrx;
+    double actualtx;
+
     int res = xtrx_set_samplerate(m_deviceParams->getDevice(),
           m_masterRate,
           m_inputRate,
           m_outputRate,
           0,
-          0,
-          0,
-          0);
+          &actualcgen,
+          &actualrx,
+          &actualtx);
 
-    if (res) {
-        //fprintf(stderr, "Unable to set samplerate, error=%d\n", res);
+    if (res)
+    {
+        qCritical("DeviceXTRXShared::set_samplerate: Unable to set %s samplerate, m_masterRate: %f, m_inputRate: %f, m_outputRate: %f, error=%d\n",
+                output ? "output" : "input", m_masterRate, m_inputRate, m_outputRate, res);
         return 0;
+    }
+    else
+    {
+        qDebug() << "DeviceXTRXShared::set_samplerate: sample rate set: "
+                << "output: "<< output
+                << "m_masterRate: " << m_masterRate
+                << "m_inputRate: " << m_inputRate
+                << "m_outputRate: " << m_outputRate
+                << "actualcgen: " << actualcgen
+                << "actualrx: " << actualrx
+                << "actualtx: " << actualtx;
     }
 
     if (output) {
