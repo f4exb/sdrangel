@@ -323,10 +323,11 @@ bool XTRXInput::start()
         return false;
     }
 
-    if (m_running) { stop(); }
+    if (m_running) {
+        stop();
+    }
 
-    if (!acquireChannel())
-    {
+    if (!acquireChannel()) {
         return false;
     }
 
@@ -346,7 +347,6 @@ bool XTRXInput::start()
     }
 
     m_XTRXInputThread->setLog2Decimation(m_settings.m_log2SoftDecim);
-
     m_XTRXInputThread->startWork();
 
     m_deviceShared.m_thread = m_XTRXInputThread;
@@ -358,6 +358,7 @@ bool XTRXInput::start()
 void XTRXInput::stop()
 {
     qDebug("XTRXInput::stop");
+    disconnect(m_XTRXInputThread, SIGNAL(finished()), this, SLOT(threadFinished()));
 
     if (m_XTRXInputThread != 0)
     {
@@ -412,7 +413,7 @@ int XTRXInput::getSampleRate() const
 
 quint64 XTRXInput::getCenterFrequency() const
 {
-    return m_settings.m_centerFrequency;
+    return m_settings.m_centerFrequency + (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
 }
 
 void XTRXInput::setCenterFrequency(qint64 centerFrequency)
@@ -705,7 +706,7 @@ void XTRXInput::apply_gain_pga(double gain)
 {
     if (xtrx_set_gain(m_deviceShared.m_deviceParams->getDevice(),
                       XTRX_CH_AB /*m_deviceShared.m_channel*/,
-                      XTRX_RX_TIA_GAIN,
+                      XTRX_RX_PGA_GAIN,
                       gain,
                       NULL) < 0)
     {
@@ -853,7 +854,6 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     }
 #endif
 
-
     if ((m_settings.m_log2SoftDecim != settings.m_log2SoftDecim) || force)
     {
         forwardChangeOwnDSP = true;
@@ -911,6 +911,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         suspendTxBuddies();
 
         double master = (settings.m_log2HardDecim == 0) ? 0 : (settings.m_devSampleRate * 4 * (1 << settings.m_log2HardDecim));
+
         if (m_deviceShared.set_samplerate(settings.m_devSampleRate,
                                           master, //(settings.m_devSampleRate<<settings.m_log2HardDecim)*4,
                                           false) < 0)
@@ -923,16 +924,15 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         {
             m_deviceShared.m_deviceParams->m_log2OvSRRx = settings.m_log2HardDecim;
             m_deviceShared.m_deviceParams->m_sampleRate = settings.m_devSampleRate;
-
             doChangeFreq = true;
             forceNCOFrequency = true;
-            qDebug("XTRXInput::applySettings: set sample rate set to %f with oversampling of %d",
+
+            qDebug("XTRXInput::applySettings: sample rate set to %f with oversampling of %d",
                    settings.m_devSampleRate,
                    1<<settings.m_log2HardDecim);
         }
 
-
-        // TODO hnags!!!
+        // TODO hangs!!!
         resumeTxBuddies();
         resumeRxBuddies();
 
@@ -962,15 +962,15 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     }
     if (doGainLna)
     {
-        apply_gain_auto(m_settings.m_lnaGain);
+        apply_gain_lna(m_settings.m_lnaGain);
     }
     if (doGainTia)
     {
-        apply_gain_auto(tia_to_db(m_settings.m_tiaGain));
+        apply_gain_tia(tia_to_db(m_settings.m_tiaGain));
     }
     if (doGainPga)
     {
-        apply_gain_auto(m_settings.m_pgaGain);
+        apply_gain_pga(m_settings.m_pgaGain);
     }
 
     if (doChangeFreq)
@@ -1019,7 +1019,6 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
             }
         }
     }
-
 
     // forward changes to buddies or oneself
 
