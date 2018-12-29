@@ -35,7 +35,7 @@
 
 const PluginDescriptor XTRXInputPlugin::m_pluginDescriptor = {
     QString("XTRX Input"),
-    QString("0.0.1"),
+    QString("4.4.0"),
     QString("(c) Sergey Kostanbaev, Fairwaves"),
     QString("https://github.com/xtrx-sdr/sdrangel"),
     true,
