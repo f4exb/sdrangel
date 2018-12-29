@@ -40,55 +40,28 @@ XTRXInputThread::~XTRXInputThread()
 
 void XTRXInputThread::startWork()
 {
-    if (m_running) return; // return if running already
-
-    xtrx_run_params params;
-    xtrx_run_params_init(&params);
-
-    params.dir = XTRX_RX;
-    params.rx.chs = XTRX_CH_AB;
-    params.rx.wfmt = XTRX_WF_16;
-    params.rx.hfmt = XTRX_IQ_INT16;
-    params.rx.flags |= XTRX_RSP_SISO_MODE;
-    params.rx_stream_start = 2*8192;
-
-    // TODO: replace this
-    if (m_shared->m_channel == XTRX_CH_B)
-        params.rx.flags |= XTRX_RSP_SWAP_AB;
-
-    int res = xtrx_run_ex(m_shared->m_deviceParams->getDevice(),
-                          &params);
-
-    if (res != 0) {
-        qCritical("XTRXInputThread::startWork: could not start stream err:%d", res);
-    } else {
-        usleep(50000);
-        qDebug("XTRXInputThread::startWork: stream started");
+    if (m_running) {
+        return; // return if running already
     }
 
     m_startWaitMutex.lock();
     start();
-    while(!m_running)
+
+    while (!m_running) {
         m_startWaiter.wait(&m_startWaitMutex, 100);
+    }
+
     m_startWaitMutex.unlock();
 }
 
 void XTRXInputThread::stopWork()
 {
-    if (!m_running) return; // return if not running
+    if (!m_running) {
+        return; // return if not running
+    }
 
     m_running = false;
-
-    int res = xtrx_stop(m_shared->m_deviceParams->getDevice(), XTRX_RX);
     wait();
-
-
-    if (res != 0) {
-        qCritical("XTRXInputThread::stopWork: could not stop stream");
-    } else {
-        usleep(50000);
-        qDebug("XTRXInputThread::stopWork: stream stopped");
-    }
 }
 
 void XTRXInputThread::setLog2Decimation(unsigned int log2_decim)
@@ -108,6 +81,34 @@ void XTRXInputThread::run()
     m_running = true;
     m_startWaiter.wakeAll();
 
+    xtrx_run_params params;
+    xtrx_run_params_init(&params);
+
+    params.dir = XTRX_RX;
+    params.rx.chs = XTRX_CH_AB;
+    params.rx.wfmt = XTRX_WF_16;
+    params.rx.hfmt = XTRX_IQ_INT16;
+    params.rx.flags |= XTRX_RSP_SISO_MODE;
+    params.rx_stream_start = 2*8192;
+
+    // TODO: replace this
+    if (m_shared->m_channel == XTRX_CH_B) {
+        params.rx.flags |= XTRX_RSP_SWAP_AB;
+    }
+
+    res = xtrx_run_ex(m_shared->m_deviceParams->getDevice(), &params);
+
+    if (res != 0)
+    {
+        qCritical("XTRXInputThread::run: could not start stream err:%d", res);
+        m_running = false;
+    }
+    else
+    {
+        usleep(50000);
+        qDebug("XTRXInputThread::run: stream started");
+    }
+
     void* buffers[1] = { m_buf };
     xtrx_recv_ex_info_t nfo;
     nfo.samples = XTRX_BLOCKSIZE;
@@ -119,8 +120,7 @@ void XTRXInputThread::run()
     while (m_running)
     {
         //if ((res = LMS_RecvStream(m_stream, (void *) m_buf, XTRX_BLOCKSIZE, &metadata, 1000)) < 0)
-        res = xtrx_recv_sync_ex(m_shared->m_deviceParams->getDevice(),
-                                &nfo);
+        res = xtrx_recv_sync_ex(m_shared->m_deviceParams->getDevice(), &nfo);
 
         if (res < 0)
         {
@@ -129,6 +129,18 @@ void XTRXInputThread::run()
         }
 
         callback(m_buf, 2 * nfo.out_samples);
+    }
+
+    res = xtrx_stop(m_shared->m_deviceParams->getDevice(), XTRX_RX);
+
+    if (res != 0)
+    {
+        qCritical("XTRXInputThread::run: could not stop stream");
+    }
+    else
+    {
+        usleep(50000);
+        qDebug("XTRXInputThread::run: stream stopped");
     }
 
     m_running = false;
