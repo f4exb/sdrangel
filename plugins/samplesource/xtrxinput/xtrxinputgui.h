@@ -89,8 +89,6 @@ private slots:
     void on_hwDecim_currentIndexChanged(int index);
     void on_swDecim_currentIndexChanged(int index);
     void on_lpf_changed(quint64 value);
-    void on_lpFIREnable_toggled(bool checked);
-    void on_lpFIR_changed(quint64 value);
     void on_gainMode_currentIndexChanged(int index);
     void on_gain_valueChanged(int value);
     void on_lnaGain_valueChanged(int value);

@@ -60,9 +60,6 @@ XTRXInputGUI::XTRXInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->lpf->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->lpf->setValueRange(6, (minF/1000)+1, maxF/1000);
 
-    ui->lpFIR->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
-    ui->lpFIR->setValueRange(5, 1U, 56000U);
-
     ui->ncoFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 
     ui->channelNumberText->setText(tr("#%1").arg(m_XTRXInput->getChannelIndex()));
@@ -280,9 +277,6 @@ void XTRXInputGUI::displaySettings()
 
     ui->lpf->setValue(m_settings.m_lpfBW / 1000);
 
-    ui->lpFIREnable->setChecked(m_settings.m_lpfFIREnable);
-    ui->lpFIR->setValue(m_settings.m_lpfFIRBW / 1000);
-
     ui->gain->setValue(m_settings.m_gain);
     ui->gainText->setText(tr("%1").arg(m_settings.m_gain));
 
@@ -490,21 +484,6 @@ void XTRXInputGUI::on_lpf_changed(quint64 value)
 {
     m_settings.m_lpfBW = value * 1000;
     sendSettings();
-}
-
-void XTRXInputGUI::on_lpFIREnable_toggled(bool checked)
-{
-    m_settings.m_lpfFIREnable = checked;
-    sendSettings();
-}
-
-void XTRXInputGUI::on_lpFIR_changed(quint64 value)
-{
-    m_settings.m_lpfFIRBW = value * 1000;
-
-    if (m_settings.m_lpfFIREnable) { // do not send the update if the FIR is disabled
-        sendSettings();
-    }
 }
 
 void XTRXInputGUI::on_gainMode_currentIndexChanged(int index)
