@@ -1,5 +1,6 @@
 #!/bin/sh
 
+cp 50-xtrx-usb3380.rules /etc/udev/rules.d/
 cp 52-airspy.rules /etc/udev/rules.d/
 cp 52-airspyhf.rules /etc/udev/rules.d/
 cp 88-nuand.rules /etc/udev/rules.d/
