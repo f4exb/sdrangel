@@ -29,12 +29,6 @@
 struct XTRXInputSettings
 {
     typedef enum {
-        FC_POS_INFRA = 0,
-        FC_POS_SUPRA,
-        FC_POS_CENTER
-    } fcPos_t;
-
-    typedef enum {
         GAIN_AUTO,
         GAIN_MANUAL
     } GainMode;
@@ -48,8 +42,6 @@ struct XTRXInputSettings
     bool     m_iqCorrection;
     uint32_t m_log2SoftDecim;
     float    m_lpfBW;        //!< LMS amalog lowpass filter bandwidth (Hz)
-    bool     m_lpfFIREnable; //!< Enable LMS digital lowpass FIR filters
-    float    m_lpfFIRBW;     //!< LMS digital lowpass FIR filters bandwidth (Hz)
     uint32_t m_gain;         //!< Optimally distributed gain (dB)
     bool     m_ncoEnable;    //!< Enable TSP NCO and mixing
     int      m_ncoFrequency; //!< Actual NCO frequency (the resulting frequency with mixing is displayed)

@@ -31,8 +31,6 @@ void XTRXInputSettings::resetToDefaults()
     m_iqCorrection = false;
     m_log2SoftDecim = 0;
     m_lpfBW = 4.5e6f;
-    m_lpfFIREnable = false;
-    m_lpfFIRBW = 2.5e6f;
     m_gain = 50;
     m_ncoEnable = false;
     m_ncoFrequency = 0;
@@ -56,8 +54,6 @@ QByteArray XTRXInputSettings::serialize() const
     s.writeBool(4, m_iqCorrection);
     s.writeU32(5, m_log2SoftDecim);
     s.writeFloat(7, m_lpfBW);
-    s.writeBool(8, m_lpfFIREnable);
-    s.writeFloat(9, m_lpfFIRBW);
     s.writeU32(10, m_gain);
     s.writeBool(11, m_ncoEnable);
     s.writeS32(12, m_ncoFrequency);
@@ -93,8 +89,6 @@ bool XTRXInputSettings::deserialize(const QByteArray& data)
         d.readBool(4, &m_iqCorrection, false);
         d.readU32(5, &m_log2SoftDecim, 0);
         d.readFloat(7, &m_lpfBW, 1.5e6);
-        d.readBool(8, &m_lpfFIREnable, false);
-        d.readFloat(9, &m_lpfFIRBW, 1.5e6);
         d.readU32(10, &m_gain, 50);
         d.readBool(11, &m_ncoEnable, false);
         d.readS32(12, &m_ncoFrequency, 0);

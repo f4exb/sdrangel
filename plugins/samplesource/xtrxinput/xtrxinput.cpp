@@ -1114,8 +1114,6 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
              << " sample rate with soft decimation: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim) << "S/s"
              << " m_gain: " << m_settings.m_gain
              << " m_lpfBW: " << m_settings.m_lpfBW
-             << " m_lpfFIRBW: " << m_settings.m_lpfFIRBW
-             << " m_lpfFIREnable: " << m_settings.m_lpfFIREnable
              << " m_ncoEnable: " << m_settings.m_ncoEnable
              << " m_ncoFrequency: " << m_settings.m_ncoFrequency
              << " m_antennaPath: " << m_settings.m_antennaPath

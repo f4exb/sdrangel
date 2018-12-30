@@ -28,7 +28,6 @@ XTRXInputThread::XTRXInputThread(DeviceXTRXShared* shared,
     m_convertBuffer(XTRX_BLOCKSIZE),
     m_sampleFifo(sampleFifo),
     m_log2Decim(0),
-    m_fcPos(XTRXInputSettings::FC_POS_CENTER),
     m_shared(shared)
 {
 }
@@ -67,11 +66,6 @@ void XTRXInputThread::stopWork()
 void XTRXInputThread::setLog2Decimation(unsigned int log2_decim)
 {
     m_log2Decim = log2_decim;
-}
-
-void XTRXInputThread::setFcPos(int fcPos)
-{
-    m_fcPos = fcPos;
 }
 
 void XTRXInputThread::run()
@@ -157,83 +151,28 @@ void XTRXInputThread::callback(const qint16* buf, qint32 len)
     }
     else
     {
-        if (m_fcPos == 0) // Infra
+        switch (m_log2Decim)
         {
-            switch (m_log2Decim)
-            {
-            case 1:
-                m_decimators.decimate2_inf(&it, buf, len);
-                break;
-            case 2:
-                m_decimators.decimate4_inf(&it, buf, len);
-                break;
-            case 3:
-                m_decimators.decimate8_inf(&it, buf, len);
-                break;
-            case 4:
-                m_decimators.decimate16_inf(&it, buf, len);
-                break;
-            case 5:
-                m_decimators.decimate32_inf(&it, buf, len);
-                break;
-            case 6:
-                m_decimators.decimate64_inf(&it, buf, len);
-                break;
-            default:
-                break;
-            }
-        }
-        else if (m_fcPos == 1) // Supra
-        {
-            switch (m_log2Decim)
-            {
-            case 1:
-                m_decimators.decimate2_sup(&it, buf, len);
-                break;
-            case 2:
-                m_decimators.decimate4_sup(&it, buf, len);
-                break;
-            case 3:
-                m_decimators.decimate8_sup(&it, buf, len);
-                break;
-            case 4:
-                m_decimators.decimate16_sup(&it, buf, len);
-                break;
-            case 5:
-                m_decimators.decimate32_sup(&it, buf, len);
-                break;
-            case 6:
-                m_decimators.decimate64_sup(&it, buf, len);
-                break;
-            default:
-                break;
-            }
-        }
-        else if (m_fcPos == 2) // Center
-        {
-            switch (m_log2Decim)
-            {
-            case 1:
-                m_decimators.decimate2_cen(&it, buf, len);
-                break;
-            case 2:
-                m_decimators.decimate4_cen(&it, buf, len);
-                break;
-            case 3:
-                m_decimators.decimate8_cen(&it, buf, len);
-                break;
-            case 4:
-                m_decimators.decimate16_cen(&it, buf, len);
-                break;
-            case 5:
-                m_decimators.decimate32_cen(&it, buf, len);
-                break;
-            case 6:
-                m_decimators.decimate64_cen(&it, buf, len);
-                break;
-            default:
-                break;
-            }
+        case 1:
+            m_decimators.decimate2_cen(&it, buf, len);
+            break;
+        case 2:
+            m_decimators.decimate4_cen(&it, buf, len);
+            break;
+        case 3:
+            m_decimators.decimate8_cen(&it, buf, len);
+            break;
+        case 4:
+            m_decimators.decimate16_cen(&it, buf, len);
+            break;
+        case 5:
+            m_decimators.decimate32_cen(&it, buf, len);
+            break;
+        case 6:
+            m_decimators.decimate64_cen(&it, buf, len);
+            break;
+        default:
+            break;
         }
     }
 
