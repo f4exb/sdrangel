@@ -28,7 +28,7 @@
 #include "dsp/decimators.h"
 #include "xtrx/devicextrxshared.h"
 
-#define XTRX_BLOCKSIZE (1<<13) //complex samples per buffer
+#define XTRX_BLOCKSIZE (1<<15) //complex samples per buffer (was 1<<13)
 
 class XTRXInputThread : public QThread, public DeviceXTRXShared::ThreadInterface
 {
