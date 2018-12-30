@@ -1,11 +1,13 @@
 project(xtrxdevice)
 
 set(xtrxdevice_SOURCES
+	devicextrx.cpp
     devicextrxparam.cpp
     devicextrxshared.cpp
 )
 
 set(xtrxdevice_HEADERS
+	devicextrx.h
     devicextrxparam.h
     devicextrxshared.h
 )

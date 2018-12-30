@@ -29,6 +29,7 @@
 #include "xtrxinputthread.h"
 #include "xtrx/devicextrxparam.h"
 #include "xtrx/devicextrxshared.h"
+#include "xtrx/devicextrx.h"
 
 MESSAGE_CLASS_DEFINITION(XTRXInput::MsgConfigureXTRX, Message)
 MESSAGE_CLASS_DEFINITION(XTRXInput::MsgGetStreamInfo, Message)
@@ -653,21 +654,15 @@ static double tia_to_db(unsigned idx)
     }
 }
 
-void XTRXInput::apply_gain_auto(double gain)
+void XTRXInput::apply_gain_auto(uint32_t gain)
 {
-    if (xtrx_set_gain(m_deviceShared.m_deviceParams->getDevice(),
-                      XTRX_CH_AB /*m_deviceShared.m_channel*/,
-                      XTRX_RX_LNA_GAIN,
-                      gain,
-                      NULL) < 0)
-    {
-        qDebug("XTRXInput::applySettings: xtrx_set_gain(auto) failed");
-    }
-    else
-    {
-        //doCalibration = true;
-        qDebug() << "XTRXInput::applySettings: Gain (auto) set to " << gain;
-    }
+    uint32_t lna, tia, pga;
+
+    DeviceXTRX::getAutoGains(gain, lna, tia, pga);
+
+    apply_gain_lna(lna);
+    apply_gain_tia(tia_to_db(tia));
+    apply_gain_pga(pga);
 }
 
 void XTRXInput::apply_gain_lna(double gain)

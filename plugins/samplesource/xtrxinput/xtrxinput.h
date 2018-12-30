@@ -194,7 +194,7 @@ public:
     void getLPRange(float& minF, float& maxF, float& stepF) const;
     uint32_t getHWLog2Decim() const;
 
-    void apply_gain_auto(double gain);
+    void apply_gain_auto(uint32_t gain);
     void apply_gain_lna(double gain);
     void apply_gain_tia(double gain);
     void apply_gain_pga(double gain);
