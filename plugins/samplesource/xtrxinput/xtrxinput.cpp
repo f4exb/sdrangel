@@ -769,15 +769,12 @@ void XTRXInput::apply_gain_auto(uint32_t gain)
 void XTRXInput::apply_gain_lna(double gain)
 {
     if (xtrx_set_gain(m_deviceShared.m_dev->getDevice(),
-                      XTRX_CH_AB /*m_deviceShared.m_channel*/,
-                      XTRX_RX_LNA_GAIN,
-                      gain,
-                      NULL) < 0)
-    {
+            m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
+            XTRX_RX_LNA_GAIN,
+            gain,
+            0) < 0) {
         qDebug("XTRXInput::applySettings: xtrx_set_gain(LNA) failed");
-    }
-    else
-    {
+    } else {
         qDebug() << "XTRXInput::applySettings: Gain (LNA) set to " << gain;
     }
 }
@@ -785,15 +782,12 @@ void XTRXInput::apply_gain_lna(double gain)
 void XTRXInput::apply_gain_tia(double gain)
 {
     if (xtrx_set_gain(m_deviceShared.m_dev->getDevice(),
-                      XTRX_CH_AB /*m_deviceShared.m_channel*/,
-                      XTRX_RX_TIA_GAIN,
-                      gain,
-                      NULL) < 0)
-    {
+            m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
+            XTRX_RX_TIA_GAIN,
+            gain,
+            0) < 0) {
         qDebug("XTRXInput::applySettings: xtrx_set_gain(TIA) failed");
-    }
-    else
-    {
+    } else {
         qDebug() << "XTRXInput::applySettings: Gain (TIA) set to " << gain;
     }
 }
@@ -801,10 +795,10 @@ void XTRXInput::apply_gain_tia(double gain)
 void XTRXInput::apply_gain_pga(double gain)
 {
     if (xtrx_set_gain(m_deviceShared.m_dev->getDevice(),
-                      XTRX_CH_AB /*m_deviceShared.m_channel*/,
-                      XTRX_RX_PGA_GAIN,
-                      gain,
-                      NULL) < 0)
+            m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
+            XTRX_RX_PGA_GAIN,
+            gain,
+            0) < 0)
     {
         qDebug("XTRXInput::applySettings: xtrx_set_gain(PGA) failed");
     }
@@ -843,8 +837,13 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
     }
 
-    if ((m_settings.m_pwrmode != settings.m_pwrmode)) {
-        if (xtrx_val_set(m_deviceShared.m_dev->getDevice(), XTRX_TRX, XTRX_CH_AB, XTRX_LMS7_PWR_MODE, settings.m_pwrmode) < 0) {
+    if ((m_settings.m_pwrmode != settings.m_pwrmode))
+    {
+        if (xtrx_val_set(m_deviceShared.m_dev->getDevice(),
+                XTRX_TRX,
+                m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
+                XTRX_LMS7_PWR_MODE,
+                settings.m_pwrmode) < 0) {
             qCritical("XTRXInput::applySettings: could not set power mode %d", settings.m_pwrmode);
         }
     }
@@ -1021,14 +1020,11 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     if (doLPCalibration)
     {
         if (xtrx_tune_rx_bandwidth(m_deviceShared.m_dev->getDevice(),
-                                   m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
-                                   m_settings.m_lpfBW,
-                                   NULL) < 0)
-        {
+                m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
+                m_settings.m_lpfBW,
+                0) < 0) {
             qCritical("XTRXInput::applySettings: could not set LPF to %f Hz", m_settings.m_lpfBW);
-        }
-        else
-        {
+        } else {
             qDebug("XTRXInput::applySettings: LPF set to %f Hz", m_settings.m_lpfBW);
         }
     }
@@ -1057,14 +1053,11 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         if (m_deviceShared.m_dev->getDevice() != 0)
         {
             if (xtrx_tune(m_deviceShared.m_dev->getDevice(),
-                          XTRX_TUNE_RX_FDD,
-                          settings.m_centerFrequency,
-                          NULL) < 0)
-            {
+                    XTRX_TUNE_RX_FDD,
+                    settings.m_centerFrequency,
+                    0) < 0) {
                 qCritical("XTRXInput::applySettings: could not set frequency to %lu", settings.m_centerFrequency);
-            }
-            else
-            {
+            } else {
                 //doCalibration = true;
                 qDebug("XTRXInput::applySettings: frequency set to %lu", settings.m_centerFrequency);
             }
@@ -1075,11 +1068,11 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     {
         if (m_deviceShared.m_dev->getDevice() != 0)
         {
-            if (xtrx_tune(m_deviceShared.m_dev->getDevice(),
-                          XTRX_TUNE_BB_RX,
-                          /* m_deviceShared.m_channel, */
-                          (settings.m_ncoEnable) ? settings.m_ncoFrequency : 0,
-                          NULL) < 0)
+            if (xtrx_tune_ex(m_deviceShared.m_dev->getDevice(),
+                    XTRX_TUNE_BB_RX,
+                    m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
+                    (settings.m_ncoEnable) ? settings.m_ncoFrequency : 0,
+                    NULL) < 0)
             {
                 qCritical("XTRXInput::applySettings: could not %s and set NCO to %d Hz",
                           settings.m_ncoEnable ? "enable" : "disable",
