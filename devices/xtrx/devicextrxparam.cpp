@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2017 Sergey Kostanbaev, Fairwaves Inc.                          //
+// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -17,28 +18,10 @@
 #include <QDebug>
 #include "devicextrxparam.h"
 
-bool DeviceXTRXParams::open(const char* deviceStr)
-{
-    int res;
-    qDebug("DeviceXTRXParams::open: serial: %s", (const char *) deviceStr);
+DeviceXTRXParams::DeviceXTRXParams() :
+    m_nbRxChannels(2),
+    m_nbTxChannels(2)
+{}
 
-    res = xtrx_open(deviceStr, XTRX_O_RESET | 4, &m_dev);
-
-    if (res)
-    {
-        qCritical() << "DeviceXTRXParams::open: cannot open device " << deviceStr;
-        return false;
-    }
-
-
-    return true;
-}
-
-void DeviceXTRXParams::close()
-{
-    if (m_dev)
-    {
-        xtrx_close(m_dev);
-        m_dev = 0;
-    }
-}
+DeviceXTRXParams::~DeviceXTRXParams()
+{}

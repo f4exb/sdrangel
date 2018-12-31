@@ -28,39 +28,56 @@
 #include "dsp/decimators.h"
 #include "xtrx/devicextrxshared.h"
 
-#define XTRX_BLOCKSIZE (1<<15) //complex samples per buffer (was 1<<13)
+struct xtrx_dev;
 
-class XTRXInputThread : public QThread, public DeviceXTRXShared::ThreadInterface
+class XTRXInputThread : public QThread
 {
     Q_OBJECT
 
 public:
-    XTRXInputThread(DeviceXTRXShared* shared, SampleSinkFifo* sampleFifo, QObject* parent = 0);
+    XTRXInputThread(struct xtrx_dev *dev, unsigned int nbChannels, unsigned int uniqueChannelIndex = 0, QObject* parent = 0);
     ~XTRXInputThread();
 
     virtual void startWork();
     virtual void stopWork();
-    virtual void setDeviceSampleRate(int sampleRate __attribute__((unused))) {}
     virtual bool isRunning() { return m_running; }
-    void setLog2Decimation(unsigned int log2_decim);
+    unsigned int getNbChannels() const { return m_nbChannels; }
+    void setLog2Decimation(unsigned int channel, unsigned int log2_decim);
+    unsigned int getLog2Decimation(unsigned int channel) const;
+    void setFifo(unsigned int channel, SampleSinkFifo *sampleFifo);
+    SampleSinkFifo *getFifo(unsigned int channel);
 
 private:
+    struct Channel
+    {
+        SampleVector m_convertBuffer;
+        SampleSinkFifo* m_sampleFifo;
+        unsigned int m_log2Decim;
+        Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators;
+
+        Channel() :
+            m_sampleFifo(0),
+            m_log2Decim(0)
+        {}
+
+        ~Channel()
+        {}
+    };
+
     QMutex m_startWaitMutex;
     QWaitCondition m_startWaiter;
     bool m_running;
+    struct xtrx_dev *m_dev;
 
-    qint16 m_buf[2*XTRX_BLOCKSIZE]; //must hold I+Q values of each sample hence 2xcomplex size
-    SampleVector m_convertBuffer;
-    SampleSinkFifo* m_sampleFifo;
-
-    unsigned int m_log2Decim; // soft decimation
-
-    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators;
-
-    DeviceXTRXShared* m_shared;
+    Channel *m_channels; //!< Array of channels dynamically allocated for the given number of Rx channels
+    qint16 *m_buf;
+    unsigned int m_nbChannels;
+    unsigned int m_uniqueChannelIndex;
 
     void run();
-    void callback(const qint16* buf, qint32 len);
+    unsigned int getNbFifos();
+    void callbackSI(const qint16* buf, qint32 len);
+    void callbackMI(const qint16* buf, qint32 len);
 };
 
 

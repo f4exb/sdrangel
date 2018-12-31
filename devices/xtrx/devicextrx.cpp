@@ -14,6 +14,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
+
+#include "xtrx_api.h"
 #include "devicextrx.h"
 
 const uint32_t DeviceXTRX::m_lnaTbl[m_nbGains] = {
@@ -31,6 +34,40 @@ const uint32_t DeviceXTRX::m_pgaTbl[m_nbGains] = {
         9,  10, 11, 12, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
         22, 23, 24, 25, 26, 27, 28, 29, 30, 31
 };
+
+DeviceXTRX::DeviceXTRX() :
+    m_dev(0)
+{}
+
+DeviceXTRX::~DeviceXTRX()
+{
+    close();
+}
+
+bool DeviceXTRX::open(const char* deviceStr)
+{
+    int res;
+    qDebug("DeviceXTRX::open: serial: %s", (const char *) deviceStr);
+
+    res = xtrx_open(deviceStr, XTRX_O_RESET | 4, &m_dev);
+
+    if (res)
+    {
+        qCritical() << "DeviceXTRX::open: cannot open device " << deviceStr;
+        return false;
+    }
+
+    return true;
+}
+
+void DeviceXTRX::close()
+{
+    if (m_dev)
+    {
+        xtrx_close(m_dev);
+        m_dev = 0;
+    }
+}
 
 void DeviceXTRX::getAutoGains(uint32_t autoGain, uint32_t& lnaGain, uint32_t& tiaGain, uint32_t& pgaGain)
 {

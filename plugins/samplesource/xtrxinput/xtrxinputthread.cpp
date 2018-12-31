@@ -16,25 +16,42 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <errno.h>
+#include <chrono>
+#include <thread>
 
+#include "xtrx_api.h"
+
+#include "xtrx/devicextrx.h"
 #include "xtrxinputsettings.h"
 #include "xtrxinputthread.h"
 
-XTRXInputThread::XTRXInputThread(DeviceXTRXShared* shared,
-                                 SampleSinkFifo* sampleFifo,
-                                 QObject* parent) :
+XTRXInputThread::XTRXInputThread(struct xtrx_dev *dev, unsigned int nbChannels, unsigned int uniqueChannelIndex, QObject* parent) :
     QThread(parent),
     m_running(false),
-    m_convertBuffer(XTRX_BLOCKSIZE),
-    m_sampleFifo(sampleFifo),
-    m_log2Decim(0),
-    m_shared(shared)
+    m_dev(dev),
+    m_nbChannels(nbChannels),
+    m_uniqueChannelIndex(uniqueChannelIndex)
 {
+    qDebug("XTRXInputThread::XTRXInputThread");
+    m_channels = new Channel[2];
+
+    for (unsigned int i = 0; i < 2; i++) {
+        m_channels[i].m_convertBuffer.resize(DeviceXTRX::blockSize, Sample{0,0});
+    }
+
+    m_buf = new qint16[2*DeviceXTRX::blockSize*2]; // room for two channels
 }
 
 XTRXInputThread::~XTRXInputThread()
 {
-    stopWork();
+    qDebug("XTRXInputThread::~XTRXInputThread");
+
+    if (m_running) {
+        stopWork();
+    }
+
+    delete[] m_buf;
+    delete[] m_channels;
 }
 
 void XTRXInputThread::startWork()
@@ -63,10 +80,6 @@ void XTRXInputThread::stopWork()
     wait();
 }
 
-void XTRXInputThread::setLog2Decimation(unsigned int log2_decim)
-{
-    m_log2Decim = log2_decim;
-}
 
 void XTRXInputThread::run()
 {
@@ -75,106 +88,172 @@ void XTRXInputThread::run()
     m_running = true;
     m_startWaiter.wakeAll();
 
-    xtrx_run_params params;
-    xtrx_run_params_init(&params);
+    unsigned int nbFifos = getNbFifos();
 
-    params.dir = XTRX_RX;
-    params.rx.chs = XTRX_CH_AB;
-    params.rx.wfmt = XTRX_WF_16;
-    params.rx.hfmt = XTRX_IQ_INT16;
-    params.rx.flags |= XTRX_RSP_SISO_MODE;
-    params.rx_stream_start = 2*8192;
-
-    // TODO: replace this
-    if (m_shared->m_channel == XTRX_CH_B) {
-        params.rx.flags |= XTRX_RSP_SWAP_AB;
-    }
-
-    res = xtrx_run_ex(m_shared->m_deviceParams->getDevice(), &params);
-
-    if (res != 0)
+    if ((m_nbChannels > 0) && (nbFifos > 0))
     {
-        qCritical("XTRXInputThread::run: could not start stream err:%d", res);
-        m_running = false;
-    }
-    else
-    {
-        usleep(50000);
-        qDebug("XTRXInputThread::run: stream started");
-    }
+        xtrx_run_params params;
+        xtrx_run_params_init(&params);
 
-    void* buffers[1] = { m_buf };
-    xtrx_recv_ex_info_t nfo;
-    nfo.samples = XTRX_BLOCKSIZE;
-    nfo.buffer_count = 1;
-    nfo.buffers = (void* const*)buffers;
-    nfo.flags = RCVEX_DONT_INSER_ZEROS | RCVEX_DROP_OLD_ON_OVERFLOW;
+        params.dir = XTRX_RX;
+        params.rx.chs = XTRX_CH_AB;
+        params.rx.wfmt = XTRX_WF_16;
+        params.rx.hfmt = XTRX_IQ_INT16;
+        params.rx_stream_start = 2*8192;
 
-
-    while (m_running)
-    {
-        //if ((res = LMS_RecvStream(m_stream, (void *) m_buf, XTRX_BLOCKSIZE, &metadata, 1000)) < 0)
-        res = xtrx_recv_sync_ex(m_shared->m_deviceParams->getDevice(), &nfo);
-
-        if (res < 0)
+        if (m_nbChannels == 1)
         {
-            qCritical("XTRXInputThread::run read error: %d", res);
-            break;
+            params.rx.flags |= XTRX_RSP_SISO_MODE;
+
+            if (m_uniqueChannelIndex == 1) {
+                params.rx.flags |= XTRX_RSP_SWAP_AB;
+            }
         }
 
-        callback(m_buf, 2 * nfo.out_samples);
-    }
+        res = xtrx_run_ex(m_dev, &params);
 
-    res = xtrx_stop(m_shared->m_deviceParams->getDevice(), XTRX_RX);
+        if (res != 0)
+        {
+            qCritical("XTRXInputThread::run: could not start stream err:%d", res);
+            m_running = false;
+        }
+        else
+        {
+            std::this_thread::sleep_for(std::chrono::microseconds(50000));
+            qDebug("XTRXInputThread::run: stream started");
+        }
 
-    if (res != 0)
-    {
-        qCritical("XTRXInputThread::run: could not stop stream");
+        void* buffers[1] = { m_buf };
+        xtrx_recv_ex_info_t nfo;
+        nfo.samples = DeviceXTRX::blockSize;
+        nfo.buffer_count = 1;
+        nfo.buffers = (void* const*)buffers;
+        nfo.flags = RCVEX_DONT_INSER_ZEROS | RCVEX_DROP_OLD_ON_OVERFLOW;
+
+        while (m_running)
+        {
+            res = xtrx_recv_sync_ex(m_dev, &nfo);
+
+            if (res < 0)
+            {
+                qCritical("XTRXInputThread::run read error: %d", res);
+                break;
+            }
+
+            if (m_nbChannels > 1) {
+                callbackMI(m_buf, 2 * nfo.out_samples);
+            } else {
+                callbackSI(m_buf, 2 * nfo.out_samples);
+            }
+        }
+
+        res = xtrx_stop(m_dev, XTRX_RX);
+
+        if (res != 0)
+        {
+            qCritical("XTRXInputThread::run: could not stop stream");
+        }
+        else
+        {
+            std::this_thread::sleep_for(std::chrono::microseconds(50000));
+            qDebug("XTRXInputThread::run: stream stopped");
+        }
     }
     else
     {
-        usleep(50000);
-        qDebug("XTRXInputThread::run: stream stopped");
+        qWarning("XTRXInputThread::run: no channels or FIFO allocated. Aborting");
     }
 
     m_running = false;
 }
 
-//  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void XTRXInputThread::callback(const qint16* buf, qint32 len)
+unsigned int XTRXInputThread::getNbFifos()
 {
-    SampleVector::iterator it = m_convertBuffer.begin();
+    unsigned int fifoCount = 0;
 
-    if (m_log2Decim == 0)
+    for (unsigned int i = 0; i < m_nbChannels; i++)
     {
-        m_decimators.decimate1(&it, buf, len);
+        if (m_channels[i].m_sampleFifo) {
+            fifoCount++;
+        }
+    }
+
+    return fifoCount;
+}
+
+void XTRXInputThread::setLog2Decimation(unsigned int channel, unsigned int log2_decim)
+{
+    if (channel < m_nbChannels) {
+        m_channels[channel].m_log2Decim = log2_decim;
+    }
+}
+
+unsigned int XTRXInputThread::getLog2Decimation(unsigned int channel) const
+{
+    if (channel < m_nbChannels) {
+        return m_channels[channel].m_log2Decim;
+    } else {
+        return 0;
+    }
+}
+
+void XTRXInputThread::setFifo(unsigned int channel, SampleSinkFifo *sampleFifo)
+{
+    if (channel < m_nbChannels) {
+        m_channels[channel].m_sampleFifo = sampleFifo;
+    }
+}
+
+SampleSinkFifo *XTRXInputThread::getFifo(unsigned int channel)
+{
+    if (channel < m_nbChannels) {
+        return m_channels[channel].m_sampleFifo;
+    } else {
+        return 0;
+    }
+}
+
+void XTRXInputThread::callbackSI(const qint16* buf, qint32 len)
+{
+    SampleVector::iterator it = m_channels[m_uniqueChannelIndex].m_convertBuffer.begin();
+
+    if (m_channels[m_uniqueChannelIndex].m_log2Decim == 0)
+    {
+        m_channels[m_uniqueChannelIndex].m_decimators.decimate1(&it, buf, len);
     }
     else
     {
-        switch (m_log2Decim)
+        switch (m_channels[m_uniqueChannelIndex].m_log2Decim)
         {
         case 1:
-            m_decimators.decimate2_cen(&it, buf, len);
+            m_channels[m_uniqueChannelIndex].m_decimators.decimate2_cen(&it, buf, len);
             break;
         case 2:
-            m_decimators.decimate4_cen(&it, buf, len);
+            m_channels[m_uniqueChannelIndex].m_decimators.decimate4_cen(&it, buf, len);
             break;
         case 3:
-            m_decimators.decimate8_cen(&it, buf, len);
+            m_channels[m_uniqueChannelIndex].m_decimators.decimate8_cen(&it, buf, len);
             break;
         case 4:
-            m_decimators.decimate16_cen(&it, buf, len);
+            m_channels[m_uniqueChannelIndex].m_decimators.decimate16_cen(&it, buf, len);
             break;
         case 5:
-            m_decimators.decimate32_cen(&it, buf, len);
+            m_channels[m_uniqueChannelIndex].m_decimators.decimate32_cen(&it, buf, len);
             break;
         case 6:
-            m_decimators.decimate64_cen(&it, buf, len);
+            m_channels[m_uniqueChannelIndex].m_decimators.decimate64_cen(&it, buf, len);
             break;
         default:
             break;
         }
     }
 
-    m_sampleFifo->write(m_convertBuffer.begin(), it);
+    m_channels[m_uniqueChannelIndex].m_sampleFifo->write(m_channels[m_uniqueChannelIndex].m_convertBuffer.begin(), it);
+}
+
+void XTRXInputThread::callbackMI(const qint16* buf, qint32 len)
+{
+    (void) buf;
+    (void) len;
+    // TODO
 }

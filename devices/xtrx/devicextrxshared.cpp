@@ -17,6 +17,7 @@
 #include <QDebug>
 
 #include "devicextrxshared.h"
+#include "devicextrx.h"
 
 MESSAGE_CLASS_DEFINITION(DeviceXTRXShared::MsgReportBuddyChange, Message)
 MESSAGE_CLASS_DEFINITION(DeviceXTRXShared::MsgReportClockSourceChange, Message)
@@ -25,11 +26,20 @@ MESSAGE_CLASS_DEFINITION(DeviceXTRXShared::MsgReportDeviceInfo, Message)
 const float  DeviceXTRXShared::m_sampleFifoLengthInSeconds = 0.25;
 const int    DeviceXTRXShared::m_sampleFifoMinSize = 48000; // 192kS/s knee
 
+DeviceXTRXShared::DeviceXTRXShared() :
+    m_dev(0),
+    m_channel(-1),
+    m_source(0),
+    m_sink(0),
+    m_inputRate(0),
+    m_outputRate(0),
+    m_masterRate(0)
+{}
 
+DeviceXTRXShared::~DeviceXTRXShared()
+{}
 
-double DeviceXTRXShared::set_samplerate(double rate,
-                                        double master,
-                                        bool output)
+double DeviceXTRXShared::set_samplerate(double rate, double master, bool output)
 {
     if (output)
     {
@@ -52,7 +62,7 @@ double DeviceXTRXShared::set_samplerate(double rate,
     double actualrx;
     double actualtx;
 
-    int res = xtrx_set_samplerate(m_deviceParams->getDevice(),
+    int res = xtrx_set_samplerate(m_dev->getDevice(),
           m_masterRate,
           m_inputRate,
           m_outputRate,
@@ -90,7 +100,7 @@ double DeviceXTRXShared::get_board_temperature()
 {
     uint64_t val = 0;
 
-    int res = xtrx_val_get(m_deviceParams->getDevice(), XTRX_TRX, XTRX_CH_AB, XTRX_BOARD_TEMP, &val);
+    int res = xtrx_val_get(m_dev->getDevice(), XTRX_TRX, XTRX_CH_AB, XTRX_BOARD_TEMP, &val);
 
     if (res) {
         return 0;
@@ -103,7 +113,7 @@ bool DeviceXTRXShared::get_gps_status()
 {
     uint64_t val = 0;
 
-    int res = xtrx_val_get(m_deviceParams->getDevice(), XTRX_TRX, XTRX_CH_AB, XTRX_WAIT_1PPS, &val);
+    int res = xtrx_val_get(m_dev->getDevice(), XTRX_TRX, XTRX_CH_AB, XTRX_WAIT_1PPS, &val);
 
     if (res) {
         return false;

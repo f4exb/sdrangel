@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2017, 2018 Edouard Griffiths, F4EXB                             //
 // Copyright (C) 2017 Sergey Kostanbaev, Fairwaves Inc.                          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -176,6 +176,8 @@ public:
     virtual void init();
     virtual bool start();
     virtual void stop();
+    XTRXInputThread *getThread() { return m_XTRXInputThread; }
+    void setThread(XTRXInputThread *thread) { m_XTRXInputThread = thread; }
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
@@ -192,7 +194,6 @@ public:
     void getLORange(float& minF, float& maxF, float& stepF) const;
     void getSRRange(float& minF, float& maxF, float& stepF) const;
     void getLPRange(float& minF, float& maxF, float& stepF) const;
-    uint32_t getHWLog2Decim() const;
 
     void apply_gain_auto(uint32_t gain);
     void apply_gain_lna(double gain);
@@ -207,18 +208,16 @@ private:
     QString m_deviceDescription;
     bool m_running;
     DeviceXTRXShared m_deviceShared;
-    bool m_channelAcquired;
 
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
 
     bool openDevice();
     void closeDevice();
-    bool acquireChannel();
-    void releaseChannel();
-    void suspendRxBuddies();
-    void resumeRxBuddies();
-    void suspendTxBuddies();
-    void resumeTxBuddies();
+    XTRXInputThread *findThread();
+    void moveThreadToBuddy();
+
+    void suspendTxThread();
+    void resumeTxThread();
     bool applySettings(const XTRXInputSettings& settings, bool force = false, bool forceNCOFrequency = false);
 };
 

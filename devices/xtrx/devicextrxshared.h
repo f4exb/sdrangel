@@ -21,6 +21,10 @@
 #include "devicextrxparam.h"
 #include "util/message.h"
 
+class DeviceXTRX;
+class XTRXInput;
+class XTRXOutput;
+
 /**
  * Structure shared by a buddy with other buddies
  */
@@ -129,14 +133,10 @@ public:
         virtual bool isRunning() = 0;
     };
 
-    DeviceXTRXParams   *m_deviceParams; //!< unique hardware device parameters
-    xtrx_channel_t      m_channel;       //!< logical device channel number (-1 if none)
-    ThreadInterface     *m_thread;       //!< holds the thread address if started else 0
-    int                 m_ncoFrequency;
-    double              m_centerFrequency;
-    uint32_t            m_log2Soft;
-    bool                m_threadWasRunning; //!< flag to know if thread needs to be resumed after suspend
-
+    DeviceXTRX          *m_dev;
+    int                 m_channel;       //!< allocated channel (-1 if none)
+    XTRXInput           *m_source;
+    XTRXOutput          *m_sink;
     double              m_inputRate;
     double              m_outputRate;
     double              m_masterRate;
@@ -144,24 +144,10 @@ public:
     static const float  m_sampleFifoLengthInSeconds;
     static const int    m_sampleFifoMinSize;
 
-    DeviceXTRXShared() :
-        m_deviceParams(0),
-        m_channel(XTRX_CH_AB),
-        m_thread(0),
-        m_ncoFrequency(0),
-        m_centerFrequency(0),
-        m_log2Soft(0),
-        m_threadWasRunning(false),
-        m_inputRate(0),
-        m_outputRate(0),
-        m_masterRate(0)
-    {}
-
-    ~DeviceXTRXShared()
-    {}
+    DeviceXTRXShared();
+    ~DeviceXTRXShared();
 
     double set_samplerate(double rate, double master, bool output);
-
     double get_board_temperature();
     bool get_gps_status();
 };

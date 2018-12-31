@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2017, 2018 Edouard Griffiths, F4EXB                             //
 // Copyright (C) 2017 Sergey Kostanbaev, Fairwaves Inc.                          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -43,15 +43,9 @@ XTRXInput::XTRXInput(DeviceSourceAPI *deviceAPI) :
     m_settings(),
     m_XTRXInputThread(0),
     m_deviceDescription("XTRXInput"),
-    m_running(false),
-    m_channelAcquired(false)
+    m_running(false)
 {
-
-    suspendRxBuddies();
-    suspendTxBuddies();
     openDevice();
-    resumeTxBuddies();
-    resumeRxBuddies();
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
@@ -59,14 +53,13 @@ XTRXInput::XTRXInput(DeviceSourceAPI *deviceAPI) :
 
 XTRXInput::~XTRXInput()
 {
-    if (m_running) stop();
+    if (m_running) {
+        stop();
+    }
+
     m_deviceAPI->removeSink(m_fileSink);
     delete m_fileSink;
-    suspendRxBuddies();
-    suspendTxBuddies();
     closeDevice();
-    resumeTxBuddies();
-    resumeRxBuddies();
 }
 
 void XTRXInput::destroy()
@@ -86,231 +79,101 @@ bool XTRXInput::openDevice()
         qDebug("XTRXInput::openDevice: allocated SampleFifo");
     }
 
-    xtrx_channel_t requestedChannel = m_deviceAPI->getItemIndex() ? XTRX_CH_B : XTRX_CH_A;
-
-    // look for Rx buddies and get reference to common parameters
-    // if there is a channel left take the first available
+    // look for Rx buddies and get reference to the device object
     if (m_deviceAPI->getSourceBuddies().size() > 0) // look source sibling first
     {
         qDebug("XTRXInput::openDevice: look in Rx buddies");
 
         DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
-        m_deviceShared = *((DeviceXTRXShared *) sourceBuddy->getBuddySharedPtr()); // copy shared data
-        DeviceXTRXParams *deviceParams = m_deviceShared.m_deviceParams; // get device parameters
+        DeviceXTRXShared *deviceXTRXShared = (DeviceXTRXShared*) sourceBuddy->getBuddySharedPtr();
 
-        if (deviceParams == 0)
+        if (deviceXTRXShared == 0)
         {
-            qCritical("XTRXInput::openDevice: cannot get device parameters from Rx buddy");
-            return false; // the device params should have been created by the buddy
-        }
-        else
-        {
-            qDebug("XTRXInput::openDevice: getting device parameters from Rx buddy");
+            qCritical("XTRXInput::openDevice: the source buddy shared pointer is null");
+            return false;
         }
 
-        if (m_deviceAPI->getSourceBuddies().size() == deviceParams->m_nbRxChannels)
+        DeviceXTRX *device = deviceXTRXShared->m_dev;
+
+        if (device == 0)
         {
-            qCritical("XTRXInput::openDevice: no more Rx channels available in device");
-            return false; // no more Rx channels available in device
-        }
-        else
-        {
-            qDebug("XTRXInput::openDevice: at least one more Rx channel is available in device");
+            qCritical("XTRXInput::openDevice: cannot get device pointer from Rx buddy");
+            return false;
         }
 
-        // check if the requested channel is busy and abort if so (should not happen if device management is working correctly)
-
-        char *busyChannels = new char[deviceParams->m_nbRxChannels];
-        memset(busyChannels, 0, deviceParams->m_nbRxChannels);
-
-        for (unsigned int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
-        {
-            DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
-            DeviceXTRXShared *buddyShared = (DeviceXTRXShared *) buddy->getBuddySharedPtr();
-
-            if (buddyShared->m_channel == requestedChannel)
-            {
-                qCritical("XTRXInput::openDevice: cannot open busy channel %u", requestedChannel);
-                return false;
-            }
-        }
-
-        m_deviceShared.m_channel = requestedChannel; // acknowledge the requested channel
-        delete[] busyChannels;
+        m_deviceShared.m_dev = device;
     }
-    // look for Tx buddies and get reference to common parameters
-    // take the first Rx channel
+    // look for Tx buddies and get reference to the device object
     else if (m_deviceAPI->getSinkBuddies().size() > 0) // then sink
     {
         qDebug("XTRXInput::openDevice: look in Tx buddies");
 
         DeviceSinkAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
-        m_deviceShared = *((DeviceXTRXShared *) sinkBuddy->getBuddySharedPtr()); // copy parameters
+        DeviceXTRXShared *deviceXTRXShared = (DeviceXTRXShared*) sinkBuddy->getBuddySharedPtr();
 
-        if (m_deviceShared.m_deviceParams == 0)
+        if (deviceXTRXShared == 0)
         {
-            qCritical("XTRXInput::openDevice: cannot get device parameters from Tx buddy");
-            return false; // the device params should have been created by the buddy
-        }
-        else
-        {
-            qDebug("XTRXInput::openDevice: getting device parameters from Tx buddy");
+            qCritical("XTRXInput::openDevice: the sink buddy shared pointer is null");
+            return false;
         }
 
-        m_deviceShared.m_channel = requestedChannel; // acknowledge the requested channel
+        DeviceXTRX *device = deviceXTRXShared->m_dev;
+
+        if (device == 0)
+        {
+            qCritical("XTRXInput::openDevice: cannot get device pointer from Tx buddy");
+            return false;
+        }
+
+        m_deviceShared.m_dev = device;
     }
-    // There are no buddies then create the first XTRX common parameters
-    // open the device this will also populate common fields
-    // take the first Rx channel
+    // There are no buddies then create the first BladeRF2 device
     else
     {
         qDebug("XTRXInput::openDevice: open device here");
 
-        m_deviceShared.m_deviceParams = new DeviceXTRXParams();
+        m_deviceShared.m_dev = new DeviceXTRX();
         char serial[256];
         strcpy(serial, qPrintable(m_deviceAPI->getSampleSourceSerial()));
 
-        if (!m_deviceShared.m_deviceParams->open(serial)) {
-            delete m_deviceShared.m_deviceParams;
-            m_deviceShared.m_deviceParams = 0;
-
+        if (!m_deviceShared.m_dev->open(serial))
+        {
+            qCritical("XTRXInput::openDevice: cannot open BladeRF2 device");
             return false;
         }
-
-        m_deviceShared.m_channel = requestedChannel; // acknowledge the requested channel
     }
 
+    m_deviceShared.m_channel = m_deviceAPI->getItemIndex(); // publicly allocate channel
+    m_deviceShared.m_source = this;
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
-
     return true;
-}
-
-void XTRXInput::suspendRxBuddies()
-{
-    const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-    std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
-
-    qDebug("XTRXInput::suspendRxBuddies (%lu)", sourceBuddies.size());
-
-    for (; itSource != sourceBuddies.end(); ++itSource)
-    {
-        DeviceXTRXShared *buddySharedPtr = (DeviceXTRXShared *) (*itSource)->getBuddySharedPtr();
-
-        if (buddySharedPtr->m_thread && buddySharedPtr->m_thread->isRunning())
-        {
-            buddySharedPtr->m_thread->stopWork();
-            buddySharedPtr->m_threadWasRunning = true;
-        }
-        else
-        {
-            buddySharedPtr->m_threadWasRunning = false;
-        }
-    }
-}
-
-void XTRXInput::suspendTxBuddies()
-{
-    const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-    std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
-
-    qDebug("XTRXInput::suspendTxBuddies (%lu)", sinkBuddies.size());
-
-    for (; itSink != sinkBuddies.end(); ++itSink)
-    {
-        DeviceXTRXShared *buddySharedPtr = (DeviceXTRXShared *) (*itSink)->getBuddySharedPtr();
-
-        if (buddySharedPtr->m_thread) {
-            buddySharedPtr->m_thread->stopWork();
-            buddySharedPtr->m_threadWasRunning = true;
-        }
-        else
-        {
-            buddySharedPtr->m_threadWasRunning = false;
-        }
-    }
-}
-
-void XTRXInput::resumeRxBuddies()
-{
-    const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-    std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
-
-    qDebug("XTRXInput::resumeRxBuddies (%lu)", sourceBuddies.size());
-
-    for (; itSource != sourceBuddies.end(); ++itSource)
-    {
-        DeviceXTRXShared *buddySharedPtr = (DeviceXTRXShared *) (*itSource)->getBuddySharedPtr();
-
-        if (buddySharedPtr->m_threadWasRunning) {
-            buddySharedPtr->m_thread->startWork();
-        }
-    }
-}
-
-void XTRXInput::resumeTxBuddies()
-{
-    const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-    std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
-
-    qDebug("XTRXInput::resumeTxBuddies (%lu)", sinkBuddies.size());
-
-    for (; itSink != sinkBuddies.end(); ++itSink)
-    {
-        DeviceXTRXShared *buddySharedPtr = (DeviceXTRXShared *) (*itSink)->getBuddySharedPtr();
-
-        if (buddySharedPtr->m_threadWasRunning) {
-            buddySharedPtr->m_thread->startWork();
-        }
-    }
 }
 
 void XTRXInput::closeDevice()
 {
-    if (m_deviceShared.m_deviceParams->getDevice() == 0) { // was never open
+    if (m_deviceShared.m_dev == 0) { // was never open
         return;
     }
 
-    if (m_running) { stop(); }
+    if (m_running) {
+        stop();
+    }
 
-    m_deviceShared.m_channel = XTRX_CH_AB;
+    if (m_XTRXInputThread) { // stills own the thread => transfer to a buddy
+        moveThreadToBuddy();
+    }
+
+    m_deviceShared.m_channel = -1; // publicly release channel
+    m_deviceShared.m_source = 0;
 
     // No buddies so effectively close the device
 
     if ((m_deviceAPI->getSinkBuddies().size() == 0) && (m_deviceAPI->getSourceBuddies().size() == 0))
     {
-        m_deviceShared.m_deviceParams->close();
-        delete m_deviceShared.m_deviceParams;
-        m_deviceShared.m_deviceParams = 0;
+        m_deviceShared.m_dev->close();
+        delete m_deviceShared.m_dev;
+        m_deviceShared.m_dev = 0;
     }
-}
-
-bool XTRXInput::acquireChannel()
-{
-    //suspendRxBuddies();
-    //suspendTxBuddies();
-
-    qDebug("XTRXInput::acquireChannel: stream set up on Rx channel %d", m_deviceShared.m_channel);
-
-    //resumeTxBuddies();
-    //resumeRxBuddies();
-
-    m_channelAcquired = true;
-    return true;
-}
-
-void XTRXInput::releaseChannel()
-{
-    //suspendRxBuddies();
-    //suspendTxBuddies();
-
-    qDebug("XTRXInput::releaseChannel: Rx channel %d disabled", m_deviceShared.m_channel);
-
-    //resumeTxBuddies();
-    //resumeRxBuddies();
-
-    // The channel will be effectively released to be reused in another device set only at close time
-
-    m_channelAcquired = false;
 }
 
 void XTRXInput::init()
@@ -318,39 +181,162 @@ void XTRXInput::init()
     applySettings(m_settings, true, false);
 }
 
+XTRXInputThread *XTRXInput::findThread()
+{
+    if (m_XTRXInputThread == 0) // this does not own the thread
+    {
+        XTRXInputThread *xtrxInputThread = 0;
+
+        // find a buddy that has allocated the thread
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+
+        for (; it != sourceBuddies.end(); ++it)
+        {
+            XTRXInput *buddySource = ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_source;
+
+            if (buddySource)
+            {
+                xtrxInputThread = buddySource->getThread();
+
+                if (xtrxInputThread) {
+                    break;
+                }
+            }
+        }
+
+        return xtrxInputThread;
+    }
+    else
+    {
+        return m_XTRXInputThread; // own thread
+    }
+}
+
+void XTRXInput::moveThreadToBuddy()
+{
+    const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+    std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+
+    for (; it != sourceBuddies.end(); ++it)
+    {
+        XTRXInput *buddySource = ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_source;
+
+        if (buddySource)
+        {
+            buddySource->setThread(m_XTRXInputThread);
+            m_XTRXInputThread = 0;  // zero for others
+        }
+    }
+}
+
 bool XTRXInput::start()
 {
-    if (!m_deviceShared.m_deviceParams->getDevice()) {
+    // There is a single thread per physical device (Rx side). This thread is unique and referenced by a unique
+    // buddy in the group of source buddies associated with this physical device.
+    //
+    // This start method is responsible for managing the thread when the streaming of a Rx channel is started
+    //
+    // It checks the following conditions
+    //   - the thread is allocated or not (by itself or one of its buddies). If it is it grabs the thread pointer.
+    //   - the requested channel is another channel (one is already streaming).
+    //
+    // The XTRX support library lets you work in two possible modes:
+    //   - Single Input (SI) with only one channel streaming. This can be channel 0 or 1 (channels can be swapped - unlike with BladeRF2).
+    //   - Multiple Input (MI) with two channels streaming using interleaved samples. It MUST be in this configuration if both channels are
+    //     streaming.
+    //
+    // It manages the transition form SI where only one channel is running to the  Multiple Input (MI) if the both channels are requested.
+    // To perform the transition it stops the thread, deletes it and creates a new one.
+    // It marks the thread as needing start.
+    //
+    // If there is no thread allocated it means we are in SI mode and it creates a new one with the requested channel.
+    // It marks the thread as needing start.
+    //
+    // Eventually it registers the FIFO in the thread. If the thread has to be started it enables the channels up to the number of channels
+    // allocated in the thread and starts the thread.
+
+    if (!m_deviceShared.m_dev || !m_deviceShared.m_dev->getDevice())
+    {
+        qDebug("XTRXInput::start: no device object");
         return false;
     }
 
-    if (m_running) {
-        stop();
+    int requestedChannel = m_deviceAPI->getItemIndex();
+    XTRXInputThread *xtrxInputThread = findThread();
+    bool needsStart = false;
+
+    if (xtrxInputThread) // if thread is already allocated
+    {
+        qDebug("XTRXInput::start: thread is already allocated");
+
+        unsigned int nbOriginalChannels = xtrxInputThread->getNbChannels();
+
+        // if one channel is already allocated it must be the other one so we'll end up with both channels
+        // thus we expand by deleting and re-creating the thread
+        if (nbOriginalChannels != 0)
+        {
+            qDebug("XTRXInput::start: expand channels. Re-allocate thread and take ownership");
+
+            SampleSinkFifo **fifos = new SampleSinkFifo*[2];
+            unsigned int *log2Decims = new unsigned int[2];
+
+            for (int i = 0; i < 2; i++) // save original FIFO references and data
+            {
+                fifos[i] = xtrxInputThread->getFifo(i);
+                log2Decims[i] = xtrxInputThread->getLog2Decimation(i);
+            }
+
+            xtrxInputThread->stopWork();
+            delete xtrxInputThread;
+            xtrxInputThread = new XTRXInputThread(m_deviceShared.m_dev->getDevice(), 2); // MI mode (2 channels)
+            m_XTRXInputThread = xtrxInputThread; // take ownership
+
+            for (int i = 0; i < 2; i++) // restore original FIFO references
+            {
+                xtrxInputThread->setFifo(i, fifos[i]);
+                xtrxInputThread->setLog2Decimation(i, log2Decims[i]);
+            }
+
+            // remove old thread address from buddies (reset in all buddies). The address being held only in the owning source.
+            const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+            std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+
+            for (; it != sourceBuddies.end(); ++it) {
+                ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
+            }
+
+            // was used as temporary storage:
+            delete[] fifos;
+            delete[] log2Decims;
+
+            needsStart = true;
+        }
+        else
+        {
+            qDebug("XTRXInput::start: keep buddy thread");
+        }
+    }
+    else // first allocation
+    {
+        qDebug("XTRXInput::start: allocate thread and take ownership");
+        xtrxInputThread = new XTRXInputThread(m_deviceShared.m_dev->getDevice(), 1, requestedChannel);
+        m_XTRXInputThread = xtrxInputThread; // take ownership
+        needsStart = true;
     }
 
-    if (!acquireChannel()) {
-        return false;
+    xtrxInputThread->setFifo(requestedChannel, &m_sampleFifo);
+    xtrxInputThread->setLog2Decimation(requestedChannel, m_settings.m_log2SoftDecim);
+
+    if (needsStart)
+    {
+        qDebug("XTRXInput::start: (re)sart thread");
+        xtrxInputThread->startWork();
     }
 
     applySettings(m_settings, true);
 
-    // start / stop streaming is done in the thread.
-
-    if ((m_XTRXInputThread = new XTRXInputThread(&m_deviceShared, &m_sampleFifo)) == 0)
-    {
-        qFatal("XTRXInput::start: cannot create thread");
-        stop();
-        return false;
-    }
-    else
-    {
-        qDebug("XTRXInput::start: thread created");
-    }
-
-    m_XTRXInputThread->setLog2Decimation(m_settings.m_log2SoftDecim);
-    m_XTRXInputThread->startWork();
-
-    m_deviceShared.m_thread = m_XTRXInputThread;
+    qDebug("XTRXInput::start: started");
     m_running = true;
 
     return true;
@@ -358,20 +344,140 @@ bool XTRXInput::start()
 
 void XTRXInput::stop()
 {
-    qDebug("XTRXInput::stop");
-    disconnect(m_XTRXInputThread, SIGNAL(finished()), this, SLOT(threadFinished()));
+    // This stop method is responsible for managing the thread when the streaming of a Rx channel is stopped
+    //
+    // If the thread is currently managing only one channel (SI mode). The thread can be just stopped and deleted.
+    // Then the channel is closed.
+    //
+    // If the thread is currently managing both channels (MI mode) then we are removing one channel. Thus we must
+    // transition from MI to SI. This transition is handled by stopping the thread, deleting it and creating a new one
+    // managing a single channel.
 
-    if (m_XTRXInputThread != 0)
-    {
-        m_XTRXInputThread->stopWork();
-        delete m_XTRXInputThread;
-        m_XTRXInputThread = 0;
+    if (!m_running) {
+        return;
     }
 
-    m_deviceShared.m_thread = 0;
-    m_running = false;
+    int requestedChannel = m_deviceAPI->getItemIndex(); // channel to remove
+    XTRXInputThread *xtrxInputThread = findThread();
 
-    releaseChannel();
+    if (xtrxInputThread == 0) { // no thread allocated
+        return;
+    }
+
+    int nbOriginalChannels = xtrxInputThread->getNbChannels();
+
+    if (nbOriginalChannels == 1) // SI mode => just stop and delete the thread
+    {
+        qDebug("XTRXInput::stop: SI mode. Just stop and delete the thread");
+        xtrxInputThread->stopWork();
+        delete xtrxInputThread;
+        m_XTRXInputThread = 0;
+
+        // remove old thread address from buddies (reset in all buddies)
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+
+        for (; it != sourceBuddies.end(); ++it) {
+            ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
+        }
+    }
+    else if (nbOriginalChannels == 2) // Reduce from MI to SI by deleting and re-creating the thread
+    {
+        qDebug("XTRXInput::stop: MI mode. Reduce by deleting and re-creating the thread");
+        xtrxInputThread->stopWork();
+        SampleSinkFifo **fifos = new SampleSinkFifo*[2];
+        unsigned int *log2Decims = new unsigned int[2];
+
+        for (int i = 0; i < 2; i++) // save original FIFO references
+        {
+            fifos[i] = xtrxInputThread->getFifo(i);
+            log2Decims[i] = xtrxInputThread->getLog2Decimation(i);
+        }
+
+        delete xtrxInputThread;
+        m_XTRXInputThread = 0;
+
+        xtrxInputThread = new XTRXInputThread(m_deviceShared.m_dev->getDevice(), 1, requestedChannel ^ 1); // leave opposite channel
+        m_XTRXInputThread = xtrxInputThread; // take ownership
+
+        for (int i = 0; i < nbOriginalChannels-1; i++)  // restore original FIFO references
+        {
+            xtrxInputThread->setFifo(i, fifos[i]);
+            xtrxInputThread->setLog2Decimation(i, log2Decims[i]);
+        }
+
+        // remove old thread address from buddies (reset in all buddies). The address being held only in the owning source.
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+
+        for (; it != sourceBuddies.end(); ++it) {
+            ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
+        }
+
+        xtrxInputThread->startWork();
+
+        // was used as temporary storage:
+        delete[] fifos;
+        delete[] log2Decims;
+    }
+
+    m_running = false;
+}
+
+void XTRXInput::suspendTxThread()
+{
+    // TODO: activate when output is managed
+//    XTRXOutputThread *xtrxOutputThread = 0;
+//
+//    // find a buddy that has allocated the thread
+//    const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+//    std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin()
+//
+//    for (; itSink != sinkBuddies.end(); ++itSink)
+//    {
+//        XTRXOutput *buddySink = ((DeviceXTRXShared*) (*itSink)->getBuddySharedPtr())->m_sink;
+//
+//        if (buddySink)
+//        {
+//            xtrxOutputThread = buddySink->getThread();
+//
+//            if (xtrxOutputThread) {
+//                break;
+//            }
+//        }
+//    }
+//
+//    if (xtrxOutputThread) {
+//        xtrxOutputThread->stopWork();
+//    }
+}
+
+void XTRXInput::resumeTxThread()
+{
+    // TODO: activate when output is managed
+//    XTRXOutputThread *xtrxOutputThread = 0;
+//
+//    // find a buddy that has allocated the thread
+//    const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+//    std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin()
+//
+//    for (; itSink != sinkBuddies.end(); ++itSink)
+//    {
+//        XTRXOutput *buddySink = ((DeviceXTRXShared*) (*itSink)->getBuddySharedPtr())->m_sink;
+//
+//        if (buddySink)
+//        {
+//            xtrxOutputThread = buddySink->getThread();
+//
+//            if (xtrxOutputThread) {
+//                break;
+//            }
+//        }
+//    }
+//
+//    if (xtrxOutputThread) {
+//        xtrxOutputThread->startWork();
+//    }
 }
 
 QByteArray XTRXInput::serialize() const
@@ -464,11 +570,6 @@ void XTRXInput::getLPRange(float& minF, float& maxF, float& stepF) const
            minF, maxF, stepF);
 }
 
-uint32_t XTRXInput::getHWLog2Decim() const
-{
-    return m_deviceShared.m_deviceParams->m_log2OvSRRx;
-}
-
 bool XTRXInput::handleMessage(const Message& message)
 {
     if (MsgConfigureXTRX::match(message))
@@ -541,7 +642,7 @@ bool XTRXInput::handleMessage(const Message& message)
         {
             uint64_t fifolevel = 0;
 
-            xtrx_val_get(m_deviceShared.m_deviceParams->getDevice(),
+            xtrx_val_get(m_deviceShared.m_dev->getDevice(),
                          XTRX_RX, XTRX_CH_AB, XTRX_PERF_LLFIFO, &fifolevel);
 
             MsgReportStreamInfo *report = MsgReportStreamInfo::create(
@@ -562,11 +663,11 @@ bool XTRXInput::handleMessage(const Message& message)
         double board_temp = 0.0;
         bool gps_locked = false;
 
-        if (!m_deviceShared.m_deviceParams->getDevice() || ((board_temp = m_deviceShared.get_board_temperature() / 256.0) == 0.0)) {
+        if (!m_deviceShared.m_dev->getDevice() || ((board_temp = m_deviceShared.get_board_temperature() / 256.0) == 0.0)) {
             qDebug("XTRXInput::handleMessage: MsgGetDeviceInfo: cannot get board temperature");
         }
 
-        if (!m_deviceShared.m_deviceParams->getDevice()) {
+        if (!m_deviceShared.m_dev->getDevice()) {
             qDebug("XTRXInput::handleMessage: MsgGetDeviceInfo: cannot get GPS lock status");
         } else {
             gps_locked = m_deviceShared.get_gps_status();
@@ -667,7 +768,7 @@ void XTRXInput::apply_gain_auto(uint32_t gain)
 
 void XTRXInput::apply_gain_lna(double gain)
 {
-    if (xtrx_set_gain(m_deviceShared.m_deviceParams->getDevice(),
+    if (xtrx_set_gain(m_deviceShared.m_dev->getDevice(),
                       XTRX_CH_AB /*m_deviceShared.m_channel*/,
                       XTRX_RX_LNA_GAIN,
                       gain,
@@ -683,7 +784,7 @@ void XTRXInput::apply_gain_lna(double gain)
 
 void XTRXInput::apply_gain_tia(double gain)
 {
-    if (xtrx_set_gain(m_deviceShared.m_deviceParams->getDevice(),
+    if (xtrx_set_gain(m_deviceShared.m_dev->getDevice(),
                       XTRX_CH_AB /*m_deviceShared.m_channel*/,
                       XTRX_RX_TIA_GAIN,
                       gain,
@@ -699,7 +800,7 @@ void XTRXInput::apply_gain_tia(double gain)
 
 void XTRXInput::apply_gain_pga(double gain)
 {
-    if (xtrx_set_gain(m_deviceShared.m_deviceParams->getDevice(),
+    if (xtrx_set_gain(m_deviceShared.m_dev->getDevice(),
                       XTRX_CH_AB /*m_deviceShared.m_channel*/,
                       XTRX_RX_PGA_GAIN,
                       gain,
@@ -715,11 +816,14 @@ void XTRXInput::apply_gain_pga(double gain)
 
 bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, bool forceNCOFrequency)
 {
+    int requestedChannel = m_deviceAPI->getItemIndex();
+    XTRXInputThread *inputThread = findThread();
+
     bool forwardChangeOwnDSP = false;
     bool forwardChangeRxDSP  = false;
     bool forwardChangeAllDSP = false;
     bool forwardClockSource  = false;
-    bool ownThreadWasRunning = false;
+    bool rxThreadWasRunning = false;
     bool doLPCalibration = false;
     bool doChangeSampleRate = false;
     bool doChangeFreq = false;
@@ -731,22 +835,17 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
 
     // apply settings
 
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
-    {
+    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force) {
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
     }
 
-    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
-    {
+    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force) {
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
     }
 
     if ((m_settings.m_pwrmode != settings.m_pwrmode)) {
-        if (xtrx_val_set(m_deviceShared.m_deviceParams->getDevice(),
-                         XTRX_TRX, XTRX_CH_AB, XTRX_LMS7_PWR_MODE, settings.m_pwrmode) < 0)
-        {
-            qCritical("XTRXInput::applySettings: could not set power mode %d",
-                      settings.m_pwrmode);
+        if (xtrx_val_set(m_deviceShared.m_dev->getDevice(), XTRX_TRX, XTRX_CH_AB, XTRX_LMS7_PWR_MODE, settings.m_pwrmode) < 0) {
+            qCritical("XTRXInput::applySettings: could not set power mode %d", settings.m_pwrmode);
         }
     }
 
@@ -754,7 +853,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
             (settings.m_extClock && (m_settings.m_extClockFreq != settings.m_extClockFreq)) || force)
     {
 
-        xtrx_set_ref_clk(m_deviceShared.m_deviceParams->getDevice(),
+        xtrx_set_ref_clk(m_deviceShared.m_dev->getDevice(),
                          (settings.m_extClock) ? settings.m_extClockFreq : 0,
                          (settings.m_extClock) ? XTRX_CLKSRC_EXT : XTRX_CLKSRC_INT);
         {
@@ -772,13 +871,12 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     {
         forwardChangeAllDSP = true; //m_settings.m_devSampleRate != settings.m_devSampleRate;
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
-        {
+        if (m_deviceShared.m_dev->getDevice() != 0) {
             doChangeSampleRate = true;
         }
     }
 
-    if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
+    if (m_deviceShared.m_dev->getDevice() != 0)
     {
         if ((m_settings.m_gainMode != settings.m_gainMode) || force)
         {
@@ -799,16 +897,13 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         }
         else if (m_settings.m_gainMode == XTRXInputSettings::GAIN_MANUAL)
         {
-            if (m_settings.m_lnaGain != settings.m_lnaGain)
-            {
+            if (m_settings.m_lnaGain != settings.m_lnaGain) {
                 doGainLna = true;
             }
-            if (m_settings.m_tiaGain != settings.m_tiaGain)
-            {
+            if (m_settings.m_tiaGain != settings.m_tiaGain) {
                 doGainTia = true;
             }
-            if (m_settings.m_pgaGain != settings.m_pgaGain)
-            {
+            if (m_settings.m_pgaGain != settings.m_pgaGain) {
                 doGainPga = true;
             }
         }
@@ -816,8 +911,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
 
     if ((m_settings.m_lpfBW != settings.m_lpfBW) || force)
     {
-        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
-        {
+        if (m_deviceShared.m_dev->getDevice() != 0) {
             doLPCalibration = true;
         }
     }
@@ -852,36 +946,27 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     if ((m_settings.m_log2SoftDecim != settings.m_log2SoftDecim) || force)
     {
         forwardChangeOwnDSP = true;
-        m_deviceShared.m_log2Soft = settings.m_log2SoftDecim; // for buddies
 
-        if (m_XTRXInputThread != 0)
+        if (inputThread != 0)
         {
-            m_XTRXInputThread->setLog2Decimation(settings.m_log2SoftDecim);
+            inputThread->setLog2Decimation(requestedChannel, settings.m_log2SoftDecim);
             qDebug() << "XTRXInput::applySettings: set soft decimation to " << (1<<settings.m_log2SoftDecim);
         }
     }
 
     if ((m_settings.m_antennaPath != settings.m_antennaPath) || force)
     {
-        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
+        if (m_deviceShared.m_dev->getDevice() != 0)
         {
-            if (xtrx_set_antenna(m_deviceShared.m_deviceParams->getDevice(),
-                                 settings.m_antennaPath) < 0)
-            {
-                qCritical("XTRXInput::applySettings: could not set antenna path to %d",
-                          (int) settings.m_antennaPath);
-            }
-            else
-            {
-                qDebug("XTRXInput::applySettings: set antenna path to %d on channel %d",
-                       (int) settings.m_antennaPath,
-                       m_deviceShared.m_channel);
+            if (xtrx_set_antenna(m_deviceShared.m_dev->getDevice(), settings.m_antennaPath) < 0) {
+                qCritical("XTRXInput::applySettings: could not set antenna path to %d", (int) settings.m_antennaPath);
+            } else {
+                qDebug("XTRXInput::applySettings: set antenna path to %d", (int) settings.m_antennaPath);
             }
         }
     }
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
-    {
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
         doChangeFreq = true;
     }
 
@@ -896,14 +981,15 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
 
     if (doChangeSampleRate)
     {
-        if (m_XTRXInputThread && m_XTRXInputThread->isRunning())
+        XTRXInputThread *rxThread = findThread();
+
+        if (rxThread && rxThread->isRunning())
         {
-            m_XTRXInputThread->stopWork();
-            ownThreadWasRunning = true;
+            rxThread->stopWork();
+            rxThreadWasRunning = true;
         }
 
-        suspendRxBuddies();
-        suspendTxBuddies();
+        suspendTxThread();
 
         double master = (settings.m_log2HardDecim == 0) ? 0 : (settings.m_devSampleRate * 4 * (1 << settings.m_log2HardDecim));
 
@@ -917,8 +1003,6 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         }
         else
         {
-            m_deviceShared.m_deviceParams->m_log2OvSRRx = settings.m_log2HardDecim;
-            m_deviceShared.m_deviceParams->m_sampleRate = settings.m_devSampleRate;
             doChangeFreq = true;
             forceNCOFrequency = true;
 
@@ -927,19 +1011,17 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
                    1<<settings.m_log2HardDecim);
         }
 
-        // TODO hangs!!!
-        resumeTxBuddies();
-        resumeRxBuddies();
+        resumeTxThread();
 
-        if (ownThreadWasRunning) {
-            m_XTRXInputThread->startWork();
+        if (rxThreadWasRunning) {
+            rxThread->startWork();
         }
     }
 
     if (doLPCalibration)
     {
-        if (xtrx_tune_rx_bandwidth(m_deviceShared.m_deviceParams->getDevice(),
-                                   m_deviceShared.m_channel,
+        if (xtrx_tune_rx_bandwidth(m_deviceShared.m_dev->getDevice(),
+                                   m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
                                    m_settings.m_lpfBW,
                                    NULL) < 0)
         {
@@ -972,9 +1054,9 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     {
         forwardChangeRxDSP = true;
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
+        if (m_deviceShared.m_dev->getDevice() != 0)
         {
-            if (xtrx_tune(m_deviceShared.m_deviceParams->getDevice(),
+            if (xtrx_tune(m_deviceShared.m_dev->getDevice(),
                           XTRX_TUNE_RX_FDD,
                           settings.m_centerFrequency,
                           NULL) < 0)
@@ -984,7 +1066,6 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
             else
             {
                 //doCalibration = true;
-                m_deviceShared.m_centerFrequency = settings.m_centerFrequency; // for buddies
                 qDebug("XTRXInput::applySettings: frequency set to %lu", settings.m_centerFrequency);
             }
         }
@@ -992,9 +1073,9 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
 
     if (forceNCOFrequency)
     {
-        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
+        if (m_deviceShared.m_dev->getDevice() != 0)
         {
-            if (xtrx_tune(m_deviceShared.m_deviceParams->getDevice(),
+            if (xtrx_tune(m_deviceShared.m_dev->getDevice(),
                           XTRX_TUNE_BB_RX,
                           /* m_deviceShared.m_channel, */
                           (settings.m_ncoEnable) ? settings.m_ncoFrequency : 0,
@@ -1007,7 +1088,6 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
             else
             {
                 forwardChangeOwnDSP = true;
-                m_deviceShared.m_ncoFrequency = settings.m_ncoEnable ? settings.m_ncoFrequency : 0; // for buddies
                 qDebug("XTRXInput::applySettings: %sd and set NCO to %d Hz",
                        settings.m_ncoEnable ? "enable" : "disable",
                        settings.m_ncoFrequency);
