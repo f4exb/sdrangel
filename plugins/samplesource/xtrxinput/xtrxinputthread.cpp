@@ -32,7 +32,7 @@ XTRXInputThread::XTRXInputThread(struct xtrx_dev *dev, unsigned int nbChannels, 
     m_nbChannels(nbChannels),
     m_uniqueChannelIndex(uniqueChannelIndex)
 {
-    qDebug("XTRXInputThread::XTRXInputThread");
+    qDebug("XTRXInputThread::XTRXInputThread: nbChannels: %u uniqueChannelIndex: %u", nbChannels, uniqueChannelIndex);
     m_channels = new Channel[2];
 
     for (unsigned int i = 0; i < 2; i++) {
@@ -90,7 +90,7 @@ void XTRXInputThread::run()
 
     unsigned int nbFifos = getNbFifos();
 
-    if ((m_nbChannels > 0) && (nbFifos > 0))
+    if ((m_nbChannels != 0) && (nbFifos != 0))
     {
         xtrx_run_params params;
         xtrx_run_params_init(&params);
@@ -103,6 +103,7 @@ void XTRXInputThread::run()
 
         if (m_nbChannels == 1)
         {
+            qDebug("XTRXInputThread::run: SI mode for channel #%u", m_uniqueChannelIndex);
             params.rx.flags |= XTRX_RSP_SISO_MODE;
 
             if (m_uniqueChannelIndex == 1) {
@@ -119,7 +120,7 @@ void XTRXInputThread::run()
         }
         else
         {
-            std::this_thread::sleep_for(std::chrono::microseconds(50000));
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
             qDebug("XTRXInputThread::run: stream started");
         }
 
@@ -137,6 +138,7 @@ void XTRXInputThread::run()
             if (res < 0)
             {
                 qCritical("XTRXInputThread::run read error: %d", res);
+                qDebug("XTRXInputThread::run: out_samples: %u out_events: %u", nfo.out_samples, nfo.out_events);
                 break;
             }
 
@@ -155,7 +157,7 @@ void XTRXInputThread::run()
         }
         else
         {
-            std::this_thread::sleep_for(std::chrono::microseconds(50000));
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
             qDebug("XTRXInputThread::run: stream stopped");
         }
     }
@@ -171,7 +173,7 @@ unsigned int XTRXInputThread::getNbFifos()
 {
     unsigned int fifoCount = 0;
 
-    for (unsigned int i = 0; i < m_nbChannels; i++)
+    for (unsigned int i = 0; i < 2; i++)
     {
         if (m_channels[i].m_sampleFifo) {
             fifoCount++;
@@ -183,14 +185,14 @@ unsigned int XTRXInputThread::getNbFifos()
 
 void XTRXInputThread::setLog2Decimation(unsigned int channel, unsigned int log2_decim)
 {
-    if (channel < m_nbChannels) {
+    if (channel < 2) {
         m_channels[channel].m_log2Decim = log2_decim;
     }
 }
 
 unsigned int XTRXInputThread::getLog2Decimation(unsigned int channel) const
 {
-    if (channel < m_nbChannels) {
+    if (channel < 2) {
         return m_channels[channel].m_log2Decim;
     } else {
         return 0;
@@ -199,14 +201,14 @@ unsigned int XTRXInputThread::getLog2Decimation(unsigned int channel) const
 
 void XTRXInputThread::setFifo(unsigned int channel, SampleSinkFifo *sampleFifo)
 {
-    if (channel < m_nbChannels) {
+    if (channel < 2) {
         m_channels[channel].m_sampleFifo = sampleFifo;
     }
 }
 
 SampleSinkFifo *XTRXInputThread::getFifo(unsigned int channel)
 {
-    if (channel < m_nbChannels) {
+    if (channel < 2) {
         return m_channels[channel].m_sampleFifo;
     } else {
         return 0;
