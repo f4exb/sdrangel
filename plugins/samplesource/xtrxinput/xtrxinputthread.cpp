@@ -38,8 +38,6 @@ XTRXInputThread::XTRXInputThread(struct xtrx_dev *dev, unsigned int nbChannels, 
     for (unsigned int i = 0; i < 2; i++) {
         m_channels[i].m_convertBuffer.resize(DeviceXTRX::blockSize, Sample{0,0});
     }
-
-    m_buf = new qint16[2*DeviceXTRX::blockSize*2]; // room for two channels
 }
 
 XTRXInputThread::~XTRXInputThread()
@@ -50,7 +48,6 @@ XTRXInputThread::~XTRXInputThread()
         stopWork();
     }
 
-    delete[] m_buf;
     delete[] m_channels;
 }
 
@@ -99,7 +96,7 @@ void XTRXInputThread::run()
         params.rx.chs = XTRX_CH_AB;
         params.rx.wfmt = XTRX_WF_16;
         params.rx.hfmt = XTRX_IQ_INT16;
-        params.rx_stream_start = 2*8192;
+        params.rx_stream_start = 2*DeviceXTRX::blockSize; // was 2*8192
 
         if (m_nbChannels == 1)
         {
@@ -124,11 +121,18 @@ void XTRXInputThread::run()
             qDebug("XTRXInputThread::run: stream started");
         }
 
-        void* buffers[1] = { m_buf };
+        const unsigned int elemSize = 4; // XTRX uses 4 byte I+Q samples
+        std::vector<std::vector<char>> buffMem(m_nbChannels, std::vector<char>(elemSize*DeviceXTRX::blockSize));
+        std::vector<void *> buffs(m_nbChannels);
+
+        for (std::size_t i = 0; i < m_nbChannels; i++) {
+            buffs[i] = buffMem[i].data();
+        }
+
         xtrx_recv_ex_info_t nfo;
         nfo.samples = DeviceXTRX::blockSize;
-        nfo.buffer_count = 1;
-        nfo.buffers = (void* const*)buffers;
+        nfo.buffer_count = m_nbChannels;
+        nfo.buffers = (void* const*) buffs.data();
         nfo.flags = RCVEX_DONT_INSER_ZEROS | RCVEX_DROP_OLD_ON_OVERFLOW;
 
         while (m_running)
@@ -143,9 +147,9 @@ void XTRXInputThread::run()
             }
 
             if (m_nbChannels > 1) {
-                callbackMI(m_buf, 2 * nfo.out_samples);
+                callbackMI((const qint16*) buffs[0], (const qint16*) buffs[1], 2 * nfo.out_samples);
             } else {
-                callbackSI(m_buf, 2 * nfo.out_samples);
+                callbackSI((const qint16*) buffs[0], 2 * nfo.out_samples);
             }
         }
 
@@ -253,9 +257,16 @@ void XTRXInputThread::callbackSI(const qint16* buf, qint32 len)
     m_channels[m_uniqueChannelIndex].m_sampleFifo->write(m_channels[m_uniqueChannelIndex].m_convertBuffer.begin(), it);
 }
 
-void XTRXInputThread::callbackMI(const qint16* buf, qint32 len)
+void XTRXInputThread::callbackMI(const qint16* buf0, const qint16* buf1, qint32 len)
 {
-    (void) buf;
-    (void) len;
-    // TODO
+    unsigned int uniqueChannelIndex = m_uniqueChannelIndex;
+
+    // channel 0
+    m_uniqueChannelIndex = 0;
+    callbackSI(buf0, len);
+    // channel 1
+    m_uniqueChannelIndex = 1;
+    callbackSI(buf1, len);
+
+    m_uniqueChannelIndex = uniqueChannelIndex;
 }

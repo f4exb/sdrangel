@@ -70,14 +70,13 @@ private:
     struct xtrx_dev *m_dev;
 
     Channel *m_channels; //!< Array of channels dynamically allocated for the given number of Rx channels
-    qint16 *m_buf;
     unsigned int m_nbChannels;
     unsigned int m_uniqueChannelIndex;
 
     void run();
     unsigned int getNbFifos();
     void callbackSI(const qint16* buf, qint32 len);
-    void callbackMI(const qint16* buf, qint32 len);
+    void callbackMI(const qint16* buf0, const qint16* buf1, qint32 len);
 };
 
 
