@@ -32,6 +32,7 @@ MINGW32 {
 MSVC {
     INCLUDEPATH += "C:\Program Files\PothosSDR\include"
 }
+macx:INCLUDEPATH += "/opt/local/include"
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
@@ -61,6 +62,11 @@ MINGW32 {
 
 MSVC {
     LIBS += -L"C:\Program Files\PothosSDR\lib" -L"C:\Program Files\PothosSDR\bin" -lbladeRF
+}
+
+macx {
+    LIBS += -L/opt/local/lib -lbladerf
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
 }
 
 RESOURCES = ../../../sdrgui/resources/res.qrc

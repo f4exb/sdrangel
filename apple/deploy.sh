@@ -1,4 +1,5 @@
 #!/bin/bash
+SDRANGEL_VERSION="4.3.2"
 QT_VERSION="5.12.0"
 QT_HOME="/Applications/Qt/${QT_VERSION}"
 
@@ -28,6 +29,11 @@ dply_plugin()
 	echo "DeployPLUGIN: `basename $1` to ${plugin_path}"
 }
 
+add_dmg_entry()
+{
+	cp -fv $1 "${DMG_MPATH}/${2}"
+}
+
 # 1st-pass: Gather libs & plugins
 for i in `find . -name '*.dylib' -type f -not -path "./${APP_PATH}/*"`; do 
 	if [[ $i == *"plugins/"* ]]; then
@@ -54,6 +60,26 @@ pwd
 	-libpath=SDRangel.app/Contents/Frameworks \
 	-verbose=1
 
-# Publish DMG
+# Add other files to DMG
+DMG_SRC="SDRangel.dmg"
+DMG_RW_SRC=${DMG_SRC/.dmg/.rw.dmg}
+DMG_TMP_A="/tmp/_dmg-attach"
+hdiutil pmap $DMG_SRC
+hdiutil convert $DMG_SRC -format UDRW -o $DMG_RW_SRC
+#hdiutil resize -limits $DMG_RW_SRC
+hdiutil attach $DMG_RW_SRC > $DMG_TMP_A
+DMG_MPATH=`cat $DMG_TMP_A | grep Volumes | awk '{ print $3 }'`
 
-# ...
+# Append files into filesystem
+add_dmg_entry ../../../libiio/build/libiio-0.14.g17b73d3.pkg
+add_dmg_entry ../../sdrangel/ReadmeMacOS.md
+
+hdiutil detach $DMG_MPATH
+# Publish version
+VERIMAGIC="-v${SDRANGEL_VERSION}_`date +%Y%m%d_%H%M%S`-Qt${QT_VERSION}"
+DMG_DEPLOY=${DMG_SRC/.dmg/${VERIMAGIC}.dmg}
+hdiutil convert $DMG_RW_SRC -format UDRW -o $DMG_DEPLOY
+rm -f $DMG_RW_SRC
+
+echo "DeployedDMG: ${DMG_DEPLOY}"
+exit 0
