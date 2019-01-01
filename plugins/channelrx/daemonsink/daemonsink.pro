@@ -1,6 +1,6 @@
 #--------------------------------------------------------
 #
-# Pro file for Android and Windows builds with Qt Creator
+# Pro file for Windows builds with Qt Creator
 #
 #--------------------------------------------------------
 
@@ -9,7 +9,7 @@ CONFIG += plugin
 
 QT += core gui widgets multimedia network opengl
 
-TARGET = inputsdrdaemonsource
+TARGET = daemonsink
 
 CONFIG(MINGW32):LIBCM256CCSRC = "C:\softs\cm256cc"
 CONFIG(MSVC):LIBCM256CCSRC = "C:\softs\cm256cc"
@@ -36,23 +36,21 @@ CONFIG(Debug):build_subdir = debug
 
 CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(MSVC):INCLUDEPATH += "C:\softs\boost_1_66_0"
-CONFIG(macx):INCLUDEPATH += "../../../../../boost_1_69_0"
+CONFIG(macx):INCLUDEPATH += "../../../boost_1_69_0"
 
-SOURCES += sdrdaemonsourcebuffer.cpp\
-    sdrdaemonsourcegui.cpp\
-    sdrdaemonsourceinput.cpp\
-    sdrdaemonsourcesettings.cpp\
-    sdrdaemonsourceplugin.cpp\
-    sdrdaemonsourceudphandler.cpp
+SOURCES += daemonsink.cpp\
+    daemonsinkgui.cpp\
+    daemonsinksettings.cpp\
+    daemonsinkplugin.cpp\
+    daemonsinkthread.cpp
 
-HEADERS += sdrdaemonsourcebuffer.h\
-    sdrdaemonsourcegui.h\
-    sdrdaemonsourceinput.h\
-    sdrdaemonsourcesettings.h\
-    sdrdaemonsourceplugin.h\
-    sdrdaemonsourceudphandler.h
+HEADERS += daemonsink.h\
+    daemonsinkgui.h\
+    daemonsinksettings.h\
+    daemonsinkplugin.h\
+    daemonsinkthread.h
 
-FORMS += sdrdaemonsourcegui.ui
+FORMS += daemonsinkgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
@@ -60,11 +58,10 @@ LIBS += -L../../../swagger/$${build_subdir} -lswagger
 LIBS += -L../../../cm256cc/$${build_subdir} -lcm256cc
 
 macx {
-    LIBS -= -L../../../nanomsg/$${build_subdir} -lnanomsg
-    LIBS += -L/usr/local/lib -lnanomsg
     QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
 }
 
 RESOURCES = ../../../sdrgui/resources/res.qrc
 
 CONFIG(MINGW32):DEFINES += USE_INTERNAL_TIMER=1
+

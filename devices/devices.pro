@@ -23,20 +23,20 @@ CONFIG(MSVC):DEFINES += devices_EXPORTS
 CONFIG(MINGW32):LIBBLADERF = "C:\Programs\bladeRF"
 CONFIG(MINGW64):LIBBLADERF = "C:\Programs\bladeRF"
 
-CONFIG(macx):LIBHACKRFSRC = "/opt/local/include"
 CONFIG(MINGW32):LIBHACKRFSRC = "C:\softs\hackrf\host"
 CONFIG(MINGW64):LIBHACKRFSRC = "C:\softs\hackrf\host"
 CONFIG(MSVC):LIBHACKRFSRC = "C:\softs\hackrf\host"
 
-CONFIG(macx):LIBLIMESUITESRC = "../../../LimeSuite-17.12.0"
 CONFIG(MINGW32):LIBLIMESUITESRC = "C:\softs\LimeSuite"
 CONFIG(MINGW64):LIBLIMESUITESRC = "C:\softs\LimeSuite"
+CONFIG(macx):LIBLIMESUITESRC = "../../../LimeSuite-17.12.0"
 
 CONFIG(MINGW32):LIBPERSEUSSRC = "C:\softs\libperseus-sdr"
+CONFIG(macx):LIBPERSEUSSRC = "../../../libperseus-sdr"
 
-CONFIG(macx):LIBIIOSRC = "../../../libiio"
 CONFIG(MINGW32):LIBIIOSRC = "C:\softs\libiio"
 CONFIG(MINGW64):LIBIIOSRC = "C:\softs\libiio"
+CONFIG(macx):LIBIIOSRC = "../../../libiio"
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../exports
@@ -45,7 +45,12 @@ INCLUDEPATH += "C:\softs\boost_1_66_0"
 INCLUDEPATH += "C:\softs\libusb-1.0.22\include"
 INCLUDEPATH += $$LIBBLADERF/include
 INCLUDEPATH += $$LIBHACKRFSRC
-
+macx {
+    INCLUDEPATH += "../../../boost_1_69_0"
+    INCLUDEPATH += "/Library/Frameworks/iio.framework/Headers/"
+    INCLUDEPATH += "/usr/local/include"
+    INCLUDEPATH += "/opt/local/include"
+}
 MINGW32 || MINGW64 || macx {
     INCLUDEPATH += ../liblimesuite/srcmw
     INCLUDEPATH += $$LIBLIMESUITESRC/src
@@ -116,25 +121,6 @@ MINGW32 || MINGW64 {
             plutosdr/deviceplutosdrshared.h
 }
 
-macx {
-    SOURCES += hackrf/devicehackrf.cpp\
-            hackrf/devicehackrfvalues.cpp\
-            hackrf/devicehackrfshared.cpp
-
-    SOURCES += limesdr/devicelimesdr.cpp\
-            limesdr/devicelimesdrparam.cpp\
-            limesdr/devicelimesdrshared.cpp
-
-    HEADERS  += hackrf/devicehackrf.h\
-            hackrf/devicehackrfparam.h\
-            hackrf/devicehackrfvalues.h\
-            hackrf/devicehackrfshared.h
-
-    HEADERS += limesdr/devicelimesdr.h\
-            limesdr/devicelimesdrparam.h\
-            limesdr/devicelimesdrshared.h
-}
-
 MSVC {
     SOURCES += bladerf1/devicebladerf1.cpp\
             bladerf1/devicebladerf1values.cpp\
@@ -191,6 +177,68 @@ MSVC {
             plutosdr/deviceplutosdrshared.h
 }
 
+macx {
+    SOURCES += bladerf1/devicebladerf1.cpp\
+            bladerf1/devicebladerf1values.cpp\
+            bladerf1/devicebladerf1shared.cpp
+
+    SOURCES += bladerf2/devicebladerf2.cpp\
+            bladerf2/devicebladerf2shared.cpp
+
+    SOURCES += hackrf/devicehackrf.cpp\
+            hackrf/devicehackrfvalues.cpp\
+            hackrf/devicehackrfshared.cpp
+
+    SOURCES += limesdr/devicelimesdr.cpp\
+            limesdr/devicelimesdrparam.cpp\
+            limesdr/devicelimesdrshared.cpp
+
+    SOURCES += soapysdr/devicesoapysdr.cpp\
+            soapysdr/devicesoapysdrparams.cpp\
+            soapysdr/devicesoapysdrscan.cpp\
+            soapysdr/devicesoapysdrshared.cpp
+
+    SOURCES += plutosdr/deviceplutosdr.cpp\
+            plutosdr/deviceplutosdrbox.cpp\
+            plutosdr/deviceplutosdrparams.cpp\
+            plutosdr/deviceplutosdrscan.cpp\
+            plutosdr/deviceplutosdrshared.cpp
+
+    SOURCES += perseus/deviceperseus.cpp\
+            perseus/deviceperseusscan.cpp
+
+    HEADERS += bladerf1/devicebladerf1.h\
+            bladerf1/devicebladerf1param.h\
+            bladerf1/devicebladerf1values.h\
+            bladerf1/devicebladerf1shared.h
+
+    HEADERS += bladerf2/devicebladerf2.h\
+            bladerf2/devicebladerf2shared.h
+
+    HEADERS  += hackrf/devicehackrf.h\
+            hackrf/devicehackrfparam.h\
+            hackrf/devicehackrfvalues.h\
+            hackrf/devicehackrfshared.h
+
+    HEADERS += limesdr/devicelimesdr.h\
+            limesdr/devicelimesdrparam.h\
+            limesdr/devicelimesdrshared.h
+
+    HEADERS += soapysdr/devicesoapysdr.h\
+            soapysdr/devicesoapysdrparams.h\
+            soapysdr/devicesoapysdrscan.h\
+            soapysdr/devicesoapysdrshared.h
+
+    HEADERS += plutosdr/deviceplutosdr.h\
+            plutosdr/deviceplutosdrbox.h\
+            plutosdr/deviceplutosdrparams.h\
+            plutosdr/deviceplutosdrscan.h\
+            plutosdr/deviceplutosdrshared.h
+
+    HEADERS += perseus/deviceperseus.h\
+            perseus/deviceperseusscan.h
+}
+
 LIBS += -L../sdrbase/$${build_subdir} -lsdrbase
 
 MINGW32 || MINGW64 {
@@ -200,17 +248,20 @@ MINGW32 || MINGW64 {
     LIBS += -L../libiio/$${build_subdir} -llibiio
 }
 
-macx {
-    LIBS += -L/opt/local/lib -lhackrf
-    LIBS += -L/usr/local/lib -lLimeSuite
-    LIBS += -framework iio
-    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
-}
-
 MSVC {
     LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
     LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lbladeRF
     LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lLimeSuite
     LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lSoapySDR
     LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -llibiio
+}
+
+macx {
+    LIBS += -L../libperseus -llibperseus
+    LIBS += -L/opt/local/lib -lbladeRF
+    LIBS += -L/opt/local/lib -lhackrf
+    LIBS += -L/opt/install/LimeSuite/lib/ -lLimeSuite
+    LIBS += -L/usr/local/lib -lSoapySDR
+    LIBS += -framework iio
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
 }

@@ -30,6 +30,7 @@ INCLUDEPATH += $$LIBBLADERFCOMMONSRC/include/windows
 
 CONFIG(MINGW32):INCLUDEPATH += "C:\softs\libusb-1.0.19\include\libusb-1.0"
 CONFIG(MINGW64):INCLUDEPATH += "C:\softs\libusb-1.0.19\include\libusb-1.0"
+CONFIG(macx):INCLUDEPATH += "/opt/local/include"
 
 SOURCES = $$LIBBLADERFCOMMONSRC/src/sha256.c\
     $$LIBBLADERFCOMMONSRC/src/dc_calibration.c\
@@ -156,6 +157,11 @@ HEADERS = $$PWD/mingw/common/include/host_config.h\
 
 CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.22\MinGW32\dll -llibusb-1.0
 CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.22\MinGW64\dll -llibusb-1.0
+macx {
+    SOURCES =
+    HEADERS =
+    LIBS += -L/opt/local/lib -lbladerf
+}
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =

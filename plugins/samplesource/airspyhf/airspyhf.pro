@@ -20,6 +20,7 @@ INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
 INCLUDEPATH += $$LIBAIRSPYHFSRC
+CONFIG(macx):INCLUDEPATH += "/usr/local/include"
 
 DEFINES += USE_SSE2=1
 QMAKE_CXXFLAGS += -msse2
@@ -48,5 +49,10 @@ LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../swagger/$${build_subdir} -lswagger
 LIBS += -L../../../libairspyhf/$${build_subdir} -llibairspyhf
+macx {
+    LIBS -= -L../../../libairspyhf/$${build_subdir} -llibairspyhf
+    LIBS += -L/usr/local/lib -lairspyhf
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}
 
 RESOURCES = ../../../sdrgui/resources/res.qrc

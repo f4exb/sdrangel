@@ -19,6 +19,7 @@ QMAKE_CXXFLAGS += -std=c++11
 
 CONFIG(MINGW32):LIBHACKRFSRC = "C:\softs\hackrf\host"
 CONFIG(MSVC):LIBHACKRFSRC = "C:\softs\hackrf\host"
+CONFIG(macx):LIBHACKRFSRC = "/opt/local/include"
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../exports
@@ -26,11 +27,7 @@ INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
 INCLUDEPATH += ../../../devices
-!macx:INCLUDEPATH += $$LIBHACKRFSRC
-macx:INCLUDEPATH += /opt/local/include
-macx {
-    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
-}
+INCLUDEPATH += $$LIBHACKRFSRC
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
@@ -52,8 +49,12 @@ FORMS += hackrfoutputgui.ui
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../swagger/$${build_subdir} -lswagger
-!macx:LIBS += -L../../../libhackrf/$${build_subdir} -llibhackrf
-macx:LIBS += -L/opt/local/lib -lhackrf
+LIBS += -L../../../libhackrf/$${build_subdir} -llibhackrf
 LIBS += -L../../../devices/$${build_subdir} -ldevices
+macx {
+    LIBS -= -L../../../libhackrf/$${build_subdir} -llibhackrf
+    LIBS += -L/opt/local/lib -lhackrf
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
+}
 
 RESOURCES = ../../../sdrgui/resources/res.qrc
