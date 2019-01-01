@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.3.0"
+  version: "4.4.0"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -1805,6 +1805,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/SoapySDR.yaml#/SoapySDROutputSettings"
       testSourceSettings:
         $ref: "http://localhost:8081/api/swagger/include/TestSource.yaml#/TestSourceSettings"
+      xtrxInputSettings:
+        $ref: "http://localhost:8081/api/swagger/include/Xtrx.yaml#/XtrxInputSettings"
 
 
   DeviceReport:
@@ -1852,6 +1854,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRReport"
       soapySDROutputReport:
         $ref: "http://localhost:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRReport"
+      xtrxInputReport:
+        $ref: "http://localhost:8081/api/swagger/include/Xtrx.yaml#/XtrxInputReport"
 
   ChannelSettings:
     description: Base channel settings. Only the channel settings corresponding to the channel specified in the channelType field is or should be present.

@@ -17,14 +17,18 @@
 
 #ifndef PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUT_H_
 #define PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUT_H_
+#include <stdint.h>
 
 #include <QString>
-#include <stdint.h>
+#include <QByteArray>
+#include <QNetworkRequest>
 
 #include "dsp/devicesamplesource.h"
 #include "xtrx/devicextrxshared.h"
 #include "xtrxinputsettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceSourceAPI;
 class XTRXInputThread;
 struct DeviceXTRXParams;
@@ -32,6 +36,7 @@ class FileRecord;
 
 class XTRXInput : public DeviceSampleSource
 {
+    Q_OBJECT
 public:
     class MsgConfigureXTRX : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -190,6 +195,29 @@ public:
 
     virtual bool handleMessage(const Message& message);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            QString& errorMessage);
+
+    virtual int webapiRunGet(
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
+    virtual int webapiRun(
+            bool run,
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
     std::size_t getChannelIndex();
     void getLORange(float& minF, float& maxF, float& stepF) const;
     void getSRRange(float& minF, float& maxF, float& stepF) const;
@@ -208,6 +236,8 @@ private:
     QString m_deviceDescription;
     bool m_running;
     DeviceXTRXShared m_deviceShared;
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
 
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
 
@@ -219,6 +249,13 @@ private:
     void suspendTxThread();
     void resumeTxThread();
     bool applySettings(const XTRXInputSettings& settings, bool force = false, bool forceNCOFrequency = false);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const XTRXInputSettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const XTRXInputSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUT_H_ */

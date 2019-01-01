@@ -42,6 +42,11 @@ void XTRXInputSettings::resetToDefaults()
     m_extClock = false;
     m_extClockFreq = 0; // Auto
     m_pwrmode = 1;
+    m_fileRecordName = "";
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray XTRXInputSettings::serialize() const
@@ -65,6 +70,11 @@ QByteArray XTRXInputSettings::serialize() const
     s.writeBool(18, m_extClock);
     s.writeU32(19, m_extClockFreq);
     s.writeU32(20, m_pwrmode);
+    s.writeString(21, m_fileRecordName);
+    s.writeBool(22, m_useReverseAPI);
+    s.writeString(23, m_reverseAPIAddress);
+    s.writeU32(24, m_reverseAPIPort);
+    s.writeU32(25, m_reverseAPIDeviceIndex);
 
     return s.final();
 }
@@ -82,6 +92,7 @@ bool XTRXInputSettings::deserialize(const QByteArray& data)
     if (d.getVersion() == 1)
     {
         int intval;
+        uint32_t uintval;
 
         d.readDouble(1, &m_devSampleRate, 5e6);
         d.readU32(2, &m_log2HardDecim, 2);
@@ -102,6 +113,19 @@ bool XTRXInputSettings::deserialize(const QByteArray& data)
         d.readBool(18, &m_extClock, false);
         d.readU32(19, &m_extClockFreq, 0);
         d.readU32(20, &m_pwrmode, 2);
+        d.readString(21, &m_fileRecordName, "");
+        d.readBool(22, &m_useReverseAPI, false);
+        d.readString(23, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(24, &uintval, 0);
+
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(25, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
         return true;
     }

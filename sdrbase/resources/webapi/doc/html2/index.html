@@ -2179,6 +2179,9 @@ margin-bottom: 20px;
     },
     "soapySDROutputReport" : {
       "$ref" : "#/definitions/SoapySDRReport"
+    },
+    "xtrxInputReport" : {
+      "$ref" : "#/definitions/XtrxInputReport"
     }
   },
   "description" : "Base device report. Only the device report corresponding to the device specified in the deviceHwType is or should be present."
@@ -2303,6 +2306,9 @@ margin-bottom: 20px;
     },
     "testSourceSettings" : {
       "$ref" : "#/definitions/TestSourceSettings"
+    },
+    "xtrxInputSettings" : {
+      "$ref" : "#/definitions/XtrxInputSettings"
     }
   },
   "description" : "Base device settings. Only the device settings corresponding to the device specified in the deviceHwType field is or should be present."
@@ -4846,6 +4852,123 @@ margin-bottom: 20px;
   },
   "description" : "WFMMod"
 };
+            defs.XtrxInputReport = {
+  "properties" : {
+    "success" : {
+      "type" : "integer",
+      "description" : "1 if info was successfully retrieved else 0"
+    },
+    "streamActive" : {
+      "type" : "integer",
+      "description" : "1 if active else 0"
+    },
+    "fifoSize" : {
+      "type" : "integer"
+    },
+    "fifoFill" : {
+      "type" : "integer"
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "gpsLock" : {
+      "type" : "integer",
+      "description" : "1 if GPSDO is locked else 0"
+    }
+  },
+  "description" : "XTRX"
+};
+            defs.XtrxInputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "log2HardDecim" : {
+      "type" : "integer"
+    },
+    "dcBlock" : {
+      "type" : "integer",
+      "description" : "Software DC blocking (1 for yes, 0 for no)"
+    },
+    "iqCorrection" : {
+      "type" : "integer",
+      "description" : "Software IQ imbalance correction (1 for yes, 0 for no)"
+    },
+    "log2SoftDecim" : {
+      "type" : "integer"
+    },
+    "lpfBW" : {
+      "type" : "integer",
+      "description" : "LMS analog lowpass filter bandwidth (Hz)"
+    },
+    "gain" : {
+      "type" : "integer",
+      "description" : "Optimally distributed gain (dB)"
+    },
+    "ncoEnable" : {
+      "type" : "integer",
+      "description" : "Enable TSP NCO and mixing (1 for yes, 0 for no)"
+    },
+    "ncoFrequency" : {
+      "type" : "integer",
+      "description" : "Frequency shift from LO"
+    },
+    "antennaPath" : {
+      "type" : "integer",
+      "description" : "Antenna selected (enum value from xtrx_antenna_t)"
+    },
+    "gainMode" : {
+      "type" : "integer",
+      "description" : "Gain mode auto or manual (enum value from GainMode)"
+    },
+    "lnaGain" : {
+      "type" : "integer",
+      "description" : "Manual LNA gain"
+    },
+    "tiaGain" : {
+      "type" : "integer",
+      "description" : "Manual TIA gain"
+    },
+    "pgaGain" : {
+      "type" : "integer",
+      "description" : "Manual PGA gain"
+    },
+    "extClock" : {
+      "type" : "integer",
+      "description" : "Use external clock source (1 for yes, 0 for no)"
+    },
+    "extClockFreq" : {
+      "type" : "integer",
+      "description" : "Frequency (Hz) of external clock source"
+    },
+    "pwrmode" : {
+      "type" : "integer",
+      "description" : "LMS power mode (0 save max to 7 perf max)"
+    },
+    "fileRecordName" : {
+      "type" : "string"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "XTRX"
+};
   </script>
 
   <div class="container-fluid">
@@ -5009,7 +5132,7 @@ margin-bottom: 20px;
         <div id="header">
           <div id="api-_">
             <h2 id="welcome-to-apidoc">API and SDK Documentation</h2>
-              <div class="app-desc">Version: 4.3.0</div>
+              <div class="app-desc">Version: 4.4.0</div>
             <hr>
             <div><p>This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube</p>
 <hr />
@@ -23877,7 +24000,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2018-12-22T12:54:35.895+01:00
+              Generated 2019-01-01T11:45:52.860+01:00
             </div>
           </div>
       </div>

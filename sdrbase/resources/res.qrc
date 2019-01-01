@@ -36,6 +36,7 @@
         <file>webapi/doc/swagger/include/UDPSink.yaml</file>
         <file>webapi/doc/swagger/include/WFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/WFMMod.yaml</file>
+        <file>webapi/doc/swagger/include/Xtrx.yaml</file>
         <file>webapi/doc/swagger-ui/swagger-ui.js.map</file>
         <file>webapi/doc/swagger-ui/swagger-ui.js</file>
         <file>webapi/doc/swagger-ui/swagger-ui.css.map</file>

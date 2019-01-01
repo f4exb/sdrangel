@@ -1800,12 +1800,12 @@ bool WebAPIRequestMapper::validateDeviceSettings(
     }
     else if ((*deviceHwType == "BladeRF1") && (deviceSettings.getTx() == 0))
     {
-        if (jsonObject.contains("bladeRFInputSettings") && jsonObject["bladeRFInputSettings"].isObject())
+        if (jsonObject.contains("bladeRF1InputSettings") && jsonObject["bladeRF1InputSettings"].isObject())
         {
-            QJsonObject bladeRFInputSettingsJsonObject = jsonObject["bladeRFInputSettings"].toObject();
-            deviceSettingsKeys = bladeRFInputSettingsJsonObject.keys();
+            QJsonObject bladeRF1InputSettingsJsonObject = jsonObject["bladeRF1InputSettings"].toObject();
+            deviceSettingsKeys = bladeRF1InputSettingsJsonObject.keys();
             deviceSettings.setBladeRf1InputSettings(new SWGSDRangel::SWGBladeRF1InputSettings());
-            deviceSettings.getBladeRf1InputSettings()->fromJsonObject(bladeRFInputSettingsJsonObject);
+            deviceSettings.getBladeRf1InputSettings()->fromJsonObject(bladeRF1InputSettingsJsonObject);
             return true;
         }
         else
@@ -1815,12 +1815,42 @@ bool WebAPIRequestMapper::validateDeviceSettings(
     }
     else if ((*deviceHwType == "BladeRF1") && (deviceSettings.getTx() != 0))
     {
-        if (jsonObject.contains("bladeRFOutputSettings") && jsonObject["bladeRFOutputSettings"].isObject())
+        if (jsonObject.contains("bladeRF1OutputSettings") && jsonObject["bladeRF1OutputSettings"].isObject())
         {
-            QJsonObject bladeRFOutputSettingsJsonObject = jsonObject["bladeRFOutputSettings"].toObject();
-            deviceSettingsKeys = bladeRFOutputSettingsJsonObject.keys();
+            QJsonObject bladeRF1OutputSettingsJsonObject = jsonObject["bladeRF1OutputSettings"].toObject();
+            deviceSettingsKeys = bladeRF1OutputSettingsJsonObject.keys();
             deviceSettings.setBladeRf1OutputSettings(new SWGSDRangel::SWGBladeRF1OutputSettings());
-            deviceSettings.getBladeRf1OutputSettings()->fromJsonObject(bladeRFOutputSettingsJsonObject);
+            deviceSettings.getBladeRf1OutputSettings()->fromJsonObject(bladeRF1OutputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if ((*deviceHwType == "BladeRF2") && (deviceSettings.getTx() == 0))
+    {
+        if (jsonObject.contains("bladeRF2InputSettings") && jsonObject["bladeRF2InputSettings"].isObject())
+        {
+            QJsonObject bladeRF2InputSettingsJsonObject = jsonObject["bladeRF2InputSettings"].toObject();
+            deviceSettingsKeys = bladeRF2InputSettingsJsonObject.keys();
+            deviceSettings.setBladeRf2InputSettings(new SWGSDRangel::SWGBladeRF2InputSettings());
+            deviceSettings.getBladeRf2InputSettings()->fromJsonObject(bladeRF2InputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if ((*deviceHwType == "BladeRF2") && (deviceSettings.getTx() != 0))
+    {
+        if (jsonObject.contains("bladeRF2OutputSettings") && jsonObject["bladeRF2OutputSettings"].isObject())
+        {
+            QJsonObject bladeRF2OutputSettingsJsonObject = jsonObject["bladeRF2OutputSettings"].toObject();
+            deviceSettingsKeys = bladeRF2OutputSettingsJsonObject.keys();
+            deviceSettings.setBladeRf2OutputSettings(new SWGSDRangel::SWGBladeRF2OutputSettings());
+            deviceSettings.getBladeRf2OutputSettings()->fromJsonObject(bladeRF2OutputSettingsJsonObject);
             return true;
         }
         else
@@ -2033,6 +2063,21 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             deviceSettingsKeys = testSourceSettingsJsonObject.keys();
             deviceSettings.setTestSourceSettings(new SWGSDRangel::SWGTestSourceSettings());
             deviceSettings.getTestSourceSettings()->fromJsonObject(testSourceSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if ((*deviceHwType == "XTRX") && (deviceSettings.getTx() == 0))
+    {
+        if (jsonObject.contains("xtrxInputSettings") && jsonObject["xtrxInputSettings"].isObject())
+        {
+            QJsonObject xtrxInputSettingsJsonObject = jsonObject["xtrxInputSettings"].toObject();
+            deviceSettingsKeys = xtrxInputSettingsJsonObject.keys();
+            deviceSettings.setXtrxInputSettings(new SWGSDRangel::SWGXtrxInputSettings());
+            deviceSettings.getXtrxInputSettings()->fromJsonObject(xtrxInputSettingsJsonObject);
             return true;
         }
         else

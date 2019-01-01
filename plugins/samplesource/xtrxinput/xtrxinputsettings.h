@@ -18,7 +18,9 @@
 #define PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUTSETTINGS_H_
 
 #include <stdint.h>
+
 #include <QByteArray>
+#include <QString>
 
 #include "xtrx_api.h"
 
@@ -41,18 +43,23 @@ struct XTRXInputSettings
     bool     m_dcBlock;
     bool     m_iqCorrection;
     uint32_t m_log2SoftDecim;
-    float    m_lpfBW;        //!< LMS amalog lowpass filter bandwidth (Hz)
+    float    m_lpfBW;        //!< LMS analog lowpass filter bandwidth (Hz)
     uint32_t m_gain;         //!< Optimally distributed gain (dB)
     bool     m_ncoEnable;    //!< Enable TSP NCO and mixing
     int      m_ncoFrequency; //!< Actual NCO frequency (the resulting frequency with mixing is displayed)
     xtrx_antenna_t  m_antennaPath;
     GainMode m_gainMode;     //!< Gain mode: auto or manual
-    uint32_t m_lnaGain;      //!< Manual LAN gain
+    uint32_t m_lnaGain;      //!< Manual LNA gain
     uint32_t m_tiaGain;      //!< Manual TIA gain
     uint32_t m_pgaGain;      //!< Manual PGA gain
     bool     m_extClock;     //!< True if external clock source
     uint32_t m_extClockFreq; //!< Frequency (Hz) of external clock source
     uint32_t m_pwrmode;
+    QString  m_fileRecordName;
+    bool     m_useReverseAPI;
+    QString  m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
 
     XTRXInputSettings();
     void resetToDefaults();

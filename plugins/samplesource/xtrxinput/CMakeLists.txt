@@ -25,6 +25,7 @@ set(xtrxinput_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    	
 	${CMAKE_SOURCE_DIR}/devices
 	${LIBXTRX_INCLUDE_DIRS}
 )
@@ -47,6 +48,7 @@ target_link_libraries(inputxtrx
 	${LIBXTRX_LIBRARIES}
 	sdrbase
 	sdrgui
+	swagger
 	xtrxdevice
 )
 

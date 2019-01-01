@@ -101,6 +101,7 @@ private slots:
 
     void updateHardware();
     void updateStatus();
+    void openDeviceSettingsDialog(const QPoint& p);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUTGUI_H_ */
