@@ -330,7 +330,7 @@ bool XTRXInput::start()
 
     if (needsStart)
     {
-        qDebug("XTRXInput::start: (re)sart thread");
+        qDebug("XTRXInput::start: (re)start thread");
         xtrxInputThread->startWork();
     }
 
@@ -357,7 +357,8 @@ void XTRXInput::stop()
         return;
     }
 
-    int requestedChannel = m_deviceAPI->getItemIndex(); // channel to remove
+    int removedChannel = m_deviceAPI->getItemIndex(); // channel to remove
+    int requestedChannel = removedChannel ^ 1; // channel to keep (opposite channel)
     XTRXInputThread *xtrxInputThread = findThread();
 
     if (xtrxInputThread == 0) { // no thread allocated
@@ -385,26 +386,13 @@ void XTRXInput::stop()
     {
         qDebug("XTRXInput::stop: MI mode. Reduce by deleting and re-creating the thread");
         xtrxInputThread->stopWork();
-        SampleSinkFifo **fifos = new SampleSinkFifo*[2];
-        unsigned int *log2Decims = new unsigned int[2];
-
-        for (int i = 0; i < 2; i++) // save original FIFO references
-        {
-            fifos[i] = xtrxInputThread->getFifo(i);
-            log2Decims[i] = xtrxInputThread->getLog2Decimation(i);
-        }
-
         delete xtrxInputThread;
         m_XTRXInputThread = 0;
 
-        xtrxInputThread = new XTRXInputThread(m_deviceShared.m_dev->getDevice(), 1, requestedChannel ^ 1); // leave opposite channel
+        xtrxInputThread = new XTRXInputThread(m_deviceShared.m_dev->getDevice(), 1, requestedChannel);
         m_XTRXInputThread = xtrxInputThread; // take ownership
-
-        for (int i = 0; i < nbOriginalChannels-1; i++)  // restore original FIFO references
-        {
-            xtrxInputThread->setFifo(i, fifos[i]);
-            xtrxInputThread->setLog2Decimation(i, log2Decims[i]);
-        }
+        xtrxInputThread->setFifo(requestedChannel, &m_sampleFifo);
+        xtrxInputThread->setLog2Decimation(requestedChannel, m_settings.m_log2SoftDecim);
 
         // remove old thread address from buddies (reset in all buddies). The address being held only in the owning source.
         const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
@@ -415,10 +403,7 @@ void XTRXInput::stop()
         }
 
         xtrxInputThread->startWork();
-
-        // was used as temporary storage:
-        delete[] fifos;
-        delete[] log2Decims;
+        applySettings(m_settings, true);
     }
 
     m_running = false;
@@ -839,29 +824,34 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
 
     if ((m_settings.m_pwrmode != settings.m_pwrmode))
     {
-        if (xtrx_val_set(m_deviceShared.m_dev->getDevice(),
-                XTRX_TRX,
-                m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
-                XTRX_LMS7_PWR_MODE,
-                settings.m_pwrmode) < 0) {
-            qCritical("XTRXInput::applySettings: could not set power mode %d", settings.m_pwrmode);
+        if (m_deviceShared.m_dev->getDevice() != 0)
+        {
+            if (xtrx_val_set(m_deviceShared.m_dev->getDevice(),
+                    XTRX_TRX,
+                    m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
+                    XTRX_LMS7_PWR_MODE,
+                    settings.m_pwrmode) < 0) {
+                qCritical("XTRXInput::applySettings: could not set power mode %d", settings.m_pwrmode);
+            }
         }
     }
 
     if ((m_settings.m_extClock != settings.m_extClock) ||
             (settings.m_extClock && (m_settings.m_extClockFreq != settings.m_extClockFreq)) || force)
     {
-
-        xtrx_set_ref_clk(m_deviceShared.m_dev->getDevice(),
-                         (settings.m_extClock) ? settings.m_extClockFreq : 0,
-                         (settings.m_extClock) ? XTRX_CLKSRC_EXT : XTRX_CLKSRC_INT);
+        if (m_deviceShared.m_dev->getDevice() != 0)
         {
-            forwardClockSource = true;
-            doChangeSampleRate = true;
-            doChangeFreq = true;
-            qDebug("XTRXInput::applySettings: clock set to %s (Ext: %d Hz)",
-                   settings.m_extClock ? "external" : "internal",
-                   settings.m_extClockFreq);
+            xtrx_set_ref_clk(m_deviceShared.m_dev->getDevice(),
+                             (settings.m_extClock) ? settings.m_extClockFreq : 0,
+                             (settings.m_extClock) ? XTRX_CLKSRC_EXT : XTRX_CLKSRC_INT);
+            {
+                forwardClockSource = true;
+                doChangeSampleRate = true;
+                doChangeFreq = true;
+                qDebug("XTRXInput::applySettings: clock set to %s (Ext: %d Hz)",
+                       settings.m_extClock ? "external" : "internal",
+                       settings.m_extClockFreq);
+            }
         }
     }
 
