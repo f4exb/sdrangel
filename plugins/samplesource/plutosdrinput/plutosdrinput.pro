@@ -16,6 +16,7 @@ QMAKE_CXXFLAGS += -msse2
 DEFINES += USE_SSE4_1=1
 QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
+macx:QMAKE_LFLAGS += -F/Library/Frameworks
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../exports
@@ -34,20 +35,24 @@ MSVC {
     INCLUDEPATH += "C:\Program Files\PothosSDR\include"
 }
 
+macx {
+    INCLUDEPATH += "/Library/Frameworks/iio.framework/Headers/"
+}
+
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
 SOURCES += plutosdrinputgui.cpp\
-  plutosdrinput.cpp\
-  plutosdrinputplugin.cpp\
-  plutosdrinputsettings.cpp\
-  plutosdrinputthread.cpp
+    plutosdrinput.cpp\
+    plutosdrinputplugin.cpp\
+    plutosdrinputsettings.cpp\
+    plutosdrinputthread.cpp
 
 HEADERS += plutosdrinputgui.h\
-  plutosdrinput.h\
-  plutosdrinputplugin.h\
-  plutosdrinputsettings.h\
-  plutosdrinputthread.h
+    plutosdrinput.h\
+    plutosdrinputplugin.h\
+    plutosdrinputsettings.h\
+    plutosdrinputthread.h
 
 FORMS += plutosdrinputgui.ui
 
@@ -62,6 +67,11 @@ MINGW32 {
 
 MSVC {
     LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -llibiio
+}
+
+macx {
+    LIBS += -framework iio
+    QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
 }
 
 RESOURCES = ../../../sdrgui/resources/res.qrc

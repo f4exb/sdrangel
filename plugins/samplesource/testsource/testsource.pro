@@ -16,6 +16,7 @@ QMAKE_CXXFLAGS += -msse2
 DEFINES += USE_SSE4_1=1
 QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
+macx:QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ../../../exports
