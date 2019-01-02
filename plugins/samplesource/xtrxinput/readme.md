@@ -14,7 +14,7 @@ The plugin will be built only if XTRX support libraries are installed in your sy
 
 If libraries are installed in a custom place like `/opt/install/xtrx-images` add the following defines on `cmake` command line:
 
-`-DLIMESUITE_INCLUDE_DIR=/opt/install/xtrx-images/include -DLIMESUITE_LIBRARY=/opt/install/xtrx-images/lib/libxtrx.so`
+`-DXTRX_DIR=/opt/install/xtrx-images`
 
 <h2>Interface</h2>
 

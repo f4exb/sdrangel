@@ -4,24 +4,23 @@ PKG_CHECK_MODULES(PC_CM256cc "libcm256cc")
 FIND_PATH(CM256CC_INCLUDE_DIR
     NAMES cm256.h
     HINTS ${PC_CM256CC_INCLUDE_DIR}
-    ${CMAKE_INSTALL_PREFIX}/include
-    ${LIBCM256CC_INSTALL_PREFIX}/include
-    PATHS
-    /usr/local/include/cm256cc
-    /usr/include/cm256cc
+          ${CMAKE_INSTALL_PREFIX}/include
+    PATHS ${CM256CC_DIR}/include/cm256cc
+          /usr/local/include/cm256cc
+          /usr/include/cm256cc
 )
 
 FIND_LIBRARY(CM256CC_LIBRARIES
     NAMES cm256cc libcm256cc
     HINTS ${PC_CM256CC_LIBDIR}
-    ${CMAKE_INSTALL_PREFIX}/lib
-    ${CMAKE_INSTALL_PREFIX}/lib64
-    PATHS
-    ${CM256CC_INCLUDE_DIR}/../lib
-    /usr/local/lib
-    /usr/local/lib64
-    /usr/lib
-    /usr/lib64
+          ${CMAKE_INSTALL_PREFIX}/lib
+          ${CMAKE_INSTALL_PREFIX}/lib64
+    PATHS ${CM256CC_DIR}/lib
+          ${CM256CC_DIR}/lib64
+          /usr/local/lib
+          /usr/local/lib64
+          /usr/lib
+          /usr/lib64
 )
 
 if(CM256CC_INCLUDE_DIR AND CM256CC_LIBRARIES)

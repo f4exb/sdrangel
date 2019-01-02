@@ -1,18 +1,22 @@
 if(NOT LIBPERSEUS_FOUND)
 
   pkg_check_modules (LIBPERSEUS_PKG libperseus)
-  find_path(LIBPERSEUS_INCLUDE_DIR NAMES perseus-sdr.h
-    PATHS
-    ${LIBPERSEUS_PKG_INCLUDE_DIRS}
-    /usr/include
-    /usr/local/include
+  
+  find_path(LIBPERSEUS_INCLUDE_DIR 
+    NAMES perseus-sdr.h
+    PATHS ${PERSEUS_DIR}/include
+          ${LIBPERSEUS_PKG_INCLUDE_DIRS}
+          /usr/include
+          /usr/local/include
   )
 
-  find_library(LIBPERSEUS_LIBRARIES NAMES perseus-sdr
-    PATHS
-    ${LIBPERSEUS_PKG_LIBRARY_DIRS}
-    /usr/lib
-    /usr/local/lib
+  find_library(LIBPERSEUS_LIBRARIES 
+    NAMES perseus-sdr
+    PATHS ${PERSEUS_DIR}/lib
+          ${PERSEUS_DIR}/lib64
+          ${LIBPERSEUS_PKG_LIBRARY_DIRS}
+          /usr/lib
+          /usr/local/lib
   )
 
   if(LIBPERSEUS_INCLUDE_DIR AND LIBPERSEUS_LIBRARIES)

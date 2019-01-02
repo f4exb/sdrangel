@@ -6,7 +6,7 @@ This output sample sink plugin sends its samples to a [HackRF device](https://gr
 
 <h2>Build</h2>
 
-The plugin will be built only if the [HackRF host library](https://github.com/mossmann/hackrf) is installed in your system. If you build it from source and install it in a custom location say: `/opt/install/libhackrf` you will have to add `-DLIBHACKRF_INCLUDE_DIR=/opt/install/libhackrf/include -DLIBHACKRF_LIBRARIES=/opt/install/libhackrf/lib/libhackrf.so` to the cmake command line.
+The plugin will be built only if the [HackRF host library](https://github.com/mossmann/hackrf) is installed in your system. If you build it from source and install it in a custom location say: `/opt/install/libhackrf` you will have to add `-DHACKRF_DIR=/opt/install/libhackrf` to the cmake command line.
 
 The HackRF Host library is also provided by many Linux distributions and is built in the SDRangel binary releases.
 

@@ -1,18 +1,21 @@
 if(NOT LIBIIO_FOUND)
 
   pkg_check_modules (LIBIIO_PKG libiio)
-  find_path(LIBIIO_INCLUDE_DIR NAMES iio.h
-    PATHS
-    ${LIBIIO_PKG_INCLUDE_DIRS}
-    /usr/include
-    /usr/local/include
+  
+  find_path(LIBIIO_INCLUDE_DIR 
+    NAMES iio.h
+    PATHS ${IIO_DIR}/include
+          ${LIBIIO_PKG_INCLUDE_DIRS}
+          /usr/include
+          /usr/local/include
   )
 
-  find_library(LIBIIO_LIBRARIES NAMES iio
-    PATHS
-    ${LIBIIO_PKG_LIBRARY_DIRS}
-    /usr/lib
-    /usr/local/lib
+  find_library(LIBIIO_LIBRARIES 
+    NAMES iio
+    PATHS ${IIO_DIR}/lib
+          ${LIBIIO_PKG_LIBRARY_DIRS}
+          /usr/lib
+          /usr/local/lib
   )
 
   if(LIBIIO_INCLUDE_DIR AND LIBIIO_LIBRARIES)

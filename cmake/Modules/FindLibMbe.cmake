@@ -1,22 +1,33 @@
 # Find libmbe
 
-FIND_PATH(LIBMBE_INCLUDE_DIR mbelib.h)
+find_path(LIBMBE_INCLUDE_DIR 
+  NAMES mbelib.h
+  PATHS ${MBE_DIR}/include
+        /usr/include
+        /usr/local/include
+)
 
-SET(LIBMBE_NAMES ${LIBMBE_NAMES} mbe libmbe)
-FIND_LIBRARY(LIBMBE_LIBRARY NAMES ${LIBMBE_NAMES} PATH)
+set(LIBMBE_NAMES ${LIBMBE_NAMES} mbe libmbe)
 
-IF (LIBMBE_INCLUDE_DIR AND LIBMBE_LIBRARY)
-    SET(LIBMBE_FOUND TRUE)
-ENDIF (LIBMBE_INCLUDE_DIR AND LIBMBE_LIBRARY)
+find_library(LIBMBE_LIBRARY 
+  NAMES ${LIBMBE_NAMES} 
+  PATHS ${MBE_DIR}/lib
+        /usr/include
+        /usr/local/include
+)
 
-IF (LIBMBE_FOUND)
-    IF (NOT LibMbe_FIND_QUIETLY)
-        MESSAGE (STATUS "Found LibMbe: ${LIBMBE_INCLUDE_DIR}, ${LIBMBE_LIBRARY}")
-    ENDIF (NOT LibMbe_FIND_QUIETLY)
-ELSE (LIBMBE_FOUND)
-    IF (LibMbe_FIND_REQUIRED)
-        MESSAGE (FATAL_ERROR "Could not find mbe")
-    ENDIF (LibMbe_FIND_REQUIRED)
-ENDIF (LIBMBE_FOUND)
+if (LIBMBE_INCLUDE_DIR AND LIBMBE_LIBRARY)
+    set(LIBMBE_FOUND TRUE)
+endif (LIBMBE_INCLUDE_DIR AND LIBMBE_LIBRARY)
+
+if (LIBMBE_FOUND)
+    if (NOT LibMbe_FIND_QUIETLY)
+        message (STATUS "Found LibMbe: ${LIBMBE_INCLUDE_DIR}, ${LIBMBE_LIBRARY}")
+    endif (NOT LibMbe_FIND_QUIETLY)
+else (LIBMBE_FOUND)
+    if (LibMbe_FIND_REQUIRED)
+        message (FATAL_ERROR "Could not find mbe")
+    endif (LibMbe_FIND_REQUIRED)
+endif (LIBMBE_FOUND)
 
 mark_as_advanced(LIBMBE_INCLUDE_DIR LIBMBE_LIBRARY)

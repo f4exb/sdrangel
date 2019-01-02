@@ -23,7 +23,7 @@ The plugin will be built only if libiio is installed in your system. To build an
   
 Then add the following defines on `cmake` command line when compiling SDRangel:
 
-`-DLIBIIO_INCLUDE_DIR=/opt/install/libiio/include -DLIBIIO_LIBRARY=/opt/install/libiio/lib/libiio.so`
+`-DIIO_DIR=/opt/install/libiio`
 
 <h2>Interface</h2>
 

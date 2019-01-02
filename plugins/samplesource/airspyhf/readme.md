@@ -8,7 +8,7 @@ This input sample source plugin gets its samples from a [Airspy HF+ device](http
 
 The plugin will be built only if the [Airspy HF library](https://github.com/airspy/airspyhf) is installed in your system. 
 
-If you build it from source and install it in a custom location say: `/opt/install/libairspyhf` you will have to add `-DLIBRTLSDR_INCLUDE_DIR=/opt/install/libairspyhf/include -DLIBRTLSDR_LIBRARIES=/opt/install/libairspyhf/lib/libairspyhf.so` to the cmake command line.
+If you build it from source and install it in a custom location say: `/opt/install/libairspyhf` you will have to add `-DAIRSPYHF_DIR=/opt/install/libairspyhf` to the cmake command line.
 
 Note: if you use binary distributions this is included in the bundle.
 

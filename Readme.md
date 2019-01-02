@@ -81,7 +81,7 @@ In case you cannot see anything related to HDMI or your desired audio device in 
 
 If you use your own location for libairspy install directory you need to specify library and include locations. Example with `/opt/install/libairspy` with the following defines on `cmake` command line:
 
-`-DLIBAIRSPY_LIBRARIES=/opt/install/libairspy/lib/libairspy.so -DLIBAIRSPY_INCLUDE_DIR=/opt/install/libairspy/include`
+`-DAIRSPY_DIR=/opt/install/libairspy`
 
 Please note that if you are using a recent version of libairspy (>= 1.0.6) the dynamic retrieval of sample rates is supported. To benefit from it you should modify the `plugins/samplesource/airspy/CMakeLists.txt` and change line `add_definitions(${QT_DEFINITIONS})` by `add_definitions("${QT_DEFINITIONS} -DLIBAIRSPY_DYN_RATES")`. In fact both lines are present with the last one commented out.
 
@@ -93,7 +93,7 @@ Be also aware that the lower rates (2.5 MS/s or 5 MS/s with modified firmware) a
 
 If you use your own location for libairspyhf install directory you need to specify library and include locations. Example with `/opt/install/libairspyhf` with the following defines on `cmake` command line:
 
-`-DLIBAIRSPYHF_LIBRARIES=/opt/install/libairspyhf/lib/libairspyhf.so -DLIBAIRSPYHF_INCLUDE_DIR=/opt/install/libairspyhf/include`
+`-DAIRSPYHF_DIR=/opt/install/libairspyhf`
 
 It is recommended to add `-DRX_SAMPLE_24BIT=ON` on the cmake command line to activate the Rx 24 bit DSP build and take advantage of improved dynamic range when using decimation.
 
@@ -105,7 +105,7 @@ It is recommended to add `-DRX_SAMPLE_24BIT=ON` on the cmake command line to act
 
 If you compile and use your own location for libbladeRF install directory you need to specify library and include locations. Example with `/opt/install/libbladerf` with the following defines on `cmake` command line:
 
-`-DLIBBLADERF_LIBRARIES=/opt/install/libbladeRF/lib/libbladeRF.so -DLIBBLADERF_INCLUDE_DIR=/opt/install/libbladeRF/include`
+`-DBLADERF_DIR=/opt/install/libbladeRF`
 
 &#9758; Please note that if you use your own library the FPGA image `hostedx40.rbf` or `hostedx115.rbf` shoud be placed in e.g. `/opt/install/libbladeRF/share/Nuand/bladeRF` unless you have flashed the FPGA image inside the BladeRF.
 
@@ -139,7 +139,7 @@ The Pro+ has trouble starting. The sound card interface is not recognized when y
 
 If you use your own location for libhackrf install directory you need to specify library and include locations. Example with `/opt/install/libhackrf` with the following defines on `cmake` command line:
 
-`-DLIBHACKRF_LIBRARIES=/opt/install/libhackrf/lib/libhackrf.so -DLIBHACKRF_INCLUDE_DIR=/opt/install/libhackrf/include`
+`-DHACKRF_DIR=/opt/install/libhackrf`
 
 HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.2 MS/s rates are considered experimental and are way out of specs of the ADC. You may or may not achieve acceptable results depending on the unit. A too low sampling rate will typically create ghost signals (images) and/or raise the noise floor.
 
@@ -162,7 +162,7 @@ HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.
 
 Then add the following defines on `cmake` command line:
 
-`-DLIMESUITE_INCLUDE_DIR=/opt/install/LimeSuite/include -DLIMESUITE_LIBRARY=/opt/install/LimeSuite/lib/libLimeSuite.so`
+`-DLIMESUITE_DIR=/opt/install/LimeSuite/include`
 
 <h2>Perseus</h2>
 
@@ -172,7 +172,7 @@ Linux only.
 
 Please note that the Perseus input plugin will be built only if the 24 bit Rx DSP chain is activated in the compilation with the `-DRX_SAMPLE_24BIT=ON` option on the cmake command line.
 
-If you use your own location for libperseus-sdr install directory you need to specify library and include locations. Example with `/opt/install/libperseus` with the following defines on `cmake` command line: `-DLIBPERSEUS_INCLUDE_DIR=/opt/install/libperseus/include -DLIBPERSEUS_LIBRARIES=/opt/install/libperseus/lib/libperseus-sdr.so`.
+If you use your own location for libperseus-sdr install directory you need to specify library and include locations. Example with `/opt/install/libperseus` with the following defines on `cmake` command line: `-DPERSEUS_DIR=/opt/install/libperseus/include`.
 
 &#9758; From version 3.12.0 the Linux binaries are built with the 24 bit Rx option and Perseus input plugin.
 
@@ -180,7 +180,7 @@ If you use your own location for libperseus-sdr install directory you need to sp
 
 [PlutoSDR](https://wiki.analog.com/university/tools/pluto) is supported with the libiio interface. This library should be installed in your system for proper build of the software and operation support. Add `libiio-dev` to the list of dependencies to install. Be aware that version 0.10 is needed and is not available yet in all distributions. You may have to compile it from source instead.
 
-If you use your own location for libiio install directory you need to specify library and include locations. Example with `/opt/install/libiio` with the following defines on `cmake` command line: `-DLIBIIO_INCLUDE_DIR=/opt/install/libiio/include -DLIBIIO_LIBRARY=/opt/install/libiio/lib/libiio.so`. In openSUSE the lib directory path would be: `-DLIBIIO_LIBRARY=/opt/install/libiio/lib64/libiio.so`.
+If you use your own location for libiio install directory you need to specify library and include locations. Example with `/opt/install/libiio` with the following defines on `cmake` command line: `-DIIO_DIR=/opt/install/libiio`.
 
 <h2>RTL-SDR</h2>
 
@@ -188,7 +188,7 @@ RTL-SDR based dongles are supported through the librtlsdr library that should be
 
 If you use your own location for librtlsdr install directory you need to specify library and include locations. Example with `/opt/install/librtlsdr` with the following defines on `cmake` command line:
 
-`-DLIBRTLSDR_LIBRARIES=/opt/install/librtlsdr/lib/librtlsdr.so -DLIBRTLSDR_INCLUDE_DIR=/opt/install/librtlsdr/include`
+`-DRTLSDR_DIR=/opt/install/librtlsdr`
 
 <h2>SDRplay RSP1</h2>
 
@@ -198,9 +198,21 @@ Linux only.
 
 If you use your own location for libmirisdr-4 install directory you need to specify library and include locations with cmake. For example with `/opt/install/libmirisdr` the following defines must be added on `cmake` command line:
 
-`-DLIBMIRISDR_LIBRARIES=/opt/install/libmirisdr/lib/libmirisdr.so -DLIBMIRISDR_INCLUDE_DIR=/opt/install/libmirisdr/include`
+`-DMIRISDR_DIR=/opt/install/libmirisdr`
 
-&#9888; The RSP1 has been discontinued in favor of RSP1A. Unfortunately due to their closed source nature RSP1A nor RSP2 can be supported in SDRangel.
+&#9888; The RSP1 has been discontinued in favor of RSP1A. Unfortunately due to their closed source nature RSP1A nor RSP2 can be supported natively in SDRangel. As a workaround you may use it through SoapySDR.
+
+<h2>XTRX</h2>
+
+Compile from source.
+
+[XTRX](https://www.crowdsupply.com/fairwaves/xtrx) is supported through the set of [xtrx libraries](https://github.com/xtrx-sdr/images).
+
+If you use your own location for the install directory (ex: `/opt/install/xtrx-images`) you need to specify it with `-DXTRX_DIR=/opt/install/xtrx-images` on the `cmake` command line.
+
+In addition before starting SDRangel you have to add the library directory to the `LD_LIBRARY_PATH` variable with `export LD_LIBRARY_PATH=/opt/install/xtrx-images/lib:$LD_LIBRARY_PATH`.
+
+&#9888; Although you will find a plugin for the transmission side transmission with XTRX is not actually working. Reception is not very stable either particularly with sample rates lower than 5 MS/s.  
 
 <h1>Plugins for special devices</h1>
 
@@ -234,7 +246,7 @@ The data blocks transmitted via UDP are protected against loss with a Cauchy MDS
 
 There is an automated skew rate compensation in place. During rate readjustment streaming can be suspended or signal glitches can occur for about one second.
 
-This plugin will be built only if the [CM256cc library](https://github.com/f4exb/cm256cc) is installed in your system. For CM256cc if you install it in a non standard directory you will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
+This plugin will be built only if the [CM256cc library](https://github.com/f4exb/cm256cc) is installed in your system. For CM256cc if you install it in a non standard directory you will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_DIR=/opt/install/cm256cc` to the cmake commands.
 
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `SDRdaemonSource[0]` even if no physical device is connected.
 
@@ -246,7 +258,7 @@ The [SDRdaemon sink output plugin](https://github.com/f4exb/sdrangel/tree/dev/pl
 
 The data blocks sent via UDP are protected against loss with a Cauchy MDS block erasure codec. This makes the transmission more robust in particular with WiFi links.
 
-This plugin will be built only if the [CM256cc library](https://github.com/f4exb/cm256cc) IS installed in your system. For CM256cc if you install it in a non standard directory you will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_INCLUDE_DIR=/opt/install/cm256cc/include/cm256cc -DCM256CC_LIBRARIES=/opt/install/cm256cc/lib/libcm256cc.so` to the cmake commands.
+This plugin will be built only if the [CM256cc library](https://github.com/f4exb/cm256cc) IS installed in your system. For CM256cc if you install it in a non standard directory you will then have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_DIR=/opt/install/cm256cc` to the cmake commands.
 
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `SDRdaemonSink[0]` even if no physical device is connected.
 
@@ -262,13 +274,13 @@ This is the `demoddsd` plugin. At present it can be used to decode the following
   - Yaesu System Fusion (YSF)
   - NXDN
 
-It is based on the [DSDcc](https://github.com/f4exb/dsdcc) C++ library which is a rewrite of the original [DSD](https://github.com/szechyjs/dsd) program. So you will need to have DSDcc installed in your system. Please follow instructions in [DSDcc readme](https://github.com/f4exb/dsdcc/blob/master/Readme.md) to build and install DSDcc. If you install it in a custom location say `/opt/install/dsdcc` you will need to add these defines to the cmake command: `-DLIBDSDCC_INCLUDE_DIR=/opt/install/dsdcc/include/dsdcc -DLIBDSDCC_LIBRARIES=/opt/install/dsdcc/lib/libdsdcc.so`
+It is based on the [DSDcc](https://github.com/f4exb/dsdcc) C++ library which is a rewrite of the original [DSD](https://github.com/szechyjs/dsd) program. So you will need to have DSDcc installed in your system. Please follow instructions in [DSDcc readme](https://github.com/f4exb/dsdcc/blob/master/Readme.md) to build and install DSDcc. If you install it in a custom location say `/opt/install/dsdcc` you will need to add these defines to the cmake command: `-DDSDCC_DIR=/opt/install/dsdcc`
 
-If you have one or more serial devices interfacing the AMBE3000 chip in packet mode you can use them to decode AMBE voice frames. For that purpose you will need to compile with [SerialDV](https://github.com/f4exb/serialDV) support. Please refer to this project Readme.md to compile and install SerialDV. If you install it in a custom location say `/opt/install/serialdv` you will need to add these defines to the cmake command: `-DLIBSERIALDV_INCLUDE_DIR=/opt/install/serialdv/include/serialdv -DLIBSERIALDV_LIBRARY=/opt/install/serialdv/lib/libserialdv.so` Also your user must be a member of group `dialout` (Ubuntu/Debian) or `uucp` (Arch) to be able to use the dongle.
+If you have one or more serial devices interfacing the AMBE3000 chip in packet mode you can use them to decode AMBE voice frames. For that purpose you will need to compile with [SerialDV](https://github.com/f4exb/serialDV) support. Please refer to this project Readme.md to compile and install SerialDV. If you install it in a custom location say `/opt/install/serialdv` you will need to add these defines to the cmake command: `-DSERIALDV_DIR=/opt/install/serialdv` Also your user must be a member of group `dialout` (Ubuntu/Debian) or `uucp` (Arch) to be able to use the dongle.
 
 Although such serial devices work with a serial interface at 400 kb in practice maybe for other reasons they are capable of handling only one conversation at a time. The software will allocate the device dynamically to a conversation with an inactivity timeout of 1 second so that conversations do not get interrupted constantly making the audio output too choppy. In practice you will have to have as many devices connected to your system as the number of conversations you would like to be handled in parallel.
 
-Alternatively you can use [mbelib](https://github.com/szechyjs/mbelib) but mbelib comes with some copyright issues (see next). If you have mbelib installed in a custom location, say `/opt/install/mbelib` you will need to add these defines to the cmake command: `-DLIBMBE_INCLUDE_DIR=/opt/install/mbelib/include -DLIBMBE_LIBRARY=/opt/install/mbelib/lib/libmbe.so`
+Alternatively you can use [mbelib](https://github.com/szechyjs/mbelib) but mbelib comes with some copyright issues (see next). If you have mbelib installed in a custom location, say `/opt/install/mbelib` you will need to add these defines to the cmake command: `-DMBE_DIR=/opt/install/mbelib`
 
 Possible copyright issues apart (see next) the audio quality with the DVSI AMBE chip is much better.
 
@@ -285,6 +297,7 @@ If you are not comfortable with this just do not install DSDcc and/or mbelib and
 
 In the [releases](https://github.com/f4exb/sdrangel/releases) section one can find binary distributions for some Debian based distributions:
 
+  - Ubuntu 18.10 (Cosmic)
   - Ubuntu 18.04 (Bionic)
   - Ubuntu 16.04 (Xenial)
   - Debian Stretch

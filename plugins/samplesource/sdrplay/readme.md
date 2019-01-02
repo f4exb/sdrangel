@@ -10,7 +10,7 @@ Driver is too unstable in Windows randomly stopping the application and causing 
 
 <h2>Build</h2>
 
-As mentioned already the plugin depends on libmirisdr-4. You will have to compile it and install it in your system. When installed in non standard folders the include and library paths have to be specified on the cmake command line. Say if you install `libmirisdr-4` in `/opt/install/libmirisdr` you will have to add `-DLIBMIRISDR_INCLUDE_DIR=/opt/install/libmirisdr/include -DLIBMIRISDR_LIBRARIES=/opt/install/libmirisdr/lib/libmirisdr.so` on the cmake command line.
+As mentioned already the plugin depends on libmirisdr-4. You will have to compile it and install it in your system. When installed in non standard folders the include and library paths have to be specified on the cmake command line. Say if you install `libmirisdr-4` in `/opt/install/libmirisdr` you will have to add `-DMIRISDR_DIR=/opt/install/libmirisdr` on the cmake command line.
 
 <h2>Interface</h2>
 

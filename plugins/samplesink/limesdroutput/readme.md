@@ -25,7 +25,7 @@ The plugin will be built only if LimeSuite is installed in your system. Please u
 
 Then add the following defines on `cmake` command line:
 
-`-DLIMESUITE_INCLUDE_DIR=/opt/install/LimeSuite/include -DLIMESUITE_LIBRARY=/opt/install/LimeSuite/lib/libLimeSuite.so`
+`-DLIMESUITE_DIR=/opt/install/LimeSuite`
 
 <h2>Installation from binary packages</h2>
 

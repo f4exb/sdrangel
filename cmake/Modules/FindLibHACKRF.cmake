@@ -1,18 +1,21 @@
 if(NOT LIBHACKRF_FOUND)
 
   pkg_check_modules (LIBHACKRF_PKG libhackrf)
-  find_path(LIBHACKRF_INCLUDE_DIR NAMES libhackrf/hackrf.h
-    PATHS
-    ${LIBHACKRF_PKG_INCLUDE_DIRS}
-    /usr/include
-    /usr/local/include
+  
+  find_path(LIBHACKRF_INCLUDE_DIR 
+    NAMES libhackrf/hackrf.h
+    PATHS ${HACKRF_DIR}/include
+          ${LIBHACKRF_PKG_INCLUDE_DIRS}
+          /usr/include
+          /usr/local/include
   )
 
-  find_library(LIBHACKRF_LIBRARIES NAMES hackrf
-    PATHS
-    ${LIBHACKRF_PKG_LIBRARY_DIRS}
-    /usr/lib
-    /usr/local/lib
+  find_library(LIBHACKRF_LIBRARIES 
+    NAMES hackrf
+    PATHS ${HACKRF_DIR}/lib
+          ${LIBHACKRF_PKG_LIBRARY_DIRS}
+          /usr/lib
+          /usr/local/lib
   )
 
   if(LIBHACKRF_INCLUDE_DIR AND LIBHACKRF_LIBRARIES)
