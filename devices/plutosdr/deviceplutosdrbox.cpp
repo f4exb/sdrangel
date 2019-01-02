@@ -713,6 +713,25 @@ bool DevicePlutoSDRBox::getTxRSSI(std::string& rssiStr, unsigned int chan)
     return get_param(DEVICE_PHY, buff, rssiStr);
 }
 
+void DevicePlutoSDRBox::getRxLORange(uint64_t& minLimit, uint64_t& maxLimit, unsigned int chan)
+{
+    // values are returned in Hz
+    qint64 stepLimit;
+    std::string rangeStr;
+
+    chan = chan % 2;
+    char buff[50];
+    snprintf(buff, sizeof(buff), "out_altvoltage%i_RX_LO_frequency_available", chan);
+
+    if(get_param(DEVICE_PHY, buff, rangeStr)) {
+        std::istringstream instream(rangeStr.substr(1, rangeStr.size() - 2));
+	instream >> minLimit >> stepLimit >> maxLimit;
+    } else {
+        minLimit = DevicePlutoSDR::loLowLimitFreq;
+	maxLimit = DevicePlutoSDR::loHighLimitFreq;
+    }
+}
+
 bool DevicePlutoSDRBox::fetchTemp()
 {
     std::string temp_mC_str;
