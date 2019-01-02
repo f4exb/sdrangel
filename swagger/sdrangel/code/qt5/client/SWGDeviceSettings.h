@@ -46,6 +46,7 @@
 #include "SWGSoapySDROutputSettings.h"
 #include "SWGTestSourceSettings.h"
 #include "SWGXtrxInputSettings.h"
+#include "SWGXtrxOutputSettings.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -144,6 +145,9 @@ public:
     SWGXtrxInputSettings* getXtrxInputSettings();
     void setXtrxInputSettings(SWGXtrxInputSettings* xtrx_input_settings);
 
+    SWGXtrxOutputSettings* getXtrxOutputSettings();
+    void setXtrxOutputSettings(SWGXtrxOutputSettings* xtrx_output_settings);
+
 
     virtual bool isSet() override;
 
@@ -225,6 +229,9 @@ private:
 
     SWGXtrxInputSettings* xtrx_input_settings;
     bool m_xtrx_input_settings_isSet;
+
+    SWGXtrxOutputSettings* xtrx_output_settings;
+    bool m_xtrx_output_settings_isSet;
 
 };
 

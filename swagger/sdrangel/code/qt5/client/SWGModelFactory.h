@@ -131,6 +131,8 @@
 #include "SWGWFMModSettings.h"
 #include "SWGXtrxInputReport.h"
 #include "SWGXtrxInputSettings.h"
+#include "SWGXtrxOutputReport.h"
+#include "SWGXtrxOutputSettings.h"
 
 namespace SWGSDRangel {
 
@@ -485,6 +487,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGXtrxInputSettings").compare(type) == 0) {
       return new SWGXtrxInputSettings();
+    }
+    if(QString("SWGXtrxOutputReport").compare(type) == 0) {
+      return new SWGXtrxOutputReport();
+    }
+    if(QString("SWGXtrxOutputSettings").compare(type) == 0) {
+      return new SWGXtrxOutputSettings();
     }
     
     return nullptr;

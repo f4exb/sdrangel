@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGXtrxInputReport.h
+ * SWGXtrxOutputReport.h
  *
  * XTRX
  */
 
-#ifndef SWGXtrxInputReport_H_
-#define SWGXtrxInputReport_H_
+#ifndef SWGXtrxOutputReport_H_
+#define SWGXtrxOutputReport_H_
 
 #include <QJsonObject>
 
@@ -28,18 +28,18 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGXtrxInputReport: public SWGObject {
+class SWG_API SWGXtrxOutputReport: public SWGObject {
 public:
-    SWGXtrxInputReport();
-    SWGXtrxInputReport(QString* json);
-    virtual ~SWGXtrxInputReport();
+    SWGXtrxOutputReport();
+    SWGXtrxOutputReport(QString* json);
+    virtual ~SWGXtrxOutputReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGXtrxInputReport* fromJson(QString &jsonString) override;
+    virtual SWGXtrxOutputReport* fromJson(QString &jsonString) override;
 
     qint32 getSuccess();
     void setSuccess(qint32 success);
@@ -79,4 +79,4 @@ private:
 
 }
 
-#endif /* SWGXtrxInputReport_H_ */
+#endif /* SWGXtrxOutputReport_H_ */

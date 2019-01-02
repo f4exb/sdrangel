@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
-// Copyright (C) 2017 Sergey Kostanbaev, Fairwaves Inc.                          //
+// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,8 +14,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "xtrxinputplugin.h"
-
 #include <QtPlugin>
 
 #include <regex>
@@ -25,16 +22,18 @@
 #include "xtrx_api.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
-#include "device/devicesourceapi.h"
+#include "device/devicesinkapi.h"
+#include "xtrx/devicextrxparam.h"
 
 #ifdef SERVER_MODE
-#include "xtrxinput.h"
+#include "xtrxoutput.h"
 #else
-#include "xtrxinputgui.h"
+#include "xtrxoutputgui.h"
 #endif
+#include "../xtrxoutput/xtrxoutputplugin.h"
 
-const PluginDescriptor XTRXInputPlugin::m_pluginDescriptor = {
-    QString("XTRX Input"),
+const PluginDescriptor XTRXOutputPlugin::m_pluginDescriptor = {
+    QString("XTRX Output"),
     QString("4.4.0"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
@@ -42,25 +41,25 @@ const PluginDescriptor XTRXInputPlugin::m_pluginDescriptor = {
     QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString XTRXInputPlugin::m_hardwareID = "XTRX";
-const QString XTRXInputPlugin::m_deviceTypeID = XTRX_DEVICE_TYPE_ID;
+const QString XTRXOutputPlugin::m_hardwareID = "XTRX";
+const QString XTRXOutputPlugin::m_deviceTypeID = XTRXOUTPUT_DEVICE_TYPE_ID;
 
-XTRXInputPlugin::XTRXInputPlugin(QObject* parent) :
+XTRXOutputPlugin::XTRXOutputPlugin(QObject* parent) :
     QObject(parent)
 {
 }
 
-const PluginDescriptor& XTRXInputPlugin::getPluginDescriptor() const
+const PluginDescriptor& XTRXOutputPlugin::getPluginDescriptor() const
 {
     return m_pluginDescriptor;
 }
 
-void XTRXInputPlugin::initPlugin(PluginAPI* pluginAPI)
+void XTRXOutputPlugin::initPlugin(PluginAPI* pluginAPI)
 {
-    pluginAPI->registerSampleSource(m_deviceTypeID, this);
+    pluginAPI->registerSampleSink(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices XTRXInputPlugin::enumSampleSources()
+PluginInterface::SamplingDevices XTRXOutputPlugin::enumSampleSinks()
 {
     SamplingDevices result;
     xtrx_device_info_t devs[32];
@@ -68,9 +67,9 @@ PluginInterface::SamplingDevices XTRXInputPlugin::enumSampleSources()
     int i;
     for (i = 0; i < res; i++) {
         DeviceXTRXParams XTRXParams;
-        for (unsigned int j = 0; j < XTRXParams.m_nbRxChannels; j++)
+        for (unsigned int j = 0; j < XTRXParams.m_nbTxChannels; j++)
         {
-            qDebug("XTRXInputPlugin::enumSampleSources: device #%d channel %u: %s", i, j, devs[i].uniqname);
+            qDebug("XTRXInputPlugin::enumSampleSinks: device #%d channel %u: %s", i, j, devs[i].uniqname);
             QString displayedName(QString("XTRX[%1:%2] %3").arg(i).arg(j).arg(devs[i].uniqname));
             result.append(SamplingDevice(displayedName,
                                          m_hardwareID,
@@ -78,8 +77,8 @@ PluginInterface::SamplingDevices XTRXInputPlugin::enumSampleSources()
                                          QString(devs[i].uniqname),
                                          i,
                                          PluginInterface::SamplingDevice::PhysicalDevice,
-                                         true,
-                                         XTRXParams.m_nbRxChannels,
+                                         false,
+                                         XTRXParams.m_nbTxChannels,
                                          j));
         }
     }
@@ -87,22 +86,22 @@ PluginInterface::SamplingDevices XTRXInputPlugin::enumSampleSources()
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* XTRXInputPlugin::createSampleSourcePluginInstanceGUI(
-        const QString& sourceId __attribute((unused)),
+PluginInstanceGUI* XTRXOutputPlugin::createSampleSinkPluginInstanceGUI(
+        const QString& sinkId __attribute((unused)),
         QWidget **widget __attribute((unused)),
         DeviceUISet *deviceUISet __attribute((unused)))
 {
     return 0;
 }
 #else
-PluginInstanceGUI* XTRXInputPlugin::createSampleSourcePluginInstanceGUI(
-        const QString& sourceId,
+PluginInstanceGUI* XTRXOutputPlugin::createSampleSinkPluginInstanceGUI(
+        const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
 {
-    if(sourceId == m_deviceTypeID)
+    if(sinkId == m_deviceTypeID)
     {
-        XTRXInputGUI* gui = new XTRXInputGUI(deviceUISet);
+        XTRXOutputGUI* gui = new XTRXOutputGUI(deviceUISet);
         *widget = gui;
         return gui;
     }
@@ -113,15 +112,16 @@ PluginInstanceGUI* XTRXInputPlugin::createSampleSourcePluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSource *XTRXInputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
+DeviceSampleSink* XTRXOutputPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
 {
-    if (sourceId == m_deviceTypeID)
+    if(sinkId == m_deviceTypeID)
     {
-        XTRXInput* input = new XTRXInput(deviceAPI);
-        return input;
+        XTRXOutput* output = new XTRXOutput(deviceAPI);
+        return output;
     }
     else
     {
         return 0;
     }
 }
+

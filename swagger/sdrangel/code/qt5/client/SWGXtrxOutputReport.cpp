@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGXtrxInputReport.h"
+#include "SWGXtrxOutputReport.h"
 
 #include "SWGHelpers.h"
 
@@ -22,12 +22,12 @@
 
 namespace SWGSDRangel {
 
-SWGXtrxInputReport::SWGXtrxInputReport(QString* json) {
+SWGXtrxOutputReport::SWGXtrxOutputReport(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGXtrxInputReport::SWGXtrxInputReport() {
+SWGXtrxOutputReport::SWGXtrxOutputReport() {
     success = 0;
     m_success_isSet = false;
     fifo_size = 0;
@@ -40,12 +40,12 @@ SWGXtrxInputReport::SWGXtrxInputReport() {
     m_gps_lock_isSet = false;
 }
 
-SWGXtrxInputReport::~SWGXtrxInputReport() {
+SWGXtrxOutputReport::~SWGXtrxOutputReport() {
     this->cleanup();
 }
 
 void
-SWGXtrxInputReport::init() {
+SWGXtrxOutputReport::init() {
     success = 0;
     m_success_isSet = false;
     fifo_size = 0;
@@ -59,7 +59,7 @@ SWGXtrxInputReport::init() {
 }
 
 void
-SWGXtrxInputReport::cleanup() {
+SWGXtrxOutputReport::cleanup() {
 
 
 
@@ -67,8 +67,8 @@ SWGXtrxInputReport::cleanup() {
 
 }
 
-SWGXtrxInputReport*
-SWGXtrxInputReport::fromJson(QString &json) {
+SWGXtrxOutputReport*
+SWGXtrxOutputReport::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -77,7 +77,7 @@ SWGXtrxInputReport::fromJson(QString &json) {
 }
 
 void
-SWGXtrxInputReport::fromJsonObject(QJsonObject &pJson) {
+SWGXtrxOutputReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&success, pJson["success"], "qint32", "");
     
     ::SWGSDRangel::setValue(&fifo_size, pJson["fifoSize"], "qint32", "");
@@ -91,7 +91,7 @@ SWGXtrxInputReport::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGXtrxInputReport::asJson ()
+SWGXtrxOutputReport::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -102,7 +102,7 @@ SWGXtrxInputReport::asJson ()
 }
 
 QJsonObject*
-SWGXtrxInputReport::asJsonObject() {
+SWGXtrxOutputReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_success_isSet){
         obj->insert("success", QJsonValue(success));
@@ -124,58 +124,58 @@ SWGXtrxInputReport::asJsonObject() {
 }
 
 qint32
-SWGXtrxInputReport::getSuccess() {
+SWGXtrxOutputReport::getSuccess() {
     return success;
 }
 void
-SWGXtrxInputReport::setSuccess(qint32 success) {
+SWGXtrxOutputReport::setSuccess(qint32 success) {
     this->success = success;
     this->m_success_isSet = true;
 }
 
 qint32
-SWGXtrxInputReport::getFifoSize() {
+SWGXtrxOutputReport::getFifoSize() {
     return fifo_size;
 }
 void
-SWGXtrxInputReport::setFifoSize(qint32 fifo_size) {
+SWGXtrxOutputReport::setFifoSize(qint32 fifo_size) {
     this->fifo_size = fifo_size;
     this->m_fifo_size_isSet = true;
 }
 
 qint32
-SWGXtrxInputReport::getFifoFill() {
+SWGXtrxOutputReport::getFifoFill() {
     return fifo_fill;
 }
 void
-SWGXtrxInputReport::setFifoFill(qint32 fifo_fill) {
+SWGXtrxOutputReport::setFifoFill(qint32 fifo_fill) {
     this->fifo_fill = fifo_fill;
     this->m_fifo_fill_isSet = true;
 }
 
 float
-SWGXtrxInputReport::getTemperature() {
+SWGXtrxOutputReport::getTemperature() {
     return temperature;
 }
 void
-SWGXtrxInputReport::setTemperature(float temperature) {
+SWGXtrxOutputReport::setTemperature(float temperature) {
     this->temperature = temperature;
     this->m_temperature_isSet = true;
 }
 
 qint32
-SWGXtrxInputReport::getGpsLock() {
+SWGXtrxOutputReport::getGpsLock() {
     return gps_lock;
 }
 void
-SWGXtrxInputReport::setGpsLock(qint32 gps_lock) {
+SWGXtrxOutputReport::setGpsLock(qint32 gps_lock) {
     this->gps_lock = gps_lock;
     this->m_gps_lock_isSet = true;
 }
 
 
 bool
-SWGXtrxInputReport::isSet(){
+SWGXtrxOutputReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_success_isSet){ isObjectUpdated = true; break;}

@@ -129,7 +129,6 @@ public:
     public:
         virtual void startWork() = 0;
         virtual void stopWork() = 0;
-        virtual void setDeviceSampleRate(int sampleRate) = 0;
         virtual bool isRunning() = 0;
     };
 
@@ -140,6 +139,8 @@ public:
     double              m_inputRate;
     double              m_outputRate;
     double              m_masterRate;
+    ThreadInterface     *m_thread;       //!< holds the thread address if started else 0
+    bool                m_threadWasRunning; //!< flag to know if thread needs to be resumed after suspend
 
     static const float  m_sampleFifoLengthInSeconds;
     static const int    m_sampleFifoMinSize;

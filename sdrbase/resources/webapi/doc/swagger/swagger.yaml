@@ -1807,6 +1807,8 @@ definitions:
         $ref: "/doc/swagger/include/TestSource.yaml#/TestSourceSettings"
       xtrxInputSettings:
         $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxInputSettings"
+      xtrxOutputSettings:
+        $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxOutputSettings"
 
 
   DeviceReport:
@@ -1856,6 +1858,8 @@ definitions:
         $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRReport"
       xtrxInputReport:
         $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxInputReport"
+      xtrxOutputReport:
+        $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxOutputReport"
 
   ChannelSettings:
     description: Base channel settings. Only the channel settings corresponding to the channel specified in the channelType field is or should be present.

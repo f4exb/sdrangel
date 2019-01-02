@@ -80,6 +80,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_test_source_settings_isSet = false;
     xtrx_input_settings = nullptr;
     m_xtrx_input_settings_isSet = false;
+    xtrx_output_settings = nullptr;
+    m_xtrx_output_settings_isSet = false;
 }
 
 SWGDeviceSettings::~SWGDeviceSettings() {
@@ -140,6 +142,8 @@ SWGDeviceSettings::init() {
     m_test_source_settings_isSet = false;
     xtrx_input_settings = new SWGXtrxInputSettings();
     m_xtrx_input_settings_isSet = false;
+    xtrx_output_settings = new SWGXtrxOutputSettings();
+    m_xtrx_output_settings_isSet = false;
 }
 
 void
@@ -220,6 +224,9 @@ SWGDeviceSettings::cleanup() {
     if(xtrx_input_settings != nullptr) { 
         delete xtrx_input_settings;
     }
+    if(xtrx_output_settings != nullptr) { 
+        delete xtrx_output_settings;
+    }
 }
 
 SWGDeviceSettings*
@@ -284,6 +291,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&test_source_settings, pJson["testSourceSettings"], "SWGTestSourceSettings", "SWGTestSourceSettings");
     
     ::SWGSDRangel::setValue(&xtrx_input_settings, pJson["xtrxInputSettings"], "SWGXtrxInputSettings", "SWGXtrxInputSettings");
+    
+    ::SWGSDRangel::setValue(&xtrx_output_settings, pJson["xtrxOutputSettings"], "SWGXtrxOutputSettings", "SWGXtrxOutputSettings");
     
 }
 
@@ -378,6 +387,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((xtrx_input_settings != nullptr) && (xtrx_input_settings->isSet())){
         toJsonValue(QString("xtrxInputSettings"), xtrx_input_settings, obj, QString("SWGXtrxInputSettings"));
+    }
+    if((xtrx_output_settings != nullptr) && (xtrx_output_settings->isSet())){
+        toJsonValue(QString("xtrxOutputSettings"), xtrx_output_settings, obj, QString("SWGXtrxOutputSettings"));
     }
 
     return obj;
@@ -643,6 +655,16 @@ SWGDeviceSettings::setXtrxInputSettings(SWGXtrxInputSettings* xtrx_input_setting
     this->m_xtrx_input_settings_isSet = true;
 }
 
+SWGXtrxOutputSettings*
+SWGDeviceSettings::getXtrxOutputSettings() {
+    return xtrx_output_settings;
+}
+void
+SWGDeviceSettings::setXtrxOutputSettings(SWGXtrxOutputSettings* xtrx_output_settings) {
+    this->xtrx_output_settings = xtrx_output_settings;
+    this->m_xtrx_output_settings_isSet = true;
+}
+
 
 bool
 SWGDeviceSettings::isSet(){
@@ -674,6 +696,7 @@ SWGDeviceSettings::isSet(){
         if(soapy_sdr_output_settings != nullptr && soapy_sdr_output_settings->isSet()){ isObjectUpdated = true; break;}
         if(test_source_settings != nullptr && test_source_settings->isSet()){ isObjectUpdated = true; break;}
         if(xtrx_input_settings != nullptr && xtrx_input_settings->isSet()){ isObjectUpdated = true; break;}
+        if(xtrx_output_settings != nullptr && xtrx_output_settings->isSet()){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

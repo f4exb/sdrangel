@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
-// Copyright (C) 2017 Sergey Kostanbaev, Fairwaves Inc.                          //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUTTHREAD_H_
-#define PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUTTHREAD_H_
+#ifndef PLUGINS_SAMPLESOURCE_XTRXOUTPUT_XTRXOUTPUTTHREAD_H_
+#define PLUGINS_SAMPLESOURCE_XTRXOUTPUT_XTRXOUTPUTTHREAD_H_
 
 #include <QThread>
 #include <QMutex>
@@ -24,40 +23,39 @@
 
 #include "xtrx_api.h"
 
-#include "dsp/samplesinkfifo.h"
-#include "dsp/decimators.h"
+#include "dsp/samplesourcefifo.h"
+#include "dsp/interpolators.h"
 #include "xtrx/devicextrxshared.h"
 
 struct xtrx_dev;
 
-class XTRXInputThread : public QThread, public DeviceXTRXShared::ThreadInterface
+class XTRXOutputThread : public QThread, public DeviceXTRXShared::ThreadInterface
 {
     Q_OBJECT
 
 public:
-    XTRXInputThread(struct xtrx_dev *dev, unsigned int nbChannels, unsigned int uniqueChannelIndex = 0, QObject* parent = 0);
-    ~XTRXInputThread();
+    XTRXOutputThread(struct xtrx_dev *dev, unsigned int nbChannels, unsigned int uniqueChannelIndex = 0, QObject* parent = 0);
+    ~XTRXOutputThread();
 
     virtual void startWork();
     virtual void stopWork();
     virtual bool isRunning() { return m_running; }
     unsigned int getNbChannels() const { return m_nbChannels; }
-    void setLog2Decimation(unsigned int channel, unsigned int log2_decim);
-    unsigned int getLog2Decimation(unsigned int channel) const;
-    void setFifo(unsigned int channel, SampleSinkFifo *sampleFifo);
-    SampleSinkFifo *getFifo(unsigned int channel);
+    void setLog2Interpolation(unsigned int channel, unsigned int log2_interp);
+    unsigned int getLog2Interpolation(unsigned int channel) const;
+    void setFifo(unsigned int channel, SampleSourceFifo *sampleFifo);
+    SampleSourceFifo *getFifo(unsigned int channel);
 
 private:
     struct Channel
     {
-        SampleVector m_convertBuffer;
-        SampleSinkFifo* m_sampleFifo;
-        unsigned int m_log2Decim;
-        Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators;
+        SampleSourceFifo* m_sampleFifo;
+        unsigned int m_log2Interp;
+        Interpolators<qint16, SDR_TX_SAMP_SZ, 12> m_interpolators;
 
         Channel() :
             m_sampleFifo(0),
-            m_log2Decim(0)
+            m_log2Interp(0)
         {}
 
         ~Channel()
@@ -70,15 +68,15 @@ private:
     struct xtrx_dev *m_dev;
 
     Channel *m_channels; //!< Array of channels dynamically allocated for the given number of Rx channels
+    qint16 *m_buf; //!< Full buffer for SISO or MIMO operation
     unsigned int m_nbChannels;
     unsigned int m_uniqueChannelIndex;
 
     void run();
     unsigned int getNbFifos();
-    void callbackSI(const qint16* buf, qint32 len);
-    void callbackMI(const qint16* buf0, const qint16* buf1, qint32 len);
+    void callback(qint16* buf, qint32 len);
+    void callbackSO(qint16* buf, qint32 len);
+    void callbackMO(qint16* buf0, qint16* buf1, qint32 len);
 };
 
-
-
-#endif /* PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUTTHREAD_H_ */
+#endif /* PLUGINS_SAMPLESOURCE_XTRXOUTPUT_XTRXOUTPUTTHREAD_H_ */

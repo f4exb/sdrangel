@@ -2182,6 +2182,9 @@ margin-bottom: 20px;
     },
     "xtrxInputReport" : {
       "$ref" : "#/definitions/XtrxInputReport"
+    },
+    "xtrxOutputReport" : {
+      "$ref" : "#/definitions/XtrxOutputReport"
     }
   },
   "description" : "Base device report. Only the device report corresponding to the device specified in the deviceHwType is or should be present."
@@ -2309,6 +2312,9 @@ margin-bottom: 20px;
     },
     "xtrxInputSettings" : {
       "$ref" : "#/definitions/XtrxInputSettings"
+    },
+    "xtrxOutputSettings" : {
+      "$ref" : "#/definitions/XtrxOutputSettings"
     }
   },
   "description" : "Base device settings. Only the device settings corresponding to the device specified in the deviceHwType field is or should be present."
@@ -4858,10 +4864,6 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "1 if info was successfully retrieved else 0"
     },
-    "streamActive" : {
-      "type" : "integer",
-      "description" : "1 if active else 0"
-    },
     "fifoSize" : {
       "type" : "integer"
     },
@@ -4952,6 +4954,92 @@ margin-bottom: 20px;
     },
     "fileRecordName" : {
       "type" : "string"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "XTRX"
+};
+            defs.XtrxOutputReport = {
+  "properties" : {
+    "success" : {
+      "type" : "integer",
+      "description" : "1 if info was successfully retrieved else 0"
+    },
+    "fifoSize" : {
+      "type" : "integer"
+    },
+    "fifoFill" : {
+      "type" : "integer"
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "gpsLock" : {
+      "type" : "integer",
+      "description" : "1 if GPSDO is locked else 0"
+    }
+  },
+  "description" : "XTRX"
+};
+            defs.XtrxOutputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "log2HardInterp" : {
+      "type" : "integer"
+    },
+    "log2SoftInterp" : {
+      "type" : "integer"
+    },
+    "lpfBW" : {
+      "type" : "integer",
+      "description" : "LMS analog lowpass filter bandwidth (Hz)"
+    },
+    "gain" : {
+      "type" : "integer",
+      "description" : "Optimally distributed gain (dB)"
+    },
+    "ncoEnable" : {
+      "type" : "integer",
+      "description" : "Enable TSP NCO and mixing (1 for yes, 0 for no)"
+    },
+    "ncoFrequency" : {
+      "type" : "integer",
+      "description" : "Frequency shift from LO"
+    },
+    "antennaPath" : {
+      "type" : "integer",
+      "description" : "Antenna selected (enum value from xtrx_antenna_t)"
+    },
+    "extClock" : {
+      "type" : "integer",
+      "description" : "Use external clock source (1 for yes, 0 for no)"
+    },
+    "extClockFreq" : {
+      "type" : "integer",
+      "description" : "Frequency (Hz) of external clock source"
+    },
+    "pwrmode" : {
+      "type" : "integer",
+      "description" : "LMS power mode (0 save max to 7 perf max)"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -24000,7 +24088,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-01-01T11:45:52.860+01:00
+              Generated 2019-01-02T09:02:53.799+01:00
             </div>
           </div>
       </div>

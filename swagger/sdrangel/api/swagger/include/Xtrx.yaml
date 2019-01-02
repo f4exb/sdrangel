@@ -80,3 +80,66 @@ XtrxInputReport:
     gpsLock:
       description: 1 if GPSDO is locked else 0
       type: integer
+      
+XtrxOutputSettings:
+  description: XTRX
+  properties:  
+    centerFrequency:
+      type: integer
+      format: int64
+    devSampleRate:
+      type: integer
+    log2HardInterp:
+      type: integer
+    log2SoftInterp:
+      type: integer
+    lpfBW:
+      description: LMS analog lowpass filter bandwidth (Hz)
+      type: integer
+    gain:
+      description: Optimally distributed gain (dB)
+      type: integer
+    ncoEnable:
+      description: Enable TSP NCO and mixing (1 for yes, 0 for no)
+      type: integer     
+    ncoFrequency:
+      description: Frequency shift from LO
+      type: integer
+    antennaPath:
+      description: Antenna selected (enum value from xtrx_antenna_t)
+      type: integer   
+    extClock:
+      description: Use external clock source (1 for yes, 0 for no)
+      type: integer    
+    extClockFreq:
+      description: Frequency (Hz) of external clock source
+      type: integer
+    pwrmode:
+      description: LMS power mode (0 save max to 7 perf max)
+      type: integer   
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer    
+
+XtrxOutputReport:
+  description: XTRX
+  properties:  
+    success:
+      description: 1 if info was successfully retrieved else 0
+      type: integer
+    fifoSize:
+      type: integer
+    fifoFill:
+      type: integer
+    temperature:
+      type: number
+      format: float
+    gpsLock:
+      description: 1 if GPSDO is locked else 0
+      type: integer      

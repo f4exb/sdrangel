@@ -38,6 +38,7 @@
 #include "SWGSDRdaemonSourceReport.h"
 #include "SWGSoapySDRReport.h"
 #include "SWGXtrxInputReport.h"
+#include "SWGXtrxOutputReport.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -115,6 +116,9 @@ public:
     SWGXtrxInputReport* getXtrxInputReport();
     void setXtrxInputReport(SWGXtrxInputReport* xtrx_input_report);
 
+    SWGXtrxOutputReport* getXtrxOutputReport();
+    void setXtrxOutputReport(SWGXtrxOutputReport* xtrx_output_report);
+
 
     virtual bool isSet() override;
 
@@ -175,6 +179,9 @@ private:
 
     SWGXtrxInputReport* xtrx_input_report;
     bool m_xtrx_input_report_isSet;
+
+    SWGXtrxOutputReport* xtrx_output_report;
+    bool m_xtrx_output_report_isSet;
 
 };
 

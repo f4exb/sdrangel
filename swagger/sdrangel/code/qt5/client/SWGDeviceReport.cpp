@@ -66,6 +66,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_soapy_sdr_output_report_isSet = false;
     xtrx_input_report = nullptr;
     m_xtrx_input_report_isSet = false;
+    xtrx_output_report = nullptr;
+    m_xtrx_output_report_isSet = false;
 }
 
 SWGDeviceReport::~SWGDeviceReport() {
@@ -112,6 +114,8 @@ SWGDeviceReport::init() {
     m_soapy_sdr_output_report_isSet = false;
     xtrx_input_report = new SWGXtrxInputReport();
     m_xtrx_input_report_isSet = false;
+    xtrx_output_report = new SWGXtrxOutputReport();
+    m_xtrx_output_report_isSet = false;
 }
 
 void
@@ -171,6 +175,9 @@ SWGDeviceReport::cleanup() {
     if(xtrx_input_report != nullptr) { 
         delete xtrx_input_report;
     }
+    if(xtrx_output_report != nullptr) { 
+        delete xtrx_output_report;
+    }
 }
 
 SWGDeviceReport*
@@ -221,6 +228,8 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&soapy_sdr_output_report, pJson["soapySDROutputReport"], "SWGSoapySDRReport", "SWGSoapySDRReport");
     
     ::SWGSDRangel::setValue(&xtrx_input_report, pJson["xtrxInputReport"], "SWGXtrxInputReport", "SWGXtrxInputReport");
+    
+    ::SWGSDRangel::setValue(&xtrx_output_report, pJson["xtrxOutputReport"], "SWGXtrxOutputReport", "SWGXtrxOutputReport");
     
 }
 
@@ -294,6 +303,9 @@ SWGDeviceReport::asJsonObject() {
     }
     if((xtrx_input_report != nullptr) && (xtrx_input_report->isSet())){
         toJsonValue(QString("xtrxInputReport"), xtrx_input_report, obj, QString("SWGXtrxInputReport"));
+    }
+    if((xtrx_output_report != nullptr) && (xtrx_output_report->isSet())){
+        toJsonValue(QString("xtrxOutputReport"), xtrx_output_report, obj, QString("SWGXtrxOutputReport"));
     }
 
     return obj;
@@ -489,6 +501,16 @@ SWGDeviceReport::setXtrxInputReport(SWGXtrxInputReport* xtrx_input_report) {
     this->m_xtrx_input_report_isSet = true;
 }
 
+SWGXtrxOutputReport*
+SWGDeviceReport::getXtrxOutputReport() {
+    return xtrx_output_report;
+}
+void
+SWGDeviceReport::setXtrxOutputReport(SWGXtrxOutputReport* xtrx_output_report) {
+    this->xtrx_output_report = xtrx_output_report;
+    this->m_xtrx_output_report_isSet = true;
+}
+
 
 bool
 SWGDeviceReport::isSet(){
@@ -513,6 +535,7 @@ SWGDeviceReport::isSet(){
         if(soapy_sdr_input_report != nullptr && soapy_sdr_input_report->isSet()){ isObjectUpdated = true; break;}
         if(soapy_sdr_output_report != nullptr && soapy_sdr_output_report->isSet()){ isObjectUpdated = true; break;}
         if(xtrx_input_report != nullptr && xtrx_input_report->isSet()){ isObjectUpdated = true; break;}
+        if(xtrx_output_report != nullptr && xtrx_output_report->isSet()){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

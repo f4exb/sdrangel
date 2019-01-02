@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
-// Copyright (C) 2017 Sergey Kostanbaev, Fairwaves Inc.                          //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,33 +14,33 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUTPLUGIN_H_
-#define PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUTPLUGIN_H_
+#ifndef PLUGINS_SAMPLESOURCE_LIMESDROUTPUT_LIMESDROUTPUTPLUGIN_H_
+#define PLUGINS_SAMPLESOURCE_LIMESDROUTPUT_LIMESDROUTPUTPLUGIN_H_
 
 #include <QObject>
 #include "plugin/plugininterface.h"
 
 class PluginAPI;
 
-#define XTRX_DEVICE_TYPE_ID "sdrangel.samplesource.xtrx"
+#define XTRXOUTPUT_DEVICE_TYPE_ID "sdrangel.samplesink.xtrx"
 
-class XTRXInputPlugin : public QObject, public PluginInterface {
+class XTRXOutputPlugin : public QObject, public PluginInterface {
     Q_OBJECT
     Q_INTERFACES(PluginInterface)
-    Q_PLUGIN_METADATA(IID XTRX_DEVICE_TYPE_ID)
+    Q_PLUGIN_METADATA(IID XTRXOUTPUT_DEVICE_TYPE_ID)
 
 public:
-    explicit XTRXInputPlugin(QObject* parent = 0);
+    explicit XTRXOutputPlugin(QObject* parent = 0);
 
     const PluginDescriptor& getPluginDescriptor() const;
     void initPlugin(PluginAPI* pluginAPI);
 
-    virtual SamplingDevices enumSampleSources();
-    virtual PluginInstanceGUI* createSampleSourcePluginInstanceGUI(
-            const QString& sourceId,
+    virtual SamplingDevices enumSampleSinks();
+    virtual PluginInstanceGUI* createSampleSinkPluginInstanceGUI(
+            const QString& sinkId,
             QWidget **widget,
             DeviceUISet *deviceUISet);
-    virtual DeviceSampleSource* createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI);
+    virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI);
 
     static const QString m_hardwareID;
     static const QString m_deviceTypeID;
@@ -51,4 +50,4 @@ private:
 };
 
 
-#endif /* PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUTPLUGIN_H_ */
+#endif /* PLUGINS_SAMPLESOURCE_LIMESDROUTPUT_LIMESDROUTPUTPLUGIN_H_ */

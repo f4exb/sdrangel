@@ -33,7 +33,9 @@ DeviceXTRXShared::DeviceXTRXShared() :
     m_sink(0),
     m_inputRate(0),
     m_outputRate(0),
-    m_masterRate(0)
+    m_masterRate(0),
+    m_thread(0),
+    m_threadWasRunning(false)
 {}
 
 DeviceXTRXShared::~DeviceXTRXShared()

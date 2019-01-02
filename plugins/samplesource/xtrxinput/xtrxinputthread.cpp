@@ -19,8 +19,6 @@
 #include <chrono>
 #include <thread>
 
-#include "xtrx_api.h"
-
 #include "xtrx/devicextrx.h"
 #include "xtrxinputsettings.h"
 #include "xtrxinputthread.h"

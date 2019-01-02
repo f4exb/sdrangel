@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017, 2018 Edouard Griffiths, F4EXB                             //
-// Copyright (C) 2017 Sergey Kostanbaev, Fairwaves Inc.                          //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,26 +14,26 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUT_H_
-#define PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUT_H_
+#ifndef PLUGINS_SAMPLESINK_XTRXOUTPUT_XTRXOUTPUT_H_
+#define PLUGINS_SAMPLESINK_XTRXOUTPUT_XTRXOUTPUT_H_
 #include <stdint.h>
 
 #include <QString>
 #include <QByteArray>
 #include <QNetworkRequest>
 
-#include "dsp/devicesamplesource.h"
+#include "dsp/devicesamplesink.h"
 #include "xtrx/devicextrxshared.h"
-#include "xtrxinputsettings.h"
+#include "xtrxoutputsettings.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
-class XTRXInputThread;
+class DeviceSinkAPI;
+class XTRXOutputThread;
 struct DeviceXTRXParams;
 class FileRecord;
 
-class XTRXInput : public DeviceSampleSource
+class XTRXOutput : public DeviceSampleSink
 {
     Q_OBJECT
 public:
@@ -42,19 +41,19 @@ public:
         MESSAGE_CLASS_DECLARATION
 
         public:
-            const XTRXInputSettings& getSettings() const { return m_settings; }
+            const XTRXOutputSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureXTRX* create(const XTRXInputSettings& settings, bool force)
+        static MsgConfigureXTRX* create(const XTRXOutputSettings& settings, bool force)
         {
             return new MsgConfigureXTRX(settings, force);
         }
 
     private:
-        XTRXInputSettings m_settings;
+        XTRXOutputSettings m_settings;
         bool m_force;
 
-        MsgConfigureXTRX(const XTRXInputSettings& settings, bool force) :
+        MsgConfigureXTRX(const XTRXOutputSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
@@ -155,34 +154,15 @@ public:
         { }
     };
 
-    class MsgFileRecord : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-        public:
-            bool getStartStop() const { return m_startStop; }
-
-        static MsgFileRecord* create(bool startStop) {
-            return new MsgFileRecord(startStop);
-        }
-
-    protected:
-        bool m_startStop;
-
-        MsgFileRecord(bool startStop) :
-            Message(),
-            m_startStop(startStop)
-        { }
-    };
-
-    XTRXInput(DeviceSourceAPI *deviceAPI);
-    virtual ~XTRXInput();
+    XTRXOutput(DeviceSinkAPI *deviceAPI);
+    virtual ~XTRXOutput();
     virtual void destroy();
 
     virtual void init();
     virtual bool start();
     virtual void stop();
-    XTRXInputThread *getThread() { return m_XTRXInputThread; }
-    void setThread(XTRXInputThread *thread) { m_XTRXInputThread = thread; }
+    XTRXOutputThread *getThread() { return m_XTRXOutputThread; }
+    void setThread(XTRXOutputThread *thread) { m_XTRXOutputThread = thread; }
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
@@ -223,39 +203,32 @@ public:
     void getSRRange(float& minF, float& maxF, float& stepF) const;
     void getLPRange(float& minF, float& maxF, float& stepF) const;
 
-    void apply_gain_auto(uint32_t gain);
-    void apply_gain_lna(double gain);
-    void apply_gain_tia(double gain);
-    void apply_gain_pga(double gain);
-
 private:
-    DeviceSourceAPI *m_deviceAPI;
+    DeviceSinkAPI *m_deviceAPI;
     QMutex m_mutex;
-    XTRXInputSettings m_settings;
-    XTRXInputThread* m_XTRXInputThread;
+    XTRXOutputSettings m_settings;
+    XTRXOutputThread* m_XTRXOutputThread;
     QString m_deviceDescription;
     bool m_running;
     DeviceXTRXShared m_deviceShared;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
-
     bool openDevice();
     void closeDevice();
-    XTRXInputThread *findThread();
+    XTRXOutputThread *findThread();
     void moveThreadToBuddy();
 
-    void suspendTxThread();
-    void resumeTxThread();
-    bool applySettings(const XTRXInputSettings& settings, bool force = false, bool forceNCOFrequency = false);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const XTRXInputSettings& settings);
+    void suspendRxThread();
+    void resumeRxThread();
+    bool applySettings(const XTRXOutputSettings& settings, bool force = false, bool forceNCOFrequency = false);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const XTRXOutputSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const XTRXInputSettings& settings, bool force);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const XTRXOutputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
 };
 
-#endif /* PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUT_H_ */
+#endif /* PLUGINS_SAMPLESINK_XTRXOUTPUT_XTRXOUTPUT_H_ */

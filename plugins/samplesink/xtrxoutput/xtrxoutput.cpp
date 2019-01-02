@@ -24,45 +24,40 @@
 #include <QBuffer>
 
 #include "SWGDeviceSettings.h"
-#include "SWGXtrxInputSettings.h"
+#include "SWGXtrxOutputSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
-#include "SWGXtrxInputReport.h"
+#include "SWGXtrxOutputReport.h"
 
 #include "device/devicesourceapi.h"
 #include "device/devicesinkapi.h"
 #include "dsp/dspcommands.h"
-#include "dsp/filerecord.h"
-#include "xtrxinput.h"
-#include "xtrxinputthread.h"
+#include "xtrxoutput.h"
+#include "xtrxoutputthread.h"
 #include "xtrx/devicextrxparam.h"
 #include "xtrx/devicextrxshared.h"
 #include "xtrx/devicextrx.h"
 
-MESSAGE_CLASS_DEFINITION(XTRXInput::MsgConfigureXTRX, Message)
-MESSAGE_CLASS_DEFINITION(XTRXInput::MsgGetStreamInfo, Message)
-MESSAGE_CLASS_DEFINITION(XTRXInput::MsgGetDeviceInfo, Message)
-MESSAGE_CLASS_DEFINITION(XTRXInput::MsgReportStreamInfo, Message)
-MESSAGE_CLASS_DEFINITION(XTRXInput::MsgFileRecord, Message)
-MESSAGE_CLASS_DEFINITION(XTRXInput::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(XTRXOutput::MsgConfigureXTRX, Message)
+MESSAGE_CLASS_DEFINITION(XTRXOutput::MsgGetStreamInfo, Message)
+MESSAGE_CLASS_DEFINITION(XTRXOutput::MsgGetDeviceInfo, Message)
+MESSAGE_CLASS_DEFINITION(XTRXOutput::MsgReportStreamInfo, Message)
+MESSAGE_CLASS_DEFINITION(XTRXOutput::MsgStartStop, Message)
 
-XTRXInput::XTRXInput(DeviceSourceAPI *deviceAPI) :
+XTRXOutput::XTRXOutput(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
-    m_XTRXInputThread(0),
-    m_deviceDescription("XTRXInput"),
+    m_XTRXOutputThread(0),
+    m_deviceDescription("XTRXOutput"),
     m_running(false)
 {
     openDevice();
-
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
-    m_deviceAPI->addSink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
-XTRXInput::~XTRXInput()
+XTRXOutput::~XTRXOutput()
 {
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
@@ -71,63 +66,29 @@ XTRXInput::~XTRXInput()
         stop();
     }
 
-    m_deviceAPI->removeSink(m_fileSink);
-    delete m_fileSink;
     closeDevice();
 }
 
-void XTRXInput::destroy()
+void XTRXOutput::destroy()
 {
     delete this;
 }
 
-bool XTRXInput::openDevice()
+bool XTRXOutput::openDevice()
 {
-    if (!m_sampleFifo.setSize(96000 * 4))
-    {
-        qCritical("XTRXInput::openDevice: could not allocate SampleFifo");
-        return false;
-    }
-    else
-    {
-        qDebug("XTRXInput::openDevice: allocated SampleFifo");
-    }
+    m_sampleSourceFifo.resize(m_settings.m_devSampleRate/(1<<(m_settings.m_log2SoftInterp <= 4 ? m_settings.m_log2SoftInterp : 4)));
 
-    // look for Rx buddies and get reference to the device object
-    if (m_deviceAPI->getSourceBuddies().size() > 0) // look source sibling first
-    {
-        qDebug("XTRXInput::openDevice: look in Rx buddies");
-
-        DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
-        DeviceXTRXShared *deviceXTRXShared = (DeviceXTRXShared*) sourceBuddy->getBuddySharedPtr();
-
-        if (deviceXTRXShared == 0)
-        {
-            qCritical("XTRXInput::openDevice: the source buddy shared pointer is null");
-            return false;
-        }
-
-        DeviceXTRX *device = deviceXTRXShared->m_dev;
-
-        if (device == 0)
-        {
-            qCritical("XTRXInput::openDevice: cannot get device pointer from Rx buddy");
-            return false;
-        }
-
-        m_deviceShared.m_dev = device;
-    }
     // look for Tx buddies and get reference to the device object
-    else if (m_deviceAPI->getSinkBuddies().size() > 0) // then sink
+    if (m_deviceAPI->getSinkBuddies().size() > 0) // then sink
     {
-        qDebug("XTRXInput::openDevice: look in Tx buddies");
+        qDebug("XTRXOutput::openDevice: look in Tx buddies");
 
         DeviceSinkAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
         DeviceXTRXShared *deviceXTRXShared = (DeviceXTRXShared*) sinkBuddy->getBuddySharedPtr();
 
         if (deviceXTRXShared == 0)
         {
-            qCritical("XTRXInput::openDevice: the sink buddy shared pointer is null");
+            qCritical("XTRXOutput::openDevice: the sink buddy shared pointer is null");
             return false;
         }
 
@@ -135,7 +96,31 @@ bool XTRXInput::openDevice()
 
         if (device == 0)
         {
-            qCritical("XTRXInput::openDevice: cannot get device pointer from Tx buddy");
+            qCritical("XTRXOutput::openDevice: cannot get device pointer from Tx buddy");
+            return false;
+        }
+
+        m_deviceShared.m_dev = device;
+    }
+    // look for Rx buddies and get reference to the device object
+    else if (m_deviceAPI->getSourceBuddies().size() > 0) // look source sibling first
+    {
+        qDebug("XTRXOutput::openDevice: look in Rx buddies");
+
+        DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
+        DeviceXTRXShared *deviceXTRXShared = (DeviceXTRXShared*) sourceBuddy->getBuddySharedPtr();
+
+        if (deviceXTRXShared == 0)
+        {
+            qCritical("XTRXOutput::openDevice: the source buddy shared pointer is null");
+            return false;
+        }
+
+        DeviceXTRX *device = deviceXTRXShared->m_dev;
+
+        if (device == 0)
+        {
+            qCritical("XTRXOutput::openDevice: cannot get device pointer from Rx buddy");
             return false;
         }
 
@@ -144,26 +129,26 @@ bool XTRXInput::openDevice()
     // There are no buddies then create the first BladeRF2 device
     else
     {
-        qDebug("XTRXInput::openDevice: open device here");
+        qDebug("XTRXOutput::openDevice: open device here");
 
         m_deviceShared.m_dev = new DeviceXTRX();
         char serial[256];
-        strcpy(serial, qPrintable(m_deviceAPI->getSampleSourceSerial()));
+        strcpy(serial, qPrintable(m_deviceAPI->getSampleSinkSerial()));
 
         if (!m_deviceShared.m_dev->open(serial))
         {
-            qCritical("XTRXInput::openDevice: cannot open BladeRF2 device");
+            qCritical("XTRXOutput::openDevice: cannot open BladeRF2 device");
             return false;
         }
     }
 
     m_deviceShared.m_channel = m_deviceAPI->getItemIndex(); // publicly allocate channel
-    m_deviceShared.m_source = this;
+    m_deviceShared.m_sink = this;
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
     return true;
 }
 
-void XTRXInput::closeDevice()
+void XTRXOutput::closeDevice()
 {
     if (m_deviceShared.m_dev == 0) { // was never open
         return;
@@ -173,12 +158,12 @@ void XTRXInput::closeDevice()
         stop();
     }
 
-    if (m_XTRXInputThread) { // stills own the thread => transfer to a buddy
+    if (m_XTRXOutputThread) { // stills own the thread => transfer to a buddy
         moveThreadToBuddy();
     }
 
     m_deviceShared.m_channel = -1; // publicly release channel
-    m_deviceShared.m_source = 0;
+    m_deviceShared.m_sink = 0;
 
     // No buddies so effectively close the device
 
@@ -190,81 +175,81 @@ void XTRXInput::closeDevice()
     }
 }
 
-void XTRXInput::init()
+void XTRXOutput::init()
 {
     applySettings(m_settings, true, false);
 }
 
-XTRXInputThread *XTRXInput::findThread()
+XTRXOutputThread *XTRXOutput::findThread()
 {
-    if (m_XTRXInputThread == 0) // this does not own the thread
+    if (m_XTRXOutputThread == 0) // this does not own the thread
     {
-        XTRXInputThread *xtrxInputThread = 0;
+        XTRXOutputThread *xtrxOutputThread = 0;
 
         // find a buddy that has allocated the thread
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceSinkAPI*>::const_iterator it = sinkBuddies.begin();
 
-        for (; it != sourceBuddies.end(); ++it)
+        for (; it != sinkBuddies.end(); ++it)
         {
-            XTRXInput *buddySource = ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_source;
+            XTRXOutput *buddySink = ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_sink;
 
-            if (buddySource)
+            if (buddySink)
             {
-                xtrxInputThread = buddySource->getThread();
+                xtrxOutputThread = buddySink->getThread();
 
-                if (xtrxInputThread) {
+                if (xtrxOutputThread) {
                     break;
                 }
             }
         }
 
-        return xtrxInputThread;
+        return xtrxOutputThread;
     }
     else
     {
-        return m_XTRXInputThread; // own thread
+        return m_XTRXOutputThread; // own thread
     }
 }
 
-void XTRXInput::moveThreadToBuddy()
+void XTRXOutput::moveThreadToBuddy()
 {
-    const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-    std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+    const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+    std::vector<DeviceSinkAPI*>::const_iterator it = sinkBuddies.begin();
 
-    for (; it != sourceBuddies.end(); ++it)
+    for (; it != sinkBuddies.end(); ++it)
     {
-        XTRXInput *buddySource = ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_source;
+        XTRXOutput *buddySink = ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_sink;
 
-        if (buddySource)
+        if (buddySink)
         {
-            buddySource->setThread(m_XTRXInputThread);
-            m_XTRXInputThread = 0;  // zero for others
+            buddySink->setThread(m_XTRXOutputThread);
+            m_XTRXOutputThread = 0;  // zero for others
         }
     }
 }
 
-bool XTRXInput::start()
+bool XTRXOutput::start()
 {
-    // There is a single thread per physical device (Rx side). This thread is unique and referenced by a unique
-    // buddy in the group of source buddies associated with this physical device.
+    // There is a single thread per physical device (Tx side). This thread is unique and referenced by a unique
+    // buddy in the group of sink buddies associated with this physical device.
     //
-    // This start method is responsible for managing the thread when the streaming of a Rx channel is started
+    // This start method is responsible for managing the thread when the streaming of a Tx channel is started
     //
     // It checks the following conditions
     //   - the thread is allocated or not (by itself or one of its buddies). If it is it grabs the thread pointer.
     //   - the requested channel is another channel (one is already streaming).
     //
     // The XTRX support library lets you work in two possible modes:
-    //   - Single Input (SI) with only one channel streaming. This can be channel 0 or 1 (channels can be swapped - unlike with BladeRF2).
-    //   - Multiple Input (MI) with two channels streaming using interleaved samples. It MUST be in this configuration if both channels are
+    //   - Single Output (SO) with only one channel streaming. This can be channel 0 or 1 (channels can be swapped - unlike with BladeRF2).
+    //   - Multiple Output (MO) with two channels streaming using interleaved samples. It MUST be in this configuration if both channels are
     //     streaming.
     //
-    // It manages the transition form SI where only one channel is running to the  Multiple Input (MI) if the both channels are requested.
+    // It manages the transition form SO where only one channel is running to the  Multiple Input (MO) if the both channels are requested.
     // To perform the transition it stops the thread, deletes it and creates a new one.
     // It marks the thread as needing start.
     //
-    // If there is no thread allocated it means we are in SI mode and it creates a new one with the requested channel.
+    // If there is no thread allocated it means we are in SO mode and it creates a new one with the requested channel.
     // It marks the thread as needing start.
     //
     // Eventually it registers the FIFO in the thread. If the thread has to be started it enables the channels up to the number of channels
@@ -272,103 +257,103 @@ bool XTRXInput::start()
 
     if (!m_deviceShared.m_dev || !m_deviceShared.m_dev->getDevice())
     {
-        qDebug("XTRXInput::start: no device object");
+        qDebug("XTRXOutput::start: no device object");
         return false;
     }
 
     int requestedChannel = m_deviceAPI->getItemIndex();
-    XTRXInputThread *xtrxInputThread = findThread();
+    XTRXOutputThread *xtrxOutputThread = findThread();
     bool needsStart = false;
 
-    if (xtrxInputThread) // if thread is already allocated
+    if (xtrxOutputThread) // if thread is already allocated
     {
-        qDebug("XTRXInput::start: thread is already allocated");
+        qDebug("XTRXOutput::start: thread is already allocated");
 
-        unsigned int nbOriginalChannels = xtrxInputThread->getNbChannels();
+        unsigned int nbOriginalChannels = xtrxOutputThread->getNbChannels();
 
         // if one channel is already allocated it must be the other one so we'll end up with both channels
         // thus we expand by deleting and re-creating the thread
         if (nbOriginalChannels != 0)
         {
-            qDebug("XTRXInput::start: expand channels. Re-allocate thread and take ownership");
+            qDebug("XTRXOutput::start: expand channels. Re-allocate thread and take ownership");
 
-            SampleSinkFifo **fifos = new SampleSinkFifo*[2];
-            unsigned int *log2Decims = new unsigned int[2];
+            SampleSourceFifo **fifos = new SampleSourceFifo*[2];
+            unsigned int *log2Interps = new unsigned int[2];
 
             for (int i = 0; i < 2; i++) // save original FIFO references and data
             {
-                fifos[i] = xtrxInputThread->getFifo(i);
-                log2Decims[i] = xtrxInputThread->getLog2Decimation(i);
+                fifos[i] = xtrxOutputThread->getFifo(i);
+                log2Interps[i] = xtrxOutputThread->getLog2Interpolation(i);
             }
 
-            xtrxInputThread->stopWork();
-            delete xtrxInputThread;
-            xtrxInputThread = new XTRXInputThread(m_deviceShared.m_dev->getDevice(), 2); // MI mode (2 channels)
-            m_XTRXInputThread = xtrxInputThread; // take ownership
-            m_deviceShared.m_thread = xtrxInputThread;
+            xtrxOutputThread->stopWork();
+            delete xtrxOutputThread;
+            xtrxOutputThread = new XTRXOutputThread(m_deviceShared.m_dev->getDevice(), 2); // MO mode (2 channels)
+            m_XTRXOutputThread = xtrxOutputThread; // take ownership
+            m_deviceShared.m_thread = xtrxOutputThread;
 
             for (int i = 0; i < 2; i++) // restore original FIFO references
             {
-                xtrxInputThread->setFifo(i, fifos[i]);
-                xtrxInputThread->setLog2Decimation(i, log2Decims[i]);
+                xtrxOutputThread->setFifo(i, fifos[i]);
+                xtrxOutputThread->setLog2Interpolation(i, log2Interps[i]);
             }
 
             // remove old thread address from buddies (reset in all buddies). The address being held only in the owning source.
-            const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-            std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+            const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+            std::vector<DeviceSinkAPI*>::const_iterator it = sinkBuddies.begin();
 
-            for (; it != sourceBuddies.end(); ++it)
+            for (; it != sinkBuddies.end(); ++it)
             {
-                ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
+                ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_sink->setThread(0);
                 ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_thread = 0;
             }
 
             // was used as temporary storage:
             delete[] fifos;
-            delete[] log2Decims;
+            delete[] log2Interps;
 
             needsStart = true;
         }
         else
         {
-            qDebug("XTRXInput::start: keep buddy thread");
+            qDebug("XTRXOutput::start: keep buddy thread");
         }
     }
     else // first allocation
     {
-        qDebug("XTRXInput::start: allocate thread and take ownership");
-        xtrxInputThread = new XTRXInputThread(m_deviceShared.m_dev->getDevice(), 1, requestedChannel);
-        m_XTRXInputThread = xtrxInputThread; // take ownership
-        m_deviceShared.m_thread = xtrxInputThread;
+        qDebug("XTRXOutput::start: allocate thread and take ownership");
+        xtrxOutputThread = new XTRXOutputThread(m_deviceShared.m_dev->getDevice(), 1, requestedChannel);
+        m_XTRXOutputThread = xtrxOutputThread; // take ownership
+        m_deviceShared.m_thread = xtrxOutputThread;
         needsStart = true;
     }
 
-    xtrxInputThread->setFifo(requestedChannel, &m_sampleFifo);
-    xtrxInputThread->setLog2Decimation(requestedChannel, m_settings.m_log2SoftDecim);
+    xtrxOutputThread->setFifo(requestedChannel, &m_sampleSourceFifo);
+    xtrxOutputThread->setLog2Interpolation(requestedChannel, m_settings.m_log2SoftInterp);
 
     if (needsStart)
     {
-        qDebug("XTRXInput::start: (re)start thread");
-        xtrxInputThread->startWork();
+        qDebug("XTRXOutput::start: (re)start thread");
+        xtrxOutputThread->startWork();
     }
 
     applySettings(m_settings, true);
 
-    qDebug("XTRXInput::start: started");
+    qDebug("XTRXOutput::start: started");
     m_running = true;
 
     return true;
 }
 
-void XTRXInput::stop()
+void XTRXOutput::stop()
 {
     // This stop method is responsible for managing the thread when the streaming of a Rx channel is stopped
     //
-    // If the thread is currently managing only one channel (SI mode). The thread can be just stopped and deleted.
+    // If the thread is currently managing only one channel (SO mode). The thread can be just stopped and deleted.
     // Then the channel is closed.
     //
-    // If the thread is currently managing both channels (MI mode) then we are removing one channel. Thus we must
-    // transition from MI to SI. This transition is handled by stopping the thread, deleting it and creating a new one
+    // If the thread is currently managing both channels (MO mode) then we are removing one channel. Thus we must
+    // transition from MO to SO. This transition is handled by stopping the thread, deleting it and creating a new one
     // managing a single channel.
 
     if (!m_running) {
@@ -377,73 +362,73 @@ void XTRXInput::stop()
 
     int removedChannel = m_deviceAPI->getItemIndex(); // channel to remove
     int requestedChannel = removedChannel ^ 1; // channel to keep (opposite channel)
-    XTRXInputThread *xtrxInputThread = findThread();
+    XTRXOutputThread *xtrxOutputThread = findThread();
 
-    if (xtrxInputThread == 0) { // no thread allocated
+    if (xtrxOutputThread == 0) { // no thread allocated
         return;
     }
 
-    int nbOriginalChannels = xtrxInputThread->getNbChannels();
+    int nbOriginalChannels = xtrxOutputThread->getNbChannels();
 
-    if (nbOriginalChannels == 1) // SI mode => just stop and delete the thread
+    if (nbOriginalChannels == 1) // SO mode => just stop and delete the thread
     {
-        qDebug("XTRXInput::stop: SI mode. Just stop and delete the thread");
-        xtrxInputThread->stopWork();
-        delete xtrxInputThread;
-        m_XTRXInputThread = 0;
+        qDebug("XTRXOutput::stop: SO mode. Just stop and delete the thread");
+        xtrxOutputThread->stopWork();
+        delete xtrxOutputThread;
+        m_XTRXOutputThread = 0;
         m_deviceShared.m_thread = 0;
 
         // remove old thread address from buddies (reset in all buddies)
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceSinkAPI*>::const_iterator it = sinkBuddies.begin();
 
-        for (; it != sourceBuddies.end(); ++it)
+        for (; it != sinkBuddies.end(); ++it)
         {
-            ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
+            ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_sink->setThread(0);
             ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_thread = 0;
         }
     }
-    else if (nbOriginalChannels == 2) // Reduce from MI to SI by deleting and re-creating the thread
+    else if (nbOriginalChannels == 2) // Reduce from MO to SO by deleting and re-creating the thread
     {
-        qDebug("XTRXInput::stop: MI mode. Reduce by deleting and re-creating the thread");
-        xtrxInputThread->stopWork();
-        delete xtrxInputThread;
-        xtrxInputThread = new XTRXInputThread(m_deviceShared.m_dev->getDevice(), 1, requestedChannel);
-        m_XTRXInputThread = xtrxInputThread; // take ownership
-        m_deviceShared.m_thread = xtrxInputThread;
+        qDebug("XTRXOutput::stop: MO mode. Reduce by deleting and re-creating the thread");
+        xtrxOutputThread->stopWork();
+        delete xtrxOutputThread;
+        xtrxOutputThread = new XTRXOutputThread(m_deviceShared.m_dev->getDevice(), 1, requestedChannel);
+        m_XTRXOutputThread = xtrxOutputThread; // take ownership
+        m_deviceShared.m_thread = xtrxOutputThread;
 
-        xtrxInputThread->setFifo(requestedChannel, &m_sampleFifo);
-        xtrxInputThread->setLog2Decimation(requestedChannel, m_settings.m_log2SoftDecim);
+        xtrxOutputThread->setFifo(requestedChannel, &m_sampleSourceFifo);
+        xtrxOutputThread->setLog2Interpolation(requestedChannel, m_settings.m_log2SoftInterp);
 
         // remove old thread address from buddies (reset in all buddies). The address being held only in the owning source.
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceSinkAPI*>::const_iterator it = sinkBuddies.begin();
 
-        for (; it != sourceBuddies.end(); ++it)
+        for (; it != sinkBuddies.end(); ++it)
         {
-            ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
+            ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_sink->setThread(0);
             ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_thread = 0;
         }
 
-        xtrxInputThread->startWork();
+        xtrxOutputThread->startWork();
         applySettings(m_settings, true);
     }
 
     m_running = false;
 }
 
-void XTRXInput::suspendTxThread()
+void XTRXOutput::suspendRxThread()
 {
-    const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-    std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+    const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+    std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
 
-    qDebug("XTRXInput::suspendTxThread (%lu)", sinkBuddies.size());
+    qDebug("XTRXOutput::suspendRxThread (%lu)", sourceBuddies.size());
 
-    for (; itSink != sinkBuddies.end(); ++itSink)
+    for (; itSource != sourceBuddies.end(); ++itSource)
     {
-        DeviceXTRXShared *buddySharedPtr = (DeviceXTRXShared *) (*itSink)->getBuddySharedPtr();
+        DeviceXTRXShared *buddySharedPtr = (DeviceXTRXShared *) (*itSource)->getBuddySharedPtr();
 
-        if ((buddySharedPtr->m_thread) && buddySharedPtr->m_thread->isRunning())
+        if (buddySharedPtr->m_thread && buddySharedPtr->m_thread->isRunning())
         {
             buddySharedPtr->m_thread->stopWork();
             buddySharedPtr->m_threadWasRunning = true;
@@ -455,16 +440,16 @@ void XTRXInput::suspendTxThread()
     }
 }
 
-void XTRXInput::resumeTxThread()
+void XTRXOutput::resumeRxThread()
 {
-    const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-    std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+    const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+    std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
 
-    qDebug("XTRXInput::resumeTxThread (%lu)", sinkBuddies.size());
+    qDebug("XTRXOutput::resumeRxThread (%lu)", sourceBuddies.size());
 
-    for (; itSink != sinkBuddies.end(); ++itSink)
+    for (; itSource != sourceBuddies.end(); ++itSource)
     {
-        DeviceXTRXShared *buddySharedPtr = (DeviceXTRXShared *) (*itSink)->getBuddySharedPtr();
+        DeviceXTRXShared *buddySharedPtr = (DeviceXTRXShared *) (*itSource)->getBuddySharedPtr();
 
         if (buddySharedPtr->m_threadWasRunning) {
             buddySharedPtr->m_thread->startWork();
@@ -472,12 +457,12 @@ void XTRXInput::resumeTxThread()
     }
 }
 
-QByteArray XTRXInput::serialize() const
+QByteArray XTRXOutput::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool XTRXInput::deserialize(const QByteArray& data)
+bool XTRXOutput::deserialize(const QByteArray& data)
 {
     bool success = true;
 
@@ -499,25 +484,25 @@ bool XTRXInput::deserialize(const QByteArray& data)
     return success;
 }
 
-const QString& XTRXInput::getDeviceDescription() const
+const QString& XTRXOutput::getDeviceDescription() const
 {
     return m_deviceDescription;
 }
 
-int XTRXInput::getSampleRate() const
+int XTRXOutput::getSampleRate() const
 {
     double rate = m_settings.m_devSampleRate;
-    return (int)((rate / (1<<m_settings.m_log2SoftDecim)));
+    return (int)((rate / (1<<m_settings.m_log2SoftInterp)));
 }
 
-quint64 XTRXInput::getCenterFrequency() const
+quint64 XTRXOutput::getCenterFrequency() const
 {
     return m_settings.m_centerFrequency + (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
 }
 
-void XTRXInput::setCenterFrequency(qint64 centerFrequency)
+void XTRXOutput::setCenterFrequency(qint64 centerFrequency)
 {
-    XTRXInputSettings settings = m_settings;
+    XTRXOutputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency - (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
 
     MsgConfigureXTRX* message = MsgConfigureXTRX::create(settings, false);
@@ -530,12 +515,12 @@ void XTRXInput::setCenterFrequency(qint64 centerFrequency)
     }
 }
 
-std::size_t XTRXInput::getChannelIndex()
+std::size_t XTRXOutput::getChannelIndex()
 {
     return m_deviceShared.m_channel;
 }
 
-void XTRXInput::getLORange(float& minF, float& maxF, float& stepF) const
+void XTRXOutput::getLORange(float& minF, float& maxF, float& stepF) const
 {
     minF = 29e6;
     maxF = 3840e6;
@@ -544,7 +529,7 @@ void XTRXInput::getLORange(float& minF, float& maxF, float& stepF) const
            minF, maxF, stepF);
 }
 
-void XTRXInput::getSRRange(float& minF, float& maxF, float& stepF) const
+void XTRXOutput::getSRRange(float& minF, float& maxF, float& stepF) const
 {
     minF = 100e3;
     maxF = 120e6;
@@ -553,7 +538,7 @@ void XTRXInput::getSRRange(float& minF, float& maxF, float& stepF) const
            minF, maxF, stepF);
 }
 
-void XTRXInput::getLPRange(float& minF, float& maxF, float& stepF) const
+void XTRXOutput::getLPRange(float& minF, float& maxF, float& stepF) const
 {
     minF = 500e3;
     maxF = 130e6;
@@ -562,16 +547,16 @@ void XTRXInput::getLPRange(float& minF, float& maxF, float& stepF) const
            minF, maxF, stepF);
 }
 
-bool XTRXInput::handleMessage(const Message& message)
+bool XTRXOutput::handleMessage(const Message& message)
 {
     if (MsgConfigureXTRX::match(message))
     {
         MsgConfigureXTRX& conf = (MsgConfigureXTRX&) message;
-        qDebug() << "XTRXInput::handleMessage: MsgConfigureXTRX";
+        qDebug() << "XTRXOutput::handleMessage: MsgConfigureXTRX";
 
         if (!applySettings(conf.getSettings(), conf.getForce()))
         {
-            qDebug("XTRXInput::handleMessage config error");
+            qDebug("XTRXOutput::handleMessage config error");
         }
 
         return true;
@@ -580,21 +565,21 @@ bool XTRXInput::handleMessage(const Message& message)
     {
         DeviceXTRXShared::MsgReportBuddyChange& report = (DeviceXTRXShared::MsgReportBuddyChange&) message;
 
-        if (report.getRxElseTx())
+        if (!report.getRxElseTx())
         {
             m_settings.m_devSampleRate   = report.getDevSampleRate();
-            m_settings.m_log2HardDecim   = report.getLog2HardDecimInterp();
+            m_settings.m_log2HardInterp   = report.getLog2HardDecimInterp();
             m_settings.m_centerFrequency = report.getCenterFrequency();
         }
         else
         {
             m_settings.m_devSampleRate = m_deviceShared.m_inputRate;
-            m_settings.m_log2HardDecim = log2(m_deviceShared.m_masterRate / m_deviceShared.m_inputRate / 4);
+            m_settings.m_log2HardInterp = log2(m_deviceShared.m_masterRate / m_deviceShared.m_inputRate / 4);
 
-            qDebug() << "XTRXInput::handleMessage: MsgReportBuddyChange:"
+            qDebug() << "XTRXOutput::handleMessage: MsgReportBuddyChange:"
                      << " host_Hz: " << m_deviceShared.m_inputRate
                      << " rf_Hz: " << m_deviceShared.m_masterRate / 4
-                     << " m_log2HardDecim: " << m_settings.m_log2HardDecim;
+                     << " m_log2HardDecim: " << m_settings.m_log2HardInterp;
         }
 
         if (m_settings.m_ncoEnable) // need to reset NCO after sample rate change
@@ -605,14 +590,14 @@ bool XTRXInput::handleMessage(const Message& message)
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
 
         DSPSignalNotification *notif = new DSPSignalNotification(
-                    m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim),
+                    m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp),
                     m_settings.m_centerFrequency + ncoShift);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
         if (getMessageQueueToGUI())
         {
             DeviceXTRXShared::MsgReportBuddyChange *reportToGUI = DeviceXTRXShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_log2HardDecim, m_settings.m_centerFrequency, true);
+                        m_settings.m_devSampleRate, m_settings.m_log2HardInterp, m_settings.m_centerFrequency, true);
             getMessageQueueToGUI()->push(reportToGUI);
         }
 
@@ -636,12 +621,12 @@ bool XTRXInput::handleMessage(const Message& message)
     }
     else if (MsgGetStreamInfo::match(message))
     {
-        if (m_deviceAPI->getSampleSourceGUIMessageQueue())
+        if (m_deviceAPI->getSampleSinkGUIMessageQueue())
         {
             uint64_t fifolevel = 0;
 
             if (m_deviceShared.m_dev && m_deviceShared.m_dev->getDevice()) {
-                xtrx_val_get(m_deviceShared.m_dev->getDevice(), XTRX_RX, XTRX_CH_AB, XTRX_PERF_LLFIFO, &fifolevel);
+                xtrx_val_get(m_deviceShared.m_dev->getDevice(), XTRX_TX, XTRX_CH_AB, XTRX_PERF_LLFIFO, &fifolevel);
             }
 
             MsgReportStreamInfo *report = MsgReportStreamInfo::create(
@@ -650,8 +635,8 @@ bool XTRXInput::handleMessage(const Message& message)
                         fifolevel,
                         65536);
 
-            if (m_deviceAPI->getSampleSourceGUIMessageQueue()) {
-                m_deviceAPI->getSampleSourceGUIMessageQueue()->push(report);
+            if (m_deviceAPI->getSampleSinkGUIMessageQueue()) {
+                m_deviceAPI->getSampleSinkGUIMessageQueue()->push(report);
             }
         }
 
@@ -663,33 +648,20 @@ bool XTRXInput::handleMessage(const Message& message)
         bool gps_locked = false;
 
         if (!m_deviceShared.m_dev->getDevice() || ((board_temp = m_deviceShared.get_board_temperature() / 256.0) == 0.0)) {
-            qDebug("XTRXInput::handleMessage: MsgGetDeviceInfo: cannot get board temperature");
+            qDebug("XTRXOutput::handleMessage: MsgGetDeviceInfo: cannot get board temperature");
         }
 
         if (!m_deviceShared.m_dev->getDevice()) {
-            qDebug("XTRXInput::handleMessage: MsgGetDeviceInfo: cannot get GPS lock status");
+            qDebug("XTRXOutput::handleMessage: MsgGetDeviceInfo: cannot get GPS lock status");
         } else {
             gps_locked = m_deviceShared.get_gps_status();
         }
 
         // send to oneself
-        if (m_deviceAPI->getSampleSourceGUIMessageQueue())
+        if (m_deviceAPI->getSampleSinkGUIMessageQueue())
         {
             DeviceXTRXShared::MsgReportDeviceInfo *report = DeviceXTRXShared::MsgReportDeviceInfo::create(board_temp, gps_locked);
-            m_deviceAPI->getSampleSourceGUIMessageQueue()->push(report);
-        }
-
-        // send to source buddies
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
-
-        for (; itSource != sourceBuddies.end(); ++itSource)
-        {
-            if ((*itSource)->getSampleSourceGUIMessageQueue())
-            {
-                DeviceXTRXShared::MsgReportDeviceInfo *report = DeviceXTRXShared::MsgReportDeviceInfo::create(board_temp, gps_locked);
-                (*itSource)->getSampleSourceGUIMessageQueue()->push(report);
-            }
+            m_deviceAPI->getSampleSinkGUIMessageQueue()->push(report);
         }
 
         // send to sink buddies
@@ -705,17 +677,17 @@ bool XTRXInput::handleMessage(const Message& message)
             }
         }
 
-        return true;
-    }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "XTRXInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
+        // send to source buddies
+        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
 
-        if (conf.getStartStop()) {
-            m_fileSink->startRecording();
-        } else {
-            m_fileSink->stopRecording();
+        for (; itSource != sourceBuddies.end(); ++itSource)
+        {
+            if ((*itSource)->getSampleSourceGUIMessageQueue())
+            {
+                DeviceXTRXShared::MsgReportDeviceInfo *report = DeviceXTRXShared::MsgReportDeviceInfo::create(board_temp, gps_locked);
+                (*itSource)->getSampleSourceGUIMessageQueue()->push(report);
+            }
         }
 
         return true;
@@ -723,18 +695,18 @@ bool XTRXInput::handleMessage(const Message& message)
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
-        qDebug() << "XTRXInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+        qDebug() << "XTRXOutput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initAcquisition())
+            if (m_deviceAPI->initGeneration())
             {
-                m_deviceAPI->startAcquisition();
+                m_deviceAPI->startGeneration();
             }
         }
         else
         {
-            m_deviceAPI->stopAcquisition();
+            m_deviceAPI->stopGeneration();
         }
 
         return true;
@@ -745,101 +717,22 @@ bool XTRXInput::handleMessage(const Message& message)
     }
 }
 
-static double tia_to_db(unsigned idx)
-{
-    switch (idx) {
-    case 1: return 12;
-    case 2: return 9;
-    default: return 0;
-    }
-}
-
-void XTRXInput::apply_gain_auto(uint32_t gain)
-{
-    uint32_t lna, tia, pga;
-
-    DeviceXTRX::getAutoGains(gain, lna, tia, pga);
-
-    apply_gain_lna(lna);
-    apply_gain_tia(tia_to_db(tia));
-    apply_gain_pga(pga);
-}
-
-void XTRXInput::apply_gain_lna(double gain)
-{
-    if (xtrx_set_gain(m_deviceShared.m_dev->getDevice(),
-            m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
-            XTRX_RX_LNA_GAIN,
-            gain,
-            0) < 0) {
-        qDebug("XTRXInput::applySettings: xtrx_set_gain(LNA) failed");
-    } else {
-        qDebug() << "XTRXInput::applySettings: Gain (LNA) set to " << gain;
-    }
-}
-
-void XTRXInput::apply_gain_tia(double gain)
-{
-    if (xtrx_set_gain(m_deviceShared.m_dev->getDevice(),
-            m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
-            XTRX_RX_TIA_GAIN,
-            gain,
-            0) < 0) {
-        qDebug("XTRXInput::applySettings: xtrx_set_gain(TIA) failed");
-    } else {
-        qDebug() << "XTRXInput::applySettings: Gain (TIA) set to " << gain;
-    }
-}
-
-void XTRXInput::apply_gain_pga(double gain)
-{
-    if (xtrx_set_gain(m_deviceShared.m_dev->getDevice(),
-            m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
-            XTRX_RX_PGA_GAIN,
-            gain,
-            0) < 0)
-    {
-        qDebug("XTRXInput::applySettings: xtrx_set_gain(PGA) failed");
-    }
-    else
-    {
-        qDebug() << "XTRXInput::applySettings: Gain (PGA) set to " << gain;
-    }
-}
-
-bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, bool forceNCOFrequency)
+bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, bool forceNCOFrequency)
 {
     int requestedChannel = m_deviceAPI->getItemIndex();
-    XTRXInputThread *inputThread = findThread();
+    XTRXOutputThread *outputThread = findThread();
     QList<QString> reverseAPIKeys;
 
     bool forwardChangeOwnDSP = false;
-    bool forwardChangeRxDSP  = false;
+    bool forwardChangeTxDSP  = false;
     bool forwardChangeAllDSP = false;
     bool forwardClockSource  = false;
-    bool rxThreadWasRunning = false;
+    bool txThreadWasRunning = false;
     bool doLPCalibration = false;
     bool doChangeSampleRate = false;
     bool doChangeFreq = false;
 
-    bool doGainAuto = false;
-    bool doGainLna = false;
-    bool doGainTia = false;
-    bool doGainPga = false;
-
     // apply settings
-
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
-    {
-        reverseAPIKeys.append("dcBlock");
-        m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
-    }
-
-    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
-    {
-        reverseAPIKeys.append("iqCorrection");
-        m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
-    }
 
     if ((m_settings.m_pwrmode != settings.m_pwrmode))
     {
@@ -852,7 +745,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
                     m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
                     XTRX_LMS7_PWR_MODE,
                     settings.m_pwrmode) < 0) {
-                qCritical("XTRXInput::applySettings: could not set power mode %d", settings.m_pwrmode);
+                qCritical("XTRXOutput::applySettings: could not set power mode %d", settings.m_pwrmode);
             }
         }
     }
@@ -876,7 +769,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
                 forwardClockSource = true;
                 doChangeSampleRate = true;
                 doChangeFreq = true;
-                qDebug("XTRXInput::applySettings: clock set to %s (Ext: %d Hz)",
+                qDebug("XTRXOutput::applySettings: clock set to %s (Ext: %d Hz)",
                        settings.m_extClock ? "external" : "internal",
                        settings.m_extClockFreq);
             }
@@ -886,12 +779,12 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force) {
         reverseAPIKeys.append("devSampleRate");
     }
-    if ((m_settings.m_log2HardDecim != settings.m_log2HardDecim) || force) {
-        reverseAPIKeys.append("log2HardDecim");
+    if ((m_settings.m_log2HardInterp != settings.m_log2HardInterp) || force) {
+        reverseAPIKeys.append("log2HardInterp");
     }
 
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
-       || (m_settings.m_log2HardDecim != settings.m_log2HardDecim) || force)
+       || (m_settings.m_log2HardInterp != settings.m_log2HardInterp) || force)
     {
         forwardChangeAllDSP = true; //m_settings.m_devSampleRate != settings.m_devSampleRate;
 
@@ -900,53 +793,20 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         }
     }
 
-    if ((m_settings.m_gainMode != settings.m_gainMode) || force) {
-        reverseAPIKeys.append("gainMode");
-    }
-    if ((m_settings.m_gain != settings.m_gain) || force) {
-        reverseAPIKeys.append("gain");
-    }
-    if ((m_settings.m_lnaGain != settings.m_lnaGain) || force) {
-        reverseAPIKeys.append("lnaGain");
-    }
-    if ((m_settings.m_tiaGain != settings.m_tiaGain) || force) {
-        reverseAPIKeys.append("tiaGain");
-    }
-    if ((m_settings.m_pgaGain != settings.m_pgaGain) || force) {
-        reverseAPIKeys.append("pgaGain");
-    }
-
-    if (m_deviceShared.m_dev->getDevice() != 0)
+    if ((m_settings.m_gain != settings.m_gain) || force)
     {
-        if ((m_settings.m_gainMode != settings.m_gainMode) || force)
+        reverseAPIKeys.append("gain");
+
+        if (m_deviceShared.m_dev->getDevice() != 0)
         {
-            if (settings.m_gainMode == XTRXInputSettings::GAIN_AUTO)
-            {
-                doGainAuto = true;
-            }
-            else
-            {
-                doGainLna = true;
-                doGainTia = true;
-                doGainPga = true;
-            }
-        }
-        else if (m_settings.m_gainMode == XTRXInputSettings::GAIN_AUTO)
-        {
-            if (m_settings.m_gain != settings.m_gain) {
-                doGainAuto = true;
-            }
-        }
-        else if (m_settings.m_gainMode == XTRXInputSettings::GAIN_MANUAL)
-        {
-            if (m_settings.m_lnaGain != settings.m_lnaGain) {
-                doGainLna = true;
-            }
-            if (m_settings.m_tiaGain != settings.m_tiaGain) {
-                doGainTia = true;
-            }
-            if (m_settings.m_pgaGain != settings.m_pgaGain) {
-                doGainPga = true;
+            if (xtrx_set_gain(m_deviceShared.m_dev->getDevice(),
+                    m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
+                    XTRX_TX_PAD_GAIN,
+                    settings.m_gain,
+                    0) < 0) {
+                qDebug("XTRXOutput::applySettings: xtrx_set_gain(PAD) failed");
+            } else {
+                qDebug() << "XTRXOutput::applySettings: Gain (PAD) set to " << settings.m_gain;
             }
         }
     }
@@ -987,15 +847,15 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     }
 #endif
 
-    if ((m_settings.m_log2SoftDecim != settings.m_log2SoftDecim) || force)
+    if ((m_settings.m_log2SoftInterp != settings.m_log2SoftInterp) || force)
     {
-        reverseAPIKeys.append("log2SoftDecim");
+        reverseAPIKeys.append("log2SoftInterp");
         forwardChangeOwnDSP = true;
 
-        if (inputThread != 0)
+        if (outputThread != 0)
         {
-            inputThread->setLog2Decimation(requestedChannel, settings.m_log2SoftDecim);
-            qDebug() << "XTRXInput::applySettings: set soft decimation to " << (1<<settings.m_log2SoftDecim);
+            outputThread->setLog2Interpolation(requestedChannel, settings.m_log2SoftInterp);
+            qDebug() << "XTRXOutput::applySettings: set soft interpolation to " << (1<<settings.m_log2SoftInterp);
         }
     }
 
@@ -1006,9 +866,9 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         if (m_deviceShared.m_dev->getDevice() != 0)
         {
             if (xtrx_set_antenna(m_deviceShared.m_dev->getDevice(), settings.m_antennaPath) < 0) {
-                qCritical("XTRXInput::applySettings: could not set antenna path to %d", (int) settings.m_antennaPath);
+                qCritical("XTRXOutput::applySettings: could not set antenna path to %d", (int) settings.m_antennaPath);
             } else {
-                qDebug("XTRXInput::applySettings: set antenna path to %d", (int) settings.m_antennaPath);
+                qDebug("XTRXOutput::applySettings: set antenna path to %d", (int) settings.m_antennaPath);
             }
         }
     }
@@ -1045,86 +905,69 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
 
     if (doChangeSampleRate)
     {
-        XTRXInputThread *rxThread = findThread();
+        XTRXOutputThread *txThread = findThread();
 
-        if (rxThread && rxThread->isRunning())
+        if (txThread && txThread->isRunning())
         {
-            rxThread->stopWork();
-            rxThreadWasRunning = true;
+            txThread->stopWork();
+            txThreadWasRunning = true;
         }
 
-        suspendTxThread();
+        suspendRxThread();
 
-        double master = (settings.m_log2HardDecim == 0) ? 0 : (settings.m_devSampleRate * 4 * (1 << settings.m_log2HardDecim));
+        double master = (settings.m_log2HardInterp == 0) ? 0 : (settings.m_devSampleRate * 4 * (1 << settings.m_log2HardInterp));
 
         if (m_deviceShared.set_samplerate(settings.m_devSampleRate,
                                           master, //(settings.m_devSampleRate<<settings.m_log2HardDecim)*4,
                                           false) < 0)
         {
-            qCritical("XTRXInput::applySettings: could not set sample rate to %f with oversampling of %d",
+            qCritical("XTRXOutput::applySettings: could not set sample rate to %f with oversampling of %d",
                       settings.m_devSampleRate,
-                      1<<settings.m_log2HardDecim);
+                      1<<settings.m_log2HardInterp);
         }
         else
         {
             doChangeFreq = true;
             forceNCOFrequency = true;
 
-            qDebug("XTRXInput::applySettings: sample rate set to %f with oversampling of %d",
+            qDebug("XTRXOutput::applySettings: sample rate set to %f with oversampling of %d",
                    settings.m_devSampleRate,
-                   1<<settings.m_log2HardDecim);
+                   1<<settings.m_log2HardInterp);
         }
 
-        resumeTxThread();
+        resumeRxThread();
 
-        if (rxThreadWasRunning) {
-            rxThread->startWork();
+        if (txThreadWasRunning) {
+            txThread->startWork();
         }
     }
 
     if (doLPCalibration)
     {
-        if (xtrx_tune_rx_bandwidth(m_deviceShared.m_dev->getDevice(),
+        if (xtrx_tune_tx_bandwidth(m_deviceShared.m_dev->getDevice(),
                 m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
                 m_settings.m_lpfBW,
                 0) < 0) {
-            qCritical("XTRXInput::applySettings: could not set LPF to %f Hz", m_settings.m_lpfBW);
+            qCritical("XTRXOutput::applySettings: could not set LPF to %f Hz", m_settings.m_lpfBW);
         } else {
-            qDebug("XTRXInput::applySettings: LPF set to %f Hz", m_settings.m_lpfBW);
+            qDebug("XTRXOutput::applySettings: LPF set to %f Hz", m_settings.m_lpfBW);
         }
-    }
-
-    if (doGainAuto)
-    {
-        apply_gain_auto(m_settings.m_gain);
-    }
-    if (doGainLna)
-    {
-        apply_gain_lna(m_settings.m_lnaGain);
-    }
-    if (doGainTia)
-    {
-        apply_gain_tia(tia_to_db(m_settings.m_tiaGain));
-    }
-    if (doGainPga)
-    {
-        apply_gain_pga(m_settings.m_pgaGain);
     }
 
     if (doChangeFreq)
     {
-        forwardChangeRxDSP = true;
+        forwardChangeTxDSP = true;
 
         if (m_deviceShared.m_dev->getDevice() != 0)
         {
             if (xtrx_tune(m_deviceShared.m_dev->getDevice(),
-                    XTRX_TUNE_RX_FDD,
+                    XTRX_TUNE_TX_FDD,
                     settings.m_centerFrequency,
                     0) < 0) {
-                qCritical("XTRXInput::applySettings: could not set frequency to %lu", settings.m_centerFrequency);
+                qCritical("XTRXOutput::applySettings: could not set frequency to %lu", settings.m_centerFrequency);
             } else {
                 //doCalibration = true;
-                qDebug("XTRXInput::applySettings: frequency set to %lu", settings.m_centerFrequency);
+                qDebug("XTRXOutput::applySettings: frequency set to %lu", settings.m_centerFrequency);
             }
         }
     }
@@ -1134,19 +977,19 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         if (m_deviceShared.m_dev->getDevice() != 0)
         {
             if (xtrx_tune_ex(m_deviceShared.m_dev->getDevice(),
-                    XTRX_TUNE_BB_RX,
+                    XTRX_TUNE_BB_TX,
                     m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
                     (settings.m_ncoEnable) ? settings.m_ncoFrequency : 0,
                     NULL) < 0)
             {
-                qCritical("XTRXInput::applySettings: could not %s and set NCO to %d Hz",
+                qCritical("XTRXOutput::applySettings: could not %s and set NCO to %d Hz",
                           settings.m_ncoEnable ? "enable" : "disable",
                           settings.m_ncoFrequency);
             }
             else
             {
                 forwardChangeOwnDSP = true;
-                qDebug("XTRXInput::applySettings: %sd and set NCO to %d Hz",
+                qDebug("XTRXOutput::applySettings: %sd and set NCO to %d Hz",
                        settings.m_ncoEnable ? "enable" : "disable",
                        settings.m_ncoFrequency);
             }
@@ -1157,13 +1000,13 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
 
     if (forwardChangeAllDSP)
     {
-        qDebug("XTRXInput::applySettings: forward change to all buddies");
+        qDebug("XTRXOutput::applySettings: forward change to all buddies");
 
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
 
         // send to self first
         DSPSignalNotification *notif = new DSPSignalNotification(
-                    m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim),
+                    m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp),
                     m_settings.m_centerFrequency + ncoShift);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
@@ -1174,7 +1017,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
             DeviceXTRXShared::MsgReportBuddyChange *report = DeviceXTRXShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_log2HardDecim, m_settings.m_centerFrequency, true);
+                        m_settings.m_devSampleRate, m_settings.m_log2HardInterp, m_settings.m_centerFrequency, true);
             (*itSource)->getSampleSourceInputMessageQueue()->push(report);
         }
 
@@ -1185,40 +1028,39 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
             DeviceXTRXShared::MsgReportBuddyChange *report = DeviceXTRXShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_log2HardDecim, m_settings.m_centerFrequency, true);
+                        m_settings.m_devSampleRate, m_settings.m_log2HardInterp, m_settings.m_centerFrequency, true);
             (*itSink)->getSampleSinkInputMessageQueue()->push(report);
         }
     }
-    else if (forwardChangeRxDSP)
+    else if (forwardChangeTxDSP)
     {
-        qDebug("XTRXInput::applySettings: forward change to Rx buddies");
+        qDebug("XTRXOutput::applySettings: forward change to Tx buddies");
 
-        int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
+        int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp);
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
 
         // send to self first
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + ncoShift);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
-        // send to source buddies
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+        // send to sink buddies
+        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
 
-        for (; itSource != sourceBuddies.end(); ++itSource)
+        for (; itSink != sinkBuddies.end(); ++itSink)
         {
             DeviceXTRXShared::MsgReportBuddyChange *report = DeviceXTRXShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_log2HardDecim, m_settings.m_centerFrequency, true);
-            (*itSource)->getSampleSourceInputMessageQueue()->push(report);
+                        m_settings.m_devSampleRate, m_settings.m_log2HardInterp, m_settings.m_centerFrequency, true);
+            (*itSink)->getSampleSinkInputMessageQueue()->push(report);
         }
     }
     else if (forwardChangeOwnDSP)
     {
-        qDebug("XTRXInput::applySettings: forward change to self only");
+        qDebug("XTRXOutput::applySettings: forward change to self only");
 
-        int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
+        int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp);
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + ncoShift);
-        m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
@@ -1249,7 +1091,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
 
     qDebug() << "XTRXInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
              << " device stream sample rate: " << m_settings.m_devSampleRate << "S/s"
-             << " sample rate with soft decimation: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim) << "S/s"
+             << " sample rate with soft interpolation: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp) << "S/s"
              << " m_gain: " << m_settings.m_gain
              << " m_lpfBW: " << m_settings.m_lpfBW
              << " m_ncoEnable: " << m_settings.m_ncoEnable
@@ -1264,7 +1106,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     return true;
 }
 
-int XTRXInput::webapiSettingsGet(
+int XTRXOutput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
                 QString& errorMessage)
 {
@@ -1275,83 +1117,62 @@ int XTRXInput::webapiSettingsGet(
     return 200;
 }
 
-int XTRXInput::webapiSettingsPutPatch(
+int XTRXOutput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage)
 {
     (void) errorMessage;
-    XTRXInputSettings settings = m_settings;
+    XTRXOutputSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("centerFrequency")) {
-        settings.m_centerFrequency = response.getXtrxInputSettings()->getCenterFrequency();
+        settings.m_centerFrequency = response.getXtrxOutputSettings()->getCenterFrequency();
     }
     if (deviceSettingsKeys.contains("devSampleRate")) {
-        settings.m_devSampleRate = response.getXtrxInputSettings()->getDevSampleRate();
+        settings.m_devSampleRate = response.getXtrxOutputSettings()->getDevSampleRate();
     }
-    if (deviceSettingsKeys.contains("log2HardDecim")) {
-        settings.m_log2HardDecim = response.getXtrxInputSettings()->getLog2HardDecim();
+    if (deviceSettingsKeys.contains("log2HardInterp")) {
+        settings.m_log2HardInterp = response.getXtrxOutputSettings()->getLog2HardInterp();
     }
-    if (deviceSettingsKeys.contains("dcBlock")) {
-        settings.m_dcBlock = response.getXtrxInputSettings()->getDcBlock() != 0;
-    }
-    if (deviceSettingsKeys.contains("iqCorrection")) {
-        settings.m_iqCorrection = response.getXtrxInputSettings()->getIqCorrection() != 0;
-    }
-    if (deviceSettingsKeys.contains("log2SoftDecim")) {
-        settings.m_log2SoftDecim = response.getXtrxInputSettings()->getLog2SoftDecim();
+    if (deviceSettingsKeys.contains("log2SoftInterp")) {
+        settings.m_log2SoftInterp = response.getXtrxOutputSettings()->getLog2SoftInterp();
     }
     if (deviceSettingsKeys.contains("lpfBW")) {
-        settings.m_lpfBW = response.getXtrxInputSettings()->getLpfBw();
+        settings.m_lpfBW = response.getXtrxOutputSettings()->getLpfBw();
     }
     if (deviceSettingsKeys.contains("gain")) {
-        settings.m_gain = response.getXtrxInputSettings()->getGain();
+        settings.m_gain = response.getXtrxOutputSettings()->getGain();
     }
     if (deviceSettingsKeys.contains("ncoEnable")) {
-        settings.m_ncoEnable = response.getXtrxInputSettings()->getNcoEnable() != 0;
+        settings.m_ncoEnable = response.getXtrxOutputSettings()->getNcoEnable() != 0;
     }
     if (deviceSettingsKeys.contains("ncoFrequency")) {
-        settings.m_ncoFrequency = response.getXtrxInputSettings()->getNcoFrequency();
+        settings.m_ncoFrequency = response.getXtrxOutputSettings()->getNcoFrequency();
     }
     if (deviceSettingsKeys.contains("antennaPath")) {
-        settings.m_antennaPath = (xtrx_antenna_t) response.getXtrxInputSettings()->getAntennaPath();
-    }
-    if (deviceSettingsKeys.contains("gainMode")) {
-        settings.m_gainMode = (XTRXInputSettings::GainMode) response.getXtrxInputSettings()->getGainMode();
-    }
-    if (deviceSettingsKeys.contains("lnaGain")) {
-        settings.m_lnaGain = response.getXtrxInputSettings()->getLnaGain();
-    }
-    if (deviceSettingsKeys.contains("tiaGain")) {
-        settings.m_tiaGain = response.getXtrxInputSettings()->getTiaGain();
-    }
-    if (deviceSettingsKeys.contains("pgaGain")) {
-        settings.m_pgaGain = response.getXtrxInputSettings()->getPgaGain();
+        settings.m_antennaPath = (xtrx_antenna_t) response.getXtrxOutputSettings()->getAntennaPath();
     }
     if (deviceSettingsKeys.contains("extClock")) {
-        settings.m_extClock = response.getXtrxInputSettings()->getExtClock() != 0;
+        settings.m_extClock = response.getXtrxOutputSettings()->getExtClock() != 0;
     }
     if (deviceSettingsKeys.contains("extClockFreq")) {
-        settings.m_extClockFreq = response.getXtrxInputSettings()->getExtClockFreq();
+        settings.m_extClockFreq = response.getXtrxOutputSettings()->getExtClockFreq();
     }
     if (deviceSettingsKeys.contains("pwrmode")) {
-        settings.m_pwrmode = response.getXtrxInputSettings()->getPwrmode();
-    }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getXtrxInputSettings()->getFileRecordName();
+        settings.m_pwrmode = response.getXtrxOutputSettings()->getPwrmode();
     }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getXtrxInputSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getXtrxOutputSettings()->getUseReverseApi() != 0;
     }
     if (deviceSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getXtrxInputSettings()->getReverseApiAddress() != 0;
+        settings.m_reverseAPIAddress = *response.getXtrxOutputSettings()->getReverseApiAddress() != 0;
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getXtrxInputSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getXtrxOutputSettings()->getReverseApiPort();
     }
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getXtrxInputSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getXtrxOutputSettings()->getReverseApiDeviceIndex();
     }
 
     MsgConfigureXTRX *msg = MsgConfigureXTRX::create(settings, force);
@@ -1367,57 +1188,44 @@ int XTRXInput::webapiSettingsPutPatch(
     return 200;
 }
 
-void XTRXInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const XTRXInputSettings& settings)
+void XTRXOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const XTRXOutputSettings& settings)
 {
-    response.getXtrxInputSettings()->setCenterFrequency(settings.m_centerFrequency);
-    response.getXtrxInputSettings()->setDevSampleRate(settings.m_devSampleRate);
-    response.getXtrxInputSettings()->setLog2HardDecim(settings.m_log2HardDecim);
-    response.getXtrxInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
-    response.getXtrxInputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
-    response.getXtrxInputSettings()->setLog2SoftDecim(settings.m_log2SoftDecim);
-    response.getXtrxInputSettings()->setLpfBw(settings.m_lpfBW);
-    response.getXtrxInputSettings()->setGain(settings.m_gain);
-    response.getXtrxInputSettings()->setNcoEnable(settings.m_ncoEnable ? 1 : 0);
-    response.getXtrxInputSettings()->setNcoFrequency(settings.m_ncoFrequency);
-    response.getXtrxInputSettings()->setAntennaPath((int) settings.m_antennaPath);
-    response.getXtrxInputSettings()->setGainMode((int) settings.m_gainMode);
-    response.getXtrxInputSettings()->setLnaGain(settings.m_lnaGain);
-    response.getXtrxInputSettings()->setTiaGain(settings.m_tiaGain);
-    response.getXtrxInputSettings()->setPgaGain(settings.m_pgaGain);
-    response.getXtrxInputSettings()->setExtClock(settings.m_extClock ? 1 : 0);
-    response.getXtrxInputSettings()->setExtClockFreq(settings.m_extClockFreq);
-    response.getXtrxInputSettings()->setPwrmode(settings.m_pwrmode);
+    response.getXtrxOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getXtrxOutputSettings()->setDevSampleRate(settings.m_devSampleRate);
+    response.getXtrxOutputSettings()->setLog2HardInterp(settings.m_log2HardInterp);
+    response.getXtrxOutputSettings()->setLog2SoftInterp(settings.m_log2SoftInterp);
+    response.getXtrxOutputSettings()->setLpfBw(settings.m_lpfBW);
+    response.getXtrxOutputSettings()->setGain(settings.m_gain);
+    response.getXtrxOutputSettings()->setNcoEnable(settings.m_ncoEnable ? 1 : 0);
+    response.getXtrxOutputSettings()->setNcoFrequency(settings.m_ncoFrequency);
+    response.getXtrxOutputSettings()->setAntennaPath((int) settings.m_antennaPath);
+    response.getXtrxOutputSettings()->setExtClock(settings.m_extClock ? 1 : 0);
+    response.getXtrxOutputSettings()->setExtClockFreq(settings.m_extClockFreq);
+    response.getXtrxOutputSettings()->setPwrmode(settings.m_pwrmode);
+    response.getXtrxOutputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getXtrxInputSettings()->getFileRecordName()) {
-        *response.getXtrxInputSettings()->getFileRecordName() = settings.m_fileRecordName;
+    if (response.getXtrxOutputSettings()->getReverseApiAddress()) {
+        *response.getXtrxOutputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getXtrxInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+        response.getXtrxOutputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getXtrxInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
-
-    if (response.getXtrxInputSettings()->getReverseApiAddress()) {
-        *response.getXtrxInputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
-    } else {
-        response.getXtrxInputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
-    }
-
-    response.getXtrxInputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getXtrxInputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getXtrxOutputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getXtrxOutputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
-int XTRXInput::webapiReportGet(
+int XTRXOutput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setXtrxInputReport(new SWGSDRangel::SWGXtrxInputReport());
+    response.setXtrxOutputReport(new SWGSDRangel::SWGXtrxOutputReport());
     response.getXtrxInputReport()->init();
     webapiFormatDeviceReport(response);
     return 200;
 }
 
-int XTRXInput::webapiRunGet(
+int XTRXOutput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
 {
@@ -1426,7 +1234,7 @@ int XTRXInput::webapiRunGet(
     return 200;
 }
 
-int XTRXInput::webapiRun(
+int XTRXOutput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
@@ -1445,7 +1253,7 @@ int XTRXInput::webapiRun(
     return 200;
 }
 
-void XTRXInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+void XTRXOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
     int ret;
     bool success = false;
@@ -1457,85 +1265,64 @@ void XTRXInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
     if (m_deviceShared.m_dev && m_deviceShared.m_dev->getDevice())
     {
         ret = xtrx_val_get(m_deviceShared.m_dev->getDevice(),
-                     XTRX_RX, XTRX_CH_AB, XTRX_PERF_LLFIFO, &fifolevel);
+                     XTRX_TX, XTRX_CH_AB, XTRX_PERF_LLFIFO, &fifolevel);
         success = (ret >= 0);
         temp = m_deviceShared.get_board_temperature() / 256.0;
         gpsStatus = m_deviceShared.get_gps_status();
     }
 
-    response.getXtrxInputReport()->setSuccess(success ? 1 : 0);
-    response.getXtrxInputReport()->setFifoSize(fifosize);
-    response.getXtrxInputReport()->setFifoFill(fifolevel);
-    response.getXtrxInputReport()->setTemperature(temp);
-    response.getXtrxInputReport()->setGpsLock(gpsStatus ? 1 : 0);
+    response.getXtrxOutputReport()->setSuccess(success ? 1 : 0);
+    response.getXtrxOutputReport()->setFifoSize(fifosize);
+    response.getXtrxOutputReport()->setFifoFill(fifolevel);
+    response.getXtrxOutputReport()->setTemperature(temp);
+    response.getXtrxOutputReport()->setGpsLock(gpsStatus ? 1 : 0);
 }
 
-void XTRXInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const XTRXInputSettings& settings, bool force)
+void XTRXOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const XTRXOutputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setTx(1);
     swgDeviceSettings->setDeviceHwType(new QString("XTRX"));
-    swgDeviceSettings->setXtrxInputSettings(new SWGSDRangel::SWGXtrxInputSettings());
-    SWGSDRangel::SWGXtrxInputSettings *swgXtrxInputSettings = swgDeviceSettings->getXtrxInputSettings();
+    swgDeviceSettings->setXtrxOutputSettings(new SWGSDRangel::SWGXtrxOutputSettings());
+    SWGSDRangel::SWGXtrxOutputSettings *swgXtrxOutputSettings = swgDeviceSettings->getXtrxOutputSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
-        swgXtrxInputSettings->setCenterFrequency(settings.m_centerFrequency);
+        swgXtrxOutputSettings->setCenterFrequency(settings.m_centerFrequency);
     }
     if (deviceSettingsKeys.contains("devSampleRate") || force) {
-        swgXtrxInputSettings->setDevSampleRate(settings.m_devSampleRate);
+        swgXtrxOutputSettings->setDevSampleRate(settings.m_devSampleRate);
     }
-    if (deviceSettingsKeys.contains("log2HardDecim") || force) {
-        swgXtrxInputSettings->setLog2HardDecim(settings.m_log2HardDecim);
+    if (deviceSettingsKeys.contains("log2HardInterp") || force) {
+        swgXtrxOutputSettings->setLog2HardInterp(settings.m_log2HardInterp);
     }
-    if (deviceSettingsKeys.contains("dcBlock") || force) {
-        swgXtrxInputSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("iqCorrection") || force) {
-        swgXtrxInputSettings->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("log2SoftDecim") || force) {
-        swgXtrxInputSettings->setLog2SoftDecim(settings.m_log2SoftDecim);
+    if (deviceSettingsKeys.contains("log2SoftInterp") || force) {
+        swgXtrxOutputSettings->setLog2SoftInterp(settings.m_log2SoftInterp);
     }
     if (deviceSettingsKeys.contains("ncoEnable") || force) {
-        swgXtrxInputSettings->setNcoEnable(settings.m_ncoEnable ? 1 : 0);
+        swgXtrxOutputSettings->setNcoEnable(settings.m_ncoEnable ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("ncoFrequency") || force) {
-        swgXtrxInputSettings->setNcoFrequency(settings.m_ncoFrequency);
+        swgXtrxOutputSettings->setNcoFrequency(settings.m_ncoFrequency);
     }
     if (deviceSettingsKeys.contains("lpfBW") || force) {
-        swgXtrxInputSettings->setLpfBw(settings.m_lpfBW);
+        swgXtrxOutputSettings->setLpfBw(settings.m_lpfBW);
     }
     if (deviceSettingsKeys.contains("antennaPath") || force) {
-        swgXtrxInputSettings->setAntennaPath((int) settings.m_antennaPath);
-    }
-    if (deviceSettingsKeys.contains("gainMode") || force) {
-        swgXtrxInputSettings->setGainMode((int) settings.m_gainMode);
+        swgXtrxOutputSettings->setAntennaPath((int) settings.m_antennaPath);
     }
     if (deviceSettingsKeys.contains("gain") || force) {
-        swgXtrxInputSettings->setGain(settings.m_gain);
-    }
-    if (deviceSettingsKeys.contains("lnaGain") || force) {
-        swgXtrxInputSettings->setLnaGain(settings.m_lnaGain);
-    }
-    if (deviceSettingsKeys.contains("tiaGain") || force) {
-        swgXtrxInputSettings->setTiaGain(settings.m_tiaGain);
-    }
-    if (deviceSettingsKeys.contains("pgaGain") || force) {
-        swgXtrxInputSettings->setPgaGain(settings.m_pgaGain);
+        swgXtrxOutputSettings->setGain(settings.m_gain);
     }
     if (deviceSettingsKeys.contains("extClock") || force) {
-        swgXtrxInputSettings->setExtClock(settings.m_extClock ? 1 : 0);
+        swgXtrxOutputSettings->setExtClock(settings.m_extClock ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("extClockFreq") || force) {
-        swgXtrxInputSettings->setExtClockFreq(settings.m_extClockFreq);
+        swgXtrxOutputSettings->setExtClockFreq(settings.m_extClockFreq);
     }
     if (deviceSettingsKeys.contains("pwrmode") || force) {
-        swgXtrxInputSettings->setPwrmode(settings.m_pwrmode);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgXtrxInputSettings->setFileRecordName(new QString(settings.m_fileRecordName));
+        swgXtrxOutputSettings->setPwrmode(settings.m_pwrmode);
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
@@ -1556,7 +1343,7 @@ void XTRXInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, co
     delete swgDeviceSettings;
 }
 
-void XTRXInput::webapiReverseSendStartStop(bool start)
+void XTRXOutput::webapiReverseSendStartStop(bool start)
 {
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
             .arg(m_settings.m_reverseAPIAddress)
@@ -1571,13 +1358,13 @@ void XTRXInput::webapiReverseSendStartStop(bool start)
     }
 }
 
-void XTRXInput::networkManagerFinished(QNetworkReply *reply)
+void XTRXOutput::networkManagerFinished(QNetworkReply *reply)
 {
     QNetworkReply::NetworkError replyError = reply->error();
 
     if (replyError)
     {
-        qWarning() << "XTRXInput::networkManagerFinished:"
+        qWarning() << "XTRXOutput::networkManagerFinished:"
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();
@@ -1586,5 +1373,5 @@ void XTRXInput::networkManagerFinished(QNetworkReply *reply)
 
     QString answer = reply->readAll();
     answer.chop(1); // remove last \n
-    qDebug("XTRXInput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    qDebug("XTRXOutput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }
