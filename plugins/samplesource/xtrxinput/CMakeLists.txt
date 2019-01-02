@@ -45,7 +45,7 @@ add_library(inputxtrx SHARED
 
 target_link_libraries(inputxtrx
 	${QT_LIBRARIES}
-	${LIBXTRX_LIBRARIES}
+	${LIBXTRX_LIBRARY}
 	sdrbase
 	sdrgui
 	swagger
