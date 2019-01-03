@@ -525,7 +525,7 @@ void XTRXOutput::getLORange(float& minF, float& maxF, float& stepF) const
     minF = 29e6;
     maxF = 3840e6;
     stepF = 10;
-    qDebug("XTRXInput::getLORange: min: %f max: %f step: %f",
+    qDebug("XTRXOutput::getLORange: min: %f max: %f step: %f",
            minF, maxF, stepF);
 }
 
@@ -534,7 +534,7 @@ void XTRXOutput::getSRRange(float& minF, float& maxF, float& stepF) const
     minF = 100e3;
     maxF = 120e6;
     stepF = 10;
-    qDebug("XTRXInput::getSRRange: min: %f max: %f step: %f",
+    qDebug("XTRXOutput::getSRRange: min: %f max: %f step: %f",
            minF, maxF, stepF);
 }
 
@@ -543,7 +543,7 @@ void XTRXOutput::getLPRange(float& minF, float& maxF, float& stepF) const
     minF = 500e3;
     maxF = 130e6;
     stepF = 10;
-    qDebug("XTRXInput::getLPRange: min: %f max: %f step: %f",
+    qDebug("XTRXOutput::getLPRange: min: %f max: %f step: %f",
            minF, maxF, stepF);
 }
 
@@ -832,14 +832,14 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
                                settings.m_lpfFIREnable,
                                settings.m_lpfFIRBW) < 0)
             {
-                qCritical("XTRXInput::applySettings: could %s and set LPF FIR to %f Hz",
+                qCritical("XTRXOutput::applySettings: could %s and set LPF FIR to %f Hz",
                           settings.m_lpfFIREnable ? "enable" : "disable",
                           settings.m_lpfFIRBW);
             }
             else
             {
                 //doCalibration = true;
-                qDebug("XTRXInput::applySettings: %sd and set LPF FIR to %f Hz",
+                qDebug("XTRXOutput::applySettings: %sd and set LPF FIR to %f Hz",
                        settings.m_lpfFIREnable ? "enable" : "disable",
                        settings.m_lpfFIRBW);
             }
@@ -919,7 +919,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
 
         if (m_deviceShared.set_samplerate(settings.m_devSampleRate,
                                           master, //(settings.m_devSampleRate<<settings.m_log2HardDecim)*4,
-                                          false) < 0)
+                                          true) < 0)
         {
             qCritical("XTRXOutput::applySettings: could not set sample rate to %f with oversampling of %d",
                       settings.m_devSampleRate,
@@ -1089,7 +1089,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         }
     }
 
-    qDebug() << "XTRXInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+    qDebug() << "XTRXOutput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
              << " device stream sample rate: " << m_settings.m_devSampleRate << "S/s"
              << " sample rate with soft interpolation: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp) << "S/s"
              << " m_gain: " << m_settings.m_gain

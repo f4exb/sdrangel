@@ -68,7 +68,6 @@ private:
     struct xtrx_dev *m_dev;
 
     Channel *m_channels; //!< Array of channels dynamically allocated for the given number of Rx channels
-    qint16 *m_buf; //!< Full buffer for SISO or MIMO operation
     unsigned int m_nbChannels;
     unsigned int m_uniqueChannelIndex;
 

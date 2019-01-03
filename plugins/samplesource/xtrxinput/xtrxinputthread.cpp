@@ -95,6 +95,7 @@ void XTRXInputThread::run()
         params.rx.wfmt = XTRX_WF_16;
         params.rx.hfmt = XTRX_IQ_INT16;
         params.rx_stream_start = 2*DeviceXTRX::blockSize; // was 2*8192
+        params.rx.paketsize = 2*DeviceXTRX::blockSize;
 
         if (m_nbChannels == 1)
         {
@@ -142,6 +143,10 @@ void XTRXInputThread::run()
                 qCritical("XTRXInputThread::run read error: %d", res);
                 qDebug("XTRXInputThread::run: out_samples: %u out_events: %u", nfo.out_samples, nfo.out_events);
                 break;
+            }
+
+            if (nfo.out_events & RCVEX_EVENT_OVERFLOW) {
+                qDebug("XTRXInputThread::run: overflow");
             }
 
             if (m_nbChannels > 1) {

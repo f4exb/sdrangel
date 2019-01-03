@@ -30,9 +30,8 @@ XTRXOutputThread::XTRXOutputThread(struct xtrx_dev *dev, unsigned int nbChannels
     m_nbChannels(nbChannels),
     m_uniqueChannelIndex(uniqueChannelIndex)
 {
-    qDebug("XTRXOutputThread::XTRXOutputThread");
+    qDebug("XTRXOutputThread::XTRXOutputThread: nbChannels: %u uniqueChannelIndex: %u", nbChannels, uniqueChannelIndex);
     m_channels = new Channel[2];
-    m_buf = new qint16[2*DeviceXTRX::blockSize*nbChannels];
 }
 
 XTRXOutputThread::~XTRXOutputThread()
@@ -43,7 +42,6 @@ XTRXOutputThread::~XTRXOutputThread()
         stopWork();
     }
 
-    delete[] m_buf;
     delete[] m_channels;
 }
 
@@ -127,7 +125,7 @@ void XTRXOutputThread::run()
 
         params.dir = XTRX_TX;
         params.tx_repeat_buf = 0;
-        params.tx.paketsize = DeviceXTRX::blockSize;
+        params.tx.paketsize = 2*DeviceXTRX::blockSize;
         params.tx.chs = XTRX_CH_AB;
         params.tx.wfmt = XTRX_WF_16;
         params.tx.hfmt = XTRX_IQ_INT16;
@@ -168,7 +166,9 @@ void XTRXOutputThread::run()
         nfo.samples = DeviceXTRX::blockSize;
         nfo.buffer_count = m_nbChannels;
         nfo.buffers = (void* const*) buffs.data();
-        nfo.flags = 0; //XTRX_TX_SEND_ZEROS;
+        nfo.flags = XTRX_TX_DONT_BUFFER; // | XTRX_TX_SEND_ZEROS;
+        nfo.timeout = 0;
+        nfo.out_txlatets = 0;
         nfo.ts = ts;
 
         while (m_running)
@@ -187,6 +187,14 @@ void XTRXOutputThread::run()
                 qCritical("XTRXOutputThread::run send error: %d", res);
                 qDebug("XTRXOutputThread::run: out_samples: %u out_flags: %u", nfo.out_samples, nfo.out_flags);
                 break;
+            }
+
+            if (nfo.out_flags & XTRX_TX_DISCARDED_TO) {
+                qDebug("XTRXOutputThread::run: underrun");
+            }
+
+            if (nfo.out_txlatets) {
+                qDebug("XTRXOutputThread::run: out_txlatets: %lu", nfo.out_txlatets);
             }
 
             nfo.ts += DeviceXTRX::blockSize;
