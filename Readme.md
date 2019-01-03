@@ -43,6 +43,7 @@ Since version 3 transmission or signal generation is supported for BladeRF, Hack
   - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
   - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput)
   - [PlutoSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/plutosdroutput)
+  - [XTRX output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/xtrxoutput)
   - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
   - [Remote device via Network with SDRdaemon](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink) Linux only
 
@@ -204,15 +205,19 @@ If you use your own location for libmirisdr-4 install directory you need to spec
 
 <h2>XTRX</h2>
 
-Compile from source.
+Experimental. Compile from source.
 
-[XTRX](https://www.crowdsupply.com/fairwaves/xtrx) is supported through the set of [xtrx libraries](https://github.com/xtrx-sdr/images).
+[XTRX](https://xtrx.io) is supported through the set of [xtrx libraries](https://github.com/xtrx-sdr/images).
 
 If you use your own location for the install directory (ex: `/opt/install/xtrx-images`) you need to specify it with `-DXTRX_DIR=/opt/install/xtrx-images` on the `cmake` command line.
 
 In addition before starting SDRangel you have to add the library directory to the `LD_LIBRARY_PATH` variable with `export LD_LIBRARY_PATH=/opt/install/xtrx-images/lib:$LD_LIBRARY_PATH`.
 
-&#9888; Although you will find a plugin for the transmission side transmission with XTRX is not actually working. Reception is not very stable either particularly with sample rates lower than 5 MS/s.  
+&#9888; It seems eception is not very stable either particularly with sample rates lower than 5 MS/s. You may need to stop and restart the device (stop/start button) to recover.
+
+&#9888; Right after (re)start you may need to move the main frequency dial back and forth if you notice that you are not on the right frequency.
+
+&#9888; At the moment simultaneous Rx and Tx is not supported.
 
 <h1>Plugins for special devices</h1>
 

@@ -2,11 +2,11 @@
 
 <h2>Introduction</h2>
 
-This input sample source plugin gets its samples from a [XTRX device](https://www.crowdsupply.com/fairwaves/xtrx).
+This input sample source plugin gets its samples from a [XTRX device](https://xtrx.io).
 
 XTRX is a 2x2 MIMO device so it has two receiving channels that can run concurrently. To activate the second channel when the first is already active just open a new source tab in the main window (Devices -> Add source device) and select the same LimeSDR device. You may need to change frequency back and forth in case reception is not working properly.
 
-Sometimes XTRX does not start properly and the spectrum looks frozen. In such a case just stop and start the device again.
+&#9888; Sometimes XTRX does not start properly and the spectrum looks frozen. In such a case just stop and start the device again.
 
 <h2>Build</h2>
 
