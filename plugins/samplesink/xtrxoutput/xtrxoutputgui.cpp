@@ -64,9 +64,6 @@ XTRXOutputGUI::XTRXOutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->channelNumberText->setText(tr("#%1").arg(m_XTRXOutput->getChannelIndex()));
 
-    ui->hwInterpLabel->setText(QString::fromUtf8("H\u2193"));
-    ui->swInterpLabel->setText(QString::fromUtf8("S\u2193"));
-
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(500);
@@ -230,7 +227,7 @@ void XTRXOutputGUI::handleInputMessages()
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
-            qDebug("XTRXInputGUI::handleInputMessages: DSPSignalNotification: SampleRate: %d, CenterFrequency: %llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("XTRXOutputGUI::handleInputMessages: DSPSignalNotification: SampleRate: %d, CenterFrequency: %llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
 
             delete message;

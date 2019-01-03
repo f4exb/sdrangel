@@ -66,9 +66,6 @@ XTRXInputGUI::XTRXInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->channelNumberText->setText(tr("#%1").arg(m_XTRXInput->getChannelIndex()));
 
-    ui->hwDecimLabel->setText(QString::fromUtf8("H\u2193"));
-    ui->swDecimLabel->setText(QString::fromUtf8("S\u2193"));
-
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(500);
