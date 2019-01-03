@@ -27,13 +27,13 @@ void XTRXOutputSettings::resetToDefaults()
 {
     m_centerFrequency = 435000*1000;
     m_devSampleRate = 5e6;
-    m_log2HardInterp = 1;
+    m_log2HardInterp = 2;
     m_log2SoftInterp = 4;
     m_lpfBW = 4.5e6f;
     m_gain = 20;
     m_ncoEnable = true;
     m_ncoFrequency = 500000;
-    m_antennaPath = XTRX_TX_H;
+    m_antennaPath = XTRX_TX_W;
     m_extClock = false;
     m_extClockFreq = 0; // Auto
     m_pwrmode = 1;
