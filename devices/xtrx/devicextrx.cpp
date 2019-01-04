@@ -125,7 +125,7 @@ double DeviceXTRX::set_samplerate(double rate, double master, bool output)
     }
     else
     {
-        qDebug() << "DeviceXTRXShared::set_samplerate: sample rate set: "
+        qDebug() << "DeviceXTRX::set_samplerate: sample rate set: "
                 << "output: "<< output
                 << "m_masterRate: " << m_masterRate
                 << "m_inputRate: " << m_inputRate
