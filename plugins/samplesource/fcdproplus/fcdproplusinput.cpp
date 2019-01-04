@@ -237,7 +237,7 @@ const QString& FCDProPlusInput::getDeviceDescription() const
 
 int FCDProPlusInput::getSampleRate() const
 {
-	return fcd_traits<ProPlus>::sampleRate;
+	return fcd_traits<ProPlus>::sampleRate/(1<<m_settings.m_log2Decim);
 }
 
 quint64 FCDProPlusInput::getCenterFrequency() const
@@ -355,6 +355,18 @@ void FCDProPlusInput::applySettings(const FCDProPlusSettings& settings, bool for
         m_settings.m_centerFrequency = settings.m_centerFrequency;
 	}
 
+	if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+	{
+        reverseAPIKeys.append("log2Decim");
+		forwardChange = true;
+
+		if (m_FCDThread != 0)
+		{
+		    m_FCDThread->setLog2Decimation(settings.m_log2Decim);
+			qDebug() << "FCDProPlusInput::applySettings: set decimation to " << (1<<settings.m_log2Decim);
+		}
+	}
+
 	if ((m_settings.m_lnaGain != settings.m_lnaGain) || force)
 	{
         reverseAPIKeys.append("lnaGain");
@@ -444,7 +456,7 @@ void FCDProPlusInput::applySettings(const FCDProPlusSettings& settings, bool for
 
 	if (forwardChange)
     {
-		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<ProPlus>::sampleRate, m_settings.m_centerFrequency);
+		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<ProPlus>::sampleRate/(1<<settings.m_log2Decim), m_settings.m_centerFrequency);
         m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }

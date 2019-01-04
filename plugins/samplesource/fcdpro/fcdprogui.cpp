@@ -308,6 +308,7 @@ void FCDProGui::displaySettings()
 	ui->gain4->setCurrentIndex(m_settings.m_gain4Index);
 	ui->gain5->setCurrentIndex(m_settings.m_gain5Index);
 	ui->gain6->setCurrentIndex(m_settings.m_gain6Index);
+	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
 	ui->rcFilter->setCurrentIndex(m_settings.m_rcFilterIndex);
 	ui->ifFilter->setCurrentIndex(m_settings.m_ifFilterIndex);
 }
@@ -436,6 +437,16 @@ void FCDProGui::on_gain5_currentIndexChanged(int index)
 void FCDProGui::on_gain6_currentIndexChanged(int index)
 {
 	m_settings.m_gain6Index = index;
+	sendSettings();
+}
+
+void FCDProGui::on_decim_currentIndexChanged(int index)
+{
+	if ((index < 0) || (index > 6)) {
+		return;
+	}
+
+	m_settings.m_log2Decim = index;
 	sendSettings();
 }
 

@@ -37,6 +37,7 @@ public:
 
 	void startWork();
 	void stopWork();
+	void setLog2Decimation(unsigned int log2_decim);
 
 private:
 	AudioFifo* m_fcdFIFO;
@@ -44,6 +45,7 @@ private:
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
 	bool m_running;
+	unsigned int m_log2Decim;
 
 	qint16 m_buf[fcd_traits<ProPlus>::convBufSize*2]; // stereo (I, Q)
 	SampleVector m_convertBuffer;

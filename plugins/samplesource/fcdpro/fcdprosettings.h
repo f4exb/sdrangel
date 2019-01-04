@@ -38,6 +38,7 @@ struct FCDProSettings {
 	qint32 m_ifFilterIndex;
 	qint32 m_gain5Index;
 	qint32 m_gain6Index;
+	quint32 m_log2Decim;
 	bool m_dcBlock;
 	bool m_iqCorrection;
     bool m_transverterMode;

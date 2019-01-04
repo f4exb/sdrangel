@@ -29,6 +29,7 @@ struct FCDProPlusSettings {
 	qint32 m_ifFilterIndex;
 	qint32 m_rfFilterIndex;
 	qint32 m_LOppmTenths;
+	quint32 m_log2Decim;
 	bool m_dcBlock;
 	bool m_iqImbalance;
     bool m_transverterMode;
