@@ -20,6 +20,23 @@ If libraries are installed in a custom place like `/opt/install/xtrx-images` add
 
 `-DXTRX_DIR=/opt/install/xtrx-images`
 
+<h2>Real time scheduling</h2>
+
+You may find in the log some info (green) messages from `libxtrx` mentioning that some task cannot be set with real time priority. While this is not an absolute necessity to make XTRX work you may want to allow your user or a specific group your user belongs to to set tasks with real time scheduling.
+
+In most Linux systems this is done by editing the `/etc/security/limits.conf` file (with sudo rights). In this file you may add these lines for your user (ex: `user`):
+
+```
+user             -       rtprio          99
+user             -       memlock         unlimited
+```
+
+For a group the syntax is the same but the group name is prefixed with `@` like:
+
+```
+@realtime        -       rtprio          99
+@realtime        -       memlock         unlimited
+
 <h2>Interface</h2>
 
 ![XTRX output plugin GUI](../../../doc/img/XTRXOutput_plugin.png)
@@ -34,7 +51,7 @@ Device start / stop button.
 
 <h3>2: DAC sample rate</h3>
 
-This is the sample rate at which the DAC runs in kS/s (k) or MS/s (M) after hardware interpolation (9). Thus this is the host to device sample rate (11) multiplied by the hardware interpolation factor (9). Please note that a hardware decimation of 4 is required for the device to work properly.
+This is the sample rate at which the DAC runs in kS/s (k) or MS/s (M) after hardware interpolation (9). Thus this is the host to device sample rate (11) multiplied by the hardware interpolation factor (9). Please note that a hardware decimation of at least 4 (the default) is required for the device to work properly.
 
 <h3>3: Center frequency</h3>
 
@@ -87,7 +104,7 @@ Use the "Cancel" button to dismiss your changes
 
 <h3>9: LMS7002M hardware interpolation factor</h3>
 
-The TSP block in the LMS7002M hardware has an interpolation chain that acts on both Tx channels. It is composed of 5 halfband interpolation stages and therefore can achieve interpolation between 1 (no interpolation) and 32 in increasing powers of 2: 1, 2, 4, 8, 16, 32. Please note that a factor of at least 4 is required. Lower values are experimental.
+The TSP block in the LMS7002M hardware has an interpolation chain that acts on both Tx channels. It is composed of 5 halfband interpolation stages and therefore can achieve interpolation between 1 (no interpolation) and 32 in increasing powers of 2: 1, 2, 4, 8, 16, 32. Please note that a factor of at least 4 is required (this is the default). Lower values are experimental.
 
 Thus the actual sample rate of the DAC is the stream sample rate (11) multiplied by this factor. In the screenshot example this yields a 12.288 MS/s rate at the DAC (3.072 * 4).
 

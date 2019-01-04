@@ -18,6 +18,24 @@ If libraries are installed in a custom place like `/opt/install/xtrx-images` add
 
 `-DXTRX_DIR=/opt/install/xtrx-images`
 
+<h2>Real time scheduling</h2>
+
+You may find in the log some info (green) messages from `libxtrx` mentioning that some task cannot be set with real time priority. While this is not an absolute necessity to make XTRX work you may want to allow your user or a specific group your user belongs to to set tasks with real time scheduling.
+
+In most Linux systems this is done by editing the `/etc/security/limits.conf` file (with sudo rights). In this file you may add these lines for your user (ex: `user`):
+
+```
+user             -       rtprio          99
+user             -       memlock         unlimited
+```
+
+For a group the syntax is the same but the group name is prefixed with `@` like:
+
+```
+@realtime        -       rtprio          99
+@realtime        -       memlock         unlimited
+```
+
 <h2>Interface</h2>
 
 ![LimeSDR input plugin GUI](../../../doc/img/XTRXInput_plugin.png)
@@ -44,7 +62,7 @@ Record baseband I/Q stream toggle button
 
 <h4>1.4: ADC sample rate</h4>
 
-This is the sample rate at which the ADC runs in kS/s (k) or MS/s (M) before hardware decimation (8). Thus this is the device to host sample rate (5) multiplied by the hardware decimation factor (3).
+This is the sample rate at which the ADC runs in kS/s (k) or MS/s (M) before hardware decimation (3). Thus this is the device to host sample rate (5) multiplied by the hardware decimation factor (3).
 
 &#9758; Note that changing the hardware decimation factor (3) or the device to host sample rate (5) may change the DAC clock sample rate and therefore the Tx side hardware interpolation factor and/or host to device sample rate.
 
@@ -160,8 +178,9 @@ Use this button to adjust the gain of tha PGA when manual gain mode is set (9.1)
 
 Use this combo box to select the antenna input:
 
-  - **Lo**: Selects the low frequency input (700 to 900 MHz nominally)
-  - **Hi**: Selects the high frequency input (2 to 2.6 GHz)
+  - **Lo**: Selects the low frequency input. You should use this one and this is the default
+  - **Wide**: Selects the wide band frequency input. This is not connected and should not be used
+  - **Hi**: Selects the high frequency input. You may use this one as well with no actual difference with "Lo".
 
 <h3>10: Stream status indicator</h3>
 
