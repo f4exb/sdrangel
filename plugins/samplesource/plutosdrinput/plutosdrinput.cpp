@@ -675,6 +675,16 @@ void PlutoSDRInput::getRSSI(std::string& rssiStr)
     }
 }
 
+void PlutoSDRInput::getLORange(qint64& minLimit, qint64& maxLimit)
+{
+    uint64_t min, max;
+    DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
+
+    plutoBox->getRxLORange(min, max, 0);
+    minLimit = min;
+    maxLimit = max;
+}
+
 void PlutoSDRInput::getGain(int& gaindB)
 {
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();

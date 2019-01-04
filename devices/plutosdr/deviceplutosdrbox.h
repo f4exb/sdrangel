@@ -105,6 +105,7 @@ public:
     bool getRxGain(int& gaindB, unsigned int chan);
     bool getRxRSSI(std::string& rssiStr, unsigned int chan);
     bool getTxRSSI(std::string& rssiStr, unsigned int chan);
+    void getRxLORange(uint64_t& minLimit, uint64_t& maxLimit, unsigned int chan);
     bool fetchTemp();
     float getTemp() const { return m_temp; }
     bool getRateGovernors(std::string& rateGovernors);
