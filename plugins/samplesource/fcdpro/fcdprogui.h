@@ -97,6 +97,7 @@ private slots:
 	void on_gain5_currentIndexChanged(int index);
 	void on_gain6_currentIndexChanged(int index);
 	void on_decim_currentIndexChanged(int index);
+	void on_fcPos_currentIndexChanged(int index);
 	void on_setDefaults_clicked(bool checked);
 	void on_startStop_toggled(bool checked);
 	void on_record_toggled(bool checked);

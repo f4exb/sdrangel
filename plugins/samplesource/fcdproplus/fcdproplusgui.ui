@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>260</width>
+    <width>320</width>
     <height>180</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>260</width>
+    <width>320</width>
     <height>180</height>
    </size>
   </property>
@@ -250,6 +250,44 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="fcPosLabel">
+       <property name="text">
+        <string>Fp</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="fcPos">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Relative position of device center frequency</string>
+       </property>
+       <property name="currentIndex">
+        <number>2</number>
+       </property>
+       <item>
+        <property name="text">
+         <string>Inf</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Sup</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Cen</string>
+        </property>
+       </item>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="labelDecim">

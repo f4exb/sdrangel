@@ -245,6 +245,20 @@ void FCDProPlusGui::on_decim_currentIndexChanged(int index)
 	sendSettings();
 }
 
+void FCDProPlusGui::on_fcPos_currentIndexChanged(int index)
+{
+	if (index == 0) {
+		m_settings.m_fcPos = FCDProPlusSettings::FC_POS_INFRA;
+		sendSettings();
+	} else if (index == 1) {
+		m_settings.m_fcPos = FCDProPlusSettings::FC_POS_SUPRA;
+		sendSettings();
+	} else if (index == 2) {
+		m_settings.m_fcPos = FCDProPlusSettings::FC_POS_CENTER;
+		sendSettings();
+	}
+}
+
 void FCDProPlusGui::on_dcOffset_toggled(bool checked)
 {
 	m_settings.m_dcBlock = checked;

@@ -181,7 +181,6 @@ private:
     bool openFCDAudio(const char *filename);
     void closeFCDAudio();
 	void applySettings(const FCDProSettings& settings, bool force);
-	void set_lo_ppm();
 
 	void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FCDProSettings& settings);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FCDProSettings& settings, bool force);

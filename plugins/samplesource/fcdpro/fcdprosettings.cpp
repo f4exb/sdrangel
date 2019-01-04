@@ -46,6 +46,7 @@ void FCDProSettings::resetToDefaults()
 	m_gain5Index = 0;
 	m_gain6Index = 0;
 	m_log2Decim = 0;
+	m_fcPos = FC_POS_CENTER;
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
     m_fileRecordName = "";
@@ -79,12 +80,13 @@ QByteArray FCDProSettings::serialize() const
 	s.writeS32(18, m_gain5Index);
 	s.writeS32(19, m_gain6Index);
 	s.writeU32(20, m_log2Decim);
-    s.writeBool(21, m_transverterMode);
-    s.writeS64(22, m_transverterDeltaFrequency);
-    s.writeBool(23, m_useReverseAPI);
-    s.writeString(24, m_reverseAPIAddress);
-    s.writeU32(25, m_reverseAPIPort);
-    s.writeU32(26, m_reverseAPIDeviceIndex);
+	s.writeS32(21, (int) m_fcPos);
+    s.writeBool(22, m_transverterMode);
+    s.writeS64(23, m_transverterDeltaFrequency);
+    s.writeBool(24, m_useReverseAPI);
+    s.writeString(25, m_reverseAPIAddress);
+    s.writeU32(26, m_reverseAPIPort);
+    s.writeU32(27, m_reverseAPIDeviceIndex);
 
 	return s.final();
 }
@@ -101,6 +103,7 @@ bool FCDProSettings::deserialize(const QByteArray& data)
 
 	if (d.getVersion() == 1)
 	{
+		int intval;
 		uint32_t uintval;
 
 		d.readBool(1, &m_dcBlock, false);
@@ -123,11 +126,13 @@ bool FCDProSettings::deserialize(const QByteArray& data)
 		d.readS32(18, &m_gain5Index, 0);
 		d.readS32(19, &m_gain6Index, 0);
 		d.readU32(20, &m_log2Decim, 0);
-        d.readBool(21, &m_transverterMode, false);
-        d.readS64(22, &m_transverterDeltaFrequency, 0);
-        d.readBool(23, &m_useReverseAPI, false);
-        d.readString(24, &m_reverseAPIAddress, "127.0.0.1");
-        d.readU32(25, &uintval, 0);
+		d.readS32(21, &intval, 2);
+		m_fcPos = (fcPos_t) intval;
+        d.readBool(22, &m_transverterMode, false);
+        d.readS64(23, &m_transverterDeltaFrequency, 0);
+        d.readBool(24, &m_useReverseAPI, false);
+        d.readString(25, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(26, &uintval, 0);
 
         if ((uintval > 1023) && (uintval < 65535)) {
             m_reverseAPIPort = uintval;
@@ -135,7 +140,7 @@ bool FCDProSettings::deserialize(const QByteArray& data)
             m_reverseAPIPort = 8888;
         }
 
-        d.readU32(26, &uintval, 0);
+        d.readU32(27, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
 		return true;

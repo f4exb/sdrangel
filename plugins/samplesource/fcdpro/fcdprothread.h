@@ -37,6 +37,7 @@ public:
 	void startWork();
 	void stopWork();
 	void setLog2Decimation(unsigned int log2_decim);
+	void setFcPos(int fcPos);
 
 private:
 	AudioFifo* m_fcdFIFO;
@@ -45,6 +46,7 @@ private:
 	QWaitCondition m_startWaiter;
 	bool m_running;
 	unsigned int m_log2Decim;
+	int m_fcPos;
 
     qint16 m_buf[fcd_traits<Pro>::convBufSize*2]; // stereo (I, Q)
 	SampleVector m_convertBuffer;

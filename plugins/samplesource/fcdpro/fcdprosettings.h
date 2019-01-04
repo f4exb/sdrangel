@@ -20,6 +20,12 @@
 #include <QString>
 
 struct FCDProSettings {
+	typedef enum {
+		FC_POS_INFRA = 0,
+		FC_POS_SUPRA,
+		FC_POS_CENTER
+	} fcPos_t;
+
 	quint64 m_centerFrequency;
 	qint32 m_LOppmTenths;
 	qint32 m_lnaGainIndex;
@@ -39,6 +45,7 @@ struct FCDProSettings {
 	qint32 m_gain5Index;
 	qint32 m_gain6Index;
 	quint32 m_log2Decim;
+	fcPos_t m_fcPos;
 	bool m_dcBlock;
 	bool m_iqCorrection;
     bool m_transverterMode;

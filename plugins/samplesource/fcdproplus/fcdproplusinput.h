@@ -150,7 +150,6 @@ public:
 	void set_if_gain(int gain);
 	void set_rf_filter(int filterIndex);
 	void set_if_filter(int filterIndex);
-	void set_lo_ppm();
 
 private:
 	DeviceSourceAPI *m_deviceAPI;

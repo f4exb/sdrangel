@@ -452,6 +452,30 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         qDebug("RTLSDRInput::applySettings: log2decim set to %d", settings.m_log2Decim);
     }
 
+    if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+    {
+        reverseAPIKeys.append("fcPos");
+
+        if (m_rtlSDRThread != 0) {
+            m_rtlSDRThread->setFcPos((int) settings.m_fcPos);
+        }
+
+        qDebug() << "RTLSDRInput::applySettings: set fc pos (enum) to " << (int) settings.m_fcPos;
+    }
+
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
+        reverseAPIKeys.append("centerFrequency");
+    }
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force) {
+        reverseAPIKeys.append("devSampleRate");
+    }
+    if ((m_settings.m_transverterMode != settings.m_transverterMode) || force) {
+        reverseAPIKeys.append("transverterMode");
+    }
+    if ((m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force) {
+        reverseAPIKeys.append("transverterDeltaFrequency");
+    }
+
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
         || (m_settings.m_fcPos != settings.m_fcPos)
         || (m_settings.m_log2Decim != settings.m_log2Decim)
@@ -459,13 +483,6 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         || (m_settings.m_transverterMode != settings.m_transverterMode)
         || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force)
     {
-        reverseAPIKeys.append("centerFrequency");
-        reverseAPIKeys.append("fcPos");
-        reverseAPIKeys.append("log2Decim");
-        reverseAPIKeys.append("devSampleRate");
-        reverseAPIKeys.append("transverterMode");
-        reverseAPIKeys.append("transverterDeltaFrequency");
-
         qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
                 settings.m_centerFrequency,
                 settings.m_transverterDeltaFrequency,
@@ -475,15 +492,6 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
                 settings.m_transverterMode);
 
         forwardChange = true;
-
-        if ((m_settings.m_fcPos != settings.m_fcPos) || force)
-        {
-            if (m_rtlSDRThread != 0) {
-                m_rtlSDRThread->setFcPos((int) settings.m_fcPos);
-            }
-
-            qDebug() << "RTLSDRInput::applySettings: set fc pos (enum) to " << (int) settings.m_fcPos;
-        }
 
         if (m_dev != 0)
         {

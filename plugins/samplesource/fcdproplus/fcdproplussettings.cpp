@@ -35,6 +35,7 @@ void FCDProPlusSettings::resetToDefaults()
 	m_ifFilterIndex = 0;
 	m_LOppmTenths = 0;
 	m_log2Decim = 0;
+	m_fcPos = FC_POS_CENTER;
 	m_dcBlock = false;
 	m_iqImbalance = false;
     m_transverterMode = false;
@@ -56,16 +57,17 @@ QByteArray FCDProPlusSettings::serialize() const
 	s.writeS32(4, m_ifFilterIndex);
 	s.writeS32(5, m_rfFilterIndex);
 	s.writeU32(6, m_log2Decim);
-	s.writeBool(7, m_dcBlock);
-	s.writeBool(8, m_iqImbalance);
-	s.writeS32(9, m_LOppmTenths);
-	s.writeU32(10, m_ifGain);
-    s.writeBool(11, m_transverterMode);
-    s.writeS64(12, m_transverterDeltaFrequency);
-    s.writeBool(13, m_useReverseAPI);
-    s.writeString(14, m_reverseAPIAddress);
-    s.writeU32(15, m_reverseAPIPort);
-    s.writeU32(16, m_reverseAPIDeviceIndex);
+	s.writeS32(7, (int) m_fcPos);
+	s.writeBool(8, m_dcBlock);
+	s.writeBool(9, m_iqImbalance);
+	s.writeS32(10, m_LOppmTenths);
+	s.writeU32(11, m_ifGain);
+    s.writeBool(12, m_transverterMode);
+    s.writeS64(13, m_transverterDeltaFrequency);
+    s.writeBool(14, m_useReverseAPI);
+    s.writeString(15, m_reverseAPIAddress);
+    s.writeU32(16, m_reverseAPIPort);
+    s.writeU32(17, m_reverseAPIDeviceIndex);
 
 	return s.final();
 }
@@ -82,6 +84,7 @@ bool FCDProPlusSettings::deserialize(const QByteArray& data)
 
 	if (d.getVersion() == 1)
 	{
+		int intval;
 		uint32_t uintval;
 
 		d.readBool(1, &m_biasT, false);
@@ -90,15 +93,17 @@ bool FCDProPlusSettings::deserialize(const QByteArray& data)
 		d.readS32(4, &m_ifFilterIndex, 0);
 		d.readS32(5, &m_rfFilterIndex, 0);
 		d.readU32(6, &m_log2Decim, 0);
-		d.readBool(7, &m_dcBlock, false);
-		d.readBool(8, &m_iqImbalance, false);
-		d.readS32(9, &m_LOppmTenths, 0);
-		d.readU32(10, &m_ifGain, 0);
-        d.readBool(11, &m_transverterMode, false);
-        d.readS64(12, &m_transverterDeltaFrequency, 0);
-        d.readBool(13, &m_useReverseAPI, false);
-        d.readString(14, &m_reverseAPIAddress, "127.0.0.1");
-        d.readU32(15, &uintval, 0);
+		d.readS32(7, &intval, 2);
+		m_fcPos = (fcPos_t) intval;
+		d.readBool(8, &m_dcBlock, false);
+		d.readBool(9, &m_iqImbalance, false);
+		d.readS32(10, &m_LOppmTenths, 0);
+		d.readU32(11, &m_ifGain, 0);
+        d.readBool(12, &m_transverterMode, false);
+        d.readS64(13, &m_transverterDeltaFrequency, 0);
+        d.readBool(14, &m_useReverseAPI, false);
+        d.readString(15, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(16, &uintval, 0);
 
         if ((uintval > 1023) && (uintval < 65535)) {
             m_reverseAPIPort = uintval;
@@ -106,7 +111,7 @@ bool FCDProPlusSettings::deserialize(const QByteArray& data)
             m_reverseAPIPort = 8888;
         }
 
-        d.readU32(16, &uintval, 0);
+        d.readU32(17, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 		return true;
 	}

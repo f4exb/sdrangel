@@ -332,14 +332,24 @@ void FCDProInput::applySettings(const FCDProSettings& settings, bool force)
     if (force || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency)) {
 		reverseAPIKeys.append("transverterDeltaFrequency");
 	}
+	if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
+		reverseAPIKeys.append("LOppmTenths");
+    }
 
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
-            || (m_settings.m_transverterMode != settings.m_transverterMode)
-            || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))
+        || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
+        || (m_settings.m_fcPos != settings.m_fcPos)
+        || (m_settings.m_log2Decim != settings.m_log2Decim)
+        || (m_settings.m_transverterMode != settings.m_transverterMode)
+        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency))
 	{
-        qint64 deviceCenterFrequency = settings.m_centerFrequency;
-        deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
-        deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
+        qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+                settings.m_centerFrequency,
+                settings.m_transverterDeltaFrequency,
+                settings.m_log2Decim,
+                (DeviceSampleSource::fcPos_t) settings.m_fcPos,
+                fcd_traits<Pro>::sampleRate,
+                settings.m_transverterMode);
 
         if (m_dev != 0)
         {
@@ -365,6 +375,17 @@ void FCDProInput::applySettings(const FCDProSettings& settings, bool force)
 			qDebug() << "FCDProInput::applySettings: set decimation to " << (1<<settings.m_log2Decim);
 		}
 	}
+
+    if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+    {
+        reverseAPIKeys.append("fcPos");
+
+        if (m_FCDThread != 0) {
+            m_FCDThread->setFcPos((int) settings.m_fcPos);
+        }
+
+        qDebug() << "FCDProInput::applySettings: set fc pos (enum) to " << (int) settings.m_fcPos;
+    }
 
 	if ((m_settings.m_lnaGainIndex != settings.m_lnaGainIndex) || force)
 	{
@@ -507,16 +528,6 @@ void FCDProInput::applySettings(const FCDProSettings& settings, bool force)
 
 		if (m_dev != 0) {
 			set_gain6(settings.m_gain6Index);
-		}
-	}
-
-	if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
-	{
-		reverseAPIKeys.append("LOppmTenths");
-        m_settings.m_LOppmTenths = settings.m_LOppmTenths;
-
-		if (m_dev != 0) {
-			set_lo_ppm();
 		}
 	}
 
@@ -810,11 +821,6 @@ void FCDProInput::set_gain6(int index)
 	{
 		qWarning() << "FCDProPlusInput::set_gain6: failed to set at " << cmd_value;
 	}
-}
-
-void FCDProInput::set_lo_ppm()
-{
-	set_center_freq((double) m_settings.m_centerFrequency);
 }
 
 int FCDProInput::webapiRunGet(
