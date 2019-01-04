@@ -636,7 +636,7 @@ bool XTRXInput::handleMessage(const Message& message)
 
         if (m_settings.m_ncoEnable) // need to reset NCO after sample rate change
         {
-            applySettings(m_settings, true, true);
+            applySettings(m_settings, false, true);
         }
 
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
@@ -809,9 +809,9 @@ void XTRXInput::apply_gain_lna(double gain)
             XTRX_RX_LNA_GAIN,
             gain,
             0) < 0) {
-        qDebug("XTRXInput::applySettings: xtrx_set_gain(LNA) failed");
+        qDebug("XTRXInput::apply_gain_lna: xtrx_set_gain(LNA) failed");
     } else {
-        qDebug() << "XTRXInput::applySettings: Gain (LNA) set to " << gain;
+        qDebug() << "XTRXInput::apply_gain_lna: Gain (LNA) set to " << gain;
     }
 }
 
@@ -822,9 +822,9 @@ void XTRXInput::apply_gain_tia(double gain)
             XTRX_RX_TIA_GAIN,
             gain,
             0) < 0) {
-        qDebug("XTRXInput::applySettings: xtrx_set_gain(TIA) failed");
+        qDebug("XTRXInput::apply_gain_tia: xtrx_set_gain(TIA) failed");
     } else {
-        qDebug() << "XTRXInput::applySettings: Gain (TIA) set to " << gain;
+        qDebug() << "XTRXInput::apply_gain_tia: Gain (TIA) set to " << gain;
     }
 }
 
@@ -836,11 +836,11 @@ void XTRXInput::apply_gain_pga(double gain)
             gain,
             0) < 0)
     {
-        qDebug("XTRXInput::applySettings: xtrx_set_gain(PGA) failed");
+        qDebug("XTRXInput::apply_gain_pga: xtrx_set_gain(PGA) failed");
     }
     else
     {
-        qDebug() << "XTRXInput::applySettings: Gain (PGA) set to " << gain;
+        qDebug() << "XTRXInput::apply_gain_pga: Gain (PGA) set to " << gain;
     }
 }
 

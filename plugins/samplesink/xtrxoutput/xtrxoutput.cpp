@@ -621,7 +621,7 @@ bool XTRXOutput::handleMessage(const Message& message)
 
         if (m_settings.m_ncoEnable) // need to reset NCO after sample rate change
         {
-            applySettings(m_settings, true, true);
+            applySettings(m_settings, false, true);
         }
 
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
@@ -770,6 +770,18 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
     bool doChangeFreq = false;
 
     // apply settings
+
+    qDebug() << "XTRXOutput::applySettings: m_centerFrequency: " << m_settings.m_centerFrequency
+             << " m_devSampleRate: " << m_settings.m_devSampleRate
+             << " m_log2SoftInterp: " << m_settings.m_log2SoftInterp
+             << " m_gain: " << m_settings.m_gain
+             << " m_lpfBW: " << m_settings.m_lpfBW
+             << " m_ncoEnable: " << m_settings.m_ncoEnable
+             << " m_ncoFrequency: " << m_settings.m_ncoFrequency
+             << " m_antennaPath: " << m_settings.m_antennaPath
+             << " m_extClock: " << m_settings.m_extClock
+             << " m_extClockFreq: " << m_settings.m_extClockFreq
+             << " force: " << force;
 
     if ((m_settings.m_pwrmode != settings.m_pwrmode))
     {
@@ -1142,21 +1154,13 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         }
     }
 
-    qDebug() << "XTRXOutput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+    qDebug() << "XTRXOutput::applySettings:"
              << " device stream sample rate: " << getDevSampleRate() << "S/s"
              << " sample rate with soft interpolation: " << getSampleRate() << "S/s"
-             << " m_devSampleRate: " << m_settings.m_devSampleRate
-             << " m_log2SoftInterp: " << m_settings.m_log2SoftInterp
-             << " m_gain: " << m_settings.m_gain
-             << " m_lpfBW: " << m_settings.m_lpfBW
-             << " m_ncoEnable: " << m_settings.m_ncoEnable
-             << " m_ncoFrequency: " << m_settings.m_ncoFrequency
-             << " m_antennaPath: " << m_settings.m_antennaPath
-             << " m_extClock: " << m_settings.m_extClock
-             << " m_extClockFreq: " << m_settings.m_extClockFreq
-             << " force: " << force
              << " forceNCOFrequency: " << forceNCOFrequency
-             << " doLPCalibration: " << doLPCalibration;
+             << " doLPCalibration: " << doLPCalibration
+             << " doChangeFreq: " << doChangeFreq
+             << " doChangeSampleRate: " << doChangeSampleRate;
 
     return true;
 }
