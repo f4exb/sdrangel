@@ -523,8 +523,6 @@ void DSPDeviceSinkEngine::handleSynchronousMessages()
 
 void DSPDeviceSinkEngine::handleInputMessages()
 {
-	qDebug() << "DSPDeviceSinkEngine::handleInputMessages";
-
 	Message* message;
 
 	while ((message = m_inputMessageQueue.pop()) != 0)
@@ -540,7 +538,9 @@ void DSPDeviceSinkEngine::handleInputMessages()
 			m_sampleRate = notif->getSampleRate();
 			m_centerFrequency = notif->getCenterFrequency();
 
-			qDebug() << "DSPDeviceSinkEngine::handleInputMessages: DSPSignalNotification(" << m_sampleRate << "," << m_centerFrequency << ")";
+			qDebug() << "DSPDeviceSinkEngine::handleInputMessages: DSPSignalNotification:"
+				<< " m_sampleRate: " << m_sampleRate
+				<< " m_centerFrequency: " << m_centerFrequency;
 
             // forward source changes to sources with immediate execution
 
@@ -557,10 +557,14 @@ void DSPDeviceSinkEngine::handleInputMessages()
 			}
 
 			// forward changes to listeners on DSP output queue
-			if (m_deviceSampleSink->getMessageQueueToGUI())
+
+			MessageQueue *guiMessageQueue = m_deviceSampleSink->getMessageQueueToGUI();
+			qDebug("DSPDeviceSinkEngine::handleInputMessages: DSPSignalNotification: guiMessageQueue: %p", guiMessageQueue);
+
+			if (guiMessageQueue)
 			{
                 DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy for the output queue
-                m_deviceSampleSink->getMessageQueueToGUI()->push(rep);
+                guiMessageQueue->push(rep);
 			}
 
 			delete message;

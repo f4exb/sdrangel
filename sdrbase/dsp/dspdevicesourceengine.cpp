@@ -684,8 +684,6 @@ void DSPDeviceSourceEngine::handleSynchronousMessages()
 
 void DSPDeviceSourceEngine::handleInputMessages()
 {
-	qDebug() << "DSPDeviceSourceEngine::handleInputMessages";
-
 	Message* message;
 
 	while ((message = m_inputMessageQueue.pop()) != 0)
@@ -732,7 +730,9 @@ void DSPDeviceSourceEngine::handleInputMessages()
 			m_sampleRate = notif->getSampleRate();
 			m_centerFrequency = notif->getCenterFrequency();
 
-			qDebug() << "DSPDeviceSourceEngine::handleInputMessages: DSPSignalNotification(" << m_sampleRate << "," << m_centerFrequency << ")";
+			qDebug() << "DSPDeviceSourceEngine::handleInputMessages: DSPSignalNotification:"
+				<< " m_sampleRate: " << m_sampleRate
+				<< " m_centerFrequency: " << m_centerFrequency;
 
 			// forward source changes to channel sinks with immediate execution (no queuing)
 
@@ -755,7 +755,7 @@ void DSPDeviceSourceEngine::handleInputMessages()
 
 			if (guiMessageQueue) {
 			    DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy for the source GUI
-                m_deviceSampleSource->getMessageQueueToGUI()->push(rep);
+                guiMessageQueue->push(rep);
 			}
 
 			//m_outputMessageQueue.push(rep);
