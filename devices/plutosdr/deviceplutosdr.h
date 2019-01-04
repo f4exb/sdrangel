@@ -36,8 +36,10 @@ public:
     DevicePlutoSDRBox* getDeviceFromURI(const std::string& uri);
     DevicePlutoSDRBox* getDeviceFromSerial(const std::string& serial);
 
-    static const uint64_t loLowLimitFreq;  //!< LO lower frequency limit (Hz)
-    static const uint64_t loHighLimitFreq; //!< LO lower frequency limit (Hz)
+    static const uint64_t rxLOLowLimitFreq;  //!< Rx LO hard coded lower frequency limit (Hz)
+    static const uint64_t rxLOHighLimitFreq; //!< Rx LO hard coded lower frequency limit (Hz)
+    static const uint64_t txLOLowLimitFreq;  //!< Tx LO hard coded lower frequency limit (Hz)
+    static const uint64_t txLOHighLimitFreq; //!< Tx LO hard coded lower frequency limit (Hz)
     static const uint32_t srLowLimitFreq;  //!< Device sample rate lower limit in S/s
     static const uint32_t srHighLimitFreq; //!< Device sample rate higher limit in S/s
     static const uint32_t bbLPRxLowLimitFreq;   //!< Analog base band Rx low pass filter lower frequency limit (Hz)

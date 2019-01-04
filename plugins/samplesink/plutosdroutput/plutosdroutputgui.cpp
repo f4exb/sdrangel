@@ -393,10 +393,13 @@ void PlutoSDROutputGUI::setSampleRateLimits()
 
 void PlutoSDROutputGUI::updateFrequencyLimits()
 {
+    qint64 minLimit, maxLimit;
     // values in kHz
     qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
-    qint64 minLimit = DevicePlutoSDR::loLowLimitFreq/1000 + deltaFrequency;
-    qint64 maxLimit = DevicePlutoSDR::loHighLimitFreq/1000 + deltaFrequency;
+    ((PlutoSDROutput *) m_sampleSink)->getLORange(minLimit, maxLimit);
+
+    minLimit = minLimit/1000 + deltaFrequency;
+    maxLimit = maxLimit/1000 + deltaFrequency;
 
     minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
     maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;

@@ -590,6 +590,16 @@ void PlutoSDROutput::getRSSI(std::string& rssiStr)
     }
 }
 
+void PlutoSDROutput::getLORange(qint64& minLimit, qint64& maxLimit)
+{
+    uint64_t min, max;
+    DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
+
+    plutoBox->getTxLORange(min, max);
+    minLimit = min;
+    maxLimit = max;
+}
+
 bool PlutoSDROutput::fetchTemperature()
 {
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();

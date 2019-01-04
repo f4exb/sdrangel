@@ -122,6 +122,7 @@ public:
     uint32_t getDACSampleRate() const { return m_deviceSampleRates.m_addaConnvRate; }
     uint32_t getFIRSampleRate() const { return m_deviceSampleRates.m_hb1Rate; }
     void getRSSI(std::string& rssiStr);
+    void getLORange(qint64& minLimit, qint64& maxLimit);
     bool fetchTemperature();
     float getTemperature();
 
