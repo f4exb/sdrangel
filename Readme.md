@@ -43,7 +43,7 @@ Since version 3 transmission or signal generation is supported for BladeRF, Hack
   - [HackRF output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/hackrfoutput)
   - [LimeSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/limesdroutput)
   - [PlutoSDR output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/plutosdroutput)
-  - [XTRX output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/xtrxoutput)
+  - [XTRX output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/xtrxoutput) Experimental.
   - [File output or file sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/filesink)
   - [Remote device via Network with SDRdaemon](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/sdrdaemonsink) Linux only
 
@@ -217,7 +217,7 @@ In addition before starting SDRangel you have to add the library directory to th
 
 &#9888; Right after (re)start you may need to move the main frequency dial back and forth if you notice that you are not on the right frequency.
 
-&#9888; At the moment simultaneous Rx and Tx is not supported.
+&#9888; Simultaneous Rx and Tx is not supported. Dual Tx is not working either.
 
 <h1>Plugins for special devices</h1>
 
