@@ -170,6 +170,16 @@ bool XTRXInputGUI::handleMessage(const Message& message)
 
         return true;
     }
+    else if (XTRXInput::MsgReportClockGenChange::match(message))
+    {
+        m_settings.m_devSampleRate = m_XTRXInput->getDevSampleRate();
+
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+
+        return true;
+    }
     else if (XTRXInput::MsgReportStreamInfo::match(message))
     {
         XTRXInput::MsgReportStreamInfo& report = (XTRXInput::MsgReportStreamInfo&) message;
@@ -245,7 +255,7 @@ void XTRXInputGUI::handleInputMessages()
 
 void XTRXInputGUI::updateADCRate()
 {
-    uint32_t adcRate = m_settings.m_devSampleRate * (1<<m_settings.m_log2HardDecim);
+    uint32_t adcRate = m_XTRXInput->getClockGen() / 4;
 
     if (adcRate < 100000000) {
         ui->adcRateLabel->setText(tr("%1k").arg(QString::number(adcRate / 1000.0f, 'g', 5)));

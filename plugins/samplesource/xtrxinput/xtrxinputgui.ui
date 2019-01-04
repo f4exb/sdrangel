@@ -29,7 +29,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>LimeSDR Input</string>
+   <string>XTRX Input</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -363,7 +363,7 @@
        </property>
        <item>
         <property name="text">
-         <string>1</string>
+         <string>A</string>
         </property>
        </item>
        <item>

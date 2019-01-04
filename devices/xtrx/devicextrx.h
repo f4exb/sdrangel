@@ -32,6 +32,11 @@ public:
     bool open(const char* deviceStr);
     void close();
     struct xtrx_dev *getDevice() { return m_dev; }
+    double set_samplerate(double rate, double master, bool output);
+    double getMasterRate() const { return m_masterRate; }
+    double getClockGen() const { return m_clockGen; }
+    double getActualInputRate() const { return m_actualInputRate; }
+    double getActualOutputRate() const { return m_actualOutputRate; }
     static void getAutoGains(uint32_t autoGain, uint32_t& lnaGain, uint32_t& tiaGain, uint32_t& pgaGain);
 
     static const uint32_t m_nbGains = 74;
@@ -39,6 +44,12 @@ public:
 
 private:
     struct xtrx_dev *m_dev; //!< device handle
+    double              m_inputRate;
+    double              m_outputRate;
+    double              m_masterRate;
+    double              m_clockGen;
+    double              m_actualInputRate;
+    double              m_actualOutputRate;
 
     static const uint32_t m_lnaTbl[m_nbGains];
     static const uint32_t m_pgaTbl[m_nbGains];

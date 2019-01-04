@@ -168,6 +168,16 @@ bool XTRXOutputGUI::handleMessage(const Message& message)
 
         return true;
     }
+    else if (XTRXOutput::MsgReportClockGenChange::match(message))
+    {
+        m_settings.m_devSampleRate = m_XTRXOutput->getDevSampleRate();
+
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+
+        return true;
+    }
     else if (XTRXOutput::MsgReportStreamInfo::match(message))
     {
         XTRXOutput::MsgReportStreamInfo& report = (XTRXOutput::MsgReportStreamInfo&) message;
@@ -243,7 +253,7 @@ void XTRXOutputGUI::handleInputMessages()
 
 void XTRXOutputGUI::updateDACRate()
 {
-    uint32_t dacRate = m_settings.m_devSampleRate * (1<<m_settings.m_log2HardInterp);
+    uint32_t dacRate = m_XTRXOutput->getClockGen() / 4;
 
     if (dacRate < 100000000) {
         ui->dacRateLabel->setText(tr("%1k").arg(QString::number(dacRate / 1000.0f, 'g', 5)));

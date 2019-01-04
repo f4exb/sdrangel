@@ -2,6 +2,8 @@
 
 <h2>Introduction</h2>
 
+&#9888; Support is experimental and for Linux only. You have to compile it from source.
+
 This input sample source plugin gets its samples from a [XTRX device](https://xtrx.io).
 
 XTRX is a 2x2 MIMO device so it has two receiving channels that can run concurrently. To activate the second channel when the first is already active just open a new source tab in the main window (Devices -> Add source device) and select the same LimeSDR device. You may need to change frequency back and forth in case reception is not working properly.
@@ -30,12 +32,12 @@ This is the center frequency of reception in kHz.
 
 <h4>1.2: Start/Stop</h4>
 
-Device start / stop button. 
+Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
   - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon to stop, plug back in, check the source on the sampling devices control panel and start again.
-  
+
 <h4>1.3: Record</h4>
 
 Record baseband I/Q stream toggle button
@@ -48,7 +50,7 @@ This is the sample rate at which the ADC runs in kS/s (k) or MS/s (M) before har
 
 <h4>1.5: Stream sample rate</h4>
 
-Baseband I/Q sample rate in kS/s. This is the device to host sample rate (5) divided by the software decimation factor (4). 
+Baseband I/Q sample rate in kS/s. This is the device to host sample rate (5) divided by the software decimation factor (4).
 
 <h4>1.6: Channel number</h4>
 
@@ -68,7 +70,7 @@ Use this button to activate/deactivate the TSP NCO. The LMS7002M chip has an ind
 
 This is the frequency shift applied when the NCO is engaged thus the actual LO frequency is the center frequency of reception minus this value. Use the thumbwheels to adjust frequency as done with the LO (1.1). Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2. The boundaries are dynamically calculated from the LO center frequency, sample rate and hardware decimation factor.
 
-&#9758; In the LMS7002M TSP block the NCO sits before the decimator (see Fig.14 of the [datasheet](http://www.limemicro.com/wp-content/uploads/2015/09/LMS7002M-Data-Sheet-v2.8.0.pdf) p.7) so it runs at the actual ADC rate. Hence the NCO limits are calculated as +/- half the device to host sample rate multiplied by the hardware decimation factor. For example with a 4 MS/s device to host sample rate (5) and a hardware decimation of 16 (3) you have +/- 32 MHz span around the LO for the NCO. In this example you can tune all HF frequencies with the center frequency set at its lowest (30 MHz). 
+&#9758; In the LMS7002M TSP block the NCO sits before the decimator (see Fig.14 of the [datasheet](http://www.limemicro.com/wp-content/uploads/2015/09/LMS7002M-Data-Sheet-v2.8.0.pdf) p.7) so it runs at the actual ADC rate. Hence the NCO limits are calculated as +/- half the device to host sample rate multiplied by the hardware decimation factor. For example with a 4 MS/s device to host sample rate (5) and a hardware decimation of 16 (3) you have +/- 32 MHz span around the LO for the NCO. In this example you can tune all HF frequencies with the center frequency set at its lowest (30 MHz).
 
 <h4>2.3: DC component auto correction</h4>
 
@@ -97,16 +99,18 @@ Use this checkbox to enable or disable the external clock input
 <h5>2.6.3: Confirm changes</h5>
 
 Use the "OK" button to confirm your changes
-  
+
 <h5>2.6.4: Dismiss changes</h5>
 
 Use the "Cancel" button to dismiss your changes
-  
+
 <h3>3: LMS7002M hardware decimation factor</h3>
 
 The TSP block in the LMS7002M hardware has a decimation chain that acts on both Rx channels. It is composed of 5 halfband decimation stages and therefore can achieve decimation between 1 (no decimation) and 32 in increasing powers of 2: 1, 2, 4, 8, 16, 32.
 
-Thus the actual sample rate of the ADC is the stream sample rate (5) multiplied by this factor. 
+Thus the actual sample rate of the ADC is the stream sample rate (5) multiplied by this factor.
+
+The first position in the combo is marked as "A". This is because decimation by 1 is not implemented and instead an automatic decimation factor is applied. The ADC rate display is updated automatically and siblings are updated with the actual ADC and hardware decimation factor.
 
 <h3>4: Software decimation factor</h3>
 
@@ -158,7 +162,7 @@ Use this combo box to select the antenna input:
 
   - **Lo**: Selects the low frequency input (700 to 900 MHz nominally)
   - **Hi**: Selects the high frequency input (2 to 2.6 GHz)
-  
+
 <h3>10: Stream status indicator</h3>
 
 This label turns green when status can be obtained from the current stream. Usually this means that the stream is up and running but not necessarily streaming data. The various status elements appear next on the same line (12)

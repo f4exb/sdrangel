@@ -31,72 +31,13 @@ DeviceXTRXShared::DeviceXTRXShared() :
     m_channel(-1),
     m_source(0),
     m_sink(0),
-    m_inputRate(0),
-    m_outputRate(0),
-    m_masterRate(0),
+
     m_thread(0),
     m_threadWasRunning(false)
 {}
 
 DeviceXTRXShared::~DeviceXTRXShared()
 {}
-
-double DeviceXTRXShared::set_samplerate(double rate, double master, bool output)
-{
-    if (output)
-    {
-        m_outputRate = rate;
-
-        if (master != 0.0) {
-            m_masterRate = master;
-        }
-    }
-    else
-    {
-        m_inputRate = rate;
-
-        if (master != 0.0) {
-            m_masterRate = master;
-        }
-    }
-
-    double actualcgen;
-    double actualrx;
-    double actualtx;
-
-    int res = xtrx_set_samplerate(m_dev->getDevice(),
-          m_masterRate,
-          m_inputRate,
-          m_outputRate,
-          0,
-          &actualcgen,
-          &actualrx,
-          &actualtx);
-
-    if (res)
-    {
-        qCritical("DeviceXTRXShared::set_samplerate: Unable to set %s samplerate, m_masterRate: %f, m_inputRate: %f, m_outputRate: %f, error=%d\n",
-                output ? "output" : "input", m_masterRate, m_inputRate, m_outputRate, res);
-        return 0;
-    }
-    else
-    {
-        qDebug() << "DeviceXTRXShared::set_samplerate: sample rate set: "
-                << "output: "<< output
-                << "m_masterRate: " << m_masterRate
-                << "m_inputRate: " << m_inputRate
-                << "m_outputRate: " << m_outputRate
-                << "actualcgen: " << actualcgen
-                << "actualrx: " << actualrx
-                << "actualtx: " << actualtx;
-    }
-
-    if (output) {
-        return m_outputRate;
-    }
-
-    return m_inputRate;
-}
 
 double DeviceXTRXShared::get_board_temperature()
 {

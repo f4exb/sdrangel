@@ -36,7 +36,11 @@ const uint32_t DeviceXTRX::m_pgaTbl[m_nbGains] = {
 };
 
 DeviceXTRX::DeviceXTRX() :
-    m_dev(0)
+    m_dev(0),
+    m_inputRate(0),
+    m_outputRate(0),
+    m_masterRate(0),
+    m_clockGen(0)
 {}
 
 DeviceXTRX::~DeviceXTRX()
@@ -83,4 +87,57 @@ void DeviceXTRX::getAutoGains(uint32_t autoGain, uint32_t& lnaGain, uint32_t& ti
 
     lnaGain = m_lnaTbl[value];
     pgaGain = m_pgaTbl[value];
+}
+
+double DeviceXTRX::set_samplerate(double rate, double master, bool output)
+{
+    if (output)
+    {
+        m_outputRate = rate;
+
+        if (master != 0.0) {
+            m_masterRate = master;
+        }
+    }
+    else
+    {
+        m_inputRate = rate;
+
+        if (master != 0.0) {
+            m_masterRate = master;
+        }
+    }
+
+    int res = xtrx_set_samplerate(m_dev,
+          m_masterRate,
+          m_inputRate,
+          m_outputRate,
+          0,
+          &m_clockGen,
+          &m_actualInputRate,
+          &m_actualOutputRate);
+
+    if (res)
+    {
+        qCritical("DeviceXTRX::set_samplerate: Unable to set %s samplerate, m_masterRate: %f, m_inputRate: %f, m_outputRate: %f, error=%d\n",
+                output ? "output" : "input", m_masterRate, m_inputRate, m_outputRate, res);
+        return 0;
+    }
+    else
+    {
+        qDebug() << "DeviceXTRXShared::set_samplerate: sample rate set: "
+                << "output: "<< output
+                << "m_masterRate: " << m_masterRate
+                << "m_inputRate: " << m_inputRate
+                << "m_outputRate: " << m_outputRate
+                << "m_clockGen: " << m_clockGen
+                << "m_actualInputRate: " << m_actualInputRate
+                << "m_actualOutputRate: " << m_actualOutputRate;
+    }
+
+    if (output) {
+        return m_outputRate;
+    }
+
+    return m_inputRate;
 }

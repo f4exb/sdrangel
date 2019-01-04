@@ -90,6 +90,21 @@ public:
         { }
     };
 
+    class MsgReportClockGenChange : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+        public:
+            static MsgReportClockGenChange* create()
+        {
+            return new MsgReportClockGenChange();
+        }
+
+    private:
+        MsgReportClockGenChange() :
+            Message()
+        { }
+    };
+
     class MsgReportStreamInfo : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -170,6 +185,9 @@ public:
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     virtual const QString& getDeviceDescription() const;
     virtual int getSampleRate() const;
+    uint32_t getDevSampleRate() const;
+    uint32_t getLog2HardInterp() const;
+    double getClockGen() const;
     virtual quint64 getCenterFrequency() const;
     virtual void setCenterFrequency(qint64 centerFrequency);
 

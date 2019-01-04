@@ -136,9 +136,7 @@ public:
     int                 m_channel;       //!< allocated channel (-1 if none)
     XTRXInput           *m_source;
     XTRXOutput          *m_sink;
-    double              m_inputRate;
-    double              m_outputRate;
-    double              m_masterRate;
+
     ThreadInterface     *m_thread;       //!< holds the thread address if started else 0
     bool                m_threadWasRunning; //!< flag to know if thread needs to be resumed after suspend
 
@@ -148,7 +146,6 @@ public:
     DeviceXTRXShared();
     ~DeviceXTRXShared();
 
-    double set_samplerate(double rate, double master, bool output);
     double get_board_temperature();
     bool get_gps_status();
 };

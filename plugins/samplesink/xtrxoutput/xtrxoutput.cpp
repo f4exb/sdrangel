@@ -41,6 +41,7 @@
 MESSAGE_CLASS_DEFINITION(XTRXOutput::MsgConfigureXTRX, Message)
 MESSAGE_CLASS_DEFINITION(XTRXOutput::MsgGetStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(XTRXOutput::MsgGetDeviceInfo, Message)
+MESSAGE_CLASS_DEFINITION(XTRXOutput::MsgReportClockGenChange, Message)
 MESSAGE_CLASS_DEFINITION(XTRXOutput::MsgReportStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(XTRXOutput::MsgStartStop, Message)
 
@@ -492,7 +493,43 @@ const QString& XTRXOutput::getDeviceDescription() const
 int XTRXOutput::getSampleRate() const
 {
     double rate = m_settings.m_devSampleRate;
+
+    if (m_deviceShared.m_dev) {
+        rate = m_deviceShared.m_dev->getActualOutputRate();
+    }
+
     return (int)((rate / (1<<m_settings.m_log2SoftInterp)));
+}
+
+uint32_t XTRXOutput::getDevSampleRate() const
+{
+    uint32_t devSampleRate = m_settings.m_devSampleRate;
+
+    if (m_deviceShared.m_dev) {
+        devSampleRate = m_deviceShared.m_dev->getActualOutputRate();
+    }
+
+    return devSampleRate;
+}
+
+uint32_t XTRXOutput::getLog2HardInterp() const
+{
+    uint32_t log2HardInterp = m_settings.m_log2HardInterp;
+
+    if (m_deviceShared.m_dev && (m_deviceShared.m_dev->getActualOutputRate() != 0.0)) {
+        log2HardInterp = log2(m_deviceShared.m_dev->getClockGen() / m_deviceShared.m_dev->getActualOutputRate() / 4);
+    }
+
+    return log2HardInterp;
+}
+
+double XTRXOutput::getClockGen() const
+{
+    if (m_deviceShared.m_dev) {
+        return m_deviceShared.m_dev->getClockGen();
+    } else {
+        return 0.0;
+    }
 }
 
 quint64 XTRXOutput::getCenterFrequency() const
@@ -573,13 +610,13 @@ bool XTRXOutput::handleMessage(const Message& message)
         }
         else
         {
-            m_settings.m_devSampleRate = m_deviceShared.m_inputRate;
-            m_settings.m_log2HardInterp = log2(m_deviceShared.m_masterRate / m_deviceShared.m_inputRate / 4);
+            m_settings.m_devSampleRate = m_deviceShared.m_dev->getActualOutputRate();
+            m_settings.m_log2HardInterp = getLog2HardInterp();
 
             qDebug() << "XTRXOutput::handleMessage: MsgReportBuddyChange:"
-                     << " host_Hz: " << m_deviceShared.m_inputRate
-                     << " rf_Hz: " << m_deviceShared.m_masterRate / 4
-                     << " m_log2HardDecim: " << m_settings.m_log2HardInterp;
+                     << " host_Hz: " << m_deviceShared.m_dev->getActualOutputRate()
+                     << " dac_Hz: " << m_deviceShared.m_dev->getClockGen() / 4
+                     << " m_log2HardInterp: " << m_settings.m_log2HardInterp;
         }
 
         if (m_settings.m_ncoEnable) // need to reset NCO after sample rate change
@@ -917,9 +954,9 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
 
         double master = (settings.m_log2HardInterp == 0) ? 0 : (settings.m_devSampleRate * 4 * (1 << settings.m_log2HardInterp));
 
-        if (m_deviceShared.set_samplerate(settings.m_devSampleRate,
-                                          master, //(settings.m_devSampleRate<<settings.m_log2HardDecim)*4,
-                                          true) < 0)
+        if (m_deviceShared.m_dev->set_samplerate(settings.m_devSampleRate,
+                master, //(settings.m_devSampleRate<<settings.m_log2HardDecim)*4,
+                true) < 0)
         {
             qCritical("XTRXOutput::applySettings: could not set sample rate to %f with oversampling of %d",
                       settings.m_devSampleRate,
@@ -929,10 +966,11 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         {
             doChangeFreq = true;
             forceNCOFrequency = true;
+            forwardChangeAllDSP = true;
 
             qDebug("XTRXOutput::applySettings: sample rate set to %f with oversampling of %d",
-                   settings.m_devSampleRate,
-                   1<<settings.m_log2HardInterp);
+                   m_deviceShared.m_dev->getActualOutputRate(),
+                   1 << getLog2HardInterp());
         }
 
         resumeRxThread();
@@ -1005,10 +1043,14 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
 
         // send to self first
-        DSPSignalNotification *notif = new DSPSignalNotification(
-                    m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp),
-                    m_settings.m_centerFrequency + ncoShift);
+        DSPSignalNotification *notif = new DSPSignalNotification(getSampleRate(), m_settings.m_centerFrequency + ncoShift);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+
+        if (getMessageQueueToGUI())
+        {
+            MsgReportClockGenChange *report = MsgReportClockGenChange::create();
+            getMessageQueueToGUI()->push(report);
+        }
 
         // send to source buddies
         const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
@@ -1017,7 +1059,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
             DeviceXTRXShared::MsgReportBuddyChange *report = DeviceXTRXShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_log2HardInterp, m_settings.m_centerFrequency, true);
+                    getDevSampleRate(), getLog2HardInterp(), m_settings.m_centerFrequency, true);
             (*itSource)->getSampleSourceInputMessageQueue()->push(report);
         }
 
@@ -1028,7 +1070,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
             DeviceXTRXShared::MsgReportBuddyChange *report = DeviceXTRXShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_log2HardInterp, m_settings.m_centerFrequency, true);
+                    getDevSampleRate(), getLog2HardInterp(), m_settings.m_centerFrequency, true);
             (*itSink)->getSampleSinkInputMessageQueue()->push(report);
         }
     }
@@ -1036,12 +1078,17 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
     {
         qDebug("XTRXOutput::applySettings: forward change to Tx buddies");
 
-        int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp);
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
 
         // send to self first
-        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + ncoShift);
+        DSPSignalNotification *notif = new DSPSignalNotification(getSampleRate(), m_settings.m_centerFrequency + ncoShift);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+
+        if (getMessageQueueToGUI())
+        {
+            MsgReportClockGenChange *report = MsgReportClockGenChange::create();
+            getMessageQueueToGUI()->push(report);
+        }
 
         // send to sink buddies
         const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
@@ -1050,7 +1097,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
             DeviceXTRXShared::MsgReportBuddyChange *report = DeviceXTRXShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_log2HardInterp, m_settings.m_centerFrequency, true);
+                    getDevSampleRate(), getLog2HardInterp(), m_settings.m_centerFrequency, true);
             (*itSink)->getSampleSinkInputMessageQueue()->push(report);
         }
     }
@@ -1058,10 +1105,16 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
     {
         qDebug("XTRXOutput::applySettings: forward change to self only");
 
-        int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp);
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
-        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + ncoShift);
+
+        DSPSignalNotification *notif = new DSPSignalNotification(getSampleRate(), m_settings.m_centerFrequency + ncoShift);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+
+        if (getMessageQueueToGUI())
+        {
+            MsgReportClockGenChange *report = MsgReportClockGenChange::create();
+            getMessageQueueToGUI()->push(report);
+        }
     }
 
     if (forwardClockSource)
@@ -1090,8 +1143,10 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
     }
 
     qDebug() << "XTRXOutput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
-             << " device stream sample rate: " << m_settings.m_devSampleRate << "S/s"
-             << " sample rate with soft interpolation: " << m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp) << "S/s"
+             << " device stream sample rate: " << getDevSampleRate() << "S/s"
+             << " sample rate with soft interpolation: " << getSampleRate() << "S/s"
+             << " m_devSampleRate: " << m_settings.m_devSampleRate
+             << " m_log2SoftInterp: " << m_settings.m_log2SoftInterp
              << " m_gain: " << m_settings.m_gain
              << " m_lpfBW: " << m_settings.m_lpfBW
              << " m_ncoEnable: " << m_settings.m_ncoEnable

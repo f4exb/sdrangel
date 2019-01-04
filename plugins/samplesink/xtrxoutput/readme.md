@@ -2,6 +2,8 @@
 
 <h2>Introduction</h2>
 
+&#9888; Support is experimental and for Linux only. You have to compile it from source.
+
 This output sample sink plugin sends its samples to a [XTRX device](https://xtrx.io).
 
 XTRX is a 2x2 MIMO device so it has two transmitting channels that can run concurrently. To activate the second channel when the first is already active just open a new sink tab in the main window (Devices -> Add sink device) and select the same LimeSDR device.
@@ -24,12 +26,12 @@ If libraries are installed in a custom place like `/opt/install/xtrx-images` add
 
 <h3>1: Start/Stop</h3>
 
-Device start / stop button. 
+Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
   - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon to stop, plug back in, check the source on the sampling devices control panel and start again.
-  
+
 <h3>2: DAC sample rate</h3>
 
 This is the sample rate at which the DAC runs in kS/s (k) or MS/s (M) after hardware interpolation (9). Thus this is the host to device sample rate (11) multiplied by the hardware interpolation factor (9). Please note that a hardware decimation of 4 is required for the device to work properly.
@@ -57,7 +59,7 @@ Use this button to activate/deactivate the TSP NCO. The LMS7002M chip has an ind
 
 This is the frequency shift applied when the NCO is engaged thus the actual LO frequency is the center frequency of transmission minus this value. Use the thumbwheels to adjust frequency as done with the LO (1.1). Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2. The boundaries are dynamically calculated from the LO center frequency, sample rate and hardware interpolation factor.
 
-&#9758; In the LMS7002M TSP block the NCO sits after the interpolator (see Fig.14 of the [datasheet](http://www.limemicro.com/wp-content/uploads/2015/09/LMS7002M-Data-Sheet-v2.8.0.pdf) p.7) so it runs at the actual DAC rate. Hence the NCO limits are calculated as +/- half the device to host sample rate multiplied by the hardware interpolation factor. For example with a 4 MS/s device to host sample rate (10) and a hardware interpolation of 16 (9) you have +/- 32 MHz span around the LO for the NCO. In this example you can tune all HF frequencies with the center frequency set at its lowest (30 MHz). 
+&#9758; In the LMS7002M TSP block the NCO sits after the interpolator (see Fig.14 of the [datasheet](http://www.limemicro.com/wp-content/uploads/2015/09/LMS7002M-Data-Sheet-v2.8.0.pdf) p.7) so it runs at the actual DAC rate. Hence the NCO limits are calculated as +/- half the device to host sample rate multiplied by the hardware interpolation factor. For example with a 4 MS/s device to host sample rate (10) and a hardware interpolation of 16 (9) you have +/- 32 MHz span around the LO for the NCO. In this example you can tune all HF frequencies with the center frequency set at its lowest (30 MHz).
 
 <h3>8: External clock control</h3>
 
@@ -78,7 +80,7 @@ Use this checkbox to enable or disable the external clock input
 <h4>8.3: Confirm changes</h4>
 
 Use the "OK" button to confirm your changes
-  
+
 <h4>8.4: Dismiss changes</h4>
 
 Use the "Cancel" button to dismiss your changes
@@ -88,6 +90,8 @@ Use the "Cancel" button to dismiss your changes
 The TSP block in the LMS7002M hardware has an interpolation chain that acts on both Tx channels. It is composed of 5 halfband interpolation stages and therefore can achieve interpolation between 1 (no interpolation) and 32 in increasing powers of 2: 1, 2, 4, 8, 16, 32. Please note that a factor of at least 4 is required. Lower values are experimental.
 
 Thus the actual sample rate of the DAC is the stream sample rate (11) multiplied by this factor. In the screenshot example this yields a 12.288 MS/s rate at the DAC (3.072 * 4).
+
+The first position in the combo is marked as "A". This is because interpolation by 1 is not implemented and instead an automatic interpolation factor is applied. The DAC rate display is updated automatically and siblings are updated with the actual DAC and hardware interpolation factor.
 
 <h3>10: Software interpolation factor</h3>
 
@@ -123,7 +127,7 @@ This label turns green when status can be obtained from the current stream. Usua
 <h3>17: GPSDO lock indicator</h3>
 
 This label turns green when the GPS used for the GPSDO is locked.
-  
+
 <h3>18: Stream global (all Tx) throughput in MB/s</h3>
 
 This is the stream throughput in MB/s and is usually about 3 times the sample rate for a single stream and 6 times for a dual Tx stream. This is due to the fact that 12 bits samples are used and although they are represented as 16 bit values only 12 bits travel on the USB link.

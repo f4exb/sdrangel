@@ -205,7 +205,7 @@ If you use your own location for libmirisdr-4 install directory you need to spec
 
 <h2>XTRX</h2>
 
-Experimental. Compile from source.
+Experimental and Linux only. Compile from source.
 
 [XTRX](https://xtrx.io) is supported through the set of [xtrx libraries](https://github.com/xtrx-sdr/images).
 
