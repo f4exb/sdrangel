@@ -88,11 +88,6 @@ Use this toggle button to activate or deactivate the frequency translation
 
 Use these buttons to confirm ("OK") or dismiss ("Cancel") your changes.
 
-<h3>5: Toggle low/high sample rate range</h3>
-
-When button is on the sample rate can vary from 230 kS/s to 300 kS/s
-When button is off the sample rate can vary from 950 kS/s to 2400 kS/s
-
 <h3>7: Set default values</h3>
 
 Use this oush button to force default reasonable values for all parameters below (8)
