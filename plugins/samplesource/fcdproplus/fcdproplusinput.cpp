@@ -601,6 +601,12 @@ int FCDProPlusInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getFcdProPlusSettings()->getCenterFrequency();
     }
+    if (deviceSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getFcdProPlusSettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("fcPos")) {
+        settings.m_fcPos = (FCDProPlusSettings::fcPos_t) response.getFcdProPlusSettings()->getFcPos();
+    }
     if (deviceSettingsKeys.contains("rangeLow")) {
         settings.m_rangeLow = response.getFcdProPlusSettings()->getRangeLow() != 0;
     }
@@ -657,6 +663,8 @@ int FCDProPlusInput::webapiSettingsPutPatch(
 void FCDProPlusInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FCDProPlusSettings& settings)
 {
     response.getFcdProPlusSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getFcdProPlusSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getFcdProPlusSettings()->setFcPos((int) settings.m_fcPos);
     response.getFcdProPlusSettings()->setRangeLow(settings.m_rangeLow ? 1 : 0);
     response.getFcdProPlusSettings()->setLnaGain(settings.m_lnaGain ? 1 : 0);
     response.getFcdProPlusSettings()->setMixGain(settings.m_mixGain ? 1 : 0);
@@ -689,6 +697,12 @@ void FCDProPlusInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKe
 
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgFCDProPlusSettings->setCenterFrequency(settings.m_centerFrequency);
+    }
+    if (deviceSettingsKeys.contains("log2Decim") || force) {
+        swgFCDProPlusSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("fcPos") || force) {
+        swgFCDProPlusSettings->setFcPos((int) settings.m_fcPos);
     }
     if (deviceSettingsKeys.contains("rangeLow") || force) {
         swgFCDProPlusSettings->setRangeLow(settings.m_rangeLow ? 1 : 0);

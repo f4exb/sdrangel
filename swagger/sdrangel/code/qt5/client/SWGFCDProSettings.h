@@ -96,6 +96,12 @@ public:
     qint32 getGain6Index();
     void setGain6Index(qint32 gain6_index);
 
+    qint32 getLog2Decim();
+    void setLog2Decim(qint32 log2_decim);
+
+    qint32 getFcPos();
+    void setFcPos(qint32 fc_pos);
+
     qint32 getDcBlock();
     void setDcBlock(qint32 dc_block);
 
@@ -168,6 +174,12 @@ private:
 
     qint32 gain6_index;
     bool m_gain6_index_isSet;
+
+    qint32 log2_decim;
+    bool m_log2_decim_isSet;
+
+    qint32 fc_pos;
+    bool m_fc_pos_isSet;
 
     qint32 dc_block;
     bool m_dc_block_isSet;

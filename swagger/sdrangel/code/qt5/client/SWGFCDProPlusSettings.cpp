@@ -30,6 +30,10 @@ SWGFCDProPlusSettings::SWGFCDProPlusSettings(QString* json) {
 SWGFCDProPlusSettings::SWGFCDProPlusSettings() {
     center_frequency = 0L;
     m_center_frequency_isSet = false;
+    log2_decim = 0;
+    m_log2_decim_isSet = false;
+    fc_pos = 0;
+    m_fc_pos_isSet = false;
     range_low = 0;
     m_range_low_isSet = false;
     lna_gain = 0;
@@ -66,6 +70,10 @@ void
 SWGFCDProPlusSettings::init() {
     center_frequency = 0L;
     m_center_frequency_isSet = false;
+    log2_decim = 0;
+    m_log2_decim_isSet = false;
+    fc_pos = 0;
+    m_fc_pos_isSet = false;
     range_low = 0;
     m_range_low_isSet = false;
     lna_gain = 0;
@@ -109,6 +117,8 @@ SWGFCDProPlusSettings::cleanup() {
 
 
 
+
+
     if(file_record_name != nullptr) { 
         delete file_record_name;
     }
@@ -126,6 +136,10 @@ SWGFCDProPlusSettings::fromJson(QString &json) {
 void
 SWGFCDProPlusSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&log2_decim, pJson["log2Decim"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&fc_pos, pJson["fcPos"], "qint32", "");
     
     ::SWGSDRangel::setValue(&range_low, pJson["rangeLow"], "qint32", "");
     
@@ -171,6 +185,12 @@ SWGFCDProPlusSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
+    }
+    if(m_log2_decim_isSet){
+        obj->insert("log2Decim", QJsonValue(log2_decim));
+    }
+    if(m_fc_pos_isSet){
+        obj->insert("fcPos", QJsonValue(fc_pos));
     }
     if(m_range_low_isSet){
         obj->insert("rangeLow", QJsonValue(range_low));
@@ -223,6 +243,26 @@ void
 SWGFCDProPlusSettings::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
     this->m_center_frequency_isSet = true;
+}
+
+qint32
+SWGFCDProPlusSettings::getLog2Decim() {
+    return log2_decim;
+}
+void
+SWGFCDProPlusSettings::setLog2Decim(qint32 log2_decim) {
+    this->log2_decim = log2_decim;
+    this->m_log2_decim_isSet = true;
+}
+
+qint32
+SWGFCDProPlusSettings::getFcPos() {
+    return fc_pos;
+}
+void
+SWGFCDProPlusSettings::setFcPos(qint32 fc_pos) {
+    this->fc_pos = fc_pos;
+    this->m_fc_pos_isSet = true;
 }
 
 qint32
@@ -361,6 +401,8 @@ SWGFCDProPlusSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
+        if(m_log2_decim_isSet){ isObjectUpdated = true; break;}
+        if(m_fc_pos_isSet){ isObjectUpdated = true; break;}
         if(m_range_low_isSet){ isObjectUpdated = true; break;}
         if(m_lna_gain_isSet){ isObjectUpdated = true; break;}
         if(m_mix_gain_isSet){ isObjectUpdated = true; break;}

@@ -45,6 +45,12 @@ public:
     qint64 getCenterFrequency();
     void setCenterFrequency(qint64 center_frequency);
 
+    qint32 getLog2Decim();
+    void setLog2Decim(qint32 log2_decim);
+
+    qint32 getFcPos();
+    void setFcPos(qint32 fc_pos);
+
     qint32 getRangeLow();
     void setRangeLow(qint32 range_low);
 
@@ -90,6 +96,12 @@ public:
 private:
     qint64 center_frequency;
     bool m_center_frequency_isSet;
+
+    qint32 log2_decim;
+    bool m_log2_decim_isSet;
+
+    qint32 fc_pos;
+    bool m_fc_pos_isSet;
 
     qint32 range_low;
     bool m_range_low_isSet;

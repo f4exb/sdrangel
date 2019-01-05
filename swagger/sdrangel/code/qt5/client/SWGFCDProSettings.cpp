@@ -64,6 +64,10 @@ SWGFCDProSettings::SWGFCDProSettings() {
     m_gain5_index_isSet = false;
     gain6_index = 0;
     m_gain6_index_isSet = false;
+    log2_decim = 0;
+    m_log2_decim_isSet = false;
+    fc_pos = 0;
+    m_fc_pos_isSet = false;
     dc_block = 0;
     m_dc_block_isSet = false;
     iq_correction = 0;
@@ -118,6 +122,10 @@ SWGFCDProSettings::init() {
     m_gain5_index_isSet = false;
     gain6_index = 0;
     m_gain6_index_isSet = false;
+    log2_decim = 0;
+    m_log2_decim_isSet = false;
+    fc_pos = 0;
+    m_fc_pos_isSet = false;
     dc_block = 0;
     m_dc_block_isSet = false;
     iq_correction = 0;
@@ -132,6 +140,8 @@ SWGFCDProSettings::init() {
 
 void
 SWGFCDProSettings::cleanup() {
+
+
 
 
 
@@ -205,6 +215,10 @@ SWGFCDProSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&gain5_index, pJson["gain5Index"], "qint32", "");
     
     ::SWGSDRangel::setValue(&gain6_index, pJson["gain6Index"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&log2_decim, pJson["log2Decim"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&fc_pos, pJson["fcPos"], "qint32", "");
     
     ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
     
@@ -285,6 +299,12 @@ SWGFCDProSettings::asJsonObject() {
     }
     if(m_gain6_index_isSet){
         obj->insert("gain6Index", QJsonValue(gain6_index));
+    }
+    if(m_log2_decim_isSet){
+        obj->insert("log2Decim", QJsonValue(log2_decim));
+    }
+    if(m_fc_pos_isSet){
+        obj->insert("fcPos", QJsonValue(fc_pos));
     }
     if(m_dc_block_isSet){
         obj->insert("dcBlock", QJsonValue(dc_block));
@@ -486,6 +506,26 @@ SWGFCDProSettings::setGain6Index(qint32 gain6_index) {
 }
 
 qint32
+SWGFCDProSettings::getLog2Decim() {
+    return log2_decim;
+}
+void
+SWGFCDProSettings::setLog2Decim(qint32 log2_decim) {
+    this->log2_decim = log2_decim;
+    this->m_log2_decim_isSet = true;
+}
+
+qint32
+SWGFCDProSettings::getFcPos() {
+    return fc_pos;
+}
+void
+SWGFCDProSettings::setFcPos(qint32 fc_pos) {
+    this->fc_pos = fc_pos;
+    this->m_fc_pos_isSet = true;
+}
+
+qint32
 SWGFCDProSettings::getDcBlock() {
     return dc_block;
 }
@@ -558,6 +598,8 @@ SWGFCDProSettings::isSet(){
         if(m_if_filter_index_isSet){ isObjectUpdated = true; break;}
         if(m_gain5_index_isSet){ isObjectUpdated = true; break;}
         if(m_gain6_index_isSet){ isObjectUpdated = true; break;}
+        if(m_log2_decim_isSet){ isObjectUpdated = true; break;}
+        if(m_fc_pos_isSet){ isObjectUpdated = true; break;}
         if(m_dc_block_isSet){ isObjectUpdated = true; break;}
         if(m_iq_correction_isSet){ isObjectUpdated = true; break;}
         if(m_transverter_mode_isSet){ isObjectUpdated = true; break;}

@@ -919,6 +919,12 @@ int FCDProInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("gain6Index")) {
         settings.m_gain6Index = response.getFcdProSettings()->getGain6Index();
     }
+    if (deviceSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getFcdProSettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("fcPos")) {
+        settings.m_fcPos = (FCDProSettings::fcPos_t) response.getFcdProSettings()->getFcPos();
+    }
     if (deviceSettingsKeys.contains("rcFilterIndex")) {
         settings.m_rcFilterIndex = response.getFcdProSettings()->getRcFilterIndex();
     }
@@ -972,6 +978,8 @@ void FCDProInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getFcdProSettings()->setGain4Index(settings.m_gain4Index);
     response.getFcdProSettings()->setGain5Index(settings.m_gain5Index);
     response.getFcdProSettings()->setGain6Index(settings.m_gain6Index);
+    response.getFcdProSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getFcdProSettings()->setFcPos((int) settings.m_fcPos);
     response.getFcdProSettings()->setRcFilterIndex(settings.m_rcFilterIndex);
     response.getFcdProSettings()->setIfFilterIndex(settings.m_ifFilterIndex);
     response.getFcdProSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
@@ -1043,6 +1051,12 @@ void FCDProInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     }
     if (deviceSettingsKeys.contains("gain6Index") || force) {
         swgFCDProSettings->setGain6Index(settings.m_gain6Index);
+    }
+    if (deviceSettingsKeys.contains("log2Decim") || force) {
+        swgFCDProSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("fcPos") || force) {
+        swgFCDProSettings->setFcPos(settings.m_fcPos);
     }
     if (deviceSettingsKeys.contains("rcFilterIndex") || force) {
         swgFCDProSettings->setRcFilterIndex(settings.m_rcFilterIndex);

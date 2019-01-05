@@ -4,6 +4,10 @@ FCDProPlusSettings:
     centerFrequency:
       type: integer
       format: int64
+    log2Decim:
+      type: integer
+    fcPos:
+      type: integer
     rangeLow:
       description: Range select (1 if low else 0)
       type: integer
@@ -32,6 +36,6 @@ FCDProPlusSettings:
       type: integer
     transverterDeltaFrequency:
       type: integer
-      format: int64      
+      format: int64
     fileRecordName:
       type: string

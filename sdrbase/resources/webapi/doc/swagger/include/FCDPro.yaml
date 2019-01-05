@@ -38,6 +38,10 @@ FCDProSettings:
       type: integer
     gain6Index:
       type: integer
+    log2Decim:
+      type: integer
+    fcPos:
+      type: integer
     dcBlock:
       type: integer
     iqCorrection:
@@ -46,7 +50,7 @@ FCDProSettings:
       type: integer
     transverterDeltaFrequency:
       type: integer
-      format: int64      
+      format: int64
     fileRecordName:
       type: string
 
