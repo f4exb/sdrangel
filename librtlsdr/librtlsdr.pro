@@ -17,6 +17,7 @@ CONFIG(MINGW32):INCLUDEPATH += "C:\softs\libusb-1.0.22\include\libusb-1.0"
 CONFIG(MINGW64):INCLUDEPATH += "C:\softs\libusb-1.0.22\include\libusb-1.0"
 CONFIG(MSVC):INCLUDEPATH += "C:\softs\libusb-1.0.22\include\libusb-1.0"
 CONFIG(macx):INCLUDEPATH += /opt/local/include
+CONFIG(MSVC):INCLUDEPATH += "C:\softs\librtlsdr\include"
 
 SOURCES = $$LIBRTLSDRSRC/src/librtlsdr.c\
     $$LIBRTLSDRSRC/src/tuner_e4k.c\
