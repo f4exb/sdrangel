@@ -267,10 +267,12 @@ void BladeRF2InputGui::displaySettings()
 
     ui->dcOffset->setChecked(m_settings.m_dcBlock);
     ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
+    ui->biasTee->setChecked(m_settings.m_biasTee);
 
     ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
+    ui->gainMode->setCurrentIndex(m_settings.m_gainMode);
     ui->gainText->setText(tr("%1 dB").arg(m_settings.m_globalGain));
     ui->gain->setValue(m_settings.m_globalGain);
 
