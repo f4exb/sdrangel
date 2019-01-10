@@ -1094,6 +1094,18 @@ int BladeRF2Input::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("fileRecordName")) {
         settings.m_fileRecordName = *response.getBladeRf1InputSettings()->getFileRecordName();
     }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getTestSourceSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getTestSourceSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getTestSourceSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getTestSourceSettings()->getReverseApiDeviceIndex();
+    }
 
     MsgConfigureBladeRF2 *msg = MsgConfigureBladeRF2::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -1138,6 +1150,17 @@ void BladeRF2Input::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     } else {
         response.getBladeRf2InputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
+
+    response.getTestSourceSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getTestSourceSettings()->getReverseApiAddress()) {
+        *response.getTestSourceSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getTestSourceSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getTestSourceSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getTestSourceSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 void BladeRF2Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)

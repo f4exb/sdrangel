@@ -704,6 +704,18 @@ int AirspyInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("fileRecordName")) {
         settings.m_fileRecordName = *response.getAirspySettings()->getFileRecordName();
     }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getTestSourceSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getTestSourceSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getTestSourceSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getTestSourceSettings()->getReverseApiDeviceIndex();
+    }
 
     MsgConfigureAirspy *msg = MsgConfigureAirspy::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -752,6 +764,17 @@ void AirspyInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     } else {
         response.getAirspySettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
+
+    response.getTestSourceSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getTestSourceSettings()->getReverseApiAddress()) {
+        *response.getTestSourceSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getTestSourceSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getTestSourceSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getTestSourceSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 void AirspyInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
