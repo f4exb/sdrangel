@@ -556,7 +556,7 @@ int TestSourceInput::webapiSettingsPutPatch(
         settings.m_useReverseAPI = response.getTestSourceSettings()->getUseReverseApi() != 0;
     }
     if (deviceSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getTestSourceSettings()->getReverseApiAddress() != 0;
+        settings.m_reverseAPIAddress = *response.getTestSourceSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getTestSourceSettings()->getReverseApiPort();
