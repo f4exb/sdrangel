@@ -1092,19 +1092,19 @@ int BladeRF2Input::webapiSettingsPutPatch(
         settings.m_transverterMode = response.getBladeRf2InputSettings()->getTransverterMode() != 0;
     }
     if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getBladeRf1InputSettings()->getFileRecordName();
+        settings.m_fileRecordName = *response.getBladeRf2InputSettings()->getFileRecordName();
     }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getTestSourceSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getBladeRf2InputSettings()->getUseReverseApi() != 0;
     }
     if (deviceSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getTestSourceSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getBladeRf2InputSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getTestSourceSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getBladeRf2InputSettings()->getReverseApiPort();
     }
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getTestSourceSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getBladeRf2InputSettings()->getReverseApiDeviceIndex();
     }
 
     MsgConfigureBladeRF2 *msg = MsgConfigureBladeRF2::create(settings, force);
@@ -1151,16 +1151,16 @@ void BladeRF2Input::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
         response.getBladeRf2InputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
-    response.getTestSourceSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getBladeRf2InputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getTestSourceSettings()->getReverseApiAddress()) {
-        *response.getTestSourceSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getBladeRf2InputSettings()->getReverseApiAddress()) {
+        *response.getBladeRf2InputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getTestSourceSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getBladeRf2InputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getTestSourceSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getTestSourceSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getBladeRf2InputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getBladeRf2InputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 void BladeRF2Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)

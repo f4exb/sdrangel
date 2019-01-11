@@ -36,15 +36,23 @@ AirspySettings:
       type: integer
     transverterDeltaFrequency:
       type: integer
-      format: int64      
+      format: int64
     fileRecordName:
       type: string
-      
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+
 AirspyReport:
   description: Airspy
   properties:
     sampleRates:
       type: array
       items:
-        $ref: "/doc/swagger/include/Structs.yaml#/SampleRate"  
-      
+        $ref: "/doc/swagger/include/Structs.yaml#/SampleRate"

@@ -29,8 +29,17 @@ BladeRF1InputSettings:
     iqCorrection:
       type: integer
     fileRecordName:
-      type: string      
-      
+      type: string
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+
 BladeRF1OutputSettings:
   description: BladeRF1
   properties:
@@ -53,4 +62,3 @@ BladeRF1OutputSettings:
       type: integer
     xb200Filter:
       type: integer
-      

@@ -573,16 +573,16 @@ int AirspyHFInput::webapiSettingsPutPatch(
         settings.m_fileRecordName = *response.getAirspyHfSettings()->getFileRecordName();
     }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getTestSourceSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getAirspyHfSettings()->getUseReverseApi() != 0;
     }
     if (deviceSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getTestSourceSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getAirspyHfSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getTestSourceSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getAirspyHfSettings()->getReverseApiPort();
     }
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getTestSourceSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getAirspyHfSettings()->getReverseApiDeviceIndex();
     }
 
     MsgConfigureAirspyHF *msg = MsgConfigureAirspyHF::create(settings, force);
@@ -614,16 +614,16 @@ void AirspyHFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
         response.getAirspyHfSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
-    response.getTestSourceSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getAirspyHfSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getTestSourceSettings()->getReverseApiAddress()) {
-        *response.getTestSourceSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getAirspyHfSettings()->getReverseApiAddress()) {
+        *response.getAirspyHfSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getTestSourceSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getAirspyHfSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getTestSourceSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getTestSourceSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getAirspyHfSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getAirspyHfSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 void AirspyHFInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
