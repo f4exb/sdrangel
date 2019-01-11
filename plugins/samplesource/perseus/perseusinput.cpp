@@ -530,6 +530,18 @@ int PerseusInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("fileRecordName")) {
         settings.m_fileRecordName = *response.getPerseusSettings()->getFileRecordName();
     }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getPerseusSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getPerseusSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getPerseusSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getPerseusSettings()->getReverseApiDeviceIndex();
+    }
 
     MsgConfigurePerseus *msg = MsgConfigurePerseus::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -573,6 +585,17 @@ void PerseusInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     } else {
         response.getPerseusSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
+
+    response.getPerseusSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getPerseusSettings()->getReverseApiAddress()) {
+        *response.getPerseusSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getPerseusSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getPerseusSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getPerseusSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 void PerseusInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)

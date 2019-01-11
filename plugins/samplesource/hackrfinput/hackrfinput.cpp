@@ -632,6 +632,18 @@ int HackRFInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("fileRecordName")) {
         settings.m_fileRecordName = *response.getHackRfInputSettings()->getFileRecordName();
     }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getHackRfInputSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getHackRfInputSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getHackRfInputSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getHackRfInputSettings()->getReverseApiDeviceIndex();
+    }
 
     MsgConfigureHackRF *msg = MsgConfigureHackRF::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -667,6 +679,17 @@ void HackRFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     } else {
         response.getHackRfInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
+
+    response.getHackRfInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getHackRfInputSettings()->getReverseApiAddress()) {
+        *response.getHackRfInputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getHackRfInputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getHackRfInputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getHackRfInputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 int HackRFInput::webapiRunGet(

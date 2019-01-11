@@ -731,7 +731,19 @@ int SDRPlayInput::webapiSettingsPutPatch(
         settings.m_basebandGain = response.getSdrPlaySettings()->getBasebandGain();
     }
     if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getRtlSdrSettings()->getFileRecordName();
+        settings.m_fileRecordName = *response.getSdrPlaySettings()->getFileRecordName();
+    }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getSdrPlaySettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getSdrPlaySettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getSdrPlaySettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getSdrPlaySettings()->getReverseApiDeviceIndex();
     }
 
     MsgConfigureSDRPlay *msg = MsgConfigureSDRPlay::create(settings, force);
@@ -770,6 +782,17 @@ void SDRPlayInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     } else {
         response.getSdrPlaySettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
+
+    response.getSdrPlaySettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getSdrPlaySettings()->getReverseApiAddress()) {
+        *response.getSdrPlaySettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getSdrPlaySettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getSdrPlaySettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getSdrPlaySettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 int SDRPlayInput::webapiReportGet(

@@ -467,6 +467,18 @@ int FileSourceInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("loop")) {
         settings.m_loop = response.getFileSourceSettings()->getLoop() != 0;
     }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getFileSourceSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getFileSourceSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getFileSourceSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getFileSourceSettings()->getReverseApiDeviceIndex();
+    }
 
     MsgConfigureFileSource *msg = MsgConfigureFileSource::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -526,6 +538,16 @@ void FileSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings&
     response.getFileSourceSettings()->setAccelerationFactor(settings.m_accelerationFactor);
     response.getFileSourceSettings()->setLoop(settings.m_loop ? 1 : 0);
 
+    response.getFileSourceSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getFileSourceSettings()->getReverseApiAddress()) {
+        *response.getFileSourceSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getFileSourceSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getFileSourceSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getFileSourceSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 void FileSourceInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)

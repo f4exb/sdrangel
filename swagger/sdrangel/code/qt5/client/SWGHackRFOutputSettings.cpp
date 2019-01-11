@@ -44,6 +44,14 @@ SWGHackRFOutputSettings::SWGHackRFOutputSettings() {
     m_bias_t_isSet = false;
     lna_ext = 0;
     m_lna_ext_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = nullptr;
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_device_index = 0;
+    m_reverse_api_device_index_isSet = false;
 }
 
 SWGHackRFOutputSettings::~SWGHackRFOutputSettings() {
@@ -68,6 +76,14 @@ SWGHackRFOutputSettings::init() {
     m_bias_t_isSet = false;
     lna_ext = 0;
     m_lna_ext_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = new QString("");
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_device_index = 0;
+    m_reverse_api_device_index_isSet = false;
 }
 
 void
@@ -78,6 +94,12 @@ SWGHackRFOutputSettings::cleanup() {
 
 
 
+
+
+
+    if(reverse_api_address != nullptr) { 
+        delete reverse_api_address;
+    }
 
 
 }
@@ -108,6 +130,14 @@ SWGHackRFOutputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&bias_t, pJson["biasT"], "qint32", "");
     
     ::SWGSDRangel::setValue(&lna_ext, pJson["lnaExt"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_address, pJson["reverseAPIAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&reverse_api_port, pJson["reverseAPIPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
     
 }
 
@@ -148,6 +178,18 @@ SWGHackRFOutputSettings::asJsonObject() {
     }
     if(m_lna_ext_isSet){
         obj->insert("lnaExt", QJsonValue(lna_ext));
+    }
+    if(m_use_reverse_api_isSet){
+        obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
+    }
+    if(reverse_api_address != nullptr && *reverse_api_address != QString("")){
+        toJsonValue(QString("reverseAPIAddress"), reverse_api_address, obj, QString("QString"));
+    }
+    if(m_reverse_api_port_isSet){
+        obj->insert("reverseAPIPort", QJsonValue(reverse_api_port));
+    }
+    if(m_reverse_api_device_index_isSet){
+        obj->insert("reverseAPIDeviceIndex", QJsonValue(reverse_api_device_index));
     }
 
     return obj;
@@ -233,6 +275,46 @@ SWGHackRFOutputSettings::setLnaExt(qint32 lna_ext) {
     this->m_lna_ext_isSet = true;
 }
 
+qint32
+SWGHackRFOutputSettings::getUseReverseApi() {
+    return use_reverse_api;
+}
+void
+SWGHackRFOutputSettings::setUseReverseApi(qint32 use_reverse_api) {
+    this->use_reverse_api = use_reverse_api;
+    this->m_use_reverse_api_isSet = true;
+}
+
+QString*
+SWGHackRFOutputSettings::getReverseApiAddress() {
+    return reverse_api_address;
+}
+void
+SWGHackRFOutputSettings::setReverseApiAddress(QString* reverse_api_address) {
+    this->reverse_api_address = reverse_api_address;
+    this->m_reverse_api_address_isSet = true;
+}
+
+qint32
+SWGHackRFOutputSettings::getReverseApiPort() {
+    return reverse_api_port;
+}
+void
+SWGHackRFOutputSettings::setReverseApiPort(qint32 reverse_api_port) {
+    this->reverse_api_port = reverse_api_port;
+    this->m_reverse_api_port_isSet = true;
+}
+
+qint32
+SWGHackRFOutputSettings::getReverseApiDeviceIndex() {
+    return reverse_api_device_index;
+}
+void
+SWGHackRFOutputSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
+    this->reverse_api_device_index = reverse_api_device_index;
+    this->m_reverse_api_device_index_isSet = true;
+}
+
 
 bool
 SWGHackRFOutputSettings::isSet(){
@@ -246,6 +328,10 @@ SWGHackRFOutputSettings::isSet(){
         if(m_dev_sample_rate_isSet){ isObjectUpdated = true; break;}
         if(m_bias_t_isSet){ isObjectUpdated = true; break;}
         if(m_lna_ext_isSet){ isObjectUpdated = true; break;}
+        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
+        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
+        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
+        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

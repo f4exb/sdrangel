@@ -72,6 +72,14 @@ SWGSoapySDRInputSettings::SWGSoapySDRInputSettings() {
     m_stream_arg_settings_isSet = false;
     device_arg_settings = nullptr;
     m_device_arg_settings_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = nullptr;
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_device_index = 0;
+    m_reverse_api_device_index_isSet = false;
 }
 
 SWGSoapySDRInputSettings::~SWGSoapySDRInputSettings() {
@@ -124,6 +132,14 @@ SWGSoapySDRInputSettings::init() {
     m_stream_arg_settings_isSet = false;
     device_arg_settings = new QList<SWGArgValue*>();
     m_device_arg_settings_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = new QString("");
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_device_index = 0;
+    m_reverse_api_device_index_isSet = false;
 }
 
 void
@@ -182,6 +198,12 @@ SWGSoapySDRInputSettings::cleanup() {
         }
         delete device_arg_settings;
     }
+
+    if(reverse_api_address != nullptr) { 
+        delete reverse_api_address;
+    }
+
+
 }
 
 SWGSoapySDRInputSettings*
@@ -239,6 +261,14 @@ SWGSoapySDRInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&stream_arg_settings, pJson["streamArgSettings"], "QList", "SWGArgValue");
     
     ::SWGSDRangel::setValue(&device_arg_settings, pJson["deviceArgSettings"], "QList", "SWGArgValue");
+    ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_address, pJson["reverseAPIAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&reverse_api_port, pJson["reverseAPIPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
+    
 }
 
 QString
@@ -320,6 +350,18 @@ SWGSoapySDRInputSettings::asJsonObject() {
     }
     if(device_arg_settings->size() > 0){
         toJsonArray((QList<void*>*)device_arg_settings, obj, "deviceArgSettings", "SWGArgValue");
+    }
+    if(m_use_reverse_api_isSet){
+        obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
+    }
+    if(reverse_api_address != nullptr && *reverse_api_address != QString("")){
+        toJsonValue(QString("reverseAPIAddress"), reverse_api_address, obj, QString("QString"));
+    }
+    if(m_reverse_api_port_isSet){
+        obj->insert("reverseAPIPort", QJsonValue(reverse_api_port));
+    }
+    if(m_reverse_api_device_index_isSet){
+        obj->insert("reverseAPIDeviceIndex", QJsonValue(reverse_api_device_index));
     }
 
     return obj;
@@ -545,6 +587,46 @@ SWGSoapySDRInputSettings::setDeviceArgSettings(QList<SWGArgValue*>* device_arg_s
     this->m_device_arg_settings_isSet = true;
 }
 
+qint32
+SWGSoapySDRInputSettings::getUseReverseApi() {
+    return use_reverse_api;
+}
+void
+SWGSoapySDRInputSettings::setUseReverseApi(qint32 use_reverse_api) {
+    this->use_reverse_api = use_reverse_api;
+    this->m_use_reverse_api_isSet = true;
+}
+
+QString*
+SWGSoapySDRInputSettings::getReverseApiAddress() {
+    return reverse_api_address;
+}
+void
+SWGSoapySDRInputSettings::setReverseApiAddress(QString* reverse_api_address) {
+    this->reverse_api_address = reverse_api_address;
+    this->m_reverse_api_address_isSet = true;
+}
+
+qint32
+SWGSoapySDRInputSettings::getReverseApiPort() {
+    return reverse_api_port;
+}
+void
+SWGSoapySDRInputSettings::setReverseApiPort(qint32 reverse_api_port) {
+    this->reverse_api_port = reverse_api_port;
+    this->m_reverse_api_port_isSet = true;
+}
+
+qint32
+SWGSoapySDRInputSettings::getReverseApiDeviceIndex() {
+    return reverse_api_device_index;
+}
+void
+SWGSoapySDRInputSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
+    this->reverse_api_device_index = reverse_api_device_index;
+    this->m_reverse_api_device_index_isSet = true;
+}
+
 
 bool
 SWGSoapySDRInputSettings::isSet(){
@@ -572,6 +654,10 @@ SWGSoapySDRInputSettings::isSet(){
         if(iq_correction != nullptr && iq_correction->isSet()){ isObjectUpdated = true; break;}
         if(stream_arg_settings->size() > 0){ isObjectUpdated = true; break;}
         if(device_arg_settings->size() > 0){ isObjectUpdated = true; break;}
+        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
+        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
+        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
+        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

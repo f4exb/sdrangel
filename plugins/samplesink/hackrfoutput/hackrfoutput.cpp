@@ -543,6 +543,18 @@ int HackRFOutput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("lnaExt")) {
         settings.m_lnaExt = response.getHackRfOutputSettings()->getLnaExt() != 0;
     }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getHackRfOutputSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getHackRfOutputSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getHackRfOutputSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getHackRfOutputSettings()->getReverseApiDeviceIndex();
+    }
 
     MsgConfigureHackRF *msg = MsgConfigureHackRF::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -567,6 +579,17 @@ void HackRFOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getHackRfOutputSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getHackRfOutputSettings()->setBiasT(settings.m_biasT ? 1 : 0);
     response.getHackRfOutputSettings()->setLnaExt(settings.m_lnaExt ? 1 : 0);
+
+    response.getHackRfOutputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getHackRfOutputSettings()->getReverseApiAddress()) {
+        *response.getHackRfOutputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getHackRfOutputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getHackRfOutputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getHackRfOutputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 int HackRFOutput::webapiRunGet(

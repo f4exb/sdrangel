@@ -23,11 +23,20 @@ PerseusSettings:
       type: integer
     transverterDeltaFrequency:
       type: integer
-      format: int64      
+      format: int64
     fileRecordName:
       type: string
     attenuator:
-      description: Attenuator setting in Bels (0, 10, 20 30 dB) 
+      description: Attenuator setting in Bels (0, 10, 20 30 dB)
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
       type: integer
 
 PerseusReport:
@@ -36,5 +45,4 @@ PerseusReport:
     sampleRates:
       type: array
       items:
-        $ref: "/doc/swagger/include/Structs.yaml#/SampleRate"  
-            
+        $ref: "/doc/swagger/include/Structs.yaml#/SampleRate"

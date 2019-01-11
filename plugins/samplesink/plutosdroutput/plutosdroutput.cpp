@@ -701,6 +701,18 @@ int PlutoSDROutput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("transverterMode")) {
         settings.m_transverterMode = response.getPlutoSdrOutputSettings()->getTransverterMode() != 0;
     }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getPlutoSdrOutputSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getPlutoSdrOutputSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getPlutoSdrOutputSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getPlutoSdrOutputSettings()->getReverseApiDeviceIndex();
+    }
 
     MsgConfigurePlutoSDR *msg = MsgConfigurePlutoSDR::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -741,6 +753,16 @@ void PlutoSDROutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& 
     response.getPlutoSdrOutputSettings()->setAntennaPath((int) settings.m_antennaPath);
     response.getPlutoSdrOutputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getPlutoSdrOutputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+    response.getPlutoSdrOutputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getPlutoSdrOutputSettings()->getReverseApiAddress()) {
+        *response.getPlutoSdrOutputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getPlutoSdrOutputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getPlutoSdrOutputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getPlutoSdrOutputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 void PlutoSDROutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)

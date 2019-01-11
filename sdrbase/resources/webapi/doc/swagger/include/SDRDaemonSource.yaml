@@ -15,6 +15,15 @@ SDRdaemonSourceSettings:
       type: integer
     fileRecordName:
       type: string
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
 
 SDRdaemonSourceReport:
   description: SDRdaemonSource
@@ -36,4 +45,3 @@ SDRdaemonSourceReport:
     maxNbRecovery:
       description: Maximum number of recovery blocks used per frame
       type: integer
- 

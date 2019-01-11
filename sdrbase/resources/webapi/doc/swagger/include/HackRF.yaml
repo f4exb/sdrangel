@@ -1,6 +1,6 @@
 HackRFInputSettings:
   description: HackRF
-  properties:  
+  properties:
     centerFrequency:
       type: integer
       format: int64
@@ -12,7 +12,7 @@ HackRFInputSettings:
       type: integer
     vgaGain:
       type: integer
-    log2Decim:              
+    log2Decim:
       type: integer
     fcPos:
       description: 0=Infra 1=Supra 2=Center
@@ -31,6 +31,15 @@ HackRFInputSettings:
       type: integer
     fileRecordName:
       type: string
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
 
 HackRFOutputSettings:
   description: HackRF
@@ -44,11 +53,20 @@ HackRFOutputSettings:
       type: integer
     vgaGain:
       type: integer
-    log2Interp:              
+    log2Interp:
       type: integer
     devSampleRate:
       type: integer
     biasT:
       type: integer
     lnaExt:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
       type: integer

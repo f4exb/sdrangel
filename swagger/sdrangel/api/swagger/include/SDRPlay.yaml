@@ -8,17 +8,17 @@ SDRPlaySettings:
       type: integer
     LOppmTenths:
       type: integer
-    frequencyBandIndex:    
+    frequencyBandIndex:
       type: integer
-    ifFrequencyIndex:    
+    ifFrequencyIndex:
       type: integer
-    bandwidthIndex:    
+    bandwidthIndex:
       type: integer
-    devSampleRateIndex:    
+    devSampleRateIndex:
       type: integer
-    log2Decim:    
+    log2Decim:
       type: integer
-    fcPos:    
+    fcPos:
       type: integer
     dcBlock:
       type: integer
@@ -35,6 +35,15 @@ SDRPlaySettings:
       type: integer
     fileRecordName:
       type: string
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
 
 SDRPlayReport:
   description: SDRplay1

@@ -411,6 +411,18 @@ int SDRdaemonSinkOutput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("channelIndex")) {
         settings.m_channelIndex = response.getSdrDaemonSinkSettings()->getChannelIndex();
     }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getSdrDaemonSinkSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getSdrDaemonSinkSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getSdrDaemonSinkSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getSdrDaemonSinkSettings()->getReverseApiDeviceIndex();
+    }
 
     MsgConfigureSDRdaemonSink *msg = MsgConfigureSDRdaemonSink::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -448,6 +460,16 @@ void SDRdaemonSinkOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSetti
     response.getSdrDaemonSinkSettings()->setDataPort(settings.m_dataPort);
     response.getSdrDaemonSinkSettings()->setDeviceIndex(settings.m_deviceIndex);
     response.getSdrDaemonSinkSettings()->setChannelIndex(settings.m_channelIndex);
+    response.getSdrDaemonSinkSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getSdrDaemonSinkSettings()->getReverseApiAddress()) {
+        *response.getSdrDaemonSinkSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getSdrDaemonSinkSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getSdrDaemonSinkSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getSdrDaemonSinkSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 void SDRdaemonSinkOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)

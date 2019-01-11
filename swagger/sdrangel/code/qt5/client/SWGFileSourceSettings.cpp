@@ -34,6 +34,14 @@ SWGFileSourceSettings::SWGFileSourceSettings() {
     m_acceleration_factor_isSet = false;
     loop = 0;
     m_loop_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = nullptr;
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_device_index = 0;
+    m_reverse_api_device_index_isSet = false;
 }
 
 SWGFileSourceSettings::~SWGFileSourceSettings() {
@@ -48,12 +56,26 @@ SWGFileSourceSettings::init() {
     m_acceleration_factor_isSet = false;
     loop = 0;
     m_loop_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = new QString("");
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_device_index = 0;
+    m_reverse_api_device_index_isSet = false;
 }
 
 void
 SWGFileSourceSettings::cleanup() {
     if(file_name != nullptr) { 
         delete file_name;
+    }
+
+
+
+    if(reverse_api_address != nullptr) { 
+        delete reverse_api_address;
     }
 
 
@@ -75,6 +97,14 @@ SWGFileSourceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&acceleration_factor, pJson["accelerationFactor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&loop, pJson["loop"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_address, pJson["reverseAPIAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&reverse_api_port, pJson["reverseAPIPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
     
 }
 
@@ -100,6 +130,18 @@ SWGFileSourceSettings::asJsonObject() {
     }
     if(m_loop_isSet){
         obj->insert("loop", QJsonValue(loop));
+    }
+    if(m_use_reverse_api_isSet){
+        obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
+    }
+    if(reverse_api_address != nullptr && *reverse_api_address != QString("")){
+        toJsonValue(QString("reverseAPIAddress"), reverse_api_address, obj, QString("QString"));
+    }
+    if(m_reverse_api_port_isSet){
+        obj->insert("reverseAPIPort", QJsonValue(reverse_api_port));
+    }
+    if(m_reverse_api_device_index_isSet){
+        obj->insert("reverseAPIDeviceIndex", QJsonValue(reverse_api_device_index));
     }
 
     return obj;
@@ -135,6 +177,46 @@ SWGFileSourceSettings::setLoop(qint32 loop) {
     this->m_loop_isSet = true;
 }
 
+qint32
+SWGFileSourceSettings::getUseReverseApi() {
+    return use_reverse_api;
+}
+void
+SWGFileSourceSettings::setUseReverseApi(qint32 use_reverse_api) {
+    this->use_reverse_api = use_reverse_api;
+    this->m_use_reverse_api_isSet = true;
+}
+
+QString*
+SWGFileSourceSettings::getReverseApiAddress() {
+    return reverse_api_address;
+}
+void
+SWGFileSourceSettings::setReverseApiAddress(QString* reverse_api_address) {
+    this->reverse_api_address = reverse_api_address;
+    this->m_reverse_api_address_isSet = true;
+}
+
+qint32
+SWGFileSourceSettings::getReverseApiPort() {
+    return reverse_api_port;
+}
+void
+SWGFileSourceSettings::setReverseApiPort(qint32 reverse_api_port) {
+    this->reverse_api_port = reverse_api_port;
+    this->m_reverse_api_port_isSet = true;
+}
+
+qint32
+SWGFileSourceSettings::getReverseApiDeviceIndex() {
+    return reverse_api_device_index;
+}
+void
+SWGFileSourceSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
+    this->reverse_api_device_index = reverse_api_device_index;
+    this->m_reverse_api_device_index_isSet = true;
+}
+
 
 bool
 SWGFileSourceSettings::isSet(){
@@ -143,6 +225,10 @@ SWGFileSourceSettings::isSet(){
         if(file_name != nullptr && *file_name != QString("")){ isObjectUpdated = true; break;}
         if(m_acceleration_factor_isSet){ isObjectUpdated = true; break;}
         if(m_loop_isSet){ isObjectUpdated = true; break;}
+        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
+        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
+        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
+        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

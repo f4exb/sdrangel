@@ -3,7 +3,7 @@ SoapySDRInputSettings:
   properties:
     centerFrequency:
       type: integer
-      format: int64      
+      format: int64
     LOppmTenths:
       type: integer
     devSampleRate:
@@ -13,17 +13,17 @@ SoapySDRInputSettings:
     fcPos:
       type: integer
     softDCCorrection:
-      description: boolean not zero for true    
+      description: boolean not zero for true
       type: integer
     softIQCorrection:
-      description: boolean not zero for true    
+      description: boolean not zero for true
       type: integer
     transverterMode:
-      description: boolean not zero for true    
+      description: boolean not zero for true
       type: integer
     transverterDeltaFrequency:
       type: integer
-      format: int64      
+      format: int64
     fileRecordName:
       type: string
     antenna:
@@ -33,21 +33,21 @@ SoapySDRInputSettings:
     tunableElements:
       type: array
       items:
-        $ref: "#/definitions/ArgValue" 
+        $ref: "#/definitions/ArgValue"
     globalGain:
       type: integer
     individualGains:
       type: array
       items:
-        $ref: "#/definitions/ArgValue" 
+        $ref: "#/definitions/ArgValue"
     autoGain:
-      description: boolean not zero for true    
+      description: boolean not zero for true
       type: integer
     autoDCCorrection:
-      description: boolean not zero for true    
+      description: boolean not zero for true
       type: integer
     autoIQCorrection:
-      description: boolean not zero for true    
+      description: boolean not zero for true
       type: integer
     dcCorrection:
       $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Complex"
@@ -56,18 +56,27 @@ SoapySDRInputSettings:
     streamArgSettings:
       type: array
       items:
-        $ref: "#/definitions/ArgValue" 
-    deviceArgSettings:    
+        $ref: "#/definitions/ArgValue"
+    deviceArgSettings:
       type: array
       items:
-        $ref: "#/definitions/ArgValue" 
+        $ref: "#/definitions/ArgValue"
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
 
 SoapySDROutputSettings:
   description: SoapySDR
   properties:
     centerFrequency:
       type: integer
-      format: int64      
+      format: int64
     LOppmTenths:
       type: integer
     devSampleRate:
@@ -75,11 +84,11 @@ SoapySDROutputSettings:
     log2Interp:
       type: integer
     transverterMode:
-      description: boolean not zero for true    
+      description: boolean not zero for true
       type: integer
     transverterDeltaFrequency:
       type: integer
-      format: int64      
+      format: int64
     antenna:
       type: string
     bandwidth:
@@ -87,21 +96,21 @@ SoapySDROutputSettings:
     tunableElements:
       type: array
       items:
-        $ref: "#/definitions/ArgValue" 
+        $ref: "#/definitions/ArgValue"
     globalGain:
       type: integer
     individualGains:
       type: array
       items:
-        $ref: "#/definitions/ArgValue" 
+        $ref: "#/definitions/ArgValue"
     autoGain:
-      description: boolean not zero for true    
+      description: boolean not zero for true
       type: integer
     autoDCCorrection:
-      description: boolean not zero for true    
+      description: boolean not zero for true
       type: integer
     autoIQCorrection:
-      description: boolean not zero for true    
+      description: boolean not zero for true
       type: integer
     dcCorrection:
       $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Complex"
@@ -110,12 +119,21 @@ SoapySDROutputSettings:
     streamArgSettings:
       type: array
       items:
-        $ref: "#/definitions/ArgValue" 
-    deviceArgSettings:    
+        $ref: "#/definitions/ArgValue"
+    deviceArgSettings:
       type: array
       items:
-        $ref: "#/definitions/ArgValue" 
-      
+        $ref: "#/definitions/ArgValue"
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+
 SoapySDRReport:
   description: SoapySDR
   properties:
@@ -143,7 +161,7 @@ SoapySDRReport:
       type: array
       items:
         type: string
-    hasAGC:    
+    hasAGC:
       description: boolean not zero for true
       type: integer
     gainRange:
@@ -164,13 +182,13 @@ SoapySDRReport:
       type: array
       items:
         $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/RangeFloat"
-    bandwidthsRanges:        
+    bandwidthsRanges:
       type: array
       items:
         $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/RangeFloat"
 
 definitions:
-        
+
   SoapySDRGainSetting:
     description: A named gain setting specified by its range
     properties:
@@ -178,7 +196,7 @@ definitions:
         type: string
       range:
         $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/RangeFloat"
-          
+
   SoapySDRFrequencySetting:
     description: A named frequency setting specified by a range list
     properties:
@@ -188,7 +206,7 @@ definitions:
         type: array
         items:
           $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/RangeFloat"
- 
+
   ArgValue:
     descripion: Generic argument value
     properties:
@@ -199,7 +217,7 @@ definitions:
         enum: [bool, int, float, string]
       valueString:
         type: string
-  
+
   ArgInfo:
     descripion: Generic argument information
     properties:
@@ -226,6 +244,5 @@ definitions:
         type: array
         items:
           type: string
-      
-      
- 
+
+

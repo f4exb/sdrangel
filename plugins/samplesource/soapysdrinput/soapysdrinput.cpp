@@ -1525,6 +1525,19 @@ int SoapySDRInput::webapiSettingsPutPatch(
         }
     }
 
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getSoapySdrInputSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getSoapySdrInputSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getSoapySdrInputSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getSoapySdrInputSettings()->getReverseApiDeviceIndex();
+    }
+
     MsgConfigureSoapySDRInput *msg = MsgConfigureSoapySDRInput::create(settings, force);
     m_inputMessageQueue.push(msg);
 
@@ -1677,6 +1690,17 @@ void SoapySDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
         const QVariant& v = settings.m_deviceArgSettings.value(itName);
         webapiFormatArgValue(v, response.getSoapySdrInputSettings()->getDeviceArgSettings()->back());
     }
+
+    response.getSoapySdrInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getSoapySdrInputSettings()->getReverseApiAddress()) {
+        *response.getSoapySdrInputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getSoapySdrInputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getSoapySdrInputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getSoapySdrInputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 void SoapySDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)

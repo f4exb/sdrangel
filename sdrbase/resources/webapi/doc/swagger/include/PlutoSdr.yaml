@@ -1,6 +1,6 @@
 PlutoSdrInputSettings:
   description: PlutoSDR
-  properties:  
+  properties:
     centerFrequency:
       type: integer
       format: int64
@@ -11,7 +11,7 @@ PlutoSdrInputSettings:
     lpfFIREnable:
       description: Low pass FIR filter enable (1 if enabled else 0)
       type: integer
-    lpfFIRBW:      
+    lpfFIRBW:
       description: digital lowpass FIR filter bandwidth (Hz)
       type: integer
     lpfFIRlog2Decim:
@@ -30,7 +30,7 @@ PlutoSdrInputSettings:
     log2Decim:
       type: integer
     lpfBW:
-      description: Analog lowpass filter bandwidth (Hz)      
+      description: Analog lowpass filter bandwidth (Hz)
       type: integer
     gain:
       description: Hardware gain
@@ -43,13 +43,22 @@ PlutoSdrInputSettings:
       type: integer
     transverterDeltaFrequency:
       type: integer
-      format: int64      
+      format: int64
     fileRecordName:
       type: string
-      
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+
 PlutoSdrOutputSettings:
   description: PlutoSDR
-  properties:  
+  properties:
     centerFrequency:
       type: integer
       format: int64
@@ -60,7 +69,7 @@ PlutoSdrOutputSettings:
     lpfFIREnable:
       description: Low pass FIR filter enable (1 if enabled else 0)
       type: integer
-    lpfFIRBW:      
+    lpfFIRBW:
       description: digital lowpass FIR filter bandwidth (Hz)
       type: integer
     lpfFIRlog2Interp:
@@ -72,7 +81,7 @@ PlutoSdrOutputSettings:
     log2Interp:
       type: integer
     lpfBW:
-      description: Analog lowpass filter bandwidth (Hz)      
+      description: Analog lowpass filter bandwidth (Hz)
       type: integer
     att:
       description: Hardware attenuator gain in decibel fourths (negative)
@@ -83,11 +92,20 @@ PlutoSdrOutputSettings:
       type: integer
     transverterDeltaFrequency:
       type: integer
-      format: int64      
+      format: int64
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
 
 PlutoSdrInputReport:
   description: PlutoSDR
-  properties:  
+  properties:
     adcRate:
       type: integer
     rssi:
@@ -96,15 +114,15 @@ PlutoSdrInputReport:
       type: integer
     temperature:
       type: number
-      format: float                        
+      format: float
 
 PlutoSdrOutputReport:
   description: PlutoSDR
-  properties:  
+  properties:
     dacRate:
       type: integer
     rssi:
       type: string
     temperature:
       type: number
-      format: float                              
+      format: float

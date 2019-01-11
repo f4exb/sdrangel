@@ -566,6 +566,17 @@ void Bladerf1Output::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& 
     response.getBladeRf1OutputSettings()->setXb200(settings.m_xb200 ? 1 : 0);
     response.getBladeRf1OutputSettings()->setXb200Path((int) settings.m_xb200Path);
     response.getBladeRf1OutputSettings()->setXb200Filter((int) settings.m_xb200Filter);
+
+    response.getBladeRf1OutputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getBladeRf1OutputSettings()->getReverseApiAddress()) {
+        *response.getBladeRf1OutputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getBladeRf1OutputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getBladeRf1OutputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getBladeRf1OutputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 int Bladerf1Output::webapiSettingsPutPatch(
@@ -603,6 +614,18 @@ int Bladerf1Output::webapiSettingsPutPatch(
     }
     if (deviceSettingsKeys.contains("xb200Filter")) {
         settings.m_xb200Filter = static_cast<bladerf_xb200_filter>(response.getBladeRf1OutputSettings()->getXb200Filter());
+    }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getBladeRf1OutputSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getBladeRf1OutputSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getBladeRf1OutputSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getBladeRf1OutputSettings()->getReverseApiDeviceIndex();
     }
 
     MsgConfigureBladerf1 *msg = MsgConfigureBladerf1::create(settings, force);

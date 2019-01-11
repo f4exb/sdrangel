@@ -946,6 +946,18 @@ int FCDProInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("fileRecordName")) {
         settings.m_fileRecordName = *response.getFcdProSettings()->getFileRecordName();
     }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getFcdProSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getFcdProSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getFcdProSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getFcdProSettings()->getReverseApiDeviceIndex();
+    }
 
     MsgConfigureFCDPro *msg = MsgConfigureFCDPro::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -992,6 +1004,17 @@ void FCDProInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     } else {
         response.getFcdProSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
+
+    response.getFcdProSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getFcdProSettings()->getReverseApiAddress()) {
+        *response.getFcdProSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getFcdProSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getFcdProSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getFcdProSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 void FCDProInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FCDProSettings& settings, bool force)

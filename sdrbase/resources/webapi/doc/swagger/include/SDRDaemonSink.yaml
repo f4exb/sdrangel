@@ -26,6 +26,15 @@ SDRdaemonSinkSettings:
     channelIndex:
       device: remote SDRangel instance channel index
       type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
 
 SDRdaemonSinkReport:
   description: SDRdaemonSource
@@ -37,4 +46,3 @@ SDRdaemonSinkReport:
     sampleCount:
       description: count of samples that have been sent
       type: integer
- 

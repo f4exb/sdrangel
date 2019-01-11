@@ -10,7 +10,16 @@ FileSourceSettings:
     loop:
       description: 1 if playing in a loop else 0
       type: integer
-      
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+
 FileSourceReport:
   description: FileSource
   properties:
@@ -31,4 +40,3 @@ FileSourceReport:
     durationTime:
       description: Duration time string representation
       type: string
-      

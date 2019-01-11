@@ -814,6 +814,18 @@ int PlutoSDRInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("fileRecordName")) {
         settings.m_fileRecordName = *response.getPlutoSdrInputSettings()->getFileRecordName();
     }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getPlutoSdrInputSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getPlutoSdrInputSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getPlutoSdrInputSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getPlutoSdrInputSettings()->getReverseApiDeviceIndex();
+    }
 
     MsgConfigurePlutoSDR *msg = MsgConfigurePlutoSDR::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -864,6 +876,17 @@ void PlutoSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     } else {
         response.getPlutoSdrInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
+
+    response.getPlutoSdrInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getPlutoSdrInputSettings()->getReverseApiAddress()) {
+        *response.getPlutoSdrInputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getPlutoSdrInputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getPlutoSdrInputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getPlutoSdrInputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 void PlutoSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)

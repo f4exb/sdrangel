@@ -993,6 +993,18 @@ int BladeRF2Output::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("transverterMode")) {
         settings.m_transverterMode = response.getBladeRf2OutputSettings()->getTransverterMode() != 0;
     }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getBladeRf2OutputSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getBladeRf2OutputSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getBladeRf2OutputSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getBladeRf2OutputSettings()->getReverseApiDeviceIndex();
+    }
 
     MsgConfigureBladeRF2 *msg = MsgConfigureBladeRF2::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -1027,6 +1039,17 @@ void BladeRF2Output::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& 
     response.getBladeRf2OutputSettings()->setGlobalGain(settings.m_globalGain);
     response.getBladeRf2OutputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getBladeRf2OutputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+
+    response.getBladeRf2OutputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getBladeRf2OutputSettings()->getReverseApiAddress()) {
+        *response.getBladeRf2OutputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getBladeRf2OutputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getBladeRf2OutputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getBladeRf2OutputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 void BladeRF2Output::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
