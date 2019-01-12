@@ -30,7 +30,7 @@ int FCDProConstants::fcdpro_lna_gain_nb_values()
 
 const fcdpro_lna_enhance FCDProConstants::lna_enhances[] = {
 		{FCDPRO_TLE_OFF, "Off"},
-		{FCDPRO_TLE_0, "1"},
+		{FCDPRO_TLE_0, "0"},
 		{FCDPRO_TLE_1, "1"},
 		{FCDPRO_TLE_2, "2"},
 		{FCDPRO_TLE_3, "3"}

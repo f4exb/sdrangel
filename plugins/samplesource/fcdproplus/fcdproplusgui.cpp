@@ -176,7 +176,10 @@ void FCDProPlusGui::handleInputMessages()
         }
         else
         {
-            qWarning("FCDProPlusGui::handleInputMessages: message: %s. No action.", message->getIdentifier());
+            if (handleMessage(*message))
+            {
+                delete message;
+            }
         }
     }
 }
@@ -210,6 +213,7 @@ void FCDProPlusGui::displaySettings()
     updateFrequencyLimits();
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->decim->setCurrentIndex(m_settings.m_log2Decim);
+    ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqImbalance);
 	ui->checkBoxG->setChecked(m_settings.m_lnaGain);

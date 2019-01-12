@@ -258,6 +258,13 @@ void FCDProGui::handleInputMessages()
 
             delete message;
         }
+        else
+        {
+            if (handleMessage(*message))
+            {
+                delete message;
+            }
+        }
     }
 }
 
@@ -309,6 +316,7 @@ void FCDProGui::displaySettings()
 	ui->gain5->setCurrentIndex(m_settings.m_gain5Index);
 	ui->gain6->setCurrentIndex(m_settings.m_gain6Index);
 	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
+	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 	ui->rcFilter->setCurrentIndex(m_settings.m_rcFilterIndex);
 	ui->ifFilter->setCurrentIndex(m_settings.m_ifFilterIndex);
 }
