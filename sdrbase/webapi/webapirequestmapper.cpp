@@ -1873,7 +1873,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if (*deviceHwType == "FCDProPlus")
+    else if (*deviceHwType == "FCDPro+")
     {
         if (jsonObject.contains("fcdProPlusSettings") && jsonObject["fcdProPlusSettings"].isObject())
         {
