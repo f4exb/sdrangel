@@ -201,6 +201,13 @@ const QByteArray* Preset::findBestDeviceConfig(const QString& sourceId,
 		const QString& sourceSerial,
 		int sourceSequence) const
 {
+	// Special case for SoapySDR based on serial (driver name)
+	if (sourceId == "sdrangel.samplesource.soapysdrinput") {
+		return findBestDeviceConfigSoapy(sourceId, sourceSerial);
+	} else if (sourceId == "sdrangel.samplesource.soapysdroutput") {
+		return findBestDeviceConfigSoapy(sourceId, sourceSerial);
+	}
+
 	DeviceeConfigs::const_iterator it = m_deviceConfigs.begin();
 	DeviceeConfigs::const_iterator itFirstOfKind = m_deviceConfigs.end();
 	DeviceeConfigs::const_iterator itMatchSequence = m_deviceConfigs.end();
@@ -239,12 +246,14 @@ const QByteArray* Preset::findBestDeviceConfig(const QString& sourceId,
 	{
 		if (itMatchSequence != m_deviceConfigs.end()) // match sequence ?
 		{
-			qDebug("Preset::findBestSourceConfig: sequence matched: id: %s seq: %d", qPrintable(itMatchSequence->m_deviceId), itMatchSequence->m_deviceSequence);
+			qDebug("Preset::findBestSourceConfig: sequence matched: id: %s ser: %s seq: %d",
+				qPrintable(itMatchSequence->m_deviceId), qPrintable(itMatchSequence->m_deviceSerial), itMatchSequence->m_deviceSequence);
 			return &(itMatchSequence->m_config);
 		}
 		else if (itFirstOfKind != m_deviceConfigs.end()) // match source type ?
 		{
-			qDebug("Preset::findBestSourceConfig: first of kind matched: id: %s", qPrintable(itFirstOfKind->m_deviceId));
+			qDebug("Preset::findBestSourceConfig: first of kind matched: id: %s ser: %s seq: %d",
+				qPrintable(itFirstOfKind->m_deviceId), qPrintable(itFirstOfKind->m_deviceSerial), itFirstOfKind->m_deviceSequence);
 			return &(itFirstOfKind->m_config);
 		}
 		else // definitely not found !
@@ -255,7 +264,70 @@ const QByteArray* Preset::findBestDeviceConfig(const QString& sourceId,
 	}
 	else // exact match
 	{
-		qDebug("Preset::findBestSourceConfig: serial matched (exact): id: %s ser: %s", qPrintable(it->m_deviceId), qPrintable(it->m_deviceSerial));
+		qDebug("Preset::findBestSourceConfig: serial matched (exact): id: %s ser: %s",
+			qPrintable(it->m_deviceId), qPrintable(it->m_deviceSerial));
+		return &(it->m_config);
+	}
+}
+
+const QByteArray* Preset::findBestDeviceConfigSoapy(const QString& sourceId, const QString& sourceSerial) const
+{
+	QStringList sourceSerialPieces = sourceSerial.split("-");
+
+	if (sourceSerialPieces.size() == 0) {
+		return 0; // unable to process
+	}
+
+	DeviceeConfigs::const_iterator it = m_deviceConfigs.begin();
+	DeviceeConfigs::const_iterator itFirstOfKind = m_deviceConfigs.end();
+
+	for (; it != m_deviceConfigs.end(); ++it)
+	{
+		if (it->m_deviceId != sourceId) // skip non matching device
+		{
+			continue;
+		}
+		else if (it->m_deviceSerial == sourceSerial) // exact match
+		{
+			break;
+		}
+		else // try to find best match on driver id (first part of serial)
+		{
+			QStringList serialPieces = it->m_deviceSerial.split("-");
+
+			if (serialPieces.size() == 0)
+			{
+				continue;
+			}
+			else if (sourceSerialPieces[0] == serialPieces[0])
+			{
+				if (itFirstOfKind == m_deviceConfigs.end())
+				{
+					itFirstOfKind = it;
+					break;
+				}
+			}
+		}
+	}
+
+	if (it == m_deviceConfigs.end()) // no exact match
+	{
+		if (itFirstOfKind == m_deviceConfigs.end())
+		{
+			qDebug("Preset::findBestDeviceConfigSoapy: no match");
+			return 0;
+		}
+		else
+		{
+			qDebug("Preset::findBestSourceConfig: first of kind matched: id: %s ser: %s seq: %d",
+				qPrintable(itFirstOfKind->m_deviceId), qPrintable(itFirstOfKind->m_deviceSerial), itFirstOfKind->m_deviceSequence);
+			return &(itFirstOfKind->m_config);
+		}
+	}
+	else // exact match
+	{
+		qDebug("Preset::findBestDeviceConfigSoapy: serial matched (exact): id: %s ser: %s seq: %d",
+			qPrintable(it->m_deviceId), qPrintable(it->m_deviceSerial), it->m_deviceSequence);
 		return &(it->m_config);
 	}
 }

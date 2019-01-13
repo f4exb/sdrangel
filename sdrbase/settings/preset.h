@@ -127,6 +127,9 @@ protected:
 
 	// screen and dock layout
 	QByteArray m_layout;
+
+private:
+	const QByteArray* findBestDeviceConfigSoapy(const QString& sourceId, const QString& deviceSerial) const;
 };
 
 Q_DECLARE_METATYPE(const Preset*);
