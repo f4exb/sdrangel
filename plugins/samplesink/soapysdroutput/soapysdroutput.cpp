@@ -720,10 +720,17 @@ void SoapySDROutput::updateGains(SoapySDR::Device *dev, int requestedChannel, So
         return;
     }
 
-    settings.m_globalGain = round(dev->getGain(SOAPY_SDR_TX, requestedChannel));
+    try
+    {
+        settings.m_globalGain = round(dev->getGain(SOAPY_SDR_TX, requestedChannel));
 
-    for (const auto &name : settings.m_individualGains.keys()) {
-        settings.m_individualGains[name] = dev->getGain(SOAPY_SDR_TX, requestedChannel, name.toStdString());
+        for (const auto &name : settings.m_individualGains.keys()) {
+            settings.m_individualGains[name] = dev->getGain(SOAPY_SDR_TX, requestedChannel, name.toStdString());
+        }
+    }
+    catch (const std::exception &ex)
+    {
+        qCritical("SoapySDROutput::updateGains: caught exception: %s", ex.what());
     }
 }
 
@@ -733,8 +740,15 @@ void SoapySDROutput::updateTunableElements(SoapySDR::Device *dev, int requestedC
         return;
     }
 
-    for (const auto &name : settings.m_tunableElements.keys()) {
-        settings.m_tunableElements[name] = dev->getFrequency(SOAPY_SDR_TX, requestedChannel, name.toStdString());
+    try
+    {
+        for (const auto &name : settings.m_tunableElements.keys()) {
+            settings.m_tunableElements[name] = dev->getFrequency(SOAPY_SDR_TX, requestedChannel, name.toStdString());
+        }
+    }
+    catch (const std::exception &ex)
+    {
+        qCritical("SoapySDROutput::updateTunableElements: caught exception: %s", ex.what());
     }
 }
 
