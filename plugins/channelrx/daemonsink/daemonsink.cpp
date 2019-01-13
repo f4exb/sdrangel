@@ -443,7 +443,7 @@ int DaemonSink::webapiSettingsPutPatch(
         settings.m_useReverseAPI = response.getDaemonSinkSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getDaemonSinkSettings()->getReverseApiAddress() != 0;
+        settings.m_reverseAPIAddress = *response.getDaemonSinkSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getDaemonSinkSettings()->getReverseApiPort();

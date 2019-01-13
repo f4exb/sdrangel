@@ -1225,7 +1225,7 @@ int XTRXOutput::webapiSettingsPutPatch(
         settings.m_useReverseAPI = response.getXtrxOutputSettings()->getUseReverseApi() != 0;
     }
     if (deviceSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getXtrxOutputSettings()->getReverseApiAddress() != 0;
+        settings.m_reverseAPIAddress = *response.getXtrxOutputSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getXtrxOutputSettings()->getReverseApiPort();

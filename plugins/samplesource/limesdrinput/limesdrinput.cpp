@@ -1509,7 +1509,7 @@ int LimeSDRInput::webapiSettingsPutPatch(
         settings.m_useReverseAPI = response.getLimeSdrInputSettings()->getUseReverseApi() != 0;
     }
     if (deviceSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getLimeSdrInputSettings()->getReverseApiAddress() != 0;
+        settings.m_reverseAPIAddress = *response.getLimeSdrInputSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getLimeSdrInputSettings()->getReverseApiPort();

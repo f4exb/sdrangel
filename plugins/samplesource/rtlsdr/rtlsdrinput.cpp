@@ -649,7 +649,7 @@ int RTLSDRInput::webapiSettingsPutPatch(
         settings.m_useReverseAPI = response.getRtlSdrSettings()->getUseReverseApi() != 0;
     }
     if (deviceSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getRtlSdrSettings()->getReverseApiAddress() != 0;
+        settings.m_reverseAPIAddress = *response.getRtlSdrSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getRtlSdrSettings()->getReverseApiPort();
