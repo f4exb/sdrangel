@@ -62,6 +62,10 @@ SWGAirspyHFSettings::SWGAirspyHFSettings() {
     m_use_lna_isSet = false;
     attenuator_steps = 0;
     m_attenuator_steps_isSet = false;
+    dc_block = 0;
+    m_dc_block_isSet = false;
+    iq_correction = 0;
+    m_iq_correction_isSet = false;
 }
 
 SWGAirspyHFSettings::~SWGAirspyHFSettings() {
@@ -104,6 +108,10 @@ SWGAirspyHFSettings::init() {
     m_use_lna_isSet = false;
     attenuator_steps = 0;
     m_attenuator_steps_isSet = false;
+    dc_block = 0;
+    m_dc_block_isSet = false;
+    iq_correction = 0;
+    m_iq_correction_isSet = false;
 }
 
 void
@@ -122,6 +130,8 @@ SWGAirspyHFSettings::cleanup() {
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
     }
+
+
 
 
 
@@ -175,6 +185,10 @@ SWGAirspyHFSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&use_lna, pJson["useLNA"], "qint32", "");
     
     ::SWGSDRangel::setValue(&attenuator_steps, pJson["attenuatorSteps"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&iq_correction, pJson["iqCorrection"], "qint32", "");
     
 }
 
@@ -242,6 +256,12 @@ SWGAirspyHFSettings::asJsonObject() {
     }
     if(m_attenuator_steps_isSet){
         obj->insert("attenuatorSteps", QJsonValue(attenuator_steps));
+    }
+    if(m_dc_block_isSet){
+        obj->insert("dcBlock", QJsonValue(dc_block));
+    }
+    if(m_iq_correction_isSet){
+        obj->insert("iqCorrection", QJsonValue(iq_correction));
     }
 
     return obj;
@@ -417,6 +437,26 @@ SWGAirspyHFSettings::setAttenuatorSteps(qint32 attenuator_steps) {
     this->m_attenuator_steps_isSet = true;
 }
 
+qint32
+SWGAirspyHFSettings::getDcBlock() {
+    return dc_block;
+}
+void
+SWGAirspyHFSettings::setDcBlock(qint32 dc_block) {
+    this->dc_block = dc_block;
+    this->m_dc_block_isSet = true;
+}
+
+qint32
+SWGAirspyHFSettings::getIqCorrection() {
+    return iq_correction;
+}
+void
+SWGAirspyHFSettings::setIqCorrection(qint32 iq_correction) {
+    this->iq_correction = iq_correction;
+    this->m_iq_correction_isSet = true;
+}
+
 
 bool
 SWGAirspyHFSettings::isSet(){
@@ -439,6 +479,8 @@ SWGAirspyHFSettings::isSet(){
         if(m_use_dsp_isSet){ isObjectUpdated = true; break;}
         if(m_use_lna_isSet){ isObjectUpdated = true; break;}
         if(m_attenuator_steps_isSet){ isObjectUpdated = true; break;}
+        if(m_dc_block_isSet){ isObjectUpdated = true; break;}
+        if(m_iq_correction_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

@@ -389,12 +389,15 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
         << " m_fileRecordName: " << settings.m_fileRecordName
         << " m_useDSP: " << settings.m_useDSP
         << " m_useAGC: " << settings.m_useAGC
+        << " m_agcHigh: " << settings.m_agcHigh
         << " m_useLNA: " << settings.m_useLNA
         << " m_attenuatorSteps: " << settings.m_attenuatorSteps
         << " m_useReverseAPI: " << settings.m_useReverseAPI
         << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
         << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-        << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex;
+        << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
+        << " m_dcBlock: " << settings.m_dcBlock
+        << " m_iqCorrection: " << settings.m_iqCorrection;
 
     QMutexLocker mutexLocker(&m_mutex);
 
@@ -403,6 +406,19 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
     QList<QString> reverseAPIKeys;
 
     int sampleRateIndex = settings.m_devSampleRateIndex;
+
+   if ((m_settings.m_dcBlock != settings.m_dcBlock) || force) {
+        reverseAPIKeys.append("dcBlock");
+    }
+    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force) {
+        reverseAPIKeys.append("iqCorrection");
+    }
+
+    if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
+        (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    {
+		m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
+	}
 
 	if ((m_settings.m_bandIndex != settings.m_bandIndex) || force) {
         reverseAPIKeys.append("bandIndex");
@@ -695,6 +711,12 @@ int AirspyHFInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("attenuatorSteps")) {
         settings.m_attenuatorSteps = response.getAirspyHfSettings()->getAttenuatorSteps();
     }
+    if (deviceSettingsKeys.contains("dcBlock")) {
+        settings.m_dcBlock = response.getAirspyHfSettings()->getDcBlock() != 0;
+    }
+    if (deviceSettingsKeys.contains("iqCorrection")) {
+        settings.m_iqCorrection = response.getAirspyHfSettings()->getIqCorrection() != 0;
+    }
 
     MsgConfigureAirspyHF *msg = MsgConfigureAirspyHF::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -740,6 +762,8 @@ void AirspyHFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     response.getAirspyHfSettings()->setUseLna(settings.m_useLNA ? 1 : 0);
     response.getAirspyHfSettings()->setAgcHigh(settings.m_agcHigh ? 1 : 0);
     response.getAirspyHfSettings()->setAttenuatorSteps(settings.m_attenuatorSteps);
+    response.getAirspyHfSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getAirspyHfSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
 }
 
 void AirspyHFInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
@@ -840,6 +864,12 @@ void AirspyHFInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
     }
     if (deviceSettingsKeys.contains("attenuatorSteps")) {
         swgAirspyHFSettings->setAttenuatorSteps(settings.m_attenuatorSteps);
+    }
+    if (deviceSettingsKeys.contains("dcBlock") || force) {
+        swgAirspyHFSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("iqCorrection") || force) {
+        swgAirspyHFSettings->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

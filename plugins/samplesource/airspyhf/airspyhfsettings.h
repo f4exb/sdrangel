@@ -29,15 +29,17 @@ struct AirspyHFSettings
     qint64 m_transverterDeltaFrequency;
     quint32 m_bandIndex;
     QString m_fileRecordName;
-    bool     m_useReverseAPI;
+    bool m_useReverseAPI;
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
-    bool     m_useDSP;
-    bool     m_useAGC;
-    bool     m_agcHigh;
-    bool     m_useLNA;
+    bool m_useDSP;
+    bool m_useAGC;
+    bool m_agcHigh;
+    bool m_useLNA;
     quint32  m_attenuatorSteps;
+	bool m_dcBlock;
+	bool m_iqCorrection;
 
     AirspyHFSettings();
 	void resetToDefaults();

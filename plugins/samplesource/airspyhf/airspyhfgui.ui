@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>324</width>
+    <width>320</width>
     <height>160</height>
    </rect>
   </property>
@@ -235,6 +235,26 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="ButtonSwitch" name="dcOffset">
+       <property name="toolTip">
+        <string>DC component block (internal DSP)</string>
+       </property>
+       <property name="text">
+        <string>DC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="iqImbalance">
+       <property name="toolTip">
+        <string>IQ imbalance correction (internal DSP)</string>
+       </property>
+       <property name="text">
+        <string>IQ</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -420,11 +440,20 @@
      </item>
      <item>
       <widget class="QComboBox" name="agc">
+       <property name="minimumSize">
+        <size>
+         <width>55</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
          <width>55</width>
          <height>16777215</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>AGC mode and threshold (HF only)</string>
        </property>
        <item>
         <property name="text">
@@ -445,6 +474,9 @@
      </item>
      <item>
       <widget class="ButtonSwitch" name="lna">
+       <property name="toolTip">
+        <string>LNA on/off (HF only)</string>
+       </property>
        <property name="text">
         <string>LNA</string>
        </property>
@@ -459,11 +491,20 @@
      </item>
      <item>
       <widget class="QComboBox" name="att">
+       <property name="minimumSize">
+        <size>
+         <width>42</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
+         <width>42</width>
          <height>16777215</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Attenuator (AGC off and HF only)</string>
        </property>
        <item>
         <property name="text">
@@ -534,6 +575,9 @@
      </item>
      <item>
       <widget class="ButtonSwitch" name="dsp">
+       <property name="toolTip">
+        <string>Toggle libairspyhf DSP on/off</string>
+       </property>
        <property name="text">
         <string>DSP</string>
        </property>

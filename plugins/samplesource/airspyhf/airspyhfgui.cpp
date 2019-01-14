@@ -230,6 +230,8 @@ void AirspyHFGui::displaySettings()
     ui->dsp->setChecked(m_settings.m_useDSP);
     ui->lna->setChecked(m_settings.m_useLNA);
     ui->att->setCurrentIndex(m_settings.m_attenuatorSteps);
+	ui->dcOffset->setChecked(m_settings.m_dcBlock);
+	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
     displayAGC();
     blockApplySettings(false);
 }
@@ -400,6 +402,18 @@ void AirspyHFGui::on_att_currentIndexChanged(int index)
         m_settings.m_attenuatorSteps = index;
         sendSettings();
     }
+}
+
+void AirspyHFGui::on_dcOffset_toggled(bool checked)
+{
+	m_settings.m_dcBlock = checked;
+	sendSettings();
+}
+
+void AirspyHFGui::on_iqImbalance_toggled(bool checked)
+{
+	m_settings.m_iqCorrection = checked;
+	sendSettings();
 }
 
 void AirspyHFGui::updateHardware()

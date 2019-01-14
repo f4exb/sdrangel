@@ -93,6 +93,12 @@ public:
     qint32 getAttenuatorSteps();
     void setAttenuatorSteps(qint32 attenuator_steps);
 
+    qint32 getDcBlock();
+    void setDcBlock(qint32 dc_block);
+
+    qint32 getIqCorrection();
+    void setIqCorrection(qint32 iq_correction);
+
 
     virtual bool isSet() override;
 
@@ -147,6 +153,12 @@ private:
 
     qint32 attenuator_steps;
     bool m_attenuator_steps_isSet;
+
+    qint32 dc_block;
+    bool m_dc_block_isSet;
+
+    qint32 iq_correction;
+    bool m_iq_correction_isSet;
 
 };
 

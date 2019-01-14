@@ -43,6 +43,10 @@ AirspyHFSettings:
     attenuatorSteps:
       description: Attenuator in number of 6 dB steps
       type: integer
+    dcBlock:
+      type: integer
+    iqCorrection:
+      type: integer
 
 AirspyHFReport:
   description: AirspyHF
