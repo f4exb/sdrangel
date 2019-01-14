@@ -255,8 +255,11 @@ if (LIBSERIALDV_FOUND)
         dsp/dvserialworker.h
         dsp/dvserialengine.h
     )
+    message(STATUS "Will have SerialDV support")
     add_definitions(-DDSD_USE_SERIALDV)
     include_directories(${LIBSERIALDV_INCLUDE_DIR})
+else(LIBSERIALDV_FOUND)
+    message(STATUS "No SerialDV support")
 endif(LIBSERIALDV_FOUND)
 
 if (BUILD_DEBIAN)

@@ -1449,29 +1449,38 @@ void MainWindow::on_action_DV_Serial_triggered(bool checked)
 
     if (checked)
     {
-        std::vector<std::string> deviceNames;
-        m_dspEngine->getDVSerialNames(deviceNames);
-
-        if (deviceNames.size() == 0)
+        if (m_dspEngine->hasDVSerialSupport())
         {
-            QMessageBox::information(this, tr("Message"), tr("No DV serial devices found"));
+            std::vector<std::string> deviceNames;
+            m_dspEngine->getDVSerialNames(deviceNames);
+
+            if (deviceNames.size() == 0)
+            {
+                QMessageBox::information(this, tr("Message"), tr("No DV serial devices found"));
+                qDebug("MainWindow::on_action_DV_Serial_triggered: No DV serial devices found");
+            }
+            else
+            {
+                std::vector<std::string>::iterator it = deviceNames.begin();
+                std::string deviceNamesStr = "DV Serial devices found: ";
+
+                while (it != deviceNames.end())
+                {
+                    if (it != deviceNames.begin()) {
+                        deviceNamesStr += ",";
+                    }
+
+                    deviceNamesStr += *it;
+                    ++it;
+                }
+
+                QMessageBox::information(this, tr("Message"), tr(deviceNamesStr.c_str()));
+            }
         }
         else
         {
-            std::vector<std::string>::iterator it = deviceNames.begin();
-            std::string deviceNamesStr = "DV Serial devices found: ";
-
-            while (it != deviceNames.end())
-            {
-                if (it != deviceNames.begin()) {
-                    deviceNamesStr += ",";
-                }
-
-                deviceNamesStr += *it;
-                ++it;
-            }
-
-            QMessageBox::information(this, tr("Message"), tr(deviceNamesStr.c_str()));
+            QMessageBox::information(this, tr("Message"), tr("No DV serial support"));
+            qDebug("MainWindow::on_action_DV_Serial_triggered: No DV serial support");
         }
     }
 }

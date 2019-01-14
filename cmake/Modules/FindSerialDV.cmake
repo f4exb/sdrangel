@@ -1,6 +1,6 @@
 # Find serialDV
 
-find_path(LIBSERIALDV_INCLUDE_DIR 
+find_path(LIBSERIALDV_INCLUDE_DIR
   NAMES dvcontroller.h
   PATHS ${SERIALDV_DIR}/include/serialdv
         /usr/include/serialdv
@@ -9,8 +9,8 @@ find_path(LIBSERIALDV_INCLUDE_DIR
 
 set(LIBSERIAL_NAMES ${LIBSERIAL_NAMES} serialdv libserialdv)
 
-find_library(LIBSERIALDV_LIBRARY 
-  NAMES ${LIBSERIALDV_NAMES} 
+find_library(LIBSERIALDV_LIBRARY
+  NAMES serialdv
   PATHS ${SERIALDV_DIR}/lib
         /usr/lib
         /usr/local/lib
