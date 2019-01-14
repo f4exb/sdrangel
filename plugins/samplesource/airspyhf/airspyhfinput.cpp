@@ -378,7 +378,23 @@ void AirspyHFInput::setDeviceCenterFrequency(quint64 freq_hz, const AirspyHFSett
 
 bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 {
-	qDebug() << "AirspyHFInput::applySettings";
+	qDebug() << "AirspyHFInput::applySettings: "
+        << " m_centerFrequency: " << settings.m_centerFrequency
+        << " m_devSampleRateIndex: " << settings.m_devSampleRateIndex
+        << " m_log2Decim: " << settings.m_log2Decim
+        << " m_LOppmTenths: " << settings.m_LOppmTenths
+        << " m_bandIndex: " << settings.m_bandIndex
+        << " m_transverterDeltaFrequency: " << settings.m_transverterDeltaFrequency
+        << " m_transverterMode: " << settings.m_transverterMode
+        << " m_fileRecordName: " << settings.m_fileRecordName
+        << " m_useDSP: " << settings.m_useDSP
+        << " m_useAGC: " << settings.m_useAGC
+        << " m_useLNA: " << settings.m_useLNA
+        << " m_attenuatorSteps: " << settings.m_attenuatorSteps
+        << " m_useReverseAPI: " << settings.m_useReverseAPI
+        << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
+        << " m_reverseAPIPort: " << settings.m_reverseAPIPort
+        << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex;
 
     QMutexLocker mutexLocker(&m_mutex);
 
@@ -482,6 +498,86 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 		forwardChange = true;
 	}
 
+    if ((m_settings.m_useAGC != settings.m_useAGC) || force)
+    {
+        reverseAPIKeys.append("useAGC");
+
+        if (m_dev != 0)
+        {
+            rc = (airspyhf_error) airspyhf_set_hf_agc(m_dev, settings.m_useAGC ? 1 : 0);
+
+	        if (rc != AIRSPYHF_SUCCESS) {
+                qCritical("AirspyHFInput::applySettings: could not set AGC to %d", settings.m_useAGC ? 1 : 0);
+            } else {
+                qDebug("AirspyHFInput::applySettings: set AGC to %d", settings.m_useAGC ? 1 : 0);
+            }
+        }
+    }
+
+    if ((m_settings.m_agcHigh != settings.m_agcHigh) || force)
+    {
+        reverseAPIKeys.append("agcHigh");
+
+        if (m_dev != 0)
+        {
+            rc = (airspyhf_error) airspyhf_set_hf_agc_threshold(m_dev, settings.m_agcHigh ? 1 : 0);
+
+	        if (rc != AIRSPYHF_SUCCESS) {
+                qCritical("AirspyHFInput::applySettings: could not set AGC to %s", settings.m_agcHigh ? "high" : "low");
+            } else {
+                qDebug("AirspyHFInput::applySettings: set AGC to %s", settings.m_agcHigh ? "high" : "low");
+            }
+        }
+    }
+
+    if ((m_settings.m_useDSP != settings.m_useDSP) || force)
+    {
+        reverseAPIKeys.append("useDSP");
+
+        if (m_dev != 0)
+        {
+            rc = (airspyhf_error) airspyhf_set_lib_dsp(m_dev, settings.m_useDSP ? 1 : 0);
+
+	        if (rc != AIRSPYHF_SUCCESS) {
+                qCritical("AirspyHFInput::applySettings: could not set DSP to %d", settings.m_useDSP ? 1 : 0);
+            } else {
+                qDebug("AirspyHFInput::applySettings: set DSP to %d", settings.m_useDSP ? 1 : 0);
+            }
+        }
+    }
+
+    if ((m_settings.m_useLNA != settings.m_useLNA) || force)
+    {
+        reverseAPIKeys.append("useLNA");
+
+        if (m_dev != 0)
+        {
+            rc = (airspyhf_error) airspyhf_set_hf_lna(m_dev, settings.m_useLNA ? 1 : 0);
+
+	        if (rc != AIRSPYHF_SUCCESS) {
+                qCritical("AirspyHFInput::applySettings: could not set LNA to %d", settings.m_useLNA ? 1 : 0);
+            } else {
+                qDebug("AirspyHFInput::applySettings: set LNA to %d", settings.m_useLNA ? 1 : 0);
+            }
+        }
+    }
+
+    if ((m_settings.m_attenuatorSteps != settings.m_attenuatorSteps) || force)
+    {
+        reverseAPIKeys.append("attenuatorSteps");
+
+        if (m_dev != 0)
+        {
+            rc = (airspyhf_error) airspyhf_set_hf_att(m_dev, settings.m_attenuatorSteps);
+
+	        if (rc != AIRSPYHF_SUCCESS) {
+                qCritical("AirspyHFInput::applySettings: could not set attenuator to %d dB", settings.m_attenuatorSteps * 6);
+            } else {
+                qDebug("AirspyHFInput::applySettings: set attenuator to %d dB", settings.m_attenuatorSteps * 6);
+            }
+        }
+    }
+
 	if (forwardChange && (sampleRateIndex >= 0))
 	{
 		int sampleRate = m_sampleRates[sampleRateIndex]/(1<<settings.m_log2Decim);
@@ -584,6 +680,21 @@ int AirspyHFInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
         settings.m_reverseAPIDeviceIndex = response.getAirspyHfSettings()->getReverseApiDeviceIndex();
     }
+    if (deviceSettingsKeys.contains("useAGC")) {
+        settings.m_useAGC = response.getAirspyHfSettings()->getUseAgc();
+    }
+    if (deviceSettingsKeys.contains("agcHigh")) {
+        settings.m_agcHigh = response.getAirspyHfSettings()->getAgcHigh();
+    }
+    if (deviceSettingsKeys.contains("useDSP")) {
+        settings.m_useDSP = response.getAirspyHfSettings()->getUseDsp();
+    }
+    if (deviceSettingsKeys.contains("useLNA")) {
+        settings.m_useLNA = response.getAirspyHfSettings()->getUseLna();
+    }
+    if (deviceSettingsKeys.contains("attenuatorSteps")) {
+        settings.m_attenuatorSteps = response.getAirspyHfSettings()->getAttenuatorSteps();
+    }
 
     MsgConfigureAirspyHF *msg = MsgConfigureAirspyHF::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -624,6 +735,11 @@ void AirspyHFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
 
     response.getAirspyHfSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getAirspyHfSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getAirspyHfSettings()->setUseAgc(settings.m_useAGC ? 1 : 0);
+    response.getAirspyHfSettings()->setUseDsp(settings.m_useDSP ? 1 : 0);
+    response.getAirspyHfSettings()->setUseLna(settings.m_useLNA ? 1 : 0);
+    response.getAirspyHfSettings()->setAgcHigh(settings.m_agcHigh ? 1 : 0);
+    response.getAirspyHfSettings()->setAttenuatorSteps(settings.m_attenuatorSteps);
 }
 
 void AirspyHFInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
@@ -709,6 +825,21 @@ void AirspyHFInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
     }
     if (deviceSettingsKeys.contains("fileRecordName") || force) {
         swgAirspyHFSettings->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+    if (deviceSettingsKeys.contains("useAGC")) {
+        swgAirspyHFSettings->setUseAgc(settings.m_useAGC ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("agcHigh")) {
+        swgAirspyHFSettings->setAgcHigh(settings.m_agcHigh ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("useDSP")) {
+        swgAirspyHFSettings->setUseDsp(settings.m_useDSP ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("useLNA")) {
+        swgAirspyHFSettings->setUseLna(settings.m_useLNA ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("attenuatorSteps")) {
+        swgAirspyHFSettings->setAttenuatorSteps(settings.m_attenuatorSteps);
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

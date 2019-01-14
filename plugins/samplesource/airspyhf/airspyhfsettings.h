@@ -33,6 +33,11 @@ struct AirspyHFSettings
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
+    bool     m_useDSP;
+    bool     m_useAGC;
+    bool     m_agcHigh;
+    bool     m_useLNA;
+    quint32  m_attenuatorSteps;
 
     AirspyHFSettings();
 	void resetToDefaults();

@@ -28,6 +28,21 @@ AirspyHFSettings:
       type: integer
     reverseAPIDeviceIndex:
       type: integer
+    useAGC:
+      description: AGC (1 for on, 0 for off)
+      type: integer
+    agcHigh:
+      description: AGC threshold (1 for high, 0 for low)
+      type: integer
+    useDSP:
+      description: LibairspyHF DSP (1 for on, 0 for off)
+      type: integer
+    useLNA:
+      description: LNA (1 for on, 0 for off)
+      type: integer
+    attenuatorSteps:
+      description: Attenuator in number of 6 dB steps
+      type: integer
 
 AirspyHFReport:
   description: AirspyHF

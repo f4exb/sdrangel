@@ -72,6 +72,7 @@ private:
     void blockApplySettings(bool block) { m_doApplySettings = !block; }
 	void displaySettings();
 	void displaySampleRates();
+	void displayAGC();
 	void sendSettings();
     void updateSampleRateAndFrequency();
     void updateFrequencyLimits();
@@ -86,6 +87,10 @@ private slots:
     void on_record_toggled(bool checked);
     void on_transverter_clicked();
     void on_band_currentIndexChanged(int index);
+	void on_dsp_toggled(bool checked);
+	void on_lna_toggled(bool checked);
+	void on_agc_currentIndexChanged(int index);
+	void on_att_currentIndexChanged(int index);
 	void updateHardware();
     void updateStatus();
 	void handleInputMessages();

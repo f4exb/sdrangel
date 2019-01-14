@@ -227,6 +227,10 @@ void AirspyHFGui::displaySettings()
 	ui->sampleRate->setCurrentIndex(m_settings.m_devSampleRateIndex);
 	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->band->blockSignals(false);
+    ui->dsp->setChecked(m_settings.m_useDSP);
+    ui->lna->setChecked(m_settings.m_useLNA);
+    ui->att->setCurrentIndex(m_settings.m_attenuatorSteps);
+    displayAGC();
     blockApplySettings(false);
 }
 
@@ -256,6 +260,22 @@ void AirspyHFGui::displaySampleRates()
 	{
 		ui->sampleRate->setCurrentIndex((int) m_rates.size()-1);
 	}
+}
+
+void AirspyHFGui::displayAGC()
+{
+    if (m_settings.m_useAGC)
+    {
+        if (m_settings.m_agcHigh) {
+            ui->agc->setCurrentIndex(2);
+        } else {
+            ui->agc->setCurrentIndex(1);
+        }
+    }
+    else
+    {
+        ui->agc->setCurrentIndex(0);
+    }
 }
 
 void AirspyHFGui::sendSettings()
@@ -338,6 +358,48 @@ void AirspyHFGui::on_band_currentIndexChanged(int index)
     qDebug("AirspyHFGui::on_band_currentIndexChanged: freq: %llu", ui->centerFrequency->getValueNew() * 1000);
     m_settings.m_centerFrequency = ui->centerFrequency->getValueNew() * 1000;
     sendSettings();
+}
+
+void AirspyHFGui::on_dsp_toggled(bool checked)
+{
+    m_settings.m_useDSP = checked;
+    sendSettings();
+}
+
+void AirspyHFGui::on_lna_toggled(bool checked)
+{
+    m_settings.m_useLNA = checked;
+    sendSettings();
+}
+
+void AirspyHFGui::on_agc_currentIndexChanged(int index)
+{
+    if (index == 0)
+    {
+        m_settings.m_useAGC = false;
+        sendSettings();
+    }
+    else if (index <= 2)
+    {
+        m_settings.m_useAGC = true;
+
+        if (index == 1) {
+            m_settings.m_agcHigh = false;
+        } else {
+            m_settings.m_agcHigh = true;
+        }
+
+        sendSettings();
+    }
+}
+
+void AirspyHFGui::on_att_currentIndexChanged(int index)
+{
+    if ((index >= 0) && (index <= 8))
+    {
+        m_settings.m_attenuatorSteps = index;
+        sendSettings();
+    }
 }
 
 void AirspyHFGui::updateHardware()

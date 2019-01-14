@@ -78,6 +78,21 @@ public:
     qint32 getReverseApiDeviceIndex();
     void setReverseApiDeviceIndex(qint32 reverse_api_device_index);
 
+    qint32 getUseAgc();
+    void setUseAgc(qint32 use_agc);
+
+    qint32 getAgcHigh();
+    void setAgcHigh(qint32 agc_high);
+
+    qint32 getUseDsp();
+    void setUseDsp(qint32 use_dsp);
+
+    qint32 getUseLna();
+    void setUseLna(qint32 use_lna);
+
+    qint32 getAttenuatorSteps();
+    void setAttenuatorSteps(qint32 attenuator_steps);
+
 
     virtual bool isSet() override;
 
@@ -117,6 +132,21 @@ private:
 
     qint32 reverse_api_device_index;
     bool m_reverse_api_device_index_isSet;
+
+    qint32 use_agc;
+    bool m_use_agc_isSet;
+
+    qint32 agc_high;
+    bool m_agc_high_isSet;
+
+    qint32 use_dsp;
+    bool m_use_dsp_isSet;
+
+    qint32 use_lna;
+    bool m_use_lna_isSet;
+
+    qint32 attenuator_steps;
+    bool m_attenuator_steps_isSet;
 
 };
 

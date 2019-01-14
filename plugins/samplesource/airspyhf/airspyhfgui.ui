@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>324</width>
-    <height>132</height>
+    <height>160</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>320</width>
-    <height>132</height>
+    <height>160</height>
    </size>
   </property>
   <property name="font">
@@ -404,6 +404,138 @@
        </property>
        <property name="text">
         <string>X</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="agcLabel">
+       <property name="text">
+        <string>AGC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="agc">
+       <property name="maximumSize">
+        <size>
+         <width>55</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <item>
+        <property name="text">
+         <string>Off</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Low</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>High</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="lna">
+       <property name="text">
+        <string>LNA</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="attLabel">
+       <property name="text">
+        <string>Att</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="att">
+       <property name="maximumSize">
+        <size>
+         <width>40</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <item>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>6</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>12</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>18</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>24</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>30</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>36</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>42</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>48</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="attUnits">
+       <property name="text">
+        <string>dB</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="dsp">
+       <property name="text">
+        <string>DSP</string>
        </property>
       </widget>
      </item>

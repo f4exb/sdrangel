@@ -38,6 +38,11 @@ void AirspyHFSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
+    m_useDSP = true;
+    m_useAGC = false;
+    m_agcHigh = false;
+    m_useLNA = false;
+    m_attenuatorSteps = 0;
 }
 
 QByteArray AirspyHFSettings::serialize() const
@@ -54,6 +59,11 @@ QByteArray AirspyHFSettings::serialize() const
     s.writeString(11, m_reverseAPIAddress);
     s.writeU32(12, m_reverseAPIPort);
     s.writeU32(13, m_reverseAPIDeviceIndex);
+    s.writeBool(14, m_useDSP);
+    s.writeBool(15, m_useAGC);
+    s.writeBool(16, m_agcHigh);
+    s.writeBool(17, m_useLNA);
+    s.writeU32(18, m_attenuatorSteps);
 
 	return s.final();
 }
@@ -93,6 +103,12 @@ bool AirspyHFSettings::deserialize(const QByteArray& data)
 
         d.readU32(13, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readBool(14, &m_useDSP, true);
+        d.readBool(15, &m_useAGC, false);
+        d.readBool(16, &m_agcHigh, false);
+        d.readBool(17, &m_useLNA, false);
+        d.readU32(18, &m_attenuatorSteps, 0);
+
 		return true;
 	}
 	else

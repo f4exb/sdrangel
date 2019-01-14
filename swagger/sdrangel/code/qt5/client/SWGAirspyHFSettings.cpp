@@ -52,6 +52,16 @@ SWGAirspyHFSettings::SWGAirspyHFSettings() {
     m_reverse_api_port_isSet = false;
     reverse_api_device_index = 0;
     m_reverse_api_device_index_isSet = false;
+    use_agc = 0;
+    m_use_agc_isSet = false;
+    agc_high = 0;
+    m_agc_high_isSet = false;
+    use_dsp = 0;
+    m_use_dsp_isSet = false;
+    use_lna = 0;
+    m_use_lna_isSet = false;
+    attenuator_steps = 0;
+    m_attenuator_steps_isSet = false;
 }
 
 SWGAirspyHFSettings::~SWGAirspyHFSettings() {
@@ -84,6 +94,16 @@ SWGAirspyHFSettings::init() {
     m_reverse_api_port_isSet = false;
     reverse_api_device_index = 0;
     m_reverse_api_device_index_isSet = false;
+    use_agc = 0;
+    m_use_agc_isSet = false;
+    agc_high = 0;
+    m_agc_high_isSet = false;
+    use_dsp = 0;
+    m_use_dsp_isSet = false;
+    use_lna = 0;
+    m_use_lna_isSet = false;
+    attenuator_steps = 0;
+    m_attenuator_steps_isSet = false;
 }
 
 void
@@ -102,6 +122,11 @@ SWGAirspyHFSettings::cleanup() {
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
     }
+
+
+
+
+
 
 
 }
@@ -140,6 +165,16 @@ SWGAirspyHFSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_port, pJson["reverseAPIPort"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&use_agc, pJson["useAGC"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&agc_high, pJson["agcHigh"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&use_dsp, pJson["useDSP"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&use_lna, pJson["useLNA"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&attenuator_steps, pJson["attenuatorSteps"], "qint32", "");
     
 }
 
@@ -192,6 +227,21 @@ SWGAirspyHFSettings::asJsonObject() {
     }
     if(m_reverse_api_device_index_isSet){
         obj->insert("reverseAPIDeviceIndex", QJsonValue(reverse_api_device_index));
+    }
+    if(m_use_agc_isSet){
+        obj->insert("useAGC", QJsonValue(use_agc));
+    }
+    if(m_agc_high_isSet){
+        obj->insert("agcHigh", QJsonValue(agc_high));
+    }
+    if(m_use_dsp_isSet){
+        obj->insert("useDSP", QJsonValue(use_dsp));
+    }
+    if(m_use_lna_isSet){
+        obj->insert("useLNA", QJsonValue(use_lna));
+    }
+    if(m_attenuator_steps_isSet){
+        obj->insert("attenuatorSteps", QJsonValue(attenuator_steps));
     }
 
     return obj;
@@ -317,6 +367,56 @@ SWGAirspyHFSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
     this->m_reverse_api_device_index_isSet = true;
 }
 
+qint32
+SWGAirspyHFSettings::getUseAgc() {
+    return use_agc;
+}
+void
+SWGAirspyHFSettings::setUseAgc(qint32 use_agc) {
+    this->use_agc = use_agc;
+    this->m_use_agc_isSet = true;
+}
+
+qint32
+SWGAirspyHFSettings::getAgcHigh() {
+    return agc_high;
+}
+void
+SWGAirspyHFSettings::setAgcHigh(qint32 agc_high) {
+    this->agc_high = agc_high;
+    this->m_agc_high_isSet = true;
+}
+
+qint32
+SWGAirspyHFSettings::getUseDsp() {
+    return use_dsp;
+}
+void
+SWGAirspyHFSettings::setUseDsp(qint32 use_dsp) {
+    this->use_dsp = use_dsp;
+    this->m_use_dsp_isSet = true;
+}
+
+qint32
+SWGAirspyHFSettings::getUseLna() {
+    return use_lna;
+}
+void
+SWGAirspyHFSettings::setUseLna(qint32 use_lna) {
+    this->use_lna = use_lna;
+    this->m_use_lna_isSet = true;
+}
+
+qint32
+SWGAirspyHFSettings::getAttenuatorSteps() {
+    return attenuator_steps;
+}
+void
+SWGAirspyHFSettings::setAttenuatorSteps(qint32 attenuator_steps) {
+    this->attenuator_steps = attenuator_steps;
+    this->m_attenuator_steps_isSet = true;
+}
+
 
 bool
 SWGAirspyHFSettings::isSet(){
@@ -334,6 +434,11 @@ SWGAirspyHFSettings::isSet(){
         if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
         if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
         if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
+        if(m_use_agc_isSet){ isObjectUpdated = true; break;}
+        if(m_agc_high_isSet){ isObjectUpdated = true; break;}
+        if(m_use_dsp_isSet){ isObjectUpdated = true; break;}
+        if(m_use_lna_isSet){ isObjectUpdated = true; break;}
+        if(m_attenuator_steps_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

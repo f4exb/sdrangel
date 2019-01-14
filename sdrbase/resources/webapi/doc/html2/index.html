@@ -1019,6 +1019,26 @@ margin-bottom: 20px;
     },
     "reverseAPIDeviceIndex" : {
       "type" : "integer"
+    },
+    "useAGC" : {
+      "type" : "integer",
+      "description" : "AGC (1 for on, 0 for off)"
+    },
+    "agcHigh" : {
+      "type" : "integer",
+      "description" : "AGC threshold (1 for high, 0 for low)"
+    },
+    "useDSP" : {
+      "type" : "integer",
+      "description" : "LibairspyHF DSP (1 for on, 0 for off)"
+    },
+    "useLNA" : {
+      "type" : "integer",
+      "description" : "LNA (1 for on, 0 for off)"
+    },
+    "attenuatorSteps" : {
+      "type" : "integer",
+      "description" : "Attenuator in number of 6 dB steps"
     }
   },
   "description" : "AirspyHF"
@@ -24347,7 +24367,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-01-11T14:37:54.502+01:00
+              Generated 2019-01-14T01:23:06.065+01:00
             </div>
           </div>
       </div>
