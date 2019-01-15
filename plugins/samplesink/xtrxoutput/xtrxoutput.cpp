@@ -776,6 +776,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
              << " m_log2SoftInterp: " << m_settings.m_log2SoftInterp
              << " m_gain: " << m_settings.m_gain
              << " m_lpfBW: " << m_settings.m_lpfBW
+             << " m_pwrmode: " << m_settings.m_pwrmode
              << " m_ncoEnable: " << m_settings.m_ncoEnable
              << " m_ncoFrequency: " << m_settings.m_ncoFrequency
              << " m_antennaPath: " << m_settings.m_antennaPath

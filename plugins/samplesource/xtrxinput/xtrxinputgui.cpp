@@ -244,6 +244,15 @@ void XTRXInputGUI::handleInputMessages()
 
             delete message;
         }
+        else if (XTRXInput::MsgConfigureXTRX::match(*message))
+        {
+            qDebug("XTRXInputGUI::handleInputMessages: MsgConfigureXTRX");
+            const XTRXInput::MsgConfigureXTRX& cfg = (XTRXInput::MsgConfigureXTRX&) *message;
+            m_settings = cfg.getSettings();
+            displaySettings();
+
+            delete message;
+        }
         else
         {
             if (handleMessage(*message)) {
@@ -288,6 +297,7 @@ void XTRXInputGUI::displaySettings()
     updateADCRate();
 
     ui->lpf->setValue(m_settings.m_lpfBW / 1000);
+    ui->pwrmode->setCurrentIndex(m_settings.m_pwrmode);
 
     ui->gain->setValue(m_settings.m_gain);
     ui->gainText->setText(tr("%1").arg(m_settings.m_gain));

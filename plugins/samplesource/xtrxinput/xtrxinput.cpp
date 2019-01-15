@@ -866,6 +866,25 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
 
     // apply settings
 
+    qDebug() << "XTRXInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+             << " device stream sample rate: " << getDevSampleRate() << "S/s"
+             << " sample rate with soft decimation: " << getSampleRate() << "S/s"
+             << " m_devSampleRate: " << m_settings.m_devSampleRate
+             << " m_dcBlock: " << m_settings.m_dcBlock
+             << " m_iqCorrection: " << m_settings.m_iqCorrection
+             << " m_log2SoftDecim: " << m_settings.m_log2SoftDecim
+             << " m_gain: " << m_settings.m_gain
+             << " m_lpfBW: " << m_settings.m_lpfBW
+             << " m_pwrmode: " << m_settings.m_pwrmode
+             << " m_ncoEnable: " << m_settings.m_ncoEnable
+             << " m_ncoFrequency: " << m_settings.m_ncoFrequency
+             << " m_antennaPath: " << m_settings.m_antennaPath
+             << " m_extClock: " << m_settings.m_extClock
+             << " m_extClockFreq: " << m_settings.m_extClockFreq
+             << " force: " << force
+             << " forceNCOFrequency: " << forceNCOFrequency
+             << " doLPCalibration: " << doLPCalibration;
+
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
     {
         reverseAPIKeys.append("dcBlock");
@@ -1299,22 +1318,6 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
             (*itSink)->getSampleSinkInputMessageQueue()->push(report);
         }
     }
-
-    qDebug() << "XTRXInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
-             << " device stream sample rate: " << getDevSampleRate() << "S/s"
-             << " sample rate with soft decimation: " << getSampleRate() << "S/s"
-             << " m_devSampleRate: " << m_settings.m_devSampleRate
-             << " m_log2SoftDecim: " << m_settings.m_log2SoftDecim
-             << " m_gain: " << m_settings.m_gain
-             << " m_lpfBW: " << m_settings.m_lpfBW
-             << " m_ncoEnable: " << m_settings.m_ncoEnable
-             << " m_ncoFrequency: " << m_settings.m_ncoFrequency
-             << " m_antennaPath: " << m_settings.m_antennaPath
-             << " m_extClock: " << m_settings.m_extClock
-             << " m_extClockFreq: " << m_settings.m_extClockFreq
-             << " force: " << force
-             << " forceNCOFrequency: " << forceNCOFrequency
-             << " doLPCalibration: " << doLPCalibration;
 
     return true;
 }

@@ -242,6 +242,15 @@ void XTRXOutputGUI::handleInputMessages()
 
             delete message;
         }
+        else if (XTRXOutput::MsgConfigureXTRX::match(*message))
+        {
+            qDebug("XTRXOutputGUI::handleInputMessages: MsgConfigureXTRX");
+            const XTRXOutput::MsgConfigureXTRX& cfg = (XTRXOutput::MsgConfigureXTRX&) *message;
+            m_settings = cfg.getSettings();
+            displaySettings();
+
+            delete message;
+        }
         else
         {
             if (handleMessage(*message)) {
@@ -283,6 +292,7 @@ void XTRXOutputGUI::displaySettings()
     updateDACRate();
 
     ui->lpf->setValue(m_settings.m_lpfBW / 1000);
+    ui->pwrmode->setCurrentIndex(m_settings.m_pwrmode);
 
     ui->gain->setValue(m_settings.m_gain);
     ui->gainText->setText(tr("%1").arg(m_settings.m_gain));
