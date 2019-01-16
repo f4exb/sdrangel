@@ -347,13 +347,13 @@ bool XTRXInput::start()
     xtrxInputThread->setFifo(requestedChannel, &m_sampleFifo);
     xtrxInputThread->setLog2Decimation(requestedChannel, m_settings.m_log2SoftDecim);
 
+    applySettings(m_settings, true);
+
     if (needsStart)
     {
         qDebug("XTRXInput::start: (re)start thread");
         xtrxInputThread->startWork();
     }
-
-    applySettings(m_settings, true);
 
     qDebug("XTRXInput::start: started");
     m_running = true;
@@ -426,8 +426,8 @@ void XTRXInput::stop()
             ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_thread = 0;
         }
 
-        xtrxInputThread->startWork();
         applySettings(m_settings, true);
+        xtrxInputThread->startWork();
     }
 
     m_running = false;

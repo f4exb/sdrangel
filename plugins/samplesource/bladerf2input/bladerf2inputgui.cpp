@@ -259,6 +259,9 @@ void BladeRF2InputGui::displaySettings()
 {
     blockApplySettings(true);
 
+    ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
+    ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
+
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->LOppm->setValue(m_settings.m_LOppmTenths);
     ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));

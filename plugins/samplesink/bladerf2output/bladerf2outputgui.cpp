@@ -247,6 +247,9 @@ void BladeRF2OutputGui::displaySettings()
 {
     blockApplySettings(true);
 
+    ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
+    ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
+
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->LOppm->setValue(m_settings.m_LOppmTenths);
     ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
@@ -257,6 +260,7 @@ void BladeRF2OutputGui::displaySettings()
 
     ui->gainText->setText(tr("%1 dB").arg(m_settings.m_globalGain));
     ui->gain->setValue(m_settings.m_globalGain);
+    ui->biasTee->setChecked(m_settings.m_biasTee);
 
     blockApplySettings(false);
 }

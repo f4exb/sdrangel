@@ -318,6 +318,9 @@ void LimeSDROutputGUI::updateDACRate()
 
 void LimeSDROutputGUI::displaySettings()
 {
+    ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
+    ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
+
     ui->extClock->setExternalClockFrequency(m_settings.m_extClockFreq);
     ui->extClock->setExternalClockActive(m_settings.m_extClock);
 

@@ -53,7 +53,8 @@ bool DeviceXTRX::open(const char* deviceStr)
     int res;
     qDebug("DeviceXTRX::open: serial: %s", (const char *) deviceStr);
 
-    res = xtrx_open(deviceStr, XTRX_O_RESET | 4, &m_dev);
+    //res = xtrx_open(deviceStr, XTRX_O_RESET | 4, &m_dev);
+    res = xtrx_open(deviceStr, 4, &m_dev);
 
     if (res)
     {
