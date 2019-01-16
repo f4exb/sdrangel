@@ -1171,8 +1171,8 @@ int XTRXOutput::webapiSettingsGet(
                 QString& errorMessage)
 {
     (void) errorMessage;
-    response.setXtrxInputSettings(new SWGSDRangel::SWGXtrxInputSettings());
-    response.getXtrxInputSettings()->init();
+    response.setXtrxOutputSettings(new SWGSDRangel::SWGXtrxOutputSettings());
+    response.getXtrxOutputSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }
@@ -1280,7 +1280,7 @@ int XTRXOutput::webapiReportGet(
 {
     (void) errorMessage;
     response.setXtrxOutputReport(new SWGSDRangel::SWGXtrxOutputReport());
-    response.getXtrxInputReport()->init();
+    response.getXtrxOutputReport()->init();
     webapiFormatDeviceReport(response);
     return 200;
 }

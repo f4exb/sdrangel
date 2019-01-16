@@ -2085,6 +2085,21 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
+    else if ((*deviceHwType == "XTRX") && (deviceSettings.getTx() != 0))
+    {
+        if (jsonObject.contains("xtrxOutputSettings") && jsonObject["xtrxOutputSettings"].isObject())
+        {
+            QJsonObject xtrxOutputSettingsJsonObject = jsonObject["xtrxOutputSettings"].toObject();
+            deviceSettingsKeys = xtrxOutputSettingsJsonObject.keys();
+            deviceSettings.setXtrxOutputSettings(new SWGSDRangel::SWGXtrxOutputSettings());
+            deviceSettings.getXtrxOutputSettings()->fromJsonObject(xtrxOutputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     else
     {
         return false;
