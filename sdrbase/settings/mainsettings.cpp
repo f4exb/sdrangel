@@ -23,7 +23,7 @@ MainSettings::~MainSettings()
     }
 }
 
-const QString& MainSettings::getFileLocation() const
+QString MainSettings::getFileLocation() const
 {
     QSettings s;
     return s.fileName();
