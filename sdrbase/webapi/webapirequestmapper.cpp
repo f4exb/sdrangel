@@ -2023,6 +2023,21 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
+    else if (*deviceHwType == "SDRplay1")
+    {
+        if (jsonObject.contains("sdrPlaySettings") && jsonObject["sdrPlaySettings"].isObject())
+        {
+            QJsonObject sdrPlaySettingsJsonObject = jsonObject["sdrPlaySettings"].toObject();
+            deviceSettingsKeys = sdrPlaySettingsJsonObject.keys();
+            deviceSettings.setSdrPlaySettings(new SWGSDRangel::SWGSDRPlaySettings());
+            deviceSettings.getSdrPlaySettings()->fromJsonObject(sdrPlaySettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     else if ((*deviceHwType == "SoapySDR")  && (deviceSettings.getTx() == 0))
     {
         if (jsonObject.contains("soapySDRInputSettings") && jsonObject["soapySDRInputSettings"].isObject())
