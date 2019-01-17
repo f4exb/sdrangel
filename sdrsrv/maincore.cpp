@@ -16,10 +16,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <unistd.h>
+
 #include <QDebug>
 #include <QSysInfo>
 #include <QResource>
-#include <unistd.h>
+#include <QStandardPaths>
 
 #include "dsp/dspengine.h"
 #include "dsp/dspdevicesourceengine.h"
@@ -57,6 +59,14 @@ MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, Q
     m_logger(logger)
 {
     qDebug() << "MainCore::MainCore: start";
+
+#if QT_VERSION >= 0x050500
+    QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    qInfo("MainCore::MainCore: settings path: %s", qPrintable(path));
+#else
+    QString path = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
+    qInfo("MainCore::MainCore: settings path: %s", qPrintable(path));
+#endif
 
     m_instance = this;
     m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
