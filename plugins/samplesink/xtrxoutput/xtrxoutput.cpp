@@ -332,13 +332,13 @@ bool XTRXOutput::start()
     xtrxOutputThread->setFifo(requestedChannel, &m_sampleSourceFifo);
     xtrxOutputThread->setLog2Interpolation(requestedChannel, m_settings.m_log2SoftInterp);
 
+    applySettings(m_settings, true);
+
     if (needsStart)
     {
         qDebug("XTRXOutput::start: (re)start thread");
         xtrxOutputThread->startWork();
     }
-
-    applySettings(m_settings, true);
 
     qDebug("XTRXOutput::start: started");
     m_running = true;
@@ -411,8 +411,8 @@ void XTRXOutput::stop()
             ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_thread = 0;
         }
 
-        xtrxOutputThread->startWork();
         applySettings(m_settings, true);
+        xtrxOutputThread->startWork();
     }
 
     m_running = false;
