@@ -270,9 +270,9 @@ Experimental and Linux only. Compile from source.
 
 Before starting SDRangel you have to add the library directory to the `LD_LIBRARY_PATH` variable for example with `export LD_LIBRARY_PATH=/opt/install/xtrx-images/lib:$LD_LIBRARY_PATH`.
 
-&#9888; Cold start with XTRX may not work (you will see error messages in the log) and you may need to stop and re-start SDRangel.
+&#9888; There are USB errors when first starting with XTRX after plugging it in. The only way to work around this is to restart SDRangel application.
 
-&#9888; It seems reception is not very stable particularly with sample rates lower than 5 MS/s. You may need to stop and restart the device (stop/start button) to recover.
+&#9888; Reception may stall sometimes particularly with sample rates lower than 5 MS/s and also after changes. You may need to stop and restart the device (stop/start button) to recover.
 
 &#9888; Right after (re)start you may need to move the main frequency dial back and forth if you notice that you are not on the right frequency.
 

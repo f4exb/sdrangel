@@ -8,6 +8,10 @@ This output sample sink plugin sends its samples to a [XTRX device](https://xtrx
 
 XTRX is a 2x2 MIMO device so it has two transmitting channels that can run concurrently. To activate the second channel when the first is already active just open a new sink tab in the main window (Devices -> Add sink device) and select the same LimeSDR device.
 
+&#9888; There are USB errors when first starting with XTRX after plugging it in. The only way to work around this is to restart SDRangel application.
+
+&#9888; Right after (re)start you may need to move the main frequency dial back and forth if you notice that you are not on the right frequency.
+
 &#9888; Simultaneous Tx and Rx is not supported. Dual Tx is not working either.
 
 &#9888; You need a hardware interpolation of at least 4 (default)

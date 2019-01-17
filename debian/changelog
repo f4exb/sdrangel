@@ -1,3 +1,15 @@
+sdrangel (4.4.1-1) unstable; urgency=medium
+
+  * AirspyHF: Implemented new settings that come along newer version of libairspyhf
+  * Fixed many glitches in the REST API device settings handling
+  * SoapySDR: on preset load match on serial or driver id for SoapySDR devices
+  * SerialDV: corrected cmake find module and improved SerialDV support error messages
+  * Make the settings location appear in the log and in the about panel of the GUI also
+  * Temptative XTRX fixes
+  * REST API examples: Added a randomize channel colors utility as a way to answer to issue #275
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 02 Jan 2019 21:14:18 +0100
+
 sdrangel (4.4.0-1) unstable; urgency=medium
 
   * XTRX support
