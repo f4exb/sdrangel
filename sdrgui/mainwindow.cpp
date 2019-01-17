@@ -28,7 +28,6 @@
 #include <QKeyEvent>
 #include <QResource>
 #include <QFontDatabase>
-#include <QStandardPaths>
 
 #include <plugin/plugininstancegui.h>
 #include <plugin/plugininstancegui.h>
@@ -99,14 +98,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	m_logger(logger)
 {
 	qDebug() << "MainWindow::MainWindow: start";
-
-#if QT_VERSION >= 0x050500
-    QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-    qInfo("MainWindow::MainWindow: settings path: %s", qPrintable(path));
-#else
-    QString path = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
-    qInfo("MainWindow::MainWindow: settings path: %s", qPrintable(path));
-#endif
 
     m_instance = this;
 	m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
@@ -1695,7 +1686,7 @@ void MainWindow::channelAddClicked(bool checked)
 
 void MainWindow::on_action_About_triggered()
 {
-	AboutDialog dlg(m_apiHost, m_apiPort, this);
+	AboutDialog dlg(m_apiHost, m_apiPort, m_settings, this);
 	dlg.exec();
 }
 

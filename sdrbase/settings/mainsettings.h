@@ -18,6 +18,8 @@ public:
 	void save() const;
 
 	void resetToDefaults();
+	const QString& getFileLocation() const;
+	int getFileFormat() const; //!< see QSettings::Format for the values
 
 	Preset* newPreset(const QString& group, const QString& description);
 	void deletePreset(const Preset* preset);

@@ -1,8 +1,9 @@
 #include "gui/aboutdialog.h"
 #include "ui_aboutdialog.h"
 #include "dsp/dsptypes.h"
+#include "settings/mainsettings.h"
 
-AboutDialog::AboutDialog(const QString& apiHost, int apiPort, QWidget* parent) :
+AboutDialog::AboutDialog(const QString& apiHost, int apiPort, const MainSettings& mainSettings, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::AboutDialog)
 {
@@ -14,6 +15,7 @@ AboutDialog::AboutDialog(const QString& apiHost, int apiPort, QWidget* parent) :
 	QString apiUrl = QString("http://%1:%2/").arg(apiHost).arg(apiPort);
 	ui->restApiUrl->setText(QString("REST API documentation: <a href=\"%1\">%2</a>").arg(apiUrl).arg(apiUrl));
 	ui->restApiUrl->setOpenExternalLinks(true);
+	ui->settingsFile->setText(QString("Settings: %1").arg(mainSettings.getFileLocation()));
 }
 
 AboutDialog::~AboutDialog()

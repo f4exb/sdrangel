@@ -7,6 +7,7 @@
 MainSettings::MainSettings() : m_audioDeviceManager(0)
 {
 	resetToDefaults();
+    qInfo("MainSettings::MainSettings: settings file: format: %d location: %s", getFileFormat(), qPrintable(getFileLocation()));
 }
 
 MainSettings::~MainSettings()
@@ -20,6 +21,18 @@ MainSettings::~MainSettings()
     {
         delete m_commands[i];
     }
+}
+
+const QString& MainSettings::getFileLocation() const
+{
+    QSettings s;
+    return s.fileName();
+}
+
+int MainSettings::getFileFormat() const
+{
+    QSettings s;
+    return (int) s.format();
 }
 
 void MainSettings::load()
