@@ -4,7 +4,7 @@ These are all Python scripts using python-requests so you have to install this p
 
 <h2>add_channel.py</h2>
 
-Adds a channel to a device set specifying device set index and channel type. 
+Adds a channel to a device set specifying device set index and channel type.
 
   - Operation ID: `devicesetChannelPost`
   - URI: `/sdrangel/deviceset/{deviceSetIndex}/channel`
@@ -36,11 +36,11 @@ It uses the following APIs:
     - OperationID: `devicesetDeviceRunPost`
     - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/run`
     - HTTP method: `POST`
-  
+
 <h2>limesdr_tx.py</h2>
 
 Create a Tx device set with a LimeSDR Tx device and a NFM modulator channel configured to send some beacon Morse code. Then starts the Tx.
- 
+
 It uses the following APIs:
 
   - To create a new device set:
@@ -63,13 +63,13 @@ It uses the following APIs:
     - OperationID: `devicesetDeviceRunPost`
     - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/run`
     - HTTP method: `POST`
-  
+
 <h2>nfm_test.py</h2>
 
 Example of creating NFM channels (demodulator and modulator) and changing the settings
 
 It uses the following APIs:
-  
+
   - To create a new channel:
     - Operation ID: `devicesetChannelPost`
     - URI: `/sdrangel/deviceset/{deviceSetIndex}/channel`
@@ -82,13 +82,13 @@ It uses the following APIs:
     - OperationID: `devicesetChannelSettingsPatch`
     - URI: `/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings`
     - HTTP method: `PATCH`
-    
+
 <h2>ptt.py</h2>
 
 Implements a basic push to talk (PTT) feature. Verifies that devise set #0 is a Rx and that #1 is a Tx. Stops streaming on one device and start streaming on the other depending on the PTT move (Rx to Tx or Tx to Rx).
 
 It uses the following APIs:
-  
+
   - Get information on device sets:
     - Operation ID: `instanceDeviceSetsGet`
     - URI: `/sdrangel/devicesets`
@@ -101,6 +101,25 @@ It uses the following APIs:
     - OperationID: `devicesetDeviceRunDelete`
     - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/run`
     - HTTP method: `DELETE`
+
+<h2>randomize_colors.py</h2>
+
+Randomize channel colors for a specified device set
+
+It uses the following APIs:
+
+  - Get information on a device set
+    - Operation ID: `devicesetGet`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}`
+    - HTTP method: `GET`
+  - To get the settings of a channel:
+    - OperationID: `devicesetChannelSettingsGet`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings`
+    - HTTP method: `GET`
+  - To change the settings of a channel:
+    - OperationID: `devicesetChannelSettingsPatch`
+    - URI: `/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings`
+    - HTTP method: `PATCH`
 
 <h2>reverseapi.py</h2>
 
@@ -148,7 +167,7 @@ It uses the following APIs:
 
   - Create a new device set:
     - Operation ID: `devicesetPost`
-    - URI: `/sdrangel/deviceset`  
+    - URI: `/sdrangel/deviceset`
     - HTTP method: `POST`
   - Get information on a device set:
     - Operation ID: `devicesetGet`
@@ -182,21 +201,21 @@ It uses the following APIs:
     - OperationID: `devicesetDeviceRunPost`
     - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/run`
     - HTTP method: `POST`
-   
+
 <h2>rx_tx_test.py</h2>
 
-Combines `rx_test` and `tx_test` to create a pair of source and sink device sets. The APIs used are the same as in `rx_test` or `tx_test`.   
+Combines `rx_test` and `tx_test` to create a pair of source and sink device sets. The APIs used are the same as in `rx_test` or `tx_test`.
 
 <h2>scanner.py</h2>
-  
+
 Simple AM and NFM scanner with multiple equally spaced channels. Stops whenever any of the channels squelch opens. At the moment the following sampling devices can be used:
 
   - AirspyHF
   - HackRF
   - LimeSDR
   - RTLSDR
-  
-Check `./scanner.py --help` for the options. 
+
+Check `./scanner.py --help` for the options.
 
 Requires numpy
 
@@ -208,13 +227,13 @@ In addition to some APIs being used in other script it uses:
     - Operation ID: `devicesetChannelsReportGet`
     - URI: `/sdrangel/deviceset/{deviceSetIndex}/channels/report`
     - HTTP method: `GET`
-  
+
 <h2>start_stop.py</h2>
 
 Starts or stops a device in the specified device set
 
 It uses the following APIs:
-  
+
   - Get information on device sets:
     - Operation ID: `instanceDeviceSetsGet`
     - URI: `/sdrangel/devicesets`
@@ -227,7 +246,7 @@ It uses the following APIs:
     - OperationID: `devicesetDeviceRunDelete`
     - URI: `/sdrangel/deviceset/{deviceSetIndex}/device/run`
     - HTTP method: `DELETE`
-    
+
 <h2>stop_server.py</h2>
 
 This works with a server instance only i.e. `sdrangelsrv`. It will shutdown the instance nicely as you would do with the exit menu or Ctl-Q in the GUI application.
@@ -247,7 +266,7 @@ It uses the following APIs:
 
   - Create a new device set:
     - Operation ID: `devicesetPost`
-    - URI: `/sdrangel/deviceset`  
+    - URI: `/sdrangel/deviceset`
     - HTTP method: `POST`
   - Get information on a device set:
     - Operation ID: `devicesetGet`
