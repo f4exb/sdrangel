@@ -21,7 +21,7 @@ def getInputOptions():
         options.address = "127.0.0.1:8888"
 
     if options.device_index < 0:
-        otions.device_index = 0
+        options.device_index = 0
 
     if options.start and options.stop:
         print("Cannot start and stop at the same time")
