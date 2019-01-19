@@ -148,6 +148,11 @@ public:
 
     double get_board_temperature();
     bool get_gps_status();
+
+private:
+    bool m_first_1pps_count;
+    uint64_t m_last_1pps_count;
+    uint32_t m_no_1pps_count_change_counter;
 };
 
 #endif /* DEVICES_LIMESDR_DEVICELIMESDRSHARED_H_ */

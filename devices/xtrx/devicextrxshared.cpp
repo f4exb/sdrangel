@@ -31,9 +31,11 @@ DeviceXTRXShared::DeviceXTRXShared() :
     m_channel(-1),
     m_source(0),
     m_sink(0),
-
     m_thread(0),
-    m_threadWasRunning(false)
+    m_threadWasRunning(false),
+    m_first_1pps_count(true),
+    m_last_1pps_count(0),
+    m_no_1pps_count_change_counter(0)
 {}
 
 DeviceXTRXShared::~DeviceXTRXShared()
@@ -56,11 +58,34 @@ bool DeviceXTRXShared::get_gps_status()
 {
     uint64_t val = 0;
 
-    int res = xtrx_val_get(m_dev->getDevice(), XTRX_TRX, XTRX_CH_AB, XTRX_WAIT_1PPS, &val);
+    int res = xtrx_val_get(m_dev->getDevice(), (xtrx_direction_t) 0, XTRX_CH_AB, XTRX_OSC_LATCH_1PPS, &val);
 
-    if (res) {
+    if (res)
+    {
         return false;
     }
+    else
+    {
+        if (m_first_1pps_count)
+        {
+            m_last_1pps_count = val;
+            m_first_1pps_count = false;
+        }
+        else
+        {
+            if (m_last_1pps_count != val)
+            {
+                m_no_1pps_count_change_counter = 7;
+                m_last_1pps_count = val;
+            }
+            else if (m_no_1pps_count_change_counter != 0)
+            {
+                m_no_1pps_count_change_counter--;
+            }
 
-    return val != 0;
+        }
+
+        //qDebug("DeviceXTRXShared::get_gps_status: XTRX_OSC_LATCH_1PPS: %lu %u", val, m_no_1pps_count_change_counter);
+        return m_no_1pps_count_change_counter != 0;
+    }
 }
