@@ -49,8 +49,6 @@
 #include "SWGDSDDemodSettings.h"
 #include "SWGDVSeralDevices.h"
 #include "SWGDVSerialDevice.h"
-#include "SWGDaemonSourceReport.h"
-#include "SWGDaemonSourceSettings.h"
 #include "SWGDeviceListItem.h"
 #include "SWGDeviceReport.h"
 #include "SWGDeviceSet.h"
@@ -100,6 +98,8 @@
 #include "SWGRange.h"
 #include "SWGRangeFloat.h"
 #include "SWGRemoteSinkSettings.h"
+#include "SWGRemoteSourceReport.h"
+#include "SWGRemoteSourceSettings.h"
 #include "SWGRtlSdrReport.h"
 #include "SWGRtlSdrSettings.h"
 #include "SWGSDRPlayReport.h"
@@ -241,12 +241,6 @@ namespace SWGSDRangel {
     }
     if(QString("SWGDVSerialDevice").compare(type) == 0) {
       return new SWGDVSerialDevice();
-    }
-    if(QString("SWGDaemonSourceReport").compare(type) == 0) {
-      return new SWGDaemonSourceReport();
-    }
-    if(QString("SWGDaemonSourceSettings").compare(type) == 0) {
-      return new SWGDaemonSourceSettings();
     }
     if(QString("SWGDeviceListItem").compare(type) == 0) {
       return new SWGDeviceListItem();
@@ -394,6 +388,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRemoteSinkSettings").compare(type) == 0) {
       return new SWGRemoteSinkSettings();
+    }
+    if(QString("SWGRemoteSourceReport").compare(type) == 0) {
+      return new SWGRemoteSourceReport();
+    }
+    if(QString("SWGRemoteSourceSettings").compare(type) == 0) {
+      return new SWGRemoteSourceSettings();
     }
     if(QString("SWGRtlSdrReport").compare(type) == 0) {
       return new SWGRtlSdrReport();

@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGDaemonSourceReport.h
+ * SWGRemoteSourceReport.h
  *
- * Daemon channel source report
+ * Remote channel source report
  */
 
-#ifndef SWGDaemonSourceReport_H_
-#define SWGDaemonSourceReport_H_
+#ifndef SWGRemoteSourceReport_H_
+#define SWGRemoteSourceReport_H_
 
 #include <QJsonObject>
 
@@ -28,18 +28,18 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGDaemonSourceReport: public SWGObject {
+class SWG_API SWGRemoteSourceReport: public SWGObject {
 public:
-    SWGDaemonSourceReport();
-    SWGDaemonSourceReport(QString* json);
-    virtual ~SWGDaemonSourceReport();
+    SWGRemoteSourceReport();
+    SWGRemoteSourceReport(QString* json);
+    virtual ~SWGRemoteSourceReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGDaemonSourceReport* fromJson(QString &jsonString) override;
+    virtual SWGRemoteSourceReport* fromJson(QString &jsonString) override;
 
     qint32 getQueueLength();
     void setQueueLength(qint32 queue_length);
@@ -127,4 +127,4 @@ private:
 
 }
 
-#endif /* SWGDaemonSourceReport_H_ */
+#endif /* SWGRemoteSourceReport_H_ */

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2018-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRC_H_
-#define PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRC_H_
+#ifndef PLUGINS_CHANNELTX_REMOTESRC_REMOTESRC_H_
+#define PLUGINS_CHANNELTX_REMOTESRC_REMOTESRC_H_
 
 #include <QObject>
 #include <QNetworkRequest>
@@ -26,40 +26,41 @@
 #include "channel/channelsourceapi.h"
 #include "util/message.h"
 
-#include "daemonsourcesettings.h"
 #include "channel/sdrdaemondataqueue.h"
 #include "channel/sdrdaemondatablock.h"
 #include "channel/sdrdaemondatareadqueue.h"
 
+#include "../remotesource/remotesourcesettings.h"
+
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
 class DeviceSinkAPI;
-class DaemonSourceThread;
+class RemoteSourceThread;
 class SDRDaemonDataBlock;
 class QNetworkAccessManager;
 class QNetworkReply;
 
-class DaemonSource : public BasebandSampleSource, public ChannelSourceAPI {
+class RemoteSource : public BasebandSampleSource, public ChannelSourceAPI {
     Q_OBJECT
 
 public:
-    class MsgConfigureDaemonSource : public Message {
+    class MsgConfigureRemoteSource : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const DaemonSourceSettings& getSettings() const { return m_settings; }
+        const RemoteSourceSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureDaemonSource* create(const DaemonSourceSettings& settings, bool force)
+        static MsgConfigureRemoteSource* create(const RemoteSourceSettings& settings, bool force)
         {
-            return new MsgConfigureDaemonSource(settings, force);
+            return new MsgConfigureRemoteSource(settings, force);
         }
 
     private:
-        DaemonSourceSettings m_settings;
+        RemoteSourceSettings m_settings;
         bool m_force;
 
-        MsgConfigureDaemonSource(const DaemonSourceSettings& settings, bool force) :
+        MsgConfigureRemoteSource(const RemoteSourceSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
@@ -179,8 +180,8 @@ public:
         { }
     };
 
-    DaemonSource(DeviceSinkAPI *deviceAPI);
-    ~DaemonSource();
+    RemoteSource(DeviceSinkAPI *deviceAPI);
+    ~RemoteSource();
 
     virtual void destroy() { delete this; }
 
@@ -221,12 +222,12 @@ private:
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
     SDRDaemonDataQueue m_dataQueue;
-    DaemonSourceThread *m_sourceThread;
+    RemoteSourceThread *m_sourceThread;
     CM256 m_cm256;
     CM256 *m_cm256p;
     bool m_running;
 
-    DaemonSourceSettings m_settings;
+    RemoteSourceSettings m_settings;
 
     CM256::cm256_block   m_cm256DescriptorBlocks[2*SDRDaemonNbOrginalBlocks]; //!< CM256 decoder descriptors (block addresses and block indexes)
     SDRDaemonMetaDataFEC m_currentMeta;
@@ -239,17 +240,17 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    void applySettings(const DaemonSourceSettings& settings, bool force = false);
+    void applySettings(const RemoteSourceSettings& settings, bool force = false);
     void handleDataBlock(SDRDaemonDataBlock *dataBlock);
     void printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData);
     uint32_t calculateDataReadQueueSize(int sampleRate);
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DaemonSourceSettings& settings);
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const RemoteSourceSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DaemonSourceSettings& settings, bool force);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteSourceSettings& settings, bool force);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void handleData();
 };
 
-#endif // PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRC_H_
+#endif // PLUGINS_CHANNELTX_REMOTESRC_REMOTESRC_H_

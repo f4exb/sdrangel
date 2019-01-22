@@ -48,8 +48,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_nfm_mod_settings_isSet = false;
     remote_sink_settings = nullptr;
     m_remote_sink_settings_isSet = false;
-    daemon_source_settings = nullptr;
-    m_daemon_source_settings_isSet = false;
+    remote_source_settings = nullptr;
+    m_remote_source_settings_isSet = false;
     ssb_mod_settings = nullptr;
     m_ssb_mod_settings_isSet = false;
     ssb_demod_settings = nullptr;
@@ -90,8 +90,8 @@ SWGChannelSettings::init() {
     m_nfm_mod_settings_isSet = false;
     remote_sink_settings = new SWGRemoteSinkSettings();
     m_remote_sink_settings_isSet = false;
-    daemon_source_settings = new SWGDaemonSourceSettings();
-    m_daemon_source_settings_isSet = false;
+    remote_source_settings = new SWGRemoteSourceSettings();
+    m_remote_source_settings_isSet = false;
     ssb_mod_settings = new SWGSSBModSettings();
     m_ssb_mod_settings_isSet = false;
     ssb_demod_settings = new SWGSSBDemodSettings();
@@ -136,8 +136,8 @@ SWGChannelSettings::cleanup() {
     if(remote_sink_settings != nullptr) { 
         delete remote_sink_settings;
     }
-    if(daemon_source_settings != nullptr) { 
-        delete daemon_source_settings;
+    if(remote_source_settings != nullptr) { 
+        delete remote_source_settings;
     }
     if(ssb_mod_settings != nullptr) { 
         delete ssb_mod_settings;
@@ -190,7 +190,7 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&remote_sink_settings, pJson["RemoteSinkSettings"], "SWGRemoteSinkSettings", "SWGRemoteSinkSettings");
     
-    ::SWGSDRangel::setValue(&daemon_source_settings, pJson["DaemonSourceSettings"], "SWGDaemonSourceSettings", "SWGDaemonSourceSettings");
+    ::SWGSDRangel::setValue(&remote_source_settings, pJson["RemoteSourceSettings"], "SWGRemoteSourceSettings", "SWGRemoteSourceSettings");
     
     ::SWGSDRangel::setValue(&ssb_mod_settings, pJson["SSBModSettings"], "SWGSSBModSettings", "SWGSSBModSettings");
     
@@ -250,8 +250,8 @@ SWGChannelSettings::asJsonObject() {
     if((remote_sink_settings != nullptr) && (remote_sink_settings->isSet())){
         toJsonValue(QString("RemoteSinkSettings"), remote_sink_settings, obj, QString("SWGRemoteSinkSettings"));
     }
-    if((daemon_source_settings != nullptr) && (daemon_source_settings->isSet())){
-        toJsonValue(QString("DaemonSourceSettings"), daemon_source_settings, obj, QString("SWGDaemonSourceSettings"));
+    if((remote_source_settings != nullptr) && (remote_source_settings->isSet())){
+        toJsonValue(QString("RemoteSourceSettings"), remote_source_settings, obj, QString("SWGRemoteSourceSettings"));
     }
     if((ssb_mod_settings != nullptr) && (ssb_mod_settings->isSet())){
         toJsonValue(QString("SSBModSettings"), ssb_mod_settings, obj, QString("SWGSSBModSettings"));
@@ -375,14 +375,14 @@ SWGChannelSettings::setRemoteSinkSettings(SWGRemoteSinkSettings* remote_sink_set
     this->m_remote_sink_settings_isSet = true;
 }
 
-SWGDaemonSourceSettings*
-SWGChannelSettings::getDaemonSourceSettings() {
-    return daemon_source_settings;
+SWGRemoteSourceSettings*
+SWGChannelSettings::getRemoteSourceSettings() {
+    return remote_source_settings;
 }
 void
-SWGChannelSettings::setDaemonSourceSettings(SWGDaemonSourceSettings* daemon_source_settings) {
-    this->daemon_source_settings = daemon_source_settings;
-    this->m_daemon_source_settings_isSet = true;
+SWGChannelSettings::setRemoteSourceSettings(SWGRemoteSourceSettings* remote_source_settings) {
+    this->remote_source_settings = remote_source_settings;
+    this->m_remote_source_settings_isSet = true;
 }
 
 SWGSSBModSettings*
@@ -460,7 +460,7 @@ SWGChannelSettings::isSet(){
         if(nfm_demod_settings != nullptr && nfm_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(nfm_mod_settings != nullptr && nfm_mod_settings->isSet()){ isObjectUpdated = true; break;}
         if(remote_sink_settings != nullptr && remote_sink_settings->isSet()){ isObjectUpdated = true; break;}
-        if(daemon_source_settings != nullptr && daemon_source_settings->isSet()){ isObjectUpdated = true; break;}
+        if(remote_source_settings != nullptr && remote_source_settings->isSet()){ isObjectUpdated = true; break;}
         if(ssb_mod_settings != nullptr && ssb_mod_settings->isSet()){ isObjectUpdated = true; break;}
         if(ssb_demod_settings != nullptr && ssb_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(udp_source_settings != nullptr && udp_source_settings->isSet()){ isObjectUpdated = true; break;}

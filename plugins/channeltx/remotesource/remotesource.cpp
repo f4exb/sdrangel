@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2018-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "remotesource.h"
+
 #include <sys/time.h>
 #include <unistd.h>
 #include <boost/crc.hpp>
@@ -26,25 +28,24 @@
 
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
-#include "SWGDaemonSourceReport.h"
+#include "SWGRemoteSourceReport.h"
 
 #include "dsp/devicesamplesink.h"
 #include "device/devicesinkapi.h"
 #include "dsp/upchannelizer.h"
 #include "dsp/threadedbasebandsamplesource.h"
 
-#include "daemonsourcethread.h"
-#include "daemonsource.h"
+#include "remotesourcethread.h"
 
-MESSAGE_CLASS_DEFINITION(DaemonSource::MsgSampleRateNotification, Message)
-MESSAGE_CLASS_DEFINITION(DaemonSource::MsgConfigureDaemonSource, Message)
-MESSAGE_CLASS_DEFINITION(DaemonSource::MsgQueryStreamData, Message)
-MESSAGE_CLASS_DEFINITION(DaemonSource::MsgReportStreamData, Message)
+MESSAGE_CLASS_DEFINITION(RemoteSource::MsgSampleRateNotification, Message)
+MESSAGE_CLASS_DEFINITION(RemoteSource::MsgConfigureRemoteSource, Message)
+MESSAGE_CLASS_DEFINITION(RemoteSource::MsgQueryStreamData, Message)
+MESSAGE_CLASS_DEFINITION(RemoteSource::MsgReportStreamData, Message)
 
-const QString DaemonSource::m_channelIdURI = "sdrangel.channeltx.daemonsource";
-const QString DaemonSource::m_channelId ="DaemonSource";
+const QString RemoteSource::m_channelIdURI = "sdrangel.channeltx.remotesource";
+const QString RemoteSource::m_channelId ="RemoteSource";
 
-DaemonSource::DaemonSource(DeviceSinkAPI *deviceAPI) :
+RemoteSource::RemoteSource(DeviceSinkAPI *deviceAPI) :
     ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
     m_sourceThread(0),
@@ -67,7 +68,7 @@ DaemonSource::DaemonSource(DeviceSinkAPI *deviceAPI) :
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
-DaemonSource::~DaemonSource()
+RemoteSource::~RemoteSource()
 {
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
@@ -77,33 +78,33 @@ DaemonSource::~DaemonSource()
     delete m_channelizer;
 }
 
-void DaemonSource::pull(Sample& sample)
+void RemoteSource::pull(Sample& sample)
 {
     m_dataReadQueue.readSample(sample, true); // true is scale for Tx
 }
 
-void DaemonSource::pullAudio(int nbSamples)
+void RemoteSource::pullAudio(int nbSamples)
 {
     (void) nbSamples;
 }
 
-void DaemonSource::start()
+void RemoteSource::start()
 {
-    qDebug("DaemonSource::start");
+    qDebug("RemoteSource::start");
 
     if (m_running) {
         stop();
     }
 
-    m_sourceThread = new DaemonSourceThread(&m_dataQueue);
+    m_sourceThread = new RemoteSourceThread(&m_dataQueue);
     m_sourceThread->startStop(true);
     m_sourceThread->dataBind(m_settings.m_dataAddress, m_settings.m_dataPort);
     m_running = true;
 }
 
-void DaemonSource::stop()
+void RemoteSource::stop()
 {
-    qDebug("DaemonSource::stop");
+    qDebug("RemoteSource::stop");
 
     if (m_sourceThread != 0)
     {
@@ -115,22 +116,22 @@ void DaemonSource::stop()
     m_running = false;
 }
 
-void DaemonSource::setDataLink(const QString& dataAddress, uint16_t dataPort)
+void RemoteSource::setDataLink(const QString& dataAddress, uint16_t dataPort)
 {
-    DaemonSourceSettings settings = m_settings;
+    RemoteSourceSettings settings = m_settings;
     settings.m_dataAddress = dataAddress;
     settings.m_dataPort = dataPort;
 
-    MsgConfigureDaemonSource *msg = MsgConfigureDaemonSource::create(settings, false);
+    MsgConfigureRemoteSource *msg = MsgConfigureRemoteSource::create(settings, false);
     m_inputMessageQueue.push(msg);
 }
 
-bool DaemonSource::handleMessage(const Message& cmd)
+bool RemoteSource::handleMessage(const Message& cmd)
 {
     if (UpChannelizer::MsgChannelizerNotification::match(cmd))
     {
         UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
-        qDebug() << "DaemonSource::handleMessage: MsgChannelizerNotification:"
+        qDebug() << "RemoteSource::handleMessage: MsgChannelizerNotification:"
                 << " basebandSampleRate: " << notif.getBasebandSampleRate()
                 << " outputSampleRate: " << notif.getSampleRate()
                 << " inputFrequencyOffset: " << notif.getFrequencyOffset();
@@ -143,10 +144,10 @@ bool DaemonSource::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgConfigureDaemonSource::match(cmd))
+    else if (MsgConfigureRemoteSource::match(cmd))
     {
-        MsgConfigureDaemonSource& cfg = (MsgConfigureDaemonSource&) cmd;
-        qDebug() << "MsgConfigureDaemonSource::handleMessage: MsgConfigureDaemonSource";
+        MsgConfigureRemoteSource& cfg = (MsgConfigureRemoteSource&) cmd;
+        qDebug() << "MsgConfigureRemoteSource::handleMessage: MsgConfigureRemoteSource";
         applySettings(cfg.getSettings(), cfg.getForce());
 
         return true;
@@ -178,32 +179,32 @@ bool DaemonSource::handleMessage(const Message& cmd)
     return false;
 }
 
-QByteArray DaemonSource::serialize() const
+QByteArray RemoteSource::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool DaemonSource::deserialize(const QByteArray& data)
+bool RemoteSource::deserialize(const QByteArray& data)
 {
     (void) data;
     if (m_settings.deserialize(data))
     {
-        MsgConfigureDaemonSource *msg = MsgConfigureDaemonSource::create(m_settings, true);
+        MsgConfigureRemoteSource *msg = MsgConfigureRemoteSource::create(m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureDaemonSource *msg = MsgConfigureDaemonSource::create(m_settings, true);
+        MsgConfigureRemoteSource *msg = MsgConfigureRemoteSource::create(m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void DaemonSource::applySettings(const DaemonSourceSettings& settings, bool force)
+void RemoteSource::applySettings(const RemoteSourceSettings& settings, bool force)
 {
-    qDebug() << "DaemonSource::applySettings:"
+    qDebug() << "RemoteSource::applySettings:"
             << " m_dataAddress: " << settings.m_dataAddress
             << " m_dataPort: " << settings.m_dataPort
             << " force: " << force;
@@ -242,12 +243,12 @@ void DaemonSource::applySettings(const DaemonSourceSettings& settings, bool forc
     m_settings = settings;
 }
 
-void DaemonSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
+void RemoteSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
 {
     (void) dataBlock;
     if (dataBlock->m_rxControlBlock.m_blockCount < SDRDaemonNbOrginalBlocks)
     {
-        qWarning("DaemonSource::handleDataBlock: incomplete data block: not processing");
+        qWarning("RemoteSource::handleDataBlock: incomplete data block: not processing");
     }
     else
     {
@@ -274,7 +275,7 @@ void DaemonSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
         // Need to use the CM256 recovery
         if (m_cm256p &&(dataBlock->m_rxControlBlock.m_originalCount < SDRDaemonNbOrginalBlocks))
         {
-            qDebug("DaemonSource::handleDataBlock: %d recovery blocks", dataBlock->m_rxControlBlock.m_recoveryCount);
+            qDebug("RemoteSource::handleDataBlock: %d recovery blocks", dataBlock->m_rxControlBlock.m_recoveryCount);
             CM256::cm256_encoder_params paramsCM256;
             paramsCM256.BlockBytes = sizeof(SDRDaemonProtectedBlock); // never changes
             paramsCM256.OriginalCount = SDRDaemonNbOrginalBlocks;  // never changes
@@ -294,7 +295,7 @@ void DaemonSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
 
             if (m_cm256.cm256_decode(paramsCM256, m_cm256DescriptorBlocks)) // CM256 decode
             {
-                qWarning() << "DaemonSource::handleDataBlock: decode CM256 error:"
+                qWarning() << "RemoteSource::handleDataBlock: decode CM256 error:"
                         << " m_originalCount: " << dataBlock->m_rxControlBlock.m_originalCount
                         << " m_recoveryCount: " << dataBlock->m_rxControlBlock.m_recoveryCount;
             }
@@ -325,7 +326,7 @@ void DaemonSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
             {
                 if (!(m_currentMeta == *metaData))
                 {
-                    printMeta("DaemonSource::handleDataBlock", metaData);
+                    printMeta("RemoteSource::handleDataBlock", metaData);
 
                     if (m_currentMeta.m_sampleRate != metaData->m_sampleRate)
                     {
@@ -338,7 +339,7 @@ void DaemonSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
             }
             else
             {
-                qWarning() << "DaemonSource::handleDataBlock: recovered meta: invalid CRC32";
+                qWarning() << "RemoteSource::handleDataBlock: recovered meta: invalid CRC32";
             }
         }
 
@@ -346,7 +347,7 @@ void DaemonSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
     }
 }
 
-void DaemonSource::handleData()
+void RemoteSource::handleData()
 {
     SDRDaemonDataBlock* dataBlock;
 
@@ -355,7 +356,7 @@ void DaemonSource::handleData()
     }
 }
 
-void DaemonSource::printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData)
+void RemoteSource::printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData)
 {
     qDebug().noquote() << header << ": "
             << "|" << metaData->m_centerFrequency
@@ -369,41 +370,41 @@ void DaemonSource::printMeta(const QString& header, SDRDaemonMetaDataFEC *metaDa
             << "|";
 }
 
-uint32_t DaemonSource::calculateDataReadQueueSize(int sampleRate)
+uint32_t RemoteSource::calculateDataReadQueueSize(int sampleRate)
 {
     // scale for 20 blocks at 48 kS/s. Take next even number.
     uint32_t maxSize = sampleRate / 2400;
     maxSize = (maxSize % 2 == 0) ? maxSize : maxSize + 1;
-    qDebug("DaemonSource::calculateDataReadQueueSize: set max queue size to %u blocks", maxSize);
+    qDebug("RemoteSource::calculateDataReadQueueSize: set max queue size to %u blocks", maxSize);
     return maxSize;
 }
 
-int DaemonSource::webapiSettingsGet(
+int RemoteSource::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setDaemonSourceSettings(new SWGSDRangel::SWGDaemonSourceSettings());
-    response.getDaemonSourceSettings()->init();
+    response.setRemoteSourceSettings(new SWGSDRangel::SWGRemoteSourceSettings());
+    response.getRemoteSourceSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
     return 200;
 }
 
-int DaemonSource::webapiSettingsPutPatch(
+int RemoteSource::webapiSettingsPutPatch(
         bool force,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
     (void) errorMessage;
-    DaemonSourceSettings settings = m_settings;
+    RemoteSourceSettings settings = m_settings;
 
     if (channelSettingsKeys.contains("dataAddress")) {
-        settings.m_dataAddress = *response.getDaemonSourceSettings()->getDataAddress();
+        settings.m_dataAddress = *response.getRemoteSourceSettings()->getDataAddress();
     }
     if (channelSettingsKeys.contains("dataPort"))
     {
-        int dataPort = response.getDaemonSourceSettings()->getDataPort();
+        int dataPort = response.getRemoteSourceSettings()->getDataPort();
 
         if ((dataPort < 1024) || (dataPort > 65535)) {
             settings.m_dataPort = 9090;
@@ -412,34 +413,34 @@ int DaemonSource::webapiSettingsPutPatch(
         }
     }
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getDaemonSourceSettings()->getRgbColor();
+        settings.m_rgbColor = response.getRemoteSourceSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getDaemonSourceSettings()->getTitle();
+        settings.m_title = *response.getRemoteSourceSettings()->getTitle();
     }
     if (channelSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getDaemonSourceSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getRemoteSourceSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getDaemonSourceSettings()->getReverseApiAddress() != 0;
+        settings.m_reverseAPIAddress = *response.getRemoteSourceSettings()->getReverseApiAddress() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getDaemonSourceSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getRemoteSourceSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getDaemonSourceSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getRemoteSourceSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getDaemonSourceSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = response.getRemoteSourceSettings()->getReverseApiChannelIndex();
     }
 
-    MsgConfigureDaemonSource *msg = MsgConfigureDaemonSource::create(settings, force);
+    MsgConfigureRemoteSource *msg = MsgConfigureRemoteSource::create(settings, force);
     m_inputMessageQueue.push(msg);
 
-    qDebug("DaemonSource::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    qDebug("RemoteSource::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureDaemonSource *msgToGUI = MsgConfigureDaemonSource::create(settings, force);
+        MsgConfigureRemoteSource *msgToGUI = MsgConfigureRemoteSource::create(settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -448,88 +449,88 @@ int DaemonSource::webapiSettingsPutPatch(
     return 200;
 }
 
-int DaemonSource::webapiReportGet(
+int RemoteSource::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setDaemonSourceReport(new SWGSDRangel::SWGDaemonSourceReport());
-    response.getDaemonSourceReport()->init();
+    response.setRemoteSourceReport(new SWGSDRangel::SWGRemoteSourceReport());
+    response.getRemoteSourceReport()->init();
     webapiFormatChannelReport(response);
     return 200;
 }
 
-void DaemonSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DaemonSourceSettings& settings)
+void RemoteSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const RemoteSourceSettings& settings)
 {
-    if (response.getDaemonSourceSettings()->getDataAddress()) {
-        *response.getDaemonSourceSettings()->getDataAddress() = settings.m_dataAddress;
+    if (response.getRemoteSourceSettings()->getDataAddress()) {
+        *response.getRemoteSourceSettings()->getDataAddress() = settings.m_dataAddress;
     } else {
-        response.getDaemonSourceSettings()->setDataAddress(new QString(settings.m_dataAddress));
+        response.getRemoteSourceSettings()->setDataAddress(new QString(settings.m_dataAddress));
     }
 
-    response.getDaemonSourceSettings()->setDataPort(settings.m_dataPort);
-    response.getDaemonSourceSettings()->setRgbColor(settings.m_rgbColor);
+    response.getRemoteSourceSettings()->setDataPort(settings.m_dataPort);
+    response.getRemoteSourceSettings()->setRgbColor(settings.m_rgbColor);
 
-    if (response.getDaemonSourceSettings()->getTitle()) {
-        *response.getDaemonSourceSettings()->getTitle() = settings.m_title;
+    if (response.getRemoteSourceSettings()->getTitle()) {
+        *response.getRemoteSourceSettings()->getTitle() = settings.m_title;
     } else {
-        response.getDaemonSourceSettings()->setTitle(new QString(settings.m_title));
+        response.getRemoteSourceSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getDaemonSourceSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getRemoteSourceSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getDaemonSourceSettings()->getReverseApiAddress()) {
-        *response.getDaemonSourceSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getRemoteSourceSettings()->getReverseApiAddress()) {
+        *response.getRemoteSourceSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getDaemonSourceSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getRemoteSourceSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getDaemonSourceSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getDaemonSourceSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
-    response.getDaemonSourceSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    response.getRemoteSourceSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getRemoteSourceSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getRemoteSourceSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
-void DaemonSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+void RemoteSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
     struct timeval tv;
     gettimeofday(&tv, 0);
 
-    response.getDaemonSourceReport()->setTvSec(tv.tv_sec);
-    response.getDaemonSourceReport()->setTvUSec(tv.tv_usec);
-    response.getDaemonSourceReport()->setQueueSize(m_dataReadQueue.size());
-    response.getDaemonSourceReport()->setQueueLength(m_dataReadQueue.length());
-    response.getDaemonSourceReport()->setSamplesCount(m_dataReadQueue.readSampleCount());
-    response.getDaemonSourceReport()->setCorrectableErrorsCount(m_nbCorrectableErrors);
-    response.getDaemonSourceReport()->setUncorrectableErrorsCount(m_nbUncorrectableErrors);
-    response.getDaemonSourceReport()->setNbOriginalBlocks(m_currentMeta.m_nbOriginalBlocks);
-    response.getDaemonSourceReport()->setNbFecBlocks(m_currentMeta.m_nbFECBlocks);
-    response.getDaemonSourceReport()->setCenterFreq(m_currentMeta.m_centerFrequency);
-    response.getDaemonSourceReport()->setSampleRate(m_currentMeta.m_sampleRate);
-    response.getDaemonSourceReport()->setDeviceCenterFreq(m_deviceAPI->getSampleSink()->getCenterFrequency()/1000);
-    response.getDaemonSourceReport()->setDeviceSampleRate(m_deviceAPI->getSampleSink()->getSampleRate());
+    response.getRemoteSourceReport()->setTvSec(tv.tv_sec);
+    response.getRemoteSourceReport()->setTvUSec(tv.tv_usec);
+    response.getRemoteSourceReport()->setQueueSize(m_dataReadQueue.size());
+    response.getRemoteSourceReport()->setQueueLength(m_dataReadQueue.length());
+    response.getRemoteSourceReport()->setSamplesCount(m_dataReadQueue.readSampleCount());
+    response.getRemoteSourceReport()->setCorrectableErrorsCount(m_nbCorrectableErrors);
+    response.getRemoteSourceReport()->setUncorrectableErrorsCount(m_nbUncorrectableErrors);
+    response.getRemoteSourceReport()->setNbOriginalBlocks(m_currentMeta.m_nbOriginalBlocks);
+    response.getRemoteSourceReport()->setNbFecBlocks(m_currentMeta.m_nbFECBlocks);
+    response.getRemoteSourceReport()->setCenterFreq(m_currentMeta.m_centerFrequency);
+    response.getRemoteSourceReport()->setSampleRate(m_currentMeta.m_sampleRate);
+    response.getRemoteSourceReport()->setDeviceCenterFreq(m_deviceAPI->getSampleSink()->getCenterFrequency()/1000);
+    response.getRemoteSourceReport()->setDeviceSampleRate(m_deviceAPI->getSampleSink()->getSampleRate());
 }
 
-void DaemonSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DaemonSourceSettings& settings, bool force)
+void RemoteSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteSourceSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setTx(1);
-    swgChannelSettings->setChannelType(new QString("DaemonSource"));
-    swgChannelSettings->setDaemonSourceSettings(new SWGSDRangel::SWGDaemonSourceSettings());
-    SWGSDRangel::SWGDaemonSourceSettings *swgDaemonSourceSettings = swgChannelSettings->getDaemonSourceSettings();
+    swgChannelSettings->setChannelType(new QString("RemoteSource"));
+    swgChannelSettings->setRemoteSourceSettings(new SWGSDRangel::SWGRemoteSourceSettings());
+    SWGSDRangel::SWGRemoteSourceSettings *swgRemoteSourceSettings = swgChannelSettings->getRemoteSourceSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
     if (channelSettingsKeys.contains("dataAddress") || force) {
-        swgDaemonSourceSettings->setDataAddress(new QString(settings.m_dataAddress));
+        swgRemoteSourceSettings->setDataAddress(new QString(settings.m_dataAddress));
     }
     if (channelSettingsKeys.contains("dataPort") || force) {
-        swgDaemonSourceSettings->setDataPort(settings.m_dataPort);
+        swgRemoteSourceSettings->setDataPort(settings.m_dataPort);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
-        swgDaemonSourceSettings->setRgbColor(settings.m_rgbColor);
+        swgRemoteSourceSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgDaemonSourceSettings->setTitle(new QString(settings.m_title));
+        swgRemoteSourceSettings->setTitle(new QString(settings.m_title));
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
@@ -551,13 +552,13 @@ void DaemonSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys
     delete swgChannelSettings;
 }
 
-void DaemonSource::networkManagerFinished(QNetworkReply *reply)
+void RemoteSource::networkManagerFinished(QNetworkReply *reply)
 {
     QNetworkReply::NetworkError replyError = reply->error();
 
     if (replyError)
     {
-        qWarning() << "DaemonSource::networkManagerFinished:"
+        qWarning() << "RemoteSource::networkManagerFinished:"
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();
@@ -566,5 +567,5 @@ void DaemonSource::networkManagerFinished(QNetworkReply *reply)
 
     QString answer = reply->readAll();
     answer.chop(1); // remove last \n
-    qDebug("DaemonSource::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    qDebug("RemoteSource::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }

@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGDaemonSourceSettings.h"
+#include "SWGRemoteSourceSettings.h"
 
 #include "SWGHelpers.h"
 
@@ -22,12 +22,12 @@
 
 namespace SWGSDRangel {
 
-SWGDaemonSourceSettings::SWGDaemonSourceSettings(QString* json) {
+SWGRemoteSourceSettings::SWGRemoteSourceSettings(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGDaemonSourceSettings::SWGDaemonSourceSettings() {
+SWGRemoteSourceSettings::SWGRemoteSourceSettings() {
     data_address = nullptr;
     m_data_address_isSet = false;
     data_port = 0;
@@ -48,12 +48,12 @@ SWGDaemonSourceSettings::SWGDaemonSourceSettings() {
     m_reverse_api_channel_index_isSet = false;
 }
 
-SWGDaemonSourceSettings::~SWGDaemonSourceSettings() {
+SWGRemoteSourceSettings::~SWGRemoteSourceSettings() {
     this->cleanup();
 }
 
 void
-SWGDaemonSourceSettings::init() {
+SWGRemoteSourceSettings::init() {
     data_address = new QString("");
     m_data_address_isSet = false;
     data_port = 0;
@@ -75,7 +75,7 @@ SWGDaemonSourceSettings::init() {
 }
 
 void
-SWGDaemonSourceSettings::cleanup() {
+SWGRemoteSourceSettings::cleanup() {
     if(data_address != nullptr) { 
         delete data_address;
     }
@@ -93,8 +93,8 @@ SWGDaemonSourceSettings::cleanup() {
 
 }
 
-SWGDaemonSourceSettings*
-SWGDaemonSourceSettings::fromJson(QString &json) {
+SWGRemoteSourceSettings*
+SWGRemoteSourceSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -103,7 +103,7 @@ SWGDaemonSourceSettings::fromJson(QString &json) {
 }
 
 void
-SWGDaemonSourceSettings::fromJsonObject(QJsonObject &pJson) {
+SWGRemoteSourceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&data_address, pJson["dataAddress"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&data_port, pJson["dataPort"], "qint32", "");
@@ -125,7 +125,7 @@ SWGDaemonSourceSettings::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGDaemonSourceSettings::asJson ()
+SWGRemoteSourceSettings::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -136,7 +136,7 @@ SWGDaemonSourceSettings::asJson ()
 }
 
 QJsonObject*
-SWGDaemonSourceSettings::asJsonObject() {
+SWGRemoteSourceSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(data_address != nullptr && *data_address != QString("")){
         toJsonValue(QString("dataAddress"), data_address, obj, QString("QString"));
@@ -170,98 +170,98 @@ SWGDaemonSourceSettings::asJsonObject() {
 }
 
 QString*
-SWGDaemonSourceSettings::getDataAddress() {
+SWGRemoteSourceSettings::getDataAddress() {
     return data_address;
 }
 void
-SWGDaemonSourceSettings::setDataAddress(QString* data_address) {
+SWGRemoteSourceSettings::setDataAddress(QString* data_address) {
     this->data_address = data_address;
     this->m_data_address_isSet = true;
 }
 
 qint32
-SWGDaemonSourceSettings::getDataPort() {
+SWGRemoteSourceSettings::getDataPort() {
     return data_port;
 }
 void
-SWGDaemonSourceSettings::setDataPort(qint32 data_port) {
+SWGRemoteSourceSettings::setDataPort(qint32 data_port) {
     this->data_port = data_port;
     this->m_data_port_isSet = true;
 }
 
 qint32
-SWGDaemonSourceSettings::getRgbColor() {
+SWGRemoteSourceSettings::getRgbColor() {
     return rgb_color;
 }
 void
-SWGDaemonSourceSettings::setRgbColor(qint32 rgb_color) {
+SWGRemoteSourceSettings::setRgbColor(qint32 rgb_color) {
     this->rgb_color = rgb_color;
     this->m_rgb_color_isSet = true;
 }
 
 QString*
-SWGDaemonSourceSettings::getTitle() {
+SWGRemoteSourceSettings::getTitle() {
     return title;
 }
 void
-SWGDaemonSourceSettings::setTitle(QString* title) {
+SWGRemoteSourceSettings::setTitle(QString* title) {
     this->title = title;
     this->m_title_isSet = true;
 }
 
 qint32
-SWGDaemonSourceSettings::getUseReverseApi() {
+SWGRemoteSourceSettings::getUseReverseApi() {
     return use_reverse_api;
 }
 void
-SWGDaemonSourceSettings::setUseReverseApi(qint32 use_reverse_api) {
+SWGRemoteSourceSettings::setUseReverseApi(qint32 use_reverse_api) {
     this->use_reverse_api = use_reverse_api;
     this->m_use_reverse_api_isSet = true;
 }
 
 QString*
-SWGDaemonSourceSettings::getReverseApiAddress() {
+SWGRemoteSourceSettings::getReverseApiAddress() {
     return reverse_api_address;
 }
 void
-SWGDaemonSourceSettings::setReverseApiAddress(QString* reverse_api_address) {
+SWGRemoteSourceSettings::setReverseApiAddress(QString* reverse_api_address) {
     this->reverse_api_address = reverse_api_address;
     this->m_reverse_api_address_isSet = true;
 }
 
 qint32
-SWGDaemonSourceSettings::getReverseApiPort() {
+SWGRemoteSourceSettings::getReverseApiPort() {
     return reverse_api_port;
 }
 void
-SWGDaemonSourceSettings::setReverseApiPort(qint32 reverse_api_port) {
+SWGRemoteSourceSettings::setReverseApiPort(qint32 reverse_api_port) {
     this->reverse_api_port = reverse_api_port;
     this->m_reverse_api_port_isSet = true;
 }
 
 qint32
-SWGDaemonSourceSettings::getReverseApiDeviceIndex() {
+SWGRemoteSourceSettings::getReverseApiDeviceIndex() {
     return reverse_api_device_index;
 }
 void
-SWGDaemonSourceSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
+SWGRemoteSourceSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
     this->reverse_api_device_index = reverse_api_device_index;
     this->m_reverse_api_device_index_isSet = true;
 }
 
 qint32
-SWGDaemonSourceSettings::getReverseApiChannelIndex() {
+SWGRemoteSourceSettings::getReverseApiChannelIndex() {
     return reverse_api_channel_index;
 }
 void
-SWGDaemonSourceSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
+SWGRemoteSourceSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
     this->reverse_api_channel_index = reverse_api_channel_index;
     this->m_reverse_api_channel_index_isSet = true;
 }
 
 
 bool
-SWGDaemonSourceSettings::isSet(){
+SWGRemoteSourceSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(data_address != nullptr && *data_address != QString("")){ isObjectUpdated = true; break;}

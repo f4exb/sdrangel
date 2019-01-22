@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2018-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,6 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "remotesourcethread.h"
+
 #include <algorithm>
 
 #include <QUdpSocket>
@@ -22,12 +24,11 @@
 #include "channel/sdrdaemondataqueue.h"
 #include "channel/sdrdaemondatablock.h"
 
-#include "daemonsourcethread.h"
 
-MESSAGE_CLASS_DEFINITION(DaemonSourceThread::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(DaemonSourceThread::MsgDataBind, Message)
+MESSAGE_CLASS_DEFINITION(RemoteSourceThread::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(RemoteSourceThread::MsgDataBind, Message)
 
-DaemonSourceThread::DaemonSourceThread(SDRDaemonDataQueue *dataQueue, QObject* parent) :
+RemoteSourceThread::RemoteSourceThread(SDRDaemonDataQueue *dataQueue, QObject* parent) :
     QThread(parent),
     m_running(false),
     m_dataQueue(dataQueue),
@@ -38,26 +39,26 @@ DaemonSourceThread::DaemonSourceThread(SDRDaemonDataQueue *dataQueue, QObject* p
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
-DaemonSourceThread::~DaemonSourceThread()
+RemoteSourceThread::~RemoteSourceThread()
 {
-    qDebug("DaemonSourceThread::~DaemonSourceThread");
+    qDebug("RemoteSourceThread::~RemoteSourceThread");
 }
 
-void DaemonSourceThread::startStop(bool start)
+void RemoteSourceThread::startStop(bool start)
 {
     MsgStartStop *msg = MsgStartStop::create(start);
     m_inputMessageQueue.push(msg);
 }
 
-void DaemonSourceThread::dataBind(const QString& address, uint16_t port)
+void RemoteSourceThread::dataBind(const QString& address, uint16_t port)
 {
     MsgDataBind *msg = MsgDataBind::create(address, port);
     m_inputMessageQueue.push(msg);
 }
 
-void DaemonSourceThread::startWork()
+void RemoteSourceThread::startWork()
 {
-    qDebug("DaemonSourceThread::startWork");
+    qDebug("RemoteSourceThread::startWork");
     m_startWaitMutex.lock();
     m_socket = new QUdpSocket(this);
     start();
@@ -66,18 +67,18 @@ void DaemonSourceThread::startWork()
     m_startWaitMutex.unlock();
 }
 
-void DaemonSourceThread::stopWork()
+void RemoteSourceThread::stopWork()
 {
-    qDebug("DaemonSourceThread::stopWork");
+    qDebug("RemoteSourceThread::stopWork");
     delete m_socket;
     m_socket = 0;
     m_running = false;
     wait();
 }
 
-void DaemonSourceThread::run()
+void RemoteSourceThread::run()
 {
-    qDebug("DaemonSourceThread::run: begin");
+    qDebug("RemoteSourceThread::run: begin");
     m_running = true;
     m_startWaiter.wakeAll();
 
@@ -87,11 +88,11 @@ void DaemonSourceThread::run()
     }
 
     m_running = false;
-    qDebug("DaemonSourceThread::run: end");
+    qDebug("RemoteSourceThread::run: end");
 }
 
 
-void DaemonSourceThread::handleInputMessages()
+void RemoteSourceThread::handleInputMessages()
 {
     Message* message;
 
@@ -100,7 +101,7 @@ void DaemonSourceThread::handleInputMessages()
         if (MsgStartStop::match(*message))
         {
             MsgStartStop* notif = (MsgStartStop*) message;
-            qDebug("DaemonSourceThread::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
+            qDebug("RemoteSourceThread::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
 
             if (notif->getStartStop()) {
                 startWork();
@@ -113,7 +114,7 @@ void DaemonSourceThread::handleInputMessages()
         else if (MsgDataBind::match(*message))
         {
             MsgDataBind* notif = (MsgDataBind*) message;
-            qDebug("DaemonSourceThread::handleInputMessages: MsgDataBind: %s:%d", qPrintable(notif->getAddress().toString()), notif->getPort());
+            qDebug("RemoteSourceThread::handleInputMessages: MsgDataBind: %s:%d", qPrintable(notif->getAddress().toString()), notif->getPort());
 
             if (m_socket)
             {
@@ -125,7 +126,7 @@ void DaemonSourceThread::handleInputMessages()
     }
 }
 
-void DaemonSourceThread::readPendingDatagrams()
+void RemoteSourceThread::readPendingDatagrams()
 {
     SDRDaemonSuperBlock superBlock;
     qint64 size;
@@ -181,7 +182,7 @@ void DaemonSourceThread::readPendingDatagrams()
         }
         else
         {
-            qWarning("DaemonSourceThread::readPendingDatagrams: wrong super block size not processing");
+            qWarning("RemoteSourceThread::readPendingDatagrams: wrong super block size not processing");
         }
     }
 }

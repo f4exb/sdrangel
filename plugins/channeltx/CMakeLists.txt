@@ -8,7 +8,7 @@ add_subdirectory(udpsource)
 
 find_package(CM256cc)
 if(CM256CC_FOUND)
-    add_subdirectory(daemonsource)
+    add_subdirectory(remotesource)
 endif(CM256CC_FOUND)
 
 find_package(OpenCV)
@@ -17,6 +17,6 @@ if (OpenCV_FOUND)
 endif()
 
 if (BUILD_DEBIAN)
-    add_subdirectory(daemonsource)
+    add_subdirectory(remotesource)
 endif (BUILD_DEBIAN)
 

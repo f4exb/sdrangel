@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2018-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,23 +14,25 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "remotesourcesettings.h"
+
 #include <QColor>
 
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
-#include "daemonsourcesettings.h"
 
-DaemonSourceSettings::DaemonSourceSettings()
+
+RemoteSourceSettings::RemoteSourceSettings()
 {
     resetToDefaults();
 }
 
-void DaemonSourceSettings::resetToDefaults()
+void RemoteSourceSettings::resetToDefaults()
 {
     m_dataAddress = "127.0.0.1";
     m_dataPort = 9090;
     m_rgbColor = QColor(140, 4, 4).rgb();
-    m_title = "Daemon source";
+    m_title = "Remote source";
     m_channelMarker = nullptr;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -39,7 +41,7 @@ void DaemonSourceSettings::resetToDefaults()
     m_reverseAPIChannelIndex = 0;
 }
 
-QByteArray DaemonSourceSettings::serialize() const
+QByteArray RemoteSourceSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeString(1, m_dataAddress);
@@ -55,7 +57,7 @@ QByteArray DaemonSourceSettings::serialize() const
     return s.final();
 }
 
-bool DaemonSourceSettings::deserialize(const QByteArray& data)
+bool RemoteSourceSettings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 
@@ -80,7 +82,7 @@ bool DaemonSourceSettings::deserialize(const QByteArray& data)
         }
 
         d.readU32(3, &m_rgbColor, QColor(0, 255, 255).rgb());
-        d.readString(4, &m_title, "Daemon source");
+        d.readString(4, &m_title, "Remote source");
         d.readBool(5, &m_useReverseAPI, false);
         d.readString(6, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(7, &tmp, 0);

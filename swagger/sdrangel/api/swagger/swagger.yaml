@@ -1890,8 +1890,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/NFMMod.yaml#/NFMModSettings"
       RemoteSinkSettings:
         $ref: "http://localhost:8081/api/swagger/include/RemoteSink.yaml#/RemoteSinkSettings"
-      DaemonSourceSettings:
-        $ref: "http://localhost:8081/api/swagger/include/DaemonSource.yaml#/DaemonSourceSettings"
+      RemoteSourceSettings:
+        $ref: "http://localhost:8081/api/swagger/include/RemoteSource.yaml#/RemoteSourceSettings"
       SSBModSettings:
         $ref: "http://localhost:8081/api/swagger/include/SSBMod.yaml#/SSBModSettings"
       SSBDemodSettings:
@@ -1931,8 +1931,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/NFMMod.yaml#/NFMModReport"
       SSBDemodReport:
         $ref: "http://localhost:8081/api/swagger/include/SSBDemod.yaml#/SSBDemodReport"
-      DaemonSourceReport:
-        $ref: "http://localhost:8081/api/swagger/include/DaemonSource.yaml#/DaemonSourceReport"
+      RemoteSourceReport:
+        $ref: "http://localhost:8081/api/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
       SSBModReport:
         $ref: "http://localhost:8081/api/swagger/include/SSBMod.yaml#/SSBModReport"
       UDPSourceReport:

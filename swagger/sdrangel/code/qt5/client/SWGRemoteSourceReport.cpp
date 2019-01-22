@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGDaemonSourceReport.h"
+#include "SWGRemoteSourceReport.h"
 
 #include "SWGHelpers.h"
 
@@ -22,12 +22,12 @@
 
 namespace SWGSDRangel {
 
-SWGDaemonSourceReport::SWGDaemonSourceReport(QString* json) {
+SWGRemoteSourceReport::SWGRemoteSourceReport(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGDaemonSourceReport::SWGDaemonSourceReport() {
+SWGRemoteSourceReport::SWGRemoteSourceReport() {
     queue_length = 0;
     m_queue_length_isSet = false;
     queue_size = 0;
@@ -56,12 +56,12 @@ SWGDaemonSourceReport::SWGDaemonSourceReport() {
     m_device_sample_rate_isSet = false;
 }
 
-SWGDaemonSourceReport::~SWGDaemonSourceReport() {
+SWGRemoteSourceReport::~SWGRemoteSourceReport() {
     this->cleanup();
 }
 
 void
-SWGDaemonSourceReport::init() {
+SWGRemoteSourceReport::init() {
     queue_length = 0;
     m_queue_length_isSet = false;
     queue_size = 0;
@@ -91,7 +91,7 @@ SWGDaemonSourceReport::init() {
 }
 
 void
-SWGDaemonSourceReport::cleanup() {
+SWGRemoteSourceReport::cleanup() {
 
 
 
@@ -107,8 +107,8 @@ SWGDaemonSourceReport::cleanup() {
 
 }
 
-SWGDaemonSourceReport*
-SWGDaemonSourceReport::fromJson(QString &json) {
+SWGRemoteSourceReport*
+SWGRemoteSourceReport::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -117,7 +117,7 @@ SWGDaemonSourceReport::fromJson(QString &json) {
 }
 
 void
-SWGDaemonSourceReport::fromJsonObject(QJsonObject &pJson) {
+SWGRemoteSourceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&queue_length, pJson["queueLength"], "qint32", "");
     
     ::SWGSDRangel::setValue(&queue_size, pJson["queueSize"], "qint32", "");
@@ -147,7 +147,7 @@ SWGDaemonSourceReport::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGDaemonSourceReport::asJson ()
+SWGRemoteSourceReport::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -158,7 +158,7 @@ SWGDaemonSourceReport::asJson ()
 }
 
 QJsonObject*
-SWGDaemonSourceReport::asJsonObject() {
+SWGRemoteSourceReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_queue_length_isSet){
         obj->insert("queueLength", QJsonValue(queue_length));
@@ -204,138 +204,138 @@ SWGDaemonSourceReport::asJsonObject() {
 }
 
 qint32
-SWGDaemonSourceReport::getQueueLength() {
+SWGRemoteSourceReport::getQueueLength() {
     return queue_length;
 }
 void
-SWGDaemonSourceReport::setQueueLength(qint32 queue_length) {
+SWGRemoteSourceReport::setQueueLength(qint32 queue_length) {
     this->queue_length = queue_length;
     this->m_queue_length_isSet = true;
 }
 
 qint32
-SWGDaemonSourceReport::getQueueSize() {
+SWGRemoteSourceReport::getQueueSize() {
     return queue_size;
 }
 void
-SWGDaemonSourceReport::setQueueSize(qint32 queue_size) {
+SWGRemoteSourceReport::setQueueSize(qint32 queue_size) {
     this->queue_size = queue_size;
     this->m_queue_size_isSet = true;
 }
 
 qint32
-SWGDaemonSourceReport::getSamplesCount() {
+SWGRemoteSourceReport::getSamplesCount() {
     return samples_count;
 }
 void
-SWGDaemonSourceReport::setSamplesCount(qint32 samples_count) {
+SWGRemoteSourceReport::setSamplesCount(qint32 samples_count) {
     this->samples_count = samples_count;
     this->m_samples_count_isSet = true;
 }
 
 qint32
-SWGDaemonSourceReport::getCorrectableErrorsCount() {
+SWGRemoteSourceReport::getCorrectableErrorsCount() {
     return correctable_errors_count;
 }
 void
-SWGDaemonSourceReport::setCorrectableErrorsCount(qint32 correctable_errors_count) {
+SWGRemoteSourceReport::setCorrectableErrorsCount(qint32 correctable_errors_count) {
     this->correctable_errors_count = correctable_errors_count;
     this->m_correctable_errors_count_isSet = true;
 }
 
 qint32
-SWGDaemonSourceReport::getUncorrectableErrorsCount() {
+SWGRemoteSourceReport::getUncorrectableErrorsCount() {
     return uncorrectable_errors_count;
 }
 void
-SWGDaemonSourceReport::setUncorrectableErrorsCount(qint32 uncorrectable_errors_count) {
+SWGRemoteSourceReport::setUncorrectableErrorsCount(qint32 uncorrectable_errors_count) {
     this->uncorrectable_errors_count = uncorrectable_errors_count;
     this->m_uncorrectable_errors_count_isSet = true;
 }
 
 qint32
-SWGDaemonSourceReport::getTvSec() {
+SWGRemoteSourceReport::getTvSec() {
     return tv_sec;
 }
 void
-SWGDaemonSourceReport::setTvSec(qint32 tv_sec) {
+SWGRemoteSourceReport::setTvSec(qint32 tv_sec) {
     this->tv_sec = tv_sec;
     this->m_tv_sec_isSet = true;
 }
 
 qint32
-SWGDaemonSourceReport::getTvUSec() {
+SWGRemoteSourceReport::getTvUSec() {
     return tv_u_sec;
 }
 void
-SWGDaemonSourceReport::setTvUSec(qint32 tv_u_sec) {
+SWGRemoteSourceReport::setTvUSec(qint32 tv_u_sec) {
     this->tv_u_sec = tv_u_sec;
     this->m_tv_u_sec_isSet = true;
 }
 
 qint32
-SWGDaemonSourceReport::getNbOriginalBlocks() {
+SWGRemoteSourceReport::getNbOriginalBlocks() {
     return nb_original_blocks;
 }
 void
-SWGDaemonSourceReport::setNbOriginalBlocks(qint32 nb_original_blocks) {
+SWGRemoteSourceReport::setNbOriginalBlocks(qint32 nb_original_blocks) {
     this->nb_original_blocks = nb_original_blocks;
     this->m_nb_original_blocks_isSet = true;
 }
 
 qint32
-SWGDaemonSourceReport::getNbFecBlocks() {
+SWGRemoteSourceReport::getNbFecBlocks() {
     return nb_fec_blocks;
 }
 void
-SWGDaemonSourceReport::setNbFecBlocks(qint32 nb_fec_blocks) {
+SWGRemoteSourceReport::setNbFecBlocks(qint32 nb_fec_blocks) {
     this->nb_fec_blocks = nb_fec_blocks;
     this->m_nb_fec_blocks_isSet = true;
 }
 
 qint32
-SWGDaemonSourceReport::getCenterFreq() {
+SWGRemoteSourceReport::getCenterFreq() {
     return center_freq;
 }
 void
-SWGDaemonSourceReport::setCenterFreq(qint32 center_freq) {
+SWGRemoteSourceReport::setCenterFreq(qint32 center_freq) {
     this->center_freq = center_freq;
     this->m_center_freq_isSet = true;
 }
 
 qint32
-SWGDaemonSourceReport::getSampleRate() {
+SWGRemoteSourceReport::getSampleRate() {
     return sample_rate;
 }
 void
-SWGDaemonSourceReport::setSampleRate(qint32 sample_rate) {
+SWGRemoteSourceReport::setSampleRate(qint32 sample_rate) {
     this->sample_rate = sample_rate;
     this->m_sample_rate_isSet = true;
 }
 
 qint32
-SWGDaemonSourceReport::getDeviceCenterFreq() {
+SWGRemoteSourceReport::getDeviceCenterFreq() {
     return device_center_freq;
 }
 void
-SWGDaemonSourceReport::setDeviceCenterFreq(qint32 device_center_freq) {
+SWGRemoteSourceReport::setDeviceCenterFreq(qint32 device_center_freq) {
     this->device_center_freq = device_center_freq;
     this->m_device_center_freq_isSet = true;
 }
 
 qint32
-SWGDaemonSourceReport::getDeviceSampleRate() {
+SWGRemoteSourceReport::getDeviceSampleRate() {
     return device_sample_rate;
 }
 void
-SWGDaemonSourceReport::setDeviceSampleRate(qint32 device_sample_rate) {
+SWGRemoteSourceReport::setDeviceSampleRate(qint32 device_sample_rate) {
     this->device_sample_rate = device_sample_rate;
     this->m_device_sample_rate_isSet = true;
 }
 
 
 bool
-SWGDaemonSourceReport::isSet(){
+SWGRemoteSourceReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_queue_length_isSet){ isObjectUpdated = true; break;}

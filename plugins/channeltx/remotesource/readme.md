@@ -1,8 +1,8 @@
-<h1>Daemon source channel plugin</h1>
+<h1>Remote source channel plugin</h1>
 
 <h2>Introduction</h2>
 
-This plugin receives I/Q samples from UDP and copies them to the baseband to be transmitted by the sink output device. It uses SDRDaemon format and possible FEC protection.
+This plugin receives I/Q samples from UDP and copies them to the baseband to be transmitted by the sink output device. It uses SDRangel remote format and possible FEC protection.
 
 It is present only in Linux binary releases.
 
@@ -12,7 +12,7 @@ The plugin will be built only if the [CM256cc library](https://github.com/f4exb/
 
 <h2>Interface</h2>
 
-![Daemon source channel plugin GUI](../../../doc/img/DaemonSource.png)
+![Remote source channel plugin GUI](../../../doc/img/RemoteSource.png)
 
 <h3>1: Data local address</h2>
 
@@ -32,7 +32,7 @@ Stream sample rate as specified in the stream meta data
 
 <h3>5: Stream status</h3>
 
-![Daemon source channel plugin GUI](../../../doc/img/DaemonSource_5.png)
+![Remote source channel plugin GUI](../../../doc/img/RemoteSource_5.png)
 
 <h4>5.1: Total number of frames and number of FEC blocks</h4>
 

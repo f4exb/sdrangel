@@ -9,7 +9,7 @@ CONFIG += plugin
 
 QT += core gui widgets multimedia network opengl
 
-TARGET = daemonsource
+TARGET = remotesource
 
 CONFIG(MINGW32):LIBCM256CCSRC = "C:\softs\cm256cc"
 CONFIG(MSVC):LIBCM256CCSRC = "C:\softs\cm256cc"
@@ -38,19 +38,19 @@ CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(MSVC):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(macx):INCLUDEPATH += "../../../../../boost_1_69_0"
 
-SOURCES += daemonsource.cpp\
-    daemonsourcegui.cpp\
-    daemonsourcesettings.cpp\
-    daemonsourceplugin.cpp\
-    daemonsourcethread.cpp
+SOURCES += remotesource.cpp\
+    remotesourcegui.cpp\
+    remotesourcesettings.cpp\
+    remotesourceplugin.cpp\
+    remotesourcethread.cpp
 
-HEADERS += daemonsource.h\
-    daemonsourcegui.h\
-    daemonsourcesettings.h\
-    daemonsourceplugin.h\
-    daemonsourcethread.h
+HEADERS += remotesource.h\
+    remotesourcegui.h\
+    remotesourcesettings.h\
+    remotesourceplugin.h\
+    remotesourcethread.h
 
-FORMS += daemonsourcegui.ui
+FORMS += remotesourcegui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui

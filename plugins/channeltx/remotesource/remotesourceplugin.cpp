@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2018-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,61 +18,61 @@
 #include "plugin/pluginapi.h"
 
 #ifndef SERVER_MODE
-#include "daemonsourcegui.h"
+#include "remotesourcegui.h"
 #endif
-#include "daemonsource.h"
-#include "daemonsourceplugin.h"
+#include "remotesource.h"
+#include "remotesourceplugin.h"
 
-const PluginDescriptor DaemonSourcePlugin::m_pluginDescriptor = {
-    QString("Daemon channel source"),
-    QString("4.3.2"),
+const PluginDescriptor RemoteSourcePlugin::m_pluginDescriptor = {
+    QString("Remote channel source"),
+    QString("4.4.2"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
     QString("https://github.com/f4exb/sdrangel")
 };
 
-DaemonSourcePlugin::DaemonSourcePlugin(QObject* parent) :
+RemoteSourcePlugin::RemoteSourcePlugin(QObject* parent) :
     QObject(parent),
     m_pluginAPI(0)
 {
 }
 
-const PluginDescriptor& DaemonSourcePlugin::getPluginDescriptor() const
+const PluginDescriptor& RemoteSourcePlugin::getPluginDescriptor() const
 {
     return m_pluginDescriptor;
 }
 
-void DaemonSourcePlugin::initPlugin(PluginAPI* pluginAPI)
+void RemoteSourcePlugin::initPlugin(PluginAPI* pluginAPI)
 {
     m_pluginAPI = pluginAPI;
 
     // register source
-    m_pluginAPI->registerTxChannel(DaemonSource::m_channelIdURI, DaemonSource::m_channelId, this);
+    m_pluginAPI->registerTxChannel(RemoteSource::m_channelIdURI, RemoteSource::m_channelId, this);
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* DaemonSourcePlugin::createTxChannelGUI(
+PluginInstanceGUI* RemoteSourcePlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet __attribute__((unused)),
         BasebandSampleSource *txChannel __attribute__((unused)))
 {
     return 0;
 }
 #else
-PluginInstanceGUI* DaemonSourcePlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
+PluginInstanceGUI* RemoteSourcePlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
 {
-    return DaemonSourceGUI::create(m_pluginAPI, deviceUISet, txChannel);
+    return RemoteSourceGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 #endif
 
-BasebandSampleSource* DaemonSourcePlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
+BasebandSampleSource* RemoteSourcePlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
 {
-    return new DaemonSource(deviceAPI);
+    return new RemoteSource(deviceAPI);
 }
 
-ChannelSourceAPI* DaemonSourcePlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)
+ChannelSourceAPI* RemoteSourcePlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)
 {
-    return new DaemonSource(deviceAPI);
+    return new RemoteSource(deviceAPI);
 }
 
 

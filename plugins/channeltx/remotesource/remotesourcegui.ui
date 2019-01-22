@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DaemonSourceGUI</class>
- <widget class="RollupWidget" name="DaemonSourceGUI">
+ <class>RemoteSourceGUI</class>
+ <widget class="RollupWidget" name="RemoteSourceGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -35,7 +35,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Daemon source</string>
+   <string>Remote source</string>
   </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">

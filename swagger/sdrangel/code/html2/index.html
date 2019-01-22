@@ -1759,8 +1759,8 @@ margin-bottom: 20px;
     "SSBDemodReport" : {
       "$ref" : "#/definitions/SSBDemodReport"
     },
-    "DaemonSourceReport" : {
-      "$ref" : "#/definitions/DaemonSourceReport"
+    "RemoteSourceReport" : {
+      "$ref" : "#/definitions/RemoteSourceReport"
     },
     "SSBModReport" : {
       "$ref" : "#/definitions/SSBModReport"
@@ -1816,8 +1816,8 @@ margin-bottom: 20px;
     "RemoteSinkSettings" : {
       "$ref" : "#/definitions/RemoteSinkSettings"
     },
-    "DaemonSourceSettings" : {
-      "$ref" : "#/definitions/DaemonSourceSettings"
+    "RemoteSourceSettings" : {
+      "$ref" : "#/definitions/RemoteSourceSettings"
     },
     "SSBModSettings" : {
       "$ref" : "#/definitions/SSBModSettings"
@@ -2047,98 +2047,6 @@ margin-bottom: 20px;
     }
   },
   "description" : "DV serial device details"
-};
-            defs.DaemonSourceReport = {
-  "properties" : {
-    "queueLength" : {
-      "type" : "integer",
-      "description" : "Data read/write queue length in number of data frames"
-    },
-    "queueSize" : {
-      "type" : "integer",
-      "description" : "Data read/write queue size in number of data frames"
-    },
-    "samplesCount" : {
-      "type" : "integer",
-      "description" : "Absolute consumed samples count"
-    },
-    "correctableErrorsCount" : {
-      "type" : "integer",
-      "description" : "Absolute number of correctable errors"
-    },
-    "uncorrectableErrorsCount" : {
-      "type" : "integer",
-      "description" : "Absolute number of uncorrectable errors"
-    },
-    "tvSec" : {
-      "type" : "integer",
-      "description" : "Counts timestamp seconds"
-    },
-    "tvUSec" : {
-      "type" : "integer",
-      "description" : "Counts timestamp microseconds"
-    },
-    "nbOriginalBlocks" : {
-      "type" : "integer",
-      "description" : "Number of original blocks per frame"
-    },
-    "nbFECBlocks" : {
-      "type" : "integer",
-      "description" : "Number of FEC blocks per frame"
-    },
-    "centerFreq" : {
-      "type" : "integer",
-      "description" : "Stream center frequency setting in kHz"
-    },
-    "sampleRate" : {
-      "type" : "integer",
-      "description" : "Stream nominal sample rate in S/s"
-    },
-    "deviceCenterFreq" : {
-      "type" : "integer",
-      "description" : "Device center frequency in kHz"
-    },
-    "deviceSampleRate" : {
-      "type" : "integer",
-      "description" : "Device baseband sample rate in S/s"
-    }
-  },
-  "description" : "Daemon channel source report"
-};
-            defs.DaemonSourceSettings = {
-  "properties" : {
-    "dataAddress" : {
-      "type" : "string",
-      "description" : "Remote USB data address"
-    },
-    "dataPort" : {
-      "type" : "integer",
-      "description" : "Remote USB data port"
-    },
-    "rgbColor" : {
-      "type" : "integer"
-    },
-    "title" : {
-      "type" : "string"
-    },
-    "useReverseAPI" : {
-      "type" : "integer",
-      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
-    },
-    "reverseAPIAddress" : {
-      "type" : "string"
-    },
-    "reverseAPIPort" : {
-      "type" : "integer"
-    },
-    "reverseAPIDeviceIndex" : {
-      "type" : "integer"
-    },
-    "reverseAPIChannelIndex" : {
-      "type" : "integer"
-    }
-  },
-  "description" : "Daemon channel source settings"
 };
             defs.DeviceListItem = {
   "properties" : {
@@ -3844,6 +3752,98 @@ margin-bottom: 20px;
     }
   },
   "description" : "Remote channel sink settings"
+};
+            defs.RemoteSourceReport = {
+  "properties" : {
+    "queueLength" : {
+      "type" : "integer",
+      "description" : "Data read/write queue length in number of data frames"
+    },
+    "queueSize" : {
+      "type" : "integer",
+      "description" : "Data read/write queue size in number of data frames"
+    },
+    "samplesCount" : {
+      "type" : "integer",
+      "description" : "Absolute consumed samples count"
+    },
+    "correctableErrorsCount" : {
+      "type" : "integer",
+      "description" : "Absolute number of correctable errors"
+    },
+    "uncorrectableErrorsCount" : {
+      "type" : "integer",
+      "description" : "Absolute number of uncorrectable errors"
+    },
+    "tvSec" : {
+      "type" : "integer",
+      "description" : "Counts timestamp seconds"
+    },
+    "tvUSec" : {
+      "type" : "integer",
+      "description" : "Counts timestamp microseconds"
+    },
+    "nbOriginalBlocks" : {
+      "type" : "integer",
+      "description" : "Number of original blocks per frame"
+    },
+    "nbFECBlocks" : {
+      "type" : "integer",
+      "description" : "Number of FEC blocks per frame"
+    },
+    "centerFreq" : {
+      "type" : "integer",
+      "description" : "Stream center frequency setting in kHz"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "description" : "Stream nominal sample rate in S/s"
+    },
+    "deviceCenterFreq" : {
+      "type" : "integer",
+      "description" : "Device center frequency in kHz"
+    },
+    "deviceSampleRate" : {
+      "type" : "integer",
+      "description" : "Device baseband sample rate in S/s"
+    }
+  },
+  "description" : "Remote channel source report"
+};
+            defs.RemoteSourceSettings = {
+  "properties" : {
+    "dataAddress" : {
+      "type" : "string",
+      "description" : "Remote USB data address"
+    },
+    "dataPort" : {
+      "type" : "integer",
+      "description" : "Remote USB data port"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "Remote channel source settings"
 };
             defs.RtlSdrReport = {
   "properties" : {
@@ -24373,7 +24373,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-01-22T23:24:38.456+01:00
+              Generated 2019-01-23T00:24:46.985+01:00
             </div>
           </div>
       </div>

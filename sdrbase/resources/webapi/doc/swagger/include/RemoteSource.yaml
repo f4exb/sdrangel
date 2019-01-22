@@ -1,5 +1,5 @@
-DaemonSourceSettings:
-  description: "Daemon channel source settings"
+RemoteSourceSettings:
+  description: "Remote channel source settings"
   properties:
     dataAddress:
       description: "Remote USB data address"
@@ -23,8 +23,8 @@ DaemonSourceSettings:
     reverseAPIChannelIndex:
       type: integer 
       
-DaemonSourceReport:
-  description: "Daemon channel source report"
+RemoteSourceReport:
+  description: "Remote channel source report"
   properties:
     queueLength:
       description: "Data read/write queue length in number of data frames"

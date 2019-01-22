@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGDaemonSourceSettings.h
+ * SWGRemoteSourceSettings.h
  *
- * Daemon channel source settings
+ * Remote channel source settings
  */
 
-#ifndef SWGDaemonSourceSettings_H_
-#define SWGDaemonSourceSettings_H_
+#ifndef SWGRemoteSourceSettings_H_
+#define SWGRemoteSourceSettings_H_
 
 #include <QJsonObject>
 
@@ -29,18 +29,18 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGDaemonSourceSettings: public SWGObject {
+class SWG_API SWGRemoteSourceSettings: public SWGObject {
 public:
-    SWGDaemonSourceSettings();
-    SWGDaemonSourceSettings(QString* json);
-    virtual ~SWGDaemonSourceSettings();
+    SWGRemoteSourceSettings();
+    SWGRemoteSourceSettings(QString* json);
+    virtual ~SWGRemoteSourceSettings();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGDaemonSourceSettings* fromJson(QString &jsonString) override;
+    virtual SWGRemoteSourceSettings* fromJson(QString &jsonString) override;
 
     QString* getDataAddress();
     void setDataAddress(QString* data_address);
@@ -104,4 +104,4 @@ private:
 
 }
 
-#endif /* SWGDaemonSourceSettings_H_ */
+#endif /* SWGRemoteSourceSettings_H_ */

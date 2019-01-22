@@ -2266,14 +2266,14 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
-    else if (*channelType == "DaemonSource")
+    else if (*channelType == "RemoteSource")
     {
         if (channelSettings.getTx() != 0)
         {
-            QJsonObject daemonChannelSourceSettingsJsonObject = jsonObject["DaemonSourceSettings"].toObject();
-            channelSettingsKeys = daemonChannelSourceSettingsJsonObject.keys();
-            channelSettings.setDaemonSourceSettings(new SWGSDRangel::SWGDaemonSourceSettings());
-            channelSettings.getDaemonSourceSettings()->fromJsonObject(daemonChannelSourceSettingsJsonObject);
+            QJsonObject remoteChannelSourceSettingsJsonObject = jsonObject["RemoteSourceSettings"].toObject();
+            channelSettingsKeys = remoteChannelSourceSettingsJsonObject.keys();
+            channelSettings.setRemoteSourceSettings(new SWGSDRangel::SWGRemoteSourceSettings());
+            channelSettings.getRemoteSourceSettings()->fromJsonObject(remoteChannelSourceSettingsJsonObject);
             return true;
         }
         else {
@@ -2519,7 +2519,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setNfmDemodSettings(0);
     channelSettings.setNfmModSettings(0);
     channelSettings.setRemoteSinkSettings(0);
-    channelSettings.setDaemonSourceSettings(0);
+    channelSettings.setRemoteSourceSettings(0);
     channelSettings.setSsbDemodSettings(0);
     channelSettings.setSsbModSettings(0);
     channelSettings.setUdpSourceSettings(0);
@@ -2539,7 +2539,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setDsdDemodReport(0);
     channelReport.setNfmDemodReport(0);
     channelReport.setNfmModReport(0);
-    channelReport.setDaemonSourceReport(0);
+    channelReport.setRemoteSourceReport(0);
     channelReport.setSsbDemodReport(0);
     channelReport.setSsbModReport(0);
     channelReport.setUdpSourceReport(0);

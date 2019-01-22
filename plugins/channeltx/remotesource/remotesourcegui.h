@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2018-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRCGUI_H_
-#define PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRCGUI_H_
+#ifndef PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCGUI_H_
+#define PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCGUI_H_
 
 #include <QTime>
 
@@ -24,22 +24,22 @@
 #include "gui/rollupwidget.h"
 #include "util/messagequeue.h"
 
-#include "daemonsourcesettings.h"
+#include "../remotesource/remotesourcesettings.h"
 
 class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSource;
-class DaemonSource;
+class RemoteSource;
 
 namespace Ui {
-    class DaemonSourceGUI;
+    class RemoteSourceGUI;
 }
 
-class DaemonSourceGUI : public RollupWidget, public PluginInstanceGUI {
+class RemoteSourceGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 
 public:
-    static DaemonSourceGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx);
+    static RemoteSourceGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx);
     virtual void destroy();
 
     void setName(const QString& name);
@@ -57,14 +57,14 @@ public slots:
     void channelMarkerChangedByCursor();
 
 private:
-    Ui::DaemonSourceGUI* ui;
+    Ui::RemoteSourceGUI* ui;
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
-    DaemonSourceSettings m_settings;
+    RemoteSourceSettings m_settings;
     bool m_doApplySettings;
 
-    DaemonSource* m_daemonSrc;
+    RemoteSource* m_remoteSrc;
     MessageQueue m_inputMessageQueue;
 
     uint32_t m_countUnrecoverable;
@@ -77,8 +77,8 @@ private:
     QTime m_time;
     uint32_t m_tickCount;
 
-    explicit DaemonSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
-    virtual ~DaemonSourceGUI();
+    explicit RemoteSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
+    virtual ~RemoteSourceGUI();
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
@@ -103,4 +103,4 @@ private slots:
 };
 
 
-#endif /* PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRCGUI_H_ */
+#endif /* PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCGUI_H_ */

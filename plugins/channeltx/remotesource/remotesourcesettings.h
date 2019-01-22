@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2018-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,34 +14,33 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRCPLUGIN_H_
-#define PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRCPLUGIN_H_
+#ifndef PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCSETTINGS_H_
+#define PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCSETTINGS_H_
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include <QString>
+#include <QByteArray>
 
-class DeviceUISet;
-class BasebandSampleSource;
+class Serializable;
 
-class DaemonSourcePlugin : public QObject, PluginInterface {
-    Q_OBJECT
-    Q_INTERFACES(PluginInterface)
-    Q_PLUGIN_METADATA(IID "sdrangel.channeltx.daemonsrc")
+struct RemoteSourceSettings
+{
+    QString  m_dataAddress; //!< Listening (local) data address
+    uint16_t m_dataPort;    //!< Listening data port
+    quint32 m_rgbColor;
+    QString m_title;
+    bool m_useReverseAPI;
+    QString m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
+    uint16_t m_reverseAPIChannelIndex;
 
-public:
-    explicit DaemonSourcePlugin(QObject* parent = 0);
+    Serializable *m_channelMarker;
 
-    const PluginDescriptor& getPluginDescriptor() const;
-    void initPlugin(PluginAPI* pluginAPI);
-
-    virtual PluginInstanceGUI* createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel);
-    virtual BasebandSampleSource* createTxChannelBS(DeviceSinkAPI *deviceAPI);
-    virtual ChannelSourceAPI* createTxChannelCS(DeviceSinkAPI *deviceAPI);
-
-private:
-    static const PluginDescriptor m_pluginDescriptor;
-
-    PluginAPI* m_pluginAPI;
+    RemoteSourceSettings();
+    void resetToDefaults();
+    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
 };
 
-#endif /* PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRCPLUGIN_H_ */
+#endif /* PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCSETTINGS_H_ */

@@ -1890,8 +1890,8 @@ definitions:
         $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModSettings"
       RemoteSinkSettings:
         $ref: "/doc/swagger/include/RemoteSink.yaml#/RemoteSinkSettings"
-      DaemonSourceSettings:
-        $ref: "/doc/swagger/include/DaemonSource.yaml#/DaemonSourceSettings"
+      RemoteSourceSettings:
+        $ref: "/doc/swagger/include/RemoteSource.yaml#/RemoteSourceSettings"
       SSBModSettings:
         $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModSettings"
       SSBDemodSettings:
@@ -1931,8 +1931,8 @@ definitions:
         $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModReport"
       SSBDemodReport:
         $ref: "/doc/swagger/include/SSBDemod.yaml#/SSBDemodReport"
-      DaemonSourceReport:
-        $ref: "/doc/swagger/include/DaemonSource.yaml#/DaemonSourceReport"
+      RemoteSourceReport:
+        $ref: "/doc/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
       SSBModReport:
         $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModReport"
       UDPSourceReport:

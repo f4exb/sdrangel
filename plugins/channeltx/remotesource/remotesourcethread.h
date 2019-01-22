@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2018-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRCTHREAD_H_
-#define PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRCTHREAD_H_
+#ifndef PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCTHREAD_H_
+#define PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCTHREAD_H_
 
 #include <QThread>
 #include <QMutex>
@@ -29,7 +29,7 @@ class SDRDaemonDataQueue;
 class SDRDaemonDataBlock;
 class QUdpSocket;
 
-class DaemonSourceThread : public QThread {
+class RemoteSourceThread : public QThread {
     Q_OBJECT
 public:
     class MsgStartStop : public Message {
@@ -74,8 +74,8 @@ public:
         }
     };
 
-    DaemonSourceThread(SDRDaemonDataQueue *dataQueue, QObject* parent = 0);
-    ~DaemonSourceThread();
+    RemoteSourceThread(SDRDaemonDataQueue *dataQueue, QObject* parent = 0);
+    ~RemoteSourceThread();
 
     void startStop(bool start);
     void dataBind(const QString& address, uint16_t port);
@@ -106,4 +106,4 @@ private slots:
 
 
 
-#endif /* PLUGINS_CHANNELTX_DAEMONSRC_DAEMONSRCTHREAD_H_ */
+#endif /* PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCTHREAD_H_ */

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2018-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,58 +14,59 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "remotesourcegui.h"
+
 #include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "mainwindow.h"
 
-#include "daemonsource.h"
-#include "ui_daemonsourcegui.h"
-#include "daemonsourcegui.h"
+#include "remotesource.h"
+#include "ui_remotesourcegui.h"
 
-DaemonSourceGUI* DaemonSourceGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
+RemoteSourceGUI* RemoteSourceGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
 {
-    DaemonSourceGUI* gui = new DaemonSourceGUI(pluginAPI, deviceUISet, channelTx);
+    RemoteSourceGUI* gui = new RemoteSourceGUI(pluginAPI, deviceUISet, channelTx);
     return gui;
 }
 
-void DaemonSourceGUI::destroy()
+void RemoteSourceGUI::destroy()
 {
     delete this;
 }
 
-void DaemonSourceGUI::setName(const QString& name)
+void RemoteSourceGUI::setName(const QString& name)
 {
     setObjectName(name);
 }
 
-QString DaemonSourceGUI::getName() const
+QString RemoteSourceGUI::getName() const
 {
     return objectName();
 }
 
-qint64 DaemonSourceGUI::getCenterFrequency() const {
+qint64 RemoteSourceGUI::getCenterFrequency() const {
     return 0;
 }
 
-void DaemonSourceGUI::setCenterFrequency(qint64 centerFrequency)
+void RemoteSourceGUI::setCenterFrequency(qint64 centerFrequency)
 {
     (void) centerFrequency;
 }
 
-void DaemonSourceGUI::resetToDefaults()
+void RemoteSourceGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
     applySettings(true);
 }
 
-QByteArray DaemonSourceGUI::serialize() const
+QByteArray RemoteSourceGUI::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool DaemonSourceGUI::deserialize(const QByteArray& data)
+bool RemoteSourceGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
@@ -77,26 +78,26 @@ bool DaemonSourceGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool DaemonSourceGUI::handleMessage(const Message& message)
+bool RemoteSourceGUI::handleMessage(const Message& message)
 {
-    if (DaemonSource::MsgSampleRateNotification::match(message))
+    if (RemoteSource::MsgSampleRateNotification::match(message))
     {
-        DaemonSource::MsgSampleRateNotification& notif = (DaemonSource::MsgSampleRateNotification&) message;
+        RemoteSource::MsgSampleRateNotification& notif = (RemoteSource::MsgSampleRateNotification&) message;
         m_channelMarker.setBandwidth(notif.getSampleRate());
         return true;
     }
-    else if (DaemonSource::MsgConfigureDaemonSource::match(message))
+    else if (RemoteSource::MsgConfigureRemoteSource::match(message))
     {
-        const DaemonSource::MsgConfigureDaemonSource& cfg = (DaemonSource::MsgConfigureDaemonSource&) message;
+        const RemoteSource::MsgConfigureRemoteSource& cfg = (RemoteSource::MsgConfigureRemoteSource&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
         return true;
     }
-    else if (DaemonSource::MsgReportStreamData::match(message))
+    else if (RemoteSource::MsgReportStreamData::match(message))
     {
-        const DaemonSource::MsgReportStreamData& report = (DaemonSource::MsgReportStreamData&) message;
+        const RemoteSource::MsgReportStreamData& report = (RemoteSource::MsgReportStreamData&) message;
         ui->sampleRate->setText(QString("%1").arg(report.get_sampleRate()));
         QString nominalNbBlocksText = QString("%1/%2")
                 .arg(report.get_nbOriginalBlocks() + report.get_nbFECBlocks())
@@ -153,9 +154,9 @@ bool DaemonSourceGUI::handleMessage(const Message& message)
     }
 }
 
-DaemonSourceGUI::DaemonSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
+RemoteSourceGUI::RemoteSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
         RollupWidget(parent),
-        ui(new Ui::DaemonSourceGUI),
+        ui(new Ui::RemoteSourceGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
         m_countUnrecoverable(0),
@@ -173,21 +174,21 @@ DaemonSourceGUI::DaemonSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-    m_daemonSrc = (DaemonSource*) channelTx;
-    m_daemonSrc->setMessageQueueToGUI(getInputMessageQueue());
+    m_remoteSrc = (RemoteSource*) channelTx;
+    m_remoteSrc->setMessageQueueToGUI(getInputMessageQueue());
 
     connect(&(m_deviceUISet->m_deviceSinkAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     m_channelMarker.setCenterFrequency(0);
-    m_channelMarker.setTitle("Daemon source");
+    m_channelMarker.setTitle("Remote source");
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
     m_settings.setChannelMarker(&m_channelMarker);
 
-    m_deviceUISet->registerTxChannelInstance(DaemonSource::m_channelIdURI, this);
+    m_deviceUISet->registerTxChannelInstance(RemoteSource::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 
@@ -200,30 +201,30 @@ DaemonSourceGUI::DaemonSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
     applySettings(true);
 }
 
-DaemonSourceGUI::~DaemonSourceGUI()
+RemoteSourceGUI::~RemoteSourceGUI()
 {
     m_deviceUISet->removeTxChannelInstance(this);
-    delete m_daemonSrc;
+    delete m_remoteSrc;
     delete ui;
 }
 
-void DaemonSourceGUI::blockApplySettings(bool block)
+void RemoteSourceGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
 }
 
-void DaemonSourceGUI::applySettings(bool force)
+void RemoteSourceGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
         setTitleColor(m_channelMarker.getColor());
 
-        DaemonSource::MsgConfigureDaemonSource* message = DaemonSource::MsgConfigureDaemonSource::create(m_settings, force);
-        m_daemonSrc->getInputMessageQueue()->push(message);
+        RemoteSource::MsgConfigureRemoteSource* message = RemoteSource::MsgConfigureRemoteSource::create(m_settings, force);
+        m_remoteSrc->getInputMessageQueue()->push(message);
     }
 }
 
-void DaemonSourceGUI::displaySettings()
+void RemoteSourceGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(0);
@@ -241,17 +242,17 @@ void DaemonSourceGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void DaemonSourceGUI::leaveEvent(QEvent*)
+void RemoteSourceGUI::leaveEvent(QEvent*)
 {
     m_channelMarker.setHighlighted(false);
 }
 
-void DaemonSourceGUI::enterEvent(QEvent*)
+void RemoteSourceGUI::enterEvent(QEvent*)
 {
     m_channelMarker.setHighlighted(true);
 }
 
-void DaemonSourceGUI::handleSourceMessages()
+void RemoteSourceGUI::handleSourceMessages()
 {
     Message* message;
 
@@ -264,13 +265,13 @@ void DaemonSourceGUI::handleSourceMessages()
     }
 }
 
-void DaemonSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void RemoteSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
 }
 
-void DaemonSourceGUI::onMenuDialogCalled(const QPoint &p)
+void RemoteSourceGUI::onMenuDialogCalled(const QPoint &p)
 {
     BasicChannelSettingsDialog dialog(&m_channelMarker, this);
     dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
@@ -296,13 +297,13 @@ void DaemonSourceGUI::onMenuDialogCalled(const QPoint &p)
     applySettings();
 }
 
-void DaemonSourceGUI::on_dataAddress_returnPressed()
+void RemoteSourceGUI::on_dataAddress_returnPressed()
 {
     m_settings.m_dataAddress = ui->dataAddress->text();
     applySettings();
 }
 
-void DaemonSourceGUI::on_dataPort_returnPressed()
+void RemoteSourceGUI::on_dataPort_returnPressed()
 {
     bool dataOk;
     int dataPort = ui->dataPort->text().toInt(&dataOk);
@@ -319,7 +320,7 @@ void DaemonSourceGUI::on_dataPort_returnPressed()
     applySettings();
 }
 
-void DaemonSourceGUI::on_dataApplyButton_clicked(bool checked)
+void RemoteSourceGUI::on_dataApplyButton_clicked(bool checked)
 {
     (void) checked;
     m_settings.m_dataAddress = ui->dataAddress->text();
@@ -335,7 +336,7 @@ void DaemonSourceGUI::on_dataApplyButton_clicked(bool checked)
     applySettings();
 }
 
-void DaemonSourceGUI::on_eventCountsReset_clicked(bool checked)
+void RemoteSourceGUI::on_eventCountsReset_clicked(bool checked)
 {
     (void) checked;
     m_countUnrecoverable = 0;
@@ -345,7 +346,7 @@ void DaemonSourceGUI::on_eventCountsReset_clicked(bool checked)
     displayEventTimer();
 }
 
-void DaemonSourceGUI::displayEventCounts()
+void RemoteSourceGUI::displayEventCounts()
 {
     QString nstr = QString("%1").arg(m_countUnrecoverable, 3, 10, QChar('0'));
     ui->eventUnrecText->setText(nstr);
@@ -353,7 +354,7 @@ void DaemonSourceGUI::displayEventCounts()
     ui->eventRecText->setText(nstr);
 }
 
-void DaemonSourceGUI::displayEventStatus(int recoverableCount, int unrecoverableCount)
+void RemoteSourceGUI::displayEventStatus(int recoverableCount, int unrecoverableCount)
 {
 
     if (unrecoverableCount == 0)
@@ -370,7 +371,7 @@ void DaemonSourceGUI::displayEventStatus(int recoverableCount, int unrecoverable
     }
 }
 
-void DaemonSourceGUI::displayEventTimer()
+void RemoteSourceGUI::displayEventTimer()
 {
     int elapsedTimeMillis = m_time.elapsed();
     QTime recordLength(0, 0, 0, 0);
@@ -379,12 +380,12 @@ void DaemonSourceGUI::displayEventTimer()
     ui->eventCountsTimeText->setText(s_time);
 }
 
-void DaemonSourceGUI::tick()
+void RemoteSourceGUI::tick()
 {
     if (++m_tickCount == 20) // once per second
     {
-        DaemonSource::MsgQueryStreamData *msg = DaemonSource::MsgQueryStreamData::create();
-        m_daemonSrc->getInputMessageQueue()->push(msg);
+        RemoteSource::MsgQueryStreamData *msg = RemoteSource::MsgQueryStreamData::create();
+        m_remoteSrc->getInputMessageQueue()->push(msg);
 
         displayEventTimer();
 
@@ -392,6 +393,6 @@ void DaemonSourceGUI::tick()
     }
 }
 
-void DaemonSourceGUI::channelMarkerChangedByCursor()
+void RemoteSourceGUI::channelMarkerChangedByCursor()
 {
 }
