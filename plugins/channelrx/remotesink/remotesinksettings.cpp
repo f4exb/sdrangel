@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
-// SDRdaemon sink channel (Rx) main settings                                     //
+// Remote sink channel (Rx) UDP sender thread                                    //
 //                                                                               //
-// SDRdaemon is a detached SDR front end that handles the interface with a       //
-// physical device and sends or receives the I/Q samples stream to or from a     //
-// SDRangel instance via UDP. It is controlled via a Web REST API.               //
+// SDRangel can work as a detached SDR front end. With this plugin it can        //
+// sends the I/Q samples stream to another SDRangel instance via UDP.            //
+// It is controlled via a Web REST API.                                          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -20,25 +20,27 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "remotesinksettings.h"
+
 #include <QColor>
 
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
-#include "daemonsinksettings.h"
 
-DaemonSinkSettings::DaemonSinkSettings()
+
+RemoteSinkSettings::RemoteSinkSettings()
 {
     resetToDefaults();
 }
 
-void DaemonSinkSettings::resetToDefaults()
+void RemoteSinkSettings::resetToDefaults()
 {
     m_nbFECBlocks = 0;
     m_txDelay = 35;
     m_dataAddress = "127.0.0.1";
     m_dataPort = 9090;
     m_rgbColor = QColor(140, 4, 4).rgb();
-    m_title = "Daemon sink";
+    m_title = "Remote sink";
     m_channelMarker = nullptr;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -47,7 +49,7 @@ void DaemonSinkSettings::resetToDefaults()
     m_reverseAPIChannelIndex = 0;
 }
 
-QByteArray DaemonSinkSettings::serialize() const
+QByteArray RemoteSinkSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeU32(1, m_nbFECBlocks);
@@ -65,7 +67,7 @@ QByteArray DaemonSinkSettings::serialize() const
     return s.final();
 }
 
-bool DaemonSinkSettings::deserialize(const QByteArray& data)
+bool RemoteSinkSettings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 
@@ -99,7 +101,7 @@ bool DaemonSinkSettings::deserialize(const QByteArray& data)
         }
 
         d.readU32(5, &m_rgbColor, QColor(0, 255, 255).rgb());
-        d.readString(6, &m_title, "Daemon sink");
+        d.readString(6, &m_title, "Remote sink");
         d.readBool(7, &m_useReverseAPI, false);
         d.readString(8, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(9, &tmp, 0);

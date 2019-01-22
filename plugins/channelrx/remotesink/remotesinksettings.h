@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2018-2019 Edouard Griffiths, F4EXB.                             //
 //                                                                               //
-// SDRdaemon sink channel (Rx) main settings                                     //
+// Remote sink channel (Rx) UDP sender thread                                    //
 //                                                                               //
-// SDRdaemon is a detached SDR front end that handles the interface with a       //
-// physical device and sends or receives the I/Q samples stream to or from a     //
-// SDRangel instance via UDP. It is controlled via a Web REST API.               //
+// SDRangel can work as a detached SDR front end. With this plugin it can        //
+// sends the I/Q samples stream to another SDRangel instance via UDP.            //
+// It is controlled via a Web REST API.                                          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -20,14 +20,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_SDRDAEMONCHANNELSINKSETTINGS_H_
-#define INCLUDE_SDRDAEMONCHANNELSINKSETTINGS_H_
+#ifndef INCLUDE_REMOTECHANNELSINKSETTINGS_H_
+#define INCLUDE_REMOTECHANNELSINKSETTINGS_H_
 
 #include <QByteArray>
+#include <QString>
 
 class Serializable;
 
-struct DaemonSinkSettings
+struct RemoteSinkSettings
 {
     uint16_t m_nbFECBlocks;
     uint32_t m_txDelay;
@@ -43,11 +44,11 @@ struct DaemonSinkSettings
 
     Serializable *m_channelMarker;
 
-    DaemonSinkSettings();
+    RemoteSinkSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 };
 
-#endif /* INCLUDE_SDRDAEMONCHANNELSINKSETTINGS_H_ */
+#endif /* INCLUDE_REMOTECHANNELSINKSETTINGS_H_ */

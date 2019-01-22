@@ -49,7 +49,6 @@
 #include "SWGDSDDemodSettings.h"
 #include "SWGDVSeralDevices.h"
 #include "SWGDVSerialDevice.h"
-#include "SWGDaemonSinkSettings.h"
 #include "SWGDaemonSourceReport.h"
 #include "SWGDaemonSourceSettings.h"
 #include "SWGDeviceListItem.h"
@@ -100,6 +99,7 @@
 #include "SWGRDSReport_altFrequencies.h"
 #include "SWGRange.h"
 #include "SWGRangeFloat.h"
+#include "SWGRemoteSinkSettings.h"
 #include "SWGRtlSdrReport.h"
 #include "SWGRtlSdrSettings.h"
 #include "SWGSDRPlayReport.h"
@@ -241,9 +241,6 @@ namespace SWGSDRangel {
     }
     if(QString("SWGDVSerialDevice").compare(type) == 0) {
       return new SWGDVSerialDevice();
-    }
-    if(QString("SWGDaemonSinkSettings").compare(type) == 0) {
-      return new SWGDaemonSinkSettings();
     }
     if(QString("SWGDaemonSourceReport").compare(type) == 0) {
       return new SWGDaemonSourceReport();
@@ -394,6 +391,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRangeFloat").compare(type) == 0) {
       return new SWGRangeFloat();
+    }
+    if(QString("SWGRemoteSinkSettings").compare(type) == 0) {
+      return new SWGRemoteSinkSettings();
     }
     if(QString("SWGRtlSdrReport").compare(type) == 0) {
       return new SWGRtlSdrReport();

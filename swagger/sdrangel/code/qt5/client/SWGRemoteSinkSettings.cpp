@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGDaemonSinkSettings.h"
+#include "SWGRemoteSinkSettings.h"
 
 #include "SWGHelpers.h"
 
@@ -22,12 +22,12 @@
 
 namespace SWGSDRangel {
 
-SWGDaemonSinkSettings::SWGDaemonSinkSettings(QString* json) {
+SWGRemoteSinkSettings::SWGRemoteSinkSettings(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGDaemonSinkSettings::SWGDaemonSinkSettings() {
+SWGRemoteSinkSettings::SWGRemoteSinkSettings() {
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
     data_address = nullptr;
@@ -52,12 +52,12 @@ SWGDaemonSinkSettings::SWGDaemonSinkSettings() {
     m_reverse_api_channel_index_isSet = false;
 }
 
-SWGDaemonSinkSettings::~SWGDaemonSinkSettings() {
+SWGRemoteSinkSettings::~SWGRemoteSinkSettings() {
     this->cleanup();
 }
 
 void
-SWGDaemonSinkSettings::init() {
+SWGRemoteSinkSettings::init() {
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
     data_address = new QString("");
@@ -83,7 +83,7 @@ SWGDaemonSinkSettings::init() {
 }
 
 void
-SWGDaemonSinkSettings::cleanup() {
+SWGRemoteSinkSettings::cleanup() {
 
     if(data_address != nullptr) { 
         delete data_address;
@@ -103,8 +103,8 @@ SWGDaemonSinkSettings::cleanup() {
 
 }
 
-SWGDaemonSinkSettings*
-SWGDaemonSinkSettings::fromJson(QString &json) {
+SWGRemoteSinkSettings*
+SWGRemoteSinkSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -113,7 +113,7 @@ SWGDaemonSinkSettings::fromJson(QString &json) {
 }
 
 void
-SWGDaemonSinkSettings::fromJsonObject(QJsonObject &pJson) {
+SWGRemoteSinkSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&nb_fec_blocks, pJson["nbFECBlocks"], "qint32", "");
     
     ::SWGSDRangel::setValue(&data_address, pJson["dataAddress"], "QString", "QString");
@@ -139,7 +139,7 @@ SWGDaemonSinkSettings::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGDaemonSinkSettings::asJson ()
+SWGRemoteSinkSettings::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -150,7 +150,7 @@ SWGDaemonSinkSettings::asJson ()
 }
 
 QJsonObject*
-SWGDaemonSinkSettings::asJsonObject() {
+SWGRemoteSinkSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_nb_fec_blocks_isSet){
         obj->insert("nbFECBlocks", QJsonValue(nb_fec_blocks));
@@ -190,118 +190,118 @@ SWGDaemonSinkSettings::asJsonObject() {
 }
 
 qint32
-SWGDaemonSinkSettings::getNbFecBlocks() {
+SWGRemoteSinkSettings::getNbFecBlocks() {
     return nb_fec_blocks;
 }
 void
-SWGDaemonSinkSettings::setNbFecBlocks(qint32 nb_fec_blocks) {
+SWGRemoteSinkSettings::setNbFecBlocks(qint32 nb_fec_blocks) {
     this->nb_fec_blocks = nb_fec_blocks;
     this->m_nb_fec_blocks_isSet = true;
 }
 
 QString*
-SWGDaemonSinkSettings::getDataAddress() {
+SWGRemoteSinkSettings::getDataAddress() {
     return data_address;
 }
 void
-SWGDaemonSinkSettings::setDataAddress(QString* data_address) {
+SWGRemoteSinkSettings::setDataAddress(QString* data_address) {
     this->data_address = data_address;
     this->m_data_address_isSet = true;
 }
 
 qint32
-SWGDaemonSinkSettings::getDataPort() {
+SWGRemoteSinkSettings::getDataPort() {
     return data_port;
 }
 void
-SWGDaemonSinkSettings::setDataPort(qint32 data_port) {
+SWGRemoteSinkSettings::setDataPort(qint32 data_port) {
     this->data_port = data_port;
     this->m_data_port_isSet = true;
 }
 
 qint32
-SWGDaemonSinkSettings::getTxDelay() {
+SWGRemoteSinkSettings::getTxDelay() {
     return tx_delay;
 }
 void
-SWGDaemonSinkSettings::setTxDelay(qint32 tx_delay) {
+SWGRemoteSinkSettings::setTxDelay(qint32 tx_delay) {
     this->tx_delay = tx_delay;
     this->m_tx_delay_isSet = true;
 }
 
 qint32
-SWGDaemonSinkSettings::getRgbColor() {
+SWGRemoteSinkSettings::getRgbColor() {
     return rgb_color;
 }
 void
-SWGDaemonSinkSettings::setRgbColor(qint32 rgb_color) {
+SWGRemoteSinkSettings::setRgbColor(qint32 rgb_color) {
     this->rgb_color = rgb_color;
     this->m_rgb_color_isSet = true;
 }
 
 QString*
-SWGDaemonSinkSettings::getTitle() {
+SWGRemoteSinkSettings::getTitle() {
     return title;
 }
 void
-SWGDaemonSinkSettings::setTitle(QString* title) {
+SWGRemoteSinkSettings::setTitle(QString* title) {
     this->title = title;
     this->m_title_isSet = true;
 }
 
 qint32
-SWGDaemonSinkSettings::getUseReverseApi() {
+SWGRemoteSinkSettings::getUseReverseApi() {
     return use_reverse_api;
 }
 void
-SWGDaemonSinkSettings::setUseReverseApi(qint32 use_reverse_api) {
+SWGRemoteSinkSettings::setUseReverseApi(qint32 use_reverse_api) {
     this->use_reverse_api = use_reverse_api;
     this->m_use_reverse_api_isSet = true;
 }
 
 QString*
-SWGDaemonSinkSettings::getReverseApiAddress() {
+SWGRemoteSinkSettings::getReverseApiAddress() {
     return reverse_api_address;
 }
 void
-SWGDaemonSinkSettings::setReverseApiAddress(QString* reverse_api_address) {
+SWGRemoteSinkSettings::setReverseApiAddress(QString* reverse_api_address) {
     this->reverse_api_address = reverse_api_address;
     this->m_reverse_api_address_isSet = true;
 }
 
 qint32
-SWGDaemonSinkSettings::getReverseApiPort() {
+SWGRemoteSinkSettings::getReverseApiPort() {
     return reverse_api_port;
 }
 void
-SWGDaemonSinkSettings::setReverseApiPort(qint32 reverse_api_port) {
+SWGRemoteSinkSettings::setReverseApiPort(qint32 reverse_api_port) {
     this->reverse_api_port = reverse_api_port;
     this->m_reverse_api_port_isSet = true;
 }
 
 qint32
-SWGDaemonSinkSettings::getReverseApiDeviceIndex() {
+SWGRemoteSinkSettings::getReverseApiDeviceIndex() {
     return reverse_api_device_index;
 }
 void
-SWGDaemonSinkSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
+SWGRemoteSinkSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
     this->reverse_api_device_index = reverse_api_device_index;
     this->m_reverse_api_device_index_isSet = true;
 }
 
 qint32
-SWGDaemonSinkSettings::getReverseApiChannelIndex() {
+SWGRemoteSinkSettings::getReverseApiChannelIndex() {
     return reverse_api_channel_index;
 }
 void
-SWGDaemonSinkSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
+SWGRemoteSinkSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
     this->reverse_api_channel_index = reverse_api_channel_index;
     this->m_reverse_api_channel_index_isSet = true;
 }
 
 
 bool
-SWGDaemonSinkSettings::isSet(){
+SWGRemoteSinkSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_nb_fec_blocks_isSet){ isObjectUpdated = true; break;}

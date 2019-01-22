@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DaemonSinkGUI</class>
- <widget class="RollupWidget" name="DaemonSinkGUI">
+ <class>RemoteSinkGUI</class>
+ <widget class="RollupWidget" name="RemoteSinkGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -35,7 +35,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Daemon sink</string>
+   <string>Remote sink</string>
   </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">

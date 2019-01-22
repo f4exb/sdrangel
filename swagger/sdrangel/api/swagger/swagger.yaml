@@ -1888,8 +1888,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
         $ref: "http://localhost:8081/api/swagger/include/NFMMod.yaml#/NFMModSettings"
-      DaemonSinkSettings:
-        $ref: "http://localhost:8081/api/swagger/include/DaemonSink.yaml#/DaemonSinkSettings"
+      RemoteSinkSettings:
+        $ref: "http://localhost:8081/api/swagger/include/RemoteSink.yaml#/RemoteSinkSettings"
       DaemonSourceSettings:
         $ref: "http://localhost:8081/api/swagger/include/DaemonSource.yaml#/DaemonSourceSettings"
       SSBModSettings:

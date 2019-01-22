@@ -27,10 +27,10 @@
 #include "SWGATVModSettings.h"
 #include "SWGBFMDemodSettings.h"
 #include "SWGDSDDemodSettings.h"
-#include "SWGDaemonSinkSettings.h"
 #include "SWGDaemonSourceSettings.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModSettings.h"
+#include "SWGRemoteSinkSettings.h"
 #include "SWGSSBDemodSettings.h"
 #include "SWGSSBModSettings.h"
 #include "SWGUDPSinkSettings.h"
@@ -84,8 +84,8 @@ public:
     SWGNFMModSettings* getNfmModSettings();
     void setNfmModSettings(SWGNFMModSettings* nfm_mod_settings);
 
-    SWGDaemonSinkSettings* getDaemonSinkSettings();
-    void setDaemonSinkSettings(SWGDaemonSinkSettings* daemon_sink_settings);
+    SWGRemoteSinkSettings* getRemoteSinkSettings();
+    void setRemoteSinkSettings(SWGRemoteSinkSettings* remote_sink_settings);
 
     SWGDaemonSourceSettings* getDaemonSourceSettings();
     void setDaemonSourceSettings(SWGDaemonSourceSettings* daemon_source_settings);
@@ -139,8 +139,8 @@ private:
     SWGNFMModSettings* nfm_mod_settings;
     bool m_nfm_mod_settings_isSet;
 
-    SWGDaemonSinkSettings* daemon_sink_settings;
-    bool m_daemon_sink_settings_isSet;
+    SWGRemoteSinkSettings* remote_sink_settings;
+    bool m_remote_sink_settings_isSet;
 
     SWGDaemonSourceSettings* daemon_source_settings;
     bool m_daemon_source_settings_isSet;

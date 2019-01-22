@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
-// SDRdaemon sink channel (Rx)                                                   //
+// Remote sink channel (Rx) UDP sender thread                                    //
 //                                                                               //
-// SDRdaemon is a detached SDR front end that handles the interface with a       //
-// physical device and sends or receives the I/Q samples stream to or from a     //
-// SDRangel instance via UDP. It is controlled via a Web REST API.               //
+// SDRangel can work as a detached SDR front end. With this plugin it can        //
+// sends the I/Q samples stream to another SDRangel instance via UDP.            //
+// It is controlled via a Web REST API.                                          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -20,8 +20,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_DAEMONSINK_H_
-#define INCLUDE_DAEMONSINK_H_
+#ifndef INCLUDE_REMOTESINK_H_
+#define INCLUDE_REMOTESINK_H_
 
 #include <QObject>
 #include <QMutex>
@@ -30,35 +30,36 @@
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelsinkapi.h"
 #include "channel/sdrdaemondatablock.h"
-#include "daemonsinksettings.h"
+
+#include "../remotesink/remotesinksettings.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
-class DaemonSinkThread;
+class RemoteSinkThread;
 
-class DaemonSink : public BasebandSampleSink, public ChannelSinkAPI {
+class RemoteSink : public BasebandSampleSink, public ChannelSinkAPI {
     Q_OBJECT
 public:
-    class MsgConfigureDaemonSink : public Message {
+    class MsgConfigureRemoteSink : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const DaemonSinkSettings& getSettings() const { return m_settings; }
+        const RemoteSinkSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureDaemonSink* create(const DaemonSinkSettings& settings, bool force)
+        static MsgConfigureRemoteSink* create(const RemoteSinkSettings& settings, bool force)
         {
-            return new MsgConfigureDaemonSink(settings, force);
+            return new MsgConfigureRemoteSink(settings, force);
         }
 
     private:
-        DaemonSinkSettings m_settings;
+        RemoteSinkSettings m_settings;
         bool m_force;
 
-        MsgConfigureDaemonSink(const DaemonSinkSettings& settings, bool force) :
+        MsgConfigureRemoteSink(const RemoteSinkSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
@@ -85,8 +86,8 @@ public:
         int m_sampleRate;
     };
 
-    DaemonSink(DeviceSourceAPI *deviceAPI);
-    virtual ~DaemonSink();
+    RemoteSink(DeviceSourceAPI *deviceAPI);
+    virtual ~RemoteSink();
     virtual void destroy() { delete this; }
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
@@ -95,7 +96,7 @@ public:
     virtual bool handleMessage(const Message& cmd);
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
-    virtual void getTitle(QString& title) { title = "SDRDaemon Sink"; }
+    virtual void getTitle(QString& title) { title = "Remote Sink"; }
     virtual qint64 getCenterFrequency() const { return 0; }
 
     virtual QByteArray serialize() const;
@@ -134,8 +135,8 @@ private:
     DownChannelizer* m_channelizer;
     bool m_running;
 
-    DaemonSinkSettings m_settings;
-    DaemonSinkThread *m_sinkThread;
+    RemoteSinkSettings m_settings;
+    RemoteSinkThread *m_sinkThread;
 
     int m_txBlockIndex;                  //!< Current index in blocks to transmit in the Tx row
     uint16_t m_frameCount;               //!< transmission frame count
@@ -154,12 +155,12 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    void applySettings(const DaemonSinkSettings& settings, bool force = false);
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DaemonSinkSettings& settings);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DaemonSinkSettings& settings, bool force);
+    void applySettings(const RemoteSinkSettings& settings, bool force = false);
+    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const RemoteSinkSettings& settings);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteSinkSettings& settings, bool force);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
 };
 
-#endif /* INCLUDE_DAEMONSINK_H_ */
+#endif /* INCLUDE_REMOTESINK_H_ */

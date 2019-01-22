@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
-// SDRdaemon sink channel (Rx)                                                   //
+// Remote sink channel (Rx) UDP sender thread                                    //
 //                                                                               //
-// SDRdaemon is a detached SDR front end that handles the interface with a       //
-// physical device and sends or receives the I/Q samples stream to or from a     //
-// SDRangel instance via UDP. It is controlled via a Web REST API.               //
+// SDRangel can work as a detached SDR front end. With this plugin it can        //
+// sends the I/Q samples stream to another SDRangel instance via UDP.            //
+// It is controlled via a Web REST API.                                          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -19,6 +19,8 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
+
+#include "remotesink.h"
 
 #include <sys/time.h>
 #include <unistd.h>
@@ -36,16 +38,16 @@
 #include "dsp/downchannelizer.h"
 #include "dsp/dspcommands.h"
 #include "device/devicesourceapi.h"
-#include "daemonsinkthread.h"
-#include "daemonsink.h"
 
-MESSAGE_CLASS_DEFINITION(DaemonSink::MsgConfigureDaemonSink, Message)
-MESSAGE_CLASS_DEFINITION(DaemonSink::MsgSampleRateNotification, Message)
+#include "../remotesink/remotesinkthread.h"
 
-const QString DaemonSink::m_channelIdURI = "sdrangel.channel.daemonsink";
-const QString DaemonSink::m_channelId = "DaemonSink";
+MESSAGE_CLASS_DEFINITION(RemoteSink::MsgConfigureRemoteSink, Message)
+MESSAGE_CLASS_DEFINITION(RemoteSink::MsgSampleRateNotification, Message)
 
-DaemonSink::DaemonSink(DeviceSourceAPI *deviceAPI) :
+const QString RemoteSink::m_channelIdURI = "sdrangel.channel.remotesink";
+const QString RemoteSink::m_channelId = "RemoteSink";
+
+RemoteSink::RemoteSink(DeviceSourceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
         m_running(false),
@@ -72,7 +74,7 @@ DaemonSink::DaemonSink(DeviceSourceAPI *deviceAPI) :
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
-DaemonSink::~DaemonSink()
+RemoteSink::~RemoteSink()
 {
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
@@ -89,26 +91,26 @@ DaemonSink::~DaemonSink()
     delete m_channelizer;
 }
 
-void DaemonSink::setTxDelay(int txDelay, int nbBlocksFEC)
+void RemoteSink::setTxDelay(int txDelay, int nbBlocksFEC)
 {
     double txDelayRatio = txDelay / 100.0;
     int samplesPerBlock = SDRDaemonNbBytesPerBlock / sizeof(Sample);
     double delay = m_sampleRate == 0 ? 1.0 : (127*samplesPerBlock*txDelayRatio) / m_sampleRate;
     delay /= 128 + nbBlocksFEC;
     m_txDelay = roundf(delay*1e6); // microseconds
-    qDebug() << "DaemonSink::setTxDelay:"
+    qDebug() << "RemoteSink::setTxDelay:"
             << " " << txDelay
             << "% m_txDelay: " << m_txDelay << "us"
             << " m_sampleRate: " << m_sampleRate << "S/s";
 }
 
-void DaemonSink::setNbBlocksFEC(int nbBlocksFEC)
+void RemoteSink::setNbBlocksFEC(int nbBlocksFEC)
 {
-    qDebug() << "DaemonSink::setNbBlocksFEC: nbBlocksFEC: " << nbBlocksFEC;
+    qDebug() << "RemoteSink::setNbBlocksFEC: nbBlocksFEC: " << nbBlocksFEC;
     m_nbBlocksFEC = nbBlocksFEC;
 }
 
-void DaemonSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
+void RemoteSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
     (void) firstOfBurst;
     SampleVector::const_iterator it = begin;
@@ -153,7 +155,7 @@ void DaemonSink::feed(const SampleVector::const_iterator& begin, const SampleVec
 
             if (!(metaData == m_currentMetaFEC))
             {
-                qDebug() << "SDRDaemonChannelSink::feed: meta: "
+                qDebug() << "RemoteSink::feed: meta: "
                         << "|" << metaData.m_centerFrequency
                         << ":" << metaData.m_sampleRate
                         << ":" << (int) (metaData.m_sampleBytes & 0xF)
@@ -219,9 +221,9 @@ void DaemonSink::feed(const SampleVector::const_iterator& begin, const SampleVec
     }
 }
 
-void DaemonSink::start()
+void RemoteSink::start()
 {
-    qDebug("DaemonSink::start");
+    qDebug("RemoteSink::start");
 
     memset((void *) &m_currentMetaFEC, 0, sizeof(SDRDaemonMetaDataFEC));
 
@@ -229,7 +231,7 @@ void DaemonSink::start()
         stop();
     }
 
-    m_sinkThread = new DaemonSinkThread();
+    m_sinkThread = new RemoteSinkThread();
     connect(this,
             SIGNAL(dataBlockAvailable(SDRDaemonDataBlock *)),
             m_sinkThread,
@@ -239,9 +241,9 @@ void DaemonSink::start()
     m_running = true;
 }
 
-void DaemonSink::stop()
+void RemoteSink::stop()
 {
-    qDebug("DaemonSink::stop");
+    qDebug("RemoteSink::stop");
 
     if (m_sinkThread != 0)
     {
@@ -253,14 +255,14 @@ void DaemonSink::stop()
     m_running = false;
 }
 
-bool DaemonSink::handleMessage(const Message& cmd)
+bool RemoteSink::handleMessage(const Message& cmd)
 {
     (void) cmd;
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
-        qDebug() << "DaemonSink::handleMessage: MsgChannelizerNotification:"
+        qDebug() << "RemoteSink::handleMessage: MsgChannelizerNotification:"
                 << " channelSampleRate: " << notif.getSampleRate()
                 << " offsetFrequency: " << notif.getFrequencyOffset();
 
@@ -282,7 +284,7 @@ bool DaemonSink::handleMessage(const Message& cmd)
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
 
-        qDebug() << "DaemonSink::handleMessage: DSPSignalNotification:"
+        qDebug() << "RemoteSink::handleMessage: DSPSignalNotification:"
                 << " inputSampleRate: " << notif.getSampleRate()
                 << " centerFrequency: " << notif.getCenterFrequency();
 
@@ -290,10 +292,10 @@ bool DaemonSink::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgConfigureDaemonSink::match(cmd))
+    else if (MsgConfigureRemoteSink::match(cmd))
     {
-        MsgConfigureDaemonSink& cfg = (MsgConfigureDaemonSink&) cmd;
-        qDebug() << "DaemonSink::handleMessage: MsgConfigureDaemonSink";
+        MsgConfigureRemoteSink& cfg = (MsgConfigureRemoteSink&) cmd;
+        qDebug() << "RemoteSink::handleMessage: MsgConfigureRemoteSink";
         applySettings(cfg.getSettings(), cfg.getForce());
 
         return true;
@@ -304,32 +306,32 @@ bool DaemonSink::handleMessage(const Message& cmd)
     }
 }
 
-QByteArray DaemonSink::serialize() const
+QByteArray RemoteSink::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool DaemonSink::deserialize(const QByteArray& data)
+bool RemoteSink::deserialize(const QByteArray& data)
 {
     (void) data;
     if (m_settings.deserialize(data))
     {
-        MsgConfigureDaemonSink *msg = MsgConfigureDaemonSink::create(m_settings, true);
+        MsgConfigureRemoteSink *msg = MsgConfigureRemoteSink::create(m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureDaemonSink *msg = MsgConfigureDaemonSink::create(m_settings, true);
+        MsgConfigureRemoteSink *msg = MsgConfigureRemoteSink::create(m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void DaemonSink::applySettings(const DaemonSinkSettings& settings, bool force)
+void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
 {
-    qDebug() << "DaemonSink::applySettings:"
+    qDebug() << "RemoteSink::applySettings:"
             << " m_nbFECBlocks: " << settings.m_nbFECBlocks
             << " m_txDelay: " << settings.m_txDelay
             << " m_dataAddress: " << settings.m_dataAddress
@@ -376,40 +378,40 @@ void DaemonSink::applySettings(const DaemonSinkSettings& settings, bool force)
     m_settings = settings;
 }
 
-int DaemonSink::webapiSettingsGet(
+int RemoteSink::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setDaemonSinkSettings(new SWGSDRangel::SWGDaemonSinkSettings());
-    response.getDaemonSinkSettings()->init();
+    response.setRemoteSinkSettings(new SWGSDRangel::SWGRemoteSinkSettings());
+    response.getRemoteSinkSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
     return 200;
 }
 
-int DaemonSink::webapiSettingsPutPatch(
+int RemoteSink::webapiSettingsPutPatch(
         bool force,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
     (void) errorMessage;
-    DaemonSinkSettings settings = m_settings;
+    RemoteSinkSettings settings = m_settings;
 
     if (channelSettingsKeys.contains("nbFECBlocks"))
     {
-        int nbFECBlocks = response.getDaemonSinkSettings()->getNbFecBlocks();
+        int nbFECBlocks = response.getRemoteSinkSettings()->getNbFecBlocks();
 
         if ((nbFECBlocks < 0) || (nbFECBlocks > 127)) {
             settings.m_nbFECBlocks = 8;
         } else {
-            settings.m_nbFECBlocks = response.getDaemonSinkSettings()->getNbFecBlocks();
+            settings.m_nbFECBlocks = response.getRemoteSinkSettings()->getNbFecBlocks();
         }
     }
 
     if (channelSettingsKeys.contains("txDelay"))
     {
-        int txDelay = response.getDaemonSinkSettings()->getTxDelay();
+        int txDelay = response.getRemoteSinkSettings()->getTxDelay();
 
         if (txDelay < 0) {
             settings.m_txDelay = 35;
@@ -419,12 +421,12 @@ int DaemonSink::webapiSettingsPutPatch(
     }
 
     if (channelSettingsKeys.contains("dataAddress")) {
-        settings.m_dataAddress = *response.getDaemonSinkSettings()->getDataAddress();
+        settings.m_dataAddress = *response.getRemoteSinkSettings()->getDataAddress();
     }
 
     if (channelSettingsKeys.contains("dataPort"))
     {
-        int dataPort = response.getDaemonSinkSettings()->getDataPort();
+        int dataPort = response.getRemoteSinkSettings()->getDataPort();
 
         if ((dataPort < 1024) || (dataPort > 65535)) {
             settings.m_dataPort = 9090;
@@ -434,34 +436,34 @@ int DaemonSink::webapiSettingsPutPatch(
     }
 
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getDaemonSinkSettings()->getRgbColor();
+        settings.m_rgbColor = response.getRemoteSinkSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getDaemonSinkSettings()->getTitle();
+        settings.m_title = *response.getRemoteSinkSettings()->getTitle();
     }
     if (channelSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getDaemonSinkSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getRemoteSinkSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getDaemonSinkSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getRemoteSinkSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getDaemonSinkSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getRemoteSinkSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getDaemonSinkSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getRemoteSinkSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getDaemonSinkSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = response.getRemoteSinkSettings()->getReverseApiChannelIndex();
     }
 
-    MsgConfigureDaemonSink *msg = MsgConfigureDaemonSink::create(settings, force);
+    MsgConfigureRemoteSink *msg = MsgConfigureRemoteSink::create(settings, force);
     m_inputMessageQueue.push(msg);
 
-    qDebug("DaemonSink::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    qDebug("RemoteSink::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureDaemonSink *msgToGUI = MsgConfigureDaemonSink::create(settings, force);
+        MsgConfigureRemoteSink *msgToGUI = MsgConfigureRemoteSink::create(settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -470,67 +472,67 @@ int DaemonSink::webapiSettingsPutPatch(
     return 200;
 }
 
-void DaemonSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DaemonSinkSettings& settings)
+void RemoteSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const RemoteSinkSettings& settings)
 {
-    response.getDaemonSinkSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
-    response.getDaemonSinkSettings()->setTxDelay(settings.m_txDelay);
+    response.getRemoteSinkSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
+    response.getRemoteSinkSettings()->setTxDelay(settings.m_txDelay);
 
-    if (response.getDaemonSinkSettings()->getDataAddress()) {
-        *response.getDaemonSinkSettings()->getDataAddress() = settings.m_dataAddress;
+    if (response.getRemoteSinkSettings()->getDataAddress()) {
+        *response.getRemoteSinkSettings()->getDataAddress() = settings.m_dataAddress;
     } else {
-        response.getDaemonSinkSettings()->setDataAddress(new QString(settings.m_dataAddress));
+        response.getRemoteSinkSettings()->setDataAddress(new QString(settings.m_dataAddress));
     }
 
-    response.getDaemonSinkSettings()->setDataPort(settings.m_dataPort);
-    response.getDaemonSinkSettings()->setRgbColor(settings.m_rgbColor);
+    response.getRemoteSinkSettings()->setDataPort(settings.m_dataPort);
+    response.getRemoteSinkSettings()->setRgbColor(settings.m_rgbColor);
 
-    if (response.getDaemonSinkSettings()->getTitle()) {
-        *response.getDaemonSinkSettings()->getTitle() = settings.m_title;
+    if (response.getRemoteSinkSettings()->getTitle()) {
+        *response.getRemoteSinkSettings()->getTitle() = settings.m_title;
     } else {
-        response.getDaemonSinkSettings()->setTitle(new QString(settings.m_title));
+        response.getRemoteSinkSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getDaemonSinkSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getRemoteSinkSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getDaemonSinkSettings()->getReverseApiAddress()) {
-        *response.getDaemonSinkSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getRemoteSinkSettings()->getReverseApiAddress()) {
+        *response.getRemoteSinkSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getDaemonSinkSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getRemoteSinkSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getDaemonSinkSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getDaemonSinkSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
-    response.getDaemonSinkSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    response.getRemoteSinkSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getRemoteSinkSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getRemoteSinkSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
-void DaemonSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DaemonSinkSettings& settings, bool force)
+void RemoteSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteSinkSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setTx(0);
-    swgChannelSettings->setChannelType(new QString("DaemonSink"));
-    swgChannelSettings->setDaemonSinkSettings(new SWGSDRangel::SWGDaemonSinkSettings());
-    SWGSDRangel::SWGDaemonSinkSettings *swgDaemonSinkSettings = swgChannelSettings->getDaemonSinkSettings();
+    swgChannelSettings->setChannelType(new QString("RemoteSink"));
+    swgChannelSettings->setRemoteSinkSettings(new SWGSDRangel::SWGRemoteSinkSettings());
+    SWGSDRangel::SWGRemoteSinkSettings *swgRemoteSinkSettings = swgChannelSettings->getRemoteSinkSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
     if (channelSettingsKeys.contains("nbFECBlocks") || force) {
-        swgDaemonSinkSettings->setNbFecBlocks(settings.m_nbFECBlocks);
+        swgRemoteSinkSettings->setNbFecBlocks(settings.m_nbFECBlocks);
     }
     if (channelSettingsKeys.contains("txDelay") || force)
     {
-        swgDaemonSinkSettings->setTxDelay(settings.m_txDelay);
+        swgRemoteSinkSettings->setTxDelay(settings.m_txDelay);
     }
     if (channelSettingsKeys.contains("dataAddress") || force) {
-        swgDaemonSinkSettings->setDataAddress(new QString(settings.m_dataAddress));
+        swgRemoteSinkSettings->setDataAddress(new QString(settings.m_dataAddress));
     }
     if (channelSettingsKeys.contains("dataPort") || force) {
-        swgDaemonSinkSettings->setDataPort(settings.m_dataPort);
+        swgRemoteSinkSettings->setDataPort(settings.m_dataPort);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
-        swgDaemonSinkSettings->setRgbColor(settings.m_rgbColor);
+        swgRemoteSinkSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgDaemonSinkSettings->setTitle(new QString(settings.m_title));
+        swgRemoteSinkSettings->setTitle(new QString(settings.m_title));
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
@@ -552,13 +554,13 @@ void DaemonSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, 
     delete swgChannelSettings;
 }
 
-void DaemonSink::networkManagerFinished(QNetworkReply *reply)
+void RemoteSink::networkManagerFinished(QNetworkReply *reply)
 {
     QNetworkReply::NetworkError replyError = reply->error();
 
     if (replyError)
     {
-        qWarning() << "DaemonSink::networkManagerFinished:"
+        qWarning() << "RemoteSink::networkManagerFinished:"
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();
@@ -567,5 +569,5 @@ void DaemonSink::networkManagerFinished(QNetworkReply *reply)
 
     QString answer = reply->readAll();
     answer.chop(1); // remove last \n
-    qDebug("DaemonSink::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    qDebug("RemoteSink::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }

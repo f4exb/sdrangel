@@ -1,5 +1,5 @@
-DaemonSinkSettings:
-  description: "Daemon channel sink settings"
+RemoteSinkSettings:
+  description: "Remote channel sink settings"
   properties:
     nbFECBlocks:
       description: "Number of FEC blocks per frame"

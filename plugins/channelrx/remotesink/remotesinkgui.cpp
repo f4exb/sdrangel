@@ -14,58 +14,59 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "remotesinkgui.h"
+
 #include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "mainwindow.h"
 
-#include "daemonsink.h"
-#include "ui_daemonsinkgui.h"
-#include "daemonsinkgui.h"
+#include "remotesink.h"
+#include "ui_remotesinkgui.h"
 
-DaemonSinkGUI* DaemonSinkGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *channelRx)
+RemoteSinkGUI* RemoteSinkGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *channelRx)
 {
-    DaemonSinkGUI* gui = new DaemonSinkGUI(pluginAPI, deviceUISet, channelRx);
+    RemoteSinkGUI* gui = new RemoteSinkGUI(pluginAPI, deviceUISet, channelRx);
     return gui;
 }
 
-void DaemonSinkGUI::destroy()
+void RemoteSinkGUI::destroy()
 {
     delete this;
 }
 
-void DaemonSinkGUI::setName(const QString& name)
+void RemoteSinkGUI::setName(const QString& name)
 {
     setObjectName(name);
 }
 
-QString DaemonSinkGUI::getName() const
+QString RemoteSinkGUI::getName() const
 {
     return objectName();
 }
 
-qint64 DaemonSinkGUI::getCenterFrequency() const {
+qint64 RemoteSinkGUI::getCenterFrequency() const {
     return 0;
 }
 
-void DaemonSinkGUI::setCenterFrequency(qint64 centerFrequency)
+void RemoteSinkGUI::setCenterFrequency(qint64 centerFrequency)
 {
     (void) centerFrequency;
 }
 
-void DaemonSinkGUI::resetToDefaults()
+void RemoteSinkGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
     applySettings(true);
 }
 
-QByteArray DaemonSinkGUI::serialize() const
+QByteArray RemoteSinkGUI::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool DaemonSinkGUI::deserialize(const QByteArray& data)
+bool RemoteSinkGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
@@ -77,19 +78,19 @@ bool DaemonSinkGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool DaemonSinkGUI::handleMessage(const Message& message)
+bool RemoteSinkGUI::handleMessage(const Message& message)
 {
-    if (DaemonSink::MsgSampleRateNotification::match(message))
+    if (RemoteSink::MsgSampleRateNotification::match(message))
     {
-        DaemonSink::MsgSampleRateNotification& notif = (DaemonSink::MsgSampleRateNotification&) message;
+        RemoteSink::MsgSampleRateNotification& notif = (RemoteSink::MsgSampleRateNotification&) message;
         m_channelMarker.setBandwidth(notif.getSampleRate());
         m_sampleRate = notif.getSampleRate();
         updateTxDelayTime();
         return true;
     }
-    else if (DaemonSink::MsgConfigureDaemonSink::match(message))
+    else if (RemoteSink::MsgConfigureRemoteSink::match(message))
     {
-        const DaemonSink::MsgConfigureDaemonSink& cfg = (DaemonSink::MsgConfigureDaemonSink&) message;
+        const RemoteSink::MsgConfigureRemoteSink& cfg = (RemoteSink::MsgConfigureRemoteSink&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
@@ -102,9 +103,9 @@ bool DaemonSinkGUI::handleMessage(const Message& message)
     }
 }
 
-DaemonSinkGUI::DaemonSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *channelrx, QWidget* parent) :
+RemoteSinkGUI::RemoteSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *channelrx, QWidget* parent) :
         RollupWidget(parent),
-        ui(new Ui::DaemonSinkGUI),
+        ui(new Ui::RemoteSinkGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
         m_sampleRate(0),
@@ -115,19 +116,19 @@ DaemonSinkGUI::DaemonSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-    m_daemonSink = (DaemonSink*) channelrx;
-    m_daemonSink->setMessageQueueToGUI(getInputMessageQueue());
+    m_remoteSink = (RemoteSink*) channelrx;
+    m_remoteSink->setMessageQueueToGUI(getInputMessageQueue());
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     m_channelMarker.setCenterFrequency(0);
-    m_channelMarker.setTitle("Daemon source");
+    m_channelMarker.setTitle("Remote source");
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
     m_settings.setChannelMarker(&m_channelMarker);
 
-    m_deviceUISet->registerRxChannelInstance(DaemonSink::m_channelIdURI, this);
+    m_deviceUISet->registerRxChannelInstance(RemoteSink::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 
@@ -140,29 +141,29 @@ DaemonSinkGUI::DaemonSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     applySettings(true);
 }
 
-DaemonSinkGUI::~DaemonSinkGUI()
+RemoteSinkGUI::~RemoteSinkGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
     delete ui;
 }
 
-void DaemonSinkGUI::blockApplySettings(bool block)
+void RemoteSinkGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
 }
 
-void DaemonSinkGUI::applySettings(bool force)
+void RemoteSinkGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
         setTitleColor(m_channelMarker.getColor());
 
-        DaemonSink::MsgConfigureDaemonSink* message = DaemonSink::MsgConfigureDaemonSink::create(m_settings, force);
-        m_daemonSink->getInputMessageQueue()->push(message);
+        RemoteSink::MsgConfigureRemoteSink* message = RemoteSink::MsgConfigureRemoteSink::create(m_settings, force);
+        m_remoteSink->getInputMessageQueue()->push(message);
     }
 }
 
-void DaemonSinkGUI::displaySettings()
+void RemoteSinkGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(0);
@@ -186,17 +187,17 @@ void DaemonSinkGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void DaemonSinkGUI::leaveEvent(QEvent*)
+void RemoteSinkGUI::leaveEvent(QEvent*)
 {
     m_channelMarker.setHighlighted(false);
 }
 
-void DaemonSinkGUI::enterEvent(QEvent*)
+void RemoteSinkGUI::enterEvent(QEvent*)
 {
     m_channelMarker.setHighlighted(true);
 }
 
-void DaemonSinkGUI::handleSourceMessages()
+void RemoteSinkGUI::handleSourceMessages()
 {
     Message* message;
 
@@ -209,13 +210,13 @@ void DaemonSinkGUI::handleSourceMessages()
     }
 }
 
-void DaemonSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void RemoteSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
 }
 
-void DaemonSinkGUI::onMenuDialogCalled(const QPoint &p)
+void RemoteSinkGUI::onMenuDialogCalled(const QPoint &p)
 {
     BasicChannelSettingsDialog dialog(&m_channelMarker, this);
     dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
@@ -241,13 +242,13 @@ void DaemonSinkGUI::onMenuDialogCalled(const QPoint &p)
     applySettings();
 }
 
-void DaemonSinkGUI::on_dataAddress_returnPressed()
+void RemoteSinkGUI::on_dataAddress_returnPressed()
 {
     m_settings.m_dataAddress = ui->dataAddress->text();
     applySettings();
 }
 
-void DaemonSinkGUI::on_dataPort_returnPressed()
+void RemoteSinkGUI::on_dataPort_returnPressed()
 {
     bool dataOk;
     int dataPort = ui->dataPort->text().toInt(&dataOk);
@@ -264,7 +265,7 @@ void DaemonSinkGUI::on_dataPort_returnPressed()
     applySettings();
 }
 
-void DaemonSinkGUI::on_dataApplyButton_clicked(bool checked)
+void RemoteSinkGUI::on_dataApplyButton_clicked(bool checked)
 {
     (void) checked;
     m_settings.m_dataAddress = ui->dataAddress->text();
@@ -280,7 +281,7 @@ void DaemonSinkGUI::on_dataApplyButton_clicked(bool checked)
     applySettings();
 }
 
-void DaemonSinkGUI::on_txDelay_valueChanged(int value)
+void RemoteSinkGUI::on_txDelay_valueChanged(int value)
 {
     m_settings.m_txDelay = value; // percentage
     ui->txDelayText->setText(tr("%1%").arg(value));
@@ -288,7 +289,7 @@ void DaemonSinkGUI::on_txDelay_valueChanged(int value)
     applySettings();
 }
 
-void DaemonSinkGUI::on_nbFECBlocks_valueChanged(int value)
+void RemoteSinkGUI::on_nbFECBlocks_valueChanged(int value)
 {
     m_settings.m_nbFECBlocks = value;
     int nbOriginalBlocks = 128;
@@ -300,7 +301,7 @@ void DaemonSinkGUI::on_nbFECBlocks_valueChanged(int value)
     applySettings();
 }
 
-void DaemonSinkGUI::updateTxDelayTime()
+void RemoteSinkGUI::updateTxDelayTime()
 {
     double txDelayRatio = m_settings.m_txDelay / 100.0;
     int samplesPerBlock = SDRDaemonNbBytesPerBlock / sizeof(Sample);
@@ -309,7 +310,7 @@ void DaemonSinkGUI::updateTxDelayTime()
     ui->txDelayTime->setText(tr("%1µs").arg(QString::number(delay*1e6, 'f', 0)));
 }
 
-void DaemonSinkGUI::tick()
+void RemoteSinkGUI::tick()
 {
     if (++m_tickCount == 20) { // once per second
         m_tickCount = 0;

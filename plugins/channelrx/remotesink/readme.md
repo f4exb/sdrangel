@@ -1,4 +1,4 @@
-<h1>Daemon sink channel plugin</h1>
+<h1>Remote sink channel plugin</h1>
 
 <h2>Introduction</h2>
 
@@ -12,7 +12,7 @@ The plugin will be built only if the [CM256cc library](https://github.com/f4exb/
 
 <h2>Interface</h2>
 
-![Daemon sink channel plugin GUI](../../../doc/img/DaemonSink.png)
+![Remote sink channel plugin GUI](../../../doc/img/RemoteSink.png)
 
 <h3>1: Distant address</h2>
 

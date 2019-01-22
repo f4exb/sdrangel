@@ -9,7 +9,7 @@ endif()
 
 find_package(CM256cc)
 if(CM256CC_FOUND)
-    add_subdirectory(daemonsink)
+    add_subdirectory(remotesink)
 endif(CM256CC_FOUND)
 
 add_subdirectory(demodnfm)

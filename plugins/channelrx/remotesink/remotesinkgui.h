@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELRX_DAEMONSINK_DAEMONSINKGUI_H_
-#define PLUGINS_CHANNELRX_DAEMONSINK_DAEMONSINKGUI_H_
+#ifndef PLUGINS_CHANNELRX_REMOTESINK_REMOTESINKGUI_H_
+#define PLUGINS_CHANNELRX_REMOTESINK_REMOTESINKGUI_H_
 
 #include <stdint.h>
 
@@ -27,21 +27,21 @@
 #include "gui/rollupwidget.h"
 #include "util/messagequeue.h"
 
-#include "daemonsinksettings.h"
+#include "remotesinksettings.h"
 
 class PluginAPI;
 class DeviceUISet;
-class DaemonSink;
+class RemoteSink;
 class BasebandSampleSink;
 
 namespace Ui {
-    class DaemonSinkGUI;
+    class RemoteSinkGUI;
 }
 
-class DaemonSinkGUI : public RollupWidget, public PluginInstanceGUI {
+class RemoteSinkGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 public:
-    static DaemonSinkGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
+    static RemoteSinkGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
     virtual void destroy();
 
     void setName(const QString& name);
@@ -56,23 +56,23 @@ public:
     virtual bool handleMessage(const Message& message);
 
 private:
-    Ui::DaemonSinkGUI* ui;
+    Ui::RemoteSinkGUI* ui;
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
-    DaemonSinkSettings m_settings;
+    RemoteSinkSettings m_settings;
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     bool m_doApplySettings;
 
-    DaemonSink* m_daemonSink;
+    RemoteSink* m_remoteSink;
     MessageQueue m_inputMessageQueue;
 
     QTime m_time;
     uint32_t m_tickCount;
 
-    explicit DaemonSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
-    virtual ~DaemonSinkGUI();
+    explicit RemoteSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
+    virtual ~RemoteSinkGUI();
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
@@ -96,4 +96,4 @@ private slots:
 
 
 
-#endif /* PLUGINS_CHANNELRX_DAEMONSINK_DAEMONSINKGUI_H_ */
+#endif /* PLUGINS_CHANNELRX_REMOTESINK_REMOTESINKGUI_H_ */

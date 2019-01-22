@@ -9,7 +9,7 @@ CONFIG += plugin
 
 QT += core gui widgets multimedia network opengl
 
-TARGET = daemonsink
+TARGET = remotesink
 
 CONFIG(MINGW32):LIBCM256CCSRC = "C:\softs\cm256cc"
 CONFIG(MSVC):LIBCM256CCSRC = "C:\softs\cm256cc"
@@ -38,19 +38,19 @@ CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(MSVC):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(macx):INCLUDEPATH += "../../../boost_1_69_0"
 
-SOURCES += daemonsink.cpp\
-    daemonsinkgui.cpp\
-    daemonsinksettings.cpp\
-    daemonsinkplugin.cpp\
-    daemonsinkthread.cpp
+SOURCES += remotesink.cpp\
+    remotesinkgui.cpp\
+    remotesinksettings.cpp\
+    remotesinkplugin.cpp\
+    remotesinkthread.cpp
 
-HEADERS += daemonsink.h\
-    daemonsinkgui.h\
-    daemonsinksettings.h\
-    daemonsinkplugin.h\
-    daemonsinkthread.h
+HEADERS += remotesink.h\
+    remotesinkgui.h\
+    remotesinksettings.h\
+    remotesinkplugin.h\
+    remotesinkthread.h
 
-FORMS += daemonsinkgui.ui
+FORMS += remotesinkgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui

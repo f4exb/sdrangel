@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2018-2019 Edouard Griffiths, F4EXB.                             //
 //                                                                               //
-// SDRdaemon sink channel (Rx) UDP sender thread                                 //
+// Remote sink channel (Rx) UDP sender thread                                    //
 //                                                                               //
-// SDRdaemon is a detached SDR front end that handles the interface with a       //
-// physical device and sends or receives the I/Q samples stream to or from a     //
-// SDRangel instance via UDP. It is controlled via a Web REST API.               //
+// SDRangel can work as a detached SDR front end. With this plugin it can        //
+// sends the I/Q samples stream to another SDRangel instance via UDP.            //
+// It is controlled via a Web REST API.                                          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -20,16 +20,16 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "remotesinkthread.h"
+
 #include <QUdpSocket>
 
 #include "channel/sdrdaemondatablock.h"
-#include "daemonsinkthread.h"
-
 #include "cm256.h"
 
-MESSAGE_CLASS_DEFINITION(DaemonSinkThread::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(RemoteSinkThread::MsgStartStop, Message)
 
-DaemonSinkThread::DaemonSinkThread(QObject* parent) :
+RemoteSinkThread::RemoteSinkThread(QObject* parent) :
     QThread(parent),
     m_running(false),
     m_address(QHostAddress::LocalHost),
@@ -40,20 +40,20 @@ DaemonSinkThread::DaemonSinkThread(QObject* parent) :
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
-DaemonSinkThread::~DaemonSinkThread()
+RemoteSinkThread::~RemoteSinkThread()
 {
-    qDebug("DaemonSinkThread::~DaemonSinkThread");
+    qDebug("RemoteSinkThread::~RemoteSinkThread");
 }
 
-void DaemonSinkThread::startStop(bool start)
+void RemoteSinkThread::startStop(bool start)
 {
     MsgStartStop *msg = MsgStartStop::create(start);
     m_inputMessageQueue.push(msg);
 }
 
-void DaemonSinkThread::startWork()
+void RemoteSinkThread::startWork()
 {
-    qDebug("DaemonSinkThread::startWork");
+    qDebug("RemoteSinkThread::startWork");
 	m_startWaitMutex.lock();
 	m_socket = new QUdpSocket(this);
 	start();
@@ -62,18 +62,18 @@ void DaemonSinkThread::startWork()
 	m_startWaitMutex.unlock();
 }
 
-void DaemonSinkThread::stopWork()
+void RemoteSinkThread::stopWork()
 {
-	qDebug("DaemonSinkThread::stopWork");
+	qDebug("RemoteSinkThread::stopWork");
     delete m_socket;
     m_socket = 0;
 	m_running = false;
 	wait();
 }
 
-void DaemonSinkThread::run()
+void RemoteSinkThread::run()
 {
-    qDebug("DaemonSinkThread::run: begin");
+    qDebug("RemoteSinkThread::run: begin");
 	m_running = true;
 	m_startWaiter.wakeAll();
 
@@ -83,16 +83,16 @@ void DaemonSinkThread::run()
     }
 
     m_running = false;
-    qDebug("DaemonSinkThread::run: end");
+    qDebug("RemoteSinkThread::run: end");
 }
 
-void DaemonSinkThread::processDataBlock(SDRDaemonDataBlock *dataBlock)
+void RemoteSinkThread::processDataBlock(SDRDaemonDataBlock *dataBlock)
 {
     handleDataBlock(*dataBlock);
     delete dataBlock;
 }
 
-void DaemonSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
+void RemoteSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
 {
 	CM256::cm256_encoder_params cm256Params;  //!< Main interface with CM256 encoder
 	CM256::cm256_block descriptorBlocks[256]; //!< Pointers to data for CM256 encoder
@@ -141,7 +141,7 @@ void DaemonSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
         // Encode FEC blocks
         if (m_cm256p->cm256_encode(cm256Params, descriptorBlocks, fecBlocks))
         {
-            qWarning("SDRDaemonChannelSinkThread::handleDataBlock: CM256 encode failed. No transmission.");
+            qWarning("RemoteSinkThread::handleDataBlock: CM256 encode failed. No transmission.");
             // TODO: send without FEC changing meta data to set indication of no FEC
         }
 
@@ -166,7 +166,7 @@ void DaemonSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
     dataBlock.m_txControlBlock.m_processed = true;
 }
 
-void DaemonSinkThread::handleInputMessages()
+void RemoteSinkThread::handleInputMessages()
 {
     Message* message;
 
@@ -175,7 +175,7 @@ void DaemonSinkThread::handleInputMessages()
         if (MsgStartStop::match(*message))
         {
             MsgStartStop* notif = (MsgStartStop*) message;
-            qDebug("DaemonSinkThread::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
+            qDebug("RemoteSinkThread::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
 
             if (notif->getStartStop()) {
                 startWork();

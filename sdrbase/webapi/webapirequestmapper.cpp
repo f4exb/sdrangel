@@ -2252,14 +2252,14 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
-    else if (*channelType == "DaemonSink")
+    else if (*channelType == "RemoteSink")
     {
         if (channelSettings.getTx() == 0)
         {
-            QJsonObject daemonChannelSinkSettingsJsonObject = jsonObject["DaemonSinkSettings"].toObject();
-            channelSettingsKeys = daemonChannelSinkSettingsJsonObject.keys();
-            channelSettings.setDaemonSinkSettings(new SWGSDRangel::SWGDaemonSinkSettings());
-            channelSettings.getDaemonSinkSettings()->fromJsonObject(daemonChannelSinkSettingsJsonObject);
+            QJsonObject remoteChannelSinkSettingsJsonObject = jsonObject["RemoteSinkSettings"].toObject();
+            channelSettingsKeys = remoteChannelSinkSettingsJsonObject.keys();
+            channelSettings.setRemoteSinkSettings(new SWGSDRangel::SWGRemoteSinkSettings());
+            channelSettings.getRemoteSinkSettings()->fromJsonObject(remoteChannelSinkSettingsJsonObject);
             return true;
         }
         else {
@@ -2518,7 +2518,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setDsdDemodSettings(0);
     channelSettings.setNfmDemodSettings(0);
     channelSettings.setNfmModSettings(0);
-    channelSettings.setDaemonSinkSettings(0);
+    channelSettings.setRemoteSinkSettings(0);
     channelSettings.setDaemonSourceSettings(0);
     channelSettings.setSsbDemodSettings(0);
     channelSettings.setSsbModSettings(0);

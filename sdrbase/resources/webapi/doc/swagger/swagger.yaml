@@ -1888,8 +1888,8 @@ definitions:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
         $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModSettings"
-      DaemonSinkSettings:
-        $ref: "/doc/swagger/include/DaemonSink.yaml#/DaemonSinkSettings"
+      RemoteSinkSettings:
+        $ref: "/doc/swagger/include/RemoteSink.yaml#/RemoteSinkSettings"
       DaemonSourceSettings:
         $ref: "/doc/swagger/include/DaemonSource.yaml#/DaemonSourceSettings"
       SSBModSettings:

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2016-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELRX_DAEMONSINK_DAEMONSINKPLUGIN_H_
-#define PLUGINS_CHANNELRX_DAEMONSINK_DAEMONSINKPLUGIN_H_
+#ifndef PLUGINS_CHANNELRX_REMOTESINK_REMOTESINKPLUGIN_H_
+#define PLUGINS_CHANNELRX_REMOTESINK_REMOTESINKPLUGIN_H_
 
 
 #include <QObject>
@@ -24,13 +24,13 @@
 class DeviceUISet;
 class BasebandSampleSink;
 
-class DaemonSinkPlugin : public QObject, PluginInterface {
+class RemoteSinkPlugin : public QObject, PluginInterface {
     Q_OBJECT
     Q_INTERFACES(PluginInterface)
-    Q_PLUGIN_METADATA(IID "sdrangel.demod.daemonsink")
+    Q_PLUGIN_METADATA(IID "sdrangel.demod.remotesink")
 
 public:
-    explicit DaemonSinkPlugin(QObject* parent = 0);
+    explicit RemoteSinkPlugin(QObject* parent = 0);
 
     const PluginDescriptor& getPluginDescriptor() const;
     void initPlugin(PluginAPI* pluginAPI);
@@ -45,4 +45,4 @@ private:
     PluginAPI* m_pluginAPI;
 };
 
-#endif /* PLUGINS_CHANNELRX_DAEMONSINK_DAEMONSINKPLUGIN_H_ */
+#endif /* PLUGINS_CHANNELRX_REMOTESINK_REMOTESINKPLUGIN_H_ */

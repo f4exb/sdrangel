@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2016-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,66 +14,66 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "daemonsinkplugin.h"
+#include "remotesinkplugin.h"
 
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
 
 #ifndef SERVER_MODE
-#include "daemonsinkgui.h"
+#include "remotesinkgui.h"
 #endif
-#include "daemonsink.h"
+#include "remotesink.h"
 
-const PluginDescriptor DaemonSinkPlugin::m_pluginDescriptor = {
-    QString("Daemon channel Sink"),
-    QString("4.3.2"),
+const PluginDescriptor RemoteSinkPlugin::m_pluginDescriptor = {
+    QString("Remote channel Sink"),
+    QString("4.4.2"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
     QString("https://github.com/f4exb/sdrangel")
 };
 
-DaemonSinkPlugin::DaemonSinkPlugin(QObject* parent) :
+RemoteSinkPlugin::RemoteSinkPlugin(QObject* parent) :
     QObject(parent),
     m_pluginAPI(0)
 {
 }
 
-const PluginDescriptor& DaemonSinkPlugin::getPluginDescriptor() const
+const PluginDescriptor& RemoteSinkPlugin::getPluginDescriptor() const
 {
     return m_pluginDescriptor;
 }
 
-void DaemonSinkPlugin::initPlugin(PluginAPI* pluginAPI)
+void RemoteSinkPlugin::initPlugin(PluginAPI* pluginAPI)
 {
     m_pluginAPI = pluginAPI;
 
     // register channel Source
-    m_pluginAPI->registerRxChannel(DaemonSink::m_channelIdURI, DaemonSink::m_channelId, this);
+    m_pluginAPI->registerRxChannel(RemoteSink::m_channelIdURI, RemoteSink::m_channelId, this);
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* DaemonSinkPlugin::createRxChannelGUI(
+PluginInstanceGUI* RemoteSinkPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet __attribute__((unused)),
         BasebandSampleSink *rxChannel __attribute__((unused)))
 {
     return 0;
 }
 #else
-PluginInstanceGUI* DaemonSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+PluginInstanceGUI* RemoteSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-    return DaemonSinkGUI::create(m_pluginAPI, deviceUISet, rxChannel);
+    return RemoteSinkGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
 
-BasebandSampleSink* DaemonSinkPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* RemoteSinkPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
 {
-    return new DaemonSink(deviceAPI);
+    return new RemoteSink(deviceAPI);
 }
 
-ChannelSinkAPI* DaemonSinkPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* RemoteSinkPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
 {
-    return new DaemonSink(deviceAPI);
+    return new RemoteSink(deviceAPI);
 }
 
 

@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGDaemonSinkSettings.h
+ * SWGRemoteSinkSettings.h
  *
- * Daemon channel sink settings
+ * Remote channel sink settings
  */
 
-#ifndef SWGDaemonSinkSettings_H_
-#define SWGDaemonSinkSettings_H_
+#ifndef SWGRemoteSinkSettings_H_
+#define SWGRemoteSinkSettings_H_
 
 #include <QJsonObject>
 
@@ -29,18 +29,18 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGDaemonSinkSettings: public SWGObject {
+class SWG_API SWGRemoteSinkSettings: public SWGObject {
 public:
-    SWGDaemonSinkSettings();
-    SWGDaemonSinkSettings(QString* json);
-    virtual ~SWGDaemonSinkSettings();
+    SWGRemoteSinkSettings();
+    SWGRemoteSinkSettings(QString* json);
+    virtual ~SWGRemoteSinkSettings();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGDaemonSinkSettings* fromJson(QString &jsonString) override;
+    virtual SWGRemoteSinkSettings* fromJson(QString &jsonString) override;
 
     qint32 getNbFecBlocks();
     void setNbFecBlocks(qint32 nb_fec_blocks);
@@ -116,4 +116,4 @@ private:
 
 }
 
-#endif /* SWGDaemonSinkSettings_H_ */
+#endif /* SWGRemoteSinkSettings_H_ */

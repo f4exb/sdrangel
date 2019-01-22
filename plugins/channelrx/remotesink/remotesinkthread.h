@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2018-2019 Edouard Griffiths, F4EXB.                             //
 //                                                                               //
-// SDRdaemon sink channel (Rx) UDP sender thread                                 //
+// Remote sink channel (Rx) UDP sender thread                                    //
 //                                                                               //
-// SDRdaemon is a detached SDR front end that handles the interface with a       //
-// physical device and sends or receives the I/Q samples stream to or from a     //
-// SDRangel instance via UDP. It is controlled via a Web REST API.               //
+// SDRangel can work as a detached SDR front end. With this plugin it can        //
+// sends the I/Q samples stream to another SDRangel instance via UDP.            //
+// It is controlled via a Web REST API.                                          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -19,6 +19,9 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
+
+#ifndef PLUGINS_CHANNELRX_REMOTESINK_REMOTESINKTHREAD_H_
+#define PLUGINS_CHANNELRX_REMOTESINK_REMOTESINKTHREAD_H_
 
 #include <QThread>
 #include <QMutex>
@@ -34,7 +37,7 @@ class SDRDaemonDataBlock;
 class CM256;
 class QUdpSocket;
 
-class DaemonSinkThread : public QThread {
+class RemoteSinkThread : public QThread {
     Q_OBJECT
 
 public:
@@ -57,8 +60,8 @@ public:
         { }
     };
 
-    DaemonSinkThread(QObject* parent = 0);
-    ~DaemonSinkThread();
+    RemoteSinkThread(QObject* parent = 0);
+    ~RemoteSinkThread();
 
     void startStop(bool start);
 
@@ -87,3 +90,6 @@ private:
 private slots:
     void handleInputMessages();
 };
+
+#endif // PLUGINS_CHANNELRX_REMOTESINK_REMOTESINKTHREAD_H_
+

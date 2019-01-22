@@ -1813,8 +1813,8 @@ margin-bottom: 20px;
     "NFMModSettings" : {
       "$ref" : "#/definitions/NFMModSettings"
     },
-    "DaemonSinkSettings" : {
-      "$ref" : "#/definitions/DaemonSinkSettings"
+    "RemoteSinkSettings" : {
+      "$ref" : "#/definitions/RemoteSinkSettings"
     },
     "DaemonSourceSettings" : {
       "$ref" : "#/definitions/DaemonSourceSettings"
@@ -2047,49 +2047,6 @@ margin-bottom: 20px;
     }
   },
   "description" : "DV serial device details"
-};
-            defs.DaemonSinkSettings = {
-  "properties" : {
-    "nbFECBlocks" : {
-      "type" : "integer",
-      "description" : "Number of FEC blocks per frame"
-    },
-    "dataAddress" : {
-      "type" : "string",
-      "description" : "Receiving USB data address"
-    },
-    "dataPort" : {
-      "type" : "integer",
-      "description" : "Receiving USB data port"
-    },
-    "txDelay" : {
-      "type" : "integer",
-      "description" : "Minimum delay in ms between consecutive USB blocks transmissions"
-    },
-    "rgbColor" : {
-      "type" : "integer"
-    },
-    "title" : {
-      "type" : "string"
-    },
-    "useReverseAPI" : {
-      "type" : "integer",
-      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
-    },
-    "reverseAPIAddress" : {
-      "type" : "string"
-    },
-    "reverseAPIPort" : {
-      "type" : "integer"
-    },
-    "reverseAPIDeviceIndex" : {
-      "type" : "integer"
-    },
-    "reverseAPIChannelIndex" : {
-      "type" : "integer"
-    }
-  },
-  "description" : "Daemon channel sink settings"
 };
             defs.DaemonSourceReport = {
   "properties" : {
@@ -3844,6 +3801,49 @@ margin-bottom: 20px;
     }
   },
   "description" : "An arbitrary range of floating point values"
+};
+            defs.RemoteSinkSettings = {
+  "properties" : {
+    "nbFECBlocks" : {
+      "type" : "integer",
+      "description" : "Number of FEC blocks per frame"
+    },
+    "dataAddress" : {
+      "type" : "string",
+      "description" : "Receiving USB data address"
+    },
+    "dataPort" : {
+      "type" : "integer",
+      "description" : "Receiving USB data port"
+    },
+    "txDelay" : {
+      "type" : "integer",
+      "description" : "Minimum delay in ms between consecutive USB blocks transmissions"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "Remote channel sink settings"
 };
             defs.RtlSdrReport = {
   "properties" : {
@@ -24373,7 +24373,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-01-14T08:33:10.665+01:00
+              Generated 2019-01-22T23:24:38.456+01:00
             </div>
           </div>
       </div>
