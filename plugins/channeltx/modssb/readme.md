@@ -220,7 +220,8 @@ The path to the selected audio file to be played or dots if unselected
 
 <h4>18.1: Audio file select</h4>
 
-Opens a file dialog to select the audio file to be played. It must be mono 48 kHz 16LE raw format.
+Opens a file dialog to select the audio file to be played. It must be 48 kHz F32LE raw format. If binaural mode is selected it takes a 2 channel (stereo) file else it should be mono.
+Using sox a .wav file can be converted with this command: `sox piano.wav -t raw -r 48k -c 1 -b 32 -L -e float piano.raw` (mono) or `sox piano.wav -t raw -r 48k -c 2 -b 32 -L -e float piano.raw` (stereo)
 
 <h4>18.2: Audio file loop</h4>
 
