@@ -9,6 +9,8 @@ QT += core
 TEMPLATE = lib
 TARGET = librtlsdr
 
+CONFIG(MSVC):DEFINES += rtlsdr_EXPORTS
+
 CONFIG(MINGW32):LIBRTLSDRSRC = "C:\softs\librtlsdr"
 CONFIG(MINGW64):LIBRTLSDRSRC = "C:\softs\librtlsdr"
 CONFIG(MSVC):LIBRTLSDRSRC = "C:\softs\librtlsdr"

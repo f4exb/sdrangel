@@ -49,7 +49,7 @@ FORMS += rtlsdrgui.ui
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../swagger/$${build_subdir} -lswagger
-LIBS -= -L../../../librtlsdr/$${build_subdir} -llibrtlsdr
+LIBS += -L../../../librtlsdr/$${build_subdir} -llibrtlsdr
 macx {
     LIBS -= -L../../../librtlsdr/$${build_subdir} -llibrtlsdr
     LIBS += -L/opt/local/lib -lrtlsdr
