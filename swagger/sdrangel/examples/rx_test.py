@@ -48,10 +48,10 @@ def getInputOptions():
     parser.add_option("--audio-channels", dest="audio_channels", help="Audio: UDP mode (0: L only 1: R only 2: L+R mono 3: LR stereo)", metavar="ENUM_INT", type="int")
     parser.add_option("--baud-rate", dest="baud_rate", help="DSD: baud rate in Baud", metavar="BAUD", type="int", default=4800)
     parser.add_option("--fm-dev", dest="fm_deviation", help="DSD: expected FM deviation", metavar="FREQ", type="int", default=5400)
-    parser.add_option("--dmn-address", dest="daemon_address", help="DaemonSink: destination data address", metavar="IP_ADDRESS", type="string")
-    parser.add_option("--dmn-port", dest="daemon_port", help="DaemonSink: destination data port", metavar="PORT", type="int")
-    parser.add_option("--dmn-fec", dest="daemon_fec", help="DaemonSink: number of FEC blocks per frame", metavar="NUMBER", type="int")
-    parser.add_option("--dmn-tx-delay", dest="daemon_tx_delay", help="DaemonSink: inter block UDP Tx delay percentage", metavar="PERCENT", type="int")
+    parser.add_option("--rmt-address", dest="remote_address", help="RemoteSink: destination data address", metavar="IP_ADDRESS", type="string")
+    parser.add_option("--rmt-port", dest="remote_port", help="RemoteSink: destination data port", metavar="PORT", type="int")
+    parser.add_option("--rmt-fec", dest="remote_fec", help="RemoteSink: number of FEC blocks per frame", metavar="NUMBER", type="int")
+    parser.add_option("--rmt-tx-delay", dest="remote_tx_delay", help="RemoteSink: inter block UDP Tx delay percentage", metavar="PERCENT", type="int")
 
     (options, args) = parser.parse_args()
 
@@ -312,16 +312,16 @@ def setupChannel(deviceset_url, options):
         settings["UDPSinkSettings"]["squelchDB"] = options.squelch_db
         settings["UDPSinkSettings"]["channelMute"] = 0
         settings["UDPSinkSettings"]["title"] = "Channel %d" % i
-    elif options.channel_id == "DaemonSink":
-        settings["DaemonSinkSettings"]["title"] = "Channel %d" % i
-        if options.daemon_address:
-            settings["DaemonSinkSettings"]["dataAddress"] = options.daemon_address
-        if options.daemon_port:
-            settings["DaemonSinkSettings"]["dataPort"] = options.daemon_port
-        if options.daemon_fec:
-            settings["DaemonSinkSettings"]["nbFECBlocks"] = options.daemon_fec
-        if options.daemon_tx_delay:
-            settings["DaemonSinkSettings"]["txDelay"] = options.daemon_tx_delay
+    elif options.channel_id == "RemoteSink":
+        settings["RemoteSinkSettings"]["title"] = "Channel %d" % i
+        if options.remote_address:
+            settings["RemoteSinkSettings"]["dataAddress"] = options.remote_address
+        if options.remote_port:
+            settings["RemoteSinkSettings"]["dataPort"] = options.remote_port
+        if options.remote_fec:
+            settings["RemoteSinkSettings"]["nbFECBlocks"] = options.remote_fec
+        if options.remote_tx_delay:
+            settings["RemoteSinkSettings"]["txDelay"] = options.remote_tx_delay
 
     r = callAPI(deviceset_url + "/channel/%d/settings" % i, "PATCH", None, settings, "Change demod")
     if r is None:

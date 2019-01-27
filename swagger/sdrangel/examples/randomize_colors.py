@@ -60,11 +60,11 @@ def get_channel_static_data(channel_info):
         elif channel_info["id"] == "NFMMod":
             settings_key = "NFMModSettings"
             tx = 1
-        elif channel_info["id"] == "DaemonSink":
-            settings_key = "DaemonSinkSettings"
+        elif channel_info["id"] == "RemoteSink":
+            settings_key = "RemoteSinkSettings"
             tx = 0
-        elif channel_info["id"] == "DaemonSource":
-            settings_key = "DaemonSourceSettings"
+        elif channel_info["id"] == "RemoteSource":
+            settings_key = "RemoteSourceSettings"
             tx = 1
         elif channel_info["id"] == "SSBMod":
             settings_key = "SSBModSettings"
