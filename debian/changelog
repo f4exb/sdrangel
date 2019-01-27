@@ -1,3 +1,10 @@
+sdrangel (4.4.2-1) unstable; urgency=medium
+
+  * Migration of Daemon* channels to Remote* channels 
+  * XTRX: fixed GPS status retrieval
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 25 Jan 2019 21:14:18 +0100
+  
 sdrangel (4.4.1-1) unstable; urgency=medium
 
   * AirspyHF: Implemented new settings that come along newer version of libairspyhf
