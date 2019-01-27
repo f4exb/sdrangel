@@ -1,4 +1,4 @@
-SET libusbdir="C:\softs\libusb-1.0.22\MinGW32"
+SET libusbdir="C:\softs\libusb-1.0.21\MinGW32"
 SET opencvdir="C:\softs\opencv\build\mw32\install\x86\mingw\bin"
 SET libxml2dir="C:\softs\libxml2-2.7.8.win32"
 SET libiconvdir="C:\softs\iconv-1.9.2.win32"

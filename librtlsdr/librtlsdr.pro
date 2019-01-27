@@ -15,9 +15,9 @@ CONFIG(MINGW32):LIBRTLSDRSRC = "C:\softs\librtlsdr"
 CONFIG(MINGW64):LIBRTLSDRSRC = "C:\softs\librtlsdr"
 CONFIG(MSVC):LIBRTLSDRSRC = "C:\softs\librtlsdr"
 
-CONFIG(MINGW32):INCLUDEPATH += "C:\softs\libusb-1.0.22\include\libusb-1.0"
-CONFIG(MINGW64):INCLUDEPATH += "C:\softs\libusb-1.0.22\include\libusb-1.0"
-CONFIG(MSVC):INCLUDEPATH += "C:\softs\libusb-1.0.22\include\libusb-1.0"
+CONFIG(MINGW32):INCLUDEPATH += "C:\softs\libusb-1.0.21\include\libusb-1.0"
+CONFIG(MINGW64):INCLUDEPATH += "C:\softs\libusb-1.0.21\include\libusb-1.0"
+CONFIG(MSVC):INCLUDEPATH += "C:\softs\libusb-1.0.21\include\libusb-1.0"
 CONFIG(macx):INCLUDEPATH += /opt/local/include
 CONFIG(MSVC):INCLUDEPATH += "C:\softs\librtlsdr\include"
 
@@ -42,9 +42,9 @@ HEADERS = $$LIBRTLSDRSRC/include/reg_field.h\
     $$LIBRTLSDRSRC/src/getopt/getopt.h\
     $$LIBRTLSDRSRC/src/convenience/convenience.h
 
-CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.22\MinGW32\dll -llibusb-1.0
-CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.22\MinGW64\dll -llibusb-1.0
-CONFIG(MSVC):LIBS += -LC:\softs\libusb-1.0.22\MS64\dll -llibusb-1.0
+CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.21\MinGW32\dll -llibusb-1.0
+CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.21\MinGW64\dll -llibusb-1.0
+CONFIG(MSVC):LIBS += -LC:\softs\libusb-1.0.21\MS64\dll -llibusb-1.0
 macx {
     SOURCES =
     HEADERS =

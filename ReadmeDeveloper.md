@@ -58,7 +58,7 @@ At present the following plugins are available:
   - `AMDemodXxx` classes in `plugins/channelrx/demodam`: AM demodulator with audio output
   - `BFMDemodXxx` classes in `plugins/channelrx/demodbfm`: Broadcast FM demodulator with audio mono/stereo output and RDS
   - `DSDDemodXxx` classes in `plugins/channelrx/demoddsd`: Digital Speech demodulator/decoder built on top of the [DSDcc library](https://github.com/f4exb/dsdcc). Produces audio output and some communication data from various digital voice standards: DMR, dPMR, D-Star, Yaesu System Fusion (YSF).
-  - `LoraDemodXxx` classes in `plugins/channelrx/demodlora`: Decodes [LoRa](http://www.semtech.com/images/datasheet/an1200.22.pdf) transmissions. This is legacy code that is not very well maintained so it may or may not work.
+  - `LoraDemodXxx` classes in `plugins/channelrx/demodlora`: Decodes [LoRa](http://www.semtech.com/images/datasheet/an1200.21.pdf) transmissions. This is legacy code that is not very well maintained so it may or may not work.
   - `NFMDemodXxx` classes in `plugins/channelrx/demodnfm`: Narrowband FM demodulator with audio output.
   - `SSBDemodXxx` classes in `plugins/channelrx/demodssb`: SSB/DSB/CW demodulator with audio output.
   - `WFMDemodXxx` classes in `plugins/channelrx/demodwfm`: Wideband FM demodulator with audio output. This is a basic demodulator.

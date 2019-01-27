@@ -42,7 +42,7 @@ INCLUDEPATH += $$PWD
 INCLUDEPATH += ../exports
 INCLUDEPATH += ../sdrbase
 INCLUDEPATH += "C:\softs\boost_1_66_0"
-INCLUDEPATH += "C:\softs\libusb-1.0.22\include"
+INCLUDEPATH += "C:\softs\libusb-1.0.21\include"
 INCLUDEPATH += $$LIBBLADERF/include
 INCLUDEPATH += $$LIBHACKRFSRC
 macx {
