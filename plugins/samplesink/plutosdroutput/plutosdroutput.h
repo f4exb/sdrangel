@@ -123,6 +123,7 @@ public:
     uint32_t getFIRSampleRate() const { return m_deviceSampleRates.m_hb1Rate; }
     void getRSSI(std::string& rssiStr);
     void getLORange(qint64& minLimit, qint64& maxLimit);
+    void getbbLPRange(quint32& minLimit, quint32& maxLimit);
     bool fetchTemperature();
     float getTemperature();
 

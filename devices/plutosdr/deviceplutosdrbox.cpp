@@ -755,6 +755,49 @@ void DevicePlutoSDRBox::getTxLORange(uint64_t& minLimit, uint64_t& maxLimit)
     }
 }
 
+void DevicePlutoSDRBox::getbbLPRxRange(uint32_t& minLimit, uint32_t& maxLimit)
+{
+    // values are returned in Hz of RF (complex channel) bandwidth
+    qint32 stepLimit;
+    std::string rangeStr;
+
+    char buff[50];
+    snprintf(buff, sizeof(buff), "in_voltage_rf_bandwidth_available");
+
+    if (get_param(DEVICE_PHY, buff, rangeStr))
+    {
+	std::istringstream instream(rangeStr.substr(1, rangeStr.size() - 2));
+	instream >> minLimit >> stepLimit >> maxLimit;
+    }
+    else
+    {
+	minLimit = DevicePlutoSDR::bbLPRxLowLimitFreq;
+	maxLimit = DevicePlutoSDR::bbLPRxHighLimitFreq;
+    }
+}
+
+void DevicePlutoSDRBox::getbbLPTxRange(uint32_t& minLimit, uint32_t& maxLimit)
+{
+    // values are returned in Hz
+    qint32 stepLimit;
+    std::string rangeStr;
+
+    char buff[50];
+    snprintf(buff, sizeof(buff), "out_voltage_rf_bandwidth_available");
+
+    if (get_param(DEVICE_PHY, buff, rangeStr))
+    {
+        std::istringstream instream(rangeStr.substr(1, rangeStr.size() - 2));
+        instream >> minLimit >> stepLimit >> maxLimit;
+    }
+    else
+    {
+	minLimit = DevicePlutoSDR::bbLPTxLowLimitFreq;
+	maxLimit = DevicePlutoSDR::bbLPTxHighLimitFreq;
+    }
+}
+
+
 bool DevicePlutoSDRBox::fetchTemp()
 {
     std::string temp_mC_str;

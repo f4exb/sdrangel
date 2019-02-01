@@ -107,6 +107,8 @@ public:
     bool getTxRSSI(std::string& rssiStr, unsigned int chan);
     void getRxLORange(uint64_t& minLimit, uint64_t& maxLimit);
     void getTxLORange(uint64_t& minLimit, uint64_t& maxLimit);
+    void getbbLPRxRange(uint32_t& minLimit, uint32_t& maxLimit);
+    void getbbLPTxRange(uint32_t& minLimit, uint32_t& maxLimit);
     bool fetchTemp();
     float getTemp() const { return m_temp; }
     bool getRateGovernors(std::string& rateGovernors);

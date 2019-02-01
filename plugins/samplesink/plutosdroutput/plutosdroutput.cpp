@@ -600,6 +600,16 @@ void PlutoSDROutput::getLORange(qint64& minLimit, qint64& maxLimit)
     maxLimit = max;
 }
 
+void PlutoSDROutput::getbbLPRange(quint32& minLimit, quint32& maxLimit)
+{
+    uint32_t min, max;
+    DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
+
+    plutoBox->getbbLPTxRange(min, max);
+    minLimit = min;
+    maxLimit = max;
+}
+
 bool PlutoSDROutput::fetchTemperature()
 {
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
