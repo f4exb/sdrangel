@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGSDRdaemonSourceSettings.h"
+#include "SWGRemoteInputSettings.h"
 
 #include "SWGHelpers.h"
 
@@ -22,12 +22,12 @@
 
 namespace SWGSDRangel {
 
-SWGSDRdaemonSourceSettings::SWGSDRdaemonSourceSettings(QString* json) {
+SWGRemoteInputSettings::SWGRemoteInputSettings(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGSDRdaemonSourceSettings::SWGSDRdaemonSourceSettings() {
+SWGRemoteInputSettings::SWGRemoteInputSettings() {
     api_address = nullptr;
     m_api_address_isSet = false;
     api_port = 0;
@@ -52,12 +52,12 @@ SWGSDRdaemonSourceSettings::SWGSDRdaemonSourceSettings() {
     m_reverse_api_device_index_isSet = false;
 }
 
-SWGSDRdaemonSourceSettings::~SWGSDRdaemonSourceSettings() {
+SWGRemoteInputSettings::~SWGRemoteInputSettings() {
     this->cleanup();
 }
 
 void
-SWGSDRdaemonSourceSettings::init() {
+SWGRemoteInputSettings::init() {
     api_address = new QString("");
     m_api_address_isSet = false;
     api_port = 0;
@@ -83,7 +83,7 @@ SWGSDRdaemonSourceSettings::init() {
 }
 
 void
-SWGSDRdaemonSourceSettings::cleanup() {
+SWGRemoteInputSettings::cleanup() {
     if(api_address != nullptr) { 
         delete api_address;
     }
@@ -105,8 +105,8 @@ SWGSDRdaemonSourceSettings::cleanup() {
 
 }
 
-SWGSDRdaemonSourceSettings*
-SWGSDRdaemonSourceSettings::fromJson(QString &json) {
+SWGRemoteInputSettings*
+SWGRemoteInputSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -115,7 +115,7 @@ SWGSDRdaemonSourceSettings::fromJson(QString &json) {
 }
 
 void
-SWGSDRdaemonSourceSettings::fromJsonObject(QJsonObject &pJson) {
+SWGRemoteInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&api_address, pJson["apiAddress"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&api_port, pJson["apiPort"], "qint32", "");
@@ -141,7 +141,7 @@ SWGSDRdaemonSourceSettings::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGSDRdaemonSourceSettings::asJson ()
+SWGRemoteInputSettings::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -152,7 +152,7 @@ SWGSDRdaemonSourceSettings::asJson ()
 }
 
 QJsonObject*
-SWGSDRdaemonSourceSettings::asJsonObject() {
+SWGRemoteInputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(api_address != nullptr && *api_address != QString("")){
         toJsonValue(QString("apiAddress"), api_address, obj, QString("QString"));
@@ -192,118 +192,118 @@ SWGSDRdaemonSourceSettings::asJsonObject() {
 }
 
 QString*
-SWGSDRdaemonSourceSettings::getApiAddress() {
+SWGRemoteInputSettings::getApiAddress() {
     return api_address;
 }
 void
-SWGSDRdaemonSourceSettings::setApiAddress(QString* api_address) {
+SWGRemoteInputSettings::setApiAddress(QString* api_address) {
     this->api_address = api_address;
     this->m_api_address_isSet = true;
 }
 
 qint32
-SWGSDRdaemonSourceSettings::getApiPort() {
+SWGRemoteInputSettings::getApiPort() {
     return api_port;
 }
 void
-SWGSDRdaemonSourceSettings::setApiPort(qint32 api_port) {
+SWGRemoteInputSettings::setApiPort(qint32 api_port) {
     this->api_port = api_port;
     this->m_api_port_isSet = true;
 }
 
 QString*
-SWGSDRdaemonSourceSettings::getDataAddress() {
+SWGRemoteInputSettings::getDataAddress() {
     return data_address;
 }
 void
-SWGSDRdaemonSourceSettings::setDataAddress(QString* data_address) {
+SWGRemoteInputSettings::setDataAddress(QString* data_address) {
     this->data_address = data_address;
     this->m_data_address_isSet = true;
 }
 
 qint32
-SWGSDRdaemonSourceSettings::getDataPort() {
+SWGRemoteInputSettings::getDataPort() {
     return data_port;
 }
 void
-SWGSDRdaemonSourceSettings::setDataPort(qint32 data_port) {
+SWGRemoteInputSettings::setDataPort(qint32 data_port) {
     this->data_port = data_port;
     this->m_data_port_isSet = true;
 }
 
 qint32
-SWGSDRdaemonSourceSettings::getDcBlock() {
+SWGRemoteInputSettings::getDcBlock() {
     return dc_block;
 }
 void
-SWGSDRdaemonSourceSettings::setDcBlock(qint32 dc_block) {
+SWGRemoteInputSettings::setDcBlock(qint32 dc_block) {
     this->dc_block = dc_block;
     this->m_dc_block_isSet = true;
 }
 
 qint32
-SWGSDRdaemonSourceSettings::getIqCorrection() {
+SWGRemoteInputSettings::getIqCorrection() {
     return iq_correction;
 }
 void
-SWGSDRdaemonSourceSettings::setIqCorrection(qint32 iq_correction) {
+SWGRemoteInputSettings::setIqCorrection(qint32 iq_correction) {
     this->iq_correction = iq_correction;
     this->m_iq_correction_isSet = true;
 }
 
 QString*
-SWGSDRdaemonSourceSettings::getFileRecordName() {
+SWGRemoteInputSettings::getFileRecordName() {
     return file_record_name;
 }
 void
-SWGSDRdaemonSourceSettings::setFileRecordName(QString* file_record_name) {
+SWGRemoteInputSettings::setFileRecordName(QString* file_record_name) {
     this->file_record_name = file_record_name;
     this->m_file_record_name_isSet = true;
 }
 
 qint32
-SWGSDRdaemonSourceSettings::getUseReverseApi() {
+SWGRemoteInputSettings::getUseReverseApi() {
     return use_reverse_api;
 }
 void
-SWGSDRdaemonSourceSettings::setUseReverseApi(qint32 use_reverse_api) {
+SWGRemoteInputSettings::setUseReverseApi(qint32 use_reverse_api) {
     this->use_reverse_api = use_reverse_api;
     this->m_use_reverse_api_isSet = true;
 }
 
 QString*
-SWGSDRdaemonSourceSettings::getReverseApiAddress() {
+SWGRemoteInputSettings::getReverseApiAddress() {
     return reverse_api_address;
 }
 void
-SWGSDRdaemonSourceSettings::setReverseApiAddress(QString* reverse_api_address) {
+SWGRemoteInputSettings::setReverseApiAddress(QString* reverse_api_address) {
     this->reverse_api_address = reverse_api_address;
     this->m_reverse_api_address_isSet = true;
 }
 
 qint32
-SWGSDRdaemonSourceSettings::getReverseApiPort() {
+SWGRemoteInputSettings::getReverseApiPort() {
     return reverse_api_port;
 }
 void
-SWGSDRdaemonSourceSettings::setReverseApiPort(qint32 reverse_api_port) {
+SWGRemoteInputSettings::setReverseApiPort(qint32 reverse_api_port) {
     this->reverse_api_port = reverse_api_port;
     this->m_reverse_api_port_isSet = true;
 }
 
 qint32
-SWGSDRdaemonSourceSettings::getReverseApiDeviceIndex() {
+SWGRemoteInputSettings::getReverseApiDeviceIndex() {
     return reverse_api_device_index;
 }
 void
-SWGSDRdaemonSourceSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
+SWGRemoteInputSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
     this->reverse_api_device_index = reverse_api_device_index;
     this->m_reverse_api_device_index_isSet = true;
 }
 
 
 bool
-SWGSDRdaemonSourceSettings::isSet(){
+SWGRemoteInputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(api_address != nullptr && *api_address != QString("")){ isObjectUpdated = true; break;}

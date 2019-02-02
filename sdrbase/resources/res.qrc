@@ -24,7 +24,7 @@
         <file>webapi/doc/swagger/include/RtlSdr.yaml</file>
         <file>webapi/doc/swagger/include/RemoteSink.yaml</file>
         <file>webapi/doc/swagger/include/RemoteSource.yaml</file>
-        <file>webapi/doc/swagger/include/SDRDaemonSource.yaml</file>
+        <file>webapi/doc/swagger/include/RemoteInput.yaml</file>
         <file>webapi/doc/swagger/include/RemoteOutput.yaml</file>
         <file>webapi/doc/swagger/include/SDRPlay.yaml</file>
         <file>webapi/doc/swagger/include/SoapySDR.yaml</file>

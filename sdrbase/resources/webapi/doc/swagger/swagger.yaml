@@ -1795,8 +1795,8 @@ definitions:
         $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
       remoteOutputSettings:
         $ref: "/doc/swagger/include/RemoteOutput.yaml#/RemoteOutputSettings"
-      sdrDaemonSourceSettings:
-        $ref: "/doc/swagger/include/SDRDaemonSource.yaml#/SDRdaemonSourceSettings"
+      remoteInputSettings:
+        $ref: "/doc/swagger/include/RemoteInput.yaml#/RemoteInputSettings"
       sdrPlaySettings:
         $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
       soapySDRInputSettings:
@@ -1848,8 +1848,8 @@ definitions:
         $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrReport"
       remoteOutputReport:
         $ref: "/doc/swagger/include/RemoteOutput.yaml#/RemoteOutputReport"
-      sdrDaemonSourceReport:
-        $ref: "/doc/swagger/include/SDRDaemonSource.yaml#/SDRdaemonSourceReport"
+      remoteInputReport:
+        $ref: "/doc/swagger/include/RemoteInput.yaml#/RemoteInputReport"
       sdrPlayReport:
         $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlayReport"
       soapySDRInputReport:

@@ -38,10 +38,10 @@
 #include "SWGPerseusSettings.h"
 #include "SWGPlutoSdrInputSettings.h"
 #include "SWGPlutoSdrOutputSettings.h"
+#include "SWGRemoteInputSettings.h"
 #include "SWGRemoteOutputSettings.h"
 #include "SWGRtlSdrSettings.h"
 #include "SWGSDRPlaySettings.h"
-#include "SWGSDRdaemonSourceSettings.h"
 #include "SWGSoapySDRInputSettings.h"
 #include "SWGSoapySDROutputSettings.h"
 #include "SWGTestSourceSettings.h"
@@ -127,8 +127,8 @@ public:
     SWGRemoteOutputSettings* getRemoteOutputSettings();
     void setRemoteOutputSettings(SWGRemoteOutputSettings* remote_output_settings);
 
-    SWGSDRdaemonSourceSettings* getSdrDaemonSourceSettings();
-    void setSdrDaemonSourceSettings(SWGSDRdaemonSourceSettings* sdr_daemon_source_settings);
+    SWGRemoteInputSettings* getRemoteInputSettings();
+    void setRemoteInputSettings(SWGRemoteInputSettings* remote_input_settings);
 
     SWGSDRPlaySettings* getSdrPlaySettings();
     void setSdrPlaySettings(SWGSDRPlaySettings* sdr_play_settings);
@@ -212,8 +212,8 @@ private:
     SWGRemoteOutputSettings* remote_output_settings;
     bool m_remote_output_settings_isSet;
 
-    SWGSDRdaemonSourceSettings* sdr_daemon_source_settings;
-    bool m_sdr_daemon_source_settings_isSet;
+    SWGRemoteInputSettings* remote_input_settings;
+    bool m_remote_input_settings_isSet;
 
     SWGSDRPlaySettings* sdr_play_settings;
     bool m_sdr_play_settings_isSet;

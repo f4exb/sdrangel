@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGSDRdaemonSourceReport.h"
+#include "SWGRemoteInputReport.h"
 
 #include "SWGHelpers.h"
 
@@ -22,40 +22,40 @@
 
 namespace SWGSDRangel {
 
-SWGSDRdaemonSourceReport::SWGSDRdaemonSourceReport(QString* json) {
+SWGRemoteInputReport::SWGRemoteInputReport(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGSDRdaemonSourceReport::SWGSDRdaemonSourceReport() {
+SWGRemoteInputReport::SWGRemoteInputReport() {
     center_frequency = 0;
     m_center_frequency_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
     buffer_rw_balance = 0;
     m_buffer_rw_balance_isSet = false;
-    daemon_timestamp = nullptr;
-    m_daemon_timestamp_isSet = false;
+    remote_timestamp = nullptr;
+    m_remote_timestamp_isSet = false;
     min_nb_blocks = 0;
     m_min_nb_blocks_isSet = false;
     max_nb_recovery = 0;
     m_max_nb_recovery_isSet = false;
 }
 
-SWGSDRdaemonSourceReport::~SWGSDRdaemonSourceReport() {
+SWGRemoteInputReport::~SWGRemoteInputReport() {
     this->cleanup();
 }
 
 void
-SWGSDRdaemonSourceReport::init() {
+SWGRemoteInputReport::init() {
     center_frequency = 0;
     m_center_frequency_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
     buffer_rw_balance = 0;
     m_buffer_rw_balance_isSet = false;
-    daemon_timestamp = new QString("");
-    m_daemon_timestamp_isSet = false;
+    remote_timestamp = new QString("");
+    m_remote_timestamp_isSet = false;
     min_nb_blocks = 0;
     m_min_nb_blocks_isSet = false;
     max_nb_recovery = 0;
@@ -63,19 +63,19 @@ SWGSDRdaemonSourceReport::init() {
 }
 
 void
-SWGSDRdaemonSourceReport::cleanup() {
+SWGRemoteInputReport::cleanup() {
 
 
 
-    if(daemon_timestamp != nullptr) { 
-        delete daemon_timestamp;
+    if(remote_timestamp != nullptr) { 
+        delete remote_timestamp;
     }
 
 
 }
 
-SWGSDRdaemonSourceReport*
-SWGSDRdaemonSourceReport::fromJson(QString &json) {
+SWGRemoteInputReport*
+SWGRemoteInputReport::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -84,14 +84,14 @@ SWGSDRdaemonSourceReport::fromJson(QString &json) {
 }
 
 void
-SWGSDRdaemonSourceReport::fromJsonObject(QJsonObject &pJson) {
+SWGRemoteInputReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint32", "");
     
     ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&buffer_rw_balance, pJson["bufferRWBalance"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&daemon_timestamp, pJson["daemonTimestamp"], "QString", "QString");
+    ::SWGSDRangel::setValue(&remote_timestamp, pJson["remoteTimestamp"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&min_nb_blocks, pJson["minNbBlocks"], "qint32", "");
     
@@ -100,7 +100,7 @@ SWGSDRdaemonSourceReport::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGSDRdaemonSourceReport::asJson ()
+SWGRemoteInputReport::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -111,7 +111,7 @@ SWGSDRdaemonSourceReport::asJson ()
 }
 
 QJsonObject*
-SWGSDRdaemonSourceReport::asJsonObject() {
+SWGRemoteInputReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
@@ -122,8 +122,8 @@ SWGSDRdaemonSourceReport::asJsonObject() {
     if(m_buffer_rw_balance_isSet){
         obj->insert("bufferRWBalance", QJsonValue(buffer_rw_balance));
     }
-    if(daemon_timestamp != nullptr && *daemon_timestamp != QString("")){
-        toJsonValue(QString("daemonTimestamp"), daemon_timestamp, obj, QString("QString"));
+    if(remote_timestamp != nullptr && *remote_timestamp != QString("")){
+        toJsonValue(QString("remoteTimestamp"), remote_timestamp, obj, QString("QString"));
     }
     if(m_min_nb_blocks_isSet){
         obj->insert("minNbBlocks", QJsonValue(min_nb_blocks));
@@ -136,74 +136,74 @@ SWGSDRdaemonSourceReport::asJsonObject() {
 }
 
 qint32
-SWGSDRdaemonSourceReport::getCenterFrequency() {
+SWGRemoteInputReport::getCenterFrequency() {
     return center_frequency;
 }
 void
-SWGSDRdaemonSourceReport::setCenterFrequency(qint32 center_frequency) {
+SWGRemoteInputReport::setCenterFrequency(qint32 center_frequency) {
     this->center_frequency = center_frequency;
     this->m_center_frequency_isSet = true;
 }
 
 qint32
-SWGSDRdaemonSourceReport::getSampleRate() {
+SWGRemoteInputReport::getSampleRate() {
     return sample_rate;
 }
 void
-SWGSDRdaemonSourceReport::setSampleRate(qint32 sample_rate) {
+SWGRemoteInputReport::setSampleRate(qint32 sample_rate) {
     this->sample_rate = sample_rate;
     this->m_sample_rate_isSet = true;
 }
 
 qint32
-SWGSDRdaemonSourceReport::getBufferRwBalance() {
+SWGRemoteInputReport::getBufferRwBalance() {
     return buffer_rw_balance;
 }
 void
-SWGSDRdaemonSourceReport::setBufferRwBalance(qint32 buffer_rw_balance) {
+SWGRemoteInputReport::setBufferRwBalance(qint32 buffer_rw_balance) {
     this->buffer_rw_balance = buffer_rw_balance;
     this->m_buffer_rw_balance_isSet = true;
 }
 
 QString*
-SWGSDRdaemonSourceReport::getDaemonTimestamp() {
-    return daemon_timestamp;
+SWGRemoteInputReport::getRemoteTimestamp() {
+    return remote_timestamp;
 }
 void
-SWGSDRdaemonSourceReport::setDaemonTimestamp(QString* daemon_timestamp) {
-    this->daemon_timestamp = daemon_timestamp;
-    this->m_daemon_timestamp_isSet = true;
+SWGRemoteInputReport::setRemoteTimestamp(QString* remote_timestamp) {
+    this->remote_timestamp = remote_timestamp;
+    this->m_remote_timestamp_isSet = true;
 }
 
 qint32
-SWGSDRdaemonSourceReport::getMinNbBlocks() {
+SWGRemoteInputReport::getMinNbBlocks() {
     return min_nb_blocks;
 }
 void
-SWGSDRdaemonSourceReport::setMinNbBlocks(qint32 min_nb_blocks) {
+SWGRemoteInputReport::setMinNbBlocks(qint32 min_nb_blocks) {
     this->min_nb_blocks = min_nb_blocks;
     this->m_min_nb_blocks_isSet = true;
 }
 
 qint32
-SWGSDRdaemonSourceReport::getMaxNbRecovery() {
+SWGRemoteInputReport::getMaxNbRecovery() {
     return max_nb_recovery;
 }
 void
-SWGSDRdaemonSourceReport::setMaxNbRecovery(qint32 max_nb_recovery) {
+SWGRemoteInputReport::setMaxNbRecovery(qint32 max_nb_recovery) {
     this->max_nb_recovery = max_nb_recovery;
     this->m_max_nb_recovery_isSet = true;
 }
 
 
 bool
-SWGSDRdaemonSourceReport::isSet(){
+SWGRemoteInputReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
         if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
         if(m_buffer_rw_balance_isSet){ isObjectUpdated = true; break;}
-        if(daemon_timestamp != nullptr && *daemon_timestamp != QString("")){ isObjectUpdated = true; break;}
+        if(remote_timestamp != nullptr && *remote_timestamp != QString("")){ isObjectUpdated = true; break;}
         if(m_min_nb_blocks_isSet){ isObjectUpdated = true; break;}
         if(m_max_nb_recovery_isSet){ isObjectUpdated = true; break;}
     }while(false);

@@ -56,8 +56,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_rtl_sdr_report_isSet = false;
     remote_output_report = nullptr;
     m_remote_output_report_isSet = false;
-    sdr_daemon_source_report = nullptr;
-    m_sdr_daemon_source_report_isSet = false;
+    remote_input_report = nullptr;
+    m_remote_input_report_isSet = false;
     sdr_play_report = nullptr;
     m_sdr_play_report_isSet = false;
     soapy_sdr_input_report = nullptr;
@@ -104,8 +104,8 @@ SWGDeviceReport::init() {
     m_rtl_sdr_report_isSet = false;
     remote_output_report = new SWGRemoteOutputReport();
     m_remote_output_report_isSet = false;
-    sdr_daemon_source_report = new SWGSDRdaemonSourceReport();
-    m_sdr_daemon_source_report_isSet = false;
+    remote_input_report = new SWGRemoteInputReport();
+    m_remote_input_report_isSet = false;
     sdr_play_report = new SWGSDRPlayReport();
     m_sdr_play_report_isSet = false;
     soapy_sdr_input_report = new SWGSoapySDRReport();
@@ -160,8 +160,8 @@ SWGDeviceReport::cleanup() {
     if(remote_output_report != nullptr) { 
         delete remote_output_report;
     }
-    if(sdr_daemon_source_report != nullptr) { 
-        delete sdr_daemon_source_report;
+    if(remote_input_report != nullptr) { 
+        delete remote_input_report;
     }
     if(sdr_play_report != nullptr) { 
         delete sdr_play_report;
@@ -219,7 +219,7 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&remote_output_report, pJson["remoteOutputReport"], "SWGRemoteOutputReport", "SWGRemoteOutputReport");
     
-    ::SWGSDRangel::setValue(&sdr_daemon_source_report, pJson["sdrDaemonSourceReport"], "SWGSDRdaemonSourceReport", "SWGSDRdaemonSourceReport");
+    ::SWGSDRangel::setValue(&remote_input_report, pJson["remoteInputReport"], "SWGRemoteInputReport", "SWGRemoteInputReport");
     
     ::SWGSDRangel::setValue(&sdr_play_report, pJson["sdrPlayReport"], "SWGSDRPlayReport", "SWGSDRPlayReport");
     
@@ -289,8 +289,8 @@ SWGDeviceReport::asJsonObject() {
     if((remote_output_report != nullptr) && (remote_output_report->isSet())){
         toJsonValue(QString("remoteOutputReport"), remote_output_report, obj, QString("SWGRemoteOutputReport"));
     }
-    if((sdr_daemon_source_report != nullptr) && (sdr_daemon_source_report->isSet())){
-        toJsonValue(QString("sdrDaemonSourceReport"), sdr_daemon_source_report, obj, QString("SWGSDRdaemonSourceReport"));
+    if((remote_input_report != nullptr) && (remote_input_report->isSet())){
+        toJsonValue(QString("remoteInputReport"), remote_input_report, obj, QString("SWGRemoteInputReport"));
     }
     if((sdr_play_report != nullptr) && (sdr_play_report->isSet())){
         toJsonValue(QString("sdrPlayReport"), sdr_play_report, obj, QString("SWGSDRPlayReport"));
@@ -451,14 +451,14 @@ SWGDeviceReport::setRemoteOutputReport(SWGRemoteOutputReport* remote_output_repo
     this->m_remote_output_report_isSet = true;
 }
 
-SWGSDRdaemonSourceReport*
-SWGDeviceReport::getSdrDaemonSourceReport() {
-    return sdr_daemon_source_report;
+SWGRemoteInputReport*
+SWGDeviceReport::getRemoteInputReport() {
+    return remote_input_report;
 }
 void
-SWGDeviceReport::setSdrDaemonSourceReport(SWGSDRdaemonSourceReport* sdr_daemon_source_report) {
-    this->sdr_daemon_source_report = sdr_daemon_source_report;
-    this->m_sdr_daemon_source_report_isSet = true;
+SWGDeviceReport::setRemoteInputReport(SWGRemoteInputReport* remote_input_report) {
+    this->remote_input_report = remote_input_report;
+    this->m_remote_input_report_isSet = true;
 }
 
 SWGSDRPlayReport*
@@ -530,7 +530,7 @@ SWGDeviceReport::isSet(){
         if(pluto_sdr_output_report != nullptr && pluto_sdr_output_report->isSet()){ isObjectUpdated = true; break;}
         if(rtl_sdr_report != nullptr && rtl_sdr_report->isSet()){ isObjectUpdated = true; break;}
         if(remote_output_report != nullptr && remote_output_report->isSet()){ isObjectUpdated = true; break;}
-        if(sdr_daemon_source_report != nullptr && sdr_daemon_source_report->isSet()){ isObjectUpdated = true; break;}
+        if(remote_input_report != nullptr && remote_input_report->isSet()){ isObjectUpdated = true; break;}
         if(sdr_play_report != nullptr && sdr_play_report->isSet()){ isObjectUpdated = true; break;}
         if(soapy_sdr_input_report != nullptr && soapy_sdr_input_report->isSet()){ isObjectUpdated = true; break;}
         if(soapy_sdr_output_report != nullptr && soapy_sdr_output_report->isSet()){ isObjectUpdated = true; break;}

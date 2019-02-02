@@ -97,6 +97,8 @@
 #include "SWGRDSReport_altFrequencies.h"
 #include "SWGRange.h"
 #include "SWGRangeFloat.h"
+#include "SWGRemoteInputReport.h"
+#include "SWGRemoteInputSettings.h"
 #include "SWGRemoteOutputReport.h"
 #include "SWGRemoteOutputSettings.h"
 #include "SWGRemoteSinkSettings.h"
@@ -106,8 +108,6 @@
 #include "SWGRtlSdrSettings.h"
 #include "SWGSDRPlayReport.h"
 #include "SWGSDRPlaySettings.h"
-#include "SWGSDRdaemonSourceReport.h"
-#include "SWGSDRdaemonSourceSettings.h"
 #include "SWGSSBDemodReport.h"
 #include "SWGSSBDemodSettings.h"
 #include "SWGSSBModReport.h"
@@ -386,6 +386,12 @@ namespace SWGSDRangel {
     if(QString("SWGRangeFloat").compare(type) == 0) {
       return new SWGRangeFloat();
     }
+    if(QString("SWGRemoteInputReport").compare(type) == 0) {
+      return new SWGRemoteInputReport();
+    }
+    if(QString("SWGRemoteInputSettings").compare(type) == 0) {
+      return new SWGRemoteInputSettings();
+    }
     if(QString("SWGRemoteOutputReport").compare(type) == 0) {
       return new SWGRemoteOutputReport();
     }
@@ -412,12 +418,6 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSDRPlaySettings").compare(type) == 0) {
       return new SWGSDRPlaySettings();
-    }
-    if(QString("SWGSDRdaemonSourceReport").compare(type) == 0) {
-      return new SWGSDRdaemonSourceReport();
-    }
-    if(QString("SWGSDRdaemonSourceSettings").compare(type) == 0) {
-      return new SWGSDRdaemonSourceSettings();
     }
     if(QString("SWGSSBDemodReport").compare(type) == 0) {
       return new SWGSSBDemodReport();

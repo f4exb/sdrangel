@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGSDRdaemonSourceReport.h
+ * SWGRemoteInputSettings.h
  *
- * SDRdaemonSource
+ * RemoteInput
  */
 
-#ifndef SWGSDRdaemonSourceReport_H_
-#define SWGSDRdaemonSourceReport_H_
+#ifndef SWGRemoteInputSettings_H_
+#define SWGRemoteInputSettings_H_
 
 #include <QJsonObject>
 
@@ -29,61 +29,91 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGSDRdaemonSourceReport: public SWGObject {
+class SWG_API SWGRemoteInputSettings: public SWGObject {
 public:
-    SWGSDRdaemonSourceReport();
-    SWGSDRdaemonSourceReport(QString* json);
-    virtual ~SWGSDRdaemonSourceReport();
+    SWGRemoteInputSettings();
+    SWGRemoteInputSettings(QString* json);
+    virtual ~SWGRemoteInputSettings();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGSDRdaemonSourceReport* fromJson(QString &jsonString) override;
+    virtual SWGRemoteInputSettings* fromJson(QString &jsonString) override;
 
-    qint32 getCenterFrequency();
-    void setCenterFrequency(qint32 center_frequency);
+    QString* getApiAddress();
+    void setApiAddress(QString* api_address);
 
-    qint32 getSampleRate();
-    void setSampleRate(qint32 sample_rate);
+    qint32 getApiPort();
+    void setApiPort(qint32 api_port);
 
-    qint32 getBufferRwBalance();
-    void setBufferRwBalance(qint32 buffer_rw_balance);
+    QString* getDataAddress();
+    void setDataAddress(QString* data_address);
 
-    QString* getDaemonTimestamp();
-    void setDaemonTimestamp(QString* daemon_timestamp);
+    qint32 getDataPort();
+    void setDataPort(qint32 data_port);
 
-    qint32 getMinNbBlocks();
-    void setMinNbBlocks(qint32 min_nb_blocks);
+    qint32 getDcBlock();
+    void setDcBlock(qint32 dc_block);
 
-    qint32 getMaxNbRecovery();
-    void setMaxNbRecovery(qint32 max_nb_recovery);
+    qint32 getIqCorrection();
+    void setIqCorrection(qint32 iq_correction);
+
+    QString* getFileRecordName();
+    void setFileRecordName(QString* file_record_name);
+
+    qint32 getUseReverseApi();
+    void setUseReverseApi(qint32 use_reverse_api);
+
+    QString* getReverseApiAddress();
+    void setReverseApiAddress(QString* reverse_api_address);
+
+    qint32 getReverseApiPort();
+    void setReverseApiPort(qint32 reverse_api_port);
+
+    qint32 getReverseApiDeviceIndex();
+    void setReverseApiDeviceIndex(qint32 reverse_api_device_index);
 
 
     virtual bool isSet() override;
 
 private:
-    qint32 center_frequency;
-    bool m_center_frequency_isSet;
+    QString* api_address;
+    bool m_api_address_isSet;
 
-    qint32 sample_rate;
-    bool m_sample_rate_isSet;
+    qint32 api_port;
+    bool m_api_port_isSet;
 
-    qint32 buffer_rw_balance;
-    bool m_buffer_rw_balance_isSet;
+    QString* data_address;
+    bool m_data_address_isSet;
 
-    QString* daemon_timestamp;
-    bool m_daemon_timestamp_isSet;
+    qint32 data_port;
+    bool m_data_port_isSet;
 
-    qint32 min_nb_blocks;
-    bool m_min_nb_blocks_isSet;
+    qint32 dc_block;
+    bool m_dc_block_isSet;
 
-    qint32 max_nb_recovery;
-    bool m_max_nb_recovery_isSet;
+    qint32 iq_correction;
+    bool m_iq_correction_isSet;
+
+    QString* file_record_name;
+    bool m_file_record_name_isSet;
+
+    qint32 use_reverse_api;
+    bool m_use_reverse_api_isSet;
+
+    QString* reverse_api_address;
+    bool m_reverse_api_address_isSet;
+
+    qint32 reverse_api_port;
+    bool m_reverse_api_port_isSet;
+
+    qint32 reverse_api_device_index;
+    bool m_reverse_api_device_index_isSet;
 
 };
 
 }
 
-#endif /* SWGSDRdaemonSourceReport_H_ */
+#endif /* SWGRemoteInputSettings_H_ */

@@ -1795,8 +1795,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
       remoteOutputSettings:
         $ref: "http://localhost:8081/api/swagger/include/RemoteOutput.yaml#/RemoteOutputSettings"
-      sdrDaemonSourceSettings:
-        $ref: "http://localhost:8081/api/swagger/include/SDRDaemonSource.yaml#/SDRdaemonSourceSettings"
+      remoteInputSettings:
+        $ref: "http://localhost:8081/api/swagger/include/RemoteInput.yaml#/RemoteInputSettings"
       sdrPlaySettings:
         $ref: "http://localhost:8081/api/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
       soapySDRInputSettings:
@@ -1848,8 +1848,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrReport"
       remoteOutputReport:
         $ref: "http://localhost:8081/api/swagger/include/RemoteOutput.yaml#/RemoteOutputReport"
-      sdrDaemonSourceReport:
-        $ref: "http://localhost:8081/api/swagger/include/SDRDaemonSource.yaml#/SDRdaemonSourceReport"
+      remoteInputReport:
+        $ref: "http://localhost:8081/api/swagger/include/RemoteInput.yaml#/RemoteInputReport"
       sdrPlayReport:
         $ref: "http://localhost:8081/api/swagger/include/SDRPlay.yaml#/SDRPlayReport"
       soapySDRInputReport:

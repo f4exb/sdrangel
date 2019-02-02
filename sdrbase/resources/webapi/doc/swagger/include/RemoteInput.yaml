@@ -1,5 +1,5 @@
-SDRdaemonSourceSettings:
-  description: SDRdaemonSource
+RemoteInputSettings:
+  description: RemoteInput
   properties:
     apiAddress:
       type: string
@@ -25,8 +25,8 @@ SDRdaemonSourceSettings:
     reverseAPIDeviceIndex:
       type: integer
 
-SDRdaemonSourceReport:
-  description: SDRdaemonSource
+RemoteInputReport:
+  description: RemoteInput
   properties:
     centerFrequency:
       type: integer
@@ -36,8 +36,8 @@ SDRdaemonSourceReport:
     bufferRWBalance:
       description: percentage off the mid buffer (positive read leads)
       type: integer
-    daemonTimestamp:
-      description: string representation of timestamp as sent by the SDRdaemon instance
+    remoteTimestamp:
+      description: string representation of timestamp as sent by the remote instance
       type: string
     minNbBlocks:
       description: Minimum number of blocks retrieved per frame

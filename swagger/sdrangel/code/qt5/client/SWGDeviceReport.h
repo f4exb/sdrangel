@@ -32,10 +32,10 @@
 #include "SWGPerseusReport.h"
 #include "SWGPlutoSdrInputReport.h"
 #include "SWGPlutoSdrOutputReport.h"
+#include "SWGRemoteInputReport.h"
 #include "SWGRemoteOutputReport.h"
 #include "SWGRtlSdrReport.h"
 #include "SWGSDRPlayReport.h"
-#include "SWGSDRdaemonSourceReport.h"
 #include "SWGSoapySDRReport.h"
 #include "SWGXtrxInputReport.h"
 #include "SWGXtrxOutputReport.h"
@@ -101,8 +101,8 @@ public:
     SWGRemoteOutputReport* getRemoteOutputReport();
     void setRemoteOutputReport(SWGRemoteOutputReport* remote_output_report);
 
-    SWGSDRdaemonSourceReport* getSdrDaemonSourceReport();
-    void setSdrDaemonSourceReport(SWGSDRdaemonSourceReport* sdr_daemon_source_report);
+    SWGRemoteInputReport* getRemoteInputReport();
+    void setRemoteInputReport(SWGRemoteInputReport* remote_input_report);
 
     SWGSDRPlayReport* getSdrPlayReport();
     void setSdrPlayReport(SWGSDRPlayReport* sdr_play_report);
@@ -165,8 +165,8 @@ private:
     SWGRemoteOutputReport* remote_output_report;
     bool m_remote_output_report_isSet;
 
-    SWGSDRdaemonSourceReport* sdr_daemon_source_report;
-    bool m_sdr_daemon_source_report_isSet;
+    SWGRemoteInputReport* remote_input_report;
+    bool m_remote_input_report_isSet;
 
     SWGSDRPlayReport* sdr_play_report;
     bool m_sdr_play_report_isSet;

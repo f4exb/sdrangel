@@ -68,8 +68,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_rtl_sdr_settings_isSet = false;
     remote_output_settings = nullptr;
     m_remote_output_settings_isSet = false;
-    sdr_daemon_source_settings = nullptr;
-    m_sdr_daemon_source_settings_isSet = false;
+    remote_input_settings = nullptr;
+    m_remote_input_settings_isSet = false;
     sdr_play_settings = nullptr;
     m_sdr_play_settings_isSet = false;
     soapy_sdr_input_settings = nullptr;
@@ -130,8 +130,8 @@ SWGDeviceSettings::init() {
     m_rtl_sdr_settings_isSet = false;
     remote_output_settings = new SWGRemoteOutputSettings();
     m_remote_output_settings_isSet = false;
-    sdr_daemon_source_settings = new SWGSDRdaemonSourceSettings();
-    m_sdr_daemon_source_settings_isSet = false;
+    remote_input_settings = new SWGRemoteInputSettings();
+    m_remote_input_settings_isSet = false;
     sdr_play_settings = new SWGSDRPlaySettings();
     m_sdr_play_settings_isSet = false;
     soapy_sdr_input_settings = new SWGSoapySDRInputSettings();
@@ -206,8 +206,8 @@ SWGDeviceSettings::cleanup() {
     if(remote_output_settings != nullptr) { 
         delete remote_output_settings;
     }
-    if(sdr_daemon_source_settings != nullptr) { 
-        delete sdr_daemon_source_settings;
+    if(remote_input_settings != nullptr) { 
+        delete remote_input_settings;
     }
     if(sdr_play_settings != nullptr) { 
         delete sdr_play_settings;
@@ -280,7 +280,7 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&remote_output_settings, pJson["remoteOutputSettings"], "SWGRemoteOutputSettings", "SWGRemoteOutputSettings");
     
-    ::SWGSDRangel::setValue(&sdr_daemon_source_settings, pJson["sdrDaemonSourceSettings"], "SWGSDRdaemonSourceSettings", "SWGSDRdaemonSourceSettings");
+    ::SWGSDRangel::setValue(&remote_input_settings, pJson["remoteInputSettings"], "SWGRemoteInputSettings", "SWGRemoteInputSettings");
     
     ::SWGSDRangel::setValue(&sdr_play_settings, pJson["sdrPlaySettings"], "SWGSDRPlaySettings", "SWGSDRPlaySettings");
     
@@ -370,8 +370,8 @@ SWGDeviceSettings::asJsonObject() {
     if((remote_output_settings != nullptr) && (remote_output_settings->isSet())){
         toJsonValue(QString("remoteOutputSettings"), remote_output_settings, obj, QString("SWGRemoteOutputSettings"));
     }
-    if((sdr_daemon_source_settings != nullptr) && (sdr_daemon_source_settings->isSet())){
-        toJsonValue(QString("sdrDaemonSourceSettings"), sdr_daemon_source_settings, obj, QString("SWGSDRdaemonSourceSettings"));
+    if((remote_input_settings != nullptr) && (remote_input_settings->isSet())){
+        toJsonValue(QString("remoteInputSettings"), remote_input_settings, obj, QString("SWGRemoteInputSettings"));
     }
     if((sdr_play_settings != nullptr) && (sdr_play_settings->isSet())){
         toJsonValue(QString("sdrPlaySettings"), sdr_play_settings, obj, QString("SWGSDRPlaySettings"));
@@ -595,14 +595,14 @@ SWGDeviceSettings::setRemoteOutputSettings(SWGRemoteOutputSettings* remote_outpu
     this->m_remote_output_settings_isSet = true;
 }
 
-SWGSDRdaemonSourceSettings*
-SWGDeviceSettings::getSdrDaemonSourceSettings() {
-    return sdr_daemon_source_settings;
+SWGRemoteInputSettings*
+SWGDeviceSettings::getRemoteInputSettings() {
+    return remote_input_settings;
 }
 void
-SWGDeviceSettings::setSdrDaemonSourceSettings(SWGSDRdaemonSourceSettings* sdr_daemon_source_settings) {
-    this->sdr_daemon_source_settings = sdr_daemon_source_settings;
-    this->m_sdr_daemon_source_settings_isSet = true;
+SWGDeviceSettings::setRemoteInputSettings(SWGRemoteInputSettings* remote_input_settings) {
+    this->remote_input_settings = remote_input_settings;
+    this->m_remote_input_settings_isSet = true;
 }
 
 SWGSDRPlaySettings*
@@ -690,7 +690,7 @@ SWGDeviceSettings::isSet(){
         if(pluto_sdr_output_settings != nullptr && pluto_sdr_output_settings->isSet()){ isObjectUpdated = true; break;}
         if(rtl_sdr_settings != nullptr && rtl_sdr_settings->isSet()){ isObjectUpdated = true; break;}
         if(remote_output_settings != nullptr && remote_output_settings->isSet()){ isObjectUpdated = true; break;}
-        if(sdr_daemon_source_settings != nullptr && sdr_daemon_source_settings->isSet()){ isObjectUpdated = true; break;}
+        if(remote_input_settings != nullptr && remote_input_settings->isSet()){ isObjectUpdated = true; break;}
         if(sdr_play_settings != nullptr && sdr_play_settings->isSet()){ isObjectUpdated = true; break;}
         if(soapy_sdr_input_settings != nullptr && soapy_sdr_input_settings->isSet()){ isObjectUpdated = true; break;}
         if(soapy_sdr_output_settings != nullptr && soapy_sdr_output_settings->isSet()){ isObjectUpdated = true; break;}

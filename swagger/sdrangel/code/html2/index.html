@@ -2137,8 +2137,8 @@ margin-bottom: 20px;
     "remoteOutputReport" : {
       "$ref" : "#/definitions/RemoteOutputReport"
     },
-    "sdrDaemonSourceReport" : {
-      "$ref" : "#/definitions/SDRdaemonSourceReport"
+    "remoteInputReport" : {
+      "$ref" : "#/definitions/RemoteInputReport"
     },
     "sdrPlayReport" : {
       "$ref" : "#/definitions/SDRPlayReport"
@@ -2264,8 +2264,8 @@ margin-bottom: 20px;
     "remoteOutputSettings" : {
       "$ref" : "#/definitions/RemoteOutputSettings"
     },
-    "sdrDaemonSourceSettings" : {
-      "$ref" : "#/definitions/SDRdaemonSourceSettings"
+    "remoteInputSettings" : {
+      "$ref" : "#/definitions/RemoteInputSettings"
     },
     "sdrPlaySettings" : {
       "$ref" : "#/definitions/SDRPlaySettings"
@@ -3710,6 +3710,73 @@ margin-bottom: 20px;
   },
   "description" : "An arbitrary range of floating point values"
 };
+            defs.RemoteInputReport = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "uint64"
+    },
+    "sampleRate" : {
+      "type" : "integer"
+    },
+    "bufferRWBalance" : {
+      "type" : "integer",
+      "description" : "percentage off the mid buffer (positive read leads)"
+    },
+    "remoteTimestamp" : {
+      "type" : "string",
+      "description" : "string representation of timestamp as sent by the remote instance"
+    },
+    "minNbBlocks" : {
+      "type" : "integer",
+      "description" : "Minimum number of blocks retrieved per frame"
+    },
+    "maxNbRecovery" : {
+      "type" : "integer",
+      "description" : "Maximum number of recovery blocks used per frame"
+    }
+  },
+  "description" : "RemoteInput"
+};
+            defs.RemoteInputSettings = {
+  "properties" : {
+    "apiAddress" : {
+      "type" : "string"
+    },
+    "apiPort" : {
+      "type" : "integer"
+    },
+    "dataAddress" : {
+      "type" : "string"
+    },
+    "dataPort" : {
+      "type" : "integer"
+    },
+    "dcBlock" : {
+      "type" : "integer"
+    },
+    "iqCorrection" : {
+      "type" : "integer"
+    },
+    "fileRecordName" : {
+      "type" : "string"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "RemoteInput"
+};
             defs.RemoteOutputReport = {
   "properties" : {
     "bufferRWBalance" : {
@@ -4085,73 +4152,6 @@ margin-bottom: 20px;
     }
   },
   "description" : "SDRplay1"
-};
-            defs.SDRdaemonSourceReport = {
-  "properties" : {
-    "centerFrequency" : {
-      "type" : "integer",
-      "format" : "uint64"
-    },
-    "sampleRate" : {
-      "type" : "integer"
-    },
-    "bufferRWBalance" : {
-      "type" : "integer",
-      "description" : "percentage off the mid buffer (positive read leads)"
-    },
-    "daemonTimestamp" : {
-      "type" : "string",
-      "description" : "string representation of timestamp as sent by the SDRdaemon instance"
-    },
-    "minNbBlocks" : {
-      "type" : "integer",
-      "description" : "Minimum number of blocks retrieved per frame"
-    },
-    "maxNbRecovery" : {
-      "type" : "integer",
-      "description" : "Maximum number of recovery blocks used per frame"
-    }
-  },
-  "description" : "SDRdaemonSource"
-};
-            defs.SDRdaemonSourceSettings = {
-  "properties" : {
-    "apiAddress" : {
-      "type" : "string"
-    },
-    "apiPort" : {
-      "type" : "integer"
-    },
-    "dataAddress" : {
-      "type" : "string"
-    },
-    "dataPort" : {
-      "type" : "integer"
-    },
-    "dcBlock" : {
-      "type" : "integer"
-    },
-    "iqCorrection" : {
-      "type" : "integer"
-    },
-    "fileRecordName" : {
-      "type" : "string"
-    },
-    "useReverseAPI" : {
-      "type" : "integer",
-      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
-    },
-    "reverseAPIAddress" : {
-      "type" : "string"
-    },
-    "reverseAPIPort" : {
-      "type" : "integer"
-    },
-    "reverseAPIDeviceIndex" : {
-      "type" : "integer"
-    }
-  },
-  "description" : "SDRdaemonSource"
 };
             defs.SSBDemodReport = {
   "properties" : {
@@ -24373,7 +24373,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-02-02T23:09:20.329+01:00
+              Generated 2019-02-03T00:47:25.749+01:00
             </div>
           </div>
       </div>

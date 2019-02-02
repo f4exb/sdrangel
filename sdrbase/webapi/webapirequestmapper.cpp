@@ -2105,6 +2105,21 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
+    else if ((*deviceHwType == "RemoteInput") && (deviceSettings.getTx() == 0))
+    {
+        if (jsonObject.contains("remoteInputSettings") && jsonObject["remoteInputSettings"].isObject())
+        {
+            QJsonObject remoteInputSettingsJsonObject = jsonObject["remoteInputSettings"].toObject();
+            deviceSettingsKeys = remoteInputSettingsJsonObject.keys();
+            deviceSettings.setRemoteInputSettings(new SWGSDRangel::SWGRemoteInputSettings());
+            deviceSettings.getRemoteInputSettings()->fromJsonObject(remoteInputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     else if ((*deviceHwType == "RemoteOutput") && (deviceSettings.getTx() != 0))
     {
         if (jsonObject.contains("remoteOutputSettings") && jsonObject["remoteOutputSettings"].isObject())
@@ -2489,7 +2504,7 @@ void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& de
     deviceSettings.setPlutoSdrOutputSettings(0);
     deviceSettings.setRtlSdrSettings(0);
     deviceSettings.setRemoteOutputSettings(0);
-    deviceSettings.setSdrDaemonSourceSettings(0);
+    deviceSettings.setRemoteInputSettings(0);
     deviceSettings.setSdrPlaySettings(0);
     deviceSettings.setTestSourceSettings(0);
 }
@@ -2508,7 +2523,7 @@ void WebAPIRequestMapper::resetDeviceReport(SWGSDRangel::SWGDeviceReport& device
     deviceReport.setPlutoSdrOutputReport(0);
     deviceReport.setRtlSdrReport(0);
     deviceReport.setRemoteOutputReport(0);
-    deviceReport.setSdrDaemonSourceReport(0);
+    deviceReport.setRemoteInputReport(0);
     deviceReport.setSdrPlayReport(0);
 }
 

@@ -24,7 +24,7 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
-#include "SWGSDRdaemonSourceReport.h"
+#include "SWGRemoteInputReport.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -317,8 +317,8 @@ int RemoteInput::webapiSettingsGet(
                 QString& errorMessage)
 {
     (void) errorMessage;
-    response.setSdrDaemonSourceSettings(new SWGSDRangel::SWGSDRdaemonSourceSettings());
-    response.getSdrDaemonSourceSettings()->init();
+    response.setRemoteInputSettings(new SWGSDRangel::SWGRemoteInputSettings());
+    response.getRemoteInputSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }
@@ -333,37 +333,37 @@ int RemoteInput::webapiSettingsPutPatch(
     RemoteInputSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("apiAddress")) {
-        settings.m_apiAddress = *response.getSdrDaemonSourceSettings()->getApiAddress();
+        settings.m_apiAddress = *response.getRemoteInputSettings()->getApiAddress();
     }
     if (deviceSettingsKeys.contains("apiPort")) {
-        settings.m_apiPort = response.getSdrDaemonSourceSettings()->getApiPort();
+        settings.m_apiPort = response.getRemoteInputSettings()->getApiPort();
     }
     if (deviceSettingsKeys.contains("dataAddress")) {
-        settings.m_dataAddress = *response.getSdrDaemonSourceSettings()->getDataAddress();
+        settings.m_dataAddress = *response.getRemoteInputSettings()->getDataAddress();
     }
     if (deviceSettingsKeys.contains("dataPort")) {
-        settings.m_dataPort = response.getSdrDaemonSourceSettings()->getDataPort();
+        settings.m_dataPort = response.getRemoteInputSettings()->getDataPort();
     }
     if (deviceSettingsKeys.contains("dcBlock")) {
-        settings.m_dcBlock = response.getSdrDaemonSourceSettings()->getDcBlock() != 0;
+        settings.m_dcBlock = response.getRemoteInputSettings()->getDcBlock() != 0;
     }
     if (deviceSettingsKeys.contains("iqCorrection")) {
-        settings.m_iqCorrection = response.getSdrDaemonSourceSettings()->getIqCorrection() != 0;
+        settings.m_iqCorrection = response.getRemoteInputSettings()->getIqCorrection() != 0;
     }
     if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getSdrDaemonSourceSettings()->getFileRecordName();
+        settings.m_fileRecordName = *response.getRemoteInputSettings()->getFileRecordName();
     }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getSdrDaemonSourceSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getRemoteInputSettings()->getUseReverseApi() != 0;
     }
     if (deviceSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getSdrDaemonSourceSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getRemoteInputSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getSdrDaemonSourceSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getRemoteInputSettings()->getReverseApiPort();
     }
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getSdrDaemonSourceSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getRemoteInputSettings()->getReverseApiDeviceIndex();
     }
 
     MsgConfigureRemoteInput *msg = MsgConfigureRemoteInput::create(settings, force);
@@ -381,29 +381,29 @@ int RemoteInput::webapiSettingsPutPatch(
 
 void RemoteInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RemoteInputSettings& settings)
 {
-    response.getSdrDaemonSourceSettings()->setApiAddress(new QString(settings.m_apiAddress));
-    response.getSdrDaemonSourceSettings()->setApiPort(settings.m_apiPort);
-    response.getSdrDaemonSourceSettings()->setDataAddress(new QString(settings.m_dataAddress));
-    response.getSdrDaemonSourceSettings()->setDataPort(settings.m_dataPort);
-    response.getSdrDaemonSourceSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
-    response.getSdrDaemonSourceSettings()->setIqCorrection(settings.m_iqCorrection);
+    response.getRemoteInputSettings()->setApiAddress(new QString(settings.m_apiAddress));
+    response.getRemoteInputSettings()->setApiPort(settings.m_apiPort);
+    response.getRemoteInputSettings()->setDataAddress(new QString(settings.m_dataAddress));
+    response.getRemoteInputSettings()->setDataPort(settings.m_dataPort);
+    response.getRemoteInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getRemoteInputSettings()->setIqCorrection(settings.m_iqCorrection);
 
-    if (response.getSdrDaemonSourceSettings()->getFileRecordName()) {
-        *response.getSdrDaemonSourceSettings()->getFileRecordName() = settings.m_fileRecordName;
+    if (response.getRemoteInputSettings()->getFileRecordName()) {
+        *response.getRemoteInputSettings()->getFileRecordName() = settings.m_fileRecordName;
     } else {
-        response.getSdrDaemonSourceSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+        response.getRemoteInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
-    response.getSdrDaemonSourceSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getRemoteInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getSdrDaemonSourceSettings()->getReverseApiAddress()) {
-        *response.getSdrDaemonSourceSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getRemoteInputSettings()->getReverseApiAddress()) {
+        *response.getRemoteInputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getSdrDaemonSourceSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getRemoteInputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getSdrDaemonSourceSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getSdrDaemonSourceSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getRemoteInputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getRemoteInputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 int RemoteInput::webapiReportGet(
@@ -411,55 +411,55 @@ int RemoteInput::webapiReportGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setSdrDaemonSourceReport(new SWGSDRangel::SWGSDRdaemonSourceReport());
-    response.getSdrDaemonSourceReport()->init();
+    response.setRemoteInputReport(new SWGSDRangel::SWGRemoteInputReport());
+    response.getRemoteInputReport()->init();
     webapiFormatDeviceReport(response);
     return 200;
 }
 
 void RemoteInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
-    response.getSdrDaemonSourceReport()->setCenterFrequency(m_remoteInputUDPHandler->getCenterFrequency());
-    response.getSdrDaemonSourceReport()->setSampleRate(m_remoteInputUDPHandler->getSampleRate());
-    response.getSdrDaemonSourceReport()->setBufferRwBalance(m_remoteInputUDPHandler->getBufferGauge());
+    response.getRemoteInputReport()->setCenterFrequency(m_remoteInputUDPHandler->getCenterFrequency());
+    response.getRemoteInputReport()->setSampleRate(m_remoteInputUDPHandler->getSampleRate());
+    response.getRemoteInputReport()->setBufferRwBalance(m_remoteInputUDPHandler->getBufferGauge());
 
     QDateTime dt = QDateTime::fromMSecsSinceEpoch(m_remoteInputUDPHandler->getTVmSec());
-    response.getSdrDaemonSourceReport()->setDaemonTimestamp(new QString(dt.toString("yyyy-MM-dd  HH:mm:ss.zzz")));
+    response.getRemoteInputReport()->setRemoteTimestamp(new QString(dt.toString("yyyy-MM-dd  HH:mm:ss.zzz")));
 
-    response.getSdrDaemonSourceReport()->setMinNbBlocks(m_remoteInputUDPHandler->getMinNbBlocks());
-    response.getSdrDaemonSourceReport()->setMaxNbRecovery(m_remoteInputUDPHandler->getMaxNbRecovery());
+    response.getRemoteInputReport()->setMinNbBlocks(m_remoteInputUDPHandler->getMinNbBlocks());
+    response.getRemoteInputReport()->setMaxNbRecovery(m_remoteInputUDPHandler->getMaxNbRecovery());
 }
 
 void RemoteInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RemoteInputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setTx(0);
-    swgDeviceSettings->setDeviceHwType(new QString("SDRdaemonSource"));
-    swgDeviceSettings->setSdrDaemonSourceSettings(new SWGSDRangel::SWGSDRdaemonSourceSettings());
-    SWGSDRangel::SWGSDRdaemonSourceSettings *swgSDRDaemonSourceSettings = swgDeviceSettings->getSdrDaemonSourceSettings();
+    swgDeviceSettings->setDeviceHwType(new QString("RemoteInput"));
+    swgDeviceSettings->setRemoteInputSettings(new SWGSDRangel::SWGRemoteInputSettings());
+    SWGSDRangel::SWGRemoteInputSettings *swgRemoteInputSettings = swgDeviceSettings->getRemoteInputSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
     if (deviceSettingsKeys.contains("apiAddress") || force) {
-        swgSDRDaemonSourceSettings->setApiAddress(new QString(settings.m_apiAddress));
+        swgRemoteInputSettings->setApiAddress(new QString(settings.m_apiAddress));
     }
     if (deviceSettingsKeys.contains("apiPort") || force) {
-        swgSDRDaemonSourceSettings->setApiPort(settings.m_apiPort);
+        swgRemoteInputSettings->setApiPort(settings.m_apiPort);
     }
     if (deviceSettingsKeys.contains("dataAddress") || force) {
-        swgSDRDaemonSourceSettings->setDataAddress(new QString(settings.m_dataAddress));
+        swgRemoteInputSettings->setDataAddress(new QString(settings.m_dataAddress));
     }
     if (deviceSettingsKeys.contains("dataPort") || force) {
-        swgSDRDaemonSourceSettings->setDataPort(settings.m_dataPort);
+        swgRemoteInputSettings->setDataPort(settings.m_dataPort);
     }
     if (deviceSettingsKeys.contains("dcBlock") || force) {
-        swgSDRDaemonSourceSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
+        swgRemoteInputSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("iqCorrection") || force) {
-        swgSDRDaemonSourceSettings->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+        swgRemoteInputSettings->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgSDRDaemonSourceSettings->setFileRecordName(new QString(settings.m_fileRecordName));
+        swgRemoteInputSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
@@ -510,5 +510,5 @@ void RemoteInput::networkManagerFinished(QNetworkReply *reply)
 
     QString answer = reply->readAll();
     answer.chop(1); // remove last \n
-    qDebug("SDRdaemonSourceInput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    qDebug("RemoteInput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }
