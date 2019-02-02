@@ -17,6 +17,9 @@
 #ifndef PLUGINS_CHANNELTX_REMOTESRC_REMOTESRC_H_
 #define PLUGINS_CHANNELTX_REMOTESRC_REMOTESRC_H_
 
+#include <channel/remotedatablock.h>
+#include <channel/remotedataqueue.h>
+#include <channel/remotedatareadqueue.h>
 #include <QObject>
 #include <QNetworkRequest>
 
@@ -26,17 +29,13 @@
 #include "channel/channelsourceapi.h"
 #include "util/message.h"
 
-#include "channel/sdrdaemondataqueue.h"
-#include "channel/sdrdaemondatablock.h"
-#include "channel/sdrdaemondatareadqueue.h"
-
 #include "../remotesource/remotesourcesettings.h"
 
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
 class DeviceSinkAPI;
 class RemoteSourceThread;
-class SDRDaemonDataBlock;
+class RemoteDataBlock;
 class QNetworkAccessManager;
 class QNetworkReply;
 
@@ -221,7 +220,7 @@ private:
     DeviceSinkAPI* m_deviceAPI;
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
-    SDRDaemonDataQueue m_dataQueue;
+    RemoteDataQueue m_dataQueue;
     RemoteSourceThread *m_sourceThread;
     CM256 m_cm256;
     CM256 *m_cm256p;
@@ -229,10 +228,10 @@ private:
 
     RemoteSourceSettings m_settings;
 
-    CM256::cm256_block   m_cm256DescriptorBlocks[2*SDRDaemonNbOrginalBlocks]; //!< CM256 decoder descriptors (block addresses and block indexes)
-    SDRDaemonMetaDataFEC m_currentMeta;
+    CM256::cm256_block   m_cm256DescriptorBlocks[2*RemoteNbOrginalBlocks]; //!< CM256 decoder descriptors (block addresses and block indexes)
+    RemoteMetaDataFEC m_currentMeta;
 
-    SDRDaemonDataReadQueue m_dataReadQueue;
+    RemoteDataReadQueue m_dataReadQueue;
 
     uint32_t m_nbCorrectableErrors;   //!< count of correctable errors in number of blocks
     uint32_t m_nbUncorrectableErrors; //!< count of uncorrectable errors in number of blocks
@@ -241,8 +240,8 @@ private:
     QNetworkRequest m_networkRequest;
 
     void applySettings(const RemoteSourceSettings& settings, bool force = false);
-    void handleDataBlock(SDRDaemonDataBlock *dataBlock);
-    void printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData);
+    void handleDataBlock(RemoteDataBlock *dataBlock);
+    void printMeta(const QString& header, RemoteMetaDataFEC *metaData);
     uint32_t calculateDataReadQueueSize(int sampleRate);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const RemoteSourceSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);

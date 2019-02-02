@@ -14,9 +14,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESINK_SDRDAEMONSINK_UDPSINKFEC_H_
-#define PLUGINS_SAMPLESINK_SDRDAEMONSINK_UDPSINKFEC_H_
+#ifndef PLUGINS_SAMPLESINK_REMOTEOUTPUT_UDPSINKFEC_H_
+#define PLUGINS_SAMPLESINK_REMOTEOUTPUT_UDPSINKFEC_H_
 
+#include <channel/remotedatablock.h>
 #include <string.h>
 #include <cstddef>
 
@@ -26,7 +27,6 @@
 
 #include "dsp/dsptypes.h"
 #include "util/CRC64.h"
-#include "channel/sdrdaemondatablock.h"
 
 class UDPSinkFECWorker;
 
@@ -86,12 +86,12 @@ private:
     uint8_t*     m_bufMeta;
     uint8_t*     m_buf;
 
-    SDRDaemonMetaDataFEC m_currentMetaFEC;  //!< Meta data for current frame
+    RemoteMetaDataFEC m_currentMetaFEC;  //!< Meta data for current frame
     uint32_t m_nbBlocksFEC;                 //!< Variable number of FEC blocks
     float m_txDelayRatio;                   //!< Delay in ratio of nominal frame period
     uint32_t m_txDelay;                     //!< Delay in microseconds (usleep) between each sending of an UDP datagram
-    SDRDaemonSuperBlock m_txBlocks[4][256]; //!< UDP blocks to send with original data + FEC
-    SDRDaemonSuperBlock m_superBlock;       //!< current super block being built
+    RemoteSuperBlock m_txBlocks[4][256]; //!< UDP blocks to send with original data + FEC
+    RemoteSuperBlock m_superBlock;       //!< current super block being built
     int m_txBlockIndex;                     //!< Current index in blocks to transmit in the Tx row
     int m_txBlocksIndex;                    //!< Current index of Tx blocks row
     uint16_t m_frameCount;                  //!< transmission frame count
@@ -102,4 +102,4 @@ private:
     uint16_t m_remotePort;
 };
 
-#endif /* PLUGINS_SAMPLESINK_SDRDAEMONSINK_UDPSINKFEC_H_ */
+#endif /* PLUGINS_SAMPLESINK_REMOTEOUTPUT_UDPSINKFEC_H_ */

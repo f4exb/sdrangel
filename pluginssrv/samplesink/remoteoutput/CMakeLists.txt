@@ -1,7 +1,7 @@
-project(sdrdaemonsink)
+project(remoteoutput)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-set(PLUGIN_PREFIX "../../../plugins/samplesink/sdrdaemonsink")
+set(PLUGIN_PREFIX "../../../plugins/samplesink/remoteoutput")
 
 if (HAS_SSSE3)
     message(STATUS "SDRdaemonFEC: use SSSE3 SIMD" )
@@ -12,20 +12,20 @@ else()
     return()
 endif()
 
-set(sdrdaemonsink_SOURCES
-	${PLUGIN_PREFIX}/sdrdaemonsinkoutput.cpp
-	${PLUGIN_PREFIX}/sdrdaemonsinkplugin.cpp
-	${PLUGIN_PREFIX}/sdrdaemonsinksettings.cpp
-	${PLUGIN_PREFIX}/sdrdaemonsinkthread.cpp
+set(remoteoutput_SOURCES
+	${PLUGIN_PREFIX}/remoteoutput.cpp
+	${PLUGIN_PREFIX}/remoteoutputplugin.cpp
+	${PLUGIN_PREFIX}/remoteoutputsettings.cpp
+	${PLUGIN_PREFIX}/remoteoutputthread.cpp
     ${PLUGIN_PREFIX}/udpsinkfec.cpp
     ${PLUGIN_PREFIX}/udpsinkfecworker.cpp
 )
 
-set(sdrdaemonsink_HEADERS
-	${PLUGIN_PREFIX}/sdrdaemonsinkoutput.h
-	${PLUGIN_PREFIX}/sdrdaemonsinkplugin.h
-	${PLUGIN_PREFIX}/sdrdaemonsinksettings.h
-	${PLUGIN_PREFIX}/sdrdaemonsinkthread.h
+set(remoteoutput_HEADERS
+	${PLUGIN_PREFIX}/remoteoutput.h
+	${PLUGIN_PREFIX}/remoteoutputplugin.h
+	${PLUGIN_PREFIX}/remoteoutputsettings.h
+	${PLUGIN_PREFIX}/remoteoutputthread.h
     ${PLUGIN_PREFIX}/udpsinkfec.h
     ${PLUGIN_PREFIX}/udpsinkfecworker.h
 )
@@ -51,20 +51,20 @@ add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 
-add_library(outputsdrdaemonsinksrv SHARED
-	${sdrdaemonsink_SOURCES}
-	${sdrdaemonsink_HEADERS_MOC}
+add_library(outputremotesrv SHARED
+	${remoteoutput_SOURCES}
+	${remoteoutput_HEADERS_MOC}
 )
 
 if (BUILD_DEBIAN)
-target_link_libraries(outputsdrdaemonsinksrv
+target_link_libraries(outputremotesrv
     ${QT_LIBRARIES}
     sdrbase
     swagger
     cm256cc
 )
 else (BUILD_DEBIAN)
-target_link_libraries(outputsdrdaemonsinksrv
+target_link_libraries(outputremotesrv
 	${QT_LIBRARIES}
 	sdrbase
 	swagger
@@ -72,6 +72,6 @@ target_link_libraries(outputsdrdaemonsinksrv
 )
 endif (BUILD_DEBIAN)
 
-target_link_libraries(outputsdrdaemonsinksrv Qt5::Core)
+target_link_libraries(outputremotesrv Qt5::Core)
 
-install(TARGETS outputsdrdaemonsinksrv DESTINATION lib/pluginssrv/samplesink)
+install(TARGETS outputremotesrv DESTINATION lib/pluginssrv/samplesink)

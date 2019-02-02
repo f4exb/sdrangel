@@ -25,8 +25,8 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 
-class SDRDaemonDataQueue;
-class SDRDaemonDataBlock;
+class RemoteDataQueue;
+class RemoteDataBlock;
 class QUdpSocket;
 
 class RemoteSourceThread : public QThread {
@@ -74,7 +74,7 @@ public:
         }
     };
 
-    RemoteSourceThread(SDRDaemonDataQueue *dataQueue, QObject* parent = 0);
+    RemoteSourceThread(RemoteDataQueue *dataQueue, QObject* parent = 0);
     ~RemoteSourceThread();
 
     void startStop(bool start);
@@ -86,13 +86,13 @@ private:
     volatile bool m_running;
 
     MessageQueue m_inputMessageQueue;
-    SDRDaemonDataQueue *m_dataQueue;
+    RemoteDataQueue *m_dataQueue;
 
     QHostAddress m_address;
     QUdpSocket *m_socket;
 
     static const uint32_t m_nbDataBlocks = 4;          //!< number of data blocks in the ring buffer
-    SDRDaemonDataBlock *m_dataBlocks[m_nbDataBlocks];  //!< ring buffer of data blocks indexed by frame affinity
+    RemoteDataBlock *m_dataBlocks[m_nbDataBlocks];  //!< ring buffer of data blocks indexed by frame affinity
 
     void startWork();
     void stopWork();

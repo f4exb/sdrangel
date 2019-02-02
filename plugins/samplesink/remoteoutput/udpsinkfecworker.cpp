@@ -14,9 +14,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "udpsinkfecworker.h"
+
 #include <QUdpSocket>
 
-#include "udpsinkfecworker.h"
 
 MESSAGE_CLASS_DEFINITION(UDPSinkFECWorker::MsgUDPFECEncodeAndSend, Message)
 MESSAGE_CLASS_DEFINITION(UDPSinkFECWorker::MsgConfigureRemoteAddress, Message)
@@ -81,7 +82,7 @@ void UDPSinkFECWorker::run()
     qDebug("UDPSinkFECWorker::process: stopped");
 }
 
-void UDPSinkFECWorker::pushTxFrame(SDRDaemonSuperBlock *txBlocks,
+void UDPSinkFECWorker::pushTxFrame(RemoteSuperBlock *txBlocks,
     uint32_t nbBlocksFEC,
     uint32_t txDelay,
     uint16_t frameIndex)
@@ -117,7 +118,7 @@ void UDPSinkFECWorker::handleInputMessages()
         else if (MsgStartStop::match(*message))
         {
             MsgStartStop* notif = (MsgStartStop*) message;
-            qDebug("DaemonSinkThread::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
+            qDebug("UDPSinkFECWorker::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
 
             if (notif->getStartStop()) {
                 startWork();
@@ -130,28 +131,27 @@ void UDPSinkFECWorker::handleInputMessages()
     }
 }
 
-void UDPSinkFECWorker::encodeAndTransmit(SDRDaemonSuperBlock *txBlockx, uint16_t frameIndex, uint32_t nbBlocksFEC, uint32_t txDelay)
+void UDPSinkFECWorker::encodeAndTransmit(RemoteSuperBlock *txBlockx, uint16_t frameIndex, uint32_t nbBlocksFEC, uint32_t txDelay)
 {
     CM256::cm256_encoder_params cm256Params;  //!< Main interface with CM256 encoder
     CM256::cm256_block descriptorBlocks[256]; //!< Pointers to data for CM256 encoder
-    SDRDaemonProtectedBlock fecBlocks[256];   //!< FEC data
+    RemoteProtectedBlock fecBlocks[256];   //!< FEC data
 
     if ((nbBlocksFEC == 0) || !m_cm256Valid)
     {
         if (m_udpSocket)
         {
-            for (unsigned int i = 0; i < SDRDaemonNbOrginalBlocks; i++)
+            for (unsigned int i = 0; i < RemoteNbOrginalBlocks; i++)
             {
-                //m_socket.SendDataGram((const void *) &txBlockx[i], SDRDaemonUdpSize, m_remoteAddress.toStdString(), (uint32_t) m_remotePort);
-                m_udpSocket->writeDatagram((const char *) &txBlockx[i], SDRDaemonUdpSize, m_remoteHostAddress, m_remotePort);
+                m_udpSocket->writeDatagram((const char *) &txBlockx[i], RemoteUdpSize, m_remoteHostAddress, m_remotePort);
                 usleep(txDelay);
             }
         }
     }
     else
     {
-        cm256Params.BlockBytes = sizeof(SDRDaemonProtectedBlock);
-        cm256Params.OriginalCount = SDRDaemonNbOrginalBlocks;
+        cm256Params.BlockBytes = sizeof(RemoteProtectedBlock);
+        cm256Params.OriginalCount = RemoteNbOrginalBlocks;
         cm256Params.RecoveryCount = nbBlocksFEC;
 
 
@@ -159,7 +159,7 @@ void UDPSinkFECWorker::encodeAndTransmit(SDRDaemonSuperBlock *txBlockx, uint16_t
         for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; ++i)
         {
             if (i >= cm256Params.OriginalCount) {
-                memset((char *) &txBlockx[i].m_protectedBlock, 0, sizeof(SDRDaemonProtectedBlock));
+                memset((char *) &txBlockx[i].m_protectedBlock, 0, sizeof(RemoteProtectedBlock));
             }
 
             txBlockx[i].m_header.m_frameIndex = frameIndex;
@@ -188,13 +188,13 @@ void UDPSinkFECWorker::encodeAndTransmit(SDRDaemonSuperBlock *txBlockx, uint16_t
         {
             for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++)
             {
-    #ifdef SDRDAEMON_PUNCTURE
-                if (i == SDRDAEMON_PUNCTURE) {
+    #ifdef REMOTE_PUNCTURE
+                if (i == REMOTE_PUNCTURE) {
                     continue;
                 }
     #endif
 
-                m_udpSocket->writeDatagram((const char *) &txBlockx[i], SDRDaemonUdpSize, m_remoteHostAddress, m_remotePort);
+                m_udpSocket->writeDatagram((const char *) &txBlockx[i], RemoteUdpSize, m_remoteHostAddress, m_remotePort);
                 usleep(txDelay);
             }
         }

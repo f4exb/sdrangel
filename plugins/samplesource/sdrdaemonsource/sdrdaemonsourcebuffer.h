@@ -17,12 +17,12 @@
 #ifndef PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONSOURCEBUFFER_H_
 #define PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONSOURCEBUFFER_H_
 
+#include <channel/remotedatablock.h>
 #include <QString>
 #include <QDebug>
 #include <cstdlib>
 #include "cm256.h"
 #include "util/movingaverage.h"
-#include "channel/sdrdaemondatablock.h"
 
 
 #define SDRDAEMONSOURCE_UDPSIZE 512               // UDP payload size
@@ -40,7 +40,7 @@ public:
 	uint8_t *readData(int32_t length);            //!< Read data from buffer
 
 	// meta data
-	const SDRDaemonMetaDataFEC& getCurrentMeta() const { return m_currentMeta; }
+	const RemoteMetaDataFEC& getCurrentMeta() const { return m_currentMeta; }
 
 	// samples timestamp
 	uint32_t getTVOutSec() const { return m_tvOut_sec; }
@@ -105,7 +105,7 @@ public:
         }
     }
 
-    static const int framesSize = SDRDAEMONSOURCE_NBDECODERSLOTS * (SDRDaemonNbOrginalBlocks - 1) * SDRDaemonNbBytesPerBlock;
+    static const int framesSize = SDRDAEMONSOURCE_NBDECODERSLOTS * (RemoteNbOrginalBlocks - 1) * RemoteNbBytesPerBlock;
 
 private:
     static const int nbDecoderSlots = SDRDAEMONSOURCE_NBDECODERSLOTS;
@@ -113,16 +113,16 @@ private:
 #pragma pack(push, 1)
     struct BufferFrame
     {
-        SDRDaemonProtectedBlock  m_blocks[SDRDaemonNbOrginalBlocks - 1];
+        RemoteProtectedBlock  m_blocks[RemoteNbOrginalBlocks - 1];
     };
 #pragma pack(pop)
 
     struct DecoderSlot
     {
-        SDRDaemonProtectedBlock m_blockZero;                                       //!< First block of a frame. Has meta data.
-        SDRDaemonProtectedBlock m_originalBlocks[SDRDaemonNbOrginalBlocks];        //!< Original blocks retrieved directly or by later FEC
-        SDRDaemonProtectedBlock m_recoveryBlocks[SDRDaemonNbOrginalBlocks];        //!< Recovery blocks (FEC blocks) with max size
-        CM256::cm256_block      m_cm256DescriptorBlocks[SDRDaemonNbOrginalBlocks]; //!< CM256 decoder descriptors (block addresses and block indexes)
+        RemoteProtectedBlock m_blockZero;                                       //!< First block of a frame. Has meta data.
+        RemoteProtectedBlock m_originalBlocks[RemoteNbOrginalBlocks];        //!< Original blocks retrieved directly or by later FEC
+        RemoteProtectedBlock m_recoveryBlocks[RemoteNbOrginalBlocks];        //!< Recovery blocks (FEC blocks) with max size
+        CM256::cm256_block      m_cm256DescriptorBlocks[RemoteNbOrginalBlocks]; //!< CM256 decoder descriptors (block addresses and block indexes)
         int                     m_blockCount;         //!< number of blocks received for this frame
         int                     m_originalCount;      //!< number of original blocks received
         int                     m_recoveryCount;      //!< number of recovery blocks received
@@ -130,7 +130,7 @@ private:
         bool                    m_metaRetrieved;      //!< true if meta data (block zero) was retrieved
     };
 
-    SDRDaemonMetaDataFEC m_currentMeta;          //!< Stored current meta data
+    RemoteMetaDataFEC m_currentMeta;          //!< Stored current meta data
     CM256::cm256_encoder_params m_paramsCM256;          //!< CM256 decoder parameters block
     DecoderSlot          m_decoderSlots[nbDecoderSlots]; //!< CM256 decoding control/buffer slots
     BufferFrame          m_frames[nbDecoderSlots];       //!< Samples buffer
@@ -165,7 +165,7 @@ private:
     CM256    m_cm256;         //!< CM256 library
     bool     m_cm256_OK;      //!< CM256 library initialized OK
 
-    inline SDRDaemonProtectedBlock* storeOriginalBlock(int slotIndex, int blockIndex, const SDRDaemonProtectedBlock& protectedBlock)
+    inline RemoteProtectedBlock* storeOriginalBlock(int slotIndex, int blockIndex, const RemoteProtectedBlock& protectedBlock)
     {
         if (blockIndex == 0) {
             // m_decoderSlots[slotIndex].m_originalBlocks[0] = protectedBlock;
@@ -180,7 +180,7 @@ private:
         }
     }
 
-    inline SDRDaemonProtectedBlock& getOriginalBlock(int slotIndex, int blockIndex)
+    inline RemoteProtectedBlock& getOriginalBlock(int slotIndex, int blockIndex)
     {
         if (blockIndex == 0) {
             // return m_decoderSlots[slotIndex].m_originalBlocks[0];
@@ -191,17 +191,17 @@ private:
         }
     }
 
-    inline SDRDaemonMetaDataFEC *getMetaData(int slotIndex)
+    inline RemoteMetaDataFEC *getMetaData(int slotIndex)
     {
         // return (MetaDataFEC *) &m_decoderSlots[slotIndex].m_originalBlocks[0];
-        return (SDRDaemonMetaDataFEC *) &m_decoderSlots[slotIndex].m_blockZero;
+        return (RemoteMetaDataFEC *) &m_decoderSlots[slotIndex].m_blockZero;
     }
 
     inline void resetOriginalBlocks(int slotIndex)
     {
         // memset((void *) m_decoderSlots[slotIndex].m_originalBlocks, 0, m_nbOriginalBlocks * sizeof(ProtectedBlock));
-        memset((void *) &m_decoderSlots[slotIndex].m_blockZero, 0, sizeof(SDRDaemonProtectedBlock));
-        memset((void *) m_frames[slotIndex].m_blocks, 0, (SDRDaemonNbOrginalBlocks - 1) * sizeof(SDRDaemonProtectedBlock));
+        memset((void *) &m_decoderSlots[slotIndex].m_blockZero, 0, sizeof(RemoteProtectedBlock));
+        memset((void *) m_frames[slotIndex].m_blocks, 0, (RemoteNbOrginalBlocks - 1) * sizeof(RemoteProtectedBlock));
     }
 
     void initDecodeAllSlots();
@@ -210,7 +210,7 @@ private:
     void checkSlotData(int slotIndex);
     void initDecodeSlot(int slotIndex);
 
-    static void printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData);
+    static void printMeta(const QString& header, RemoteMetaDataFEC *metaData);
 };
 
 

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// SDRdaemon - send I/Q samples read from a SDR device over the network via UDP. //
+// Remote - send I/Q samples read from a SDR device over the network via UDP.    //
 //                                                                               //
 // Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
 //                                                                               //

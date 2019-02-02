@@ -1,11 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
-// SDRdaemon sink channel (Rx) data blocks to read queue                         //
+// Remote sink channel (Rx) data blocks to read queue                            //
 //                                                                               //
-// SDRdaemon is a detached SDR front end that handles the interface with a       //
-// physical device and sends or receives the I/Q samples stream to or from a     //
-// SDRangel instance via UDP. It is controlled via a Web REST API.               //
+// SDRangel can serve as a remote SDR front end that handles the interface       //
+// with a physical device and sends or receives the I/Q samples stream via UDP   //
+// to or from another SDRangel instance or any program implementing the same     //
+// protocol. The remote SDRangel is controlled via its Web REST API.             //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -20,12 +21,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "channel/sdrdaemondatablock.h"
-#include "channel/sdrdaemondatareadqueue.h"
+#include <channel/remotedatablock.h>
+#include <channel/remotedatareadqueue.h>
 
-const uint32_t SDRDaemonDataReadQueue::MinimumMaxSize = 10;
+const uint32_t RemoteDataReadQueue::MinimumMaxSize = 10;
 
-SDRDaemonDataReadQueue::SDRDaemonDataReadQueue() :
+RemoteDataReadQueue::RemoteDataReadQueue() :
         m_dataBlock(0),
         m_maxSize(MinimumMaxSize),
         m_blockIndex(1),
@@ -34,9 +35,9 @@ SDRDaemonDataReadQueue::SDRDaemonDataReadQueue() :
         m_full(false)
 {}
 
-SDRDaemonDataReadQueue::~SDRDaemonDataReadQueue()
+RemoteDataReadQueue::~RemoteDataReadQueue()
 {
-    SDRDaemonDataBlock* data;
+    RemoteDataBlock* data;
 
     while ((data = pop()) != 0)
     {
@@ -45,13 +46,13 @@ SDRDaemonDataReadQueue::~SDRDaemonDataReadQueue()
     }
 }
 
-void SDRDaemonDataReadQueue::push(SDRDaemonDataBlock* dataBlock)
+void RemoteDataReadQueue::push(RemoteDataBlock* dataBlock)
 {
     if (length() >= m_maxSize)
     {
         qWarning("SDRDaemonDataReadQueue::push: queue is full");
         m_full = true; // stop filling the queue
-        SDRDaemonDataBlock *data = m_dataReadQueue.takeLast();
+        RemoteDataBlock *data = m_dataReadQueue.takeLast();
         delete data;
     }
 
@@ -64,7 +65,7 @@ void SDRDaemonDataReadQueue::push(SDRDaemonDataBlock* dataBlock)
     }
 }
 
-SDRDaemonDataBlock* SDRDaemonDataReadQueue::pop()
+RemoteDataBlock* RemoteDataReadQueue::pop()
 {
     if (m_dataReadQueue.isEmpty())
     {
@@ -79,14 +80,14 @@ SDRDaemonDataBlock* SDRDaemonDataReadQueue::pop()
     }
 }
 
-void SDRDaemonDataReadQueue::setSize(uint32_t size)
+void RemoteDataReadQueue::setSize(uint32_t size)
 {
     if (size != m_maxSize) {
         m_maxSize = size < MinimumMaxSize ? MinimumMaxSize : size;
     }
 }
 
-void SDRDaemonDataReadQueue::readSample(Sample& s, bool scaleForTx)
+void RemoteDataReadQueue::readSample(Sample& s, bool scaleForTx)
 {
     // depletion/repletion state
     if (m_dataBlock == 0)
@@ -109,7 +110,7 @@ void SDRDaemonDataReadQueue::readSample(Sample& s, bool scaleForTx)
     }
 
     int sampleSize = m_dataBlock->m_superBlocks[m_blockIndex].m_header.m_sampleBytes * 2;
-    uint32_t samplesPerBlock = SDRDaemonNbBytesPerBlock / sampleSize;
+    uint32_t samplesPerBlock = RemoteNbBytesPerBlock / sampleSize;
 
     if (m_sampleIndex < samplesPerBlock)
     {
@@ -122,7 +123,7 @@ void SDRDaemonDataReadQueue::readSample(Sample& s, bool scaleForTx)
         m_sampleIndex = 0;
         m_blockIndex++;
 
-        if (m_blockIndex < SDRDaemonNbOrginalBlocks)
+        if (m_blockIndex < RemoteNbOrginalBlocks)
         {
             convertDataToSample(s, m_blockIndex, m_sampleIndex, scaleForTx);
             m_sampleIndex++;

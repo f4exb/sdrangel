@@ -85,7 +85,7 @@ This is the frequency shift applied when the NCO is engaged thus the actual LO f
 
 This button opens a dialog to set the transverter mode frequency translation options:
 
-![SDR Daemon source input stream transverter dialog](../../../doc/img/RTLSDR_plugin_xvrt.png)
+![LimeSDR source input stream transverter dialog](../../../doc/img/RTLSDR_plugin_xvrt.png)
 
 Note that if you mouse over the button a tooltip appears that displays the translating frequency and if translation is enabled or disabled. When the frequency translation is enabled the button is lit.
 

@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_SDRDAEMONSINKGUI_H
-#define INCLUDE_SDRDAEMONSINKGUI_H
+#ifndef INCLUDE_REMOTEOUTPUTGUI_H
+#define INCLUDE_REMOTEOUTPUTGUI_H
 
 #include <stdint.h>
 
@@ -28,8 +28,8 @@
 #include "util/messagequeue.h"
 #include "util/limitedcounter.h"
 
-#include "sdrdaemonsinksettings.h"
-#include "sdrdaemonsinkoutput.h"
+#include "remoteoutput.h"
+#include "remoteoutputsettings.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -38,12 +38,12 @@ class DeviceSampleSink;
 class DeviceUISet;
 
 namespace Ui {
-	class SDRdaemonSinkGui;
+	class RemoteOutputGui;
 }
 
-class SDRdaemonSinkExpAvg {
+class RemoteOutputExpAvg {
 public:
-    SDRdaemonSinkExpAvg(float alpha) :
+    RemoteOutputExpAvg(float alpha) :
         m_alpha(alpha),
         m_start(true),
         m_s(0)
@@ -68,12 +68,12 @@ private:
     float m_s;
 };
 
-class SDRdaemonSinkGui : public QWidget, public PluginInstanceGUI {
+class RemoteOutputSinkGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
-	virtual ~SDRdaemonSinkGui();
+	explicit RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
+	virtual ~RemoteOutputSinkGui();
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -88,11 +88,11 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	Ui::SDRdaemonSinkGui* ui;
+	Ui::RemoteOutputGui* ui;
 
 	DeviceUISet* m_deviceUISet;
-	SDRdaemonSinkSettings m_settings;        //!< current settings
-	SDRdaemonSinkSettings m_controlSettings; //!< settings last sent to device via control port
+	RemoteOutputSettings m_settings;        //!< current settings
+	RemoteOutputSettings m_controlSettings; //!< settings last sent to device via control port
 	QTimer m_updateTimer;
     QTimer m_statusTimer;
 	DeviceSampleSink* m_deviceSampleSink;
@@ -157,4 +157,4 @@ private slots:
     void openDeviceSettingsDialog(const QPoint& p);
 };
 
-#endif // INCLUDE_FILESINKGUI_H
+#endif // INCLUDE_REMOTEOUTPUTGUI_H

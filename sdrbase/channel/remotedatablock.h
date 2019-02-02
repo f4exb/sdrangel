@@ -1,11 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
-// SDRdaemon sink channel (Rx) data block                                        //
+// Remote sink channel (Rx) data block                                           //
 //                                                                               //
-// SDRdaemon is a detached SDR front end that handles the interface with a       //
-// physical device and sends or receives the I/Q samples stream to or from a     //
-// SDRangel instance via UDP. It is controlled via a Web REST API.               //
+// SDRangel can serve as a remote SDR front end that handles the interface       //
+// with a physical device and sends or receives the I/Q samples stream via UDP   //
+// to or from another SDRangel instance or any program implementing the same     //
+// protocol. The remote SDRangel is controlled via its Web REST API.             //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -34,7 +35,7 @@
 //#define UDPSINKFEC_NBTXBLOCKS 8
 
 #pragma pack(push, 1)
-struct SDRDaemonMetaDataFEC
+struct RemoteMetaDataFEC
 {
     uint32_t m_centerFrequency;   //!<  4 center frequency in kHz
     uint32_t m_sampleRate;        //!<  8 sample rate in Hz
@@ -47,7 +48,7 @@ struct SDRDaemonMetaDataFEC
     uint32_t m_tv_usec;           //!< 20 microseconds of timestamp at start time of super-frame processing
     uint32_t m_crc32;             //!< 24 CRC32 of the above
 
-    bool operator==(const SDRDaemonMetaDataFEC& rhs)
+    bool operator==(const RemoteMetaDataFEC& rhs)
     {
         // Only the first 6 fields are relevant
         return (m_centerFrequency == rhs.m_centerFrequency)
@@ -72,7 +73,7 @@ struct SDRDaemonMetaDataFEC
     }
 };
 
-struct SDRDaemonHeader
+struct RemoteHeader
 {
     uint16_t m_frameIndex;
     uint8_t  m_blockIndex;
@@ -92,23 +93,23 @@ struct SDRDaemonHeader
     }
 };
 
-static const int SDRDaemonUdpSize = UDPSINKFEC_UDPSIZE;
-static const int SDRDaemonNbOrginalBlocks = UDPSINKFEC_NBORIGINALBLOCKS;
-static const int SDRDaemonNbBytesPerBlock = UDPSINKFEC_UDPSIZE - sizeof(SDRDaemonHeader);
+static const int RemoteUdpSize = UDPSINKFEC_UDPSIZE;
+static const int RemoteNbOrginalBlocks = UDPSINKFEC_NBORIGINALBLOCKS;
+static const int RemoteNbBytesPerBlock = UDPSINKFEC_UDPSIZE - sizeof(RemoteHeader);
 
-struct SDRDaemonProtectedBlock
+struct RemoteProtectedBlock
 {
-    uint8_t buf[SDRDaemonNbBytesPerBlock];
+    uint8_t buf[RemoteNbBytesPerBlock];
 
     void init() {
-        std::fill(buf, buf+SDRDaemonNbBytesPerBlock, 0);
+        std::fill(buf, buf+RemoteNbBytesPerBlock, 0);
     }
 };
 
-struct SDRDaemonSuperBlock
+struct RemoteSuperBlock
 {
-    SDRDaemonHeader         m_header;
-    SDRDaemonProtectedBlock m_protectedBlock;
+    RemoteHeader         m_header;
+    RemoteProtectedBlock m_protectedBlock;
 
     void init()
     {
@@ -118,7 +119,7 @@ struct SDRDaemonSuperBlock
 };
 #pragma pack(pop)
 
-struct SDRDaemonTxControlBlock
+struct RemoteTxControlBlock
 {
     bool m_complete;
     bool m_processed;
@@ -128,7 +129,7 @@ struct SDRDaemonTxControlBlock
     QString m_dataAddress;
     uint16_t m_dataPort;
 
-    SDRDaemonTxControlBlock() {
+    RemoteTxControlBlock() {
         m_complete = false;
         m_processed = false;
         m_frameIndex = 0;
@@ -139,7 +140,7 @@ struct SDRDaemonTxControlBlock
     }
 };
 
-struct SDRDaemonRxControlBlock
+struct RemoteRxControlBlock
 {
     int  m_blockCount;    //!< number of blocks received for this frame
     int  m_originalCount; //!< number of original blocks received
@@ -147,7 +148,7 @@ struct SDRDaemonRxControlBlock
     bool m_metaRetrieved; //!< true if meta data (block zero) was retrieved
     int  m_frameIndex;    //!< this frame index or -1 if unset
 
-    SDRDaemonRxControlBlock() {
+    RemoteRxControlBlock() {
         m_blockCount = 0;
         m_originalCount = 0;
         m_recoveryCount = 0;
@@ -156,18 +157,18 @@ struct SDRDaemonRxControlBlock
     }
 };
 
-class SDRDaemonDataBlock
+class RemoteDataBlock
 {
 public:
-    SDRDaemonDataBlock() {
-        m_superBlocks = new SDRDaemonSuperBlock[256];
+    RemoteDataBlock() {
+        m_superBlocks = new RemoteSuperBlock[256];
     }
-    ~SDRDaemonDataBlock() {
+    ~RemoteDataBlock() {
         delete[] m_superBlocks;
     }
-    SDRDaemonTxControlBlock m_txControlBlock;
-    SDRDaemonRxControlBlock m_rxControlBlock;
-    SDRDaemonSuperBlock     *m_superBlocks;
+    RemoteTxControlBlock m_txControlBlock;
+    RemoteRxControlBlock m_rxControlBlock;
+    RemoteSuperBlock     *m_superBlocks;
 };
 
 #endif /* SDRDAEMON_CHANNEL_SDRDAEMONDATABLOCK_H_ */

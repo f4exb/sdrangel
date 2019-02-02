@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_SDRDAEMONSINKTHREAD_H
-#define INCLUDE_SDRDAEMONSINKTHREAD_H
+#ifndef INCLUDE_REMOTEOUTPUTTHREAD_H
+#define INCLUDE_REMOTEOUTPUTTHREAD_H
 
 #include <iostream>
 #include <fstream>
@@ -33,17 +33,17 @@
 
 #include "udpsinkfec.h"
 
-#define SDRDAEMONSINK_THROTTLE_MS 50
+#define REMOTEOUTPUT_THROTTLE_MS 50
 
 class SampleSourceFifo;
 struct timeval;
 
-class SDRdaemonSinkThread : public QThread {
+class RemoteOutputThread : public QThread {
 	Q_OBJECT
 
 public:
-	SDRdaemonSinkThread(SampleSourceFifo* sampleFifo, QObject* parent = 0);
-	~SDRdaemonSinkThread();
+	RemoteOutputThread(SampleSourceFifo* sampleFifo, QObject* parent = 0);
+	~RemoteOutputThread();
 
 	void startWork();
 	void stopWork();
@@ -85,4 +85,4 @@ private slots:
 	void tick();
 };
 
-#endif // INCLUDE_SDRDAEMONSINKTHREAD_H
+#endif // INCLUDE_REMOTEOUTPUTTHREAD_H

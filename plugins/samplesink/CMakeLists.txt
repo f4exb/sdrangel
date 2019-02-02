@@ -25,7 +25,7 @@ endif(LIBUSB_FOUND AND LIBIIO_FOUND)
 
 find_package(CM256cc)
 if(CM256CC_FOUND)
-    add_subdirectory(sdrdaemonsink)
+    add_subdirectory(remoteoutput)
 endif(CM256CC_FOUND)
 
 find_package(SoapySDR)
@@ -44,7 +44,7 @@ if (BUILD_DEBIAN)
     add_subdirectory(hackrfoutput)
     add_subdirectory(limesdroutput)
     add_subdirectory(plutosdroutput)
-    add_subdirectory(sdrdaemonsink)
+    add_subdirectory(remoteoutput)
     add_subdirectory(soapysdroutput)
 endif (BUILD_DEBIAN)
 

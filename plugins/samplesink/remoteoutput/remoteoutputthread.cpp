@@ -22,9 +22,9 @@
 
 #include "dsp/samplesourcefifo.h"
 #include "util/timeutil.h"
-#include "sdrdaemonsinkthread.h"
+#include "remoteoutputthread.h"
 
-SDRdaemonSinkThread::SDRdaemonSinkThread(SampleSourceFifo* sampleFifo, QObject* parent) :
+RemoteOutputThread::RemoteOutputThread(SampleSourceFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_samplesChunkSize(0),
@@ -32,22 +32,22 @@ SDRdaemonSinkThread::SDRdaemonSinkThread(SampleSourceFifo* sampleFifo, QObject* 
 	m_samplesCount(0),
 	m_chunkCorrection(0),
     m_samplerate(0),
-    m_throttlems(SDRDAEMONSINK_THROTTLE_MS),
+    m_throttlems(REMOTEOUTPUT_THROTTLE_MS),
     m_maxThrottlems(50),
     m_throttleToggle(false)
 {
 }
 
-SDRdaemonSinkThread::~SDRdaemonSinkThread()
+RemoteOutputThread::~RemoteOutputThread()
 {
 	if (m_running) {
 		stopWork();
 	}
 }
 
-void SDRdaemonSinkThread::startWork()
+void RemoteOutputThread::startWork()
 {
-	qDebug() << "SDRdaemonSinkThread::startWork: ";
+	qDebug() << "RemoteOutputThread::startWork: ";
 	m_udpSinkFEC.start();
     m_maxThrottlems = 0;
     m_startWaitMutex.lock();
@@ -58,19 +58,19 @@ void SDRdaemonSinkThread::startWork()
     m_startWaitMutex.unlock();
 }
 
-void SDRdaemonSinkThread::stopWork()
+void RemoteOutputThread::stopWork()
 {
-	qDebug() << "SDRdaemonSinkThread::stopWork";
+	qDebug() << "RemoteOutputThread::stopWork";
 	m_running = false;
 	wait();
 	m_udpSinkFEC.stop();
 }
 
-void SDRdaemonSinkThread::setSamplerate(int samplerate)
+void RemoteOutputThread::setSamplerate(int samplerate)
 {
 	if (samplerate != m_samplerate)
 	{
-	    qDebug() << "SDRdaemonSinkThread::setSamplerate:"
+	    qDebug() << "RemoteOutputThread::setSamplerate:"
 	            << " new:" << samplerate
 	            << " old:" << m_samplerate;
 
@@ -97,7 +97,7 @@ void SDRdaemonSinkThread::setSamplerate(int samplerate)
 	}
 }
 
-void SDRdaemonSinkThread::run()
+void RemoteOutputThread::run()
 {
 	m_running = true;
 	m_startWaiter.wakeAll();
@@ -110,13 +110,13 @@ void SDRdaemonSinkThread::run()
 	m_running = false;
 }
 
-void SDRdaemonSinkThread::connectTimer(const QTimer& timer)
+void RemoteOutputThread::connectTimer(const QTimer& timer)
 {
-	qDebug() << "SDRdaemonSinkThread::connectTimer";
+	qDebug() << "RemoteOutputThread::connectTimer";
 	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
-void SDRdaemonSinkThread::tick()
+void RemoteOutputThread::tick()
 {
 	if (m_running)
 	{
@@ -140,7 +140,7 @@ void SDRdaemonSinkThread::tick()
 	}
 }
 
-uint32_t SDRdaemonSinkThread::getSamplesCount(uint64_t& ts_usecs) const
+uint32_t RemoteOutputThread::getSamplesCount(uint64_t& ts_usecs) const
 {
     ts_usecs = TimeUtil::nowus();
     return m_samplesCount;

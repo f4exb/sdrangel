@@ -243,10 +243,10 @@ void RemoteSource::applySettings(const RemoteSourceSettings& settings, bool forc
     m_settings = settings;
 }
 
-void RemoteSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
+void RemoteSource::handleDataBlock(RemoteDataBlock* dataBlock)
 {
     (void) dataBlock;
-    if (dataBlock->m_rxControlBlock.m_blockCount < SDRDaemonNbOrginalBlocks)
+    if (dataBlock->m_rxControlBlock.m_blockCount < RemoteNbOrginalBlocks)
     {
         qWarning("RemoteSource::handleDataBlock: incomplete data block: not processing");
     }
@@ -270,15 +270,15 @@ void RemoteSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
             }
         }
 
-        //qDebug("DaemonSource::handleDataBlock: frame: %u blocks: %d", dataBlock.m_rxControlBlock.m_frameIndex, blockCount);
+        //qDebug("RemoteSource::handleDataBlock: frame: %u blocks: %d", dataBlock.m_rxControlBlock.m_frameIndex, blockCount);
 
         // Need to use the CM256 recovery
-        if (m_cm256p &&(dataBlock->m_rxControlBlock.m_originalCount < SDRDaemonNbOrginalBlocks))
+        if (m_cm256p &&(dataBlock->m_rxControlBlock.m_originalCount < RemoteNbOrginalBlocks))
         {
             qDebug("RemoteSource::handleDataBlock: %d recovery blocks", dataBlock->m_rxControlBlock.m_recoveryCount);
             CM256::cm256_encoder_params paramsCM256;
-            paramsCM256.BlockBytes = sizeof(SDRDaemonProtectedBlock); // never changes
-            paramsCM256.OriginalCount = SDRDaemonNbOrginalBlocks;  // never changes
+            paramsCM256.BlockBytes = sizeof(RemoteProtectedBlock); // never changes
+            paramsCM256.OriginalCount = RemoteNbOrginalBlocks;  // never changes
 
             if (m_currentMeta.m_tv_sec == 0) {
                 paramsCM256.RecoveryCount = dataBlock->m_rxControlBlock.m_recoveryCount;
@@ -287,8 +287,8 @@ void RemoteSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
             }
 
             // update counters
-            if (dataBlock->m_rxControlBlock.m_originalCount < SDRDaemonNbOrginalBlocks - paramsCM256.RecoveryCount) {
-                m_nbUncorrectableErrors += SDRDaemonNbOrginalBlocks - paramsCM256.RecoveryCount - dataBlock->m_rxControlBlock.m_originalCount;
+            if (dataBlock->m_rxControlBlock.m_originalCount < RemoteNbOrginalBlocks - paramsCM256.RecoveryCount) {
+                m_nbUncorrectableErrors += RemoteNbOrginalBlocks - paramsCM256.RecoveryCount - dataBlock->m_rxControlBlock.m_originalCount;
             } else {
                 m_nbCorrectableErrors += dataBlock->m_rxControlBlock.m_recoveryCount;
             }
@@ -303,11 +303,11 @@ void RemoteSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
             {
                 for (int ir = 0; ir < dataBlock->m_rxControlBlock.m_recoveryCount; ir++) // restore missing blocks
                 {
-                    int recoveryIndex = SDRDaemonNbOrginalBlocks - dataBlock->m_rxControlBlock.m_recoveryCount + ir;
+                    int recoveryIndex = RemoteNbOrginalBlocks - dataBlock->m_rxControlBlock.m_recoveryCount + ir;
                     int blockIndex = m_cm256DescriptorBlocks[recoveryIndex].Index;
-                    SDRDaemonProtectedBlock *recoveredBlock =
-                            (SDRDaemonProtectedBlock *) m_cm256DescriptorBlocks[recoveryIndex].Block;
-                    memcpy((void *) &(dataBlock->m_superBlocks[blockIndex].m_protectedBlock), recoveredBlock, sizeof(SDRDaemonProtectedBlock));
+                    RemoteProtectedBlock *recoveredBlock =
+                            (RemoteProtectedBlock *) m_cm256DescriptorBlocks[recoveryIndex].Block;
+                    memcpy((void *) &(dataBlock->m_superBlocks[blockIndex].m_protectedBlock), recoveredBlock, sizeof(RemoteProtectedBlock));
                     if ((blockIndex == 0) && !dataBlock->m_rxControlBlock.m_metaRetrieved) {
                         dataBlock->m_rxControlBlock.m_metaRetrieved = true;
                     }
@@ -318,7 +318,7 @@ void RemoteSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
         // Validate block zero and retrieve its data
         if (dataBlock->m_rxControlBlock.m_metaRetrieved)
         {
-            SDRDaemonMetaDataFEC *metaData = (SDRDaemonMetaDataFEC *) &(dataBlock->m_superBlocks[0].m_protectedBlock);
+            RemoteMetaDataFEC *metaData = (RemoteMetaDataFEC *) &(dataBlock->m_superBlocks[0].m_protectedBlock);
             boost::crc_32_type crc32;
             crc32.process_bytes(metaData, 20);
 
@@ -349,14 +349,14 @@ void RemoteSource::handleDataBlock(SDRDaemonDataBlock* dataBlock)
 
 void RemoteSource::handleData()
 {
-    SDRDaemonDataBlock* dataBlock;
+    RemoteDataBlock* dataBlock;
 
     while (m_running && ((dataBlock = m_dataQueue.pop()) != 0)) {
         handleDataBlock(dataBlock);
     }
 }
 
-void RemoteSource::printMeta(const QString& header, SDRDaemonMetaDataFEC *metaData)
+void RemoteSource::printMeta(const QString& header, RemoteMetaDataFEC *metaData)
 {
     qDebug().noquote() << header << ": "
             << "|" << metaData->m_centerFrequency

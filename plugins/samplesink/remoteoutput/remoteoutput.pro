@@ -9,7 +9,7 @@ CONFIG += plugin
 
 QT += core gui widgets multimedia network opengl
 
-TARGET = outputsdrdaemonsink
+TARGET = remoteoutput
 
 CONFIG(MINGW32):LIBCM256CCSRC = "C:\softs\cm256cc"
 CONFIG(MSVC):LIBCM256CCSRC = "C:\softs\cm256cc"
@@ -38,23 +38,23 @@ CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(MSVC):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(macx):INCLUDEPATH += "../../../boost_1_69_0"
 
-SOURCES += sdrdaemonsinkthread.cpp\
-sdrdaemonsinkgui.cpp\
-sdrdaemonsinkoutput.cpp\
-sdrdaemonsinksettings.cpp\
-sdrdaemonsinkplugin.cpp\
+SOURCES += remoteoutputthread.cpp\
+remoteoutputgui.cpp\
+remtoeoutput.cpp\
+remtoeoutputsettings.cpp\
+remoteoutputplugin.cpp\
 udpsinkfec.cpp\
 udpsinkfecworker.cpp
 
-HEADERS += sdrdaemonsinkthread.h\
-sdrdaemonsinkgui.h\
-sdrdaemonsinkoutput.h\
-sdrdaemonsinksettings.h\
-sdrdaemonsinkplugin.h\
+HEADERS += remoteoutputthread.h\
+remoteoutputgui.h\
+remtoeoutput.h\
+remtoeoutputsettings.h\
+remoteoutputplugin.h\
 udpsinkfec.h\
 udpsinkfecworker.h
 
-FORMS += sdrdaemonsinkgui.ui
+FORMS += remoteoutputgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui

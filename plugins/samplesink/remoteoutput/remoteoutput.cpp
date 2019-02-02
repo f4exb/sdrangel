@@ -34,22 +34,22 @@
 
 #include "device/devicesinkapi.h"
 
-#include "sdrdaemonsinkoutput.h"
-#include "sdrdaemonsinkthread.h"
+#include "remoteoutput.h"
+#include "remoteoutputthread.h"
 
-MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkWork, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonSinkOutput::MsgConfigureSDRdaemonSinkChunkCorrection, Message)
+MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgConfigureRemoteOutput, Message)
+MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgConfigureRemoteOutputWork, Message)
+MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgConfigureRemoteOutputChunkCorrection, Message)
 
-const uint32_t SDRdaemonSinkOutput::NbSamplesForRateCorrection = 5000000;
+const uint32_t RemoteOutput::NbSamplesForRateCorrection = 5000000;
 
-SDRdaemonSinkOutput::SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI) :
+RemoteOutput::RemoteOutput(DeviceSinkAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_centerFrequency(0),
-    m_sdrDaemonSinkThread(0),
-	m_deviceDescription("SDRdaemonSink"),
+    m_remoteOutputThread(0),
+	m_deviceDescription("RemoteOutput"),
     m_startingTimeStamp(0),
 	m_masterTimer(deviceAPI->getMasterTimer()),
 	m_tickCount(0),
@@ -68,29 +68,29 @@ SDRdaemonSinkOutput::SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI) :
     connect(&m_masterTimer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
-SDRdaemonSinkOutput::~SDRdaemonSinkOutput()
+RemoteOutput::~RemoteOutput()
 {
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 	stop();
 	delete m_networkManager;
 }
 
-void SDRdaemonSinkOutput::destroy()
+void RemoteOutput::destroy()
 {
     delete this;
 }
 
-bool SDRdaemonSinkOutput::start()
+bool RemoteOutput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);
-	qDebug() << "SDRdaemonSinkOutput::start";
+	qDebug() << "RemoteOutput::start";
 
-	m_sdrDaemonSinkThread = new SDRdaemonSinkThread(&m_sampleSourceFifo);
-	m_sdrDaemonSinkThread->setDataAddress(m_settings.m_dataAddress, m_settings.m_dataPort);
-	m_sdrDaemonSinkThread->setSamplerate(m_settings.m_sampleRate);
-	m_sdrDaemonSinkThread->setNbBlocksFEC(m_settings.m_nbFECBlocks);
-	m_sdrDaemonSinkThread->connectTimer(m_masterTimer);
-	m_sdrDaemonSinkThread->startWork();
+	m_remoteOutputThread = new RemoteOutputThread(&m_sampleSourceFifo);
+	m_remoteOutputThread->setDataAddress(m_settings.m_dataAddress, m_settings.m_dataPort);
+	m_remoteOutputThread->setSamplerate(m_settings.m_sampleRate);
+	m_remoteOutputThread->setNbBlocksFEC(m_settings.m_nbFECBlocks);
+	m_remoteOutputThread->connectTimer(m_masterTimer);
+	m_remoteOutputThread->startWork();
 
 	// restart auto rate correction
 	m_lastRemoteTimestampRateCorrection = 0;
@@ -98,39 +98,39 @@ bool SDRdaemonSinkOutput::start()
 	m_lastQueueLength = -2; // set first value out of bounds
 	m_chunkSizeCorrection = 0;
 
-    m_sdrDaemonSinkThread->setTxDelay(m_settings.m_txDelay);
+    m_remoteOutputThread->setTxDelay(m_settings.m_txDelay);
 
 	mutexLocker.unlock();
 	//applySettings(m_generalSettings, m_settings, true);
-	qDebug("SDRdaemonSinkOutput::start: started");
+	qDebug("RemoteOutput::start: started");
 
 	return true;
 }
 
-void SDRdaemonSinkOutput::init()
+void RemoteOutput::init()
 {
     applySettings(m_settings, true);
 }
 
-void SDRdaemonSinkOutput::stop()
+void RemoteOutput::stop()
 {
-	qDebug() << "SDRdaemonSinkOutput::stop";
+	qDebug() << "RemoteOutput::stop";
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_sdrDaemonSinkThread != 0)
+	if(m_remoteOutputThread != 0)
 	{
-	    m_sdrDaemonSinkThread->stopWork();
-		delete m_sdrDaemonSinkThread;
-		m_sdrDaemonSinkThread = 0;
+	    m_remoteOutputThread->stopWork();
+		delete m_remoteOutputThread;
+		m_remoteOutputThread = 0;
 	}
 }
 
-QByteArray SDRdaemonSinkOutput::serialize() const
+QByteArray RemoteOutput::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool SDRdaemonSinkOutput::deserialize(const QByteArray& data)
+bool RemoteOutput::deserialize(const QByteArray& data)
 {
     bool success = true;
 
@@ -140,62 +140,62 @@ bool SDRdaemonSinkOutput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureSDRdaemonSink* message = MsgConfigureSDRdaemonSink::create(m_settings, true);
+    MsgConfigureRemoteOutput* message = MsgConfigureRemoteOutput::create(m_settings, true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureSDRdaemonSink* messageToGUI = MsgConfigureSDRdaemonSink::create(m_settings, true);
+        MsgConfigureRemoteOutput* messageToGUI = MsgConfigureRemoteOutput::create(m_settings, true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
     return success;
 }
 
-const QString& SDRdaemonSinkOutput::getDeviceDescription() const
+const QString& RemoteOutput::getDeviceDescription() const
 {
 	return m_deviceDescription;
 }
 
-int SDRdaemonSinkOutput::getSampleRate() const
+int RemoteOutput::getSampleRate() const
 {
 	return m_settings.m_sampleRate;
 }
 
-quint64 SDRdaemonSinkOutput::getCenterFrequency() const
+quint64 RemoteOutput::getCenterFrequency() const
 {
 	return m_centerFrequency;
 }
 
-std::time_t SDRdaemonSinkOutput::getStartingTimeStamp() const
+std::time_t RemoteOutput::getStartingTimeStamp() const
 {
 	return m_startingTimeStamp;
 }
 
-bool SDRdaemonSinkOutput::handleMessage(const Message& message)
+bool RemoteOutput::handleMessage(const Message& message)
 {
 
-    if (MsgConfigureSDRdaemonSink::match(message))
+    if (MsgConfigureRemoteOutput::match(message))
     {
-        qDebug() << "SDRdaemonSinkOutput::handleMessage:" << message.getIdentifier();
-	    MsgConfigureSDRdaemonSink& conf = (MsgConfigureSDRdaemonSink&) message;
+        qDebug() << "RemoteOutput::handleMessage:" << message.getIdentifier();
+	    MsgConfigureRemoteOutput& conf = (MsgConfigureRemoteOutput&) message;
         applySettings(conf.getSettings(), conf.getForce());
         return true;
     }
-	else if (MsgConfigureSDRdaemonSinkWork::match(message))
+	else if (MsgConfigureRemoteOutputWork::match(message))
 	{
-		MsgConfigureSDRdaemonSinkWork& conf = (MsgConfigureSDRdaemonSinkWork&) message;
+		MsgConfigureRemoteOutputWork& conf = (MsgConfigureRemoteOutputWork&) message;
 		bool working = conf.isWorking();
 
-		if (m_sdrDaemonSinkThread != 0)
+		if (m_remoteOutputThread != 0)
 		{
 			if (working)
 			{
-			    m_sdrDaemonSinkThread->startWork();
+			    m_remoteOutputThread->startWork();
 			}
 			else
 			{
-			    m_sdrDaemonSinkThread->stopWork();
+			    m_remoteOutputThread->stopWork();
 			}
 		}
 
@@ -204,7 +204,7 @@ bool SDRdaemonSinkOutput::handleMessage(const Message& message)
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
-        qDebug() << "SDRdaemonSinkOutput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+        qDebug() << "RemoteOutput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
 
         if (cmd.getStartStop())
         {
@@ -224,13 +224,13 @@ bool SDRdaemonSinkOutput::handleMessage(const Message& message)
 
         return true;
     }
-	else if (MsgConfigureSDRdaemonSinkChunkCorrection::match(message))
+	else if (MsgConfigureRemoteOutputChunkCorrection::match(message))
 	{
-	    MsgConfigureSDRdaemonSinkChunkCorrection& conf = (MsgConfigureSDRdaemonSinkChunkCorrection&) message;
+	    MsgConfigureRemoteOutputChunkCorrection& conf = (MsgConfigureRemoteOutputChunkCorrection&) message;
 
-	    if (m_sdrDaemonSinkThread != 0)
+	    if (m_remoteOutputThread != 0)
         {
-	        m_sdrDaemonSinkThread->setChunkCorrection(conf.getChunkCorrection());
+	        m_remoteOutputThread->setChunkCorrection(conf.getChunkCorrection());
         }
 
 	    return true;
@@ -241,7 +241,7 @@ bool SDRdaemonSinkOutput::handleMessage(const Message& message)
 	}
 }
 
-void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, bool force)
+void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool force)
 {
     QMutexLocker mutexLocker(&m_mutex);
     bool forwardChange = false;
@@ -263,8 +263,8 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 
     if (force || (m_settings.m_dataAddress != settings.m_dataAddress) || (m_settings.m_dataPort != settings.m_dataPort))
     {
-        if (m_sdrDaemonSinkThread != 0) {
-            m_sdrDaemonSinkThread->setDataAddress(settings.m_dataAddress, settings.m_dataPort);
+        if (m_remoteOutputThread != 0) {
+            m_remoteOutputThread->setDataAddress(settings.m_dataAddress, settings.m_dataPort);
         }
     }
 
@@ -272,8 +272,8 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
     {
         reverseAPIKeys.append("sampleRate");
 
-        if (m_sdrDaemonSinkThread != 0) {
-            m_sdrDaemonSinkThread->setSamplerate(settings.m_sampleRate);
+        if (m_remoteOutputThread != 0) {
+            m_remoteOutputThread->setSamplerate(settings.m_sampleRate);
         }
 
         m_tickMultiplier = (21*NbSamplesForRateCorrection) / (2*settings.m_sampleRate); // two times per sample filling period plus small extension
@@ -287,8 +287,8 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
     {
         reverseAPIKeys.append("nbFECBlocks");
 
-        if (m_sdrDaemonSinkThread != 0) {
-            m_sdrDaemonSinkThread->setNbBlocksFEC(settings.m_nbFECBlocks);
+        if (m_remoteOutputThread != 0) {
+            m_remoteOutputThread->setNbBlocksFEC(settings.m_nbFECBlocks);
         }
 
         changeTxDelay = true;
@@ -302,14 +302,14 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
 
     if (changeTxDelay)
     {
-        if (m_sdrDaemonSinkThread != 0) {
-            m_sdrDaemonSinkThread->setTxDelay(settings.m_txDelay);
+        if (m_remoteOutputThread != 0) {
+            m_remoteOutputThread->setTxDelay(settings.m_txDelay);
         }
     }
 
     mutexLocker.unlock();
 
-    qDebug() << "SDRdaemonSinkOutput::applySettings:"
+    qDebug() << "RemoteOutput::applySettings:"
             << " m_sampleRate: " << settings.m_sampleRate
             << " m_txDelay: " << settings.m_txDelay
             << " m_nbFECBlocks: " << settings.m_nbFECBlocks
@@ -336,7 +336,7 @@ void SDRdaemonSinkOutput::applySettings(const SDRdaemonSinkSettings& settings, b
     m_settings = settings;
 }
 
-int SDRdaemonSinkOutput::webapiRunGet(
+int RemoteOutput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
 {
@@ -345,7 +345,7 @@ int SDRdaemonSinkOutput::webapiRunGet(
     return 200;
 }
 
-int SDRdaemonSinkOutput::webapiRun(
+int RemoteOutput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
@@ -364,7 +364,7 @@ int SDRdaemonSinkOutput::webapiRun(
     return 200;
 }
 
-int SDRdaemonSinkOutput::webapiSettingsGet(
+int RemoteOutput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
                 QString& errorMessage)
 {
@@ -375,14 +375,14 @@ int SDRdaemonSinkOutput::webapiSettingsGet(
     return 200;
 }
 
-int SDRdaemonSinkOutput::webapiSettingsPutPatch(
+int RemoteOutput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage)
 {
     (void) errorMessage;
-    SDRdaemonSinkSettings settings = m_settings;
+    RemoteOutputSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("sampleRate")) {
         settings.m_sampleRate = response.getSdrDaemonSinkSettings()->getSampleRate();
@@ -424,12 +424,12 @@ int SDRdaemonSinkOutput::webapiSettingsPutPatch(
         settings.m_reverseAPIDeviceIndex = response.getSdrDaemonSinkSettings()->getReverseApiDeviceIndex();
     }
 
-    MsgConfigureSDRdaemonSink *msg = MsgConfigureSDRdaemonSink::create(settings, force);
+    MsgConfigureRemoteOutput *msg = MsgConfigureRemoteOutput::create(settings, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureSDRdaemonSink *msgToGUI = MsgConfigureSDRdaemonSink::create(settings, force);
+        MsgConfigureRemoteOutput *msgToGUI = MsgConfigureRemoteOutput::create(settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -437,7 +437,7 @@ int SDRdaemonSinkOutput::webapiSettingsPutPatch(
     return 200;
 }
 
-int SDRdaemonSinkOutput::webapiReportGet(
+int RemoteOutput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
         QString& errorMessage)
 {
@@ -448,7 +448,7 @@ int SDRdaemonSinkOutput::webapiReportGet(
     return 200;
 }
 
-void SDRdaemonSinkOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRdaemonSinkSettings& settings)
+void RemoteOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RemoteOutputSettings& settings)
 {
     response.getSdrDaemonSinkSettings()->setCenterFrequency(m_centerFrequency);
     response.getSdrDaemonSinkSettings()->setSampleRate(settings.m_sampleRate);
@@ -472,14 +472,14 @@ void SDRdaemonSinkOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSetti
     response.getSdrDaemonSinkSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
-void SDRdaemonSinkOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+void RemoteOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
     uint64_t ts_usecs;
     response.getSdrDaemonSinkReport()->setBufferRwBalance(m_sampleSourceFifo.getRWBalance());
-    response.getSdrDaemonSinkReport()->setSampleCount(m_sdrDaemonSinkThread ? (int) m_sdrDaemonSinkThread->getSamplesCount(ts_usecs) : 0);
+    response.getSdrDaemonSinkReport()->setSampleCount(m_remoteOutputThread ? (int) m_remoteOutputThread->getSamplesCount(ts_usecs) : 0);
 }
 
-void SDRdaemonSinkOutput::tick()
+void RemoteOutput::tick()
 {
     if (++m_tickCount == m_tickMultiplier)
     {
@@ -498,11 +498,11 @@ void SDRdaemonSinkOutput::tick()
     }
 }
 
-void SDRdaemonSinkOutput::networkManagerFinished(QNetworkReply *reply)
+void RemoteOutput::networkManagerFinished(QNetworkReply *reply)
 {
     if (reply->error())
     {
-        qInfo("SDRdaemonSinkOutput::networkManagerFinished: error: %s", qPrintable(reply->errorString()));
+        qInfo("RemoteOutput::networkManagerFinished: error: %s", qPrintable(reply->errorString()));
         return;
     }
 
@@ -521,24 +521,24 @@ void SDRdaemonSinkOutput::networkManagerFinished(QNetworkReply *reply)
         else
         {
             QString errorMsg = QString("Reply JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
-            qInfo().noquote() << "SDRdaemonSinkOutput::networkManagerFinished" << errorMsg;
+            qInfo().noquote() << "RemoteOutput::networkManagerFinished" << errorMsg;
         }
     }
     catch (const std::exception& ex)
     {
         QString errorMsg = QString("Error parsing request: ") + ex.what();
-        qInfo().noquote() << "SDRdaemonSinkOutput::networkManagerFinished" << errorMsg;
+        qInfo().noquote() << "RemoteOutput::networkManagerFinished" << errorMsg;
     }
 }
 
-void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString& answer)
+void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString& answer)
 {
     if (jsonObject.contains("DaemonSourceReport"))
     {
         QJsonObject report = jsonObject["DaemonSourceReport"].toObject();
         m_centerFrequency = report["deviceCenterFreq"].toInt() * 1000;
 
-        if (!m_sdrDaemonSinkThread) {
+        if (!m_remoteOutputThread) {
             return;
         }
 
@@ -559,7 +559,7 @@ void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject, const Q
 
         uint32_t sampleCountDelta, sampleCount;
         uint64_t timestampUs;
-        sampleCount = m_sdrDaemonSinkThread->getSamplesCount(timestampUs);
+        sampleCount = m_remoteOutputThread->getSamplesCount(timestampUs);
 
         if (sampleCount < m_lastSampleCount) {
             sampleCountDelta = (0xFFFFFFFFU - m_lastSampleCount) + sampleCount + 1;
@@ -580,7 +580,7 @@ void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject, const Q
             m_nbRemoteSamplesSinceRateCorrection += remoteSampleCountDelta;
             m_nbSamplesSinceRateCorrection += sampleCountDelta;
 
-            qDebug("SDRdaemonSinkOutput::analyzeApiReply: queueLengthPercent: %d m_nbSamplesSinceRateCorrection: %u",
+            qDebug("RemoteOutput::analyzeApiReply: queueLengthPercent: %d m_nbSamplesSinceRateCorrection: %u",
                 queueLengthPercent,
                 m_nbRemoteSamplesSinceRateCorrection);
 
@@ -603,23 +603,23 @@ void SDRdaemonSinkOutput::analyzeApiReply(const QJsonObject& jsonObject, const Q
     }
     else if (jsonObject.contains("sdrDaemonSinkSettings"))
     {
-        qDebug("SDRdaemonSinkOutput::analyzeApiReply: reply:\n%s", answer.toStdString().c_str());
+        qDebug("RemoteOutput::analyzeApiReply: reply:\n%s", answer.toStdString().c_str());
     }
 }
 
-void SDRdaemonSinkOutput::sampleRateCorrection(double remoteTimeDeltaUs, double timeDeltaUs, uint32_t remoteSampleCount, uint32_t sampleCount)
+void RemoteOutput::sampleRateCorrection(double remoteTimeDeltaUs, double timeDeltaUs, uint32_t remoteSampleCount, uint32_t sampleCount)
 {
     double deltaSR = (remoteSampleCount/remoteTimeDeltaUs) - (sampleCount/timeDeltaUs);
     double chunkCorr = 50000 * deltaSR; // for 50ms chunk intervals (50000us)
     m_chunkSizeCorrection += roundf(chunkCorr);
 
-    qDebug("SDRdaemonSinkOutput::sampleRateCorrection: %d (%f) samples", m_chunkSizeCorrection, chunkCorr);
+    qDebug("RemoteOutput::sampleRateCorrection: %d (%f) samples", m_chunkSizeCorrection, chunkCorr);
 
-    MsgConfigureSDRdaemonSinkChunkCorrection* message = MsgConfigureSDRdaemonSinkChunkCorrection::create(m_chunkSizeCorrection);
+    MsgConfigureRemoteOutputChunkCorrection* message = MsgConfigureRemoteOutputChunkCorrection::create(m_chunkSizeCorrection);
     getInputMessageQueue()->push(message);
 }
 
-void SDRdaemonSinkOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SDRdaemonSinkSettings& settings, bool force)
+void RemoteOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RemoteOutputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setTx(1);
@@ -675,7 +675,7 @@ void SDRdaemonSinkOutput::webapiReverseSendSettings(QList<QString>& deviceSettin
     delete swgDeviceSettings;
 }
 
-void SDRdaemonSinkOutput::webapiReverseSendStartStop(bool start)
+void RemoteOutput::webapiReverseSendStartStop(bool start)
 {
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
             .arg(m_settings.m_reverseAPIAddress)

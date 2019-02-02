@@ -1,11 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
-// SDRdaemon sink channel (Rx) data blocks to read queue                         //
+// Remote sink channel (Rx) data blocks to read queue                            //
 //                                                                               //
-// SDRdaemon is a detached SDR front end that handles the interface with a       //
-// physical device and sends or receives the I/Q samples stream to or from a     //
-// SDRangel instance via UDP. It is controlled via a Web REST API.               //
+// SDRangel can serve as a remote SDR front end that handles the interface       //
+// with a physical device and sends or receives the I/Q samples stream via UDP   //
+// to or from another SDRangel instance or any program implementing the same     //
+// protocol. The remote SDRangel is controlled via its Web REST API.             //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -20,22 +21,22 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRDAEMON_CHANNEL_SDRDAEMONDATAREADQUEUE_H_
-#define SDRDAEMON_CHANNEL_SDRDAEMONDATAREADQUEUE_H_
+#ifndef CHANNEL_REMOTEDATAREADQUEUE_H_
+#define CHANNEL_REMOTEDATAREADQUEUE_H_
 
 #include <QQueue>
 
-class SDRDaemonDataBlock;
+class RemoteDataBlock;
 class Sample;
 
-class SDRDaemonDataReadQueue
+class RemoteDataReadQueue
 {
 public:
-    SDRDaemonDataReadQueue();
-    ~SDRDaemonDataReadQueue();
+    RemoteDataReadQueue();
+    ~RemoteDataReadQueue();
 
-    void push(SDRDaemonDataBlock* dataBlock); //!< push block on the queue
-    SDRDaemonDataBlock* pop();                //!< Pop block from the queue
+    void push(RemoteDataBlock* dataBlock); //!< push block on the queue
+    RemoteDataBlock* pop();                //!< Pop block from the queue
     void readSample(Sample& s, bool scaleForTx = false); //!< Read sample from queue possibly scaling to Tx size
     uint32_t length() const { return m_dataReadQueue.size(); } //!< Returns queue length
     uint32_t size() const { return m_maxSize; } //!< Returns queue size (max length)
@@ -45,8 +46,8 @@ public:
     static const uint32_t MinimumMaxSize;
 
 private:
-    QQueue<SDRDaemonDataBlock*> m_dataReadQueue;
-    SDRDaemonDataBlock *m_dataBlock;
+    QQueue<RemoteDataBlock*> m_dataReadQueue;
+    RemoteDataBlock *m_dataBlock;
     uint32_t m_maxSize;
     uint32_t m_blockIndex;
     uint32_t m_sampleIndex;
@@ -90,4 +91,4 @@ private:
 
 
 
-#endif /* SDRDAEMON_CHANNEL_SDRDAEMONDATAREADQUEUE_H_ */
+#endif /* CHANNEL_REMOTEDATAREADQUEUE_H_ */

@@ -63,7 +63,7 @@ Use this slider to adjust LO correction in ppm. It can be varied from -20.0 to 2
 
 This button opens a dialog to set the transverter mode frequency translation options:
 
-![SDR Daemon source input stream transverter dialog](../../../doc/img/RTLSDR_plugin_xvrt.png)
+![PlutoSDR source input stream transverter dialog](../../../doc/img/RTLSDR_plugin_xvrt.png)
 
 Note that if you mouse over the button a tooltip appears that displays the translating frequency and if translation is enabled or disabled. When the frequency translation is enabled the button is lit.
 

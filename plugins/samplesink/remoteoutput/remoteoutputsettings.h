@@ -14,40 +14,32 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_SDRDAEMONSINKPLUGIN_H
-#define INCLUDE_SDRDAEMONSINKPLUGIN_H
+#ifndef PLUGINS_REMOTEOUTPUT_REMOTEOUTPUTSETTINGS_H_
+#define PLUGINS_REMOTEOUTPUT_REMOTEOUTPUTSETTINGS_H_
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include <QByteArray>
+#include <QString>
 
-#define SDRDAEMONSINK_DEVICE_TYPE_ID "sdrangel.samplesink.sdrdaemonsink"
+struct RemoteOutputSettings {
+    quint64 m_centerFrequency;
+    quint32 m_sampleRate;
+    float   m_txDelay;
+    quint32 m_nbFECBlocks;
+    QString m_apiAddress;
+    quint16 m_apiPort;
+    QString m_dataAddress;
+    quint16 m_dataPort;
+    quint32 m_deviceIndex;
+    quint32 m_channelIndex;
+    bool     m_useReverseAPI;
+    QString  m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
 
-class PluginAPI;
-class DeviceSinkAPI;
-
-class SDRdaemonSinkPlugin : public QObject, public PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID SDRDAEMONSINK_DEVICE_TYPE_ID)
-
-public:
-	explicit SDRdaemonSinkPlugin(QObject* parent = NULL);
-
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
-
-	virtual SamplingDevices enumSampleSinks();
-	virtual PluginInstanceGUI* createSampleSinkPluginInstanceGUI(
-	        const QString& sinkId,
-	        QWidget **widget,
-	        DeviceUISet *deviceUISet);
-	virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI);
-
-	static const QString m_hardwareID;
-    static const QString m_deviceTypeID;
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
+    RemoteOutputSettings();
+    void resetToDefaults();
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
 };
 
-#endif // INCLUDE_SDRDAEMONSINKPLUGIN_H
+#endif /* PLUGINS_REMOTEOUTPUT_REMOTEOUTPUTSETTINGS_H_ */

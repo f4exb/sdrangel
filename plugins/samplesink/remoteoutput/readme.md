@@ -1,14 +1,14 @@
-<h1>SDRdaemon sink plugin</h1>
+<h1>Remote output plugin</h1>
 
 <h2>Introduction</h2>
 
-This output sample sink plugin sends its samples over tbe network to a SDRangel instance's Daemon source channel using UDP connection.
+This output sample sink plugin sends its samples over the network to a SDRangel instance's Remote source channel using UDP connection.
 
 Forward Error Correction with a Cauchy MDS block erasure codec is used to prevent block loss. This can make the UDP transmission more robust particularly over WiFi links.
 
 The distant SDRangel instance to which the data stream is sent is controlled via its REST API using a separate control software for example [SDRangelcli](https://github.com/f4exb/sdrangelcli)
 
-The sample size used in the I/Q stream is the Rx sample size of the local instance. Possible conversion takes place in the distant Daemon source channel plugin to match the Rx sample size of the distant instance. Best performace is obtained when both instances use the same sample size. 
+The sample size used in the I/Q stream is the Rx sample size of the local instance. Possible conversion takes place in the distant Remote source channel plugin to match the Rx sample size of the distant instance. Best performace is obtained when both instances use the same sample size. 
 
 It is present only in Linux binary releases.
 
@@ -18,7 +18,7 @@ The plugin will be built only if the [CM256cc library](https://github.com/f4exb/
 
 <h2>Interface</h2>
 
-![SDR Daemon sink output plugin GUI](../../../doc/img/SDRdaemonSink_plugin.png)
+![SDR Remote output plugin GUI](../../../doc/img/RemoteOutput_plugin.png)
 
 <h3>1: Start/Stop</h3>
 
@@ -41,7 +41,7 @@ This is the remote instance baseband sample rate. It can be a power of two multi
 
 <h3>5: Stream controls and API destination</h3> 
 
-![SDR Daemon sink output sample rate GUI](../../../doc/img/SDRdaemonSink_plugin_05.png)
+![SDR Remote output sample rate GUI](../../../doc/img/RemoteOutput_plugin_05.png)
 
 <h4>5.1: Network stream sample rate</h4>
 
@@ -66,11 +66,11 @@ This is the device set index in the remote instance to which the stream is conne
 
 <h4>5.4: remote instance channel index</h4>
 
-This is the channel index of the Daemon source in the remote instance to which the stream is connected to. Use this value to properly address the API to get status.
+This is the channel index of the Remote source in the remote instance to which the stream is connected to. Use this value to properly address the API to get status.
 
 <h3>6: Forward Error Correction setting and status</h3>
 
-![SDR Daemon sink output FEC GUI](../../../doc/img/SDRdaemonSink_plugin_06.png)
+![SDR Remote output FEC GUI](../../../doc/img/RemoteOutput_plugin_06.png)
 
 <h4>6.1: Desired number of FEC blocks per frame</h4>
 
@@ -115,7 +115,7 @@ This is the detail of the ratio shown in the gauge. Each frame block is a block 
 
 <h3>9: Distant server API address and port</h3>
 
-![SDR Daemon source input stream GUI](../../../doc/img/SDRdaemonSource_plugin_05.png)
+![SDR Remote input stream GUI](../../../doc/img/SDRdaemonSource_plugin_05.png)
 
 <h4>9.1: API connection indicator</h4>
 
@@ -135,7 +135,7 @@ When the return key is hit within the address (9.2) or port (9.3) the changes ar
 
 <h3>10: Local data address and port</h3>
 
-![SDR Daemon source input stream GUI](../../../doc/img/SDRdaemonSource_plugin_06.png)
+![SDR Remote input stream GUI](../../../doc/img/SDRdaemonSource_plugin_06.png)
 
 <h4>10.1: Data IP address</h4>
 

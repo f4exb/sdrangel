@@ -54,7 +54,7 @@ This is the Tx filter bandwidth in kHz. Minimum and maximum values are adjusted 
 
 This button opens a dialog to set the transverter mode frequency translation options:
 
-![SDR Daemon source input stream transverter dialog](../../../doc/img/RTLSDR_plugin_xvrt.png)
+![BladeRF2 source input stream transverter dialog](../../../doc/img/RTLSDR_plugin_xvrt.png)
 
 Note that if you mouse over the button a tooltip appears that displays the translating frequency and if translation is enabled or disabled. When the frequency translation is enabled the button is lit.
 

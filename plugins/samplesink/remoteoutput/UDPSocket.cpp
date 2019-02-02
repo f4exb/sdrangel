@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// SDRdaemon - send I/Q samples read from a SDR device over the network via UDP. //
+// Remote - send I/Q samples read from a SDR device over the network via UDP.    //
 //                                                                               //
 // Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
@@ -19,6 +19,7 @@
 // Original code is posted at: https://cppcodetips.wordpress.com/2014/01/29/udp-socket-class-in-c/
 
 #include "UDPSocket.h"
+
 #include <errno.h>
 #include <cstring>
 #include <fcntl.h>

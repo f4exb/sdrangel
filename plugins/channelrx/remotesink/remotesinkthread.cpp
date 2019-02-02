@@ -22,9 +22,9 @@
 
 #include "remotesinkthread.h"
 
+#include <channel/remotedatablock.h>
 #include <QUdpSocket>
 
-#include "channel/sdrdaemondatablock.h"
 #include "cm256.h"
 
 MESSAGE_CLASS_DEFINITION(RemoteSinkThread::MsgStartStop, Message)
@@ -86,48 +86,48 @@ void RemoteSinkThread::run()
     qDebug("RemoteSinkThread::run: end");
 }
 
-void RemoteSinkThread::processDataBlock(SDRDaemonDataBlock *dataBlock)
+void RemoteSinkThread::processDataBlock(RemoteDataBlock *dataBlock)
 {
     handleDataBlock(*dataBlock);
     delete dataBlock;
 }
 
-void RemoteSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
+void RemoteSinkThread::handleDataBlock(RemoteDataBlock& dataBlock)
 {
 	CM256::cm256_encoder_params cm256Params;  //!< Main interface with CM256 encoder
 	CM256::cm256_block descriptorBlocks[256]; //!< Pointers to data for CM256 encoder
-	SDRDaemonProtectedBlock fecBlocks[256];   //!< FEC data
+	RemoteProtectedBlock fecBlocks[256];   //!< FEC data
 
     uint16_t frameIndex = dataBlock.m_txControlBlock.m_frameIndex;
     int nbBlocksFEC = dataBlock.m_txControlBlock.m_nbBlocksFEC;
     int txDelay = dataBlock.m_txControlBlock.m_txDelay;
     m_address.setAddress(dataBlock.m_txControlBlock.m_dataAddress);
     uint16_t dataPort = dataBlock.m_txControlBlock.m_dataPort;
-    SDRDaemonSuperBlock *txBlockx = dataBlock.m_superBlocks;
+    RemoteSuperBlock *txBlockx = dataBlock.m_superBlocks;
 
     if ((nbBlocksFEC == 0) || !m_cm256p) // Do not FEC encode
     {
         if (m_socket)
         {
-            for (int i = 0; i < SDRDaemonNbOrginalBlocks; i++)
+            for (int i = 0; i < RemoteNbOrginalBlocks; i++)
             {
                 // send block via UDP
-                m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) SDRDaemonUdpSize, m_address, dataPort);
+                m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) RemoteUdpSize, m_address, dataPort);
                 usleep(txDelay);
             }
         }
     }
     else
     {
-        cm256Params.BlockBytes = sizeof(SDRDaemonProtectedBlock);
-        cm256Params.OriginalCount = SDRDaemonNbOrginalBlocks;
+        cm256Params.BlockBytes = sizeof(RemoteProtectedBlock);
+        cm256Params.OriginalCount = RemoteNbOrginalBlocks;
         cm256Params.RecoveryCount = nbBlocksFEC;
 
         // Fill pointers to data
         for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; ++i)
         {
             if (i >= cm256Params.OriginalCount) {
-                memset((void *) &txBlockx[i].m_protectedBlock, 0, sizeof(SDRDaemonProtectedBlock));
+                memset((void *) &txBlockx[i].m_protectedBlock, 0, sizeof(RemoteProtectedBlock));
             }
 
             txBlockx[i].m_header.m_frameIndex = frameIndex;
@@ -157,7 +157,7 @@ void RemoteSinkThread::handleDataBlock(SDRDaemonDataBlock& dataBlock)
             for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++)
             {
                 // send block via UDP
-                m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) SDRDaemonUdpSize, m_address, dataPort);
+                m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) RemoteUdpSize, m_address, dataPort);
                 usleep(txDelay);
             }
         }

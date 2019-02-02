@@ -16,26 +16,26 @@
 
 #include "remotesourcethread.h"
 
+#include <channel/remotedatablock.h>
+#include <channel/remotedataqueue.h>
 #include <algorithm>
 
 #include <QUdpSocket>
 #include "cm256.h"
 
-#include "channel/sdrdaemondataqueue.h"
-#include "channel/sdrdaemondatablock.h"
 
 
 MESSAGE_CLASS_DEFINITION(RemoteSourceThread::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(RemoteSourceThread::MsgDataBind, Message)
 
-RemoteSourceThread::RemoteSourceThread(SDRDaemonDataQueue *dataQueue, QObject* parent) :
+RemoteSourceThread::RemoteSourceThread(RemoteDataQueue *dataQueue, QObject* parent) :
     QThread(parent),
     m_running(false),
     m_dataQueue(dataQueue),
     m_address(QHostAddress::LocalHost),
     m_socket(0)
 {
-    std::fill(m_dataBlocks, m_dataBlocks+4, (SDRDaemonDataBlock *) 0);
+    std::fill(m_dataBlocks, m_dataBlocks+4, (RemoteDataBlock *) 0);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
@@ -128,7 +128,7 @@ void RemoteSourceThread::handleInputMessages()
 
 void RemoteSourceThread::readPendingDatagrams()
 {
-    SDRDaemonSuperBlock superBlock;
+    RemoteSuperBlock superBlock;
     qint64 size;
 
     while (m_socket->hasPendingDatagrams())
@@ -136,15 +136,15 @@ void RemoteSourceThread::readPendingDatagrams()
         QHostAddress sender;
         quint16 senderPort = 0;
         //qint64 pendingDataSize = m_socket->pendingDatagramSize();
-        size = m_socket->readDatagram((char *) &superBlock, (long long int) sizeof(SDRDaemonSuperBlock), &sender, &senderPort);
+        size = m_socket->readDatagram((char *) &superBlock, (long long int) sizeof(RemoteSuperBlock), &sender, &senderPort);
 
-        if (size == sizeof(SDRDaemonSuperBlock))
+        if (size == sizeof(RemoteSuperBlock))
         {
             unsigned int dataBlockIndex = superBlock.m_header.m_frameIndex % m_nbDataBlocks;
 
             // create the first block for this index
             if (m_dataBlocks[dataBlockIndex] == 0) {
-                m_dataBlocks[dataBlockIndex] = new SDRDaemonDataBlock();
+                m_dataBlocks[dataBlockIndex] = new RemoteDataBlock();
             }
 
             if (m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_frameIndex < 0)
@@ -159,9 +159,9 @@ void RemoteSourceThread::readPendingDatagrams()
 
                 if (superBlock.m_header.m_frameIndex != frameIndex)
                 {
-                    //qDebug("DaemonSourceThread::readPendingDatagrams: push frame %u", frameIndex);
+                    //qDebug("RemoteSourceThread::readPendingDatagrams: push frame %u", frameIndex);
                     m_dataQueue->push(m_dataBlocks[dataBlockIndex]);
-                    m_dataBlocks[dataBlockIndex] = new SDRDaemonDataBlock();
+                    m_dataBlocks[dataBlockIndex] = new RemoteDataBlock();
                     m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_frameIndex = superBlock.m_header.m_frameIndex;
                 }
             }
@@ -172,7 +172,7 @@ void RemoteSourceThread::readPendingDatagrams()
                 m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_metaRetrieved = true;
             }
 
-            if (superBlock.m_header.m_blockIndex < SDRDaemonNbOrginalBlocks) {
+            if (superBlock.m_header.m_blockIndex < RemoteNbOrginalBlocks) {
                 m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_originalCount++;
             } else {
                 m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_recoveryCount++;

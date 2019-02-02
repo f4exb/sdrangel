@@ -15,14 +15,14 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "util/simpleserializer.h"
-#include "sdrdaemonsinksettings.h"
+#include "remoteoutputsettings.h"
 
-SDRdaemonSinkSettings::SDRdaemonSinkSettings()
+RemoteOutputSettings::RemoteOutputSettings()
 {
     resetToDefaults();
 }
 
-void SDRdaemonSinkSettings::resetToDefaults()
+void RemoteOutputSettings::resetToDefaults()
 {
     m_centerFrequency = 435000*1000;
     m_sampleRate = 48000;
@@ -40,7 +40,7 @@ void SDRdaemonSinkSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
 }
 
-QByteArray SDRdaemonSinkSettings::serialize() const
+QByteArray RemoteOutputSettings::serialize() const
 {
     SimpleSerializer s(1);
 
@@ -62,7 +62,7 @@ QByteArray SDRdaemonSinkSettings::serialize() const
     return s.final();
 }
 
-bool SDRdaemonSinkSettings::deserialize(const QByteArray& data)
+bool RemoteOutputSettings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 

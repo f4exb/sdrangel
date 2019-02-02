@@ -33,7 +33,7 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 
-class SDRDaemonDataBlock;
+class RemoteDataBlock;
 class CM256;
 class QUdpSocket;
 
@@ -66,7 +66,7 @@ public:
     void startStop(bool start);
 
 public slots:
-    void processDataBlock(SDRDaemonDataBlock *dataBlock);
+    void processDataBlock(RemoteDataBlock *dataBlock);
 
 private:
 	QMutex m_startWaitMutex;
@@ -85,7 +85,7 @@ private:
     void stopWork();
 
     void run();
-    void handleDataBlock(SDRDaemonDataBlock& dataBlock);
+    void handleDataBlock(RemoteDataBlock& dataBlock);
 
 private slots:
     void handleInputMessages();

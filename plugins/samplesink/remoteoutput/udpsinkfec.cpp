@@ -14,13 +14,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "udpsinkfec.h"
+
 #include <QDebug>
 
 #include <boost/crc.hpp>
 #include <boost/cstdint.hpp>
 
 #include "util/timeutil.h"
-#include "udpsinkfec.h"
+
 #include "udpsinkfecworker.h"
 
 
@@ -38,8 +40,8 @@ UDPSinkFEC::UDPSinkFEC() :
     m_remoteAddress("127.0.0.1"),
     m_remotePort(9090)
 {
-    memset((char *) m_txBlocks, 0, 4*256*sizeof(SDRDaemonSuperBlock));
-    memset((char *) &m_superBlock, 0, sizeof(SDRDaemonSuperBlock));
+    memset((char *) m_txBlocks, 0, 4*256*sizeof(RemoteSuperBlock));
+    memset((char *) &m_superBlock, 0, sizeof(RemoteSuperBlock));
     m_currentMetaFEC.init();
     m_bufMeta = new uint8_t[m_udpSize];
     m_buf = new uint8_t[m_udpSize];
@@ -75,7 +77,7 @@ void UDPSinkFEC::setTxDelay(float txDelayRatio)
     // divided by sample rate gives the frame process time
     // divided by the number of actual blocks including FEC blocks gives the block (i.e. UDP block) process time
     m_txDelayRatio = txDelayRatio;
-    int samplesPerBlock = SDRDaemonNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8);
+    int samplesPerBlock = RemoteNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8);
     double delay = ((127*samplesPerBlock*txDelayRatio) / m_sampleRate)/(128 + m_nbBlocksFEC);
     m_txDelay = delay * 1e6;
     qDebug() << "UDPSinkFEC::setTxDelay: txDelay: " << txDelayRatio << " m_txDelay: " << m_txDelay << " us";
@@ -117,7 +119,7 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
 
         if (m_txBlockIndex == 0) // Tx block index 0 is a block with only meta data
         {
-            SDRDaemonMetaDataFEC metaData;
+            RemoteMetaDataFEC metaData;
 
             uint64_t ts_usecs = TimeUtil::nowus();
 
@@ -142,9 +144,8 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
             m_superBlock.m_header.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
             m_superBlock.m_header.m_sampleBits = SDR_RX_SAMP_SZ;
 
-            SDRDaemonMetaDataFEC *destMeta = (SDRDaemonMetaDataFEC *) &m_superBlock.m_protectedBlock;
+            RemoteMetaDataFEC *destMeta = (RemoteMetaDataFEC *) &m_superBlock.m_protectedBlock;
             *destMeta = metaData;
-            //memcpy((char *) &m_superBlock.m_protectedBlock, (const char *) &metaData, sizeof(SDRDaemonMetaDataFEC));
 
             if (!(metaData == m_currentMetaFEC))
             {
@@ -166,7 +167,7 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
             m_txBlockIndex = 1; // next Tx block with data
         }
 
-        int samplesPerBlock = SDRDaemonNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8); // two I or Q samples
+        int samplesPerBlock = RemoteNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8); // two I or Q samples
 
         if (m_sampleIndex + inRemainingSamples < samplesPerBlock) // there is still room in the current super block
         {

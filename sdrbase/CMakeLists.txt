@@ -13,8 +13,8 @@ set(sdrbase_SOURCES
 
     channel/channelsinkapi.cpp
     channel/channelsourceapi.cpp
-    channel/sdrdaemondataqueue.cpp
-    channel/sdrdaemondatareadqueue.cpp
+    channel/remotedataqueue.cpp
+    channel/remotedatareadqueue.cpp
 
     commands/command.cpp
 
@@ -105,9 +105,9 @@ set(sdrbase_HEADERS
 
     channel/channelsinkapi.h
     channel/channelsourceapi.h
-    channel/sdrdaemondataqueue.h
-    channel/sdrdaemondatareadqueue.h
-    channel/sdrdaemondatablock.h
+    channel/remotedataqueue.h
+    channel/remotedatareadqueue.h
+    channel/remotedatablock.h
 
     commands/command.h
 

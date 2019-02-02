@@ -54,7 +54,7 @@ SDRdaemonSourceUDPHandler::SDRdaemonSourceUDPHandler(SampleSinkFifo *sampleFifo,
     m_throttleToggle(false),
 	m_autoCorrBuffer(true)
 {
-    m_udpBuf = new char[SDRDaemonUdpSize];
+    m_udpBuf = new char[RemoteUdpSize];
 
 #ifdef USE_INTERNAL_TIMER
 #warning "Uses internal timer"
@@ -165,7 +165,7 @@ void SDRdaemonSourceUDPHandler::dataReadyRead()
 		qint64 pendingDataSize = m_dataSocket->pendingDatagramSize();
 		m_udpReadBytes += m_dataSocket->readDatagram(&m_udpBuf[m_udpReadBytes], pendingDataSize, &m_remoteAddress, 0);
 
-		if (m_udpReadBytes == SDRDaemonUdpSize) {
+		if (m_udpReadBytes == RemoteUdpSize) {
 		    processData();
 		    m_udpReadBytes = 0;
 		}
@@ -175,7 +175,7 @@ void SDRdaemonSourceUDPHandler::dataReadyRead()
 void SDRdaemonSourceUDPHandler::processData()
 {
     m_sdrDaemonBuffer.writeData(m_udpBuf);
-    const SDRDaemonMetaDataFEC& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
+    const RemoteMetaDataFEC& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
     bool change = false;
 
     m_tv_msec = m_sdrDaemonBuffer.getTVOutMSec();
@@ -259,7 +259,7 @@ void SDRdaemonSourceUDPHandler::tick()
         m_readLengthSamples += m_sdrDaemonBuffer.getRWBalanceCorrection();
     }
 
-    const SDRDaemonMetaDataFEC& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
+    const RemoteMetaDataFEC& metaData =  m_sdrDaemonBuffer.getCurrentMeta();
     m_readLength = m_readLengthSamples * (metaData.m_sampleBytes & 0xF) * 2;
 
     if ((metaData.m_sampleBits == 16) && (SDR_RX_SAMP_SZ == 24)) // 16 -> 24 bits

@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_SDRDAEMONSINKOUTPUT_H
-#define INCLUDE_SDRDAEMONSINKOUTPUT_H
+#ifndef INCLUDE_REMOTEOUTPUT_H
+#define INCLUDE_REMOTEOUTPUT_H
 
 #include <ctime>
 #include <iostream>
@@ -28,55 +28,55 @@
 
 #include "dsp/devicesamplesink.h"
 
-#include "sdrdaemonsinksettings.h"
+#include "remoteoutputsettings.h"
 
-class SDRdaemonSinkThread;
+class RemoteOutputThread;
 class DeviceSinkAPI;
 class QNetworkAccessManager;
 class QNetworkReply;
 class QJsonObject;
 
-class SDRdaemonSinkOutput : public DeviceSampleSink {
+class RemoteOutput : public DeviceSampleSink {
     Q_OBJECT
 public:
-	class MsgConfigureSDRdaemonSink : public Message {
+	class MsgConfigureRemoteOutput : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const SDRdaemonSinkSettings& getSettings() const { return m_settings; }
+		const RemoteOutputSettings& getSettings() const { return m_settings; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureSDRdaemonSink* create(const SDRdaemonSinkSettings& settings, bool force = false)
+		static MsgConfigureRemoteOutput* create(const RemoteOutputSettings& settings, bool force = false)
 		{
-			return new MsgConfigureSDRdaemonSink(settings, force);
+			return new MsgConfigureRemoteOutput(settings, force);
 		}
 
 	private:
-		SDRdaemonSinkSettings m_settings;
+		RemoteOutputSettings m_settings;
 		bool m_force;
 
-		MsgConfigureSDRdaemonSink(const SDRdaemonSinkSettings& settings, bool force) :
+		MsgConfigureRemoteOutput(const RemoteOutputSettings& settings, bool force) :
 			Message(),
 			m_settings(settings),
 			m_force(force)
 		{ }
 	};
 
-	class MsgConfigureSDRdaemonSinkWork : public Message {
+	class MsgConfigureRemoteOutputWork : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 		bool isWorking() const { return m_working; }
 
-		static MsgConfigureSDRdaemonSinkWork* create(bool working)
+		static MsgConfigureRemoteOutputWork* create(bool working)
 		{
-			return new MsgConfigureSDRdaemonSinkWork(working);
+			return new MsgConfigureRemoteOutputWork(working);
 		}
 
 	private:
 		bool m_working;
 
-		MsgConfigureSDRdaemonSinkWork(bool working) :
+		MsgConfigureRemoteOutputWork(bool working) :
 			Message(),
 			m_working(working)
 		{ }
@@ -101,28 +101,28 @@ public:
         { }
     };
 
-    class MsgConfigureSDRdaemonSinkChunkCorrection : public Message {
+    class MsgConfigureRemoteOutputChunkCorrection : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
         int getChunkCorrection() const { return m_chunkCorrection; }
 
-        static MsgConfigureSDRdaemonSinkChunkCorrection* create(int chunkCorrection)
+        static MsgConfigureRemoteOutputChunkCorrection* create(int chunkCorrection)
         {
-            return new MsgConfigureSDRdaemonSinkChunkCorrection(chunkCorrection);
+            return new MsgConfigureRemoteOutputChunkCorrection(chunkCorrection);
         }
 
     private:
         int m_chunkCorrection;
 
-        MsgConfigureSDRdaemonSinkChunkCorrection(int chunkCorrection) :
+        MsgConfigureRemoteOutputChunkCorrection(int chunkCorrection) :
             Message(),
             m_chunkCorrection(chunkCorrection)
         { }
     };
 
-	SDRdaemonSinkOutput(DeviceSinkAPI *deviceAPI);
-	virtual ~SDRdaemonSinkOutput();
+	RemoteOutput(DeviceSinkAPI *deviceAPI);
+	virtual ~RemoteOutput();
 	virtual void destroy();
 
     virtual void init();
@@ -167,9 +167,9 @@ public:
 private:
     DeviceSinkAPI *m_deviceAPI;
 	QMutex m_mutex;
-	SDRdaemonSinkSettings m_settings;
+	RemoteOutputSettings m_settings;
 	uint64_t m_centerFrequency;
-	SDRdaemonSinkThread* m_sdrDaemonSinkThread;
+	RemoteOutputThread* m_remoteOutputThread;
 	QString m_deviceDescription;
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
@@ -189,13 +189,13 @@ private:
     int m_chunkSizeCorrection;
     static const uint32_t NbSamplesForRateCorrection;
 
-	void applySettings(const SDRdaemonSinkSettings& settings, bool force = false);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRdaemonSinkSettings& settings);
+	void applySettings(const RemoteOutputSettings& settings, bool force = false);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RemoteOutputSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 
     void analyzeApiReply(const QJsonObject& jsonObject, const QString& answer);
     void sampleRateCorrection(double remoteTimeDeltaUs, double timeDeltaUs, uint32_t remoteSampleCount, uint32_t sampleCount);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SDRdaemonSinkSettings& settings, bool force);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RemoteOutputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:
@@ -203,4 +203,4 @@ private slots:
     void networkManagerFinished(QNetworkReply *reply);
 };
 
-#endif // INCLUDE_SDRDAEMONSINKOUTPUT_H
+#endif // INCLUDE_REMOTEOUTPUT_H

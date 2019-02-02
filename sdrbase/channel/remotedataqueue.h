@@ -1,11 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
-// SDRdaemon sink channel (Rx) data blocks queue                                 //
+// Remote sink channel (Rx) data blocks queue                                    //
 //                                                                               //
-// SDRdaemon is a detached SDR front end that handles the interface with a       //
-// physical device and sends or receives the I/Q samples stream to or from a     //
-// SDRangel instance via UDP. It is controlled via a Web REST API.               //
+// SDRangel can serve as a remote SDR front end that handles the interface       //
+// with a physical device and sends or receives the I/Q samples stream via UDP   //
+// to or from another SDRangel instance or any program implementing the same     //
+// protocol. The remote SDRangel is controlled via its Web REST API.             //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -20,24 +21,24 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRDAEMON_CHANNEL_SDRDAEMONDATAQUEUE_H_
-#define SDRDAEMON_CHANNEL_SDRDAEMONDATAQUEUE_H_
+#ifndef CHANNEL_REMOTEDATAQUEUE_H_
+#define CHANNEL_REMOTEDATAQUEUE_H_
 
 #include <QObject>
 #include <QMutex>
 #include <QQueue>
 
-class SDRDaemonDataBlock;
+class RemoteDataBlock;
 
-class SDRDaemonDataQueue : public QObject {
+class RemoteDataQueue : public QObject {
     Q_OBJECT
 
 public:
-    SDRDaemonDataQueue(QObject* parent = NULL);
-    ~SDRDaemonDataQueue();
+    RemoteDataQueue(QObject* parent = NULL);
+    ~RemoteDataQueue();
 
-    void push(SDRDaemonDataBlock* dataBlock, bool emitSignal = true);  //!< Push daa block onto queue
-    SDRDaemonDataBlock* pop(); //!< Pop message from queue
+    void push(RemoteDataBlock* dataBlock, bool emitSignal = true);  //!< Push daa block onto queue
+    RemoteDataBlock* pop(); //!< Pop message from queue
 
     int size(); //!< Returns queue size
     void clear(); //!< Empty queue
@@ -47,7 +48,7 @@ signals:
 
 private:
     QMutex m_lock;
-    QQueue<SDRDaemonDataBlock*> m_queue;
+    QQueue<RemoteDataBlock*> m_queue;
 };
 
-#endif /* SDRDAEMON_CHANNEL_SDRDAEMONDATAQUEUE_H_ */
+#endif /* CHANNEL_REMOTEDATAQUEUE_H_ */

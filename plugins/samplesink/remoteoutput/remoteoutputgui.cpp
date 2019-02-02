@@ -26,7 +26,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "ui_sdrdaemonsinkgui.h"
+#include "ui_remoteoutputgui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
@@ -39,13 +39,15 @@
 
 #include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
-#include "channel/sdrdaemondatablock.h"
-#include "udpsinkfec.h"
-#include "sdrdaemonsinkgui.h"
+#include "remoteoutputgui.h"
 
-SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
+#include <channel/remotedatablock.h>
+
+#include "udpsinkfec.h"
+
+RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
-	ui(new Ui::SDRdaemonSinkGui),
+	ui(new Ui::RemoteOutputGui),
 	m_deviceUISet(deviceUISet),
 	m_settings(),
 	m_deviceSampleSink(0),
@@ -83,7 +85,7 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 
-	m_deviceSampleSink = (SDRdaemonSinkOutput*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
+	m_deviceSampleSink = (RemoteOutput*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 
@@ -103,34 +105,34 @@ SDRdaemonSinkGui::SDRdaemonSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
     sendSettings();
 }
 
-SDRdaemonSinkGui::~SDRdaemonSinkGui()
+RemoteOutputSinkGui::~RemoteOutputSinkGui()
 {
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
 	delete ui;
 }
 
-void SDRdaemonSinkGui::blockApplySettings(bool block)
+void RemoteOutputSinkGui::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
 }
 
-void SDRdaemonSinkGui::destroy()
+void RemoteOutputSinkGui::destroy()
 {
 	delete this;
 }
 
-void SDRdaemonSinkGui::setName(const QString& name)
+void RemoteOutputSinkGui::setName(const QString& name)
 {
 	setObjectName(name);
 }
 
-QString SDRdaemonSinkGui::getName() const
+QString RemoteOutputSinkGui::getName() const
 {
 	return objectName();
 }
 
-void SDRdaemonSinkGui::resetToDefaults()
+void RemoteOutputSinkGui::resetToDefaults()
 {
     blockApplySettings(true);
 	m_settings.resetToDefaults();
@@ -139,12 +141,12 @@ void SDRdaemonSinkGui::resetToDefaults()
 	sendSettings();
 }
 
-QByteArray SDRdaemonSinkGui::serialize() const
+QByteArray RemoteOutputSinkGui::serialize() const
 {
 	return m_settings.serialize();
 }
 
-bool SDRdaemonSinkGui::deserialize(const QByteArray& data)
+bool RemoteOutputSinkGui::deserialize(const QByteArray& data)
 {
     blockApplySettings(true);
 
@@ -163,20 +165,20 @@ bool SDRdaemonSinkGui::deserialize(const QByteArray& data)
 	}
 }
 
-bool SDRdaemonSinkGui::handleMessage(const Message& message)
+bool RemoteOutputSinkGui::handleMessage(const Message& message)
 {
-    if (SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink::match(message))
+    if (RemoteOutput::MsgConfigureRemoteOutput::match(message))
     {
-        const SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink& cfg = (SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink&) message;
+        const RemoteOutput::MsgConfigureRemoteOutput& cfg = (RemoteOutput::MsgConfigureRemoteOutput&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
         return true;
     }
-    else if (SDRdaemonSinkOutput::MsgStartStop::match(message))
+    else if (RemoteOutput::MsgStartStop::match(message))
     {
-        SDRdaemonSinkOutput::MsgStartStop& notif = (SDRdaemonSinkOutput::MsgStartStop&) message;
+        RemoteOutput::MsgStartStop& notif = (RemoteOutput::MsgStartStop&) message;
         blockApplySettings(true);
         ui->startStop->setChecked(notif.getStartStop());
         blockApplySettings(false);
@@ -188,7 +190,7 @@ bool SDRdaemonSinkGui::handleMessage(const Message& message)
 	}
 }
 
-void SDRdaemonSinkGui::handleInputMessages()
+void RemoteOutputSinkGui::handleInputMessages()
 {
     Message* message;
 
@@ -198,7 +200,7 @@ void SDRdaemonSinkGui::handleInputMessages()
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_sampleRate = notif->getSampleRate();
-            qDebug("SDRdaemonSinkGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("RemoteOutputSinkGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRate();
 
             delete message;
@@ -212,20 +214,20 @@ void SDRdaemonSinkGui::handleInputMessages()
     }
 }
 
-void SDRdaemonSinkGui::updateSampleRate()
+void RemoteOutputSinkGui::updateSampleRate()
 {
     m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
     ui->deviceRateText->setText(tr("%1k").arg((float)(m_sampleRate) / 1000));
 }
 
-void SDRdaemonSinkGui::updateTxDelayTooltip()
+void RemoteOutputSinkGui::updateTxDelayTooltip()
 {
-    int samplesPerBlock = SDRDaemonNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8);
+    int samplesPerBlock = RemoteNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8);
     double delay = ((127*samplesPerBlock*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
     ui->txDelayText->setToolTip(tr("%1 us").arg(QString::number(delay*1e6, 'f', 0)));
 }
 
-void SDRdaemonSinkGui::displaySettings()
+void RemoteOutputSinkGui::displaySettings()
 {
     blockApplySettings(true);
     ui->centerFrequency->setValue(m_deviceCenterFrequency / 1000);
@@ -247,23 +249,23 @@ void SDRdaemonSinkGui::displaySettings()
     blockApplySettings(false);
 }
 
-void SDRdaemonSinkGui::sendSettings()
+void RemoteOutputSinkGui::sendSettings()
 {
     if(!m_updateTimer.isActive())
         m_updateTimer.start(100);
 }
 
 
-void SDRdaemonSinkGui::updateHardware()
+void RemoteOutputSinkGui::updateHardware()
 {
-    qDebug() << "SDRdaemonSinkGui::updateHardware";
-    SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink* message = SDRdaemonSinkOutput::MsgConfigureSDRdaemonSink::create(m_settings, m_forceSettings);
+    qDebug() << "RemoteOutputSinkGui::updateHardware";
+    RemoteOutput::MsgConfigureRemoteOutput* message = RemoteOutput::MsgConfigureRemoteOutput::create(m_settings, m_forceSettings);
     m_deviceSampleSink->getInputMessageQueue()->push(message);
     m_forceSettings = false;
     m_updateTimer.stop();
 }
 
-void SDRdaemonSinkGui::updateStatus()
+void RemoteOutputSinkGui::updateStatus()
 {
     int state = m_deviceUISet->m_deviceSinkAPI->state();
 
@@ -292,14 +294,14 @@ void SDRdaemonSinkGui::updateStatus()
     }
 }
 
-void SDRdaemonSinkGui::on_sampleRate_changed(quint64 value)
+void RemoteOutputSinkGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_sampleRate = value;
     updateTxDelayTooltip();
     sendSettings();
 }
 
-void SDRdaemonSinkGui::on_txDelay_valueChanged(int value)
+void RemoteOutputSinkGui::on_txDelay_valueChanged(int value)
 {
     m_settings.m_txDelay = value / 100.0;
     ui->txDelayText->setText(tr("%1").arg(value));
@@ -307,7 +309,7 @@ void SDRdaemonSinkGui::on_txDelay_valueChanged(int value)
     sendSettings();
 }
 
-void SDRdaemonSinkGui::on_nbFECBlocks_valueChanged(int value)
+void RemoteOutputSinkGui::on_nbFECBlocks_valueChanged(int value)
 {
     m_settings.m_nbFECBlocks = value;
     int nbOriginalBlocks = 128;
@@ -319,7 +321,7 @@ void SDRdaemonSinkGui::on_nbFECBlocks_valueChanged(int value)
     sendSettings();
 }
 
-void SDRdaemonSinkGui::on_deviceIndex_returnPressed()
+void RemoteOutputSinkGui::on_deviceIndex_returnPressed()
 {
     bool dataOk;
     int deviceIndex = ui->deviceIndex->text().toInt(&dataOk);
@@ -333,7 +335,7 @@ void SDRdaemonSinkGui::on_deviceIndex_returnPressed()
     sendSettings();
 }
 
-void SDRdaemonSinkGui::on_channelIndex_returnPressed()
+void RemoteOutputSinkGui::on_channelIndex_returnPressed()
 {
     bool dataOk;
     int channelIndex = ui->channelIndex->text().toInt(&dataOk);
@@ -347,7 +349,7 @@ void SDRdaemonSinkGui::on_channelIndex_returnPressed()
     sendSettings();
 }
 
-void SDRdaemonSinkGui::on_apiAddress_returnPressed()
+void RemoteOutputSinkGui::on_apiAddress_returnPressed()
 {
     m_settings.m_apiAddress = ui->apiAddress->text();
     sendSettings();
@@ -357,7 +359,7 @@ void SDRdaemonSinkGui::on_apiAddress_returnPressed()
     m_networkManager->get(m_networkRequest);
 }
 
-void SDRdaemonSinkGui::on_apiPort_returnPressed()
+void RemoteOutputSinkGui::on_apiPort_returnPressed()
 {
     bool dataOk;
     int apiPort = ui->apiPort->text().toInt(&dataOk);
@@ -375,13 +377,13 @@ void SDRdaemonSinkGui::on_apiPort_returnPressed()
     m_networkManager->get(m_networkRequest);
 }
 
-void SDRdaemonSinkGui::on_dataAddress_returnPressed()
+void RemoteOutputSinkGui::on_dataAddress_returnPressed()
 {
     m_settings.m_dataAddress = ui->dataAddress->text();
     sendSettings();
 }
 
-void SDRdaemonSinkGui::on_dataPort_returnPressed()
+void RemoteOutputSinkGui::on_dataPort_returnPressed()
 {
     bool dataOk;
     int dataPort = ui->dataPort->text().toInt(&dataOk);
@@ -395,7 +397,7 @@ void SDRdaemonSinkGui::on_dataPort_returnPressed()
     sendSettings();
 }
 
-void SDRdaemonSinkGui::on_apiApplyButton_clicked(bool checked)
+void RemoteOutputSinkGui::on_apiApplyButton_clicked(bool checked)
 {
     (void) checked;
     m_settings.m_apiAddress = ui->apiAddress->text();
@@ -415,7 +417,7 @@ void SDRdaemonSinkGui::on_apiApplyButton_clicked(bool checked)
     m_networkManager->get(m_networkRequest);
 }
 
-void SDRdaemonSinkGui::on_dataApplyButton_clicked(bool checked)
+void RemoteOutputSinkGui::on_dataApplyButton_clicked(bool checked)
 {
     (void) checked;
     m_settings.m_dataAddress = ui->dataAddress->text();
@@ -431,16 +433,16 @@ void SDRdaemonSinkGui::on_dataApplyButton_clicked(bool checked)
     sendSettings();
 }
 
-void SDRdaemonSinkGui::on_startStop_toggled(bool checked)
+void RemoteOutputSinkGui::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
     {
-        SDRdaemonSinkOutput::MsgStartStop *message = SDRdaemonSinkOutput::MsgStartStop::create(checked);
+        RemoteOutput::MsgStartStop *message = RemoteOutput::MsgStartStop::create(checked);
         m_deviceSampleSink->getInputMessageQueue()->push(message);
     }
 }
 
-void SDRdaemonSinkGui::on_eventCountsReset_clicked(bool checked)
+void RemoteOutputSinkGui::on_eventCountsReset_clicked(bool checked)
 {
     (void) checked;
     m_countUnrecoverable = 0;
@@ -450,7 +452,7 @@ void SDRdaemonSinkGui::on_eventCountsReset_clicked(bool checked)
     displayEventTimer();
 }
 
-void SDRdaemonSinkGui::displayEventCounts()
+void RemoteOutputSinkGui::displayEventCounts()
 {
     QString nstr = QString("%1").arg(m_countUnrecoverable, 3, 10, QChar('0'));
     ui->eventUnrecText->setText(nstr);
@@ -458,7 +460,7 @@ void SDRdaemonSinkGui::displayEventCounts()
     ui->eventRecText->setText(nstr);
 }
 
-void SDRdaemonSinkGui::displayEventStatus(int recoverableCount, int unrecoverableCount)
+void RemoteOutputSinkGui::displayEventStatus(int recoverableCount, int unrecoverableCount)
 {
 
     if (unrecoverableCount == 0)
@@ -475,7 +477,7 @@ void SDRdaemonSinkGui::displayEventStatus(int recoverableCount, int unrecoverabl
     }
 }
 
-void SDRdaemonSinkGui::displayEventTimer()
+void RemoteOutputSinkGui::displayEventTimer()
 {
     int elapsedTimeMillis = m_time.elapsed();
     QTime recordLength(0, 0, 0, 0);
@@ -484,7 +486,7 @@ void SDRdaemonSinkGui::displayEventTimer()
     ui->eventCountsTimeText->setText(s_time);
 }
 
-void SDRdaemonSinkGui::tick()
+void RemoteOutputSinkGui::tick()
 {
     if (++m_tickCount == 20) // once per second
 	{
@@ -504,7 +506,7 @@ void SDRdaemonSinkGui::tick()
 	}
 }
 
-void SDRdaemonSinkGui::networkManagerFinished(QNetworkReply *reply)
+void RemoteOutputSinkGui::networkManagerFinished(QNetworkReply *reply)
 {
     if (reply->error())
     {
@@ -532,7 +534,7 @@ void SDRdaemonSinkGui::networkManagerFinished(QNetworkReply *reply)
             ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
             QString errorMsg = QString("Reply JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
             ui->statusText->setText(QString("JSON error. See log"));
-            qInfo().noquote() << "SDRdaemonSinkGui::networkManagerFinished" << errorMsg;
+            qInfo().noquote() << "RemoteOutputSinkGui::networkManagerFinished" << errorMsg;
         }
     }
     catch (const std::exception& ex)
@@ -540,11 +542,11 @@ void SDRdaemonSinkGui::networkManagerFinished(QNetworkReply *reply)
         ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
         QString errorMsg = QString("Error parsing request: ") + ex.what();
         ui->statusText->setText("Error parsing request. See log for details");
-        qInfo().noquote() << "SDRdaemonSinkGui::networkManagerFinished" << errorMsg;
+        qInfo().noquote() << "RemoteOutputSinkGui::networkManagerFinished" << errorMsg;
     }
 }
 
-void SDRdaemonSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
+void RemoteOutputSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
 {
     QString infoLine;
 
@@ -629,7 +631,7 @@ void SDRdaemonSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
     }
 }
 
-void SDRdaemonSinkGui::openDeviceSettingsDialog(const QPoint& p)
+void RemoteOutputSinkGui::openDeviceSettingsDialog(const QPoint& p)
 {
     BasicDeviceSettingsDialog dialog(this);
     dialog.setUseReverseAPI(m_settings.m_useReverseAPI);

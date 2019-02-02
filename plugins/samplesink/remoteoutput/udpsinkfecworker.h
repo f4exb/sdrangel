@@ -14,9 +14,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESINK_SDRDAEMONSINK_UDPSINKFECWORKER_H_
-#define PLUGINS_SAMPLESINK_SDRDAEMONSINK_UDPSINKFECWORKER_H_
+#ifndef PLUGINS_SAMPLESINK_REMOTEOUTPUT_UDPSINKFECWORKER_H_
+#define PLUGINS_SAMPLESINK_REMOTEOUTPUT_UDPSINKFECWORKER_H_
 
+#include <channel/remotedatablock.h>
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
@@ -26,7 +27,6 @@
 
 #include "util/messagequeue.h"
 #include "util/message.h"
-#include "channel/sdrdaemondatablock.h"
 
 class QUdpSocket;
 
@@ -38,13 +38,13 @@ public:
     {
         MESSAGE_CLASS_DECLARATION
     public:
-        SDRDaemonSuperBlock *getTxBlocks() const { return m_txBlockx; }
+        RemoteSuperBlock *getTxBlocks() const { return m_txBlockx; }
         uint32_t getNbBlocsFEC() const { return m_nbBlocksFEC; }
         uint32_t getTxDelay() const { return m_txDelay; }
         uint16_t getFrameIndex() const { return m_frameIndex; }
 
         static MsgUDPFECEncodeAndSend* create(
-                SDRDaemonSuperBlock *txBlocks,
+                RemoteSuperBlock *txBlocks,
                 uint32_t nbBlocksFEC,
                 uint32_t txDelay,
                 uint16_t frameIndex)
@@ -53,13 +53,13 @@ public:
         }
 
     private:
-        SDRDaemonSuperBlock *m_txBlockx;
+        RemoteSuperBlock *m_txBlockx;
         uint32_t m_nbBlocksFEC;
         uint32_t m_txDelay;
         uint16_t m_frameIndex;
 
         MsgUDPFECEncodeAndSend(
-                SDRDaemonSuperBlock *txBlocks,
+                RemoteSuperBlock *txBlocks,
                 uint32_t nbBlocksFEC,
                 uint32_t txDelay,
                 uint16_t frameIndex) :
@@ -116,7 +116,7 @@ public:
 
     void startStop(bool start);
 
-    void pushTxFrame(SDRDaemonSuperBlock *txBlocks,
+    void pushTxFrame(RemoteSuperBlock *txBlocks,
         uint32_t nbBlocksFEC,
         uint32_t txDelay,
         uint16_t frameIndex);
@@ -131,7 +131,7 @@ private:
     void startWork();
     void stopWork();
     void run();
-    void encodeAndTransmit(SDRDaemonSuperBlock *txBlockx, uint16_t frameIndex, uint32_t nbBlocksFEC, uint32_t txDelay);
+    void encodeAndTransmit(RemoteSuperBlock *txBlockx, uint16_t frameIndex, uint32_t nbBlocksFEC, uint32_t txDelay);
 
     QMutex m_startWaitMutex;
     QWaitCondition m_startWaiter;
@@ -144,4 +144,4 @@ private:
     QHostAddress m_remoteHostAddress;
 };
 
-#endif /* PLUGINS_SAMPLESINK_SDRDAEMONSINK_UDPSINKFECWORKER_H_ */
+#endif /* PLUGINS_SAMPLESINK_REMOTEOUTPUT_UDPSINKFECWORKER_H_ */

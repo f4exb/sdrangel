@@ -94,7 +94,7 @@ RemoteSink::~RemoteSink()
 void RemoteSink::setTxDelay(int txDelay, int nbBlocksFEC)
 {
     double txDelayRatio = txDelay / 100.0;
-    int samplesPerBlock = SDRDaemonNbBytesPerBlock / sizeof(Sample);
+    int samplesPerBlock = RemoteNbBytesPerBlock / sizeof(Sample);
     double delay = m_sampleRate == 0 ? 1.0 : (127*samplesPerBlock*txDelayRatio) / m_sampleRate;
     delay /= 128 + nbBlocksFEC;
     m_txDelay = roundf(delay*1e6); // microseconds
@@ -123,35 +123,34 @@ void RemoteSink::feed(const SampleVector::const_iterator& begin, const SampleVec
         if (m_txBlockIndex == 0)
         {
             struct timeval tv;
-            SDRDaemonMetaDataFEC metaData;
+            RemoteMetaDataFEC metaData;
             gettimeofday(&tv, 0);
 
             metaData.m_centerFrequency = m_centerFrequency;
             metaData.m_sampleRate = m_sampleRate;
             metaData.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
             metaData.m_sampleBits = SDR_RX_SAMP_SZ;
-            metaData.m_nbOriginalBlocks = SDRDaemonNbOrginalBlocks;
+            metaData.m_nbOriginalBlocks = RemoteNbOrginalBlocks;
             metaData.m_nbFECBlocks = m_nbBlocksFEC;
             metaData.m_tv_sec = tv.tv_sec;
             metaData.m_tv_usec = tv.tv_usec;
 
             if (!m_dataBlock) { // on the very first cycle there is no data block allocated
-                m_dataBlock = new SDRDaemonDataBlock();
+                m_dataBlock = new RemoteDataBlock();
             }
 
             boost::crc_32_type crc32;
             crc32.process_bytes(&metaData, 20);
             metaData.m_crc32 = crc32.checksum();
-            SDRDaemonSuperBlock& superBlock = m_dataBlock->m_superBlocks[0]; // first block
+            RemoteSuperBlock& superBlock = m_dataBlock->m_superBlocks[0]; // first block
             superBlock.init();
             superBlock.m_header.m_frameIndex = m_frameCount;
             superBlock.m_header.m_blockIndex = m_txBlockIndex;
             superBlock.m_header.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
             superBlock.m_header.m_sampleBits = SDR_RX_SAMP_SZ;
 
-            SDRDaemonMetaDataFEC *destMeta = (SDRDaemonMetaDataFEC *) &superBlock.m_protectedBlock;
+            RemoteMetaDataFEC *destMeta = (RemoteMetaDataFEC *) &superBlock.m_protectedBlock;
             *destMeta = metaData;
-            //memcpy((void *) &superBlock.m_protectedBlock, (const void *) &metaData, sizeof(SDRDaemonMetaDataFEC));
 
             if (!(metaData == m_currentMetaFEC))
             {
@@ -172,7 +171,7 @@ void RemoteSink::feed(const SampleVector::const_iterator& begin, const SampleVec
         } // block zero
 
         // handle different sample sizes...
-        int samplesPerBlock = SDRDaemonNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8); // two I or Q samples
+        int samplesPerBlock = RemoteNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8); // two I or Q samples
         if (m_sampleIndex + inRemainingSamples < samplesPerBlock) // there is still room in the current super block
         {
             memcpy((void *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*sizeof(Sample)],
@@ -195,7 +194,7 @@ void RemoteSink::feed(const SampleVector::const_iterator& begin, const SampleVec
             m_superBlock.m_header.m_sampleBits = SDR_RX_SAMP_SZ;
             m_dataBlock->m_superBlocks[m_txBlockIndex] = m_superBlock;
 
-            if (m_txBlockIndex == SDRDaemonNbOrginalBlocks - 1) // frame complete
+            if (m_txBlockIndex == RemoteNbOrginalBlocks - 1) // frame complete
             {
                 m_dataBlockMutex.lock();
                 m_dataBlock->m_txControlBlock.m_frameIndex = m_frameCount;
@@ -207,7 +206,7 @@ void RemoteSink::feed(const SampleVector::const_iterator& begin, const SampleVec
                 m_dataBlock->m_txControlBlock.m_dataPort = m_dataPort;
 
                 emit dataBlockAvailable(m_dataBlock);
-                m_dataBlock = new SDRDaemonDataBlock(); // create a new one immediately
+                m_dataBlock = new RemoteDataBlock(); // create a new one immediately
                 m_dataBlockMutex.unlock();
 
                 m_txBlockIndex = 0;
@@ -225,7 +224,7 @@ void RemoteSink::start()
 {
     qDebug("RemoteSink::start");
 
-    memset((void *) &m_currentMetaFEC, 0, sizeof(SDRDaemonMetaDataFEC));
+    memset((void *) &m_currentMetaFEC, 0, sizeof(RemoteMetaDataFEC));
 
     if (m_running) {
         stop();
@@ -233,9 +232,9 @@ void RemoteSink::start()
 
     m_sinkThread = new RemoteSinkThread();
     connect(this,
-            SIGNAL(dataBlockAvailable(SDRDaemonDataBlock *)),
+            SIGNAL(dataBlockAvailable(RemoteDataBlock *)),
             m_sinkThread,
-            SLOT(processDataBlock(SDRDaemonDataBlock *)),
+            SLOT(processDataBlock(RemoteDataBlock *)),
             Qt::QueuedConnection);
     m_sinkThread->startStop(true);
     m_running = true;

@@ -23,14 +23,13 @@
 #ifndef INCLUDE_REMOTESINK_H_
 #define INCLUDE_REMOTESINK_H_
 
+#include <channel/remotedatablock.h>
 #include <QObject>
 #include <QMutex>
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelsinkapi.h"
-#include "channel/sdrdaemondatablock.h"
-
 #include "../remotesink/remotesinksettings.h"
 
 class QNetworkAccessManager;
@@ -127,7 +126,7 @@ public:
     static const QString m_channelId;
 
 signals:
-    void dataBlockAvailable(SDRDaemonDataBlock *dataBlock);
+    void dataBlockAvailable(RemoteDataBlock *dataBlock);
 
 private:
     DeviceSourceAPI *m_deviceAPI;
@@ -141,9 +140,9 @@ private:
     int m_txBlockIndex;                  //!< Current index in blocks to transmit in the Tx row
     uint16_t m_frameCount;               //!< transmission frame count
     int m_sampleIndex;                   //!< Current sample index in protected block data
-    SDRDaemonSuperBlock m_superBlock;
-    SDRDaemonMetaDataFEC m_currentMetaFEC;
-    SDRDaemonDataBlock *m_dataBlock;
+    RemoteSuperBlock m_superBlock;
+    RemoteMetaDataFEC m_currentMetaFEC;
+    RemoteDataBlock *m_dataBlock;
     QMutex m_dataBlockMutex;
 
     uint64_t m_centerFrequency;

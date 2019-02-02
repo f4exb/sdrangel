@@ -21,45 +21,45 @@
 #include "device/devicesinkapi.h"
 
 #ifdef SERVER_MODE
-#include "sdrdaemonsinkoutput.h"
+#include "remoteoutput.h"
 #else
-#include "sdrdaemonsinkgui.h"
+#include "remoteoutputgui.h"
 #endif
-#include "sdrdaemonsinkplugin.h"
+#include "remoteoutputplugin.h"
 
-const PluginDescriptor SDRdaemonSinkPlugin::m_pluginDescriptor = {
-	QString("SDRdaemon sink output"),
-	QString("4.4.1"),
+const PluginDescriptor RemoteOutputPlugin::m_pluginDescriptor = {
+	QString("Remote output"),
+	QString("4.4.3"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString SDRdaemonSinkPlugin::m_hardwareID = "SDRdaemonSink";
-const QString SDRdaemonSinkPlugin::m_deviceTypeID = SDRDAEMONSINK_DEVICE_TYPE_ID;
+const QString RemoteOutputPlugin::m_hardwareID = "RemoteOutput";
+const QString RemoteOutputPlugin::m_deviceTypeID = REMOTEOUTPUT_DEVICE_TYPE_ID;
 
-SDRdaemonSinkPlugin::SDRdaemonSinkPlugin(QObject* parent) :
+RemoteOutputPlugin::RemoteOutputPlugin(QObject* parent) :
 	QObject(parent)
 {
 }
 
-const PluginDescriptor& SDRdaemonSinkPlugin::getPluginDescriptor() const
+const PluginDescriptor& RemoteOutputPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void SDRdaemonSinkPlugin::initPlugin(PluginAPI* pluginAPI)
+void RemoteOutputPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	pluginAPI->registerSampleSink(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices SDRdaemonSinkPlugin::enumSampleSinks()
+PluginInterface::SamplingDevices RemoteOutputPlugin::enumSampleSinks()
 {
 	SamplingDevices result;
 
     result.append(SamplingDevice(
-            "SDRdaemonSink",
+            "RemoteOutput",
             m_hardwareID,
             m_deviceTypeID,
             QString::null,
@@ -73,7 +73,7 @@ PluginInterface::SamplingDevices SDRdaemonSinkPlugin::enumSampleSinks()
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* SDRdaemonSinkPlugin::createSampleSinkPluginInstanceGUI(
+PluginInstanceGUI* RemoteOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId __attribute((unused)),
         QWidget **widget __attribute((unused)),
         DeviceUISet *deviceUISet __attribute((unused)))
@@ -81,14 +81,14 @@ PluginInstanceGUI* SDRdaemonSinkPlugin::createSampleSinkPluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* SDRdaemonSinkPlugin::createSampleSinkPluginInstanceGUI(
+PluginInstanceGUI* RemoteOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
 {
 	if(sinkId == m_deviceTypeID)
 	{
-	    SDRdaemonSinkGui* gui = new SDRdaemonSinkGui(deviceUISet);
+	    RemoteOutputSinkGui* gui = new RemoteOutputSinkGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	}
@@ -99,11 +99,11 @@ PluginInstanceGUI* SDRdaemonSinkPlugin::createSampleSinkPluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSink* SDRdaemonSinkPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
+DeviceSampleSink* RemoteOutputPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
 {
     if(sinkId == m_deviceTypeID)
     {
-        SDRdaemonSinkOutput* output = new SDRdaemonSinkOutput(deviceAPI);
+        RemoteOutput* output = new RemoteOutput(deviceAPI);
         return output;
     }
     else
