@@ -21,45 +21,45 @@
 #include "device/devicesourceapi.h"
 
 #ifdef SERVER_MODE
-#include "sdrdaemonsourceinput.h"
+#include "remoteinput.h"
 #else
-#include "sdrdaemonsourcegui.h"
+#include "remoteinputgui.h"
 #endif
-#include "sdrdaemonsourceplugin.h"
+#include "remoteinputplugin.h"
 
-const PluginDescriptor SDRdaemonSourcePlugin::m_pluginDescriptor = {
-	QString("SDRdaemon source input"),
-	QString("4.4.1"),
+const PluginDescriptor RemoteInputPlugin::m_pluginDescriptor = {
+	QString("Remote input"),
+	QString("4.4.3"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString SDRdaemonSourcePlugin::m_hardwareID = "SDRdaemonSource";
-const QString SDRdaemonSourcePlugin::m_deviceTypeID = SDRDAEMONSOURCE_DEVICE_TYPE_ID;
+const QString RemoteInputPlugin::m_hardwareID = "RemoteInput";
+const QString RemoteInputPlugin::m_deviceTypeID = REMOTEINPUT_DEVICE_TYPE_ID;
 
-SDRdaemonSourcePlugin::SDRdaemonSourcePlugin(QObject* parent) :
+RemoteInputPlugin::RemoteInputPlugin(QObject* parent) :
 	QObject(parent)
 {
 }
 
-const PluginDescriptor& SDRdaemonSourcePlugin::getPluginDescriptor() const
+const PluginDescriptor& RemoteInputPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void SDRdaemonSourcePlugin::initPlugin(PluginAPI* pluginAPI)
+void RemoteInputPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices SDRdaemonSourcePlugin::enumSampleSources()
+PluginInterface::SamplingDevices RemoteInputPlugin::enumSampleSources()
 {
 	SamplingDevices result;
 
     result.append(SamplingDevice(
-            "SDRdaemonSource",
+            "RemoteInput",
             m_hardwareID,
             m_deviceTypeID,
             QString::null,
@@ -73,7 +73,7 @@ PluginInterface::SamplingDevices SDRdaemonSourcePlugin::enumSampleSources()
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* SDRdaemonSourcePlugin::createSampleSourcePluginInstanceGUI(
+PluginInstanceGUI* RemoteInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId __attribute((unused)),
         QWidget **widget __attribute((unused)),
         DeviceUISet *deviceUISet __attribute((unused)))
@@ -81,14 +81,14 @@ PluginInstanceGUI* SDRdaemonSourcePlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* SDRdaemonSourcePlugin::createSampleSourcePluginInstanceGUI(
+PluginInstanceGUI* RemoteInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
 {
 	if(sourceId == m_deviceTypeID)
 	{
-		SDRdaemonSourceGui* gui = new SDRdaemonSourceGui(deviceUISet);
+		RemoteInputGui* gui = new RemoteInputGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	}
@@ -99,11 +99,11 @@ PluginInstanceGUI* SDRdaemonSourcePlugin::createSampleSourcePluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSource *SDRdaemonSourcePlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
+DeviceSampleSource *RemoteInputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
 {
     if (sourceId == m_deviceTypeID)
     {
-        SDRdaemonSourceInput* input = new SDRdaemonSourceInput(deviceAPI);
+        RemoteInput* input = new RemoteInput(deviceAPI);
         return input;
     }
     else

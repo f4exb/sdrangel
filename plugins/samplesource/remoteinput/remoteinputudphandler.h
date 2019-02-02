@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONSOURCEUDPHANDLER_H_
-#define PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONSOURCEUDPHANDLER_H_
+#ifndef PLUGINS_SAMPLESOURCE_REMOTEINPUT_REMOTEINPUTUDPHANDLER_H_
+#define PLUGINS_SAMPLESOURCE_REMOTEINPUT_REMOTEINPUTUDPHANDLER_H_
 
 #include <QObject>
 #include <QUdpSocket>
@@ -23,21 +23,21 @@
 #include <QMutex>
 #include <QElapsedTimer>
 
-#include "sdrdaemonsourcebuffer.h"
+#include "remoteinputbuffer.h"
 
-#define SDRDAEMONSOURCE_THROTTLE_MS 50
+#define REMOTEINPUT_THROTTLE_MS 50
 
 class SampleSinkFifo;
 class MessageQueue;
 class QTimer;
 class DeviceSourceAPI;
 
-class SDRdaemonSourceUDPHandler : public QObject
+class RemoteInputUDPHandler : public QObject
 {
 	Q_OBJECT
 public:
-	SDRdaemonSourceUDPHandler(SampleSinkFifo* sampleFifo, DeviceSourceAPI *deviceAPI);
-	~SDRdaemonSourceUDPHandler();
+	RemoteInputUDPHandler(SampleSinkFifo* sampleFifo, DeviceSourceAPI *deviceAPI);
+	~RemoteInputUDPHandler();
 	void setMessageQueueToGUI(MessageQueue *queue) { m_outputMessageQueueToGUI = queue; }
 	void start();
 	void stop();
@@ -47,10 +47,10 @@ public:
     bool isStreaming() const { return m_masterTimerConnected; }
     int getSampleRate() const { return m_samplerate; }
     int getCenterFrequency() const { return m_centerFrequency * 1000; }
-    int getBufferGauge() const { return m_sdrDaemonBuffer.getBufferGauge(); }
+    int getBufferGauge() const { return m_remoteInputBuffer.getBufferGauge(); }
     uint64_t getTVmSec() const { return m_tv_msec; }
-    int getMinNbBlocks() { return m_sdrDaemonBuffer.getMinNbBlocks(); }
-    int getMaxNbRecovery() { return m_sdrDaemonBuffer.getMaxNbRecovery(); }
+    int getMinNbBlocks() { return m_remoteInputBuffer.getMinNbBlocks(); }
+    int getMaxNbRecovery() { return m_remoteInputBuffer.getMaxNbRecovery(); }
 public slots:
 	void dataReadyRead();
 
@@ -60,7 +60,7 @@ private:
 	bool m_masterTimerConnected;
 	bool m_running;
     uint32_t m_rateDivider;
-	SDRdaemonSourceBuffer m_sdrDaemonBuffer;
+	RemoteInputBuffer m_remoteInputBuffer;
 	QUdpSocket *m_dataSocket;
 	QHostAddress m_dataAddress;
 	QHostAddress m_remoteAddress;
@@ -96,4 +96,4 @@ private slots:
 
 
 
-#endif /* PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONSOURCEUDPHANDLER_H_ */
+#endif /* PLUGINS_SAMPLESOURCE_REMOTEINPUT_REMOTEINPUTUDPHANDLER_H_ */

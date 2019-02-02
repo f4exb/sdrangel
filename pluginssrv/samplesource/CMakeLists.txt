@@ -71,7 +71,7 @@ endif(LIBUSB_FOUND AND LIBRTLSDR_FOUND)
 
 find_package(CM256cc)
 if(CM256CC_FOUND)
-    add_subdirectory(sdrdaemonsource)
+    add_subdirectory(remoteinput)
 endif(CM256CC_FOUND)
 
 find_package(LibMiriSDR)
@@ -100,7 +100,7 @@ if (BUILD_DEBIAN)
     add_subdirectory(perseus)
     add_subdirectory(plutosdrinput)
     add_subdirectory(rtlsdr)
-    add_subdirectory(sdrdaemonsource)
+    add_subdirectory(remoteinput)
     add_subdirectory(sdrplay)
 endif (BUILD_DEBIAN)
 

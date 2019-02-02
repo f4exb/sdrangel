@@ -32,26 +32,26 @@
 #include "device/devicesourceapi.h"
 #include "dsp/filerecord.h"
 
-#include "sdrdaemonsourceinput.h"
-#include "sdrdaemonsourceudphandler.h"
+#include "remoteinput.h"
+#include "remoteinputudphandler.h"
 
-MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgConfigureSDRdaemonSource, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgConfigureSDRdaemonStreamTiming, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgReportSDRdaemonAcquisition, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamData, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgReportSDRdaemonSourceStreamTiming, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgFileRecord, Message)
-MESSAGE_CLASS_DEFINITION(SDRdaemonSourceInput::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(RemoteInput::MsgConfigureRemoteInput, Message)
+MESSAGE_CLASS_DEFINITION(RemoteInput::MsgConfigureRemoteInputTiming, Message)
+MESSAGE_CLASS_DEFINITION(RemoteInput::MsgReportRemoteInputAcquisition, Message)
+MESSAGE_CLASS_DEFINITION(RemoteInput::MsgReportRemoteInputStreamData, Message)
+MESSAGE_CLASS_DEFINITION(RemoteInput::MsgReportRemoteInputStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(RemoteInput::MsgFileRecord, Message)
+MESSAGE_CLASS_DEFINITION(RemoteInput::MsgStartStop, Message)
 
-SDRdaemonSourceInput::SDRdaemonSourceInput(DeviceSourceAPI *deviceAPI) :
+RemoteInput::RemoteInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
-	m_SDRdaemonUDPHandler(0),
+	m_remoteInputUDPHandler(0),
 	m_deviceDescription(),
 	m_startingTimeStamp(0)
 {
 	m_sampleFifo.setSize(96000 * 4);
-	m_SDRdaemonUDPHandler = new SDRdaemonSourceUDPHandler(&m_sampleFifo, m_deviceAPI);
+	m_remoteInputUDPHandler = new RemoteInputUDPHandler(&m_sampleFifo, m_deviceAPI);
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->addSink(m_fileSink);
@@ -60,45 +60,45 @@ SDRdaemonSourceInput::SDRdaemonSourceInput(DeviceSourceAPI *deviceAPI) :
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
-SDRdaemonSourceInput::~SDRdaemonSourceInput()
+RemoteInput::~RemoteInput()
 {
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
 	stop();
     m_deviceAPI->removeSink(m_fileSink);
     delete m_fileSink;
-	delete m_SDRdaemonUDPHandler;
+	delete m_remoteInputUDPHandler;
 }
 
-void SDRdaemonSourceInput::destroy()
+void RemoteInput::destroy()
 {
     delete this;
 }
 
-void SDRdaemonSourceInput::init()
+void RemoteInput::init()
 {
     applySettings(m_settings, true);
 }
 
-bool SDRdaemonSourceInput::start()
+bool RemoteInput::start()
 {
-	qDebug() << "SDRdaemonSourceInput::start";
-    m_SDRdaemonUDPHandler->start();
+	qDebug() << "RemoteInput::start";
+    m_remoteInputUDPHandler->start();
 	return true;
 }
 
-void SDRdaemonSourceInput::stop()
+void RemoteInput::stop()
 {
-	qDebug() << "SDRdaemonSourceInput::stop";
-    m_SDRdaemonUDPHandler->stop();
+	qDebug() << "RemoteInput::stop";
+    m_remoteInputUDPHandler->stop();
 }
 
-QByteArray SDRdaemonSourceInput::serialize() const
+QByteArray RemoteInput::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool SDRdaemonSourceInput::deserialize(const QByteArray& data)
+bool RemoteInput::deserialize(const QByteArray& data)
 {
     bool success = true;
 
@@ -108,55 +108,55 @@ bool SDRdaemonSourceInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureSDRdaemonSource* message = MsgConfigureSDRdaemonSource::create(m_settings, true);
+    MsgConfigureRemoteInput* message = MsgConfigureRemoteInput::create(m_settings, true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureSDRdaemonSource* messageToGUI = MsgConfigureSDRdaemonSource::create(m_settings, true);
+        MsgConfigureRemoteInput* messageToGUI = MsgConfigureRemoteInput::create(m_settings, true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
     return success;
 }
 
-void SDRdaemonSourceInput::setMessageQueueToGUI(MessageQueue *queue)
+void RemoteInput::setMessageQueueToGUI(MessageQueue *queue)
 {
     m_guiMessageQueue = queue;
-    m_SDRdaemonUDPHandler->setMessageQueueToGUI(queue);
+    m_remoteInputUDPHandler->setMessageQueueToGUI(queue);
 }
 
-const QString& SDRdaemonSourceInput::getDeviceDescription() const
+const QString& RemoteInput::getDeviceDescription() const
 {
 	return m_deviceDescription;
 }
 
-int SDRdaemonSourceInput::getSampleRate() const
+int RemoteInput::getSampleRate() const
 {
-    return m_SDRdaemonUDPHandler->getSampleRate();
+    return m_remoteInputUDPHandler->getSampleRate();
 }
 
-quint64 SDRdaemonSourceInput::getCenterFrequency() const
+quint64 RemoteInput::getCenterFrequency() const
 {
-    return m_SDRdaemonUDPHandler->getCenterFrequency();
+    return m_remoteInputUDPHandler->getCenterFrequency();
 }
 
-void SDRdaemonSourceInput::setCenterFrequency(qint64 centerFrequency)
+void RemoteInput::setCenterFrequency(qint64 centerFrequency)
 {
     (void) centerFrequency;
 }
 
-std::time_t SDRdaemonSourceInput::getStartingTimeStamp() const
+std::time_t RemoteInput::getStartingTimeStamp() const
 {
 	return m_startingTimeStamp;
 }
 
-bool SDRdaemonSourceInput::isStreaming() const
+bool RemoteInput::isStreaming() const
 {
-    return m_SDRdaemonUDPHandler->isStreaming();
+    return m_remoteInputUDPHandler->isStreaming();
 }
 
-bool SDRdaemonSourceInput::handleMessage(const Message& message)
+bool RemoteInput::handleMessage(const Message& message)
 {
     if (DSPSignalNotification::match(message))
     {
@@ -166,7 +166,7 @@ bool SDRdaemonSourceInput::handleMessage(const Message& message)
     else if (MsgFileRecord::match(message))
     {
         MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "SDRdaemonSourceInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
+        qDebug() << "RemoteInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
 
         if (conf.getStartStop())
         {
@@ -188,7 +188,7 @@ bool SDRdaemonSourceInput::handleMessage(const Message& message)
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
-        qDebug() << "SDRdaemonSourceInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+        qDebug() << "RemoteInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
 
         if (cmd.getStartStop())
         {
@@ -208,10 +208,10 @@ bool SDRdaemonSourceInput::handleMessage(const Message& message)
 
         return true;
     }
-    else if (MsgConfigureSDRdaemonSource::match(message))
+    else if (MsgConfigureRemoteInput::match(message))
     {
-        qDebug() << "SDRdaemonSourceInput::handleMessage:" << message.getIdentifier();
-        MsgConfigureSDRdaemonSource& conf = (MsgConfigureSDRdaemonSource&) message;
+        qDebug() << "RemoteInput::handleMessage:" << message.getIdentifier();
+        MsgConfigureRemoteInput& conf = (MsgConfigureRemoteInput&) message;
         applySettings(conf.getSettings(), conf.getForce());
         return true;
     }
@@ -221,12 +221,12 @@ bool SDRdaemonSourceInput::handleMessage(const Message& message)
 	}
 }
 
-void SDRdaemonSourceInput::applySettings(const SDRdaemonSourceSettings& settings, bool force)
+void RemoteInput::applySettings(const RemoteInputSettings& settings, bool force)
 {
     QMutexLocker mutexLocker(&m_mutex);
     std::ostringstream os;
     QString remoteAddress;
-    m_SDRdaemonUDPHandler->getRemoteAddress(remoteAddress);
+    m_remoteInputUDPHandler->getRemoteAddress(remoteAddress);
     QList<QString> reverseAPIKeys;
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || force) {
@@ -254,13 +254,13 @@ void SDRdaemonSourceInput::applySettings(const SDRdaemonSourceSettings& settings
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
     {
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
-        qDebug("SDRdaemonSourceInput::applySettings: corrections: DC block: %s IQ imbalance: %s",
+        qDebug("RemoteInput::applySettings: corrections: DC block: %s IQ imbalance: %s",
                 settings.m_dcBlock ? "true" : "false",
                 settings.m_iqCorrection ? "true" : "false");
     }
 
-    m_SDRdaemonUDPHandler->configureUDPLink(settings.m_dataAddress, settings.m_dataPort);
-    m_SDRdaemonUDPHandler->getRemoteAddress(remoteAddress);
+    m_remoteInputUDPHandler->configureUDPLink(settings.m_dataAddress, settings.m_dataPort);
+    m_remoteInputUDPHandler->getRemoteAddress(remoteAddress);
 
     mutexLocker.unlock();
 
@@ -276,7 +276,7 @@ void SDRdaemonSourceInput::applySettings(const SDRdaemonSourceSettings& settings
     m_settings = settings;
     m_remoteAddress = remoteAddress;
 
-    qDebug() << "SDRdaemonSourceInput::applySettings: "
+    qDebug() << "RemoteInput::applySettings: "
             << " m_dataAddress: " << m_settings.m_dataAddress
             << " m_dataPort: " << m_settings.m_dataPort
             << " m_apiAddress: " << m_settings.m_apiAddress
@@ -284,7 +284,7 @@ void SDRdaemonSourceInput::applySettings(const SDRdaemonSourceSettings& settings
             << " m_remoteAddress: " << m_remoteAddress;
 }
 
-int SDRdaemonSourceInput::webapiRunGet(
+int RemoteInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
 {
@@ -293,7 +293,7 @@ int SDRdaemonSourceInput::webapiRunGet(
     return 200;
 }
 
-int SDRdaemonSourceInput::webapiRun(
+int RemoteInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
@@ -312,7 +312,7 @@ int SDRdaemonSourceInput::webapiRun(
     return 200;
 }
 
-int SDRdaemonSourceInput::webapiSettingsGet(
+int RemoteInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
                 QString& errorMessage)
 {
@@ -323,14 +323,14 @@ int SDRdaemonSourceInput::webapiSettingsGet(
     return 200;
 }
 
-int SDRdaemonSourceInput::webapiSettingsPutPatch(
+int RemoteInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage)
 {
     (void) errorMessage;
-    SDRdaemonSourceSettings settings = m_settings;
+    RemoteInputSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("apiAddress")) {
         settings.m_apiAddress = *response.getSdrDaemonSourceSettings()->getApiAddress();
@@ -366,12 +366,12 @@ int SDRdaemonSourceInput::webapiSettingsPutPatch(
         settings.m_reverseAPIDeviceIndex = response.getSdrDaemonSourceSettings()->getReverseApiDeviceIndex();
     }
 
-    MsgConfigureSDRdaemonSource *msg = MsgConfigureSDRdaemonSource::create(settings, force);
+    MsgConfigureRemoteInput *msg = MsgConfigureRemoteInput::create(settings, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureSDRdaemonSource *msgToGUI = MsgConfigureSDRdaemonSource::create(settings, force);
+        MsgConfigureRemoteInput *msgToGUI = MsgConfigureRemoteInput::create(settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -379,7 +379,7 @@ int SDRdaemonSourceInput::webapiSettingsPutPatch(
     return 200;
 }
 
-void SDRdaemonSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRdaemonSourceSettings& settings)
+void RemoteInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RemoteInputSettings& settings)
 {
     response.getSdrDaemonSourceSettings()->setApiAddress(new QString(settings.m_apiAddress));
     response.getSdrDaemonSourceSettings()->setApiPort(settings.m_apiPort);
@@ -406,7 +406,7 @@ void SDRdaemonSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSett
     response.getSdrDaemonSourceSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
-int SDRdaemonSourceInput::webapiReportGet(
+int RemoteInput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
         QString& errorMessage)
 {
@@ -417,20 +417,20 @@ int SDRdaemonSourceInput::webapiReportGet(
     return 200;
 }
 
-void SDRdaemonSourceInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+void RemoteInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
-    response.getSdrDaemonSourceReport()->setCenterFrequency(m_SDRdaemonUDPHandler->getCenterFrequency());
-    response.getSdrDaemonSourceReport()->setSampleRate(m_SDRdaemonUDPHandler->getSampleRate());
-    response.getSdrDaemonSourceReport()->setBufferRwBalance(m_SDRdaemonUDPHandler->getBufferGauge());
+    response.getSdrDaemonSourceReport()->setCenterFrequency(m_remoteInputUDPHandler->getCenterFrequency());
+    response.getSdrDaemonSourceReport()->setSampleRate(m_remoteInputUDPHandler->getSampleRate());
+    response.getSdrDaemonSourceReport()->setBufferRwBalance(m_remoteInputUDPHandler->getBufferGauge());
 
-    QDateTime dt = QDateTime::fromMSecsSinceEpoch(m_SDRdaemonUDPHandler->getTVmSec());
+    QDateTime dt = QDateTime::fromMSecsSinceEpoch(m_remoteInputUDPHandler->getTVmSec());
     response.getSdrDaemonSourceReport()->setDaemonTimestamp(new QString(dt.toString("yyyy-MM-dd  HH:mm:ss.zzz")));
 
-    response.getSdrDaemonSourceReport()->setMinNbBlocks(m_SDRdaemonUDPHandler->getMinNbBlocks());
-    response.getSdrDaemonSourceReport()->setMaxNbRecovery(m_SDRdaemonUDPHandler->getMaxNbRecovery());
+    response.getSdrDaemonSourceReport()->setMinNbBlocks(m_remoteInputUDPHandler->getMinNbBlocks());
+    response.getSdrDaemonSourceReport()->setMaxNbRecovery(m_remoteInputUDPHandler->getMaxNbRecovery());
 }
 
-void SDRdaemonSourceInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SDRdaemonSourceSettings& settings, bool force)
+void RemoteInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RemoteInputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setTx(0);
@@ -480,7 +480,7 @@ void SDRdaemonSourceInput::webapiReverseSendSettings(QList<QString>& deviceSetti
     delete swgDeviceSettings;
 }
 
-void SDRdaemonSourceInput::webapiReverseSendStartStop(bool start)
+void RemoteInput::webapiReverseSendStartStop(bool start)
 {
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
             .arg(m_settings.m_reverseAPIAddress)
@@ -495,13 +495,13 @@ void SDRdaemonSourceInput::webapiReverseSendStartStop(bool start)
     }
 }
 
-void SDRdaemonSourceInput::networkManagerFinished(QNetworkReply *reply)
+void RemoteInput::networkManagerFinished(QNetworkReply *reply)
 {
     QNetworkReply::NetworkError replyError = reply->error();
 
     if (replyError)
     {
-        qWarning() << "SDRdaemonSourceInput::networkManagerFinished:"
+        qWarning() << "RemoteInput::networkManagerFinished:"
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();

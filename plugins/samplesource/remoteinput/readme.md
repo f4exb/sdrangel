@@ -1,8 +1,8 @@
-<h1>SDRdaemon source plugin</h1>
+<h1>Remote input plugin</h1>
 
 <h2>Introduction</h2>
 
-This input sample source plugin gets its samples over tbe network from a SDRangel instance's Daemon channel sink using UDP connection.
+This input sample source plugin gets its samples over tbe network from a SDRangel instance's Remote channel sink using UDP connection.
 
 Forward Error Correction with a Cauchy MDS block erasure codec is used to prevent block loss. This can make the UDP transmission more robust particularly over WiFi links.
 
@@ -20,15 +20,15 @@ The plugin will be built only if the [CM256cc library](https://github.com/f4exb/
 
 <h2>Interface</h2>
 
-![SDR Daemon source input plugin GUI](../../../doc/img/SDRdaemonSource_plugin.png)
+![SDR Remote input plugin GUI](../../../doc/img/RemoteInput_plugin.png)
 
 <h3>1: Common stream parameters</h3>
 
-![SDR Daemon source input stream GUI](../../../doc/img/SDRdaemonSource_plugin_01.png)
+![SDR Remote input stream GUI](../../../doc/img/RemoteInput_plugin_01.png)
 
 <h4>1.1: Frequency</h4>
 
-This is the center frequency in kHz sent in the meta data from the distant SDRdaemon instance and corresponds to the center frequency of reception.
+This is the center frequency in kHz sent in the meta data from the distant SDRangel instance and corresponds to the center frequency of reception.
 
 <h4>1.2: Start/Stop</h4>
 
@@ -47,7 +47,7 @@ Stream I/Q sample rate in kS/s
 
 <h3>2: Auto correction options and stream status</h3>
 
-![SDR Daemon source input stream GUI](../../../doc/img/SDRdaemonSource_plugin_02.png)
+![SDR Remote input stream GUI](../../../doc/img/RemoteInput_plugin_02.png)
 
 <h4>2.1: Auto correction options</h4>
 
@@ -71,7 +71,7 @@ This corresponds to the value shown in the gauges above (9)
   
 <h4>2.4: Date/time</h4>
 
-This is the current timestamp of the block of data sent from the receiver. It is refreshed about every second. The plugin tries to take into account the buffer that is used between the data received from the network and the data effectively used by the system however this may not be extremely accurate. It is based on the timestamps sent from the SDRdaemon utility at the other hand that does not take into account its own buffers.
+This is the current timestamp of the block of data sent from the receiver. It is refreshed about every second. The plugin tries to take into account the buffer that is used between the data received from the network and the data effectively used by the system however this may not be extremely accurate. It is based on the timestamps sent from the Remote sink channel at the other hand that does not take into account its own buffers.
 
 <h3>3: Main buffer R/W pointers gauge</h3>
 
@@ -84,7 +84,7 @@ The system tries to compensate read / write unbalance however at start or when a
 
 <h3>4: Data stream status</h3>
 
-![SDR Daemon source input stream GUI](../../../doc/img/SDRdaemonSource_plugin_04.png)
+![SDR Remote input stream GUI](../../../doc/img/RemoteInput_plugin_04.png)
 
 <h4>4.1: Sample size</h4>
 
@@ -134,7 +134,7 @@ This HH:mm:ss time display shows the time since the reset events counters button
 
 <h3>5: Distant server API address and port</h3>
 
-![SDR Daemon source input stream GUI](../../../doc/img/SDRdaemonSource_plugin_05.png)
+![SDR Remote input stream GUI](../../../doc/img/RemoteInput_plugin_05.png)
 
 <h4>5.1: API connection indicator</h4>
 
@@ -154,7 +154,7 @@ When the return key is hit within the address (5.2) or port (5.3) the changes ar
 
 <h3>6: Local data address and port</h3>
 
-![SDR Daemon source input stream GUI](../../../doc/img/SDRdaemonSource_plugin_06.png)
+![SDR Remote source input stream GUI](../../../doc/img/RemoteInput_plugin_06.png)
 
 <h4>6.1: Data IP address</h4>
 

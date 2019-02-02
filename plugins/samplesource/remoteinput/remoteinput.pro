@@ -9,7 +9,7 @@ CONFIG += plugin
 
 QT += core gui widgets multimedia network opengl
 
-TARGET = inputsdrdaemonsource
+TARGET = remoteinput
 
 CONFIG(MINGW32):LIBCM256CCSRC = "C:\softs\cm256cc"
 CONFIG(MSVC):LIBCM256CCSRC = "C:\softs\cm256cc"
@@ -38,21 +38,21 @@ CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(MSVC):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(macx):INCLUDEPATH += "../../../../../boost_1_69_0"
 
-SOURCES += sdrdaemonsourcebuffer.cpp\
-    sdrdaemonsourcegui.cpp\
-    sdrdaemonsourceinput.cpp\
-    sdrdaemonsourcesettings.cpp\
-    sdrdaemonsourceplugin.cpp\
-    sdrdaemonsourceudphandler.cpp
+SOURCES += remoteinputbuffer.cpp\
+    remoteinputgui.cpp\
+    remoteinput.cpp\
+    remoteinputsettings.cpp\
+    remoteinputplugin.cpp\
+    remoteinputeudphandler.cpp
 
-HEADERS += sdrdaemonsourcebuffer.h\
-    sdrdaemonsourcegui.h\
-    sdrdaemonsourceinput.h\
-    sdrdaemonsourcesettings.h\
-    sdrdaemonsourceplugin.h\
-    sdrdaemonsourceudphandler.h
+HEADERS += remoteinputbuffer.h\
+    remoteinputgui.h\
+    remoteinput.h\
+    remoteinputsettings.h\
+    remoteinputplugin.h\
+    remoteinputeudphandler.h
 
-FORMS += sdrdaemonsourcegui.ui
+FORMS += remoteinputgui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui

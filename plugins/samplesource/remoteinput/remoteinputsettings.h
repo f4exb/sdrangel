@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -14,39 +14,29 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_SDRDAEMONSOURCEPLUGIN_H
-#define INCLUDE_SDRDAEMONSOURCEPLUGIN_H
+#ifndef PLUGINS_SAMPLESOURCE_REMOTEINPUT_REMOTEINPUTSETTINGS_H_
+#define PLUGINS_SAMPLESOURCE_REMOTEINPUT_REMOTEINPUTSETTINGS_H_
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include <QByteArray>
+#include <QString>
 
-#define SDRDAEMONSOURCE_DEVICE_TYPE_ID "sdrangel.samplesource.sdrdaemonsource"
+struct RemoteInputSettings {
+    QString m_apiAddress;
+    quint16 m_apiPort;
+    QString m_dataAddress;
+    quint16 m_dataPort;
+    bool    m_dcBlock;
+    bool    m_iqCorrection;
+    QString m_fileRecordName;
+    bool     m_useReverseAPI;
+    QString  m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
 
-class PluginAPI;
-
-class SDRdaemonSourcePlugin : public QObject, public PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID SDRDAEMONSOURCE_DEVICE_TYPE_ID)
-
-public:
-	explicit SDRdaemonSourcePlugin(QObject* parent = NULL);
-
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
-
-	virtual SamplingDevices enumSampleSources();
-	virtual PluginInstanceGUI* createSampleSourcePluginInstanceGUI(
-	        const QString& sourceId,
-	        QWidget **widget,
-	        DeviceUISet *deviceUISet);
-	virtual DeviceSampleSource* createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI);
-
-	static const QString m_hardwareID;
-    static const QString m_deviceTypeID;
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
+    RemoteInputSettings();
+    void resetToDefaults();
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
 };
 
-#endif // INCLUDE_SDRDAEMONSOURCEPLUGIN_H
+#endif /* PLUGINS_SAMPLESOURCE_REMOTEINPUT_REMOTEINPUTSETTINGS_H_ */

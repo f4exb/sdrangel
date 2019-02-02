@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_SDRDAEMONSOURCEGUI_H
-#define INCLUDE_SDRDAEMONSOURCEGUI_H
+#ifndef INCLUDE_REMOTEINPUTGUI_H
+#define INCLUDE_REMOTEINPUTGUI_H
 
 #include <QTimer>
 #include <QWidget>
@@ -24,7 +24,7 @@
 #include "plugin/plugininstancegui.h"
 #include "util/messagequeue.h"
 
-#include "sdrdaemonsourceinput.h"
+#include "remoteinput.h"
 
 class DeviceUISet;
 class QNetworkAccessManager;
@@ -32,15 +32,15 @@ class QNetworkReply;
 class QJsonObject;
 
 namespace Ui {
-	class SDRdaemonSourceGui;
+	class RemoteInputGui;
 }
 
-class SDRdaemonSourceGui : public QWidget, public PluginInstanceGUI {
+class RemoteInputGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit SDRdaemonSourceGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
-	virtual ~SDRdaemonSourceGui();
+	explicit RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
+	virtual ~RemoteInputGui();
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -55,11 +55,11 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	Ui::SDRdaemonSourceGui* ui;
+	Ui::RemoteInputGui* ui;
 
 	DeviceUISet* m_deviceUISet;
-    SDRdaemonSourceSettings m_settings;        //!< current settings
-	SDRdaemonSourceInput* m_sampleSource;
+    RemoteInputSettings m_settings;        //!< current settings
+	RemoteInput* m_sampleSource;
     bool m_acquisition;
     int m_streamSampleRate;          //!< Sample rate of received stream
     quint64 m_streamCenterFrequency; //!< Center frequency of received stream
@@ -136,4 +136,4 @@ private slots:
     void openDeviceSettingsDialog(const QPoint& p);
 };
 
-#endif // INCLUDE_SDRDAEMONSOURCEGUI_H
+#endif // INCLUDE_REMOTEINPUTGUI_H

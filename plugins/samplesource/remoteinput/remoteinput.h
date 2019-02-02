@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_SDRDAEMONSOURCEINPUT_H
-#define INCLUDE_SDRDAEMONSOURCEINPUT_H
+#ifndef INCLUDE_REMOTEINPUT_H
+#define INCLUDE_REMOTEINPUT_H
 
 #include <ctime>
 #include <iostream>
@@ -26,79 +26,80 @@
 #include <QTimer>
 #include <QNetworkRequest>
 
-#include <dsp/devicesamplesource.h>
-#include "sdrdaemonsourcesettings.h"
+#include "dsp/devicesamplesource.h"
+
+#include "remoteinputsettings.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceSourceAPI;
-class SDRdaemonSourceUDPHandler;
+class RemoteInputUDPHandler;
 class FileRecord;
 
-class SDRdaemonSourceInput : public DeviceSampleSource {
+class RemoteInput : public DeviceSampleSource {
     Q_OBJECT
 public:
-    class MsgConfigureSDRdaemonSource : public Message {
+    class MsgConfigureRemoteInput : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const SDRdaemonSourceSettings& getSettings() const { return m_settings; }
+        const RemoteInputSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureSDRdaemonSource* create(const SDRdaemonSourceSettings& settings, bool force = false)
+        static MsgConfigureRemoteInput* create(const RemoteInputSettings& settings, bool force = false)
         {
-            return new MsgConfigureSDRdaemonSource(settings, force);
+            return new MsgConfigureRemoteInput(settings, force);
         }
 
     private:
-        SDRdaemonSourceSettings m_settings;
+        RemoteInputSettings m_settings;
         bool m_force;
 
-        MsgConfigureSDRdaemonSource(const SDRdaemonSourceSettings& settings, bool force) :
+        MsgConfigureRemoteInput(const RemoteInputSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
         { }
     };
 
-	class MsgConfigureSDRdaemonStreamTiming : public Message {
+	class MsgConfigureRemoteInputTiming : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 
-		static MsgConfigureSDRdaemonStreamTiming* create()
+		static MsgConfigureRemoteInputTiming* create()
 		{
-			return new MsgConfigureSDRdaemonStreamTiming();
+			return new MsgConfigureRemoteInputTiming();
 		}
 
 	private:
 
-		MsgConfigureSDRdaemonStreamTiming() :
+		MsgConfigureRemoteInputTiming() :
 			Message()
 		{ }
 	};
 
-	class MsgReportSDRdaemonAcquisition : public Message {
+	class MsgReportRemoteInputAcquisition : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 		bool getAcquisition() const { return m_acquisition; }
 
-		static MsgReportSDRdaemonAcquisition* create(bool acquisition)
+		static MsgReportRemoteInputAcquisition* create(bool acquisition)
 		{
-			return new MsgReportSDRdaemonAcquisition(acquisition);
+			return new MsgReportRemoteInputAcquisition(acquisition);
 		}
 
 	protected:
 		bool m_acquisition;
 
-		MsgReportSDRdaemonAcquisition(bool acquisition) :
+		MsgReportRemoteInputAcquisition(bool acquisition) :
 			Message(),
 			m_acquisition(acquisition)
 		{ }
 	};
 
-	class MsgReportSDRdaemonSourceStreamData : public Message {
+	class MsgReportRemoteInputStreamData : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
@@ -106,9 +107,9 @@ public:
 		quint64 getCenterFrequency() const { return m_centerFrequency; }
 		uint32_t get_tv_msec() const { return m_tv_msec; }
 
-		static MsgReportSDRdaemonSourceStreamData* create(int sampleRate, quint64 centerFrequency, uint64_t tv_msec)
+		static MsgReportRemoteInputStreamData* create(int sampleRate, quint64 centerFrequency, uint64_t tv_msec)
 		{
-			return new MsgReportSDRdaemonSourceStreamData(sampleRate, centerFrequency, tv_msec);
+			return new MsgReportRemoteInputStreamData(sampleRate, centerFrequency, tv_msec);
 		}
 
 	protected:
@@ -116,7 +117,7 @@ public:
 		quint64 m_centerFrequency;
 		uint64_t m_tv_msec;
 
-		MsgReportSDRdaemonSourceStreamData(int sampleRate, quint64 centerFrequency, uint64_t tv_msec) :
+		MsgReportRemoteInputStreamData(int sampleRate, quint64 centerFrequency, uint64_t tv_msec) :
 			Message(),
 			m_sampleRate(sampleRate),
 			m_centerFrequency(centerFrequency),
@@ -124,7 +125,7 @@ public:
 		{ }
 	};
 
-	class MsgReportSDRdaemonSourceStreamTiming : public Message {
+	class MsgReportRemoteInputStreamTiming : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
@@ -144,7 +145,7 @@ public:
         int getSampleBits() const { return m_sampleBits; }
         int getSampleBytes() const { return m_sampleBytes; }
 
-		static MsgReportSDRdaemonSourceStreamTiming* create(uint64_t tv_msec,
+		static MsgReportRemoteInputStreamTiming* create(uint64_t tv_msec,
 				float bufferLenSec,
                 int32_t bufferGauge,
                 int framesDecodingStatus,
@@ -160,7 +161,7 @@ public:
                 int sampleBits,
                 int sampleBytes)
 		{
-			return new MsgReportSDRdaemonSourceStreamTiming(tv_msec,
+			return new MsgReportRemoteInputStreamTiming(tv_msec,
 					bufferLenSec,
                     bufferGauge,
                     framesDecodingStatus,
@@ -194,7 +195,7 @@ public:
         int      m_sampleBits;
         int      m_sampleBytes;
 
-		MsgReportSDRdaemonSourceStreamTiming(uint64_t tv_msec,
+		MsgReportRemoteInputStreamTiming(uint64_t tv_msec,
 				float bufferLenSec,
                 int32_t bufferGauge,
                 int framesDecodingStatus,
@@ -266,8 +267,8 @@ public:
         { }
     };
 
-	SDRdaemonSourceInput(DeviceSourceAPI *deviceAPI);
-	virtual ~SDRdaemonSourceInput();
+	RemoteInput(DeviceSourceAPI *deviceAPI);
+	virtual ~RemoteInput();
 	virtual void destroy();
 
     virtual void init();
@@ -313,8 +314,8 @@ public:
 private:
 	DeviceSourceAPI *m_deviceAPI;
 	QMutex m_mutex;
-	SDRdaemonSourceSettings m_settings;
-	SDRdaemonSourceUDPHandler* m_SDRdaemonUDPHandler;
+	RemoteInputSettings m_settings;
+	RemoteInputUDPHandler* m_remoteInputUDPHandler;
     QString m_remoteAddress;
 	QString m_deviceDescription;
 	std::time_t m_startingTimeStamp;
@@ -322,14 +323,14 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    void applySettings(const SDRdaemonSourceSettings& settings, bool force = false);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRdaemonSourceSettings& settings);
+    void applySettings(const RemoteInputSettings& settings, bool force = false);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RemoteInputSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SDRdaemonSourceSettings& settings, bool force);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RemoteInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
 };
 
-#endif // INCLUDE_SDRDAEMONSOURCEINPUT_H
+#endif // INCLUDE_REMOTEINPUT_H

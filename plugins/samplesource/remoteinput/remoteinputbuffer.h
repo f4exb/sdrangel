@@ -14,8 +14,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONSOURCEBUFFER_H_
-#define PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONSOURCEBUFFER_H_
+#ifndef PLUGINS_SAMPLESOURCE_REMOTEINPUT_REMOTEINPUTBUFFER_H_
+#define PLUGINS_SAMPLESOURCE_REMOTEINPUT_REMOTEINPUTBUFFER_H_
 
 #include <channel/remotedatablock.h>
 #include <QString>
@@ -25,15 +25,15 @@
 #include "util/movingaverage.h"
 
 
-#define SDRDAEMONSOURCE_UDPSIZE 512               // UDP payload size
-#define SDRDAEMONSOURCE_NBORIGINALBLOCKS 128      // number of sample blocks per frame excluding FEC blocks
-#define SDRDAEMONSOURCE_NBDECODERSLOTS 16         // power of two sub multiple of uint16_t size. A too large one is superfluous.
+#define REMOTEINPUT_UDPSIZE 512               // UDP payload size
+#define REMOTEINPUT_NBORIGINALBLOCKS 128      // number of sample blocks per frame excluding FEC blocks
+#define REMOTEINPUT_NBDECODERSLOTS 16         // power of two sub multiple of uint16_t size. A too large one is superfluous.
 
-class SDRdaemonSourceBuffer
+class RemoteInputBuffer
 {
 public:
-	SDRdaemonSourceBuffer();
-	~SDRdaemonSourceBuffer();
+	RemoteInputBuffer();
+	~RemoteInputBuffer();
 
 	// R/W operations
 	void writeData(char *array); //!< Write data into buffer.
@@ -105,10 +105,10 @@ public:
         }
     }
 
-    static const int framesSize = SDRDAEMONSOURCE_NBDECODERSLOTS * (RemoteNbOrginalBlocks - 1) * RemoteNbBytesPerBlock;
+    static const int framesSize = REMOTEINPUT_NBDECODERSLOTS * (RemoteNbOrginalBlocks - 1) * RemoteNbBytesPerBlock;
 
 private:
-    static const int nbDecoderSlots = SDRDAEMONSOURCE_NBDECODERSLOTS;
+    static const int nbDecoderSlots = REMOTEINPUT_NBDECODERSLOTS;
 
 #pragma pack(push, 1)
     struct BufferFrame
@@ -215,4 +215,4 @@ private:
 
 
 
-#endif /* PLUGINS_SAMPLESOURCE_SDRDAEMONSOURCE_SDRDAEMONSOURCEBUFFER_H_ */
+#endif /* PLUGINS_SAMPLESOURCE_REMOTEINPUT_REMOTEINPUTBUFFER_H_ */

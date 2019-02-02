@@ -15,14 +15,14 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "util/simpleserializer.h"
-#include "sdrdaemonsourcesettings.h"
+#include "remoteinputsettings.h"
 
-SDRdaemonSourceSettings::SDRdaemonSourceSettings()
+RemoteInputSettings::RemoteInputSettings()
 {
     resetToDefaults();
 }
 
-void SDRdaemonSourceSettings::resetToDefaults()
+void RemoteInputSettings::resetToDefaults()
 {
     m_apiAddress = "127.0.0.1";
     m_apiPort = 9091;
@@ -37,7 +37,7 @@ void SDRdaemonSourceSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
 }
 
-QByteArray SDRdaemonSourceSettings::serialize() const
+QByteArray RemoteInputSettings::serialize() const
 {
     SimpleSerializer s(1);
 
@@ -55,7 +55,7 @@ QByteArray SDRdaemonSourceSettings::serialize() const
     return s.final();
 }
 
-bool SDRdaemonSourceSettings::deserialize(const QByteArray& data)
+bool RemoteInputSettings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 

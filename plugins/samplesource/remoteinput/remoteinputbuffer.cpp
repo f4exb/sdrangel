@@ -21,11 +21,11 @@
 #include <algorithm>
 #include <boost/crc.hpp>
 #include <boost/cstdint.hpp>
-#include "sdrdaemonsourcebuffer.h"
+#include "remoteinputbuffer.h"
 
 
 
-SDRdaemonSourceBuffer::SDRdaemonSourceBuffer() :
+RemoteInputBuffer::RemoteInputBuffer() :
         m_decoderIndexHead(nbDecoderSlots/2),
         m_frameHead(0),
         m_curNbBlocks(0),
@@ -55,7 +55,7 @@ SDRdaemonSourceBuffer::SDRdaemonSourceBuffer() :
 
     if (!m_cm256.isInitialized()) {
         m_cm256_OK = false;
-        qDebug() << "SDRdaemonSourceBuffer::SDRdaemonSourceBuffer: cannot initialize CM256 library";
+        qDebug() << "RemoteInputBuffer::RemoteInputBuffer: cannot initialize CM256 library";
     } else {
         m_cm256_OK = true;
     }
@@ -64,14 +64,14 @@ SDRdaemonSourceBuffer::SDRdaemonSourceBuffer() :
     std::fill(m_frames, m_frames + nbDecoderSlots, BufferFrame());
 }
 
-SDRdaemonSourceBuffer::~SDRdaemonSourceBuffer()
+RemoteInputBuffer::~RemoteInputBuffer()
 {
 	if (m_readBuffer) {
 		delete[] m_readBuffer;
 	}
 }
 
-void SDRdaemonSourceBuffer::initDecodeAllSlots()
+void RemoteInputBuffer::initDecodeAllSlots()
 {
     for (int i = 0; i < nbDecoderSlots; i++)
     {
@@ -85,7 +85,7 @@ void SDRdaemonSourceBuffer::initDecodeAllSlots()
     }
 }
 
-void SDRdaemonSourceBuffer::initDecodeSlot(int slotIndex)
+void RemoteInputBuffer::initDecodeSlot(int slotIndex)
 {
     // collect stats before voiding the slot
 
@@ -121,7 +121,7 @@ void SDRdaemonSourceBuffer::initDecodeSlot(int slotIndex)
     memset((void *) m_decoderSlots[slotIndex].m_recoveryBlocks, 0, RemoteNbOrginalBlocks * sizeof(RemoteProtectedBlock));
 }
 
-void SDRdaemonSourceBuffer::initReadIndex()
+void RemoteInputBuffer::initReadIndex()
 {
     m_readIndex = ((m_decoderIndexHead + (nbDecoderSlots/2)) % nbDecoderSlots) * sizeof(BufferFrame);
     m_wrDeltaEstimate = m_framesNbBytes / 2;
@@ -129,7 +129,7 @@ void SDRdaemonSourceBuffer::initReadIndex()
     m_nbWrites = 0;
 }
 
-void SDRdaemonSourceBuffer::rwCorrectionEstimate(int slotIndex)
+void RemoteInputBuffer::rwCorrectionEstimate(int slotIndex)
 {
 	if (m_nbReads >= 40) // check every ~1s as tick is ~50ms
 	{
@@ -162,7 +162,7 @@ void SDRdaemonSourceBuffer::rwCorrectionEstimate(int slotIndex)
 	}
 }
 
-void SDRdaemonSourceBuffer::checkSlotData(int slotIndex)
+void RemoteInputBuffer::checkSlotData(int slotIndex)
 {
     int pseudoWriteIndex = slotIndex * sizeof(BufferFrame);
     m_wrDeltaEstimate = pseudoWriteIndex - m_readIndex;
@@ -181,14 +181,14 @@ void SDRdaemonSourceBuffer::checkSlotData(int slotIndex)
 
     if (!m_decoderSlots[slotIndex].m_decoded)
     {
-        qDebug() << "SDRdaemonSourceBuffer::checkSlotData: incomplete frame:"
+        qDebug() << "RemoteInputBuffer::checkSlotData: incomplete frame:"
                 << " slotIndex: " << slotIndex
                 << " m_blockCount: " << m_decoderSlots[slotIndex].m_blockCount
                 << " m_recoveryCount: " << m_decoderSlots[slotIndex].m_recoveryCount;
     }
 }
 
-void SDRdaemonSourceBuffer::writeData(char *array)
+void RemoteInputBuffer::writeData(char *array)
 {
     RemoteSuperBlock *superBlock = (RemoteSuperBlock *) array;
     int frameIndex = superBlock->m_header.m_frameIndex;
@@ -258,7 +258,7 @@ void SDRdaemonSourceBuffer::writeData(char *array)
 
             if (m_cm256.cm256_decode(m_paramsCM256, m_decoderSlots[decoderIndex].m_cm256DescriptorBlocks)) // CM256 decode
             {
-                qDebug() << "SDRdaemonSourceBuffer::writeData: decode CM256 error:"
+                qDebug() << "RemoteInputBuffer::writeData: decode CM256 error:"
                         << " decoderIndex: " << decoderIndex
                         << " m_blockCount: " << m_decoderSlots[decoderIndex].m_blockCount
                         << " m_originalCount: " << m_decoderSlots[decoderIndex].m_originalCount
@@ -266,7 +266,7 @@ void SDRdaemonSourceBuffer::writeData(char *array)
             }
             else
             {
-                qDebug() << "SDRdaemonSourceBuffer::writeData: decode CM256 success:"
+                qDebug() << "RemoteInputBuffer::writeData: decode CM256 success:"
                         << " decoderIndex: " << decoderIndex
                         << " m_blockCount: " << m_decoderSlots[decoderIndex].m_blockCount
                         << " m_originalCount: " << m_decoderSlots[decoderIndex].m_originalCount
@@ -288,17 +288,17 @@ void SDRdaemonSourceBuffer::writeData(char *array)
                         if (crc32.checksum() == metaData->m_crc32)
                         {
                             m_decoderSlots[decoderIndex].m_metaRetrieved = true;
-                            printMeta("SDRdaemonSourceBuffer::writeData: recovered meta", metaData);
+                            printMeta("RemoteInputBuffer::writeData: recovered meta", metaData);
                         }
                         else
                         {
-                            qDebug() << "SDRdaemonSourceBuffer::writeData: recovered meta: invalid CRC32";
+                            qDebug() << "RemoteInputBuffer::writeData: recovered meta: invalid CRC32";
                         }
                     }
 
                     storeOriginalBlock(decoderIndex, blockIndex, *recoveredBlock);
 
-                    qDebug() << "SDRdaemonSourceBuffer::writeData: recovered block #" << blockIndex;
+                    qDebug() << "RemoteInputBuffer::writeData: recovered block #" << blockIndex;
                 } // restore missing blocks
             } // CM256 decode
         } // recovery
@@ -318,7 +318,7 @@ void SDRdaemonSourceBuffer::writeData(char *array)
                     m_readNbBytes = (sampleRate * metaData->m_sampleBytes * 2) / 20;
                 }
 
-                printMeta("SDRdaemonSourceBuffer::writeData: new meta", metaData); // print for change other than timestamp
+                printMeta("RemoteInputBuffer::writeData: new meta", metaData); // print for change other than timestamp
             }
 
             m_currentMeta = *metaData; // renew current meta
@@ -326,7 +326,7 @@ void SDRdaemonSourceBuffer::writeData(char *array)
     } // decode
 }
 
-uint8_t *SDRdaemonSourceBuffer::readData(int32_t length)
+uint8_t *RemoteInputBuffer::readData(int32_t length)
 {
     uint8_t *buffer = (uint8_t *) m_frames;
     uint32_t readIndex = m_readIndex;
@@ -368,7 +368,7 @@ uint8_t *SDRdaemonSourceBuffer::readData(int32_t length)
     }
 }
 
-void SDRdaemonSourceBuffer::printMeta(const QString& header, RemoteMetaDataFEC *metaData)
+void RemoteInputBuffer::printMeta(const QString& header, RemoteMetaDataFEC *metaData)
 {
 	qDebug() << header << ": "
             << "|" << metaData->m_centerFrequency

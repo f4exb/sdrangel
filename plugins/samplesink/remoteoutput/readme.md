@@ -115,7 +115,7 @@ This is the detail of the ratio shown in the gauge. Each frame block is a block 
 
 <h3>9: Distant server API address and port</h3>
 
-![SDR Remote input stream GUI](../../../doc/img/SDRdaemonSource_plugin_05.png)
+![SDR Remote input stream GUI](../../../doc/img/RemoteInput_plugin_05.png)
 
 <h4>9.1: API connection indicator</h4>
 
@@ -135,7 +135,7 @@ When the return key is hit within the address (9.2) or port (9.3) the changes ar
 
 <h3>10: Local data address and port</h3>
 
-![SDR Remote input stream GUI](../../../doc/img/SDRdaemonSource_plugin_06.png)
+![SDR Remote input stream GUI](../../../doc/img/RemoteInput_plugin_06.png)
 
 <h4>10.1: Data IP address</h4>
 
