@@ -685,6 +685,16 @@ void PlutoSDRInput::getLORange(qint64& minLimit, qint64& maxLimit)
     maxLimit = max;
 }
 
+void PlutoSDRInput::getbbLPRange(quint32& minLimit, quint32& maxLimit)
+{
+    uint32_t min, max;
+    DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
+
+    plutoBox->getbbLPRxRange(min, max);
+    minLimit = min;
+    maxLimit = max;
+}
+
 void PlutoSDRInput::getGain(int& gaindB)
 {
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();

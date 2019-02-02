@@ -53,7 +53,10 @@ PlutoSDRInputGui::PlutoSDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->sampleRate->setValueRange(8, DevicePlutoSDR::srLowLimitFreq, DevicePlutoSDR::srHighLimitFreq);
 
     ui->lpf->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
-    ui->lpf->setValueRange(5, DevicePlutoSDR::bbLPRxLowLimitFreq/1000, DevicePlutoSDR::bbLPRxHighLimitFreq/1000);
+
+    quint32 minLimit, maxLimit;
+    ((PlutoSDRInput *) m_sampleSource)->getbbLPRange(minLimit, maxLimit);
+    ui->lpf->setValueRange(5, minLimit/1000, maxLimit/1000);
 
     ui->lpFIR->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->lpFIR->setValueRange(5, 1U, 56000U); // will be dynamically recalculated
