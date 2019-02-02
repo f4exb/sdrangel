@@ -25,7 +25,7 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
-#include "SWGSDRdaemonSinkReport.h"
+#include "SWGRemoteOutputReport.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -369,8 +369,8 @@ int RemoteOutput::webapiSettingsGet(
                 QString& errorMessage)
 {
     (void) errorMessage;
-    response.setSdrDaemonSinkSettings(new SWGSDRangel::SWGSDRdaemonSinkSettings());
-    response.getSdrDaemonSinkSettings()->init();
+    response.setRemoteOutputSettings(new SWGSDRangel::SWGRemoteOutputSettings());
+    response.getRemoteOutputSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }
@@ -385,43 +385,43 @@ int RemoteOutput::webapiSettingsPutPatch(
     RemoteOutputSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("sampleRate")) {
-        settings.m_sampleRate = response.getSdrDaemonSinkSettings()->getSampleRate();
+        settings.m_sampleRate = response.getRemoteOutputSettings()->getSampleRate();
     }
     if (deviceSettingsKeys.contains("txDelay")) {
-        settings.m_txDelay = response.getSdrDaemonSinkSettings()->getTxDelay();
+        settings.m_txDelay = response.getRemoteOutputSettings()->getTxDelay();
     }
     if (deviceSettingsKeys.contains("nbFECBlocks")) {
-        settings.m_nbFECBlocks = response.getSdrDaemonSinkSettings()->getNbFecBlocks();
+        settings.m_nbFECBlocks = response.getRemoteOutputSettings()->getNbFecBlocks();
     }
     if (deviceSettingsKeys.contains("apiAddress")) {
-        settings.m_apiAddress = *response.getSdrDaemonSinkSettings()->getApiAddress();
+        settings.m_apiAddress = *response.getRemoteOutputSettings()->getApiAddress();
     }
     if (deviceSettingsKeys.contains("apiPort")) {
-        settings.m_apiPort = response.getSdrDaemonSinkSettings()->getApiPort();
+        settings.m_apiPort = response.getRemoteOutputSettings()->getApiPort();
     }
     if (deviceSettingsKeys.contains("dataAddress")) {
-        settings.m_dataAddress = *response.getSdrDaemonSinkSettings()->getDataAddress();
+        settings.m_dataAddress = *response.getRemoteOutputSettings()->getDataAddress();
     }
     if (deviceSettingsKeys.contains("dataPort")) {
-        settings.m_dataPort = response.getSdrDaemonSinkSettings()->getDataPort();
+        settings.m_dataPort = response.getRemoteOutputSettings()->getDataPort();
     }
     if (deviceSettingsKeys.contains("deviceIndex")) {
-        settings.m_deviceIndex = response.getSdrDaemonSinkSettings()->getDeviceIndex();
+        settings.m_deviceIndex = response.getRemoteOutputSettings()->getDeviceIndex();
     }
     if (deviceSettingsKeys.contains("channelIndex")) {
-        settings.m_channelIndex = response.getSdrDaemonSinkSettings()->getChannelIndex();
+        settings.m_channelIndex = response.getRemoteOutputSettings()->getChannelIndex();
     }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getSdrDaemonSinkSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getRemoteOutputSettings()->getUseReverseApi() != 0;
     }
     if (deviceSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getSdrDaemonSinkSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getRemoteOutputSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getSdrDaemonSinkSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getRemoteOutputSettings()->getReverseApiPort();
     }
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getSdrDaemonSinkSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getRemoteOutputSettings()->getReverseApiDeviceIndex();
     }
 
     MsgConfigureRemoteOutput *msg = MsgConfigureRemoteOutput::create(settings, force);
@@ -442,41 +442,41 @@ int RemoteOutput::webapiReportGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setSdrDaemonSinkReport(new SWGSDRangel::SWGSDRdaemonSinkReport());
-    response.getSdrDaemonSinkReport()->init();
+    response.setRemoteOutputReport(new SWGSDRangel::SWGRemoteOutputReport());
+    response.getRemoteOutputReport()->init();
     webapiFormatDeviceReport(response);
     return 200;
 }
 
 void RemoteOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RemoteOutputSettings& settings)
 {
-    response.getSdrDaemonSinkSettings()->setCenterFrequency(m_centerFrequency);
-    response.getSdrDaemonSinkSettings()->setSampleRate(settings.m_sampleRate);
-    response.getSdrDaemonSinkSettings()->setTxDelay(settings.m_txDelay);
-    response.getSdrDaemonSinkSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
-    response.getSdrDaemonSinkSettings()->setApiAddress(new QString(settings.m_apiAddress));
-    response.getSdrDaemonSinkSettings()->setApiPort(settings.m_apiPort);
-    response.getSdrDaemonSinkSettings()->setDataAddress(new QString(settings.m_dataAddress));
-    response.getSdrDaemonSinkSettings()->setDataPort(settings.m_dataPort);
-    response.getSdrDaemonSinkSettings()->setDeviceIndex(settings.m_deviceIndex);
-    response.getSdrDaemonSinkSettings()->setChannelIndex(settings.m_channelIndex);
-    response.getSdrDaemonSinkSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getRemoteOutputSettings()->setCenterFrequency(m_centerFrequency);
+    response.getRemoteOutputSettings()->setSampleRate(settings.m_sampleRate);
+    response.getRemoteOutputSettings()->setTxDelay(settings.m_txDelay);
+    response.getRemoteOutputSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
+    response.getRemoteOutputSettings()->setApiAddress(new QString(settings.m_apiAddress));
+    response.getRemoteOutputSettings()->setApiPort(settings.m_apiPort);
+    response.getRemoteOutputSettings()->setDataAddress(new QString(settings.m_dataAddress));
+    response.getRemoteOutputSettings()->setDataPort(settings.m_dataPort);
+    response.getRemoteOutputSettings()->setDeviceIndex(settings.m_deviceIndex);
+    response.getRemoteOutputSettings()->setChannelIndex(settings.m_channelIndex);
+    response.getRemoteOutputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getSdrDaemonSinkSettings()->getReverseApiAddress()) {
-        *response.getSdrDaemonSinkSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getRemoteOutputSettings()->getReverseApiAddress()) {
+        *response.getRemoteOutputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getSdrDaemonSinkSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getRemoteOutputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getSdrDaemonSinkSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getSdrDaemonSinkSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getRemoteOutputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getRemoteOutputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 void RemoteOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
     uint64_t ts_usecs;
-    response.getSdrDaemonSinkReport()->setBufferRwBalance(m_sampleSourceFifo.getRWBalance());
-    response.getSdrDaemonSinkReport()->setSampleCount(m_remoteOutputThread ? (int) m_remoteOutputThread->getSamplesCount(ts_usecs) : 0);
+    response.getRemoteOutputReport()->setBufferRwBalance(m_sampleSourceFifo.getRWBalance());
+    response.getRemoteOutputReport()->setSampleCount(m_remoteOutputThread ? (int) m_remoteOutputThread->getSamplesCount(ts_usecs) : 0);
 }
 
 void RemoteOutput::tick()
@@ -533,9 +533,9 @@ void RemoteOutput::networkManagerFinished(QNetworkReply *reply)
 
 void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString& answer)
 {
-    if (jsonObject.contains("DaemonSourceReport"))
+    if (jsonObject.contains("RemoteSourceReport"))
     {
-        QJsonObject report = jsonObject["DaemonSourceReport"].toObject();
+        QJsonObject report = jsonObject["RemoteSourceReport"].toObject();
         m_centerFrequency = report["deviceCenterFreq"].toInt() * 1000;
 
         if (!m_remoteOutputThread) {
@@ -601,7 +601,7 @@ void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString&
         m_lastSampleCount = sampleCount;
         m_lastQueueLength = queueLength;
     }
-    else if (jsonObject.contains("sdrDaemonSinkSettings"))
+    else if (jsonObject.contains("remoteOutputSettings"))
     {
         qDebug("RemoteOutput::analyzeApiReply: reply:\n%s", answer.toStdString().c_str());
     }
@@ -623,38 +623,38 @@ void RemoteOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setTx(1);
-    swgDeviceSettings->setDeviceHwType(new QString("SDRdaemonSink"));
-    swgDeviceSettings->setSdrDaemonSinkSettings(new SWGSDRangel::SWGSDRdaemonSinkSettings());
-    SWGSDRangel::SWGSDRdaemonSinkSettings *swgSdrDaemonSinkSettings = swgDeviceSettings->getSdrDaemonSinkSettings();
+    swgDeviceSettings->setDeviceHwType(new QString("RemoteOutput"));
+    swgDeviceSettings->setRemoteOutputSettings(new SWGSDRangel::SWGRemoteOutputSettings());
+    SWGSDRangel::SWGRemoteOutputSettings *swgRemoteOutputSettings = swgDeviceSettings->getRemoteOutputSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
     if (deviceSettingsKeys.contains("sampleRate") || force) {
-        swgSdrDaemonSinkSettings->setSampleRate(settings.m_sampleRate);
+        swgRemoteOutputSettings->setSampleRate(settings.m_sampleRate);
     }
     if (deviceSettingsKeys.contains("txDelay") || force) {
-        swgSdrDaemonSinkSettings->setTxDelay(settings.m_txDelay);
+        swgRemoteOutputSettings->setTxDelay(settings.m_txDelay);
     }
     if (deviceSettingsKeys.contains("nbFECBlocks") || force) {
-        swgSdrDaemonSinkSettings->setNbFecBlocks(settings.m_nbFECBlocks);
+        swgRemoteOutputSettings->setNbFecBlocks(settings.m_nbFECBlocks);
     }
     if (deviceSettingsKeys.contains("apiAddress") || force) {
-        swgSdrDaemonSinkSettings->setApiAddress(new QString(settings.m_apiAddress));
+        swgRemoteOutputSettings->setApiAddress(new QString(settings.m_apiAddress));
     }
     if (deviceSettingsKeys.contains("apiPort") || force) {
-        swgSdrDaemonSinkSettings->setApiPort(settings.m_apiPort);
+        swgRemoteOutputSettings->setApiPort(settings.m_apiPort);
     }
     if (deviceSettingsKeys.contains("dataAddress") || force) {
-        swgSdrDaemonSinkSettings->setDataAddress(new QString(settings.m_dataAddress));
+        swgRemoteOutputSettings->setDataAddress(new QString(settings.m_dataAddress));
     }
     if (deviceSettingsKeys.contains("dataPort") || force) {
-        swgSdrDaemonSinkSettings->setDataPort(settings.m_dataPort);
+        swgRemoteOutputSettings->setDataPort(settings.m_dataPort);
     }
     if (deviceSettingsKeys.contains("deviceIndex") || force) {
-        swgSdrDaemonSinkSettings->setDeviceIndex(settings.m_deviceIndex);
+        swgRemoteOutputSettings->setDeviceIndex(settings.m_deviceIndex);
     }
     if (deviceSettingsKeys.contains("channelIndex") || force) {
-        swgSdrDaemonSinkSettings->setChannelIndex(settings.m_channelIndex);
+        swgRemoteOutputSettings->setChannelIndex(settings.m_channelIndex);
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

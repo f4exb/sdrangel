@@ -1,5 +1,5 @@
-SDRdaemonSinkSettings:
-  description: SDRdaemonSink
+RemoteOutputSettings:
+  description: RemoteOutput
   properties:
     centerFrequency:
       type: integer
@@ -36,8 +36,8 @@ SDRdaemonSinkSettings:
     reverseAPIDeviceIndex:
       type: integer
 
-SDRdaemonSinkReport:
-  description: SDRdaemonSource
+RemoteOutputReport:
+  description: RemoteOutput
   properties:
     bufferRWBalance:
       description: ratio off the mid buffer (positive read leads)

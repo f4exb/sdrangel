@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.4.1"
+  version: "4.4.3"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -1793,8 +1793,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputSettings"
       rtlSdrSettings:
         $ref: "http://localhost:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
-      sdrDaemonSinkSettings:
-        $ref: "http://localhost:8081/api/swagger/include/SDRDaemonSink.yaml#/SDRdaemonSinkSettings"
+      remoteOutputSettings:
+        $ref: "http://localhost:8081/api/swagger/include/RemoteOutput.yaml#/RemoteOutputSettings"
       sdrDaemonSourceSettings:
         $ref: "http://localhost:8081/api/swagger/include/SDRDaemonSource.yaml#/SDRdaemonSourceSettings"
       sdrPlaySettings:
@@ -1846,8 +1846,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputReport"
       rtlSdrReport:
         $ref: "http://localhost:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrReport"
-      sdrDaemonSinkReport:
-        $ref: "http://localhost:8081/api/swagger/include/SDRDaemonSink.yaml#/SDRdaemonSinkReport"
+      remoteOutputReport:
+        $ref: "http://localhost:8081/api/swagger/include/RemoteOutput.yaml#/RemoteOutputReport"
       sdrDaemonSourceReport:
         $ref: "http://localhost:8081/api/swagger/include/SDRDaemonSource.yaml#/SDRdaemonSourceReport"
       sdrPlayReport:

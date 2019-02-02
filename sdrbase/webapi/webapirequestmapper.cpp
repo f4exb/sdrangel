@@ -86,16 +86,6 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             return;
         }
 
-        if (path.startsWith("/sdrdaemon"))
-        {
-            SWGSDRangel::SWGErrorResponse errorResponse;
-            response.setStatus(501,"Not implemented");
-            errorResponse.init();
-            *errorResponse.getMessage() = "Not implemented";
-            response.write(errorResponse.asJson().toUtf8());
-            return;
-        }
-
         if (path == WebAPIAdapterInterface::instanceSummaryURL) {
             instanceSummaryService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceDevicesURL) {
@@ -2115,6 +2105,21 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
+    else if ((*deviceHwType == "RemoteOutput") && (deviceSettings.getTx() != 0))
+    {
+        if (jsonObject.contains("remoteOutputSettings") && jsonObject["remoteOutputSettings"].isObject())
+        {
+            QJsonObject remoteOutputSettingsJsonObject = jsonObject["remoteOutputSettings"].toObject();
+            deviceSettingsKeys = remoteOutputSettingsJsonObject.keys();
+            deviceSettings.setRemoteOutputSettings(new SWGSDRangel::SWGRemoteOutputSettings());
+            deviceSettings.getRemoteOutputSettings()->fromJsonObject(remoteOutputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     else
     {
         return false;
@@ -2483,7 +2488,7 @@ void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& de
     deviceSettings.setPlutoSdrInputSettings(0);
     deviceSettings.setPlutoSdrOutputSettings(0);
     deviceSettings.setRtlSdrSettings(0);
-    deviceSettings.setSdrDaemonSinkSettings(0);
+    deviceSettings.setRemoteOutputSettings(0);
     deviceSettings.setSdrDaemonSourceSettings(0);
     deviceSettings.setSdrPlaySettings(0);
     deviceSettings.setTestSourceSettings(0);
@@ -2502,7 +2507,7 @@ void WebAPIRequestMapper::resetDeviceReport(SWGSDRangel::SWGDeviceReport& device
     deviceReport.setPlutoSdrInputReport(0);
     deviceReport.setPlutoSdrOutputReport(0);
     deviceReport.setRtlSdrReport(0);
-    deviceReport.setSdrDaemonSinkReport(0);
+    deviceReport.setRemoteOutputReport(0);
     deviceReport.setSdrDaemonSourceReport(0);
     deviceReport.setSdrPlayReport(0);
 }

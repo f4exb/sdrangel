@@ -2134,8 +2134,8 @@ margin-bottom: 20px;
     "rtlSdrReport" : {
       "$ref" : "#/definitions/RtlSdrReport"
     },
-    "sdrDaemonSinkReport" : {
-      "$ref" : "#/definitions/SDRdaemonSinkReport"
+    "remoteOutputReport" : {
+      "$ref" : "#/definitions/RemoteOutputReport"
     },
     "sdrDaemonSourceReport" : {
       "$ref" : "#/definitions/SDRdaemonSourceReport"
@@ -2261,8 +2261,8 @@ margin-bottom: 20px;
     "rtlSdrSettings" : {
       "$ref" : "#/definitions/RtlSdrSettings"
     },
-    "sdrDaemonSinkSettings" : {
-      "$ref" : "#/definitions/SDRdaemonSinkSettings"
+    "remoteOutputSettings" : {
+      "$ref" : "#/definitions/RemoteOutputSettings"
     },
     "sdrDaemonSourceSettings" : {
       "$ref" : "#/definitions/SDRdaemonSourceSettings"
@@ -3710,6 +3710,71 @@ margin-bottom: 20px;
   },
   "description" : "An arbitrary range of floating point values"
 };
+            defs.RemoteOutputReport = {
+  "properties" : {
+    "bufferRWBalance" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "ratio off the mid buffer (positive read leads)"
+    },
+    "sampleCount" : {
+      "type" : "integer",
+      "description" : "count of samples that have been sent"
+    }
+  },
+  "description" : "RemoteOutput"
+};
+            defs.RemoteOutputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "uint64"
+    },
+    "sampleRate" : {
+      "type" : "integer"
+    },
+    "txDelay" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "minimum delay in ms between two consecutive packets sending"
+    },
+    "nbFECBlocks" : {
+      "type" : "integer"
+    },
+    "apiAddress" : {
+      "type" : "string"
+    },
+    "apiPort" : {
+      "type" : "integer"
+    },
+    "dataAddress" : {
+      "type" : "string"
+    },
+    "dataPort" : {
+      "type" : "integer"
+    },
+    "deviceIndex" : {
+      "type" : "integer"
+    },
+    "channelIndex" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "RemoteOutput"
+};
             defs.RemoteSinkSettings = {
   "properties" : {
     "nbFECBlocks" : {
@@ -4020,71 +4085,6 @@ margin-bottom: 20px;
     }
   },
   "description" : "SDRplay1"
-};
-            defs.SDRdaemonSinkReport = {
-  "properties" : {
-    "bufferRWBalance" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "ratio off the mid buffer (positive read leads)"
-    },
-    "sampleCount" : {
-      "type" : "integer",
-      "description" : "count of samples that have been sent"
-    }
-  },
-  "description" : "SDRdaemonSource"
-};
-            defs.SDRdaemonSinkSettings = {
-  "properties" : {
-    "centerFrequency" : {
-      "type" : "integer",
-      "format" : "uint64"
-    },
-    "sampleRate" : {
-      "type" : "integer"
-    },
-    "txDelay" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "minimum delay in ms between two consecutive packets sending"
-    },
-    "nbFECBlocks" : {
-      "type" : "integer"
-    },
-    "apiAddress" : {
-      "type" : "string"
-    },
-    "apiPort" : {
-      "type" : "integer"
-    },
-    "dataAddress" : {
-      "type" : "string"
-    },
-    "dataPort" : {
-      "type" : "integer"
-    },
-    "deviceIndex" : {
-      "type" : "integer"
-    },
-    "channelIndex" : {
-      "type" : "integer"
-    },
-    "useReverseAPI" : {
-      "type" : "integer",
-      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
-    },
-    "reverseAPIAddress" : {
-      "type" : "string"
-    },
-    "reverseAPIPort" : {
-      "type" : "integer"
-    },
-    "reverseAPIDeviceIndex" : {
-      "type" : "integer"
-    }
-  },
-  "description" : "SDRdaemonSink"
 };
             defs.SDRdaemonSourceReport = {
   "properties" : {
@@ -5505,7 +5505,7 @@ margin-bottom: 20px;
         <div id="header">
           <div id="api-_">
             <h2 id="welcome-to-apidoc">API and SDK Documentation</h2>
-              <div class="app-desc">Version: 4.4.1</div>
+              <div class="app-desc">Version: 4.4.3</div>
             <hr>
             <div><p>This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube</p>
 <hr />
@@ -24373,7 +24373,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-01-23T00:24:46.985+01:00
+              Generated 2019-02-02T23:09:20.329+01:00
             </div>
           </div>
       </div>

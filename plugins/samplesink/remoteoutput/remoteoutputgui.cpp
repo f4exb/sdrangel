@@ -550,9 +550,9 @@ void RemoteOutputSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
 {
     QString infoLine;
 
-    if (jsonObject.contains("DaemonSourceReport"))
+    if (jsonObject.contains("RemoteSourceReport"))
     {
-        QJsonObject report = jsonObject["DaemonSourceReport"].toObject();
+        QJsonObject report = jsonObject["RemoteSourceReport"].toObject();
         m_deviceCenterFrequency = report["deviceCenterFreq"].toInt() * 1000;
         m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
         ui->centerFrequency->setValue(m_deviceCenterFrequency/1000);
