@@ -9,7 +9,7 @@ CONFIG += plugin
 
 QT += core gui widgets multimedia network opengl
 
-TARGET = remoteoutput
+TARGET = outputremote
 
 CONFIG(MINGW32):LIBCM256CCSRC = "C:\softs\cm256cc"
 CONFIG(MSVC):LIBCM256CCSRC = "C:\softs\cm256cc"
@@ -40,16 +40,16 @@ CONFIG(macx):INCLUDEPATH += "../../../boost_1_69_0"
 
 SOURCES += remoteoutputthread.cpp\
 remoteoutputgui.cpp\
-remtoeoutput.cpp\
-remtoeoutputsettings.cpp\
+remoteoutput.cpp\
+remoteoutputsettings.cpp\
 remoteoutputplugin.cpp\
 udpsinkfec.cpp\
 udpsinkfecworker.cpp
 
 HEADERS += remoteoutputthread.h\
 remoteoutputgui.h\
-remtoeoutput.h\
-remtoeoutputsettings.h\
+remoteoutput.h\
+remoteoutputsettings.h\
 remoteoutputplugin.h\
 udpsinkfec.h\
 udpsinkfecworker.h

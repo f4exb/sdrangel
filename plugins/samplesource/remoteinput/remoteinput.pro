@@ -9,7 +9,7 @@ CONFIG += plugin
 
 QT += core gui widgets multimedia network opengl
 
-TARGET = remoteinput
+TARGET = inputremote
 
 CONFIG(MINGW32):LIBCM256CCSRC = "C:\softs\cm256cc"
 CONFIG(MSVC):LIBCM256CCSRC = "C:\softs\cm256cc"
@@ -43,14 +43,14 @@ SOURCES += remoteinputbuffer.cpp\
     remoteinput.cpp\
     remoteinputsettings.cpp\
     remoteinputplugin.cpp\
-    remoteinputeudphandler.cpp
+    remoteinputudphandler.cpp
 
 HEADERS += remoteinputbuffer.h\
     remoteinputgui.h\
     remoteinput.h\
     remoteinputsettings.h\
     remoteinputplugin.h\
-    remoteinputeudphandler.h
+    remoteinputudphandler.h
 
 FORMS += remoteinputgui.ui
 
