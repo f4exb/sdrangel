@@ -103,16 +103,16 @@ private:
 	PluginAPI::SamplingDeviceRegistrations m_sampleSinkRegistrations; //!< Output sink plugins (one per device kind) register here
 
 	// "Local" sample source device IDs
-    static const QString m_sdrDaemonSourceHardwareID;   //!< SDRdaemon source hardware ID
-    static const QString m_sdrDaemonSourceDeviceTypeID; //!< SDRdaemon source plugin ID
-    static const QString m_fileSourceHardwareID;        //!< FileSource source hardware ID
-    static const QString m_fileSourceDeviceTypeID;      //!< FileSource source plugin ID
+    static const QString m_remoteInputHardwareID;    //!< Remote input hardware ID
+    static const QString m_remoteInputDeviceTypeID;  //!< Remote input plugin ID
+    static const QString m_fileSourceHardwareID;     //!< FileSource source hardware ID
+    static const QString m_fileSourceDeviceTypeID;   //!< FileSource source plugin ID
 
     // "Local" sample sink device IDs
-    static const QString m_sdrDaemonSinkHardwareID;   //!< SDRdaemon source hardware ID
-    static const QString m_sdrDaemonSinkDeviceTypeID; //!< SDRdaemon source plugin ID
-    static const QString m_fileSinkHardwareID;        //!< FileSource source hardware ID
-    static const QString m_fileSinkDeviceTypeID;      //!< FileSink sink plugin ID
+    static const QString m_remoteOutputHardwareID;   //!< Remote output hardware ID
+    static const QString m_remoteOutputDeviceTypeID; //!< Remote output plugin ID
+    static const QString m_fileSinkHardwareID;       //!< FileSource source hardware ID
+    static const QString m_fileSinkDeviceTypeID;     //!< FileSink sink plugin ID
 
 	void loadPluginsDir(const QDir& dir);
 };

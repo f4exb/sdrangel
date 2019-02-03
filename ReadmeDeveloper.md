@@ -40,8 +40,7 @@ At present the following plugins are available:
   - `FCDProPlusXxx` classes in `plugins/samplesource/fcdproplus`: Interface with Funcube Pro+ devices
   - `HackRFXxx` classes in `plugins/samplesource/hackrf`: Interface with HackRF devices
   - `RTLSDRXxx` classes in `plugins/samplesource/rtlsdr`: Interface with RTL-SDR devices
-  - `SDRDaemonXxx` classes in `plugins/samplesource/sdrdaemon`: Special interface collecting I/Q samples from an UDP flow sent by a remote device using [SDRdaemon](https://github.com/f4exb/sdrdaemon).
-  - `SDRDaemonFECXxx` classes in `plugins/samplesource/sdrdaemonfec`: Special interface collecting I/Q samples from an UDP flow sent by a remote device using [SDRdaemon](https://github.com/f4exb/sdrdaemon) with FEC protection of blocks.
+  - `RemoteInput` class in `plugins/samplesource/remoteinput`: Special interface collecting I/Q samples from an UDP flow sent by a remote instance of SDRangel using Remote sink channel.
   - `FileSource` classes in `plugins/samplesource/filesource`: Special interface reading I/Q samples from a file directly into the baseband skipping the downsampling block
 
 <h3>Device sample sink plugins</h3>

@@ -41,7 +41,7 @@ RemoteDataReadQueue::~RemoteDataReadQueue()
 
     while ((data = pop()) != 0)
     {
-        qDebug("SDRDaemonDataReadQueue::~SDRDaemonDataReadQueue: data block was still in queue");
+        qDebug("RemoteDataReadQueue::~RemoteDataReadQueue: data block was still in queue");
         delete data;
     }
 }
@@ -50,7 +50,7 @@ void RemoteDataReadQueue::push(RemoteDataBlock* dataBlock)
 {
     if (length() >= m_maxSize)
     {
-        qWarning("SDRDaemonDataReadQueue::push: queue is full");
+        qWarning("RemoteDataReadQueue::push: queue is full");
         m_full = true; // stop filling the queue
         RemoteDataBlock *data = m_dataReadQueue.takeLast();
         delete data;
@@ -94,7 +94,7 @@ void RemoteDataReadQueue::readSample(Sample& s, bool scaleForTx)
     {
         if (length() >= m_maxSize/2)
         {
-            qDebug("SDRDaemonDataReadQueue::readSample: initial pop new block: queue size: %u", length());
+            qDebug("RemoteDataReadQueue::readSample: initial pop new block: queue size: %u", length());
             m_blockIndex = 1;
             m_dataBlock = m_dataReadQueue.takeFirst();
             convertDataToSample(s, m_blockIndex, m_sampleIndex, scaleForTx);
@@ -135,12 +135,12 @@ void RemoteDataReadQueue::readSample(Sample& s, bool scaleForTx)
             m_dataBlock = 0;
 
             if (length() == 0) {
-                qWarning("SDRDaemonDataReadQueue::readSample: try to pop new block but queue is empty");
+                qWarning("RemoteDataReadQueue::readSample: try to pop new block but queue is empty");
             }
 
             if (length() > 0)
             {
-                //qDebug("SDRDaemonDataReadQueue::readSample: pop new block: queue size: %u", length());
+                //qDebug("RemoteDataReadQueue::readSample: pop new block: queue size: %u", length());
                 m_blockIndex = 1;
                 m_dataBlock = m_dataReadQueue.takeFirst();
                 convertDataToSample(s, m_blockIndex, m_sampleIndex, scaleForTx);

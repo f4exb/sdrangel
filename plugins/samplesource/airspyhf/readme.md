@@ -20,7 +20,7 @@ For controls 10 to 13 to be effective you will need a recent version (up to date
 
 <h3>1: Common stream parameters</h3>
 
-![SDR Daemon source input stream GUI](../../../doc/img/SDRdaemonSource_plugin_01.png)
+![Remote source input stream GUI](../../../doc/img/RemoteInput_plugin_01.png)
 
 <h4>1.1: Frequency</h4>
 
@@ -81,7 +81,7 @@ The I/Q stream from the AirspyHF to host is downsampled by a power of two before
 
 This button opens a dialog to set the transverter mode frequency translation options:
 
-![SDR Daemon source input stream transverter dialog](../../../doc/img/RTLSDR_plugin_xvrt.png)
+![AirspyHF input stream transverter dialog](../../../doc/img/RTLSDR_plugin_xvrt.png)
 
 Note that if you mouse over the button a tooltip appears that displays the translating frequency and if translation is enabled or disabled. When the frequency translation is enabled the button is lit.
 

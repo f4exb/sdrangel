@@ -32,13 +32,13 @@
 
 #include "plugin/pluginmanager.h"
 
-const QString PluginManager::m_sdrDaemonSourceHardwareID = "SDRdaemonSource";
-const QString PluginManager::m_sdrDaemonSourceDeviceTypeID = "sdrangel.samplesource.sdrdaemonsource";
+const QString PluginManager::m_remoteInputHardwareID = "RemoteInput";
+const QString PluginManager::m_remoteInputDeviceTypeID = "sdrangel.samplesource.remoteinput";
 const QString PluginManager::m_fileSourceHardwareID = "FileSource";
 const QString PluginManager::m_fileSourceDeviceTypeID = "sdrangel.samplesource.filesource";
 
-const QString PluginManager::m_sdrDaemonSinkHardwareID = "SDRdaemonSink";
-const QString PluginManager::m_sdrDaemonSinkDeviceTypeID = "sdrangel.samplesink.sdrdaemonsink";
+const QString PluginManager::m_remoteOutputHardwareID = "RemoteOutput";
+const QString PluginManager::m_remoteOutputDeviceTypeID = "sdrangel.samplesink.remoteoutput";
 const QString PluginManager::m_fileSinkHardwareID = "FileSink";
 const QString PluginManager::m_fileSinkDeviceTypeID = "sdrangel.samplesink.filesink";
 

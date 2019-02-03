@@ -18,7 +18,7 @@ The BladeRF Host library is also provided by many Linux distributions (check its
 
 <h3>1: Common stream parameters</h3>
 
-![SDR Daemon source input stream GUI](../../../doc/img/SDRdaemonSource_plugin_01.png)
+![Remote source input stream GUI](../../../doc/img/RemoteInput_plugin_01.png)
 
 <h4>1.1: Frequency</h4>
 

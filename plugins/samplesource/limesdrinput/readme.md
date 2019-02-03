@@ -37,7 +37,7 @@ Then add the following defines on `cmake` command line:
 
 <h3>1: Common stream parameters</h3>
 
-![SDR Daemon source input stream GUI](../../../doc/img/LimeSDRInput_plugin_1.png)
+![LimeSDR source input stream GUI](../../../doc/img/LimeSDRInput_plugin_1.png)
 
 <h4>1.1: Frequency</h4>
 
@@ -71,7 +71,7 @@ LimeSDR is a 2x2 MIMO device so it has two receiving channels. This shows the co
 
 <h3>2: NCO, DC/IQ correction and external clock controls</h3>
 
-![SDR Daemon source input stream GUI](../../../doc/img/LimeSDRInput_plugin_2.png)
+![LimeSDR source input stream GUI](../../../doc/img/LimeSDRInput_plugin_2.png)
 
 <h4>2.1: NCO toggle</h4>
 
@@ -97,7 +97,7 @@ Enables or disables the auto I/Q balance correction. The DC correction must be e
 
 This button opens a dialog to set the transverter mode frequency translation options:
 
-![SDR Daemon source input stream transverter dialog](../../../doc/img/RTLSDR_plugin_xvrt.png)
+![LimeSDR source input stream transverter dialog](../../../doc/img/RTLSDR_plugin_xvrt.png)
 
 Note that if you mouse over the button a tooltip appears that displays the translating frequency and if translation is enabled or disabled. When the frequency translation is enabled the button is lit.
 

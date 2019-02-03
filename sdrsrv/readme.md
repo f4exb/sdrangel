@@ -8,7 +8,7 @@ The main motivations are:
   - be able to run SDRangel on hardware with less CPU/GPU requirements in particular without OpenGL suport. 
   - be used in sophisticated remote transponders or repeaters in a headless server configuration. 
   - possibility to use Docker technology to host SDRangel server instances in a distributed environment.
-  - using [SDRdaemon](https://github.com/f4exb/sdrdaemon) for the RF device interface even more distributed architectures can be supported to share workload in a cluster.   
+  - possibility to use SDRangel remotely for the RF device interface even more distributed architectures can be supported to share workload in a cluster.   
   - using the Web REST API interface developers with web technology skills can implement their own GUI.
 
 <h2>Plugins supported</h2>
@@ -16,7 +16,7 @@ The main motivations are:
   - Rx channels:
     - AM demodulator
     - BFM (Broadcast FM) demodulator
-    - Daemon sink
+    - Remote sink
     - DSD (Digital Vouice) demodulator
     - NFM (Narrowband FM) demodulator
     - SSB demodulator
@@ -26,7 +26,7 @@ The main motivations are:
   - Tx channels:
     - AM modulator
     - ATV modulator
-    - Daemon source
+    - Remote source
     - NFM (Narrowband FM) modulator
     - SSB modulator
     - WFM (Wideband FM) modulator
@@ -44,7 +44,7 @@ The main motivations are:
     - Perseus (24 bit build only)
     - PlutoSDR input
     - RTL-SDR
-    - SDRdaemon source
+    - Remote input
     - SDRplay RSP1
     - Test source
     
@@ -54,7 +54,7 @@ The main motivations are:
     - HackRF output
     - LimeSDR output
     - PlutoSDR output
-    - SDRdaemon sink
+    - Remote output
 
 <h2>Command line options</h2>
 

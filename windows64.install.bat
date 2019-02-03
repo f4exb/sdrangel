@@ -72,7 +72,7 @@ copy plugins\channeltx\modwfm\%1\modwfm.dll %2\plugins\channeltx
 copy plugins\channeltx\udpsink\%1\udpsink.dll %2\plugins\channeltx
 copy plugins\samplesource\filesource\%1\inputfilesource.dll %2\plugins\samplesource
 copy plugins\samplesource\testsource\%1\inputtestsource.dll %2\plugins\samplesource
-copy plugins\samplesource\sdrdaemonsource\%1\inputsdrdaemonsource.dll %2\plugins\samplesource
+copy plugins\samplesource\remoteinput\%1\inputremote.dll %2\plugins\samplesource
 copy plugins\samplesource\rtlsdr\%1\inputrtlsdr.dll %2\plugins\samplesource
 copy plugins\samplesource\hackrfinput\%1\inputhackrf.dll %2\plugins\samplesource
 copy plugins\samplesource\airspy\%1\inputairspy.dll %2\plugins\samplesource

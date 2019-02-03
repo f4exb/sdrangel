@@ -25,7 +25,7 @@
 #include "remotesink.h"
 
 const PluginDescriptor RemoteSinkPlugin::m_pluginDescriptor = {
-    QString("Remote channel Sink"),
+    QString("Remote channel sink"),
     QString("4.4.2"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),

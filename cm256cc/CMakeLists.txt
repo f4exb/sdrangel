@@ -1,11 +1,11 @@
 project(cm256cc)
 
 if (HAS_SSSE3)
-    message(STATUS "SDRdaemonFEC: use SSSE3 SIMD" )
+    message(STATUS "RemoteFEC: use SSSE3 SIMD" )
 elseif (HAS_NEON)
-    message(STATUS "SDRdaemonFEC: use Neon SIMD" )
+    message(STATUS "RemoteFEC: use Neon SIMD" )
 else()
-    message(STATUS "SDRdaemonFEC: Unsupported architecture")
+    message(STATUS "RemoteFEC: Unsupported architecture")
     return()
 endif()
 

@@ -1,3 +1,10 @@
+sdrangel (4.4.3-1) unstable; urgency=medium
+
+  * Migration of SDRDaemon* devices to Remote* devices 
+  * PlutoSDR: get LP filter bandwidth from device
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 03 Feb 2019 10:14:18 +0100
+  
 sdrangel (4.4.2-1) unstable; urgency=medium
 
   * Migration of Daemon* channels to Remote* channels 

@@ -14,7 +14,7 @@ The plugin is present in the core of the software and thus is always present in 
 
 <h3>1: Common stream parameters</h3>
 
-![SDR Daemon source input stream GUI](../../../doc/img/SDRdaemonSource_plugin_01.png)
+![Remote source input stream GUI](../../../doc/img/RemoteInput_plugin_01.png)
 
 <h4>1.1: Frequency</h4>
 

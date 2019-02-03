@@ -39,7 +39,7 @@ RemoteDataQueue::~RemoteDataQueue()
 
 	while ((data = pop()) != 0)
 	{
-		qDebug() << "SDRDaemonDataQueue::~SDRDaemonDataQueue: data block was still in queue";
+		qDebug() << "RemoteDataQueue::~RemoteDataQueue: data block was still in queue";
 		delete data;
 	}
 }

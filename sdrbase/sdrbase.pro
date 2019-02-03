@@ -61,8 +61,8 @@ SOURCES += audio/audiodevicemanager.cpp\
         audio/audionetsink.cpp\
         channel/channelsinkapi.cpp\
         channel/channelsourceapi.cpp\
-        channel/sdrdaemondataqueue.cpp\
-        channel/sdrdaemondatareadqueue.cpp\
+        channel/remotedataqueue.cpp\
+        channel/remotedatareadqueue.cpp\
         commands/command.cpp\
         device/devicesourceapi.cpp\
         device/devicesinkapi.cpp\
@@ -139,9 +139,9 @@ HEADERS  += audio/audiodevicemanager.h\
         audio/audionetsink.h\
         channel/channelsinkapi.h\
         channel/channelsourceapi.h\
-        channel/sdrdaemondataqueue.h\
-        channel/sdrdaemondatareadqueue.h\
-        channel/sdrdaemondatablock.h\
+        channel/remotedataqueue.h\
+        channel/remotedatareadqueue.h\
+        channel/remotedatablock.h\
         commands/command.h\
         device/devicesourceapi.h\
         device/devicesinkapi.h\

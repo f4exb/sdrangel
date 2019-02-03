@@ -21,8 +21,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRDAEMON_CHANNEL_SDRDAEMONDATABLOCK_H_
-#define SDRDAEMON_CHANNEL_SDRDAEMONDATABLOCK_H_
+#ifndef CHANNEL_REMOTEDATABLOCK_H_
+#define CHANNEL_REMOTEDATABLOCK_H_
 
 #include <stdint.h>
 #include <string.h>
@@ -171,4 +171,4 @@ public:
     RemoteSuperBlock     *m_superBlocks;
 };
 
-#endif /* SDRDAEMON_CHANNEL_SDRDAEMONDATABLOCK_H_ */
+#endif /* CHANNEL_REMOTEDATABLOCK_H_ */

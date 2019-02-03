@@ -28,7 +28,7 @@
 #include "remoteinputplugin.h"
 
 const PluginDescriptor RemoteInputPlugin::m_pluginDescriptor = {
-	QString("Remote input"),
+	QString("Remote device input"),
 	QString("4.4.3"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),

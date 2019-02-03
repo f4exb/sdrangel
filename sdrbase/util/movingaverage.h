@@ -1,6 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////////////
-// SDRdaemon - send I/Q samples read from a SDR device over the network via UDP      //
-//             with FEC protection. GNUradio interface.                              //
 //                                                                                   //
 // http://stackoverflow.com/questions/10990618/calculate-rolling-moving-average-in-c //
 //                                                                                   //
@@ -124,4 +122,4 @@ class MovingAverageUtilVar
 };
 
 
-#endif /* GR_SDRDAEMONFEC_LIB_MOVINGAVERAGE_H_ */
+#endif /* _UTIL_MOVINGAVERAGE_H_ */

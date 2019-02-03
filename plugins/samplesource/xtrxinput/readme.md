@@ -48,7 +48,7 @@ For a group the syntax is the same but the group name is prefixed with `@` like:
 
 <h3>1: Common stream parameters</h3>
 
-![SDR Daemon source input stream GUI](../../../doc/img/LimeSDRInput_plugin_1.png)
+![XTRX source input stream GUI](../../../doc/img/LimeSDRInput_plugin_1.png)
 
 <h4>1.1: Frequency</h4>
 
@@ -82,7 +82,7 @@ LimeSDR is a 2x2 MIMO device so it has two receiving channels. This shows the co
 
 <h3>2: NCO, DC/IQ correction and external clock controls</h3>
 
-![SDR Daemon source input stream GUI](../../../doc/img/LimeSDRInput_plugin_2.png)
+![XTRX source input stream GUI](../../../doc/img/LimeSDRInput_plugin_2.png)
 
 <h4>2.1: NCO toggle</h4>
 
