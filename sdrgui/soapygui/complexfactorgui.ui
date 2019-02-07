@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>307</width>
-    <height>51</height>
+    <width>300</width>
+    <height>58</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,8 +18,8 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>0</width>
-    <height>30</height>
+    <width>300</width>
+    <height>58</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -53,6 +53,9 @@
     </item>
     <item>
      <widget class="QCheckBox" name="automatic">
+      <property name="toolTip">
+       <string>Automatic setting</string>
+      </property>
       <property name="layoutDirection">
        <enum>Qt::RightToLeft</enum>
       </property>
@@ -67,6 +70,9 @@ QCheckBox::indicator::checked {background: rgb(255, 157, 38);}</string>
     </item>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
       <property name="leftMargin">
        <number>6</number>
       </property>
@@ -91,7 +97,7 @@ QCheckBox::indicator::checked {background: rgb(255, 157, 38);}</string>
         <item>
          <widget class="QSlider" name="module">
           <property name="toolTip">
-           <string>Normalized module</string>
+           <string>Complex modulus normalized</string>
           </property>
           <property name="minimum">
            <number>0</number>
@@ -143,7 +149,7 @@ QCheckBox::indicator::checked {background: rgb(255, 157, 38);}</string>
         <item>
          <widget class="QSlider" name="arg">
           <property name="toolTip">
-           <string>Argument (angle) in degrees</string>
+           <string>Complex argument (angle) in degrees</string>
           </property>
           <property name="minimum">
            <number>-180</number>

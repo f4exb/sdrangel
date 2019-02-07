@@ -321,6 +321,9 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_ppm">
+     <property name="bottomMargin">
+      <number>4</number>
+     </property>
      <item>
       <widget class="QLabel" name="LOppmLabel">
        <property name="text">
@@ -366,6 +369,13 @@
     </layout>
    </item>
    <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QScrollArea" name="scrollArea">
      <property name="verticalScrollBarPolicy">
       <enum>Qt::ScrollBarAsNeeded</enum>
@@ -379,7 +389,7 @@
         <x>0</x>
         <y>0</y>
         <width>318</width>
-        <height>53</height>
+        <height>49</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">

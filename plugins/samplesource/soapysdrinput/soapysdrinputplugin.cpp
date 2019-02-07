@@ -30,7 +30,7 @@
 
 const PluginDescriptor SoapySDRInputPlugin::m_pluginDescriptor = {
     QString("SoapySDR Input"),
-    QString("4.4.1"),
+    QString("4.4.4"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,

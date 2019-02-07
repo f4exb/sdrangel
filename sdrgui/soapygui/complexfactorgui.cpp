@@ -47,12 +47,16 @@ bool ComplexFactorGUI::getAutomatic() const
 
 void ComplexFactorGUI::setModule(double value)
 {
-    ui->module->setValue((int) (value < -1.0 ? -1.0 : value > 1.0 ? 1.0 : value)*100.0f);
+    double modValue = value < -1.0 ? -1.0 : value > 1.0 ? 1.0 : value;
+    ui->module->setValue((int) modValue*100.0f);
+    ui->moduleText->setText(tr("%1").arg(modValue, 0, 'f', 2));
 }
 
 void ComplexFactorGUI::setArgument(double value)
 {
-    ui->module->setValue((int) (value < -180.0 ? -180.0 : value > 180.0 ? 180.0 : value));
+    int argValue = (int) (value < -180.0 ? -180.0 : value > 180.0 ? 180.0 : value);
+    ui->arg->setValue(argValue);
+    ui->argText->setText(tr("%1").arg(value));
 }
 
 void ComplexFactorGUI::setAutomatic(bool automatic)
@@ -84,10 +88,12 @@ void ComplexFactorGUI::on_automatic_toggled(bool set)
 
 void ComplexFactorGUI::on_module_valueChanged(int value)
 {
-    emit moduleChanged(value / 100.0f);
+    ui->moduleText->setText(tr("%1").arg(value/100.0f, 0, 'f', 2));
+    emit moduleChanged(value/100.0f);
 }
 
 void ComplexFactorGUI::on_arg_valueChanged(int value)
 {
+    ui->argText->setText(tr("%1").arg(value));
     emit argumentChanged(value);
 }
