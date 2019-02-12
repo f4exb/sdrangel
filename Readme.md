@@ -83,51 +83,22 @@ Plese consult the [Wiki page for compilation in Linux](https://github.com/f4exb/
 To be sure you will need at least Qt version 5.5. It definitely does not work with versions earlier than 5.3 but neither 5.3 nor 5.4 were tested.
 
   - Linux builds are made with 5.5.1 (Xenial), 5.9 (Artful, Stretch, Bionic) and 5.11 (Cosmic)
-  - Windows build is made with 5.10.1 in 32 bit mode and has Qt ANGLE support (OpenGL emulation with DirectX)
+  - Windows build is made with 5.10.1 and has Qt ANGLE support (OpenGL emulation with DirectX)
 
 &#9758; From version 3.12.0 the Linux binaries are built with the 24 bit Rx option.
 
 <h2>Ubuntu</h2>
 
-<h3>Prerequisites for 16.04 LTS</h3>
-
-For DATV demodulator support you need to install the ffmpeg v.3 suite. Therefore you will need to add this PPA to the sources list using this command:
-`sudo add-apt-repository ppa:jonathonf/ffmpeg-3`
-
-Then do `sudo apt-get update` and go to the next step. Alternatively if you have an older version of ffmpeg suite already installed just do `sudo apt-get dist-upgrde`.
-
-<h3>With newer versions just do:</h3>
-
   - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libsqlite3-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev`
-  - `mkdir build && cd build && cmake ../ && make`
-
-`librtlsdr-dev` is in the `universe` repo. (utopic 14.10 amd64.)
-
-<h2>Mint</h2>
-
-Tested with Cinnamon 17.2. Since it is based on Ubuntu 14.04 LTS please follow instructions for this distribution (paragraph just above).
 
 <h2>Debian</h2>
 
-For any version of Debian you will need Qt5.
-
-Debian 7 "wheezy" uses Qt4. Qt5 is available from the "wheezy-backports" repo, but this will remove Qt4. Debian 8 "jessie" uses Qt5.
-
-For Debian Jessie or Stretch:
-
-`sudo apt-get install cmake g++ pkg-config libfftw3-dev libusb-1.0-0-dev libusb-dev qt5-default qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libsqlite3-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev`
-
-`mkdir build && cd build && cmake ../ && make`
+  - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libusb-1.0-0-dev libusb-dev qt5-default qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libsqlite3-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev`
 
 <h2>openSUSE</h2>
 
-This has been tested with the Leap 42.3 distribution:
-
-`sudo zypper install Mesa-libGL1 Mesa-libEGL-devel Mesa-libGL-devel Mesa-libGLESv1_CM-devel Mesa-libGLESv2-devel Mesa-libGLESv3-devel Mesa-libglapi-devel libOSMesa-devel`
-
-`sudo zypper install cmake fftw3-devel gcc-c++ libusb-1_0-devel libqt5-qtbase-devel libQt5OpenGL-devel libqt5-qtmultimedia-devel libqt5-qttools-devel libQt5Network-devel libQt5Widgets-devel boost-devel alsa-devel pulseaudio opencv-devel`
-
-Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
+  - `sudo zypper install Mesa-libGL1 Mesa-libEGL-devel Mesa-libGL-devel Mesa-libGLESv1_CM-devel Mesa-libGLESv2-devel Mesa-libGLESv3-devel Mesa-libglapi-devel libOSMesa-devel`
+  - `sudo zypper install cmake fftw3-devel gcc-c++ libusb-1_0-devel libqt5-qtbase-devel libQt5OpenGL-devel libqt5-qtmultimedia-devel libqt5-qttools-devel libQt5Network-devel libQt5Widgets-devel boost-devel alsa-devel pulseaudio opencv-devel`
 
   - Note1: if you are on Leap you will need a more recent g++ compiler so in place of `gcc-c++` use `gcc6-c++` or `gcc7-c++` then add the following in the cmake command: `-DCMAKE_C_COMPILER=/usr/bin/gcc-7 -DCMAKE_CXX_COMPILER=/usr/bin/g++-7` (for gcc 7) and then `-DCMAKE_INSTALL_PREFIX:PATH=...` for the custom install path (not `-DCMAKE_INSTALL_PREFIX=...`)
   - Note2 for udev rules: installed udev rules for BladeRF and HackRF are targeted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in openSUSE. To fix it you can either:
@@ -143,8 +114,6 @@ This has been tested with Fedora 23 and 22:
   - `sudo dnf install mesa-libGL-devel`
   - `sudo dnf install cmake gcc-c++ pkgconfig fftw-devel libusb-devel qt5-qtbase-devel qt5-qtmultimedia-devel qt5-qttools-devel boost-devel pulseaudio alsa-lib-devel`
 
-Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
-
   - Note for udev rules: the same as for openSUSE applies. This is detailed in the previous paragraph for openSUSE.
 
 <h2>Arch Linux / Manjaro</h2>
@@ -152,8 +121,6 @@ Then you should be all set to build the software with `cmake` and `make` as disc
 Tested with the 15.09 version with LXDE desktop (community supported). The exact desktop environment should not matter anyway. Prerequisites should be similar for Arch and all derivatives.
 
 `sudo pacman -S cmake pkg-config fftw qt5-multimedia qt5-tools qt5-base libusb boost boost-libs pulseaudio`
-
-Then you should be all set to build the software with `cmake` and `make` as discussed earlier.
 
   - Note1 for udev rules: the same as for openSUSE and Fedora applies.
   - Note2: Two package are avaliable in the AUR (thanks Mikos!), [sdrangel](https://aur.archlinux.org/packages/sdrangel), which provides the lastest tagged release (stable), and [sdrangel-git](https://aur.archlinux.org/packages/sdrangel-git), which builds the latest commit from this repository (unstable).
@@ -175,6 +142,8 @@ Contributors welcome!
 <h1>Supported hardware</h1>
 
 &#9758; Details on how to compile support libraries and integrate them in the final build of SDRangel are detailed in the [Wiki page for compilation in Linux](https://github.com/f4exb/sdrangel/wiki/Compile-from-source-in-Linux) mentioned earlier.
+
+The notes below are left for complementary information
 
 <h2>Airspy</h2>
 
@@ -269,8 +238,6 @@ Experimental and Linux only. Compile from source.
 [XTRX](https://xtrx.io) is supported through the set of [xtrx libraries](https://github.com/xtrx-sdr/images).
 
 Before starting SDRangel you have to add the library directory to the `LD_LIBRARY_PATH` variable for example with `export LD_LIBRARY_PATH=/opt/install/xtrx-images/lib:$LD_LIBRARY_PATH`.
-
-&#9888; There are USB errors when first starting with XTRX after plugging it in. The only way to work around this is to restart SDRangel application.
 
 &#9888; Reception may stall sometimes particularly with sample rates lower than 5 MS/s and also after changes. You may need to stop and restart the device (stop/start button) to recover.
 
