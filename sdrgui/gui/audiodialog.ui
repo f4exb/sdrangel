@@ -255,6 +255,11 @@
            </item>
            <item>
             <property name="text">
+             <string>L8</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
              <string>PCMA/8k</string>
             </property>
            </item>
@@ -539,6 +544,39 @@
   <tabstop>audioOutTree</tabstop>
  </tabstops>
  <resources>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
   <include location="../resources/res.qrc"/>
  </resources>
  <connections>

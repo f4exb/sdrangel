@@ -119,6 +119,9 @@ void AudioNetSink::setParameters(Codec codec, bool stereo, int sampleRate)
             m_audioCompressor.fillULaw();
             m_rtpBufferAudio->setPayloadInformation(RTPSink::PayloadPCMU8, sampleRate);
             break;
+        case CodecL8:
+            m_rtpBufferAudio->setPayloadInformation(RTPSink::PayloadL8, sampleRate);
+            break;
         case CodecL16: // actually no codec
         default:
             m_rtpBufferAudio->setPayloadInformation(stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Mono, sampleRate);
@@ -148,6 +151,13 @@ void AudioNetSink::write(qint16 sample)
                 m_bufferIndex += sizeof(qint8);
             }
                 break;
+            case CodecL8:
+            {
+                qint8 *p = (qint8*) &m_data[m_bufferIndex];
+                *p = sample / 256;
+                m_bufferIndex += sizeof(qint8);
+            }
+                break;
             case CodecL16:
             default:
             {
@@ -167,6 +177,12 @@ void AudioNetSink::write(qint16 sample)
         case CodecPCMU:
         {
             qint8 p = m_audioCompressor.compress8(sample);
+            m_rtpBufferAudio->write((uint8_t *) &p);
+        }
+            break;
+        case CodecL8:
+        {
+            qint8 p = sample / 256;
             m_rtpBufferAudio->write((uint8_t *) &p);
         }
             break;

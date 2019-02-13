@@ -84,26 +84,32 @@ void RTPSink::setPayloadInformation(PayloadType payloadType, int sampleRate)
         m_sampleBytes = 1;
         m_rtpSession.SetDefaultPayloadType(8);
         m_packetSamples = m_sampleRate / 50; // 20ms packet samples
-        timestampinc = m_sampleRate / 50; // 8k -> 160 packets in 20ms
+        timestampinc = m_sampleRate / 50;    // 1 channel
         break;
     case PayloadPCMU8:
         m_sampleBytes = 1;
         m_rtpSession.SetDefaultPayloadType(0);
         m_packetSamples = m_sampleRate / 50; // 20ms packet samples
-        timestampinc = m_sampleRate / 50; // 8k -> 160 packets in 20ms
+        timestampinc = m_sampleRate / 50;    // 1 channel
+        break;
+    case PayloadL8:
+        m_sampleBytes = 1;
+        m_rtpSession.SetDefaultPayloadType(96);
+        m_packetSamples = m_sampleRate / 50; // 20ms packet samples
+        timestampinc = m_sampleRate / 50;    // 1 channel
         break;
     case PayloadL16Stereo:
         m_sampleBytes = 4;
         m_rtpSession.SetDefaultPayloadType(96);
         m_packetSamples = m_sampleRate / 50; // 20ms packet samples
-        timestampinc = m_sampleRate / 100;
+        timestampinc = m_sampleRate / 100;   // 2 channels
         break;
     case PayloadL16Mono:
     default:
         m_sampleBytes = 2;
         m_rtpSession.SetDefaultPayloadType(96);
         m_packetSamples = m_sampleRate / 50; // 20ms packet samples
-        timestampinc = m_sampleRate / 50;
+        timestampinc = m_sampleRate / 50;    // 1 channel
         break;
     }
 
@@ -220,7 +226,11 @@ void RTPSink::write(const uint8_t *sampleByte)
             qCritical("RTPSink::write: cannot write packet: %s", qrtplib::RTPGetErrorString(status).c_str());
         }
 
-        writeNetBuf(&m_byteBuffer[0], sampleByte,  elemLength(m_payloadType), m_sampleBytes, m_endianReverse);
+        writeNetBuf(&m_byteBuffer[0], 
+            sampleByte,  
+            elemLength(m_payloadType), 
+            m_sampleBytes, 
+            m_endianReverse);
         m_sampleBufferIndex = 1;
     }
 }

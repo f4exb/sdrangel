@@ -40,9 +40,10 @@ public:
 
     typedef enum
     {
-        CodecL16,
-        CodecPCMA,
-        CodecPCMU
+        CodecL16,  //!< Linear 16 bit samples (no formatting)
+        CodecL8,   //!< Linear 8 bit samples
+        CodecPCMA, //!< PCM A-law 8 bit samples
+        CodecPCMU  //!< PCM Mu-law 8 bit samples
     } Codec;
 
     AudioNetSink(QObject *parent); //!< without RTP

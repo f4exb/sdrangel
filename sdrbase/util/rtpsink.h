@@ -42,6 +42,7 @@ public:
     {
         PayloadL16Mono,
         PayloadL16Stereo,
+        PayloadL8,
         PayloadPCMA8,
         PayloadPCMU8
     } PayloadType;

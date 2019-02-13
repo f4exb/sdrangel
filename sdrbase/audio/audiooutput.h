@@ -43,9 +43,10 @@ public:
 
     enum UDPChannelCodec
     {
-        UDPCodecL16, //!< Linear 16 bit (no codec)
-        UDPCodecALaw,
-        UDPCodecULaw
+        UDPCodecL16,   //!< Linear 16 bit (no codec)
+		UDPCodecL8,    //!< Linear 8 bit
+        UDPCodecALaw,  //!< PCM A-law 8 bit
+        UDPCodecULaw   //!< PCM Mu-law 8 bit
     };
 
 	AudioOutput();
