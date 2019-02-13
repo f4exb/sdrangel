@@ -42,15 +42,30 @@ QDataStream& operator>>(QDataStream& ds, AudioDeviceManager::InputDeviceInfo& in
 
 QDataStream& operator<<(QDataStream& ds, const AudioDeviceManager::OutputDeviceInfo& info)
 {
-    ds << info.sampleRate << info.udpAddress << info.udpPort << info.copyToUDP << info.udpUseRTP << (int) info.udpChannelMode;
+    ds << info.sampleRate
+        << info.udpAddress
+        << info.udpPort
+        << info.copyToUDP
+        << info.udpUseRTP
+        << (int) info.udpChannelMode
+        << (int) info.udpChannelCodec;
     return ds;
 }
 
 QDataStream& operator>>(QDataStream& ds, AudioDeviceManager::OutputDeviceInfo& info)
 {
     int intChannelMode;
-    ds >> info.sampleRate >> info.udpAddress >> info.udpPort >> info.copyToUDP >> info.udpUseRTP >> intChannelMode;
+    int intChannelCodec;
+
+    ds >> info.sampleRate
+        >> info.udpAddress
+        >> info.udpPort
+        >> info.copyToUDP
+        >> info.udpUseRTP
+        >> intChannelMode
+        >> intChannelCodec;
     info.udpChannelMode = (AudioOutput::UDPChannelMode) intChannelMode;
+    info.udpChannelCodec = (AudioOutput::UDPChannelCodec) intChannelCodec;
     return ds;
 }
 
@@ -346,6 +361,7 @@ void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
     bool copyAudioToUDP;
     bool udpUseRTP;
     AudioOutput::UDPChannelMode udpChannelMode;
+    AudioOutput::UDPChannelCodec udpChannelCodec;
     QString deviceName;
 
     if (getOutputDeviceName(outputDeviceIndex, deviceName))
@@ -358,6 +374,7 @@ void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
             copyAudioToUDP = false;
             udpUseRTP = false;
             udpChannelMode = AudioOutput::UDPChannelLeft;
+            udpChannelCodec = AudioOutput::UDPCodecL16;
         }
         else
         {
@@ -367,6 +384,7 @@ void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
             copyAudioToUDP = m_audioOutputInfos[deviceName].copyToUDP;
             udpUseRTP = m_audioOutputInfos[deviceName].udpUseRTP;
             udpChannelMode = m_audioOutputInfos[deviceName].udpChannelMode;
+            udpChannelCodec = m_audioOutputInfos[deviceName].udpChannelCodec;
         }
 
         m_audioOutputs[outputDeviceIndex]->start(outputDeviceIndex, sampleRate);
@@ -376,6 +394,7 @@ void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
         m_audioOutputInfos[deviceName].copyToUDP = copyAudioToUDP;
         m_audioOutputInfos[deviceName].udpUseRTP = udpUseRTP;
         m_audioOutputInfos[deviceName].udpChannelMode = udpChannelMode;
+        m_audioOutputInfos[deviceName].udpChannelCodec = udpChannelCodec;
     }
     else
     {
@@ -588,7 +607,7 @@ void AudioDeviceManager::setOutputDeviceInfo(int outputDeviceIndex, const Output
     audioOutput->setUdpDestination(deviceInfo.udpAddress, deviceInfo.udpPort);
     audioOutput->setUdpUseRTP(deviceInfo.udpUseRTP);
     audioOutput->setUdpChannelMode(deviceInfo.udpChannelMode);
-    audioOutput->setUdpChannelFormat(deviceInfo.udpChannelMode == AudioOutput::UDPChannelStereo, deviceInfo.sampleRate);
+    audioOutput->setUdpChannelFormat(deviceInfo.udpChannelCodec, deviceInfo.udpChannelMode == AudioOutput::UDPChannelStereo, deviceInfo.sampleRate);
 
     qDebug("AudioDeviceManager::setOutputDeviceInfo: index: %d device: %s updated",
             outputDeviceIndex, qPrintable(deviceName));
@@ -756,6 +775,7 @@ void AudioDeviceManager::debugAudioOutputInfos() const
                 << " udpPort: " << it.value().udpPort
                 << " copyToUDP: " << it.value().copyToUDP
                 << " udpUseRTP: " << it.value().udpUseRTP
-                << " udpChannelMode: " << (int) it.value().udpChannelMode;
+                << " udpChannelMode: " << (int) it.value().udpChannelMode
+                << " udpChannelCodec: " << (int) it.value().udpChannelCodec;
     }
 }

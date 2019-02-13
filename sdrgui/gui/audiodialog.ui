@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>472</width>
-    <height>349</height>
+    <width>560</width>
+    <height>400</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>560</width>
+    <height>400</height>
+   </size>
   </property>
   <property name="font">
    <font>
@@ -227,6 +233,34 @@
            <item>
             <property name="text">
              <string>Stereo</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="outputUDPChannelCodec">
+           <property name="minimumSize">
+            <size>
+             <width>85</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Encoding</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>L16</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>PCMA/8k</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>PCMU/8k</string>
             </property>
            </item>
           </widget>

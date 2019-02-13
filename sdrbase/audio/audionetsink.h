@@ -19,6 +19,7 @@
 #define SDRBASE_AUDIO_AUDIONETSINK_H_
 
 #include "dsp/dsptypes.h"
+#include "audiocompressor.h"
 #include "export.h"
 
 #include <QObject>
@@ -37,6 +38,13 @@ public:
         SinkRTP
     } SinkType;
 
+    typedef enum
+    {
+        CodecL16,
+        CodecPCMA,
+        CodecPCMU
+    } Codec;
+
     AudioNetSink(QObject *parent); //!< without RTP
     AudioNetSink(QObject *parent, int sampleRate, bool stereo); //!< with RTP
     ~AudioNetSink();
@@ -44,11 +52,11 @@ public:
     void setDestination(const QString& address, uint16_t port);
     void addDestination(const QString& address, uint16_t port);
     void deleteDestination(const QString& address, uint16_t port);
-    void setParameters(bool stereo, int sampleRate);
+    void setParameters(Codec codec, bool stereo, int sampleRate);
 
     void write(qint16 sample);
     void write(qint16 lSample, qint16 rSample);
-    void write(AudioSample* samples, uint32_t numSamples);
+    //void write(AudioSample* samples, uint32_t numSamples);
 
     bool isRTPCapable() const;
     bool selectType(SinkType type);
@@ -59,8 +67,10 @@ public:
 
 protected:
     SinkType m_type;
+    Codec m_codec;
     QUdpSocket *m_udpSocket;
     RTPSink *m_rtpBufferAudio;
+    AudioCompressor m_audioCompressor;
     char m_data[65536];
     unsigned int m_bufferIndex;
     QHostAddress m_address;

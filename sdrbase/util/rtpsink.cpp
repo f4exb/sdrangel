@@ -76,24 +76,37 @@ void RTPSink::setPayloadInformation(PayloadType payloadType, int sampleRate)
     uint32_t timestampinc;
     QMutexLocker locker(&m_mutex);
 
-    qDebug("RTPSink::setPayloadInformation: %d sampleRate: %d", payloadType, sampleRate);
+    qDebug("RTPSink::setPayloadInformation: payloadType: %d sampleRate: %d", payloadType, sampleRate);
 
     switch (payloadType)
     {
+    case PayloadPCMA8:
+        m_sampleBytes = 1;
+        m_rtpSession.SetDefaultPayloadType(8);
+        m_packetSamples = m_sampleRate / 50; // 20ms packet samples
+        timestampinc = m_sampleRate / 50; // 8k -> 160 packets in 20ms
+        break;
+    case PayloadPCMU8:
+        m_sampleBytes = 1;
+        m_rtpSession.SetDefaultPayloadType(0);
+        m_packetSamples = m_sampleRate / 50; // 20ms packet samples
+        timestampinc = m_sampleRate / 50; // 8k -> 160 packets in 20ms
+        break;
     case PayloadL16Stereo:
         m_sampleBytes = 4;
         m_rtpSession.SetDefaultPayloadType(96);
+        m_packetSamples = m_sampleRate / 50; // 20ms packet samples
         timestampinc = m_sampleRate / 100;
         break;
     case PayloadL16Mono:
     default:
         m_sampleBytes = 2;
         m_rtpSession.SetDefaultPayloadType(96);
+        m_packetSamples = m_sampleRate / 50; // 20ms packet samples
         timestampinc = m_sampleRate / 50;
         break;
     }
 
-    m_packetSamples = m_sampleRate/50; // 20ms packet samples
     m_bufferSize = m_packetSamples * m_sampleBytes;
 
     if (m_byteBuffer) {
@@ -299,6 +312,10 @@ unsigned int RTPSink::elemLength(PayloadType payloadType)
 {
     switch (payloadType)
     {
+    case PayloadPCMA8:
+    case PayloadPCMU8:
+        return sizeof(int8_t);
+        break;
     case PayloadL16Stereo:
         return sizeof(int16_t);
         break;

@@ -29,6 +29,7 @@ AudioOutput::AudioOutput() :
 	m_audioNetSink(0),
 	m_copyAudioToUdp(false),
 	m_udpChannelMode(UDPChannelLeft),
+	m_udpChannelCodec(UDPCodecL16),
 	m_audioUsageCount(0),
 	m_onExit(false),
 	m_audioFifos()
@@ -200,10 +201,12 @@ void AudioOutput::setUdpChannelMode(UDPChannelMode udpChannelMode)
     m_udpChannelMode = udpChannelMode;
 }
 
-void AudioOutput::setUdpChannelFormat(bool stereo, int sampleRate)
+void AudioOutput::setUdpChannelFormat(UDPChannelCodec udpChannelCodec, bool stereo, int sampleRate)
 {
+    m_udpChannelCodec = udpChannelCodec;
+
     if (m_audioNetSink) {
-        m_audioNetSink->setParameters(stereo, sampleRate);
+        m_audioNetSink->setParameters((AudioNetSink::Codec) m_udpChannelCodec, stereo, sampleRate);
     }
 }
 

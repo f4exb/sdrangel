@@ -28,10 +28,20 @@ public:
     ~AudioCompressor();
     void fillLUT();   //!< 4 bands
     void fillLUT2();  //!< 8 bands (default)
+    void fillALaw();  //!< A-law compression to 8 bits
+    void fillULaw();  //!< u-law compression to 8 bits
     int16_t compress(int16_t sample);
+    int8_t compress8(int16_t sample);
 
 private:
+    int8_t ALaw_Encode(int16_t number);
+    int8_t MuLaw_Encode(int16_t number);
+
     int16_t m_lut[32768];
+    static const uint16_t ALAW_MAX;
+    static const uint16_t MULAW_MAX;
+    static const uint16_t MULAW_BIAS;
+
 };
 
 

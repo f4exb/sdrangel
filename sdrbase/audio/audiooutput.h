@@ -41,6 +41,13 @@ public:
         UDPChannelStereo
     };
 
+    enum UDPChannelCodec
+    {
+        UDPCodecL16, //!< Linear 16 bit (no codec)
+        UDPCodecALaw,
+        UDPCodecULaw
+    };
+
 	AudioOutput();
 	virtual ~AudioOutput();
 
@@ -58,7 +65,7 @@ public:
 	void setUdpCopyToUDP(bool copyToUDP);
 	void setUdpUseRTP(bool useRTP);
 	void setUdpChannelMode(UDPChannelMode udpChannelMode);
-	void setUdpChannelFormat(bool stereo, int sampleRate);
+	void setUdpChannelFormat(UDPChannelCodec udpChannelCodec, bool stereo, int sampleRate);
 
 private:
 	QMutex m_mutex;
@@ -66,6 +73,7 @@ private:
 	AudioNetSink* m_audioNetSink;
 	bool m_copyAudioToUdp;
 	UDPChannelMode m_udpChannelMode;
+	UDPChannelCodec m_udpChannelCodec;
 	uint m_audioUsageCount;
 	bool m_onExit;
 

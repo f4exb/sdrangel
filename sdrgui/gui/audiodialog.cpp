@@ -219,6 +219,7 @@ void AudioDialogX::updateOutputDisplay()
     ui->outputUDPCopy->setChecked(m_outputDeviceInfo.copyToUDP);
     ui->outputUDPUseRTP->setChecked(m_outputDeviceInfo.udpUseRTP);
     ui->outputUDPChannelMode->setCurrentIndex((int) m_outputDeviceInfo.udpChannelMode);
+    ui->outputUDPChannelCodec->setCurrentIndex((int) m_outputDeviceInfo.udpChannelCodec);
 }
 
 void AudioDialogX::updateOutputDeviceInfo()
@@ -229,5 +230,6 @@ void AudioDialogX::updateOutputDeviceInfo()
     m_outputDeviceInfo.copyToUDP = ui->outputUDPCopy->isChecked();
     m_outputDeviceInfo.udpUseRTP = ui->outputUDPUseRTP->isChecked();
     m_outputDeviceInfo.udpChannelMode = (AudioOutput::UDPChannelMode) ui->outputUDPChannelMode->currentIndex();
+    m_outputDeviceInfo.udpChannelCodec = (AudioOutput::UDPChannelCodec) ui->outputUDPChannelCodec->currentIndex();
 }
 

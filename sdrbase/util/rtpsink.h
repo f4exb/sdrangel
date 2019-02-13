@@ -42,6 +42,8 @@ public:
     {
         PayloadL16Mono,
         PayloadL16Stereo,
+        PayloadPCMA8,
+        PayloadPCMU8
     } PayloadType;
 
     RTPSink(QUdpSocket *udpSocket, int sampleRate, bool stereo);

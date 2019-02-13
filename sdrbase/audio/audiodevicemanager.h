@@ -75,6 +75,7 @@ public:
         bool copyToUDP;
         bool udpUseRTP;
         AudioOutput::UDPChannelMode udpChannelMode;
+        AudioOutput::UDPChannelCodec udpChannelCodec;
         friend QDataStream& operator<<(QDataStream& ds, const OutputDeviceInfo& info);
         friend QDataStream& operator>>(QDataStream& ds, OutputDeviceInfo& info);
     };
