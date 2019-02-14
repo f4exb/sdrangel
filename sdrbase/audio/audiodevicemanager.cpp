@@ -614,6 +614,7 @@ void AudioDeviceManager::setOutputDeviceInfo(int outputDeviceIndex, const Output
     audioOutput->setUdpUseRTP(deviceInfo.udpUseRTP);
     audioOutput->setUdpChannelMode(deviceInfo.udpChannelMode);
     audioOutput->setUdpChannelFormat(deviceInfo.udpChannelCodec, deviceInfo.udpChannelMode == AudioOutput::UDPChannelStereo, deviceInfo.sampleRate);
+    audioOutput->setUdpDecimation(deviceInfo.decimationFactor);
 
     qDebug("AudioDeviceManager::setOutputDeviceInfo: index: %d device: %s updated",
             outputDeviceIndex, qPrintable(deviceName));

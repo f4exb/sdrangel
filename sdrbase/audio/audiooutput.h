@@ -67,6 +67,7 @@ public:
 	void setUdpUseRTP(bool useRTP);
 	void setUdpChannelMode(UDPChannelMode udpChannelMode);
 	void setUdpChannelFormat(UDPChannelCodec udpChannelCodec, bool stereo, int sampleRate);
+	void setUdpDecimation(uint32_t decimation);
 
 private:
 	QMutex m_mutex;

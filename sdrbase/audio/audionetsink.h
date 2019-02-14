@@ -19,6 +19,7 @@
 #define SDRBASE_AUDIO_AUDIONETSINK_H_
 
 #include "dsp/dsptypes.h"
+#include "audiofilter.h"
 #include "audiocompressor.h"
 #include "export.h"
 
@@ -54,10 +55,10 @@ public:
     void addDestination(const QString& address, uint16_t port);
     void deleteDestination(const QString& address, uint16_t port);
     void setParameters(Codec codec, bool stereo, int sampleRate);
+    void setDecimation(uint32_t decimation);
 
     void write(qint16 sample);
     void write(qint16 lSample, qint16 rSample);
-    //void write(AudioSample* samples, uint32_t numSamples);
 
     bool isRTPCapable() const;
     bool selectType(SinkType type);
@@ -72,6 +73,9 @@ protected:
     QUdpSocket *m_udpSocket;
     RTPSink *m_rtpBufferAudio;
     AudioCompressor m_audioCompressor;
+    AudioFilter m_audioFilter;
+    uint32_t m_decimation;
+    uint32_t m_decimationCount;
     char m_data[65536];
     unsigned int m_bufferIndex;
     QHostAddress m_address;

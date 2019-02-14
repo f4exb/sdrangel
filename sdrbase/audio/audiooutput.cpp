@@ -210,6 +210,13 @@ void AudioOutput::setUdpChannelFormat(UDPChannelCodec udpChannelCodec, bool ster
     }
 }
 
+void AudioOutput::setUdpDecimation(uint32_t decimation)
+{
+	if (m_audioNetSink) {
+		m_audioNetSink->setDecimation(decimation);
+	}
+}
+
 qint64 AudioOutput::readData(char* data, qint64 maxLen)
 {
     //qDebug("AudioOutput::readData: %lld", maxLen);
