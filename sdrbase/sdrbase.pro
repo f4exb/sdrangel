@@ -56,6 +56,7 @@ MINGW32 || MINGW64 || MSVC {
 SOURCES += audio/audiodevicemanager.cpp\
         audio/audiocompressor.cpp\
         audio/audiofifo.cpp\
+        audio/audiofilter.cpp\
         audio/audiooutput.cpp\
         audio/audioinput.cpp\
         audio/audionetsink.cpp\
@@ -134,6 +135,7 @@ SOURCES += audio/audiodevicemanager.cpp\
 HEADERS  += audio/audiodevicemanager.h\
         audio/audiocompressor.h\
         audio/audiofifo.h\
+        audio/audiofilter.h\
         audio/audiooutput.h\
         audio/audioinput.h\
         audio/audionetsink.h\
