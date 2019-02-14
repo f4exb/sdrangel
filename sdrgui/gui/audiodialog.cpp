@@ -282,7 +282,7 @@ void AudioDialogX::updateOutputSDPString()
     }
 
     int nChannels = m_outputDeviceInfo.udpChannelMode == AudioOutput::UDPChannelStereo ? 2 : 1;
-
     uint32_t decimationFactor = m_outputDeviceInfo.decimationFactor == 0 ? 1 : m_outputDeviceInfo.decimationFactor;
+
     ui->outputSDPText->setText(tr("%1/%2/%3").arg(format).arg(m_outputDeviceInfo.sampleRate/decimationFactor).arg(nChannels));
 }
