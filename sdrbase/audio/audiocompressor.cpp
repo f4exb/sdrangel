@@ -107,8 +107,7 @@ int16_t AudioCompressor::compress(int16_t sample)
 
 int8_t AudioCompressor::compress8(int16_t sample)
 {
-    return ALaw_Encode(sample);
-    //return m_lut[sample/2 + 16384];
+    return m_lut[sample/2 + 16384];
 }
 
 /* http://dystopiancode.blogspot.com/2012/02/pcm-law-and-u-law-companding-algorithms.html

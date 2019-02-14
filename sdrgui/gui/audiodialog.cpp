@@ -211,6 +211,30 @@ void AudioDialogX::on_outputCleanup_clicked(bool checked)
     m_audioDeviceManager->outputInfosCleanup();
 }
 
+void AudioDialogX::on_outputSampleRate_valueChanged(int value)
+{
+    m_outputDeviceInfo.sampleRate = value;
+    updateOutputSDPString();
+}
+
+void AudioDialogX::on_decimationFactor_currentIndexChanged(int index)
+{
+    m_outputDeviceInfo.decimationFactor = index + 1;
+    updateOutputSDPString();
+}
+
+void AudioDialogX::on_outputUDPChannelCodec_currentIndexChanged(int index)
+{
+    m_outputDeviceInfo.udpChannelCodec = (AudioOutput::UDPChannelCodec) index;
+    updateOutputSDPString();
+}
+
+void AudioDialogX::on_outputUDPChannelMode_currentIndexChanged(int index)
+{
+    m_outputDeviceInfo.udpChannelMode = (AudioOutput::UDPChannelMode) index;
+    updateOutputSDPString();
+}
+
 void AudioDialogX::updateOutputDisplay()
 {
     ui->outputSampleRate->setValue(m_outputDeviceInfo.sampleRate);
@@ -220,6 +244,8 @@ void AudioDialogX::updateOutputDisplay()
     ui->outputUDPUseRTP->setChecked(m_outputDeviceInfo.udpUseRTP);
     ui->outputUDPChannelMode->setCurrentIndex((int) m_outputDeviceInfo.udpChannelMode);
     ui->outputUDPChannelCodec->setCurrentIndex((int) m_outputDeviceInfo.udpChannelCodec);
+    ui->decimationFactor->setCurrentIndex(m_outputDeviceInfo.decimationFactor - 1);
+    updateOutputSDPString();
 }
 
 void AudioDialogX::updateOutputDeviceInfo()
@@ -231,5 +257,31 @@ void AudioDialogX::updateOutputDeviceInfo()
     m_outputDeviceInfo.udpUseRTP = ui->outputUDPUseRTP->isChecked();
     m_outputDeviceInfo.udpChannelMode = (AudioOutput::UDPChannelMode) ui->outputUDPChannelMode->currentIndex();
     m_outputDeviceInfo.udpChannelCodec = (AudioOutput::UDPChannelCodec) ui->outputUDPChannelCodec->currentIndex();
+    m_outputDeviceInfo.decimationFactor = ui->decimationFactor->currentIndex() + 1;
 }
 
+void AudioDialogX::updateOutputSDPString()
+{
+    QString format;
+
+    switch(m_outputDeviceInfo.udpChannelCodec)
+    {
+    case AudioOutput::UDPCodecALaw:
+        format = "PCMA";
+        break;
+    case AudioOutput::UDPCodecULaw:
+        format = "PCMU";
+        break;
+    case AudioOutput::UDPCodecL8:
+        format = "L8";
+        break;
+    case AudioOutput::UDPCodecL16:
+    default:
+        format = "L16";
+        break;
+    }
+
+    int nChannels = m_outputDeviceInfo.udpChannelMode == AudioOutput::UDPChannelStereo ? 2 : 1;
+
+    ui->outputSDPText->setText(tr("%1/%2/%3").arg(format).arg(m_outputDeviceInfo.sampleRate/m_outputDeviceInfo.decimationFactor).arg(nChannels));
+}

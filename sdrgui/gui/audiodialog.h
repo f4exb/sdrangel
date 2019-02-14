@@ -27,6 +27,7 @@ private:
 	void updateOutputDisplay();
 	void updateInputDeviceInfo();
 	void updateOutputDeviceInfo();
+	void updateOutputSDPString();
 
 	Ui::AudioDialog* ui;
 
@@ -46,6 +47,10 @@ private slots:
     void on_outputUDPPort_editingFinished();
     void on_outputReset_clicked(bool checked);
     void on_outputCleanup_clicked(bool checked);
+    void on_outputSampleRate_valueChanged(int value);
+    void on_decimationFactor_currentIndexChanged(int index);
+    void on_outputUDPChannelCodec_currentIndexChanged(int index);
+    void on_outputUDPChannelMode_currentIndexChanged(int index);
 };
 
 #endif // INCLUDE_AUDIODIALOG_H

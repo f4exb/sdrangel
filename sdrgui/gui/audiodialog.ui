@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>560</width>
-    <height>400</height>
+    <width>460</width>
+    <height>460</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>560</width>
-    <height>400</height>
+    <width>460</width>
+    <height>460</height>
    </size>
   </property>
   <property name="font">
@@ -125,6 +125,170 @@
         </layout>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="outputFormatLayout">
+         <property name="topMargin">
+          <number>6</number>
+         </property>
+         <item>
+          <widget class="QComboBox" name="outputUDPChannelMode">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>70</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Channel copy mode</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>Left</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Right</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Mixed</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Stereo</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="decimationLabel">
+           <property name="text">
+            <string>/</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="decimationFactor">
+           <property name="maximumSize">
+            <size>
+             <width>40</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Decimation</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>1</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>2</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>3</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>4</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>5</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>6</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="outputUDPChannelCodec">
+           <property name="minimumSize">
+            <size>
+             <width>65</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>65</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Encoding</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>L16</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>L8</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>PCMA</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>PCMU</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="outputSDPText">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Encoding string in SDP format</string>
+           </property>
+           <property name="text">
+            <string>PCMA/48000</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_6">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="outputUDPLayout">
          <item>
           <widget class="QLabel" name="outputUDPAddressLabel">
@@ -202,72 +366,6 @@
            <property name="text">
             <string>UDP</string>
            </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="outputUDPChannelMode">
-           <property name="minimumSize">
-            <size>
-             <width>80</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Channel copy mode</string>
-           </property>
-           <item>
-            <property name="text">
-             <string>Left</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Right</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Mixed</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Stereo</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="outputUDPChannelCodec">
-           <property name="minimumSize">
-            <size>
-             <width>85</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Encoding</string>
-           </property>
-           <item>
-            <property name="text">
-             <string>L16</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>L8</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>PCMA/8k</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>PCMU/8k</string>
-            </property>
-           </item>
           </widget>
          </item>
          <item>

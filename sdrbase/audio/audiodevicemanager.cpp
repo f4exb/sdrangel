@@ -48,7 +48,8 @@ QDataStream& operator<<(QDataStream& ds, const AudioDeviceManager::OutputDeviceI
         << info.copyToUDP
         << info.udpUseRTP
         << (int) info.udpChannelMode
-        << (int) info.udpChannelCodec;
+        << (int) info.udpChannelCodec
+        << info.decimationFactor;
     return ds;
 }
 
@@ -63,7 +64,8 @@ QDataStream& operator>>(QDataStream& ds, AudioDeviceManager::OutputDeviceInfo& i
         >> info.copyToUDP
         >> info.udpUseRTP
         >> intChannelMode
-        >> intChannelCodec;
+        >> intChannelCodec
+        >> info.decimationFactor;
     info.udpChannelMode = (AudioOutput::UDPChannelMode) intChannelMode;
     info.udpChannelCodec = (AudioOutput::UDPChannelCodec) intChannelCodec;
     return ds;
@@ -362,6 +364,7 @@ void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
     bool udpUseRTP;
     AudioOutput::UDPChannelMode udpChannelMode;
     AudioOutput::UDPChannelCodec udpChannelCodec;
+    uint32_t decimationFactor;
     QString deviceName;
 
     if (getOutputDeviceName(outputDeviceIndex, deviceName))
@@ -375,6 +378,7 @@ void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
             udpUseRTP = false;
             udpChannelMode = AudioOutput::UDPChannelLeft;
             udpChannelCodec = AudioOutput::UDPCodecL16;
+            decimationFactor = 1;
         }
         else
         {
@@ -385,6 +389,7 @@ void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
             udpUseRTP = m_audioOutputInfos[deviceName].udpUseRTP;
             udpChannelMode = m_audioOutputInfos[deviceName].udpChannelMode;
             udpChannelCodec = m_audioOutputInfos[deviceName].udpChannelCodec;
+            decimationFactor = m_audioOutputInfos[deviceName].decimationFactor;
         }
 
         m_audioOutputs[outputDeviceIndex]->start(outputDeviceIndex, sampleRate);
@@ -395,6 +400,7 @@ void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
         m_audioOutputInfos[deviceName].udpUseRTP = udpUseRTP;
         m_audioOutputInfos[deviceName].udpChannelMode = udpChannelMode;
         m_audioOutputInfos[deviceName].udpChannelCodec = udpChannelCodec;
+        m_audioOutputInfos[deviceName].decimationFactor = decimationFactor;
     }
     else
     {
@@ -776,6 +782,7 @@ void AudioDeviceManager::debugAudioOutputInfos() const
                 << " copyToUDP: " << it.value().copyToUDP
                 << " udpUseRTP: " << it.value().udpUseRTP
                 << " udpChannelMode: " << (int) it.value().udpChannelMode
-                << " udpChannelCodec: " << (int) it.value().udpChannelCodec;
+                << " udpChannelCodec: " << (int) it.value().udpChannelCodec
+                << " decimationFactor: " << it.value().decimationFactor;
     }
 }
