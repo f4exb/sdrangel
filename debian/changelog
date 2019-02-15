@@ -1,8 +1,9 @@
 sdrangel (4.4.4-1) unstable; urgency=medium
 
   * SoapySDR: fixed some GUI issues
+  * UDP/RTP audio: added decimation and PCM A-law and Mu-law compression 
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 10 Feb 2019 10:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 15 Feb 2019 10:14:18 +0100
   
 sdrangel (4.4.3-1) unstable; urgency=medium
 

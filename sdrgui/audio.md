@@ -47,36 +47,58 @@ This is the device sample rate in samples per second (S/s).
 
 By pushing this button the values are reset to the defaults (see 1.1 for actual default values)
 
-<h3>1.7 UDP address</h3>
-
-This is the destination address of the UDP stream
-
-<h3>1.8 UDP port</h3>
-
-This is the destination port of the UDP stream
-
-<h3>1.9 Copy audio to UDP stream toggle</h3>
-
-Use this button to activate or de-activate the copy of the audio stream to UDP stream
-
-<h3>1.10 UDP copy channel mode</h3>
+<h3>1.7 UDP copy channel mode</h3>
 
   - `Left`: UDP stream is mono (1 channel) and the left audio channel is copied
   - `Right`: UDP stream is mono (1 channel) and the right audio channel is copied
   - `Mixed`: UDP stream is mono (1 channel) and the mix of left and right audio channels is copied
   - `Stereo`:  UDP stream is stereo (2 channels) and audio channels are copied to their UDP channel counterparts respectively
 
-<h3>1.11 Use RTP protocol over UDP</h3>
+<h3>1.8 Decimation factor</h3>
+
+It is possible to decimate the sample rate (1.5) by this value before sending the stream via UDP.
+
+<h3>1.9 Codec</h3>
+
+This is the codec applied before sending the stream via UDP. The following are available:
+
+  - `L16`: Linear 16 bit signed integers (native)
+  - `L8`: Linear 8 bit signed integers
+  - `PCMA`: A-law compressed 8 bit PCM
+  - `PCMU`: Mu-law compressed 8 bit PCM
+  
+<h3>1.10 SDP string</h3>
+
+This is the SDP string representatiopn of the stream sent via UDP (RTP). In SDP files it is used on the `a=rtpmap`line (See 1.14). It can be used to check the effect of settings 1.5, 1.8 and 1.9. 
+
+<h3>1.11 UDP address</h3>
+
+This is the destination address of the UDP stream
+
+<h3>1.12 UDP port</h3>
+
+This is the destination port of the UDP stream
+
+<h3>1.13 Copy audio to UDP stream toggle</h3>
+
+Use this button to activate or de-activate the copy of the audio stream to UDP stream
+
+<h3>1.14 Use RTP protocol over UDP</h3>
 
 Check this box to activate the RTP protocol over UDP. RTP parameters are as follows:
 
-  - Payload type: 96
+  - Payload type: 
+    - codec `L16`, `L8`: 96
+    - codec `PCMA`: 8
+    - codec `PCMU`: 0
   - Sample rate: the sample rate of the corresponding audio device
-  - Sample format: 16 bit integer signed (S16LE)
+  - Sample format:
+    - codec `L16`: 16 bit integer signed (S16LE)
+    - codec `L8`, `PCMA`, `PCMU`: 8 bit integer signed (S8)
   - Channels: 1 for mono (Left, Right and Mixed copy channels mode); 2 for stereo (Stereo copy channels mode)
   - Address and port: destination address and port (local on the client machine)
 
-You may read the RTP stream using a SDP file (extension `.sdp`) that can be read with any program supporting SDP files (VLC, MX player, ffmpeg, ...). For a mono 48000 S/s stream at address `192.168.0.34:9998` the contents of the file would be as follows:
+You may read the RTP stream using a SDP file (extension `.sdp`) that can be read with any program supporting SDP files (VLC, MX player, ffmpeg, ...). For a mono 48000 S/s stream at address `192.168.0.34:9998 and L16 codec the contents of the file would be as follows:
 
 ```
 c=IN IP4 192.168.0.34
@@ -84,21 +106,31 @@ m=audio 9998 RTP/AVP 96
 a=rtpmap:96 L16/48000/1
 ```
 
+For PCMA at 8k sample rate which is a popular format the contents of the file would be as follows:
+
+```
+c=IN IP4 192.168.0.34
+m=audio 9998 RTP/AVP 8
+a=rtpmap:8 PCMA/8000/1
+```
+
 &#9758; Note that on Android clients VLC has trouble working with the RTP stream (choppy audio, hanging unexpectedly...) therefore [MX player](https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad&hl=en) is recommended.
 
-<h3>1.12 Cleanup registrations not in the list</h3>
+&#9758; With PCMA and PCMU codecs it is possible to listen to the RTP stream directly in the browser using a [Janus WebRTC server](https://janus.conf.meetecho.com/). Please refer to the Wiki for more instructions.
+
+<h3>1.15 Cleanup registrations not in the list</h3>
 
 Use this button to keep only the visible devices in the devices registrations. The devices registrations with custom parameters are kept in the preferences using the device names. This button makes some tidying up when devices are permanently removed.
 
-<h3>1.13 Unregister device</h3>
+<h3>1.16 Unregister device</h3>
 
 Use this button to remove the device from the devices registrations returning it to the unregistered state. Therefore when associated to an output stream or selected it will initially take default values and appear with the `D` indicator in the list.
 
-<h3>1.14 OK button</h3>
+<h3>1.17 OK button</h3>
 
 Use this button to confirm your changes and close dialog. Note that you can change parameters of only one device at a time.
 
-<h3>1.15 Cancel button</h3>
+<h3>1.18 Cancel button</h3>
 
 Use this button to dismiss your changes and close dialog.
 
