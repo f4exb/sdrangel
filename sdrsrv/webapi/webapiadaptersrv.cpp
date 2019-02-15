@@ -279,6 +279,8 @@ int WebAPIAdapterSrv::instanceAudioGet(
     outputDevices->back()->setCopyToUdp(outputDeviceInfo.copyToUDP ? 1 : 0);
     outputDevices->back()->setUdpUsesRtp(outputDeviceInfo.udpUseRTP ? 1 : 0);
     outputDevices->back()->setUdpChannelMode((int) outputDeviceInfo.udpChannelMode);
+    outputDevices->back()->setUdpChannelCodec((int) outputDeviceInfo.udpChannelCodec);
+    outputDevices->back()->setUdpDecimationFactor(outputDeviceInfo.udpDecimationFactor);
     *outputDevices->back()->getUdpAddress() = outputDeviceInfo.udpAddress;
     outputDevices->back()->setUdpPort(outputDeviceInfo.udpPort);
 
@@ -297,6 +299,8 @@ int WebAPIAdapterSrv::instanceAudioGet(
         outputDevices->back()->setCopyToUdp(outputDeviceInfo.copyToUDP ? 1 : 0);
         outputDevices->back()->setUdpUsesRtp(outputDeviceInfo.udpUseRTP ? 1 : 0);
         outputDevices->back()->setUdpChannelMode((int) outputDeviceInfo.udpChannelMode);
+        outputDevices->back()->setUdpChannelCodec((int) outputDeviceInfo.udpChannelCodec);
+        outputDevices->back()->setUdpDecimationFactor(outputDeviceInfo.udpDecimationFactor);
         *outputDevices->back()->getUdpAddress() = outputDeviceInfo.udpAddress;
         outputDevices->back()->setUdpPort(outputDeviceInfo.udpPort);
     }
@@ -382,7 +386,9 @@ int WebAPIAdapterSrv::instanceAudioOutputPatch(
     response.setSampleRate(outputDeviceInfo.sampleRate);
     response.setCopyToUdp(outputDeviceInfo.copyToUDP == 0 ? 0 : 1);
     response.setUdpUsesRtp(outputDeviceInfo.udpUseRTP == 0 ? 0 : 1);
-    response.setUdpChannelMode(outputDeviceInfo.udpChannelMode % 4);
+    response.setUdpChannelMode(outputDeviceInfo.udpChannelMode);
+    response.setUdpChannelCodec(outputDeviceInfo.udpChannelCodec);
+    response.setUdpDecimationFactor(outputDeviceInfo.udpDecimationFactor);
 
     if (response.getUdpAddress()) {
         *response.getUdpAddress() = outputDeviceInfo.udpAddress;
@@ -440,7 +446,9 @@ int WebAPIAdapterSrv::instanceAudioOutputDelete(
     response.setSampleRate(outputDeviceInfo.sampleRate);
     response.setCopyToUdp(outputDeviceInfo.copyToUDP == 0 ? 0 : 1);
     response.setUdpUsesRtp(outputDeviceInfo.udpUseRTP == 0 ? 0 : 1);
-    response.setUdpChannelMode(outputDeviceInfo.udpChannelMode % 4);
+    response.setUdpChannelMode(outputDeviceInfo.udpChannelMode);
+    response.setUdpChannelCodec(outputDeviceInfo.udpChannelCodec);
+    response.setUdpDecimationFactor(outputDeviceInfo.udpDecimationFactor);
 
     if (response.getUdpAddress()) {
         *response.getUdpAddress() = outputDeviceInfo.udpAddress;

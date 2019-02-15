@@ -2457,6 +2457,16 @@ bool WebAPIRequestMapper::validateAudioOutputDevice(
         audioOutputDevice.setUdpChannelMode(jsonObject["udpChannelMode"].toInt());
         audioOutputDeviceKeys.append("udpChannelMode");
     }
+    if (jsonObject.contains("udpChannelCodec"))
+    {
+        audioOutputDevice.setUdpChannelCodec(jsonObject["udpChannelCodec"].toInt());
+        audioOutputDeviceKeys.append("udpChannelCodec");
+    }
+    if (jsonObject.contains("udpDecimationFactor"))
+    {
+        audioOutputDevice.setUdpDecimationFactor(jsonObject["udpDecimationFactor"].toInt());
+        audioOutputDeviceKeys.append("udpDecimationFactor");
+    }
     if (jsonObject.contains("udpAddress"))
     {
         audioOutputDevice.setUdpAddress(new QString(jsonObject["udpAddress"].toString()));

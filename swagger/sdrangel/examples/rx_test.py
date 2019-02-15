@@ -46,6 +46,8 @@ def getInputOptions():
     parser.add_option("--audio-address", dest="audio_address", help="Audio: UDP destination address", metavar="IP_ADDRESS", type="string")
     parser.add_option("--audio-port", dest="audio_port", help="Audio: UDP destination port", metavar="IP_PORT", type="int")
     parser.add_option("--audio-channels", dest="audio_channels", help="Audio: UDP mode (0: L only 1: R only 2: L+R mono 3: LR stereo)", metavar="ENUM_INT", type="int")
+    parser.add_option("--audio-codec", dest="audio_codec", help="Audio: codec to use for UDP (0: L16, 1: L8, 2: PCMA, 3: PCMU)", metavar="ENUM_INT", type="int")
+    parser.add_option("--audio-decim", dest="audio_decim", help="Audio. decimation to apply for UDP (1 to 6)", metavar="INT", type="int")
     parser.add_option("--baud-rate", dest="baud_rate", help="DSD: baud rate in Baud", metavar="BAUD", type="int", default=4800)
     parser.add_option("--fm-dev", dest="fm_deviation", help="DSD: expected FM deviation", metavar="FREQ", type="int", default=5400)
     parser.add_option("--rmt-address", dest="remote_address", help="RemoteSink: destination data address", metavar="IP_ADDRESS", type="string")
@@ -120,6 +122,10 @@ def setup_audio(options):
         audio_dict["udpPort"] = options.audio_port
     if options.audio_channels:
         audio_dict["udpChannelMode"] = 0 if options.audio_channels < 0 else 3 if options.audio_channels > 3 else options.audio_channels
+    if options.audio_codec:
+        audio_dict["udpChannelCodec"] = 0 if options.audio_codec < 0 else 3 if options.audio_codec > 3 else options.audio_codec
+    if options.audio_decim:
+        audio_dict["udpDecimationFactor"] = 1 if options.audio_decim < 1 else 6 if options.audio_decim > 6 else options.audio_decim
 
     r = callAPI('/audio/output/parameters', "PATCH", None, audio_dict, "setup audio {}".format(options.audio_name))
     if r is None:

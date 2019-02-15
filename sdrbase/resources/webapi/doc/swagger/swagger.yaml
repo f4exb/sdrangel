@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.4.3"
+  version: "4.4.4"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -1595,7 +1595,13 @@ definitions:
         description: '1 if RTP protocol is used over UDP else 0'
         type: integer
       udpChannelMode:
-        description: 'How audio data is copied to UDP: 0: left 1: right 2: mixed 3: stereo'
+        description: 'How audio data is copied to UDP: 0: left 1: right 2: mixed 3: stereo (AudioOutput::UDPChannelMode)'
+        type: integer
+      udpChannelCodec:
+        description: 'Index of codec used in UDP/RTP transmission. See AudioOutput::UDPChannelCodec.'
+        type: integer
+      udpDecimationFactor:
+        description: 'Decimation used before codec in UDP/RTP transmission. Ranges from 1 to 6.'
         type: integer
       udpAddress:
         description: "UDP destination address"
