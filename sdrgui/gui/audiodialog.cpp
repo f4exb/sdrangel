@@ -219,7 +219,7 @@ void AudioDialogX::on_outputSampleRate_valueChanged(int value)
 
 void AudioDialogX::on_decimationFactor_currentIndexChanged(int index)
 {
-    m_outputDeviceInfo.decimationFactor = index + 1;
+    m_outputDeviceInfo.udpDecimationFactor = index + 1;
     updateOutputSDPString();
 }
 
@@ -244,7 +244,7 @@ void AudioDialogX::updateOutputDisplay()
     ui->outputUDPUseRTP->setChecked(m_outputDeviceInfo.udpUseRTP);
     ui->outputUDPChannelMode->setCurrentIndex((int) m_outputDeviceInfo.udpChannelMode);
     ui->outputUDPChannelCodec->setCurrentIndex((int) m_outputDeviceInfo.udpChannelCodec);
-    ui->decimationFactor->setCurrentIndex(m_outputDeviceInfo.decimationFactor == 0 ? 0 : m_outputDeviceInfo.decimationFactor - 1);
+    ui->decimationFactor->setCurrentIndex(m_outputDeviceInfo.udpDecimationFactor == 0 ? 0 : m_outputDeviceInfo.udpDecimationFactor - 1);
     updateOutputSDPString();
 }
 
@@ -257,7 +257,7 @@ void AudioDialogX::updateOutputDeviceInfo()
     m_outputDeviceInfo.udpUseRTP = ui->outputUDPUseRTP->isChecked();
     m_outputDeviceInfo.udpChannelMode = (AudioOutput::UDPChannelMode) ui->outputUDPChannelMode->currentIndex();
     m_outputDeviceInfo.udpChannelCodec = (AudioOutput::UDPChannelCodec) ui->outputUDPChannelCodec->currentIndex();
-    m_outputDeviceInfo.decimationFactor = ui->decimationFactor->currentIndex() + 1;
+    m_outputDeviceInfo.udpDecimationFactor = ui->decimationFactor->currentIndex() + 1;
 }
 
 void AudioDialogX::updateOutputSDPString()
@@ -282,7 +282,7 @@ void AudioDialogX::updateOutputSDPString()
     }
 
     int nChannels = m_outputDeviceInfo.udpChannelMode == AudioOutput::UDPChannelStereo ? 2 : 1;
-    uint32_t decimationFactor = m_outputDeviceInfo.decimationFactor == 0 ? 1 : m_outputDeviceInfo.decimationFactor;
+    uint32_t decimationFactor = m_outputDeviceInfo.udpDecimationFactor == 0 ? 1 : m_outputDeviceInfo.udpDecimationFactor;
 
     ui->outputSDPText->setText(tr("%1/%2/%3").arg(format).arg(m_outputDeviceInfo.sampleRate/decimationFactor).arg(nChannels));
 }
