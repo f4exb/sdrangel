@@ -8,6 +8,7 @@ set(sdrbase_SOURCES
     audio/audiodevicemanager.cpp
     audio/audiofifo.cpp
     audio/audiofilter.cpp
+    audio/audiog722.cpp
     audio/audiooutput.cpp
     audio/audioinput.cpp
     audio/audionetsink.cpp
@@ -101,6 +102,7 @@ set(sdrbase_HEADERS
     audio/audiodevicemanager.h
     audio/audiofifo.h
     audio/audiofilter.h
+    audio/audiog722.h
     audio/audiooutput.h
     audio/audioinput.h
     audio/audionetsink.h

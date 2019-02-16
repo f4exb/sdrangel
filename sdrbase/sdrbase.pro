@@ -57,6 +57,7 @@ SOURCES += audio/audiodevicemanager.cpp\
         audio/audiocompressor.cpp\
         audio/audiofifo.cpp\
         audio/audiofilter.cpp\
+        audio/audiog722.cpp\
         audio/audiooutput.cpp\
         audio/audioinput.cpp\
         audio/audionetsink.cpp\
@@ -136,6 +137,7 @@ HEADERS  += audio/audiodevicemanager.h\
         audio/audiocompressor.h\
         audio/audiofifo.h\
         audio/audiofilter.h\
+        audio/audiog722.h\        
         audio/audiooutput.h\
         audio/audioinput.h\
         audio/audionetsink.h\
