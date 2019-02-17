@@ -27,6 +27,7 @@ AudioNetSink::AudioNetSink(QObject *parent) :
     m_type(SinkUDP),
     m_codec(CodecL16),
     m_rtpBufferAudio(0),
+    m_sampleRate(48000),
     m_decimation(1),
     m_decimationCount(0),
     m_bufferIndex(0),
@@ -40,6 +41,7 @@ AudioNetSink::AudioNetSink(QObject *parent, int sampleRate, bool stereo) :
     m_type(SinkUDP),
     m_codec(CodecL16),
     m_rtpBufferAudio(0),
+    m_sampleRate(48000),
     m_decimation(1),
     m_decimationCount(0),
     m_bufferIndex(0),
@@ -110,6 +112,8 @@ void AudioNetSink::setParameters(Codec codec, bool stereo, int sampleRate)
             << " sampleRate: " << sampleRate;
 
     m_codec = codec;
+    m_sampleRate = sampleRate;
+    m_audioFilter.setDecimFilters(m_sampleRate, m_decimation);
 
     if (m_rtpBufferAudio)
     {
@@ -138,6 +142,7 @@ void AudioNetSink::setDecimation(uint32_t decimation)
 {
     m_decimation = decimation < 1 ? 1 : decimation > 6 ? 6 : decimation;
     qDebug() << "AudioNetSink::setDecimation: " << m_decimation << " from: " << decimation;
+    m_audioFilter.setDecimFilters(m_sampleRate, m_decimation);
     m_decimationCount = 0;
 }
 

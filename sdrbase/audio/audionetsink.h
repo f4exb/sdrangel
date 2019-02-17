@@ -74,6 +74,7 @@ protected:
     RTPSink *m_rtpBufferAudio;
     AudioCompressor m_audioCompressor;
     AudioFilter m_audioFilter;
+    int m_sampleRate;
     uint32_t m_decimation;
     uint32_t m_decimationCount;
     char m_data[65536];
