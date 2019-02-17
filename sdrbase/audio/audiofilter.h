@@ -21,7 +21,7 @@
 #include "dsp/iirfilter.h"
 
 /**
- * This is a 2 pole lowpass Chebyshev (recursive) filter at fc=0.075 using coefficients found in table 20-1 of
+ * By default this is a 2 pole lowpass Chebyshev (recursive) filter at fc=0.075 using coefficients found in table 20-1 of
  * http://www.analog.com/media/en/technical-documentation/dsp-book/dsp_book_Ch20.pdf
  *
  * At the interpolated sampling frequency of 48 kHz the -3 dB corner is at 48 * .075 = 3.6 kHz which is perfect for voice
@@ -36,6 +36,8 @@
  *
  * This one works directly with floats
  *
+ * It can be generalized using the program found in tables 20-4 and 20-5 of the same document. This form is used as a
+ * decimation filter and can be set with the setDecimFilters method
  */
 
 class SDRBASE_API AudioFilter {
@@ -45,18 +47,29 @@ public:
 
     void useHP(bool useHP) { m_useHP = useHP; }
     bool usesHP() const { return m_useHP; }
+    void setDecimFilters(int sr, uint32_t decim);
     float run(const float& sample);
     float runHP(const float& sample);
     float runLP(const float& sample);
 
 private:
+    void calculate2(bool highPass, double fc, float *a, float *b); // two pole Chebyshev calculation
+    void cheby(bool highPass, double fc, float pr, int np, double *a, double *b);
+    void cheby_sub(bool highPass, double fc, float pr, int np, int stage,
+            double& a0, double& a1, double& a2, double& b1, double& b2);
+
     IIRFilter<float, 2> m_filterLP;
     IIRFilter<float, 2> m_filterHP;
     bool m_useHP;
+    float m_lpva[3];
+    float m_lpvb[3];
+    float m_hpva[3];
+    float m_hpvb[3];
     static const float m_lpa[3];
     static const float m_lpb[3];
     static const float m_hpa[3];
     static const float m_hpb[3];
+
 };
 
 #endif // _SDRBASE_AUDIO_AUDIOFILTER_H_
