@@ -1,3 +1,9 @@
+sdrangel (4.4.5-1) unstable; urgency=medium
+
+  * UDP/RTP audio: added G722 support 
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 24 Feb 2019 10:14:18 +0100
+  
 sdrangel (4.4.4-1) unstable; urgency=medium
 
   * SoapySDR: fixed some GUI issues
