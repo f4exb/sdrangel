@@ -298,7 +298,7 @@ void AudioDialogX::updateOutputSDPString()
 {
     QString format;
     int nChannels = m_outputDeviceInfo.udpChannelMode == AudioOutput::UDPChannelStereo ? 2 : 1;
-    uint32_t decimationFactor = m_outputDeviceInfo.udpDecimationFactor == 0 ? 1 : m_outputDeviceInfo.udpDecimationFactor;
+    uint32_t effectiveSampleRate = m_outputDeviceInfo.sampleRate / (m_outputDeviceInfo.udpDecimationFactor == 0 ? 1 : m_outputDeviceInfo.udpDecimationFactor);
 
     switch (m_outputDeviceInfo.udpChannelCodec)
     {
@@ -310,6 +310,7 @@ void AudioDialogX::updateOutputSDPString()
         break;
     case AudioOutput::UDPCodecG722:
         format = "G722";
+        effectiveSampleRate /= 2; // codec does a decimation by 2
         break;
     case AudioOutput::UDPCodecL8:
         format = "L8";
@@ -320,7 +321,7 @@ void AudioDialogX::updateOutputSDPString()
         break;
     }
 
-    ui->outputSDPText->setText(tr("%1/%2/%3").arg(format).arg(m_outputDeviceInfo.sampleRate/decimationFactor).arg(nChannels));
+    ui->outputSDPText->setText(tr("%1/%2/%3").arg(format).arg(effectiveSampleRate).arg(nChannels));
 }
 
 void AudioDialogX::check()
