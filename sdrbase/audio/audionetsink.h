@@ -68,10 +68,12 @@ public:
     void moveToThread(QThread *thread);
 
     static const int m_udpBlockSize;
-    static const int m_dataBlockSize = 16384*5; // room for G722 conversion (largest to date)
-    static const int m_g722BlockSize = 16384;   // number of resulting G722 bytes
+    static const int m_dataBlockSize = 65536; // room for G722 conversion (64000 = 12800*5 largest to date)
+    static const int m_g722BlockSize = 12800; // number of resulting G722 bytes (80*20ms frames)
 
 protected:
+    void setDecimationFilters();
+
     SinkType m_type;
     Codec m_codec;
     QUdpSocket *m_udpSocket;

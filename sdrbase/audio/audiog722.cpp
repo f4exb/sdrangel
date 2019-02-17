@@ -93,6 +93,9 @@ void AudioG722::g722_encode_state::init(int rate, int options)
     out_buffer = 0;
     out_bits = 0;
 
+    char *pBand = (char *) band;
+    std::fill(pBand, pBand + sizeof(band), 0);
+
     if (rate == 48000) {
         bits_per_sample = 6;
     } else if (rate == 56000) {
@@ -263,8 +266,8 @@ int AudioG722::encode(uint8_t g722_data[], const int16_t amp[], int len)
     {
         if (state.itu_test_mode)
         {
-            xlow =
             xhigh = amp[j++] >> 1;
+            xlow = xhigh;
         }
         else
         {

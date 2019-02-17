@@ -47,7 +47,7 @@ public:
 
     void useHP(bool useHP) { m_useHP = useHP; }
     bool usesHP() const { return m_useHP; }
-    void setDecimFilters(int sr, uint32_t decim);
+    void setDecimFilters(int srHigh, int srLow, float fcHigh, float fcLow);
     float run(const float& sample);
     float runHP(const float& sample);
     float runLP(const float& sample);

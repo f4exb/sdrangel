@@ -115,7 +115,8 @@ void AudioNetSink::setParameters(Codec codec, bool stereo, int sampleRate)
 
     m_codec = codec;
     m_sampleRate = sampleRate;
-    m_audioFilter.setDecimFilters(m_sampleRate, m_decimation);
+
+    setDecimationFilters();
 
     if (m_rtpBufferAudio)
     {
@@ -147,8 +148,29 @@ void AudioNetSink::setDecimation(uint32_t decimation)
 {
     m_decimation = decimation < 1 ? 1 : decimation > 6 ? 6 : decimation;
     qDebug() << "AudioNetSink::setDecimation: " << m_decimation << " from: " << decimation;
-    m_audioFilter.setDecimFilters(m_sampleRate, m_decimation);
+    setDecimationFilters();
     m_decimationCount = 0;
+}
+
+void AudioNetSink::setDecimationFilters()
+{
+    int decimatedSampleRate = m_sampleRate / m_decimation;
+
+    switch (m_codec)
+    {
+    case CodecPCMA:
+    case CodecPCMU:
+        m_audioFilter.setDecimFilters(m_sampleRate, decimatedSampleRate, 3300.0, 300.0);
+        break;
+    case CodecG722:
+        m_audioFilter.setDecimFilters(m_sampleRate, decimatedSampleRate, 7000.0, 50.0);
+        break;
+    case CodecL8:
+    case CodecL16:
+    default:
+        m_audioFilter.setDecimFilters(m_sampleRate, decimatedSampleRate, 0.45*decimatedSampleRate, 50.0);
+        break;
+    }
 }
 
 void AudioNetSink::write(qint16 isample)
@@ -157,7 +179,7 @@ void AudioNetSink::write(qint16 isample)
 
     if (m_decimation > 1)
     {
-        float lpSample = m_audioFilter.runLP(sample / 32768.0f);
+        float lpSample = m_audioFilter.run(sample / 32768.0f);
 
         if (m_decimationCount >= m_decimation - 1)
         {

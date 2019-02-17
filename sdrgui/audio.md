@@ -1,8 +1,8 @@
 <h1>Audio management</h1>
 
 Audio devices can be controlled with two dialogs:
-  - The Audio preferences dialog: set audio device parameters. The dialog shows one tab for output and another tab for input devices
-  - The Audio selection dialog: each channel plugin having audio output or input can show this dialog to select which device to use to direct output or input streams. This dialog opens by right clicking on a button that depends on the plugin (see plugin documentation).
+  - The Audio preferences dialog: set audio device parameters. The dialog shows one tab for output and another tab for input devices. Detailed in sections 1 and 2.
+  - The Audio selection dialog: each channel plugin having audio output or input can show this dialog to select which device to use to direct output or input streams. This dialog opens by right clicking on a button that depends on the plugin (see plugin documentation). Detailed in section 3.
 
 <h2>1. Audio output preferences</h2>
 
@@ -64,8 +64,8 @@ This is the codec applied before sending the stream via UDP. The following are a
 
   - `L16`: Linear 16 bit signed integers (native)
   - `L8`: Linear 8 bit signed integers
-  - `PCMA`: A-law compressed 8 bit PCM (requires 8000 Hz sample rate mono)
-  - `PCMU`: Mu-law compressed 8 bit PCM (requires 8000 Hz sample rate mono)
+  - `PCMA`: A-law 8 bit PCM (requires 8000 Hz sample rate mono)
+  - `PCMU`: Mu-law 8 bit PCM (requires 8000 Hz sample rate mono)
   - `G722`: G722 64 kbit/s (requires 16000 Hz sample rate mono)
   
 <h3>1.10 SDP string</h3>
@@ -92,10 +92,14 @@ Check this box to activate the RTP protocol over UDP. RTP parameters are as foll
     - codec `L16`, `L8`: 96
     - codec `PCMA`: 8
     - codec `PCMU`: 0
-  - Sample rate: the sample rate of the corresponding audio device
+    - codec `G722`: 9
+  - Sample rate: the resulting stream sample rate after decimation and possible compression:
+    - codec `PCMA`, `PCMU`: must be 8000 S/s
+    - codec `G722`: must be 8000 S/s (16000 S/s input before compression) 
   - Sample format:
     - codec `L16`: 16 bit integer signed (S16LE)
     - codec `L8`, `PCMA`, `PCMU`: 8 bit integer signed (S8)
+    - codec `G722`: 8 bit unsigned integer. Note that this is the stream compressed to 64 kbits/s.
   - Channels: 1 for mono (Left, Right and Mixed copy channels mode); 2 for stereo (Stereo copy channels mode)
   - Address and port: destination address and port (local on the client machine)
 
@@ -107,7 +111,7 @@ m=audio 9998 RTP/AVP 96
 a=rtpmap:96 L16/48000/1
 ```
 
-For PCMA at 8k sample rate which is a popular format the contents of the file would be as follows:
+For PCMA or PCMU (here PCMA):
 
 ```
 c=IN IP4 192.168.0.34
@@ -115,9 +119,17 @@ m=audio 9998 RTP/AVP 8
 a=rtpmap:8 PCMA/8000/1
 ```
 
+For G722:
+
+```
+c=IN IP4 192.168.0.34
+m=audio 9998 RTP/AVP 9
+a=rtpmap:9 G722/8000/1
+```
+
 &#9758; Note that on Android clients VLC has trouble working with the RTP stream (choppy audio, hanging unexpectedly...) therefore [MX player](https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad&hl=en) is recommended.
 
-&#9758; With PCMA and PCMU codecs it is possible to listen to the RTP stream directly in the browser using a [Janus WebRTC server](https://janus.conf.meetecho.com/). Please refer to the Wiki for more instructions.
+&#9758; With PCMA and PCMU and more recently G722 codecs it is possible to listen to the RTP stream directly in the browser using a [Janus WebRTC server](https://janus.conf.meetecho.com/). Please refer to the Wiki page "Networking audio" for detailed instructions.
 
 <h3>1.15 Cleanup registrations not in the list</h3>
 

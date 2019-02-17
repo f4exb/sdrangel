@@ -37,14 +37,13 @@ AudioFilter::~AudioFilter()
 {}
 
 
-void AudioFilter::setDecimFilters(int sr, uint32_t decim)
+void AudioFilter::setDecimFilters(int srHigh, int srLow, float fcHigh, float fcLow)
 {
-    int downSR = sr / (decim == 0 ? 1 : decim);
-    double fcH = (0.45 * downSR) / (sr <= 0 ? 1 : sr); // high cut frequency normalized to SR
-    double fcL = 300.0 / downSR; // low cut frequency normalized to downsampled SR
+    double fcNormHigh = fcHigh / srHigh;
+    double fcNormLow = fcLow / srLow;
 
-    calculate2(false, fcH, m_lpva, m_lpvb);
-    calculate2(true, fcL, m_hpva, m_hpvb);
+    calculate2(false, fcNormHigh, m_lpva, m_lpvb);
+    calculate2(true, fcNormLow, m_hpva, m_hpvb);
 
     m_filterLP.setCoeffs(m_lpva, m_lpvb);
     m_filterHP.setCoeffs(m_hpva, m_hpvb);
