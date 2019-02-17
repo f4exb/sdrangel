@@ -15,6 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+
 #include "audionetsink.h"
 #include "util/rtpsink.h"
 
@@ -33,7 +35,7 @@ AudioNetSink::AudioNetSink(QObject *parent) :
     m_bufferIndex(0),
     m_port(9998)
 {
-    memset(m_data, 0, 65536);
+    std::fill(m_data, m_data+m_dataBlockSize, 0);
     m_udpSocket = new QUdpSocket(parent);
 }
 
@@ -47,7 +49,7 @@ AudioNetSink::AudioNetSink(QObject *parent, int sampleRate, bool stereo) :
     m_bufferIndex(0),
     m_port(9998)
 {
-    memset(m_data, 0, 65536);
+    std::fill(m_data, m_data+m_dataBlockSize, 0);
     m_udpSocket = new QUdpSocket(parent);
     m_rtpBufferAudio = new RTPSink(m_udpSocket, sampleRate, stereo);
 }
@@ -130,6 +132,9 @@ void AudioNetSink::setParameters(Codec codec, bool stereo, int sampleRate)
         case CodecL8:
             m_rtpBufferAudio->setPayloadInformation(RTPSink::PayloadL8, sampleRate);
             break;
+        case CodecG722:
+            m_rtpBufferAudio->setPayloadInformation(RTPSink::PayloadG722, sampleRate/2);
+            break;
         case CodecL16: // actually no codec
         default:
             m_rtpBufferAudio->setPayloadInformation(stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Mono, sampleRate);
@@ -173,34 +178,43 @@ void AudioNetSink::write(qint16 isample)
             m_udpSocket->writeDatagram((const char*)m_data, (qint64 ) m_udpBlockSize, m_address, m_port);
             m_bufferIndex = 0;
         }
-        else
+
+        switch(m_codec)
         {
-            switch(m_codec)
-            {
-            case CodecPCMA:
-            case CodecPCMU:
-            {
-                qint8 *p = (qint8*) &m_data[m_bufferIndex];
-                *p = m_audioCompressor.compress8(sample);
-                m_bufferIndex += sizeof(qint8);
+        case CodecPCMA:
+        case CodecPCMU:
+        {
+            qint8 *p = (qint8*) &m_data[m_bufferIndex];
+            *p = m_audioCompressor.compress8(sample);
+            m_bufferIndex += sizeof(qint8);
+        }
+            break;
+        case CodecL8:
+        {
+            qint8 *p = (qint8*) &m_data[m_bufferIndex];
+            *p = sample / 256;
+            m_bufferIndex += sizeof(qint8);
+        }
+            break;
+        case CodecG722:
+        {
+            qint16 *p = (qint16*) &m_data[m_udpBlockSize + 2*m_bufferIndex];
+            *p = sample;
+            m_bufferIndex += 1;
+
+            if (m_bufferIndex == m_udpBlockSize) {
+                m_g722.encode((uint8_t *) m_data, (const int16_t*) &m_data[3*m_udpBlockSize], m_udpBlockSize);
             }
-                break;
-            case CodecL8:
-            {
-                qint8 *p = (qint8*) &m_data[m_bufferIndex];
-                *p = sample / 256;
-                m_bufferIndex += sizeof(qint8);
-            }
-                break;
-            case CodecL16:
-            default:
-            {
-                qint16 *p = (qint16*) &m_data[m_bufferIndex];
-                *p = sample;
-                m_bufferIndex += sizeof(qint16);
-            }
-                break;
-            }
+        }
+            break;
+        case CodecL16:
+        default:
+        {
+            qint16 *p = (qint16*) &m_data[m_bufferIndex];
+            *p = sample;
+            m_bufferIndex += sizeof(qint16);
+        }
+            break;
         }
     }
     else if (m_type == SinkRTP)
@@ -218,6 +232,22 @@ void AudioNetSink::write(qint16 isample)
         {
             qint8 p = sample / 256;
             m_rtpBufferAudio->write((uint8_t *) &p);
+        }
+            break;
+        case CodecG722:
+        {
+            if (m_bufferIndex >= m_g722BlockSize)
+            {
+                static const int sz = m_g722BlockSize / sizeof(int16_t);
+                uint8_t g722_data[sz];
+                m_g722.encode(g722_data, (const int16_t*) m_data, sz);
+                m_rtpBufferAudio->write(g722_data, sz);
+                m_bufferIndex = 0;
+            }
+
+            qint16 *p = (qint16*) &m_data[m_bufferIndex];
+            *p = sample;
+            m_bufferIndex += sizeof(qint16);
         }
             break;
         case CodecL16:

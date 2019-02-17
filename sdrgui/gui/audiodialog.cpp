@@ -1,9 +1,28 @@
-#include "audiodialog.h"
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015-2019 F4EXB                                                 //
+// written by Edouard Griffiths                                                  //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
 
-#include <audio/audiodevicemanager.h>
-#include <QTreeWidgetItem>
-#include "ui_audiodialog.h"
 #include <math.h>
+
+#include <QTreeWidgetItem>
+#include <QMessageBox>
+
+#include "audio/audiodevicemanager.h"
+#include "audiodialog.h"
+#include "ui_audiodialog.h"
 
 AudioDialogX::AudioDialogX(AudioDeviceManager* audioDeviceManager, QWidget* parent) :
 	QDialog(parent),
@@ -263,26 +282,43 @@ void AudioDialogX::updateOutputDeviceInfo()
 void AudioDialogX::updateOutputSDPString()
 {
     QString format;
-
-    switch(m_outputDeviceInfo.udpChannelCodec)
-    {
-    case AudioOutput::UDPCodecALaw:
-        format = "PCMA";
-        break;
-    case AudioOutput::UDPCodecULaw:
-        format = "PCMU";
-        break;
-    case AudioOutput::UDPCodecL8:
-        format = "L8";
-        break;
-    case AudioOutput::UDPCodecL16:
-    default:
-        format = "L16";
-        break;
-    }
-
     int nChannels = m_outputDeviceInfo.udpChannelMode == AudioOutput::UDPChannelStereo ? 2 : 1;
     uint32_t decimationFactor = m_outputDeviceInfo.udpDecimationFactor == 0 ? 1 : m_outputDeviceInfo.udpDecimationFactor;
+
+    if (m_outputDeviceInfo.udpChannelCodec == AudioOutput::UDPCodecALaw)
+    {
+        format = "PCMA";
+        if ((nChannels != 1) || (m_outputDeviceInfo.sampleRate/decimationFactor != 8000)) {
+            QMessageBox::information(this, tr("Message"), tr("PCMA must be 8000 Hz single channel"));
+        }
+    }
+    else if (m_outputDeviceInfo.udpChannelCodec == AudioOutput::UDPCodecULaw)
+    {
+        format = "PCMU";
+        if ((nChannels != 1) || (m_outputDeviceInfo.sampleRate/decimationFactor != 8000)) {
+            QMessageBox::information(this, tr("Message"), tr("PCMU must be 8000 Hz single channel"));
+        }
+    }
+    else if (m_outputDeviceInfo.udpChannelCodec == AudioOutput::UDPCodecG722)
+    {
+        format = "G722";
+        if ((nChannels != 1) || (m_outputDeviceInfo.sampleRate/decimationFactor != 16000)) {
+            QMessageBox::information(this, tr("Message"), tr("G722 must be 16000 Hz single channel"));
+        }
+    }
+    else if (m_outputDeviceInfo.udpChannelCodec == AudioOutput::UDPCodecL8)
+    {
+        format = "L8";
+    }
+    else if (m_outputDeviceInfo.udpChannelCodec == AudioOutput::UDPCodecL16)
+    {
+        format = "L16";
+    }
+    else
+    {
+        QMessageBox::information(this, tr("Message"), tr("Unknown codec"));
+        format = "UNK";
+    }
 
     ui->outputSDPText->setText(tr("%1/%2/%3").arg(format).arg(m_outputDeviceInfo.sampleRate/decimationFactor).arg(nChannels));
 }

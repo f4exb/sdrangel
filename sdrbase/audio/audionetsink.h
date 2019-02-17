@@ -21,6 +21,7 @@
 #include "dsp/dsptypes.h"
 #include "audiofilter.h"
 #include "audiocompressor.h"
+#include "audiog722.h"
 #include "export.h"
 
 #include <QObject>
@@ -44,7 +45,8 @@ public:
         CodecL16,  //!< Linear 16 bit samples (no formatting)
         CodecL8,   //!< Linear 8 bit samples
         CodecPCMA, //!< PCM A-law 8 bit samples
-        CodecPCMU  //!< PCM Mu-law 8 bit samples
+        CodecPCMU, //!< PCM Mu-law 8 bit samples
+        CodecG722  //!< G722 compressed 8 bit samples 16kS/s in 8kS/s out
     } Codec;
 
     AudioNetSink(QObject *parent); //!< without RTP
@@ -66,6 +68,8 @@ public:
     void moveToThread(QThread *thread);
 
     static const int m_udpBlockSize;
+    static const int m_dataBlockSize = 65536;
+    static const int m_g722BlockSize = 1024;  // size in bytes
 
 protected:
     SinkType m_type;
@@ -73,11 +77,12 @@ protected:
     QUdpSocket *m_udpSocket;
     RTPSink *m_rtpBufferAudio;
     AudioCompressor m_audioCompressor;
+    AudioG722 m_g722;
     AudioFilter m_audioFilter;
     int m_sampleRate;
     uint32_t m_decimation;
     uint32_t m_decimationCount;
-    char m_data[65536];
+    char m_data[m_dataBlockSize];
     unsigned int m_bufferIndex;
     QHostAddress m_address;
     unsigned int m_port;

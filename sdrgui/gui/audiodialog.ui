@@ -255,6 +255,11 @@
              <string>PCMU</string>
             </property>
            </item>
+           <item>
+            <property name="text">
+             <string>G722</string>
+            </property>
+           </item>
           </widget>
          </item>
          <item>
