@@ -68,8 +68,8 @@ public:
     void moveToThread(QThread *thread);
 
     static const int m_udpBlockSize;
-    static const int m_dataBlockSize = 65536;
-    static const int m_g722BlockSize = 1024;  // size in bytes
+    static const int m_dataBlockSize = 16384*5; // room for G722 conversion (largest to date)
+    static const int m_g722BlockSize = 16384;   // number of resulting G722 bytes
 
 protected:
     SinkType m_type;

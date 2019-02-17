@@ -173,10 +173,21 @@ void AudioNetSink::write(qint16 isample)
 
     if (m_type == SinkUDP)
     {
-        if (m_bufferIndex >= m_udpBlockSize)
+        if (m_codec == CodecG722)
         {
-            m_udpSocket->writeDatagram((const char*)m_data, (qint64 ) m_udpBlockSize, m_address, m_port);
-            m_bufferIndex = 0;
+            if (m_bufferIndex >= 2*m_udpBlockSize)
+            {
+                m_udpSocket->writeDatagram((const char*) m_data, (qint64 ) m_udpBlockSize, m_address, m_port);
+                m_bufferIndex = 0;
+            }
+        }
+        else
+        {
+            if (m_bufferIndex >= m_udpBlockSize)
+            {
+                m_udpSocket->writeDatagram((const char*) m_data, (qint64 ) m_udpBlockSize, m_address, m_port);
+                m_bufferIndex = 0;
+            }
         }
 
         switch(m_codec)
@@ -202,8 +213,8 @@ void AudioNetSink::write(qint16 isample)
             *p = sample;
             m_bufferIndex += 1;
 
-            if (m_bufferIndex == m_udpBlockSize) {
-                m_g722.encode((uint8_t *) m_data, (const int16_t*) &m_data[3*m_udpBlockSize], m_udpBlockSize);
+            if (m_bufferIndex == 2*m_udpBlockSize) {
+                m_g722.encode((uint8_t *) m_data, (const int16_t*) &m_data[m_udpBlockSize], 2*m_udpBlockSize);
             }
         }
             break;
@@ -236,18 +247,20 @@ void AudioNetSink::write(qint16 isample)
             break;
         case CodecG722:
         {
-            if (m_bufferIndex >= m_g722BlockSize)
+
+            if (m_bufferIndex >= 2*m_g722BlockSize)
             {
-                static const int sz = m_g722BlockSize / sizeof(int16_t);
-                uint8_t g722_data[sz];
-                m_g722.encode(g722_data, (const int16_t*) m_data, sz);
-                m_rtpBufferAudio->write(g722_data, sz);
+                m_g722.encode((uint8_t *) m_data, (const int16_t*) &m_data[m_g722BlockSize], 2*m_g722BlockSize);
                 m_bufferIndex = 0;
             }
 
-            qint16 *p = (qint16*) &m_data[m_bufferIndex];
+            if (m_bufferIndex%2 == 0) {
+                m_rtpBufferAudio->write((uint8_t *) &m_data[m_bufferIndex/2]);
+            }
+
+            qint16 *p = (qint16*) &m_data[m_g722BlockSize + 2*m_bufferIndex];
             *p = sample;
-            m_bufferIndex += sizeof(qint16);
+            m_bufferIndex += 1;
         }
             break;
         case CodecL16:

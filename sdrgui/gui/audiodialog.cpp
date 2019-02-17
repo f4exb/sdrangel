@@ -234,28 +234,37 @@ void AudioDialogX::on_outputSampleRate_valueChanged(int value)
 {
     m_outputDeviceInfo.sampleRate = value;
     updateOutputSDPString();
+    check();
 }
 
 void AudioDialogX::on_decimationFactor_currentIndexChanged(int index)
 {
     m_outputDeviceInfo.udpDecimationFactor = index + 1;
     updateOutputSDPString();
+    check();
 }
 
 void AudioDialogX::on_outputUDPChannelCodec_currentIndexChanged(int index)
 {
     m_outputDeviceInfo.udpChannelCodec = (AudioOutput::UDPChannelCodec) index;
     updateOutputSDPString();
+    check();
 }
 
 void AudioDialogX::on_outputUDPChannelMode_currentIndexChanged(int index)
 {
     m_outputDeviceInfo.udpChannelMode = (AudioOutput::UDPChannelMode) index;
     updateOutputSDPString();
+    check();
 }
 
 void AudioDialogX::updateOutputDisplay()
 {
+    ui->outputSampleRate->blockSignals(true);
+    ui->outputUDPChannelMode->blockSignals(true);
+    ui->outputUDPChannelCodec->blockSignals(true);
+    ui->decimationFactor->blockSignals(true);
+
     ui->outputSampleRate->setValue(m_outputDeviceInfo.sampleRate);
     ui->outputUDPAddress->setText(m_outputDeviceInfo.udpAddress);
     ui->outputUDPPort->setText(tr("%1").arg(m_outputDeviceInfo.udpPort));
@@ -264,7 +273,13 @@ void AudioDialogX::updateOutputDisplay()
     ui->outputUDPChannelMode->setCurrentIndex((int) m_outputDeviceInfo.udpChannelMode);
     ui->outputUDPChannelCodec->setCurrentIndex((int) m_outputDeviceInfo.udpChannelCodec);
     ui->decimationFactor->setCurrentIndex(m_outputDeviceInfo.udpDecimationFactor == 0 ? 0 : m_outputDeviceInfo.udpDecimationFactor - 1);
+
     updateOutputSDPString();
+
+    ui->outputSampleRate->blockSignals(false);
+    ui->outputUDPChannelMode->blockSignals(false);
+    ui->outputUDPChannelCodec->blockSignals(false);
+    ui->decimationFactor->blockSignals(false);
 }
 
 void AudioDialogX::updateOutputDeviceInfo()
@@ -285,40 +300,50 @@ void AudioDialogX::updateOutputSDPString()
     int nChannels = m_outputDeviceInfo.udpChannelMode == AudioOutput::UDPChannelStereo ? 2 : 1;
     uint32_t decimationFactor = m_outputDeviceInfo.udpDecimationFactor == 0 ? 1 : m_outputDeviceInfo.udpDecimationFactor;
 
+    switch (m_outputDeviceInfo.udpChannelCodec)
+    {
+    case AudioOutput::UDPCodecALaw:
+        format = "PCMA";
+        break;
+    case AudioOutput::UDPCodecULaw:
+        format = "PCMU";
+        break;
+    case AudioOutput::UDPCodecG722:
+        format = "G722";
+        break;
+    case AudioOutput::UDPCodecL8:
+        format = "L8";
+        break;
+    case AudioOutput::UDPCodecL16:
+    default:
+        format = "L16";
+        break;
+    }
+
+    ui->outputSDPText->setText(tr("%1/%2/%3").arg(format).arg(m_outputDeviceInfo.sampleRate/decimationFactor).arg(nChannels));
+}
+
+void AudioDialogX::check()
+{
+    int nChannels = m_outputDeviceInfo.udpChannelMode == AudioOutput::UDPChannelStereo ? 2 : 1;
+    uint32_t decimationFactor = m_outputDeviceInfo.udpDecimationFactor == 0 ? 1 : m_outputDeviceInfo.udpDecimationFactor;
+
     if (m_outputDeviceInfo.udpChannelCodec == AudioOutput::UDPCodecALaw)
     {
-        format = "PCMA";
         if ((nChannels != 1) || (m_outputDeviceInfo.sampleRate/decimationFactor != 8000)) {
             QMessageBox::information(this, tr("Message"), tr("PCMA must be 8000 Hz single channel"));
         }
     }
     else if (m_outputDeviceInfo.udpChannelCodec == AudioOutput::UDPCodecULaw)
     {
-        format = "PCMU";
         if ((nChannels != 1) || (m_outputDeviceInfo.sampleRate/decimationFactor != 8000)) {
             QMessageBox::information(this, tr("Message"), tr("PCMU must be 8000 Hz single channel"));
         }
     }
     else if (m_outputDeviceInfo.udpChannelCodec == AudioOutput::UDPCodecG722)
     {
-        format = "G722";
         if ((nChannels != 1) || (m_outputDeviceInfo.sampleRate/decimationFactor != 16000)) {
             QMessageBox::information(this, tr("Message"), tr("G722 must be 16000 Hz single channel"));
         }
     }
-    else if (m_outputDeviceInfo.udpChannelCodec == AudioOutput::UDPCodecL8)
-    {
-        format = "L8";
-    }
-    else if (m_outputDeviceInfo.udpChannelCodec == AudioOutput::UDPCodecL16)
-    {
-        format = "L16";
-    }
-    else
-    {
-        QMessageBox::information(this, tr("Message"), tr("Unknown codec"));
-        format = "UNK";
-    }
-
-    ui->outputSDPText->setText(tr("%1/%2/%3").arg(format).arg(m_outputDeviceInfo.sampleRate/decimationFactor).arg(nChannels));
 }

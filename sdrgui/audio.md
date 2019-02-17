@@ -64,8 +64,9 @@ This is the codec applied before sending the stream via UDP. The following are a
 
   - `L16`: Linear 16 bit signed integers (native)
   - `L8`: Linear 8 bit signed integers
-  - `PCMA`: A-law compressed 8 bit PCM
-  - `PCMU`: Mu-law compressed 8 bit PCM
+  - `PCMA`: A-law compressed 8 bit PCM (requires 8000 Hz sample rate mono)
+  - `PCMU`: Mu-law compressed 8 bit PCM (requires 8000 Hz sample rate mono)
+  - `G722`: G722 64 kbit/s (requires 16000 Hz sample rate mono)
   
 <h3>1.10 SDP string</h3>
 

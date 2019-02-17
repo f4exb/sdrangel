@@ -39,6 +39,7 @@ private:
 private slots:
 	void accept();
 	void reject();
+	void check();
     void on_audioInTree_currentItemChanged(QTreeWidgetItem* currentItem, QTreeWidgetItem* previousItem);
 	void on_audioOutTree_currentItemChanged(QTreeWidgetItem* currentItem, QTreeWidgetItem* previousItem);
 	void on_inputVolume_valueChanged(int value);
