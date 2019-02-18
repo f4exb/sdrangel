@@ -37,6 +37,7 @@ CONFIG(ANDROID):INCLUDEPATH += /opt/softs/boost_1_60_0
 CONFIG(MINGW32):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(MINGW64):INCLUDEPATH += "C:\softs\boost_1_66_0"
 CONFIG(MSVC):INCLUDEPATH += "C:\softs\boost_1_66_0"
+CONFIG(MSVC):INCLUDEPATH += "C:\softs\libopus_v1.3_msvc15\include"
 
 CONFIG(MINGW32):INCLUDEPATH += "C:\softs\serialDV"
 CONFIG(MINGW64):INCLUDEPATH += "C:\softs\serialDV"
@@ -58,6 +59,7 @@ SOURCES += audio/audiodevicemanager.cpp\
         audio/audiofifo.cpp\
         audio/audiofilter.cpp\
         audio/audiog722.cpp\
+        audio/audioopus.cpp\
         audio/audiooutput.cpp\
         audio/audioinput.cpp\
         audio/audionetsink.cpp\
@@ -138,6 +140,7 @@ HEADERS  += audio/audiodevicemanager.h\
         audio/audiofifo.h\
         audio/audiofilter.h\
         audio/audiog722.h\        
+        audio/audioopus.h\
         audio/audiooutput.h\
         audio/audioinput.h\
         audio/audionetsink.h\
@@ -231,6 +234,9 @@ HEADERS  += audio/audiodevicemanager.h\
         webapi/webapiserver.h\
         mainparser.h
 
+MSVC {
+    LIBS += -LC:\softs\libopus_v1.3_msvc15\lib\x64 -lopus
+}
 MINGW32 || MINGW64 || MSVC {
     LIBS += -L../serialdv/$${build_subdir} -lserialdv
 }

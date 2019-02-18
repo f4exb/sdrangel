@@ -71,7 +71,7 @@ private:
         void init(int rate, int options);
     };
 
-    __inline__ int16_t saturate(int32_t amp)
+    int16_t saturate(int32_t amp)
     {
         int16_t amp16;
 
