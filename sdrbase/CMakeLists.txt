@@ -9,6 +9,7 @@ set(sdrbase_SOURCES
     audio/audiofifo.cpp
     audio/audiofilter.cpp
     audio/audiog722.cpp
+    audio/audioopus.cpp
     audio/audiooutput.cpp
     audio/audioinput.cpp
     audio/audionetsink.cpp
@@ -104,6 +105,7 @@ set(sdrbase_HEADERS
     audio/audiofilter.h
     audio/audiog722.h
     audio/audiooutput.h
+    audio/audioopus.h
     audio/audioinput.h
     audio/audionetsink.h
 
@@ -224,6 +226,8 @@ set(sdrbase_SOURCES
     ${sdrbase_HEADERS}
 )
 
+find_package(Opus REQUIRED)
+
 if(FFTW3F_FOUND)
     set(sdrbase_SOURCES
         ${sdrbase_SOURCES}
@@ -297,6 +301,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/qrtplib
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${Boost_INCLUDE_DIRS}
+    ${OPUS_INCLUDE_DIRS}
 )
 
 target_link_libraries(sdrbase
@@ -304,6 +309,7 @@ target_link_libraries(sdrbase
     httpserver
     qrtplib
     swagger
+    ${OPUS_LIBRARIES}
 )
 
 if(FFTW3F_FOUND)
