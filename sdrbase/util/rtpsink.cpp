@@ -112,9 +112,9 @@ void RTPSink::setPayloadInformation(PayloadType payloadType, int sampleRate)
         break;
     case PayloadOpus:
         m_sampleBytes = 1;
-        m_rtpSession.SetDefaultPayloadType(101);
-        m_packetSamples = 960; // Fixed 20ms @ 48 kHz as per https://tools.ietf.org/html/rfc7587
-        timestampinc = 960;    // and per single channel
+        m_rtpSession.SetDefaultPayloadType(96);
+        m_packetSamples = 160; // Payload size is 160 bytes
+        timestampinc = 960;    // But increment is 960
         break;
     case PayloadL16Mono:
     default:
@@ -336,6 +336,9 @@ unsigned int RTPSink::elemLength(PayloadType payloadType)
     {
     case PayloadPCMA8:
     case PayloadPCMU8:
+    case PayloadG722:
+    case PayloadOpus:
+    case PayloadL8:
         return sizeof(int8_t);
         break;
     case PayloadL16Stereo:
