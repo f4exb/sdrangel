@@ -107,8 +107,8 @@ void RTPSink::setPayloadInformation(PayloadType payloadType, int sampleRate)
     case PayloadG722:
         m_sampleBytes = 1;
         m_rtpSession.SetDefaultPayloadType(9);
-        m_packetSamples = m_sampleRate / 50; // 20ms packet samples
-        timestampinc = m_sampleRate / 50;    // 1 channel
+        m_packetSamples = 160; // Fixed 8 kB/s 20ms packet samples
+        timestampinc = 160;    // 1 channel
         break;
     case PayloadOpus:
         m_sampleBytes = 1;
