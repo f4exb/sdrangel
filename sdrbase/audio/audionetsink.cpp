@@ -207,6 +207,10 @@ void AudioNetSink::write(qint16 isample)
                 m_bufferIndex = 0;
             }
         }
+        else if (m_codec == CodecOpus)
+        {
+
+        }
         else
         {
             if (m_bufferIndex >= m_udpBlockSize)
@@ -242,6 +246,11 @@ void AudioNetSink::write(qint16 isample)
             if (m_bufferIndex == 2*m_udpBlockSize) {
                 m_g722.encode((uint8_t *) m_data, (const int16_t*) &m_data[m_udpBlockSize], 2*m_udpBlockSize);
             }
+        }
+            break;
+        case CodecOpus:
+        {
+
         }
             break;
         case CodecL16:
