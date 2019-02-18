@@ -67,7 +67,7 @@ This is the codec applied before sending the stream via UDP. The following are a
   - `PCMA`: A-law 8 bit PCM (requires 8000 Hz sample rate mono)
   - `PCMU`: Mu-law 8 bit PCM (requires 8000 Hz sample rate mono)
   - `G722`: G722 64 kbit/s (requires 16000 Hz sample rate mono)
-  - `OPUS` : Opus 64 kbit/s
+  - `OPUS` : Opus constant 64 kbit/s (requires 48, 24, 16 or 12 kHz sample rates)
 
 <h3>1.10 SDP string</h3>
 

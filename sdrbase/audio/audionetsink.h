@@ -22,6 +22,7 @@
 #include "audiofilter.h"
 #include "audiocompressor.h"
 #include "audiog722.h"
+#include "audioopus.h"
 #include "export.h"
 
 #include <QObject>
@@ -72,9 +73,11 @@ public:
     static const int m_dataBlockSize = 65536; // room for G722 conversion (64000 = 12800*5 largest to date)
     static const int m_g722BlockSize = 12800; // number of resulting G722 bytes (80*20ms frames)
     static const int m_opusBlockSize = 960*2; // provision for 20ms of 2 int16 channels at 48 kS/s
+    static const int m_opusOutputSize = 160;  // output frame: 20ms of 8 bit data @ 64 kbits/s = 160 bytes
 
 protected:
-    void setDecimationFilters();
+    void setNewCodecData();       // actions to take when changes affecting codec dependent data occurs
+    void setDecimationFilters();  // set decimation filters limits depending on effective sample rate and codec
 
     SinkType m_type;
     Codec m_codec;
@@ -82,18 +85,20 @@ protected:
     RTPSink *m_rtpBufferAudio;
     AudioCompressor m_audioCompressor;
     AudioG722 m_g722;
+    AudioOpus m_opus;
     AudioFilter m_audioFilter;
     int m_sampleRate;
+    bool m_stereo;
     uint32_t m_decimation;
     uint32_t m_decimationCount;
     char m_data[m_dataBlockSize];
-    uint16_t m_opusIn[m_opusBlockSize];
+    int16_t m_opusIn[m_opusBlockSize];
+    int m_codecInputSize;  // codec input block size - for codecs with actual encoding (Opus only for now)
+    int m_codecInputIndex; // codec input block fill index
+    int m_codecRatio;      // codec compression ratio
     unsigned int m_bufferIndex;
     QHostAddress m_address;
     unsigned int m_port;
 };
-
-
-
 
 #endif /* SDRBASE_AUDIO_AUDIONETSINK_H_ */

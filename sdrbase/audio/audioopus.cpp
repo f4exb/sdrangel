@@ -2,6 +2,9 @@
 // Copyright (C) 2019 F4EXB                                                      //
 // written by Edouard Griffiths                                                  //
 //                                                                               //
+// In this version we will use a fixed constant bit rate of 64kbit/s.            //
+// With a frame time of 20ms the encoder output size is always 160 bytes.        //
+//                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
 // the Free Software Foundation as version 3 of the License, or                  //
@@ -69,6 +72,15 @@ void AudioOpus::setEncoder(int32_t fs, int nChannels)
         m_encoderOK = false;
         return;
     }
+
+    error = opus_encoder_ctl(m_encoderState, OPUS_SET_VBR(0)); // force constant bit rate
+
+    if (error != OPUS_OK)
+    {
+        qWarning("AudioOpus::setEncoder: set constant bitrate error: %s", opus_strerror(error));
+        m_encoderOK = false;
+        return;
+    }
 }
 
 int AudioOpus::encode(int frameSize, int16_t *in, uint8_t *out)
@@ -77,7 +89,7 @@ int AudioOpus::encode(int frameSize, int16_t *in, uint8_t *out)
 
     if (nbBytes < 0)
     {
-        qWarning("AudioOpus::encode failed: %s\n", opus_strerror(nbBytes));
+        qWarning("AudioOpus::encode failed: %s", opus_strerror(nbBytes));
         return 0;
     }
     else

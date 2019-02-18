@@ -350,4 +350,11 @@ void AudioDialogX::check()
             QMessageBox::information(this, tr("Message"), tr("G722 must be 16000 Hz single channel"));
         }
     }
+    else if (m_outputDeviceInfo.udpChannelCodec == AudioOutput::UDPCodecOpus)
+    {
+        int effectiveSampleRate = m_outputDeviceInfo.sampleRate/decimationFactor;
+        if ((effectiveSampleRate != 48000) || (effectiveSampleRate != 24000) || (effectiveSampleRate != 16000) || (effectiveSampleRate != 12000)) {
+            QMessageBox::information(this, tr("Message"), tr("Opus takes only 48, 24, 16 or 12 kHz sample rates"));
+        }
+    }
 }

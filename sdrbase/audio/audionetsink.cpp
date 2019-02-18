@@ -30,8 +30,11 @@ AudioNetSink::AudioNetSink(QObject *parent) :
     m_codec(CodecL16),
     m_rtpBufferAudio(0),
     m_sampleRate(48000),
+    m_stereo(false),
     m_decimation(1),
     m_decimationCount(0),
+    m_codecInputSize(960),
+    m_codecInputIndex(0),
     m_bufferIndex(0),
     m_port(9998)
 {
@@ -44,8 +47,11 @@ AudioNetSink::AudioNetSink(QObject *parent, int sampleRate, bool stereo) :
     m_codec(CodecL16),
     m_rtpBufferAudio(0),
     m_sampleRate(48000),
+    m_stereo(false),
     m_decimation(1),
     m_decimationCount(0),
+    m_codecInputSize(960),
+    m_codecInputIndex(0),
     m_bufferIndex(0),
     m_port(9998)
 {
@@ -114,9 +120,10 @@ void AudioNetSink::setParameters(Codec codec, bool stereo, int sampleRate)
             << " sampleRate: " << sampleRate;
 
     m_codec = codec;
+    m_stereo = stereo;
     m_sampleRate = sampleRate;
 
-    setDecimationFilters();
+    setNewCodecData();
 
     if (m_rtpBufferAudio)
     {
@@ -151,8 +158,26 @@ void AudioNetSink::setDecimation(uint32_t decimation)
 {
     m_decimation = decimation < 1 ? 1 : decimation > 6 ? 6 : decimation;
     qDebug() << "AudioNetSink::setDecimation: " << m_decimation << " from: " << decimation;
-    setDecimationFilters();
+    setNewCodecData();
     m_decimationCount = 0;
+}
+
+void AudioNetSink::setNewCodecData()
+{
+    if (m_codec == CodecOpus)
+    {
+        m_codecInputSize = m_sampleRate / (m_decimation * 50); // 20ms = 1/50s - size is per channel
+        m_codecInputSize = m_codecInputSize > 960 ? 960 : m_codecInputSize; // hard limit of 48 kS/s
+        m_codecRatio = (m_sampleRate / m_decimation) / (AudioOpus::m_bitrate / 8); // compressor ratio
+        qDebug() << "AudioNetSink::setNewCodecData: CodecOpus:"
+            << " m_codecInputSize: " << m_codecInputSize
+            << " m_codecRatio: " << m_codecRatio
+            << " Fs: " << m_sampleRate/m_decimation
+            << " stereo: " << m_stereo;
+        m_opus.setEncoder(m_sampleRate/m_decimation, m_stereo ? 2 : 1);
+    }
+
+    setDecimationFilters();
 }
 
 void AudioNetSink::setDecimationFilters()
@@ -207,10 +232,6 @@ void AudioNetSink::write(qint16 isample)
                 m_bufferIndex = 0;
             }
         }
-        else if (m_codec == CodecOpus)
-        {
-
-        }
         else
         {
             if (m_bufferIndex >= m_udpBlockSize)
@@ -250,7 +271,15 @@ void AudioNetSink::write(qint16 isample)
             break;
         case CodecOpus:
         {
+            if (m_codecInputIndex == m_codecInputSize)
+            {
+                int nbBytes = m_opus.encode(m_codecInputSize, m_opusIn, (uint8_t *) m_data);
+                nbBytes = nbBytes > m_udpBlockSize ? m_udpBlockSize : nbBytes;
+                m_udpSocket->writeDatagram((const char*) m_data, (qint64 ) nbBytes, m_address, m_port);
+                m_codecInputIndex = 0;
+            }
 
+            m_opusIn[m_codecInputIndex++] = sample;
         }
             break;
         case CodecL16:
@@ -289,13 +318,32 @@ void AudioNetSink::write(qint16 isample)
                 m_bufferIndex = 0;
             }
 
-            if (m_bufferIndex%2 == 0) {
+            if (m_bufferIndex % 2 == 0) {
                 m_rtpBufferAudio->write((uint8_t *) &m_data[m_bufferIndex/2]);
             }
 
             qint16 *p = (qint16*) &m_data[m_g722BlockSize + 2*m_bufferIndex];
             *p = sample;
             m_bufferIndex += 1;
+        }
+            break;
+        case CodecOpus:
+        {
+            if (m_codecInputIndex == m_codecInputSize)
+            {
+                int nbBytes = m_opus.encode(m_codecInputSize, m_opusIn, (uint8_t *) m_data);
+                if (nbBytes != AudioOpus::m_bitrate/400) { // 8 bits for 1/50s (20ms)
+                    qWarning("AudioNetSink::write: CodecOpus mono: unexpected output frame size: %d bytes", nbBytes);
+                }
+                m_bufferIndex = 0;
+                m_codecInputIndex = 0;
+            }
+
+            if (m_codecInputIndex % m_codecRatio == 0) {
+                m_rtpBufferAudio->write((uint8_t *) &m_data[m_bufferIndex++]);
+            }
+
+            m_opusIn[m_codecInputIndex++] = sample;
         }
             break;
         case CodecL16:
@@ -333,10 +381,43 @@ void AudioNetSink::write(qint16 ilSample, qint16 irSample)
     {
         if (m_bufferIndex >= m_udpBlockSize)
         {
-            m_udpSocket->writeDatagram((const char*)m_data, (qint64 ) m_udpBlockSize, m_address, m_port);
+            m_udpSocket->writeDatagram((const char*) m_data, (qint64 ) m_udpBlockSize, m_address, m_port);
             m_bufferIndex = 0;
         }
-        else
+
+        switch(m_codec)
+        {
+        case CodecPCMA:
+        case CodecPCMU:
+        case CodecG722:
+            break; // mono modes - do nothing
+        case CodecOpus:
+        {
+            if (m_codecInputIndex == m_codecInputSize)
+            {
+                int nbBytes = m_opus.encode(m_codecInputSize, m_opusIn, (uint8_t *) m_data);
+                nbBytes = nbBytes > m_udpBlockSize ? m_udpBlockSize : nbBytes;
+                m_udpSocket->writeDatagram((const char*) m_data, (qint64 ) nbBytes, m_address, m_port);
+                m_codecInputIndex = 0;
+            }
+
+            m_opusIn[2*m_codecInputIndex]   = lSample;
+            m_opusIn[2*m_codecInputIndex+1] = rSample;
+            m_codecInputIndex++;
+        }
+            break;
+        case CodecL8:
+        {
+            qint8 *p = (qint8*) &m_data[m_bufferIndex];
+            *p = lSample / 256;
+            m_bufferIndex += sizeof(qint8);
+            p = (qint8*) &m_data[m_bufferIndex];
+            *p = rSample / 256;
+            m_bufferIndex += sizeof(qint8);
+        }
+            break;
+        case CodecL16:
+        default:
         {
             qint16 *p = (qint16*) &m_data[m_bufferIndex];
             *p = lSample;
@@ -345,10 +426,50 @@ void AudioNetSink::write(qint16 ilSample, qint16 irSample)
             *p = rSample;
             m_bufferIndex += sizeof(qint16);
         }
+            break;
+        }
     }
     else if (m_type == SinkRTP)
     {
-        m_rtpBufferAudio->write((uint8_t *) &lSample, (uint8_t *) &rSample);
+        switch(m_codec)
+        {
+        case CodecPCMA:
+        case CodecPCMU:
+        case CodecG722:
+            break; // mono modes - do nothing
+        case CodecOpus:
+        {
+            if (m_codecInputIndex == m_codecInputSize)
+            {
+                int nbBytes = m_opus.encode(m_codecInputSize, m_opusIn, (uint8_t *) m_data);
+                if (nbBytes != AudioOpus::m_bitrate/400) { // 8 bits for 1/50s (20ms)
+                    qWarning("AudioNetSink::write: CodecOpus stereo: unexpected output frame size: %d bytes", nbBytes);
+                }
+                m_bufferIndex = 0;
+                m_codecInputIndex = 0;
+            }
+
+            if (m_codecInputIndex % m_codecRatio == 0) {
+                m_rtpBufferAudio->write((uint8_t *) &m_data[m_bufferIndex++]);
+            }
+
+            m_opusIn[2*m_codecInputIndex]   = lSample;
+            m_opusIn[2*m_codecInputIndex+1] = rSample;
+            m_codecInputIndex++;
+        }
+            break;
+        case CodecL8:
+        {
+            qint8 pl = lSample / 256;
+            qint8 pr = rSample / 256;
+            m_rtpBufferAudio->write((uint8_t *) &pl, (uint8_t *) &pr);
+        }
+            break;
+        case CodecL16:
+        default:
+            m_rtpBufferAudio->write((uint8_t *) &lSample, (uint8_t *) &rSample);
+            break;
+        }
     }
 }
 
