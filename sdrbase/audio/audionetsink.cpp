@@ -136,6 +136,9 @@ void AudioNetSink::setParameters(Codec codec, bool stereo, int sampleRate)
         case CodecG722:
             m_rtpBufferAudio->setPayloadInformation(RTPSink::PayloadG722, sampleRate/2);
             break;
+        case CodecOpus:
+            m_rtpBufferAudio->setPayloadInformation(RTPSink::PayloadOpus, sampleRate);
+            break;
         case CodecL16: // actually no codec
         default:
             m_rtpBufferAudio->setPayloadInformation(stereo ? RTPSink::PayloadL16Stereo : RTPSink::PayloadL16Mono, sampleRate);
@@ -165,6 +168,7 @@ void AudioNetSink::setDecimationFilters()
     case CodecG722:
         m_audioFilter.setDecimFilters(m_sampleRate, decimatedSampleRate, 7000.0, 50.0);
         break;
+    case CodecOpus:
     case CodecL8:
     case CodecL16:
     default:

@@ -46,7 +46,8 @@ public:
         CodecL8,   //!< Linear 8 bit samples
         CodecPCMA, //!< PCM A-law 8 bit samples
         CodecPCMU, //!< PCM Mu-law 8 bit samples
-        CodecG722  //!< G722 compressed 8 bit samples 16kS/s in 8kS/s out
+        CodecG722, //!< G722 compressed 8 bit samples 16kS/s in 8kS/s out
+        CodecOpus  //!< Opus compressed 8 bit samples at 64kbits/s (8kS/s out). Various input sample rates
     } Codec;
 
     AudioNetSink(QObject *parent); //!< without RTP
@@ -70,6 +71,7 @@ public:
     static const int m_udpBlockSize;
     static const int m_dataBlockSize = 65536; // room for G722 conversion (64000 = 12800*5 largest to date)
     static const int m_g722BlockSize = 12800; // number of resulting G722 bytes (80*20ms frames)
+    static const int m_opusBlockSize = 960*4; // provision for 20ms of 2 int16 channels at 48 kS/s
 
 protected:
     void setDecimationFilters();

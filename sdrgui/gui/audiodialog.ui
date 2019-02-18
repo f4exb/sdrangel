@@ -260,6 +260,11 @@
              <string>G722</string>
             </property>
            </item>
+           <item>
+            <property name="text">
+             <string>Opus</string>
+            </property>
+           </item>
           </widget>
          </item>
          <item>

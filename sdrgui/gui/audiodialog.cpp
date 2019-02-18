@@ -315,6 +315,9 @@ void AudioDialogX::updateOutputSDPString()
     case AudioOutput::UDPCodecL8:
         format = "L8";
         break;
+    case AudioOutput::UDPCodecOpus:
+        format = "opus";
+        break;
     case AudioOutput::UDPCodecL16:
     default:
         format = "L16";

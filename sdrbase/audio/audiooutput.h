@@ -47,7 +47,8 @@ public:
 		UDPCodecL8,    //!< Linear 8 bit
         UDPCodecALaw,  //!< PCM A-law 8 bit
         UDPCodecULaw,  //!< PCM Mu-law 8 bit
-        UDPCodecG722   //!< G722 compression
+        UDPCodecG722,  //!< G722 compression
+		UDPCodecOpus   //!< Opus compression
     };
 
 	AudioOutput();

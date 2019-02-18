@@ -67,10 +67,11 @@ This is the codec applied before sending the stream via UDP. The following are a
   - `PCMA`: A-law 8 bit PCM (requires 8000 Hz sample rate mono)
   - `PCMU`: Mu-law 8 bit PCM (requires 8000 Hz sample rate mono)
   - `G722`: G722 64 kbit/s (requires 16000 Hz sample rate mono)
-  
+  - `OPUS` : Opus 64 kbit/s
+
 <h3>1.10 SDP string</h3>
 
-This is the SDP string representatiopn of the stream sent via UDP (RTP). In SDP files it is used on the `a=rtpmap`line (See 1.14). It can be used to check the effect of settings 1.5, 1.8 and 1.9. 
+This is the SDP string representatiopn of the stream sent via UDP (RTP). In SDP files it is used on the `a=rtpmap`line (See 1.14). It can be used to check the effect of settings 1.5, 1.8 and 1.9.
 
 <h3>1.11 UDP address</h3>
 
@@ -88,18 +89,19 @@ Use this button to activate or de-activate the copy of the audio stream to UDP s
 
 Check this box to activate the RTP protocol over UDP. RTP parameters are as follows:
 
-  - Payload type: 
+  - Payload type:
     - codec `L16`, `L8`: 96
+    - codec `OPUS`: 101
     - codec `PCMA`: 8
     - codec `PCMU`: 0
     - codec `G722`: 9
   - Sample rate: the resulting stream sample rate after decimation and possible compression:
     - codec `PCMA`, `PCMU`: must be 8000 S/s
-    - codec `G722`: must be 8000 S/s (16000 S/s input before compression) 
+    - codec `G722`: must be 8000 S/s (16000 S/s input before compression)
   - Sample format:
     - codec `L16`: 16 bit integer signed (S16LE)
     - codec `L8`, `PCMA`, `PCMU`: 8 bit integer signed (S8)
-    - codec `G722`: 8 bit unsigned integer. Note that this is the stream compressed to 64 kbits/s.
+    - codec `G722`, `OPUS`: 8 bit unsigned integer. Note that this is the stream compressed to 64 kbits/s.
   - Channels: 1 for mono (Left, Right and Mixed copy channels mode); 2 for stereo (Stereo copy channels mode)
   - Address and port: destination address and port (local on the client machine)
 
@@ -125,6 +127,14 @@ For G722:
 c=IN IP4 192.168.0.34
 m=audio 9998 RTP/AVP 9
 a=rtpmap:9 G722/8000/1
+```
+
+For Opus mono:
+
+```
+c=IN IP4 192.168.0.34
+m=audio 9998 RTP/AVP 101
+a=rtpmap:101 opus/48000/1
 ```
 
 &#9758; Note that on Android clients VLC has trouble working with the RTP stream (choppy audio, hanging unexpectedly...) therefore [MX player](https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad&hl=en) is recommended.

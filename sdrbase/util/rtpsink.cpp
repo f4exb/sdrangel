@@ -110,6 +110,12 @@ void RTPSink::setPayloadInformation(PayloadType payloadType, int sampleRate)
         m_packetSamples = m_sampleRate / 50; // 20ms packet samples
         timestampinc = m_sampleRate / 50;    // 1 channel
         break;
+    case PayloadOpus:
+        m_sampleBytes = 1;
+        m_rtpSession.SetDefaultPayloadType(101);
+        m_packetSamples = 160; // Fixed 20ms @ 64 kbits/s packet samples
+        timestampinc = 160;    // 1 channel
+        break;
     case PayloadL16Mono:
     default:
         m_sampleBytes = 2;

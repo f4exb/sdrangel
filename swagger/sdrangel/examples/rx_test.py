@@ -46,7 +46,7 @@ def getInputOptions():
     parser.add_option("--audio-address", dest="audio_address", help="Audio: UDP destination address", metavar="IP_ADDRESS", type="string")
     parser.add_option("--audio-port", dest="audio_port", help="Audio: UDP destination port", metavar="IP_PORT", type="int")
     parser.add_option("--audio-channels", dest="audio_channels", help="Audio: UDP mode (0: L only 1: R only 2: L+R mono 3: LR stereo)", metavar="ENUM_INT", type="int")
-    parser.add_option("--audio-codec", dest="audio_codec", help="Audio: codec to use for UDP (0: L16, 1: L8, 2: PCMA, 3: PCMU, 4: G722)", metavar="ENUM_INT", type="int")
+    parser.add_option("--audio-codec", dest="audio_codec", help="Audio: codec to use for UDP (0: L16, 1: L8, 2: PCMA, 3: PCMU, 4: G722, 5: Opus)", metavar="ENUM_INT", type="int")
     parser.add_option("--audio-decim", dest="audio_decim", help="Audio. decimation to apply for UDP (1 to 6)", metavar="INT", type="int")
     parser.add_option("--baud-rate", dest="baud_rate", help="DSD: baud rate in Baud", metavar="BAUD", type="int", default=4800)
     parser.add_option("--fm-dev", dest="fm_deviation", help="DSD: expected FM deviation", metavar="FREQ", type="int", default=5400)
