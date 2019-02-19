@@ -45,15 +45,11 @@ void AudioOpus::setEncoder(int32_t fs, int nChannels)
     bool newInstance = true;
     QMutexLocker mutexLocker(&m_mutex);
 
-    if (m_encoderState)
-    {
-        error = opus_encoder_init(m_encoderState, fs, nChannels, OPUS_APPLICATION_AUDIO);
-        newInstance = false;
+    if (m_encoderState) {
+        opus_encoder_destroy(m_encoderState);
     }
-    else
-    {
-        m_encoderState = opus_encoder_create(fs, nChannels, OPUS_APPLICATION_AUDIO, &error);
-    }
+
+    m_encoderState = opus_encoder_create(fs, nChannels, OPUS_APPLICATION_AUDIO, &error);
 
     if (error != OPUS_OK)
     {
