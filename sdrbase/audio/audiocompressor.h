@@ -37,7 +37,7 @@ private:
     int8_t ALaw_Encode(int16_t number);
     int8_t MuLaw_Encode(int16_t number);
 
-    int16_t m_lut[65536];
+    int16_t m_lut[32768];
     static const uint16_t ALAW_MAX;
     static const uint16_t MULAW_MAX;
     static const uint16_t MULAW_BIAS;

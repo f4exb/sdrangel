@@ -86,15 +86,15 @@ void AudioCompressor::fillLUT2()
 
 void AudioCompressor::fillALaw()
 {
-    for (int i=-32768; i<32768; i++) {
-        m_lut[i+32768] = ALaw_Encode(i);
+    for (int i=-16384; i<16384; i++) {
+        m_lut[i+16384] = ALaw_Encode(2*i);
     }
 }
 
 void AudioCompressor::fillULaw()
 {
-    for (int i=-32768; i<32768; i++) {
-        m_lut[i+32768] = MuLaw_Encode(i);
+    for (int i=-16384; i<16384; i++) {
+        m_lut[i+16384] = MuLaw_Encode(2*i);
     }
 }
 
@@ -107,7 +107,7 @@ int16_t AudioCompressor::compress(int16_t sample)
 
 int8_t AudioCompressor::compress8(int16_t sample)
 {
-    return m_lut[sample + 32768];
+    return m_lut[sample/2 + 16384];
 }
 
 /* http://dystopiancode.blogspot.com/2012/02/pcm-law-and-u-law-companding-algorithms.html
