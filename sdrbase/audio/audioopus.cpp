@@ -20,12 +20,14 @@
 
 #include "opus/opus.h"
 #include <QDebug>
+#include <QMutexLocker>
 
 #include "audioopus.h"
 
 AudioOpus::AudioOpus() :
     m_encoderState(0),
-    m_encoderOK(false)
+    m_encoderOK(false),
+    m_mutex(QMutex::Recursive)
 {
     qDebug("AudioOpus::AudioOpus: libopus version %s", opus_get_version_string());
 }
@@ -41,6 +43,7 @@ void AudioOpus::setEncoder(int32_t fs, int nChannels)
 {
     int error;
     bool newInstance = true;
+    QMutexLocker mutexLocker(&m_mutex);
 
     if (m_encoderState)
     {
@@ -85,6 +88,8 @@ void AudioOpus::setEncoder(int32_t fs, int nChannels)
 
 int AudioOpus::encode(int frameSize, int16_t *in, uint8_t *out)
 {
+    QMutexLocker mutexLocker(&m_mutex);
+
     int nbBytes = opus_encode(m_encoderState, in, frameSize, out, m_maxPacketSize);
 
     if (nbBytes < 0)

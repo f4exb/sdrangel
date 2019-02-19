@@ -317,6 +317,8 @@ void AudioDialogX::updateOutputSDPString()
         break;
     case AudioOutput::UDPCodecOpus:
         format = "opus";
+        nChannels = 2; // always 2 even for mono
+        effectiveSampleRate = 48000; // always 48000 regardless of input rate
         break;
     case AudioOutput::UDPCodecL16:
     default:

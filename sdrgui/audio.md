@@ -129,12 +129,13 @@ m=audio 9998 RTP/AVP 9
 a=rtpmap:9 G722/8000/1
 ```
 
-For Opus mono:
+For Opus mono or stereo:
 
 ```
 c=IN IP4 192.168.0.34
-m=audio 9998 RTP/AVP 101
-a=rtpmap:101 opus/48000/1
+m=audio 9998 RTP/AVP 96
+a=rtpmap:96 opus/48000/2
+a=fmtp:96 cbr=1
 ```
 
 &#9758; Note that on Android clients VLC has trouble working with the RTP stream (choppy audio, hanging unexpectedly...) therefore [MX player](https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad&hl=en) is recommended.

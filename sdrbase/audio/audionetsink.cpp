@@ -175,6 +175,8 @@ void AudioNetSink::setNewCodecData()
             << " Fs: " << m_sampleRate/m_decimation
             << " stereo: " << m_stereo;
         m_opus.setEncoder(m_sampleRate/m_decimation, m_stereo ? 2 : 1);
+        m_codecInputIndex = 0;
+        m_bufferIndex = 0;
     }
 
     setDecimationFilters();
