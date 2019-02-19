@@ -7,6 +7,7 @@ SET pothosdir="C:\Program Files\PothosSDR"
 SET pthreadsdir="C:\softs\pthreads-w32"
 SET ffmpegdir="C:\softs\ffmpeg-20181127-1035206-win64-shared\bin"
 SET qt5dir="C:\Qt\5.11.1\msvc2017_64\bin"
+SET libopusdir="C:\softs\libopus_v1.3_msvc15\bin\x64"
 
 copy app\%1\sdrangel.exe %2
 copy sdrbase\%1\sdrbase.dll %2
@@ -43,6 +44,7 @@ REM copy %opencvdir%\libopencv_highgui2413.dll %2
 REM copy %opencvdir%\libopencv_core2413.dll %2
 copy %ffmpegdir%\*.dll %2
 copy %qt5dir%\Qt5Qml.dll %2
+copy %libopusdir%\opus.dll %2
 
 mkdir %2\plugins
 mkdir %2\plugins\channelrx

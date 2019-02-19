@@ -139,7 +139,7 @@ HEADERS  += audio/audiodevicemanager.h\
         audio/audiocompressor.h\
         audio/audiofifo.h\
         audio/audiofilter.h\
-        audio/audiog722.h\        
+        audio/audiog722.h\
         audio/audioopus.h\
         audio/audiooutput.h\
         audio/audioinput.h\
@@ -235,7 +235,7 @@ HEADERS  += audio/audiodevicemanager.h\
         mainparser.h
 
 MSVC {
-    LIBS += -LC:\softs\libopus_v1.3_msvc15\lib\x64 -lopus
+    LIBS += -LC:\softs\libopus_v1.3_msvc15\bin\x64 -LC:\softs\libopus_v1.3_msvc15\lib\x64 -lopus
 }
 MINGW32 || MINGW64 || MSVC {
     LIBS += -L../serialdv/$${build_subdir} -lserialdv

@@ -67,7 +67,7 @@ This is the codec applied before sending the stream via UDP. The following are a
   - `PCMA`: A-law 8 bit PCM (requires 8000 Hz sample rate mono)
   - `PCMU`: Mu-law 8 bit PCM (requires 8000 Hz sample rate mono)
   - `G722`: G722 64 kbit/s (requires 16000 Hz sample rate mono)
-  - `OPUS` : Opus constant 64 kbit/s (requires 48, 24, 16 or 12 kHz sample rates)
+  - `opus` : Opus constant 64 kbit/s (requires 48, 24, 16 or 12 kHz sample rates. 48 kHz makes more sense when using Opus)
 
 <h3>1.10 SDP string</h3>
 
@@ -90,18 +90,18 @@ Use this button to activate or de-activate the copy of the audio stream to UDP s
 Check this box to activate the RTP protocol over UDP. RTP parameters are as follows:
 
   - Payload type:
-    - codec `L16`, `L8`: 96
-    - codec `OPUS`: 101
+    - codec `L16`, `L8`, `opus`: 96
     - codec `PCMA`: 8
     - codec `PCMU`: 0
     - codec `G722`: 9
   - Sample rate: the resulting stream sample rate after decimation and possible compression:
     - codec `PCMA`, `PCMU`: must be 8000 S/s
     - codec `G722`: must be 8000 S/s (16000 S/s input before compression)
+    - codec `opus`: timestamp increment is that of 20ms @ 48kHz i.e. 960 but actual payload and sample rate is 160 bytes at 8 kHz
   - Sample format:
     - codec `L16`: 16 bit integer signed (S16LE)
     - codec `L8`, `PCMA`, `PCMU`: 8 bit integer signed (S8)
-    - codec `G722`, `OPUS`: 8 bit unsigned integer. Note that this is the stream compressed to 64 kbits/s.
+    - codec `G722`, `opus`: 8 bit unsigned integer. Note that this is the stream compressed to 64 kbits/s.
   - Channels: 1 for mono (Left, Right and Mixed copy channels mode); 2 for stereo (Stereo copy channels mode)
   - Address and port: destination address and port (local on the client machine)
 

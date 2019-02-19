@@ -86,6 +86,12 @@ int AudioOpus::encode(int frameSize, int16_t *in, uint8_t *out)
 {
     QMutexLocker mutexLocker(&m_mutex);
 
+    if (!m_encoderOK)
+    {
+        qWarning("AudioOpus::encode: encoder not initialized");
+        return 0;
+    }
+
     int nbBytes = opus_encode(m_encoderState, in, frameSize, out, m_maxPacketSize);
 
     if (nbBytes < 0)
