@@ -23,6 +23,8 @@ In this column there are two indicators:
     - UDP port: 9998
     - Copy audio to UDP: unchecked (false)
     - UDP copy channel mode: mono left channel (Left)
+    - Decimation factor: 1 (no decimation)
+    - UDP codec L16 (linear 16 bit)
     - Use RTP protocol: unchecked (false)
 
 A unset indicator is marked with an underscore character: `_`
@@ -52,7 +54,7 @@ By pushing this button the values are reset to the defaults (see 1.1 for actual 
   - `Left`: UDP stream is mono (1 channel) and the left audio channel is copied
   - `Right`: UDP stream is mono (1 channel) and the right audio channel is copied
   - `Mixed`: UDP stream is mono (1 channel) and the mix of left and right audio channels is copied
-  - `Stereo`:  UDP stream is stereo (2 channels) and audio channels are copied to their UDP channel counterparts respectively
+  - `Stereo`:  UDP stream is stereo (2 channels) and audio channels are copied to their respective targets
 
 <h3>1.8 Decimation factor</h3>
 

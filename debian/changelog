@@ -1,30 +1,30 @@
 sdrangel (4.4.5-1) unstable; urgency=medium
 
-  * UDP/RTP audio: added G722 support 
+  * UDP/RTP audio: added G722 and Opus support
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 24 Feb 2019 10:14:18 +0100
-  
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 19 Feb 2019 22:14:18 +0100
+
 sdrangel (4.4.4-1) unstable; urgency=medium
 
   * SoapySDR: fixed some GUI issues
-  * UDP/RTP audio: added decimation and PCM A-law and Mu-law compression 
+  * UDP/RTP audio: added decimation and PCM A-law and Mu-law compression
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 15 Feb 2019 10:14:18 +0100
-  
+
 sdrangel (4.4.3-1) unstable; urgency=medium
 
-  * Migration of SDRDaemon* devices to Remote* devices 
+  * Migration of SDRDaemon* devices to Remote* devices
   * PlutoSDR: get LP filter bandwidth from device
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 03 Feb 2019 10:14:18 +0100
-  
+
 sdrangel (4.4.2-1) unstable; urgency=medium
 
-  * Migration of Daemon* channels to Remote* channels 
+  * Migration of Daemon* channels to Remote* channels
   * XTRX: fixed GPS status retrieval
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 25 Jan 2019 21:14:18 +0100
-  
+
 sdrangel (4.4.1-1) unstable; urgency=medium
 
   * AirspyHF: Implemented new settings that come along newer version of libairspyhf
