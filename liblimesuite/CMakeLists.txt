@@ -30,6 +30,7 @@ set(limesuite_SOURCES
     ${LIBLIMESUITESRC}/src/API/qLimeSDR.cpp
     ${LIBLIMESUITESRC}/src/API/LimeSDR_mini.cpp
     ${LIBLIMESUITESRC}/src/API/LimeSDR.cpp
+    ${LIBLIMESUITESRC}/src/API/LimeSDR_PCIE.cpp
     ${LIBLIMESUITESRC}/src/FPGA_common/FPGA_common.cpp
     ${LIBLIMESUITESRC}/src/FPGA_common/FPGA_Mini.cpp
     ${LIBLIMESUITESRC}/src/FPGA_common/FPGA_Q.cpp

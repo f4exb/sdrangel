@@ -4,7 +4,7 @@ project(iio)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(LIBIIO_VERSION_MAJOR 0)
-set(LIBIIO_VERSION_MINOR 10)
+set(LIBIIO_VERSION_MINOR 17)
 set(VERSION "${LIBIIO_VERSION_MAJOR}.${LIBIIO_VERSION_MINOR}")
 
 # Set the default install path to /usr
@@ -99,11 +99,14 @@ if (ENABLE_IPV6)
 endif()
 
 set(LIBIIO_CFILES ${LIBIIOSRC}/backend.c 
-    ${LIBIIOSRC}/channel.c 
-    ${LIBIIOSRC}/device.c 
-    ${LIBIIOSRC}/context.c 
     ${LIBIIOSRC}/buffer.c 
+    ${LIBIIOSRC}/channel.c 
+    ${LIBIIOSRC}/context.c 
+    ${LIBIIOSRC}/device.c
+    ${LIBIIOSRC}/local.c
+    ${LIBIIOSRC}/lock.c
     ${LIBIIOSRC}/utilities.c 
+    ${LIBIIOSRC}/sort.c 
     ${LIBIIOSRC}/scan.c)
 set(LIBIIO_HEADERS ${LIBIIOSRC}/iio.h)
 

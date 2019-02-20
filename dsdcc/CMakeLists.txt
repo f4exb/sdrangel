@@ -29,6 +29,7 @@ set(dsdcc_SOURCES
     ${LIBDSDCCSRC}/mbefec.cpp
     ${LIBDSDCCSRC}/locator.cpp
     ${LIBDSDCCSRC}/phaselock.cpp
+    ${LIBDSDCCSRC}/timeutil.cpp
 )
 
 set(dsdcc_HEADERS
@@ -61,6 +62,7 @@ set(dsdcc_HEADERS
     ${LIBDSDCCSRC}/mbefec.h
     ${LIBDSDCCSRC}/locator.h
     ${LIBDSDCCSRC}/phaselock.h
+    ${LIBDSDCCSRC}/timeutil.h
 )
 
 add_definitions(-DDSD_USE_MBELIB)
