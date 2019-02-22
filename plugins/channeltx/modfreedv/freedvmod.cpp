@@ -58,11 +58,8 @@ FreeDVMod::FreeDVMod(DeviceSinkAPI *deviceAPI) :
     m_outputSampleRate(48000),
     m_inputFrequencyOffset(0),
     m_SSBFilter(0),
-    m_DSBFilter(0),
 	m_SSBFilterBuffer(0),
-	m_DSBFilterBuffer(0),
 	m_SSBFilterBufferIndex(0),
-	m_DSBFilterBufferIndex(0),
     m_sampleSink(0),
     m_audioFifo(4800),
 	m_settingsMutex(QMutex::Recursive),
@@ -71,9 +68,7 @@ FreeDVMod::FreeDVMod(DeviceSinkAPI *deviceAPI) :
 	m_sampleRate(48000),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
-	m_levelSum(0.0f),
-	m_inAGC(9600, 0.2, 1e-4),
-	m_agcStepLength(2400)
+	m_levelSum(0.0f)
 {
 	setObjectName(m_channelId);
 
@@ -81,11 +76,8 @@ FreeDVMod::FreeDVMod(DeviceSinkAPI *deviceAPI) :
     m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getInputSampleRate();
 
     m_SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_audioSampleRate, m_settings.m_bandwidth / m_audioSampleRate, m_ssbFftLen);
-    m_DSBFilter = new fftfilt((2.0f * m_settings.m_bandwidth) / m_audioSampleRate, 2 * m_ssbFftLen);
     m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
-    m_DSBFilterBuffer = new Complex[m_ssbFftLen];
     std::fill(m_SSBFilterBuffer, m_SSBFilterBuffer+(m_ssbFftLen>>1), Complex{0,0});
-    std::fill(m_DSBFilterBuffer, m_DSBFilterBuffer+m_ssbFftLen, Complex{0,0});
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
@@ -103,10 +95,6 @@ FreeDVMod::FreeDVMod(DeviceSinkAPI *deviceAPI) :
 	m_cwKeyer.setSampleRate(48000);
 	m_cwKeyer.setWPM(13);
 	m_cwKeyer.setMode(CWKeyerSettings::CWNone);
-
-	m_inAGC.setGate(m_settings.m_agcThresholdGate);
-	m_inAGC.setStepDownDelay(m_settings.m_agcThresholdDelay);
-	m_inAGC.setClamping(true);
 
     applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
@@ -133,9 +121,7 @@ FreeDVMod::~FreeDVMod()
     delete m_channelizer;
 
     delete m_SSBFilter;
-    delete m_DSBFilter;
     delete[] m_SSBFilterBuffer;
-    delete[] m_DSBFilterBuffer;
 }
 
 void FreeDVMod::pull(Sample& sample)
@@ -216,28 +202,9 @@ void FreeDVMod::pullAF(Complex& sample)
     switch (m_settings.m_modAFInput)
     {
     case FreeDVModSettings::FreeDVModInputTone:
-    	if (m_settings.m_dsb)
-    	{
-    		Real t = m_toneNco.next()/1.25;
-    		sample.real(t);
-    		sample.imag(t);
-    	}
-    	else
-    	{
-    		if (m_settings.m_usb) {
-    			sample = m_toneNco.nextIQ();
-    		} else {
-    			sample = m_toneNco.nextQI();
-    		}
-    	}
+		sample = m_toneNco.nextIQ();
         break;
     case FreeDVModSettings::FreeDVModInputFile:
-    	// Monaural (mono):
-        // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
-        // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
-    	// Binaural (stereo):
-        // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
-        // ffplay -f f32le -ar 48k -ac 2 f4exb_call.raw
         if (m_ifstream.is_open())
         {
             if (m_ifstream.eof())
@@ -256,39 +223,10 @@ void FreeDVMod::pullAF(Complex& sample)
             }
             else
             {
-            	if (m_settings.m_audioBinaural)
-            	{
-            		Complex c;
-                	m_ifstream.read(reinterpret_cast<char*>(&c), sizeof(Complex));
-
-                	if (m_settings.m_audioFlipChannels)
-                	{
-                        ci.real(c.imag() * m_settings.m_volumeFactor);
-                        ci.imag(c.real() * m_settings.m_volumeFactor);
-                	}
-                	else
-                	{
-                    	ci = c * m_settings.m_volumeFactor;
-                	}
-            	}
-            	else
-            	{
-                    Real real;
-                	m_ifstream.read(reinterpret_cast<char*>(&real), sizeof(Real));
-
-                	if (m_settings.m_agc)
-                	{
-                        ci.real(real);
-                        ci.imag(0.0f);
-                        m_inAGC.feed(ci);
-                        ci *= m_settings.m_volumeFactor;
-                	}
-                	else
-                	{
-                        ci.real(real * m_settings.m_volumeFactor);
-                        ci.imag(0.0f);
-                	}
-            	}
+                Real real;
+                m_ifstream.read(reinterpret_cast<char*>(&real), sizeof(Real));
+                ci.real(real * m_settings.m_volumeFactor);
+                ci.imag(0.0f);
             }
         }
         else
@@ -298,35 +236,8 @@ void FreeDVMod::pullAF(Complex& sample)
         }
         break;
     case FreeDVModSettings::FreeDVModInputAudio:
-        if (m_settings.m_audioBinaural)
-    	{
-        	if (m_settings.m_audioFlipChannels)
-        	{
-                ci.real((m_audioBuffer[m_audioBufferFill].r / SDR_TX_SCALEF) * m_settings.m_volumeFactor);
-                ci.imag((m_audioBuffer[m_audioBufferFill].l / SDR_TX_SCALEF) * m_settings.m_volumeFactor);
-        	}
-        	else
-        	{
-                ci.real((m_audioBuffer[m_audioBufferFill].l / SDR_TX_SCALEF) * m_settings.m_volumeFactor);
-                ci.imag((m_audioBuffer[m_audioBufferFill].r / SDR_TX_SCALEF) * m_settings.m_volumeFactor);
-        	}
-    	}
-        else
-        {
-            if (m_settings.m_agc)
-            {
-                ci.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r)  / 65536.0f));
-                ci.imag(0.0f);
-                m_inAGC.feed(ci);
-                ci *= m_settings.m_volumeFactor;
-            }
-            else
-            {
-                ci.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r)  / 65536.0f) * m_settings.m_volumeFactor);
-                ci.imag(0.0f);
-            }
-        }
-
+        ci.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r)  / 65536.0f) * m_settings.m_volumeFactor);
+        ci.imag(0.0f);
         break;
     case FreeDVModSettings::FreeDVModInputCWTone:
     	Real fadeFactor;
@@ -334,40 +245,13 @@ void FreeDVMod::pullAF(Complex& sample)
         if (m_cwKeyer.getSample())
         {
             m_cwKeyer.getCWSmoother().getFadeSample(true, fadeFactor);
-
-        	if (m_settings.m_dsb)
-        	{
-        		Real t = m_toneNco.next() * fadeFactor;
-        		sample.real(t);
-        		sample.imag(t);
-        	}
-        	else
-        	{
-        		if (m_settings.m_usb) {
-        			sample = m_toneNco.nextIQ() * fadeFactor;
-        		} else {
-        			sample = m_toneNco.nextQI() * fadeFactor;
-        		}
-        	}
+            sample = m_toneNco.nextIQ() * fadeFactor;
         }
         else
         {
         	if (m_cwKeyer.getCWSmoother().getFadeSample(false, fadeFactor))
         	{
-            	if (m_settings.m_dsb)
-            	{
-            		Real t = (m_toneNco.next() * fadeFactor)/1.25;
-            		sample.real(t);
-            		sample.imag(t);
-            	}
-            	else
-            	{
-            		if (m_settings.m_usb) {
-            			sample = m_toneNco.nextIQ() * fadeFactor;
-            		} else {
-            			sample = m_toneNco.nextQI() * fadeFactor;
-            		}
-            	}
+                sample = m_toneNco.nextIQ() * fadeFactor;
         	}
         	else
         	{
@@ -388,32 +272,16 @@ void FreeDVMod::pullAF(Complex& sample)
     if ((m_settings.m_modAFInput == FreeDVModSettings::FreeDVModInputFile)
        || (m_settings.m_modAFInput == FreeDVModSettings::FreeDVModInputAudio)) // real audio
     {
-    	if (m_settings.m_dsb)
-    	{
-    		n_out = m_DSBFilter->runDSB(ci, &filtered);
+        n_out = m_SSBFilter->runSSB(ci, &filtered, true); // USB
 
-    		if (n_out > 0)
-    		{
-    			memcpy((void *) m_DSBFilterBuffer, (const void *) filtered, n_out*sizeof(Complex));
-    			m_DSBFilterBufferIndex = 0;
-    		}
+        if (n_out > 0)
+        {
+            memcpy((void *) m_SSBFilterBuffer, (const void *) filtered, n_out*sizeof(Complex));
+            m_SSBFilterBufferIndex = 0;
+        }
 
-    		sample = m_DSBFilterBuffer[m_DSBFilterBufferIndex];
-    		m_DSBFilterBufferIndex++;
-    	}
-    	else
-    	{
-    		n_out = m_SSBFilter->runSSB(ci, &filtered, m_settings.m_usb);
-
-    		if (n_out > 0)
-    		{
-    			memcpy((void *) m_SSBFilterBuffer, (const void *) filtered, n_out*sizeof(Complex));
-    			m_SSBFilterBufferIndex = 0;
-    		}
-
-    		sample = m_SSBFilterBuffer[m_SSBFilterBufferIndex];
-    		m_SSBFilterBufferIndex++;
-    	}
+        sample = m_SSBFilterBuffer[m_SSBFilterBufferIndex];
+        m_SSBFilterBufferIndex++;
 
     	if (n_out > 0)
     	{
@@ -428,16 +296,7 @@ void FreeDVMod::pullAF(Complex& sample)
                 {
                     Real avgr = (m_sum.real() / decim) * 0.891235351562f * SDR_TX_SCALEF; //scaling at -1 dB to account for possible filter overshoot
                     Real avgi = (m_sum.imag() / decim) * 0.891235351562f * SDR_TX_SCALEF;
-
-                    if (!m_settings.m_dsb & !m_settings.m_usb)
-                    { // invert spectrum for LSB
-                        m_sampleBuffer.push_back(Sample(avgi, avgr));
-                    }
-                    else
-                    {
-                        m_sampleBuffer.push_back(Sample(avgr, avgi));
-                    }
-
+                    m_sampleBuffer.push_back(Sample(avgr, avgi));
                     m_sum.real(0.0);
                     m_sum.imag(0.0);
                 }
@@ -453,21 +312,12 @@ void FreeDVMod::pullAF(Complex& sample)
         {
             Real avgr = (m_sum.real() / decim) * 0.891235351562f * SDR_TX_SCALEF; //scaling at -1 dB to account for possible filter overshoot
             Real avgi = (m_sum.imag() / decim) * 0.891235351562f * SDR_TX_SCALEF;
-
-            if (!m_settings.m_dsb & !m_settings.m_usb)
-            { // invert spectrum for LSB
-                m_sampleBuffer.push_back(Sample(avgi, avgr));
-            }
-            else
-            {
-                m_sampleBuffer.push_back(Sample(avgr, avgi));
-            }
-
+            m_sampleBuffer.push_back(Sample(avgr, avgi));
             m_sum.real(0.0);
             m_sum.imag(0.0);
         }
 
-        if (m_sumCount < (m_settings.m_dsb ? m_ssbFftLen : m_ssbFftLen>>1))
+        if (m_sumCount < (m_ssbFftLen>>1))
         {
             n_out = 0;
             m_sumCount++;
@@ -483,7 +333,7 @@ void FreeDVMod::pullAF(Complex& sample)
     {
         if (m_sampleSink != 0)
         {
-            m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), !m_settings.m_dsb);
+            m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true); // SSB
         }
 
         m_sampleBuffer.clear();
@@ -680,18 +530,6 @@ void FreeDVMod::applyAudioSampleRate(int sampleRate)
 
     float band = m_settings.m_bandwidth;
     float lowCutoff = m_settings.m_lowCutoff;
-    bool usb = m_settings.m_usb;
-
-    if (band < 0) // negative means LSB
-    {
-        band = -band;            // turn to positive
-        lowCutoff = -lowCutoff;
-        usb = false;  // and take note of side band
-    }
-    else
-    {
-        usb = true;
-    }
 
     if (band < 100.0f) // at least 100 Hz
     {
@@ -704,16 +542,12 @@ void FreeDVMod::applyAudioSampleRate(int sampleRate)
     }
 
     m_SSBFilter->create_filter(lowCutoff / sampleRate, band / sampleRate);
-    m_DSBFilter->create_dsb_filter((2.0f * band) / sampleRate);
 
     m_settings.m_bandwidth = band;
     m_settings.m_lowCutoff = lowCutoff;
-    m_settings.m_usb = usb;
 
     m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
     m_cwKeyer.setSampleRate(sampleRate);
-
-    m_agcStepLength = std::min(sampleRate/20, m_settings.m_agcTime/2); // 50 ms or half the AGC length whichever is smaller
 
     m_settingsMutex.unlock();
 
@@ -760,7 +594,6 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
 {
     float band = settings.m_bandwidth;
     float lowCutoff = settings.m_lowCutoff;
-    bool usb = settings.m_usb;
     QList<QString> reverseAPIKeys;
 
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
@@ -772,9 +605,6 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
     if ((settings.m_lowCutoff != m_settings.m_lowCutoff) || force) {
         reverseAPIKeys.append("lowCutoff");
     }
-    if ((settings.m_usb != m_settings.m_usb) || force) {
-        reverseAPIKeys.append("usb");
-    }
     if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
         reverseAPIKeys.append("toneFrequency");
     }
@@ -784,41 +614,11 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
     if ((settings.m_spanLog2 != m_settings.m_spanLog2) || force) {
         reverseAPIKeys.append("spanLog2");
     }
-    if ((settings.m_audioBinaural != m_settings.m_audioBinaural) || force) {
-        reverseAPIKeys.append("audioBinaural");
-    }
-    if ((settings.m_audioFlipChannels != m_settings.m_audioFlipChannels) || force) {
-        reverseAPIKeys.append("audioFlipChannels");
-    }
-    if ((settings.m_dsb != m_settings.m_dsb) || force) {
-        reverseAPIKeys.append("dsb");
-    }
     if ((settings.m_audioMute != m_settings.m_audioMute) || force) {
         reverseAPIKeys.append("audioMute");
     }
     if ((settings.m_playLoop != m_settings.m_playLoop) || force) {
         reverseAPIKeys.append("playLoop");
-    }
-    if ((settings.m_agc != m_settings.m_agc) || force) {
-        reverseAPIKeys.append("agc");
-    }
-    if ((settings.m_agcOrder != m_settings.m_agcOrder) || force) {
-        reverseAPIKeys.append("agcOrder");
-    }
-    if ((settings.m_agcTime != m_settings.m_agcTime) || force) {
-        reverseAPIKeys.append("agcTime");
-    }
-    if ((settings.m_agcThresholdEnable != m_settings.m_agcThresholdEnable) || force) {
-        reverseAPIKeys.append("agcThresholdEnable");
-    }
-    if ((settings.m_agcThreshold != m_settings.m_agcThreshold) || force) {
-        reverseAPIKeys.append("agcThreshold");
-    }
-    if ((settings.m_agcThresholdGate != m_settings.m_agcThresholdGate) || force) {
-        reverseAPIKeys.append("agcThresholdGate");
-    }
-    if ((settings.m_agcThresholdDelay != m_settings.m_agcThresholdDelay) || force) {
-        reverseAPIKeys.append("agcThresholdDelay");
     }
     if ((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
         reverseAPIKeys.append("rgbColor");
@@ -836,17 +636,6 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
     if ((settings.m_bandwidth != m_settings.m_bandwidth) ||
         (settings.m_lowCutoff != m_settings.m_lowCutoff) || force)
     {
-        if (band < 0) // negative means LSB
-        {
-            band = -band;            // turn to positive
-            lowCutoff = -lowCutoff;
-            usb = false;  // and take note of side band
-        }
-        else
-        {
-            usb = true;
-        }
-
         if (band < 100.0f) // at least 100 Hz
         {
             band = 100.0f;
@@ -863,7 +652,6 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
         m_interpolatorDistance = (Real) m_audioSampleRate / (Real) m_outputSampleRate;
         m_interpolator.create(48, m_audioSampleRate, band, 3.0);
         m_SSBFilter->create_filter(lowCutoff / m_audioSampleRate, band / m_audioSampleRate);
-        m_DSBFilter->create_dsb_filter((2.0f * band) / m_audioSampleRate);
         m_settingsMutex.unlock();
     }
 
@@ -872,48 +660,6 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
         m_settingsMutex.lock();
         m_toneNco.setFreq(settings.m_toneFrequency, m_audioSampleRate);
         m_settingsMutex.unlock();
-    }
-
-    if ((settings.m_dsb != m_settings.m_dsb) || force)
-    {
-        if (settings.m_dsb)
-        {
-            std::fill(m_DSBFilterBuffer, m_DSBFilterBuffer+m_ssbFftLen, Complex{0,0});
-            m_DSBFilterBufferIndex = 0;
-        }
-        else
-        {
-            std::fill(m_SSBFilterBuffer, m_SSBFilterBuffer+(m_ssbFftLen>>1), Complex{0,0});
-            m_SSBFilterBufferIndex = 0;
-        }
-    }
-
-    if ((settings.m_agcTime != m_settings.m_agcTime) ||
-        (settings.m_agcOrder != m_settings.m_agcOrder) || force)
-    {
-        m_settingsMutex.lock();
-        m_inAGC.resize(settings.m_agcTime, m_agcStepLength, settings.m_agcOrder);
-        m_settingsMutex.unlock();
-    }
-
-    if ((settings.m_agcThresholdEnable != m_settings.m_agcThresholdEnable) || force)
-    {
-        m_inAGC.setThresholdEnable(settings.m_agcThresholdEnable);
-    }
-
-    if ((settings.m_agcThreshold != m_settings.m_agcThreshold) || force)
-    {
-        m_inAGC.setThreshold(settings.m_agcThreshold);
-    }
-
-    if ((settings.m_agcThresholdGate != m_settings.m_agcThresholdGate) || force)
-    {
-        m_inAGC.setGate(settings.m_agcThresholdGate);
-    }
-
-    if ((settings.m_agcThresholdDelay != m_settings.m_agcThresholdDelay) || force)
-    {
-        m_inAGC.setStepDownDelay(settings.m_agcThresholdDelay);
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
@@ -941,7 +687,6 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
     m_settings = settings;
     m_settings.m_bandwidth = band;
     m_settings.m_lowCutoff = lowCutoff;
-    m_settings.m_usb = usb;
 }
 
 QByteArray FreeDVMod::serialize() const
@@ -998,9 +743,6 @@ int FreeDVMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("lowCutoff")) {
         settings.m_lowCutoff = response.getFreeDvModSettings()->getLowCutoff();
     }
-    if (channelSettingsKeys.contains("usb")) {
-        settings.m_usb = response.getFreeDvModSettings()->getUsb() != 0;
-    }
     if (channelSettingsKeys.contains("toneFrequency")) {
         settings.m_toneFrequency = response.getFreeDvModSettings()->getToneFrequency();
     }
@@ -1010,41 +752,11 @@ int FreeDVMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("spanLog2")) {
         settings.m_spanLog2 = response.getFreeDvModSettings()->getSpanLog2();
     }
-    if (channelSettingsKeys.contains("audioBinaural")) {
-        settings.m_audioBinaural = response.getFreeDvModSettings()->getAudioBinaural() != 0;
-    }
-    if (channelSettingsKeys.contains("audioFlipChannels")) {
-        settings.m_audioFlipChannels = response.getFreeDvModSettings()->getAudioFlipChannels() != 0;
-    }
-    if (channelSettingsKeys.contains("dsb")) {
-        settings.m_dsb = response.getFreeDvModSettings()->getDsb() != 0;
-    }
     if (channelSettingsKeys.contains("audioMute")) {
         settings.m_audioMute = response.getFreeDvModSettings()->getAudioMute() != 0;
     }
     if (channelSettingsKeys.contains("playLoop")) {
         settings.m_playLoop = response.getFreeDvModSettings()->getPlayLoop() != 0;
-    }
-    if (channelSettingsKeys.contains("agc")) {
-        settings.m_agc = response.getFreeDvModSettings()->getAgc() != 0;
-    }
-    if (channelSettingsKeys.contains("agcOrder")) {
-        settings.m_agcOrder = response.getFreeDvModSettings()->getAgcOrder();
-    }
-    if (channelSettingsKeys.contains("agcTime")) {
-        settings.m_agcTime = response.getFreeDvModSettings()->getAgcTime();
-    }
-    if (channelSettingsKeys.contains("agcThresholdEnable")) {
-        settings.m_agcThresholdEnable = response.getFreeDvModSettings()->getAgcThresholdEnable() != 0;
-    }
-    if (channelSettingsKeys.contains("agcThreshold")) {
-        settings.m_agcThreshold = response.getFreeDvModSettings()->getAgcThreshold();
-    }
-    if (channelSettingsKeys.contains("agcThresholdGate")) {
-        settings.m_agcThresholdGate = response.getFreeDvModSettings()->getAgcThresholdGate();
-    }
-    if (channelSettingsKeys.contains("agcThresholdDelay")) {
-        settings.m_agcThresholdDelay = response.getFreeDvModSettings()->getAgcThresholdDelay();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getFreeDvModSettings()->getRgbColor();
@@ -1145,22 +857,11 @@ void FreeDVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getFreeDvModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getFreeDvModSettings()->setBandwidth(settings.m_bandwidth);
     response.getFreeDvModSettings()->setLowCutoff(settings.m_lowCutoff);
-    response.getFreeDvModSettings()->setUsb(settings.m_usb ? 1 : 0);
     response.getFreeDvModSettings()->setToneFrequency(settings.m_toneFrequency);
     response.getFreeDvModSettings()->setVolumeFactor(settings.m_volumeFactor);
     response.getFreeDvModSettings()->setSpanLog2(settings.m_spanLog2);
-    response.getFreeDvModSettings()->setAudioBinaural(settings.m_audioBinaural ? 1 : 0);
-    response.getFreeDvModSettings()->setAudioFlipChannels(settings.m_audioFlipChannels ? 1 : 0);
-    response.getFreeDvModSettings()->setDsb(settings.m_dsb ? 1 : 0);
     response.getFreeDvModSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getFreeDvModSettings()->setPlayLoop(settings.m_playLoop ? 1 : 0);
-    response.getFreeDvModSettings()->setAgc(settings.m_agc ? 1 : 0);
-    response.getFreeDvModSettings()->setAgcOrder(settings.m_agcOrder);
-    response.getFreeDvModSettings()->setAgcTime(settings.m_agcTime);
-    response.getFreeDvModSettings()->setAgcThresholdEnable(settings.m_agcThresholdEnable ? 1 : 0);
-    response.getFreeDvModSettings()->setAgcThreshold(settings.m_agcThreshold);
-    response.getFreeDvModSettings()->setAgcThresholdGate(settings.m_agcThresholdGate);
-    response.getFreeDvModSettings()->setAgcThresholdDelay(settings.m_agcThresholdDelay);
     response.getFreeDvModSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getFreeDvModSettings()->getTitle()) {
@@ -1234,9 +935,6 @@ void FreeDVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     if (channelSettingsKeys.contains("lowCutoff") || force) {
         swgFreeDVModSettings->setLowCutoff(settings.m_lowCutoff);
     }
-    if (channelSettingsKeys.contains("usb") || force) {
-        swgFreeDVModSettings->setUsb(settings.m_usb ? 1 : 0);
-    }
     if (channelSettingsKeys.contains("toneFrequency") || force) {
         swgFreeDVModSettings->setToneFrequency(settings.m_toneFrequency);
     }
@@ -1246,41 +944,11 @@ void FreeDVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     if (channelSettingsKeys.contains("spanLog2") || force) {
         swgFreeDVModSettings->setSpanLog2(settings.m_spanLog2);
     }
-    if (channelSettingsKeys.contains("audioBinaural") || force) {
-        swgFreeDVModSettings->setAudioBinaural(settings.m_audioBinaural ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("audioFlipChannels") || force) {
-        swgFreeDVModSettings->setAudioFlipChannels(settings.m_audioFlipChannels ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("dsb") || force) {
-        swgFreeDVModSettings->setDsb(settings.m_dsb ? 1 : 0);
-    }
     if (channelSettingsKeys.contains("audioMute") || force) {
         swgFreeDVModSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
     }
     if (channelSettingsKeys.contains("playLoop") || force) {
         swgFreeDVModSettings->setPlayLoop(settings.m_playLoop ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("agc") || force) {
-        swgFreeDVModSettings->setAgc(settings.m_agc ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("agcOrder") || force) {
-        swgFreeDVModSettings->setAgcOrder(settings.m_agcOrder);
-    }
-    if (channelSettingsKeys.contains("agcTime") || force) {
-        swgFreeDVModSettings->setAgcTime(settings.m_agcTime);
-    }
-    if (channelSettingsKeys.contains("agcThresholdEnable") || force) {
-        swgFreeDVModSettings->setAgcThresholdEnable(settings.m_agcThresholdEnable ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("agcThreshold") || force) {
-        swgFreeDVModSettings->setAgcThreshold(settings.m_agcThreshold);
-    }
-    if (channelSettingsKeys.contains("agcThresholdGate") || force) {
-        swgFreeDVModSettings->setAgcThresholdGate(settings.m_agcThresholdGate);
-    }
-    if (channelSettingsKeys.contains("agcThresholdDelay") || force) {
-        swgFreeDVModSettings->setAgcThresholdDelay(settings.m_agcThresholdDelay);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgFreeDVModSettings->setRgbColor(settings.m_rgbColor);

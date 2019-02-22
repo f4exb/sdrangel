@@ -52,9 +52,6 @@ public:
     float getLowCutoff();
     void setLowCutoff(float low_cutoff);
 
-    qint32 getUsb();
-    void setUsb(qint32 usb);
-
     float getToneFrequency();
     void setToneFrequency(float tone_frequency);
 
@@ -64,41 +61,11 @@ public:
     qint32 getSpanLog2();
     void setSpanLog2(qint32 span_log2);
 
-    qint32 getAudioBinaural();
-    void setAudioBinaural(qint32 audio_binaural);
-
-    qint32 getAudioFlipChannels();
-    void setAudioFlipChannels(qint32 audio_flip_channels);
-
-    qint32 getDsb();
-    void setDsb(qint32 dsb);
-
     qint32 getAudioMute();
     void setAudioMute(qint32 audio_mute);
 
     qint32 getPlayLoop();
     void setPlayLoop(qint32 play_loop);
-
-    qint32 getAgc();
-    void setAgc(qint32 agc);
-
-    float getAgcOrder();
-    void setAgcOrder(float agc_order);
-
-    qint32 getAgcTime();
-    void setAgcTime(qint32 agc_time);
-
-    qint32 getAgcThresholdEnable();
-    void setAgcThresholdEnable(qint32 agc_threshold_enable);
-
-    qint32 getAgcThreshold();
-    void setAgcThreshold(qint32 agc_threshold);
-
-    qint32 getAgcThresholdGate();
-    void setAgcThresholdGate(qint32 agc_threshold_gate);
-
-    qint32 getAgcThresholdDelay();
-    void setAgcThresholdDelay(qint32 agc_threshold_delay);
 
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
@@ -143,9 +110,6 @@ private:
     float low_cutoff;
     bool m_low_cutoff_isSet;
 
-    qint32 usb;
-    bool m_usb_isSet;
-
     float tone_frequency;
     bool m_tone_frequency_isSet;
 
@@ -155,41 +119,11 @@ private:
     qint32 span_log2;
     bool m_span_log2_isSet;
 
-    qint32 audio_binaural;
-    bool m_audio_binaural_isSet;
-
-    qint32 audio_flip_channels;
-    bool m_audio_flip_channels_isSet;
-
-    qint32 dsb;
-    bool m_dsb_isSet;
-
     qint32 audio_mute;
     bool m_audio_mute_isSet;
 
     qint32 play_loop;
     bool m_play_loop_isSet;
-
-    qint32 agc;
-    bool m_agc_isSet;
-
-    float agc_order;
-    bool m_agc_order_isSet;
-
-    qint32 agc_time;
-    bool m_agc_time_isSet;
-
-    qint32 agc_threshold_enable;
-    bool m_agc_threshold_enable_isSet;
-
-    qint32 agc_threshold;
-    bool m_agc_threshold_isSet;
-
-    qint32 agc_threshold_gate;
-    bool m_agc_threshold_gate_isSet;
-
-    qint32 agc_threshold_delay;
-    bool m_agc_threshold_delay_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;

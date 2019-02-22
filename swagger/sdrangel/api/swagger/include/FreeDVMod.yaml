@@ -10,8 +10,6 @@ FreeDVModSettings:
     lowCutoff:
       type: number
       format: float
-    usb:
-      type: integer
     toneFrequency:
       type: number
       format: float
@@ -20,30 +18,9 @@ FreeDVModSettings:
       format: float
     spanLog2:
       type: integer
-    audioBinaural:
-      type: integer
-    audioFlipChannels:
-      type: integer
-    dsb:
-      type: integer
     audioMute:
       type: integer
     playLoop:
-      type: integer
-    agc:
-      type: integer
-    agcOrder:
-      type: number
-      format: float
-    agcTime:
-      type: integer
-    agcThresholdEnable:
-      type: integer
-    agcThreshold:
-      type: integer
-    agcThresholdGate:
-      type: integer
-    agcThresholdDelay:
       type: integer
     rgbColor:
       type: integer

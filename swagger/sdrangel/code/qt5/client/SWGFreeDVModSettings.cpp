@@ -34,38 +34,16 @@ SWGFreeDVModSettings::SWGFreeDVModSettings() {
     m_bandwidth_isSet = false;
     low_cutoff = 0.0f;
     m_low_cutoff_isSet = false;
-    usb = 0;
-    m_usb_isSet = false;
     tone_frequency = 0.0f;
     m_tone_frequency_isSet = false;
     volume_factor = 0.0f;
     m_volume_factor_isSet = false;
     span_log2 = 0;
     m_span_log2_isSet = false;
-    audio_binaural = 0;
-    m_audio_binaural_isSet = false;
-    audio_flip_channels = 0;
-    m_audio_flip_channels_isSet = false;
-    dsb = 0;
-    m_dsb_isSet = false;
     audio_mute = 0;
     m_audio_mute_isSet = false;
     play_loop = 0;
     m_play_loop_isSet = false;
-    agc = 0;
-    m_agc_isSet = false;
-    agc_order = 0.0f;
-    m_agc_order_isSet = false;
-    agc_time = 0;
-    m_agc_time_isSet = false;
-    agc_threshold_enable = 0;
-    m_agc_threshold_enable_isSet = false;
-    agc_threshold = 0;
-    m_agc_threshold_isSet = false;
-    agc_threshold_gate = 0;
-    m_agc_threshold_gate_isSet = false;
-    agc_threshold_delay = 0;
-    m_agc_threshold_delay_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -100,38 +78,16 @@ SWGFreeDVModSettings::init() {
     m_bandwidth_isSet = false;
     low_cutoff = 0.0f;
     m_low_cutoff_isSet = false;
-    usb = 0;
-    m_usb_isSet = false;
     tone_frequency = 0.0f;
     m_tone_frequency_isSet = false;
     volume_factor = 0.0f;
     m_volume_factor_isSet = false;
     span_log2 = 0;
     m_span_log2_isSet = false;
-    audio_binaural = 0;
-    m_audio_binaural_isSet = false;
-    audio_flip_channels = 0;
-    m_audio_flip_channels_isSet = false;
-    dsb = 0;
-    m_dsb_isSet = false;
     audio_mute = 0;
     m_audio_mute_isSet = false;
     play_loop = 0;
     m_play_loop_isSet = false;
-    agc = 0;
-    m_agc_isSet = false;
-    agc_order = 0.0f;
-    m_agc_order_isSet = false;
-    agc_time = 0;
-    m_agc_time_isSet = false;
-    agc_threshold_enable = 0;
-    m_agc_threshold_enable_isSet = false;
-    agc_threshold = 0;
-    m_agc_threshold_isSet = false;
-    agc_threshold_gate = 0;
-    m_agc_threshold_gate_isSet = false;
-    agc_threshold_delay = 0;
-    m_agc_threshold_delay_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -156,17 +112,6 @@ SWGFreeDVModSettings::init() {
 
 void
 SWGFreeDVModSettings::cleanup() {
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -212,37 +157,15 @@ SWGFreeDVModSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&low_cutoff, pJson["lowCutoff"], "float", "");
     
-    ::SWGSDRangel::setValue(&usb, pJson["usb"], "qint32", "");
-    
     ::SWGSDRangel::setValue(&tone_frequency, pJson["toneFrequency"], "float", "");
     
     ::SWGSDRangel::setValue(&volume_factor, pJson["volumeFactor"], "float", "");
     
     ::SWGSDRangel::setValue(&span_log2, pJson["spanLog2"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&audio_binaural, pJson["audioBinaural"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&audio_flip_channels, pJson["audioFlipChannels"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&dsb, pJson["dsb"], "qint32", "");
-    
     ::SWGSDRangel::setValue(&audio_mute, pJson["audioMute"], "qint32", "");
     
     ::SWGSDRangel::setValue(&play_loop, pJson["playLoop"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&agc, pJson["agc"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&agc_order, pJson["agcOrder"], "float", "");
-    
-    ::SWGSDRangel::setValue(&agc_time, pJson["agcTime"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&agc_threshold_enable, pJson["agcThresholdEnable"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&agc_threshold, pJson["agcThreshold"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&agc_threshold_gate, pJson["agcThresholdGate"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&agc_threshold_delay, pJson["agcThresholdDelay"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -289,9 +212,6 @@ SWGFreeDVModSettings::asJsonObject() {
     if(m_low_cutoff_isSet){
         obj->insert("lowCutoff", QJsonValue(low_cutoff));
     }
-    if(m_usb_isSet){
-        obj->insert("usb", QJsonValue(usb));
-    }
     if(m_tone_frequency_isSet){
         obj->insert("toneFrequency", QJsonValue(tone_frequency));
     }
@@ -301,41 +221,11 @@ SWGFreeDVModSettings::asJsonObject() {
     if(m_span_log2_isSet){
         obj->insert("spanLog2", QJsonValue(span_log2));
     }
-    if(m_audio_binaural_isSet){
-        obj->insert("audioBinaural", QJsonValue(audio_binaural));
-    }
-    if(m_audio_flip_channels_isSet){
-        obj->insert("audioFlipChannels", QJsonValue(audio_flip_channels));
-    }
-    if(m_dsb_isSet){
-        obj->insert("dsb", QJsonValue(dsb));
-    }
     if(m_audio_mute_isSet){
         obj->insert("audioMute", QJsonValue(audio_mute));
     }
     if(m_play_loop_isSet){
         obj->insert("playLoop", QJsonValue(play_loop));
-    }
-    if(m_agc_isSet){
-        obj->insert("agc", QJsonValue(agc));
-    }
-    if(m_agc_order_isSet){
-        obj->insert("agcOrder", QJsonValue(agc_order));
-    }
-    if(m_agc_time_isSet){
-        obj->insert("agcTime", QJsonValue(agc_time));
-    }
-    if(m_agc_threshold_enable_isSet){
-        obj->insert("agcThresholdEnable", QJsonValue(agc_threshold_enable));
-    }
-    if(m_agc_threshold_isSet){
-        obj->insert("agcThreshold", QJsonValue(agc_threshold));
-    }
-    if(m_agc_threshold_gate_isSet){
-        obj->insert("agcThresholdGate", QJsonValue(agc_threshold_gate));
-    }
-    if(m_agc_threshold_delay_isSet){
-        obj->insert("agcThresholdDelay", QJsonValue(agc_threshold_delay));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -401,16 +291,6 @@ SWGFreeDVModSettings::setLowCutoff(float low_cutoff) {
     this->m_low_cutoff_isSet = true;
 }
 
-qint32
-SWGFreeDVModSettings::getUsb() {
-    return usb;
-}
-void
-SWGFreeDVModSettings::setUsb(qint32 usb) {
-    this->usb = usb;
-    this->m_usb_isSet = true;
-}
-
 float
 SWGFreeDVModSettings::getToneFrequency() {
     return tone_frequency;
@@ -442,36 +322,6 @@ SWGFreeDVModSettings::setSpanLog2(qint32 span_log2) {
 }
 
 qint32
-SWGFreeDVModSettings::getAudioBinaural() {
-    return audio_binaural;
-}
-void
-SWGFreeDVModSettings::setAudioBinaural(qint32 audio_binaural) {
-    this->audio_binaural = audio_binaural;
-    this->m_audio_binaural_isSet = true;
-}
-
-qint32
-SWGFreeDVModSettings::getAudioFlipChannels() {
-    return audio_flip_channels;
-}
-void
-SWGFreeDVModSettings::setAudioFlipChannels(qint32 audio_flip_channels) {
-    this->audio_flip_channels = audio_flip_channels;
-    this->m_audio_flip_channels_isSet = true;
-}
-
-qint32
-SWGFreeDVModSettings::getDsb() {
-    return dsb;
-}
-void
-SWGFreeDVModSettings::setDsb(qint32 dsb) {
-    this->dsb = dsb;
-    this->m_dsb_isSet = true;
-}
-
-qint32
 SWGFreeDVModSettings::getAudioMute() {
     return audio_mute;
 }
@@ -489,76 +339,6 @@ void
 SWGFreeDVModSettings::setPlayLoop(qint32 play_loop) {
     this->play_loop = play_loop;
     this->m_play_loop_isSet = true;
-}
-
-qint32
-SWGFreeDVModSettings::getAgc() {
-    return agc;
-}
-void
-SWGFreeDVModSettings::setAgc(qint32 agc) {
-    this->agc = agc;
-    this->m_agc_isSet = true;
-}
-
-float
-SWGFreeDVModSettings::getAgcOrder() {
-    return agc_order;
-}
-void
-SWGFreeDVModSettings::setAgcOrder(float agc_order) {
-    this->agc_order = agc_order;
-    this->m_agc_order_isSet = true;
-}
-
-qint32
-SWGFreeDVModSettings::getAgcTime() {
-    return agc_time;
-}
-void
-SWGFreeDVModSettings::setAgcTime(qint32 agc_time) {
-    this->agc_time = agc_time;
-    this->m_agc_time_isSet = true;
-}
-
-qint32
-SWGFreeDVModSettings::getAgcThresholdEnable() {
-    return agc_threshold_enable;
-}
-void
-SWGFreeDVModSettings::setAgcThresholdEnable(qint32 agc_threshold_enable) {
-    this->agc_threshold_enable = agc_threshold_enable;
-    this->m_agc_threshold_enable_isSet = true;
-}
-
-qint32
-SWGFreeDVModSettings::getAgcThreshold() {
-    return agc_threshold;
-}
-void
-SWGFreeDVModSettings::setAgcThreshold(qint32 agc_threshold) {
-    this->agc_threshold = agc_threshold;
-    this->m_agc_threshold_isSet = true;
-}
-
-qint32
-SWGFreeDVModSettings::getAgcThresholdGate() {
-    return agc_threshold_gate;
-}
-void
-SWGFreeDVModSettings::setAgcThresholdGate(qint32 agc_threshold_gate) {
-    this->agc_threshold_gate = agc_threshold_gate;
-    this->m_agc_threshold_gate_isSet = true;
-}
-
-qint32
-SWGFreeDVModSettings::getAgcThresholdDelay() {
-    return agc_threshold_delay;
-}
-void
-SWGFreeDVModSettings::setAgcThresholdDelay(qint32 agc_threshold_delay) {
-    this->agc_threshold_delay = agc_threshold_delay;
-    this->m_agc_threshold_delay_isSet = true;
 }
 
 qint32
@@ -669,22 +449,11 @@ SWGFreeDVModSettings::isSet(){
         if(m_input_frequency_offset_isSet){ isObjectUpdated = true; break;}
         if(m_bandwidth_isSet){ isObjectUpdated = true; break;}
         if(m_low_cutoff_isSet){ isObjectUpdated = true; break;}
-        if(m_usb_isSet){ isObjectUpdated = true; break;}
         if(m_tone_frequency_isSet){ isObjectUpdated = true; break;}
         if(m_volume_factor_isSet){ isObjectUpdated = true; break;}
         if(m_span_log2_isSet){ isObjectUpdated = true; break;}
-        if(m_audio_binaural_isSet){ isObjectUpdated = true; break;}
-        if(m_audio_flip_channels_isSet){ isObjectUpdated = true; break;}
-        if(m_dsb_isSet){ isObjectUpdated = true; break;}
         if(m_audio_mute_isSet){ isObjectUpdated = true; break;}
         if(m_play_loop_isSet){ isObjectUpdated = true; break;}
-        if(m_agc_isSet){ isObjectUpdated = true; break;}
-        if(m_agc_order_isSet){ isObjectUpdated = true; break;}
-        if(m_agc_time_isSet){ isObjectUpdated = true; break;}
-        if(m_agc_threshold_enable_isSet){ isObjectUpdated = true; break;}
-        if(m_agc_threshold_isSet){ isObjectUpdated = true; break;}
-        if(m_agc_threshold_gate_isSet){ isObjectUpdated = true; break;}
-        if(m_agc_threshold_delay_isSet){ isObjectUpdated = true; break;}
         if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
         if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
         if(audio_device_name != nullptr && *audio_device_name != QString("")){ isObjectUpdated = true; break;}

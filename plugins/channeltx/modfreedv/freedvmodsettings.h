@@ -34,28 +34,14 @@ struct FreeDVModSettings
         FreeDVModInputCWTone
     } FreeDVModInputAF;
 
-    static const int m_nbAGCTimeConstants;
-    static const int m_agcTimeConstant[];
-
     qint64 m_inputFrequencyOffset;
     Real m_bandwidth;
     Real m_lowCutoff;
-    bool m_usb;
     float m_toneFrequency;
     float m_volumeFactor;
     int  m_spanLog2;
-    bool m_audioBinaural;
-    bool m_audioFlipChannels;
-    bool m_dsb;
     bool m_audioMute;
     bool m_playLoop;
-    bool m_agc;
-    float m_agcOrder;
-    int m_agcTime;
-    bool m_agcThresholdEnable;
-    int m_agcThreshold;
-    int m_agcThresholdGate;
-    int m_agcThresholdDelay;
     quint32 m_rgbColor;
 
     QString m_title;
@@ -79,9 +65,6 @@ struct FreeDVModSettings
     void setCWKeyerGUI(Serializable *cwKeyerGUI) { m_cwKeyerGUI = cwKeyerGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
-
-    static int getAGCTimeConstant(int index);
-    static int getAGCTimeConstantIndex(int agcTimeConstant);
 };
 
 

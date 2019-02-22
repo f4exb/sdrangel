@@ -276,11 +276,8 @@ private:
     Real m_interpolatorDistanceRemain;
     bool m_interpolatorConsumed;
 	fftfilt* m_SSBFilter;
-	fftfilt* m_DSBFilter;
 	Complex* m_SSBFilterBuffer;
-	Complex* m_DSBFilterBuffer;
 	int m_SSBFilterBufferIndex;
-	int m_DSBFilterBufferIndex;
 	static const int m_ssbFftLen;
 
 	BasebandSampleSink* m_sampleSink;
@@ -309,9 +306,6 @@ private:
     Real m_peakLevel;
     Real m_levelSum;
     CWKeyer m_cwKeyer;
-
-    MagAGC m_inAGC;
-    int m_agcStepLength;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
