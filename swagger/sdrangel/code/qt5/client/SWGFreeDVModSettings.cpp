@@ -50,6 +50,8 @@ SWGFreeDVModSettings::SWGFreeDVModSettings() {
     m_title_isSet = false;
     audio_device_name = nullptr;
     m_audio_device_name_isSet = false;
+    free_dv_mode = 0;
+    m_free_dv_mode_isSet = false;
     mod_af_input = 0;
     m_mod_af_input_isSet = false;
     use_reverse_api = 0;
@@ -94,6 +96,8 @@ SWGFreeDVModSettings::init() {
     m_title_isSet = false;
     audio_device_name = new QString("");
     m_audio_device_name_isSet = false;
+    free_dv_mode = 0;
+    m_free_dv_mode_isSet = false;
     mod_af_input = 0;
     m_mod_af_input_isSet = false;
     use_reverse_api = 0;
@@ -127,6 +131,7 @@ SWGFreeDVModSettings::cleanup() {
     if(audio_device_name != nullptr) { 
         delete audio_device_name;
     }
+
 
 
     if(reverse_api_address != nullptr) { 
@@ -172,6 +177,8 @@ SWGFreeDVModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&free_dv_mode, pJson["freeDVMode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&mod_af_input, pJson["modAFInput"], "qint32", "");
     
@@ -235,6 +242,9 @@ SWGFreeDVModSettings::asJsonObject() {
     }
     if(audio_device_name != nullptr && *audio_device_name != QString("")){
         toJsonValue(QString("audioDeviceName"), audio_device_name, obj, QString("QString"));
+    }
+    if(m_free_dv_mode_isSet){
+        obj->insert("freeDVMode", QJsonValue(free_dv_mode));
     }
     if(m_mod_af_input_isSet){
         obj->insert("modAFInput", QJsonValue(mod_af_input));
@@ -372,6 +382,16 @@ SWGFreeDVModSettings::setAudioDeviceName(QString* audio_device_name) {
 }
 
 qint32
+SWGFreeDVModSettings::getFreeDvMode() {
+    return free_dv_mode;
+}
+void
+SWGFreeDVModSettings::setFreeDvMode(qint32 free_dv_mode) {
+    this->free_dv_mode = free_dv_mode;
+    this->m_free_dv_mode_isSet = true;
+}
+
+qint32
 SWGFreeDVModSettings::getModAfInput() {
     return mod_af_input;
 }
@@ -457,6 +477,7 @@ SWGFreeDVModSettings::isSet(){
         if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
         if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
         if(audio_device_name != nullptr && *audio_device_name != QString("")){ isObjectUpdated = true; break;}
+        if(m_free_dv_mode_isSet){ isObjectUpdated = true; break;}
         if(m_mod_af_input_isSet){ isObjectUpdated = true; break;}
         if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
         if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}

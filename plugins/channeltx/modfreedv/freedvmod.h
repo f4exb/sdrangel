@@ -236,6 +236,8 @@ public:
 
     uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
     double getMagSq() const { return m_magsq; }
+    Real getLowCutoff() const { return m_lowCutoff; }
+    Real getHiCutoff() const { return m_hiCutoff; }
 
     CWKeyer *getCWKeyer() { return &m_cwKeyer; }
 
@@ -265,6 +267,8 @@ private:
     int m_basebandSampleRate;
     int m_outputSampleRate;
     int m_inputFrequencyOffset;
+    Real m_lowCutoff;
+    Real m_hiCutoff;
     FreeDVModSettings m_settings;
     quint32 m_audioSampleRate;
 
@@ -315,6 +319,7 @@ private:
     void applyAudioSampleRate(int sampleRate);
     void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const FreeDVModSettings& settings, bool force = false);
+    void applyFreeDVMode(FreeDVModSettings::FreeDVMode mode);
     void pullAF(Complex& sample);
     void calculateLevel(Complex& sample);
     void modulateSample();

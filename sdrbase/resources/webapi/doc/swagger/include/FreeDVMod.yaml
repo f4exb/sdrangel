@@ -28,6 +28,8 @@ FreeDVModSettings:
       type: string
     audioDeviceName:
       type: string
+    freeDVMode:
+      type: integer
     modAFInput:
       type: integer
     useReverseAPI:

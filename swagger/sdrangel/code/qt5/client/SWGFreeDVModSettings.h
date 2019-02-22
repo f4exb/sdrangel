@@ -76,6 +76,9 @@ public:
     QString* getAudioDeviceName();
     void setAudioDeviceName(QString* audio_device_name);
 
+    qint32 getFreeDvMode();
+    void setFreeDvMode(qint32 free_dv_mode);
+
     qint32 getModAfInput();
     void setModAfInput(qint32 mod_af_input);
 
@@ -133,6 +136,9 @@ private:
 
     QString* audio_device_name;
     bool m_audio_device_name_isSet;
+
+    qint32 free_dv_mode;
+    bool m_free_dv_mode_isSet;
 
     qint32 mod_af_input;
     bool m_mod_af_input_isSet;

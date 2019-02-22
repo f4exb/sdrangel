@@ -57,6 +57,8 @@ FreeDVMod::FreeDVMod(DeviceSinkAPI *deviceAPI) :
     m_basebandSampleRate(48000),
     m_outputSampleRate(48000),
     m_inputFrequencyOffset(0),
+    m_lowCutoff(0.0),
+    m_hiCutoff(6000.0),
     m_SSBFilter(0),
 	m_SSBFilterBuffer(0),
 	m_SSBFilterBufferIndex(0),
@@ -75,7 +77,7 @@ FreeDVMod::FreeDVMod(DeviceSinkAPI *deviceAPI) :
 	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo, getInputMessageQueue());
     m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getInputSampleRate();
 
-    m_SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_audioSampleRate, m_settings.m_bandwidth / m_audioSampleRate, m_ssbFftLen);
+    m_SSBFilter = new fftfilt(m_lowCutoff / m_audioSampleRate, m_hiCutoff / m_audioSampleRate, m_ssbFftLen);
     m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
     std::fill(m_SSBFilterBuffer, m_SSBFilterBuffer+(m_ssbFftLen>>1), Complex{0,0});
 
@@ -526,25 +528,9 @@ void FreeDVMod::applyAudioSampleRate(int sampleRate)
     m_interpolatorDistanceRemain = 0;
     m_interpolatorConsumed = false;
     m_interpolatorDistance = (Real) sampleRate / (Real) m_outputSampleRate;
-    m_interpolator.create(48, sampleRate, m_settings.m_bandwidth, 3.0);
+    m_interpolator.create(48, sampleRate, m_hiCutoff, 3.0);
 
-    float band = m_settings.m_bandwidth;
-    float lowCutoff = m_settings.m_lowCutoff;
-
-    if (band < 100.0f) // at least 100 Hz
-    {
-        band = 100.0f;
-        lowCutoff = 0;
-    }
-
-    if (band - lowCutoff < 100.0f) {
-        lowCutoff = band - 100.0f;
-    }
-
-    m_SSBFilter->create_filter(lowCutoff / sampleRate, band / sampleRate);
-
-    m_settings.m_bandwidth = band;
-    m_settings.m_lowCutoff = lowCutoff;
+    m_SSBFilter->create_filter(m_lowCutoff / sampleRate, m_hiCutoff / sampleRate);
 
     m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
     m_cwKeyer.setSampleRate(sampleRate);
@@ -581,7 +567,7 @@ void FreeDVMod::applyChannelSettings(int basebandSampleRate, int outputSampleRat
         m_interpolatorDistanceRemain = 0;
         m_interpolatorConsumed = false;
         m_interpolatorDistance = (Real) m_audioSampleRate / (Real) outputSampleRate;
-        m_interpolator.create(48, m_audioSampleRate, m_settings.m_bandwidth, 3.0);
+        m_interpolator.create(48, m_audioSampleRate, m_hiCutoff, 3.0);
         m_settingsMutex.unlock();
     }
 
@@ -590,20 +576,26 @@ void FreeDVMod::applyChannelSettings(int basebandSampleRate, int outputSampleRat
     m_inputFrequencyOffset = inputFrequencyOffset;
 }
 
+void FreeDVMod::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
+{
+    m_hiCutoff = FreeDVModSettings::getHiCutoff(mode);
+    m_lowCutoff = FreeDVModSettings::getLowCutoff(mode);
+
+    m_settingsMutex.lock();
+    m_interpolatorDistanceRemain = 0;
+    m_interpolatorConsumed = false;
+    m_interpolatorDistance = (Real) m_audioSampleRate / (Real) m_outputSampleRate;
+    m_interpolator.create(48, m_audioSampleRate, m_hiCutoff, 3.0);
+    m_SSBFilter->create_filter(m_lowCutoff / m_audioSampleRate, m_hiCutoff / m_audioSampleRate);
+    m_settingsMutex.unlock();
+}
+
 void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
 {
-    float band = settings.m_bandwidth;
-    float lowCutoff = settings.m_lowCutoff;
     QList<QString> reverseAPIKeys;
 
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
         reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_bandwidth != m_settings.m_bandwidth) || force) {
-        reverseAPIKeys.append("bandwidth");
-    }
-    if ((settings.m_lowCutoff != m_settings.m_lowCutoff) || force) {
-        reverseAPIKeys.append("lowCutoff");
     }
     if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
         reverseAPIKeys.append("toneFrequency");
@@ -626,33 +618,14 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
     if ((settings.m_title != m_settings.m_title) || force) {
         reverseAPIKeys.append("title");
     }
+    if ((settings.m_freeDVMode != m_settings.m_freeDVMode) || force) {
+        reverseAPIKeys.append("freeDVMode");
+    }
     if ((settings.m_modAFInput != m_settings.m_modAFInput) || force) {
         reverseAPIKeys.append("modAFInput");
     }
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
         reverseAPIKeys.append("audioDeviceName");
-    }
-
-    if ((settings.m_bandwidth != m_settings.m_bandwidth) ||
-        (settings.m_lowCutoff != m_settings.m_lowCutoff) || force)
-    {
-        if (band < 100.0f) // at least 100 Hz
-        {
-            band = 100.0f;
-            lowCutoff = 0;
-        }
-
-        if (band - lowCutoff < 100.0f) {
-            lowCutoff = band - 100.0f;
-        }
-
-        m_settingsMutex.lock();
-        m_interpolatorDistanceRemain = 0;
-        m_interpolatorConsumed = false;
-        m_interpolatorDistance = (Real) m_audioSampleRate / (Real) m_outputSampleRate;
-        m_interpolator.create(48, m_audioSampleRate, band, 3.0);
-        m_SSBFilter->create_filter(lowCutoff / m_audioSampleRate, band / m_audioSampleRate);
-        m_settingsMutex.unlock();
     }
 
     if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force)
@@ -674,6 +647,10 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
         }
     }
 
+    if ((m_settings.m_freeDVMode != settings.m_freeDVMode) || force) {
+        applyFreeDVMode(settings.m_freeDVMode);
+    }
+
     if (settings.m_useReverseAPI)
     {
         bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
@@ -685,8 +662,6 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
     }
 
     m_settings = settings;
-    m_settings.m_bandwidth = band;
-    m_settings.m_lowCutoff = lowCutoff;
 }
 
 QByteArray FreeDVMod::serialize() const
@@ -737,12 +712,6 @@ int FreeDVMod::webapiSettingsPutPatch(
         settings.m_inputFrequencyOffset = response.getFreeDvModSettings()->getInputFrequencyOffset();
         frequencyOffsetChanged = true;
     }
-    if (channelSettingsKeys.contains("bandwidth")) {
-        settings.m_bandwidth = response.getFreeDvModSettings()->getBandwidth();
-    }
-    if (channelSettingsKeys.contains("lowCutoff")) {
-        settings.m_lowCutoff = response.getFreeDvModSettings()->getLowCutoff();
-    }
     if (channelSettingsKeys.contains("toneFrequency")) {
         settings.m_toneFrequency = response.getFreeDvModSettings()->getToneFrequency();
     }
@@ -763,6 +732,9 @@ int FreeDVMod::webapiSettingsPutPatch(
     }
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getFreeDvModSettings()->getTitle();
+    }
+    if (channelSettingsKeys.contains("freeDVMode")) {
+        settings.m_freeDVMode = (FreeDVModSettings::FreeDVMode) response.getFreeDvModSettings()->getFreeDvMode();
     }
     if (channelSettingsKeys.contains("modAFInput")) {
         settings.m_modAFInput = (FreeDVModSettings::FreeDVModInputAF) response.getFreeDvModSettings()->getModAfInput();
@@ -855,8 +827,6 @@ int FreeDVMod::webapiReportGet(
 void FreeDVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const FreeDVModSettings& settings)
 {
     response.getFreeDvModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.getFreeDvModSettings()->setBandwidth(settings.m_bandwidth);
-    response.getFreeDvModSettings()->setLowCutoff(settings.m_lowCutoff);
     response.getFreeDvModSettings()->setToneFrequency(settings.m_toneFrequency);
     response.getFreeDvModSettings()->setVolumeFactor(settings.m_volumeFactor);
     response.getFreeDvModSettings()->setSpanLog2(settings.m_spanLog2);
@@ -929,12 +899,6 @@ void FreeDVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
         swgFreeDVModSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     }
-    if (channelSettingsKeys.contains("bandwidth") || force) {
-        swgFreeDVModSettings->setBandwidth(settings.m_bandwidth);
-    }
-    if (channelSettingsKeys.contains("lowCutoff") || force) {
-        swgFreeDVModSettings->setLowCutoff(settings.m_lowCutoff);
-    }
     if (channelSettingsKeys.contains("toneFrequency") || force) {
         swgFreeDVModSettings->setToneFrequency(settings.m_toneFrequency);
     }
@@ -955,6 +919,9 @@ void FreeDVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     }
     if (channelSettingsKeys.contains("title") || force) {
         swgFreeDVModSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("freeDVMode") || force) {
+        swgFreeDVModSettings->setFreeDvMode((int) settings.m_freeDVMode);
     }
     if (channelSettingsKeys.contains("modAFInput") || force) {
         swgFreeDVModSettings->setModAfInput((int) settings.m_modAFInput);

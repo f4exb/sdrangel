@@ -182,18 +182,6 @@ void FreeDVModGUI::on_spanLog2_valueChanged(int value)
     applyBandwidths(5 - value);
 }
 
-void FreeDVModGUI::on_BW_valueChanged(int value)
-{
-    (void) value;
-    applyBandwidths(5 - ui->spanLog2->value());
-}
-
-void FreeDVModGUI::on_lowCut_valueChanged(int value)
-{
-    (void) value;
-    applyBandwidths(5 - ui->spanLog2->value());
-}
-
 void FreeDVModGUI::on_toneFrequency_valueChanged(int value)
 {
     ui->toneFrequencyText->setText(QString("%1k").arg(value / 100.0, 0, 'f', 2));
@@ -212,6 +200,14 @@ void FreeDVModGUI::on_audioMute_toggled(bool checked)
 {
     m_settings.m_audioMute = checked;
 	applySettings();
+}
+
+void FreeDVModGUI::on_freeDVMode_currentIndexChanged(int index)
+{
+    m_settings.m_freeDVMode = (FreeDVModSettings::FreeDVMode) index;
+    m_channelMarker.setBandwidth(FreeDVModSettings::getHiCutoff(m_settings.m_freeDVMode) * 2);
+    m_channelMarker.setLowCutoff(FreeDVModSettings::getLowCutoff(m_settings.m_freeDVMode));
+    applySettings();
 }
 
 void FreeDVModGUI::on_playLoop_toggled(bool checked)
@@ -368,16 +364,7 @@ FreeDVModGUI::FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
-    m_channelMarker.blockSignals(true);
-	m_channelMarker.setColor(QColor(0, 255, 204));
-	m_channelMarker.setBandwidth(m_spectrumRate);
-	m_channelMarker.setSidebands(ChannelMarker::usb);
-	m_channelMarker.setCenterFrequency(0);
-    m_channelMarker.setTitle("FreeDV Modulator");
-    m_channelMarker.blockSignals(false);
 	m_channelMarker.setVisible(true);
-
-    setTitleColor(m_channelMarker.getColor());
 
     m_deviceUISet->registerTxChannelInstance(FreeDVMod::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
@@ -394,11 +381,6 @@ FreeDVModGUI::FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	connect(m_freeDVMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
-
-    m_iconDSBUSB.addPixmap(QPixmap("://dsb.png"), QIcon::Normal, QIcon::On);
-    m_iconDSBUSB.addPixmap(QPixmap("://usb.png"), QIcon::Normal, QIcon::Off);
-    m_iconDSBLSB.addPixmap(QPixmap("://dsb.png"), QIcon::Normal, QIcon::On);
-    m_iconDSBLSB.addPixmap(QPixmap("://lsb.png"), QIcon::Normal, QIcon::Off);
 
     displaySettings();
     applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
@@ -435,8 +417,6 @@ void FreeDVModGUI::applySettings(bool force)
 void FreeDVModGUI::applyBandwidths(int spanLog2, bool force)
 {
     m_spectrumRate = m_freeDVMod->getAudioSampleRate() / (1<<spanLog2);
-    int bw = ui->BW->value();
-    int lw = ui->lowCut->value();
     int bwMax = m_freeDVMod->getAudioSampleRate() / (100*(1<<spanLog2));
     int tickInterval = m_spectrumRate / 1200;
     tickInterval = tickInterval == 0 ? 1 : tickInterval;
@@ -444,60 +424,20 @@ void FreeDVModGUI::applyBandwidths(int spanLog2, bool force)
     qDebug() << "FreeDVModGUI::applyBandwidths:"
             << " spanLog2: " << spanLog2
             << " m_spectrumRate: " << m_spectrumRate
-            << " bw: " << bw
-            << " lw: " << lw
             << " bwMax: " << bwMax
             << " tickInterval: " << tickInterval;
 
-    ui->BW->setTickInterval(tickInterval);
-    ui->lowCut->setTickInterval(tickInterval);
-
-    bw = bw < -bwMax ? -bwMax : bw > bwMax ? bwMax : bw;
-
-    if (bw < 0) {
-        lw = lw < bw+1 ? bw+1 : lw < 0 ? lw : 0;
-    } else if (bw > 0) {
-        lw = lw > bw-1 ? bw-1 : lw < 0 ? 0 : lw;
-    } else {
-        lw = 0;
-    }
-
     QString spanStr = QString::number(bwMax/10.0, 'f', 1);
-    QString bwStr   = QString::number(bw/10.0, 'f', 1);
-    QString lwStr   = QString::number(lw/10.0, 'f', 1);
 
-    ui->BWText->setText(tr("%1k").arg(bwStr));
     ui->spanText->setText(tr("%1k").arg(spanStr));
-    ui->scaleMinus->setText("-");
-    ui->scaleCenter->setText("0");
-    ui->scalePlus->setText("+");
-    ui->lsbLabel->setText("LSB");
-    ui->usbLabel->setText("USB");
     ui->glSpectrum->setCenterFrequency(m_spectrumRate/2);
     ui->glSpectrum->setSampleRate(m_spectrumRate);
     ui->glSpectrum->setSsbSpectrum(true);
-    ui->glSpectrum->setLsbDisplay(bw < 0);
-    ui->lowCutText->setText(tr("%1k").arg(lwStr));
-
-    ui->BW->blockSignals(true);
-    ui->lowCut->blockSignals(true);
-
-    ui->BW->setMaximum(bwMax);
-    ui->BW->setValue(bw);
-    ui->lowCut->setValue(lw);
-
-    ui->lowCut->blockSignals(false);
-    ui->BW->blockSignals(false);
+    ui->glSpectrum->setLsbDisplay(false);
 
     m_settings.m_spanLog2 = spanLog2;
-    m_settings.m_bandwidth = bw * 100;
-    m_settings.m_lowCutoff = lw * 100;
 
     applySettings(force);
-
-    bool applySettingsWereBlocked = blockApplySettings(true);
-    m_channelMarker.setBandwidth(bw * 200);
-    blockApplySettings(applySettingsWereBlocked);
 }
 
 void FreeDVModGUI::displaySettings()
@@ -505,15 +445,9 @@ void FreeDVModGUI::displaySettings()
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setTitle(m_settings.m_title);
-    m_channelMarker.setBandwidth(m_settings.m_bandwidth * 2);
-    m_channelMarker.setLowCutoff(m_settings.m_lowCutoff);
-
-    if (m_settings.m_bandwidth < 0) {
-        m_channelMarker.setSidebands(ChannelMarker::lsb);
-    } else {
-        m_channelMarker.setSidebands(ChannelMarker::usb);
-    }
-
+    m_channelMarker.setBandwidth(FreeDVModSettings::getHiCutoff(m_settings.m_freeDVMode) * 2);
+    m_channelMarker.setLowCutoff(FreeDVModSettings::getLowCutoff(m_settings.m_freeDVMode));
+    m_channelMarker.setSidebands(ChannelMarker::usb);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor);
 
@@ -527,22 +461,15 @@ void FreeDVModGUI::displaySettings()
 
     // Prevent uncontrolled triggering of applyBandwidths
     ui->spanLog2->blockSignals(true);
-    ui->BW->blockSignals(true);
 
     ui->spanLog2->setValue(5 - m_settings.m_spanLog2);
 
-    ui->BW->setValue(roundf(m_settings.m_bandwidth/100.0));
-    QString s = QString::number(m_settings.m_bandwidth/1000.0, 'f', 1);
-
-    ui->BWText->setText(tr("%1k").arg(s));
+    QString s = QString::number(m_freeDVMod->getHiCutoff()/1000.0, 'f', 1);
 
     ui->spanLog2->blockSignals(false);
-    ui->BW->blockSignals(false);
 
     // The only one of the four signals triggering applyBandwidths will trigger it once only with all other values
     // set correctly and therefore validate the settings and apply them to dependent widgets
-    ui->lowCut->setValue(m_settings.m_lowCutoff / 100.0);
-    ui->lowCutText->setText(tr("%1k").arg(m_settings.m_lowCutoff / 1000.0));
 
     ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
 

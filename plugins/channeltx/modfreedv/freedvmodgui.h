@@ -79,9 +79,6 @@ private:
     bool m_enableNavTime;
     MessageQueue m_inputMessageQueue;
 
-    QIcon m_iconDSBUSB;
-    QIcon m_iconDSBLSB;
-
     explicit FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
     virtual ~FreeDVModGUI();
 
@@ -100,10 +97,9 @@ private slots:
     void handleSourceMessages();
     void on_deltaFrequency_changed(qint64 value);
     void on_spanLog2_valueChanged(int value);
-    void on_BW_valueChanged(int value);
-    void on_lowCut_valueChanged(int value);
     void on_volume_valueChanged(int value);
     void on_audioMute_toggled(bool checked);
+    void on_freeDVMode_currentIndexChanged(int index);
     void on_tone_toggled(bool checked);
     void on_toneFrequency_valueChanged(int value);
     void on_mic_toggled(bool checked);

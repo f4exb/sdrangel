@@ -32,8 +32,6 @@ FreeDVModSettings::FreeDVModSettings() :
 void FreeDVModSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
-    m_bandwidth = 3000.0;
-    m_lowCutoff = 300.0;
     m_toneFrequency = 1000.0;
     m_volumeFactor = 1.0;
     m_spanLog2 = 3;
@@ -43,6 +41,7 @@ void FreeDVModSettings::resetToDefaults()
     m_title = "FreeDV Modulator";
     m_modAFInput = FreeDVModInputAF::FreeDVModInputNone;
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_freeDVMode = FreeDVMode::FreeDVMode2400A;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -55,7 +54,6 @@ QByteArray FreeDVModSettings::serialize() const
     SimpleSerializer s(1);
 
     s.writeS32(1, m_inputFrequencyOffset);
-    s.writeS32(2, roundf(m_bandwidth / 100.0));
     s.writeS32(3, roundf(m_toneFrequency / 10.0));
 
     if (m_spectrumGUI) {
@@ -68,8 +66,8 @@ QByteArray FreeDVModSettings::serialize() const
         s.writeBlob(6, m_cwKeyerGUI->serialize());
     }
 
-    s.writeS32(7, roundf(m_lowCutoff / 100.0));
     s.writeS32(8, m_spanLog2);
+    s.writeS32(10, (int) m_freeDVMode);
 
     if (m_channelMarker) {
         s.writeBlob(18, m_channelMarker->serialize());
@@ -106,9 +104,6 @@ bool FreeDVModSettings::deserialize(const QByteArray& data)
         d.readS32(1, &tmp, 0);
         m_inputFrequencyOffset = tmp;
 
-        d.readS32(2, &tmp, 30);
-        m_bandwidth = tmp * 100.0;
-
         d.readS32(3, &tmp, 100);
         m_toneFrequency = tmp * 10.0;
 
@@ -125,10 +120,14 @@ bool FreeDVModSettings::deserialize(const QByteArray& data)
             m_cwKeyerGUI->deserialize(bytetmp);
         }
 
-        d.readS32(7, &tmp, 3);
-        m_lowCutoff = tmp * 100.0;
-
         d.readS32(8, &m_spanLog2, 3);
+
+        d.readS32(10, &tmp, 0);
+        if ((tmp < 0) || (tmp > (int) FreeDVMode::FreeDVMode700D)) {
+            m_freeDVMode = FreeDVMode::FreeDVMode2400A;
+        } else {
+            m_freeDVMode = (FreeDVMode) tmp;
+        }
 
         if (m_channelMarker) {
             d.readBlob(18, &bytetmp);
@@ -166,5 +165,41 @@ bool FreeDVModSettings::deserialize(const QByteArray& data)
     {
         resetToDefaults();
         return false;
+    }
+}
+
+int FreeDVModSettings::getHiCutoff(FreeDVMode freeDVMode)
+{
+    switch(freeDVMode)
+    {
+        case FreeDVModSettings::FreeDVMode800XA: // C4FM NB
+            return 2400;
+            break;
+        case FreeDVModSettings::FreeDVMode700D: // OFDM
+        case FreeDVModSettings::FreeDVMode1600: // OFDM
+            return 2200.0;
+            break;
+        case FreeDVModSettings::FreeDVMode2400A: // C4FM WB
+        default:
+            return 6000.0;
+            break;
+    }
+}
+
+int FreeDVModSettings::getLowCutoff(FreeDVMode freeDVMode)
+{
+    switch(freeDVMode)
+    {
+        case FreeDVModSettings::FreeDVMode800XA: // C4FM NB
+            return 400.0;
+            break;
+        case FreeDVModSettings::FreeDVMode700D: // OFDM
+        case FreeDVModSettings::FreeDVMode1600: // OFDM
+            return 800.0;
+            break;
+        case FreeDVModSettings::FreeDVMode2400A: // C4FM WB
+        default:
+            return 0.0;
+            break;
     }
 }

@@ -34,9 +34,15 @@ struct FreeDVModSettings
         FreeDVModInputCWTone
     } FreeDVModInputAF;
 
+    typedef enum
+    {
+        FreeDVMode2400A,
+        FreeDVMode1600,
+        FreeDVMode800XA,
+        FreeDVMode700D
+    } FreeDVMode;
+
     qint64 m_inputFrequencyOffset;
-    Real m_bandwidth;
-    Real m_lowCutoff;
     float m_toneFrequency;
     float m_volumeFactor;
     int  m_spanLog2;
@@ -47,6 +53,7 @@ struct FreeDVModSettings
     QString m_title;
     FreeDVModInputAF m_modAFInput;
     QString m_audioDeviceName;
+    FreeDVMode m_freeDVMode;
 
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
@@ -65,6 +72,9 @@ struct FreeDVModSettings
     void setCWKeyerGUI(Serializable *cwKeyerGUI) { m_cwKeyerGUI = cwKeyerGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+
+    static int getHiCutoff(FreeDVMode freeDVMode);
+    static int getLowCutoff(FreeDVMode freeDVMode);
 };
 
 
