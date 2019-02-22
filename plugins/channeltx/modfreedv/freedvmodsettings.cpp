@@ -64,7 +64,7 @@ void FreeDVModSettings::resetToDefaults()
     m_agcThreshold = -40; // dB
     m_agcThresholdGate = 192;
     m_agcThresholdDelay = 2400;
-    m_rgbColor = QColor(0, 255, 0).rgb();
+    m_rgbColor = QColor(0, 255, 204).rgb();
     m_title = "FreeDV Modulator";
     m_modAFInput = FreeDVModInputAF::FreeDVModInputNone;
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;

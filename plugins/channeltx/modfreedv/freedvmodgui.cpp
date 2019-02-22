@@ -439,7 +439,7 @@ FreeDVModGUI::FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
     m_channelMarker.blockSignals(true);
-	m_channelMarker.setColor(Qt::darkCyan);
+	m_channelMarker.setColor(QColor(0, 255, 204));
 	m_channelMarker.setBandwidth(m_spectrumRate);
 	m_channelMarker.setSidebands(ChannelMarker::usb);
 	m_channelMarker.setCenterFrequency(0);

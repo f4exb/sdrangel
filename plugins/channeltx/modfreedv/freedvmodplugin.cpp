@@ -24,7 +24,7 @@
 #include "freedvmodplugin.h"
 
 const PluginDescriptor FreeDVModPlugin::m_pluginDescriptor = {
-    QString("SSB Modulator"),
+    QString("FreeDV Modulator"),
     QString("4.5.0"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
