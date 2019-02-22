@@ -20,5 +20,7 @@ if (BUILD_DEBIAN)
     add_subdirectory(remotesource)
 endif (BUILD_DEBIAN)
 
-# TODO: add FreeDV stuff only if codec2 library is present
-add_subdirectory(modfreedv)
+find_package(Codec2)
+if (CODEC2_FOUND)
+    add_subdirectory(modfreedv)
+endif(CODEC2_FOUND)
