@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.4.4"
+  version: "4.5.0"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -1890,6 +1890,8 @@ definitions:
         $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
       DSDDemodSettings:
         $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodSettings"
+      FreeDVModSettings:
+        $ref: "/doc/swagger/include/FreeDVMod.yaml#/FreeDVModSettings"
       NFMDemodSettings:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
@@ -1931,6 +1933,8 @@ definitions:
         $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodReport"
       DSDDemodReport:
         $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodReport"
+      FreeDVModReport:
+        $ref: "/doc/swagger/include/FreeDVMod.yaml#/FreeDVModReport"
       NFMDemodReport:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
       NFMModReport:

@@ -1758,6 +1758,9 @@ margin-bottom: 20px;
     "DSDDemodReport" : {
       "$ref" : "#/definitions/DSDDemodReport"
     },
+    "FreeDVModReport" : {
+      "$ref" : "#/definitions/FreeDVModReport"
+    },
     "NFMDemodReport" : {
       "$ref" : "#/definitions/NFMDemodReport"
     },
@@ -1814,6 +1817,9 @@ margin-bottom: 20px;
     },
     "DSDDemodSettings" : {
       "$ref" : "#/definitions/DSDDemodSettings"
+    },
+    "FreeDVModSettings" : {
+      "$ref" : "#/definitions/FreeDVModSettings"
     },
     "NFMDemodSettings" : {
       "$ref" : "#/definitions/NFMDemodSettings"
@@ -2539,6 +2545,121 @@ margin-bottom: 20px;
     }
   },
   "description" : "FileSource"
+};
+            defs.FreeDVModReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "audioSampleRate" : {
+      "type" : "integer"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "FreeDVMod"
+};
+            defs.FreeDVModSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "bandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "lowCutoff" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "usb" : {
+      "type" : "integer"
+    },
+    "toneFrequency" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "volumeFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "spanLog2" : {
+      "type" : "integer"
+    },
+    "audioBinaural" : {
+      "type" : "integer"
+    },
+    "audioFlipChannels" : {
+      "type" : "integer"
+    },
+    "dsb" : {
+      "type" : "integer"
+    },
+    "audioMute" : {
+      "type" : "integer"
+    },
+    "playLoop" : {
+      "type" : "integer"
+    },
+    "agc" : {
+      "type" : "integer"
+    },
+    "agcOrder" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "agcTime" : {
+      "type" : "integer"
+    },
+    "agcThresholdEnable" : {
+      "type" : "integer"
+    },
+    "agcThreshold" : {
+      "type" : "integer"
+    },
+    "agcThresholdGate" : {
+      "type" : "integer"
+    },
+    "agcThresholdDelay" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
+    "modAFInput" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "cwKeyer" : {
+      "$ref" : "#/definitions/CWKeyerSettings"
+    }
+  },
+  "description" : "FreeDVMod"
 };
             defs.Frequency = {
   "properties" : {
@@ -5513,7 +5634,7 @@ margin-bottom: 20px;
         <div id="header">
           <div id="api-_">
             <h2 id="welcome-to-apidoc">API and SDK Documentation</h2>
-              <div class="app-desc">Version: 4.4.4</div>
+              <div class="app-desc">Version: 4.5.0</div>
             <hr>
             <div><p>This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube</p>
 <hr />
@@ -24381,7 +24502,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-02-15T10:08:14.210+01:00
+              Generated 2019-02-22T06:26:26.189+01:00
             </div>
           </div>
       </div>

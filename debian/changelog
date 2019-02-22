@@ -1,3 +1,9 @@
+sdrangel (4.5.0-1) unstable; urgency=medium
+
+  * Implemented a FreeDV modulator
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 03 Mar 2019 20:14:18 +0100
+
 sdrangel (4.4.5-1) unstable; urgency=medium
 
   * UDP/RTP audio: added G722 and Opus support

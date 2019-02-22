@@ -1,0 +1,136 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
+#ifndef PLUGINS_CHANNELTX_MODFREEDV_FREEDVMODGUI_H_
+#define PLUGINS_CHANNELTX_MODFREEDV_FREEDVMODGUI_H_
+
+#include <QIcon>
+
+#include <plugin/plugininstancegui.h>
+#include "gui/rollupwidget.h"
+#include "dsp/channelmarker.h"
+#include "util/movingaverage.h"
+#include "util/messagequeue.h"
+
+#include "freedvmod.h"
+#include "freedvmodsettings.h"
+
+class PluginAPI;
+class DeviceUISet;
+class BasebandSampleSource;
+class SpectrumVis;
+
+namespace Ui {
+    class FreeDVModGUI;
+}
+
+class FreeDVModGUI : public RollupWidget, public PluginInstanceGUI {
+    Q_OBJECT
+
+public:
+    static FreeDVModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx);
+    virtual void destroy();
+
+    void setName(const QString& name);
+    QString getName() const;
+    virtual qint64 getCenterFrequency() const;
+    virtual void setCenterFrequency(qint64 centerFrequency);
+
+    void resetToDefaults();
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
+    virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    virtual bool handleMessage(const Message& message);
+
+public slots:
+    void channelMarkerChangedByCursor();
+
+private:
+    Ui::FreeDVModGUI* ui;
+    PluginAPI* m_pluginAPI;
+    DeviceUISet* m_deviceUISet;
+    ChannelMarker m_channelMarker;
+    FreeDVModSettings m_settings;
+    bool m_doApplySettings;
+	int m_spectrumRate;
+
+    SpectrumVis* m_spectrumVis;
+    FreeDVMod* m_freeDVMod;
+    MovingAverageUtil<double, double, 20> m_channelPowerDbAvg;
+
+    QString m_fileName;
+    quint32 m_recordLength;
+    int m_recordSampleRate;
+    int m_samplesCount;
+    std::size_t m_tickCount;
+    bool m_enableNavTime;
+    MessageQueue m_inputMessageQueue;
+
+    QIcon m_iconDSBUSB;
+    QIcon m_iconDSBLSB;
+
+    explicit FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
+    virtual ~FreeDVModGUI();
+
+    bool blockApplySettings(bool block);
+    void applySettings(bool force = false);
+    void applyBandwidths(int spanLog2, bool force = false);
+    void displaySettings();
+    void displayAGCPowerThreshold();
+    void updateWithStreamData();
+    void updateWithStreamTime();
+    void channelMarkerUpdate();
+
+    void leaveEvent(QEvent*);
+    void enterEvent(QEvent*);
+
+private slots:
+    void handleSourceMessages();
+    void on_deltaFrequency_changed(qint64 value);
+    void on_flipSidebands_clicked(bool checked);
+    void on_dsb_toggled(bool checked);
+    void on_audioBinaural_toggled(bool checked);
+    void on_audioFlipChannels_toggled(bool checked);
+    void on_spanLog2_valueChanged(int value);
+    void on_BW_valueChanged(int value);
+    void on_lowCut_valueChanged(int value);
+    void on_volume_valueChanged(int value);
+    void on_audioMute_toggled(bool checked);
+    void on_tone_toggled(bool checked);
+    void on_toneFrequency_valueChanged(int value);
+    void on_mic_toggled(bool checked);
+    void on_agc_toggled(bool checked);
+    void on_agcOrder_valueChanged(int value);
+    void on_agcTime_valueChanged(int value);
+    void on_agcThreshold_valueChanged(int value);
+    void on_agcThresholdGate_valueChanged(int value);
+    void on_agcThresholdDelay_valueChanged(int value);
+    void on_play_toggled(bool checked);
+    void on_playLoop_toggled(bool checked);
+    void on_morseKeyer_toggled(bool checked);
+
+    void on_navTimeSlider_valueChanged(int value);
+    void on_showFileDialog_clicked(bool checked);
+
+    void onWidgetRolled(QWidget* widget, bool rollDown);
+    void onMenuDialogCalled(const QPoint& p);
+
+    void configureFileName();
+    void audioSelect();
+    void tick();
+};
+
+#endif /* PLUGINS_CHANNELTX_MODFREEDV_FREEDVMODGUI_H_ */

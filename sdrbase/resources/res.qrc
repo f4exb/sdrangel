@@ -15,6 +15,7 @@
         <file>webapi/doc/swagger/include/FCDPro.yaml</file>
         <file>webapi/doc/swagger/include/FCDProPlus.yaml</file>
         <file>webapi/doc/swagger/include/FileSource.yaml</file>
+        <file>webapi/doc/swagger/include/FreeDVMod.yaml</file>
         <file>webapi/doc/swagger/include/HackRF.yaml</file>
         <file>webapi/doc/swagger/include/LimeSdr.yaml</file>
         <file>webapi/doc/swagger/include/NFMDemod.yaml</file>
@@ -29,7 +30,7 @@
         <file>webapi/doc/swagger/include/SDRPlay.yaml</file>
         <file>webapi/doc/swagger/include/SoapySDR.yaml</file>
         <file>webapi/doc/swagger/include/SSBDemod.yaml</file>
-        <file>webapi/doc/swagger/include/SSBMod.yaml</file>        
+        <file>webapi/doc/swagger/include/SSBMod.yaml</file>
         <file>webapi/doc/swagger/include/Structs.yaml</file>
         <file>webapi/doc/swagger/include/TestSource.yaml</file>
         <file>webapi/doc/swagger/include/UDPSource.yaml</file>
