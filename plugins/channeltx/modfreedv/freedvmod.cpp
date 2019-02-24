@@ -57,7 +57,7 @@ FreeDVMod::FreeDVMod(DeviceSinkAPI *deviceAPI) :
     ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
     m_basebandSampleRate(48000),
-    m_outputSampleRate(48000),
+    m_outputSampleRate(48000),   // default 2400A mode
     m_inputFrequencyOffset(0),
     m_lowCutoff(0.0),
     m_hiCutoff(6000.0),
@@ -69,7 +69,7 @@ FreeDVMod::FreeDVMod(DeviceSinkAPI *deviceAPI) :
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
 	m_recordLength(0),
-	m_sampleRate(48000),
+	m_inputSampleRate(8000), // all modes take 8000 S/s input
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
@@ -100,10 +100,10 @@ FreeDVMod::FreeDVMod(DeviceSinkAPI *deviceAPI) :
 
 	m_magsq = 0.0;
 
-	m_toneNco.setFreq(1000.0, m_audioSampleRate);
+	m_toneNco.setFreq(1000.0, m_inputSampleRate);
 
 	// CW keyer
-	m_cwKeyer.setSampleRate(48000);
+	m_cwKeyer.setSampleRate(m_inputSampleRate);
 	m_cwKeyer.setWPM(13);
 	m_cwKeyer.setMode(CWKeyerSettings::CWNone);
 
@@ -214,153 +214,125 @@ void FreeDVMod::pullAF(Complex& sample)
     int decim = 1<<(m_settings.m_spanLog2 - 1);
     unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
 
-    switch (m_settings.m_modAFInput)
+    if (m_iModem >= m_nNomModemSamples)
     {
-    case FreeDVModSettings::FreeDVModInputTone:
-		sample = m_toneNco.nextIQ();
-        break;
-    case FreeDVModSettings::FreeDVModInputFile:
-        if (m_iModem >= m_nNomModemSamples)
+        switch (m_settings.m_modAFInput)
         {
-            if (m_ifstream.is_open())
+        case FreeDVModSettings::FreeDVModInputTone:
+            for (int i = 0; i < m_nSpeechSamples; i++) {
+                m_speechIn[i] = m_toneNco.next() * 32768.0f * m_settings.m_volumeFactor;
+            }
+            freedv_tx(m_freeDV, m_modOut, m_speechIn);
+            break;
+        case FreeDVModSettings::FreeDVModInputFile:
+            if (m_iModem >= m_nNomModemSamples)
             {
-                std::fill(m_speechIn, m_speechIn + m_nSpeechSamples, 0);
-
-                if (m_ifstream.eof())
+                if (m_ifstream.is_open())
                 {
-                    if (m_settings.m_playLoop)
+                    std::fill(m_speechIn, m_speechIn + m_nSpeechSamples, 0);
+
+                    if (m_ifstream.eof())
                     {
-                        m_ifstream.clear();
-                        m_ifstream.seekg(0, std::ios::beg);
-                    }
-                }
-
-                if (m_ifstream.eof())
-                {
-                    std::fill(m_modOut, m_modOut + m_nNomModemSamples, 0);
-                }
-                else
-                {
-
-                    m_ifstream.read(reinterpret_cast<char*>(m_speechIn), sizeof(int16_t) * m_nSpeechSamples);
-
-                    if (m_settings.m_volumeFactor != 1.0)
-                    {
-                        for (int i = 0; i < m_nSpeechSamples; i++) {
-                            m_speechIn[i] *= m_settings.m_volumeFactor;
+                        if (m_settings.m_playLoop)
+                        {
+                            m_ifstream.clear();
+                            m_ifstream.seekg(0, std::ios::beg);
                         }
                     }
 
-                    freedv_tx(m_freeDV, m_modOut, m_speechIn);
+                    if (m_ifstream.eof())
+                    {
+                        std::fill(m_modOut, m_modOut + m_nNomModemSamples, 0);
+                    }
+                    else
+                    {
+
+                        m_ifstream.read(reinterpret_cast<char*>(m_speechIn), sizeof(int16_t) * m_nSpeechSamples);
+
+                        if (m_settings.m_volumeFactor != 1.0)
+                        {
+                            for (int i = 0; i < m_nSpeechSamples; i++) {
+                                m_speechIn[i] *= m_settings.m_volumeFactor;
+                            }
+                        }
+
+                        freedv_tx(m_freeDV, m_modOut, m_speechIn);
+                    }
                 }
-            }
-            else
-            {
-                std::fill(m_modOut, m_modOut + m_nNomModemSamples, 0);
-            }
-
-            m_iModem = 0;
-        }
-
-        ci.real(m_modOut[m_iModem++] / (SDR_TX_SCALEF/8.0f));
-        ci.imag(0.0f);
-        break;
-    case FreeDVModSettings::FreeDVModInputAudio:
-        ci.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r)  / (2.0 * SDR_TX_SCALEF)) * m_settings.m_volumeFactor);
-        ci.imag(0.0f);
-        break;
-    case FreeDVModSettings::FreeDVModInputCWTone:
-    	Real fadeFactor;
-
-        if (m_cwKeyer.getSample())
-        {
-            m_cwKeyer.getCWSmoother().getFadeSample(true, fadeFactor);
-            sample = m_toneNco.nextIQ() * fadeFactor;
-        }
-        else
-        {
-        	if (m_cwKeyer.getCWSmoother().getFadeSample(false, fadeFactor))
-        	{
-                sample = m_toneNco.nextIQ() * fadeFactor;
-        	}
-        	else
-        	{
-                sample.real(0.0f);
-                sample.imag(0.0f);
-                m_toneNco.setPhase(0);
-        	}
-        }
-
-        break;
-    case FreeDVModSettings::FreeDVModInputNone:
-    default:
-        sample.real(0.0f);
-        sample.imag(0.0f);
-        break;
-    }
-
-    if ((m_settings.m_modAFInput == FreeDVModSettings::FreeDVModInputFile)
-       || (m_settings.m_modAFInput == FreeDVModSettings::FreeDVModInputAudio)) // real audio
-    {
-        n_out = m_SSBFilter->runSSB(ci, &filtered, true); // USB
-
-        if (n_out > 0)
-        {
-            memcpy((void *) m_SSBFilterBuffer, (const void *) filtered, n_out*sizeof(Complex));
-            m_SSBFilterBufferIndex = 0;
-        }
-
-        sample = m_SSBFilterBuffer[m_SSBFilterBufferIndex];
-        m_SSBFilterBufferIndex++;
-
-    	if (n_out > 0)
-    	{
-            for (int i = 0; i < n_out; i++)
-            {
-                // Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
-                // smart decimation with bit gain using float arithmetic (23 bits significand)
-
-                m_sum += filtered[i];
-
-                if (!(m_undersampleCount++ & decim_mask))
+                else
                 {
-                    Real avgr = (m_sum.real() / decim) * 0.891235351562f * SDR_TX_SCALEF; //scaling at -1 dB to account for possible filter overshoot
-                    Real avgi = (m_sum.imag() / decim) * 0.891235351562f * SDR_TX_SCALEF;
-                    m_sampleBuffer.push_back(Sample(avgr, avgi));
-                    m_sum.real(0.0);
-                    m_sum.imag(0.0);
+                    std::fill(m_modOut, m_modOut + m_nNomModemSamples, 0);
                 }
             }
-    	}
-    } // Real audio
-    else if ((m_settings.m_modAFInput == FreeDVModSettings::FreeDVModInputTone)
-          || (m_settings.m_modAFInput == FreeDVModSettings::FreeDVModInputCWTone)) // tone
-    {
-        m_sum += sample;
+            break;
+        case FreeDVModSettings::FreeDVModInputAudio:
+            for (int i = 0; i < m_nSpeechSamples; i++) {
+                m_speechIn[i] = (m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) * (m_settings.m_volumeFactor / 2);
+            }
+            freedv_tx(m_freeDV, m_modOut, m_speechIn);
+            break;
+        case FreeDVModSettings::FreeDVModInputCWTone:
+            for (int i = 0; i < m_nSpeechSamples; i++)
+            {
+                Real fadeFactor;
 
-        if (!(m_undersampleCount++ & decim_mask))
-        {
-            Real avgr = (m_sum.real() / decim) * 0.891235351562f * SDR_TX_SCALEF; //scaling at -1 dB to account for possible filter overshoot
-            Real avgi = (m_sum.imag() / decim) * 0.891235351562f * SDR_TX_SCALEF;
-            m_sampleBuffer.push_back(Sample(avgr, avgi));
-            m_sum.real(0.0);
-            m_sum.imag(0.0);
+                if (m_cwKeyer.getSample())
+                {
+                    m_cwKeyer.getCWSmoother().getFadeSample(true, fadeFactor);
+                    m_speechIn[i] = m_toneNco.next() * 32768.0f * fadeFactor * m_settings.m_volumeFactor;
+                }
+                else
+                {
+                    if (m_cwKeyer.getCWSmoother().getFadeSample(false, fadeFactor))
+                    {
+                        m_speechIn[i] = m_toneNco.next() * 32768.0f * fadeFactor * m_settings.m_volumeFactor;
+                    }
+                    else
+                    {
+                        m_speechIn[i] = 0;
+                        m_toneNco.setPhase(0);
+                    }
+                }
+            }
+            freedv_tx(m_freeDV, m_modOut, m_speechIn);
+            break;
+        case FreeDVModSettings::FreeDVModInputNone:
+        default:
+            std::fill(m_speechIn, m_speechIn + m_nSpeechSamples, 0);
+            freedv_tx(m_freeDV, m_modOut, m_speechIn);
+            break;
         }
 
-        if (m_sumCount < (m_ssbFftLen>>1))
-        {
-            n_out = 0;
-            m_sumCount++;
-        }
-        else
-        {
-            n_out = m_sumCount;
-            m_sumCount = 0;
-        }
+        m_iModem = 0;
     }
+
+    ci.real(m_modOut[m_iModem++] / (SDR_TX_SCALEF/8.0f));
+    ci.imag(0.0f);
+
+    n_out = m_SSBFilter->runSSB(ci, &filtered, true); // USB
 
     if (n_out > 0)
     {
+        memcpy((void *) m_SSBFilterBuffer, (const void *) filtered, n_out*sizeof(Complex));
+        m_SSBFilterBufferIndex = 0;
+
+        for (int i = 0; i < n_out; i++)
+        {
+            // Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
+            // smart decimation with bit gain using float arithmetic (23 bits significand)
+
+            m_sum += filtered[i];
+
+            if (!(m_undersampleCount++ & decim_mask))
+            {
+                Real avgr = (m_sum.real() / decim) * 0.891235351562f * SDR_TX_SCALEF; //scaling at -1 dB to account for possible filter overshoot
+                Real avgi = (m_sum.imag() / decim) * 0.891235351562f * SDR_TX_SCALEF;
+                m_sampleBuffer.push_back(Sample(avgr, avgi));
+                m_sum.real(0.0);
+                m_sum.imag(0.0);
+            }
+        }
+
         if (m_sampleSink != 0)
         {
             m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true); // SSB
@@ -368,6 +340,8 @@ void FreeDVMod::pullAF(Complex& sample)
 
         m_sampleBuffer.clear();
     }
+
+    sample = m_SSBFilterBuffer[m_SSBFilterBufferIndex++];
 }
 
 void FreeDVMod::calculateLevel(Complex& sample)
@@ -514,8 +488,8 @@ void FreeDVMod::openFileStream()
     m_fileSize = m_ifstream.tellg();
     m_ifstream.seekg(0,std::ios_base::beg);
 
-    m_sampleRate = 48000; // fixed rate
-    m_recordLength = m_fileSize / (sizeof(Real) * m_sampleRate);
+    m_inputSampleRate = 48000; // fixed rate
+    m_recordLength = m_fileSize / (sizeof(Real) * m_inputSampleRate);
 
     qDebug() << "FreeDVMod::openFileStream: " << m_fileName.toStdString().c_str()
             << " fileSize: " << m_fileSize << "bytes"
@@ -524,7 +498,7 @@ void FreeDVMod::openFileStream()
     if (getMessageQueueToGUI())
     {
         MsgReportFileSourceStreamData *report;
-        report = MsgReportFileSourceStreamData::create(m_sampleRate, m_recordLength);
+        report = MsgReportFileSourceStreamData::create(m_inputSampleRate, m_recordLength);
         getMessageQueueToGUI()->push(report);
     }
 }
@@ -535,7 +509,7 @@ void FreeDVMod::seekFileStream(int seekPercentage)
 
     if (m_ifstream.is_open())
     {
-        int seekPoint = ((m_recordLength * seekPercentage) / 100) * m_sampleRate;
+        int seekPoint = ((m_recordLength * seekPercentage) / 100) * m_inputSampleRate;
         seekPoint *= sizeof(Real);
         m_ifstream.clear();
         m_ifstream.seekg(seekPoint, std::ios::beg);

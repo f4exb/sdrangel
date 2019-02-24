@@ -305,7 +305,7 @@ private:
     QString m_fileName;
     quint64 m_fileSize;     //!< raw file size (bytes)
     quint32 m_recordLength; //!< record length in seconds computed from file size
-    int m_sampleRate;
+    int m_inputSampleRate;  //!< speech (input) sample rate (fixed 8000 S/s)
 
     quint32 m_levelCalcCount;
     Real m_peakLevel;

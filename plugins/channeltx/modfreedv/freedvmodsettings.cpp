@@ -199,7 +199,7 @@ int FreeDVModSettings::getLowCutoff(FreeDVMode freeDVMode)
             break;
         case FreeDVModSettings::FreeDVMode2400A: // C4FM WB
         default:
-            return 50.0;
+            return 0.0;
             break;
     }
 }
