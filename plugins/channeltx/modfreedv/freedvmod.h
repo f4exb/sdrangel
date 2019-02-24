@@ -324,6 +324,7 @@ private:
     int m_iModem;
     int16_t *m_speechIn;
     int16_t *m_modOut;
+    float m_scaleFactor; //!< divide by this amount to scale from int16 to float in [-1.0, 1.0] interval
 
     static const int m_levelNbSamples;
 

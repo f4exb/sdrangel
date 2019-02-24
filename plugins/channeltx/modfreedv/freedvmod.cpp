@@ -80,7 +80,8 @@ FreeDVMod::FreeDVMod(DeviceSinkAPI *deviceAPI) :
 	m_iSpeech(0),
 	m_iModem(0),
 	m_speechIn(0),
-	m_modOut(0)
+	m_modOut(0),
+	m_scaleFactor(SDR_TX_SCALEF)
 {
 	setObjectName(m_channelId);
 
@@ -307,7 +308,7 @@ void FreeDVMod::pullAF(Complex& sample)
         m_iModem = 0;
     }
 
-    ci.real(m_modOut[m_iModem++] / (SDR_TX_SCALEF/8.0f));
+    ci.real(m_modOut[m_iModem++] / m_scaleFactor);
     ci.imag(0.0f);
 
     n_out = m_SSBFilter->runSSB(ci, &filtered, true); // USB
@@ -595,16 +596,20 @@ void FreeDVMod::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
     {
     case FreeDVModSettings::FreeDVMode700D:
         fdv_mode = FREEDV_MODE_700D;
+        m_scaleFactor = SDR_TX_SCALEF / 3.2f;
         break;
     case FreeDVModSettings::FreeDVMode800XA:
         fdv_mode = FREEDV_MODE_800XA;
+        m_scaleFactor = SDR_TX_SCALEF / 8.2f;
         break;
     case FreeDVModSettings::FreeDVMode1600:
         fdv_mode = FREEDV_MODE_1600;
+        m_scaleFactor = SDR_TX_SCALEF / 3.2f;
         break;
     case FreeDVModSettings::FreeDVMode2400A:
     default:
         fdv_mode = FREEDV_MODE_2400A;
+        m_scaleFactor = SDR_TX_SCALEF / 8.2f;
         break;
     }
 
