@@ -27,6 +27,8 @@
 #include <complex.h>
 #include <algorithm>
 
+#include "codec2/freedv_api.h"
+
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGFreeDVModReport.h"
@@ -70,7 +72,14 @@ FreeDVMod::FreeDVMod(DeviceSinkAPI *deviceAPI) :
 	m_sampleRate(48000),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
-	m_levelSum(0.0f)
+	m_levelSum(0.0f),
+	m_freeDV(0),
+	m_nSpeechSamples(0),
+	m_nNomModemSamples(0),
+	m_iSpeech(0),
+	m_iModem(0),
+	m_speechIn(0),
+	m_modOut(0)
 {
 	setObjectName(m_channelId);
 
@@ -124,6 +133,10 @@ FreeDVMod::~FreeDVMod()
 
     delete m_SSBFilter;
     delete[] m_SSBFilterBuffer;
+
+    if (m_freeDV) {
+        freedv_close(m_freeDV);
+    }
 }
 
 void FreeDVMod::pull(Sample& sample)
@@ -207,38 +220,53 @@ void FreeDVMod::pullAF(Complex& sample)
 		sample = m_toneNco.nextIQ();
         break;
     case FreeDVModSettings::FreeDVModInputFile:
-        if (m_ifstream.is_open())
+        if (m_iModem >= m_nNomModemSamples)
         {
-            if (m_ifstream.eof())
+            if (m_ifstream.is_open())
             {
-            	if (m_settings.m_playLoop)
-            	{
-                    m_ifstream.clear();
-                    m_ifstream.seekg(0, std::ios::beg);
-            	}
-            }
+                std::fill(m_speechIn, m_speechIn + m_nSpeechSamples, 0);
 
-            if (m_ifstream.eof())
-            {
-                ci.real(0.0f);
-                ci.imag(0.0f);
+                if (m_ifstream.eof())
+                {
+                    if (m_settings.m_playLoop)
+                    {
+                        m_ifstream.clear();
+                        m_ifstream.seekg(0, std::ios::beg);
+                    }
+                }
+
+                if (m_ifstream.eof())
+                {
+                    std::fill(m_modOut, m_modOut + m_nNomModemSamples, 0);
+                }
+                else
+                {
+
+                    m_ifstream.read(reinterpret_cast<char*>(m_speechIn), sizeof(int16_t) * m_nSpeechSamples);
+
+                    if (m_settings.m_volumeFactor != 1.0)
+                    {
+                        for (int i = 0; i < m_nSpeechSamples; i++) {
+                            m_speechIn[i] *= m_settings.m_volumeFactor;
+                        }
+                    }
+
+                    freedv_tx(m_freeDV, m_modOut, m_speechIn);
+                }
             }
             else
             {
-                Real real;
-                m_ifstream.read(reinterpret_cast<char*>(&real), sizeof(Real));
-                ci.real(real * m_settings.m_volumeFactor);
-                ci.imag(0.0f);
+                std::fill(m_modOut, m_modOut + m_nNomModemSamples, 0);
             }
+
+            m_iModem = 0;
         }
-        else
-        {
-            ci.real(0.0f);
-            ci.imag(0.0f);
-        }
+
+        ci.real(m_modOut[m_iModem++] / (SDR_TX_SCALEF/8.0f));
+        ci.imag(0.0f);
         break;
     case FreeDVModSettings::FreeDVModInputAudio:
-        ci.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r)  / 65536.0f) * m_settings.m_volumeFactor);
+        ci.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r)  / (2.0 * SDR_TX_SCALEF)) * m_settings.m_volumeFactor);
         ci.imag(0.0f);
         break;
     case FreeDVModSettings::FreeDVModInputCWTone:
@@ -582,11 +610,87 @@ void FreeDVMod::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
     m_lowCutoff = FreeDVModSettings::getLowCutoff(mode);
 
     m_settingsMutex.lock();
+
+    // baseband interpolator and filter
+
     m_interpolatorDistanceRemain = 0;
     m_interpolatorConsumed = false;
     m_interpolatorDistance = (Real) m_audioSampleRate / (Real) m_outputSampleRate;
     m_interpolator.create(48, m_audioSampleRate, m_hiCutoff, 3.0);
     m_SSBFilter->create_filter(m_lowCutoff / m_audioSampleRate, m_hiCutoff / m_audioSampleRate);
+
+    // FreeDV object
+
+    if (m_freeDV) {
+        freedv_close(m_freeDV);
+    }
+
+    int fdv_mode = -1;
+
+    switch(mode)
+    {
+    case FreeDVModSettings::FreeDVMode700D:
+        fdv_mode = FREEDV_MODE_700D;
+        break;
+    case FreeDVModSettings::FreeDVMode800XA:
+        fdv_mode = FREEDV_MODE_800XA;
+        break;
+    case FreeDVModSettings::FreeDVMode1600:
+        fdv_mode = FREEDV_MODE_1600;
+        break;
+    case FreeDVModSettings::FreeDVMode2400A:
+    default:
+        fdv_mode = FREEDV_MODE_2400A;
+        break;
+    }
+
+    if (fdv_mode == FREEDV_MODE_700D)
+    {
+        struct freedv_advanced adv;
+        adv.interleave_frames = 1;
+        m_freeDV = freedv_open_advanced(fdv_mode, &adv);
+    }
+    else
+    {
+        m_freeDV = freedv_open(fdv_mode);
+    }
+
+    if (m_freeDV)
+    {
+        freedv_set_test_frames(m_freeDV, 0);
+        freedv_set_snr_squelch_thresh(m_freeDV, -100.0);
+        freedv_set_squelch_en(m_freeDV, 1);
+        freedv_set_clip(m_freeDV, 0);
+        freedv_set_tx_bpf(m_freeDV, 1);
+        freedv_set_ext_vco(m_freeDV, 0);
+
+        int nSpeechSamples = freedv_get_n_speech_samples(m_freeDV);
+        int nNomModemSamples = freedv_get_n_nom_modem_samples(m_freeDV);
+        int Fs = freedv_get_modem_sample_rate(m_freeDV);
+        int Rs = freedv_get_modem_symbol_rate(m_freeDV);
+        if ((m_speechIn) && (nSpeechSamples != m_nSpeechSamples)) {
+            delete[] m_speechIn;
+        }
+
+        if ((m_modOut) && (nNomModemSamples != m_nNomModemSamples)) {
+            delete[] m_modOut;
+        }
+
+        m_nSpeechSamples = nSpeechSamples;
+        m_nNomModemSamples = nNomModemSamples;
+        m_speechIn = new int16_t[m_nSpeechSamples];
+        m_modOut = new int16_t[m_nNomModemSamples];
+        m_iSpeech = 0;
+        m_iModem = 0;
+
+        qDebug() << "FreeDVMod::applyFreeDVMode:"
+                << " fdv_mode: " << fdv_mode
+                << " Fs: " << Fs
+                << " Rs: " << Rs
+                << " m_nSpeechSamples: " << m_nSpeechSamples
+                << " m_nNomModemSamples: " << m_nNomModemSamples;
+    }
+
     m_settingsMutex.unlock();
 }
 

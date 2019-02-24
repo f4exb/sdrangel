@@ -24,6 +24,7 @@ include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${CODEC2_INCLUDE_DIR}
 )
 
 add_definitions(${QT_DEFINITIONS})
@@ -43,6 +44,7 @@ target_link_libraries(modfreedv
     sdrbase
     sdrgui
     swagger
+    ${CODEC2_LIBRARIES}
 )
 
 target_link_libraries(modfreedv Qt5::Core Qt5::Widgets)

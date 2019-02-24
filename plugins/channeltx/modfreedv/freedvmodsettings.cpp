@@ -173,7 +173,7 @@ int FreeDVModSettings::getHiCutoff(FreeDVMode freeDVMode)
     switch(freeDVMode)
     {
         case FreeDVModSettings::FreeDVMode800XA: // C4FM NB
-            return 2400;
+            return 2400.0;
             break;
         case FreeDVModSettings::FreeDVMode700D: // OFDM
         case FreeDVModSettings::FreeDVMode1600: // OFDM
@@ -199,7 +199,7 @@ int FreeDVModSettings::getLowCutoff(FreeDVMode freeDVMode)
             break;
         case FreeDVModSettings::FreeDVMode2400A: // C4FM WB
         default:
-            return 0.0;
+            return 50.0;
             break;
     }
 }
