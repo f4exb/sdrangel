@@ -700,7 +700,7 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
     if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force)
     {
         m_settingsMutex.lock();
-        m_toneNco.setFreq(settings.m_toneFrequency, m_audioSampleRate);
+        m_toneNco.setFreq(settings.m_toneFrequency, m_inputSampleRate);
         m_settingsMutex.unlock();
     }
 
@@ -850,7 +850,7 @@ int FreeDVMod::webapiSettingsPutPatch(
 
         m_cwKeyer.setLoop(cwKeyerSettings.m_loop);
         m_cwKeyer.setMode(cwKeyerSettings.m_mode);
-        m_cwKeyer.setSampleRate(cwKeyerSettings.m_sampleRate);
+        //m_cwKeyer.setSampleRate(cwKeyerSettings.m_sampleRate);
         m_cwKeyer.setText(cwKeyerSettings.m_text);
         m_cwKeyer.setWPM(cwKeyerSettings.m_wpm);
 
