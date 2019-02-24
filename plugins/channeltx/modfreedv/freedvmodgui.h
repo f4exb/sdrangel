@@ -97,6 +97,7 @@ private slots:
     void handleSourceMessages();
     void on_deltaFrequency_changed(qint64 value);
     void on_spanLog2_valueChanged(int value);
+    void on_gaugeInput_toggled(bool checked);
     void on_volume_valueChanged(int value);
     void on_audioMute_toggled(bool checked);
     void on_freeDVMode_currentIndexChanged(int index);

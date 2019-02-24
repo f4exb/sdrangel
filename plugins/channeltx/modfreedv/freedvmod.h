@@ -34,6 +34,7 @@
 #include "dsp/fftfilt.h"
 #include "dsp/cwkeyer.h"
 #include "audio/audiofifo.h"
+#include "audio/audioresampler.h"
 #include "util/message.h"
 
 #include "freedvmodsettings.h"
@@ -325,6 +326,7 @@ private:
     int16_t *m_speechIn;
     int16_t *m_modOut;
     float m_scaleFactor; //!< divide by this amount to scale from int16 to float in [-1.0, 1.0] interval
+    AudioResampler m_audioResampler;
 
     static const int m_levelNbSamples;
 
@@ -334,6 +336,7 @@ private:
     void applyFreeDVMode(FreeDVModSettings::FreeDVMode mode);
     void pullAF(Complex& sample);
     void calculateLevel(Complex& sample);
+    void calculateLevel(qint16& sample);
     void modulateSample();
     void openFileStream();
     void seekFileStream(int seekPercentage);

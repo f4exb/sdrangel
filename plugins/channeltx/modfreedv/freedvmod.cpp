@@ -182,7 +182,7 @@ void FreeDVMod::pull(Sample& sample)
 
 void FreeDVMod::pullAudio(int nbSamples)
 {
-    unsigned int nbSamplesAudio = nbSamples * ((Real) m_audioSampleRate / (Real) m_basebandSampleRate);
+    unsigned int nbSamplesAudio = nbSamples * ((Real) m_audioSampleRate / (Real) m_modemSampleRate);
 
     if (nbSamplesAudio > m_audioBuffer.size())
     {
@@ -196,7 +196,9 @@ void FreeDVMod::pullAudio(int nbSamples)
 void FreeDVMod::modulateSample()
 {
     pullAF(m_modSample);
-    calculateLevel(m_modSample);
+    if (!m_settings.m_gaugeInputElseModem) {
+        calculateLevel(m_modSample);
+    }
     m_audioBufferFill++;
 }
 
@@ -221,8 +223,12 @@ void FreeDVMod::pullAF(Complex& sample)
         switch (m_settings.m_modAFInput)
         {
         case FreeDVModSettings::FreeDVModInputTone:
-            for (int i = 0; i < m_nSpeechSamples; i++) {
+            for (int i = 0; i < m_nSpeechSamples; i++)
+            {
                 m_speechIn[i] = m_toneNco.next() * 32768.0f * m_settings.m_volumeFactor;
+                if (m_settings.m_gaugeInputElseModem) {
+                    calculateLevel(m_speechIn[i]);
+                }
             }
             freedv_tx(m_freeDV, m_modOut, m_speechIn);
             break;
@@ -251,10 +257,16 @@ void FreeDVMod::pullAF(Complex& sample)
 
                         m_ifstream.read(reinterpret_cast<char*>(m_speechIn), sizeof(int16_t) * m_nSpeechSamples);
 
-                        if (m_settings.m_volumeFactor != 1.0)
+                        if ((m_settings.m_volumeFactor != 1.0) || m_settings.m_gaugeInputElseModem)
                         {
-                            for (int i = 0; i < m_nSpeechSamples; i++) {
-                                m_speechIn[i] *= m_settings.m_volumeFactor;
+                            for (int i = 0; i < m_nSpeechSamples; i++)
+                            {
+                                if (m_settings.m_volumeFactor != 1.0) {
+                                    m_speechIn[i] *= m_settings.m_volumeFactor;
+                                }
+                                if (m_settings.m_gaugeInputElseModem) {
+                                    calculateLevel(m_speechIn[i]);
+                                }
                             }
                         }
 
@@ -268,8 +280,20 @@ void FreeDVMod::pullAF(Complex& sample)
             }
             break;
         case FreeDVModSettings::FreeDVModInputAudio:
-            for (int i = 0; i < m_nSpeechSamples; i++) {
-                m_speechIn[i] = (m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) * (m_settings.m_volumeFactor / 2);
+            for (int i = 0; i < m_nSpeechSamples; i++)
+            {
+                qint16 audioSample = (m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) * (m_settings.m_volumeFactor / 2.0f);
+                m_audioBufferFill++;
+
+                while (!m_audioResampler.downSample(audioSample, m_speechIn[i]))
+                {
+                    audioSample = (m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) * (m_settings.m_volumeFactor / 2.0f);
+                    m_audioBufferFill++;
+                }
+
+                if (m_settings.m_gaugeInputElseModem) {
+                    calculateLevel(m_speechIn[i]);
+                }
             }
             freedv_tx(m_freeDV, m_modOut, m_speechIn);
             break;
@@ -294,6 +318,10 @@ void FreeDVMod::pullAF(Complex& sample)
                         m_speechIn[i] = 0;
                         m_toneNco.setPhase(0);
                     }
+                }
+
+                if (m_settings.m_gaugeInputElseModem) {
+                    calculateLevel(m_speechIn[i]);
                 }
             }
             freedv_tx(m_freeDV, m_modOut, m_speechIn);
@@ -360,6 +388,27 @@ void FreeDVMod::calculateLevel(Complex& sample)
     {
         qreal rmsLevel = sqrt(m_levelSum / m_levelNbSamples);
         //qDebug("NFMMod::calculateLevel: %f %f", rmsLevel, m_peakLevel);
+        emit levelChanged(rmsLevel, m_peakLevel, m_levelNbSamples);
+        m_peakLevel = 0.0f;
+        m_levelSum = 0.0f;
+        m_levelCalcCount = 0;
+    }
+}
+
+void FreeDVMod::calculateLevel(qint16& sample)
+{
+    Real t = sample / SDR_TX_SCALEF;
+
+    if (m_levelCalcCount < m_levelNbSamples)
+    {
+        m_peakLevel = std::max(std::fabs(m_peakLevel), t);
+        m_levelSum += t * t;
+        m_levelCalcCount++;
+    }
+    else
+    {
+        qreal rmsLevel = sqrt(m_levelSum / m_levelNbSamples);
+        //qDebug("FreeDVMod::calculateLevel: %f %f", rmsLevel, m_peakLevel);
         emit levelChanged(rmsLevel, m_peakLevel, m_levelNbSamples);
         m_peakLevel = 0.0f;
         m_levelSum = 0.0f;
@@ -522,6 +571,12 @@ void FreeDVMod::applyAudioSampleRate(int sampleRate)
 {
     qDebug("FreeDVMod::applyAudioSampleRate: %d", sampleRate);
     // TODO: put up simple IIR interpolator when sampleRate < m_modemSampleRate
+
+    m_settingsMutex.lock();
+    m_audioResampler.setDecimation(sampleRate / m_inputSampleRate);
+    m_audioResampler.setAudioFilters(sampleRate, m_inputSampleRate, 250, 3300);
+    m_settingsMutex.unlock();
+
     m_audioSampleRate = sampleRate;
 }
 
@@ -686,6 +741,9 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
     if ((settings.m_playLoop != m_settings.m_playLoop) || force) {
         reverseAPIKeys.append("playLoop");
     }
+    if ((settings.m_playLoop != m_settings.m_gaugeInputElseModem) || force) {
+        reverseAPIKeys.append("gaugeInputElseModem");
+    }
     if ((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
         reverseAPIKeys.append("rgbColor");
     }
@@ -801,6 +859,9 @@ int FreeDVMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("playLoop")) {
         settings.m_playLoop = response.getFreeDvModSettings()->getPlayLoop() != 0;
     }
+    if (channelSettingsKeys.contains("gaugeInputElseModem")) {
+        settings.m_gaugeInputElseModem = response.getFreeDvModSettings()->getGaugeInputElseModem() != 0;
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getFreeDvModSettings()->getRgbColor();
     }
@@ -907,6 +968,7 @@ void FreeDVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getFreeDvModSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getFreeDvModSettings()->setPlayLoop(settings.m_playLoop ? 1 : 0);
     response.getFreeDvModSettings()->setRgbColor(settings.m_rgbColor);
+    response.getFreeDvModSettings()->setGaugeInputElseModem(settings.m_gaugeInputElseModem ? 1 : 0);
 
     if (response.getFreeDvModSettings()->getTitle()) {
         *response.getFreeDvModSettings()->getTitle() = settings.m_title;
@@ -940,17 +1002,17 @@ void FreeDVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
 
     apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
 
-    response.getAmModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getFreeDvModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getAmModSettings()->getReverseApiAddress()) {
-        *response.getAmModSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getFreeDvModSettings()->getReverseApiAddress()) {
+        *response.getFreeDvModSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getAmModSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getFreeDvModSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getAmModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getAmModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
-    response.getAmModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    response.getFreeDvModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getFreeDvModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getFreeDvModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void FreeDVMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -987,6 +1049,9 @@ void FreeDVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     }
     if (channelSettingsKeys.contains("playLoop") || force) {
         swgFreeDVModSettings->setPlayLoop(settings.m_playLoop ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("gaugeInputElseModem") || force) {
+        swgFreeDVModSettings->setPlayLoop(settings.m_gaugeInputElseModem ? 1 : 0);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgFreeDVModSettings->setRgbColor(settings.m_rgbColor);

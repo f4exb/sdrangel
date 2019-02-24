@@ -32,6 +32,8 @@ FreeDVModSettings:
       type: integer
     modAFInput:
       type: integer
+    gaugeInputElseModem:
+      type: integer      
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

@@ -54,6 +54,8 @@ SWGFreeDVModSettings::SWGFreeDVModSettings() {
     m_free_dv_mode_isSet = false;
     mod_af_input = 0;
     m_mod_af_input_isSet = false;
+    gauge_input_else_modem = 0;
+    m_gauge_input_else_modem_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -100,6 +102,8 @@ SWGFreeDVModSettings::init() {
     m_free_dv_mode_isSet = false;
     mod_af_input = 0;
     m_mod_af_input_isSet = false;
+    gauge_input_else_modem = 0;
+    m_gauge_input_else_modem_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -131,6 +135,7 @@ SWGFreeDVModSettings::cleanup() {
     if(audio_device_name != nullptr) { 
         delete audio_device_name;
     }
+
 
 
 
@@ -181,6 +186,8 @@ SWGFreeDVModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&free_dv_mode, pJson["freeDVMode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&mod_af_input, pJson["modAFInput"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&gauge_input_else_modem, pJson["gaugeInputElseModem"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -248,6 +255,9 @@ SWGFreeDVModSettings::asJsonObject() {
     }
     if(m_mod_af_input_isSet){
         obj->insert("modAFInput", QJsonValue(mod_af_input));
+    }
+    if(m_gauge_input_else_modem_isSet){
+        obj->insert("gaugeInputElseModem", QJsonValue(gauge_input_else_modem));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -402,6 +412,16 @@ SWGFreeDVModSettings::setModAfInput(qint32 mod_af_input) {
 }
 
 qint32
+SWGFreeDVModSettings::getGaugeInputElseModem() {
+    return gauge_input_else_modem;
+}
+void
+SWGFreeDVModSettings::setGaugeInputElseModem(qint32 gauge_input_else_modem) {
+    this->gauge_input_else_modem = gauge_input_else_modem;
+    this->m_gauge_input_else_modem_isSet = true;
+}
+
+qint32
 SWGFreeDVModSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -479,6 +499,7 @@ SWGFreeDVModSettings::isSet(){
         if(audio_device_name != nullptr && *audio_device_name != QString("")){ isObjectUpdated = true; break;}
         if(m_free_dv_mode_isSet){ isObjectUpdated = true; break;}
         if(m_mod_af_input_isSet){ isObjectUpdated = true; break;}
+        if(m_gauge_input_else_modem_isSet){ isObjectUpdated = true; break;}
         if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
         if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
         if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}

@@ -13,6 +13,7 @@ set(sdrbase_SOURCES
     audio/audiooutput.cpp
     audio/audioinput.cpp
     audio/audionetsink.cpp
+    audio/audioresampler.cpp
 
     channel/channelsinkapi.cpp
     channel/channelsourceapi.cpp
@@ -108,6 +109,7 @@ set(sdrbase_HEADERS
     audio/audioopus.h
     audio/audioinput.h
     audio/audionetsink.h
+    audio/audioresampler.h
 
     channel/channelsinkapi.h
     channel/channelsourceapi.h

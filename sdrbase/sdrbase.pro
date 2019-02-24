@@ -63,6 +63,7 @@ SOURCES += audio/audiodevicemanager.cpp\
         audio/audiooutput.cpp\
         audio/audioinput.cpp\
         audio/audionetsink.cpp\
+        audio/audioresampler.cpp\
         channel/channelsinkapi.cpp\
         channel/channelsourceapi.cpp\
         channel/remotedataqueue.cpp\
@@ -144,6 +145,7 @@ HEADERS  += audio/audiodevicemanager.h\
         audio/audiooutput.h\
         audio/audioinput.h\
         audio/audionetsink.h\
+        audio/audioresampler.h\        
         channel/channelsinkapi.h\
         channel/channelsourceapi.h\
         channel/remotedataqueue.h\

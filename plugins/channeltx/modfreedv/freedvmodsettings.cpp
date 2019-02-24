@@ -42,6 +42,7 @@ void FreeDVModSettings::resetToDefaults()
     m_modAFInput = FreeDVModInputAF::FreeDVModInputNone;
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_freeDVMode = FreeDVMode::FreeDVMode2400A;
+    m_gaugeInputElseModem = false;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -66,6 +67,7 @@ QByteArray FreeDVModSettings::serialize() const
         s.writeBlob(6, m_cwKeyerGUI->serialize());
     }
 
+    s.writeBool(7, m_gaugeInputElseModem);
     s.writeS32(8, m_spanLog2);
     s.writeS32(10, (int) m_freeDVMode);
 
@@ -120,6 +122,7 @@ bool FreeDVModSettings::deserialize(const QByteArray& data)
             m_cwKeyerGUI->deserialize(bytetmp);
         }
 
+        d.readBool(7, &m_gaugeInputElseModem, false);
         d.readS32(8, &m_spanLog2, 3);
 
         d.readS32(10, &tmp, 0);

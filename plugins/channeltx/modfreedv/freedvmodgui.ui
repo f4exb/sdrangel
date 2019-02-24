@@ -168,6 +168,16 @@
     <item>
      <layout class="QHBoxLayout" name="volumeLayout">
       <item>
+       <widget class="QCheckBox" name="gaugeInput">
+        <property name="toolTip">
+         <string>Check to see input level else shows modem level</string>
+        </property>
+        <property name="text">
+         <string>In</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="volLabel">
         <property name="text">
          <string>Vol</string>

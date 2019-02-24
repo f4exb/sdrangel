@@ -182,6 +182,12 @@ void FreeDVModGUI::on_spanLog2_valueChanged(int value)
     applyBandwidths(5 - value);
 }
 
+void FreeDVModGUI::on_gaugeInput_toggled(bool checked)
+{
+    m_settings.m_gaugeInputElseModem = checked;
+    applySettings();
+}
+
 void FreeDVModGUI::on_toneFrequency_valueChanged(int value)
 {
     ui->toneFrequencyText->setText(QString("%1k").arg(value / 100.0, 0, 'f', 2));
@@ -463,6 +469,7 @@ void FreeDVModGUI::displaySettings()
     ui->spanLog2->blockSignals(true);
 
     ui->spanLog2->setValue(5 - m_settings.m_spanLog2);
+    ui->gaugeInput->setChecked(m_settings.m_gaugeInputElseModem);
 
     QString s = QString::number(m_freeDVMod->getHiCutoff()/1000.0, 'f', 1);
 

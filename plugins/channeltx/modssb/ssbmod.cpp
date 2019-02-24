@@ -1199,17 +1199,17 @@ void SSBMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
 
     apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
 
-    response.getAmModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getSsbModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getAmModSettings()->getReverseApiAddress()) {
-        *response.getAmModSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getSsbModSettings()->getReverseApiAddress()) {
+        *response.getSsbModSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getAmModSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getSsbModSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getAmModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getAmModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
-    response.getAmModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    response.getSsbModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getSsbModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getSsbModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void SSBMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
