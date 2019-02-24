@@ -416,8 +416,8 @@ void FreeDVModGUI::applySettings(bool force)
 
 void FreeDVModGUI::applyBandwidths(int spanLog2, bool force)
 {
-    m_spectrumRate = m_freeDVMod->getAudioSampleRate() / (1<<spanLog2);
-    int bwMax = m_freeDVMod->getAudioSampleRate() / (100*(1<<spanLog2));
+    m_spectrumRate = m_freeDVMod->getModemSampleRate() / (1<<spanLog2);
+    int bwMax = m_freeDVMod->getModemSampleRate() / (100*(1<<spanLog2));
     int tickInterval = m_spectrumRate / 1200;
     tickInterval = tickInterval == 0 ? 1 : tickInterval;
 

@@ -236,6 +236,7 @@ public:
                 QString& errorMessage);
 
     uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
+    uint32_t getModemSampleRate() const { return m_modemSampleRate; }
     double getMagSq() const { return m_magsq; }
     Real getLowCutoff() const { return m_lowCutoff; }
     Real getHiCutoff() const { return m_hiCutoff; }
@@ -267,6 +268,7 @@ private:
 
     int m_basebandSampleRate;
     int m_outputSampleRate;
+    int m_modemSampleRate;
     int m_inputFrequencyOffset;
     Real m_lowCutoff;
     Real m_hiCutoff;

@@ -57,7 +57,8 @@ FreeDVMod::FreeDVMod(DeviceSinkAPI *deviceAPI) :
     ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
     m_basebandSampleRate(48000),
-    m_outputSampleRate(48000),   // default 2400A mode
+    m_outputSampleRate(48000),
+    m_modemSampleRate(48000), // // default 2400A mode
     m_inputFrequencyOffset(0),
     m_lowCutoff(0.0),
     m_hiCutoff(6000.0),
@@ -107,13 +108,13 @@ FreeDVMod::FreeDVMod(DeviceSinkAPI *deviceAPI) :
 	m_cwKeyer.setWPM(13);
 	m_cwKeyer.setMode(CWKeyerSettings::CWNone);
 
-    applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
-    applySettings(m_settings, true);
-
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
     m_deviceAPI->addThreadedSource(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
+
+    applySettings(m_settings, true);
+    applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -519,33 +520,8 @@ void FreeDVMod::seekFileStream(int seekPercentage)
 void FreeDVMod::applyAudioSampleRate(int sampleRate)
 {
     qDebug("FreeDVMod::applyAudioSampleRate: %d", sampleRate);
-
-
-    MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
-            sampleRate, m_settings.m_inputFrequencyOffset);
-    m_inputMessageQueue.push(channelConfigMsg);
-
-    m_settingsMutex.lock();
-
-    m_interpolatorDistanceRemain = 0;
-    m_interpolatorConsumed = false;
-    m_interpolatorDistance = (Real) sampleRate / (Real) m_outputSampleRate;
-    m_interpolator.create(48, sampleRate, m_hiCutoff, 3.0);
-
-    m_SSBFilter->create_filter(m_lowCutoff / sampleRate, m_hiCutoff / sampleRate);
-
-    m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
-    m_cwKeyer.setSampleRate(sampleRate);
-
-    m_settingsMutex.unlock();
-
+    // TODO: put up simple IIR interpolator when sampleRate < m_modemSampleRate
     m_audioSampleRate = sampleRate;
-
-    if (getMessageQueueToGUI())
-    {
-        DSPConfigureAudio *cfg = new DSPConfigureAudio(m_audioSampleRate);
-        getMessageQueueToGUI()->push(cfg);
-    }
 }
 
 void FreeDVMod::applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force)
@@ -568,8 +544,8 @@ void FreeDVMod::applyChannelSettings(int basebandSampleRate, int outputSampleRat
         m_settingsMutex.lock();
         m_interpolatorDistanceRemain = 0;
         m_interpolatorConsumed = false;
-        m_interpolatorDistance = (Real) m_audioSampleRate / (Real) outputSampleRate;
-        m_interpolator.create(48, m_audioSampleRate, m_hiCutoff, 3.0);
+        m_interpolatorDistance = (Real) m_modemSampleRate / (Real) outputSampleRate;
+        m_interpolator.create(48, m_modemSampleRate, m_hiCutoff, 3.0);
         m_settingsMutex.unlock();
     }
 
@@ -582,16 +558,30 @@ void FreeDVMod::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
 {
     m_hiCutoff = FreeDVModSettings::getHiCutoff(mode);
     m_lowCutoff = FreeDVModSettings::getLowCutoff(mode);
+    int modemSampleRate = FreeDVModSettings::getModSampleRate(mode);
 
     m_settingsMutex.lock();
 
     // baseband interpolator and filter
+    if (modemSampleRate != m_modemSampleRate)
+    {
+        MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
+                modemSampleRate, m_settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(channelConfigMsg);
 
-    m_interpolatorDistanceRemain = 0;
-    m_interpolatorConsumed = false;
-    m_interpolatorDistance = (Real) m_audioSampleRate / (Real) m_outputSampleRate;
-    m_interpolator.create(48, m_audioSampleRate, m_hiCutoff, 3.0);
-    m_SSBFilter->create_filter(m_lowCutoff / m_audioSampleRate, m_hiCutoff / m_audioSampleRate);
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorConsumed = false;
+        m_interpolatorDistance = (Real) modemSampleRate / (Real) m_outputSampleRate;
+        m_interpolator.create(48, modemSampleRate, m_hiCutoff, 3.0);
+        m_SSBFilter->create_filter(m_lowCutoff / modemSampleRate, m_hiCutoff / modemSampleRate);
+        m_modemSampleRate = modemSampleRate;
+
+        if (getMessageQueueToGUI())
+        {
+            DSPConfigureAudio *cfg = new DSPConfigureAudio(m_modemSampleRate);
+            getMessageQueueToGUI()->push(cfg);
+        }
+    }
 
     // FreeDV object
 
@@ -659,6 +649,7 @@ void FreeDVMod::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
 
         qDebug() << "FreeDVMod::applyFreeDVMode:"
                 << " fdv_mode: " << fdv_mode
+                << " m_modemSampleRate: " << m_modemSampleRate
                 << " Fs: " << Fs
                 << " Rs: " << Rs
                 << " m_nSpeechSamples: " << m_nSpeechSamples
