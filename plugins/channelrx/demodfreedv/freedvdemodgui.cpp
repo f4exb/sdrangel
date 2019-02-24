@@ -1,11 +1,27 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
 #include <QPixmap>
 
-#include "ssbdemodgui.h"
+#include "freedvdemodgui.h"
 
-#include <device/devicesourceapi.h>
+#include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
 
-#include "ui_ssbdemodgui.h"
+#include "ui_freedvdemodgui.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -17,52 +33,52 @@
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "mainwindow.h"
-#include "ssbdemod.h"
+#include "freedvdemod.h"
 
-SSBDemodGUI* SSBDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+FreeDVDemodGUI* FreeDVDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	SSBDemodGUI* gui = new SSBDemodGUI(pluginAPI, deviceUISet, rxChannel);
+    FreeDVDemodGUI* gui = new FreeDVDemodGUI(pluginAPI, deviceUISet, rxChannel);
 	return gui;
 }
 
-void SSBDemodGUI::destroy()
+void FreeDVDemodGUI::destroy()
 {
 	delete this;
 }
 
-void SSBDemodGUI::setName(const QString& name)
+void FreeDVDemodGUI::setName(const QString& name)
 {
 	setObjectName(name);
 }
 
-QString SSBDemodGUI::getName() const
+QString FreeDVDemodGUI::getName() const
 {
 	return objectName();
 }
 
-qint64 SSBDemodGUI::getCenterFrequency() const
+qint64 FreeDVDemodGUI::getCenterFrequency() const
 {
 	return m_channelMarker.getCenterFrequency();
 }
 
-void SSBDemodGUI::setCenterFrequency(qint64 centerFrequency)
+void FreeDVDemodGUI::setCenterFrequency(qint64 centerFrequency)
 {
 	m_channelMarker.setCenterFrequency(centerFrequency);
 	m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
 	applySettings();
 }
 
-void SSBDemodGUI::resetToDefaults()
+void FreeDVDemodGUI::resetToDefaults()
 {
 	m_settings.resetToDefaults();
 }
 
-QByteArray SSBDemodGUI::serialize() const
+QByteArray FreeDVDemodGUI::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool SSBDemodGUI::deserialize(const QByteArray& data)
+bool FreeDVDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data))
     {
@@ -79,12 +95,12 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool SSBDemodGUI::handleMessage(const Message& message)
+bool FreeDVDemodGUI::handleMessage(const Message& message)
 {
-    if (SSBDemod::MsgConfigureSSBDemod::match(message))
+    if (FreeDVDemod::MsgConfigureFreeDVDemod::match(message))
     {
-        qDebug("SSBDemodGUI::handleMessage: SSBDemod::MsgConfigureSSBDemod");
-        const SSBDemod::MsgConfigureSSBDemod& cfg = (SSBDemod::MsgConfigureSSBDemod&) message;
+        qDebug("FreeDVDemodGUI::handleMessage: FreeDVDemodGUI::MsgConfigureFreeDVDemod");
+        const FreeDVDemod::MsgConfigureFreeDVDemod& cfg = (FreeDVDemod::MsgConfigureFreeDVDemod&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
@@ -93,7 +109,7 @@ bool SSBDemodGUI::handleMessage(const Message& message)
     }
     else if (DSPConfigureAudio::match(message))
     {
-        qDebug("SSBDemodGUI::handleMessage: DSPConfigureAudio: %d", m_ssbDemod->getAudioSampleRate());
+        qDebug("FreeDVDemodGUI::handleMessage: DSPConfigureAudio: %d", m_freeDVDemod->getAudioSampleRate());
         applyBandwidths(5 - ui->spanLog2->value()); // will update spectrum details with new sample rate
         return true;
     }
@@ -103,7 +119,7 @@ bool SSBDemodGUI::handleMessage(const Message& message)
     }
 }
 
-void SSBDemodGUI::handleInputMessages()
+void FreeDVDemodGUI::handleInputMessages()
 {
     Message* message;
 
@@ -116,77 +132,77 @@ void SSBDemodGUI::handleInputMessages()
     }
 }
 
-void SSBDemodGUI::channelMarkerChangedByCursor()
+void FreeDVDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     applySettings();
 }
 
-void SSBDemodGUI::channelMarkerHighlightedByCursor()
+void FreeDVDemodGUI::channelMarkerHighlightedByCursor()
 {
     setHighlighted(m_channelMarker.getHighlighted());
 }
 
-void SSBDemodGUI::on_audioBinaural_toggled(bool binaural)
+void FreeDVDemodGUI::on_audioBinaural_toggled(bool binaural)
 {
 	m_audioBinaural = binaural;
 	m_settings.m_audioBinaural = binaural;
 	applySettings();
 }
 
-void SSBDemodGUI::on_audioFlipChannels_toggled(bool flip)
+void FreeDVDemodGUI::on_audioFlipChannels_toggled(bool flip)
 {
 	m_audioFlipChannels = flip;
 	m_settings.m_audioFlipChannels = flip;
 	applySettings();
 }
 
-void SSBDemodGUI::on_dsb_toggled(bool dsb)
+void FreeDVDemodGUI::on_dsb_toggled(bool dsb)
 {
     ui->flipSidebands->setEnabled(!dsb);
     applyBandwidths(5 - ui->spanLog2->value());
 }
 
-void SSBDemodGUI::on_deltaFrequency_changed(qint64 value)
+void FreeDVDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     applySettings();
 }
 
-void SSBDemodGUI::on_BW_valueChanged(int value)
+void FreeDVDemodGUI::on_BW_valueChanged(int value)
 {
     (void) value;
     applyBandwidths(5 - ui->spanLog2->value());
 }
 
-void SSBDemodGUI::on_lowCut_valueChanged(int value)
+void FreeDVDemodGUI::on_lowCut_valueChanged(int value)
 {
     (void) value;
     applyBandwidths(5 - ui->spanLog2->value());
 }
 
-void SSBDemodGUI::on_volume_valueChanged(int value)
+void FreeDVDemodGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
 	m_settings.m_volume = value / 10.0;
 	applySettings();
 }
 
-void SSBDemodGUI::on_agc_toggled(bool checked)
+void FreeDVDemodGUI::on_agc_toggled(bool checked)
 {
     m_settings.m_agc = checked;
     applySettings();
 }
 
-void SSBDemodGUI::on_agcClamping_toggled(bool checked)
+void FreeDVDemodGUI::on_agcClamping_toggled(bool checked)
 {
     m_settings.m_agcClamping = checked;
     applySettings();
 }
 
-void SSBDemodGUI::on_agcTimeLog2_valueChanged(int value)
+void FreeDVDemodGUI::on_agcTimeLog2_valueChanged(int value)
 {
     QString s = QString::number((1<<value), 'f', 0);
     ui->agcTimeText->setText(s);
@@ -194,14 +210,14 @@ void SSBDemodGUI::on_agcTimeLog2_valueChanged(int value)
     applySettings();
 }
 
-void SSBDemodGUI::on_agcPowerThreshold_valueChanged(int value)
+void FreeDVDemodGUI::on_agcPowerThreshold_valueChanged(int value)
 {
     displayAGCPowerThreshold(value);
     m_settings.m_agcPowerThreshold = value;
     applySettings();
 }
 
-void SSBDemodGUI::on_agcThresholdGate_valueChanged(int value)
+void FreeDVDemodGUI::on_agcThresholdGate_valueChanged(int value)
 {
     QString s = QString::number(value, 'f', 0);
     ui->agcThresholdGateText->setText(s);
@@ -209,14 +225,14 @@ void SSBDemodGUI::on_agcThresholdGate_valueChanged(int value)
     applySettings();
 }
 
-void SSBDemodGUI::on_audioMute_toggled(bool checked)
+void FreeDVDemodGUI::on_audioMute_toggled(bool checked)
 {
 	m_audioMute = checked;
 	m_settings.m_audioMute = checked;
 	applySettings();
 }
 
-void SSBDemodGUI::on_spanLog2_valueChanged(int value)
+void FreeDVDemodGUI::on_spanLog2_valueChanged(int value)
 {
     if ((value < 0) || (value > 4)) {
         return;
@@ -225,7 +241,7 @@ void SSBDemodGUI::on_spanLog2_valueChanged(int value)
     applyBandwidths(5 - ui->spanLog2->value());
 }
 
-void SSBDemodGUI::on_flipSidebands_clicked(bool checked)
+void FreeDVDemodGUI::on_flipSidebands_clicked(bool checked)
 {
     (void) checked;
     int bwValue = ui->BW->value();
@@ -234,7 +250,7 @@ void SSBDemodGUI::on_flipSidebands_clicked(bool checked)
     ui->lowCut->setValue(-lcValue);
 }
 
-void SSBDemodGUI::onMenuDialogCalled(const QPoint &p)
+void FreeDVDemodGUI::onMenuDialogCalled(const QPoint &p)
 {
     BasicChannelSettingsDialog dialog(&m_channelMarker, this);
     dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
@@ -261,15 +277,15 @@ void SSBDemodGUI::onMenuDialogCalled(const QPoint &p)
     applySettings();
 }
 
-void SSBDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void FreeDVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
 }
 
-SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
+FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
-	ui(new Ui::SSBDemodGUI),
+	ui(new Ui::FreeDVDemodGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
@@ -286,17 +302,11 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF, ui->glSpectrum);
-	m_ssbDemod = (SSBDemod*) rxChannel; //new SSBDemod(m_deviceUISet->m_deviceSourceAPI);
-	m_ssbDemod->setMessageQueueToGUI(getInputMessageQueue());
-	m_ssbDemod->setSampleSink(m_spectrumVis);
+	m_freeDVDemod = (FreeDVDemod*) rxChannel;
+	m_freeDVDemod->setSampleSink(m_spectrumVis);
+	m_freeDVDemod->setMessageQueueToGUI(getInputMessageQueue());
 
-    CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
-    connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
-
-    ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
-    ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
-	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
+	resetToDefaults();
 
     ui->glSpectrum->setCenterFrequency(m_spectrumRate/2);
     ui->glSpectrum->setSampleRate(m_spectrumRate);
@@ -307,20 +317,20 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-	m_channelMarker.blockSignals(true);
-	m_channelMarker.setColor(Qt::green);
-    m_channelMarker.setBandwidth(6000);
-    m_channelMarker.setCenterFrequency(0);
-    m_channelMarker.setTitle("SSB Demodulator");
-    m_channelMarker.blockSignals(false);
-    m_channelMarker.setVisible(true); // activate signal on the last setting only
+	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
 
-    setTitleColor(m_channelMarker.getColor());
+    ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
+    ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
+	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
+
+    m_channelMarker.setVisible(true); // activate signal on the last setting only
 
     m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setSpectrumGUI(ui->spectrumGUI);
 
-	m_deviceUISet->registerRxChannelInstance(SSBDemod::m_channelIdURI, this);
+	m_deviceUISet->registerRxChannelInstance(FreeDVDemod::m_channelIdURI, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 
@@ -339,46 +349,46 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
 }
 
-SSBDemodGUI::~SSBDemodGUI()
+FreeDVDemodGUI::~FreeDVDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
-	delete m_ssbDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
+	delete m_freeDVDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete m_spectrumVis;
 	delete ui;
 }
 
-bool SSBDemodGUI::blockApplySettings(bool block)
+bool FreeDVDemodGUI::blockApplySettings(bool block)
 {
     bool ret = !m_doApplySettings;
     m_doApplySettings = !block;
     return ret;
 }
 
-void SSBDemodGUI::applySettings(bool force)
+void FreeDVDemodGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-        SSBDemod::MsgConfigureChannelizer* channelConfigMsg = SSBDemod::MsgConfigureChannelizer::create(
-                m_ssbDemod->getAudioSampleRate(), m_channelMarker.getCenterFrequency());
-        m_ssbDemod->getInputMessageQueue()->push(channelConfigMsg);
+        FreeDVDemod::MsgConfigureChannelizer* channelConfigMsg = FreeDVDemod::MsgConfigureChannelizer::create(
+                m_freeDVDemod->getAudioSampleRate(), m_channelMarker.getCenterFrequency());
+        m_freeDVDemod->getInputMessageQueue()->push(channelConfigMsg);
 
-        SSBDemod::MsgConfigureSSBDemod* message = SSBDemod::MsgConfigureSSBDemod::create( m_settings, force);
-        m_ssbDemod->getInputMessageQueue()->push(message);
+        FreeDVDemod::MsgConfigureFreeDVDemod* message = FreeDVDemod::MsgConfigureFreeDVDemod::create( m_settings, force);
+        m_freeDVDemod->getInputMessageQueue()->push(message);
 	}
 }
 
-void SSBDemodGUI::applyBandwidths(int spanLog2, bool force)
+void FreeDVDemodGUI::applyBandwidths(int spanLog2, bool force)
 {
     bool dsb = ui->dsb->isChecked();
     //int spanLog2 = ui->spanLog2->value();
-    m_spectrumRate = m_ssbDemod->getAudioSampleRate() / (1<<spanLog2);
+    m_spectrumRate = m_freeDVDemod->getAudioSampleRate() / (1<<spanLog2);
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
-    int bwMax = m_ssbDemod->getAudioSampleRate() / (100*(1<<spanLog2));
+    int bwMax = m_freeDVDemod->getAudioSampleRate() / (100*(1<<spanLog2));
     int tickInterval = m_spectrumRate / 1200;
     tickInterval = tickInterval == 0 ? 1 : tickInterval;
 
-    qDebug() << "SSBDemodGUI::applyBandwidths:"
+    qDebug() << "FreeDVDemodGUI::applyBandwidths:"
             << " dsb: " << dsb
             << " spanLog2: " << spanLog2
             << " m_spectrumRate: " << m_spectrumRate
@@ -456,7 +466,7 @@ void SSBDemodGUI::applyBandwidths(int spanLog2, bool force)
     ui->lowCut->blockSignals(false);
     ui->BW->blockSignals(false);
 
-    ui->channelPowerMeter->setRange(SSBDemodSettings::m_minPowerThresholdDB, 0);
+    ui->channelPowerMeter->setRange(FreeDVDemodSettings::m_minPowerThresholdDB, 0);
 
     m_settings.m_dsb = dsb;
     m_settings.m_spanLog2 = spanLog2;
@@ -473,7 +483,7 @@ void SSBDemodGUI::applyBandwidths(int spanLog2, bool force)
     blockApplySettings(wasBlocked);
 }
 
-void SSBDemodGUI::displaySettings()
+void FreeDVDemodGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
@@ -558,9 +568,9 @@ void SSBDemodGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void SSBDemodGUI::displayAGCPowerThreshold(int value)
+void FreeDVDemodGUI::displayAGCPowerThreshold(int value)
 {
-    if (value == SSBDemodSettings::m_minPowerThresholdDB)
+    if (value == FreeDVDemodSettings::m_minPowerThresholdDB)
     {
         ui->agcPowerThresholdText->setText("---");
     }
@@ -571,19 +581,19 @@ void SSBDemodGUI::displayAGCPowerThreshold(int value)
     }
 }
 
-void SSBDemodGUI::leaveEvent(QEvent*)
+void FreeDVDemodGUI::leaveEvent(QEvent*)
 {
 	m_channelMarker.setHighlighted(false);
 }
 
-void SSBDemodGUI::enterEvent(QEvent*)
+void FreeDVDemodGUI::enterEvent(QEvent*)
 {
 	m_channelMarker.setHighlighted(true);
 }
 
-void SSBDemodGUI::audioSelect()
+void FreeDVDemodGUI::audioSelect()
 {
-    qDebug("SSBDemodGUI::audioSelect");
+    qDebug("FreeDVDemodGUI::audioSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
     audioSelect.exec();
 
@@ -594,24 +604,24 @@ void SSBDemodGUI::audioSelect()
     }
 }
 
-void SSBDemodGUI::tick()
+void FreeDVDemodGUI::tick()
 {
     double magsqAvg, magsqPeak;
     int nbMagsqSamples;
-    m_ssbDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+    m_freeDVDemod->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
     double powDbAvg = CalcDb::dbPower(magsqAvg);
     double powDbPeak = CalcDb::dbPower(magsqPeak);
 
     ui->channelPowerMeter->levelChanged(
-            (SSBDemodSettings::m_mminPowerThresholdDBf + powDbAvg) / SSBDemodSettings::m_mminPowerThresholdDBf,
-            (SSBDemodSettings::m_mminPowerThresholdDBf + powDbPeak) / SSBDemodSettings::m_mminPowerThresholdDBf,
+            (FreeDVDemodSettings::m_mminPowerThresholdDBf + powDbAvg) / FreeDVDemodSettings::m_mminPowerThresholdDBf,
+            (FreeDVDemodSettings::m_mminPowerThresholdDBf + powDbPeak) / FreeDVDemodSettings::m_mminPowerThresholdDBf,
             nbMagsqSamples);
 
     if (m_tickCount % 4 == 0) {
         ui->channelPower->setText(tr("%1 dB").arg(powDbAvg, 0, 'f', 1));
     }
 
-    bool squelchOpen = m_ssbDemod->getAudioActive();
+    bool squelchOpen = m_freeDVDemod->getAudioActive();
 
     if (squelchOpen != m_squelchOpen)
     {
