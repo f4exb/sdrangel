@@ -203,3 +203,12 @@ int FreeDVModSettings::getLowCutoff(FreeDVMode freeDVMode)
             break;
     }
 }
+
+int FreeDVModSettings::getModSampleRate(FreeDVMode freeDVMode)
+{
+    if (freeDVMode == FreeDVModSettings::FreeDVMode2400A) {
+        return 48000;
+    } else {
+        return 8000;
+    }
+}

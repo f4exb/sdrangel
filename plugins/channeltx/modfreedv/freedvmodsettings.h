@@ -75,6 +75,7 @@ struct FreeDVModSettings
 
     static int getHiCutoff(FreeDVMode freeDVMode);
     static int getLowCutoff(FreeDVMode freeDVMode);
+    static int getModSampleRate(FreeDVMode freeDVMode);
 };
 
 
