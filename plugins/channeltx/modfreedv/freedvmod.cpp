@@ -692,18 +692,27 @@ void FreeDVMod::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
         int nNomModemSamples = freedv_get_n_nom_modem_samples(m_freeDV);
         int Fs = freedv_get_modem_sample_rate(m_freeDV);
         int Rs = freedv_get_modem_symbol_rate(m_freeDV);
-        if ((m_speechIn) && (nSpeechSamples != m_nSpeechSamples)) {
-            delete[] m_speechIn;
+
+        if (nSpeechSamples != m_nSpeechSamples)
+        {
+            if (m_speechIn) {
+                delete[] m_speechIn;
+            }
+
+            m_speechIn = new int16_t[nSpeechSamples];
+            m_nSpeechSamples = nSpeechSamples;
         }
 
-        if ((m_modOut) && (nNomModemSamples != m_nNomModemSamples)) {
-            delete[] m_modOut;
+        if (nNomModemSamples != m_nNomModemSamples)
+        {
+            if (m_modOut) {
+                delete[] m_modOut;
+            }
+
+            m_modOut = new int16_t[nNomModemSamples];
+            m_nNomModemSamples = nNomModemSamples;
         }
 
-        m_nSpeechSamples = nSpeechSamples;
-        m_nNomModemSamples = nNomModemSamples;
-        m_speechIn = new int16_t[m_nSpeechSamples];
-        m_modOut = new int16_t[m_nNomModemSamples];
         m_iSpeech = 0;
         m_iModem = 0;
 
