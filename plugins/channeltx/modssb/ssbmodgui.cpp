@@ -120,8 +120,14 @@ bool SSBModGUI::handleMessage(const Message& message)
     }
     else if (SSBMod::MsgConfigureSSBMod::match(message))
     {
+        SSBModSettings mod_settings; // different USB/LSB convention between modulator and GUI
         const SSBMod::MsgConfigureSSBMod& cfg = (SSBMod::MsgConfigureSSBMod&) message;
-        m_settings = cfg.getSettings();
+        mod_settings = cfg.getSettings();
+        if (mod_settings.m_usb == false) {
+            mod_settings.m_bandwidth = -mod_settings.m_bandwidth;
+            mod_settings.m_lowCutoff = -mod_settings.m_lowCutoff;
+        }
+        m_settings = mod_settings;
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -497,7 +503,17 @@ void SSBModGUI::applySettings(bool force)
 		        48000, m_settings.m_inputFrequencyOffset);
         m_ssbMod->getInputMessageQueue()->push(msgChan);
 
-		SSBMod::MsgConfigureSSBMod *msg = SSBMod::MsgConfigureSSBMod::create(m_settings, force);
+        SSBModSettings mod_settings; // different USB/LSB convention between modulator and GUI
+        mod_settings = m_settings;
+        if (mod_settings.m_bandwidth > 0) {
+            mod_settings.m_usb = true;
+        } else {
+            mod_settings.m_bandwidth = -mod_settings.m_bandwidth;
+            mod_settings.m_lowCutoff = -mod_settings.m_lowCutoff;
+            mod_settings.m_usb = false;
+        }
+
+		SSBMod::MsgConfigureSSBMod *msg = SSBMod::MsgConfigureSSBMod::create(mod_settings, force);
 		m_ssbMod->getInputMessageQueue()->push(msg);
 	}
 }
