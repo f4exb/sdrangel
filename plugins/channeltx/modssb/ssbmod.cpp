@@ -684,17 +684,6 @@ void SSBMod::applyAudioSampleRate(int sampleRate)
     float lowCutoff = m_settings.m_lowCutoff;
     bool usb = m_settings.m_usb;
 
-    if (band < 0) // negative means LSB
-    {
-        band = -band;            // turn to positive
-        lowCutoff = -lowCutoff;
-        usb = false;  // and take note of side band
-    }
-    else
-    {
-        usb = true;
-    }
-
     if (band < 100.0f) // at least 100 Hz
     {
         band = 100.0f;
@@ -838,17 +827,6 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
     if ((settings.m_bandwidth != m_settings.m_bandwidth) ||
         (settings.m_lowCutoff != m_settings.m_lowCutoff) || force)
     {
-        if (band < 0) // negative means LSB
-        {
-            band = -band;            // turn to positive
-            lowCutoff = -lowCutoff;
-            usb = false;  // and take note of side band
-        }
-        else
-        {
-            usb = true;
-        }
-
         if (band < 100.0f) // at least 100 Hz
         {
             band = 100.0f;
