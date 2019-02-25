@@ -319,6 +319,7 @@ private:
 	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const FreeDVDemodSettings& settings, bool force = false);
     void applyAudioSampleRate(int sampleRate);
+	void applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const FreeDVDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreeDVDemodSettings& settings, bool force);

@@ -360,45 +360,60 @@ void FreeDVDemod::applyAudioSampleRate(int sampleRate)
 {
     qDebug("FreeDVDemod::applyAudioSampleRate: %d", sampleRate);
 
-    MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
-            sampleRate, m_settings.m_inputFrequencyOffset);
-    m_inputMessageQueue.push(channelConfigMsg);
-
     m_settingsMutex.lock();
-
-    m_interpolator.create(16, m_inputSampleRate, m_hiCutoff * 1.5f, 2.0f);
-    m_interpolatorDistanceRemain = 0;
-    m_interpolatorDistance = (Real) m_inputSampleRate / (Real) sampleRate;
-
-    SSBFilter->create_filter(m_lowCutoff / (float) sampleRate, m_hiCutoff / (float) sampleRate);
-
-    int agcNbSamples = (sampleRate / 1000) * (1<<m_settings.m_agcTimeLog2);
-    int agcThresholdGate = (sampleRate / 1000) * m_settings.m_agcThresholdGate; // ms
-
-    if (m_agcNbSamples != agcNbSamples)
-    {
-        m_agc.resize(agcNbSamples, agcNbSamples/2, agcTarget);
-        m_agc.setStepDownDelay(agcNbSamples);
-        m_agcNbSamples = agcNbSamples;
-    }
-
-    if (m_agcThresholdGate != agcThresholdGate)
-    {
-        m_agc.setGate(agcThresholdGate);
-        m_agcThresholdGate = agcThresholdGate;
-    }
-
     m_audioFifo.setSize(sampleRate);
-
     m_settingsMutex.unlock();
 
     m_audioSampleRate = sampleRate;
+}
 
-    if (m_guiMessageQueue) // forward to GUI if any
+void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
+{
+    m_hiCutoff = FreeDVDemodSettings::getHiCutoff(mode);
+    m_lowCutoff = FreeDVDemodSettings::getLowCutoff(mode);
+    uint32_t modemSampleRate = FreeDVDemodSettings::getModSampleRate(mode);
+
+    m_settingsMutex.lock();
+
+    // baseband interpolator and filter
+    if (modemSampleRate != m_modemSampleRate)
     {
-        DSPConfigureAudio *cfg = new DSPConfigureAudio(m_audioSampleRate);
-        m_guiMessageQueue->push(cfg);
+        MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
+                modemSampleRate, m_settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(channelConfigMsg);
+
+        m_interpolator.create(16, m_inputSampleRate, m_hiCutoff * 1.5f, 2.0f);
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorDistance = (Real) m_inputSampleRate / (Real) modemSampleRate;
+
+        SSBFilter->create_filter(m_lowCutoff / (float) modemSampleRate, m_hiCutoff / (float) modemSampleRate);
+
+        int agcNbSamples = (modemSampleRate / 1000) * (1<<m_settings.m_agcTimeLog2);
+        int agcThresholdGate = (modemSampleRate / 1000) * m_settings.m_agcThresholdGate; // ms
+
+        if (m_agcNbSamples != agcNbSamples)
+        {
+            m_agc.resize(agcNbSamples, agcNbSamples/2, agcTarget);
+            m_agc.setStepDownDelay(agcNbSamples);
+            m_agcNbSamples = agcNbSamples;
+        }
+
+        if (m_agcThresholdGate != agcThresholdGate)
+        {
+            m_agc.setGate(agcThresholdGate);
+            m_agcThresholdGate = agcThresholdGate;
+        }
+
+        m_modemSampleRate = modemSampleRate;
+
+        if (getMessageQueueToGUI())
+        {
+            DSPConfigureAudio *cfg = new DSPConfigureAudio(m_modemSampleRate);
+            getMessageQueueToGUI()->push(cfg);
+        }
     }
+
+    m_settingsMutex.unlock();
 }
 
 void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
@@ -508,6 +523,10 @@ void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
     }
     if ((m_settings.m_agc != settings.m_agc) || force) {
         reverseAPIKeys.append("agc");
+    }
+
+    if ((settings.m_freeDVMode != m_settings.m_freeDVMode) || force) {
+        applyFreeDVMode(settings.m_freeDVMode);
     }
 
     m_spanLog2 = settings.m_spanLog2;
