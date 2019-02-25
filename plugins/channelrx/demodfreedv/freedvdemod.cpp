@@ -47,9 +47,6 @@ const QString FreeDVDemod::m_channelId = "FreeDVDemod";
 FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
-        m_audioBinaual(false),
-        m_audioFlipChannels(false),
-        m_dsb(false),
         m_audioMute(false),
         m_agc(12000, agcTarget, 1e-2),
         m_agcActive(false),
@@ -66,8 +63,8 @@ FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
 {
 	setObjectName(m_channelId);
 
-	m_Bandwidth = 5000;
-	m_LowCutoff = 300;
+	m_hiCutoff = 5000;
+	m_lowCutoff = 300;
 	m_volume = 2.0;
 	m_spanLog2 = 3;
 	m_inputSampleRate = 48000;
@@ -81,7 +78,6 @@ FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
 	m_undersampleCount = 0;
 	m_sum = 0;
 
-	m_usb = true;
 	m_magsq = 0.0f;
 	m_magsqSum = 0.0f;
 	m_magsqPeak = 0.0f;
@@ -90,8 +86,7 @@ FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
 	m_agc.setClampMax(SDR_RX_SCALED/100.0);
 	m_agc.setClamping(m_agcClamping);
 
-	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, ssbFftLen);
-	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_audioSampleRate, 2 * ssbFftLen);
+	SSBFilter = new fftfilt(m_lowCutoff / m_audioSampleRate, m_hiCutoff / m_audioSampleRate, ssbFftLen);
 
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 	applySettings(m_settings, true);
@@ -116,7 +111,6 @@ FreeDVDemod::~FreeDVDemod()
     delete m_threadedChannelizer;
     delete m_channelizer;
     delete SSBFilter;
-    delete DSBFilter;
 }
 
 void FreeDVDemod::configure(MessageQueue* messageQueue,
@@ -170,15 +164,7 @@ void FreeDVDemod::feed(const SampleVector::const_iterator& begin, const SampleVe
 
 		if(m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
 		{
-			if (m_dsb)
-			{
-				n_out = DSBFilter->runDSB(ci, &sideband);
-			}
-			else
-			{
-				n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
-			}
-
+            n_out = SSBFilter->runSSB(ci, &sideband, true);
 			m_interpolatorDistanceRemain += m_interpolatorDistance;
 		}
 		else
@@ -207,16 +193,7 @@ void FreeDVDemod::feed(const SampleVector::const_iterator& begin, const SampleVe
                 }
 
                 m_magsqCount++;
-
-				if (!m_dsb & !m_usb)
-				{ // invert spectrum for LSB
-					m_sampleBuffer.push_back(Sample(avgi, avgr));
-				}
-				else
-				{
-					m_sampleBuffer.push_back(Sample(avgr, avgi));
-				}
-
+                m_sampleBuffer.push_back(Sample(avgr, avgi));
                 m_sum.real(0.0);
                 m_sum.imag(0.0);
 			}
@@ -234,27 +211,10 @@ void FreeDVDemod::feed(const SampleVector::const_iterator& begin, const SampleVe
 			else
 			{
 			    fftfilt::cmplx z = delayedSample * m_agc.getStepValue();
-
-				if (m_audioBinaual)
-				{
-					if (m_audioFlipChannels)
-					{
-						m_audioBuffer[m_audioBufferFill].r = (qint16)(z.imag() * m_volume);
-						m_audioBuffer[m_audioBufferFill].l = (qint16)(z.real() * m_volume);
-					}
-					else
-					{
-						m_audioBuffer[m_audioBufferFill].r = (qint16)(z.real() * m_volume);
-						m_audioBuffer[m_audioBufferFill].l = (qint16)(z.imag() * m_volume);
-					}
-				}
-				else
-				{
-					Real demod = (z.real() + z.imag()) * 0.7;
-					qint16 sample = (qint16)(demod * m_volume);
-					m_audioBuffer[m_audioBufferFill].l = sample;
-					m_audioBuffer[m_audioBufferFill].r = sample;
-				}
+                Real demod = (z.real() + z.imag()) * 0.7;
+                qint16 sample = (qint16)(demod * m_volume);
+                m_audioBuffer[m_audioBufferFill].l = sample;
+                m_audioBuffer[m_audioBufferFill].r = sample;
 			}
 
 			++m_audioBufferFill;
@@ -284,7 +244,7 @@ void FreeDVDemod::feed(const SampleVector::const_iterator& begin, const SampleVe
 
 	if (m_sampleSink != 0)
 	{
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), !m_dsb);
+		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
 	}
 
 	m_sampleBuffer.clear();
@@ -386,7 +346,7 @@ void FreeDVDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOf
     if ((m_inputSampleRate != inputSampleRate) || force)
     {
         m_settingsMutex.lock();
-        m_interpolator.create(16, inputSampleRate, m_Bandwidth * 1.5f, 2.0f);
+        m_interpolator.create(16, inputSampleRate, m_hiCutoff * 1.5f, 2.0f);
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) inputSampleRate / (Real) m_audioSampleRate;
         m_settingsMutex.unlock();
@@ -406,12 +366,11 @@ void FreeDVDemod::applyAudioSampleRate(int sampleRate)
 
     m_settingsMutex.lock();
 
-    m_interpolator.create(16, m_inputSampleRate, m_Bandwidth * 1.5f, 2.0f);
+    m_interpolator.create(16, m_inputSampleRate, m_hiCutoff * 1.5f, 2.0f);
     m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = (Real) m_inputSampleRate / (Real) sampleRate;
 
-    SSBFilter->create_filter(m_LowCutoff / (float) sampleRate, m_Bandwidth / (float) sampleRate);
-    DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) sampleRate);
+    SSBFilter->create_filter(m_lowCutoff / (float) sampleRate, m_hiCutoff / (float) sampleRate);
 
     int agcNbSamples = (sampleRate / 1000) * (1<<m_settings.m_agcTimeLog2);
     int agcThresholdGate = (sampleRate / 1000) * m_settings.m_agcThresholdGate; // ms

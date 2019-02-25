@@ -273,18 +273,14 @@ private:
     DownChannelizer* m_channelizer;
     FreeDVDemodSettings m_settings;
 
-	Real m_Bandwidth;
-	Real m_LowCutoff;
+	Real m_hiCutoff;
+	Real m_lowCutoff;
 	Real m_volume;
 	int m_spanLog2;
 	fftfilt::cmplx m_sum;
 	int m_undersampleCount;
 	int m_inputSampleRate;
 	int m_inputFrequencyOffset;
-	bool m_audioBinaual;
-	bool m_audioFlipChannels;
-	bool m_usb;
-	bool m_dsb;
 	bool m_audioMute;
 	double m_magsq;
 	double m_magsqSum;
@@ -305,7 +301,6 @@ private:
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
 	fftfilt* SSBFilter;
-	fftfilt* DSBFilter;
 
 	BasebandSampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;
