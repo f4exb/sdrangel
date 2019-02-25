@@ -22,6 +22,8 @@
 #include <QNetworkReply>
 #include <QBuffer>
 
+#include "codec2/freedv_api.h"
+
 #include "SWGChannelSettings.h"
 #include "SWGFreeDVDemodSettings.h"
 #include "SWGChannelReport.h"
@@ -59,6 +61,14 @@ FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
         m_sampleSink(0),
         m_audioFifo(24000),
         m_modemSampleRate(48000),
+        m_freeDV(0),
+        m_nSpeechSamples(0),
+        m_nMaxModemSamples(0),
+        m_iSpeech(0),
+        m_iModem(0),
+        m_speechOut(0),
+        m_modIn(0),
+        m_scaleFactor(SDR_RX_SCALEF),
         m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName(m_channelId);
@@ -411,6 +421,94 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
             DSPConfigureAudio *cfg = new DSPConfigureAudio(m_modemSampleRate);
             getMessageQueueToGUI()->push(cfg);
         }
+    }
+
+    // FreeDV object
+
+    if (m_freeDV) {
+        freedv_close(m_freeDV);
+    }
+
+    int fdv_mode = -1;
+
+    switch(mode)
+    {
+    case FreeDVDemodSettings::FreeDVMode700D:
+        fdv_mode = FREEDV_MODE_700D;
+        m_scaleFactor = SDR_RX_SCALEF / 3.2f;
+        break;
+    case FreeDVDemodSettings::FreeDVMode800XA:
+        fdv_mode = FREEDV_MODE_800XA;
+        m_scaleFactor = SDR_RX_SCALEF / 8.2f;
+        break;
+    case FreeDVDemodSettings::FreeDVMode1600:
+        fdv_mode = FREEDV_MODE_1600;
+        m_scaleFactor = SDR_RX_SCALEF / 3.2f;
+        break;
+    case FreeDVDemodSettings::FreeDVMode2400A:
+    default:
+        fdv_mode = FREEDV_MODE_2400A;
+        m_scaleFactor = SDR_RX_SCALEF / 8.2f;
+        break;
+    }
+
+    if (fdv_mode == FREEDV_MODE_700D)
+    {
+        struct freedv_advanced adv;
+        adv.interleave_frames = 1;
+        m_freeDV = freedv_open_advanced(fdv_mode, &adv);
+    }
+    else
+    {
+        m_freeDV = freedv_open(fdv_mode);
+    }
+
+    if (m_freeDV)
+    {
+        freedv_set_test_frames(m_freeDV, 0);
+        freedv_set_snr_squelch_thresh(m_freeDV, -100.0);
+        freedv_set_squelch_en(m_freeDV, 0);
+        freedv_set_clip(m_freeDV, 0);
+        freedv_set_tx_bpf(m_freeDV, 1);
+        freedv_set_ext_vco(m_freeDV, 0);
+
+        int nSpeechSamples = freedv_get_n_speech_samples(m_freeDV);
+        int nNomModemSamples = freedv_get_n_max_modem_samples(m_freeDV);
+        int Fs = freedv_get_modem_sample_rate(m_freeDV);
+        int Rs = freedv_get_modem_symbol_rate(m_freeDV);
+
+        if (nSpeechSamples != m_nSpeechSamples)
+        {
+            if (m_speechOut) {
+                delete[] m_speechOut;
+            }
+
+            m_speechOut = new int16_t[m_nSpeechSamples];
+            m_nSpeechSamples = nSpeechSamples;
+        }
+
+        if (nNomModemSamples != m_nMaxModemSamples)
+        {
+            if (m_modIn) {
+                delete[] m_modIn;
+            }
+
+            m_modIn = new int16_t[m_nMaxModemSamples];
+            m_nMaxModemSamples = nNomModemSamples;
+        }
+
+        m_iSpeech = 0;
+        m_iModem = 0;
+        m_nin = freedv_nin(m_freeDV);
+
+        qDebug() << "FreeDVMod::applyFreeDVMode:"
+                << " fdv_mode: " << fdv_mode
+                << " m_modemSampleRate: " << m_modemSampleRate
+                << " Fs: " << Fs
+                << " Rs: " << Rs
+                << " m_nSpeechSamples: " << m_nSpeechSamples
+                << " m_nMaxModemSamples: " << m_nMaxModemSamples
+                << " m_nin: " << m_nin;
     }
 
     m_settingsMutex.unlock();

@@ -29,6 +29,7 @@
 #include "dsp/fftfilt.h"
 #include "dsp/agc.h"
 #include "audio/audiofifo.h"
+#include "audio/audioresampler.h"
 #include "util/message.h"
 #include "util/doublebufferfifo.h"
 
@@ -42,6 +43,7 @@ class QNetworkReply;
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
+struct freedv;
 
 class FreeDVDemod : public BasebandSampleSink, public ChannelSinkAPI {
 	Q_OBJECT
@@ -313,6 +315,17 @@ private:
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+
+    struct freedv *m_freeDV;
+    int m_nSpeechSamples;
+    int m_nMaxModemSamples;
+    int m_nin;
+    int m_iSpeech;
+    int m_iModem;
+    int16_t *m_speechOut;
+    int16_t *m_modIn;
+    float m_scaleFactor; //!< divide by this amount to scale from int16 to float in [-1.0, 1.0] interval
+    AudioResampler m_audioResampler;
 
 	QMutex m_settingsMutex;
 
