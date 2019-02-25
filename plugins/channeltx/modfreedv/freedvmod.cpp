@@ -539,7 +539,6 @@ void FreeDVMod::openFileStream()
     m_fileSize = m_ifstream.tellg();
     m_ifstream.seekg(0,std::ios_base::beg);
 
-    m_inputSampleRate = 48000; // fixed rate
     m_recordLength = m_fileSize / (sizeof(Real) * m_inputSampleRate);
 
     qDebug() << "FreeDVMod::openFileStream: " << m_fileName.toStdString().c_str()
