@@ -424,14 +424,11 @@ void FreeDVModGUI::applyBandwidths(int spanLog2, bool force)
 {
     m_spectrumRate = m_freeDVMod->getModemSampleRate() / (1<<spanLog2);
     int bwMax = m_freeDVMod->getModemSampleRate() / (100*(1<<spanLog2));
-    int tickInterval = m_spectrumRate / 1200;
-    tickInterval = tickInterval == 0 ? 1 : tickInterval;
 
     qDebug() << "FreeDVModGUI::applyBandwidths:"
             << " spanLog2: " << spanLog2
             << " m_spectrumRate: " << m_spectrumRate
-            << " bwMax: " << bwMax
-            << " tickInterval: " << tickInterval;
+            << " bwMax: " << bwMax;
 
     QString spanStr = QString::number(bwMax/10.0, 'f', 1);
 

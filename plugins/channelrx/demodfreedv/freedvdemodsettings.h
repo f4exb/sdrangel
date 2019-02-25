@@ -34,13 +34,8 @@ struct FreeDVDemodSettings
     } FreeDVMode;
 
     qint32 m_inputFrequencyOffset;
-    Real m_rfBandwidth;
-    Real m_lowCutoff;
     Real m_volume;
     int  m_spanLog2;
-    bool m_audioBinaural;
-    bool m_audioFlipChannels;
-    bool m_dsb;
     bool m_audioMute;
     bool m_agc;
     bool m_agcClamping;

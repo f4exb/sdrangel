@@ -125,6 +125,7 @@ public:
     virtual bool deserialize(const QByteArray& data);
 
     uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
+    uint32_t getModemSampleRate() const { return m_modemSampleRate; }
     double getMagSq() const { return m_magsq; }
 	bool getAudioActive() const { return m_audioActive; }
 
@@ -313,6 +314,7 @@ private:
 	uint m_audioBufferFill;
 	AudioFifo m_audioFifo;
 	quint32 m_audioSampleRate;
+	quint32 m_modemSampleRate;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

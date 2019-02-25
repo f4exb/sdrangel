@@ -61,6 +61,7 @@ FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
         m_audioActive(false),
         m_sampleSink(0),
         m_audioFifo(24000),
+        m_modemSampleRate(48000),
         m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName(m_channelId);
@@ -445,13 +446,8 @@ void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
 {
     qDebug() << "FreeDVDemod::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_lowCutoff: " << settings.m_lowCutoff
             << " m_volume: " << settings.m_volume
             << " m_spanLog2: " << settings.m_spanLog2
-            << " m_audioBinaual: " << settings.m_audioBinaural
-            << " m_audioFlipChannels: " << settings.m_audioFlipChannels
-            << " m_dsb: " << settings.m_dsb
             << " m_audioMute: " << settings.m_audioMute
             << " m_agcActive: " << settings.m_agc
             << " m_agcClamping: " << settings.m_agcClamping
@@ -465,46 +461,6 @@ void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
 
     if((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
         reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if((m_settings.m_rfBandwidth != settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if((m_settings.m_lowCutoff != settings.m_lowCutoff) || force) {
-        reverseAPIKeys.append("lowCutoff");
-    }
-
-    if((m_settings.m_rfBandwidth != settings.m_rfBandwidth) ||
-        (m_settings.m_lowCutoff != settings.m_lowCutoff) || force)
-    {
-        float band, lowCutoff;
-
-        band = settings.m_rfBandwidth;
-        lowCutoff = settings.m_lowCutoff;
-
-        if (band < 0) {
-            band = -band;
-            lowCutoff = -lowCutoff;
-            m_usb = false;
-        } else {
-            m_usb = true;
-        }
-
-        if (band < 100.0f)
-        {
-            band = 100.0f;
-            lowCutoff = 0;
-        }
-
-        m_Bandwidth = band;
-        m_LowCutoff = lowCutoff;
-
-        m_settingsMutex.lock();
-        m_interpolator.create(16, m_inputSampleRate, m_Bandwidth * 1.5f, 2.0f);
-        m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance = (Real) m_inputSampleRate / (Real) m_audioSampleRate;
-        SSBFilter->create_filter(m_LowCutoff / (float) m_audioSampleRate, m_Bandwidth / (float) m_audioSampleRate);
-        DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) m_audioSampleRate);
-        m_settingsMutex.unlock();
     }
 
     if ((m_settings.m_volume != settings.m_volume) || force)
@@ -588,15 +544,6 @@ void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
     if ((m_settings.m_spanLog2 != settings.m_spanLog2) || force) {
         reverseAPIKeys.append("spanLog2");
     }
-    if ((m_settings.m_audioBinaural != settings.m_audioBinaural) || force) {
-        reverseAPIKeys.append("audioBinaural");
-    }
-    if ((m_settings.m_audioFlipChannels != settings.m_audioFlipChannels) || force) {
-        reverseAPIKeys.append("audioFlipChannels");
-    }
-    if ((m_settings.m_dsb != settings.m_dsb) || force) {
-        reverseAPIKeys.append("dsb");
-    }
     if ((m_settings.m_audioMute != settings.m_audioMute) || force) {
         reverseAPIKeys.append("audioMute");
     }
@@ -605,9 +552,6 @@ void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
     }
 
     m_spanLog2 = settings.m_spanLog2;
-    m_audioBinaual = settings.m_audioBinaural;
-    m_audioFlipChannels = settings.m_audioFlipChannels;
-    m_dsb = settings.m_dsb;
     m_audioMute = settings.m_audioMute;
     m_agcActive = settings.m_agc;
 
@@ -672,26 +616,11 @@ int FreeDVDemod::webapiSettingsPutPatch(
         settings.m_inputFrequencyOffset = response.getSsbDemodSettings()->getInputFrequencyOffset();
         frequencyOffsetChanged = true;
     }
-    if (channelSettingsKeys.contains("rfBandwidth")) {
-        settings.m_rfBandwidth = response.getSsbDemodSettings()->getRfBandwidth();
-    }
-    if (channelSettingsKeys.contains("lowCutoff")) {
-        settings.m_lowCutoff = response.getSsbDemodSettings()->getLowCutoff();
-    }
     if (channelSettingsKeys.contains("volume")) {
         settings.m_volume = response.getSsbDemodSettings()->getVolume();
     }
     if (channelSettingsKeys.contains("spanLog2")) {
         settings.m_spanLog2 = response.getSsbDemodSettings()->getSpanLog2();
-    }
-    if (channelSettingsKeys.contains("audioBinaural")) {
-        settings.m_audioBinaural = response.getSsbDemodSettings()->getAudioBinaural() != 0;
-    }
-    if (channelSettingsKeys.contains("audioFlipChannels")) {
-        settings.m_audioFlipChannels = response.getSsbDemodSettings()->getAudioFlipChannels() != 0;
-    }
-    if (channelSettingsKeys.contains("dsb")) {
-        settings.m_dsb = response.getSsbDemodSettings()->getDsb() != 0;
     }
     if (channelSettingsKeys.contains("audioMute")) {
         settings.m_audioMute = response.getSsbDemodSettings()->getAudioMute() != 0;
@@ -758,13 +687,8 @@ void FreeDVDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
 {
     response.getSsbDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getSsbDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.getSsbDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
-    response.getSsbDemodSettings()->setLowCutoff(settings.m_lowCutoff);
     response.getSsbDemodSettings()->setVolume(settings.m_volume);
     response.getSsbDemodSettings()->setSpanLog2(settings.m_spanLog2);
-    response.getSsbDemodSettings()->setAudioBinaural(settings.m_audioBinaural ? 1 : 0);
-    response.getSsbDemodSettings()->setAudioFlipChannels(settings.m_audioFlipChannels ? 1 : 0);
-    response.getSsbDemodSettings()->setDsb(settings.m_dsb ? 1 : 0);
     response.getSsbDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getSsbDemodSettings()->setAgc(settings.m_agc ? 1 : 0);
     response.getSsbDemodSettings()->setAgcClamping(settings.m_agcClamping ? 1 : 0);
@@ -811,26 +735,11 @@ void FreeDVDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys,
     if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
         swgSSBDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     }
-    if (channelSettingsKeys.contains("rfBandwidth") || force) {
-        swgSSBDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
-    }
-    if (channelSettingsKeys.contains("lowCutoff") || force) {
-        swgSSBDemodSettings->setLowCutoff(settings.m_lowCutoff);
-    }
     if (channelSettingsKeys.contains("volume") || force) {
         swgSSBDemodSettings->setVolume(settings.m_volume);
     }
     if (channelSettingsKeys.contains("spanLog2") || force) {
         swgSSBDemodSettings->setSpanLog2(settings.m_spanLog2);
-    }
-    if (channelSettingsKeys.contains("audioBinaural") || force) {
-        swgSSBDemodSettings->setAudioBinaural(settings.m_audioBinaural ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("audioFlipChannels") || force) {
-        swgSSBDemodSettings->setAudioFlipChannels(settings.m_audioFlipChannels ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("dsb") || force) {
-        swgSSBDemodSettings->setDsb(settings.m_dsb ? 1 : 0);
     }
     if (channelSettingsKeys.contains("audioMute") || force) {
         swgSSBDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
