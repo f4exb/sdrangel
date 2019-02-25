@@ -1,0 +1,52 @@
+FreeDVDemodSettings:
+  description: FreeDVDemod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    volume:
+      type: number
+      format: float
+    spanLog2:
+      type: integer
+    audioMute:
+      description: Mute audio (1 if muted else 0)
+      type: integer
+    agc:
+      description: AGC (1 if AGC active else 0)
+      type: integer
+    agcClamping:
+      description: AGC clamping (1 if AGC clampingactive else 0)
+      type: integer
+    agcTimeLog2:
+      description: AGC averaging time log2 in milliseconds
+      type: integer
+    agcPowerThreshold:
+      description: Audio open RF threshold (dB)
+      type: integer
+    agcThresholdGate:
+      description: Audio squelch gate in ms
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    audioDeviceName:
+      type: string
+    freeDVMode:
+      type: integer
+      
+FreeDVDemodReport:
+  description: FreeDVDemod
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    squelch:
+      description: Audio squelch status (1 if open else 0)
+      type: integer
+    audioSampleRate:
+      type: integer
+    channelSampleRate:
+      type: integer

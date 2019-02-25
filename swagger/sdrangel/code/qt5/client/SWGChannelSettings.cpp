@@ -42,6 +42,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_bfm_demod_settings_isSet = false;
     dsd_demod_settings = nullptr;
     m_dsd_demod_settings_isSet = false;
+    free_dv_demod_settings = nullptr;
+    m_free_dv_demod_settings_isSet = false;
     free_dv_mod_settings = nullptr;
     m_free_dv_mod_settings_isSet = false;
     nfm_demod_settings = nullptr;
@@ -86,6 +88,8 @@ SWGChannelSettings::init() {
     m_bfm_demod_settings_isSet = false;
     dsd_demod_settings = new SWGDSDDemodSettings();
     m_dsd_demod_settings_isSet = false;
+    free_dv_demod_settings = new SWGFreeDVDemodSettings();
+    m_free_dv_demod_settings_isSet = false;
     free_dv_mod_settings = new SWGFreeDVModSettings();
     m_free_dv_mod_settings_isSet = false;
     nfm_demod_settings = new SWGNFMDemodSettings();
@@ -130,6 +134,9 @@ SWGChannelSettings::cleanup() {
     }
     if(dsd_demod_settings != nullptr) { 
         delete dsd_demod_settings;
+    }
+    if(free_dv_demod_settings != nullptr) { 
+        delete free_dv_demod_settings;
     }
     if(free_dv_mod_settings != nullptr) { 
         delete free_dv_mod_settings;
@@ -191,6 +198,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&dsd_demod_settings, pJson["DSDDemodSettings"], "SWGDSDDemodSettings", "SWGDSDDemodSettings");
     
+    ::SWGSDRangel::setValue(&free_dv_demod_settings, pJson["FreeDVDemodSettings"], "SWGFreeDVDemodSettings", "SWGFreeDVDemodSettings");
+    
     ::SWGSDRangel::setValue(&free_dv_mod_settings, pJson["FreeDVModSettings"], "SWGFreeDVModSettings", "SWGFreeDVModSettings");
     
     ::SWGSDRangel::setValue(&nfm_demod_settings, pJson["NFMDemodSettings"], "SWGNFMDemodSettings", "SWGNFMDemodSettings");
@@ -249,6 +258,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((dsd_demod_settings != nullptr) && (dsd_demod_settings->isSet())){
         toJsonValue(QString("DSDDemodSettings"), dsd_demod_settings, obj, QString("SWGDSDDemodSettings"));
+    }
+    if((free_dv_demod_settings != nullptr) && (free_dv_demod_settings->isSet())){
+        toJsonValue(QString("FreeDVDemodSettings"), free_dv_demod_settings, obj, QString("SWGFreeDVDemodSettings"));
     }
     if((free_dv_mod_settings != nullptr) && (free_dv_mod_settings->isSet())){
         toJsonValue(QString("FreeDVModSettings"), free_dv_mod_settings, obj, QString("SWGFreeDVModSettings"));
@@ -355,6 +367,16 @@ void
 SWGChannelSettings::setDsdDemodSettings(SWGDSDDemodSettings* dsd_demod_settings) {
     this->dsd_demod_settings = dsd_demod_settings;
     this->m_dsd_demod_settings_isSet = true;
+}
+
+SWGFreeDVDemodSettings*
+SWGChannelSettings::getFreeDvDemodSettings() {
+    return free_dv_demod_settings;
+}
+void
+SWGChannelSettings::setFreeDvDemodSettings(SWGFreeDVDemodSettings* free_dv_demod_settings) {
+    this->free_dv_demod_settings = free_dv_demod_settings;
+    this->m_free_dv_demod_settings_isSet = true;
 }
 
 SWGFreeDVModSettings*
@@ -479,6 +501,7 @@ SWGChannelSettings::isSet(){
         if(atv_mod_settings != nullptr && atv_mod_settings->isSet()){ isObjectUpdated = true; break;}
         if(bfm_demod_settings != nullptr && bfm_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(dsd_demod_settings != nullptr && dsd_demod_settings->isSet()){ isObjectUpdated = true; break;}
+        if(free_dv_demod_settings != nullptr && free_dv_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(free_dv_mod_settings != nullptr && free_dv_mod_settings->isSet()){ isObjectUpdated = true; break;}
         if(nfm_demod_settings != nullptr && nfm_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(nfm_mod_settings != nullptr && nfm_mod_settings->isSet()){ isObjectUpdated = true; break;}

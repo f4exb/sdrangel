@@ -23,9 +23,9 @@
 #include <QBuffer>
 
 #include "SWGChannelSettings.h"
-#include "SWGSSBDemodSettings.h"
+#include "SWGFreeDVDemodSettings.h"
 #include "SWGChannelReport.h"
-#include "SWGSSBDemodReport.h"
+#include "SWGFreeDVDemodReport.h"
 
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
@@ -573,8 +573,8 @@ int FreeDVDemod::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setSsbDemodSettings(new SWGSDRangel::SWGSSBDemodSettings());
-    response.getSsbDemodSettings()->init();
+    response.setFreeDvDemodSettings(new SWGSDRangel::SWGFreeDVDemodSettings());
+    response.getFreeDvDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
     return 200;
 }
@@ -591,41 +591,41 @@ int FreeDVDemod::webapiSettingsPutPatch(
 
     if (channelSettingsKeys.contains("inputFrequencyOffset"))
     {
-        settings.m_inputFrequencyOffset = response.getSsbDemodSettings()->getInputFrequencyOffset();
+        settings.m_inputFrequencyOffset = response.getFreeDvDemodSettings()->getInputFrequencyOffset();
         frequencyOffsetChanged = true;
     }
     if (channelSettingsKeys.contains("volume")) {
-        settings.m_volume = response.getSsbDemodSettings()->getVolume();
+        settings.m_volume = response.getFreeDvDemodSettings()->getVolume();
     }
     if (channelSettingsKeys.contains("spanLog2")) {
-        settings.m_spanLog2 = response.getSsbDemodSettings()->getSpanLog2();
+        settings.m_spanLog2 = response.getFreeDvDemodSettings()->getSpanLog2();
     }
     if (channelSettingsKeys.contains("audioMute")) {
-        settings.m_audioMute = response.getSsbDemodSettings()->getAudioMute() != 0;
+        settings.m_audioMute = response.getFreeDvDemodSettings()->getAudioMute() != 0;
     }
     if (channelSettingsKeys.contains("agc")) {
-        settings.m_agc = response.getSsbDemodSettings()->getAgc() != 0;
+        settings.m_agc = response.getFreeDvDemodSettings()->getAgc() != 0;
     }
     if (channelSettingsKeys.contains("agcClamping")) {
-        settings.m_agcClamping = response.getSsbDemodSettings()->getAgcClamping() != 0;
+        settings.m_agcClamping = response.getFreeDvDemodSettings()->getAgcClamping() != 0;
     }
     if (channelSettingsKeys.contains("agcTimeLog2")) {
-        settings.m_agcTimeLog2 = response.getSsbDemodSettings()->getAgcTimeLog2();
+        settings.m_agcTimeLog2 = response.getFreeDvDemodSettings()->getAgcTimeLog2();
     }
     if (channelSettingsKeys.contains("agcPowerThreshold")) {
-        settings.m_agcPowerThreshold = response.getSsbDemodSettings()->getAgcPowerThreshold();
+        settings.m_agcPowerThreshold = response.getFreeDvDemodSettings()->getAgcPowerThreshold();
     }
     if (channelSettingsKeys.contains("agcThresholdGate")) {
-        settings.m_agcThresholdGate = response.getSsbDemodSettings()->getAgcThresholdGate();
+        settings.m_agcThresholdGate = response.getFreeDvDemodSettings()->getAgcThresholdGate();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getSsbDemodSettings()->getRgbColor();
+        settings.m_rgbColor = response.getFreeDvDemodSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getSsbDemodSettings()->getTitle();
+        settings.m_title = *response.getFreeDvDemodSettings()->getTitle();
     }
     if (channelSettingsKeys.contains("audioDeviceName")) {
-        settings.m_audioDeviceName = *response.getSsbDemodSettings()->getAudioDeviceName();
+        settings.m_audioDeviceName = *response.getFreeDvDemodSettings()->getAudioDeviceName();
     }
 
     if (frequencyOffsetChanged)
@@ -655,36 +655,36 @@ int FreeDVDemod::webapiReportGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setSsbDemodReport(new SWGSDRangel::SWGSSBDemodReport());
-    response.getSsbDemodReport()->init();
+    response.setFreeDvDemodReport(new SWGSDRangel::SWGFreeDVDemodReport());
+    response.getFreeDvDemodReport()->init();
     webapiFormatChannelReport(response);
     return 200;
 }
 
 void FreeDVDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const FreeDVDemodSettings& settings)
 {
-    response.getSsbDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
-    response.getSsbDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.getSsbDemodSettings()->setVolume(settings.m_volume);
-    response.getSsbDemodSettings()->setSpanLog2(settings.m_spanLog2);
-    response.getSsbDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
-    response.getSsbDemodSettings()->setAgc(settings.m_agc ? 1 : 0);
-    response.getSsbDemodSettings()->setAgcClamping(settings.m_agcClamping ? 1 : 0);
-    response.getSsbDemodSettings()->setAgcTimeLog2(settings.m_agcTimeLog2);
-    response.getSsbDemodSettings()->setAgcPowerThreshold(settings.m_agcPowerThreshold);
-    response.getSsbDemodSettings()->setAgcThresholdGate(settings.m_agcThresholdGate);
-    response.getSsbDemodSettings()->setRgbColor(settings.m_rgbColor);
+    response.getFreeDvDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
+    response.getFreeDvDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getFreeDvDemodSettings()->setVolume(settings.m_volume);
+    response.getFreeDvDemodSettings()->setSpanLog2(settings.m_spanLog2);
+    response.getFreeDvDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
+    response.getFreeDvDemodSettings()->setAgc(settings.m_agc ? 1 : 0);
+    response.getFreeDvDemodSettings()->setAgcClamping(settings.m_agcClamping ? 1 : 0);
+    response.getFreeDvDemodSettings()->setAgcTimeLog2(settings.m_agcTimeLog2);
+    response.getFreeDvDemodSettings()->setAgcPowerThreshold(settings.m_agcPowerThreshold);
+    response.getFreeDvDemodSettings()->setAgcThresholdGate(settings.m_agcThresholdGate);
+    response.getFreeDvDemodSettings()->setRgbColor(settings.m_rgbColor);
 
-    if (response.getSsbDemodSettings()->getTitle()) {
-        *response.getSsbDemodSettings()->getTitle() = settings.m_title;
+    if (response.getFreeDvDemodSettings()->getTitle()) {
+        *response.getFreeDvDemodSettings()->getTitle() = settings.m_title;
     } else {
-        response.getSsbDemodSettings()->setTitle(new QString(settings.m_title));
+        response.getFreeDvDemodSettings()->setTitle(new QString(settings.m_title));
     }
 
-    if (response.getSsbDemodSettings()->getAudioDeviceName()) {
-        *response.getSsbDemodSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    if (response.getFreeDvDemodSettings()->getAudioDeviceName()) {
+        *response.getFreeDvDemodSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
     } else {
-        response.getSsbDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        response.getFreeDvDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
 }
 
@@ -694,10 +694,10 @@ void FreeDVDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respo
     int nbMagsqSamples;
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
 
-    response.getSsbDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
-    response.getSsbDemodReport()->setSquelch(m_audioActive ? 1 : 0);
-    response.getSsbDemodReport()->setAudioSampleRate(m_audioSampleRate);
-    response.getSsbDemodReport()->setChannelSampleRate(m_inputSampleRate);
+    response.getFreeDvDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getFreeDvDemodReport()->setSquelch(m_audioActive ? 1 : 0);
+    response.getFreeDvDemodReport()->setAudioSampleRate(m_audioSampleRate);
+    response.getFreeDvDemodReport()->setChannelSampleRate(m_inputSampleRate);
 }
 
 void FreeDVDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreeDVDemodSettings& settings, bool force)
@@ -705,46 +705,46 @@ void FreeDVDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys,
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setTx(0);
     swgChannelSettings->setChannelType(new QString("SSBDemod"));
-    swgChannelSettings->setSsbDemodSettings(new SWGSDRangel::SWGSSBDemodSettings());
-    SWGSDRangel::SWGSSBDemodSettings *swgSSBDemodSettings = swgChannelSettings->getSsbDemodSettings();
+    swgChannelSettings->setFreeDvDemodSettings(new SWGSDRangel::SWGFreeDVDemodSettings());
+    SWGSDRangel::SWGFreeDVDemodSettings *swgFreeDVDemodSettings = swgChannelSettings->getFreeDvDemodSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
     if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
-        swgSSBDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+        swgFreeDVDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     }
     if (channelSettingsKeys.contains("volume") || force) {
-        swgSSBDemodSettings->setVolume(settings.m_volume);
+        swgFreeDVDemodSettings->setVolume(settings.m_volume);
     }
     if (channelSettingsKeys.contains("spanLog2") || force) {
-        swgSSBDemodSettings->setSpanLog2(settings.m_spanLog2);
+        swgFreeDVDemodSettings->setSpanLog2(settings.m_spanLog2);
     }
     if (channelSettingsKeys.contains("audioMute") || force) {
-        swgSSBDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
+        swgFreeDVDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
     }
     if (channelSettingsKeys.contains("agc") || force) {
-        swgSSBDemodSettings->setAgc(settings.m_agc ? 1 : 0);
+        swgFreeDVDemodSettings->setAgc(settings.m_agc ? 1 : 0);
     }
     if (channelSettingsKeys.contains("agcClamping") || force) {
-        swgSSBDemodSettings->setAgcClamping(settings.m_agcClamping ? 1 : 0);
+        swgFreeDVDemodSettings->setAgcClamping(settings.m_agcClamping ? 1 : 0);
     }
     if (channelSettingsKeys.contains("agcTimeLog2") || force) {
-        swgSSBDemodSettings->setAgcTimeLog2(settings.m_agcTimeLog2);
+        swgFreeDVDemodSettings->setAgcTimeLog2(settings.m_agcTimeLog2);
     }
     if (channelSettingsKeys.contains("agcPowerThreshold") || force) {
-        swgSSBDemodSettings->setAgcPowerThreshold(settings.m_agcPowerThreshold);
+        swgFreeDVDemodSettings->setAgcPowerThreshold(settings.m_agcPowerThreshold);
     }
     if (channelSettingsKeys.contains("agcThresholdGate") || force) {
-        swgSSBDemodSettings->setAgcThresholdGate(settings.m_agcThresholdGate);
+        swgFreeDVDemodSettings->setAgcThresholdGate(settings.m_agcThresholdGate);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
-        swgSSBDemodSettings->setRgbColor(settings.m_rgbColor);
+        swgFreeDVDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgSSBDemodSettings->setTitle(new QString(settings.m_title));
+        swgFreeDVDemodSettings->setTitle(new QString(settings.m_title));
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgSSBDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        swgFreeDVDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")

@@ -1890,6 +1890,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
       DSDDemodSettings:
         $ref: "http://localhost:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodSettings"
+      FreeDVDemodSettings:
+        $ref: "http://localhost:8081/api/swagger/include/FreeDVDemod.yaml#/FreeDVDemodSettings"
       FreeDVModSettings:
         $ref: "http://localhost:8081/api/swagger/include/FreeDVMod.yaml#/FreeDVModSettings"
       NFMDemodSettings:
@@ -1933,6 +1935,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/BFMDemod.yaml#/BFMDemodReport"
       DSDDemodReport:
         $ref: "http://localhost:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodReport"
+      FreeDVDemodReport:
+        $ref: "http://localhost:8081/api/swagger/include/FreeDVDemod.yaml#/FreeDVDemodReport"
       FreeDVModReport:
         $ref: "http://localhost:8081/api/swagger/include/FreeDVMod.yaml#/FreeDVModReport"
       NFMDemodReport:

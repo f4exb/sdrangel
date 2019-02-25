@@ -27,6 +27,7 @@
 #include "SWGATVModSettings.h"
 #include "SWGBFMDemodSettings.h"
 #include "SWGDSDDemodSettings.h"
+#include "SWGFreeDVDemodSettings.h"
 #include "SWGFreeDVModSettings.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModSettings.h"
@@ -78,6 +79,9 @@ public:
 
     SWGDSDDemodSettings* getDsdDemodSettings();
     void setDsdDemodSettings(SWGDSDDemodSettings* dsd_demod_settings);
+
+    SWGFreeDVDemodSettings* getFreeDvDemodSettings();
+    void setFreeDvDemodSettings(SWGFreeDVDemodSettings* free_dv_demod_settings);
 
     SWGFreeDVModSettings* getFreeDvModSettings();
     void setFreeDvModSettings(SWGFreeDVModSettings* free_dv_mod_settings);
@@ -136,6 +140,9 @@ private:
 
     SWGDSDDemodSettings* dsd_demod_settings;
     bool m_dsd_demod_settings_isSet;
+
+    SWGFreeDVDemodSettings* free_dv_demod_settings;
+    bool m_free_dv_demod_settings_isSet;
 
     SWGFreeDVModSettings* free_dv_mod_settings;
     bool m_free_dv_mod_settings_isSet;

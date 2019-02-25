@@ -4,12 +4,6 @@ FreeDVModSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
-    bandwidth:
-      type: number
-      format: float
-    lowCutoff:
-      type: number
-      format: float
     toneFrequency:
       type: number
       format: float

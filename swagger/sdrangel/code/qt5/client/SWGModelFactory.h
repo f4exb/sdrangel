@@ -60,6 +60,8 @@
 #include "SWGFCDProSettings.h"
 #include "SWGFileSourceReport.h"
 #include "SWGFileSourceSettings.h"
+#include "SWGFreeDVDemodReport.h"
+#include "SWGFreeDVDemodSettings.h"
 #include "SWGFreeDVModReport.h"
 #include "SWGFreeDVModSettings.h"
 #include "SWGFrequency.h"
@@ -276,6 +278,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFileSourceSettings").compare(type) == 0) {
       return new SWGFileSourceSettings();
+    }
+    if(QString("SWGFreeDVDemodReport").compare(type) == 0) {
+      return new SWGFreeDVDemodReport();
+    }
+    if(QString("SWGFreeDVDemodSettings").compare(type) == 0) {
+      return new SWGFreeDVDemodSettings();
     }
     if(QString("SWGFreeDVModReport").compare(type) == 0) {
       return new SWGFreeDVModReport();

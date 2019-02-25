@@ -30,10 +30,6 @@ SWGFreeDVModSettings::SWGFreeDVModSettings(QString* json) {
 SWGFreeDVModSettings::SWGFreeDVModSettings() {
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
-    bandwidth = 0.0f;
-    m_bandwidth_isSet = false;
-    low_cutoff = 0.0f;
-    m_low_cutoff_isSet = false;
     tone_frequency = 0.0f;
     m_tone_frequency_isSet = false;
     volume_factor = 0.0f;
@@ -78,10 +74,6 @@ void
 SWGFreeDVModSettings::init() {
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
-    bandwidth = 0.0f;
-    m_bandwidth_isSet = false;
-    low_cutoff = 0.0f;
-    m_low_cutoff_isSet = false;
     tone_frequency = 0.0f;
     m_tone_frequency_isSet = false;
     volume_factor = 0.0f;
@@ -127,8 +119,6 @@ SWGFreeDVModSettings::cleanup() {
 
 
 
-
-
     if(title != nullptr) { 
         delete title;
     }
@@ -162,10 +152,6 @@ SWGFreeDVModSettings::fromJson(QString &json) {
 void
 SWGFreeDVModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
-    
-    ::SWGSDRangel::setValue(&bandwidth, pJson["bandwidth"], "float", "");
-    
-    ::SWGSDRangel::setValue(&low_cutoff, pJson["lowCutoff"], "float", "");
     
     ::SWGSDRangel::setValue(&tone_frequency, pJson["toneFrequency"], "float", "");
     
@@ -219,12 +205,6 @@ SWGFreeDVModSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_input_frequency_offset_isSet){
         obj->insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
-    }
-    if(m_bandwidth_isSet){
-        obj->insert("bandwidth", QJsonValue(bandwidth));
-    }
-    if(m_low_cutoff_isSet){
-        obj->insert("lowCutoff", QJsonValue(low_cutoff));
     }
     if(m_tone_frequency_isSet){
         obj->insert("toneFrequency", QJsonValue(tone_frequency));
@@ -289,26 +269,6 @@ void
 SWGFreeDVModSettings::setInputFrequencyOffset(qint64 input_frequency_offset) {
     this->input_frequency_offset = input_frequency_offset;
     this->m_input_frequency_offset_isSet = true;
-}
-
-float
-SWGFreeDVModSettings::getBandwidth() {
-    return bandwidth;
-}
-void
-SWGFreeDVModSettings::setBandwidth(float bandwidth) {
-    this->bandwidth = bandwidth;
-    this->m_bandwidth_isSet = true;
-}
-
-float
-SWGFreeDVModSettings::getLowCutoff() {
-    return low_cutoff;
-}
-void
-SWGFreeDVModSettings::setLowCutoff(float low_cutoff) {
-    this->low_cutoff = low_cutoff;
-    this->m_low_cutoff_isSet = true;
 }
 
 float
@@ -487,8 +447,6 @@ SWGFreeDVModSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_input_frequency_offset_isSet){ isObjectUpdated = true; break;}
-        if(m_bandwidth_isSet){ isObjectUpdated = true; break;}
-        if(m_low_cutoff_isSet){ isObjectUpdated = true; break;}
         if(m_tone_frequency_isSet){ isObjectUpdated = true; break;}
         if(m_volume_factor_isSet){ isObjectUpdated = true; break;}
         if(m_span_log2_isSet){ isObjectUpdated = true; break;}

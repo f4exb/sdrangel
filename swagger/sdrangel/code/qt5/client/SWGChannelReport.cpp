@@ -42,6 +42,8 @@ SWGChannelReport::SWGChannelReport() {
     m_bfm_demod_report_isSet = false;
     dsd_demod_report = nullptr;
     m_dsd_demod_report_isSet = false;
+    free_dv_demod_report = nullptr;
+    m_free_dv_demod_report_isSet = false;
     free_dv_mod_report = nullptr;
     m_free_dv_mod_report_isSet = false;
     nfm_demod_report = nullptr;
@@ -84,6 +86,8 @@ SWGChannelReport::init() {
     m_bfm_demod_report_isSet = false;
     dsd_demod_report = new SWGDSDDemodReport();
     m_dsd_demod_report_isSet = false;
+    free_dv_demod_report = new SWGFreeDVDemodReport();
+    m_free_dv_demod_report_isSet = false;
     free_dv_mod_report = new SWGFreeDVModReport();
     m_free_dv_mod_report_isSet = false;
     nfm_demod_report = new SWGNFMDemodReport();
@@ -126,6 +130,9 @@ SWGChannelReport::cleanup() {
     }
     if(dsd_demod_report != nullptr) { 
         delete dsd_demod_report;
+    }
+    if(free_dv_demod_report != nullptr) { 
+        delete free_dv_demod_report;
     }
     if(free_dv_mod_report != nullptr) { 
         delete free_dv_mod_report;
@@ -184,6 +191,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&dsd_demod_report, pJson["DSDDemodReport"], "SWGDSDDemodReport", "SWGDSDDemodReport");
     
+    ::SWGSDRangel::setValue(&free_dv_demod_report, pJson["FreeDVDemodReport"], "SWGFreeDVDemodReport", "SWGFreeDVDemodReport");
+    
     ::SWGSDRangel::setValue(&free_dv_mod_report, pJson["FreeDVModReport"], "SWGFreeDVModReport", "SWGFreeDVModReport");
     
     ::SWGSDRangel::setValue(&nfm_demod_report, pJson["NFMDemodReport"], "SWGNFMDemodReport", "SWGNFMDemodReport");
@@ -240,6 +249,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((dsd_demod_report != nullptr) && (dsd_demod_report->isSet())){
         toJsonValue(QString("DSDDemodReport"), dsd_demod_report, obj, QString("SWGDSDDemodReport"));
+    }
+    if((free_dv_demod_report != nullptr) && (free_dv_demod_report->isSet())){
+        toJsonValue(QString("FreeDVDemodReport"), free_dv_demod_report, obj, QString("SWGFreeDVDemodReport"));
     }
     if((free_dv_mod_report != nullptr) && (free_dv_mod_report->isSet())){
         toJsonValue(QString("FreeDVModReport"), free_dv_mod_report, obj, QString("SWGFreeDVModReport"));
@@ -343,6 +355,16 @@ void
 SWGChannelReport::setDsdDemodReport(SWGDSDDemodReport* dsd_demod_report) {
     this->dsd_demod_report = dsd_demod_report;
     this->m_dsd_demod_report_isSet = true;
+}
+
+SWGFreeDVDemodReport*
+SWGChannelReport::getFreeDvDemodReport() {
+    return free_dv_demod_report;
+}
+void
+SWGChannelReport::setFreeDvDemodReport(SWGFreeDVDemodReport* free_dv_demod_report) {
+    this->free_dv_demod_report = free_dv_demod_report;
+    this->m_free_dv_demod_report_isSet = true;
 }
 
 SWGFreeDVModReport*
@@ -457,6 +479,7 @@ SWGChannelReport::isSet(){
         if(atv_mod_report != nullptr && atv_mod_report->isSet()){ isObjectUpdated = true; break;}
         if(bfm_demod_report != nullptr && bfm_demod_report->isSet()){ isObjectUpdated = true; break;}
         if(dsd_demod_report != nullptr && dsd_demod_report->isSet()){ isObjectUpdated = true; break;}
+        if(free_dv_demod_report != nullptr && free_dv_demod_report->isSet()){ isObjectUpdated = true; break;}
         if(free_dv_mod_report != nullptr && free_dv_mod_report->isSet()){ isObjectUpdated = true; break;}
         if(nfm_demod_report != nullptr && nfm_demod_report->isSet()){ isObjectUpdated = true; break;}
         if(nfm_mod_report != nullptr && nfm_mod_report->isSet()){ isObjectUpdated = true; break;}

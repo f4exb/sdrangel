@@ -11,18 +11,17 @@
  */
 
 /*
- * SWGFreeDVModSettings.h
+ * SWGFreeDVDemodSettings.h
  *
- * FreeDVMod
+ * FreeDVDemod
  */
 
-#ifndef SWGFreeDVModSettings_H_
-#define SWGFreeDVModSettings_H_
+#ifndef SWGFreeDVDemodSettings_H_
+#define SWGFreeDVDemodSettings_H_
 
 #include <QJsonObject>
 
 
-#include "SWGCWKeyerSettings.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -30,27 +29,24 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGFreeDVModSettings: public SWGObject {
+class SWG_API SWGFreeDVDemodSettings: public SWGObject {
 public:
-    SWGFreeDVModSettings();
-    SWGFreeDVModSettings(QString* json);
-    virtual ~SWGFreeDVModSettings();
+    SWGFreeDVDemodSettings();
+    SWGFreeDVDemodSettings(QString* json);
+    virtual ~SWGFreeDVDemodSettings();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGFreeDVModSettings* fromJson(QString &jsonString) override;
+    virtual SWGFreeDVDemodSettings* fromJson(QString &jsonString) override;
 
     qint64 getInputFrequencyOffset();
     void setInputFrequencyOffset(qint64 input_frequency_offset);
 
-    float getToneFrequency();
-    void setToneFrequency(float tone_frequency);
-
-    float getVolumeFactor();
-    void setVolumeFactor(float volume_factor);
+    float getVolume();
+    void setVolume(float volume);
 
     qint32 getSpanLog2();
     void setSpanLog2(qint32 span_log2);
@@ -58,8 +54,20 @@ public:
     qint32 getAudioMute();
     void setAudioMute(qint32 audio_mute);
 
-    qint32 getPlayLoop();
-    void setPlayLoop(qint32 play_loop);
+    qint32 getAgc();
+    void setAgc(qint32 agc);
+
+    qint32 getAgcClamping();
+    void setAgcClamping(qint32 agc_clamping);
+
+    qint32 getAgcTimeLog2();
+    void setAgcTimeLog2(qint32 agc_time_log2);
+
+    qint32 getAgcPowerThreshold();
+    void setAgcPowerThreshold(qint32 agc_power_threshold);
+
+    qint32 getAgcThresholdGate();
+    void setAgcThresholdGate(qint32 agc_threshold_gate);
 
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
@@ -73,30 +81,6 @@ public:
     qint32 getFreeDvMode();
     void setFreeDvMode(qint32 free_dv_mode);
 
-    qint32 getModAfInput();
-    void setModAfInput(qint32 mod_af_input);
-
-    qint32 getGaugeInputElseModem();
-    void setGaugeInputElseModem(qint32 gauge_input_else_modem);
-
-    qint32 getUseReverseApi();
-    void setUseReverseApi(qint32 use_reverse_api);
-
-    QString* getReverseApiAddress();
-    void setReverseApiAddress(QString* reverse_api_address);
-
-    qint32 getReverseApiPort();
-    void setReverseApiPort(qint32 reverse_api_port);
-
-    qint32 getReverseApiDeviceIndex();
-    void setReverseApiDeviceIndex(qint32 reverse_api_device_index);
-
-    qint32 getReverseApiChannelIndex();
-    void setReverseApiChannelIndex(qint32 reverse_api_channel_index);
-
-    SWGCWKeyerSettings* getCwKeyer();
-    void setCwKeyer(SWGCWKeyerSettings* cw_keyer);
-
 
     virtual bool isSet() override;
 
@@ -104,11 +88,8 @@ private:
     qint64 input_frequency_offset;
     bool m_input_frequency_offset_isSet;
 
-    float tone_frequency;
-    bool m_tone_frequency_isSet;
-
-    float volume_factor;
-    bool m_volume_factor_isSet;
+    float volume;
+    bool m_volume_isSet;
 
     qint32 span_log2;
     bool m_span_log2_isSet;
@@ -116,8 +97,20 @@ private:
     qint32 audio_mute;
     bool m_audio_mute_isSet;
 
-    qint32 play_loop;
-    bool m_play_loop_isSet;
+    qint32 agc;
+    bool m_agc_isSet;
+
+    qint32 agc_clamping;
+    bool m_agc_clamping_isSet;
+
+    qint32 agc_time_log2;
+    bool m_agc_time_log2_isSet;
+
+    qint32 agc_power_threshold;
+    bool m_agc_power_threshold_isSet;
+
+    qint32 agc_threshold_gate;
+    bool m_agc_threshold_gate_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;
@@ -131,32 +124,8 @@ private:
     qint32 free_dv_mode;
     bool m_free_dv_mode_isSet;
 
-    qint32 mod_af_input;
-    bool m_mod_af_input_isSet;
-
-    qint32 gauge_input_else_modem;
-    bool m_gauge_input_else_modem_isSet;
-
-    qint32 use_reverse_api;
-    bool m_use_reverse_api_isSet;
-
-    QString* reverse_api_address;
-    bool m_reverse_api_address_isSet;
-
-    qint32 reverse_api_port;
-    bool m_reverse_api_port_isSet;
-
-    qint32 reverse_api_device_index;
-    bool m_reverse_api_device_index_isSet;
-
-    qint32 reverse_api_channel_index;
-    bool m_reverse_api_channel_index_isSet;
-
-    SWGCWKeyerSettings* cw_keyer;
-    bool m_cw_keyer_isSet;
-
 };
 
 }
 
-#endif /* SWGFreeDVModSettings_H_ */
+#endif /* SWGFreeDVDemodSettings_H_ */

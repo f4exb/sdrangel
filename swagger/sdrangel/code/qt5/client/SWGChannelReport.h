@@ -27,6 +27,7 @@
 #include "SWGATVModReport.h"
 #include "SWGBFMDemodReport.h"
 #include "SWGDSDDemodReport.h"
+#include "SWGFreeDVDemodReport.h"
 #include "SWGFreeDVModReport.h"
 #include "SWGNFMDemodReport.h"
 #include "SWGNFMModReport.h"
@@ -77,6 +78,9 @@ public:
 
     SWGDSDDemodReport* getDsdDemodReport();
     void setDsdDemodReport(SWGDSDDemodReport* dsd_demod_report);
+
+    SWGFreeDVDemodReport* getFreeDvDemodReport();
+    void setFreeDvDemodReport(SWGFreeDVDemodReport* free_dv_demod_report);
 
     SWGFreeDVModReport* getFreeDvModReport();
     void setFreeDvModReport(SWGFreeDVModReport* free_dv_mod_report);
@@ -132,6 +136,9 @@ private:
 
     SWGDSDDemodReport* dsd_demod_report;
     bool m_dsd_demod_report_isSet;
+
+    SWGFreeDVDemodReport* free_dv_demod_report;
+    bool m_free_dv_demod_report_isSet;
 
     SWGFreeDVModReport* free_dv_mod_report;
     bool m_free_dv_mod_report_isSet;
