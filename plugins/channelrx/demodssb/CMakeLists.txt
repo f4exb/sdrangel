@@ -44,6 +44,7 @@ target_link_libraries(demodssb
 	${QT_LIBRARIES}
 	sdrbase
 	sdrgui
+	swagger
 )
 
 target_link_libraries(demodssb Qt5::Core Qt5::Widgets)
