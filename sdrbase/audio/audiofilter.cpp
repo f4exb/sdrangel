@@ -38,23 +38,23 @@ AudioFilter::~AudioFilter()
 {}
 
 
-void AudioFilter::setDecimFilters(int srHigh, int srLow, float fcHigh, float fcLow)
+void AudioFilter::setDecimFilters(int srHigh, int srLow, float fcHigh, float fcLow, float fgain)
 {
     double fcNormHigh = fcHigh / srHigh;
     double fcNormLow = fcLow / srLow;
 
-    calculate2(false, fcNormHigh, m_lpva, m_lpvb);
-    calculate2(true, fcNormLow, m_hpva, m_hpvb);
+    calculate2(false, fcNormHigh, m_lpva, m_lpvb, fgain);
+    calculate2(true, fcNormLow, m_hpva, m_hpvb, fgain);
 
     m_filterLP.setCoeffs(m_lpva, m_lpvb);
     m_filterHP.setCoeffs(m_hpva, m_hpvb);
 }
 
-void AudioFilter::calculate2(bool highPass, double fc, float *va, float *vb)
+void AudioFilter::calculate2(bool highPass, double fc, float *va, float *vb, float fgain)
 {
     double a[22], b[22];
 
-    cheby(highPass, fc, 0.5, 2, a, b); // low-pass, 0.5% ripple, 2 pole filter
+    cheby(highPass, fc, 0.5, 2, a, b, fgain); // low-pass, 0.5% ripple, 2 pole filter
 
     // Copy to the 2-pole filter coefficients
     for (int i=0; i<3; i++) {
@@ -79,7 +79,7 @@ void AudioFilter::calculate2(bool highPass, double fc, float *va, float *vb)
  * Adapted from BASIC program in table 20-4 of
  * https://www.analog.com/media/en/technical-documentation/dsp-book/dsp_book_Ch20.pdf
  */
-void AudioFilter::cheby(bool highPass, double fc, float pr, int np, double *a, double *b)
+void AudioFilter::cheby(bool highPass, double fc, float pr, int np, double *a, double *b, float fgain)
 {
     double a0, a1, a2, b1, b2;
     double ta[22], tb[22];
@@ -135,6 +135,7 @@ void AudioFilter::cheby(bool highPass, double fc, float pr, int np, double *a, d
     }
 
     double gain = sa/(1.0 -sb);
+    gain /= fgain;
 
     for (int i=0; i<20; i++) {
         a[i] /= gain;

@@ -47,14 +47,14 @@ public:
 
     void useHP(bool useHP) { m_useHP = useHP; }
     bool usesHP() const { return m_useHP; }
-    void setDecimFilters(int srHigh, int srLow, float fcHigh, float fcLow);
+    void setDecimFilters(int srHigh, int srLow, float fcHigh, float fcLow, float gain = 1.0f);
     float run(const float& sample);
     float runHP(const float& sample);
     float runLP(const float& sample);
 
 private:
-    void calculate2(bool highPass, double fc, float *a, float *b); // two pole Chebyshev calculation
-    void cheby(bool highPass, double fc, float pr, int np, double *a, double *b);
+    void calculate2(bool highPass, double fc, float *a, float *b, float fgain); // two pole Chebyshev calculation
+    void cheby(bool highPass, double fc, float pr, int np, double *a, double *b, float fgain);
     void cheby_sub(bool highPass, double fc, float pr, int np, int stage,
             double& a0, double& a1, double& a2, double& b1, double& b2);
 

@@ -30,7 +30,7 @@ void AudioResampler::setDecimation(uint32_t decimation)
     m_decimation = decimation == 0 ? 1 : decimation;
 }
 
-void AudioResampler::setAudioFilters(int srHigh, int srLow, int fcLow, int fcHigh)
+void AudioResampler::setAudioFilters(int srHigh, int srLow, int fcLow, int fcHigh, float gain)
 {
     srHigh = (srHigh <= 100 ? 100 : srHigh);
     srLow = (srLow <= 0 ? 1 : srLow);
@@ -40,7 +40,7 @@ void AudioResampler::setAudioFilters(int srHigh, int srLow, int fcLow, int fcHig
     fcHigh = fcHigh < 100 ? 100 : fcHigh;
     fcLow = fcLow > fcHigh - 100 ? fcHigh - 100 : fcLow;
 
-    m_audioFilter.setDecimFilters(srHigh, srLow, fcHigh, fcLow);
+    m_audioFilter.setDecimFilters(srHigh, srLow, fcHigh, fcLow, gain);
 }
 
 bool AudioResampler::downSample(qint16 sampleIn, qint16& sampleOut)

@@ -49,8 +49,8 @@ const QString FreeDVDemod::m_channelId = "FreeDVDemod";
 FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
-        m_hiCutoff(5000),
-        m_lowCutoff(300),
+        m_hiCutoff(6000),
+        m_lowCutoff(0),
         m_volume(2),
         m_spanLog2(3),
         m_sum(0),
@@ -97,7 +97,7 @@ FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
 	m_agc.setClampMax(SDR_RX_SCALED/100.0);
 	m_agc.setClamping(m_agcClamping);
 
-	SSBFilter = new fftfilt(m_lowCutoff / m_audioSampleRate, m_hiCutoff / m_audioSampleRate, ssbFftLen);
+	SSBFilter = new fftfilt(m_lowCutoff / m_modemSampleRate, m_hiCutoff / m_modemSampleRate, ssbFftLen);
 
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 	applySettings(m_settings, true);
@@ -320,7 +320,7 @@ bool FreeDVDemod::handleMessage(const Message& cmd)
 
 void FreeDVDemod::pushSampleToDV(int16_t sample)
 {
-    qint16 speechSample, audioSample;
+    qint16 audioSample;
 
     if (m_iModem == m_nin)
     {
@@ -328,9 +328,7 @@ void FreeDVDemod::pushSampleToDV(int16_t sample)
 
         for (int i = 0; i < nout; i++)
         {
-            speechSample = (qint16)(m_speechOut[i] * m_volume);
-
-            while (!m_audioResampler.upSample(speechSample, audioSample)) {
+            while (!m_audioResampler.upSample(m_speechOut[i], audioSample)) {
                 pushSampleToAudio(audioSample);
             }
 
@@ -346,8 +344,8 @@ void FreeDVDemod::pushSampleToDV(int16_t sample)
 
 void FreeDVDemod::pushSampleToAudio(int16_t sample)
 {
-    m_audioBuffer[m_audioBufferFill].l = sample;
-    m_audioBuffer[m_audioBufferFill].r = sample;
+    m_audioBuffer[m_audioBufferFill].l = sample * m_volume;
+    m_audioBuffer[m_audioBufferFill].r = sample * m_volume;
     ++m_audioBufferFill;
 
     if (m_audioBufferFill >= m_audioBuffer.size())
@@ -379,7 +377,7 @@ void FreeDVDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOf
         m_settingsMutex.lock();
         m_interpolator.create(16, inputSampleRate, m_hiCutoff * 1.5f, 2.0f);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance = (Real) inputSampleRate / (Real) m_audioSampleRate;
+        m_interpolatorDistance = (Real) inputSampleRate / (Real) m_modemSampleRate;
         m_settingsMutex.unlock();
     }
 
@@ -394,7 +392,7 @@ void FreeDVDemod::applyAudioSampleRate(int sampleRate)
     m_settingsMutex.lock();
     m_audioFifo.setSize(sampleRate);
     m_audioResampler.setDecimation(sampleRate / m_speechSampleRate);
-    m_audioResampler.setAudioFilters(sampleRate, m_speechSampleRate, 250, 3300);
+    m_audioResampler.setAudioFilters(sampleRate, sampleRate, 250, 3300, 4.0f);
     m_settingsMutex.unlock();
 
     m_audioSampleRate = sampleRate;
@@ -415,14 +413,16 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
                 modemSampleRate, m_settings.m_inputFrequencyOffset);
         m_inputMessageQueue.push(channelConfigMsg);
 
-        m_interpolator.create(16, m_inputSampleRate, m_hiCutoff * 1.5f, 2.0f);
         m_interpolatorDistanceRemain = 0;
+        //m_interpolatorConsumed = false;
         m_interpolatorDistance = (Real) m_inputSampleRate / (Real) modemSampleRate;
-
+        m_interpolator.create(16, m_inputSampleRate, m_hiCutoff * 1.5f, 2.0f);
         SSBFilter->create_filter(m_lowCutoff / (float) modemSampleRate, m_hiCutoff / (float) modemSampleRate);
 
         int agcNbSamples = (modemSampleRate / 1000) * (1<<m_settings.m_agcTimeLog2);
         int agcThresholdGate = (modemSampleRate / 1000) * m_settings.m_agcThresholdGate; // ms
+
+        m_modemSampleRate = modemSampleRate;
 
         if (m_agcNbSamples != agcNbSamples)
         {
@@ -436,8 +436,6 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
             m_agc.setGate(agcThresholdGate);
             m_agcThresholdGate = agcThresholdGate;
         }
-
-        m_modemSampleRate = modemSampleRate;
 
         if (getMessageQueueToGUI())
         {
@@ -583,10 +581,10 @@ void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
         (m_settings.m_agcThresholdGate != settings.m_agcThresholdGate) ||
         (m_settings.m_agcClamping != settings.m_agcClamping) || force)
     {
-        int agcNbSamples = (m_audioSampleRate / 1000) * (1<<settings.m_agcTimeLog2);
+        int agcNbSamples = (m_modemSampleRate / 1000) * (1<<settings.m_agcTimeLog2);
         m_agc.setThresholdEnable(settings.m_agcPowerThreshold != -FreeDVDemodSettings::m_minPowerThresholdDB);
         double agcPowerThreshold = CalcDb::powerFromdB(settings.m_agcPowerThreshold) * (SDR_RX_SCALED*SDR_RX_SCALED);
-        int agcThresholdGate = (m_audioSampleRate / 1000) * settings.m_agcThresholdGate; // ms
+        int agcThresholdGate = (m_modemSampleRate / 1000) * settings.m_agcThresholdGate; // ms
         bool agcClamping = settings.m_agcClamping;
 
         if (m_agcNbSamples != agcNbSamples)
@@ -752,7 +750,7 @@ int FreeDVDemod::webapiSettingsPutPatch(
     if (frequencyOffsetChanged)
     {
         MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
-                m_audioSampleRate, settings.m_inputFrequencyOffset);
+                m_modemSampleRate, settings.m_inputFrequencyOffset);
         m_inputMessageQueue.push(channelConfigMsg);
     }
 

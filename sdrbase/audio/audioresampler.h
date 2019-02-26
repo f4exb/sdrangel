@@ -29,7 +29,7 @@ public:
 
     void setDecimation(uint32_t decimation);
     uint32_t getDecimation() const { return m_decimation; }
-    void setAudioFilters(int srHigh, int srLow, int fcLow, int fcHigh);
+    void setAudioFilters(int srHigh, int srLow, int fcLow, int fcHigh, float gain=1.0f);
     bool downSample(qint16 sampleIn, qint16& sampleOut);
     bool upSample(qint16 sampleIn, qint16& sampleOut);
 
