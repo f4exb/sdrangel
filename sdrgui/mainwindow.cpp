@@ -209,7 +209,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	m_apiServer = new WebAPIServer(m_apiHost, m_apiPort, m_requestMapper);
 	m_apiServer->start();
 
-	connect(qApp, SIGNAL(focusChanged(QWidget *, QWidget *)), this, SLOT(focusHasChanged(QWidget *, QWidget *)));
 	m_commandKeyReceiver = new CommandKeyReceiver();
 	m_commandKeyReceiver->setRelease(true);
 	this->installEventFilter(m_commandKeyReceiver);
@@ -1789,19 +1788,6 @@ void MainWindow::setLoggingOptions()
                 .arg(qApp->applicationPid()));
  #endif
         m_logger->logToFile(QtInfoMsg, appInfoStr);
-    }
-}
-
-void MainWindow::focusHasChanged(QWidget *oldWidget, QWidget *newWidget)
-{
-    (void) oldWidget;
-    // this is the hard way:
-//    if (ui->commandKeyboardConnect->isChecked() && (newWidget != this)) {
-//        setFocus();
-//    }
-    // this is the soft way:
-    if (newWidget != this) {
-        ui->commandKeyboardConnect->setChecked(false);
     }
 }
 

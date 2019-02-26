@@ -663,9 +663,9 @@ This will save the commands immediately. The commands will be automatically save
 
 This will delete the currently selected command or if selection is a group this will delete all commands in the group.
 
-<h5>5B.6.8. Activate keyboard binding</h5>
+<h5>5B.6.8. Activate keyboard bindings</h5>
 
-Use this button to activate the keyboard binding. This requires that the focus is set to the main window. On a few occasions the main window looses focus and the button gets unselected. Just click again on this button to reactivate the keyboard binding. Note that you need to have this button selected (its background should be lit in beige/orange) for the key binding to be effective.
+Use this button to activate the keyboard bindings. Note that you need to have this button selected (its background should be lit in beige/orange) for the key bindings to be effective.
 
 <h3>6. Channels</h3>
 

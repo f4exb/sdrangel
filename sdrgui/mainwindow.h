@@ -391,7 +391,6 @@ private slots:
 	void on_action_removeLastDevice_triggered();
 	void on_action_Exit_triggered();
 	void tabInputViewIndexChanged();
-	void focusHasChanged(QWidget *oldWidget, QWidget *newWidget);
 	void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
 };
 
