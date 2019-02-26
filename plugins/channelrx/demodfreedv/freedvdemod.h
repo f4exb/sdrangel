@@ -282,6 +282,9 @@ private:
 	fftfilt::cmplx m_sum;
 	int m_undersampleCount;
 	int m_inputSampleRate;
+	uint32_t m_modemSampleRate;
+	uint32_t m_speechSampleRate;
+	uint32_t m_audioSampleRate;
 	int m_inputFrequencyOffset;
 	bool m_audioMute;
 	double m_magsq;
@@ -310,8 +313,6 @@ private:
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
 	AudioFifo m_audioFifo;
-	quint32 m_audioSampleRate;
-	quint32 m_modemSampleRate;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -329,6 +330,8 @@ private:
 
 	QMutex m_settingsMutex;
 
+	void pushSampleToDV(int16_t sample);
+	void pushSampleToAudio(int16_t sample);
 	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const FreeDVDemodSettings& settings, bool force = false);
     void applyAudioSampleRate(int sampleRate);

@@ -28,9 +28,10 @@ public:
     ~AudioResampler();
 
     void setDecimation(uint32_t decimation);
+    uint32_t getDecimation() const { return m_decimation; }
     void setAudioFilters(int srHigh, int srLow, int fcLow, int fcHigh);
     bool downSample(qint16 sampleIn, qint16& sampleOut);
-    qint16 upSample(qint16 sampleIn, bool& consumed);
+    bool upSample(qint16 sampleIn, qint16& sampleOut);
 
 private:
     AudioFilter m_audioFilter;

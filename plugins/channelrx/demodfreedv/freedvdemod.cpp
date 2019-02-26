@@ -49,6 +49,15 @@ const QString FreeDVDemod::m_channelId = "FreeDVDemod";
 FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
+        m_hiCutoff(5000),
+        m_lowCutoff(300),
+        m_volume(2),
+        m_spanLog2(3),
+        m_sum(0),
+        m_inputSampleRate(48000),
+        m_modemSampleRate(48000),
+        m_speechSampleRate(8000), // fixed 8 kS/s
+        m_inputFrequencyOffset(0),
         m_audioMute(false),
         m_agc(12000, agcTarget, 1e-2),
         m_agcActive(false),
@@ -60,7 +69,6 @@ FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
         m_audioActive(false),
         m_sampleSink(0),
         m_audioFifo(24000),
-        m_modemSampleRate(48000),
         m_freeDV(0),
         m_nSpeechSamples(0),
         m_nMaxModemSamples(0),
@@ -73,20 +81,13 @@ FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
 {
 	setObjectName(m_channelId);
 
-	m_hiCutoff = 5000;
-	m_lowCutoff = 300;
-	m_volume = 2.0;
-	m_spanLog2 = 3;
-	m_inputSampleRate = 48000;
-	m_inputFrequencyOffset = 0;
-
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
-    m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
+    uint32_t audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
+    applyAudioSampleRate(audioSampleRate);
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 	m_undersampleCount = 0;
-	m_sum = 0;
 
 	m_magsq = 0.0f;
 	m_magsqSum = 0.0f;
@@ -212,34 +213,10 @@ void FreeDVDemod::feed(const SampleVector::const_iterator& begin, const SampleVe
             fftfilt::cmplx& delayedSample = m_squelchDelayLine.readBack(m_agc.getStepDownDelay());
             m_audioActive = delayedSample.real() != 0.0;
             m_squelchDelayLine.write(sideband[i]*agcVal);
+            fftfilt::cmplx z = delayedSample * m_agc.getStepValue();
+            Real demod = (z.real() + z.imag()) * 0.7;
 
-			if (m_audioMute)
-			{
-				m_audioBuffer[m_audioBufferFill].r = 0;
-				m_audioBuffer[m_audioBufferFill].l = 0;
-			}
-			else
-			{
-			    fftfilt::cmplx z = delayedSample * m_agc.getStepValue();
-                Real demod = (z.real() + z.imag()) * 0.7;
-                qint16 sample = (qint16)(demod * m_volume);
-                m_audioBuffer[m_audioBufferFill].l = sample;
-                m_audioBuffer[m_audioBufferFill].r = sample;
-			}
-
-			++m_audioBufferFill;
-
-			if (m_audioBufferFill >= m_audioBuffer.size())
-			{
-				uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
-
-				if (res != m_audioBufferFill)
-				{
-				    qDebug("FreeDVDemod::feed: %u/%u samples written", res, m_audioBufferFill);
-				}
-
-				m_audioBufferFill = 0;
-			}
+            pushSampleToDV((qint16) demod);
 		}
 	}
 
@@ -341,6 +318,50 @@ bool FreeDVDemod::handleMessage(const Message& cmd)
 	}
 }
 
+void FreeDVDemod::pushSampleToDV(int16_t sample)
+{
+    qint16 speechSample, audioSample;
+
+    if (m_iModem == m_nin)
+    {
+        int nout = freedv_rx(m_freeDV, m_speechOut, m_modIn);
+
+        for (int i = 0; i < nout; i++)
+        {
+            speechSample = (qint16)(m_speechOut[i] * m_volume);
+
+            while (!m_audioResampler.upSample(speechSample, audioSample)) {
+                pushSampleToAudio(audioSample);
+            }
+
+            pushSampleToAudio(audioSample);
+        }
+
+        m_iModem = 0;
+        m_iSpeech = 0;
+    }
+
+    m_modIn[m_iModem++] = sample;
+}
+
+void FreeDVDemod::pushSampleToAudio(int16_t sample)
+{
+    m_audioBuffer[m_audioBufferFill].l = sample;
+    m_audioBuffer[m_audioBufferFill].r = sample;
+    ++m_audioBufferFill;
+
+    if (m_audioBufferFill >= m_audioBuffer.size())
+    {
+        uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
+
+        if (res != m_audioBufferFill) {
+            qDebug("FreeDVDemod::pushSampleToAudio: %u/%u samples written", res, m_audioBufferFill);
+        }
+
+        m_audioBufferFill = 0;
+    }
+}
+
 void FreeDVDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
 {
     qDebug() << "FreeDVDemod::applyChannelSettings:"
@@ -372,6 +393,8 @@ void FreeDVDemod::applyAudioSampleRate(int sampleRate)
 
     m_settingsMutex.lock();
     m_audioFifo.setSize(sampleRate);
+    m_audioResampler.setDecimation(sampleRate / m_speechSampleRate);
+    m_audioResampler.setAudioFilters(sampleRate, m_speechSampleRate, 250, 3300);
     m_settingsMutex.unlock();
 
     m_audioSampleRate = sampleRate;
@@ -473,7 +496,7 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
         freedv_set_ext_vco(m_freeDV, 0);
 
         int nSpeechSamples = freedv_get_n_speech_samples(m_freeDV);
-        int nNomModemSamples = freedv_get_n_max_modem_samples(m_freeDV);
+        int nMaxModemSamples = freedv_get_n_max_modem_samples(m_freeDV);
         int Fs = freedv_get_modem_sample_rate(m_freeDV);
         int Rs = freedv_get_modem_symbol_rate(m_freeDV);
 
@@ -483,18 +506,18 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
                 delete[] m_speechOut;
             }
 
-            m_speechOut = new int16_t[m_nSpeechSamples];
+            m_speechOut = new int16_t[nSpeechSamples];
             m_nSpeechSamples = nSpeechSamples;
         }
 
-        if (nNomModemSamples != m_nMaxModemSamples)
+        if (nMaxModemSamples != m_nMaxModemSamples)
         {
             if (m_modIn) {
                 delete[] m_modIn;
             }
 
-            m_modIn = new int16_t[m_nMaxModemSamples];
-            m_nMaxModemSamples = nNomModemSamples;
+            m_modIn = new int16_t[nMaxModemSamples];
+            m_nMaxModemSamples = nMaxModemSamples;
         }
 
         m_iSpeech = 0;

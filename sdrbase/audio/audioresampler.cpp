@@ -65,30 +65,30 @@ bool AudioResampler::downSample(qint16 sampleIn, qint16& sampleOut)
     }
 }
 
-qint16 AudioResampler::upSample(qint16 sampleIn, bool& consumed)
+bool AudioResampler::upSample(qint16 sampleIn, qint16& sampleOut)
 {
     float lpSample;
 
     if (m_decimation == 1)
     {
-        consumed = true;
-        return sampleIn;
+        sampleOut = sampleIn;
+        return true;
     }
 
     if (m_decimationCount >= m_decimation - 1)
     {
-        consumed = true;
         m_decimationCount = 0;
         lpSample = m_audioFilter.run(sampleIn / 32768.0f);
+        sampleOut = lpSample * 32768.0f;
+        return true;
     }
     else
     {
-        consumed = false;
         m_decimationCount++;
         lpSample = m_audioFilter.run(0.0f);
+        sampleOut = lpSample * 32768.0f;
+        return false;
     }
-
-    return lpSample * 32768.0f;
 }
 
 
