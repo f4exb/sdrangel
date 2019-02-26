@@ -481,9 +481,9 @@ bool FreeDVMod::handleMessage(const Message& cmd)
     	std::size_t samplesCount;
 
     	if (m_ifstream.eof()) {
-    		samplesCount = m_fileSize / sizeof(Real);
+    		samplesCount = m_fileSize / sizeof(int16_t);
     	} else {
-    		samplesCount = m_ifstream.tellg() / sizeof(Real);
+    		samplesCount = m_ifstream.tellg() / sizeof(int16_t);
     	}
 
         if (getMessageQueueToGUI())
@@ -539,7 +539,7 @@ void FreeDVMod::openFileStream()
     m_fileSize = m_ifstream.tellg();
     m_ifstream.seekg(0,std::ios_base::beg);
 
-    m_recordLength = m_fileSize / (sizeof(Real) * m_inputSampleRate);
+    m_recordLength = m_fileSize / (sizeof(int16_t) * m_inputSampleRate);
 
     qDebug() << "FreeDVMod::openFileStream: " << m_fileName.toStdString().c_str()
             << " fileSize: " << m_fileSize << "bytes"
