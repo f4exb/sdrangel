@@ -573,7 +573,7 @@ void FreeDVMod::applyAudioSampleRate(int sampleRate)
 
     m_settingsMutex.lock();
     m_audioResampler.setDecimation(sampleRate / m_inputSampleRate);
-    m_audioResampler.setAudioFilters(sampleRate, m_inputSampleRate, 250, 3300);
+    m_audioResampler.setAudioFilters(sampleRate, sampleRate, 250, 3300);
     m_settingsMutex.unlock();
 
     m_audioSampleRate = sampleRate;
