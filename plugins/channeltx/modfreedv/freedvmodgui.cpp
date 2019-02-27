@@ -114,7 +114,7 @@ bool FreeDVModGUI::handleMessage(const Message& message)
     }
     else if (DSPConfigureAudio::match(message))
     {
-        qDebug("FreeDVModGUI::handleMessage: DSPConfigureAudio: %d", m_freeDVMod->getAudioSampleRate());
+        qDebug("FreeDVModGUI::handleMessage: DSPConfigureAudio: %d", m_freeDVMod->getModemSampleRate());
         applyBandwidths(5 - ui->spanLog2->value()); // will update spectrum details with new sample rate
         return true;
     }
@@ -464,13 +464,10 @@ void FreeDVModGUI::displaySettings()
 
     // Prevent uncontrolled triggering of applyBandwidths
     ui->spanLog2->blockSignals(true);
-
     ui->spanLog2->setValue(5 - m_settings.m_spanLog2);
-    ui->gaugeInput->setChecked(m_settings.m_gaugeInputElseModem);
-
-    QString s = QString::number(m_freeDVMod->getHiCutoff()/1000.0, 'f', 1);
-
     ui->spanLog2->blockSignals(false);
+
+    ui->gaugeInput->setChecked(m_settings.m_gaugeInputElseModem);
 
     // The only one of the four signals triggering applyBandwidths will trigger it once only with all other values
     // set correctly and therefore validate the settings and apply them to dependent widgets

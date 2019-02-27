@@ -194,6 +194,11 @@
           </item>
           <item>
            <property name="text">
+            <string>700C</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
             <string>700D</string>
            </property>
           </item>

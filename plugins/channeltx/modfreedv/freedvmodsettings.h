@@ -39,6 +39,7 @@ struct FreeDVModSettings
         FreeDVMode2400A,
         FreeDVMode1600,
         FreeDVMode800XA,
+        FreeDVMode700C,
         FreeDVMode700D
     } FreeDVMode;
 

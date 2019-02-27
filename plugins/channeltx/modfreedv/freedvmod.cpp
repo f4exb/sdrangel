@@ -648,6 +648,10 @@ void FreeDVMod::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
 
     switch(mode)
     {
+    case FreeDVModSettings::FreeDVMode700C:
+        fdv_mode = FREEDV_MODE_700C;
+        m_scaleFactor = SDR_TX_SCALEF / 3.2f;
+        break;
     case FreeDVModSettings::FreeDVMode700D:
         fdv_mode = FREEDV_MODE_700D;
         m_scaleFactor = SDR_TX_SCALEF / 3.2f;

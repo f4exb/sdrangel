@@ -178,9 +178,10 @@ int FreeDVModSettings::getHiCutoff(FreeDVMode freeDVMode)
         case FreeDVModSettings::FreeDVMode800XA: // C4FM NB
             return 2400.0;
             break;
+        case FreeDVModSettings::FreeDVMode700C: // OFDM
         case FreeDVModSettings::FreeDVMode700D: // OFDM
         case FreeDVModSettings::FreeDVMode1600: // OFDM
-            return 2200.0;
+            return 2400.0;
             break;
         case FreeDVModSettings::FreeDVMode2400A: // C4FM WB
         default:
@@ -196,9 +197,10 @@ int FreeDVModSettings::getLowCutoff(FreeDVMode freeDVMode)
         case FreeDVModSettings::FreeDVMode800XA: // C4FM NB
             return 400.0;
             break;
+        case FreeDVModSettings::FreeDVMode700C: // OFDM
         case FreeDVModSettings::FreeDVMode700D: // OFDM
         case FreeDVModSettings::FreeDVMode1600: // OFDM
-            return 800.0;
+            return 600.0;
             break;
         case FreeDVModSettings::FreeDVMode2400A: // C4FM WB
         default:

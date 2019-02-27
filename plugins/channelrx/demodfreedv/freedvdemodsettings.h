@@ -30,7 +30,8 @@ struct FreeDVDemodSettings
         FreeDVMode2400A,
         FreeDVMode1600,
         FreeDVMode800XA,
-        FreeDVMode700D
+        FreeDVMode700C,
+        FreeDVMode700D,
     } FreeDVMode;
 
     qint32 m_inputFrequencyOffset;
