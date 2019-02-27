@@ -510,6 +510,81 @@
      </layout>
     </item>
     <item>
+     <layout class="QHBoxLayout" name="statsLayout">
+      <item>
+       <widget class="QLabel" name="snrLabel">
+        <property name="text">
+         <string>SNR</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="LevelMeterSignalDB" name="snrMeter" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>180</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="snrUnits">
+        <property name="text">
+         <string>dB</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="berLabel">
+        <property name="text">
+         <string>BER</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="berText">
+        <property name="text">
+         <string>00</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="syncLabel">
+        <property name="text">
+         <string>Syn</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="synText">
+        <property name="text">
+         <string>00</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="spanLayout">
       <item>
        <widget class="QLabel" name="spanLabel">

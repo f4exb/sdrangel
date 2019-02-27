@@ -162,6 +162,8 @@ public:
         m_magsqCount = 0;
     }
 
+	void getSNRLevels(double& avg, double& peak, int& nbSamples);
+
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage);
@@ -207,6 +209,17 @@ private:
 		uint32_t m_frameCount;
 		uint32_t m_berFrameCount; //!< count of frames for BER estimation
 		uint32_t m_fps; //!< frames per second
+	};
+
+	struct FreeDVSNR
+	{
+		FreeDVSNR();
+		void accumulate(float snrdB);
+
+		double m_sum;
+		float m_peak;
+		int m_n;
+		bool m_reset;
 	};
 
 	class MsgConfigureFreeDVDemodPrivate : public Message {
@@ -359,6 +372,7 @@ private:
     int16_t *m_modIn;
     AudioResampler m_audioResampler;
 	FreeDVStats m_freeDVStats;
+	FreeDVSNR m_freeDVSNR;
 
 	QMutex m_settingsMutex;
 

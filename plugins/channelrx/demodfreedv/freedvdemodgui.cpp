@@ -153,6 +153,7 @@ void FreeDVDemodGUI::on_deltaFrequency_changed(qint64 value)
 
 void FreeDVDemodGUI::on_reSync_clicked(bool checked)
 {
+    (void) checked;
     FreeDVDemod::MsgResyncFreeDVDemod* message = FreeDVDemod::MsgResyncFreeDVDemod::create();
     m_freeDVDemod->getInputMessageQueue()->push(message);
 }
@@ -298,6 +299,7 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
+    ui->snrMeter->setRange(-20, 30);
 
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 

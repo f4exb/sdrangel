@@ -91,8 +91,31 @@ void FreeDVDemod::FreeDVStats::collect(struct freedv *freeDV)
 
     m_berFrameCount++;
     m_frameCount++;
+}
 
+FreeDVDemod::FreeDVSNR::FreeDVSNR()
+{
+    m_sum = 0.0f;
+    m_peak = 0.0f;
+    m_n = 0;
+    m_reset = true;
+}
 
+void FreeDVDemod::FreeDVSNR::accumulate(float snrdB)
+{
+    if (m_reset)
+    {
+        m_sum = CalcDb::powerFromdB(snrdB);
+        m_peak = snrdB;
+        m_n = 1;
+        m_reset = false;
+    }
+    else
+    {
+        m_sum += CalcDb::powerFromdB(snrdB);
+        m_peak = std::max(m_peak, snrdB);
+        m_n++;
+    }
 }
 
 FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
@@ -382,6 +405,7 @@ void FreeDVDemod::pushSampleToDV(int16_t sample)
     {
         int nout = freedv_rx(m_freeDV, m_speechOut, m_modIn);
         m_freeDVStats.collect(m_freeDV);
+        m_freeDVSNR.accumulate(m_freeDVStats.m_snrEst);
 
         for (int i = 0; i < nout; i++)
         {
@@ -724,6 +748,23 @@ void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
     }
 
     m_settings = settings;
+}
+
+void FreeDVDemod::getSNRLevels(double& avg, double& peak, int& nbSamples)
+{
+    if (m_freeDVSNR.m_n > 0)
+    {
+        avg = CalcDb::dbPower(m_freeDVSNR.m_sum / m_freeDVSNR.m_n);
+        peak = m_freeDVSNR.m_peak;
+        nbSamples = m_freeDVSNR.m_n;
+        m_freeDVSNR.m_reset = true;
+    }
+    else
+    {
+        avg = 0.0;
+        peak = 0.0;
+        nbSamples = 1;
+    }
 }
 
 QByteArray FreeDVDemod::serialize() const
