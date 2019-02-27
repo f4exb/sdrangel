@@ -76,7 +76,6 @@ FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
         m_iModem(0),
         m_speechOut(0),
         m_modIn(0),
-        m_scaleFactor(SDR_RX_SCALEF),
         m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName(m_channelId);
@@ -456,24 +455,19 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
     {
     case FreeDVDemodSettings::FreeDVMode700C:
         fdv_mode = FREEDV_MODE_700C;
-        m_scaleFactor = SDR_RX_SCALEF / 3.2f;
         break;
     case FreeDVDemodSettings::FreeDVMode700D:
         fdv_mode = FREEDV_MODE_700D;
-        m_scaleFactor = SDR_RX_SCALEF / 3.2f;
         break;
     case FreeDVDemodSettings::FreeDVMode800XA:
         fdv_mode = FREEDV_MODE_800XA;
-        m_scaleFactor = SDR_RX_SCALEF / 8.2f;
         break;
     case FreeDVDemodSettings::FreeDVMode1600:
         fdv_mode = FREEDV_MODE_1600;
-        m_scaleFactor = SDR_RX_SCALEF / 3.2f;
         break;
     case FreeDVDemodSettings::FreeDVMode2400A:
     default:
         fdv_mode = FREEDV_MODE_2400A;
-        m_scaleFactor = SDR_RX_SCALEF / 8.2f;
         break;
     }
 
@@ -494,7 +488,6 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
         freedv_set_snr_squelch_thresh(m_freeDV, -100.0);
         freedv_set_squelch_en(m_freeDV, 0);
         freedv_set_clip(m_freeDV, 0);
-        freedv_set_tx_bpf(m_freeDV, 1);
         freedv_set_ext_vco(m_freeDV, 0);
 
         int nSpeechSamples = freedv_get_n_speech_samples(m_freeDV);

@@ -39,11 +39,11 @@ FreeDVDemodSettings::FreeDVDemodSettings() :
 void FreeDVDemodSettings::resetToDefaults()
 {
     m_audioMute = false;
-    m_agc = false;
+    m_agc = true;
     m_agcClamping = false;
-    m_agcPowerThreshold = -40;
-    m_agcThresholdGate = 4;
-    m_agcTimeLog2 = 7;
+    m_agcPowerThreshold = -100;
+    m_agcThresholdGate = 0;
+    m_agcTimeLog2 = 0;
     m_volume = 3.0;
     m_spanLog2 = 3;
     m_inputFrequencyOffset = 0;

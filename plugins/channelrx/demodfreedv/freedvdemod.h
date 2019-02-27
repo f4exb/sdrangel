@@ -325,7 +325,6 @@ private:
     int m_iModem;
     int16_t *m_speechOut;
     int16_t *m_modIn;
-    float m_scaleFactor; //!< divide by this amount to scale from int16 to float in [-1.0, 1.0] interval
     AudioResampler m_audioResampler;
 
 	QMutex m_settingsMutex;

@@ -337,7 +337,7 @@
          <string>AGC time constant (ms in log2 steps)</string>
         </property>
         <property name="minimum">
-         <number>4</number>
+         <number>0</number>
         </property>
         <property name="maximum">
          <number>11</number>
