@@ -177,6 +177,25 @@ private:
         double m_magsqPeak;
     };
 
+	struct FreeDVStats
+	{
+		FreeDVStats();
+		void init();
+		void collect(struct freedv *freedv);
+
+		int m_sync;
+		float m_snrEst;
+		float m_clockOffset;
+		float m_freqOffset;
+		float m_syncMetric;
+		int m_totalBitErrors;
+		int m_lastTotalBitErrors;
+		int m_ber; //!< estimated BER (b/s)
+		uint32_t m_frameCount;
+		uint32_t m_berFrameCount; //!< count of frames for BER estimation
+		uint32_t m_fps; //!< frames per second
+	};
+
 	class MsgConfigureFreeDVDemodPrivate : public Message {
 		MESSAGE_CLASS_DECLARATION
 
@@ -326,6 +345,7 @@ private:
     int16_t *m_speechOut;
     int16_t *m_modIn;
     AudioResampler m_audioResampler;
+	FreeDVStats m_freeDVStats;
 
 	QMutex m_settingsMutex;
 

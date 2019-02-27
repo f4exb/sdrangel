@@ -46,6 +46,54 @@ MESSAGE_CLASS_DEFINITION(FreeDVDemod::MsgConfigureChannelizer, Message)
 const QString FreeDVDemod::m_channelIdURI = "sdrangel.channel.freedvdemod";
 const QString FreeDVDemod::m_channelId = "FreeDVDemod";
 
+FreeDVDemod::FreeDVStats::FreeDVStats()
+{
+    init();
+}
+
+void FreeDVDemod::FreeDVStats::init()
+{
+    m_sync = 0;
+    m_snrEst = -20;
+    m_clockOffset = 0;
+    m_freqOffset = 0;
+    m_syncMetric = 0;
+    m_totalBitErrors = 0;
+    m_lastTotalBitErrors = 0;
+    m_ber = 0;
+    m_frameCount = 0;
+    m_berFrameCount = 0;
+    m_fps = 1;
+}
+
+void FreeDVDemod::FreeDVStats::collect(struct freedv *freeDV)
+{
+    struct MODEM_STATS stats;
+
+    freedv_get_modem_extended_stats(freeDV, &stats);
+    m_totalBitErrors = freedv_get_total_bit_errors(freeDV);
+    m_clockOffset = stats.clock_offset;
+    m_freqOffset = stats.foff;
+    m_syncMetric = stats.sync_metric;
+    m_sync = stats.sync;
+    m_snrEst = stats.snr_est;
+
+    if (m_berFrameCount >= m_fps)
+    {
+        m_ber = m_totalBitErrors - m_lastTotalBitErrors;
+        m_ber = m_ber < 0 ? 0 : m_ber;
+        m_berFrameCount = 0;
+        m_lastTotalBitErrors = m_totalBitErrors;
+    }
+
+    m_berFrameCount++;
+    m_frameCount++;
+
+    qDebug("FreeDVStats::collect: demod sync: %d sync metric: %f demod snr: %3.2f dB  BER: %d clock offset: %f freq offset: %f",
+        m_sync, m_syncMetric, m_snrEst, m_ber, m_clockOffset, m_freqOffset);
+
+}
+
 FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
@@ -324,6 +372,7 @@ void FreeDVDemod::pushSampleToDV(int16_t sample)
     if (m_iModem == m_nin)
     {
         int nout = freedv_rx(m_freeDV, m_speechOut, m_modIn);
+        m_freeDVStats.collect(m_freeDV);
 
         for (int i = 0; i < nout; i++)
         {
@@ -494,6 +543,11 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
         int nMaxModemSamples = freedv_get_n_max_modem_samples(m_freeDV);
         int Fs = freedv_get_modem_sample_rate(m_freeDV);
         int Rs = freedv_get_modem_symbol_rate(m_freeDV);
+        m_freeDVStats.init();
+
+        if (m_nin > 0) {
+            m_freeDVStats.m_fps = m_modemSampleRate / m_nin;
+        }
 
         if (nSpeechSamples != m_nSpeechSamples)
         {
@@ -526,7 +580,8 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
                 << " Rs: " << Rs
                 << " m_nSpeechSamples: " << m_nSpeechSamples
                 << " m_nMaxModemSamples: " << m_nMaxModemSamples
-                << " m_nin: " << m_nin;
+                << " m_nin: " << m_nin
+                << " FPS: " << m_freeDVStats.m_fps;
     }
 
     m_settingsMutex.unlock();
