@@ -40,6 +40,7 @@
 #include "freedvdemod.h"
 
 MESSAGE_CLASS_DEFINITION(FreeDVDemod::MsgConfigureFreeDVDemod, Message)
+MESSAGE_CLASS_DEFINITION(FreeDVDemod::MsgResyncFreeDVDemod, Message)
 MESSAGE_CLASS_DEFINITION(FreeDVDemod::MsgConfigureFreeDVDemodPrivate, Message)
 MESSAGE_CLASS_DEFINITION(FreeDVDemod::MsgConfigureChannelizer, Message)
 
@@ -84,13 +85,13 @@ void FreeDVDemod::FreeDVStats::collect(struct freedv *freeDV)
         m_ber = m_ber < 0 ? 0 : m_ber;
         m_berFrameCount = 0;
         m_lastTotalBitErrors = m_totalBitErrors;
+        qDebug("FreeDVStats::collect: demod sync: %d sync metric: %f demod snr: %3.2f dB  BER: %d clock offset: %f freq offset: %f",
+            m_sync, m_syncMetric, m_snrEst, m_ber, m_clockOffset, m_freqOffset);
     }
 
     m_berFrameCount++;
     m_frameCount++;
 
-    qDebug("FreeDVStats::collect: demod sync: %d sync metric: %f demod snr: %3.2f dB  BER: %d clock offset: %f freq offset: %f",
-        m_sync, m_syncMetric, m_snrEst, m_ber, m_clockOffset, m_freqOffset);
 
 }
 
@@ -325,6 +326,14 @@ bool FreeDVDemod::handleMessage(const Message& cmd)
 
         applySettings(cfg.getSettings(), cfg.getForce());
 
+        return true;
+    }
+    else if (MsgResyncFreeDVDemod::match(cmd))
+    {
+        qDebug("FreeDVDemod::handleMessage: MsgResyncFreeDVDemod");
+        m_settingsMutex.lock();
+        freedv_set_sync(m_freeDV, unsync);
+        m_settingsMutex.unlock();
         return true;
     }
     else if (BasebandSampleSink::MsgThreadedSink::match(cmd))

@@ -71,6 +71,19 @@ public:
         { }
     };
 
+	class MsgResyncFreeDVDemod : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+        static MsgResyncFreeDVDemod* create() {
+            return new MsgResyncFreeDVDemod();
+        }
+
+	private:
+		MsgResyncFreeDVDemod()
+		{}
+	};
+
     class MsgConfigureChannelizer : public Message {
         MESSAGE_CLASS_DECLARATION
 

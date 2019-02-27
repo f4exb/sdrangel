@@ -151,6 +151,12 @@ void FreeDVDemodGUI::on_deltaFrequency_changed(qint64 value)
     applySettings();
 }
 
+void FreeDVDemodGUI::on_reSync_clicked(bool checked)
+{
+    FreeDVDemod::MsgResyncFreeDVDemod* message = FreeDVDemod::MsgResyncFreeDVDemod::create();
+    m_freeDVDemod->getInputMessageQueue()->push(message);
+}
+
 void FreeDVDemodGUI::on_freeDVMode_currentIndexChanged(int index)
 {
     m_settings.m_freeDVMode = (FreeDVDemodSettings::FreeDVMode) index;

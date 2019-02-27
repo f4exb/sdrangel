@@ -96,6 +96,7 @@ private:
 
 private slots:
 	void on_deltaFrequency_changed(qint64 value);
+	void on_reSync_clicked(bool checked);
     void on_freeDVMode_currentIndexChanged(int index);
 	void on_volume_valueChanged(int value);
 	void on_agc_toggled(bool checked);
