@@ -523,7 +523,7 @@
         <property name="minimumSize">
          <size>
           <width>180</width>
-          <height>0</height>
+          <height>24</height>
          </size>
         </property>
         <property name="font">

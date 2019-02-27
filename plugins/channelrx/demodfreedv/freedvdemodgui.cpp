@@ -299,7 +299,9 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
+    ui->snrMeter->setColorTheme(LevelMeterSignalDB::ColorCyanAndBlue);
     ui->snrMeter->setRange(-20, 30);
+    ui->snrMeter->setAverageSmoothing(2);
 
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
@@ -473,6 +475,16 @@ void FreeDVDemodGUI::tick()
     if (m_tickCount % 4 == 0) {
         ui->channelPower->setText(tr("%1 dB").arg(powDbAvg, 0, 'f', 1));
     }
+
+    double snrAvg, snrPeak;
+    int nbSNRSamples;
+    m_freeDVDemod->getSNRLevels(snrAvg, snrPeak, nbSNRSamples);
+
+    ui->snrMeter->levelChanged(
+        (20.0f + snrAvg) / 50.0f,
+        (20.0f + snrPeak) / 50.0f,
+        nbSNRSamples
+    );
 
     bool squelchOpen = m_freeDVDemod->getAudioActive();
 

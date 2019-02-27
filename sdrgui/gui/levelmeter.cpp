@@ -64,6 +64,7 @@ LevelMeter::LevelMeter(QWidget *parent)
     ,   m_decayedPeakLevel(0.0)
     ,   m_peakDecayRate(PeakDecayRate)
     ,   m_peakHoldLevel(0.0)
+    ,   m_avgSmoothing(256)
     ,   m_redrawTimer(new QTimer(this))
     ,   m_avgColor(0xff, 0x8b, 0x00, 128)          // color mapper foreground
     ,   m_peakColor(Qt::red)                       // just red 100% opaque
@@ -94,7 +95,7 @@ void LevelMeter::reset()
 void LevelMeter::levelChanged(qreal avgLevel, qreal peakLevel, int numSamples)
 {
     // Smooth the RMS signal
-    const qreal smooth = pow(qreal(0.9), static_cast<qreal>(numSamples) / 256); // TODO: remove this magic number
+    const qreal smooth = pow(qreal(0.9), static_cast<qreal>(numSamples) / m_avgSmoothing);
     m_avgLevel = (m_avgLevel * smooth) + (avgLevel * (1.0 - smooth));
 
     if (peakLevel > m_decayedPeakLevel) {
@@ -141,6 +142,11 @@ void LevelMeter::resizeEvent(QResizeEvent * event)
     Q_UNUSED(event)
 
     resized();
+}
+
+void LevelMeter::setAverageSmoothing(uint32_t smoothingFactor)
+{
+    m_avgSmoothing = smoothingFactor < 1 ? 1 : smoothingFactor > 256 ? 256 : smoothingFactor;
 }
 
 // ====================================================================
@@ -251,22 +257,25 @@ void LevelMeterVU::render(QPainter *painter)
 
 // ====================================================================
 
-const QColor LevelMeterSignalDB::m_avgColor[3] = {
+const QColor LevelMeterSignalDB::m_avgColor[4] = {
         QColor(0xff, 0x8b, 0x00, 128),
         QColor(0x8c, 0xff, 0x00, 128),
-		QColor(0x8c, 0xff, 0x00, 128)
+		QColor(0x8c, 0xff, 0x00, 128),
+        QColor(0x8c, 0xbf, 0xff, 128),
 };
 
-const QColor LevelMeterSignalDB::m_decayedPeakColor[3] = {
+const QColor LevelMeterSignalDB::m_decayedPeakColor[4] = {
         QColor(0x97, 0x54, 0x00, 128),
         QColor(0x53, 0x96, 0x00, 128),
-        QColor(0x00, 0x96, 0x53, 128)
+        QColor(0x00, 0x96, 0x53, 128),
+        QColor(0x00, 0x94, 0x94, 128),
 };
 
-const QColor LevelMeterSignalDB::m_peakColor[3] = {
+const QColor LevelMeterSignalDB::m_peakColor[4] = {
         Qt::red,
         Qt::green,
-		Qt::green
+		Qt::green,
+        Qt::cyan
 };
 
 LevelMeterSignalDB::LevelMeterSignalDB(QWidget *parent) :

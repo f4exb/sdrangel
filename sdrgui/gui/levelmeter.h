@@ -70,6 +70,8 @@ public:
     void paintEvent(QPaintEvent *event);
     void resizeEvent(QResizeEvent * event);
 
+    void setAverageSmoothing(uint32_t smoothingFactor);
+
 public slots:
     void reset();
     void levelChanged(qreal rmsLevel, qreal peakLevel, int numSamples);
@@ -119,6 +121,11 @@ protected:
      */
     QTime m_peakHoldLevelChanged;
 
+    /**
+     * Average smoothing factor (between 1: fast and 256: slow)
+    */
+    uint32_t m_avgSmoothing;
+
     QTimer *m_redrawTimer;
 
     QColor m_avgColor;
@@ -155,7 +162,8 @@ public:
     {
         ColorGold,
         ColorGreenYellow,
-		ColorGreenAndBlue
+		ColorGreenAndBlue,
+        ColorCyanAndBlue
     } ColorTheme;
 
     LevelMeterSignalDB(QWidget *parent = 0);
@@ -164,9 +172,9 @@ public:
     void setColorTheme(ColorTheme colorTheme) { m_colorTheme = colorTheme; }
     void setRange(int min, int max);
 
-    static const QColor m_avgColor[3];
-    static const QColor m_decayedPeakColor[3];
-    static const QColor m_peakColor[3];
+    static const QColor m_avgColor[4];
+    static const QColor m_decayedPeakColor[4];
+    static const QColor m_peakColor[4];
 
 protected:
     virtual void render(QPainter *painter);
