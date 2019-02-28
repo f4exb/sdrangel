@@ -340,12 +340,8 @@ private:
 	double m_magsqPeak;
     int  m_magsqCount;
     MagSqLevelsStore m_magSqLevelStore;
-    MagAGC m_agc;
+	SimpleAGC<4800> m_simpleAGC;
     bool m_agcActive;
-    bool m_agcClamping;
-    int m_agcNbSamples;         //!< number of audio (48 kHz) samples for AGC averaging
-    double m_agcPowerThreshold; //!< AGC power threshold (linear)
-    int m_agcThresholdGate;     //!< Gate length in number of samples befor threshold triggers
     DoubleBufferFIFO<fftfilt::cmplx> m_squelchDelayLine;
     bool m_audioActive;         //!< True if an audio signal is produced (no AGC or AGC and above threshold)
 

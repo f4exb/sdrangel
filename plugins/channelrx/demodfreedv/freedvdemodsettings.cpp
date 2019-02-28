@@ -40,10 +40,6 @@ void FreeDVDemodSettings::resetToDefaults()
 {
     m_audioMute = false;
     m_agc = true;
-    m_agcClamping = false;
-    m_agcPowerThreshold = -100;
-    m_agcThresholdGate = 0;
-    m_agcTimeLog2 = 0;
     m_volume = 3.0;
     m_spanLog2 = 3;
     m_inputFrequencyOffset = 0;
@@ -71,10 +67,6 @@ QByteArray FreeDVDemodSettings::serialize() const
     s.writeU32(5, m_rgbColor);
     s.writeS32(7, m_spanLog2);
     s.writeBool(11, m_agc);
-    s.writeS32(12, m_agcTimeLog2);
-    s.writeS32(13, m_agcPowerThreshold);
-    s.writeS32(14, m_agcThresholdGate);
-    s.writeBool(15, m_agcClamping);
     s.writeString(16, m_title);
     s.writeString(17, m_audioDeviceName);
     s.writeBool(18, m_useReverseAPI);
@@ -118,10 +110,6 @@ bool FreeDVDemodSettings::deserialize(const QByteArray& data)
         d.readS32(6, &tmp, 30);
         d.readS32(7, &m_spanLog2, 3);
         d.readBool(11, &m_agc, false);
-        d.readS32(12, &m_agcTimeLog2, 7);
-        d.readS32(13, &m_agcPowerThreshold, -40);
-        d.readS32(14, &m_agcThresholdGate, 4);
-        d.readBool(15, &m_agcClamping, false);
         d.readString(16, &m_title, "SSB Demodulator");
         d.readString(17, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readBool(18, &m_useReverseAPI, false);

@@ -57,18 +57,6 @@ public:
     qint32 getAgc();
     void setAgc(qint32 agc);
 
-    qint32 getAgcClamping();
-    void setAgcClamping(qint32 agc_clamping);
-
-    qint32 getAgcTimeLog2();
-    void setAgcTimeLog2(qint32 agc_time_log2);
-
-    qint32 getAgcPowerThreshold();
-    void setAgcPowerThreshold(qint32 agc_power_threshold);
-
-    qint32 getAgcThresholdGate();
-    void setAgcThresholdGate(qint32 agc_threshold_gate);
-
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -99,18 +87,6 @@ private:
 
     qint32 agc;
     bool m_agc_isSet;
-
-    qint32 agc_clamping;
-    bool m_agc_clamping_isSet;
-
-    qint32 agc_time_log2;
-    bool m_agc_time_log2_isSet;
-
-    qint32 agc_power_threshold;
-    bool m_agc_power_threshold_isSet;
-
-    qint32 agc_threshold_gate;
-    bool m_agc_threshold_gate_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;

@@ -89,8 +89,6 @@ private:
 	void applyBandwidths(int spanLog2, bool force = false);
 	void displaySettings();
 
-	void displayAGCPowerThreshold(int value);
-
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
 
@@ -100,10 +98,6 @@ private slots:
     void on_freeDVMode_currentIndexChanged(int index);
 	void on_volume_valueChanged(int value);
 	void on_agc_toggled(bool checked);
-    void on_agcClamping_toggled(bool checked);
-	void on_agcTimeLog2_valueChanged(int value);
-    void on_agcPowerThreshold_valueChanged(int value);
-    void on_agcThresholdGate_valueChanged(int value);
 	void on_audioMute_toggled(bool checked);
 	void on_spanLog2_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);

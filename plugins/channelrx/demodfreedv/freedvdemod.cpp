@@ -131,12 +131,8 @@ FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
         m_speechSampleRate(8000), // fixed 8 kS/s
         m_inputFrequencyOffset(0),
         m_audioMute(false),
-        m_agc(12000, agcTarget, 1e-2),
+        m_simpleAGC(0.003f, 0.0f, 1e-6f),
         m_agcActive(false),
-        m_agcClamping(false),
-        m_agcNbSamples(12000),
-        m_agcPowerThreshold(1e-2),
-        m_agcThresholdGate(0),
         m_squelchDelayLine(2*48000),
         m_audioActive(false),
         m_sampleSink(0),
@@ -165,8 +161,7 @@ FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
 	m_magsqPeak = 0.0f;
 	m_magsqCount = 0;
 
-	m_agc.setClampMax(SDR_RX_SCALED/100.0);
-	m_agc.setClamping(m_agcClamping);
+    m_simpleAGC.resizeNew(m_modemSampleRate/10, 0.003);
 
 	SSBFilter = new fftfilt(m_lowCutoff / m_modemSampleRate, m_hiCutoff / m_modemSampleRate, ssbFftLen);
 
@@ -280,12 +275,16 @@ void FreeDVDemod::feed(const SampleVector::const_iterator& begin, const SampleVe
                 m_sum.imag(0.0);
 			}
 
-            float agcVal = m_agcActive ? m_agc.feedAndGetValue(sideband[i]) : 10.0; // 10.0 for 3276.8, 1.0 for 327.68
-            fftfilt::cmplx& delayedSample = m_squelchDelayLine.readBack(m_agc.getStepDownDelay());
-            m_audioActive = delayedSample.real() != 0.0;
-            m_squelchDelayLine.write(sideband[i]*agcVal);
-            fftfilt::cmplx z = delayedSample * m_agc.getStepValue();
+            fftfilt::cmplx z = sideband[i];
             Real demod = (z.real() + z.imag()) * 0.7;
+            if (m_agcActive)
+            {
+                m_simpleAGC.feed(demod);
+                demod *= 3276.8f / m_simpleAGC.getValue(); // provision for peak to average ratio (here 10)
+                // if (i == 0) {
+                //     qDebug("FreeDVDemod::feed: m_simpleAGC: %f", m_simpleAGC.getValue());
+                // }
+            }
 
             pushSampleToDV((qint16) demod);
 		}
@@ -499,24 +498,9 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
         //m_interpolatorConsumed = false;
         m_interpolatorDistance = (Real) m_inputSampleRate / (Real) modemSampleRate;
         m_interpolator.create(16, m_inputSampleRate, m_hiCutoff * 1.5f, 2.0f);
-
-        int agcNbSamples = (modemSampleRate / 1000) * (1<<m_settings.m_agcTimeLog2);
-        int agcThresholdGate = (modemSampleRate / 1000) * m_settings.m_agcThresholdGate; // ms
-
         m_modemSampleRate = modemSampleRate;
 
-        if (m_agcNbSamples != agcNbSamples)
-        {
-            m_agc.resize(agcNbSamples, agcNbSamples/2, agcTarget);
-            m_agc.setStepDownDelay(agcNbSamples);
-            m_agcNbSamples = agcNbSamples;
-        }
-
-        if (m_agcThresholdGate != agcThresholdGate)
-        {
-            m_agc.setGate(agcThresholdGate);
-            m_agcThresholdGate = agcThresholdGate;
-        }
+        m_simpleAGC.resizeNew(modemSampleRate/10, 0.003);
 
         if (getMessageQueueToGUI())
         {
@@ -631,10 +615,6 @@ void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
             << " m_spanLog2: " << settings.m_spanLog2
             << " m_audioMute: " << settings.m_audioMute
             << " m_agcActive: " << settings.m_agc
-            << " m_agcClamping: " << settings.m_agcClamping
-            << " m_agcTimeLog2: " << settings.m_agcTimeLog2
-            << " agcPowerThreshold: " << settings.m_agcPowerThreshold
-            << " agcThresholdGate: " << settings.m_agcThresholdGate
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " force: " << force;
 
@@ -649,64 +629,6 @@ void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
         reverseAPIKeys.append("volume");
         m_volume = settings.m_volume;
         m_volume /= 4.0; // for 3276.8
-    }
-
-    if ((m_settings.m_agcTimeLog2 != settings.m_agcTimeLog2) || force) {
-        reverseAPIKeys.append("agcTimeLog2");
-    }
-    if ((m_settings.m_agcPowerThreshold != settings.m_agcPowerThreshold) || force) {
-        reverseAPIKeys.append("agcPowerThreshold");
-    }
-    if ((m_settings.m_agcThresholdGate != settings.m_agcThresholdGate) || force) {
-        reverseAPIKeys.append("agcThresholdGate");
-    }
-    if ((m_settings.m_agcClamping != settings.m_agcClamping) || force) {
-        reverseAPIKeys.append("agcClamping");
-    }
-
-    if ((m_settings.m_agcTimeLog2 != settings.m_agcTimeLog2) ||
-        (m_settings.m_agcPowerThreshold != settings.m_agcPowerThreshold) ||
-        (m_settings.m_agcThresholdGate != settings.m_agcThresholdGate) ||
-        (m_settings.m_agcClamping != settings.m_agcClamping) || force)
-    {
-        int agcNbSamples = (m_modemSampleRate / 1000) * (1<<settings.m_agcTimeLog2);
-        m_agc.setThresholdEnable(settings.m_agcPowerThreshold != -FreeDVDemodSettings::m_minPowerThresholdDB);
-        double agcPowerThreshold = CalcDb::powerFromdB(settings.m_agcPowerThreshold) * (SDR_RX_SCALED*SDR_RX_SCALED);
-        int agcThresholdGate = (m_modemSampleRate / 1000) * settings.m_agcThresholdGate; // ms
-        bool agcClamping = settings.m_agcClamping;
-
-        if (m_agcNbSamples != agcNbSamples)
-        {
-            m_settingsMutex.lock();
-            m_agc.resize(agcNbSamples, agcNbSamples/2, agcTarget);
-            m_agc.setStepDownDelay(agcNbSamples);
-            m_agcNbSamples = agcNbSamples;
-            m_settingsMutex.unlock();
-        }
-
-        if (m_agcPowerThreshold != agcPowerThreshold)
-        {
-            m_agc.setThreshold(agcPowerThreshold);
-            m_agcPowerThreshold = agcPowerThreshold;
-        }
-
-        if (m_agcThresholdGate != agcThresholdGate)
-        {
-            m_agc.setGate(agcThresholdGate);
-            m_agcThresholdGate = agcThresholdGate;
-        }
-
-        if (m_agcClamping != agcClamping)
-        {
-            m_agc.setClamping(agcClamping);
-            m_agcClamping = agcClamping;
-        }
-
-        qDebug() << "SBDemod::applySettings: AGC:"
-            << " agcNbSamples: " << agcNbSamples
-            << " agcPowerThreshold: " << agcPowerThreshold
-            << " agcThresholdGate: " << agcThresholdGate
-            << " agcClamping: " << agcClamping;
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
@@ -830,18 +752,6 @@ int FreeDVDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("agc")) {
         settings.m_agc = response.getFreeDvDemodSettings()->getAgc() != 0;
     }
-    if (channelSettingsKeys.contains("agcClamping")) {
-        settings.m_agcClamping = response.getFreeDvDemodSettings()->getAgcClamping() != 0;
-    }
-    if (channelSettingsKeys.contains("agcTimeLog2")) {
-        settings.m_agcTimeLog2 = response.getFreeDvDemodSettings()->getAgcTimeLog2();
-    }
-    if (channelSettingsKeys.contains("agcPowerThreshold")) {
-        settings.m_agcPowerThreshold = response.getFreeDvDemodSettings()->getAgcPowerThreshold();
-    }
-    if (channelSettingsKeys.contains("agcThresholdGate")) {
-        settings.m_agcThresholdGate = response.getFreeDvDemodSettings()->getAgcThresholdGate();
-    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getFreeDvDemodSettings()->getRgbColor();
     }
@@ -893,10 +803,6 @@ void FreeDVDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     response.getFreeDvDemodSettings()->setSpanLog2(settings.m_spanLog2);
     response.getFreeDvDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getFreeDvDemodSettings()->setAgc(settings.m_agc ? 1 : 0);
-    response.getFreeDvDemodSettings()->setAgcClamping(settings.m_agcClamping ? 1 : 0);
-    response.getFreeDvDemodSettings()->setAgcTimeLog2(settings.m_agcTimeLog2);
-    response.getFreeDvDemodSettings()->setAgcPowerThreshold(settings.m_agcPowerThreshold);
-    response.getFreeDvDemodSettings()->setAgcThresholdGate(settings.m_agcThresholdGate);
     response.getFreeDvDemodSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getFreeDvDemodSettings()->getTitle()) {
@@ -948,18 +854,6 @@ void FreeDVDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys,
     }
     if (channelSettingsKeys.contains("agc") || force) {
         swgFreeDVDemodSettings->setAgc(settings.m_agc ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("agcClamping") || force) {
-        swgFreeDVDemodSettings->setAgcClamping(settings.m_agcClamping ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("agcTimeLog2") || force) {
-        swgFreeDVDemodSettings->setAgcTimeLog2(settings.m_agcTimeLog2);
-    }
-    if (channelSettingsKeys.contains("agcPowerThreshold") || force) {
-        swgFreeDVDemodSettings->setAgcPowerThreshold(settings.m_agcPowerThreshold);
-    }
-    if (channelSettingsKeys.contains("agcThresholdGate") || force) {
-        swgFreeDVDemodSettings->setAgcThresholdGate(settings.m_agcThresholdGate);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgFreeDVDemodSettings->setRgbColor(settings.m_rgbColor);

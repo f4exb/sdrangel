@@ -38,14 +38,6 @@ SWGFreeDVDemodSettings::SWGFreeDVDemodSettings() {
     m_audio_mute_isSet = false;
     agc = 0;
     m_agc_isSet = false;
-    agc_clamping = 0;
-    m_agc_clamping_isSet = false;
-    agc_time_log2 = 0;
-    m_agc_time_log2_isSet = false;
-    agc_power_threshold = 0;
-    m_agc_power_threshold_isSet = false;
-    agc_threshold_gate = 0;
-    m_agc_threshold_gate_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -72,14 +64,6 @@ SWGFreeDVDemodSettings::init() {
     m_audio_mute_isSet = false;
     agc = 0;
     m_agc_isSet = false;
-    agc_clamping = 0;
-    m_agc_clamping_isSet = false;
-    agc_time_log2 = 0;
-    m_agc_time_log2_isSet = false;
-    agc_power_threshold = 0;
-    m_agc_power_threshold_isSet = false;
-    agc_threshold_gate = 0;
-    m_agc_threshold_gate_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -92,10 +76,6 @@ SWGFreeDVDemodSettings::init() {
 
 void
 SWGFreeDVDemodSettings::cleanup() {
-
-
-
-
 
 
 
@@ -131,14 +111,6 @@ SWGFreeDVDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&audio_mute, pJson["audioMute"], "qint32", "");
     
     ::SWGSDRangel::setValue(&agc, pJson["agc"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&agc_clamping, pJson["agcClamping"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&agc_time_log2, pJson["agcTimeLog2"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&agc_power_threshold, pJson["agcPowerThreshold"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&agc_threshold_gate, pJson["agcThresholdGate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -178,18 +150,6 @@ SWGFreeDVDemodSettings::asJsonObject() {
     }
     if(m_agc_isSet){
         obj->insert("agc", QJsonValue(agc));
-    }
-    if(m_agc_clamping_isSet){
-        obj->insert("agcClamping", QJsonValue(agc_clamping));
-    }
-    if(m_agc_time_log2_isSet){
-        obj->insert("agcTimeLog2", QJsonValue(agc_time_log2));
-    }
-    if(m_agc_power_threshold_isSet){
-        obj->insert("agcPowerThreshold", QJsonValue(agc_power_threshold));
-    }
-    if(m_agc_threshold_gate_isSet){
-        obj->insert("agcThresholdGate", QJsonValue(agc_threshold_gate));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -258,46 +218,6 @@ SWGFreeDVDemodSettings::setAgc(qint32 agc) {
 }
 
 qint32
-SWGFreeDVDemodSettings::getAgcClamping() {
-    return agc_clamping;
-}
-void
-SWGFreeDVDemodSettings::setAgcClamping(qint32 agc_clamping) {
-    this->agc_clamping = agc_clamping;
-    this->m_agc_clamping_isSet = true;
-}
-
-qint32
-SWGFreeDVDemodSettings::getAgcTimeLog2() {
-    return agc_time_log2;
-}
-void
-SWGFreeDVDemodSettings::setAgcTimeLog2(qint32 agc_time_log2) {
-    this->agc_time_log2 = agc_time_log2;
-    this->m_agc_time_log2_isSet = true;
-}
-
-qint32
-SWGFreeDVDemodSettings::getAgcPowerThreshold() {
-    return agc_power_threshold;
-}
-void
-SWGFreeDVDemodSettings::setAgcPowerThreshold(qint32 agc_power_threshold) {
-    this->agc_power_threshold = agc_power_threshold;
-    this->m_agc_power_threshold_isSet = true;
-}
-
-qint32
-SWGFreeDVDemodSettings::getAgcThresholdGate() {
-    return agc_threshold_gate;
-}
-void
-SWGFreeDVDemodSettings::setAgcThresholdGate(qint32 agc_threshold_gate) {
-    this->agc_threshold_gate = agc_threshold_gate;
-    this->m_agc_threshold_gate_isSet = true;
-}
-
-qint32
 SWGFreeDVDemodSettings::getRgbColor() {
     return rgb_color;
 }
@@ -347,10 +267,6 @@ SWGFreeDVDemodSettings::isSet(){
         if(m_span_log2_isSet){ isObjectUpdated = true; break;}
         if(m_audio_mute_isSet){ isObjectUpdated = true; break;}
         if(m_agc_isSet){ isObjectUpdated = true; break;}
-        if(m_agc_clamping_isSet){ isObjectUpdated = true; break;}
-        if(m_agc_time_log2_isSet){ isObjectUpdated = true; break;}
-        if(m_agc_power_threshold_isSet){ isObjectUpdated = true; break;}
-        if(m_agc_threshold_gate_isSet){ isObjectUpdated = true; break;}
         if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
         if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
         if(audio_device_name != nullptr && *audio_device_name != QString("")){ isObjectUpdated = true; break;}

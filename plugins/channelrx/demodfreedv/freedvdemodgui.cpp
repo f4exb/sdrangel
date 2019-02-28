@@ -180,35 +180,6 @@ void FreeDVDemodGUI::on_agc_toggled(bool checked)
     applySettings();
 }
 
-void FreeDVDemodGUI::on_agcClamping_toggled(bool checked)
-{
-    m_settings.m_agcClamping = checked;
-    applySettings();
-}
-
-void FreeDVDemodGUI::on_agcTimeLog2_valueChanged(int value)
-{
-    QString s = QString::number((1<<value), 'f', 0);
-    ui->agcTimeText->setText(s);
-    m_settings.m_agcTimeLog2 = value;
-    applySettings();
-}
-
-void FreeDVDemodGUI::on_agcPowerThreshold_valueChanged(int value)
-{
-    displayAGCPowerThreshold(value);
-    m_settings.m_agcPowerThreshold = value;
-    applySettings();
-}
-
-void FreeDVDemodGUI::on_agcThresholdGate_valueChanged(int value)
-{
-    QString s = QString::number(value, 'f', 0);
-    ui->agcThresholdGateText->setText(s);
-    m_settings.m_agcThresholdGate = value;
-    applySettings();
-}
-
 void FreeDVDemodGUI::on_audioMute_toggled(bool checked)
 {
 	m_audioMute = checked;
@@ -397,7 +368,6 @@ void FreeDVDemodGUI::displaySettings()
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
     ui->agc->setChecked(m_settings.m_agc);
-    ui->agcClamping->setChecked(m_settings.m_agcClamping);
     ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
@@ -409,31 +379,7 @@ void FreeDVDemodGUI::displaySettings()
     ui->volume->setValue(m_settings.m_volume * 10.0);
     ui->volumeText->setText(QString("%1").arg(m_settings.m_volume, 0, 'f', 1));
 
-    ui->agcTimeLog2->setValue(m_settings.m_agcTimeLog2);
-    QString s = QString::number((1<<ui->agcTimeLog2->value()), 'f', 0);
-    ui->agcTimeText->setText(s);
-
-    ui->agcPowerThreshold->setValue(m_settings.m_agcPowerThreshold);
-    displayAGCPowerThreshold(ui->agcPowerThreshold->value());
-
-    ui->agcThresholdGate->setValue(m_settings.m_agcThresholdGate);
-    s = QString::number(ui->agcThresholdGate->value(), 'f', 0);
-    ui->agcThresholdGateText->setText(s);
-
     blockApplySettings(false);
-}
-
-void FreeDVDemodGUI::displayAGCPowerThreshold(int value)
-{
-    if (value == FreeDVDemodSettings::m_minPowerThresholdDB)
-    {
-        ui->agcPowerThresholdText->setText("---");
-    }
-    else
-    {
-        QString s = QString::number(value, 'f', 0);
-        ui->agcPowerThresholdText->setText(s);
-    }
 }
 
 void FreeDVDemodGUI::leaveEvent(QEvent*)

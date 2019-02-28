@@ -39,10 +39,6 @@ struct FreeDVDemodSettings
     int  m_spanLog2;
     bool m_audioMute;
     bool m_agc;
-    bool m_agcClamping;
-    int  m_agcTimeLog2;
-    int  m_agcPowerThreshold;
-    int  m_agcThresholdGate;
     quint32 m_rgbColor;
     QString m_title;
     QString m_audioDeviceName;
