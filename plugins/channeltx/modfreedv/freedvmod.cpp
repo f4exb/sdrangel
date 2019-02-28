@@ -50,7 +50,7 @@ MESSAGE_CLASS_DEFINITION(FreeDVMod::MsgReportFileSourceStreamTiming, Message)
 
 const QString FreeDVMod::m_channelIdURI = "sdrangel.channeltx.freedvmod";
 const QString FreeDVMod::m_channelId = "FreeDVMod";
-const int FreeDVMod::m_levelNbSamples = 480; // every 10ms
+const int FreeDVMod::m_levelNbSamples = 80; // every 10ms
 const int FreeDVMod::m_ssbFftLen = 1024;
 
 FreeDVMod::FreeDVMod(DeviceSinkAPI *deviceAPI) :

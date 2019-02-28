@@ -32,6 +32,8 @@ SWGFreeDVDemodSettings::SWGFreeDVDemodSettings() {
     m_input_frequency_offset_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
+    volume_in = 0.0f;
+    m_volume_in_isSet = false;
     span_log2 = 0;
     m_span_log2_isSet = false;
     audio_mute = 0;
@@ -58,6 +60,8 @@ SWGFreeDVDemodSettings::init() {
     m_input_frequency_offset_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
+    volume_in = 0.0f;
+    m_volume_in_isSet = false;
     span_log2 = 0;
     m_span_log2_isSet = false;
     audio_mute = 0;
@@ -76,6 +80,7 @@ SWGFreeDVDemodSettings::init() {
 
 void
 SWGFreeDVDemodSettings::cleanup() {
+
 
 
 
@@ -105,6 +110,8 @@ SWGFreeDVDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
     
     ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
+    
+    ::SWGSDRangel::setValue(&volume_in, pJson["volumeIn"], "float", "");
     
     ::SWGSDRangel::setValue(&span_log2, pJson["spanLog2"], "qint32", "");
     
@@ -141,6 +148,9 @@ SWGFreeDVDemodSettings::asJsonObject() {
     }
     if(m_volume_isSet){
         obj->insert("volume", QJsonValue(volume));
+    }
+    if(m_volume_in_isSet){
+        obj->insert("volumeIn", QJsonValue(volume_in));
     }
     if(m_span_log2_isSet){
         obj->insert("spanLog2", QJsonValue(span_log2));
@@ -185,6 +195,16 @@ void
 SWGFreeDVDemodSettings::setVolume(float volume) {
     this->volume = volume;
     this->m_volume_isSet = true;
+}
+
+float
+SWGFreeDVDemodSettings::getVolumeIn() {
+    return volume_in;
+}
+void
+SWGFreeDVDemodSettings::setVolumeIn(float volume_in) {
+    this->volume_in = volume_in;
+    this->m_volume_in_isSet = true;
 }
 
 qint32
@@ -264,6 +284,7 @@ SWGFreeDVDemodSettings::isSet(){
     do{
         if(m_input_frequency_offset_isSet){ isObjectUpdated = true; break;}
         if(m_volume_isSet){ isObjectUpdated = true; break;}
+        if(m_volume_in_isSet){ isObjectUpdated = true; break;}
         if(m_span_log2_isSet){ isObjectUpdated = true; break;}
         if(m_audio_mute_isSet){ isObjectUpdated = true; break;}
         if(m_agc_isSet){ isObjectUpdated = true; break;}

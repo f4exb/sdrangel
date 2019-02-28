@@ -288,7 +288,7 @@
       <item>
        <widget class="QLabel" name="voluneInLabel">
         <property name="text">
-         <string>Input</string>
+         <string>In</string>
         </property>
        </widget>
       </item>
@@ -300,6 +300,15 @@
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Modem input volume adjustment</string>
+        </property>
+        <property name="maximum">
+         <number>99</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
        </widget>
       </item>
       <item>
@@ -309,6 +318,9 @@
           <width>30</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Modem input volume</string>
         </property>
         <property name="text">
          <string>2.0</string>
@@ -361,6 +373,9 @@
           <height>24</height>
          </size>
         </property>
+        <property name="maximum">
+         <number>99</number>
+        </property>
         <property name="pageStep">
          <number>1</number>
         </property>
@@ -404,64 +419,6 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="statsLayout">
-      <item>
-       <widget class="QLabel" name="snrLabel">
-        <property name="text">
-         <string>SNR</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="LevelMeterSignalDB" name="snrMeter" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>180</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Liberation Mono</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>SNR estimation</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="snrText">
-        <property name="minimumSize">
-         <size>
-          <width>52</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>SNR estimation</string>
-        </property>
-        <property name="text">
-         <string>-10.0 dB</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="Line" name="line_4">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
       <item>
        <widget class="QLabel" name="berLabel">
         <property name="text">
@@ -510,6 +467,64 @@
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="snrLabel">
+        <property name="text">
+         <string>SNR</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="LevelMeterSignalDB" name="snrMeter" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>180</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>SNR estimation</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="snrText">
+        <property name="minimumSize">
+         <size>
+          <width>52</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>SNR estimation</string>
+        </property>
+        <property name="text">
+         <string>-10.0 dB</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>

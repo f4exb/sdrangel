@@ -41,7 +41,7 @@ void FreeDVDemodSettings::resetToDefaults()
     m_audioMute = false;
     m_agc = true;
     m_volume = 3.0;
-    m_volumeIn = 3.0;
+    m_volumeIn = 1.0;
     m_spanLog2 = 3;
     m_inputFrequencyOffset = 0;
     m_rgbColor = QColor(0, 255, 204).rgb();
@@ -109,7 +109,7 @@ bool FreeDVDemodSettings::deserialize(const QByteArray& data)
         }
 
         d.readU32(5, &m_rgbColor);
-        d.readS32(6, &tmp, 30);
+        d.readS32(6, &tmp, 10);
         m_volumeIn = tmp / 10.0;
         d.readS32(7, &m_spanLog2, 3);
         d.readBool(11, &m_agc, false);

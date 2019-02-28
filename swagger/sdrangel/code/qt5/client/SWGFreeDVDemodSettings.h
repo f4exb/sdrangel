@@ -48,6 +48,9 @@ public:
     float getVolume();
     void setVolume(float volume);
 
+    float getVolumeIn();
+    void setVolumeIn(float volume_in);
+
     qint32 getSpanLog2();
     void setSpanLog2(qint32 span_log2);
 
@@ -78,6 +81,9 @@ private:
 
     float volume;
     bool m_volume_isSet;
+
+    float volume_in;
+    bool m_volume_in_isSet;
 
     qint32 span_log2;
     bool m_span_log2_isSet;

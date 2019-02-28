@@ -306,11 +306,16 @@ void FreeDVDemod::feed(const SampleVector::const_iterator& begin, const SampleVe
             if (m_agcActive)
             {
                 m_simpleAGC.feed(demod);
-                demod *= 3276.8f / m_simpleAGC.getValue(); // provision for peak to average ratio (here 10)
+                demod *= (m_settings.m_volumeIn * 3276.8f) / m_simpleAGC.getValue(); // provision for peak to average ratio (here 10) compensated by m_volumeIn
                 // if (i == 0) {
                 //     qDebug("FreeDVDemod::feed: m_simpleAGC: %f", m_simpleAGC.getValue());
                 // }
             }
+            else
+            {
+                demod *= m_settings.m_volumeIn;
+            }
+
 
             pushSampleToDV((qint16) demod);
 		}
@@ -650,6 +655,7 @@ void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
     qDebug() << "FreeDVDemod::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_volume: " << settings.m_volume
+            << " m_volumeIn: " << settings.m_volumeIn
             << " m_spanLog2: " << settings.m_spanLog2
             << " m_audioMute: " << settings.m_audioMute
             << " m_agcActive: " << settings.m_agc
@@ -667,6 +673,11 @@ void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
         reverseAPIKeys.append("volume");
         m_volume = settings.m_volume;
         m_volume /= 4.0; // for 3276.8
+    }
+
+    if ((m_settings.m_volumeIn != settings.m_volumeIn) || force)
+    {
+        reverseAPIKeys.append("volumeIn");
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
@@ -781,6 +792,9 @@ int FreeDVDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("volume")) {
         settings.m_volume = response.getFreeDvDemodSettings()->getVolume();
     }
+    if (channelSettingsKeys.contains("volumeIn")) {
+        settings.m_volumeIn = response.getFreeDvDemodSettings()->getVolumeIn();
+    }
     if (channelSettingsKeys.contains("spanLog2")) {
         settings.m_spanLog2 = response.getFreeDvDemodSettings()->getSpanLog2();
     }
@@ -838,6 +852,7 @@ void FreeDVDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     response.getFreeDvDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getFreeDvDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getFreeDvDemodSettings()->setVolume(settings.m_volume);
+    response.getFreeDvDemodSettings()->setVolumeIn(settings.m_volumeIn);
     response.getFreeDvDemodSettings()->setSpanLog2(settings.m_spanLog2);
     response.getFreeDvDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getFreeDvDemodSettings()->setAgc(settings.m_agc ? 1 : 0);
@@ -883,6 +898,9 @@ void FreeDVDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys,
     }
     if (channelSettingsKeys.contains("volume") || force) {
         swgFreeDVDemodSettings->setVolume(settings.m_volume);
+    }
+    if (channelSettingsKeys.contains("volumeIn") || force) {
+        swgFreeDVDemodSettings->setVolumeIn(settings.m_volumeIn);
     }
     if (channelSettingsKeys.contains("spanLog2") || force) {
         swgFreeDVDemodSettings->setSpanLog2(settings.m_spanLog2);

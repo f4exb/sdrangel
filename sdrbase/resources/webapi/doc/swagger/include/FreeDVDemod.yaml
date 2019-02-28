@@ -5,6 +5,11 @@ FreeDVDemodSettings:
       type: integer
       format: int64
     volume:
+      description: Audio volume
+      type: number
+      format: float
+    volumeIn:
+      description: Modem input volume
       type: number
       format: float
     spanLog2:
