@@ -1,6 +1,6 @@
 sdrangel (4.5.0-1) unstable; urgency=medium
 
-  * Implemented a FreeDV modulator
+  * Implemented a FreeDV modulator and demodulator
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 03 Mar 2019 20:14:18 +0100
 

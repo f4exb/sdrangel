@@ -21,7 +21,6 @@
 #include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
 
-#include "ui_freedvdemodgui.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -33,6 +32,8 @@
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "mainwindow.h"
+
+#include "ui_freedvdemodgui.h"
 #include "freedvdemod.h"
 
 FreeDVDemodGUI* FreeDVDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
@@ -386,6 +387,9 @@ void FreeDVDemodGUI::displaySettings()
 
     ui->volume->setValue(m_settings.m_volume * 10.0);
     ui->volumeText->setText(QString("%1").arg(m_settings.m_volume, 0, 'f', 1));
+
+    ui->volumeIn->setValue(m_settings.m_volumeIn * 10.0);
+    ui->volumeInText->setText(QString("%1").arg(m_settings.m_volumeIn, 0, 'f', 1));
 
     blockApplySettings(false);
 }

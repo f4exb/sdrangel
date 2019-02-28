@@ -161,7 +161,43 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="audioOptionsLayout"/>
+       <layout class="QHBoxLayout" name="audioOptionsLayout">
+        <property name="leftMargin">
+         <number>6</number>
+        </property>
+        <item>
+         <widget class="QComboBox" name="freeDVMode">
+          <property name="toolTip">
+           <string>FreeDV mode</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>2400A</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>1600</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>800XA</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>700C</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>700D</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
@@ -384,38 +420,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item>
-       <widget class="QComboBox" name="freeDVMode">
-        <property name="toolTip">
-         <string>FreeDV mode</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>2400A</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>1600</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>800XA</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>700C</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>700D</string>
-         </property>
-        </item>
-       </widget>
       </item>
      </layout>
     </item>

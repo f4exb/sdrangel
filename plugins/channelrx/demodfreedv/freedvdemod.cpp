@@ -301,8 +301,10 @@ void FreeDVDemod::feed(const SampleVector::const_iterator& begin, const SampleVe
                 m_sum.imag(0.0);
 			}
 
-            fftfilt::cmplx z = sideband[i];
-            Real demod = (z.real() + z.imag()) * 0.7;
+            // fftfilt::cmplx z = sideband[i];
+            // Real demod = (z.real() + z.imag()) * 0.7;
+            Real demod = sideband[i].real(); // works as good
+
             if (m_agcActive)
             {
                 m_simpleAGC.feed(demod);
@@ -448,13 +450,22 @@ void FreeDVDemod::pushSampleToDV(int16_t sample)
         m_freeDVStats.collect(m_freeDV);
         m_freeDVSNR.accumulate(m_freeDVStats.m_snrEst);
 
-        for (int i = 0; i < nout; i++)
+        if (m_settings.m_audioMute)
         {
-            while (!m_audioResampler.upSample(m_speechOut[i], audioSample)) {
+            for (uint32_t i = 0; i < nout * m_audioResampler.getDecimation(); i++) {
+                pushSampleToAudio(0);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < nout; i++)
+            {
+                while (!m_audioResampler.upSample(m_speechOut[i], audioSample)) {
+                    pushSampleToAudio(audioSample);
+                }
+
                 pushSampleToAudio(audioSample);
             }
-
-            pushSampleToAudio(audioSample);
         }
 
         m_iModem = 0;

@@ -25,7 +25,6 @@
 #include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
 #include "dsp/spectrumvis.h"
-#include "ui_freedvmodgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
@@ -35,6 +34,7 @@
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "mainwindow.h"
+#include "ui_freedvmodgui.h"
 
 FreeDVModGUI* FreeDVModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
 {
