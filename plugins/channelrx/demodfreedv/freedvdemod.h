@@ -393,7 +393,7 @@ private:
 	FreeDVStats m_freeDVStats;
 	FreeDVSNR m_freeDVSNR;
 	LevelRMS m_levelIn;
-	static const int m_levelInNbSamples;
+	int m_levelInNbSamples;
 
 	QMutex m_settingsMutex;
 

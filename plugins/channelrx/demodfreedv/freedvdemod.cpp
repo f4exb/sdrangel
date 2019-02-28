@@ -46,7 +46,6 @@ MESSAGE_CLASS_DEFINITION(FreeDVDemod::MsgConfigureChannelizer, Message)
 
 const QString FreeDVDemod::m_channelIdURI = "sdrangel.channel.freedvdemod";
 const QString FreeDVDemod::m_channelId = "FreeDVDemod";
-const int FreeDVDemod::m_levelInNbSamples = 160; // 10ms @ 8kS/s modem input
 
 FreeDVDemod::FreeDVStats::FreeDVStats()
 {
@@ -170,6 +169,7 @@ FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
         m_iModem(0),
         m_speechOut(0),
         m_modIn(0),
+        m_levelInNbSamples(480), // 10ms @ 48 kS/s
         m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName(m_channelId);
@@ -435,7 +435,7 @@ void FreeDVDemod::pushSampleToDV(int16_t sample)
         m_levelIn.m_reset = true;
     }
 
-    m_levelIn.accumulate(sample/32768.0f);
+    m_levelIn.accumulate(sample/29491.2f); // scale on 90% (0.9 * 32768.0)
 
     if (m_iModem == m_nin)
     {
@@ -538,6 +538,7 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
         m_modemSampleRate = modemSampleRate;
 
         m_simpleAGC.resizeNew(modemSampleRate/10, 0.003);
+        m_levelInNbSamples = m_modemSampleRate / 100; // 10ms
 
         if (getMessageQueueToGUI())
         {
