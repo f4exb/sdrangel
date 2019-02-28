@@ -46,6 +46,7 @@ MESSAGE_CLASS_DEFINITION(FreeDVDemod::MsgConfigureChannelizer, Message)
 
 const QString FreeDVDemod::m_channelIdURI = "sdrangel.channel.freedvdemod";
 const QString FreeDVDemod::m_channelId = "FreeDVDemod";
+const int FreeDVDemod::m_levelInNbSamples = 160; // 10ms @ 8kS/s modem input
 
 FreeDVDemod::FreeDVStats::FreeDVStats()
 {
@@ -114,6 +115,31 @@ void FreeDVDemod::FreeDVSNR::accumulate(float snrdB)
     {
         m_sum += CalcDb::powerFromdB(snrdB);
         m_peak = std::max(m_peak, snrdB);
+        m_n++;
+    }
+}
+
+FreeDVDemod::LevelRMS::LevelRMS()
+{
+    m_sum = 0.0f;
+    m_peak = 0.0f;
+    m_n = 0;
+    m_reset = true;
+}
+
+void FreeDVDemod::LevelRMS::accumulate(float level)
+{
+    if (m_reset)
+    {
+        m_sum = level * level;
+        m_peak = std::fabs(level);
+        m_n = 1;
+        m_reset = false;
+    }
+    else
+    {
+        m_sum += level * level;
+        m_peak = std::max(m_peak, std::fabs(level));
         m_n++;
     }
 }
@@ -399,6 +425,17 @@ bool FreeDVDemod::handleMessage(const Message& cmd)
 void FreeDVDemod::pushSampleToDV(int16_t sample)
 {
     qint16 audioSample;
+
+    if (m_levelIn.m_n >= m_levelInNbSamples)
+    {
+        qreal rmsLevel = sqrt(m_levelIn.m_sum / m_levelInNbSamples);
+        // qDebug("FreeDVDemod::pushSampleToDV: rmsLevel: %f m_peak: %f m_levelInNbSamples: %d",
+        //     rmsLevel, m_levelIn.m_peak, m_levelInNbSamples);
+        emit levelInChanged(rmsLevel, m_levelIn.m_peak, m_levelInNbSamples);
+        m_levelIn.m_reset = true;
+    }
+
+    m_levelIn.accumulate(sample/32768.0f);
 
     if (m_iModem == m_nin)
     {

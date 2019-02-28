@@ -174,6 +174,13 @@ void FreeDVDemodGUI::on_volume_valueChanged(int value)
 	applySettings();
 }
 
+void FreeDVDemodGUI::on_volumeIn_valueChanged(int value)
+{
+	ui->volumeInText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+	m_settings.m_volumeIn = value / 10.0;
+	applySettings();
+}
+
 void FreeDVDemodGUI::on_agc_toggled(bool checked)
 {
     m_settings.m_agc = checked;
@@ -286,6 +293,7 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+	connect(m_freeDVDemod, SIGNAL(levelInChanged(qreal, qreal, int)), ui->volumeInMeter, SLOT(levelChanged(qreal, qreal, int)));
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 

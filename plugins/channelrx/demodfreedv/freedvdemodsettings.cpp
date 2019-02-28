@@ -41,6 +41,7 @@ void FreeDVDemodSettings::resetToDefaults()
     m_audioMute = false;
     m_agc = true;
     m_volume = 3.0;
+    m_volumeIn = 3.0;
     m_spanLog2 = 3;
     m_inputFrequencyOffset = 0;
     m_rgbColor = QColor(0, 255, 204).rgb();
@@ -65,6 +66,7 @@ QByteArray FreeDVDemodSettings::serialize() const
     }
 
     s.writeU32(5, m_rgbColor);
+    s.writeS32(6, m_volumeIn * 10.0);
     s.writeS32(7, m_spanLog2);
     s.writeBool(11, m_agc);
     s.writeString(16, m_title);
@@ -108,6 +110,7 @@ bool FreeDVDemodSettings::deserialize(const QByteArray& data)
 
         d.readU32(5, &m_rgbColor);
         d.readS32(6, &tmp, 30);
+        m_volumeIn = tmp / 10.0;
         d.readS32(7, &m_spanLog2, 3);
         d.readBool(11, &m_agc, false);
         d.readString(16, &m_title, "SSB Demodulator");

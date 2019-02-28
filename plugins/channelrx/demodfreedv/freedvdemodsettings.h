@@ -36,6 +36,7 @@ struct FreeDVDemodSettings
 
     qint32 m_inputFrequencyOffset;
     Real m_volume;
+    Real m_volumeIn;
     int  m_spanLog2;
     bool m_audioMute;
     bool m_agc;

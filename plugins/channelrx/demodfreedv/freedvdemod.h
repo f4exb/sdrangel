@@ -184,6 +184,15 @@ public:
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
+signals:
+	/**
+	 * Level changed
+	 * \param rmsLevel RMS level in range 0.0 - 1.0
+	 * \param peakLevel Peak level in range 0.0 - 1.0
+	 * \param numSamples Number of audio samples analyzed
+	 */
+	void levelInChanged(qreal rmsLevel, qreal peakLevel, int numSamples);
+
 private:
     struct MagSqLevelsStore
     {
@@ -218,6 +227,17 @@ private:
 	{
 		FreeDVSNR();
 		void accumulate(float snrdB);
+
+		double m_sum;
+		float m_peak;
+		int m_n;
+		bool m_reset;
+	};
+
+	struct LevelRMS
+	{
+		LevelRMS();
+		void accumulate(float fsample);
 
 		double m_sum;
 		float m_peak;
@@ -372,6 +392,8 @@ private:
     AudioResampler m_audioResampler;
 	FreeDVStats m_freeDVStats;
 	FreeDVSNR m_freeDVSNR;
+	LevelRMS m_levelIn;
+	static const int m_levelInNbSamples;
 
 	QMutex m_settingsMutex;
 

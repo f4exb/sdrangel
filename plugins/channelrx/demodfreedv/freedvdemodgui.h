@@ -97,6 +97,7 @@ private slots:
 	void on_reSync_clicked(bool checked);
     void on_freeDVMode_currentIndexChanged(int index);
 	void on_volume_valueChanged(int value);
+	void on_volumeIn_valueChanged(int value);
 	void on_agc_toggled(bool checked);
 	void on_audioMute_toggled(bool checked);
 	void on_spanLog2_valueChanged(int value);
