@@ -616,6 +616,7 @@ void FreeDVMod::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
     int modemSampleRate = FreeDVModSettings::getModSampleRate(mode);
 
     m_settingsMutex.lock();
+    m_SSBFilter->create_filter(m_lowCutoff / modemSampleRate, m_hiCutoff / modemSampleRate);
 
     // baseband interpolator and filter
     if (modemSampleRate != m_modemSampleRate)
@@ -628,7 +629,6 @@ void FreeDVMod::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
         m_interpolatorConsumed = false;
         m_interpolatorDistance = (Real) modemSampleRate / (Real) m_outputSampleRate;
         m_interpolator.create(48, modemSampleRate, m_hiCutoff, 3.0);
-        m_SSBFilter->create_filter(m_lowCutoff / modemSampleRate, m_hiCutoff / modemSampleRate);
         m_modemSampleRate = modemSampleRate;
 
         if (getMessageQueueToGUI())
@@ -722,6 +722,8 @@ void FreeDVMod::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
         qDebug() << "FreeDVMod::applyFreeDVMode:"
                 << " fdv_mode: " << fdv_mode
                 << " m_modemSampleRate: " << m_modemSampleRate
+                << " m_lowCutoff: " << m_lowCutoff
+                << " m_hiCutoff: " << m_hiCutoff
                 << " Fs: " << Fs
                 << " Rs: " << Rs
                 << " m_nSpeechSamples: " << m_nSpeechSamples

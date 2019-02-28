@@ -54,7 +54,7 @@ FreeDVDemod::FreeDVStats::FreeDVStats()
 
 void FreeDVDemod::FreeDVStats::init()
 {
-    m_sync = 0;
+    m_sync = false;
     m_snrEst = -20;
     m_clockOffset = 0;
     m_freqOffset = 0;
@@ -76,7 +76,7 @@ void FreeDVDemod::FreeDVStats::collect(struct freedv *freeDV)
     m_clockOffset = stats.clock_offset;
     m_freqOffset = stats.foff;
     m_syncMetric = stats.sync_metric;
-    m_sync = stats.sync;
+    m_sync = stats.sync != 0;
     m_snrEst = stats.snr_est;
 
     if (m_berFrameCount >= m_fps)
@@ -85,8 +85,8 @@ void FreeDVDemod::FreeDVStats::collect(struct freedv *freeDV)
         m_ber = m_ber < 0 ? 0 : m_ber;
         m_berFrameCount = 0;
         m_lastTotalBitErrors = m_totalBitErrors;
-        qDebug("FreeDVStats::collect: demod sync: %d sync metric: %f demod snr: %3.2f dB  BER: %d clock offset: %f freq offset: %f",
-            m_sync, m_syncMetric, m_snrEst, m_ber, m_clockOffset, m_freqOffset);
+//        qDebug("FreeDVStats::collect: demod sync: %s sync metric: %f demod snr: %3.2f dB  BER: %d clock offset: %f freq offset: %f",
+//            m_sync ? "ok" : "ko", m_syncMetric, m_snrEst, m_ber, m_clockOffset, m_freqOffset);
     }
 
     m_berFrameCount++;
@@ -486,8 +486,9 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
     uint32_t modemSampleRate = FreeDVDemodSettings::getModSampleRate(mode);
 
     m_settingsMutex.lock();
+    SSBFilter->create_filter(m_lowCutoff / (float) modemSampleRate, m_hiCutoff / (float) modemSampleRate);
 
-    // baseband interpolator and filter
+    // baseband interpolator
     if (modemSampleRate != m_modemSampleRate)
     {
         MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
@@ -498,7 +499,6 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
         //m_interpolatorConsumed = false;
         m_interpolatorDistance = (Real) m_inputSampleRate / (Real) modemSampleRate;
         m_interpolator.create(16, m_inputSampleRate, m_hiCutoff * 1.5f, 2.0f);
-        SSBFilter->create_filter(m_lowCutoff / (float) modemSampleRate, m_hiCutoff / (float) modemSampleRate);
 
         int agcNbSamples = (modemSampleRate / 1000) * (1<<m_settings.m_agcTimeLog2);
         int agcThresholdGate = (modemSampleRate / 1000) * m_settings.m_agcThresholdGate; // ms
@@ -571,16 +571,13 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
         freedv_set_squelch_en(m_freeDV, 0);
         freedv_set_clip(m_freeDV, 0);
         freedv_set_ext_vco(m_freeDV, 0);
+        freedv_set_sync(m_freeDV, manualsync);
 
         int nSpeechSamples = freedv_get_n_speech_samples(m_freeDV);
         int nMaxModemSamples = freedv_get_n_max_modem_samples(m_freeDV);
         int Fs = freedv_get_modem_sample_rate(m_freeDV);
         int Rs = freedv_get_modem_symbol_rate(m_freeDV);
         m_freeDVStats.init();
-
-        if (m_nin > 0) {
-            m_freeDVStats.m_fps = m_modemSampleRate / m_nin;
-        }
 
         if (nSpeechSamples != m_nSpeechSamples)
         {
@@ -606,9 +603,15 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
         m_iModem = 0;
         m_nin = freedv_nin(m_freeDV);
 
+        if (m_nin > 0) {
+            m_freeDVStats.m_fps = m_modemSampleRate / m_nin;
+        }
+
         qDebug() << "FreeDVMod::applyFreeDVMode:"
                 << " fdv_mode: " << fdv_mode
                 << " m_modemSampleRate: " << m_modemSampleRate
+                << " m_lowCutoff: " << m_lowCutoff
+                << " m_hiCutoff: " << m_hiCutoff
                 << " Fs: " << Fs
                 << " Rs: " << Rs
                 << " m_nSpeechSamples: " << m_nSpeechSamples

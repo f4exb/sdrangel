@@ -454,7 +454,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Open record file (48 kHz 32 bit float LE mono)</string>
+         <string>Open record file (8 kHz 16 bit signed integer LE mono)</string>
         </property>
         <property name="text">
          <string/>

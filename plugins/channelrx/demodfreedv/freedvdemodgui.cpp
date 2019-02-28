@@ -83,14 +83,14 @@ bool FreeDVDemodGUI::deserialize(const QByteArray& data)
     if(m_settings.deserialize(data))
     {
         displaySettings();
-        applySettings(true); // will have true
+        applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
         displaySettings();
-        applySettings(true); // will have true
+        applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
         return false;
     }
 }
@@ -300,7 +300,7 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
     ui->snrMeter->setColorTheme(LevelMeterSignalDB::ColorCyanAndBlue);
-    ui->snrMeter->setRange(-20, 30);
+    ui->snrMeter->setRange(-10, 30);
     ui->snrMeter->setAverageSmoothing(2);
 
     m_channelMarker.setVisible(true); // activate signal on the last setting only
@@ -472,19 +472,31 @@ void FreeDVDemodGUI::tick()
             (FreeDVDemodSettings::m_mminPowerThresholdDBf + powDbPeak) / FreeDVDemodSettings::m_mminPowerThresholdDBf,
             nbMagsqSamples);
 
-    if (m_tickCount % 4 == 0) {
-        ui->channelPower->setText(tr("%1 dB").arg(powDbAvg, 0, 'f', 1));
-    }
-
     double snrAvg, snrPeak;
     int nbSNRSamples;
     m_freeDVDemod->getSNRLevels(snrAvg, snrPeak, nbSNRSamples);
 
     ui->snrMeter->levelChanged(
-        (20.0f + snrAvg) / 50.0f,
-        (20.0f + snrPeak) / 50.0f,
+        (10.0f + snrAvg) / 40.0f,
+        (10.0f + snrPeak) / 40.0f,
         nbSNRSamples
     );
+
+    ui->berText->setText(tr("%1").arg(m_freeDVDemod->getBER()));
+    float freqOffset = m_freeDVDemod->getFrequencyOffset();
+    int freqOffsetInt = freqOffset < -999 ? -999 : freqOffset > 999 ? 999 : freqOffset;
+    ui->freqOffset->setText(tr("%1Hz").arg(freqOffsetInt));
+
+    if (m_freeDVDemod->isSync()) {
+        ui->syncLabel->setStyleSheet("QLabel { background-color : green; }");
+    } else {
+        ui->syncLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+    }
+
+    if (m_tickCount % 4 == 0) {
+        ui->channelPower->setText(tr("%1 dB").arg(powDbAvg, 0, 'f', 1));
+        ui->snrText->setText(tr("%1 dB").arg(snrAvg < -90 ? -90 : snrAvg > 90 ? 90 : snrAvg, 0, 'f', 1));
+    }
 
     bool squelchOpen = m_freeDVDemod->getAudioActive();
 

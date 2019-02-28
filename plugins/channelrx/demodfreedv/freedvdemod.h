@@ -163,6 +163,9 @@ public:
     }
 
 	void getSNRLevels(double& avg, double& peak, int& nbSamples);
+	int getBER() const { return m_freeDVStats.m_ber; }
+	float getFrequencyOffset() const { return m_freeDVStats.m_freqOffset; }
+	bool isSync() const { return m_freeDVStats.m_sync; }
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
@@ -198,7 +201,7 @@ private:
 		void init();
 		void collect(struct freedv *freedv);
 
-		int m_sync;
+		bool m_sync;
 		float m_snrEst;
 		float m_clockOffset;
 		float m_freqOffset;

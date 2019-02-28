@@ -67,14 +67,14 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
     if(m_settings.deserialize(data))
     {
         displaySettings();
-        applySettings(true); // will have true
+        applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
         displaySettings();
-        applySettings(true); // will have true
+        applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
         return false;
     }
 }
