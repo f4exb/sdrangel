@@ -259,6 +259,9 @@
           <pointsize>8</pointsize>
          </font>
         </property>
+        <property name="toolTip">
+         <string>Channel power</string>
+        </property>
        </widget>
       </item>
      </layout>
@@ -320,7 +323,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Modem input volume</string>
+         <string>Modem input volume level</string>
         </property>
         <property name="text">
          <string>2.0</string>
@@ -350,6 +353,9 @@
           <pointsize>8</pointsize>
          </font>
         </property>
+        <property name="toolTip">
+         <string>Modem input volume</string>
+        </property>
        </widget>
       </item>
       <item>
@@ -373,6 +379,9 @@
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Audio output volume control</string>
+        </property>
         <property name="maximum">
          <number>99</number>
         </property>
@@ -388,6 +397,9 @@
           <width>30</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Audio output volume level </string>
         </property>
         <property name="text">
          <string>2.0</string>
@@ -600,7 +612,7 @@
       <item>
        <widget class="QSlider" name="spanLog2">
         <property name="toolTip">
-         <string>Demod frequency span</string>
+         <string>Spectrum display frequency span</string>
         </property>
         <property name="minimum">
          <number>0</number>
@@ -635,6 +647,9 @@
           <width>50</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Spectrum display frequency span (kHz)</string>
         </property>
         <property name="text">
          <string>6.0k</string>

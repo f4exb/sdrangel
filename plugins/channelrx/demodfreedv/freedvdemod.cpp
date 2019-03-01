@@ -611,6 +611,10 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
         freedv_set_ext_vco(m_freeDV, 0);
         freedv_set_sync(m_freeDV, manualsync);
 
+        freedv_set_callback_txt(m_freeDV, nullptr, nullptr, nullptr);
+        freedv_set_callback_protocol(m_freeDV, nullptr, nullptr, nullptr);
+        freedv_set_callback_data(m_freeDV, nullptr, nullptr, nullptr);
+
         int nSpeechSamples = freedv_get_n_speech_samples(m_freeDV);
         int nMaxModemSamples = freedv_get_n_max_modem_samples(m_freeDV);
         int Fs = freedv_get_modem_sample_rate(m_freeDV);
