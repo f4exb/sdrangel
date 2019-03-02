@@ -8,6 +8,17 @@ RUN useradd -m sdr && echo "sdr:sdr" | chpasswd && adduser sdr sudo
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER sdr
 
+# Some essentials
+RUN sudo apt-get update && sudo apt-get -y install \
+	vim \
+	openssh-server \
+	iputils-ping \
+	traceroute \
+	iproute2
+	
+# Configure SSH for X-forwarding
+RUN sudo sed -i '/X11UseLocalhost/c\X11UseLocalhost no' /etc/ssh/sshd_config
+
 # Prepare buiid and install environment
 RUN sudo mkdir /opt/build /opt/install \
     && sudo chown sdr:sdr /opt/build /opt/install
@@ -219,3 +230,8 @@ RUN cd /opt/build \
     && mkdir build; cd build \
     && cmake -Wno-dev -DDEBUG_OUTPUT=ON -DBUILD_TYPE=RELEASE -DRX_SAMPLE_24BIT=ON -DMIRISDR_DIR=/opt/install/libmirisdr -DAIRSPY_DIR=/opt/install/libairspy -DAIRSPYHF_DIR=/opt/install/libairspyhf -DBLADERF_DIR=/opt/install/libbladeRF -DHACKRF_DIR=/opt/install/libhackrf -DRTLSDR_DIR=/opt/install/librtlsdr -DLIMESUITE_DIR=/opt/install/LimeSuite -DIIO_DIR=/opt/install/libiio -DCM256CC_DIR=/opt/install/cm256cc -DDSDCC_DIR=/opt/install/dsdcc -DSERIALDV_DIR=/opt/install/serialdv -DMBE_DIR=/opt/install/mbelib -DPERSEUS_DIR=/opt/install/libperseus -DXTRX_DIR=/opt/install/xtrx-images -DSOAPYSDR_DIR=/opt/install/SoapySDR -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel .. \
     && make -j8 install
+
+# Start some services on which SDRangel depends
+RUN sudo service ssh start \
+	&& sudo service dbus start \
+	&& sudo service avahi-daemon start
