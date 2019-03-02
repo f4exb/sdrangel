@@ -49,6 +49,18 @@ void DevicePlutoSDRScan::scan()
 
     m_scans.clear();
 
+    if (num_contexts == 0)
+    {
+	    struct iio_context *ctx = iio_create_network_context("pluto.local");
+		if(!ctx) {
+            return;
+        }
+        m_scans.push_back({std::string("PlutoSDR"), std::string("networked"), std::string("ip:pluto.local")});
+        m_serialMap[m_scans.back().m_serial] = &m_scans.back();
+        m_urilMap[m_scans.back().m_uri] = &m_scans.back();    
+		iio_context_destroy(ctx);
+    }
+
     for (i = 0; i < num_contexts; i++)
     {
         const char *description = iio_context_info_get_description(info[i]);
@@ -120,6 +132,4 @@ void DevicePlutoSDRScan::getSerials(std::vector<std::string>& serials) const
         serials.push_back(it->m_serial);
     }
 }
-
-
 
