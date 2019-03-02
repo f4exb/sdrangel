@@ -17,7 +17,8 @@ RUN sudo apt-get update && sudo apt-get -y install \
 	iproute2
 	
 # Configure SSH for X-forwarding
-RUN sudo sed -i '/X11UseLocalhost/c\X11UseLocalhost no' /etc/ssh/sshd_config
+RUN sudo sed -i '/X11Forwarding/c\X11Forwarding yes' /etc/ssh/sshd_config \
+	&& sudo sed -i '/X11UseLocalhost/c\X11UseLocalhost no' /etc/ssh/sshd_config
 
 # Prepare buiid and install environment
 RUN sudo mkdir /opt/build /opt/install \
