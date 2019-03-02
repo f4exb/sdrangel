@@ -14,6 +14,8 @@ The modulation and standard is automatically detected and switched depending on 
 
 To enable this plugin at compile time you will need to have DSDcc installed in your system. Please follow instructions in [DSDcc readme](https://github.com/f4exb/dsdcc/blob/master/Readme.md) to build and install DSDcc. If you install it in a custom location say `/opt/install/dsdcc` you will need to add these defines to the cmake command: `-DDSDCC_DIR=/opt/install/dsdcc`
 
+&#9888; A minimum of 48 kS/s I/Q sample rate in the baseband is required for the demodulator/decoder to work correctly.
+
 <h2>DV serial device support</h2>
 
 You can use a serial device connected to your system that implements and exposes the packet interface of the AMBE3000 chip. This can be for example a ThumbDV USB dongle. In order to support DV serial devices in your system you will need two things:

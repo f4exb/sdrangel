@@ -4,6 +4,8 @@
 
 This plugin can be used to demodulate a signal following the [FreeDV digital voice protocol](https://freedv.org/).
 
+&#9888; A minimum of 48 kS/s I/Q sample rate in the baseband is required in 2400A mode for the demodulator/decoder to work correctly. Other modes only require 8 kS/s.
+
 <h2>Interface</h2>
 
 ![FreeDV Demodulator plugin GUI](../../../doc/img/FreeDVDemod_plugin.png)

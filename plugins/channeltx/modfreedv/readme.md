@@ -4,6 +4,8 @@
 
 This plugin can be used to generate a signal following the [FreeDV digital voice protocol](https://freedv.org/).
 
+&#9888; A minimum of 48 kS/s I/Q sample rate in the baseband is required in 2400A mode for the coder/modulator to work correctly. Other modes only require 8 kS/s however such a low rate is not recommended and at least 48 kS/s should be used anyway.
+
 <h2>Interface</h2>
 
 ![FreeDV Modulator plugin GUI](../../../doc/img/FreeDVMod_plugin.png)
@@ -120,8 +122,8 @@ The path to the selected audio file to be played or dots if unselected
 
 <h4>12.1: Audio file select</h4>
 
-Opens a file dialog to select the audio file to be played. It must be 48 kHz F32LE raw format. If binaural mode is selected it takes a 2 channel (stereo) file else it should be mono.
-Using sox a .wav file can be converted with this command: `sox piano.wav -t raw -r 48k -c 1 -b 32 -L -e float piano.raw` (mono) or `sox piano.wav -t raw -r 48k -c 2 -b 32 -L -e float piano.raw` (stereo)
+Opens a file dialog to select the audio file to be played. It must be 8 kHz S16LE single (mono) channel raw format.
+Using sox a .wav file can be converted with this command: `sox piano.wav -t raw -r 8k -c 1 -b 16 -L -e signed piano.raw`
 
 <h4>12.2: Audio file loop</h4>
 
