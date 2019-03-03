@@ -233,6 +233,5 @@ RUN cd /opt/build \
     && make -j8 install
 
 # Start some services on which SDRangel depends
-RUN sudo service ssh start \
-	&& sudo service dbus start \
-	&& sudo service avahi-daemon start
+COPY start.sh /start.sh
+ENTRYPOINT ["/start.sh"]
