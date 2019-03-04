@@ -363,6 +363,11 @@ if (BUILD_DEBIAN)
 	add_subdirectory(libsoapysdr)
 endif (BUILD_DEBIAN)
 
+find_package(Codec2)
+if (CODEC2_FOUND)
+    add_subdirectory(libfreedv)
+endif(CODEC2_FOUND)
+
 add_subdirectory(devices)
 if (BUILD_GUI)
 add_subdirectory(plugins)
