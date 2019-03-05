@@ -39,6 +39,6 @@ void kiss_fftri(kiss_fftr_cfg cfg,const kiss_fft_cpx *freqdata,kiss_fft_scalar *
 
 } // FreeDV
 
-#define kiss_fftr_free free
+//#define kiss_fftr_free free
 
 #endif

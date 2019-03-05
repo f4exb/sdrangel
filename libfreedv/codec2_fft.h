@@ -14,8 +14,9 @@
 #include <string.h>
 #include <math.h>
 
-namespace FreeDV
-{
+#include "codec2/comp.h"
+#include "defines.h"
+#include "kiss_fftr.h"
 
 #ifdef FDV_ARM_MATH
   #include "fdv_arm_math.h"
@@ -23,15 +24,16 @@ namespace FreeDV
     #define USE_KISS_FFT
 #endif
 
-#include "defines.h"
-#include "codec2/comp.h"
-
-
-typedef COMP    codec2_fft_cpx;
-#include "kiss_fftr.h"
-
 #ifdef USE_KISS_FFT
     #include "kiss_fft.h"
+#endif
+
+namespace FreeDV
+{
+
+typedef COMP    codec2_fft_cpx;
+
+#ifdef USE_KISS_FFT
     typedef kiss_fftr_cfg codec2_fftr_cfg;
     typedef kiss_fft_cfg codec2_fft_cfg;
     typedef kiss_fft_scalar codec2_fft_scalar;
@@ -51,11 +53,8 @@ typedef COMP    codec2_fft_cpx;
   typedef codec2_fft_struct* codec2_fft_cfg;
 #endif
 
-
-
 static inline void codec2_fftr(codec2_fftr_cfg cfg, codec2_fft_scalar* in, codec2_fft_cpx* out)
 {
-
 #ifdef USE_KISS_FFT
       kiss_fftr(cfg, in, (kiss_fft_cpx*)out);
 #else
@@ -75,8 +74,8 @@ static inline void codec2_fftri(codec2_fftr_cfg cfg, codec2_fft_cpx* in, codec2_
 
 }
 
-codec2_fft_cfg codec2_fft_alloc(int nfft, int inverse_fft, void* mem, size_t* lenmem);
-codec2_fftr_cfg codec2_fftr_alloc(int nfft, int inverse_fft, void* mem, size_t* lenmem);
+codec2_fft_cfg codec2_fft_alloc(int nfft, int inverse_fft, void* mem, std::size_t* lenmem);
+codec2_fftr_cfg codec2_fftr_alloc(int nfft, int inverse_fft, void* mem, std::size_t* lenmem);
 void codec2_fft_free(codec2_fft_cfg cfg);
 void codec2_fftr_free(codec2_fftr_cfg cfg);
 

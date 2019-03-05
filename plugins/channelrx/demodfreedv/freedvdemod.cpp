@@ -22,7 +22,7 @@
 #include <QNetworkReply>
 #include <QBuffer>
 
-#include "codec2/freedv_api.h"
+#include "libfreedv.h"
 
 #include "SWGChannelSettings.h"
 #include "SWGFreeDVDemodSettings.h"
@@ -67,12 +67,12 @@ void FreeDVDemod::FreeDVStats::init()
     m_fps = 1;
 }
 
-void FreeDVDemod::FreeDVStats::collect(struct freedv *freeDV)
+void FreeDVDemod::FreeDVStats::collect(struct FreeDV::freedv *freeDV)
 {
-    struct MODEM_STATS stats;
+    struct FreeDV::MODEM_STATS stats;
 
-    freedv_get_modem_extended_stats(freeDV, &stats);
-    m_totalBitErrors = freedv_get_total_bit_errors(freeDV);
+    FreeDV::freedv_get_modem_extended_stats(freeDV, &stats);
+    m_totalBitErrors = FreeDV::freedv_get_total_bit_errors(freeDV);
     m_clockOffset = stats.clock_offset;
     m_freqOffset = stats.foff;
     m_syncMetric = stats.sync_metric;
@@ -150,7 +150,7 @@ FreeDVDemod::FreeDVDemod(DeviceSourceAPI *deviceAPI) :
         m_lowCutoff(0),
         m_volume(2),
         m_spanLog2(3),
-        m_sum(0),
+        m_sum(fftfilt::cmplx{0,0}),
         m_inputSampleRate(48000),
         m_modemSampleRate(48000),
         m_speechSampleRate(8000), // fixed 8 kS/s
@@ -387,7 +387,7 @@ bool FreeDVDemod::handleMessage(const Message& cmd)
     {
         qDebug("FreeDVDemod::handleMessage: MsgResyncFreeDVDemod");
         m_settingsMutex.lock();
-        freedv_set_sync(m_freeDV, unsync);
+        FreeDV::freedv_set_sync(m_freeDV, FreeDV::unsync);
         m_settingsMutex.unlock();
         return true;
     }
@@ -593,27 +593,27 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
 
     if (fdv_mode == FREEDV_MODE_700D)
     {
-        struct freedv_advanced adv;
+        struct FreeDV::freedv_advanced adv;
         adv.interleave_frames = 1;
         m_freeDV = freedv_open_advanced(fdv_mode, &adv);
     }
     else
     {
-        m_freeDV = freedv_open(fdv_mode);
+        m_freeDV = FreeDV::freedv_open(fdv_mode);
     }
 
     if (m_freeDV)
     {
-        freedv_set_test_frames(m_freeDV, 0);
-        freedv_set_snr_squelch_thresh(m_freeDV, -100.0);
-        freedv_set_squelch_en(m_freeDV, 0);
-        freedv_set_clip(m_freeDV, 0);
-        freedv_set_ext_vco(m_freeDV, 0);
-        freedv_set_sync(m_freeDV, manualsync);
+        FreeDV::freedv_set_test_frames(m_freeDV, 0);
+        FreeDV::freedv_set_snr_squelch_thresh(m_freeDV, -100.0);
+        FreeDV::freedv_set_squelch_en(m_freeDV, 0);
+        FreeDV::freedv_set_clip(m_freeDV, 0);
+        FreeDV::freedv_set_ext_vco(m_freeDV, 0);
+        FreeDV::freedv_set_sync(m_freeDV, FreeDV::manualsync);
 
-        freedv_set_callback_txt(m_freeDV, nullptr, nullptr, nullptr);
-        freedv_set_callback_protocol(m_freeDV, nullptr, nullptr, nullptr);
-        freedv_set_callback_data(m_freeDV, nullptr, nullptr, nullptr);
+        FreeDV::freedv_set_callback_txt(m_freeDV, nullptr, nullptr, nullptr);
+        FreeDV::freedv_set_callback_protocol(m_freeDV, nullptr, nullptr, nullptr);
+        FreeDV::freedv_set_callback_data(m_freeDV, nullptr, nullptr, nullptr);
 
         int nSpeechSamples = freedv_get_n_speech_samples(m_freeDV);
         int nMaxModemSamples = freedv_get_n_max_modem_samples(m_freeDV);

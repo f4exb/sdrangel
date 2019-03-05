@@ -43,7 +43,10 @@ class QNetworkReply;
 class DeviceSourceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
+
+namespace FreeDV {
 struct freedv;
+}
 
 class FreeDVDemod : public BasebandSampleSink, public ChannelSinkAPI {
 	Q_OBJECT
@@ -208,7 +211,7 @@ private:
 	{
 		FreeDVStats();
 		void init();
-		void collect(struct freedv *freedv);
+		void collect(struct FreeDV::freedv *freedv);
 
 		bool m_sync;
 		float m_snrEst;
@@ -381,7 +384,7 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    struct freedv *m_freeDV;
+    struct FreeDV::freedv *m_freeDV;
     int m_nSpeechSamples;
     int m_nMaxModemSamples;
     int m_nin;

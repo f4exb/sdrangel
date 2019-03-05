@@ -23,7 +23,8 @@ set(freedv_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client	
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${CMAKE_SOURCE_DIR}/libfreedv	
     ${CODEC2_INCLUDE_DIR}
 )
 
@@ -44,6 +45,7 @@ target_link_libraries(demodfreedv
 	sdrbase
 	sdrgui
 	swagger
+	freedv
 	${CODEC2_LIBRARIES}
 )
 

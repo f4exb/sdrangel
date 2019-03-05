@@ -20,6 +20,9 @@
   in the tools/ directory.
 */
 
+namespace FreeDV
+{
+
 #ifdef USE_SIMD
 # include <xmmintrin.h>
 # define kiss_fft_scalar __m128
@@ -45,8 +48,6 @@
 # endif
 #endif
 
-namespace FreeDV
-{
 
 typedef struct {
     kiss_fft_scalar r;

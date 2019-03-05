@@ -29,8 +29,8 @@
 #define __MODEMPROBE_H
 #include <stdint.h>
 #include <stdlib.h>
-#include <complex.h>
-#include "comp.h"
+#include <complex>
+#include "codec2/comp.h"
 
 namespace FreeDV
 {
@@ -103,28 +103,47 @@ static inline void modem_probe_samp_cft(char *tracename,complex float samp[],siz
 
 #else
 
-static inline void modem_probe_init(char *modname,char *runname){
-        return;
+static inline void modem_probe_init(const char *modname, char *runname)
+{
+    (void) modname;
+    (void) runname;
+    return;
 }
 
-static inline void modem_probe_close(){
-        return;
+static inline void modem_probe_close() {
+    return;
 }
 
-static inline void modem_probe_samp_i(char *name,int samp[],size_t sampcnt){
-        return;
+static inline void modem_probe_samp_i(const char *name, int samp[], std::size_t sampcnt)
+{
+    (void) name;
+    (void) samp;
+    (void) sampcnt;
+    return;
 }
 
-static inline void modem_probe_samp_f(char *name,float samp[],size_t cnt){
-        return;
+static inline void modem_probe_samp_f(const char *name, float samp[], std::size_t cnt)
+{
+    (void) name;
+    (void) samp;
+    (void) cnt;
+    return;
 }
 
-static inline void modem_probe_samp_c(char *name,COMP samp[],size_t cnt){
-        return;
+static inline void modem_probe_samp_c(const char *name, COMP samp[], std::size_t cnt)
+{
+    (void) name;
+    (void) samp;
+    (void) cnt;
+    return;
 }
 
-static inline void modem_probe_samp_cft(char *name,complex float samp[],size_t cnt){
-        return;
+static inline void modem_probe_samp_cft(const char *name, std::complex<float> samp[], std::size_t cnt)
+{
+    (void) name;
+    (void) samp;
+    (void) cnt;
+    return;
 }
 
 #endif
