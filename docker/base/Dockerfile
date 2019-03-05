@@ -72,6 +72,9 @@ RUN sudo apt-get update && sudo apt-get -y install \
     libopus-dev \
     libavahi-client-dev
 
+# This is the first step to allow sharing pulseaudio with the host
+COPY pulse-client.conf /etc/pulse/client.conf 
+
 # CM256cc
 RUN cd /opt/build \
     && git clone https://github.com/f4exb/cm256cc.git \
