@@ -43,8 +43,8 @@
 #define TAU         (2.0f * M_PI)
 #define ROT45       (M_PI / 4.0f)
 
-#define cmplx(value) (COSF(value) + SINF(value) * I)
-#define cmplxconj(value) (COSF(value) + SINF(value) * -I)
+#define cmplx(value) (std::complex<float>{cos(value), sin(value)})
+#define cmplxconj(value) (std::complex<float>{cos(value), -sin(value)})
 
 namespace FreeDV
 {

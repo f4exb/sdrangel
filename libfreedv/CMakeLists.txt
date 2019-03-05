@@ -9,8 +9,14 @@ set(freedv_SOURCES
 	freedv_filter.cpp
 	freedv_vhf_framing.cpp
 	fsk.cpp
+	gp_interleaver.cpp
+	HRA_112_112.cpp
+	interldpc.cpp
 	kiss_fft.cpp
 	linreg.cpp
+	mpdecode_core.cpp
+	ofdm.cpp
+	phi0.cpp
 )
 
 set(freedv_HEADERS
@@ -32,6 +38,7 @@ set(freedv_HEADERS
 	fsk.h
 	gp_interleaver.h
 	hanning.h
+	HRA_112_112.h
 	interldpc.h
 	_kiss_fft_guts.h
 	kiss_fft.h
@@ -44,6 +51,7 @@ set(freedv_HEADERS
 	mpdecode_core.h
 	ofdm_internal.h
 	os.h
+	phi0.h
 	pilot_coeff.h
 	pilots_coh.h
 	rn_coh.h
