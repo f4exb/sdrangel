@@ -8,6 +8,7 @@ set(freedv_SOURCES
 	freedv_data_channel.cpp
 	freedv_filter.cpp
 	freedv_vhf_framing.cpp
+	fmfsk.cpp
 	fsk.cpp
 	gp_interleaver.cpp
 	HRA_112_112.cpp
