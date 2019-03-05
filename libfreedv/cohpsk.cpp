@@ -42,7 +42,7 @@
 #include "cohpsk_internal.h"
 #include "fdmdv_internal.h"
 #include "pilots_coh.h"
-#include "codec2/comp_prim.h"
+#include "comp_prim.h"
 #include "kiss_fft.h"
 #include "linreg.h"
 #include "rn_coh.h"

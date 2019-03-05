@@ -26,6 +26,7 @@ set(freedv_HEADERS
 	codec2_ofdm.h
 	cohpsk_defs.h
 	cohpsk_internal.h
+	comp_prim.h
 	defines.h
 	fdmdv_internal.h
 	fdv_arm_math.h

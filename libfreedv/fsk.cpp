@@ -70,7 +70,7 @@
 #include <math.h>
 
 #include "fsk.h"
-#include "codec2/comp_prim.h"
+#include "comp_prim.h"
 #include "kiss_fftr.h"
 #include "modem_probe.h"
 

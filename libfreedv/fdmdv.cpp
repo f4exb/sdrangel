@@ -41,7 +41,7 @@
 
 #include "fdmdv_internal.h"
 #include "codec2_fdmdv.h"
-#include "codec2/comp_prim.h"
+#include "comp_prim.h"
 #include "rn.h"
 #include "rxdec_coeff.h"
 #include "test_bits.h"

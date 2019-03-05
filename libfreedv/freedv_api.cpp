@@ -54,7 +54,7 @@
 #include "libfreedv.h"
 #include "freedv_api_internal.h"
 #include "freedv_vhf_framing.h"
-#include "codec2/comp_prim.h"
+#include "comp_prim.h"
 #include "freedv_filter.h"
 
 #include "codec2_ofdm.h"

@@ -39,7 +39,7 @@
 #include <math.h>
 
 #include "linreg.h"
-#include "codec2/comp_prim.h"
+#include "comp_prim.h"
 
 namespace FreeDV
 {
