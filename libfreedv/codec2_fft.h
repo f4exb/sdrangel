@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <cstddef>
 
 #include "codec2/comp.h"
 #include "defines.h"
