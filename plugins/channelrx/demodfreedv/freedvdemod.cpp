@@ -446,7 +446,7 @@ void FreeDVDemod::pushSampleToDV(int16_t sample)
 
     if (m_iModem == m_nin)
     {
-        int nout = freedv_rx(m_freeDV, m_speechOut, m_modIn);
+        int nout = FreeDV::freedv_rx(m_freeDV, m_speechOut, m_modIn);
         m_freeDVStats.collect(m_freeDV);
         m_freeDVSNR.accumulate(m_freeDVStats.m_snrEst);
 
@@ -566,7 +566,7 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
     // FreeDV object
 
     if (m_freeDV) {
-        freedv_close(m_freeDV);
+        FreeDV::freedv_close(m_freeDV);
     }
 
     int fdv_mode = -1;
@@ -595,7 +595,7 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
     {
         struct FreeDV::freedv_advanced adv;
         adv.interleave_frames = 1;
-        m_freeDV = freedv_open_advanced(fdv_mode, &adv);
+        m_freeDV = FreeDV::freedv_open_advanced(fdv_mode, &adv);
     }
     else
     {
@@ -615,10 +615,10 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
         FreeDV::freedv_set_callback_protocol(m_freeDV, nullptr, nullptr, nullptr);
         FreeDV::freedv_set_callback_data(m_freeDV, nullptr, nullptr, nullptr);
 
-        int nSpeechSamples = freedv_get_n_speech_samples(m_freeDV);
-        int nMaxModemSamples = freedv_get_n_max_modem_samples(m_freeDV);
-        int Fs = freedv_get_modem_sample_rate(m_freeDV);
-        int Rs = freedv_get_modem_symbol_rate(m_freeDV);
+        int nSpeechSamples = FreeDV::freedv_get_n_speech_samples(m_freeDV);
+        int nMaxModemSamples = FreeDV::freedv_get_n_max_modem_samples(m_freeDV);
+        int Fs = FreeDV::freedv_get_modem_sample_rate(m_freeDV);
+        int Rs = FreeDV::freedv_get_modem_symbol_rate(m_freeDV);
         m_freeDVStats.init();
 
         if (nSpeechSamples != m_nSpeechSamples)
@@ -643,7 +643,7 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
 
         m_iSpeech = 0;
         m_iModem = 0;
-        m_nin = freedv_nin(m_freeDV);
+        m_nin = FreeDV::freedv_nin(m_freeDV);
 
         if (m_nin > 0) {
             m_freeDVStats.m_fps = m_modemSampleRate / m_nin;

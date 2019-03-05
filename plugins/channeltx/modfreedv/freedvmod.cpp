@@ -27,7 +27,7 @@
 #include <complex.h>
 #include <algorithm>
 
-#include "codec2/freedv_api.h"
+#include "libfreedv.h"
 
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
@@ -137,7 +137,7 @@ FreeDVMod::~FreeDVMod()
     delete[] m_SSBFilterBuffer;
 
     if (m_freeDV) {
-        freedv_close(m_freeDV);
+        FreeDV::freedv_close(m_freeDV);
     }
 }
 
@@ -230,7 +230,7 @@ void FreeDVMod::pullAF(Complex& sample)
                     calculateLevel(m_speechIn[i]);
                 }
             }
-            freedv_tx(m_freeDV, m_modOut, m_speechIn);
+            FreeDV::freedv_tx(m_freeDV, m_modOut, m_speechIn);
             break;
         case FreeDVModSettings::FreeDVModInputFile:
             if (m_iModem >= m_nNomModemSamples)
@@ -270,7 +270,7 @@ void FreeDVMod::pullAF(Complex& sample)
                             }
                         }
 
-                        freedv_tx(m_freeDV, m_modOut, m_speechIn);
+                        FreeDV::freedv_tx(m_freeDV, m_modOut, m_speechIn);
                     }
                 }
                 else
@@ -295,7 +295,7 @@ void FreeDVMod::pullAF(Complex& sample)
                     calculateLevel(m_speechIn[i]);
                 }
             }
-            freedv_tx(m_freeDV, m_modOut, m_speechIn);
+            FreeDV::freedv_tx(m_freeDV, m_modOut, m_speechIn);
             break;
         case FreeDVModSettings::FreeDVModInputCWTone:
             for (int i = 0; i < m_nSpeechSamples; i++)
@@ -324,12 +324,12 @@ void FreeDVMod::pullAF(Complex& sample)
                     calculateLevel(m_speechIn[i]);
                 }
             }
-            freedv_tx(m_freeDV, m_modOut, m_speechIn);
+            FreeDV::freedv_tx(m_freeDV, m_modOut, m_speechIn);
             break;
         case FreeDVModSettings::FreeDVModInputNone:
         default:
             std::fill(m_speechIn, m_speechIn + m_nSpeechSamples, 0);
-            freedv_tx(m_freeDV, m_modOut, m_speechIn);
+            FreeDV::freedv_tx(m_freeDV, m_modOut, m_speechIn);
             break;
         }
 
@@ -641,7 +641,7 @@ void FreeDVMod::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
     // FreeDV object
 
     if (m_freeDV) {
-        freedv_close(m_freeDV);
+        FreeDV::freedv_close(m_freeDV);
     }
 
     int fdv_mode = -1;
@@ -673,32 +673,32 @@ void FreeDVMod::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
 
     if (fdv_mode == FREEDV_MODE_700D)
     {
-        struct freedv_advanced adv;
+        struct FreeDV::freedv_advanced adv;
         adv.interleave_frames = 1;
-        m_freeDV = freedv_open_advanced(fdv_mode, &adv);
+        m_freeDV = FreeDV::freedv_open_advanced(fdv_mode, &adv);
     }
     else
     {
-        m_freeDV = freedv_open(fdv_mode);
+        m_freeDV = FreeDV::freedv_open(fdv_mode);
     }
 
     if (m_freeDV)
     {
-        freedv_set_test_frames(m_freeDV, 0);
-        freedv_set_snr_squelch_thresh(m_freeDV, -100.0);
-        freedv_set_squelch_en(m_freeDV, 1);
-        freedv_set_clip(m_freeDV, 0);
-        freedv_set_tx_bpf(m_freeDV, 1);
-        freedv_set_ext_vco(m_freeDV, 0);
+        FreeDV::freedv_set_test_frames(m_freeDV, 0);
+        FreeDV::freedv_set_snr_squelch_thresh(m_freeDV, -100.0);
+        FreeDV::freedv_set_squelch_en(m_freeDV, 1);
+        FreeDV::freedv_set_clip(m_freeDV, 0);
+        FreeDV::freedv_set_tx_bpf(m_freeDV, 1);
+        FreeDV::freedv_set_ext_vco(m_freeDV, 0);
 
-        freedv_set_callback_txt(m_freeDV, nullptr, nullptr, nullptr);
-        freedv_set_callback_protocol(m_freeDV, nullptr, nullptr, nullptr);
-        freedv_set_callback_data(m_freeDV, nullptr, nullptr, nullptr);
+        FreeDV::freedv_set_callback_txt(m_freeDV, nullptr, nullptr, nullptr);
+        FreeDV::freedv_set_callback_protocol(m_freeDV, nullptr, nullptr, nullptr);
+        FreeDV::freedv_set_callback_data(m_freeDV, nullptr, nullptr, nullptr);
 
-        int nSpeechSamples = freedv_get_n_speech_samples(m_freeDV);
-        int nNomModemSamples = freedv_get_n_nom_modem_samples(m_freeDV);
-        int Fs = freedv_get_modem_sample_rate(m_freeDV);
-        int Rs = freedv_get_modem_symbol_rate(m_freeDV);
+        int nSpeechSamples = FreeDV::freedv_get_n_speech_samples(m_freeDV);
+        int nNomModemSamples = FreeDV::freedv_get_n_nom_modem_samples(m_freeDV);
+        int Fs = FreeDV::freedv_get_modem_sample_rate(m_freeDV);
+        int Rs = FreeDV::freedv_get_modem_symbol_rate(m_freeDV);
 
         if (nSpeechSamples != m_nSpeechSamples)
         {
