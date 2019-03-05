@@ -1534,7 +1534,8 @@ void ofdm_set_sync(struct OFDM *ofdm, Sync sync_cmd) {
             ofdm->sync_mode = manualsync;
             break;
         default:
-            assert(0);
+            fprintf(stderr, "FreeDV::ofdm_set_sync: unknnown sync mode default to autosync");
+            ofdm->sync_mode = autosync;
     }
 }
 

@@ -187,7 +187,8 @@ struct freedv *freedv_open_advanced(int mode, struct freedv_advanced *adv) {
             codec2_mode = CODEC2_MODE_700C;
             break;
         default:
-            assert(0);
+            codec2_mode = CODEC2_MODE_700C;
+            fprintf(stderr, "FreeDV::freedv_open_advanced: unknown mode default to FREEDV_MODE_700C");
         }
 
         f->cohpsk = cohpsk_create();
@@ -932,7 +933,7 @@ static void freedv_comptx_700(struct freedv *f, COMP mod_out[]) {
             break;
         default:
             nspare = 0;
-            assert(0);
+            fprintf(stderr, "FreeDV::freedv_comptx_700: unknown mode default to nspare = 0");
         }
 
         data_flag_index = codec2_get_spare_bit_index(f->codec2);
@@ -1674,7 +1675,7 @@ static int freedv_comprx_700(struct freedv *f, COMP demod_in_8kHz[], int *valid)
                     break;
                 default:
                     nspare = 0;
-                    assert(0);
+                    fprintf(stderr, "FreeDV::freedv_comprx_700: unknown mode default to nspare = 0");
                 }
 
                 for(k=0; k<nspare; k++)  {

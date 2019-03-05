@@ -76,7 +76,7 @@ int choose_interleaver_b(int Nbits)
 
     /* if we get it means a Nbits we dont have in our table so choke */
 
-    assert(0);
+    fprintf(stderr, "FreeDV::choose_interleaver_b: Nbits not in table return 0 as default");
     return 0;
 }
 
