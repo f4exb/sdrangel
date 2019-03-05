@@ -148,6 +148,7 @@ void freedv_data_set_cb_tx(struct freedv_data_channel *fdc, freedv_data_callback
 void freedv_data_channel_rx_frame(struct freedv_data_channel *fdc, unsigned char *data, std::size_t size, int from_bit, int bcast_bit, int crc_bit, int end_bits)
 {
     int copy_bits;
+
     if (end_bits) {
         copy_bits = end_bits;
     } else {
@@ -155,76 +156,102 @@ void freedv_data_channel_rx_frame(struct freedv_data_channel *fdc, unsigned char
     }
 
     /* New packet? */
-    if (fdc->packet_rx_cnt == 0) {
+    if (fdc->packet_rx_cnt == 0)
+    {
         /* Does the packet have a compressed from field? */
         if (from_bit) {
-	    /* Compressed from: take the previously received header */
-	    memcpy(fdc->packet_rx + fdc->packet_rx_cnt, fdc->rx_header, 6);
-	    fdc->packet_rx_cnt += 6;
-       	}
-	if (bcast_bit) {
-            if (!from_bit) {
+            /* Compressed from: take the previously received header */
+            memcpy(fdc->packet_rx + fdc->packet_rx_cnt, fdc->rx_header, 6);
+            fdc->packet_rx_cnt += 6;
+        }
+
+        if (bcast_bit)
+        {
+            if (!from_bit)
+            {
                 /* Copy from header and modify size and end_bits accordingly */
                 memcpy(fdc->packet_rx + fdc->packet_rx_cnt, data, 6);
                 fdc->packet_rx_cnt += 6;
                 copy_bits -= 6;
-                if (copy_bits < 0)
+
+                if (copy_bits < 0) {
                     copy_bits = 0;
+                }
+
                 data += 6;
             }
             /* Compressed to: fill in broadcast address */
             memcpy(fdc->packet_rx + fdc->packet_rx_cnt, fdc_header_bcast, sizeof(fdc_header_bcast));
             fdc->packet_rx_cnt += 6;
-	}
-        if (crc_bit) {
+        }
+
+        if (crc_bit)
+        {
             unsigned char calc_crc = fdc_crc4(data, size);
-            if (calc_crc == end_bits) {
-	        /* It is a single header field, remember it for later */
+
+            if (calc_crc == end_bits)
+            {
+                /* It is a single header field, remember it for later */
                 memcpy(fdc->packet_rx + 6, data, 6);
-		memcpy(fdc->packet_rx, fdc_header_bcast, 6);
+                memcpy(fdc->packet_rx, fdc_header_bcast, 6);
+
                 if (fdc->cb_rx) {
                     fdc->cb_rx(fdc->cb_rx_state, fdc->packet_rx, 12);
                 }
             }
+
             fdc->packet_rx_cnt = 0;
             return;
         }
     }
 
-    if (fdc->packet_rx_cnt + copy_bits >= FREEDV_DATA_CHANNEL_PACKET_MAX) {
-        /* Something went wrong... this can not be a real packet */
-	fdc->packet_rx_cnt = 0;
-	return;
+    if (fdc->packet_rx_cnt + copy_bits >= FREEDV_DATA_CHANNEL_PACKET_MAX)
+    {
+        // Something went wrong... this can not be a real packet
+        fdc->packet_rx_cnt = 0;
+        return;
+    }
+    else if (fdc->packet_rx_cnt < 0)
+    {
+        // This is wrong too...
+        fdc->packet_rx_cnt = 0;
+        return;
     }
 
     memcpy(fdc->packet_rx + fdc->packet_rx_cnt, data, copy_bits);
     fdc->packet_rx_cnt += copy_bits;
 
-    if (end_bits != 0 && fdc->packet_rx_cnt >= 2) {
+    if (end_bits != 0 && fdc->packet_rx_cnt >= 2)
+    {
         unsigned short calc_crc = fdc_crc(fdc->packet_rx, fdc->packet_rx_cnt - 2);
         unsigned short rx_crc;
-	rx_crc = fdc->packet_rx[fdc->packet_rx_cnt - 1] << 8;
+        rx_crc = fdc->packet_rx[fdc->packet_rx_cnt - 1] << 8;
         rx_crc |= fdc->packet_rx[fdc->packet_rx_cnt - 2];
 
-        if (rx_crc == calc_crc) {
+        if (rx_crc == calc_crc)
+        {
             if ((std::size_t) fdc->packet_rx_cnt == size) {
-	        /* It is a single header field, remember it for later */
+                /* It is a single header field, remember it for later */
                 memcpy(fdc->rx_header, fdc->packet_rx, 6);
             }
 
             /* callback */
-            if (fdc->cb_rx) {
+            if (fdc->cb_rx)
+            {
                 unsigned char tmp[6];
-		memcpy(tmp, fdc->packet_rx, 6);
-		memcpy(fdc->packet_rx, fdc->packet_rx + 6, 6);
-		memcpy(fdc->packet_rx + 6, tmp, 6);
+                memcpy(tmp, fdc->packet_rx, 6);
+                memcpy(fdc->packet_rx, fdc->packet_rx + 6, 6);
+                memcpy(fdc->packet_rx + 6, tmp, 6);
+                std::size_t size = fdc->packet_rx_cnt - 2;
 
-		std::size_t size = fdc->packet_rx_cnt - 2;
-                if (size < 12)
+                if (size < 12) {
                     size = 12;
+                }
+
                 fdc->cb_rx(fdc->cb_rx_state, fdc->packet_rx, size);
             }
         }
+
         fdc->packet_rx_cnt = 0;
     }
 }

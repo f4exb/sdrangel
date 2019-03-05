@@ -96,7 +96,7 @@ struct FDMDV * fdmdv_create(int Nc)
     assert(f->rx_test_bits_mem != NULL);
     for(i=0; i<f->ntest_bits; i++)
 	f->rx_test_bits_mem[i] = 0;
-    assert((sizeof(test_bits)/sizeof(int)) >= f->ntest_bits);
+    assert((sizeof(test_bits)/sizeof(int)) >= (std::size_t) f->ntest_bits);
 
     f->old_qpsk_mapping = 0;
 
