@@ -14,6 +14,7 @@ set(freedv_SOURCES
 	HRA_112_112.cpp
 	interldpc.cpp
 	kiss_fft.cpp
+	kiss_fftr.cpp
 	linreg.cpp
 	mpdecode_core.cpp
 	ofdm.cpp
