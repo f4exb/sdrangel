@@ -77,6 +77,11 @@ else(LIBUSB_FOUND AND LIBMIRISDR_FOUND)
     message(STATUS "LibMiriSDR NOT found")
 endif(LIBUSB_FOUND AND LIBMIRISDR_FOUND)
 
+find_package(LibXTRX)
+if(LIBXTRX_FOUND)
+	add_subdirectory(xtrxinput)
+endif(LIBXTRX_FOUND)
+
 find_package(SoapySDR)
 if(LIBUSB_FOUND AND SOAPYSDR_FOUND)
 	add_subdirectory(soapysdrinput)

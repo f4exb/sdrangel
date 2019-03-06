@@ -23,15 +23,20 @@ if(LIBUSB_FOUND AND LIBIIO_FOUND)
     add_subdirectory(plutosdroutput)
 endif(LIBUSB_FOUND AND LIBIIO_FOUND)
 
+find_package(LibXTRX)
+if(LIBXTRX_FOUND)
+	add_subdirectory(xtrxoutput)
+endif(LIBXTRX_FOUND)
+
+find_package(SoapySDR)
+if(LIBUSB_FOUND AND SOAPYSDR_FOUND)
+add_subdirectory(soapysdroutput)
+endif()
+
 find_package(CM256cc)
 if(CM256CC_FOUND)
     add_subdirectory(remoteoutput)
 endif(CM256CC_FOUND)
-
-find_package(SoapySDR)
-if(LIBUSB_FOUND AND SOAPYSDR_FOUND)
-	add_subdirectory(soapysdroutput)
-endif()
 
 if (BUILD_DEBIAN)
     add_subdirectory(bladerf1output)
