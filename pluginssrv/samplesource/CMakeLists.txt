@@ -54,11 +54,6 @@ if(LIBUSB_FOUND AND RX_SAMPLE_24BIT AND LIBPERSEUS_FOUND)
     add_subdirectory(perseus)
 endif(LIBUSB_FOUND AND RX_SAMPLE_24BIT AND LIBPERSEUS_FOUND)
 
-find_package(LibXTRX)
-if(LIBXTRX_FOUND)
-	add_subdirectory(xtrxinput)
-endif(LIBXTRX_FOUND)
-
 find_package(LibIIO)
 if(LIBUSB_FOUND AND LIBIIO_FOUND)
     add_subdirectory(plutosdrinput)

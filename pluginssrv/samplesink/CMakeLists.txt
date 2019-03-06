@@ -33,11 +33,6 @@ if(LIBUSB_FOUND AND SOAPYSDR_FOUND)
 	add_subdirectory(soapysdroutput)
 endif()
 
-find_package(LibXTRX)
-if(LIBXTRX_FOUND)
-	add_subdirectory(xtrxoutput)
-endif(LIBXTRX_FOUND)
-
 if (BUILD_DEBIAN)
     add_subdirectory(bladerf1output)
     add_subdirectory(bladerf2output)
