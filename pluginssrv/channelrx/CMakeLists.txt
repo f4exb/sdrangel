@@ -12,6 +12,11 @@ if(CM256CC_FOUND)
     add_subdirectory(remotesink)
 endif(CM256CC_FOUND)
 
+find_package(Codec2)
+if (CODEC2_FOUND)
+    add_subdirectory(demodfreedv)
+endif(CODEC2_FOUND)
+
 add_subdirectory(demodnfm)
 add_subdirectory(demodssb)
 add_subdirectory(demodwfm)

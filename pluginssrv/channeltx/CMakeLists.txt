@@ -15,3 +15,8 @@ find_package(OpenCV)
 if (OpenCV_FOUND)
 	add_subdirectory(modatv)
 endif()
+
+find_package(Codec2)
+if (CODEC2_FOUND)
+    add_subdirectory(modfreedv)
+endif(CODEC2_FOUND)
