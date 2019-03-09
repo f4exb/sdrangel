@@ -94,7 +94,7 @@ public:
     bool IsFromSameHost(const RTPAddress *addr) const;
 
     /** Equality */
-    bool operator==(const RTPAddress& otherAddress);
+    bool operator==(const RTPAddress& otherAddress) const;
 
     /** Get host address */
     const QHostAddress& getAddress() const
