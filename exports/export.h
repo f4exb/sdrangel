@@ -102,18 +102,6 @@
 #  define QRTPLIB_API
 #endif
 
-/* the 'SERIALDV_API' controls the import/export of 'serialdv' symbols
- */
-#if !defined(sdrangel_STATIC)
-#  ifdef serialdv_EXPORTS
-#    define SERIALDV_API __SDR_EXPORT
-#  else
-#    define SERIALDV_API __SDR_IMPORT
-#  endif
-#else
-#  define SERIALDV_API
-#endif
-
 /* the 'SWG_API' controls the import/export of 'swagger' symbols
  */
 #if !defined(sdrangel_STATIC)
