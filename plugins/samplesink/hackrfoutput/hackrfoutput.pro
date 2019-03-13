@@ -18,7 +18,6 @@ QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
 
 CONFIG(MINGW32):LIBHACKRFSRC = "C:\softs\hackrf\host"
-CONFIG(MSVC):LIBHACKRFSRC = "C:\softs\hackrf\host"
 CONFIG(macx):LIBHACKRFSRC = "/opt/local/include"
 
 INCLUDEPATH += $$PWD
@@ -27,7 +26,8 @@ INCLUDEPATH += ../../../sdrbase
 INCLUDEPATH += ../../../sdrgui
 INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
 INCLUDEPATH += ../../../devices
-INCLUDEPATH += $$LIBHACKRFSRC
+CONFIG(!MSVC):INCLUDEPATH += $$LIBHACKRFSRC
+CONFIG(MSVC):INCLUDEPATH += "C:\Program Files\PothosSDR\include"
 
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
@@ -49,7 +49,8 @@ FORMS += hackrfoutputgui.ui
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 LIBS += -L../../../swagger/$${build_subdir} -lswagger
-LIBS += -L../../../libhackrf/$${build_subdir} -llibhackrf
+CONFIG(!MSVC):LIBS += -L../../../libhackrf/$${build_subdir} -llibhackrf
+CONFIG(MSVC):LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lhackrf
 LIBS += -L../../../devices/$${build_subdir} -ldevices
 macx {
     LIBS -= -L../../../libhackrf/$${build_subdir} -llibhackrf

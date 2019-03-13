@@ -25,7 +25,6 @@ CONFIG(MINGW64):LIBBLADERF = "C:\Programs\bladeRF"
 
 CONFIG(MINGW32):LIBHACKRFSRC = "C:\softs\hackrf\host"
 CONFIG(MINGW64):LIBHACKRFSRC = "C:\softs\hackrf\host"
-CONFIG(MSVC):LIBHACKRFSRC = "C:\softs\hackrf\host"
 
 CONFIG(MINGW32):LIBLIMESUITESRC = "C:\softs\LimeSuite"
 CONFIG(MINGW64):LIBLIMESUITESRC = "C:\softs\LimeSuite"
@@ -249,7 +248,7 @@ MINGW32 || MINGW64 {
 }
 
 MSVC {
-    LIBS += -L../libhackrf/$${build_subdir} -llibhackrf
+    LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lhackrf
     LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lbladeRF
     LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lLimeSuite
     LIBS += -L"C:\Program Files\PothosSDR\bin" -L"C:\Program Files\PothosSDR\lib" -lSoapySDR

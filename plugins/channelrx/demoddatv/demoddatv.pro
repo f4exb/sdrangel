@@ -26,7 +26,7 @@ CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
 CONFIG(MSVC):INCLUDEPATH += "C:\softs\boost_1_66_0"
-CONFIG(MSVC):INCLUDEPATH += "C:\softs\ffmpeg-20181127-1035206-win64-dev\include"
+CONFIG(MSVC):INCLUDEPATH += "C:\softs\ffmpeg-20190308-9645147-win64-dev\include"
 CONFIG(macx):INCLUDEPATH += "../../../../../boost_1_69_0"
 
 SOURCES += datvdemod.cpp\
@@ -60,6 +60,6 @@ FORMS += datvdemodgui.ui
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui
 #LIBS += -lavutil -lswscale -lavdevice -lavformat -lavcodec -lswresample
-LIBS += -L"C:\softs\ffmpeg-20181127-1035206-win64-dev\lib" -lavutil -lswscale -lavdevice -lavformat -lavcodec -lswresample
+LIBS += -L"C:\softs\ffmpeg-20190308-9645147-win64-dev\lib" -lavutil -lswscale -lavdevice -lavformat -lavcodec -lswresample
 
-RESOURCES = ../../../sdrbase/resources/res.qrc
+RESOURCES = ../../../sdrgui/resources/res.qrc

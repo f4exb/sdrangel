@@ -10,6 +10,7 @@ TEMPLATE = lib
 TARGET = mbelib
 
 CONFIG(MSVC):DEFINES += mbelib_EXPORTS
+CONFIG(MSVC):DEFINES += _USE_MATH_DEFINES
 
 CONFIG(MINGW32):LIBMBELIBSRC = "C:\softs\mbelib"
 CONFIG(MINGW64):LIBMBELIBSRC = "C:\softs\mbelib"
@@ -34,5 +35,5 @@ $$LIBMBELIBSRC/ambe3600x2450_const.h\
 $$LIBMBELIBSRC/ecc_const.h\
 $$LIBMBELIBSRC/imbe7200x4400_const.h\
 $$LIBMBELIBSRC/mbelib.h\
-$$LIBMBELIBSRC/export.h\
+$$LIBMBELIBSRC/mbelib_export.h\
 $$LIBMBELIBSRC/mbelib_const.h
