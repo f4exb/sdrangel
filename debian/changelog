@@ -1,3 +1,12 @@
+sdrangel (4.5.1-1) unstable; urgency=medium
+
+  * Perseus: fixed cold start flawed init sequence
+  * PlutoSDR: recognize networked devices
+  * FreeDV: internal FreeDV library to facilitate packaging
+  * Fixed some constness in qrtplib
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 17 Mar 2019 20:14:18 +0100
+
 sdrangel (4.5.0-1) unstable; urgency=medium
 
   * Implemented a FreeDV modulator and demodulator

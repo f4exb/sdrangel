@@ -56,7 +56,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 
     QCoreApplication::setOrganizationName("f4exb");
     QCoreApplication::setApplicationName("SDRangelSrv");
-    QCoreApplication::setApplicationVersion("4.5.0");
+    QCoreApplication::setApplicationVersion("4.5.1");
 
     int catchSignals[] = {SIGQUIT, SIGINT, SIGTERM, SIGHUP};
     std::vector<int> vsig(catchSignals, catchSignals + sizeof(catchSignals) / sizeof(int));
