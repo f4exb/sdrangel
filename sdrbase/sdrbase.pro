@@ -44,6 +44,7 @@ CONFIG(MINGW64):INCLUDEPATH += "C:\softs\serialDV"
 CONFIG(MSVC):INCLUDEPATH += "C:\softs\serialDV"
 
 CONFIG(macx):INCLUDEPATH += "../../../boost_1_69_0"
+CONFIG(macx):INCLUDEPATH += "/opt/local/include"
 
 MINGW32 || MINGW64 || MSVC {
     HEADERS += \
@@ -247,6 +248,7 @@ LIBS += -L../qrtplib/$${build_subdir} -lqrtplib
 LIBS += -L../swagger/$${build_subdir} -lswagger
 
 macx {
+    LIBS += -L/opt/local/lib -lopus
     QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
 }
 

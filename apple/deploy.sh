@@ -1,6 +1,6 @@
 #!/bin/bash
-SDRANGEL_VERSION="4.3.2"
-QT_VERSION="5.12.0"
+SDRANGEL_VERSION="4.5.0"
+QT_VERSION="5.12.1"
 QT_HOME="/Applications/Qt/${QT_VERSION}"
 
 # Run from build directory after build
@@ -43,6 +43,12 @@ for i in `find . -name '*.dylib' -type f -not -path "./${APP_PATH}/*"`; do
 	fi
 done
 
+# Missing ones
+dply_lib /opt/install/LimeSuite/lib/libLimeSuite.18.10-1.dylib
+dply_lib /opt/local/lib/libnanomsg.5.0.0.dylib
+dply_lib /usr/local/lib/libmirisdr.4.dylib 
+dply_lib /usr/local/lib/libSoapySDR.0.7.dylib 
+
 # 2nd-pass: Symlink libs
 cd $APP_LIB
 for i in `find . -name '*.1.0.0.dylib' -type f -not -path "./plugins/*"`; do
@@ -51,13 +57,20 @@ for i in `find . -name '*.1.0.0.dylib' -type f -not -path "./plugins/*"`; do
 	ln -sf $i "${i/.1.0.0.dylib/.dylib}"
 done
 cd ../../..
-pwd
+
+LIB_PATH="SDRangel.app/Contents/Frameworks"
+CUR_PATH=`pwd`
+cd $LIB_PATH
+# Symbolic links
+ln -sf "libnanomsg.5.0.0.dylib" "libnanomsg.5.dylib"
 
 # Deploy DMG
+cd $CUR_PATH
+pwd
 "${QT_HOME}/clang_64/bin/macdeployqt" ./SDRangel.app \
 	-always-overwrite \
 	-dmg \
-	-libpath=SDRangel.app/Contents/Frameworks \
+	-libpath=${LIB_PATH} \
 	-verbose=1
 
 # Add other files to DMG
@@ -66,7 +79,7 @@ DMG_RW_SRC=${DMG_SRC/.dmg/.rw.dmg}
 DMG_TMP_A="/tmp/_dmg-attach"
 hdiutil pmap $DMG_SRC
 hdiutil convert $DMG_SRC -format UDRW -o $DMG_RW_SRC
-#hdiutil resize -limits $DMG_RW_SRC
+hdiutil resize -limits $DMG_RW_SRC
 hdiutil attach $DMG_RW_SRC > $DMG_TMP_A
 DMG_MPATH=`cat $DMG_TMP_A | grep Volumes | awk '{ print $3 }'`
 
@@ -78,7 +91,7 @@ hdiutil detach $DMG_MPATH
 # Publish version
 VERIMAGIC="-v${SDRANGEL_VERSION}_`date +%Y%m%d_%H%M%S`-Qt${QT_VERSION}"
 DMG_DEPLOY=${DMG_SRC/.dmg/${VERIMAGIC}.dmg}
-hdiutil convert $DMG_RW_SRC -format UDRW -o $DMG_DEPLOY
+hdiutil convert $DMG_RW_SRC -format UDBZ -o $DMG_DEPLOY
 rm -f $DMG_RW_SRC
 
 echo "DeployedDMG: ${DMG_DEPLOY}"
