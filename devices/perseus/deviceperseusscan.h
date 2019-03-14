@@ -35,7 +35,8 @@ public:
         int         m_sequence;
     };
 
-    void scan(int nbDevices);
+    bool scan(int nbDevices); //!< false if one device had its firmware not yet downloaded
+    void clear();
     int getNbActiveDevices() const { return m_scans.size(); }
     const std::string* getSerialAt(unsigned int index) const;
     uint16_t getSerialNumberAt(unsigned int index) const ;

@@ -25,7 +25,7 @@ class DEVICES_API DevicePerseus
 {
 public:
     static DevicePerseus& instance();
-    void scan() { m_scan.scan(m_nbDevices); }
+    void scan();
     void getSerials(std::vector<std::string>& serials) const { m_scan.getSerials(serials); }
     int getSequenceFromSerial(const std::string& serial) const { return m_scan.getSequenceFromSerial(serial); }
 
@@ -36,6 +36,7 @@ protected:
     ~DevicePerseus();
 
 private:
+    bool internal_scan();
     int m_nbDevices;
     DevicePerseusScan m_scan;
 };
