@@ -1,3 +1,19 @@
+// This file is part of LeanSDR Copyright (C) 2016-2018 <pabr@pabr.org>.
+// See the toplevel README for more information.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #ifndef LEANSDR_RS_H
 #define LEANSDR_RS_H
 
@@ -28,16 +44,13 @@ namespace leansdr
 // Tp is a C++ integer type for representing P(X) (1 bit larger than Te).
 // ALPHA is a primitive element of GF(2^N). Usually "2"=[X] is chosen.
 
-template<typename Te, typename Tp, Tp P, int N, Te ALPHA>
+template <typename Te, typename Tp, Tp P, int N, Te ALPHA>
 struct gf2x_p
 {
     gf2x_p()
     {
         if (ALPHA != 2)
-        {
-            fail("gf2x_p::gf2x_p", "alpha!=2 not implemented");
-            return;
-        }
+            fail("alpha!=2 not implemented");
         // Precompute log and exp tables.
         Tp alpha_i = 1;
         for (Tp i = 0; i < (1 << N); ++i)
@@ -45,20 +58,14 @@ struct gf2x_p
             lut_exp[i] = alpha_i;
             lut_exp[((1 << N) - 1) + i] = alpha_i;
             lut_log[alpha_i] = i;
-            alpha_i <<= 1;  // Multiply by alpha=[X] i.e. increase degrees
+            alpha_i <<= 1; // Multiply by alpha=[X] i.e. increase degrees
             if (alpha_i & (1 << N))
-                alpha_i ^= P;  // Modulo P iteratively
+                alpha_i ^= P; // Modulo P iteratively
         }
     }
     static const Te alpha = ALPHA;
-    inline Te add(Te x, Te y)
-    {
-        return x ^ y;
-    }  // Addition modulo 2
-    inline Te sub(Te x, Te y)
-    {
-        return x ^ y;
-    }  // Subtraction modulo 2
+    inline Te add(Te x, Te y) { return x ^ y; } // Addition modulo 2
+    inline Te sub(Te x, Te y) { return x ^ y; } // Subtraction modulo 2
     inline Te mul(Te x, Te y)
     {
         if (!x || !y)
@@ -77,16 +84,11 @@ struct gf2x_p
         //    if ( ! x ) fail("inv");
         return lut_exp[((1 << N) - 1) - lut_log[x]];
     }
-    inline Te exp(Te x)
-    {
-        return lut_exp[x];
-    }
-    inline Te log(Te x)
-    {
-        return lut_log[x];
-    }
-private:
-    Te lut_exp[(1 << N) * 2];  // Wrap to avoid indexing modulo 2^N-1
+    inline Te exp(Te x) { return lut_exp[x]; }
+    inline Te log(Te x) { return lut_log[x]; }
+
+  private:
+    Te lut_exp[(1 << N) * 2]; // Wrap to avoid indexing modulo 2^N-1
     Te lut_log[1 << N];
 };
 
@@ -98,14 +100,14 @@ struct rs_engine
     // p(X) = X^8 + X^4 + X^3 + X^2 + 1
     gf2x_p<unsigned char, unsigned short, 0x11d, 8, 2> gf;
 
-    u8 G[17];  // { G_16, ..., G_0 }
+    u8 G[17]; // { G_16, ..., G_0 }
 
     rs_engine()
     {
         // EN 300 421, section 4.4.2, Code Generator Polynomial
         // G(X) = (X-alpha^0)*...*(X-alpha^15)
         for (int i = 0; i <= 16; ++i)
-            G[i] = (i == 16) ? 1 : 0;  // Init G=1
+            G[i] = (i == 16) ? 1 : 0; // Init G=1
         for (int d = 0; d < 16; ++d)
         {
             // Multiply by (X-alpha^d)
@@ -115,7 +117,8 @@ struct rs_engine
         }
 #if DEBUG_RS
         fprintf(stderr, "RS generator:");
-        for ( int i=0; i<=16; ++i ) fprintf(stderr, " %02x", G[i]);
+        for (int i = 0; i <= 16; ++i)
+            fprintf(stderr, " %02x", G[i]);
         fprintf(stderr, "\n");
 #endif
     }
@@ -162,12 +165,13 @@ struct rs_engine
     {
         // TBD Avoid copying
         u8 p[204];
-        memcpy(p, msg, 204); // was 188 but causing underflow (PVS https://www.viva64.com/en/w/v512/)
+        memcpy(p, msg, 188);
         memset(p + 188, 0, 16);
         // p = msg*X^16
 #if DEBUG_RS
         fprintf(stderr, "uncoded:");
-        for ( int i=0; i<204; ++i ) fprintf(stderr, " %d", p[i]);
+        for (int i = 0; i < 204; ++i)
+            fprintf(stderr, " %d", p[i]);
         fprintf(stderr, "\n");
 #endif
         // Compute remainder modulo G
@@ -183,7 +187,8 @@ struct rs_engine
         }
 #if DEBUG_RS
         fprintf(stderr, "coded:");
-        for ( int i=0; i<204; ++i ) fprintf(stderr, " %d", p[i]);
+        for (int i = 0; i < 204; ++i)
+            fprintf(stderr, " %d", p[i]);
         fprintf(stderr, "\n");
 #endif
         memcpy(msg + 188, p + 188, 16);
@@ -193,14 +198,13 @@ struct rs_engine
     // If pin[] is provided, errors will be fixed in the original
     // message too and syndromes will be updated.
 
-    bool correct(u8 synd[16], u8 pout[188], u8 pin[204] = NULL, int *bits_corrected = NULL)
+    bool correct(u8 synd[16], u8 pout[188],
+                 u8 pin[204] = NULL, int *bits_corrected = NULL)
     {
         // Berlekamp - Massey
         // http://en.wikipedia.org/wiki/Berlekamp%E2%80%93Massey_algorithm#Code_sample
-        u8 C[16] =
-        { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // Max degree is L
-        u8 B[16] =
-        { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        u8 C[16] = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Max degree is L
+        u8 B[16] = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         int L = 0;
         int m = 1;
         u8 b = 1;
@@ -234,11 +238,13 @@ struct rs_engine
         // L is the number of errors
         // C of degree L is now the error locator polynomial (Lambda)
 #if DEBUG_RS
-        fprintf(stderr, "[L=%d  C=",L);
-        for ( int i=0; i<16; ++i ) fprintf(stderr, " %d", C[i]);
+        fprintf(stderr, "[L=%d  C=", L);
+        for (int i = 0; i < 16; ++i)
+            fprintf(stderr, " %d", C[i]);
         fprintf(stderr, "]\n");
         fprintf(stderr, "[S=");
-        for ( int i=0; i<16; ++i ) fprintf(stderr, " %d", synd[i]);
+        for (int i = 0; i < 16; ++i)
+            fprintf(stderr, " %d", synd[i]);
         fprintf(stderr, "]\n");
 #endif
 
@@ -255,7 +261,8 @@ struct rs_engine
                     omega[i + j] ^= gf.mul(synd[i], C[j]);
 #if DEBUG_RS
         fprintf(stderr, "omega=");
-        for ( int i=0; i<16; ++i ) fprintf(stderr, " %d", omega[i]);
+        for (int i = 0; i < 16; ++i)
+            fprintf(stderr, " %d", omega[i]);
         fprintf(stderr, "\n");
 #endif
 
@@ -265,7 +272,8 @@ struct rs_engine
             Cprime[i] = (i & 1) ? 0 : C[i + 1];
 #if DEBUG_RS
         fprintf(stderr, "Cprime=");
-        for ( int i=0; i<15; ++i ) fprintf(stderr, " %d", Cprime[i]);
+        for (int i = 0; i < 15; ++i)
+            fprintf(stderr, " %d", Cprime[i]);
         fprintf(stderr, "\n");
 #endif
 
@@ -274,15 +282,15 @@ struct rs_engine
         int roots_found = 0;
         for (int i = 0; i < 255; ++i)
         {
-            u8 r = gf.exp(i);  // Candidate root alpha^0..alpha^254
+            u8 r = gf.exp(i); // Candidate root alpha^0..alpha^254
             u8 v = eval_poly(C, L, r);
             if (!v)
             {
                 // r is a root X_k^-1 of the error locator polynomial.
                 u8 xk = gf.inv(r);
-                int loc = (255 - i) % 255;  // == log(xk)
+                int loc = (255 - i) % 255; // == log(xk)
 #if DEBUG_RS
-                        fprintf(stderr, "found root=%d, inv=%d, loc=%d\n", r, xk, loc);
+                fprintf(stderr, "found root=%d, inv=%d, loc=%d\n", r, xk, loc);
 #endif
                 if (loc < 204)
                 {
@@ -308,9 +316,8 @@ struct rs_engine
         else
             return false;
     }
-
 };
 
-}  // namespace
+} // namespace leansdr
 
-#endif  // LEANSDR_RS_H
+#endif // LEANSDR_RS_H

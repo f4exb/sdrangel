@@ -1,3 +1,19 @@
+// This file is part of LeanSDR Copyright (C) 2016-2018 <pabr@pabr.org>.
+// See the toplevel README for more information.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #ifndef LEANSDR_VITERBI_H
 #define LEANSDR_VITERBI_H
 
@@ -24,7 +40,7 @@ namespace leansdr
 // TPM, TBM are unsigned integer types for path/branch metrics.
 // TPM is at least as wide as TBM.
 
-template<typename TS, int NSTATES, typename TUS, int NUS, int NCS>
+template <typename TS, int NSTATES, typename TUS, int NUS, int NCS>
 struct trellis
 {
     static const int NOSTATE = NSTATES + 1;
@@ -33,9 +49,9 @@ struct trellis
     {
         struct branch
         {
-            TS pred;         // Predecessor state or NOSTATE
-            TUS us;          // Uncoded symbol
-        } branches[NCS];   // Incoming branches indexed by coded symbol
+            TS pred;     // Predecessor state or NOSTATE
+            TUS us;      // Uncoded symbol
+        } branches[NCS]; // Incoming branches indexed by coded symbol
     } states[NSTATES];
 
     trellis()
@@ -50,8 +66,7 @@ struct trellis
     {
         if (NCS & (NCS - 1))
         {
-            fprintf(stderr, "leansdr::trellis::init_convolutional: NCS must be a power of 2\n");
-            return;
+            fprintf(stderr, "NCS must be a power of 2\n");
         }
         // Derive number of polynomials from NCS.
         int nG = log2i(NCS);
@@ -61,29 +76,27 @@ struct trellis
             for (TUS us = 0; us < NUS; ++us)
             {
                 // Run the convolutional encoder from state s with input us
-                uint64_t shiftreg = s;  // TBD type
+                uint64_t shiftreg = s; // TBD type
                 // Reverse bits
                 TUS us_rev = 0;
                 for (int b = 1; b < NUS; b *= 2)
                     if (us & b)
                         us_rev |= (NUS / 2 / b);
                 shiftreg |= us_rev * NSTATES;
-                uint32_t cs = 0;  // TBD type
+                uint32_t cs = 0; // TBD type
                 for (int g = 0; g < nG; ++g)
                     cs = (cs << 1) | parity(shiftreg & G[g]);
-                shiftreg /= NUS;  // Shift bits for 1 uncoded symbol
+                shiftreg /= NUS; // Shift bits for 1 uncoded symbol
                 // [us] at state [s] emits [cs] and leads to state [shiftreg].
                 typename state::branch *b = &states[shiftreg].branches[cs];
                 if (b->pred != NOSTATE)
                 {
-                    fprintf(stderr, "leansdr::trellis::init_convolutional: Invalid convolutional code\n");
-                    return;
+                    fprintf(stderr, "Invalid convolutional code\n");
                 }
                 b->pred = s;
                 b->us = us;
             }
         }
-
     }
 
     void dump()
@@ -102,42 +115,46 @@ struct trellis
             fprintf(stderr, "\n");
         }
     }
-
 };
 
 // Interface that hides the templated internals.
-template<typename TUS, typename TCS, typename TBM, typename TPM>
+template <typename TUS,
+          typename TCS,
+          typename TBM,
+          typename TPM>
 struct viterbi_dec_interface
 {
-    virtual TUS update(TBM costs[], TPM *quality = NULL)=0;
-    virtual TUS update(TCS s, TBM cost, TPM *quality = NULL)=0;
-    virtual TUS update(int nm, TCS cs[], TBM costs[], TPM *quality = NULL)=0;
+    virtual TUS update(TBM *costs, TPM *quality = NULL) = 0;
+    virtual TUS update(TCS s, TBM cost, TPM *quality = NULL) = 0;
 };
 
-template<typename TS, int NSTATES, typename TUS, int NUS, typename TCS, int NCS, typename TBM, typename TPM, typename TP>
-struct viterbi_dec: viterbi_dec_interface<TUS, TCS, TBM, TPM>
+template <typename TS, int NSTATES,
+          typename TUS, int NUS,
+          typename TCS, int NCS,
+          typename TBM, typename TPM,
+          typename TP>
+struct viterbi_dec : viterbi_dec_interface<TUS, TCS, TBM, TPM>
 {
 
     trellis<TS, NSTATES, TUS, NUS, NCS> *trell;
 
     struct state
     {
-        TPM cost;    // Metric of best path leading to this state
-        TP path;     // Best path leading to this state
+        TPM cost; // Metric of best path leading to this state
+        TP path;  // Best path leading to this state
     };
     typedef state statebank[NSTATES];
     state statebanks[2][NSTATES];
-    statebank *states, *newstates;  // Alternate between banks
+    statebank *states, *newstates; // Alternate between banks
 
-    viterbi_dec(trellis<TS, NSTATES, TUS, NUS, NCS> *_trellis) :
-            trell(_trellis)
+    viterbi_dec(trellis<TS, NSTATES, TUS, NUS, NCS> *_trellis) : trell(_trellis)
     {
         states = &statebanks[0];
         newstates = &statebanks[1];
         for (TS s = 0; s < NSTATES; ++s)
             (*states)[s].cost = 0;
         // Determine max value that can fit in TPM
-        max_tpm = (TPM) 0 - 1;
+        max_tpm = (TPM)0 - 1;
         if (max_tpm < 0)
         {
             // TPM is signed
@@ -160,12 +177,13 @@ struct viterbi_dec: viterbi_dec_interface<TUS, TCS, TBM, TPM>
             // Select best branch
             for (int cs = 0; cs < NCS; ++cs)
             {
-                typename trellis<TS, NSTATES, TUS, NUS, NCS>::state::branch *b = &trell->states[s].branches[cs];
+                typename trellis<TS, NSTATES, TUS, NUS, NCS>::state::branch *b =
+                    &trell->states[s].branches[cs];
                 if (b->pred == trell->NOSTATE)
                     continue;
                 TPM m = (*states)[b->pred].cost + costs[cs];
                 if (m <= best_m)
-                {  // <= guarantees one match
+                { // <= guarantees one match
                     best_m = m;
                     best_b = b;
                 }
@@ -193,10 +211,10 @@ struct viterbi_dec: viterbi_dec_interface<TUS, TCS, TBM, TPM>
         for (TS s = 0; s < NSTATES; ++s)
             (*states)[s].cost -= best_tpm;
 #if 0
-        // Observe that the min-max range remains bounded
-        fprintf(stderr,"-%2d = [", best_tpm);
-        for ( TS s=0; s<NSTATES; ++s ) fprintf(stderr," %d", (*states)[s].cost);
-        fprintf(stderr," ]\n");
+      // Observe that the min-max range remains bounded
+      fprintf(stderr,"-%2d = [", best_tpm);
+      for ( TS s=0; s<NSTATES; ++s ) fprintf(stderr," %d", (*states)[s].cost);
+      fprintf(stderr," ]\n");
 #endif
         // Return difference between best and second-best as quality metric.
         if (quality)
@@ -221,12 +239,13 @@ struct viterbi_dec: viterbi_dec_interface<TUS, TCS, TBM, TPM>
             typename trellis<TS, NSTATES, TUS, NUS, NCS>::state::branch *best_b = NULL;
             for (int im = 0; im < nm; ++im)
             {
-                typename trellis<TS, NSTATES, TUS, NUS, NCS>::state::branch *b = &trell->states[s].branches[cs[im]];
+                typename trellis<TS, NSTATES, TUS, NUS, NCS>::state::branch *b =
+                    &trell->states[s].branches[cs[im]];
                 if (b->pred == trell->NOSTATE)
                     continue;
                 TPM m = (*states)[b->pred].cost + costs[im];
                 if (m <= best_m)
-                {  // <= guarantees one match
+                { // <= guarantees one match
                     best_m = m;
                     best_b = b;
                 }
@@ -238,7 +257,8 @@ struct viterbi_dec: viterbi_dec_interface<TUS, TCS, TBM, TPM>
                 // This works because costs are negative.
                 for (int cs = 0; cs < NCS; ++cs)
                 {
-                    typename trellis<TS, NSTATES, TUS, NUS, NCS>::state::branch *b = &trell->states[s].branches[cs];
+                    typename trellis<TS, NSTATES, TUS, NUS, NCS>::state::branch *b =
+                        &trell->states[s].branches[cs];
                     if (b->pred == trell->NOSTATE)
                         continue;
                     TPM m = (*states)[b->pred].cost;
@@ -272,10 +292,10 @@ struct viterbi_dec: viterbi_dec_interface<TUS, TCS, TBM, TPM>
         for (TS s = 0; s < NSTATES; ++s)
             (*states)[s].cost -= best_tpm;
 #if 0
-        // Observe that the min-max range remains bounded
-        fprintf(stderr,"-%2d = [", best_tpm);
-        for ( TS s=0; s<NSTATES; ++s ) fprintf(stderr," %d", (*states)[s].cost);
-        fprintf(stderr," ]\n");
+      // Observe that the min-max range remains bounded
+      fprintf(stderr,"-%2d = [", best_tpm);
+      for ( TS s=0; s<NSTATES; ++s ) fprintf(stderr," %d", (*states)[s].cost);
+      fprintf(stderr," ]\n");
 #endif
         // Return difference between best and second-best as quality metric.
         if (quality)
@@ -301,7 +321,7 @@ struct viterbi_dec: viterbi_dec_interface<TUS, TCS, TBM, TPM>
         fprintf(stderr, "\n");
     }
 
-private:
+  private:
     TPM max_tpm;
 };
 
@@ -310,24 +330,15 @@ private:
 // DEPTH is the number of symbols stored in the path.
 // T is an unsigned integer type wider than NBITS*DEPTH.
 
-template<typename T, typename TUS, int NBITS, int DEPTH>
+template <typename T, typename TUS, int NBITS, int DEPTH>
 struct bitpath
 {
     T val;
-    bitpath() :
-            val(0)
-    {
-    }
-    void append(TUS us)
-    {
-        val = (val << NBITS) | us;
-    }
-    TUS read()
-    {
-        return (val >> (DEPTH - 1) * NBITS) & ((1 << NBITS) - 1);
-    }
+    bitpath() : val(0) {}
+    void append(TUS us) { val = (val << NBITS) | us; }
+    TUS read() { return (val >> (DEPTH - 1) * NBITS) & ((1 << NBITS) - 1); }
 };
 
-}  // namespace
+} // namespace leansdr
 
-#endif  // LEANSDR_VITERBI_H
+#endif // LEANSDR_VITERBI_H

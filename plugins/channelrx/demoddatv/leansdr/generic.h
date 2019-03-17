@@ -1,14 +1,26 @@
+// This file is part of LeanSDR Copyright (C) 2016-2018 <pabr@pabr.org>.
+// See the toplevel README for more information.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #ifndef LEANSDR_GENERIC_H
 #define LEANSDR_GENERIC_H
 
+#include <errno.h>
+#include <fcntl.h>
 #include <sys/types.h>
-
-#ifdef _MSC_VER
-#include <stdlib.h>
-#include <io.h>
-#else
 #include <unistd.h>
-#endif
 
 #include "leansdr/math.h"
 
@@ -22,11 +34,14 @@ namespace leansdr
 // [file_reader] reads raw data from a file descriptor into a [pipebuf].
 // If the file descriptor is seekable, data can be looped.
 
-template<typename T>
-struct file_reader: runnable
+template <typename T>
+struct file_reader : runnable
 {
-    file_reader(scheduler *sch, int _fdin, pipebuf<T> &_out) :
-            runnable(sch, _out.name), loop(false), fdin(_fdin), out(_out)
+    file_reader(scheduler *sch, int _fdin, pipebuf<T> &_out)
+        : runnable(sch, _out.name),
+          loop(false),
+          filler(NULL),
+          fdin(_fdin), out(_out)
     {
     }
     void run()
@@ -35,32 +50,29 @@ struct file_reader: runnable
         if (!size)
             return;
 
-#ifdef _MSC_VER
-        again: ssize_t nr = _read(fdin, out.wr(), size);
-#else
-        again: ssize_t nr = read(fdin, out.wr(), size);
-#endif
-        if (nr < 0)
+    again:
+        ssize_t nr = read(fdin, out.wr(), size);
+        if (nr < 0 && errno == EWOULDBLOCK)
         {
-            fatal("leansdr::file_reader::run: read");
+            if (filler)
+            {
+                if (sch->debug)
+                    fprintf(stderr, "U");
+                out.write(*filler);
+            }
             return;
         }
+        if (nr < 0)
+            fatal("read(file_reader)");
         if (!nr)
         {
             if (!loop)
                 return;
             if (sch->debug)
-                fprintf(stderr, "leansdr::file_reader::run: %s looping\n", name);
-#ifdef _MSC_VER
-            off_t res = _lseek(fdin, 0, SEEK_SET);
-#else
+                fprintf(stderr, "%s looping\n", name);
             off_t res = lseek(fdin, 0, SEEK_SET);
-#endif
-            if (res == (off_t) -1)
-            {
-                fatal("leansdr::file_reader::run: lseek");
-                return;
-            }
+            if (res == (off_t)-1)
+                fatal("lseek");
             goto again;
         }
 
@@ -71,16 +83,9 @@ struct file_reader: runnable
         {
             if (sch->debug)
                 fprintf(stderr, "+");
-#ifdef _MSC_VER
-            ssize_t nr2 = _read(fdin, (char*) out.wr() + nr, remain);
-#else
-            ssize_t nr2 = read(fdin, (char*) out.wr() + nr, remain);
-#endif
+            ssize_t nr2 = read(fdin, (char *)out.wr() + nr, remain);
             if (nr2 <= 0)
-            {
-                fatal("leansdr::file_reader::run: partial read");
-                return;
-            }
+                fatal("partial read");
             nr += nr2;
             remain -= nr2;
         }
@@ -88,18 +93,27 @@ struct file_reader: runnable
         out.written(nr / sizeof(T));
     }
     bool loop;
-private:
+    void set_realtime(T &_filler)
+    {
+        int flags = fcntl(fdin, F_GETFL);
+        if (fcntl(fdin, F_SETFL, flags | O_NONBLOCK))
+            fatal("fcntl");
+        filler = new T(_filler);
+    }
+
+  private:
+    T *filler;
     int fdin;
     pipewriter<T> out;
 };
 
 // [file_writer] writes raw data from a [pipebuf] to a file descriptor.
 
-template<typename T>
-struct file_writer: runnable
+template <typename T>
+struct file_writer : runnable
 {
-    file_writer(scheduler *sch, pipebuf<T> &_in, int _fdout) :
-            runnable(sch, _in.name), in(_in), fdout(_fdout)
+    file_writer(scheduler *sch, pipebuf<T> &_in, int _fdout) : runnable(sch, _in.name),
+                                                               in(_in), fdout(_fdout)
     {
     }
     void run()
@@ -107,29 +121,17 @@ struct file_writer: runnable
         int size = in.readable() * sizeof(T);
         if (!size)
             return;
-#ifdef _MSC_VER
-        int nw = _write(fdout, in.rd(), size);
-#else
         int nw = write(fdout, in.rd(), size);
-#endif
         if (!nw)
-        {
-            fatal("leansdr::file_writer::run: pipe");
-            return;
-        }
+            fatal("pipe");
         if (nw < 0)
-        {
-            fatal("leansdr::file_writer::run: write");
-            return;
-        }
+            fatal("write");
         if (nw % sizeof(T))
-        {
-            fatal("leansdr::file_writer::run:partial write");
-            return;
-        }
+            fatal("partial write");
         in.read(nw / sizeof(T));
     }
-private:
+
+  private:
     pipereader<T> in;
     int fdout;
 };
@@ -137,11 +139,14 @@ private:
 // [file_printer] writes data from a [pipebuf] to a file descriptor,
 // with printf-style formatting and optional scaling.
 
-template<typename T>
-struct file_printer: runnable
+template <typename T>
+struct file_printer : runnable
 {
-    file_printer(scheduler *sch, const char *_format, pipebuf<T> &_in, int _fdout, int _decimation = 1) :
-            runnable(sch, _in.name), scale(1), decimation(_decimation), in(_in), format(_format), fdout(_fdout), phase(0)
+    file_printer(scheduler *sch, const char *_format,
+                 pipebuf<T> &_in, int _fdout,
+                 int _decimation = 1) : runnable(sch, _in.name),
+                                        scale(1), decimation(_decimation),
+                                        in(_in), format(_format), fdout(_fdout), phase(0)
     {
     }
     void run()
@@ -156,27 +161,18 @@ struct file_printer: runnable
                 char buf[256];
                 int len = snprintf(buf, sizeof(buf), format, (*pin) * scale);
                 if (len < 0)
-                {
-                    fatal("leansdr::file_printer::run: obsolete glibc");
-                    return;
-                }
-#ifdef _MSC_VER
-                int nw = _write(fdout, buf, len);
-#else
+                    fatal("obsolete glibc");
                 int nw = write(fdout, buf, len);
-#endif
                 if (nw != len)
-                {
-                    fatal("leansdr::file_printer::run: partial write");
-                    return;
-                }
+                    fatal("partial write");
             }
         }
         in.read(n);
     }
     T scale;
     int decimation;
-private:
+
+  private:
     pipereader<T> in;
     const char *format;
     int fdout;
@@ -187,11 +183,18 @@ private:
 // to a file descriptor on a single line.
 // Special case for complex.
 
-template<typename T>
-struct file_carrayprinter: runnable
+template <typename T>
+struct file_carrayprinter : runnable
 {
-    file_carrayprinter(scheduler *sch, const char *_head, const char *_format, const char *_sep, const char *_tail, pipebuf<complex<T> > &_in, int _fdout) :
-            runnable(sch, _in.name), scale(1), fixed_size(0), in(_in), head(_head), format(_format), sep(_sep), tail(_tail), fout(fdopen(_fdout, "w"))
+    file_carrayprinter(scheduler *sch,
+                       const char *_head,
+                       const char *_format,
+                       const char *_sep,
+                       const char *_tail,
+                       pipebuf<complex<T>> &_in, int _fdout) : runnable(sch, _in.name),
+                                                               scale(1), fixed_size(0), in(_in),
+                                                               head(_head), format(_format), sep(_sep), tail(_tail),
+                                                               fout(fdopen(_fdout, "w"))
     {
     }
     void run()
@@ -218,32 +221,36 @@ struct file_carrayprinter: runnable
         }
     }
     T scale;
-    int fixed_size;  // Number of elements per batch, or 0.
-private:
-    pipereader<complex<T> > in;
+    int fixed_size; // Number of elements per batch, or 0.
+  private:
+    pipereader<complex<T>> in;
     const char *head, *format, *sep, *tail;
     FILE *fout;
 };
 
-template<typename T, int N>
-struct file_vectorprinter: runnable
+template <typename T, int N>
+struct file_vectorprinter : runnable
 {
-    file_vectorprinter(scheduler *sch, const char *_head, const char *_format, const char *_sep, const char *_tail, pipebuf<T[N]> &_in, int _fdout) :
-            runnable(sch, _in.name), scale(1), in(_in), head(_head), format(_format), sep(_sep), tail(_tail)
+    file_vectorprinter(scheduler *sch,
+                       const char *_head,
+                       const char *_format,
+                       const char *_sep,
+                       const char *_tail,
+                       pipebuf<T[N]> &_in, int _fdout, int _n = N) : runnable(sch, _in.name), scale(1), in(_in),
+                                                                     head(_head), format(_format), sep(_sep), tail(_tail), n(_n)
     {
         fout = fdopen(_fdout, "w");
         if (!fout)
-        {
-            fatal("leansdr::file_vectorprinter::file_vectorprinter: fdopen");
-        }
+            fatal("fdopen");
     }
     void run()
     {
         while (in.readable() >= 1)
         {
-            fprintf(fout, head, N);
-            T (*pin)[N] = in.rd();
-            for (int i = 0; i < N; ++i)
+            fprintf(fout, head, n);
+            T(*pin)
+            [N] = in.rd();
+            for (int i = 0; i < n; ++i)
             {
                 if (i)
                     fprintf(fout, "%s", sep);
@@ -255,20 +262,23 @@ struct file_vectorprinter: runnable
         fflush(fout);
     }
     T scale;
-private:
+
+  private:
     pipereader<T[N]> in;
     const char *head, *format, *sep, *tail;
     FILE *fout;
+    int n;
 };
 
 // [itemcounter] writes the number of input items to the output [pipebuf].
 // [Tout] must be a numeric type.
 
-template<typename Tin, typename Tout>
-struct itemcounter: runnable
+template <typename Tin, typename Tout>
+struct itemcounter : runnable
 {
-    itemcounter(scheduler *sch, pipebuf<Tin> &_in, pipebuf<Tout> &_out) :
-            runnable(sch, "itemcounter"), in(_in), out(_out)
+    itemcounter(scheduler *sch, pipebuf<Tin> &_in, pipebuf<Tout> &_out)
+        : runnable(sch, "itemcounter"),
+          in(_in), out(_out)
     {
     }
     void run()
@@ -281,20 +291,23 @@ struct itemcounter: runnable
         out.write(count);
         in.read(count);
     }
-private:
+
+  private:
     pipereader<Tin> in;
     pipewriter<Tout> out;
 };
 
 // [decimator] forwards 1 in N sample.
 
-template<typename T>
-struct decimator: runnable
+template <typename T>
+struct decimator : runnable
 {
     unsigned int d;
 
-    decimator(scheduler *sch, int _d, pipebuf<T> &_in, pipebuf<T> &_out) :
-            runnable(sch, "decimator"), d(_d), in(_in), out(_out)
+    decimator(scheduler *sch, int _d, pipebuf<T> &_in, pipebuf<T> &_out)
+        : runnable(sch, "decimator"),
+          d(_d),
+          in(_in), out(_out)
     {
     }
     void run()
@@ -306,7 +319,8 @@ struct decimator: runnable
         in.read(count * d);
         out.written(count);
     }
-private:
+
+  private:
     pipereader<T> in;
     pipewriter<T> out;
 };
@@ -314,13 +328,18 @@ private:
 // [rate_estimator] accumulates counts of two quantities
 // and periodically outputs their ratio.
 
-template<typename T>
-struct rate_estimator: runnable
+template <typename T>
+struct rate_estimator : runnable
 {
     int sample_size;
 
-    rate_estimator(scheduler *sch, pipebuf<int> &_num, pipebuf<int> &_den, pipebuf<float> &_rate) :
-            runnable(sch, "rate_estimator"), sample_size(10000), num(_num), den(_den), rate(_rate), acc_num(0), acc_den(0)
+    rate_estimator(scheduler *sch,
+                   pipebuf<int> &_num, pipebuf<int> &_den,
+                   pipebuf<float> &_rate)
+        : runnable(sch, "rate_estimator"),
+          sample_size(10000),
+          num(_num), den(_den), rate(_rate),
+          acc_num(0), acc_den(0)
     {
     }
 
@@ -339,12 +358,12 @@ struct rate_estimator: runnable
         den.read(count);
         if (acc_den >= sample_size)
         {
-            rate.write((float) acc_num / acc_den);
+            rate.write((float)acc_num / acc_den);
             acc_num = acc_den = 0;
         }
     }
 
-private:
+  private:
     pipereader<int> num, den;
     pipewriter<float> rate;
     T acc_num, acc_den;
@@ -352,18 +371,16 @@ private:
 
 // SERIALIZER
 
-template<typename Tin, typename Tout>
-struct serializer: runnable
+template <typename Tin, typename Tout>
+struct serializer : runnable
 {
-    serializer(scheduler *sch, pipebuf<Tin> &_in, pipebuf<Tout> &_out) :
-            nin(max((size_t) 1, sizeof(Tin) / sizeof(Tout))), nout(max((size_t) 1, sizeof(Tout) / sizeof(Tin))), in(_in), out(_out, nout)
+    serializer(scheduler *sch, pipebuf<Tin> &_in, pipebuf<Tout> &_out)
+        : nin(max((size_t)1, sizeof(Tin) / sizeof(Tout))),
+          nout(max((size_t)1, sizeof(Tout) / sizeof(Tin))),
+          in(_in), out(_out, nout)
     {
-        (void) sch;
         if (nin * sizeof(Tin) != nout * sizeof(Tout))
-        {
-            fail("serializer::serializer", "incompatible sizes");
-            return;
-        }
+            fail("serializer: incompatible sizes");
     }
     void run()
     {
@@ -374,61 +391,63 @@ struct serializer: runnable
             out.written(nout);
         }
     }
-private:
+
+  private:
     int nin, nout;
     pipereader<Tin> in;
     pipewriter<Tout> out;
-};
-// serializer
+}; // serializer
 
 // [buffer_reader] reads from a user-supplied buffer.
 
-template<typename T>
-struct buffer_reader: runnable
+template <typename T>
+struct buffer_reader : runnable
 {
-    buffer_reader(scheduler *sch, T *_data, int _count, pipebuf<T> &_out) :
-            runnable(sch, "buffer_reader"), data(_data), count(_count), out(_out), pos(0)
+    buffer_reader(scheduler *sch, T *_data, int _count, pipebuf<T> &_out)
+        : runnable(sch, "buffer_reader"),
+          data(_data), count(_count), out(_out), pos(0)
     {
     }
     void run()
     {
-        int n = min(out.writable(), (unsigned long) (count - pos));
+        int n = min(out.writable(), (unsigned long)(count - pos));
         memcpy(out.wr(), &data[pos], n * sizeof(T));
         pos += n;
         out.written(n);
     }
-private:
+
+  private:
     T *data;
     int count;
     pipewriter<T> out;
     int pos;
-};
-// buffer_reader
+}; // buffer_reader
 
 // [buffer_writer] writes to a user-supplied buffer.
 
-template<typename T>
-struct buffer_writer: runnable
+template <typename T>
+struct buffer_writer : runnable
 {
-    buffer_writer(scheduler *sch, pipebuf<T> &_in, T *_data, int _count) :
-            runnable(sch, "buffer_reader"), in(_in), data(_data), count(_count), pos(0)
+    buffer_writer(scheduler *sch, pipebuf<T> &_in, T *_data, int _count)
+        : runnable(sch, "buffer_reader"),
+          in(_in), data(_data), count(_count), pos(0)
     {
     }
     void run()
     {
-        int n = min(in.readable(), (unsigned long) (count - pos));
+        int n = min(in.readable(), (unsigned long)(count - pos));
         memcpy(&data[pos], in.rd(), n * sizeof(T));
         in.read(n);
         pos += n;
     }
-private:
+
+  private:
     pipereader<T> in;
     T *data;
     int count;
     int pos;
-};
-// buffer_writer
+}; // buffer_writer
 
-}// namespace
+} // namespace leansdr
 
-#endif  // LEANSDR_GENERIC_H
+#endif // LEANSDR_GENERIC_H

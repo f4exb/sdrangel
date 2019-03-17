@@ -531,34 +531,34 @@ void DATVDemod::InitDATVFramework()
     switch(m_objRunning.enmModulation)
     {
         case BPSK:
-           m_objCfg.constellation = leansdr::cstln_lut<256>::BPSK;
+           m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::BPSK;
            break;
         case QPSK:
-            m_objCfg.constellation = leansdr::cstln_lut<256>::QPSK;
+            m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::QPSK;
             break;
         case PSK8:
-            m_objCfg.constellation = leansdr::cstln_lut<256>::PSK8;
+            m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::PSK8;
             break;
         case APSK16:
-            m_objCfg.constellation = leansdr::cstln_lut<256>::APSK16;
+            m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::APSK16;
             break;
         case APSK32:
-           m_objCfg.constellation = leansdr::cstln_lut<256>::APSK32;
+           m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::APSK32;
            break;
         case APSK64E:
-           m_objCfg.constellation = leansdr::cstln_lut<256>::APSK64E;
+           m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::APSK64E;
            break;
         case QAM16:
-           m_objCfg.constellation = leansdr::cstln_lut<256>::QAM16;
+           m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::QAM16;
            break;
         case QAM64:
-           m_objCfg.constellation = leansdr::cstln_lut<256>::QAM64;
+           m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::QAM64;
            break;
         case QAM256:
-           m_objCfg.constellation = leansdr::cstln_lut<256>::QAM256;
+           m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::QAM256;
            break;
         default:
-           m_objCfg.constellation = leansdr::cstln_lut<256>::BPSK;
+           m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::BPSK;
            break;
     }
 
@@ -648,7 +648,7 @@ void DATVDemod::InitDATVFramework()
 
     // Generic constellation receiver
 
-    p_symbols = new leansdr::pipebuf<leansdr::softsymbol>(m_objScheduler, "PSK soft-symbols", BUF_SYMBOLS);
+    p_symbols = new leansdr::pipebuf<leansdr::eucl_ss>(m_objScheduler, "PSK soft-symbols", BUF_SYMBOLS);
     p_freq = new leansdr::pipebuf<leansdr::f32> (m_objScheduler, "freq", BUF_SLOW);
     p_ss = new leansdr::pipebuf<leansdr::f32> (m_objScheduler, "SS", BUF_SLOW);
     p_mer = new leansdr::pipebuf<leansdr::f32> (m_objScheduler, "MER", BUF_SLOW);
@@ -682,7 +682,7 @@ void DATVDemod::InitDATVFramework()
           return;
     }
 
-    m_objDemodulator = new leansdr::cstln_receiver<leansdr::f32>(
+    m_objDemodulator = new leansdr::cstln_receiver<leansdr::f32, leansdr::eucl_ss>(
             m_objScheduler,
             sampler,
             *p_preprocessed,
@@ -694,8 +694,8 @@ void DATVDemod::InitDATVFramework()
 
     if (m_objCfg.standard == DVB_S)
     {
-        if ( m_objCfg.constellation != leansdr::cstln_lut<256>::QPSK
-            && m_objCfg.constellation != leansdr::cstln_lut<256>::BPSK )
+        if ( m_objCfg.constellation != leansdr::cstln_lut<leansdr::eucl_ss, 256>::QPSK
+            && m_objCfg.constellation != leansdr::cstln_lut<leansdr::eucl_ss, 256>::BPSK )
         {
             qWarning("DATVDemod::InitDATVFramework: non-standard constellation for DVB-S");
         }

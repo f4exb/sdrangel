@@ -25,11 +25,7 @@ class DownChannelizer;
 
 #define rfFilterFftLength 1024
 
-#ifndef LEANSDR_FRAMEWORK
-#define LEANSDR_FRAMEWORK
-
 //LeanSDR
-
 #include "leansdr/framework.h"
 #include "leansdr/generic.h"
 #include "leansdr/dsp.h"
@@ -41,10 +37,10 @@ class DownChannelizer;
 #include "leansdr/hdlc.h"
 #include "leansdr/iess.h"
 
-#endif
-
 #include "datvconstellation.h"
 #include "datvvideoplayer.h"
+#include "datvideostream.h"
+#include "datvideorender.h"
 
 #include "channel/channelsinkapi.h"
 #include "dsp/basebandsamplesink.h"
@@ -59,9 +55,6 @@ class DownChannelizer;
 #include "audio/audiofifo.h"
 #include "util/message.h"
 #include "util/movingaverage.h"
-
-#include "datvideostream.h"
-#include "datvideorender.h"
 
 #include <QMutex>
 
@@ -83,7 +76,7 @@ struct config
     bool cnr;            // Measure CNR
     unsigned int decim;  // Decimation, 0=auto
     float Fm;            // QPSK symbol rate (Hz)
-    leansdr::cstln_lut<256>::predef constellation;
+    leansdr::cstln_lut<leansdr::eucl_ss, 256>::predef constellation;
     leansdr::code_rate fec;
     float Ftune;         // Bias frequency for the QPSK demodulator (Hz)
     bool allow_drift;
@@ -109,7 +102,7 @@ struct config
         cnr(false),
         decim(0),
         Fm(2e6),
-        constellation(leansdr::cstln_lut<256>::QPSK),
+        constellation(leansdr::cstln_lut<leansdr::eucl_ss, 256>::QPSK),
         fec(leansdr::FEC12),
         Ftune(0),
         allow_drift(false),
@@ -323,7 +316,7 @@ private:
     };
 
     unsigned long m_lngExpectedReadIQ;
-    unsigned long m_lngReadIQ;
+    long m_lngReadIQ;
 
     //************** LEANDBV Parameters **************
 
@@ -372,7 +365,7 @@ private:
     float *coeffs_sampler;
     int ncoeffs_sampler;
 
-    leansdr::pipebuf<leansdr::softsymbol> *p_symbols;
+    leansdr::pipebuf<leansdr::eucl_ss> *p_symbols;
     leansdr::pipebuf<leansdr::f32> *p_freq;
     leansdr::pipebuf<leansdr::f32> *p_ss;
     leansdr::pipebuf<leansdr::f32> *p_mer;
@@ -386,7 +379,7 @@ private:
     leansdr::file_writer<leansdr::cf32> *r_ppout;
 
     //GENERIC CONSTELLATION RECEIVER
-    leansdr::cstln_receiver<leansdr::f32> *m_objDemodulator;
+    leansdr::cstln_receiver<leansdr::f32, leansdr::eucl_ss> *m_objDemodulator;
 
     // DECONVOLUTION AND SYNCHRONIZATION
     leansdr::pipebuf<leansdr::u8> *p_bytes;

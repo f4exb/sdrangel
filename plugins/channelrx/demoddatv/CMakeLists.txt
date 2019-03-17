@@ -7,7 +7,12 @@ set(datv_SOURCES
 	datvdemodgui.cpp
 	datvdemodplugin.cpp
 	datvideostream.cpp
-	datvideorender.cpp
+    datvideorender.cpp
+    leansdr/dvb.cpp
+    leansdr/filtergen.cpp
+    leansdr/framework.cpp
+    leansdr/math.cpp
+    leansdr/sdr.cpp
 )
 
 set(datv_HEADERS
@@ -15,7 +20,12 @@ set(datv_HEADERS
 	datvdemodgui.h
 	datvdemodplugin.h
 	datvideostream.h
-	datvideorender.h
+    datvideorender.h
+    leansdr/dvb.h
+    leansdr/filtergen.h
+    leansdr/framework.h
+    leansdr/math.h
+    leansdr/sdr.h
 )
 
 set(datv_FORMS

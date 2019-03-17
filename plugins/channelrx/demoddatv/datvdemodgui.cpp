@@ -21,7 +21,7 @@
 #include <QMediaMetaData>
 
 #include "datvdemodgui.h"
-#include "datvideostream.h"
+//#include "datvideostream.h"
 
 #include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"

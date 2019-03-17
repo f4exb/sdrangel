@@ -1,26 +1,37 @@
+// This file is part of LeanSDR Copyright (C) 2016-2018 <pabr@pabr.org>.
+// See the toplevel README for more information.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #ifndef LEANSDR_FRAMEWORK_H
 #define LEANSDR_FRAMEWORK_H
 
-#include <cstddef>
-#include <algorithm>
-
+#include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
+
+#ifndef VERSION
+#define VERSION "undefined"
+#endif
 
 namespace leansdr
 {
 
-inline void fatal(const char *s)
-{
-    perror(s);
-}
-
-inline void fail(const char *f, const char *s)
-{
-    fprintf(stderr, "leansdr::%s: %s\n", f, s);
-}
+void fatal(const char *s);
+void fail(const char *s);
 
 //////////////////////////////////////////////////////////////////////
 // DSP framework
@@ -50,25 +61,25 @@ struct pipebuf_common
 
     virtual void dump(std::size_t *total_bufs)
     {
-        (void) total_bufs;
+        (void)total_bufs;
     }
 
-    pipebuf_common(const char *_name) :
-            name(_name)
+    const char *name;
+
+    pipebuf_common(const char *_name) : name(_name)
     {
     }
 
     virtual ~pipebuf_common()
     {
     }
-
-    const char *name;
 };
 
 struct runnable_common
 {
-    runnable_common(const char *_name) :
-            name(_name)
+    const char *name;
+
+    runnable_common(const char *_name) : name(_name)
     {
     }
 
@@ -83,13 +94,12 @@ struct runnable_common
     virtual void shutdown()
     {
     }
-
 #ifdef DEBUG
     ~runnable_common()
-    {   fprintf(stderr, "Deallocating %s !\n", name);}
+    {
+        fprintf(stderr, "Deallocating %s !\n", name);
+    }
 #endif
-
-    const char *name;
 };
 
 struct window_placement
@@ -105,39 +115,35 @@ struct scheduler
     runnable_common *runnables[MAX_RUNNABLES];
     int nrunnables;
     window_placement *windows;
-    bool verbose, debug;
+    bool verbose, debug, debug2;
 
-    scheduler() :
-            npipes(0), nrunnables(0), windows(nullptr), verbose(false), debug(false)
+    scheduler() : npipes(0),
+                  nrunnables(0),
+                  windows(NULL),
+                  verbose(false),
+                  debug(false),
+                  debug2(false)
     {
-        std::fill(pipes, pipes + MAX_PIPES, nullptr);
-        std::fill(runnables, runnables + MAX_RUNNABLES, nullptr);
     }
 
     void add_pipe(pipebuf_common *p)
     {
         if (npipes == MAX_PIPES)
-        {
-            fail("scheduler::add_pipe", "MAX_PIPES");
-            return;
-        }
+            fail("MAX_PIPES");
         pipes[npipes++] = p;
     }
 
     void add_runnable(runnable_common *r)
     {
         if (nrunnables == MAX_RUNNABLES)
-        {
-            fail("scheduler::add_runnable", "MAX_RUNNABLES");
-        }
+            fail("MAX_RUNNABLES");
         runnables[nrunnables++] = r;
     }
 
     void step()
     {
-        for (int i = 0; i < nrunnables; ++i) {
+        for (int i = 0; i < nrunnables; ++i)
             runnables[i]->run();
-        }
     }
 
     void run()
@@ -148,26 +154,23 @@ struct scheduler
         {
             step();
             unsigned long long h = hash();
-            if (h == prev_hash) {
+            if (h == prev_hash)
                 break;
-            }
             prev_hash = h;
         }
     }
 
     void shutdown()
     {
-        for (int i = 0; i < nrunnables; ++i) {
+        for (int i = 0; i < nrunnables; ++i)
             runnables[i]->shutdown();
-        }
     }
 
     unsigned long long hash()
     {
         unsigned long long h = 0;
-        for (int i = 0; i < npipes; ++i) {
+        for (int i = 0; i < npipes; ++i)
             h += (1 + i) * pipes[i]->hash();
-        }
         return h;
     }
 
@@ -175,26 +178,26 @@ struct scheduler
     {
         fprintf(stderr, "\n");
         std::size_t total_bufs = 0;
-        for (int i = 0; i < npipes; ++i) {
+        for (int i = 0; i < npipes; ++i)
             pipes[i]->dump(&total_bufs);
-        }
-        fprintf(stderr, "leansdr::scheduler::dump Total buffer memory: %ld KiB\n", (unsigned long) total_bufs / 1024);
+        fprintf(stderr, "Total buffer memory: %ld KiB\n",
+                (unsigned long)total_bufs / 1024);
     }
 };
 
-struct runnable: runnable_common
+struct runnable : runnable_common
 {
-    runnable(scheduler *_sch, const char *name) :
-            runnable_common(name), sch(_sch)
+    runnable(scheduler *_sch, const char *name) : runnable_common(name), sch(_sch)
     {
         sch->add_runnable(this);
     }
-protected:
+
+  protected:
     scheduler *sch;
 };
 
-template<typename T>
-struct pipebuf: pipebuf_common
+template <typename T>
+struct pipebuf : pipebuf_common
 {
     T *buf;
     T *rds[MAX_READERS];
@@ -207,9 +210,13 @@ struct pipebuf: pipebuf_common
         return sizeof(T);
     }
 
-    pipebuf(scheduler *sch, const char *name, unsigned long size) :
-            pipebuf_common(name), buf(new T[size]), nrd(0), wr(buf), end(
-                    buf + size), min_write(1), total_written(0), total_read(0)
+    pipebuf(scheduler *sch, const char *name, unsigned long size) : pipebuf_common(name),
+                                                                    buf(new T[size]),
+                                                                    nrd(0), wr(buf),
+                                                                    end(buf + size),
+                                                                    min_write(1),
+                                                                    total_written(0),
+                                                                    total_read(0)
     {
         sch->add_pipe(this);
     }
@@ -217,10 +224,7 @@ struct pipebuf: pipebuf_common
     int add_reader()
     {
         if (nrd == MAX_READERS)
-        {
-            fail("pipebuf::add_reader", "too many readers");
-            return nrd;
-        }
+            fail("too many readers");
         rds[nrd] = wr;
         return nrd++;
     }
@@ -229,16 +233,12 @@ struct pipebuf: pipebuf_common
     {
         T *rd = wr;
         for (int i = 0; i < nrd; ++i)
-        {
-            if (rds[i] < rd) {
+            if (rds[i] < rd)
                 rd = rds[i];
-            }
-        }
         memmove(buf, rd, (wr - rd) * sizeof(T));
         wr -= rd - buf;
-        for (int i = 0; i < nrd; ++i) {
+        for (int i = 0; i < nrd; ++i)
             rds[i] -= rd - buf;
-        }
     }
 
     long long hash()
@@ -248,71 +248,53 @@ struct pipebuf: pipebuf_common
 
     void dump(std::size_t *total_bufs)
     {
-        if (total_written < 10000) {
-            fprintf(stderr, "leansdr::pipebuf::dump: .%-16s : %4ld/%4ld", name, total_read, total_written);
-        } else if (total_written < 1000000) {
-            fprintf(stderr, "leansdr::pipebuf::dump: .%-16s : %3ldk/%3ldk", name, total_read / 1000, total_written / 1000);
-        } else {
-            fprintf(stderr, "leansdr::pipebuf::dump: .%-16s : %3ldM/%3ldM", name, total_read / 1000000, total_written / 1000000);
-        }
-
+        if (total_written < 10000)
+            fprintf(stderr, ".%-16s : %4ld/%4ld", name, total_read,
+                    total_written);
+        else if (total_written < 1000000)
+            fprintf(stderr, ".%-16s : %3ldk/%3ldk", name, total_read / 1000,
+                    total_written / 1000);
+        else
+            fprintf(stderr, ".%-16s : %3ldM/%3ldM", name, total_read / 1000000,
+                    total_written / 1000000);
         *total_bufs += (end - buf) * sizeof(T);
         unsigned long nw = end - wr;
-        fprintf(stderr, "leansdr::pipebuf: %6ld writable %c,", nw, (nw < min_write) ? '!' : ' ');
+        fprintf(stderr, " %6ld writable %c,", nw, (nw < min_write) ? '!' : ' ');
         T *rd = wr;
-
         for (int j = 0; j < nrd; ++j)
-        {
-            if (rds[j] < rd) {
+            if (rds[j] < rd)
                 rd = rds[j];
-            }
-        }
-
-        fprintf(stderr, "leansdr::pipebuf::dump: %6d unread (", (int) (wr - rd));
-
-        for (int j = 0; j < nrd; ++j) {
-            fprintf(stderr, "leansdr::pipebuf: %d", (int) (wr - rds[j]));
-        }
-
-        fprintf(stderr, "leansdr::pipebuf::dump: )\n");
+        fprintf(stderr, " %6d unread (", (int)(wr - rd));
+        for (int j = 0; j < nrd; ++j)
+            fprintf(stderr, " %d", (int)(wr - rds[j]));
+        fprintf(stderr, " )\n");
     }
     unsigned long min_write;
     unsigned long total_written, total_read;
 #ifdef DEBUG
     ~pipebuf()
-    {   fprintf(stderr, "Deallocating %s !\n", name);}
+    {
+        fprintf(stderr, "Deallocating %s !\n", name);
+    }
 #endif
 };
 
-template<typename T>
+template <typename T>
 struct pipewriter
 {
     pipebuf<T> &buf;
 
-    pipewriter(pipebuf<T> &_buf, unsigned long min_write = 1) :
-            buf(_buf)
+    pipewriter(pipebuf<T> &_buf, unsigned long min_write = 1) : buf(_buf)
     {
-        if (min_write > buf.min_write) {
+        if (min_write > buf.min_write)
             buf.min_write = min_write;
-        }
     }
-
-    /** Return number of items writable at this->wr, 0 if full. */
-    unsigned long writable()
+    // Return number of items writable at this->wr, 0 if full.
+    long writable()
     {
-        if (buf.end < buf.wr)
-        {
-            fprintf(stderr, "leansdr::pipewriter::writable: overflow in %s buffer\n", buf.name);
-            return 0;
-        }
-
-        unsigned long delta = buf.end - buf.wr;
-
-        if (delta < buf.min_write) {
+        if (buf.end < buf.min_write + buf.wr)
             buf.pack();
-        }
-
-        return delta;
+        return buf.end - buf.wr;
     }
 
     T *wr()
@@ -324,9 +306,9 @@ struct pipewriter
     {
         if (buf.wr + n > buf.end)
         {
-            fprintf(stderr, "leansdr::pipewriter::written: overflow in %s buffer\n", buf.name);
-            return;
+            fprintf(stderr, "Bug: overflow to %s\n", buf.name);
         }
+
         buf.wr += n;
         buf.total_written += n;
     }
@@ -340,38 +322,36 @@ struct pipewriter
 
 // Convenience functions for working with optional pipes
 
-template<typename T>
-pipewriter<T> *opt_writer(pipebuf<T> *buf)
+template <typename T>
+pipewriter<T> *opt_writer(pipebuf<T> *buf, unsigned long min_write = 1)
 {
-    return buf ? new pipewriter<T>(*buf) : NULL;
+    return buf ? new pipewriter<T>(*buf, min_write) : NULL;
 }
 
-template<typename T>
-bool opt_writable(pipewriter<T> *p, unsigned int n = 1)
+template <typename T>
+bool opt_writable(pipewriter<T> *p, int n = 1)
 {
     return (p == NULL) || p->writable() >= n;
 }
 
-template<typename T>
+template <typename T>
 void opt_write(pipewriter<T> *p, T val)
 {
-    if (p) {
+    if (p)
         p->write(val);
-    }
 }
 
-template<typename T>
+template <typename T>
 struct pipereader
 {
     pipebuf<T> &buf;
     int id;
 
-    pipereader(pipebuf<T> &_buf) :
-            buf(_buf), id(_buf.add_reader())
+    pipereader(pipebuf<T> &_buf) : buf(_buf), id(_buf.add_reader())
     {
     }
 
-    unsigned long readable()
+    long readable()
     {
         return buf.wr - buf.rds[id];
     }
@@ -385,9 +365,9 @@ struct pipereader
     {
         if (buf.rds[id] + n > buf.wr)
         {
-            fprintf(stderr, "leansdr::pipereader::read: underflow in %s buffer\n", buf.name);
-            return;
+            fprintf(stderr, "Bug: underflow from %s\n", buf.name);
         }
+
         buf.rds[id] += n;
         buf.total_read += n;
     }
@@ -395,7 +375,8 @@ struct pipereader
 
 // Math functions for templates
 
-template<typename T> T gen_sqrt(T x);
+template <typename T>
+T gen_sqrt(T x);
 inline float gen_sqrt(float x)
 {
     return sqrtf(x);
@@ -411,7 +392,8 @@ inline long double gen_sqrt(long double x)
     return sqrtl(x);
 }
 
-template<typename T> T gen_abs(T x);
+template <typename T>
+T gen_abs(T x);
 inline float gen_abs(float x)
 {
     return fabsf(x);
@@ -427,7 +409,8 @@ inline long int gen_abs(long int x)
     return labs(x);
 }
 
-template<typename T> T gen_hypot(T x, T y);
+template <typename T>
+T gen_hypot(T x, T y);
 inline float gen_hypot(float x, float y)
 {
     return hypotf(x, y);
@@ -438,7 +421,8 @@ inline long double gen_hypot(long double x, long double y)
     return hypotl(x, y);
 }
 
-template<typename T> T gen_atan2(T y, T x);
+template <typename T>
+T gen_atan2(T y, T x);
 inline float gen_atan2(float y, float x)
 {
     return atan2f(y, x);
@@ -449,13 +433,13 @@ inline long double gen_atan2(long double y, long double x)
     return atan2l(y, x);
 }
 
-template<typename T>
+template <typename T>
 T min(const T &x, const T &y)
 {
     return (x < y) ? x : y;
 }
 
-template<typename T>
+template <typename T>
 T max(const T &x, const T &y)
 {
     return (x < y) ? y : x;
@@ -470,6 +454,6 @@ typedef signed char s8;
 typedef signed short s16;
 typedef signed long s32;
 
-}  // namespace
+} // namespace leansdr
 
-#endif  // LEANSDR_FRAMEWORK_H
+#endif // LEANSDR_FRAMEWORK_H
