@@ -5,7 +5,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(datv_SOURCES
 	datvdemod.cpp
 	datvdemodgui.cpp
-	datvdemodplugin.cpp
+    datvdemodplugin.cpp
+    datvdemodsettings.cpp
 	datvideostream.cpp
     datvideorender.cpp
     leansdr/dvb.cpp
@@ -19,6 +20,7 @@ set(datv_HEADERS
 	datvdemod.h
 	datvdemodgui.h
 	datvdemodplugin.h
+    datvdemodsettings.h
 	datvideostream.h
     datvideorender.h
     leansdr/dvb.h

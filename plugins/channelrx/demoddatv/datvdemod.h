@@ -275,7 +275,21 @@ private:
                 bool blnViterbi,
                 int intExcursion)
             {
-                return new MsgConfigureDATVDemod(intRFBandwidth,intCenterFrequency,enmStandard, enmModulation, enmFEC, intSymbolRate, intNotchFilters, blnAllowDrift,blnFastLock,enmFilter,blnHardMetric,fltRollOff, blnViterbi, intExcursion);
+                return new MsgConfigureDATVDemod(
+                    intRFBandwidth,
+                    intCenterFrequency,
+                    enmStandard,
+                    enmModulation,
+                    enmFEC,
+                    intSymbolRate,
+                    intNotchFilters,
+                    blnAllowDrift,
+                    blnFastLock,
+                    enmFilter,
+                    blnHardMetric,
+                    fltRollOff,
+                    blnViterbi,
+                    intExcursion);
             }
 
             DATVConfig m_objMsgConfig;

@@ -169,7 +169,21 @@ void DATVDemod::configure(MessageQueue* objMessageQueue,
           bool blnViterbi,
           int intExcursion)
 {
-    Message* msgCmd = MsgConfigureDATVDemod::create(intRFBandwidth,intCenterFrequency,enmStandard, enmModulation, enmFEC, intSymbolRate, intNotchFilters, blnAllowDrift,blnFastLock,enmFilter,blnHardMetric,fltRollOff, blnViterbi,intExcursion);
+    Message* msgCmd = MsgConfigureDATVDemod::create(
+        intRFBandwidth,
+        intCenterFrequency,
+        enmStandard,
+        enmModulation,
+        enmFEC,
+        intSymbolRate,
+        intNotchFilters,
+        blnAllowDrift,
+        blnFastLock,
+        enmFilter,
+        blnHardMetric,
+        fltRollOff,
+        blnViterbi,
+        intExcursion);
     objMessageQueue->push(msgCmd);
 }
 
