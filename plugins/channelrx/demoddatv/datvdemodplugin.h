@@ -32,7 +32,7 @@ class DATVDemodPlugin : public QObject, PluginInterface
     Q_PLUGIN_METADATA(IID "sdrangel.channel.demoddatv")
 
 public:
-    explicit DATVDemodPlugin(QObject* ptrParent = NULL);
+    explicit DATVDemodPlugin(QObject* ptrParent = nullptr);
 
 	const PluginDescriptor& getPluginDescriptor() const;
     void initPlugin(PluginAPI* ptrPluginAPI);

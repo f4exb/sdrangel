@@ -66,22 +66,17 @@ struct DataTSMetaData2
     {
         PID=-1;
         CodecID=-1;
-
-
         Program="";
         Stream="";
-
         Width=-1;
         Height=-1;
         BitRate=-1;
         Channels=-1;
         CodecDescription="";
-
         OK_Data=false;
         OK_Decoding=false;
         OK_TransportStream=false;
         OK_VideoStream=false;
-
     }
 };
 
@@ -131,18 +126,16 @@ protected:
 
 signals:
     void onMetaDataChanged(DataTSMetaData2 *objMetaData);
-
 };
 
 //To run Video Rendering with a dedicated thread
 class DATVideoRenderThread: public QThread
 {
-
     public:
         DATVideoRenderThread()
         {
-            m_objRenderer = NULL;
-            m_objStream = NULL;
+            m_objRenderer = nullptr;
+            m_objStream = nullptr;
             m_blnRenderingVideo=false;
         }
 
@@ -162,31 +155,25 @@ class DATVideoRenderThread: public QThread
 
         void run()
         {
-            if(m_blnRenderingVideo)
-            {
+            if (m_blnRenderingVideo) {
                 return;
             }
 
-            if((m_objRenderer==NULL) || (m_objStream==NULL))
-            {
+            if ((m_objRenderer==nullptr) || (m_objStream==nullptr)) {
                 return ;
             }
 
             m_blnRenderingVideo = m_objRenderer->OpenStream(m_objStream);
 
-            if(!m_blnRenderingVideo)
-            {
+            if (!m_blnRenderingVideo) {
                 return;
             }
 
-            while((m_objRenderer->RenderStream()) && (m_blnRenderingVideo==true))
-            {
+            while ((m_objRenderer->RenderStream()) && (m_blnRenderingVideo == true)) {
             }
 
             m_objRenderer->CloseStream(m_objStream);
-
             m_blnRenderingVideo=false;
-
         }
 
         void stopRendering()

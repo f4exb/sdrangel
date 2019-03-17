@@ -73,59 +73,59 @@ inline int decimation(float Fin, float Fout) { int d = Fin / Fout; return std::m
 
 struct config
 {
-  dvb_version  standard;
-  dvb_sampler sampler;
+    dvb_version  standard;
+    dvb_sampler sampler;
 
-  int buf_factor;      // Buffer sizing
-  float Fs;            // Sampling frequency (Hz)
-  float Fderot;        // Shift the signal (Hz). Note: Ftune is faster
-  int anf;             // Number of auto notch filters
-  bool cnr;            // Measure CNR
-  unsigned int decim;  // Decimation, 0=auto
-  float Fm;            // QPSK symbol rate (Hz)
-  leansdr::cstln_lut<256>::predef constellation;
-  leansdr::code_rate fec;
-  float Ftune;         // Bias frequency for the QPSK demodulator (Hz)
-  bool allow_drift;
-  bool fastlock;
-  bool viterbi;
-  bool hard_metric;
-  bool resample;
-  float resample_rej;  // Approx. filter rejection in dB
-  int rrc_steps;       // Discrete steps between symbols, 0=auto
-  float rrc_rej;       // Approx. RRC filter rejection in dB
-  float rolloff;       // Roll-off 0..1
-  bool hdlc;           // Expect HDLC frames instead of MPEG packets
-  bool packetized;     // Output frames with 16-bit BE length
-  float Finfo;         // Desired refresh rate on fd_info (Hz)
+    int buf_factor;      // Buffer sizing
+    float Fs;            // Sampling frequency (Hz)
+    float Fderot;        // Shift the signal (Hz). Note: Ftune is faster
+    int anf;             // Number of auto notch filters
+    bool cnr;            // Measure CNR
+    unsigned int decim;  // Decimation, 0=auto
+    float Fm;            // QPSK symbol rate (Hz)
+    leansdr::cstln_lut<256>::predef constellation;
+    leansdr::code_rate fec;
+    float Ftune;         // Bias frequency for the QPSK demodulator (Hz)
+    bool allow_drift;
+    bool fastlock;
+    bool viterbi;
+    bool hard_metric;
+    bool resample;
+    float resample_rej;  // Approx. filter rejection in dB
+    int rrc_steps;       // Discrete steps between symbols, 0=auto
+    float rrc_rej;       // Approx. RRC filter rejection in dB
+    float rolloff;       // Roll-off 0..1
+    bool hdlc;           // Expect HDLC frames instead of MPEG packets
+    bool packetized;     // Output frames with 16-bit BE length
+    float Finfo;         // Desired refresh rate on fd_info (Hz)
 
-  config() :
-      standard(DVB_S),
-      sampler(SAMP_LINEAR),
-      buf_factor(4),
-      Fs(2.4e6),
-      Fderot(0),
-      anf(0),
-      cnr(false),
-      decim(0),
-      Fm(2e6),
-      constellation(leansdr::cstln_lut<256>::QPSK),
-      fec(leansdr::FEC12),
-      Ftune(0),
-      allow_drift(false),
-      fastlock(true),
-      viterbi(false),
-      hard_metric(false),
-      resample(false),
-      resample_rej(10),
-      rrc_steps(0),
-      rrc_rej(10),
-      rolloff(0.35),
-      hdlc(false),
-      packetized(false),
-      Finfo(5)
-  {
-  }
+    config() :
+        standard(DVB_S),
+        sampler(SAMP_LINEAR),
+        buf_factor(4),
+        Fs(2.4e6),
+        Fderot(0),
+        anf(0),
+        cnr(false),
+        decim(0),
+        Fm(2e6),
+        constellation(leansdr::cstln_lut<256>::QPSK),
+        fec(leansdr::FEC12),
+        Ftune(0),
+        allow_drift(false),
+        fastlock(true),
+        viterbi(false),
+        hard_metric(false),
+        resample(false),
+        resample_rej(10),
+        rrc_steps(0),
+        rrc_rej(10),
+        rolloff(0.35),
+        hdlc(false),
+        packetized(false),
+        Finfo(5)
+    {
+    }
 };
 
 
@@ -240,7 +240,6 @@ public:
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
-
     class MsgConfigureChannelizer : public Message
     {
         MESSAGE_CLASS_DECLARATION
@@ -248,8 +247,7 @@ public:
         public:
             int getCenterFrequency() const { return m_centerFrequency; }
 
-            static MsgConfigureChannelizer* create(int centerFrequency)
-            {
+            static MsgConfigureChannelizer* create(int centerFrequency) {
                 return new MsgConfigureChannelizer(centerFrequency);
             }
 
@@ -259,7 +257,7 @@ public:
             MsgConfigureChannelizer(int centerFrequency) :
             Message(),
             m_centerFrequency(centerFrequency)
-            { }
+            {}
     };
 
 private:

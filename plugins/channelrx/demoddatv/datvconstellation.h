@@ -24,8 +24,7 @@
 #include "leansdr/framework.h"
 #include "gui/tvscreen.h"
 
-namespace leansdr
-{
+namespace leansdr {
 
 static const int DEFAULT_GUI_DECIMATION = 64;
 
@@ -41,23 +40,28 @@ template<typename T> struct datvconstellation: runnable
     std::vector<int> cstln_rows;
     std::vector<int> cstln_cols;
 
-    datvconstellation(scheduler *sch, pipebuf<complex<T> > &_in, T _xymin, T _xymax, const char *_name = 0, TVScreen *objDATVScreen = 0) :
-            runnable(sch, _name ? _name : _in.name),
-            xymin(_xymin),
-            xymax(_xymax),
-            decimation(DEFAULT_GUI_DECIMATION),
-            pixels_per_frame(1024),
-            cstln(0),
-            m_objDATVScreen(objDATVScreen),
-            in(_in),
-            phase(0)
+    datvconstellation(
+            scheduler *sch,
+            pipebuf<complex<T> > &_in,
+            T _xymin,
+            T _xymax,
+            const char *_name = nullptr,
+            TVScreen *objDATVScreen = nullptr) :
+        runnable(sch, _name ? _name : _in.name),
+        xymin(_xymin),
+        xymax(_xymax),
+        decimation(DEFAULT_GUI_DECIMATION),
+        pixels_per_frame(1024),
+        cstln(0),
+        m_objDATVScreen(objDATVScreen),
+        in(_in),
+        phase(0)
     {
     }
 
     void run()
     {
         //Symbols
-
         while (in.readable() >= pixels_per_frame)
         {
             if ((!phase) && m_objDATVScreen)
@@ -69,17 +73,18 @@ template<typename T> struct datvconstellation: runnable
                 for (; p < pend; ++p)
                 {
                     m_objDATVScreen->selectRow(256 * (p->re - xymin) / (xymax - xymin));
-                    m_objDATVScreen->setDataColor(256 - 256 * ((p->im - xymin) / (xymax - xymin)), 255, 0, 255);
+                    m_objDATVScreen->setDataColor(
+                        256 - 256 * ((p->im - xymin) / (xymax - xymin)),
+                        255, 0, 255);
                 }
 
                 if (cstln && (*cstln))
                 {
                     // Plot constellation points
-
                     std::vector<int>::const_iterator row_it = cstln_rows.begin();
                     std::vector<int>::const_iterator col_it = cstln_cols.begin();
 
-                    for (; (row_it != cstln_rows.end()) && (col_it != cstln_cols.end()); ++row_it, ++col_it)
+                    for (;(row_it != cstln_rows.end()) && (col_it != cstln_cols.end()); ++row_it, ++col_it)
                     {
                         m_objDATVScreen->selectRow(*row_it);
                         m_objDATVScreen->setDataColor(*col_it, 250, 250, 5);
@@ -91,8 +96,7 @@ template<typename T> struct datvconstellation: runnable
 
             in.read(pixels_per_frame);
 
-            if (++phase >= decimation)
-            {
+            if (++phase >= decimation) {
                 phase = 0;
             }
         }
@@ -128,6 +132,6 @@ template<typename T> struct datvconstellation: runnable
     }
 };
 
-}
+} // leansdr
 
 #endif // DATVCONSTELLATION_H

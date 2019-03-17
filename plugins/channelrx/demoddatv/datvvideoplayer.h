@@ -23,18 +23,21 @@
 
 namespace leansdr
 {
+
 template<typename T> struct datvvideoplayer: runnable
 {
     datvvideoplayer(scheduler *sch, pipebuf<T> &_in, DATVideostream * objVideoStream) :
-            runnable(sch, _in.name), in(_in), m_objVideoStream(objVideoStream)
+        runnable(sch, _in.name), in(_in), m_objVideoStream(objVideoStream)
     {
     }
 
     void run()
     {
         int size = in.readable() * sizeof(T);
-        if (!size)
+
+        if (!size) {
             return;
+        }
 
         int nw = m_objVideoStream->pushData((const char *) in.rd(), size);
 
@@ -43,18 +46,22 @@ template<typename T> struct datvvideoplayer: runnable
             fatal("leansdr::datvvideoplayer::run: pipe");
             return;
         }
+
         if (nw < 0)
         {
             fatal("leansdr::datvvideoplayer::run: write");
             return;
         }
+
         if (nw % sizeof(T))
         {
             fatal("leansdr::datvvideoplayer::run: partial write");
             return;
         }
+
         in.read(nw / sizeof(T));
     }
+
 private:
     pipereader<T> in;
     DATVideostream * m_objVideoStream;

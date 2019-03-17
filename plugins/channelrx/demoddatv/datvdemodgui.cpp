@@ -309,16 +309,13 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     ui->pushButton_3->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
 
     resetToDefaults(); // does applySettings()
-
 }
 
 DATVDemodGUI::~DATVDemodGUI()
 {
-
     m_deviceUISet->removeRxChannelInstance(this);
     delete m_objDATVDemod;
     delete ui;
-
 }
 
 void DATVDemodGUI::blockApplySettings(bool blnBlock)
@@ -350,124 +347,82 @@ void DATVDemodGUI::applySettings()
 
         strStandard = ui->cmbStandard->currentText();
 
-        if(strStandard=="DVB-S")
-        {
+        if(strStandard=="DVB-S") {
             enmVersion=DVB_S;
-        }
-        else if (strStandard=="DVB-S2")
-        {
+        } else if (strStandard=="DVB-S2") {
             enmVersion=DVB_S2;
-        }
-        else
-        {
+        } else {
             enmVersion=DVB_S;
         }
-
 
         //BPSK, QPSK, PSK8, APSK16, APSK32, APSK64E, QAM16, QAM64, QAM256
 
         strModulation = ui->cmbModulation->currentText();
 
-        if(strModulation=="BPSK")
-        {
+        if(strModulation=="BPSK") {
             enmSelectedModulation=BPSK;
         }
-        else if(strModulation=="QPSK")
-        {
+        else if(strModulation=="QPSK") {
             enmSelectedModulation=QPSK;
         }
-        else if(strModulation=="8PSK")
-        {
+        else if(strModulation=="8PSK") {
             enmSelectedModulation=PSK8;
         }
-        else if(strModulation=="16APSK")
-        {
+        else if(strModulation=="16APSK") {
             enmSelectedModulation=APSK16;
         }
-        else if(strModulation=="32APSK")
-        {
+        else if(strModulation=="32APSK") {
             enmSelectedModulation=APSK32;
         }
-        else if(strModulation=="64APSKE")
-        {
+        else if(strModulation=="64APSKE") {
             enmSelectedModulation=APSK64E;
         }
-        else if(strModulation=="16QAM")
-        {
+        else if(strModulation=="16QAM") {
             enmSelectedModulation=QAM16;
         }
-        else if(strModulation=="64QAM")
-        {
+        else if(strModulation=="64QAM") {
             enmSelectedModulation=QAM64;
         }
-        else if(strModulation=="256QAM")
-        {
+        else if(strModulation=="256QAM") {
             enmSelectedModulation=QAM256;
-        }
-        else
-        {
+        } else {
             enmSelectedModulation=BPSK;
         }
 
         //Viterbi only for BPSK et QPSK
-        if((enmSelectedModulation!=BPSK) && (enmSelectedModulation!=QPSK))
-        {
+        if ((enmSelectedModulation!=BPSK) && (enmSelectedModulation!=QPSK)) {
             ui->chkViterbi->setChecked(false);
         }
 
-
         strFEC = ui->cmbFEC->currentText();
 
-        if(strFEC == "1/2")
-        {
+        if (strFEC == "1/2") {
             enmFEC = leansdr::FEC12;
-        }
-        else if(strFEC == "2/3")
-        {
+        } else if (strFEC == "2/3") {
             enmFEC = leansdr::FEC23;
-        }
-        else if(strFEC == "3/4")
-        {
+        } else if (strFEC == "3/4") {
             enmFEC = leansdr::FEC34;
-        }
-        else if(strFEC == "5/6")
-        {
+        } else if (strFEC == "5/6") {
             enmFEC = leansdr::FEC56;
-        }
-        else if(strFEC == "7/8")
-        {
+        } else if (strFEC == "7/8") {
             enmFEC = leansdr::FEC78;
-        }
-        else if(strFEC == "4/5")
-        {
+        } else if (strFEC == "4/5") {
             enmFEC = leansdr::FEC45;
-        }
-        else if(strFEC == "8/9")
-        {
+        } else if (strFEC == "8/9") {
             enmFEC = leansdr::FEC89;
-        }
-        else if(strFEC == "9/10")
-        {
+        } else if (strFEC == "9/10") {
             enmFEC = leansdr::FEC910;
-        }
-        else
-        {
+        } else {
             enmFEC = leansdr::FEC12;
         }
 
-        if (ui->cmbFilter->currentIndex()==0)
-        {
+        if (ui->cmbFilter->currentIndex() == 0) {
             enmSampler = SAMP_LINEAR;
-        }
-        else if(ui->cmbFilter->currentIndex()==1)
-        {
+        } else if (ui->cmbFilter->currentIndex() == 1) {
             enmSampler = SAMP_NEAREST;
-        }
-        else
-        {
+        } else {
             enmSampler = SAMP_RRC;
         }
-
 
         m_objDATVDemod->configure(
             m_objDATVDemod->getInputMessageQueue(),
@@ -487,8 +442,8 @@ void DATVDemodGUI::applySettings()
             ui->spiExcursion->value());
 
         qDebug() << "DATVDemodGUI::applySettings:"
-                << " m_objDATVDemod->getCenterFrequency: " << m_objDATVDemod->getCenterFrequency()
-                << " m_objDATVDemod->GetSampleRate: " << m_objDATVDemod->GetSampleRate();
+            << " m_objDATVDemod->getCenterFrequency: " << m_objDATVDemod->getCenterFrequency()
+            << " m_objDATVDemod->GetSampleRate: " << m_objDATVDemod->GetSampleRate();
     }
 }
 
@@ -675,7 +630,7 @@ void DATVDemodGUI::on_pushButton_3_clicked()
 
    m_blnButtonPlayClicked=true;
 
-   if(m_objDATVDemod!=NULL)
+   if(m_objDATVDemod!=nullptr)
    {
        m_objDATVDemod->PlayVideo(true);
    }
@@ -695,16 +650,11 @@ void DATVDemodGUI::on_mouseEvent(QMouseEvent* obj)
 
 QString DATVDemodGUI::formatBytes(qint64 intBytes)
 {
-    if(intBytes<1024)
-    {
+    if(intBytes<1024) {
         return QString("%1").arg(intBytes);
-    }
-    else if(intBytes<1024*1024)
-    {
+    } else if(intBytes<1024*1024) {
         return QString("%1 K").arg((float)(10*intBytes/1024)/10.0f);
-    }
-    else if(intBytes<1024*1024*1024)
-    {
+    } else if(intBytes<1024*1024*1024) {
         return QString("%1 M").arg((float)(10*intBytes/(1024*1024))/10.0f);
     }
 
@@ -718,17 +668,13 @@ void DATVDemodGUI::on_StreamDataAvailable(int *intPackets, int *intBytes, int *i
     ui->lblStatus->setText(QString("Data: %1B").arg(formatBytes(*intTotalReceived)));
     m_intLastDecodedData = *intTotalReceived;
 
-    if((*intPercent)<100)
-    {
-         ui->prgSynchro->setValue(*intPercent);
-    }
-    else
-    {
-         ui->prgSynchro->setValue(100);
+    if((*intPercent)<100) {
+        ui->prgSynchro->setValue(*intPercent);
+    } else {
+        ui->prgSynchro->setValue(100);
     }
 
     m_intReadyDecodedData = *intBytes;
-
 }
 
 void DATVDemodGUI::on_spiBandwidth_valueChanged(int arg1)
@@ -758,37 +704,32 @@ void DATVDemodGUI::on_StreamMetaDataChanged(DataTSMetaData2 *objMetaData)
 {
     QString strMetaData="";
 
-    if(objMetaData!=NULL)
+    if (objMetaData != nullptr)
     {
-
-        if(objMetaData->OK_TransportStream==true)
+        if (objMetaData->OK_TransportStream == true)
         {
             strMetaData.sprintf("PID: %d - Width: %d - Height: %d\r\n%s%s\r\nCodec: %s\r\n",
-                    objMetaData->PID,
-                    objMetaData->Width,
-                    objMetaData->Height,
-                    objMetaData->Program.toStdString().c_str(),
-                    objMetaData->Stream.toStdString().c_str(),
-                    objMetaData->CodecDescription.toStdString().c_str());
+                objMetaData->PID,
+                objMetaData->Width,
+                objMetaData->Height,
+                objMetaData->Program.toStdString().c_str(),
+                objMetaData->Stream.toStdString().c_str(),
+                objMetaData->CodecDescription.toStdString().c_str());
         }
-        ui->textEdit->setText(strMetaData);
 
+        ui->textEdit->setText(strMetaData);
         ui->chkData->setChecked(objMetaData->OK_Data);
         ui->chkTS->setChecked(objMetaData->OK_TransportStream);
         ui->chkVS->setChecked(objMetaData->OK_VideoStream);
         ui->chkDecoding->setChecked(objMetaData->OK_Decoding);
 
-        if(objMetaData->OK_Decoding==true)
-        {
+        if (objMetaData->OK_Decoding == true) {
             ui->pushButton_3->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
-        }
-        else
-        {
+        } else {
             ui->pushButton_3->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
         }
 
-        if(objMetaData->Height>0)
-        {
+        if (objMetaData->Height > 0) {
             ui->screenTV_2->setFixedWidth((int)objMetaData->Width*(270.0f/(float)objMetaData->Height));
         }
     }
@@ -806,7 +747,6 @@ void DATVDemodGUI::on_cmbFilter_currentIndexChanged(int index)
 {
     (void) index;
     displayRRCParameters((ui->cmbFilter->currentIndex()==2));
-
     applySettings();
 }
 
