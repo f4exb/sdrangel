@@ -41,6 +41,7 @@ class DownChannelizer;
 #include "datvvideoplayer.h"
 #include "datvideostream.h"
 #include "datvideorender.h"
+#include "datvdemodsettings.h"
 
 #include "channel/channelsinkapi.h"
 #include "dsp/basebandsamplesink.h"
@@ -58,16 +59,16 @@ class DownChannelizer;
 
 #include <QMutex>
 
-enum DATVModulation { BPSK, QPSK, PSK8, APSK16, APSK32, APSK64E, QAM16, QAM64, QAM256 };
-enum dvb_version { DVB_S, DVB_S2 };
-enum dvb_sampler { SAMP_NEAREST, SAMP_LINEAR, SAMP_RRC };
+// enum DATVModulation { BPSK, QPSK, PSK8, APSK16, APSK32, APSK64E, QAM16, QAM64, QAM256 };
+// enum dvb_version { DVB_S, DVB_S2 };
+// enum dvb_sampler { SAMP_NEAREST, SAMP_LINEAR, SAMP_RRC };
 
 inline int decimation(float Fin, float Fout) { int d = Fin / Fout; return std::max(d, 1); }
 
 struct config
 {
-    dvb_version  standard;
-    dvb_sampler sampler;
+    DATVDemodSettings::dvb_version standard;
+    DATVDemodSettings::dvb_sampler sampler;
 
     int buf_factor;      // Buffer sizing
     float Fs;            // Sampling frequency (Hz)
@@ -93,8 +94,8 @@ struct config
     float Finfo;         // Desired refresh rate on fd_info (Hz)
 
     config() :
-        standard(DVB_S),
-        sampler(SAMP_LINEAR),
+        standard(DATVDemodSettings::DVB_S),
+        sampler(DATVDemodSettings::SAMP_LINEAR),
         buf_factor(4),
         Fs(2.4e6),
         Fderot(0),
@@ -121,48 +122,6 @@ struct config
     }
 };
 
-
-struct DATVConfig
-{
-    int intMsps;
-    int intRFBandwidth;
-    int intCenterFrequency;
-    dvb_version enmStandard;
-    DATVModulation enmModulation;
-    leansdr::code_rate enmFEC;
-    int intSampleRate;
-    int intSymbolRate;
-    int intNotchFilters;
-    bool blnAllowDrift;
-    bool blnFastLock;
-    dvb_sampler enmFilter;
-    bool blnHardMetric;
-    float fltRollOff;
-    bool blnViterbi;
-    int intExcursion;
-
-    DATVConfig() :
-        intMsps(1024000),
-        intRFBandwidth(1024000),
-        intCenterFrequency(0),
-        enmStandard(DVB_S),
-        enmModulation(BPSK),
-        enmFEC(leansdr::FEC12),
-        intSampleRate(1024000),
-        intSymbolRate(250000),
-        intNotchFilters(1),
-        blnAllowDrift(false),
-        blnFastLock(false),
-        enmFilter(SAMP_LINEAR),
-        blnHardMetric(false),
-        fltRollOff(0.35),
-        blnViterbi(false),
-        intExcursion(10)
-    {
-    }
-};
-
-
 class DATVDemod : public BasebandSampleSink, public ChannelSinkAPI
 {
 	Q_OBJECT
@@ -175,27 +134,10 @@ public:
     virtual void destroy() { delete this; }
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = objectName(); }
-    virtual qint64 getCenterFrequency() const { return m_objRunning.intCenterFrequency; }
+    virtual qint64 getCenterFrequency() const { return m_settings.m_centerFrequency; }
 
     virtual QByteArray serialize() const { return QByteArray(); }
     virtual bool deserialize(const QByteArray& data) { (void) data; return false; }
-
-    void configure(
-        MessageQueue* objMessageQueue,
-        int intRFBandwidth,
-        int intCenterFrequency,
-        dvb_version enmStandard,
-        DATVModulation enmModulation,
-        leansdr::code_rate enmFEC,
-        int intSymbolRate,
-        int intNotchFilters,
-        bool blnAllowDrift,
-        bool blnFastLock,
-        dvb_sampler enmFilter,
-        bool blnHardMetric,
-        float fltRollOff,
-        bool blnViterbi,
-        int intfltExcursion);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -211,15 +153,15 @@ public:
         int intMsps,
         int intRFBandwidth,
         int intCenterFrequency,
-        dvb_version enmStandard,
-        DATVModulation enmModulation,
+        DATVDemodSettings::dvb_version enmStandard,
+        DATVDemodSettings::DATVModulation enmModulation,
         leansdr::code_rate enmFEC,
         int intSampleRate,
         int intSymbolRate,
         int intNotchFilters,
         bool blnAllowDrift,
         bool blnFastLock,
-        dvb_sampler enmFilter,
+        DATVDemodSettings::dvb_sampler enmFilter,
         bool blnHardMetric,
         float fltRollOff,
         bool blnViterbi,
@@ -253,82 +195,30 @@ public:
             {}
     };
 
-private:
-    class MsgConfigureDATVDemod : public Message
-    {
+    class MsgConfigureDATVDemod : public Message {
         MESSAGE_CLASS_DECLARATION
 
-        public:
-            static MsgConfigureDATVDemod* create(
-                int intRFBandwidth,
-                int intCenterFrequency,
-                dvb_version enmStandard,
-                DATVModulation enmModulation,
-                leansdr::code_rate enmFEC,
-                int intSymbolRate,
-                int intNotchFilters,
-                bool blnAllowDrift,
-                bool blnFastLock,
-                dvb_sampler enmFilter,
-                bool blnHardMetric,
-                float fltRollOff,
-                bool blnViterbi,
-                int intExcursion)
-            {
-                return new MsgConfigureDATVDemod(
-                    intRFBandwidth,
-                    intCenterFrequency,
-                    enmStandard,
-                    enmModulation,
-                    enmFEC,
-                    intSymbolRate,
-                    intNotchFilters,
-                    blnAllowDrift,
-                    blnFastLock,
-                    enmFilter,
-                    blnHardMetric,
-                    fltRollOff,
-                    blnViterbi,
-                    intExcursion);
-            }
+    public:
+        const DATVDemodSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
 
-            DATVConfig m_objMsgConfig;
+        static MsgConfigureDATVDemod* create(const DATVDemodSettings& settings, bool force)
+        {
+            return new MsgConfigureDATVDemod(settings, force);
+        }
 
-        private:
-            MsgConfigureDATVDemod(
-                    int intRFBandwidth,
-                    int intCenterFrequency,
-                    dvb_version enmStandard,
-                    DATVModulation enmModulation,
-                    leansdr::code_rate enmFEC,
-                    int intSymbolRate,
-                    int intNotchFilters,
-                    bool blnAllowDrift,
-                    bool blnFastLock,
-                    dvb_sampler enmFilter,
-                    bool blnHardMetric,
-                    float fltRollOff,
-                    bool blnViterbi,
-                    int intExcursion) :
-                Message()
-            {
-                m_objMsgConfig.intRFBandwidth = intRFBandwidth;
-                m_objMsgConfig.intCenterFrequency = intCenterFrequency;
-                m_objMsgConfig.enmStandard = enmStandard;
-                m_objMsgConfig.enmModulation = enmModulation;
-                m_objMsgConfig.enmFEC = enmFEC;
-                m_objMsgConfig.intSymbolRate = intSymbolRate;
-                m_objMsgConfig.intNotchFilters = intNotchFilters;
-                m_objMsgConfig.blnAllowDrift = blnAllowDrift;
-                m_objMsgConfig.blnFastLock = blnFastLock;
-                m_objMsgConfig.enmFilter= enmFilter;
-                m_objMsgConfig.blnHardMetric = blnHardMetric;
-                m_objMsgConfig.fltRollOff = fltRollOff;
-                m_objMsgConfig.blnViterbi = blnViterbi;
-                m_objMsgConfig.intExcursion = intExcursion;
-            }
+    private:
+        DATVDemodSettings m_settings;
+        bool m_force;
+
+        MsgConfigureDATVDemod(const DATVDemodSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
     };
 
+private:
     unsigned long m_lngExpectedReadIQ;
     long m_lngReadIQ;
 
@@ -455,14 +345,17 @@ private:
     bool m_blnRenderingVideo;
     bool m_blnStartStopVideo;
 
-    DATVModulation m_enmModulation;
+    DATVDemodSettings::DATVModulation m_enmModulation;
 
-    DATVConfig m_objRunning;
+    //DATVConfig m_objRunning;
+    DATVDemodSettings m_settings;
     MovingAverageUtil<double, double, 32> m_objMagSqAverage;
 
     QMutex m_objSettingsMutex;
 
-    void ApplySettings();
+    //void ApplySettings();
+    void applySettings(const DATVDemodSettings& settings, bool force = false);
+	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 };
 
 #endif // INCLUDE_DATVDEMOD_H

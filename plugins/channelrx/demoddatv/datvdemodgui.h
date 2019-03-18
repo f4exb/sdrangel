@@ -32,10 +32,7 @@
 class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
-//class DeviceSourceAPI;
-//class ThreadedBasebandSampleSink;
 class DownChannelizer;
-//class DATVDemod;
 
 namespace Ui
 {
@@ -106,6 +103,7 @@ private:
     DATVDemod* m_objDATVDemod;
     MessageQueue m_inputMessageQueue;
     int m_intCenterFrequency;
+    DATVDemodSettings m_settings;
 
     QTimer m_objTimer;
     qint64 m_intPreviousDecodedData;
@@ -123,7 +121,8 @@ private:
     virtual ~DATVDemodGUI();
 
     void blockApplySettings(bool blnBlock);
-	void applySettings();
+	void applySettings(bool force = false);
+    void displaySettings();
     QString formatBytes(qint64 intBytes);
 
     void displayRRCParameters(bool blnVisible);

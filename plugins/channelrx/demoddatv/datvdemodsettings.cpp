@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QColor>
+#include <QDebug>
 
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
@@ -32,7 +33,7 @@ void DATVDemodSettings::resetToDefaults()
     m_rgbColor = QColor(Qt::magenta).rgb();
     m_title = "DATV Demodulator";
     m_msps = 1024000;
-    m_rfBandwidth = 1024000;
+    m_rfBandwidth = 512000;
     m_centerFrequency = 0;
     m_standard = DVB_S;
     m_modulation = BPSK;
@@ -96,7 +97,7 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         QString strtmp;
 
         d.readS32(1, &m_msps, 1024000);
-        d.readS32(2, &m_rfBandwidth, 1024000);
+        d.readS32(2, &m_rfBandwidth, 512000);
         d.readS32(3, &m_centerFrequency, 0);
 
         d.readS32(4, &tmp, (int) DVB_S);
@@ -113,7 +114,7 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
             m_channelMarker->deserialize(bytetmp);
         }
 
-        d.readU32(7, &m_rgbColor);
+        d.readU32(7, &m_rgbColor, QColor(Qt::magenta).rgb());
         d.readString(8, &m_title, "DATV Demodulator");
 
         d.readS32(9, &tmp, (int) leansdr::code_rate::FEC12);
@@ -142,4 +143,43 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void DATVDemodSettings::debug(const QString& msg) const
+{
+    qDebug() << msg
+        << " m_msps: " << m_msps
+        << " m_sampleRate: " << m_sampleRate
+        << " m_allowDrift: " << m_allowDrift
+        << " m_rfBandwidth: " << m_rfBandwidth
+        << " m_centerFrequency: " << m_centerFrequency
+        << " m_fastLock: " << m_fastLock
+        << " m_hardMetric: " << m_hardMetric
+        << " m_filter: " << m_filter
+        << " m_rollOff: " << m_rollOff
+        << " m_viterbi: " << m_viterbi
+        << " m_fec: " << m_fec
+        << " m_modulation: " << m_modulation
+        << " m_standard: " << m_standard
+        << " m_notchFilters: " << m_notchFilters
+        << " m_symbolRate: " << m_symbolRate
+        << " m_excursion: " << m_excursion;
+}
+
+bool DATVDemodSettings::isDifferent(const DATVDemodSettings& other)
+{
+    return ((m_allowDrift != other.m_allowDrift)
+        || (m_rfBandwidth != other.m_rfBandwidth)
+        || (m_centerFrequency != other.m_centerFrequency)
+        || (m_fastLock != other.m_fastLock)
+        || (m_hardMetric != other.m_hardMetric)
+        || (m_filter != other.m_filter)
+        || (m_rollOff != other.m_rollOff)
+        || (m_viterbi != other.m_viterbi)
+        || (m_fec != other.m_fec)
+        || (m_modulation != other.m_modulation)
+        || (m_standard != other.m_standard)
+        || (m_notchFilters != other.m_notchFilters)
+        || (m_symbolRate != other.m_symbolRate)
+        || (m_excursion != other.m_excursion));
 }

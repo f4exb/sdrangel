@@ -45,7 +45,7 @@ DATVDemod::DATVDemod(DeviceSourceAPI *deviceAPI) :
     m_objRenderThread(nullptr),
     m_blnRenderingVideo(false),
     m_blnStartStopVideo(false),
-    m_enmModulation(BPSK /*DATV_FM1*/),
+    m_enmModulation(DATVDemodSettings::BPSK /*DATV_FM1*/),
     m_objSettingsMutex(QMutex::NonRecursive)
 {
     setObjectName("DATVDemod");
@@ -151,97 +151,6 @@ bool DATVDemod::PlayVideo(bool blnStartStop)
     }
 
     return true;
-}
-
-void DATVDemod::configure(MessageQueue* objMessageQueue,
-          int intRFBandwidth,
-          int intCenterFrequency,
-          dvb_version enmStandard,
-          DATVModulation enmModulation,
-          leansdr::code_rate enmFEC,
-          int intSymbolRate,
-          int intNotchFilters,
-          bool blnAllowDrift,
-          bool blnFastLock,
-          dvb_sampler enmFilter,
-          bool blnHardMetric,
-          float fltRollOff,
-          bool blnViterbi,
-          int intExcursion)
-{
-    Message* msgCmd = MsgConfigureDATVDemod::create(
-        intRFBandwidth,
-        intCenterFrequency,
-        enmStandard,
-        enmModulation,
-        enmFEC,
-        intSymbolRate,
-        intNotchFilters,
-        blnAllowDrift,
-        blnFastLock,
-        enmFilter,
-        blnHardMetric,
-        fltRollOff,
-        blnViterbi,
-        intExcursion);
-    objMessageQueue->push(msgCmd);
-}
-
-void DATVDemod::InitDATVParameters(int intMsps,
-           int intRFBandwidth,
-           int intCenterFrequency,
-           dvb_version enmStandard,
-           DATVModulation enmModulation,
-           leansdr::code_rate enmFEC,
-           int intSampleRate,
-           int intSymbolRate,
-           int intNotchFilters,
-           bool blnAllowDrift,
-           bool blnFastLock,
-           dvb_sampler enmFilter,
-           bool blnHardMetric,
-           float fltRollOff,
-           bool blnViterbi,
-           int intExcursion)
-{
-    Real fltLowCut;
-    Real fltHiCut;
-
-    m_objSettingsMutex.lock();
-
-    m_blnInitialized=false;
-
-    //Bandpass filter shaping
-
-    fltLowCut = -((float)intRFBandwidth / 2.0) / (float)intMsps;
-    fltHiCut  = ((float)intRFBandwidth / 2.0) / (float)intMsps;
-    m_objRFFilter->create_filter(fltLowCut, fltHiCut);
-    m_objNCO.setFreq(-(float)intCenterFrequency,(float)intMsps);
-
-    //Config update
-
-    m_objRunning.intMsps = intMsps;
-    m_objRunning.intCenterFrequency = intCenterFrequency;
-    m_objRunning.intRFBandwidth = intRFBandwidth;
-    m_objRunning.enmStandard = enmStandard;
-    m_objRunning.enmModulation = enmModulation;
-    m_objRunning.enmFEC = enmFEC;
-    m_objRunning.intSampleRate = intSampleRate;
-    m_objRunning.intSymbolRate = intSymbolRate;
-    m_objRunning.intNotchFilters = intNotchFilters;
-    m_objRunning.blnAllowDrift = blnAllowDrift;
-    m_objRunning.blnFastLock = blnFastLock;
-    m_objRunning.enmFilter = enmFilter;
-    m_objRunning.blnHardMetric = blnHardMetric;
-    m_objRunning.fltRollOff = fltRollOff;
-    m_objRunning.blnViterbi = blnViterbi;
-    m_objRunning.intExcursion = intExcursion;
-
-    m_blnInitialized=true;
-
-    m_objSettingsMutex.unlock();
-
-    m_blnNeedConfigUpdate=true;
 }
 
 void DATVDemod::CleanUpDATVFramework(bool blnRelease)
@@ -516,59 +425,59 @@ void DATVDemod::InitDATVFramework()
     m_lngReadIQ = 0;
     CleanUpDATVFramework(false);
 
-    qDebug()  << "DATVDemod::InitDATVParameters:"
-        <<  " Msps: " << m_objRunning.intMsps
-        <<  " Sample Rate: " << m_objRunning.intSampleRate
-        <<  " Symbol Rate: " << m_objRunning.intSymbolRate
-        <<  " Modulation: " << m_objRunning.enmModulation
-        <<  " Notch Filters: " << m_objRunning.intNotchFilters
-        <<  " Allow Drift: " << m_objRunning.blnAllowDrift
-        <<  " Fast Lock: " << m_objRunning.blnFastLock
-        <<  " Filter: " << m_objRunning.enmFilter
-        <<  " HARD METRIC: " << m_objRunning.blnHardMetric
-        <<  " RollOff: " << m_objRunning.fltRollOff
-        <<  " Viterbi: " << m_objRunning.blnViterbi
-        <<  " Excursion: " << m_objRunning.intExcursion;
+    qDebug()  << "DATVDemod::InitDATVFramework:"
+        <<  " Msps: " << m_settings.m_msps
+        <<  " Sample Rate: " << m_settings.m_sampleRate
+        <<  " Symbol Rate: " << m_settings.m_symbolRate
+        <<  " Modulation: " << m_settings.m_modulation
+        <<  " Notch Filters: " << m_settings.m_notchFilters
+        <<  " Allow Drift: " << m_settings.m_allowDrift
+        <<  " Fast Lock: " << m_settings.m_fastLock
+        <<  " Filter: " << m_settings.m_filter
+        <<  " HARD METRIC: " << m_settings.m_hardMetric
+        <<  " RollOff: " << m_settings.m_rollOff
+        <<  " Viterbi: " << m_settings.m_viterbi
+        <<  " Excursion: " << m_settings.m_excursion;
 
-    m_objCfg.standard = m_objRunning.enmStandard;
+    m_objCfg.standard = m_settings.m_standard;
 
-    m_objCfg.fec = m_objRunning.enmFEC;
-    m_objCfg.Fs = (float) m_objRunning.intSampleRate;
-    m_objCfg.Fm = (float) m_objRunning.intSymbolRate;
-    m_objCfg.fastlock = m_objRunning.blnFastLock;
+    m_objCfg.fec = m_settings.m_fec;
+    m_objCfg.Fs = (float) m_settings.m_sampleRate;
+    m_objCfg.Fm = (float) m_settings.m_symbolRate;
+    m_objCfg.fastlock = m_settings.m_fastLock;
 
-    m_objCfg.sampler = m_objRunning.enmFilter;
-    m_objCfg.rolloff = m_objRunning.fltRollOff;  //0...1
-    m_objCfg.rrc_rej = (float) m_objRunning.intExcursion;  //dB
+    m_objCfg.sampler = m_settings.m_filter;
+    m_objCfg.rolloff = m_settings.m_rollOff;  //0...1
+    m_objCfg.rrc_rej = (float) m_settings.m_excursion;  //dB
     m_objCfg.rrc_steps = 0; //auto
 
-    switch(m_objRunning.enmModulation)
+    switch(m_settings.m_modulation)
     {
-        case BPSK:
+        case DATVDemodSettings::BPSK:
            m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::BPSK;
            break;
-        case QPSK:
+        case DATVDemodSettings::QPSK:
             m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::QPSK;
             break;
-        case PSK8:
+        case DATVDemodSettings::PSK8:
             m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::PSK8;
             break;
-        case APSK16:
+        case DATVDemodSettings::APSK16:
             m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::APSK16;
             break;
-        case APSK32:
+        case DATVDemodSettings::APSK32:
            m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::APSK32;
            break;
-        case APSK64E:
+        case DATVDemodSettings::APSK64E:
            m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::APSK64E;
            break;
-        case QAM16:
+        case DATVDemodSettings::QAM16:
            m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::QAM16;
            break;
-        case QAM64:
+        case DATVDemodSettings::QAM64:
            m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::QAM64;
            break;
-        case QAM256:
+        case DATVDemodSettings::QAM256:
            m_objCfg.constellation = leansdr::cstln_lut<leansdr::eucl_ss, 256>::QAM256;
            break;
         default:
@@ -576,12 +485,11 @@ void DATVDemod::InitDATVFramework()
            break;
     }
 
-    m_objCfg.allow_drift = m_objRunning.blnAllowDrift;
-    m_objCfg.anf = m_objRunning.intNotchFilters;
-    m_objCfg.hard_metric = m_objRunning.blnHardMetric;
-    m_objCfg.sampler = m_objRunning.enmFilter;
-    m_objCfg.viterbi = m_objRunning.blnViterbi;
-
+    m_objCfg.allow_drift = m_settings.m_allowDrift;
+    m_objCfg.anf = m_settings.m_notchFilters;
+    m_objCfg.hard_metric = m_settings.m_hardMetric;
+    m_objCfg.sampler = m_settings.m_filter;
+    m_objCfg.viterbi = m_settings.m_viterbi;
 
     // Min buffer size for baseband data
     //   scopes: 1024
@@ -670,13 +578,13 @@ void DATVDemod::InitDATVFramework()
 
     switch (m_objCfg.sampler)
     {
-        case SAMP_NEAREST:
+        case DATVDemodSettings::SAMP_NEAREST:
           sampler = new leansdr::nearest_sampler<float>();
           break;
-        case SAMP_LINEAR:
+        case DATVDemodSettings::SAMP_LINEAR:
           sampler = new leansdr::linear_sampler<float>();
           break;
-        case SAMP_RRC:
+        case DATVDemodSettings::SAMP_RRC:
         {
           if (m_objCfg.rrc_steps == 0)
           {
@@ -706,7 +614,7 @@ void DATVDemod::InitDATVFramework()
             p_mer,
             p_sampled);
 
-    if (m_objCfg.standard == DVB_S)
+    if (m_objCfg.standard == DATVDemodSettings::DVB_S)
     {
         if ( m_objCfg.constellation != leansdr::cstln_lut<leansdr::eucl_ss, 256>::QPSK
             && m_objCfg.constellation != leansdr::cstln_lut<leansdr::eucl_ss, 256>::BPSK )
@@ -715,7 +623,7 @@ void DATVDemod::InitDATVFramework()
         }
     }
 
-    if (m_objCfg.standard == DVB_S2)
+    if (m_objCfg.standard == DATVDemodSettings::DVB_S2)
     {
         // For DVB-S2 testing only.
         // Constellation should be determined from PL signalling.
@@ -947,14 +855,7 @@ bool DATVDemod::handleMessage(const Message& cmd)
         qDebug() << "DATVDemod::handleMessage: MsgChannelizerNotification:"
             << " m_intSampleRate: " << objNotif.getSampleRate()
             << " m_intFrequencyOffset: " << objNotif.getFrequencyOffset();
-
-        if (m_objRunning.intMsps != objNotif.getSampleRate())
-        {
-            m_objRunning.intMsps = objNotif.getSampleRate();
-            m_objRunning.intSampleRate = m_objRunning.intMsps;
-
-            ApplySettings();
-        }
+        applyChannelSettings(objNotif.getSampleRate(), objNotif.getFrequencyOffset());
 
         return true;
     }
@@ -974,57 +875,8 @@ bool DATVDemod::handleMessage(const Message& cmd)
     else if (MsgConfigureDATVDemod::match(cmd))
 	{
         MsgConfigureDATVDemod& objCfg = (MsgConfigureDATVDemod&) cmd;
-
-
-        if ((objCfg.m_objMsgConfig.blnAllowDrift != m_objRunning.blnAllowDrift)
-            || (objCfg.m_objMsgConfig.intRFBandwidth != m_objRunning.intRFBandwidth)
-            || (objCfg.m_objMsgConfig.intCenterFrequency != m_objRunning.intCenterFrequency)
-            || (objCfg.m_objMsgConfig.blnFastLock != m_objRunning.blnFastLock)
-            || (objCfg.m_objMsgConfig.blnHardMetric != m_objRunning.blnHardMetric)
-            || (objCfg.m_objMsgConfig.enmFilter != m_objRunning.enmFilter)
-            || (objCfg.m_objMsgConfig.fltRollOff != m_objRunning.fltRollOff)
-            || (objCfg.m_objMsgConfig.blnViterbi != m_objRunning.blnViterbi)
-            || (objCfg.m_objMsgConfig.enmFEC != m_objRunning.enmFEC)
-            || (objCfg.m_objMsgConfig.enmModulation != m_objRunning.enmModulation)
-            || (objCfg.m_objMsgConfig.enmStandard != m_objRunning.enmStandard)
-            || (objCfg.m_objMsgConfig.intNotchFilters != m_objRunning.intNotchFilters)
-            || (objCfg.m_objMsgConfig.intSymbolRate != m_objRunning.intSymbolRate)
-            || (objCfg.m_objMsgConfig.intExcursion != m_objRunning.intExcursion))
-        {
-            m_objRunning.blnAllowDrift = objCfg.m_objMsgConfig.blnAllowDrift;
-            m_objRunning.blnFastLock = objCfg.m_objMsgConfig.blnFastLock;
-            m_objRunning.blnHardMetric = objCfg.m_objMsgConfig.blnHardMetric;
-            m_objRunning.enmFilter = objCfg.m_objMsgConfig.enmFilter;
-            m_objRunning.fltRollOff = objCfg.m_objMsgConfig.fltRollOff;
-            m_objRunning.blnViterbi = objCfg.m_objMsgConfig.blnViterbi;
-            m_objRunning.enmFEC = objCfg.m_objMsgConfig.enmFEC;
-            m_objRunning.enmModulation = objCfg.m_objMsgConfig.enmModulation;
-            m_objRunning.enmStandard = objCfg.m_objMsgConfig.enmStandard;
-            m_objRunning.intNotchFilters = objCfg.m_objMsgConfig.intNotchFilters;
-            m_objRunning.intSymbolRate = objCfg.m_objMsgConfig.intSymbolRate;
-            m_objRunning.intRFBandwidth = objCfg.m_objMsgConfig.intRFBandwidth;
-            m_objRunning.intCenterFrequency = objCfg.m_objMsgConfig.intCenterFrequency;
-            m_objRunning.intExcursion = objCfg.m_objMsgConfig.intExcursion;
-
-            qDebug() << "ATVDemod::handleMessage: MsgConfigureDATVDemod:"
-                << " blnAllowDrift: " << objCfg.m_objMsgConfig.blnAllowDrift
-                << " intRFBandwidth: " << objCfg.m_objMsgConfig.intRFBandwidth
-                << " intCenterFrequency: " << objCfg.m_objMsgConfig.intCenterFrequency
-                << " blnFastLock: " << objCfg.m_objMsgConfig.blnFastLock
-                << " enmFilter: " << objCfg.m_objMsgConfig.enmFilter
-                << " fltRollOff: " << objCfg.m_objMsgConfig.fltRollOff
-                << " blnViterbi: " << objCfg.m_objMsgConfig.blnViterbi
-                << " enmFEC: " << objCfg.m_objMsgConfig.enmFEC
-                << " enmModulation: " << objCfg.m_objMsgConfig.enmModulation
-                << " enmStandard: " << objCfg.m_objMsgConfig.enmStandard
-                << " intNotchFilters: " << objCfg.m_objMsgConfig.intNotchFilters
-                << " intSymbolRate: " << objCfg.m_objMsgConfig.intSymbolRate
-                << " intRFBandwidth: " << objCfg.m_objMsgConfig.intRFBandwidth
-                << " intCenterFrequency: " << objCfg.m_objMsgConfig.intCenterFrequency
-                << " intExcursion: " << objCfg.m_objMsgConfig.intExcursion;
-
-            ApplySettings();
-        }
+        qDebug() << "DATVDemod::handleMessage: MsgConfigureDATVDemod";
+        applySettings(objCfg.getSettings(), objCfg.getForce());
 
         return true;
 	}
@@ -1034,31 +886,95 @@ bool DATVDemod::handleMessage(const Message& cmd)
 	}
 }
 
-void DATVDemod::ApplySettings()
+void DATVDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
 {
-    if (m_objRunning.intMsps == 0) {
+    qDebug() << "DATVDemod::applyChannelSettings:"
+            << " inputSampleRate: " << inputSampleRate
+            << " inputFrequencyOffset: " << inputFrequencyOffset;
+
+    if ((m_settings.m_centerFrequency != inputFrequencyOffset) ||
+        (m_settings.m_msps != inputSampleRate) || force)
+    {
+        m_objNCO.setFreq(-(float) inputFrequencyOffset, (float) inputSampleRate);
+    }
+
+    if ((m_settings.m_msps != inputSampleRate) || force)
+    {
+        m_objSettingsMutex.lock();
+        //Bandpass filter shaping
+        Real fltLowCut = -((float) m_settings.m_rfBandwidth / 2.0) / (float) inputSampleRate;
+        Real fltHiCut  = ((float) m_settings.m_rfBandwidth / 2.0) / (float) inputSampleRate;
+        m_objRFFilter->create_filter(fltLowCut, fltHiCut);
+        m_blnNeedConfigUpdate = true;
+        m_objSettingsMutex.unlock();
+    }
+
+    m_settings.m_msps = inputSampleRate;
+    m_settings.m_sampleRate = m_settings.m_msps;
+    m_settings.m_centerFrequency = inputFrequencyOffset;
+}
+
+void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
+{
+    QString msg = tr("DATVDemod::applySettings: force: %1").arg(force);
+    settings.debug(msg);
+
+    if (m_settings.m_msps == 0) {
         return;
     }
 
-    InitDATVParameters(m_objRunning.intMsps,
-        m_objRunning.intRFBandwidth,
-        m_objRunning.intCenterFrequency,
-        m_objRunning.enmStandard,
-        m_objRunning.enmModulation,
-        m_objRunning.enmFEC,
-        m_objRunning.intSampleRate,
-        m_objRunning.intSymbolRate,
-        m_objRunning.intNotchFilters,
-        m_objRunning.blnAllowDrift,
-        m_objRunning.blnFastLock,
-        m_objRunning.enmFilter,
-        m_objRunning.blnHardMetric,
-        m_objRunning.fltRollOff,
-        m_objRunning.blnViterbi,
-        m_objRunning.intExcursion);
+    if (m_settings.isDifferent(settings) || force)
+    {
+        m_objSettingsMutex.lock();
+
+        if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth)
+            || force)
+        {
+
+            //Bandpass filter shaping
+            Real fltLowCut = -((float) settings.m_rfBandwidth / 2.0) / (float) m_settings.m_msps;
+            Real fltHiCut  = ((float) settings.m_rfBandwidth / 2.0) / (float) m_settings.m_msps;
+            m_objRFFilter->create_filter(fltLowCut, fltHiCut);
+        }
+
+        if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+            || force)
+        {
+            m_objNCO.setFreq(-(float) settings.m_centerFrequency, (float) m_settings.m_msps);
+        }
+
+        m_objSettingsMutex.unlock();
+        m_blnNeedConfigUpdate = true;
+    }
+
+    m_settings = settings;
 }
+
+// void DATVDemod::ApplySettings()
+// {
+//     if (m_objRunning.intMsps == 0) {
+//         return;
+//     }
+
+//     InitDATVParameters(m_objRunning.intMsps,
+//         m_objRunning.intRFBandwidth,
+//         m_objRunning.intCenterFrequency,
+//         m_objRunning.enmStandard,
+//         m_objRunning.enmModulation,
+//         m_objRunning.enmFEC,
+//         m_objRunning.intSampleRate,
+//         m_objRunning.intSymbolRate,
+//         m_objRunning.intNotchFilters,
+//         m_objRunning.blnAllowDrift,
+//         m_objRunning.blnFastLock,
+//         m_objRunning.enmFilter,
+//         m_objRunning.blnHardMetric,
+//         m_objRunning.fltRollOff,
+//         m_objRunning.blnViterbi,
+//         m_objRunning.intExcursion);
+// }
 
 int DATVDemod::GetSampleRate()
 {
-    return m_objRunning.intMsps;
+    return m_settings.m_msps;
 }

@@ -56,13 +56,13 @@ struct DATVDemodSettings
     quint32 m_rgbColor;
     QString m_title;
     Serializable *m_channelMarker;
-    int m_msps;
+    int m_msps; //!< FIXME: ineffective
     int m_rfBandwidth;
     int m_centerFrequency;
     dvb_version m_standard;
     DATVModulation m_modulation;
     leansdr::code_rate m_fec;
-    int m_sampleRate;
+    int m_sampleRate; //!< FIXME: innefective
     int m_symbolRate;
     int m_notchFilters;
     bool m_allowDrift;
@@ -78,6 +78,8 @@ struct DATVDemodSettings
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void debug(const QString& msg) const;
+    bool isDifferent(const DATVDemodSettings& other);
 };
 
 #endif // PLUGINS_CHANNELRX_DEMODATV_DATVDEMODSETTINGS_H_
