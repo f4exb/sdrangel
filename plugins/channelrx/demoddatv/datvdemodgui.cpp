@@ -647,7 +647,7 @@ void DATVDemodGUI::displayRRCParameters(bool blnVisible)
 void DATVDemodGUI::on_cmbFilter_currentIndexChanged(int index)
 {
     (void) index;
-    displayRRCParameters((ui->cmbFilter->currentIndex()==2));
+    displayRRCParameters((ui->cmbFilter->currentIndex() == 2));
     applySettings();
 }
 

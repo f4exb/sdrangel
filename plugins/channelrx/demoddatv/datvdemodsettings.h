@@ -56,13 +56,11 @@ struct DATVDemodSettings
     quint32 m_rgbColor;
     QString m_title;
     Serializable *m_channelMarker;
-    int m_msps; //!< FIXME: ineffective
     int m_rfBandwidth;
     int m_centerFrequency;
     dvb_version m_standard;
     DATVModulation m_modulation;
     leansdr::code_rate m_fec;
-    int m_sampleRate; //!< FIXME: innefective
     int m_symbolRate;
     int m_notchFilters;
     bool m_allowDrift;

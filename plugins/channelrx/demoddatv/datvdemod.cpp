@@ -46,6 +46,7 @@ DATVDemod::DATVDemod(DeviceSourceAPI *deviceAPI) :
     m_blnRenderingVideo(false),
     m_blnStartStopVideo(false),
     m_enmModulation(DATVDemodSettings::BPSK /*DATV_FM1*/),
+    m_sampleRate(1024000),
     m_objSettingsMutex(QMutex::NonRecursive)
 {
     setObjectName("DATVDemod");
@@ -426,8 +427,6 @@ void DATVDemod::InitDATVFramework()
     CleanUpDATVFramework(false);
 
     qDebug()  << "DATVDemod::InitDATVFramework:"
-        <<  " Msps: " << m_settings.m_msps
-        <<  " Sample Rate: " << m_settings.m_sampleRate
         <<  " Symbol Rate: " << m_settings.m_symbolRate
         <<  " Modulation: " << m_settings.m_modulation
         <<  " Notch Filters: " << m_settings.m_notchFilters
@@ -442,7 +441,7 @@ void DATVDemod::InitDATVFramework()
     m_objCfg.standard = m_settings.m_standard;
 
     m_objCfg.fec = m_settings.m_fec;
-    m_objCfg.Fs = (float) m_settings.m_sampleRate;
+    m_objCfg.Fs = (float) m_sampleRate;
     m_objCfg.Fm = (float) m_settings.m_symbolRate;
     m_objCfg.fastlock = m_settings.m_fastLock;
 
@@ -864,7 +863,7 @@ bool DATVDemod::handleMessage(const Message& cmd)
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
 
         m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-                m_channelizer->getInputSampleRate(),
+                m_channelizer->getInputSampleRate(), // do not change sample rate
                 cfg.getCenterFrequency());
 
         qDebug() << "DATVDemod::handleMessage: MsgConfigureChannelizer: sampleRate: " << m_channelizer->getInputSampleRate()
@@ -893,12 +892,12 @@ void DATVDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffs
             << " inputFrequencyOffset: " << inputFrequencyOffset;
 
     if ((m_settings.m_centerFrequency != inputFrequencyOffset) ||
-        (m_settings.m_msps != inputSampleRate) || force)
+        (m_sampleRate != inputSampleRate) || force)
     {
         m_objNCO.setFreq(-(float) inputFrequencyOffset, (float) inputSampleRate);
     }
 
-    if ((m_settings.m_msps != inputSampleRate) || force)
+    if ((m_sampleRate != inputSampleRate) || force)
     {
         m_objSettingsMutex.lock();
         //Bandpass filter shaping
@@ -909,8 +908,7 @@ void DATVDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffs
         m_objSettingsMutex.unlock();
     }
 
-    m_settings.m_msps = inputSampleRate;
-    m_settings.m_sampleRate = m_settings.m_msps;
+    m_sampleRate = inputSampleRate;
     m_settings.m_centerFrequency = inputFrequencyOffset;
 }
 
@@ -919,7 +917,7 @@ void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
     QString msg = tr("DATVDemod::applySettings: force: %1").arg(force);
     settings.debug(msg);
 
-    if (m_settings.m_msps == 0) {
+    if (m_sampleRate == 0) {
         return;
     }
 
@@ -932,15 +930,15 @@ void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
         {
 
             //Bandpass filter shaping
-            Real fltLowCut = -((float) settings.m_rfBandwidth / 2.0) / (float) m_settings.m_msps;
-            Real fltHiCut  = ((float) settings.m_rfBandwidth / 2.0) / (float) m_settings.m_msps;
+            Real fltLowCut = -((float) settings.m_rfBandwidth / 2.0) / (float) m_sampleRate;
+            Real fltHiCut  = ((float) settings.m_rfBandwidth / 2.0) / (float) m_sampleRate;
             m_objRFFilter->create_filter(fltLowCut, fltHiCut);
         }
 
         if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
             || force)
         {
-            m_objNCO.setFreq(-(float) settings.m_centerFrequency, (float) m_settings.m_msps);
+            m_objNCO.setFreq(-(float) settings.m_centerFrequency, (float) m_sampleRate);
         }
 
         m_objSettingsMutex.unlock();
@@ -950,31 +948,7 @@ void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
     m_settings = settings;
 }
 
-// void DATVDemod::ApplySettings()
-// {
-//     if (m_objRunning.intMsps == 0) {
-//         return;
-//     }
-
-//     InitDATVParameters(m_objRunning.intMsps,
-//         m_objRunning.intRFBandwidth,
-//         m_objRunning.intCenterFrequency,
-//         m_objRunning.enmStandard,
-//         m_objRunning.enmModulation,
-//         m_objRunning.enmFEC,
-//         m_objRunning.intSampleRate,
-//         m_objRunning.intSymbolRate,
-//         m_objRunning.intNotchFilters,
-//         m_objRunning.blnAllowDrift,
-//         m_objRunning.blnFastLock,
-//         m_objRunning.enmFilter,
-//         m_objRunning.blnHardMetric,
-//         m_objRunning.fltRollOff,
-//         m_objRunning.blnViterbi,
-//         m_objRunning.intExcursion);
-// }
-
 int DATVDemod::GetSampleRate()
 {
-    return m_settings.m_msps;
+    return m_sampleRate;
 }

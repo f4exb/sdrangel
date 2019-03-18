@@ -32,13 +32,11 @@ void DATVDemodSettings::resetToDefaults()
 {
     m_rgbColor = QColor(Qt::magenta).rgb();
     m_title = "DATV Demodulator";
-    m_msps = 1024000;
     m_rfBandwidth = 512000;
     m_centerFrequency = 0;
     m_standard = DVB_S;
     m_modulation = BPSK;
     m_fec = leansdr::FEC12;
-    m_sampleRate = 1024000;
     m_symbolRate = 250000;
     m_notchFilters = 1;
     m_allowDrift = false;
@@ -53,7 +51,6 @@ void DATVDemodSettings::resetToDefaults()
 QByteArray DATVDemodSettings::serialize() const
 {
     SimpleSerializer s(1);
-    s.writeS32(1, m_msps);
     s.writeS32(2, m_rfBandwidth);
     s.writeS32(3, m_centerFrequency);
     s.writeS32(4, (int) m_standard);
@@ -66,7 +63,6 @@ QByteArray DATVDemodSettings::serialize() const
     s.writeU32(7, m_rgbColor);
     s.writeString(8, m_title);
     s.writeS32(9, (int) m_fec);
-    s.writeS32(10, m_sampleRate);
     s.writeS32(11, m_symbolRate);
     s.writeS32(12, m_notchFilters);
     s.writeBool(13, m_allowDrift);
@@ -96,7 +92,6 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         qint32 tmp;
         QString strtmp;
 
-        d.readS32(1, &m_msps, 1024000);
         d.readS32(2, &m_rfBandwidth, 512000);
         d.readS32(3, &m_centerFrequency, 0);
 
@@ -121,7 +116,6 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         tmp = tmp < 0 ? 0 : tmp >= (int) leansdr::code_rate::FEC_COUNT ? (int) leansdr::code_rate::FEC_COUNT - 1 : tmp;
         m_fec = (leansdr::code_rate) tmp;
 
-        d.readS32(10, &m_sampleRate, 1024000);
         d.readS32(11, &m_symbolRate, 250000);
         d.readS32(12, &m_notchFilters, 1);
         d.readBool(13, &m_allowDrift, false);
@@ -148,8 +142,6 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
 void DATVDemodSettings::debug(const QString& msg) const
 {
     qDebug() << msg
-        << " m_msps: " << m_msps
-        << " m_sampleRate: " << m_sampleRate
         << " m_allowDrift: " << m_allowDrift
         << " m_rfBandwidth: " << m_rfBandwidth
         << " m_centerFrequency: " << m_centerFrequency

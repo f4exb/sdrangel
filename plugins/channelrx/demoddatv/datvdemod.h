@@ -349,6 +349,7 @@ private:
 
     //DATVConfig m_objRunning;
     DATVDemodSettings m_settings;
+    int m_sampleRate;
     MovingAverageUtil<double, double, 32> m_objMagSqAverage;
 
     QMutex m_objSettingsMutex;
