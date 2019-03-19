@@ -17,6 +17,7 @@
 #include <QColor>
 #include <QDebug>
 
+#include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
 
@@ -46,6 +47,8 @@ void DATVDemodSettings::resetToDefaults()
     m_rollOff = 0.35;
     m_viterbi = false;
     m_excursion = 10;
+    m_audioMute = false;
+    m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
 }
 
 QByteArray DATVDemodSettings::serialize() const
@@ -63,6 +66,7 @@ QByteArray DATVDemodSettings::serialize() const
     s.writeU32(7, m_rgbColor);
     s.writeString(8, m_title);
     s.writeS32(9, (int) m_fec);
+    s.writeBool(10, m_audioMute);
     s.writeS32(11, m_symbolRate);
     s.writeS32(12, m_notchFilters);
     s.writeBool(13, m_allowDrift);
@@ -72,6 +76,7 @@ QByteArray DATVDemodSettings::serialize() const
     s.writeFloat(17, m_rollOff);
     s.writeBool(18, m_viterbi);
     s.writeS32(19, m_excursion);
+    s.writeString(20, m_audioDeviceName);
 
     return s.final();
 }
@@ -116,6 +121,7 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         tmp = tmp < 0 ? 0 : tmp >= (int) leansdr::code_rate::FEC_COUNT ? (int) leansdr::code_rate::FEC_COUNT - 1 : tmp;
         m_fec = (leansdr::code_rate) tmp;
 
+        d.readBool(10, &m_audioMute, false);
         d.readS32(11, &m_symbolRate, 250000);
         d.readS32(12, &m_notchFilters, 1);
         d.readBool(13, &m_allowDrift, false);
@@ -129,6 +135,7 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         d.readFloat(17, &m_rollOff, 0.35);
         d.readBool(18, &m_viterbi, false);
         d.readS32(19, &m_excursion, 10);
+        d.readString(20, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
 
         return true;
     }
@@ -155,7 +162,9 @@ void DATVDemodSettings::debug(const QString& msg) const
         << " m_standard: " << m_standard
         << " m_notchFilters: " << m_notchFilters
         << " m_symbolRate: " << m_symbolRate
-        << " m_excursion: " << m_excursion;
+        << " m_excursion: " << m_excursion
+        << " m_audioMute: " << m_audioMute
+        << " m_audioDeviceName: " << m_audioDeviceName;
 }
 
 bool DATVDemodSettings::isDifferent(const DATVDemodSettings& other)

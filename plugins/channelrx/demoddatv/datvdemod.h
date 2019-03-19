@@ -146,6 +146,7 @@ public:
 
     bool SetTVScreen(TVScreen *objScreen);
     DATVideostream * SetVideoRender(DATVideoRender *objScreen);
+    bool audioActive();
 
     bool PlayVideo(bool blnStartStop);
 
@@ -333,10 +334,13 @@ private:
     DownChannelizer* m_channelizer;
 
     //*************** DATV PARAMETERS  ***************
-    TVScreen * m_objRegisteredTVScreen;
-    DATVideoRender * m_objRegisteredVideoRender;
-    DATVideostream * m_objVideoStream;
-    DATVideoRenderThread * m_objRenderThread;
+    TVScreen *m_objRegisteredTVScreen;
+    DATVideoRender *m_objRegisteredVideoRender;
+    DATVideostream *m_objVideoStream;
+    DATVideoRenderThread *m_objRenderThread;
+
+    // Audio
+	AudioFifo m_audioFifo;
 
     fftfilt * m_objRFFilter;
     NCO m_objNCO;

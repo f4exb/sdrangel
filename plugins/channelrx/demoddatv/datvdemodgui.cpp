@@ -33,6 +33,8 @@
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "dsp/dspengine.h"
+#include "gui/crightclickenabler.h"
+#include "gui/audioselectdialog.h"
 #include "mainwindow.h"
 
 const QString DATVDemodGUI::m_strChannelID = "sdrangel.channel.demoddatv";
@@ -151,9 +153,8 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
 
     m_objDATVDemod->SetTVScreen(ui->screenTV);
 
-    connect(m_objDATVDemod->SetVideoRender(ui->screenTV_2),&DATVideostream::onDataPackets,this,&DATVDemodGUI::on_StreamDataAvailable);
-
-    connect(ui->screenTV_2,&DATVideoRender::onMetaDataChanged,this,&DATVDemodGUI::on_StreamMetaDataChanged);
+    connect(m_objDATVDemod->SetVideoRender(ui->screenTV_2), &DATVideostream::onDataPackets, this, &DATVDemodGUI::on_StreamDataAvailable);
+    connect(ui->screenTV_2, &DATVideoRender::onMetaDataChanged, this, &DATVDemodGUI::on_StreamMetaDataChanged);
 
     m_intPreviousDecodedData=0;
     m_intLastDecodedData=0;
@@ -185,7 +186,10 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     m_deviceUISet->addChannelMarker(&m_objChannelMarker);
     m_deviceUISet->addRollupWidget(this);
 
-    ui->pushButton_3->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    ui->videoPlay->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+
+	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
+	connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
 
     resetToDefaults(); // does applySettings()
 }
@@ -219,6 +223,7 @@ void DATVDemodGUI::displaySettings()
     ui->chkHardMetric->setChecked(m_settings.m_hardMetric);
     ui->spiRollOff->setValue((int) (m_settings.m_rollOff * 100.0f));
     ui->chkViterbi->setChecked(m_settings.m_viterbi);
+    ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->cmbFEC->setCurrentIndex((int) m_settings.m_fec);
     ui->cmbModulation->setCurrentIndex((int) m_settings.m_modulation);
     ui->cmbStandard->setCurrentIndex((int) m_settings.m_standard);
@@ -362,6 +367,19 @@ void DATVDemodGUI::enterEvent(QEvent*)
     blockApplySettings(false);
 }
 
+void DATVDemodGUI::audioSelect()
+{
+    qDebug("AMDemodGUI::audioSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
+}
+
 void DATVDemodGUI::tick()
 {
     if (m_objDATVDemod)
@@ -375,6 +393,12 @@ void DATVDemodGUI::tick()
     {
         m_intLastSpeed = 8*(m_intLastDecodedData-m_intPreviousDecodedData);
         ui->lblRate->setText(QString("Speed: %1b/s").arg(formatBytes(m_intLastSpeed)));
+    }
+
+    if (m_objDATVDemod->audioActive()) {
+        ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
+    } else {
+        ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
     }
 
     m_intPreviousDecodedData = m_intLastDecodedData;
@@ -625,9 +649,9 @@ void DATVDemodGUI::on_StreamMetaDataChanged(DataTSMetaData2 *objMetaData)
         ui->chkDecoding->setChecked(objMetaData->OK_Decoding);
 
         if (objMetaData->OK_Decoding == true) {
-            ui->pushButton_3->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+            ui->videoPlay->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
         } else {
-            ui->pushButton_3->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+            ui->videoPlay->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
         }
 
         if (objMetaData->Height > 0) {

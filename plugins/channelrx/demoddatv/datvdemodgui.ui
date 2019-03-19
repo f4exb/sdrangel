@@ -204,7 +204,7 @@
     <enum>QTabWidget::West</enum>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="datvTab">
     <attribute name="title">
@@ -756,7 +756,7 @@
        <bool>false</bool>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_4">
+     <widget class="QPushButton" name="fullScreen">
       <property name="geometry">
        <rect>
         <x>400</x>
@@ -772,12 +772,12 @@
        <string>Full Screen</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_3">
+     <widget class="QPushButton" name="videoPlay">
       <property name="geometry">
        <rect>
         <x>400</x>
         <y>300</y>
-        <width>91</width>
+        <width>56</width>
         <height>27</height>
        </rect>
       </property>
@@ -785,7 +785,7 @@
        <string>Start/Stop video streaming</string>
       </property>
       <property name="text">
-       <string>  Video</string>
+       <string>   Video</string>
       </property>
      </widget>
      <widget class="QWidget" name="formLayoutWidget">
@@ -916,6 +916,24 @@
        <bool>true</bool>
       </property>
      </widget>
+     <widget class="QToolButton" name="audioMute">
+      <property name="geometry">
+       <rect>
+        <x>460</x>
+        <y>300</y>
+        <width>28</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset resource="../../../sdrgui/resources/res.qrc">
+        <normaloff>:/sound_on.png</normaloff>
+        <normalon>:/sound_off.png</normalon>:/sound_on.png</iconset>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>
@@ -946,6 +964,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+ </resources>
  <connections/>
 </ui>

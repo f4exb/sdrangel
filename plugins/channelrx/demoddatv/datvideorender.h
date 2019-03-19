@@ -41,6 +41,8 @@ extern "C"
 #include "libswscale/swscale.h"
 }
 
+class AudioFifo;
+
 struct DataTSMetaData2
 {
     int PID;
@@ -92,6 +94,10 @@ public:
     bool RenderStream();
     bool CloseStream(QIODevice *objDevice);
 
+    void setAudioFIFO(AudioFifo *fifo) { m_audioFifo = fifo; }
+    int getVideoStreamIndex() const { return m_intVideoStreamIndex; }
+    int getAudioStreamIndex() const { return m_audioStreamIndex; }
+
     struct DataTSMetaData2 MetaData;
 
 private:
@@ -106,11 +112,16 @@ private:
     AVCodecContext *m_objDecoderCtx;
     AVFrame *m_objFrame;
 
+	AudioVector m_audioBuffer;
+	uint32_t m_audioBufferFill;
+    AudioFifo *m_audioFifo;
+
     uint8_t *m_pbytDecodedData[4];
     int m_pintDecodedLineSize[4];
 
     int m_intFrameCount;
     int m_intVideoStreamIndex;
+    int m_audioStreamIndex;
 
     int m_intCurrentRenderWidth;
     int m_intCurrentRenderHeight;

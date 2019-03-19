@@ -68,6 +68,7 @@ private slots:
 
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDoubleClicked();
+    void audioSelect();
     void tick();
 
     void on_cmbStandard_currentIndexChanged(const QString &arg1);

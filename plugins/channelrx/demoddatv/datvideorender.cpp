@@ -21,15 +21,19 @@ DATVideoRender::DATVideoRender(QWidget * parent):
     TVScreen(true, parent)
 {
     installEventFilter(this);
-    m_blnIsFullScreen=false;
-    m_blnRunning=false;
+    m_blnIsFullScreen = false;
+    m_blnRunning = false;
 
-    m_blnIsFFMPEGInitialized=false;
-    m_blnIsOpen=false;
-    m_objFormatCtx=nullptr;
-    m_objDecoderCtx=nullptr;
-    m_objSwsCtx=nullptr;
-    m_intVideoStreamIndex=-1;
+    m_blnIsFFMPEGInitialized = false;
+    m_blnIsOpen = false;
+    m_objFormatCtx = nullptr;
+    m_objDecoderCtx = nullptr;
+    m_objSwsCtx = nullptr;
+	m_audioBuffer.resize(1<<14);
+	m_audioBufferFill = 0;
+    m_audioFifo = nullptr;
+    m_intVideoStreamIndex = -1;
+    m_audioStreamIndex = -1;
 
     m_intCurrentRenderWidth=-1;
     m_intCurrentRenderHeight=-1;
@@ -169,6 +173,15 @@ bool DATVideoRender::PreprocessStream()
     }
 
     m_intVideoStreamIndex = intRet;
+
+    //Find audio stream
+    intRet = av_find_best_stream(m_objFormatCtx, AVMEDIA_TYPE_AUDIO, -1, -1, nullptr, 0);
+
+    if (intRet < 0) {
+        qDebug() << "DATVideoProcess::PreprocessStream cannot find audio stream";
+    }
+
+    m_audioStreamIndex = intRet;
 
     //Prepare Codec and extract meta data
 
@@ -474,6 +487,10 @@ bool DATVideoRender::RenderStream()
             av_frame_unref(m_objFrame);
             m_intFrameCount ++;
         }
+    }
+    else if (objPacket.stream_index == m_audioStreamIndex)
+    {
+
     }
 
     av_packet_unref(&objPacket);

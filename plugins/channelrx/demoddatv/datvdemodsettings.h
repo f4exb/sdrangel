@@ -61,6 +61,8 @@ struct DATVDemodSettings
     dvb_version m_standard;
     DATVModulation m_modulation;
     leansdr::code_rate m_fec;
+    bool m_audioMute;
+    QString m_audioDeviceName;
     int m_symbolRate;
     int m_notchFilters;
     bool m_allowDrift;

@@ -43,6 +43,7 @@ DATVDemod::DATVDemod(DeviceSourceAPI *deviceAPI) :
     m_objRegisteredVideoRender(0),
     m_objVideoStream(nullptr),
     m_objRenderThread(nullptr),
+    m_audioFifo(48000),
     m_blnRenderingVideo(false),
     m_blnStartStopVideo(false),
     m_enmModulation(DATVDemodSettings::BPSK /*DATV_FM1*/),
@@ -50,6 +51,9 @@ DATVDemod::DATVDemod(DeviceSourceAPI *deviceAPI) :
     m_objSettingsMutex(QMutex::NonRecursive)
 {
     setObjectName("DATVDemod");
+
+	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
+	//m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
 
     //*************** DATV PARAMETERS  ***************
     m_blnInitialized=false;
@@ -74,6 +78,8 @@ DATVDemod::~DATVDemod()
         //Immediately exit from DATVideoStream if waiting for data before killing thread
         m_objVideoStream->ThreadTimeOut=0;
     }
+
+    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
 
     if(m_objRenderThread!=nullptr)
     {
@@ -101,15 +107,22 @@ bool DATVDemod::SetTVScreen(TVScreen *objScreen)
     return true;
 }
 
-DATVideostream * DATVDemod::SetVideoRender(DATVideoRender *objScreen)
+DATVideostream *DATVDemod::SetVideoRender(DATVideoRender *objScreen)
 {
     m_objRegisteredVideoRender = objScreen;
-
-    m_objRenderThread = new DATVideoRenderThread(m_objRegisteredVideoRender,m_objVideoStream);
-
+    m_objRegisteredVideoRender->setAudioFIFO(&m_audioFifo);
+    m_objRenderThread = new DATVideoRenderThread(m_objRegisteredVideoRender, m_objVideoStream);
     return m_objVideoStream;
 }
 
+bool DATVDemod::audioActive()
+{
+    if (m_objRegisteredVideoRender) {
+        return m_objRegisteredVideoRender->getAudioStreamIndex() >= 0;
+    } else {
+        return false;
+    }
+}
 
 bool DATVDemod::PlayVideo(bool blnStartStop)
 {
@@ -839,6 +852,7 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
 
 void DATVDemod::start()
 {
+    m_audioFifo.clear();
 }
 
 void DATVDemod::stop()
@@ -919,6 +933,18 @@ void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
 
     if (m_sampleRate == 0) {
         return;
+    }
+
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
+        audioDeviceManager->addAudioSink(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
+        // uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
+
+        // if (m_audioSampleRate != audioSampleRate) {
+        //     applyAudioSampleRate(audioSampleRate);
+        // }
     }
 
     if (m_settings.isDifferent(settings) || force)
