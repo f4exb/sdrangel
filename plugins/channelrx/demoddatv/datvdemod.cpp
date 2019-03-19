@@ -939,7 +939,7 @@ void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
-        audioDeviceManager->addAudioSink(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
+        audioDeviceManager->addAudioSink(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex); // removes from current if necessary
         // uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
 
         // if (m_audioSampleRate != audioSampleRate) {

@@ -26,20 +26,20 @@ DATVideoRender::DATVideoRender(QWidget * parent):
 
     m_blnIsFFMPEGInitialized = false;
     m_blnIsOpen = false;
-    m_objFormatCtx = nullptr;
-    m_objDecoderCtx = nullptr;
+    m_formatCtx = nullptr;
+    m_videoDecoderCtx = nullptr;
     m_objSwsCtx = nullptr;
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
     m_audioFifo = nullptr;
-    m_intVideoStreamIndex = -1;
+    m_videoStreamIndex = -1;
     m_audioStreamIndex = -1;
 
     m_intCurrentRenderWidth=-1;
     m_intCurrentRenderHeight=-1;
 
-    m_objFrame=nullptr;
-    m_intFrameCount=-1;
+    m_frame=nullptr;
+    m_frameCount=-1;
 }
 
 bool DATVideoRender::eventFilter(QObject *obj, QEvent *event)
@@ -145,37 +145,37 @@ bool DATVideoRender::InitializeFFMPEG()
 
 bool DATVideoRender::PreprocessStream()
 {
-    AVDictionary *objOpts = nullptr;
-    AVCodec *objCodec = nullptr;
+    AVDictionary *opts = nullptr;
+    AVCodec *videoCodec = nullptr;
+    AVCodec *audioCodec = nullptr;
 
     int intRet=-1;
-    char *objBuffer=nullptr;
+    char *buffer=nullptr;
 
     //Identify stream
 
-    if (avformat_find_stream_info(m_objFormatCtx, nullptr) < 0)
+    if (avformat_find_stream_info(m_formatCtx, nullptr) < 0)
     {
-        avformat_close_input(&m_objFormatCtx);
-        m_objFormatCtx=nullptr;
-
+        avformat_close_input(&m_formatCtx);
+        m_formatCtx = nullptr;
         qDebug() << "DATVideoProcess::PreprocessStream cannot find stream info";
         return false;
     }
 
     //Find video stream
-    intRet = av_find_best_stream(m_objFormatCtx, AVMEDIA_TYPE_VIDEO, -1, -1, nullptr, 0);
+    intRet = av_find_best_stream(m_formatCtx, AVMEDIA_TYPE_VIDEO, -1, -1, nullptr, 0);
 
     if (intRet < 0)
     {
-        avformat_close_input(&m_objFormatCtx);
+        avformat_close_input(&m_formatCtx);
         qDebug() << "DATVideoProcess::PreprocessStream cannot find video stream";
         return false;
     }
 
-    m_intVideoStreamIndex = intRet;
+    m_videoStreamIndex = intRet;
 
     //Find audio stream
-    intRet = av_find_best_stream(m_objFormatCtx, AVMEDIA_TYPE_AUDIO, -1, -1, nullptr, 0);
+    intRet = av_find_best_stream(m_formatCtx, AVMEDIA_TYPE_AUDIO, -1, -1, nullptr, 0);
 
     if (intRet < 0) {
         qDebug() << "DATVideoProcess::PreprocessStream cannot find audio stream";
@@ -183,86 +183,109 @@ bool DATVideoRender::PreprocessStream()
 
     m_audioStreamIndex = intRet;
 
-    //Prepare Codec and extract meta data
+    // Prepare Video Codec and extract meta data
 
     // FIXME: codec is depreecated but replacement fails
-//    AVCodecParameters *parms = m_objFormatCtx->streams[m_intVideoStreamIndex]->codecpar;
-//    m_objDecoderCtx = new AVCodecContext();
-//    avcodec_parameters_to_context(m_objDecoderCtx, parms);
-    m_objDecoderCtx = m_objFormatCtx->streams[m_intVideoStreamIndex]->codec;
+//    AVCodecParameters *parms = m_formatCtx->streams[m_videoStreamIndex]->codecpar;
+//    m_videoDecoderCtx = new AVCodecContext();
+//    avcodec_parameters_to_context(m_videoDecoderCtx, parms);
+    m_videoDecoderCtx = m_formatCtx->streams[m_videoStreamIndex]->codec;
 
     //Meta Data
 
-    MetaData.PID = m_objFormatCtx->streams[m_intVideoStreamIndex]->id;
-    MetaData.CodecID = m_objDecoderCtx->codec_id;
+    MetaData.PID = m_formatCtx->streams[m_videoStreamIndex]->id;
+    MetaData.CodecID = m_videoDecoderCtx->codec_id;
     MetaData.OK_TransportStream = true;
-    MetaData.Program="";
-    MetaData.Stream="";
+    MetaData.Program = "";
+    MetaData.Stream = "";
 
-    if(m_objFormatCtx->programs)
+    if (m_formatCtx->programs)
     {
-        objBuffer=nullptr;
-        av_dict_get_string(m_objFormatCtx->programs[m_intVideoStreamIndex]->metadata,&objBuffer,':','\n');
+        buffer = nullptr;
+        av_dict_get_string(m_formatCtx->programs[m_videoStreamIndex]->metadata, &buffer, ':', '\n');
 
-        if(objBuffer!=nullptr) {
-            MetaData.Program = QString("%1").arg(objBuffer);
+        if (buffer != nullptr) {
+            MetaData.Program = QString("%1").arg(buffer);
         }
     }
 
-    objBuffer=nullptr;
+    buffer = nullptr;
 
-    av_dict_get_string(m_objFormatCtx->streams[m_intVideoStreamIndex]->metadata,&objBuffer,':','\n');
+    av_dict_get_string(m_formatCtx->streams[m_videoStreamIndex]->metadata, &buffer, ':', '\n');
 
-    if (objBuffer != nullptr) {
-        MetaData.Stream = QString("%1").arg(objBuffer);
+    if (buffer != nullptr) {
+        MetaData.Stream = QString("%1").arg(buffer);
     }
 
     emit onMetaDataChanged(&MetaData);
 
     //Decoder
-    objCodec = avcodec_find_decoder(m_objDecoderCtx->codec_id);
+    videoCodec = avcodec_find_decoder(m_videoDecoderCtx->codec_id);
 
-    if (objCodec == nullptr)
+    if (videoCodec == nullptr)
     {
-        avformat_close_input(&m_objFormatCtx);
-        m_objFormatCtx=nullptr;
+        avformat_close_input(&m_formatCtx);
+        m_formatCtx = nullptr;
 
-        qDebug() << "DATVideoProcess::PreprocessStream cannot find associated CODEC";
+        qDebug() << "DATVideoProcess::PreprocessStream cannot find associated video CODEC";
         return false;
     }
 
-    av_dict_set(&objOpts, "refcounted_frames", "1", 0);
+    av_dict_set(&opts, "refcounted_frames", "1", 0);
 
-    if (avcodec_open2(m_objDecoderCtx, objCodec, &objOpts) < 0)
+    if (avcodec_open2(m_videoDecoderCtx, videoCodec, &opts) < 0)
     {
-        avformat_close_input(&m_objFormatCtx);
-        m_objFormatCtx=nullptr;
+        avformat_close_input(&m_formatCtx);
+        m_formatCtx=nullptr;
 
-        qDebug() << "DATVideoProcess::PreprocessStream cannot open associated CODEC";
+        qDebug() << "DATVideoProcess::PreprocessStream cannot open associated video CODEC";
         return false;
     }
 
     //Allocate Frame
-    m_objFrame = av_frame_alloc();
+    m_frame = av_frame_alloc();
 
-    if (!m_objFrame)
+    if (!m_frame)
     {
-        avformat_close_input(&m_objFormatCtx);
-        m_objFormatCtx=nullptr;
+        avformat_close_input(&m_formatCtx);
+        m_formatCtx=nullptr;
 
         qDebug() << "DATVideoProcess::PreprocessStream cannot allocate frame";
         return false;
     }
 
-    m_intFrameCount=0;
-    MetaData.Width=m_objDecoderCtx->width;
-    MetaData.Height=m_objDecoderCtx->height;
-    MetaData.BitRate= m_objDecoderCtx->bit_rate;
-    MetaData.Channels=m_objDecoderCtx->channels;
-    MetaData.CodecDescription= QString("%1").arg(objCodec->long_name);
+    m_frameCount = 0;
+    MetaData.Width = m_videoDecoderCtx->width;
+    MetaData.Height = m_videoDecoderCtx->height;
+    MetaData.BitRate = m_videoDecoderCtx->bit_rate;
+    MetaData.Channels = m_videoDecoderCtx->channels;
+    MetaData.CodecDescription = QString("%1").arg(videoCodec->long_name);
     MetaData.OK_VideoStream = true;
 
     emit onMetaDataChanged(&MetaData);
+
+    // Prepare Audio Codec
+
+    if (m_audioStreamIndex >= 0)
+    {
+        m_audioDecoderCtx = m_formatCtx->streams[m_audioStreamIndex]->codec;
+
+        audioCodec = avcodec_find_decoder(m_audioDecoderCtx->codec_id);
+
+        if (audioCodec == nullptr)
+        {
+            qDebug() << "DATVideoProcess::PreprocessStream cannot find associated audio CODEC";
+            m_audioStreamIndex = -1; // invalidate audio
+        }
+        else
+        {
+            if (avcodec_open2(m_audioDecoderCtx, audioCodec, nullptr) < 0)
+            {
+                qDebug() << "DATVideoProcess::PreprocessStream cannot open associated audio CODEC";
+                m_audioStreamIndex = -1; // invalidate audio
+            }
+        }
+    }
 
     return true;
 }
@@ -321,9 +344,9 @@ bool DATVideoRender::OpenStream(DATVideostream *objDevice)
 
     //Connect QIODevice to FFMPEG Reader
 
-    m_objFormatCtx = avformat_alloc_context();
+    m_formatCtx = avformat_alloc_context();
 
-    if (m_objFormatCtx == nullptr)
+    if (m_formatCtx == nullptr)
     {
         qDebug() << "DATVideoProcess::OpenStream cannot alloc format FFMPEG context";
         m_blnRunning = false;
@@ -340,10 +363,10 @@ bool DATVideoRender::OpenStream(DATVideostream *objDevice)
         nullptr,
         &SeekFunction);
 
-    m_objFormatCtx->pb = objIOCtx;
-    m_objFormatCtx->flags |= AVFMT_FLAG_CUSTOM_IO;
+    m_formatCtx->pb = objIOCtx;
+    m_formatCtx->flags |= AVFMT_FLAG_CUSTOM_IO;
 
-    if (avformat_open_input(&m_objFormatCtx, nullptr  , nullptr, nullptr) < 0)
+    if (avformat_open_input(&m_formatCtx, nullptr  , nullptr, nullptr) < 0)
     {
         qDebug() << "DATVideoProcess::OpenStream cannot open stream";
         m_blnRunning=false;
@@ -383,7 +406,7 @@ bool DATVideoRender::RenderStream()
 
     //********** Rendering **********
 
-    if (av_read_frame(m_objFormatCtx, &objPacket) < 0)
+    if (av_read_frame(m_formatCtx, &objPacket) < 0)
     {
         qDebug() << "DATVideoProcess::RenderStream reading packet error";
         m_blnRunning=false;
@@ -391,27 +414,27 @@ bool DATVideoRender::RenderStream()
     }
 
     //Video channel
-    if (objPacket.stream_index == m_intVideoStreamIndex)
+    if (objPacket.stream_index == m_videoStreamIndex)
     {
-        memset(m_objFrame, 0, sizeof(AVFrame));
-        av_frame_unref(m_objFrame);
+        memset(m_frame, 0, sizeof(AVFrame));
+        av_frame_unref(m_frame);
 
         intGotFrame = 0;
 
-        if (new_decode( m_objDecoderCtx, m_objFrame, &intGotFrame, &objPacket)<0)
+        if (new_decode(m_videoDecoderCtx, m_frame, &intGotFrame, &objPacket) < 0)
         {
-            qDebug() << "DATVideoProcess::RenderStream decoding packet error";
-            m_blnRunning=false;
+            qDebug() << "DATVideoProcess::RenderStream decoding video packet error";
+            m_blnRunning = false;
             return false;
         }
 
         if (intGotFrame)
         {
             //Rendering and RGB Converter setup
-            blnNeedRenderingSetup=(m_intFrameCount==0);
+            blnNeedRenderingSetup=(m_frameCount==0);
             blnNeedRenderingSetup|=(m_objSwsCtx==nullptr);
 
-            if ((m_intCurrentRenderWidth!=m_objFrame->width) || (m_intCurrentRenderHeight!=m_objFrame->height)) {
+            if ((m_intCurrentRenderWidth!=m_frame->width) || (m_intCurrentRenderHeight!=m_frame->height)) {
                 blnNeedRenderingSetup=true;
             }
 
@@ -426,12 +449,12 @@ bool DATVideoRender::RenderStream()
                 //Convertisseur YUV -> RGB
                 m_objSwsCtx = sws_alloc_context();
 
-                av_opt_set_int(m_objSwsCtx,"srcw",m_objFrame->width,0);
-                av_opt_set_int(m_objSwsCtx,"srch",m_objFrame->height,0);
-                av_opt_set_int(m_objSwsCtx,"src_format",m_objFrame->format,0);
+                av_opt_set_int(m_objSwsCtx,"srcw",m_frame->width,0);
+                av_opt_set_int(m_objSwsCtx,"srch",m_frame->height,0);
+                av_opt_set_int(m_objSwsCtx,"src_format",m_frame->format,0);
 
-                av_opt_set_int(m_objSwsCtx,"dstw",m_objFrame->width,0);
-                av_opt_set_int(m_objSwsCtx,"dsth",m_objFrame->height,0);
+                av_opt_set_int(m_objSwsCtx,"dstw",m_frame->width,0);
+                av_opt_set_int(m_objSwsCtx,"dsth",m_frame->height,0);
                 av_opt_set_int(m_objSwsCtx,"dst_format",AV_PIX_FMT_RGB24 ,0);
 
                 av_opt_set_int(m_objSwsCtx,"sws_flag", SWS_FAST_BILINEAR  /* SWS_BICUBIC*/,0);
@@ -450,7 +473,7 @@ bool DATVideoRender::RenderStream()
                     //av_freep(&m_pintDecodedLineSize[0]);
                 }
 
-                if (av_image_alloc(m_pbytDecodedData, m_pintDecodedLineSize,m_objFrame->width, m_objFrame->height, AV_PIX_FMT_RGB24, 1)<0)
+                if (av_image_alloc(m_pbytDecodedData, m_pintDecodedLineSize,m_frame->width, m_frame->height, AV_PIX_FMT_RGB24, 1)<0)
                 {
                     qDebug() << "DATVideoProcess::RenderStream cannont init video image buffer";
                     sws_freeContext(m_objSwsCtx);
@@ -461,22 +484,22 @@ bool DATVideoRender::RenderStream()
 
                 //Rendering device setup
 
-                resizeTVScreen(m_objFrame->width,m_objFrame->height);
+                resizeTVScreen(m_frame->width,m_frame->height);
                 update();
                 resetImage();
 
-                m_intCurrentRenderWidth=m_objFrame->width;
-                m_intCurrentRenderHeight=m_objFrame->height;
+                m_intCurrentRenderWidth=m_frame->width;
+                m_intCurrentRenderHeight=m_frame->height;
 
-                MetaData.Width = m_objFrame->width;
-                MetaData.Height = m_objFrame->height;
+                MetaData.Width = m_frame->width;
+                MetaData.Height = m_frame->height;
                 MetaData.OK_Decoding = true;
                 emit onMetaDataChanged(&MetaData);
             }
 
             //Frame rendering
 
-            if (sws_scale(m_objSwsCtx, m_objFrame->data, m_objFrame->linesize, 0, m_objFrame->height, m_pbytDecodedData, m_pintDecodedLineSize)<0)
+            if (sws_scale(m_objSwsCtx, m_frame->data, m_frame->linesize, 0, m_frame->height, m_pbytDecodedData, m_pintDecodedLineSize)<0)
             {
                 qDebug() << "DATVideoProcess::RenderStream error converting video frame to RGB";
                 m_blnRunning=false;
@@ -484,13 +507,13 @@ bool DATVideoRender::RenderStream()
             }
 
             renderImage(m_pbytDecodedData[0]);
-            av_frame_unref(m_objFrame);
-            m_intFrameCount ++;
+            av_frame_unref(m_frame);
+            m_frameCount ++;
         }
     }
+    // Audio channel
     else if (objPacket.stream_index == m_audioStreamIndex)
     {
-
     }
 
     av_packet_unref(&objPacket);
@@ -521,7 +544,7 @@ bool DATVideoRender::CloseStream(QIODevice *objDevice)
         return false;
     }
 
-    if (!m_objFormatCtx)
+    if (!m_formatCtx)
     {
         qDebug() << "DATVideoProcess::CloseStream FFMEG Context is not initialized";
         return false;
@@ -531,19 +554,19 @@ bool DATVideoRender::CloseStream(QIODevice *objDevice)
     m_blnRunning=true;
 
     // maybe done in the avcodec_close
-//    avformat_close_input(&m_objFormatCtx);
-//    m_objFormatCtx=nullptr;
+//    avformat_close_input(&m_formatCtx);
+//    m_formatCtx=nullptr;
 
-    if (m_objDecoderCtx)
+    if (m_videoDecoderCtx)
     {
-        avcodec_close(m_objDecoderCtx);
-        m_objDecoderCtx = nullptr;
+        avcodec_close(m_videoDecoderCtx);
+        m_videoDecoderCtx = nullptr;
     }
 
-    if (m_objFrame)
+    if (m_frame)
     {
-        av_frame_unref(m_objFrame);
-        av_frame_free(&m_objFrame);
+        av_frame_unref(m_frame);
+        av_frame_free(&m_frame);
     }
 
     if (m_objSwsCtx != nullptr)

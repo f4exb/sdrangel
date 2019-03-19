@@ -95,7 +95,7 @@ public:
     bool CloseStream(QIODevice *objDevice);
 
     void setAudioFIFO(AudioFifo *fifo) { m_audioFifo = fifo; }
-    int getVideoStreamIndex() const { return m_intVideoStreamIndex; }
+    int getVideoStreamIndex() const { return m_videoStreamIndex; }
     int getAudioStreamIndex() const { return m_audioStreamIndex; }
 
     struct DataTSMetaData2 MetaData;
@@ -108,10 +108,10 @@ private:
     bool m_blnIsOpen;
 
     SwsContext *m_objSwsCtx;
-    AVFormatContext *m_objFormatCtx;
-    AVCodecContext *m_objDecoderCtx;
-    AVFrame *m_objFrame;
-
+    AVFormatContext *m_formatCtx;
+    AVCodecContext *m_videoDecoderCtx;
+    AVCodecContext *m_audioDecoderCtx;
+    AVFrame *m_frame;
 	AudioVector m_audioBuffer;
 	uint32_t m_audioBufferFill;
     AudioFifo *m_audioFifo;
@@ -119,8 +119,8 @@ private:
     uint8_t *m_pbytDecodedData[4];
     int m_pintDecodedLineSize[4];
 
-    int m_intFrameCount;
-    int m_intVideoStreamIndex;
+    int m_frameCount;
+    int m_videoStreamIndex;
     int m_audioStreamIndex;
 
     int m_intCurrentRenderWidth;
