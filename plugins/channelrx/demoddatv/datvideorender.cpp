@@ -257,6 +257,10 @@ bool DATVideoRender::PreprocessStream()
         qDebug() << "DATVideoProcess::PreprocessStream cannot find associated video CODEC";
         return false;
     }
+    else
+    {
+        qDebug() << "DATVideoProcess::PreprocessStream: video CODEC found: " << videoCodec->name;
+    }
 
     av_dict_set(&opts, "refcounted_frames", "1", 0);
 
@@ -571,7 +575,8 @@ bool DATVideoRender::RenderStream()
         av_frame_unref(m_frame);
         gotFrame = 0;
 
-        if (avcodec_decode_audio4(m_audioDecoderCtx, m_frame, &gotFrame, &packet) >= 0)
+        if (new_decode(m_audioDecoderCtx, m_frame, &gotFrame, &packet) >= 0)
+        //if (avcodec_decode_audio4(m_audioDecoderCtx, m_frame, &gotFrame, &packet) >= 0) // old style
         {
             if (gotFrame)
             {
@@ -608,6 +613,10 @@ bool DATVideoRender::RenderStream()
 
                 m_audioTestIndex = i;
             }
+        }
+        else
+        {
+            qDebug("DATVideoRender::RenderStream: audio decode error");
         }
     }
 
