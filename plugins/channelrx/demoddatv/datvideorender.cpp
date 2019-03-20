@@ -51,9 +51,9 @@ DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent)
     m_frame = nullptr;
     m_frameCount = -1;
 
-    for (int i = 0; i < 512; i++)
+    for (int i = 0; i < m_audioTestSize; i++)
     {
-        m_audioTest[2*i]   = 32768.0f * sin((M_PI * i)/256.0f);
+        m_audioTest[2*i]   = 32768.0f * sin((M_PI * i)/1024.0f);
         m_audioTest[2*i+1] = m_audioTest[2*i];
     }
 }
@@ -205,11 +205,16 @@ bool DATVideoRender::PreprocessStream()
 
     // Prepare Video Codec and extract meta data
 
-    // FIXME: codec is depreecated but replacement fails
-    //    AVCodecParameters *parms = m_formatCtx->streams[m_videoStreamIndex]->codecpar;
-    //    m_videoDecoderCtx = new AVCodecContext();
-    //    avcodec_parameters_to_context(m_videoDecoderCtx, parms);
-    m_videoDecoderCtx = m_formatCtx->streams[m_videoStreamIndex]->codec;
+    AVCodecParameters *parms = m_formatCtx->streams[m_videoStreamIndex]->codecpar;
+
+    if (m_videoDecoderCtx) {
+        avcodec_free_context(&m_videoDecoderCtx);
+    }
+
+    m_videoDecoderCtx = avcodec_alloc_context3(NULL);
+    avcodec_parameters_to_context(m_videoDecoderCtx, parms);
+
+    // m_videoDecoderCtx = m_formatCtx->streams[m_videoStreamIndex]->codec; // old style
 
     //Meta Data
 
@@ -290,14 +295,22 @@ bool DATVideoRender::PreprocessStream()
 
     if (m_audioStreamIndex >= 0)
     {
-        m_audioDecoderCtx = m_formatCtx->streams[m_audioStreamIndex]->codec;
+        AVCodecParameters *parms = m_formatCtx->streams[m_audioStreamIndex]->codecpar;
+
+        if (m_audioDecoderCtx) {
+            avcodec_free_context(&m_audioDecoderCtx);
+        }
+
+        m_audioDecoderCtx = avcodec_alloc_context3(NULL);
+        avcodec_parameters_to_context(m_audioDecoderCtx, parms);
+
+        //m_audioDecoderCtx = m_formatCtx->streams[m_audioStreamIndex]->codec; // old style
 
         qDebug() << "DATVideoProcess::PreprocessStream: audio: "
         << " channels: " << m_audioDecoderCtx->channels
         << " channel_layout: " << m_audioDecoderCtx->channel_layout
         << " sample_rate: " << m_audioDecoderCtx->sample_rate
         << " sample_fmt: " << m_audioDecoderCtx->sample_fmt
-        << " codec_name: "<< QString(m_audioDecoderCtx->codec_name)
         << " codec_id: "<< m_audioDecoderCtx->codec_id;
 
         audioCodec = avcodec_find_decoder(m_audioDecoderCtx->codec_id);
@@ -573,6 +586,27 @@ bool DATVideoRender::RenderStream()
                 //     qDebug("DATVideoRender::RenderStream: %u/%u audio samples written", res, frame_count);
                 //     m_audioFifo->clear();
                 // }
+
+                int count = frame_count;
+                int i = m_audioTestIndex;
+
+                while (count > 0)
+                {
+                    if (i + count < m_audioTestSize)
+                    {
+                        m_audioFifo->write((const quint8*)&m_audioTest[2*i], 2*count);
+                        i += count;
+                        count = 0;
+                    }
+                    else
+                    {
+                        m_audioFifo->write((const quint8*)&m_audioTest[2*i], 2*(m_audioTestSize - i));
+                        count -= (m_audioTestSize - i);
+                        i = 0;
+                    }
+                }
+
+                m_audioTestIndex = i;
             }
         }
     }
