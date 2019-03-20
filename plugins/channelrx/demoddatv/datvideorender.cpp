@@ -15,6 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <math.h>
+
 extern "C"
 {
 #include <libswresample/swresample.h>
@@ -39,6 +41,7 @@ DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent)
     m_audioFifo = nullptr;
     m_audioSWR = nullptr;
     m_audioSampleRate = 48000;
+    m_audioTestIndex = 0;
     m_videoStreamIndex = -1;
     m_audioStreamIndex = -1;
 
@@ -47,6 +50,12 @@ DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent)
 
     m_frame = nullptr;
     m_frameCount = -1;
+
+    for (int i = 0; i < 512; i++)
+    {
+        m_audioTest[2*i]   = 32768.0f * sin((M_PI * i)/256.0f);
+        m_audioTest[2*i+1] = m_audioTest[2*i];
+    }
 }
 
 bool DATVideoRender::eventFilter(QObject *obj, QEvent *event)
@@ -556,13 +565,14 @@ bool DATVideoRender::RenderStream()
                 uint16_t *audioBuffer;
                 av_samples_alloc((uint8_t**) &audioBuffer, nullptr, 2, m_frame->nb_samples, AV_SAMPLE_FMT_S16, 0);
                 int frame_count = swr_convert(m_audioSWR, (uint8_t**) &audioBuffer, m_frame->nb_samples, (const uint8_t**) m_frame->data, m_frame->nb_samples);
-                int res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], frame_count);
 
-                if (res != frame_count)
-                {
-                    qDebug("DATVideoRender::RenderStream: %u/%u audio samples written", res, frame_count);
-                    m_audioFifo->clear();
-                }
+                // int res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], frame_count);
+
+                // if (res != frame_count)
+                // {
+                //     qDebug("DATVideoRender::RenderStream: %u/%u audio samples written", res, frame_count);
+                //     m_audioFifo->clear();
+                // }
             }
         }
     }

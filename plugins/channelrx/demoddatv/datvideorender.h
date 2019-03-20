@@ -116,6 +116,8 @@ class DATVideoRender : public TVScreen
     AudioFifo *m_audioFifo;
     struct SwrContext* m_audioSWR;
     int m_audioSampleRate;
+    uint16_t m_audioTest[1024];
+    int m_audioTestIndex;
 
     uint8_t *m_pbytDecodedData[4];
     int m_pintDecodedLineSize[4];
