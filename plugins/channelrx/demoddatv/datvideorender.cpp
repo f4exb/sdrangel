@@ -15,6 +15,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+extern "C"
+{
+#include <libswresample/swresample.h>
+}
+
+#include "audio/audiofifo.h"
 #include "datvideorender.h"
 
 DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent)
@@ -31,6 +37,8 @@ DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent)
     m_audioBuffer.resize(1 << 14);
     m_audioBufferFill = 0;
     m_audioFifo = nullptr;
+    m_audioSWR = nullptr;
+    m_audioSampleRate = 48000;
     m_videoStreamIndex = -1;
     m_audioStreamIndex = -1;
 
@@ -275,6 +283,14 @@ bool DATVideoRender::PreprocessStream()
     {
         m_audioDecoderCtx = m_formatCtx->streams[m_audioStreamIndex]->codec;
 
+        qDebug() << "DATVideoProcess::PreprocessStream: audio: "
+        << " channels: " << m_audioDecoderCtx->channels
+        << " channel_layout: " << m_audioDecoderCtx->channel_layout
+        << " sample_rate: " << m_audioDecoderCtx->sample_rate
+        << " sample_fmt: " << m_audioDecoderCtx->sample_fmt
+        << " codec_name: "<< QString(m_audioDecoderCtx->codec_name)
+        << " codec_id: "<< m_audioDecoderCtx->codec_id;
+
         audioCodec = avcodec_find_decoder(m_audioDecoderCtx->codec_id);
 
         if (audioCodec == nullptr)
@@ -284,11 +300,18 @@ bool DATVideoRender::PreprocessStream()
         }
         else
         {
+            qDebug() << "DATVideoProcess::PreprocessStream: audio CODEC found: " << audioCodec->name;
+
             if (avcodec_open2(m_audioDecoderCtx, audioCodec, nullptr) < 0)
             {
                 qDebug() << "DATVideoProcess::PreprocessStream cannot open associated audio CODEC";
                 m_audioStreamIndex = -1; // invalidate audio
             }
+            else
+            {
+                setResampler();
+            }
+
         }
     }
 
@@ -520,8 +543,28 @@ bool DATVideoRender::RenderStream()
         }
     }
     // Audio channel
-    else if (packet.stream_index == m_audioStreamIndex)
+    else if ((packet.stream_index == m_audioStreamIndex) && (m_audioFifo) && (swr_is_initialized(m_audioSWR)))
     {
+        memset(m_frame, 0, sizeof(AVFrame));
+        av_frame_unref(m_frame);
+        gotFrame = 0;
+
+        if (avcodec_decode_audio4(m_audioDecoderCtx, m_frame, &gotFrame, &packet) >= 0)
+        {
+            if (gotFrame)
+            {
+                uint16_t *audioBuffer;
+                av_samples_alloc((uint8_t**) &audioBuffer, nullptr, 2, m_frame->nb_samples, AV_SAMPLE_FMT_S16, 0);
+                int frame_count = swr_convert(m_audioSWR, (uint8_t**) &audioBuffer, m_frame->nb_samples, (const uint8_t**) m_frame->data, m_frame->nb_samples);
+                int res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], frame_count);
+
+                if (res != frame_count)
+                {
+                    qDebug("DATVideoRender::RenderStream: %u/%u audio samples written", res, frame_count);
+                    m_audioFifo->clear();
+                }
+            }
+        }
     }
 
     av_packet_unref(&packet);
@@ -531,6 +574,20 @@ bool DATVideoRender::RenderStream()
     m_running = false;
 
     return true;
+}
+
+void DATVideoRender::setResampler()
+{
+    m_audioSWR = swr_alloc();
+    av_opt_set_int(m_audioSWR, "in_channel_count",  m_audioDecoderCtx->channels, 0);
+    av_opt_set_int(m_audioSWR, "out_channel_count", 2, 0);
+    av_opt_set_int(m_audioSWR, "in_channel_layout",  m_audioDecoderCtx->channel_layout, 0);
+    av_opt_set_int(m_audioSWR, "out_channel_layout", AV_CH_LAYOUT_STEREO, 0);
+    av_opt_set_int(m_audioSWR, "in_sample_rate", m_audioDecoderCtx->sample_rate, 0);
+    av_opt_set_int(m_audioSWR, "out_sample_rate", m_audioSampleRate, 0);
+    av_opt_set_sample_fmt(m_audioSWR, "in_sample_fmt",  m_audioDecoderCtx->sample_fmt, 0);
+    av_opt_set_sample_fmt(m_audioSWR, "out_sample_fmt", AV_SAMPLE_FMT_S16,  0);
+    swr_init(m_audioSWR);
 }
 
 bool DATVideoRender::CloseStream(QIODevice *device)

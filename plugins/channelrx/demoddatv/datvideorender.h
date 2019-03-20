@@ -114,6 +114,8 @@ class DATVideoRender : public TVScreen
     AudioVector m_audioBuffer;
     uint32_t m_audioBufferFill;
     AudioFifo *m_audioFifo;
+    struct SwrContext* m_audioSWR;
+    int m_audioSampleRate;
 
     uint8_t *m_pbytDecodedData[4];
     int m_pintDecodedLineSize[4];
@@ -133,6 +135,9 @@ class DATVideoRender : public TVScreen
 
   protected:
     virtual bool eventFilter(QObject *obj, QEvent *event);
+
+  private:
+    void setResampler();
 
   signals:
     void onMetaDataChanged(DataTSMetaData2 *metaData);
