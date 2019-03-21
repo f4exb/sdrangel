@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <math.h>
+#include <algorithm>
 
 extern "C"
 {
@@ -41,7 +42,7 @@ DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent)
     m_audioFifo = nullptr;
     m_audioSWR = nullptr;
     m_audioSampleRate = 48000;
-    m_audioTestIndex = 0;
+    m_audioFifoBufferIndex = 0;
     m_videoStreamIndex = -1;
     m_audioStreamIndex = -1;
 
@@ -51,11 +52,11 @@ DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent)
     m_frame = nullptr;
     m_frameCount = -1;
 
-    for (int i = 0; i < m_audioTestSize; i++)
-    {
-        m_audioTest[2*i]   = 32768.0f * sin((M_PI * i)/1024.0f);
-        m_audioTest[2*i+1] = m_audioTest[2*i];
-    }
+    // for (int i = 0; i < m_audioFifoBufferSize; i++)
+    // {
+    //     m_audioFifoBuffer[2*i]   = 8192.0f * sin((M_PI * i)/(m_audioFifoBufferSize/1000.0f));
+    //     m_audioFifoBuffer[2*i+1] = m_audioFifoBuffer[2*i];
+    // }
 }
 
 bool DATVideoRender::eventFilter(QObject *obj, QEvent *event)
@@ -584,34 +585,33 @@ bool DATVideoRender::RenderStream()
                 av_samples_alloc((uint8_t**) &audioBuffer, nullptr, 2, m_frame->nb_samples, AV_SAMPLE_FMT_S16, 0);
                 int frame_count = swr_convert(m_audioSWR, (uint8_t**) &audioBuffer, m_frame->nb_samples, (const uint8_t**) m_frame->data, m_frame->nb_samples);
 
-                // int res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], frame_count);
+                // int ret = m_audioFifo->write((const quint8*) &audioBuffer[0], frame_count);
 
-                // if (res != frame_count)
-                // {
-                //     qDebug("DATVideoRender::RenderStream: %u/%u audio samples written", res, frame_count);
-                //     m_audioFifo->clear();
+                // if (ret < frame_count) {
+                //     qDebug("DATVideoRender::RenderStream: audio frames missing %d vs %d", ret, frame_count);
                 // }
 
-                int count = frame_count;
-                int i = m_audioTestIndex;
-
-                while (count > 0)
+                if (m_audioFifoBufferIndex + frame_count < m_audioFifoBufferSize)
                 {
-                    if (i + count < m_audioTestSize)
-                    {
-                        m_audioFifo->write((const quint8*)&m_audioTest[2*i], 2*count);
-                        i += count;
-                        count = 0;
-                    }
-                    else
-                    {
-                        m_audioFifo->write((const quint8*)&m_audioTest[2*i], 2*(m_audioTestSize - i));
-                        count -= (m_audioTestSize - i);
-                        i = 0;
-                    }
+                    std::copy(&audioBuffer[0], &audioBuffer[2*frame_count], &m_audioFifoBuffer[2*m_audioFifoBufferIndex]);
+                    m_audioFifoBufferIndex += frame_count;
+                }
+                else
+                {
+                    int remainder = m_audioFifoBufferSize - m_audioFifoBufferIndex;
+                    std::copy(&audioBuffer[0], &audioBuffer[2*remainder], &m_audioFifoBuffer[2*m_audioFifoBufferIndex]);
+                    m_audioFifo->write((const quint8*) &m_audioFifoBuffer[0], m_audioFifoBufferSize);
+                    std::copy(&audioBuffer[2*remainder], &audioBuffer[2*frame_count], &m_audioFifoBuffer[0]);
+                    m_audioFifoBufferIndex = frame_count - remainder;
                 }
 
-                m_audioTestIndex = i;
+                // m_audioFifoBufferIndex += frame_count;
+
+                // if (m_audioFifoBufferIndex >= m_audioFifoBufferSize)
+                // {
+                //     m_audioFifo->write((const quint8*)&m_audioFifoBuffer[0], m_audioFifoBufferSize);
+                //     m_audioFifoBufferIndex -= m_audioFifoBufferSize;
+                // }
             }
         }
         else
