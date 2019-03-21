@@ -186,7 +186,10 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     m_deviceUISet->addChannelMarker(&m_objChannelMarker);
     m_deviceUISet->addRollupWidget(this);
 
-    ui->videoPlay->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    QPixmap pixmapTarget = QPixmap(":/film.png");
+    pixmapTarget = pixmapTarget.scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    ui->videoPlay->setAlignment(Qt::AlignCenter);
+    ui->videoPlay->setPixmap(pixmapTarget);
 
 	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
 	connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
@@ -648,11 +651,11 @@ void DATVDemodGUI::on_StreamMetaDataChanged(DataTSMetaData2 *objMetaData)
         ui->chkVS->setChecked(objMetaData->OK_VideoStream);
         ui->chkDecoding->setChecked(objMetaData->OK_Decoding);
 
-        if (objMetaData->OK_Decoding == true) {
-            ui->videoPlay->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
-        } else {
-            ui->videoPlay->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-        }
+		if (objMetaData->OK_Decoding) {
+			ui->videoPlay->setStyleSheet("QLabel { background-color : green; }");
+		} else {
+			ui->videoPlay->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+		}
 
         if (objMetaData->Height > 0) {
             ui->screenTV_2->setFixedWidth((int)objMetaData->Width*(270.0f/(float)objMetaData->Height));

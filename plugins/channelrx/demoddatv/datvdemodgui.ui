@@ -761,8 +761,8 @@
        <rect>
         <x>400</x>
         <y>350</y>
-        <width>91</width>
-        <height>27</height>
+        <width>90</width>
+        <height>26</height>
        </rect>
       </property>
       <property name="toolTip">
@@ -770,22 +770,6 @@
       </property>
       <property name="text">
        <string>Full Screen</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="videoPlay">
-      <property name="geometry">
-       <rect>
-        <x>400</x>
-        <y>300</y>
-        <width>56</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>Start/Stop video streaming</string>
-      </property>
-      <property name="text">
-       <string>   Video</string>
       </property>
      </widget>
      <widget class="QWidget" name="formLayoutWidget">
@@ -919,11 +903,14 @@
      <widget class="QToolButton" name="audioMute">
       <property name="geometry">
        <rect>
-        <x>460</x>
+        <x>430</x>
         <y>300</y>
-        <width>28</width>
-        <height>26</height>
+        <width>24</width>
+        <height>24</height>
        </rect>
+      </property>
+      <property name="toolTip">
+       <string>Audio mute (right click: Audio select)</string>
       </property>
       <property name="text">
        <string>...</string>
@@ -932,6 +919,66 @@
        <iconset resource="../../../sdrgui/resources/res.qrc">
         <normaloff>:/sound_on.png</normaloff>
         <normalon>:/sound_off.png</normalon>:/sound_on.png</iconset>
+      </property>
+     </widget>
+     <widget class="QLabel" name="videoPlay">
+      <property name="geometry">
+       <rect>
+        <x>400</x>
+        <y>300</y>
+        <width>24</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Video play indicator</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QSlider" name="audioVolume">
+      <property name="geometry">
+       <rect>
+        <x>400</x>
+        <y>330</y>
+        <width>90</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Audio volume control</string>
+      </property>
+      <property name="minimum">
+       <number>-32</number>
+      </property>
+      <property name="maximum">
+       <number>32</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="audioVolumeText">
+      <property name="geometry">
+       <rect>
+        <x>460</x>
+        <y>300</y>
+        <width>24</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Audio volume</string>
+      </property>
+      <property name="text">
+       <string>-32</string>
       </property>
      </widget>
     </widget>
