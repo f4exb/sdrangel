@@ -234,6 +234,9 @@ void DATVDemodGUI::displaySettings()
     ui->rfBandwidth->setValue(m_settings.m_rfBandwidth);
     ui->spiSymbolRate->setValue(m_settings.m_symbolRate);
     ui->spiExcursion->setValue(m_settings.m_excursion);
+    ui->audioMute->setChecked(m_settings.m_audioMute);
+    ui->audioVolume->setValue(m_settings.m_audioVolume);
+    ui->audioVolumeText->setText(tr("%1").arg(m_settings.m_audioVolume));
 
     blockApplySettings(false);
     m_objChannelMarker.blockSignals(false);
@@ -347,6 +350,8 @@ void DATVDemodGUI::applySettings(bool force)
         m_settings.m_rollOff = ((float)ui->spiRollOff->value()) / 100.0f;
         m_settings.m_viterbi = ui->chkViterbi->isChecked();
         m_settings.m_excursion = ui->spiExcursion->value();
+        m_settings.m_audioMute = ui->audioMute->isChecked();
+        m_settings.m_audioVolume = ui->audioVolume->value();
 
         QString msg = tr("DATVDemodGUI::applySettings: force: %1").arg(force);
         m_settings.debug(msg);
@@ -625,6 +630,18 @@ void DATVDemodGUI::on_rfBandwidth_changed(qint64 value)
 
 void DATVDemodGUI::on_chkFastlock_clicked()
 {
+    applySettings();
+}
+
+void DATVDemodGUI::on_audioMute_toggled(bool checked)
+{
+    (void) checked;
+	applySettings();
+}
+
+void DATVDemodGUI::on_audioVolume_valueChanged(int value)
+{
+    ui->audioVolumeText->setText(tr("%1").arg(value));
     applySettings();
 }
 

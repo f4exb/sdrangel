@@ -947,6 +947,20 @@ void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
         // }
     }
 
+    if ((settings.m_audioVolume) != (m_settings.m_audioVolume) || force)
+    {
+        if (m_objRegisteredVideoRender) {
+            m_objRegisteredVideoRender->setAudioVolume(settings.m_audioVolume);
+        }
+    }
+
+    if ((settings.m_audioMute) != (m_settings.m_audioMute) || force)
+    {
+        if (m_objRegisteredVideoRender) {
+            m_objRegisteredVideoRender->setAudioMute(settings.m_audioMute);
+        }
+    }
+
     if (m_settings.isDifferent(settings) || force)
     {
         m_objSettingsMutex.lock();

@@ -87,6 +87,8 @@ class DATVideoRender : public TVScreen
 
   public:
     explicit DATVideoRender(QWidget *parent);
+    ~DATVideoRender();
+
     void SetFullScreen(bool blnFullScreen);
 
     bool OpenStream(DATVideostream *objDevice);
@@ -96,6 +98,9 @@ class DATVideoRender : public TVScreen
     void setAudioFIFO(AudioFifo *fifo) { m_audioFifo = fifo; }
     int getVideoStreamIndex() const { return m_videoStreamIndex; }
     int getAudioStreamIndex() const { return m_audioStreamIndex; }
+
+    void setAudioMute(bool audioMute) { m_audioMute = audioMute; }
+    void setAudioVolume(int audioVolume);
 
     struct DataTSMetaData2 MetaData;
 
@@ -119,6 +124,9 @@ class DATVideoRender : public TVScreen
     static const int m_audioFifoBufferSize = 16000;
     uint16_t m_audioFifoBuffer[m_audioFifoBufferSize*2]; // 2 channels
     int m_audioFifoBufferIndex;
+    bool m_audioMute;
+    int m_audioVolume;
+    bool m_updateAudioResampler;
 
     uint8_t *m_pbytDecodedData[4];
     int m_pintDecodedLineSize[4];
@@ -135,12 +143,10 @@ class DATVideoRender : public TVScreen
     void ResetMetaData();
 
     int new_decode(AVCodecContext *avctx, AVFrame *frame, int *got_frame, AVPacket *pkt);
+    void setResampler();
 
   protected:
     virtual bool eventFilter(QObject *obj, QEvent *event);
-
-  private:
-    void setResampler();
 
   signals:
     void onMetaDataChanged(DataTSMetaData2 *metaData);

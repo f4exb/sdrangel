@@ -72,6 +72,7 @@ struct DATVDemodSettings
     float m_rollOff;
     bool m_viterbi;
     int m_excursion;
+    int m_audioVolume;
 
     DATVDemodSettings();
     void resetToDefaults();

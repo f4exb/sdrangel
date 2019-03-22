@@ -49,6 +49,7 @@ void DATVDemodSettings::resetToDefaults()
     m_excursion = 10;
     m_audioMute = false;
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_audioVolume = 0;
 }
 
 QByteArray DATVDemodSettings::serialize() const
@@ -77,6 +78,7 @@ QByteArray DATVDemodSettings::serialize() const
     s.writeBool(18, m_viterbi);
     s.writeS32(19, m_excursion);
     s.writeString(20, m_audioDeviceName);
+    s.writeS32(21, m_audioVolume);
 
     return s.final();
 }
@@ -136,6 +138,7 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         d.readBool(18, &m_viterbi, false);
         d.readS32(19, &m_excursion, 10);
         d.readString(20, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
+        d.readS32(21, &m_audioVolume, 0);
 
         return true;
     }
@@ -164,7 +167,8 @@ void DATVDemodSettings::debug(const QString& msg) const
         << " m_symbolRate: " << m_symbolRate
         << " m_excursion: " << m_excursion
         << " m_audioMute: " << m_audioMute
-        << " m_audioDeviceName: " << m_audioDeviceName;
+        << " m_audioDeviceName: " << m_audioDeviceName
+        << " m_audioVolume: " << m_audioVolume;
 }
 
 bool DATVDemodSettings::isDifferent(const DATVDemodSettings& other)

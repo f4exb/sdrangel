@@ -45,6 +45,9 @@ DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent)
     m_audioFifoBufferIndex = 0;
     m_videoStreamIndex = -1;
     m_audioStreamIndex = -1;
+    m_audioMute = false;
+    m_audioVolume = 0;
+    m_updateAudioResampler = false;
 
     m_currentRenderWidth = -1;
     m_currentRenderHeight = -1;
@@ -57,6 +60,13 @@ DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent)
     //     m_audioFifoBuffer[2*i]   = 8192.0f * sin((M_PI * i)/(m_audioFifoBufferSize/1000.0f));
     //     m_audioFifoBuffer[2*i+1] = m_audioFifoBuffer[2*i];
     // }
+}
+
+DATVideoRender::~DATVideoRender()
+{
+    if (m_audioSWR) {
+        swr_free(&m_audioSWR);
+    }
 }
 
 bool DATVideoRender::eventFilter(QObject *obj, QEvent *event)
@@ -572,6 +582,12 @@ bool DATVideoRender::RenderStream()
     // Audio channel
     else if ((packet.stream_index == m_audioStreamIndex) && (m_audioFifo) && (swr_is_initialized(m_audioSWR)))
     {
+        if (m_updateAudioResampler)
+        {
+            setResampler();
+            m_updateAudioResampler = false;
+        }
+
         memset(m_frame, 0, sizeof(AVFrame));
         av_frame_unref(m_frame);
         gotFrame = 0;
@@ -629,8 +645,18 @@ bool DATVideoRender::RenderStream()
     return true;
 }
 
+void DATVideoRender::setAudioVolume(int audioVolume)
+{
+    m_audioVolume = audioVolume < -32 ? -32 : audioVolume > 32 ? 32 : audioVolume;
+    m_updateAudioResampler = true;
+}
+
 void DATVideoRender::setResampler()
 {
+    if (m_audioSWR) {
+        swr_free(&m_audioSWR);
+    }
+
     m_audioSWR = swr_alloc();
     av_opt_set_int(m_audioSWR, "in_channel_count",  m_audioDecoderCtx->channels, 0);
     av_opt_set_int(m_audioSWR, "out_channel_count", 2, 0);
@@ -640,7 +666,24 @@ void DATVideoRender::setResampler()
     av_opt_set_int(m_audioSWR, "out_sample_rate", m_audioSampleRate, 0);
     av_opt_set_sample_fmt(m_audioSWR, "in_sample_fmt",  m_audioDecoderCtx->sample_fmt, 0);
     av_opt_set_sample_fmt(m_audioSWR, "out_sample_fmt", AV_SAMPLE_FMT_S16,  0);
+    av_opt_set_int(m_audioSWR, "center_mix_level", m_audioVolume, 0);
+    av_opt_set_int(m_audioSWR, "surround_mix_level", m_audioVolume, 0);
+    av_opt_set_int(m_audioSWR, "lfe_mix_level", m_audioVolume, 0);
+
     swr_init(m_audioSWR);
+
+    qDebug() << "DATVideoRender::setResampler: "
+        << " in_channel_count: " <<  m_audioDecoderCtx->channels
+        << " out_channel_count: " << 2
+        << " in_channel_layout: " <<  m_audioDecoderCtx->channel_layout
+        << " out_channel_layout: " <<  AV_CH_LAYOUT_STEREO
+        << " in_sample_rate: " << m_audioDecoderCtx->sample_rate
+        << " out_sample_rate: " << m_audioSampleRate
+        << " in_sample_fmt: " << m_audioDecoderCtx->sample_fmt
+        << " out_sample_fmt: " << AV_SAMPLE_FMT_S16
+        << " center_mix_level: " << m_audioVolume
+        << " surround_mix_level: " << m_audioVolume
+        << " lfe_mix_level: " << m_audioVolume;
 }
 
 bool DATVideoRender::CloseStream(QIODevice *device)

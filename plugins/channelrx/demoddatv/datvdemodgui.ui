@@ -204,7 +204,7 @@
     <enum>QTabWidget::West</enum>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="datvTab">
     <attribute name="title">
@@ -961,6 +961,9 @@
       <property name="maximum">
        <number>32</number>
       </property>
+      <property name="pageStep">
+       <number>1</number>
+      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
@@ -979,6 +982,9 @@
       </property>
       <property name="text">
        <string>-32</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </widget>

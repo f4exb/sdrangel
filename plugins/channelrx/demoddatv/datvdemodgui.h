@@ -92,6 +92,8 @@ private slots:
     void on_spiExcursion_valueChanged(int arg1);
     void on_deltaFrequency_changed(qint64 value);
     void on_rfBandwidth_changed(qint64 value);
+    void on_audioMute_toggled(bool checked);
+    void on_audioVolume_valueChanged(int value);
 
 private:
     Ui::DATVDemodGUI* ui;
