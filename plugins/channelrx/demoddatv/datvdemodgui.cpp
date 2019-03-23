@@ -160,7 +160,6 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     m_intLastDecodedData=0;
     m_intLastSpeed=0;
     m_intReadyDecodedData=0;
-    m_blnButtonPlayClicked=false;
     m_objTimer.setInterval(1000);
     connect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
     m_objTimer.start();
@@ -557,7 +556,7 @@ void DATVDemodGUI::on_chkHardMetric_clicked()
     applySettings();
 }
 
-void DATVDemodGUI::on_pushButton_2_clicked()
+void DATVDemodGUI::on_resetDefaults_clicked()
 {
     resetToDefaults();
 }
@@ -579,22 +578,9 @@ void DATVDemodGUI::on_chkAllowDrift_clicked()
      applySettings();
 }
 
-void DATVDemodGUI::on_pushButton_3_clicked()
-{
-
-   m_blnButtonPlayClicked=true;
-
-   if(m_objDATVDemod!=nullptr)
-   {
-       m_objDATVDemod->PlayVideo(true);
-   }
-}
-
-
-void DATVDemodGUI::on_pushButton_4_clicked()
+void DATVDemodGUI::on_fullScreen_clicked()
 {
     ui->screenTV_2->SetFullScreen(true);
-
 }
 
 void DATVDemodGUI::on_mouseEvent(QMouseEvent* obj)
@@ -705,8 +691,8 @@ void DATVDemodGUI::displayRRCParameters(bool blnVisible)
 {
     ui->spiRollOff->setVisible(blnVisible);
     ui->spiExcursion->setVisible(blnVisible);
-    ui->label_5->setVisible(blnVisible);
-    ui->label_6->setVisible(blnVisible);
+    ui->rollOffLabel->setVisible(blnVisible);
+    ui->excursionLabel->setVisible(blnVisible);
 }
 
 void DATVDemodGUI::on_cmbFilter_currentIndexChanged(int index)

@@ -95,15 +95,13 @@ void DATVideoRender::SetFullScreen(bool fullScreen)
     if (fullScreen == true)
     {
         setWindowFlags(Qt::Window);
-        setWindowState(Qt::WindowFullScreen);
-        show();
+        showFullScreen();
         m_isFullScreen = true;
     }
     else
     {
         setWindowFlags(Qt::Widget);
-        setWindowState(Qt::WindowNoState);
-        show();
+        showNormal();
         m_isFullScreen = false;
     }
 }

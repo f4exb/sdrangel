@@ -454,7 +454,7 @@
         <string>HARD METRIC</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="sSecLabel">
        <property name="geometry">
         <rect>
          <x>100</x>
@@ -499,7 +499,7 @@
         <number>32</number>
        </property>
       </widget>
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="notchFilterLabel">
        <property name="geometry">
         <rect>
          <x>100</x>
@@ -544,7 +544,7 @@
         <string>Data: 0</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="resetDefaults">
        <property name="geometry">
         <rect>
          <x>230</x>
@@ -552,6 +552,9 @@
          <width>21</width>
          <height>22</height>
         </rect>
+       </property>
+       <property name="toolTip">
+        <string>Reset to defaults</string>
        </property>
        <property name="text">
         <string>R</string>
@@ -595,7 +598,7 @@
         <string>Speed: 0b/s</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="bufferLabel">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -658,7 +661,7 @@
         <number>35</number>
        </property>
       </widget>
-      <widget class="QLabel" name="label_5">
+      <widget class="QLabel" name="rollOffLabel">
        <property name="geometry">
         <rect>
          <x>106</x>
@@ -671,7 +674,7 @@
         <string>R.off</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_6">
+      <widget class="QLabel" name="excursionLabel">
        <property name="geometry">
         <rect>
          <x>180</x>
