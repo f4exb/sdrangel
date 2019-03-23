@@ -100,6 +100,7 @@ class DATVideoRender : public TVScreen
     int getAudioStreamIndex() const { return m_audioStreamIndex; }
 
     void setAudioMute(bool audioMute) { m_audioMute = audioMute; }
+    void setVideoMute(bool videoMute) { m_videoMute = videoMute; }
     void setAudioVolume(int audioVolume);
 
     struct DataTSMetaData2 MetaData;
@@ -116,16 +117,15 @@ class DATVideoRender : public TVScreen
     AVCodecContext *m_videoDecoderCtx;
     AVCodecContext *m_audioDecoderCtx;
     AVFrame *m_frame;
-    AudioVector m_audioBuffer;
-    uint32_t m_audioBufferFill;
     AudioFifo *m_audioFifo;
     struct SwrContext* m_audioSWR;
     int m_audioSampleRate;
     static const int m_audioFifoBufferSize = 16000;
-    uint16_t m_audioFifoBuffer[m_audioFifoBufferSize*2]; // 2 channels
+    int16_t m_audioFifoBuffer[m_audioFifoBufferSize*2]; // 2 channels
     int m_audioFifoBufferIndex;
     bool m_audioMute;
-    int m_audioVolume;
+    bool m_videoMute;
+    float m_audioVolume;
     bool m_updateAudioResampler;
 
     uint8_t *m_pbytDecodedData[4];

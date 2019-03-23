@@ -37,8 +37,6 @@ DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent)
     m_formatCtx = nullptr;
     m_videoDecoderCtx = nullptr;
     m_swsCtx = nullptr;
-    m_audioBuffer.resize(1 << 14);
-    m_audioBufferFill = 0;
     m_audioFifo = nullptr;
     m_audioSWR = nullptr;
     m_audioSampleRate = 48000;
@@ -46,6 +44,7 @@ DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent)
     m_videoStreamIndex = -1;
     m_audioStreamIndex = -1;
     m_audioMute = false;
+    m_videoMute = false;
     m_audioVolume = 0;
     m_updateAudioResampler = false;
 
@@ -481,7 +480,7 @@ bool DATVideoRender::RenderStream()
     }
 
     //Video channel
-    if (packet.stream_index == m_videoStreamIndex)
+    if ((packet.stream_index == m_videoStreamIndex) && (!m_videoMute))
     {
         memset(m_frame, 0, sizeof(AVFrame));
         av_frame_unref(m_frame);
@@ -580,7 +579,7 @@ bool DATVideoRender::RenderStream()
         }
     }
     // Audio channel
-    else if ((packet.stream_index == m_audioStreamIndex) && (m_audioFifo) && (swr_is_initialized(m_audioSWR)))
+    else if ((packet.stream_index == m_audioStreamIndex) && (m_audioFifo) && (swr_is_initialized(m_audioSWR)) && (!m_audioMute))
     {
         if (m_updateAudioResampler)
         {
@@ -597,37 +596,45 @@ bool DATVideoRender::RenderStream()
         {
             if (gotFrame)
             {
-                uint16_t *audioBuffer;
+                int16_t *audioBuffer;
                 av_samples_alloc((uint8_t**) &audioBuffer, nullptr, 2, m_frame->nb_samples, AV_SAMPLE_FMT_S16, 0);
                 int frame_count = swr_convert(m_audioSWR, (uint8_t**) &audioBuffer, m_frame->nb_samples, (const uint8_t**) m_frame->data, m_frame->nb_samples);
 
+                // direct writing:
                 // int ret = m_audioFifo->write((const quint8*) &audioBuffer[0], frame_count);
 
                 // if (ret < frame_count) {
                 //     qDebug("DATVideoRender::RenderStream: audio frames missing %d vs %d", ret, frame_count);
                 // }
 
-                if (m_audioFifoBufferIndex + frame_count < m_audioFifoBufferSize)
-                {
-                    std::copy(&audioBuffer[0], &audioBuffer[2*frame_count], &m_audioFifoBuffer[2*m_audioFifoBufferIndex]);
-                    m_audioFifoBufferIndex += frame_count;
-                }
-                else
-                {
-                    int remainder = m_audioFifoBufferSize - m_audioFifoBufferIndex;
-                    std::copy(&audioBuffer[0], &audioBuffer[2*remainder], &m_audioFifoBuffer[2*m_audioFifoBufferIndex]);
-                    m_audioFifo->write((const quint8*) &m_audioFifoBuffer[0], m_audioFifoBufferSize);
-                    std::copy(&audioBuffer[2*remainder], &audioBuffer[2*frame_count], &m_audioFifoBuffer[0]);
-                    m_audioFifoBufferIndex = frame_count - remainder;
-                }
-
-                // m_audioFifoBufferIndex += frame_count;
-
-                // if (m_audioFifoBufferIndex >= m_audioFifoBufferSize)
+                // buffered writing:
+                // if (m_audioFifoBufferIndex + frame_count < m_audioFifoBufferSize)
                 // {
-                //     m_audioFifo->write((const quint8*)&m_audioFifoBuffer[0], m_audioFifoBufferSize);
-                //     m_audioFifoBufferIndex -= m_audioFifoBufferSize;
+                //     std::copy(&audioBuffer[0], &audioBuffer[2*frame_count], &m_audioFifoBuffer[2*m_audioFifoBufferIndex]);
+                //     m_audioFifoBufferIndex += frame_count;
                 // }
+                // else
+                // {
+                //     int remainder = m_audioFifoBufferSize - m_audioFifoBufferIndex;
+                //     std::copy(&audioBuffer[0], &audioBuffer[2*remainder], &m_audioFifoBuffer[2*m_audioFifoBufferIndex]);
+                //     m_audioFifo->write((const quint8*) &m_audioFifoBuffer[0], m_audioFifoBufferSize);
+                //     std::copy(&audioBuffer[2*remainder], &audioBuffer[2*frame_count], &m_audioFifoBuffer[0]);
+                //     m_audioFifoBufferIndex = frame_count - remainder;
+                // }
+
+                // Apply volume:
+                for (int i = 0; i < frame_count; i++)
+                {
+                    m_audioFifoBuffer[2*m_audioFifoBufferIndex]   = m_audioVolume * audioBuffer[2*i];
+                    m_audioFifoBuffer[2*m_audioFifoBufferIndex+1] = m_audioVolume * audioBuffer[2*i+1];
+                    m_audioFifoBufferIndex++;
+
+                    if (m_audioFifoBufferIndex >= m_audioFifoBufferSize)
+                    {
+                        m_audioFifo->write((const quint8*) &m_audioFifoBuffer[0], m_audioFifoBufferSize);
+                        m_audioFifoBufferIndex = 0;
+                    }
+                }
             }
         }
         else
@@ -647,8 +654,8 @@ bool DATVideoRender::RenderStream()
 
 void DATVideoRender::setAudioVolume(int audioVolume)
 {
-    m_audioVolume = audioVolume < -32 ? -32 : audioVolume > 32 ? 32 : audioVolume;
-    m_updateAudioResampler = true;
+    int audioVolumeConstrained = audioVolume < 0 ? 0 : audioVolume > 100 ? 100 : audioVolume;
+    m_audioVolume = audioVolumeConstrained / 100.0f;
 }
 
 void DATVideoRender::setResampler()
@@ -666,9 +673,6 @@ void DATVideoRender::setResampler()
     av_opt_set_int(m_audioSWR, "out_sample_rate", m_audioSampleRate, 0);
     av_opt_set_sample_fmt(m_audioSWR, "in_sample_fmt",  m_audioDecoderCtx->sample_fmt, 0);
     av_opt_set_sample_fmt(m_audioSWR, "out_sample_fmt", AV_SAMPLE_FMT_S16,  0);
-    av_opt_set_int(m_audioSWR, "center_mix_level", m_audioVolume, 0);
-    av_opt_set_int(m_audioSWR, "surround_mix_level", m_audioVolume, 0);
-    av_opt_set_int(m_audioSWR, "lfe_mix_level", m_audioVolume, 0);
 
     swr_init(m_audioSWR);
 
@@ -680,10 +684,7 @@ void DATVideoRender::setResampler()
         << " in_sample_rate: " << m_audioDecoderCtx->sample_rate
         << " out_sample_rate: " << m_audioSampleRate
         << " in_sample_fmt: " << m_audioDecoderCtx->sample_fmt
-        << " out_sample_fmt: " << AV_SAMPLE_FMT_S16
-        << " center_mix_level: " << m_audioVolume
-        << " surround_mix_level: " << m_audioVolume
-        << " lfe_mix_level: " << m_audioVolume;
+        << " out_sample_fmt: " << AV_SAMPLE_FMT_S16;
 }
 
 bool DATVideoRender::CloseStream(QIODevice *device)

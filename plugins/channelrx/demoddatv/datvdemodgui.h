@@ -94,6 +94,7 @@ private slots:
     void on_rfBandwidth_changed(qint64 value);
     void on_audioMute_toggled(bool checked);
     void on_audioVolume_valueChanged(int value);
+    void on_videoMute_toggled(bool checked);
 
 private:
     Ui::DATVDemodGUI* ui;

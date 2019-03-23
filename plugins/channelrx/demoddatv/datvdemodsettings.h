@@ -73,6 +73,7 @@ struct DATVDemodSettings
     bool m_viterbi;
     int m_excursion;
     int m_audioVolume;
+    bool m_videoMute;
 
     DATVDemodSettings();
     void resetToDefaults();

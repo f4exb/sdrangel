@@ -204,7 +204,7 @@
     <enum>QTabWidget::West</enum>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="datvTab">
     <attribute name="title">
@@ -913,34 +913,15 @@
        <string>Audio mute (right click: Audio select)</string>
       </property>
       <property name="text">
-       <string>...</string>
+       <string/>
       </property>
       <property name="icon">
        <iconset resource="../../../sdrgui/resources/res.qrc">
         <normaloff>:/sound_on.png</normaloff>
         <normalon>:/sound_off.png</normalon>:/sound_on.png</iconset>
       </property>
-     </widget>
-     <widget class="QLabel" name="videoPlay">
-      <property name="geometry">
-       <rect>
-        <x>400</x>
-        <y>300</y>
-        <width>24</width>
-        <height>24</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>Video play indicator</string>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Plain</enum>
-      </property>
-      <property name="text">
-       <string/>
+      <property name="checkable">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QSlider" name="audioVolume">
@@ -956,13 +937,16 @@
        <string>Audio volume control</string>
       </property>
       <property name="minimum">
-       <number>-32</number>
+       <number>0</number>
       </property>
       <property name="maximum">
-       <number>32</number>
+       <number>100</number>
       </property>
       <property name="pageStep">
        <number>1</number>
+      </property>
+      <property name="value">
+       <number>80</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
@@ -981,10 +965,34 @@
        <string>Audio volume</string>
       </property>
       <property name="text">
-       <string>-32</string>
+       <string>100</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QToolButton" name="videoMute">
+      <property name="geometry">
+       <rect>
+        <x>400</x>
+        <y>300</y>
+        <width>24</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Video mute</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="../../../sdrgui/resources/res.qrc">
+        <normaloff>:/film.png</normaloff>
+        <normalon>:/no_film.png</normalon>:/film.png</iconset>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
       </property>
      </widget>
     </widget>

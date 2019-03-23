@@ -186,10 +186,10 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     m_deviceUISet->addChannelMarker(&m_objChannelMarker);
     m_deviceUISet->addRollupWidget(this);
 
-    QPixmap pixmapTarget = QPixmap(":/film.png");
-    pixmapTarget = pixmapTarget.scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    ui->videoPlay->setAlignment(Qt::AlignCenter);
-    ui->videoPlay->setPixmap(pixmapTarget);
+    // QPixmap pixmapTarget = QPixmap(":/film.png");
+    // pixmapTarget = pixmapTarget.scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    // ui->videoPlay->setAlignment(Qt::AlignCenter);
+    // ui->videoPlay->setPixmap(pixmapTarget);
 
 	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
 	connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
@@ -234,9 +234,9 @@ void DATVDemodGUI::displaySettings()
     ui->rfBandwidth->setValue(m_settings.m_rfBandwidth);
     ui->spiSymbolRate->setValue(m_settings.m_symbolRate);
     ui->spiExcursion->setValue(m_settings.m_excursion);
-    ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->audioVolume->setValue(m_settings.m_audioVolume);
     ui->audioVolumeText->setText(tr("%1").arg(m_settings.m_audioVolume));
+    ui->videoMute->setChecked(m_settings.m_videoMute);
 
     blockApplySettings(false);
     m_objChannelMarker.blockSignals(false);
@@ -352,6 +352,7 @@ void DATVDemodGUI::applySettings(bool force)
         m_settings.m_excursion = ui->spiExcursion->value();
         m_settings.m_audioMute = ui->audioMute->isChecked();
         m_settings.m_audioVolume = ui->audioVolume->value();
+        m_settings.m_videoMute = ui->videoMute->isChecked();
 
         QString msg = tr("DATVDemodGUI::applySettings: force: %1").arg(force);
         m_settings.debug(msg);
@@ -639,6 +640,12 @@ void DATVDemodGUI::on_audioMute_toggled(bool checked)
 	applySettings();
 }
 
+void DATVDemodGUI::on_videoMute_toggled(bool checked)
+{
+    (void) checked;
+	applySettings();
+}
+
 void DATVDemodGUI::on_audioVolume_valueChanged(int value)
 {
     ui->audioVolumeText->setText(tr("%1").arg(value));
@@ -669,9 +676,9 @@ void DATVDemodGUI::on_StreamMetaDataChanged(DataTSMetaData2 *objMetaData)
         ui->chkDecoding->setChecked(objMetaData->OK_Decoding);
 
 		if (objMetaData->OK_Decoding) {
-			ui->videoPlay->setStyleSheet("QLabel { background-color : green; }");
+			ui->videoMute->setStyleSheet("QToolButton { background-color : green; }");
 		} else {
-			ui->videoPlay->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+			ui->videoMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 		}
 
         if (objMetaData->Height > 0) {

@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
+    <file>no_film.png</file>
     <file>gps.png</file>
     <file>linear.png</file>
     <file>logarithmic.png</file>
