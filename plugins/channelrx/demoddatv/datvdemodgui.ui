@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>530</width>
-    <height>443</height>
+    <height>444</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -233,6 +233,9 @@
      </property>
      <property name="title">
       <string>DATV Settings</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
@@ -720,31 +723,22 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>0</y>
+       <y>283</y>
        <width>496</width>
-       <height>385</height>
+       <height>111</height>
       </rect>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>496</width>
-       <height>385</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>496</width>
-       <height>385</height>
-      </size>
      </property>
      <property name="title">
       <string>VIDEO Stream</string>
      </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
      <widget class="QTextEdit" name="textEdit">
       <property name="geometry">
        <rect>
-        <x>0</x>
-        <y>300</y>
+        <x>2</x>
+        <y>20</y>
         <width>281</width>
         <height>81</height>
        </rect>
@@ -763,7 +757,7 @@
       <property name="geometry">
        <rect>
         <x>400</x>
-        <y>350</y>
+        <y>76</y>
         <width>90</width>
         <height>26</height>
        </rect>
@@ -782,7 +776,7 @@
       <property name="geometry">
        <rect>
         <x>300</x>
-        <y>320</y>
+        <y>40</y>
         <width>85</width>
         <height>20</height>
        </rect>
@@ -804,7 +798,7 @@
       <property name="geometry">
        <rect>
         <x>300</x>
-        <y>340</y>
+        <y>60</y>
         <width>85</width>
         <height>20</height>
        </rect>
@@ -826,7 +820,7 @@
       <property name="geometry">
        <rect>
         <x>300</x>
-        <y>360</y>
+        <y>80</y>
         <width>85</width>
         <height>20</height>
        </rect>
@@ -848,7 +842,7 @@
       <property name="geometry">
        <rect>
         <x>300</x>
-        <y>300</y>
+        <y>20</y>
         <width>85</width>
         <height>20</height>
        </rect>
@@ -867,7 +861,7 @@
       <property name="geometry">
        <rect>
         <x>430</x>
-        <y>300</y>
+        <y>26</y>
         <width>24</width>
         <height>24</height>
        </rect>
@@ -891,7 +885,7 @@
       <property name="geometry">
        <rect>
         <x>400</x>
-        <y>330</y>
+        <y>56</y>
         <width>90</width>
         <height>16</height>
        </rect>
@@ -919,7 +913,7 @@
       <property name="geometry">
        <rect>
         <x>460</x>
-        <y>300</y>
+        <y>26</y>
         <width>24</width>
         <height>24</height>
        </rect>
@@ -938,7 +932,7 @@
       <property name="geometry">
        <rect>
         <x>400</x>
-        <y>300</y>
+        <y>26</y>
         <width>24</width>
         <height>24</height>
        </rect>
@@ -958,16 +952,37 @@
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="DATVideoRender" name="screenTV_2" native="true">
-      <property name="geometry">
-       <rect>
-        <x>2</x>
-        <y>22</y>
-        <width>492</width>
-        <height>270</height>
-       </rect>
+    </widget>
+    <widget class="QWidget" name="verticalLayoutWidget_2">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>501</width>
+       <height>281</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="screenLayout">
+      <property name="spacing">
+       <number>0</number>
       </property>
-     </widget>
+      <property name="leftMargin">
+       <number>4</number>
+      </property>
+      <property name="rightMargin">
+       <number>4</number>
+      </property>
+      <item>
+       <widget class="DATVideoRender" name="screenTV_2" native="true">
+        <property name="maximumSize">
+         <size>
+          <width>490</width>
+          <height>270</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </widget>
   </widget>
