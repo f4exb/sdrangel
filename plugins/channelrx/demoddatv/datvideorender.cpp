@@ -54,6 +54,9 @@ DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent)
     m_frame = nullptr;
     m_frameCount = -1;
 
+    m_audioDecodeOK = false;
+    m_videoDecodeOK = false;
+
     // for (int i = 0; i < m_audioFifoBufferSize; i++)
     // {
     //     m_audioFifoBuffer[2*i]   = 8192.0f * sin((M_PI * i)/(m_audioFifoBufferSize/1000.0f));
@@ -487,95 +490,98 @@ bool DATVideoRender::RenderStream()
 
         gotFrame = 0;
 
-        if (new_decode(m_videoDecoderCtx, m_frame, &gotFrame, &packet) < 0)
+        if (new_decode(m_videoDecoderCtx, m_frame, &gotFrame, &packet) >= 0)
         {
-            qDebug() << "DATVideoProcess::RenderStream decoding video packet error";
-            m_running = false;
-            return false;
+            m_videoDecodeOK = true;
+
+            if (gotFrame)
+            {
+                //Rendering and RGB Converter setup
+                needRenderingSetup = (m_frameCount == 0);
+                needRenderingSetup |= (m_swsCtx == nullptr);
+
+                if ((m_currentRenderWidth != m_frame->width) || (m_currentRenderHeight != m_frame->height))
+                {
+                    needRenderingSetup = true;
+                }
+
+                if (needRenderingSetup)
+                {
+                    if (m_swsCtx != nullptr)
+                    {
+                        sws_freeContext(m_swsCtx);
+                        m_swsCtx = nullptr;
+                    }
+
+                    //Convertisseur YUV -> RGB
+                    m_swsCtx = sws_alloc_context();
+
+                    av_opt_set_int(m_swsCtx, "srcw", m_frame->width, 0);
+                    av_opt_set_int(m_swsCtx, "srch", m_frame->height, 0);
+                    av_opt_set_int(m_swsCtx, "src_format", m_frame->format, 0);
+
+                    av_opt_set_int(m_swsCtx, "dstw", m_frame->width, 0);
+                    av_opt_set_int(m_swsCtx, "dsth", m_frame->height, 0);
+                    av_opt_set_int(m_swsCtx, "dst_format", AV_PIX_FMT_RGB24, 0);
+
+                    av_opt_set_int(m_swsCtx, "sws_flag", SWS_FAST_BILINEAR /* SWS_BICUBIC*/, 0);
+
+                    if (sws_init_context(m_swsCtx, nullptr, nullptr) < 0)
+                    {
+                        qDebug() << "DATVideoProcess::RenderStream cannont init video data converter";
+                        m_swsCtx = nullptr;
+                        m_running = false;
+                        return false;
+                    }
+
+                    if ((m_currentRenderHeight > 0) && (m_currentRenderWidth > 0))
+                    {
+                        //av_freep(&m_pbytDecodedData[0]);
+                        //av_freep(&m_pintDecodedLineSize[0]);
+                    }
+
+                    if (av_image_alloc(m_pbytDecodedData, m_pintDecodedLineSize, m_frame->width, m_frame->height, AV_PIX_FMT_RGB24, 1) < 0)
+                    {
+                        qDebug() << "DATVideoProcess::RenderStream cannont init video image buffer";
+                        sws_freeContext(m_swsCtx);
+                        m_swsCtx = nullptr;
+                        m_running = false;
+                        return false;
+                    }
+
+                    //Rendering device setup
+
+                    resizeTVScreen(m_frame->width, m_frame->height);
+                    update();
+                    resetImage();
+
+                    m_currentRenderWidth = m_frame->width;
+                    m_currentRenderHeight = m_frame->height;
+
+                    MetaData.Width = m_frame->width;
+                    MetaData.Height = m_frame->height;
+                    MetaData.OK_Decoding = true;
+                    emit onMetaDataChanged(&MetaData);
+                }
+
+                //Frame rendering
+
+                if (sws_scale(m_swsCtx, m_frame->data, m_frame->linesize, 0, m_frame->height, m_pbytDecodedData, m_pintDecodedLineSize) < 0)
+                {
+                    qDebug() << "DATVideoProcess::RenderStream error converting video frame to RGB";
+                    m_running = false;
+                    return false;
+                }
+
+                renderImage(m_pbytDecodedData[0]);
+                av_frame_unref(m_frame);
+                m_frameCount++;
+            }
         }
-
-        if (gotFrame)
+        else
         {
-            //Rendering and RGB Converter setup
-            needRenderingSetup = (m_frameCount == 0);
-            needRenderingSetup |= (m_swsCtx == nullptr);
-
-            if ((m_currentRenderWidth != m_frame->width) || (m_currentRenderHeight != m_frame->height))
-            {
-                needRenderingSetup = true;
-            }
-
-            if (needRenderingSetup)
-            {
-                if (m_swsCtx != nullptr)
-                {
-                    sws_freeContext(m_swsCtx);
-                    m_swsCtx = nullptr;
-                }
-
-                //Convertisseur YUV -> RGB
-                m_swsCtx = sws_alloc_context();
-
-                av_opt_set_int(m_swsCtx, "srcw", m_frame->width, 0);
-                av_opt_set_int(m_swsCtx, "srch", m_frame->height, 0);
-                av_opt_set_int(m_swsCtx, "src_format", m_frame->format, 0);
-
-                av_opt_set_int(m_swsCtx, "dstw", m_frame->width, 0);
-                av_opt_set_int(m_swsCtx, "dsth", m_frame->height, 0);
-                av_opt_set_int(m_swsCtx, "dst_format", AV_PIX_FMT_RGB24, 0);
-
-                av_opt_set_int(m_swsCtx, "sws_flag", SWS_FAST_BILINEAR /* SWS_BICUBIC*/, 0);
-
-                if (sws_init_context(m_swsCtx, nullptr, nullptr) < 0)
-                {
-                    qDebug() << "DATVideoProcess::RenderStream cannont init video data converter";
-                    m_swsCtx = nullptr;
-                    m_running = false;
-                    return false;
-                }
-
-                if ((m_currentRenderHeight > 0) && (m_currentRenderWidth > 0))
-                {
-                    //av_freep(&m_pbytDecodedData[0]);
-                    //av_freep(&m_pintDecodedLineSize[0]);
-                }
-
-                if (av_image_alloc(m_pbytDecodedData, m_pintDecodedLineSize, m_frame->width, m_frame->height, AV_PIX_FMT_RGB24, 1) < 0)
-                {
-                    qDebug() << "DATVideoProcess::RenderStream cannont init video image buffer";
-                    sws_freeContext(m_swsCtx);
-                    m_swsCtx = nullptr;
-                    m_running = false;
-                    return false;
-                }
-
-                //Rendering device setup
-
-                resizeTVScreen(m_frame->width, m_frame->height);
-                update();
-                resetImage();
-
-                m_currentRenderWidth = m_frame->width;
-                m_currentRenderHeight = m_frame->height;
-
-                MetaData.Width = m_frame->width;
-                MetaData.Height = m_frame->height;
-                MetaData.OK_Decoding = true;
-                emit onMetaDataChanged(&MetaData);
-            }
-
-            //Frame rendering
-
-            if (sws_scale(m_swsCtx, m_frame->data, m_frame->linesize, 0, m_frame->height, m_pbytDecodedData, m_pintDecodedLineSize) < 0)
-            {
-                qDebug() << "DATVideoProcess::RenderStream error converting video frame to RGB";
-                m_running = false;
-                return false;
-            }
-
-            renderImage(m_pbytDecodedData[0]);
-            av_frame_unref(m_frame);
-            m_frameCount++;
+            m_videoDecodeOK = false;
+            // qDebug() << "DATVideoProcess::RenderStream video decode error";
         }
     }
     // Audio channel
@@ -592,8 +598,9 @@ bool DATVideoRender::RenderStream()
         gotFrame = 0;
 
         if (new_decode(m_audioDecoderCtx, m_frame, &gotFrame, &packet) >= 0)
-        //if (avcodec_decode_audio4(m_audioDecoderCtx, m_frame, &gotFrame, &packet) >= 0) // old style
         {
+            m_audioDecodeOK = true;
+
             if (gotFrame)
             {
                 int16_t *audioBuffer;
@@ -639,7 +646,8 @@ bool DATVideoRender::RenderStream()
         }
         else
         {
-            qDebug("DATVideoRender::RenderStream: audio decode error");
+            m_audioDecodeOK = false;
+            // qDebug("DATVideoRender::RenderStream: audio decode error");
         }
     }
 
@@ -648,14 +656,13 @@ bool DATVideoRender::RenderStream()
     //********** Rendering **********
 
     m_running = false;
-
     return true;
 }
 
 void DATVideoRender::setAudioVolume(int audioVolume)
 {
     int audioVolumeConstrained = audioVolume < 0 ? 0 : audioVolume > 100 ? 100 : audioVolume;
-    m_audioVolume = audioVolumeConstrained / 100.0f;
+    m_audioVolume = pow(10.0, audioVolumeConstrained*0.02 - 2.0); // .01 -> 1 log
 }
 
 void DATVideoRender::setResampler()

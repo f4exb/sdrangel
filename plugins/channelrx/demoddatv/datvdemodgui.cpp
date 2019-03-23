@@ -404,10 +404,30 @@ void DATVDemodGUI::tick()
         ui->lblRate->setText(QString("Speed: %1b/s").arg(formatBytes(m_intLastSpeed)));
     }
 
-    if (m_objDATVDemod->audioActive()) {
-        ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
-    } else {
+    if (m_objDATVDemod->audioActive())
+    {
+        if (m_objDATVDemod->audioDecodeOK()) {
+            ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
+        } else {
+            ui->audioMute->setStyleSheet("QToolButton { background-color : red; }");
+        }
+    }
+    else
+    {
         ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+    }
+
+    if (m_objDATVDemod->videoActive())
+    {
+		if (m_objDATVDemod->videoDecodeOK()) {
+			ui->videoMute->setStyleSheet("QToolButton { background-color : green; }");
+		} else {
+			ui->videoMute->setStyleSheet("QToolButton { background-color : red; }");
+		}
+    }
+    else
+    {
+        ui->videoMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
     }
 
     m_intPreviousDecodedData = m_intLastDecodedData;
@@ -674,12 +694,6 @@ void DATVDemodGUI::on_StreamMetaDataChanged(DataTSMetaData2 *objMetaData)
         ui->chkTS->setChecked(objMetaData->OK_TransportStream);
         ui->chkVS->setChecked(objMetaData->OK_VideoStream);
         ui->chkDecoding->setChecked(objMetaData->OK_Decoding);
-
-		if (objMetaData->OK_Decoding) {
-			ui->videoMute->setStyleSheet("QToolButton { background-color : green; }");
-		} else {
-			ui->videoMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-		}
 
         if (objMetaData->Height > 0) {
             ui->screenTV_2->setFixedWidth((int)objMetaData->Width*(270.0f/(float)objMetaData->Height));

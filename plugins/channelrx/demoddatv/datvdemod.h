@@ -147,6 +147,9 @@ public:
     bool SetTVScreen(TVScreen *objScreen);
     DATVideostream * SetVideoRender(DATVideoRender *objScreen);
     bool audioActive();
+    bool audioDecodeOK();
+    bool videoActive();
+    bool videoDecodeOK();
 
     bool PlayVideo(bool blnStartStop);
 

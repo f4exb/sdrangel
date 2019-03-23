@@ -103,6 +103,9 @@ class DATVideoRender : public TVScreen
     void setVideoMute(bool videoMute) { m_videoMute = videoMute; }
     void setAudioVolume(int audioVolume);
 
+    bool getAudioDecodeOK() const { return m_audioDecodeOK; }
+    bool getVideoDecodeOK() const { return m_videoDecodeOK; }
+
     struct DataTSMetaData2 MetaData;
 
   private:
@@ -137,6 +140,9 @@ class DATVideoRender : public TVScreen
 
     int m_currentRenderWidth;
     int m_currentRenderHeight;
+
+    bool m_audioDecodeOK;
+    bool m_videoDecodeOK;
 
     bool InitializeFFMPEG();
     bool PreprocessStream();

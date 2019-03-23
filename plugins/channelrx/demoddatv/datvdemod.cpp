@@ -124,6 +124,33 @@ bool DATVDemod::audioActive()
     }
 }
 
+bool DATVDemod::videoActive()
+{
+    if (m_objRegisteredVideoRender) {
+        return m_objRegisteredVideoRender->getVideoStreamIndex() >= 0;
+    } else {
+        return false;
+    }
+}
+
+bool DATVDemod::audioDecodeOK()
+{
+    if (m_objRegisteredVideoRender) {
+        return m_objRegisteredVideoRender->getAudioDecodeOK();
+    } else {
+        return false;
+    }
+}
+
+bool DATVDemod::videoDecodeOK()
+{
+    if (m_objRegisteredVideoRender) {
+        return m_objRegisteredVideoRender->getVideoDecodeOK();
+    } else {
+        return false;
+    }
+}
+
 bool DATVDemod::PlayVideo(bool blnStartStop)
 {
 
