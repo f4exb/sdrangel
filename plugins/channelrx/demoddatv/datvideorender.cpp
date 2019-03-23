@@ -18,6 +18,8 @@
 #include <math.h>
 #include <algorithm>
 
+#include <QGroupBox>
+
 extern "C"
 {
 #include <libswresample/swresample.h>
@@ -26,7 +28,7 @@ extern "C"
 #include "audio/audiofifo.h"
 #include "datvideorender.h"
 
-DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent)
+DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent), m_parentWidget(parent)
 {
     installEventFilter(this);
     m_isFullScreen = false;
@@ -94,14 +96,25 @@ void DATVideoRender::SetFullScreen(bool fullScreen)
 
     if (fullScreen == true)
     {
-        setWindowFlags(Qt::Window);
-        showFullScreen();
+        m_originalWindowFlags = this->windowFlags();
+        m_originalSize = this->size();
+        this->setParent(0);
+        this->setWindowFlags( Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint);
+        this->showMaximized();
+        // setWindowFlags(Qt::Window);
+        // setWindowState(Qt::WindowFullScreen);
+        // show();
         m_isFullScreen = true;
     }
     else
     {
-        setWindowFlags(Qt::Widget);
-        showNormal();
+        this->setParent(m_parentWidget);
+        this->resize(m_originalSize);
+        this->overrideWindowFlags(m_originalWindowFlags);
+        this->show();
+        // setWindowFlags(Qt::Widget);
+        // setWindowState(Qt::WindowNoState);
+        // show();
         m_isFullScreen = false;
     }
 }

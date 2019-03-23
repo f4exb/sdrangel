@@ -164,6 +164,8 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     connect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
     m_objTimer.start();
 
+    //ui->fullScreen->setVisible(false);
+
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);

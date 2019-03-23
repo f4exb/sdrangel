@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>530</width>
-    <height>442</height>
+    <height>443</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -204,7 +204,7 @@
     <enum>QTabWidget::West</enum>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="datvTab">
     <attribute name="title">
@@ -775,46 +775,6 @@
        <string>Full Screen</string>
       </property>
      </widget>
-     <widget class="QWidget" name="formLayoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>20</y>
-        <width>488</width>
-        <height>272</height>
-       </rect>
-      </property>
-      <layout class="QFormLayout" name="formLayout">
-       <item row="0" column="0">
-        <widget class="DATVideoRender" name="screenTV_2" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>480</width>
-           <height>270</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>355</width>
-           <height>270</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>Video</string>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
      <widget class="QCheckBox" name="chkTS">
       <property name="enabled">
        <bool>false</bool>
@@ -996,6 +956,16 @@
       </property>
       <property name="checkable">
        <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="DATVideoRender" name="screenTV_2" native="true">
+      <property name="geometry">
+       <rect>
+        <x>2</x>
+        <y>22</y>
+        <width>492</width>
+        <height>270</height>
+       </rect>
       </property>
      </widget>
     </widget>

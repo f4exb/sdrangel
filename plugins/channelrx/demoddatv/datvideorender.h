@@ -109,6 +109,10 @@ class DATVideoRender : public TVScreen
     struct DataTSMetaData2 MetaData;
 
   private:
+    QWidget *m_parentWidget;
+    Qt::WindowFlags m_originalWindowFlags;
+    QSize m_originalSize;
+
     bool m_running;
     bool m_isFullScreen;
 
