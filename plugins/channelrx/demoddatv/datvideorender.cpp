@@ -18,7 +18,7 @@
 #include <math.h>
 #include <algorithm>
 
-#include <QGroupBox>
+#include <QLayout>
 
 extern "C"
 {
@@ -38,6 +38,7 @@ DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent), m_pare
     m_isOpen = false;
     m_formatCtx = nullptr;
     m_videoDecoderCtx = nullptr;
+    m_audioDecoderCtx = nullptr;
     m_swsCtx = nullptr;
     m_audioFifo = nullptr;
     m_audioSWR = nullptr;
@@ -96,25 +97,30 @@ void DATVideoRender::SetFullScreen(bool fullScreen)
 
     if (fullScreen == true)
     {
-        m_originalWindowFlags = this->windowFlags();
-        m_originalSize = this->size();
-        this->setParent(0);
-        this->setWindowFlags( Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint);
-        this->showMaximized();
-        // setWindowFlags(Qt::Window);
-        // setWindowState(Qt::WindowFullScreen);
-        // show();
+        qDebug("DATVideoRender::SetFullScreen: go to fullscreen");
+        // m_originalWindowFlags = this->windowFlags();
+        // m_originalSize = this->size();
+        // m_parentWidget->layout()->removeWidget(this);
+        // //this->setParent(0);
+        // this->setWindowFlags( Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint);
+        // m_parentWidget->show();
+        setWindowFlags(Qt::Window);
+        setWindowState(Qt::WindowFullScreen);
+        show();
         m_isFullScreen = true;
     }
     else
     {
-        this->setParent(m_parentWidget);
-        this->resize(m_originalSize);
-        this->overrideWindowFlags(m_originalWindowFlags);
-        this->show();
-        // setWindowFlags(Qt::Widget);
+        qDebug("DATVideoRender::SetFullScreen: come back from fullscreen");
+        // //this->setParent(m_parentWidget);
+        // this->resize(m_originalSize);
+        // this->overrideWindowFlags(m_originalWindowFlags);
         // setWindowState(Qt::WindowNoState);
-        // show();
+        // m_parentWidget->layout()->addWidget(this);
+        // m_parentWidget->show();
+        setWindowFlags(Qt::Widget);
+        setWindowState(Qt::WindowNoState);
+        show();
         m_isFullScreen = false;
     }
 }
