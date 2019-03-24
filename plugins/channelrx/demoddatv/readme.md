@@ -6,11 +6,11 @@
   - libavcodec-dev
   - libavformat-dev
 
-[LeanSDR](https://github.com/pabr/leansdr) framework from F4DAV is intensively used. It has been integrated in the source tree and modified to suit SDRangel specific needs. 
+[LeanSDR](https://github.com/pabr/leansdr) framework from F4DAV is intensively used. It has been integrated in the source tree and modified to suit SDRangel specific needs.
 
 <h2>Introduction</h2>
 
-This plugin can be used to view digital amateur analog television transmissions a.k.a DATV. The only supported standard for now is DVB-S in various modulations. The standard modulation is QPSK but experimental configurations with other PSK modulations (BPSK, 8PSK, QAMn) can be selected.  
+This plugin can be used to view digital amateur analog television transmissions a.k.a DATV. The only supported standard for now is DVB-S in various modulations. The standard modulation is QPSK but experimental configurations with other PSK modulations (BPSK, 8PSK, QAMn) can be selected.
 
 The whole bandwidth available to the channel is used. That is it runs at the device sample rate possibly downsampled by a power of two in the source plugin.
 
@@ -60,8 +60,8 @@ For now only the DVB-S standard is available
   - APSK64e: amplitude and phase shift keying with 64 symbols
   - QAM16: quadrature amplitude modulation with 16 symbols
   - QAM64: quadrature amplitude modulation with 64 symbols
-  - QAM256: quadrature amplitude modulation with 256 symbols  
-  
+  - QAM256: quadrature amplitude modulation with 256 symbols
+
 <h5>B.2a.3: Symbol rate</h5>
 
 This controls the expected symbol rate
@@ -114,13 +114,13 @@ Gauge that shows percentage of buffer queue length
 
 ![DATV Demodulator plugin video GUI](../../../doc/img/DATVDemod_pluginVideo.png)
 
-<h5>B.2b.1: Image thumbnail</h4>
+<h5>B.2b.1: Image</h5>
 
-Use full screen button (5) to switch to full screen video
+The decoded video is displayed here
 
-<h5>B.2b.2: Stream information</h4>
+<h5>B.2b.2: Stream information</h5>
 
-<h5>B.2b.3: Stream decoding status</h4>
+<h5>B.2b.3: Stream decoding status</h5>
 
 These non clickable checkboxes report the decoding status (checked when OK):
 
@@ -128,9 +128,30 @@ These non clickable checkboxes report the decoding status (checked when OK):
   - transport: transport stream detected
   - video: video data detected
   - decoding: video being decoded
-  
-<h5>B.2b.4: Play/pause video playback</h4>
-  
-<h5>B.2b.4: Full screen mode</h4>
 
-Click on this button to see video in full screen mode then click anywhere on the screen to exit full screen mode
+<h5>B.2b.4: Video mute</h5>
+
+Toggle button to pause/run video decoding. This also indicates the video status:
+
+  - Grey (no color): there is no video stream
+  - Green: a video stream is present and successfully decoded
+  - Red: a video stream is present but decoding fails
+
+<h5>B.2b.5: Audio mute</h5>
+
+Toggle button to pause/run audio decoding. This also indicates the audio status:
+
+  - Grey (no color): there is no audio stream
+  - Green: an audio stream is present and successfully decoded
+  - Red: an audio stream is present but decoding fails
+
+In addition right clicking on the button will give you access to the audio device selection dialog
+
+<h5>B.2b.6: Audio volume</h5>
+
+Show the audio volume on a 0 to 100 scale. The actual coefficient applied to the audio samples follows a logarithmic rule where 0 corresponds to 0.01, 50 to 0.1 and 100 to 1.0
+
+<h5>B.2b.7: Audio volume control</h5>
+
+Use this slider to control the value (0 to 100) of the audio volume.
+
