@@ -306,7 +306,7 @@ struct fir_filter : runnable
             T *pc = shifted_coeffs;
             T *pi = pin;
             T x = 0;
-            for (unsigned int i = ncoeffs; i--; ++pc, --pi)
+            for (int i = ncoeffs; i--; ++pc, --pi)
                 x = x + (*pc) * (*pi);
             *pout = x;
         }
@@ -325,7 +325,7 @@ struct fir_filter : runnable
     float current_freq;
     void set_freq(float f)
     {
-        for (unsigned int i = 0; i < ncoeffs; ++i)
+        for (int i = 0; i < ncoeffs; ++i)
         {
             float a = 2 * M_PI * f * (i - ncoeffs / 2);
             float c = cosf(a), s = sinf(a);
