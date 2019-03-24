@@ -763,7 +763,7 @@ struct cstln_lut : cstln_base
     void make_lut_from_symbols(float mer)
     {
         // Note: Excessively low values of MER will break 16APSK and 32APSK.
-        float sigma = cstln_amp * exp10f(-mer / 20);
+        float sigma = cstln_amp * pow(10.0, (-mer / 20));
 
         // Precomputed values.
         // Shared scope so that we don't have to reset dists2[nsymbols..] to -1.

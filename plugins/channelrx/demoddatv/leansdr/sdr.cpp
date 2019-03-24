@@ -5,15 +5,15 @@ namespace leansdr
 
 const char *cstln_base::names[] =
     {
-        [BPSK] = "BPSK",
-        [QPSK] = "QPSK",
-        [PSK8] = "8PSK",
-        [APSK16] = "16APSK",
-        [APSK32] = "32APSK",
-        [APSK64E] = "64APSKe",
-        [QAM16] = "16QAM",
-        [QAM64] = "64QAM",
-        [QAM256] = "256QAM"
+        "BPSK",
+        "QPSK",
+        "8PSK",
+        "16APSK",
+        "32APSK",
+        "64APSKe",
+        "16QAM",
+        "64QAM",
+        "256QAM"
     };
 
 

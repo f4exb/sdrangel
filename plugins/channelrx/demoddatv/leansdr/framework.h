@@ -17,6 +17,9 @@
 #ifndef LEANSDR_FRAMEWORK_H
 #define LEANSDR_FRAMEWORK_H
 
+#include <cstddef>
+#include <algorithm>
+
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>

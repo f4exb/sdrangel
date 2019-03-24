@@ -297,7 +297,7 @@ struct fir_filter : runnable
             }
         }
 
-        unsigned long count = min((in.readable() - ncoeffs) / decim,
+        long count = min((in.readable() - ncoeffs) / decim,
                                   out.writable());
         T *pin = in.rd() + ncoeffs, *pend = pin + count * decim, *pout = out.wr();
         // TBD use coeffs when current_freq=0 (fewer mults if float)
@@ -315,11 +315,11 @@ struct fir_filter : runnable
     }
 
   private:
-    unsigned int ncoeffs;
+    int ncoeffs;
     Tc *coeffs;
     pipereader<T> in;
     pipewriter<T> out;
-    unsigned int decim;
+    int decim;
 
     T *shifted_coeffs;
     float current_freq;

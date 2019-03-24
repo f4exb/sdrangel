@@ -20,7 +20,13 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/types.h>
+
+#ifdef _MSC_VER
+#include <stdlib.h>
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 #include "leansdr/math.h"
 
@@ -302,7 +308,7 @@ struct itemcounter : runnable
 template <typename T>
 struct decimator : runnable
 {
-    unsigned int d;
+    int d;
 
     decimator(scheduler *sch, int _d, pipebuf<T> &_in, pipebuf<T> &_out)
         : runnable(sch, "decimator"),
@@ -312,7 +318,7 @@ struct decimator : runnable
     }
     void run()
     {
-        unsigned long count = min(in.readable() / d, out.writable());
+        long count = min(in.readable() / d, out.writable());
         T *pin = in.rd(), *pend = pin + count * d, *pout = out.wr();
         for (; pin < pend; pin += d, ++pout)
             *pout = *pin;
