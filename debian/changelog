@@ -5,6 +5,7 @@ sdrangel (4.5.1-1) unstable; urgency=medium
   * PlutoSDR: recognize networked devices
   * FreeDV: internal FreeDV library to facilitate packaging
   * Fixed some constness in qrtplib
+  * Fixed bug in Channel Analyzer deserialization. Fixes issue #314.
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 22 Mar 2019 20:14:18 +0100
 

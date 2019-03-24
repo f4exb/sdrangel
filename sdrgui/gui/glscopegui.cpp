@@ -380,7 +380,7 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 
         for (iTrigger = 0; iTrigger < nbTriggersSaved; iTrigger++)
         {
-            ScopeVis::TriggerData triggerData = m_scopeVis->getTriggerData(iTrigger);
+            ScopeVis::TriggerData triggerData;
             float r, g, b;
 
             d.readS32(210 + 16*iTrigger, &intValue, 0);
