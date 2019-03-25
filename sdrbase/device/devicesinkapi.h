@@ -81,6 +81,7 @@ public:
     uint32_t getSampleSinkSequence() const { return m_sampleSinkSequence; }
     uint32_t getNbItems() const { return m_nbItems; }
     uint32_t getItemIndex() const { return m_itemIndex; }
+    int getDeviceSetIndex() const { return m_deviceTabIndex; }
     PluginInterface *getPluginInterface() { return m_pluginInterface; }
     PluginInstanceGUI *getSampleSinkPluginInstanceGUI() { return m_sampleSinkPluginInstanceUI; }
     void getDeviceEngineStateStr(QString& state);

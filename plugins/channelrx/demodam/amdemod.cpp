@@ -718,6 +718,8 @@ void AMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, con
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setTx(0);
+    swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
+    swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("AMDemod"));
     swgChannelSettings->setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
     SWGSDRangel::SWGAMDemodSettings *swgAMDemodSettings = swgChannelSettings->getAmDemodSettings();

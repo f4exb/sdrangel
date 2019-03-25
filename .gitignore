@@ -20,5 +20,5 @@ debian/files
 debian/sdrangel.debhelper.log
 debian/debhelper-build-stamp
 obj-x86_64-linux-gnu/*
-**/venv/
+**/venv*/
 *.pyc

@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.5.0"
+  version: "4.5.2"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -1765,6 +1765,9 @@ definitions:
       tx:
         description: Not zero if it is a tx device else it is a rx device
         type: integer
+      originatorIndex:
+        description: Optional for reverse API. This is the device set index from where the message comes from.
+        type: integer
       airspySettings:
         $ref: "http://localhost:8081/api/swagger/include/Airspy.yaml#/AirspySettings"
       airspyHFSettings:
@@ -1879,6 +1882,12 @@ definitions:
         type: string
       tx:
         description: Not zero if it is a tx channel else it is a rx channel
+        type: integer
+      originatorDeviceSetIndex:
+        description: Optional for reverse API. This is the device set index from where the message comes from.
+        type: integer
+      originatorChannelIndex:
+        description: Optional for reverse API. This is the channel index from where the message comes from.
         type: integer
       AMDemodSettings:
         $ref: "http://localhost:8081/api/swagger/include/AMDemod.yaml#/AMDemodSettings"

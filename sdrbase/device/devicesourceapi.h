@@ -81,6 +81,7 @@ public:
     uint32_t getSampleSourceSequence() const { return m_sampleSourceSequence; }
     uint32_t getNbItems() const { return m_nbItems; }
     uint32_t getItemIndex() const { return m_itemIndex; }
+    int getDeviceSetIndex() const { return m_deviceTabIndex; }
     PluginInterface *getPluginInterface() { return m_pluginInterface; }
     PluginInstanceGUI *getSampleSourcePluginInstanceGUI() { return m_sampleSourcePluginInstanceUI; }
     void getDeviceEngineStateStr(QString& state);
@@ -107,7 +108,7 @@ public:
     const QTimer& getMasterTimer() const { return m_masterTimer; } //!< This is the DSPEngine master timer
 
 protected:
-    int m_deviceTabIndex;
+    int m_deviceTabIndex;              //!< This is the tab index in the GUI and also the device set index
     DSPDeviceSourceEngine *m_deviceSourceEngine;
 
     QString m_hardwareId;              //!< The internal id that identifies the type of hardware (i.e. HackRF, BladeRF, ...)

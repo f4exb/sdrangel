@@ -88,8 +88,10 @@ ChannelSinkAPI *DeviceSourceAPI::getChanelAPIAt(int index)
 
 void DeviceSourceAPI::renumerateChannels()
 {
-    for (int i = 0; i < m_channelAPIs.size(); ++i) {
+    for (int i = 0; i < m_channelAPIs.size(); ++i)
+    {
         m_channelAPIs.at(i)->setIndexInDeviceSet(i);
+        m_channelAPIs.at(i)->setDeviceSetIndex(m_deviceTabIndex);
     }
 }
 

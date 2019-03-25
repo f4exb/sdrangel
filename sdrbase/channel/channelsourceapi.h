@@ -75,6 +75,8 @@ public:
 
     int getIndexInDeviceSet() const { return m_indexInDeviceSet; }
     void setIndexInDeviceSet(int indexInDeviceSet) { m_indexInDeviceSet = indexInDeviceSet; }
+    int getDeviceSetIndex() const { return m_deviceSetIndex; }
+    void setDeviceSetIndex(int deviceSetIndex) { m_deviceSetIndex = deviceSetIndex; }
     uint64_t getUID() const { return m_uid; }
 
 private:
@@ -84,6 +86,7 @@ private:
     QString m_name;
 
     int m_indexInDeviceSet;
+    int m_deviceSetIndex;
     uint64_t m_uid;
 };
 

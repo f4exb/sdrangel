@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 ''' Test reverse API
 Run with:
 export FLASK_APP=reverseapi.py
@@ -18,40 +19,43 @@ def hello_sdrangel():
 def device_run(deviceset_index):
     ''' Reply with the expected reply of a working device '''
     if request.method == 'POST':
-        print("Start device %d" % deviceset_index)
+        print(f'Start device {deviceset_index}')
         reply = { "state": "idle" }
         return jsonify(reply)
     elif request.method == 'DELETE':
-        print("Stop device %d" % deviceset_index)
+        print(f'Stop device {deviceset_index}')
         reply = { "state": "running" }
         return jsonify(reply)
     elif request.method == 'GET':
-        return "RUN device %d" % deviceset_index
+        return f'RUN device {deviceset_index}'
 
 
 @app.route('/sdrangel/deviceset/<int:deviceset_index>/device/settings', methods=['GET', 'PATCH', 'PUT'])
 def device_settings(deviceset_index):
     ''' Reply with a copy of the device setting structure received '''
     content = request.get_json(silent=True)
+    originatorIndex = content.get('originatorIndex')
     if request.method == 'PATCH':
-        print("Partial update of device %d" % deviceset_index)
+        print(f'Partial update of device {deviceset_index} from device {originatorIndex}')
         return jsonify(content)
     if request.method == 'PUT':
-        print("Full update of device %d" % deviceset_index)
+        print(f'Full update of device {deviceset_index} from device {originatorIndex}')
         return jsonify(content)
     if request.method == 'GET':
-        return 'GET settings for device %d' % deviceset_index
+        return f'GET settings for device {deviceset_index}'
 
 
 @app.route('/sdrangel/deviceset/<int:deviceset_index>/channel/<int:channel_index>/settings', methods=['GET', 'PATCH', 'PUT'])
 def channel_settings(deviceset_index, channel_index):
     ''' Reply with a copy of the channel setting structure received '''
     content = request.get_json(silent=True)
+    originatorDeviceSetIndex = content.get('originatorDeviceSetIndex')
+    originatorChannelIndex = content.get('originatorChannelIndex')
     if request.method == 'PATCH':
-        print("Partial update of device %d channel %d" % (deviceset_index, channel_index))
+        print(f'Partial update of (device:channel) {deviceset_index}:{channel_index} from {originatorDeviceSetIndex}:{originatorChannelIndex}')
         return jsonify(content)
     if request.method == 'PUT':
-        print("Full update of device %d channel %d" % (deviceset_index, channel_index))
+        print(f'Full update of (device:channel) {deviceset_index}:{channel_index} from {originatorDeviceSetIndex}:{originatorChannelIndex}')
         return jsonify(content)
     if request.method == 'GET':
-        return 'GET settings for device %d and channel %d' % (deviceset_index, channel_index)
+        return f'GET settings for (device:channel) {deviceset_index}:{channel_index}'
