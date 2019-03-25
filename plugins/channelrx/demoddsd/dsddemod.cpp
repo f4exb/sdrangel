@@ -1038,6 +1038,8 @@ void DSDDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setTx(0);
+    swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
+    swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("DSDDemod"));
     swgChannelSettings->setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());
     SWGSDRangel::SWGDSDDemodSettings *swgDSDDemodSettings = swgChannelSettings->getDsdDemodSettings();

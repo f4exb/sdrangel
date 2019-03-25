@@ -508,6 +508,8 @@ void RemoteSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, 
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setTx(0);
+    swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
+    swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("RemoteSink"));
     swgChannelSettings->setRemoteSinkSettings(new SWGSDRangel::SWGRemoteSinkSettings());
     SWGSDRangel::SWGRemoteSinkSettings *swgRemoteSinkSettings = swgChannelSettings->getRemoteSinkSettings();

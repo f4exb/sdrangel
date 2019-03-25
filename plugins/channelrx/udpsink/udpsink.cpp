@@ -872,6 +872,8 @@ void UDPSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, con
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setTx(0);
+    swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
+    swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("UDPSink"));
     swgChannelSettings->setUdpSinkSettings(new SWGSDRangel::SWGUDPSinkSettings());
     SWGSDRangel::SWGUDPSinkSettings *swgUDPSinkSettings = swgChannelSettings->getUdpSinkSettings();

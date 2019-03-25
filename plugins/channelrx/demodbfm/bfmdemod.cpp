@@ -778,6 +778,8 @@ void BFMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setTx(0);
+    swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
+    swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("BFMDemod"));
     swgChannelSettings->setBfmDemodSettings(new SWGSDRangel::SWGBFMDemodSettings());
     SWGSDRangel::SWGBFMDemodSettings *swgBFMDemodSettings = swgChannelSettings->getBfmDemodSettings();

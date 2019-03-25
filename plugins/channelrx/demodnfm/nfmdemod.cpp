@@ -781,6 +781,8 @@ void NFMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setTx(0);
+    swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
+    swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("NFMDemod"));
     swgChannelSettings->setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
     SWGSDRangel::SWGNFMDemodSettings *swgNFMDemodSettings = swgChannelSettings->getNfmDemodSettings();
