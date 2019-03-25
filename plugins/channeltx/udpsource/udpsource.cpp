@@ -858,6 +858,8 @@ void UDPSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setTx(1);
+    swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
+    swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("UDPSource"));
     swgChannelSettings->setUdpSourceSettings(new SWGSDRangel::SWGUDPSourceSettings());
     SWGSDRangel::SWGUDPSourceSettings *swgUDPSourceSettings = swgChannelSettings->getUdpSourceSettings();

@@ -1044,6 +1044,8 @@ void FreeDVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setTx(1);
+    swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
+    swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("FreeDVMod"));
     swgChannelSettings->setFreeDvModSettings(new SWGSDRangel::SWGFreeDVModSettings());
     SWGSDRangel::SWGFreeDVModSettings *swgFreeDVModSettings = swgChannelSettings->getFreeDvModSettings();

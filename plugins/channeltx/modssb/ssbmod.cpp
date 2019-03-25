@@ -1201,6 +1201,8 @@ void SSBMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setTx(1);
+    swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
+    swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("SSBMod"));
     swgChannelSettings->setSsbModSettings(new SWGSDRangel::SWGSSBModSettings());
     SWGSDRangel::SWGSSBModSettings *swgSSBModSettings = swgChannelSettings->getSsbModSettings();

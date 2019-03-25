@@ -25,7 +25,7 @@
 
 const PluginDescriptor FreeDVModPlugin::m_pluginDescriptor = {
     QString("FreeDV Modulator"),
-    QString("4.5.0"),
+    QString("4.5.2"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
