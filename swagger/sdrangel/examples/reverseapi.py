@@ -18,12 +18,16 @@ def hello_sdrangel():
 @app.route('/sdrangel/deviceset/<int:deviceset_index>/device/run', methods=['GET', 'POST', 'DELETE'])
 def device_run(deviceset_index):
     ''' Reply with the expected reply of a working device '''
+    originatorIndex = None
+    content = request.get_json(silent=True)
+    if content:
+        originatorIndex = content.get('originatorIndex')
     if request.method == 'POST':
-        print(f'Start device {deviceset_index}')
+        print(f'Start device {deviceset_index} from device {originatorIndex}')
         reply = { "state": "idle" }
         return jsonify(reply)
     elif request.method == 'DELETE':
-        print(f'Stop device {deviceset_index}')
+        print(f'Stop device {deviceset_index} from device {originatorIndex}')
         reply = { "state": "running" }
         return jsonify(reply)
     elif request.method == 'GET':

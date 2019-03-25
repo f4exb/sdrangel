@@ -537,7 +537,7 @@ SWGDeviceSetApi::devicesetDeviceReportGetCallback(SWGHttpRequestWorker * worker)
 }
 
 void
-SWGDeviceSetApi::devicesetDeviceRunDelete(qint32 device_set_index) {
+SWGDeviceSetApi::devicesetDeviceRunDelete(qint32 device_set_index, SWGDeviceSettings& body) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/device/run");
 
@@ -549,7 +549,10 @@ SWGDeviceSetApi::devicesetDeviceRunDelete(qint32 device_set_index) {
     SWGHttpRequestInput input(fullPath, "DELETE");
 
 
-
+    
+    QString output = body.asJson();
+    input.request_body.append(output);
+    
 
 
     foreach(QString key, this->defaultHeaders.keys()) {
@@ -645,7 +648,7 @@ SWGDeviceSetApi::devicesetDeviceRunGetCallback(SWGHttpRequestWorker * worker) {
 }
 
 void
-SWGDeviceSetApi::devicesetDeviceRunPost(qint32 device_set_index) {
+SWGDeviceSetApi::devicesetDeviceRunPost(qint32 device_set_index, SWGDeviceSettings& body) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/device/run");
 
@@ -657,7 +660,10 @@ SWGDeviceSetApi::devicesetDeviceRunPost(qint32 device_set_index) {
     SWGHttpRequestInput input(fullPath, "POST");
 
 
-
+    
+    QString output = body.asJson();
+    input.request_body.append(output);
+    
 
 
     foreach(QString key, this->defaultHeaders.keys()) {

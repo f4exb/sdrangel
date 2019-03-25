@@ -10269,8 +10269,9 @@ public class DeviceSetApiExample {
         
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        DeviceSettings body = ; // DeviceSettings | Originator information in the reverse API case
         try {
-            DeviceState result = apiInstance.devicesetDeviceRunDelete(deviceSetIndex);
+            DeviceState result = apiInstance.devicesetDeviceRunDelete(deviceSetIndex, body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DeviceSetApi#devicesetDeviceRunDelete");
@@ -10288,8 +10289,9 @@ public class DeviceSetApiExample {
     public static void main(String[] args) {
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        DeviceSettings body = ; // DeviceSettings | Originator information in the reverse API case
         try {
-            DeviceState result = apiInstance.devicesetDeviceRunDelete(deviceSetIndex);
+            DeviceState result = apiInstance.devicesetDeviceRunDelete(deviceSetIndex, body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DeviceSetApi#devicesetDeviceRunDelete");
@@ -10304,10 +10306,12 @@ public class DeviceSetApiExample {
   </div> -->
                             <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceRunDelete-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+DeviceSettings *body = ; // Originator information in the reverse API case (optional)
 
 DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
 
 [apiInstance devicesetDeviceRunDeleteWith:deviceSetIndex
+    body:body
               completionHandler: ^(DeviceState output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -10326,6 +10330,9 @@ var api = new SdRangel.DeviceSetApi()
 
 var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
 
+var opts = { 
+  'body':  // {DeviceSettings} Originator information in the reverse API case
+};
 
 var callback = function(error, data, response) {
   if (error) {
@@ -10334,7 +10341,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.devicesetDeviceRunDelete(deviceSetIndex, callback);
+api.devicesetDeviceRunDelete(deviceSetIndex, opts, callback);
 </code></pre>
                             </div>
 
@@ -10357,10 +10364,11 @@ namespace Example
             
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional) 
 
             try
             {
-                DeviceState result = apiInstance.devicesetDeviceRunDelete(deviceSetIndex);
+                DeviceState result = apiInstance.devicesetDeviceRunDelete(deviceSetIndex, body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -10379,9 +10387,10 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\DeviceSetApi();
 $deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$body = ; // DeviceSettings | Originator information in the reverse API case
 
 try {
-    $result = $api_instance->devicesetDeviceRunDelete($deviceSetIndex);
+    $result = $api_instance->devicesetDeviceRunDelete($deviceSetIndex, $body);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling DeviceSetApi->devicesetDeviceRunDelete: ', $e->getMessage(), PHP_EOL;
@@ -10396,9 +10405,10 @@ use SWGSDRangel::DeviceSetApi;
 
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Originator information in the reverse API case
 
 eval { 
-    my $result = $api_instance->devicesetDeviceRunDelete(deviceSetIndex => $deviceSetIndex);
+    my $result = $api_instance->devicesetDeviceRunDelete(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
 if ($@) {
@@ -10416,9 +10426,10 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
+body =  # DeviceSettings | Originator information in the reverse API case (optional)
 
 try: 
-    api_response = api_instance.deviceset_device_run_delete(deviceSetIndex)
+    api_response = api_instance.deviceset_device_run_delete(deviceSetIndex, body=body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DeviceSetApi->devicesetDeviceRunDelete: %s\n" % e)</code></pre>
@@ -10459,6 +10470,48 @@ except ApiException as e:
                             </table>
 
 
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body </td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Originator information in the reverse API case",
+  "required" : false,
+  "schema" : {
+    "$ref" : "#/definitions/DeviceSettings"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_devicesetDeviceRunDelete_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_devicesetDeviceRunDelete_body"></div>
+</td>
+</tr>
+
+                            </table>
 
 
 
@@ -11191,8 +11244,9 @@ public class DeviceSetApiExample {
         
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        DeviceSettings body = ; // DeviceSettings | Originator information in the reverse API case
         try {
-            DeviceState result = apiInstance.devicesetDeviceRunPost(deviceSetIndex);
+            DeviceState result = apiInstance.devicesetDeviceRunPost(deviceSetIndex, body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DeviceSetApi#devicesetDeviceRunPost");
@@ -11210,8 +11264,9 @@ public class DeviceSetApiExample {
     public static void main(String[] args) {
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        DeviceSettings body = ; // DeviceSettings | Originator information in the reverse API case
         try {
-            DeviceState result = apiInstance.devicesetDeviceRunPost(deviceSetIndex);
+            DeviceState result = apiInstance.devicesetDeviceRunPost(deviceSetIndex, body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DeviceSetApi#devicesetDeviceRunPost");
@@ -11226,10 +11281,12 @@ public class DeviceSetApiExample {
   </div> -->
                             <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceRunPost-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+DeviceSettings *body = ; // Originator information in the reverse API case (optional)
 
 DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
 
 [apiInstance devicesetDeviceRunPostWith:deviceSetIndex
+    body:body
               completionHandler: ^(DeviceState output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -11248,6 +11305,9 @@ var api = new SdRangel.DeviceSetApi()
 
 var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
 
+var opts = { 
+  'body':  // {DeviceSettings} Originator information in the reverse API case
+};
 
 var callback = function(error, data, response) {
   if (error) {
@@ -11256,7 +11316,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.devicesetDeviceRunPost(deviceSetIndex, callback);
+api.devicesetDeviceRunPost(deviceSetIndex, opts, callback);
 </code></pre>
                             </div>
 
@@ -11279,10 +11339,11 @@ namespace Example
             
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional) 
 
             try
             {
-                DeviceState result = apiInstance.devicesetDeviceRunPost(deviceSetIndex);
+                DeviceState result = apiInstance.devicesetDeviceRunPost(deviceSetIndex, body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -11301,9 +11362,10 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\DeviceSetApi();
 $deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$body = ; // DeviceSettings | Originator information in the reverse API case
 
 try {
-    $result = $api_instance->devicesetDeviceRunPost($deviceSetIndex);
+    $result = $api_instance->devicesetDeviceRunPost($deviceSetIndex, $body);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling DeviceSetApi->devicesetDeviceRunPost: ', $e->getMessage(), PHP_EOL;
@@ -11318,9 +11380,10 @@ use SWGSDRangel::DeviceSetApi;
 
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Originator information in the reverse API case
 
 eval { 
-    my $result = $api_instance->devicesetDeviceRunPost(deviceSetIndex => $deviceSetIndex);
+    my $result = $api_instance->devicesetDeviceRunPost(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
 if ($@) {
@@ -11338,9 +11401,10 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
+body =  # DeviceSettings | Originator information in the reverse API case (optional)
 
 try: 
-    api_response = api_instance.deviceset_device_run_post(deviceSetIndex)
+    api_response = api_instance.deviceset_device_run_post(deviceSetIndex, body=body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DeviceSetApi->devicesetDeviceRunPost: %s\n" % e)</code></pre>
@@ -11381,6 +11445,48 @@ except ApiException as e:
                             </table>
 
 
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body </td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Originator information in the reverse API case",
+  "required" : false,
+  "schema" : {
+    "$ref" : "#/definitions/DeviceSettings"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_devicesetDeviceRunPost_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_devicesetDeviceRunPost_body"></div>
+</td>
+</tr>
+
+                            </table>
 
 
 
@@ -24546,7 +24652,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-03-24T23:28:38.479+01:00
+              Generated 2019-03-25T14:39:14.782+01:00
             </div>
           </div>
       </div>

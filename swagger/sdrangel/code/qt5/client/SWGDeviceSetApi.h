@@ -51,9 +51,9 @@ public:
     void devicesetChannelsReportGet(qint32 device_set_index);
     void devicesetDevicePut(qint32 device_set_index, SWGDeviceListItem& body);
     void devicesetDeviceReportGet(qint32 device_set_index);
-    void devicesetDeviceRunDelete(qint32 device_set_index);
+    void devicesetDeviceRunDelete(qint32 device_set_index, SWGDeviceSettings& body);
     void devicesetDeviceRunGet(qint32 device_set_index);
-    void devicesetDeviceRunPost(qint32 device_set_index);
+    void devicesetDeviceRunPost(qint32 device_set_index, SWGDeviceSettings& body);
     void devicesetDeviceSettingsGet(qint32 device_set_index);
     void devicesetDeviceSettingsPatch(qint32 device_set_index, SWGDeviceSettings& body);
     void devicesetDeviceSettingsPut(qint32 device_set_index, SWGDeviceSettings& body);

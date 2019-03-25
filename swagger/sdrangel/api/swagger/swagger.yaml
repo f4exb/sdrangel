@@ -904,6 +904,12 @@ paths:
           type: integer
           required: true
           description: Index of device set in the device set list
+        - name: body
+          in: body
+          description: Originator information in the reverse API case
+          required: false
+          schema:
+            $ref: "#/definitions/DeviceSettings"
       responses:
         "200":
           description: On success return state before change
@@ -932,6 +938,12 @@ paths:
           type: integer
           required: true
           description: Index of device set in the device set list
+        - name: body
+          in: body
+          description: Originator information in the reverse API case
+          required: false
+          schema:
+            $ref: "#/definitions/DeviceSettings"
       responses:
         "200":
           description: On success return state before change
