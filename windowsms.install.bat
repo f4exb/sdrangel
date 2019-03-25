@@ -5,8 +5,8 @@ SET libiconvdir="C:\softs\iconv-1.9.2.win32"
 SET libzlib1dir="C:\softs\zlib-1.2.5"
 SET pothosdir="C:\Program Files\PothosSDR"
 SET pthreadsdir="C:\softs\pthreads-w32"
-SET ffmpegdir="C:\softs\ffmpeg-20181127-1035206-win64-shared\bin"
-SET qt5dir="C:\Qt\5.11.1\msvc2017_64\bin"
+SET ffmpegdir="C:\softs\ffmpeg-20190308-9645147-win64-shared\bin"
+SET qt5dir="C:\Qt\5.12.1\msvc2017_64\bin"
 SET libopusdir="C:\softs\libopus_v1.3_msvc15\bin\x64"
 
 copy app\%1\sdrangel.exe %2
@@ -23,11 +23,12 @@ copy swagger\%1\swagger.dll %2
 copy logging\%1\logging.dll %2
 copy cm256cc\%1\cm256cc.dll %2
 
-copy libhackrf\%1\libhackrf.dll %2
+REM copy libhackrf\%1\libhackrf.dll %2
 copy librtlsdr\%1\librtlsdr.dll %2
 copy libairspy\%1\libairspy.dll %2
 copy libairspyhf\%1\libairspyhf.dll %2
 copy %pothosdir%\bin\bladeRF.dll %2
+copy %pothosdir%\bin\hackrf.dll %2
 copy %pothosdir%\bin\libiio.dll %2
 copy %pothosdir%\bin\LimeSuite.dll %2
 copy %pothosdir%\bin\SoapySDR.dll %2
