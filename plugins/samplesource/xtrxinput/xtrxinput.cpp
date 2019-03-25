@@ -1532,6 +1532,7 @@ void XTRXInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, co
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("XTRX"));
     swgDeviceSettings->setXtrxInputSettings(new SWGSDRangel::SWGXtrxInputSettings());
     SWGSDRangel::SWGXtrxInputSettings *swgXtrxInputSettings = swgDeviceSettings->getXtrxInputSettings();

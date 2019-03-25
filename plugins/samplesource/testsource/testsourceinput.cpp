@@ -619,6 +619,7 @@ void TestSourceInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKe
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("TestSource"));
     swgDeviceSettings->setTestSourceSettings(new SWGSDRangel::SWGTestSourceSettings());
     SWGSDRangel::SWGTestSourceSettings *swgTestSourceSettings = swgDeviceSettings->getTestSourceSettings();

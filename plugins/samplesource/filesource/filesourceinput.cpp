@@ -590,6 +590,7 @@ void FileSourceInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKe
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("FileSource"));
     swgDeviceSettings->setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
     SWGSDRangel::SWGFileSourceSettings *swgFileSourceSettings = swgDeviceSettings->getFileSourceSettings();

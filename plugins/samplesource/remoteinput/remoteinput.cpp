@@ -434,6 +434,7 @@ void RemoteInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("RemoteInput"));
     swgDeviceSettings->setRemoteInputSettings(new SWGSDRangel::SWGRemoteInputSettings());
     SWGSDRangel::SWGRemoteInputSettings *swgRemoteInputSettings = swgDeviceSettings->getRemoteInputSettings();

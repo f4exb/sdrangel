@@ -613,6 +613,7 @@ void PerseusInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("Perseus"));
     swgDeviceSettings->setPerseusSettings(new SWGSDRangel::SWGPerseusSettings());
     SWGSDRangel::SWGPerseusSettings *swgPerseusSettings = swgDeviceSettings->getPerseusSettings();

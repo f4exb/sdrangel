@@ -32,7 +32,7 @@ const int AirspyPlugin::m_maxDevices = 32;
 
 const PluginDescriptor AirspyPlugin::m_pluginDescriptor = {
 	QString("Airspy Input"),
-	QString("4.4.1"),
+	QString("4.5.2"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

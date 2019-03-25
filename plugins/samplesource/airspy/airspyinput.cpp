@@ -792,6 +792,7 @@ void AirspyInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("Airspy"));
     swgDeviceSettings->setAirspySettings(new SWGSDRangel::SWGAirspySettings());
     SWGSDRangel::SWGAirspySettings *swgAirspySettings = swgDeviceSettings->getAirspySettings();

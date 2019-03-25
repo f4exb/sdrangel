@@ -1246,6 +1246,7 @@ void BladeRF2Input::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("BladeRF2"));
     swgDeviceSettings->setBladeRf2InputSettings(new SWGSDRangel::SWGBladeRF2InputSettings());
     SWGSDRangel::SWGBladeRF2InputSettings *swgBladeRF2Settings = swgDeviceSettings->getBladeRf2InputSettings();
