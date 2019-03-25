@@ -833,16 +833,27 @@ void Bladerf1Input::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
 
 void Bladerf1Input::webapiReverseSendStartStop(bool start)
 {
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
+    swgDeviceSettings->setDeviceHwType(new QString("BladeRF1"));
+
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
             .arg(m_settings.m_reverseAPIAddress)
             .arg(m_settings.m_reverseAPIPort)
             .arg(m_settings.m_reverseAPIDeviceIndex);
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
 
     if (start) {
-        m_networkManager->sendCustomRequest(m_networkRequest, "POST");
+        m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
     } else {
-        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE");
+        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
     }
 }
 
