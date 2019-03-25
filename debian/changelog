@@ -2,7 +2,7 @@ sdrangel (4.5.2-1) unstable; urgency=medium
 
   * Send device and channel index in reverse API. Implements issue #312.
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 30 Mar 2019 20:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 25 Mar 2019 20:14:18 +0100
 
 sdrangel (4.5.1-1) unstable; urgency=medium
 
