@@ -1822,6 +1822,7 @@ void SoapySDROutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKey
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setTx(1);
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("SoapySDR"));
     swgDeviceSettings->setSoapySdrOutputSettings(new SWGSDRangel::SWGSoapySDROutputSettings());
     swgDeviceSettings->getSoapySdrOutputSettings()->init();

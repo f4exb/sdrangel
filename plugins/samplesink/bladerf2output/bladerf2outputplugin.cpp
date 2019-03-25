@@ -30,7 +30,7 @@
 
 const PluginDescriptor BladeRF2OutputPlugin::m_pluginDescriptor = {
     QString("BladeRF2 Output"),
-    QString("4.4.1"),
+    QString("4.5.2"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
