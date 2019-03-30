@@ -139,7 +139,9 @@ bool HackRFInput::start()
         return false;
     }
 
-    if (m_running) stop();
+    if (m_running) {
+        stop();
+    }
 
     m_hackRFThread = new HackRFInputThread(m_dev, &m_sampleFifo);
 
@@ -319,7 +321,20 @@ bool HackRFInput::handleMessage(const Message& message)
             (DeviceSampleSource::fcPos_t) m_settings.m_fcPos,
             m_settings.m_devSampleRate);
         qDebug("HackRFInput::handleMessage: MsgSynchronizeFrequency: centerFrequency: %lld Hz", centerFrequency);
-        setCenterFrequency(centerFrequency);
+        HackRFInputSettings settings = m_settings;
+        settings.m_centerFrequency = centerFrequency;
+
+        if (m_guiMessageQueue)
+        {
+            MsgConfigureHackRF* messageToGUI = MsgConfigureHackRF::create(settings, false);
+            m_guiMessageQueue->push(messageToGUI);
+        }
+
+        m_settings.m_centerFrequency = settings.m_centerFrequency;
+		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
+		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+        m_fileSink->handleMessage(*notif); // forward to file sink
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
         return true;
     }
@@ -329,20 +344,19 @@ bool HackRFInput::handleMessage(const Message& message)
 	}
 }
 
-void HackRFInput::setDeviceCenterFrequency(quint64 freq_hz)
+void HackRFInput::setDeviceCenterFrequency(quint64 freq_hz, qint32 LOppmTenths)
 {
-	qint64 df = ((qint64)freq_hz * m_settings.m_LOppmTenths) / 10000000LL;
-	freq_hz += df;
+    if (!m_dev) {
+        return;
+    }
 
-	hackrf_error rc = (hackrf_error) hackrf_set_freq(m_dev, static_cast<uint64_t>(freq_hz));
+	qint64 df = ((qint64)freq_hz * LOppmTenths) / 10000000LL;
+	hackrf_error rc = (hackrf_error) hackrf_set_freq(m_dev, static_cast<uint64_t>(freq_hz + df));
 
-	if (rc != HACKRF_SUCCESS)
-	{
-		qWarning("HackRFInput::setDeviceCenterFrequency: could not frequency to %llu Hz", freq_hz);
-	}
-	else
-	{
-		qWarning("HackRFInput::setDeviceCenterFrequency: frequency set to %llu Hz", freq_hz);
+	if (rc != HACKRF_SUCCESS) {
+		qWarning("HackRFInput::setDeviceCenterFrequency: could not frequency to %llu Hz", freq_hz + df);
+	} else {
+		qDebug("HackRFInput::setDeviceCenterFrequency: frequency set to %llu Hz", freq_hz + df);
 	}
 }
 
@@ -405,8 +419,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		}
 	}
 
-	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)) // forward delta to buddy if necessary
-	{
+	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)) {
         reverseAPIKeys.append("centerFrequency");
 	}
 
@@ -429,10 +442,14 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
                 settings.m_log2Decim,
                 (DeviceSampleSource::fcPos_t) settings.m_fcPos,
                 settings.m_devSampleRate);
+		setDeviceCenterFrequency(deviceCenterFrequency, settings.m_LOppmTenths);
 
-		if (m_dev != 0) {
-			setDeviceCenterFrequency(deviceCenterFrequency);
-		}
+        if (m_deviceAPI->getSinkBuddies().size() > 0) // forward to buddy if necessary
+	    {
+	        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
+            DeviceHackRFShared::MsgSynchronizeFrequency *freqMsg = DeviceHackRFShared::MsgSynchronizeFrequency::create(deviceCenterFrequency);
+	        buddy->getSampleSinkInputMessageQueue()->push(freqMsg);
+	    }
 
 		forwardChange = true;
 	}

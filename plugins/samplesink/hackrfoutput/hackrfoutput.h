@@ -142,8 +142,8 @@ private:
 	DeviceHackRFParams m_sharedParams;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
-
 	bool m_running;
+
     bool openDevice();
     void closeDevice();
 	bool applySettings(const HackRFOutputSettings& settings, bool force);

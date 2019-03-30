@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 F4EXB                                                      //
+// Copyright (C) 2016-2019 F4EXB                                                 //
 // written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -35,6 +35,12 @@ namespace SWGSDRangel
 class SDRBASE_API DeviceSampleSink : public QObject {
 	Q_OBJECT
 public:
+    typedef enum {
+        FC_POS_INFRA = 0,
+        FC_POS_SUPRA,
+        FC_POS_CENTER
+    } fcPos_t;
+
 	DeviceSampleSink();
 	virtual ~DeviceSampleSink();
 	virtual void destroy() = 0;
@@ -107,6 +113,27 @@ public:
     virtual void setMessageQueueToGUI(MessageQueue *queue) = 0; // pure virtual so that child classes must have to deal with this
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
 	SampleSourceFifo* getSampleFifo() { return &m_sampleSourceFifo; }
+
+    static qint64 calculateDeviceCenterFrequency(
+            quint64 centerFrequency,
+            qint64 transverterDeltaFrequency,
+            int log2Interp,
+            fcPos_t fcPos,
+            quint32 devSampleRate,
+            bool transverterMode = false);
+
+    static qint64 calculateCenterFrequency(
+            quint64 deviceCenterFrequency,
+            qint64 transverterDeltaFrequency,
+            int log2Interp,
+            fcPos_t fcPos,
+            quint32 devSampleRate,
+            bool transverterMode = false);
+
+    static qint32 calculateFrequencyShift(
+            int log2Interp,
+            fcPos_t fcPos,
+            quint32 devSampleRate);
 
 protected slots:
 	void handleInputMessages();
