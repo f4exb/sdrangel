@@ -24,6 +24,8 @@ STOP_COUNT = 0
 OTHER_DICT = {}
 RUNNING = set()
 DELAY = 1
+FREQ_SYNC = False
+FREQ_HAS_CHANGED = False
 
 app = Flask(__name__)
 
@@ -99,6 +101,51 @@ def get_sdrangel_ip(request):
         return request.environ['HTTP_X_FORWARDED_FOR']
 
 # ======================================================================
+def get_center_frequency(content):
+    """ Look for center frequency recursively """
+# ----------------------------------------------------------------------
+    for k in content:
+        if isinstance(content[k], dict):
+            return get_center_frequency(content[k])
+        elif k == "centerFrequency":
+            return content[k]
+
+# ======================================================================
+def change_center_frequency(content, new_frequency):
+    """ Change center frequency searching recursively """
+# ----------------------------------------------------------------------
+    for k in content:
+        if isinstance(content[k], dict):
+            change_center_frequency(content[k], new_frequency)
+        elif k == "centerFrequency":
+            content[k] = new_frequency
+
+# ======================================================================
+def set_center_frequency(new_frequency, device_index, sdrangel_ip, sdrangel_port):
+    """ Set a new center frequency for given device """
+# ----------------------------------------------------------------------
+    base_url = f'http://{sdrangel_ip}:{sdrangel_port}/sdrangel'
+    r = requests.get(url=base_url + f'/deviceset/{device_index}/device/settings')
+    if r.status_code / 100 == 2:
+        rj = r.json()
+        frequency =  get_center_frequency(rj)
+        if new_frequency != frequency:
+            change_center_frequency(rj, new_frequency)
+            r = requests.patch(url=base_url + f'/deviceset/{device_index}/device/settings', json=rj)
+            if r.status_code / 100 == 2:
+                print(f'set_center_frequency: changed center frequency of device {device_index} to {new_frequency}')
+                global FREQ_HAS_CHANGED
+                FREQ_HAS_CHANGED = True
+                return jsonify(rj)
+            else:
+                print(f'set_center_frequency: failed to change center frequency of device {device_index}. HTTP error {r.status_code}')
+        else:
+            print(f'set_center_frequency: frequency of device {device_index} is unchanged')
+    else:
+        print(f'set_center_frequency: error getting settings for device {device_index}. HTTP error {r.status_code}')
+    return ""
+
+# ======================================================================
 @app.route('/sdrangel')
 def hello_sdrangel():
     """ Just to test if it works """
@@ -155,6 +202,34 @@ def device_run(deviceset_index):
         return f'RUN device {deviceset_index}'
 
 # ======================================================================
+@app.route('/sdrangel/deviceset/<int:deviceset_index>/device/settings', methods=['GET', 'PATCH', 'PUT'])
+def device_settings(deviceset_index):
+    ''' Reply with the expected reply of a working device '''
+# ----------------------------------------------------------------------
+    originator_index = None
+    content = request.get_json(silent=True)
+    if content:
+        originator_index = content.get('originatorIndex')
+    if originator_index is None:
+        print('device_settings: SDRangel reverse API v4.5.2 or higher required. No or invalid originator information')
+        return ""
+    sdrangel_ip = get_sdrangel_ip(request)
+    other_device_index = OTHER_DICT.get(originator_index)
+    if other_device_index is None:
+        print('device_settings: Device {originator_index} is not part of the linked pair. Aborting request.')
+        return ""
+    new_frequency = get_center_frequency(content)
+    if new_frequency and FREQ_SYNC:
+        global FREQ_HAS_CHANGED
+        if FREQ_HAS_CHANGED:
+            FREQ_HAS_CHANGED = False
+            print('device_settings: frequency was just changed. Ignoring this change.')
+        else:
+            set_center_frequency(new_frequency, other_device_index, sdrangel_ip, SDRANGEL_API_PORT)
+            print(f'device_settings: Device {originator_index} changed frequency to {new_frequency}')
+    return ""
+
+# ======================================================================
 def getInputOptions():
     """ This is the argument line parser """
 # ----------------------------------------------------------------------
@@ -164,6 +239,7 @@ def getInputOptions():
     parser.add_argument("-p", "--port-sdr", dest="sdrangel_port", help="SDRangel REST API port", metavar="PORT", type=int)
     parser.add_argument("-l", "--link", dest="linked_devices", help="pair of indexes of devices to link", metavar="LIST", type=int, nargs=2)
     parser.add_argument("-d", "--delay", dest="delay", help="switchover delay in seconds", metavar="SECONDS", type=int)
+    parser.add_argument("-f", "--freq-sync", dest="freq_sync", help="synchronize linked devices frequencies", action="store_true")
     options = parser.parse_args()
 
     if options.addr == None:
@@ -176,13 +252,15 @@ def getInputOptions():
         options.linked_devices = [0, 1]
     if options.delay == None:
         options.delay = 1
+    if options.freq_sync == None:
+        options.freq_sync = False
 
     other_dict = {
         options.linked_devices[0]: options.linked_devices[1],
         options.linked_devices[1]: options.linked_devices[0]
     }
 
-    return options.addr, options.port, options.sdrangel_port, options.delay, other_dict
+    return options.addr, options.port, options.sdrangel_port, options.delay, options.freq_sync, other_dict
 
 # ======================================================================
 def main():
@@ -191,8 +269,9 @@ def main():
     global SDRANGEL_API_PORT
     global OTHER_DICT
     global DELAY
-    addr, port, SDRANGEL_API_PORT, DELAY, OTHER_DICT = getInputOptions()
-    print(f'main: starting: SDRangel port: {SDRANGEL_API_PORT} links: {OTHER_DICT}')
+    global FREQ_SYNC
+    addr, port, SDRANGEL_API_PORT, DELAY, FREQ_SYNC, OTHER_DICT = getInputOptions()
+    print(f'main: starting: SDRangel port: {SDRANGEL_API_PORT} links: {OTHER_DICT} freq sync: {FREQ_SYNC}')
     app.run(debug=True, host=addr, port=port)
 
 

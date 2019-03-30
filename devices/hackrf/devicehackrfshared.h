@@ -17,30 +17,32 @@
 #ifndef DEVICES_HACKRF_DEVICEHACKRFSHARED_H_
 #define DEVICES_HACKRF_DEVICEHACKRFSHARED_H_
 
+#include <stdint.h>
+
 #include "util/message.h"
 #include "export.h"
 
 class DEVICES_API DeviceHackRFShared
 {
 public:
-    class DEVICES_API MsgConfigureFrequencyDelta : public Message
+    class DEVICES_API MsgSynchronizeFrequency : public Message
     {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        int getFrequencyDelta() const { return m_frequencyDelta; }
+        uint64_t getFrequency() const { return m_frequency; }
 
-        static MsgConfigureFrequencyDelta *create(int frequencyDelta)
+        static MsgSynchronizeFrequency *create(uint64_t frequency)
         {
-            return new MsgConfigureFrequencyDelta(frequencyDelta);
+            return new MsgSynchronizeFrequency(frequency);
         }
 
     private:
-        int m_frequencyDelta;
+        uint64_t m_frequency;
 
-        MsgConfigureFrequencyDelta(int frequencyDelta) :
+        MsgSynchronizeFrequency(uint64_t frequency) :
             Message(),
-            m_frequencyDelta(frequencyDelta)
+            m_frequency(frequency)
         { }
     };
 

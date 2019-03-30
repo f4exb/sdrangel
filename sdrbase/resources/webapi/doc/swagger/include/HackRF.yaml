@@ -27,8 +27,6 @@ HackRFInputSettings:
       type: integer
     iqCorrection:
       type: integer
-    linkTxFrequency:
-      type: integer
     fileRecordName:
       type: string
     useReverseAPI:

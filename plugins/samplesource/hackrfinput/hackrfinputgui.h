@@ -88,7 +88,6 @@ private slots:
 	void on_LOppm_valueChanged(int value);
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);
-    void on_linkTxFreq_toggled(bool checked);
 	void on_biasT_stateChanged(int state);
 	void on_decim_currentIndexChanged(int index);
 	void on_fcPos_currentIndexChanged(int index);

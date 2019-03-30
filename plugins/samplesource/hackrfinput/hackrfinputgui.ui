@@ -253,7 +253,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="5">
+     <item row="0" column="4">
       <widget class="QCheckBox" name="biasT">
        <property name="toolTip">
         <string>Activate antenna bias tee</string>
@@ -266,7 +266,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="6">
+     <item row="0" column="5">
       <widget class="QCheckBox" name="lnaExt">
        <property name="toolTip">
         <string>Extra LNA +14dB</string>
@@ -291,20 +291,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item row="0" column="4">
-      <widget class="ButtonSwitch" name="linkTxFreq">
-       <property name="toolTip">
-        <string>Toggle Tx frequency link</string>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../sdrgui/resources/res.qrc">
-         <normaloff>:/link.png</normaloff>:/link.png</iconset>
-       </property>
-      </widget>
      </item>
     </layout>
    </item>

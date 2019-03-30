@@ -181,15 +181,6 @@ void HackRFOutputGui::handleInputMessages()
 
             delete message;
         }
-        else if (DeviceHackRFShared::MsgConfigureFrequencyDelta::match(*message))
-        {
-            blockApplySettings(true);
-            DeviceHackRFShared::MsgConfigureFrequencyDelta* deltaMsg = (DeviceHackRFShared::MsgConfigureFrequencyDelta *) message;
-            ui->centerFrequency->setValue(ui->centerFrequency->getValue() + (deltaMsg->getFrequencyDelta()/1000));
-            blockApplySettings(false);
-
-            delete message;
-        }
         else
         {
             if (handleMessage(*message))

@@ -39,7 +39,6 @@ struct HackRFInputSettings {
 	bool m_lnaExt;
 	bool m_dcBlock;
 	bool m_iqCorrection;
-	bool m_linkTxFrequency;
 	QString m_fileRecordName;
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;

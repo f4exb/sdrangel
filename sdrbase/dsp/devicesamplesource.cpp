@@ -68,6 +68,29 @@ qint64 DeviceSampleSource::calculateDeviceCenterFrequency(
     return deviceCenterFrequency;
 }
 
+qint64 DeviceSampleSource::calculateCenterFrequency(
+            quint64 deviceCenterFrequency,
+            qint64 transverterDeltaFrequency,
+            int log2Decim,
+            fcPos_t fcPos,
+            quint32 devSampleRate,
+            bool transverterMode)
+{
+    qint64 centerFrequency = deviceCenterFrequency;
+    centerFrequency += calculateFrequencyShift(log2Decim, fcPos, devSampleRate);
+    centerFrequency += transverterMode ? transverterDeltaFrequency : 0;
+    centerFrequency = centerFrequency < 0 ? 0 : centerFrequency;
+
+    qDebug() << "DeviceSampleSource::calculateCenterFrequency:"
+            << " desired center freq: " << centerFrequency << " Hz"
+            << " device center freq: " << deviceCenterFrequency << " Hz"
+            << " device sample rate: " << devSampleRate << "S/s"
+            << " Actual sample rate: " << devSampleRate/(1<<log2Decim) << "S/s"
+            << " center freq position code: " << fcPos;
+
+    return centerFrequency;
+}
+
 /**
  * log2Decim = 0:  no shift
  *

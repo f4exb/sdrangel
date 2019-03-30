@@ -276,12 +276,6 @@ void HackRFInputGui::on_iqImbalance_toggled(bool checked)
 	sendSettings();
 }
 
-void HackRFInputGui::on_linkTxFreq_toggled(bool checked)
-{
-    m_settings.m_linkTxFrequency = checked;
-    sendSettings();
-}
-
 void HackRFInputGui::on_bbFilter_currentIndexChanged(int index)
 {
     int newBandwidth = HackRFBandwidths::getBandwidth(index);

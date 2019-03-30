@@ -24,12 +24,12 @@ This is the center frequency of reception in kHz.
 
 <h4>1.2: Start/Stop</h4>
 
-Device start / stop button. 
+Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
   - Red square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
-  
+
 If you have the Tx open in another tab and it is running then it will be stopped automatically before the Rx starts. In a similar manner the Rx will be stopped before the Tx is started from the Tx tab.
 
 The settings on Rx or Tx tab are reapplied on start so these settings can be considered independent.
@@ -40,7 +40,7 @@ Record baseband I/Q stream toggle button
 
 <h4>1.4: Baseband sample rate</h4>
 
-Baseband I/Q sample rate in kS/s. This is the device sample rate (4) divided by the decimation factor (6). 
+Baseband I/Q sample rate in kS/s. This is the device sample rate (4) divided by the decimation factor (6).
 
 <h3>2: Local Oscillator correction</h3>
 
@@ -53,21 +53,13 @@ These buttons control the local DSP auto correction options:
   - **DC**: auto remove DC component
   - **IQ**: auto make I/Q balance. The DC correction must be enabled for this to be effective.
 
-<h3>3A: Link Tx frequency</h3>
-
-Use this button to toggle the device Tx frequency link.
-
-When active (button lit) and a tab is opened for the Tx part of the same device this option will activate the link of the Tx frequency to the Rx frequency. Thus when changing the Rx frequency the Tx frequency will vary by the same amount. This facilitates the split operation or repeater operation. You can also set the Tx frequency so that it follows exactly the Rx frequency (simplex).
-
-The amount of shift is simply set by changing the frequency in the Tx tab.
-  
 <h3>4: Bias tee</h3>
 
 Use this checkbox to toggle the +5V power supply on the antenna connector.
 
 <h3>5:RF amp</h3>
 
-Use this checkbox to toggle the extra low noise amplifier (LNA). This gives an additional gain of 14 dB. 
+Use this checkbox to toggle the extra low noise amplifier (LNA). This gives an additional gain of 14 dB.
 
 <h3>6: Device sample rate</h3>
 
@@ -89,10 +81,10 @@ The device stream from the HackRF is decimated to obtain the baseband stream. Po
 <h3>8: Baseband center frequency position relative the the HackRF Rx center frequency</h3>
 
   - **Cen**: the decimation operation takes place around the HackRF Rx center frequency Fs
-  - **Inf**: the decimation operation takes place around Fs - Fc. 
+  - **Inf**: the decimation operation takes place around Fs - Fc.
   - **Sup**: the decimation operation takes place around Fs + Fc.
-  
-With SR as the sample rate before decimation Fc is calculated as: 
+
+With SR as the sample rate before decimation Fc is calculated as:
 
   - if decimation n is 4 or lower:  Fc = SR/2^(log2(n)-1). The device center frequency is on the side of the baseband. You need a RF filter bandwidth at least twice the baseband.
   - if decimation n is 8 or higher: Fc = SR/n. The device center frequency is half the baseband away from the side of the baseband. You need a RF filter bandwidth at least 3 times the baseband.

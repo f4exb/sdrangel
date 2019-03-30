@@ -246,16 +246,6 @@ bool HackRFOutput::handleMessage(const Message& message)
 
 		return true;
 	}
-    else if (DeviceHackRFShared::MsgConfigureFrequencyDelta::match(message))
-    {
-        DeviceHackRFShared::MsgConfigureFrequencyDelta& conf = (DeviceHackRFShared::MsgConfigureFrequencyDelta&) message;
-        HackRFOutputSettings newSettings = m_settings;
-        newSettings.m_centerFrequency = m_settings.m_centerFrequency + conf.getFrequencyDelta();
-        qDebug() << "HackRFOutput::handleMessage: DeviceHackRFShared::MsgConfigureFrequencyDelta: newFreq: " << newSettings.m_centerFrequency;
-        applySettings(newSettings, false);
-
-        return true;
-    }
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
@@ -313,18 +303,18 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
     QList<QString> reverseAPIKeys;
 
 	qDebug() << "HackRFOutput::applySettings"
-        << " m_centerFrequency: " << m_settings.m_centerFrequency
-        << " m_LOppmTenths: " << m_settings.m_LOppmTenths
-        << " m_bandwidth: " << m_settings.m_bandwidth
-        << " m_devSampleRate: " << m_settings.m_devSampleRate
-        << " m_log2Interp: " << m_settings.m_log2Interp
-        << " m_biasT: " << m_settings.m_biasT
-        << " m_lnaExt: " << m_settings.m_lnaExt
-        << " m_vgaGain: " << m_settings.m_vgaGain
-        << " m_useReverseAPI: " << m_settings.m_useReverseAPI
-        << " m_reverseAPIAddress: " << m_settings.m_reverseAPIAddress
-        << " m_reverseAPIPort: " << m_settings.m_reverseAPIPort
-        << " m_reverseAPIDeviceIndex: " << m_settings.m_reverseAPIDeviceIndex
+        << " m_centerFrequency: " << settings.m_centerFrequency
+        << " m_LOppmTenths: " << settings.m_LOppmTenths
+        << " m_bandwidth: " << settings.m_bandwidth
+        << " m_devSampleRate: " << settings.m_devSampleRate
+        << " m_log2Interp: " << settings.m_log2Interp
+        << " m_biasT: " << settings.m_biasT
+        << " m_lnaExt: " << settings.m_lnaExt
+        << " m_vgaGain: " << settings.m_vgaGain
+        << " m_useReverseAPI: " << settings.m_useReverseAPI
+        << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
+        << " m_reverseAPIPort: " << settings.m_reverseAPIPort
+        << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
         << " force: " << force;
 
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force) {
@@ -389,8 +379,16 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 		}
 	}
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
+    {
         reverseAPIKeys.append("centerFrequency");
+
+        if (m_deviceAPI->getSourceBuddies().size() > 0)
+	    {
+	        DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
+            DeviceHackRFShared::MsgSynchronizeFrequency *freqMsg = DeviceHackRFShared::MsgSynchronizeFrequency::create(settings.m_centerFrequency);
+	        buddy->getSampleSourceInputMessageQueue()->push(freqMsg);
+	    }
     }
     if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
         reverseAPIKeys.append("LOppmTenths");

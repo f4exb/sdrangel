@@ -309,6 +309,20 @@ bool HackRFInput::handleMessage(const Message& message)
 
         return true;
     }
+    else if (DeviceHackRFShared::MsgSynchronizeFrequency::match(message))
+    {
+        DeviceHackRFShared::MsgSynchronizeFrequency& freqMsg = (DeviceHackRFShared::MsgSynchronizeFrequency&) message;
+        qint64 centerFrequency = DeviceSampleSource::calculateCenterFrequency(
+            freqMsg.getFrequency(),
+            0,
+            m_settings.m_log2Decim,
+            (DeviceSampleSource::fcPos_t) m_settings.m_fcPos,
+            m_settings.m_devSampleRate);
+        qDebug("HackRFInput::handleMessage: MsgSynchronizeFrequency: centerFrequency: %lld Hz", centerFrequency);
+        setCenterFrequency(centerFrequency);
+
+        return true;
+    }
 	else
 	{
 		return false;
@@ -347,9 +361,6 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
     }
     if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force) {
         reverseAPIKeys.append("iqCorrection");
-    }
-    if ((m_settings.m_linkTxFrequency != settings.m_linkTxFrequency) || force) {
-        reverseAPIKeys.append("linkTxFrequency");
     }
 
 	if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
@@ -397,21 +408,6 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)) // forward delta to buddy if necessary
 	{
         reverseAPIKeys.append("centerFrequency");
-
-        if (m_settings.m_linkTxFrequency && (m_deviceAPI->getSinkBuddies().size() > 0))
-	    {
-	        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
-            DeviceHackRFShared::MsgConfigureFrequencyDelta *deltaMsg = DeviceHackRFShared::MsgConfigureFrequencyDelta::create(
-                    settings.m_centerFrequency - m_settings.m_centerFrequency);
-
-	        if (buddy->getSampleSinkGUIMessageQueue())
-	        {
-	            DeviceHackRFShared::MsgConfigureFrequencyDelta *deltaMsgToGUI = new DeviceHackRFShared::MsgConfigureFrequencyDelta(*deltaMsg);
-                buddy->getSampleSinkGUIMessageQueue()->push(deltaMsgToGUI);
-	        }
-
-	        buddy->getSampleSinkInputMessageQueue()->push(deltaMsg);
-	    }
 	}
 
     if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
@@ -561,8 +557,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
             << " m_devSampleRate: " << m_settings.m_devSampleRate
             << " m_biasT: " << m_settings.m_biasT
             << " m_lnaExt: " << m_settings.m_lnaExt
-            << " m_dcBlock: " << m_settings.m_dcBlock
-            << " m_linkTxFrequency: " << m_settings.m_linkTxFrequency;
+            << " m_dcBlock: " << m_settings.m_dcBlock;
 
 	return true;
 }
@@ -626,9 +621,6 @@ int HackRFInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("iqCorrection")) {
         settings.m_iqCorrection = response.getHackRfInputSettings()->getIqCorrection() != 0;
     }
-    if (deviceSettingsKeys.contains("linkTxFrequency")) {
-        settings.m_linkTxFrequency = response.getHackRfInputSettings()->getLinkTxFrequency() != 0;
-    }
     if (deviceSettingsKeys.contains("fileRecordName")) {
         settings.m_fileRecordName = *response.getHackRfInputSettings()->getFileRecordName();
     }
@@ -672,7 +664,6 @@ void HackRFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getHackRfInputSettings()->setLnaExt(settings.m_lnaExt ? 1 : 0);
     response.getHackRfInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getHackRfInputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
-    response.getHackRfInputSettings()->setLinkTxFrequency(settings.m_linkTxFrequency ? 1 : 0);
 
     if (response.getHackRfInputSettings()->getFileRecordName()) {
         *response.getHackRfInputSettings()->getFileRecordName() = settings.m_fileRecordName;
@@ -766,9 +757,6 @@ void HackRFInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     }
     if (deviceSettingsKeys.contains("iqCorrection") || force) {
         swgHackRFInputSettings->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("linkTxFrequency") || force) {
-        swgHackRFInputSettings->setLinkTxFrequency(settings.m_linkTxFrequency ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("fileRecordName") || force) {
         swgHackRFInputSettings->setFileRecordName(new QString(settings.m_fileRecordName));
