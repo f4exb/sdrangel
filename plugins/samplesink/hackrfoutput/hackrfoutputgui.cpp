@@ -298,6 +298,12 @@ void HackRFOutputGui::on_interp_currentIndexChanged(int index)
 	sendSettings();
 }
 
+void HackRFOutputGui::on_fcPos_currentIndexChanged(int index)
+{
+    m_settings.m_fcPos = (HackRFOutputSettings::fcPos_t) (index < 0 ? 0 : index > 2 ? 2 : index);
+	sendSettings();
+}
+
 void HackRFOutputGui::on_txvga_valueChanged(int value)
 {
 	if ((value < 0) || (value > 47))

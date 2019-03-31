@@ -58,6 +58,11 @@ void HackRFOutputThread::setLog2Interpolation(unsigned int log2Interp)
 	m_log2Interp = log2Interp;
 }
 
+void HackRFOutputThread::setFcPos(int fcPos)
+{
+	m_fcPos = fcPos;
+}
+
 void HackRFOutputThread::run()
 {
 	hackrf_error rc;
@@ -121,28 +126,83 @@ void HackRFOutputThread::callback(qint8* buf, qint32 len)
 	}
 	else
 	{
-        switch (m_log2Interp)
+		if (m_fcPos == 0) // Infra
+		{
+            switch (m_log2Interp)
+            {
+            case 1:
+                m_interpolators.interpolate2_inf(&beginRead, buf, len);
+                break;
+            case 2:
+                m_interpolators.interpolate4_inf(&beginRead, buf, len);
+                break;
+            // case 3:
+            //     m_interpolators.interpolate8_cen(&beginRead, buf, len);
+            //     break;
+            // case 4:
+            //     m_interpolators.interpolate16_cen(&beginRead, buf, len);
+            //     break;
+            // case 5:
+            //     m_interpolators.interpolate32_cen(&beginRead, buf, len);
+            //     break;
+            // case 6:
+            //     m_interpolators.interpolate64_cen(&beginRead, buf, len);
+            //     break;
+            default:
+                break;
+            }
+        }
+        else if (m_fcPos == 1) // Supra
         {
-        case 1:
-            m_interpolators.interpolate2_cen(&beginRead, buf, len);
-            break;
-        case 2:
-            m_interpolators.interpolate4_cen(&beginRead, buf, len);
-            break;
-        case 3:
-            m_interpolators.interpolate8_cen(&beginRead, buf, len);
-            break;
-        case 4:
-            m_interpolators.interpolate16_cen(&beginRead, buf, len);
-            break;
-        case 5:
-            m_interpolators.interpolate32_cen(&beginRead, buf, len);
-            break;
-        case 6:
-            m_interpolators.interpolate64_cen(&beginRead, buf, len);
-            break;
-        default:
-            break;
+            switch (m_log2Interp)
+            {
+            case 1:
+                m_interpolators.interpolate2_sup(&beginRead, buf, len);
+                break;
+            case 2:
+                m_interpolators.interpolate4_sup(&beginRead, buf, len);
+                break;
+            // case 3:
+            //     m_interpolators.interpolate8_cen(&beginRead, buf, len);
+            //     break;
+            // case 4:
+            //     m_interpolators.interpolate16_cen(&beginRead, buf, len);
+            //     break;
+            // case 5:
+            //     m_interpolators.interpolate32_cen(&beginRead, buf, len);
+            //     break;
+            // case 6:
+            //     m_interpolators.interpolate64_cen(&beginRead, buf, len);
+            //     break;
+            default:
+                break;
+            }
+        }
+        else if (m_fcPos == 2) // Center
+        {
+            switch (m_log2Interp)
+            {
+            case 1:
+                m_interpolators.interpolate2_cen(&beginRead, buf, len);
+                break;
+            case 2:
+                m_interpolators.interpolate4_cen(&beginRead, buf, len);
+                break;
+            case 3:
+                m_interpolators.interpolate8_cen(&beginRead, buf, len);
+                break;
+            case 4:
+                m_interpolators.interpolate16_cen(&beginRead, buf, len);
+                break;
+            case 5:
+                m_interpolators.interpolate32_cen(&beginRead, buf, len);
+                break;
+            case 6:
+                m_interpolators.interpolate64_cen(&beginRead, buf, len);
+                break;
+            default:
+                break;
+            }
         }
 	}
 }

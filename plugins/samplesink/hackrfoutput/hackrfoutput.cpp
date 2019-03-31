@@ -335,6 +335,7 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
         << " m_bandwidth: " << settings.m_bandwidth
         << " m_devSampleRate: " << settings.m_devSampleRate
         << " m_log2Interp: " << settings.m_log2Interp
+        << " m_fcPos: " << settings.m_fcPos
         << " m_biasT: " << settings.m_biasT
         << " m_lnaExt: " << settings.m_lnaExt
         << " m_vgaGain: " << settings.m_vgaGain
@@ -432,6 +433,13 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
         }
 
 		forwardChange = true;
+	}
+
+	if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+	{
+		if (m_hackRFThread != 0) {
+			m_hackRFThread->setFcPos((int) settings.m_fcPos);
+		}
 	}
 
 	if ((m_settings.m_vgaGain != settings.m_vgaGain) || force)

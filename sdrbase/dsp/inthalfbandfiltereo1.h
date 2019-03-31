@@ -620,6 +620,38 @@ public:
         doInterpolateFIR(x2, y2);
     }
 
+    void myInterpolateInf(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2, qint32 *x3, qint32 *y3, qint32 *x4, qint32 *y4)
+    {
+        myInterpolate(x1, y1, x2, y2);
+        myInterpolate(x3, y3, x4, y4);
+        // rotation
+        qint32 x;
+        x = *x1;
+        *x1 = *y1;
+        *y1 = -x;
+        *x2 = -*x2;
+        *y2 = -*y2;
+        x = *x3;
+        *x3 = -*y3;
+        *y3 = x;
+    }
+
+    void myInterpolateSup(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2, qint32 *x3, qint32 *y3, qint32 *x4, qint32 *y4)
+    {
+        myInterpolate(x1, y1, x2, y2);
+        myInterpolate(x3, y3, x4, y4);
+        // rotation
+        qint32 x;
+        x = *x1;
+        *x1 = -*y1;
+        *y1 = x;
+        *x2 = -*x2;
+        *y2 = -*y2;
+        x = *x3;
+        *x3 = *y3;
+        *y3 = -x;
+    }
+
 protected:
     int32_t m_even[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder]; // double buffer technique
     int32_t m_odd[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder]; // double buffer technique

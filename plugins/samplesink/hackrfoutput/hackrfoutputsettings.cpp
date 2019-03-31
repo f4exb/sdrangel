@@ -31,6 +31,7 @@ void HackRFOutputSettings::resetToDefaults()
 	m_LOppmTenths = 0;
 	m_biasT = false;
 	m_log2Interp = 0;
+    m_fcPos = FC_POS_CENTER;
 	m_lnaExt = false;
 	m_vgaGain = 22;
 	m_bandwidth = 1750000;
@@ -46,6 +47,7 @@ QByteArray HackRFOutputSettings::serialize() const
 	SimpleSerializer s(1);
 
 	s.writeS32(1, m_LOppmTenths);
+    s.writeS32(2, (int) m_fcPos);
 	s.writeBool(3, m_biasT);
 	s.writeU32(4, m_log2Interp);
 	s.writeBool(5, m_lnaExt);
@@ -73,8 +75,11 @@ bool HackRFOutputSettings::deserialize(const QByteArray& data)
 	if (d.getVersion() == 1)
 	{
 		uint32_t uintval;
+        int32_t intval;
 
 		d.readS32(1, &m_LOppmTenths, 0);
+        d.readS32(2, &intval, 2);
+        m_fcPos = (fcPos_t) (intval < 0 ? 0 : intval > 2 ? 2 : intval);
 		d.readBool(3, &m_biasT, false);
 		d.readU32(4, &m_log2Interp, 0);
 		d.readBool(5, &m_lnaExt, false);

@@ -747,6 +747,38 @@ public:
         doInterpolateFIR(x2, y2);
     }
 
+    void myInterpolateInf(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2, qint32 *x3, qint32 *y3, qint32 *x4, qint32 *y4)
+    {
+        myInterpolate(x1, y1, x2, y2);
+        myInterpolate(x3, y3, x4, y4);
+        // rotation
+        qint32 x;
+        x = *x1;
+        *x1 = *y1;
+        *y1 = -x;
+        *x2 = -*x2;
+        *y2 = -*y2;
+        x = *x3;
+        *x3 = -*y3;
+        *y3 = x;
+    }
+
+    void myInterpolateSup(qint32 *x1, qint32 *y1, qint32 *x2, qint32 *y2, qint32 *x3, qint32 *y3, qint32 *x4, qint32 *y4)
+    {
+        myInterpolate(x1, y1, x2, y2);
+        myInterpolate(x3, y3, x4, y4);
+        // rotation
+        qint32 x;
+        x = *x1;
+        *x1 = -*y1;
+        *y1 = x;
+        *x2 = -*x2;
+        *y2 = -*y2;
+        x = *x3;
+        *x3 = *y3;
+        *y3 = -x;
+    }
+
 protected:
 	AccuType m_samples[HBFIRFilterTraits<HBFilterOrder>::hbOrder + 1][2];     // Valgrind optim (from qint16)
 	qint16 m_ptr;

@@ -21,11 +21,18 @@
 #include <QString>
 
 struct HackRFOutputSettings {
+	typedef enum {
+		FC_POS_INFRA = 0,
+		FC_POS_SUPRA,
+		FC_POS_CENTER
+	} fcPos_t;
+
 	quint64 m_centerFrequency;
 	qint32  m_LOppmTenths;
 	quint32 m_bandwidth;
 	quint32 m_vgaGain;
 	quint32 m_log2Interp;
+  	fcPos_t m_fcPos;
 	quint64 m_devSampleRate;
 	bool m_biasT;
 	bool m_lnaExt;

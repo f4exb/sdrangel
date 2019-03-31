@@ -37,6 +37,7 @@ public:
 	void startWork();
 	void stopWork();
 	void setLog2Interpolation(unsigned int log2_interp);
+    void setFcPos(int fcPos);
 
 private:
 	QMutex m_startWaitMutex;
@@ -48,6 +49,7 @@ private:
 	SampleSourceFifo* m_sampleFifo;
 
 	unsigned int m_log2Interp;
+    int m_fcPos;
 
     Interpolators<qint8, SDR_TX_SAMP_SZ, 8> m_interpolators;
 
