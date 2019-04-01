@@ -211,6 +211,7 @@ void HackRFOutputGui::displaySettings()
 	ui->sampleRate->setValue(m_settings.m_devSampleRate);
 
 	ui->interp->setCurrentIndex(m_settings.m_log2Interp);
+    ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
 	ui->lnaExt->setChecked(m_settings.m_lnaExt);
 	ui->txvgaGainText->setText(tr("%1dB").arg(m_settings.m_vgaGain));

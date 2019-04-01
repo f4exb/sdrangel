@@ -278,7 +278,7 @@ bool HackRFOutput::handleMessage(const Message& message)
             freqMsg.getFrequency(),
             0,
             m_settings.m_log2Interp,
-            DeviceSampleSink::FC_POS_CENTER,
+            (DeviceSampleSink::fcPos_t) m_settings.m_fcPos,
             m_settings.m_devSampleRate);
         qDebug("HackRFOutput::handleMessage: MsgSynchronizeFrequency: centerFrequency: %lld Hz", centerFrequency);
         HackRFOutputSettings settings = m_settings;
@@ -414,14 +414,17 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
         reverseAPIKeys.append("LOppmTenths");
     }
 
-	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency) ||
-			(m_settings.m_LOppmTenths != settings.m_LOppmTenths))
+	if ((m_settings.m_centerFrequency != settings.m_centerFrequency) ||
+	    (m_settings.m_devSampleRate != settings.m_devSampleRate) ||
+        (m_settings.m_LOppmTenths != settings.m_LOppmTenths) ||
+        (m_settings.m_log2Interp != settings.m_log2Interp) ||
+        (m_settings.m_fcPos != settings.m_fcPos) || force)
 	{
         qint64 deviceCenterFrequency = DeviceSampleSink::calculateDeviceCenterFrequency(
                 settings.m_centerFrequency,
                 0,
                 settings.m_log2Interp,
-                DeviceSampleSink::FC_POS_CENTER,
+                (DeviceSampleSink::fcPos_t) settings.m_fcPos,
                 settings.m_devSampleRate);
         setDeviceCenterFrequency(deviceCenterFrequency, settings.m_LOppmTenths);
 

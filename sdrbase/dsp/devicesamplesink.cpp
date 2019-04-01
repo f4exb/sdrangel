@@ -96,41 +96,48 @@ qint64 DeviceSampleSink::calculateCenterFrequency(
 /**
  * log2Interp = 0:  no shift
  *
- * n = log2Interp <= 2: fc = +/- 1/2^(n-1)
- *      center
- *  |     ^     |
- *  | inf | sup |
- *     ^     ^
+ * log2Interp = 1:  middle of side band (inf or sup: 1/2)
+ *        ^     |     ^
+ *  | inf | inf | sup | sup |
  *
- * n = log2Interp > 2: fc = +/- 1/2^n
- *         center
- *  |         ^         |
- *  |  |inf|  |  |sup|  |
- *       ^         ^
+ * log2Interp = 2:  middle of far side half side band (inf, inf or sup, sup: 1/2 + 1/4)
+ *     ^        |        ^
+ *  | inf | inf | sup | sup |
+ *
+ * log2Interp = 3:  inf, inf, sup or sup, sup, inf: 1/2 + 1/4 - 1/8 = 5/8
+ * log2Interp = 4:  inf, inf, sup, inf or sup, sup, inf, sup: 1/2 + 1/4 - 1/8 + 1/16 = 11/16
+ * log2Interp = 5:  inf, inf, sup, inf, sup or sup, sup, inf, sup, inf: 1/2 + 1/4 - 1/8 + 1/16 - 1/32 = 21/32
+ * log2Interp = 6:  inf, sup, inf, sup, inf, sup or sup, inf, sup, inf, sup, inf: 1/2 - 1/4 + 1/8 -1/16 + 1/32 - 1/64 = 21/64
+ *
  */
 qint32 DeviceSampleSink::calculateFrequencyShift(
             int log2Interp,
             fcPos_t fcPos,
             quint32 devSampleRate)
 {
-    if (log2Interp == 0) { // no shift at all
+    if (fcPos == FC_POS_CENTER) {
         return 0;
-    } else if (log2Interp < 3) {
-        if (fcPos == FC_POS_INFRA) { // shift in the square next to center frequency
-            return -(devSampleRate / (1<<(log2Interp+1)));
-        } else if (fcPos == FC_POS_SUPRA) {
-            return devSampleRate / (1<<(log2Interp+1));
-        } else {
-            return 0;
-        }
+    }
+
+    int sign = fcPos == FC_POS_INFRA ? -1 : 1;
+    int halfSampleRate = devSampleRate / 2; // fractions are relative to sideband thus based on half the sample rate
+
+    if (log2Interp == 0) {
+        return 0;
+    } else if (log2Interp == 1) {
+        return sign * (halfSampleRate / 2);
+    } else if (log2Interp == 2) {
+        return sign * ((halfSampleRate * 3) / 4);
+    } else if (log2Interp == 3) {
+        return sign * ((halfSampleRate * 5) / 8);
+    } else if (log2Interp == 4) {
+        return sign * ((halfSampleRate * 11) / 16);
+    } else if (log2Interp == 5) {
+        return sign * ((halfSampleRate * 21) / 32);
+    } else if (log2Interp == 6) {
+        return sign * ((halfSampleRate * 21) / 64);
     } else {
-        if (fcPos == FC_POS_INFRA) { // shift centered in the square next to center frequency
-            return -(devSampleRate / (1<<(log2Interp)));
-        } else if (fcPos == FC_POS_SUPRA) {
-            return devSampleRate / (1<<(log2Interp));
-        } else {
-            return 0;
-        }
+        return 0;
     }
 }
 
