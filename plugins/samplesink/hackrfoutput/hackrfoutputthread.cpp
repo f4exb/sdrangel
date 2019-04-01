@@ -136,15 +136,15 @@ void HackRFOutputThread::callback(qint8* buf, qint32 len)
             case 2:
                 m_interpolators.interpolate4_inf(&beginRead, buf, len);
                 break;
-            // case 3:
-            //     m_interpolators.interpolate8_cen(&beginRead, buf, len);
-            //     break;
-            // case 4:
-            //     m_interpolators.interpolate16_cen(&beginRead, buf, len);
-            //     break;
-            // case 5:
-            //     m_interpolators.interpolate32_cen(&beginRead, buf, len);
-            //     break;
+            case 3:
+                m_interpolators.interpolate8_inf(&beginRead, buf, len);
+                break;
+            case 4:
+                m_interpolators.interpolate16_inf(&beginRead, buf, len);
+                break;
+            case 5:
+                m_interpolators.interpolate32_inf(&beginRead, buf, len);
+                break;
             // case 6:
             //     m_interpolators.interpolate64_cen(&beginRead, buf, len);
             //     break;
@@ -162,15 +162,15 @@ void HackRFOutputThread::callback(qint8* buf, qint32 len)
             case 2:
                 m_interpolators.interpolate4_sup(&beginRead, buf, len);
                 break;
-            // case 3:
-            //     m_interpolators.interpolate8_cen(&beginRead, buf, len);
-            //     break;
-            // case 4:
-            //     m_interpolators.interpolate16_cen(&beginRead, buf, len);
-            //     break;
-            // case 5:
-            //     m_interpolators.interpolate32_cen(&beginRead, buf, len);
-            //     break;
+            case 3:
+                m_interpolators.interpolate8_sup(&beginRead, buf, len);
+                break;
+            case 4:
+                m_interpolators.interpolate16_sup(&beginRead, buf, len);
+                break;
+            case 5:
+                m_interpolators.interpolate32_sup(&beginRead, buf, len);
+                break;
             // case 6:
             //     m_interpolators.interpolate64_cen(&beginRead, buf, len);
             //     break;

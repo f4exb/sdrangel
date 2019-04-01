@@ -116,8 +116,17 @@ public:
 	void interpolate4_sup(SampleVector::iterator* it, T* buf, qint32 len);
 
     void interpolate8_cen(SampleVector::iterator* it, T* buf, qint32 len);
+    void interpolate8_inf(SampleVector::iterator* it, T* buf, qint32 len);
+    void interpolate8_sup(SampleVector::iterator* it, T* buf, qint32 len);
+
 	void interpolate16_cen(SampleVector::iterator* it, T* buf, qint32 len);
+	void interpolate16_inf(SampleVector::iterator* it, T* buf, qint32 len);
+	void interpolate16_sup(SampleVector::iterator* it, T* buf, qint32 len);
+
 	void interpolate32_cen(SampleVector::iterator* it, T* buf, qint32 len);
+	void interpolate32_inf(SampleVector::iterator* it, T* buf, qint32 len);
+	void interpolate32_sup(SampleVector::iterator* it, T* buf, qint32 len);
+
 	void interpolate64_cen(SampleVector::iterator* it, T* buf, qint32 len);
 
 private:
@@ -279,23 +288,9 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate4_inf(SampleVector::itera
         m_interpolator4.myInterpolateInf(&intbuf[0], &intbuf[1], &intbuf[2], &intbuf[3], &intbuf[4], &intbuf[5], &intbuf[6], &intbuf[7]);
         m_interpolator4.myInterpolateInf(&intbuf[8], &intbuf[9], &intbuf[10], &intbuf[11], &intbuf[12], &intbuf[13], &intbuf[14], &intbuf[15]);
 
-        buf[pos+0] = intbuf[0] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+1] = intbuf[1] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+2] = intbuf[2] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+3] = intbuf[3] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+4] = intbuf[4] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+5] = intbuf[5] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+6] = intbuf[6] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+7] = intbuf[7] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-
-        buf[pos+8]  = intbuf[8]  >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+9]  = intbuf[9]  >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+10] = intbuf[10] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+11] = intbuf[11] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+12] = intbuf[12] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+13] = intbuf[13] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+14] = intbuf[14] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+15] = intbuf[15] >> interpolation_shifts<SdrBits, OutputBits>::post4;
+        for (int i = 0; i < 16; i++) {
+            buf[pos+i] = intbuf[i] >> interpolation_shifts<SdrBits, OutputBits>::post4;
+        }
     }
 }
 
@@ -319,23 +314,9 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate4_sup(SampleVector::itera
         m_interpolator4.myInterpolateSup(&intbuf[0], &intbuf[1], &intbuf[2], &intbuf[3], &intbuf[4], &intbuf[5], &intbuf[6], &intbuf[7]);
         m_interpolator4.myInterpolateSup(&intbuf[8], &intbuf[9], &intbuf[10], &intbuf[11], &intbuf[12], &intbuf[13], &intbuf[14], &intbuf[15]);
 
-        buf[pos+0] = intbuf[0] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+1] = intbuf[1] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+2] = intbuf[2] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+3] = intbuf[3] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+4] = intbuf[4] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+5] = intbuf[5] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+6] = intbuf[6] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+7] = intbuf[7] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-
-        buf[pos+8]  = intbuf[8]  >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+9]  = intbuf[9]  >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+10] = intbuf[10] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+11] = intbuf[11] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+12] = intbuf[12] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+13] = intbuf[13] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+14] = intbuf[14] >> interpolation_shifts<SdrBits, OutputBits>::post4;
-        buf[pos+15] = intbuf[15] >> interpolation_shifts<SdrBits, OutputBits>::post4;
+        for (int i = 0; i < 16; i++) {
+            buf[pos+i] = intbuf[i] >> interpolation_shifts<SdrBits, OutputBits>::post4;
+        }
     }
 }
 
@@ -379,6 +360,68 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate8_cen(SampleVector::itera
 
         ++(*it);
 	}
+}
+
+template<typename T, uint SdrBits, uint OutputBits>
+void Interpolators<T, SdrBits, OutputBits>::interpolate8_inf(SampleVector::iterator* it, T* buf, qint32 len)
+{
+	qint32 intbuf[32];
+
+	for (int pos = 0; pos < len - 31; pos += 32)
+	{
+        memset(intbuf, 0, 32*sizeof(qint32));
+		intbuf[0]   = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre8;
+		intbuf[1]   = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre8;
+        ++(*it);
+		intbuf[16]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre8;
+		intbuf[17]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre8;
+        ++(*it);
+
+        m_interpolator2.myInterpolateSup(&intbuf[0], &intbuf[1], &intbuf[8], &intbuf[9], &intbuf[16], &intbuf[17], &intbuf[24], &intbuf[25]);
+
+        m_interpolator4.myInterpolateInf(&intbuf[0], &intbuf[1], &intbuf[4], &intbuf[5], &intbuf[8], &intbuf[9], &intbuf[12], &intbuf[13]);
+        m_interpolator4.myInterpolateInf(&intbuf[16], &intbuf[17], &intbuf[20], &intbuf[21], &intbuf[24], &intbuf[25], &intbuf[28], &intbuf[29]);
+
+        m_interpolator8.myInterpolateInf(&intbuf[0], &intbuf[1], &intbuf[2], &intbuf[3], &intbuf[4], &intbuf[5], &intbuf[6], &intbuf[7]);
+        m_interpolator8.myInterpolateInf(&intbuf[8], &intbuf[9], &intbuf[10], &intbuf[11], &intbuf[12], &intbuf[13], &intbuf[14], &intbuf[15]);
+        m_interpolator8.myInterpolateInf(&intbuf[16], &intbuf[17], &intbuf[18], &intbuf[19], &intbuf[20], &intbuf[21], &intbuf[22], &intbuf[23]);
+        m_interpolator8.myInterpolateInf(&intbuf[24], &intbuf[25], &intbuf[26], &intbuf[27], &intbuf[28], &intbuf[29], &intbuf[30], &intbuf[31]);
+
+        for (int i = 0; i < 32; i++) {
+            buf[pos+i] = intbuf[i] >> interpolation_shifts<SdrBits, OutputBits>::post8;
+        }
+    }
+}
+
+template<typename T, uint SdrBits, uint OutputBits>
+void Interpolators<T, SdrBits, OutputBits>::interpolate8_sup(SampleVector::iterator* it, T* buf, qint32 len)
+{
+	qint32 intbuf[32];
+
+	for (int pos = 0; pos < len - 31; pos += 32)
+	{
+        memset(intbuf, 0, 32*sizeof(qint32));
+		intbuf[0]   = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre8;
+		intbuf[1]   = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre8;
+        ++(*it);
+		intbuf[16]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre8;
+		intbuf[17]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre8;
+        ++(*it);
+
+        m_interpolator2.myInterpolateInf(&intbuf[0], &intbuf[1], &intbuf[8], &intbuf[9], &intbuf[16], &intbuf[17], &intbuf[24], &intbuf[25]);
+
+        m_interpolator4.myInterpolateSup(&intbuf[0], &intbuf[1], &intbuf[4], &intbuf[5], &intbuf[8], &intbuf[9], &intbuf[12], &intbuf[13]);
+        m_interpolator4.myInterpolateSup(&intbuf[16], &intbuf[17], &intbuf[20], &intbuf[21], &intbuf[24], &intbuf[25], &intbuf[28], &intbuf[29]);
+
+        m_interpolator8.myInterpolateSup(&intbuf[0], &intbuf[1], &intbuf[2], &intbuf[3], &intbuf[4], &intbuf[5], &intbuf[6], &intbuf[7]);
+        m_interpolator8.myInterpolateSup(&intbuf[8], &intbuf[9], &intbuf[10], &intbuf[11], &intbuf[12], &intbuf[13], &intbuf[14], &intbuf[15]);
+        m_interpolator8.myInterpolateSup(&intbuf[16], &intbuf[17], &intbuf[18], &intbuf[19], &intbuf[20], &intbuf[21], &intbuf[22], &intbuf[23]);
+        m_interpolator8.myInterpolateSup(&intbuf[24], &intbuf[25], &intbuf[26], &intbuf[27], &intbuf[28], &intbuf[29], &intbuf[30], &intbuf[31]);
+
+        for (int i = 0; i < 32; i++) {
+            buf[pos+i] = intbuf[i] >> interpolation_shifts<SdrBits, OutputBits>::post8;
+        }
+    }
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
@@ -449,6 +492,86 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate16_cen(SampleVector::iter
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
+void Interpolators<T, SdrBits, OutputBits>::interpolate16_inf(SampleVector::iterator* it, T* buf, qint32 len)
+{
+	qint32 intbuf[64];
+
+	for (int pos = 0; pos < len - 63; pos += 64)
+	{
+        memset(intbuf, 0, 64*sizeof(qint32));
+		intbuf[0]   = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre16;
+		intbuf[1]   = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre16;
+        ++(*it);
+		intbuf[32]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre16;
+		intbuf[33]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre16;
+        ++(*it);
+
+        m_interpolator2.myInterpolateSup(&intbuf[0], &intbuf[1], &intbuf[16], &intbuf[17], &intbuf[32], &intbuf[33], &intbuf[48], &intbuf[49]);
+
+        m_interpolator4.myInterpolateInf(&intbuf[0], &intbuf[1], &intbuf[8], &intbuf[9], &intbuf[16], &intbuf[17], &intbuf[24], &intbuf[25]);
+        m_interpolator4.myInterpolateInf(&intbuf[32], &intbuf[33], &intbuf[40], &intbuf[41], &intbuf[48], &intbuf[49], &intbuf[56], &intbuf[57]);
+
+        m_interpolator8.myInterpolateInf(&intbuf[0],  &intbuf[1],  &intbuf[4],  &intbuf[5],  &intbuf[8],  &intbuf[9],  &intbuf[12], &intbuf[13]);
+        m_interpolator8.myInterpolateInf(&intbuf[16], &intbuf[17], &intbuf[20], &intbuf[21], &intbuf[24], &intbuf[25], &intbuf[28], &intbuf[29]);
+        m_interpolator8.myInterpolateInf(&intbuf[32], &intbuf[33], &intbuf[36], &intbuf[37], &intbuf[40], &intbuf[41], &intbuf[44], &intbuf[45]);
+        m_interpolator8.myInterpolateInf(&intbuf[48], &intbuf[49], &intbuf[52], &intbuf[53], &intbuf[56], &intbuf[57], &intbuf[60], &intbuf[61]);
+
+        m_interpolator16.myInterpolateInf(&intbuf[0],  &intbuf[1],  &intbuf[2],  &intbuf[3],  &intbuf[4],  &intbuf[5],  &intbuf[6],  &intbuf[7]);
+        m_interpolator16.myInterpolateInf(&intbuf[8],  &intbuf[9],  &intbuf[10], &intbuf[11], &intbuf[12], &intbuf[13], &intbuf[14], &intbuf[15]);
+        m_interpolator16.myInterpolateInf(&intbuf[16], &intbuf[17], &intbuf[18], &intbuf[19], &intbuf[20], &intbuf[21], &intbuf[22], &intbuf[23]);
+        m_interpolator16.myInterpolateInf(&intbuf[24], &intbuf[25], &intbuf[26], &intbuf[27], &intbuf[28], &intbuf[29], &intbuf[30], &intbuf[31]);
+        m_interpolator16.myInterpolateInf(&intbuf[32], &intbuf[33], &intbuf[34], &intbuf[35], &intbuf[36], &intbuf[37], &intbuf[38], &intbuf[39]);
+        m_interpolator16.myInterpolateInf(&intbuf[40], &intbuf[41], &intbuf[42], &intbuf[43], &intbuf[44], &intbuf[45], &intbuf[46], &intbuf[47]);
+        m_interpolator16.myInterpolateInf(&intbuf[48], &intbuf[49], &intbuf[50], &intbuf[51], &intbuf[52], &intbuf[53], &intbuf[54], &intbuf[55]);
+        m_interpolator16.myInterpolateInf(&intbuf[56], &intbuf[57], &intbuf[58], &intbuf[59], &intbuf[60], &intbuf[61], &intbuf[62], &intbuf[63]);
+
+        for (int i = 0; i < 64; i++) {
+            buf[pos+i] = intbuf[i] >> interpolation_shifts<SdrBits, OutputBits>::post16;
+        }
+    }
+}
+
+template<typename T, uint SdrBits, uint OutputBits>
+void Interpolators<T, SdrBits, OutputBits>::interpolate16_sup(SampleVector::iterator* it, T* buf, qint32 len)
+{
+	qint32 intbuf[64];
+
+	for (int pos = 0; pos < len - 63; pos += 64)
+	{
+        memset(intbuf, 0, 64*sizeof(qint32));
+		intbuf[0]   = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre16;
+		intbuf[1]   = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre16;
+        ++(*it);
+		intbuf[32]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre16;
+		intbuf[33]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre16;
+        ++(*it);
+
+        m_interpolator2.myInterpolateInf(&intbuf[0], &intbuf[1], &intbuf[16], &intbuf[17], &intbuf[32], &intbuf[33], &intbuf[48], &intbuf[49]);
+
+        m_interpolator4.myInterpolateSup(&intbuf[0], &intbuf[1], &intbuf[8], &intbuf[9], &intbuf[16], &intbuf[17], &intbuf[24], &intbuf[25]);
+        m_interpolator4.myInterpolateSup(&intbuf[32], &intbuf[33], &intbuf[40], &intbuf[41], &intbuf[48], &intbuf[49], &intbuf[56], &intbuf[57]);
+
+        m_interpolator8.myInterpolateSup(&intbuf[0],  &intbuf[1],  &intbuf[4],  &intbuf[5],  &intbuf[8],  &intbuf[9],  &intbuf[12], &intbuf[13]);
+        m_interpolator8.myInterpolateSup(&intbuf[16], &intbuf[17], &intbuf[20], &intbuf[21], &intbuf[24], &intbuf[25], &intbuf[28], &intbuf[29]);
+        m_interpolator8.myInterpolateSup(&intbuf[32], &intbuf[33], &intbuf[36], &intbuf[37], &intbuf[40], &intbuf[41], &intbuf[44], &intbuf[45]);
+        m_interpolator8.myInterpolateSup(&intbuf[48], &intbuf[49], &intbuf[52], &intbuf[53], &intbuf[56], &intbuf[57], &intbuf[60], &intbuf[61]);
+
+        m_interpolator16.myInterpolateSup(&intbuf[0],  &intbuf[1],  &intbuf[2],  &intbuf[3],  &intbuf[4],  &intbuf[5],  &intbuf[6],  &intbuf[7]);
+        m_interpolator16.myInterpolateSup(&intbuf[8],  &intbuf[9],  &intbuf[10], &intbuf[11], &intbuf[12], &intbuf[13], &intbuf[14], &intbuf[15]);
+        m_interpolator16.myInterpolateSup(&intbuf[16], &intbuf[17], &intbuf[18], &intbuf[19], &intbuf[20], &intbuf[21], &intbuf[22], &intbuf[23]);
+        m_interpolator16.myInterpolateSup(&intbuf[24], &intbuf[25], &intbuf[26], &intbuf[27], &intbuf[28], &intbuf[29], &intbuf[30], &intbuf[31]);
+        m_interpolator16.myInterpolateSup(&intbuf[32], &intbuf[33], &intbuf[34], &intbuf[35], &intbuf[36], &intbuf[37], &intbuf[38], &intbuf[39]);
+        m_interpolator16.myInterpolateSup(&intbuf[40], &intbuf[41], &intbuf[42], &intbuf[43], &intbuf[44], &intbuf[45], &intbuf[46], &intbuf[47]);
+        m_interpolator16.myInterpolateSup(&intbuf[48], &intbuf[49], &intbuf[50], &intbuf[51], &intbuf[52], &intbuf[53], &intbuf[54], &intbuf[55]);
+        m_interpolator16.myInterpolateSup(&intbuf[56], &intbuf[57], &intbuf[58], &intbuf[59], &intbuf[60], &intbuf[61], &intbuf[62], &intbuf[63]);
+
+        for (int i = 0; i < 64; i++) {
+            buf[pos+i] = intbuf[i] >> interpolation_shifts<SdrBits, OutputBits>::post16;
+        }
+    }
+}
+
+template<typename T, uint SdrBits, uint OutputBits>
 void Interpolators<T, SdrBits, OutputBits>::interpolate32_cen(SampleVector::iterator* it, T* buf, qint32 len)
 {
 	qint32 intbuf[64];
@@ -460,10 +583,8 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate32_cen(SampleVector::iter
         intbuf[1]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre32;
         m_interpolator2.myInterpolate(&intbuf[0], &intbuf[1], &intbuf[32], &intbuf[33]);
 
-
         m_interpolator4.myInterpolate(&intbuf[0],  &intbuf[1],  &intbuf[16], &intbuf[17]);
         m_interpolator4.myInterpolate(&intbuf[32], &intbuf[33], &intbuf[48], &intbuf[49]);
-
 
         m_interpolator8.myInterpolate(&intbuf[0],  &intbuf[1],  &intbuf[8],  &intbuf[9]);
         m_interpolator8.myInterpolate(&intbuf[16], &intbuf[17], &intbuf[24], &intbuf[25]);
@@ -563,6 +684,120 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate32_cen(SampleVector::iter
 
         ++(*it);
 	}
+}
+
+template<typename T, uint SdrBits, uint OutputBits>
+void Interpolators<T, SdrBits, OutputBits>::interpolate32_inf(SampleVector::iterator* it, T* buf, qint32 len)
+{
+	qint32 intbuf[128];
+
+	for (int pos = 0; pos < len - 127; pos += 128)
+	{
+	    memset(intbuf, 0, 128*sizeof(qint32));
+        intbuf[0]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        intbuf[1]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        ++(*it);
+        intbuf[64]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        intbuf[65]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        ++(*it);
+
+        m_interpolator2.myInterpolateSup(&intbuf[0],   &intbuf[1],  &intbuf[32], &intbuf[33], &intbuf[64], &intbuf[65], &intbuf[96], &intbuf[97]);
+
+        m_interpolator4.myInterpolateInf(&intbuf[0],   &intbuf[1],  &intbuf[16], &intbuf[17], &intbuf[32], &intbuf[33], &intbuf[48],  &intbuf[49]);
+        m_interpolator4.myInterpolateInf(&intbuf[64],  &intbuf[65], &intbuf[80], &intbuf[81], &intbuf[96], &intbuf[97], &intbuf[112], &intbuf[113]);
+
+        m_interpolator8.myInterpolateSup(&intbuf[0],   &intbuf[1],  &intbuf[8],   &intbuf[9],   &intbuf[16],  &intbuf[17],  &intbuf[24],  &intbuf[25]);
+        m_interpolator8.myInterpolateSup(&intbuf[32],  &intbuf[33], &intbuf[40],  &intbuf[41],  &intbuf[48],  &intbuf[49],  &intbuf[56],  &intbuf[57]);
+        m_interpolator8.myInterpolateSup(&intbuf[64],  &intbuf[65], &intbuf[72],  &intbuf[73],  &intbuf[80],  &intbuf[81],  &intbuf[88],  &intbuf[89]);
+        m_interpolator8.myInterpolateSup(&intbuf[96],  &intbuf[97], &intbuf[104], &intbuf[105], &intbuf[112], &intbuf[113], &intbuf[120], &intbuf[121]);
+
+        m_interpolator16.myInterpolateInf(&intbuf[0],   &intbuf[1],   &intbuf[4],   &intbuf[5],   &intbuf[8],   &intbuf[9],   &intbuf[12],  &intbuf[13]);
+        m_interpolator16.myInterpolateInf(&intbuf[16],  &intbuf[17],  &intbuf[20],  &intbuf[21],  &intbuf[24],  &intbuf[25],  &intbuf[28],  &intbuf[29]);
+        m_interpolator16.myInterpolateInf(&intbuf[32],  &intbuf[33],  &intbuf[36],  &intbuf[37],  &intbuf[40],  &intbuf[41],  &intbuf[44],  &intbuf[45]);
+        m_interpolator16.myInterpolateInf(&intbuf[48],  &intbuf[49],  &intbuf[52],  &intbuf[53],  &intbuf[56],  &intbuf[57],  &intbuf[60],  &intbuf[61]);
+        m_interpolator16.myInterpolateInf(&intbuf[64],  &intbuf[65],  &intbuf[68],  &intbuf[69],  &intbuf[72],  &intbuf[73],  &intbuf[76],  &intbuf[77]);
+        m_interpolator16.myInterpolateInf(&intbuf[80],  &intbuf[81],  &intbuf[84],  &intbuf[85],  &intbuf[88],  &intbuf[89],  &intbuf[92],  &intbuf[93]);
+        m_interpolator16.myInterpolateInf(&intbuf[96],  &intbuf[97],  &intbuf[100], &intbuf[101], &intbuf[104], &intbuf[105], &intbuf[108], &intbuf[109]);
+        m_interpolator16.myInterpolateInf(&intbuf[112], &intbuf[113], &intbuf[116], &intbuf[117], &intbuf[120], &intbuf[121], &intbuf[124], &intbuf[125]);
+
+        m_interpolator32.myInterpolateInf(&intbuf[0],   &intbuf[1],   &intbuf[2],   &intbuf[3],   &intbuf[4],   &intbuf[5],   &intbuf[6],   &intbuf[7]);
+        m_interpolator32.myInterpolateInf(&intbuf[8],   &intbuf[9],   &intbuf[10],  &intbuf[11],  &intbuf[12],  &intbuf[13],  &intbuf[14],  &intbuf[15]);
+        m_interpolator32.myInterpolateInf(&intbuf[16],  &intbuf[17],  &intbuf[18],  &intbuf[19],  &intbuf[20],  &intbuf[21],  &intbuf[22],  &intbuf[23]);
+        m_interpolator32.myInterpolateInf(&intbuf[24],  &intbuf[25],  &intbuf[26],  &intbuf[27],  &intbuf[28],  &intbuf[29],  &intbuf[30],  &intbuf[31]);
+        m_interpolator32.myInterpolateInf(&intbuf[32],  &intbuf[33],  &intbuf[34],  &intbuf[35],  &intbuf[36],  &intbuf[37],  &intbuf[38],  &intbuf[39]);
+        m_interpolator32.myInterpolateInf(&intbuf[40],  &intbuf[41],  &intbuf[42],  &intbuf[43],  &intbuf[44],  &intbuf[45],  &intbuf[46],  &intbuf[47]);
+        m_interpolator32.myInterpolateInf(&intbuf[48],  &intbuf[49],  &intbuf[50],  &intbuf[51],  &intbuf[52],  &intbuf[53],  &intbuf[54],  &intbuf[55]);
+        m_interpolator32.myInterpolateInf(&intbuf[56],  &intbuf[57],  &intbuf[58],  &intbuf[59],  &intbuf[60],  &intbuf[61],  &intbuf[62],  &intbuf[63]);
+        m_interpolator32.myInterpolateInf(&intbuf[64],  &intbuf[65],  &intbuf[66],  &intbuf[67],  &intbuf[68],  &intbuf[69],  &intbuf[70],  &intbuf[71]);
+        m_interpolator32.myInterpolateInf(&intbuf[72],  &intbuf[73],  &intbuf[74],  &intbuf[75],  &intbuf[76],  &intbuf[77],  &intbuf[78],  &intbuf[79]);
+        m_interpolator32.myInterpolateInf(&intbuf[80],  &intbuf[81],  &intbuf[82],  &intbuf[83],  &intbuf[84],  &intbuf[85],  &intbuf[86],  &intbuf[87]);
+        m_interpolator32.myInterpolateInf(&intbuf[88],  &intbuf[89],  &intbuf[90],  &intbuf[91],  &intbuf[92],  &intbuf[93],  &intbuf[94],  &intbuf[95]);
+        m_interpolator32.myInterpolateInf(&intbuf[96],  &intbuf[97],  &intbuf[98],  &intbuf[99],  &intbuf[100], &intbuf[101], &intbuf[102], &intbuf[103]);
+        m_interpolator32.myInterpolateInf(&intbuf[104], &intbuf[105], &intbuf[106], &intbuf[107], &intbuf[108], &intbuf[109], &intbuf[110], &intbuf[111]);
+        m_interpolator32.myInterpolateInf(&intbuf[112], &intbuf[113], &intbuf[114], &intbuf[115], &intbuf[116], &intbuf[117], &intbuf[118], &intbuf[119]);
+        m_interpolator32.myInterpolateInf(&intbuf[120], &intbuf[121], &intbuf[122], &intbuf[123], &intbuf[124], &intbuf[125], &intbuf[126], &intbuf[127]);
+
+        for (int i = 0; i < 128; i++) {
+            buf[pos+i] = intbuf[i] >> interpolation_shifts<SdrBits, OutputBits>::post32;
+        }
+    }
+}
+
+template<typename T, uint SdrBits, uint OutputBits>
+void Interpolators<T, SdrBits, OutputBits>::interpolate32_sup(SampleVector::iterator* it, T* buf, qint32 len)
+{
+	qint32 intbuf[128];
+
+	for (int pos = 0; pos < len - 127; pos += 128)
+	{
+	    memset(intbuf, 0, 128*sizeof(qint32));
+        intbuf[0]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        intbuf[1]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        ++(*it);
+        intbuf[64]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        intbuf[65]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        ++(*it);
+
+        m_interpolator2.myInterpolateInf(&intbuf[0],   &intbuf[1],  &intbuf[32], &intbuf[33], &intbuf[64], &intbuf[65], &intbuf[96], &intbuf[97]);
+
+        m_interpolator4.myInterpolateSup(&intbuf[0],   &intbuf[1],  &intbuf[16], &intbuf[17], &intbuf[32], &intbuf[33], &intbuf[48],  &intbuf[49]);
+        m_interpolator4.myInterpolateSup(&intbuf[64],  &intbuf[65], &intbuf[80], &intbuf[81], &intbuf[96], &intbuf[97], &intbuf[112], &intbuf[113]);
+
+        m_interpolator8.myInterpolateInf(&intbuf[0],   &intbuf[1],  &intbuf[8],   &intbuf[9],   &intbuf[16],  &intbuf[17],  &intbuf[24],  &intbuf[25]);
+        m_interpolator8.myInterpolateInf(&intbuf[32],  &intbuf[33], &intbuf[40],  &intbuf[41],  &intbuf[48],  &intbuf[49],  &intbuf[56],  &intbuf[57]);
+        m_interpolator8.myInterpolateInf(&intbuf[64],  &intbuf[65], &intbuf[72],  &intbuf[73],  &intbuf[80],  &intbuf[81],  &intbuf[88],  &intbuf[89]);
+        m_interpolator8.myInterpolateInf(&intbuf[96],  &intbuf[97], &intbuf[104], &intbuf[105], &intbuf[112], &intbuf[113], &intbuf[120], &intbuf[121]);
+
+        m_interpolator16.myInterpolateSup(&intbuf[0],   &intbuf[1],   &intbuf[4],   &intbuf[5],   &intbuf[8],   &intbuf[9],   &intbuf[12],  &intbuf[13]);
+        m_interpolator16.myInterpolateSup(&intbuf[16],  &intbuf[17],  &intbuf[20],  &intbuf[21],  &intbuf[24],  &intbuf[25],  &intbuf[28],  &intbuf[29]);
+        m_interpolator16.myInterpolateSup(&intbuf[32],  &intbuf[33],  &intbuf[36],  &intbuf[37],  &intbuf[40],  &intbuf[41],  &intbuf[44],  &intbuf[45]);
+        m_interpolator16.myInterpolateSup(&intbuf[48],  &intbuf[49],  &intbuf[52],  &intbuf[53],  &intbuf[56],  &intbuf[57],  &intbuf[60],  &intbuf[61]);
+        m_interpolator16.myInterpolateSup(&intbuf[64],  &intbuf[65],  &intbuf[68],  &intbuf[69],  &intbuf[72],  &intbuf[73],  &intbuf[76],  &intbuf[77]);
+        m_interpolator16.myInterpolateSup(&intbuf[80],  &intbuf[81],  &intbuf[84],  &intbuf[85],  &intbuf[88],  &intbuf[89],  &intbuf[92],  &intbuf[93]);
+        m_interpolator16.myInterpolateSup(&intbuf[96],  &intbuf[97],  &intbuf[100], &intbuf[101], &intbuf[104], &intbuf[105], &intbuf[108], &intbuf[109]);
+        m_interpolator16.myInterpolateSup(&intbuf[112], &intbuf[113], &intbuf[116], &intbuf[117], &intbuf[120], &intbuf[121], &intbuf[124], &intbuf[125]);
+
+        m_interpolator32.myInterpolateSup(&intbuf[0],   &intbuf[1],   &intbuf[2],   &intbuf[3],   &intbuf[4],   &intbuf[5],   &intbuf[6],   &intbuf[7]);
+        m_interpolator32.myInterpolateSup(&intbuf[8],   &intbuf[9],   &intbuf[10],  &intbuf[11],  &intbuf[12],  &intbuf[13],  &intbuf[14],  &intbuf[15]);
+        m_interpolator32.myInterpolateSup(&intbuf[16],  &intbuf[17],  &intbuf[18],  &intbuf[19],  &intbuf[20],  &intbuf[21],  &intbuf[22],  &intbuf[23]);
+        m_interpolator32.myInterpolateSup(&intbuf[24],  &intbuf[25],  &intbuf[26],  &intbuf[27],  &intbuf[28],  &intbuf[29],  &intbuf[30],  &intbuf[31]);
+        m_interpolator32.myInterpolateSup(&intbuf[32],  &intbuf[33],  &intbuf[34],  &intbuf[35],  &intbuf[36],  &intbuf[37],  &intbuf[38],  &intbuf[39]);
+        m_interpolator32.myInterpolateSup(&intbuf[40],  &intbuf[41],  &intbuf[42],  &intbuf[43],  &intbuf[44],  &intbuf[45],  &intbuf[46],  &intbuf[47]);
+        m_interpolator32.myInterpolateSup(&intbuf[48],  &intbuf[49],  &intbuf[50],  &intbuf[51],  &intbuf[52],  &intbuf[53],  &intbuf[54],  &intbuf[55]);
+        m_interpolator32.myInterpolateSup(&intbuf[56],  &intbuf[57],  &intbuf[58],  &intbuf[59],  &intbuf[60],  &intbuf[61],  &intbuf[62],  &intbuf[63]);
+        m_interpolator32.myInterpolateSup(&intbuf[64],  &intbuf[65],  &intbuf[66],  &intbuf[67],  &intbuf[68],  &intbuf[69],  &intbuf[70],  &intbuf[71]);
+        m_interpolator32.myInterpolateSup(&intbuf[72],  &intbuf[73],  &intbuf[74],  &intbuf[75],  &intbuf[76],  &intbuf[77],  &intbuf[78],  &intbuf[79]);
+        m_interpolator32.myInterpolateSup(&intbuf[80],  &intbuf[81],  &intbuf[82],  &intbuf[83],  &intbuf[84],  &intbuf[85],  &intbuf[86],  &intbuf[87]);
+        m_interpolator32.myInterpolateSup(&intbuf[88],  &intbuf[89],  &intbuf[90],  &intbuf[91],  &intbuf[92],  &intbuf[93],  &intbuf[94],  &intbuf[95]);
+        m_interpolator32.myInterpolateSup(&intbuf[96],  &intbuf[97],  &intbuf[98],  &intbuf[99],  &intbuf[100], &intbuf[101], &intbuf[102], &intbuf[103]);
+        m_interpolator32.myInterpolateSup(&intbuf[104], &intbuf[105], &intbuf[106], &intbuf[107], &intbuf[108], &intbuf[109], &intbuf[110], &intbuf[111]);
+        m_interpolator32.myInterpolateSup(&intbuf[112], &intbuf[113], &intbuf[114], &intbuf[115], &intbuf[116], &intbuf[117], &intbuf[118], &intbuf[119]);
+        m_interpolator32.myInterpolateSup(&intbuf[120], &intbuf[121], &intbuf[122], &intbuf[123], &intbuf[124], &intbuf[125], &intbuf[126], &intbuf[127]);
+
+        for (int i = 0; i < 128; i++) {
+            buf[pos+i] = intbuf[i] >> interpolation_shifts<SdrBits, OutputBits>::post32;
+        }
+    }
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
