@@ -319,7 +319,8 @@ bool HackRFInput::handleMessage(const Message& message)
             0,
             m_settings.m_log2Decim,
             (DeviceSampleSource::fcPos_t) m_settings.m_fcPos,
-            m_settings.m_devSampleRate);
+            m_settings.m_devSampleRate,
+            DeviceSampleSource::FSHIFT_TXSYNC);
         qDebug("HackRFInput::handleMessage: MsgSynchronizeFrequency: centerFrequency: %lld Hz", centerFrequency);
         HackRFInputSettings settings = m_settings;
         settings.m_centerFrequency = centerFrequency;
@@ -441,7 +442,9 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
                 0,
                 settings.m_log2Decim,
                 (DeviceSampleSource::fcPos_t) settings.m_fcPos,
-                settings.m_devSampleRate);
+                settings.m_devSampleRate,
+                DeviceSampleSource::FrequencyShiftScheme::FSHIFT_TXSYNC,
+                false);
 		setDeviceCenterFrequency(deviceCenterFrequency, settings.m_LOppmTenths);
 
         if (m_deviceAPI->getSinkBuddies().size() > 0) // forward to buddy if necessary

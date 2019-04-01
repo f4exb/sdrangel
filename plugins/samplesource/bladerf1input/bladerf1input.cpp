@@ -542,7 +542,9 @@ bool Bladerf1Input::applySettings(const BladeRF1InputSettings& settings, bool fo
                 0,
                 settings.m_log2Decim,
                 (DeviceSampleSource::fcPos_t) settings.m_fcPos,
-                settings.m_devSampleRate);
+                settings.m_devSampleRate,
+                DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
+                false);
 
         forwardChange = true;
 

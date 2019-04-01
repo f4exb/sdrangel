@@ -1018,7 +1018,9 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
                 0,
                 settings.m_log2Decim,
                 (DeviceSampleSource::fcPos_t) settings.m_fcPos,
-                settings.m_devSampleRate);
+                settings.m_devSampleRate,
+                DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
+                false);
 
         forwardChangeOwnDSP = true;
         forwardChangeToBuddies = true;

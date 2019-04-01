@@ -42,6 +42,11 @@ public:
         FC_POS_CENTER
     } fcPos_t;
 
+    typedef enum {
+        FSHIFT_STD = 0, // Standard Rx independent
+        FSHIFT_TXSYNC   // Follows same scheme as Tx
+    } FrequencyShiftScheme;
+
 	DeviceSampleSource();
 	virtual ~DeviceSampleSource();
 	virtual void destroy() = 0;
@@ -121,7 +126,9 @@ public:
             int log2Decim,
             fcPos_t fcPos,
             quint32 devSampleRate,
-            bool transverterMode = false);
+            FrequencyShiftScheme frequencyShiftScheme,
+            bool transverterMode = false
+    );
 
     static qint64 calculateCenterFrequency(
             quint64 deviceCenterFrequency,
@@ -129,12 +136,16 @@ public:
             int log2Decim,
             fcPos_t fcPos,
             quint32 devSampleRate,
-            bool transverterMode = false);
+            FrequencyShiftScheme frequencyShiftScheme,
+            bool transverterMode = false
+    );
 
     static qint32 calculateFrequencyShift(
             int log2Decim,
             fcPos_t fcPos,
-            quint32 devSampleRate);
+            quint32 devSampleRate,
+            FrequencyShiftScheme frequencyShiftScheme
+    );
 
 protected slots:
 	void handleInputMessages();

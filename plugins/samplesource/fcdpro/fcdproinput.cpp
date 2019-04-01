@@ -349,6 +349,7 @@ void FCDProInput::applySettings(const FCDProSettings& settings, bool force)
                 settings.m_log2Decim,
                 (DeviceSampleSource::fcPos_t) settings.m_fcPos,
                 fcd_traits<Pro>::sampleRate,
+                DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
                 settings.m_transverterMode);
 
         if (m_dev != 0)

@@ -555,7 +555,9 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
                 0,
                 settings.m_log2Decim,
                 (DeviceSampleSource::fcPos_t) settings.m_fcPos,
-                SDRPlaySampleRates::getRate(settings.m_devSampleRateIndex));
+                SDRPlaySampleRates::getRate(settings.m_devSampleRateIndex),
+                DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
+                false);
 
         forwardChange = true;
 

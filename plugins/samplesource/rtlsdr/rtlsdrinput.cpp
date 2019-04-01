@@ -489,6 +489,7 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
                 settings.m_log2Decim,
                 (DeviceSampleSource::fcPos_t) settings.m_fcPos,
                 settings.m_devSampleRate,
+                DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
                 settings.m_transverterMode);
 
         forwardChange = true;

@@ -446,6 +446,7 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
                 settings.m_log2Decim,
                 (DeviceSampleSource::fcPos_t) settings.m_fcPos,
                 m_sampleRates[settings.m_devSampleRateIndex],
+                DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
                 settings.m_transverterMode);
 
 		if (m_dev != 0) {

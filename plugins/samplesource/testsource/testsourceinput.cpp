@@ -295,7 +295,9 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
                 0, // no transverter mode
                 settings.m_log2Decim,
                 (DeviceSampleSource::fcPos_t) settings.m_fcPos,
-                settings.m_sampleRate);
+                settings.m_sampleRate,
+                DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
+                false);
 
         int frequencyShift = settings.m_frequencyShift;
         quint32 devSampleRate = settings.m_sampleRate;
@@ -305,7 +307,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
             frequencyShift += DeviceSampleSource::calculateFrequencyShift(
                     settings.m_log2Decim,
                     (DeviceSampleSource::fcPos_t) settings.m_fcPos,
-                    settings.m_sampleRate);
+                    settings.m_sampleRate,
+                    DeviceSampleSource::FSHIFT_STD);
         }
 
         if (m_testSourceThread != 0)

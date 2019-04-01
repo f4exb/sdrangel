@@ -676,7 +676,9 @@ bool BladeRF2Input::handleMessage(const Message& message)
                         0,
                         settings.m_log2Decim,
                         (DeviceSampleSource::fcPos_t) settings.m_fcPos,
-                        settings.m_devSampleRate);
+                        settings.m_devSampleRate,
+                        DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
+                        false);
 
                 if (setDeviceCenterFrequency(dev, requestedChannel, deviceCenterFrequency, settings.m_LOppmTenths))
                 {
@@ -888,7 +890,9 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
                 0,
                 settings.m_log2Decim,
                 (DeviceSampleSource::fcPos_t) settings.m_fcPos,
-                settings.m_devSampleRate);
+                settings.m_devSampleRate,
+                DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
+                false);
 
         forwardChangeOwnDSP = true;
         forwardChangeRxBuddies = true;

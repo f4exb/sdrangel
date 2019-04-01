@@ -139,19 +139,19 @@ void HackRFInputThread::callback(const qint8* buf, qint32 len)
 				m_decimators.decimate2_inf(&it, buf, len);
 				break;
 			case 2:
-				m_decimators.decimate4_inf(&it, buf, len);
+				m_decimators.decimate4_inf_txsync(&it, buf, len);
 				break;
 			case 3:
-				m_decimators.decimate8_inf(&it, buf, len);
+				m_decimators.decimate8_inf_txsync(&it, buf, len);
 				break;
 			case 4:
-				m_decimators.decimate16_inf(&it, buf, len);
+				m_decimators.decimate16_inf_txsync(&it, buf, len);
 				break;
 			case 5:
-				m_decimators.decimate32_inf(&it, buf, len);
+				m_decimators.decimate32_inf_txsync(&it, buf, len);
 				break;
 			case 6:
-				m_decimators.decimate64_inf(&it, buf, len);
+				m_decimators.decimate64_inf_txsync(&it, buf, len);
 				break;
 			default:
 				break;
@@ -165,19 +165,19 @@ void HackRFInputThread::callback(const qint8* buf, qint32 len)
 				m_decimators.decimate2_sup(&it, buf, len);
 				break;
 			case 2:
-				m_decimators.decimate4_sup(&it, buf, len);
+				m_decimators.decimate4_sup_txsync(&it, buf, len);
 				break;
 			case 3:
-				m_decimators.decimate8_sup(&it, buf, len);
+				m_decimators.decimate8_sup_txsync(&it, buf, len);
 				break;
 			case 4:
-				m_decimators.decimate16_sup(&it, buf, len);
+				m_decimators.decimate16_sup_txsync(&it, buf, len);
 				break;
 			case 5:
-				m_decimators.decimate32_sup(&it, buf, len);
+				m_decimators.decimate32_sup_txsync(&it, buf, len);
 				break;
 			case 6:
-				m_decimators.decimate64_sup(&it, buf, len);
+				m_decimators.decimate64_sup_txsync(&it, buf, len);
 				break;
 			default:
 				break;
