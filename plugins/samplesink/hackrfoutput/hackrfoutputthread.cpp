@@ -145,9 +145,9 @@ void HackRFOutputThread::callback(qint8* buf, qint32 len)
             case 5:
                 m_interpolators.interpolate32_inf(&beginRead, buf, len);
                 break;
-            // case 6:
-            //     m_interpolators.interpolate64_cen(&beginRead, buf, len);
-            //     break;
+            case 6:
+                m_interpolators.interpolate64_inf(&beginRead, buf, len);
+                break;
             default:
                 break;
             }
@@ -171,9 +171,9 @@ void HackRFOutputThread::callback(qint8* buf, qint32 len)
             case 5:
                 m_interpolators.interpolate32_sup(&beginRead, buf, len);
                 break;
-            // case 6:
-            //     m_interpolators.interpolate64_cen(&beginRead, buf, len);
-            //     break;
+            case 6:
+                m_interpolators.interpolate64_sup(&beginRead, buf, len);
+                break;
             default:
                 break;
             }
