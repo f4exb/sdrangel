@@ -132,7 +132,10 @@ bool HackRFOutput::start()
 //	mutexLocker.unlock();
 
 	applySettings(m_settings, true);
-	m_hackRFThread->setLog2Interpolation(m_settings.m_log2Interp);
+
+	m_hackRFThread->setSamplerate(m_settings.m_devSampleRate);
+    m_hackRFThread->setLog2Interpolation(m_settings.m_log2Interp);
+    m_hackRFThread->setFcPos((int) m_settings.m_fcPos);
 
 	m_hackRFThread->startWork();
 
@@ -413,6 +416,9 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
     if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
         reverseAPIKeys.append("LOppmTenths");
     }
+    if ((m_settings.m_fcPos != settings.m_fcPos) || force) {
+        reverseAPIKeys.append("fcPos");
+    }
 
 	if ((m_settings.m_centerFrequency != settings.m_centerFrequency) ||
 	    (m_settings.m_devSampleRate != settings.m_devSampleRate) ||
@@ -571,6 +577,12 @@ int HackRFOutput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("log2Interp")) {
         settings.m_log2Interp = response.getHackRfOutputSettings()->getLog2Interp();
     }
+    if (deviceSettingsKeys.contains("fcPos"))
+    {
+        int fcPos = response.getHackRfInputSettings()->getFcPos();
+        fcPos = fcPos < 0 ? 0 : fcPos > 2 ? 2 : fcPos;
+        settings.m_fcPos = (HackRFOutputSettings::fcPos_t) fcPos;
+    }
     if (deviceSettingsKeys.contains("devSampleRate")) {
         settings.m_devSampleRate = response.getHackRfOutputSettings()->getDevSampleRate();
     }
@@ -613,6 +625,7 @@ void HackRFOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getHackRfOutputSettings()->setBandwidth(settings.m_bandwidth);
     response.getHackRfOutputSettings()->setVgaGain(settings.m_vgaGain);
     response.getHackRfOutputSettings()->setLog2Interp(settings.m_log2Interp);
+    response.getHackRfOutputSettings()->setFcPos(settings.m_fcPos);
     response.getHackRfOutputSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getHackRfOutputSettings()->setBiasT(settings.m_biasT ? 1 : 0);
     response.getHackRfOutputSettings()->setLnaExt(settings.m_lnaExt ? 1 : 0);
@@ -682,6 +695,9 @@ void HackRFOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
     }
     if (deviceSettingsKeys.contains("log2Interp") || force) {
         swgHackRFOutputSettings->setLog2Interp(settings.m_log2Interp);
+    }
+    if (deviceSettingsKeys.contains("fcPos") || force) {
+        swgHackRFOutputSettings->setFcPos((int) settings.m_fcPos);
     }
     if (deviceSettingsKeys.contains("devSampleRate") || force) {
         swgHackRFOutputSettings->setDevSampleRate(settings.m_devSampleRate);

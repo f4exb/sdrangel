@@ -57,6 +57,9 @@ public:
     qint32 getLog2Interp();
     void setLog2Interp(qint32 log2_interp);
 
+    qint32 getFcPos();
+    void setFcPos(qint32 fc_pos);
+
     qint32 getDevSampleRate();
     void setDevSampleRate(qint32 dev_sample_rate);
 
@@ -96,6 +99,9 @@ private:
 
     qint32 log2_interp;
     bool m_log2_interp_isSet;
+
+    qint32 fc_pos;
+    bool m_fc_pos_isSet;
 
     qint32 dev_sample_rate;
     bool m_dev_sample_rate_isSet;

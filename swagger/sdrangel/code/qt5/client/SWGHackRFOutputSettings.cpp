@@ -38,6 +38,8 @@ SWGHackRFOutputSettings::SWGHackRFOutputSettings() {
     m_vga_gain_isSet = false;
     log2_interp = 0;
     m_log2_interp_isSet = false;
+    fc_pos = 0;
+    m_fc_pos_isSet = false;
     dev_sample_rate = 0;
     m_dev_sample_rate_isSet = false;
     bias_t = 0;
@@ -70,6 +72,8 @@ SWGHackRFOutputSettings::init() {
     m_vga_gain_isSet = false;
     log2_interp = 0;
     m_log2_interp_isSet = false;
+    fc_pos = 0;
+    m_fc_pos_isSet = false;
     dev_sample_rate = 0;
     m_dev_sample_rate_isSet = false;
     bias_t = 0;
@@ -88,6 +92,7 @@ SWGHackRFOutputSettings::init() {
 
 void
 SWGHackRFOutputSettings::cleanup() {
+
 
 
 
@@ -124,6 +129,8 @@ SWGHackRFOutputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&vga_gain, pJson["vgaGain"], "qint32", "");
     
     ::SWGSDRangel::setValue(&log2_interp, pJson["log2Interp"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&fc_pos, pJson["fcPos"], "qint32", "");
     
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
     
@@ -169,6 +176,9 @@ SWGHackRFOutputSettings::asJsonObject() {
     }
     if(m_log2_interp_isSet){
         obj->insert("log2Interp", QJsonValue(log2_interp));
+    }
+    if(m_fc_pos_isSet){
+        obj->insert("fcPos", QJsonValue(fc_pos));
     }
     if(m_dev_sample_rate_isSet){
         obj->insert("devSampleRate", QJsonValue(dev_sample_rate));
@@ -243,6 +253,16 @@ void
 SWGHackRFOutputSettings::setLog2Interp(qint32 log2_interp) {
     this->log2_interp = log2_interp;
     this->m_log2_interp_isSet = true;
+}
+
+qint32
+SWGHackRFOutputSettings::getFcPos() {
+    return fc_pos;
+}
+void
+SWGHackRFOutputSettings::setFcPos(qint32 fc_pos) {
+    this->fc_pos = fc_pos;
+    this->m_fc_pos_isSet = true;
 }
 
 qint32
@@ -325,6 +345,7 @@ SWGHackRFOutputSettings::isSet(){
         if(m_bandwidth_isSet){ isObjectUpdated = true; break;}
         if(m_vga_gain_isSet){ isObjectUpdated = true; break;}
         if(m_log2_interp_isSet){ isObjectUpdated = true; break;}
+        if(m_fc_pos_isSet){ isObjectUpdated = true; break;}
         if(m_dev_sample_rate_isSet){ isObjectUpdated = true; break;}
         if(m_bias_t_isSet){ isObjectUpdated = true; break;}
         if(m_lna_ext_isSet){ isObjectUpdated = true; break;}
