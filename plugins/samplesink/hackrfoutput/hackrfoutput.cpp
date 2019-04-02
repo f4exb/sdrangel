@@ -133,7 +133,6 @@ bool HackRFOutput::start()
 
 	applySettings(m_settings, true);
 
-	m_hackRFThread->setSamplerate(m_settings.m_devSampleRate);
     m_hackRFThread->setLog2Interpolation(m_settings.m_log2Interp);
     m_hackRFThread->setFcPos((int) m_settings.m_fcPos);
 

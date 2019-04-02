@@ -4,12 +4,6 @@
 
 This input sample source plugin gets its samples from a [HackRF device](https://greatscottgadgets.com/hackrf/).
 
-<h2>Build</h2>
-
-The plugin will be built only if the [HackRF host library](https://github.com/mossmann/hackrf) is installed in your system. If you build it from source and install it in a custom location say: `/opt/install/libhackrf` you will have to add `-DHACKRF_DIR=/opt/install/libhackrf` to the cmake command line.
-
-The HackRF Host library is also provided by many Linux distributions and is built in the SDRangel binary releases.
-
 <h2>Interface</h2>
 
 ![HackRF input plugin GUI](../../../doc/img/HackRFInput_plugin.png)
@@ -84,10 +78,14 @@ The device stream from the HackRF is decimated to obtain the baseband stream. Po
   - **Inf**: the decimation operation takes place around Fs - Fc.
   - **Sup**: the decimation operation takes place around Fs + Fc.
 
-With SR as the sample rate before decimation Fc is calculated as:
+With SR as the sample rate before decimation Fc is calculated depending on the decimaton factor:
 
-  - if decimation n is 4 or lower:  Fc = SR/2^(log2(n)-1). The device center frequency is on the side of the baseband. You need a RF filter bandwidth at least twice the baseband.
-  - if decimation n is 8 or higher: Fc = SR/n. The device center frequency is half the baseband away from the side of the baseband. You need a RF filter bandwidth at least 3 times the baseband.
+  - **2**: Fc = SR/4
+  - **4**: Fc = 3*SR/8
+  - **8**: Fc = 5*SR/16
+  - **16**: Fc = 11*SR/32
+  - **32**: Fc = 21*SR/64
+  - **64**: Fc = 21*SR/128
 
 <h3>9: Rx filter bandwidth</h3>
 
@@ -100,3 +98,11 @@ The LNA gain can be adjusted from 0 dB to 40 dB in 8 dB steps.
 <h3>11: Rx variable gain amplifier gain</h3>
 
 The Rx VGA gain can be adjusted from 0 dB to 62 dB in 2 dB steps.
+
+<h2>Frequency synchronization with Tx</h2>
+
+When a device set for the same physical device is present the device center frequencies are synchronized because there is only one LO for the physical device.
+
+When the center frequency position Fc (control 8) is set to center (Cen) in both Rx and Tx the actual frequency of reception and transmission are the same.
+
+In other cases for both frequencies to match you have to set the same sample rate and Fc position (either Inf or Sup) in the Rx and Tx.
