@@ -380,20 +380,6 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_gain != settings.m_gain) || force)
-    {
-        reverseAPIKeys.append("gain");
-
-        if(m_dev != 0)
-        {
-            if (rtlsdr_set_tuner_gain(m_dev, settings.m_gain) != 0) {
-                qCritical("RTLSDRInput::applySettings: rtlsdr_set_tuner_gain() failed");
-            } else {
-                qDebug("RTLSDRInput::applySettings: rtlsdr_set_tuner_gain() to %d", settings.m_gain);
-            }
-        }
-    }
-
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || (m_settings.m_iqImbalance != settings.m_iqImbalance) || force)
     {
         reverseAPIKeys.append("dcBlock");
@@ -550,6 +536,19 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
+    if ((m_settings.m_gain != settings.m_gain) || force)
+    {
+        reverseAPIKeys.append("gain");
+
+        if(m_dev != 0)
+        {
+            if (rtlsdr_set_tuner_gain(m_dev, settings.m_gain) != 0) {
+                qCritical("RTLSDRInput::applySettings: rtlsdr_set_tuner_gain() failed");
+            } else {
+                qDebug("RTLSDRInput::applySettings: rtlsdr_set_tuner_gain() to %d", settings.m_gain);
+            }
+        }
+    }
 
     if (settings.m_useReverseAPI)
     {
