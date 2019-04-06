@@ -310,22 +310,6 @@
       </widget>
      </item>
      <item>
-      <widget class="TransverterButton" name="transverter">
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Transverter frequency translation dialog</string>
-       </property>
-       <property name="text">
-        <string>X</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="ExternalClockButton" name="extClock">
        <property name="toolTip">
         <string>External clock dialog</string>
@@ -649,6 +633,22 @@
       <widget class="QLabel" name="lpFIRUnits">
        <property name="text">
         <string>kHz</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="TransverterButton" name="transverter">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Transverter frequency translation dialog</string>
+       </property>
+       <property name="text">
+        <string>X</string>
        </property>
       </widget>
      </item>
