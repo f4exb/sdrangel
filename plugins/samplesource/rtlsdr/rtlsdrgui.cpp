@@ -251,11 +251,12 @@ void RTLSDRGui::displayGains()
 
 void RTLSDRGui::displaySampleRate()
 {
-    ui->sampleRateMode->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
     ui->sampleRate->blockSignals(true);
+    displayFcTooltip();
 
     if (m_sampleRateMode)
     {
+        ui->sampleRateMode->setStyleSheet("QToolButton { background:rgb(60,60,60); }");
         ui->sampleRateMode->setText("SR");
 
         if (m_settings.m_lowSampleRate) {
@@ -272,6 +273,7 @@ void RTLSDRGui::displaySampleRate()
     }
     else
     {
+        ui->sampleRateMode->setStyleSheet("QToolButton { background:rgb(50,50,50); }");
         ui->sampleRateMode->setText("BB");
 
         if (m_settings.m_lowSampleRate) {
@@ -287,6 +289,17 @@ void RTLSDRGui::displaySampleRate()
     }
 
     ui->sampleRate->blockSignals(false);
+}
+
+void RTLSDRGui::displayFcTooltip()
+{
+    int32_t fShift = DeviceSampleSource::calculateFrequencyShift(
+        m_settings.m_log2Decim,
+        (DeviceSampleSource::fcPos_t) m_settings.m_fcPos,
+        m_settings.m_devSampleRate,
+        DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD
+    );
+    ui->fcPos->setToolTip(tr("Relative position of device center frequency: %1 kHz").arg(QString::number(fShift / 1000.0f, 'g', 5)));
 }
 
 void RTLSDRGui::displaySettings()
@@ -343,16 +356,9 @@ void RTLSDRGui::on_decim_currentIndexChanged(int index)
 
 void RTLSDRGui::on_fcPos_currentIndexChanged(int index)
 {
-	if (index == 0) {
-		m_settings.m_fcPos = RTLSDRSettings::FC_POS_INFRA;
-		sendSettings();
-	} else if (index == 1) {
-		m_settings.m_fcPos = RTLSDRSettings::FC_POS_SUPRA;
-		sendSettings();
-	} else if (index == 2) {
-		m_settings.m_fcPos = RTLSDRSettings::FC_POS_CENTER;
-		sendSettings();
-	}
+    m_settings.m_fcPos = (RTLSDRSettings::fcPos_t) (index < 0 ? 0 : index > 2 ? 2 : index);
+    displayFcTooltip();
+    sendSettings();
 }
 
 void RTLSDRGui::on_ppm_valueChanged(int value)
@@ -501,6 +507,7 @@ void RTLSDRGui::on_sampleRate_changed(quint64 value)
         m_settings.m_devSampleRate = value * (1 << m_settings.m_log2Decim);
     }
 
+    displayFcTooltip();
     sendSettings();
 }
 

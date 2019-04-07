@@ -70,6 +70,7 @@ private:
 
 	void displayGains();
     void displaySampleRate();
+    void displayFcTooltip();
 	void displaySettings();
 	void sendSettings();
 	void updateSampleRateAndFrequency();
