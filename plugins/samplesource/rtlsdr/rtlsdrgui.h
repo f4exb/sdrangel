@@ -58,6 +58,7 @@ private:
     bool m_doApplySettings;
 	bool m_forceSettings;
 	RTLSDRSettings m_settings;
+    bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
 	std::vector<int> m_gains;
@@ -68,6 +69,7 @@ private:
 	MessageQueue m_inputMessageQueue;
 
 	void displayGains();
+    void displaySampleRate();
 	void displaySettings();
 	void sendSettings();
 	void updateSampleRateAndFrequency();
@@ -92,6 +94,7 @@ private slots:
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
     void on_transverter_clicked();
+    void on_sampleRateMode_toggled(bool checked);
     void openDeviceSettingsDialog(const QPoint& p);
 	void updateHardware();
 	void updateStatus();
