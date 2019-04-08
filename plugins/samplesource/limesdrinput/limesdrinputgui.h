@@ -56,6 +56,7 @@ private:
     DeviceUISet* m_deviceUISet;
     LimeSDRInput* m_limeSDRInput; //!< Same object as above but gives easy access to LimeSDRInput methods and attributes that are used intensively
     LimeSDRInputSettings m_settings;
+    bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
     QTimer m_updateTimer;
     QTimer m_statusTimer;
     int m_sampleRate;
@@ -68,6 +69,7 @@ private:
     MessageQueue m_inputMessageQueue;
 
     void displaySettings();
+    void displaySampleRate();
     void setNCODisplay();
     void setCenterFrequencyDisplay();
     void setCenterFrequencySetting(uint64_t kHzValue);
@@ -100,6 +102,7 @@ private slots:
     void on_antenna_currentIndexChanged(int index);
     void on_extClock_clicked();
     void on_transverter_clicked();
+    void on_sampleRateMode_toggled(bool checked);
     void openDeviceSettingsDialog(const QPoint& p);
 
     void updateHardware();
