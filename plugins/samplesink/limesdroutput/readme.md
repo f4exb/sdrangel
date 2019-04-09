@@ -37,25 +37,27 @@ Then add the following defines on `cmake` command line:
 
 <h3>1: Start/Stop</h3>
 
-Device start / stop button. 
+Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
   - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon to stop, plug back in, check the source on the sampling devices control panel and start again.
-  
+
 <h3>2A: DAC sample rate</h3>
 
 This is the sample rate at which the DAC runs in kS/s (k) or MS/s (M) after hardware interpolation (8). Thus this is the host to device sample rate (10) multiplied by the hardware interpolation factor (8).
 
-&#9758; Note that changing the hardware interpolation factor (8) or the host to device sample rate (10) may change the ADC clock sample rate and therefore the Rx side hardware decimation factor and/or device to host sample rate. In fact ADC and DAC sample rates can be equal or related by a factor of 2. 
+&#9758; Note that changing the hardware interpolation factor (8) or the host to device sample rate (10) may change the ADC clock sample rate and therefore the Rx side hardware decimation factor and/or device to host sample rate. In fact ADC and DAC sample rates can be equal or related by a factor of 2.
 
-<h3>2B: Baseband sample rate</h3>
+<h3>2B: Stream sample rate</h3>
 
-This is the baseband sample rate in kS/s before interpolation (9) to produce the final stream that is sent to the LimeSDR device. Thus this is the host to device sample rate (10) divided by the software interpolation factor (9).
+In host to device sample rate input mode (10A) this is the baseband I/Q sample rate in kS/s. This is the host to device sample rate (10) divided by the software interpolation factor (9).
+
+In baseband sample rate input mode (10A) this is the host to device sample rate in kS/s. This is the baseband sample rate (10) multiplied by the software interpolation factor (9)
 
 Transmission latency depends essentially in the delay in the sample FIFO. The size of sample FIFO is calculated to give a fixed delay of 250 ms or 48000 samples whichever is bigger. Below is the delay in seconds vs baseband sample rate in kS/s from 48 to 250 kS/s. The 250 ms delay is reached at 192 kS/s:
 
-![BladeRF output plugin FIFO delay other](../../../doc/img/LimeSDROutput_plugin_fifodly.png) 
+![BladeRF output plugin FIFO delay other](../../../doc/img/LimeSDROutput_plugin_fifodly.png)
 
 <h3>3: Center frequency</h3>
 
@@ -79,7 +81,7 @@ Use this button to activate/deactivate the TSP NCO. The LMS7002M chip has an ind
 
 This is the frequency shift applied when the NCO is engaged thus the actual LO frequency is the center frequency of transmission minus this value. Use the thumbwheels to adjust frequency as done with the LO (1.1). Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2. The boundaries are dynamically calculated from the LO center frequency, sample rate and hardware interpolation factor.
 
-&#9758; In the LMS7002M TSP block the NCO sits after the interpolator (see Fig.14 of the [datasheet](http://www.limemicro.com/wp-content/uploads/2015/09/LMS7002M-Data-Sheet-v2.8.0.pdf) p.7) so it runs at the actual DAC rate. Hence the NCO limits are calculated as +/- half the device to host sample rate multiplied by the hardware interpolation factor. For example with a 4 MS/s device to host sample rate (10) and a hardware interpolation of 16 (8) you have +/- 32 MHz span around the LO for the NCO. In this example you can tune all HF frequencies with the center frequency set at its lowest (30 MHz). 
+&#9758; In the LMS7002M TSP block the NCO sits after the interpolator (see Fig.14 of the [datasheet](http://www.limemicro.com/wp-content/uploads/2015/09/LMS7002M-Data-Sheet-v2.8.0.pdf) p.7) so it runs at the actual DAC rate. Hence the NCO limits are calculated as +/- half the device to host sample rate multiplied by the hardware interpolation factor. For example with a 4 MS/s device to host sample rate (10) and a hardware interpolation of 16 (8) you have +/- 32 MHz span around the LO for the NCO. In this example you can tune all HF frequencies with the center frequency set at its lowest (30 MHz).
 
 <h3>7: Transverter mode open dialog</h3>
 
@@ -93,7 +95,7 @@ Note that if you mouse over the button a tooltip appears that displays the trans
 
 You can set the translating frequency in Hz with this dial. Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
-The frequency set in the device is the frequency on the main dial (1) minus this frequency. Thus it is positive for down converters and negative for up converters. 
+The frequency set in the device is the frequency on the main dial (1) minus this frequency. Thus it is positive for down converters and negative for up converters.
 
 For example a mixer at 120 MHz for HF operation you would set the value to -120,000,000 Hz so that if the main dial frequency is set at 7,130 kHz the PlutoSDR will be set to 127.130 MHz.
 
@@ -109,7 +111,7 @@ Use this toggle button to activate or deactivate the frequency translation
 
 <h4>7.3: Confirmation buttons</h4>
 
-Use these buttons to confirm ("OK") or dismiss ("Cancel") your changes. 
+Use these buttons to confirm ("OK") or dismiss ("Cancel") your changes.
 
 <h3>7A: External clock control</h3>
 
@@ -130,7 +132,7 @@ Use this checkbox to enable or disable the external clock input
 <h4>7A.3: Confirm changes</h4>
 
 Use the "OK" button to confirm your changes
-  
+
 <h4>7A.4: Dismiss changes</h4>
 
 Use the "Cancel" button to dismiss your changes
@@ -144,6 +146,13 @@ Thus the actual sample rate of the DAC is the stream sample rate (10) multiplied
 <h3>9: Software interpolation factor</h3>
 
 The I/Q stream from the baseband is upsampled by a power of two by software inside the plugin before being sent to the LimeSDR device. Possible values are increasing powers of two: 1 (no interpolation), 2, 4, 8, 16, 32.
+
+<h3>10A: Host to device sample rate / Baseband sample rate input toggle</h3>
+
+Use this toggle button to switch the sample rate input next (10) between host to device sample rate and baseband sample rate input. The button shows the current mode:
+
+  - **SR**: host to device sample rate input mode. The baseband sample rate (2B) is the host to device sample rate (10) divided by the software interpolation factor (9).
+  - **BB**: baseband sample rate input mode. The host to device sample rate (2B) is the baseband sample rate (8) multiplied by the software interpolation factor (9).
 
 <h3>10: Host to device stream sample rate</h3>
 
@@ -182,9 +191,9 @@ This label turns green when status can be obtained from the current stream. Usua
 <h3>17: Stream warning indicators</h3>
 
   - **U**: turns red if stream experiences underruns
-  - **O**: turns red if stream experiences overruns  
+  - **O**: turns red if stream experiences overruns
   - **P**: turns red if stream experiences packet drop outs
-  
+
 <h3>18: Stream global (all Tx) throughput in MB/s</h3>
 
 This is the stream throughput in MB/s and is usually about 3 times the sample rate for a single stream and 6 times for a dual Tx stream. This is due to the fact that 12 bits samples are used and although they are represented as 16 bit values only 12 bits travel on the USB link.
