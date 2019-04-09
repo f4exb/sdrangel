@@ -1,0 +1,133 @@
+name: sdrangel
+version: 4.5.4
+summary: SDRangel + LimeSDR
+description: SDRangel is an Open Source Qt5 / OpenGL 3.0+ SDR and signal analyzer frontend to various hardware.
+confinement: strict
+grade: stable
+
+apps:
+    sdrangel:
+        command: desktop-launch sdrangel
+        plugs: [network, network-bind, home, unity7, opengl, raw-usb]
+
+    LimeUtil:
+        command: LimeUtil
+        plugs: [network, network-bind, home, raw-usb]
+
+    sdrangelsrv:
+        command: sdrangelsrv
+        plugs: [network, network-bind, home, raw-usb]
+
+    sdrangelbench:
+        command: sdrangelbench
+
+parts:
+
+    limesuite:
+        plugin: cmake
+        source: https://github.com/myriadrf/LimeSuite.git
+        source-commit: 025ffa1a
+        configflags:
+            - -DENABLE_QUICKTEST=OFF
+            - -DENABLE_GUI=OFF
+            - -DENABLE_SOAPY_LMS7=OFF
+            - -DENABLE_EXAMPLES=OFF
+            - -DENABLE_UTILITIES=OFF
+            - -DENABLE_HEADERS=ON
+            - -DENABLE_SIMD_FLAGS=SSE3
+        build-packages:
+            - libusb-1.0-0-dev
+        stage-packages:
+            - libstdc++6
+
+    sdrangel:
+        plugin: cmake
+        source: https://github.com/f4exb/sdrangel
+        source-type: git
+        source-tag: v4.5.4
+        after: [desktop-qt5, limesuite, mbelib, serialdv, dsdcc, codec2, cm265cc, gcc7]
+        configflags:
+            - -DDEBUG_OUTPUT=ON
+            - -DBUILD_TYPE=RELEASE
+            - -DRX_SAMPLE_24BIT=ON
+            - -DCMAKE_CXX_COMPILER=/usr/bin/g++-7  #sdrangel fails to compile with with gcc5
+        build-packages:
+            - libfftw3-dev
+            - libusb-1.0-0-dev
+            - libusb-dev
+            - qt5-default
+            - qtbase5-dev
+            - qtchooser
+            - libqt5multimedia5-plugins
+            - qtmultimedia5-dev
+            - qttools5-dev
+            - qttools5-dev-tools
+            - libqt5opengl5-dev
+            - libboost-all-dev
+            - libasound2-dev
+            - pulseaudio
+            - libopencv-dev
+            - libxml2-dev
+            - bison
+            - flex
+            - ffmpeg
+            - libavcodec-dev
+            - libavformat-dev
+            - libopus-dev
+
+    gcc7:			#sdrangel fails to compile with with gcc5, install gcc7
+        plugin: nil
+        override-pull: |
+            sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+            sudo apt update
+            sudo apt install g++-7 -y
+        build-packages:
+            - software-properties-common
+
+    mbelib:
+        plugin: cmake
+        source: https://github.com/szechyjs/mbelib.git
+        source-type: git
+        source-commit: e2d84c1
+
+    serialdv:
+        plugin: cmake
+        source: https://github.com/f4exb/serialDV.git
+        source-type: git
+        source-commit: c58676a
+        configflags:
+            - -DCMAKE_CXX_FLAGS="-std=c++11"
+
+    dsdcc:
+        plugin: cmake
+        source: https://github.com/f4exb/dsdcc.git
+        source-type: git
+        source-commit: 2a89df4
+        configflags:
+            - -DUSE_MBELIB=ON
+            - -DCMAKE_CXX_FLAGS="-std=c++11"
+    codec2:
+        plugin: cmake
+        source: https://svn.code.sf.net/p/freetel/code/codec2-dev
+        source-type: svn
+        source-commit: "4067"
+        build-packages:
+            - libspeexdsp-dev
+            - libsamplerate0-dev
+
+    cm265cc:
+        plugin: cmake
+        source: https://github.com/f4exb/cm256cc.git
+        source-type: git
+        source-commit: 64beaaa
+
+
+
+
+
+
+
+
+
+
+
