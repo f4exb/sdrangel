@@ -33,6 +33,7 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     ui(new Ui::LimeSDROutputGUI),
     m_deviceUISet(deviceUISet),
     m_settings(),
+    m_sampleRateMode(true),
     m_sampleRate(0),
     m_lastEngineState(DSPDeviceSinkEngine::StNotStarted),
     m_doApplySettings(true),
@@ -302,7 +303,7 @@ void LimeSDROutputGUI::updateSampleRateAndFrequency()
 {
     m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
     m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-    ui->deviceRateLabel->setText(tr("%1k").arg(QString::number(m_sampleRate / 1000.0f, 'g', 5)));
+    displaySampleRate();
 }
 
 void LimeSDROutputGUI::updateDACRate()
@@ -316,6 +317,38 @@ void LimeSDROutputGUI::updateDACRate()
     }
 }
 
+void LimeSDROutputGUI::displaySampleRate()
+{
+    float minF, maxF;
+    m_limeSDROutput->getSRRange(minF, maxF);
+
+    ui->sampleRate->blockSignals(true);
+
+    if (m_sampleRateMode)
+    {
+        ui->sampleRateMode->setStyleSheet("QToolButton { background:rgb(60,60,60); }");
+        ui->sampleRateMode->setText("SR");
+        ui->sampleRate->setValueRange(8, (uint32_t) minF, (uint32_t) maxF);
+        ui->sampleRate->setValue(m_settings.m_devSampleRate);
+        ui->sampleRate->setToolTip("Device to host sample rate (S/s)");
+        ui->deviceRateText->setToolTip("Baseband sample rate (S/s)");
+        uint32_t basebandSampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp);
+        ui->deviceRateText->setText(tr("%1k").arg(QString::number(basebandSampleRate / 1000.0f, 'g', 5)));
+    }
+    else
+    {
+        ui->sampleRateMode->setStyleSheet("QToolButton { background:rgb(50,50,50); }");
+        ui->sampleRateMode->setText("BB");
+        ui->sampleRate->setValueRange(8, (uint32_t) minF/(1<<m_settings.m_log2SoftInterp), (uint32_t) maxF/(1<<m_settings.m_log2SoftInterp));
+        ui->sampleRate->setValue(m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp));
+        ui->sampleRate->setToolTip("Baseband sample rate (S/s)");
+        ui->deviceRateText->setToolTip("Device to host sample rate (S/s)");
+        ui->deviceRateText->setText(tr("%1k").arg(QString::number(m_settings.m_devSampleRate / 1000.0f, 'g', 5)));
+    }
+
+    ui->sampleRate->blockSignals(false);
+}
+
 void LimeSDROutputGUI::displaySettings()
 {
     ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
@@ -325,7 +358,7 @@ void LimeSDROutputGUI::displaySettings()
     ui->extClock->setExternalClockActive(m_settings.m_extClock);
 
     setCenterFrequencyDisplay();
-    ui->sampleRate->setValue(m_settings.m_devSampleRate);
+    displaySampleRate();
 
     ui->hwInterp->setCurrentIndex(m_settings.m_log2HardInterp);
     ui->swInterp->setCurrentIndex(m_settings.m_log2SoftInterp);
@@ -497,7 +530,12 @@ void LimeSDROutputGUI::on_ncoEnable_toggled(bool checked)
 
 void LimeSDROutputGUI::on_sampleRate_changed(quint64 value)
 {
-    m_settings.m_devSampleRate = value;
+    if (m_sampleRateMode) {
+        m_settings.m_devSampleRate = value;
+    } else {
+        m_settings.m_devSampleRate = value * (1 << m_settings.m_log2SoftInterp);
+    }
+
     updateDACRate();
     setNCODisplay();
     sendSettings();}
@@ -514,9 +552,19 @@ void LimeSDROutputGUI::on_hwInterp_currentIndexChanged(int index)
 
 void LimeSDROutputGUI::on_swInterp_currentIndexChanged(int index)
 {
-    if ((index <0) || (index > 6))
+    if ((index <0) || (index > 6)) {
         return;
+    }
+
     m_settings.m_log2SoftInterp = index;
+    displaySampleRate();
+
+    if (m_sampleRateMode) {
+        m_settings.m_devSampleRate = ui->sampleRate->getValueNew();
+    } else {
+        m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2SoftInterp);
+    }
+
     sendSettings();
 }
 
@@ -567,6 +615,12 @@ void LimeSDROutputGUI::on_transverter_clicked()
     updateFrequencyLimits();
     setCenterFrequencySetting(ui->centerFrequency->getValueNew());
     sendSettings();
+}
+
+void LimeSDROutputGUI::on_sampleRateMode_toggled(bool checked)
+{
+    m_sampleRateMode = checked;
+    displaySampleRate();
 }
 
 void LimeSDROutputGUI::openDeviceSettingsDialog(const QPoint& p)
