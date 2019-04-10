@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
 // Copyright (C) 2017 Sergey Kostanbaev, Fairwaves Inc.                          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -35,7 +35,7 @@
 
 const PluginDescriptor XTRXInputPlugin::m_pluginDescriptor = {
     QString("XTRX Input"),
-    QString("4.5.2"),
+    QString("4.5.4"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,

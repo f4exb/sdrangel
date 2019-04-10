@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -34,7 +34,7 @@
 
 const PluginDescriptor XTRXOutputPlugin::m_pluginDescriptor = {
     QString("XTRX Output"),
-    QString("4.5.2"),
+    QString("4.5.4"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,

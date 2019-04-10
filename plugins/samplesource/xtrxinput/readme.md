@@ -74,7 +74,9 @@ This is the sample rate at which the ADC runs in kS/s (k) or MS/s (M) before har
 
 <h4>1.5: Stream sample rate</h4>
 
-Baseband I/Q sample rate in kS/s. This is the device to host sample rate (5) divided by the software decimation factor (4).
+In device to host sample rate input mode (5A) this is the baseband I/Q sample rate in kS/s. This is the device to host sample rate (5) divided by the software decimation factor (4).
+
+In baseband sample rate input mode (5A) this is the device to host sample rate in kS/s. This is the baseband sample rate (5) multiplied by the software decimation factor (4)
 
 <h4>1.6: Channel number</h4>
 
@@ -140,9 +142,18 @@ The first position in the combo is marked as "A". This is because decimation by 
 
 The I/Q stream from the XTRX is downsampled by a power of two by software inside the plugin before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32.
 
-<h3>5: Device to host stream sample rate</h3>
+<h3>5A: Device to host sample rate / Baseband sample rate input toggle</h3>
 
-This is the XTRX device to/from host stream sample rate in S/s. It is the same for the Rx and Tx systems.
+Use this toggle button to switch the sample rate input next (5) between device to host sample rate and baseband sample rate input. The button shows the current mode:
+
+  - **SR**: device to host sample rate input mode. The baseband sample rate (1.5) is the device to host sample rate (5) divided by the software decimation factor (4).
+  - **BB**: baseband sample rate input mode. The device to host sample rate (1.5) is the baseband sample rate (5) multiplied by the software decimation factor (4).
+
+<h3>5: Sample rate</h3>
+
+This is the XTRX device to/from host stream sample rate or baseband sample rate in samples per second (S/s). The control (5A) is used to switch between the two input modes. The device to/from host stream sample rate is the same for the Rx and Tx systems.
+
+The limits are adjusted automatically. In baseband input mode the limits are driven by the decimation factor (4). You may need to increase this decimation factor to be able to reach lower values.
 
 Use the wheels to adjust the sample rate. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows.
 
