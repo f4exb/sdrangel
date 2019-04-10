@@ -56,6 +56,7 @@ private:
     DeviceUISet* m_deviceUISet;
     XTRXOutput* m_XTRXOutput; //!< Same object as above but gives easy access to XTRXInput methods and attributes that are used intensively
     XTRXOutputSettings m_settings;
+    bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
     QTimer m_updateTimer;
     QTimer m_statusTimer;
     int m_sampleRate;
@@ -68,6 +69,7 @@ private:
     MessageQueue m_inputMessageQueue;
 
     void displaySettings();
+    void displaySampleRate();
     void setNCODisplay();
     void setCenterFrequencyDisplay();
     void setCenterFrequencySetting(uint64_t kHzValue);
@@ -90,6 +92,7 @@ private slots:
     void on_antenna_currentIndexChanged(int index);
     void on_extClock_clicked();
     void on_pwrmode_currentIndexChanged(int index);
+    void on_sampleRateMode_toggled(bool checked);
 
     void updateHardware();
     void updateStatus();

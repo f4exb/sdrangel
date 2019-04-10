@@ -129,6 +129,7 @@ void XTRXOutputThread::run()
         params.tx.chs = XTRX_CH_AB;
         params.tx.wfmt = XTRX_WF_16;
         params.tx.hfmt = XTRX_IQ_INT16;
+        params.tx.flags |= XTRX_RSP_SWAP_IQ;
 
         if (m_nbChannels == 1)
         {

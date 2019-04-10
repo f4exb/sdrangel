@@ -65,10 +65,11 @@ This is the center frequency of transmission in kHz.
 
 LimeSDR is a 2x2 MIMO device so it has two transmitting channels. This shows the corresponding Tx channel index (0 or 1).
 
-
 <h3>5: Stream sample rate</h3>
 
-Baseband I/Q sample rate in kS/s. This is the device to host sample rate (11) divided by the software interpolation factor (10).
+In host to device sample rate input mode (11A) this is the baseband I/Q sample rate in kS/s. This is the host to device sample rate (11) divided by the software interpolation factor (10).
+
+In baseband sample rate input mode (11A) this is the host to device sample rate in kS/s. This is the baseband sample rate (11) multiplied by the software interpolation factor (10)
 
 <h3>6: NCO toggle</h3>
 
@@ -118,9 +119,18 @@ The first position in the combo is marked as "A". This is because interpolation 
 
 The I/Q stream from the baseband is upsampled by a power of two by software inside the plugin before being sent to the LimeSDR device. Possible values are increasing powers of two: 1 (no interpolation), 2, 4, 8, 16, 32.
 
-<h3>11: Host to device stream sample rate</h3>
+<h3>11A: Host to device sample rate / Baseband sample rate input toggle</h3>
 
-This is the LMS7002M device to/from host stream sample rate in S/s. It is the same for the Rx and Tx systems.
+Use this toggle button to switch the sample rate input next (10) between host to device sample rate and baseband sample rate input. The button shows the current mode:
+
+  - **SR**: host to device sample rate input mode. The baseband sample rate (5) is the host to device sample rate (11) divided by the software interpolation factor (10).
+  - **BB**: baseband sample rate input mode. The host to device sample rate (5) is the baseband sample rate (11) multiplied by the software interpolation factor (10).
+
+<h3>11: Sample rate</h3>
+
+This is the LMS7002M device to/from host stream sample rate or baseband sample rate in samples per second (S/s). The control (11A) is used to switch between the two input modes. The device to/from host stream sample rate is the same for the Rx and Tx systems.
+
+The limits are adjusted automatically. In baseband input mode the limits are driven by the interpolation factor (10). You may need to increase this interpolation factor to be able to reach lower values.
 
 Use the wheels to adjust the sample rate. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows.
 
