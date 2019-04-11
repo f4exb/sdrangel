@@ -91,7 +91,7 @@
        <item>
         <layout class="QHBoxLayout" name="deviceRateLayout">
          <item>
-          <widget class="QLabel" name="deviceRateLabel">
+          <widget class="QLabel" name="deviceRateText">
            <property name="toolTip">
             <string>I/Q sample rate kS/s</string>
            </property>
@@ -303,15 +303,30 @@
       <number>2</number>
      </property>
      <item>
-      <widget class="QLabel" name="samplerateLabel">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QToolButton" name="sampleRateMode">
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Toggle between device to host (SR) and base band (BB) sample rate input</string>
        </property>
        <property name="text">
         <string>SR</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

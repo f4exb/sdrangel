@@ -58,6 +58,7 @@ private:
 	bool m_forceSettings;
 	bool m_doApplySettings;
 	BladeRF1InputSettings m_settings;
+    bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
 	std::vector<int> m_gains;
@@ -68,6 +69,8 @@ private:
 	MessageQueue m_inputMessageQueue;
 
 	void displaySettings();
+    void displaySampleRate();
+    void displayFcTooltip();
 	void sendSettings();
 	unsigned int getXb200Index(bool xb_200, bladerf_xb200_path xb200Path, bladerf_xb200_filter xb200Filter);
 	void updateSampleRateAndFrequency();
@@ -88,6 +91,7 @@ private slots:
 	void on_fcPos_currentIndexChanged(int index);
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
+    void on_sampleRateMode_toggled(bool checked);
 	void updateHardware();
 	void updateStatus();
     void openDeviceSettingsDialog(const QPoint& p);
