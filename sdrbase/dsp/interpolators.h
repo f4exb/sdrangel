@@ -106,31 +106,31 @@ class Interpolators
 {
 public:
     // interleaved I/Q input buffer
-	void interpolate1(SampleVector::iterator* it, T* buf, qint32 len);
+	void interpolate1(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
 
-    void interpolate2_cen(SampleVector::iterator* it, T* buf, qint32 len);
-	void interpolate2_inf(SampleVector::iterator* it, T* buf, qint32 len);
-	void interpolate2_sup(SampleVector::iterator* it, T* buf, qint32 len);
+    void interpolate2_cen(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
+	void interpolate2_inf(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
+	void interpolate2_sup(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
 
-    void interpolate4_cen(SampleVector::iterator* it, T* buf, qint32 len);
-	void interpolate4_inf(SampleVector::iterator* it, T* buf, qint32 len);
-	void interpolate4_sup(SampleVector::iterator* it, T* buf, qint32 len);
+    void interpolate4_cen(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
+	void interpolate4_inf(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
+	void interpolate4_sup(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
 
-    void interpolate8_cen(SampleVector::iterator* it, T* buf, qint32 len);
-    void interpolate8_inf(SampleVector::iterator* it, T* buf, qint32 len);
-    void interpolate8_sup(SampleVector::iterator* it, T* buf, qint32 len);
+    void interpolate8_cen(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
+    void interpolate8_inf(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
+    void interpolate8_sup(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
 
-	void interpolate16_cen(SampleVector::iterator* it, T* buf, qint32 len);
-	void interpolate16_inf(SampleVector::iterator* it, T* buf, qint32 len);
-	void interpolate16_sup(SampleVector::iterator* it, T* buf, qint32 len);
+	void interpolate16_cen(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
+	void interpolate16_inf(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
+	void interpolate16_sup(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
 
-	void interpolate32_cen(SampleVector::iterator* it, T* buf, qint32 len);
-	void interpolate32_inf(SampleVector::iterator* it, T* buf, qint32 len);
-	void interpolate32_sup(SampleVector::iterator* it, T* buf, qint32 len);
+	void interpolate32_cen(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
+	void interpolate32_inf(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
+	void interpolate32_sup(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
 
-	void interpolate64_cen(SampleVector::iterator* it, T* buf, qint32 len);
-	void interpolate64_inf(SampleVector::iterator* it, T* buf, qint32 len);
-	void interpolate64_sup(SampleVector::iterator* it, T* buf, qint32 len);
+	void interpolate64_cen(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
+	void interpolate64_inf(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
+	void interpolate64_sup(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ = false);
 
 private:
 #ifdef USE_SSE4_1
@@ -151,25 +151,49 @@ private:
 };
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate1(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate1(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
-	for (int pos = 0; pos < len - 1; pos += 2)
-	{
-	    buf[pos+0] = (**it).m_real >> interpolation_shifts<SdrBits, OutputBits>::post1;
-	    buf[pos+1] = (**it).m_imag >> interpolation_shifts<SdrBits, OutputBits>::post1;
-		++(*it);
-	}
+    if (invertIQ)
+    {
+        for (int pos = 0; pos < len - 1; pos += 2)
+        {
+            buf[pos+1] = (**it).m_real >> interpolation_shifts<SdrBits, OutputBits>::post1;
+            buf[pos+0] = (**it).m_imag >> interpolation_shifts<SdrBits, OutputBits>::post1;
+            ++(*it);
+        }
+    }
+    else
+    {
+        for (int pos = 0; pos < len - 1; pos += 2)
+        {
+            buf[pos+0] = (**it).m_real >> interpolation_shifts<SdrBits, OutputBits>::post1;
+            buf[pos+1] = (**it).m_imag >> interpolation_shifts<SdrBits, OutputBits>::post1;
+            ++(*it);
+        }
+    }
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate2_cen(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate2_cen(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
 	qint32 intbuf[4];
+    qint32 *bufI, *bufQ;
+
+    if (invertIQ)
+    {
+        bufI = &intbuf[1];
+        bufQ = &intbuf[0];
+    }
+    else
+    {
+        bufI = &intbuf[0];
+        bufQ = &intbuf[1];
+    }
 
     for (int pos = 0; pos < len - 3; pos += 4)
     {
-        intbuf[0] = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre2;
-        intbuf[1] = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre2;
+        *bufI = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre2;
+        *bufQ = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre2;
 //        intbuf[2] = 0;
 //        intbuf[3] = 0;
 
@@ -185,19 +209,35 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate2_cen(SampleVector::itera
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate2_inf(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate2_inf(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
 	qint32 intbuf[8];
+    qint32 *bufI0, *bufQ0, *bufI1, *bufQ1;
+
+    if (invertIQ)
+    {
+        bufI0 = &intbuf[1];
+        bufQ0 = &intbuf[0];
+        bufI1 = &intbuf[5];
+        bufQ1 = &intbuf[4];
+    }
+    else
+    {
+        bufI0 = &intbuf[0];
+        bufQ0 = &intbuf[1];
+        bufI1 = &intbuf[4];
+        bufQ1 = &intbuf[5];
+    }
 
     for (int pos = 0; pos < len - 7; pos += 8)
     {
         memset(intbuf, 0, 8*sizeof(qint32));
 
-        intbuf[0] = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre2;
-        intbuf[1] = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre2;
+        *bufI0 = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre2;
+        *bufQ0 = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre2;
         ++(*it);
-        intbuf[4] = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre2;
-        intbuf[5] = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre2;
+        *bufI1 = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre2;
+        *bufQ1 = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre2;
         ++(*it);
 
         m_interpolator2.myInterpolateInf(&intbuf[0], &intbuf[1], &intbuf[2], &intbuf[3], &intbuf[4], &intbuf[5], &intbuf[6], &intbuf[7]);
@@ -214,19 +254,35 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate2_inf(SampleVector::itera
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate2_sup(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate2_sup(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
 	qint32 intbuf[8];
+    qint32 *bufI0, *bufQ0, *bufI1, *bufQ1;
+
+    if (invertIQ)
+    {
+        bufI0 = &intbuf[1];
+        bufQ0 = &intbuf[0];
+        bufI1 = &intbuf[5];
+        bufQ1 = &intbuf[4];
+    }
+    else
+    {
+        bufI0 = &intbuf[0];
+        bufQ0 = &intbuf[1];
+        bufI1 = &intbuf[4];
+        bufQ1 = &intbuf[5];
+    }
 
     for (int pos = 0; pos < len - 7; pos += 8)
     {
         memset(intbuf, 0, 8*sizeof(qint32));
 
-        intbuf[0] = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre2;
-        intbuf[1] = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre2;
+        *bufI0 = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre2;
+        *bufQ0 = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre2;
         ++(*it);
-        intbuf[4] = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre2;
-        intbuf[5] = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre2;
+        *bufI1 = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre2;
+        *bufQ1 = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre2;
         ++(*it);
 
         m_interpolator2.myInterpolateSup(&intbuf[0], &intbuf[1], &intbuf[2], &intbuf[3], &intbuf[4], &intbuf[5], &intbuf[6], &intbuf[7]);
@@ -243,15 +299,27 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate2_sup(SampleVector::itera
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate4_cen(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate4_cen(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
 	qint32 intbuf[8];
+    qint32 *bufI, *bufQ;
+
+    if (invertIQ)
+    {
+        bufI = &intbuf[1];
+        bufQ = &intbuf[0];
+    }
+    else
+    {
+        bufI = &intbuf[0];
+        bufQ = &intbuf[1];
+    }
 
 	for (int pos = 0; pos < len - 7; pos += 8)
 	{
         memset(intbuf, 0, 8*sizeof(qint32));
-		intbuf[0]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre4;
-		intbuf[1]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre4;
+		*bufI  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre4;
+		*bufQ  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre4;
 
         m_interpolator2.myInterpolate(&intbuf[0], &intbuf[1], &intbuf[4], &intbuf[5]);
 
@@ -272,18 +340,34 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate4_cen(SampleVector::itera
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate4_inf(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate4_inf(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
     qint32 intbuf[16];
+    qint32 *bufI0, *bufQ0, *bufI1, *bufQ1;
+
+    if (invertIQ)
+    {
+        bufI0 = &intbuf[1];
+        bufQ0 = &intbuf[0];
+        bufI1 = &intbuf[9];
+        bufQ1 = &intbuf[8];
+    }
+    else
+    {
+        bufI0 = &intbuf[0];
+        bufQ0 = &intbuf[1];
+        bufI1 = &intbuf[8];
+        bufQ1 = &intbuf[9];
+    }
 
     for (int pos = 0; pos < len - 15; pos += 16)
     {
         memset(intbuf, 0, 16*sizeof(qint32));
-		intbuf[0]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre4;
-		intbuf[1]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre4;
+		*bufI0  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre4;
+		*bufQ0  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre4;
         ++(*it);
-		intbuf[8]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre4;
-		intbuf[9]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre4;
+		*bufI1  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre4;
+		*bufQ1  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre4;
         ++(*it);
 
         m_interpolator2.myInterpolateInf(&intbuf[0], &intbuf[1], &intbuf[4], &intbuf[5], &intbuf[8], &intbuf[9], &intbuf[12], &intbuf[13]);
@@ -298,18 +382,34 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate4_inf(SampleVector::itera
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate4_sup(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate4_sup(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
     qint32 intbuf[16];
+    qint32 *bufI0, *bufQ0, *bufI1, *bufQ1;
+
+    if (invertIQ)
+    {
+        bufI0 = &intbuf[1];
+        bufQ0 = &intbuf[0];
+        bufI1 = &intbuf[9];
+        bufQ1 = &intbuf[8];
+    }
+    else
+    {
+        bufI0 = &intbuf[0];
+        bufQ0 = &intbuf[1];
+        bufI1 = &intbuf[8];
+        bufQ1 = &intbuf[9];
+    }
 
     for (int pos = 0; pos < len - 15; pos += 16)
     {
         memset(intbuf, 0, 16*sizeof(qint32));
-		intbuf[0]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre4;
-		intbuf[1]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre4;
+		*bufI0  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre4;
+		*bufQ0  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre4;
         ++(*it);
-		intbuf[8]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre4;
-		intbuf[9]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre4;
+		*bufI1  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre4;
+		*bufQ1  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre4;
         ++(*it);
 
         m_interpolator2.myInterpolateSup(&intbuf[0], &intbuf[1], &intbuf[4], &intbuf[5], &intbuf[8], &intbuf[9], &intbuf[12], &intbuf[13]);
@@ -324,15 +424,27 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate4_sup(SampleVector::itera
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate8_cen(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate8_cen(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
 	qint32 intbuf[16];
+    qint32 *bufI, *bufQ;
+
+    if (invertIQ)
+    {
+        bufI = &intbuf[1];
+        bufQ = &intbuf[0];
+    }
+    else
+    {
+        bufI = &intbuf[0];
+        bufQ = &intbuf[1];
+    }
 
 	for (int pos = 0; pos < len - 15; pos += 16)
 	{
         memset(intbuf, 0, 16*sizeof(qint32));
-        intbuf[0]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre8;
-        intbuf[1]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre8;
+        *bufI  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre8;
+        *bufQ  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre8;
 
         m_interpolator2.myInterpolate(&intbuf[0], &intbuf[1], &intbuf[8], &intbuf[9]);
 
@@ -366,18 +478,34 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate8_cen(SampleVector::itera
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate8_inf(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate8_inf(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
 	qint32 intbuf[32];
+    qint32 *bufI0, *bufQ0, *bufI1, *bufQ1;
+
+    if (invertIQ)
+    {
+        bufI0 = &intbuf[1];
+        bufQ0 = &intbuf[0];
+        bufI1 = &intbuf[17];
+        bufQ1 = &intbuf[16];
+    }
+    else
+    {
+        bufI0 = &intbuf[0];
+        bufQ0 = &intbuf[1];
+        bufI1 = &intbuf[16];
+        bufQ1 = &intbuf[17];
+    }
 
 	for (int pos = 0; pos < len - 31; pos += 32)
 	{
         memset(intbuf, 0, 32*sizeof(qint32));
-		intbuf[0]   = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre8;
-		intbuf[1]   = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre8;
+		*bufI0   = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre8;
+		*bufQ0   = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre8;
         ++(*it);
-		intbuf[16]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre8;
-		intbuf[17]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre8;
+		*bufI1  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre8;
+		*bufQ1  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre8;
         ++(*it);
 
         m_interpolator2.myInterpolateSup(&intbuf[0], &intbuf[1], &intbuf[8], &intbuf[9], &intbuf[16], &intbuf[17], &intbuf[24], &intbuf[25]);
@@ -397,18 +525,34 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate8_inf(SampleVector::itera
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate8_sup(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate8_sup(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
 	qint32 intbuf[32];
+    qint32 *bufI0, *bufQ0, *bufI1, *bufQ1;
+
+    if (invertIQ)
+    {
+        bufI0 = &intbuf[1];
+        bufQ0 = &intbuf[0];
+        bufI1 = &intbuf[17];
+        bufQ1 = &intbuf[16];
+    }
+    else
+    {
+        bufI0 = &intbuf[0];
+        bufQ0 = &intbuf[1];
+        bufI1 = &intbuf[16];
+        bufQ1 = &intbuf[17];
+    }
 
 	for (int pos = 0; pos < len - 31; pos += 32)
 	{
         memset(intbuf, 0, 32*sizeof(qint32));
-		intbuf[0]   = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre8;
-		intbuf[1]   = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre8;
+		*bufI0   = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre8;
+		*bufQ0   = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre8;
         ++(*it);
-		intbuf[16]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre8;
-		intbuf[17]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre8;
+		*bufI1  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre8;
+		*bufQ1  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre8;
         ++(*it);
 
         m_interpolator2.myInterpolateInf(&intbuf[0], &intbuf[1], &intbuf[8], &intbuf[9], &intbuf[16], &intbuf[17], &intbuf[24], &intbuf[25]);
@@ -428,15 +572,27 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate8_sup(SampleVector::itera
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate16_cen(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate16_cen(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
 	qint32 intbuf[32];
+    qint32 *bufI, *bufQ;
+
+    if (invertIQ)
+    {
+        bufI = &intbuf[1];
+        bufQ = &intbuf[0];
+    }
+    else
+    {
+        bufI = &intbuf[0];
+        bufQ = &intbuf[1];
+    }
 
 	for (int pos = 0; pos < len - 31; pos += 32)
 	{
         memset(intbuf, 0, 32*sizeof(qint32));
-        intbuf[0]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre16;
-        intbuf[1]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre16;
+        *bufI  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre16;
+        *bufQ  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre16;
 
         m_interpolator2.myInterpolate(&intbuf[0], &intbuf[1], &intbuf[16], &intbuf[17]);
 
@@ -495,18 +651,34 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate16_cen(SampleVector::iter
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate16_inf(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate16_inf(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
 	qint32 intbuf[64];
+    qint32 *bufI0, *bufQ0, *bufI1, *bufQ1;
+
+    if (invertIQ)
+    {
+        bufI0 = &intbuf[1];
+        bufQ0 = &intbuf[0];
+        bufI1 = &intbuf[33];
+        bufQ1 = &intbuf[32];
+    }
+    else
+    {
+        bufI0 = &intbuf[0];
+        bufQ0 = &intbuf[1];
+        bufI1 = &intbuf[32];
+        bufQ1 = &intbuf[33];
+    }
 
 	for (int pos = 0; pos < len - 63; pos += 64)
 	{
         memset(intbuf, 0, 64*sizeof(qint32));
-		intbuf[0]   = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre16;
-		intbuf[1]   = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre16;
+		*bufI0   = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre16;
+		*bufQ0   = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre16;
         ++(*it);
-		intbuf[32]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre16;
-		intbuf[33]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre16;
+		*bufI1  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre16;
+		*bufQ1  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre16;
         ++(*it);
 
         m_interpolator2.myInterpolateInf(&intbuf[0], &intbuf[1], &intbuf[16], &intbuf[17], &intbuf[32], &intbuf[33], &intbuf[48], &intbuf[49]);
@@ -535,18 +707,34 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate16_inf(SampleVector::iter
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate16_sup(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate16_sup(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
 	qint32 intbuf[64];
+    qint32 *bufI0, *bufQ0, *bufI1, *bufQ1;
+
+    if (invertIQ)
+    {
+        bufI0 = &intbuf[1];
+        bufQ0 = &intbuf[0];
+        bufI1 = &intbuf[33];
+        bufQ1 = &intbuf[32];
+    }
+    else
+    {
+        bufI0 = &intbuf[0];
+        bufQ0 = &intbuf[1];
+        bufI1 = &intbuf[32];
+        bufQ1 = &intbuf[33];
+    }
 
 	for (int pos = 0; pos < len - 63; pos += 64)
 	{
         memset(intbuf, 0, 64*sizeof(qint32));
-		intbuf[0]   = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre16;
-		intbuf[1]   = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre16;
+		*bufI0   = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre16;
+		*bufQ0   = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre16;
         ++(*it);
-		intbuf[32]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre16;
-		intbuf[33]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre16;
+		*bufI1  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre16;
+		*bufQ1  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre16;
         ++(*it);
 
         m_interpolator2.myInterpolateSup(&intbuf[0], &intbuf[1], &intbuf[16], &intbuf[17], &intbuf[32], &intbuf[33], &intbuf[48], &intbuf[49]);
@@ -575,15 +763,27 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate16_sup(SampleVector::iter
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate32_cen(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate32_cen(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
 	qint32 intbuf[64];
+    qint32 *bufI, *bufQ;
+
+    if (invertIQ)
+    {
+        bufI = &intbuf[1];
+        bufQ = &intbuf[0];
+    }
+    else
+    {
+        bufI = &intbuf[0];
+        bufQ = &intbuf[1];
+    }
 
 	for (int pos = 0; pos < len - 63; pos += 64)
 	{
 	    memset(intbuf, 0, 64*sizeof(qint32));
-        intbuf[0]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre32;
-        intbuf[1]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        *bufI  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        *bufQ  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre32;
         m_interpolator2.myInterpolate(&intbuf[0], &intbuf[1], &intbuf[32], &intbuf[33]);
 
         m_interpolator4.myInterpolate(&intbuf[0],  &intbuf[1],  &intbuf[16], &intbuf[17]);
@@ -690,18 +890,34 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate32_cen(SampleVector::iter
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate32_inf(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate32_inf(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
 	qint32 intbuf[128];
+    qint32 *bufI0, *bufQ0, *bufI1, *bufQ1;
+
+    if (invertIQ)
+    {
+        bufI0 = &intbuf[1];
+        bufQ0 = &intbuf[0];
+        bufI1 = &intbuf[65];
+        bufQ1 = &intbuf[64];
+    }
+    else
+    {
+        bufI0 = &intbuf[0];
+        bufQ0 = &intbuf[1];
+        bufI1 = &intbuf[64];
+        bufQ1 = &intbuf[65];
+    }
 
 	for (int pos = 0; pos < len - 127; pos += 128)
 	{
 	    memset(intbuf, 0, 128*sizeof(qint32));
-        intbuf[0]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre32;
-        intbuf[1]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        *bufI0  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        *bufQ0  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre32;
         ++(*it);
-        intbuf[64]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre32;
-        intbuf[65]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        *bufI1  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        *bufQ1  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre32;
         ++(*it);
 
         m_interpolator2.myInterpolateSup(&intbuf[0],   &intbuf[1],  &intbuf[32], &intbuf[33], &intbuf[64], &intbuf[65], &intbuf[96], &intbuf[97]);
@@ -747,18 +963,34 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate32_inf(SampleVector::iter
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate32_sup(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate32_sup(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
 	qint32 intbuf[128];
+    qint32 *bufI0, *bufQ0, *bufI1, *bufQ1;
+
+    if (invertIQ)
+    {
+        bufI0 = &intbuf[1];
+        bufQ0 = &intbuf[0];
+        bufI1 = &intbuf[65];
+        bufQ1 = &intbuf[64];
+    }
+    else
+    {
+        bufI0 = &intbuf[0];
+        bufQ0 = &intbuf[1];
+        bufI1 = &intbuf[64];
+        bufQ1 = &intbuf[65];
+    }
 
 	for (int pos = 0; pos < len - 127; pos += 128)
 	{
 	    memset(intbuf, 0, 128*sizeof(qint32));
-        intbuf[0]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre32;
-        intbuf[1]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        *bufI0  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        *bufQ0  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre32;
         ++(*it);
-        intbuf[64]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre32;
-        intbuf[65]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        *bufI1  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre32;
+        *bufQ1  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre32;
         ++(*it);
 
         m_interpolator2.myInterpolateInf(&intbuf[0],   &intbuf[1],  &intbuf[32], &intbuf[33], &intbuf[64], &intbuf[65], &intbuf[96], &intbuf[97]);
@@ -804,15 +1036,27 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate32_sup(SampleVector::iter
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate64_cen(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate64_cen(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
 	qint32 intbuf[128];
+    qint32 *bufI, *bufQ;
+
+    if (invertIQ)
+    {
+        bufI = &intbuf[1];
+        bufQ = &intbuf[0];
+    }
+    else
+    {
+        bufI = &intbuf[0];
+        bufQ = &intbuf[1];
+    }
 
 	for (int pos = 0; pos < len - 127; pos += 128)
 	{
         memset(intbuf, 0, 128*sizeof(qint32));
-        intbuf[0]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre64;
-        intbuf[1]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre64;
+        *bufI  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre64;
+        *bufQ  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre64;
         m_interpolator2.myInterpolate(&intbuf[0], &intbuf[1], &intbuf[64], &intbuf[65]);
 
         m_interpolator4.myInterpolate(&intbuf[0],  &intbuf[1],  &intbuf[32], &intbuf[33]);
@@ -998,18 +1242,34 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate64_cen(SampleVector::iter
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate64_inf(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate64_inf(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
 	qint32 intbuf[256];
+    qint32 *bufI0, *bufQ0, *bufI1, *bufQ1;
+
+    if (invertIQ)
+    {
+        bufI0 = &intbuf[1];
+        bufQ0 = &intbuf[0];
+        bufI1 = &intbuf[129];
+        bufQ1 = &intbuf[128];
+    }
+    else
+    {
+        bufI0 = &intbuf[0];
+        bufQ0 = &intbuf[1];
+        bufI1 = &intbuf[128];
+        bufQ1 = &intbuf[129];
+    }
 
 	for (int pos = 0; pos < len - 255; pos += 256)
 	{
 	    memset(intbuf, 0, 256*sizeof(qint32));
-        intbuf[0]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre64;
-        intbuf[1]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre64;
+        *bufI0  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre64;
+        *bufQ0  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre64;
         ++(*it);
-        intbuf[128]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre64;
-        intbuf[129]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre64;
+        *bufI1  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre64;
+        *bufQ1  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre64;
         ++(*it);
 
         m_interpolator2.myInterpolateSup(&intbuf[0],   &intbuf[1],  &intbuf[64], &intbuf[65], &intbuf[128], &intbuf[129], &intbuf[192], &intbuf[193]);
@@ -1062,18 +1322,34 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate64_inf(SampleVector::iter
 }
 
 template<typename T, uint SdrBits, uint OutputBits>
-void Interpolators<T, SdrBits, OutputBits>::interpolate64_sup(SampleVector::iterator* it, T* buf, qint32 len)
+void Interpolators<T, SdrBits, OutputBits>::interpolate64_sup(SampleVector::iterator* it, T* buf, qint32 len, bool invertIQ)
 {
 	qint32 intbuf[256];
+    qint32 *bufI0, *bufQ0, *bufI1, *bufQ1;
+
+    if (invertIQ)
+    {
+        bufI0 = &intbuf[1];
+        bufQ0 = &intbuf[0];
+        bufI1 = &intbuf[129];
+        bufQ1 = &intbuf[128];
+    }
+    else
+    {
+        bufI0 = &intbuf[0];
+        bufQ0 = &intbuf[1];
+        bufI1 = &intbuf[128];
+        bufQ1 = &intbuf[129];
+    }
 
 	for (int pos = 0; pos < len - 255; pos += 256)
 	{
 	    memset(intbuf, 0, 256*sizeof(qint32));
-        intbuf[0]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre64;
-        intbuf[1]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre64;
+        *bufI0  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre64;
+        *bufQ0  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre64;
         ++(*it);
-        intbuf[128]  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre64;
-        intbuf[129]  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre64;
+        *bufI1  = (**it).m_real << interpolation_shifts<SdrBits, OutputBits>::pre64;
+        *bufQ1  = (**it).m_imag << interpolation_shifts<SdrBits, OutputBits>::pre64;
         ++(*it);
 
         m_interpolator2.myInterpolateInf(&intbuf[0],   &intbuf[1],  &intbuf[64], &intbuf[65], &intbuf[128], &intbuf[129], &intbuf[192], &intbuf[193]);
