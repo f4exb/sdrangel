@@ -95,22 +95,22 @@ void Bladerf1OutputThread::callback(qint16* buf, qint32 len)
         switch (m_log2Interp)
         {
         case 1:
-            m_interpolators.interpolate2_cen(&beginRead, buf, len*2);
+            m_interpolators.interpolate2_cen(&beginRead, buf, len*2, true);
             break;
         case 2:
-            m_interpolators.interpolate4_cen(&beginRead, buf, len*2);
+            m_interpolators.interpolate4_cen(&beginRead, buf, len*2, true);
             break;
         case 3:
-            m_interpolators.interpolate8_cen(&beginRead, buf, len*2);
+            m_interpolators.interpolate8_cen(&beginRead, buf, len*2, true);
             break;
         case 4:
-            m_interpolators.interpolate16_cen(&beginRead, buf, len*2);
+            m_interpolators.interpolate16_cen(&beginRead, buf, len*2, true);
             break;
         case 5:
-            m_interpolators.interpolate32_cen(&beginRead, buf, len*2);
+            m_interpolators.interpolate32_cen(&beginRead, buf, len*2, true);
             break;
         case 6:
-            m_interpolators.interpolate64_cen(&beginRead, buf, len*2);
+            m_interpolators.interpolate64_cen(&beginRead, buf, len*2, true);
             break;
         default:
             break;
