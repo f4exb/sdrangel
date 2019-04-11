@@ -4,6 +4,7 @@
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
 // the Free Software Foundation as version 3 of the License, or                  //
+// (at your option) any later version.                                           //
 //                                                                               //
 // This program is distributed in the hope that it will be useful,               //
 // but WITHOUT ANY WARRANTY; without even the implied warranty of                //
@@ -45,7 +46,7 @@ void TestSourceSettings::resetToDefaults()
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
-    m_reverseAPIDeviceIndex = 0;    
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray TestSourceSettings::serialize() const
