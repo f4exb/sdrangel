@@ -58,6 +58,7 @@ private:
     bool m_forceSettings;
     bool m_doApplySettings;
     BladeRF2InputSettings m_settings;
+    bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
     QTimer m_updateTimer;
     QTimer m_statusTimer;
     std::vector<int> m_gains;
@@ -68,6 +69,8 @@ private:
     MessageQueue m_inputMessageQueue;
 
     void displaySettings();
+    void displaySampleRate();
+    void displayFcTooltip();
     void sendSettings();
     void updateSampleRateAndFrequency();
     void updateFrequencyLimits();
@@ -90,6 +93,7 @@ private slots:
     void on_transverter_clicked();
     void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
+    void on_sampleRateMode_toggled(bool checked);
     void updateHardware();
     void updateStatus();
     void openDeviceSettingsDialog(const QPoint& p);

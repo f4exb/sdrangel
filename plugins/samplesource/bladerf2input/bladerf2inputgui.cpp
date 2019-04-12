@@ -39,6 +39,7 @@ BladeRF2InputGui::BladeRF2InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_forceSettings(true),
     m_doApplySettings(true),
     m_settings(),
+    m_sampleRateMode(true),
     m_sampleSource(0),
     m_sampleRate(0),
     m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
@@ -253,7 +254,53 @@ void BladeRF2InputGui::updateSampleRateAndFrequency()
 {
     m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
     m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-    ui->deviceRateLabel->setText(tr("%1k").arg(QString::number(m_sampleRate / 1000.0f, 'g', 5)));
+    displaySampleRate();
+}
+
+void BladeRF2InputGui::displaySampleRate()
+{
+    int max, min, step;
+    m_sampleSource->getSampleRateRange(min, max, step);
+
+    ui->sampleRate->blockSignals(true);
+    displayFcTooltip();
+
+    if (m_sampleRateMode)
+    {
+        ui->sampleRateMode->setStyleSheet("QToolButton { background:rgb(60,60,60); }");
+        ui->sampleRateMode->setText("SR");
+        // BladeRF can go as low as 80 kS/s but because of buffering in practice experience is not good below 330 kS/s
+        ui->sampleRate->setValueRange(8, min, max);
+        ui->sampleRate->setValue(m_settings.m_devSampleRate);
+        ui->sampleRate->setToolTip("Device to host sample rate (S/s)");
+        ui->deviceRateText->setToolTip("Baseband sample rate (S/s)");
+        uint32_t basebandSampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
+        ui->deviceRateText->setText(tr("%1k").arg(QString::number(basebandSampleRate / 1000.0f, 'g', 5)));
+    }
+    else
+    {
+        ui->sampleRateMode->setStyleSheet("QToolButton { background:rgb(50,50,50); }");
+        ui->sampleRateMode->setText("BB");
+        // BladeRF can go as low as 80 kS/s but because of buffering in practice experience is not good below 330 kS/s
+        ui->sampleRate->setValueRange(8, min/(1<<m_settings.m_log2Decim), max/(1<<m_settings.m_log2Decim));
+        ui->sampleRate->setValue(m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim));
+        ui->sampleRate->setToolTip("Baseband sample rate (S/s)");
+        ui->deviceRateText->setToolTip("Device to host sample rate (S/s)");
+        ui->deviceRateText->setText(tr("%1k").arg(QString::number(m_settings.m_devSampleRate / 1000.0f, 'g', 5)));
+    }
+
+    ui->sampleRate->blockSignals(false);
+}
+
+void BladeRF2InputGui::displayFcTooltip()
+{
+    int32_t fShift = DeviceSampleSource::calculateFrequencyShift(
+        m_settings.m_log2Decim,
+        (DeviceSampleSource::fcPos_t) m_settings.m_fcPos,
+        m_settings.m_devSampleRate,
+        DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD
+    );
+    ui->fcPos->setToolTip(tr("Relative position of device center frequency: %1 kHz").arg(QString::number(fShift / 1000.0f, 'g', 5)));
 }
 
 void BladeRF2InputGui::displaySettings()
@@ -266,7 +313,7 @@ void BladeRF2InputGui::displaySettings()
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->LOppm->setValue(m_settings.m_LOppmTenths);
     ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
-    ui->sampleRate->setValue(m_settings.m_devSampleRate);
+    displaySampleRate();
     ui->bandwidth->setValue(m_settings.m_bandwidth / 1000);
 
     ui->dcOffset->setChecked(m_settings.m_dcBlock);
@@ -310,7 +357,13 @@ void BladeRF2InputGui::on_LOppm_valueChanged(int value)
 
 void BladeRF2InputGui::on_sampleRate_changed(quint64 value)
 {
-    m_settings.m_devSampleRate = value;
+    if (m_sampleRateMode) {
+        m_settings.m_devSampleRate = value;
+    } else {
+        m_settings.m_devSampleRate = value * (1 << m_settings.m_log2Decim);
+    }
+
+    displayFcTooltip();
     sendSettings();
 }
 
@@ -340,24 +393,27 @@ void BladeRF2InputGui::on_bandwidth_changed(quint64 value)
 
 void BladeRF2InputGui::on_decim_currentIndexChanged(int index)
 {
-    if ((index <0) || (index > 6))
+    if ((index <0) || (index > 6)) {
         return;
+    }
+
     m_settings.m_log2Decim = index;
+    displaySampleRate();
+
+    if (m_sampleRateMode) {
+        m_settings.m_devSampleRate = ui->sampleRate->getValueNew();
+    } else {
+        m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2Decim);
+    }
+
     sendSettings();
 }
 
 void BladeRF2InputGui::on_fcPos_currentIndexChanged(int index)
 {
-    if (index == 0) {
-        m_settings.m_fcPos = BladeRF2InputSettings::FC_POS_INFRA;
-        sendSettings();
-    } else if (index == 1) {
-        m_settings.m_fcPos = BladeRF2InputSettings::FC_POS_SUPRA;
-        sendSettings();
-    } else if (index == 2) {
-        m_settings.m_fcPos = BladeRF2InputSettings::FC_POS_CENTER;
-        sendSettings();
-    }
+    m_settings.m_fcPos = (BladeRF2InputSettings::fcPos_t) (index < 0 ? 0 : index > 2 ? 2 : index);
+    displayFcTooltip();
+    sendSettings();
 }
 
 void BladeRF2InputGui::on_gainMode_currentIndexChanged(int index)
@@ -421,6 +477,12 @@ void BladeRF2InputGui::on_record_toggled(bool checked)
 
     BladeRF2Input::MsgFileRecord* message = BladeRF2Input::MsgFileRecord::create(checked);
     m_sampleSource->getInputMessageQueue()->push(message);
+}
+
+void BladeRF2InputGui::on_sampleRateMode_toggled(bool checked)
+{
+    m_sampleRateMode = checked;
+    displaySampleRate();
 }
 
 void BladeRF2InputGui::updateHardware()
