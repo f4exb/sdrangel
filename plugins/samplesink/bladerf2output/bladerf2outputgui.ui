@@ -77,6 +77,12 @@
         <layout class="QHBoxLayout" name="deviceRateLayout">
          <item>
           <widget class="QLabel" name="deviceRateText">
+           <property name="minimumSize">
+            <size>
+             <width>56</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="toolTip">
             <string>I/Q sample rate kS/s</string>
            </property>
