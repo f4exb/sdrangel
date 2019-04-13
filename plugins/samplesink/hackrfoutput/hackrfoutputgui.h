@@ -80,6 +80,7 @@ private:
 
 	void displaySettings();
     void displaySampleRate();
+    void displayFcTooltip();
 	void displayBandwidths();
 	void sendSettings();
     void updateSampleRateAndFrequency();

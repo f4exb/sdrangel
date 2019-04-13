@@ -203,6 +203,7 @@ void HackRFOutputGui::updateSampleRateAndFrequency()
 void HackRFOutputGui::displaySampleRate()
 {
     ui->sampleRate->blockSignals(true);
+    displayFcTooltip();
 
     if (m_sampleRateMode)
     {
@@ -227,6 +228,15 @@ void HackRFOutputGui::displaySampleRate()
     }
 
     ui->sampleRate->blockSignals(false);
+}
+
+void HackRFOutputGui::displayFcTooltip()
+{
+    int32_t fShift = DeviceSampleSink::calculateFrequencyShift(
+        m_settings.m_log2Interp,
+        (DeviceSampleSink::fcPos_t) m_settings.m_fcPos,
+        m_settings.m_devSampleRate);
+    ui->fcPos->setToolTip(tr("Relative position of device center frequency: %1 kHz").arg(QString::number(fShift / 1000.0f, 'g', 5)));
 }
 
 void HackRFOutputGui::displaySettings()
@@ -298,6 +308,7 @@ void HackRFOutputGui::on_sampleRate_changed(quint64 value)
         m_settings.m_devSampleRate = value * (1 << m_settings.m_log2Interp);
     }
 
+    displayFcTooltip();
     sendSettings();
 }
 
@@ -348,6 +359,7 @@ void HackRFOutputGui::on_interp_currentIndexChanged(int index)
 void HackRFOutputGui::on_fcPos_currentIndexChanged(int index)
 {
     m_settings.m_fcPos = (HackRFOutputSettings::fcPos_t) (index < 0 ? 0 : index > 2 ? 2 : index);
+    displayFcTooltip();
 	sendSettings();
 }
 
