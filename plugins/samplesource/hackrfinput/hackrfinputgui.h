@@ -66,6 +66,7 @@ private:
 
 	DeviceUISet* m_deviceUISet;
 	HackRFInputSettings m_settings;
+    bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
 	bool m_forceSettings;
 	bool m_doApplySettings;
 	QTimer m_updateTimer;
@@ -77,6 +78,8 @@ private:
 	MessageQueue m_inputMessageQueue;
 
 	void displaySettings();
+    void displaySampleRate();
+    void displayFcTooltip();
 	void displayBandwidths();
 	void sendSettings();
     void updateSampleRateAndFrequency();
@@ -98,6 +101,7 @@ private slots:
 	void on_vga_valueChanged(int value);
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
+    void on_sampleRateMode_toggled(bool checked);
 	void updateHardware();
 	void updateStatus();
     void openDeviceSettingsDialog(const QPoint& p);
