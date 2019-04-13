@@ -203,7 +203,7 @@ void Bladerf1OutputGui::displaySampleRate()
         ui->sampleRateMode->setText("SR");
         ui->sampleRate->setValueRange(8, BLADERF_SAMPLERATE_MIN, BLADERF_SAMPLERATE_REC_MAX);
         ui->sampleRate->setValue(m_settings.m_devSampleRate);
-        ui->sampleRate->setToolTip("Device to host sample rate (S/s)");
+        ui->sampleRate->setToolTip("Host to device sample rate (S/s)");
         ui->deviceRateText->setToolTip("Baseband sample rate (S/s)");
         uint32_t basebandSampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Interp);
         ui->deviceRateText->setText(tr("%1k").arg(QString::number(basebandSampleRate / 1000.0f, 'g', 5)));
@@ -215,7 +215,7 @@ void Bladerf1OutputGui::displaySampleRate()
         ui->sampleRate->setValueRange(8, BLADERF_SAMPLERATE_MIN/(1<<m_settings.m_log2Interp), BLADERF_SAMPLERATE_REC_MAX/(1<<m_settings.m_log2Interp));
         ui->sampleRate->setValue(m_settings.m_devSampleRate/(1<<m_settings.m_log2Interp));
         ui->sampleRate->setToolTip("Baseband sample rate (S/s)");
-        ui->deviceRateText->setToolTip("Device to host sample rate (S/s)");
+        ui->deviceRateText->setToolTip("Host to device sample rate (S/s)");
         ui->deviceRateText->setText(tr("%1k").arg(QString::number(m_settings.m_devSampleRate / 1000.0f, 'g', 5)));
     }
 

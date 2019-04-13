@@ -57,6 +57,7 @@ private:
     Ui::PlutoSDROutputGUI* ui;
     DeviceUISet* m_deviceUISet;
     PlutoSDROutputSettings m_settings;
+    bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
     bool m_forceSettings;
     QTimer m_updateTimer;
     QTimer m_statusTimer;
@@ -69,6 +70,7 @@ private:
     MessageQueue m_inputMessageQueue;
 
     void displaySettings();
+    void displaySampleRate();
     void sendSettings(bool forceSettings = false);
     void blockApplySettings(bool block);
     void updateSampleRateAndFrequency();
@@ -90,6 +92,7 @@ private slots:
     void on_att_valueChanged(int value);
     void on_antenna_currentIndexChanged(int index);
     void on_transverter_clicked();
+    void on_sampleRateMode_toggled(bool checked);
     void updateHardware();
     void updateStatus();
     void handleInputMessages();

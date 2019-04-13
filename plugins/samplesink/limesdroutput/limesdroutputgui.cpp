@@ -331,7 +331,7 @@ void LimeSDROutputGUI::displaySampleRate()
         ui->sampleRateMode->setText("SR");
         ui->sampleRate->setValueRange(8, (uint32_t) minF, (uint32_t) maxF);
         ui->sampleRate->setValue(m_settings.m_devSampleRate);
-        ui->sampleRate->setToolTip("Device to host sample rate (S/s)");
+        ui->sampleRate->setToolTip("Host to device sample rate (S/s)");
         ui->deviceRateText->setToolTip("Baseband sample rate (S/s)");
         uint32_t basebandSampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp);
         ui->deviceRateText->setText(tr("%1k").arg(QString::number(basebandSampleRate / 1000.0f, 'g', 5)));
@@ -343,7 +343,7 @@ void LimeSDROutputGUI::displaySampleRate()
         ui->sampleRate->setValueRange(8, (uint32_t) minF/(1<<m_settings.m_log2SoftInterp), (uint32_t) maxF/(1<<m_settings.m_log2SoftInterp));
         ui->sampleRate->setValue(m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp));
         ui->sampleRate->setToolTip("Baseband sample rate (S/s)");
-        ui->deviceRateText->setToolTip("Device to host sample rate (S/s)");
+        ui->deviceRateText->setToolTip("Host to device sample rate (S/s)");
         ui->deviceRateText->setText(tr("%1k").arg(QString::number(m_settings.m_devSampleRate / 1000.0f, 'g', 5)));
     }
 
