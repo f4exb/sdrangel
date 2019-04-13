@@ -28,6 +28,7 @@
 #include "loggerwithfile.h"
 #include "mainbench.h"
 #include "dsp/dsptypes.h"
+#include "sdrangel_version.h"
 
 void handler(int sig) {
     fprintf(stderr, "quit the application by signal(%d).\n", sig);
@@ -58,7 +59,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 
     QCoreApplication::setOrganizationName("f4exb");
     QCoreApplication::setApplicationName("SDRangelBench");
-    QCoreApplication::setApplicationVersion("4.5.4");
+    QCoreApplication::setApplicationVersion(GIT_COMMIT_HASH_STR);
 
     int catchSignals[] = {SIGQUIT, SIGINT, SIGTERM, SIGHUP};
     std::vector<int> vsig(catchSignals, catchSignals + sizeof(catchSignals) / sizeof(int));

@@ -633,10 +633,10 @@ void MainWindow::createStatusBar()
 {
     QString qtVersionStr = QString("Qt %1 ").arg(QT_VERSION_STR);
 #if QT_VERSION >= 0x050400
-    m_showSystemWidget = new QLabel("SDRangel v" + qApp->applicationVersion() + " " + qtVersionStr
+    m_showSystemWidget = new QLabel("SDRangel " + qApp->applicationVersion() + " " + qtVersionStr
             + QSysInfo::currentCpuArchitecture() + " " + QSysInfo::prettyProductName(), this);
 #else
-    m_showSystemWidget = new QLabel("SDRangel v" + qApp->applicationVersion() + " " + qtVersionStr, this);
+    m_showSystemWidget = new QLabel("SDRangel " + qApp->applicationVersion() + " " + qtVersionStr, this);
 #endif
     statusBar()->addPermanentWidget(m_showSystemWidget);
 

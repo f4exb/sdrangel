@@ -26,6 +26,7 @@
 #include "loggerwithfile.h"
 #include "mainwindow.h"
 #include "dsp/dsptypes.h"
+#include "sdrangel_version.h"
 
 static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *logger)
 {
@@ -36,7 +37,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 */
 	QCoreApplication::setOrganizationName("f4exb");
 	QCoreApplication::setApplicationName("SDRangel");
-    QCoreApplication::setApplicationVersion("4.5.4");
+    QCoreApplication::setApplicationVersion(GIT_COMMIT_HASH_STR);
 #if QT_VERSION >= 0x050600
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling); // DPI support
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps); //HiDPI pixmaps

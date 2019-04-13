@@ -228,6 +228,21 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 ##############################################################################
+
+execute_process(
+    COMMAND git describe --abbrev=8 --always --tags
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_COMMIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+add_definitions("-DGIT_COMMIT_HASH=${GIT_COMMIT_HASH}")
+
+configure_file(
+    ${CMAKE_SOURCE_DIR}/version.h.in
+    ${CMAKE_BINARY_DIR}/generated/sdrangel_version.h
+)
+
+##############################################################################
 # base libraries
 add_subdirectory(sdrbase)
 if (BUILD_GUI)
@@ -244,6 +259,7 @@ add_subdirectory(swagger)
 
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_BINARY_DIR}/generated
     ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/sdrbase
     ${CMAKE_SOURCE_DIR}/sdrgui
