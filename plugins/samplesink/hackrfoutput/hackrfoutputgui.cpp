@@ -41,6 +41,7 @@ HackRFOutputGui::HackRFOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_deviceUISet(deviceUISet),
 	m_forceSettings(true),
 	m_settings(),
+    m_sampleRateMode(true),
 	m_deviceSampleSink(0),
 	m_lastEngineState(DSPDeviceSinkEngine::StNotStarted),
 	m_doApplySettings(true)
@@ -196,7 +197,36 @@ void HackRFOutputGui::updateSampleRateAndFrequency()
 {
     m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
     m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-    ui->deviceRateText->setText(QString("%1k").arg(QString::number(m_sampleRate/1000.0, 'g', 5)));
+    displaySampleRate();
+}
+
+void HackRFOutputGui::displaySampleRate()
+{
+    ui->sampleRate->blockSignals(true);
+
+    if (m_sampleRateMode)
+    {
+        ui->sampleRateMode->setStyleSheet("QToolButton { background:rgb(60,60,60); }");
+        ui->sampleRateMode->setText("SR");
+        ui->sampleRate->setValueRange(8, 1000000U, 20000000U);
+        ui->sampleRate->setValue(m_settings.m_devSampleRate);
+        ui->sampleRate->setToolTip("Device to host sample rate (S/s)");
+        ui->deviceRateText->setToolTip("Baseband sample rate (S/s)");
+        uint32_t basebandSampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Interp);
+        ui->deviceRateText->setText(tr("%1k").arg(QString::number(basebandSampleRate / 1000.0f, 'g', 5)));
+    }
+    else
+    {
+        ui->sampleRateMode->setStyleSheet("QToolButton { background:rgb(50,50,50); }");
+        ui->sampleRateMode->setText("BB");
+        ui->sampleRate->setValueRange(8, 1000000U/(1<<m_settings.m_log2Interp), 20000000U/(1<<m_settings.m_log2Interp));
+        ui->sampleRate->setValue(m_settings.m_devSampleRate/(1<<m_settings.m_log2Interp));
+        ui->sampleRate->setToolTip("Baseband sample rate (S/s)");
+        ui->deviceRateText->setToolTip("Device to host sample rate (S/s)");
+        ui->deviceRateText->setText(tr("%1k").arg(QString::number(m_settings.m_devSampleRate / 1000.0f, 'g', 5)));
+    }
+
+    ui->sampleRate->blockSignals(false);
 }
 
 void HackRFOutputGui::displaySettings()
@@ -209,7 +239,7 @@ void HackRFOutputGui::displaySettings()
 
 	ui->biasT->setChecked(m_settings.m_biasT);
 
-	ui->sampleRate->setValue(m_settings.m_devSampleRate);
+	displaySampleRate();
 
 	ui->interp->setCurrentIndex(m_settings.m_log2Interp);
     ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
@@ -262,7 +292,12 @@ void HackRFOutputGui::on_centerFrequency_changed(quint64 value)
 
 void HackRFOutputGui::on_sampleRate_changed(quint64 value)
 {
-    m_settings.m_devSampleRate = value;
+    if (m_sampleRateMode) {
+        m_settings.m_devSampleRate = value;
+    } else {
+        m_settings.m_devSampleRate = value * (1 << m_settings.m_log2Interp);
+    }
+
     sendSettings();
 }
 
@@ -294,9 +329,19 @@ void HackRFOutputGui::on_lnaExt_stateChanged(int state)
 
 void HackRFOutputGui::on_interp_currentIndexChanged(int index)
 {
-	if ((index <0) || (index > 6))
+	if ((index <0) || (index > 6)) {
 		return;
+    }
+
 	m_settings.m_log2Interp = index;
+    displaySampleRate();
+
+    if (m_sampleRateMode) {
+        m_settings.m_devSampleRate = ui->sampleRate->getValueNew();
+    } else {
+        m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2Interp);
+    }
+
 	sendSettings();
 }
 
@@ -323,6 +368,12 @@ void HackRFOutputGui::on_startStop_toggled(bool checked)
         HackRFOutput::MsgStartStop *message = HackRFOutput::MsgStartStop::create(checked);
         m_deviceSampleSink->getInputMessageQueue()->push(message);
     }
+}
+
+void HackRFOutputGui::on_sampleRateMode_toggled(bool checked)
+{
+    m_sampleRateMode = checked;
+    displaySampleRate();
 }
 
 void HackRFOutputGui::updateHardware()
