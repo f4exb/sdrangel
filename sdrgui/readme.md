@@ -168,22 +168,22 @@ Use this checkbox to toggle on/off the reverse API feature. With reverse API eng
 
 ```
 {
-  "deviceHwType": "HackRF", 
+  "deviceHwType": "HackRF",
   "hackRFInputSettings": {
-    "LOppmTenths": 0, 
-    "bandwidth": 1750000, 
-    "biasT": 0, 
-    "centerFrequency": 435000000, 
-    "dcBlock": 0, 
-    "devSampleRate": 2400000, 
-    "fcPos": 2, 
-    "iqCorrection": 0, 
-    "linkTxFrequency": 0, 
-    "lnaExt": 0, 
-    "lnaGain": 16, 
-    "log2Decim": 0, 
+    "LOppmTenths": 0,
+    "bandwidth": 1750000,
+    "biasT": 0,
+    "centerFrequency": 435000000,
+    "dcBlock": 0,
+    "devSampleRate": 2400000,
+    "fcPos": 2,
+    "iqCorrection": 0,
+    "linkTxFrequency": 0,
+    "lnaExt": 0,
+    "lnaGain": 16,
+    "log2Decim": 0,
     "vgaGain": 16
-  }, 
+  },
   "tx": 0
 }
 ```
@@ -701,25 +701,25 @@ Use this checkbox to toggle on/off the reverse API feature. With reverse API eng
 ```
 {
   "SSBDemodSettings": {
-    "agc": 0, 
-    "agcClamping": 0, 
-    "agcPowerThreshold": -40, 
-    "agcThresholdGate": 4, 
-    "agcTimeLog2": 7, 
-    "audioBinaural": 0, 
-    "audioDeviceName": "System default device", 
-    "audioFlipChannels": 0, 
-    "audioMute": 0, 
-    "dsb": 0, 
-    "inputFrequencyOffset": 0, 
-    "lowCutoff": 300, 
-    "rfBandwidth": 3000, 
-    "rgbColor": -16711936, 
-    "spanLog2": 3, 
-    "title": "SSB Demodulator", 
+    "agc": 0,
+    "agcClamping": 0,
+    "agcPowerThreshold": -40,
+    "agcThresholdGate": 4,
+    "agcTimeLog2": 7,
+    "audioBinaural": 0,
+    "audioDeviceName": "System default device",
+    "audioFlipChannels": 0,
+    "audioMute": 0,
+    "dsb": 0,
+    "inputFrequencyOffset": 0,
+    "lowCutoff": 300,
+    "rfBandwidth": 3000,
+    "rgbColor": -16711936,
+    "spanLog2": 3,
+    "title": "SSB Demodulator",
     "volume": 3
-  }, 
-  "channelType": "SSBDemod", 
+  },
+  "channelType": "SSBDemod",
   "tx": 0
 }
 ```
@@ -763,7 +763,7 @@ The spectrum display is controlled by the display control (4).
 
 <h4>8.1. SDRangel version</h4>
 
-Self explanatory
+This is the current tag or the latest tag followed by the number of commits since the latest tag followed by the git commit SHA1 (8 hex characters) preceded by 'g'. Ex: `v4.5.3-29-gf5f2349d`
 
 <h4>8.2. Qt version</h4>
 
@@ -779,4 +779,4 @@ Pretty print of the operating system in which SDRangel is running.
 
 <h4>8.5. Local date and time</h4>
 
-Local time timestamp according to system clock
+Local time timestamp according to system clock. Format: `yyyy-mm-dd HH:MM:ss TZ`

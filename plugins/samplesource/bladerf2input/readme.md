@@ -26,19 +26,21 @@ This is the center frequency of reception in kHz. The center frequency is the sa
 
 <h4>1.2: Start/Stop</h4>
 
-Device start / stop button. 
+Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
   - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
-  
+
 <h4>1.3: Record</h4>
 
 Record baseband I/Q stream toggle button
 
 <h4>1.4: Stream sample rate</h4>
 
-Baseband I/Q sample rate in kS/s. This is the device sample rate (4) divided by the decimation factor (6). 
+In device to host sample rate input mode (6A) this is the baseband I/Q sample rate in kS/s. This is the device to host sample rate (6) divided by the decimation factor (8).
+
+In baseband sample rate input mode (6A) this is the device to host sample rate in kS/s. This is the baseband sample rate (6) multiplied by the decimation factor (8)
 
 <h3>2: LO ppm correction</h3>
 
@@ -50,7 +52,7 @@ These buttons control the local DSP auto correction options:
 
   - **DC**: auto remove DC component
   - **IQ**: auto make I/Q balance. The DC correction must be enabled for this to be effective.
-  
+
 <h3>4: Rx filter bandwidth</h3>
 
 This is the Rx filter bandwidth in kHz. Minimum and maximum values are adjusted automatically. Normal range is from 200 kHz to 56 MHz. The Rx filter bandwidth is the same for all Rx channels. The GUI of the sibling channel if present is adjusted automatically.
@@ -67,7 +69,7 @@ Note that if you mouse over the button a tooltip appears that displays the trans
 
 You can set the translating frequency in Hz with this dial. Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
-The frequency set in the device is the frequency on the main dial (1) minus this frequency. Thus it is positive for down converters and negative for up converters. 
+The frequency set in the device is the frequency on the main dial (1) minus this frequency. Thus it is positive for down converters and negative for up converters.
 
 For example a mixer at 120 MHz for HF operation you would set the value to -120,000,000 Hz so that if the main dial frequency is set at 7,130 kHz the PlutoSDR will be set to 127.130 MHz.
 
@@ -83,11 +85,20 @@ Use this toggle button to activate or deactivate the frequency translation
 
 <h4>5.3: Confirmation buttons</h4>
 
-Use these buttons to confirm ("OK") or dismiss ("Cancel") your changes. 
+Use these buttons to confirm ("OK") or dismiss ("Cancel") your changes.
 
-<h3>6: Device sample rate</h3>
+<h3>6A: Device sample rate / Baseband sample rate input toggle</h3>
 
-This is the BladeRF device ADC sample rate in S/s.
+Use this toggle button to switch the sample rate input next (6) between device sample rate and baseband sample rate input. The button shows the current mode:
+
+  - **SR**: device sample rate input mode. The baseband sample rate (1.4) is the device sample rate (6) divided by the decimation factor (8).
+  - **BB**: baseband sample rate input mode. The device sample rate (1.4) is the baseband sample rate (6) multiplied by the decimation factor (8).
+
+<h3>6: Sample rate</h3>
+
+This is the BladeRF device ADC sample rate or baseband sample rate in samples per second (S/s). The control (4A) is used to switch between the two input modes.
+
+The limits are adjusted automatically. In baseband input mode the limits are driven by the decimation factor (5). You may need to increase this decimation factor to be able to reach lower values.
 
 Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
@@ -98,10 +109,10 @@ The ADC sample rate is the same for all Rx channels. The GUI of the sibling chan
 Possible values are:
 
   - **Cen**: the decimation operation takes place around the BladeRF Rx center frequency Fs
-  - **Inf**: the decimation operation takes place around Fs - Fc. 
+  - **Inf**: the decimation operation takes place around Fs - Fc.
   - **Sup**: the decimation operation takes place around Fs + Fc.
-  
-With SR as the sample rate before decimation Fc is calculated as: 
+
+With SR as the sample rate before decimation Fc is calculated as:
 
   - if decimation n is 4 or lower:  Fc = SR/2^(log2(n)-1). The device center frequency is on the side of the baseband. You need a RF filter bandwidth at least twice the baseband.
   - if decimation n is 8 or higher: Fc = SR/n. The device center frequency is half the baseband away from the side of the baseband. You need a RF filter bandwidth at least 3 times the baseband.

@@ -38,7 +38,9 @@ Record baseband I/Q stream toggle button
 
 <h4>1.4: Stream sample rate</h4>
 
-Baseband I/Q sample rate in kS/s. This is the device sample rate (4) divided by the decimation factor (6).
+In device to host sample rate input mode (4A) this is the baseband I/Q sample rate in kS/s. This is the device to host sample rate (4) divided by the decimation factor (5).
+
+In baseband sample rate input mode (4A) this is the device to host sample rate in kS/s. This is the baseband sample rate (4) multiplied by the decimation factor (5)
 
 <h3>2: Auto correction options</h3>
 

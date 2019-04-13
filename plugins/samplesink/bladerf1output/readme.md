@@ -42,9 +42,11 @@ Device start / stop button.
   - Red square icon: device is running and can be stopped
   - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
 
-<h3>2: Baseband sample rate</h3>
+<h3>2: Stream sample rate</h3>
 
-This is the baseband sample rate in kS/s before interpolation (4) to produce the final stream that is sent to the BladeRF device. Thus this is the device sample rate (6) divided by the interpolation factor (4).
+In host to device sample rate input mode (6A) this is the baseband I/Q sample rate in kS/s. This is the host to device sample rate (6) divided by the interpolation factor (7).
+
+In baseband sample rate input mode (6A) this is the host to device sample rate in kS/s. This is the baseband sample rate (6) multiplied by the software interpolation factor (7)
 
 Transmission latency depends essentially in the delay in the sample FIFO. The FIFO size is calculated as follows:
 
