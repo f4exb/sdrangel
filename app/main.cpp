@@ -26,7 +26,11 @@
 #include "loggerwithfile.h"
 #include "mainwindow.h"
 #include "dsp/dsptypes.h"
+#ifdef _MSC_VER
+#define GIT_COMMIT_HASH_STR "v4.5.4"
+#else
 #include "sdrangel_version.h"
+#endif
 
 static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *logger)
 {
