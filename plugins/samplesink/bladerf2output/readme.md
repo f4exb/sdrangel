@@ -91,7 +91,7 @@ Use this toggle button to switch the sample rate input next (7) between host to 
 
 <h3>7: Sample rate</h3>
 
-This is the BladeRF device DAC sample rate sample rate or baseband sample rate in samples per second (S/s). The control (7A) is used to switch between the two input modes. The device to/from host stream sample rate is the same for the Rx and Tx systems.
+This is the BladeRF device DAC sample rate or baseband sample rate in samples per second (S/s). The control (7A) is used to switch between the two input modes. The device to/from host stream sample rate is the same for the Rx and Tx systems.
 
 The limits are adjusted automatically. In baseband input mode the limits are driven by the interpolation factor (8). You may need to increase this interpolation factor to be able to reach lower values.
 

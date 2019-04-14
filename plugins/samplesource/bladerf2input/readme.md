@@ -96,9 +96,9 @@ Use this toggle button to switch the sample rate input next (6) between device s
 
 <h3>6: Sample rate</h3>
 
-This is the BladeRF device ADC sample rate or baseband sample rate in samples per second (S/s). The control (4A) is used to switch between the two input modes.
+This is the BladeRF device ADC sample rate or baseband sample rate in samples per second (S/s). The control (6A) is used to switch between the two input modes.
 
-The limits are adjusted automatically. In baseband input mode the limits are driven by the decimation factor (5). You may need to increase this decimation factor to be able to reach lower values.
+The limits are adjusted automatically. In baseband input mode the limits are driven by the decimation factor (8). You may need to increase this decimation factor to be able to reach lower values.
 
 Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 

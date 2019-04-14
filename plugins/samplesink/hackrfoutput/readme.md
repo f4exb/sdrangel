@@ -20,9 +20,11 @@ If you have the Rx open in another tab and it is running then it will be stopped
 
 The settings on Tx or Rx tab are reapplied on start so these settings can be considered independent.
 
-<h3>2: Baseband sample rate</h3>
+<h3>2: Stream sample rate</h3>
 
-This is the baseband sample rate in kS/s before interpolation (5) to produce the final stream that is sent to the HackRF device. Thus this is the device sample rate (8) divided by the interpolation factor (5).
+In host to device sample rate input mode (8A) this is the baseband I/Q sample rate in kS/s. This is the host to device sample rate (8) divided by the interpolation factor (10).
+
+In baseband sample rate input mode (8A) this is the host to device sample rate in kS/s. This is the baseband sample rate (8) multiplied by the software interpolation factor (10)
 
 Transmission latency depends essentially in the delay in the sample FIFO. The size of sample FIFO is calculated to give a fixed delay of 250 ms or 150000 samples whichever is bigger. Below is the delay in seconds vs baseband sample rate in kS/s from 48 to 800 kS/s. The 250 ms delay is reached at 600 kS/s:
 
@@ -55,9 +57,18 @@ According to HackRF documentation the output power when the PA is engaged and th
   - 2750 MHz to 4000 MHz: 0 dBm to 5 dBm, increasing as frequency decreases
   - 4000 MHz to 6000 MHz: -10 dBm to 0 dBm, generally increasing as frequency decreases
 
-<h3>8: Device sample rate</h3>
+<h3>8A: Host to device sample rate / Baseband sample rate input toggle</h3>
 
-This is the HackRF device DAC sample rate in S/s.
+Use this toggle button to switch the sample rate input next (8) between host to device sample rate and baseband sample rate input. The button shows the current mode:
+
+  - **SR**: host to device sample rate input mode. The baseband sample rate (2) is the host to device sample rate (8) divided by the interpolation factor (10).
+  - **BB**: baseband sample rate input mode. The host to device sample rate (2) is the baseband sample rate (8) multiplied by the interpolation factor (10).
+
+<h3>8: Sample rate</h3>
+
+This is the HackRF device DAC sample rate or baseband sample rate in samples per second (S/s). The control (8A) is used to switch between the two input modes. The device to/from host stream sample rate is the same for the Rx and Tx systems.
+
+The limits are adjusted automatically. In baseband input mode the limits are driven by the interpolation factor (10). You may need to increase this interpolation factor to be able to reach lower values.
 
 Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 

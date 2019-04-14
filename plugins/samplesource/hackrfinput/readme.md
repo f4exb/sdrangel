@@ -32,9 +32,11 @@ The settings on Rx or Tx tab are reapplied on start so these settings can be con
 
 Record baseband I/Q stream toggle button
 
-<h4>1.4: Baseband sample rate</h4>
+<h4>1.4: Stream sample rate</h4>
 
-Baseband I/Q sample rate in kS/s. This is the device sample rate (4) divided by the decimation factor (6).
+In device to host sample rate input mode (6A) this is the baseband I/Q sample rate in kS/s. This is the device to host sample rate (6) divided by the decimation factor (7).
+
+In baseband sample rate input mode (6A) this is the device to host sample rate in kS/s. This is the baseband sample rate (6) multiplied by the decimation factor (7)
 
 <h3>2: Local Oscillator correction</h3>
 
@@ -55,9 +57,18 @@ Use this checkbox to toggle the +5V power supply on the antenna connector.
 
 Use this checkbox to toggle the extra low noise amplifier (LNA). This gives an additional gain of 14 dB.
 
-<h3>6: Device sample rate</h3>
+<h3>6A: Device sample rate / Baseband sample rate input toggle</h3>
 
-This is the HackRF device ADC sample rate in S/s.
+Use this toggle button to switch the sample rate input next (6) between device sample rate and baseband sample rate input. The button shows the current mode:
+
+  - **SR**: device sample rate input mode. The baseband sample rate (1.4) is the device sample rate (6) divided by the decimation factor (7).
+  - **BB**: baseband sample rate input mode. The device sample rate (1.4) is the baseband sample rate (6) multiplied by the decimation factor (7).
+
+<h3>6: Sample rate</h3>
+
+This is the HackRF device ADC sample rate or baseband sample rate in samples per second (S/s). The control (6A) is used to switch between the two input modes.
+
+The limits are adjusted automatically. In baseband input mode the limits are driven by the decimation factor (7). You may need to increase this decimation factor to be able to reach lower values.
 
 Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
