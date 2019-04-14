@@ -158,7 +158,7 @@ Use this toggle button to switch the sample rate input next (10) between host to
 
 This is the LMS7002M device to/from host stream sample rate or baseband sample rate in samples per second (S/s). The control (10A) is used to switch between the two input modes. The device to/from host stream sample rate is the same for the Rx and Tx systems.
 
-The limits are adjusted automatically. In baseband input mode the limits are driven by the interpolation factor (9). You may need to increase this interpolation factor to be able to reach lower values.
+The limits are adjusted automatically. In baseband input mode the limits are driven by the software interpolation factor (9). You may need to increase this interpolation factor to be able to reach lower values.
 
 This is the LMS7002M device to/from host stream sample rate in S/s. It is the same for the Rx and Tx systems.
 
