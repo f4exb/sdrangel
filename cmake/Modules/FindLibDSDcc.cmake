@@ -2,11 +2,11 @@
 
 if(NOT LIBDSDCC_FOUND)
 
-  pkg_check_modules (LIBDSDCC_PKG libdsdcc)
+  pkg_check_modules(LIBDSDCC_PKG libdsdcc)
   
   find_path(LIBDSDCC_INCLUDE_DIR 
-    NAMES dsd_decoder.h
-    PATHS ${DSDCC_DIR}/include/dsdcc
+    NAMES dsdcc/dsd_decoder.h
+    PATHS ${DSDCC_DIR}/include
           ${LIBDSDCC_PKG_INCLUDE_DIRS}
           /usr/include/dsdcc
           /usr/local/include/dsdcc
