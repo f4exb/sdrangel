@@ -25,7 +25,7 @@
 
 #include "fdv_arm_math.h"
 
-#define cmplx(value) (std::complex<float>{cosf(value), sinf(value)})
+#define cmplx(value) (COSF(value) + SINF(value) * std::complex<float>(0.0f, 1.0f))
 
 namespace FreeDV
 {
