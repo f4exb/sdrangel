@@ -1,3 +1,9 @@
+sdrangel (4.5.5-1) unstable; urgency=medium
+
+  * Fixed HackRF Fc pos setting from REST API.
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 20 Apr 2019 20:14:18 +0100
+
 sdrangel (4.5.4-1) unstable; urgency=medium
 
   * Fixed RTL-SDR gain setting sequence. Fixes issue #321.

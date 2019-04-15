@@ -579,7 +579,7 @@ int HackRFOutput::webapiSettingsPutPatch(
     }
     if (deviceSettingsKeys.contains("fcPos"))
     {
-        int fcPos = response.getHackRfInputSettings()->getFcPos();
+        int fcPos = response.getHackRfOutputSettings()->getFcPos();
         fcPos = fcPos < 0 ? 0 : fcPos > 2 ? 2 : fcPos;
         settings.m_fcPos = (HackRFOutputSettings::fcPos_t) fcPos;
     }
