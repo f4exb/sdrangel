@@ -22,7 +22,7 @@
 #include <QString>
 #include <QDebug>
 #include <cstdlib>
-#include "cm256.h"
+#include "cm256cc/cm256.h"
 #include "util/movingaverage.h"
 
 
