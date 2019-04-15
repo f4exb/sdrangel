@@ -135,7 +135,7 @@ static float max_star0(
                        float delta1,
                        float delta2 )
 {
-    register float diff;
+    float diff;
 
     diff = delta2 - delta1;
 
