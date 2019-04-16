@@ -73,6 +73,17 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->hwDecimLabel->setText(QString::fromUtf8("H\u2193"));
     ui->swDecimLabel->setText(QString::fromUtf8("S\u2193"));
 
+    if (m_limeSDRInput->getLimeType() == DeviceLimeSDRParams::LimeMini)
+    {
+        ui->antenna->setItemText(2, "NC");
+        ui->antenna->setItemText(3, "Lo");
+    }
+    else
+    {
+        ui->antenna->setItemText(2, "Lo");
+        ui->antenna->setItemText(3, "Wi");
+    }
+
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(500);
