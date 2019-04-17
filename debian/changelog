@@ -1,6 +1,8 @@
 sdrangel (4.5.5-1) unstable; urgency=medium
 
-  * Fixed HackRF Fc pos setting from REST API.
+  * FreeDV: fixes in REST API
+  * LimeSDR: fixed Rx and Tx antenna labels for Lime mini
+  * HackRF output: fixed setting of Fc pos from REST API
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 20 Apr 2019 20:14:18 +0100
 

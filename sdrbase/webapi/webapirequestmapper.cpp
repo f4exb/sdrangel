@@ -2238,6 +2238,34 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
+    else if (*channelType == "FreeDVDemod")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject freeDVDemodSettingsJsonObject = jsonObject["FreeDVDemodSettings"].toObject();
+            channelSettingsKeys = freeDVDemodSettingsJsonObject.keys();
+            channelSettings.setFreeDvDemodSettings(new SWGSDRangel::SWGFreeDVDemodSettings());
+            channelSettings.getFreeDvDemodSettings()->fromJsonObject(freeDVDemodSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "FreeDVMod")
+    {
+        if (channelSettings.getTx() != 0)
+        {
+            QJsonObject freeDVModSettingsJsonObject = jsonObject["FreeDVModSettings"].toObject();
+            channelSettingsKeys = freeDVModSettingsJsonObject.keys();
+            channelSettings.setFreeDvModSettings(new SWGSDRangel::SWGFreeDVModSettings());
+            channelSettings.getFreeDvModSettings()->fromJsonObject(freeDVModSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     else if (*channelType == "NFMDemod")
     {
         if (channelSettings.getTx() == 0)

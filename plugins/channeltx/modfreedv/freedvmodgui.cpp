@@ -423,10 +423,17 @@ void FreeDVModGUI::applySettings(bool force)
 
 void FreeDVModGUI::applyBandwidths(int spanLog2, bool force)
 {
+    displayBandwidths(spanLog2);
+    m_settings.m_spanLog2 = spanLog2;
+    applySettings(force);
+}
+
+void FreeDVModGUI::displayBandwidths(int spanLog2)
+{
     m_spectrumRate = m_freeDVMod->getModemSampleRate() / (1<<spanLog2);
     int bwMax = m_freeDVMod->getModemSampleRate() / (100*(1<<spanLog2));
 
-    qDebug() << "FreeDVModGUI::applyBandwidths:"
+    qDebug() << "FreeDVModGUI::displayBandwidths:"
             << " spanLog2: " << spanLog2
             << " m_spectrumRate: " << m_spectrumRate
             << " bwMax: " << bwMax;
@@ -438,10 +445,6 @@ void FreeDVModGUI::applyBandwidths(int spanLog2, bool force)
     ui->glSpectrum->setSampleRate(m_spectrumRate);
     ui->glSpectrum->setSsbSpectrum(true);
     ui->glSpectrum->setLsbDisplay(false);
-
-    m_settings.m_spanLog2 = spanLog2;
-
-    applySettings(force);
 }
 
 void FreeDVModGUI::displaySettings()
@@ -460,12 +463,14 @@ void FreeDVModGUI::displaySettings()
 
     blockApplySettings(true);
 
+    ui->freeDVMode->setCurrentIndex((int) m_settings.m_freeDVMode);
     ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->playLoop->setChecked(m_settings.m_playLoop);
 
     // Prevent uncontrolled triggering of applyBandwidths
     ui->spanLog2->blockSignals(true);
     ui->spanLog2->setValue(5 - m_settings.m_spanLog2);
+    displayBandwidths(m_settings.m_spanLog2);
     ui->spanLog2->blockSignals(false);
 
     ui->gaugeInput->setChecked(m_settings.m_gaugeInputElseModem);

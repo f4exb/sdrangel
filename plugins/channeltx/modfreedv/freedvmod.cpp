@@ -996,6 +996,7 @@ void FreeDVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     }
 
     response.getFreeDvModSettings()->setModAfInput((int) settings.m_modAFInput);
+    response.getFreeDvModSettings()->setFreeDvMode((int) settings.m_freeDVMode);
 
     if (response.getFreeDvModSettings()->getAudioDeviceName()) {
         *response.getFreeDvModSettings()->getAudioDeviceName() = settings.m_audioDeviceName;

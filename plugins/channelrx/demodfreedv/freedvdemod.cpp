@@ -873,6 +873,7 @@ void FreeDVDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     response.getFreeDvDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getFreeDvDemodSettings()->setAgc(settings.m_agc ? 1 : 0);
     response.getFreeDvDemodSettings()->setRgbColor(settings.m_rgbColor);
+    response.getFreeDvDemodSettings()->setFreeDvMode((int) settings.m_freeDVMode);
 
     if (response.getFreeDvDemodSettings()->getTitle()) {
         *response.getFreeDvDemodSettings()->getTitle() = settings.m_title;

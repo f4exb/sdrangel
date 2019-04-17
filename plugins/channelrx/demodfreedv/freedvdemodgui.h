@@ -88,6 +88,7 @@ private:
     bool blockApplySettings(bool block);
 	void applySettings(bool force = false);
 	void applyBandwidths(int spanLog2, bool force = false);
+	void displayBandwidths(int spanLog2);
 	void displaySettings();
 
 	void leaveEvent(QEvent*);

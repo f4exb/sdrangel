@@ -338,10 +338,17 @@ void FreeDVDemodGUI::applySettings(bool force)
 
 void FreeDVDemodGUI::applyBandwidths(int spanLog2, bool force)
 {
+    displayBandwidths(m_settings.m_spanLog2);
+    m_settings.m_spanLog2 = spanLog2;
+    applySettings(force);
+}
+
+void FreeDVDemodGUI::displayBandwidths(int spanLog2)
+{
     m_spectrumRate = m_freeDVDemod->getModemSampleRate() / (1<<spanLog2);
     int bwMax = m_freeDVDemod->getModemSampleRate() / (100*(1<<spanLog2));
 
-    qDebug() << "FreeDVDemodGUI::applyBandwidths:"
+    qDebug() << "FreeDVDemodGUI::displayBandwidths:"
             << " spanLog2: " << spanLog2
             << " m_spectrumRate: " << m_spectrumRate
             << " bwMax: " << bwMax;
@@ -353,10 +360,6 @@ void FreeDVDemodGUI::applyBandwidths(int spanLog2, bool force)
     ui->glSpectrum->setSampleRate(m_spectrumRate);
     ui->glSpectrum->setSsbSpectrum(true);
     ui->glSpectrum->setLsbDisplay(false);
-
-    m_settings.m_spanLog2 = spanLog2;
-
-    applySettings(force);
 }
 
 void FreeDVDemodGUI::displaySettings()
@@ -375,8 +378,7 @@ void FreeDVDemodGUI::displaySettings()
 
     blockApplySettings(true);
 
-    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-
+    ui->freeDVMode->setCurrentIndex((int) m_settings.m_freeDVMode);
     ui->agc->setChecked(m_settings.m_agc);
     ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
@@ -384,6 +386,7 @@ void FreeDVDemodGUI::displaySettings()
     // Prevent uncontrolled triggering of applyBandwidths
     ui->spanLog2->blockSignals(true);
     ui->spanLog2->setValue(5 - m_settings.m_spanLog2);
+    displayBandwidths(m_settings.m_spanLog2);
     ui->spanLog2->blockSignals(false);
 
     ui->volume->setValue(m_settings.m_volume * 10.0);
