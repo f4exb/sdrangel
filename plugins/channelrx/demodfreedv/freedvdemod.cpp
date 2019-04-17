@@ -805,6 +805,9 @@ int FreeDVDemod::webapiSettingsPutPatch(
         settings.m_inputFrequencyOffset = response.getFreeDvDemodSettings()->getInputFrequencyOffset();
         frequencyOffsetChanged = true;
     }
+    if (channelSettingsKeys.contains("freeDVMode")) {
+        settings.m_freeDVMode = (FreeDVDemodSettings::FreeDVMode) response.getFreeDvDemodSettings()->getFreeDvMode();
+    }
     if (channelSettingsKeys.contains("volume")) {
         settings.m_volume = response.getFreeDvDemodSettings()->getVolume();
     }
@@ -914,6 +917,9 @@ void FreeDVDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys,
 
     if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
         swgFreeDVDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("freeDVMode") || force) {
+        swgFreeDVDemodSettings->setFreeDvMode((int) settings.m_freeDVMode);
     }
     if (channelSettingsKeys.contains("volume") || force) {
         swgFreeDVDemodSettings->setVolume(settings.m_volume);
