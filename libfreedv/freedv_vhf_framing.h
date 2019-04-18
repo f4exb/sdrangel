@@ -36,6 +36,7 @@
 #ifndef _FREEDV_VHF_FRAMING_H
 #define _FREEDV_VHF_FRAMING_H
 
+#include <cstddef>
 #include "freedv_data_channel.h"
 
 /* Standard frame type */

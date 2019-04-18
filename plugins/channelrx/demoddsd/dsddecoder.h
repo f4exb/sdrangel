@@ -19,7 +19,7 @@
 #ifndef PLUGINS_CHANNELRX_DEMODDSD_DSDDECODER_H_
 #define PLUGINS_CHANNELRX_DEMODDSD_DSDDECODER_H_
 
-#include "dsd_decoder.h"
+#include "dsdcc/dsd_decoder.h"
 
 class AudioFifo;
 

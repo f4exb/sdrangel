@@ -3,6 +3,7 @@ project(qrtplib)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set (qrtplib_HEADERS
+    ../apple/apple_compat.h
     rtcpapppacket.h
     rtcpbyepacket.h
     rtcpcompoundpacket.h
@@ -45,6 +46,7 @@ set (qrtplib_HEADERS
     )
 
 set(qrtplib_SOURCES
+    ../apple/apple_compat.c
     rtcpapppacket.cpp
     rtcpbyepacket.cpp
     rtcpcompoundpacket.cpp

@@ -50,7 +50,7 @@ BladeRF2OutputGui::BladeRF2OutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     ui->setupUi(this);
 
     m_sampleSink->getFrequencyRange(f_min, f_max, step);
-    qDebug("BladeRF2OutputGui::BladeRF2OutputGui: getFrequencyRange: [%lu,%lu] step: %d", f_min, f_max, step);
+    qDebug("BladeRF2OutputGui::BladeRF2OutputGui: getFrequencyRange: [%llu,%llu] step: %d", f_min, f_max, step);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(7, f_min/1000, f_max/1000);
 

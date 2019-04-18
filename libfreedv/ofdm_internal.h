@@ -41,7 +41,7 @@
 #endif
 
 #define TAU         (2.0f * M_PI)
-#define ROT45       (M_PI / 4.0f)
+#define ROT45       float(M_PI / 4.0f)
 
 #define cmplx(value) (std::complex<float>{cosf(value), sinf(value)})
 #define cmplxconj(value) (std::complex<float>{cosf(value), -sinf(value)})

@@ -22,7 +22,7 @@
 #include <algorithm>
 
 #include <QUdpSocket>
-#include "cm256.h"
+#include "cm256cc/cm256.h"
 
 
 
