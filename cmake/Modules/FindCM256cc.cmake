@@ -2,12 +2,12 @@ INCLUDE(FindPkgConfig)
 PKG_CHECK_MODULES(PC_CM256cc "libcm256cc")
 
 FIND_PATH(CM256CC_INCLUDE_DIR
-    NAMES cm256.h
+    NAMES cm256cc/cm256.h
     HINTS ${PC_CM256CC_INCLUDE_DIR}
           ${CMAKE_INSTALL_PREFIX}/include
-    PATHS ${CM256CC_DIR}/include/cm256cc
-          /usr/local/include/cm256cc
-          /usr/include/cm256cc
+    PATHS ${CM256CC_DIR}/include
+          /usr/local/include
+          /usr/include
 )
 
 FIND_LIBRARY(CM256CC_LIBRARIES

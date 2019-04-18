@@ -26,7 +26,7 @@
 #include <channel/remotedatablock.h>
 #include <QUdpSocket>
 
-#include "cm256.h"
+#include "cm256cc/cm256.h"
 
 MESSAGE_CLASS_DEFINITION(RemoteSinkThread::MsgStartStop, Message)
 

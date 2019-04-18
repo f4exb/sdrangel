@@ -24,7 +24,7 @@
 #include <QObject>
 #include <QNetworkRequest>
 
-#include "cm256.h"
+#include "cm256cc/cm256.h"
 
 #include "dsp/basebandsamplesource.h"
 #include "channel/channelsourceapi.h"

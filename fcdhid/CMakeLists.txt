@@ -16,6 +16,7 @@ set(fcdhid_HEADERS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
+        ${LIBUSB_INCLUDE_DIR}
 )
 
 #add_definitions(-DQT_PLUGIN)
@@ -27,7 +28,7 @@ add_library(fcdhid SHARED
 
 target_link_libraries(fcdhid
 	${LIBUSB_LIBRARIES}
-    ${ICONV_LIBRARY}
+        ${ICONV_LIBRARY}
 )
 
 install(TARGETS fcdhid DESTINATION lib)

@@ -24,7 +24,7 @@
 #include <QWaitCondition>
 #include <QHostAddress>
 
-#include "cm256.h"
+#include "cm256cc/cm256.h"
 
 #include "util/messagequeue.h"
 #include "util/message.h"

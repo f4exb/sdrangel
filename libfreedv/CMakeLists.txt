@@ -1,5 +1,7 @@
 project(freedv)
 
+set(CMAKE_CXX_STANDARD 11)
+
 set(freedv_SOURCES
 	codec2_fft.cpp
 	cohpsk.cpp

@@ -320,22 +320,22 @@ void DeviceSinkAPI::addSourceBuddy(DeviceSourceAPI* buddy)
 {
     m_sourceBuddies.push_back(buddy);
     buddy->m_sinkBuddies.push_back(this);
-    qDebug("DeviceSinkAPI::addSourceBuddy: added buddy %s(%s) to the list [%lx] <-> [%lx]",
+    qDebug("DeviceSinkAPI::addSourceBuddy: added buddy %s(%s) to the list [%llu] <-> [%llu]",
             qPrintable(buddy->getHardwareId()),
             qPrintable(buddy->getSampleSourceSerial()),
-            (uint64_t) buddy,
-            (uint64_t) this);
+            (quint64) buddy,
+            (quint64) this);
 }
 
 void DeviceSinkAPI::addSinkBuddy(DeviceSinkAPI* buddy)
 {
     m_sinkBuddies.push_back(buddy);
     buddy->m_sinkBuddies.push_back(this);
-    qDebug("DeviceSinkAPI::addSinkBuddy: added buddy %s(%s) to the list [%lx] <-> [%lx]",
+    qDebug("DeviceSinkAPI::addSinkBuddy: added buddy %s(%s) to the list [%llu] <-> [%llu]",
             qPrintable(buddy->getHardwareId()),
             qPrintable(buddy->getSampleSinkSerial()),
-            (uint64_t) buddy,
-            (uint64_t) this);
+            (quint64) buddy,
+            (quint64) this);
 }
 
 void DeviceSinkAPI::removeSourceBuddy(DeviceSourceAPI* buddy)
@@ -346,21 +346,21 @@ void DeviceSinkAPI::removeSourceBuddy(DeviceSourceAPI* buddy)
     {
         if (*it == buddy)
         {
-            qDebug("DeviceSinkAPI::removeSourceBuddy: buddy %s(%s) [%lx] removed from the list of [%lx]",
+            qDebug("DeviceSinkAPI::removeSourceBuddy: buddy %s(%s) [%llu] removed from the list of [%llu]",
                     qPrintable(buddy->getHardwareId()),
                     qPrintable(buddy->getSampleSourceSerial()),
-                    (uint64_t) (*it),
-                    (uint64_t) this);
+                    (quint64) (*it),
+                    (quint64) this);
             m_sourceBuddies.erase(it);
             return;
         }
     }
 
-    qDebug("DeviceSinkAPI::removeSourceBuddy: buddy %s(%s) [%lx] not found in the list of [%lx]",
+    qDebug("DeviceSinkAPI::removeSourceBuddy: buddy %s(%s) [%llu] not found in the list of [%llu]",
             qPrintable(buddy->getHardwareId()),
             qPrintable(buddy->getSampleSourceSerial()),
-            (uint64_t) buddy,
-            (uint64_t) this);
+            (quint64) buddy,
+            (quint64) this);
 }
 
 void DeviceSinkAPI::removeSinkBuddy(DeviceSinkAPI* buddy)
@@ -371,21 +371,21 @@ void DeviceSinkAPI::removeSinkBuddy(DeviceSinkAPI* buddy)
     {
         if (*it == buddy)
         {
-            qDebug("DeviceSinkAPI::removeSinkBuddy: buddy %s(%s) [%lx] removed from the list of [%lx]",
+            qDebug("DeviceSinkAPI::removeSinkBuddy: buddy %s(%s) [%llu] removed from the list of [%llu]",
                     qPrintable(buddy->getHardwareId()),
                     qPrintable(buddy->getSampleSinkSerial()),
-                    (uint64_t) (*it),
-                    (uint64_t) this);
+                    (quint64) (*it),
+                    (quint64) this);
             m_sinkBuddies.erase(it);
             return;
         }
     }
 
-    qDebug("DeviceSinkAPI::removeSinkBuddy: buddy %s(%s) [%lx] not found in the list of [%lx]",
+    qDebug("DeviceSinkAPI::removeSinkBuddy: buddy %s(%s) [%llu] not found in the list of [%llu]",
             qPrintable(buddy->getHardwareId()),
             qPrintable(buddy->getSampleSinkSerial()),
-            (uint64_t) buddy,
-            (uint64_t) this);
+            (quint64) buddy,
+            (quint64) this);
 }
 
 void DeviceSinkAPI::clearBuddiesLists()
