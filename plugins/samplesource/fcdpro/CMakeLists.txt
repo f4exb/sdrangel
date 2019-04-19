@@ -46,7 +46,6 @@ add_library(inputfcdpro SHARED
 
 target_link_libraries(inputfcdpro
 	${QT_LIBRARIES}
-	asound
 	fcdhid
 	fcdlib
 	sdrbase
