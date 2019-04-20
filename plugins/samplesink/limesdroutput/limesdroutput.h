@@ -231,6 +231,7 @@ public:
     void getSRRange(float& minF, float& maxF) const;
     void getLPRange(float& minF, float& maxF) const;
     uint32_t getHWLog2Interp() const;
+    DeviceLimeSDRParams::LimeType getLimeType() const;
 
 private:
     DeviceSinkAPI *m_deviceAPI;

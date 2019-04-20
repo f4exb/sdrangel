@@ -924,7 +924,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Antenna select: No: none, Lo: 700:900M, Hi: 2:2.6G, Wi: wideband, T1: Tx1 LB, T2: Tx2 LB</string>
+        <string>Antenna select: No: none, NC: not connected, Lo: 700:900M, Hi: 2:2.6G, Wi: wideband, T1: Tx1 LB, T2: Tx2 LB</string>
        </property>
        <item>
         <property name="text">

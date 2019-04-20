@@ -70,6 +70,17 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->channelNumberText->setText(tr("#%1").arg(m_limeSDRInput->getChannelIndex()));
 
+    if (m_limeSDRInput->getLimeType() == DeviceLimeSDRParams::LimeMini)
+    {
+        ui->antenna->setItemText(2, "NC");
+        ui->antenna->setItemText(3, "Lo");
+    }
+    else
+    {
+        ui->antenna->setItemText(2, "Lo");
+        ui->antenna->setItemText(3, "Wi");
+    }
+
     ui->hwDecimLabel->setText(QString::fromUtf8("H\u2193"));
     ui->swDecimLabel->setText(QString::fromUtf8("S\u2193"));
 

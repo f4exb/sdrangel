@@ -538,6 +538,15 @@ uint32_t LimeSDRInput::getHWLog2Decim() const
     return m_deviceShared.m_deviceParams->m_log2OvSRRx;
 }
 
+DeviceLimeSDRParams::LimeType LimeSDRInput::getLimeType() const
+{
+    if (m_deviceShared.m_deviceParams) {
+        return m_deviceShared.m_deviceParams->m_type;
+    } else {
+        return DeviceLimeSDRParams::LimeUndefined;
+    }
+}
+
 bool LimeSDRInput::handleMessage(const Message& message)
 {
     if (MsgConfigureLimeSDR::match(message))

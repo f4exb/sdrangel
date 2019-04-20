@@ -67,6 +67,17 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->channelNumberText->setText(tr("#%1").arg(m_limeSDROutput->getChannelIndex()));
 
+    if (m_limeSDROutput->getLimeType() == DeviceLimeSDRParams::LimeMini)
+    {
+        ui->antenna->setItemText(1, "Hi");
+        ui->antenna->setItemText(2, "Lo");
+    }
+    else
+    {
+        ui->antenna->setItemText(1, "Lo");
+        ui->antenna->setItemText(2, "Hi");
+    }
+
     ui->hwInterpLabel->setText(QString::fromUtf8("H\u2191"));
     ui->swInterpLabel->setText(QString::fromUtf8("S\u2191"));
 
