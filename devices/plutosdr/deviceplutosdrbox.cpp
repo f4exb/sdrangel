@@ -659,7 +659,7 @@ void DevicePlutoSDRBox::getXO()
     try
     {
         m_xoInitial = boost::lexical_cast<quint64>(valueStr);
-        qDebug("DevicePlutoSDRBox::getXO: %llu", m_xoInitial);
+        qDebug("DevicePlutoSDRBox::getXO: %ld", m_xoInitial);
     }
     catch (const boost::bad_lexical_cast &e)
     {
