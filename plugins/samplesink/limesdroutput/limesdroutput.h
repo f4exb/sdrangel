@@ -231,12 +231,10 @@ public:
     void getSRRange(float& minF, float& maxF) const;
     void getLPRange(float& minF, float& maxF) const;
     uint32_t getHWLog2Interp() const;
-    DeviceLimeSDRParams::LimeType getLimeType() const { return m_limeType; }
 
 private:
     DeviceSinkAPI *m_deviceAPI;
     QMutex m_mutex;
-    DeviceLimeSDRParams::LimeType m_limeType;
     LimeSDROutputSettings m_settings;
     LimeSDROutputThread* m_limeSDROutputThread;
     QString m_deviceDescription;

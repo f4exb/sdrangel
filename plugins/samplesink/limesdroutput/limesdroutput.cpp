@@ -59,11 +59,8 @@ LimeSDROutput::LimeSDROutput(DeviceSinkAPI *deviceAPI) :
     m_streamId.handle = 0;
     suspendRxBuddies();
     suspendTxBuddies();
-
-    if (openDevice()) {
-        m_limeType = m_deviceShared.m_deviceParams->m_type;
-    }
-        resumeTxBuddies();
+    openDevice();
+    resumeTxBuddies();
     resumeRxBuddies();
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));

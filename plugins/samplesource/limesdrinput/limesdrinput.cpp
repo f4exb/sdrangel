@@ -51,7 +51,6 @@ MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgStartStop, Message)
 
 LimeSDRInput::LimeSDRInput(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_limeType(DeviceLimeSDRParams::LimeUndefined),
     m_settings(),
     m_limeSDRInputThread(0),
     m_deviceDescription("LimeSDRInput"),
@@ -61,11 +60,6 @@ LimeSDRInput::LimeSDRInput(DeviceSourceAPI *deviceAPI) :
     m_streamId.handle = 0;
     suspendRxBuddies();
     suspendTxBuddies();
-
-    if (openDevice()) {
-        m_limeType = m_deviceShared.m_deviceParams->m_type;
-    }
-
     openDevice();
     resumeTxBuddies();
     resumeRxBuddies();
