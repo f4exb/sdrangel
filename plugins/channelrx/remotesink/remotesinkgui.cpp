@@ -145,6 +145,7 @@ RemoteSinkGUI::RemoteSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 RemoteSinkGUI::~RemoteSinkGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
+    delete m_remoteSink; // TODO: check this: when the GUI closes it has to delete the demodulator
     delete ui;
 }
 
