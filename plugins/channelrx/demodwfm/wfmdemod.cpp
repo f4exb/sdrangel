@@ -328,6 +328,11 @@ void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
             << " m_squelch: " << settings.m_squelch
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_audioMute: " << settings.m_audioMute
+            << " m_useReverseAPI: " << settings.m_useReverseAPI
+            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
+            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
+            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
+            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
@@ -482,6 +487,21 @@ int WFMDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("audioDeviceName")) {
         settings.m_audioDeviceName = *response.getWfmDemodSettings()->getAudioDeviceName();
     }
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getWfmDemodSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getWfmDemodSettings()->getReverseApiAddress();
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getWfmDemodSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getWfmDemodSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getWfmDemodSettings()->getReverseApiChannelIndex();
+    }
 
     if (frequencyOffsetChanged)
     {
@@ -537,6 +557,18 @@ void WFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     } else {
         response.getWfmDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
+
+    response.getWfmDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getWfmDemodSettings()->getReverseApiAddress()) {
+        *response.getWfmDemodSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getWfmDemodSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getWfmDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getWfmDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getWfmDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void WFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)

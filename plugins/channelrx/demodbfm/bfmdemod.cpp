@@ -640,7 +640,7 @@ int BFMDemod::webapiSettingsPutPatch(
         settings.m_useReverseAPI = response.getBfmDemodSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getBfmDemodSettings()->getReverseApiAddress() != 0;
+        settings.m_reverseAPIAddress = *response.getBfmDemodSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getBfmDemodSettings()->getReverseApiPort();

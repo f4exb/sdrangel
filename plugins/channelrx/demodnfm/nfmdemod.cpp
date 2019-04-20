@@ -502,6 +502,10 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
             << " m_audioMute: " << settings.m_audioMute
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_useReverseAPI: " << settings.m_useReverseAPI
+            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
+            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
+            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
+            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
@@ -704,6 +708,21 @@ int NFMDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("audioDeviceName")) {
         settings.m_audioDeviceName = *response.getNfmDemodSettings()->getAudioDeviceName();
     }
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getNfmDemodSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getNfmDemodSettings()->getReverseApiAddress();
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getNfmDemodSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getNfmDemodSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getNfmDemodSettings()->getReverseApiChannelIndex();
+    }
 
     if (frequencyOffsetChanged)
     {
@@ -763,6 +782,18 @@ void NFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     } else {
         response.getNfmDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
+
+    response.getNfmDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getNfmDemodSettings()->getReverseApiAddress()) {
+        *response.getNfmDemodSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getNfmDemodSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getNfmDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getNfmDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getNfmDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void NFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)

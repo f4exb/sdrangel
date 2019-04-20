@@ -920,7 +920,7 @@ int DSDDemod::webapiSettingsPutPatch(
         settings.m_useReverseAPI = response.getDsdDemodSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getDsdDemodSettings()->getReverseApiAddress() != 0;
+        settings.m_reverseAPIAddress = *response.getDsdDemodSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getDsdDemodSettings()->getReverseApiPort();

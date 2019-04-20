@@ -755,7 +755,7 @@ int UDPSource::webapiSettingsPutPatch(
         settings.m_useReverseAPI = response.getUdpSourceSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getUdpSourceSettings()->getReverseApiAddress() != 0;
+        settings.m_reverseAPIAddress = *response.getUdpSourceSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getUdpSourceSettings()->getReverseApiPort();

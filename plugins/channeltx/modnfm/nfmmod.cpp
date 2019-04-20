@@ -691,7 +691,7 @@ int NFMMod::webapiSettingsPutPatch(
         settings.m_useReverseAPI = response.getNfmModSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getNfmModSettings()->getReverseApiAddress() != 0;
+        settings.m_reverseAPIAddress = *response.getNfmModSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getNfmModSettings()->getReverseApiPort();

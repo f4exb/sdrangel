@@ -499,6 +499,11 @@ void WFMMod::applySettings(const WFMModSettings& settings, bool force)
             << " m_playLoop: " << settings.m_playLoop
             << " m_modAFInput: " << settings.m_modAFInput
             << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_useReverseAPI: " << settings.m_useReverseAPI
+            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
+            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
+            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
+            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
@@ -656,6 +661,21 @@ int WFMMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("fmDeviation")) {
         settings.m_fmDeviation = response.getWfmModSettings()->getFmDeviation();
     }
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getWfmModSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getWfmModSettings()->getReverseApiAddress();
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getWfmModSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getWfmModSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getWfmModSettings()->getReverseApiChannelIndex();
+    }
 
     if (channelSettingsKeys.contains("cwKeyer"))
     {
@@ -766,6 +786,18 @@ void WFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     } else {
         response.getWfmModSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
+
+    response.getWfmModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getWfmModSettings()->getReverseApiAddress()) {
+        *response.getWfmModSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getWfmModSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getWfmModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getWfmModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getWfmModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void WFMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)

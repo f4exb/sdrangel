@@ -512,6 +512,11 @@ void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
             << " m_udpAddressStr: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
             << " m_audioPort: " << settings.m_audioPort
+            << " m_useReverseAPI: " << settings.m_useReverseAPI
+            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
+            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
+            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
+            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
@@ -792,6 +797,21 @@ int UDPSink::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getUdpSinkSettings()->getTitle();
     }
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getUdpSinkSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getUdpSinkSettings()->getReverseApiAddress();
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getUdpSinkSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getUdpSinkSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getUdpSinkSettings()->getReverseApiChannelIndex();
+    }
 
     if (frequencyOffsetChanged)
     {
@@ -859,6 +879,18 @@ void UDPSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
     } else {
         response.getUdpSinkSettings()->setTitle(new QString(settings.m_title));
     }
+
+    response.getUdpSinkSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getUdpSinkSettings()->getReverseApiAddress()) {
+        *response.getUdpSinkSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getUdpSinkSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getUdpSinkSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getUdpSinkSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getUdpSinkSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void UDPSink::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)

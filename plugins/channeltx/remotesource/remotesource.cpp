@@ -423,7 +423,7 @@ int RemoteSource::webapiSettingsPutPatch(
         settings.m_useReverseAPI = response.getRemoteSourceSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getRemoteSourceSettings()->getReverseApiAddress() != 0;
+        settings.m_reverseAPIAddress = *response.getRemoteSourceSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getRemoteSourceSettings()->getReverseApiPort();

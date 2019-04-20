@@ -463,6 +463,11 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
             << " agcPowerThreshold: " << settings.m_agcPowerThreshold
             << " agcThresholdGate: " << settings.m_agcThresholdGate
             << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_useReverseAPI: " << settings.m_useReverseAPI
+            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
+            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
+            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
+            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
@@ -724,6 +729,21 @@ int SSBDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("audioDeviceName")) {
         settings.m_audioDeviceName = *response.getSsbDemodSettings()->getAudioDeviceName();
     }
+    if (channelSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getSsbDemodSettings()->getUseReverseApi() != 0;
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getSsbDemodSettings()->getReverseApiAddress();
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getSsbDemodSettings()->getReverseApiPort();
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getSsbDemodSettings()->getReverseApiDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIChannelIndex = response.getSsbDemodSettings()->getReverseApiChannelIndex();
+    }
 
     if (frequencyOffsetChanged)
     {
@@ -788,6 +808,18 @@ void SSBDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     } else {
         response.getSsbDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
+
+    response.getSsbDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getSsbDemodSettings()->getReverseApiAddress()) {
+        *response.getSsbDemodSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getSsbDemodSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getSsbDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getSsbDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getSsbDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 }
 
 void SSBDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
