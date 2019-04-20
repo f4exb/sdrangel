@@ -66,6 +66,16 @@ SWGUDPSinkSettings::SWGUDPSinkSettings() {
     m_rgb_color_isSet = false;
     title = nullptr;
     m_title_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = nullptr;
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_device_index = 0;
+    m_reverse_api_device_index_isSet = false;
+    reverse_api_channel_index = 0;
+    m_reverse_api_channel_index_isSet = false;
 }
 
 SWGUDPSinkSettings::~SWGUDPSinkSettings() {
@@ -112,6 +122,16 @@ SWGUDPSinkSettings::init() {
     m_rgb_color_isSet = false;
     title = new QString("");
     m_title_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = new QString("");
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_device_index = 0;
+    m_reverse_api_device_index_isSet = false;
+    reverse_api_channel_index = 0;
+    m_reverse_api_channel_index_isSet = false;
 }
 
 void
@@ -139,6 +159,13 @@ SWGUDPSinkSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
+    if(reverse_api_address != nullptr) { 
+        delete reverse_api_address;
+    }
+
+
+
 }
 
 SWGUDPSinkSettings*
@@ -189,6 +216,16 @@ SWGUDPSinkSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_address, pJson["reverseAPIAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&reverse_api_port, pJson["reverseAPIPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
     
 }
 
@@ -262,6 +299,21 @@ SWGUDPSinkSettings::asJsonObject() {
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
+    if(m_use_reverse_api_isSet){
+        obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
+    }
+    if(reverse_api_address != nullptr && *reverse_api_address != QString("")){
+        toJsonValue(QString("reverseAPIAddress"), reverse_api_address, obj, QString("QString"));
+    }
+    if(m_reverse_api_port_isSet){
+        obj->insert("reverseAPIPort", QJsonValue(reverse_api_port));
+    }
+    if(m_reverse_api_device_index_isSet){
+        obj->insert("reverseAPIDeviceIndex", QJsonValue(reverse_api_device_index));
+    }
+    if(m_reverse_api_channel_index_isSet){
+        obj->insert("reverseAPIChannelIndex", QJsonValue(reverse_api_channel_index));
     }
 
     return obj;
@@ -457,6 +509,56 @@ SWGUDPSinkSettings::setTitle(QString* title) {
     this->m_title_isSet = true;
 }
 
+qint32
+SWGUDPSinkSettings::getUseReverseApi() {
+    return use_reverse_api;
+}
+void
+SWGUDPSinkSettings::setUseReverseApi(qint32 use_reverse_api) {
+    this->use_reverse_api = use_reverse_api;
+    this->m_use_reverse_api_isSet = true;
+}
+
+QString*
+SWGUDPSinkSettings::getReverseApiAddress() {
+    return reverse_api_address;
+}
+void
+SWGUDPSinkSettings::setReverseApiAddress(QString* reverse_api_address) {
+    this->reverse_api_address = reverse_api_address;
+    this->m_reverse_api_address_isSet = true;
+}
+
+qint32
+SWGUDPSinkSettings::getReverseApiPort() {
+    return reverse_api_port;
+}
+void
+SWGUDPSinkSettings::setReverseApiPort(qint32 reverse_api_port) {
+    this->reverse_api_port = reverse_api_port;
+    this->m_reverse_api_port_isSet = true;
+}
+
+qint32
+SWGUDPSinkSettings::getReverseApiDeviceIndex() {
+    return reverse_api_device_index;
+}
+void
+SWGUDPSinkSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
+    this->reverse_api_device_index = reverse_api_device_index;
+    this->m_reverse_api_device_index_isSet = true;
+}
+
+qint32
+SWGUDPSinkSettings::getReverseApiChannelIndex() {
+    return reverse_api_channel_index;
+}
+void
+SWGUDPSinkSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
+    this->reverse_api_channel_index = reverse_api_channel_index;
+    this->m_reverse_api_channel_index_isSet = true;
+}
+
 
 bool
 SWGUDPSinkSettings::isSet(){
@@ -481,6 +583,11 @@ SWGUDPSinkSettings::isSet(){
         if(m_audio_port_isSet){ isObjectUpdated = true; break;}
         if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
         if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
+        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
+        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
+        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
+        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
+        if(m_reverse_api_channel_index_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

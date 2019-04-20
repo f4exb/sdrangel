@@ -16,7 +16,7 @@ UDPSinkSettings:
       type: integer
     channelMute:
       description: channel mute (1 if muted else 0)
-      type: integer      
+      type: integer
     gain:
       type: number
       format: float
@@ -28,34 +28,45 @@ UDPSinkSettings:
       type: integer
     squelchEnabled:
       description: squelch enable (1 if enabled else 0)
-      type: integer      
+      type: integer
     agc:
       description: AGC enable (1 if enabled else 0)
-      type: integer      
+      type: integer
     audioActive:
       description: Audio return enable (1 if enabled else 0)
-      type: integer      
+      type: integer
     audioStereo:
       description: Audio return stereo (1 if stereo else 0)
-      type: integer      
+      type: integer
     volume:
-      type: integer      
+      type: integer
     udpAddress:
       description: destination UDP address (remote)
       type: string
     udpPort:
       description: destination UDP port (remote)
       type: integer
-      format: uint16            
+      format: uint16
     audioPort:
       description: audio return UDP port (local)
       type: integer
-      format: uint16            
+      format: uint16
     rgbColor:
-      type: integer            
+      type: integer
     title:
       type: string
-      
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+
 UDPSinkReport:
   description: UDPSink
   properties:
@@ -72,4 +83,3 @@ UDPSinkReport:
       type: integer
     inputSampleRate:
       type: integer
-      
