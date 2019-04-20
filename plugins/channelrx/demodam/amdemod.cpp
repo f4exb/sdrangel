@@ -438,7 +438,7 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
             << " m_syncAMOperation: " << (int) settings.m_syncAMOperation
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIPort
+            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
             << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
             << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
@@ -621,7 +621,7 @@ int AMDemod::webapiSettingsPutPatch(
         settings.m_useReverseAPI = response.getAmDemodSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getAmDemodSettings()->getReverseApiAddress() != 0;
+        settings.m_reverseAPIAddress = *response.getAmDemodSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getAmDemodSettings()->getReverseApiPort();

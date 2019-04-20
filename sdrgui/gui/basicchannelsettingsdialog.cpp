@@ -60,7 +60,7 @@ void BasicChannelSettingsDialog::setReverseAPIDeviceIndex(uint16_t deviceIndex)
 void BasicChannelSettingsDialog::setReverseAPIChannelIndex(uint16_t channelIndex)
 {
     m_reverseAPIChannelIndex = channelIndex > 99 ? 99 : channelIndex;
-    ui->reverseAPIDeviceIndex->setText(tr("%1").arg(m_reverseAPIChannelIndex));
+    ui->reverseAPIChannelIndex->setText(tr("%1").arg(m_reverseAPIChannelIndex));
 }
 
 void BasicChannelSettingsDialog::paintColor()
