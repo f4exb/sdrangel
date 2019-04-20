@@ -93,6 +93,21 @@ public:
     QString* getAudioDeviceName();
     void setAudioDeviceName(QString* audio_device_name);
 
+    qint32 getUseReverseApi();
+    void setUseReverseApi(qint32 use_reverse_api);
+
+    QString* getReverseApiAddress();
+    void setReverseApiAddress(QString* reverse_api_address);
+
+    qint32 getReverseApiPort();
+    void setReverseApiPort(qint32 reverse_api_port);
+
+    qint32 getReverseApiDeviceIndex();
+    void setReverseApiDeviceIndex(qint32 reverse_api_device_index);
+
+    qint32 getReverseApiChannelIndex();
+    void setReverseApiChannelIndex(qint32 reverse_api_channel_index);
+
 
     virtual bool isSet() override;
 
@@ -147,6 +162,21 @@ private:
 
     QString* audio_device_name;
     bool m_audio_device_name_isSet;
+
+    qint32 use_reverse_api;
+    bool m_use_reverse_api_isSet;
+
+    QString* reverse_api_address;
+    bool m_reverse_api_address_isSet;
+
+    qint32 reverse_api_port;
+    bool m_reverse_api_port_isSet;
+
+    qint32 reverse_api_device_index;
+    bool m_reverse_api_device_index_isSet;
+
+    qint32 reverse_api_channel_index;
+    bool m_reverse_api_channel_index_isSet;
 
 };
 

@@ -72,6 +72,21 @@ public:
     qint32 getFreeDvMode();
     void setFreeDvMode(qint32 free_dv_mode);
 
+    qint32 getUseReverseApi();
+    void setUseReverseApi(qint32 use_reverse_api);
+
+    QString* getReverseApiAddress();
+    void setReverseApiAddress(QString* reverse_api_address);
+
+    qint32 getReverseApiPort();
+    void setReverseApiPort(qint32 reverse_api_port);
+
+    qint32 getReverseApiDeviceIndex();
+    void setReverseApiDeviceIndex(qint32 reverse_api_device_index);
+
+    qint32 getReverseApiChannelIndex();
+    void setReverseApiChannelIndex(qint32 reverse_api_channel_index);
+
 
     virtual bool isSet() override;
 
@@ -105,6 +120,21 @@ private:
 
     qint32 free_dv_mode;
     bool m_free_dv_mode_isSet;
+
+    qint32 use_reverse_api;
+    bool m_use_reverse_api_isSet;
+
+    QString* reverse_api_address;
+    bool m_reverse_api_address_isSet;
+
+    qint32 reverse_api_port;
+    bool m_reverse_api_port_isSet;
+
+    qint32 reverse_api_device_index;
+    bool m_reverse_api_device_index_isSet;
+
+    qint32 reverse_api_channel_index;
+    bool m_reverse_api_channel_index_isSet;
 
 };
 
