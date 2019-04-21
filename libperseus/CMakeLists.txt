@@ -7,7 +7,6 @@ find_package(LibUSB)
 add_definitions(-DHAVE_CONFIG_H)
 
 set(perseus_SOURCES
-    ${LIBPERSEUSSRC}/fifo.c
     fpga_data.c
     ${LIBPERSEUSSRC}/perseuserr.c
     ${LIBPERSEUSSRC}/perseusfx2.c
@@ -16,7 +15,6 @@ set(perseus_SOURCES
 )
 
 set(perseus_HEADERS
-    ${LIBPERSEUSSRC}/fifo.h
     fpga_data.h
     ${LIBPERSEUSSRC}/perseuserr.h
     ${LIBPERSEUSSRC}/perseusfx2.h
@@ -27,7 +25,7 @@ set(perseus_HEADERS
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${LIBUSB_INCLUDE_DIR}    
+    ${LIBUSB_INCLUDE_DIR}
     ${LIBPERSEUSSRC}
 )
 

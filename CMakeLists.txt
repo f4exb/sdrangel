@@ -32,6 +32,7 @@ option(RX_SAMPLE_24BIT "Internal 24 bit Rx DSP" OFF)
 option(NO_DSP_SIMD "Do not use SIMD instructions for DSP even if available" OFF)
 option(BUILD_SERVER "Build Server" ON)
 option(BUILD_GUI "Build GUI" ON)
+option(ENABLE_DISTRIBUTION "Compile for package distribution" OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
