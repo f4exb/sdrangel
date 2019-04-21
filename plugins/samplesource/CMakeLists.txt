@@ -29,10 +29,10 @@ if(LIBUSB_FOUND AND LIBBLADERF_FOUND)
     add_subdirectory(bladerf2input)
 endif(LIBUSB_FOUND AND LIBBLADERF_FOUND)
 
-if(LIBUSB_FOUND AND NOT APPLE)
+if(LIBUSB_FOUND)
     add_subdirectory(fcdpro)
     add_subdirectory(fcdproplus)
-endif(LIBUSB_FOUND AND NOT APPLE)
+endif(LIBUSB_FOUND)
 
 find_package(LibHACKRF)
 if(LIBUSB_FOUND AND LIBHACKRF_FOUND)

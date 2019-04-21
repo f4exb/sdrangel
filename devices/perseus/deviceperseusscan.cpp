@@ -29,33 +29,24 @@ bool DevicePerseusScan::scan(int nbDevices)
 		return true;
 	}
 
-    bool done = true;
+        bool done = true;
 	perseus_descr *descr;
 	eeprom_prodid prodid;
 
 	for (int deviceIndex = 0; deviceIndex < nbDevices; deviceIndex++)
 	{
-		if ((descr = perseus_open(deviceIndex)) == 0)
+	if ((descr = perseus_open(deviceIndex)) == 0)
         {
-			qCritical("DevicePerseusScan::scan: device #%d open error: %s", deviceIndex, perseus_errorstr());
-			perseus_close(descr);
-			continue;
-		}
-
-        if (descr->firmware_downloaded)
-        {
-            qDebug("DevicePerseusScan::scan: device #%d firmware is already downloaded", deviceIndex);
-        }
-        else
-        {
-            qDebug("DevicePerseusScan::scan: device #%d firmware is not yet downloaded", deviceIndex);
-            done = false;
-        }
+	    qCritical("DevicePerseusScan::scan: device #%d open error: %s", deviceIndex, perseus_errorstr());
+	    perseus_close(descr);
+	    continue;
+	}
 
         if (perseus_firmware_download(descr, 0) < 0)
         {
             qCritical("DevicePerseusScan::scan: device #%d firmware download error: %s", deviceIndex, perseus_errorstr());
             perseus_close(descr);
+            done = false;
             continue;
         }
         else
