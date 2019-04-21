@@ -35,12 +35,12 @@ bool DevicePerseusScan::scan(int nbDevices)
 
 	for (int deviceIndex = 0; deviceIndex < nbDevices; deviceIndex++)
 	{
-	if ((descr = perseus_open(deviceIndex)) == 0)
+        if ((descr = perseus_open(deviceIndex)) == 0)
         {
-	    qCritical("DevicePerseusScan::scan: device #%d open error: %s", deviceIndex, perseus_errorstr());
-	    perseus_close(descr);
-	    continue;
-	}
+            qCritical("DevicePerseusScan::scan: device #%d open error: %s", deviceIndex, perseus_errorstr());
+            perseus_close(descr);
+            continue;
+        }
 
         if (perseus_firmware_download(descr, 0) < 0)
         {
