@@ -25,7 +25,7 @@ set(fcdproplus_FORMS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
+        ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
 	${CMAKE_SOURCE_DIR}/fcdhid
 	${CMAKE_SOURCE_DIR}/fcdlib
 )
@@ -46,7 +46,6 @@ add_library(inputfcdproplus SHARED
 
 target_link_libraries(inputfcdproplus
 	${QT_LIBRARIES}
-	asound
 	fcdhid
 	fcdlib
 	sdrbase
