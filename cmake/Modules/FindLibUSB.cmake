@@ -1,7 +1,6 @@
 if(NOT LIBUSB_FOUND)
   pkg_check_modules (LIBUSB_PKG libusb-1.0)
-  find_path(LIBUSB_INCLUDE_DIR
-    NAMES libusb-1.0/libusb.h
+  find_path(LIBUSB_INCLUDE_DIR NAMES libusb.h
     PATHS
     ${LIBUSB_PKG_INCLUDE_DIRS}
     /usr/include/libusb-1.0
@@ -9,8 +8,7 @@ if(NOT LIBUSB_FOUND)
     /usr/local/include
   )
 
-  find_library(LIBUSB_LIBRARIES
-    NAMES usb-1.0
+  find_library(LIBUSB_LIBRARIES NAMES usb-1.0
     PATHS
     ${LIBUSB_PKG_LIBRARY_DIRS}
     /usr/lib
