@@ -24,7 +24,7 @@ include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client	
-    ${LIBDSDCCSRC}
+    ${LIBDSDCCSRC}/..
     ${LIBMBELIBSRC}
 )
 else (BUILD_DEBIAN)
