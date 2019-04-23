@@ -532,12 +532,16 @@ endif()
 install(TARGETS sdrangelbench DESTINATION bin)
 #install(TARGETS sdrbase DESTINATION lib)
 
-#install files and directories
+#install files and directories (linux specific)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 install(DIRECTORY udev-rules DESTINATION share/sdrangel)
 install(FILES udev-rules/install.sh DESTINATION share/sdrangel/udev-rules PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sdrbase.rcc DESTINATION bin)
 install(FILES desktop/sdrangel.desktop DESTINATION share/applications)
 install(FILES desktop/sdrangel_icon.png DESTINATION share/pixmaps)
+endif()
+
+# needed by REST API documentation
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sdrbase.rcc DESTINATION bin)
 
 ##############################################################################
 
