@@ -4,6 +4,12 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_L
     message(FATAL_ERROR "SDRangel requires GCC version 4.9 or higher!")
 endif()
 
+# enable ccache if present in the path
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+endif()
+
 # QT Framework
 set(CMAKE_PREFIX_PATH "/Applications/Qt/5.7/clang_64/lib/cmake")
 
