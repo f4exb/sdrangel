@@ -30,7 +30,7 @@
 
 const PluginDescriptor RemoteInputPlugin::m_pluginDescriptor = {
 	QString("Remote device input"),
-	QString("4.5.2"),
+	QString("4.5.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

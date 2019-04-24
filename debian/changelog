@@ -1,3 +1,10 @@
+sdrangel (4.5.6-1) unstable; urgency=medium
+
+  * Remote input: fixed version display
+  * DSD demod: save PLL enable and autio mute in preset
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 28 Apr 2019 20:14:18 +0100
+
 sdrangel (4.5.5-1) unstable; urgency=medium
 
   * FreeDV: fixes in REST API
