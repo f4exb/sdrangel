@@ -68,6 +68,7 @@ QByteArray DSDDemodSettings::serialize() const
     s.writeS32(3, m_demodGain*100.0);
     s.writeS32(4, m_fmDeviation/100.0);
     s.writeS32(5, m_squelch);
+    s.writeBool(6, m_pllLock);
     s.writeU32(7, m_rgbColor);
     s.writeS32(8, m_squelchGate);
     s.writeS32(9, m_volume*10.0);
@@ -98,6 +99,7 @@ QByteArray DSDDemodSettings::serialize() const
     s.writeU32(26, m_reverseAPIPort);
     s.writeU32(27, m_reverseAPIDeviceIndex);
     s.writeU32(28, m_reverseAPIChannelIndex);
+    s.writeBool(29, m_audioMute);
 
     return s.final();
 }
@@ -134,6 +136,7 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         m_fmDeviation = tmp * 100.0;
         d.readS32(5, &tmp, -40);
         m_squelch = tmp < -100 ? tmp / 10.0 : tmp;
+        d.readBool(6, &m_pllLock, true);
         d.readU32(7, &m_rgbColor);
         d.readS32(8, &m_squelchGate, 5);
         d.readS32(9, &tmp, 20);
@@ -173,6 +176,7 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(28, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readBool(29, &m_audioMute, false);
 
         return true;
     }
