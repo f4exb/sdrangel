@@ -614,7 +614,7 @@ void RemoteInputGui::analyzeApiReply(const QJsonObject& jsonObject)
     QString infoLine;
 
     if (jsonObject.contains("version")) {
-        infoLine = "v" + jsonObject["version"].toString();
+        infoLine = jsonObject["version"].toString();
     }
 
     if (jsonObject.contains("qtVersion")) {
