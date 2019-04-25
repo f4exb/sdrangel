@@ -37,6 +37,8 @@ struct RemoteSinkSettings
     uint16_t m_dataPort;
     quint32 m_rgbColor;
     QString m_title;
+    uint32_t m_log2Decim;
+    uint32_t m_filterChainHash;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

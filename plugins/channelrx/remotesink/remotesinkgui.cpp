@@ -15,13 +15,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "remotesinkgui.h"
+#include <QLocale>
 
 #include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "dsp/hbfilterchainconverter.h"
 #include "mainwindow.h"
 
+#include "remotesinkgui.h"
 #include "remotesink.h"
 #include "ui_remotesinkgui.h"
 
@@ -87,6 +89,7 @@ bool RemoteSinkGUI::handleMessage(const Message& message)
         m_channelMarker.setBandwidth(notif.getSampleRate());
         m_sampleRate = notif.getSampleRate();
         updateTxDelayTime();
+        displayRateAndShift();
         return true;
     }
     else if (RemoteSink::MsgConfigureRemoteSink::match(message))
@@ -171,6 +174,7 @@ void RemoteSinkGUI::displaySettings()
     m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle(m_settings.m_title);
     m_channelMarker.setBandwidth(m_sampleRate); // TODO
+    m_channelMarker.setMovable(false); // do not let user move the center arbitrarily
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
 
@@ -178,6 +182,8 @@ void RemoteSinkGUI::displaySettings()
     setWindowTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
+    ui->decimationFactor->setCurrentIndex(m_settings.m_log2Decim);
+    ui->position->setValue(m_settings.m_filterChainHash);
     ui->dataAddress->setText(m_settings.m_dataAddress);
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
     QString s = QString::number(128 + m_settings.m_nbFECBlocks, 'f', 0);
@@ -186,7 +192,19 @@ void RemoteSinkGUI::displaySettings()
     ui->txDelayText->setText(tr("%1%").arg(m_settings.m_txDelay));
     ui->txDelay->setValue(m_settings.m_txDelay);
     updateTxDelayTime();
+    applyDecimation();
     blockApplySettings(false);
+}
+
+void RemoteSinkGUI::displayRateAndShift()
+{
+    int shift = m_shiftFrequencyFactor * m_sampleRate;
+    double channelSampleRate = ((double) m_sampleRate) / (1<<m_settings.m_log2Decim);
+    QLocale loc;
+    ui->offsetFrequencyText->setText(tr("%1 Hz").arg(loc.toString(shift)));
+    ui->channelRateText->setText(tr("%1k").arg(QString::number(channelSampleRate / 1000.0, 'g', 5)));
+    m_channelMarker.setCenterFrequency(shift);
+    m_channelMarker.setBandwidth(channelSampleRate);
 }
 
 void RemoteSinkGUI::leaveEvent(QEvent*)
@@ -242,6 +260,18 @@ void RemoteSinkGUI::onMenuDialogCalled(const QPoint &p)
     setTitleColor(m_settings.m_rgbColor);
 
     applySettings();
+}
+
+void RemoteSinkGUI::on_decimationFactor_currentIndexChanged(int index)
+{
+    m_settings.m_log2Decim = index;
+    applyDecimation();
+}
+
+void RemoteSinkGUI::on_position_valueChanged(int value)
+{
+    m_settings.m_filterChainHash = value;
+    applyPosition();
 }
 
 void RemoteSinkGUI::on_dataAddress_returnPressed()
@@ -310,6 +340,29 @@ void RemoteSinkGUI::updateTxDelayTime()
     double delay = m_sampleRate == 0 ? 0.0 : (127*samplesPerBlock*txDelayRatio) / m_sampleRate;
     delay /= 128 + m_settings.m_nbFECBlocks;
     ui->txDelayTime->setText(tr("%1µs").arg(QString::number(delay*1e6, 'f', 0)));
+}
+
+void RemoteSinkGUI::applyDecimation()
+{
+    uint32_t maxHash = 1;
+
+    for (uint32_t i = 0; i < m_settings.m_log2Decim; i++) {
+        maxHash *= 3;
+    }
+
+    ui->position->setMaximum(maxHash-1);
+    m_settings.m_filterChainHash = ui->position->value();
+    applyPosition();
+}
+
+void RemoteSinkGUI::applyPosition()
+{
+    ui->filterChainIndex->setText(tr("%1").arg(m_settings.m_filterChainHash));
+    QString s;
+    m_shiftFrequencyFactor = HBFilterChainConverter::convertToString(m_settings.m_log2Decim, m_settings.m_filterChainHash, s);
+    ui->filterChainText->setText(s);
+
+    displayRateAndShift();
 }
 
 void RemoteSinkGUI::tick()

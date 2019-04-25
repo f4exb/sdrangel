@@ -42,6 +42,8 @@ void RemoteSinkSettings::resetToDefaults()
     m_dataPort = 9090;
     m_rgbColor = QColor(140, 4, 4).rgb();
     m_title = "Remote sink";
+    m_log2Decim = 0;
+    m_filterChainHash = 0;
     m_channelMarker = nullptr;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -64,6 +66,8 @@ QByteArray RemoteSinkSettings::serialize() const
     s.writeU32(9, m_reverseAPIPort);
     s.writeU32(10, m_reverseAPIDeviceIndex);
     s.writeU32(11, m_reverseAPIChannelIndex);
+    s.writeU32(12, m_log2Decim);
+    s.writeU32(13, m_filterChainHash);
 
     return s.final();
 }
@@ -117,6 +121,9 @@ bool RemoteSinkSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = tmp > 99 ? 99 : tmp;
         d.readU32(11, &tmp, 0);
         m_reverseAPIChannelIndex = tmp > 99 ? 99 : tmp;
+        d.readU32(12, &tmp, 0);
+        m_log2Decim = tmp > 6 ? 6 : tmp;
+        d.readU32(13, &m_filterChainHash, 0);
 
         return true;
     }

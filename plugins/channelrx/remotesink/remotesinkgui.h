@@ -64,6 +64,7 @@ private:
     RemoteSinkSettings m_settings;
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
+    double m_shiftFrequencyFactor; //!< Channel frequency shift factor
     bool m_doApplySettings;
 
     RemoteSink* m_remoteSink;
@@ -78,13 +79,19 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
+    void displayRateAndShift();
     void updateTxDelayTime();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
 
+    void applyDecimation();
+    void applyPosition();
+
 private slots:
     void handleSourceMessages();
+    void on_decimationFactor_currentIndexChanged(int index);
+    void on_position_valueChanged(int value);
     void on_dataAddress_returnPressed();
     void on_dataPort_returnPressed();
     void on_dataApplyButton_clicked(bool checked);

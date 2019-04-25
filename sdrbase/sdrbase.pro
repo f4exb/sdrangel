@@ -96,6 +96,7 @@ SOURCES += audio/audiodevicemanager.cpp\
         dsp/filerecord.cpp\
         dsp/freqlockcomplex.cpp\
         dsp/interpolator.cpp\
+        dsp/hbfilterchainconverter.cpp \
         dsp/hbfiltertraits.cpp\
         dsp/lowpass.cpp\
         dsp/nco.cpp\
@@ -146,7 +147,7 @@ HEADERS  += audio/audiodevicemanager.h\
         audio/audiooutput.h\
         audio/audioinput.h\
         audio/audionetsink.h\
-        audio/audioresampler.h\        
+        audio/audioresampler.h\
         channel/channelsinkapi.h\
         channel/channelsourceapi.h\
         channel/remotedataqueue.h\
@@ -181,6 +182,7 @@ HEADERS  += audio/audiodevicemanager.h\
         dsp/filerecord.h\
         dsp/freqlockcomplex.h\
         dsp/gfft.h\
+        dsp/hbfilterchainconverter.h \
         dsp/hbfiltertraits.h\
         dsp/iirfilter.h\
         dsp/interpolator.h\

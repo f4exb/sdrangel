@@ -1,5 +1,6 @@
 sdrangel (4.5.6-1) unstable; urgency=medium
 
+  * Remote channel sink: implemented decimation with possible center shift. Issue #331
   * Remote input: fixed version display
   * DSD demod: save PLL enable and autio mute in preset
 
