@@ -63,6 +63,20 @@ public:
         qint64 m_frequencyOffset;
     };
 
+    class SDRBASE_API MsgSetChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        MsgSetChannelizer() :
+            Message()
+        { }
+
+        std::vector<unsigned int>& getStageIndexes() { return m_stageIndexes; }
+
+    private:
+        std::vector<unsigned int> m_stageIndexes;
+    };
+
     UpChannelizer(BasebandSampleSource* sampleSink);
     virtual ~UpChannelizer();
 
@@ -115,8 +129,10 @@ protected:
     QMutex m_mutex;
 
     void applyConfiguration();
+    void applySetting(const std::vector<unsigned int>& stageIndexes);
     bool signalContainsChannel(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd) const;
     Real createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd);
+    double setFilterChain(const std::vector<unsigned int>& stageIndexes); //!< returns offset in ratio of sample rate
     void freeFilterChain();
 
 signals:

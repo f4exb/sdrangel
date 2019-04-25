@@ -25,6 +25,7 @@
 #include <QDebug>
 
 MESSAGE_CLASS_DEFINITION(UpChannelizer::MsgChannelizerNotification, Message)
+MESSAGE_CLASS_DEFINITION(UpChannelizer::MsgSetChannelizer, Message)
 
 UpChannelizer::UpChannelizer(BasebandSampleSource* sampleSource) :
     m_sampleSource(sampleSource),
@@ -157,6 +158,14 @@ bool UpChannelizer::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MsgSetChannelizer::match(cmd))
+    {
+        MsgSetChannelizer& chan = (MsgSetChannelizer&) cmd;
+        qDebug() << "UpChannelizer::handleMessage: MsgSetChannelizer";
+        applySetting(chan.getStageIndexes());
+
+        return true;
+    }
     else
     {
         return false;
@@ -206,6 +215,30 @@ void UpChannelizer::applyConfiguration()
         MsgChannelizerNotification *notif = MsgChannelizerNotification::create(m_outputSampleRate, m_currentInputSampleRate, m_currentCenterFrequency);
         m_sampleSource->getInputMessageQueue()->push(notif);
     }
+}
+
+void UpChannelizer::applySetting(const std::vector<unsigned int>& stageIndexes)
+{
+    m_mutex.lock();
+
+    freeFilterChain();
+
+    m_currentCenterFrequency = m_outputSampleRate * setFilterChain(stageIndexes);
+
+    m_mutex.unlock();
+
+    m_currentInputSampleRate = m_outputSampleRate / (1 << m_filterStages.size());
+    m_requestedInputSampleRate = m_currentInputSampleRate;
+
+	qDebug() << "UpChannelizer::applySetting in=" << m_outputSampleRate
+			<< ", out=" << m_currentInputSampleRate
+			<< ", fc=" << m_currentCenterFrequency;
+
+	if (m_sampleSource != 0)
+	{
+		MsgChannelizerNotification *notif = MsgChannelizerNotification::create(m_outputSampleRate, m_currentInputSampleRate, m_currentCenterFrequency);
+		m_sampleSource->getInputMessageQueue()->push(notif);
+	}
 }
 
 #ifdef USE_SSE4_1
@@ -266,21 +299,17 @@ bool UpChannelizer::signalContainsChannel(Real sigStart, Real sigEnd, Real chanS
 Real UpChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd)
 {
     Real sigBw = sigEnd - sigStart;
-    Real safetyMargin = sigBw / 20;
     Real rot = sigBw / 4;
     Sample s;
-
-    safetyMargin = 0;
 
     qDebug() << "UpChannelizer::createFilterChain: start:"
             << " sig: ["  << sigStart << ":" << sigEnd << "]"
             << " BW: " << sigBw
             << " chan: [" << chanStart << ":" << chanEnd << "]"
-            << " rot: " << rot
-            << " safety: " << safetyMargin;
+            << " rot: " << rot;
 
     // check if it fits into the left half
-    if(signalContainsChannel(sigStart + safetyMargin, sigStart + sigBw / 2.0 - safetyMargin, chanStart, chanEnd))
+    if(signalContainsChannel(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd))
     {
         qDebug() << "UpChannelizer::createFilterChain: take left half (rotate by +1/4 and decimate by 2):"
                 << " [" << m_filterStages.size() << "]"
@@ -291,7 +320,7 @@ Real UpChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart
     }
 
     // check if it fits into the right half
-    if(signalContainsChannel(sigEnd - sigBw / 2.0f + safetyMargin, sigEnd - safetyMargin, chanStart, chanEnd))
+    if(signalContainsChannel(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd))
     {
         qDebug() << "UpChannelizer::createFilterChain: take right half (rotate by -1/4 and decimate by 2):"
                 << " [" << m_filterStages.size() << "]"
@@ -303,7 +332,7 @@ Real UpChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart
 
     // check if it fits into the center
     // Was: if(signalContainsChannel(sigStart + rot + safetyMargin, sigStart + rot + sigBw / 2.0f - safetyMargin, chanStart, chanEnd)) {
-    if(signalContainsChannel(sigStart + rot + safetyMargin, sigEnd - rot - safetyMargin, chanStart, chanEnd))
+    if(signalContainsChannel(sigStart + rot, sigEnd - rot, chanStart, chanEnd))
     {
         qDebug() << "UpChannelizer::createFilterChain: take center half (decimate by 2):"
                 << " [" << m_filterStages.size() << "]"
@@ -320,6 +349,38 @@ Real UpChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart
             << " #stages: " << m_filterStages.size()
             << " BW: "  << sigBw
             << " ofs: " << ofs;
+
+    return ofs;
+}
+
+double UpChannelizer::setFilterChain(const std::vector<unsigned int>& stageIndexes)
+{
+    // filters are described from lower to upper level but the chain is constructed the other way round
+    std::vector<unsigned int>::const_reverse_iterator rit = stageIndexes.rbegin();
+    double ofs = 0.0, ofs_stage = 0.25;
+
+    // Each index is a base 3 number with 0 = low, 1 = center, 2 = high
+    // Functions at upper level will convert a number to base 3 to describe the filter chain. Common converting
+    // algorithms will go from LSD to MSD. This explains the reverse order.
+    for (; rit != stageIndexes.rend(); ++rit)
+    {
+        if (*rit == 0)
+        {
+            m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
+            ofs -= ofs_stage;
+        }
+        else if (*rit == 1)
+        {
+            m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
+        }
+        else if (*rit == 2)
+        {
+            m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
+            ofs += ofs_stage;
+        }
+
+        ofs_stage /= 2;
+    }
 
     return ofs;
 }
