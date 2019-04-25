@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 F4EXB                                                      //
+// Copyright (C) 2016-2019 F4EXB                                                 //
 // written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -24,6 +24,7 @@
 #include <QDebug>
 
 MESSAGE_CLASS_DEFINITION(DownChannelizer::MsgChannelizerNotification, Message)
+MESSAGE_CLASS_DEFINITION(DownChannelizer::MsgSetChannelizer, Message)
 
 DownChannelizer::DownChannelizer(BasebandSampleSink* sampleSink) :
 	m_sampleSink(sampleSink),
@@ -143,6 +144,14 @@ bool DownChannelizer::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (MsgSetChannelizer::match(cmd))
+    {
+        MsgSetChannelizer& chan = (MsgSetChannelizer&) cmd;
+        qDebug() << "DownChannelizer::handleMessage: MsgSetChannelizer";
+        applySetting(chan.getStageIndexes());
+
+        return true;
+    }
     else if (BasebandSampleSink::MsgThreadedSink::match(cmd))
     {
         qDebug() << "DownChannelizer::handleMessage: MsgThreadedSink: forwarded to demod";
@@ -179,6 +188,30 @@ void DownChannelizer::applyConfiguration()
 
 	qDebug() << "DownChannelizer::applyConfiguration in=" << m_inputSampleRate
 			<< ", req=" << m_requestedOutputSampleRate
+			<< ", out=" << m_currentOutputSampleRate
+			<< ", fc=" << m_currentCenterFrequency;
+
+	if (m_sampleSink != 0)
+	{
+		MsgChannelizerNotification *notif = MsgChannelizerNotification::create(m_currentOutputSampleRate, m_currentCenterFrequency);
+		m_sampleSink->getInputMessageQueue()->push(notif);
+	}
+}
+
+void DownChannelizer::applySetting(const std::vector<unsigned int>& stageIndexes)
+{
+    m_mutex.lock();
+
+    freeFilterChain();
+
+    m_currentCenterFrequency = m_inputSampleRate * setFilterChain(stageIndexes);
+
+    m_mutex.unlock();
+
+    m_currentOutputSampleRate = m_inputSampleRate / (1 << m_filterStages.size());
+    m_requestedOutputSampleRate = m_currentOutputSampleRate;
+
+	qDebug() << "DownChannelizer::applySetting in=" << m_inputSampleRate
 			<< ", out=" << m_currentOutputSampleRate
 			<< ", fc=" << m_currentCenterFrequency;
 
@@ -251,40 +284,69 @@ bool DownChannelizer::signalContainsChannel(Real sigStart, Real sigEnd, Real cha
 Real DownChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd)
 {
 	Real sigBw = sigEnd - sigStart;
-	Real safetyMargin = sigBw / 20;
 	Real rot = sigBw / 4;
 
-	safetyMargin = 0;
+	qDebug("DownChannelizer::createFilterChain: Signal [%.1f, %.1f] (BW %.1f), Channel [%.1f, %.1f], Rot %.1f", sigStart, sigEnd, sigBw, chanStart, chanEnd, rot);
 
-	//fprintf(stderr, "Channelizer::createFilterChain: ");
-	//fprintf(stderr, "Signal [%.1f, %.1f] (BW %.1f), Channel [%.1f, %.1f], Rot %.1f, Safety %.1f\n", sigStart, sigEnd, sigBw, chanStart, chanEnd, rot, safetyMargin);
-#if 1
 	// check if it fits into the left half
-	if(signalContainsChannel(sigStart + safetyMargin, sigStart + sigBw / 2.0 - safetyMargin, chanStart, chanEnd)) {
-		//fprintf(stderr, "-> take left half (rotate by +1/4 and decimate by 2)\n");
+	if(signalContainsChannel(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd))
+    {
+		qDebug("DownChannelizer::createFilterChain: -> take left half (rotate by +1/4 and decimate by 2)");
 		m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
 		return createFilterChain(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd);
 	}
 
 	// check if it fits into the right half
-	if(signalContainsChannel(sigEnd - sigBw / 2.0f + safetyMargin, sigEnd - safetyMargin, chanStart, chanEnd)) {
-		//fprintf(stderr, "-> take right half (rotate by -1/4 and decimate by 2)\n");
+	if(signalContainsChannel(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd))
+    {
+		qDebug("DownChannelizer::createFilterChain: -> take right half (rotate by -1/4 and decimate by 2)");
 		m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
 		return createFilterChain(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd);
 	}
 
 	// check if it fits into the center
-	// Was: if(signalContainsChannel(sigStart + rot + safetyMargin, sigStart + rot + sigBw / 2.0f - safetyMargin, chanStart, chanEnd)) {
-	if(signalContainsChannel(sigStart + rot + safetyMargin, sigEnd - rot - safetyMargin, chanStart, chanEnd)) {
-		//fprintf(stderr, "-> take center half (decimate by 2)\n");
+	if(signalContainsChannel(sigStart + rot, sigEnd - rot, chanStart, chanEnd))
+    {
+		qDebug("DownChannelizer::createFilterChain: -> take center half (decimate by 2)");
 		m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
-		// Was: return createFilterChain(sigStart + rot, sigStart + sigBw / 2.0f + rot, chanStart, chanEnd);
 		return createFilterChain(sigStart + rot, sigEnd - rot, chanStart, chanEnd);
 	}
-#endif
+
 	Real ofs = ((chanEnd - chanStart) / 2.0 + chanStart) - ((sigEnd - sigStart) / 2.0 + sigStart);
-	//fprintf(stderr, "-> complete (final BW %.1f, frequency offset %.1f)\n", sigBw, ofs);
+	qDebug("DownChannelizer::createFilterChain: -> complete (final BW %.1f, frequency offset %.1f)", sigBw, ofs);
 	return ofs;
+}
+
+double DownChannelizer::setFilterChain(const std::vector<unsigned int>& stageIndexes)
+{
+    // filters are described from lower to upper level but the chain is constructed the other way round
+    std::vector<unsigned int>::const_reverse_iterator rit = stageIndexes.rbegin();
+    double ofs = 0.0, ofs_stage = 0.25;
+
+    // Each index is a base 3 number with 0 = low, 1 = center, 2 = high
+    // Functions at upper level will convert a number to base 3 to describe the filter chain. Common converting
+    // algorithms will go from LSD to MSD. This explains the reverse order.
+    for (; rit != stageIndexes.rend(); ++rit)
+    {
+        if (*rit == 0)
+        {
+            m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
+            ofs -= ofs_stage;
+        }
+        else if (*rit == 1)
+        {
+            m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
+        }
+        else if (*rit == 2)
+        {
+            m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
+            ofs += ofs_stage;
+        }
+
+        ofs_stage /= 2;
+    }
+
+    return ofs;
 }
 
 void DownChannelizer::freeFilterChain()

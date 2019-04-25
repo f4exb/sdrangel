@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 F4EXB                                                      //
+// Copyright (C) 2016-2019 F4EXB                                                 //
 // written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -21,6 +21,7 @@
 
 #include <dsp/basebandsamplesink.h>
 #include <list>
+#include <vector>
 #include <QMutex>
 #include "export.h"
 #include "util/message.h"
@@ -55,6 +56,20 @@ public:
 		int m_sampleRate;
 		qint64 m_frequencyOffset;
 	};
+
+    class SDRBASE_API MsgSetChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        MsgSetChannelizer() :
+            Message()
+        { }
+
+        std::vector<unsigned int>& getStageIndexes() { return m_stageIndexes; }
+
+    private:
+        std::vector<unsigned int> m_stageIndexes;
+    };
 
 	DownChannelizer(BasebandSampleSink* sampleSink);
 	virtual ~DownChannelizer();
@@ -108,8 +123,10 @@ protected:
 	QMutex m_mutex;
 
 	void applyConfiguration();
+    void applySetting(const std::vector<unsigned int>& stageIndexes);
 	bool signalContainsChannel(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd) const;
 	Real createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd);
+    double setFilterChain(const std::vector<unsigned int>& stageIndexes); //!< returns offset in ratio of sample rate
 	void freeFilterChain();
 	void debugFilterChain();
 
