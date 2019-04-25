@@ -56,6 +56,7 @@ double HBFilterChainConverter::convertToIndexes(unsigned int log2, unsigned int 
     // continue shift with leading zeroes. ix has the number of leading zeroes.
     for (unsigned int i = 0; i < ix; i++)
     {
+        chainIndexes.push_back(0);
         shift -= shift_stage;
         shift_stage *= 2;
     }

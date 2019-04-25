@@ -78,6 +78,7 @@ private:
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
+    void applyChannelSettings();
     void displaySettings();
     void displayRateAndShift();
     void updateTxDelayTime();

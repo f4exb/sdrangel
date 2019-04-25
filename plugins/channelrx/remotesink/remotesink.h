@@ -31,7 +31,7 @@
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelsinkapi.h"
-#include "../remotesink/remotesinksettings.h"
+#include "remotesinksettings.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -86,6 +86,29 @@ public:
         int m_sampleRate;
     };
 
+    class MsgConfigureChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getLog2Decim() const { return m_log2Decim; }
+        int getFilterChainHash() const { return m_filterChainHash; }
+
+        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
+        {
+            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+        }
+
+    private:
+        unsigned int m_log2Decim;
+        unsigned int m_filterChainHash;
+
+        MsgConfigureChannelizer(unsigned int log2Decim, int filterChainHash) :
+            Message(),
+            m_log2Decim(log2Decim),
+            m_filterChainHash(filterChainHash)
+        { }
+    };
+
     RemoteSink(DeviceSourceAPI *deviceAPI);
     virtual ~RemoteSink();
     virtual void destroy() { delete this; }
@@ -122,6 +145,7 @@ public:
     void setTxDelay(int txDelay, int nbBlocksFEC);
     void setDataAddress(const QString& address) { m_dataAddress = address; }
     void setDataPort(uint16_t port) { m_dataPort = port; }
+    void setChannelizer(unsigned int log2Decim, unsigned int filterChainHash);
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
@@ -147,6 +171,7 @@ private:
     QMutex m_dataBlockMutex;
 
     uint64_t m_centerFrequency;
+    int64_t m_frequencyOffset;
     uint32_t m_sampleRate;
     int m_nbBlocksFEC;
     int m_txDelay;

@@ -44,6 +44,7 @@
 
 MESSAGE_CLASS_DEFINITION(RemoteSink::MsgConfigureRemoteSink, Message)
 MESSAGE_CLASS_DEFINITION(RemoteSink::MsgSampleRateNotification, Message)
+MESSAGE_CLASS_DEFINITION(RemoteSink::MsgConfigureChannelizer, Message)
 
 const QString RemoteSink::m_channelIdURI = "sdrangel.channel.remotesink";
 const QString RemoteSink::m_channelId = "RemoteSink";
@@ -58,6 +59,7 @@ RemoteSink::RemoteSink(DeviceSourceAPI *deviceAPI) :
         m_sampleIndex(0),
         m_dataBlock(0),
         m_centerFrequency(0),
+        m_frequencyOffset(0),
         m_sampleRate(48000),
         m_nbBlocksFEC(0),
         m_txDelay(35),
@@ -127,7 +129,7 @@ void RemoteSink::feed(const SampleVector::const_iterator& begin, const SampleVec
             RemoteMetaDataFEC metaData;
             gettimeofday(&tv, 0);
 
-            metaData.m_centerFrequency = m_centerFrequency;
+            metaData.m_centerFrequency = m_centerFrequency + (m_frequencyOffset/1000); // FIXME: precision issue
             metaData.m_sampleRate = m_sampleRate;
             metaData.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
             metaData.m_sampleBits = SDR_RX_SAMP_SZ;
@@ -271,12 +273,7 @@ bool RemoteSink::handleMessage(const Message& cmd)
         }
 
         setTxDelay(m_settings.m_txDelay, m_settings.m_nbFECBlocks);
-
-        if (m_guiMessageQueue)
-        {
-            MsgSampleRateNotification *msg = MsgSampleRateNotification::create(notif.getSampleRate());
-            m_guiMessageQueue->push(msg);
-        }
+        m_frequencyOffset = notif.getFrequencyOffset();
 
 		return true;
 	}
@@ -290,6 +287,12 @@ bool RemoteSink::handleMessage(const Message& cmd)
 
         setCenterFrequency(notif.getCenterFrequency());
 
+        if (m_guiMessageQueue)
+        {
+            MsgSampleRateNotification *msg = MsgSampleRateNotification::create(notif.getSampleRate());
+            m_guiMessageQueue->push(msg);
+        }
+
         return true;
     }
     else if (MsgConfigureRemoteSink::match(cmd))
@@ -297,6 +300,22 @@ bool RemoteSink::handleMessage(const Message& cmd)
         MsgConfigureRemoteSink& cfg = (MsgConfigureRemoteSink&) cmd;
         qDebug() << "RemoteSink::handleMessage: MsgConfigureRemoteSink";
         applySettings(cfg.getSettings(), cfg.getForce());
+
+        return true;
+    }
+    else if (MsgConfigureChannelizer::match(cmd))
+    {
+        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
+        m_settings.m_log2Decim = cfg.getLog2Decim();
+        m_settings.m_filterChainHash =  cfg.getFilterChainHash();
+
+        qDebug() << "RemoteSink::handleMessage: MsgConfigureChannelizer:"
+                << " log2Decim: " << m_settings.m_log2Decim
+                << " filterChainHash: " << m_settings.m_filterChainHash;
+
+        m_channelizer->set(m_channelizer->getInputMessageQueue(),
+            m_settings.m_log2Decim,
+            m_settings.m_filterChainHash);
 
         return true;
     }

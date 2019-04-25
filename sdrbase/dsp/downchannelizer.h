@@ -61,20 +61,25 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        MsgSetChannelizer() :
-            Message()
+        MsgSetChannelizer(unsigned int log2Decim, unsigned int filterChainHash) :
+            Message(),
+            m_log2Decim(log2Decim),
+            m_filterChainHash(filterChainHash)
         { }
 
-        std::vector<unsigned int>& getStageIndexes() { return m_stageIndexes; }
+        unsigned int getLog2Decim() const { return m_log2Decim; }
+        unsigned int getFilterChainHash() const { return m_filterChainHash; }
 
     private:
-        std::vector<unsigned int> m_stageIndexes;
+        unsigned int m_log2Decim;
+        unsigned int m_filterChainHash;
     };
 
 	DownChannelizer(BasebandSampleSink* sampleSink);
 	virtual ~DownChannelizer();
 
 	void configure(MessageQueue* messageQueue, int sampleRate, int centerFrequency);
+    void set(MessageQueue* messageQueue, unsigned int log2Decim, unsigned int filterChainHash);
 	int getInputSampleRate() const { return m_inputSampleRate; }
 	int getRequestedCenterFrequency() const { return m_requestedCenterFrequency; }
 
@@ -113,6 +118,7 @@ protected:
 	};
 	typedef std::list<FilterStage*> FilterStages;
 	FilterStages m_filterStages;
+    bool m_filterChainSetMode;
 	BasebandSampleSink* m_sampleSink; //!< Demodulator
 	int m_inputSampleRate;
 	int m_requestedOutputSampleRate;
@@ -123,10 +129,10 @@ protected:
 	QMutex m_mutex;
 
 	void applyConfiguration();
-    void applySetting(const std::vector<unsigned int>& stageIndexes);
+    void applySetting(unsigned int log2Decim, unsigned int filterChainHash);
 	bool signalContainsChannel(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd) const;
 	Real createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd);
-    double setFilterChain(const std::vector<unsigned int>& stageIndexes); //!< returns offset in ratio of sample rate
+    void setFilterChain(const std::vector<unsigned int>& stageIndexes);
 	void freeFilterChain();
 	void debugFilterChain();
 
