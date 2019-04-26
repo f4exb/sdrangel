@@ -34,6 +34,8 @@ public:
     static double convertToIndexes(unsigned int log2, unsigned int chainHash, std::vector<unsigned int>& chainIndexes);
     // Same but used only for display giving a string representation of the filter chain
     static double convertToString(unsigned int log2, unsigned int chainHash, QString& chainString);
+    // Just calculate the frequency shift factor relative to sample rate
+    static double getShiftFactor(unsigned int log2, unsigned int chainHash);
 };
 
 #endif // SDRBASE_DSP_HBFILTERCHAINCONVERTER_H

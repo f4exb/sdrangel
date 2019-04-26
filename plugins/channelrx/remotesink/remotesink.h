@@ -120,7 +120,7 @@ public:
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = "Remote Sink"; }
-    virtual qint64 getCenterFrequency() const { return 0; }
+    virtual qint64 getCenterFrequency() const { return m_frequencyOffset; }
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
@@ -173,6 +173,7 @@ private:
     uint64_t m_centerFrequency;
     int64_t m_frequencyOffset;
     uint32_t m_sampleRate;
+    uint32_t m_deviceSampleRate;
     int m_nbBlocksFEC;
     int m_txDelay;
     QString m_dataAddress;
@@ -182,6 +183,7 @@ private:
 
     void applySettings(const RemoteSinkSettings& settings, bool force = false);
     void validateFilterChainHash(RemoteSinkSettings& settings);
+    void calculateFrequencyOffset();
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const RemoteSinkSettings& settings);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteSinkSettings& settings, bool force);
 

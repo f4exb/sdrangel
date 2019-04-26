@@ -38,6 +38,7 @@
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/downchannelizer.h"
 #include "dsp/dspcommands.h"
+#include "dsp/hbfilterchainconverter.h"
 #include "device/devicesourceapi.h"
 
 #include "../remotesink/remotesinkthread.h"
@@ -61,6 +62,7 @@ RemoteSink::RemoteSink(DeviceSourceAPI *deviceAPI) :
         m_centerFrequency(0),
         m_frequencyOffset(0),
         m_sampleRate(48000),
+        m_deviceSampleRate(48000),
         m_nbBlocksFEC(0),
         m_txDelay(35),
         m_dataAddress("127.0.0.1"),
@@ -273,7 +275,6 @@ bool RemoteSink::handleMessage(const Message& cmd)
         }
 
         setTxDelay(m_settings.m_txDelay, m_settings.m_nbFECBlocks);
-        m_frequencyOffset = notif.getFrequencyOffset();
 
 		return true;
 	}
@@ -286,6 +287,8 @@ bool RemoteSink::handleMessage(const Message& cmd)
                 << " centerFrequency: " << notif.getCenterFrequency();
 
         setCenterFrequency(notif.getCenterFrequency());
+        m_deviceSampleRate = notif.getSampleRate();
+        calculateFrequencyOffset(); // This is when device sample rate changes
 
         // Redo the channelizer stuff with the new sample rate to re-synchronize everything
         m_channelizer->set(m_channelizer->getInputMessageQueue(),
@@ -321,6 +324,8 @@ bool RemoteSink::handleMessage(const Message& cmd)
         m_channelizer->set(m_channelizer->getInputMessageQueue(),
             m_settings.m_log2Decim,
             m_settings.m_filterChainHash);
+
+        calculateFrequencyOffset(); // This is when decimation or filter chain changes
 
         return true;
     }
@@ -411,6 +416,12 @@ void RemoteSink::validateFilterChainHash(RemoteSinkSettings& settings)
     }
 
     settings.m_filterChainHash = settings.m_filterChainHash >= s ? s-1 : settings.m_filterChainHash;
+}
+
+void RemoteSink::calculateFrequencyOffset()
+{
+    double shiftFactor = HBFilterChainConverter::getShiftFactor(m_settings.m_log2Decim, m_settings.m_filterChainHash);
+    m_frequencyOffset = m_deviceSampleRate * shiftFactor;
 }
 
 int RemoteSink::webapiSettingsGet(

@@ -28,13 +28,10 @@ double HBFilterChainConverter::convertToIndexes(unsigned int log2, unsigned int 
     }
 
     unsigned int s = 1;
-    unsigned int d = 1;
     unsigned int u = chainHash;
 
-    for (unsigned int i = 0; i < log2; i++)
-    {
+    for (unsigned int i = 0; i < log2; i++) {
         s *= 3;
-        d *= 2;
     }
 
     u %= s; // scale
@@ -73,14 +70,11 @@ double HBFilterChainConverter::convertToString(unsigned int log2, unsigned int c
     }
 
     unsigned int s = 1;
-    unsigned int d = 1;
     unsigned int u = chainHash;
     chainString = "";
 
-    for (unsigned int i = 0; i < log2; i++)
-    {
+    for (unsigned int i = 0; i < log2; i++) {
         s *= 3;
-        d *= 2;
     }
 
     u %= s; // scale
@@ -111,6 +105,45 @@ double HBFilterChainConverter::convertToString(unsigned int log2, unsigned int c
     for (unsigned int i = 0; i < ix; i++)
     {
         chainString = "L" + chainString;
+        shift -= shift_stage;
+        shift_stage *= 2;
+    }
+
+    return shift;
+}
+
+double HBFilterChainConverter::getShiftFactor(unsigned int log2, unsigned int chainHash)
+{
+    if (log2 == 0)
+    {
+        return 0.0;
+    }
+
+    unsigned int s = 1;
+    unsigned int u = chainHash;
+
+    for (unsigned int i = 0; i < log2; i++) {
+        s *= 3;
+    }
+
+    u %= s; // scale
+    unsigned int ix = log2;
+    double shift = 0.0;
+    double shift_stage = 1.0 / (1<<(log2+1));
+
+    // base3 conversion
+    do
+    {
+        int r = u % 3;
+        shift += (r-1)*shift_stage;
+        shift_stage *= 2;
+        u /= 3;
+        ix--;
+    } while (u);
+
+    // continue shift with leading zeroes. ix has the number of leading zeroes.
+    for (unsigned int i = 0; i < ix; i++)
+    {
         shift -= shift_stage;
         shift_stage *= 2;
     }
