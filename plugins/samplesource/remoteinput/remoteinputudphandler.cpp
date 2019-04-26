@@ -195,16 +195,16 @@ void RemoteInputUDPHandler::processData()
 
     if (change && (m_samplerate != 0))
     {
-        qDebug("RemoteInputUDPHandler::processData: m_samplerate: %u m_centerFrequency: %u kHz", m_samplerate, m_centerFrequency);
+        qDebug("RemoteInputUDPHandler::processData: m_samplerate: %u S/s m_centerFrequency: %lu Hz", m_samplerate, m_centerFrequency);
 
-        DSPSignalNotification *notif = new DSPSignalNotification(m_samplerate, m_centerFrequency * 1000); // Frequency in Hz for the DSP engine
+        DSPSignalNotification *notif = new DSPSignalNotification(m_samplerate, m_centerFrequency); // Frequency in Hz for the DSP engine
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
         if (m_outputMessageQueueToGUI)
         {
             RemoteInput::MsgReportRemoteInputStreamData *report = RemoteInput::MsgReportRemoteInputStreamData::create(
                 m_samplerate,
-                m_centerFrequency * 1000, // Frequency in Hz for the GUI
+                m_centerFrequency, // Frequency in Hz for the GUI
                 m_tv_msec);
 
             m_outputMessageQueueToGUI->push(report);

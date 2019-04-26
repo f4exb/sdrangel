@@ -129,7 +129,7 @@ void RemoteSink::feed(const SampleVector::const_iterator& begin, const SampleVec
             RemoteMetaDataFEC metaData;
             gettimeofday(&tv, 0);
 
-            metaData.m_centerFrequency = m_centerFrequency + (m_frequencyOffset/1000); // FIXME: precision issue
+            metaData.m_centerFrequency = m_centerFrequency + m_frequencyOffset;
             metaData.m_sampleRate = m_sampleRate;
             metaData.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
             metaData.m_sampleBits = SDR_RX_SAMP_SZ;

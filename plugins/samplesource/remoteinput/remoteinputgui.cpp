@@ -287,7 +287,7 @@ void RemoteInputGui::updateSampleRateAndFrequency()
     ui->deviceRateText->setText(tr("%1k").arg((float)m_streamSampleRate / 1000));
     blockApplySettings(true);
     ui->centerFrequency->setValue(m_streamCenterFrequency / 1000);
-    ui->centerFrequencyHz->setValue(0); // TODO
+    ui->centerFrequencyHz->setValue(m_streamCenterFrequency % 1000);
     blockApplySettings(false);
 }
 
@@ -296,7 +296,7 @@ void RemoteInputGui::displaySettings()
     blockApplySettings(true);
 
     ui->centerFrequency->setValue(m_streamCenterFrequency / 1000);
-    ui->centerFrequencyHz->setValue(0); // TODO
+    ui->centerFrequencyHz->setValue(m_streamCenterFrequency % 1000);
     ui->deviceRateText->setText(tr("%1k").arg(m_streamSampleRate / 1000.0));
 
     ui->apiAddress->setText(m_settings.m_apiAddress);

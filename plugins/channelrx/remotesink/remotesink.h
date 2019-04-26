@@ -136,7 +136,7 @@ public:
             QString& errorMessage);
 
     /** Set center frequency given in Hz */
-    void setCenterFrequency(uint64_t centerFrequency) { m_centerFrequency = centerFrequency / 1000; }
+    void setCenterFrequency(uint64_t centerFrequency) { m_centerFrequency = centerFrequency; }
 
     /** Set sample rate given in Hz */
     void setSampleRate(uint32_t sampleRate) { m_sampleRate = sampleRate; }

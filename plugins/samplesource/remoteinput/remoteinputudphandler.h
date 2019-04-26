@@ -47,7 +47,7 @@ public:
     int getNbOriginalBlocks() const { return RemoteNbOrginalBlocks; }
     bool isStreaming() const { return m_masterTimerConnected; }
     int getSampleRate() const { return m_samplerate; }
-    int getCenterFrequency() const { return m_centerFrequency * 1000; }
+    int getCenterFrequency() const { return m_centerFrequency; }
     int getBufferGauge() const { return m_remoteInputBuffer.getBufferGauge(); }
     uint64_t getTVmSec() const { return m_tv_msec; }
     int getMinNbBlocks() { return m_remoteInputBuffer.getMinNbBlocks(); }
@@ -71,7 +71,7 @@ private:
 	qint64 m_udpReadBytes;
 	SampleSinkFifo *m_sampleFifo;
 	uint32_t m_samplerate;
-	uint32_t m_centerFrequency;
+	uint64_t m_centerFrequency;
 	uint64_t m_tv_msec;
 	MessageQueue *m_outputMessageQueueToGUI;
 	uint32_t m_tickCount;
