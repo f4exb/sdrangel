@@ -137,7 +137,7 @@
         </font>
        </property>
        <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
+        <cursorShape>ForbiddenCursor</cursorShape>
        </property>
        <property name="focusPolicy">
         <enum>Qt::StrongFocus</enum>
@@ -148,24 +148,37 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="freqUnits">
-       <property name="text">
-        <string> kHz</string>
+      <layout class="QVBoxLayout" name="hertzLayout">
+       <property name="rightMargin">
+        <number>10</number>
        </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="freqRightlSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-      </spacer>
+       <item>
+        <widget class="QLabel" name="freqUnits">
+         <property name="text">
+          <string> kHz</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="ValueDial" name="centerFrequencyHz" native="true">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="font">
+          <font>
+           <family>Liberation Mono</family>
+           <pointsize>10</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>ForbiddenCursor</cursorShape>
+         </property>
+         <property name="toolTip">
+          <string>Remote center frequency sub kHz</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>

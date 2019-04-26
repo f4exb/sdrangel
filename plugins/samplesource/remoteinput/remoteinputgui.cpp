@@ -80,6 +80,9 @@ RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 0, 9999999U);
 
+	ui->centerFrequencyHz->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+	ui->centerFrequencyHz->setValueRange(3, 0, 999U);
+
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
@@ -284,6 +287,7 @@ void RemoteInputGui::updateSampleRateAndFrequency()
     ui->deviceRateText->setText(tr("%1k").arg((float)m_streamSampleRate / 1000));
     blockApplySettings(true);
     ui->centerFrequency->setValue(m_streamCenterFrequency / 1000);
+    ui->centerFrequencyHz->setValue(0); // TODO
     blockApplySettings(false);
 }
 
@@ -292,6 +296,7 @@ void RemoteInputGui::displaySettings()
     blockApplySettings(true);
 
     ui->centerFrequency->setValue(m_streamCenterFrequency / 1000);
+    ui->centerFrequencyHz->setValue(0); // TODO
     ui->deviceRateText->setText(tr("%1k").arg(m_streamSampleRate / 1000.0));
 
     ui->apiAddress->setText(m_settings.m_apiAddress);
