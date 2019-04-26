@@ -143,7 +143,7 @@ void RemoteSink::feed(const SampleVector::const_iterator& begin, const SampleVec
             }
 
             boost::crc_32_type crc32;
-            crc32.process_bytes(&metaData, 20);
+            crc32.process_bytes(&metaData, 24);
             metaData.m_crc32 = crc32.checksum();
             RemoteSuperBlock& superBlock = m_dataBlock->m_superBlocks[0]; // first block
             superBlock.init();

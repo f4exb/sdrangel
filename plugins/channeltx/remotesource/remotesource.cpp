@@ -321,7 +321,7 @@ void RemoteSource::handleDataBlock(RemoteDataBlock* dataBlock)
         {
             RemoteMetaDataFEC *metaData = (RemoteMetaDataFEC *) &(dataBlock->m_superBlocks[0].m_protectedBlock);
             boost::crc_32_type crc32;
-            crc32.process_bytes(metaData, 20);
+            crc32.process_bytes(metaData, 24);
 
             if (crc32.checksum() == metaData->m_crc32)
             {
