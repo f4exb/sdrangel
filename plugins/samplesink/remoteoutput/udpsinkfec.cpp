@@ -134,7 +134,7 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
             metaData.m_tv_usec = ts_usecs % 1000000UL;
 
             boost::crc_32_type crc32;
-            crc32.process_bytes(&metaData, 24);
+            crc32.process_bytes(&metaData, sizeof(RemoteMetaDataFEC)-4);
 
             metaData.m_crc32 = crc32.checksum();
 

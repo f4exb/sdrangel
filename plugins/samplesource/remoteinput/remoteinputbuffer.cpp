@@ -284,7 +284,7 @@ void RemoteInputBuffer::writeData(char *array)
                         RemoteMetaDataFEC *metaData = (RemoteMetaDataFEC *) recoveredBlock;
 
                         boost::crc_32_type crc32;
-                        crc32.process_bytes(metaData, 24);
+                        crc32.process_bytes(metaData, sizeof(RemoteMetaDataFEC)-4);
 
                         if (crc32.checksum() == metaData->m_crc32)
                         {
