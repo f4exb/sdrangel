@@ -17,6 +17,10 @@ RemoteSinkSettings:
       type: integer
     title:
       type: string
+    log2Decim:
+      type: integer
+    filterChainHash:
+      type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

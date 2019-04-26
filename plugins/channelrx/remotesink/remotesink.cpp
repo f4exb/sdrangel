@@ -402,6 +402,17 @@ void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
     m_settings = settings;
 }
 
+void RemoteSink::validateFilterChainHash(RemoteSinkSettings& settings)
+{
+    unsigned int s = 1;
+
+    for (unsigned int i = 0; i < settings.m_log2Decim; i++) {
+        s *= 3;
+    }
+
+    settings.m_filterChainHash = settings.m_filterChainHash >= s ? s-1 : settings.m_filterChainHash;
+}
+
 int RemoteSink::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
@@ -465,6 +476,16 @@ int RemoteSink::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getRemoteSinkSettings()->getTitle();
     }
+    if (channelSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getRemoteSinkSettings()->getLog2Decim();
+    }
+
+    if (channelSettingsKeys.contains("filterChainHash"))
+    {
+        settings.m_filterChainHash = response.getRemoteSinkSettings()->getFilterChainHash();
+        validateFilterChainHash(settings);
+    }
+
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getRemoteSinkSettings()->getUseReverseApi() != 0;
     }
@@ -483,6 +504,12 @@ int RemoteSink::webapiSettingsPutPatch(
 
     MsgConfigureRemoteSink *msg = MsgConfigureRemoteSink::create(settings, force);
     m_inputMessageQueue.push(msg);
+
+    if ((settings.m_log2Decim != m_settings.m_log2Decim) || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
+    {
+        MsgConfigureChannelizer *msg = MsgConfigureChannelizer::create(settings.m_log2Decim, settings.m_filterChainHash);
+        m_inputMessageQueue.push(msg);
+    }
 
     qDebug("RemoteSink::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
@@ -516,6 +543,8 @@ void RemoteSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
         response.getRemoteSinkSettings()->setTitle(new QString(settings.m_title));
     }
 
+    response.getRemoteSinkSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getRemoteSinkSettings()->setFilterChainHash(settings.m_filterChainHash);
     response.getRemoteSinkSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getRemoteSinkSettings()->getReverseApiAddress()) {
@@ -559,6 +588,12 @@ void RemoteSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, 
     }
     if (channelSettingsKeys.contains("title") || force) {
         swgRemoteSinkSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("log2Decim") || force) {
+        swgRemoteSinkSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (channelSettingsKeys.contains("filterChainHash") || force) {
+        swgRemoteSinkSettings->setFilterChainHash(settings.m_filterChainHash);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")

@@ -1,5 +1,5 @@
 name: sdrangel
-version: 4.5.5
+version: 4.5.6
 summary: SDRangel + LimeSDR
 description: SDRangel is an Open Source Qt5 / OpenGL 3.0+ SDR and signal analyzer frontend to various hardware.
 confinement: strict
@@ -44,7 +44,7 @@ parts:
         plugin: cmake
         source: https://github.com/f4exb/sdrangel
         source-type: git
-        source-tag: v4.5.4
+        source-tag: v4.5.6
         after: [desktop-qt5, limesuite, mbelib, serialdv, dsdcc, codec2, cm265cc, gcc7]
         configflags:
             - -DDEBUG_OUTPUT=ON

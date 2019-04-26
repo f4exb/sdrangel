@@ -27,7 +27,7 @@
 #include "mainwindow.h"
 #include "dsp/dsptypes.h"
 #ifdef _MSC_VER
-#define GIT_COMMIT_HASH_STR "v4.5.5"
+#define GIT_COMMIT_HASH_STR "v4.5.6"
 #else
 #include "sdrangel_version.h"
 #endif

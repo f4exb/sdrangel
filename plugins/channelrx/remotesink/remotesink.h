@@ -181,6 +181,7 @@ private:
     QNetworkRequest m_networkRequest;
 
     void applySettings(const RemoteSinkSettings& settings, bool force = false);
+    void validateFilterChainHash(RemoteSinkSettings& settings);
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const RemoteSinkSettings& settings);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteSinkSettings& settings, bool force);
 
