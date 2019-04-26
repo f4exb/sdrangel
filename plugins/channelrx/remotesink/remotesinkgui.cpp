@@ -194,7 +194,6 @@ void RemoteSinkGUI::displaySettings()
 
     blockApplySettings(true);
     ui->decimationFactor->setCurrentIndex(m_settings.m_log2Decim);
-    ui->position->setValue(m_settings.m_filterChainHash);
     ui->dataAddress->setText(m_settings.m_dataAddress);
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
     QString s = QString::number(128 + m_settings.m_nbFECBlocks, 'f', 0);
@@ -362,6 +361,7 @@ void RemoteSinkGUI::applyDecimation()
     }
 
     ui->position->setMaximum(maxHash-1);
+    ui->position->setValue(m_settings.m_filterChainHash);
     m_settings.m_filterChainHash = ui->position->value();
     applyPosition();
 }
