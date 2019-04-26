@@ -4,9 +4,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_L
     message(FATAL_ERROR "SDRangel requires GCC version 4.9 or higher!")
 endif()
 
-# QT Framework
-set(CMAKE_PREFIX_PATH "/Applications/Qt/5.7/clang_64/lib/cmake")
-
 # use, i.e. don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
