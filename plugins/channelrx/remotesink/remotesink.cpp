@@ -287,6 +287,11 @@ bool RemoteSink::handleMessage(const Message& cmd)
 
         setCenterFrequency(notif.getCenterFrequency());
 
+        // Redo the channelizer stuff with the new sample rate to re-synchronize everything
+        m_channelizer->set(m_channelizer->getInputMessageQueue(),
+            m_settings.m_log2Decim,
+            m_settings.m_filterChainHash);
+
         if (m_guiMessageQueue)
         {
             MsgSampleRateNotification *msg = MsgSampleRateNotification::create(notif.getSampleRate());
