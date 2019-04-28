@@ -167,8 +167,6 @@ void RemoteInputBuffer::checkSlotData(int slotIndex)
 {
     int pseudoWriteIndex = slotIndex * sizeof(BufferFrame);
     m_wrDeltaEstimate = pseudoWriteIndex - m_readIndex;
-    m_nbWrites++;
-
     int rwDelayBytes = (m_wrDeltaEstimate > 0 ? m_wrDeltaEstimate : sizeof(BufferFrame) * nbDecoderSlots + m_wrDeltaEstimate);
     int sampleRate = m_currentMeta.m_sampleRate;
 
@@ -210,6 +208,7 @@ void RemoteInputBuffer::writeData(char *array)
         m_frameHead = frameIndex;          // new frame head
         checkSlotData(decoderIndex);       // check slot before re-init
         rwCorrectionEstimate(decoderIndex);
+        m_nbWrites++;
         initDecodeSlot(decoderIndex);      // collect stats and re-initialize current slot
     }
 
