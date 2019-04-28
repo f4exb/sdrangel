@@ -318,7 +318,7 @@ void RemoteInputBuffer::writeData(char *array)
                 if (sampleRate != 0)
                 {
                     m_bufferLenSec = (float) m_framesNbBytes / (float) (sampleRate * metaData->m_sampleBytes * 2);
-                    m_balCorrLimit = sampleRate / 1000; // +/- 1 ms correction max per read
+                    m_balCorrLimit = sampleRate / 100; // +/- 10 ms correction max per read
                     m_readNbBytes = (sampleRate * metaData->m_sampleBytes * 2) / 20;
                 }
 
