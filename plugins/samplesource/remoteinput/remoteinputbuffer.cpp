@@ -147,10 +147,14 @@ void RemoteInputBuffer::rwCorrectionEstimate(int slotIndex)
 		}
 		else // read lags
 		{
-			dBytes = (nbDecoderSlots * sizeof(BufferFrame)) - normalizedReadIndex - rwDelta;
+            int bufSize = (nbDecoderSlots * sizeof(BufferFrame));
+			dBytes = bufSize - normalizedReadIndex - rwDelta;
 		}
 
-        m_balCorrection = (m_balCorrection / 4) + (dBytes / (int) (m_currentMeta.m_sampleBytes * 2 * m_nbReads)); // correction is in number of samples. Alpha = 0.25
+         // calculate exponential moving average on floating point for better accuracy (was int)
+        double newCorrection = ((double) dBytes) / (((int) m_currentMeta.m_sampleBytes) * 2 * m_nbReads);
+        m_balCorrection = 0.25*m_balCorrection + 0.75*newCorrection; // exponential average with alpha = 0.75 (original is wrong)
+        //m_balCorrection = (m_balCorrection / 4) + (dBytes / (int) (m_currentMeta.m_sampleBytes * 2 * m_nbReads)); // correction is in number of samples. Alpha = 0.25
 
         if (m_balCorrection < -m_balCorrLimit) {
             m_balCorrection = -m_balCorrLimit;
