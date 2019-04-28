@@ -10,9 +10,9 @@ Adds a channel to a device set specifying device set index and channel type.
   - URI: `/sdrangel/deviceset/{deviceSetIndex}/channel`
   - HTTP method: `POST`
 
-<h2>devicesets_config.py</h2>
+<h2>config.py</h2>
 
-Example of building an entire configuration with 3 device sets using presets to configure each one of the device sets then start streaming on all of them.
+Configure a SDRangel instance with a sequence of API calls defined as a list in a JSON file. See `test.json` for an example.
 
 It uses the following APIs:
 

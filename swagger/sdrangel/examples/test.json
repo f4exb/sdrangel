@@ -1,0 +1,151 @@
+[
+    [
+        "/deviceset/0/device",
+        "PUT",
+        null,
+        {
+            "hwType": "HackRF"
+        },
+        "Set HackRF on Rx 0"
+    ],
+    [
+        "/deviceset/0/device/settings",
+        "PUT",
+        null,
+        {
+            "deviceHwType": "HackRF",
+            "hackRFInputSettings": {
+              "LOppmTenths": 0,
+              "bandwidth": 1750000,
+              "biasT": 0,
+              "centerFrequency": 433800000,
+              "dcBlock": 1,
+              "devSampleRate": 1536000,
+              "fcPos": 2,
+              "iqCorrection": 0,
+              "lnaExt": 1,
+              "lnaGain": 32,
+              "log2Decim": 2,
+              "reverseAPIAddress": "127.0.0.1",
+              "reverseAPIDeviceIndex": 0,
+              "reverseAPIPort": 8888,
+              "useReverseAPI": 0,
+              "vgaGain": 24
+            },
+            "tx": 0
+        },
+        "Setup HackRF on Rx 0"
+    ],
+    [
+        "/deviceset/0/channel",
+        "POST",
+        null,
+        {
+            "channelType": "RemoteSink",
+            "tx": 0
+        },
+        "Add a remote sink channel"
+    ],
+    [
+        "/deviceset/0/channel/0/settings",
+        "PUT",
+        null,
+        {
+            "RemoteSinkSettings": {
+              "dataAddress": "192.168.1.5",
+              "dataPort": 9094,
+              "filterChainHash": 0,
+              "log2Decim": 3,
+              "nbFECBlocks": 8,
+              "reverseAPIAddress": "127.0.0.1",
+              "reverseAPIChannelIndex": 0,
+              "reverseAPIDeviceIndex": 0,
+              "reverseAPIPort": 8888,
+              "rgbColor": -7601148,
+              "title": "Channel 0",
+              "txDelay": 0,
+              "useReverseAPI": 0
+            },
+            "channelType": "RemoteSink",
+            "tx": 0
+        },
+        "Setup remote sink on channel 0"
+    ],
+    [
+        "/deviceset/0/channel",
+        "POST",
+        null,
+        {
+            "channelType": "RemoteSink",
+            "tx": 0
+        },
+        "Add a remote sink channel"
+    ],
+    [
+        "/deviceset/0/channel/1/settings",
+        "PUT",
+        null,
+        {
+            "RemoteSinkSettings": {
+              "dataAddress": "192.168.1.5",
+              "dataPort": 9095,
+              "filterChainHash": 13,
+              "log2Decim": 3,
+              "nbFECBlocks": 8,
+              "reverseAPIAddress": "127.0.0.1",
+              "reverseAPIChannelIndex": 0,
+              "reverseAPIDeviceIndex": 0,
+              "reverseAPIPort": 8888,
+              "rgbColor": -7601148,
+              "title": "Remote sink",
+              "txDelay": 0,
+              "useReverseAPI": 0
+            },
+            "channelType": "RemoteSink",
+            "tx": 0
+        },
+        "Setup remote sink on channel 1"
+    ],
+    [
+        "/deviceset/0/channel",
+        "POST",
+        null,
+        {
+            "channelType": "RemoteSink",
+            "tx": 0
+        },
+        "Add a remote sink channel"
+    ],
+    [
+        "/deviceset/0/channel/2/settings",
+        "PUT",
+        null,
+        {
+            "RemoteSinkSettings": {
+              "dataAddress": "192.168.1.5",
+              "dataPort": 9096,
+              "filterChainHash": 26,
+              "log2Decim": 3,
+              "nbFECBlocks": 8,
+              "reverseAPIAddress": "127.0.0.1",
+              "reverseAPIChannelIndex": 0,
+              "reverseAPIDeviceIndex": 0,
+              "reverseAPIPort": 8888,
+              "rgbColor": -7601148,
+              "title": "Remote sink",
+              "txDelay": 0,
+              "useReverseAPI": 0
+            },
+            "channelType": "RemoteSink",
+            "tx": 0
+        },
+        "Setup remote sink on channel 2"
+    ],
+    [
+        "/deviceset/0/device/run",
+        "POST",
+        null,
+        null,
+        "Start device on deviceset R0"
+    ]
+]
