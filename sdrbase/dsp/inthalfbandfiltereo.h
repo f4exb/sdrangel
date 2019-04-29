@@ -790,7 +790,7 @@ public:
 protected:
     EOStorageType m_even[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder];
     EOStorageType m_odd[2][HBFIRFilterTraits<HBFilterOrder>::hbOrder];
-    int32_t m_samples[HBFIRFilterTraits<HBFilterOrder>::hbOrder][2];
+    EOStorageType m_samples[HBFIRFilterTraits<HBFilterOrder>::hbOrder][2];
 
     int m_ptr;
     int m_size;
@@ -849,13 +849,13 @@ protected:
         {
             if ((m_ptr % 2) == 0)
             {
-                iAcc += (m_even[0][a] + m_even[0][b]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
-                qAcc += (m_even[1][a] + m_even[1][b]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+                iAcc += ((EOStorageType)(m_even[0][a] + m_even[0][b])) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+                qAcc += ((EOStorageType)(m_even[1][a] + m_even[1][b])) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
             }
             else
             {
-                iAcc += (m_odd[0][a] + m_odd[0][b]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
-                qAcc += (m_odd[1][a] + m_odd[1][b]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+                iAcc += ((EOStorageType)(m_odd[0][a] + m_odd[0][b])) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+                qAcc += ((EOStorageType)(m_odd[1][a] + m_odd[1][b])) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
             }
 
             a -= 1;
@@ -864,13 +864,13 @@ protected:
 
         if ((m_ptr % 2) == 0)
         {
-            iAcc += ((int32_t)m_odd[0][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            qAcc += ((int32_t)m_odd[1][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            iAcc += m_odd[0][m_ptr/2 + m_size/2] << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            qAcc += m_odd[1][m_ptr/2 + m_size/2] << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
         }
         else
         {
-            iAcc += ((int32_t)m_even[0][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            qAcc += ((int32_t)m_even[1][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            iAcc += m_even[0][m_ptr/2 + m_size/2 + 1] << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            qAcc += m_even[1][m_ptr/2 + m_size/2 + 1] << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
         }
 
         sample->setReal(iAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1));
@@ -889,13 +889,13 @@ protected:
         {
             if ((m_ptr % 2) == 0)
             {
-                iAcc += (m_even[0][a] + m_even[0][b]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
-                qAcc += (m_even[1][a] + m_even[1][b]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+                iAcc += ((EOStorageType)(m_even[0][a] + m_even[0][b])) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+                qAcc += ((EOStorageType)(m_even[1][a] + m_even[1][b])) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
             }
             else
             {
-                iAcc += (m_odd[0][a] + m_odd[0][b]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
-                qAcc += (m_odd[1][a] + m_odd[1][b]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+                iAcc += ((EOStorageType)(m_odd[0][a] + m_odd[0][b])) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+                qAcc += ((EOStorageType)(m_odd[1][a] + m_odd[1][b])) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
             }
 
             a -= 1;
@@ -904,13 +904,13 @@ protected:
 
         if ((m_ptr % 2) == 0)
         {
-            iAcc += ((int32_t)m_odd[0][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            qAcc += ((int32_t)m_odd[1][m_ptr/2 + m_size/2]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            iAcc += m_odd[0][m_ptr/2 + m_size/2] << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            qAcc += m_odd[1][m_ptr/2 + m_size/2] << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
         }
         else
         {
-            iAcc += ((int32_t)m_even[0][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
-            qAcc += ((int32_t)m_even[1][m_ptr/2 + m_size/2 + 1]) << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            iAcc += m_even[0][m_ptr/2 + m_size/2 + 1] << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
+            qAcc += m_even[1][m_ptr/2 + m_size/2 + 1] << (HBFIRFilterTraits<HBFilterOrder>::hbShift - 1);
         }
 
         *x = iAcc >> (HBFIRFilterTraits<HBFilterOrder>::hbShift -1); // HB_SHIFT incorrect do not loose the gained bit
@@ -928,8 +928,8 @@ protected:
         // go through samples in buffer
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
-            iAcc += (m_samples[a][0] + m_samples[b][0]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
-            qAcc += (m_samples[a][1] + m_samples[b][1]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+            iAcc += ((EOStorageType)(m_samples[a][0] + m_samples[b][0])) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+            qAcc += ((EOStorageType)(m_samples[a][1] + m_samples[b][1])) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
             a++;
             b--;
         }
@@ -949,8 +949,8 @@ protected:
         // go through samples in buffer
         for (int i = 0; i < HBFIRFilterTraits<HBFilterOrder>::hbOrder / 4; i++)
         {
-            iAcc += (m_samples[a][0] + m_samples[b][0]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
-            qAcc += (m_samples[a][1] + m_samples[b][1]) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+            iAcc += ((EOStorageType)(m_samples[a][0] + m_samples[b][0])) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
+            qAcc += ((EOStorageType)(m_samples[a][1] + m_samples[b][1])) * HBFIRFilterTraits<HBFilterOrder>::hbCoeffs[i];
             a++;
             b--;
         }
