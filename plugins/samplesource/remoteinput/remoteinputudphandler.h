@@ -80,7 +80,7 @@ private:
 
 	QElapsedTimer m_elapsedTimer;
 	int m_throttlems;
-    uint32_t m_readLengthSamples;
+    int32_t m_readLengthSamples;
     uint32_t m_readLength;
     int32_t *m_converterBuffer;
     uint32_t m_converterBufferNbSamples;

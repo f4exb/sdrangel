@@ -256,8 +256,13 @@ void RemoteInputUDPHandler::tick()
         m_throttleToggle = !m_throttleToggle;
     }
 
-    if (m_autoCorrBuffer) {
+    if (m_autoCorrBuffer)
+    {
         m_readLengthSamples += m_remoteInputBuffer.getRWBalanceCorrection();
+        // Eliminate negative or excessively high values
+        m_readLengthSamples = m_readLengthSamples < 0 ?
+            0 : m_readLengthSamples > (int) m_remoteInputBuffer.getCurrentMeta().m_sampleRate/5 ?
+                m_remoteInputBuffer.getCurrentMeta().m_sampleRate/5 : m_readLengthSamples;
     }
 
     const RemoteMetaDataFEC& metaData =  m_remoteInputBuffer.getCurrentMeta();
@@ -265,7 +270,7 @@ void RemoteInputUDPHandler::tick()
 
     if ((metaData.m_sampleBits == 16) && (SDR_RX_SAMP_SZ == 24)) // 16 -> 24 bits
     {
-        if (m_readLengthSamples > m_converterBufferNbSamples)
+        if (m_readLengthSamples > (int) m_converterBufferNbSamples)
         {
             if (m_converterBuffer) { delete[] m_converterBuffer; }
             m_converterBuffer = new int32_t[m_readLengthSamples*2];
@@ -273,7 +278,7 @@ void RemoteInputUDPHandler::tick()
 
         uint8_t *buf = m_remoteInputBuffer.readData(m_readLength);
 
-        for (unsigned int is = 0; is < m_readLengthSamples; is++)
+        for (int is = 0; is < m_readLengthSamples; is++)
         {
             m_converterBuffer[2*is] = ((int16_t*)buf)[2*is]; // I
             m_converterBuffer[2*is]<<=8;
@@ -285,7 +290,7 @@ void RemoteInputUDPHandler::tick()
     }
     else if ((metaData.m_sampleBits == 24) && (SDR_RX_SAMP_SZ == 16)) // 24 -> 16 bits
     {
-        if (m_readLengthSamples > m_converterBufferNbSamples)
+        if (m_readLengthSamples > (int) m_converterBufferNbSamples)
         {
             if (m_converterBuffer) { delete[] m_converterBuffer; }
             m_converterBuffer = new int32_t[m_readLengthSamples];
@@ -293,7 +298,7 @@ void RemoteInputUDPHandler::tick()
 
         uint8_t *buf = m_remoteInputBuffer.readData(m_readLength);
 
-        for (unsigned int is = 0; is < m_readLengthSamples; is++)
+        for (int is = 0; is < m_readLengthSamples; is++)
         {
             m_converterBuffer[is] =  ((int32_t *)buf)[2*is+1]>>8; // Q -> MSB
             m_converterBuffer[is] <<=16;
