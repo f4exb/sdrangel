@@ -1,9 +1,6 @@
 project(airspy)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(airspy_SOURCES
-    airspygui.cpp
     airspyinput.cpp
     airspyplugin.cpp
     airspysettings.cpp
@@ -11,68 +8,52 @@ set(airspy_SOURCES
 )
 
 set(airspy_HEADERS
-    airspygui.h
     airspyinput.h
     airspyplugin.h
     airspysettings.h
     airspythread.h
 )
 
-set(airspy_FORMS
-    airspygui.ui
-)
-
-if (BUILD_DEBIAN)
 include_directories(
-    .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client        
-    ${LIBAIRSPYSRC}
-    ${LIBAIRSPYSRC}/libairspy/src
-)
-else (BUILD_DEBIAN)
-include_directories(
-    .
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client        
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${LIBAIRSPY_INCLUDE_DIR}
 )
-endif (BUILD_DEBIAN)
 
-#include(${QT_USE_FILE})
-#add_definitions(${QT_DEFINITIONS})
-add_definitions("${QT_DEFINITIONS} -DLIBAIRSPY_DYN_RATES")
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(airspy_SOURCES
+        ${airspy_SOURCES}
+        airspygui.cpp
 
-#qt4_wrap_cpp(airspy_HEADERS_MOC ${airspy_HEADERS})
-qt5_wrap_ui(airspy_FORMS_HEADERS ${airspy_FORMS})
+        airspygui.ui
+    )
+    set(airspy_HEADERS
+        ${airspy_HEADERS}
+        airspygui.h
+    )
 
-add_library(inputairspy SHARED
-    ${airspy_SOURCES}
-    ${airspy_HEADERS_MOC}
-    ${airspy_FORMS_HEADERS}
+    set(TARGET_NAME inputairspy)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER "plugins")
+else()
+    set(TARGET_NAME inputairspysrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER "pluginssrv")
+endif()
+
+add_library(${TARGET_NAME} SHARED
+	${airspy_SOURCES}
 )
 
-if (BUILD_DEBIAN)
-target_link_libraries(inputairspy
-    ${QT_LIBRARIES}
-    airspy
-    sdrbase
-    sdrgui
-    swagger
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
+	sdrbase
+	${TARGET_LIB_GUI}
+        swagger
+        ${LIBAIRSPY_LIBRARIES}
 )
-else (BUILD_DEBIAN)
-target_link_libraries(inputairspy
-    ${QT_LIBRARIES}
-    ${LIBAIRSPY_LIBRARIES}
-    sdrbase
-    sdrgui
-    swagger
-)
-endif (BUILD_DEBIAN)
 
-
-target_link_libraries(inputairspy Qt5::Core Qt5::Widgets)
-
-install(TARGETS inputairspy DESTINATION lib/plugins/samplesource)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_LIB_DIR}/${INSTALL_FOLDER}/samplesource)

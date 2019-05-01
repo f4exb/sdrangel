@@ -1,51 +1,37 @@
 project(devices)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+include_directories(
+    # export.h
+    ${CMAKE_SOURCE_DIR}/exports
+    # util/message.h
+    ${CMAKE_SOURCE_DIR}/sdrbase
+)
 
-find_package(LibUSB)
-
-if (BUILD_DEBIAN)
+if(ENABLE_BLADERF AND LIBBLADERF_FOUND)
     add_subdirectory(bladerf1)
     add_subdirectory(bladerf2)
+endif()
+
+if(ENABLE_HACKRF AND LIBHACKRF_FOUND)
     add_subdirectory(hackrf)
+endif()
+
+if(ENABLE_LIMESUITE AND LIMESUITE_FOUND)
     add_subdirectory(limesdr)
-    add_subdirectory(perseus)
+endif()
+
+if(ENABLE_XTRX AND LIBXTRX_FOUND)
+    add_subdirectory(xtrx)
+endif()
+
+if(ENABLE_IIO AND LIBIIO_FOUND)
     add_subdirectory(plutosdr)
+endif()
+
+if(ENABLE_PERSEUS AND LIBPERSEUS_FOUND)
+    add_subdirectory(perseus)
+endif()
+
+if(ENABLE_SOAPYSDR AND SOAPYSDR_FOUND)
     add_subdirectory(soapysdr)
-else(BUILD_DEBIAN)
-    find_package(LibBLADERF)
-    if(LIBUSB_FOUND AND LIBBLADERF_FOUND)
-        add_subdirectory(bladerf1)
-        add_subdirectory(bladerf2)
-    endif(LIBUSB_FOUND AND LIBBLADERF_FOUND)
-
-    find_package(LibHACKRF)
-    if(LIBUSB_FOUND AND LIBHACKRF_FOUND)
-        add_subdirectory(hackrf)
-    endif(LIBUSB_FOUND AND LIBHACKRF_FOUND)
-
-    find_package(LimeSuite)
-    if(LIBUSB_FOUND AND LIMESUITE_FOUND)
-        add_subdirectory(limesdr)
-    endif(LIBUSB_FOUND AND LIMESUITE_FOUND)
-
-    find_package(LibXTRX)
-    if(LIBXTRX_FOUND)
-        add_subdirectory(xtrx)
-    endif(LIBXTRX_FOUND)
-
-    find_package(LibIIO)
-    if(LIBUSB_FOUND AND LIBIIO_FOUND)
-        add_subdirectory(plutosdr)
-    endif(LIBUSB_FOUND AND LIBIIO_FOUND)
-
-    find_package(LibPerseus)
-    if(LIBUSB_FOUND AND LIBPERSEUS_FOUND)
-        add_subdirectory(perseus)
-    endif()
-
-    find_package(SoapySDR)
-    if(SOAPYSDR_FOUND)
-        add_subdirectory(soapysdr)
-    endif()
-endif (BUILD_DEBIAN)
+endif()

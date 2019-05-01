@@ -1,9 +1,6 @@
 project(sdrplay)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(sdrplay_SOURCES
-    sdrplaygui.cpp
     sdrplayinput.cpp
     sdrplayplugin.cpp
     sdrplaysettings.cpp
@@ -11,63 +8,52 @@ set(sdrplay_SOURCES
 )
 
 set(sdrplay_HEADERS
-    sdrplaygui.h
     sdrplayinput.h
     sdrplayplugin.h
     sdrplaysettings.h
     sdrplaythread.h
 )
 
-set(sdrplay_FORMS
-    sdrplaygui.ui
-)
-
-if (BUILD_DEBIAN)
 include_directories(
-    .
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${LIBMIRISDRSRC}/include
-    ${LIBMIRISDRSRC}/src
-)
-else (BUILD_DEBIAN)
-include_directories(
-    .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${LIBMIRISDR_INCLUDE_DIR}
 )
-endif (BUILD_DEBIAN)
 
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(sdrplay_SOURCES
+        ${sdrplay_SOURCES}
+        sdrplaygui.cpp
 
-qt5_wrap_ui(sdrplay_FORMS_HEADERS ${sdrplay_FORMS})
+        sdrplaygui.ui
+    )
+    set(sdrplay_HEADERS
+        ${sdrplay_HEADERS}
+        sdrplaygui.h
+    )
 
-add_library(inputsdrplay SHARED
-    ${sdrplay_SOURCES}
-    ${sdrplay_HEADERS_MOC}
-    ${sdrplay_FORMS_HEADERS}
+    set(TARGET_NAME inputsdrplay)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER "plugins")
+else()
+    set(TARGET_NAME inputsdrplaysrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER "pluginssrv")
+endif()
+
+add_library(${TARGET_NAME} SHARED
+	${sdrplay_SOURCES}
 )
 
-if (BUILD_DEBIAN)
-target_link_libraries(inputsdrplay
-    ${QT_LIBRARIES}
-    mirisdr
-    sdrbase
-    sdrgui
-    swagger
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
+	sdrbase
+	${TARGET_LIB_GUI}
+        swagger
+        ${LIBMIRISDR_LIBRARIES}
 )
-else (BUILD_DEBIAN)
-target_link_libraries(inputsdrplay
-    ${QT_LIBRARIES}
-    ${LIBMIRISDR_LIBRARIES}
-    sdrbase
-    sdrgui
-    swagger
-)
-endif (BUILD_DEBIAN)
 
-target_link_libraries(inputsdrplay Qt5::Core Qt5::Widgets)
-
-install(TARGETS inputsdrplay DESTINATION lib/plugins/samplesource)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_LIB_DIR}/${INSTALL_FOLDER}/samplesource)

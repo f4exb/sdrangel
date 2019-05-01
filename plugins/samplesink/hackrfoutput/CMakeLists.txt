@@ -1,9 +1,6 @@
 project(hackrfoutput)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(hackrfoutput_SOURCES
-    hackrfoutputgui.cpp
     hackrfoutput.cpp
     hackrfoutputplugin.cpp
     hackrfoutputsettings.cpp
@@ -11,71 +8,54 @@ set(hackrfoutput_SOURCES
 )
 
 set(hackrfoutput_HEADERS
-    hackrfoutputgui.h
     hackrfoutput.h
     hackrfoutputplugin.h
     hackrfoutputsettings.h
     hackrfoutputthread.h
 )
 
-set(hackrfoutput_FORMS
-    hackrfoutputgui.ui
-)
-
-if (BUILD_DEBIAN)
 include_directories(
-        .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
-    ${CMAKE_SOURCE_DIR}/devices    
-    ${LIBHACKRFSRC}
-    ${LIBHACKRFSRC}/libhackrf/src
-)
-else (BUILD_DEBIAN)
-include_directories(
-        .
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
-    ${CMAKE_SOURCE_DIR}/devices    
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${CMAKE_SOURCE_DIR}/devices
     ${LIBHACKRF_INCLUDE_DIR}
 )
-endif (BUILD_DEBIAN)
 
-#include(${QT_USE_FILE})
-#add_definitions(${QT_DEFINITIONS})
-add_definitions("${QT_DEFINITIONS} -DLIBHACKRF_DYN_RATES")
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(hackrfoutput_SOURCES
+        ${hackrfoutput_SOURCES}
+        hackrfoutputgui.cpp
 
-#qt4_wrap_cpp(hackrfoutput_HEADERS_MOC ${hackrfoutput_HEADERS})
-qt5_wrap_ui(hackrfoutput_FORMS_HEADERS ${hackrfoutput_FORMS})
+        hackrfoutputgui.ui
+    )
+    set(hackrfoutput_HEADERS
+        ${hackrfoutput_HEADERS}
+        hackrfoutputgui.h
+    )
 
-add_library(outputhackrf SHARED
-    ${hackrfoutput_SOURCES}
-    ${hackrfoutput_HEADERS_MOC}
-    ${hackrfoutput_FORMS_HEADERS}
+    set(TARGET_NAME outputhackrf)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER "plugins")
+else()
+    set(TARGET_NAME outputhackrfsrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER "pluginssrv")
+endif()
+
+add_library(${TARGET_NAME} SHARED
+	${hackrfoutput_SOURCES}
 )
 
-if (BUILD_DEBIAN)
-target_link_libraries(outputhackrf
-    ${QT_LIBRARIES}
-    hackrf
-    sdrbase
-    sdrgui
-    swagger
-    hackrfdevice
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
+	sdrbase
+	${TARGET_LIB_GUI}
+        swagger
+        ${LIBHACKRF_LIBRARIES}
+        hackrfdevice
 )
-else (BUILD_DEBIAN)
-target_link_libraries(outputhackrf
-    ${QT_LIBRARIES}
-    ${LIBHACKRF_LIBRARIES}
-    sdrbase
-    sdrgui
-    swagger
-    hackrfdevice
-)
-endif (BUILD_DEBIAN)
 
-target_link_libraries(outputhackrf Qt5::Core Qt5::Widgets)
-
-install(TARGETS outputhackrf DESTINATION lib/plugins/samplesink)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_LIB_DIR}/${INSTALL_FOLDER}/samplesink)

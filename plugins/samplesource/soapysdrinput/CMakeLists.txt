@@ -1,9 +1,6 @@
 project(soapysdrinput)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(soapysdrinput_SOURCES
-	soapysdrinputgui.cpp
 	soapysdrinput.cpp
 	soapysdrinputplugin.cpp
 	soapysdrinputsettings.cpp
@@ -11,68 +8,54 @@ set(soapysdrinput_SOURCES
 )
 
 set(soapysdrinput_HEADERS
-	soapysdrinputgui.h
 	soapysdrinput.h
 	soapysdrinputplugin.h
 	soapysdrinputsettings.h
 	soapysdrinputthread.h
 )
 
-set(soapysdrinput_FORMS
-	soapysdrinputgui.ui
-)
-
-if (BUILD_DEBIAN)
 include_directories(
-    .
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${CMAKE_SOURCE_DIR}/devices
-    ${SOAPYSDR_SOURCE_DIR}/include
-    ${SOAPYSDR_SOURCE_DIR}/src
-)
-else (BUILD_DEBIAN)
-include_directories(
-	.
 	${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+        ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 	${CMAKE_SOURCE_DIR}/devices
 	${SOAPYSDR_INCLUDE_DIR}
 )
-endif (BUILD_DEBIAN)
 
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(soapysdrinput_SOURCES
+        ${soapysdrinput_SOURCES}
+        soapysdrinputgui.cpp
 
-qt5_wrap_ui(soapysdrinput_FORMS_HEADERS ${soapysdrinput_FORMS})
+        soapysdrinputgui.ui
+    )
+    set(soapysdrinput_HEADERS
+        ${soapysdrinput_HEADERS}
+        soapysdrinputgui.h
+    )
 
-add_library(inputsoapysdr SHARED
+    set(TARGET_NAME inputsoapysdr)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER "plugins")
+else()
+    set(TARGET_NAME inputsoapysdrsrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER "pluginssrv")
+endif()
+
+add_library(${TARGET_NAME} SHARED
 	${soapysdrinput_SOURCES}
-	${soapysdrinput_HEADERS_MOC}
-	${soapysdrinput_FORMS_HEADERS}
 )
 
-if (BUILD_DEBIAN)
-target_link_libraries(inputsoapysdr
-    ${QT_LIBRARIES}
-    SoapySDR
-    sdrbase
-    sdrgui
-    swagger
-    soapysdrdevice
-)
-else (BUILD_DEBIAN)
-target_link_libraries(inputsoapysdr
-	${QT_LIBRARIES}
-	${SOAPYSDR_LIBRARY}
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
 	sdrbase
-	sdrgui
-	swagger
-	soapysdrdevice
+	${TARGET_LIB_GUI}
+        swagger
+        ${SOAPYSDR_LIBRARIES}
+        soapysdrdevice
 )
-endif (BUILD_DEBIAN)
 
-target_link_libraries(inputsoapysdr Qt5::Core Qt5::Widgets)
-
-install(TARGETS inputsoapysdr DESTINATION lib/plugins/samplesource)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_LIB_DIR}/${INSTALL_FOLDER}/samplesource)

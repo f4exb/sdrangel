@@ -1,9 +1,6 @@
 project(fcdproplus)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(fcdproplus_SOURCES
-	fcdproplusgui.cpp
 	fcdproplusinput.cpp
 	fcdproplusplugin.cpp
 	fcdproplussettings.cpp
@@ -11,48 +8,54 @@ set(fcdproplus_SOURCES
 )
 
 set(fcdproplus_HEADERS
-	fcdproplusgui.h
 	fcdproplusinput.h
 	fcdproplusplugin.h
 	fcdproplussettings.h
 	fcdproplusthread.h
 )
 
-set(fcdproplus_FORMS
-	fcdproplusgui.ui
-)
-
 include_directories(
-	.
 	${CMAKE_CURRENT_BINARY_DIR}
-        ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
+        ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 	${CMAKE_SOURCE_DIR}/fcdhid
 	${CMAKE_SOURCE_DIR}/fcdlib
 )
 
-#include(${QT_USE_FILE})
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(fcdproplus_SOURCES
+        ${fcdproplus_SOURCES}
+        fcdproplusgui.cpp
 
-#qt4_wrap_cpp(fcdproplus_HEADERS_MOC ${fcdproplus_HEADERS})
-qt5_wrap_ui(fcdproplus_FORMS_HEADERS ${fcdproplus_FORMS})
+        fcdproplusgui.ui
+    )
+    set(fcdproplus_HEADERS
+        ${fcdproplus_HEADERS}
+        fcdproplusgui.h
+    )
 
-add_library(inputfcdproplus SHARED
+    set(TARGET_NAME inputfcdproplus)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER "plugins")
+else()
+    set(TARGET_NAME inputfcdproplussrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER "pluginssrv")
+endif()
+
+add_library(${TARGET_NAME} SHARED
 	${fcdproplus_SOURCES}
-	${fcdproplus_HEADERS_MOC}
-	${fcdproplus_FORMS_HEADERS}
 )
 
-target_link_libraries(inputfcdproplus
-	${QT_LIBRARIES}
-	fcdhid
-	fcdlib
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
 	sdrbase
-	sdrgui
-	swagger
+	${TARGET_LIB_GUI}
+        swagger
+        fcdhid
+        fcdlib
 )
 
-target_link_libraries(inputfcdproplus Qt5::Core Qt5::Widgets)
-
-install(TARGETS inputfcdproplus DESTINATION lib/plugins/samplesource)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_LIB_DIR}/${INSTALL_FOLDER}/samplesource)

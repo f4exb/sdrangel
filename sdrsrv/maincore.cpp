@@ -72,12 +72,6 @@ MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, Q
 
     QString applicationDirPath = QCoreApplication::instance()->applicationDirPath();
 
-    if (QResource::registerResource(applicationDirPath + "/sdrbase.rcc")) {
-        qDebug("MainCore::MainCore: registered resource file %s/%s", qPrintable(applicationDirPath), "sdrbase.rcc");
-    } else {
-        qWarning("MainCore::MainCore: could not register resource file %s/%s", qPrintable(applicationDirPath), "sdrbase.rcc");
-    }
-
     m_apiAdapter = new WebAPIAdapterSrv(*this);
     m_requestMapper = new WebAPIRequestMapper(this);
     m_requestMapper->setAdapter(m_apiAdapter);

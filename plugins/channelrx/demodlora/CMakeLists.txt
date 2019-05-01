@@ -1,12 +1,12 @@
 project(lora)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(lora_SOURCES
 	lorademod.cpp
 	lorademodgui.cpp
 	lorademodsettings.cpp
 	loraplugin.cpp
+
+	lorademodgui.ui
 )
 
 set(lora_HEADERS
@@ -16,35 +16,19 @@ set(lora_HEADERS
 	loraplugin.h
 )
 
-set(lora_FORMS
-	lorademodgui.ui
-)
-
 include_directories(
-	.
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
-#include(${QT_USE_FILE})
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
-
-#qt5_wrap_cpp(lora_HEADERS_MOC ${lora_HEADERS})
-qt5_wrap_ui(lora_FORMS_HEADERS ${lora_FORMS})
-
 add_library(demodlora SHARED
 	${lora_SOURCES}
-	${lora_HEADERS_MOC}
-	${lora_FORMS_HEADERS}
 )
 
 target_link_libraries(demodlora
-	${QT_LIBRARIES}
+        Qt5::Core
+        Qt5::Widgets
 	sdrbase
 	sdrgui
 )
 
-target_link_libraries(demodlora Qt5::Core Qt5::Widgets)
-
-install(TARGETS demodlora DESTINATION lib/plugins/channelrx)
+install(TARGETS demodlora DESTINATION ${INSTALL_LIB_DIR}/plugins/channelrx)

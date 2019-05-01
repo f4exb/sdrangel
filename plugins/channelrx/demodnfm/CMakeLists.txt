@@ -1,52 +1,55 @@
 project(nfm)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(nfm_SOURCES
 	nfmdemod.cpp
-	nfmdemodgui.cpp
 	nfmdemodsettings.cpp
 	nfmplugin.cpp
 )
 
 set(nfm_HEADERS
 	nfmdemod.h
-	nfmdemodgui.h
 	nfmdemodsettings.h
 	nfmplugin.h
 )
 
-set(nfm_FORMS
-	nfmdemodgui.ui
-)
-
 include_directories(
-	.
 	${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+        ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
-#include(${QT_USE_FILE})
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(nfm_SOURCES
+        ${nfm_SOURCES}
+        nfmdemodgui.cpp
 
-#qt5_wrap_cpp(nfm_HEADERS_MOC ${nfm_HEADERS})
-qt5_wrap_ui(nfm_FORMS_HEADERS ${nfm_FORMS})
+	nfmdemodgui.ui
+    )
+    set(nfm_HEADERS
+        ${nfm_HEADERS}
+        nfmdemodgui.h
+    )
 
-add_library(demodnfm SHARED
+    set(TARGET_NAME demodnfm)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER "plugins")
+else()
+    set(TARGET_NAME demodnfmsrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER "pluginssrv")
+endif()
+
+add_library(${TARGET_NAME} SHARED
 	${nfm_SOURCES}
-	${nfm_HEADERS_MOC}
-	${nfm_FORMS_HEADERS}
 )
 
-target_link_libraries(demodnfm
-	${QT_LIBRARIES}
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
 	sdrbase
-	sdrgui
-	swagger
+	${TARGET_LIB_GUI}
+        swagger
 )
 
-target_link_libraries(demodnfm Qt5::Core Qt5::Widgets)
-
-install(TARGETS demodnfm DESTINATION lib/plugins/channelrx)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_LIB_DIR}/${INSTALL_FOLDER}/channelrx)

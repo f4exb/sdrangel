@@ -1,9 +1,6 @@
 project(plutosdrinput)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(plutosdrinput_SOURCES
-    plutosdrinputgui.cpp
     plutosdrinput.cpp
     plutosdrinputplugin.cpp
     plutosdrinputsettings.cpp
@@ -11,69 +8,54 @@ set(plutosdrinput_SOURCES
 )
 
 set(plutosdrinput_HEADERS
-    plutosdrinputgui.h
     plutosdrinput.h
     plutosdrinputplugin.h
     plutosdrinputsettings.h
     plutosdrinputthread.h
 )
 
-set(plutosdrinput_FORMS
-    plutosdrinputgui.ui
-)
-
-if (BUILD_DEBIAN)
 include_directories(
-    .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
-    ${CMAKE_SOURCE_DIR}/devices    
-    ${LIBIIOSRC}
-)
-else (BUILD_DEBIAN)
-include_directories(
-        .
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
-    ${CMAKE_SOURCE_DIR}/devices    
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${CMAKE_SOURCE_DIR}/devices
     ${LIBIIO_INCLUDE_DIR}
 )
-endif (BUILD_DEBIAN)
 
-#include(${QT_USE_FILE})
-#add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(plutosdrinput_SOURCES
+        ${plutosdrinput_SOURCES}
+        plutosdrinputgui.cpp
 
-#qt4_wrap_cpp(plutosdrinput_HEADERS_MOC ${plutosdrinput_HEADERS})
-qt5_wrap_ui(plutosdrinput_FORMS_HEADERS ${plutosdrinput_FORMS})
+        plutosdrinputgui.ui
+    )
+    set(plutosdrinput_HEADERS
+        ${plutosdrinput_HEADERS}
+        plutosdrinputgui.h
+    )
 
-add_library(inputplutosdr SHARED
-    ${plutosdrinput_SOURCES}
-    ${plutosdrinput_HEADERS_MOC}
-    ${plutosdrinput_FORMS_HEADERS}
+    set(TARGET_NAME inputplutosdr)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER "plugins")
+else()
+    set(TARGET_NAME inputplutosdrsrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER "pluginssrv")
+endif()
+
+add_library(${TARGET_NAME} SHARED
+	${plutosdrinput_SOURCES}
 )
 
-if (BUILD_DEBIAN)
-target_link_libraries(inputplutosdr
-    ${QT_LIBRARIES}
-    iio
-    sdrbase
-    sdrgui
-    swagger
-    plutosdrdevice
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
+	sdrbase
+	${TARGET_LIB_GUI}
+        swagger
+        ${LIBIIO_LIBRARIES}
+        plutosdrdevice
 )
-else (BUILD_DEBIAN)
-target_link_libraries(inputplutosdr
-    ${QT_LIBRARIES}
-    ${LIBIIO_LIBRARIES}
-    sdrbase
-    sdrgui
-    swagger
-    plutosdrdevice
-)
-endif (BUILD_DEBIAN)
 
-qt5_use_modules(inputplutosdr Core Widgets)
-
-install(TARGETS inputplutosdr DESTINATION lib/plugins/samplesource)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_LIB_DIR}/${INSTALL_FOLDER}/samplesource)

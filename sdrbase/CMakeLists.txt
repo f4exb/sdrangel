@@ -1,9 +1,53 @@
 project (sdrbase)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined")
+find_package(Opus REQUIRED)
+
+if(FFTW3F_FOUND)
+    set(sdrbase_SOURCES
+        ${sdrbase_SOURCES}
+        dsp/fftwengine.cpp
+    )
+    set(sdrbase_HEADERS
+        ${sdrbase_HEADERS}
+        dsp/fftwengine.h
+    )
+    add_definitions(-DUSE_FFTW)
+    include_directories(${FFTW3F_INCLUDE_DIRS})
+    set(sdrbase_FFTW3F_LIB ${FFTW3F_LIBRARIES})
+else(FFTW3F_FOUND)
+    set(sdrbase_SOURCES
+        ${sdrbase_SOURCES}
+        dsp/kissengine.cpp
+        dsp/kissfft.h
+    )
+    set(sdrbase_HEADERS
+        ${sdrbase_HEADERS}
+        dsp/kissengine.h
+    )
+    add_definitions(-DUSE_KISSFFT)
+endif(FFTW3F_FOUND)
+
+if (LIBSERIALDV_FOUND)
+    set(sdrbase_SOURCES
+        ${sdrbase_SOURCES}
+        dsp/dvserialworker.cpp
+        dsp/dvserialengine.cpp
+    )
+    set(sdrbase_HEADERS
+        ${sdrbase_HEADERS}
+        dsp/dvserialworker.h
+        dsp/dvserialengine.h
+    )
+    message(STATUS "Will have SerialDV support")
+    add_definitions(-DDSD_USE_SERIALDV)
+    include_directories(${LIBSERIALDV_INCLUDE_DIR})
+    set(sdrbase_SERIALDV_LIB ${LIBSERIALDV_LIBRARY})
+else(LIBSERIALDV_FOUND)
+    message(STATUS "No SerialDV support")
+endif(LIBSERIALDV_FOUND)
 
 set(sdrbase_SOURCES
+    ${sdrbase_SOURCES}
     audio/audiocompressor.cpp
     audio/audiodevicemanager.cpp
     audio/audiofifo.cpp
@@ -96,10 +140,13 @@ set(sdrbase_SOURCES
     webapi/webapiserver.cpp
 
     mainparser.cpp
+
+    resources/res.qrc
 )
 
 set(sdrbase_HEADERS
-	audio/audiocompressor.h
+    ${sdrbase_HEADERS}
+    audio/audiocompressor.h
     audio/audiodevicemanager.h
     audio/audiofifo.h
     audio/audiofilter.h
@@ -221,81 +268,8 @@ set(sdrbase_HEADERS
     mainparser.h
 )
 
-set(sdrbase_SOURCES
-    ${sdrbase_SOURCES}
-    ${sdrbase_HEADERS}
-)
-
-find_package(Opus REQUIRED)
-
-if(FFTW3F_FOUND)
-    set(sdrbase_SOURCES
-        ${sdrbase_SOURCES}
-        dsp/fftwengine.cpp
-    )
-    set(sdrbase_HEADERS
-        ${sdrbase_HEADERS}
-        dsp/fftwengine.h
-    )
-    add_definitions(-DUSE_FFTW)
-    include_directories(${FFTW3F_INCLUDE_DIRS})
-else(FFTW3F_FOUND)
-    set(sdrbase_SOURCES
-        ${sdrbase_SOURCES}
-        dsp/kissengine.cpp
-        dsp/kissfft.h
-    )
-    set(sdrbase_HEADERS
-        ${sdrbase_HEADERS}
-        dsp/kissengine.h
-    )
-    add_definitions(-DUSE_KISSFFT)
-endif(FFTW3F_FOUND)
-
-if (LIBSERIALDV_FOUND)
-    set(sdrbase_SOURCES
-        ${sdrbase_SOURCES}
-        dsp/dvserialworker.cpp
-        dsp/dvserialengine.cpp
-    )
-    set(sdrbase_HEADERS
-        ${sdrbase_HEADERS}
-        dsp/dvserialworker.h
-        dsp/dvserialengine.h
-    )
-    message(STATUS "Will have SerialDV support")
-    add_definitions(-DDSD_USE_SERIALDV)
-    include_directories(${LIBSERIALDV_INCLUDE_DIR})
-else(LIBSERIALDV_FOUND)
-    message(STATUS "No SerialDV support")
-endif(LIBSERIALDV_FOUND)
-
-if (BUILD_DEBIAN)
-    set(sdrbase_SOURCES
-        ${sdrbase_SOURCES}
-        dsp/dvserialworker.cpp
-        dsp/dvserialengine.cpp
-    )
-    set(sdrbase_HEADERS
-        ${sdrbase_HEADERS}
-        dsp/dvserialworker.h
-        dsp/dvserialengine.h
-    )
-    add_definitions(-DDSD_USE_SERIALDV)
-    include_directories(${LIBSERIALDVSRC})
-endif (BUILD_DEBIAN)
-
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_SHARED)
-
-add_library(sdrbase SHARED
-    ${sdrbase_SOURCES}
-    ${sdrbase_HEADERS_MOC}
-)
-
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
-    .
     ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/httpserver
     ${CMAKE_SOURCE_DIR}/qrtplib
@@ -304,30 +278,19 @@ include_directories(
     ${OPUS_INCLUDE_DIRS}
 )
 
+add_library(sdrbase SHARED
+    ${sdrbase_SOURCES}
+)
+
 target_link_libraries(sdrbase
-    ${QT_LIBRARIES}
+    ${OPUS_LIBRARIES}
+    ${sdrbase_FFTW3F_LIB}
+    ${sdrbase_SERIALDV_LIB}
+    Qt5::Core
+    Qt5::Multimedia
     httpserver
     qrtplib
     swagger
-    ${OPUS_LIBRARIES}
 )
 
-if(FFTW3F_FOUND)
-    target_link_libraries(sdrbase ${FFTW3F_LIBRARIES})
-endif(FFTW3F_FOUND)
-
-if(LIBSERIALDV_FOUND)
-    target_link_libraries(sdrbase ${LIBSERIALDV_LIBRARY})
-endif(LIBSERIALDV_FOUND)
-
-if (BUILD_DEBIAN)
-    target_link_libraries(sdrbase serialdv)
-endif (BUILD_DEBIAN)
-
-set_target_properties(sdrbase PROPERTIES DEFINE_SYMBOL "sdrbase_EXPORTS")
-target_compile_features(sdrbase PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
-
-target_link_libraries(sdrbase Qt5::Core Qt5::Multimedia)
-
-install(TARGETS sdrbase DESTINATION lib)
-
+install(TARGETS sdrbase DESTINATION ${INSTALL_LIB_DIR})

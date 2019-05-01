@@ -1,9 +1,6 @@
 project(hackrfinput)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(hackrfinput_SOURCES
-    hackrfinputgui.cpp
     hackrfinput.cpp
     hackrfinputplugin.cpp
     hackrfinputsettings.cpp
@@ -11,71 +8,54 @@ set(hackrfinput_SOURCES
 )
 
 set(hackrfinput_HEADERS
-    hackrfinputgui.h
     hackrfinput.h
     hackrfinputplugin.h
     hackrfinputsettings.h
     hackrfinputthread.h
 )
 
-set(hackrfinput_FORMS
-    hackrfinputgui.ui
-)
-
-if (BUILD_DEBIAN)
 include_directories(
-        .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
-    ${CMAKE_SOURCE_DIR}/devices    
-    ${LIBHACKRFSRC}
-    ${LIBHACKRFSRC}/libhackrf/src
-)
-else (BUILD_DEBIAN)
-include_directories(
-        .
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
-    ${CMAKE_SOURCE_DIR}/devices    
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${CMAKE_SOURCE_DIR}/devices
     ${LIBHACKRF_INCLUDE_DIR}
 )
-endif (BUILD_DEBIAN)
 
-#include(${QT_USE_FILE})
-#add_definitions(${QT_DEFINITIONS})
-add_definitions("${QT_DEFINITIONS} -DLIBHACKRF_DYN_RATES")
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(hackrfinput_SOURCES
+        ${hackrfinput_SOURCES}
+        hackrfinputgui.cpp
 
-#qt4_wrap_cpp(hackrfinput_HEADERS_MOC ${hackrfinput_HEADERS})
-qt5_wrap_ui(hackrfinput_FORMS_HEADERS ${hackrfinput_FORMS})
+        hackrfinputgui.ui
+    )
+    set(hackrfinput_HEADERS
+        ${hackrfinput_HEADERS}
+        hackrfinputgui.h
+    )
 
-add_library(inputhackrf SHARED
-    ${hackrfinput_SOURCES}
-    ${hackrfinput_HEADERS_MOC}
-    ${hackrfinput_FORMS_HEADERS}
+    set(TARGET_NAME inputhackrf)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER "plugins")
+else()
+    set(TARGET_NAME inputhackrfsrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER "pluginssrv")
+endif()
+
+add_library(${TARGET_NAME} SHARED
+	${hackrfinput_SOURCES}
 )
 
-if (BUILD_DEBIAN)
-target_link_libraries(inputhackrf
-    ${QT_LIBRARIES}
-    hackrf
-    sdrbase
-    sdrgui
-    swagger
-    hackrfdevice
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
+	sdrbase
+	${TARGET_LIB_GUI}
+        swagger
+        ${LIBHACKRF_LIBRARIES}
+        hackrfdevice
 )
-else (BUILD_DEBIAN)
-target_link_libraries(inputhackrf
-    ${QT_LIBRARIES}
-    ${LIBHACKRF_LIBRARIES}
-    sdrbase
-    sdrgui
-    swagger
-    hackrfdevice
-)
-endif (BUILD_DEBIAN)
 
-target_link_libraries(inputhackrf Qt5::Core Qt5::Widgets)
-
-install(TARGETS inputhackrf DESTINATION lib/plugins/samplesource)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_LIB_DIR}/${INSTALL_FOLDER}/samplesource)

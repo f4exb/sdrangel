@@ -21,8 +21,8 @@
 #include <QList>
 #include <QSysInfo>
 
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "../mainwindow.h"
+#include "../ui_mainwindow.h"
 #include "loggerwithfile.h"
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"

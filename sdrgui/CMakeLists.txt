@@ -1,7 +1,5 @@
 project (sdrgui)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(sdrgui_SOURCES
     mainwindow.cpp
     gui/aboutdialog.cpp
@@ -65,6 +63,33 @@ set(sdrgui_SOURCES
     soapygui/arginfogui.cpp
 
     webapi/webapiadaptergui.cpp
+
+    resources/res.qrc
+
+    mainwindow.ui
+    gui/aboutdialog.ui
+    gui/addpresetdialog.ui
+    gui/basicchannelsettingsdialog.ui
+    gui/basicdevicesettingsdialog.ui
+    gui/commandoutputdialog.ui
+    gui/cwkeyergui.ui
+    gui/editcommanddialog.ui
+    gui/externalclockdialog.ui
+    gui/glscopegui.ui
+    gui/glspectrumgui.ui
+    gui/pluginsdialog.ui
+    gui/audiodialog.ui
+    gui/audioselectdialog.ui
+    gui/samplingdevicecontrol.ui
+    gui/samplingdevicedialog.ui
+    gui/myposdialog.ui
+    gui/transverterdialog.ui
+    gui/loggingdialog.ui
+    soapygui/discreterangegui.ui
+    soapygui/intervalrangegui.ui
+    soapygui/intervalslidergui.ui
+    soapygui/complexfactorgui.ui
+    soapygui/arginfogui.ui
 )
 
 set(sdrgui_HEADERS
@@ -132,61 +157,7 @@ set(sdrgui_HEADERS
     webapi/webapiadaptergui.h
 )
 
-set(sdrgui_SOURCES
-    ${sdrgui_SOURCES}
-    ${sdrgui_HEADERS}
-)
-
-set(sdrgui_FORMS
-    mainwindow.ui
-    gui/aboutdialog.ui
-    gui/addpresetdialog.ui
-    gui/basicchannelsettingsdialog.ui
-    gui/basicdevicesettingsdialog.ui
-    gui/commandoutputdialog.ui
-    gui/cwkeyergui.ui
-    gui/editcommanddialog.ui
-    gui/externalclockdialog.ui
-    gui/glscopegui.ui
-    gui/glspectrumgui.ui
-    gui/pluginsdialog.ui
-    gui/audiodialog.ui
-    gui/audioselectdialog.ui
-    gui/samplingdevicecontrol.ui
-    gui/samplingdevicedialog.ui
-    gui/myposdialog.ui
-    gui/transverterdialog.ui
-    gui/loggingdialog.ui
-    soapygui/discreterangegui.ui
-    soapygui/intervalrangegui.ui
-    soapygui/intervalslidergui.ui
-    soapygui/complexfactorgui.ui
-    soapygui/arginfogui.ui
-)
-
-set(sdrgui_RESOURCES
-    resources/res.qrc
-)
-
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_SHARED)
-
-qt5_wrap_ui(sdrgui_FORMS_HEADERS ${sdrgui_FORMS})
-qt5_add_resources(sdrgui_RESOURCES_RCC ${sdrgui_RESOURCES})
-
-if(WIN32)
-    SET(sdrgui_SOURCES ${sdrgui_SOURCES} resources/sdrangel.rc)
-endif(WIN32)
-
-add_library(sdrgui SHARED
-    ${sdrgui_SOURCES}
-    ${sdrgui_HEADERS_MOC}
-    ${sdrgui_FORMS_HEADERS}
-    ${sdrgui_RESOURCES_RCC}
-)
-
 include_directories(
-    .
     ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/sdrbase
     ${CMAKE_SOURCE_DIR}/logging
@@ -197,17 +168,18 @@ include_directories(
     ${Boost_INCLUDE_DIRS}
 )
 
+add_library(sdrgui SHARED
+    ${sdrgui_SOURCES}
+)
+
 target_link_libraries(sdrgui
-    ${QT_LIBRARIES}
+    Qt5::Core
+    Qt5::Widgets
+    Qt5::OpenGL
+    Qt5::Multimedia
     ${OPENGL_LIBRARIES}
     sdrbase
     logging
 )
 
-set_target_properties(sdrgui PROPERTIES DEFINE_SYMBOL "sdrgui_EXPORTS")
-target_compile_features(sdrgui PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
-
-target_link_libraries(sdrgui Qt5::Core Qt5::Widgets Qt5::OpenGL Qt5::Multimedia)
-
-install(TARGETS sdrgui DESTINATION lib)
-
+install(TARGETS sdrgui DESTINATION ${INSTALL_LIB_DIR})
