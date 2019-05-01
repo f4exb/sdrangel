@@ -13,21 +13,6 @@ project(sdrangel)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-# declare build structures
-# !! change sdrbase/plugin/pluginmanager.cpp too !!
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(BUILD_PLUGINS_DIR ${CMAKE_BINARY_DIR}/lib/plugins)
-set(BUILD_PLUGINSSRV_DIR ${CMAKE_BINARY_DIR}/lib/pluginssrv)
-set(INSTALL_BIN_DIR "bin/")
-set(INSTALL_LIB_DIR "lib/sdrangel")
-set(INSTALL_PLUGINS_DIR ${INSTALL_LIB_DIR}/plugins)
-set(INSTALL_PLUGINSSRV_DIR ${INSTALL_LIB_DIR}/pluginssrv)
-
-set(CMAKE_MACOSX_RPATH 1)
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}")
-
 # SDRAngel cmake options
 option(DEBUG_OUTPUT "Print debug messages" OFF)
 option(SANITIZE_ADDRESS "Activate memory address sanitization" OFF)
@@ -50,9 +35,30 @@ option(ENABLE_RTLSDR "Enable rtl-sdr support" ON)
 option(ENABLE_SOAPYSDR "Enable SoapySDR support" ON)
 option(ENABLE_XTRX "Enable XTRX support" ON)
 
+# if we don't set build_type
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+# as default disable qDebug()
 if(NOT DEBUG_OUTPUT)
     add_definitions("-DQT_NO_DEBUG_OUTPUT")
 endif()
+
+# declare build structures
+# !! change sdrbase/plugin/pluginmanager.cpp too !!
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(BUILD_PLUGINS_DIR ${CMAKE_BINARY_DIR}/lib/plugins)
+set(BUILD_PLUGINSSRV_DIR ${CMAKE_BINARY_DIR}/lib/pluginssrv)
+set(INSTALL_BIN_DIR "bin/")
+set(INSTALL_LIB_DIR "lib/sdrangel")
+set(INSTALL_PLUGINS_DIR ${INSTALL_LIB_DIR}/plugins)
+set(INSTALL_PLUGINSSRV_DIR ${INSTALL_LIB_DIR}/pluginssrv)
+
+set(CMAKE_MACOSX_RPATH 1)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}")
 
 # set compiler
 include(FindCompiler)
@@ -81,8 +87,7 @@ find_package(Qt5 COMPONENTS MultimediaWidgets REQUIRED)
 
 # for the server we don't need OpenGL components
 if (BUILD_GUI)
-    set(QT_USE_QTOPENGL TRUE)
-    find_package(OpenGL REQUIRED)
+     find_package(OpenGL REQUIRED)
     find_package(Qt5 COMPONENTS OpenGL REQUIRED)
 endif()
 
