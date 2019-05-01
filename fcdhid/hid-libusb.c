@@ -70,7 +70,7 @@ extern "C" {
  */
 #ifdef __APPLE__
 
-#include "../apple/apple_compat.h"
+#include "../custom/apple/apple_compat.h"
 
 #endif
 

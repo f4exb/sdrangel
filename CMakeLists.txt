@@ -182,7 +182,7 @@ execute_process(
 add_definitions("-DGIT_COMMIT_HASH=${GIT_COMMIT_HASH}")
 
 configure_file(
-    ${CMAKE_SOURCE_DIR}/version.h.in
+    ${CMAKE_SOURCE_DIR}/custom/version.h.in
     ${CMAKE_BINARY_DIR}/generated/sdrangel_version.h
 )
 
