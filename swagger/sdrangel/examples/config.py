@@ -63,7 +63,7 @@ def main():
 
     except Exception as ex:
         tb = traceback.format_exc()
-        print >> sys.stderr, tb
+        print(tb, file=sys.stderr)
 
 
 # ======================================================================
