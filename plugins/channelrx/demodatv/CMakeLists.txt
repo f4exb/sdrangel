@@ -32,4 +32,4 @@ target_link_libraries(demodatv
 	sdrgui
 )
 
-install(TARGETS demodatv DESTINATION ${INSTALL_LIB_DIR}/plugins/channelrx)
+install(TARGETS demodatv DESTINATION ${INSTALL_PLUGINS_DIR})

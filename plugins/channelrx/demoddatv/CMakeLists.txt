@@ -58,4 +58,4 @@ target_link_libraries(demoddatv
     ${SWRESAMPLE_LIBRARIES}
 )
 
-install(TARGETS demoddatv DESTINATION ${INSTALL_LIB_DIR}/plugins/channelrx)
+install(TARGETS demoddatv DESTINATION ${INSTALL_PLUGINS_DIR})

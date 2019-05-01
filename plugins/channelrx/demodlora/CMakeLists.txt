@@ -31,4 +31,4 @@ target_link_libraries(demodlora
 	sdrgui
 )
 
-install(TARGETS demodlora DESTINATION ${INSTALL_LIB_DIR}/plugins/channelrx)
+install(TARGETS demodlora DESTINATION ${INSTALL_PLUGINS_DIR})

@@ -32,4 +32,4 @@ target_link_libraries(chanalyzer
 	sdrgui
 )
 
-install(TARGETS chanalyzer DESTINATION ${INSTALL_LIB_DIR}/plugins/channelrx)
+install(TARGETS chanalyzer DESTINATION ${INSTALL_PLUGINS_DIR})

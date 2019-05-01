@@ -53,7 +53,7 @@ PluginManager::PluginManager(QObject* parent) :
 
 PluginManager::~PluginManager()
 {
-//	freeAll();
+  //  freeAll();
 }
 
 void PluginManager::loadPlugins(const QString& pluginsSubDir)
@@ -65,19 +65,38 @@ void PluginManager::loadPlugins(const QString& pluginsSubDir)
 void PluginManager::loadPluginsPart(const QString& pluginsSubDir)
 {
     QString applicationDirPath = QCoreApplication::instance()->applicationDirPath();
-    QString applicationLibPath = applicationDirPath + "/../lib/" + pluginsSubDir;
+    QStringList PluginsPath;
+
+    // NOTE: not the best solution but for now this is
+    // on make install [PREFIX]/bin and [PREFIX]/lib/sdrangel
+    PluginsPath << applicationDirPath + "/../lib/sdrangel/" + pluginsSubDir;
+    // on build
+    PluginsPath << applicationDirPath + "/lib/" + pluginsSubDir;
 #ifdef __APPLE__
-    applicationLibPath.clear();
-    applicationLibPath.append(applicationDirPath + "/../Frameworks/" + pluginsSubDir);
+    // on SDRAngel.app
+    PluginsPath << applicationDirPath + "/../Frameworks/" + pluginsSubDir;
 #endif
-    QString applicationBuildPath = applicationDirPath + "/" + pluginsSubDir;
-    qDebug() << "PluginManager::loadPlugins: " << qPrintable(applicationLibPath) << "," << qPrintable(applicationBuildPath);
 
-    QDir pluginsLibDir = QDir(applicationLibPath);
-    QDir pluginsBuildDir = QDir(applicationBuildPath);
+    // NOTE: exit on the first folder found
+    bool found = false;
+    foreach (QString dir, PluginsPath)
+      {
+        QDir d(dir);
+        if (d.isEmpty()) {
+          qDebug("PluginManager::loadPluginsPart folder %s is empty", qPrintable(dir));
+          continue;
+        }
 
-    loadPluginsDir(pluginsLibDir);
-    loadPluginsDir(pluginsBuildDir);
+        found = true;
+        loadPluginsDir(d);
+        break;
+      }
+
+    if (!found)
+      {
+        qCritical("No plugins found. Exit immediately.");
+        exit(EXIT_FAILURE);
+      }
 }
 
 void PluginManager::loadPluginsFinal()
@@ -133,83 +152,72 @@ void PluginManager::loadPluginsDir(const QDir& dir)
 {
 	QDir pluginsDir(dir);
 
-	foreach (QString fileName, pluginsDir.entryList(QDir::Files))
-	{
-        if (fileName.endsWith(".so") || fileName.endsWith(".dll") || fileName.endsWith(".dylib"))
-		{
-			qDebug() << "PluginManager::loadPluginsDir: fileName: " << qPrintable(fileName);
+        foreach (QString fileName, pluginsDir.entryList(QDir::Files))
+          {
+            if (QLibrary::isLibrary(fileName))
+              {
+                qDebug("PluginManager::loadPluginsDir: fileName: %s", qPrintable(fileName));
 
-			QPluginLoader* loader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
-			PluginInterface* plugin = qobject_cast<PluginInterface*>(loader->instance());
+                QPluginLoader* plugin = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
+                if (!plugin->load())
+                  {
+                    qWarning("PluginManager::loadPluginsDir: %s", qPrintable(plugin->errorString()));
+                    delete plugin;
+                    continue;
+                  }
 
-			if (loader->isLoaded())
-			{
-				qInfo("PluginManager::loadPluginsDir: loaded plugin %s", qPrintable(fileName));
-			}
-			else
-			{
-				qWarning() << "PluginManager::loadPluginsDir: " << qPrintable(loader->errorString());
-			}
+                PluginInterface* instance = qobject_cast<PluginInterface*>(plugin->instance());
+                if (instance == nullptr)
+                  {
+                    qWarning("PluginManager::loadPluginsDir: Unable to get main instance of plugin: %s", qPrintable(fileName) );
+                    delete plugin;
+                    continue;
+                  }
 
-			if (plugin != 0)
-			{
-				m_plugins.append(Plugin(fileName, loader, plugin));
-			}
-			else
-			{
-				loader->unload();
-			}
-
-			delete loader; // Valgrind memcheck
-		}
-	}
-
-	// recursive calls on subdirectories
-
-	foreach (QString dirName, pluginsDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
-	{
-		loadPluginsDir(pluginsDir.absoluteFilePath(dirName));
-	}
+                qInfo("PluginManager::loadPluginsDir: loaded plugin %s", qPrintable(fileName));
+                m_plugins.append(Plugin(fileName, plugin, instance));
+              }
+          }
 }
 
 void PluginManager::listTxChannels(QList<QString>& list)
 {
-    list.clear();
+  list.clear();
 
-    for(PluginAPI::ChannelRegistrations::iterator it = m_txChannelRegistrations.begin(); it != m_txChannelRegistrations.end(); ++it)
+  for(PluginAPI::ChannelRegistrations::iterator it = m_txChannelRegistrations.begin(); it != m_txChannelRegistrations.end(); ++it)
     {
-        const PluginDescriptor& pluginDescipror = it->m_plugin->getPluginDescriptor();
-        list.append(pluginDescipror.displayedName);
+      const PluginDescriptor& pluginDescipror = it->m_plugin->getPluginDescriptor();
+      list.append(pluginDescipror.displayedName);
     }
 }
 
 void PluginManager::listRxChannels(QList<QString>& list)
 {
-    list.clear();
+  list.clear();
 
-    for(PluginAPI::ChannelRegistrations::iterator it = m_rxChannelRegistrations.begin(); it != m_rxChannelRegistrations.end(); ++it)
+  for(PluginAPI::ChannelRegistrations::iterator it = m_rxChannelRegistrations.begin(); it != m_rxChannelRegistrations.end(); ++it)
     {
-        const PluginDescriptor& pluginDesciptor = it->m_plugin->getPluginDescriptor();
-        list.append(pluginDesciptor.displayedName);
+      const PluginDescriptor& pluginDesciptor = it->m_plugin->getPluginDescriptor();
+      list.append(pluginDesciptor.displayedName);
     }
 }
 
 void PluginManager::createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI)
 {
-    if (channelPluginIndex < m_rxChannelRegistrations.size())
+  if (channelPluginIndex < m_rxChannelRegistrations.size())
     {
-        PluginInterface *pluginInterface = m_rxChannelRegistrations[channelPluginIndex].m_plugin;
-        BasebandSampleSink *rxChannel = pluginInterface->createRxChannelBS(deviceAPI);
-        pluginInterface->createRxChannelGUI(deviceUISet, rxChannel);
+      PluginInterface *pluginInterface = m_rxChannelRegistrations[channelPluginIndex].m_plugin;
+      BasebandSampleSink *rxChannel = pluginInterface->createRxChannelBS(deviceAPI);
+      pluginInterface->createRxChannelGUI(deviceUISet, rxChannel);
     }
 }
 
 void PluginManager::createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI)
 {
-    if (channelPluginIndex < m_txChannelRegistrations.size())
+  if (channelPluginIndex < m_txChannelRegistrations.size())
     {
-        PluginInterface *pluginInterface = m_txChannelRegistrations[channelPluginIndex].m_plugin;
-        BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(deviceAPI);
-        pluginInterface->createTxChannelGUI(deviceUISet, txChannel);
+      PluginInterface *pluginInterface = m_txChannelRegistrations[channelPluginIndex].m_plugin;
+      BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(deviceAPI);
+      pluginInterface->createTxChannelGUI(deviceUISet, txChannel);
     }
 }

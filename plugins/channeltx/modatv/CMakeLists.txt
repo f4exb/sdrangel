@@ -33,12 +33,12 @@ if(NOT SERVER_MODE)
     set(TARGET_NAME modatv)
     set(TARGET_LIB "Qt5::Widgets")
     set(TARGET_LIB_GUI "sdrgui")
-    set(INSTALL_FOLDER "plugins")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()
     set(TARGET_NAME modatvsrv)
     set(TARGET_LIB "")
     set(TARGET_LIB_GUI "")
-    set(INSTALL_FOLDER "pluginssrv")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
 endif()
 
 add_library(${TARGET_NAME} SHARED
@@ -54,4 +54,4 @@ target_link_libraries(${TARGET_NAME}
         ${OpenCV_LIBS}
 )
 
-install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_LIB_DIR}/${INSTALL_FOLDER}/channeltx)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
