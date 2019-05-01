@@ -25,6 +25,9 @@ set(INSTALL_LIB_DIR "lib/sdrangel")
 set(INSTALL_PLUGINS_DIR ${INSTALL_LIB_DIR}/plugins)
 set(INSTALL_PLUGINSSRV_DIR ${INSTALL_LIB_DIR}/pluginssrv)
 
+set(CMAKE_MACOSX_RPATH 1)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}")
+
 # SDRAngel cmake options
 option(DEBUG_OUTPUT "Print debug messages" OFF)
 option(SANITIZE_ADDRESS "Activate memory address sanitization" OFF)
@@ -78,6 +81,7 @@ find_package(Qt5 COMPONENTS MultimediaWidgets REQUIRED)
 
 # for the server we don't need OpenGL components
 if (BUILD_GUI)
+    set(QT_USE_QTOPENGL TRUE)
     find_package(OpenGL REQUIRED)
     find_package(Qt5 COMPONENTS OpenGL REQUIRED)
 endif()
