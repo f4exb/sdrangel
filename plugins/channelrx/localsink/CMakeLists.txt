@@ -35,35 +35,18 @@ add_library(localsink SHARED
 	${localsink_FORMS_HEADERS}
 )
 
-if (BUILD_DEBIAN)
 target_include_directories(localsink PUBLIC
     .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
-else (BUILD_DEBIAN)
-target_include_directories(localsink PUBLIC
-    .
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-)
-endif (BUILD_DEBIAN)
 
-if (BUILD_DEBIAN)
 target_link_libraries(localsink
     ${QT_LIBRARIES}
     sdrbase
     sdrgui
     swagger
 )
-else (BUILD_DEBIAN)
-target_link_libraries(localsink
-    ${QT_LIBRARIES}
-    sdrbase
-    sdrgui
-    swagger
-)
-endif (BUILD_DEBIAN)
 
 target_link_libraries(localsink Qt5::Core Qt5::Widgets)
 

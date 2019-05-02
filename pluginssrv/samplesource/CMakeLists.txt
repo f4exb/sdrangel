@@ -106,3 +106,4 @@ endif (BUILD_DEBIAN)
 
 add_subdirectory(filesource)
 add_subdirectory(testsource)
+add_subdirectory(localinput)

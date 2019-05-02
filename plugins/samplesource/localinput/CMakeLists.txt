@@ -20,7 +20,6 @@ set(localinput_FORMS
     localinputgui.ui
 )
 
-#include(${QT_USE_FILE})
 add_definitions(${QT_DEFINITIONS})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
@@ -33,39 +32,18 @@ add_library(inputlocal SHARED
     ${localinput_FORMS_HEADERS}
 )
 
-if (BUILD_DEBIAN)
 target_include_directories(inputlocal PUBLIC
     .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${LIBCM256CCSRC}/..
 )
-else (BUILD_DEBIAN)
-target_include_directories(inputlocal PUBLIC
-    .
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${CM256CC_INCLUDE_DIR}
-)
-endif (BUILD_DEBIAN)
 
-if (BUILD_DEBIAN)
 target_link_libraries(inputlocal
     ${QT_LIBRARIES}
-    cm256cc
     sdrbase
     sdrgui
     swagger
 )
-else (BUILD_DEBIAN)
-target_link_libraries(inputlocal
-    ${QT_LIBRARIES}
-    ${CM256CC_LIBRARIES}
-    sdrbase
-    sdrgui
-    swagger
-)
-endif (BUILD_DEBIAN)
 
 target_link_libraries(inputlocal Qt5::Core Qt5::Widgets)
 
