@@ -33,6 +33,7 @@ void handler(int sig) {
     QCoreApplication::quit();
 }
 
+#ifndef _WIN32
 void catchUnixSignals(const std::vector<int>& quitSignals) {
     sigset_t blocking_mask;
     sigemptyset(&blocking_mask);
@@ -50,6 +51,7 @@ void catchUnixSignals(const std::vector<int>& quitSignals) {
         sigaction(*it, &sa, 0);
     }
 }
+#endif
 
 static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *logger)
 {
@@ -59,9 +61,11 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
     QCoreApplication::setApplicationName("SDRangelSrv");
     QCoreApplication::setApplicationVersion(SDRANGEL_VERSION);
 
+#ifndef _WIN32
     int catchSignals[] = {SIGQUIT, SIGINT, SIGTERM, SIGHUP};
     std::vector<int> vsig(catchSignals, catchSignals + sizeof(catchSignals) / sizeof(int));
     catchUnixSignals(vsig);
+#endif
 
     MainParser parser;
     parser.parse(a);
