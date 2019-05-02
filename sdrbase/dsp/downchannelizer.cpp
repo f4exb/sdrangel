@@ -79,6 +79,10 @@ void DownChannelizer::feed(const SampleVector::const_iterator& begin, const Samp
 
 			for (; stage != m_filterStages.end(); ++stage)
 			{
+#ifndef SDR_RX_SAMPLE_24BIT
+                s.m_real /= 2; // avoid saturation on 16 bit samples
+                s.m_imag /= 2;
+#endif
 				if(!(*stage)->work(&s))
 				{
 					break;
@@ -87,8 +91,10 @@ void DownChannelizer::feed(const SampleVector::const_iterator& begin, const Samp
 
 			if(stage == m_filterStages.end())
 			{
-			    s.m_real /= (1<<(m_filterStages.size()));
+#ifdef SDR_RX_SAMPLE_24BIT
+			    s.m_real /= (1<<(m_filterStages.size())); // on 32 bit samples there is enough headroom to just divide the final result
 			    s.m_imag /= (1<<(m_filterStages.size()));
+#endif
 				m_sampleBuffer.push_back(s);
 			}
 		}
