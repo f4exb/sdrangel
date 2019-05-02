@@ -2,7 +2,15 @@
 
 <h2>Introduction</h2>
 
-This plugin sends I/Q samples from the baseband to a Local Input plugin source in another device set.
+This plugin sends I/Q samples from the baseband to a Local Input plugin source in another device set. It is basically the same as the Remote Sink channel plugin but pipes the samples internally instead of sending them over the network.
+
+It may be used when you want to "zoom in" a particular area of the baseband. For example you would like to receive both the SSB section and the repeater section of the amateur 2m band (Region 1) using a single Rx device for example the RTL-SDR. You would then run the RTL-SDR at 2.4 MS/s without decimation. This provides a 2.4 MHz bandwidth that when centered on 145 MHz spans more than the entire 2m band (Region 1).
+
+You can then use a Local Sink decimating by 8 and centered on 144.250 MHz (Position code 2, filter chain code LLH) thus spanning 300 kHz from 144.150 to 144.400 MHz. You can use another Local Sink decimating by 4 and centered on 145.600 MHz (Position code 7, filter chain code HC) thus spanning 600 kHz from 145.300 to 145.900 MHz and including the entire repeater band.
+
+These Local Sinks can then be coupled with two Local Input device source plugins in two different device sets. In these device sets you will get a better view of the respective sub bands.
+
+Note that because it uses only the channelizer half band filter chain to achieve decimation and center frequency shift you have a limited choice on the center frequencies that may be used (similarly to the Remote Sink). The available center frequencies depend on the baseband sample rate, the channel decimation and the filter chain that is used so you have to play with these parameters to obtain a suitable center frequency and pass band.
 
 <h2>Interface</h2>
 

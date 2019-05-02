@@ -131,6 +131,9 @@ void LocalInput::setSampleRate(int sampleRate)
 {
     m_sampleRate = sampleRate;
 
+    DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency); // Frequency in Hz for the DSP engine
+    m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+
     if (getMessageQueueToGUI())
     {
         MsgReportSampleRateAndFrequency *msg = MsgReportSampleRateAndFrequency::create(m_sampleRate, m_centerFrequency);
@@ -146,6 +149,9 @@ quint64 LocalInput::getCenterFrequency() const
 void LocalInput::setCenterFrequency(qint64 centerFrequency)
 {
     m_centerFrequency = centerFrequency;
+
+    DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency); // Frequency in Hz for the DSP engine
+    m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
     if (getMessageQueueToGUI())
     {
