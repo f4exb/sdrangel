@@ -17,8 +17,6 @@
 
 #include "localsink.h"
 
-#include <sys/time.h>
-#include <unistd.h>
 #include <boost/crc.hpp>
 #include <boost/cstdint.hpp>
 

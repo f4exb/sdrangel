@@ -12,7 +12,7 @@ QT += core gui widgets multimedia network opengl
 TARGET = inputremote
 
 CONFIG(MINGW32):LIBCM256CCSRC = "C:\softs\cm256cc"
-CONFIG(MSVC):LIBCM256CCSRC = "C:\softs\cm256cc"
+CONFIG(MSVC):LIBCM256CCSRC = "C:\softs"
 CONFIG(macx):LIBCM256CCSRC = "../../../../deps/cm256cc"
 
 INCLUDEPATH += $$PWD

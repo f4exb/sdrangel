@@ -64,6 +64,7 @@ copy plugins\channelrx\demodnfm\%1\demodnfm.dll %2\plugins\channelrx
 copy plugins\channelrx\demodssb\%1\demodssb.dll %2\plugins\channelrx
 copy plugins\channelrx\demodwfm\%1\demodwfm.dll %2\plugins\channelrx
 copy plugins\channelrx\udpsink\%1\udpsink.dll %2\plugins\channelrx
+copy plugins\channelrx\localsink\%1\localsink.dll %2\plugins\channelrx
 
 copy plugins\channeltx\modam\%1\modam.dll %2\plugins\channeltx
 REM copy plugins\channeltx\modatv\%1\modatv.dll %2\plugins\channeltx
@@ -84,6 +85,7 @@ copy plugins\samplesource\limesdrinput\%1\inputlimesdr.dll %2\plugins\samplesour
 copy plugins\samplesource\plutosdrinput\%1\inputplutosdr.dll %2\plugins\samplesource
 copy plugins\samplesource\remoteinput\%1\inputremote.dll %2\plugins\samplesource
 copy plugins\samplesource\soapysdrinput\%1\inputsoapysdr.dll %2\plugins\samplesource
+copy plugins\samplesource\localinput\%1\inputlocal.dll %2\plugins\samplesource
 
 copy plugins\samplesink\filesink\%1\outputfilesink.dll %2\plugins\samplesink
 copy plugins\samplesink\bladerf1output\%1\outputbladerf1.dll %2\plugins\samplesink

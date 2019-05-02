@@ -18,7 +18,7 @@ QMAKE_CXXFLAGS += -msse4.1
 QMAKE_CXXFLAGS += -std=c++11
 
 CONFIG(MINGW32):LIBDSDCCSRC = "C:\softs\dsdcc"
-CONFIG(MSVC):LIBDSDCCSRC = "C:\softs\dsdcc"
+CONFIG(MSVC):LIBDSDCCSRC = "C:\softs"
 CONFIG(macx):LIBDSDCCSRC = "../../../../deps/dsdcc"
 
 CONFIG(MINGW32):LIBMBELIBSRC = "C:\softs\mbelib"
