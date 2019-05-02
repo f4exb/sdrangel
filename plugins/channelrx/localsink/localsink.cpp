@@ -346,6 +346,8 @@ int LocalSink::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
+    response.setLocalSinkSettings(new SWGSDRangel::SWGLocalSinkSettings());
+    response.getLocalSinkSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
     return 200;
 }

@@ -389,7 +389,8 @@ int LocalInput::webapiReportGet(
 
 void LocalInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
-    (void) response;
+    response.getLocalInputReport()->setCenterFrequency(m_centerFrequency);
+    response.getLocalInputReport()->setSampleRate(m_sampleRate);
 }
 
 void LocalInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const LocalInputSettings& settings, bool force)
