@@ -28,7 +28,6 @@
 #include "loggerwithfile.h"
 #include "mainbench.h"
 #include "dsp/dsptypes.h"
-#include "sdrangel_version.h"
 
 void handler(int sig) {
     fprintf(stderr, "quit the application by signal(%d).\n", sig);
@@ -59,7 +58,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 
     QCoreApplication::setOrganizationName("f4exb");
     QCoreApplication::setApplicationName("SDRangelBench");
-    QCoreApplication::setApplicationVersion(GIT_COMMIT_HASH_STR);
+    QCoreApplication::setApplicationVersion(SDRANGEL_VERSION);
 
     int catchSignals[] = {SIGQUIT, SIGINT, SIGTERM, SIGHUP};
     std::vector<int> vsig(catchSignals, catchSignals + sizeof(catchSignals) / sizeof(int));
@@ -70,43 +69,41 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 
 #if QT_VERSION >= 0x050400
     qInfo("%s %s Qt %s %db %s %s DSP Rx:%db Tx:%db PID %lld",
-            qPrintable(QCoreApplication::applicationName()),
-            qPrintable(QCoreApplication::applicationVersion()),
-            qPrintable(QString(QT_VERSION_STR)),
-            QT_POINTER_SIZE*8,
-            qPrintable(QSysInfo::currentCpuArchitecture()),
-            qPrintable(QSysInfo::prettyProductName()),
-            SDR_RX_SAMP_SZ,
-            SDR_TX_SAMP_SZ,
-            QCoreApplication::applicationPid());
+          qPrintable(QCoreApplication::applicationName()),
+          qPrintable(QCoreApplication::applicationVersion()),
+          qPrintable(QString(QT_VERSION_STR)),
+          QT_POINTER_SIZE*8,
+          qPrintable(QSysInfo::currentCpuArchitecture()),
+          qPrintable(QSysInfo::prettyProductName()),
+          SDR_RX_SAMP_SZ,
+          SDR_TX_SAMP_SZ,
+          QCoreApplication::applicationPid());
 #else
     qInfo("%s %s Qt %s %db DSP Rx:%db Tx:%db PID %lld",
-            qPrintable(QCoreApplication::applicationName()),
-            qPrintable((QCoreApplication::>applicationVersion()),
-            qPrintable(QString(QT_VERSION_STR)),
-            QT_POINTER_SIZE*8,
-            SDR_RX_SAMP_SZ,
-            SDR_TX_SAMP_SZ,
-            QCoreApplication::applicationPid());
+          qPrintable(QCoreApplication::applicationName()),
+          qPrintable((QCoreApplication::>applicationVersion()),
+                     qPrintable(QString(QT_VERSION_STR)),
+                     QT_POINTER_SIZE*8,
+                     SDR_RX_SAMP_SZ,
+                     SDR_TX_SAMP_SZ,
+                     QCoreApplication::applicationPid());
 #endif
 
-    MainBench m(logger, parser, &a);
+          MainBench m(logger, parser, &a);
 
-    // This will cause the application to exit when the main core is finished
-    QObject::connect(&m, SIGNAL(finished()), &a, SLOT(quit()));
-    // This will run the task from the application event loop
-    QTimer::singleShot(0, &m, SLOT(run()));
+          // This will cause the application to exit when the main core is finished
+          QObject::connect(&m, SIGNAL(finished()), &a, SLOT(quit()));
+          // This will run the task from the application event loop
+          QTimer::singleShot(0, &m, SLOT(run()));
 
-    return a.exec();
-}
+          return a.exec();
+          }
 
-int main(int argc, char* argv[])
-{
-    qtwebapp::LoggerWithFile *logger = new qtwebapp::LoggerWithFile(qApp);
-    logger->installMsgHandler();
-    int res = runQtApplication(argc, argv, logger);
-    qWarning("SDRangel quit.");
-    return res;
-}
-
-
+      int main(int argc, char* argv[])
+      {
+        qtwebapp::LoggerWithFile *logger = new qtwebapp::LoggerWithFile(qApp);
+        logger->installMsgHandler();
+        int res = runQtApplication(argc, argv, logger);
+        qWarning("SDRangel quit.");
+        return res;
+      }

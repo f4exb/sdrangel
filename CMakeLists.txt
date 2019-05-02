@@ -9,16 +9,34 @@ project(sdrangel)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
-# set version
-SET(sdrangel_VERSION_MAJOR "4")
-SET(sdrangel_VERSION_MINOR "5")
-SET(sdrangel_VERSION_PATCH "6")
-SET(sdrangel_VERSION_SUFFIX "")
-SET(sdrangel_VERSION "${sdrangel_VERSION_MAJOR}.${sdrangel_VERSION_MINOR}.${sdrangel_VERSION_PATCH}${sdrangel_VERSION_SUFFIX}")
-SET(CPACK_PACKAGE_VERSION "${sdrangel_VERSION_MAJOR}.${sdrangel_VERSION_MINOR}.${sdrangel_VERSION_PATCH}")
-SET(CPACK_PACKAGE_VERSION_MAJOR ${sdrangel_VERSION_MAJOR})
-SET(CPACK_PACKAGE_VERSION_MINOR ${sdrangel_VERSION_MINOR})
-SET(CPACK_PACKAGE_VERSION_PATCH ${sdrangel_VERSION_PATCH})
+# configure version
+set(SDRANGEL_VERSION_MAJOR "4")
+set(SDRANGEL_VERSION_MINOR "5")
+set(SDRANGEL_VERSION_PATCH "6")
+set(SDRANGEL_VERSION_SUFFIX "")
+
+find_package(Git)
+if(GIT_FOUND)
+    execute_process(COMMAND "${GIT_EXECUTABLE}" rev-parse --short HEAD
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        RESULT_VARIABLE res
+        OUTPUT_VARIABLE out
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(NOT res)
+        set(SDRANGEL_VERSION_SUFFIX "-${out}")
+    endif()
+endif()
+
+set(SDRANGEL_VERSION "${SDRANGEL_VERSION_MAJOR}.${SDRANGEL_VERSION_MINOR}.${SDRANGEL_VERSION_PATCH}${SDRANGEL_VERSION_SUFFIX}")
+message(STATUS "SDRAngel Version: ${SDRANGEL_VERSION}")
+add_definitions("-DSDRANGEL_LIB_VERSION=\"${SDRANGEL_VERSION_MAJOR}.${SDRANGEL_VERSION_MINOR}.${SDRANGEL_VERSION_PATCH}\"")
+add_definitions("-DSDRANGEL_VERSION=\"${SDRANGEL_VERSION}\"")
+
+set(CPACK_PACKAGE_VERSION "${SDRANGEL_VERSION}")
+set(CPACK_PACKAGE_VERSION_MAJOR ${SDRANGEL_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${SDRANGEL_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${SDRANGEL_VERSION_PATCH})
 
 # disable only when needed
 set(CMAKE_CXX_STANDARD 11)
@@ -208,21 +226,6 @@ elseif (C_GCC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=1")
 endif()
 
-########## version configuration ############
-## need more work
-execute_process(
-    COMMAND git describe --abbrev=8 --always --tags
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_COMMIT_HASH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-add_definitions("-DGIT_COMMIT_HASH=${GIT_COMMIT_HASH}")
-set(CPACK_PACKAGE_VERSION ${GIT_COMMIT_HASH})
-
-configure_file(
-    ${CMAKE_SOURCE_DIR}/custom/version.h.in
-    ${CMAKE_BINARY_DIR}/generated/sdrangel_version.h
-)
 
 ########### include sub-projects ############
 if(BUILD_EXTERNAL_LIBRARIES)
@@ -277,7 +280,6 @@ endif()
 # includes needed by the following target
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}/generated
     ${CMAKE_SOURCE_DIR}/sdrbase
     ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/sdrgui
