@@ -1841,6 +1841,9 @@ margin-bottom: 20px;
     "NFMModSettings" : {
       "$ref" : "#/definitions/NFMModSettings"
     },
+    "LocalSinkSettings" : {
+      "$ref" : "#/definitions/LocalSinkSettings"
+    },
     "RemoteSinkSettings" : {
       "$ref" : "#/definitions/RemoteSinkSettings"
     },
@@ -2150,6 +2153,9 @@ margin-bottom: 20px;
     "limeSdrOutputReport" : {
       "$ref" : "#/definitions/LimeSdrOutputReport"
     },
+    "localInputReport" : {
+      "$ref" : "#/definitions/LocalInputReport"
+    },
     "perseusReport" : {
       "$ref" : "#/definitions/PerseusReport"
     },
@@ -2280,6 +2286,9 @@ margin-bottom: 20px;
     },
     "limeSdrOutputSettings" : {
       "$ref" : "#/definitions/LimeSdrOutputSettings"
+    },
+    "localInputSettings" : {
+      "$ref" : "#/definitions/LocalInputSettings"
     },
     "perseusSettings" : {
       "$ref" : "#/definitions/PerseusSettings"
@@ -3213,6 +3222,82 @@ margin-bottom: 20px;
     }
   },
   "description" : "LimeSDR"
+};
+            defs.LocalInputReport = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "uint64"
+    },
+    "sampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "LocalInput"
+};
+            defs.LocalInputSettings = {
+  "properties" : {
+    "dcBlock" : {
+      "type" : "integer"
+    },
+    "iqCorrection" : {
+      "type" : "integer"
+    },
+    "fileRecordName" : {
+      "type" : "string"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "LocalInput"
+};
+            defs.LocalSinkSettings = {
+  "properties" : {
+    "localDeviceIndex" : {
+      "type" : "integer",
+      "description" : "Receiving local device index"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "filterChainHash" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "Local channel sink settings"
 };
             defs.LocationInformation = {
   "required" : [ "latitude", "longitude" ],
@@ -5765,7 +5850,7 @@ margin-bottom: 20px;
         <div id="header">
           <div id="api-_">
             <h2 id="welcome-to-apidoc">API and SDK Documentation</h2>
-              <div class="app-desc">Version: 4.5.6</div>
+              <div class="app-desc">Version: 4.6.0</div>
             <hr>
             <div><p>This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube</p>
 <hr />
@@ -24739,7 +24824,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-04-26T13:56:51.976+02:00
+              Generated 2019-05-01T23:54:36.944+02:00
             </div>
           </div>
       </div>

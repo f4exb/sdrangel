@@ -20,7 +20,7 @@ set(remoteinput_SOURCES
     remoteinputplugin.cpp
 )
 
-set(sremoteinput_HEADERS
+set(remoteinput_HEADERS
     remoteinputbuffer.h
     remoteinputudphandler.h
     remoteinputgui.h

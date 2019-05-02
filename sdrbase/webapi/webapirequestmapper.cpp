@@ -2121,6 +2121,21 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
+    else if ((*deviceHwType == "LocalInput") && (deviceSettings.getTx() == 0))
+    {
+        if (jsonObject.contains("localInputSettings") && jsonObject["localInputSettings"].isObject())
+        {
+            QJsonObject localInputSettingsJsonObject = jsonObject["localInputSettings"].toObject();
+            deviceSettingsKeys = localInputSettingsJsonObject.keys();
+            deviceSettings.setLocalInputSettings(new SWGSDRangel::SWGLocalInputSettings());
+            deviceSettings.getLocalInputSettings()->fromJsonObject(localInputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     else if ((*deviceHwType == "RemoteOutput") && (deviceSettings.getTx() != 0))
     {
         if (jsonObject.contains("remoteOutputSettings") && jsonObject["remoteOutputSettings"].isObject())
@@ -2295,6 +2310,20 @@ bool WebAPIRequestMapper::validateChannelSettings(
 
             channelSettings.setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
             channelSettings.getNfmModSettings()->fromJsonObject(nfmModSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (*channelType == "LocalSink")
+    {
+        if (channelSettings.getTx() == 0)
+        {
+            QJsonObject localChannelSinkSettingsJsonObject = jsonObject["LocalSinkSettings"].toObject();
+            channelSettingsKeys = localChannelSinkSettingsJsonObject.keys();
+            channelSettings.setLocalSinkSettings(new SWGSDRangel::SWGLocalSinkSettings());
+            channelSettings.getLocalSinkSettings()->fromJsonObject(localChannelSinkSettingsJsonObject);
             return true;
         }
         else {

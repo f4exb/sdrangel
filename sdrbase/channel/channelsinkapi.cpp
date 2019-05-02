@@ -23,6 +23,7 @@
 ChannelSinkAPI::ChannelSinkAPI(const QString& name) :
         m_name(name),
         m_indexInDeviceSet(-1),
+        m_deviceSourceAPI(0),
         m_uid(UidCalculator::getNewObjectId())
 {
 }

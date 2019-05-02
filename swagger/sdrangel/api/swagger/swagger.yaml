@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.5.6"
+  version: "4.6.0"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -1806,6 +1806,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputSettings"
       limeSdrOutputSettings:
         $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputSettings"
+      localInputSettings:
+        $ref: "http://localhost:8081/api/swagger/include/LocalInput.yaml#/LocalInputSettings"
       perseusSettings:
         $ref: "http://localhost:8081/api/swagger/include/Perseus.yaml#/PerseusSettings"
       plutoSdrInputSettings:
@@ -1859,6 +1861,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
       limeSdrOutputReport:
         $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
+      localInputReport:
+        $ref: "http://localhost:8081/api/swagger/include/LocalInput.yaml#/LocalInputReport"
       perseusReport:
         $ref: "http://localhost:8081/api/swagger/include/Perseus.yaml#/PerseusReport"
       plutoSdrInputReport:
@@ -1919,6 +1923,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
         $ref: "http://localhost:8081/api/swagger/include/NFMMod.yaml#/NFMModSettings"
+      LocalSinkSettings:
+        $ref: "http://localhost:8081/api/swagger/include/LocalSink.yaml#/LocalSinkSettings"
       RemoteSinkSettings:
         $ref: "http://localhost:8081/api/swagger/include/RemoteSink.yaml#/RemoteSinkSettings"
       RemoteSourceSettings:

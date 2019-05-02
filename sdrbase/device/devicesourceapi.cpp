@@ -93,6 +93,7 @@ void DeviceSourceAPI::renumerateChannels()
     {
         m_channelAPIs.at(i)->setIndexInDeviceSet(i);
         m_channelAPIs.at(i)->setDeviceSetIndex(m_deviceTabIndex);
+        m_channelAPIs.at(i)->setDeviceSourceAPI(this);
     }
 }
 

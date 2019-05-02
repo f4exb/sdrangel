@@ -9,6 +9,7 @@ add_subdirectory(udpsink)
 add_subdirectory(demodwfm)
 add_subdirectory(chanalyzer)
 add_subdirectory(demodatv)
+add_subdirectory(localsink)
 
 if(LIBDSDCC_FOUND AND LIBMBE_FOUND)
     add_subdirectory(demoddsd)

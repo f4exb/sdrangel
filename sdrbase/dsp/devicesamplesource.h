@@ -61,6 +61,7 @@ public:
 
 	virtual const QString& getDeviceDescription() const = 0;
 	virtual int getSampleRate() const = 0; //!< Sample rate exposed by the source
+    virtual void setSampleRate(int sampleRate) = 0; //!< For when the source sample rate is set externally
 	virtual quint64 getCenterFrequency() const = 0; //!< Center frequency exposed by the source
     virtual void setCenterFrequency(qint64 centerFrequency) = 0;
 

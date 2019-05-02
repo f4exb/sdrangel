@@ -1,3 +1,9 @@
+sdrangel (4.6.0-1) unstable; urgency=medium
+
+  * New LocalSink and LocalInput plugin pair to use sub basebands internally
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 02 May 2019 11:14:18 +0100
+
 sdrangel (4.5.6-1) unstable; urgency=medium
 
   * Remote channel sink: implemented decimation with possible center shift. Issue #331

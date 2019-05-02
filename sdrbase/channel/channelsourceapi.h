@@ -25,6 +25,8 @@
 
 #include "export.h"
 
+class DeviceSinkAPI;
+
 namespace SWGSDRangel
 {
     class SWGChannelSettings;
@@ -78,6 +80,8 @@ public:
     void setIndexInDeviceSet(int indexInDeviceSet) { m_indexInDeviceSet = indexInDeviceSet; }
     int getDeviceSetIndex() const { return m_deviceSetIndex; }
     void setDeviceSetIndex(int deviceSetIndex) { m_deviceSetIndex = deviceSetIndex; }
+    DeviceSinkAPI *getDeviceSinkAPI() { return m_deviceSinkAPI; }
+    void setDeviceSinkAPI(DeviceSinkAPI *deviceSinkAPI) { m_deviceSinkAPI = deviceSinkAPI; }
     uint64_t getUID() const { return m_uid; }
 
 private:
@@ -88,6 +92,7 @@ private:
 
     int m_indexInDeviceSet;
     int m_deviceSetIndex;
+    DeviceSinkAPI *m_deviceSinkAPI;
     uint64_t m_uid;
 };
 

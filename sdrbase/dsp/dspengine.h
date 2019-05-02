@@ -52,9 +52,11 @@ public:
 
 	AudioDeviceManager *getAudioDeviceManager() { return &m_audioDeviceManager; }
 
+    uint32_t getDeviceSourceEnginesNumber() const { return m_deviceSourceEngines.size(); }
     DSPDeviceSourceEngine *getDeviceSourceEngineByIndex(uint deviceIndex) { return m_deviceSourceEngines[deviceIndex]; }
     DSPDeviceSourceEngine *getDeviceSourceEngineByUID(uint uid);
 
+    uint32_t getDeviceSinkEnginesNumber() const { return m_deviceSinkEngines.size(); }
     DSPDeviceSinkEngine *getDeviceSinkEngineByIndex(uint deviceIndex) { return m_deviceSinkEngines[deviceIndex]; }
     DSPDeviceSinkEngine *getDeviceSinkEngineByUID(uint uid);
 

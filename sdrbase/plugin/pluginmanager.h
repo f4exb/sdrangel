@@ -103,6 +103,8 @@ private:
 	PluginAPI::SamplingDeviceRegistrations m_sampleSinkRegistrations; //!< Output sink plugins (one per device kind) register here
 
 	// "Local" sample source device IDs
+    static const QString m_localInputHardwareID;     //!< Local input hardware ID
+    static const QString m_localInputDeviceTypeID;   //!< Local input plugin ID
     static const QString m_remoteInputHardwareID;    //!< Remote input hardware ID
     static const QString m_remoteInputDeviceTypeID;  //!< Remote input plugin ID
     static const QString m_fileSourceHardwareID;     //!< FileSource source hardware ID

@@ -33,6 +33,8 @@
 
 #include "plugin/pluginmanager.h"
 
+const QString PluginManager::m_localInputHardwareID = "LocalInput";
+const QString PluginManager::m_localInputDeviceTypeID = "sdrangel.samplesource.localinput";
 const QString PluginManager::m_remoteInputHardwareID = "RemoteInput";
 const QString PluginManager::m_remoteInputDeviceTypeID = "sdrangel.samplesource.remoteinput";
 const QString PluginManager::m_fileSourceHardwareID = "FileSource";

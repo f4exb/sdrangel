@@ -41,7 +41,7 @@
 #include "dsp/hbfilterchainconverter.h"
 #include "device/devicesourceapi.h"
 
-#include "../remotesink/remotesinkthread.h"
+#include "remotesinkthread.h"
 
 MESSAGE_CLASS_DEFINITION(RemoteSink::MsgConfigureRemoteSink, Message)
 MESSAGE_CLASS_DEFINITION(RemoteSink::MsgSampleRateNotification, Message)

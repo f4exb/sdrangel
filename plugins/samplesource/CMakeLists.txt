@@ -102,5 +102,5 @@ if (BUILD_DEBIAN)
 endif (BUILD_DEBIAN)
 
 add_subdirectory(filesource)
+add_subdirectory(localinput)
 add_subdirectory(testsource)
-
