@@ -93,6 +93,12 @@ set(INSTALL_LIB_DIR "lib/${PROJECT_NAME}")
 set(INSTALL_PLUGINS_DIR ${INSTALL_LIB_DIR}/plugins)
 set(INSTALL_PLUGINSSRV_DIR ${INSTALL_LIB_DIR}/pluginssrv)
 
+if(NOT CMAKE_INSTALL_RPATH)
+    set(CMAKE_INSTALL_RPATH
+        ${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR} CACHE
+        PATH "Library Install RPath" FORCE)
+endif(NOT CMAKE_INSTALL_RPATH)
+
 if (APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET, "10.9")
     set(CMAKE_MACOSX_RPATH ON)
@@ -108,11 +114,16 @@ if (APPLE)
     endif(NOT CMAKE_INSTALL_NAME_DIR)
 endif()
 
-if(NOT CMAKE_INSTALL_RPATH)
-    set(CMAKE_INSTALL_RPATH
-        ${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR} CACHE
-        PATH "Library Install RPath" FORCE)
-endif(NOT CMAKE_INSTALL_RPATH)
+if (WIN32)
+   set(EXTERNAL_LIBRARY_FOLDER "${CMAKE_SOURCE_DIR}/external/windows")
+   set(BOOST_ROOT "${EXTERNAL_LIBRARY_FOLDER}/boot")
+   set(FFTW3F_INCLUDE_DIRS="${EXTERNAL_LIBRARY_FOLDER}/fftw-3/include")
+   set(FFTW3F_LIBRARIES="${EXTERNAL_LIBRARY_FOLDER}/fftw-3/libfftw3f-3.dll")
+   set(LIBUSB_INCLUDE_DIR="${EXTERNAL_LIBRARY_FOLDER}/libusb/include")
+   set(LIBUSB_LIBRARIES="${EXTERNAL_LIBRARY_FOLDER}/libusb/libusb-1.0.x64.dll")
+   set(OpenCV_INCLUDE_DIRS="${EXTERNAL_LIBRARY_FOLDER}/opencv/include")
+   set(OpenCV_LIBS="${EXTERNAL_LIBRARY_FOLDER}/opencv/opencv_ffmpeg410_64.dll")
+endif()
 
 # set compiler
 include(FindCompiler)

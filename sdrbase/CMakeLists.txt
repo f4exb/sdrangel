@@ -1,5 +1,9 @@
 project (sdrbase)
 
+if(WIN32)
+    set(OPUS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/external/windows/opus/include")
+    set(OPUS_LIBRARIES "${CMAKE_SOURCE_DIR}/external/windows/libopus-0.x64.dll")
+endif()
 find_package(Opus REQUIRED)
 
 if(FFTW3F_FOUND)
