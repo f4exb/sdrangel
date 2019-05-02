@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1.0)
 
-# just to be sure that c++11 if fully supported
+# just to be sure that c++11 is fully supported
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
     message(FATAL_ERROR "SDRangel requires GCC version 4.9 or higher!")
 endif()
@@ -8,6 +8,9 @@ endif()
 project(sdrangel)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
+
+# For some external project macros
+include(ExternalProject)
 
 # configure version
 set(SDRANGEL_VERSION_MAJOR "4")
@@ -42,6 +45,11 @@ set(CPACK_PACKAGE_VERSION_PATCH ${SDRANGEL_VERSION_PATCH})
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
+# quite unfair with *BSD/...
+if(UNIX AND NOT APPLE)
+    set(LINUX TRUE)
+endif()
+
 # SDRAngel cmake options
 option(DEBUG_OUTPUT "Print debug messages" OFF)
 option(SANITIZE_ADDRESS "Activate memory address sanitization" OFF)
@@ -50,7 +58,7 @@ option(BUILD_SERVER "Build Server" ON)
 option(BUILD_GUI "Build GUI" ON)
 option(FORCE_SSSE3 "Compile with SSSE3 instruction only" OFF)
 option(FORCE_SSE41 "Compile with SSE4.1 instruction only" OFF)
-option(BUILD_EXTERNAL_LIBRARIES "Build external libraries" OFF)
+option(ENABLE_EXTERNAL_LIBRARIES "Build external libraries" OFF)
 option(ENABLE_AIRSPY "Enable AirSpy support" ON)
 option(ENABLE_AIRSPYHF "Enable AirSpyHF support" ON)
 option(ENABLE_BLADERF "Enable bladeRF support" ON)
@@ -92,6 +100,8 @@ set(INSTALL_BIN_DIR "bin/")
 set(INSTALL_LIB_DIR "lib/${PROJECT_NAME}")
 set(INSTALL_PLUGINS_DIR ${INSTALL_LIB_DIR}/plugins)
 set(INSTALL_PLUGINSSRV_DIR ${INSTALL_LIB_DIR}/pluginssrv)
+set(EXTERNAL_BUILD_LIBRARIES "${CMAKE_BINARY_DIR}/external_build")
+set(EXTERNAL_INSTALL_LIBRARIES "${CMAKE_BINARY_DIR}/external")
 
 if(NOT CMAKE_INSTALL_RPATH)
     set(CMAKE_INSTALL_RPATH
@@ -123,6 +133,35 @@ if (WIN32)
    set(LIBUSB_LIBRARIES="${EXTERNAL_LIBRARY_FOLDER}/libusb/libusb-1.0.x64.dll")
    set(OpenCV_INCLUDE_DIRS="${EXTERNAL_LIBRARY_FOLDER}/opencv/include")
    set(OpenCV_LIBS="${EXTERNAL_LIBRARY_FOLDER}/opencv/opencv_ffmpeg410_64.dll")
+endif()
+
+# enable 24 bit receiving path
+if (RX_SAMPLE_24BIT)
+    message(STATUS "Compiling for 24 bit Rx DSP chain")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSDR_RX_SAMPLE_24BIT")
+else()
+    message(STATUS "Compiling for 16 bit Rx DSP chain")
+endif()
+
+if (SANITIZE_ADDRESS)
+    message(STATUS "Activate address sanitization")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
+    set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -fsanitize=address")
+endif()
+
+if (C_CLANG OR C_GCC)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wvla -Woverloaded-virtual -ffast-math -ftree-vectorize ${EXTRA_FLAGS}")
+elseif (C_MSVC)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W3 -MP ${EXTRA_FLAGS}")
+endif()
+
+if (C_CLANG)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=1")
+elseif (C_GCC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=1")
 endif()
 
 # set compiler
@@ -160,22 +199,25 @@ endif()
 find_package(PkgConfig REQUIRED)
 find_package(Boost REQUIRED)
 find_package(FFTW3F REQUIRED)
-find_package(Codec2)
-find_package(LibUSB)
+find_package(LibUSB REQUIRED)  # used by so many packages
 find_package(OpenCV) # channeltx/modatv
-
-# !! TODO think how to manage build/link external libraries
-if (NOT BUILD_EXTERNAL_LIBRARIES)
-    find_package(LibDSDcc)
-    find_package(LibMbe)
-    find_package(SerialDV)
-    find_package(CM256cc)
-endif()
 
 # macOS compatibility
 if(APPLE)
     find_package(ICONV)
 endif()
+
+# include external cmake if needed
+if(ENABLE_EXTERNAL_LIBRARIES)
+    add_subdirectory(external)
+endif()
+
+# after external libraries
+find_package(LibDSDcc)
+find_package(LibMbe)
+find_package(SerialDV)
+find_package(CM256cc)
+find_package(Codec2)
 
 # Devices
 if(ENABLE_AIRSPY)
@@ -210,53 +252,6 @@ if(ENABLE_SOAPYSDR)
 endif()
 if(ENABLE_XTRX)
     find_package(LibXTRX)
-endif()
-
-# enable 24 bit receiving path
-if (RX_SAMPLE_24BIT)
-    message(STATUS "Compiling for 24 bit Rx DSP chain")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSDR_RX_SAMPLE_24BIT")
-else()
-    message(STATUS "Compiling for 16 bit Rx DSP chain")
-endif()
-
-if (SANITIZE_ADDRESS)
-    message(STATUS "Activate address sanitization")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
-    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
-    set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -fsanitize=address")
-endif()
-
-if (C_CLANG OR C_GCC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wvla -Woverloaded-virtual -ffast-math -ftree-vectorize ${EXTRA_FLAGS}")
-elseif (C_MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W3 -MP ${EXTRA_FLAGS}")
-endif()
-
-if (C_CLANG)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=1")
-elseif (C_GCC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=1")
-endif()
-
-########### include sub-projects ############
-if(BUILD_EXTERNAL_LIBRARIES)
-    add_subdirectory(external/cm256cc)
-    add_subdirectory(external/mbelib)
-    add_subdirectory(external/serialdv)
-    add_subdirectory(external/dsdcc)
-    add_subdirectory(external/libairspy)
-    add_subdirectory(external/libairspyhf)
-    add_subdirectory(external/libhackrf)
-    add_subdirectory(external/librtlsdr)
-    add_subdirectory(external/libbladerf)
-    add_subdirectory(external/liblimesuite)
-    add_subdirectory(external/libmirisdr)
-    add_subdirectory(external/libperseus)
-    add_subdirectory(external/libiio)
-    add_subdirectory(external/libsoapysdr)
 endif()
 
 if (CODEC2_FOUND)
