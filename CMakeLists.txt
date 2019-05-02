@@ -226,7 +226,6 @@ elseif (C_GCC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=1")
 endif()
 
-
 ########### include sub-projects ############
 if(BUILD_EXTERNAL_LIBRARIES)
     add_subdirectory(external/cm256cc)
@@ -355,10 +354,10 @@ endif()
 
 #install files and directories (linux specific)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-install(DIRECTORY custom/udev-rules DESTINATION share/sdrangel)
-install(FILES udev-rules/install.sh DESTINATION share/sdrangel/udev-rules PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-install(FILES custom/desktop/sdrangel.desktop DESTINATION share/applications)
-install(FILES custom/desktop/sdrangel_icon.png DESTINATION share/pixmaps)
+    install(DIRECTORY custom/udev-rules DESTINATION share/sdrangel)
+    install(FILES custom/udev-rules/install.sh DESTINATION share/sdrangel/udev-rules PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+    install(FILES custom/desktop/sdrangel.desktop DESTINATION share/applications)
+    install(FILES custom/desktop/sdrangel_icon.png DESTINATION share/pixmaps)
 endif()
 
 ############ uninstall target ################
