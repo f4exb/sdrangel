@@ -350,10 +350,10 @@ endif()
 ############ install targets ################
 install(TARGETS sdrangelbench DESTINATION ${INSTALL_BIN_DIR})
 if (BUILD_GUI)
-install(TARGETS sdrangel DESTINATION ${INSTALL_BIN_DIR})
+    install(TARGETS sdrangel DESTINATION ${INSTALL_BIN_DIR})
 endif()
 if (BUILD_SERVER)
-install(TARGETS sdrangelsrv DESTINATION ${INSTALL_BIN_DIR})
+    install(TARGETS sdrangelsrv DESTINATION ${INSTALL_BIN_DIR})
 endif()
 
 #install files and directories (linux specific)
