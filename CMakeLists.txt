@@ -5,9 +5,20 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_L
     message(FATAL_ERROR "SDRangel requires GCC version 4.9 or higher!")
 endif()
 
+project(sdrangel)
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
-project(sdrangel)
+# set version
+SET(sdrangel_VERSION_MAJOR "4")
+SET(sdrangel_VERSION_MINOR "5")
+SET(sdrangel_VERSION_PATCH "6")
+SET(sdrangel_VERSION_SUFFIX "")
+SET(sdrangel_VERSION "${sdrangel_VERSION_MAJOR}.${sdrangel_VERSION_MINOR}.${sdrangel_VERSION_PATCH}${sdrangel_VERSION_SUFFIX}")
+SET(CPACK_PACKAGE_VERSION "${sdrangel_VERSION_MAJOR}.${sdrangel_VERSION_MINOR}.${sdrangel_VERSION_PATCH}")
+SET(CPACK_PACKAGE_VERSION_MAJOR ${sdrangel_VERSION_MAJOR})
+SET(CPACK_PACKAGE_VERSION_MINOR ${sdrangel_VERSION_MINOR})
+SET(CPACK_PACKAGE_VERSION_PATCH ${sdrangel_VERSION_PATCH})
 
 # disable only when needed
 set(CMAKE_CXX_STANDARD 11)
@@ -34,6 +45,9 @@ option(ENABLE_PERSEUS "Enable perseus support" ON)
 option(ENABLE_RTLSDR "Enable rtl-sdr support" ON)
 option(ENABLE_SOAPYSDR "Enable SoapySDR support" ON)
 option(ENABLE_XTRX "Enable XTRX support" ON)
+if(APPLE)
+    option(MACOS_BUNDLE "Enable macOS Bundle" OFF)
+endif()
 
 # if we don't set build_type
 if(NOT CMAKE_BUILD_TYPE)
@@ -53,12 +67,30 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(BUILD_PLUGINS_DIR ${CMAKE_BINARY_DIR}/lib/plugins)
 set(BUILD_PLUGINSSRV_DIR ${CMAKE_BINARY_DIR}/lib/pluginssrv)
 set(INSTALL_BIN_DIR "bin/")
-set(INSTALL_LIB_DIR "lib/sdrangel")
+set(INSTALL_LIB_DIR "lib/${PROJECT_NAME}")
 set(INSTALL_PLUGINS_DIR ${INSTALL_LIB_DIR}/plugins)
 set(INSTALL_PLUGINSSRV_DIR ${INSTALL_LIB_DIR}/pluginssrv)
 
-set(CMAKE_MACOSX_RPATH 1)
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}")
+if (APPLE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET, "10.9")
+    set(CMAKE_MACOSX_RPATH ON)
+
+    if(NOT CMAKE_INSTALL_NAME_DIR)
+        set(CMAKE_INSTALL_NAME_DIR
+            ${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR} CACHE
+            PATH "Library Install Name Destination Directory" FORCE)
+    else()
+        set(CMAKE_INSTALL_NAME_DIR
+            ${CMAKE_INSTALL_NAME_DIR}/${PROJECT_NAME} CACHE
+            PATH "Library Install Name Destination Directory" FORCE)
+    endif(NOT CMAKE_INSTALL_NAME_DIR)
+endif()
+
+if(NOT CMAKE_INSTALL_RPATH)
+    set(CMAKE_INSTALL_RPATH
+        ${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR} CACHE
+        PATH "Library Install RPath" FORCE)
+endif(NOT CMAKE_INSTALL_RPATH)
 
 # set compiler
 include(FindCompiler)
@@ -87,7 +119,7 @@ find_package(Qt5 COMPONENTS MultimediaWidgets REQUIRED)
 
 # for the server we don't need OpenGL components
 if (BUILD_GUI)
-     find_package(OpenGL REQUIRED)
+    find_package(OpenGL REQUIRED)
     find_package(Qt5 COMPONENTS OpenGL REQUIRED)
 endif()
 
@@ -141,7 +173,7 @@ if(ENABLE_RTLSDR)
     find_package(LibRTLSDR)
 endif()
 if(ENABLE_SOAPYSDR)
-    find_package(SoapySDR)
+    find_package(SoapySDR 0.4.0)
 endif()
 if(ENABLE_XTRX)
     find_package(LibXTRX)
@@ -185,6 +217,7 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 add_definitions("-DGIT_COMMIT_HASH=${GIT_COMMIT_HASH}")
+set(CPACK_PACKAGE_VERSION ${GIT_COMMIT_HASH})
 
 configure_file(
     ${CMAKE_SOURCE_DIR}/custom/version.h.in
