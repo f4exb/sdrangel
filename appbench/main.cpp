@@ -58,7 +58,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 {
     QCoreApplication a(argc, argv);
 
-    QCoreApplication::setOrganizationName("f4exb");
+    QCoreApplication::setOrganizationName(COMPANY);
     QCoreApplication::setApplicationName("SDRangelBench");
     QCoreApplication::setApplicationVersion(SDRANGEL_VERSION);
 

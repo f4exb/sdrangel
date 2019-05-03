@@ -1,49 +1,71 @@
 cmake_minimum_required(VERSION 3.1.0)
 
-# just to be sure that c++11 is fully supported
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
-    message(FATAL_ERROR "SDRangel requires GCC version 4.9 or higher!")
-endif()
-
 project(sdrangel)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
+
+# disable only when needed
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # For some external project macros
 include(ExternalProject)
 
 # configure version
-set(SDRANGEL_VERSION_MAJOR "4")
-set(SDRANGEL_VERSION_MINOR "5")
-set(SDRANGEL_VERSION_PATCH "6")
-set(SDRANGEL_VERSION_SUFFIX "")
+set(sdrangel_VERSION_MAJOR "4")
+set(sdrangel_VERSION_MINOR "5")
+set(sdrangel_VERSION_PATCH "6")
+set(sdrangel_VERSION_SUFFIX "")
+
+# Set additional project information
+set(COMPANY "f4exb")
+add_definitions("-DCOMPANY=\"${COMPANY}\"")
+set(APPLICATION_NAME "SDRangel")
+add_definitions("-DAPPLICATION_NAME=\"${APPLICATION_NAME}\"")
+set(APPLICATION_MAINTAINER="Edouard Griffiths")
+set(COPYRIGHT "Copyright (c) 2019 Edouard Griffiths. All rights reserved.")
+add_definitions("-DCOPYRIGHT=\"${COPYRIGHT}\"")
+set(IDENTIFIER "com.${COMPANY}.${APPLICATION_NAME}")
+add_definitions("-DIDENTIFIER=\"${IDENTIFIER}\"")
 
 find_package(Git)
-if(GIT_FOUND)
-    execute_process(COMMAND "${GIT_EXECUTABLE}" rev-parse --short HEAD
-        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-        RESULT_VARIABLE res
-        OUTPUT_VARIABLE out
-        ERROR_QUIET
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if(NOT res)
-        set(SDRANGEL_VERSION_SUFFIX "-${out}")
+if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git/")
+  execute_process(COMMAND "${GIT_EXECUTABLE}" rev-parse --short HEAD
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    RESULT_VARIABLE res
+    OUTPUT_VARIABLE out
+    ERROR_QUIET
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(NOT res)
+        set(sdrangel_VERSION_SUFFIX "-${out}")
     endif()
 endif()
 
-set(SDRANGEL_VERSION "${SDRANGEL_VERSION_MAJOR}.${SDRANGEL_VERSION_MINOR}.${SDRANGEL_VERSION_PATCH}${SDRANGEL_VERSION_SUFFIX}")
-message(STATUS "SDRAngel Version: ${SDRANGEL_VERSION}")
-add_definitions("-DSDRANGEL_LIB_VERSION=\"${SDRANGEL_VERSION_MAJOR}.${SDRANGEL_VERSION_MINOR}.${SDRANGEL_VERSION_PATCH}\"")
-add_definitions("-DSDRANGEL_VERSION=\"${SDRANGEL_VERSION}\"")
+set(sdrangel_VERSION "${sdrangel_VERSION_MAJOR}.${sdrangel_VERSION_MINOR}.${sdrangel_VERSION_PATCH}${sdrangel_VERSION_SUFFIX}")
+message(STATUS "${APPLICATION_NAME} Version: ${sdrangel_VERSION}")
+add_definitions("-DSDRANGEL_LIB_VERSION=\"${sdrangel_VERSION_MAJOR}.${sdrangel_VERSION_MINOR}.${sdrangel_VERSION_PATCH}\"")
+add_definitions("-DSDRANGEL_VERSION=\"${sdrangel_VERSION}\"")
 
-set(CPACK_PACKAGE_VERSION "${SDRANGEL_VERSION}")
-set(CPACK_PACKAGE_VERSION_MAJOR ${SDRANGEL_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${SDRANGEL_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${SDRANGEL_VERSION_PATCH})
-
-# disable only when needed
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+# configure CPACK infomation
+set(CPACK_PACKAGE_NAME "${APPLICATION_NAME}")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "SDR Rx/Tx software for Airspy, Airspy HF+, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube")
+set(CPACK_PACKAGE_VENDOR "${COMPANY}")
+set(CPACK_PACKAGE_CONTACT "https://github.com/f4exb/sdrangel")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/Readme.md")
+set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${VERSION}")
+set(CPACK_PACKAGE_VERSION "${sdrangel_VERSION}")
+set(CPACK_PACKAGE_VERSION_MAJOR ${sdrangel_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${sdrangel_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${sdrangel_VERSION_PATCH})
+set(CPACK_SOURCE_STRIP_FILES true)
+set(CPACK_STRIP_FILES true)
+set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${sdrangel_VERSION}-${CMAKE_SYSTEM_PROCESSOR}")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/Readme.md")
+set(CPACK_SOURCE_IGNORE_FILES "${PROJECT_BINARY_DIR};/.git/;.gitignore;menu.yml;.travis.yml;.appveyor.yml;default.nix;.envrc;TODOs.org;/.scripts/")
+set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
+set(CPACK_GENERATOR "ZIP;TGZ")
 
 # quite unfair with *BSD/...
 if(UNIX AND NOT APPLE)
@@ -56,6 +78,7 @@ option(SANITIZE_ADDRESS "Activate memory address sanitization" OFF)
 option(RX_SAMPLE_24BIT "Internal 24 bit Rx DSP" ON)
 option(BUILD_SERVER "Build Server" ON)
 option(BUILD_GUI "Build GUI" ON)
+option(BUNDLE "Enable distribution bundle" OFF)
 option(FORCE_SSSE3 "Compile with SSSE3 instruction only" OFF)
 option(FORCE_SSE41 "Compile with SSE4.1 instruction only" OFF)
 option(ENABLE_EXTERNAL_LIBRARIES "Build external libraries" OFF)
@@ -71,18 +94,16 @@ option(ENABLE_PERSEUS "Enable perseus support" ON)
 option(ENABLE_RTLSDR "Enable rtl-sdr support" ON)
 option(ENABLE_SOAPYSDR "Enable SoapySDR support" ON)
 option(ENABLE_XTRX "Enable XTRX support" ON)
-if(APPLE)
-    option(MACOS_BUNDLE "Enable macOS Bundle" OFF)
-endif()
 
 # if we don't set build_type
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release")
+if(NOT DEFINED CMAKE_BUILD_TYPE OR "${CMAKE_BUILD_TYPE}" STREQUAL "")
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
+message(STATUS "Build type set to ${CMAKE_BUILD_TYPE}")
 
 # as default disable qDebug()
 if(NOT DEBUG_OUTPUT)
-    add_definitions("-DQT_NO_DEBUG_OUTPUT")
+  add_definitions("-DQT_NO_DEBUG_OUTPUT")
 endif()
 
 # declare build structures
@@ -97,42 +118,31 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(BUILD_PLUGINS_DIR ${CMAKE_BINARY_DIR}/lib/plugins)
 set(BUILD_PLUGINSSRV_DIR ${CMAKE_BINARY_DIR}/lib/pluginssrv)
 set(INSTALL_BIN_DIR "bin/")
-set(INSTALL_LIB_DIR "lib/${PROJECT_NAME}")
+# use only lib when create .app/.dmg
+if(APPLE AND BUNDLE AND BUILD_GUI)
+  set(INSTALL_LIB_DIR "lib")
+else()
+  set(INSTALL_LIB_DIR "lib/${CMAKE_PROJECT_NAME}")
+endif()
 set(INSTALL_PLUGINS_DIR ${INSTALL_LIB_DIR}/plugins)
 set(INSTALL_PLUGINSSRV_DIR ${INSTALL_LIB_DIR}/pluginssrv)
 set(EXTERNAL_BUILD_LIBRARIES "${CMAKE_BINARY_DIR}/external_build")
 set(EXTERNAL_INSTALL_LIBRARIES "${CMAKE_BINARY_DIR}/external")
 
-if(NOT CMAKE_INSTALL_RPATH)
-    set(CMAKE_INSTALL_RPATH
-        ${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR} CACHE
-        PATH "Library Install RPath" FORCE)
-endif(NOT CMAKE_INSTALL_RPATH)
-
-if (APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET, "10.9")
-    set(CMAKE_MACOSX_RPATH ON)
-
-    if(NOT CMAKE_INSTALL_NAME_DIR)
-        set(CMAKE_INSTALL_NAME_DIR
-            ${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR} CACHE
-            PATH "Library Install Name Destination Directory" FORCE)
-    else()
-        set(CMAKE_INSTALL_NAME_DIR
-            ${CMAKE_INSTALL_NAME_DIR}/${PROJECT_NAME} CACHE
-            PATH "Library Install Name Destination Directory" FORCE)
-    endif(NOT CMAKE_INSTALL_NAME_DIR)
+if(APPLE)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET, "10.9")
+  set(CMAKE_MACOSX_RPATH ON)
 endif()
 
 if (WIN32)
-   set(EXTERNAL_LIBRARY_FOLDER "${CMAKE_SOURCE_DIR}/external/windows")
-   set(BOOST_ROOT "${EXTERNAL_LIBRARY_FOLDER}/boot")
-   set(FFTW3F_INCLUDE_DIRS="${EXTERNAL_LIBRARY_FOLDER}/fftw-3/include")
-   set(FFTW3F_LIBRARIES="${EXTERNAL_LIBRARY_FOLDER}/fftw-3/libfftw3f-3.dll")
-   set(LIBUSB_INCLUDE_DIR="${EXTERNAL_LIBRARY_FOLDER}/libusb/include")
-   set(LIBUSB_LIBRARIES="${EXTERNAL_LIBRARY_FOLDER}/libusb/libusb-1.0.x64.dll")
-   set(OpenCV_INCLUDE_DIRS="${EXTERNAL_LIBRARY_FOLDER}/opencv/include")
-   set(OpenCV_LIBS="${EXTERNAL_LIBRARY_FOLDER}/opencv/opencv_ffmpeg410_64.dll")
+  set(EXTERNAL_LIBRARY_FOLDER "${CMAKE_SOURCE_DIR}/external/windows")
+  set(BOOST_ROOT "${EXTERNAL_LIBRARY_FOLDER}/boot")
+  set(FFTW3F_INCLUDE_DIRS="${EXTERNAL_LIBRARY_FOLDER}/fftw-3/include")
+  set(FFTW3F_LIBRARIES="${EXTERNAL_LIBRARY_FOLDER}/fftw-3/libfftw3f-3.dll")
+  set(LIBUSB_INCLUDE_DIR="${EXTERNAL_LIBRARY_FOLDER}/libusb/include")
+  set(LIBUSB_LIBRARIES="${EXTERNAL_LIBRARY_FOLDER}/libusb/libusb-1.0.x64.dll")
+  set(OpenCV_INCLUDE_DIRS="${EXTERNAL_LIBRARY_FOLDER}/opencv/include")
+  set(OpenCV_LIBS="${EXTERNAL_LIBRARY_FOLDER}/opencv/opencv_ffmpeg410_64.dll")
 endif()
 
 # enable 24 bit receiving path
@@ -184,6 +194,8 @@ set(CMAKE_AUTORCC TRUE)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Qt requirements
+# TODO check minimum version
+set(_required_qt_version "5.6.0")
 find_package(Qt5 COMPONENTS Core REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt5 COMPONENTS Multimedia REQUIRED)
@@ -320,18 +332,17 @@ if (BUILD_GUI)
         sdrgui/resources/sdrangel.rc
     )
 
-    add_executable(sdrangel
-        ${sdrangel_SOURCES}
+  add_executable(sdrangel
+    ${sdrangel_SOURCES}
     )
 
-    target_link_libraries(sdrangel
-        ${OPENGL_LIBRARIES}
-        Qt5::Widgets
-        Qt5::Multimedia
-        sdrbase
-        sdrgui
-        logging
-
+  target_link_libraries(sdrangel
+    ${OPENGL_LIBRARIES}
+    Qt5::Widgets
+    Qt5::Multimedia
+    sdrbase
+    sdrgui
+    logging
     )
 endif()
 
@@ -353,29 +364,105 @@ if (BUILD_SERVER)
     )
 endif()
 
-############ install targets ################
-install(TARGETS sdrangelbench DESTINATION ${INSTALL_BIN_DIR})
-if (BUILD_GUI)
-    install(TARGETS sdrangel DESTINATION ${INSTALL_BIN_DIR})
-endif()
-if (BUILD_SERVER)
-    install(TARGETS sdrangelsrv DESTINATION ${INSTALL_BIN_DIR})
-endif()
+############ install/package targets ################
+if(APPLE AND BUNDLE AND BUILD_GUI)
 
-#install files and directories (linux specific)
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    install(DIRECTORY custom/udev-rules DESTINATION share/sdrangel)
-    install(FILES custom/udev-rules/install.sh DESTINATION share/sdrangel/udev-rules PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+  # https://cmake.org/cmake/help/v3.0/module/InstallRequiredSystemLibraries.html
+  #CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
+
+  install(TARGETS sdrangelbench)
+  if (BUILD_SERVER)
+    install(TARGETS sdrangelsrv)
+  endif()
+
+  #include(DeployQt)
+  #macdeployqt(sdrangel)
+
+  include(InstallRequiredSystemLibraries)
+
+  configure_file("${CMAKE_SOURCE_DIR}/custom/desktop/MacOSXBundleInfo.plist.in"
+    "${CMAKE_BINARY_DIR}/Info.plist" @ONLY)
+
+  set(CPACK_GENERATOR "Bundle")
+  set(CPACK_BINARY_DRAGNDROP ON)
+  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/custom/desktop/sdrangel_icon.icns")
+  set(CPACK_BUNDLE_NAME "${APPLICATION_NAME}")
+  set(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/custom/desktop/sdrangel_icon.icns")
+  set(CPACK_BUNDLE_PLIST "${CMAKE_BINARY_DIR}/Info.plist")
+  set(CPACK_BUNDLE_STARTUP_COMMAND "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}")
+  #set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};${CMAKE_PROJECT_NAME};lib;/")
+
+  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/custom/desktop/sdrangel_icon.icns")
+
+elseif(LINUX AND BUNDLE)
+
+  # see https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/PackageGenerators
+  list(APPEND CPACK_GENERATOR "DEB")
+  set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${APPLICATION_MAINTAINER}")
+  set(CPACK_DEBIAN_PACKAGE_SECTION "hamradio")
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.3.1-6), libgcc1 (>= 1:3.4.2-12)")
+
+  list(APPEND CPACK_GENERATOR "RPM")
+  set(CPACK_RPM_PACKAGE_RELEASE "1")
+  set(CPACK_RPM_PACKAGE_LICENSE "GPL-3.0")
+  set(CPACK_RPM_PACKAGE_REQUIRES "libusb")
+
+elseif((WIN32 OR MINGW) AND BUNDLE)
+
+  set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
+
+  list(APPEND CPACK_GENERATOR "NSIS")
+  set(CPACK_NSIS_PACKAGE_NAME "${APPLICATION_NAME}")
+  set(CPACK_NSIS_CONTACT "${APPLICATION_MAINTAINER}")
+  set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+  set(CPACK_NSIS_MODIFY_PATH ON)
+
+  # from https://blog.nathanosman.com/2017/11/24/using-windeployqt-with-cpack.html
+  # DeployQt.cmake
+
+else()
+
+  if(NOT CMAKE_INSTALL_RPATH)
+    set(CMAKE_INSTALL_RPATH
+      ${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR} CACHE
+      PATH "Library Install RPath" FORCE)
+  endif()
+
+  # force full path
+  if(APPLE AND NOT CMAKE_INSTALL_NAME_DIR)
+    set(CMAKE_INSTALL_NAME_DIR
+      ${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR} CACHE
+      PATH "Library Install Name Destination Directory" FORCE)
+  endif()
+
+  install(TARGETS sdrangelbench DESTINATION ${INSTALL_BIN_DIR})
+  if (BUILD_GUI)
+  install(TARGETS sdrangel DESTINATION ${INSTALL_BIN_DIR})
+  endif()
+  if (BUILD_SERVER)
+    install(TARGETS sdrangelsrv DESTINATION ${INSTALL_BIN_DIR})
+  endif()
+
+  #install files and directories (linux specific)
+  if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    # TODO remove useless udev
+    #install(DIRECTORY custom/udev-rules DESTINATION share/sdrangel)
+    #install(FILES custom/udev-rules/install.sh DESTINATION share/sdrangel/udev-rules PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
     install(FILES custom/desktop/sdrangel.desktop DESTINATION share/applications)
     install(FILES custom/desktop/sdrangel_icon.png DESTINATION share/pixmaps)
+  endif()
+
 endif()
+
+message(STATUS "CPack generators: ${CPACK_GENERATOR}")
+include(CPack)
 
 ############ uninstall target ################
 configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/include/uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake"
-    IMMEDIATE @ONLY)
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/include/uninstall.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake"
+  IMMEDIATE @ONLY)
 
 add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -P
-    ${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake)
+  COMMAND ${CMAKE_COMMAND} -P
+  ${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake)

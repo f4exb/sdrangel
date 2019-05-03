@@ -74,7 +74,7 @@ void PluginManager::loadPluginsPart(const QString& pluginsSubDir)
     PluginsPath << applicationDirPath + "/lib/" + pluginsSubDir;
 #ifdef __APPLE__
     // on SDRAngel.app
-    PluginsPath << applicationDirPath + "/../Frameworks/" + pluginsSubDir;
+    PluginsPath << applicationDirPath + "/../Resources/lib/" + pluginsSubDir;
 #endif
 
     // NOTE: exit on the first folder found
