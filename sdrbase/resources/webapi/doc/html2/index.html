@@ -1764,6 +1764,9 @@ margin-bottom: 20px;
     "FreeDVModReport" : {
       "$ref" : "#/definitions/FreeDVModReport"
     },
+    "FreqTrackerReport" : {
+      "$ref" : "#/definitions/FreqTrackerReport"
+    },
     "NFMDemodReport" : {
       "$ref" : "#/definitions/NFMDemodReport"
     },
@@ -1834,6 +1837,9 @@ margin-bottom: 20px;
     },
     "FreeDVModSettings" : {
       "$ref" : "#/definitions/FreeDVModSettings"
+    },
+    "FreqTrackerSettings" : {
+      "$ref" : "#/definitions/FreqTrackerSettings"
     },
     "NFMDemodSettings" : {
       "$ref" : "#/definitions/NFMDemodSettings"
@@ -2729,6 +2735,91 @@ margin-bottom: 20px;
     }
   },
   "description" : "FreeDVMod"
+};
+            defs.FreqTrackerReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "squelch" : {
+      "type" : "integer",
+      "description" : "squelch status (1 if open else 0)"
+    },
+    "sampleRate" : {
+      "type" : "integer"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "FreqTracker"
+};
+            defs.FreqTrackerSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "channel center frequency shift from baseband center in Hz"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "channel RF bandwidth in Hz (floors to next 100 Hz)"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "squelch" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power squelch threshold in decibels"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "tracking" : {
+      "type" : "integer",
+      "description" : "Tracking 1 for enabled 0 for disabled"
+    },
+    "trackerType" : {
+      "type" : "integer",
+      "description" : "Tracker element type (FLL, PLL...)"
+    },
+    "pllPskOrder" : {
+      "type" : "integer",
+      "description" : "M-ary PSK type (log2)"
+    },
+    "rrc" : {
+      "type" : "integer",
+      "description" : "RRC filter (1 for on, 0 for off)"
+    },
+    "rrcRolloff" : {
+      "type" : "integer",
+      "description" : "RRC filter rolloff factor in %"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "FreqTracker"
 };
             defs.Frequency = {
   "properties" : {
@@ -24824,7 +24915,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-05-01T23:54:36.944+02:00
+              Generated 2019-05-03T21:05:56.826+02:00
             </div>
           </div>
       </div>

@@ -1,0 +1,62 @@
+FreqTrackerSettings:
+  description: FreqTracker
+  properties:
+    inputFrequencyOffset:
+      description: channel center frequency shift from baseband center in Hz
+      type: integer
+      format: int64
+    rfBandwidth:
+      description: channel RF bandwidth in Hz (floors to next 100 Hz)
+      type: number
+      format: float
+    log2Decim:
+      type: integer
+    squelch:
+      description: power squelch threshold in decibels
+      type: number
+      format: float
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    tracking:
+      description: Tracking 1 for enabled 0 for disabled
+      type: integer
+    trackerType:
+      description: Tracker element type (FLL, PLL...)
+      type: integer
+    pllPskOrder:
+      description: M-ary PSK type (log2)
+      type: integer
+    rrc:
+      description: RRC filter (1 for on, 0 for off)
+      type: integer
+    rrcRolloff:
+      description: RRC filter rolloff factor in %
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+
+FreqTrackerReport:
+  description: FreqTracker
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    squelch:
+      description: squelch status (1 if open else 0)
+      type: integer
+    sampleRate:
+      type: integer
+    channelSampleRate:
+      type: integer

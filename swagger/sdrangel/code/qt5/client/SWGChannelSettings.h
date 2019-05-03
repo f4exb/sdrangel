@@ -29,6 +29,7 @@
 #include "SWGDSDDemodSettings.h"
 #include "SWGFreeDVDemodSettings.h"
 #include "SWGFreeDVModSettings.h"
+#include "SWGFreqTrackerSettings.h"
 #include "SWGLocalSinkSettings.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModSettings.h"
@@ -92,6 +93,9 @@ public:
 
     SWGFreeDVModSettings* getFreeDvModSettings();
     void setFreeDvModSettings(SWGFreeDVModSettings* free_dv_mod_settings);
+
+    SWGFreqTrackerSettings* getFreqTrackerSettings();
+    void setFreqTrackerSettings(SWGFreqTrackerSettings* freq_tracker_settings);
 
     SWGNFMDemodSettings* getNfmDemodSettings();
     void setNfmDemodSettings(SWGNFMDemodSettings* nfm_demod_settings);
@@ -162,6 +166,9 @@ private:
 
     SWGFreeDVModSettings* free_dv_mod_settings;
     bool m_free_dv_mod_settings_isSet;
+
+    SWGFreqTrackerSettings* freq_tracker_settings;
+    bool m_freq_tracker_settings_isSet;
 
     SWGNFMDemodSettings* nfm_demod_settings;
     bool m_nfm_demod_settings_isSet;

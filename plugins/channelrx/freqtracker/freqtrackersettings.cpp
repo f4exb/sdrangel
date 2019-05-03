@@ -1,0 +1,142 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2019 Edouard Griffiths, F4EXB.                                  //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+// (at your option) any later version.                                           //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
+#include <QColor>
+
+#include "dsp/dspengine.h"
+#include "util/simpleserializer.h"
+#include "settings/serializable.h"
+#include "freqtrackersettings.h"
+
+FreqTrackerSettings::FreqTrackerSettings() :
+    m_channelMarker(0)
+{
+    resetToDefaults();
+}
+
+void FreqTrackerSettings::resetToDefaults()
+{
+    m_inputFrequencyOffset = 0;
+    m_rfBandwidth = 6000;
+    m_log2Decim = 0;
+    m_squelch = -40.0;
+    m_rgbColor = QColor(200, 244, 66).rgb();
+    m_title = "Frequency Tracker";
+    m_tracking = false;
+    m_trackerType = TrackerFLL;
+    m_pllPskOrder = 1;
+    m_rrc = false;
+    m_rrcRolloff = 35;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
+    m_reverseAPIChannelIndex = 0;
+}
+
+QByteArray FreqTrackerSettings::serialize() const
+{
+    SimpleSerializer s(1);
+    s.writeS32(1, m_inputFrequencyOffset);
+    s.writeS32(2, m_rfBandwidth/100);
+    s.writeU32(3, m_log2Decim);
+    s.writeS32(5, m_squelch);
+
+    if (m_channelMarker) {
+        s.writeBlob(6, m_channelMarker->serialize());
+    }
+
+    s.writeU32(7, m_rgbColor);
+    s.writeString(9, m_title);
+    s.writeBool(10, m_tracking);
+    s.writeS32(12, (int) m_trackerType);
+    s.writeU32(13, m_pllPskOrder);
+    s.writeBool(14, m_rrc);
+    s.writeU32(15, m_rrcRolloff);
+    s.writeBool(16, m_useReverseAPI);
+    s.writeString(17, m_reverseAPIAddress);
+    s.writeU32(18, m_reverseAPIPort);
+    s.writeU32(19, m_reverseAPIDeviceIndex);
+    s.writeU32(20, m_reverseAPIChannelIndex);
+
+    return s.final();
+}
+
+bool FreqTrackerSettings::deserialize(const QByteArray& data)
+{
+    SimpleDeserializer d(data);
+
+    if(!d.isValid())
+    {
+        resetToDefaults();
+        return false;
+    }
+
+    if(d.getVersion() == 1)
+    {
+        QByteArray bytetmp;
+        qint32 tmp;
+        uint32_t utmp;
+        QString strtmp;
+
+        d.readS32(1, &m_inputFrequencyOffset, 0);
+        d.readS32(2, &tmp, 4);
+        m_rfBandwidth = 100 * tmp;
+        d.readU32(3, &utmp, 0);
+        m_log2Decim = utmp > 6 ? 6 : utmp;
+        d.readS32(4, &tmp, 20);
+        d.readS32(5, &tmp, -40);
+        m_squelch = tmp;
+        d.readBlob(6, &bytetmp);
+
+        if (m_channelMarker) {
+            m_channelMarker->deserialize(bytetmp);
+        }
+
+        d.readU32(7, &m_rgbColor, QColor(200, 244, 66).rgb());
+        d.readString(9, &m_title, "Frequency Tracker");
+        d.readBool(10, &m_tracking, false);
+        d.readS32(12, &tmp, 0);
+        m_trackerType = tmp < 0 ? TrackerFLL : tmp > 1 ? TrackerPLL : (TrackerType) tmp;
+        d.readU32(13, &utmp, 1);
+        m_pllPskOrder = utmp > 4 ? 4 : utmp;
+        d.readBool(14, &m_rrc, false);
+        d.readU32(15, &utmp, 35);
+        m_rrcRolloff = utmp > 100 ? 100 : utmp;
+        d.readBool(16, &m_useReverseAPI, false);
+        d.readString(17, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(18, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(19, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(20, &utmp, 0);
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+
+        return true;
+    }
+    else
+    {
+        resetToDefaults();
+        return false;
+    }
+}

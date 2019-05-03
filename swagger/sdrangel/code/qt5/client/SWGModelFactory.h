@@ -64,6 +64,8 @@
 #include "SWGFreeDVDemodSettings.h"
 #include "SWGFreeDVModReport.h"
 #include "SWGFreeDVModSettings.h"
+#include "SWGFreqTrackerReport.h"
+#include "SWGFreqTrackerSettings.h"
 #include "SWGFrequency.h"
 #include "SWGFrequencyBand.h"
 #include "SWGFrequencyRange.h"
@@ -293,6 +295,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFreeDVModSettings").compare(type) == 0) {
       return new SWGFreeDVModSettings();
+    }
+    if(QString("SWGFreqTrackerReport").compare(type) == 0) {
+      return new SWGFreqTrackerReport();
+    }
+    if(QString("SWGFreqTrackerSettings").compare(type) == 0) {
+      return new SWGFreqTrackerSettings();
     }
     if(QString("SWGFrequency").compare(type) == 0) {
       return new SWGFrequency();

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>320</width>
-    <height>100</height>
+    <height>110</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -37,13 +37,16 @@
   <property name="windowTitle">
    <string>Local sink</string>
   </property>
+  <property name="statusTip">
+   <string>Local Sink</string>
+  </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>10</y>
      <width>301</width>
-     <height>141</height>
+     <height>91</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -304,23 +307,6 @@
          <size>
           <width>40</width>
           <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
          </size>
         </property>
        </spacer>

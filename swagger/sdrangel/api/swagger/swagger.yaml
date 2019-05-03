@@ -1919,6 +1919,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/FreeDVDemod.yaml#/FreeDVDemodSettings"
       FreeDVModSettings:
         $ref: "http://localhost:8081/api/swagger/include/FreeDVMod.yaml#/FreeDVModSettings"
+      FreqTrackerSettings:
+        $ref: "http://localhost:8081/api/swagger/include/FreqTracker.yaml#/FreqTrackerSettings"
       NFMDemodSettings:
         $ref: "http://localhost:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
       NFMModSettings:
@@ -1966,6 +1968,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/FreeDVDemod.yaml#/FreeDVDemodReport"
       FreeDVModReport:
         $ref: "http://localhost:8081/api/swagger/include/FreeDVMod.yaml#/FreeDVModReport"
+      FreqTrackerReport:
+        $ref: "http://localhost:8081/api/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
       NFMDemodReport:
         $ref: "http://localhost:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodReport"
       NFMModReport:

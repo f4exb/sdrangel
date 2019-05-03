@@ -29,6 +29,7 @@
 #include "SWGDSDDemodReport.h"
 #include "SWGFreeDVDemodReport.h"
 #include "SWGFreeDVModReport.h"
+#include "SWGFreqTrackerReport.h"
 #include "SWGNFMDemodReport.h"
 #include "SWGNFMModReport.h"
 #include "SWGRemoteSourceReport.h"
@@ -84,6 +85,9 @@ public:
 
     SWGFreeDVModReport* getFreeDvModReport();
     void setFreeDvModReport(SWGFreeDVModReport* free_dv_mod_report);
+
+    SWGFreqTrackerReport* getFreqTrackerReport();
+    void setFreqTrackerReport(SWGFreqTrackerReport* freq_tracker_report);
 
     SWGNFMDemodReport* getNfmDemodReport();
     void setNfmDemodReport(SWGNFMDemodReport* nfm_demod_report);
@@ -142,6 +146,9 @@ private:
 
     SWGFreeDVModReport* free_dv_mod_report;
     bool m_free_dv_mod_report_isSet;
+
+    SWGFreqTrackerReport* freq_tracker_report;
+    bool m_freq_tracker_report_isSet;
 
     SWGNFMDemodReport* nfm_demod_report;
     bool m_nfm_demod_report_isSet;

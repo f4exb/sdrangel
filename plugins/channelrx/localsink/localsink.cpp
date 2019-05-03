@@ -125,7 +125,6 @@ void LocalSink::stop()
 
 bool LocalSink::handleMessage(const Message& cmd)
 {
-    (void) cmd;
 	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;

@@ -50,6 +50,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_free_dv_demod_settings_isSet = false;
     free_dv_mod_settings = nullptr;
     m_free_dv_mod_settings_isSet = false;
+    freq_tracker_settings = nullptr;
+    m_freq_tracker_settings_isSet = false;
     nfm_demod_settings = nullptr;
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = nullptr;
@@ -102,6 +104,8 @@ SWGChannelSettings::init() {
     m_free_dv_demod_settings_isSet = false;
     free_dv_mod_settings = new SWGFreeDVModSettings();
     m_free_dv_mod_settings_isSet = false;
+    freq_tracker_settings = new SWGFreqTrackerSettings();
+    m_freq_tracker_settings_isSet = false;
     nfm_demod_settings = new SWGNFMDemodSettings();
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = new SWGNFMModSettings();
@@ -154,6 +158,9 @@ SWGChannelSettings::cleanup() {
     }
     if(free_dv_mod_settings != nullptr) { 
         delete free_dv_mod_settings;
+    }
+    if(freq_tracker_settings != nullptr) { 
+        delete freq_tracker_settings;
     }
     if(nfm_demod_settings != nullptr) { 
         delete nfm_demod_settings;
@@ -222,6 +229,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&free_dv_demod_settings, pJson["FreeDVDemodSettings"], "SWGFreeDVDemodSettings", "SWGFreeDVDemodSettings");
     
     ::SWGSDRangel::setValue(&free_dv_mod_settings, pJson["FreeDVModSettings"], "SWGFreeDVModSettings", "SWGFreeDVModSettings");
+    
+    ::SWGSDRangel::setValue(&freq_tracker_settings, pJson["FreqTrackerSettings"], "SWGFreqTrackerSettings", "SWGFreqTrackerSettings");
     
     ::SWGSDRangel::setValue(&nfm_demod_settings, pJson["NFMDemodSettings"], "SWGNFMDemodSettings", "SWGNFMDemodSettings");
     
@@ -293,6 +302,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((free_dv_mod_settings != nullptr) && (free_dv_mod_settings->isSet())){
         toJsonValue(QString("FreeDVModSettings"), free_dv_mod_settings, obj, QString("SWGFreeDVModSettings"));
+    }
+    if((freq_tracker_settings != nullptr) && (freq_tracker_settings->isSet())){
+        toJsonValue(QString("FreqTrackerSettings"), freq_tracker_settings, obj, QString("SWGFreqTrackerSettings"));
     }
     if((nfm_demod_settings != nullptr) && (nfm_demod_settings->isSet())){
         toJsonValue(QString("NFMDemodSettings"), nfm_demod_settings, obj, QString("SWGNFMDemodSettings"));
@@ -441,6 +453,16 @@ SWGChannelSettings::setFreeDvModSettings(SWGFreeDVModSettings* free_dv_mod_setti
     this->m_free_dv_mod_settings_isSet = true;
 }
 
+SWGFreqTrackerSettings*
+SWGChannelSettings::getFreqTrackerSettings() {
+    return freq_tracker_settings;
+}
+void
+SWGChannelSettings::setFreqTrackerSettings(SWGFreqTrackerSettings* freq_tracker_settings) {
+    this->freq_tracker_settings = freq_tracker_settings;
+    this->m_freq_tracker_settings_isSet = true;
+}
+
 SWGNFMDemodSettings*
 SWGChannelSettings::getNfmDemodSettings() {
     return nfm_demod_settings;
@@ -567,6 +589,7 @@ SWGChannelSettings::isSet(){
         if(dsd_demod_settings != nullptr && dsd_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(free_dv_demod_settings != nullptr && free_dv_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(free_dv_mod_settings != nullptr && free_dv_mod_settings->isSet()){ isObjectUpdated = true; break;}
+        if(freq_tracker_settings != nullptr && freq_tracker_settings->isSet()){ isObjectUpdated = true; break;}
         if(nfm_demod_settings != nullptr && nfm_demod_settings->isSet()){ isObjectUpdated = true; break;}
         if(nfm_mod_settings != nullptr && nfm_mod_settings->isSet()){ isObjectUpdated = true; break;}
         if(local_sink_settings != nullptr && local_sink_settings->isSet()){ isObjectUpdated = true; break;}
