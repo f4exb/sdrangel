@@ -18,6 +18,29 @@ set(sdrangel_VERSION_MINOR "6")
 set(sdrangel_VERSION_PATCH "0")
 set(sdrangel_VERSION_SUFFIX "")
 
+# SDRAngel cmake options
+option(DEBUG_OUTPUT "Print debug messages" OFF)
+option(SANITIZE_ADDRESS "Activate memory address sanitization" OFF)
+option(RX_SAMPLE_24BIT "Internal 24 bit Rx DSP" ON)
+option(BUILD_SERVER "Build Server" ON)
+option(BUILD_GUI "Build GUI" ON)
+option(BUNDLE "Enable distribution bundle" OFF)
+option(FORCE_SSSE3 "Compile with SSSE3 instruction only" OFF)
+option(FORCE_SSE41 "Compile with SSE4.1 instruction only" OFF)
+option(ENABLE_EXTERNAL_LIBRARIES "Build external libraries" OFF)
+option(ENABLE_AIRSPY "Enable AirSpy support" ON)
+option(ENABLE_AIRSPYHF "Enable AirSpyHF support" ON)
+option(ENABLE_BLADERF "Enable bladeRF support" ON)
+option(ENABLE_FUNCUBE "Enable FUNcube support" ON)
+option(ENABLE_HACKRF "Enable HackRF support" ON)
+option(ENABLE_IIO "Enable liniio support like PlutoSDR" ON)
+option(ENABLE_LIMESUITE "Enable limesuite support" ON)
+option(ENABLE_MIRISDR "Enable LibMiri for old SDRPlay" ON)
+option(ENABLE_PERSEUS "Enable perseus support" ON)
+option(ENABLE_RTLSDR "Enable rtl-sdr support" ON)
+option(ENABLE_SOAPYSDR "Enable SoapySDR support" ON)
+option(ENABLE_XTRX "Enable XTRX support" ON)
+
 # Set additional project information
 set(COMPANY "f4exb")
 add_definitions("-DCOMPANY=\"${COMPANY}\"")
@@ -48,7 +71,7 @@ add_definitions("-DSDRANGEL_LIB_VERSION=\"${sdrangel_VERSION_MAJOR}.${sdrangel_V
 add_definitions("-DSDRANGEL_VERSION=\"${sdrangel_VERSION}\"")
 
 # configure CPACK infomation
-set(CPACK_PACKAGE_NAME "${CMAKE_PACKAGE_NAME}")
+set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "SDR Rx/Tx software for Airspy, Airspy HF+, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube")
 set(CPACK_PACKAGE_VENDOR "${COMPANY}")
 set(CPACK_PACKAGE_CONTACT "https://github.com/f4exb/sdrangel")
@@ -65,33 +88,6 @@ set(CPACK_SOURCE_IGNORE_FILES "${PROJECT_BINARY_DIR};/.git/;.gitignore;menu.yml;
 set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
 set(CPACK_GENERATOR "ZIP;TGZ")
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set(LINUX TRUE)
-endif()
-
-# SDRAngel cmake options
-option(DEBUG_OUTPUT "Print debug messages" OFF)
-option(SANITIZE_ADDRESS "Activate memory address sanitization" OFF)
-option(RX_SAMPLE_24BIT "Internal 24 bit Rx DSP" ON)
-option(BUILD_SERVER "Build Server" ON)
-option(BUILD_GUI "Build GUI" ON)
-option(BUNDLE "Enable distribution bundle" OFF)
-option(FORCE_SSSE3 "Compile with SSSE3 instruction only" OFF)
-option(FORCE_SSE41 "Compile with SSE4.1 instruction only" OFF)
-option(ENABLE_EXTERNAL_LIBRARIES "Build external libraries" OFF)
-option(ENABLE_AIRSPY "Enable AirSpy support" ON)
-option(ENABLE_AIRSPYHF "Enable AirSpyHF support" ON)
-option(ENABLE_BLADERF "Enable bladeRF support" ON)
-option(ENABLE_FUNCUBE "Enable FUNcube support" ON)
-option(ENABLE_HACKRF "Enable HackRF support" ON)
-option(ENABLE_IIO "Enable liniio support like PlutoSDR" ON)
-option(ENABLE_LIMESUITE "Enable limesuite support" ON)
-option(ENABLE_MIRISDR "Enable LibMiri for old SDRPlay" ON)
-option(ENABLE_PERSEUS "Enable perseus support" ON)
-option(ENABLE_RTLSDR "Enable rtl-sdr support" ON)
-option(ENABLE_SOAPYSDR "Enable SoapySDR support" ON)
-option(ENABLE_XTRX "Enable XTRX support" ON)
-
 # if we don't set build_type
 if(NOT DEFINED CMAKE_BUILD_TYPE OR "${CMAKE_BUILD_TYPE}" STREQUAL "")
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
@@ -106,9 +102,9 @@ endif()
 # declare build structures
 # !! change sdrbase/plugin/pluginmanager.cpp too !!
 if(WIN32)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 else()
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/)
 endif()
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -126,14 +122,23 @@ set(INSTALL_PLUGINSSRV_DIR ${INSTALL_LIB_DIR}/pluginssrv)
 set(EXTERNAL_BUILD_LIBRARIES "${CMAKE_BINARY_DIR}/external_build")
 set(EXTERNAL_INSTALL_LIBRARIES "${CMAKE_BINARY_DIR}/external")
 
-if(APPLE)
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  set(LINUX TRUE)
+  # populate distribution name
+  # LSB_CODENAME will hold trusty
+  find_program(LSB_RELEASE_EXECUTABLE lsb_release)
+  if(LSB_RELEASE_EXECUTABLE)
+    execute_process(COMMAND ${LSB_RELEASE_EXECUTABLE} -cs
+      OUTPUT_VARIABLE LSB_CODENAME
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+  endif()
+elseif(APPLE)
   # check
   set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
   message(STATUS "Build for macOS version: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
   set(CMAKE_MACOSX_RPATH ON)
-endif()
-
-if (WIN32)
+elseif (WIN32)
   set(EXTERNAL_LIBRARY_FOLDER "${CMAKE_SOURCE_DIR}/external/windows")
   set(BOOST_ROOT "${EXTERNAL_LIBRARY_FOLDER}/boot")
   set(FFTW3F_INCLUDE_DIRS="${EXTERNAL_LIBRARY_FOLDER}/fftw-3/include")
@@ -369,11 +374,6 @@ endif()
 
 if(APPLE AND BUNDLE AND BUILD_GUI)
 
-  install(TARGETS sdrangelbench)
-  if (BUILD_SERVER)
-    install(TARGETS sdrangelsrv)
-  endif()
-
   configure_file("${CMAKE_SOURCE_DIR}/custom/desktop/MacOSXBundleInfo.plist.in"
     "${CMAKE_BINARY_DIR}/Info.plist" @ONLY)
 
@@ -397,16 +397,35 @@ if(APPLE AND BUNDLE AND BUILD_GUI)
 
 elseif(LINUX AND BUNDLE)
 
-  # see https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/PackageGenerators
-  list(APPEND CPACK_GENERATOR "DEB")
+  # TODO:
+  #   - perseus package
+  #   - CHANGELOG see https://github.com/xbmc/xbmc/pull/9987/commits/0152e8f50c0f11c8bddcfdc65e1596851fe8b310
+  #   - verify dpkg info
+  #   - Boost seems used through Qt
+
+  # needs dpkg
+  set(CPACK_GENERATOR "DEB")
+  set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION}_${LSB_CODENAME}_${CMAKE_SYSTEM_PROCESSOR}")
   set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${APPLICATION_MAINTAINER}")
   set(CPACK_DEBIAN_PACKAGE_SECTION "hamradio")
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libasound2, libfftw3-single3, libgcc1, libgl1-mesa-glx, libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5network5, libqt5opengl5, libqt5widgets5, libqt5multimedia5-plugins, libstdc++6, libusb-1.0-0, libopencv, pulseaudio, libxml2, ffmpeg, libavcodec, libavformat, libopus, libcodec2")
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libasound2, libfftw3-single3, libgcc1, libgl1-mesa-glx, libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5network5, libqt5opengl5, libqt5widgets5, libqt5multimedia5-plugins, libstdc++6, libusb-1.0-0, pulseaudio, libxml2, ffmpeg, libopus0, codec2, libairspy0, libhackrf0, librtlsdr0, libbladerf1, libmirisdr0, libiio0, soapysdr-tools")
 
-  list(APPEND CPACK_GENERATOR "RPM")
-  set(CPACK_RPM_PACKAGE_RELEASE "1")
-  set(CPACK_RPM_PACKAGE_LICENSE "GPL-3.0")
-  set(CPACK_RPM_PACKAGE_REQUIRES "libusb")
+  if ("${LSB_CODENAME}" STREQUAL "buster") # Debian 10
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec58, libavformat58, libairspyhf1, libopencv-imgproc3.2, libopencv-highgui3.2, limesuite")
+  elseif("${LSB_CODENAME}" STREQUAL "stretch") # Debian 9
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec57, libavformat57, libopencv-imgproc2.45v5, libopencv-highgu2.4-deb0, limesuite")
+  elseif("${LSB_CODENAME}" STREQUAL "bionic")  # Ubuntu 18.04
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec57, libavformat57, libairspyhf0, libopencv-imgproc3.2, libopencv-highgui3.2, limesuite")
+  elseif("${LSB_CODENAME}" STREQUAL "xenial")  # Ubuntu 16.04
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec-ffmpeg56, libavformat-ffmpeg56, libopencv-imgproc2.4v5, libopencv-highgui2.4v5")
+  endif()
+
+  # TODO
+  # needs rpmbuild (rpm on debian)
+  #list(APPEND CPACK_GENERATOR "RPM")
+  #set(CPACK_RPM_PACKAGE_RELEASE "1")
+  #set(CPACK_RPM_PACKAGE_LICENSE "GPL-3.0")
+  #set(CPACK_RPM_PACKAGE_REQUIRES "libusb")
 
 elseif((WIN32 OR MINGW) AND BUNDLE)
 
@@ -417,9 +436,6 @@ elseif((WIN32 OR MINGW) AND BUNDLE)
   set(CPACK_NSIS_CONTACT "${APPLICATION_MAINTAINER}")
   set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
   set(CPACK_NSIS_MODIFY_PATH ON)
-
-  # from https://blog.nathanosman.com/2017/11/24/using-windeployqt-with-cpack.html
-  # DeployQt.cmake
 
 else()
 
@@ -436,23 +452,20 @@ else()
       PATH "Library Install Name Destination Directory" FORCE)
   endif()
 
-  install(TARGETS sdrangelbench DESTINATION ${INSTALL_BIN_DIR})
-  if (BUILD_GUI)
+endif(APPLE AND BUNDLE AND BUILD_GUI)
+
+install(TARGETS sdrangelbench DESTINATION ${INSTALL_BIN_DIR})
+if (BUILD_GUI AND NOT (APPLE AND BUNDLE))
   install(TARGETS sdrangel DESTINATION ${INSTALL_BIN_DIR})
-  endif()
-  if (BUILD_SERVER)
-    install(TARGETS sdrangelsrv DESTINATION ${INSTALL_BIN_DIR})
-  endif()
+endif()
+if (BUILD_SERVER)
+  install(TARGETS sdrangelsrv DESTINATION ${INSTALL_BIN_DIR})
+endif()
 
-  #install files and directories (linux specific)
-  if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    # TODO remove useless udev
-    #install(DIRECTORY custom/udev-rules DESTINATION share/sdrangel)
-    #install(FILES custom/udev-rules/install.sh DESTINATION share/sdrangel/udev-rules PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-    install(FILES custom/desktop/sdrangel.desktop DESTINATION share/applications)
-    install(FILES custom/desktop/sdrangel_icon.png DESTINATION share/pixmaps)
-  endif()
-
+#install files and directories (linux specific)
+if (LINUX)
+  install(FILES custom/desktop/sdrangel.desktop DESTINATION share/applications)
+  install(FILES custom/desktop/sdrangel_icon.png DESTINATION share/pixmaps)
 endif()
 
 message(STATUS "CPack generators: ${CPACK_GENERATOR}")
