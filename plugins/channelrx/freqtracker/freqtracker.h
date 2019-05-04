@@ -43,6 +43,7 @@ class QNetworkReply;
 class DeviceSourceAPI;
 class DownChannelizer;
 class ThreadedBasebandSampleSink;
+class QTimer;
 class fftfilt;
 
 class FreqTracker : public BasebandSampleSink, public ChannelSinkAPI {
@@ -98,20 +99,22 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgSampleRateNotification* create(int sampleRate) {
-            return new MsgSampleRateNotification(sampleRate);
+        static MsgSampleRateNotification* create(int sampleRate, int frequencyOffset) {
+            return new MsgSampleRateNotification(sampleRate, frequencyOffset);
         }
 
         int getSampleRate() const { return m_sampleRate; }
+        int getFrequencyOffset() const { return m_frequencyOffset; }
 
     private:
-
-        MsgSampleRateNotification(int sampleRate) :
+        MsgSampleRateNotification(int sampleRate, int frequencyOffset) :
             Message(),
-            m_sampleRate(sampleRate)
+            m_sampleRate(sampleRate),
+            m_frequencyOffset(frequencyOffset)
         { }
 
         int m_sampleRate;
+        int m_frequencyOffset;
     };
 
     FreqTracker(DeviceSourceAPI *deviceAPI);
@@ -149,6 +152,7 @@ public:
 	bool getSquelchOpen() const { return m_squelchOpen; }
 	bool getPllLocked() const { return (m_settings.m_trackerType == FreqTrackerSettings::TrackerPLL) && m_pll.locked(); }
 	Real getFrequency() const;
+    Real getAvgDeltaFreq() const { return m_avgDeltaFreq; }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
@@ -222,12 +226,19 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+    const QTimer *m_timer;
+    bool m_timerConnected;
+    uint32_t m_tickCount;
+    int m_lastCorrAbs;
+    Real m_avgDeltaFreq;
 	QMutex m_settingsMutex;
 
     void applySettings(const FreqTrackerSettings& settings, bool force = false);
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
     void setInterpolator();
     void configureChannelizer();
+    void connectTimer();
+    void disconnectTimer();
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const FreqTrackerSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreqTrackerSettings& settings, bool force);
@@ -236,7 +247,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-
+	void tick();
 };
 
 #endif // INCLUDE_FREQTRACKER_H

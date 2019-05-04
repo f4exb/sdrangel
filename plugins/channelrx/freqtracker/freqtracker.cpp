@@ -18,6 +18,7 @@
 #include "freqtracker.h"
 
 #include <QTime>
+#include <QTimer>
 #include <QDebug>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -61,10 +62,21 @@ FreqTracker::FreqTracker(DeviceSourceAPI *deviceAPI) :
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
+        m_timerConnected(false),
+        m_tickCount(0),
+        m_lastCorrAbs(0),
+        m_avgDeltaFreq(0.0),
         m_settingsMutex(QMutex::Recursive)
 {
     setObjectName(m_channelId);
 
+#ifdef USE_INTERNAL_TIMER
+#warning "Uses internal timer"
+    m_timer = new QTimer();
+    m_timer->start(50);
+#else
+    m_timer = &DSPEngine::instance()->getMasterTimer();
+#endif
 	m_magsq = 0.0;
 
     m_channelizer = new DownChannelizer(this);
@@ -82,6 +94,11 @@ FreqTracker::FreqTracker(DeviceSourceAPI *deviceAPI) :
 
 FreqTracker::~FreqTracker()
 {
+    disconnectTimer();
+#ifdef USE_INTERNAL_TIMER
+    m_timer->stop();
+    delete m_timer;
+#endif
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
     m_deviceAPI->removeChannelAPI(this);
@@ -243,7 +260,7 @@ bool FreqTracker::handleMessage(const Message& cmd)
 
 void FreqTracker::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
 {
-    qDebug() << "AMDemod::applyChannelSettings:"
+    qDebug() << "FreqTracker::applyChannelSettings:"
             << " inputSampleRate: " << inputSampleRate
             << " inputFrequencyOffset: " << inputFrequencyOffset;
 
@@ -320,16 +337,26 @@ void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
     if ((m_settings.m_tracking != settings.m_tracking) || force)
     {
         reverseAPIKeys.append("tracking");
+        m_avgDeltaFreq = 0.0;
+
         if (settings.m_tracking)
         {
             m_pll.reset();
             m_fll.reset();
+            m_lastCorrAbs = 0;
+            connectTimer();
+        }
+        else
+        {
+            disconnectTimer();
         }
     }
 
     if ((m_settings.m_trackerType != settings.m_trackerType) || force)
     {
         reverseAPIKeys.append("trackerType");
+        m_lastCorrAbs = 0;
+        m_avgDeltaFreq = 0.0;
 
         if (settings.m_trackerType == FreqTrackerSettings::TrackerFLL) {
             m_fll.reset();
@@ -399,8 +426,29 @@ void FreqTracker::configureChannelizer()
 
     if (m_guiMessageQueue)
     {
-        MsgSampleRateNotification *msg = MsgSampleRateNotification::create(m_deviceSampleRate / (1<<m_settings.m_log2Decim));
+        MsgSampleRateNotification *msg = MsgSampleRateNotification::create(
+            m_deviceSampleRate / (1<<m_settings.m_log2Decim),
+            m_settings.m_inputFrequencyOffset);
         m_guiMessageQueue->push(msg);
+    }
+}
+
+void FreqTracker::connectTimer()
+{
+    if (!m_timerConnected)
+    {
+        m_tickCount = 0;
+        connect(m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+        m_timerConnected = true;
+    }
+}
+
+void FreqTracker::disconnectTimer()
+{
+    if (m_timerConnected)
+    {
+        disconnect(m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+        m_timerConnected = false;
     }
 }
 
@@ -630,4 +678,39 @@ void FreqTracker::networkManagerFinished(QNetworkReply *reply)
     QString answer = reply->readAll();
     answer.chop(1); // remove last \n
     qDebug("FreqTracker::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+}
+
+void FreqTracker::tick()
+{
+    if (getSquelchOpen() && (m_settings.m_trackerType != FreqTrackerSettings::TrackerNone)) {
+        m_avgDeltaFreq = 0.1*getFrequency() + 0.9*m_avgDeltaFreq;
+    }
+
+    if (m_tickCount < 19)
+    {
+        m_tickCount++;
+    }
+    else
+    {
+        if (getSquelchOpen() && (m_settings.m_trackerType != FreqTrackerSettings::TrackerNone))
+        {
+            int decayAmount = m_channelSampleRate < 100 ? 1 : m_channelSampleRate / 100;
+
+            if (m_lastCorrAbs < decayAmount)
+            {
+                FreqTrackerSettings settings = m_settings;
+                settings.m_inputFrequencyOffset += m_avgDeltaFreq;
+                m_lastCorrAbs = m_avgDeltaFreq < 0 ? m_avgDeltaFreq : m_avgDeltaFreq;
+                applySettings(settings);
+            }
+            else
+            {
+                if (m_lastCorrAbs >= decayAmount) {
+                    m_lastCorrAbs -= decayAmount;
+                }
+            }
+        }
+
+        m_tickCount = 0;
+    }
 }

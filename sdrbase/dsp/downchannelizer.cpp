@@ -153,9 +153,9 @@ bool DownChannelizer::handleMessage(const Message& cmd)
 		m_requestedOutputSampleRate = chan.getSampleRate();
 		m_requestedCenterFrequency = chan.getCenterFrequency();
 
-		qDebug() << "DownChannelizer::handleMessage: DSPConfigureChannelizer:"
-				<< " m_requestedOutputSampleRate: " << m_requestedOutputSampleRate
-				<< " m_requestedCenterFrequency: " << m_requestedCenterFrequency;
+            // qDebug() << "DownChannelizer::handleMessage: DSPConfigureChannelizer:"
+            // 		<< " m_requestedOutputSampleRate: " << m_requestedOutputSampleRate
+            // 		<< " m_requestedCenterFrequency: " << m_requestedCenterFrequency;
 
 		applyConfiguration();
 
@@ -309,12 +309,12 @@ Real DownChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanSta
 	Real sigBw = sigEnd - sigStart;
 	Real rot = sigBw / 4;
 
-	qDebug("DownChannelizer::createFilterChain: Signal [%.1f, %.1f] (BW %.1f), Channel [%.1f, %.1f], Rot %.1f", sigStart, sigEnd, sigBw, chanStart, chanEnd, rot);
+	//qDebug("DownChannelizer::createFilterChain: Signal [%.1f, %.1f] (BW %.1f), Channel [%.1f, %.1f], Rot %.1f", sigStart, sigEnd, sigBw, chanStart, chanEnd, rot);
 
 	// check if it fits into the left half
 	if(signalContainsChannel(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd))
     {
-		qDebug("DownChannelizer::createFilterChain: -> take left half (rotate by +1/4 and decimate by 2)");
+		//qDebug("DownChannelizer::createFilterChain: -> take left half (rotate by +1/4 and decimate by 2)");
 		m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
 		return createFilterChain(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd);
 	}
@@ -322,7 +322,7 @@ Real DownChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanSta
 	// check if it fits into the right half
 	if(signalContainsChannel(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd))
     {
-		qDebug("DownChannelizer::createFilterChain: -> take right half (rotate by -1/4 and decimate by 2)");
+		//qDebug("DownChannelizer::createFilterChain: -> take right half (rotate by -1/4 and decimate by 2)");
 		m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
 		return createFilterChain(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd);
 	}
@@ -330,13 +330,13 @@ Real DownChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanSta
 	// check if it fits into the center
 	if(signalContainsChannel(sigStart + rot, sigEnd - rot, chanStart, chanEnd))
     {
-		qDebug("DownChannelizer::createFilterChain: -> take center half (decimate by 2)");
+		//qDebug("DownChannelizer::createFilterChain: -> take center half (decimate by 2)");
 		m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
 		return createFilterChain(sigStart + rot, sigEnd - rot, chanStart, chanEnd);
 	}
 
 	Real ofs = ((chanEnd - chanStart) / 2.0 + chanStart) - ((sigEnd - sigStart) / 2.0 + sigStart);
-	qDebug("DownChannelizer::createFilterChain: -> complete (final BW %.1f, frequency offset %.1f)", sigBw, ofs);
+	//qDebug("DownChannelizer::createFilterChain: -> complete (final BW %.1f, frequency offset %.1f)", sigBw, ofs);
 	return ofs;
 }
 

@@ -111,6 +111,11 @@ bool FreqTrackerGUI::handleMessage(const Message& message)
         const FreqTracker::MsgSampleRateNotification& cfg = (FreqTracker::MsgSampleRateNotification&) message;
         m_channelSampleRate = cfg.getSampleRate();
         ui->channelSampleRateText->setText(tr("%1k").arg(QString::number(m_channelSampleRate / 1000.0f, 'g', 5)));
+        blockApplySettings(true);
+        m_settings.m_inputFrequencyOffset = cfg.getFrequencyOffset();
+        ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
+        m_channelMarker.setCenterFrequency(cfg.getFrequencyOffset());
+        blockApplySettings(false);
 
         if (m_channelSampleRate > 1000) {
             ui->rfBW->setMaximum(m_channelSampleRate/100);
@@ -396,7 +401,7 @@ void FreqTrackerGUI::tick()
         ui->tracking->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
     }
 
-    int freq = m_freqTracker->getFrequency();
+    int freq = m_freqTracker->getAvgDeltaFreq();
     QLocale loc;
     ui->trackingFrequencyText->setText(tr("%1 Hz").arg(loc.toString(freq)));
 
