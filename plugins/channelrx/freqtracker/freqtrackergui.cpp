@@ -188,7 +188,11 @@ void FreqTrackerGUI::on_trackerType_currentIndexChanged(int index)
 
 void FreqTrackerGUI::on_pllPskOrder_currentIndexChanged(int index)
 {
-    m_settings.m_pllPskOrder = index;
+    if ((index < 0) || (index > 5)) {
+        return;
+    }
+
+    m_settings.m_pllPskOrder = 1<<index;
     applySettings();
 }
 
@@ -372,6 +376,12 @@ void FreqTrackerGUI::tick()
 
 	bool squelchOpen = m_freqTracker->getSquelchOpen();
 
+    if (squelchOpen) {
+        ui->squelchLabel->setStyleSheet("QLabel { background-color : green; }");
+    } else {
+        ui->squelchLabel->setStyleSheet("QLabel { background:rgb(50,50,50); }");
+    }
+
 	if (m_settings.m_tracking)
 	{
 	    if (m_freqTracker->getPllLocked()) {
@@ -380,9 +390,13 @@ void FreqTrackerGUI::tick()
 	        ui->tracking->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 	    }
 
-        int freq = (m_freqTracker->getPllFrequency() * m_freqTracker->getSampleRate()) / (2.0*M_PI);
-        ui->tracking->setToolTip(tr("PLL for synchronous AM. Freq = %1 Hz").arg(freq));
+        int freq = m_freqTracker->getFrequency();
+        ui->tracking->setToolTip(tr("Tracking on. Freq = %1 Hz").arg(freq));
 	}
+    else
+    {
+        ui->tracking->setToolTip("Tracking off");
+    }
 
 	m_tickCount++;
 }

@@ -429,6 +429,11 @@
           <string>16</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>32</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -504,7 +509,7 @@
     <item>
      <layout class="QHBoxLayout" name="squelchLayout">
       <item>
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="squelchLabel">
         <property name="text">
          <string>Sq</string>
         </property>

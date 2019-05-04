@@ -147,8 +147,8 @@ public:
     uint32_t getSampleRate() const { return m_channelSampleRate; }
 	double getMagSq() const { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }
-	bool getPllLocked() const { return (m_settings.m_trackerType == FreqTrackerSettings::TrackerPLL) && m_pll.locked(); }
-	Real getPllFrequency() const { return m_pll.getFreq(); }
+	bool getPllLocked() const { return m_settings.m_tracking && (m_settings.m_trackerType == FreqTrackerSettings::TrackerPLL) && m_pll.locked(); }
+	Real getFrequency() const;
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
@@ -217,7 +217,6 @@ private:
 	MagSqLevelsStore m_magSqLevelStore;
 
 	MovingAverageUtil<Real, double, 16> m_movingAverage;
-    Bandpass<Real> m_bandpass;
 
     static const int m_udpBlockSize;
     QNetworkAccessManager *m_networkManager;
@@ -226,6 +225,7 @@ private:
 	QMutex m_settingsMutex;
 
     void applySettings(const FreqTrackerSettings& settings, bool force = false);
+    void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
     void setInterpolator();
     void configureChannelizer();
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const FreqTrackerSettings& settings);

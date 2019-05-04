@@ -76,6 +76,8 @@ FreqTracker::FreqTracker(DeviceSourceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+
+    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 }
 
 FreqTracker::~FreqTracker()
@@ -157,17 +159,18 @@ void FreqTracker::processOneSample(Complex &ci)
         }
     }
 
-    qint16 sample;
-
     m_squelchOpen = (m_squelchCount >= m_channelSampleRate / 20);
 
     if (m_squelchOpen)
     {
-        Real demod;
-    }
-    else
-    {
-        sample = 0;
+        if (m_settings.m_trackerType == FreqTrackerSettings::TrackerFLL)
+        {
+            m_fll.feed(re, im);
+        }
+        else if (m_settings.m_trackerType == FreqTrackerSettings::TrackerPLL)
+        {
+            m_pll.feed(re, im);
+        }
     }
 }
 
@@ -175,6 +178,7 @@ void FreqTracker::start()
 {
 	qDebug("FreqTracker::start");
 	m_squelchCount = 0;
+    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
     m_running = true;
 }
 
@@ -182,6 +186,19 @@ void FreqTracker::stop()
 {
     qDebug("FreqTracker::stop");
     m_running = false;
+}
+
+Real FreqTracker::getFrequency() const
+{
+    if (!m_settings.m_tracking) {
+        return 0;
+    } else if (m_settings.m_trackerType == FreqTrackerSettings::TrackerPLL) {
+        return (m_pll.getFreq() * m_channelSampleRate) / (2.0 * M_PI);
+    } else if (m_settings.m_trackerType == FreqTrackerSettings::TrackerFLL) {
+        return (m_fll.getFreq() * m_channelSampleRate) / (2.0 * M_PI);
+    } else {
+        return 0;
+    }
 }
 
 bool FreqTracker::handleMessage(const Message& cmd)
@@ -196,17 +213,18 @@ bool FreqTracker::handleMessage(const Message& cmd)
                 << " centerFrequency: " << notif.getCenterFrequency();
 
         configureChannelizer();
+
+        return true;
     }
     else if (DownChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
-        m_inputSampleRate = notif.getSampleRate();
-        m_inputFrequencyOffset = notif.getFrequencyOffset();
 
         qDebug() << "FreqTracker::handleMessage: MsgChannelizerNotification:"
-                << " inputSampleRate: " << m_inputSampleRate
-                << " inputFrequencyOffset: " << m_inputFrequencyOffset;
+                << " inputSampleRate: " << notif.getSampleRate()
+                << " inputFrequencyOffset: " << notif.getFrequencyOffset();
 
+        applyChannelSettings(notif.getSampleRate(), notif.getFrequencyOffset());
         setInterpolator();
 
 		return true;
@@ -223,6 +241,26 @@ bool FreqTracker::handleMessage(const Message& cmd)
 	{
 		return false;
 	}
+}
+
+void FreqTracker::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
+{
+    qDebug() << "AMDemod::applyChannelSettings:"
+            << " inputSampleRate: " << inputSampleRate
+            << " inputFrequencyOffset: " << inputFrequencyOffset;
+
+    if ((m_inputFrequencyOffset != inputFrequencyOffset) ||
+        (m_inputSampleRate != inputSampleRate) || force)
+    {
+        m_nco.setFreq(-inputFrequencyOffset, inputSampleRate);
+    }
+
+    if ((m_inputSampleRate != inputSampleRate) || force) {
+        setInterpolator();
+    }
+
+    m_inputSampleRate = inputSampleRate;
+    m_inputFrequencyOffset = inputFrequencyOffset;
 }
 
 void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
@@ -248,6 +286,7 @@ void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
 
     QList<QString> reverseAPIKeys;
     bool updateChannelizer = false;
+    bool updateInterpolator = false;
 
     if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force)
     {
@@ -261,16 +300,10 @@ void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
         updateChannelizer = true;
     }
 
-    if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-
-    if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth)
-     && (m_settings.m_log2Decim == settings.m_log2Decim)
-     && (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)
-     && !force)
+    if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth) || force)
     {
-        setInterpolator();
+        updateInterpolator = true;
+        reverseAPIKeys.append("rfBandwidth");
     }
 
     if ((m_settings.m_squelch != settings.m_squelch) || force)
@@ -285,15 +318,37 @@ void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
     if ((m_settings.m_title != settings.m_title) || force) {
         reverseAPIKeys.append("title");
     }
-    if ((m_settings.m_tracking != settings.m_tracking) || force) {
+
+    if ((m_settings.m_tracking != settings.m_tracking) || force)
+    {
         reverseAPIKeys.append("tracking");
+        if (settings.m_tracking)
+        {
+            m_pll.reset();
+            m_fll.reset();
+        }
     }
-    if ((m_settings.m_trackerType != settings.m_trackerType) || force) {
+
+    if ((m_settings.m_trackerType != settings.m_trackerType) || force)
+    {
         reverseAPIKeys.append("trackerType");
+
+        if (settings.m_trackerType == FreqTrackerSettings::TrackerFLL) {
+            m_fll.reset();
+        } else if (settings.m_trackerType == FreqTrackerSettings::TrackerPLL) {
+            m_pll.reset();
+        }
     }
-    if ((m_settings.m_pllPskOrder != settings.m_pllPskOrder) || force) {
+
+    if ((m_settings.m_pllPskOrder != settings.m_pllPskOrder) || force)
+    {
         reverseAPIKeys.append("pllPskOrder");
+
+        if (settings.m_pllPskOrder < 32) {
+            m_pll.setPskOrder(settings.m_pllPskOrder);
+        }
     }
+
     if ((m_settings.m_rrc != settings.m_rrc) || force) {
         reverseAPIKeys.append("rrc");
     }
@@ -313,9 +368,10 @@ void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
 
     m_settings = settings;
 
-    if (updateChannelizer)
-    {
+    if (updateChannelizer) {
         configureChannelizer();
+    } else if (updateInterpolator) {
+        setInterpolator();
     }
 }
 
@@ -325,18 +381,22 @@ void FreqTracker::setInterpolator()
     m_interpolator.create(16, m_inputSampleRate, m_settings.m_rfBandwidth / 2.2f);
     m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = (Real) m_inputSampleRate / (Real) m_channelSampleRate;
-    m_bandpass.create(301, m_channelSampleRate, 300.0, m_settings.m_rfBandwidth / 2.0f);
     m_settingsMutex.unlock();
 }
 
 void FreqTracker::configureChannelizer()
 {
+    m_channelSampleRate = m_deviceSampleRate / (1<<m_settings.m_log2Decim);
+
     qDebug() << "FreqTracker::configureChannelizer:"
-            << " sampleRate: " << m_deviceSampleRate / (1<<m_settings.m_log2Decim)
+            << " sampleRate: " << m_channelSampleRate
             << " inputFrequencyOffset: " << m_settings.m_inputFrequencyOffset;
 
+    m_pll.setSampleRate(m_channelSampleRate);
+    m_fll.setSampleRate(m_channelSampleRate);
+
     m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-        m_deviceSampleRate / (1<<m_settings.m_log2Decim),
+        m_channelSampleRate,
         m_settings.m_inputFrequencyOffset);
 
     if (m_guiMessageQueue)
@@ -387,12 +447,9 @@ int FreqTracker::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     FreqTrackerSettings settings = m_settings;
-    bool frequencyOffsetChanged = false;
 
-    if (channelSettingsKeys.contains("inputFrequencyOffset"))
-    {
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getFreqTrackerSettings()->getInputFrequencyOffset();
-        frequencyOffsetChanged = true;
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getFreqTrackerSettings()->getRfBandwidth();
@@ -446,13 +503,6 @@ int FreqTracker::webapiSettingsPutPatch(
 
     MsgConfigureFreqTracker *msg = MsgConfigureFreqTracker::create(settings, force);
     m_inputMessageQueue.push(msg);
-
-    if ((settings.m_log2Decim != m_settings.m_log2Decim) || frequencyOffsetChanged || force)
-    {
-        MsgConfigureChannelizer *msg = MsgConfigureChannelizer::create(
-            m_deviceSampleRate / (1<<settings.m_log2Decim), settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(msg);
-    }
 
     qDebug("FreqTracker::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any

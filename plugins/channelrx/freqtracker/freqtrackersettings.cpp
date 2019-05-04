@@ -38,7 +38,7 @@ void FreqTrackerSettings::resetToDefaults()
     m_title = "Frequency Tracker";
     m_tracking = false;
     m_trackerType = TrackerFLL;
-    m_pllPskOrder = 1;
+    m_pllPskOrder = 2; // BPSK
     m_rrc = false;
     m_rrcRolloff = 35;
     m_useReverseAPI = false;
@@ -112,8 +112,8 @@ bool FreqTrackerSettings::deserialize(const QByteArray& data)
         d.readBool(10, &m_tracking, false);
         d.readS32(12, &tmp, 0);
         m_trackerType = tmp < 0 ? TrackerFLL : tmp > 1 ? TrackerPLL : (TrackerType) tmp;
-        d.readU32(13, &utmp, 1);
-        m_pllPskOrder = utmp > 4 ? 4 : utmp;
+        d.readU32(13, &utmp, 2);
+        m_pllPskOrder = utmp > 32 ? 32 : utmp;
         d.readBool(14, &m_rrc, false);
         d.readU32(15, &utmp, 35);
         m_rrcRolloff = utmp > 100 ? 100 : utmp;
