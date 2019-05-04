@@ -41,6 +41,7 @@ public:
     const std::complex<float>& getComplex() const { return m_y; }
     float getReal() const { return m_yRe; }
     float getImag() const { return m_yIm; }
+    float getFreq() const { return m_freq; }
 
 private:
     /** Normalize angle in radians into the [-pi,+pi] region */

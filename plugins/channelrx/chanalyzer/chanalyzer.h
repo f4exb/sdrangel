@@ -124,10 +124,11 @@ public:
 	DownChannelizer *getChannelizer() { return m_channelizer; }
 	int getInputSampleRate() const { return m_inputSampleRate; }
     int getChannelSampleRate() const { return m_settings.m_downSample ? m_settings.m_downSampleRate : m_inputSampleRate; }
+    int getDecimation() const { return 1<<m_settings.m_spanLog2; }
 	double getMagSq() const { return m_magsq; }
 	double getMagSqAvg() const { return (double) m_channelPowerAvg; }
 	bool isPllLocked() const { return m_settings.m_pll && m_pll.locked(); }
-    Real getPllFrequency() const { return m_pll.getFreq(); }
+    Real getPllFrequency() const;
 	Real getPllDeltaPhase() const { return m_pll.getDeltaPhi(); }
     Real getPllPhase() const { return m_pll.getPhiHat(); }
 

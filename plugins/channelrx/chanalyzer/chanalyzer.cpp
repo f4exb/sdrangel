@@ -379,3 +379,14 @@ void ChannelAnalyzer::applySettings(const ChannelAnalyzerSettings& settings, boo
 
     m_settings = settings;
 }
+
+Real ChannelAnalyzer::getPllFrequency() const
+{
+    if (m_settings.m_fll) {
+        return m_fll.getFreq();
+    } else if (m_settings.m_pll) {
+        return m_pll.getFreq();
+    } else {
+        return 0.0;
+    }
+}

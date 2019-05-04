@@ -241,7 +241,8 @@ void ChannelAnalyzerGUI::tick()
 
 	if (ui->pll->isChecked())
 	{
-		int freq = (m_channelAnalyzer->getPllFrequency() * m_channelAnalyzer->getChannelSampleRate()) / (2.0*M_PI);
+        double sampleRate = ((double) m_channelAnalyzer->getChannelSampleRate()) / m_channelAnalyzer->getDecimation();
+		int freq = (m_channelAnalyzer->getPllFrequency() * sampleRate) / (2.0*M_PI);
 		ui->pll->setToolTip(tr("PLL lock. Freq = %1 Hz").arg(freq));
 	}
 }
