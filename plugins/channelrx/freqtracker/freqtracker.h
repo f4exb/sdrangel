@@ -25,7 +25,7 @@
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelsinkapi.h"
-#include "dsp/nco.h"
+#include "dsp/ncof.h"
 #include "dsp/interpolator.h"
 #include "util/movingaverage.h"
 #include "dsp/agc.h"
@@ -196,20 +196,20 @@ private:
     DownChannelizer* m_channelizer;
     FreqTrackerSettings m_settings;
 
-    int m_deviceSampleRate;
+    uint32_t m_deviceSampleRate;
     int m_inputSampleRate;
     int m_inputFrequencyOffset;
     uint32_t m_channelSampleRate;
     bool m_running;
 
-	NCO m_nco;
+	NCOF m_nco;
     PhaseLockComplex m_pll;
     FreqLockComplex m_fll;
 	Interpolator m_interpolator;
 	Real m_interpolatorDistance;
 	Real m_interpolatorDistanceRemain;
 
-	fftfilt* RRCFilter;
+	fftfilt* m_rrcFilter;
 
 	Real m_squelchLevel;
 	uint32_t m_squelchCount;

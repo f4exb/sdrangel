@@ -84,7 +84,8 @@ FreqTracker::FreqTracker(DeviceSourceAPI *deviceAPI) :
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
 
-    m_pll.computeCoefficients(0.05, 0.707, 1000);
+    m_pll.computeCoefficients(0.002f, 0.5f, 10.0f); // bandwidth, damping factor, loop gain
+    m_rrcFilter = new fftfilt(m_settings.m_rfBandwidth / m_channelSampleRate, 2*1024);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -105,6 +106,7 @@ FreqTracker::~FreqTracker()
     m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+    delete m_rrcFilter;
 }
 
 void FreqTracker::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
@@ -149,44 +151,60 @@ void FreqTracker::feed(const SampleVector::const_iterator& begin, const SampleVe
 
 void FreqTracker::processOneSample(Complex &ci)
 {
-    Real re = ci.real() / SDR_RX_SCALEF;
-    Real im = ci.imag() / SDR_RX_SCALEF;
-    Real magsq = re*re + im*im;
-    m_movingAverage(magsq);
-    m_magsq = m_movingAverage.asDouble();
-    m_magsqSum += magsq;
+    fftfilt::cmplx *sideband;
+    int n_out;
 
-    if (magsq > m_magsqPeak)
+    if (m_settings.m_rrc)
     {
-        m_magsqPeak = magsq;
-    }
-
-    m_magsqCount++;
-
-    if (m_magsq < m_squelchLevel)
-    {
-        if (m_squelchCount > 0) {
-            m_squelchCount--;
-        }
+        n_out = m_rrcFilter->runFilt(ci, &sideband);
     }
     else
     {
-        if (m_squelchCount < m_channelSampleRate / 10) {
-            m_squelchCount++;
-        }
+        n_out = 1;
+        sideband = &ci;
     }
 
-    m_squelchOpen = (m_squelchCount >= m_channelSampleRate / 20);
-
-    if (m_squelchOpen)
+    for (int i = 0; i < n_out; i++)
     {
-        if (m_settings.m_trackerType == FreqTrackerSettings::TrackerFLL)
+        Real re = sideband[i].real() / SDR_RX_SCALEF;
+        Real im = sideband[i].imag() / SDR_RX_SCALEF;
+        Real magsq = re*re + im*im;
+        m_movingAverage(magsq);
+        m_magsq = m_movingAverage.asDouble();
+        m_magsqSum += magsq;
+
+        if (magsq > m_magsqPeak)
         {
-            m_fll.feed(re, im);
+            m_magsqPeak = magsq;
         }
-        else if (m_settings.m_trackerType == FreqTrackerSettings::TrackerPLL)
+
+        m_magsqCount++;
+
+        if (m_magsq < m_squelchLevel)
         {
-            m_pll.feed(re, im);
+            if (m_squelchCount > 0) {
+                m_squelchCount--;
+            }
+        }
+        else
+        {
+            if (m_squelchCount < m_channelSampleRate / 10) {
+                m_squelchCount++;
+            }
+        }
+
+        m_squelchOpen = (m_squelchCount >= m_channelSampleRate / 20);
+
+        if (m_squelchOpen)
+        {
+            if (m_settings.m_trackerType == FreqTrackerSettings::TrackerFLL)
+            {
+                m_fll.feed(re, im);
+            }
+            else if (m_settings.m_trackerType == FreqTrackerSettings::TrackerPLL)
+            {
+                m_pll.feed(re, im);
+            }
         }
     }
 }
@@ -338,17 +356,12 @@ void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
     {
         reverseAPIKeys.append("tracking");
         m_avgDeltaFreq = 0.0;
+        m_lastCorrAbs = 0;
 
         if (settings.m_tracking)
         {
             m_pll.reset();
             m_fll.reset();
-            m_lastCorrAbs = 0;
-            connectTimer();
-        }
-        else
-        {
-            disconnectTimer();
         }
     }
 
@@ -362,6 +375,12 @@ void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
             m_fll.reset();
         } else if (settings.m_trackerType == FreqTrackerSettings::TrackerPLL) {
             m_pll.reset();
+        }
+
+        if (settings.m_trackerType == FreqTrackerSettings::TrackerNone) {
+            disconnectTimer();
+        } else {
+            connectTimer();
         }
     }
 
@@ -377,8 +396,10 @@ void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
     if ((m_settings.m_rrc != settings.m_rrc) || force) {
         reverseAPIKeys.append("rrc");
     }
-    if ((m_settings.m_rrcRolloff != settings.m_rrcRolloff) || force) {
+    if ((m_settings.m_rrcRolloff != settings.m_rrcRolloff) || force)
+    {
         reverseAPIKeys.append("rrcRolloff");
+        updateInterpolator = true;
     }
 
     if (settings.m_useReverseAPI)
@@ -406,19 +427,22 @@ void FreqTracker::setInterpolator()
     m_interpolator.create(16, m_inputSampleRate, m_settings.m_rfBandwidth / 2.2f);
     m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = (Real) m_inputSampleRate / (Real) m_channelSampleRate;
+    m_rrcFilter->create_rrc_filter(m_settings.m_rfBandwidth / m_channelSampleRate, m_settings.m_rrcRolloff / 100.0);
     m_settingsMutex.unlock();
 }
 
 void FreqTracker::configureChannelizer()
 {
-    m_channelSampleRate = m_deviceSampleRate / (1<<m_settings.m_log2Decim);
+    if (m_channelSampleRate != m_deviceSampleRate / (1<<m_settings.m_log2Decim))
+    {
+        m_channelSampleRate = m_deviceSampleRate / (1<<m_settings.m_log2Decim);
+        m_pll.setSampleRate(m_channelSampleRate);
+        m_fll.setSampleRate(m_channelSampleRate);
+    }
 
     qDebug() << "FreqTracker::configureChannelizer:"
             << " sampleRate: " << m_channelSampleRate
             << " inputFrequencyOffset: " << m_settings.m_inputFrequencyOffset;
-
-    m_pll.setSampleRate(m_channelSampleRate);
-    m_fll.setSampleRate(m_channelSampleRate);
 
     m_channelizer->configure(m_channelizer->getInputMessageQueue(),
         m_channelSampleRate,
@@ -682,7 +706,7 @@ void FreqTracker::networkManagerFinished(QNetworkReply *reply)
 
 void FreqTracker::tick()
 {
-    if (getSquelchOpen() && (m_settings.m_trackerType != FreqTrackerSettings::TrackerNone)) {
+    if (getSquelchOpen()) {
         m_avgDeltaFreq = 0.1*getFrequency() + 0.9*m_avgDeltaFreq;
     }
 
@@ -692,7 +716,7 @@ void FreqTracker::tick()
     }
     else
     {
-        if (getSquelchOpen() && (m_settings.m_trackerType != FreqTrackerSettings::TrackerNone))
+        if ((m_settings.m_tracking) && getSquelchOpen())
         {
             int decayAmount = m_channelSampleRate < 100 ? 1 : m_channelSampleRate / 100;
 
