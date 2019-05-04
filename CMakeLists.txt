@@ -23,7 +23,7 @@ set(COMPANY "f4exb")
 add_definitions("-DCOMPANY=\"${COMPANY}\"")
 set(APPLICATION_NAME "SDRangel")
 add_definitions("-DAPPLICATION_NAME=\"${APPLICATION_NAME}\"")
-set(APPLICATION_MAINTAINER="Edouard Griffiths")
+set(APPLICATION_MAINTAINER="Edouard Griffiths, F4EXB <f4exb06@gmail.com>")
 set(COPYRIGHT "Copyright (c) 2019 Edouard Griffiths. All rights reserved.")
 add_definitions("-DCOPYRIGHT=\"${COPYRIGHT}\"")
 set(IDENTIFIER "com.${COMPANY}.${APPLICATION_NAME}")
@@ -48,28 +48,25 @@ add_definitions("-DSDRANGEL_LIB_VERSION=\"${sdrangel_VERSION_MAJOR}.${sdrangel_V
 add_definitions("-DSDRANGEL_VERSION=\"${sdrangel_VERSION}\"")
 
 # configure CPACK infomation
-set(CPACK_PACKAGE_NAME "${APPLICATION_NAME}")
+set(CPACK_PACKAGE_NAME "${CMAKE_PACKAGE_NAME}")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "SDR Rx/Tx software for Airspy, Airspy HF+, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube")
 set(CPACK_PACKAGE_VENDOR "${COMPANY}")
 set(CPACK_PACKAGE_CONTACT "https://github.com/f4exb/sdrangel")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/Readme.md")
-set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${VERSION}")
 set(CPACK_PACKAGE_VERSION "${sdrangel_VERSION}")
 set(CPACK_PACKAGE_VERSION_MAJOR ${sdrangel_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${sdrangel_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${sdrangel_VERSION_PATCH})
 set(CPACK_SOURCE_STRIP_FILES true)
 set(CPACK_STRIP_FILES true)
-set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${sdrangel_VERSION}-${CMAKE_SYSTEM_PROCESSOR}")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/Readme.md")
 set(CPACK_SOURCE_IGNORE_FILES "${PROJECT_BINARY_DIR};/.git/;.gitignore;menu.yml;.travis.yml;.appveyor.yml;default.nix;.envrc;TODOs.org;/.scripts/")
 set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
 set(CPACK_GENERATOR "ZIP;TGZ")
 
-# quite unfair with *BSD/...
-if(UNIX AND NOT APPLE)
-    set(LINUX TRUE)
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  set(LINUX TRUE)
 endif()
 
 # SDRAngel cmake options
@@ -130,7 +127,9 @@ set(EXTERNAL_BUILD_LIBRARIES "${CMAKE_BINARY_DIR}/external_build")
 set(EXTERNAL_INSTALL_LIBRARIES "${CMAKE_BINARY_DIR}/external")
 
 if(APPLE)
-  set(CMAKE_OSX_DEPLOYMENT_TARGET, "10.9")
+  # check
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
+  message(STATUS "Build for macOS version: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
   set(CMAKE_MACOSX_RPATH ON)
 endif()
 
@@ -216,7 +215,7 @@ find_package(OpenCV) # channeltx/modatv
 
 # macOS compatibility
 if(APPLE)
-    find_package(ICONV)
+  find_package(Iconv)
 endif()
 
 # include external cmake if needed
@@ -365,20 +364,15 @@ if (BUILD_SERVER)
 endif()
 
 ############ install/package targets ################
-if(APPLE AND BUNDLE AND BUILD_GUI)
+# https://cmake.org/cmake/help/v3.0/module/InstallRequiredSystemLibraries.html
+#include(InstallRequiredSystemLibraries)
 
-  # https://cmake.org/cmake/help/v3.0/module/InstallRequiredSystemLibraries.html
-  #CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
+if(APPLE AND BUNDLE AND BUILD_GUI)
 
   install(TARGETS sdrangelbench)
   if (BUILD_SERVER)
     install(TARGETS sdrangelsrv)
   endif()
-
-  #include(DeployQt)
-  #macdeployqt(sdrangel)
-
-  include(InstallRequiredSystemLibraries)
 
   configure_file("${CMAKE_SOURCE_DIR}/custom/desktop/MacOSXBundleInfo.plist.in"
     "${CMAKE_BINARY_DIR}/Info.plist" @ONLY)
@@ -390,9 +384,16 @@ if(APPLE AND BUNDLE AND BUILD_GUI)
   set(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/custom/desktop/sdrangel_icon.icns")
   set(CPACK_BUNDLE_PLIST "${CMAKE_BINARY_DIR}/Info.plist")
   set(CPACK_BUNDLE_STARTUP_COMMAND "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}")
+
+  #  CPACK_INSTALL_CMAKE_PROJECTS
+
   #set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};${CMAKE_PROJECT_NAME};lib;/")
 
-  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/custom/desktop/sdrangel_icon.icns")
+  #  set(CPACK_APP_BUNDLE_DIR "${CPACK_PACKAGE_DIRECTORY}/_CPack_Packages/Darwin/Bundle/${CPACK_PACKAGE_FILE_NAME}/${APPLICATION_NAME}.app")
+  #  install( CODE "
+  #  INCLUDE(BundleUtilities)
+  #  fixup_bundle( ${CPACK_APP_BUNDLE_DIR} \"\" \"\" )"
+  #  COMPONENT Runtime )
 
 elseif(LINUX AND BUNDLE)
 
@@ -400,7 +401,7 @@ elseif(LINUX AND BUNDLE)
   list(APPEND CPACK_GENERATOR "DEB")
   set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${APPLICATION_MAINTAINER}")
   set(CPACK_DEBIAN_PACKAGE_SECTION "hamradio")
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.3.1-6), libgcc1 (>= 1:3.4.2-12)")
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libasound2, libfftw3-single3, libgcc1, libgl1-mesa-glx, libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5network5, libqt5opengl5, libqt5widgets5, libqt5multimedia5-plugins, libstdc++6, libusb-1.0-0, libopencv, pulseaudio, libxml2, ffmpeg, libavcodec, libavformat, libopus, libcodec2")
 
   list(APPEND CPACK_GENERATOR "RPM")
   set(CPACK_RPM_PACKAGE_RELEASE "1")
@@ -409,7 +410,7 @@ elseif(LINUX AND BUNDLE)
 
 elseif((WIN32 OR MINGW) AND BUNDLE)
 
-  set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
+  #set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
 
   list(APPEND CPACK_GENERATOR "NSIS")
   set(CPACK_NSIS_PACKAGE_NAME "${APPLICATION_NAME}")
