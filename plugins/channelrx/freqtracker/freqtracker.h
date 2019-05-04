@@ -147,7 +147,7 @@ public:
     uint32_t getSampleRate() const { return m_channelSampleRate; }
 	double getMagSq() const { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }
-	bool getPllLocked() const { return m_settings.m_tracking && (m_settings.m_trackerType == FreqTrackerSettings::TrackerPLL) && m_pll.locked(); }
+	bool getPllLocked() const { return (m_settings.m_trackerType == FreqTrackerSettings::TrackerPLL) && m_pll.locked(); }
 	Real getFrequency() const;
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)

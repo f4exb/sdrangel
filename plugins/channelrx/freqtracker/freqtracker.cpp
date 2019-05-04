@@ -190,9 +190,7 @@ void FreqTracker::stop()
 
 Real FreqTracker::getFrequency() const
 {
-    if (!m_settings.m_tracking) {
-        return 0;
-    } else if (m_settings.m_trackerType == FreqTrackerSettings::TrackerPLL) {
+    if (m_settings.m_trackerType == FreqTrackerSettings::TrackerPLL) {
         return (m_pll.getFreq() * m_channelSampleRate) / (2.0 * M_PI);
     } else if (m_settings.m_trackerType == FreqTrackerSettings::TrackerFLL) {
         return (m_fll.getFreq() * m_channelSampleRate) / (2.0 * M_PI);

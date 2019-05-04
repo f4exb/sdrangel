@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
+    <width>360</width>
     <height>145</height>
    </rect>
   </property>
@@ -18,13 +18,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>350</width>
+    <width>360</width>
     <height>100</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>350</width>
+    <width>360</width>
     <height>16777215</height>
    </size>
   </property>
@@ -45,7 +45,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>348</width>
+     <width>358</width>
      <height>140</height>
     </rect>
    </property>
@@ -127,6 +127,25 @@
          <widget class="Line" name="line">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="trackingFrequencyText">
+          <property name="minimumSize">
+           <size>
+            <width>85</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Tracking delta frequency (Hz)</string>
+          </property>
+          <property name="text">
+           <string>-9,999,999 Hz</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
@@ -375,6 +394,11 @@
         <property name="toolTip">
          <string>Tracking type</string>
         </property>
+        <item>
+         <property name="text">
+          <string>No</string>
+         </property>
+        </item>
         <item>
          <property name="text">
           <string>FLL</string>

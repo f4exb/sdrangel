@@ -111,7 +111,7 @@ bool FreqTrackerSettings::deserialize(const QByteArray& data)
         d.readString(9, &m_title, "Frequency Tracker");
         d.readBool(10, &m_tracking, false);
         d.readS32(12, &tmp, 0);
-        m_trackerType = tmp < 0 ? TrackerFLL : tmp > 1 ? TrackerPLL : (TrackerType) tmp;
+        m_trackerType = tmp < 0 ? TrackerFLL : tmp > 2 ? TrackerPLL : (TrackerType) tmp;
         d.readU32(13, &utmp, 2);
         m_pllPskOrder = utmp > 32 ? 32 : utmp;
         d.readBool(14, &m_rrc, false);

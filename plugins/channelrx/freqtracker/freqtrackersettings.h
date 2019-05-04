@@ -29,6 +29,7 @@ struct FreqTrackerSettings
 {
     enum TrackerType
     {
+        TrackerNone,
         TrackerFLL,
         TrackerPLL
     };

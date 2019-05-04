@@ -334,15 +334,23 @@ void FreqTrackerGUI::displaySettings()
     blockApplySettings(true);
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-
+    ui->log2Decim->setCurrentIndex(m_settings.m_log2Decim);
     int displayValue = m_settings.m_rfBandwidth/100.0;
     ui->rfBW->setValue(displayValue);
     ui->rfBWText->setText(QString("%1 kHz").arg(displayValue / 10.0, 0, 'f', 1));
-
     ui->squelch->setValue(m_settings.m_squelch);
     ui->squelchText->setText(QString("%1 dB").arg(m_settings.m_squelch));
-
     ui->tracking->setChecked(m_settings.m_tracking);
+    ui->trackerType->setCurrentIndex((int) m_settings.m_trackerType);
+
+    int i = 0;
+    for(; ((m_settings.m_pllPskOrder>>i) & 1) == 0; i++);
+    ui->pllPskOrder->setCurrentIndex(i);
+
+    ui->rrc->setChecked(m_settings.m_rrc);
+    ui->rrcRolloff->setValue(m_settings.m_rrcRolloff);
+    QString rolloffStr = QString::number(m_settings.m_rrcRolloff/100.0, 'f', 2);
+    ui->rrcRolloffText->setText(rolloffStr);
 
     blockApplySettings(false);
 }
@@ -382,19 +390,19 @@ void FreqTrackerGUI::tick()
         ui->squelchLabel->setStyleSheet("QLabel { background:rgb(50,50,50); }");
     }
 
-	if (m_settings.m_tracking)
-	{
-	    if (m_freqTracker->getPllLocked()) {
-	        ui->tracking->setStyleSheet("QToolButton { background-color : green; }");
-	    } else {
-	        ui->tracking->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-	    }
+    if (m_freqTracker->getPllLocked()) {
+        ui->tracking->setStyleSheet("QToolButton { background-color : green; }");
+    } else {
+        ui->tracking->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+    }
 
-        int freq = m_freqTracker->getFrequency();
-        ui->tracking->setToolTip(tr("Tracking on. Freq = %1 Hz").arg(freq));
-	}
-    else
-    {
+    int freq = m_freqTracker->getFrequency();
+    QLocale loc;
+    ui->trackingFrequencyText->setText(tr("%1 Hz").arg(loc.toString(freq)));
+
+	if (m_settings.m_tracking) {
+        ui->tracking->setToolTip("Tracking on");
+	} else {
         ui->tracking->setToolTip("Tracking off");
     }
 
