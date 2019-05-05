@@ -80,18 +80,17 @@ FreqTracker::FreqTracker(DeviceSourceAPI *deviceAPI) :
 #endif
 	m_magsq = 0.0;
 
+    m_rrcFilter = new fftfilt(m_settings.m_rfBandwidth / m_channelSampleRate, 2*1024);
+    m_pll.computeCoefficients(0.002f, 0.5f, 10.0f); // bandwidth, damping factor, loop gain
+    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
+
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
     m_deviceAPI->addThreadedSink(m_threadedChannelizer);
     m_deviceAPI->addChannelAPI(this);
 
-    m_pll.computeCoefficients(0.002f, 0.5f, 10.0f); // bandwidth, damping factor, loop gain
-    m_rrcFilter = new fftfilt(m_settings.m_rfBandwidth / m_channelSampleRate, 2*1024);
-
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-
-    applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 }
 
 FreqTracker::~FreqTracker()
@@ -760,19 +759,22 @@ void FreqTracker::tick()
         {
             uint32_t decayDivider = 1000.0 * m_settings.m_alphaEMA;
             int decayAmount = m_channelSampleRate < decayDivider ? 1 : m_channelSampleRate / decayDivider;
+            int trim = m_channelSampleRate / 1000;
 
             if (m_lastCorrAbs < decayAmount)
             {
-                FreqTrackerSettings settings = m_settings;
-                settings.m_inputFrequencyOffset += m_avgDeltaFreq;
-                m_lastCorrAbs = m_avgDeltaFreq < 0 ? m_avgDeltaFreq : m_avgDeltaFreq;
-                applySettings(settings);
+                m_lastCorrAbs = m_avgDeltaFreq < 0 ? -m_avgDeltaFreq : m_avgDeltaFreq;
+
+                if (m_lastCorrAbs > trim)
+                {
+                    FreqTrackerSettings settings = m_settings;
+                    settings.m_inputFrequencyOffset += m_avgDeltaFreq;
+                    applySettings(settings);
+                }
             }
             else
             {
-                if (m_lastCorrAbs >= decayAmount) {
-                    m_lastCorrAbs -= decayAmount;
-                }
+                m_lastCorrAbs -= decayAmount;
             }
         }
 

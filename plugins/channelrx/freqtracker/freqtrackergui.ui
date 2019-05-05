@@ -581,6 +581,9 @@
      <layout class="QHBoxLayout" name="squelchLayout">
       <item>
        <widget class="QLabel" name="squelchLabel">
+        <property name="toolTip">
+         <string>Squelch indicator</string>
+        </property>
         <property name="text">
          <string>Sq</string>
         </property>
@@ -616,6 +619,9 @@
           <height>0</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Squelch level (dB)</string>
+        </property>
         <property name="text">
          <string>-40dB</string>
         </property>
@@ -639,7 +645,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Squelch gate (ms)</string>
+         <string>Squelch gate</string>
         </property>
         <property name="minimum">
          <number>0</number>
