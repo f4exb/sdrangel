@@ -1,3 +1,9 @@
+sdrangel (4.7.0-1) unstable; urgency=medium
+
+  * New Frequency Tracker Rx channel plugin
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 05 May 2019 16:14:18 +0100
+
 sdrangel (4.6.0-1) unstable; urgency=medium
 
   * New LocalSink and LocalInput plugin pair to use sub basebands internally
