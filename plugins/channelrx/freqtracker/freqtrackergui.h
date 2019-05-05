@@ -88,6 +88,7 @@ private slots:
     void on_log2Decim_currentIndexChanged(int index);
 	void on_rfBW_valueChanged(int value);
 	void on_tracking_toggled(bool checked);
+	void on_alphaEMA_valueChanged(int value);
     void on_trackerType_currentIndexChanged(int index);
     void on_pllPskOrder_currentIndexChanged(int index);
     void on_rrc_toggled(bool checked);

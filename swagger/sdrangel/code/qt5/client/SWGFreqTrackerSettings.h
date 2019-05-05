@@ -60,6 +60,9 @@ public:
     QString* getTitle();
     void setTitle(QString* title);
 
+    qint32 getAlphaEma();
+    void setAlphaEma(qint32 alpha_ema);
+
     qint32 getTracking();
     void setTracking(qint32 tracking);
 
@@ -111,6 +114,9 @@ private:
 
     QString* title;
     bool m_title_isSet;
+
+    qint32 alpha_ema;
+    bool m_alpha_ema_isSet;
 
     qint32 tracking;
     bool m_tracking_isSet;

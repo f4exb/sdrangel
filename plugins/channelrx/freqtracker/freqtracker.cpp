@@ -253,9 +253,11 @@ bool FreqTracker::handleMessage(const Message& cmd)
 	{
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
-        qDebug() << "FreqTracker::handleMessage: MsgChannelizerNotification:"
-                << " inputSampleRate: " << notif.getSampleRate()
-                << " inputFrequencyOffset: " << notif.getFrequencyOffset();
+        if (!m_settings.m_tracking) {
+            qDebug() << "FreqTracker::handleMessage: MsgChannelizerNotification:"
+                    << " inputSampleRate: " << notif.getSampleRate()
+                    << " inputFrequencyOffset: " << notif.getFrequencyOffset();
+        }
 
         applyChannelSettings(notif.getSampleRate(), notif.getFrequencyOffset());
         setInterpolator();
@@ -278,9 +280,11 @@ bool FreqTracker::handleMessage(const Message& cmd)
 
 void FreqTracker::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
 {
-    qDebug() << "FreqTracker::applyChannelSettings:"
-            << " inputSampleRate: " << inputSampleRate
-            << " inputFrequencyOffset: " << inputFrequencyOffset;
+    if (!m_settings.m_tracking) {
+        qDebug() << "FreqTracker::applyChannelSettings:"
+                << " inputSampleRate: " << inputSampleRate
+                << " inputFrequencyOffset: " << inputFrequencyOffset;
+    }
 
     if ((m_inputFrequencyOffset != inputFrequencyOffset) ||
         (m_inputSampleRate != inputSampleRate) || force)
@@ -298,24 +302,28 @@ void FreqTracker::applyChannelSettings(int inputSampleRate, int inputFrequencyOf
 
 void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
 {
-    qDebug() << "FreqTracker::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_log2Decim: " << settings.m_log2Decim
-            << " m_squelch: " << settings.m_squelch
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_title: " << settings.m_title
-            << " m_tracking: " << settings.m_tracking
-            << " m_trackerType: " << settings.m_trackerType
-            << " m_pllPskOrder: " << settings.m_pllPskOrder
-            << " m_rrc: " << settings.m_rrc
-            << " m_rrcRolloff: " << settings.m_rrcRolloff
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    if (!settings.m_tracking)
+    {
+        qDebug() << "FreqTracker::applySettings:"
+                << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
+                << " m_rfBandwidth: " << settings.m_rfBandwidth
+                << " m_log2Decim: " << settings.m_log2Decim
+                << " m_squelch: " << settings.m_squelch
+                << " m_rgbColor: " << settings.m_rgbColor
+                << " m_title: " << settings.m_title
+                << " m_alphaEMA: " << settings.m_alphaEMA
+                << " m_tracking: " << settings.m_tracking
+                << " m_trackerType: " << settings.m_trackerType
+                << " m_pllPskOrder: " << settings.m_pllPskOrder
+                << " m_rrc: " << settings.m_rrc
+                << " m_rrcRolloff: " << settings.m_rrcRolloff
+                << " m_useReverseAPI: " << settings.m_useReverseAPI
+                << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
+                << " m_reverseAPIPort: " << settings.m_reverseAPIPort
+                << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
+                << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
+                << " force: " << force;
+    }
 
     QList<QString> reverseAPIKeys;
     bool updateChannelizer = false;
@@ -350,6 +358,9 @@ void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
     }
     if ((m_settings.m_title != settings.m_title) || force) {
         reverseAPIKeys.append("title");
+    }
+    if ((m_settings.m_alphaEMA != settings.m_alphaEMA) || force) {
+        reverseAPIKeys.append("alphaEMA");
     }
 
     if ((m_settings.m_tracking != settings.m_tracking) || force)
@@ -440,9 +451,11 @@ void FreqTracker::configureChannelizer()
         m_fll.setSampleRate(m_channelSampleRate);
     }
 
-    qDebug() << "FreqTracker::configureChannelizer:"
-            << " sampleRate: " << m_channelSampleRate
-            << " inputFrequencyOffset: " << m_settings.m_inputFrequencyOffset;
+    if (!m_settings.m_tracking) {
+        qDebug() << "FreqTracker::configureChannelizer:"
+                << " sampleRate: " << m_channelSampleRate
+                << " inputFrequencyOffset: " << m_settings.m_inputFrequencyOffset;
+    }
 
     m_channelizer->configure(m_channelizer->getInputMessageQueue(),
         m_channelSampleRate,
@@ -535,6 +548,10 @@ int FreqTracker::webapiSettingsPutPatch(
     }
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getFreqTrackerSettings()->getTitle();
+    }
+    if (channelSettingsKeys.contains("alphaEMA")) {
+        float alphaEMA =  response.getFreqTrackerSettings()->getAlphaEma();
+        settings.m_alphaEMA = alphaEMA < 0.01 ? 0.01 : alphaEMA > 1.0 ? 1.0 : alphaEMA;
     }
     if (channelSettingsKeys.contains("tracking")) {
         settings.m_tracking = response.getFreqTrackerSettings()->getTracking() ? 1 : 0;
@@ -707,7 +724,7 @@ void FreqTracker::networkManagerFinished(QNetworkReply *reply)
 void FreqTracker::tick()
 {
     if (getSquelchOpen()) {
-        m_avgDeltaFreq = 0.1*getFrequency() + 0.9*m_avgDeltaFreq;
+        m_avgDeltaFreq = m_settings.m_alphaEMA*getFrequency() + (1.0 - m_settings.m_alphaEMA)*m_avgDeltaFreq;
     }
 
     if (m_tickCount < 19)
@@ -718,7 +735,8 @@ void FreqTracker::tick()
     {
         if ((m_settings.m_tracking) && getSquelchOpen())
         {
-            int decayAmount = m_channelSampleRate < 100 ? 1 : m_channelSampleRate / 100;
+            uint32_t decayDivider = 1000.0 * m_settings.m_alphaEMA;
+            int decayAmount = m_channelSampleRate < decayDivider ? 1 : m_channelSampleRate / decayDivider;
 
             if (m_lastCorrAbs < decayAmount)
             {

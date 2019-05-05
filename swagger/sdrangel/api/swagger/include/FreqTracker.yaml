@@ -19,6 +19,10 @@ FreqTrackerSettings:
       type: integer
     title:
       type: string
+    alphaEMA:
+      description: Alpha factor for delta frequency EMA
+      type: number
+      format: float
     tracking:
       description: Tracking 1 for enabled 0 for disabled
       type: integer

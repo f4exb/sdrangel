@@ -107,7 +107,9 @@ bool FreqTrackerGUI::handleMessage(const Message& message)
     }
     else if (FreqTracker::MsgSampleRateNotification::match(message))
     {
-        qDebug("FreqTrackerGUI::handleMessage: FreqTracker::MsgSampleRateNotification");
+        if (!m_settings.m_tracking) {
+            qDebug("FreqTrackerGUI::handleMessage: FreqTracker::MsgSampleRateNotification");
+        }
         const FreqTracker::MsgSampleRateNotification& cfg = (FreqTracker::MsgSampleRateNotification&) message;
         m_channelSampleRate = cfg.getSampleRate();
         ui->channelSampleRateText->setText(tr("%1k").arg(QString::number(m_channelSampleRate / 1000.0f, 'g', 5)));
@@ -182,6 +184,14 @@ void FreqTrackerGUI::on_tracking_toggled(bool checked)
     }
 
     m_settings.m_tracking = checked;
+    applySettings();
+}
+
+void FreqTrackerGUI::on_alphaEMA_valueChanged(int value)
+{
+    m_settings.m_alphaEMA = value / 100.0;
+    QString alphaEMAStr = QString::number(m_settings.m_alphaEMA, 'f', 2);
+    ui->alphaEMAText->setText(alphaEMAStr);
     applySettings();
 }
 
@@ -347,6 +357,9 @@ void FreqTrackerGUI::displaySettings()
     ui->squelchText->setText(QString("%1 dB").arg(m_settings.m_squelch));
     ui->tracking->setChecked(m_settings.m_tracking);
     ui->trackerType->setCurrentIndex((int) m_settings.m_trackerType);
+    QString alphaEMAStr = QString::number(m_settings.m_alphaEMA, 'f', 2);
+    ui->alphaEMAText->setText(alphaEMAStr);
+    ui->alphaEMA->setValue(m_settings.m_alphaEMA*100.0);
 
     int i = 0;
     for(; ((m_settings.m_pllPskOrder>>i) & 1) == 0; i++);

@@ -40,6 +40,8 @@ SWGFreqTrackerSettings::SWGFreqTrackerSettings() {
     m_rgb_color_isSet = false;
     title = nullptr;
     m_title_isSet = false;
+    alpha_ema = 0;
+    m_alpha_ema_isSet = false;
     tracking = 0;
     m_tracking_isSet = false;
     tracker_type = 0;
@@ -80,6 +82,8 @@ SWGFreqTrackerSettings::init() {
     m_rgb_color_isSet = false;
     title = new QString("");
     m_title_isSet = false;
+    alpha_ema = 0;
+    m_alpha_ema_isSet = false;
     tracking = 0;
     m_tracking_isSet = false;
     tracker_type = 0;
@@ -118,6 +122,7 @@ SWGFreqTrackerSettings::cleanup() {
 
 
 
+
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
     }
@@ -148,6 +153,8 @@ SWGFreqTrackerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&alpha_ema, pJson["alphaEMA"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tracking, pJson["tracking"], "qint32", "");
     
@@ -202,6 +209,9 @@ SWGFreqTrackerSettings::asJsonObject() {
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
+    if(m_alpha_ema_isSet){
+        obj->insert("alphaEMA", QJsonValue(alpha_ema));
     }
     if(m_tracking_isSet){
         obj->insert("tracking", QJsonValue(tracking));
@@ -295,6 +305,16 @@ void
 SWGFreqTrackerSettings::setTitle(QString* title) {
     this->title = title;
     this->m_title_isSet = true;
+}
+
+qint32
+SWGFreqTrackerSettings::getAlphaEma() {
+    return alpha_ema;
+}
+void
+SWGFreqTrackerSettings::setAlphaEma(qint32 alpha_ema) {
+    this->alpha_ema = alpha_ema;
+    this->m_alpha_ema_isSet = true;
 }
 
 qint32
@@ -408,6 +428,7 @@ SWGFreqTrackerSettings::isSet(){
         if(m_squelch_isSet){ isObjectUpdated = true; break;}
         if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
         if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
+        if(m_alpha_ema_isSet){ isObjectUpdated = true; break;}
         if(m_tracking_isSet){ isObjectUpdated = true; break;}
         if(m_tracker_type_isSet){ isObjectUpdated = true; break;}
         if(m_pll_psk_order_isSet){ isObjectUpdated = true; break;}

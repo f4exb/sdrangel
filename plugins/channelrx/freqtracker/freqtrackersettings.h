@@ -41,6 +41,7 @@ struct FreqTrackerSettings
     quint32 m_rgbColor;
     QString m_title;
     Serializable *m_channelMarker;
+    float m_alphaEMA; //!< alpha factor for delta frequency EMA
     bool m_tracking;
     TrackerType m_trackerType;
     uint32_t m_pllPskOrder;
