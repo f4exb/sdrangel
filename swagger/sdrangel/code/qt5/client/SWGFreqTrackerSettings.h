@@ -60,8 +60,8 @@ public:
     QString* getTitle();
     void setTitle(QString* title);
 
-    qint32 getAlphaEma();
-    void setAlphaEma(qint32 alpha_ema);
+    float getAlphaEma();
+    void setAlphaEma(float alpha_ema);
 
     qint32 getTracking();
     void setTracking(qint32 tracking);
@@ -77,6 +77,9 @@ public:
 
     qint32 getRrcRolloff();
     void setRrcRolloff(qint32 rrc_rolloff);
+
+    qint32 getSquelchGate();
+    void setSquelchGate(qint32 squelch_gate);
 
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
@@ -115,7 +118,7 @@ private:
     QString* title;
     bool m_title_isSet;
 
-    qint32 alpha_ema;
+    float alpha_ema;
     bool m_alpha_ema_isSet;
 
     qint32 tracking;
@@ -132,6 +135,9 @@ private:
 
     qint32 rrc_rolloff;
     bool m_rrc_rolloff_isSet;
+
+    qint32 squelch_gate;
+    bool m_squelch_gate_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

@@ -214,6 +214,7 @@ private:
 	Real m_squelchLevel;
 	uint32_t m_squelchCount;
 	bool m_squelchOpen;
+    uint32_t m_squelchGate; //!< Squelch gate in samples
 	double m_magsq;
 	double m_magsqSum;
 	double m_magsqPeak;

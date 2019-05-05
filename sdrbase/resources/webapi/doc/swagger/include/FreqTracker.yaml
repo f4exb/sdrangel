@@ -20,8 +20,9 @@ FreqTrackerSettings:
     title:
       type: string
     alphaEMA:
-      description: Alpha factor for delta frequency EMA in %
-      type: integer
+      description: Alpha factor for delta frequency EMA
+      type: number
+      format: float
     tracking:
       description: Tracking 1 for enabled 0 for disabled
       type: integer
@@ -36,6 +37,9 @@ FreqTrackerSettings:
       type: integer
     rrcRolloff:
       description: RRC filter rolloff factor in %
+      type: integer
+    squelchGate:
+      description: Squelch trigger gate in 10s of ms
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)

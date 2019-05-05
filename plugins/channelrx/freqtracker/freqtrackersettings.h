@@ -47,6 +47,7 @@ struct FreqTrackerSettings
     uint32_t m_pllPskOrder;
     bool m_rrc;
     uint32_t m_rrcRolloff; //!< in 100ths
+    int m_squelchGate; //!< in 10s of ms
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

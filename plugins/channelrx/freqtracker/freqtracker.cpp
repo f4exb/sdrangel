@@ -59,6 +59,7 @@ FreqTracker::FreqTracker(DeviceSourceAPI *deviceAPI) :
         m_channelSampleRate(48000),
         m_running(false),
         m_squelchOpen(false),
+        m_squelchGate(0),
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
@@ -182,18 +183,34 @@ void FreqTracker::processOneSample(Complex &ci)
 
         if (m_magsq < m_squelchLevel)
         {
-            if (m_squelchCount > 0) {
-                m_squelchCount--;
+            if (m_squelchGate > 0)
+            {
+                if (m_squelchCount > 0) {
+                    m_squelchCount--;
+                }
+
+                m_squelchOpen = m_squelchCount >= m_squelchGate;
+            }
+            else
+            {
+                m_squelchOpen = false;
             }
         }
         else
         {
-            if (m_squelchCount < m_channelSampleRate / 10) {
-                m_squelchCount++;
+            if (m_squelchGate > 0)
+            {
+                if (m_squelchCount < 2*m_squelchGate) {
+                    m_squelchCount++;
+                }
+
+                m_squelchOpen = m_squelchCount >= m_squelchGate;
+            }
+            else
+            {
+                m_squelchOpen = true;
             }
         }
-
-        m_squelchOpen = (m_squelchCount >= m_channelSampleRate / 20);
 
         if (m_squelchOpen)
         {
@@ -412,6 +429,11 @@ void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
         reverseAPIKeys.append("rrcRolloff");
         updateInterpolator = true;
     }
+    if ((m_settings.m_squelchGate != settings.m_squelchGate) || force)
+    {
+        reverseAPIKeys.append("squelchGate");
+        updateInterpolator = true;
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -439,6 +461,7 @@ void FreqTracker::setInterpolator()
     m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = (Real) m_inputSampleRate / (Real) m_channelSampleRate;
     m_rrcFilter->create_rrc_filter(m_settings.m_rfBandwidth / m_channelSampleRate, m_settings.m_rrcRolloff / 100.0);
+    m_squelchGate = (m_channelSampleRate / 100) * m_settings.m_squelchGate; // gate is given in 10s of ms at channel sample rate
     m_settingsMutex.unlock();
 }
 

@@ -2783,8 +2783,9 @@ margin-bottom: 20px;
       "type" : "string"
     },
     "alphaEMA" : {
-      "type" : "integer",
-      "description" : "Alpha factor for delta frequency EMA in %"
+      "type" : "number",
+      "format" : "float",
+      "description" : "Alpha factor for delta frequency EMA"
     },
     "tracking" : {
       "type" : "integer",
@@ -2805,6 +2806,10 @@ margin-bottom: 20px;
     "rrcRolloff" : {
       "type" : "integer",
       "description" : "RRC filter rolloff factor in %"
+    },
+    "squelchGate" : {
+      "type" : "integer",
+      "description" : "Squelch trigger gate in 10s of ms"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -24919,7 +24924,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-05-05T01:27:03.875+02:00
+              Generated 2019-05-05T11:13:49.637+02:00
             </div>
           </div>
       </div>

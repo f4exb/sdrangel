@@ -232,6 +232,13 @@ void FreqTrackerGUI::on_squelch_valueChanged(int value)
 	applySettings();
 }
 
+void FreqTrackerGUI::on_squelchGate_valueChanged(int value)
+{
+    ui->squelchGateText->setText(QString("%1").arg(value * 10.0f, 0, 'f', 0));
+    m_settings.m_squelchGate = value;
+	applySettings();
+}
+
 void FreqTrackerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -369,6 +376,8 @@ void FreqTrackerGUI::displaySettings()
     ui->rrcRolloff->setValue(m_settings.m_rrcRolloff);
     QString rolloffStr = QString::number(m_settings.m_rrcRolloff/100.0, 'f', 2);
     ui->rrcRolloffText->setText(rolloffStr);
+    ui->squelchGateText->setText(QString("%1").arg(m_settings.m_squelchGate * 10.0f, 0, 'f', 0));
+    ui->squelchGate->setValue(m_settings.m_squelchGate);
 
     blockApplySettings(false);
 }

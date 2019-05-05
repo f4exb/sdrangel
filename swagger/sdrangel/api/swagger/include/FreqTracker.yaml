@@ -38,6 +38,9 @@ FreqTrackerSettings:
     rrcRolloff:
       description: RRC filter rolloff factor in %
       type: integer
+    squelchGate:
+      description: Squelch trigger gate in 10s of ms
+      type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

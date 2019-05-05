@@ -94,6 +94,7 @@ private slots:
     void on_rrc_toggled(bool checked);
 	void on_rrcRolloff_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
+    void on_squelchGate_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();

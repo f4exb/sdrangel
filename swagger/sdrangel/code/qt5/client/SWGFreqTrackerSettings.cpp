@@ -40,7 +40,7 @@ SWGFreqTrackerSettings::SWGFreqTrackerSettings() {
     m_rgb_color_isSet = false;
     title = nullptr;
     m_title_isSet = false;
-    alpha_ema = 0;
+    alpha_ema = 0.0f;
     m_alpha_ema_isSet = false;
     tracking = 0;
     m_tracking_isSet = false;
@@ -52,6 +52,8 @@ SWGFreqTrackerSettings::SWGFreqTrackerSettings() {
     m_rrc_isSet = false;
     rrc_rolloff = 0;
     m_rrc_rolloff_isSet = false;
+    squelch_gate = 0;
+    m_squelch_gate_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -82,7 +84,7 @@ SWGFreqTrackerSettings::init() {
     m_rgb_color_isSet = false;
     title = new QString("");
     m_title_isSet = false;
-    alpha_ema = 0;
+    alpha_ema = 0.0f;
     m_alpha_ema_isSet = false;
     tracking = 0;
     m_tracking_isSet = false;
@@ -94,6 +96,8 @@ SWGFreqTrackerSettings::init() {
     m_rrc_isSet = false;
     rrc_rolloff = 0;
     m_rrc_rolloff_isSet = false;
+    squelch_gate = 0;
+    m_squelch_gate_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -116,6 +120,7 @@ SWGFreqTrackerSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
 
 
 
@@ -154,7 +159,7 @@ SWGFreqTrackerSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&alpha_ema, pJson["alphaEMA"], "qint32", "");
+    ::SWGSDRangel::setValue(&alpha_ema, pJson["alphaEMA"], "float", "");
     
     ::SWGSDRangel::setValue(&tracking, pJson["tracking"], "qint32", "");
     
@@ -165,6 +170,8 @@ SWGFreqTrackerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rrc, pJson["rrc"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rrc_rolloff, pJson["rrcRolloff"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&squelch_gate, pJson["squelchGate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -227,6 +234,9 @@ SWGFreqTrackerSettings::asJsonObject() {
     }
     if(m_rrc_rolloff_isSet){
         obj->insert("rrcRolloff", QJsonValue(rrc_rolloff));
+    }
+    if(m_squelch_gate_isSet){
+        obj->insert("squelchGate", QJsonValue(squelch_gate));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -307,12 +317,12 @@ SWGFreqTrackerSettings::setTitle(QString* title) {
     this->m_title_isSet = true;
 }
 
-qint32
+float
 SWGFreqTrackerSettings::getAlphaEma() {
     return alpha_ema;
 }
 void
-SWGFreqTrackerSettings::setAlphaEma(qint32 alpha_ema) {
+SWGFreqTrackerSettings::setAlphaEma(float alpha_ema) {
     this->alpha_ema = alpha_ema;
     this->m_alpha_ema_isSet = true;
 }
@@ -365,6 +375,16 @@ void
 SWGFreqTrackerSettings::setRrcRolloff(qint32 rrc_rolloff) {
     this->rrc_rolloff = rrc_rolloff;
     this->m_rrc_rolloff_isSet = true;
+}
+
+qint32
+SWGFreqTrackerSettings::getSquelchGate() {
+    return squelch_gate;
+}
+void
+SWGFreqTrackerSettings::setSquelchGate(qint32 squelch_gate) {
+    this->squelch_gate = squelch_gate;
+    this->m_squelch_gate_isSet = true;
 }
 
 qint32
@@ -434,6 +454,7 @@ SWGFreqTrackerSettings::isSet(){
         if(m_pll_psk_order_isSet){ isObjectUpdated = true; break;}
         if(m_rrc_isSet){ isObjectUpdated = true; break;}
         if(m_rrc_rolloff_isSet){ isObjectUpdated = true; break;}
+        if(m_squelch_gate_isSet){ isObjectUpdated = true; break;}
         if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
         if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
         if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
