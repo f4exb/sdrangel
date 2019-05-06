@@ -4,6 +4,8 @@
 
 This plugin can be used to track the center frequency of a carrier. It will try to adjust its center frequency on the carrier center frequency. It is normally used in conjunction with a utility program that monitors the plugin center frequency via reverse API. This utility can then make use of this information to control other plugins or any other purpose.
 
+&#9758; You will find the `freqtracking.py` (Python script) utility program that can be used to manage frequency tracking in the `scriptsapi` folder of this repository. More  details can be found in the `Readme.md` file in the same folder.
+
 <h2>Interface</h2>
 
 ![Frequency Tracker plugin GUI](../../../doc/img/FreqTracker_plugin.png)
@@ -19,6 +21,8 @@ To change the frequency manually use the wheels to adjust the frequency shift in
 <h3>2: Instantateous tracker error</h2>
 
 This is the instantaneous frequency error in Hz. It is activated as soon as the FLL or PLL tracker is selected (7.3) regardless of the tracking activation (7.1)
+
+&#9758; Note that the correction is limited to +/- 1/1000th of the channel sample rate in Hz. In the screenshot example the channel sample rate is 25 kS/s and thus the correction is effective only if the tracker error is larger that +/- 25 Hz.
 
 <h3>3: Channel power</h3>
 
@@ -56,14 +60,14 @@ S<sub>i</sub> = &alpha; x<sub>i</sub> + S<sub>i-1</sub>
 
 Alpha can be set between 0.01 and 1.0
 
-The lower alpha the lesser new values influence the average and thus the smoother the variations but also the slower the system reacts and the longer the acquisition. So you may want to start with values from 0.5 to 1.0 and reduce the value as the tracking achieves the correct frequency to reduce jitter. You may also let the system take the time to reach the correct value progressively with alpha values from 0.01 to 0.1.
+&#9758; The lower alpha the lesser new values influence the average and thus the smoother the variations but also the slower the system reacts and the longer the acquisition. So you may want to start with values from 0.5 to 1.0 and reduce the value as the tracking achieves the correct frequency to reduce jitter. You may also let the system take the time to reach the correct value progressively with alpha values from 0.01 to 0.1.
 
 <h4>7.3 Tracker type selection</h4>
 
 You may select the type of tracker with this combo box:
 
   - **No**: No tracking
-  - **FLL**: Frequency Locked Loop suitable for CW and FM type signals covering also any kind of digital m-ary FSK modulation. Note that for FM digital modulations the PLL may work also and sometimes with better stability.
+  - **FLL**: Frequency Locked Loop suitable for CW and FM type signals covering also any kind of digital m-ary FSK modulation. &#9758; Note that for FM digital modulations the PLL may work also and sometimes with better stability.
   - **PLL**: Phase Locked Loop suitable for digital phase modulations i.e. m-ary PSK in power of two orders. The order can be selected with the combo on the right (7.4)
 
 <h3>7.4 Order of PSK modulation</h3>
