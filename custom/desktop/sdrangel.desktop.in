@@ -1,9 +1,9 @@
 [Desktop Entry]
-Name=SDRangel
+Name=@APPLICATION_NAME@
 GenericName=SDR/Analyzer frontend
 Comment=SDR/Analyzer frontend for Airspy, Airspy HF+, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube
-Exec=sdrangel
-Icon=sdrangel_icon.png
+Exec=@CMAKE_PROJECT_NAME@
+Icon=@CMAKE_PROJECT_NAME@_icon.png
 StartupNotify=true
 Terminal=false
 Type=Application

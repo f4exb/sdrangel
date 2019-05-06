@@ -110,12 +110,14 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(BUILD_PLUGINS_DIR ${CMAKE_BINARY_DIR}/lib/plugins)
 set(BUILD_PLUGINSSRV_DIR ${CMAKE_BINARY_DIR}/lib/pluginssrv)
-set(INSTALL_BIN_DIR "bin/")
+set(INSTALL_BIN_DIR "bin")
 # use only lib when create .app/.dmg
 if(APPLE AND BUNDLE AND BUILD_GUI)
   set(INSTALL_LIB_DIR "lib")
+  set(INSTALL_DOC_DIR "doc")
 else()
   set(INSTALL_LIB_DIR "lib/${CMAKE_PROJECT_NAME}")
+  set(INSTALL_DOC_DIR "share/${CMAKE_PROJECT_NAME}")
 endif()
 set(INSTALL_PLUGINS_DIR ${INSTALL_LIB_DIR}/plugins)
 set(INSTALL_PLUGINSSRV_DIR ${INSTALL_LIB_DIR}/pluginssrv)
@@ -133,11 +135,16 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
       OUTPUT_STRIP_TRAILING_WHITESPACE
       )
   endif()
+  configure_file("${CMAKE_SOURCE_DIR}/custom/desktop/${CMAKE_PROJECT_NAME}.desktop.in"
+    "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.desktop" @ONLY)
 elseif(APPLE)
   # check
   set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
   message(STATUS "Build for macOS version: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
   set(CMAKE_MACOSX_RPATH ON)
+
+  configure_file("${CMAKE_SOURCE_DIR}/custom/desktop/MacOSXBundleInfo.plist.in"
+    "${CMAKE_BINARY_DIR}/Info.plist" @ONLY)
 elseif (WIN32)
   set(EXTERNAL_LIBRARY_FOLDER "${CMAKE_SOURCE_DIR}/external/windows")
   set(BOOST_ROOT "${EXTERNAL_LIBRARY_FOLDER}/boot")
@@ -198,7 +205,6 @@ set(CMAKE_AUTORCC TRUE)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Qt requirements
-# TODO check minimum version
 set(_required_qt_version "5.6.0")
 find_package(Qt5 COMPONENTS Core REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
@@ -336,11 +342,11 @@ if (BUILD_GUI)
         sdrgui/resources/sdrangel.rc
     )
 
-  add_executable(sdrangel
+  add_executable(${CMAKE_PROJECT_NAME}
     ${sdrangel_SOURCES}
     )
 
-  target_link_libraries(sdrangel
+  target_link_libraries(${CMAKE_PROJECT_NAME}
     ${OPENGL_LIBRARIES}
     Qt5::Widgets
     Qt5::Multimedia
@@ -352,8 +358,8 @@ endif()
 
 ############ build sdrangel server ################
 if (BUILD_SERVER)
-    set(sdrangelsrv_SOURCES
-        appsrv/main.cpp
+  set(sdrangelsrv_SOURCES
+    appsrv/main.cpp
     )
 
     add_executable(sdrangelsrv
@@ -368,74 +374,135 @@ if (BUILD_SERVER)
     )
 endif()
 
-############ install/package targets ################
-# https://cmake.org/cmake/help/v3.0/module/InstallRequiredSystemLibraries.html
-#include(InstallRequiredSystemLibraries)
+############ install ##################
+install(TARGETS sdrangelbench DESTINATION ${INSTALL_BIN_DIR})
+if (BUILD_GUI)
+  #AND (APPLE AND NOT BUNDLE))
+  install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION ${INSTALL_BIN_DIR})
+endif()
+if (BUILD_SERVER)
+  install(TARGETS sdrangelsrv DESTINATION ${INSTALL_BIN_DIR})
+endif()
 
+# install documentation
+# TODO maybe install readme for every plugins
+if (LINUX OR APPLE)
+  install(FILES ${CMAKE_SOURCE_DIR}/Readme.md DESTINATION ${INSTALL_DOC_DIR})
+  install(FILES ${CMAKE_SOURCE_DIR}/CHANGELOG DESTINATION ${INSTALL_DOC_DIR})
+  install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION ${INSTALL_DOC_DIR})
+endif()
+
+#install files and directories (linux specific)
+if (LINUX)
+  install(FILES ${CMAKE_BINARY_DIR}/sdrangel.desktop DESTINATION share/applications)
+  install(FILES ${CMAKE_SOURCE_DIR}/custom/desktop/sdrangel_icon.png DESTINATION share/pixmaps)
+endif()
+
+############ uninstall target ################
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/include/uninstall.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake"
+  IMMEDIATE @ONLY)
+
+add_custom_target(uninstall
+  COMMAND ${CMAKE_COMMAND} -P
+  ${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake)
+
+############ packaging ################
 if(APPLE AND BUNDLE AND BUILD_GUI)
-
-  configure_file("${CMAKE_SOURCE_DIR}/custom/desktop/MacOSXBundleInfo.plist.in"
-    "${CMAKE_BINARY_DIR}/Info.plist" @ONLY)
 
   set(CPACK_GENERATOR "Bundle")
   set(CPACK_BINARY_DRAGNDROP ON)
-  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/custom/desktop/sdrangel_icon.icns")
   set(CPACK_BUNDLE_NAME "${APPLICATION_NAME}")
   set(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/custom/desktop/sdrangel_icon.icns")
   set(CPACK_BUNDLE_PLIST "${CMAKE_BINARY_DIR}/Info.plist")
+  set(CPACK_BUNDLE_STARTUP_COMMAND "${CMAKE_SOURCE_DIR}/cmake/sdrangel.sh")
   set(CPACK_BUNDLE_STARTUP_COMMAND "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}")
+  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/custom/desktop/sdrangel_icon.icns")
 
-  #  CPACK_INSTALL_CMAKE_PROJECTS
+  # fixup_bundle() doesn't work correctly with RPATH so, I move on ;-)
+  #  GET_TARGET_PROPERTY(_qmake_path Qt5::qmake IMPORTED_LOCATION)
+  #  GET_FILENAME_COMPONENT(_qt_bindir ${_qmake_path} DIRECTORY)
+  #  INSTALL(
+  #    CODE "EXECUTE_PROCESS(COMMAND \"${_qt_bindir}/macdeployqt\" \"\${CMAKE_INSTALL_PREFIX}/../../\"
+  #    -appstore-compliant
+  #    -executable=\"\${CMAKE_INSTALL_PREFIX}/${INSTALL_BIN_DIR}/sdrangel\"
+  #    -executable=\"\${CMAKE_INSTALL_PREFIX}/${INSTALL_BIN_DIR}/sdrangelsrv\"
+  #    -executable=\"\${CMAKE_INSTALL_PREFIX}/${INSTALL_BIN_DIR}/sdrangelbench\"
+  #    -libpath=\"${CMAKE_BINARY_DIR}/${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\")"
+  #    #    -libpath=\"\${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}\")"
+  #    COMPONENT applications)
 
-  #set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};${CMAKE_PROJECT_NAME};lib;/")
-
-  #  set(CPACK_APP_BUNDLE_DIR "${CPACK_PACKAGE_DIRECTORY}/_CPack_Packages/Darwin/Bundle/${CPACK_PACKAGE_FILE_NAME}/${APPLICATION_NAME}.app")
-  #  install( CODE "
-  #  INCLUDE(BundleUtilities)
-  #  fixup_bundle( ${CPACK_APP_BUNDLE_DIR} \"\" \"\" )"
-  #  COMPONENT Runtime )
+  #  INSTALL(CODE "
+  #       SET(BU_COPY_FULL_FRAMEWORK_CONTENTS ON)
+  #       include(BundleUtilities)
+  #       fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/../../../${CPACK_BUNDLE_NAME}.app\"   \"\"   \"/opt/local/lib;/usr/local/lib\")
+  #       " COMPONENT Runtime)
 
 elseif(LINUX AND BUNDLE)
 
-  # TODO:
-  #   - perseus package
-  #   - CHANGELOG see https://github.com/xbmc/xbmc/pull/9987/commits/0152e8f50c0f11c8bddcfdc65e1596851fe8b310
-  #   - verify dpkg info
-  #   - Boost seems used through Qt
+  find_program (DPKG_BUILDER dpkg-buildpackage DOC "Debian package builder")
+  if (DPKG_BUILDER)
+    #
+    # Derive the correct filename for a Debian package because the DEB
+    # generator doesn't do this correctly at present.
+    #
+    find_program (DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
+    if (DPKG_PROGRAM)
+      execute_process (
+	COMMAND ${DPKG_PROGRAM} --print-architecture
+	OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+    else (DPKG_PROGRAM)
+      set (CPACK_DEBIAN_PACKAGE_ARCHITECTURE noarch)
+    endif (DPKG_PROGRAM)
 
-  # needs dpkg
-  set(CPACK_GENERATOR "DEB")
-  set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION}_${LSB_CODENAME}_${CMAKE_SYSTEM_PROCESSOR}")
-  set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${APPLICATION_MAINTAINER}")
-  set(CPACK_DEBIAN_PACKAGE_SECTION "hamradio")
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libasound2, libfftw3-single3, libgcc1, libgl1-mesa-glx, libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5network5, libqt5opengl5, libqt5widgets5, libqt5multimedia5-plugins, libstdc++6, libusb-1.0-0, pulseaudio, libxml2, ffmpeg, libopus0, codec2, libairspy0, libhackrf0, librtlsdr0, libbladerf1, libmirisdr0, libiio0, soapysdr-tools")
+    # TODO:
+    #   - perseus package
+    #   - CHANGELOG see https://github.com/xbmc/xbmc/pull/9987/commits/0152e8f50c0f11c8bddcfdc65e1596851fe8b310
+    #   - verify dpkg info
+    #   - Boost seems used through Qt
 
-  if ("${LSB_CODENAME}" STREQUAL "buster") # Debian 10
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec58, libavformat58, libairspyhf1, libopencv-imgproc3.2, libopencv-highgui3.2, limesuite")
-  elseif("${LSB_CODENAME}" STREQUAL "stretch") # Debian 9
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec57, libavformat57, libopencv-imgproc2.45v5, libopencv-highgu2.4-deb0, limesuite")
-  elseif("${LSB_CODENAME}" STREQUAL "bionic")  # Ubuntu 18.04
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec57, libavformat57, libairspyhf0, libopencv-imgproc3.2, libopencv-highgui3.2, limesuite")
-  elseif("${LSB_CODENAME}" STREQUAL "xenial")  # Ubuntu 16.04
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec-ffmpeg56, libavformat-ffmpeg56, libopencv-imgproc2.4v5, libopencv-highgui2.4v5")
-  endif()
+    # needs dpkg
+    set(CPACK_GENERATOR "DEB")
+    set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION}_${LSB_CODENAME}_${CMAKE_SYSTEM_PROCESSOR}")
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${APPLICATION_MAINTAINER}")
+    set(CPACK_DEBIAN_PACKAGE_SECTION "hamradio")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libasound2, libfftw3-single3, libgcc1, libgl1-mesa-glx, libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5network5, libqt5opengl5, libqt5widgets5, libqt5multimedia5-plugins, libstdc++6, libusb-1.0-0, pulseaudio, libxml2, ffmpeg, libopus0, codec2, libairspy0, libhackrf0, librtlsdr0, libbladerf1, libmirisdr0, libiio0, soapysdr-tools")
 
-  # TODO
-  # needs rpmbuild (rpm on debian)
-  #list(APPEND CPACK_GENERATOR "RPM")
-  #set(CPACK_RPM_PACKAGE_RELEASE "1")
-  #set(CPACK_RPM_PACKAGE_LICENSE "GPL-3.0")
-  #set(CPACK_RPM_PACKAGE_REQUIRES "libusb")
+    if ("${LSB_CODENAME}" STREQUAL "buster") # Debian 10
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec58, libavformat58, libairspyhf1, libopencv-imgproc3.2, libopencv-highgui3.2, limesuite")
+    elseif("${LSB_CODENAME}" STREQUAL "stretch") # Debian 9
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec57, libavformat57, libopencv-imgproc2.45v5, libopencv-highgu2.4-deb0, limesuite")
+    elseif("${LSB_CODENAME}" STREQUAL "bionic")  # Ubuntu 18.04
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec57, libavformat57, libairspyhf0, libopencv-imgproc3.2, libopencv-highgui3.2, limesuite")
+    elseif("${LSB_CODENAME}" STREQUAL "xenial")  # Ubuntu 16.04
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec-ffmpeg56, libavformat-ffmpeg56, libopencv-imgproc2.4v5, libopencv-highgui2.4v5")
+    endif()
+
+    set (CPACK_DEBIAN_PACKAGE_PACKAGE_SHLIBDEPS ON)
+  endif (DPKG_BUILDER)
+
+  find_program (RPMBUILDER rpmbuild DOC "RPM package builder")
+  if (RPMBUILDER)
+    # TODO
+    #list(APPEND CPACK_GENERATOR "RPM")
+    #set(CPACK_RPM_PACKAGE_RELEASE "1")
+    #set(CPACK_RPM_PACKAGE_LICENSE "GPL-3.0")
+    #set(CPACK_RPM_PACKAGE_REQUIRES "libusb")
+    #set (CPACK_RPM_PACKAGE_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+  endif (RPMBUILDER)
 
 elseif((WIN32 OR MINGW) AND BUNDLE)
 
   #set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
 
-  list(APPEND CPACK_GENERATOR "NSIS")
-  set(CPACK_NSIS_PACKAGE_NAME "${APPLICATION_NAME}")
-  set(CPACK_NSIS_CONTACT "${APPLICATION_MAINTAINER}")
-  set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
-  set(CPACK_NSIS_MODIFY_PATH ON)
+    list(APPEND CPACK_GENERATOR "NSIS")
+    set(CPACK_NSIS_PACKAGE_NAME "${APPLICATION_NAME}")
+    set(CPACK_NSIS_CONTACT "${APPLICATION_MAINTAINER}")
+    set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+    set(CPACK_NSIS_MODIFY_PATH ON)
 
 else()
 
@@ -454,29 +521,5 @@ else()
 
 endif(APPLE AND BUNDLE AND BUILD_GUI)
 
-install(TARGETS sdrangelbench DESTINATION ${INSTALL_BIN_DIR})
-if (BUILD_GUI AND NOT (APPLE AND BUNDLE))
-  install(TARGETS sdrangel DESTINATION ${INSTALL_BIN_DIR})
-endif()
-if (BUILD_SERVER)
-  install(TARGETS sdrangelsrv DESTINATION ${INSTALL_BIN_DIR})
-endif()
-
-#install files and directories (linux specific)
-if (LINUX)
-  install(FILES custom/desktop/sdrangel.desktop DESTINATION share/applications)
-  install(FILES custom/desktop/sdrangel_icon.png DESTINATION share/pixmaps)
-endif()
-
 message(STATUS "CPack generators: ${CPACK_GENERATOR}")
 include(CPack)
-
-############ uninstall target ################
-configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/include/uninstall.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake"
-  IMMEDIATE @ONLY)
-
-add_custom_target(uninstall
-  COMMAND ${CMAKE_COMMAND} -P
-  ${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake)
