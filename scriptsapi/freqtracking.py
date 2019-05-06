@@ -44,7 +44,7 @@ def getInputOptions():
     if options.addr == None:
         options.addr = "0.0.0.0"
     if options.port == None:
-        options.port = 8000
+        options.port = 8888
     if options.sdrangel_port == None:
         options.sdrangel_port = 8091
 
@@ -112,7 +112,16 @@ def adjust_channels(sdrangel_ip, sdrangel_port):
         if r.status_code / 100 != 2:
             remove_keys.append(k)
     for k in remove_keys:
-        TRACKING_DICT.pop(k, None)
+        tracking_item = TRACKING_DICT.pop(k, None)
+        if tracking_item:
+            request_content = tracking_item.get('requestContent')
+            if request_content:
+                channel_type = request_content.get('channelType')
+            else:
+                channel_type = 'Undefined'
+            device_index = k[0]
+            channel_index = k[1]
+            print(f'SDRangel: {sdrangel_ip}:{sdrangel_port} Removed {channel_type} [{device_index}:{channel_index}]')
 
 
 # ======================================================================
@@ -158,7 +167,7 @@ def channel_settings(deviceset_index, channel_index):
     channel_type = content.get('channelType')
     for freq_offset in gen_dict_extract('inputFrequencyOffset', content):
         if channel_type == "FreqTracker":
-            print(f'SDRangel: {sdrangel_ip}:{SDRANGEL_API_PORT} Tracker: {freq_offset} Hz')
+            print(f'SDRangel: {sdrangel_ip}:{SDRANGEL_API_PORT} Tracker [{orig_device_index}:{orig_channel_index}] at {freq_offset} Hz')
             TRACKER_OFFSET = freq_offset
             TRACKER_DEVICE = orig_device_index
             adjust_channels(sdrangel_ip, SDRANGEL_API_PORT)
