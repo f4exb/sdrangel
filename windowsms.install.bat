@@ -9,6 +9,7 @@ SET ffmpegdir="C:\softs\ffmpeg-20190308-9645147-win64-shared\bin"
 SET qt5dir="C:\Qt\5.12.1\msvc2017_64\bin"
 SET libopusdir="C:\softs\libopus_v1.3_msvc15\bin\x64"
 
+echo copy internal libraries...
 copy app\%1\sdrangel.exe %2
 copy sdrbase\%1\sdrbase.dll %2
 copy sdrbase\res.qrb %2\sdrbase.rcc
@@ -22,11 +23,12 @@ copy qrtplib\%1\qrtplib.dll %2
 copy swagger\%1\swagger.dll %2
 copy logging\%1\logging.dll %2
 copy cm256cc\%1\cm256cc.dll %2
-
 REM copy libhackrf\%1\libhackrf.dll %2
 copy librtlsdr\%1\librtlsdr.dll %2
 copy libairspy\%1\libairspy.dll %2
 copy libairspyhf\%1\libairspyhf.dll %2
+
+echo copy external dependencies...
 copy %pothosdir%\bin\bladeRF.dll %2
 copy %pothosdir%\bin\hackrf.dll %2
 copy %pothosdir%\bin\libiio.dll %2
@@ -53,6 +55,7 @@ mkdir %2\plugins\channeltx
 mkdir %2\plugins\samplesource
 mkdir %2\plugins\samplesink
 
+echo copy channelrx...
 copy plugins\channelrx\chanalyzer\%1\chanalyzer.dll %2\plugins\channelrx
 copy plugins\channelrx\demodam\%1\demodam.dll %2\plugins\channelrx
 copy plugins\channelrx\demodatv\%1\demodatv.dll %2\plugins\channelrx
@@ -65,7 +68,9 @@ copy plugins\channelrx\demodssb\%1\demodssb.dll %2\plugins\channelrx
 copy plugins\channelrx\demodwfm\%1\demodwfm.dll %2\plugins\channelrx
 copy plugins\channelrx\udpsink\%1\udpsink.dll %2\plugins\channelrx
 copy plugins\channelrx\localsink\%1\localsink.dll %2\plugins\channelrx
+copy plugins\channelrx\freqtracker\%1\freqtracker.dll %2\plugins\channelrx
 
+echo copy channeltx...
 copy plugins\channeltx\modam\%1\modam.dll %2\plugins\channeltx
 REM copy plugins\channeltx\modatv\%1\modatv.dll %2\plugins\channeltx
 copy plugins\channeltx\modnfm\%1\modnfm.dll %2\plugins\channeltx
@@ -73,6 +78,7 @@ copy plugins\channeltx\modssb\%1\modssb.dll %2\plugins\channeltx
 copy plugins\channeltx\modwfm\%1\modwfm.dll %2\plugins\channeltx
 copy plugins\channeltx\udpsource\%1\udpsource.dll %2\plugins\channeltx
 
+echo copy samplesource...
 copy plugins\samplesource\filesource\%1\inputfilesource.dll %2\plugins\samplesource
 copy plugins\samplesource\testsource\%1\inputtestsource.dll %2\plugins\samplesource
 copy plugins\samplesource\rtlsdr\%1\inputrtlsdr.dll %2\plugins\samplesource
@@ -87,6 +93,7 @@ copy plugins\samplesource\remoteinput\%1\inputremote.dll %2\plugins\samplesource
 copy plugins\samplesource\soapysdrinput\%1\inputsoapysdr.dll %2\plugins\samplesource
 copy plugins\samplesource\localinput\%1\inputlocal.dll %2\plugins\samplesource
 
+echo copy samplesink...
 copy plugins\samplesink\filesink\%1\outputfilesink.dll %2\plugins\samplesink
 copy plugins\samplesink\bladerf1output\%1\outputbladerf1.dll %2\plugins\samplesink
 copy plugins\samplesink\bladerf2output\%1\outputbladerf2.dll %2\plugins\samplesink
