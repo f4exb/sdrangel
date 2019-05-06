@@ -9,7 +9,7 @@ CONFIG += plugin
 
 QT += core gui widgets multimedia
 
-TARGET = demodam
+TARGET = freqtracker
 
 DEFINES += USE_SSE2=1
 QMAKE_CXXFLAGS += -msse2
@@ -26,20 +26,17 @@ INCLUDEPATH += ../../../swagger/sdrangel/code/qt5/client
 CONFIG(Release):build_subdir = release
 CONFIG(Debug):build_subdir = debug
 
-SOURCES += amdemod.cpp\
-	amdemodgui.cpp\
-	amdemodplugin.cpp\
-        amdemodsettings.cpp\
-        amdemodssbdialog.cpp
+SOURCES += freqtracker.cpp\
+	freqtrackergui.cpp\
+	freqtrackerplugin.cpp\
+    freqtrackersettings.cpp
 
-HEADERS += amdemod.h\
-	amdemodgui.h\
-	amdemodplugin.h\
-        amdemodsettings.h\
-        amdemodssbdialog.h
+HEADERS += freqtracker.h\
+	freqtrackergui.h\
+	freqtrackerplugin.h\
+    freqtrackersettings.h
 
-FORMS += amdemodgui.ui\
-      amdemodssb.ui
+FORMS += freqtrackergui.ui
 
 LIBS += -L../../../sdrbase/$${build_subdir} -lsdrbase
 LIBS += -L../../../sdrgui/$${build_subdir} -lsdrgui

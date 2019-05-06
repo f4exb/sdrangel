@@ -62,6 +62,7 @@ SUBDIRS += plugins/channelrx/demodssb
 SUBDIRS += plugins/channelrx/demodwfm
 SUBDIRS += plugins/channelrx/udpsink
 SUBDIRS += plugins/channelrx/localsink
+SUBDIRS += plugins/channelrx/freqtracker
 SUBDIRS += plugins/channeltx/modam
 SUBDIRS += plugins/channeltx/modnfm
 SUBDIRS += plugins/channeltx/modssb
