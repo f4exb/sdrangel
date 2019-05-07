@@ -375,9 +375,21 @@ if (BUILD_SERVER)
 endif()
 
 ############ install ##################
+if(NOT CMAKE_INSTALL_RPATH)
+  set(CMAKE_INSTALL_RPATH
+    ${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR} CACHE
+    PATH "Library Install RPath" FORCE)
+endif()
+
+# force full path
+if(APPLE AND NOT CMAKE_INSTALL_NAME_DIR)
+  set(CMAKE_INSTALL_NAME_DIR
+    ${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR} CACHE
+    PATH "Library Install Name Destination Directory" FORCE)
+endif()
+
 install(TARGETS sdrangelbench DESTINATION ${INSTALL_BIN_DIR})
 if (BUILD_GUI)
-  #AND (APPLE AND NOT BUNDLE))
   install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION ${INSTALL_BIN_DIR})
 endif()
 if (BUILD_SERVER)
@@ -425,19 +437,19 @@ if(APPLE AND BUNDLE AND BUILD_GUI)
   #  GET_FILENAME_COMPONENT(_qt_bindir ${_qmake_path} DIRECTORY)
   #  INSTALL(
   #    CODE "EXECUTE_PROCESS(COMMAND \"${_qt_bindir}/macdeployqt\" \"\${CMAKE_INSTALL_PREFIX}/../../\"
-  #    -appstore-compliant
-  #    -executable=\"\${CMAKE_INSTALL_PREFIX}/${INSTALL_BIN_DIR}/sdrangel\"
-  #    -executable=\"\${CMAKE_INSTALL_PREFIX}/${INSTALL_BIN_DIR}/sdrangelsrv\"
-  #    -executable=\"\${CMAKE_INSTALL_PREFIX}/${INSTALL_BIN_DIR}/sdrangelbench\"
-  #    -libpath=\"${CMAKE_BINARY_DIR}/${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\")"
+  #      -appstore-compliant
+  #      -executable=\"\${CMAKE_INSTALL_PREFIX}/${INSTALL_BIN_DIR}/sdrangel\"
+  #      -executable=\"\${CMAKE_INSTALL_PREFIX}/${INSTALL_BIN_DIR}/sdrangelsrv\"
+  #      -executable=\"\${CMAKE_INSTALL_PREFIX}/${INSTALL_BIN_DIR}/sdrangelbench\")"
+#        -libpath=\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\")"
   #    #    -libpath=\"\${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}\")"
-  #    COMPONENT applications)
+   #     COMPONENT applications)
 
-  #  INSTALL(CODE "
-  #       SET(BU_COPY_FULL_FRAMEWORK_CONTENTS ON)
-  #       include(BundleUtilities)
-  #       fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/../../../${CPACK_BUNDLE_NAME}.app\"   \"\"   \"/opt/local/lib;/usr/local/lib\")
-  #       " COMPONENT Runtime)
+    INSTALL(CODE "
+         SET(BU_COPY_FULL_FRAMEWORK_CONTENTS ON)
+         include(BundleUtilities)
+         fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/../../../${CPACK_BUNDLE_NAME}.app\"   \"\"   \"/opt/local/lib;/usr/local/lib\")
+         " COMPONENT Runtime)
 
 elseif(LINUX AND BUNDLE)
 
