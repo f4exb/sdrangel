@@ -158,12 +158,12 @@ def device_run(deviceset_index):
     ''' Reply with the expected reply of a working device '''
 # ----------------------------------------------------------------------
     originator_index = None
-    tx = None
+    direction = None
     content = request.get_json(silent=True)
     if content:
         originator_index = content.get('originatorIndex')
-        tx = content.get('tx')
-    if originator_index is None or tx is None:
+        direction = content.get('direction')
+    if originator_index is None or direction is None:
         print('device_run: SDRangel reverse API v4.5.2 or higher required. No or invalid originator information')
         return ""
     sdrangel_ip = get_sdrangel_ip(request)
@@ -174,7 +174,7 @@ def device_run(deviceset_index):
     global RUNNING
     print(f'device_run: Device: {originator_index} Other device: {other_device_index} Running: {RUNNING}')
     if request.method == 'POST':
-        print(f'device_run: Device {originator_index} (tx={tx}) has started at {sdrangel_ip}:{SDRANGEL_API_PORT}')
+        print(f'device_run: Device {originator_index} (direction={direction}) has started at {sdrangel_ip}:{SDRANGEL_API_PORT}')
         if originator_index not in RUNNING:
             RUNNING.add(originator_index)
         if other_device_index in RUNNING:
@@ -186,7 +186,7 @@ def device_run(deviceset_index):
         reply = { "state": "idle" }
         return jsonify(reply)
     elif request.method == 'DELETE':
-        print(f'device_run: Device {originator_index} (tx={tx}) has stopped at {sdrangel_ip}:{SDRANGEL_API_PORT}')
+        print(f'device_run: Device {originator_index} (direction={direction}) has stopped at {sdrangel_ip}:{SDRANGEL_API_PORT}')
         if originator_index in RUNNING:
             RUNNING.remove(originator_index)
         if other_device_index not in RUNNING:

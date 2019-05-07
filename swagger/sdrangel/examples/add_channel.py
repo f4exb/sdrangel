@@ -36,7 +36,7 @@ def main():
         global base_url
         base_url = "http://%s/sdrangel" % options.address
         device_url = base_url + ("/deviceset/%d/channel" % options.device_index)
-        r = requests.post(url=device_url, json={"tx": 0, "channelType": options.channel_id})
+        r = requests.post(url=device_url, json={"direction": 0, "channelType": options.channel_id})
         if r.status_code / 100 == 2:
             print("Success")
             print json.dumps(r.json(), indent=4, sort_keys=True)

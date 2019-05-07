@@ -19,15 +19,15 @@ def getInputOptions():
 
     parser = OptionParser(usage="usage: %%prog [-t]\n")
     parser.add_option("-a", "--address", dest="address", help="address and port", metavar="ADDRESS", type="string")
-    parser.add_option("-R", "--device-hwid-rx", dest="device_hwid_rx", help="device hardware id for Rx", metavar="HWID", type="string")
-    parser.add_option("-T", "--device-hwid-tx", dest="device_hwid_tx", help="device hardware id for Tx", metavar="HWID", type="string")
+    parser.add_option("-R", "--device-hwidrx", dest="device_hwid_rx", help="device hardware id for Rx", metavar="HWID", type="string")
+    parser.add_option("-T", "--device-hwidtx", dest="device_hwid_tx", help="device hardware id for Tx", metavar="HWID", type="string")
     parser.add_option("-F", "--device-freq", dest="device_freq", help="device center frequency (kHz)", metavar="FREQ", type="int")
     parser.add_option("-f", "--channel-freq", dest="channel_freq", help="channel center frequency (Hz)", metavar="FREQ", type="int")
     parser.add_option("-U", "--copy-to-udp", dest="udp_copy", help="UDP audio copy to <address>[:<port>]", metavar="IP:PORT", type="string")
-    parser.add_option("-s", "--sample-rate-rx", dest="sample_rate_rx", help="device to host (Rx) sample rate (kS/s)", metavar="RATE", type="int")
-    parser.add_option("-S", "--sample-rate-tx", dest="sample_rate_tx", help="host to device (Tx) sample rate (kS/s)", metavar="RATE", type="int")
-    parser.add_option("-n", "--antenna-path-rx", dest="antenna_path_rx", help="antenna path index (Rx)", metavar="INDEX", type="int")
-    parser.add_option("-N", "--antenna-path-tx", dest="antenna_path_tx", help="antenna path index (Tx)", metavar="INDEX", type="int")
+    parser.add_option("-s", "--sample-raterx", dest="sample_rate_rx", help="device to host (Rx) sample rate (kS/s)", metavar="RATE", type="int")
+    parser.add_option("-S", "--sample-ratetx", dest="sample_rate_tx", help="host to device (Tx) sample rate (kS/s)", metavar="RATE", type="int")
+    parser.add_option("-n", "--antenna-pathrx", dest="antenna_path_rx", help="antenna path index (Rx)", metavar="INDEX", type="int")
+    parser.add_option("-N", "--antenna-pathtx", dest="antenna_path_tx", help="antenna path index (Tx)", metavar="INDEX", type="int")
 
     (options, args) = parser.parse_args()
 
@@ -101,7 +101,7 @@ def main():
         nb_devicesets = r['devicesetcount']
 
         if nb_devicesets == 0:  # server starts without device set so add Rx device set
-            r1 = callAPI("/deviceset", "POST", {"tx": 0}, None, "Add Rx device set")
+            r1 = callAPI("/deviceset", "POST", {"direction": 0}, None, "Add Rx device set")
             if r1 is None:
                 exit(-1)
 
@@ -110,7 +110,7 @@ def main():
         deviceset_index_rx = 0
         deviceset_url = "/deviceset/%d" % deviceset_index_rx
 
-        r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "%s" % options.device_hwid_rx, "tx": 0}, "setup device on Rx device set")
+        r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "%s" % options.device_hwid_rx, "direction": 0}, "setup device on Rx device set")
         if r is None:
             exit(-1)
 
@@ -151,7 +151,7 @@ def main():
         if r is None:
             exit(-1)
 
-        r = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": "NFMDemod", "tx": 0}, "Create NFM demod")
+        r = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": "NFMDemod", "direction": 0}, "Create NFM demod")
         if r is None:
             exit(-1)
 
@@ -185,13 +185,13 @@ def main():
 
         # ## Tx setup
 
-        r = callAPI("/deviceset", "POST", {"tx": 1}, None, "Add Tx device set")
+        r = callAPI("/deviceset", "POST", {"direction": 1}, None, "Add Tx device set")
         if r is None:
             exit(-1)
 
         deviceset_url = "/deviceset/%d" % (deviceset_index_rx + 1)
 
-        r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "%s" % options.device_hwid_tx, "tx": 1}, "setup device on Tx device set")
+        r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "%s" % options.device_hwid_tx, "direction": 1}, "setup device on Tx device set")
         if r is None:
             exit(-1)
 
@@ -222,7 +222,7 @@ def main():
         if r is None:
             exit(-1)
 
-        r = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": "NFMMod", "tx": 1}, "Create NFM mod")
+        r = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": "NFMMod", "direction": 1}, "Create NFM mod")
         if r is None:
             exit(-1)
 

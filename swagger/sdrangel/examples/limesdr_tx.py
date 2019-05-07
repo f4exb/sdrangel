@@ -65,13 +65,13 @@ def main():
         global base_url
         base_url = "http://%s/sdrangel" % options.address
 
-        r = callAPI("/deviceset", "POST", {"tx": 1}, None, "Add Tx device set")
+        r = callAPI("/deviceset", "POST", {"direction": 1}, None, "Add Tx device set")
         if r is None:
             exit(-1)
 
         deviceset_url = "/deviceset/%d" % options.device_index
 
-        r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "LimeSDR", "tx": 1}, "setup LimeSDR on Tx device set")
+        r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "LimeSDR", "direction": 1}, "setup LimeSDR on Tx device set")
         if r is None:
             exit(-1)
 
@@ -91,7 +91,7 @@ def main():
         if r is None:
             exit(-1)
 
-        r = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": "NFMMod", "tx": 1}, "Create NFM mod")
+        r = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": "NFMMod", "direction": 1}, "Create NFM mod")
         if r is None:
             exit(-1)
 

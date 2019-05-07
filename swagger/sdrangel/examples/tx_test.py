@@ -166,7 +166,7 @@ def setupDevice(options):
 
 # ======================================================================
 def setupChannel(options):
-    r = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": options.channel_id, "tx": 1}, "Create modulator")
+    r = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": options.channel_id, "direction": 1}, "Create modulator")
     if r is None:
         exit(-1)
 
@@ -266,14 +266,14 @@ def main():
         base_url = "http://%s/sdrangel" % options.address
 
         if options.create:
-            r = callAPI("/deviceset", "POST", {"tx": 1}, None, "Add Tx device set")
+            r = callAPI("/deviceset", "POST", {"direction": 1}, None, "Add Tx device set")
             if r is None:
                 exit(-1)
 
         global deviceset_url
         deviceset_url = "/deviceset/%d" % options.device_index
 
-        r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "%s" % options.device_hwid, "tx": 1}, "setup device on Tx device set")
+        r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "%s" % options.device_hwid, "direction": 1}, "setup device on Tx device set")
         if r is None:
             exit(-1)
 

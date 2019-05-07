@@ -41,65 +41,65 @@ def getInputOptions():
 def get_channel_static_data(channel_info):
         if channel_info["id"] == "AMDemod":
             settings_key = "AMDemodSettings"
-            tx = 0
+            direction = 0
         elif channel_info["id"] == "AMMod":
             settings_key = "AMModSettings"
-            tx = 1
+            direction = 1
         elif channel_info["id"] == "ATVMod":
             settings_key = "ATVModSettings"
-            tx = 1
+            direction = 1
         elif channel_info["id"] == "BFMDemod":
             settings_key = "BFMDemodSettings"
-            tx = 0
+            direction = 0
         elif channel_info["id"] == "DSDDemod":
             settings_key = "DSDDemodSettings"
-            tx = 0
+            direction = 0
         elif channel_info["id"] == "NFMDemod":
             settings_key = "NFMDemodSettings"
-            tx = 0
+            direction = 0
         elif channel_info["id"] == "NFMMod":
             settings_key = "NFMModSettings"
-            tx = 1
+            direction = 1
         elif channel_info["id"] == "RemoteSink":
             settings_key = "RemoteSinkSettings"
-            tx = 0
+            direction = 0
         elif channel_info["id"] == "RemoteSource":
             settings_key = "RemoteSourceSettings"
-            tx = 1
+            direction = 1
         elif channel_info["id"] == "SSBMod":
             settings_key = "SSBModSettings"
-            tx = 1
+            direction = 1
         elif channel_info["id"] == "SSBDemod":
             settings_key = "SSBDemodSettings"
-            tx = 0
+            direction = 0
         elif channel_info["id"] == "UDPSource":
             settings_key = "UDPSourceSettings"
-            tx = 1
+            direction = 1
         elif channel_info["id"] == "UDPSink":
             settings_key = "UDPSinkSettings"
-            tx = 0
+            direction = 0
         elif channel_info["id"] == "WFMDemod":
             settings_key = "WFMDemodSettings"
-            tx = 0
+            direction = 0
         elif channel_info["id"] == "WFMMod":
             settings_key = "WFMModSettings"
-            tx = 1
+            direction = 1
         else:
             settings_key = None
-            tx = None
-        return settings_key, tx
+            direction = None
+        return settings_key, direction
 
 # ======================================================================
 def randomize_channels_colors(options, channels):
     for channel_info in channels:
-        settings_key, tx = get_channel_static_data(channel_info)
+        settings_key, direction = get_channel_static_data(channel_info)
         if settings_key is None:
             continue
         color = random.randint(0, (1<<24))
         rn, gn, bn = color_to_rgb(color)
         payload_json = {
             "channelType": channel_info["id"],
-            "tx": tx,
+            "direction": direction,
             settings_key: {
                 "rgbColor": color
             }
@@ -114,7 +114,7 @@ def randomize_channels_colors(options, channels):
 # ======================================================================
 def randomize_channels_hsv(options, channels):
     for channel_info in channels:
-        settings_key, tx = get_channel_static_data(channel_info)
+        settings_key, direction = get_channel_static_data(channel_info)
         settings_url = base_url + ("/deviceset/{0}/channel/{1}/settings".format(options.device_index, channel_info["index"]))
         rep = requests.get(url=settings_url)
         if rep.status_code / 100 == 2:
@@ -139,7 +139,7 @@ def randomize_channels_hsv(options, channels):
             new_color = rgb_to_color(rn, gn, bn)
             payload_json = {
                 "channelType": channel_info["id"],
-                "tx": tx,
+                "direction": direction,
                 settings_key: {
                     "rgbColor": new_color
                 }

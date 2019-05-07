@@ -53,7 +53,7 @@ def getInputOptions():
     parser.add_option("--rmt-address", dest="remote_address", help="RemoteSink: destination data address", metavar="IP_ADDRESS", type="string")
     parser.add_option("--rmt-port", dest="remote_port", help="RemoteSink: destination data port", metavar="PORT", type="int")
     parser.add_option("--rmt-fec", dest="remote_fec", help="RemoteSink: number of FEC blocks per frame", metavar="NUMBER", type="int")
-    parser.add_option("--rmt-tx-delay", dest="remote_tx_delay", help="RemoteSink: inter block UDP Tx delay percentage", metavar="PERCENT", type="int")
+    parser.add_option("--rmt-txdelay", dest="remote_tx_delay", help="RemoteSink: inter block UDP Tx delay percentage", metavar="PERCENT", type="int")
 
     (options, args) = parser.parse_args()
 
@@ -134,7 +134,7 @@ def setup_audio(options):
 
 # ======================================================================
 def setupDevice(deviceset_url, options):
-        r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "%s" % options.device_hwid, "tx": 0}, "setup device on Rx device set")
+        r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": "%s" % options.device_hwid, "direction": 0}, "setup device on Rx device set")
         if r is None:
             exit(-1)
 
@@ -245,7 +245,7 @@ def setupDevice(deviceset_url, options):
 def setupChannel(deviceset_url, options):
     i = 0
 
-    settings = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": options.channel_id, "tx": 0}, "Create demod")
+    settings = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": options.channel_id, "direction": 0}, "Create demod")
     if settings is None:
         exit(-1)
 
@@ -349,7 +349,7 @@ def main():
         deviceset_url = "/deviceset/%d" % options.device_index
 
         if options.create:
-            r = callAPI("/deviceset", "POST", {"tx": 0}, None, "Add Rx device set")
+            r = callAPI("/deviceset", "POST", {"direction": 0}, None, "Add Rx device set")
             if r is None:
                 exit(-1)
 

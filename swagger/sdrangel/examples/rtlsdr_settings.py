@@ -49,7 +49,7 @@ def getRtlSdrSettings():
 
 
 def patchRtlSdrSettings(settings):
-    new_settings = {"deviceHwType": "RTLSDR", "tx": 0, "rtlSdrSettings": settings}
+    new_settings = {"deviceHwType": "RTLSDR", "direction": 0, "rtlSdrSettings": settings}
     r = requests.patch(url=base_url + "/deviceset/0/device/settings", json=new_settings)
     if r.status_code / 100 == 2:
         print json.dumps(r.json(), indent=4, sort_keys=True)

@@ -61,7 +61,7 @@ def main():
         global base_url
         base_url = "http://%s/sdrangel" % options.address
 
-        settings = callAPI("/deviceset/0/channel", "POST", None, {"channelType": "NFMDemod", "tx": 0}, "Create NFM demod")
+        settings = callAPI("/deviceset/0/channel", "POST", None, {"channelType": "NFMDemod", "direction": 0}, "Create NFM demod")
         if settings is None:
             exit(-1)
 
@@ -72,11 +72,11 @@ def main():
         if r is None:
             exit(-1)
 
-        r = callAPI("/deviceset", "POST", {"tx": 1}, None, "Add Tx device set")
+        r = callAPI("/deviceset", "POST", {"direction": 1}, None, "Add Tx device set")
         if r is None:
             exit(-1)
 
-        settings = callAPI("/deviceset/1/channel", "POST", None, {"channelType": "NFMMod", "tx": 1}, "Create NFM mod")
+        settings = callAPI("/deviceset/1/channel", "POST", None, {"channelType": "NFMMod", "direction": 1}, "Create NFM mod")
         if settings is None:
             exit(-1)
 

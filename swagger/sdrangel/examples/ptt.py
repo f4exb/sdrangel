@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 '''
  PTT (Push To Talk) script example.
- 
+
  Assumes Rx and Tx are contiguous device sets with Rx at index i and Tx at index i+1
- 
- When going from Rx to Tx (push) the device set index specified must be the Rx one 
+
+ When going from Rx to Tx (push) the device set index specified must be the Rx one
  When going from Tx to Rx (release) the device set index specified must be the Tx one
- Defaults are Rx at index 0 and Tx at index 1 
- 
+ Defaults are Rx at index 0 and Tx at index 1
+
  Default web API base address is http://127.0.0.1:8091/sdrangel (default of sdrangel web API)
  You may change the address and port portion with the -a parameter. Ex: -a 44.168.40.128:8888
 '''
@@ -105,7 +105,7 @@ def main():
             if deviceSets is not None:
                 if len(deviceSets) > 1:
                     if options.transmit:
-                        if deviceSets[options.deviceset_index]["samplingDevice"]["tx"] == 0 and deviceSets[options.deviceset_index + 1]["samplingDevice"]["tx"] == 1:
+                        if deviceSets[options.deviceset_index]["samplingDevice"]["direction"] == 0 and deviceSets[options.deviceset_index + 1]["samplingDevice"]["direction"] == 1:
                             stopDevice(options.deviceset_index)
                             time.sleep(1)
                             startDevice(options.deviceset_index + 1)
@@ -113,7 +113,7 @@ def main():
                         else:
                             print("Incorrect configuration expecting Rx%d and Tx%d" % (options.deviceset_index, options.deviceset_index + 1))
                     else:
-                        if deviceSets[options.deviceset_index - 1]["samplingDevice"]["tx"] == 0 and deviceSets[options.deviceset_index]["samplingDevice"]["tx"] == 1:
+                        if deviceSets[options.deviceset_index - 1]["samplingDevice"]["direction"] == 0 and deviceSets[options.deviceset_index]["samplingDevice"]["direction"] == 1:
                             stopDevice(options.deviceset_index)
                             time.sleep(1)
                             startDevice(options.deviceset_index - 1)

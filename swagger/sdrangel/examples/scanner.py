@@ -2,11 +2,11 @@
 
 """
   SDRangel REST API client script
-  
+
   Simple scanner for AM and NFM channels. Builds an array of equally spaced channels. Moves device center frequency
   so that adjacent parts of the spectrum are scanned by the array of channels. Stops when any of the channels
   is active. Resumes when none of the channels is active.
-  
+
   Uses /sdrangel/deviceset/{deviceSetIndex}/channels/report API to get channel information (since v3.13.1)
 """
 
@@ -178,7 +178,7 @@ def changeDeviceFrequency(fc, options):
 def setupChannels(scan_control, options):
     i = 0
     for shift in scan_control.channel_shifts:
-        settings = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": options.channel_id, "tx": 0}, "Create demod")
+        settings = callAPI(deviceset_url + "/channel", "POST", None, {"channelType": options.channel_id, "direction": 0}, "Create demod")
         if settings is None:
             exit(-1)
 
@@ -314,11 +314,11 @@ def main():
 
         if not options.rerun:  # Skip device and channels settings in re-run mode
             if options.create:
-                r = callAPI("/deviceset", "POST", {"tx": 0}, None, "Add Rx device set")
+                r = callAPI("/deviceset", "POST", {"direction": 0}, None, "Add Rx device set")
                 if r is None:
                     exit(-1)
 
-            r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": options.device_hwid, "tx": 0}, "setup device on Rx device set")
+            r = callAPI(deviceset_url + "/device", "PUT", None, {"hwType": options.device_hwid, "direction": 0}, "setup device on Rx device set")
             if r is None:
                 exit(-1)
 
