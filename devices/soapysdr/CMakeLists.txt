@@ -16,7 +16,7 @@ set(soapysdrdevice_HEADERS
 
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${SOAPYSDR_INCLUDE_DIR}
+    ${SoapySDR_INCLUDE_DIRS}
 )
 
 add_library(soapysdrdevice SHARED
@@ -27,7 +27,7 @@ set_target_properties(soapysdrdevice
     PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
 
 target_link_libraries(soapysdrdevice
-    ${SOAPYSDR_LIBRARY}
+    ${SoapySDR_LIBRARIES}
     sdrbase
 )
 

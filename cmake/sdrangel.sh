@@ -1,12 +1,10 @@
 #!/bin/sh
 
-SDRANGEL_BUNDLE="`echo "$0" | sed -e 's/\/Contents\/MacOS\/.*//'`"
-SDRANGEL_RESOURCES="$SDRANGEL_BUNDLE/Contents/Resources"
+get_abs_dir() {
+  # $1 : relative filename
+  echo "$(cd "$(dirname "$1")" && pwd)"
+}
 
-echo "running $0"
-echo "SDRANGEL_BUNDLE: $SDRANGEL_BUNDLE"
+SDRANGEL_RESOURCES="$(get_abs_dir "$0")/../Resources"
+exec "$SDRANGEL_RESOURCES/sdrangel"
 
-export "DYLD_LIBRARY_PATH=$SDRANGEL_RESOURCES/lib"
-export "PATH=$SDRANGEL_RESOURCES/bin:$PATH"
-
-exec "$SDRANGEL_RESOURCES/bin/sdrangel"

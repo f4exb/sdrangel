@@ -18,7 +18,7 @@ include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
         ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 	${CMAKE_SOURCE_DIR}/devices
-	${SOAPYSDR_INCLUDE_DIR}
+	${SoapySDR_INCLUDE_DIRS}
 )
 
 if(NOT SERVER_MODE)
@@ -54,7 +54,7 @@ target_link_libraries(${TARGET_NAME}
 	sdrbase
 	${TARGET_LIB_GUI}
         swagger
-        ${SOAPYSDR_LIBRARY}
+        ${SoapySDR_LIBRARIES}
         soapysdrdevice
 )
 
