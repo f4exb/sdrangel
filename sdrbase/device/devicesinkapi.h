@@ -45,7 +45,6 @@ public:
     // Device engine stuff
     void addSpectrumSink(BasebandSampleSink* sink);                //!< Add the spectrum sample sink to device engine (spectrum vis)
     void removeSpectrumSink(BasebandSampleSink* sink);             //!< Remove the spectrum sample sink from device engine (spectrum vis)
-    void addSource(BasebandSampleSource* source);                  //!< Add a baseband sample source to device engine
     void removeSource(BasebandSampleSource* sink);                 //!< Remove a baseband sample source from device engine
     void addThreadedSource(ThreadedBasebandSampleSource* sink);    //!< Add a baseband sample source that will run on its own thread to device engine
     void removeThreadedSource(ThreadedBasebandSampleSource* sink); //!< Remove a baseband sample source that runs on its own thread from device engine

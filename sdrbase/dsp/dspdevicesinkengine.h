@@ -67,9 +67,6 @@ public:
 	DeviceSampleSink *getSink() { return m_deviceSampleSink; }
 	void setSinkSequence(int sequence); //!< Set the sample sink sequence in type
 
-	void addSource(BasebandSampleSource* source); //!< Add a baseband sample source
-	void removeSource(BasebandSampleSource* source); //!< Remove a baseband sample source
-
 	void addThreadedSource(ThreadedBasebandSampleSource* source); //!< Add a baseband sample source that will run on its own thread
 	void removeThreadedSource(ThreadedBasebandSampleSource* source); //!< Remove a baseband sample source that runs on its own thread
 

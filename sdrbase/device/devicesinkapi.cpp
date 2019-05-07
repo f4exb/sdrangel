@@ -53,16 +53,6 @@ void DeviceSinkAPI::removeSpectrumSink(BasebandSampleSink* spectrumSink)
     m_deviceSinkEngine->removeSpectrumSink(spectrumSink);
 }
 
-void DeviceSinkAPI::addSource(BasebandSampleSource *source)
-{
-    m_deviceSinkEngine->addSource(source);
-}
-
-void DeviceSinkAPI::removeSource(BasebandSampleSource* source)
-{
-    m_deviceSinkEngine->removeSource(source);
-}
-
 void DeviceSinkAPI::addThreadedSource(ThreadedBasebandSampleSource* source)
 {
     m_deviceSinkEngine->addThreadedSource(source);

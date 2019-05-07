@@ -113,20 +113,6 @@ void DSPDeviceSinkEngine::setSinkSequence(int sequence)
 	m_sampleSinkSequence = sequence;
 }
 
-void DSPDeviceSinkEngine::addSource(BasebandSampleSource* source)
-{
-	qDebug() << "DSPDeviceSinkEngine::addSource: " << source->objectName().toStdString().c_str();
-	DSPAddBasebandSampleSource cmd(source);
-	m_syncMessenger.sendWait(cmd);
-}
-
-void DSPDeviceSinkEngine::removeSource(BasebandSampleSource* source)
-{
-	qDebug() << "DSPDeviceSinkEngine::removeSource: " << source->objectName().toStdString().c_str();
-	DSPRemoveBasebandSampleSource cmd(source);
-	m_syncMessenger.sendWait(cmd);
-}
-
 void DSPDeviceSinkEngine::addThreadedSource(ThreadedBasebandSampleSource* source)
 {
 	qDebug() << "DSPDeviceSinkEngine::addThreadedSource: " << source->objectName().toStdString().c_str();
