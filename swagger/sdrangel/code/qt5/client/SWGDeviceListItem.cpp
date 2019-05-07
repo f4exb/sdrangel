@@ -38,10 +38,10 @@ SWGDeviceListItem::SWGDeviceListItem() {
     m_sequence_isSet = false;
     direction = 0;
     m_direction_isSet = false;
-    nb_streams = 0;
-    m_nb_streams_isSet = false;
-    stream_index = 0;
-    m_stream_index_isSet = false;
+    device_nb_streams = 0;
+    m_device_nb_streams_isSet = false;
+    device_stream_index = 0;
+    m_device_stream_index_isSet = false;
     device_set_index = 0;
     m_device_set_index_isSet = false;
     index = 0;
@@ -64,10 +64,10 @@ SWGDeviceListItem::init() {
     m_sequence_isSet = false;
     direction = 0;
     m_direction_isSet = false;
-    nb_streams = 0;
-    m_nb_streams_isSet = false;
-    stream_index = 0;
-    m_stream_index_isSet = false;
+    device_nb_streams = 0;
+    m_device_nb_streams_isSet = false;
+    device_stream_index = 0;
+    m_device_stream_index_isSet = false;
     device_set_index = 0;
     m_device_set_index_isSet = false;
     index = 0;
@@ -114,9 +114,9 @@ SWGDeviceListItem::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&direction, pJson["direction"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&nb_streams, pJson["nbStreams"], "qint32", "");
+    ::SWGSDRangel::setValue(&device_nb_streams, pJson["deviceNbStreams"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
+    ::SWGSDRangel::setValue(&device_stream_index, pJson["deviceStreamIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&device_set_index, pJson["deviceSetIndex"], "qint32", "");
     
@@ -153,11 +153,11 @@ SWGDeviceListItem::asJsonObject() {
     if(m_direction_isSet){
         obj->insert("direction", QJsonValue(direction));
     }
-    if(m_nb_streams_isSet){
-        obj->insert("nbStreams", QJsonValue(nb_streams));
+    if(m_device_nb_streams_isSet){
+        obj->insert("deviceNbStreams", QJsonValue(device_nb_streams));
     }
-    if(m_stream_index_isSet){
-        obj->insert("streamIndex", QJsonValue(stream_index));
+    if(m_device_stream_index_isSet){
+        obj->insert("deviceStreamIndex", QJsonValue(device_stream_index));
     }
     if(m_device_set_index_isSet){
         obj->insert("deviceSetIndex", QJsonValue(device_set_index));
@@ -220,23 +220,23 @@ SWGDeviceListItem::setDirection(qint32 direction) {
 }
 
 qint32
-SWGDeviceListItem::getNbStreams() {
-    return nb_streams;
+SWGDeviceListItem::getDeviceNbStreams() {
+    return device_nb_streams;
 }
 void
-SWGDeviceListItem::setNbStreams(qint32 nb_streams) {
-    this->nb_streams = nb_streams;
-    this->m_nb_streams_isSet = true;
+SWGDeviceListItem::setDeviceNbStreams(qint32 device_nb_streams) {
+    this->device_nb_streams = device_nb_streams;
+    this->m_device_nb_streams_isSet = true;
 }
 
 qint32
-SWGDeviceListItem::getStreamIndex() {
-    return stream_index;
+SWGDeviceListItem::getDeviceStreamIndex() {
+    return device_stream_index;
 }
 void
-SWGDeviceListItem::setStreamIndex(qint32 stream_index) {
-    this->stream_index = stream_index;
-    this->m_stream_index_isSet = true;
+SWGDeviceListItem::setDeviceStreamIndex(qint32 device_stream_index) {
+    this->device_stream_index = device_stream_index;
+    this->m_device_stream_index_isSet = true;
 }
 
 qint32
@@ -269,8 +269,8 @@ SWGDeviceListItem::isSet(){
         if(serial != nullptr && *serial != QString("")){ isObjectUpdated = true; break;}
         if(m_sequence_isSet){ isObjectUpdated = true; break;}
         if(m_direction_isSet){ isObjectUpdated = true; break;}
-        if(m_nb_streams_isSet){ isObjectUpdated = true; break;}
-        if(m_stream_index_isSet){ isObjectUpdated = true; break;}
+        if(m_device_nb_streams_isSet){ isObjectUpdated = true; break;}
+        if(m_device_stream_index_isSet){ isObjectUpdated = true; break;}
         if(m_device_set_index_isSet){ isObjectUpdated = true; break;}
         if(m_index_isSet){ isObjectUpdated = true; break;}
     }while(false);

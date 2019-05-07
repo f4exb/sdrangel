@@ -1731,10 +1731,10 @@ bool WebAPIRequestMapper::validateDeviceListItem(SWGSDRangel::SWGDeviceListItem&
         deviceListItem.setSequence(-1);
     }
 
-    if (jsonObject.contains("streamIndex")) {
-        deviceListItem.setStreamIndex(jsonObject["streamIndex"].toInt(-1));
+    if (jsonObject.contains("deviceStreamIndex")) {
+        deviceListItem.setDeviceStreamIndex(jsonObject["deviceStreamIndex"].toInt(-1));
     } else {
-        deviceListItem.setStreamIndex(-1);
+        deviceListItem.setDeviceStreamIndex(-1);
     }
 
     return identified;

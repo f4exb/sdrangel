@@ -2107,13 +2107,13 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
     },
-    "nbStreams" : {
+    "deviceNbStreams" : {
       "type" : "integer",
       "description" : "Number of channels or streams in the device"
     },
-    "streamIndex" : {
+    "deviceStreamIndex" : {
       "type" : "integer",
-      "description" : "Index of the channel in the device"
+      "description" : "Index of the channel in the device. Applies to single stream directions (Rx or Tx)"
     },
     "deviceSetIndex" : {
       "type" : "integer",
@@ -4779,7 +4779,7 @@ margin-bottom: 20px;
   "description" : "A sample rate expressed in samples per second (S/s)"
 };
             defs.SamplingDevice = {
-  "required" : [ "bandwidth", "centerFrequency", "hwType", "index", "sequence", "serial", "state", "streamIndex" ],
+  "required" : [ "bandwidth", "centerFrequency", "hwType", "index", "sequence", "serial", "state" ],
   "properties" : {
     "index" : {
       "type" : "integer",
@@ -4793,13 +4793,13 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
     },
-    "nbStreams" : {
+    "deviceNbStreams" : {
       "type" : "integer",
       "description" : "Number of channels or streams in the device"
     },
-    "streamIndex" : {
+    "deviceStreamIndex" : {
       "type" : "integer",
-      "description" : "Index of the channel in the device"
+      "description" : "Index of the channel in the device. Applies to single stream directions (Rx or Tx)"
     },
     "sequence" : {
       "type" : "integer",
@@ -9567,7 +9567,7 @@ public class DeviceSetApiExample {
         
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
-        DeviceListItem body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
+        DeviceListItem body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
         try {
             DeviceListItem result = apiInstance.devicesetDevicePut(deviceSetIndex, body);
             System.out.println(result);
@@ -9587,7 +9587,7 @@ public class DeviceSetApiExample {
     public static void main(String[] args) {
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
-        DeviceListItem body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
+        DeviceListItem body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
         try {
             DeviceListItem result = apiInstance.devicesetDevicePut(deviceSetIndex, body);
             System.out.println(result);
@@ -9604,7 +9604,7 @@ public class DeviceSetApiExample {
   </div> -->
                             <div class="tab-pane" id="examples-DeviceSet-devicesetDevicePut-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
-DeviceListItem *body = ; // Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
+DeviceListItem *body = ; // Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
 
 DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
 
@@ -9628,7 +9628,7 @@ var api = new SdRangel.DeviceSetApi()
 
 var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
 
-var body = ; // {DeviceListItem} Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
+var body = ; // {DeviceListItem} Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
 
 
 var callback = function(error, data, response) {
@@ -9661,7 +9661,7 @@ namespace Example
             
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
-            var body = new DeviceListItem(); // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
+            var body = new DeviceListItem(); // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
 
             try
             {
@@ -9684,7 +9684,7 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\DeviceSetApi();
 $deviceSetIndex = 56; // Integer | Index of device set in the device set list
-$body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
+$body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
 
 try {
     $result = $api_instance->devicesetDevicePut($deviceSetIndex, $body);
@@ -9702,7 +9702,7 @@ use SWGSDRangel::DeviceSetApi;
 
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
-my $body = SWGSDRangel::Object::DeviceListItem->new(); # DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
+my $body = SWGSDRangel::Object::DeviceListItem->new(); # DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
 
 eval { 
     my $result = $api_instance->devicesetDevicePut(deviceSetIndex => $deviceSetIndex, body => $body);
@@ -9723,7 +9723,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
-body =  # DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
+body =  # DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
 
 try: 
     api_response = api_instance.deviceset_device_put(deviceSetIndex, body)
@@ -9782,7 +9782,7 @@ $(document).ready(function() {
   var schemaWrapper = {
   "in" : "body",
   "name" : "body",
-  "description" : "Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.",
+  "description" : "Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.",
   "required" : true,
   "schema" : {
     "$ref" : "#/definitions/DeviceListItem"
@@ -24924,7 +24924,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-05-07T11:40:05.130+02:00
+              Generated 2019-05-07T14:58:09.366+02:00
             </div>
           </div>
       </div>

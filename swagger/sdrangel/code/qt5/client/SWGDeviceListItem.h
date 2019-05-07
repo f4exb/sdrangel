@@ -57,11 +57,11 @@ public:
     qint32 getDirection();
     void setDirection(qint32 direction);
 
-    qint32 getNbStreams();
-    void setNbStreams(qint32 nb_streams);
+    qint32 getDeviceNbStreams();
+    void setDeviceNbStreams(qint32 device_nb_streams);
 
-    qint32 getStreamIndex();
-    void setStreamIndex(qint32 stream_index);
+    qint32 getDeviceStreamIndex();
+    void setDeviceStreamIndex(qint32 device_stream_index);
 
     qint32 getDeviceSetIndex();
     void setDeviceSetIndex(qint32 device_set_index);
@@ -88,11 +88,11 @@ private:
     qint32 direction;
     bool m_direction_isSet;
 
-    qint32 nb_streams;
-    bool m_nb_streams_isSet;
+    qint32 device_nb_streams;
+    bool m_device_nb_streams_isSet;
 
-    qint32 stream_index;
-    bool m_stream_index_isSet;
+    qint32 device_stream_index;
+    bool m_device_stream_index_isSet;
 
     qint32 device_set_index;
     bool m_device_set_index_isSet;

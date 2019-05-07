@@ -133,8 +133,8 @@ int WebAPIAdapterSrv::instanceDevices(
         *devices->back()->getHwType() = samplingDevice.hardwareId;
         *devices->back()->getSerial() = samplingDevice.serial;
         devices->back()->setSequence(samplingDevice.sequence);
-        devices->back()->setTx(!samplingDevice.rxElseTx);
-        devices->back()->setNbStreams(samplingDevice.deviceNbItems);
+        devices->back()->setDirection(samplingDevice.rxElseTx ? 0 : 1);
+        devices->back()->setDeviceNbStreams(samplingDevice.deviceNbItems);
         devices->back()->setDeviceSetIndex(samplingDevice.claimed);
         devices->back()->setIndex(i);
     }
@@ -161,7 +161,7 @@ int WebAPIAdapterSrv::instanceChannels(
         const PluginDescriptor& pluginDescriptor = channelInterface->getPluginDescriptor();
         *channels->back()->getVersion() = pluginDescriptor.version;
         *channels->back()->getName() = pluginDescriptor.displayedName;
-        channels->back()->setTx(tx);
+        channels->back()->setDirection(tx ? 1 : 0);
         *channels->back()->getIdUri() = channelRegistrations->at(i).m_channelIdURI;
         *channels->back()->getId() = channelRegistrations->at(i).m_channelId;
         channels->back()->setIndex(i);
@@ -1028,26 +1028,43 @@ int WebAPIAdapterSrv::devicesetDevicePut(
     {
         DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
 
-        if ((query.getTx() == 0) && (deviceSet->m_deviceSinkEngine))
+        if ((query.getDirection() != 1) && (deviceSet->m_deviceSinkEngine))
         {
             error.init();
-            *error.getMessage() = QString("Device type (Rx) and device set type (Tx) mismatch");
+            *error.getMessage() = QString("Device type and device set type (Tx) mismatch");
             return 404;
         }
 
-        if ((query.getTx() != 0) && (deviceSet->m_deviceSourceEngine))
+        if ((query.getDirection() != 0) && (deviceSet->m_deviceSourceEngine))
         {
             error.init();
-            *error.getMessage() = QString("Device type (Tx) and device set type (Rx) mismatch");
+            *error.getMessage() = QString("Device type and device set type (Rx) mismatch");
             return 404;
         }
 
-        int nbSamplingDevices = query.getTx() != 0 ? DeviceEnumerator::instance()->getNbTxSamplingDevices() : DeviceEnumerator::instance()->getNbRxSamplingDevices();
-        int tx = query.getTx();
+        int nbSamplingDevices;
+
+        if (query.getDirection() == 0) {
+            nbSamplingDevices = DeviceEnumerator::instance()->getNbRxSamplingDevices();
+        } else if (query.getDirection() == 1) {
+            nbSamplingDevices = DeviceEnumerator::instance()->getNbTxSamplingDevices();
+        } else {
+            nbSamplingDevices = 0; // TODO: not implemented yet
+        }
 
         for (int i = 0; i < nbSamplingDevices; i++)
         {
-            PluginInterface::SamplingDevice samplingDevice = query.getTx() ? DeviceEnumerator::instance()->getTxSamplingDevice(i) : DeviceEnumerator::instance()->getRxSamplingDevice(i);
+            int tx;
+
+            if (query.getDirection() == 0) {
+                tx = 0;
+            } else if (query.getDirection() == 1) {
+                tx = 1;
+            } else {
+                continue; // TODO: any device (2) not supported yet
+            }
+
+            PluginInterface::SamplingDevice samplingDevice = query.getDirection() == 0 ? DeviceEnumerator::instance()->getRxSamplingDevice(i) : DeviceEnumerator::instance()->getTxSamplingDevice(i);
 
             if (query.getDisplayedName() && (*query.getDisplayedName() != samplingDevice.displayedName)) {
                 continue;
@@ -1065,11 +1082,11 @@ int WebAPIAdapterSrv::devicesetDevicePut(
                 continue;
             }
 
-            if ((query.getStreamIndex() >= 0) && (query.getStreamIndex() != samplingDevice.deviceItemIndex)) {
+            if ((query.getDeviceStreamIndex() >= 0) && (query.getDeviceStreamIndex() != samplingDevice.deviceItemIndex)) {
                 continue;
             }
 
-            MainCore::MsgSetDevice *msg = MainCore::MsgSetDevice::create(deviceSetIndex, i, query.getTx() != 0);
+            MainCore::MsgSetDevice *msg = MainCore::MsgSetDevice::create(deviceSetIndex, i, query.getDirection() == 1);
             m_mainCore.m_inputMessageQueue.push(msg);
 
             response.init();
@@ -1077,9 +1094,9 @@ int WebAPIAdapterSrv::devicesetDevicePut(
             *response.getHwType() = samplingDevice.hardwareId;
             *response.getSerial() = samplingDevice.serial;
             response.setSequence(samplingDevice.sequence);
-            response.setTx(tx);
-            response.setNbStreams(samplingDevice.deviceNbItems);
-            response.setStreamIndex(samplingDevice.deviceItemIndex);
+            response.setDirection(tx);
+            response.setDeviceNbStreams(samplingDevice.deviceNbItems);
+            response.setDeviceStreamIndex(samplingDevice.deviceItemIndex);
             response.setDeviceSetIndex(deviceSetIndex);
             response.setIndex(i);
 
@@ -1110,17 +1127,17 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsGet(
     {
         DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
 
-        if (deviceSet->m_deviceSourceEngine) // Rx
+        if (deviceSet->m_deviceSourceEngine) // Single Rx
         {
             response.setDeviceHwType(new QString(deviceSet->m_deviceSourceAPI->getHardwareId()));
-            response.setTx(0);
+            response.setDirection(0);
             DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
             return source->webapiSettingsGet(response, *error.getMessage());
         }
-        else if (deviceSet->m_deviceSinkEngine) // Tx
+        else if (deviceSet->m_deviceSinkEngine) // Single Tx
         {
             response.setDeviceHwType(new QString(deviceSet->m_deviceSinkAPI->getHardwareId()));
-            response.setTx(1);
+            response.setDirection(1);
             DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
             return sink->webapiSettingsGet(response, *error.getMessage());
         }
@@ -1150,11 +1167,11 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsPutPatch(
     {
         DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
 
-        if (deviceSet->m_deviceSourceEngine) // Rx
+        if (deviceSet->m_deviceSourceEngine) // Single Rx
         {
-            if (response.getTx() != 0)
+            if (response.getDirection() != 0)
             {
-                *error.getMessage() = QString("Rx device found but Tx device requested");
+                *error.getMessage() = QString("Single Rx device found but other type of device requested");
                 return 400;
             }
             if (deviceSet->m_deviceSourceAPI->getHardwareId() != *response.getDeviceHwType())
@@ -1168,11 +1185,11 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsPutPatch(
                 return source->webapiSettingsPutPatch(force, deviceSettingsKeys, response, *error.getMessage());
             }
         }
-        else if (deviceSet->m_deviceSinkEngine) // Tx
+        else if (deviceSet->m_deviceSinkEngine) // Single Tx
         {
-            if (response.getTx() == 0)
+            if (response.getDirection() != 1)
             {
-                *error.getMessage() = QString("Tx device found but Rx device requested");
+                *error.getMessage() = QString("Single Tx device found but other type of device requested");
                 return 400;
             }
             else if (deviceSet->m_deviceSinkAPI->getHardwareId() != *response.getDeviceHwType())
@@ -1318,17 +1335,17 @@ int WebAPIAdapterSrv::devicesetDeviceReportGet(
     {
         DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
 
-        if (deviceSet->m_deviceSourceEngine) // Rx
+        if (deviceSet->m_deviceSourceEngine) // Single Rx
         {
             response.setDeviceHwType(new QString(deviceSet->m_deviceSourceAPI->getHardwareId()));
-            response.setTx(0);
+            response.setDirection(0);
             DeviceSampleSource *source = deviceSet->m_deviceSourceAPI->getSampleSource();
             return source->webapiReportGet(response, *error.getMessage());
         }
-        else if (deviceSet->m_deviceSinkEngine) // Tx
+        else if (deviceSet->m_deviceSinkEngine) // Single Tx
         {
             response.setDeviceHwType(new QString(deviceSet->m_deviceSinkAPI->getHardwareId()));
-            response.setTx(1);
+            response.setDirection(1);
             DeviceSampleSink *sink = deviceSet->m_deviceSinkAPI->getSampleSink();
             return sink->webapiReportGet(response, *error.getMessage());
         }
@@ -1376,7 +1393,7 @@ int WebAPIAdapterSrv::devicesetChannelPost(
     {
         DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
 
-        if (query.getTx() == 0) // Rx
+        if (query.getDirection() == 0) // Single Rx
         {
             if (deviceSet->m_deviceSourceEngine == 0)
             {
@@ -1412,7 +1429,7 @@ int WebAPIAdapterSrv::devicesetChannelPost(
                 return 404;
             }
         }
-        else // Tx
+        else if (query.getDirection() == 1) // single Tx
         {
             if (deviceSet->m_deviceSinkEngine == 0)
             {
@@ -1447,6 +1464,12 @@ int WebAPIAdapterSrv::devicesetChannelPost(
                 *error.getMessage() = QString("There is no transmit channel with id %1").arg(*query.getChannelType());
                 return 404;
             }
+        }
+        else
+        {
+            error.init();
+            *error.getMessage() = QString("This type of device is not implemented yet");
+            return 400;
         }
     }
     else
@@ -1536,7 +1559,7 @@ int WebAPIAdapterSrv::devicesetChannelSettingsGet(
     {
         DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
 
-        if (deviceSet->m_deviceSourceEngine) // Rx
+        if (deviceSet->m_deviceSourceEngine) // Single Rx
         {
             ChannelSinkAPI *channelAPI = deviceSet->m_deviceSourceAPI->getChanelAPIAt(channelIndex);
 
@@ -1549,11 +1572,11 @@ int WebAPIAdapterSrv::devicesetChannelSettingsGet(
             {
                 response.setChannelType(new QString());
                 channelAPI->getIdentifier(*response.getChannelType());
-                response.setTx(0);
+                response.setDirection(0);
                 return channelAPI->webapiSettingsGet(response, *error.getMessage());
             }
         }
-        else if (deviceSet->m_deviceSinkEngine) // Tx
+        else if (deviceSet->m_deviceSinkEngine) // Single Tx
         {
             ChannelSourceAPI *channelAPI = deviceSet->m_deviceSinkAPI->getChanelAPIAt(channelIndex);
 
@@ -1566,7 +1589,7 @@ int WebAPIAdapterSrv::devicesetChannelSettingsGet(
             {
                 response.setChannelType(new QString());
                 channelAPI->getIdentifier(*response.getChannelType());
-                response.setTx(1);
+                response.setDirection(1);
                 return channelAPI->webapiSettingsGet(response, *error.getMessage());
             }
         }
@@ -1595,7 +1618,7 @@ int WebAPIAdapterSrv::devicesetChannelReportGet(
     {
         DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
 
-        if (deviceSet->m_deviceSourceEngine) // Rx
+        if (deviceSet->m_deviceSourceEngine) // Single Rx
         {
             ChannelSinkAPI *channelAPI = deviceSet->m_deviceSourceAPI->getChanelAPIAt(channelIndex);
 
@@ -1608,11 +1631,11 @@ int WebAPIAdapterSrv::devicesetChannelReportGet(
             {
                 response.setChannelType(new QString());
                 channelAPI->getIdentifier(*response.getChannelType());
-                response.setTx(0);
+                response.setDirection(0);
                 return channelAPI->webapiReportGet(response, *error.getMessage());
             }
         }
-        else if (deviceSet->m_deviceSinkEngine) // Tx
+        else if (deviceSet->m_deviceSinkEngine) // Single Tx
         {
             ChannelSourceAPI *channelAPI = deviceSet->m_deviceSinkAPI->getChanelAPIAt(channelIndex);
 
@@ -1625,7 +1648,7 @@ int WebAPIAdapterSrv::devicesetChannelReportGet(
             {
                 response.setChannelType(new QString());
                 channelAPI->getIdentifier(*response.getChannelType());
-                response.setTx(1);
+                response.setDirection(1);
                 return channelAPI->webapiReportGet(response, *error.getMessage());
             }
         }
@@ -1747,15 +1770,15 @@ void WebAPIAdapterSrv::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, con
     SWGSDRangel::SWGSamplingDevice *samplingDevice = swgDeviceSet->getSamplingDevice();
     samplingDevice->init();
     samplingDevice->setIndex(deviceUISetIndex);
-    samplingDevice->setTx(deviceSet->m_deviceSinkEngine != 0);
 
-    if (deviceSet->m_deviceSinkEngine) // Tx data
+    if (deviceSet->m_deviceSinkEngine) // Single Tx data
     {
+        samplingDevice->setDirection(1);
         *samplingDevice->getHwType() = deviceSet->m_deviceSinkAPI->getHardwareId();
         *samplingDevice->getSerial() = deviceSet->m_deviceSinkAPI->getSampleSinkSerial();
         samplingDevice->setSequence(deviceSet->m_deviceSinkAPI->getSampleSinkSequence());
-        samplingDevice->setNbStreams(deviceSet->m_deviceSinkAPI->getNbItems());
-        samplingDevice->setStreamIndex(deviceSet->m_deviceSinkAPI->getItemIndex());
+        samplingDevice->setDeviceNbStreams(deviceSet->m_deviceSinkAPI->getNbItems());
+        samplingDevice->setDeviceStreamIndex(deviceSet->m_deviceSinkAPI->getItemIndex());
         deviceSet->m_deviceSinkAPI->getDeviceEngineStateStr(*samplingDevice->getState());
         DeviceSampleSink *sampleSink = deviceSet->m_deviceSinkEngine->getSink();
 
@@ -1780,13 +1803,14 @@ void WebAPIAdapterSrv::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, con
         }
     }
 
-    if (deviceSet->m_deviceSourceEngine) // Rx data
+    if (deviceSet->m_deviceSourceEngine) // Single Rx data
     {
+        samplingDevice->setDirection(1);
         *samplingDevice->getHwType() = deviceSet->m_deviceSourceAPI->getHardwareId();
         *samplingDevice->getSerial() = deviceSet->m_deviceSourceAPI->getSampleSourceSerial();
         samplingDevice->setSequence(deviceSet->m_deviceSourceAPI->getSampleSourceSequence());
-        samplingDevice->setNbStreams(deviceSet->m_deviceSourceAPI->getNbItems());
-        samplingDevice->setStreamIndex(deviceSet->m_deviceSourceAPI->getItemIndex());
+        samplingDevice->setDeviceNbStreams(deviceSet->m_deviceSourceAPI->getNbItems());
+        samplingDevice->setDeviceStreamIndex(deviceSet->m_deviceSourceAPI->getItemIndex());
         deviceSet->m_deviceSourceAPI->getDeviceEngineStateStr(*samplingDevice->getState());
         DeviceSampleSource *sampleSource = deviceSet->m_deviceSourceEngine->getSource();
 

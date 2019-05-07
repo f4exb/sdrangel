@@ -754,7 +754,7 @@ paths:
           description: Index of device set in the device set list
         - name: body
           in: body
-          description: Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
+          description: Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
           required: true
           schema:
             $ref: "#/definitions/DeviceListItem"
@@ -1371,11 +1371,11 @@ definitions:
       direction:
         description: "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
         type: integer
-      nbStreams:
+      deviceNbStreams:
         description: "Number of channels or streams in the device"
         type: integer
-      streamIndex:
-        description: "Index of the channel in the device"
+      deviceStreamIndex:
+        description: "Index of the channel in the device. Applies to single stream directions (Rx or Tx)"
         type: integer
       deviceSetIndex:
         description: "Index of the device set that claimed this device (-1 if not claimed)"
@@ -1470,11 +1470,11 @@ definitions:
       direction:
         description: "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
         type: integer
-      nbStreams:
+      deviceNbStreams:
         description: "Number of channels or streams in the device"
         type: integer
-      streamIndex:
-        description: "Index of the channel in the device"
+      deviceStreamIndex:
+        description: "Index of the channel in the device. Applies to single stream directions (Rx or Tx)"
         type: integer
       sequence:
         description: "Sequence in the enumeration of same device types"
