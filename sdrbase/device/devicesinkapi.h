@@ -87,10 +87,6 @@ public:
     ChannelSourceAPI *getChanelAPIAt(int index);
     int getNbChannels() const { return m_channelAPIs.size(); }
 
-    void registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
-    void removeChannelInstance(PluginInstanceGUI* pluginGUI);
-
-
     void loadSinkSettings(const Preset* preset);
     void saveSinkSettings(Preset* preset);
 
