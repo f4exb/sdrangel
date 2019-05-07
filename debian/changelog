@@ -1,3 +1,10 @@
+sdrangel (4.7.1-1) unstable; urgency=medium
+
+  * SSB modulator: fixed compressor overloading
+  * REST API: tx, nbStreams and streamIndex names change
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 07 May 2019 14:14:18 +0100
+
 sdrangel (4.7.0-1) unstable; urgency=medium
 
   * New Frequency Tracker Rx channel plugin
