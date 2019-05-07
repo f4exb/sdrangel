@@ -110,6 +110,7 @@ SSBMod::SSBMod(DeviceSinkAPI *deviceAPI) :
 	m_inAGC.setGate(m_settings.m_agcThresholdGate);
 	m_inAGC.setStepDownDelay(m_settings.m_agcThresholdDelay);
 	m_inAGC.setClamping(true);
+    m_inAGC.setHardLimiting(true);
 
     applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);

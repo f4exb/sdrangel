@@ -55,7 +55,8 @@ MagAGC::MagAGC(int historySize, double R, double threshold) :
 	m_stepDownDelay(historySize),
 	m_clamping(false),
 	m_R2(R*R),
-	m_clampMax(1.0)
+	m_clampMax(1.0),
+    m_hardLimiting(false)
 {}
 
 MagAGC::~MagAGC()
@@ -93,6 +94,15 @@ void MagAGC::setThresholdEnable(bool enable)
 void MagAGC::feed(Complex& ci)
 {
 	ci *= feedAndGetValue(ci);
+}
+
+double MagAGC::hardLimiter(double multiplier, double magsq)
+{
+    if ((m_hardLimiting) && (multiplier*multiplier*magsq > 1.0)) {
+        return 1.0 / (multiplier*sqrt(magsq));
+    } else {
+        return multiplier;
+    }
 }
 
 double MagAGC::feedAndGetValue(const Complex& ci)
@@ -153,11 +163,11 @@ double MagAGC::feedAndGetValue(const Complex& ci)
             if (m_stepUpCounter < m_stepLength)
             {
                 m_stepUpCounter++;
-                return m_u0 * StepFunctions::smootherstep(m_stepUpCounter * m_stepDelta);
+                return hardLimiter(m_u0 * StepFunctions::smootherstep(m_stepUpCounter * m_stepDelta), m_magsq);
             }
             else
             {
-                return m_u0;
+                return hardLimiter(m_u0, m_magsq);
             }
         }
         else
@@ -167,7 +177,7 @@ double MagAGC::feedAndGetValue(const Complex& ci)
             if (m_stepDownCounter > 0)
             {
                 m_stepDownCounter--;
-                return m_u0 * StepFunctions::smootherstep(m_stepDownCounter * m_stepDelta);
+                return hardLimiter(m_u0 * StepFunctions::smootherstep(m_stepDownCounter * m_stepDelta), m_magsq);
             }
             else
             {
@@ -177,7 +187,7 @@ double MagAGC::feedAndGetValue(const Complex& ci)
     }
     else
     {
-        return m_u0;
+        return hardLimiter(m_u0, m_magsq);
     }
 }
 

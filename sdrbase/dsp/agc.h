@@ -53,6 +53,7 @@ public:
     int getStepDownDelay() const { return m_stepDownDelay; }
     float getStepDownValue() const;
     float getStepValue() const;
+    void setHardLimiting(bool hardLimiting) { m_hardLimiting = hardLimiting; }
 
 private:
     bool m_squared;        //!< use squared magnitude (power) to compute AGC value
@@ -69,6 +70,9 @@ private:
     bool m_clamping;       //!< clamping active
     double m_R2;           //!< square of ordered magnitude
     double m_clampMax;     //!< maximum to clamp to as power value
+    bool m_hardLimiting;   //!< hard limit multiplier so that resulting sample magnitude does not exceed 1.0
+
+    double hardLimiter(double multiplier, double magsq);
 };
 
 template<uint32_t AvgSize>
