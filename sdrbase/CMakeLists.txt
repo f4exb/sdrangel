@@ -69,6 +69,7 @@ set(sdrbase_SOURCES
 
     device/devicesourceapi.cpp
     device/devicesinkapi.cpp
+    device/deviceapi.cpp
     device/deviceenumerator.cpp
 
     settings/preferences.cpp
@@ -190,6 +191,7 @@ set(sdrbase_HEADERS
 
     device/devicesourceapi.h
     device/devicesinkapi.h
+    device/deviceapi.h
     device/deviceenumerator.h
 
     plugin/plugininstancegui.h
