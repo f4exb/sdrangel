@@ -71,7 +71,7 @@ PluginInterface::SamplingDevices FCDProPlugin::enumSampleSources()
 				serialNumber,
 				i,
 				PluginInterface::SamplingDevice::PhysicalDevice,
-				true,
+				PluginInterface::SamplingDevice::StreamSingleRx,
 				1,
 				0));
 

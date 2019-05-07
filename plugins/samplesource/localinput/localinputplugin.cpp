@@ -66,7 +66,7 @@ PluginInterface::SamplingDevices LocalInputPlugin::enumSampleSources()
             QString::null,
             0,
             PluginInterface::SamplingDevice::BuiltInDevice,
-            true,
+            PluginInterface::SamplingDevice::StreamSingleRx,
             1,
             0));
 

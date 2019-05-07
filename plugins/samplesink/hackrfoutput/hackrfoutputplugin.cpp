@@ -101,7 +101,7 @@ PluginInterface::SamplingDevices HackRFOutputPlugin::enumSampleSinks()
 					serial_str,
 					i,
 					PluginInterface::SamplingDevice::PhysicalDevice,
-					false,
+					PluginInterface::SamplingDevice::StreamSingleTx,
 					1,
 					0));
 

@@ -98,7 +98,7 @@ PluginInterface::SamplingDevices Blderf2InputPlugin::enumSampleSources()
                             QString(devinfo[i].serial),
                             i,
                             PluginInterface::SamplingDevice::PhysicalDevice,
-                            true,
+                            PluginInterface::SamplingDevice::StreamSingleRx,
                             nbRxChannels,
                             j));
                 }

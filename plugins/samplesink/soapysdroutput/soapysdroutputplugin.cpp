@@ -81,7 +81,7 @@ PluginInterface::SamplingDevices SoapySDROutputPlugin::enumSampleSinks()
                     serial,
                     idev,
                     PluginInterface::SamplingDevice::PhysicalDevice,
-                    false,
+                    PluginInterface::SamplingDevice::StreamSingleTx,
                     nbTxChannels,
                     ichan));
         }

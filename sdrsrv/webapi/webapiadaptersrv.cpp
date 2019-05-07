@@ -133,7 +133,7 @@ int WebAPIAdapterSrv::instanceDevices(
         *devices->back()->getHwType() = samplingDevice.hardwareId;
         *devices->back()->getSerial() = samplingDevice.serial;
         devices->back()->setSequence(samplingDevice.sequence);
-        devices->back()->setDirection(samplingDevice.rxElseTx ? 0 : 1);
+        devices->back()->setDirection((int) samplingDevice.streamType);
         devices->back()->setDeviceNbStreams(samplingDevice.deviceNbItems);
         devices->back()->setDeviceSetIndex(samplingDevice.claimed);
         devices->back()->setIndex(i);

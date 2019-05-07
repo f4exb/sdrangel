@@ -62,7 +62,7 @@ PluginInterface::SamplingDevices RTLSDRPlugin::enumSampleSources()
 				QString(serial),
 				i,
 				PluginInterface::SamplingDevice::PhysicalDevice,
-				true,
+				PluginInterface::SamplingDevice::StreamSingleRx,
 				1,
 				0));
 	}

@@ -66,7 +66,7 @@ PluginInterface::SamplingDevices RemoteOutputPlugin::enumSampleSinks()
             QString::null,
             0,
             PluginInterface::SamplingDevice::BuiltInDevice,
-            false,
+            PluginInterface::SamplingDevice::StreamSingleTx,
             1,
             0));
 

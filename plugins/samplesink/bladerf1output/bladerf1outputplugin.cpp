@@ -94,7 +94,7 @@ PluginInterface::SamplingDevices Bladerf1OutputPlugin::enumSampleSinks()
                         QString(devinfo[i].serial),
                         i,
                         PluginInterface::SamplingDevice::PhysicalDevice,
-                        false,
+                        PluginInterface::SamplingDevice::StreamSingleTx,
                         1,
                         0));
 

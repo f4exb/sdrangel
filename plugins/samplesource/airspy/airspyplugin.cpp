@@ -107,7 +107,7 @@ PluginInterface::SamplingDevices AirspyPlugin::enumSampleSources()
 						serial_str,
 						i,
 						PluginInterface::SamplingDevice::PhysicalDevice,
-						true,
+						PluginInterface::SamplingDevice::StreamSingleRx,
 						1,
 						0));
 

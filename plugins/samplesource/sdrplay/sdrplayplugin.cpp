@@ -83,7 +83,7 @@ PluginInterface::SamplingDevices SDRPlayPlugin::enumSampleSources()
 				QString(serial),
 				i,
 				PluginInterface::SamplingDevice::PhysicalDevice,
-				true,
+				PluginInterface::SamplingDevice::StreamSingleRx,
 				1,
 				0));
 	}

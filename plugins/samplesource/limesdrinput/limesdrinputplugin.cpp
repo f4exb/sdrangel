@@ -100,7 +100,7 @@ PluginInterface::SamplingDevices LimeSDRInputPlugin::enumSampleSources()
                         QString(deviceList[i]),
                         i,
                         PluginInterface::SamplingDevice::PhysicalDevice,
-                        true,
+                        PluginInterface::SamplingDevice::StreamSingleRx,
                         limeSDRParams.m_nbRxChannels,
                         j));
             }

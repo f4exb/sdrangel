@@ -39,13 +39,20 @@ public:
             BuiltInDevice
         };
 
+        enum StreamType
+        {
+            StreamSingleRx, //!< Exposes a single input stream that can be one of the streams of a physical device
+            StreamSingleTx, //!< Exposes a single output stream that can be one of the streams of a physical device
+            StreamAny       //!< May expose any number of input and/or output streams
+        };
+
 		QString displayedName;    //!< The human readable name
 		QString hardwareId;       //!< The internal id that identifies the type of hardware (i.e. HackRF, BladeRF, ...)
 		QString id;               //!< The internal plugin ID corresponding to the device (i.e. for HackRF input, for HackRF output ...)
 		QString serial;           //!< The device serial number defined by the vendor or a fake one (SDRplay)
 		int sequence;             //!< The device sequence. >0 when more than one device of the same type is connected
 		SamplingDeviceType type;  //!< The sampling device type for behavior information
-		bool rxElseTx;            //!< This is the Rx part else the Tx part of the device
+		StreamType streamType;    //!< This is the type of stream supported
 		int deviceNbItems;        //!< Number of items (or streams) in the device. >1 for composite devices.
 		int deviceItemIndex;      //!< For composite devices this is the Rx or Tx stream index. -1 if not initialized
 		int claimed;              //!< This is the device set index if claimed else -1
@@ -56,7 +63,7 @@ public:
 				const QString& _serial,
 				int _sequence,
 				SamplingDeviceType _type,
-				bool _rxElseTx,
+				StreamType _streamType,
 				int _deviceNbItems,
 				int _deviceItemIndex) :
 			displayedName(_displayedName),
@@ -65,7 +72,7 @@ public:
 			serial(_serial),
 			sequence(_sequence),
 			type(_type),
-			rxElseTx(_rxElseTx),
+			streamType(_streamType),
 			deviceNbItems(_deviceNbItems),
 			deviceItemIndex(_deviceItemIndex),
 			claimed(-1)

@@ -78,7 +78,7 @@ PluginInterface::SamplingDevices XTRXOutputPlugin::enumSampleSinks()
                                          QString(devs[i].uniqname),
                                          i,
                                          PluginInterface::SamplingDevice::PhysicalDevice,
-                                         false,
+                                         PluginInterface::SamplingDevice::StreamSingleTx,
                                          XTRXParams.m_nbTxChannels,
                                          j));
         }

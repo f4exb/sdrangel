@@ -98,7 +98,7 @@ PluginInterface::SamplingDevices BladeRF2OutputPlugin::enumSampleSinks()
                             QString(devinfo[i].serial),
                             i,
                             PluginInterface::SamplingDevice::PhysicalDevice,
-                            false,
+                            PluginInterface::SamplingDevice::StreamSingleTx,
                             nbTxChannels,
                             j));
                 }
