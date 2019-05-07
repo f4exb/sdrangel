@@ -1673,12 +1673,6 @@ void MainWindow::channelAddClicked(bool checked)
         }
         else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
         {
-            uint32_t nbSources = deviceUI->m_deviceSinkAPI->getNumberOfSources();
-
-            if (nbSources > 0) {
-                QMessageBox::information(this, tr("Message"), tr("%1 channel(s) already in use. Multiple transmission channels is experimental. You may experience performance problems").arg(nbSources));
-            }
-
             m_pluginManager->createTxChannelInstance(deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI, deviceUI->m_deviceSinkAPI);
         }
     }

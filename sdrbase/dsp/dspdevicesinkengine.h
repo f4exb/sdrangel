@@ -73,8 +73,6 @@ public:
 	void addThreadedSource(ThreadedBasebandSampleSource* source); //!< Add a baseband sample source that will run on its own thread
 	void removeThreadedSource(ThreadedBasebandSampleSource* source); //!< Remove a baseband sample source that runs on its own thread
 
-	uint32_t getNumberOfSources() const { return m_basebandSampleSources.size() + m_threadedBasebandSampleSources.size(); }
-
 	void addSpectrumSink(BasebandSampleSink* spectrumSink);    //!< Add a spectrum vis baseband sample sink
 	void removeSpectrumSink(BasebandSampleSink* spectrumSink); //!< Add a spectrum vis baseband sample sink
 

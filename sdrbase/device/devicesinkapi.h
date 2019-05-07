@@ -51,7 +51,6 @@ public:
     void removeThreadedSource(ThreadedBasebandSampleSource* sink); //!< Remove a baseband sample source that runs on its own thread from device engine
     void addChannelAPI(ChannelSourceAPI* channelAPI);
     void removeChannelAPI(ChannelSourceAPI* channelAPI);
-    uint32_t getNumberOfSources();
     void setSampleSink(DeviceSampleSink* sink);                    //!< Set device engine sample sink type
     DeviceSampleSink *getSampleSink();                             //!< Return pointer to the device sample sink
     bool initGeneration();                                         //!< Initialize device engine generation sequence

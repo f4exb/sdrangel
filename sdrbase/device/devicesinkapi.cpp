@@ -108,11 +108,6 @@ void DeviceSinkAPI::renumerateChannels()
 }
 
 
-uint32_t DeviceSinkAPI::getNumberOfSources()
-{
-    return m_deviceSinkEngine->getNumberOfSources();
-}
-
 void DeviceSinkAPI::setSampleSink(DeviceSampleSink* sink)
 {
     m_deviceSinkEngine->setSink(sink);
