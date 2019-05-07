@@ -443,7 +443,7 @@ void LocalSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
 void LocalSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const LocalSinkSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
-    swgChannelSettings->setTx(0);
+    swgChannelSettings->setDirection(0); // single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("LocalSink"));

@@ -623,7 +623,7 @@ void RemoteOutput::sampleRateCorrection(double remoteTimeDeltaUs, double timeDel
 void RemoteOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RemoteOutputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(1);
+    swgDeviceSettings->setDirection(1); // single Tx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("RemoteOutput"));
     swgDeviceSettings->setRemoteOutputSettings(new SWGSDRangel::SWGRemoteOutputSettings());
@@ -680,7 +680,7 @@ void RemoteOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
 void RemoteOutput::webapiReverseSendStartStop(bool start)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(1);
+    swgDeviceSettings->setDirection(1); // single Tx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("RemoteOutput"));
 

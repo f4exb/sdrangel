@@ -849,7 +849,7 @@ void SDRPlayInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respon
 void SDRPlayInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SDRPlaySettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("SDRplay1"));
     swgDeviceSettings->setSdrPlaySettings(new SWGSDRangel::SWGSDRPlaySettings());
@@ -927,7 +927,7 @@ void SDRPlayInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
 void SDRPlayInput::webapiReverseSendStartStop(bool start)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("SDRplay1"));
 

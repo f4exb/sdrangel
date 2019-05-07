@@ -1391,10 +1391,10 @@ void WebAPIRequestMapper::devicesetChannelService(
                 SWGSDRangel::SWGSuccessResponse normalResponse;
                 resetChannelSettings(query);
 
-                if (jsonObject.contains("tx")) {
-                    query.setTx(jsonObject["tx"].toInt());
+                if (jsonObject.contains("direction")) {
+                    query.setDirection(jsonObject["direction"].toInt());
                 } else {
-                    query.setTx(0); // assume Rx
+                    query.setDirection(0); // assume Rx
                 }
 
                 if (jsonObject.contains("channelType") && jsonObject["channelType"].isString())
@@ -1686,10 +1686,10 @@ bool WebAPIRequestMapper::validatePresetExport(SWGSDRangel::SWGPresetExport& pre
 
 bool WebAPIRequestMapper::validateDeviceListItem(SWGSDRangel::SWGDeviceListItem& deviceListItem, QJsonObject& jsonObject)
 {
-    if (jsonObject.contains("tx")) {
-        deviceListItem.setTx(jsonObject["tx"].toInt());
+    if (jsonObject.contains("direction")) {
+        deviceListItem.setDirection(jsonObject["direction"].toInt());
     } else {
-        deviceListItem.setTx(0); // assume Rx
+        deviceListItem.setDirection(0); // assume Rx
     }
 
     bool identified = false;
@@ -1745,10 +1745,10 @@ bool WebAPIRequestMapper::validateDeviceSettings(
         QJsonObject& jsonObject,
         QStringList& deviceSettingsKeys)
 {
-    if (jsonObject.contains("tx")) {
-        deviceSettings.setTx(jsonObject["tx"].toInt());
+    if (jsonObject.contains("direction")) {
+        deviceSettings.setDirection(jsonObject["direction"].toInt());
     } else {
-        deviceSettings.setTx(0); // assume Rx
+        deviceSettings.setDirection(0); // assume single Rx
     }
 
     if (jsonObject.contains("deviceHwType") && jsonObject["deviceHwType"].isString()) {
@@ -1759,7 +1759,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
 
     QString *deviceHwType = deviceSettings.getDeviceHwType();
 
-    if ((*deviceHwType == "Airspy") && (deviceSettings.getTx() == 0))
+    if ((*deviceHwType == "Airspy") && (deviceSettings.getDirection() == 0))
     {
         if (jsonObject.contains("airspySettings") && jsonObject["airspySettings"].isObject())
         {
@@ -1774,7 +1774,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "AirspyHF") && (deviceSettings.getTx() == 0))
+    else if ((*deviceHwType == "AirspyHF") && (deviceSettings.getDirection() == 0))
     {
         if (jsonObject.contains("airspyHFSettings") && jsonObject["airspyHFSettings"].isObject())
         {
@@ -1789,7 +1789,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "BladeRF1") && (deviceSettings.getTx() == 0))
+    else if ((*deviceHwType == "BladeRF1") && (deviceSettings.getDirection() == 0))
     {
         if (jsonObject.contains("bladeRF1InputSettings") && jsonObject["bladeRF1InputSettings"].isObject())
         {
@@ -1804,7 +1804,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "BladeRF1") && (deviceSettings.getTx() != 0))
+    else if ((*deviceHwType == "BladeRF1") && (deviceSettings.getDirection() == 1))
     {
         if (jsonObject.contains("bladeRF1OutputSettings") && jsonObject["bladeRF1OutputSettings"].isObject())
         {
@@ -1819,7 +1819,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "BladeRF2") && (deviceSettings.getTx() == 0))
+    else if ((*deviceHwType == "BladeRF2") && (deviceSettings.getDirection() == 0))
     {
         if (jsonObject.contains("bladeRF2InputSettings") && jsonObject["bladeRF2InputSettings"].isObject())
         {
@@ -1834,7 +1834,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "BladeRF2") && (deviceSettings.getTx() != 0))
+    else if ((*deviceHwType == "BladeRF2") && (deviceSettings.getDirection() == 1))
     {
         if (jsonObject.contains("bladeRF2OutputSettings") && jsonObject["bladeRF2OutputSettings"].isObject())
         {
@@ -1894,7 +1894,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "HackRF") && (deviceSettings.getTx() == 0))
+    else if ((*deviceHwType == "HackRF") && (deviceSettings.getDirection() == 0))
     {
         if (jsonObject.contains("hackRFInputSettings") && jsonObject["hackRFInputSettings"].isObject())
         {
@@ -1909,7 +1909,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "HackRF") && (deviceSettings.getTx() != 0))
+    else if ((*deviceHwType == "HackRF") && (deviceSettings.getDirection() == 1))
     {
         if (jsonObject.contains("hackRFOutputSettings") && jsonObject["hackRFOutputSettings"].isObject())
         {
@@ -1924,7 +1924,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "LimeSDR") && (deviceSettings.getTx() == 0))
+    else if ((*deviceHwType == "LimeSDR") && (deviceSettings.getDirection() == 0))
     {
         if (jsonObject.contains("limeSdrInputSettings") && jsonObject["limeSdrInputSettings"].isObject())
         {
@@ -1939,7 +1939,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "LimeSDR") && (deviceSettings.getTx() != 0))
+    else if ((*deviceHwType == "LimeSDR") && (deviceSettings.getDirection() == 1))
     {
         if (jsonObject.contains("limeSdrOutputSettings") && jsonObject["limeSdrOutputSettings"].isObject())
         {
@@ -1969,7 +1969,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "PlutoSDR") && (deviceSettings.getTx() == 0))
+    else if ((*deviceHwType == "PlutoSDR") && (deviceSettings.getDirection() == 0))
     {
         if (jsonObject.contains("plutoSdrInputSettings") && jsonObject["plutoSdrInputSettings"].isObject())
         {
@@ -1984,7 +1984,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "PlutoSDR") && (deviceSettings.getTx() != 0))
+    else if ((*deviceHwType == "PlutoSDR") && (deviceSettings.getDirection() == 1))
     {
         if (jsonObject.contains("plutoSdrOutputSettings") && jsonObject["plutoSdrOutputSettings"].isObject())
         {
@@ -2029,7 +2029,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "SoapySDR")  && (deviceSettings.getTx() == 0))
+    else if ((*deviceHwType == "SoapySDR")  && (deviceSettings.getDirection() == 0))
     {
         if (jsonObject.contains("soapySDRInputSettings") && jsonObject["soapySDRInputSettings"].isObject())
         {
@@ -2045,7 +2045,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "SoapySDR")  && (deviceSettings.getTx() != 0))
+    else if ((*deviceHwType == "SoapySDR")  && (deviceSettings.getDirection() == 1))
     {
         if (jsonObject.contains("soapySDROutputSettings") && jsonObject["soapySDROutputSettings"].isObject())
         {
@@ -2076,7 +2076,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "XTRX") && (deviceSettings.getTx() == 0))
+    else if ((*deviceHwType == "XTRX") && (deviceSettings.getDirection() == 0))
     {
         if (jsonObject.contains("xtrxInputSettings") && jsonObject["xtrxInputSettings"].isObject())
         {
@@ -2091,7 +2091,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "XTRX") && (deviceSettings.getTx() != 0))
+    else if ((*deviceHwType == "XTRX") && (deviceSettings.getDirection() == 1))
     {
         if (jsonObject.contains("xtrxOutputSettings") && jsonObject["xtrxOutputSettings"].isObject())
         {
@@ -2106,7 +2106,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "RemoteInput") && (deviceSettings.getTx() == 0))
+    else if ((*deviceHwType == "RemoteInput") && (deviceSettings.getDirection() == 0))
     {
         if (jsonObject.contains("remoteInputSettings") && jsonObject["remoteInputSettings"].isObject())
         {
@@ -2121,7 +2121,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "LocalInput") && (deviceSettings.getTx() == 0))
+    else if ((*deviceHwType == "LocalInput") && (deviceSettings.getDirection() == 0))
     {
         if (jsonObject.contains("localInputSettings") && jsonObject["localInputSettings"].isObject())
         {
@@ -2136,7 +2136,7 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if ((*deviceHwType == "RemoteOutput") && (deviceSettings.getTx() != 0))
+    else if ((*deviceHwType == "RemoteOutput") && (deviceSettings.getDirection() == 1))
     {
         if (jsonObject.contains("remoteOutputSettings") && jsonObject["remoteOutputSettings"].isObject())
         {
@@ -2162,10 +2162,10 @@ bool WebAPIRequestMapper::validateChannelSettings(
         QJsonObject& jsonObject,
         QStringList& channelSettingsKeys)
 {
-    if (jsonObject.contains("tx")) {
-        channelSettings.setTx(jsonObject["tx"].toInt());
+    if (jsonObject.contains("direction")) {
+        channelSettings.setDirection(jsonObject["direction"].toInt());
     } else {
-        channelSettings.setTx(0); // assume Rx
+        channelSettings.setDirection(0); // assume single Rx
     }
 
     if (jsonObject.contains("channelType") && jsonObject["channelType"].isString()) {
@@ -2178,7 +2178,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
 
     if (*channelType == "AMDemod")
     {
-        if (channelSettings.getTx() == 0)
+        if (channelSettings.getDirection() == 0)
         {
             QJsonObject amDemodSettingsJsonObject = jsonObject["AMDemodSettings"].toObject();
             channelSettingsKeys = amDemodSettingsJsonObject.keys();
@@ -2192,7 +2192,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "AMMod")
     {
-        if (channelSettings.getTx() != 0)
+        if (channelSettings.getDirection() == 1)
         {
             QJsonObject amModSettingsJsonObject = jsonObject["AMModSettings"].toObject();
             channelSettingsKeys = amModSettingsJsonObject.keys();
@@ -2213,7 +2213,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "ATVMod")
     {
-        if (channelSettings.getTx() != 0)
+        if (channelSettings.getDirection() == 1)
         {
             QJsonObject atvModSettingsJsonObject = jsonObject["ATVModSettings"].toObject();
             channelSettingsKeys = atvModSettingsJsonObject.keys();
@@ -2227,7 +2227,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "BFMDemod")
     {
-        if (channelSettings.getTx() == 0)
+        if (channelSettings.getDirection() == 0)
         {
             QJsonObject bfmDemodSettingsJsonObject = jsonObject["BFMDemodSettings"].toObject();
             channelSettingsKeys = bfmDemodSettingsJsonObject.keys();
@@ -2241,7 +2241,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "DSDDemod")
     {
-        if (channelSettings.getTx() == 0)
+        if (channelSettings.getDirection() == 0)
         {
             QJsonObject dsdDemodSettingsJsonObject = jsonObject["DSDDemodSettings"].toObject();
             channelSettingsKeys = dsdDemodSettingsJsonObject.keys();
@@ -2255,7 +2255,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "FreeDVDemod")
     {
-        if (channelSettings.getTx() == 0)
+        if (channelSettings.getDirection() == 0)
         {
             QJsonObject freeDVDemodSettingsJsonObject = jsonObject["FreeDVDemodSettings"].toObject();
             channelSettingsKeys = freeDVDemodSettingsJsonObject.keys();
@@ -2269,7 +2269,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "FreeDVMod")
     {
-        if (channelSettings.getTx() != 0)
+        if (channelSettings.getDirection() == 1)
         {
             QJsonObject freeDVModSettingsJsonObject = jsonObject["FreeDVModSettings"].toObject();
             channelSettingsKeys = freeDVModSettingsJsonObject.keys();
@@ -2283,7 +2283,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "NFMDemod")
     {
-        if (channelSettings.getTx() == 0)
+        if (channelSettings.getDirection() == 0)
         {
             QJsonObject nfmDemodSettingsJsonObject = jsonObject["NFMDemodSettings"].toObject();
             channelSettingsKeys = nfmDemodSettingsJsonObject.keys();
@@ -2297,7 +2297,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "NFMMod")
     {
-        if (channelSettings.getTx() != 0)
+        if (channelSettings.getDirection() == 1)
         {
             QJsonObject nfmModSettingsJsonObject = jsonObject["NFMModSettings"].toObject();
             channelSettingsKeys = nfmModSettingsJsonObject.keys();
@@ -2318,7 +2318,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "LocalSink")
     {
-        if (channelSettings.getTx() == 0)
+        if (channelSettings.getDirection() == 0)
         {
             QJsonObject localChannelSinkSettingsJsonObject = jsonObject["LocalSinkSettings"].toObject();
             channelSettingsKeys = localChannelSinkSettingsJsonObject.keys();
@@ -2332,7 +2332,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "RemoteSink")
     {
-        if (channelSettings.getTx() == 0)
+        if (channelSettings.getDirection() == 0)
         {
             QJsonObject remoteChannelSinkSettingsJsonObject = jsonObject["RemoteSinkSettings"].toObject();
             channelSettingsKeys = remoteChannelSinkSettingsJsonObject.keys();
@@ -2346,7 +2346,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "RemoteSource")
     {
-        if (channelSettings.getTx() != 0)
+        if (channelSettings.getDirection() == 1)
         {
             QJsonObject remoteChannelSourceSettingsJsonObject = jsonObject["RemoteSourceSettings"].toObject();
             channelSettingsKeys = remoteChannelSourceSettingsJsonObject.keys();
@@ -2360,7 +2360,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "SSBDemod")
     {
-        if (channelSettings.getTx() == 0)
+        if (channelSettings.getDirection() == 0)
         {
             QJsonObject ssbDemodSettingsJsonObject = jsonObject["SSBDemodSettings"].toObject();
             channelSettingsKeys = ssbDemodSettingsJsonObject.keys();
@@ -2374,7 +2374,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "SSBMod")
     {
-        if (channelSettings.getTx() != 0)
+        if (channelSettings.getDirection() == 1)
         {
             QJsonObject ssbModSettingsJsonObject = jsonObject["SSBModSettings"].toObject();
             channelSettingsKeys = ssbModSettingsJsonObject.keys();
@@ -2395,7 +2395,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "UDPSource")
     {
-        if (channelSettings.getTx() != 0)
+        if (channelSettings.getDirection() == 1)
         {
             QJsonObject udpSourceSettingsJsonObject = jsonObject["UDPSourceSettings"].toObject();
             channelSettingsKeys = udpSourceSettingsJsonObject.keys();
@@ -2409,7 +2409,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "UDPSink")
     {
-        if (channelSettings.getTx() == 0)
+        if (channelSettings.getDirection() == 0)
         {
             QJsonObject udpSinkSettingsJsonObject = jsonObject["UDPSinkSettings"].toObject();
             channelSettingsKeys = udpSinkSettingsJsonObject.keys();
@@ -2423,7 +2423,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "WFMDemod")
     {
-        if (channelSettings.getTx() == 0)
+        if (channelSettings.getDirection() == 0)
         {
             QJsonObject wfmDemodSettingsJsonObject = jsonObject["WFMDemodSettings"].toObject();
             channelSettingsKeys = wfmDemodSettingsJsonObject.keys();
@@ -2437,7 +2437,7 @@ bool WebAPIRequestMapper::validateChannelSettings(
     }
     else if (*channelType == "WFMMod")
     {
-        if (channelSettings.getTx() != 0)
+        if (channelSettings.getDirection() == 1)
         {
             QJsonObject wfmModSettingsJsonObject = jsonObject["WFMModSettings"].toObject();
             channelSettingsKeys = wfmModSettingsJsonObject.keys();

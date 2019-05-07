@@ -613,7 +613,7 @@ void PerseusInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respon
 void PerseusInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const PerseusSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("Perseus"));
     swgDeviceSettings->setPerseusSettings(new SWGSDRangel::SWGPerseusSettings());
@@ -676,7 +676,7 @@ void PerseusInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
 void PerseusInput::webapiReverseSendStartStop(bool start)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("Perseus"));
 

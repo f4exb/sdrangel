@@ -673,7 +673,7 @@ int HackRFOutput::webapiRun(
 void HackRFOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const HackRFOutputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(1);
+    swgDeviceSettings->setDirection(1); // single Tx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("HackRF"));
     swgDeviceSettings->setHackRfOutputSettings(new SWGSDRangel::SWGHackRFOutputSettings());
@@ -730,7 +730,7 @@ void HackRFOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
 void HackRFOutput::webapiReverseSendStartStop(bool start)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(1);
+    swgDeviceSettings->setDirection(1); // single Tx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("HackRF"));
 

@@ -820,7 +820,7 @@ int AirspyHFInput::webapiRun(
 void AirspyHFInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const AirspyHFSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("AirspyHF"));
     swgDeviceSettings->setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
@@ -895,7 +895,7 @@ void AirspyHFInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
 void AirspyHFInput::webapiReverseSendStartStop(bool start)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("AirspyHF"));
 

@@ -1822,7 +1822,7 @@ void SoapySDROutput::webapiFormatArgInfo(const SoapySDR::ArgInfo& arg, SWGSDRang
 void SoapySDROutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SoapySDROutputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(1);
+    swgDeviceSettings->setDirection(1); // Single Tx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("SoapySDR"));
     swgDeviceSettings->setSoapySdrOutputSettings(new SWGSDRangel::SWGSoapySDROutputSettings());
@@ -1901,7 +1901,7 @@ void SoapySDROutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKey
 void SoapySDROutput::webapiReverseSendStartStop(bool start)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(1);
+    swgDeviceSettings->setDirection(1); // Single Tx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("SoapySDR"));
 

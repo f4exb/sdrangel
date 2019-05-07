@@ -1045,7 +1045,7 @@ void FreeDVMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
 void FreeDVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreeDVModSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
-    swgChannelSettings->setTx(1);
+    swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("FreeDVMod"));
@@ -1125,7 +1125,7 @@ void FreeDVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
 void FreeDVMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
-    swgChannelSettings->setTx(1);
+    swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setChannelType(new QString("FreeDVMod"));
     swgChannelSettings->setFreeDvModSettings(new SWGSDRangel::SWGFreeDVModSettings());
     SWGSDRangel::SWGFreeDVModSettings *swgFreeDVModSettings = swgChannelSettings->getFreeDvModSettings();

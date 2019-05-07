@@ -1444,7 +1444,7 @@ void LimeSDROutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
 void LimeSDROutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const LimeSDROutputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(1);
+    swgDeviceSettings->setDirection(1); // single Tx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("LimeSDR"));
     swgDeviceSettings->setLimeSdrOutputSettings(new SWGSDRangel::SWGLimeSdrOutputSettings());
@@ -1525,7 +1525,7 @@ void LimeSDROutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
 void LimeSDROutput::webapiReverseSendStartStop(bool start)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(1);
+    swgDeviceSettings->setDirection(1); // single Tx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("LimeSDR"));
 

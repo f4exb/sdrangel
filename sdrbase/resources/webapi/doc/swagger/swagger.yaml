@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.7.0"
+  version: "4.7.1"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -83,9 +83,9 @@ paths:
       tags:
         - Instance
       parameters:
-        - name: tx
+        - name: direction
           in: query
-          description: Set to non zero (true) for Tx direction (default Rx)
+          description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
           required: false
           type: integer
       responses:
@@ -106,9 +106,9 @@ paths:
       tags:
         - Instance
       parameters:
-        - name: tx
+        - name: direction
           in: query
-          description: Set to non zero (true) for Tx channels (default Rx)
+          description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
           required: false
           type: integer
       responses:
@@ -648,9 +648,9 @@ paths:
       tags:
         - DeviceSet
       parameters:
-        - name: tx
+        - name: direction
           in: query
-          description: Set to non zero (true) for a Tx device set (default Rx)
+          description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
           required: false
           type: integer
       responses:
@@ -754,7 +754,7 @@ paths:
           description: Index of device set in the device set list
         - name: body
           in: body
-          description: Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
+          description: Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
           required: true
           schema:
             $ref: "#/definitions/DeviceListItem"
@@ -1368,8 +1368,8 @@ definitions:
       sequence:
         description: "Sequence in the enumeration of same device types"
         type: integer
-      tx:
-        description: "Set to not zero (true) if this is a Tx device"
+      direction:
+        description: "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
         type: integer
       nbStreams:
         description: "Number of channels or streams in the device"
@@ -1398,8 +1398,8 @@ definitions:
       id:
         description: "Key to identify the channel plugin type as short object name"
         type: string
-      tx:
-        description: "Not zero (true) if this is a Tx channel"
+      direction:
+        description: "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
         type: integer
       version:
         description: "Channel plugin version number"
@@ -1467,8 +1467,8 @@ definitions:
       hwType:
         description: "Key to identify the type of hardware device"
         type: string
-      tx:
-        description: "Not zero (true) if this is a Tx device"
+      direction:
+        description: "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
         type: integer
       nbStreams:
         description: "Number of channels or streams in the device"
@@ -1769,13 +1769,13 @@ definitions:
     discriminator: deviceHwType
     required:
       - deviceHwType
-      - tx
+      - direction
     properties:
       deviceHwType:
         description: Device hardware type code
         type: string
-      tx:
-        description: Not zero if it is a tx device else it is a rx device
+      direction:
+        description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         type: integer
       originatorIndex:
         description: Optional for reverse API. This is the device set index from where the message comes from.
@@ -1839,13 +1839,13 @@ definitions:
     discriminator: deviceHwType
     required:
       - deviceHwType
-      - tx
+      - direction
     properties:
       deviceHwType:
         description: Device hardware type code
         type: string
-      tx:
-        description: Not zero if it is a tx device else it is a rx device
+      direction:
+        description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         type: integer
       airspyReport:
         $ref: "/doc/swagger/include/Airspy.yaml#/AirspyReport"
@@ -1891,13 +1891,13 @@ definitions:
     discriminator: channelType
     required:
       - channelType
-      - tx
+      - direction
     properties:
       channelType:
         description: Channel type code
         type: string
-      tx:
-        description: Not zero if it is a tx channel else it is a rx channel
+      direction:
+        description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         type: integer
       originatorDeviceSetIndex:
         description: Optional for reverse API. This is the device set index from where the message comes from.
@@ -1951,8 +1951,8 @@ definitions:
       channelType:
         description: Channel type code
         type: string
-      tx:
-        description: Not zero if it is a tx channel else it is a rx channel
+      direction:
+        description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         type: integer
       AMDemodReport:
         $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodReport"

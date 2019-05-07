@@ -838,7 +838,7 @@ void NFMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 void NFMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NFMModSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
-    swgChannelSettings->setTx(1);
+    swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("NFMMod"));
@@ -924,7 +924,7 @@ void NFMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
 void NFMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
-    swgChannelSettings->setTx(1);
+    swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setChannelType(new QString("AMMod"));
     swgChannelSettings->setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
     SWGSDRangel::SWGNFMModSettings *swgNFModSettings = swgChannelSettings->getNfmModSettings();

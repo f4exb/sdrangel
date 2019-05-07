@@ -1502,7 +1502,7 @@ void ATVMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 void ATVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ATVModSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
-    swgChannelSettings->setTx(1);
+    swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("ATVMod"));

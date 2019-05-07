@@ -1717,9 +1717,9 @@ margin-bottom: 20px;
       "type" : "string",
       "description" : "Key to identify the channel plugin type as short object name"
     },
-    "tx" : {
+    "direction" : {
       "type" : "integer",
-      "description" : "Not zero (true) if this is a Tx channel"
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
     },
     "version" : {
       "type" : "string",
@@ -1739,9 +1739,9 @@ margin-bottom: 20px;
       "type" : "string",
       "description" : "Channel type code"
     },
-    "tx" : {
+    "direction" : {
       "type" : "integer",
-      "description" : "Not zero if it is a tx channel else it is a rx channel"
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
     },
     "AMDemodReport" : {
       "$ref" : "#/definitions/AMDemodReport"
@@ -1798,16 +1798,16 @@ margin-bottom: 20px;
   "description" : "Base channel report. Only the channel report corresponding to the channel specified in the channelType field is or should be present."
 };
             defs.ChannelSettings = {
-  "required" : [ "channelType", "tx" ],
+  "required" : [ "channelType", "direction" ],
   "discriminator" : "channelType",
   "properties" : {
     "channelType" : {
       "type" : "string",
       "description" : "Channel type code"
     },
-    "tx" : {
+    "direction" : {
       "type" : "integer",
-      "description" : "Not zero if it is a tx channel else it is a rx channel"
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
     },
     "originatorDeviceSetIndex" : {
       "type" : "integer",
@@ -2103,9 +2103,9 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Sequence in the enumeration of same device types"
     },
-    "tx" : {
+    "direction" : {
       "type" : "integer",
-      "description" : "Set to not zero (true) if this is a Tx device"
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
     },
     "nbStreams" : {
       "type" : "integer",
@@ -2127,16 +2127,16 @@ margin-bottom: 20px;
   "description" : "Summarized information about attached hardware device"
 };
             defs.DeviceReport = {
-  "required" : [ "deviceHwType", "tx" ],
+  "required" : [ "deviceHwType", "direction" ],
   "discriminator" : "deviceHwType",
   "properties" : {
     "deviceHwType" : {
       "type" : "string",
       "description" : "Device hardware type code"
     },
-    "tx" : {
+    "direction" : {
       "type" : "integer",
-      "description" : "Not zero if it is a tx device else it is a rx device"
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
     },
     "airspyReport" : {
       "$ref" : "#/definitions/AirspyReport"
@@ -2239,16 +2239,16 @@ margin-bottom: 20px;
   "description" : "List of device sets opened in this instance"
 };
             defs.DeviceSettings = {
-  "required" : [ "deviceHwType", "tx" ],
+  "required" : [ "deviceHwType", "direction" ],
   "discriminator" : "deviceHwType",
   "properties" : {
     "deviceHwType" : {
       "type" : "string",
       "description" : "Device hardware type code"
     },
-    "tx" : {
+    "direction" : {
       "type" : "integer",
-      "description" : "Not zero if it is a tx device else it is a rx device"
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
     },
     "originatorIndex" : {
       "type" : "integer",
@@ -4789,9 +4789,9 @@ margin-bottom: 20px;
       "type" : "string",
       "description" : "Key to identify the type of hardware device"
     },
-    "tx" : {
+    "direction" : {
       "type" : "integer",
-      "description" : "Not zero (true) if this is a Tx device"
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
     },
     "nbStreams" : {
       "type" : "integer",
@@ -5950,7 +5950,7 @@ margin-bottom: 20px;
         <div id="header">
           <div id="api-_">
             <h2 id="welcome-to-apidoc">API and SDK Documentation</h2>
-              <div class="app-desc">Version: 4.7.0</div>
+              <div class="app-desc">Version: 4.7.1</div>
             <hr>
             <div><p>This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube</p>
 <hr />
@@ -9567,7 +9567,7 @@ public class DeviceSetApiExample {
         
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
-        DeviceListItem body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
+        DeviceListItem body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
         try {
             DeviceListItem result = apiInstance.devicesetDevicePut(deviceSetIndex, body);
             System.out.println(result);
@@ -9587,7 +9587,7 @@ public class DeviceSetApiExample {
     public static void main(String[] args) {
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
-        DeviceListItem body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
+        DeviceListItem body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
         try {
             DeviceListItem result = apiInstance.devicesetDevicePut(deviceSetIndex, body);
             System.out.println(result);
@@ -9604,7 +9604,7 @@ public class DeviceSetApiExample {
   </div> -->
                             <div class="tab-pane" id="examples-DeviceSet-devicesetDevicePut-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
-DeviceListItem *body = ; // Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
+DeviceListItem *body = ; // Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
 
 DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
 
@@ -9628,7 +9628,7 @@ var api = new SdRangel.DeviceSetApi()
 
 var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
 
-var body = ; // {DeviceListItem} Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
+var body = ; // {DeviceListItem} Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
 
 
 var callback = function(error, data, response) {
@@ -9661,7 +9661,7 @@ namespace Example
             
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
-            var body = new DeviceListItem(); // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
+            var body = new DeviceListItem(); // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
 
             try
             {
@@ -9684,7 +9684,7 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\DeviceSetApi();
 $deviceSetIndex = 56; // Integer | Index of device set in the device set list
-$body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
+$body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
 
 try {
     $result = $api_instance->devicesetDevicePut($deviceSetIndex, $body);
@@ -9702,7 +9702,7 @@ use SWGSDRangel::DeviceSetApi;
 
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
-my $body = SWGSDRangel::Object::DeviceListItem->new(); # DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
+my $body = SWGSDRangel::Object::DeviceListItem->new(); # DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
 
 eval { 
     my $result = $api_instance->devicesetDevicePut(deviceSetIndex => $deviceSetIndex, body => $body);
@@ -9723,7 +9723,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
-body =  # DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.
+body =  # DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.
 
 try: 
     api_response = api_instance.deviceset_device_put(deviceSetIndex, body)
@@ -9782,7 +9782,7 @@ $(document).ready(function() {
   var schemaWrapper = {
   "in" : "body",
   "name" : "body",
-  "description" : "Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if tx is not specified.",
+  "description" : "Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and nbStreams are ignored. Rx is assumed if Tx is not specified.",
   "required" : true,
   "schema" : {
     "$ref" : "#/definitions/DeviceListItem"
@@ -14628,7 +14628,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-DeviceSet-instanceDeviceSetPost-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/deviceset?tx="</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/deviceset?direction="</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-DeviceSet-instanceDeviceSetPost-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -14644,9 +14644,9 @@ public class DeviceSetApiExample {
     public static void main(String[] args) {
         
         DeviceSetApi apiInstance = new DeviceSetApi();
-        Integer tx = 56; // Integer | Set to non zero (true) for a Tx device set (default Rx)
+        Integer direction = 56; // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         try {
-            SuccessResponse result = apiInstance.instanceDeviceSetPost(tx);
+            SuccessResponse result = apiInstance.instanceDeviceSetPost(direction);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DeviceSetApi#instanceDeviceSetPost");
@@ -14663,9 +14663,9 @@ public class DeviceSetApiExample {
 
     public static void main(String[] args) {
         DeviceSetApi apiInstance = new DeviceSetApi();
-        Integer tx = 56; // Integer | Set to non zero (true) for a Tx device set (default Rx)
+        Integer direction = 56; // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         try {
-            SuccessResponse result = apiInstance.instanceDeviceSetPost(tx);
+            SuccessResponse result = apiInstance.instanceDeviceSetPost(direction);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DeviceSetApi#instanceDeviceSetPost");
@@ -14679,11 +14679,11 @@ public class DeviceSetApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-DeviceSet-instanceDeviceSetPost-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *tx = 56; // Set to non zero (true) for a Tx device set (default Rx) (optional)
+                              <pre class="prettyprint"><code class="language-cpp">Integer *direction = 56; // 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
 
 DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
 
-[apiInstance instanceDeviceSetPostWith:tx
+[apiInstance instanceDeviceSetPostWith:direction
               completionHandler: ^(SuccessResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -14701,7 +14701,7 @@ DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
 var api = new SdRangel.DeviceSetApi()
 
 var opts = { 
-  'tx': 56 // {Integer} Set to non zero (true) for a Tx device set (default Rx)
+  'direction': 56 // {Integer} 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 };
 
 var callback = function(error, data, response) {
@@ -14733,11 +14733,11 @@ namespace Example
         {
             
             var apiInstance = new DeviceSetApi();
-            var tx = 56;  // Integer | Set to non zero (true) for a Tx device set (default Rx) (optional) 
+            var direction = 56;  // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional) 
 
             try
             {
-                SuccessResponse result = apiInstance.instanceDeviceSetPost(tx);
+                SuccessResponse result = apiInstance.instanceDeviceSetPost(direction);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -14755,10 +14755,10 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\DeviceSetApi();
-$tx = 56; // Integer | Set to non zero (true) for a Tx device set (default Rx)
+$direction = 56; // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 
 try {
-    $result = $api_instance->instanceDeviceSetPost($tx);
+    $result = $api_instance->instanceDeviceSetPost($direction);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling DeviceSetApi->instanceDeviceSetPost: ', $e->getMessage(), PHP_EOL;
@@ -14772,10 +14772,10 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::DeviceSetApi;
 
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
-my $tx = 56; # Integer | Set to non zero (true) for a Tx device set (default Rx)
+my $direction = 56; # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 
 eval { 
-    my $result = $api_instance->instanceDeviceSetPost(tx => $tx);
+    my $result = $api_instance->instanceDeviceSetPost(direction => $direction);
     print Dumper($result);
 };
 if ($@) {
@@ -14792,10 +14792,10 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.DeviceSetApi()
-tx = 56 # Integer | Set to non zero (true) for a Tx device set (default Rx) (optional)
+direction = 56 # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
 
 try: 
-    api_response = api_instance.instance_device_set_post(tx=tx)
+    api_response = api_instance.instance_device_set_post(direction=direction)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DeviceSetApi->instanceDeviceSetPost: %s\n" % e)</code></pre>
@@ -14814,11 +14814,11 @@ except ApiException as e:
                                 <th width="150px">Name</th>
                                 <th>Description</th>
                               </tr>
-                                <tr><td style="width:150px;">tx</td>
+                                <tr><td style="width:150px;">direction</td>
 <td>
 
 
-    <div id="d2e199_instanceDeviceSetPost_tx">
+    <div id="d2e199_instanceDeviceSetPost_direction">
         <div class="json-schema-view">
             <div class="primitive">
                 <span class="type">
@@ -14826,7 +14826,7 @@ except ApiException as e:
                 </span>
 
                     <div class="inner description">
-                        Set to non zero (true) for a Tx device set (default Rx)
+                        0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
                     </div>
             </div>
         </div>
@@ -17729,7 +17729,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instanceChannels-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/channels?tx="</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/channels?direction="</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instanceChannels-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -17745,9 +17745,9 @@ public class InstanceApiExample {
     public static void main(String[] args) {
         
         InstanceApi apiInstance = new InstanceApi();
-        Integer tx = 56; // Integer | Set to non zero (true) for Tx channels (default Rx)
+        Integer direction = 56; // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         try {
-            InstanceChannelsResponse result = apiInstance.instanceChannels(tx);
+            InstanceChannelsResponse result = apiInstance.instanceChannels(direction);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling InstanceApi#instanceChannels");
@@ -17764,9 +17764,9 @@ public class InstanceApiExample {
 
     public static void main(String[] args) {
         InstanceApi apiInstance = new InstanceApi();
-        Integer tx = 56; // Integer | Set to non zero (true) for Tx channels (default Rx)
+        Integer direction = 56; // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         try {
-            InstanceChannelsResponse result = apiInstance.instanceChannels(tx);
+            InstanceChannelsResponse result = apiInstance.instanceChannels(direction);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling InstanceApi#instanceChannels");
@@ -17780,11 +17780,11 @@ public class InstanceApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-Instance-instanceChannels-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *tx = 56; // Set to non zero (true) for Tx channels (default Rx) (optional)
+                              <pre class="prettyprint"><code class="language-cpp">Integer *direction = 56; // 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
 
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceChannelsWith:tx
+[apiInstance instanceChannelsWith:direction
               completionHandler: ^(InstanceChannelsResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -17802,7 +17802,7 @@ InstanceApi *apiInstance = [[InstanceApi alloc] init];
 var api = new SdRangel.InstanceApi()
 
 var opts = { 
-  'tx': 56 // {Integer} Set to non zero (true) for Tx channels (default Rx)
+  'direction': 56 // {Integer} 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 };
 
 var callback = function(error, data, response) {
@@ -17834,11 +17834,11 @@ namespace Example
         {
             
             var apiInstance = new InstanceApi();
-            var tx = 56;  // Integer | Set to non zero (true) for Tx channels (default Rx) (optional) 
+            var direction = 56;  // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional) 
 
             try
             {
-                InstanceChannelsResponse result = apiInstance.instanceChannels(tx);
+                InstanceChannelsResponse result = apiInstance.instanceChannels(direction);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -17856,10 +17856,10 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\InstanceApi();
-$tx = 56; // Integer | Set to non zero (true) for Tx channels (default Rx)
+$direction = 56; // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 
 try {
-    $result = $api_instance->instanceChannels($tx);
+    $result = $api_instance->instanceChannels($direction);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling InstanceApi->instanceChannels: ', $e->getMessage(), PHP_EOL;
@@ -17873,10 +17873,10 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
-my $tx = 56; # Integer | Set to non zero (true) for Tx channels (default Rx)
+my $direction = 56; # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 
 eval { 
-    my $result = $api_instance->instanceChannels(tx => $tx);
+    my $result = $api_instance->instanceChannels(direction => $direction);
     print Dumper($result);
 };
 if ($@) {
@@ -17893,10 +17893,10 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
-tx = 56 # Integer | Set to non zero (true) for Tx channels (default Rx) (optional)
+direction = 56 # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
 
 try: 
-    api_response = api_instance.instance_channels(tx=tx)
+    api_response = api_instance.instance_channels(direction=direction)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling InstanceApi->instanceChannels: %s\n" % e)</code></pre>
@@ -17915,11 +17915,11 @@ except ApiException as e:
                                 <th width="150px">Name</th>
                                 <th>Description</th>
                               </tr>
-                                <tr><td style="width:150px;">tx</td>
+                                <tr><td style="width:150px;">direction</td>
 <td>
 
 
-    <div id="d2e199_instanceChannels_tx">
+    <div id="d2e199_instanceChannels_direction">
         <div class="json-schema-view">
             <div class="primitive">
                 <span class="type">
@@ -17927,7 +17927,7 @@ except ApiException as e:
                 </span>
 
                     <div class="inner description">
-                        Set to non zero (true) for Tx channels (default Rx)
+                        0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
                     </div>
             </div>
         </div>
@@ -19523,7 +19523,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Instance-instanceDevices-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/devices?tx="</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/devices?direction="</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Instance-instanceDevices-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -19539,9 +19539,9 @@ public class InstanceApiExample {
     public static void main(String[] args) {
         
         InstanceApi apiInstance = new InstanceApi();
-        Integer tx = 56; // Integer | Set to non zero (true) for Tx direction (default Rx)
+        Integer direction = 56; // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         try {
-            InstanceDevicesResponse result = apiInstance.instanceDevices(tx);
+            InstanceDevicesResponse result = apiInstance.instanceDevices(direction);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling InstanceApi#instanceDevices");
@@ -19558,9 +19558,9 @@ public class InstanceApiExample {
 
     public static void main(String[] args) {
         InstanceApi apiInstance = new InstanceApi();
-        Integer tx = 56; // Integer | Set to non zero (true) for Tx direction (default Rx)
+        Integer direction = 56; // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         try {
-            InstanceDevicesResponse result = apiInstance.instanceDevices(tx);
+            InstanceDevicesResponse result = apiInstance.instanceDevices(direction);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling InstanceApi#instanceDevices");
@@ -19574,11 +19574,11 @@ public class InstanceApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-Instance-instanceDevices-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *tx = 56; // Set to non zero (true) for Tx direction (default Rx) (optional)
+                              <pre class="prettyprint"><code class="language-cpp">Integer *direction = 56; // 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
 
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceDevicesWith:tx
+[apiInstance instanceDevicesWith:direction
               completionHandler: ^(InstanceDevicesResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -19596,7 +19596,7 @@ InstanceApi *apiInstance = [[InstanceApi alloc] init];
 var api = new SdRangel.InstanceApi()
 
 var opts = { 
-  'tx': 56 // {Integer} Set to non zero (true) for Tx direction (default Rx)
+  'direction': 56 // {Integer} 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 };
 
 var callback = function(error, data, response) {
@@ -19628,11 +19628,11 @@ namespace Example
         {
             
             var apiInstance = new InstanceApi();
-            var tx = 56;  // Integer | Set to non zero (true) for Tx direction (default Rx) (optional) 
+            var direction = 56;  // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional) 
 
             try
             {
-                InstanceDevicesResponse result = apiInstance.instanceDevices(tx);
+                InstanceDevicesResponse result = apiInstance.instanceDevices(direction);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -19650,10 +19650,10 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\InstanceApi();
-$tx = 56; // Integer | Set to non zero (true) for Tx direction (default Rx)
+$direction = 56; // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 
 try {
-    $result = $api_instance->instanceDevices($tx);
+    $result = $api_instance->instanceDevices($direction);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling InstanceApi->instanceDevices: ', $e->getMessage(), PHP_EOL;
@@ -19667,10 +19667,10 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
-my $tx = 56; # Integer | Set to non zero (true) for Tx direction (default Rx)
+my $direction = 56; # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 
 eval { 
-    my $result = $api_instance->instanceDevices(tx => $tx);
+    my $result = $api_instance->instanceDevices(direction => $direction);
     print Dumper($result);
 };
 if ($@) {
@@ -19687,10 +19687,10 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
-tx = 56 # Integer | Set to non zero (true) for Tx direction (default Rx) (optional)
+direction = 56 # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
 
 try: 
-    api_response = api_instance.instance_devices(tx=tx)
+    api_response = api_instance.instance_devices(direction=direction)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling InstanceApi->instanceDevices: %s\n" % e)</code></pre>
@@ -19709,11 +19709,11 @@ except ApiException as e:
                                 <th width="150px">Name</th>
                                 <th>Description</th>
                               </tr>
-                                <tr><td style="width:150px;">tx</td>
+                                <tr><td style="width:150px;">direction</td>
 <td>
 
 
-    <div id="d2e199_instanceDevices_tx">
+    <div id="d2e199_instanceDevices_direction">
         <div class="json-schema-view">
             <div class="primitive">
                 <span class="type">
@@ -19721,7 +19721,7 @@ except ApiException as e:
                 </span>
 
                     <div class="inner description">
-                        Set to non zero (true) for Tx direction (default Rx)
+                        0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
                     </div>
             </div>
         </div>
@@ -24924,7 +24924,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-05-05T23:39:03.203+02:00
+              Generated 2019-05-07T11:40:05.130+02:00
             </div>
           </div>
       </div>

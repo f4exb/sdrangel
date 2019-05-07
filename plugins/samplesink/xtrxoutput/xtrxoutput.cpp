@@ -1342,7 +1342,7 @@ void XTRXOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response
 void XTRXOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const XTRXOutputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(1);
+    swgDeviceSettings->setDirection(1); // Single Tx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("XTRX"));
     swgDeviceSettings->setXtrxOutputSettings(new SWGSDRangel::SWGXtrxOutputSettings());
@@ -1408,7 +1408,7 @@ void XTRXOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, c
 void XTRXOutput::webapiReverseSendStartStop(bool start)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(1);
+    swgDeviceSettings->setDirection(1); // Single Tx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("XTRX"));
 

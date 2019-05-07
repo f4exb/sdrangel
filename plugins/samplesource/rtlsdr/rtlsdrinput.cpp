@@ -762,7 +762,7 @@ void RTLSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respons
 void RTLSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RTLSDRSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setDeviceHwType(new QString("RTLSDR"));
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setRtlSdrSettings(new SWGSDRangel::SWGRtlSdrSettings());
@@ -840,7 +840,7 @@ void RTLSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
 void RTLSDRInput::webapiReverseSendStartStop(bool start)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setDeviceHwType(new QString("RTLSDR"));
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
 

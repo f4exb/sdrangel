@@ -402,7 +402,7 @@ void LocalInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response
 void LocalInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const LocalInputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("LocalInput"));
     swgDeviceSettings->setLocalInputSettings(new SWGSDRangel::SWGLocalInputSettings());
@@ -441,7 +441,7 @@ void LocalInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, c
 void LocalInput::webapiReverseSendStartStop(bool start)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("LocalInput"));
 

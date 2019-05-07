@@ -713,7 +713,7 @@ void FCDProPlusInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings&
 void FCDProPlusInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FCDProPlusSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("FCDPro+"));
     swgDeviceSettings->setFcdProPlusSettings(new SWGSDRangel::SWGFCDProPlusSettings());
@@ -791,7 +791,7 @@ void FCDProPlusInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKe
 void FCDProPlusInput::webapiReverseSendStartStop(bool start)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("FCDPro+"));
 

@@ -622,7 +622,7 @@ void TestSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings&
 void TestSourceInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const TestSourceSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("TestSource"));
     swgDeviceSettings->setTestSourceSettings(new SWGSDRangel::SWGTestSourceSettings());
@@ -705,7 +705,7 @@ void TestSourceInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKe
 void TestSourceInput::webapiReverseSendStartStop(bool start)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(0);
+    swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("TestSource"));
 

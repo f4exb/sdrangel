@@ -789,7 +789,7 @@ void PlutoSDROutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
 void PlutoSDROutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const PlutoSDROutputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(1);
+    swgDeviceSettings->setDirection(1); // single Tx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("PlutoSDR"));
     swgDeviceSettings->setPlutoSdrOutputSettings(new SWGSDRangel::SWGPlutoSdrOutputSettings());
@@ -858,7 +858,7 @@ void PlutoSDROutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKey
 void PlutoSDROutput::webapiReverseSendStartStop(bool start)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
-    swgDeviceSettings->setTx(1);
+    swgDeviceSettings->setDirection(1); // single Tx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("PlutoSDR"));
 
