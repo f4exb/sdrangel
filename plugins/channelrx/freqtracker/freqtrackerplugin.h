@@ -30,7 +30,7 @@ class FreqTrackerPlugin : public QObject, PluginInterface {
 	Q_PLUGIN_METADATA(IID "sdrangel.channel.freqtracker")
 
 public:
-	explicit FreqTrackerPlugin(QObject* parent = NULL);
+	explicit FreqTrackerPlugin(QObject* parent = nullptr);
 
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
