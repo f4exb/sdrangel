@@ -28,7 +28,7 @@
 
 #include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 
 const QString DATVDemod::m_channelIdURI = "sdrangel.channel.demoddatv";
 const QString DATVDemod::m_channelId = "DATVDemod";
@@ -36,7 +36,7 @@ const QString DATVDemod::m_channelId = "DATVDemod";
 MESSAGE_CLASS_DEFINITION(DATVDemod::MsgConfigureDATVDemod, Message)
 MESSAGE_CLASS_DEFINITION(DATVDemod::MsgConfigureChannelizer, Message)
 
-DATVDemod::DATVDemod(DeviceSourceAPI *deviceAPI) :
+DATVDemod::DATVDemod(DeviceAPI *deviceAPI) :
     ChannelSinkAPI(m_channelIdURI),
     m_blnNeedConfigUpdate(false),
     m_deviceAPI(deviceAPI),
@@ -66,8 +66,8 @@ DATVDemod::DATVDemod(DeviceSourceAPI *deviceAPI) :
 
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelSinkAPI(this);
 }
 
 DATVDemod::~DATVDemod()
@@ -95,8 +95,8 @@ DATVDemod::~DATVDemod()
 
     CleanUpDATVFramework(true);
 
-    m_deviceAPI->removeChannelAPI(this);
-    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->removeChannelSinkAPI(this);
+    m_deviceAPI->removeChannelSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
     delete m_objRFFilter;

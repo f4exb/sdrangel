@@ -27,8 +27,6 @@
 #endif
 #include "plutosdroutputplugin.h"
 
-class DeviceSourceAPI;
-
 const PluginDescriptor PlutoSDROutputPlugin::m_pluginDescriptor = {
 	QString("PlutoSDR Output"),
 	QString("4.5.4"),
@@ -115,7 +113,7 @@ PluginInstanceGUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSink *PlutoSDROutputPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
+DeviceSampleSink *PlutoSDROutputPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceAPI *deviceAPI)
 {
     if (sinkId == m_deviceTypeID)
     {

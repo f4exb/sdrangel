@@ -67,12 +67,12 @@ PluginInstanceGUI* LocalSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet,
 }
 #endif
 
-BasebandSampleSink* LocalSinkPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* LocalSinkPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
 {
     return new LocalSink(deviceAPI);
 }
 
-ChannelSinkAPI* LocalSinkPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* LocalSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new LocalSink(deviceAPI);
 }

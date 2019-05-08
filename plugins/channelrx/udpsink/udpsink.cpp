@@ -32,7 +32,7 @@
 #include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/dspcommands.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 
 #include "udpsink.h"
 
@@ -45,7 +45,7 @@ MESSAGE_CLASS_DEFINITION(UDPSink::MsgUDPSinkSpectrum, Message)
 const QString UDPSink::m_channelIdURI = "sdrangel.channel.udpsink";
 const QString UDPSink::m_channelId = "UDPSink";
 
-UDPSink::UDPSink(DeviceSourceAPI *deviceAPI) :
+UDPSink::UDPSink(DeviceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
         m_inputSampleRate(48000),
@@ -112,8 +112,8 @@ UDPSink::UDPSink(DeviceSourceAPI *deviceAPI) :
 
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -129,8 +129,8 @@ UDPSink::~UDPSink()
     delete m_udpBufferMono16;
 	delete[] m_udpAudioBuf;
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
-	m_deviceAPI->removeChannelAPI(this);
-    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->removeChannelSinkAPI(this);
+    m_deviceAPI->removeChannelSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
     delete UDPFilter;

@@ -55,12 +55,12 @@ PluginInstanceGUI* ChannelAnalyzerPlugin::createRxChannelGUI(DeviceUISet *device
     return ChannelAnalyzerGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 
-BasebandSampleSink* ChannelAnalyzerPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* ChannelAnalyzerPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
 {
     return new ChannelAnalyzer(deviceAPI);
 }
 
-ChannelSinkAPI* ChannelAnalyzerPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* ChannelAnalyzerPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new ChannelAnalyzer(deviceAPI);
 }

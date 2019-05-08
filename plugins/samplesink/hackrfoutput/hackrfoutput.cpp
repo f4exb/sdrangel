@@ -28,8 +28,7 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "device/devicesourceapi.h"
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 #include "hackrf/devicehackrfshared.h"
 #include "hackrfoutputthread.h"
 #include "hackrfoutput.h"
@@ -38,7 +37,7 @@ MESSAGE_CLASS_DEFINITION(HackRFOutput::MsgConfigureHackRF, Message)
 MESSAGE_CLASS_DEFINITION(HackRFOutput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(HackRFOutput::MsgReportHackRF, Message)
 
-HackRFOutput::HackRFOutput(DeviceSinkAPI *deviceAPI) :
+HackRFOutput::HackRFOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),
@@ -81,7 +80,7 @@ bool HackRFOutput::openDevice()
 
     if (m_deviceAPI->getSourceBuddies().size() > 0)
     {
-        DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
+        DeviceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
         DeviceHackRFParams *buddySharedParams = (DeviceHackRFParams *) buddy->getBuddySharedPtr();
 
         if (buddySharedParams == 0)
@@ -101,9 +100,9 @@ bool HackRFOutput::openDevice()
     }
     else
     {
-        if ((m_dev = DeviceHackRF::open_hackrf(qPrintable(m_deviceAPI->getSampleSinkSerial()))) == 0)
+        if ((m_dev = DeviceHackRF::open_hackrf(qPrintable(m_deviceAPI->getSamplingDeviceSerial()))) == 0)
         {
-            qCritical("HackRFOutput::openDevice: could not open HackRF %s", qPrintable(m_deviceAPI->getSampleSinkSerial()));
+            qCritical("HackRFOutput::openDevice: could not open HackRF %s", qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
             return false;
         }
 
@@ -258,14 +257,14 @@ bool HackRFOutput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initGeneration())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startGeneration();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopGeneration();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {
@@ -436,9 +435,9 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 
         if (m_deviceAPI->getSourceBuddies().size() > 0)
         {
-            DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
+            DeviceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
             DeviceHackRFShared::MsgSynchronizeFrequency *freqMsg = DeviceHackRFShared::MsgSynchronizeFrequency::create(deviceCenterFrequency);
-            buddy->getSampleSourceInputMessageQueue()->push(freqMsg);
+            buddy->getSamplingDeviceInputMessageQueue()->push(freqMsg);
         }
 
 		forwardChange = true;

@@ -30,7 +30,7 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 #include "dsp/filerecord.h"
 
 #include "localinput.h"
@@ -40,7 +40,7 @@ MESSAGE_CLASS_DEFINITION(LocalInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(LocalInput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(LocalInput::MsgReportSampleRateAndFrequency, Message)
 
-LocalInput::LocalInput(DeviceSourceAPI *deviceAPI) :
+LocalInput::LocalInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
 	m_deviceDescription("LocalInput"),
@@ -49,7 +49,7 @@ LocalInput::LocalInput(DeviceSourceAPI *deviceAPI) :
 	m_sampleFifo.setSize(96000 * 4);
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
-    m_deviceAPI->addSink(m_fileSink);
+    m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -60,7 +60,7 @@ LocalInput::~LocalInput()
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
 	stop();
-    m_deviceAPI->removeSink(m_fileSink);
+    m_deviceAPI->removeAncillarySink(m_fileSink);
     delete m_fileSink;
 }
 
@@ -201,14 +201,14 @@ bool LocalInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initAcquisition())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startAcquisition();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopAcquisition();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {

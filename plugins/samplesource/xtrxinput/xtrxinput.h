@@ -30,7 +30,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class XTRXInputThread;
 struct DeviceXTRXParams;
 class FileRecord;
@@ -190,7 +190,7 @@ public:
         { }
     };
 
-    XTRXInput(DeviceSourceAPI *deviceAPI);
+    XTRXInput(DeviceAPI *deviceAPI);
     virtual ~XTRXInput();
     virtual void destroy();
 
@@ -249,7 +249,7 @@ public:
     void apply_gain_pga(double gain);
 
 private:
-    DeviceSourceAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
     QMutex m_mutex;
     XTRXInputSettings m_settings;
     XTRXInputThread* m_XTRXInputThread;

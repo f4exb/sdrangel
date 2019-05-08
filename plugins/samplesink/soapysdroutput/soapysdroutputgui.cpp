@@ -20,7 +20,7 @@
 
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "util/simpleserializer.h"
 #include "ui_soapysdroutputgui.h"
@@ -46,7 +46,7 @@ SoapySDROutputGui::SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     m_doApplySettings(true),
     m_sampleSink(0),
     m_sampleRate(0),
-    m_lastEngineState(DSPDeviceSinkEngine::StNotStarted),
+    m_lastEngineState(DeviceAPI::StNotStarted),
     m_antennas(0),
     m_sampleRateGUI(0),
     m_bandwidthGUI(0),
@@ -57,7 +57,7 @@ SoapySDROutputGui::SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     m_autoDCCorrection(0),
     m_autoIQCorrection(0)
 {
-    m_sampleSink = (SoapySDROutput*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
+    m_sampleSink = (SoapySDROutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
     ui->setupUi(this);
 
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -855,24 +855,24 @@ void SoapySDROutputGui::updateHardware()
 
 void SoapySDROutputGui::updateStatus()
 {
-    int state = m_deviceUISet->m_deviceSinkAPI->state();
+    int state = m_deviceUISet->m_deviceAPI->state();
 
     if(m_lastEngineState != state)
     {
         switch(state)
         {
-            case DSPDeviceSinkEngine::StNotStarted:
+            case DeviceAPI::StNotStarted:
                 ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
                 break;
-            case DSPDeviceSinkEngine::StIdle:
+            case DeviceAPI::StIdle:
                 ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
                 break;
-            case DSPDeviceSinkEngine::StRunning:
+            case DeviceAPI::StRunning:
                 ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
                 break;
-            case DSPDeviceSinkEngine::StError:
+            case DeviceAPI::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSinkAPI->errorMessage());
+                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
                 break;

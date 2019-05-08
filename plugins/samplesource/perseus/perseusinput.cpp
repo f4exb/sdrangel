@@ -27,7 +27,7 @@
 #include "dsp/filerecord.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 #include "perseus/deviceperseus.h"
 
 #include "perseusinput.h"
@@ -37,7 +37,7 @@ MESSAGE_CLASS_DEFINITION(PerseusInput::MsgConfigurePerseus, Message)
 MESSAGE_CLASS_DEFINITION(PerseusInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(PerseusInput::MsgStartStop, Message)
 
-PerseusInput::PerseusInput(DeviceSourceAPI *deviceAPI) :
+PerseusInput::PerseusInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_fileSink(0),
     m_deviceDescription("PerseusInput"),
@@ -47,7 +47,7 @@ PerseusInput::PerseusInput(DeviceSourceAPI *deviceAPI) :
 {
     openDevice();
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
-    m_deviceAPI->addSink(m_fileSink);
+    m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -57,7 +57,7 @@ PerseusInput::~PerseusInput()
 {
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
-    m_deviceAPI->removeSink(m_fileSink);
+    m_deviceAPI->removeAncillarySink(m_fileSink);
     delete m_fileSink;
     closeDevice();
 }
@@ -185,14 +185,14 @@ bool PerseusInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initAcquisition())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startAcquisition();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopAcquisition();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {
@@ -241,8 +241,8 @@ bool PerseusInput::openDevice()
         return false;
     }
 
-    m_deviceAPI->getSampleSourceSerial();
-    int deviceSequence = DevicePerseus::instance().getSequenceFromSerial(m_deviceAPI->getSampleSourceSerial().toStdString());
+    m_deviceAPI->getSamplingDeviceSerial();
+    int deviceSequence = DevicePerseus::instance().getSequenceFromSerial(m_deviceAPI->getSamplingDeviceSerial().toStdString());
 
     if ((m_perseusDescriptor = perseus_open(deviceSequence)) == 0)
     {

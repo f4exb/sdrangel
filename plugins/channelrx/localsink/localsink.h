@@ -26,7 +26,7 @@
 #include "channel/channelsinkapi.h"
 #include "localsinksettings.h"
 
-class DeviceSourceAPI;
+class DeviceAPI;
 class DeviceSampleSource;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
@@ -103,7 +103,7 @@ public:
         { }
     };
 
-    LocalSink(DeviceSourceAPI *deviceAPI);
+    LocalSink(DeviceAPI *deviceAPI);
     virtual ~LocalSink();
     virtual void destroy() { delete this; }
 
@@ -145,7 +145,7 @@ signals:
     void samplesAvailable(const quint8* data, uint count);
 
 private:
-    DeviceSourceAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
     bool m_running;

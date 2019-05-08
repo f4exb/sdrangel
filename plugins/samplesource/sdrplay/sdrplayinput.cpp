@@ -33,7 +33,7 @@
 #include <dsp/filerecord.h>
 #include "sdrplayinput.h"
 
-#include <device/devicesourceapi.h>
+#include <device/deviceapi.h>
 
 #include "sdrplaythread.h"
 
@@ -42,7 +42,7 @@ MESSAGE_CLASS_DEFINITION(SDRPlayInput::MsgReportSDRPlayGains, Message)
 MESSAGE_CLASS_DEFINITION(SDRPlayInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(SDRPlayInput::MsgStartStop, Message)
 
-SDRPlayInput::SDRPlayInput(DeviceSourceAPI *deviceAPI) :
+SDRPlayInput::SDRPlayInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_variant(SDRPlayUndef),
     m_settings(),
@@ -54,7 +54,7 @@ SDRPlayInput::SDRPlayInput(DeviceSourceAPI *deviceAPI) :
 {
     openDevice();
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
-    m_deviceAPI->addSink(m_fileSink);
+    m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -69,7 +69,7 @@ SDRPlayInput::~SDRPlayInput()
         stop();
     }
 
-    m_deviceAPI->removeSink(m_fileSink);
+    m_deviceAPI->removeAncillarySink(m_fileSink);
     delete m_fileSink;
     closeDevice();
 }
@@ -81,7 +81,7 @@ void SDRPlayInput::destroy()
 
 bool SDRPlayInput::openDevice()
 {
-    m_devNumber = m_deviceAPI->getSampleSourceSequence();
+    m_devNumber = m_deviceAPI->getSamplingDeviceSequence();
 
     if (m_dev != 0)
     {
@@ -337,14 +337,14 @@ bool SDRPlayInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initAcquisition())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startAcquisition();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopAcquisition();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {

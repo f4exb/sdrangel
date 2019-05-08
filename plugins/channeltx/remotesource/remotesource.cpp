@@ -32,7 +32,7 @@
 #include "SWGRemoteSourceReport.h"
 
 #include "dsp/devicesamplesink.h"
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 #include "dsp/upchannelizer.h"
 #include "dsp/threadedbasebandsamplesource.h"
 
@@ -46,7 +46,7 @@ MESSAGE_CLASS_DEFINITION(RemoteSource::MsgReportStreamData, Message)
 const QString RemoteSource::m_channelIdURI = "sdrangel.channeltx.remotesource";
 const QString RemoteSource::m_channelId ="RemoteSource";
 
-RemoteSource::RemoteSource(DeviceSinkAPI *deviceAPI) :
+RemoteSource::RemoteSource(DeviceAPI *deviceAPI) :
     ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
     m_sourceThread(0),
@@ -62,8 +62,8 @@ RemoteSource::RemoteSource(DeviceSinkAPI *deviceAPI) :
 
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSource(m_threadedChannelizer);
+    m_deviceAPI->addChannelSourceAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -73,8 +73,8 @@ RemoteSource::~RemoteSource()
 {
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
-    m_deviceAPI->removeChannelAPI(this);
-    m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
+    m_deviceAPI->removeChannelSourceAPI(this);
+    m_deviceAPI->removeChannelSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
 }

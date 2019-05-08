@@ -38,7 +38,7 @@ struct fcd_buffer {
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class FCDProPlusThread;
 class FileRecord;
 
@@ -106,7 +106,7 @@ public:
         { }
     };
 
-	FCDProPlusInput(DeviceSourceAPI *deviceAPI);
+	FCDProPlusInput(DeviceAPI *deviceAPI);
 	virtual ~FCDProPlusInput();
 	virtual void destroy();
 
@@ -154,7 +154,7 @@ public:
 	void set_if_filter(int filterIndex);
 
 private:
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
 	hid_device *m_dev;
 	AudioInput m_fcdAudioInput;
 	AudioFifo m_fcdFIFO;

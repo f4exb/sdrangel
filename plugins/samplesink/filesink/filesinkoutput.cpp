@@ -27,7 +27,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/filerecord.h"
 
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 
 #include "filesinkoutput.h"
 #include "filesinkthread.h"
@@ -40,7 +40,7 @@ MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkStreamTiming, Messa
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgReportFileSinkGeneration, Message)
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgReportFileSinkStreamTiming, Message)
 
-FileSinkOutput::FileSinkOutput(DeviceSinkAPI *deviceAPI) :
+FileSinkOutput::FileSinkOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_fileSinkThread(0),
@@ -214,14 +214,14 @@ bool FileSinkOutput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initGeneration())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startGeneration();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopGeneration();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         return true;

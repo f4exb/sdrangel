@@ -43,7 +43,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
-class DeviceSourceAPI;
+class DeviceAPI;
 
 class WFMDemod : public BasebandSampleSink, public ChannelSinkAPI {
     Q_OBJECT
@@ -94,7 +94,7 @@ public:
         { }
     };
 
-	WFMDemod(DeviceSourceAPI *deviceAPI);
+	WFMDemod(DeviceAPI *deviceAPI);
 	virtual ~WFMDemod();
 	virtual void destroy() { delete this; }
 
@@ -173,7 +173,7 @@ private:
 		RSRunning
 	};
 
-    DeviceSourceAPI* m_deviceAPI;
+    DeviceAPI* m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
 

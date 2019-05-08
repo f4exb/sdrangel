@@ -37,7 +37,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/dspcommands.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 
 #include "nfmdemod.h"
 
@@ -52,7 +52,7 @@ static const double afSqTones[2] = {1000.0, 6000.0}; // {1200.0, 8000.0};
 static const double afSqTones_lowrate[2] = {1000.0, 3500.0};
 const int NFMDemod::m_udpBlockSize = 512;
 
-NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
+NFMDemod::NFMDemod(DeviceAPI *devieAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(devieAPI),
         m_inputSampleRate(48000),
@@ -97,8 +97,8 @@ NFMDemod::NFMDemod(DeviceSourceAPI *devieAPI) :
 
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -109,8 +109,8 @@ NFMDemod::~NFMDemod()
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
-	m_deviceAPI->removeChannelAPI(this);
-    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->removeChannelSinkAPI(this);
+    m_deviceAPI->removeChannelSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
 }

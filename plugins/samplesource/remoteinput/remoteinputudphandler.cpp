@@ -21,12 +21,12 @@
 
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include <device/devicesourceapi.h>
+#include "device/deviceapi.h"
 
 #include "remoteinputudphandler.h"
 #include "remoteinput.h"
 
-RemoteInputUDPHandler::RemoteInputUDPHandler(SampleSinkFifo *sampleFifo, DeviceSourceAPI *deviceAPI) :
+RemoteInputUDPHandler::RemoteInputUDPHandler(SampleSinkFifo *sampleFifo, DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_masterTimer(deviceAPI->getMasterTimer()),
     m_masterTimerConnected(false),

@@ -41,7 +41,7 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class QUdpSocket;
-class DeviceSourceAPI;
+class DeviceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
@@ -96,7 +96,7 @@ public:
         { }
     };
 
-	UDPSink(DeviceSourceAPI *deviceAPI);
+	UDPSink(DeviceAPI *deviceAPI);
 	virtual ~UDPSink();
 	virtual void destroy() { delete this; }
 	void setSpectrum(BasebandSampleSink* spectrum) { m_spectrum = spectrum; }
@@ -179,7 +179,7 @@ protected:
         int32_t m_i;
     };
 
-    DeviceSourceAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
 

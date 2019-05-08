@@ -37,7 +37,7 @@
 #include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/dspcommands.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 #include "util/db.h"
 
 #include "rdsparser.h"
@@ -52,7 +52,7 @@ const QString BFMDemod::m_channelId = "BFMDemod";
 const Real BFMDemod::default_deemphasis = 50.0; // 50 us
 const int BFMDemod::m_udpBlockSize = 512;
 
-BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
+BFMDemod::BFMDemod(DeviceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
         m_inputSampleRate(384000),
@@ -103,8 +103,8 @@ BFMDemod::BFMDemod(DeviceSourceAPI *deviceAPI) :
 
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -117,8 +117,8 @@ BFMDemod::~BFMDemod()
 
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
 
-	m_deviceAPI->removeChannelAPI(this);
-    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->removeChannelSinkAPI(this);
+    m_deviceAPI->removeChannelSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
     delete m_rfFilter;

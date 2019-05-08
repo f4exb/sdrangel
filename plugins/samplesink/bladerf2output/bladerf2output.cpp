@@ -31,8 +31,7 @@
 
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "device/devicesinkapi.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 #include "bladerf2/devicebladerf2shared.h"
 #include "bladerf2/devicebladerf2.h"
 
@@ -43,7 +42,7 @@ MESSAGE_CLASS_DEFINITION(BladeRF2Output::MsgConfigureBladeRF2, Message)
 MESSAGE_CLASS_DEFINITION(BladeRF2Output::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(BladeRF2Output::MsgReportGainRange, Message)
 
-BladeRF2Output::BladeRF2Output(DeviceSinkAPI *deviceAPI) :
+BladeRF2Output::BladeRF2Output(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
     m_dev(0),
@@ -82,7 +81,7 @@ bool BladeRF2Output::openDevice()
     {
         qDebug("BladeRF2Output::openDevice: look in Tx buddies");
 
-        DeviceSinkAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
+        DeviceAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
         DeviceBladeRF2Shared *deviceBladeRF2Shared = (DeviceBladeRF2Shared*) sinkBuddy->getBuddySharedPtr();
 
         if (deviceBladeRF2Shared == 0)
@@ -106,7 +105,7 @@ bool BladeRF2Output::openDevice()
     {
         qDebug("BladeRF2Output::openDevice: look in Rx buddies");
 
-        DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
+        DeviceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
         DeviceBladeRF2Shared *deviceBladeRF2Shared = (DeviceBladeRF2Shared*) sourceBuddy->getBuddySharedPtr();
 
         if (deviceBladeRF2Shared == 0)
@@ -132,7 +131,7 @@ bool BladeRF2Output::openDevice()
 
         m_deviceShared.m_dev = new DeviceBladeRF2();
         char serial[256];
-        strcpy(serial, qPrintable(m_deviceAPI->getSampleSinkSerial()));
+        strcpy(serial, qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
 
         if (!m_deviceShared.m_dev->open(serial))
         {
@@ -186,8 +185,8 @@ BladeRF2OutputThread *BladeRF2Output::findThread()
         BladeRF2OutputThread *bladeRF2OutputThread = 0;
 
         // find a buddy that has allocated the thread
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator it = sinkBuddies.begin();
+        const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceAPI*>::const_iterator it = sinkBuddies.begin();
 
         for (; it != sinkBuddies.end(); ++it)
         {
@@ -213,8 +212,8 @@ BladeRF2OutputThread *BladeRF2Output::findThread()
 
 void BladeRF2Output::moveThreadToBuddy()
 {
-    const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-    std::vector<DeviceSinkAPI*>::const_iterator it = sinkBuddies.begin();
+    const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+    std::vector<DeviceAPI*>::const_iterator it = sinkBuddies.begin();
 
     for (; it != sinkBuddies.end(); ++it)
     {
@@ -300,8 +299,8 @@ bool BladeRF2Output::start()
             }
 
             // remove old thread address from buddies (reset in all buddies)
-            const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-            std::vector<DeviceSinkAPI*>::const_iterator it = sinkBuddies.begin();
+            const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+            std::vector<DeviceAPI*>::const_iterator it = sinkBuddies.begin();
 
             for (; it != sinkBuddies.end(); ++it) {
                 ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_sink->setThread(0);
@@ -394,8 +393,8 @@ void BladeRF2Output::stop()
         m_thread = 0;
 
         // remove old thread address from buddies (reset in all buddies)
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator it = sinkBuddies.begin();
+        const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceAPI*>::const_iterator it = sinkBuddies.begin();
 
         for (; it != sinkBuddies.end(); ++it) {
             ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_sink->setThread(0);
@@ -438,8 +437,8 @@ void BladeRF2Output::stop()
         }
 
         // remove old thread address from buddies (reset in all buddies)
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator it = sinkBuddies.begin();
+        const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceAPI*>::const_iterator it = sinkBuddies.begin();
 
         for (; it != sinkBuddies.end(); ++it) {
             ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_sink->setThread(0);
@@ -674,14 +673,14 @@ bool BladeRF2Output::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initGeneration())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startGeneration();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopGeneration();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {
@@ -876,8 +875,8 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
     if (forwardChangeRxBuddies)
     {
         // send to source buddies
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+        const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceAPI*>::const_iterator itSource = sourceBuddies.begin();
 
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
@@ -887,15 +886,15 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
                     2,
                     settings.m_devSampleRate, // need to forward actual rate to the Rx side
                     false);
-            (*itSource)->getSampleSourceInputMessageQueue()->push(report);
+            (*itSource)->getSamplingDeviceInputMessageQueue()->push(report);
         }
     }
 
     if (forwardChangeTxBuddies)
     {
         // send to sink buddies
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+        const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceAPI*>::const_iterator itSink = sinkBuddies.begin();
 
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
@@ -905,7 +904,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
                     2,
                     settings.m_devSampleRate,
                     false);
-            (*itSink)->getSampleSinkInputMessageQueue()->push(report);
+            (*itSink)->getSamplingDeviceInputMessageQueue()->push(report);
         }
     }
 

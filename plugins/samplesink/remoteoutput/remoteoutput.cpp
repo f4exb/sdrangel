@@ -33,7 +33,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/filerecord.h"
 
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 
 #include "remoteoutput.h"
 #include "remoteoutputthread.h"
@@ -45,7 +45,7 @@ MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgConfigureRemoteOutputChunkCorrection, 
 
 const uint32_t RemoteOutput::NbSamplesForRateCorrection = 5000000;
 
-RemoteOutput::RemoteOutput(DeviceSinkAPI *deviceAPI) :
+RemoteOutput::RemoteOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_centerFrequency(0),
@@ -209,14 +209,14 @@ bool RemoteOutput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initGeneration())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startGeneration();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopGeneration();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {

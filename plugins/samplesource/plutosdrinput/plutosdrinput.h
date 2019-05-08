@@ -31,7 +31,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class FileRecord;
 class PlutoSDRInputThread;
 
@@ -99,7 +99,7 @@ public:
         { }
     };
 
-    PlutoSDRInput(DeviceSourceAPI *deviceAPI);
+    PlutoSDRInput(DeviceAPI *deviceAPI);
     ~PlutoSDRInput();
     virtual void destroy();
 
@@ -152,7 +152,7 @@ public:
     float getTemperature();
 
  private:
-    DeviceSourceAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
     FileRecord *m_fileSink;
     QString m_deviceDescription;
     PlutoSDRInputSettings m_settings;

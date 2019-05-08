@@ -31,13 +31,13 @@
 class SampleSinkFifo;
 class MessageQueue;
 class QTimer;
-class DeviceSourceAPI;
+class DeviceAPI;
 
 class RemoteInputUDPHandler : public QObject
 {
 	Q_OBJECT
 public:
-	RemoteInputUDPHandler(SampleSinkFifo* sampleFifo, DeviceSourceAPI *deviceAPI);
+	RemoteInputUDPHandler(SampleSinkFifo* sampleFifo, DeviceAPI *deviceAPI);
 	~RemoteInputUDPHandler();
 	void setMessageQueueToGUI(MessageQueue *queue) { m_outputMessageQueueToGUI = queue; }
 	void start();
@@ -56,7 +56,7 @@ public slots:
 	void dataReadyRead();
 
 private:
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
 	const QTimer& m_masterTimer;
 	bool m_masterTimerConnected;
 	bool m_running;

@@ -27,8 +27,8 @@
 #include "SWGDeviceReport.h"
 #include "SWGAirspyHFReport.h"
 
-#include <device/devicesourceapi.h>
-#include <dsp/filerecord.h>
+#include "device/deviceapi.h"
+#include "dsp/filerecord.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 
@@ -47,7 +47,7 @@ const qint64 AirspyHFInput::loHighLimitFreqHF  =  31000000L;
 const qint64 AirspyHFInput::loLowLimitFreqVHF  =  60000000L;
 const qint64 AirspyHFInput::loHighLimitFreqVHF = 260000000L;
 
-AirspyHFInput::AirspyHFInput(DeviceSourceAPI *deviceAPI) :
+AirspyHFInput::AirspyHFInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),
@@ -57,7 +57,7 @@ AirspyHFInput::AirspyHFInput(DeviceSourceAPI *deviceAPI) :
 {
     openDevice();
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
-    m_deviceAPI->addSink(m_fileSink);
+    m_deviceAPI->addAncillarySink(m_fileSink);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
@@ -71,7 +71,7 @@ AirspyHFInput::~AirspyHFInput()
         stop();
     }
 
-    m_deviceAPI->removeSink(m_fileSink);
+    m_deviceAPI->removeAncillarySink(m_fileSink);
     delete m_fileSink;
     closeDevice();
 }
@@ -96,15 +96,15 @@ bool AirspyHFInput::openDevice()
         return false;
     }
 
-    if ((m_dev = open_airspyhf_from_serial(m_deviceAPI->getSampleSourceSerial())) == 0)
+    if ((m_dev = open_airspyhf_from_serial(m_deviceAPI->getSamplingDeviceSerial())) == 0)
     {
-        qCritical("AirspyHFInput::openDevice: could not open Airspy HF with serial %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
+        qCritical("AirspyHFInput::openDevice: could not open Airspy HF with serial %s", qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
         m_dev = 0;
         return false;
     }
     else
     {
-        qDebug("AirspyHFInput::openDevice: opened Airspy HF with serial %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
+        qDebug("AirspyHFInput::openDevice: opened Airspy HF with serial %s", qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
     }
 
     uint32_t nbSampleRates;
@@ -311,14 +311,14 @@ bool AirspyHFInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initAcquisition())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startAcquisition();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopAcquisition();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {

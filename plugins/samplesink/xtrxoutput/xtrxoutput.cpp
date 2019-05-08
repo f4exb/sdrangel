@@ -30,8 +30,7 @@
 #include "SWGDeviceReport.h"
 #include "SWGXtrxOutputReport.h"
 
-#include "device/devicesourceapi.h"
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
 #include "xtrxoutput.h"
 #include "xtrxoutputthread.h"
@@ -46,7 +45,7 @@ MESSAGE_CLASS_DEFINITION(XTRXOutput::MsgReportClockGenChange, Message)
 MESSAGE_CLASS_DEFINITION(XTRXOutput::MsgReportStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(XTRXOutput::MsgStartStop, Message)
 
-XTRXOutput::XTRXOutput(DeviceSinkAPI *deviceAPI) :
+XTRXOutput::XTRXOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
     m_XTRXOutputThread(0),
@@ -85,7 +84,7 @@ bool XTRXOutput::openDevice()
     {
         qDebug("XTRXOutput::openDevice: look in Tx buddies");
 
-        DeviceSinkAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
+        DeviceAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
         DeviceXTRXShared *deviceXTRXShared = (DeviceXTRXShared*) sinkBuddy->getBuddySharedPtr();
 
         if (deviceXTRXShared == 0)
@@ -109,7 +108,7 @@ bool XTRXOutput::openDevice()
     {
         qDebug("XTRXOutput::openDevice: look in Rx buddies");
 
-        DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
+        DeviceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
         DeviceXTRXShared *deviceXTRXShared = (DeviceXTRXShared*) sourceBuddy->getBuddySharedPtr();
 
         if (deviceXTRXShared == 0)
@@ -135,7 +134,7 @@ bool XTRXOutput::openDevice()
 
         m_deviceShared.m_dev = new DeviceXTRX();
         char serial[256];
-        strcpy(serial, qPrintable(m_deviceAPI->getSampleSinkSerial()));
+        strcpy(serial, qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
 
         if (!m_deviceShared.m_dev->open(serial))
         {
@@ -189,8 +188,8 @@ XTRXOutputThread *XTRXOutput::findThread()
         XTRXOutputThread *xtrxOutputThread = 0;
 
         // find a buddy that has allocated the thread
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator it = sinkBuddies.begin();
+        const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceAPI*>::const_iterator it = sinkBuddies.begin();
 
         for (; it != sinkBuddies.end(); ++it)
         {
@@ -216,8 +215,8 @@ XTRXOutputThread *XTRXOutput::findThread()
 
 void XTRXOutput::moveThreadToBuddy()
 {
-    const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-    std::vector<DeviceSinkAPI*>::const_iterator it = sinkBuddies.begin();
+    const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+    std::vector<DeviceAPI*>::const_iterator it = sinkBuddies.begin();
 
     for (; it != sinkBuddies.end(); ++it)
     {
@@ -301,8 +300,8 @@ bool XTRXOutput::start()
             }
 
             // remove old thread address from buddies (reset in all buddies). The address being held only in the owning source.
-            const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-            std::vector<DeviceSinkAPI*>::const_iterator it = sinkBuddies.begin();
+            const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+            std::vector<DeviceAPI*>::const_iterator it = sinkBuddies.begin();
 
             for (; it != sinkBuddies.end(); ++it)
             {
@@ -381,8 +380,8 @@ void XTRXOutput::stop()
         m_deviceShared.m_thread = 0;
 
         // remove old thread address from buddies (reset in all buddies)
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator it = sinkBuddies.begin();
+        const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceAPI*>::const_iterator it = sinkBuddies.begin();
 
         for (; it != sinkBuddies.end(); ++it)
         {
@@ -403,8 +402,8 @@ void XTRXOutput::stop()
         xtrxOutputThread->setLog2Interpolation(requestedChannel, m_settings.m_log2SoftInterp);
 
         // remove old thread address from buddies (reset in all buddies). The address being held only in the owning source.
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator it = sinkBuddies.begin();
+        const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceAPI*>::const_iterator it = sinkBuddies.begin();
 
         for (; it != sinkBuddies.end(); ++it)
         {
@@ -421,8 +420,8 @@ void XTRXOutput::stop()
 
 void XTRXOutput::suspendRxThread()
 {
-    const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-    std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+    const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+    std::vector<DeviceAPI*>::const_iterator itSource = sourceBuddies.begin();
 
     qDebug("XTRXOutput::suspendRxThread (%lu)", sourceBuddies.size());
 
@@ -444,8 +443,8 @@ void XTRXOutput::suspendRxThread()
 
 void XTRXOutput::resumeRxThread()
 {
-    const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-    std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+    const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+    std::vector<DeviceAPI*>::const_iterator itSource = sourceBuddies.begin();
 
     qDebug("XTRXOutput::resumeRxThread (%lu)", sourceBuddies.size());
 
@@ -659,7 +658,7 @@ bool XTRXOutput::handleMessage(const Message& message)
     }
     else if (MsgGetStreamInfo::match(message))
     {
-        if (m_deviceAPI->getSampleSinkGUIMessageQueue())
+        if (m_deviceAPI->getSamplingDeviceGUIMessageQueue())
         {
             uint64_t fifolevel = 0;
 
@@ -673,8 +672,8 @@ bool XTRXOutput::handleMessage(const Message& message)
                         fifolevel,
                         65536);
 
-            if (m_deviceAPI->getSampleSinkGUIMessageQueue()) {
-                m_deviceAPI->getSampleSinkGUIMessageQueue()->push(report);
+            if (m_deviceAPI->getSamplingDeviceGUIMessageQueue()) {
+                m_deviceAPI->getSamplingDeviceGUIMessageQueue()->push(report);
             }
         }
 
@@ -696,35 +695,35 @@ bool XTRXOutput::handleMessage(const Message& message)
         }
 
         // send to oneself
-        if (m_deviceAPI->getSampleSinkGUIMessageQueue())
+        if (m_deviceAPI->getSamplingDeviceGUIMessageQueue())
         {
             DeviceXTRXShared::MsgReportDeviceInfo *report = DeviceXTRXShared::MsgReportDeviceInfo::create(board_temp, gps_locked);
-            m_deviceAPI->getSampleSinkGUIMessageQueue()->push(report);
+            m_deviceAPI->getSamplingDeviceGUIMessageQueue()->push(report);
         }
 
         // send to sink buddies
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+        const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceAPI*>::const_iterator itSink = sinkBuddies.begin();
 
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
-            if ((*itSink)->getSampleSinkGUIMessageQueue())
+            if ((*itSink)->getSamplingDeviceGUIMessageQueue())
             {
                 DeviceXTRXShared::MsgReportDeviceInfo *report = DeviceXTRXShared::MsgReportDeviceInfo::create(board_temp, gps_locked);
-                (*itSink)->getSampleSinkGUIMessageQueue()->push(report);
+                (*itSink)->getSamplingDeviceGUIMessageQueue()->push(report);
             }
         }
 
         // send to source buddies
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+        const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceAPI*>::const_iterator itSource = sourceBuddies.begin();
 
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
-            if ((*itSource)->getSampleSourceGUIMessageQueue())
+            if ((*itSource)->getSamplingDeviceGUIMessageQueue())
             {
                 DeviceXTRXShared::MsgReportDeviceInfo *report = DeviceXTRXShared::MsgReportDeviceInfo::create(board_temp, gps_locked);
-                (*itSource)->getSampleSourceGUIMessageQueue()->push(report);
+                (*itSource)->getSamplingDeviceGUIMessageQueue()->push(report);
             }
         }
 
@@ -737,14 +736,14 @@ bool XTRXOutput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initGeneration())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startGeneration();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopGeneration();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         return true;
@@ -1067,25 +1066,25 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         }
 
         // send to source buddies
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+        const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceAPI*>::const_iterator itSource = sourceBuddies.begin();
 
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
             DeviceXTRXShared::MsgReportBuddyChange *report = DeviceXTRXShared::MsgReportBuddyChange::create(
                     getDevSampleRate(), getLog2HardInterp(), m_settings.m_centerFrequency, true);
-            (*itSource)->getSampleSourceInputMessageQueue()->push(report);
+            (*itSource)->getSamplingDeviceInputMessageQueue()->push(report);
         }
 
         // send to sink buddies
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+        const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceAPI*>::const_iterator itSink = sinkBuddies.begin();
 
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
             DeviceXTRXShared::MsgReportBuddyChange *report = DeviceXTRXShared::MsgReportBuddyChange::create(
                     getDevSampleRate(), getLog2HardInterp(), m_settings.m_centerFrequency, true);
-            (*itSink)->getSampleSinkInputMessageQueue()->push(report);
+            (*itSink)->getSamplingDeviceInputMessageQueue()->push(report);
         }
     }
     else if (forwardChangeTxDSP)
@@ -1105,14 +1104,14 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         }
 
         // send to sink buddies
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+        const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceAPI*>::const_iterator itSink = sinkBuddies.begin();
 
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
             DeviceXTRXShared::MsgReportBuddyChange *report = DeviceXTRXShared::MsgReportBuddyChange::create(
                     getDevSampleRate(), getLog2HardInterp(), m_settings.m_centerFrequency, true);
-            (*itSink)->getSampleSinkInputMessageQueue()->push(report);
+            (*itSink)->getSamplingDeviceInputMessageQueue()->push(report);
         }
     }
     else if (forwardChangeOwnDSP)
@@ -1134,25 +1133,25 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
     if (forwardClockSource)
     {
         // send to source buddies
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+        const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceAPI*>::const_iterator itSource = sourceBuddies.begin();
 
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
             DeviceXTRXShared::MsgReportClockSourceChange *report = DeviceXTRXShared::MsgReportClockSourceChange::create(
                         m_settings.m_extClock, m_settings.m_extClockFreq);
-            (*itSource)->getSampleSourceInputMessageQueue()->push(report);
+            (*itSource)->getSamplingDeviceInputMessageQueue()->push(report);
         }
 
         // send to sink buddies
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+        const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceAPI*>::const_iterator itSink = sinkBuddies.begin();
 
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
             DeviceXTRXShared::MsgReportClockSourceChange *report = DeviceXTRXShared::MsgReportClockSourceChange::create(
                         m_settings.m_extClock, m_settings.m_extClockFreq);
-            (*itSink)->getSampleSinkInputMessageQueue()->push(report);
+            (*itSink)->getSamplingDeviceInputMessageQueue()->push(report);
         }
     }
 

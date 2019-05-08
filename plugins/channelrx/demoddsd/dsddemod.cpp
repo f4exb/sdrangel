@@ -38,7 +38,7 @@
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/downchannelizer.h"
 #include "dsp/dspcommands.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 #include "util/db.h"
 
 #include "dsddemod.h"
@@ -51,7 +51,7 @@ const QString DSDDemod::m_channelIdURI = "sdrangel.channel.dsddemod";
 const QString DSDDemod::m_channelId = "DSDDemod";
 const int DSDDemod::m_udpBlockSize = 512;
 
-DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
+DSDDemod::DSDDemod(DeviceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
         m_inputSampleRate(48000),
@@ -95,8 +95,8 @@ DSDDemod::DSDDemod(DeviceSourceAPI *deviceAPI) :
 
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -110,8 +110,8 @@ DSDDemod::~DSDDemod()
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo1);
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo2);
 
-    m_deviceAPI->removeChannelAPI(this);
-    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->removeChannelSinkAPI(this);
+    m_deviceAPI->removeChannelSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
 }

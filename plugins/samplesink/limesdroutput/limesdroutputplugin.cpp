@@ -157,7 +157,7 @@ bool LimeSDROutputPlugin::findSerial(const char *lmsInfoStr, std::string& serial
     }
 }
 
-DeviceSampleSink* LimeSDROutputPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI)
+DeviceSampleSink* LimeSDROutputPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceAPI *deviceAPI)
 {
     if(sinkId == m_deviceTypeID)
     {

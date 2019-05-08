@@ -26,9 +26,10 @@
 #include "SWGDeviceState.h"
 
 #include "dsp/dspcommands.h"
+#include "dsp/dspdevicesourceengine.h"
+#include "dsp/dspdevicesinkengine.h"
 #include "dsp/dspengine.h"
-#include "device/devicesinkapi.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 #include "bladerf1/devicebladerf1shared.h"
 #include "bladerf1outputthread.h"
 #include "bladerf1output.h"
@@ -37,7 +38,7 @@ MESSAGE_CLASS_DEFINITION(Bladerf1Output::MsgConfigureBladerf1, Message)
 MESSAGE_CLASS_DEFINITION(Bladerf1Output::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(Bladerf1Output::MsgReportBladerf1, Message)
 
-Bladerf1Output::Bladerf1Output(DeviceSinkAPI *deviceAPI) :
+Bladerf1Output::Bladerf1Output(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),
@@ -83,7 +84,7 @@ bool Bladerf1Output::openDevice()
 
     if (m_deviceAPI->getSourceBuddies().size() > 0)
     {
-        DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
+        DeviceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
         DeviceBladeRF1Params *buddySharedParams = (DeviceBladeRF1Params *) sourceBuddy->getBuddySharedPtr();
 
         if (buddySharedParams == 0)
@@ -103,9 +104,9 @@ bool Bladerf1Output::openDevice()
     }
     else
     {
-        if (!DeviceBladeRF1::open_bladerf(&m_dev, qPrintable(m_deviceAPI->getSampleSinkSerial())))
+        if (!DeviceBladeRF1::open_bladerf(&m_dev, qPrintable(m_deviceAPI->getSamplingDeviceSerial())))
         {
-            qCritical("BladerfOutput::start: could not open BladeRF %s", qPrintable(m_deviceAPI->getSampleSinkSerial()));
+            qCritical("BladerfOutput::start: could not open BladeRF %s", qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
             return false;
         }
 
@@ -277,14 +278,14 @@ bool Bladerf1Output::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initGeneration())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startGeneration();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopGeneration();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {
@@ -420,7 +421,7 @@ bool Bladerf1Output::applySettings(const BladeRF1OutputSettings& settings, bool 
 
             if (m_deviceAPI->getSourceBuddies().size() > 0)
             {
-                DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
+                DeviceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
 
                 if (buddy->getDeviceSourceEngine()->state() == DSPDeviceSourceEngine::StRunning) { // Tx side running
                     changeSettings = false;

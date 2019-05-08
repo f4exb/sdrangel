@@ -16,8 +16,7 @@ class QPluginLoader;
 class Preset;
 class Message;
 class MessageQueue;
-class DeviceSourceAPI;
-class DeviceSinkAPI;
+class DeviceAPI;
 
 class SDRBASE_API PluginManager : public QObject {
 	Q_OBJECT
@@ -58,10 +57,10 @@ public:
 	PluginAPI::ChannelRegistrations *getRxChannelRegistrations() { return &m_rxChannelRegistrations; }
 	PluginAPI::ChannelRegistrations *getTxChannelRegistrations() { return &m_txChannelRegistrations; }
 
-    void createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceSourceAPI *deviceAPI);
+    void createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI);
     void listRxChannels(QList<QString>& list);
 
-	void createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceSinkAPI *deviceAPI);
+	void createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI);
 	void listTxChannels(QList<QString>& list);
 
 	static const QString& getFileSourceDeviceId() { return m_fileSourceDeviceTypeID; }

@@ -38,12 +38,12 @@ PluginInstanceGUI* LoRaPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, Base
 	return LoRaDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 
-BasebandSampleSink* LoRaPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* LoRaPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
 {
     return new LoRaDemod(deviceAPI);
 }
 
-ChannelSinkAPI* LoRaPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* LoRaPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new LoRaDemod(deviceAPI);
 }

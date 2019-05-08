@@ -37,7 +37,7 @@
 #define LORA_SFFT_LEN (SPREADFACTOR / 2)
 #define LORA_SQUELCH (3)
 
-class DeviceSourceAPI;
+class DeviceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
@@ -89,7 +89,7 @@ public:
         { }
     };
 
-	LoRaDemod(DeviceSourceAPI* deviceAPI);
+	LoRaDemod(DeviceAPI* deviceAPI);
 	virtual ~LoRaDemod();
 	virtual void destroy() { delete this; }
 	void setSpectrumSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
@@ -118,7 +118,7 @@ private:
 	void hamming6(char* inout, int size);
 	void prng6(char* inout, int size);
 
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
     LoRaDemodSettings m_settings;

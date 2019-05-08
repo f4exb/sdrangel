@@ -27,7 +27,7 @@
 #include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "bladerf1outputgui.h"
 
@@ -41,9 +41,9 @@ Bladerf1OutputGui::Bladerf1OutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     m_sampleRateMode(true),
 	m_deviceSampleSink(nullptr),
 	m_sampleRate(0),
-	m_lastEngineState(DSPDeviceSinkEngine::StNotStarted)
+	m_lastEngineState(DeviceAPI::StNotStarted)
 {
-    m_deviceSampleSink = (Bladerf1Output*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
+    m_deviceSampleSink = (Bladerf1Output*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -395,24 +395,24 @@ void Bladerf1OutputGui::updateHardware()
 
 void Bladerf1OutputGui::updateStatus()
 {
-    int state = m_deviceUISet->m_deviceSinkAPI->state();
+    int state = m_deviceUISet->m_deviceAPI->state();
 
     if(m_lastEngineState != state)
     {
         switch(state)
         {
-            case DSPDeviceSinkEngine::StNotStarted:
+            case DeviceAPI::StNotStarted:
                 ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
                 break;
-            case DSPDeviceSinkEngine::StIdle:
+            case DeviceAPI::StIdle:
                 ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
                 break;
-            case DSPDeviceSinkEngine::StRunning:
+            case DeviceAPI::StRunning:
                 ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
                 break;
-            case DSPDeviceSinkEngine::StError:
+            case DeviceAPI::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSinkAPI->errorMessage());
+                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
                 break;

@@ -27,7 +27,7 @@
 #include "rtlsdrsettings.h"
 #include <rtl-sdr.h>
 
-class DeviceSourceAPI;
+class DeviceAPI;
 class RTLSDRThread;
 class FileRecord;
 class QNetworkAccessManager;
@@ -97,7 +97,7 @@ public:
         { }
     };
 
-	RTLSDRInput(DeviceSourceAPI *deviceAPI);
+	RTLSDRInput(DeviceAPI *deviceAPI);
 	virtual ~RTLSDRInput();
 	virtual void destroy();
 
@@ -153,7 +153,7 @@ public:
     static const int sampleRateHighRangeMax;
 
 private:
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
 	QMutex m_mutex;
 	RTLSDRSettings m_settings;

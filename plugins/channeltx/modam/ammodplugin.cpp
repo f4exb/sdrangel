@@ -66,12 +66,12 @@ PluginInstanceGUI* AMModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, Bas
 }
 #endif
 
-BasebandSampleSource* AMModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
+BasebandSampleSource* AMModPlugin::createTxChannelBS(DeviceAPI *deviceAPI)
 {
     return new AMMod(deviceAPI);
 }
 
-ChannelSourceAPI* AMModPlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)
+ChannelSourceAPI* AMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
 {
     return new AMMod(deviceAPI);
 }

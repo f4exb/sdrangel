@@ -29,7 +29,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class AirspyHFThread;
 class FileRecord;
 
@@ -97,7 +97,7 @@ public:
         { }
     };
 
-	AirspyHFInput(DeviceSourceAPI *deviceAPI);
+	AirspyHFInput(DeviceAPI *deviceAPI);
 	virtual ~AirspyHFInput();
 	virtual void destroy();
 
@@ -147,7 +147,7 @@ public:
     static const qint64 loHighLimitFreqVHF;
 
 private:
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	AirspyHFSettings m_settings;
 	airspyhf_device_t* m_dev;

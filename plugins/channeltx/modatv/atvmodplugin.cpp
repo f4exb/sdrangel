@@ -66,12 +66,12 @@ PluginInstanceGUI* ATVModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, Ba
 }
 #endif
 
-BasebandSampleSource* ATVModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
+BasebandSampleSource* ATVModPlugin::createTxChannelBS(DeviceAPI *deviceAPI)
 {
     return new ATVMod(deviceAPI);
 }
 
-ChannelSourceAPI* ATVModPlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)
+ChannelSourceAPI* ATVModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
 {
     return new ATVMod(deviceAPI);
 }

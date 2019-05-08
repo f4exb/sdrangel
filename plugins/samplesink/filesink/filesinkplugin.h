@@ -24,7 +24,7 @@
 #define FILESINK_DEVICE_TYPE_ID "sdrangel.samplesink.filesink"
 
 class PluginAPI;
-class DeviceSinkAPI;
+class DeviceAPI;
 
 class FileSinkPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
@@ -42,7 +42,7 @@ public:
 	        const QString& sinkId,
 	        QWidget **widget,
 	        DeviceUISet *deviceUISet);
-	virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceSinkAPI *deviceAPI);
+	virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceAPI *deviceAPI);
 
 	static const QString m_hardwareID;
     static const QString m_deviceTypeID;

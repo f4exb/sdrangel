@@ -60,12 +60,12 @@ PluginInstanceGUI* ATVDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, 
     return ATVDemodGUI::create(m_ptrPluginAPI, deviceUISet, rxChannel);
 }
 
-BasebandSampleSink* ATVDemodPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* ATVDemodPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
 {
     return new ATVDemod(deviceAPI);
 }
 
-ChannelSinkAPI* ATVDemodPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* ATVDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new ATVDemod(deviceAPI);
 }

@@ -44,7 +44,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
@@ -121,7 +121,7 @@ public:
         { }
     };
 
-	BFMDemod(DeviceSourceAPI *deviceAPI);
+	BFMDemod(DeviceAPI *deviceAPI);
 	virtual ~BFMDemod();
     virtual void destroy() { delete this; }
 	void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
@@ -212,7 +212,7 @@ private:
 		RSRunning
 	};
 
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
 

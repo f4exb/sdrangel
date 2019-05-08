@@ -38,11 +38,11 @@
 
 #include "mainwindow.h"
 
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "remoteoutputgui.h"
 
-#include <channel/remotedatablock.h>
+#include "channel/remotedatablock.h"
 
 #include "udpsinkfec.h"
 
@@ -56,7 +56,7 @@ RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* pare
 	m_samplesCount(0),
 	m_tickCount(0),
 	m_nbSinceLastFlowCheck(0),
-	m_lastEngineState(DSPDeviceSinkEngine::StNotStarted),
+	m_lastEngineState(DeviceAPI::StNotStarted),
 	m_doApplySettings(true),
 	m_forceSettings(true)
 {
@@ -81,12 +81,12 @@ RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* pare
 
     ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 
-	connect(&(m_deviceUISet->m_deviceSinkAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 
-	m_deviceSampleSink = (RemoteOutput*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
+	m_deviceSampleSink = (RemoteOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 
@@ -268,24 +268,24 @@ void RemoteOutputSinkGui::updateHardware()
 
 void RemoteOutputSinkGui::updateStatus()
 {
-    int state = m_deviceUISet->m_deviceSinkAPI->state();
+    int state = m_deviceUISet->m_deviceAPI->state();
 
     if(m_lastEngineState != state)
     {
         switch(state)
         {
-            case DSPDeviceSinkEngine::StNotStarted:
+            case DeviceAPI::StNotStarted:
                 ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
                 break;
-            case DSPDeviceSinkEngine::StIdle:
+            case DeviceAPI::StIdle:
                 ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
                 break;
-            case DSPDeviceSinkEngine::StRunning:
+            case DeviceAPI::StRunning:
                 ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
                 break;
-            case DSPDeviceSinkEngine::StError:
+            case DeviceAPI::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSinkAPI->errorMessage());
+                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
                 break;

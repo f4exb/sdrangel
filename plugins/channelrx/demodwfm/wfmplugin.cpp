@@ -50,12 +50,12 @@ PluginInstanceGUI* WFMPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, Baseb
 }
 #endif
 
-BasebandSampleSink* WFMPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* WFMPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
 {
     return new WFMDemod(deviceAPI);
 }
 
-ChannelSinkAPI* WFMPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* WFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new WFMDemod(deviceAPI);
 }

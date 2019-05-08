@@ -31,8 +31,6 @@ namespace Ui {
 
 class ChannelMarker;
 class PluginManager;
-class DeviceSourceAPI;
-class DeviceSinkAPI;
 
 class SDRGUI_API SamplingDeviceControl : public QWidget {
     Q_OBJECT

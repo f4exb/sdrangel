@@ -31,7 +31,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSinkAPI;
+class DeviceAPI;
 class SoapySDROutputThread;
 
 namespace SoapySDR
@@ -117,7 +117,7 @@ public:
         { }
     };
 
-    SoapySDROutput(DeviceSinkAPI *deviceAPI);
+    SoapySDROutput(DeviceAPI *deviceAPI);
     virtual ~SoapySDROutput();
     virtual void destroy();
 
@@ -181,7 +181,7 @@ public:
             QString& errorMessage);
 
 private:
-    DeviceSinkAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
     QMutex m_mutex;
     SoapySDROutputSettings m_settings;
     QString m_deviceDescription;

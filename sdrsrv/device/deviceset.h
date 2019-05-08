@@ -21,9 +21,8 @@
 #include <QTimer>
 
 class DSPDeviceSourceEngine;
-class DeviceSourceAPI;
+class DeviceAPI;
 class DSPDeviceSinkEngine;
-class DeviceSinkAPI;
 class PluginAPI;
 class ChannelSinkAPI;
 class ChannelSourceAPI;
@@ -33,9 +32,8 @@ class DeviceSet
 {
 public:
     DSPDeviceSourceEngine *m_deviceSourceEngine;
-    DeviceSourceAPI *m_deviceSourceAPI;
+    DeviceAPI *m_deviceAPI;
     DSPDeviceSinkEngine *m_deviceSinkEngine;
-    DeviceSinkAPI *m_deviceSinkAPI;
 
     DeviceSet(int tabIndex);
     ~DeviceSet();

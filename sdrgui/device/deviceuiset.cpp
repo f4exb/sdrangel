@@ -47,9 +47,8 @@ DeviceUISet::DeviceUISet(int tabIndex, bool rxElseTx, QTimer& timer)
     m_channelWindow = new ChannelWindow;
     m_samplingDeviceControl = new SamplingDeviceControl(tabIndex, rxElseTx);
     m_deviceSourceEngine = 0;
-    m_deviceSourceAPI = 0;
+    m_deviceAPI = 0;
     m_deviceSinkEngine = 0;
-    m_deviceSinkAPI = 0;
     m_deviceTabIndex = tabIndex;
 
     // m_spectrum needs to have its font to be set since it cannot be inherited from the main window
@@ -199,7 +198,7 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
                             qPrintable((*channelRegistrations)[i].m_channelIdURI),
                             qPrintable(channelConfig.m_channelIdURI));
                     BasebandSampleSink *rxChannel =
-                            (*channelRegistrations)[i].m_plugin->createRxChannelBS(m_deviceSourceAPI);
+                            (*channelRegistrations)[i].m_plugin->createRxChannelBS(m_deviceAPI);
                     PluginInstanceGUI *rxChannelGUI =
                             (*channelRegistrations)[i].m_plugin->createRxChannelGUI(this, rxChannel);
                     reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, rxChannelGUI);
@@ -280,7 +279,7 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
                             qPrintable((*channelRegistrations)[i].m_channelIdURI),
                             qPrintable(channelConfig.m_channelIdURI));
                     BasebandSampleSource *txChannel =
-                            (*channelRegistrations)[i].m_plugin->createTxChannelBS(m_deviceSinkAPI);
+                            (*channelRegistrations)[i].m_plugin->createTxChannelBS(m_deviceAPI);
                     PluginInstanceGUI *txChannelGUI =
                             (*channelRegistrations)[i].m_plugin->createTxChannelGUI(this, txChannel);
                     reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, txChannelGUI);

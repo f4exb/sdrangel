@@ -34,7 +34,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/dspcommands.h"
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 #include "util/db.h"
 
 #include "wfmmod.h"
@@ -52,7 +52,7 @@ const QString WFMMod::m_channelId = "WFMMod";
 const int WFMMod::m_levelNbSamples = 480; // every 10ms
 const int WFMMod::m_rfFilterFFTLength = 1024;
 
-WFMMod::WFMMod(DeviceSinkAPI *deviceAPI) :
+WFMMod::WFMMod(DeviceAPI *deviceAPI) :
     ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
     m_basebandSampleRate(384000),
@@ -97,8 +97,8 @@ WFMMod::WFMMod(DeviceSinkAPI *deviceAPI) :
 
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSource(m_threadedChannelizer);
+    m_deviceAPI->addChannelSourceAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -109,8 +109,8 @@ WFMMod::~WFMMod()
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(&m_audioFifo);
-    m_deviceAPI->removeChannelAPI(this);
-    m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
+    m_deviceAPI->removeChannelSourceAPI(this);
+    m_deviceAPI->removeChannelSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
     delete m_rfFilter;

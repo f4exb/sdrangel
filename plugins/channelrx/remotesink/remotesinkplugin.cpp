@@ -67,12 +67,12 @@ PluginInstanceGUI* RemoteSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet
 }
 #endif
 
-BasebandSampleSink* RemoteSinkPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* RemoteSinkPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
 {
     return new RemoteSink(deviceAPI);
 }
 
-ChannelSinkAPI* RemoteSinkPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* RemoteSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new RemoteSink(deviceAPI);
 }

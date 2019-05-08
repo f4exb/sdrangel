@@ -29,7 +29,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSinkAPI;
+class DeviceAPI;
 class XTRXOutputThread;
 struct DeviceXTRXParams;
 class FileRecord;
@@ -170,7 +170,7 @@ public:
         { }
     };
 
-    XTRXOutput(DeviceSinkAPI *deviceAPI);
+    XTRXOutput(DeviceAPI *deviceAPI);
     virtual ~XTRXOutput();
     virtual void destroy();
 
@@ -223,7 +223,7 @@ public:
     void getLPRange(float& minF, float& maxF, float& stepF) const;
 
 private:
-    DeviceSinkAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
     QMutex m_mutex;
     XTRXOutputSettings m_settings;
     XTRXOutputThread* m_XTRXOutputThread;

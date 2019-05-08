@@ -30,10 +30,11 @@
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/downchannelizer.h"
 #include "dsp/dspcommands.h"
+#include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspengine.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/hbfilterchainconverter.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 
 #include "localsinkthread.h"
 
@@ -44,7 +45,7 @@ MESSAGE_CLASS_DEFINITION(LocalSink::MsgConfigureChannelizer, Message)
 const QString LocalSink::m_channelIdURI = "sdrangel.channel.localsink";
 const QString LocalSink::m_channelId = "LocalSink";
 
-LocalSink::LocalSink(DeviceSourceAPI *deviceAPI) :
+LocalSink::LocalSink(DeviceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
         m_running(false),
@@ -61,8 +62,8 @@ LocalSink::LocalSink(DeviceSourceAPI *deviceAPI) :
 
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -72,8 +73,8 @@ LocalSink::~LocalSink()
 {
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
-    m_deviceAPI->removeChannelAPI(this);
-    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->removeChannelSinkAPI(this);
+    m_deviceAPI->removeChannelSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
 }

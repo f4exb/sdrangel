@@ -37,7 +37,7 @@
 
 #define ssbFftLen 1024
 
-class DeviceSourceAPI;
+class DeviceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
@@ -106,7 +106,7 @@ public:
         { }
     };
 
-    ChannelAnalyzer(DeviceSourceAPI *deviceAPI);
+    ChannelAnalyzer(DeviceAPI *deviceAPI);
 	virtual ~ChannelAnalyzer();
 	virtual void destroy() { delete this; }
 	void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
@@ -148,7 +148,7 @@ public:
     static const QString m_channelId;
 
 private:
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
     ChannelAnalyzerSettings m_settings;

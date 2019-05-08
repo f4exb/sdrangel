@@ -26,7 +26,7 @@ class DEVICES_API DevicePlutoSDRBox;
 
 /**
  * This structure refers to one physical device shared among parties (logical devices represented by
- * the DeviceSinkAPI or DeviceSourceAPI).
+ * the DeviceAPI with single Rx or Tx stream type).
  * It allows storing information on the common resources in one place and is shared among participants.
  * There is only one copy that is constructed by the first participant and destroyed by the last.
  * A participant knows it is the first or last by checking the lists of buddies (Rx + Tx).

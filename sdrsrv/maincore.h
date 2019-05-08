@@ -32,8 +32,6 @@
 class DSPEngine;
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
-class DeviceSourceAPI;
-class DeviceSinkAPI;
 class PluginAPI;
 class PluginInterface;
 class PluginManager;

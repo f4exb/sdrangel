@@ -30,7 +30,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSinkAPI;
+class DeviceAPI;
 class PlutoSDROutputThread;
 
 class PlutoSDROutput : public DeviceSampleSink {
@@ -78,7 +78,7 @@ public:
         { }
     };
 
-    PlutoSDROutput(DeviceSinkAPI *deviceAPI);
+    PlutoSDROutput(DeviceAPI *deviceAPI);
     ~PlutoSDROutput();
     virtual void destroy();
 
@@ -129,7 +129,7 @@ public:
     float getTemperature();
 
  private:
-    DeviceSinkAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
     QString m_deviceDescription;
     PlutoSDROutputSettings m_settings;
     bool m_running;

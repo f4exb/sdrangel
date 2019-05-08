@@ -35,7 +35,7 @@
 #include "mainwindow.h"
 
 #include "filesourcegui.h"
-#include <device/devicesourceapi.h>
+#include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 
 FileSourceGui::FileSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
@@ -54,7 +54,7 @@ FileSourceGui::FileSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_samplesCount(0),
 	m_tickCount(0),
 	m_enableNavTime(false),
-	m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
+	m_lastEngineState(DeviceAPI::StNotStarted)
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -62,7 +62,7 @@ FileSourceGui::FileSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	ui->fileNameText->setText(m_fileName);
 	ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 
-	connect(&(m_deviceUISet->m_deviceSourceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 
@@ -75,7 +75,7 @@ FileSourceGui::FileSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	ui->navTimeSlider->setEnabled(false);
 	ui->acceleration->setEnabled(false);
 
-    m_sampleSource = m_deviceUISet->m_deviceSourceAPI->getSampleSource();
+    m_sampleSource = m_deviceUISet->m_deviceAPI->getSampleSource();
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
@@ -271,24 +271,24 @@ void FileSourceGui::on_startStop_toggled(bool checked)
 
 void FileSourceGui::updateStatus()
 {
-    int state = m_deviceUISet->m_deviceSourceAPI->state();
+    int state = m_deviceUISet->m_deviceAPI->state();
 
     if(m_lastEngineState != state)
     {
         switch(state)
         {
-            case DSPDeviceSourceEngine::StNotStarted:
+            case DeviceAPI::StNotStarted:
                 ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
                 break;
-            case DSPDeviceSourceEngine::StIdle:
+            case DeviceAPI::StIdle:
                 ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
                 break;
-            case DSPDeviceSourceEngine::StRunning:
+            case DeviceAPI::StRunning:
                 ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
                 break;
-            case DSPDeviceSourceEngine::StError:
+            case DeviceAPI::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSourceAPI->errorMessage());
+                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
                 break;

@@ -28,7 +28,7 @@
 #include "limesdr/devicelimesdrshared.h"
 #include "limesdrinputsettings.h"
 
-class DeviceSourceAPI;
+class DeviceAPI;
 class LimeSDRInputThread;
 class FileRecord;
 class QNetworkAccessManager;
@@ -204,7 +204,7 @@ public:
         { }
     };
 
-    LimeSDRInput(DeviceSourceAPI *deviceAPI);
+    LimeSDRInput(DeviceAPI *deviceAPI);
     virtual ~LimeSDRInput();
     virtual void destroy();
 
@@ -255,7 +255,7 @@ public:
     DeviceLimeSDRParams::LimeType getLimeType() const;
 
 private:
-    DeviceSourceAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
     QMutex m_mutex;
     LimeSDRInputSettings m_settings;
     LimeSDRInputThread* m_limeSDRInputThread;

@@ -29,9 +29,8 @@ class GLSpectrumGUI;
 class ChannelWindow;
 class SamplingDeviceControl;
 class DSPDeviceSourceEngine;
-class DeviceSourceAPI;
+class DeviceAPI;
 class DSPDeviceSinkEngine;
-class DeviceSinkAPI;
 class ChannelMarker;
 class PluginAPI;
 
@@ -44,9 +43,8 @@ public:
     ChannelWindow *m_channelWindow;
     SamplingDeviceControl *m_samplingDeviceControl;
     DSPDeviceSourceEngine *m_deviceSourceEngine;
-    DeviceSourceAPI *m_deviceSourceAPI;
+    DeviceAPI *m_deviceAPI;
     DSPDeviceSinkEngine *m_deviceSinkEngine;
-    DeviceSinkAPI *m_deviceSinkAPI;
     QByteArray m_mainWindowState;
 
     DeviceUISet(int tabIndex, bool rxElseTx, QTimer& timer);

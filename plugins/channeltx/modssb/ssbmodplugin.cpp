@@ -66,12 +66,12 @@ PluginInstanceGUI* SSBModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, Ba
 }
 #endif
 
-BasebandSampleSource* SSBModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
+BasebandSampleSource* SSBModPlugin::createTxChannelBS(DeviceAPI *deviceAPI)
 {
     return new SSBMod(deviceAPI);
 }
 
-ChannelSourceAPI* SSBModPlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)
+ChannelSourceAPI* SSBModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
 {
     return new SSBMod(deviceAPI);
 }

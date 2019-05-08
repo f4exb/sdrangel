@@ -31,7 +31,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class SoapySDRInputThread;
 class FileRecord;
 
@@ -138,7 +138,7 @@ public:
         { }
     };
 
-    SoapySDRInput(DeviceSourceAPI *deviceAPI);
+    SoapySDRInput(DeviceAPI *deviceAPI);
     virtual ~SoapySDRInput();
     virtual void destroy();
 
@@ -204,7 +204,7 @@ public:
             QString& errorMessage);
 
 private:
-    DeviceSourceAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
     QMutex m_mutex;
     SoapySDRInputSettings m_settings;
     QString m_deviceDescription;

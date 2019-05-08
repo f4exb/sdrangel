@@ -33,7 +33,7 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class FileSourceThread;
-class DeviceSourceAPI;
+class DeviceAPI;
 
 class FileSourceInput : public DeviceSampleSource {
 	Q_OBJECT
@@ -275,7 +275,7 @@ public:
 		{ }
 	};
 
-	FileSourceInput(DeviceSourceAPI *deviceAPI);
+	FileSourceInput(DeviceAPI *deviceAPI);
 	virtual ~FileSourceInput();
 	virtual void destroy();
 
@@ -320,7 +320,7 @@ public:
             QString& errorMessage);
 
 	private:
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	FileSourceSettings m_settings;
 	std::ifstream m_ifstream;

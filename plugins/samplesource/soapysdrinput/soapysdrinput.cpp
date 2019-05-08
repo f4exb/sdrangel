@@ -27,8 +27,7 @@
 #include "SWGDeviceReport.h"
 #include "SWGSoapySDRReport.h"
 
-#include "device/devicesourceapi.h"
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/filerecord.h"
 #include "dsp/dspengine.h"
@@ -42,7 +41,7 @@ MESSAGE_CLASS_DEFINITION(SoapySDRInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(SoapySDRInput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(SoapySDRInput::MsgReportGainChange, Message)
 
-SoapySDRInput::SoapySDRInput(DeviceSourceAPI *deviceAPI) :
+SoapySDRInput::SoapySDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
     m_deviceDescription("SoapySDRInput"),
@@ -56,7 +55,7 @@ SoapySDRInput::SoapySDRInput(DeviceSourceAPI *deviceAPI) :
     initDeviceArgSettings(m_settings);
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
-    m_deviceAPI->addSink(m_fileSink);
+    m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -71,7 +70,7 @@ SoapySDRInput::~SoapySDRInput()
         stop();
     }
 
-    m_deviceAPI->removeSink(m_fileSink);
+    m_deviceAPI->removeAncillarySink(m_fileSink);
     delete m_fileSink;
 
     closeDevice();
@@ -99,7 +98,7 @@ bool SoapySDRInput::openDevice()
     {
         qDebug("SoapySDRInput::openDevice: look in Rx buddies");
 
-        DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
+        DeviceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
         DeviceSoapySDRShared *deviceSoapySDRShared = (DeviceSoapySDRShared*) sourceBuddy->getBuddySharedPtr();
 
         if (deviceSoapySDRShared == 0)
@@ -124,7 +123,7 @@ bool SoapySDRInput::openDevice()
     {
         qDebug("SoapySDRInput::openDevice: look in Tx buddies");
 
-        DeviceSinkAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
+        DeviceAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
         DeviceSoapySDRShared *deviceSoapySDRShared = (DeviceSoapySDRShared*) sinkBuddy->getBuddySharedPtr();
 
         if (deviceSoapySDRShared == 0)
@@ -149,7 +148,7 @@ bool SoapySDRInput::openDevice()
     {
         qDebug("SoapySDRInput::openDevice: open device here");
         DeviceSoapySDR& deviceSoapySDR = DeviceSoapySDR::instance();
-        m_deviceShared.m_device = deviceSoapySDR.openSoapySDR(m_deviceAPI->getSampleSourceSequence());
+        m_deviceShared.m_device = deviceSoapySDR.openSoapySDR(m_deviceAPI->getSamplingDeviceSequence());
 
         if (!m_deviceShared.m_device)
         {
@@ -398,8 +397,8 @@ SoapySDRInputThread *SoapySDRInput::findThread()
         SoapySDRInputThread *soapySDRInputThread = 0;
 
         // find a buddy that has allocated the thread
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+        const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceAPI*>::const_iterator it = sourceBuddies.begin();
 
         for (; it != sourceBuddies.end(); ++it)
         {
@@ -425,8 +424,8 @@ SoapySDRInputThread *SoapySDRInput::findThread()
 
 void SoapySDRInput::moveThreadToBuddy()
 {
-    const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-    std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+    const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+    std::vector<DeviceAPI*>::const_iterator it = sourceBuddies.begin();
 
     for (; it != sourceBuddies.end(); ++it)
     {
@@ -520,8 +519,8 @@ bool SoapySDRInput::start()
             }
 
             // remove old thread address from buddies (reset in all buddies). The address being held only in the owning source.
-            const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-            std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+            const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+            std::vector<DeviceAPI*>::const_iterator it = sourceBuddies.begin();
 
             for (; it != sourceBuddies.end(); ++it) {
                 ((DeviceSoapySDRShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
@@ -605,8 +604,8 @@ void SoapySDRInput::stop()
         m_thread = 0;
 
         // remove old thread address from buddies (reset in all buddies)
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+        const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceAPI*>::const_iterator it = sourceBuddies.begin();
 
         for (; it != sourceBuddies.end(); ++it) {
             ((DeviceSoapySDRShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
@@ -654,8 +653,8 @@ void SoapySDRInput::stop()
         }
 
         // remove old thread address from buddies (reset in all buddies). The address being held only in the owning source.
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator it = sourceBuddies.begin();
+        const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceAPI*>::const_iterator it = sourceBuddies.begin();
 
         for (; it != sourceBuddies.end(); ++it) {
             ((DeviceSoapySDRShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
@@ -824,14 +823,14 @@ bool SoapySDRInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initAcquisition())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startAcquisition();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopAcquisition();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {
@@ -1275,8 +1274,8 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
     if (forwardChangeToBuddies)
     {
         // send to buddies
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
 
         for (const auto &itSource : sourceBuddies)
         {
@@ -1286,7 +1285,7 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
                     (int) settings.m_fcPos,
                     settings.m_devSampleRate,
                     true);
-            itSource->getSampleSourceInputMessageQueue()->push(report);
+            itSource->getSamplingDeviceInputMessageQueue()->push(report);
         }
 
         for (const auto &itSink : sinkBuddies)
@@ -1297,28 +1296,28 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
                     (int) settings.m_fcPos,
                     settings.m_devSampleRate,
                     true);
-            itSink->getSampleSinkInputMessageQueue()->push(report);
+            itSink->getSamplingDeviceInputMessageQueue()->push(report);
         }
     }
 
     if (deviceArgsChanged)
     {
         // send to buddies
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
 
         for (const auto &itSource : sourceBuddies)
         {
             DeviceSoapySDRShared::MsgReportDeviceArgsChange *report = DeviceSoapySDRShared::MsgReportDeviceArgsChange::create(
                     settings.m_deviceArgSettings);
-            itSource->getSampleSourceInputMessageQueue()->push(report);
+            itSource->getSamplingDeviceInputMessageQueue()->push(report);
         }
 
         for (const auto &itSink : sinkBuddies)
         {
             DeviceSoapySDRShared::MsgReportDeviceArgsChange *report = DeviceSoapySDRShared::MsgReportDeviceArgsChange::create(
                     settings.m_deviceArgSettings);
-            itSink->getSampleSinkInputMessageQueue()->push(report);
+            itSink->getSamplingDeviceInputMessageQueue()->push(report);
         }
     }
 

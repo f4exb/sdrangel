@@ -29,8 +29,7 @@
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "dsp/filerecord.h"
-#include "device/devicesourceapi.h"
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 #include "hackrf/devicehackrfvalues.h"
 #include "hackrf/devicehackrfshared.h"
 
@@ -42,7 +41,7 @@ MESSAGE_CLASS_DEFINITION(HackRFInput::MsgReportHackRF, Message)
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgStartStop, Message)
 
-HackRFInput::HackRFInput(DeviceSourceAPI *deviceAPI) :
+HackRFInput::HackRFInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),
@@ -53,7 +52,7 @@ HackRFInput::HackRFInput(DeviceSourceAPI *deviceAPI) :
     openDevice();
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
-    m_deviceAPI->addSink(m_fileSink);
+    m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 
@@ -70,7 +69,7 @@ HackRFInput::~HackRFInput()
         stop();
     }
 
-    m_deviceAPI->removeSink(m_fileSink);
+    m_deviceAPI->removeAncillarySink(m_fileSink);
     delete m_fileSink;
     closeDevice();
 	m_deviceAPI->setBuddySharedPtr(0);
@@ -96,7 +95,7 @@ bool HackRFInput::openDevice()
 
     if (m_deviceAPI->getSinkBuddies().size() > 0)
     {
-        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
+        DeviceAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
         DeviceHackRFParams *buddySharedParams = (DeviceHackRFParams *) buddy->getBuddySharedPtr();
 
         if (buddySharedParams == 0)
@@ -116,9 +115,9 @@ bool HackRFInput::openDevice()
     }
     else
     {
-        if ((m_dev = DeviceHackRF::open_hackrf(qPrintable(m_deviceAPI->getSampleSourceSerial()))) == 0)
+        if ((m_dev = DeviceHackRF::open_hackrf(qPrintable(m_deviceAPI->getSamplingDeviceSerial()))) == 0)
         {
-            qCritical("HackRFInput::openDevice: could not open HackRF %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
+            qCritical("HackRFInput::openDevice: could not open HackRF %s", qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
             return false;
         }
 
@@ -296,14 +295,14 @@ bool HackRFInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initAcquisition())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startAcquisition();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopAcquisition();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {
@@ -450,9 +449,9 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
         if (m_deviceAPI->getSinkBuddies().size() > 0) // forward to buddy if necessary
 	    {
-	        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
+	        DeviceAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
             DeviceHackRFShared::MsgSynchronizeFrequency *freqMsg = DeviceHackRFShared::MsgSynchronizeFrequency::create(deviceCenterFrequency);
-	        buddy->getSampleSinkInputMessageQueue()->push(freqMsg);
+	        buddy->getSamplingDeviceInputMessageQueue()->push(freqMsg);
 	    }
 
 		forwardChange = true;

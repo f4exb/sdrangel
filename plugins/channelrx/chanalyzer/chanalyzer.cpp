@@ -19,7 +19,7 @@
 #include <QDebug>
 #include <stdio.h>
 
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 #include "audio/audiooutput.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/downchannelizer.h"
@@ -32,7 +32,7 @@ MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgReportChannelSampleRateChanged, Mes
 const QString ChannelAnalyzer::m_channelIdURI = "sdrangel.channel.chanalyzer";
 const QString ChannelAnalyzer::m_channelId = "ChannelAnalyzer";
 
-ChannelAnalyzer::ChannelAnalyzer(DeviceSourceAPI *deviceAPI) :
+ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
         m_sampleSink(0),
@@ -60,14 +60,14 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceSourceAPI *deviceAPI) :
 
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelSinkAPI(this);
 }
 
 ChannelAnalyzer::~ChannelAnalyzer()
 {
-	m_deviceAPI->removeChannelAPI(this);
-    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->removeChannelSinkAPI(this);
+    m_deviceAPI->removeChannelSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
     delete SSBFilter;

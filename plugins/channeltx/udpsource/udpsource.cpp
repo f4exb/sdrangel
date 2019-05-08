@@ -24,7 +24,7 @@
 #include "SWGChannelReport.h"
 #include "SWGUDPSourceReport.h"
 
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 #include "dsp/upchannelizer.h"
 #include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/dspcommands.h"
@@ -41,7 +41,7 @@ MESSAGE_CLASS_DEFINITION(UDPSource::MsgResetReadIndex, Message)
 const QString UDPSource::m_channelIdURI = "sdrangel.channeltx.udpsource";
 const QString UDPSource::m_channelId = "UDPSource";
 
-UDPSource::UDPSource(DeviceSinkAPI *deviceAPI) :
+UDPSource::UDPSource(DeviceAPI *deviceAPI) :
     ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
     m_basebandSampleRate(48000),
@@ -80,8 +80,8 @@ UDPSource::UDPSource(DeviceSinkAPI *deviceAPI) :
 
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSource(m_threadedChannelizer);
+    m_deviceAPI->addChannelSourceAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -91,8 +91,8 @@ UDPSource::~UDPSource()
 {
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
-    m_deviceAPI->removeChannelAPI(this);
-    m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
+    m_deviceAPI->removeChannelSourceAPI(this);
+    m_deviceAPI->removeChannelSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
     delete m_SSBFilter;

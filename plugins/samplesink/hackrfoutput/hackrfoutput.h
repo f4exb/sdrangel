@@ -29,7 +29,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSinkAPI;
+class DeviceAPI;
 class HackRFOutputThread;
 
 class HackRFOutput : public DeviceSampleSink {
@@ -95,7 +95,7 @@ public:
 		{ }
 	};
 
-	HackRFOutput(DeviceSinkAPI *deviceAPI);
+	HackRFOutput(DeviceAPI *deviceAPI);
 	virtual ~HackRFOutput();
 	virtual void destroy();
 
@@ -134,7 +134,7 @@ public:
             QString& errorMessage);
 
 private:
-	DeviceSinkAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	HackRFOutputSettings m_settings;
 	struct hackrf_device* m_dev;

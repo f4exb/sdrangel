@@ -25,7 +25,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 
 #include "atvdemod.h"
 
@@ -39,7 +39,7 @@ const QString ATVDemod::m_channelIdURI = "sdrangel.channel.demodatv";
 const QString ATVDemod::m_channelId = "ATVDemod";
 const int ATVDemod::m_ssbFftLen = 1024;
 
-ATVDemod::ATVDemod(DeviceSourceAPI *deviceAPI) :
+ATVDemod::ATVDemod(DeviceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
         m_scopeSink(0),
@@ -90,16 +90,16 @@ ATVDemod::ATVDemod(DeviceSourceAPI *deviceAPI) :
 
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelSinkAPI(this);
 
     connect(m_channelizer, SIGNAL(inputSampleRateChanged()), this, SLOT(channelSampleRateChanged()));
 }
 
 ATVDemod::~ATVDemod()
 {
-    m_deviceAPI->removeChannelAPI(this);
-    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->removeChannelSinkAPI(this);
+    m_deviceAPI->removeChannelSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
     delete m_DSBFilter;

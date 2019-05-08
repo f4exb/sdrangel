@@ -31,7 +31,7 @@
 #include "airspyinput.h"
 #include "airspyplugin.h"
 
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 #include "dsp/filerecord.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -45,7 +45,7 @@ MESSAGE_CLASS_DEFINITION(AirspyInput::MsgFileRecord, Message)
 const qint64 AirspyInput::loLowLimitFreq = 24000000L;
 const qint64 AirspyInput::loHighLimitFreq = 1900000000L;
 
-AirspyInput::AirspyInput(DeviceSourceAPI *deviceAPI) :
+AirspyInput::AirspyInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),
@@ -55,7 +55,7 @@ AirspyInput::AirspyInput(DeviceSourceAPI *deviceAPI) :
 {
     openDevice();
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
-    m_deviceAPI->addSink(m_fileSink);
+    m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -70,7 +70,7 @@ AirspyInput::~AirspyInput()
         stop();
     }
 
-    m_deviceAPI->removeSink(m_fileSink);
+    m_deviceAPI->removeAncillarySink(m_fileSink);
     delete m_fileSink;
     closeDevice();
 }
@@ -102,7 +102,7 @@ bool AirspyInput::openDevice()
         return false;
     }
 
-    int device = m_deviceAPI->getSampleSourceSequence();
+    int device = m_deviceAPI->getSamplingDeviceSequence();
 
     if ((m_dev = open_airspy_from_sequence(device)) == 0)
     {
@@ -301,14 +301,14 @@ bool AirspyInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initAcquisition())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startAcquisition();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopAcquisition();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {

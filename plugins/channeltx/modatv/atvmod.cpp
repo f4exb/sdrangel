@@ -31,7 +31,7 @@
 #include "dsp/upchannelizer.h"
 #include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/dspcommands.h"
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 #include "util/db.h"
 
 #include "atvmod.h"
@@ -58,7 +58,7 @@ const int ATVMod::m_nbBars = 6;
 const int ATVMod::m_cameraFPSTestNbFrames = 100;
 const int ATVMod::m_ssbFftLen = 1024;
 
-ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
+ATVMod::ATVMod(DeviceAPI *deviceAPI) :
     ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
     m_outputSampleRate(1000000),
@@ -103,8 +103,8 @@ ATVMod::ATVMod(DeviceSinkAPI *deviceAPI) :
 
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSource(m_threadedChannelizer);
+    m_deviceAPI->addChannelSourceAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -120,8 +120,8 @@ ATVMod::~ATVMod()
 	}
 
     releaseCameras();
-	m_deviceAPI->removeChannelAPI(this);
-    m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
+	m_deviceAPI->removeChannelSourceAPI(this);
+    m_deviceAPI->removeChannelSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
     delete m_SSBFilter;

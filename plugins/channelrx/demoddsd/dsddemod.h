@@ -43,7 +43,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
@@ -96,7 +96,7 @@ public:
         { }
     };
 
-    DSDDemod(DeviceSourceAPI *deviceAPI);
+    DSDDemod(DeviceAPI *deviceAPI);
 	~DSDDemod();
 	virtual void destroy() { delete this; }
 	void setScopeXYSink(BasebandSampleSink* sampleSink) { m_scopeXY = sampleSink; }
@@ -205,7 +205,7 @@ private:
 		RSRunning
 	};
 
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
 

@@ -33,7 +33,7 @@
 
 #include <dsp/downchannelizer.h>
 #include "dsp/threadedbasebandsamplesink.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -48,7 +48,7 @@ const QString WFMDemod::m_channelIdURI = "sdrangel.channel.wfmdemod";
 const QString WFMDemod::m_channelId = "WFMDemod";
 const int WFMDemod::m_udpBlockSize = 512;
 
-WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
+WFMDemod::WFMDemod(DeviceAPI* deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
         m_inputSampleRate(384000),
@@ -77,8 +77,8 @@ WFMDemod::WFMDemod(DeviceSourceAPI* deviceAPI) :
 
 	m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -90,8 +90,8 @@ WFMDemod::~WFMDemod()
     delete m_networkManager;
 	DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
 
-	m_deviceAPI->removeChannelAPI(this);
-	m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->removeChannelSinkAPI(this);
+	m_deviceAPI->removeChannelSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
     delete m_rfFilter;

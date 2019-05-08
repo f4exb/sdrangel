@@ -35,7 +35,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class RemoteSinkThread;
@@ -109,7 +109,7 @@ public:
         { }
     };
 
-    RemoteSink(DeviceSourceAPI *deviceAPI);
+    RemoteSink(DeviceAPI *deviceAPI);
     virtual ~RemoteSink();
     virtual void destroy() { delete this; }
 
@@ -154,7 +154,7 @@ signals:
     void dataBlockAvailable(RemoteDataBlock *dataBlock);
 
 private:
-    DeviceSourceAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
     bool m_running;

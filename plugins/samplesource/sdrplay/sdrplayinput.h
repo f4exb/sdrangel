@@ -30,7 +30,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class SDRPlayThread;
 class FileRecord;
 
@@ -135,7 +135,7 @@ public:
         { }
     };
 
-    SDRPlayInput(DeviceSourceAPI *deviceAPI);
+    SDRPlayInput(DeviceAPI *deviceAPI);
     virtual ~SDRPlayInput();
     virtual void destroy();
 
@@ -181,7 +181,7 @@ public:
     SDRPlayVariant getVariant() const { return m_variant; }
 
 private:
-    DeviceSourceAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
     QMutex m_mutex;
     SDRPlayVariant m_variant;
     SDRPlaySettings m_settings;

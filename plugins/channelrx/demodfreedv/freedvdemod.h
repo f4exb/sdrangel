@@ -41,7 +41,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
@@ -111,7 +111,7 @@ public:
         { }
     };
 
-    FreeDVDemod(DeviceSourceAPI *deviceAPI);
+    FreeDVDemod(DeviceAPI *deviceAPI);
 	virtual ~FreeDVDemod();
 	virtual void destroy() { delete this; }
 	void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
@@ -342,7 +342,7 @@ private:
 		{ }
 	};
 
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
     FreeDVDemodSettings m_settings;

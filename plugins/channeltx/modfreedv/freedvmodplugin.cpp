@@ -66,12 +66,12 @@ PluginInstanceGUI* FreeDVModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet,
 }
 #endif
 
-BasebandSampleSource* FreeDVModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
+BasebandSampleSource* FreeDVModPlugin::createTxChannelBS(DeviceAPI *deviceAPI)
 {
     return new FreeDVMod(deviceAPI);
 }
 
-ChannelSourceAPI* FreeDVModPlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)
+ChannelSourceAPI* FreeDVModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
 {
     return new FreeDVMod(deviceAPI);
 }

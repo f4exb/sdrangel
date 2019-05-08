@@ -156,7 +156,7 @@ bool LimeSDRInputPlugin::findSerial(const char *lmsInfoStr, std::string& serial)
     }
 }
 
-DeviceSampleSource *LimeSDRInputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
+DeviceSampleSource *LimeSDRInputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceAPI *deviceAPI)
 {
     if (sourceId == m_deviceTypeID)
     {

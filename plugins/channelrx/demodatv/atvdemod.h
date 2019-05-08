@@ -40,7 +40,7 @@
 #include "util/message.h"
 #include "gui/tvscreen.h"
 
-class DeviceSourceAPI;
+class DeviceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
@@ -192,7 +192,7 @@ public:
         { }
     };
 
-    ATVDemod(DeviceSourceAPI *deviceAPI);
+    ATVDemod(DeviceAPI *deviceAPI);
 	~ATVDemod();
 	virtual void destroy() { delete this; }
 	void setScopeSink(BasebandSampleSink* scopeSink) { m_scopeSink = scopeSink; }
@@ -405,7 +405,7 @@ private:
         bool m_start;
     };
 
-    DeviceSourceAPI* m_deviceAPI;
+    DeviceAPI* m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
 

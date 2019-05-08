@@ -34,7 +34,7 @@
 
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
-class DeviceSinkAPI;
+class DeviceAPI;
 class RemoteSourceThread;
 class RemoteDataBlock;
 class QNetworkAccessManager;
@@ -180,7 +180,7 @@ public:
         { }
     };
 
-    RemoteSource(DeviceSinkAPI *deviceAPI);
+    RemoteSource(DeviceAPI *deviceAPI);
     ~RemoteSource();
 
     virtual void destroy() { delete this; }
@@ -218,7 +218,7 @@ public:
     static const QString m_channelId;
 
 private:
-    DeviceSinkAPI* m_deviceAPI;
+    DeviceAPI* m_deviceAPI;
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
     RemoteDataQueue m_dataQueue;

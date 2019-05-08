@@ -66,12 +66,12 @@ PluginInstanceGUI* NFMModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, Ba
 }
 #endif
 
-BasebandSampleSource* NFMModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
+BasebandSampleSource* NFMModPlugin::createTxChannelBS(DeviceAPI *deviceAPI)
 {
     return new NFMMod(deviceAPI);
 }
 
-ChannelSourceAPI* NFMModPlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)
+ChannelSourceAPI* NFMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
 {
     return new NFMMod(deviceAPI);
 }

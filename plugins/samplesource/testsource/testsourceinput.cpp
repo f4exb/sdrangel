@@ -27,7 +27,7 @@
 #include "SWGDeviceState.h"
 
 #include "testsourceinput.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 #include "testsourcethread.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -38,7 +38,7 @@ MESSAGE_CLASS_DEFINITION(TestSourceInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(TestSourceInput::MsgStartStop, Message)
 
 
-TestSourceInput::TestSourceInput(DeviceSourceAPI *deviceAPI) :
+TestSourceInput::TestSourceInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_testSourceThread(0),
@@ -47,7 +47,7 @@ TestSourceInput::TestSourceInput(DeviceSourceAPI *deviceAPI) :
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
-    m_deviceAPI->addSink(m_fileSink);
+    m_deviceAPI->addAncillarySink(m_fileSink);
 
     if (!m_sampleFifo.setSize(96000 * 4)) {
         qCritical("TestSourceInput::TestSourceInput: Could not allocate SampleFifo");
@@ -66,7 +66,7 @@ TestSourceInput::~TestSourceInput()
         stop();
     }
 
-    m_deviceAPI->removeSink(m_fileSink);
+    m_deviceAPI->removeAncillarySink(m_fileSink);
     delete m_fileSink;
 }
 
@@ -214,14 +214,14 @@ bool TestSourceInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initAcquisition())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startAcquisition();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopAcquisition();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {

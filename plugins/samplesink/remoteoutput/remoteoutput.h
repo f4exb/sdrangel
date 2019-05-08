@@ -32,7 +32,7 @@
 #include "remoteoutputsettings.h"
 
 class RemoteOutputThread;
-class DeviceSinkAPI;
+class DeviceAPI;
 class QNetworkAccessManager;
 class QNetworkReply;
 class QJsonObject;
@@ -122,7 +122,7 @@ public:
         { }
     };
 
-	RemoteOutput(DeviceSinkAPI *deviceAPI);
+	RemoteOutput(DeviceAPI *deviceAPI);
 	virtual ~RemoteOutput();
 	virtual void destroy();
 
@@ -166,7 +166,7 @@ public:
             QString& errorMessage);
 
 private:
-    DeviceSinkAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	RemoteOutputSettings m_settings;
 	uint64_t m_centerFrequency;

@@ -27,8 +27,7 @@
 #include "dsp/filerecord.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "device/devicesourceapi.h"
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 #include "plutosdr/deviceplutosdrparams.h"
 #include "plutosdr/deviceplutosdrbox.h"
 
@@ -41,7 +40,7 @@ MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgConfigurePlutoSDR, Message)
 MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgStartStop, Message)
 
-PlutoSDRInput::PlutoSDRInput(DeviceSourceAPI *deviceAPI) :
+PlutoSDRInput::PlutoSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_fileSink(0),
     m_deviceDescription("PlutoSDRInput"),
@@ -61,7 +60,7 @@ PlutoSDRInput::PlutoSDRInput(DeviceSourceAPI *deviceAPI) :
     resumeBuddies();
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
-    m_deviceAPI->addSink(m_fileSink);
+    m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -71,7 +70,7 @@ PlutoSDRInput::~PlutoSDRInput()
 {
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
-    m_deviceAPI->removeSink(m_fileSink);
+    m_deviceAPI->removeAncillarySink(m_fileSink);
     delete m_fileSink;
     suspendBuddies();
     closeDevice();
@@ -224,14 +223,14 @@ bool PlutoSDRInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initAcquisition())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startAcquisition();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopAcquisition();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {
@@ -276,7 +275,7 @@ bool PlutoSDRInput::openDevice()
     {
         qDebug("PlutoSDRInput::openDevice: look at Tx buddy");
 
-        DeviceSinkAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
+        DeviceAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
         DevicePlutoSDRShared* buddySharedPtr = (DevicePlutoSDRShared*) sinkBuddy->getBuddySharedPtr();
         m_deviceShared.m_deviceParams = buddySharedPtr->m_deviceParams;
 
@@ -298,7 +297,7 @@ bool PlutoSDRInput::openDevice()
 
         m_deviceShared.m_deviceParams = new DevicePlutoSDRParams();
         char serial[256];
-        strcpy(serial, qPrintable(m_deviceAPI->getSampleSourceSerial()));
+        strcpy(serial, qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
         m_deviceShared.m_deviceParams->open(serial);
     }
 
@@ -332,7 +331,7 @@ void PlutoSDRInput::suspendBuddies()
 
     for (unsigned int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
     {
-        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
+        DeviceAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
         DevicePlutoSDRShared *buddyShared = (DevicePlutoSDRShared *) buddy->getBuddySharedPtr();
 
         if (buddyShared->m_thread) {
@@ -347,7 +346,7 @@ void PlutoSDRInput::resumeBuddies()
 
     for (unsigned int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
     {
-        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
+        DeviceAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
         DevicePlutoSDRShared *buddyShared = (DevicePlutoSDRShared *) buddy->getBuddySharedPtr();
 
         if (buddyShared->m_thread) {
@@ -459,8 +458,8 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
 
     if (suspendAllOtherThreads)
     {
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+        const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceAPI*>::const_iterator itSink = sinkBuddies.begin();
 
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
@@ -610,8 +609,8 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
 
     if (suspendAllOtherThreads)
     {
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+        const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceAPI*>::const_iterator itSink = sinkBuddies.begin();
 
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
@@ -633,8 +632,8 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
 
         qDebug("PlutoSDRInput::applySettings: forwardChangeOtherDSP");
 
-        const std::vector<DeviceSinkAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-        std::vector<DeviceSinkAPI*>::const_iterator itSink = sinkBuddies.begin();
+        const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+        std::vector<DeviceAPI*>::const_iterator itSink = sinkBuddies.begin();
 
         for (; itSink != sinkBuddies.end(); ++itSink)
         {
@@ -645,13 +644,13 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
                     settings.m_lpfFIRBW,
                     settings.m_LOppmTenths);
 
-            if ((*itSink)->getSampleSinkGUIMessageQueue())
+            if ((*itSink)->getSamplingDeviceGUIMessageQueue())
             {
                 DevicePlutoSDRShared::MsgCrossReportToBuddy *msgToGUI = new DevicePlutoSDRShared::MsgCrossReportToBuddy(*msg);
-                (*itSink)->getSampleSinkGUIMessageQueue()->push(msgToGUI);
+                (*itSink)->getSamplingDeviceGUIMessageQueue()->push(msgToGUI);
             }
 
-            (*itSink)->getSampleSinkInputMessageQueue()->push(msg);
+            (*itSink)->getSamplingDeviceInputMessageQueue()->push(msg);
         }
     }
 

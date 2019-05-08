@@ -66,12 +66,12 @@ PluginInstanceGUI* FreqTrackerPlugin::createRxChannelGUI(DeviceUISet *deviceUISe
 }
 #endif
 
-BasebandSampleSink* FreqTrackerPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* FreqTrackerPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
 {
     return new FreqTracker(deviceAPI);
 }
 
-ChannelSinkAPI* FreqTrackerPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* FreqTrackerPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new FreqTracker(deviceAPI);
 }

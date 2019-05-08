@@ -66,12 +66,12 @@ PluginInstanceGUI* RemoteSourcePlugin::createTxChannelGUI(DeviceUISet *deviceUIS
 }
 #endif
 
-BasebandSampleSource* RemoteSourcePlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
+BasebandSampleSource* RemoteSourcePlugin::createTxChannelBS(DeviceAPI *deviceAPI)
 {
     return new RemoteSource(deviceAPI);
 }
 
-ChannelSourceAPI* RemoteSourcePlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)
+ChannelSourceAPI* RemoteSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI)
 {
     return new RemoteSource(deviceAPI);
 }

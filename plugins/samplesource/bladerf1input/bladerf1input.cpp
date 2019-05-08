@@ -27,10 +27,11 @@
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
+#include "dsp/dspdevicesourceengine.h"
+#include "dsp/dspdevicesinkengine.h"
 #include "dsp/dspengine.h"
 #include "dsp/filerecord.h"
-#include "device/devicesourceapi.h"
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 
 #include "bladerf1input.h"
 #include "bladerf1inputthread.h"
@@ -39,7 +40,7 @@ MESSAGE_CLASS_DEFINITION(Bladerf1Input::MsgConfigureBladerf1, Message)
 MESSAGE_CLASS_DEFINITION(Bladerf1Input::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(Bladerf1Input::MsgFileRecord, Message)
 
-Bladerf1Input::Bladerf1Input(DeviceSourceAPI *deviceAPI) :
+Bladerf1Input::Bladerf1Input(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),
@@ -49,7 +50,7 @@ Bladerf1Input::Bladerf1Input(DeviceSourceAPI *deviceAPI) :
 {
     openDevice();
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
-    m_deviceAPI->addSink(m_fileSink);
+    m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 
@@ -66,7 +67,7 @@ Bladerf1Input::~Bladerf1Input()
         stop();
     }
 
-    m_deviceAPI->removeSink(m_fileSink);
+    m_deviceAPI->removeAncillarySink(m_fileSink);
     delete m_fileSink;
     closeDevice();
     m_deviceAPI->setBuddySharedPtr(0);
@@ -94,7 +95,7 @@ bool Bladerf1Input::openDevice()
 
     if (m_deviceAPI->getSinkBuddies().size() > 0)
     {
-        DeviceSinkAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
+        DeviceAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
         DeviceBladeRF1Params *buddySharedParams = (DeviceBladeRF1Params *) sinkBuddy->getBuddySharedPtr();
 
         if (buddySharedParams == 0)
@@ -114,9 +115,9 @@ bool Bladerf1Input::openDevice()
     }
     else
     {
-        if (!DeviceBladeRF1::open_bladerf(&m_dev, qPrintable(m_deviceAPI->getSampleSourceSerial())))
+        if (!DeviceBladeRF1::open_bladerf(&m_dev, qPrintable(m_deviceAPI->getSamplingDeviceSerial())))
         {
-            qCritical("BladerfInput::start: could not open BladeRF %s", qPrintable(m_deviceAPI->getSampleSourceSerial()));
+            qCritical("BladerfInput::start: could not open BladeRF %s", qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
             return false;
         }
 
@@ -313,14 +314,14 @@ bool Bladerf1Input::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initAcquisition())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startAcquisition();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopAcquisition();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {
@@ -408,7 +409,7 @@ bool Bladerf1Input::applySettings(const BladeRF1InputSettings& settings, bool fo
 
 		    if (m_deviceAPI->getSinkBuddies().size() > 0)
 		    {
-		        DeviceSinkAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
+		        DeviceAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
 
 		        if (buddy->getDeviceSinkEngine()->state() == DSPDeviceSinkEngine::StRunning) { // Tx side running
 		            changeSettings = false;

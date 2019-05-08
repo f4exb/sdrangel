@@ -26,7 +26,7 @@
 
 #include "export.h"
 
-class DeviceSourceAPI;
+class DeviceAPI;
 
 namespace SWGSDRangel
 {
@@ -81,8 +81,8 @@ public:
     void setIndexInDeviceSet(int indexInDeviceSet) { m_indexInDeviceSet = indexInDeviceSet; }
     int getDeviceSetIndex() const { return m_deviceSetIndex; }
     void setDeviceSetIndex(int deviceSetIndex) { m_deviceSetIndex = deviceSetIndex; }
-    DeviceSourceAPI *getDeviceSourceAPI() { return m_deviceSourceAPI; }
-    void setDeviceSourceAPI(DeviceSourceAPI *deviceSourceAPI) { m_deviceSourceAPI = deviceSourceAPI; }
+    DeviceAPI *getDeviceSourceAPI() { return m_deviceSourceAPI; }
+    void setDeviceSourceAPI(DeviceAPI *deviceSourceAPI) { m_deviceSourceAPI = deviceSourceAPI; }
     uint64_t getUID() const { return m_uid; }
 
 private:
@@ -93,7 +93,7 @@ private:
 
     int m_indexInDeviceSet;
     int m_deviceSetIndex;
-    DeviceSourceAPI *m_deviceSourceAPI;
+    DeviceAPI *m_deviceSourceAPI;
     uint64_t m_uid;
 };
 

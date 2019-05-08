@@ -28,7 +28,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class AirspyThread;
 class FileRecord;
 
@@ -96,7 +96,7 @@ public:
         { }
     };
 
-	AirspyInput(DeviceSourceAPI *deviceAPI);
+	AirspyInput(DeviceAPI *deviceAPI);
 	virtual ~AirspyInput();
 	virtual void destroy();
 
@@ -144,7 +144,7 @@ public:
 	static const qint64 loHighLimitFreq;
 
 private:
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	AirspySettings m_settings;
 	struct airspy_device* m_dev;

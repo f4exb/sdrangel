@@ -66,12 +66,12 @@ PluginInstanceGUI* WFMModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, Ba
 }
 #endif
 
-BasebandSampleSource* WFMModPlugin::createTxChannelBS(DeviceSinkAPI *deviceAPI)
+BasebandSampleSource* WFMModPlugin::createTxChannelBS(DeviceAPI *deviceAPI)
 {
     return new WFMMod(deviceAPI);
 }
 
-ChannelSourceAPI* WFMModPlugin::createTxChannelCS(DeviceSinkAPI *deviceAPI)
+ChannelSourceAPI* WFMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
 {
     return new WFMMod(deviceAPI);
 }

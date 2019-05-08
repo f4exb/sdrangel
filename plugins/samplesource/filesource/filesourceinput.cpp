@@ -30,9 +30,10 @@
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
+#include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspengine.h"
 #include "dsp/filerecord.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 
 #include "filesourceinput.h"
 #include "filesourcethread.h"
@@ -49,7 +50,7 @@ MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamData, Message
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportHeaderCRC, Message)
 
-FileSourceInput::FileSourceInput(DeviceSourceAPI *deviceAPI) :
+FileSourceInput::FileSourceInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_fileSourceThread(NULL),
@@ -347,14 +348,14 @@ bool FileSourceInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initAcquisition())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startAcquisition();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopAcquisition();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {

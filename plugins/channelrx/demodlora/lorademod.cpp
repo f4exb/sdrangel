@@ -25,7 +25,7 @@
 #include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/dspcommands.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 
 #include "lorademod.h"
 #include "lorabits.h"
@@ -36,7 +36,7 @@ MESSAGE_CLASS_DEFINITION(LoRaDemod::MsgConfigureChannelizer, Message)
 const QString LoRaDemod::m_channelIdURI = "sdrangel.channel.lorademod";
 const QString LoRaDemod::m_channelId = "LoRaDemod";
 
-LoRaDemod::LoRaDemod(DeviceSourceAPI* deviceAPI) :
+LoRaDemod::LoRaDemod(DeviceAPI* deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
         m_sampleSink(0),
@@ -69,8 +69,8 @@ LoRaDemod::LoRaDemod(DeviceSourceAPI* deviceAPI) :
 
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelSinkAPI(this);
 }
 
 LoRaDemod::~LoRaDemod()
@@ -86,8 +86,8 @@ LoRaDemod::~LoRaDemod()
 	if (finetune)
 		delete [] finetune;
 
-	m_deviceAPI->removeChannelAPI(this);
-    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+	m_deviceAPI->removeChannelSinkAPI(this);
+    m_deviceAPI->removeChannelSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
 }

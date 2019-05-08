@@ -28,7 +28,7 @@
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "dsp/filerecord.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 
 #include "fcdproplusinput.h"
 #include "fcdproplusthread.h"
@@ -39,7 +39,7 @@ MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgConfigureFCDProPlus, Message)
 MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgFileRecord, Message)
 
-FCDProPlusInput::FCDProPlusInput(DeviceSourceAPI *deviceAPI) :
+FCDProPlusInput::FCDProPlusInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_dev(0),
 	m_settings(),
@@ -50,7 +50,7 @@ FCDProPlusInput::FCDProPlusInput(DeviceSourceAPI *deviceAPI) :
     m_fcdFIFO.setSize(20*fcd_traits<ProPlus>::convBufSize);
     openDevice();
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
-    m_deviceAPI->addSink(m_fileSink);
+    m_deviceAPI->addAncillarySink(m_fileSink);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
@@ -64,7 +64,7 @@ FCDProPlusInput::~FCDProPlusInput()
         stop();
     }
 
-    m_deviceAPI->removeSink(m_fileSink);
+    m_deviceAPI->removeAncillarySink(m_fileSink);
     delete m_fileSink;
 
     closeDevice();
@@ -81,7 +81,7 @@ bool FCDProPlusInput::openDevice()
         closeDevice();
     }
 
-    int device = m_deviceAPI->getSampleSourceSequence();
+    int device = m_deviceAPI->getSamplingDeviceSequence();
     qDebug() << "FCDProPlusInput::openDevice with device #" << device;
     m_dev = fcdOpen(fcd_traits<ProPlus>::vendorId, fcd_traits<ProPlus>::productId, device);
 
@@ -277,14 +277,14 @@ bool FCDProPlusInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initAcquisition())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startAcquisition();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopAcquisition();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {

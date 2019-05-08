@@ -29,7 +29,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSinkAPI;
+class DeviceAPI;
 class LimeSDROutputThread;
 struct DeviceLimeSDRParams;
 
@@ -184,7 +184,7 @@ public:
         { }
     };
 
-    LimeSDROutput(DeviceSinkAPI *deviceAPI);
+    LimeSDROutput(DeviceAPI *deviceAPI);
     virtual ~LimeSDROutput();
     virtual void destroy();
 
@@ -234,7 +234,7 @@ public:
     DeviceLimeSDRParams::LimeType getLimeType() const;
 
 private:
-    DeviceSinkAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
     QMutex m_mutex;
     LimeSDROutputSettings m_settings;
     LimeSDROutputThread* m_limeSDROutputThread;

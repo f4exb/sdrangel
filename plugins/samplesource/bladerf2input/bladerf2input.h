@@ -30,7 +30,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class BladeRF2InputThread;
 class FileRecord;
 struct bladerf_gain_modes;
@@ -131,7 +131,7 @@ public:
         int m_value;
     };
 
-    BladeRF2Input(DeviceSourceAPI *deviceAPI);
+    BladeRF2Input(DeviceAPI *deviceAPI);
     virtual ~BladeRF2Input();
     virtual void destroy();
 
@@ -183,7 +183,7 @@ public:
             QString& errorMessage);
 
 private:
-    DeviceSourceAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
     QMutex m_mutex;
     BladeRF2InputSettings m_settings;
     QString m_deviceDescription;

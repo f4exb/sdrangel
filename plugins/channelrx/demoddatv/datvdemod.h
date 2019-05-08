@@ -20,7 +20,7 @@
 #ifndef INCLUDE_DATVDEMOD_H
 #define INCLUDE_DATVDEMOD_H
 
-class DeviceSourceAPI;
+class DeviceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
@@ -129,7 +129,7 @@ class DATVDemod : public BasebandSampleSink, public ChannelSinkAPI
 
 public:
 
-    DATVDemod(DeviceSourceAPI *);
+    DATVDemod(DeviceAPI *);
     ~DATVDemod();
 
     virtual void destroy() { delete this; }
@@ -332,7 +332,7 @@ private:
     //CONSTELLATION
     leansdr::datvconstellation<leansdr::f32> *r_scope_symbols;
 
-    DeviceSourceAPI* m_deviceAPI;
+    DeviceAPI* m_deviceAPI;
 
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;

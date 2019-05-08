@@ -28,7 +28,6 @@
 #include "sdrplayinput.h"
 #include "sdrplaysettings.h"
 
-class DeviceSourceAPI;
 class DeviceUISet;
 
 namespace Ui {

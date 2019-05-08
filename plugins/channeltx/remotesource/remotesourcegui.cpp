@@ -17,7 +17,7 @@
 
 #include "remotesourcegui.h"
 
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "mainwindow.h"
@@ -178,7 +178,7 @@ RemoteSourceGUI::RemoteSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
     m_remoteSrc = (RemoteSource*) channelTx;
     m_remoteSrc->setMessageQueueToGUI(getInputMessageQueue());
 
-    connect(&(m_deviceUISet->m_deviceSinkAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
+    connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.setColor(m_settings.m_rgbColor);

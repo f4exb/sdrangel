@@ -40,7 +40,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class DownChannelizer;
 class ThreadedBasebandSampleSink;
 class QTimer;
@@ -117,7 +117,7 @@ public:
         int m_frequencyOffset;
     };
 
-    FreqTracker(DeviceSourceAPI *deviceAPI);
+    FreqTracker(DeviceAPI *deviceAPI);
 	~FreqTracker();
 	virtual void destroy() { delete this; }
 
@@ -191,7 +191,7 @@ private:
 		RSRunning
 	};
 
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
     ThreadedBasebandSampleSink* m_threadedChannelizer;
     DownChannelizer* m_channelizer;
     FreqTrackerSettings m_settings;

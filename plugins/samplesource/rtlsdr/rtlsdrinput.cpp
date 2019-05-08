@@ -30,7 +30,7 @@
 #include "SWGRtlSdrReport.h"
 
 #include "rtlsdrinput.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 #include "rtlsdrthread.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -49,7 +49,7 @@ const int RTLSDRInput::sampleRateLowRangeMax = 300000U;
 const int RTLSDRInput::sampleRateHighRangeMin = 950000U;
 const int RTLSDRInput::sampleRateHighRangeMax = 2400000U;
 
-RTLSDRInput::RTLSDRInput(DeviceSourceAPI *deviceAPI) :
+RTLSDRInput::RTLSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),
@@ -60,7 +60,7 @@ RTLSDRInput::RTLSDRInput(DeviceSourceAPI *deviceAPI) :
     openDevice();
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
-    m_deviceAPI->addSink(m_fileSink);
+    m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -75,7 +75,7 @@ RTLSDRInput::~RTLSDRInput()
         stop();
     }
 
-    m_deviceAPI->removeSink(m_fileSink);
+    m_deviceAPI->removeAncillarySink(m_fileSink);
     delete m_fileSink;
 
     closeDevice();
@@ -107,7 +107,7 @@ bool RTLSDRInput::openDevice()
 
     int device;
 
-    if ((device = rtlsdr_get_index_by_serial(qPrintable(m_deviceAPI->getSampleSourceSerial()))) < 0)
+    if ((device = rtlsdr_get_index_by_serial(qPrintable(m_deviceAPI->getSamplingDeviceSerial()))) < 0)
     {
         qCritical("RTLSDRInput::openDevice: could not get RTLSDR serial number");
         return false;
@@ -344,13 +344,13 @@ bool RTLSDRInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initAcquisition()) {
-                m_deviceAPI->startAcquisition();
+            if (m_deviceAPI->initDeviceEngine()) {
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopAcquisition();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {

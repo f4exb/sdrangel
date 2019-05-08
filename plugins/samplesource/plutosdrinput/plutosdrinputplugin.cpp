@@ -27,7 +27,7 @@
 #endif
 #include "plutosdrinputplugin.h"
 
-class DeviceSourceAPI;
+class DeviceAPI;
 
 const PluginDescriptor PlutoSDRInputPlugin::m_pluginDescriptor = {
 	QString("PlutoSDR Input"),
@@ -115,7 +115,7 @@ PluginInstanceGUI* PlutoSDRInputPlugin::createSampleSourcePluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSource *PlutoSDRInputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
+DeviceSampleSource *PlutoSDRInputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceAPI *deviceAPI)
 {
     if (sourceId == m_deviceTypeID)
     {

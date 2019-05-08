@@ -97,7 +97,7 @@ PluginInstanceGUI* TestSourcePlugin::createSampleSourcePluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSource *TestSourcePlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI)
+DeviceSampleSource *TestSourcePlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceAPI *deviceAPI)
 {
     if (sourceId == m_deviceTypeID)
     {

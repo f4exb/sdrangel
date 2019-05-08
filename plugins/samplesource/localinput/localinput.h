@@ -33,7 +33,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class FileRecord;
 
 class LocalInput : public DeviceSampleSource {
@@ -122,7 +122,7 @@ public:
         { }
     };
 
-	LocalInput(DeviceSourceAPI *deviceAPI);
+	LocalInput(DeviceAPI *deviceAPI);
 	virtual ~LocalInput();
 	virtual void destroy();
 
@@ -167,7 +167,7 @@ public:
             QString& errorMessage);
 
 private:
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	LocalInputSettings m_settings;
     qint64 m_centerFrequency;

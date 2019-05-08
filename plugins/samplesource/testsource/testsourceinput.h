@@ -26,7 +26,7 @@
 #include <dsp/devicesamplesource.h>
 #include "testsourcesettings.h"
 
-class DeviceSourceAPI;
+class DeviceAPI;
 class TestSourceThread;
 class FileRecord;
 class QNetworkAccessManager;
@@ -96,7 +96,7 @@ public:
         { }
     };
 
-    TestSourceInput(DeviceSourceAPI *deviceAPI);
+    TestSourceInput(DeviceAPI *deviceAPI);
 	virtual ~TestSourceInput();
 	virtual void destroy();
 
@@ -136,7 +136,7 @@ public:
             QString& errorMessage);
 
 private:
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
 	QMutex m_mutex;
 	TestSourceSettings m_settings;

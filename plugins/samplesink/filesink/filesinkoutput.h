@@ -28,7 +28,7 @@
 #include "filesinksettings.h"
 
 class FileSinkThread;
-class DeviceSinkAPI;
+class DeviceAPI;
 
 class FileSinkOutput : public DeviceSampleSink {
 public:
@@ -171,7 +171,7 @@ public:
 		{ }
 	};
 
-	FileSinkOutput(DeviceSinkAPI *deviceAPI);
+	FileSinkOutput(DeviceAPI *deviceAPI);
 	virtual ~FileSinkOutput();
 	virtual void destroy();
 
@@ -201,7 +201,7 @@ public:
             QString& errorMessage);
 
 private:
-    DeviceSinkAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	FileSinkSettings m_settings;
 	std::ofstream m_ofstream;

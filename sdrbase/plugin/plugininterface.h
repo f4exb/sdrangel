@@ -17,9 +17,8 @@ struct SDRBASE_API PluginDescriptor {
 };
 
 class PluginAPI;
-class DeviceSourceAPI;
+class DeviceAPI;
 class DeviceUISet;
-class DeviceSinkAPI;
 class PluginInstanceGUI;
 class QWidget;
 class DeviceSampleSource;
@@ -97,14 +96,14 @@ public:
     }
 
     virtual BasebandSampleSink* createRxChannelBS(
-            DeviceSourceAPI *deviceAPI)
+            DeviceAPI *deviceAPI)
     {
         (void) deviceAPI;
         return nullptr;
     }
 
     virtual ChannelSinkAPI* createRxChannelCS(
-            DeviceSourceAPI *deviceAPI)
+            DeviceAPI *deviceAPI)
     {
         (void) deviceAPI;
         return nullptr;
@@ -122,14 +121,14 @@ public:
     }
 
     virtual BasebandSampleSource* createTxChannelBS(
-            DeviceSinkAPI *deviceAPI)
+            DeviceAPI *deviceAPI)
     {
         (void) deviceAPI;
         return nullptr;
     }
 
     virtual ChannelSourceAPI* createTxChannelCS(
-            DeviceSinkAPI *deviceAPI)
+            DeviceAPI *deviceAPI)
     {
         (void) deviceAPI;
         return nullptr;
@@ -152,7 +151,7 @@ public:
 
     virtual DeviceSampleSource* createSampleSourcePluginInstanceInput( // creates the input "core"
             const QString& sourceId,
-            DeviceSourceAPI *deviceAPI)
+            DeviceAPI *deviceAPI)
     {
         (void) sourceId;
         (void) deviceAPI;
@@ -178,7 +177,7 @@ public:
 
     virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput( // creates the output "core"
             const QString& sinkId,
-            DeviceSinkAPI *deviceAPI)
+            DeviceAPI *deviceAPI)
     {
         (void) sinkId;
         (void) deviceAPI;

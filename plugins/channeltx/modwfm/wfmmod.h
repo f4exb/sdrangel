@@ -41,7 +41,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSinkAPI;
+class DeviceAPI;
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
 
@@ -202,7 +202,7 @@ public:
 
     //=================================================================
 
-    WFMMod(DeviceSinkAPI *deviceAPI);
+    WFMMod(DeviceAPI *deviceAPI);
     ~WFMMod();
     virtual void destroy() { delete this; }
 
@@ -256,7 +256,7 @@ private:
         RSRunning
     };
 
-    DeviceSinkAPI* m_deviceAPI;
+    DeviceAPI* m_deviceAPI;
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
 

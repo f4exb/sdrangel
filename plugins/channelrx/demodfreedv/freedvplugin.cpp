@@ -67,12 +67,12 @@ PluginInstanceGUI* FreeDVPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, Ba
 }
 #endif
 
-BasebandSampleSink* FreeDVPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* FreeDVPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
 {
     return new FreeDVDemod(deviceAPI);
 }
 
-ChannelSinkAPI* FreeDVPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* FreeDVPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new FreeDVDemod(deviceAPI);
 }

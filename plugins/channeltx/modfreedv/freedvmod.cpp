@@ -38,7 +38,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/dspcommands.h"
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 #include "util/db.h"
 
 MESSAGE_CLASS_DEFINITION(FreeDVMod::MsgConfigureFreeDVMod, Message)
@@ -54,7 +54,7 @@ const QString FreeDVMod::m_channelId = "FreeDVMod";
 const int FreeDVMod::m_levelNbSamples = 80; // every 10ms
 const int FreeDVMod::m_ssbFftLen = 1024;
 
-FreeDVMod::FreeDVMod(DeviceSinkAPI *deviceAPI) :
+FreeDVMod::FreeDVMod(DeviceAPI *deviceAPI) :
     ChannelSourceAPI(m_channelIdURI),
     m_deviceAPI(deviceAPI),
     m_basebandSampleRate(48000),
@@ -112,8 +112,8 @@ FreeDVMod::FreeDVMod(DeviceSinkAPI *deviceAPI) :
 
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-    m_deviceAPI->addThreadedSource(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSource(m_threadedChannelizer);
+    m_deviceAPI->addChannelSourceAPI(this);
 
     applySettings(m_settings, true);
     applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
@@ -129,8 +129,8 @@ FreeDVMod::~FreeDVMod()
 
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(&m_audioFifo);
 
-    m_deviceAPI->removeChannelAPI(this);
-    m_deviceAPI->removeThreadedSource(m_threadedChannelizer);
+    m_deviceAPI->removeChannelSourceAPI(this);
+    m_deviceAPI->removeChannelSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
 

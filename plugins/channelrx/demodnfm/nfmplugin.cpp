@@ -49,12 +49,12 @@ PluginInstanceGUI* NFMPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, Baseb
 }
 #endif
 
-BasebandSampleSink* NFMPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* NFMPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
 {
     return new NFMDemod(deviceAPI);
 }
 
-ChannelSinkAPI* NFMPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* NFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new NFMDemod(deviceAPI);
 }

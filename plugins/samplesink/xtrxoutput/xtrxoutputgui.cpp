@@ -27,7 +27,7 @@
 #include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "xtrxoutputgui.h"
 
@@ -38,13 +38,13 @@ XTRXOutputGUI::XTRXOutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_settings(),
     m_sampleRateMode(true),
     m_sampleRate(0),
-    m_lastEngineState((DSPDeviceSinkEngine::State)-1),
+    m_lastEngineState(DeviceAPI::StNotStarted),
     m_doApplySettings(true),
     m_forceSettings(true),
     m_statusCounter(0),
     m_deviceStatusCounter(0)
 {
-    m_XTRXOutput = (XTRXOutput*) m_deviceUISet->m_deviceSinkAPI->getSampleSink();
+    m_XTRXOutput = (XTRXOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
     ui->setupUi(this);
 
@@ -399,24 +399,24 @@ void XTRXOutputGUI::updateHardware()
 
 void XTRXOutputGUI::updateStatus()
 {
-    int state = m_deviceUISet->m_deviceSinkAPI->state();
+    int state = m_deviceUISet->m_deviceAPI->state();
 
     if(m_lastEngineState != state)
     {
         switch(state)
         {
-        case DSPDeviceSinkEngine::StNotStarted:
+        case DeviceAPI::StNotStarted:
             ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
             break;
-        case DSPDeviceSinkEngine::StIdle:
+        case DeviceAPI::StIdle:
             ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
             break;
-        case DSPDeviceSinkEngine::StRunning:
+        case DeviceAPI::StRunning:
             ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
             break;
-        case DSPDeviceSinkEngine::StError:
+        case DeviceAPI::StError:
             ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-            QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSinkAPI->errorMessage());
+            QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
             break;
         default:
             break;
@@ -442,7 +442,7 @@ void XTRXOutputGUI::updateStatus()
     }
     else
     {
-        if (m_deviceUISet->m_deviceSinkAPI->isBuddyLeader())
+        if (m_deviceUISet->m_deviceAPI->isBuddyLeader())
         {
             XTRXOutput::MsgGetDeviceInfo* message = XTRXOutput::MsgGetDeviceInfo::create();
             m_XTRXOutput->getInputMessageQueue()->push(message);

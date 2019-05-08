@@ -68,12 +68,12 @@ PluginInstanceGUI* DSDDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, 
 }
 #endif
 
-BasebandSampleSink* DSDDemodPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* DSDDemodPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
 {
     return new DSDDemod(deviceAPI);
 }
 
-ChannelSinkAPI* DSDDemodPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* DSDDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new DSDDemod(deviceAPI);
 }

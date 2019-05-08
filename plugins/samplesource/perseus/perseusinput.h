@@ -29,7 +29,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class FileRecord;
 class PerseusThread;
 
@@ -97,7 +97,7 @@ public:
         { }
     };
 
-    PerseusInput(DeviceSourceAPI *deviceAPI);
+    PerseusInput(DeviceAPI *deviceAPI);
     ~PerseusInput();
     virtual void destroy();
 
@@ -143,7 +143,7 @@ public:
     const std::vector<uint32_t>& getSampleRates() const { return m_sampleRates; }
 
 private:
-    DeviceSourceAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
     FileRecord *m_fileSink;
     QString m_deviceDescription;
     PerseusSettings m_settings;

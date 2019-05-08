@@ -36,8 +36,6 @@ class PluginInterface;
 class PluginInstanceGUI;
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
-class DeviceSourceAPI;
-class DeviceSinkAPI;
 class Preset;
 
 class SDRBASE_API DeviceAPI : public QObject {
@@ -102,19 +100,19 @@ public:
     void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection, int streamIndex = 0); //!< Configure current device engine DSP corrections (Rx)
 
     void setHardwareId(const QString& id);
-    void setSamplingDeviceId(const QString& id);
+    void setSamplingDeviceId(const QString& id) { m_samplingDeviceId = id; }
     // void setSampleSourceId(const QString& id);
     // void setSampleSinkId(const QString& id);
-    void resetSamplingDeviceId();
+    void resetSamplingDeviceId() { m_samplingDeviceId.clear(); }
     // void resetSampleSourceId();
     // void resetSampleSinkId();
-    void setSamplingDeviceSerial(const QString& serial);
+    void setSamplingDeviceSerial(const QString& serial) { m_samplingDeviceSerial = serial; }
     // void setSampleSourceSerial(const QString& serial);
     // void setSampleSinkSerial(const QString& serial);
-    void setSamplingDeviceDisplayName(const QString& name);
+    void setSamplingDeviceDisplayName(const QString& name) { m_samplingDeviceDisplayName = name; }
     // void setSampleSourceDisplayName(const QString& serial);
     // void setSampleSinkDisplayName(const QString& serial);
-    void setSamplingDeviceSequence(int sequence);
+    void setSamplingDeviceSequence(int sequence) { m_samplingDeviceSequence = sequence; }
     // void setSampleSourceSequence(int sequence);
     // void setSampleSinkSequence(int sequence);
     void setNbItems(uint32_t nbItems);
@@ -127,17 +125,16 @@ public:
     // void setSampleSinkPluginInstanceUI(PluginInstanceGUI *gui);
 
     const QString& getHardwareId() const { return m_hardwareId; }
-    const QString& getSamplingDeviceId() const { return m_sampleSourceId; }
+    const QString& getSamplingDeviceId() const { return m_samplingDeviceId; }
     // const QString& getSampleSourceId() const { return m_sampleSourceId; }
     // const QString& getSampleSinkId() const { return m_sampleSinkId; }
-    const QString& getSamplingDeviceSerial() const { return m_sampleSourceSerial; }
+    const QString& getSamplingDeviceSerial() const { return m_samplingDeviceSerial; }
     // const QString& getSampleSourceSerial() const { return m_sampleSourceSerial; }
     // const QString& getSampleSinkSerial() const { return m_sampleSinkSerial; }
-    const QString& getSamplingDeviceDisplayName() const { return m_sampleSourceDisplayName; }
+    const QString& getSamplingDeviceDisplayName() const { return m_samplingDeviceDisplayName; }
     // const QString& getSampleSourceDisplayName() const { return m_sampleSourceDisplayName; }
     // const QString& getSampleSinkDisplayName() const { return m_sampleSinkDisplayName; }
-
-    uint32_t getSamplingDeviceSequence() const { return m_sampleSourceSequence; }
+    uint32_t getSamplingDeviceSequence() const { return m_samplingDeviceSequence; }
     // uint32_t getSampleSourceSequence() const { return m_sampleSourceSequence; }
     // uint32_t getSampleSinkSequence() const { return m_sampleSinkSequence; }
 
@@ -146,7 +143,7 @@ public:
     int getDeviceSetIndex() const { return m_deviceTabIndex; }
     PluginInterface *getPluginInterface() { return m_pluginInterface; }
 
-    PluginInstanceGUI *getSamplingDevicePluginInstanceGUI() { return m_sampleSourcePluginInstanceUI; }
+    PluginInstanceGUI *getSamplingDevicePluginInstanceGUI() { return m_samplingDevicePluginInstanceUI; }
     // PluginInstanceGUI *getSampleSourcePluginInstanceGUI() { return m_sampleSourcePluginInstanceUI; }
     // PluginInstanceGUI *getSampleSinkPluginInstanceGUI() { return m_sampleSinkPluginInstanceUI; }
 
@@ -186,12 +183,17 @@ protected:
     // common
 
     StreamType m_streamType;
-    int m_deviceTabIndex;              //!< This is the tab index in the GUI and also the device set index
-    QString m_hardwareId;              //!< The internal id that identifies the type of hardware (i.e. HackRF, BladeRF, ...)
-    uint32_t m_nbItems;                //!< Number of items or streams in the device. Can be >1 for NxM devices (i.e. 2 for LimeSDR)
-    uint32_t m_itemIndex;              //!< The Rx stream index. Can be >0 for NxM devices (i.e. 0 or 1 for LimeSDR)
+    int m_deviceTabIndex;                //!< This is the tab index in the GUI and also the device set index
+    QString m_hardwareId;                //!< The internal id that identifies the type of hardware (i.e. HackRF, BladeRF, ...)
+    uint32_t m_nbItems;                  //!< Number of items or streams in the device. Can be >1 for NxM devices (i.e. 2 for LimeSDR)
+    uint32_t m_itemIndex;                //!< The Rx stream index. Can be >0 for NxM devices (i.e. 0 or 1 for LimeSDR)
     PluginInterface* m_pluginInterface;
-    const QTimer& m_masterTimer; //!< This is the DSPEngine master timer
+    const QTimer& m_masterTimer;         //!< This is the DSPEngine master timer
+    QString m_samplingDeviceId;          //!< The internal plugin ID corresponding to the device (i.e. for HackRF input, for HackRF output ...)
+    QString m_samplingDeviceSerial;      //!< The device serial number defined by the vendor or a fake one (SDRplay)
+    QString m_samplingDeviceDisplayName; //!< The human readable name identifying this instance
+    uint32_t m_samplingDeviceSequence;   //!< The device sequence. >0 when more than one device of the same type is connected
+    PluginInstanceGUI* m_samplingDevicePluginInstanceUI;
 
     // Buddies (single Rx or single Tx)
 
@@ -203,29 +205,12 @@ protected:
     // Single Rx (i.e. source)
 
     DSPDeviceSourceEngine *m_deviceSourceEngine;
-    QString m_sampleSourceId;          //!< The internal plugin ID corresponding to the device (i.e. for HackRF input, for HackRF output ...)
-    QString m_sampleSourceSerial;      //!< The device serial number defined by the vendor or a fake one (SDRplay)
-    QString m_sampleSourceDisplayName; //!< The human readable name identifying this instance
-    uint32_t m_sampleSourceSequence;   //!< The device sequence. >0 when more than one device of the same type is connected
-    PluginInstanceGUI* m_sampleSourcePluginInstanceUI; // TODO: factorize
-
     QList<ChannelSinkAPI*> m_channelSinkAPIs;
 
     // Single Tx (i.e. sink)
 
     DSPDeviceSinkEngine *m_deviceSinkEngine;
-    QString m_sampleSinkId;          //!< The internal plugin ID corresponding to the device (i.e. for HackRF input, for HackRF output ...)
-    QString m_sampleSinkSerial;      //!< The device serial number defined by the vendor
-    QString m_sampleSinkDisplayName; //!< The human readable name identifying this instance
-    uint32_t m_sampleSinkSequence;   //!< The device sequence. >0 when more than one device of the same type is connected
-    PluginInstanceGUI* m_sampleSinkPluginInstanceUI; // TODO: factorize
-
     QList<ChannelSourceAPI*> m_channelSourceAPIs;
-
-    // Friends
-
-    friend class DeviceSinkAPI;
-    friend class DeviceSourceAPI;
 
 private:
     void renumerateChannels();

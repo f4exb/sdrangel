@@ -50,12 +50,12 @@ PluginInstanceGUI* SSBPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, Baseb
 }
 #endif
 
-BasebandSampleSink* SSBPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* SSBPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
 {
     return new SSBDemod(deviceAPI);
 }
 
-ChannelSinkAPI* SSBPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* SSBPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new SSBDemod(deviceAPI);
 }

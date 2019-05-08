@@ -38,7 +38,7 @@
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/dspcommands.h"
 #include "dsp/fftfilt.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 #include "util/db.h"
 #include "util/stepfunctions.h"
 
@@ -50,7 +50,7 @@ const QString FreqTracker::m_channelIdURI = "sdrangel.channel.freqtracker";
 const QString FreqTracker::m_channelId = "FreqTracker";
 const int FreqTracker::m_udpBlockSize = 512;
 
-FreqTracker::FreqTracker(DeviceSourceAPI *deviceAPI) :
+FreqTracker::FreqTracker(DeviceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
         m_deviceSampleRate(48000),
@@ -86,8 +86,8 @@ FreqTracker::FreqTracker(DeviceSourceAPI *deviceAPI) :
 
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -102,8 +102,8 @@ FreqTracker::~FreqTracker()
 #endif
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
-    m_deviceAPI->removeChannelAPI(this);
-    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->removeChannelSinkAPI(this);
+    m_deviceAPI->removeChannelSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
     delete m_rrcFilter;

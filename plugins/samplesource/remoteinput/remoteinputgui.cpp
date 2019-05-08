@@ -39,7 +39,7 @@
 #include "dsp/dspcommands.h"
 #include "mainwindow.h"
 #include "util/simpleserializer.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "remoteinputgui.h"
 
@@ -53,7 +53,7 @@ RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_acquisition(false),
 	m_streamSampleRate(0),
 	m_streamCenterFrequency(0),
-	m_lastEngineState(DSPDeviceSourceEngine::StNotStarted),
+	m_lastEngineState(DeviceAPI::StNotStarted),
 	m_framesDecodingStatus(0),
 	m_bufferLengthInSecs(0.0),
     m_bufferGauge(-50),
@@ -92,7 +92,7 @@ RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_statusTimer.start(500);
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 
-    m_sampleSource = (RemoteInput*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
+    m_sampleSource = (RemoteInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 	m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
@@ -538,24 +538,24 @@ void RemoteInputGui::updateStatus()
 {
     if (m_sampleSource->isStreaming())
     {
-        int state = m_deviceUISet->m_deviceSourceAPI->state();
+        int state = m_deviceUISet->m_deviceAPI->state();
 
         if (m_lastEngineState != state)
         {
             switch(state)
             {
-                case DSPDeviceSourceEngine::StNotStarted:
+                case DeviceAPI::StNotStarted:
                     ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
                     break;
-                case DSPDeviceSourceEngine::StIdle:
+                case DeviceAPI::StIdle:
                     ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
                     break;
-                case DSPDeviceSourceEngine::StRunning:
+                case DeviceAPI::StRunning:
                     ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
                     break;
-                case DSPDeviceSourceEngine::StError:
+                case DeviceAPI::StError:
                     ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                    QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSourceAPI->errorMessage());
+                    QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                     break;
                 default:
                     break;

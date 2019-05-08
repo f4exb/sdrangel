@@ -26,8 +26,7 @@
 
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "device/devicesourceapi.h"
-#include "device/devicesinkapi.h"
+#include "device/deviceapi.h"
 #include "plutosdr/deviceplutosdrparams.h"
 #include "plutosdr/deviceplutosdrbox.h"
 
@@ -39,7 +38,7 @@
 MESSAGE_CLASS_DEFINITION(PlutoSDROutput::MsgConfigurePlutoSDR, Message)
 MESSAGE_CLASS_DEFINITION(PlutoSDROutput::MsgStartStop, Message)
 
-PlutoSDROutput::PlutoSDROutput(DeviceSinkAPI *deviceAPI) :
+PlutoSDROutput::PlutoSDROutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_deviceDescription("PlutoSDROutput"),
     m_settings(),
@@ -209,14 +208,14 @@ bool PlutoSDROutput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initGeneration())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startGeneration();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopGeneration();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {
@@ -240,7 +239,7 @@ bool PlutoSDROutput::openDevice()
     {
         qDebug("PlutoSDROutput::openDevice: look at Rx buddy");
 
-        DeviceSourceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
+        DeviceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
         DevicePlutoSDRShared* buddySharedPtr = (DevicePlutoSDRShared*) sourceBuddy->getBuddySharedPtr();
         m_deviceShared.m_deviceParams = buddySharedPtr->m_deviceParams;
 
@@ -262,7 +261,7 @@ bool PlutoSDROutput::openDevice()
 
         m_deviceShared.m_deviceParams = new DevicePlutoSDRParams();
         char serial[256];
-        strcpy(serial, qPrintable(m_deviceAPI->getSampleSinkSerial()));
+        strcpy(serial, qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
         m_deviceShared.m_deviceParams->open(serial);
     }
 
@@ -296,7 +295,7 @@ void PlutoSDROutput::suspendBuddies()
 
     for (unsigned int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
     {
-        DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
+        DeviceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
         DevicePlutoSDRShared *buddyShared = (DevicePlutoSDRShared *) buddy->getBuddySharedPtr();
 
         if (buddyShared->m_thread) {
@@ -311,7 +310,7 @@ void PlutoSDROutput::resumeBuddies()
 
     for (unsigned int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
     {
-        DeviceSourceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
+        DeviceAPI *buddy = m_deviceAPI->getSourceBuddies()[i];
         DevicePlutoSDRShared *buddyShared = (DevicePlutoSDRShared *) buddy->getBuddySharedPtr();
 
         if (buddyShared->m_thread) {
@@ -383,8 +382,8 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
 
     if (suspendAllOtherThreads)
     {
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator itSink = sourceBuddies.begin();
+        const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceAPI*>::const_iterator itSink = sourceBuddies.begin();
 
         for (; itSink != sourceBuddies.end(); ++itSink)
         {
@@ -526,8 +525,8 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
 
     if (suspendAllOtherThreads)
     {
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+        const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceAPI*>::const_iterator itSource = sourceBuddies.begin();
 
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
@@ -548,8 +547,8 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
     {
         qDebug("PlutoSDROutput::applySettings: forwardChangeOtherDSP");
 
-        const std::vector<DeviceSourceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-        std::vector<DeviceSourceAPI*>::const_iterator itSource = sourceBuddies.begin();
+        const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+        std::vector<DeviceAPI*>::const_iterator itSource = sourceBuddies.begin();
 
         for (; itSource != sourceBuddies.end(); ++itSource)
         {
@@ -560,13 +559,13 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
                     settings.m_lpfFIRBW,
                     settings.m_LOppmTenths);
 
-            if ((*itSource)->getSampleSourceGUIMessageQueue())
+            if ((*itSource)->getSamplingDeviceGUIMessageQueue())
             {
                 DevicePlutoSDRShared::MsgCrossReportToBuddy *msgToGUI = new DevicePlutoSDRShared::MsgCrossReportToBuddy(*msg);
-                (*itSource)->getSampleSourceGUIMessageQueue()->push(msgToGUI);
+                (*itSource)->getSamplingDeviceGUIMessageQueue()->push(msgToGUI);
             }
 
-            (*itSource)->getSampleSourceInputMessageQueue()->push(msg);
+            (*itSource)->getSamplingDeviceInputMessageQueue()->push(msg);
         }
     }
 

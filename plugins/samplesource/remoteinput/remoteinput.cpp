@@ -30,7 +30,7 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 #include "dsp/filerecord.h"
 
 #include "remoteinput.h"
@@ -44,7 +44,7 @@ MESSAGE_CLASS_DEFINITION(RemoteInput::MsgReportRemoteInputStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(RemoteInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(RemoteInput::MsgStartStop, Message)
 
-RemoteInput::RemoteInput(DeviceSourceAPI *deviceAPI) :
+RemoteInput::RemoteInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
 	m_remoteInputUDPHandler(0),
@@ -55,7 +55,7 @@ RemoteInput::RemoteInput(DeviceSourceAPI *deviceAPI) :
 	m_remoteInputUDPHandler = new RemoteInputUDPHandler(&m_sampleFifo, m_deviceAPI);
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
-    m_deviceAPI->addSink(m_fileSink);
+    m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -66,7 +66,7 @@ RemoteInput::~RemoteInput()
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
 	stop();
-    m_deviceAPI->removeSink(m_fileSink);
+    m_deviceAPI->removeAncillarySink(m_fileSink);
     delete m_fileSink;
 	delete m_remoteInputUDPHandler;
 }
@@ -193,14 +193,14 @@ bool RemoteInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initAcquisition())
+            if (m_deviceAPI->initDeviceEngine())
             {
-                m_deviceAPI->startAcquisition();
+                m_deviceAPI->startDeviceEngine();
             }
         }
         else
         {
-            m_deviceAPI->stopAcquisition();
+            m_deviceAPI->stopDeviceEngine();
         }
 
         if (m_settings.m_useReverseAPI) {

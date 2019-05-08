@@ -29,7 +29,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSinkAPI;
+class DeviceAPI;
 class BladeRF2OutputThread;
 struct bladerf_gain_modes;
 
@@ -103,7 +103,7 @@ public:
         {}
     };
 
-    BladeRF2Output(DeviceSinkAPI *deviceAPI);
+    BladeRF2Output(DeviceAPI *deviceAPI);
     virtual ~BladeRF2Output();
     virtual void destroy();
 
@@ -153,7 +153,7 @@ public:
             QString& errorMessage);
 
 private:
-    DeviceSinkAPI *m_deviceAPI;
+    DeviceAPI *m_deviceAPI;
     QMutex m_mutex;
     BladeRF2OutputSettings m_settings;
     struct bladerf* m_dev;

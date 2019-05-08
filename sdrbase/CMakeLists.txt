@@ -67,8 +67,8 @@ set(sdrbase_SOURCES
     dsp/devicesamplesource.cpp
     dsp/devicesamplesink.cpp
 
-    device/devicesourceapi.cpp
-    device/devicesinkapi.cpp
+    # device/devicesourceapi.cpp
+    # device/devicesinkapi.cpp
     device/deviceapi.cpp
     device/deviceenumerator.cpp
 
@@ -189,8 +189,8 @@ set(sdrbase_HEADERS
     dsp/devicesamplesource.h
     dsp/devicesamplesink.h
 
-    device/devicesourceapi.h
-    device/devicesinkapi.h
+    # device/devicesourceapi.h
+    # device/devicesinkapi.h
     device/deviceapi.h
     device/deviceenumerator.h
 

@@ -42,7 +42,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
-class DeviceSinkAPI;
+class DeviceAPI;
 
 class AMMod : public BasebandSampleSource, public ChannelSourceAPI {
     Q_OBJECT
@@ -201,7 +201,7 @@ public:
 
     //=================================================================
 
-    AMMod(DeviceSinkAPI *deviceAPI);
+    AMMod(DeviceAPI *deviceAPI);
     ~AMMod();
     virtual void destroy() { delete this; }
 
@@ -255,7 +255,7 @@ private:
         RSRunning
     };
 
-    DeviceSinkAPI* m_deviceAPI;
+    DeviceAPI* m_deviceAPI;
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
 

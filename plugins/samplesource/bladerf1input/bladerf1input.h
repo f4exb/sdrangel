@@ -31,7 +31,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class Bladerf1InputThread;
 class FileRecord;
 
@@ -99,7 +99,7 @@ public:
         { }
     };
 
-    Bladerf1Input(DeviceSourceAPI *deviceAPI);
+    Bladerf1Input(DeviceAPI *deviceAPI);
 	virtual ~Bladerf1Input();
 	virtual void destroy();
 
@@ -139,7 +139,7 @@ public:
             QString& errorMessage);
 
 private:
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	BladeRF1InputSettings m_settings;
 	struct bladerf* m_dev;

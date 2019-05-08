@@ -39,7 +39,7 @@
 #include "dsp/downchannelizer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/hbfilterchainconverter.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 
 #include "remotesinkthread.h"
 
@@ -50,7 +50,7 @@ MESSAGE_CLASS_DEFINITION(RemoteSink::MsgConfigureChannelizer, Message)
 const QString RemoteSink::m_channelIdURI = "sdrangel.channel.remotesink";
 const QString RemoteSink::m_channelId = "RemoteSink";
 
-RemoteSink::RemoteSink(DeviceSourceAPI *deviceAPI) :
+RemoteSink::RemoteSink(DeviceAPI *deviceAPI) :
         ChannelSinkAPI(m_channelIdURI),
         m_deviceAPI(deviceAPI),
         m_running(false),
@@ -72,8 +72,8 @@ RemoteSink::RemoteSink(DeviceSourceAPI *deviceAPI) :
 
     m_channelizer = new DownChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addThreadedSink(m_threadedChannelizer);
-    m_deviceAPI->addChannelAPI(this);
+    m_deviceAPI->addChannelSink(m_threadedChannelizer);
+    m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -90,8 +90,8 @@ RemoteSink::~RemoteSink()
     }
 
     m_dataBlockMutex.unlock();
-    m_deviceAPI->removeChannelAPI(this);
-    m_deviceAPI->removeThreadedSink(m_threadedChannelizer);
+    m_deviceAPI->removeChannelSinkAPI(this);
+    m_deviceAPI->removeChannelSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
 }

@@ -40,7 +40,7 @@
 
 #include "nfmmodsettings.h"
 
-class DeviceSinkAPI;
+class DeviceAPI;
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
 class QNetworkAccessManager;
@@ -203,7 +203,7 @@ public:
 
     //=================================================================
 
-    NFMMod(DeviceSinkAPI *deviceAPI);
+    NFMMod(DeviceAPI *deviceAPI);
     ~NFMMod();
     virtual void destroy() { delete this; }
 
@@ -257,7 +257,7 @@ private:
         RSRunning
     };
 
-    DeviceSinkAPI* m_deviceAPI;
+    DeviceAPI* m_deviceAPI;
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
 

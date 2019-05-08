@@ -30,7 +30,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class HackRFInputThread;
 class FileRecord;
 
@@ -116,7 +116,7 @@ public:
         { }
     };
 
-	HackRFInput(DeviceSourceAPI *deviceAPI);
+	HackRFInput(DeviceAPI *deviceAPI);
 	virtual ~HackRFInput();
 	virtual void destroy();
 
@@ -157,7 +157,7 @@ public:
 
 
 private:
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	HackRFInputSettings m_settings;
 	struct hackrf_device* m_dev;

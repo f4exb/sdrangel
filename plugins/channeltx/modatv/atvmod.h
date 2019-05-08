@@ -41,7 +41,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSinkAPI;
+class DeviceAPI;
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
 
@@ -354,7 +354,7 @@ public:
         { }
     };
 
-    ATVMod(DeviceSinkAPI *deviceAPI);
+    ATVMod(DeviceAPI *deviceAPI);
     ~ATVMod();
     virtual void destroy() { delete this; }
 
@@ -442,7 +442,7 @@ private:
         {}
     };
 
-    DeviceSinkAPI* m_deviceAPI;
+    DeviceAPI* m_deviceAPI;
     ThreadedBasebandSampleSource* m_threadedChannelizer;
     UpChannelizer* m_channelizer;
 

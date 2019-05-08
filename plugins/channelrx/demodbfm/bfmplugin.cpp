@@ -68,12 +68,12 @@ PluginInstanceGUI* BFMPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, Baseb
 }
 #endif
 
-BasebandSampleSink* BFMPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* BFMPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
 {
     return new BFMDemod(deviceAPI);
 }
 
-ChannelSinkAPI* BFMPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* BFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new BFMDemod(deviceAPI);
 }

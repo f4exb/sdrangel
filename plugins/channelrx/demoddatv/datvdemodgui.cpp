@@ -134,7 +134,6 @@ void DATVDemodGUI::onMenuDoubleClicked()
 {
 }
 
-//DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceSourceAPI *objDeviceAPI, QWidget* objParent) :
 DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent) :
         RollupWidget(objParent),
         ui(new Ui::DATVDemodGUI),

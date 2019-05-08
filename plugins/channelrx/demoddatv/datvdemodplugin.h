@@ -39,8 +39,8 @@ public:
     void initPlugin(PluginAPI* ptrPluginAPI);
 
     virtual PluginInstanceGUI* createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
-    virtual BasebandSampleSink* createRxChannelBS(DeviceSourceAPI *deviceAPI);
-    virtual ChannelSinkAPI* createRxChannelCS(DeviceSourceAPI *deviceAPI);
+    virtual BasebandSampleSink* createRxChannelBS(DeviceAPI *deviceAPI);
+    virtual ChannelSinkAPI* createRxChannelCS(DeviceAPI *deviceAPI);
 
 
 private:

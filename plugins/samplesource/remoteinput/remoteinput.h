@@ -33,7 +33,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceSourceAPI;
+class DeviceAPI;
 class RemoteInputUDPHandler;
 class FileRecord;
 
@@ -268,7 +268,7 @@ public:
         { }
     };
 
-	RemoteInput(DeviceSourceAPI *deviceAPI);
+	RemoteInput(DeviceAPI *deviceAPI);
 	virtual ~RemoteInput();
 	virtual void destroy();
 
@@ -314,7 +314,7 @@ public:
             QString& errorMessage);
 
 private:
-	DeviceSourceAPI *m_deviceAPI;
+	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	RemoteInputSettings m_settings;
 	RemoteInputUDPHandler* m_remoteInputUDPHandler;

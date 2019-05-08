@@ -27,7 +27,7 @@
 #include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-#include "device/devicesourceapi.h"
+#include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 
 #include "bladerf2inputgui.h"
@@ -42,9 +42,9 @@ BladeRF2InputGui::BladeRF2InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleRateMode(true),
     m_sampleSource(0),
     m_sampleRate(0),
-    m_lastEngineState(DSPDeviceSourceEngine::StNotStarted)
+    m_lastEngineState(DeviceAPI::StNotStarted)
 {
-    m_sampleSource = (BladeRF2Input*) m_deviceUISet->m_deviceSourceAPI->getSampleSource();
+    m_sampleSource = (BladeRF2Input*) m_deviceUISet->m_deviceAPI->getSampleSource();
     int max, min, step;
     uint64_t f_min, f_max;
 
@@ -504,24 +504,24 @@ void BladeRF2InputGui::blockApplySettings(bool block)
 
 void BladeRF2InputGui::updateStatus()
 {
-    int state = m_deviceUISet->m_deviceSourceAPI->state();
+    int state = m_deviceUISet->m_deviceAPI->state();
 
     if(m_lastEngineState != state)
     {
         switch(state)
         {
-            case DSPDeviceSourceEngine::StNotStarted:
+            case DeviceAPI::StNotStarted:
                 ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
                 break;
-            case DSPDeviceSourceEngine::StIdle:
+            case DeviceAPI::StIdle:
                 ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
                 break;
-            case DSPDeviceSourceEngine::StRunning:
+            case DeviceAPI::StRunning:
                 ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
                 break;
-            case DSPDeviceSourceEngine::StError:
+            case DeviceAPI::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceSourceAPI->errorMessage());
+                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
                 break;

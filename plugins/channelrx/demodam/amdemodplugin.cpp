@@ -49,12 +49,12 @@ PluginInstanceGUI* AMDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, B
 }
 #endif
 
-BasebandSampleSink* AMDemodPlugin::createRxChannelBS(DeviceSourceAPI *deviceAPI)
+BasebandSampleSink* AMDemodPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
 {
     return new AMDemod(deviceAPI);
 }
 
-ChannelSinkAPI* AMDemodPlugin::createRxChannelCS(DeviceSourceAPI *deviceAPI)
+ChannelSinkAPI* AMDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new AMDemod(deviceAPI);
 }

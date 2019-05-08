@@ -24,7 +24,7 @@ public:
 	        const QString& sourceId,
 	        QWidget **widget,
 	        DeviceUISet *deviceUISet);
-	virtual DeviceSampleSource* createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceSourceAPI *deviceAPI);
+	virtual DeviceSampleSource* createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceAPI *deviceAPI);
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;
