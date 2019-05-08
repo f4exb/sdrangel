@@ -40,6 +40,7 @@ option(ENABLE_PERSEUS "Enable perseus support" ON)
 option(ENABLE_RTLSDR "Enable rtl-sdr support" ON)
 option(ENABLE_SOAPYSDR "Enable SoapySDR support" ON)
 option(ENABLE_XTRX "Enable XTRX support" ON)
+option(ENABLE_PACK_MIRSDRAPI "Enable inclusion of the mirsdr-api library - for personal use only" OFF)
 
 # Set additional project information
 set(COMPANY "f4exb")
@@ -76,7 +77,7 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "SDR Rx/Tx software for Airspy, Airspy HF+
 set(CPACK_PACKAGE_VENDOR "${COMPANY}")
 set(CPACK_PACKAGE_CONTACT "https://github.com/f4exb/sdrangel")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/Readme.md")
-set(CPACK_PACKAGE_VERSION "${sdrangel_VERSION}")
+set(CPACK_PACKAGE_VERSION "${sdrangel_VERSION_MAJOR}.${sdrangel_VERSION_MINOR}.${sdrangel_VERSION_PATCH}")
 set(CPACK_PACKAGE_VERSION_MAJOR ${sdrangel_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${sdrangel_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${sdrangel_VERSION_PATCH})
@@ -86,7 +87,6 @@ set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/Readme.md")
 set(CPACK_SOURCE_IGNORE_FILES "${PROJECT_BINARY_DIR};/.git/;.gitignore;menu.yml;.travis.yml;.appveyor.yml;default.nix;.envrc;TODOs.org;/.scripts/")
 set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
-set(CPACK_GENERATOR "ZIP;TGZ")
 
 # if we don't set build_type
 if(NOT DEFINED CMAKE_BUILD_TYPE OR "${CMAKE_BUILD_TYPE}" STREQUAL "")
@@ -108,8 +108,8 @@ else()
 endif()
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-set(BUILD_PLUGINS_DIR "${CMAKE_BINARY_DIR}/lib/plugins")
-set(BUILD_PLUGINSSRV_DIR "${CMAKE_BINARY_DIR}/lib/pluginssrv")
+set(BUILD_PLUGINS_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/plugins")
+set(BUILD_PLUGINSSRV_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pluginssrv")
 # use only lib when create .app/.dmg
 if(APPLE AND BUNDLE AND BUILD_GUI)
   set(INSTALL_BIN_DIR ".")
@@ -128,7 +128,7 @@ set(EXTERNAL_INSTALL_LIBRARIES "${CMAKE_BINARY_DIR}/external")
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set(LINUX TRUE)
   # populate distribution name
-  # LSB_CODENAME will hold trusty
+  # LSB_CODENAME will hold trusty for example
   find_program(LSB_RELEASE_EXECUTABLE lsb_release)
   if(LSB_RELEASE_EXECUTABLE)
     execute_process(COMMAND ${LSB_RELEASE_EXECUTABLE} -cs
@@ -139,10 +139,23 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   configure_file("${CMAKE_SOURCE_DIR}/cmake/cpack/${CMAKE_PROJECT_NAME}.desktop.in"
     "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.desktop" @ONLY)
 elseif(APPLE)
-  # check
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
-  message(STATUS "Build for macOS version: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
+  if(NOT DEFINED ENV{MACOSX_DEPLOYMENT_TARGET})
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
+  endif()
+  message(STATUS "Build for macOS target: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
+
   set(CMAKE_MACOSX_RPATH ON)
+  message(STATUS "RPATH support: ${CMAKE_MACOSX_RPATH}")
+
+  # TODO: check if(DEFINED) andfix macports -D
+  # fix install path
+  set(CMAKE_INSTALL_RPATH
+    "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}" CACHE
+    PATH "Library Install RPath" FORCE)
+  # force full path
+  set(CMAKE_INSTALL_NAME_DIR
+    "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}" CACHE
+    PATH "Library Install Name Destination Directory" FORCE)
 
   configure_file("${CMAKE_SOURCE_DIR}/cmake/cpack/MacOSXBundleInfo.plist.in"
     "${CMAKE_BINARY_DIR}/Info.plist" @ONLY)
@@ -276,6 +289,9 @@ if(ENABLE_SOAPYSDR)
     set(SOAPYSDR_FOUND ON)
     message(STATUS "Found SoapySDR: ${SoapySDR_INCLUDE_DIRS}, ${SoapySDR_LIBRARIES}")
   endif()
+  # Only on APPLE; bad!
+  string(REPLACE "-flat_namespace" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
+  string(REPLACE "-flat_namespace" "" CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS}")
 endif()
 if(ENABLE_XTRX)
   find_package(LibXTRX)
@@ -380,22 +396,9 @@ if (BUILD_SERVER)
 endif()
 
 ############ install ##################
-if(NOT CMAKE_INSTALL_RPATH)
-  set(CMAKE_INSTALL_RPATH
-    ${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR} CACHE
-    PATH "Library Install RPath" FORCE)
-endif()
-
-# force full path
-if(APPLE AND NOT CMAKE_INSTALL_NAME_DIR)
-  set(CMAKE_INSTALL_NAME_DIR
-    ${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR} CACHE
-    PATH "Library Install Name Destination Directory" FORCE)
-endif()
-
 install(TARGETS sdrangelbench DESTINATION ${INSTALL_BIN_DIR})
 if (BUILD_GUI)
-  install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION ${INSTALL_BIN_DIR})
+      install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION ${INSTALL_BIN_DIR})
 endif()
 if (BUILD_SERVER)
   install(TARGETS sdrangelsrv DESTINATION ${INSTALL_BIN_DIR})
@@ -426,4 +429,4 @@ add_custom_target(uninstall
   ${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake)
 
 ############ packaging ################
-include(CPack)
+add_subdirectory(cmake/cpack)

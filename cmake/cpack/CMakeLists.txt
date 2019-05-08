@@ -14,13 +14,25 @@ query_qmake (QT_INSTALL_IMPORTS QT_IMPORTS_DIR)
 
 if(APPLE AND BUNDLE AND BUILD_GUI)
 
+  find_program (SW_VERS_PROGRAM sw_vers)
+  if (SW_VERS_PROGRAM)
+    execute_process (
+      COMMAND ${SW_VERS_PROGRAM} -productVersion
+      OUTPUT_VARIABLE CPACK_MACOS_PACKAGE_ARCHITECTURE
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+  else (SW_VERS_PROGRAM)
+    set (CPACK_MACOS_PACKAGE_ARCHITECTURE noarch)
+  endif (SW_VERS_PROGRAM)
+
   set(CPACK_GENERATOR "Bundle")
   set(CPACK_BINARY_DRAGNDROP ON)
   set(CPACK_BUNDLE_NAME "${APPLICATION_NAME}")
-  set(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/custom/desktop/sdrangel_icon.icns")
+  set(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/cmake/cpack/sdrangel_icon.icns")
   set(CPACK_BUNDLE_PLIST "${CMAKE_BINARY_DIR}/Info.plist")
   set(CPACK_BUNDLE_STARTUP_COMMAND "${CMAKE_SOURCE_DIR}/cmake/cpack/sdrangel.sh")
-  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/custom/desktop/sdrangel_icon.icns")
+  set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/cmake/cpack/sdrangel_icon.icns")
+  set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION}_${CPACK_MACOS_PACKAGE_ARCHITECTURE}_${CMAKE_SYSTEM_PROCESSOR}")
 
   # Copy Qt Plugins; fixup_bundle doesn't do that
   install (
@@ -79,14 +91,21 @@ Plugins = ../PlugIns
   include(BundleUtilities)
   fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/${CMAKE_PROJECT_NAME}\" \"\${SDRANGEL_PLUGINS};\${SDRANGEL_PLUGINSSRV};\${QTPLUGINS};\${SOAPYSDR_PLUGINS}\" \"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\")
 
-  # remove non distribuitable files
-  file(REMOVE \"\${CMAKE_INSTALL_PREFIX}/../Frameworks/libmirsdrapi-rsp.dylib\")
+  # remove non distribuitable file
+  if(ENABLE_MIRSDRAPI AND OFF)
+    message(STATUS \"Remove libmirsdrapi-rsp.dylib - not distribuitable\")
+    file(REMOVE \"\${CMAKE_INSTALL_PREFIX}/../Frameworks/libmirsdrapi-rsp.dylib\")
+  endif()
 
-  # Remove unused library
-  #file(GLOB SDRANGEL_LIB \"\${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-  #file(REMOVE_RECURSE \"\${SDRANGEL_LIB}\")
-  file(REMOVE \"\${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-" COMPONENT Runtime)
+  # remove unused library
+  file(GLOB SDRANGEL_REMOVE_LIB \"\${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+  foreach(file \${SDRANGEL_REMOVE_LIB})
+    file(REMOVE \"\${file}\")
+  endforeach()
+  " COMPONENT Runtime)
+
+  # TODO: code/dmg signature
+  #   see https://github.com/cjcliffe/CubicSDR
 
 elseif(LINUX AND BUNDLE)
 
@@ -99,10 +118,10 @@ elseif(LINUX AND BUNDLE)
     find_program (DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
     if (DPKG_PROGRAM)
       execute_process (
-	COMMAND ${DPKG_PROGRAM} --print-architecture
-	OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
-	OUTPUT_STRIP_TRAILING_WHITESPACE
-	)
+        COMMAND ${DPKG_PROGRAM} --print-architecture
+        OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
     else (DPKG_PROGRAM)
       set (CPACK_DEBIAN_PACKAGE_ARCHITECTURE noarch)
     endif (DPKG_PROGRAM)
@@ -116,31 +135,35 @@ elseif(LINUX AND BUNDLE)
     # needs dpkg
     set(CPACK_GENERATOR "DEB")
     set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION}_${LSB_CODENAME}_${CMAKE_SYSTEM_PROCESSOR}")
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${APPLICATION_MAINTAINER}")
     set(CPACK_DEBIAN_PACKAGE_SECTION "hamradio")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libasound2, libfftw3-single3, libgcc1, libgl1-mesa-glx, libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5network5, libqt5opengl5, libqt5widgets5, libqt5multimedia5-plugins, libstdc++6, libusb-1.0-0, pulseaudio, libxml2, ffmpeg, libopus0, codec2, libairspy0, libhackrf0, librtlsdr0, libbladerf1, libmirisdr0, libiio0, soapysdr-tools")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libasound2, libfftw3-single3, libgcc1, libgl1-mesa-glx, libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5network5, libqt5opengl5, libqt5widgets5, libqt5multimedia5-plugins, libstdc++6, libusb-1.0-0, pulseaudio, libxml2, ffmpeg, libopus0, codec2, libairspy0, libhackrf0, librtlsdr0, libbladerf1, libmirisdr0, libiio0")
 
     if ("${LSB_CODENAME}" STREQUAL "buster") # Debian 10
-      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec58, libavformat58, libairspyhf1, libopencv-imgproc3.2, libopencv-highgui3.2, limesuite")
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec58, libavformat58, libairspyhf1, libopencv-imgproc3.2, libopencv-highgui3.2, limesuite, soapysdr-tools")
     elseif("${LSB_CODENAME}" STREQUAL "stretch") # Debian 9
-      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec57, libavformat57, libopencv-imgproc2.45v5, libopencv-highgu2.4-deb0, limesuite")
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec57, libavformat57, libopencv-imgproc2.45v5, libopencv-highgu2.4-deb0, limesuite, soapysdr-tools")
     elseif("${LSB_CODENAME}" STREQUAL "bionic")  # Ubuntu 18.04
-      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec57, libavformat57, libairspyhf0, libopencv-imgproc3.2, libopencv-highgui3.2, limesuite")
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec57, libavformat57, libairspyhf0, libopencv-imgproc3.2, libopencv-highgui3.2, limesuite, soapysdr-tools")
     elseif("${LSB_CODENAME}" STREQUAL "xenial")  # Ubuntu 16.04
       set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec-ffmpeg56, libavformat-ffmpeg56, libopencv-imgproc2.4v5, libopencv-highgui2.4v5")
     endif()
 
-    set (CPACK_DEBIAN_PACKAGE_PACKAGE_SHLIBDEPS ON)
+    # needed before cmake 2.8.3
+    # maybe we can move back to debian/
+    set(CPACK_SET_DESTDIR true)
+
   endif (DPKG_BUILDER)
 
   find_program (RPMBUILDER rpmbuild DOC "RPM package builder")
   if (RPMBUILDER)
-    # TODO
-    #list(APPEND CPACK_GENERATOR "RPM")
-    #set(CPACK_RPM_PACKAGE_RELEASE "1")
-    #set(CPACK_RPM_PACKAGE_LICENSE "GPL-3.0")
-    #set(CPACK_RPM_PACKAGE_REQUIRES "libusb")
-    #set (CPACK_RPM_PACKAGE_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+    list(APPEND CPACK_GENERATOR "RPM")
+    set(CPACK_RPM_PACKAGE_RELEASE "1")
+    set(CPACK_RPM_PACKAGE_LICENSE "GPL-3.0")
+    # TODO OpenSUSE and Fedora dependencies
+    set(CPACK_RPM_PACKAGE_REQUIRES "libusb fftw qt5 pulseaudio libxml2")
+    set (CPACK_RPM_PACKAGE_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
   endif (RPMBUILDER)
 
 elseif((WIN32 OR MINGW) AND BUNDLE)
