@@ -179,7 +179,7 @@ void MainSettings::renamePresetGroup(const QString& oldGroupName, const QString&
     }
 }
 
-const Preset* MainSettings::getPreset(const QString& groupName, quint64 centerFrequency, const QString& description) const
+const Preset* MainSettings::getPreset(const QString& groupName, quint64 centerFrequency, const QString& description, const QString& type) const
 {
     int nbPresets = getPresetCount();
 
@@ -189,7 +189,11 @@ const Preset* MainSettings::getPreset(const QString& groupName, quint64 centerFr
             (getPreset(i)->getCenterFrequency() == centerFrequency) &&
             (getPreset(i)->getDescription() == description))
         {
-            return getPreset(i);
+            if (type == "R" && getPreset(i)->isSourcePreset()) {
+                return getPreset(i);
+            } else if (type == "T" && !getPreset(i)->isSourcePreset()) {
+                return getPreset(i);
+            }
         }
     }
 

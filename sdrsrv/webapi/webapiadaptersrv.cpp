@@ -116,27 +116,47 @@ int WebAPIAdapterSrv::instanceDelete(
 }
 
 int WebAPIAdapterSrv::instanceDevices(
-            bool tx,
+            int direction,
             SWGSDRangel::SWGInstanceDevicesResponse& response,
             SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
     response.init();
-    int nbSamplingDevices = tx ? DeviceEnumerator::instance()->getNbTxSamplingDevices() : DeviceEnumerator::instance()->getNbRxSamplingDevices();
+
+    int nbSamplingDevices;
+
+    if (direction == 0) { // Single Rx stream device
+        nbSamplingDevices = DeviceEnumerator::instance()->getNbRxSamplingDevices();
+    } else if (direction == 1) { // Single Tx stream device
+        nbSamplingDevices = DeviceEnumerator::instance()->getNbTxSamplingDevices();
+    } else { // not supported
+        nbSamplingDevices = 0;
+    }
+
+
     response.setDevicecount(nbSamplingDevices);
     QList<SWGSDRangel::SWGDeviceListItem*> *devices = response.getDevices();
 
     for (int i = 0; i < nbSamplingDevices; i++)
     {
-        PluginInterface::SamplingDevice samplingDevice = tx ? DeviceEnumerator::instance()->getTxSamplingDevice(i) : DeviceEnumerator::instance()->getRxSamplingDevice(i);
+        const PluginInterface::SamplingDevice *samplingDevice = nullptr;
+
+        if (direction == 0) {
+            samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(i);
+        } else if (direction == 1) {
+            samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(i);
+        } else {
+            continue;
+        }
+
         devices->append(new SWGSDRangel::SWGDeviceListItem);
         devices->back()->init();
-        *devices->back()->getDisplayedName() = samplingDevice.displayedName;
-        *devices->back()->getHwType() = samplingDevice.hardwareId;
-        *devices->back()->getSerial() = samplingDevice.serial;
-        devices->back()->setSequence(samplingDevice.sequence);
-        devices->back()->setDirection((int) samplingDevice.streamType);
-        devices->back()->setDeviceNbStreams(samplingDevice.deviceNbItems);
-        devices->back()->setDeviceSetIndex(samplingDevice.claimed);
+        *devices->back()->getDisplayedName() = samplingDevice->displayedName;
+        *devices->back()->getHwType() = samplingDevice->hardwareId;
+        *devices->back()->getSerial() = samplingDevice->serial;
+        devices->back()->setSequence(samplingDevice->sequence);
+        devices->back()->setDirection((int) samplingDevice->streamType);
+        devices->back()->setDeviceNbStreams(samplingDevice->deviceNbItems);
+        devices->back()->setDeviceSetIndex(samplingDevice->claimed);
         devices->back()->setIndex(i);
     }
 
@@ -144,13 +164,30 @@ int WebAPIAdapterSrv::instanceDevices(
 }
 
 int WebAPIAdapterSrv::instanceChannels(
-            bool tx,
+            int direction,
             SWGSDRangel::SWGInstanceChannelsResponse& response,
             SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
     response.init();
-    PluginAPI::ChannelRegistrations *channelRegistrations = tx ? m_mainCore.m_pluginManager->getTxChannelRegistrations() : m_mainCore.m_pluginManager->getRxChannelRegistrations();
-    int nbChannelDevices = channelRegistrations->size();
+    PluginAPI::ChannelRegistrations *channelRegistrations;
+    int nbChannelDevices;
+
+    if (direction == 0) // Single sink (Rx) channel
+    {
+        channelRegistrations = m_mainCore.m_pluginManager->getRxChannelRegistrations();
+        nbChannelDevices = channelRegistrations->size();
+    }
+    else if (direction == 1) // Single source (Tx) channel
+    {
+        channelRegistrations = m_mainCore.m_pluginManager->getTxChannelRegistrations();
+        nbChannelDevices = channelRegistrations->size();
+    }
+    else // not supported
+    {
+        channelRegistrations = nullptr;
+        nbChannelDevices = 0;
+    }
+
     response.setChannelcount(nbChannelDevices);
     QList<SWGSDRangel::SWGChannelListItem*> *channels = response.getChannels();
 
@@ -162,7 +199,7 @@ int WebAPIAdapterSrv::instanceChannels(
         const PluginDescriptor& pluginDescriptor = channelInterface->getPluginDescriptor();
         *channels->back()->getVersion() = pluginDescriptor.version;
         *channels->back()->getName() = pluginDescriptor.displayedName;
-        channels->back()->setDirection(tx ? 1 : 0);
+        channels->back()->setDirection(direction);
         *channels->back()->getIdUri() = channelRegistrations->at(i).m_channelIdURI;
         *channels->back()->getId() = channelRegistrations->at(i).m_channelId;
         channels->back()->setIndex(i);
@@ -637,15 +674,17 @@ int WebAPIAdapterSrv::instancePresetFilePost(
 
     const Preset *selectedPreset = m_mainCore.m_settings.getPreset(*presetIdentifier->getGroupName(),
             presetIdentifier->getCenterFrequency(),
-            *presetIdentifier->getName());
+            *presetIdentifier->getName(),
+            *presetIdentifier->getType());
 
     if (selectedPreset == 0)
     {
         error.init();
-        *error.getMessage() = QString("There is no preset [%1, %2, %3]")
+        *error.getMessage() = QString("There is no preset [%1, %2, %3, %4]")
                 .arg(*presetIdentifier->getGroupName())
                 .arg(presetIdentifier->getCenterFrequency())
-                .arg(*presetIdentifier->getName());
+                .arg(*presetIdentifier->getName())
+                .arg(*presetIdentifier->getType());
         return 404;
     }
 
@@ -753,15 +792,17 @@ int WebAPIAdapterSrv::instancePresetPatch(
 
     const Preset *selectedPreset = m_mainCore.m_settings.getPreset(*presetIdentifier->getGroupName(),
             presetIdentifier->getCenterFrequency(),
-            *presetIdentifier->getName());
+            *presetIdentifier->getName(),
+            *presetIdentifier->getType());
 
     if (selectedPreset == 0)
     {
         error.init();
-        *error.getMessage() = QString("There is no preset [%1, %2, %3]")
+        *error.getMessage() = QString("There is no preset [%1, %2, %3 %4]")
                 .arg(*presetIdentifier->getGroupName())
                 .arg(presetIdentifier->getCenterFrequency())
-                .arg(*presetIdentifier->getName());
+                .arg(*presetIdentifier->getName())
+                .arg(*presetIdentifier->getType());
         return 404;
     }
 
@@ -811,15 +852,17 @@ int WebAPIAdapterSrv::instancePresetPut(
 
     const Preset *selectedPreset = m_mainCore.m_settings.getPreset(*presetIdentifier->getGroupName(),
             presetIdentifier->getCenterFrequency(),
-            *presetIdentifier->getName());
+            *presetIdentifier->getName(),
+            *presetIdentifier->getType());
 
     if (selectedPreset == 0)
     {
         error.init();
-        *error.getMessage() = QString("There is no preset [%1, %2, %3]")
+        *error.getMessage() = QString("There is no preset [%1, %2, %3 %4]")
                 .arg(*presetIdentifier->getGroupName())
                 .arg(presetIdentifier->getCenterFrequency())
-                .arg(*presetIdentifier->getName());
+                .arg(*presetIdentifier->getName())
+                .arg(*presetIdentifier->getType());
         return 404;
     }
     else // update existing preset
@@ -887,7 +930,8 @@ int WebAPIAdapterSrv::instancePresetPost(
 
     const Preset *selectedPreset = m_mainCore.m_settings.getPreset(*presetIdentifier->getGroupName(),
             deviceCenterFrequency,
-            *presetIdentifier->getName());
+            *presetIdentifier->getName(),
+            *presetIdentifier->getType());
 
     if (selectedPreset == 0) // save on a new preset
     {
@@ -896,10 +940,11 @@ int WebAPIAdapterSrv::instancePresetPost(
     else
     {
         error.init();
-        *error.getMessage() = QString("Preset already exists [%1, %2, %3]")
+        *error.getMessage() = QString("Preset already exists [%1, %2, %3 %4]")
                 .arg(*presetIdentifier->getGroupName())
                 .arg(deviceCenterFrequency)
-                .arg(*presetIdentifier->getName());
+                .arg(*presetIdentifier->getName())
+                .arg(*presetIdentifier->getType());
         return 409;
     }
 
@@ -921,15 +966,17 @@ int WebAPIAdapterSrv::instancePresetDelete(
 {
     const Preset *selectedPreset = m_mainCore.m_settings.getPreset(*response.getGroupName(),
             response.getCenterFrequency(),
-            *response.getName());
+            *response.getName(),
+            *response.getType());
 
     if (selectedPreset == 0)
     {
         error.init();
-        *error.getMessage() = QString("There is no preset [%1, %2, %3]")
+        *error.getMessage() = QString("There is no preset [%1, %2, %3 %4]")
                 .arg(*response.getGroupName())
                 .arg(response.getCenterFrequency())
-                .arg(*response.getName());
+                .arg(*response.getName())
+                .arg(*response.getType());
         return 404;
     }
 
@@ -953,11 +1000,11 @@ int WebAPIAdapterSrv::instanceDeviceSetsGet(
 }
 
 int WebAPIAdapterSrv::instanceDeviceSetPost(
-        bool tx,
+        int direction,
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
 {
-    MainCore::MsgAddDeviceSet *msg = MainCore::MsgAddDeviceSet::create(tx);
+    MainCore::MsgAddDeviceSet *msg = MainCore::MsgAddDeviceSet::create(direction);
     m_mainCore.m_inputMessageQueue.push(msg);
 
     response.init();
@@ -1055,35 +1102,41 @@ int WebAPIAdapterSrv::devicesetDevicePut(
 
         for (int i = 0; i < nbSamplingDevices; i++)
         {
-            int tx;
+            int direction;
+            const PluginInterface::SamplingDevice *samplingDevice;
 
-            if (query.getDirection() == 0) {
-                tx = 0;
-            } else if (query.getDirection() == 1) {
-                tx = 1;
-            } else {
+            if (query.getDirection() == 0)
+            {
+                direction = 0;
+                samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(i);
+            }
+            else if (query.getDirection() == 1)
+            {
+                direction = 1;
+                samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(i);
+            }
+            else
+            {
                 continue; // TODO: any device (2) not supported yet
             }
 
-            PluginInterface::SamplingDevice samplingDevice = query.getDirection() == 0 ? DeviceEnumerator::instance()->getRxSamplingDevice(i) : DeviceEnumerator::instance()->getTxSamplingDevice(i);
-
-            if (query.getDisplayedName() && (*query.getDisplayedName() != samplingDevice.displayedName)) {
+            if (query.getDisplayedName() && (*query.getDisplayedName() != samplingDevice->displayedName)) {
                 continue;
             }
 
-            if (query.getHwType() && (*query.getHwType() != samplingDevice.hardwareId)) {
+            if (query.getHwType() && (*query.getHwType() != samplingDevice->hardwareId)) {
                 continue;
             }
 
-            if ((query.getSequence() >= 0) && (query.getSequence() != samplingDevice.sequence)) {
+            if ((query.getSequence() >= 0) && (query.getSequence() != samplingDevice->sequence)) {
                 continue;
             }
 
-            if (query.getSerial() && (*query.getSerial() != samplingDevice.serial)) {
+            if (query.getSerial() && (*query.getSerial() != samplingDevice->serial)) {
                 continue;
             }
 
-            if ((query.getDeviceStreamIndex() >= 0) && (query.getDeviceStreamIndex() != samplingDevice.deviceItemIndex)) {
+            if ((query.getDeviceStreamIndex() >= 0) && (query.getDeviceStreamIndex() != samplingDevice->deviceItemIndex)) {
                 continue;
             }
 
@@ -1091,13 +1144,13 @@ int WebAPIAdapterSrv::devicesetDevicePut(
             m_mainCore.m_inputMessageQueue.push(msg);
 
             response.init();
-            *response.getDisplayedName() = samplingDevice.displayedName;
-            *response.getHwType() = samplingDevice.hardwareId;
-            *response.getSerial() = samplingDevice.serial;
-            response.setSequence(samplingDevice.sequence);
-            response.setDirection(tx);
-            response.setDeviceNbStreams(samplingDevice.deviceNbItems);
-            response.setDeviceStreamIndex(samplingDevice.deviceItemIndex);
+            *response.getDisplayedName() = samplingDevice->displayedName;
+            *response.getHwType() = samplingDevice->hardwareId;
+            *response.getSerial() = samplingDevice->serial;
+            response.setSequence(samplingDevice->sequence);
+            response.setDirection(direction);
+            response.setDeviceNbStreams(samplingDevice->deviceNbItems);
+            response.setDeviceStreamIndex(samplingDevice->deviceItemIndex);
             response.setDeviceSetIndex(deviceSetIndex);
             response.setIndex(i);
 

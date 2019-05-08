@@ -160,19 +160,19 @@ private:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        bool isTx() const { return m_tx; }
+        int getDirection() const { return m_direction; }
 
-        static MsgAddDeviceSet* create(bool tx)
+        static MsgAddDeviceSet* create(int direction)
         {
-            return new MsgAddDeviceSet(tx);
+            return new MsgAddDeviceSet(direction);
         }
 
     private:
-        bool m_tx;
+        int m_direction;
 
-        MsgAddDeviceSet(bool tx) :
+        MsgAddDeviceSet(int direction) :
             Message(),
-            m_tx(tx)
+            m_direction(direction)
         { }
     };
 

@@ -142,12 +142,13 @@ bool MainCore::handleMessage(const Message& cmd)
     else if (MsgAddDeviceSet::match(cmd))
     {
         MsgAddDeviceSet& notif = (MsgAddDeviceSet&) cmd;
+        int direction = notif.getDirection();
 
-        if (notif.isTx()) {
+        if (direction == 1) { // Single stream Tx
             addSinkDevice();
-        } else {
+        } else if (direction == 0) { // Single stream Rx
             addSourceDevice();
-        }
+        } // device type not (yet) supported
 
         return true;
     }
@@ -283,14 +284,14 @@ void MainCore::addSinkDevice()
 
     // create a file sink by default
     int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileSinkDeviceIndex();
-    PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice.sequence);
-    m_deviceSets.back()->m_deviceAPI->setNbItems(samplingDevice.deviceNbItems);
-    m_deviceSets.back()->m_deviceAPI->setItemIndex(samplingDevice.deviceItemIndex);
-    m_deviceSets.back()->m_deviceAPI->setHardwareId(samplingDevice.hardwareId);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice.id);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice.serial);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice.displayedName);
+    const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
+    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+    m_deviceSets.back()->m_deviceAPI->setNbItems(samplingDevice->deviceNbItems);
+    m_deviceSets.back()->m_deviceAPI->setItemIndex(samplingDevice->deviceItemIndex);
+    m_deviceSets.back()->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
+    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
+    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
     m_deviceSets.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(fileSinkDeviceIndex));
 
     // delete previous plugin instance
@@ -323,14 +324,14 @@ void MainCore::addSourceDevice()
 
     // Create a file source instance by default
     int fileSourceDeviceIndex = DeviceEnumerator::instance()->getFileSourceDeviceIndex();
-    PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(fileSourceDeviceIndex);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice.sequence);
-    m_deviceSets.back()->m_deviceAPI->setNbItems(samplingDevice.deviceNbItems);
-    m_deviceSets.back()->m_deviceAPI->setItemIndex(samplingDevice.deviceItemIndex);
-    m_deviceSets.back()->m_deviceAPI->setHardwareId(samplingDevice.hardwareId);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice.id);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice.serial);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice.displayedName);
+    const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(fileSourceDeviceIndex);
+    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+    m_deviceSets.back()->m_deviceAPI->setNbItems(samplingDevice->deviceNbItems);
+    m_deviceSets.back()->m_deviceAPI->setItemIndex(samplingDevice->deviceItemIndex);
+    m_deviceSets.back()->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
+    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
+    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
     m_deviceSets.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(fileSourceDeviceIndex));
 
     DeviceSampleSource *source = m_deviceSets.back()->m_deviceAPI->getPluginInterface()->createSampleSourcePluginInstanceInput(
@@ -399,14 +400,14 @@ void MainCore::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
                 deviceSet->m_deviceAPI->getSampleSource());
         deviceSet->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
-        PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(selectedDeviceIndex);
-        deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice.sequence);
-        deviceSet->m_deviceAPI->setNbItems(samplingDevice.deviceNbItems);
-        deviceSet->m_deviceAPI->setItemIndex(samplingDevice.deviceItemIndex);
-        deviceSet->m_deviceAPI->setHardwareId(samplingDevice.hardwareId);
-        deviceSet->m_deviceAPI->setSamplingDeviceId(samplingDevice.id);
-        deviceSet->m_deviceAPI->setSamplingDeviceSerial(samplingDevice.serial);
-        deviceSet->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice.displayedName);
+        const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(selectedDeviceIndex);
+        deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+        deviceSet->m_deviceAPI->setNbItems(samplingDevice->deviceNbItems);
+        deviceSet->m_deviceAPI->setItemIndex(samplingDevice->deviceItemIndex);
+        deviceSet->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
+        deviceSet->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
+        deviceSet->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+        deviceSet->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
         deviceSet->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(selectedDeviceIndex));
 
         // add to buddies list
@@ -467,14 +468,14 @@ void MainCore::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
                 deviceSet->m_deviceAPI->getSampleSink());
         deviceSet->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
-        PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(selectedDeviceIndex);
-        deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice.sequence);
-        deviceSet->m_deviceAPI->setNbItems(samplingDevice.deviceNbItems);
-        deviceSet->m_deviceAPI->setItemIndex(samplingDevice.deviceItemIndex);
-        deviceSet->m_deviceAPI->setHardwareId(samplingDevice.hardwareId);
-        deviceSet->m_deviceAPI->setSamplingDeviceId(samplingDevice.id);
-        deviceSet->m_deviceAPI->setSamplingDeviceSerial(samplingDevice.serial);
-        deviceSet->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice.displayedName);
+        const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(selectedDeviceIndex);
+        deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+        deviceSet->m_deviceAPI->setNbItems(samplingDevice->deviceNbItems);
+        deviceSet->m_deviceAPI->setItemIndex(samplingDevice->deviceItemIndex);
+        deviceSet->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
+        deviceSet->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
+        deviceSet->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+        deviceSet->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
         deviceSet->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(selectedDeviceIndex));
 
         // add to buddies list

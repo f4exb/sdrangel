@@ -63,15 +63,15 @@ void SamplingDeviceControl::setSelectedDeviceIndex(int index)
 {
     if (m_rxElseTx)
     {
-        PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(index);
+        const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(index);
         DeviceEnumerator::instance()->changeRxSelection(m_deviceTabIndex, index);
-        ui->deviceSelectedText->setText(samplingDevice.displayedName);
+        ui->deviceSelectedText->setText(samplingDevice->displayedName);
     }
     else
     {
-        PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(index);
+        const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(index);
         DeviceEnumerator::instance()->changeTxSelection(m_deviceTabIndex, index);
-        ui->deviceSelectedText->setText(samplingDevice.displayedName);
+        ui->deviceSelectedText->setText(samplingDevice->displayedName);
     }
 
     m_selectedDeviceIndex = index;

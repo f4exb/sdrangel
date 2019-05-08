@@ -43,8 +43,8 @@ public:
     void removeTxSelection(int tabIndex);
     int getNbRxSamplingDevices() const { return m_rxEnumeration.size(); }
     int getNbTxSamplingDevices() const { return m_txEnumeration.size(); }
-    PluginInterface::SamplingDevice getRxSamplingDevice(int deviceIndex) const { return m_rxEnumeration[deviceIndex].m_samplingDevice; }
-    PluginInterface::SamplingDevice getTxSamplingDevice(int deviceIndex) const { return m_txEnumeration[deviceIndex].m_samplingDevice; }
+    const PluginInterface::SamplingDevice* getRxSamplingDevice(int deviceIndex) const { return &m_rxEnumeration[deviceIndex].m_samplingDevice; }
+    const PluginInterface::SamplingDevice* getTxSamplingDevice(int deviceIndex) const { return &m_txEnumeration[deviceIndex].m_samplingDevice; }
     PluginInterface *getRxPluginInterface(int deviceIndex) { return m_rxEnumeration[deviceIndex].m_pluginInterface; }
     PluginInterface *getTxPluginInterface(int deviceIndex) { return m_txEnumeration[deviceIndex].m_pluginInterface; }
     int getFileSourceDeviceIndex() const;

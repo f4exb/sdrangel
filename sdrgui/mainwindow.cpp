@@ -278,14 +278,14 @@ void MainWindow::addSourceDevice(int deviceIndex)
         deviceIndex = DeviceEnumerator::instance()->getFileSourceDeviceIndex();
     }
 
-    PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice.sequence);
-    m_deviceUIs.back()->m_deviceAPI->setNbItems(samplingDevice.deviceNbItems);
-    m_deviceUIs.back()->m_deviceAPI->setItemIndex(samplingDevice.deviceItemIndex);
-    m_deviceUIs.back()->m_deviceAPI->setHardwareId(samplingDevice.hardwareId);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice.id);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice.serial);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice.displayedName);
+    const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
+    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+    m_deviceUIs.back()->m_deviceAPI->setNbItems(samplingDevice->deviceNbItems);
+    m_deviceUIs.back()->m_deviceAPI->setItemIndex(samplingDevice->deviceItemIndex);
+    m_deviceUIs.back()->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
+    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
+    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(deviceIndex));
 
     m_deviceUIs.back()->m_samplingDeviceControl->setSelectedDeviceIndex(deviceIndex);
@@ -349,14 +349,14 @@ void MainWindow::addSinkDevice()
 
     // create a file sink by default
     int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileSinkDeviceIndex();
-    PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice.sequence);
-    m_deviceUIs.back()->m_deviceAPI->setNbItems(samplingDevice.deviceNbItems);
-    m_deviceUIs.back()->m_deviceAPI->setItemIndex(samplingDevice.deviceItemIndex);
-    m_deviceUIs.back()->m_deviceAPI->setHardwareId(samplingDevice.hardwareId);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice.id);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice.serial);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice.displayedName);
+    const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
+    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+    m_deviceUIs.back()->m_deviceAPI->setNbItems(samplingDevice->deviceNbItems);
+    m_deviceUIs.back()->m_deviceAPI->setItemIndex(samplingDevice->deviceItemIndex);
+    m_deviceUIs.back()->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
+    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
+    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(fileSinkDeviceIndex));
 
     m_deviceUIs.back()->m_samplingDeviceControl->setSelectedDeviceIndex(fileSinkDeviceIndex);
@@ -795,12 +795,13 @@ bool MainWindow::handleMessage(const Message& cmd)
     else if (MsgAddDeviceSet::match(cmd))
     {
         MsgAddDeviceSet& notif = (MsgAddDeviceSet&) cmd;
+        int direction = notif.getDirection();
 
-        if (notif.isTx()) {
+        if (direction == 1) { // Single stream Tx
             addSinkDevice();
-        } else {
+        } else if (direction == 0) { // Single stream Rx
             addSourceDevice(-1); // create with file source device by default
-        }
+        } // other device types not (yet) supported
 
         return true;
     }
@@ -1506,15 +1507,15 @@ void MainWindow::sampleSourceChanged()
                 deviceUI->m_deviceAPI->getSampleSource());
         deviceUI->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
-        PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(
+        const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(
             deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex());
-        deviceUI->m_deviceAPI->setSamplingDeviceSequence(samplingDevice.sequence);
-        deviceUI->m_deviceAPI->setNbItems(samplingDevice.deviceNbItems);
-        deviceUI->m_deviceAPI->setItemIndex(samplingDevice.deviceItemIndex);
-        deviceUI->m_deviceAPI->setHardwareId(samplingDevice.hardwareId);
-        deviceUI->m_deviceAPI->setSamplingDeviceId(samplingDevice.id);
-        deviceUI->m_deviceAPI->setSamplingDeviceSerial(samplingDevice.serial);
-        deviceUI->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice.displayedName);
+        deviceUI->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+        deviceUI->m_deviceAPI->setNbItems(samplingDevice->deviceNbItems);
+        deviceUI->m_deviceAPI->setItemIndex(samplingDevice->deviceItemIndex);
+        deviceUI->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
+        deviceUI->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
+        deviceUI->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+        deviceUI->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
         deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex()));
 
         // add to buddies list
@@ -1569,8 +1570,8 @@ void MainWindow::sampleSourceChanged()
 
         if (currentSourceTabIndex == 0) // save as default starting device
         {
-            m_settings.setSourceIndex(samplingDevice.sequence);
-            m_settings.setSourceDeviceId(samplingDevice.id);
+            m_settings.setSourceIndex(samplingDevice->sequence);
+            m_settings.setSourceDeviceId(samplingDevice->id);
         }
     }
 }
@@ -1596,14 +1597,14 @@ void MainWindow::sampleSinkChanged()
                 deviceUI->m_deviceAPI->getSampleSink());
         deviceUI->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
-        PluginInterface::SamplingDevice samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex());
-        deviceUI->m_deviceAPI->setSamplingDeviceSequence(samplingDevice.sequence);
-        deviceUI->m_deviceAPI->setNbItems(samplingDevice.deviceNbItems);
-        deviceUI->m_deviceAPI->setItemIndex(samplingDevice.deviceItemIndex);
-        deviceUI->m_deviceAPI->setHardwareId(samplingDevice.hardwareId);
-        deviceUI->m_deviceAPI->setSamplingDeviceId(samplingDevice.id);
-        deviceUI->m_deviceAPI->setSamplingDeviceSerial(samplingDevice.serial);
-        deviceUI->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice.displayedName);
+        const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex());
+        deviceUI->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+        deviceUI->m_deviceAPI->setNbItems(samplingDevice->deviceNbItems);
+        deviceUI->m_deviceAPI->setItemIndex(samplingDevice->deviceItemIndex);
+        deviceUI->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
+        deviceUI->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
+        deviceUI->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+        deviceUI->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
         deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex()));
 
         // add to buddies list

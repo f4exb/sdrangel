@@ -212,14 +212,19 @@ void WebAPIRequestMapper::instanceDevicesService(qtwebapp::HttpRequest& request,
 
     if (request.getMethod() == "GET")
     {
-        QByteArray txStr = request.getParameter("tx");
-        bool tx = false;
+        QByteArray dirStr = request.getParameter("direction");
+        int direction = 0;
 
-        if (txStr.length() != 0) {
-            tx = !(txStr == "0");
+        if (dirStr.length() != 0)
+        {
+            bool ok;
+            int tmp = dirStr.toInt(&ok);
+            if (ok) {
+                direction = tmp;
+            }
         }
 
-        int status = m_adapter->instanceDevices(tx, normalResponse, errorResponse);
+        int status = m_adapter->instanceDevices(direction, normalResponse, errorResponse);
         response.setStatus(status);
 
         if (status/100 == 2) {
@@ -246,14 +251,19 @@ void WebAPIRequestMapper::instanceChannelsService(qtwebapp::HttpRequest& request
 
     if (request.getMethod() == "GET")
     {
-        QByteArray txStr = request.getParameter("tx");
-        bool tx = false;
+        QByteArray dirStr = request.getParameter("direction");
+        int direction = 0;
 
-        if (txStr.length() != 0) {
-            tx = !(txStr == "0");
+        if (dirStr.length() != 0)
+        {
+            bool ok;
+            int tmp = dirStr.toInt(&ok);
+            if (ok) {
+                direction = tmp;
+            }
         }
 
-        int status = m_adapter->instanceChannels(tx, normalResponse, errorResponse);
+        int status = m_adapter->instanceChannels(direction, normalResponse, errorResponse);
         response.setStatus(status);
 
         if (status/100 == 2) {
@@ -962,14 +972,19 @@ void WebAPIRequestMapper::instanceDeviceSetService(qtwebapp::HttpRequest& reques
     if (request.getMethod() == "POST")
     {
         SWGSDRangel::SWGSuccessResponse normalResponse;
-        QByteArray txStr = request.getParameter("tx");
-        bool tx = false;
+        QByteArray dirStr = request.getParameter("direction");
+        int direction = 0;
 
-        if (txStr.length() != 0) {
-            tx = !(txStr == "0");
+        if (dirStr.length() != 0)
+        {
+            bool ok;
+            int tmp = dirStr.toInt(&ok);
+            if (ok) {
+                direction = tmp;
+            }
         }
 
-        int status = m_adapter->instanceDeviceSetPost(tx, normalResponse, errorResponse);
+        int status = m_adapter->instanceDeviceSetPost(direction, normalResponse, errorResponse);
         response.setStatus(status);
 
         if (status/100 == 2) {

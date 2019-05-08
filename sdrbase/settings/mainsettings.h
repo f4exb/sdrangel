@@ -25,7 +25,7 @@ public:
 	void deletePreset(const Preset* preset);
 	int getPresetCount() const { return m_presets.count(); }
 	const Preset* getPreset(int index) const { return m_presets[index]; }
-	const Preset* getPreset(const QString& groupName, quint64 centerFrequency, const QString& description) const;
+	const Preset* getPreset(const QString& groupName, quint64 centerFrequency, const QString& description, const QString& type) const;
 	void sortPresets();
 	void renamePresetGroup(const QString& oldGroupName, const QString& newGroupName);
 	void deletePresetGroup(const QString& groupName);

@@ -42,12 +42,12 @@ public:
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceDevices(
-            bool tx,
+            int direction,
             SWGSDRangel::SWGInstanceDevicesResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceChannels(
-            bool tx,
+            int direction,
             SWGSDRangel::SWGInstanceChannelsResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
@@ -135,7 +135,7 @@ public:
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceDeviceSetPost(
-            bool tx,
+            int direction,
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 

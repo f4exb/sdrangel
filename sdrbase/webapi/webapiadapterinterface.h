@@ -93,11 +93,11 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceDevices(
-            bool tx,
+            int direction,
             SWGSDRangel::SWGInstanceDevicesResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
-        (void) tx;
+        (void) direction;
         (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
@@ -109,11 +109,11 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceChannels(
-            bool tx,
+            int direction,
             SWGSDRangel::SWGInstanceChannelsResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
-        (void) tx;
+        (void) direction;
         (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
@@ -437,11 +437,11 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceDeviceSetPost(
-            bool tx,
+            int direction,
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
-        (void) tx;
+        (void) direction;
         (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
