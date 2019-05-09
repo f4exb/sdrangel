@@ -1,5 +1,9 @@
 project (sdrgui)
 
+# with cmake <3.9 doesn't work with ../ used on webapi
+# see https://cmake.org/cmake/help/v3.9/prop_tgt/AUTOUIC_SEARCH_PATHS.html
+set(CMAKE_AUTOUIC OFF)
+
 set(sdrgui_SOURCES
     mainwindow.cpp
     gui/aboutdialog.cpp
@@ -65,31 +69,6 @@ set(sdrgui_SOURCES
     webapi/webapiadaptergui.cpp
 
     resources/res.qrc
-
-    mainwindow.ui
-    gui/aboutdialog.ui
-    gui/addpresetdialog.ui
-    gui/basicchannelsettingsdialog.ui
-    gui/basicdevicesettingsdialog.ui
-    gui/commandoutputdialog.ui
-    gui/cwkeyergui.ui
-    gui/editcommanddialog.ui
-    gui/externalclockdialog.ui
-    gui/glscopegui.ui
-    gui/glspectrumgui.ui
-    gui/pluginsdialog.ui
-    gui/audiodialog.ui
-    gui/audioselectdialog.ui
-    gui/samplingdevicecontrol.ui
-    gui/samplingdevicedialog.ui
-    gui/myposdialog.ui
-    gui/transverterdialog.ui
-    gui/loggingdialog.ui
-    soapygui/discreterangegui.ui
-    soapygui/intervalrangegui.ui
-    soapygui/intervalslidergui.ui
-    soapygui/complexfactorgui.ui
-    soapygui/arginfogui.ui
 )
 
 set(sdrgui_HEADERS
@@ -157,29 +136,59 @@ set(sdrgui_HEADERS
     webapi/webapiadaptergui.h
 )
 
+set(sdrgui_FORMS
+  mainwindow.ui
+  gui/aboutdialog.ui
+  gui/addpresetdialog.ui
+  gui/basicchannelsettingsdialog.ui
+  gui/basicdevicesettingsdialog.ui
+  gui/commandoutputdialog.ui
+  gui/cwkeyergui.ui
+  gui/editcommanddialog.ui
+  gui/externalclockdialog.ui
+  gui/glscopegui.ui
+  gui/glspectrumgui.ui
+  gui/pluginsdialog.ui
+  gui/audiodialog.ui
+  gui/audioselectdialog.ui
+  gui/samplingdevicecontrol.ui
+  gui/samplingdevicedialog.ui
+  gui/myposdialog.ui
+  gui/transverterdialog.ui
+  gui/loggingdialog.ui
+  soapygui/discreterangegui.ui
+  soapygui/intervalrangegui.ui
+  soapygui/intervalslidergui.ui
+  soapygui/complexfactorgui.ui
+  soapygui/arginfogui.ui
+  )
+
+qt5_wrap_ui(sdrgui_FORMS_HEADERS ${sdrgui_FORMS})
+
 include_directories(
-    ${CMAKE_SOURCE_DIR}/exports
-    ${CMAKE_SOURCE_DIR}/sdrbase
-    ${CMAKE_SOURCE_DIR}/logging
-    ${CMAKE_SOURCE_DIR}/httpserver
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${OPENGL_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIRS}
-)
+  ${CMAKE_SOURCE_DIR}/exports
+  ${CMAKE_SOURCE_DIR}/sdrbase
+  ${CMAKE_SOURCE_DIR}/logging
+  ${CMAKE_SOURCE_DIR}/httpserver
+  ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${OPENGL_INCLUDE_DIR}
+  ${Boost_INCLUDE_DIRS}
+  )
 
 add_library(sdrgui SHARED
-    ${sdrgui_SOURCES}
-)
+  ${sdrgui_SOURCES}
+  ${sdrgui_FORMS_HEADERS}
+  )
 
 target_link_libraries(sdrgui
-    Qt5::Core
-    Qt5::Widgets
-    Qt5::OpenGL
-    Qt5::Multimedia
-    ${OPENGL_LIBRARIES}
-    sdrbase
-    logging
-)
+  Qt5::Core
+  Qt5::Widgets
+  Qt5::OpenGL
+  Qt5::Multimedia
+  ${OPENGL_LIBRARIES}
+  sdrbase
+  logging
+  )
 
 install(TARGETS sdrgui DESTINATION ${INSTALL_LIB_DIR})
