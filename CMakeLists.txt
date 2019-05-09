@@ -89,7 +89,9 @@ set(CPACK_SOURCE_IGNORE_FILES "${PROJECT_BINARY_DIR};/.git/;.gitignore;menu.yml;
 set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
 
 # if we don't set build_type
-if(NOT DEFINED CMAKE_BUILD_TYPE OR "${CMAKE_BUILD_TYPE}" STREQUAL "")
+if(NOT DEFINED CMAKE_BUILD_TYPE OR
+    "${CMAKE_BUILD_TYPE}" STREQUAL "" OR
+    "${CMAKE_BUILD_TYPE}" STREQUAL "MacPorts")
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 message(STATUS "Build type set to ${CMAKE_BUILD_TYPE}")
