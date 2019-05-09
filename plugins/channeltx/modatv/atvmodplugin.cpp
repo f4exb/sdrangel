@@ -71,7 +71,7 @@ BasebandSampleSource* ATVModPlugin::createTxChannelBS(DeviceAPI *deviceAPI)
     return new ATVMod(deviceAPI);
 }
 
-ChannelSourceAPI* ATVModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* ATVModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
 {
     return new ATVMod(deviceAPI);
 }

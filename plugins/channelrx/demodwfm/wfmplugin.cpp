@@ -55,7 +55,7 @@ BasebandSampleSink* WFMPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
     return new WFMDemod(deviceAPI);
 }
 
-ChannelSinkAPI* WFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* WFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new WFMDemod(deviceAPI);
 }

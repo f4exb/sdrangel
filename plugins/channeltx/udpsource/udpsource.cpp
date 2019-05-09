@@ -42,7 +42,7 @@ const QString UDPSource::m_channelIdURI = "sdrangel.channeltx.udpsource";
 const QString UDPSource::m_channelId = "UDPSource";
 
 UDPSource::UDPSource(DeviceAPI *deviceAPI) :
-    ChannelSourceAPI(m_channelIdURI),
+    ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
     m_basebandSampleRate(48000),
     m_outputSampleRate(48000),

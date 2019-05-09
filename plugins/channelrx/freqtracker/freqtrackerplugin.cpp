@@ -71,7 +71,7 @@ BasebandSampleSink* FreqTrackerPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
     return new FreqTracker(deviceAPI);
 }
 
-ChannelSinkAPI* FreqTrackerPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* FreqTrackerPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new FreqTracker(deviceAPI);
 }

@@ -71,7 +71,7 @@ BasebandSampleSource* SSBModPlugin::createTxChannelBS(DeviceAPI *deviceAPI)
     return new SSBMod(deviceAPI);
 }
 
-ChannelSourceAPI* SSBModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* SSBModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
 {
     return new SSBMod(deviceAPI);
 }

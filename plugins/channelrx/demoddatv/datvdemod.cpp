@@ -37,7 +37,7 @@ MESSAGE_CLASS_DEFINITION(DATVDemod::MsgConfigureDATVDemod, Message)
 MESSAGE_CLASS_DEFINITION(DATVDemod::MsgConfigureChannelizer, Message)
 
 DATVDemod::DATVDemod(DeviceAPI *deviceAPI) :
-    ChannelSinkAPI(m_channelIdURI),
+    ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
     m_blnNeedConfigUpdate(false),
     m_deviceAPI(deviceAPI),
     m_objRegisteredTVScreen(0),

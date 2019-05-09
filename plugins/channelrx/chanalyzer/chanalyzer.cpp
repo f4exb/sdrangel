@@ -33,7 +33,7 @@ const QString ChannelAnalyzer::m_channelIdURI = "sdrangel.channel.chanalyzer";
 const QString ChannelAnalyzer::m_channelId = "ChannelAnalyzer";
 
 ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
-        ChannelSinkAPI(m_channelIdURI),
+        ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_sampleSink(0),
         m_settingsMutex(QMutex::Recursive)

@@ -23,8 +23,7 @@
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"
 #include "settings/preset.h"
-#include "channel/channelsinkapi.h"
-#include "channel/channelsourceapi.h"
+#include "channel/channelapi.h"
 
 #include "deviceapi.h"
 
@@ -107,14 +106,17 @@ void DeviceAPI::removeChannelSource(ThreadedBasebandSampleSource* source, int st
     }
 }
 
-void DeviceAPI::addChannelSinkAPI(ChannelSinkAPI* channelAPI)
+void DeviceAPI::addChannelSinkAPI(ChannelAPI* channelAPI, int streamIndex)
 {
+    (void) streamIndex;
     m_channelSinkAPIs.append(channelAPI);
     renumerateChannels();
 }
 
-void DeviceAPI::removeChannelSinkAPI(ChannelSinkAPI* channelAPI)
+void DeviceAPI::removeChannelSinkAPI(ChannelAPI* channelAPI, int streamIndex)
 {
+    (void) streamIndex;
+
     if (m_channelSinkAPIs.removeOne(channelAPI)) {
         renumerateChannels();
     }
@@ -122,14 +124,17 @@ void DeviceAPI::removeChannelSinkAPI(ChannelSinkAPI* channelAPI)
     channelAPI->setIndexInDeviceSet(-1);
 }
 
-void DeviceAPI::addChannelSourceAPI(ChannelSourceAPI* channelAPI)
+void DeviceAPI::addChannelSourceAPI(ChannelAPI* channelAPI, int streamIndex)
 {
+    (void) streamIndex;
     m_channelSourceAPIs.append(channelAPI);
     renumerateChannels();
 }
 
-void DeviceAPI::removeChannelSourceAPI(ChannelSourceAPI* channelAPI)
+void DeviceAPI::removeChannelSourceAPI(ChannelAPI* channelAPI, int streamIndex)
 {
+    (void) streamIndex;
+
     if (m_channelSourceAPIs.removeOne(channelAPI)) {
         renumerateChannels();
     }
@@ -356,8 +361,10 @@ void DeviceAPI::getDeviceEngineStateStr(QString& state)
     }
 }
 
-ChannelSinkAPI *DeviceAPI::getChanelSinkAPIAt(int index)
+ChannelAPI *DeviceAPI::getChanelSinkAPIAt(int index, int streamIndex)
 {
+    (void) streamIndex;
+
     if (m_streamType == StreamSingleRx)
     {
         if (index < m_channelSinkAPIs.size()) {
@@ -372,8 +379,10 @@ ChannelSinkAPI *DeviceAPI::getChanelSinkAPIAt(int index)
     }
 }
 
-ChannelSourceAPI *DeviceAPI::getChanelSourceAPIAt(int index)
+ChannelAPI *DeviceAPI::getChanelSourceAPIAt(int index, int streamIndex)
 {
+    (void) streamIndex;
+
      if (m_streamType == StreamSingleTx)
     {
         if (index < m_channelSourceAPIs.size()) {
@@ -688,7 +697,7 @@ void DeviceAPI::renumerateChannels()
         {
             m_channelSinkAPIs.at(i)->setIndexInDeviceSet(i);
             m_channelSinkAPIs.at(i)->setDeviceSetIndex(m_deviceTabIndex);
-            //m_channelSinkAPIs.at(i)->setDeviceSourceAPI(this); // FIXME: use generic DeviceAPI in ChannelSinkAPI
+            m_channelSinkAPIs.at(i)->setDeviceAPI(this);
         }
     }
     else if (m_streamType == StreamSingleTx)
@@ -697,7 +706,7 @@ void DeviceAPI::renumerateChannels()
         {
             m_channelSourceAPIs.at(i)->setIndexInDeviceSet(i);
             m_channelSourceAPIs.at(i)->setDeviceSetIndex(m_deviceTabIndex);
-            //m_channelSourceAPIs.at(i)->setDeviceSinkAPI(this); // FIXME: use generic DeviceAPI in ChannelSourceAPI
+            m_channelSourceAPIs.at(i)->setDeviceAPI(this);
         }
     }
 }

@@ -71,7 +71,7 @@ BasebandSampleSink* FreeDVPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
     return new FreeDVDemod(deviceAPI);
 }
 
-ChannelSinkAPI* FreeDVPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* FreeDVPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new FreeDVDemod(deviceAPI);
 }

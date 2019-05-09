@@ -53,7 +53,7 @@ static const double afSqTones_lowrate[2] = {1000.0, 3500.0};
 const int NFMDemod::m_udpBlockSize = 512;
 
 NFMDemod::NFMDemod(DeviceAPI *devieAPI) :
-        ChannelSinkAPI(m_channelIdURI),
+        ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(devieAPI),
         m_inputSampleRate(48000),
         m_inputFrequencyOffset(0),

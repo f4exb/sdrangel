@@ -54,7 +54,7 @@ BasebandSampleSink* AMDemodPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
     return new AMDemod(deviceAPI);
 }
 
-ChannelSinkAPI* AMDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* AMDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new AMDemod(deviceAPI);
 }

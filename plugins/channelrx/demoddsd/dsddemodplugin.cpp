@@ -72,7 +72,7 @@ BasebandSampleSink* DSDDemodPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
     return new DSDDemod(deviceAPI);
 }
 
-ChannelSinkAPI* DSDDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* DSDDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new DSDDemod(deviceAPI);
 }

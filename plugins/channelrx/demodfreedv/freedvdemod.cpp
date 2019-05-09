@@ -145,7 +145,7 @@ void FreeDVDemod::LevelRMS::accumulate(float level)
 }
 
 FreeDVDemod::FreeDVDemod(DeviceAPI *deviceAPI) :
-        ChannelSinkAPI(m_channelIdURI),
+        ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_hiCutoff(6000),
         m_lowCutoff(0),

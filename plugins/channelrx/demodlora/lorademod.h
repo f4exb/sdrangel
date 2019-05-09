@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "dsp/basebandsamplesink.h"
-#include "channel/channelsinkapi.h"
+#include "channel/channelapi.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "util/message.h"
@@ -41,7 +41,7 @@ class DeviceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
-class LoRaDemod : public BasebandSampleSink, public ChannelSinkAPI {
+class LoRaDemod : public BasebandSampleSink, public ChannelAPI {
 public:
     class MsgConfigureLoRaDemod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -105,6 +105,16 @@ public:
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+
+    virtual int getNbSinkStreams() const { return 1; }
+    virtual int getNbSourceStreams() const { return 0; }
+
+    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
+    {
+        (void) streamIndex;
+        (void) sinkElseSource;
+        return 0;
+    }
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

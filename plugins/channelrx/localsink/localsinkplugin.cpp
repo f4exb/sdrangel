@@ -72,7 +72,7 @@ BasebandSampleSink* LocalSinkPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
     return new LocalSink(deviceAPI);
 }
 
-ChannelSinkAPI* LocalSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* LocalSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new LocalSink(deviceAPI);
 }

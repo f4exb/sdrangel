@@ -27,8 +27,7 @@
 class BasebandSampleSink;
 class ThreadedBasebandSampleSink;
 class ThreadedBasebandSampleSource;
-class ChannelSinkAPI;
-class ChannelSourceAPI;
+class ChannelAPI;
 class DeviceSampleSink;
 class DeviceSampleSource;
 class MessageQueue;
@@ -72,10 +71,10 @@ public:
     void addChannelSource(ThreadedBasebandSampleSource* sink, int streamIndex = 0);    //!< Add a channel source (Tx)
     void removeChannelSource(ThreadedBasebandSampleSource* sink, int streamIndex = 0); //!< Remove a channel source (Tx)
 
-    void addChannelSinkAPI(ChannelSinkAPI* channelAPI);
-    void removeChannelSinkAPI(ChannelSinkAPI* channelAPI);
-    void addChannelSourceAPI(ChannelSourceAPI* channelAPI);
-    void removeChannelSourceAPI(ChannelSourceAPI* channelAPI);
+    void addChannelSinkAPI(ChannelAPI* channelAPI, int streamIndex = 0);
+    void removeChannelSinkAPI(ChannelAPI* channelAPI, int streamIndex = 0);
+    void addChannelSourceAPI(ChannelAPI* channelAPI, int streamIndex = 0);
+    void removeChannelSourceAPI(ChannelAPI* channelAPI, int streamIndex = 0);
 
     void setSampleSource(DeviceSampleSource* source); //!< Set the device sample source (single Rx)
     void setSampleSink(DeviceSampleSink* sink);       //!< Set the device sample sink (single Tx)
@@ -149,8 +148,8 @@ public:
 
     void getDeviceEngineStateStr(QString& state);
 
-    ChannelSinkAPI *getChanelSinkAPIAt(int index);
-    ChannelSourceAPI *getChanelSourceAPIAt(int index);
+    ChannelAPI *getChanelSinkAPIAt(int index, int streamIndex = 0);
+    ChannelAPI *getChanelSourceAPIAt(int index, int streamIndex = 0);
 
     int getNbSourceChannels() const { return m_channelSourceAPIs.size(); }
     int getNbSinkChannels() const { return m_channelSinkAPIs.size(); }
@@ -205,12 +204,12 @@ protected:
     // Single Rx (i.e. source)
 
     DSPDeviceSourceEngine *m_deviceSourceEngine;
-    QList<ChannelSinkAPI*> m_channelSinkAPIs;
+    QList<ChannelAPI*> m_channelSinkAPIs;
 
     // Single Tx (i.e. sink)
 
     DSPDeviceSinkEngine *m_deviceSinkEngine;
-    QList<ChannelSourceAPI*> m_channelSourceAPIs;
+    QList<ChannelAPI*> m_channelSourceAPIs;
 
 private:
     void renumerateChannels();

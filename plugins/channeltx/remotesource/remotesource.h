@@ -18,16 +18,17 @@
 #ifndef PLUGINS_CHANNELTX_REMOTESRC_REMOTESRC_H_
 #define PLUGINS_CHANNELTX_REMOTESRC_REMOTESRC_H_
 
-#include <channel/remotedatablock.h>
-#include <channel/remotedataqueue.h>
-#include <channel/remotedatareadqueue.h>
+#include "channel/remotedatablock.h"
+#include "channel/remotedataqueue.h"
+#include "channel/remotedatareadqueue.h"
+
 #include <QObject>
 #include <QNetworkRequest>
 
 #include "cm256cc/cm256.h"
 
 #include "dsp/basebandsamplesource.h"
-#include "channel/channelsourceapi.h"
+#include "channel/channelapi.h"
 #include "util/message.h"
 
 #include "../remotesource/remotesourcesettings.h"
@@ -40,7 +41,7 @@ class RemoteDataBlock;
 class QNetworkAccessManager;
 class QNetworkReply;
 
-class RemoteSource : public BasebandSampleSource, public ChannelSourceAPI {
+class RemoteSource : public BasebandSampleSource, public ChannelAPI {
     Q_OBJECT
 
 public:
@@ -194,6 +195,16 @@ public:
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
     virtual qint64 getCenterFrequency() const { return 0; }
+
+    virtual int getNbSinkStreams() const { return 1; }
+    virtual int getNbSourceStreams() const { return 0; }
+
+    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
+    {
+        (void) streamIndex;
+        (void) sinkElseSource;
+        return 0;
+    }
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);

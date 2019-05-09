@@ -30,7 +30,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
-#include "channel/channelsinkapi.h"
+#include "channel/channelapi.h"
 #include "remotesinksettings.h"
 
 class QNetworkAccessManager;
@@ -40,7 +40,7 @@ class ThreadedBasebandSampleSink;
 class DownChannelizer;
 class RemoteSinkThread;
 
-class RemoteSink : public BasebandSampleSink, public ChannelSinkAPI {
+class RemoteSink : public BasebandSampleSink, public ChannelAPI {
     Q_OBJECT
 public:
     class MsgConfigureRemoteSink : public Message {
@@ -124,6 +124,16 @@ public:
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+
+    virtual int getNbSinkStreams() const { return 1; }
+    virtual int getNbSourceStreams() const { return 0; }
+
+    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
+    {
+        (void) streamIndex;
+        (void) sinkElseSource;
+        return m_frequencyOffset;
+    }
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,

@@ -49,7 +49,7 @@ const QString WFMDemod::m_channelId = "WFMDemod";
 const int WFMDemod::m_udpBlockSize = 512;
 
 WFMDemod::WFMDemod(DeviceAPI* deviceAPI) :
-        ChannelSinkAPI(m_channelIdURI),
+        ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_inputSampleRate(384000),
         m_inputFrequencyOffset(0),

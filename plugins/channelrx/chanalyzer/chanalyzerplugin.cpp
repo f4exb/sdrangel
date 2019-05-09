@@ -60,7 +60,7 @@ BasebandSampleSink* ChannelAnalyzerPlugin::createRxChannelBS(DeviceAPI *deviceAP
     return new ChannelAnalyzer(deviceAPI);
 }
 
-ChannelSinkAPI* ChannelAnalyzerPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* ChannelAnalyzerPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new ChannelAnalyzer(deviceAPI);
 }

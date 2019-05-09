@@ -65,7 +65,7 @@ BasebandSampleSink* ATVDemodPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
     return new ATVDemod(deviceAPI);
 }
 
-ChannelSinkAPI* ATVDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* ATVDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new ATVDemod(deviceAPI);
 }

@@ -24,8 +24,7 @@ class DSPDeviceSourceEngine;
 class DeviceAPI;
 class DSPDeviceSinkEngine;
 class PluginAPI;
-class ChannelSinkAPI;
-class ChannelSourceAPI;
+class ChannelAPI;
 class Preset;
 
 class DeviceSet
@@ -44,10 +43,10 @@ public:
     void addTxChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
     void deleteRxChannel(int channelIndex);
     void deleteTxChannel(int channelIndex);
-    void registerRxChannelInstance(const QString& channelName, ChannelSinkAPI* channelAPI);
-    void registerTxChannelInstance(const QString& channelName, ChannelSourceAPI* channelAPI);
-    void removeRxChannelInstance(ChannelSinkAPI* channelAPI);
-    void removeTxChannelInstance(ChannelSourceAPI* channelAPI);
+    void registerRxChannelInstance(const QString& channelName, ChannelAPI* channelAPI);
+    void registerTxChannelInstance(const QString& channelName, ChannelAPI* channelAPI);
+    void removeRxChannelInstance(ChannelAPI* channelAPI);
+    void removeTxChannelInstance(ChannelAPI* channelAPI);
     void freeRxChannels();
     void freeTxChannels();
     void loadRxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
@@ -59,26 +58,16 @@ private:
     struct ChannelInstanceRegistration
     {
         QString m_channelName;
-        ChannelSinkAPI *m_channelSinkAPI;
-        ChannelSourceAPI *m_channelSourceAPI;
+        ChannelAPI *m_channelSinkAPI;
+        ChannelAPI *m_channelSourceAPI;
 
         ChannelInstanceRegistration() :
             m_channelName(),
-            m_channelSinkAPI(0),
-            m_channelSourceAPI(0)
+            m_channelSinkAPI(nullptr),
+            m_channelSourceAPI(nullptr)
         { }
 
-        ChannelInstanceRegistration(const QString& channelName, ChannelSinkAPI* channelAPI) :
-            m_channelName(channelName),
-            m_channelSinkAPI(channelAPI),
-            m_channelSourceAPI(0)
-        { }
-
-        ChannelInstanceRegistration(const QString& channelName, ChannelSourceAPI* channelAPI) :
-            m_channelName(channelName),
-            m_channelSinkAPI(0),
-            m_channelSourceAPI(channelAPI)
-        { }
+        ChannelInstanceRegistration(const QString& channelName, ChannelAPI* channelAPI);
 
         bool operator<(const ChannelInstanceRegistration& other) const;
     };

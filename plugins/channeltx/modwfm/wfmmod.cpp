@@ -53,7 +53,7 @@ const int WFMMod::m_levelNbSamples = 480; // every 10ms
 const int WFMMod::m_rfFilterFFTLength = 1024;
 
 WFMMod::WFMMod(DeviceAPI *deviceAPI) :
-    ChannelSourceAPI(m_channelIdURI),
+    ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
     m_basebandSampleRate(384000),
     m_outputSampleRate(384000),

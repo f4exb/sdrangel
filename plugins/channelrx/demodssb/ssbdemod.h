@@ -25,7 +25,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
-#include "channel/channelsinkapi.h"
+#include "channel/channelapi.h"
 #include "dsp/ncof.h"
 #include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"
@@ -45,7 +45,7 @@ class DeviceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
-class SSBDemod : public BasebandSampleSink, public ChannelSinkAPI {
+class SSBDemod : public BasebandSampleSink, public ChannelAPI {
 	Q_OBJECT
 public:
     class MsgConfigureSSBDemod : public Message {
@@ -125,6 +125,16 @@ public:
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+
+    virtual int getNbSinkStreams() const { return 1; }
+    virtual int getNbSourceStreams() const { return 0; }
+
+    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
+    {
+        (void) streamIndex;
+        (void) sinkElseSource;
+        return m_settings.m_inputFrequencyOffset;
+    }
 
     uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
     double getMagSq() const { return m_magsq; }

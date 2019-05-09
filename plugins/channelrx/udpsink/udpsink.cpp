@@ -46,7 +46,7 @@ const QString UDPSink::m_channelIdURI = "sdrangel.channel.udpsink";
 const QString UDPSink::m_channelId = "UDPSink";
 
 UDPSink::UDPSink(DeviceAPI *deviceAPI) :
-        ChannelSinkAPI(m_channelIdURI),
+        ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_inputSampleRate(48000),
         m_inputFrequencyOffset(0),

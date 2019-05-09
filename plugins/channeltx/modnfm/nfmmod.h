@@ -26,7 +26,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesource.h"
-#include "channel/channelsourceapi.h"
+#include "channel/channelapi.h"
 #include "dsp/nco.h"
 #include "dsp/ncof.h"
 #include "dsp/interpolator.h"
@@ -46,7 +46,7 @@ class UpChannelizer;
 class QNetworkAccessManager;
 class QNetworkReply;
 
-class NFMMod : public BasebandSampleSource, public ChannelSourceAPI {
+class NFMMod : public BasebandSampleSource, public ChannelAPI {
     Q_OBJECT
 
 public:
@@ -219,6 +219,16 @@ public:
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+
+    virtual int getNbSinkStreams() const { return 1; }
+    virtual int getNbSourceStreams() const { return 0; }
+
+    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
+    {
+        (void) streamIndex;
+        (void) sinkElseSource;
+        return m_settings.m_inputFrequencyOffset;
+    }
 
     virtual int webapiSettingsGet(
                 SWGSDRangel::SWGChannelSettings& response,

@@ -71,7 +71,7 @@ BasebandSampleSource* WFMModPlugin::createTxChannelBS(DeviceAPI *deviceAPI)
     return new WFMMod(deviceAPI);
 }
 
-ChannelSourceAPI* WFMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* WFMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
 {
     return new WFMMod(deviceAPI);
 }

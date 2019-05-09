@@ -40,7 +40,7 @@ const QString ATVDemod::m_channelId = "ATVDemod";
 const int ATVDemod::m_ssbFftLen = 1024;
 
 ATVDemod::ATVDemod(DeviceAPI *deviceAPI) :
-        ChannelSinkAPI(m_channelIdURI),
+        ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_scopeSink(0),
         m_registeredTVScreen(0),

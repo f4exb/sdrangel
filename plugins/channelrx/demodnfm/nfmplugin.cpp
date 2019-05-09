@@ -54,7 +54,7 @@ BasebandSampleSink* NFMPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
     return new NFMDemod(deviceAPI);
 }
 
-ChannelSinkAPI* NFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* NFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new NFMDemod(deviceAPI);
 }

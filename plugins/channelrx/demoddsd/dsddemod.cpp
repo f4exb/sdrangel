@@ -52,7 +52,7 @@ const QString DSDDemod::m_channelId = "DSDDemod";
 const int DSDDemod::m_udpBlockSize = 512;
 
 DSDDemod::DSDDemod(DeviceAPI *deviceAPI) :
-        ChannelSinkAPI(m_channelIdURI),
+        ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_inputSampleRate(48000),
         m_inputFrequencyOffset(0),

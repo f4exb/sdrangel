@@ -51,7 +51,7 @@ const QString RemoteSink::m_channelIdURI = "sdrangel.channel.remotesink";
 const QString RemoteSink::m_channelId = "RemoteSink";
 
 RemoteSink::RemoteSink(DeviceAPI *deviceAPI) :
-        ChannelSinkAPI(m_channelIdURI),
+        ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_running(false),
         m_sinkThread(0),

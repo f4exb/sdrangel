@@ -73,7 +73,7 @@ BasebandSampleSource* UDPSourcePlugin::createTxChannelBS(DeviceAPI *deviceAPI)
     return new UDPSource(deviceAPI);
 }
 
-ChannelSourceAPI* UDPSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* UDPSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI)
 {
     return new UDPSource(deviceAPI);
 }

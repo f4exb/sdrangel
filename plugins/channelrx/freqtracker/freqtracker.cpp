@@ -51,7 +51,7 @@ const QString FreqTracker::m_channelId = "FreqTracker";
 const int FreqTracker::m_udpBlockSize = 512;
 
 FreqTracker::FreqTracker(DeviceAPI *deviceAPI) :
-        ChannelSinkAPI(m_channelIdURI),
+        ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_deviceSampleRate(48000),
         m_inputSampleRate(48000),

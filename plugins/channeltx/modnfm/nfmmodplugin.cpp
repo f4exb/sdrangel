@@ -71,7 +71,7 @@ BasebandSampleSource* NFMModPlugin::createTxChannelBS(DeviceAPI *deviceAPI)
     return new NFMMod(deviceAPI);
 }
 
-ChannelSourceAPI* NFMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* NFMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
 {
     return new NFMMod(deviceAPI);
 }

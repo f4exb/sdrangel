@@ -44,7 +44,7 @@ class DownChannelizer;
 #include "datvideorender.h"
 #include "datvdemodsettings.h"
 
-#include "channel/channelsinkapi.h"
+#include "channel/channelapi.h"
 #include "dsp/basebandsamplesink.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/dspcommands.h"
@@ -123,7 +123,7 @@ struct config
     }
 };
 
-class DATVDemod : public BasebandSampleSink, public ChannelSinkAPI
+class DATVDemod : public BasebandSampleSink, public ChannelAPI
 {
 	Q_OBJECT
 
@@ -144,6 +144,16 @@ public:
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
+
+    virtual int getNbSinkStreams() const { return 1; }
+    virtual int getNbSourceStreams() const { return 0; }
+
+    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
+    {
+        (void) streamIndex;
+        (void) sinkElseSource;
+        return m_settings.m_centerFrequency;
+    }
 
     bool SetTVScreen(TVScreen *objScreen);
     DATVideostream * SetVideoRender(DATVideoRender *objScreen);

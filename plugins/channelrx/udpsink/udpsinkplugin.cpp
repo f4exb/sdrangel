@@ -72,7 +72,7 @@ BasebandSampleSink* UDPSinkPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
     return new UDPSink(deviceAPI);
 }
 
-ChannelSinkAPI* UDPSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* UDPSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new UDPSink(deviceAPI);
 }

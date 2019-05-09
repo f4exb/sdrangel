@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "dsp/basebandsamplesink.h"
-#include "channel/channelsinkapi.h"
+#include "channel/channelapi.h"
 #include "dsp/interpolator.h"
 #include "dsp/ncof.h"
 #include "dsp/fftcorr.h"
@@ -41,7 +41,7 @@ class DeviceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
-class ChannelAnalyzer : public BasebandSampleSink, public ChannelSinkAPI {
+class ChannelAnalyzer : public BasebandSampleSink, public ChannelAPI {
 public:
     class MsgConfigureChannelAnalyzer : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -143,6 +143,16 @@ public:
 
     virtual QByteArray serialize() const { return QByteArray(); }
     virtual bool deserialize(const QByteArray& data) { (void) data; return false; }
+
+    virtual int getNbSinkStreams() const { return 1; }
+    virtual int getNbSourceStreams() const { return 0; }
+
+    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
+    {
+        (void) streamIndex;
+        (void) sinkElseSource;
+        return m_settings.m_frequency;
+    }
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

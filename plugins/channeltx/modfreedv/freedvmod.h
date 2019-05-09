@@ -26,7 +26,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesource.h"
-#include "channel/channelsourceapi.h"
+#include "channel/channelapi.h"
 #include "dsp/basebandsamplesink.h"
 #include "dsp/ncof.h"
 #include "dsp/interpolator.h"
@@ -50,7 +50,7 @@ namespace FreeDV {
 struct freedv;
 }
 
-class FreeDVMod : public BasebandSampleSource, public ChannelSourceAPI {
+class FreeDVMod : public BasebandSampleSource, public ChannelAPI {
     Q_OBJECT
 
 public:
@@ -225,6 +225,16 @@ public:
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+
+    virtual int getNbSinkStreams() const { return 1; }
+    virtual int getNbSourceStreams() const { return 0; }
+
+    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
+    {
+        (void) streamIndex;
+        (void) sinkElseSource;
+        return m_settings.m_inputFrequencyOffset;
+    }
 
     virtual int webapiSettingsGet(
                 SWGSDRangel::SWGChannelSettings& response,

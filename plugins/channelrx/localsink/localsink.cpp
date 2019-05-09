@@ -46,7 +46,7 @@ const QString LocalSink::m_channelIdURI = "sdrangel.channel.localsink";
 const QString LocalSink::m_channelId = "LocalSink";
 
 LocalSink::LocalSink(DeviceAPI *deviceAPI) :
-        ChannelSinkAPI(m_channelIdURI),
+        ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_running(false),
         m_sinkThread(0),
@@ -250,9 +250,9 @@ DeviceSampleSource *LocalSink::getLocalDevice(uint32_t index)
 
         if (deviceSource->getDeviceDescription() == "LocalInput")
         {
-            if (!getDeviceSourceAPI()) {
+            if (!getDeviceAPI()) {
                 qDebug("LocalSink::getLocalDevice: the parent device is unset");
-            } else if (getDeviceSourceAPI()->getDeviceUID() == deviceSourceEngine->getUID()) {
+            } else if (getDeviceAPI()->getDeviceUID() == deviceSourceEngine->getUID()) {
                 qDebug("LocalSink::getLocalDevice: source device at index %u is the parent device", index);
             } else {
                 return deviceSource;

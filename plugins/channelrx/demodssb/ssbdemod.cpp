@@ -49,7 +49,7 @@ const QString SSBDemod::m_channelIdURI = "sdrangel.channel.ssbdemod";
 const QString SSBDemod::m_channelId = "SSBDemod";
 
 SSBDemod::SSBDemod(DeviceAPI *deviceAPI) :
-        ChannelSinkAPI(m_channelIdURI),
+        ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_audioBinaual(false),
         m_audioFlipChannels(false),

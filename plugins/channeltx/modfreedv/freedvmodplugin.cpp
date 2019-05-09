@@ -71,7 +71,7 @@ BasebandSampleSource* FreeDVModPlugin::createTxChannelBS(DeviceAPI *deviceAPI)
     return new FreeDVMod(deviceAPI);
 }
 
-ChannelSourceAPI* FreeDVModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* FreeDVModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
 {
     return new FreeDVMod(deviceAPI);
 }

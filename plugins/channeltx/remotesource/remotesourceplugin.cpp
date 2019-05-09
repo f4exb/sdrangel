@@ -71,7 +71,7 @@ BasebandSampleSource* RemoteSourcePlugin::createTxChannelBS(DeviceAPI *deviceAPI
     return new RemoteSource(deviceAPI);
 }
 
-ChannelSourceAPI* RemoteSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* RemoteSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI)
 {
     return new RemoteSource(deviceAPI);
 }

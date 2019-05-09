@@ -15,8 +15,9 @@ set(sdrbase_SOURCES
     audio/audionetsink.cpp
     audio/audioresampler.cpp
 
-    channel/channelsinkapi.cpp
-    channel/channelsourceapi.cpp
+    channel/channelapi.cpp
+    # channel/channelsinkapi.cpp
+    # channel/channelsourceapi.cpp
     channel/remotedataqueue.cpp
     channel/remotedatareadqueue.cpp
 
@@ -113,8 +114,9 @@ set(sdrbase_HEADERS
     audio/audionetsink.h
     audio/audioresampler.h
 
-    channel/channelsinkapi.h
-    channel/channelsourceapi.h
+    channel/channelapi.h
+    # channel/channelsinkapi.h
+    # channel/channelsourceapi.h
     channel/remotedataqueue.h
     channel/remotedatareadqueue.h
     channel/remotedatablock.h

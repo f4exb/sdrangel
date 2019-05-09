@@ -72,7 +72,7 @@ BasebandSampleSink* RemoteSinkPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
     return new RemoteSink(deviceAPI);
 }
 
-ChannelSinkAPI* RemoteSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* RemoteSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new RemoteSink(deviceAPI);
 }

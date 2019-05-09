@@ -47,7 +47,7 @@ const QString RemoteSource::m_channelIdURI = "sdrangel.channeltx.remotesource";
 const QString RemoteSource::m_channelId ="RemoteSource";
 
 RemoteSource::RemoteSource(DeviceAPI *deviceAPI) :
-    ChannelSourceAPI(m_channelIdURI),
+    ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
     m_sourceThread(0),
     m_running(false),

@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "dsp/basebandsamplesink.h"
-#include "channel/channelsinkapi.h"
+#include "channel/channelapi.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/dspcommands.h"
 #include "dsp/downchannelizer.h"
@@ -44,7 +44,7 @@ class DeviceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
-class ATVDemod : public BasebandSampleSink, public ChannelSinkAPI
+class ATVDemod : public BasebandSampleSink, public ChannelAPI
 {
 	Q_OBJECT
 
@@ -232,6 +232,16 @@ public:
 
     virtual QByteArray serialize() const { return QByteArray(); }
     virtual bool deserialize(const QByteArray& data) { (void) data; return false; }
+
+    virtual int getNbSinkStreams() const { return 1; }
+    virtual int getNbSourceStreams() const { return 0; }
+
+    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
+    {
+        (void) streamIndex;
+        (void) sinkElseSource;
+        return m_rfRunning.m_intFrequencyOffset;
+    }
 
     void setTVScreen(TVScreen *objScreen); //!< set by the GUI
     int getSampleRate();

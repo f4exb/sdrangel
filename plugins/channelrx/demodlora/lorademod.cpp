@@ -37,7 +37,7 @@ const QString LoRaDemod::m_channelIdURI = "sdrangel.channel.lorademod";
 const QString LoRaDemod::m_channelId = "LoRaDemod";
 
 LoRaDemod::LoRaDemod(DeviceAPI* deviceAPI) :
-        ChannelSinkAPI(m_channelIdURI),
+        ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_sampleSink(0),
         m_settingsMutex(QMutex::Recursive)

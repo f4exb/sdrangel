@@ -55,7 +55,7 @@ const int FreeDVMod::m_levelNbSamples = 80; // every 10ms
 const int FreeDVMod::m_ssbFftLen = 1024;
 
 FreeDVMod::FreeDVMod(DeviceAPI *deviceAPI) :
-    ChannelSourceAPI(m_channelIdURI),
+    ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
     m_basebandSampleRate(48000),
     m_outputSampleRate(48000),

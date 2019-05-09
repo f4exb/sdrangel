@@ -66,7 +66,7 @@ BasebandSampleSink* DATVDemodPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
     return new DATVDemod(deviceAPI);
 }
 
-ChannelSinkAPI* DATVDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* DATVDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new DATVDemod(deviceAPI);
 }

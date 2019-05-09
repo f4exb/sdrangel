@@ -43,7 +43,7 @@ BasebandSampleSink* LoRaPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
     return new LoRaDemod(deviceAPI);
 }
 
-ChannelSinkAPI* LoRaPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* LoRaPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new LoRaDemod(deviceAPI);
 }

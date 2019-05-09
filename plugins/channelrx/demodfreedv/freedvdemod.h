@@ -24,7 +24,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
-#include "channel/channelsinkapi.h"
+#include "channel/channelapi.h"
 #include "dsp/ncof.h"
 #include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"
@@ -49,7 +49,7 @@ namespace FreeDV {
 struct freedv;
 }
 
-class FreeDVDemod : public BasebandSampleSink, public ChannelSinkAPI {
+class FreeDVDemod : public BasebandSampleSink, public ChannelAPI {
 	Q_OBJECT
 public:
     class MsgConfigureFreeDVDemod : public Message {
@@ -142,6 +142,16 @@ public:
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+
+    virtual int getNbSinkStreams() const { return 1; }
+    virtual int getNbSourceStreams() const { return 0; }
+
+    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
+    {
+        (void) streamIndex;
+        (void) sinkElseSource;
+        return m_settings.m_inputFrequencyOffset;
+    }
 
     uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
     uint32_t getModemSampleRate() const { return m_modemSampleRate; }

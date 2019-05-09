@@ -54,8 +54,7 @@
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
 #include "dsp/dspengine.h"
-#include "channel/channelsourceapi.h"
-#include "channel/channelsinkapi.h"
+#include "channel/channelapi.h"
 #include "plugin/pluginapi.h"
 #include "plugin/pluginmanager.h"
 #include "webapiadaptersrv.h"
@@ -1615,7 +1614,7 @@ int WebAPIAdapterSrv::devicesetChannelSettingsGet(
 
         if (deviceSet->m_deviceSourceEngine) // Single Rx
         {
-            ChannelSinkAPI *channelAPI = deviceSet->m_deviceAPI->getChanelSinkAPIAt(channelIndex);
+            ChannelAPI *channelAPI = deviceSet->m_deviceAPI->getChanelSinkAPIAt(channelIndex);
 
             if (channelAPI == 0)
             {
@@ -1632,7 +1631,7 @@ int WebAPIAdapterSrv::devicesetChannelSettingsGet(
         }
         else if (deviceSet->m_deviceSinkEngine) // Single Tx
         {
-            ChannelSourceAPI *channelAPI = deviceSet->m_deviceAPI->getChanelSourceAPIAt(channelIndex);
+            ChannelAPI *channelAPI = deviceSet->m_deviceAPI->getChanelSourceAPIAt(channelIndex);
 
             if (channelAPI == 0)
             {
@@ -1674,7 +1673,7 @@ int WebAPIAdapterSrv::devicesetChannelReportGet(
 
         if (deviceSet->m_deviceSourceEngine) // Single Rx
         {
-            ChannelSinkAPI *channelAPI = deviceSet->m_deviceAPI->getChanelSinkAPIAt(channelIndex);
+            ChannelAPI *channelAPI = deviceSet->m_deviceAPI->getChanelSinkAPIAt(channelIndex);
 
             if (channelAPI == 0)
             {
@@ -1691,7 +1690,7 @@ int WebAPIAdapterSrv::devicesetChannelReportGet(
         }
         else if (deviceSet->m_deviceSinkEngine) // Single Tx
         {
-            ChannelSourceAPI *channelAPI = deviceSet->m_deviceAPI->getChanelSourceAPIAt(channelIndex);
+            ChannelAPI *channelAPI = deviceSet->m_deviceAPI->getChanelSourceAPIAt(channelIndex);
 
             if (channelAPI == 0)
             {
@@ -1735,7 +1734,7 @@ int WebAPIAdapterSrv::devicesetChannelSettingsPutPatch(
 
         if (deviceSet->m_deviceSourceEngine) // Rx
         {
-            ChannelSinkAPI *channelAPI = deviceSet->m_deviceAPI->getChanelSinkAPIAt(channelIndex);
+            ChannelAPI *channelAPI = deviceSet->m_deviceAPI->getChanelSinkAPIAt(channelIndex);
 
             if (channelAPI == 0)
             {
@@ -1763,7 +1762,7 @@ int WebAPIAdapterSrv::devicesetChannelSettingsPutPatch(
         }
         else if (deviceSet->m_deviceSinkEngine) // Tx
         {
-            ChannelSourceAPI *channelAPI = deviceSet->m_deviceAPI->getChanelSourceAPIAt(channelIndex);
+            ChannelAPI *channelAPI = deviceSet->m_deviceAPI->getChanelSourceAPIAt(channelIndex);
 
             if (channelAPI == 0)
             {
@@ -1848,7 +1847,7 @@ void WebAPIAdapterSrv::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, con
         {
             channels->append(new SWGSDRangel::SWGChannel);
             channels->back()->init();
-            ChannelSourceAPI *channel = deviceSet->m_deviceAPI->getChanelSourceAPIAt(i);
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSourceAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setIndex(channel->getIndexInDeviceSet());
             channels->back()->setUid(channel->getUID());
@@ -1880,7 +1879,7 @@ void WebAPIAdapterSrv::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, con
         {
             channels->append(new SWGSDRangel::SWGChannel);
             channels->back()->init();
-            ChannelSinkAPI *channel = deviceSet->m_deviceAPI->getChanelSinkAPIAt(i);
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSinkAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setIndex(channel->getIndexInDeviceSet());
             channels->back()->setUid(channel->getUID());
@@ -1905,7 +1904,7 @@ void WebAPIAdapterSrv::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channel
         {
             channels->append(new SWGSDRangel::SWGChannel);
             channels->back()->init();
-            ChannelSourceAPI *channel = deviceSet->m_deviceAPI->getChanelSourceAPIAt(i);
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSourceAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setIndex(channel->getIndexInDeviceSet());
             channels->back()->setUid(channel->getUID());
@@ -1931,7 +1930,7 @@ void WebAPIAdapterSrv::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channel
         {
             channels->append(new SWGSDRangel::SWGChannel);
             channels->back()->init();
-            ChannelSinkAPI *channel = deviceSet->m_deviceAPI->getChanelSinkAPIAt(i);
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSinkAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setIndex(channel->getIndexInDeviceSet());
             channels->back()->setUid(channel->getUID());

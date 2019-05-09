@@ -54,7 +54,7 @@ BasebandSampleSink* SSBPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
     return new SSBDemod(deviceAPI);
 }
 
-ChannelSinkAPI* SSBPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* SSBPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new SSBDemod(deviceAPI);
 }

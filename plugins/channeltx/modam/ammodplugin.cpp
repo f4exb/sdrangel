@@ -71,7 +71,7 @@ BasebandSampleSource* AMModPlugin::createTxChannelBS(DeviceAPI *deviceAPI)
     return new AMMod(deviceAPI);
 }
 
-ChannelSourceAPI* AMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* AMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
 {
     return new AMMod(deviceAPI);
 }

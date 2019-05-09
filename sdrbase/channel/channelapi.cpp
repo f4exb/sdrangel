@@ -1,5 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018-2019 Edouard Griffiths, F4EXB                              //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// API for Rx channels                                                           //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,34 +17,13 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCPLUGIN_H_
-#define PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCPLUGIN_H_
+#include "util/uid.h"
+#include "channelapi.h"
 
-#include <QObject>
-#include "plugin/plugininterface.h"
-
-class DeviceUISet;
-class BasebandSampleSource;
-
-class RemoteSourcePlugin : public QObject, PluginInterface {
-    Q_OBJECT
-    Q_INTERFACES(PluginInterface)
-    Q_PLUGIN_METADATA(IID "sdrangel.channeltx.remotesrc")
-
-public:
-    explicit RemoteSourcePlugin(QObject* parent = 0);
-
-    const PluginDescriptor& getPluginDescriptor() const;
-    void initPlugin(PluginAPI* pluginAPI);
-
-    virtual PluginInstanceGUI* createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel);
-    virtual BasebandSampleSource* createTxChannelBS(DeviceAPI *deviceAPI);
-    virtual ChannelAPI* createTxChannelCS(DeviceAPI *deviceAPI);
-
-private:
-    static const PluginDescriptor m_pluginDescriptor;
-
-    PluginAPI* m_pluginAPI;
-};
-
-#endif /* PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCPLUGIN_H_ */
+ChannelAPI::ChannelAPI(const QString& name, StreamType streamType) :
+    m_name(name),
+    m_streamType(streamType),
+    m_indexInDeviceSet(-1),
+    m_deviceAPI(0),
+    m_uid(UidCalculator::getNewObjectId())
+{ }

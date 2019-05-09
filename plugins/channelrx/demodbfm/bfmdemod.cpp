@@ -53,7 +53,7 @@ const Real BFMDemod::default_deemphasis = 50.0; // 50 us
 const int BFMDemod::m_udpBlockSize = 512;
 
 BFMDemod::BFMDemod(DeviceAPI *deviceAPI) :
-        ChannelSinkAPI(m_channelIdURI),
+        ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_inputSampleRate(384000),
         m_inputFrequencyOffset(0),

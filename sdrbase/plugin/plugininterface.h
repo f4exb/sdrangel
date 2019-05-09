@@ -25,8 +25,7 @@ class DeviceSampleSource;
 class DeviceSampleSink;
 class BasebandSampleSink;
 class BasebandSampleSource;
-class ChannelSinkAPI;
-class ChannelSourceAPI;
+class ChannelAPI;
 
 class SDRBASE_API PluginInterface {
 public:
@@ -102,7 +101,7 @@ public:
         return nullptr;
     }
 
-    virtual ChannelSinkAPI* createRxChannelCS(
+    virtual ChannelAPI* createRxChannelCS(
             DeviceAPI *deviceAPI)
     {
         (void) deviceAPI;
@@ -127,7 +126,7 @@ public:
         return nullptr;
     }
 
-    virtual ChannelSourceAPI* createTxChannelCS(
+    virtual ChannelAPI* createTxChannelCS(
             DeviceAPI *deviceAPI)
     {
         (void) deviceAPI;

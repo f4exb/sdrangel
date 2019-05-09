@@ -73,7 +73,7 @@ BasebandSampleSink* BFMPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
     return new BFMDemod(deviceAPI);
 }
 
-ChannelSinkAPI* BFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* BFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
 {
     return new BFMDemod(deviceAPI);
 }
