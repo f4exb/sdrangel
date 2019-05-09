@@ -149,16 +149,6 @@ elseif(APPLE)
   set(CMAKE_MACOSX_RPATH ON)
   message(STATUS "RPATH support: ${CMAKE_MACOSX_RPATH}")
 
-  # TODO: check if(DEFINED) andfix macports -D
-  # fix install path
-  set(CMAKE_INSTALL_RPATH
-    "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}" CACHE
-    PATH "Library Install RPath" FORCE)
-  # force full path
-  set(CMAKE_INSTALL_NAME_DIR
-    "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}" CACHE
-    PATH "Library Install Name Destination Directory" FORCE)
-
   configure_file("${CMAKE_SOURCE_DIR}/cmake/cpack/MacOSXBundleInfo.plist.in"
     "${CMAKE_BINARY_DIR}/Info.plist" @ONLY)
 elseif (WIN32)
@@ -171,6 +161,16 @@ elseif (WIN32)
   set(OpenCV_INCLUDE_DIRS="${EXTERNAL_LIBRARY_FOLDER}/opencv/include")
   set(OpenCV_LIBS="${EXTERNAL_LIBRARY_FOLDER}/opencv/opencv_ffmpeg410_64.dll")
 endif()
+
+# TODO: check if(DEFINED) and fix macports -D
+# fix install path
+set(CMAKE_INSTALL_RPATH
+  "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}" CACHE
+  PATH "Library Install RPath" FORCE)
+# force full path
+set(CMAKE_INSTALL_NAME_DIR
+  "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}" CACHE
+  PATH "Library Install Name Destination Directory" FORCE)
 
 # enable 24 bit receiving path
 if (RX_SAMPLE_24BIT)
