@@ -20,8 +20,6 @@
 #include "util/simpleserializer.h"
 #include "fcdproplusplugin.h"
 
-#include <device/devicesourceapi.h>
-
 #ifdef SERVER_MODE
 #include "fcdproplusinput.h"
 #else

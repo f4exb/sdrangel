@@ -21,7 +21,6 @@
 
 #include "atvdemodgui.h"
 
-#include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
 #include "dsp/downchannelizer.h"
 

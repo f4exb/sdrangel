@@ -18,7 +18,6 @@
 #include <QtPlugin>
 #include "libhackrf/hackrf.h"
 
-#include "device/devicesourceapi.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 

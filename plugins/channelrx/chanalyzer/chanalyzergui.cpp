@@ -18,7 +18,6 @@
 #include <QDockWidget>
 #include <QMainWindow>
 
-#include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
 #include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"

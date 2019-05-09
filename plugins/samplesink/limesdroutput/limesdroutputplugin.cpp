@@ -23,7 +23,6 @@
 #include "lime/LimeSuite.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
-#include "device/devicesinkapi.h"
 #include "limesdr/devicelimesdrparam.h"
 
 #ifdef SERVER_MODE

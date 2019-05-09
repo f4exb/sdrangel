@@ -23,7 +23,6 @@
 #include "xtrx_api.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
-#include "device/devicesinkapi.h"
 #include "xtrx/devicextrxparam.h"
 
 #ifdef SERVER_MODE

@@ -16,7 +16,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
 #include "dsp/spectrumvis.h"

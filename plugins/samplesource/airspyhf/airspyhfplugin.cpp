@@ -18,7 +18,6 @@
 #include <QtPlugin>
 #include <libairspyhf/airspyhf.h>
 
-#include <device/devicesourceapi.h>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "airspyhfplugin.h"

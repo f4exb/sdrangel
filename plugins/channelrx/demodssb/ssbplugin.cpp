@@ -1,6 +1,5 @@
 #include "ssbplugin.h"
 
-#include <device/devicesourceapi.h>
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
 #ifndef SERVER_MODE

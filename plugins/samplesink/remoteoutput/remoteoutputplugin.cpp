@@ -19,7 +19,6 @@
 
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
-#include "device/devicesinkapi.h"
 
 #ifdef SERVER_MODE
 #include "remoteoutput.h"

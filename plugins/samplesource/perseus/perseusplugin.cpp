@@ -18,11 +18,11 @@
 #include <QtPlugin>
 #include "perseus-sdr.h"
 
-#include <device/devicesourceapi.h>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "perseus/deviceperseus.h"
 #include "perseusplugin.h"
+
 #ifdef SERVER_MODE
 #include "perseusinput.h"
 #else

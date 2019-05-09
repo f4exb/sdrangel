@@ -21,7 +21,6 @@
 #include <QTime>
 #include <QDebug>
 
-#include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
 #include "dsp/upchannelizer.h"
 #include "dsp/threadedbasebandsamplesource.h"

@@ -17,7 +17,6 @@
 
 #include <QtPlugin>
 
-#include "device/devicesourceapi.h"
 #include "plugin/pluginapi.h"
 #ifndef SERVER_MODE
 #include "freedvdemodgui.h"

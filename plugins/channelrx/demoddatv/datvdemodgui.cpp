@@ -23,9 +23,7 @@
 
 #include "datvdemodgui.h"
 
-#include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
-#include "device/devicesourceapi.h"
 #include "dsp/downchannelizer.h"
 
 #include "dsp/threadedbasebandsamplesink.h"

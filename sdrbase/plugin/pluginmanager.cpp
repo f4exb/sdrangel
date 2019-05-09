@@ -23,8 +23,6 @@
 #include <cstdio>
 
 #include <plugin/plugininstancegui.h>
-#include "device/devicesourceapi.h"
-#include "device/devicesinkapi.h"
 #include "device/deviceenumerator.h"
 #include "settings/preset.h"
 #include "util/message.h"

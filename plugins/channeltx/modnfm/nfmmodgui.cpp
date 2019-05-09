@@ -21,7 +21,6 @@
 #include <QTime>
 #include <QDebug>
 
-#include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"

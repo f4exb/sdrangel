@@ -23,7 +23,6 @@
 
 #include "freedvmodgui.h"
 
-#include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
 #include "dsp/spectrumvis.h"
 #include "plugin/pluginapi.h"

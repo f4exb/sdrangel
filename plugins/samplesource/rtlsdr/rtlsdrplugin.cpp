@@ -3,7 +3,6 @@
 
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
-#include <device/devicesourceapi.h>
 
 #ifdef SERVER_MODE
 #include "rtlsdrinput.h"

@@ -33,6 +33,8 @@ class DeviceAPI;
 class DSPDeviceSinkEngine;
 class ChannelMarker;
 class PluginAPI;
+class PluginInstanceGUI;
+class Preset;
 
 class SDRGUI_API DeviceUISet
 {

@@ -19,13 +19,13 @@
 #include <mirisdr.h>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+
 #ifdef SERVER_MODE
 #include "sdrplayinput.h"
 #else
 #include "sdrplaygui.h"
 #endif
 #include "sdrplayplugin.h"
-#include <device/devicesourceapi.h>
 
 const PluginDescriptor SDRPlayPlugin::m_pluginDescriptor = {
     QString("SDRPlay RSP1 Input"),

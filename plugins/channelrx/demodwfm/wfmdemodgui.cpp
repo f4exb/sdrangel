@@ -1,8 +1,8 @@
 #include "wfmdemodgui.h"
 
-#include <device/devicesourceapi.h>
 #include "device/deviceuiset.h"
-#include <dsp/downchannelizer.h>
+#include "dsp/downchannelizer.h"
+
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>

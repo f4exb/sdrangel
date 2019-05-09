@@ -23,7 +23,6 @@
 
 #include "ssbmodgui.h"
 
-#include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
 #include "dsp/spectrumvis.h"
 #include "ui_ssbmodgui.h"

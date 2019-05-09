@@ -17,7 +17,6 @@
 
 #include <QLocale>
 
-#include "device/devicesourceapi.h"
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "dsp/hbfilterchainconverter.h"

@@ -2,7 +2,6 @@
 
 #include "ssbdemodgui.h"
 
-#include <device/devicesourceapi.h>
 #include "device/deviceuiset.h"
 
 #include "ui_ssbdemodgui.h"

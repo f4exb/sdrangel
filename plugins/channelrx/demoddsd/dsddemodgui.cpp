@@ -18,9 +18,8 @@
 
 #include "dsddemodgui.h"
 
-#include <device/devicesourceapi.h>
 #include "device/deviceuiset.h"
-#include <dsp/downchannelizer.h>
+#include "dsp/downchannelizer.h"
 
 #include "dsp/threadedbasebandsamplesink.h"
 #include "ui_dsddemodgui.h"

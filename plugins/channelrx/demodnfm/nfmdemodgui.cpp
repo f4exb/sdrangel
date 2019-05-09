@@ -1,6 +1,5 @@
 #include "nfmdemodgui.h"
 
-#include <device/devicesourceapi.h>
 #include "device/deviceuiset.h"
 #include <QDockWidget>
 #include <QMainWindow>

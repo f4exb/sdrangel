@@ -18,7 +18,6 @@
 
 #include "bfmdemodgui.h"
 
-#include <device/devicesourceapi.h>
 #include "device/deviceuiset.h"
 #include <dsp/downchannelizer.h>
 #include <QDockWidget>

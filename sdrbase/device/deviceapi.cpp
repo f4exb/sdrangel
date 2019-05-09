@@ -17,8 +17,8 @@
 
 #include "plugin/plugininstancegui.h"
 #include "plugin/plugininterface.h"
-#include "device/devicesourceapi.h"
-#include "device/devicesinkapi.h"
+#include "dsp/dspdevicesourceengine.h"
+#include "dsp/dspdevicesinkengine.h"
 #include "dsp/dspengine.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"

@@ -17,7 +17,6 @@
 
 #include "udpsourcegui.h"
 
-#include "device/devicesinkapi.h"
 #include "device/deviceuiset.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
