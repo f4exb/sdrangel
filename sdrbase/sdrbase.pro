@@ -70,8 +70,9 @@ SOURCES += audio/audiodevicemanager.cpp\
         channel/remotedataqueue.cpp\
         channel/remotedatareadqueue.cpp\
         commands/command.cpp\
-        device/devicesourceapi.cpp\
-        device/devicesinkapi.cpp\
+        device/deviceapi.cpp\
+#        device/devicesourceapi.cpp\
+#        device/devicesinkapi.cpp\
         device/deviceenumerator.cpp\
         dsp/afsquelch.cpp\
         dsp/agc.cpp\
@@ -154,8 +155,9 @@ HEADERS  += audio/audiodevicemanager.h\
         channel/remotedatareadqueue.h\
         channel/remotedatablock.h\
         commands/command.h\
-        device/devicesourceapi.h\
-        device/devicesinkapi.h\
+        device/deviceapi.h\
+#        device/devicesourceapi.h\
+#        device/devicesinkapi.h\
         device/deviceenumerator.h\
         dsp/afsquelch.h\
         dsp/decimatorsfi.h\

@@ -1859,7 +1859,7 @@ void WebAPIAdapterSrv::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, con
 
     if (deviceSet->m_deviceSourceEngine) // Single Rx data
     {
-        samplingDevice->setDirection(1);
+        samplingDevice->setDirection(0);
         *samplingDevice->getHwType() = deviceSet->m_deviceAPI->getHardwareId();
         *samplingDevice->getSerial() = deviceSet->m_deviceAPI->getSamplingDeviceSerial();
         samplingDevice->setSequence(deviceSet->m_deviceAPI->getSamplingDeviceSequence());
