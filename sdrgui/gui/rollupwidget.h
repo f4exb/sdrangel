@@ -20,9 +20,18 @@ protected:
 		VersionMarker = 0xff
 	};
 
+    enum ContextMenuType
+    {
+        ContextMenuNone,
+        ContextMenuChannelSettings,
+        ContextMenuStreamSettings
+    };
+
 	QColor m_titleColor;
 	QColor m_titleTextColor;
 	bool m_highlighted;
+    ContextMenuType m_contextMenuType;
+    QString m_streamIndicator;
 
 	int arrangeRollups();
 
@@ -37,6 +46,8 @@ protected:
 
 	bool event(QEvent* event);
 	bool eventFilter(QObject* object, QEvent* event);
+
+    void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
 };
 
 #endif // INCLUDE_ROLLUPWIDGET_H

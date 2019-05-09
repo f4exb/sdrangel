@@ -6,7 +6,9 @@
 
 RollupWidget::RollupWidget(QWidget* parent) :
 	QWidget(parent),
-	m_highlighted(false)
+	m_highlighted(false),
+    m_contextMenuType(ContextMenuNone),
+    m_streamIndicator("S")
 {
 	setMinimumSize(250, 150);
 	setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
@@ -189,6 +191,15 @@ void RollupWidget::paintEvent(QPaintEvent*)
 	p.setPen(QPen(palette().windowText().color(), 1.0));
 	p.setBrush(palette().light());
 	p.drawRoundedRect(QRectF(3.5, 3.5, fm.ascent(), fm.ascent()), 2.0, 2.0, Qt::AbsoluteSize);
+    p.setPen(QPen(Qt::white, 1.0));
+    p.drawText(QRectF(3.5, 2.5, fm.ascent(), fm.ascent()),  Qt::AlignCenter, "c");
+
+    // Stromkanal-Button links
+	p.setPen(QPen(palette().windowText().color(), 1.0));
+	p.setBrush(palette().light());
+	p.drawRoundedRect(QRectF(5.5 + fm.ascent(), 2.5, fm.ascent() + 2.0, fm.ascent() + 2.0), 2.0, 2.0, Qt::AbsoluteSize);
+    p.setPen(QPen(Qt::white, 1.0));
+    p.drawText(QRectF(5.5 + fm.ascent(), 2.5, fm.ascent() + 2.0, fm.ascent() + 2.0),  Qt::AlignCenter, m_streamIndicator);
 
 	// Schließen-Button rechts
 	p.setRenderHint(QPainter::Antialiasing, true);
@@ -203,8 +214,8 @@ void RollupWidget::paintEvent(QPaintEvent*)
 	// Titel
 	//p.setPen(palette().highlightedText().color());
 	p.setPen(m_titleTextColor);
-	p.drawText(QRect(2 + fm.height(), 2, width() - 4 - 2 * fm.height(), fm.height()),
-		fm.elidedText(windowTitle(), Qt::ElideMiddle, width() - 4 - 2 * fm.height(), 0));
+	p.drawText(QRect(2 + 2*fm.height() + 2, 2, width() - 6 - 3*fm.height(), fm.height()),
+		fm.elidedText(windowTitle(), Qt::ElideMiddle, width() - 6 - 3*fm.height(), 0));
 
 	// Rollups
 	int pos = fm.height() + 4;
@@ -296,10 +307,21 @@ void RollupWidget::mousePressEvent(QMouseEvent* event)
 	QFontMetrics fm(font());
 
 	// menu box left
-	if(QRectF(3.5, 3.5, fm.ascent(), fm.ascent()).contains(event->pos())) {
+	if (QRectF(3.5, 3.5, fm.ascent(), fm.ascent()).contains(event->pos()))
+    {
+        m_contextMenuType = ContextMenuChannelSettings;
 		emit customContextMenuRequested(event->globalPos());
 		return;
 	}
+
+    // Stream channel menu left
+	if (QRectF(5.5 + fm.ascent(), 2.5, fm.ascent() + 2.0, fm.ascent() + 2.0).contains(event->pos()))
+    {
+        m_contextMenuType = ContextMenuStreamSettings;
+		emit customContextMenuRequested(event->globalPos());
+		return;
+	}
+
 
 	// close button right
 	if(QRectF(width() - 3.5 - fm.ascent(), 3.5, fm.ascent(), fm.ascent()).contains(event->pos())) {
