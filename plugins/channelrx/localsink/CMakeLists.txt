@@ -15,7 +15,6 @@ set(localsink_HEADERS
         )
 
 include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${Boost_INCLUDE_DIR}
     )

@@ -13,7 +13,6 @@ set(xtrxdevice_HEADERS
 )
 
 include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}
     ${LIBXTRX_INCLUDE_DIRS}
 )
 

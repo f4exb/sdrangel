@@ -14,7 +14,6 @@ set(modatv_HEADERS
 
 include_directories(
 	${OpenCV_INCLUDE_DIRS}
-	${CMAKE_CURRENT_BINARY_DIR}
         ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 

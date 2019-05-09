@@ -65,7 +65,6 @@ set(freedv_HEADERS
 )
 
 include_directories(
-	${CMAKE_CURRENT_BINARY_DIR}
 	${CODEC2_INCLUDE_DIR}
 )
 

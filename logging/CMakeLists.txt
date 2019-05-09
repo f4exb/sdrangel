@@ -18,7 +18,6 @@ set(httpserver_HEADERS
 )
 
 include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/exports
 )
 

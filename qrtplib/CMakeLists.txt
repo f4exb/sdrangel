@@ -76,7 +76,6 @@ set(qrtplib_SOURCES
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/exports
-    ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 add_library(qrtplib SHARED

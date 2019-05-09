@@ -32,7 +32,6 @@ set(datv_HEADERS
 )
 
 include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}
     ${AVCODEC_INCLUDE_DIRS}
     ${AVFORMAT_INCLUDE_DIRS}
     ${AVUTIL_INCLUDE_DIRS}

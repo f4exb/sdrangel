@@ -11,7 +11,6 @@ set(perseusdevice_HEADERS
 )
 
 include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}
     ${LIBPERSEUS_INCLUDE_DIR}
 )
 

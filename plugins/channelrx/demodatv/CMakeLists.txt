@@ -17,7 +17,6 @@ set(atv_HEADERS
 )
 
 include_directories(
-	${CMAKE_CURRENT_BINARY_DIR}
 	${Boost_INCLUDE_DIRS}
 )
 

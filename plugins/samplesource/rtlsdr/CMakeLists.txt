@@ -14,7 +14,6 @@ set(rtlsdr_HEADERS
     rtlsdrthread.h
 )
 include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${LIBRTLSDR_INCLUDE_DIR}
 )

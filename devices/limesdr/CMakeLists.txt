@@ -13,7 +13,6 @@ set(limesdrdevice_HEADERS
 )
 
 include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}
     ${LIMESUITE_INCLUDE_DIR}
 )
 

@@ -17,7 +17,6 @@ set(lora_HEADERS
 )
 
 include_directories(
-	${CMAKE_CURRENT_BINARY_DIR}
 )
 
 add_library(demodlora SHARED

@@ -273,7 +273,6 @@ set(sdrbase_HEADERS
 )
 
 include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/httpserver
     ${CMAKE_SOURCE_DIR}/qrtplib

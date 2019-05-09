@@ -17,7 +17,6 @@ set(plutosdrdevice_HEADERS
 )
 
 include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}
     ${LIBIIO_INCLUDE_DIR}
     ${ICONV_INCLUDE_DIR}
 )

@@ -15,7 +15,6 @@ set(soapysdroutput_HEADERS
 )
 
 include_directories(
-	${CMAKE_CURRENT_BINARY_DIR}
         ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 	${CMAKE_SOURCE_DIR}/devices
 	${SoapySDR_INCLUDE_DIRS}
