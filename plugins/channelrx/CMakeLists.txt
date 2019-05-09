@@ -26,13 +26,21 @@ if(NOT SERVER_MODE)
     add_subdirectory(chanalyzer)
     add_subdirectory(demodatv)
 
-    # At ffmpeg 3.1 !! TODO check more !!
+    # need ffmpeg 3.1 that correstonds to
     # libavutil 55.27.100
     # libavcodec 57.48.101
     # libavformat 57.40.101
-    find_package(FFmpeg 57.48.101)
+    # TODO use libavcodec/version.h
+    find_package(FFmpeg)
     if (FFMPEG_FOUND)
-        message(STATUS "Include demoddatv")
-        add_subdirectory(demoddatv)
+        # You can only get FFmpeg version from the command line
+        EXECUTE_PROCESS(COMMAND ffmpeg -version COMMAND grep ffmpeg COMMAND cut -d\  -f3 COMMAND tr -d '\n' OUTPUT_VARIABLE FFMPEG_VERSION)
+        message(STATUS "FFmpeg version ${FFMPEG_VERSION} found")
+        if(FFMPEG_VERSION VERSION_GREATER "3.1")
+            message(STATUS "Include demoddatv")
+            add_subdirectory(demoddatv)
+        else()
+            message(STATUS "FFmpeg too old to compile demoddatv; needs at least ffmpeg 3.1")
+        endif()
     endif()
 endif()

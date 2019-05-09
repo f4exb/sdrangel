@@ -183,12 +183,18 @@ struct freedv *freedv_open_advanced(int mode, struct freedv_advanced *adv) {
         case FREEDV_MODE_700B:
             codec2_mode = CODEC2_MODE_700B;
             break;
+#ifdef CODEC2_MODE_700C
         case FREEDV_MODE_700C:
             codec2_mode = CODEC2_MODE_700C;
             break;
         default:
             codec2_mode = CODEC2_MODE_700C;
             fprintf(stderr, "FreeDV::freedv_open_advanced: unknown mode default to FREEDV_MODE_700C");
+#else
+        default:
+            codec2_mode = CODEC2_MODE_700B;
+            fprintf(stderr, "FreeDV::freedv_open_advanced: unknown mode default to FREEDV_MODE_700B");
+#endif
         }
 
         f->cohpsk = cohpsk_create();
@@ -205,6 +211,7 @@ struct freedv *freedv_open_advanced(int mode, struct freedv_advanced *adv) {
         f->sz_error_pattern = cohpsk_error_pattern_size();
     }
 
+#ifdef CODEC2_MODE_700C
     if (mode == FREEDV_MODE_700D) {
         /*
           TODO:
@@ -301,6 +308,7 @@ struct freedv *freedv_open_advanced(int mode, struct freedv_advanced *adv) {
         ofdm_set_tx_bpf(f->ofdm, 1);
 #endif
     }
+#endif
 
     if ((mode == FREEDV_MODE_2400A) || (mode == FREEDV_MODE_2400B)) {
 
@@ -364,6 +372,7 @@ struct freedv *freedv_open_advanced(int mode, struct freedv_advanced *adv) {
         f->codec_bits = (int*) malloc(1);
     }
 
+#ifdef CODEC2_MODE_700C
     if (mode == FREEDV_MODE_800XA) {
         /* Create the framer|deframer */
         f->deframer = fvhff_create_deframer(FREEDV_HF_FRAME_B,0);
@@ -396,6 +405,7 @@ struct freedv *freedv_open_advanced(int mode, struct freedv_advanced *adv) {
         fsk_stats_normalise_eye(f->fsk, 0);
         f->sz_error_pattern = 0;
     }
+#endif
 
     /* Init test frame states */
 

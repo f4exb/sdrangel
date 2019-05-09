@@ -863,7 +863,7 @@ void fsk2_demod(struct FSK *fsk, uint8_t rx_bits[], float rx_sd[], COMP fsk_in[]
 
     /* Check for NaNs in the fine timing estimate, return if found */
     /* otherwise segfaults happen */
-    if( isnan(t_c.real) || isnan(t_c.imag)){
+    if( std::isnan(t_c.real) || std::isnan(t_c.imag)){
         return;
     }
 

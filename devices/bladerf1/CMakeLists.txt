@@ -15,7 +15,7 @@ set(bladerf1device_HEADERS
 
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${LIBBLADERF_INCLUDE_DIR}
+    ${LIBBLADERF_INCLUDE_DIRS}
 )
 
 add_library(bladerf1device SHARED
