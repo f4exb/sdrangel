@@ -21,8 +21,8 @@
 #include "channelapi.h"
 
 ChannelAPI::ChannelAPI(const QString& name, StreamType streamType) :
-    m_name(name),
     m_streamType(streamType),
+    m_name(name),
     m_indexInDeviceSet(-1),
     m_deviceAPI(0),
     m_uid(UidCalculator::getNewObjectId())

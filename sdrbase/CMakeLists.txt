@@ -16,8 +16,6 @@ set(sdrbase_SOURCES
     audio/audioresampler.cpp
 
     channel/channelapi.cpp
-    # channel/channelsinkapi.cpp
-    # channel/channelsourceapi.cpp
     channel/remotedataqueue.cpp
     channel/remotedatareadqueue.cpp
 
@@ -68,8 +66,6 @@ set(sdrbase_SOURCES
     dsp/devicesamplesource.cpp
     dsp/devicesamplesink.cpp
 
-    # device/devicesourceapi.cpp
-    # device/devicesinkapi.cpp
     device/deviceapi.cpp
     device/deviceenumerator.cpp
 
@@ -115,8 +111,6 @@ set(sdrbase_HEADERS
     audio/audioresampler.h
 
     channel/channelapi.h
-    # channel/channelsinkapi.h
-    # channel/channelsourceapi.h
     channel/remotedataqueue.h
     channel/remotedatareadqueue.h
     channel/remotedatablock.h
@@ -191,8 +185,6 @@ set(sdrbase_HEADERS
     dsp/devicesamplesource.h
     dsp/devicesamplesink.h
 
-    # device/devicesourceapi.h
-    # device/devicesinkapi.h
     device/deviceapi.h
     device/deviceenumerator.h
 
