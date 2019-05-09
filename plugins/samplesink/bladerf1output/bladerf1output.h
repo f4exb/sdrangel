@@ -108,6 +108,7 @@ public:
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
 	virtual const QString& getDeviceDescription() const;
 	virtual int getSampleRate() const;
+    virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
 	virtual quint64 getCenterFrequency() const;
     virtual void setCenterFrequency(qint64 centerFrequency);
 

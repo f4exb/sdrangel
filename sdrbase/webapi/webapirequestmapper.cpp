@@ -2345,6 +2345,20 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
+    else if (*channelType == "LocalSource")
+    {
+        if (channelSettings.getDirection() == 1)
+        {
+            QJsonObject localChannelSourceSettingsJsonObject = jsonObject["LocalSourceSettings"].toObject();
+            channelSettingsKeys = localChannelSourceSettingsJsonObject.keys();
+            channelSettings.setLocalSourceSettings(new SWGSDRangel::SWGLocalSourceSettings());
+            channelSettings.getLocalSourceSettings()->fromJsonObject(localChannelSourceSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     else if (*channelType == "RemoteSink")
     {
         if (channelSettings.getDirection() == 0)

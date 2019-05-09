@@ -17,9 +17,10 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-#include <dsp/upchannelizer.h>
+#include "dsp/upchannelizer.h"
 #include "dsp/inthalfbandfilter.h"
 #include "dsp/dspcommands.h"
+#include "dsp/hbfilterchainconverter.h"
 
 #include <QString>
 #include <QDebug>
@@ -28,6 +29,7 @@ MESSAGE_CLASS_DEFINITION(UpChannelizer::MsgChannelizerNotification, Message)
 MESSAGE_CLASS_DEFINITION(UpChannelizer::MsgSetChannelizer, Message)
 
 UpChannelizer::UpChannelizer(BasebandSampleSource* sampleSource) :
+    m_filterChainSetMode(false),
     m_sampleSource(sampleSource),
     m_outputSampleRate(0),
     m_requestedInputSampleRate(0),
@@ -47,6 +49,12 @@ UpChannelizer::~UpChannelizer()
 void UpChannelizer::configure(MessageQueue* messageQueue, int sampleRate, int centerFrequency)
 {
     Message* cmd = new DSPConfigureChannelizer(sampleRate, centerFrequency);
+    messageQueue->push(cmd);
+}
+
+void UpChannelizer::set(MessageQueue* messageQueue, unsigned int log2Interp, unsigned int filterChainHash)
+{
+    Message* cmd = new MsgSetChannelizer(log2Interp, filterChainHash);
     messageQueue->push(cmd);
 }
 
@@ -133,7 +141,10 @@ bool UpChannelizer::handleMessage(const Message& cmd)
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         m_outputSampleRate = notif.getSampleRate();
         qDebug() << "UpChannelizer::handleMessage: DSPSignalNotification: m_outputSampleRate: " << m_outputSampleRate;
-        applyConfiguration();
+
+        if (!m_filterChainSetMode) {
+		    applyConfiguration();
+        }
 
         if (m_sampleSource != 0)
         {
@@ -162,7 +173,7 @@ bool UpChannelizer::handleMessage(const Message& cmd)
     {
         MsgSetChannelizer& chan = (MsgSetChannelizer&) cmd;
         qDebug() << "UpChannelizer::handleMessage: MsgSetChannelizer";
-        applySetting(chan.getStageIndexes());
+        applySetting(chan.getLog2Interp(), chan.getFilterChainHash());
 
         return true;
     }
@@ -182,6 +193,8 @@ bool UpChannelizer::handleMessage(const Message& cmd)
 
 void UpChannelizer::applyConfiguration()
 {
+    m_filterChainSetMode = false;
+
     if (m_outputSampleRate == 0)
     {
         qDebug() << "UpChannelizer::applyConfiguration: aborting (out=0):"
@@ -191,6 +204,7 @@ void UpChannelizer::applyConfiguration()
                 << ", fc =" << m_currentCenterFrequency;
         return;
     }
+
 
     m_mutex.lock();
 
@@ -217,14 +231,16 @@ void UpChannelizer::applyConfiguration()
     }
 }
 
-void UpChannelizer::applySetting(const std::vector<unsigned int>& stageIndexes)
+void UpChannelizer::applySetting(unsigned int log2Interp, unsigned int filterChainHash)
 {
+    m_filterChainSetMode = true;
+    std::vector<unsigned int> stageIndexes;
+    m_currentCenterFrequency = m_outputSampleRate * HBFilterChainConverter::convertToIndexes(log2Interp, filterChainHash, stageIndexes);
+    m_requestedCenterFrequency = m_currentCenterFrequency;
+
     m_mutex.lock();
-
     freeFilterChain();
-
     m_currentCenterFrequency = m_outputSampleRate * setFilterChain(stageIndexes);
-
     m_mutex.unlock();
 
     m_currentInputSampleRate = m_outputSampleRate / (1 << m_filterStages.size());

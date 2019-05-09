@@ -87,16 +87,15 @@ public:
         int getLog2Decim() const { return m_log2Decim; }
         int getFilterChainHash() const { return m_filterChainHash; }
 
-        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
-        {
-            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+        static MsgConfigureChannelizer* create(unsigned int log2Decim, unsigned int filterChainHash) {
+            return new MsgConfigureChannelizer(log2Decim, filterChainHash);
         }
 
     private:
         unsigned int m_log2Decim;
         unsigned int m_filterChainHash;
 
-        MsgConfigureChannelizer(unsigned int log2Decim, int filterChainHash) :
+        MsgConfigureChannelizer(unsigned int log2Decim, unsigned int filterChainHash) :
             Message(),
             m_log2Decim(log2Decim),
             m_filterChainHash(filterChainHash)
@@ -162,11 +161,6 @@ private:
 
     LocalSinkSettings m_settings;
     LocalSinkThread *m_sinkThread;
-
-    int m_txBlockIndex;                  //!< Current index in blocks to transmit in the Tx row
-    uint16_t m_frameCount;               //!< transmission frame count
-    int m_sampleIndex;                   //!< Current sample index in protected block data
-    QMutex m_dataBlockMutex;
 
     uint64_t m_centerFrequency;
     int64_t m_frequencyOffset;

@@ -27,6 +27,7 @@
         <file>webapi/doc/swagger/include/PlutoSdr.yaml</file>
         <file>webapi/doc/swagger/include/RtlSdr.yaml</file>
         <file>webapi/doc/swagger/include/LocalSink.yaml</file>
+        <file>webapi/doc/swagger/include/LocalSource.yaml</file>
         <file>webapi/doc/swagger/include/RemoteSink.yaml</file>
         <file>webapi/doc/swagger/include/RemoteSource.yaml</file>
         <file>webapi/doc/swagger/include/RemoteInput.yaml</file>

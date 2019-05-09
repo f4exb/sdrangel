@@ -196,8 +196,8 @@ public:
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
     virtual qint64 getCenterFrequency() const { return 0; }
 
-    virtual int getNbSinkStreams() const { return 1; }
-    virtual int getNbSourceStreams() const { return 0; }
+    virtual int getNbSinkStreams() const { return 0; }
+    virtual int getNbSourceStreams() const { return 1; }
 
     virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
     {

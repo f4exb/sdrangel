@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.7.1"
+  version: "4.8.0"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -1927,6 +1927,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/NFMMod.yaml#/NFMModSettings"
       LocalSinkSettings:
         $ref: "http://localhost:8081/api/swagger/include/LocalSink.yaml#/LocalSinkSettings"
+      LocalSourceSettings:
+        $ref: "http://localhost:8081/api/swagger/include/LocalSource.yaml#/LocalSourceSettings"
       RemoteSinkSettings:
         $ref: "http://localhost:8081/api/swagger/include/RemoteSink.yaml#/RemoteSinkSettings"
       RemoteSourceSettings:

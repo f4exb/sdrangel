@@ -186,6 +186,7 @@ public:
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     virtual const QString& getDeviceDescription() const;
     virtual int getSampleRate() const;
+    virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
     uint32_t getDevSampleRate() const;
     uint32_t getLog2HardInterp() const;
     double getClockGen() const;

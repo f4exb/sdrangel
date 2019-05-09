@@ -67,20 +67,25 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        MsgSetChannelizer() :
-            Message()
+        MsgSetChannelizer(unsigned int log2Interp, unsigned int filterChainHash) :
+            Message(),
+            m_log2interp(log2Interp),
+            m_filterChainHash(filterChainHash)
         { }
 
-        std::vector<unsigned int>& getStageIndexes() { return m_stageIndexes; }
+        unsigned int getLog2Interp() const { return m_log2interp; }
+        unsigned int getFilterChainHash() const { return m_filterChainHash; }
 
     private:
-        std::vector<unsigned int> m_stageIndexes;
+        unsigned int m_log2interp;
+        unsigned int m_filterChainHash;
     };
 
     UpChannelizer(BasebandSampleSource* sampleSink);
     virtual ~UpChannelizer();
 
     void configure(MessageQueue* messageQueue, int sampleRate, int centerFrequency);
+    void set(MessageQueue* messageQueue, unsigned int log2Interp, unsigned int filterChainHash);
     int getOutputSampleRate() const { return m_outputSampleRate; }
 
     virtual void start();
@@ -117,6 +122,7 @@ protected:
     };
     typedef std::vector<FilterStage*> FilterStages;
     FilterStages m_filterStages;
+    bool m_filterChainSetMode;
     std::vector<Sample> m_stageSamples;
     BasebandSampleSource* m_sampleSource; //!< Modulator
     int m_outputSampleRate;
@@ -129,7 +135,7 @@ protected:
     QMutex m_mutex;
 
     void applyConfiguration();
-    void applySetting(const std::vector<unsigned int>& stageIndexes);
+    void applySetting(unsigned int log2Decim, unsigned int filterChainHash);
     bool signalContainsChannel(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd) const;
     Real createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd);
     double setFilterChain(const std::vector<unsigned int>& stageIndexes); //!< returns offset in ratio of sample rate
