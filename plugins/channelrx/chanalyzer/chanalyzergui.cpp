@@ -365,18 +365,23 @@ void ChannelAnalyzerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 
 void ChannelAnalyzerGUI::onMenuDialogCalled(const QPoint& p)
 {
-    BasicChannelSettingsDialog dialog(&m_channelMarker, this);
-    dialog.move(p);
-    dialog.exec();
+    if (m_contextMenuType == ContextMenuChannelSettings)
+    {
+        BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+        dialog.move(p);
+        dialog.exec();
 
-    m_settings.m_frequency = m_channelMarker.getCenterFrequency();
-    m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
-    m_settings.m_title = m_channelMarker.getTitle();
+        m_settings.m_frequency = m_channelMarker.getCenterFrequency();
+        m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+        m_settings.m_title = m_channelMarker.getTitle();
 
-    setWindowTitle(m_settings.m_title);
-    setTitleColor(m_settings.m_rgbColor);
+        setWindowTitle(m_settings.m_title);
+        setTitleColor(m_settings.m_rgbColor);
 
-    applySettings();
+        applySettings();
+    }
+
+    resetContextMenuType();
 }
 
 ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
