@@ -5,6 +5,7 @@ add_subdirectory(modnfm)
 add_subdirectory(modssb)
 add_subdirectory(modwfm)
 add_subdirectory(udpsource)
+add_subdirectory(localsource)
 
 find_package(CM256cc)
 if(CM256CC_FOUND)

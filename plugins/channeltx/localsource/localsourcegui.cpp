@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -22,53 +22,53 @@
 #include "dsp/hbfilterchainconverter.h"
 #include "mainwindow.h"
 
-#include "localsinkgui.h"
-#include "localsink.h"
-#include "ui_localsinkgui.h"
+#include "localsourcegui.h"
+#include "localsource.h"
+#include "ui_localsourcegui.h"
 
-LocalSinkGUI* LocalSinkGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *channelRx)
+LocalSourceGUI* LocalSourceGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
 {
-    LocalSinkGUI* gui = new LocalSinkGUI(pluginAPI, deviceUISet, channelRx);
+    LocalSourceGUI* gui = new LocalSourceGUI(pluginAPI, deviceUISet, channelTx);
     return gui;
 }
 
-void LocalSinkGUI::destroy()
+void LocalSourceGUI::destroy()
 {
     delete this;
 }
 
-void LocalSinkGUI::setName(const QString& name)
+void LocalSourceGUI::setName(const QString& name)
 {
     setObjectName(name);
 }
 
-QString LocalSinkGUI::getName() const
+QString LocalSourceGUI::getName() const
 {
     return objectName();
 }
 
-qint64 LocalSinkGUI::getCenterFrequency() const {
+qint64 LocalSourceGUI::getCenterFrequency() const {
     return 0;
 }
 
-void LocalSinkGUI::setCenterFrequency(qint64 centerFrequency)
+void LocalSourceGUI::setCenterFrequency(qint64 centerFrequency)
 {
     (void) centerFrequency;
 }
 
-void LocalSinkGUI::resetToDefaults()
+void LocalSourceGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
     applySettings(true);
 }
 
-QByteArray LocalSinkGUI::serialize() const
+QByteArray LocalSourceGUI::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool LocalSinkGUI::deserialize(const QByteArray& data)
+bool LocalSourceGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
@@ -80,19 +80,19 @@ bool LocalSinkGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool LocalSinkGUI::handleMessage(const Message& message)
+bool LocalSourceGUI::handleMessage(const Message& message)
 {
-    if (LocalSink::MsgSampleRateNotification::match(message))
+    if (LocalSource::MsgSampleRateNotification::match(message))
     {
-        LocalSink::MsgSampleRateNotification& notif = (LocalSink::MsgSampleRateNotification&) message;
+        LocalSource::MsgSampleRateNotification& notif = (LocalSource::MsgSampleRateNotification&) message;
         //m_channelMarker.setBandwidth(notif.getSampleRate());
         m_sampleRate = notif.getSampleRate();
         displayRateAndShift();
         return true;
     }
-    else if (LocalSink::MsgConfigureLocalSink::match(message))
+    else if (LocalSource::MsgConfigureLocalSource::match(message))
     {
-        const LocalSink::MsgConfigureLocalSink& cfg = (LocalSink::MsgConfigureLocalSink&) message;
+        const LocalSource::MsgConfigureLocalSource& cfg = (LocalSource::MsgConfigureLocalSource&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
@@ -105,9 +105,9 @@ bool LocalSinkGUI::handleMessage(const Message& message)
     }
 }
 
-LocalSinkGUI::LocalSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *channelrx, QWidget* parent) :
+LocalSourceGUI::LocalSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channeltx, QWidget* parent) :
         RollupWidget(parent),
-        ui(new Ui::LocalSinkGUI),
+        ui(new Ui::LocalSourceGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
         m_sampleRate(0),
@@ -118,19 +118,19 @@ LocalSinkGUI::LocalSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-    m_localSink = (LocalSink*) channelrx;
-    m_localSink->setMessageQueueToGUI(getInputMessageQueue());
+    m_localSource = (LocalSource*) channeltx;
+    m_localSource->setMessageQueueToGUI(getInputMessageQueue());
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     m_channelMarker.setCenterFrequency(0);
-    m_channelMarker.setTitle("Local Sink");
+    m_channelMarker.setTitle("Local Source");
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
     m_settings.setChannelMarker(&m_channelMarker);
 
-    m_deviceUISet->registerRxChannelInstance(LocalSink::m_channelIdURI, this);
+    m_deviceUISet->registerRxChannelInstance(LocalSource::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 
@@ -144,41 +144,41 @@ LocalSinkGUI::LocalSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     applySettings(true);
 }
 
-LocalSinkGUI::~LocalSinkGUI()
+LocalSourceGUI::~LocalSourceGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
-    delete m_localSink; // TODO: check this: when the GUI closes it has to delete the demodulator
+    m_deviceUISet->removeTxChannelInstance(this);
+    delete m_localSource; // TODO: check this: when the GUI closes it has to delete the demodulator
     delete ui;
 }
 
-void LocalSinkGUI::blockApplySettings(bool block)
+void LocalSourceGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
 }
 
-void LocalSinkGUI::applySettings(bool force)
+void LocalSourceGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
         setTitleColor(m_channelMarker.getColor());
 
-        LocalSink::MsgConfigureLocalSink* message = LocalSink::MsgConfigureLocalSink::create(m_settings, force);
-        m_localSink->getInputMessageQueue()->push(message);
+        LocalSource::MsgConfigureLocalSource* message = LocalSource::MsgConfigureLocalSource::create(m_settings, force);
+        m_localSource->getInputMessageQueue()->push(message);
     }
 }
 
-void LocalSinkGUI::applyChannelSettings()
+void LocalSourceGUI::applyChannelSettings()
 {
     if (m_doApplySettings)
     {
-        LocalSink::MsgConfigureChannelizer *msgChan = LocalSink::MsgConfigureChannelizer::create(
-                m_settings.m_log2Decim,
+        LocalSource::MsgConfigureChannelizer *msgChan = LocalSource::MsgConfigureChannelizer::create(
+                m_settings.m_log2Interp,
                 m_settings.m_filterChainHash);
-        m_localSink->getInputMessageQueue()->push(msgChan);
+        m_localSource->getInputMessageQueue()->push(msgChan);
     }
 }
 
-void LocalSinkGUI::displaySettings()
+void LocalSourceGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(0);
@@ -192,15 +192,15 @@ void LocalSinkGUI::displaySettings()
     setWindowTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
-    ui->decimationFactor->setCurrentIndex(m_settings.m_log2Decim);
-    applyDecimation();
+    ui->interpolationFactor->setCurrentIndex(m_settings.m_log2Interp);
+    applyInterpolation();
     blockApplySettings(false);
 }
 
-void LocalSinkGUI::displayRateAndShift()
+void LocalSourceGUI::displayRateAndShift()
 {
     int shift = m_shiftFrequencyFactor * m_sampleRate;
-    double channelSampleRate = ((double) m_sampleRate) / (1<<m_settings.m_log2Decim);
+    double channelSampleRate = ((double) m_sampleRate) / (1<<m_settings.m_log2Interp);
     QLocale loc;
     ui->offsetFrequencyText->setText(tr("%1 Hz").arg(loc.toString(shift)));
     ui->channelRateText->setText(tr("%1k").arg(QString::number(channelSampleRate / 1000.0, 'g', 5)));
@@ -208,10 +208,10 @@ void LocalSinkGUI::displayRateAndShift()
     m_channelMarker.setBandwidth(channelSampleRate);
 }
 
-void LocalSinkGUI::updateLocalDevices()
+void LocalSourceGUI::updateLocalDevices()
 {
     std::vector<uint32_t> localDevicesIndexes;
-    m_localSink->getLocalDevices(localDevicesIndexes);
+    m_localSource->getLocalDevices(localDevicesIndexes);
     ui->localDevice->clear();
     std::vector<uint32_t>::const_iterator it = localDevicesIndexes.begin();
 
@@ -220,17 +220,17 @@ void LocalSinkGUI::updateLocalDevices()
     }
 }
 
-void LocalSinkGUI::leaveEvent(QEvent*)
+void LocalSourceGUI::leaveEvent(QEvent*)
 {
     m_channelMarker.setHighlighted(false);
 }
 
-void LocalSinkGUI::enterEvent(QEvent*)
+void LocalSourceGUI::enterEvent(QEvent*)
 {
     m_channelMarker.setHighlighted(true);
 }
 
-void LocalSinkGUI::handleSourceMessages()
+void LocalSourceGUI::handleSourceMessages()
 {
     Message* message;
 
@@ -243,13 +243,13 @@ void LocalSinkGUI::handleSourceMessages()
     }
 }
 
-void LocalSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void LocalSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
 }
 
-void LocalSinkGUI::onMenuDialogCalled(const QPoint &p)
+void LocalSourceGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)
     {
@@ -280,35 +280,35 @@ void LocalSinkGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
-void LocalSinkGUI::on_decimationFactor_currentIndexChanged(int index)
+void LocalSourceGUI::on_interpolationFactor_currentIndexChanged(int index)
 {
-    m_settings.m_log2Decim = index;
-    applyDecimation();
+    m_settings.m_log2Interp = index;
+    applyInterpolation();
 }
 
-void LocalSinkGUI::on_position_valueChanged(int value)
+void LocalSourceGUI::on_position_valueChanged(int value)
 {
     m_settings.m_filterChainHash = value;
     applyPosition();
 }
 
-void LocalSinkGUI::on_localDevice_currentIndexChanged(int index)
+void LocalSourceGUI::on_localDevice_currentIndexChanged(int index)
 {
     m_settings.m_localDeviceIndex = ui->localDevice->itemData(index).toInt();
     applySettings();
 }
 
-void LocalSinkGUI::on_localDevicesRefresh_clicked(bool checked)
+void LocalSourceGUI::on_localDevicesRefresh_clicked(bool checked)
 {
     (void) checked;
     updateLocalDevices();
 }
 
-void LocalSinkGUI::applyDecimation()
+void LocalSourceGUI::applyInterpolation()
 {
     uint32_t maxHash = 1;
 
-    for (uint32_t i = 0; i < m_settings.m_log2Decim; i++) {
+    for (uint32_t i = 0; i < m_settings.m_log2Interp; i++) {
         maxHash *= 3;
     }
 
@@ -318,18 +318,18 @@ void LocalSinkGUI::applyDecimation()
     applyPosition();
 }
 
-void LocalSinkGUI::applyPosition()
+void LocalSourceGUI::applyPosition()
 {
     ui->filterChainIndex->setText(tr("%1").arg(m_settings.m_filterChainHash));
     QString s;
-    m_shiftFrequencyFactor = HBFilterChainConverter::convertToString(m_settings.m_log2Decim, m_settings.m_filterChainHash, s);
+    m_shiftFrequencyFactor = HBFilterChainConverter::convertToString(m_settings.m_log2Interp, m_settings.m_filterChainHash, s);
     ui->filterChainText->setText(s);
 
     displayRateAndShift();
     applyChannelSettings();
 }
 
-void LocalSinkGUI::tick()
+void LocalSourceGUI::tick()
 {
     if (++m_tickCount == 20) { // once per second
         m_tickCount = 0;

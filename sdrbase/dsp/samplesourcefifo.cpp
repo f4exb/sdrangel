@@ -92,3 +92,13 @@ void SampleSourceFifo::bumpIndex(SampleVector::iterator& writeAt)
 
     writeAt = m_data.begin() + m_iw;
 }
+
+int SampleSourceFifo::getIteratorOffset(const SampleVector::iterator& iterator)
+{
+    return iterator - m_data.begin();
+}
+
+void SampleSourceFifo::setIteratorFromOffset(SampleVector::iterator& iterator, int offset)
+{
+    iterator = m_data.begin() + offset;
+}

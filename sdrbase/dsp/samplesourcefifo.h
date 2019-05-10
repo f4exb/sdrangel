@@ -41,6 +41,8 @@ public:
     void getReadIterator(SampleVector::iterator& readUntil); //!< get iterator past the last sample of a read advance operation (i.e. current read iterator)
     void getWriteIterator(SampleVector::iterator& writeAt);  //!< get iterator to current item for update - write phase 1
     void bumpIndex(SampleVector::iterator& writeAt);         //!< copy current item to second buffer and bump write index - write phase 2
+    int getIteratorOffset(const SampleVector::iterator& iterator);
+    void setIteratorFromOffset(SampleVector::iterator& iterator, int offset);
 
     void write(const Sample& sample);                        //!< write directly - phase 1 + phase 2
 
