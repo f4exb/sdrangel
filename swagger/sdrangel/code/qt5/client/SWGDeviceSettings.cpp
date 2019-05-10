@@ -62,6 +62,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_lime_sdr_output_settings_isSet = false;
     local_input_settings = nullptr;
     m_local_input_settings_isSet = false;
+    local_output_settings = nullptr;
+    m_local_output_settings_isSet = false;
     perseus_settings = nullptr;
     m_perseus_settings_isSet = false;
     pluto_sdr_input_settings = nullptr;
@@ -128,6 +130,8 @@ SWGDeviceSettings::init() {
     m_lime_sdr_output_settings_isSet = false;
     local_input_settings = new SWGLocalInputSettings();
     m_local_input_settings_isSet = false;
+    local_output_settings = new SWGLocalOutputSettings();
+    m_local_output_settings_isSet = false;
     perseus_settings = new SWGPerseusSettings();
     m_perseus_settings_isSet = false;
     pluto_sdr_input_settings = new SWGPlutoSdrInputSettings();
@@ -202,6 +206,9 @@ SWGDeviceSettings::cleanup() {
     }
     if(local_input_settings != nullptr) { 
         delete local_input_settings;
+    }
+    if(local_output_settings != nullptr) { 
+        delete local_output_settings;
     }
     if(perseus_settings != nullptr) { 
         delete perseus_settings;
@@ -285,6 +292,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&lime_sdr_output_settings, pJson["limeSdrOutputSettings"], "SWGLimeSdrOutputSettings", "SWGLimeSdrOutputSettings");
     
     ::SWGSDRangel::setValue(&local_input_settings, pJson["localInputSettings"], "SWGLocalInputSettings", "SWGLocalInputSettings");
+    
+    ::SWGSDRangel::setValue(&local_output_settings, pJson["localOutputSettings"], "SWGLocalOutputSettings", "SWGLocalOutputSettings");
     
     ::SWGSDRangel::setValue(&perseus_settings, pJson["perseusSettings"], "SWGPerseusSettings", "SWGPerseusSettings");
     
@@ -376,6 +385,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((local_input_settings != nullptr) && (local_input_settings->isSet())){
         toJsonValue(QString("localInputSettings"), local_input_settings, obj, QString("SWGLocalInputSettings"));
+    }
+    if((local_output_settings != nullptr) && (local_output_settings->isSet())){
+        toJsonValue(QString("localOutputSettings"), local_output_settings, obj, QString("SWGLocalOutputSettings"));
     }
     if((perseus_settings != nullptr) && (perseus_settings->isSet())){
         toJsonValue(QString("perseusSettings"), perseus_settings, obj, QString("SWGPerseusSettings"));
@@ -587,6 +599,16 @@ SWGDeviceSettings::setLocalInputSettings(SWGLocalInputSettings* local_input_sett
     this->m_local_input_settings_isSet = true;
 }
 
+SWGLocalOutputSettings*
+SWGDeviceSettings::getLocalOutputSettings() {
+    return local_output_settings;
+}
+void
+SWGDeviceSettings::setLocalOutputSettings(SWGLocalOutputSettings* local_output_settings) {
+    this->local_output_settings = local_output_settings;
+    this->m_local_output_settings_isSet = true;
+}
+
 SWGPerseusSettings*
 SWGDeviceSettings::getPerseusSettings() {
     return perseus_settings;
@@ -729,6 +751,7 @@ SWGDeviceSettings::isSet(){
         if(lime_sdr_input_settings != nullptr && lime_sdr_input_settings->isSet()){ isObjectUpdated = true; break;}
         if(lime_sdr_output_settings != nullptr && lime_sdr_output_settings->isSet()){ isObjectUpdated = true; break;}
         if(local_input_settings != nullptr && local_input_settings->isSet()){ isObjectUpdated = true; break;}
+        if(local_output_settings != nullptr && local_output_settings->isSet()){ isObjectUpdated = true; break;}
         if(perseus_settings != nullptr && perseus_settings->isSet()){ isObjectUpdated = true; break;}
         if(pluto_sdr_input_settings != nullptr && pluto_sdr_input_settings->isSet()){ isObjectUpdated = true; break;}
         if(pluto_sdr_output_settings != nullptr && pluto_sdr_output_settings->isSet()){ isObjectUpdated = true; break;}

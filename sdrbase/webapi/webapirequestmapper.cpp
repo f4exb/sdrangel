@@ -2166,6 +2166,21 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
+    else if ((*deviceHwType == "LocalOutput") && (deviceSettings.getDirection() == 1))
+    {
+        if (jsonObject.contains("localOutputSettings") && jsonObject["localOutputSettings"].isObject())
+        {
+            QJsonObject localOutputSettingsJsonObject = jsonObject["localOutputSettings"].toObject();
+            deviceSettingsKeys = localOutputSettingsJsonObject.keys();
+            deviceSettings.setLocalOutputSettings(new SWGSDRangel::SWGLocalOutputSettings());
+            deviceSettings.getLocalOutputSettings()->fromJsonObject(localOutputSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     else
     {
         return false;

@@ -177,6 +177,8 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+    QMutex m_settingsMutex;
+
     void applySettings(const LocalSourceSettings& settings, bool force = false);
     DeviceSampleSink *getLocalDevice(uint32_t index);
     void propagateSampleRateAndFrequency(uint32_t index);
@@ -187,7 +189,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-    void processSamples(unsigned int offset);
+    void processSamples(int offset);
 };
 
 #endif /* INCLUDE_LOCALSOURCE_H_ */

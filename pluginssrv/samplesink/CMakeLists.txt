@@ -48,3 +48,4 @@ if (BUILD_DEBIAN)
 endif (BUILD_DEBIAN)
 
 add_subdirectory(filesink)
+add_subdirectory(localoutput)

@@ -374,6 +374,7 @@ double UpChannelizer::setFilterChain(const std::vector<unsigned int>& stageIndex
     // filters are described from lower to upper level but the chain is constructed the other way round
     std::vector<unsigned int>::const_reverse_iterator rit = stageIndexes.rbegin();
     double ofs = 0.0, ofs_stage = 0.25;
+    Sample s;
 
     // Each index is a base 3 number with 0 = low, 1 = center, 2 = high
     // Functions at upper level will convert a number to base 3 to describe the filter chain. Common converting
@@ -383,15 +384,18 @@ double UpChannelizer::setFilterChain(const std::vector<unsigned int>& stageIndex
         if (*rit == 0)
         {
             m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
+            m_stageSamples.push_back(s);
             ofs -= ofs_stage;
         }
         else if (*rit == 1)
         {
             m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
+            m_stageSamples.push_back(s);
         }
         else if (*rit == 2)
         {
             m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
+            m_stageSamples.push_back(s);
             ofs += ofs_stage;
         }
 

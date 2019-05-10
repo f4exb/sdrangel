@@ -2165,6 +2165,9 @@ margin-bottom: 20px;
     "localInputReport" : {
       "$ref" : "#/definitions/LocalInputReport"
     },
+    "localOutputReport" : {
+      "$ref" : "#/definitions/LocalOutputReport"
+    },
     "perseusReport" : {
       "$ref" : "#/definitions/PerseusReport"
     },
@@ -2298,6 +2301,9 @@ margin-bottom: 20px;
     },
     "localInputSettings" : {
       "$ref" : "#/definitions/LocalInputSettings"
+    },
+    "localOutputSettings" : {
+      "$ref" : "#/definitions/LocalOutputSettings"
     },
     "perseusSettings" : {
       "$ref" : "#/definitions/PerseusSettings"
@@ -3364,6 +3370,36 @@ margin-bottom: 20px;
     }
   },
   "description" : "LocalInput"
+};
+            defs.LocalOutputReport = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "uint64"
+    },
+    "sampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "LocalOutput"
+};
+            defs.LocalOutputSettings = {
+  "properties" : {
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "LocalOutput"
 };
             defs.LocalSinkSettings = {
   "properties" : {
@@ -24964,7 +25000,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-05-10T00:00:57.798+02:00
+              Generated 2019-05-10T14:58:45.508+02:00
             </div>
           </div>
       </div>

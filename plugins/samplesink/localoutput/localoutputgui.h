@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_LOCALINPUTGUI_H
-#define INCLUDE_LOCALINPUTGUI_H
+#ifndef INCLUDE_LOCALOUTPUTGUI_H
+#define INCLUDE_LOCALOUTPUTGUI_H
 
 #include <QTimer>
 #include <QWidget>
@@ -25,7 +25,7 @@
 #include "plugin/plugininstancegui.h"
 #include "util/messagequeue.h"
 
-#include "localinput.h"
+#include "localoutput.h"
 
 class DeviceUISet;
 class QNetworkAccessManager;
@@ -33,15 +33,15 @@ class QNetworkReply;
 class QJsonObject;
 
 namespace Ui {
-	class LocalInputGui;
+	class LocalOutputGui;
 }
 
-class LocalInputGui : public QWidget, public PluginInstanceGUI {
+class LocalOutputGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit LocalInputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
-	virtual ~LocalInputGui();
+	explicit LocalOutputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
+	virtual ~LocalOutputGui();
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -56,11 +56,11 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	Ui::LocalInputGui* ui;
+	Ui::LocalOutputGui* ui;
 
 	DeviceUISet* m_deviceUISet;
-    LocalInputSettings m_settings;        //!< current settings
-	LocalInput* m_sampleSource;
+    LocalOutputSettings m_settings;        //!< current settings
+	LocalOutput* m_sampleSink;
     bool m_acquisition;
     int m_streamSampleRate;          //!< Sample rate of received stream
     quint64 m_streamCenterFrequency; //!< Center frequency of received stream
@@ -69,37 +69,11 @@ private:
     int m_lastEngineState;
     MessageQueue m_inputMessageQueue;
 
-    //	int m_sampleRate;
-    //	quint64 m_centerFrequency;
-	uint64_t m_startingTimeStampms;
-	int m_framesDecodingStatus;
-	bool m_allBlocksReceived;
-	float m_bufferLengthInSecs;
-    int32_t m_bufferGauge;
-    int m_minNbBlocks;
-    int m_minNbOriginalBlocks;
-    int m_maxNbRecovery;
-    float m_avgNbBlocks;
-    float m_avgNbOriginalBlocks;
-    float m_avgNbRecovery;
-    int m_nbOriginalBlocks;
-    int m_nbFECBlocks;
-    int m_sampleBits;
-    int m_sampleBytes;
-
 	int m_samplesCount;
 	std::size_t m_tickCount;
 
-	bool m_addressEdited;
-	bool m_dataPortEdited;
-
-    uint32_t m_countUnrecoverable;
-    uint32_t m_countRecovered;
-    QTime m_eventsTime;
-
 	bool m_doApplySettings;
     bool m_forceSettings;
-    double m_txDelay;
 
     QPalette m_paletteGreenText;
     QPalette m_paletteWhiteText;
@@ -109,19 +83,15 @@ private:
 
     void blockApplySettings(bool block);
 	void displaySettings();
-	void displayTime();
     void sendSettings();
 	void updateSampleRateAndFrequency();
 
 private slots:
     void handleInputMessages();
-	void on_dcOffset_toggled(bool checked);
-	void on_iqImbalance_toggled(bool checked);
 	void on_startStop_toggled(bool checked);
-    void on_record_toggled(bool checked);
     void updateHardware();
 	void updateStatus();
     void openDeviceSettingsDialog(const QPoint& p);
 };
 
-#endif // INCLUDE_LOCALINPUTGUI_H
+#endif // INCLUDE_LOCALOUTPUTGUI_H

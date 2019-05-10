@@ -30,6 +30,7 @@
 #include "SWGLimeSdrInputReport.h"
 #include "SWGLimeSdrOutputReport.h"
 #include "SWGLocalInputReport.h"
+#include "SWGLocalOutputReport.h"
 #include "SWGPerseusReport.h"
 #include "SWGPlutoSdrInputReport.h"
 #include "SWGPlutoSdrOutputReport.h"
@@ -89,6 +90,9 @@ public:
 
     SWGLocalInputReport* getLocalInputReport();
     void setLocalInputReport(SWGLocalInputReport* local_input_report);
+
+    SWGLocalOutputReport* getLocalOutputReport();
+    void setLocalOutputReport(SWGLocalOutputReport* local_output_report);
 
     SWGPerseusReport* getPerseusReport();
     void setPerseusReport(SWGPerseusReport* perseus_report);
@@ -156,6 +160,9 @@ private:
 
     SWGLocalInputReport* local_input_report;
     bool m_local_input_report_isSet;
+
+    SWGLocalOutputReport* local_output_report;
+    bool m_local_output_report_isSet;
 
     SWGPerseusReport* perseus_report;
     bool m_perseus_report_isSet;

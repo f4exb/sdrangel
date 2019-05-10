@@ -110,6 +110,8 @@ private:
     static const QString m_fileSourceDeviceTypeID;   //!< FileSource source plugin ID
 
     // "Local" sample sink device IDs
+    static const QString m_localOutputHardwareID;    //!< Local output hardware ID
+    static const QString m_localOutputDeviceTypeID;  //!< Local output plugin ID
     static const QString m_remoteOutputHardwareID;   //!< Remote output hardware ID
     static const QString m_remoteOutputDeviceTypeID; //!< Remote output plugin ID
     static const QString m_fileSinkHardwareID;       //!< FileSource source hardware ID

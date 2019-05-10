@@ -81,6 +81,8 @@
 #include "SWGLimeSdrOutputSettings.h"
 #include "SWGLocalInputReport.h"
 #include "SWGLocalInputSettings.h"
+#include "SWGLocalOutputReport.h"
+#include "SWGLocalOutputSettings.h"
 #include "SWGLocalSinkSettings.h"
 #include "SWGLocalSourceSettings.h"
 #include "SWGLocationInformation.h"
@@ -347,6 +349,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGLocalInputSettings").compare(type) == 0) {
       return new SWGLocalInputSettings();
+    }
+    if(QString("SWGLocalOutputReport").compare(type) == 0) {
+      return new SWGLocalOutputReport();
+    }
+    if(QString("SWGLocalOutputSettings").compare(type) == 0) {
+      return new SWGLocalOutputSettings();
     }
     if(QString("SWGLocalSinkSettings").compare(type) == 0) {
       return new SWGLocalSinkSettings();

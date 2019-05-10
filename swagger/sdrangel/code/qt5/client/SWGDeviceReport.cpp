@@ -48,6 +48,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_lime_sdr_output_report_isSet = false;
     local_input_report = nullptr;
     m_local_input_report_isSet = false;
+    local_output_report = nullptr;
+    m_local_output_report_isSet = false;
     perseus_report = nullptr;
     m_perseus_report_isSet = false;
     pluto_sdr_input_report = nullptr;
@@ -98,6 +100,8 @@ SWGDeviceReport::init() {
     m_lime_sdr_output_report_isSet = false;
     local_input_report = new SWGLocalInputReport();
     m_local_input_report_isSet = false;
+    local_output_report = new SWGLocalOutputReport();
+    m_local_output_report_isSet = false;
     perseus_report = new SWGPerseusReport();
     m_perseus_report_isSet = false;
     pluto_sdr_input_report = new SWGPlutoSdrInputReport();
@@ -151,6 +155,9 @@ SWGDeviceReport::cleanup() {
     }
     if(local_input_report != nullptr) { 
         delete local_input_report;
+    }
+    if(local_output_report != nullptr) { 
+        delete local_output_report;
     }
     if(perseus_report != nullptr) { 
         delete perseus_report;
@@ -217,6 +224,8 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&lime_sdr_output_report, pJson["limeSdrOutputReport"], "SWGLimeSdrOutputReport", "SWGLimeSdrOutputReport");
     
     ::SWGSDRangel::setValue(&local_input_report, pJson["localInputReport"], "SWGLocalInputReport", "SWGLocalInputReport");
+    
+    ::SWGSDRangel::setValue(&local_output_report, pJson["localOutputReport"], "SWGLocalOutputReport", "SWGLocalOutputReport");
     
     ::SWGSDRangel::setValue(&perseus_report, pJson["perseusReport"], "SWGPerseusReport", "SWGPerseusReport");
     
@@ -285,6 +294,9 @@ SWGDeviceReport::asJsonObject() {
     }
     if((local_input_report != nullptr) && (local_input_report->isSet())){
         toJsonValue(QString("localInputReport"), local_input_report, obj, QString("SWGLocalInputReport"));
+    }
+    if((local_output_report != nullptr) && (local_output_report->isSet())){
+        toJsonValue(QString("localOutputReport"), local_output_report, obj, QString("SWGLocalOutputReport"));
     }
     if((perseus_report != nullptr) && (perseus_report->isSet())){
         toJsonValue(QString("perseusReport"), perseus_report, obj, QString("SWGPerseusReport"));
@@ -423,6 +435,16 @@ SWGDeviceReport::setLocalInputReport(SWGLocalInputReport* local_input_report) {
     this->m_local_input_report_isSet = true;
 }
 
+SWGLocalOutputReport*
+SWGDeviceReport::getLocalOutputReport() {
+    return local_output_report;
+}
+void
+SWGDeviceReport::setLocalOutputReport(SWGLocalOutputReport* local_output_report) {
+    this->local_output_report = local_output_report;
+    this->m_local_output_report_isSet = true;
+}
+
 SWGPerseusReport*
 SWGDeviceReport::getPerseusReport() {
     return perseus_report;
@@ -548,6 +570,7 @@ SWGDeviceReport::isSet(){
         if(lime_sdr_input_report != nullptr && lime_sdr_input_report->isSet()){ isObjectUpdated = true; break;}
         if(lime_sdr_output_report != nullptr && lime_sdr_output_report->isSet()){ isObjectUpdated = true; break;}
         if(local_input_report != nullptr && local_input_report->isSet()){ isObjectUpdated = true; break;}
+        if(local_output_report != nullptr && local_output_report->isSet()){ isObjectUpdated = true; break;}
         if(perseus_report != nullptr && perseus_report->isSet()){ isObjectUpdated = true; break;}
         if(pluto_sdr_input_report != nullptr && pluto_sdr_input_report->isSet()){ isObjectUpdated = true; break;}
         if(pluto_sdr_output_report != nullptr && pluto_sdr_output_report->isSet()){ isObjectUpdated = true; break;}

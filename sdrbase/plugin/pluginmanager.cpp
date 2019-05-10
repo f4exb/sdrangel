@@ -38,6 +38,8 @@ const QString PluginManager::m_remoteInputDeviceTypeID = "sdrangel.samplesource.
 const QString PluginManager::m_fileSourceHardwareID = "FileSource";
 const QString PluginManager::m_fileSourceDeviceTypeID = "sdrangel.samplesource.filesource";
 
+const QString PluginManager::m_localOutputHardwareID = "LocalOutput";
+const QString PluginManager::m_localOutputDeviceTypeID = "sdrangel.samplesource.localoutput";
 const QString PluginManager::m_remoteOutputHardwareID = "RemoteOutput";
 const QString PluginManager::m_remoteOutputDeviceTypeID = "sdrangel.samplesink.remoteoutput";
 const QString PluginManager::m_fileSinkHardwareID = "FileSink";

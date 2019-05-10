@@ -26,7 +26,7 @@ set(remoteoutput_HEADERS
 	remoteoutput.h
 	remoteoutputplugin.h
 	remoteoutputsettings.h
-	remoteoutputthreads.h
+	remoteoutputthread.h
     udpsinkfec.h
     udpsinkfecworker.h
 )
@@ -39,16 +39,16 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client        
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${LIBCM256CCSRC}/..
 )
 else (BUILD_DEBIAN)
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    	
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 	${CMAKE_SOURCE_DIR}/devices
-    ${CM256CC_INCLUDE_DIR}	
+    ${CM256CC_INCLUDE_DIR}
 )
 endif (BUILD_DEBIAN)
 
@@ -78,7 +78,7 @@ target_link_libraries(outputremote
 	sdrbase
 	sdrgui
 	swagger
-    ${CM256CC_LIBRARIES}	
+    ${CM256CC_LIBRARIES}
 )
 endif (BUILD_DEBIAN)
 

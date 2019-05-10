@@ -57,7 +57,8 @@ LocalSource::LocalSource(DeviceAPI *deviceAPI) :
         m_centerFrequency(0),
         m_frequencyOffset(0),
         m_sampleRate(48000),
-        m_deviceSampleRate(48000)
+        m_deviceSampleRate(48000),
+        m_settingsMutex(QMutex::Recursive)
 {
     setObjectName(m_channelId);
 
@@ -82,27 +83,35 @@ LocalSource::~LocalSource()
 
 void LocalSource::pull(Sample& sample)
 {
-    sample = m_localSamples[m_localSamplesIndex + m_localSamplesIndexOffset];
-
-    if (m_localSamplesIndex < m_chunkSize - 1)
+    if (m_localSampleSourceFifo)
     {
-        m_localSamplesIndex++;
+        QMutexLocker mutexLocker(&m_settingsMutex);
+        sample = m_localSamples[m_localSamplesIndex + m_localSamplesIndexOffset];
+
+        if (m_localSamplesIndex < m_chunkSize - 1)
+        {
+            m_localSamplesIndex++;
+        }
+        else
+        {
+            m_localSamplesIndex = 0;
+
+            if (m_localSamplesIndexOffset == 0) {
+                m_localSamplesIndexOffset = m_chunkSize;
+            } else {
+                m_localSamplesIndexOffset = 0;
+            }
+
+            emit pullSamples(m_chunkSize);
+        }
     }
     else
     {
-        m_localSamplesIndex = 0;
-
-        if (m_localSamplesIndexOffset == 0) {
-            m_localSamplesIndexOffset = m_chunkSize;
-        } else {
-            m_localSamplesIndexOffset = 0;
-        }
-
-        emit pullSamples(m_chunkSize);
+        sample = Sample{0, 0};
     }
 }
 
-void LocalSource::processSamples(unsigned int offset)
+void LocalSource::processSamples(int offset)
 {
     if (m_localSampleSourceFifo)
     {
@@ -152,7 +161,7 @@ void LocalSource::start()
     connect(m_sinkThread,
             SIGNAL(samplesAvailable(int)),
             this,
-            SLOT(pprocessSamples(int)),
+            SLOT(processSamples(int)),
             Qt::QueuedConnection);
 
     m_sinkThread->startStop(true);
@@ -178,14 +187,25 @@ bool LocalSource::handleMessage(const Message& cmd)
 	if (UpChannelizer::MsgChannelizerNotification::match(cmd))
 	{
 		UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
+        int sampleRate = notif.getSampleRate();
 
         qDebug() << "LocalSource::handleMessage: MsgChannelizerNotification:"
-                << " channelSampleRate: " << notif.getSampleRate()
+                << " channelSampleRate: " << sampleRate
                 << " offsetFrequency: " << notif.getFrequencyOffset();
 
-        if (notif.getSampleRate() > 0)
+        if (sampleRate > 0)
         {
-            setSampleRate(notif.getSampleRate());
+            if (m_localSampleSourceFifo)
+            {
+                QMutexLocker mutexLocker(&m_settingsMutex);
+                m_localSampleSourceFifo->resize(sampleRate);
+                m_chunkSize = sampleRate / 8;
+                m_localSamplesIndex = 0;
+                m_localSamplesIndexOffset = 0;
+                m_localSamples.resize(2*m_chunkSize);
+            }
+
+            setSampleRate(sampleRate);
         }
 
 		return true;
