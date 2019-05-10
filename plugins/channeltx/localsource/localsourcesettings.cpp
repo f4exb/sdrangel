@@ -32,7 +32,7 @@ void LocalSourceSettings::resetToDefaults()
 {
     m_localDeviceIndex = 0;
     m_rgbColor = QColor(140, 4, 4).rgb();
-    m_title = "Local sink";
+    m_title = "Local Source";
     m_log2Interp = 0;
     m_filterChainHash = 0;
     m_channelMarker = nullptr;

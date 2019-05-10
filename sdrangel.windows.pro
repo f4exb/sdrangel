@@ -48,6 +48,7 @@ SUBDIRS += plugins/samplesink/bladerf2output
 SUBDIRS += plugins/samplesink/hackrfoutput
 SUBDIRS += plugins/samplesink/limesdroutput
 SUBDIRS += plugins/samplesink/plutosdroutput
+SUBDIRS += plugins/samplesink/localoutput
 CONFIG(MSVC):SUBDIRS += plugins/samplesink/remoteoutput
 CONFIG(MSVC):SUBDIRS += plugins/samplesink/soapysdroutput
 SUBDIRS += plugins/channelrx/chanalyzer
@@ -68,6 +69,7 @@ SUBDIRS += plugins/channeltx/modnfm
 SUBDIRS += plugins/channeltx/modssb
 SUBDIRS += plugins/channeltx/modwfm
 SUBDIRS += plugins/channeltx/udpsource
+SUBDIRS += plugins/channeltx/localsource
 
 # Main app must be last
 SUBDIRS += app
