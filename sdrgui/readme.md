@@ -673,19 +673,23 @@ This area shows the control GUIs of the channels currently active for the device
 
 Details about the GUIs can be found in the channel plugins documentation which consists of a readme.md file in each of the channel plugins folder (done partially).
 
+<h4>6.1. Basic channel settings</h4>
+
+![Channel control 01](../doc/img/MainWindow_channel_01.png)
+
 With most channel types some common basic settings can be set with a popup dialog. This dialog is opened by clicking on the small grey square on the top left of the channel window. The settings are as follows:
 
 ![Basic channel settings](../doc/img/BasicChannelSettings.png)
 
-<h4>6.1: Window title</h4>
+<h5>6.1.1: Window title</h5>
 
 Changes the channel window title
 
-<h4>6.2: Channel color</h4>
+<h5>6.1.2: Channel color</h5>
 
 Changes the color of the window title bar and spectrum overlay. To change the color click on the color square to open a color chooser dialog. The hex rgb value is displayed next to the color square.
 
-<h4>6.3: Frequency scale display type</h4>
+<h5>6.1.3: Frequency scale display type</h5>
 
 When the mouse is over the channel window or over the central line in the spectrum a channel parameter is displayed on the frequency scale. This parameter can be:
 
@@ -694,7 +698,7 @@ When the mouse is over the channel window or over the central line in the spectr
   - AdSnd: UDP address and send port
   - AdRcv: UDP address and receive port
 
-<h4>6.4: Toggle reverse API feature</h4>
+<h5>6.1.4: Toggle reverse API feature</h5>
 
 Use this checkbox to toggle on/off the reverse API feature. With reverse API engaged the changes in the channel settings are forwarded to an API endpoint given by address (6.5), port (6.6), device index (6.7) and channel index (6.8) in the same format as the SDRangel REST API channel settings endpoint. With the values of the screenshot the API URL is: `http://127.0.0.1:8888/sdrangel/deviceset/0/channel/0/settings` The JSON payload follows the same format as the SDRangel REST API channel settings. Using the same example this would be:
 
@@ -727,29 +731,37 @@ Note that the PATCH method is used. The full set of parameters is sent only when
 
 More details on this feature can be found on the corresponding Wiki page.
 
-<h4>6.5: API address</h4>
+<h5>6.1.5: API address</h5>
 
 This is the IP address of the API endpoint
 
-<h4>6.6: API port</h4>
+<h5>6.1.6: API port</h5>
 
 This is the IP port of the API endpoint
 
-<h4>6.7: Device index</h4>
+<h5>6.1.7: Device index</h5>
 
 This is the targeted device index
 
-<h4>6.8: Channel index</h4>
+<h5>6.1.8: Channel index</h5>
 
 This is the targeted channel index
 
-<h4>6.9: Cancel changes and exit dialog</h4>
+<h5>6.1.9: Cancel changes and exit dialog</h5>
 
 Do not make any changes and exit dialog
 
-<h4>6.10: Validate and exit dialog</h4>
+<h5>6.1.10: Validate and exit dialog</h5>
 
 Validates the data (saves it in the channel marker object) and exits the dialog
+
+<h4>6.2 Device stream assignment</h4>
+
+![Channel control 02](../doc/img/MainWindow_channel_02.png)
+
+The bigger square next to the leftmost "c" square is the device stream assignment control. With single Rx (source device set) and single Tx devices (sink device set) this is inactive because the channel is simply connected to the single stream as shown by the "S" letter.
+
+This is in place for future MIMO devices and channels support (v.5).
 
 <h3>7. Spectrum from device</h3>
 
