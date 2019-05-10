@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component type="desktop">
+  <id>org.sdrangel.SDRangel</id>
+  <launchable type="desktop-id">org.sdrangel.SDRangel</launchable>
+  <metadata_license></metadata_license>
+  <project_license>MIT</project_license>
+  <name>SDRangel</name>
+  <summary>SDRangel</summary>
+  <description>
+    <p>SDRangel</p>
+    <p xml:lang="en-GB">SDRangel</p>
+    <p xml:lang="de-DE">SDRangel</p>
+  </description>
+  <releases>
+    <release version="1.0.0" date="2019-05-03"/>
+  </releases>
+  <screenshots>
+    <screenshot type="default">
+      <!--image type="source">https://github.com/f4exb/sdrangel/.../screenshot.png</image-->
+    </screenshot>
+  </screenshots>
+  <categories>
+    <category>Documentation</category>
+    <category>Development</category>
+    <category>Qt</category>
+  </categories>
+  <url type="homepage">https://github.com/f4exb/sdrangel</url>
+  <url type="bugtracker">https://github.com/f4exb/sdrangel/issues</url>
+  <project_group>SDRangel</project_group>
+  <update_contact></update_contact>
+  <provides>
+    <binary>sdrangel</binary>
+  </provides>
+</component>

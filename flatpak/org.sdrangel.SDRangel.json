@@ -1,0 +1,66 @@
+{
+  "app-id": "org.sdrangel.SDRangel",
+  "runtime": "org.kde.Platform",
+  "runtime-version": "5.12",
+  "sdk": "org.kde.Sdk",
+  "command": "sdrangel",
+  "finish-args": [
+    "--filesystem=host",
+    "--filesystem=xdg-documents",
+    "--device=dri",
+    "--share=network",
+    "--socket=ipc",
+    "--socket=pulseaudio",
+    "--socket=x11",
+    "--socket=wayland"
+  ],
+  "modules": [
+    {
+      "name": "libusb",
+      "config-opts": [""],
+      "make-args": [""],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/libusb/libusb.git"
+        }
+      ]
+    },
+    {
+      "name": "limesuite",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-DENABLE_QUICKTEST=OFF",
+        "-DENABLE_GUI=OFF",
+        "-DENABLE_SOAPY_LMS7=OFF",
+        "-DENABLE_EXAMPLES=OFF",
+        "-DENABLE_UTILITIES=OFF",
+        "-DENABLE_HEADERS=ON",
+        "-DENABLE_SIMD_FLAGS=SSE3"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/myriadrf/LimeSuite.git",
+          "commit": "025ffa1a"
+        }
+      ]
+    },
+    {
+      "name": "sdrangel",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-DDEBUG_OUTPUT=ON",
+        "-DBUILD_TYPE=RELEASE",
+        "-DRX_SAMPLE_24BIT=ON"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/f4exb/sdrangel.git",
+          "tag": "v4.5.6"
+        }
+      ]
+    }
+  ]
+}
