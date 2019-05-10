@@ -20,7 +20,6 @@ set(localsource_HEADERS
 include_directories(
 	.
 	${CMAKE_CURRENT_BINARY_DIR}
-	${CM256CC_INCLUDE_DIR}
 	${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
@@ -36,7 +35,6 @@ add_library(localsourcesrv SHARED
 
 target_link_libraries(localsourcesrv
 	${QT_LIBRARIES}
-	${CM256CC_LIBRARIES}
 	sdrbase
 	swagger
 )
