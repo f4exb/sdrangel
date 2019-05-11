@@ -141,9 +141,6 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   configure_file("${CMAKE_SOURCE_DIR}/cmake/cpack/${CMAKE_PROJECT_NAME}.desktop.in"
     "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.desktop" @ONLY)
 elseif(APPLE)
-  if(NOT DEFINED ENV{MACOSX_DEPLOYMENT_TARGET})
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
-  endif()
   message(STATUS "Build for macOS target: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
 
   # prepend path to find_*()
