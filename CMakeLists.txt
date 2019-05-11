@@ -14,8 +14,8 @@ include(ExternalProject)
 
 # configure version
 set(sdrangel_VERSION_MAJOR "4")
-set(sdrangel_VERSION_MINOR "7")
-set(sdrangel_VERSION_PATCH "1")
+set(sdrangel_VERSION_MINOR "8")
+set(sdrangel_VERSION_PATCH "0")
 set(sdrangel_VERSION_SUFFIX "")
 
 # SDRAngel cmake options
