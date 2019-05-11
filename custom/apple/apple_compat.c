@@ -57,23 +57,4 @@ int pthread_barrier_wait(pthread_barrier_t *barrier)
     }
 }
 
-#ifdef _DARWIN_FEATURE_CLOCK_GETTIME
-/**
- * Missing POSIX RealTime/Monotonic Clock
- */
-#include <mach/mach_time.h>
-
-int clock_gettime(int clk_id, struct timespec *t) {
-    mach_timebase_info_data_t timebase;
-    mach_timebase_info(&timebase);
-    uint64_t time;
-    time = mach_absolute_time();
-    double nseconds = ((double)time * (double)timebase.numer)/((double)timebase.denom);
-    double seconds = ((double)time * (double)timebase.numer)/((double)timebase.denom * 1e9);
-    t->tv_sec = seconds;
-    t->tv_nsec = nseconds;
-    return 0;
-}
-#endif
-
-#endif // APPLE Compatibility
+#endif // __APPLE_
