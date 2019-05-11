@@ -77,6 +77,7 @@ copy plugins\channeltx\modnfm\%1\modnfm.dll %2\plugins\channeltx
 copy plugins\channeltx\modssb\%1\modssb.dll %2\plugins\channeltx
 copy plugins\channeltx\modwfm\%1\modwfm.dll %2\plugins\channeltx
 copy plugins\channeltx\udpsource\%1\udpsource.dll %2\plugins\channeltx
+copy plugins\channeltx\localsource\%1\localsource.dll %2\plugins\channeltx
 
 echo copy samplesource...
 copy plugins\samplesource\filesource\%1\inputfilesource.dll %2\plugins\samplesource
@@ -101,4 +102,5 @@ copy plugins\samplesink\hackrfoutput\%1\outputhackrf.dll %2\plugins\samplesink
 copy plugins\samplesink\limesdroutput\%1\outputlimesdr.dll %2\plugins\samplesink
 copy plugins\samplesink\plutosdroutput\%1\outputplutosdr.dll %2\plugins\samplesink
 copy plugins\samplesink\remoteoutput\%1\outputremote.dll %2\plugins\samplesink
+copy plugins\samplesink\localoutput\%1\outputlocal.dll %2\plugins\samplesink
 copy plugins\samplesink\soapysdroutput\%1\outputsoapysdr.dll %2\plugins\samplesink
