@@ -52,6 +52,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_displayMaxHold(false),
 	m_currentSpectrum(0),
 	m_displayCurrent(false),
+    m_leftMargin(0),
 	m_waterfallBuffer(0),
 	m_waterfallBufferPos(0),
     m_waterfallTextureHeight(-1),
@@ -1036,7 +1037,7 @@ void GLSpectrum::applyChanges()
 	int frequencyScaleTop = 0;
 	int histogramTop = 0;
 	int histogramHeight = 20;
-	int leftMargin;
+	//int m_leftMargin;
 	int rightMargin = fm.width("000");
 
 	// displays both histogram and waterfall
@@ -1092,46 +1093,46 @@ void GLSpectrum::applyChanges()
 		    m_powerScale.setRange(Unit::Decibel, m_referenceLevel - m_powerRange, m_referenceLevel);
 		}
 
-		leftMargin = m_timeScale.getScaleWidth();
+		m_leftMargin = m_timeScale.getScaleWidth();
 
-		if(m_powerScale.getScaleWidth() > leftMargin)
+		if(m_powerScale.getScaleWidth() > m_leftMargin)
 		{
-			leftMargin = m_powerScale.getScaleWidth();
+			m_leftMargin = m_powerScale.getScaleWidth();
 		}
 
-		leftMargin += 2 * M;
+		m_leftMargin += 2 * M;
 
-		m_frequencyScale.setSize(width() - leftMargin - rightMargin);
+		m_frequencyScale.setSize(width() - m_leftMargin - rightMargin);
 		m_frequencyScale.setRange(Unit::Frequency, m_centerFrequency - m_sampleRate / 2, m_centerFrequency + m_sampleRate / 2);
 		m_frequencyScale.setMakeOpposite(m_lsbDisplay);
 
 		m_glWaterfallBoxMatrix.setToIdentity();
 		m_glWaterfallBoxMatrix.translate(
-			-1.0f + ((float)(2*leftMargin)   / (float) width()),
+			-1.0f + ((float)(2*m_leftMargin)   / (float) width()),
 			 1.0f - ((float)(2*waterfallTop) / (float) height())
 		);
 		m_glWaterfallBoxMatrix.scale(
-			((float) 2 * (width() - leftMargin - rightMargin)) / (float) width(),
+			((float) 2 * (width() - m_leftMargin - rightMargin)) / (float) width(),
 			(float) (-2*waterfallHeight) / (float) height()
 		);
 
 		m_glHistogramBoxMatrix.setToIdentity();
 		m_glHistogramBoxMatrix.translate(
-			-1.0f + ((float)(2*leftMargin)   / (float) width()),
+			-1.0f + ((float)(2*m_leftMargin)   / (float) width()),
 			 1.0f - ((float)(2*histogramTop) / (float) height())
 		);
 		m_glHistogramBoxMatrix.scale(
-			((float) 2 * (width() - leftMargin - rightMargin)) / (float) width(),
+			((float) 2 * (width() - m_leftMargin - rightMargin)) / (float) width(),
 			(float) (-2*histogramHeight) / (float) height()
 		);
 
 		m_glHistogramSpectrumMatrix.setToIdentity();
 		m_glHistogramSpectrumMatrix.translate(
-			-1.0f + ((float)(2*leftMargin)   / (float) width()),
+			-1.0f + ((float)(2*m_leftMargin)   / (float) width()),
 			 1.0f - ((float)(2*histogramTop) / (float) height())
 		);
 		m_glHistogramSpectrumMatrix.scale(
-			((float) 2 * (width() - leftMargin - rightMargin)) / ((float) width() * (float)(m_fftSize - 1)),
+			((float) 2 * (width() - m_leftMargin - rightMargin)) / ((float) width() * (float)(m_fftSize - 1)),
 			((float) 2*histogramHeight / height()) / m_powerRange
 		);
 
@@ -1155,7 +1156,7 @@ void GLSpectrum::applyChanges()
 		m_glLeftScaleBoxMatrix.setToIdentity();
 		m_glLeftScaleBoxMatrix.translate(-1.0f, 1.0f);
 		m_glLeftScaleBoxMatrix.scale(
-			(float)(2*(leftMargin - 1)) / (float) width(),
+			(float)(2*(m_leftMargin - 1)) / (float) width(),
 			-2.0f
 		);
 	}
@@ -1195,20 +1196,20 @@ void GLSpectrum::applyChanges()
 			}
 		}
 
-		leftMargin = m_timeScale.getScaleWidth();
-		leftMargin += 2 * M;
+		m_leftMargin = m_timeScale.getScaleWidth();
+		m_leftMargin += 2 * M;
 
-		m_frequencyScale.setSize(width() - leftMargin - rightMargin);
+		m_frequencyScale.setSize(width() - m_leftMargin - rightMargin);
 		m_frequencyScale.setRange(Unit::Frequency, m_centerFrequency - m_sampleRate / 2.0, m_centerFrequency + m_sampleRate / 2.0);
 		m_frequencyScale.setMakeOpposite(m_lsbDisplay);
 
 		m_glWaterfallBoxMatrix.setToIdentity();
 		m_glWaterfallBoxMatrix.translate(
-			-1.0f + ((float)(2*leftMargin)   / (float) width()),
+			-1.0f + ((float)(2*m_leftMargin)   / (float) width()),
 			 1.0f - ((float)(2*topMargin) / (float) height())
 		);
 		m_glWaterfallBoxMatrix.scale(
-			((float) 2 * (width() - leftMargin - rightMargin)) / (float) width(),
+			((float) 2 * (width() - m_leftMargin - rightMargin)) / (float) width(),
 			(float) (-2*waterfallHeight) / (float) height()
 		);
 
@@ -1232,7 +1233,7 @@ void GLSpectrum::applyChanges()
 		m_glLeftScaleBoxMatrix.setToIdentity();
 		m_glLeftScaleBoxMatrix.translate(-1.0f, 1.0f);
 		m_glLeftScaleBoxMatrix.scale(
-			(float)(2*(leftMargin - 1)) / (float) width(),
+			(float)(2*(m_leftMargin - 1)) / (float) width(),
 			-2.0f
 		);
 	}
@@ -1247,30 +1248,30 @@ void GLSpectrum::applyChanges()
 
 		m_powerScale.setSize(histogramHeight);
 		m_powerScale.setRange(Unit::Decibel, m_referenceLevel - m_powerRange, m_referenceLevel);
-		leftMargin = m_powerScale.getScaleWidth();
-		leftMargin += 2 * M;
+		m_leftMargin = m_powerScale.getScaleWidth();
+		m_leftMargin += 2 * M;
 
-		m_frequencyScale.setSize(width() - leftMargin - rightMargin);
+		m_frequencyScale.setSize(width() - m_leftMargin - rightMargin);
 		m_frequencyScale.setRange(Unit::Frequency, m_centerFrequency - m_sampleRate / 2, m_centerFrequency + m_sampleRate / 2);
 		m_frequencyScale.setMakeOpposite(m_lsbDisplay);
 
 		m_glHistogramSpectrumMatrix.setToIdentity();
 		m_glHistogramSpectrumMatrix.translate(
-			-1.0f + ((float)(2*leftMargin)   / (float) width()),
+			-1.0f + ((float)(2*m_leftMargin)   / (float) width()),
 			 1.0f - ((float)(2*histogramTop) / (float) height())
 		);
 		m_glHistogramSpectrumMatrix.scale(
-			((float) 2 * (width() - leftMargin - rightMargin)) / ((float) width() * (float)(m_fftSize - 1)),
+			((float) 2 * (width() - m_leftMargin - rightMargin)) / ((float) width() * (float)(m_fftSize - 1)),
 			((float) 2*(height() - topMargin - frequencyScaleHeight) / height()) / m_powerRange
 		);
 
 		m_glHistogramBoxMatrix.setToIdentity();
 		m_glHistogramBoxMatrix.translate(
-			-1.0f + ((float)(2*leftMargin)   / (float) width()),
+			-1.0f + ((float)(2*m_leftMargin)   / (float) width()),
 			 1.0f - ((float)(2*histogramTop) / (float) height())
 		);
 		m_glHistogramBoxMatrix.scale(
-			((float) 2 * (width() - leftMargin - rightMargin)) / (float) width(),
+			((float) 2 * (width() - m_leftMargin - rightMargin)) / (float) width(),
 			(float) (-2*(height() - topMargin - frequencyScaleHeight)) / (float) height()
 		);
 
@@ -1294,13 +1295,13 @@ void GLSpectrum::applyChanges()
 		m_glLeftScaleBoxMatrix.setToIdentity();
 		m_glLeftScaleBoxMatrix.translate(-1.0f, 1.0f);
 		m_glLeftScaleBoxMatrix.scale(
-			(float)(2*(leftMargin - 1)) / (float) width(),
+			(float)(2*(m_leftMargin - 1)) / (float) width(),
 			-2.0f
 		);
 	}
 	else
 	{
-		leftMargin = 2;
+		m_leftMargin = 2;
 		waterfallHeight = 0;
 	}
 
@@ -1338,7 +1339,7 @@ void GLSpectrum::applyChanges()
 		QMatrix4x4 glMatrixDsb;
 		glMatrixDsb.setToIdentity();
 		glMatrixDsb.translate(
-			-1.0f + 2.0f * ((leftMargin + m_frequencyScale.getPosFromValue(xc - (dsbw/2))) / (float) width()),
+			-1.0f + 2.0f * ((m_leftMargin + m_frequencyScale.getPosFromValue(xc - (dsbw/2))) / (float) width()),
 			 1.0f
 		);
 		glMatrixDsb.scale(
@@ -1352,7 +1353,7 @@ void GLSpectrum::applyChanges()
 			 (float) waterfallTop / (float) height()
 		);
 		dv->m_glMatrixDsbWaterfall.scale(
-			(float) (width() - leftMargin - rightMargin) / (float) width(),
+			(float) (width() - m_leftMargin - rightMargin) / (float) width(),
 			(float) waterfallHeight / (float) height()
 		);
 
@@ -1362,7 +1363,7 @@ void GLSpectrum::applyChanges()
 			 (float) histogramTop / (float) height()
 		);
 		dv->m_glMatrixDsbHistogram.scale(
-			(float) (width() - leftMargin - rightMargin) / (float) width(),
+			(float) (width() - m_leftMargin - rightMargin) / (float) width(),
 			(float) histogramHeight / (float) height()
 		);
 
@@ -1372,7 +1373,7 @@ void GLSpectrum::applyChanges()
 			 (float) frequencyScaleTop / (float) height()
 		);
 		dv->m_glMatrixDsbFreqScale.scale(
-			(float) (width() - leftMargin - rightMargin) / (float) width(),
+			(float) (width() - m_leftMargin - rightMargin) / (float) width(),
 			(float) frequencyScaleHeight / (float) height()
 		);
 
@@ -1381,7 +1382,7 @@ void GLSpectrum::applyChanges()
 		QMatrix4x4 glMatrix;
 		glMatrix.setToIdentity();
 		glMatrix.translate(
-			-1.0f + 2.0f * ((leftMargin + m_frequencyScale.getPosFromValue(xc + nw)) / (float) width()),
+			-1.0f + 2.0f * ((m_leftMargin + m_frequencyScale.getPosFromValue(xc + nw)) / (float) width()),
 			 1.0f
 		);
 		glMatrix.scale(
@@ -1395,7 +1396,7 @@ void GLSpectrum::applyChanges()
 			 (float) waterfallTop / (float) height()
 		);
 		dv->m_glMatrixWaterfall.scale(
-			(float) (width() - leftMargin - rightMargin) / (float) width(),
+			(float) (width() - m_leftMargin - rightMargin) / (float) width(),
 			(float) waterfallHeight / (float) height()
 		);
 
@@ -1405,7 +1406,7 @@ void GLSpectrum::applyChanges()
 			 (float) histogramTop / (float) height()
 		);
 		dv->m_glMatrixHistogram.scale(
-			(float) (width() - leftMargin - rightMargin) / (float) width(),
+			(float) (width() - m_leftMargin - rightMargin) / (float) width(),
 			(float) histogramHeight / (float) height()
 		);
 
@@ -1415,14 +1416,14 @@ void GLSpectrum::applyChanges()
 			 (float) frequencyScaleTop / (float) height()
 		);
 		dv->m_glMatrixFreqScale.scale(
-			(float) (width() - leftMargin - rightMargin) / (float) width(),
+			(float) (width() - m_leftMargin - rightMargin) / (float) width(),
 			(float) frequencyScaleHeight / (float) height()
 		);
 
 
 		/*
 		dv->m_glRect.setRect(
-			m_frequencyScale.getPosFromValue(m_centerFrequency + dv->m_channelMarker->getCenterFrequency() - dv->m_channelMarker->getBandwidth() / 2) / (float)(width() - leftMargin - rightMargin),
+			m_frequencyScale.getPosFromValue(m_centerFrequency + dv->m_channelMarker->getCenterFrequency() - dv->m_channelMarker->getBandwidth() / 2) / (float)(width() - m_leftMargin - rightMargin),
 			0,
 			(dv->m_channelMarker->getBandwidth() / (float)m_sampleRate),
 			1);
@@ -1430,7 +1431,7 @@ void GLSpectrum::applyChanges()
 
 		if(m_displayHistogram || m_displayMaxHold || m_displayCurrent || m_displayWaterfall)
 		{
-			dv->m_rect.setRect(m_frequencyScale.getPosFromValue(xc) + leftMargin - 1,
+			dv->m_rect.setRect(m_frequencyScale.getPosFromValue(xc) + m_leftMargin - 1,
 			topMargin,
 			5,
 			height() - topMargin - bottomMargin);
@@ -1438,7 +1439,7 @@ void GLSpectrum::applyChanges()
 
 		/*
 		if(m_displayHistogram || m_displayMaxHold || m_displayWaterfall) {
-			dv->m_rect.setRect(m_frequencyScale.getPosFromValue(m_centerFrequency + dv->m_channelMarker->getCenterFrequency()) + leftMargin - 1,
+			dv->m_rect.setRect(m_frequencyScale.getPosFromValue(m_centerFrequency + dv->m_channelMarker->getCenterFrequency()) + m_leftMargin - 1,
 			topMargin,
 			5,
 			height() - topMargin - bottomMargin);
@@ -1448,7 +1449,7 @@ void GLSpectrum::applyChanges()
 
 	// prepare left scales (time and power)
 	{
-		m_leftMarginPixmap = QPixmap(leftMargin - 1, height());
+		m_leftMarginPixmap = QPixmap(m_leftMargin - 1, height());
 		m_leftMarginPixmap.fill(Qt::black);
 		{
 			QPainter painter(&m_leftMarginPixmap);
@@ -1462,7 +1463,7 @@ void GLSpectrum::applyChanges()
 					tick = &(*tickList)[i];
 					if(tick->major) {
 						if(tick->textSize > 0)
-							painter.drawText(QPointF(leftMargin - M - tick->textSize, waterfallTop + fm.ascent() + tick->textPos), tick->text);
+							painter.drawText(QPointF(m_leftMargin - M - tick->textSize, waterfallTop + fm.ascent() + tick->textPos), tick->text);
 					}
 				}
 			}
@@ -1472,7 +1473,7 @@ void GLSpectrum::applyChanges()
 					tick = &(*tickList)[i];
 					if(tick->major) {
 						if(tick->textSize > 0)
-							painter.drawText(QPointF(leftMargin - M - tick->textSize, histogramTop + histogramHeight - tick->textPos - 1), tick->text);
+							painter.drawText(QPointF(m_leftMargin - M - tick->textSize, histogramTop + histogramHeight - tick->textPos - 1), tick->text);
 					}
 				}
 			}
@@ -1489,7 +1490,7 @@ void GLSpectrum::applyChanges()
 			painter.setPen(Qt::NoPen);
 			painter.setBrush(Qt::black);
 			painter.setBrush(Qt::transparent);
-			painter.drawRect(leftMargin, 0, width() - leftMargin, frequencyScaleHeight);
+			painter.drawRect(m_leftMargin, 0, width() - m_leftMargin, frequencyScaleHeight);
 			painter.setPen(QColor(0xf0, 0xf0, 0xff));
 			painter.setFont(font());
 			const ScaleEngine::TickList* tickList = &m_frequencyScale.getTickList();
@@ -1498,7 +1499,7 @@ void GLSpectrum::applyChanges()
 				tick = &(*tickList)[i];
 				if(tick->major) {
 					if(tick->textSize > 0)
-						painter.drawText(QPointF(leftMargin + tick->textPos, fm.height() + fm.ascent() / 2 - 1), tick->text);
+						painter.drawText(QPointF(m_leftMargin + tick->textPos, fm.height() + fm.ascent() / 2 - 1), tick->text);
 				}
 			}
 
@@ -1537,7 +1538,7 @@ void GLSpectrum::applyChanges()
 						ftext = ftext + " ";
 						shift = - fm.width(ftext);
 					}
-					painter.drawText(QPointF(leftMargin + m_frequencyScale.getPosFromValue(xc) + shift, 2*fm.height() + fm.ascent() / 2 - 1), ftext);
+					painter.drawText(QPointF(m_leftMargin + m_frequencyScale.getPosFromValue(xc) + shift, 2*fm.height() + fm.ascent() / 2 - 1), ftext);
 				}
 			}
 
@@ -1739,6 +1740,52 @@ void GLSpectrum::mouseReleaseEvent(QMouseEvent*)
 		releaseMouse();
 		m_cursorState = CSChannel;
 	}
+}
+
+void GLSpectrum::wheelEvent(QWheelEvent *event)
+{
+    int mul;
+
+    if (event->modifiers() & Qt::ShiftModifier) {
+        mul = 100;
+    } else if (event->modifiers() & Qt::ControlModifier) {
+        mul = 10;
+    } else {
+        mul = 1;
+    }
+
+    for (int i = 0; i < m_channelMarkerStates.size(); ++i)
+    {
+        if (m_channelMarkerStates[i]->m_rect.contains(event->pos()))
+        {
+            int freq = m_channelMarkerStates[i]->m_channelMarker->getCenterFrequency();
+
+            if (event->delta() > 0) {
+                freq += 10 * mul;
+            } else if (event->delta() < 0) {
+                freq -= 10 * mul;
+            }
+
+            // calculate scale relative cursor position for new frequency
+            float x_pos = m_frequencyScale.getPosFromValue(m_centerFrequency + freq);
+
+            if ((x_pos >= 0.0) && (x_pos < m_frequencyScale.getSize())) // cursor must be in scale
+            {
+                m_channelMarkerStates[i]->m_channelMarker->setCenterFrequencyByCursor(freq);
+                m_channelMarkerStates[i]->m_channelMarker->setCenterFrequency(freq);
+
+                // cursor follow-up
+                int xd = x_pos + m_leftMargin;
+                QCursor c = cursor();
+                QPoint cp_a = c.pos();
+                QPoint cp_w = mapFromGlobal(cp_a);
+                cp_w.setX(xd);
+                cp_a = mapToGlobal(cp_w);
+                c.setPos(cp_a);
+                setCursor(c);
+            }
+        }
+    }
 }
 
 void GLSpectrum::enterEvent(QEvent* event)
