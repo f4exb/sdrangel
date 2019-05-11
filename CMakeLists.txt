@@ -146,6 +146,9 @@ elseif(APPLE)
   endif()
   message(STATUS "Build for macOS target: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
 
+  # prepend path to find_*()
+  set(CMAKE_FIND_ROOT_PATH "/opt/local")
+
   set(CMAKE_MACOSX_RPATH ON)
   message(STATUS "RPATH support: ${CMAKE_MACOSX_RPATH}")
 
