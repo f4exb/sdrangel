@@ -16,12 +16,14 @@ if (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${LIBUSB_INCLUDE_DIR}
     ${LIBPERSEUSSRC}
 )
 else (BUILD_DEBIAN)
 include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${LIBUSB_INCLUDE_DIR}
     ${LIBPERSEUS_INCLUDE_DIR}
 )
 endif (BUILD_DEBIAN)
@@ -37,11 +39,13 @@ set_target_properties(perseusdevice PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
 
 if (BUILD_DEBIAN)
 target_link_libraries(perseusdevice
+    ${LIBUSB_LIBRARIES}
     perseus
     sdrbase
 )
 else (BUILD_DEBIAN)
 target_link_libraries(perseusdevice
+    ${LIBUSB_LIBRARIES}
     ${LIBPERSEUS_LIBRARIES}
     sdrbase
 )
