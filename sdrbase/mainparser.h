@@ -34,14 +34,17 @@ public:
 
     const QString& getServerAddress() const { return m_serverAddress; }
     uint16_t getServerPort() const { return m_serverPort; }
+    bool getMIMOSupport() const { return m_mimoSupport; }
 
 private:
     QString  m_serverAddress;
     uint16_t m_serverPort;
+    bool m_mimoSupport;
 
     QCommandLineParser m_parser;
     QCommandLineOption m_serverAddressOption;
     QCommandLineOption m_serverPortOption;
+    QCommandLineOption m_mimoOption;
 };
 
 

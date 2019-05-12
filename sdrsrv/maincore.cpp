@@ -84,6 +84,8 @@ MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, Q
     m_apiServer = new WebAPIServer(parser.getServerAddress(), parser.getServerPort(), m_requestMapper);
     m_apiServer->start();
 
+    m_dspEngine->setMIMOSupport(parser.getMIMOSupport());
+
     qDebug() << "MainCore::MainCore: end";
 }
 

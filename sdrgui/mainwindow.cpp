@@ -215,6 +215,8 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	m_commandKeyReceiver->setRelease(true);
 	this->installEventFilter(m_commandKeyReceiver);
 
+    m_dspEngine->setMIMOSupport(parser.getMIMOSupport());
+
     qDebug() << "MainWindow::MainWindow: end";
 }
 

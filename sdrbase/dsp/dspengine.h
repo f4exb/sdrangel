@@ -75,6 +75,8 @@ public:
 	        AudioFifo *audioFifo);
 
     const QTimer& getMasterTimer() const { return m_masterTimer; }
+    void setMIMOSupport(bool mimoSupport) { m_mimoSupport = mimoSupport; }
+    bool getMIMOSupport() const { return m_mimoSupport; }
 
 private:
 	std::vector<DSPDeviceSourceEngine*> m_deviceSourceEngines;
@@ -86,6 +88,7 @@ private:
     int m_audioOutputDeviceIndex;
     QTimer m_masterTimer;
 	bool m_dvSerialSupport;
+    bool m_mimoSupport;
 #ifdef DSD_USE_SERIALDV
 	DVSerialEngine m_dvSerialEngine;
 #endif

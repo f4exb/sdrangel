@@ -31,6 +31,7 @@ DSPEngine::DSPEngine() :
     m_audioOutputDeviceIndex(-1)    // default device
 {
 	m_dvSerialSupport = false;
+    m_mimoSupport = false;
     m_masterTimer.start(50);
 }
 
