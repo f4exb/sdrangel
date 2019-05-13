@@ -749,7 +749,7 @@ void FreqTracker::tick()
         m_avgDeltaFreq = m_settings.m_alphaEMA*getFrequency() + (1.0 - m_settings.m_alphaEMA)*m_avgDeltaFreq;
     }
 
-    if (m_tickCount < 19)
+    if (m_tickCount < 9)
     {
         m_tickCount++;
     }
@@ -757,7 +757,7 @@ void FreqTracker::tick()
     {
         if ((m_settings.m_tracking) && getSquelchOpen())
         {
-            uint32_t decayDivider = 1000.0 * m_settings.m_alphaEMA;
+            uint32_t decayDivider = 200.0 * m_settings.m_alphaEMA;
             int decayAmount = m_channelSampleRate < decayDivider ? 1 : m_channelSampleRate / decayDivider;
             int trim = m_channelSampleRate / 1000;
 
