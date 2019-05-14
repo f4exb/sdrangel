@@ -48,6 +48,7 @@
 #include "gui/audiodialog.h"
 #include "gui/loggingdialog.h"
 #include "gui/samplingdevicecontrol.h"
+#include "gui/sdrangelsplash.h"
 #include "gui/mypositiondialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
@@ -73,6 +74,7 @@
 
 #include <string>
 #include <QDebug>
+#include <QSplashScreen>
 
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgLoadPreset, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgSavePreset, Message)
@@ -102,7 +104,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	qDebug() << "MainWindow::MainWindow: start";
 
     m_instance = this;
-	m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
 
     QFontDatabase::addApplicationFont(":/LiberationSans-Regular.ttf");
     QFontDatabase::addApplicationFont(":/LiberationMono-Regular.ttf");
@@ -110,6 +111,14 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     QFont font("Liberation Sans");
     font.setPointSize(9);
     qApp->setFont(font);
+
+    QPixmap logoPixmap(":/sdrangel_logo.png");
+    SDRangelSplash *splash = new SDRangelSplash(logoPixmap);
+    splash->setMessageRect(QRect(10, 80, 350, 12));
+    splash->show();
+    splash->showStatusMessage("starting...", Qt::white);
+
+	m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
 
 	ui->setupUi(this);
 	createStatusBar();
@@ -166,33 +175,40 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
 	m_masterTimer.start(50);
 
+    splash->showStatusMessage("load settings...", Qt::white);
     qDebug() << "MainWindow::MainWindow: load settings...";
 
 	loadSettings();
 
+    splash->showStatusMessage("load plugins...", Qt::white);
     qDebug() << "MainWindow::MainWindow: load plugins...";
 
     m_pluginManager = new PluginManager(this);
     m_pluginManager->loadPlugins(QString("plugins"));
 
-    qDebug() << "MainWindow::MainWindow: select SampleSource from settings or default (file source) ...";
+    splash->showStatusMessage("load file source...", Qt::white);
+    qDebug() << "MainWindow::MainWindow: select SampleSource from settings or default (file source)...";
 
 	int deviceIndex = DeviceEnumerator::instance()->getRxSamplingDeviceIndex(m_settings.getSourceDeviceId(), m_settings.getSourceIndex());
 	addSourceDevice(deviceIndex);  // add the first device set with file source device as default if device in settings is not enumerated
 	m_deviceUIs.back()->m_deviceAPI->setBuddyLeader(true); // the first device is always the leader
 
+    splash->showStatusMessage("load current preset settings...", Qt::white);
 	qDebug() << "MainWindow::MainWindow: load current preset settings...";
 
 	loadPresetSettings(m_settings.getWorkingPreset(), 0);
 
+    splash->showStatusMessage("apply settings...", Qt::white);
 	qDebug() << "MainWindow::MainWindow: apply settings...";
 
 	applySettings();
 
+    splash->showStatusMessage("update preset controls...", Qt::white);
 	qDebug() << "MainWindow::MainWindow: update preset controls...";
 
 	updatePresetControls();
 
+    splash->showStatusMessage("finishing...", Qt::white);
 	connect(ui->tabInputsView, SIGNAL(currentChanged(int)), this, SLOT(tabInputViewIndexChanged()));
 
 	QString applicationDirPath = qApp->applicationDirPath();
@@ -216,6 +232,8 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	this->installEventFilter(m_commandKeyReceiver);
 
     m_dspEngine->setMIMOSupport(parser.getMIMOSupport());
+
+    delete splash;
 
     qDebug() << "MainWindow::MainWindow: end";
 }

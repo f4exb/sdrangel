@@ -40,6 +40,7 @@ set(sdrgui_SOURCES
     gui/samplingdevicecontrol.cpp
     gui/samplingdevicedialog.cpp
     gui/scaleengine.cpp
+    gui/sdrangelsplash.cpp
     gui/tickedslider.cpp
     gui/transverterbutton.cpp
     gui/transverterdialog.cpp
@@ -105,6 +106,7 @@ set(sdrgui_HEADERS
     gui/samplingdevicecontrol.h
     gui/samplingdevicedialog.h
     gui/scaleengine.h
+    gui/sdrangelsplash.h
     gui/tickedslider.h
     gui/transverterbutton.h
     gui/transverterdialog.h
