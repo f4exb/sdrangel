@@ -210,6 +210,7 @@ QString DSPDeviceMIMOEngine::deviceDescription()
  */
 void DSPDeviceMIMOEngine::work(int nbWriteSamples)
 {
+    (void) nbWriteSamples;
     // Sources
     for (unsigned int isource = 0; isource < m_deviceSampleMIMO->getNbSourceFifos(); isource++)
     {
@@ -547,7 +548,7 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
 	{
         const AddBasebandSampleSink *msg = (AddBasebandSampleSink *) message;
 		BasebandSampleSink* sink = msg->getSampleSink();
-        int isource = msg->getIndex();
+        unsigned int isource = msg->getIndex();
 
         if ((isource < m_basebandSampleSinks.size()) && (isource < m_sourceStreamSampleRates.size()) && (isource < m_sourceCenterFrequencies.size()))
         {
@@ -565,7 +566,7 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
 	{
         const RemoveBasebandSampleSink *msg = (RemoveBasebandSampleSink *) message;
 		BasebandSampleSink* sink = ((DSPRemoveBasebandSampleSink*) message)->getSampleSink();
-        int isource = msg->getIndex();
+        unsigned int isource = msg->getIndex();
 
         if (isource < m_basebandSampleSinks.size())
         {
@@ -580,7 +581,7 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
 	{
         const AddThreadedBasebandSampleSink *msg = (AddThreadedBasebandSampleSink *) message;
 		ThreadedBasebandSampleSink *threadedSink = msg->getThreadedSampleSink();
-        int isource = msg->getIndex();
+        unsigned int isource = msg->getIndex();
 
         if ((isource < m_threadedBasebandSampleSinks.size()) && (isource < m_sourceStreamSampleRates.size()) && (isource < m_sourceCenterFrequencies.size()))
         {
@@ -598,7 +599,7 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
 	{
         const RemoveThreadedBasebandSampleSink *msg = (RemoveThreadedBasebandSampleSink *) message;
 		ThreadedBasebandSampleSink* threadedSink = msg->getThreadedSampleSink();
-        int isource = msg->getIndex();
+        unsigned int isource = msg->getIndex();
 
         if (isource < m_threadedBasebandSampleSinks.size())
         {
@@ -610,7 +611,7 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
 	{
         const AddThreadedBasebandSampleSource *msg = (AddThreadedBasebandSampleSource *) message;
 		ThreadedBasebandSampleSource *threadedSource = msg->getThreadedSampleSource();
-        int isink = msg->getIndex();
+        unsigned int isink = msg->getIndex();
 
         if ((isink < m_threadedBasebandSampleSources.size()) && (isink < m_sinkStreamSampleRates.size()) && (isink < m_sinkCenterFrequencies.size()))
         {
@@ -628,7 +629,7 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
 	{
         const RemoveThreadedBasebandSampleSource *msg = (RemoveThreadedBasebandSampleSource *) message;
 		ThreadedBasebandSampleSource* threadedSource = msg->getThreadedSampleSource();
-        int isink = msg->getIndex();
+        unsigned int isink = msg->getIndex();
 
         if (isink < m_threadedBasebandSampleSources.size())
         {
@@ -651,7 +652,7 @@ void DSPDeviceMIMOEngine::handleInputMessages()
 		if (ConfigureCorrection::match(*message))
 		{
 			ConfigureCorrection* conf = (ConfigureCorrection*) message;
-            int isource = conf->getIndex();
+            unsigned int isource = conf->getIndex();
 
             if (isource < m_sourcesCorrections.size())
             {
@@ -691,7 +692,7 @@ void DSPDeviceMIMOEngine::handleInputMessages()
 			// update DSP values
 
             bool sourceOrSink = notif->getSourceOrSink();
-            int istream = notif->getIndex();
+            unsigned int istream = notif->getIndex();
 			int sampleRate = notif->getSampleRate();
 			qint64 centerFrequency = notif->getCenterFrequency();
 

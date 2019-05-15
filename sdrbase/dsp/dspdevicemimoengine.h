@@ -47,92 +47,92 @@ public:
     class AddThreadedBasebandSampleSource : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
-        AddThreadedBasebandSampleSource(ThreadedBasebandSampleSource* threadedSampleSource, int index) :
+        AddThreadedBasebandSampleSource(ThreadedBasebandSampleSource* threadedSampleSource, unsigned int index) :
             Message(),
             m_threadedSampleSource(threadedSampleSource),
             m_index(index)
         { }
         ThreadedBasebandSampleSource* getThreadedSampleSource() const { return m_threadedSampleSource; }
-        int getIndex() const { return m_index; }
+        unsigned int getIndex() const { return m_index; }
     private:
         ThreadedBasebandSampleSource* m_threadedSampleSource;
-        int m_index;
+        unsigned int m_index;
     };
 
     class RemoveThreadedBasebandSampleSource : public Message {
 	    MESSAGE_CLASS_DECLARATION
 
     public:
-        RemoveThreadedBasebandSampleSource(ThreadedBasebandSampleSource* threadedSampleSource, int index) :
+        RemoveThreadedBasebandSampleSource(ThreadedBasebandSampleSource* threadedSampleSource, unsigned int index) :
             Message(),
             m_threadedSampleSource(threadedSampleSource),
             m_index(index)
         { }
         ThreadedBasebandSampleSource* getThreadedSampleSource() const { return m_threadedSampleSource; }
-        int getIndex() const { return m_index; }
+        unsigned int getIndex() const { return m_index; }
     private:
         ThreadedBasebandSampleSource* m_threadedSampleSource;
-        int m_index;
+        unsigned int m_index;
     };
 
     class AddThreadedBasebandSampleSink : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
-        AddThreadedBasebandSampleSink(ThreadedBasebandSampleSink* threadedSampleSink, int index) :
+        AddThreadedBasebandSampleSink(ThreadedBasebandSampleSink* threadedSampleSink, unsigned int index) :
             Message(),
             m_threadedSampleSink(threadedSampleSink),
             m_index(index)
         { }
         ThreadedBasebandSampleSink* getThreadedSampleSink() const { return m_threadedSampleSink; }
-        int getIndex() const { return m_index; }
+        unsigned int getIndex() const { return m_index; }
     private:
         ThreadedBasebandSampleSink* m_threadedSampleSink;
-        int m_index;
+        unsigned int m_index;
     };
 
     class RemoveThreadedBasebandSampleSink : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
-        RemoveThreadedBasebandSampleSink(ThreadedBasebandSampleSink* threadedSampleSink, int index) :
+        RemoveThreadedBasebandSampleSink(ThreadedBasebandSampleSink* threadedSampleSink, unsigned int index) :
             Message(),
             m_threadedSampleSink(threadedSampleSink),
             m_index(index)
         { }
         ThreadedBasebandSampleSink* getThreadedSampleSink() const { return m_threadedSampleSink; }
-        int getIndex() const { return m_index; }
+        unsigned int getIndex() const { return m_index; }
     private:
         ThreadedBasebandSampleSink* m_threadedSampleSink;
-        int m_index;
+        unsigned int m_index;
     };
 
     class AddBasebandSampleSink : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
-        AddBasebandSampleSink(BasebandSampleSink* sampleSink, int index) :
+        AddBasebandSampleSink(BasebandSampleSink* sampleSink, unsigned int index) :
             Message(),
             m_sampleSink(sampleSink),
             m_index(index)
         { }
         BasebandSampleSink* getSampleSink() const { return m_sampleSink; }
-        int getIndex() const { return m_index; }
+        unsigned int getIndex() const { return m_index; }
     private:
         BasebandSampleSink* m_sampleSink;
-        int m_index;
+        unsigned int m_index;
     };
 
     class RemoveBasebandSampleSink : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
-        RemoveBasebandSampleSink(BasebandSampleSink* sampleSink, int index) :
+        RemoveBasebandSampleSink(BasebandSampleSink* sampleSink, unsigned int index) :
             Message(),
             m_sampleSink(sampleSink),
             m_index(index)
         { }
         BasebandSampleSink* getSampleSink() const { return m_sampleSink; }
-        int getIndex() const { return m_index; }
+        unsigned int getIndex() const { return m_index; }
     private:
         BasebandSampleSink* m_sampleSink;
-        int m_index;
+        unsigned int m_index;
     };
 
     class AddSpectrumSink : public Message {
@@ -174,7 +174,7 @@ public:
     class ConfigureCorrection : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
-        ConfigureCorrection(bool dcOffsetCorrection, bool iqImbalanceCorrection, int index) :
+        ConfigureCorrection(bool dcOffsetCorrection, bool iqImbalanceCorrection, unsigned int index) :
             Message(),
             m_dcOffsetCorrection(dcOffsetCorrection),
             m_iqImbalanceCorrection(iqImbalanceCorrection),
@@ -182,17 +182,17 @@ public:
         { }
         bool getDCOffsetCorrection() const { return m_dcOffsetCorrection; }
         bool getIQImbalanceCorrection() const { return m_iqImbalanceCorrection; }
-        int getIndex() const { return m_index; }
+        unsigned int getIndex() const { return m_index; }
     private:
         bool m_dcOffsetCorrection;
         bool m_iqImbalanceCorrection;
-        int m_index;
+        unsigned int m_index;
     };
 
     class SignalNotification : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
-        SignalNotification(int samplerate, qint64 centerFrequency, bool sourceOrSink, int index) :
+        SignalNotification(int samplerate, qint64 centerFrequency, bool sourceOrSink, unsigned int index) :
             Message(),
             m_sampleRate(samplerate),
             m_centerFrequency(centerFrequency),
@@ -202,12 +202,12 @@ public:
         int getSampleRate() const { return m_sampleRate; }
         qint64 getCenterFrequency() const { return m_centerFrequency; }
         bool getSourceOrSink() const { return m_sourceOrSink; }
-        int getIndex() const { return m_index; }
+        unsigned int getIndex() const { return m_index; }
     private:
         int m_sampleRate;
         qint64 m_centerFrequency;
         bool m_sourceOrSink;
-        int m_index;
+        unsigned int m_index;
     };
 
 	enum State {
@@ -324,7 +324,7 @@ private slots:
 	void handleData();                 //!< Handle data when samples have to be processed
 	void handleSynchronousMessages();  //!< Handle synchronous messages with the thread
 	void handleInputMessages();        //!< Handle input message queue
-	void handleForwardToSpectrumSink(int nbSamples);
+	//TODO: void handleForwardToSpectrumSink(int nbSamples);
 };
 
 #endif // SDRBASE_DSP_DSPDEVICEMIMOENGINE_H_
