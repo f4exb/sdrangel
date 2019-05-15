@@ -269,3 +269,208 @@ void DSPDeviceMIMOEngine::work(int nbWriteSamples, int nbReadSamples)
 
     // TODO: sinks
 }
+
+// notStarted -> idle -> init -> running -+
+//                ^                       |
+//                +-----------------------+
+
+DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoIdle()
+{
+	qDebug() << "DSPDeviceMIMOEngine::gotoIdle";
+
+	switch(m_state) {
+		case StNotStarted:
+			return StNotStarted;
+
+		case StIdle:
+		case StError:
+			return StIdle;
+
+		case StReady:
+		case StRunning:
+			break;
+	}
+
+	if (m_deviceSampleMIMO == 0)
+	{
+		return StIdle;
+	}
+
+	// stop everything
+
+    std::vector<BasebandSampleSinks>::const_iterator vbit = m_basebandSampleSinks.begin();
+
+	for (; vbit != m_basebandSampleSinks.end(); ++vbit)
+	{
+        for (BasebandSampleSinks::const_iterator it = vbit->begin(); it != vbit->end(); ++it) {
+		    (*it)->stop();
+        }
+	}
+
+    std::vector<ThreadedBasebandSampleSinks>::const_iterator vtit = m_threadedBasebandSampleSinks.begin();
+
+    for (; vtit != m_threadedBasebandSampleSinks.end(); vtit++)
+    {
+        for (ThreadedBasebandSampleSinks::const_iterator it = vtit->begin(); it != vtit->end(); ++it) {
+            (*it)->stop();
+        }
+    }
+
+	m_deviceSampleMIMO->stop();
+	m_deviceDescription.clear();
+
+    for (std::vector<uint32_t>::iterator it = m_sourceStreamSampleRates.begin(); it != m_sourceStreamSampleRates.end(); ++it) {
+        *it = 0;
+    }
+
+	return StIdle;
+}
+
+DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoInit()
+{
+	switch(m_state) {
+		case StNotStarted:
+			return StNotStarted;
+
+		case StRunning: // FIXME: assumes it goes first through idle state. Could we get back to init from running directly?
+			return StRunning;
+
+		case StReady:
+			return StReady;
+
+		case StIdle:
+		case StError:
+			break;
+	}
+
+	if (m_deviceSampleMIMO == 0) {
+		return gotoError("No sample MIMO configured");
+	}
+
+	// init: pass sample rate and center frequency to all sample rate and/or center frequency dependent sinks and wait for completion
+
+
+	m_deviceDescription = m_deviceSampleMIMO->getDeviceDescription();
+
+	qDebug() << "DSPDeviceMIMOEngine::gotoInit: "
+	        << " m_deviceDescription: " << m_deviceDescription.toStdString().c_str();
+
+    for (unsigned int isource = 0; isource < m_deviceSampleMIMO->getNbSourceFifos(); isource++)
+    {
+        if (isource < m_sourcesCorrections.size())
+        {
+            m_sourcesCorrections[isource].m_iOffset = 0;
+            m_sourcesCorrections[isource].m_qOffset = 0;
+            m_sourcesCorrections[isource].m_iRange = 1 << 16;
+            m_sourcesCorrections[isource].m_qRange = 1 << 16;
+        }
+
+        if ((isource < m_sourceCenterFrequencies.size()) && (isource < m_sourceStreamSampleRates.size()))
+        {
+            m_sourceCenterFrequencies[isource] = m_deviceSampleMIMO->getSourceCenterFrequency(isource);
+            m_sourceStreamSampleRates[isource] = m_deviceSampleMIMO->getSourceSampleRate(isource);
+
+            qDebug("DSPDeviceMIMOEngine::gotoInit: m_sourceCenterFrequencies[%d] = %llu", isource,  m_sourceCenterFrequencies[isource]);
+            qDebug("DSPDeviceMIMOEngine::gotoInit: m_sourceStreamSampleRates[%d] = %d", isource,  m_sourceStreamSampleRates[isource]);
+
+	        DSPSignalNotification notif(m_sourceStreamSampleRates[isource], m_sourceCenterFrequencies[isource]);
+
+            if (isource < m_basebandSampleSinks.size())
+            {
+                for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks[isource].begin(); it != m_basebandSampleSinks[isource].end(); ++it)
+                {
+                    qDebug() << "DSPDeviceMIMOEngine::gotoInit: initializing " << (*it)->objectName().toStdString().c_str();
+                    (*it)->handleMessage(notif);
+                }
+            }
+
+            if (isource < m_threadedBasebandSampleSinks.size())
+            {
+                for (ThreadedBasebandSampleSinks::const_iterator it = m_threadedBasebandSampleSinks[isource].begin(); it != m_threadedBasebandSampleSinks[isource].end(); ++it)
+                {
+                    qDebug() << "DSPDeviceMIMOEngine::gotoInit: initializing ThreadedSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
+                    (*it)->handleSinkMessage(notif);
+                }
+            }
+
+            // pass data to listeners
+            // if (m_deviceSampleSource->getMessageQueueToGUI())
+            // {
+            //     DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy for the output queue
+            //     m_deviceSampleSource->getMessageQueueToGUI()->push(rep);
+            // }
+        }
+    }
+
+	return StReady;
+}
+
+DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoRunning()
+{
+	qDebug() << "DSPDeviceMIMOEngine::gotoRunning";
+
+	switch(m_state)
+    {
+		case StNotStarted:
+			return StNotStarted;
+
+		case StIdle:
+			return StIdle;
+
+		case StRunning:
+			return StRunning;
+
+		case StReady:
+		case StError:
+			break;
+	}
+
+	if (!m_deviceSampleMIMO) {
+		return gotoError("DSPDeviceMIMOEngine::gotoRunning: No sample source configured");
+	}
+
+	qDebug() << "DSPDeviceMIMOEngine::gotoRunning: " << m_deviceDescription.toStdString().c_str() << " started";
+
+	// Start everything
+
+	if (!m_deviceSampleMIMO->start())
+	{
+		return gotoError("Could not start sample source");
+	}
+
+    std::vector<BasebandSampleSinks>::const_iterator vbit = m_basebandSampleSinks.begin();
+
+	for (; vbit != m_basebandSampleSinks.end(); ++vbit)
+	{
+        for (BasebandSampleSinks::const_iterator it = vbit->begin(); it != vbit->end(); ++it)
+        {
+            qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting " << (*it)->objectName().toStdString().c_str();
+		    (*it)->start();
+        }
+	}
+
+    std::vector<ThreadedBasebandSampleSinks>::const_iterator vtit = m_threadedBasebandSampleSinks.begin();
+
+    for (; vtit != m_threadedBasebandSampleSinks.end(); vtit++)
+    {
+        for (ThreadedBasebandSampleSinks::const_iterator it = vtit->begin(); it != vtit->end(); ++it)
+        {
+    		qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting ThreadedSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
+            (*it)->start();
+        }
+    }
+
+	qDebug() << "DSPDeviceMIMOEngine::gotoRunning:input message queue pending: " << m_inputMessageQueue.size();
+
+	return StRunning;
+}
+
+DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoError(const QString& errorMessage)
+{
+	qDebug() << "DSPDeviceMIMOEngine::gotoError: " << errorMessage;
+
+	m_errorMessage = errorMessage;
+	m_deviceDescription.clear();
+	m_state = StError;
+	return StError;
+}

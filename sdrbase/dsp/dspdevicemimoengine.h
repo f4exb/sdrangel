@@ -211,6 +211,17 @@ public:
 	QString deviceDescription(); //!< Return the device description
 
 private:
+    struct SourceCorrection
+    {
+        bool m_dcOffsetCorrection;
+        bool m_iqImbalanceCorrection;
+        double m_iOffset;
+        double m_qOffset;
+        int m_iRange;
+        int m_qRange;
+        int m_imbalance;
+    };
+
 	uint32_t m_uid; //!< unique ID
     State m_state;
 
@@ -232,8 +243,11 @@ private:
 	typedef std::list<ThreadedBasebandSampleSource*> ThreadedBasebandSampleSources;
 	std::vector<ThreadedBasebandSampleSources> m_threadedBasebandSampleSources; //!< channel sample sources on their own threads (per output stream)
 
+    std::vector<quint64> m_sourceCenterFrequencies;  //!< device sources streams (Rx) sample rates
+    std::vector<quint64> m_sinkCenterFrequencies;    //!< device sink streams (Tx) sample rates
     std::vector<uint32_t> m_sourceStreamSampleRates; //!< device sources streams (Rx) sample rates
     std::vector<uint32_t> m_sinkStreamSampleRates;   //!< device sink streams (Tx) sample rates
+    std::vector<SourceCorrection> m_sourcesCorrections;
 
     BasebandSampleSink *m_spectrumSink; //!< The spectrum sink
 
