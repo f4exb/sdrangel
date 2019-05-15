@@ -122,10 +122,10 @@ public:
     virtual void setMessageQueueToGUI(MessageQueue *queue) = 0; // pure virtual so that child classes must have to deal with this
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
 
-    unsigned int getNbSourceFifos() const { return m_sampleSourceFifos.size(); }
-    unsigned int getNbSinkFifos() const { return m_sampleSinkFifos.size(); }
-	SampleSourceFifo* getSampleSourceFifo(int index);
-    SampleSinkFifo* getSampleSinkFifo(int index);
+    unsigned int getNbSourceFifos() const { return m_sampleSourceFifos.size(); } //!< Get the number of Tx FIFOs
+    unsigned int getNbSinkFifos() const { return m_sampleSinkFifos.size(); }     //!< Get the number of Rx FIFOs
+	SampleSourceFifo* getSampleSourceFifo(int index); //!< Get Tx FIFO at index
+    SampleSinkFifo* getSampleSinkFifo(int index);     //!< Get Rx FIFO at index
 
 protected slots:
 	void handleInputMessages();

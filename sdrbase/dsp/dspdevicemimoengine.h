@@ -23,6 +23,7 @@
 
 #include "util/messagequeue.h"
 #include "util/syncmessenger.h"
+#include "util/movingaverage.h"
 #include "export.h"
 
 class DeviceSampleMIMO;
@@ -161,13 +162,52 @@ public:
         QString m_errorMessage;
     };
 
-    class GetSinkDeviceDescription : public Message {
+    class GetMIMODeviceDescription : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
         void setDeviceDescription(const QString& text) { m_deviceDescription = text; }
         const QString& getDeviceDescription() const { return m_deviceDescription; }
     private:
         QString m_deviceDescription;
+    };
+
+    class ConfigureCorrection : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        ConfigureCorrection(bool dcOffsetCorrection, bool iqImbalanceCorrection, int index) :
+            Message(),
+            m_dcOffsetCorrection(dcOffsetCorrection),
+            m_iqImbalanceCorrection(iqImbalanceCorrection),
+            m_index(index)
+        { }
+        bool getDCOffsetCorrection() const { return m_dcOffsetCorrection; }
+        bool getIQImbalanceCorrection() const { return m_iqImbalanceCorrection; }
+        int getIndex() const { return m_index; }
+    private:
+        bool m_dcOffsetCorrection;
+        bool m_iqImbalanceCorrection;
+        int m_index;
+    };
+
+    class SignalNotification : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        SignalNotification(int samplerate, qint64 centerFrequency, bool sourceOrSink, int index) :
+            Message(),
+            m_sampleRate(samplerate),
+            m_centerFrequency(centerFrequency),
+            m_sourceOrSink(sourceOrSink),
+            m_index(index)
+        { }
+        int getSampleRate() const { return m_sampleRate; }
+        qint64 getCenterFrequency() const { return m_centerFrequency; }
+        bool getSourceOrSink() const { return m_sourceOrSink; }
+        int getIndex() const { return m_index; }
+    private:
+        int m_sampleRate;
+        qint64 m_centerFrequency;
+        bool m_sourceOrSink;
+        int m_index;
     };
 
 	enum State {
@@ -220,6 +260,25 @@ private:
         int m_iRange;
         int m_qRange;
         int m_imbalance;
+        MovingAverageUtil<int32_t, int64_t, 1024> m_iBeta;
+        MovingAverageUtil<int32_t, int64_t, 1024> m_qBeta;
+#if IMBALANCE_INT
+        // Fixed point DC + IQ corrections
+        MovingAverageUtil<int64_t, int64_t, 128> m_avgII;
+        MovingAverageUtil<int64_t, int64_t, 128> m_avgIQ;
+        MovingAverageUtil<int64_t, int64_t, 128> m_avgPhi;
+        MovingAverageUtil<int64_t, int64_t, 128> m_avgII2;
+        MovingAverageUtil<int64_t, int64_t, 128> m_avgQQ2;
+        MovingAverageUtil<int64_t, int64_t, 128> m_avgAmp;
+#else
+        // Floating point DC + IQ corrections
+        MovingAverageUtil<float, double, 128> m_avgII;
+        MovingAverageUtil<float, double, 128> m_avgIQ;
+        MovingAverageUtil<float, double, 128> m_avgII2;
+        MovingAverageUtil<float, double, 128> m_avgQQ2;
+        MovingAverageUtil<double, double, 128> m_avgPhi;
+        MovingAverageUtil<double, double, 128> m_avgAmp;
+#endif
     };
 
 	uint32_t m_uid; //!< unique ID
@@ -252,17 +311,19 @@ private:
     BasebandSampleSink *m_spectrumSink; //!< The spectrum sink
 
   	void run();
-	void work(int nbWriteSamples, int nbReadSamples); //!< transfer samples if in running state
+	void work(int nbWriteSamples); //!< transfer samples if in running state
 
 	State gotoIdle();     //!< Go to the idle state
 	State gotoInit();     //!< Go to the acquisition init state from idle
 	State gotoRunning();  //!< Go to the running state from ready state
 	State gotoError(const QString& errorMsg); //!< Go to an error state
 
+    void handleSetMIMO(DeviceSampleMIMO* mimo); //!< Manage MIMO device setting
+
 private slots:
-	void handleData(int nbSamples);    //!< Handle data when samples have to be written to the sample FIFO
-	void handleInputMessages();        //!< Handle input message queue
+	void handleData();                 //!< Handle data when samples have to be processed
 	void handleSynchronousMessages();  //!< Handle synchronous messages with the thread
+	void handleInputMessages();        //!< Handle input message queue
 	void handleForwardToSpectrumSink(int nbSamples);
 };
 
