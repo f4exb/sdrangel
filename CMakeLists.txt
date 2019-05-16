@@ -242,7 +242,7 @@ find_package(OpenCV) # channeltx/modatv
 
 # macOS compatibility
 if(APPLE)
-  find_package(Iconv)
+  find_package(ICONV)
 endif()
 
 # include external cmake if needed
@@ -333,7 +333,6 @@ endif()
 
 # includes needed by the following target
 include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/sdrbase
     ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/sdrgui

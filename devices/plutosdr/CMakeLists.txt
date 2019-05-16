@@ -19,6 +19,7 @@ set(plutosdrdevice_HEADERS
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
     ${LIBIIO_INCLUDE_DIR}
+    ${ICONV_INCLUDE_DIR}
 )
 
 add_library(plutosdrdevice SHARED
@@ -29,8 +30,9 @@ set_target_properties(plutosdrdevice
     PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
 
 target_link_libraries(plutosdrdevice
-    ${LIBIIO_LIBRARIES}
     sdrbase
+    ${LIBIIO_LIBRARIES}
+    ${ICONV_LIBRARY}
 )
 
 install(TARGETS plutosdrdevice DESTINATION ${INSTALL_LIB_DIR})
