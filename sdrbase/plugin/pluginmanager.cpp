@@ -82,7 +82,7 @@ void PluginManager::loadPluginsPart(const QString& pluginsSubDir)
     foreach (QString dir, PluginsPath)
       {
         QDir d(dir);
-        if (d.isEmpty()) {
+        if (d.entryList(QDir::Files).count() == 0) {
           qDebug("PluginManager::loadPluginsPart folder %s is empty", qPrintable(dir));
           continue;
         }
