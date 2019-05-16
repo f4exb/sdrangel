@@ -50,9 +50,10 @@ DeviceSet::ChannelInstanceRegistration::ChannelInstanceRegistration(const QStrin
 
 DeviceSet::DeviceSet(int tabIndex)
 {
-    m_deviceSourceEngine = 0;
     m_deviceAPI = 0;
+    m_deviceSourceEngine = 0;
     m_deviceSinkEngine = 0;
+    m_deviceMIMOEngine = 0;
     m_deviceTabIndex = tabIndex;
 }
 

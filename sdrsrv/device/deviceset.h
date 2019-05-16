@@ -20,9 +20,10 @@
 
 #include <QTimer>
 
-class DSPDeviceSourceEngine;
 class DeviceAPI;
+class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
+class DSPDeviceMIMOEngine;
 class PluginAPI;
 class ChannelAPI;
 class Preset;
@@ -30,9 +31,10 @@ class Preset;
 class DeviceSet
 {
 public:
-    DSPDeviceSourceEngine *m_deviceSourceEngine;
     DeviceAPI *m_deviceAPI;
+    DSPDeviceSourceEngine *m_deviceSourceEngine;
     DSPDeviceSinkEngine *m_deviceSinkEngine;
+    DSPDeviceMIMOEngine *m_deviceMIMOEngine;
 
     DeviceSet(int tabIndex);
     ~DeviceSet();

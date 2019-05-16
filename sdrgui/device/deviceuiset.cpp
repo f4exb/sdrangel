@@ -31,19 +31,19 @@
 
 #include "deviceuiset.h"
 
-DeviceUISet::DeviceUISet(int tabIndex, bool rxElseTx, QTimer& timer)
+DeviceUISet::DeviceUISet(int tabIndex, int deviceType, QTimer& timer)
 {
     m_spectrum = new GLSpectrum;
-    if (rxElseTx) {
+    if ((deviceType == 0) || (deviceType == 2)) { // Single Rx or MIMO
         m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF, m_spectrum);
-    } else {
+    } else if (deviceType == 1) { // Single Tx
         m_spectrumVis = new SpectrumVis(SDR_TX_SCALEF, m_spectrum);
     }
     m_spectrum->connectTimer(timer);
     m_spectrumGUI = new GLSpectrumGUI;
     m_spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, m_spectrum);
     m_channelWindow = new ChannelWindow;
-    m_samplingDeviceControl = new SamplingDeviceControl(tabIndex, rxElseTx);
+    m_samplingDeviceControl = new SamplingDeviceControl(tabIndex, deviceType);
     m_deviceSourceEngine = 0;
     m_deviceAPI = 0;
     m_deviceSinkEngine = 0;

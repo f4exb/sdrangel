@@ -24,10 +24,10 @@
 #include "device/deviceenumerator.h"
 
 
-SamplingDeviceDialog::SamplingDeviceDialog(bool rxElseTx, int deviceTabIndex, QWidget* parent) :
+SamplingDeviceDialog::SamplingDeviceDialog(int deviceType, int deviceTabIndex, QWidget* parent) :
     QDialog(parent),
     ui(new Ui::SamplingDeviceDialog),
-    m_rxElseTx(rxElseTx),
+    m_deviceType(deviceType),
     m_deviceTabIndex(deviceTabIndex),
     m_selectedDeviceIndex(-1)
 {
@@ -35,9 +35,9 @@ SamplingDeviceDialog::SamplingDeviceDialog(bool rxElseTx, int deviceTabIndex, QW
 
     QList<QString> deviceDisplayNames;
 
-    if (m_rxElseTx) {
+    if (m_deviceType == 0) { // Single Rx
         DeviceEnumerator::instance()->listRxDeviceNames(deviceDisplayNames, m_deviceIndexes);
-    } else {
+    } else if (m_deviceType == 1) { // Single Tx
         DeviceEnumerator::instance()->listTxDeviceNames(deviceDisplayNames, m_deviceIndexes);
     }
 
@@ -54,9 +54,9 @@ void SamplingDeviceDialog::accept()
 {
     m_selectedDeviceIndex = m_deviceIndexes[ui->deviceSelect->currentIndex()];
 
-    if (m_rxElseTx) {
+    if (m_deviceType == 0) { // Single Rx
         DeviceEnumerator::instance()->changeRxSelection(m_deviceTabIndex, m_selectedDeviceIndex);
-    } else {
+    } else if (m_deviceType == 1) { // Single Tx
         DeviceEnumerator::instance()->changeTxSelection(m_deviceTabIndex, m_selectedDeviceIndex);
     }
 

@@ -266,7 +266,7 @@ void MainWindow::addSourceDevice(int deviceIndex)
     sprintf(uidCStr, "UID:%d", dspDeviceSourceEngineUID);
 
     int deviceTabIndex = m_deviceUIs.size();
-    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, true, m_masterTimer));
+    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, 0, m_masterTimer));
     m_deviceUIs.back()->m_deviceSourceEngine = dspDeviceSourceEngine;
 
     char tabNameCStr[16];
@@ -339,7 +339,7 @@ void MainWindow::addSinkDevice()
     sprintf(uidCStr, "UID:%d", dspDeviceSinkEngineUID);
 
     int deviceTabIndex = m_deviceUIs.size();
-    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, false, m_masterTimer));
+    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, 1, m_masterTimer));
     m_deviceUIs.back()->m_deviceSourceEngine = 0;
     m_deviceUIs.back()->m_deviceSinkEngine = dspDeviceSinkEngine;
 

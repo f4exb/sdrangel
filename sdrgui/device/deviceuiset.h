@@ -28,9 +28,10 @@ class GLSpectrum;
 class GLSpectrumGUI;
 class ChannelWindow;
 class SamplingDeviceControl;
-class DSPDeviceSourceEngine;
 class DeviceAPI;
+class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
+class DSPDeviceMIMOEngine;
 class ChannelMarker;
 class PluginAPI;
 class PluginInstanceGUI;
@@ -44,12 +45,13 @@ public:
     GLSpectrumGUI *m_spectrumGUI;
     ChannelWindow *m_channelWindow;
     SamplingDeviceControl *m_samplingDeviceControl;
-    DSPDeviceSourceEngine *m_deviceSourceEngine;
     DeviceAPI *m_deviceAPI;
+    DSPDeviceSourceEngine *m_deviceSourceEngine;
     DSPDeviceSinkEngine *m_deviceSinkEngine;
+    DSPDeviceMIMOEngine *m_deviceMIMOEngine;
     QByteArray m_mainWindowState;
 
-    DeviceUISet(int tabIndex, bool rxElseTx, QTimer& timer);
+    DeviceUISet(int tabIndex, int deviceType, QTimer& timer);
     ~DeviceUISet();
 
     GLSpectrum *getSpectrum() { return m_spectrum; }     //!< Direct spectrum getter
