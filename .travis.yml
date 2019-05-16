@@ -1,0 +1,83 @@
+matrix:
+  include:
+  - os: linux
+    dist: xenial
+  - os: linux
+    dist: xenial
+    env: CMAKE_CUSTOM_OPTIONS="-DBUILD_GUI=OFF"
+  - os: osx
+    osx_image: xcode10.2
+  - os: osx
+    osx_image: xcode9.4
+  - os: osx
+    osx_image: xcode8.3
+  - os: osx
+    osx_image: xcode7.3
+git:
+  submodules: false
+cache:
+  directories:
+  - $HOME/.macports-ci-ccache
+language: cpp
+addons:
+  apt:
+    update: true
+    # not needed: build-essential cmake git
+    # need per distro
+    packages:
+      - libfftw3-dev
+      - qtbase5-dev
+      - libqt5opengl5-dev
+      - qttools5-dev
+      - qttools5-dev-tools
+      - qtmultimedia5-dev
+      - libqt5multimedia5-plugins
+      - libusb-1.0-0-dev
+      - libboost-all-dev
+      - librtlsdr-dev
+      - libasound2-dev
+      - libopencv-dev
+      - libopencv-dev
+      - libsqlite3-dev
+      - libxml2-dev
+      - bison
+      - flex
+      - ffmpeg
+      - libavcodec-dev
+      - libavformat-dev
+      - libopus-dev
+      - libcodec2-dev
+      - libairspy-dev
+      - libhackrf-dev
+      - librtlsdr-dev
+install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then curl -LO https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source ./macports-ci install; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source macports-ci ccache; fi
+  # libiio disabled otherwise OpenBLAS compilation timeout
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then sudo port -N -k install libiconv fftw-3-single libusb boost opencv ffmpeg libopus SoapySDR airspy airspyhf bladerf hackrf limesuite rtl-sdr SoapySDRPlay SoapyRemote SoapyAudio; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then sudo port -N -k install perseus-sdr codec2 cm256cc; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then sudo port -N -k install dsdcc +mbelib; fi
+  # macOS 10.11 doesn't support newest Qt
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then if [[ "$TRAVIS_OSX_IMAGE" == "xcode7.3" ]]; then sudo port -N -k install qt59-qtmultimedia qt59-qttools; else sudo port -N -k install qt5-qtmultimedia qt5-qttools; fi; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source macports-ci ccache --save; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then bash cmake/travis-ci/build_codec2.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then bash cmake/travis-ci/build_cm256cc.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then bash cmake/travis-ci/build_dsdcc.sh; fi
+script:
+  - bash -c export
+  - bash -c pwd
+  - bash cmake/travis-ci/build_sdrangel.sh
+env:
+  - CMAKE_CUSTOM_OPTIONS="-DFORCE_SSE41=ON -DBUNDLE=ON -DENABLE_PACK_MIRSDRAPI=ON"
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  keep_history: true
+  on:
+    branch: master
+  repo: sdrangel-travis-ci
+  project_name: SDRangel
+  email: rainbow@irh.it
+  name: rainbow
