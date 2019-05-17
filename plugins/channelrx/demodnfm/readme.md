@@ -10,7 +10,7 @@ This plugin can be used to listen to a narrowband FM modulated signal. "Narrowba
 
 <h3>1: Frequency shift from center frequency of reception value</h3>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2. Left click on a digit sets the cursor position at this digit. 
+Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2. Left click on a digit sets the cursor position at this digit.
 
 <h3>2: Channel power</h3>
 
@@ -26,13 +26,13 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 
 This is the bandwidth in kHz of the channel signal before demodulation. It can be set in steps as 5, 6.25, 8.33, 10, 12.5, 15, 20, 25 and 40 kHz. The expected one side frequency deviation is 0.4 times the bandwidth.
 
-&#9758; The demodulation is done at the channel sample rate which is guaranteed not to be lower than the requested audio sample rate but can possibly be equal to it. This means that for correct operation in any case you must ensure that the sample rate of the audio device is not lower than the Nyquist rate required to process this channel bandwidth. 
+&#9758; The demodulation is done at the channel sample rate which is guaranteed not to be lower than the requested audio sample rate but can possibly be equal to it. This means that for correct operation in any case you must ensure that the sample rate of the audio device is not lower than the Nyquist rate required to process this channel bandwidth.
 
 &#9758; The channel sample rate is always the baseband signal rate divided by an integer power of two so depending on the baseband sample rate obtained from the sampling device you could also guarantee a minimal channel bandwidth. For example with a 125 kS/s baseband sample rate and a 8 kS/s audio sample rate the channel sample rate cannot be lower than 125/8 = 15.625 kS/s (125/16 = 7.8125 kS/s is too small) which is still OK for 5 or 6.25 kHz channel bandwidths.
 
 <h3>5: AF bandwidth</h3>
 
-This is the bandwidth of the audio signal in kHz (i.e. after demodulation). It can be set in continuous kHz steps from 1 to 20 kHz. 
+This is the bandwidth of the audio signal in kHz (i.e. after demodulation). It can be set in continuous kHz steps from 1 to 20 kHz.
 
 <h3>6: Volume</h3>
 
@@ -50,7 +50,7 @@ Case when the delta/Level squelch control (7) is off (power). This is the squelc
 
 <h4>Audio frequency delta mode</h4>
 
-Case when the delta/Level squelch control (7) is on (delta). In this mode the squelch compares the power of the demodulated audio signal in a low frequency band and a high frequency band. In the absence of signal the discriminator response is nearly flat and the power in the two bands is more or less balanced. In the presence of a signal the lower band will receive more power than the higher band. The squelch does the ratio of both powers and the squelch is opened if this ratio is lower than the threshold given in percent. 
+Case when the delta/Level squelch control (7) is on (delta). In this mode the squelch compares the power of the demodulated audio signal in a low frequency band and a high frequency band. In the absence of signal the discriminator response is nearly flat and the power in the two bands is more or less balanced. In the presence of a signal the lower band will receive more power than the higher band. The squelch does the ratio of both powers and the squelch is opened if this ratio is lower than the threshold given in percent.
 
 A ratio of 1 (100%) will always open the squelch and a ratio of 0 will always close it. The value can be varied to detect more distorted and thus weak signals towards the higher values. The button rotation runs from higher to lower as you turn it clockwise thus giving the same feel as in power mode. The best ratio for a standard NFM transmission is ~40%.
 
@@ -66,7 +66,7 @@ This is the squelch gate in milliseconds. The squelch input must be open for thi
 
 <h3>10: CTCSS on/off</h3>
 
-Use the checkbox to toggle CTCSS activation. When activated it will look for a tone squelch in the demodulated signal and display its frequency (see 10). 
+Use the checkbox to toggle CTCSS activation. When activated it will look for a tone squelch in the demodulated signal and display its frequency (see 10).
 
 <h3>11: CTCSS tone</h3>
 
@@ -76,7 +76,11 @@ This is the tone squelch in Hz. It can be selected using the toolbox among the u
 
 This is the value of the tone squelch received when the CTCSS is activated. It displays `--` if the CTCSS system is de-activated.
 
-<h3>13: Audio mute and audio output select</h3>
+<h3>13: Audio high pass filter</h3>
+
+Toggle a 300 Hz cutoff high pass filter on audio to cut-off CTCSS frequencies. It is on by default for normal audio channels usage. You can switch it off to pipe the audio in programs requiring DC like DSD+ or Multimon.
+
+<h3>14: Audio mute and audio output select</h3>
 
 Left click on this button to toggle audio mute for this channel. The button will light up in green if the squelch is open. This helps identifying which channels are active in a multi-channel configuration.
 
