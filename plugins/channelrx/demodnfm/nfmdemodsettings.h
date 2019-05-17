@@ -42,6 +42,7 @@ struct NFMDemodSettings
     quint32 m_rgbColor;
     QString m_title;
     QString m_audioDeviceName;
+    bool m_highPass;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

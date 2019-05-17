@@ -575,6 +575,20 @@
        </spacer>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="highPassFilter">
+        <property name="toolTip">
+         <string>High pass audio filter</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/filter_highpass.png</normaloff>:/filter_highpass.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="audioMute">
         <property name="toolTip">
          <string>Left: Mute/Unmute audio Right: Select audio output device</string>

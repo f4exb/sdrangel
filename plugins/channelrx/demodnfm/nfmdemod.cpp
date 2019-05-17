@@ -90,7 +90,7 @@ NFMDemod::NFMDemod(DeviceAPI *devieAPI) :
 	m_ctcssDetector.setCoefficients(m_audioSampleRate/16, m_audioSampleRate/8.0f); // 0.5s / 2 Hz resolution
 	m_afSquelch.setCoefficients(m_audioSampleRate/2000, 600, m_audioSampleRate, 200, 0, afSqTones); // 0.5ms test period, 300ms average span, audio SR, 100ms attack, no decay
 
-    m_lowpass.create(301, m_audioSampleRate, 250.0);
+    m_ctcssLowpass.create(301, m_audioSampleRate, 250.0);
 
     applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
 	applySettings(m_settings, true);
@@ -247,7 +247,7 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                 {
                     if (m_settings.m_ctcssOn)
                     {
-                        Real ctcss_sample = m_lowpass.filter(demod * m_discriCompensation);
+                        Real ctcss_sample = m_ctcssLowpass.filter(demod * m_discriCompensation);
 
                         if ((m_sampleCount & 7) == 7) // decimate 48k -> 6k
                         {
@@ -287,7 +287,11 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
                     }
                     else
                     {
-                        sample = m_bandpass.filter(m_squelchDelayLine.readBack(m_squelchGate)) * m_settings.m_volume;
+                        if (m_settings.m_highPass) {
+                            sample = m_bandpass.filter(m_squelchDelayLine.readBack(m_squelchGate)) * m_settings.m_volume;
+                        } else {
+                            sample = m_lowpass.filter(m_squelchDelayLine.readBack(m_squelchGate)) * m_settings.m_volume;
+                        }
                     }
                 }
                 else
@@ -436,8 +440,9 @@ void NFMDemod::applyAudioSampleRate(int sampleRate)
     m_interpolator.create(16, m_inputSampleRate, m_settings.m_rfBandwidth / 2.2f);
     m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = (Real) m_inputSampleRate / (Real) sampleRate;
-    m_lowpass.create(301, sampleRate, 250.0);
+    m_ctcssLowpass.create(301, sampleRate, 250.0);
     m_bandpass.create(301, sampleRate, 300.0, m_settings.m_afBandwidth);
+    m_lowpass.create(301, sampleRate, m_settings.m_afBandwidth);
     m_squelchGate = (sampleRate / 100) * m_settings.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
     m_squelchCount = 0; // reset squelch open counter
     m_ctcssDetector.setCoefficients(sampleRate/16, sampleRate/8.0f); // 0.5s / 2 Hz resolution
@@ -499,6 +504,7 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
             << " m_squelch: " << settings.m_squelch
             << " m_ctcssIndex: " << settings.m_ctcssIndex
             << " m_ctcssOn: " << settings.m_ctcssOn
+            << " m_highPass: " << m_settings.m_highPass
             << " m_audioMute: " << settings.m_audioMute
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_useReverseAPI: " << settings.m_useReverseAPI
@@ -550,6 +556,7 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
         reverseAPIKeys.append("afBandwidth");
         m_settingsMutex.lock();
         m_bandpass.create(301, m_audioSampleRate, 300.0, settings.m_afBandwidth);
+        m_lowpass.create(301, m_audioSampleRate, settings.m_afBandwidth);
         m_settingsMutex.unlock();
     }
 
@@ -589,6 +596,10 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
     {
         reverseAPIKeys.append("ctcssIndex");
         setSelectedCtcssIndex(settings.m_ctcssIndex);
+    }
+
+    if ((settings.m_highPass != m_settings.m_highPass) || force) {
+        reverseAPIKeys.append("highPass");
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
