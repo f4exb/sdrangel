@@ -133,6 +133,7 @@ set(sdrbase_HEADERS
     dsp/decimatorsfi.h
     dsp/decimatorsu.h
     dsp/interpolators.h
+    dsp/interpolatorsif.h
     dsp/dspcommands.h
     dsp/dspengine.h
     dsp/dspdevicesourceengine.h
