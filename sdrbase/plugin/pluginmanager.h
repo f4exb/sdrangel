@@ -84,6 +84,7 @@ public:
 
 	static const QString& getFileSourceDeviceId() { return m_fileSourceDeviceTypeID; }
 	static const QString& getFileSinkDeviceId() { return m_fileSinkDeviceTypeID; }
+	static const QString& getTestMIMODeviceId() { return m_testMIMODeviceTypeID; }
 
 private:
 	struct SamplingDevice { //!< This is the device registration
@@ -137,6 +138,10 @@ private:
     static const QString m_remoteOutputDeviceTypeID; //!< Remote output plugin ID
     static const QString m_fileSinkHardwareID;       //!< FileSource source hardware ID
     static const QString m_fileSinkDeviceTypeID;     //!< FileSink sink plugin ID
+
+    // "Local" sample MIMO device IDs
+    static const QString m_testMIMOHardwareID;       //!< Test MIMO hardware ID
+    static const QString m_testMIMODeviceTypeID;     //!< Test MIMO plugin ID
 
 	void loadPluginsDir(const QDir& dir);
 };

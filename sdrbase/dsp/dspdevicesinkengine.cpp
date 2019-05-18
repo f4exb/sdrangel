@@ -33,10 +33,10 @@ DSPDeviceSinkEngine::DSPDeviceSinkEngine(uint32_t uid, QObject* parent) :
 	QThread(parent),
     m_uid(uid),
 	m_state(StNotStarted),
-	m_deviceSampleSink(0),
+	m_deviceSampleSink(nullptr),
 	m_sampleSinkSequence(0),
 	m_basebandSampleSources(),
-	m_spectrumSink(0),
+	m_spectrumSink(nullptr),
 	m_sampleRate(0),
 	m_centerFrequency(0),
 	m_multipleSourcesDivisionFactor(1)
@@ -391,12 +391,9 @@ void DSPDeviceSinkEngine::handleSetSink(DeviceSampleSink* sink)
 
 	m_deviceSampleSink = sink;
 
-	if(m_deviceSampleSink != 0)
-	{
+	if(m_deviceSampleSink != 0) {
 		qDebug("DSPDeviceSinkEngine::handleSetSink: set %s", qPrintable(sink->getDeviceDescription()));
-	}
-	else
-	{
+	} else {
 		qDebug("DSPDeviceSinkEngine::handleSetSource: set none");
 	}
 }

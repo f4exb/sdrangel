@@ -42,7 +42,8 @@ MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::SignalNotification, Message)
 DSPDeviceMIMOEngine::DSPDeviceMIMOEngine(uint32_t uid, QObject* parent) :
 	QThread(parent),
     m_uid(uid),
-    m_state(StNotStarted)
+    m_state(StNotStarted),
+    m_deviceSampleMIMO(nullptr)
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 	connect(&m_syncMessenger, SIGNAL(messageSent()), this, SLOT(handleSynchronousMessages()), Qt::QueuedConnection);
@@ -103,7 +104,7 @@ void DSPDeviceMIMOEngine::stopProcess()
 
 void DSPDeviceMIMOEngine::setMIMO(DeviceSampleMIMO* mimo)
 {
-	qDebug() << "DSPDeviceMIMOEngine::setSink";
+	qDebug() << "DSPDeviceMIMOEngine::setMIMO";
 	SetSampleMIMO cmd(mimo);
 	m_syncMessenger.sendWait(cmd);
 }
@@ -306,8 +307,7 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoIdle()
 			break;
 	}
 
-	if (m_deviceSampleMIMO == 0)
-	{
+	if (!m_deviceSampleMIMO) {
 		return StIdle;
 	}
 
@@ -358,7 +358,7 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoInit()
 			break;
 	}
 
-	if (m_deviceSampleMIMO == 0) {
+	if (!m_deviceSampleMIMO) {
 		return gotoError("No sample MIMO configured");
 	}
 
@@ -448,8 +448,7 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoRunning()
 
 	// Start everything
 
-	if (!m_deviceSampleMIMO->start())
-	{
+	if (!m_deviceSampleMIMO->start()) {
 		return gotoError("Could not start sample source");
 	}
 
@@ -500,6 +499,8 @@ void DSPDeviceMIMOEngine::handleData()
 
 void DSPDeviceMIMOEngine::handleSetMIMO(DeviceSampleMIMO* mimo)
 {
+    m_deviceSampleMIMO = mimo;
+
     if (mimo && (mimo->getNbSinkFifos() > 0))
     {
         // if there is at least one Rx then the first Rx drives the FIFOs

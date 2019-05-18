@@ -483,8 +483,8 @@ int TestMI::webapiSettingsGet(
                 QString& errorMessage)
 {
     (void) errorMessage;
-    response.setTestSourceMiSettings(new SWGSDRangel::SWGTestSourceMISettings());
-    response.getTestSourceMiSettings()->init();
+    response.setTestMiSettings(new SWGSDRangel::SWGTestMISettings());
+    response.getTestMiSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }
@@ -499,75 +499,75 @@ int TestMI::webapiSettingsPutPatch(
     TestMISettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("centerFrequency")) {
-        settings.m_centerFrequency = response.getTestSourceMiSettings()->getCenterFrequency();
+        settings.m_centerFrequency = response.getTestMiSettings()->getCenterFrequency();
     }
     if (deviceSettingsKeys.contains("frequencyShift")) {
-        settings.m_frequencyShift = response.getTestSourceMiSettings()->getFrequencyShift();
+        settings.m_frequencyShift = response.getTestMiSettings()->getFrequencyShift();
     }
     if (deviceSettingsKeys.contains("sampleRate")) {
-        settings.m_sampleRate = response.getTestSourceMiSettings()->getSampleRate();
+        settings.m_sampleRate = response.getTestMiSettings()->getSampleRate();
     }
     if (deviceSettingsKeys.contains("log2Decim")) {
-        settings.m_log2Decim = response.getTestSourceMiSettings()->getLog2Decim();
+        settings.m_log2Decim = response.getTestMiSettings()->getLog2Decim();
     }
     if (deviceSettingsKeys.contains("fcPos")) {
-        int fcPos = response.getTestSourceMiSettings()->getFcPos();
+        int fcPos = response.getTestMiSettings()->getFcPos();
         fcPos = fcPos < 0 ? 0 : fcPos > 2 ? 2 : fcPos;
         settings.m_fcPos = (TestMISettings::fcPos_t) fcPos;
     }
     if (deviceSettingsKeys.contains("sampleSizeIndex")) {
-        int sampleSizeIndex = response.getTestSourceMiSettings()->getSampleSizeIndex();
+        int sampleSizeIndex = response.getTestMiSettings()->getSampleSizeIndex();
         sampleSizeIndex = sampleSizeIndex < 0 ? 0 : sampleSizeIndex > 1 ? 2 : sampleSizeIndex;
         settings.m_sampleSizeIndex = sampleSizeIndex;
     }
     if (deviceSettingsKeys.contains("amplitudeBits")) {
-        settings.m_amplitudeBits = response.getTestSourceMiSettings()->getAmplitudeBits();
+        settings.m_amplitudeBits = response.getTestMiSettings()->getAmplitudeBits();
     }
     if (deviceSettingsKeys.contains("autoCorrOptions")) {
-        int autoCorrOptions = response.getTestSourceMiSettings()->getAutoCorrOptions();
+        int autoCorrOptions = response.getTestMiSettings()->getAutoCorrOptions();
         autoCorrOptions = autoCorrOptions < 0 ? 0 : autoCorrOptions >= TestMISettings::AutoCorrLast ? TestMISettings::AutoCorrLast-1 : autoCorrOptions;
         settings.m_sampleSizeIndex = (TestMISettings::AutoCorrOptions) autoCorrOptions;
     }
     if (deviceSettingsKeys.contains("modulation")) {
-        int modulation = response.getTestSourceMiSettings()->getModulation();
+        int modulation = response.getTestMiSettings()->getModulation();
         modulation = modulation < 0 ? 0 : modulation >= TestMISettings::ModulationLast ? TestMISettings::ModulationLast-1 : modulation;
         settings.m_modulation = (TestMISettings::Modulation) modulation;
     }
     if (deviceSettingsKeys.contains("modulationTone")) {
-        settings.m_modulationTone = response.getTestSourceMiSettings()->getModulationTone();
+        settings.m_modulationTone = response.getTestMiSettings()->getModulationTone();
     }
     if (deviceSettingsKeys.contains("amModulation")) {
-        settings.m_amModulation = response.getTestSourceMiSettings()->getAmModulation();
+        settings.m_amModulation = response.getTestMiSettings()->getAmModulation();
     };
     if (deviceSettingsKeys.contains("fmDeviation")) {
-        settings.m_fmDeviation = response.getTestSourceMiSettings()->getFmDeviation();
+        settings.m_fmDeviation = response.getTestMiSettings()->getFmDeviation();
     };
     if (deviceSettingsKeys.contains("dcFactor")) {
-        settings.m_dcFactor = response.getTestSourceMiSettings()->getDcFactor();
+        settings.m_dcFactor = response.getTestMiSettings()->getDcFactor();
     };
     if (deviceSettingsKeys.contains("iFactor")) {
-        settings.m_iFactor = response.getTestSourceMiSettings()->getIFactor();
+        settings.m_iFactor = response.getTestMiSettings()->getIFactor();
     };
     if (deviceSettingsKeys.contains("qFactor")) {
-        settings.m_qFactor = response.getTestSourceMiSettings()->getQFactor();
+        settings.m_qFactor = response.getTestMiSettings()->getQFactor();
     };
     if (deviceSettingsKeys.contains("phaseImbalance")) {
-        settings.m_phaseImbalance = response.getTestSourceMiSettings()->getPhaseImbalance();
+        settings.m_phaseImbalance = response.getTestMiSettings()->getPhaseImbalance();
     };
     if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getTestSourceMiSettings()->getFileRecordName();
+        settings.m_fileRecordName = *response.getTestMiSettings()->getFileRecordName();
     }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getTestSourceMiSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getTestMiSettings()->getUseReverseApi() != 0;
     }
     if (deviceSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getTestSourceMiSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getTestMiSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getTestSourceMiSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getTestMiSettings()->getReverseApiPort();
     }
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getTestSourceMiSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getTestMiSettings()->getReverseApiDeviceIndex();
     }
 
     MsgConfigureTestSource *msg = MsgConfigureTestSource::create(settings, force);
@@ -585,39 +585,39 @@ int TestMI::webapiSettingsPutPatch(
 
 void TestMI::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const TestMISettings& settings)
 {
-    response.getTestSourceMiSettings()->setCenterFrequency(settings.m_centerFrequency);
-    response.getTestSourceMiSettings()->setFrequencyShift(settings.m_frequencyShift);
-    response.getTestSourceMiSettings()->setSampleRate(settings.m_sampleRate);
-    response.getTestSourceMiSettings()->setLog2Decim(settings.m_log2Decim);
-    response.getTestSourceMiSettings()->setFcPos((int) settings.m_fcPos);
-    response.getTestSourceMiSettings()->setSampleSizeIndex((int) settings.m_sampleSizeIndex);
-    response.getTestSourceMiSettings()->setAmplitudeBits(settings.m_amplitudeBits);
-    response.getTestSourceMiSettings()->setAutoCorrOptions((int) settings.m_autoCorrOptions);
-    response.getTestSourceMiSettings()->setModulation((int) settings.m_modulation);
-    response.getTestSourceMiSettings()->setModulationTone(settings.m_modulationTone);
-    response.getTestSourceMiSettings()->setAmModulation(settings.m_amModulation);
-    response.getTestSourceMiSettings()->setFmDeviation(settings.m_fmDeviation);
-    response.getTestSourceMiSettings()->setDcFactor(settings.m_dcFactor);
-    response.getTestSourceMiSettings()->setIFactor(settings.m_iFactor);
-    response.getTestSourceMiSettings()->setQFactor(settings.m_qFactor);
-    response.getTestSourceMiSettings()->setPhaseImbalance(settings.m_phaseImbalance);
+    response.getTestMiSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getTestMiSettings()->setFrequencyShift(settings.m_frequencyShift);
+    response.getTestMiSettings()->setSampleRate(settings.m_sampleRate);
+    response.getTestMiSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getTestMiSettings()->setFcPos((int) settings.m_fcPos);
+    response.getTestMiSettings()->setSampleSizeIndex((int) settings.m_sampleSizeIndex);
+    response.getTestMiSettings()->setAmplitudeBits(settings.m_amplitudeBits);
+    response.getTestMiSettings()->setAutoCorrOptions((int) settings.m_autoCorrOptions);
+    response.getTestMiSettings()->setModulation((int) settings.m_modulation);
+    response.getTestMiSettings()->setModulationTone(settings.m_modulationTone);
+    response.getTestMiSettings()->setAmModulation(settings.m_amModulation);
+    response.getTestMiSettings()->setFmDeviation(settings.m_fmDeviation);
+    response.getTestMiSettings()->setDcFactor(settings.m_dcFactor);
+    response.getTestMiSettings()->setIFactor(settings.m_iFactor);
+    response.getTestMiSettings()->setQFactor(settings.m_qFactor);
+    response.getTestMiSettings()->setPhaseImbalance(settings.m_phaseImbalance);
 
-    if (response.getTestSourceMiSettings()->getFileRecordName()) {
-        *response.getTestSourceMiSettings()->getFileRecordName() = settings.m_fileRecordName;
+    if (response.getTestMiSettings()->getFileRecordName()) {
+        *response.getTestMiSettings()->getFileRecordName() = settings.m_fileRecordName;
     } else {
-        response.getTestSourceMiSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+        response.getTestMiSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
-    response.getTestSourceMiSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getTestMiSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getTestSourceMiSettings()->getReverseApiAddress()) {
-        *response.getTestSourceMiSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getTestMiSettings()->getReverseApiAddress()) {
+        *response.getTestMiSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getTestSourceMiSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getTestMiSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getTestSourceMiSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getTestSourceMiSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getTestMiSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getTestMiSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 void TestMI::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const TestMISettings& settings, bool force)
@@ -626,61 +626,61 @@ void TestMI::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const
     swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("TestSource"));
-    swgDeviceSettings->setTestSourceMiSettings(new SWGSDRangel::SWGTestSourceMISettings());
-    SWGSDRangel::SWGTestSourceMISettings *swgTestSourceMISettings = swgDeviceSettings->getTestSourceMiSettings();
+    swgDeviceSettings->setTestMiSettings(new SWGSDRangel::SWGTestMISettings());
+    SWGSDRangel::SWGTestMISettings *swgTestMISettings = swgDeviceSettings->getTestMiSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
-        swgTestSourceMISettings->setCenterFrequency(settings.m_centerFrequency);
+        swgTestMISettings->setCenterFrequency(settings.m_centerFrequency);
     }
     if (deviceSettingsKeys.contains("frequencyShift") || force) {
-        swgTestSourceMISettings->setFrequencyShift(settings.m_frequencyShift);
+        swgTestMISettings->setFrequencyShift(settings.m_frequencyShift);
     }
     if (deviceSettingsKeys.contains("sampleRate") || force) {
-        swgTestSourceMISettings->setSampleRate(settings.m_sampleRate);
+        swgTestMISettings->setSampleRate(settings.m_sampleRate);
     }
     if (deviceSettingsKeys.contains("log2Decim") || force) {
-        swgTestSourceMISettings->setLog2Decim(settings.m_log2Decim);
+        swgTestMISettings->setLog2Decim(settings.m_log2Decim);
     }
     if (deviceSettingsKeys.contains("fcPos") || force) {
-        swgTestSourceMISettings->setFcPos((int) settings.m_fcPos);
+        swgTestMISettings->setFcPos((int) settings.m_fcPos);
     }
     if (deviceSettingsKeys.contains("sampleSizeIndex") || force) {
-        swgTestSourceMISettings->setSampleSizeIndex(settings.m_sampleSizeIndex);
+        swgTestMISettings->setSampleSizeIndex(settings.m_sampleSizeIndex);
     }
     if (deviceSettingsKeys.contains("amplitudeBits") || force) {
-        swgTestSourceMISettings->setAmplitudeBits(settings.m_amplitudeBits);
+        swgTestMISettings->setAmplitudeBits(settings.m_amplitudeBits);
     }
     if (deviceSettingsKeys.contains("autoCorrOptions") || force) {
-        swgTestSourceMISettings->setAutoCorrOptions((int) settings.m_sampleSizeIndex);
+        swgTestMISettings->setAutoCorrOptions((int) settings.m_sampleSizeIndex);
     }
     if (deviceSettingsKeys.contains("modulation") || force) {
-        swgTestSourceMISettings->setModulation((int) settings.m_modulation);
+        swgTestMISettings->setModulation((int) settings.m_modulation);
     }
     if (deviceSettingsKeys.contains("modulationTone")) {
-        swgTestSourceMISettings->setModulationTone(settings.m_modulationTone);
+        swgTestMISettings->setModulationTone(settings.m_modulationTone);
     }
     if (deviceSettingsKeys.contains("amModulation") || force) {
-        swgTestSourceMISettings->setAmModulation(settings.m_amModulation);
+        swgTestMISettings->setAmModulation(settings.m_amModulation);
     };
     if (deviceSettingsKeys.contains("fmDeviation") || force) {
-        swgTestSourceMISettings->setFmDeviation(settings.m_fmDeviation);
+        swgTestMISettings->setFmDeviation(settings.m_fmDeviation);
     };
     if (deviceSettingsKeys.contains("dcFactor") || force) {
-        swgTestSourceMISettings->setDcFactor(settings.m_dcFactor);
+        swgTestMISettings->setDcFactor(settings.m_dcFactor);
     };
     if (deviceSettingsKeys.contains("iFactor") || force) {
-        swgTestSourceMISettings->setIFactor(settings.m_iFactor);
+        swgTestMISettings->setIFactor(settings.m_iFactor);
     };
     if (deviceSettingsKeys.contains("qFactor") || force) {
-        swgTestSourceMISettings->setQFactor(settings.m_qFactor);
+        swgTestMISettings->setQFactor(settings.m_qFactor);
     };
     if (deviceSettingsKeys.contains("phaseImbalance") || force) {
-        swgTestSourceMISettings->setPhaseImbalance(settings.m_phaseImbalance);
+        swgTestMISettings->setPhaseImbalance(settings.m_phaseImbalance);
     };
     if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgTestSourceMISettings->setFileRecordName(new QString(settings.m_fileRecordName));
+        swgTestMISettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

@@ -233,6 +233,18 @@ int DeviceEnumerator::getFileSinkDeviceIndex() const
     return -1;
 }
 
+int DeviceEnumerator::getTestMIMODeviceIndex() const
+{
+    for (DevicesEnumeration::const_iterator it = m_mimoEnumeration.begin(); it != m_mimoEnumeration.end(); ++it)
+    {
+        if (it->m_samplingDevice.id == PluginManager::getTestMIMODeviceId()) {
+            return it->m_index;
+        }
+    }
+
+    return -1;
+}
+
 int DeviceEnumerator::getRxSamplingDeviceIndex(const QString& deviceId, int sequence)
 {
     for (DevicesEnumeration::iterator it = m_rxEnumeration.begin(); it != m_rxEnumeration.end(); ++it)

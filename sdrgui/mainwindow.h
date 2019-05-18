@@ -77,7 +77,7 @@ public:
 	void addViewAction(QAction* action);
 
     void addChannelRollup(int deviceTabIndex, QWidget* widget);
-	void setDeviceGUI(int deviceTabIndex, QWidget* gui, const QString& deviceDisplayName, bool sourceDevice = true);
+	void setDeviceGUI(int deviceTabIndex, QWidget* gui, const QString& deviceDisplayName, int deviceType = 0);
 
 	const QTimer& getMasterTimer() const { return m_masterTimer; }
 	const MainSettings& getMainSettings() const { return m_settings; }
@@ -330,6 +330,7 @@ private:
 	WebAPIAdapterGUI *m_apiAdapter;
 	QString m_apiHost;
 	int m_apiPort;
+    bool m_mimoEnabled;
 
 	CommandKeyReceiver *m_commandKeyReceiver;
 
@@ -347,6 +348,7 @@ private:
 
 	void addSourceDevice(int deviceIndex);
 	void addSinkDevice();
+    void addMIMODevice();
     void removeLastDevice();
     void deleteChannel(int deviceSetIndex, int channelIndex);
 
@@ -382,11 +384,13 @@ private slots:
 	void on_action_My_Position_triggered();
 	void sampleSourceChanged();
 	void sampleSinkChanged();
+	void sampleMIMOChanged();
     void channelAddClicked(bool checked);
 	void on_action_Loaded_Plugins_triggered();
 	void on_action_About_triggered();
 	void on_action_addSourceDevice_triggered();
 	void on_action_addSinkDevice_triggered();
+    void on_action_addMIMODevice_triggered();
 	void on_action_removeLastDevice_triggered();
 	void on_action_Exit_triggered();
 	void tabInputViewIndexChanged();

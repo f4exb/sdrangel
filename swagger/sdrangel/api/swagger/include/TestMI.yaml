@@ -1,4 +1,4 @@
-TestSourceMISettings:
+TestMISettings:
   description: TestSourceMI
   properties:
     centerFrequency:

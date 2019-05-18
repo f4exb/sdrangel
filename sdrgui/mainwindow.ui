@@ -64,7 +64,7 @@
      <x>0</x>
      <y>0</y>
      <width>1012</width>
-     <height>19</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -79,6 +79,7 @@
     </property>
     <addaction name="action_addSourceDevice"/>
     <addaction name="action_addSinkDevice"/>
+    <addaction name="action_addMIMODevice"/>
     <addaction name="action_removeLastDevice"/>
    </widget>
    <widget class="QMenu" name="menu_View">
@@ -906,6 +907,17 @@
    </property>
    <property name="toolTip">
     <string>Message logging options</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Liberation Sans</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="action_addMIMODevice">
+   <property name="text">
+    <string>Add MIMO device set</string>
    </property>
    <property name="font">
     <font>

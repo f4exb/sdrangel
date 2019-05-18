@@ -54,8 +54,9 @@ public:
     PluginInterface *getRxPluginInterface(int deviceIndex) { return m_rxEnumeration[deviceIndex].m_pluginInterface; }
     PluginInterface *getTxPluginInterface(int deviceIndex) { return m_txEnumeration[deviceIndex].m_pluginInterface; }
     PluginInterface *getMIMOPluginInterface(int deviceIndex) { return m_mimoEnumeration[deviceIndex].m_pluginInterface; }
-    int getFileSourceDeviceIndex() const;
-    int getFileSinkDeviceIndex() const;
+    int getFileSourceDeviceIndex() const; //!< Get Rx default device
+    int getFileSinkDeviceIndex() const;   //!< Get Tx default device
+    int getTestMIMODeviceIndex() const;   //!< Get MIMO default device
     int getRxSamplingDeviceIndex(const QString& deviceId, int sequence);
     int getTxSamplingDeviceIndex(const QString& deviceId, int sequence);
     int getMIMOSamplingDeviceIndex(const QString& deviceId, int sequence);

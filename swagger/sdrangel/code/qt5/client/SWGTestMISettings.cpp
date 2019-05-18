@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGTestSourceMISettings.h"
+#include "SWGTestMISettings.h"
 
 #include "SWGHelpers.h"
 
@@ -22,12 +22,12 @@
 
 namespace SWGSDRangel {
 
-SWGTestSourceMISettings::SWGTestSourceMISettings(QString* json) {
+SWGTestMISettings::SWGTestMISettings(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGTestSourceMISettings::SWGTestSourceMISettings() {
+SWGTestMISettings::SWGTestMISettings() {
     center_frequency = 0;
     m_center_frequency_isSet = false;
     frequency_shift = 0;
@@ -72,12 +72,12 @@ SWGTestSourceMISettings::SWGTestSourceMISettings() {
     m_reverse_api_device_index_isSet = false;
 }
 
-SWGTestSourceMISettings::~SWGTestSourceMISettings() {
+SWGTestMISettings::~SWGTestMISettings() {
     this->cleanup();
 }
 
 void
-SWGTestSourceMISettings::init() {
+SWGTestMISettings::init() {
     center_frequency = 0;
     m_center_frequency_isSet = false;
     frequency_shift = 0;
@@ -123,7 +123,7 @@ SWGTestSourceMISettings::init() {
 }
 
 void
-SWGTestSourceMISettings::cleanup() {
+SWGTestMISettings::cleanup() {
 
 
 
@@ -151,8 +151,8 @@ SWGTestSourceMISettings::cleanup() {
 
 }
 
-SWGTestSourceMISettings*
-SWGTestSourceMISettings::fromJson(QString &json) {
+SWGTestMISettings*
+SWGTestMISettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -161,7 +161,7 @@ SWGTestSourceMISettings::fromJson(QString &json) {
 }
 
 void
-SWGTestSourceMISettings::fromJsonObject(QJsonObject &pJson) {
+SWGTestMISettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint32", "");
     
     ::SWGSDRangel::setValue(&frequency_shift, pJson["frequencyShift"], "qint32", "");
@@ -207,7 +207,7 @@ SWGTestSourceMISettings::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGTestSourceMISettings::asJson ()
+SWGTestMISettings::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -218,7 +218,7 @@ SWGTestSourceMISettings::asJson ()
 }
 
 QJsonObject*
-SWGTestSourceMISettings::asJsonObject() {
+SWGTestMISettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
@@ -288,218 +288,218 @@ SWGTestSourceMISettings::asJsonObject() {
 }
 
 qint32
-SWGTestSourceMISettings::getCenterFrequency() {
+SWGTestMISettings::getCenterFrequency() {
     return center_frequency;
 }
 void
-SWGTestSourceMISettings::setCenterFrequency(qint32 center_frequency) {
+SWGTestMISettings::setCenterFrequency(qint32 center_frequency) {
     this->center_frequency = center_frequency;
     this->m_center_frequency_isSet = true;
 }
 
 qint32
-SWGTestSourceMISettings::getFrequencyShift() {
+SWGTestMISettings::getFrequencyShift() {
     return frequency_shift;
 }
 void
-SWGTestSourceMISettings::setFrequencyShift(qint32 frequency_shift) {
+SWGTestMISettings::setFrequencyShift(qint32 frequency_shift) {
     this->frequency_shift = frequency_shift;
     this->m_frequency_shift_isSet = true;
 }
 
 qint32
-SWGTestSourceMISettings::getSampleRate() {
+SWGTestMISettings::getSampleRate() {
     return sample_rate;
 }
 void
-SWGTestSourceMISettings::setSampleRate(qint32 sample_rate) {
+SWGTestMISettings::setSampleRate(qint32 sample_rate) {
     this->sample_rate = sample_rate;
     this->m_sample_rate_isSet = true;
 }
 
 qint32
-SWGTestSourceMISettings::getLog2Decim() {
+SWGTestMISettings::getLog2Decim() {
     return log2_decim;
 }
 void
-SWGTestSourceMISettings::setLog2Decim(qint32 log2_decim) {
+SWGTestMISettings::setLog2Decim(qint32 log2_decim) {
     this->log2_decim = log2_decim;
     this->m_log2_decim_isSet = true;
 }
 
 qint32
-SWGTestSourceMISettings::getFcPos() {
+SWGTestMISettings::getFcPos() {
     return fc_pos;
 }
 void
-SWGTestSourceMISettings::setFcPos(qint32 fc_pos) {
+SWGTestMISettings::setFcPos(qint32 fc_pos) {
     this->fc_pos = fc_pos;
     this->m_fc_pos_isSet = true;
 }
 
 qint32
-SWGTestSourceMISettings::getSampleSizeIndex() {
+SWGTestMISettings::getSampleSizeIndex() {
     return sample_size_index;
 }
 void
-SWGTestSourceMISettings::setSampleSizeIndex(qint32 sample_size_index) {
+SWGTestMISettings::setSampleSizeIndex(qint32 sample_size_index) {
     this->sample_size_index = sample_size_index;
     this->m_sample_size_index_isSet = true;
 }
 
 qint32
-SWGTestSourceMISettings::getAmplitudeBits() {
+SWGTestMISettings::getAmplitudeBits() {
     return amplitude_bits;
 }
 void
-SWGTestSourceMISettings::setAmplitudeBits(qint32 amplitude_bits) {
+SWGTestMISettings::setAmplitudeBits(qint32 amplitude_bits) {
     this->amplitude_bits = amplitude_bits;
     this->m_amplitude_bits_isSet = true;
 }
 
 qint32
-SWGTestSourceMISettings::getAutoCorrOptions() {
+SWGTestMISettings::getAutoCorrOptions() {
     return auto_corr_options;
 }
 void
-SWGTestSourceMISettings::setAutoCorrOptions(qint32 auto_corr_options) {
+SWGTestMISettings::setAutoCorrOptions(qint32 auto_corr_options) {
     this->auto_corr_options = auto_corr_options;
     this->m_auto_corr_options_isSet = true;
 }
 
 qint32
-SWGTestSourceMISettings::getModulation() {
+SWGTestMISettings::getModulation() {
     return modulation;
 }
 void
-SWGTestSourceMISettings::setModulation(qint32 modulation) {
+SWGTestMISettings::setModulation(qint32 modulation) {
     this->modulation = modulation;
     this->m_modulation_isSet = true;
 }
 
 qint32
-SWGTestSourceMISettings::getModulationTone() {
+SWGTestMISettings::getModulationTone() {
     return modulation_tone;
 }
 void
-SWGTestSourceMISettings::setModulationTone(qint32 modulation_tone) {
+SWGTestMISettings::setModulationTone(qint32 modulation_tone) {
     this->modulation_tone = modulation_tone;
     this->m_modulation_tone_isSet = true;
 }
 
 qint32
-SWGTestSourceMISettings::getAmModulation() {
+SWGTestMISettings::getAmModulation() {
     return am_modulation;
 }
 void
-SWGTestSourceMISettings::setAmModulation(qint32 am_modulation) {
+SWGTestMISettings::setAmModulation(qint32 am_modulation) {
     this->am_modulation = am_modulation;
     this->m_am_modulation_isSet = true;
 }
 
 qint32
-SWGTestSourceMISettings::getFmDeviation() {
+SWGTestMISettings::getFmDeviation() {
     return fm_deviation;
 }
 void
-SWGTestSourceMISettings::setFmDeviation(qint32 fm_deviation) {
+SWGTestMISettings::setFmDeviation(qint32 fm_deviation) {
     this->fm_deviation = fm_deviation;
     this->m_fm_deviation_isSet = true;
 }
 
 float
-SWGTestSourceMISettings::getDcFactor() {
+SWGTestMISettings::getDcFactor() {
     return dc_factor;
 }
 void
-SWGTestSourceMISettings::setDcFactor(float dc_factor) {
+SWGTestMISettings::setDcFactor(float dc_factor) {
     this->dc_factor = dc_factor;
     this->m_dc_factor_isSet = true;
 }
 
 float
-SWGTestSourceMISettings::getIFactor() {
+SWGTestMISettings::getIFactor() {
     return i_factor;
 }
 void
-SWGTestSourceMISettings::setIFactor(float i_factor) {
+SWGTestMISettings::setIFactor(float i_factor) {
     this->i_factor = i_factor;
     this->m_i_factor_isSet = true;
 }
 
 float
-SWGTestSourceMISettings::getQFactor() {
+SWGTestMISettings::getQFactor() {
     return q_factor;
 }
 void
-SWGTestSourceMISettings::setQFactor(float q_factor) {
+SWGTestMISettings::setQFactor(float q_factor) {
     this->q_factor = q_factor;
     this->m_q_factor_isSet = true;
 }
 
 float
-SWGTestSourceMISettings::getPhaseImbalance() {
+SWGTestMISettings::getPhaseImbalance() {
     return phase_imbalance;
 }
 void
-SWGTestSourceMISettings::setPhaseImbalance(float phase_imbalance) {
+SWGTestMISettings::setPhaseImbalance(float phase_imbalance) {
     this->phase_imbalance = phase_imbalance;
     this->m_phase_imbalance_isSet = true;
 }
 
 QString*
-SWGTestSourceMISettings::getFileRecordName() {
+SWGTestMISettings::getFileRecordName() {
     return file_record_name;
 }
 void
-SWGTestSourceMISettings::setFileRecordName(QString* file_record_name) {
+SWGTestMISettings::setFileRecordName(QString* file_record_name) {
     this->file_record_name = file_record_name;
     this->m_file_record_name_isSet = true;
 }
 
 qint32
-SWGTestSourceMISettings::getUseReverseApi() {
+SWGTestMISettings::getUseReverseApi() {
     return use_reverse_api;
 }
 void
-SWGTestSourceMISettings::setUseReverseApi(qint32 use_reverse_api) {
+SWGTestMISettings::setUseReverseApi(qint32 use_reverse_api) {
     this->use_reverse_api = use_reverse_api;
     this->m_use_reverse_api_isSet = true;
 }
 
 QString*
-SWGTestSourceMISettings::getReverseApiAddress() {
+SWGTestMISettings::getReverseApiAddress() {
     return reverse_api_address;
 }
 void
-SWGTestSourceMISettings::setReverseApiAddress(QString* reverse_api_address) {
+SWGTestMISettings::setReverseApiAddress(QString* reverse_api_address) {
     this->reverse_api_address = reverse_api_address;
     this->m_reverse_api_address_isSet = true;
 }
 
 qint32
-SWGTestSourceMISettings::getReverseApiPort() {
+SWGTestMISettings::getReverseApiPort() {
     return reverse_api_port;
 }
 void
-SWGTestSourceMISettings::setReverseApiPort(qint32 reverse_api_port) {
+SWGTestMISettings::setReverseApiPort(qint32 reverse_api_port) {
     this->reverse_api_port = reverse_api_port;
     this->m_reverse_api_port_isSet = true;
 }
 
 qint32
-SWGTestSourceMISettings::getReverseApiDeviceIndex() {
+SWGTestMISettings::getReverseApiDeviceIndex() {
     return reverse_api_device_index;
 }
 void
-SWGTestSourceMISettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
+SWGTestMISettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
     this->reverse_api_device_index = reverse_api_device_index;
     this->m_reverse_api_device_index_isSet = true;
 }
 
 
 bool
-SWGTestSourceMISettings::isSet(){
+SWGTestMISettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_center_frequency_isSet){ isObjectUpdated = true; break;}

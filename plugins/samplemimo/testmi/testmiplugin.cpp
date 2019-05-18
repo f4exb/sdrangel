@@ -86,12 +86,12 @@ PluginInstanceGUI* TestMIPlugin::createSampleMIMOPluginInstanceGUI(
         QWidget **widget,
         DeviceUISet *deviceUISet)
 {
-	if(sourceId == m_deviceTypeID) {
+	if (sourceId == m_deviceTypeID) {
 		TestMIGui* gui = new TestMIGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	} else {
-		return 0;
+		return nullptr;
 	}
 }
 #endif

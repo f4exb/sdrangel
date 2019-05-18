@@ -33,6 +33,7 @@
 
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
+class DSPDeviceMIMOEngine;
 
 class SDRBASE_API DSPEngine : public QObject {
 	Q_OBJECT
@@ -50,6 +51,9 @@ public:
 	DSPDeviceSinkEngine *addDeviceSinkEngine();
 	void removeLastDeviceSinkEngine();
 
+	DSPDeviceMIMOEngine *addDeviceMIMOEngine();
+	void removeLastDeviceMIMOEngine();
+
 	AudioDeviceManager *getAudioDeviceManager() { return &m_audioDeviceManager; }
 
     uint32_t getDeviceSourceEnginesNumber() const { return m_deviceSourceEngines.size(); }
@@ -59,6 +63,10 @@ public:
     uint32_t getDeviceSinkEnginesNumber() const { return m_deviceSinkEngines.size(); }
     DSPDeviceSinkEngine *getDeviceSinkEngineByIndex(uint deviceIndex) { return m_deviceSinkEngines[deviceIndex]; }
     DSPDeviceSinkEngine *getDeviceSinkEngineByUID(uint uid);
+
+    uint32_t getDeviceMIMOEnginesNumber() const { return m_deviceMIMOEngines.size(); }
+    DSPDeviceMIMOEngine *getDeviceMIMOEngineByIndex(uint deviceIndex) { return m_deviceMIMOEngines[deviceIndex]; }
+    DSPDeviceMIMOEngine *getDeviceMIMOEngineByUID(uint uid);
 
 	// Serial DV methods:
 
@@ -83,6 +91,8 @@ private:
 	uint m_deviceSourceEnginesUIDSequence;
 	std::vector<DSPDeviceSinkEngine*> m_deviceSinkEngines;
 	uint m_deviceSinkEnginesUIDSequence;
+	std::vector<DSPDeviceMIMOEngine*> m_deviceMIMOEngines;
+	uint m_deviceMIMOEnginesUIDSequence;
     AudioDeviceManager m_audioDeviceManager;
     int m_audioInputDeviceIndex;
     int m_audioOutputDeviceIndex;

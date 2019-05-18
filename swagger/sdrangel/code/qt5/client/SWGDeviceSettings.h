@@ -46,7 +46,7 @@
 #include "SWGSDRPlaySettings.h"
 #include "SWGSoapySDRInputSettings.h"
 #include "SWGSoapySDROutputSettings.h"
-#include "SWGTestSourceMISettings.h"
+#include "SWGTestMISettings.h"
 #include "SWGTestSourceSettings.h"
 #include "SWGXtrxInputSettings.h"
 #include "SWGXtrxOutputSettings.h"
@@ -154,8 +154,8 @@ public:
     SWGTestSourceSettings* getTestSourceSettings();
     void setTestSourceSettings(SWGTestSourceSettings* test_source_settings);
 
-    SWGTestSourceMISettings* getTestSourceMiSettings();
-    void setTestSourceMiSettings(SWGTestSourceMISettings* test_source_mi_settings);
+    SWGTestMISettings* getTestMiSettings();
+    void setTestMiSettings(SWGTestMISettings* test_mi_settings);
 
     SWGXtrxInputSettings* getXtrxInputSettings();
     void setXtrxInputSettings(SWGXtrxInputSettings* xtrx_input_settings);
@@ -251,8 +251,8 @@ private:
     SWGTestSourceSettings* test_source_settings;
     bool m_test_source_settings_isSet;
 
-    SWGTestSourceMISettings* test_source_mi_settings;
-    bool m_test_source_mi_settings_isSet;
+    SWGTestMISettings* test_mi_settings;
+    bool m_test_mi_settings_isSet;
 
     SWGXtrxInputSettings* xtrx_input_settings;
     bool m_xtrx_input_settings_isSet;

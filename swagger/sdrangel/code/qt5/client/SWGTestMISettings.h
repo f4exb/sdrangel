@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGTestSourceMISettings.h
+ * SWGTestMISettings.h
  *
  * TestSourceMI
  */
 
-#ifndef SWGTestSourceMISettings_H_
-#define SWGTestSourceMISettings_H_
+#ifndef SWGTestMISettings_H_
+#define SWGTestMISettings_H_
 
 #include <QJsonObject>
 
@@ -29,18 +29,18 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGTestSourceMISettings: public SWGObject {
+class SWG_API SWGTestMISettings: public SWGObject {
 public:
-    SWGTestSourceMISettings();
-    SWGTestSourceMISettings(QString* json);
-    virtual ~SWGTestSourceMISettings();
+    SWGTestMISettings();
+    SWGTestMISettings(QString* json);
+    virtual ~SWGTestMISettings();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGTestSourceMISettings* fromJson(QString &jsonString) override;
+    virtual SWGTestMISettings* fromJson(QString &jsonString) override;
 
     qint32 getCenterFrequency();
     void setCenterFrequency(qint32 center_frequency);
@@ -176,4 +176,4 @@ private:
 
 }
 
-#endif /* SWGTestSourceMISettings_H_ */
+#endif /* SWGTestMISettings_H_ */

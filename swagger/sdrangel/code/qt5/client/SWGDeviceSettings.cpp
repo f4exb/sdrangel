@@ -84,8 +84,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_soapy_sdr_output_settings_isSet = false;
     test_source_settings = nullptr;
     m_test_source_settings_isSet = false;
-    test_source_mi_settings = nullptr;
-    m_test_source_mi_settings_isSet = false;
+    test_mi_settings = nullptr;
+    m_test_mi_settings_isSet = false;
     xtrx_input_settings = nullptr;
     m_xtrx_input_settings_isSet = false;
     xtrx_output_settings = nullptr;
@@ -154,8 +154,8 @@ SWGDeviceSettings::init() {
     m_soapy_sdr_output_settings_isSet = false;
     test_source_settings = new SWGTestSourceSettings();
     m_test_source_settings_isSet = false;
-    test_source_mi_settings = new SWGTestSourceMISettings();
-    m_test_source_mi_settings_isSet = false;
+    test_mi_settings = new SWGTestMISettings();
+    m_test_mi_settings_isSet = false;
     xtrx_input_settings = new SWGXtrxInputSettings();
     m_xtrx_input_settings_isSet = false;
     xtrx_output_settings = new SWGXtrxOutputSettings();
@@ -244,8 +244,8 @@ SWGDeviceSettings::cleanup() {
     if(test_source_settings != nullptr) { 
         delete test_source_settings;
     }
-    if(test_source_mi_settings != nullptr) { 
-        delete test_source_mi_settings;
+    if(test_mi_settings != nullptr) { 
+        delete test_mi_settings;
     }
     if(xtrx_input_settings != nullptr) { 
         delete xtrx_input_settings;
@@ -322,7 +322,7 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&test_source_settings, pJson["testSourceSettings"], "SWGTestSourceSettings", "SWGTestSourceSettings");
     
-    ::SWGSDRangel::setValue(&test_source_mi_settings, pJson["testSourceMISettings"], "SWGTestSourceMISettings", "SWGTestSourceMISettings");
+    ::SWGSDRangel::setValue(&test_mi_settings, pJson["testMISettings"], "SWGTestMISettings", "SWGTestMISettings");
     
     ::SWGSDRangel::setValue(&xtrx_input_settings, pJson["xtrxInputSettings"], "SWGXtrxInputSettings", "SWGXtrxInputSettings");
     
@@ -428,8 +428,8 @@ SWGDeviceSettings::asJsonObject() {
     if((test_source_settings != nullptr) && (test_source_settings->isSet())){
         toJsonValue(QString("testSourceSettings"), test_source_settings, obj, QString("SWGTestSourceSettings"));
     }
-    if((test_source_mi_settings != nullptr) && (test_source_mi_settings->isSet())){
-        toJsonValue(QString("testSourceMISettings"), test_source_mi_settings, obj, QString("SWGTestSourceMISettings"));
+    if((test_mi_settings != nullptr) && (test_mi_settings->isSet())){
+        toJsonValue(QString("testMISettings"), test_mi_settings, obj, QString("SWGTestMISettings"));
     }
     if((xtrx_input_settings != nullptr) && (xtrx_input_settings->isSet())){
         toJsonValue(QString("xtrxInputSettings"), xtrx_input_settings, obj, QString("SWGXtrxInputSettings"));
@@ -721,14 +721,14 @@ SWGDeviceSettings::setTestSourceSettings(SWGTestSourceSettings* test_source_sett
     this->m_test_source_settings_isSet = true;
 }
 
-SWGTestSourceMISettings*
-SWGDeviceSettings::getTestSourceMiSettings() {
-    return test_source_mi_settings;
+SWGTestMISettings*
+SWGDeviceSettings::getTestMiSettings() {
+    return test_mi_settings;
 }
 void
-SWGDeviceSettings::setTestSourceMiSettings(SWGTestSourceMISettings* test_source_mi_settings) {
-    this->test_source_mi_settings = test_source_mi_settings;
-    this->m_test_source_mi_settings_isSet = true;
+SWGDeviceSettings::setTestMiSettings(SWGTestMISettings* test_mi_settings) {
+    this->test_mi_settings = test_mi_settings;
+    this->m_test_mi_settings_isSet = true;
 }
 
 SWGXtrxInputSettings*
@@ -784,7 +784,7 @@ SWGDeviceSettings::isSet(){
         if(soapy_sdr_input_settings != nullptr && soapy_sdr_input_settings->isSet()){ isObjectUpdated = true; break;}
         if(soapy_sdr_output_settings != nullptr && soapy_sdr_output_settings->isSet()){ isObjectUpdated = true; break;}
         if(test_source_settings != nullptr && test_source_settings->isSet()){ isObjectUpdated = true; break;}
-        if(test_source_mi_settings != nullptr && test_source_mi_settings->isSet()){ isObjectUpdated = true; break;}
+        if(test_mi_settings != nullptr && test_mi_settings->isSet()){ isObjectUpdated = true; break;}
         if(xtrx_input_settings != nullptr && xtrx_input_settings->isSet()){ isObjectUpdated = true; break;}
         if(xtrx_output_settings != nullptr && xtrx_output_settings->isSet()){ isObjectUpdated = true; break;}
     }while(false);
