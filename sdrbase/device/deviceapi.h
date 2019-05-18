@@ -30,11 +30,13 @@ class ThreadedBasebandSampleSource;
 class ChannelAPI;
 class DeviceSampleSink;
 class DeviceSampleSource;
+class DeviceSampleMIMO;
 class MessageQueue;
 class PluginInterface;
 class PluginInstanceGUI;
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
+class DSPDeviceMIMOEngine;
 class Preset;
 
 class SDRBASE_API DeviceAPI : public QObject {
@@ -59,7 +61,8 @@ public:
         StreamType streamType,
         int deviceTabIndex,
         DSPDeviceSourceEngine *deviceSourceEngine,
-        DSPDeviceSinkEngine *deviceSinkEngine
+        DSPDeviceSinkEngine *deviceSinkEngine,
+        DSPDeviceMIMOEngine *deviceMIMOEngine
     );
     ~DeviceAPI();
 
@@ -78,8 +81,10 @@ public:
 
     void setSampleSource(DeviceSampleSource* source); //!< Set the device sample source (single Rx)
     void setSampleSink(DeviceSampleSink* sink);       //!< Set the device sample sink (single Tx)
+    void setSampleMIMO(DeviceSampleMIMO* mimo);       //!< Set the device sample MIMO
     DeviceSampleSource *getSampleSource();            //!< Return pointer to the device sample source (single Rx) or nullptr
     DeviceSampleSink *getSampleSink();                //!< Return pointer to the device sample sink (single Tx) or nullptr
+    DeviceSampleMIMO *getSampleMIMO();                //!< Return pointer to the device sample MIMO or nullptr
 
     bool initDeviceEngine();    //!< Init the device engine corresponding to the stream type
     bool startDeviceEngine();   //!< Start the device engine corresponding to the stream type
@@ -210,6 +215,10 @@ protected:
 
     DSPDeviceSinkEngine *m_deviceSinkEngine;
     QList<ChannelAPI*> m_channelSourceAPIs;
+
+    // MIMO
+
+    DSPDeviceMIMOEngine *m_deviceMIMOEngine;
 
 private:
     void renumerateChannels();

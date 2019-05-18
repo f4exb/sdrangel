@@ -23,6 +23,7 @@ class PluginInstanceGUI;
 class QWidget;
 class DeviceSampleSource;
 class DeviceSampleSink;
+class DeviceSampleMIMO;
 class BasebandSampleSink;
 class BasebandSampleSource;
 class ChannelAPI;
@@ -185,6 +186,34 @@ public:
 
     virtual void deleteSampleSinkPluginInstanceGUI(PluginInstanceGUI *ui);
     virtual void deleteSampleSinkPluginInstanceOutput(DeviceSampleSink *sink);
+
+    // device MIMO plugins only
+
+	virtual SamplingDevices enumSampleMIMO() { return SamplingDevices(); }
+
+	virtual PluginInstanceGUI* createSampleMIMOPluginInstanceGUI(
+            const QString& mimoId,
+            QWidget **widget,
+            DeviceUISet *deviceUISet)
+    {
+        (void) mimoId;
+        (void) widget;
+        (void) deviceUISet;
+        return nullptr;
+    }
+
+    virtual DeviceSampleMIMO* createSampleMIMOPluginInstanceMIMO( // creates the MIMO "core"
+            const QString& mimoId,
+            DeviceAPI *deviceAPI)
+    {
+        (void) mimoId;
+        (void) deviceAPI;
+        return nullptr;
+    }
+
+    virtual void deleteSampleMIMOPluginInstanceGUI(PluginInstanceGUI *ui);
+    virtual void deleteSampleMIMOPluginInstanceMIMO(DeviceSampleMIMO *mimo);
+
 };
 
 Q_DECLARE_INTERFACE(PluginInterface, "SDRangel.PluginInterface/0.1");

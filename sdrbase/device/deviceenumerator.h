@@ -35,22 +35,30 @@ public:
 
     void enumerateRxDevices(PluginManager *pluginManager);
     void enumerateTxDevices(PluginManager *pluginManager);
+    void enumerateMIMODevices(PluginManager *pluginManager);
     void listRxDeviceNames(QList<QString>& list, std::vector<int>& indexes) const;
     void listTxDeviceNames(QList<QString>& list, std::vector<int>& indexes) const;
+    void listMIMODeviceNames(QList<QString>& list, std::vector<int>& indexes) const;
     void changeRxSelection(int tabIndex, int deviceIndex);
     void changeTxSelection(int tabIndex, int deviceIndex);
+    void changeMIMOSelection(int tabIndex, int deviceIndex);
     void removeRxSelection(int tabIndex);
     void removeTxSelection(int tabIndex);
+    void removeMIMOSelection(int tabIndex);
     int getNbRxSamplingDevices() const { return m_rxEnumeration.size(); }
     int getNbTxSamplingDevices() const { return m_txEnumeration.size(); }
+    int getNbMIMOSamplingDevices() const { return m_mimoEnumeration.size(); }
     const PluginInterface::SamplingDevice* getRxSamplingDevice(int deviceIndex) const { return &m_rxEnumeration[deviceIndex].m_samplingDevice; }
     const PluginInterface::SamplingDevice* getTxSamplingDevice(int deviceIndex) const { return &m_txEnumeration[deviceIndex].m_samplingDevice; }
+    const PluginInterface::SamplingDevice* getMIMOSamplingDevice(int deviceIndex) const { return &m_mimoEnumeration[deviceIndex].m_samplingDevice; }
     PluginInterface *getRxPluginInterface(int deviceIndex) { return m_rxEnumeration[deviceIndex].m_pluginInterface; }
     PluginInterface *getTxPluginInterface(int deviceIndex) { return m_txEnumeration[deviceIndex].m_pluginInterface; }
+    PluginInterface *getMIMOPluginInterface(int deviceIndex) { return m_mimoEnumeration[deviceIndex].m_pluginInterface; }
     int getFileSourceDeviceIndex() const;
     int getFileSinkDeviceIndex() const;
     int getRxSamplingDeviceIndex(const QString& deviceId, int sequence);
     int getTxSamplingDeviceIndex(const QString& deviceId, int sequence);
+    int getMIMOSamplingDeviceIndex(const QString& deviceId, int sequence);
 
 private:
     struct DeviceEnumeration
@@ -70,6 +78,7 @@ private:
 
     DevicesEnumeration m_rxEnumeration;
     DevicesEnumeration m_txEnumeration;
+    DevicesEnumeration m_mimoEnumeration;
 };
 
 #endif /* SDRBASE_DEVICE_DEVICEENUMERATOR_H_ */

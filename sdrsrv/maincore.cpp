@@ -166,11 +166,11 @@ bool MainCore::handleMessage(const Message& cmd)
     {
         MsgSetDevice& notif = (MsgSetDevice&) cmd;
 
-        if (notif.isTx()) {
+        if (notif.getDeviceType() == 1) {
             changeSampleSink(notif.getDeviceSetIndex(), notif.getDeviceIndex());
-        } else {
+        } else if (notif.getDeviceType() == 0) {
             changeSampleSource(notif.getDeviceSetIndex(), notif.getDeviceIndex());
-        }
+        } // TODO: for MIMO
 
         return true;
     }
@@ -281,7 +281,7 @@ void MainCore::addSinkDevice()
     char tabNameCStr[16];
     sprintf(tabNameCStr, "T%d", deviceTabIndex);
 
-    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleTx, deviceTabIndex, nullptr, dspDeviceSinkEngine);
+    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleTx, deviceTabIndex, nullptr, dspDeviceSinkEngine, nullptr);
 
     m_deviceSets.back()->m_deviceAPI = deviceAPI;
     QList<QString> channelNames;
@@ -324,7 +324,7 @@ void MainCore::addSourceDevice()
     char tabNameCStr[16];
     sprintf(tabNameCStr, "R%d", deviceTabIndex);
 
-    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleRx, deviceTabIndex, dspDeviceSourceEngine, nullptr);
+    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleRx, deviceTabIndex, dspDeviceSourceEngine, nullptr, nullptr);
 
     m_deviceSets.back()->m_deviceAPI = deviceAPI;
 

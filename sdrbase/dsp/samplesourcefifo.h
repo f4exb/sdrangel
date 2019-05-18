@@ -29,7 +29,8 @@ class SDRBASE_API SampleSourceFifo : public QObject {
     Q_OBJECT
 
 public:
-    SampleSourceFifo(uint32_t size);
+    SampleSourceFifo(uint32_t size, QObject* parent = nullptr);
+    SampleSourceFifo(const SampleSourceFifo& other);
     ~SampleSourceFifo();
 
     void resize(uint32_t size);

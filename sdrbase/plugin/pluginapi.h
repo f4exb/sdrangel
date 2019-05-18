@@ -57,6 +57,9 @@ public:
 	// Sample Sink stuff
 	void registerSampleSink(const QString& sinkName, PluginInterface* plugin);
 
+	// Sample MIMO stuff
+	void registerSampleMIMO(const QString& sinkName, PluginInterface* plugin);
+
 protected:
 	PluginManager* m_pluginManager;
 

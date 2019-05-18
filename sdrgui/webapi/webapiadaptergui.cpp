@@ -1052,7 +1052,7 @@ int WebAPIAdapterGUI::devicesetDevicePut(
                 continue;
             }
 
-            MainWindow::MsgSetDevice *msg = MainWindow::MsgSetDevice::create(deviceSetIndex, i, query.getDirection() == 1);
+            MainWindow::MsgSetDevice *msg = MainWindow::MsgSetDevice::create(deviceSetIndex, i, query.getDirection());
             m_mainWindow.m_inputMessageQueue.push(msg);
 
             response.init();

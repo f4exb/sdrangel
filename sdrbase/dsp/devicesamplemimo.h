@@ -124,8 +124,8 @@ public:
 
     unsigned int getNbSourceFifos() const { return m_sampleSourceFifos.size(); } //!< Get the number of Tx FIFOs
     unsigned int getNbSinkFifos() const { return m_sampleSinkFifos.size(); }     //!< Get the number of Rx FIFOs
-	SampleSourceFifo* getSampleSourceFifo(int index); //!< Get Tx FIFO at index
-    SampleSinkFifo* getSampleSinkFifo(int index);     //!< Get Rx FIFO at index
+	SampleSourceFifo* getSampleSourceFifo(unsigned int index); //!< Get Tx FIFO at index
+    SampleSinkFifo* getSampleSinkFifo(unsigned int index);     //!< Get Rx FIFO at index
 
 protected slots:
 	void handleInputMessages();

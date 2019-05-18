@@ -43,8 +43,9 @@ private:
 	void create(uint s);
 
 public:
-	SampleSinkFifo(QObject* parent = NULL);
-	SampleSinkFifo(int size, QObject* parent = NULL);
+	SampleSinkFifo(QObject* parent = nullptr);
+	SampleSinkFifo(int size, QObject* parent = nullptr);
+    SampleSinkFifo(const SampleSinkFifo& other);
 	~SampleSinkFifo();
 
 	bool setSize(int size);

@@ -21,6 +21,7 @@
 
 #include <QThread>
 
+#include "util/message.h"
 #include "util/messagequeue.h"
 #include "util/syncmessenger.h"
 #include "util/movingaverage.h"
@@ -233,6 +234,7 @@ public:
 	void setMIMO(DeviceSampleMIMO* mimo); //!< Set the sample MIMO type
 	DeviceSampleMIMO *getMIMO() { return m_deviceSampleMIMO; }
 	void setMIMOSequence(int sequence); //!< Set the sample MIMO sequence in type
+    uint getUID() const { return m_uid; }
 
 	void addChannelSource(ThreadedBasebandSampleSource* source, int index = 0);    //!< Add a channel source that will run on its own thread
 	void removeChannelSource(ThreadedBasebandSampleSource* source, int index = 0); //!< Remove a channel source that runs on its own thread
@@ -249,6 +251,8 @@ public:
 
 	QString errorMessage(); //!< Return the current error message
 	QString deviceDescription(); //!< Return the device description
+
+   	void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection, int isource); //!< Configure source DSP corrections
 
 private:
     struct SourceCorrection

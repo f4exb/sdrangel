@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 F4EXB                                                      //
-// written by Edouard Griffiths                                                  //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -16,47 +15,39 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QDebug>
+#ifndef _TESTMI_TESTMIPLUGIN_H
+#define _TESTMI_TESTMIPLUGIN_H
 
-#include "devicesamplemimo.h"
+#include <QObject>
+#include "plugin/plugininterface.h"
 
-DeviceSampleMIMO::DeviceSampleMIMO() :
-    m_guiMessageQueue(0)
-{
-	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-}
+class PluginAPI;
 
-DeviceSampleMIMO::~DeviceSampleMIMO()
-{
-}
+#define TESTMI_DEVICE_TYPE_ID "sdrangel.samplemimo.testmi"
 
-void DeviceSampleMIMO::handleInputMessages()
-{
-	Message* message;
+class TestMIPlugin : public QObject, public PluginInterface {
+	Q_OBJECT
+	Q_INTERFACES(PluginInterface)
+	Q_PLUGIN_METADATA(IID TESTMI_DEVICE_TYPE_ID)
 
-	while ((message = m_inputMessageQueue.pop()) != 0)
-	{
-		if (handleMessage(*message))
-		{
-			delete message;
-		}
-	}
-}
+public:
+	explicit TestMIPlugin(QObject* parent = NULL);
 
-SampleSourceFifo* DeviceSampleMIMO::getSampleSourceFifo(unsigned int index)
-{
-    if (index >= m_sampleSourceFifos.size()) {
-        return nullptr;
-    } else {
-        return &m_sampleSourceFifos[index];
-    }
-}
+	const PluginDescriptor& getPluginDescriptor() const;
+	void initPlugin(PluginAPI* pluginAPI);
 
-SampleSinkFifo* DeviceSampleMIMO::getSampleSinkFifo(unsigned int index)
-{
-    if (index >= m_sampleSinkFifos.size()) {
-        return nullptr;
-    } else {
-        return &m_sampleSinkFifos[index];
-    }
-}
+	virtual SamplingDevices enumSampleMIMO();
+	virtual PluginInstanceGUI* createSampleMIMOPluginInstanceGUI(
+	        const QString& sourceId,
+	        QWidget **widget,
+	        DeviceUISet *deviceUISet);
+	virtual DeviceSampleMIMO* createSampleMIMOPluginInstanceMIMO(const QString& sourceId, DeviceAPI *deviceAPI);
+
+	static const QString m_hardwareID;
+    static const QString m_deviceTypeID;
+
+private:
+	static const PluginDescriptor m_pluginDescriptor;
+};
+
+#endif // _TESTMI_TESTMIPLUGIN_H

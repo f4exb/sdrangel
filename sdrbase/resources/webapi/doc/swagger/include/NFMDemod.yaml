@@ -29,6 +29,8 @@ NFMDemodSettings:
       format: float
     ctcssOn:
       type: integer
+    highPass:
+      type: integer
     audioMute:
       type: integer
     ctcssIndex:

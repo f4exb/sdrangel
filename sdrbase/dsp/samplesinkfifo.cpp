@@ -54,6 +54,17 @@ SampleSinkFifo::SampleSinkFifo(int size, QObject* parent) :
 	create(size);
 }
 
+SampleSinkFifo::SampleSinkFifo(const SampleSinkFifo& other) :
+    QObject(other.parent()),
+    m_data(other.m_data)
+{
+  	m_suppressed = -1;
+	m_size = m_data.size();
+	m_fill = 0;
+	m_head = 0;
+	m_tail = 0;
+}
+
 SampleSinkFifo::~SampleSinkFifo()
 {
 	QMutexLocker mutexLocker(&m_mutex);

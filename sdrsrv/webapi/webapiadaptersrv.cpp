@@ -1139,7 +1139,7 @@ int WebAPIAdapterSrv::devicesetDevicePut(
                 continue;
             }
 
-            MainCore::MsgSetDevice *msg = MainCore::MsgSetDevice::create(deviceSetIndex, i, query.getDirection() == 1);
+            MainCore::MsgSetDevice *msg = MainCore::MsgSetDevice::create(deviceSetIndex, i, query.getDirection());
             m_mainCore.m_inputMessageQueue.push(msg);
 
             response.init();

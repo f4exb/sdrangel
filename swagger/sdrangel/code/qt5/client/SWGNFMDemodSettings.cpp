@@ -46,6 +46,8 @@ SWGNFMDemodSettings::SWGNFMDemodSettings() {
     m_volume_isSet = false;
     ctcss_on = 0;
     m_ctcss_on_isSet = false;
+    high_pass = 0;
+    m_high_pass_isSet = false;
     audio_mute = 0;
     m_audio_mute_isSet = false;
     ctcss_index = 0;
@@ -92,6 +94,8 @@ SWGNFMDemodSettings::init() {
     m_volume_isSet = false;
     ctcss_on = 0;
     m_ctcss_on_isSet = false;
+    high_pass = 0;
+    m_high_pass_isSet = false;
     audio_mute = 0;
     m_audio_mute_isSet = false;
     ctcss_index = 0;
@@ -116,6 +120,7 @@ SWGNFMDemodSettings::init() {
 
 void
 SWGNFMDemodSettings::cleanup() {
+
 
 
 
@@ -171,6 +176,8 @@ SWGNFMDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
     
     ::SWGSDRangel::setValue(&ctcss_on, pJson["ctcssOn"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&high_pass, pJson["highPass"], "qint32", "");
     
     ::SWGSDRangel::setValue(&audio_mute, pJson["audioMute"], "qint32", "");
     
@@ -234,6 +241,9 @@ SWGNFMDemodSettings::asJsonObject() {
     }
     if(m_ctcss_on_isSet){
         obj->insert("ctcssOn", QJsonValue(ctcss_on));
+    }
+    if(m_high_pass_isSet){
+        obj->insert("highPass", QJsonValue(high_pass));
     }
     if(m_audio_mute_isSet){
         obj->insert("audioMute", QJsonValue(audio_mute));
@@ -360,6 +370,16 @@ SWGNFMDemodSettings::setCtcssOn(qint32 ctcss_on) {
 }
 
 qint32
+SWGNFMDemodSettings::getHighPass() {
+    return high_pass;
+}
+void
+SWGNFMDemodSettings::setHighPass(qint32 high_pass) {
+    this->high_pass = high_pass;
+    this->m_high_pass_isSet = true;
+}
+
+qint32
 SWGNFMDemodSettings::getAudioMute() {
     return audio_mute;
 }
@@ -473,6 +493,7 @@ SWGNFMDemodSettings::isSet(){
         if(m_squelch_isSet){ isObjectUpdated = true; break;}
         if(m_volume_isSet){ isObjectUpdated = true; break;}
         if(m_ctcss_on_isSet){ isObjectUpdated = true; break;}
+        if(m_high_pass_isSet){ isObjectUpdated = true; break;}
         if(m_audio_mute_isSet){ isObjectUpdated = true; break;}
         if(m_ctcss_index_isSet){ isObjectUpdated = true; break;}
         if(m_rgb_color_isSet){ isObjectUpdated = true; break;}

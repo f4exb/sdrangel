@@ -19,7 +19,8 @@
 #include <assert.h>
 #include "samplesourcefifo.h"
 
-SampleSourceFifo::SampleSourceFifo(uint32_t size) :
+SampleSourceFifo::SampleSourceFifo(uint32_t size, QObject* parent) :
+    QObject(parent),
     m_size(size),
     m_init(false)
 {
@@ -27,6 +28,12 @@ SampleSourceFifo::SampleSourceFifo(uint32_t size) :
     init();
 }
 
+SampleSourceFifo::SampleSourceFifo(const SampleSourceFifo& other) :
+    QObject(other.parent()),
+    m_data(other.m_data)
+{
+    init();
+}
 
 SampleSourceFifo::~SampleSourceFifo()
 {}

@@ -32,7 +32,6 @@
 class QLabel;
 class QTreeWidgetItem;
 class QDir;
-class SamplingDeviceControl;
 
 class DSPEngine;
 class DSPDeviceSourceEngine;
@@ -196,7 +195,7 @@ private:
     public:
         int getDeviceSetIndex() const { return m_deviceSetIndex; }
         int getDeviceIndex() const { return m_deviceIndex; }
-        bool isTx() const { return m_tx; }
+        int getDeviceType() const { return m_deviceType; }
 
         static MsgSetDevice* create(int deviceSetIndex, int deviceIndex, bool tx)
         {
@@ -206,13 +205,13 @@ private:
     private:
         int m_deviceSetIndex;
         int m_deviceIndex;
-        bool m_tx;
+        int m_deviceType;
 
-        MsgSetDevice(int deviceSetIndex, int deviceIndex, bool tx) :
+        MsgSetDevice(int deviceSetIndex, int deviceIndex, int deviceType) :
             Message(),
             m_deviceSetIndex(deviceSetIndex),
             m_deviceIndex(deviceIndex),
-            m_tx(tx)
+            m_deviceType(deviceType)
         { }
     };
 

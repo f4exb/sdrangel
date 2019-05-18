@@ -1830,6 +1830,8 @@ definitions:
         $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDROutputSettings"
       testSourceSettings:
         $ref: "/doc/swagger/include/TestSource.yaml#/TestSourceSettings"
+      testSourceMISettings:
+        $ref: "/doc/swagger/include/TestSourceMI.yaml#/TestSourceMISettings"
       xtrxInputSettings:
         $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxInputSettings"
       xtrxOutputSettings:

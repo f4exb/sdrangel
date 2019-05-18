@@ -776,3 +776,10 @@ void DSPDeviceMIMOEngine::handleInputMessages()
 		}
 	}
 }
+
+void DSPDeviceMIMOEngine::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection, int isource)
+{
+	qDebug() << "DSPDeviceMIMOEngine::configureCorrections";
+	ConfigureCorrection* cmd = new ConfigureCorrection(dcOffsetCorrection, iqImbalanceCorrection, isource);
+	m_inputMessageQueue.push(cmd);
+}

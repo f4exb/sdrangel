@@ -26,6 +26,11 @@ void PluginAPI::registerSampleSink(const QString& sinkName, PluginInterface* plu
 	m_pluginManager->registerSampleSink(sinkName, plugin);
 }
 
+void PluginAPI::registerSampleMIMO(const QString& mimoName, PluginInterface* plugin)
+{
+	m_pluginManager->registerSampleMIMO(mimoName, plugin);
+}
+
 PluginAPI::ChannelRegistrations *PluginAPI::getTxChannelRegistrations()
 {
     return m_pluginManager->getTxChannelRegistrations();

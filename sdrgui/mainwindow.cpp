@@ -272,7 +272,7 @@ void MainWindow::addSourceDevice(int deviceIndex)
     char tabNameCStr[16];
     sprintf(tabNameCStr, "R%d", deviceTabIndex);
 
-    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleRx, deviceTabIndex, dspDeviceSourceEngine, nullptr);
+    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleRx, deviceTabIndex, dspDeviceSourceEngine, nullptr, nullptr);
 
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
@@ -346,7 +346,7 @@ void MainWindow::addSinkDevice()
     char tabNameCStr[16];
     sprintf(tabNameCStr, "T%d", deviceTabIndex);
 
-    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleTx, deviceTabIndex, nullptr, dspDeviceSinkEngine);
+    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleTx, deviceTabIndex, nullptr, dspDeviceSinkEngine, nullptr);
 
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
@@ -840,11 +840,11 @@ bool MainWindow::handleMessage(const Message& cmd)
         DeviceUISet *deviceUI = m_deviceUIs[notif.getDeviceSetIndex()];
         deviceUI->m_samplingDeviceControl->setSelectedDeviceIndex(notif.getDeviceIndex());
 
-        if (notif.isTx()) {
+        if (notif.getDeviceType() == 1) {
             sampleSinkChanged();
-        } else {
+        } else if (notif.getDeviceType() == 0) {
             sampleSourceChanged();
-        }
+        } // TODO: for MIMO
 
         return true;
     }

@@ -39,6 +39,8 @@ SamplingDeviceDialog::SamplingDeviceDialog(int deviceType, int deviceTabIndex, Q
         DeviceEnumerator::instance()->listRxDeviceNames(deviceDisplayNames, m_deviceIndexes);
     } else if (m_deviceType == 1) { // Single Tx
         DeviceEnumerator::instance()->listTxDeviceNames(deviceDisplayNames, m_deviceIndexes);
+    } else if (m_deviceType == 2) { // MIMO
+        DeviceEnumerator::instance()->listMIMODeviceNames(deviceDisplayNames, m_deviceIndexes);
     }
 
     QStringList devicesNamesList(deviceDisplayNames);
@@ -58,6 +60,8 @@ void SamplingDeviceDialog::accept()
         DeviceEnumerator::instance()->changeRxSelection(m_deviceTabIndex, m_selectedDeviceIndex);
     } else if (m_deviceType == 1) { // Single Tx
         DeviceEnumerator::instance()->changeTxSelection(m_deviceTabIndex, m_selectedDeviceIndex);
+    } else if (m_deviceType == 2) { // MIMO
+        DeviceEnumerator::instance()->changeMIMOSelection(m_deviceTabIndex, m_selectedDeviceIndex);
     }
 
     QDialog::accept();
