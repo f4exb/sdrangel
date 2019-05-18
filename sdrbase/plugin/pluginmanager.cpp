@@ -80,23 +80,23 @@ void PluginManager::loadPluginsPart(const QString& pluginsSubDir)
     // NOTE: exit on the first folder found
     bool found = false;
     foreach (QString dir, PluginsPath)
-      {
+    {
         QDir d(dir);
         if (d.entryList(QDir::Files).count() == 0) {
-          qDebug("PluginManager::loadPluginsPart folder %s is empty", qPrintable(dir));
-          continue;
+            qDebug("PluginManager::loadPluginsPart folder %s is empty", qPrintable(dir));
+            continue;
         }
 
         found = true;
         loadPluginsDir(d);
         break;
-      }
+    }
 
     if (!found)
-      {
+    {
         qCritical("No plugins found. Exit immediately.");
         exit(EXIT_FAILURE);
-      }
+    }
 }
 
 void PluginManager::loadPluginsFinal()
@@ -150,74 +150,74 @@ void PluginManager::registerSampleSink(const QString& sinkName, PluginInterface*
 
 void PluginManager::loadPluginsDir(const QDir& dir)
 {
-	QDir pluginsDir(dir);
+    QDir pluginsDir(dir);
 
-        foreach (QString fileName, pluginsDir.entryList(QDir::Files))
-          {
-            if (QLibrary::isLibrary(fileName))
-              {
-                qDebug("PluginManager::loadPluginsDir: fileName: %s", qPrintable(fileName));
+    foreach (QString fileName, pluginsDir.entryList(QDir::Files))
+    {
+        if (QLibrary::isLibrary(fileName))
+        {
+            qDebug("PluginManager::loadPluginsDir: fileName: %s", qPrintable(fileName));
 
-                QPluginLoader* plugin = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
-                if (!plugin->load())
-                  {
-                    qWarning("PluginManager::loadPluginsDir: %s", qPrintable(plugin->errorString()));
-                    delete plugin;
-                    continue;
-                  }
+            QPluginLoader* pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
+            if (!pluginLoader->load())
+            {
+                qWarning("PluginManager::loadPluginsDir: %s", qPrintable(pluginLoader->errorString()));
+                delete pluginLoader;
+                continue;
+            }
 
-                PluginInterface* instance = qobject_cast<PluginInterface*>(plugin->instance());
-                if (instance == nullptr)
-                  {
-                    qWarning("PluginManager::loadPluginsDir: Unable to get main instance of plugin: %s", qPrintable(fileName) );
-                    delete plugin;
-                    continue;
-                  }
+            PluginInterface* instance = qobject_cast<PluginInterface*>(pluginLoader->instance());
+            if (instance == nullptr)
+            {
+                qWarning("PluginManager::loadPluginsDir: Unable to get main instance of plugin: %s", qPrintable(fileName) );
+                delete pluginLoader;
+                continue;
+            }
 
-                qInfo("PluginManager::loadPluginsDir: loaded plugin %s", qPrintable(fileName));
-                m_plugins.append(Plugin(fileName, plugin, instance));
-              }
-          }
+            qInfo("PluginManager::loadPluginsDir: loaded plugin %s", qPrintable(fileName));
+            m_plugins.append(Plugin(fileName, pluginLoader, instance));
+       }
+    }
 }
 
 void PluginManager::listTxChannels(QList<QString>& list)
 {
-  list.clear();
+    list.clear();
 
-  for(PluginAPI::ChannelRegistrations::iterator it = m_txChannelRegistrations.begin(); it != m_txChannelRegistrations.end(); ++it)
+    for(PluginAPI::ChannelRegistrations::iterator it = m_txChannelRegistrations.begin(); it != m_txChannelRegistrations.end(); ++it)
     {
-      const PluginDescriptor& pluginDescipror = it->m_plugin->getPluginDescriptor();
-      list.append(pluginDescipror.displayedName);
+        const PluginDescriptor& pluginDescipror = it->m_plugin->getPluginDescriptor();
+        list.append(pluginDescipror.displayedName);
     }
 }
 
 void PluginManager::listRxChannels(QList<QString>& list)
 {
-  list.clear();
+    list.clear();
 
-  for(PluginAPI::ChannelRegistrations::iterator it = m_rxChannelRegistrations.begin(); it != m_rxChannelRegistrations.end(); ++it)
+    for(PluginAPI::ChannelRegistrations::iterator it = m_rxChannelRegistrations.begin(); it != m_rxChannelRegistrations.end(); ++it)
     {
-      const PluginDescriptor& pluginDesciptor = it->m_plugin->getPluginDescriptor();
-      list.append(pluginDesciptor.displayedName);
+        const PluginDescriptor& pluginDesciptor = it->m_plugin->getPluginDescriptor();
+        list.append(pluginDesciptor.displayedName);
     }
 }
 
 void PluginManager::createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI)
 {
-  if (channelPluginIndex < m_rxChannelRegistrations.size())
+    if (channelPluginIndex < m_rxChannelRegistrations.size())
     {
-      PluginInterface *pluginInterface = m_rxChannelRegistrations[channelPluginIndex].m_plugin;
-      BasebandSampleSink *rxChannel = pluginInterface->createRxChannelBS(deviceAPI);
-      pluginInterface->createRxChannelGUI(deviceUISet, rxChannel);
+        PluginInterface *pluginInterface = m_rxChannelRegistrations[channelPluginIndex].m_plugin;
+        BasebandSampleSink *rxChannel = pluginInterface->createRxChannelBS(deviceAPI);
+        pluginInterface->createRxChannelGUI(deviceUISet, rxChannel);
     }
 }
 
 void PluginManager::createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI)
 {
-  if (channelPluginIndex < m_txChannelRegistrations.size())
+    if (channelPluginIndex < m_txChannelRegistrations.size())
     {
-      PluginInterface *pluginInterface = m_txChannelRegistrations[channelPluginIndex].m_plugin;
-      BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(deviceAPI);
-      pluginInterface->createTxChannelGUI(deviceUISet, txChannel);
+        PluginInterface *pluginInterface = m_txChannelRegistrations[channelPluginIndex].m_plugin;
+        BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(deviceAPI);
+        pluginInterface->createTxChannelGUI(deviceUISet, txChannel);
     }
 }
