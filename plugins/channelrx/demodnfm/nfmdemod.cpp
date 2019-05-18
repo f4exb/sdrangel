@@ -681,6 +681,9 @@ int NFMDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("audioMute")) {
         settings.m_audioMute = response.getNfmDemodSettings()->getAudioMute() != 0;
     }
+    if (channelSettingsKeys.contains("highPass")) {
+        settings.m_highPass = response.getNfmDemodSettings()->getHighPass() != 0;
+    }
     if (channelSettingsKeys.contains("ctcssIndex")) {
         settings.m_ctcssIndex = response.getNfmDemodSettings()->getCtcssIndex();
     }
@@ -771,6 +774,7 @@ void NFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
 {
     response.getNfmDemodSettings()->setAfBandwidth(settings.m_afBandwidth);
     response.getNfmDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
+    response.getNfmDemodSettings()->setHighPass(settings.m_highPass ? 1 : 0);
     response.getNfmDemodSettings()->setCtcssIndex(settings.m_ctcssIndex);
     response.getNfmDemodSettings()->setCtcssOn(settings.m_ctcssOn ? 1 : 0);
     response.getNfmDemodSettings()->setDeltaSquelch(settings.m_deltaSquelch ? 1 : 0);
@@ -837,6 +841,9 @@ void NFMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
     }
     if (channelSettingsKeys.contains("audioMute") || force) {
         swgNFMDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("highPass") || force) {
+        swgNFMDemodSettings->setAudioMute(settings.m_highPass ? 1 : 0);
     }
     if (channelSettingsKeys.contains("ctcssIndex") || force) {
         swgNFMDemodSettings->setCtcssIndex(settings.m_ctcssIndex);
