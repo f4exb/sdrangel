@@ -222,6 +222,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     }
 
     m_mimoEnabled = parser.getMIMOSupport();
+
 	m_apiAdapter = new WebAPIAdapterGUI(*this);
 	m_requestMapper = new WebAPIRequestMapper(this);
 	m_requestMapper->setAdapter(m_apiAdapter);
@@ -283,6 +284,7 @@ void MainWindow::addSourceDevice(int deviceIndex)
     m_pluginManager->listRxChannels(channelNames);
     QStringList channelNamesList(channelNames);
     m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector()->addItems(channelNamesList);
+    m_deviceUIs.back()->setNumberOfAvailableRxChannels(channelNamesList.size());
 
     connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(channelAddClicked(bool)));
 
@@ -357,6 +359,7 @@ void MainWindow::addSinkDevice()
     m_pluginManager->listTxChannels(channelNames);
     QStringList channelNamesList(channelNames);
     m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector()->addItems(channelNamesList);
+    m_deviceUIs.back()->setNumberOfAvailableTxChannels(channelNamesList.size());
 
     connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(channelAddClicked(bool)));
 
@@ -430,12 +433,13 @@ void MainWindow::addMIMODevice()
     m_pluginManager->listRxChannels(rxChannelNames);
     QStringList rxChannelNamesList(rxChannelNames);
     channelSelector->addItems(rxChannelNamesList);
-    channelSelector->insertSeparator(channelSelector->count());
+    m_deviceUIs.back()->setNumberOfAvailableRxChannels(rxChannelNamesList.size());
     // Add Tx channels
     QList<QString> txChannelNames;
     m_pluginManager->listTxChannels(txChannelNames);
     QStringList txChannelNamesList(txChannelNames);
     channelSelector->addItems(txChannelNamesList);
+    m_deviceUIs.back()->setNumberOfAvailableTxChannels(txChannelNamesList.size());
     // TODO: add MIMO channels
 
     connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(channelAddClicked(bool)));
@@ -1872,6 +1876,22 @@ void MainWindow::channelAddClicked(bool checked)
         {
             m_pluginManager->createTxChannelInstance(
                 deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI, deviceUI->m_deviceAPI);
+        }
+        else if (deviceUI->m_deviceMIMOEngine) // MIMO device => all possible channels. Depends on index range
+        {
+            int nbRxChannels = deviceUI->getNumberOfAvailableRxChannels();
+            int nbTxChannels = deviceUI->getNumberOfAvailableTxChannels();
+            int selectedIndex = deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex();
+            qDebug("MainWindow::channelAddClicked: MIMO: tab: %d nbRx: %d nbTx: %d selected: %d",
+                currentSourceTabIndex, nbRxChannels, nbTxChannels, selectedIndex);
+
+            if (selectedIndex < nbRxChannels) {
+                m_pluginManager->createRxChannelInstance(
+                    selectedIndex, deviceUI, deviceUI->m_deviceAPI);
+            } else if (selectedIndex < nbRxChannels + nbTxChannels) {
+                m_pluginManager->createTxChannelInstance(
+                    selectedIndex - nbRxChannels, deviceUI, deviceUI->m_deviceAPI);
+            }
         }
     }
 }

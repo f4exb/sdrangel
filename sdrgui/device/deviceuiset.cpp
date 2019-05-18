@@ -48,6 +48,9 @@ DeviceUISet::DeviceUISet(int tabIndex, int deviceType, QTimer& timer)
     m_deviceAPI = 0;
     m_deviceSinkEngine = 0;
     m_deviceTabIndex = tabIndex;
+    m_nbAvailableRxChannels = 0;   // updated at enumeration for UI selector
+    m_nbAvailableTxChannels = 0;   // updated at enumeration for UI selector
+    m_nbAvailableMIMOChannels = 0; // updated at enumeration for UI selector
 
     // m_spectrum needs to have its font to be set since it cannot be inherited from the main window
     QFont font;

@@ -73,6 +73,14 @@ public:
     void loadTxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveTxChannelSettings(Preset* preset);
 
+    // These are the number of channel types available for selection
+    void setNumberOfAvailableRxChannels(int number) { m_nbAvailableRxChannels = number; }
+    void setNumberOfAvailableTxChannels(int number) { m_nbAvailableTxChannels = number; }
+    void setNumberOfAvailableMIMOChannels(int number) { m_nbAvailableMIMOChannels = number; }
+    int getNumberOfAvailableRxChannels() const { return m_nbAvailableRxChannels; }
+    int getNumberOfAvailableTxChannels() const { return m_nbAvailableTxChannels; }
+    int getNumberOfAvailableMIMOChannels() const { return m_nbAvailableMIMOChannels; }
+
 private:
     struct ChannelInstanceRegistration
     {
@@ -97,6 +105,9 @@ private:
     ChannelInstanceRegistrations m_rxChannelInstanceRegistrations;
     ChannelInstanceRegistrations m_txChannelInstanceRegistrations;
     int m_deviceTabIndex;
+    int m_nbAvailableRxChannels;   //!< Number of Rx channels available for selection
+    int m_nbAvailableTxChannels;   //!< Number of Tx channels available for selection
+    int m_nbAvailableMIMOChannels; //!< Number of MIMO channels available for selection
 
     void renameRxChannelInstances();
     void renameTxChannelInstances();
