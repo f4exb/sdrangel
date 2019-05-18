@@ -20,8 +20,6 @@ set -e
 
 case "$1" in
     configure)
-        cd /opt/sdrangel/share/sdrangel/udev-rules
-        ./install.sh
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

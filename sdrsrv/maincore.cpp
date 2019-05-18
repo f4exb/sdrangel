@@ -274,8 +274,6 @@ void MainCore::addSinkDevice()
     int deviceTabIndex = m_deviceSets.size();
     m_deviceSets.push_back(new DeviceSet(deviceTabIndex));
     m_deviceSets.back()->m_deviceSourceEngine = 0;
-        m_deviceSets.back()->m_deviceMIMOEngine = 0;
- dspDeviceSinkEngine;
     m_deviceSets.back()->m_deviceMIMOEngine = 0;
 
     char tabNameCStr[16];
