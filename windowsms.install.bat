@@ -37,7 +37,6 @@ copy %pothosdir%\bin\SoapySDR.dll %2
 
 copy %libusbdir%\dll\libusb-1.0.dll %2
 copy %pthreadsdir%\dll\x64\pthreadVC2.dll %2
-REM copy libsqlite3\%1\libsqlite3.dll %2
 REM copy %libxml2dir%\bin\libxml2.dll %2
 REM copy %libiconvdir%\bin\iconv.dll %2
 REM copy %libzlib1dir%\bin\zlib1.dll %2

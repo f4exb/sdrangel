@@ -22,7 +22,6 @@ copy librtlsdr\%1\librtlsdr.dll %2
 copy libairspy\%1\libairspy.dll %2
 copy libairspyhf\%1\libairspyhf.dll %2
 REM copy libbladerf\%1\libbladerf.dll %2
-REM copy libsqlite3\%1\libsqlite3.dll %2
 copy liblimesuite\%1\liblimesuite.dll %2
 copy libiio\%1\libiio.dll %2
 copy %libusbdir%\dll\libusb-1.0.dll %2

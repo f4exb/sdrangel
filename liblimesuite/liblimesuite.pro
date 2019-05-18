@@ -27,9 +27,6 @@ macx {
     INCLUDEPATH += "/opt/local/include/libusb-1.0"
 }
 
-#CONFIG(MINGW32):INCLUDEPATH += "..\libsqlite3\src"
-#CONFIG(MINGW64):INCLUDEPATH += "..\libsqlite3\src"
-
 INCLUDEPATH += $$LIBLIMESUITESRC/src
 INCLUDEPATH += $$LIBLIMESUITESRC/src/lime
 INCLUDEPATH += $$LIBLIMESUITESRC/src/ADF4002
@@ -41,7 +38,7 @@ INCLUDEPATH += $$LIBLIMESUITESRC/src/lms7002m_mcu
 INCLUDEPATH += $$LIBLIMESUITESRC/src/Si5351C
 INCLUDEPATH += $$LIBLIMESUITESRC/src/protocols
 INCLUDEPATH += $$LIBLIMESUITESRC/external/cpp-feather-ini-parser
-    
+
 SOURCES = $$LIBLIMESUITESRC/src/Logger.cpp\
     $$LIBLIMESUITESRC/src/ADF4002/ADF4002.cpp\
     $$LIBLIMESUITESRC/src/lms7002m_mcu/MCU_BD.cpp\
@@ -79,11 +76,11 @@ SOURCES = $$LIBLIMESUITESRC/src/Logger.cpp\
     $$LIBLIMESUITESRC/src/ConnectionFTDI/ConnectionFT601.cpp\
     $$LIBLIMESUITESRC/src/ConnectionFTDI//ConnectionFT601Entry.cpp\
     $$LIBLIMESUITESRC/src/ConnectionFX3/ConnectionFX3Entry.cpp\
-    $$LIBLIMESUITESRC/src/ConnectionFX3/ConnectionFX3.cpp\    
+    $$LIBLIMESUITESRC/src/ConnectionFX3/ConnectionFX3.cpp\
     src/BuiltinConnections.cpp\
     src/SystemResources.cpp\
     src/VersionInfo.cpp
-    
+
 HEADERS = $$LIBLIMESUITESRC/src/API/*.h\
     $$LIBLIMESUITESRC/src/GFIR/*.h\
     $$LIBLIMESUITESRC/src/protocols/*.h\
@@ -94,7 +91,7 @@ HEADERS = $$LIBLIMESUITESRC/src/API/*.h\
     $$LIBLIMESUITESRC/src/lms7002m/*.h\
     $$LIBLIMESUITESRC/src/FPGA_common/*.h\
     $$LIBLIMESUITESRC/src/HPM7/*.h
-    
+
 CONFIG(MINGW32):LIBS += -LC:\softs\libusb-1.0.21\MinGW32\dll -llibusb-1.0
 CONFIG(MINGW64):LIBS += -LC:\softs\libusb-1.0.21\MinGW64\dll -llibusb-1.0
 macx {
@@ -103,9 +100,7 @@ macx {
     LIBS += -L/opt/install/LimeSuite/lib/ -lLimeSuite
     LIBS += -L/opt/local/lib -lusb-1.0
 }
-#CONFIG(MINGW32):LIBS += -L../libsqlite3/release -llibsqlite3
-#CONFIG(MINGW64):LIBS += -L../libsqlite3/release -llibsqlite3
 
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =
-    
+
