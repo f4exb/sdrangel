@@ -94,7 +94,7 @@ if(NOT DEFINED CMAKE_BUILD_TYPE OR
     "${CMAKE_BUILD_TYPE}" STREQUAL "MacPorts")
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
-message(STATUS "Build type set to ${CMAKE_BUILD_TYPE}")
+message(STATUS "Build type set to: ${CMAKE_BUILD_TYPE}")
 
 # as default disable qDebug()
 if(NOT DEBUG_OUTPUT)
