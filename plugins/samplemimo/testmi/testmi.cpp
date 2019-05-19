@@ -50,6 +50,7 @@ TestMI::TestMI(DeviceAPI *deviceAPI) :
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
+    m_deviceAPI->addSourceStream(); // Add a new source stream data set in the engine
     m_deviceAPI->addAncillarySink(m_fileSink);
     m_sampleSinkFifos.push_back(SampleSinkFifo(96000 * 4));
     m_networkManager = new QNetworkAccessManager();
@@ -66,6 +67,7 @@ TestMI::~TestMI()
     }
 
     m_deviceAPI->removeAncillarySink(m_fileSink);
+    m_deviceAPI->removeLastSourceStream(); // Remove the last source stream data set in the engine
     delete m_fileSink;
 }
 

@@ -60,6 +60,22 @@ public:
         unsigned int m_index;
     };
 
+    class AddSourceStream : public Message {
+        MESSAGE_CLASS_DECLARATION
+    };
+
+    class RemoveLastSourceStream : public Message {
+        MESSAGE_CLASS_DECLARATION
+    };
+
+    class AddSinkStream : public Message {
+        MESSAGE_CLASS_DECLARATION
+    };
+
+    class RemoveLastSinkStream : public Message {
+        MESSAGE_CLASS_DECLARATION
+    };
+
     class RemoveThreadedBasebandSampleSource : public Message {
 	    MESSAGE_CLASS_DECLARATION
 
@@ -250,6 +266,11 @@ public:
 	void setMIMOSequence(int sequence); //!< Set the sample MIMO sequence in type
     uint getUID() const { return m_uid; }
 
+    void addSourceStream();
+    void removeLastSourceStream();
+    void addSinkStream();
+    void removeLastSinkStream();
+
 	void addChannelSource(ThreadedBasebandSampleSource* source, int index = 0);    //!< Add a channel source that will run on its own thread
 	void removeChannelSource(ThreadedBasebandSampleSource* source, int index = 0); //!< Remove a channel source that runs on its own thread
 	void addChannelSink(ThreadedBasebandSampleSink* sink, int index = 0);          //!< Add a channel sink that will run on its own thread
@@ -298,6 +319,26 @@ private:
         MovingAverageUtil<double, double, 128> m_avgPhi;
         MovingAverageUtil<double, double, 128> m_avgAmp;
 #endif
+        SourceCorrection()
+        {
+            m_dcOffsetCorrection = false;
+            m_iqImbalanceCorrection = false;
+            m_iOffset = 0;
+            m_qOffset = 0;
+            m_iRange = 1 << 16;
+            m_qRange = 1 << 16;
+            m_imbalance = 65536;
+            m_iBeta.reset();
+            m_qBeta.reset();
+            m_avgAmp.reset();
+            m_avgII.reset();
+            m_avgII2.reset();
+            m_avgIQ.reset();
+            m_avgPhi.reset();
+            m_avgQQ2.reset();
+            m_iBeta.reset();
+            m_qBeta.reset();
+        }
     };
 
 	uint32_t m_uid; //!< unique ID

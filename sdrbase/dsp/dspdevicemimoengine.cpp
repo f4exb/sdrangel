@@ -26,6 +26,10 @@
 #include "dspdevicemimoengine.h"
 
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::SetSampleMIMO, Message)
+MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddSourceStream, Message)
+MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::RemoveLastSourceStream, Message)
+MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddSinkStream, Message)
+MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::RemoveLastSinkStream, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddThreadedBasebandSampleSource, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::RemoveThreadedBasebandSampleSource, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddThreadedBasebandSampleSink, Message)
@@ -116,6 +120,34 @@ void DSPDeviceMIMOEngine::setMIMOSequence(int sequence)
 {
 	qDebug("DSPDeviceMIMOEngine::setSinkSequence: seq: %d", sequence);
 	m_sampleMIMOSequence = sequence;
+}
+
+void DSPDeviceMIMOEngine::addSourceStream()
+{
+	qDebug("DSPDeviceMIMOEngine::addSourceStream");
+    AddSourceStream cmd;
+    m_syncMessenger.sendWait(cmd);
+}
+
+void DSPDeviceMIMOEngine::removeLastSourceStream()
+{
+	qDebug("DSPDeviceMIMOEngine::removeLastSourceStream");
+    RemoveLastSourceStream cmd;
+    m_syncMessenger.sendWait(cmd);
+}
+
+void DSPDeviceMIMOEngine::addSinkStream()
+{
+	qDebug("DSPDeviceMIMOEngine::addSinkStream");
+    AddSinkStream cmd;
+    m_syncMessenger.sendWait(cmd);
+}
+
+void DSPDeviceMIMOEngine::removeLastSinkStream()
+{
+	qDebug("DSPDeviceMIMOEngine::removeLastSinkStream");
+    RemoveLastSourceStream cmd;
+    m_syncMessenger.sendWait(cmd);
 }
 
 void DSPDeviceMIMOEngine::addChannelSource(ThreadedBasebandSampleSource* source, int index)
@@ -294,7 +326,6 @@ void DSPDeviceMIMOEngine::work(int nbWriteSamples)
                 }
             }
 
-
             // adjust FIFO pointers
             sampleFifo->readCommit((unsigned int) count);
             samplesDone += count;
@@ -422,11 +453,18 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoInit()
             }
         }
 
-        // pass data to listeners
-        // if (m_deviceSampleSource->getMessageQueueToGUI())
-        // {
-        //     DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy for the output queue
-        //     m_deviceSampleSource->getMessageQueueToGUI()->push(rep);
+        // Probably not necessary
+        // // possibly forward to spectrum sink
+        // if ((m_spectrumSink) && (m_spectrumInputSourceElseSink) && (isource == m_spectrumInputIndex)) {
+        //     m_spectrumSink->handleMessage(notif);
+        // }
+
+        // // forward changes to MIMO GUI input queue
+        // MessageQueue *guiMessageQueue = m_deviceSampleMIMO->getMessageQueueToGUI();
+
+        // if (guiMessageQueue) {
+        //     SignalNotification* rep = new SignalNotification(sourceStreamSampleRate, sourceCenterFrequency, true, isource); // make a copy for the MIMO GUI
+        //     guiMessageQueue->push(rep);
         // }
     }
 
@@ -560,13 +598,32 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
 	else if (SetSampleMIMO::match(*message)) {
 		handleSetMIMO(((SetSampleMIMO*) message)->getSampleMIMO());
 	}
+    else if (AddSourceStream::match(*message))
+    {
+        m_basebandSampleSinks.push_back(BasebandSampleSinks());
+        m_threadedBasebandSampleSinks.push_back(ThreadedBasebandSampleSinks());
+        m_sourcesCorrections.push_back(SourceCorrection());
+    }
+    else if (RemoveLastSourceStream::match(*message))
+    {
+        m_basebandSampleSinks.pop_back();
+        m_threadedBasebandSampleSinks.pop_back();
+    }
+    else if (AddSinkStream::match(*message))
+    {
+        m_threadedBasebandSampleSources.push_back(ThreadedBasebandSampleSources());
+    }
+    else if (RemoveLastSinkStream::match(*message))
+    {
+        m_threadedBasebandSampleSources.pop_back();
+    }
 	else if (AddBasebandSampleSink::match(*message))
 	{
         const AddBasebandSampleSink *msg = (AddBasebandSampleSink *) message;
 		BasebandSampleSink* sink = msg->getSampleSink();
         unsigned int isource = msg->getIndex();
 
-        if ((isource < m_basebandSampleSinks.size()) && (isource < m_deviceSampleMIMO->getNbSourceStreams()))
+        if (isource < m_basebandSampleSinks.size())
         {
             m_basebandSampleSinks[isource].push_back(sink);
             // initialize sample rate and center frequency in the sink:
@@ -601,7 +658,7 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
 		ThreadedBasebandSampleSink *threadedSink = msg->getThreadedSampleSink();
         unsigned int isource = msg->getIndex();
 
-        if ((isource < m_threadedBasebandSampleSinks.size()) && (isource < m_deviceSampleMIMO->getNbSourceStreams()))
+        if (isource < m_threadedBasebandSampleSinks.size())
         {
 		    m_threadedBasebandSampleSinks[isource].push_back(threadedSink);
             // initialize sample rate and center frequency in the sink:
@@ -633,7 +690,7 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
 		ThreadedBasebandSampleSource *threadedSource = msg->getThreadedSampleSource();
         unsigned int isink = msg->getIndex();
 
-        if ((isink < m_threadedBasebandSampleSources.size()) && (isink < m_deviceSampleMIMO->getNbSinkStreams()))
+        if (isink < m_threadedBasebandSampleSources.size())
         {
 		    m_threadedBasebandSampleSources[isink].push_back(threadedSource);
             // initialize sample rate and center frequency in the sink:
@@ -751,7 +808,8 @@ void DSPDeviceMIMOEngine::handleInputMessages()
                         m_sourcesCorrections[isource].m_imbalance = 65536;
                     }
                 }
-
+                m_sourcesCorrections[isource].m_iBeta.reset();
+                m_sourcesCorrections[isource].m_qBeta.reset();
                 m_sourcesCorrections[isource].m_avgAmp.reset();
                 m_sourcesCorrections[isource].m_avgII.reset();
                 m_sourcesCorrections[isource].m_avgII2.reset();
