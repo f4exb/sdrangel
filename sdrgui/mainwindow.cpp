@@ -320,7 +320,7 @@ void MainWindow::addSourceDevice(int deviceIndex)
             m_deviceUIs.back()->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
 
 
-    DeviceSampleSource *source = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleSourcePluginInstanceInput(
+    DeviceSampleSource *source = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleSourcePluginInstance(
             m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceId(), m_deviceUIs.back()->m_deviceAPI);
     m_deviceUIs.back()->m_deviceAPI->setSampleSource(source);
     QWidget *gui;
@@ -391,7 +391,7 @@ void MainWindow::addSinkDevice()
     m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
             m_deviceUIs.back()->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
 
-    DeviceSampleSink *sink = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleSinkPluginInstanceOutput(
+    DeviceSampleSink *sink = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleSinkPluginInstance(
             m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceId(), m_deviceUIs.back()->m_deviceAPI);
     m_deviceUIs.back()->m_deviceAPI->setSampleSink(sink);
     QWidget *gui;
@@ -472,7 +472,7 @@ void MainWindow::addMIMODevice()
     m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
             m_deviceUIs.back()->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
 
-    DeviceSampleMIMO *mimo = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleMIMOPluginInstanceMIMO(
+    DeviceSampleMIMO *mimo = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleMIMOPluginInstance(
             m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceId(), m_deviceUIs.back()->m_deviceAPI);
     m_deviceUIs.back()->m_deviceAPI->setSampleMIMO(mimo);
     QWidget *gui;
@@ -1701,7 +1701,7 @@ void MainWindow::sampleSourceChanged()
         }
 
         // constructs new GUI and input object
-        DeviceSampleSource *source = deviceUI->m_deviceAPI->getPluginInterface()->createSampleSourcePluginInstanceInput(
+        DeviceSampleSource *source = deviceUI->m_deviceAPI->getPluginInterface()->createSampleSourcePluginInstance(
                 deviceUI->m_deviceAPI->getSamplingDeviceId(), deviceUI->m_deviceAPI);
         deviceUI->m_deviceAPI->setSampleSource(source);
         QWidget *gui;
@@ -1790,7 +1790,7 @@ void MainWindow::sampleSinkChanged()
         }
 
         // constructs new GUI and output object
-        DeviceSampleSink *sink = deviceUI->m_deviceAPI->getPluginInterface()->createSampleSinkPluginInstanceOutput(
+        DeviceSampleSink *sink = deviceUI->m_deviceAPI->getPluginInterface()->createSampleSinkPluginInstance(
                 deviceUI->m_deviceAPI->getSamplingDeviceId(), deviceUI->m_deviceAPI);
         deviceUI->m_deviceAPI->setSampleSink(sink);
         QWidget *gui;
@@ -1840,7 +1840,7 @@ void MainWindow::sampleMIMOChanged()
             DeviceEnumerator::instance()->getMIMOPluginInterface(deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex()));
 
         // constructs new GUI and output object
-        DeviceSampleMIMO *mimo = deviceUI->m_deviceAPI->getPluginInterface()->createSampleMIMOPluginInstanceMIMO(
+        DeviceSampleMIMO *mimo = deviceUI->m_deviceAPI->getPluginInterface()->createSampleMIMOPluginInstance(
                 deviceUI->m_deviceAPI->getSamplingDeviceId(), deviceUI->m_deviceAPI);
         deviceUI->m_deviceAPI->setSampleMIMO(mimo);
         QWidget *gui;

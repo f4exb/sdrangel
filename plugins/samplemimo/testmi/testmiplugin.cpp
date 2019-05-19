@@ -96,7 +96,7 @@ PluginInstanceGUI* TestMIPlugin::createSampleMIMOPluginInstanceGUI(
 }
 #endif
 
-DeviceSampleMIMO *TestMIPlugin::createSampleMIMOPluginInstanceMIMO(const QString& mimoId, DeviceAPI *deviceAPI)
+DeviceSampleMIMO *TestMIPlugin::createSampleMIMOPluginInstance(const QString& mimoId, DeviceAPI *deviceAPI)
 {
     if (mimoId == m_deviceTypeID)
     {

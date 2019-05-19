@@ -41,7 +41,7 @@ public:
 	        const QString& sourceId,
 	        QWidget **widget,
 	        DeviceUISet *deviceUISet);
-	virtual DeviceSampleMIMO* createSampleMIMOPluginInstanceMIMO(const QString& sourceId, DeviceAPI *deviceAPI);
+	virtual DeviceSampleMIMO* createSampleMIMOPluginInstance(const QString& sourceId, DeviceAPI *deviceAPI);
 
 	static const QString m_hardwareID;
     static const QString m_deviceTypeID;

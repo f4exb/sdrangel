@@ -149,7 +149,7 @@ public:
         return nullptr;
     }
 
-    virtual DeviceSampleSource* createSampleSourcePluginInstanceInput( // creates the input "core"
+    virtual DeviceSampleSource* createSampleSourcePluginInstance( // creates the input "core"
             const QString& sourceId,
             DeviceAPI *deviceAPI)
     {
@@ -175,7 +175,7 @@ public:
         return nullptr;
     }
 
-    virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput( // creates the output "core"
+    virtual DeviceSampleSink* createSampleSinkPluginInstance( // creates the output "core"
             const QString& sinkId,
             DeviceAPI *deviceAPI)
     {
@@ -202,7 +202,7 @@ public:
         return nullptr;
     }
 
-    virtual DeviceSampleMIMO* createSampleMIMOPluginInstanceMIMO( // creates the MIMO "core"
+    virtual DeviceSampleMIMO* createSampleMIMOPluginInstance( // creates the MIMO "core"
             const QString& mimoId,
             DeviceAPI *deviceAPI)
     {
