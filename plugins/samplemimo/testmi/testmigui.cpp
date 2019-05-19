@@ -30,6 +30,7 @@
 #include "gui/crightclickenabler.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspdevicemimoengine.h"
 #include "dsp/dspcommands.h"
 #include "util/db.h"
 
@@ -489,12 +490,13 @@ void TestMIGui::handleInputMessages()
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        if (DSPSignalNotification::match(*message))
+        if (DSPDeviceMIMOEngine::SignalNotification::match(*message))
         {
-            DSPSignalNotification* notif = (DSPSignalNotification*) message;
+            DSPDeviceMIMOEngine::SignalNotification* notif = (DSPDeviceMIMOEngine::SignalNotification*) message;
             m_deviceSampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
-            qDebug("TestMIGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu",
+            // Do not consider multiple sources at this time
+            qDebug("TestMIGui::handleInputMessages: DSPDeviceMIMOEngine::SignalNotification: SampleRate:%d, CenterFrequency:%llu",
                     notif->getSampleRate(),
                     notif->getCenterFrequency());
             updateSampleRateAndFrequency();

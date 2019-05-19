@@ -68,6 +68,7 @@ public:
 
     void addAncillarySink(BasebandSampleSink* sink);     //!< Adds a sink to receive full baseband and that is not a channel (e.g. spectrum)
     void removeAncillarySink(BasebandSampleSink* sink);  //!< Removes it
+    void setSpectrumSinkInput(bool sourceElseSink = true, unsigned int index = 0); //!< Used in the MIMO case to select which stream is used as input to main spectrum
 
     void addChannelSink(ThreadedBasebandSampleSink* sink, int streamIndex = 0);        //!< Add a channel sink (Rx)
     void removeChannelSink(ThreadedBasebandSampleSink* sink, int streamIndex = 0);     //!< Remove a channel sink (Rx)

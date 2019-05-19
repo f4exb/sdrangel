@@ -29,6 +29,7 @@
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspdevicemimoengine.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/filerecord.h"
 
@@ -388,7 +389,9 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
         int sampleRate = settings.m_sampleRate/(1<<settings.m_log2Decim);
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
         m_fileSink->handleMessage(*notif); // forward to file sink
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+        DSPDeviceMIMOEngine::SignalNotification *engineNotif = new DSPDeviceMIMOEngine::SignalNotification(
+            sampleRate, settings.m_centerFrequency, true, 0);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineNotif);
     }
 
     if ((m_settings.m_modulationTone != settings.m_modulationTone) || force)

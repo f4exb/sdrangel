@@ -211,6 +211,20 @@ public:
         unsigned int m_index;
     };
 
+    class SetSpectrumSinkInput : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        SetSpectrumSinkInput(bool sourceElseSink, int index) :
+            m_sourceElseSink(sourceElseSink),
+            m_index(index)
+        { }
+        bool getSourceElseSink() const { return m_sourceElseSink; }
+        int getIndex() const { return m_index; }
+    private:
+        bool m_sourceElseSink;
+        int m_index;
+    };
+
 	enum State {
 		StNotStarted,  //!< engine is before initialization
 		StIdle,        //!< engine is idle
@@ -246,6 +260,7 @@ public:
 
 	void addSpectrumSink(BasebandSampleSink* spectrumSink);    //!< Add a spectrum vis baseband sample sink
 	void removeSpectrumSink(BasebandSampleSink* spectrumSink); //!< Add a spectrum vis baseband sample sink
+    void setSpectrumSinkInput(bool sourceElseSink, int index);
 
 	State state() const { return m_state; } //!< Return DSP engine current state
 
@@ -306,13 +321,11 @@ private:
 	typedef std::list<ThreadedBasebandSampleSource*> ThreadedBasebandSampleSources;
 	std::vector<ThreadedBasebandSampleSources> m_threadedBasebandSampleSources; //!< channel sample sources on their own threads (per output stream)
 
-    std::vector<quint64> m_sourceCenterFrequencies;  //!< device sources streams (Rx) sample rates
-    std::vector<quint64> m_sinkCenterFrequencies;    //!< device sink streams (Tx) sample rates
-    std::vector<uint32_t> m_sourceStreamSampleRates; //!< device sources streams (Rx) sample rates
-    std::vector<uint32_t> m_sinkStreamSampleRates;   //!< device sink streams (Tx) sample rates
     std::vector<SourceCorrection> m_sourcesCorrections;
 
     BasebandSampleSink *m_spectrumSink; //!< The spectrum sink
+    bool m_spectrumInputSourceElseSink; //!< Source else sink stream to be used as spectrum sink input
+    unsigned int m_spectrumInputIndex;  //!< Index of the stream to be used as spectrum sink input
 
   	void run();
 	void work(int nbWriteSamples); //!< transfer samples if in running state
@@ -328,7 +341,7 @@ private slots:
 	void handleData();                 //!< Handle data when samples have to be processed
 	void handleSynchronousMessages();  //!< Handle synchronous messages with the thread
 	void handleInputMessages();        //!< Handle input message queue
-	//TODO: void handleForwardToSpectrumSink(int nbSamples);
+	void handleForwardToSpectrumSink(int nbSamples);
 };
 
 #endif // SDRBASE_DSP_DSPDEVICEMIMOENGINE_H_

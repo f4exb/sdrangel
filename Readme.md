@@ -74,6 +74,10 @@ The audio devices with Qt are supported through pulseaudio and unless you are us
 
 In case you cannot see anything related to HDMI or your desired audio device in pavucontrol just restart pulseaudio with `pulseaudio -k` (`-k` kills the previous instance before restarting) and do the above steps again.
 
+<h1>Note on udev rules</h1>
+
+On Linux you need specific files in `/etc/udev/rules.d` to be able to access the SDR hardware. Please refer to the respective hardware vendor instructions to install these files.
+
 <h1>Software build on Linux</h1>
 
 Plese consult the [Wiki page for compilation in Linux](https://github.com/f4exb/sdrangel/wiki/Compile-from-source-in-Linux). The notes below are left for further information if needed although you should be all set with the Wiki.

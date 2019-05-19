@@ -126,6 +126,11 @@ public:
     unsigned int getNbSinkFifos() const { return m_sampleSinkFifos.size(); }     //!< Get the number of Rx FIFOs
 	SampleSourceFifo* getSampleSourceFifo(unsigned int index); //!< Get Tx FIFO at index
     SampleSinkFifo* getSampleSinkFifo(unsigned int index);     //!< Get Rx FIFO at index
+    // Streams and FIFOs are in opposed source/sink type whick makes it confusing when stream direction is involved:
+    //   Rx: source stream -> sink FIFO    -> channel sinks
+    //   Tx: sink stream   <- source FIFO  <- channel sources
+    unsigned int getNbSourceStreams() const { return m_sampleSinkFifos.size(); } //!< Commodity function same as getNbSinkFifos (Rx or source streams)
+    unsigned int getNbSinkStreams() const { return m_sampleSourceFifos.size(); } //!< Commodity function same as getNbSourceFifos (Tx or sink streams)
 
 protected slots:
 	void handleInputMessages();

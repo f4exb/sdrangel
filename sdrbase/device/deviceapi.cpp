@@ -74,6 +74,13 @@ void DeviceAPI::removeAncillarySink(BasebandSampleSink* sink)
     }
 }
 
+void DeviceAPI::setSpectrumSinkInput(bool sourceElseSink, unsigned int index)
+{
+    if (m_deviceMIMOEngine) { // In practice this is only used in the MIMO case
+        m_deviceMIMOEngine->setSpectrumSinkInput(sourceElseSink, index);
+    }
+}
+
 void DeviceAPI::addChannelSink(ThreadedBasebandSampleSink* sink, int streamIndex)
 {
     (void) streamIndex;
