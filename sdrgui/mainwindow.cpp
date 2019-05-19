@@ -221,8 +221,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
         qWarning("MainWindow::MainWindow: could not register resource file %s/%s", qPrintable(applicationDirPath), "sdrbase.rcc");
     }
 
-    m_mimoEnabled = parser.getMIMOSupport();
-
 	m_apiAdapter = new WebAPIAdapterGUI(*this);
 	m_requestMapper = new WebAPIRequestMapper(this);
 	m_requestMapper->setAdapter(m_apiAdapter);
@@ -1914,7 +1912,7 @@ void MainWindow::on_action_addSinkDevice_triggered()
 
 void MainWindow::on_action_addMIMODevice_triggered()
 {
-    if (m_mimoEnabled) {
+    if (m_dspEngine->getMIMOSupport()) {
         addMIMODevice();
     } else {
         QMessageBox::information(this, tr("Message"), tr("MIMO operation not supported yet"));

@@ -330,7 +330,6 @@ private:
 	WebAPIAdapterGUI *m_apiAdapter;
 	QString m_apiHost;
 	int m_apiPort;
-    bool m_mimoEnabled;
 
 	CommandKeyReceiver *m_commandKeyReceiver;
 
