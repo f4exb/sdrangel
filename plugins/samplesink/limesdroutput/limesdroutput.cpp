@@ -54,6 +54,7 @@ LimeSDROutput::LimeSDROutput(DeviceAPI *deviceAPI) :
     m_running(false),
     m_channelAcquired(false)
 {
+    m_deviceAPI->setNbSinkStreams(1);
     m_sampleSourceFifo.resize(16*LIMESDROUTPUT_BLOCKSIZE);
     m_streamId.handle = 0;
     suspendRxBuddies();
@@ -88,7 +89,7 @@ void LimeSDROutput::destroy()
 
 bool LimeSDROutput::openDevice()
 {
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
 
     // look for Tx buddies and get reference to common parameters
     // if there is a channel left take the first available

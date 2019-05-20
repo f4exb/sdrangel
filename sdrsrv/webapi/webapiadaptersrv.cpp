@@ -1830,8 +1830,8 @@ void WebAPIAdapterSrv::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, con
         *samplingDevice->getHwType() = deviceSet->m_deviceAPI->getHardwareId();
         *samplingDevice->getSerial() = deviceSet->m_deviceAPI->getSamplingDeviceSerial();
         samplingDevice->setSequence(deviceSet->m_deviceAPI->getSamplingDeviceSequence());
-        samplingDevice->setDeviceNbStreams(deviceSet->m_deviceAPI->getNbItems());
-        samplingDevice->setDeviceStreamIndex(deviceSet->m_deviceAPI->getItemIndex());
+        samplingDevice->setDeviceNbStreams(deviceSet->m_deviceAPI->getDeviceNbItems());
+        samplingDevice->setDeviceStreamIndex(deviceSet->m_deviceAPI->getDeviceItemIndex());
         deviceSet->m_deviceAPI->getDeviceEngineStateStr(*samplingDevice->getState());
         DeviceSampleSink *sampleSink = deviceSet->m_deviceSinkEngine->getSink();
 
@@ -1862,8 +1862,8 @@ void WebAPIAdapterSrv::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, con
         *samplingDevice->getHwType() = deviceSet->m_deviceAPI->getHardwareId();
         *samplingDevice->getSerial() = deviceSet->m_deviceAPI->getSamplingDeviceSerial();
         samplingDevice->setSequence(deviceSet->m_deviceAPI->getSamplingDeviceSequence());
-        samplingDevice->setDeviceNbStreams(deviceSet->m_deviceAPI->getNbItems());
-        samplingDevice->setDeviceStreamIndex(deviceSet->m_deviceAPI->getItemIndex());
+        samplingDevice->setDeviceNbStreams(deviceSet->m_deviceAPI->getDeviceNbItems());
+        samplingDevice->setDeviceStreamIndex(deviceSet->m_deviceAPI->getDeviceItemIndex());
         deviceSet->m_deviceAPI->getDeviceEngineStateStr(*samplingDevice->getState());
         DeviceSampleSource *sampleSource = deviceSet->m_deviceSourceEngine->getSource();
 

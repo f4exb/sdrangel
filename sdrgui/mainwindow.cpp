@@ -303,8 +303,8 @@ void MainWindow::addSourceDevice(int deviceIndex)
 
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-    m_deviceUIs.back()->m_deviceAPI->setNbItems(samplingDevice->deviceNbItems);
-    m_deviceUIs.back()->m_deviceAPI->setItemIndex(samplingDevice->deviceItemIndex);
+    m_deviceUIs.back()->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
+    m_deviceUIs.back()->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
     m_deviceUIs.back()->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
@@ -375,8 +375,8 @@ void MainWindow::addSinkDevice()
     int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileSinkDeviceIndex();
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-    m_deviceUIs.back()->m_deviceAPI->setNbItems(samplingDevice->deviceNbItems);
-    m_deviceUIs.back()->m_deviceAPI->setItemIndex(samplingDevice->deviceItemIndex);
+    m_deviceUIs.back()->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
+    m_deviceUIs.back()->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
     m_deviceUIs.back()->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
@@ -456,8 +456,8 @@ void MainWindow::addMIMODevice()
     int testMIMODeviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex();
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(testMIMODeviceIndex);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-    m_deviceUIs.back()->m_deviceAPI->setNbItems(samplingDevice->deviceNbItems);
-    m_deviceUIs.back()->m_deviceAPI->setItemIndex(samplingDevice->deviceItemIndex);
+    m_deviceUIs.back()->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
+    m_deviceUIs.back()->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
     m_deviceUIs.back()->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
@@ -1656,8 +1656,8 @@ void MainWindow::sampleSourceChanged()
         const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(
             deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex());
         deviceUI->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-        deviceUI->m_deviceAPI->setNbItems(samplingDevice->deviceNbItems);
-        deviceUI->m_deviceAPI->setItemIndex(samplingDevice->deviceItemIndex);
+        deviceUI->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
+        deviceUI->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
         deviceUI->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
         deviceUI->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
         deviceUI->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
@@ -1745,8 +1745,8 @@ void MainWindow::sampleSinkChanged()
 
         const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex());
         deviceUI->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-        deviceUI->m_deviceAPI->setNbItems(samplingDevice->deviceNbItems);
-        deviceUI->m_deviceAPI->setItemIndex(samplingDevice->deviceItemIndex);
+        deviceUI->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
+        deviceUI->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
         deviceUI->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
         deviceUI->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
         deviceUI->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
@@ -1828,8 +1828,8 @@ void MainWindow::sampleMIMOChanged()
         const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(
             deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex());
         deviceUI->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-        deviceUI->m_deviceAPI->setNbItems(samplingDevice->deviceNbItems);
-        deviceUI->m_deviceAPI->setItemIndex(samplingDevice->deviceItemIndex);
+        deviceUI->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
+        deviceUI->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
         deviceUI->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
         deviceUI->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
         deviceUI->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);

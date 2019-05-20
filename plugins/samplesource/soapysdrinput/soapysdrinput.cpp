@@ -55,6 +55,7 @@ SoapySDRInput::SoapySDRInput(DeviceAPI *deviceAPI) :
     initDeviceArgSettings(m_settings);
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
+    m_deviceAPI->setNbSourceStreams(1);
     m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
@@ -159,7 +160,7 @@ bool SoapySDRInput::openDevice()
         m_deviceShared.m_deviceParams = new DeviceSoapySDRParams(m_deviceShared.m_device);
     }
 
-    m_deviceShared.m_channel = m_deviceAPI->getItemIndex(); // publicly allocate channel
+    m_deviceShared.m_channel = m_deviceAPI->getDeviceItemIndex(); // publicly allocate channel
     m_deviceShared.m_source = this;
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
     return true;
@@ -481,7 +482,7 @@ bool SoapySDRInput::start()
         return false;
     }
 
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     SoapySDRInputThread *soapySDRInputThread = findThread();
     bool needsStart = false;
 
@@ -587,7 +588,7 @@ void SoapySDRInput::stop()
         return;
     }
 
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     SoapySDRInputThread *soapySDRInputThread = findThread();
 
     if (soapySDRInputThread == 0) { // no thread allocated
@@ -841,7 +842,7 @@ bool SoapySDRInput::handleMessage(const Message& message)
     }
     else if (DeviceSoapySDRShared::MsgReportBuddyChange::match(message))
     {
-        int requestedChannel = m_deviceAPI->getItemIndex();
+        int requestedChannel = m_deviceAPI->getDeviceItemIndex();
         DeviceSoapySDRShared::MsgReportBuddyChange& report = (DeviceSoapySDRShared::MsgReportBuddyChange&) message;
         SoapySDRInputSettings settings = m_settings;
         settings.m_fcPos = (SoapySDRInputSettings::fcPos_t) report.getFcPos();
@@ -918,7 +919,7 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
 
     SoapySDR::Device *dev = m_deviceShared.m_device;
     SoapySDRInputThread *inputThread = findThread();
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     qint64 xlatedDeviceCenterFrequency = settings.m_centerFrequency;
     xlatedDeviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
     xlatedDeviceCenterFrequency = xlatedDeviceCenterFrequency < 0 ? 0 : xlatedDeviceCenterFrequency;

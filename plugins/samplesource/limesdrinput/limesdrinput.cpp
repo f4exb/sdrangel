@@ -64,6 +64,7 @@ LimeSDRInput::LimeSDRInput(DeviceAPI *deviceAPI) :
     resumeRxBuddies();
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
+    m_deviceAPI->setNbSourceStreams(1);
     m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
@@ -105,7 +106,7 @@ bool LimeSDRInput::openDevice()
         qDebug("LimeSDRInput::openDevice: allocated SampleFifo");
     }
 
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
 
     // look for Rx buddies and get reference to common parameters
     // if there is a channel left take the first available

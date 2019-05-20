@@ -46,6 +46,7 @@ PlutoSDROutput::PlutoSDROutput(DeviceAPI *deviceAPI) :
     m_plutoTxBuffer(0),
     m_plutoSDROutputThread(0)
 {
+    m_deviceAPI->setNbSinkStreams(1);
     m_deviceSampleRates.m_addaConnvRate = 0;
     m_deviceSampleRates.m_bbRateHz = 0;
     m_deviceSampleRates.m_firRate = 0;

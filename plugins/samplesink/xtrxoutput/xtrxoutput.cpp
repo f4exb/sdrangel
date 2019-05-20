@@ -53,7 +53,7 @@ XTRXOutput::XTRXOutput(DeviceAPI *deviceAPI) :
     m_running(false)
 {
     openDevice();
-
+    m_deviceAPI->setNbSinkStreams(1);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
@@ -143,7 +143,7 @@ bool XTRXOutput::openDevice()
         }
     }
 
-    m_deviceShared.m_channel = m_deviceAPI->getItemIndex(); // publicly allocate channel
+    m_deviceShared.m_channel = m_deviceAPI->getDeviceItemIndex(); // publicly allocate channel
     m_deviceShared.m_sink = this;
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
     return true;
@@ -262,7 +262,7 @@ bool XTRXOutput::start()
         return false;
     }
 
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     XTRXOutputThread *xtrxOutputThread = findThread();
     bool needsStart = false;
 
@@ -361,7 +361,7 @@ void XTRXOutput::stop()
         return;
     }
 
-    int removedChannel = m_deviceAPI->getItemIndex(); // channel to remove
+    int removedChannel = m_deviceAPI->getDeviceItemIndex(); // channel to remove
     int requestedChannel = removedChannel ^ 1; // channel to keep (opposite channel)
     XTRXOutputThread *xtrxOutputThread = findThread();
 
@@ -756,7 +756,7 @@ bool XTRXOutput::handleMessage(const Message& message)
 
 bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, bool forceNCOFrequency)
 {
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     XTRXOutputThread *outputThread = findThread();
     QList<QString> reverseAPIKeys;
 

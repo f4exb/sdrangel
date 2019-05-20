@@ -44,6 +44,7 @@ SoapySDROutput::SoapySDROutput(DeviceAPI *deviceAPI) :
     m_running(false),
     m_thread(0)
 {
+    m_deviceAPI->setNbSinkStreams(1);
     openDevice();
     initGainSettings(m_settings);
     initTunableElementsSettings(m_settings);
@@ -141,7 +142,7 @@ bool SoapySDROutput::openDevice()
         m_deviceShared.m_deviceParams = new DeviceSoapySDRParams(m_deviceShared.m_device);
     }
 
-    m_deviceShared.m_channel = m_deviceAPI->getItemIndex(); // publicly allocate channel
+    m_deviceShared.m_channel = m_deviceAPI->getDeviceItemIndex(); // publicly allocate channel
     m_deviceShared.m_sink = this;
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
     return true;
@@ -448,7 +449,7 @@ bool SoapySDROutput::start()
         return false;
     }
 
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     SoapySDROutputThread *soapySDROutputThread = findThread();
     bool needsStart = false;
 
@@ -545,7 +546,7 @@ void SoapySDROutput::stop()
         return;
     }
 
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     SoapySDROutputThread *soapySDROutputThread = findThread();
 
     if (soapySDROutputThread == 0) { // no thread allocated
@@ -790,7 +791,7 @@ bool SoapySDROutput::handleMessage(const Message& message)
     }
     else if (DeviceSoapySDRShared::MsgReportBuddyChange::match(message))
     {
-        int requestedChannel = m_deviceAPI->getItemIndex();
+        int requestedChannel = m_deviceAPI->getDeviceItemIndex();
         //DeviceSoapySDRShared::MsgReportBuddyChange& report = (DeviceSoapySDRShared::MsgReportBuddyChange&) message;
         SoapySDROutputSettings settings = m_settings;
         //bool fromRxBuddy = report.getRxElseTx();
@@ -861,7 +862,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
 
     SoapySDR::Device *dev = m_deviceShared.m_device;
     SoapySDROutputThread *outputThread = findThread();
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     qint64 xlatedDeviceCenterFrequency = settings.m_centerFrequency;
     xlatedDeviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
     xlatedDeviceCenterFrequency = xlatedDeviceCenterFrequency < 0 ? 0 : xlatedDeviceCenterFrequency;

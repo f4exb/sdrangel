@@ -48,6 +48,7 @@ LocalInput::LocalInput(DeviceAPI *deviceAPI) :
 	m_sampleFifo.setSize(96000 * 4);
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
+    m_deviceAPI->setNbSourceStreams(1);
     m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();

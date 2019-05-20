@@ -63,6 +63,7 @@ FileSourceInput::FileSourceInput(DeviceAPI *deviceAPI) :
     m_startingTimeStamp(0),
     m_masterTimer(deviceAPI->getMasterTimer())
 {
+    m_deviceAPI->setNbSourceStreams(1);
     qDebug("FileSourceInput::FileSourceInput: device source engine: %p", m_deviceAPI->getDeviceSourceEngine());
     qDebug("FileSourceInput::FileSourceInput: device source engine message queue: %p", m_deviceAPI->getDeviceEngineInputMessageQueue());
     qDebug("FileSourceInput::FileSourceInput: device source: %p", m_deviceAPI->getDeviceSourceEngine()->getSource());

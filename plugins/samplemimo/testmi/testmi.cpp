@@ -50,6 +50,7 @@ TestMI::TestMI(DeviceAPI *deviceAPI) :
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
+    m_deviceAPI->setNbSourceStreams(1);
     m_deviceAPI->addSourceStream(); // Add a new source stream data set in the engine
     m_deviceAPI->addAncillarySink(m_fileSink);
     m_sampleSinkFifos.push_back(SampleSinkFifo(96000 * 4));

@@ -126,8 +126,6 @@ public:
     void setSamplingDeviceSequence(int sequence) { m_samplingDeviceSequence = sequence; }
     // void setSampleSourceSequence(int sequence);
     // void setSampleSinkSequence(int sequence);
-    void setNbItems(uint32_t nbItems);
-    void setItemIndex(uint32_t index);
     void setSamplingDevicePluginInterface(PluginInterface *iface);
     // void setSampleSourcePluginInterface(PluginInterface *iface);
     // void setSampleSinkPluginInterface(PluginInterface *iface);
@@ -149,8 +147,11 @@ public:
     // uint32_t getSampleSourceSequence() const { return m_sampleSourceSequence; }
     // uint32_t getSampleSinkSequence() const { return m_sampleSinkSequence; }
 
-    uint32_t getNbItems() const { return m_nbItems; }
-    uint32_t getItemIndex() const { return m_itemIndex; }
+    void setDeviceNbItems(uint32_t nbItems);
+    void setDeviceItemIndex(uint32_t index);
+    uint32_t getDeviceNbItems() const { return m_deviceNbItems; }
+    uint32_t getDeviceItemIndex() const { return m_deviceItemIndex; }
+
     int getDeviceSetIndex() const { return m_deviceTabIndex; }
     PluginInterface *getPluginInterface() { return m_pluginInterface; }
 
@@ -188,6 +189,11 @@ public:
     const std::vector<DeviceAPI*>& getSourceBuddies() const { return m_sourceBuddies; }
     const std::vector<DeviceAPI*>& getSinkBuddies() const { return m_sinkBuddies; }
 
+    void setNbSourceStreams(uint32_t nbSourceStreams) { m_nbSourceStreams = nbSourceStreams; }
+    void setNbSinkStreams(uint32_t nbSinkStreams) { m_nbSinkStreams = nbSinkStreams; }
+    uint32_t getNbSourceStreams() const { return m_nbSourceStreams; }
+    uint32_t getNbSinkStreams() const { return m_nbSinkStreams; }
+
     const QTimer& getMasterTimer() const { return m_masterTimer; } //!< This is the DSPEngine master timer
 
 protected:
@@ -196,8 +202,10 @@ protected:
     StreamType m_streamType;
     int m_deviceTabIndex;                //!< This is the tab index in the GUI and also the device set index
     QString m_hardwareId;                //!< The internal id that identifies the type of hardware (i.e. HackRF, BladeRF, ...)
-    uint32_t m_nbItems;                  //!< Number of items or streams in the device. Can be >1 for NxM devices (i.e. 2 for LimeSDR)
-    uint32_t m_itemIndex;                //!< The Rx stream index. Can be >0 for NxM devices (i.e. 0 or 1 for LimeSDR)
+    uint32_t m_deviceNbItems;            //!< Number of items in the physical device either Rx or Tx. Can be >1 for NxM devices (i.e. 2 for LimeSDR)
+    uint32_t m_deviceItemIndex;          //!< The item index inb the Rx or Tx side of the physical device. Can be >0 for NxM devices (i.e. 0 or 1 for LimeSDR)
+    uint32_t m_nbSourceStreams;          //!< The number of source streams in the logical device. 1 for Single Rx (SI) can be 0 or more for MIMO
+    uint32_t m_nbSinkStreams;            //!< The number of sink streams in the logical device. 1 for Single Tx (SO) can be 0 or more for MIMO
     PluginInterface* m_pluginInterface;
     const QTimer& m_masterTimer;         //!< This is the DSPEngine master timer
     QString m_samplingDeviceId;          //!< The internal plugin ID corresponding to the device (i.e. for HackRF input, for HackRF output ...)

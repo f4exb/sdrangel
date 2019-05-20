@@ -51,6 +51,7 @@ BladeRF2Output::BladeRF2Output(DeviceAPI *deviceAPI) :
     m_running(false)
 {
     openDevice();
+    m_deviceAPI->setNbSinkStreams(1);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
@@ -140,7 +141,7 @@ bool BladeRF2Output::openDevice()
         }
     }
 
-    m_deviceShared.m_channel = m_deviceAPI->getItemIndex(); // publicly allocate channel
+    m_deviceShared.m_channel = m_deviceAPI->getDeviceItemIndex(); // publicly allocate channel
     m_deviceShared.m_sink = this;
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
     return true;
@@ -264,7 +265,7 @@ bool BladeRF2Output::start()
         return false;
     }
 
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     BladeRF2OutputThread *bladeRF2OutputThread = findThread();
     bool needsStart = false;
 
@@ -376,7 +377,7 @@ void BladeRF2Output::stop()
         return;
     }
 
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     BladeRF2OutputThread *bladeRF2OutputThread = findThread();
 
     if (bladeRF2OutputThread == 0) { // no thread allocated
@@ -610,7 +611,7 @@ bool BladeRF2Output::handleMessage(const Message& message)
 
         if (dev) // The BladeRF device must have been open to do so
         {
-            int requestedChannel = m_deviceAPI->getItemIndex();
+            int requestedChannel = m_deviceAPI->getDeviceItemIndex();
 
             if (report.getRxElseTx()) // Rx buddy change: check for sample rate change only
             {
@@ -703,7 +704,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
     QList<QString> reverseAPIKeys;
 
     struct bladerf *dev = m_deviceShared.m_dev->getDev();
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     int nbChannels = getNbChannels();
     qint64 deviceCenterFrequency = settings.m_centerFrequency;
     deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;

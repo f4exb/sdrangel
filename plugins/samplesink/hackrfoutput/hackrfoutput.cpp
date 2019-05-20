@@ -46,6 +46,7 @@ HackRFOutput::HackRFOutput(DeviceAPI *deviceAPI) :
 	m_running(false)
 {
     openDevice();
+    m_deviceAPI->setNbSinkStreams(1);
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));

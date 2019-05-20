@@ -38,13 +38,15 @@ DeviceAPI::DeviceAPI(
 ) :
     m_streamType(streamType),
     m_deviceTabIndex(deviceTabIndex),
-    m_nbItems(1),
-    m_itemIndex(0),
-    m_pluginInterface(0),
+    m_deviceNbItems(1),
+    m_deviceItemIndex(0),
+    m_nbSourceStreams(0),
+    m_nbSinkStreams(0),
+    m_pluginInterface(nullptr),
     m_masterTimer(DSPEngine::instance()->getMasterTimer()),
     m_samplingDeviceSequence(0),
     m_samplingDevicePluginInstanceUI(0),
-    m_buddySharedPtr(0),
+    m_buddySharedPtr(nullptr),
     m_isBuddyLeader(false),
     m_deviceSourceEngine(deviceSourceEngine),
     m_deviceSinkEngine(deviceSinkEngine),
@@ -358,14 +360,14 @@ void DeviceAPI::setHardwareId(const QString& id)
     m_hardwareId = id;
 }
 
-void DeviceAPI::setNbItems(uint32_t nbItems)
+void DeviceAPI::setDeviceNbItems(uint32_t nbItems)
 {
-    m_nbItems = nbItems;
+    m_deviceNbItems = nbItems;
 }
 
-void DeviceAPI::setItemIndex(uint32_t index)
+void DeviceAPI::setDeviceItemIndex(uint32_t index)
 {
-    m_itemIndex = index;
+    m_deviceItemIndex = index;
 }
 
 void DeviceAPI::setSamplingDevicePluginInterface(PluginInterface *iface)
