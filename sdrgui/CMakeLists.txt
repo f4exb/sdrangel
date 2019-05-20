@@ -20,6 +20,7 @@ set(sdrgui_SOURCES
     gui/comboboxnoarrow.cpp
     gui/crightclickenabler.cpp
     gui/cwkeyergui.cpp
+    gui/devicestreamselectiondialog.cpp
     gui/editcommanddialog.cpp
     gui/externalclockbutton.cpp
     gui/externalclockdialog.cpp
@@ -85,6 +86,7 @@ set(sdrgui_HEADERS
     gui/comboboxnoarrow.h
     gui/crightclickenabler.h
     gui/cwkeyergui.h
+    gui/devicestreamselectiondialog.h
     gui/editcommanddialog.h
     gui/externalclockbutton.h
     gui/externalclockdialog.h
@@ -146,6 +148,7 @@ set(sdrgui_FORMS
     gui/basicchannelsettingsdialog.ui
     gui/basicdevicesettingsdialog.ui
     gui/commandoutputdialog.ui
+    gui/devicestreamselectiondialog.ui
     gui/cwkeyergui.ui
     gui/editcommanddialog.ui
     gui/externalclockdialog.ui

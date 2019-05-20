@@ -107,6 +107,11 @@ AMDemod::~AMDemod()
     delete SSBFilter;
 }
 
+uint32_t AMDemod::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSourceStreams();
+}
+
 void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
     (void) firstOfBurst;

@@ -31,6 +31,7 @@
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "gui/devicestreamselectiondialog.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 #include "gui/crightclickenabler.h"
@@ -232,7 +233,14 @@ void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
     }
     else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
     {
-        // TODO: open select MIMO channel dialog
+        DeviceStreamSelectionDialog dialog(this);
+        dialog.setNumberOfStreams(m_amDemod->getNumberOfDeviceStreams());
+        dialog.setStreamIndex(m_settings.m_streamIndex);
+        dialog.move(p);
+        dialog.exec();
+
+        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+        applySettings();
     }
 
     resetContextMenuType();
