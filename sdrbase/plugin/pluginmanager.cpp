@@ -163,9 +163,9 @@ void PluginManager::loadPluginsDir(const QDir& dir)
 				qWarning() << "PluginManager::loadPluginsDir: " << qPrintable(loader->errorString());
 			}
 
-			if (plugin != 0)
+			if (plugin)
 			{
-				m_plugins.append(Plugin(fileName, loader, plugin));
+				m_plugins.append(Plugin(fileName, plugin));
 			}
 			else
 			{
