@@ -436,6 +436,7 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_pll: " << settings.m_pll
             << " m_syncAMOperation: " << (int) settings.m_syncAMOperation
+            << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
             << " m_reverseAPIPort: " << settings.m_reverseAPIPort
@@ -518,6 +519,10 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
 
     if ((m_settings.m_volume != settings.m_volume) || force) {
         reverseAPIKeys.append("volume");
+    }
+
+    if ((m_settings.m_streamIndex != settings.m_streamIndex) || force) {
+        reverseAPIKeys.append("streamIndex");
     }
 
     if (settings.m_useReverseAPI)
@@ -617,6 +622,9 @@ int AMDemod::webapiSettingsPutPatch(
                         AMDemodSettings::SyncAMLSB : (AMDemodSettings::SyncAMOperation) syncAMOperationCode;
     }
 
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getAmDemodSettings()->getStreamIndex();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getAmDemodSettings()->getUseReverseApi() != 0;
     }
@@ -690,6 +698,7 @@ void AMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
 
     response.getAmDemodSettings()->setPll(settings.m_pll ? 1 : 0);
     response.getAmDemodSettings()->setSyncAmOperation((int) m_settings.m_syncAMOperation);
+    response.getAmDemodSettings()->setStreamIndex(m_settings.m_streamIndex);
     response.getAmDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getAmDemodSettings()->getReverseApiAddress()) {
@@ -759,6 +768,9 @@ void AMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, con
     }
     if (channelSettingsKeys.contains("syncAMOperation") || force) {
         swgAMDemodSettings->setSyncAmOperation((int) settings.m_syncAMOperation);
+    }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgAMDemodSettings->setStreamIndex(settings.m_streamIndex);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")

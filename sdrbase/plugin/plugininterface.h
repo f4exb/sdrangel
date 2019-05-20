@@ -42,7 +42,7 @@ public:
         {
             StreamSingleRx, //!< Exposes a single input stream that can be one of the streams of a physical device
             StreamSingleTx, //!< Exposes a single output stream that can be one of the streams of a physical device
-            StreamAny       //!< May expose any number of input and/or output streams
+            StreamMIMO      //!< May expose any number of input and/or output streams
         };
 
 		QString displayedName;    //!< The human readable name

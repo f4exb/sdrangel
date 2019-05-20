@@ -2,7 +2,7 @@ AMDemodSettings:
   description: AMDemod
   properties:
     inputFrequencyOffset:
-      description: channel center frequency shift from baseband center in Hz    
+      description: channel center frequency shift from baseband center in Hz
       type: integer
       format: int64
     rfBandwidth:
@@ -33,6 +33,9 @@ AMDemodSettings:
     syncAMOperation:
       description: Synchronous AM sidebands mode (DSB, USB, LSB)
       type: integer
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
@@ -41,9 +44,9 @@ AMDemodSettings:
     reverseAPIPort:
       type: integer
     reverseAPIDeviceIndex:
-      type: integer      
+      type: integer
     reverseAPIChannelIndex:
-      type: integer      
+      type: integer
 
 AMDemodReport:
   description: AMDemod
@@ -59,4 +62,3 @@ AMDemodReport:
       type: integer
     channelSampleRate:
       type: integer
-      

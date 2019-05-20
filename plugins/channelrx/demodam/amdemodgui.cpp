@@ -230,6 +230,10 @@ void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
 
         applySettings();
     }
+    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
+    {
+        // TODO: open select MIMO channel dialog
+    }
 
     resetContextMenuType();
 }
@@ -379,7 +383,18 @@ void AMDemodGUI::displaySettings()
         ui->ssb->setIcon(m_iconDSBUSB);
     }
 
+    displayStreamIndex();
+
     blockApplySettings(false);
+}
+
+void AMDemodGUI::displayStreamIndex()
+{
+    if (m_deviceUISet->m_deviceMIMOEngine) {
+        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
+    } else {
+        setStreamIndicator("S"); // single channel indicator
+    }
 }
 
 void AMDemodGUI::leaveEvent(QEvent*)

@@ -40,7 +40,7 @@ public:
     {
         StreamSingleSink,   //!< Exposes a single sink stream (input, Rx)
         StreamSingleSource, //!< Exposes a single source stream (output, Tx)
-        StreamAny           //!< May expose any number of sink and/or source streams
+        StreamMIMO          //!< May expose any number of sink and/or source streams
     };
 
     ChannelAPI(const QString& name, StreamType streamType);

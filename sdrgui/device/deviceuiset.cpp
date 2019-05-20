@@ -44,9 +44,10 @@ DeviceUISet::DeviceUISet(int tabIndex, int deviceType, QTimer& timer)
     m_spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, m_spectrum);
     m_channelWindow = new ChannelWindow;
     m_samplingDeviceControl = new SamplingDeviceControl(tabIndex, deviceType);
-    m_deviceSourceEngine = 0;
-    m_deviceAPI = 0;
-    m_deviceSinkEngine = 0;
+    m_deviceAPI = nullptr;
+    m_deviceSourceEngine = nullptr;
+    m_deviceSinkEngine = nullptr;
+    m_deviceMIMOEngine = nullptr;
     m_deviceTabIndex = tabIndex;
     m_nbAvailableRxChannels = 0;   // updated at enumeration for UI selector
     m_nbAvailableTxChannels = 0;   // updated at enumeration for UI selector

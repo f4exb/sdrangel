@@ -761,6 +761,10 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Synchronous AM sidebands mode (DSB, USB, LSB)"
     },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
     "useReverseAPI" : {
       "type" : "integer",
       "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
@@ -25080,7 +25084,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-05-18T10:36:57.027+02:00
+              Generated 2019-05-20T16:12:41.467+02:00
             </div>
           </div>
       </div>

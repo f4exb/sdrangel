@@ -384,3 +384,9 @@ bool RollupWidget::eventFilter(QObject* object, QEvent* event)
 	}
 	return QWidget::eventFilter(object, event);
 }
+
+void RollupWidget::setStreamIndicator(const QString& indicator)
+{
+	m_streamIndicator = indicator;
+	update();
+}

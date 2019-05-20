@@ -421,7 +421,7 @@ void MainWindow::addMIMODevice()
     char tabNameCStr[16];
     sprintf(tabNameCStr, "M%d", deviceTabIndex);
 
-    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleTx, deviceTabIndex, nullptr, nullptr, dspDeviceMIMOEngine);
+    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamMIMO, deviceTabIndex, nullptr, nullptr, dspDeviceMIMOEngine);
 
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);

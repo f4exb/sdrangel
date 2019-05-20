@@ -65,7 +65,7 @@ PluginInterface::SamplingDevices TestMIPlugin::enumSampleMIMO()
             QString::null,
             0,
             PluginInterface::SamplingDevice::BuiltInDevice,
-            PluginInterface::SamplingDevice::StreamAny,
+            PluginInterface::SamplingDevice::StreamMIMO,
             1,
             0));
 

@@ -50,6 +50,8 @@ SWGAMDemodSettings::SWGAMDemodSettings() {
     m_pll_isSet = false;
     sync_am_operation = 0;
     m_sync_am_operation_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -90,6 +92,8 @@ SWGAMDemodSettings::init() {
     m_pll_isSet = false;
     sync_am_operation = 0;
     m_sync_am_operation_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -117,6 +121,7 @@ SWGAMDemodSettings::cleanup() {
     if(audio_device_name != nullptr) { 
         delete audio_device_name;
     }
+
 
 
 
@@ -160,6 +165,8 @@ SWGAMDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&pll, pJson["pll"], "qint32", "");
     
     ::SWGSDRangel::setValue(&sync_am_operation, pJson["syncAMOperation"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -219,6 +226,9 @@ SWGAMDemodSettings::asJsonObject() {
     }
     if(m_sync_am_operation_isSet){
         obj->insert("syncAMOperation", QJsonValue(sync_am_operation));
+    }
+    if(m_stream_index_isSet){
+        obj->insert("streamIndex", QJsonValue(stream_index));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -350,6 +360,16 @@ SWGAMDemodSettings::setSyncAmOperation(qint32 sync_am_operation) {
 }
 
 qint32
+SWGAMDemodSettings::getStreamIndex() {
+    return stream_index;
+}
+void
+SWGAMDemodSettings::setStreamIndex(qint32 stream_index) {
+    this->stream_index = stream_index;
+    this->m_stream_index_isSet = true;
+}
+
+qint32
 SWGAMDemodSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -415,6 +435,7 @@ SWGAMDemodSettings::isSet(){
         if(audio_device_name != nullptr && *audio_device_name != QString("")){ isObjectUpdated = true; break;}
         if(m_pll_isSet){ isObjectUpdated = true; break;}
         if(m_sync_am_operation_isSet){ isObjectUpdated = true; break;}
+        if(m_stream_index_isSet){ isObjectUpdated = true; break;}
         if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
         if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
         if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
