@@ -22,10 +22,10 @@
 DeviceStreamSelectionDialog::DeviceStreamSelectionDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DeviceStreamSelectionDialog),
-    m_hasChanged(false),
-    m_streamIndex(0)
+    m_hasChanged(false)
 {
     ui->setupUi(this);
+    setStreamIndex(0);
 }
 
 DeviceStreamSelectionDialog::~DeviceStreamSelectionDialog()
