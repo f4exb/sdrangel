@@ -178,7 +178,7 @@ bool FileSourceInput::start()
 	QMutexLocker mutexLocker(&m_mutex);
 	qDebug() << "FileSourceInput::start";
 
-	if (m_ifstream.tellg() != 0) {
+	if (m_ifstream.tellg() != (std::streampos)0) {
 		m_ifstream.clear();
 		m_ifstream.seekg(sizeof(FileRecord::Header), std::ios::beg);
 	}
