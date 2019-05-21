@@ -24,7 +24,7 @@ set_target_properties(xtrxdevice
     PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
 
 target_link_libraries(xtrxdevice
-    ${LIBXTRX_LIBRARIES}
+    ${LIBXTRX_LIBRARY}
     sdrbase
 )
 

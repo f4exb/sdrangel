@@ -53,7 +53,7 @@ target_link_libraries(${TARGET_NAME}
 	sdrbase
 	${TARGET_LIB_GUI}
         swagger
-        ${LIBXTRX_LIBRARIES}
+        ${LIBXTRX_LIBRARY}
         xtrxdevice
 )
 
