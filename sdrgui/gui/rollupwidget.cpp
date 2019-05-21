@@ -322,7 +322,6 @@ void RollupWidget::mousePressEvent(QMouseEvent* event)
 		return;
 	}
 
-
 	// close button right
 	if(QRectF(width() - 3.5 - fm.ascent(), 3.5, fm.ascent(), fm.ascent()).contains(event->pos())) {
 		close();
