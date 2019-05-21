@@ -63,7 +63,8 @@ TestSourceThread::TestSourceThread(SampleSinkFifo* sampleFifo, QObject* parent) 
 	m_fcPosShift(0),
     m_throttlems(TESTSOURCE_THROTTLE_MS),
     m_throttleToggle(false),
-    m_mutex(QMutex::Recursive)
+    m_mutex(QMutex::Recursive),
+    m_histoCounter(0)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
@@ -74,6 +75,7 @@ TestSourceThread::~TestSourceThread()
 
 void TestSourceThread::startWork()
 {
+    //m_timer.setTimerType(Qt::PreciseTimer);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
     m_timer.start(50);
 	m_startWaitMutex.lock();
@@ -391,6 +393,25 @@ void TestSourceThread::tick()
     if (m_running)
     {
         qint64 throttlems = m_elapsedTimer.restart();
+
+        std::map<int,int>::iterator it;
+        it = m_timerHistogram.find(throttlems);
+
+        if (it == m_timerHistogram.end()) {
+            m_timerHistogram[throttlems] = 1;
+        } else {
+            it->second++;
+        }
+
+        if (m_histoCounter < 49) {
+            m_histoCounter++;
+        } else {
+            qDebug("TestSourceThread::tick: -----------");
+            for (std::map<int,int>::iterator it = m_timerHistogram.begin(); it != m_timerHistogram.end(); ++it) {
+                qDebug("TestSourceThread::tick: %d: %d", it->first, it->second);
+            }
+            m_histoCounter = 0;
+        }
 
         if ((throttlems > 45) && (throttlems < 55) && (throttlems != m_throttlems))
         {
