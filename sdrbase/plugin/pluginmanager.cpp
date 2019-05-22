@@ -174,8 +174,10 @@ void PluginManager::loadPluginsDir(const QDir& dir)
                 continue;
             }
 
+            delete(pluginLoader);
+
             qInfo("PluginManager::loadPluginsDir: loaded plugin %s", qPrintable(fileName));
-            m_plugins.append(Plugin(fileName, pluginLoader, instance));
+            m_plugins.append(Plugin(fileName, instance));
        }
     }
 }

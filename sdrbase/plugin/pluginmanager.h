@@ -25,12 +25,10 @@ public:
 	struct Plugin
 	{
 		QString filename;
-		QPluginLoader* loader;
 		PluginInterface* pluginInterface;
 
-		Plugin(const QString& _filename, QPluginLoader* pluginLoader, PluginInterface* _plugin) :
+		Plugin(const QString& _filename, PluginInterface* _plugin) :
 			filename(_filename),
-			loader(pluginLoader),
 			pluginInterface(_plugin)
 		{ }
 	};
