@@ -51,7 +51,6 @@ target_link_libraries(${TARGET_NAME}
         ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
-        ${CM256CC_LIBRARIES}
         swagger
 )
 
