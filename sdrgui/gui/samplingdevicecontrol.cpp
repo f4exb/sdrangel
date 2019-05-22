@@ -73,6 +73,12 @@ void SamplingDeviceControl::setSelectedDeviceIndex(int index)
         DeviceEnumerator::instance()->changeTxSelection(m_deviceTabIndex, index);
         ui->deviceSelectedText->setText(samplingDevice->displayedName);
     }
+    else if (m_deviceType == 2) // MIMO
+    {
+        const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(index);
+        DeviceEnumerator::instance()->changeMIMOSelection(m_deviceTabIndex, index);
+        ui->deviceSelectedText->setText(samplingDevice->displayedName);
+    }
 
     m_selectedDeviceIndex = index;
 }
