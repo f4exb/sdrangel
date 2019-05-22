@@ -2,7 +2,7 @@ if(NOT LIBIIO_FOUND)
 
   pkg_check_modules (LIBIIO_PKG libiio>=0.7)
 
-  if(LIBIIO_PKG_FOUND)
+  if(LIBIIO_PKG_FOUND OR (DEFINED IIO_DIR))
     find_path(LIBIIO_INCLUDE_DIR
       NAMES iio.h
       PATHS ${IIO_DIR}/include
@@ -20,15 +20,15 @@ if(NOT LIBIIO_FOUND)
       )
 
     if(LIBIIO_INCLUDE_DIR AND LIBIIO_LIBRARIES)
-    set(LIBIIO_FOUND TRUE CACHE INTERNAL "libiio found")
-    message(STATUS "Found libiio: ${LIBIIO_INCLUDE_DIR}, ${LIBIIO_LIBRARIES}")
-  else(LIBIIO_INCLUDE_DIR AND LIBIIO_LIBRARIES)
-    set(LIBIIO_FOUND FALSE CACHE INTERNAL "libiio found")
-    message(STATUS "libiio not found.")
-  endif(LIBIIO_INCLUDE_DIR AND LIBIIO_LIBRARIES)
+      set(LIBIIO_FOUND TRUE CACHE INTERNAL "libiio found")
+      message(STATUS "Found libiio: ${LIBIIO_INCLUDE_DIR}, ${LIBIIO_LIBRARIES}")
+    else(LIBIIO_INCLUDE_DIR AND LIBIIO_LIBRARIES)
+      set(LIBIIO_FOUND FALSE CACHE INTERNAL "libiio found")
+      message(STATUS "libiio not found.")
+    endif(LIBIIO_INCLUDE_DIR AND LIBIIO_LIBRARIES)
 
-  mark_as_advanced(LIBIIO_INCLUDE_DIR LIBIIO_LIBRARIES)
+    mark_as_advanced(LIBIIO_INCLUDE_DIR LIBIIO_LIBRARIES)
 
-endif(LIBIIO_PKG_FOUND)
+  endif(LIBIIO_PKG_FOUND OR (DEFINED IIO_DIR))
 
 endif(NOT LIBIIO_FOUND)
