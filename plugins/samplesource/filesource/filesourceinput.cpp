@@ -60,8 +60,7 @@ FileSourceInput::FileSourceInput(DeviceAPI *deviceAPI) :
 	m_sampleSize(0),
 	m_centerFrequency(0),
 	m_recordLength(0),
-    m_startingTimeStamp(0),
-    m_masterTimer(deviceAPI->getMasterTimer())
+    m_startingTimeStamp(0)
 {
     m_deviceAPI->setNbSourceStreams(1);
     qDebug("FileSourceInput::FileSourceInput: device source engine: %p", m_deviceAPI->getDeviceSourceEngine());
@@ -69,10 +68,13 @@ FileSourceInput::FileSourceInput(DeviceAPI *deviceAPI) :
     qDebug("FileSourceInput::FileSourceInput: device source: %p", m_deviceAPI->getDeviceSourceEngine()->getSource());
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    m_masterTimer.setTimerType(Qt::PreciseTimer);
+    m_masterTimer.start(50);
 }
 
 FileSourceInput::~FileSourceInput()
 {
+    m_masterTimer.stop();
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
 

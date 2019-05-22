@@ -75,7 +75,7 @@ TestSourceThread::~TestSourceThread()
 
 void TestSourceThread::startWork()
 {
-    //m_timer.setTimerType(Qt::PreciseTimer);
+    m_timer.setTimerType(Qt::PreciseTimer);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
     m_timer.start(50);
 	m_startWaitMutex.lock();
