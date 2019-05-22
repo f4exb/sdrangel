@@ -1,0 +1,53 @@
+Source: sdrangel
+Maintainer: Edouard Griffiths, F4EXB <f4exb06@gmail.com>
+Section: hamradio
+Priority: optional
+Standards-Version: 3.9.2
+Homepage: https://github.com/f4exb/sdrangel
+Build-Depends: debhelper (>= 9),
+ libfftw3-dev,
+ qtbase5-dev,
+ libqt5opengl5-dev,
+ qttools5-dev,
+ qttools5-dev-tools,
+ qtmultimedia5-dev,
+ libqt5multimedia5-plugins,
+ libusb-1.0-0-dev,
+ libboost-all-dev,
+ librtlsdr-dev,
+ libasound2-dev,
+ libopencv-dev,
+ libopencv-dev,
+ libsqlite3-dev,
+ libxml2-dev,
+ bison,
+ flex,
+ ffmpeg,
+ libavcodec-dev,
+ libavformat-dev,
+ libopus-dev,
+ libcodec2-dev,
+ libairspy-dev,
+ libhackrf-dev,
+ librtlsdr-dev
+# TODO:
+#   - more dependencies based on version; newer has more devices
+#   - manage dependencies not present upstream
+
+Package: sdrangel
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: SDR/Analyzer/Generator front-end for various hardware
+ SDR/Analyzer/Generator front-end for Airspy, BladeRF, HackRF,
+ RTL-SDR, FunCube, LimeSDR, PlutoSDR.
+ Also File source and sink for I/Q samples, network I/Q sources with
+ remote instance.
+ Based on Qt5 framework and OpenGL for the spectrum and scope rendering.
+ Builds on Linux, Windows and Mac O/S
+ Reception modes supported:
+   Analog: AM, ATV, NFM, WFM, SSB, broadcast FM
+   Digital: D-Star, Yaesu SF, DMR, dPMR, LoRa
+   Analyzer: Generic channel
+ Transmission modes supported:
+   Analog: AM, ATV, NFM, SSB, WFM
+Homepage: https://github.com/f4exb/sdrangel

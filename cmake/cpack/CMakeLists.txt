@@ -107,8 +107,11 @@ Plugins = ../PlugIns
   # TODO: code/dmg signature
   #   see https://github.com/cjcliffe/CubicSDR
 
+# NOTE: only as reference; remove in future
 elseif(LINUX AND BUNDLE)
 
+  # NOTE: moved to debhelper tool (debian/ folder)
+  #   useful for the moment to maintain dependencies list per distro
   find_program (DPKG_BUILDER dpkg-buildpackage DOC "Debian package builder")
   if (DPKG_BUILDER)
     #
@@ -151,11 +154,13 @@ elseif(LINUX AND BUNDLE)
     endif()
 
     # needed before cmake 2.8.3
-    # maybe we can move back to debian/
     set(CPACK_SET_DESTDIR true)
 
   endif (DPKG_BUILDER)
 
+  # NOTE: moved to distro tool
+  # for fedora see https://docs.fedoraproject.org/en-US/quick-docs/creating-rpm-packages/
+  #                https://docs.fedoraproject.org/en-US/packaging-guidelines/CMake/
   find_program (RPMBUILDER rpmbuild DOC "RPM package builder")
   if (RPMBUILDER)
     list(APPEND CPACK_GENERATOR "RPM")

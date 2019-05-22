@@ -92,7 +92,8 @@ set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
 # if we don't set build_type
 if(NOT DEFINED CMAKE_BUILD_TYPE OR
     "${CMAKE_BUILD_TYPE}" STREQUAL "" OR
-    "${CMAKE_BUILD_TYPE}" STREQUAL "MacPorts")
+    "${CMAKE_BUILD_TYPE}" STREQUAL "MacPorts" OR
+    "${CMAKE_BUILD_TYPE}" STREQUAL "None")
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 message(STATUS "Build type set to: ${CMAKE_BUILD_TYPE}")
@@ -403,6 +404,9 @@ endif()
 # TODO maybe install readme for every plugins
 if (LINUX OR APPLE)
   install(FILES ${CMAKE_SOURCE_DIR}/Readme.md DESTINATION ${INSTALL_DOC_DIR})
+endif()
+
+if(APPLE)
   install(FILES ${CMAKE_SOURCE_DIR}/CHANGELOG DESTINATION ${INSTALL_DOC_DIR})
   install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION ${INSTALL_DOC_DIR})
 endif()
