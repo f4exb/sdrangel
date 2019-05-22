@@ -55,14 +55,15 @@ add_definitions("-DIDENTIFIER=\"${IDENTIFIER}\"")
 
 find_package(Git)
 if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git/")
-  execute_process(COMMAND "${GIT_EXECUTABLE}" rev-parse --short HEAD
+  execute_process(COMMAND "${GIT_EXECUTABLE}" describe --tags
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     RESULT_VARIABLE res
     OUTPUT_VARIABLE out
     ERROR_QUIET
     OUTPUT_STRIP_TRAILING_WHITESPACE)
   if(NOT res)
-        set(sdrangel_VERSION_SUFFIX "-${out}")
+        string(REGEX REPLACE "^v([0-9]+)\.([0-9]+)\.([0-9]+)-" "" git_commit ${out})
+        set(sdrangel_VERSION_SUFFIX "-${git_commit}")
     endif()
 endif()
 
