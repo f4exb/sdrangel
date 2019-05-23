@@ -22,7 +22,8 @@ include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${CMAKE_SOURCE_DIR}/devices        
+    ${CMAKE_SOURCE_DIR}/devices
+    ${LIBUSB_INCLUDE_DIR}
     ${LIBPERSEUSSRC}
     ${LIBPERSEUSSRC}/libperseus/src
 )
@@ -31,7 +32,8 @@ include_directories(
     .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${CMAKE_SOURCE_DIR}/devices        
+    ${CMAKE_SOURCE_DIR}/devices
+    ${LIBUSB_INCLUDE_DIR}
     ${LIBPERSEUS_INCLUDE_DIR}
 )
 endif (BUILD_DEBIAN)
@@ -48,6 +50,7 @@ add_library(inputperseussrv SHARED
 if (BUILD_DEBIAN)
 target_link_libraries(inputperseussrv
     ${QT_LIBRARIES}
+    ${LIBUSB_LIBRARIES}
     perseus
     sdrbase
     swagger
@@ -56,6 +59,7 @@ target_link_libraries(inputperseussrv
 else (BUILD_DEBIAN)
 target_link_libraries(inputperseussrv
     ${QT_LIBRARIES}
+    ${LIBUSB_LIBRARIES}
     ${LIBPERSEUS_LIBRARIES}
     sdrbase
     swagger

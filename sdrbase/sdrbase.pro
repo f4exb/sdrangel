@@ -82,6 +82,7 @@ SOURCES += audio/audiodevicemanager.cpp\
         dsp/decimatorsfi.cpp\
         dsp/dspcommands.cpp\
         dsp/dspengine.cpp\
+        dsp/dspdevicemimoengine.cpp\
         dsp/dspdevicesourceengine.cpp\
         dsp/dspdevicesinkengine.cpp\
         dsp/fftengine.cpp\
@@ -114,6 +115,7 @@ SOURCES += audio/audiodevicemanager.cpp\
         dsp/wfir.cpp\
         dsp/devicesamplesource.cpp\
         dsp/devicesamplesink.cpp\
+        dsp/devicesamplemimo.cpp\
         settings/preferences.cpp\
         settings/preset.cpp\
         settings/mainsettings.cpp\
@@ -165,6 +167,7 @@ HEADERS  += audio/audiodevicemanager.h\
         dsp/interpolators.h\
         dsp/dspcommands.h\
         dsp/dspengine.h\
+        dsp/dspdevicemimoengine.h\
         dsp/dspdevicesourceengine.h\
         dsp/dspdevicesinkengine.h\
         dsp/dsptypes.h\
@@ -212,6 +215,7 @@ HEADERS  += audio/audiodevicemanager.h\
         dsp/wfir.h\
         dsp/devicesamplesource.h\
         dsp/devicesamplesink.h\
+        dsp/devicesamplemimo.h\
         plugin/plugininstancegui.h\
         plugin/plugininterface.h\
         plugin/pluginapi.h\

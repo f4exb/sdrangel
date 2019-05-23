@@ -59,6 +59,7 @@ SOURCES += mainwindow.cpp\
         gui/commandoutputdialog.cpp\
         gui/crightclickenabler.cpp\
         gui/cwkeyergui.cpp\
+        gui/devicestreamselectiondialog.cpp\
         gui/editcommanddialog.cpp\
         gui/externalclockbutton.cpp\
         gui/externalclockdialog.cpp\
@@ -79,6 +80,7 @@ SOURCES += mainwindow.cpp\
         gui/rollupwidget.cpp\
         gui/samplingdevicecontrol.cpp\
         gui/samplingdevicedialog.cpp\
+        gui/sdrangelsplash.cpp\
         gui/mypositiondialog.cpp\
         gui/scaleengine.cpp\
         gui/transverterbutton.cpp\
@@ -119,6 +121,7 @@ HEADERS  += mainwindow.h\
         gui/commandoutputdialog.h\
         gui/crightclickenabler.h\
         gui/cwkeyergui.h\
+        gui/devicestreamselectiondialog.h\
         gui/editcommanddialog.h\
         gui/externalclockbutton.h\
         gui/externalclockdialog.h\
@@ -138,6 +141,7 @@ HEADERS  += mainwindow.h\
         gui/rollupwidget.h\
         gui/samplingdevicecontrol.h\
         gui/samplingdevicedialog.h\
+        gui/sdrangelsplash.h\
         gui/mypositiondialog.h\
         gui/scaleengine.h\
         gui/tickedslider.h\

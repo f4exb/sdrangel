@@ -27,6 +27,8 @@ LIBS += -L../logging/$${build_subdir} -llogging
 CONFIG(ANDROID):CONFIG += mobility
 CONFIG(ANDROID):MOBILITY =
 
+RC_ICONS = ../sdrgui/resources/sdrangel_icon.ico
+
 macx {
     QMAKE_TARGET_BUNDLE_PREFIX = org.f4exb
     QMAKE_BUNDLE = SDRangel
