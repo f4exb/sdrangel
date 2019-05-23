@@ -45,6 +45,10 @@ add_library(${TARGET_NAME} SHARED
 	${modfreedv_SOURCES}
 )
 
+if(ENABLE_EXTERNAL_LIBRARIES)
+    add_dependencies(${TARGET_NAME} codec2)
+endif()
+
 target_link_libraries(${TARGET_NAME}
         Qt5::Core
         ${TARGET_LIB}

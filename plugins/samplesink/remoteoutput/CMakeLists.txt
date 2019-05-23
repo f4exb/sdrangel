@@ -30,6 +30,7 @@ set(remoteoutput_HEADERS
 include_directories(
         ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 	${CMAKE_SOURCE_DIR}/devices
+        ${Boost_INCLUDE_DIRS}
         ${CM256CC_INCLUDE_DIR}
 )
 
@@ -59,6 +60,10 @@ endif()
 add_library(${TARGET_NAME} SHARED
 	${remoteoutput_SOURCES}
 )
+
+if(ENABLE_EXTERNAL_LIBRARIES)
+    add_dependencies(${TARGET_NAME} cm256cc)
+endif()
 
 target_link_libraries(${TARGET_NAME}
         Qt5::Core

@@ -72,6 +72,10 @@ add_library(freedv SHARED
 	${freedv_SOURCES}
 )
 
+if(ENABLE_EXTERNAL_LIBRARIES)
+    add_dependencies(freedv codec2)
+endif()
+
 target_link_libraries(freedv
 	${CODEC2_LIBRARIES}
 )

@@ -1,8 +1,8 @@
 project (sdrbase)
 
 if(WIN32)
-    set(OPUS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/external/windows/opus/include")
-    set(OPUS_LIBRARIES "${CMAKE_SOURCE_DIR}/external/windows/libopus-0.x64.dll")
+    set(OPUS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/external/windows/libopus/include")
+    set(OPUS_LIBRARIES "${CMAKE_SOURCE_DIR}/external/windows/libopus/lib/x64/libopus.lib")
 endif()
 find_package(Opus REQUIRED)
 
@@ -46,8 +46,6 @@ if (LIBSERIALDV_FOUND)
     add_definitions(-DDSD_USE_SERIALDV)
     include_directories(${LIBSERIALDV_INCLUDE_DIR})
     set(sdrbase_SERIALDV_LIB ${LIBSERIALDV_LIBRARY})
-else(LIBSERIALDV_FOUND)
-    message(STATUS "No SerialDV support")
 endif(LIBSERIALDV_FOUND)
 
 set(sdrbase_SOURCES
@@ -284,6 +282,10 @@ include_directories(
 add_library(sdrbase SHARED
     ${sdrbase_SOURCES}
 )
+
+if(ENABLE_EXTERNAL_LIBRARIES AND LIBSERIALDV_FOUND)
+    add_dependencies(sdrbase serialdv)
+endif()
 
 target_link_libraries(sdrbase
     ${OPUS_LIBRARIES}
