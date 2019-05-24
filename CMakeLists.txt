@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.1.0)
 
+# force 64bit on windows because we have only that library
+# TODO discuss because, at this days, a dsp software should be 64bit
+if(WIN32 AND NOT CMAKE_GENERATOR_PLATFORM AND NOT CMAKE_C_COMPILER AND NOT CMAKE_CXX_COMPILER)
+  set(CMAKE_GENERATOR_PLATFORM "x64" CACHE INTERNAL "")
+endif()
+
 project(sdrangel)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
@@ -92,11 +98,8 @@ set(CPACK_SOURCE_IGNORE_FILES "${PROJECT_BINARY_DIR};/.git/;.gitignore;menu.yml;
 set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
 
 # if we don't set build_type
-if(NOT DEFINED CMAKE_BUILD_TYPE OR
-    "${CMAKE_BUILD_TYPE}" STREQUAL "" OR
-    "${CMAKE_BUILD_TYPE}" STREQUAL "MacPorts" OR
-    "${CMAKE_BUILD_TYPE}" STREQUAL "None")
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+if(NOT DEFINED CMAKE_BUILD_TYPE OR "${CMAKE_BUILD_TYPE}" STREQUAL "")
+      set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 message(STATUS "Build type set to: ${CMAKE_BUILD_TYPE}")
 
@@ -106,14 +109,26 @@ if(NOT DEBUG_OUTPUT)
 endif()
 
 # declare build structures
-# !! change sdrbase/plugin/pluginmanager.cpp too !!
+# !! change sdrbase/plugins/pluginmanager.cpp too !!
+set(SDRANGEL_BINARY_BIN_DIR "${CMAKE_BINARY_DIR}/bin")
+set(SDRANGEL_BINARY_LIB_DIR "${CMAKE_BINARY_DIR}/lib")
 if(WIN32)
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${SDRANGEL_BINARY_BIN_DIR}")
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 else()
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 endif()
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${SDRANGEL_BINARY_LIB_DIR}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${SDRANGEL_BINARY_LIB_DIR}")
+if(WIN32)
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+  set(BUILD_PLUGINS_RUNTIME_DIR "${SDRANGEL_BINARY_BIN_DIR}/plugins")
+  set(BUILD_PLUGINSSRV_RUNTIME_DIR "${SDRANGEL_BINARY_BIN_DIR}/pluginssrv")
+endif()
 set(BUILD_PLUGINS_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/plugins")
 set(BUILD_PLUGINSSRV_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pluginssrv")
 # use only lib when create .app/.dmg
@@ -159,15 +174,53 @@ elseif(APPLE)
   configure_file("${CMAKE_SOURCE_DIR}/cmake/cpack/MacOSXBundleInfo.plist.in"
     "${CMAKE_BINARY_DIR}/Info.plist" @ONLY)
 elseif (WIN32)
+  # check compiler version
+  if(MSVC_VERSION GREATER 1919 AND MSVC_VERSION LESS 1910)
+    message(FATAL_ERROR "You must use Microsoft Visual Studio 2017 as compiler, aka MSVC 14.1")
+  endif()
+
+  # used on code but not defined on VS2017
+  add_definitions(-D__WINDOWS__)
+
+  # compile with full multicore
+  set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+
+  # find Qt folder
+  include(QtLocator)
+
+  # in alternative we can use ExternalProject
   set(EXTERNAL_LIBRARY_FOLDER "${CMAKE_SOURCE_DIR}/external/windows")
   set(BOOST_ROOT "${EXTERNAL_LIBRARY_FOLDER}/boost" CACHE INTERNAL "")
   set(FFTW3F_FOUND ON CACHE INTERNAL "")
   set(FFTW3F_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/fftw-3/include" CACHE INTERNAL "")
-  set(FFTW3F_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/fftw-3/libfftw3f-3.dll" CACHE INTERNAL "")
+  set(FFTW3F_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/fftw-3/libfftw3f-3.lib" CACHE INTERNAL "")
   set(LIBUSB_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/libusb/include" CACHE INTERNAL "")
-  set(LIBUSB_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/libusb/libusb-1.0.x64.dll" CACHE INTERNAL "")
+  set(LIBUSB_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/libusb/MS64/dll/libusb-1.0.lib" CACHE INTERNAL "")
   set(OpenCV_DIR "${EXTERNAL_LIBRARY_FOLDER}/opencv" CACHE INTERNAL "")
   set(PKG_CONFIG_EXECUTABLE "${EXTERNAL_LIBRARY_FOLDER}/pkg-config-lite/bin/pkg-config.exe" CACHE INTERNAL "")
+
+  # ffmpeg
+  set(FFMPEG_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  #set(FFMPEG_LIBRARIES)
+  set(AVCODEC_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(AVCODEC_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/avcodec.lib" CACHE INTERNAL "")
+  set(AVFORMAT_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(AVFORMAT_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/avformat.lib" CACHE INTERNAL "")
+  set(AVUTIL_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(AVUTIL_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/avutil.lib" CACHE INTERNAL "")
+  set(SWRESAMPLE_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(SWRESAMPLE_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/swresample.lib" CACHE INTERNAL "")
+  set(SWSCALE_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(SWSCALE_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/swscale.lib" CACHE INTERNAL "")
+
+  # used on fixup_bundle phase
+  set(WINDOWS_FIXUP_BUNDLE_LIB_DIRS
+    "${Qt5_DIR}/../../../bin"
+    "${EXTERNAL_LIBRARY_FOLDER}/fftw-3"
+    "${EXTERNAL_LIBRARY_FOLDER}/libusb/MS64/dll"
+    "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/bin"
+  )
 endif()
 
 # TODO: check if(DEFINED) and fix macports -D
@@ -246,7 +299,22 @@ find_package(PkgConfig REQUIRED)
 find_package(Boost REQUIRED)
 find_package(FFTW3F REQUIRED)
 find_package(LibUSB REQUIRED)  # used by so many packages
-find_package(OpenCV) # channeltx/modatv
+find_package(OpenCV REQUIRED core highgui imgproc) # channeltx/modatv
+
+# unfortunately OpenCV library from windows doesn't set the cache option
+if(WIN32)
+  set(OpenCV_INCLUDE_DIRS "${OpenCV_INCLUDE_DIRS}" CACHE INTERNAL "")
+  set(OpenCV_LIBS "${OpenCV_LIBS}" CACHE INTERNAL "")
+
+  # add libs folder for fixup_bundle()
+  get_filename_component(GFN_Boost_LIBS_DIR Boost_LIBS DIRECTORY)
+  get_filename_component(GFN_OpenCV_LIBS_DIR OpenCV_LIBS DIRECTORY)
+  set(WINDOWS_FIXUP_BUNDLE_LIB_DIRS
+    "${WINDOWS_FIXUP_BUNDLE_LIB_DIRS}"
+    "${GFN_Boost_LIBS_DIR}"
+    "${GFN_OpenCV_LIBS_DIR}"
+  )
+endif()
 
 # macOS compatibility
 if(APPLE)
@@ -310,12 +378,18 @@ endif()
 
 # base libraries
 add_subdirectory(sdrbase)
-add_subdirectory(sdrbench)
 add_subdirectory(httpserver)
 add_subdirectory(logging)
 add_subdirectory(qrtplib)
 add_subdirectory(swagger)
 add_subdirectory(devices)
+
+# strange symbol dependency
+#  mainbench.obj : error LNK2001: unresolved external
+#  symbol "public: static float const decimation_scale<12>::scaleIn" (?scaleIn@?$decimation_scale@$0M@@@2MB)
+if(NOT WIN32)
+  add_subdirectory(sdrbench)
+endif()
 
 if (BUILD_GUI)
     add_subdirectory(sdrgui)
@@ -343,20 +417,21 @@ include_directories(
 )
 
 ############ build sdrangel benchmark ################
-set(sdrangelbench_SOURCES
+if(NOT WIN32)
+  set(sdrangelbench_SOURCES
     appbench/main.cpp
-)
+  )
 
-add_executable(sdrangelbench
+  add_executable(sdrangelbench
     ${sdrangelbench_SOURCES}
-)
+  )
 
-target_link_libraries(sdrangelbench
+  target_link_libraries(sdrangelbench
     Qt5::Multimedia
     sdrbench
     logging
-)
-
+  )
+endif()
 ############ build sdrangel gui ################
 if (BUILD_GUI)
     set(sdrangel_SOURCES
@@ -397,7 +472,9 @@ if (BUILD_SERVER)
 endif()
 
 ############ install ##################
-install(TARGETS sdrangelbench DESTINATION ${INSTALL_BIN_DIR})
+if(NOT WIN32)
+  install(TARGETS sdrangelbench DESTINATION ${INSTALL_BIN_DIR})
+endif()
 if (BUILD_GUI)
       install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION ${INSTALL_BIN_DIR})
 endif()

@@ -1,5 +1,5 @@
-#include <arm_neon.h>
 #include <stdint.h>
+#include <arm_neon.h>
 #include <stdlib.h>
 #include <signal.h>
 

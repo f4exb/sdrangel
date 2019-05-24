@@ -7,91 +7,158 @@
 # other viable solution is to use execute_process() during config
 # but make the configuration dirty
 
+# which version/tag/checkout to use
+set(CODEC2_TAG 7a0187da3ffb06fd90c081216b50bab94d02d046)
+set(CM256CC_TAG 19f023d9d6c6f1a2e7dc5bcf466a1424c7918de4)
+set(MBELIB_TAG "debian/1.3.0")
+set(SERIALDV_TAG abd65a0fc2d5339808194862d14119b0cba70424)
+set(DSDCC_TAG 2d60d60f16c1ac778ba518310180f81043befdd0)
+
+
 # For some external project macros
 include(ExternalProject)
 
-# add the build path to cmake
-#list(APPEND CMAKE_PREFIX_PATH "${EXTERNAL_BUILD_LIBRARIES}")
+# default build destination in windows to avoid Release/Debug folder
+if(WIN32)
+  # the build will be output on the same folder of sdrangel
+  set(DEFAULT_OUTPUT_DIRECTORY
+    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${SDRANGEL_BINARY_BIN_DIR}
+    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=${SDRANGEL_BINARY_BIN_DIR}
+    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=${SDRANGEL_BINARY_BIN_DIR}
+    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${SDRANGEL_BINARY_LIB_DIR}
+    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG=${SDRANGEL_BINARY_LIB_DIR}
+    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=${SDRANGEL_BINARY_LIB_DIR}
+    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${SDRANGEL_BINARY_LIB_DIR}
+    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG=${SDRANGEL_BINARY_LIB_DIR}
+    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=${SDRANGEL_BINARY_LIB_DIR})
+endif()
 
 # macro that create symbolic links
 macro(makeLink src dest target)
-  add_custom_command(TARGET ${target} PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E create_symlink ${src} ${dest} DEPENDS  ${dest} COMMENT "mklink ${src} -> ${dest}")
+  if(NOT EXISTS ${dest})
+    add_custom_command(TARGET ${target} PRE_BUILD
+      COMMAND ${CMAKE_COMMAND} -E create_symlink ${src} ${dest} DEPENDS ${dest} COMMENT "mklink ${src} -> ${dest}")
+  endif()
+endmacro()
+# macro that copy folder
+macro(makeCopy src dest target)
+  if(NOT EXISTS ${dest})
+    add_custom_command(TARGET ${target} PRE_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${src} ${dest} DEPENDS ${dest} COMMENT "copy ${src} -> ${dest}")
+  endif()
 endmacro()
 
-# needs boost
-ExternalProject_Add(codec2
+# probably build with mingw64 on windows
+if(NOT WIN32)
+  # needs boost
+  ExternalProject_Add(codec2
     GIT_REPOSITORY https://github.com/drowe67/codec2.git
-    GIT_TAG 7a0187da3ffb06fd90c081216b50bab94d02d046
+    GIT_TAG ${CODEC2_TAG}
     PREFIX "${EXTERNAL_BUILD_LIBRARIES}/codec2"
+    CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORY}
     INSTALL_COMMAND ""
     TEST_COMMAND ""
-)
-set(CODEC2_FOUND ON CACHE INTERNAL "")
-set(CODEC2_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/codec2/src/codec2/src" CACHE INTERNAL "")
-set(CODEC2_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/codec2/src/codec2-build/libcodec2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-# some source include "codec2/comp.h" and some without codec2
-makeLink("${EXTERNAL_BUILD_LIBRARIES}/codec2/src/codec2/src" "${EXTERNAL_BUILD_LIBRARIES}/codec2/src/codec2/src/codec2" codec2)
+  )
+  ExternalProject_Get_Property(codec2 source_dir binary_dir)
+  set(CODEC2_FOUND ON CACHE INTERNAL "")
+  set(CODEC2_INCLUDE_DIR "${source_dir}/src" CACHE INTERNAL "")
+  if(WIN32)
+    set(CODEC2_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/codec2.lib" CACHE INTERNAL "")
+    makeCopy("${source_dir}/src" "${source_dir}/src/codec2" codec2)
+  else()
+    set(CODEC2_LIBRARIES "${binary_dir}/libcodec2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    # some source include "codec2/comp.h" and some without codec2
+    makeLink("${source_dir}/src" "${source_dir}/src/codec2" codec2)
+  endif()
+endif()
 
 # needs boost
 ExternalProject_Add(cm256cc
     GIT_REPOSITORY https://github.com/f4exb/cm256cc.git
-    GIT_TAG v1.0.5
+    GIT_TAG ${CM256CC_TAG}
     PREFIX "${EXTERNAL_BUILD_LIBRARIES}/cm256cc"
+    CMAKE_ARGS -DBUILD_TOOLS=OFF -DBOOST_ROOT="${BOOST_ROOT}" ${DEFAULT_OUTPUT_DIRECTORY}
     INSTALL_COMMAND ""
     TEST_COMMAND ""
 )
+ExternalProject_Get_Property(cm256cc source_dir binary_dir)
 set(CM256CC_FOUND ON CACHE INTERNAL "")
+# we need cm256cc/library.h
 set(CM256CC_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/cm256cc/src" CACHE INTERNAL "")
-set(CM256CC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/cm256cc/src/cm256cc-build/libcm256cc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+if(WIN32)
+  set(CM256CC_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/cm256cc.lib" CACHE INTERNAL "")
+else()
+  set(CM256CC_LIBRARIES "${binary_dir}/libcm256cc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+endif()
 
+set(USE_MBELIB OFF)
+if(NOT WIN32)
 ExternalProject_Add(mbelib
     GIT_REPOSITORY https://github.com/szechyjs/mbelib.git
-    GIT_TAG "debian/1.3.0"
+    GIT_TAG ${MBELIB_TAG}
     PREFIX "${EXTERNAL_BUILD_LIBRARIES}/mbelib"
+    CMAKE_ARGS -DDISABLE_TEST=ON ${DEFAULT_OUTPUT_DIRECTORY}
     INSTALL_COMMAND ""
     TEST_COMMAND ""
 )
+ExternalProject_Get_Property(mbelib source_dir binary_dir)
+set(USE_MBELIB ON)
 set(DSDCC_DEPENDS mbelib)
 set(LIBMBE_FOUND)
-set(LIBMBE_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/mbelib/src/mbelib")
-set(LIBMBE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/mbelib/src/mbelib-build/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}")
+set(LIBMBE_INCLUDE_DIR "${source_dir}")
+if(WIN32)
+  set(LIBMBE_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/mbe.lib")
+else()
+  set(LIBMBE_LIBRARIES "${binary_dir}/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}")
+endif()
+endif(NOT WIN32)
 
 if(WIN32 OR LINUX)
     ExternalProject_Add(serialdv
         GIT_REPOSITORY https://github.com/f4exb/serialDV.git
-        GIT_TAG 89c841ce5b24b8b75c329d6330ec216773f002d2
+        GIT_TAG ${SERIALDV_TAG}
         PREFIX "${EXTERNAL_BUILD_LIBRARIES}/serialdv"
+        CMAKE_ARGS -DBUILD_TOOL=OFF ${DEFAULT_OUTPUT_DIRECTORY}
         INSTALL_COMMAND ""
         TEST_COMMAND ""
     )
+    ExternalProject_Get_Property(serialdv source_dir binary_dir)
     set(DSDCC_DEPENDS ${DSDCC_DEPENDS} serialdv)
     set(LIBSERIALDV_FOUND ON CACHE INTERNAL "")
-    set(LIBSERIALDV_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/serialdv/src/serialdv" CACHE INTERNAL "")
-    set(LIBSERIALDV_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/serialdv/src/serialdv-build/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-
-    # because sdrbase/dsp/dvserialworker.h use dsp/dvcontroller.h
-    # so we need a link
-    makeLink("${EXTERNAL_BUILD_LIBRARIES}/serialdv/src/serialdv" "${EXTERNAL_BUILD_LIBRARIES}/serialdv/src/serialdv/dsp" serialdv)
+    set(LIBSERIALDV_INCLUDE_DIR "${source_dir}" CACHE INTERNAL "")
+    if(WIN32)
+      set(LIBSERIALDV_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/serialdv.lib" CACHE INTERNAL "")
+      makeCopy("${source_dir}" "${source_dir}/dsp" serialdv)
+    else()
+      set(LIBSERIALDV_LIBRARY "${binary_dir}/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+      # because sdrbase/dsp/dvserialworker.h use dsp/dvcontroller.h
+      # so we need a link
+      makeLink("${source_dir}" "${source_dir}/dsp" serialdv)
+    endif()
 endif()
 
 ExternalProject_Add(dsdcc
     GIT_REPOSITORY https://github.com/f4exb/dsdcc.git
-    GIT_TAG cee82816bc8982ecb218abbd2baeb5bb5186711b
+    GIT_TAG ${DSDCC_TAG}
     DEPENDS ${DSDCC_DEPENDS}
     PREFIX "${EXTERNAL_BUILD_LIBRARIES}/dsdcc"
-    CMAKE_ARGS "-DUSE_MBELIB=ON -DLIBMBE_INCLUDE_DIR=${LIBMBE_INCLUDE_DIR} -DLIBMBE_LIBRARY=${LIBMBE_LIBRARIES} -DLIBSERIALDV_INCLUDE_DIR=${LIBSERIALDV_INCLUDE_DIR} -DLIBSERIALDV_LIBRARY=${LIBSERIALDV_LIBRARY}"
+    CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORY} -DBUILD_TOOL=OFF -DUSE_MBELIB=${USE_MBELIB} -DLIBMBE_INCLUDE_DIR="${LIBMBE_INCLUDE_DIR}" -DLIBMBE_LIBRARY="${LIBMBE_LIBRARIES}" -DLIBSERIALDV_INCLUDE_DIR="${LIBSERIALDV_INCLUDE_DIR}" -DLIBSERIALDV_LIBRARY="${LIBSERIALDV_LIBRARY}"
     INSTALL_COMMAND ""
     TEST_COMMAND ""
 )
+ExternalProject_Get_Property(dsdcc source_dir binary_dir)
 set(LIBDSDCC_FOUND ON CACHE INTERNAL "")
 set(LIBDSDCC_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/dsdcc/src" CACHE INTERNAL "")
-set(LIBDSDCC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/dsdcc/src/dsdcc-build/libdsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+if(WIN32)
+  set(LIBDSDCC_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/dsdcc.lib" CACHE INTERNAL "")
+else()
+  set(LIBDSDCC_LIBRARIES "${binary_dir}/libdsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+endif()
 
 # already on the respository
 # TODO decide what to do
 if(OFF)
-# needs pkgconfig, libusb, autoconf, automake and autolib
+# needs pkgconfig, libusb, autoconf, automake and libtool
 ExternalProject_Add(perseus
     GIT_REPOSITORY https://github.com/f4exb/libperseus-sdr.git
     GIT_TAG afefa23e3140ac79d845acb68cf0beeb86d09028
