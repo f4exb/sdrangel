@@ -91,9 +91,9 @@ PluginInterface::SamplingDevices SoapySDROutputPlugin::enumSampleSinks()
 
 #ifdef SERVER_MODE
 PluginInstanceGUI* SoapySDROutputPlugin::createSampleSinkPluginInstanceGUI(
-        const QString& sinkId __attribute__((unused)),
-        QWidget **widget __attribute__((unused)),
-        DeviceUISet *deviceUISet __attribute__((unused)))
+        const QString& sinkId,
+        QWidget **widget,
+        DeviceUISet *deviceUISet)
 {
     return 0;
 }

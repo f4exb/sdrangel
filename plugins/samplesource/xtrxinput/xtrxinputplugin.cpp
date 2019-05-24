@@ -88,9 +88,9 @@ PluginInterface::SamplingDevices XTRXInputPlugin::enumSampleSources()
 
 #ifdef SERVER_MODE
 PluginInstanceGUI* XTRXInputPlugin::createSampleSourcePluginInstanceGUI(
-        const QString& sourceId __attribute((unused)),
-        QWidget **widget __attribute((unused)),
-        DeviceUISet *deviceUISet __attribute((unused)))
+        const QString& sourceId,
+        QWidget **widget,
+        DeviceUISet *deviceUISet)
 {
     return 0;
 }

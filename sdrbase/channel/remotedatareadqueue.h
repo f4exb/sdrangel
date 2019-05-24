@@ -27,10 +27,12 @@
 
 #include <QQueue>
 
+#include "export.h"
+
 class RemoteDataBlock;
 class Sample;
 
-class RemoteDataReadQueue
+class SDRBASE_API RemoteDataReadQueue
 {
 public:
     RemoteDataReadQueue();

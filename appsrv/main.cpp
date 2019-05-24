@@ -21,7 +21,6 @@
 #include <QSysInfo>
 
 #include <signal.h>
-#include <unistd.h>
 #include <vector>
 
 #include "loggerwithfile.h"

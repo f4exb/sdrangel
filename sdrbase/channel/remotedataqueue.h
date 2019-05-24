@@ -29,9 +29,11 @@
 #include <QMutex>
 #include <QQueue>
 
+#include "export.h"
+
 class RemoteDataBlock;
 
-class RemoteDataQueue : public QObject {
+class SDRBASE_API RemoteDataQueue : public QObject {
     Q_OBJECT
 
 public:

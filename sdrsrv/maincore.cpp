@@ -17,8 +17,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <unistd.h>
-
 #include <QDebug>
 #include <QSysInfo>
 #include <QResource>
