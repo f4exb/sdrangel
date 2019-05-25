@@ -2,14 +2,14 @@
 
 if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
   JOBS=$(sysctl -n hw.ncpu)
-elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+elif [ "${TRAVIS_OS_NAME}" == "linux" ] || [ ${CI_LINUX} = true ]; then
   JOBS=$(nproc --all)
 else
   JOBS=1
 fi
 
 
-if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+if [ "${TRAVIS_OS_NAME}" == "linux" ] || [ ${CI_LINUX} = true ]; then
   debuild -i -us -uc -b
 else
   mkdir build && cd build

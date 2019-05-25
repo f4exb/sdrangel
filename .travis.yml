@@ -5,6 +5,9 @@ matrix:
   - os: linux
     dist: xenial
     env: CMAKE_CUSTOM_OPTIONS="-DBUILD_GUI=OFF"
+  - os: linux
+    dist: xenial
+    env: CMAKE_CUSTOM_OPTIONS="-DENABLE_EXTERNAL_LIBRARIES=ON"
   - os: osx
     osx_image: xcode10.2
   - os: osx
@@ -43,7 +46,6 @@ addons:
       - librtlsdr-dev
       - libasound2-dev
       - libopencv-dev
-      - libopencv-dev
       - libsqlite3-dev
       - libxml2-dev
       - bison
@@ -67,23 +69,19 @@ install:
   # macOS 10.11 doesn't support newest Qt
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then if [[ "$TRAVIS_OSX_IMAGE" == "xcode7.3" ]]; then sudo port -N -k install qt59-qtmultimedia qt59-qttools; else sudo port -N -k install qt5-qtmultimedia qt5-qttools; fi; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source macports-ci ccache --save; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then bash cmake/travis-ci/build_codec2.sh; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then bash cmake/travis-ci/build_cm256cc.sh; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then bash cmake/travis-ci/build_dsdcc.sh; fi
+  # use codec2 from repository
+  #- if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_codec2.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_cm256cc.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_mbelib.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_serialdv.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_dsdcc.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_perseus-sdr.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_xtrx-sdr.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_airspyhf.sh; fi
+
 script:
   - bash -c export
   - bash -c pwd
-  - bash cmake/travis-ci/build_sdrangel.sh
+  - bash cmake/ci/build_sdrangel.sh
 env:
   - CMAKE_CUSTOM_OPTIONS="-DFORCE_SSE41=ON -DBUNDLE=ON -DENABLE_PACK_MIRSDRAPI=ON"
-deploy:
-  provider: pages
-  skip_cleanup: true
-  github_token: $GITHUB_TOKEN
-  keep_history: true
-  on:
-    branch: master
-  repo: sdrangel-travis-ci
-  project_name: SDRangel
-  email: rainbow@irh.it
-  name: rainbow
