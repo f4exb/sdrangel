@@ -20,7 +20,7 @@
 
 #include <QString>
 
-struct TestMISettings {
+struct TestMIStreamSettings {
     typedef enum {
         FC_POS_INFRA = 0,
         FC_POS_SUPRA,
@@ -60,20 +60,25 @@ struct TestMISettings {
     float m_iFactor;        //!< -1.0 < x < 1.0
     float m_qFactor;        //!< -1.0 < x < 1.0
     float m_phaseImbalance; //!< -1.0 < x < 1.0
+
+	TestMIStreamSettings();
+	void resetToDefaults();
+};
+
+struct TestMISettings {
     QString m_fileRecordName;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
+    std::vector<TestMIStreamSettings> m_streams;
 
 	TestMISettings();
+    TestMISettings(const TestMISettings& other);
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 };
-
-
-
 
 
 #endif /* _TESTMI_TESTMISETTINGS_H_ */

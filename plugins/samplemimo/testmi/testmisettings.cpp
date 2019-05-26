@@ -19,12 +19,12 @@
 #include "util/simpleserializer.h"
 #include "testmisettings.h"
 
-TestMISettings::TestMISettings()
+TestMIStreamSettings::TestMIStreamSettings()
 {
     resetToDefaults();
 }
 
-void TestMISettings::resetToDefaults()
+void TestMIStreamSettings::resetToDefaults()
 {
     m_centerFrequency = 435000*1000;
     m_frequencyShift = 0;
@@ -42,36 +42,64 @@ void TestMISettings::resetToDefaults()
     m_iFactor = 0.0f;
     m_qFactor = 0.0f;
     m_phaseImbalance = 0.0f;
+}
+
+TestMISettings::TestMISettings()
+{
     m_fileRecordName = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
+    m_streams.push_back(TestMIStreamSettings());
+    m_streams.push_back(TestMIStreamSettings());
+}
+
+TestMISettings::TestMISettings(const TestMISettings& other) :
+    m_streams(other.m_streams)
+{
+    m_fileRecordName = other.m_fileRecordName;
+    m_useReverseAPI = other.m_useReverseAPI;
+    m_reverseAPIAddress = other.m_reverseAPIAddress;
+    m_reverseAPIPort = other.m_reverseAPIPort;
+    m_reverseAPIDeviceIndex = other.m_reverseAPIDeviceIndex;
+}
+
+void TestMISettings::resetToDefaults()
+{
+    for (unsigned int i = 0; i < m_streams.size(); i++) {
+        m_streams[i].resetToDefaults();
+    }
 }
 
 QByteArray TestMISettings::serialize() const
 {
     SimpleSerializer s(1);
 
-    s.writeS32(2, m_frequencyShift);
-    s.writeU32(3, m_sampleRate);
-    s.writeU32(4, m_log2Decim);
-    s.writeS32(5, (int) m_fcPos);
-    s.writeU32(6, m_sampleSizeIndex);
-    s.writeS32(7, m_amplitudeBits);
-    s.writeS32(8, (int) m_autoCorrOptions);
-    s.writeFloat(10, m_dcFactor);
-    s.writeFloat(11, m_iFactor);
-    s.writeFloat(12, m_qFactor);
-    s.writeFloat(13, m_phaseImbalance);
-    s.writeS32(14, (int) m_modulation);
-    s.writeS32(15, m_modulationTone);
-    s.writeS32(16, m_amModulation);
-    s.writeS32(17, m_fmDeviation);
-    s.writeBool(18, m_useReverseAPI);
-    s.writeString(19, m_reverseAPIAddress);
-    s.writeU32(20, m_reverseAPIPort);
-    s.writeU32(21, m_reverseAPIDeviceIndex);
+    s.writeBool(1, m_useReverseAPI);
+    s.writeString(2, m_reverseAPIAddress);
+    s.writeU32(3, m_reverseAPIPort);
+    s.writeU32(4, m_reverseAPIDeviceIndex);
+
+    for (unsigned int i = 0; i < m_streams.size(); i++)
+    {
+        s.writeS32(10 + 30*i, m_streams[i].m_frequencyShift);
+        s.writeU32(11 + 30*i, m_streams[i].m_sampleRate);
+        s.writeU32(12 + 30*i, m_streams[i].m_log2Decim);
+        s.writeS32(13 + 30*i, (int) m_streams[i].m_fcPos);
+        s.writeU32(14 + 30*i, m_streams[i].m_sampleSizeIndex);
+        s.writeS32(15 + 30*i, m_streams[i].m_amplitudeBits);
+        s.writeS32(16 + 30*i, (int) m_streams[i].m_autoCorrOptions);
+        s.writeFloat(17 + 30*i, m_streams[i].m_dcFactor);
+        s.writeFloat(18 + 30*i, m_streams[i].m_iFactor);
+        s.writeFloat(19 + 30*i, m_streams[i].m_qFactor);
+        s.writeFloat(20 + 30*i, m_streams[i].m_phaseImbalance);
+        s.writeS32(21 + 30*i, (int) m_streams[i].m_modulation);
+        s.writeS32(22 + 30*i, m_streams[i].m_modulationTone);
+        s.writeS32(23 + 30*i, m_streams[i].m_amModulation);
+        s.writeS32(24 + 30*i, m_streams[i].m_fmDeviation);
+    }
+
     return s.final();
 }
 
@@ -90,40 +118,9 @@ bool TestMISettings::deserialize(const QByteArray& data)
         int intval;
         uint32_t utmp;
 
-        d.readS32(2, &m_frequencyShift, 0);
-        d.readU32(3, &m_sampleRate, 768*1000);
-        d.readU32(4, &m_log2Decim, 4);
-        d.readS32(5, &intval, 0);
-        m_fcPos = (fcPos_t) intval;
-        d.readU32(6, &m_sampleSizeIndex, 0);
-        d.readS32(7, &m_amplitudeBits, 128);
-        d.readS32(8, &intval, 0);
-
-        if (intval < 0 || intval > (int) AutoCorrLast) {
-            m_autoCorrOptions = AutoCorrNone;
-        } else {
-            m_autoCorrOptions = (AutoCorrOptions) intval;
-        }
-
-        d.readFloat(10, &m_dcFactor, 0.0f);
-        d.readFloat(11, &m_iFactor, 0.0f);
-        d.readFloat(12, &m_qFactor, 0.0f);
-        d.readFloat(13, &m_phaseImbalance, 0.0f);
-        d.readS32(14, &intval, 0);
-
-        if (intval < 0 || intval > (int) ModulationLast) {
-            m_modulation = ModulationNone;
-        } else {
-            m_modulation = (Modulation) intval;
-        }
-
-        d.readS32(15, &m_modulationTone, 44);
-        d.readS32(16, &m_amModulation, 50);
-        d.readS32(17, &m_fmDeviation, 50);
-
-        d.readBool(18, &m_useReverseAPI, false);
-        d.readString(19, &m_reverseAPIAddress, "127.0.0.1");
-        d.readU32(20, &utmp, 0);
+        d.readBool(1, &m_useReverseAPI, false);
+        d.readString(2, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(3, &utmp, 0);
 
         if ((utmp > 1023) && (utmp < 65535)) {
             m_reverseAPIPort = utmp;
@@ -131,8 +128,42 @@ bool TestMISettings::deserialize(const QByteArray& data)
             m_reverseAPIPort = 8888;
         }
 
-        d.readU32(21, &utmp, 0);
+        d.readU32(4, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+
+        for (unsigned int i = 0; i < m_streams.size(); i++)
+        {
+            d.readS32(10 + 30*i, &m_streams[i].m_frequencyShift, 0);
+            d.readU32(11 + 30*i, &m_streams[i].m_sampleRate, 768*1000);
+            d.readU32(12 + 30*i, &m_streams[i].m_log2Decim, 4);
+            d.readS32(13 + 30*i, &intval, 0);
+            m_streams[i].m_fcPos = (TestMIStreamSettings::fcPos_t) intval;
+            d.readU32(14 + 30*i, &m_streams[i].m_sampleSizeIndex, 0);
+            d.readS32(15 + 30*i, &m_streams[i].m_amplitudeBits, 128);
+            d.readS32(16 + 30*i, &intval, 0);
+
+            if (intval < 0 || intval > (int) TestMIStreamSettings::AutoCorrLast) {
+                m_streams[i].m_autoCorrOptions = TestMIStreamSettings::AutoCorrNone;
+            } else {
+                m_streams[i].m_autoCorrOptions = (TestMIStreamSettings::AutoCorrOptions) intval;
+            }
+
+            d.readFloat(17 + 30*i, &m_streams[i].m_dcFactor, 0.0f);
+            d.readFloat(18 + 30*i, &m_streams[i].m_iFactor, 0.0f);
+            d.readFloat(19 + 30*i, &m_streams[i].m_qFactor, 0.0f);
+            d.readFloat(20 + 30*i, &m_streams[i].m_phaseImbalance, 0.0f);
+            d.readS32(21 + 30*i, &intval, 0);
+
+            if (intval < 0 || intval > (int) TestMIStreamSettings::ModulationLast) {
+                m_streams[i].m_modulation = TestMIStreamSettings::ModulationNone;
+            } else {
+                m_streams[i].m_modulation = (TestMIStreamSettings::Modulation) intval;
+            }
+
+            d.readS32(22 + 30*i, &m_streams[i].m_modulationTone, 44);
+            d.readS32(23 + 30*i, &m_streams[i].m_amModulation, 50);
+            d.readS32(24 + 30*i, &m_streams[i].m_fmDeviation, 50);
+        }
 
         return true;
     }

@@ -142,11 +142,17 @@ public:
             QString& errorMessage);
 
 private:
+    struct DeviceSettingsKeys
+    {
+        QList<QString> m_commonSettingsKeys;
+        QList<QList<QString>> m_streamsSettingsKeys;
+    };
+
 	DeviceAPI *m_deviceAPI;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
 	QMutex m_mutex;
 	TestMISettings m_settings;
-	TestMIThread* m_testSourceThread;
+	std::vector<TestMIThread*> m_testSourceThreads;
 	QString m_deviceDescription;
 	bool m_running;
     const QTimer& m_masterTimer;
@@ -155,7 +161,7 @@ private:
 
 	bool applySettings(const TestMISettings& settings, bool force);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const TestMISettings& settings);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const TestMISettings& settings, bool force);
+    void webapiReverseSendSettings(const DeviceSettingsKeys& deviceSettingsKeys, const TestMISettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

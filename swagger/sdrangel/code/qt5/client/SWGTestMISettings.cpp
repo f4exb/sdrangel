@@ -28,38 +28,6 @@ SWGTestMISettings::SWGTestMISettings(QString* json) {
 }
 
 SWGTestMISettings::SWGTestMISettings() {
-    center_frequency = 0;
-    m_center_frequency_isSet = false;
-    frequency_shift = 0;
-    m_frequency_shift_isSet = false;
-    sample_rate = 0;
-    m_sample_rate_isSet = false;
-    log2_decim = 0;
-    m_log2_decim_isSet = false;
-    fc_pos = 0;
-    m_fc_pos_isSet = false;
-    sample_size_index = 0;
-    m_sample_size_index_isSet = false;
-    amplitude_bits = 0;
-    m_amplitude_bits_isSet = false;
-    auto_corr_options = 0;
-    m_auto_corr_options_isSet = false;
-    modulation = 0;
-    m_modulation_isSet = false;
-    modulation_tone = 0;
-    m_modulation_tone_isSet = false;
-    am_modulation = 0;
-    m_am_modulation_isSet = false;
-    fm_deviation = 0;
-    m_fm_deviation_isSet = false;
-    dc_factor = 0.0f;
-    m_dc_factor_isSet = false;
-    i_factor = 0.0f;
-    m_i_factor_isSet = false;
-    q_factor = 0.0f;
-    m_q_factor_isSet = false;
-    phase_imbalance = 0.0f;
-    m_phase_imbalance_isSet = false;
     file_record_name = nullptr;
     m_file_record_name_isSet = false;
     use_reverse_api = 0;
@@ -70,6 +38,8 @@ SWGTestMISettings::SWGTestMISettings() {
     m_reverse_api_port_isSet = false;
     reverse_api_device_index = 0;
     m_reverse_api_device_index_isSet = false;
+    streams = nullptr;
+    m_streams_isSet = false;
 }
 
 SWGTestMISettings::~SWGTestMISettings() {
@@ -78,38 +48,6 @@ SWGTestMISettings::~SWGTestMISettings() {
 
 void
 SWGTestMISettings::init() {
-    center_frequency = 0;
-    m_center_frequency_isSet = false;
-    frequency_shift = 0;
-    m_frequency_shift_isSet = false;
-    sample_rate = 0;
-    m_sample_rate_isSet = false;
-    log2_decim = 0;
-    m_log2_decim_isSet = false;
-    fc_pos = 0;
-    m_fc_pos_isSet = false;
-    sample_size_index = 0;
-    m_sample_size_index_isSet = false;
-    amplitude_bits = 0;
-    m_amplitude_bits_isSet = false;
-    auto_corr_options = 0;
-    m_auto_corr_options_isSet = false;
-    modulation = 0;
-    m_modulation_isSet = false;
-    modulation_tone = 0;
-    m_modulation_tone_isSet = false;
-    am_modulation = 0;
-    m_am_modulation_isSet = false;
-    fm_deviation = 0;
-    m_fm_deviation_isSet = false;
-    dc_factor = 0.0f;
-    m_dc_factor_isSet = false;
-    i_factor = 0.0f;
-    m_i_factor_isSet = false;
-    q_factor = 0.0f;
-    m_q_factor_isSet = false;
-    phase_imbalance = 0.0f;
-    m_phase_imbalance_isSet = false;
     file_record_name = new QString("");
     m_file_record_name_isSet = false;
     use_reverse_api = 0;
@@ -120,26 +58,12 @@ SWGTestMISettings::init() {
     m_reverse_api_port_isSet = false;
     reverse_api_device_index = 0;
     m_reverse_api_device_index_isSet = false;
+    streams = new QList<SWGTestMiStreamSettings*>();
+    m_streams_isSet = false;
 }
 
 void
 SWGTestMISettings::cleanup() {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     if(file_record_name != nullptr) { 
         delete file_record_name;
     }
@@ -149,6 +73,13 @@ SWGTestMISettings::cleanup() {
     }
 
 
+    if(streams != nullptr) { 
+        auto arr = streams;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete streams;
+    }
 }
 
 SWGTestMISettings*
@@ -162,38 +93,6 @@ SWGTestMISettings::fromJson(QString &json) {
 
 void
 SWGTestMISettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&frequency_shift, pJson["frequencyShift"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&log2_decim, pJson["log2Decim"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&fc_pos, pJson["fcPos"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&sample_size_index, pJson["sampleSizeIndex"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&amplitude_bits, pJson["amplitudeBits"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&auto_corr_options, pJson["autoCorrOptions"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&modulation, pJson["modulation"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&modulation_tone, pJson["modulationTone"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&am_modulation, pJson["amModulation"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&fm_deviation, pJson["fmDeviation"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&dc_factor, pJson["dcFactor"], "float", "");
-    
-    ::SWGSDRangel::setValue(&i_factor, pJson["iFactor"], "float", "");
-    
-    ::SWGSDRangel::setValue(&q_factor, pJson["qFactor"], "float", "");
-    
-    ::SWGSDRangel::setValue(&phase_imbalance, pJson["phaseImbalance"], "float", "");
-    
     ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
@@ -204,6 +103,8 @@ SWGTestMISettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
     
+    
+    ::SWGSDRangel::setValue(&streams, pJson["streams"], "QList", "SWGTestMiStreamSettings");
 }
 
 QString
@@ -220,54 +121,6 @@ SWGTestMISettings::asJson ()
 QJsonObject*
 SWGTestMISettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_center_frequency_isSet){
-        obj->insert("centerFrequency", QJsonValue(center_frequency));
-    }
-    if(m_frequency_shift_isSet){
-        obj->insert("frequencyShift", QJsonValue(frequency_shift));
-    }
-    if(m_sample_rate_isSet){
-        obj->insert("sampleRate", QJsonValue(sample_rate));
-    }
-    if(m_log2_decim_isSet){
-        obj->insert("log2Decim", QJsonValue(log2_decim));
-    }
-    if(m_fc_pos_isSet){
-        obj->insert("fcPos", QJsonValue(fc_pos));
-    }
-    if(m_sample_size_index_isSet){
-        obj->insert("sampleSizeIndex", QJsonValue(sample_size_index));
-    }
-    if(m_amplitude_bits_isSet){
-        obj->insert("amplitudeBits", QJsonValue(amplitude_bits));
-    }
-    if(m_auto_corr_options_isSet){
-        obj->insert("autoCorrOptions", QJsonValue(auto_corr_options));
-    }
-    if(m_modulation_isSet){
-        obj->insert("modulation", QJsonValue(modulation));
-    }
-    if(m_modulation_tone_isSet){
-        obj->insert("modulationTone", QJsonValue(modulation_tone));
-    }
-    if(m_am_modulation_isSet){
-        obj->insert("amModulation", QJsonValue(am_modulation));
-    }
-    if(m_fm_deviation_isSet){
-        obj->insert("fmDeviation", QJsonValue(fm_deviation));
-    }
-    if(m_dc_factor_isSet){
-        obj->insert("dcFactor", QJsonValue(dc_factor));
-    }
-    if(m_i_factor_isSet){
-        obj->insert("iFactor", QJsonValue(i_factor));
-    }
-    if(m_q_factor_isSet){
-        obj->insert("qFactor", QJsonValue(q_factor));
-    }
-    if(m_phase_imbalance_isSet){
-        obj->insert("phaseImbalance", QJsonValue(phase_imbalance));
-    }
     if(file_record_name != nullptr && *file_record_name != QString("")){
         toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
     }
@@ -283,168 +136,11 @@ SWGTestMISettings::asJsonObject() {
     if(m_reverse_api_device_index_isSet){
         obj->insert("reverseAPIDeviceIndex", QJsonValue(reverse_api_device_index));
     }
+    if(streams->size() > 0){
+        toJsonArray((QList<void*>*)streams, obj, "streams", "SWGTestMiStreamSettings");
+    }
 
     return obj;
-}
-
-qint32
-SWGTestMISettings::getCenterFrequency() {
-    return center_frequency;
-}
-void
-SWGTestMISettings::setCenterFrequency(qint32 center_frequency) {
-    this->center_frequency = center_frequency;
-    this->m_center_frequency_isSet = true;
-}
-
-qint32
-SWGTestMISettings::getFrequencyShift() {
-    return frequency_shift;
-}
-void
-SWGTestMISettings::setFrequencyShift(qint32 frequency_shift) {
-    this->frequency_shift = frequency_shift;
-    this->m_frequency_shift_isSet = true;
-}
-
-qint32
-SWGTestMISettings::getSampleRate() {
-    return sample_rate;
-}
-void
-SWGTestMISettings::setSampleRate(qint32 sample_rate) {
-    this->sample_rate = sample_rate;
-    this->m_sample_rate_isSet = true;
-}
-
-qint32
-SWGTestMISettings::getLog2Decim() {
-    return log2_decim;
-}
-void
-SWGTestMISettings::setLog2Decim(qint32 log2_decim) {
-    this->log2_decim = log2_decim;
-    this->m_log2_decim_isSet = true;
-}
-
-qint32
-SWGTestMISettings::getFcPos() {
-    return fc_pos;
-}
-void
-SWGTestMISettings::setFcPos(qint32 fc_pos) {
-    this->fc_pos = fc_pos;
-    this->m_fc_pos_isSet = true;
-}
-
-qint32
-SWGTestMISettings::getSampleSizeIndex() {
-    return sample_size_index;
-}
-void
-SWGTestMISettings::setSampleSizeIndex(qint32 sample_size_index) {
-    this->sample_size_index = sample_size_index;
-    this->m_sample_size_index_isSet = true;
-}
-
-qint32
-SWGTestMISettings::getAmplitudeBits() {
-    return amplitude_bits;
-}
-void
-SWGTestMISettings::setAmplitudeBits(qint32 amplitude_bits) {
-    this->amplitude_bits = amplitude_bits;
-    this->m_amplitude_bits_isSet = true;
-}
-
-qint32
-SWGTestMISettings::getAutoCorrOptions() {
-    return auto_corr_options;
-}
-void
-SWGTestMISettings::setAutoCorrOptions(qint32 auto_corr_options) {
-    this->auto_corr_options = auto_corr_options;
-    this->m_auto_corr_options_isSet = true;
-}
-
-qint32
-SWGTestMISettings::getModulation() {
-    return modulation;
-}
-void
-SWGTestMISettings::setModulation(qint32 modulation) {
-    this->modulation = modulation;
-    this->m_modulation_isSet = true;
-}
-
-qint32
-SWGTestMISettings::getModulationTone() {
-    return modulation_tone;
-}
-void
-SWGTestMISettings::setModulationTone(qint32 modulation_tone) {
-    this->modulation_tone = modulation_tone;
-    this->m_modulation_tone_isSet = true;
-}
-
-qint32
-SWGTestMISettings::getAmModulation() {
-    return am_modulation;
-}
-void
-SWGTestMISettings::setAmModulation(qint32 am_modulation) {
-    this->am_modulation = am_modulation;
-    this->m_am_modulation_isSet = true;
-}
-
-qint32
-SWGTestMISettings::getFmDeviation() {
-    return fm_deviation;
-}
-void
-SWGTestMISettings::setFmDeviation(qint32 fm_deviation) {
-    this->fm_deviation = fm_deviation;
-    this->m_fm_deviation_isSet = true;
-}
-
-float
-SWGTestMISettings::getDcFactor() {
-    return dc_factor;
-}
-void
-SWGTestMISettings::setDcFactor(float dc_factor) {
-    this->dc_factor = dc_factor;
-    this->m_dc_factor_isSet = true;
-}
-
-float
-SWGTestMISettings::getIFactor() {
-    return i_factor;
-}
-void
-SWGTestMISettings::setIFactor(float i_factor) {
-    this->i_factor = i_factor;
-    this->m_i_factor_isSet = true;
-}
-
-float
-SWGTestMISettings::getQFactor() {
-    return q_factor;
-}
-void
-SWGTestMISettings::setQFactor(float q_factor) {
-    this->q_factor = q_factor;
-    this->m_q_factor_isSet = true;
-}
-
-float
-SWGTestMISettings::getPhaseImbalance() {
-    return phase_imbalance;
-}
-void
-SWGTestMISettings::setPhaseImbalance(float phase_imbalance) {
-    this->phase_imbalance = phase_imbalance;
-    this->m_phase_imbalance_isSet = true;
 }
 
 QString*
@@ -497,32 +193,27 @@ SWGTestMISettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
     this->m_reverse_api_device_index_isSet = true;
 }
 
+QList<SWGTestMiStreamSettings*>*
+SWGTestMISettings::getStreams() {
+    return streams;
+}
+void
+SWGTestMISettings::setStreams(QList<SWGTestMiStreamSettings*>* streams) {
+    this->streams = streams;
+    this->m_streams_isSet = true;
+}
+
 
 bool
 SWGTestMISettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_frequency_shift_isSet){ isObjectUpdated = true; break;}
-        if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_log2_decim_isSet){ isObjectUpdated = true; break;}
-        if(m_fc_pos_isSet){ isObjectUpdated = true; break;}
-        if(m_sample_size_index_isSet){ isObjectUpdated = true; break;}
-        if(m_amplitude_bits_isSet){ isObjectUpdated = true; break;}
-        if(m_auto_corr_options_isSet){ isObjectUpdated = true; break;}
-        if(m_modulation_isSet){ isObjectUpdated = true; break;}
-        if(m_modulation_tone_isSet){ isObjectUpdated = true; break;}
-        if(m_am_modulation_isSet){ isObjectUpdated = true; break;}
-        if(m_fm_deviation_isSet){ isObjectUpdated = true; break;}
-        if(m_dc_factor_isSet){ isObjectUpdated = true; break;}
-        if(m_i_factor_isSet){ isObjectUpdated = true; break;}
-        if(m_q_factor_isSet){ isObjectUpdated = true; break;}
-        if(m_phase_imbalance_isSet){ isObjectUpdated = true; break;}
         if(file_record_name != nullptr && *file_record_name != QString("")){ isObjectUpdated = true; break;}
         if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
         if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
         if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
         if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
+        if(streams->size() > 0){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

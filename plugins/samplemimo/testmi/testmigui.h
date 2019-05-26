@@ -57,6 +57,7 @@ private:
 
 	DeviceUISet* m_deviceUISet;
 	TestMISettings m_settings;
+    int m_streamIndex; //!< Current stream index being dealt with
     QTimer m_updateTimer;
     QTimer m_statusTimer;
 	bool m_doApplySettings;
@@ -80,6 +81,7 @@ private:
 private slots:
     void handleInputMessages();
 	void on_startStop_toggled(bool checked);
+    void on_streamIndex_currentIndexChanged(int index);
     void on_centerFrequency_changed(quint64 value);
     void on_autoCorr_currentIndexChanged(int index);
     void on_frequencyShift_changed(qint64 value);

@@ -2090,6 +2090,27 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
+    else if ((*deviceHwType == "TestMI") && (deviceSettings.getDirection() == 2))
+    {
+        if (jsonObject.contains("TestMISettings") && jsonObject["TestMISettings"].isObject())
+        {
+            QJsonObject testMISettingsJsonObject = jsonObject["TestMISettings"].toObject();
+            deviceSettingsKeys = testMISettingsJsonObject.keys();
+
+            if (deviceSettingsKeys.contains("streams") && testMISettingsJsonObject["streams"].isArray())
+            {
+                appendSettingsArrayKeys(testMISettingsJsonObject, "streams", deviceSettingsKeys);
+            }
+
+            deviceSettings.setTestMiSettings(new SWGSDRangel::SWGTestMISettings());
+            deviceSettings.getTestMiSettings()->fromJsonObject(testMISettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     else if ((*deviceHwType == "XTRX") && (deviceSettings.getDirection() == 0))
     {
         if (jsonObject.contains("xtrxInputSettings") && jsonObject["xtrxInputSettings"].isObject())
@@ -2594,6 +2615,30 @@ void WebAPIRequestMapper::appendSettingsSubKeys(
         keyList.append(parentKey + QString(".") + childSettingsKeys.at(i));
     }
 }
+
+void WebAPIRequestMapper::appendSettingsArrayKeys(
+        const QJsonObject& parentSettingsJsonObject,
+        const QString& parentKey,
+        QStringList& keyList)
+{
+    QJsonArray streams = parentSettingsJsonObject[parentKey].toArray();
+
+    for (int istream = 0; istream < streams.count(); istream++)
+    {
+        QJsonValue v = streams.takeAt(istream);
+
+        if (v.isObject())
+        {
+            QJsonObject streamSettingsJsonObject = v.toObject();
+            QStringList streamSettingsKeys = streamSettingsJsonObject.keys();
+
+            for (int i = 0; i < streamSettingsKeys.size(); i++) {
+                keyList.append(tr("streams[%1].%2").arg(istream).arg(streamSettingsKeys[i]));
+            }
+        }
+    }
+}
+
 
 void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings)
 {

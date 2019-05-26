@@ -92,6 +92,11 @@ private:
             const QString& parentKey,
             QStringList& keyList);
 
+    void appendSettingsArrayKeys(
+            const QJsonObject& parentSettingsJsonObject,
+            const QString& parentKey,
+            QStringList& keyList);
+
     bool parseJsonBody(QString& jsonStr, QJsonObject& jsonObject, qtwebapp::HttpResponse& response);
 
     void resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings);

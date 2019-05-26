@@ -73,7 +73,7 @@ public:
     void setPhaseImbalance(float phaseImbalance);
     void setFrequencyShift(int shift);
     void setToneFrequency(int toneFrequency);
-    void setModulation(TestMISettings::Modulation modulation);
+    void setModulation(TestMIStreamSettings::Modulation modulation);
     void setAMModulation(float amModulation);
     void setFMDeviation(float deviation);
     void setPattern0();
@@ -94,7 +94,7 @@ private:
     NCOF m_toneNco;
 	int m_frequencyShift;
 	int m_toneFrequency;
-	TestMISettings::Modulation m_modulation;
+	TestMIStreamSettings::Modulation m_modulation;
 	float m_amModulation;
 	float m_fmDeviationUnit;
 	float m_fmPhasor;

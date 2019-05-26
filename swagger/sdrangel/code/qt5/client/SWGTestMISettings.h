@@ -13,7 +13,7 @@
 /*
  * SWGTestMISettings.h
  *
- * TestSourceMI
+ * TestMISettings
  */
 
 #ifndef SWGTestMISettings_H_
@@ -22,6 +22,8 @@
 #include <QJsonObject>
 
 
+#include "SWGTestMiStreamSettings.h"
+#include <QList>
 #include <QString>
 
 #include "SWGObject.h"
@@ -42,54 +44,6 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGTestMISettings* fromJson(QString &jsonString) override;
 
-    qint32 getCenterFrequency();
-    void setCenterFrequency(qint32 center_frequency);
-
-    qint32 getFrequencyShift();
-    void setFrequencyShift(qint32 frequency_shift);
-
-    qint32 getSampleRate();
-    void setSampleRate(qint32 sample_rate);
-
-    qint32 getLog2Decim();
-    void setLog2Decim(qint32 log2_decim);
-
-    qint32 getFcPos();
-    void setFcPos(qint32 fc_pos);
-
-    qint32 getSampleSizeIndex();
-    void setSampleSizeIndex(qint32 sample_size_index);
-
-    qint32 getAmplitudeBits();
-    void setAmplitudeBits(qint32 amplitude_bits);
-
-    qint32 getAutoCorrOptions();
-    void setAutoCorrOptions(qint32 auto_corr_options);
-
-    qint32 getModulation();
-    void setModulation(qint32 modulation);
-
-    qint32 getModulationTone();
-    void setModulationTone(qint32 modulation_tone);
-
-    qint32 getAmModulation();
-    void setAmModulation(qint32 am_modulation);
-
-    qint32 getFmDeviation();
-    void setFmDeviation(qint32 fm_deviation);
-
-    float getDcFactor();
-    void setDcFactor(float dc_factor);
-
-    float getIFactor();
-    void setIFactor(float i_factor);
-
-    float getQFactor();
-    void setQFactor(float q_factor);
-
-    float getPhaseImbalance();
-    void setPhaseImbalance(float phase_imbalance);
-
     QString* getFileRecordName();
     void setFileRecordName(QString* file_record_name);
 
@@ -105,58 +59,13 @@ public:
     qint32 getReverseApiDeviceIndex();
     void setReverseApiDeviceIndex(qint32 reverse_api_device_index);
 
+    QList<SWGTestMiStreamSettings*>* getStreams();
+    void setStreams(QList<SWGTestMiStreamSettings*>* streams);
+
 
     virtual bool isSet() override;
 
 private:
-    qint32 center_frequency;
-    bool m_center_frequency_isSet;
-
-    qint32 frequency_shift;
-    bool m_frequency_shift_isSet;
-
-    qint32 sample_rate;
-    bool m_sample_rate_isSet;
-
-    qint32 log2_decim;
-    bool m_log2_decim_isSet;
-
-    qint32 fc_pos;
-    bool m_fc_pos_isSet;
-
-    qint32 sample_size_index;
-    bool m_sample_size_index_isSet;
-
-    qint32 amplitude_bits;
-    bool m_amplitude_bits_isSet;
-
-    qint32 auto_corr_options;
-    bool m_auto_corr_options_isSet;
-
-    qint32 modulation;
-    bool m_modulation_isSet;
-
-    qint32 modulation_tone;
-    bool m_modulation_tone_isSet;
-
-    qint32 am_modulation;
-    bool m_am_modulation_isSet;
-
-    qint32 fm_deviation;
-    bool m_fm_deviation_isSet;
-
-    float dc_factor;
-    bool m_dc_factor_isSet;
-
-    float i_factor;
-    bool m_i_factor_isSet;
-
-    float q_factor;
-    bool m_q_factor_isSet;
-
-    float phase_imbalance;
-    bool m_phase_imbalance_isSet;
-
     QString* file_record_name;
     bool m_file_record_name_isSet;
 
@@ -171,6 +80,9 @@ private:
 
     qint32 reverse_api_device_index;
     bool m_reverse_api_device_index_isSet;
+
+    QList<SWGTestMiStreamSettings*>* streams;
+    bool m_streams_isSet;
 
 };
 
