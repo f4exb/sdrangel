@@ -1837,7 +1837,7 @@ void MainWindow::sampleMIMOChanged()
         deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(
             DeviceEnumerator::instance()->getMIMOPluginInterface(deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex()));
 
-        // constructs new GUI and output object
+        // constructs new GUI and MIMO object
         DeviceSampleMIMO *mimo = deviceUI->m_deviceAPI->getPluginInterface()->createSampleMIMOPluginInstance(
                 deviceUI->m_deviceAPI->getSamplingDeviceId(), deviceUI->m_deviceAPI);
         deviceUI->m_deviceAPI->setSampleMIMO(mimo);

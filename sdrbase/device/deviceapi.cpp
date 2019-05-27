@@ -58,10 +58,10 @@ DeviceAPI::~DeviceAPI()
 {
 }
 
-void DeviceAPI::addSourceStream()
+void DeviceAPI::addSourceStream(bool connect)
 {
     if (m_deviceMIMOEngine) {
-        m_deviceMIMOEngine->addSourceStream();
+        m_deviceMIMOEngine->addSourceStream(connect);
     }
 }
 
@@ -72,10 +72,10 @@ void DeviceAPI::removeLastSourceStream()
     }
 }
 
-void DeviceAPI::addSinkStream()
+void DeviceAPI::addSinkStream(bool connect)
 {
     if (m_deviceMIMOEngine) {
-        m_deviceMIMOEngine->addSinkStream();
+        m_deviceMIMOEngine->addSinkStream(connect);
     }
 }
 
@@ -92,7 +92,7 @@ void DeviceAPI::addAncillarySink(BasebandSampleSink *sink)
         m_deviceSourceEngine->addSink(sink);
     } else if (m_deviceSinkEngine) {
         m_deviceSinkEngine->addSpectrumSink(sink);
-    }
+    } // TODO: MIMO
 }
 
 void DeviceAPI::removeAncillarySink(BasebandSampleSink* sink)
@@ -101,7 +101,7 @@ void DeviceAPI::removeAncillarySink(BasebandSampleSink* sink)
         m_deviceSourceEngine->removeSink(sink);
     } else if (m_deviceSinkEngine) {
         m_deviceSinkEngine->removeSpectrumSink(sink);
-    }
+    } // TODO: MIMO
 }
 
 void DeviceAPI::setSpectrumSinkInput(bool sourceElseSink, unsigned int index)
@@ -126,6 +126,8 @@ void DeviceAPI::removeChannelSink(ThreadedBasebandSampleSink* sink, int streamIn
 
     if (m_deviceSourceEngine) {
         m_deviceSourceEngine->removeThreadedSink(sink);
+    } else if (m_deviceMIMOEngine) {
+        m_deviceMIMOEngine->removeChannelSink(sink, streamIndex);
     }
 }
 

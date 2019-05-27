@@ -36,6 +36,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/dspcommands.h"
+#include "dsp/devicesamplemimo.h"
 #include "dsp/fftfilt.h"
 #include "device/deviceapi.h"
 #include "util/db.h"
@@ -374,7 +375,7 @@ bool AMDemod::handleMessage(const Message& cmd)
 
 void AMDemod::applyAudioSampleRate(int sampleRate)
 {
-    qDebug("AMDemod::applyAudioSampleRate: %d", sampleRate);
+    qDebug("AMDemod::applyAudioSampleRate: sampleRate: %d m_inputSampleRate: %d", sampleRate, m_inputSampleRate);
 
     MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
             sampleRate, m_settings.m_inputFrequencyOffset);
@@ -408,7 +409,8 @@ void AMDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset
 {
     qDebug() << "AMDemod::applyChannelSettings:"
             << " inputSampleRate: " << inputSampleRate
-            << " inputFrequencyOffset: " << inputFrequencyOffset;
+            << " inputFrequencyOffset: " << inputFrequencyOffset
+            << " m_audioSampleRate: " << m_audioSampleRate;
 
     if ((m_inputFrequencyOffset != inputFrequencyOffset) ||
         (m_inputSampleRate != inputSampleRate) || force)
@@ -526,7 +528,18 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         reverseAPIKeys.append("volume");
     }
 
-    if ((m_settings.m_streamIndex != settings.m_streamIndex) || force) {
+    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    {
+        if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
+        {
+            m_deviceAPI->removeChannelSinkAPI(this, m_settings.m_streamIndex);
+            m_deviceAPI->removeChannelSink(m_threadedChannelizer, m_settings.m_streamIndex);
+            m_deviceAPI->addChannelSink(m_threadedChannelizer, settings.m_streamIndex);
+            m_deviceAPI->addChannelSinkAPI(this, settings.m_streamIndex);
+            // apply stream sample rate to itself
+            applyChannelSettings(m_deviceAPI->getSampleMIMO()->getSourceSampleRate(settings.m_streamIndex), m_inputFrequencyOffset);
+        }
+
         reverseAPIKeys.append("streamIndex");
     }
 

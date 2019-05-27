@@ -28,7 +28,7 @@
 
 MESSAGE_CLASS_DEFINITION(TestMIThread::MsgStartStop, Message)
 
-TestMIThread::TestMIThread(SampleSinkFifo* sampleFifo, QObject* parent) :
+TestMIThread::TestMIThread(SampleSinkFifo* sampleFifo, int streamIndex, QObject* parent) :
 	QThread(parent),
 	m_running(false),
     m_buf(0),
@@ -36,6 +36,7 @@ TestMIThread::TestMIThread(SampleSinkFifo* sampleFifo, QObject* parent) :
     m_chunksize(0),
 	m_convertBuffer(TESTMI_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
+    m_streamIndex(streamIndex),
 	m_frequencyShift(0),
 	m_toneFrequency(440),
 	m_modulation(TestMIStreamSettings::ModulationNone),

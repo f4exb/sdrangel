@@ -51,9 +51,9 @@ TestMI::TestMI(DeviceAPI *deviceAPI) :
 {
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(2);
-    m_deviceAPI->addSourceStream(); // Add a new source stream data set in the engine
-    m_deviceAPI->addSourceStream(); // Add a new source stream data set in the engine
-    m_deviceAPI->addAncillarySink(m_fileSink);
+    m_deviceAPI->addSourceStream(true); // Add a new source stream data set in the engine - asynchronous handling of FIFOs
+    m_deviceAPI->addSourceStream(true); // Add a new source stream data set in the engine - asynchronous handling of FIFOs
+    //m_deviceAPI->addAncillarySink(m_fileSink); TODO: implement when active
     m_sampleSinkFifos.push_back(SampleSinkFifo(96000 * 4));
     m_sampleSinkFifos.push_back(SampleSinkFifo(96000 * 4));
     m_networkManager = new QNetworkAccessManager();
@@ -87,15 +87,18 @@ void TestMI::init()
 
 bool TestMI::start()
 {
+    qDebug("TestMI::start");
 	QMutexLocker mutexLocker(&m_mutex);
 
-    if (m_running) stop();
+    if (m_running) {
+        stop();
+    }
 
-    m_testSourceThreads.push_back(new TestMIThread(&m_sampleSinkFifos[0]));
+    m_testSourceThreads.push_back(new TestMIThread(&m_sampleSinkFifos[0], 0));
 	m_testSourceThreads.back()->setSamplerate(m_settings.m_streams[0].m_sampleRate);
 	m_testSourceThreads.back()->startStop(true);
 
-    m_testSourceThreads.push_back(new TestMIThread(&m_sampleSinkFifos[1]));
+    m_testSourceThreads.push_back(new TestMIThread(&m_sampleSinkFifos[1], 1));
 	m_testSourceThreads.back()->setSamplerate(m_settings.m_streams[1].m_sampleRate);
 	m_testSourceThreads.back()->startStop(true);
 
@@ -109,6 +112,7 @@ bool TestMI::start()
 
 void TestMI::stop()
 {
+    qDebug("TestMI::stop");
 	QMutexLocker mutexLocker(&m_mutex);
 
     std::vector<TestMIThread*>::iterator it = m_testSourceThreads.begin();
@@ -263,12 +267,10 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
 {
     DeviceSettingsKeys deviceSettingsKeys;
 
-    QList<QList<QString>> streamReverseAPIKeys; // FIXME: one set of keys per streams
-
     for (unsigned int istream = 0; istream < m_settings.m_streams.size(); istream++)
     {
         deviceSettingsKeys.m_streamsSettingsKeys.push_back(QList<QString>());
-        QList<QString>& reverseAPIKeys = streamReverseAPIKeys.back();
+        QList<QString>& reverseAPIKeys = deviceSettingsKeys.m_streamsSettingsKeys.back();
 
         if ((m_settings.m_streams[istream].m_autoCorrOptions != settings.m_streams[istream].m_autoCorrOptions) || force)
         {
@@ -296,7 +298,8 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
             if ((istream < m_testSourceThreads.size()) && (m_testSourceThreads[istream]))
             {
                 m_testSourceThreads[istream]->setSamplerate(settings.m_streams[istream].m_sampleRate);
-                qDebug("TestMI::applySettings: sample rate set to %d", settings.m_streams[istream].m_sampleRate);
+                qDebug("TestMI::applySettings: thread on stream: %u sample rate set to %d",
+                    istream, settings.m_streams[istream].m_sampleRate);
             }
         }
 
@@ -307,7 +310,8 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
             if ((istream < m_testSourceThreads.size()) && (m_testSourceThreads[istream]))
             {
                 m_testSourceThreads[istream]->setLog2Decimation(settings.m_streams[istream].m_log2Decim);
-                qDebug() << "TestMI::applySettings: set decimation to " << (1<<settings.m_streams[istream].m_log2Decim);
+                qDebug("TestMI::applySettings: thread on stream: %u set decimation to %d",
+                    istream, (1<<settings.m_streams[istream].m_log2Decim));
             }
         }
 
@@ -347,7 +351,7 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
                 m_testSourceThreads[istream]->setFcPos((int) settings.m_streams[istream].m_fcPos);
                 m_testSourceThreads[istream]->setFrequencyShift(frequencyShift);
                 qDebug() << "TestMI::applySettings:"
-                        << " istream: " << istream
+                        << " thread on istream: " << istream
                         << " center freq: " << settings.m_streams[istream].m_centerFrequency << " Hz"
                         << " device center freq: " << deviceCenterFrequency << " Hz"
                         << " device sample rate: " << devSampleRate << "Hz"

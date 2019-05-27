@@ -240,6 +240,7 @@ void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
         dialog.exec();
 
         m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+        displayStreamIndex();
         applySettings();
     }
 
