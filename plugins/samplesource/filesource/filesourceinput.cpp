@@ -94,7 +94,11 @@ void FileSourceInput::openFileStream()
 		m_ifstream.close();
 	}
 
+#ifdef Q_OS_WIN
+	m_ifstream.open(m_fileName.toStdWString().c_str(), std::ios::binary | std::ios::ate);
+#else
 	m_ifstream.open(m_fileName.toStdString().c_str(), std::ios::binary | std::ios::ate);
+#endif
 	quint64 fileSize = m_ifstream.tellg();
 
 	if (fileSize > sizeof(FileRecord::Header))
