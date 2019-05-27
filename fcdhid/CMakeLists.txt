@@ -7,7 +7,6 @@ set(fcdhid_SOURCES
 )
 
 set(fcdhid_HEADERS
-    	../custom/apple/apple_compat.h
 	fcdhid.h
 	hid-libusb.h
 	hidapi.h
@@ -16,6 +15,7 @@ set(fcdhid_HEADERS
 include_directories(
         ${LIBUSB_INCLUDE_DIR}
         ${ICONV_INCLUDE_DIR}
+        ${CUSTOM_APPLE_INCLUDE}
 )
 
 add_library(fcdhid SHARED

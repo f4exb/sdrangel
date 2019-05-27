@@ -145,6 +145,10 @@ set(INSTALL_PLUGINS_DIR "${INSTALL_LIB_DIR}/plugins")
 set(INSTALL_PLUGINSSRV_DIR "${INSTALL_LIB_DIR}/pluginssrv")
 set(EXTERNAL_BUILD_LIBRARIES "${CMAKE_BINARY_DIR}/external")
 
+# custom libraries
+set(CUSTOM_APPLE_INCLUDE "${CMAKE_SOURCE_DIR}/custom/apple" CACHE INTERNAL "")
+set(CUSTOM_WINDOWS_INCLUDE "${CMAKE_SOURCE_DIR}/custom/windows" CACHE INTERNAL "")
+
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set(LINUX TRUE)
   # populate distribution name

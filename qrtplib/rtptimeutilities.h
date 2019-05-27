@@ -61,7 +61,7 @@
 #endif // RTP_HAVE_VSUINT64SUFFIX
 
 #ifdef __APPLE__
-#include   "../custom/apple/apple_compat.h"
+#include "../custom/apple/apple_compat.h"
 #endif
 
 namespace qrtplib
