@@ -36,7 +36,7 @@ def start_device(device_index, sdrangel_ip, sdrangel_port):
     base_url = f'http://{sdrangel_ip}:{sdrangel_port}/sdrangel'
     dev_run_url = base_url + f'/deviceset/{device_index}/device/run'
     r = requests.get(url=dev_run_url)
-    if r.status_code / 100 == 2:
+    if r.status_code // 100 == 2:
         rj = r.json()
         state = rj.get("state", None)
         if state is not None:
@@ -51,7 +51,7 @@ def start_device(device_index, sdrangel_ip, sdrangel_port):
         else:
             print(f'start_device: Cannot get device {device_index} running state')
     else:
-        print(f'start_device: Error getting device {device_index} running state')
+        print(f'start_device: Error {r.status_code} getting device {device_index} running state')
 
 # ======================================================================
 def stop_device(device_index, sdrangel_ip, sdrangel_port):
@@ -60,7 +60,7 @@ def stop_device(device_index, sdrangel_ip, sdrangel_port):
     base_url = f'http://{sdrangel_ip}:{sdrangel_port}/sdrangel'
     dev_run_url = base_url + f'/deviceset/{device_index}/device/run'
     r = requests.get(url=dev_run_url)
-    if r.status_code / 100 == 2:
+    if r.status_code // 100 == 2:
         rj = r.json()
         state = rj.get("state", None)
         if state is not None:
@@ -75,7 +75,7 @@ def stop_device(device_index, sdrangel_ip, sdrangel_port):
         else:
             print(f'stop_device: Cannot get device {device_index} running state')
     else:
-        print(f'stop_device: Error getting device {device_index} running state')
+        print(f'stop_device: Error {r.status_code} getting device {device_index} running state')
 
 # ======================================================================
 def set_focus(device_index, sdrangel_ip, sdrangel_port):
@@ -84,12 +84,12 @@ def set_focus(device_index, sdrangel_ip, sdrangel_port):
     base_url = f'http://{sdrangel_ip}:{sdrangel_port}/sdrangel'
     dev_focus_url = base_url + f'/deviceset/{device_index}/focus'
     r = requests.patch(url=dev_focus_url)
-    if r.status_code / 100 == 2:
+    if r.status_code // 100 == 2:
         print(f'set_focus: Focus set on device set {device_index}')
     elif r.status_code == 400:
         print(f'set_focus: Focus on device set is not supported in a server instance')
     else:
-        print(f'set_focus: Error setting focus on device set {device_index}')
+        print(f'set_focus: Error {r.status_code} setting focus on device set {device_index}')
 
 # ======================================================================
 def get_sdrangel_ip(request):
@@ -126,7 +126,7 @@ def set_center_frequency(new_frequency, device_index, sdrangel_ip, sdrangel_port
 # ----------------------------------------------------------------------
     base_url = f'http://{sdrangel_ip}:{sdrangel_port}/sdrangel'
     r = requests.get(url=base_url + f'/deviceset/{device_index}/device/settings')
-    if r.status_code / 100 == 2:
+    if r.status_code // 100 == 2:
         rj = r.json()
         frequency =  get_center_frequency(rj)
         if new_frequency != frequency:
@@ -138,11 +138,11 @@ def set_center_frequency(new_frequency, device_index, sdrangel_ip, sdrangel_port
                 FREQ_HAS_CHANGED = True
                 return jsonify(rj)
             else:
-                print(f'set_center_frequency: failed to change center frequency of device {device_index}. HTTP error {r.status_code}')
+                print(f'set_center_frequency: failed to change center frequency of device {device_index} with error {r.status_code}')
         else:
             print(f'set_center_frequency: frequency of device {device_index} is unchanged')
     else:
-        print(f'set_center_frequency: error getting settings for device {device_index}. HTTP error {r.status_code}')
+        print(f'set_center_frequency: error {r.status_code} getting settings for device {device_index}')
     return ""
 
 # ======================================================================
