@@ -63,17 +63,20 @@ public:
 
     public:
         bool getStartStop() const { return m_startStop; }
+        int getStreamIndex() const { return m_streamIndex; }
 
-        static MsgFileRecord* create(bool startStop) {
-            return new MsgFileRecord(startStop);
+        static MsgFileRecord* create(bool startStop, int streamIndex) {
+            return new MsgFileRecord(startStop, streamIndex);
         }
 
     protected:
         bool m_startStop;
+        int m_streamIndex;
 
-        MsgFileRecord(bool startStop) :
+        MsgFileRecord(bool startStop, int streamIndex) :
             Message(),
-            m_startStop(startStop)
+            m_startStop(startStop),
+            m_streamIndex(streamIndex)
         { }
     };
 
@@ -141,6 +144,8 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    bool isRecording(unsigned int istream) const;
+
 private:
     struct DeviceSettingsKeys
     {
@@ -149,7 +154,7 @@ private:
     };
 
 	DeviceAPI *m_deviceAPI;
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
+    std::vector<FileRecord *> m_fileSinks; //!< File sinks to record device I/Q output
 	QMutex m_mutex;
 	TestMISettings m_settings;
 	std::vector<TestMIThread*> m_testSourceThreads;

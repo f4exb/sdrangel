@@ -49,11 +49,9 @@ TestMI::TestMI(DeviceAPI *deviceAPI) :
 	m_running(false),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(2);
     m_deviceAPI->addSourceStream(true); // Add a new source stream data set in the engine - asynchronous handling of FIFOs
     m_deviceAPI->addSourceStream(true); // Add a new source stream data set in the engine - asynchronous handling of FIFOs
-    //m_deviceAPI->addAncillarySink(m_fileSink); TODO: implement when active
     m_sampleSinkFifos.push_back(SampleSinkFifo(96000 * 4));
     m_sampleSinkFifos.push_back(SampleSinkFifo(96000 * 4));
     m_networkManager = new QNetworkAccessManager();
@@ -69,10 +67,17 @@ TestMI::~TestMI()
         stop();
     }
 
-    m_deviceAPI->removeAncillarySink(m_fileSink);
+    std::vector<FileRecord*>::iterator it = m_fileSinks.begin();
+    int istream = 0;
+
+    for (; it != m_fileSinks.end(); ++it, istream++)
+    {
+        m_deviceAPI->removeAncillarySink(*it, istream);
+        delete *it;
+    }
+
     m_deviceAPI->removeLastSourceStream(); // Remove the last source stream data set in the engine
     m_deviceAPI->removeLastSourceStream(); // Remove the last source stream data set in the engine
-    delete m_fileSink;
 }
 
 void TestMI::destroy()
@@ -82,6 +87,11 @@ void TestMI::destroy()
 
 void TestMI::init()
 {
+    m_fileSinks.push_back(new FileRecord(QString("test_0_%1.sdriq").arg(m_deviceAPI->getDeviceUID())));
+    m_fileSinks.push_back(new FileRecord(QString("test_1_%1.sdriq").arg(m_deviceAPI->getDeviceUID())));
+    m_deviceAPI->addAncillarySink(m_fileSinks[0], 0);
+    m_deviceAPI->addAncillarySink(m_fileSinks[1], 1);
+
     applySettings(m_settings, true);
 }
 
@@ -216,20 +226,21 @@ bool TestMI::handleMessage(const Message& message)
     {
         MsgFileRecord& conf = (MsgFileRecord&) message;
         qDebug() << "TestMI::handleMessage: MsgFileRecord: " << conf.getStartStop();
+        int istream = conf.getStreamIndex();
 
         if (conf.getStartStop())
         {
             if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink->setFileName(m_settings.m_fileRecordName);
+                m_fileSinks[istream]->setFileName(m_settings.m_fileRecordName + "_0.sdriq");
             } else {
-                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
+                m_fileSinks[istream]->genUniqueFileName(m_deviceAPI->getDeviceUID(), istream);
             }
 
-            m_fileSink->startRecording();
+            m_fileSinks[istream]->startRecording();
         }
         else
         {
-            m_fileSink->stopRecording();
+            m_fileSinks[istream]->stopRecording();
         }
 
         return true;
@@ -421,7 +432,7 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
         {
             int sampleRate = settings.m_streams[istream].m_sampleRate/(1<<settings.m_streams[istream].m_log2Decim);
             DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_streams[istream].m_centerFrequency);
-            m_fileSink->handleMessage(*notif); // forward to file sink
+            m_fileSinks[istream]->handleMessage(*notif); // forward to file sink
             DSPDeviceMIMOEngine::SignalNotification *engineNotif = new DSPDeviceMIMOEngine::SignalNotification(
                 sampleRate, settings.m_streams[istream].m_centerFrequency, true, 0);
             m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineNotif);
@@ -819,4 +830,13 @@ void TestMI::networkManagerFinished(QNetworkReply *reply)
     QString answer = reply->readAll();
     answer.chop(1); // remove last \n
     qDebug("TestMI::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+}
+
+bool TestMI::isRecording(unsigned int istream) const
+{
+    if (istream < m_fileSinks.size()) {
+        return m_fileSinks[istream]->isRecording();
+    } else {
+        return false;
+    }
 }

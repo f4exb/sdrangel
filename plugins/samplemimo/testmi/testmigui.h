@@ -77,6 +77,7 @@ private:
     void updateAmpCoarseLimit();
     void updateAmpFineLimit();
     void updateFrequencyShiftLimit();
+    void updateFileRecordStatus();
 
 private slots:
     void handleInputMessages();

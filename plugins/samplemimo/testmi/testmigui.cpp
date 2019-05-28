@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -145,6 +145,7 @@ void TestMIGui::on_startStop_toggled(bool checked)
 void TestMIGui::on_streamIndex_currentIndexChanged(int index)
 {
     m_streamIndex = index;
+    updateFileRecordStatus();
     displaySettings();
 }
 
@@ -296,7 +297,7 @@ void TestMIGui::on_record_toggled(bool checked)
         ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
     }
 
-    TestMI::MsgFileRecord* message = TestMI::MsgFileRecord::create(checked);
+    TestMI::MsgFileRecord* message = TestMI::MsgFileRecord::create(checked, m_streamIndex);
     m_sampleMIMO->getInputMessageQueue()->push(message);
 }
 
@@ -374,6 +375,15 @@ void TestMIGui::updateFrequencyShiftLimit()
 {
     int sampleRate = ui->sampleRate->getValueNew();
     ui->frequencyShift->setValueRange(false, 7, -sampleRate, sampleRate);
+}
+
+void TestMIGui::updateFileRecordStatus()
+{
+    if (((TestMI*) m_sampleMIMO)->isRecording(m_streamIndex)) {
+        ui->record->setStyleSheet("QToolButton { background-color : red; }");
+    } else {
+        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+    }
 }
 
 void TestMIGui::displaySettings()
