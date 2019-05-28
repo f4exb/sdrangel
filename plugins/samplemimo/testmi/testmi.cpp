@@ -434,7 +434,7 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
             DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_streams[istream].m_centerFrequency);
             m_fileSinks[istream]->handleMessage(*notif); // forward to file sink
             DSPDeviceMIMOEngine::SignalNotification *engineNotif = new DSPDeviceMIMOEngine::SignalNotification(
-                sampleRate, settings.m_streams[istream].m_centerFrequency, true, 0);
+                sampleRate, settings.m_streams[istream].m_centerFrequency, true, istream);
             m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineNotif);
         }
 

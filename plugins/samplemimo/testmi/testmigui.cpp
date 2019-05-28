@@ -53,8 +53,14 @@ TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
     qDebug("TestMIGui::TestMIGui");
     m_sampleMIMO = m_deviceUISet->m_deviceAPI->getSampleMIMO();
     m_streamIndex = 0;
+    m_deviceCenterFrequencies.push_back(m_settings.m_streams[0].m_centerFrequency);
+    m_deviceCenterFrequencies.push_back(m_settings.m_streams[1].m_centerFrequency);
+    m_deviceSampleRates.push_back(m_settings.m_streams[0].m_sampleRate / (1<<m_settings.m_streams[0].m_log2Decim));
+    m_deviceSampleRates.push_back(m_settings.m_streams[1].m_sampleRate / (1<<m_settings.m_streams[1].m_log2Decim));
 
     ui->setupUi(this);
+    ui->spectrumSource->addItem("0");
+    ui->spectrumSource->addItem("1");
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(7, 0, 9999999);
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
@@ -146,7 +152,15 @@ void TestMIGui::on_streamIndex_currentIndexChanged(int index)
 {
     m_streamIndex = index;
     updateFileRecordStatus();
+    updateSampleRateAndFrequency();
     displaySettings();
+}
+
+void TestMIGui::on_spectrumSource_currentIndexChanged(int index)
+{
+    m_spectrumStreamIndex = index;
+    m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(true, m_spectrumStreamIndex);
+    updateSampleRateAndFrequency();
 }
 
 void TestMIGui::on_centerFrequency_changed(quint64 value)
@@ -511,10 +525,14 @@ void TestMIGui::handleInputMessages()
         if (DSPDeviceMIMOEngine::SignalNotification::match(*message))
         {
             DSPDeviceMIMOEngine::SignalNotification* notif = (DSPDeviceMIMOEngine::SignalNotification*) message;
-            m_deviceSampleRate = notif->getSampleRate();
-            m_deviceCenterFrequency = notif->getCenterFrequency();
+            int istream = notif->getIndex();
+            bool sourceOrSink = notif->getSourceOrSink();
+            m_deviceSampleRates[istream] = notif->getSampleRate();
+            m_deviceCenterFrequencies[istream] = notif->getCenterFrequency();
             // Do not consider multiple sources at this time
-            qDebug("TestMIGui::handleInputMessages: DSPDeviceMIMOEngine::SignalNotification: SampleRate:%d, CenterFrequency:%llu",
+            qDebug("TestMIGui::handleInputMessages: DSPDeviceMIMOEngine::SignalNotification: %s stream: %d SampleRate:%d, CenterFrequency:%llu",
+                    sourceOrSink ? "source" : "sink",
+                    istream,
                     notif->getSampleRate(),
                     notif->getCenterFrequency());
             updateSampleRateAndFrequency();
@@ -533,9 +551,9 @@ void TestMIGui::handleInputMessages()
 
 void TestMIGui::updateSampleRateAndFrequency()
 {
-    m_deviceUISet->getSpectrum()->setSampleRate(m_deviceSampleRate);
-    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-    ui->deviceRateText->setText(tr("%1k").arg((float)m_deviceSampleRate / 1000));
+    m_deviceUISet->getSpectrum()->setSampleRate(m_deviceSampleRates[m_spectrumStreamIndex]);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequencies[m_spectrumStreamIndex]);
+    ui->deviceRateText->setText(tr("%1k").arg((float) m_deviceSampleRates[m_streamIndex] / 1000));
 }
 
 void TestMIGui::openDeviceSettingsDialog(const QPoint& p)

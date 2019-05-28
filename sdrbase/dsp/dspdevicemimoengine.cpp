@@ -948,7 +948,6 @@ void DSPDeviceMIMOEngine::handleInputMessages()
 				<< " sampleRate: " << sampleRate
 				<< " centerFrequency: " << centerFrequency;
 
-
             if (sourceElseSink)
             {
                 if ((istream < m_deviceSampleMIMO->getNbSourceStreams()))
@@ -984,6 +983,7 @@ void DSPDeviceMIMOEngine::handleInputMessages()
                         guiMessageQueue->push(rep);
                     }
 
+                    // forward changes to spectrum sink if currently active
                     if (m_spectrumSink && m_spectrumInputSourceElseSink && (m_spectrumInputIndex == istream))
                     {
                         DSPSignalNotification spectrumNotif(sampleRate, centerFrequency);
@@ -1016,6 +1016,7 @@ void DSPDeviceMIMOEngine::handleInputMessages()
                         guiMessageQueue->push(rep);
                     }
 
+                    // forward changes to spectrum sink if currently active
                     if (m_spectrumSink && !m_spectrumInputSourceElseSink && (m_spectrumInputIndex == istream))
                     {
                         DSPSignalNotification spectrumNotif(sampleRate, centerFrequency);

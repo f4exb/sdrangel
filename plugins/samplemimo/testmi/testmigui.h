@@ -58,14 +58,15 @@ private:
 	DeviceUISet* m_deviceUISet;
 	TestMISettings m_settings;
     int m_streamIndex; //!< Current stream index being dealt with
+    int m_spectrumStreamIndex; //!< Index of the stream displayed on main spectrum
     QTimer m_updateTimer;
     QTimer m_statusTimer;
 	bool m_doApplySettings;
     bool m_forceSettings;
 	DeviceSampleMIMO* m_sampleMIMO;
 	std::size_t m_tickCount;
-    int m_deviceSampleRate;
-    quint64 m_deviceCenterFrequency; //!< Center frequency in device
+    std::vector<int> m_deviceSampleRates;
+    std::vector<quint64> m_deviceCenterFrequencies; //!< Center frequency in device
 	int m_lastEngineState;
 	MessageQueue m_inputMessageQueue;
 
@@ -83,6 +84,7 @@ private slots:
     void handleInputMessages();
 	void on_startStop_toggled(bool checked);
     void on_streamIndex_currentIndexChanged(int index);
+    void on_spectrumSource_currentIndexChanged(int index);
     void on_centerFrequency_changed(quint64 value);
     void on_autoCorr_currentIndexChanged(int index);
     void on_frequencyShift_changed(qint64 value);
