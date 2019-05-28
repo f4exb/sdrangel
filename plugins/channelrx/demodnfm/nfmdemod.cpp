@@ -163,173 +163,189 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
-        if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
+        if (m_interpolatorDistance < 1.0f) // interpolate
         {
-
-            qint16 sample;
-
-            double magsqRaw; // = ci.real()*ci.real() + c.imag()*c.imag();
-            Real deviation;
-
-            Real demod = m_phaseDiscri.phaseDiscriminatorDelta(ci, magsqRaw, deviation);
-
-            Real magsq = magsqRaw / (SDR_RX_SCALED*SDR_RX_SCALED);
-            m_movingAverage(magsq);
-            m_magsqSum += magsq;
-
-            if (magsq > m_magsqPeak)
+            while (!m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
             {
-                m_magsqPeak = magsq;
+                processOneSample(ci);
+                m_interpolatorDistanceRemain += m_interpolatorDistance;
+            }
+        }
+        else // decimate
+        {
+            if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
+            {
+                processOneSample(ci);
+                m_interpolatorDistanceRemain += m_interpolatorDistance;
+            }
+        }
+    }
+
+	m_settingsMutex.unlock();
+}
+
+void NFMDemod::processOneSample(Complex &ci)
+{
+    qint16 sample;
+
+    double magsqRaw; // = ci.real()*ci.real() + c.imag()*c.imag();
+    Real deviation;
+
+    Real demod = m_phaseDiscri.phaseDiscriminatorDelta(ci, magsqRaw, deviation);
+
+    Real magsq = magsqRaw / (SDR_RX_SCALED*SDR_RX_SCALED);
+    m_movingAverage(magsq);
+    m_magsqSum += magsq;
+
+    if (magsq > m_magsqPeak)
+    {
+        m_magsqPeak = magsq;
+    }
+
+    m_magsqCount++;
+    m_sampleCount++;
+
+    // AF processing
+
+    if (m_settings.m_deltaSquelch)
+    {
+        if (m_afSquelch.analyze(demod * m_discriCompensation))
+        {
+            m_afSquelchOpen = m_afSquelch.evaluate(); // ? m_squelchGate + m_squelchDecay : 0;
+
+            if (!m_afSquelchOpen) {
+                m_squelchDelayLine.zeroBack(m_audioSampleRate/10); // zero out evaluation period
+            }
+        }
+
+        if (m_afSquelchOpen)
+        {
+            m_squelchDelayLine.write(demod * m_discriCompensation);
+
+            if (m_squelchCount < 2*m_squelchGate) {
+                m_squelchCount++;
+            }
+        }
+        else
+        {
+            m_squelchDelayLine.write(0);
+
+            if (m_squelchCount > 0) {
+                m_squelchCount--;
+            }
+        }
+    }
+    else
+    {
+        if ((Real) m_movingAverage < m_squelchLevel)
+        {
+            m_squelchDelayLine.write(0);
+
+            if (m_squelchCount > 0) {
+                m_squelchCount--;
+            }
+        }
+        else
+        {
+            m_squelchDelayLine.write(demod * m_discriCompensation);
+
+            if (m_squelchCount < 2*m_squelchGate) {
+                m_squelchCount++;
+            }
+        }
+    }
+
+    m_squelchOpen = (m_squelchCount > m_squelchGate);
+
+    if (m_settings.m_audioMute)
+    {
+        sample = 0;
+    }
+    else
+    {
+        if (m_squelchOpen)
+        {
+            if (m_settings.m_ctcssOn)
+            {
+                Real ctcss_sample = m_ctcssLowpass.filter(demod * m_discriCompensation);
+
+                if ((m_sampleCount & 7) == 7) // decimate 48k -> 6k
+                {
+                    if (m_ctcssDetector.analyze(&ctcss_sample))
+                    {
+                        int maxToneIndex;
+
+                        if (m_ctcssDetector.getDetectedTone(maxToneIndex))
+                        {
+                            if (maxToneIndex+1 != m_ctcssIndex)
+                            {
+                                if (getMessageQueueToGUI()) {
+                                    MsgReportCTCSSFreq *msg = MsgReportCTCSSFreq::create(m_ctcssDetector.getToneSet()[maxToneIndex]);
+                                    getMessageQueueToGUI()->push(msg);
+                                }
+                                m_ctcssIndex = maxToneIndex+1;
+                            }
+                        }
+                        else
+                        {
+                            if (m_ctcssIndex != 0)
+                            {
+                                if (getMessageQueueToGUI()) {
+                                    MsgReportCTCSSFreq *msg = MsgReportCTCSSFreq::create(0);
+                                    getMessageQueueToGUI()->push(msg);
+                                }
+                                m_ctcssIndex = 0;
+                            }
+                        }
+                    }
+                }
             }
 
-            m_magsqCount++;
-            m_sampleCount++;
-
-            // AF processing
-
-            if (m_settings.m_deltaSquelch)
-            {
-                if (m_afSquelch.analyze(demod * m_discriCompensation))
-                {
-                    m_afSquelchOpen = m_afSquelch.evaluate(); // ? m_squelchGate + m_squelchDecay : 0;
-
-                    if (!m_afSquelchOpen) {
-                        m_squelchDelayLine.zeroBack(m_audioSampleRate/10); // zero out evaluation period
-                    }
-                }
-
-                if (m_afSquelchOpen)
-                {
-                    m_squelchDelayLine.write(demod * m_discriCompensation);
-
-                    if (m_squelchCount < 2*m_squelchGate) {
-                        m_squelchCount++;
-                    }
-                }
-                else
-                {
-                    m_squelchDelayLine.write(0);
-
-                    if (m_squelchCount > 0) {
-                        m_squelchCount--;
-                    }
-                }
-            }
-            else
-            {
-                if ((Real) m_movingAverage < m_squelchLevel)
-                {
-                    m_squelchDelayLine.write(0);
-
-                    if (m_squelchCount > 0) {
-                        m_squelchCount--;
-                    }
-                }
-                else
-                {
-                    m_squelchDelayLine.write(demod * m_discriCompensation);
-
-                    if (m_squelchCount < 2*m_squelchGate) {
-                        m_squelchCount++;
-                    }
-                }
-            }
-
-            m_squelchOpen = (m_squelchCount > m_squelchGate);
-
-            if (m_settings.m_audioMute)
+            if (m_settings.m_ctcssOn && m_ctcssIndexSelected && (m_ctcssIndexSelected != m_ctcssIndex))
             {
                 sample = 0;
             }
             else
             {
-                if (m_squelchOpen)
-                {
-                    if (m_settings.m_ctcssOn)
-                    {
-                        Real ctcss_sample = m_ctcssLowpass.filter(demod * m_discriCompensation);
-
-                        if ((m_sampleCount & 7) == 7) // decimate 48k -> 6k
-                        {
-                            if (m_ctcssDetector.analyze(&ctcss_sample))
-                            {
-                                int maxToneIndex;
-
-                                if (m_ctcssDetector.getDetectedTone(maxToneIndex))
-                                {
-                                    if (maxToneIndex+1 != m_ctcssIndex)
-                                    {
-                                        if (getMessageQueueToGUI()) {
-                                            MsgReportCTCSSFreq *msg = MsgReportCTCSSFreq::create(m_ctcssDetector.getToneSet()[maxToneIndex]);
-                                            getMessageQueueToGUI()->push(msg);
-                                        }
-                                        m_ctcssIndex = maxToneIndex+1;
-                                    }
-                                }
-                                else
-                                {
-                                    if (m_ctcssIndex != 0)
-                                    {
-                                        if (getMessageQueueToGUI()) {
-                                            MsgReportCTCSSFreq *msg = MsgReportCTCSSFreq::create(0);
-                                            getMessageQueueToGUI()->push(msg);
-                                        }
-                                        m_ctcssIndex = 0;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (m_settings.m_ctcssOn && m_ctcssIndexSelected && (m_ctcssIndexSelected != m_ctcssIndex))
-                    {
-                        sample = 0;
-                    }
-                    else
-                    {
-                        if (m_settings.m_highPass) {
-                            sample = m_bandpass.filter(m_squelchDelayLine.readBack(m_squelchGate)) * m_settings.m_volume;
-                        } else {
-                            sample = m_lowpass.filter(m_squelchDelayLine.readBack(m_squelchGate)) * m_settings.m_volume;
-                        }
-                    }
-                }
-                else
-                {
-                    if (m_ctcssIndex != 0)
-                    {
-                        if (getMessageQueueToGUI()) {
-                            MsgReportCTCSSFreq *msg = MsgReportCTCSSFreq::create(0);
-                            getMessageQueueToGUI()->push(msg);
-                        }
-
-                        m_ctcssIndex = 0;
-                    }
-
-                    sample = 0;
+                if (m_settings.m_highPass) {
+                    sample = m_bandpass.filter(m_squelchDelayLine.readBack(m_squelchGate)) * m_settings.m_volume;
+                } else {
+                    sample = m_lowpass.filter(m_squelchDelayLine.readBack(m_squelchGate)) * m_settings.m_volume;
                 }
             }
-
-
-            m_audioBuffer[m_audioBufferFill].l = sample;
-            m_audioBuffer[m_audioBufferFill].r = sample;
-            ++m_audioBufferFill;
-
-            if (m_audioBufferFill >= m_audioBuffer.size())
-            {
-                uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
-
-                if (res != m_audioBufferFill)
-                {
-                    qDebug("NFMDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
-                }
-
-                m_audioBufferFill = 0;
-            }
-
-            m_interpolatorDistanceRemain += m_interpolatorDistance;
         }
-	}
+        else
+        {
+            if (m_ctcssIndex != 0)
+            {
+                if (getMessageQueueToGUI()) {
+                    MsgReportCTCSSFreq *msg = MsgReportCTCSSFreq::create(0);
+                    getMessageQueueToGUI()->push(msg);
+                }
+
+                m_ctcssIndex = 0;
+            }
+
+            sample = 0;
+        }
+    }
+
+
+    m_audioBuffer[m_audioBufferFill].l = sample;
+    m_audioBuffer[m_audioBufferFill].r = sample;
+    ++m_audioBufferFill;
+
+    if (m_audioBufferFill >= m_audioBuffer.size())
+    {
+        uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
+
+        if (res != m_audioBufferFill)
+        {
+            qDebug("NFMDemod::feed: %u/%u audio samples written", res, m_audioBufferFill);
+        }
+
+        m_audioBufferFill = 0;
+    }
 
 	if (m_audioBufferFill > 0)
 	{
@@ -342,8 +358,6 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 		m_audioBufferFill = 0;
 	}
-
-	m_settingsMutex.unlock();
 }
 
 void NFMDemod::start()
