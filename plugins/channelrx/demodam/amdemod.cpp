@@ -130,14 +130,11 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 
 		if (m_interpolatorDistance < 1.0f) // interpolate
 		{
-            processOneSample(ci);
-
-		    while (m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
+		    while (!m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
             {
                 processOneSample(ci);
+                m_interpolatorDistanceRemain += m_interpolatorDistance;
             }
-
-            m_interpolatorDistanceRemain += m_interpolatorDistance;
 		}
 		else // decimate
 		{
