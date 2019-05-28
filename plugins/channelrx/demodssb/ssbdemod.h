@@ -338,6 +338,8 @@ private:
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SSBDemodSettings& settings, bool force);
 
+    void processOneSample(Complex &ci);
+
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
 };
