@@ -278,8 +278,33 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
 {
     DeviceSettingsKeys deviceSettingsKeys;
 
-    for (unsigned int istream = 0; istream < m_settings.m_streams.size(); istream++)
+    qDebug() << "TestMI::applySettings: common: "
+        << " m_fileRecordName: " << settings.m_fileRecordName
+        << " m_useReverseAPI: " << settings.m_useReverseAPI
+        << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
+        << " m_reverseAPIPort: " << settings.m_reverseAPIPort
+        << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex;
+
+    for (unsigned int istream = 0; (istream < m_settings.m_streams.size()) && (istream < settings.m_streams.size()); istream++)
     {
+        qDebug() << "TestMI::applySettings: stream #" << istream << ": "
+            << " m_centerFrequency: " << settings.m_streams[istream].m_centerFrequency
+            << " m_frequencyShift: " << settings.m_streams[istream].m_frequencyShift
+            << " m_sampleRate: " << settings.m_streams[istream].m_sampleRate
+            << " m_log2Decim: " << settings.m_streams[istream].m_log2Decim
+            << " m_fcPos: " << settings.m_streams[istream].m_fcPos
+            << " m_amplitudeBits: " << settings.m_streams[istream].m_amplitudeBits
+            << " m_sampleSizeIndex: " << settings.m_streams[istream].m_sampleSizeIndex
+            << " m_autoCorrOptions: " << settings.m_streams[istream].m_autoCorrOptions
+            << " m_dcFactor: " << settings.m_streams[istream].m_dcFactor
+            << " m_iFactor: " << settings.m_streams[istream].m_iFactor
+            << " m_qFactor: " << settings.m_streams[istream].m_qFactor
+            << " m_phaseImbalance: " << settings.m_streams[istream].m_phaseImbalance
+            << " m_modulation: " << settings.m_streams[istream].m_modulation
+            << " m_amModulation: " << settings.m_streams[istream].m_amModulation
+            << " m_fmDeviation: " << settings.m_streams[istream].m_fmDeviation
+            << " m_modulationTone: " << settings.m_streams[istream].m_modulationTone;
+
         deviceSettingsKeys.m_streamsSettingsKeys.push_back(QList<QString>());
         QList<QString>& reverseAPIKeys = deviceSettingsKeys.m_streamsSettingsKeys.back();
 
