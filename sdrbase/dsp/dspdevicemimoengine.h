@@ -389,6 +389,7 @@ private:
 	State gotoError(const QString& errorMsg); //!< Go to an error state
 
     void handleSetMIMO(DeviceSampleMIMO* mimo); //!< Manage MIMO device setting
+   	void iqCorrections(SampleVector::iterator begin, SampleVector::iterator end, int isource, bool imbalanceCorrection);
 
 private slots:
 	void handleData();                 //!< Handle data when samples have to be processed

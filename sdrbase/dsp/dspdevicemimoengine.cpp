@@ -357,7 +357,10 @@ void DSPDeviceMIMOEngine::workSampleSink(unsigned int sinkIndex)
 		// first part of FIFO data
 		if (part1begin != part1end)
 		{
-            // TODO: DC and IQ corrections
+            // DC and IQ corrections
+            if (m_sourcesCorrections[sinkIndex].m_dcOffsetCorrection) {
+                iqCorrections(part1begin, part1end, sinkIndex, m_sourcesCorrections[sinkIndex].m_iqImbalanceCorrection);
+            }
 
 			// feed data to direct sinks
             if (sinkIndex < m_basebandSampleSinks.size())
@@ -382,7 +385,10 @@ void DSPDeviceMIMOEngine::workSampleSink(unsigned int sinkIndex)
 		// second part of FIFO data (used when block wraps around)
 		if(part2begin != part2end)
 		{
-            // TODO: DC and IQ corrections
+            // DC and IQ corrections
+            if (m_sourcesCorrections[sinkIndex].m_dcOffsetCorrection) {
+                iqCorrections(part2begin, part2end, sinkIndex, m_sourcesCorrections[sinkIndex].m_iqImbalanceCorrection);
+            }
 
 			// feed data to direct sinks
             if (sinkIndex < m_basebandSampleSinks.size())
@@ -1047,4 +1053,93 @@ void DSPDeviceMIMOEngine::handleForwardToSpectrumSink(int nbSamples)
 		sampleFifo->getReadIterator(readUntil);
 		m_spectrumSink->feed(readUntil - nbSamples, readUntil, false);
 	}
+}
+
+void DSPDeviceMIMOEngine::iqCorrections(SampleVector::iterator begin, SampleVector::iterator end, int isource, bool imbalanceCorrection)
+{
+    for(SampleVector::iterator it = begin; it < end; it++)
+    {
+        m_sourcesCorrections[isource].m_iBeta(it->real());
+        m_sourcesCorrections[isource].m_qBeta(it->imag());
+
+        if (imbalanceCorrection)
+        {
+#if IMBALANCE_INT
+            // acquisition
+            int64_t xi = (it->m_real - (int32_t) m_sourcesCorrections[isource].m_iBeta) << 5;
+            int64_t xq = (it->m_imag - (int32_t) m_sourcesCorrections[isource].m_qBeta) << 5;
+
+            // phase imbalance
+            m_sourcesCorrections[isource].m_avgII((xi*xi)>>28); // <I", I">
+            m_sourcesCorrections[isource].m_avgIQ((xi*xq)>>28); // <I", Q">
+
+            if ((int64_t) m_sourcesCorrections[isource].m_avgII != 0)
+            {
+                int64_t phi = (((int64_t) m_sourcesCorrections[isource].m_avgIQ)<<28) / (int64_t) m_sourcesCorrections[isource].m_avgII;
+                m_sourcesCorrections[isource].m_avgPhi(phi);
+            }
+
+            int64_t corrPhi = (((int64_t) m_sourcesCorrections[isource].m_avgPhi) * xq) >> 28;  //(m_avgPhi.asDouble()/16777216.0) * ((double) xq);
+
+            int64_t yi = xi - corrPhi;
+            int64_t yq = xq;
+
+            // amplitude I/Q imbalance
+            m_sourcesCorrections[isource].m_avgII2((yi*yi)>>28); // <I, I>
+            m_sourcesCorrections[isource].m_avgQQ2((yq*yq)>>28); // <Q, Q>
+
+            if ((int64_t) m_sourcesCorrections[isource].m_avgQQ2 != 0)
+            {
+                int64_t a = (((int64_t) m_sourcesCorrections[isource].m_avgII2)<<28) / (int64_t) m_sourcesCorrections[isource].m_avgQQ2;
+                Fixed<int64_t, 28> fA(Fixed<int64_t, 28>::internal(), a);
+                Fixed<int64_t, 28> sqrtA = sqrt((Fixed<int64_t, 28>) fA);
+                m_sourcesCorrections[isource].m_avgAmp(sqrtA.as_internal());
+            }
+
+            int64_t zq = (((int64_t) m_sourcesCorrections[isource].m_avgAmp) * yq) >> 28;
+
+            it->m_real = yi >> 5;
+            it->m_imag = zq >> 5;
+
+#else
+            // DC correction and conversion
+            float xi = (it->m_real - (int32_t) m_sourcesCorrections[isource].m_iBeta) / SDR_RX_SCALEF;
+            float xq = (it->m_imag - (int32_t) m_sourcesCorrections[isource].m_qBeta) / SDR_RX_SCALEF;
+
+            // phase imbalance
+            m_sourcesCorrections[isource].m_avgII(xi*xi); // <I", I">
+            m_sourcesCorrections[isource].m_avgIQ(xi*xq); // <I", Q">
+
+
+            if (m_sourcesCorrections[isource].m_avgII.asDouble() != 0) {
+                m_sourcesCorrections[isource].m_avgPhi(m_sourcesCorrections[isource].m_avgIQ.asDouble()/m_sourcesCorrections[isource].m_avgII.asDouble());
+            }
+
+            float& yi = xi; // the in phase remains the reference
+            float yq = xq - m_sourcesCorrections[isource].m_avgPhi.asDouble()*xi;
+
+            // amplitude I/Q imbalance
+            m_sourcesCorrections[isource].m_avgII2(yi*yi); // <I, I>
+            m_sourcesCorrections[isource].m_avgQQ2(yq*yq); // <Q, Q>
+
+            if (m_sourcesCorrections[isource].m_avgQQ2.asDouble() != 0) {
+                m_sourcesCorrections[isource].m_avgAmp(sqrt(m_sourcesCorrections[isource].m_avgII2.asDouble() / m_sourcesCorrections[isource].m_avgQQ2.asDouble()));
+            }
+
+            // final correction
+            float& zi = yi; // the in phase remains the reference
+            float zq = m_sourcesCorrections[isource].m_avgAmp.asDouble() * yq;
+
+            // convert and store
+            it->m_real = zi * SDR_RX_SCALEF;
+            it->m_imag = zq * SDR_RX_SCALEF;
+#endif
+        }
+        else
+        {
+            // DC correction only
+            it->m_real -= (int32_t) m_sourcesCorrections[isource].m_iBeta;
+            it->m_imag -= (int32_t) m_sourcesCorrections[isource].m_qBeta;
+        }
+    }
 }

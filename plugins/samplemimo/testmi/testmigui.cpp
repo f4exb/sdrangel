@@ -388,9 +388,8 @@ void TestMIGui::updateAmpFineLimit()
 void TestMIGui::updateFrequencyShiftLimit()
 {
     qint64 sampleRate = ui->sampleRate->getValueNew();
-    qint64 frequencyShift = ui->frequencyShift->getValueNew();
     ui->frequencyShift->setValueRange(false, 7, -sampleRate, sampleRate);
-    ui->frequencyShift->setValue(frequencyShift);
+    ui->frequencyShift->setValue(m_settings.m_streams[m_streamIndex].m_frequencyShift);
 }
 
 void TestMIGui::updateFileRecordStatus()
