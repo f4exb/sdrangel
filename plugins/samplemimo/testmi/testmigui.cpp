@@ -150,6 +150,15 @@ void TestMIGui::on_startStop_toggled(bool checked)
 
 void TestMIGui::on_streamIndex_currentIndexChanged(int index)
 {
+    if (ui->streamLock->isChecked())
+    {
+        m_spectrumStreamIndex = index;
+        m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(true, m_spectrumStreamIndex);
+        ui->spectrumSource->blockSignals(true);
+        ui->spectrumSource->setCurrentIndex(index);
+        ui->spectrumSource->blockSignals(false);
+    }
+
     m_streamIndex = index;
     updateFileRecordStatus();
     updateSampleRateAndFrequency();
@@ -161,6 +170,23 @@ void TestMIGui::on_spectrumSource_currentIndexChanged(int index)
     m_spectrumStreamIndex = index;
     m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(true, m_spectrumStreamIndex);
     updateSampleRateAndFrequency();
+
+    if (ui->streamLock->isChecked())
+    {
+        ui->streamIndex->blockSignals(true);
+        ui->streamIndex->setCurrentIndex(index);
+        ui->streamIndex->blockSignals(false);
+        m_streamIndex = index;
+        updateFileRecordStatus();
+        displaySettings();
+    }
+}
+
+void TestMIGui::on_streamLock_toggled(bool checked)
+{
+    if (checked && (ui->streamIndex->currentIndex() != ui->spectrumSource->currentIndex())) {
+        ui->spectrumSource->setCurrentIndex(ui->streamIndex->currentIndex());
+    }
 }
 
 void TestMIGui::on_centerFrequency_changed(quint64 value)
