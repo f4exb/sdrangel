@@ -461,7 +461,7 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) m_inputSampleRate / (Real) m_audioSampleRate;
         m_bandpass.create(301, m_audioSampleRate, 300.0, settings.m_rfBandwidth / 2.0f);
-        m_lowpass.create(301, m_audioSampleRate,  m_settings.m_rfBandwidth / 2.0f);
+        m_lowpass.create(301, m_audioSampleRate,  settings.m_rfBandwidth / 2.0f);
         DSBFilter->create_dsb_filter((2.0f * settings.m_rfBandwidth) / (float) m_audioSampleRate);
         m_settingsMutex.unlock();
 
