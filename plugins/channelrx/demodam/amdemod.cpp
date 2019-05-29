@@ -260,6 +260,10 @@ void AMDemod::processOneSample(Complex &ci)
             demod = m_bandpass.filter(demod);
             demod /= 301.0f;
         }
+        else
+        {
+            demod = m_lowpass.filter(demod);
+        }
 
         Real attack = (m_squelchCount - 0.05f * m_audioSampleRate) / (0.05f * m_audioSampleRate);
         sample = demod * StepFunctions::smootherstep(attack) * (m_audioSampleRate/24) * m_settings.m_volume;
@@ -383,6 +387,7 @@ void AMDemod::applyAudioSampleRate(int sampleRate)
     m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = (Real) m_inputSampleRate / (Real) sampleRate;
     m_bandpass.create(301, sampleRate, 300.0, m_settings.m_rfBandwidth / 2.0f);
+    m_lowpass.create(301, sampleRate,  m_settings.m_rfBandwidth / 2.0f);
     m_audioFifo.setSize(sampleRate);
     m_squelchDelayLine.resize(sampleRate/5);
     DSBFilter->create_dsb_filter((2.0f * m_settings.m_rfBandwidth) / (float) sampleRate);
@@ -456,6 +461,7 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) m_inputSampleRate / (Real) m_audioSampleRate;
         m_bandpass.create(301, m_audioSampleRate, 300.0, settings.m_rfBandwidth / 2.0f);
+        m_lowpass.create(301, m_audioSampleRate,  m_settings.m_rfBandwidth / 2.0f);
         DSBFilter->create_dsb_filter((2.0f * settings.m_rfBandwidth) / (float) m_audioSampleRate);
         m_settingsMutex.unlock();
 

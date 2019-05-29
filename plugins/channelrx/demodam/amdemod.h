@@ -207,6 +207,7 @@ private:
 	MovingAverageUtil<Real, double, 16> m_movingAverage;
 	SimpleAGC<4800> m_volumeAGC;
     Bandpass<Real> m_bandpass;
+    Lowpass<Real> m_lowpass;
     Lowpass<std::complex<float> > m_pllFilt;
     PhaseLockComplex m_pll;
     fftfilt* DSBFilter;
