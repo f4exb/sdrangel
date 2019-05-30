@@ -371,14 +371,25 @@ void SSBDemodGUI::applySettings(bool force)
 	}
 }
 
+int SSBDemodGUI::spanLog2Limit(int spanLog2)
+{
+    while (((m_ssbDemod->getAudioSampleRate() / (1<<spanLog2)) > m_ssbDemod->getInputSampleRate()) && (spanLog2 < 4)) {
+        spanLog2++;
+    }
+
+    return spanLog2;
+}
+
 void SSBDemodGUI::applyBandwidths(int spanLog2, bool force)
 {
+    spanLog2 = spanLog2Limit(spanLog2);
+    ui->spanLog2->setMaximum(5 - spanLog2Limit(1));
     bool dsb = ui->dsb->isChecked();
     //int spanLog2 = ui->spanLog2->value();
     m_spectrumRate = m_ssbDemod->getAudioSampleRate() / (1<<spanLog2);
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
-    int bwMax = m_ssbDemod->getAudioSampleRate() / (100*(1<<spanLog2));
+    int bwMax = std::min(m_ssbDemod->getAudioSampleRate() / (100*(1<<spanLog2)), (3*m_ssbDemod->getInputSampleRate())/400);
     int tickInterval = m_spectrumRate / 1200;
     tickInterval = tickInterval == 0 ? 1 : tickInterval;
 
