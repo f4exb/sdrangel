@@ -234,7 +234,7 @@ void SSBDemod::processOneSample(Complex &ci)
             m_sum.imag(0.0);
         }
 
-        float agcVal = m_agcActive ? m_agc.feedAndGetValue(sideband[i]) : 10.0; // 10.0 for 3276.8, 1.0 for 327.68
+        float agcVal = m_agcActive ? m_agc.feedAndGetValue(sideband[i]) : 0.1;
         fftfilt::cmplx& delayedSample = m_squelchDelayLine.readBack(m_agc.getStepDownDelay());
         m_audioActive = delayedSample.real() != 0.0;
         m_squelchDelayLine.write(sideband[i]*agcVal);
@@ -246,7 +246,7 @@ void SSBDemod::processOneSample(Complex &ci)
         }
         else
         {
-            fftfilt::cmplx z = delayedSample * m_agc.getStepValue();
+            fftfilt::cmplx z = m_agcActive ? delayedSample * m_agc.getStepValue() : delayedSample;
 
             if (m_audioBinaual)
             {

@@ -45,12 +45,12 @@ void SSBDemodSettings::resetToDefaults()
     m_audioMute = false;
     m_agc = false;
     m_agcClamping = false;
-    m_agcPowerThreshold = -40;
+    m_agcPowerThreshold = -100;
     m_agcThresholdGate = 4;
     m_agcTimeLog2 = 7;
     m_rfBandwidth = 3000;
     m_lowCutoff = 300;
-    m_volume = 3.0;
+    m_volume = 1.0;
     m_spanLog2 = 3;
     m_inputFrequencyOffset = 0;
     m_rgbColor = QColor(0, 255, 0).rgb();
