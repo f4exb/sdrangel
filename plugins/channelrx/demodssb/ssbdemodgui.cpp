@@ -389,7 +389,7 @@ void SSBDemodGUI::applyBandwidths(int spanLog2, bool force)
     m_spectrumRate = m_ssbDemod->getAudioSampleRate() / (1<<spanLog2);
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
-    int bwMax = std::min(m_ssbDemod->getAudioSampleRate() / (100*(1<<spanLog2)), (3*m_ssbDemod->getInputSampleRate())/400);
+    int bwMax = std::min(m_ssbDemod->getAudioSampleRate() / (100*(1<<spanLog2)), m_ssbDemod->getInputSampleRate()/100);
     int tickInterval = m_spectrumRate / 1200;
     tickInterval = tickInterval == 0 ? 1 : tickInterval;
 
