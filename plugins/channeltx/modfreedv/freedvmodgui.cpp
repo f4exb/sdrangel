@@ -375,6 +375,7 @@ FreeDVModGUI::FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
+    m_channelMarker.setSourceOrSinkStream(false);
 	m_channelMarker.setVisible(true);
 
     m_deviceUISet->registerTxChannelInstance(FreeDVMod::m_channelIdURI, this);

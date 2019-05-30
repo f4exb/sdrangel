@@ -153,6 +153,7 @@ void TestMIGui::on_streamIndex_currentIndexChanged(int index)
     if (ui->streamLock->isChecked())
     {
         m_spectrumStreamIndex = index;
+        m_deviceUISet->m_spectrum->setDisplayedStream(true, index);
         m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(true, m_spectrumStreamIndex);
         ui->spectrumSource->blockSignals(true);
         ui->spectrumSource->setCurrentIndex(index);
@@ -168,6 +169,7 @@ void TestMIGui::on_streamIndex_currentIndexChanged(int index)
 void TestMIGui::on_spectrumSource_currentIndexChanged(int index)
 {
     m_spectrumStreamIndex = index;
+    m_deviceUISet->m_spectrum->setDisplayedStream(true, index);
     m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(true, m_spectrumStreamIndex);
     updateSampleRateAndFrequency();
 

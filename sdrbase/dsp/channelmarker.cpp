@@ -37,7 +37,9 @@ ChannelMarker::ChannelMarker(QObject* parent) :
 	m_highlighted(false),
 	m_color(m_colorTable[m_nextColor]),
 	m_movable(true),
-	m_fScaleDisplayType(FScaleDisplay_freq)
+	m_fScaleDisplayType(FScaleDisplay_freq),
+    m_sourceOrSinkStream(true),
+    m_streamIndex(0)
 {
 	++m_nextColor;
 	if(m_colorTable[m_nextColor] == 0)

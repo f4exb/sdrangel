@@ -678,6 +678,7 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_channelMarker.setBandwidth(5000);
 	m_channelMarker.setCenterFrequency(0);
 	m_channelMarker.setTitle("ATV Modulator");
+    m_channelMarker.setSourceOrSinkStream(false);
 	m_channelMarker.blockSignals(false);
 	m_channelMarker.setVisible(true); // activate signal on the last setting only
 
