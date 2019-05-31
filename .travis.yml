@@ -46,7 +46,7 @@ addons:
       - librtlsdr-dev
       - libasound2-dev
       - libopencv-dev
-      - libsqlite3-dev
+      - libopencv-imgcodecs-dev
       - libxml2-dev
       - bison
       - flex

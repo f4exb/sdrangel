@@ -60,8 +60,8 @@ for:
           sudo apt-get -y install build-essential cmake git \
             devscripts fakeroot debhelper libfftw3-dev qtbase5-dev libqt5opengl5-dev \
             qttools5-dev qttools5-dev-tools qtmultimedia5-dev libqt5multimedia5-plugins \
-            libusb-1.0-0-dev libboost-all-dev librtlsdr-dev libasound2-dev libopencv-dev \
-            libsqlite3-dev libxml2-dev bison flex ffmpeg  libpostproc-dev libavcodec-dev libavformat-dev \
+            libusb-1.0-0-dev libboost-all-dev librtlsdr-dev libasound2-dev libopencv-dev libopencv-imgcodecs-dev \
+            libxml2-dev bison flex ffmpeg  libpostproc-dev libavcodec-dev libavformat-dev \
             libopus-dev libcodec2-dev libairspy-dev libhackrf-dev \
             librtlsdr-dev liblimesuite-dev libbladerf-dev libsoapysdr-dev libiio-dev \
             autoconf automake libtool
