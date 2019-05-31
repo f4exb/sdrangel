@@ -1,3 +1,10 @@
+sdrangel (4.8.2-1) unstable; urgency=medium
+
+  * SSB demod: fixes
+  * Audio input: set default volume factor to 1.0 (was 0.15)
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 30 May 2019 20:44:06 +0100
+
 sdrangel (4.8.1-1) unstable; urgency=medium
 
   * Debian: removed udev rules stuff
