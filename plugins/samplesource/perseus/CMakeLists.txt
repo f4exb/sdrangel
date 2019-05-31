@@ -17,6 +17,7 @@ set(perseus_HEADERS
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${CMAKE_SOURCE_DIR}/devices
+    ${LIBUSB_INCLUDE_DIR}
     ${LIBPERSEUS_INCLUDE_DIR}
 )
 
@@ -53,6 +54,7 @@ target_link_libraries(${TARGET_NAME}
 	sdrbase
 	${TARGET_LIB_GUI}
         swagger
+        ${LIBUSB_LIBRARIES}
         ${LIBPERSEUS_LIBRARIES}
         perseusdevice
 )

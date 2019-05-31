@@ -11,6 +11,7 @@ set(perseusdevice_HEADERS
 )
 
 include_directories(
+    ${LIBUSB_INCLUDE_DIR}
     ${LIBPERSEUS_INCLUDE_DIR}
 )
 
@@ -22,6 +23,7 @@ set_target_properties(perseusdevice
     PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
 
 target_link_libraries(perseusdevice
+    ${LIBUSB_LIBRARIES}
     ${LIBPERSEUS_LIBRARIES}
     sdrbase
 )
