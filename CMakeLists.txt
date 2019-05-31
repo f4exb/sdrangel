@@ -232,6 +232,8 @@ endif()
 set(CMAKE_INSTALL_RPATH
   "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}" CACHE
   PATH "Library Install RPath" FORCE)
+# Allow RPATH to files outside the build tree
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # force full path
 set(CMAKE_INSTALL_NAME_DIR
   "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}" CACHE
