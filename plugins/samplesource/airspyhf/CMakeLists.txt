@@ -1,9 +1,6 @@
 project(airspyhf)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(airspyhf_SOURCES
-    airspyhfgui.cpp
     airspyhfinput.cpp
     airspyhfplugin.cpp
     airspyhfsettings.cpp
@@ -11,68 +8,51 @@ set(airspyhf_SOURCES
 )
 
 set(airspyhf_HEADERS
-    airspyhfgui.h
     airspyhfinput.h
     airspyhfplugin.h
     airspyhfsettings.h
     airspyhfthread.h
 )
 
-set(airspyhf_FORMS
-    airspyhfgui.ui
-)
-
-if (BUILD_DEBIAN)
 include_directories(
-    .
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client        
-    ${LIBAIRSPYHFSRC}
-    ${LIBAIRSPYHFSRC}/libairspyhf/src
-)
-else (BUILD_DEBIAN)
-include_directories(
-    .
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client        
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${LIBAIRSPYHF_INCLUDE_DIR}
 )
-endif (BUILD_DEBIAN)
 
-#include(${QT_USE_FILE})
-#add_definitions(${QT_DEFINITIONS})
-add_definitions("${QT_DEFINITIONS} -DLIBAIRSPY_DYN_RATES")
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(airspyhf_SOURCES
+        ${airspyhf_SOURCES}
+        airspyhfgui.cpp
 
-#qt4_wrap_cpp(airspyhf_HEADERS_MOC ${airspyhf_HEADERS})
-qt5_wrap_ui(airspyhf_FORMS_HEADERS ${airspyhf_FORMS})
+        airspyhfgui.ui
+    )
+    set(airspyhf_HEADERS
+        ${airspyhf_HEADERS}
+        airspyhfgui.h
+    )
 
-add_library(inputairspyhf SHARED
-    ${airspyhf_SOURCES}
-    ${airspyhf_HEADERS_MOC}
-    ${airspyhf_FORMS_HEADERS}
+    set(TARGET_NAME inputairspyhf)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+else()
+    set(TARGET_NAME inputairspyhfsrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
+endif()
+
+add_library(${TARGET_NAME} SHARED
+	${airspyhf_SOURCES}
 )
 
-if (BUILD_DEBIAN)
-target_link_libraries(inputairspyhf
-    ${QT_LIBRARIES}
-    airspyhf
-    sdrbase
-    sdrgui
-    swagger
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
+	sdrbase
+	${TARGET_LIB_GUI}
+        swagger
+        ${LIBAIRSPYHF_LIBRARIES}
 )
-else (BUILD_DEBIAN)
-target_link_libraries(inputairspyhf
-    ${QT_LIBRARIES}
-    ${LIBAIRSPYHF_LIBRARIES}
-    sdrbase
-    sdrgui
-    swagger
-)
-endif (BUILD_DEBIAN)
 
-
-qt5_use_modules(inputairspyhf Core Widgets)
-
-install(TARGETS inputairspyhf DESTINATION lib/plugins/samplesource)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

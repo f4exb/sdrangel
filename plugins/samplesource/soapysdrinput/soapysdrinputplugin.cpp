@@ -90,9 +90,9 @@ PluginInterface::SamplingDevices SoapySDRInputPlugin::enumSampleSources()
 
 #ifdef SERVER_MODE
 PluginInstanceGUI* SoapySDRInputPlugin::createSampleSourcePluginInstanceGUI(
-        const QString& sourceId __attribute__((unused)),
-        QWidget **widget __attribute__((unused)),
-        DeviceUISet *deviceUISet __attribute__((unused)))
+        const QString& sourceId,
+        QWidget **widget,
+        DeviceUISet *deviceUISet)
 {
     return 0;
 }

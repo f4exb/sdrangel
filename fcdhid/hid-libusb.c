@@ -69,9 +69,7 @@ extern "C" {
  * MacOS does not implement POSIX Thread Barriers
  */
 #ifdef __APPLE__
-
-#include "../apple/apple_compat.h"
-
+#include "apple_compat.h"
 #endif
 
 /* Uncomment to enable the retrieval of Usage and Usage Page in

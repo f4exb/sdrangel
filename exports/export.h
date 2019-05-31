@@ -55,6 +55,18 @@
 #   define SDRGUI_API
 #endif
 
+/* the 'SDRSRV_API' controls the import/export of 'sdrsrv' symbols
+ */
+#if !defined(sdrangel_STATIC)
+#  ifdef sdrsrv_EXPORTS
+#    define SDRSRV_API __SDR_EXPORT
+#  else
+#    define SDRSRV_API __SDR_IMPORT
+#  endif
+#else
+#   define SDRSRV_API
+#endif
+
 /* the 'DEVICES_API' controls the import/export of 'devices' symbols
  */
 #if !defined(sdrangel_STATIC)

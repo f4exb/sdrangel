@@ -1,322 +1,248 @@
 cmake_minimum_required(VERSION 3.1.0)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
-    message(FATAL_ERROR "SDRangel requires GCC version 4.9 or higher!")
+# force 64bit on windows because we have only that library
+# TODO discuss because, at this days, a dsp software should be 64bit
+if(WIN32 AND NOT CMAKE_GENERATOR_PLATFORM AND NOT CMAKE_C_COMPILER AND NOT CMAKE_CXX_COMPILER)
+  set(CMAKE_GENERATOR_PLATFORM "x64" CACHE INTERNAL "")
 endif()
-
-# use, i.e. don't skip the full RPATH for the build tree
-set(CMAKE_SKIP_BUILD_RPATH  FALSE)
-
-# when building, don't use the install RPATH already
-# (but later on when installing)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-add_definitions(-DLINUX) # for compatibility with Android and Windows builds with QtCretino
-
-option(V4L-RTL "Use Linux Kernel RTL-SDR Source." OFF)
-option(V4L-MSI "Use Linux Kernel MSI2500 Source." OFF)
-option(BUILD_TYPE "Build type (RELEASE, RELEASEWITHDBGINFO, DEBUG" RELEASE)
-option(DEBUG_OUTPUT "Print debug messages" OFF)
-option(SANITIZE_ADDRESS "Activate memory address sanitization" OFF)
-option(HOST_RPI "Compiling on RPi" OFF)
-option(RX_SAMPLE_24BIT "Internal 24 bit Rx DSP" OFF)
-option(NO_DSP_SIMD "Do not use SIMD instructions for DSP even if available" OFF)
-option(BUILD_SERVER "Build Server" ON)
-option(BUILD_GUI "Build GUI" ON)
-option(ENABLE_DISTRIBUTION "Compile for package distribution" OFF)
-
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 project(sdrangel)
 
-if (BUILD_TYPE MATCHES RELEASE)
-    set(CMAKE_BUILD_TYPE "Release")
-elseif (BUILD_TYPE MATCHES RELEASEWITHDBGINFO)
-    set(CMAKE_BUILD_TYPE "ReleaseWithDebugInfo")
-elseif (BUILD_TYPE MATCHES DEBUG)
-    set(CMAKE_BUILD_TYPE "Debug")
-elseif (BUILD_TYPE MATCHES DEBIAN)
-    set(CMAKE_BUILD_TYPE "Release")
-    set(BUILD_DEBIAN TRUE)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
+
+# disable only when needed
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# configure version
+set(sdrangel_VERSION_MAJOR "4")
+set(sdrangel_VERSION_MINOR "8")
+set(sdrangel_VERSION_PATCH "0")
+set(sdrangel_VERSION_SUFFIX "")
+
+# SDRAngel cmake options
+option(DEBUG_OUTPUT "Print debug messages" OFF)
+option(SANITIZE_ADDRESS "Activate memory address sanitization" OFF)
+option(RX_SAMPLE_24BIT "Internal 24 bit Rx DSP" ON)
+option(BUILD_SERVER "Build Server" ON)
+option(BUILD_GUI "Build GUI" ON)
+option(BUNDLE "Enable distribution bundle" OFF)
+option(FORCE_SSSE3 "Compile with SSSE3 instruction only" OFF)
+option(FORCE_SSE41 "Compile with SSE4.1 instruction only" OFF)
+option(ENABLE_AIRSPY "Enable AirSpy support" ON)
+option(ENABLE_AIRSPYHF "Enable AirSpyHF support" ON)
+option(ENABLE_BLADERF "Enable bladeRF support" ON)
+option(ENABLE_FUNCUBE "Enable FUNcube support" ON)
+option(ENABLE_HACKRF "Enable HackRF support" ON)
+option(ENABLE_IIO "Enable liniio support like PlutoSDR" ON)
+option(ENABLE_LIMESUITE "Enable limesuite support" ON)
+option(ENABLE_MIRISDR "Enable LibMiri for old SDRPlay" ON)
+option(ENABLE_PERSEUS "Enable perseus support" ON)
+option(ENABLE_RTLSDR "Enable rtl-sdr support" ON)
+option(ENABLE_SOAPYSDR "Enable SoapySDR support" ON)
+option(ENABLE_XTRX "Enable XTRX support" ON)
+option(ENABLE_PACK_MIRSDRAPI "Enable inclusion of the mirsdr-api library - for personal use only" OFF)
+# on windows always build external libraries
+if(WIN32)
+  option(ENABLE_EXTERNAL_LIBRARIES "Build external libraries" ON)
 else()
-    set(CMAKE_BUILD_TYPE "Release")
+  option(ENABLE_EXTERNAL_LIBRARIES "Build external libraries" OFF)
 endif()
 
-set(QT_USE_QTOPENGL TRUE)
-set(CMAKE_AUTOMOC ON)
+# Set additional project information
+set(COMPANY "f4exb")
+add_definitions("-DCOMPANY=\"${COMPANY}\"")
+set(APPLICATION_NAME "SDRangel")
+add_definitions("-DAPPLICATION_NAME=\"${APPLICATION_NAME}\"")
+set(APPLICATION_MAINTAINER="Edouard Griffiths, F4EXB <f4exb06@gmail.com>")
+set(COPYRIGHT "Copyright (c) 2019 Edouard Griffiths. All rights reserved.")
+add_definitions("-DCOPYRIGHT=\"${COPYRIGHT}\"")
+set(IDENTIFIER "com.${COMPANY}.${APPLICATION_NAME}")
+add_definitions("-DIDENTIFIER=\"${IDENTIFIER}\"")
 
-if(APPLE AND EXISTS /usr/local/opt/qt5)
-       # Homebrew installs Qt5 (up to at least 5.9.1) in
-       # /usr/local/qt5, ensure it can be found by CMake since
-       # it is not in the default /usr/local prefix.
-       list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt5")
+find_package(Git)
+if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git/")
+  execute_process(COMMAND "${GIT_EXECUTABLE}" describe --tags
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    RESULT_VARIABLE res
+    OUTPUT_VARIABLE out
+    ERROR_QUIET
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(NOT res)
+        string(REGEX REPLACE "^v([0-9]+)\.([0-9]+)\.([0-9]+)-" "" git_commit ${out})
+        set(sdrangel_VERSION_SUFFIX "-${git_commit}")
+    endif()
 endif()
 
-#find_package(Qt4 REQUIRED)
-find_package(Qt5Core 5.0 REQUIRED)
-find_package(Qt5Widgets 5.0 REQUIRED)
-find_package(Qt5Multimedia 5.0 REQUIRED)
-find_package(Qt5OpenGL 5.0 REQUIRED)
-find_package(OpenGL REQUIRED)
-find_package(PkgConfig)
-find_package(Boost REQUIRED)
-find_package(FFTW3F)
+set(sdrangel_VERSION "${sdrangel_VERSION_MAJOR}.${sdrangel_VERSION_MINOR}.${sdrangel_VERSION_PATCH}${sdrangel_VERSION_SUFFIX}")
+message(STATUS "${APPLICATION_NAME} Version: ${sdrangel_VERSION}")
+add_definitions("-DSDRANGEL_LIB_VERSION=\"${sdrangel_VERSION_MAJOR}.${sdrangel_VERSION_MINOR}.${sdrangel_VERSION_PATCH}\"")
+add_definitions("-DSDRANGEL_VERSION=\"${sdrangel_VERSION}\"")
 
-if (NOT BUILD_DEBIAN)
-    find_package(LibDSDcc)
-    find_package(LibMbe)
-    find_package(SerialDV)
+# configure CPACK infomation
+set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "SDR Rx/Tx software for Airspy, Airspy HF+, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube")
+set(CPACK_PACKAGE_VENDOR "${COMPANY}")
+set(CPACK_PACKAGE_CONTACT "https://github.com/f4exb/sdrangel")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/Readme.md")
+set(CPACK_PACKAGE_VERSION "${sdrangel_VERSION_MAJOR}.${sdrangel_VERSION_MINOR}.${sdrangel_VERSION_PATCH}")
+set(CPACK_PACKAGE_VERSION_MAJOR ${sdrangel_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${sdrangel_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${sdrangel_VERSION_PATCH})
+set(CPACK_SOURCE_STRIP_FILES true)
+set(CPACK_STRIP_FILES true)
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/Readme.md")
+set(CPACK_SOURCE_IGNORE_FILES "${PROJECT_BINARY_DIR};/.git/;.gitignore;menu.yml;.travis.yml;.appveyor.yml;default.nix;.envrc;TODOs.org;/.scripts/")
+set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
+
+# if we don't set build_type
+if(NOT DEFINED CMAKE_BUILD_TYPE OR "${CMAKE_BUILD_TYPE}" STREQUAL "")
+      set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+message(STATUS "Build type set to: ${CMAKE_BUILD_TYPE}")
+
+# as default disable qDebug()
+if(NOT DEBUG_OUTPUT)
+  add_definitions("-DQT_NO_DEBUG_OUTPUT")
 endif()
 
-# MacOS Compatibility
-if(APPLE)
-        find_package(ICONV)
-endif(APPLE)
-##############################################################################
-
-#include(${QT_USE_FILE})
-
-if (DEBUG_OUTPUT)
-    set( QT_DEFINITIONS "${QT_DEFINITIONS}" )
+# declare build structures
+# !! change sdrbase/plugins/pluginmanager.cpp too !!
+set(SDRANGEL_BINARY_BIN_DIR "${CMAKE_BINARY_DIR}/bin")
+set(SDRANGEL_BINARY_LIB_DIR "${CMAKE_BINARY_DIR}/lib")
+if(WIN32)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${SDRANGEL_BINARY_BIN_DIR}")
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 else()
-    set( QT_DEFINITIONS "${QT_DEFINITIONS} -DQT_NO_DEBUG_OUTPUT" )
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+endif()
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${SDRANGEL_BINARY_LIB_DIR}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${SDRANGEL_BINARY_LIB_DIR}")
+if(WIN32)
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+  set(BUILD_PLUGINS_RUNTIME_DIR "${SDRANGEL_BINARY_BIN_DIR}/plugins")
+  set(BUILD_PLUGINSSRV_RUNTIME_DIR "${SDRANGEL_BINARY_BIN_DIR}/pluginssrv")
+endif()
+set(BUILD_PLUGINS_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/plugins")
+set(BUILD_PLUGINSSRV_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pluginssrv")
+# use only lib when create .app/.dmg
+if(APPLE AND BUNDLE AND BUILD_GUI)
+  set(INSTALL_BIN_DIR ".")
+  set(INSTALL_LIB_DIR "lib")
+  set(INSTALL_DOC_DIR "doc")
+else()
+  set(INSTALL_BIN_DIR "bin")
+  set(INSTALL_LIB_DIR "lib/${CMAKE_PROJECT_NAME}")
+  set(INSTALL_DOC_DIR "share/${CMAKE_PROJECT_NAME}")
+endif()
+set(INSTALL_PLUGINS_DIR "${INSTALL_LIB_DIR}/plugins")
+set(INSTALL_PLUGINSSRV_DIR "${INSTALL_LIB_DIR}/pluginssrv")
+set(EXTERNAL_BUILD_LIBRARIES "${CMAKE_BINARY_DIR}/external")
+
+# custom libraries
+set(CUSTOM_APPLE_INCLUDE "${CMAKE_SOURCE_DIR}/custom/apple" CACHE INTERNAL "")
+set(CUSTOM_WINDOWS_INCLUDE "${CMAKE_SOURCE_DIR}/custom/windows" CACHE INTERNAL "")
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  set(LINUX TRUE)
+  # populate distribution name
+  # LSB_CODENAME will hold trusty for example
+  find_program(LSB_RELEASE_EXECUTABLE lsb_release)
+  if(LSB_RELEASE_EXECUTABLE)
+    execute_process(COMMAND ${LSB_RELEASE_EXECUTABLE} -cs
+      OUTPUT_VARIABLE LSB_CODENAME
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+  endif()
+  configure_file("${CMAKE_SOURCE_DIR}/cmake/cpack/${CMAKE_PROJECT_NAME}.desktop.in"
+    "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.desktop" @ONLY)
+elseif(APPLE)
+  if("${CMAKE_OSX_DEPLOYMENT_TARGET}" STREQUAL "")
+    message(STATUS "Build for macOS target: local version")
+  else()
+    message(STATUS "Build for macOS target: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
+  endif()
+
+  # prepend path to find_*()
+  set(CMAKE_FIND_ROOT_PATH "/opt/local")
+
+  set(CMAKE_MACOSX_RPATH ON)
+  message(STATUS "RPATH support: ${CMAKE_MACOSX_RPATH}")
+
+  configure_file("${CMAKE_SOURCE_DIR}/cmake/cpack/MacOSXBundleInfo.plist.in"
+    "${CMAKE_BINARY_DIR}/Info.plist" @ONLY)
+elseif (WIN32)
+  # check compiler version
+  if(MSVC_VERSION GREATER 1919 AND MSVC_VERSION LESS 1910)
+    message(FATAL_ERROR "You must use Microsoft Visual Studio 2017 as compiler, aka MSVC 14.1")
+  endif()
+
+  # used on code but not defined on VS2017
+  add_definitions(-D__WINDOWS__)
+
+  # compile with full multicore
+  set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+
+  # find Qt folder
+  include(QtLocator)
+
+  # in alternative we can use ExternalProject
+  set(EXTERNAL_LIBRARY_FOLDER "${CMAKE_SOURCE_DIR}/external/windows")
+  set(BOOST_ROOT "${EXTERNAL_LIBRARY_FOLDER}/boost" CACHE INTERNAL "")
+  set(FFTW3F_FOUND ON CACHE INTERNAL "")
+  set(FFTW3F_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/fftw-3/include" CACHE INTERNAL "")
+  set(FFTW3F_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/fftw-3/libfftw3f-3.lib" CACHE INTERNAL "")
+  set(LIBUSB_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/libusb/include" CACHE INTERNAL "")
+  set(LIBUSB_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/libusb/MS64/dll/libusb-1.0.lib" CACHE INTERNAL "")
+  set(OpenCV_DIR "${EXTERNAL_LIBRARY_FOLDER}/opencv" CACHE INTERNAL "")
+  set(PKG_CONFIG_EXECUTABLE "${EXTERNAL_LIBRARY_FOLDER}/pkg-config-lite/bin/pkg-config.exe" CACHE INTERNAL "")
+
+  # ffmpeg
+  set(FFMPEG_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  #set(FFMPEG_LIBRARIES)
+  set(AVCODEC_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(AVCODEC_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/avcodec.lib" CACHE INTERNAL "")
+  set(AVFORMAT_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(AVFORMAT_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/avformat.lib" CACHE INTERNAL "")
+  set(AVUTIL_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(AVUTIL_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/avutil.lib" CACHE INTERNAL "")
+  set(SWRESAMPLE_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(SWRESAMPLE_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/swresample.lib" CACHE INTERNAL "")
+  set(SWSCALE_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(SWSCALE_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/swscale.lib" CACHE INTERNAL "")
+
+  # used on fixup_bundle phase
+  set(WINDOWS_FIXUP_BUNDLE_LIB_DIRS
+    "${Qt5_DIR}/../../../bin"
+    "${EXTERNAL_LIBRARY_FOLDER}/fftw-3"
+    "${EXTERNAL_LIBRARY_FOLDER}/libusb/MS64/dll"
+    "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/bin"
+  )
 endif()
 
-add_definitions(${QT_DEFINITIONS})
+# TODO: check if(DEFINED) and fix macports -D
+# fix install path
+set(CMAKE_INSTALL_RPATH
+  "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}" CACHE
+  PATH "Library Install RPath" FORCE)
+# force full path
+set(CMAKE_INSTALL_NAME_DIR
+  "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}" CACHE
+  PATH "Library Install Name Destination Directory" FORCE)
 
-if(MSVC)
-    foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
-        string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
-        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/bin_${OUTPUTCONFIG})
-        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/bin_${OUTPUTCONFIG})
-        set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/bin_${OUTPUTCONFIG})
-    endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
-endif()
-
-##############################################################################
-
-if (HOST_RPI)
-    message( STATUS "Compiling on RPi" )
-endif()
-
-
-set(TEST_DIR ${PROJECT_SOURCE_DIR}/cmake/test)
-
-# Clang or AppleClang (see CMP0025)
-if(NOT DEFINED C_CLANG AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    set(C_CLANG 1)
-endif()
-if(NOT DEFINED C_GCC AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    set(C_GCC 1)
-endif()
-
-# Detect current compilation architecture and create standard definitions
-# =======================================================================
-include(CheckSymbolExists)
-function(detect_architecture symbol arch)
-    if (NOT DEFINED ARCHITECTURE)
-        set(CMAKE_REQUIRED_QUIET 1)
-        check_symbol_exists("${symbol}" "" ARCHITECTURE_${arch})
-        unset(CMAKE_REQUIRED_QUIET)
-
-        # The output variable needs to be unique across invocations otherwise
-        # CMake's crazy scope rules will keep it defined
-        if (ARCHITECTURE_${arch})
-            set(ARCHITECTURE "${arch}" PARENT_SCOPE)
-            set(ARCHITECTURE_${arch} 1 PARENT_SCOPE)
-            add_definitions(-DARCHITECTURE_${arch}=1)
-        endif()
-    endif()
-endfunction()
-
-if (NOT ENABLE_GENERIC)
-    if (MSVC)
-        detect_architecture("_M_AMD64" x86_64)
-        detect_architecture("_M_IX86" x86)
-        detect_architecture("_M_ARM" ARM)
-        detect_architecture("_M_ARM64" ARM64)
-    else()
-        detect_architecture("__x86_64__" x86_64)
-        detect_architecture("__i386__" x86)
-        detect_architecture("__arm__" ARM)
-        detect_architecture("__aarch64__" ARM64)
-    endif()
-endif()
-if (NOT DEFINED ARCHITECTURE)
-    set(ARCHITECTURE "GENERIC")
-    set(ARCHITECTURE_GENERIC 1)
-    add_definitions(-DARCHITECTURE_GENERIC=1)
-endif()
-message(STATUS "Target architecture: ${ARCHITECTURE}")
-
-# flag that set the minimum cpu flag requirements
-# used to create re-distribuitable binary
-if (ENABLE_DISTRIBUTION)
-    if (${ARCHITECTURE} MATCHES "x86_64|x86")
-        set(HAS_SSSE3 ON CACHE BOOL "SSSE3 SIMD enabled")
-        if(C_GCC OR C_CLANG)
-            set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mssse3" )
-            message(STATUS "Use SSSE3 SIMD instructions")
-            add_definitions(-DUSE_SSSE3)
-        elseif(MSVC)
-            set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /arch:SSSE3" )
-            set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /GL /Ot /Ox /arch:SSSE3" )
-            set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG" )
-            message(STATUS "Use MSVC SSSE3 SIMD instructions")
-            add_definitions (/D "_CRT_SECURE_NO_WARNINGS")
-            add_definitions(-DUSE_SSSE3)
-        endif()
-    elseif (${ARCHITECTURE} MATCHES "ARM|ARM64")
-        set(HAS_NEON ON CACHE BOOL "NEON SIMD enabled")
-        message(STATUS "Use NEON SIMD instructions")
-        add_definitions(-DUSE_NEON)
-    endif()
-else ()
-if (${ARCHITECTURE} MATCHES "x86_64|x86")
-    try_run(RUN_SSE2 COMPILE_SSE2 ${CMAKE_BINARY_DIR}/tmp ${TEST_DIR}/test_x86_sse2.cxx COMPILE_DEFINITIONS -msse2 -O0)
-    if(COMPILE_SSE2 AND RUN_SSE2 EQUAL 0)
-       set(HAS_SSE2 ON CACHE BOOL "Architecture has SSSE2 SIMD enabled")
-       if(C_GCC OR C_CLANG)
-           set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse2" )
-           message(STATUS "Use SSE2 SIMD instructions")
-           add_definitions(-DUSE_SSE2)
-       elseif(MSVC)
-           set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /arch:SSE2" )
-           set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /GL /Ot /Ox /arch:SSE2" )
-           set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG" )
-           add_definitions (/D "_CRT_SECURE_NO_WARNINGS")
-           add_definitions(-DUSE_SSE2)
-       endif()
-    else()
-       set(HAS_SSE2 OFF CACHE BOOL "Architecture does not have SSSE2 SIMD enabled")
-    endif()
-    try_run(RUN_SSSE3 COMPILE_SSSE3 ${CMAKE_BINARY_DIR}/tmp ${TEST_DIR}/test_x86_ssse3.cxx COMPILE_DEFINITIONS -mssse3 -O0)
-    if(COMPILE_SSSE3 AND RUN_SSSE3 EQUAL 0)
-       set(HAS_SSSE3 ON CACHE BOOL "Architecture has SSSE3 SIMD enabled")
-       if(C_GCC OR C_CLANG)
-           set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mssse3" )
-           message(STATUS "Use SSSE3 SIMD instructions")
-           add_definitions(-DUSE_SSSE3)
-       elseif(MSVC)
-           set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /arch:SSSE3" )
-           set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /GL /Ot /Ox /arch:SSSE3" )
-           set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG" )
-           message(STATUS "Use MSVC SSSE3 SIMD instructions")
-           add_definitions (/D "_CRT_SECURE_NO_WARNINGS")
-           add_definitions(-DUSE_SSSE3)
-       endif()
-    else()
-       set(HAS_SSSE3 OFF CACHE BOOL "Architecture does not have SSSE3 SIMD enabled")
-    endif()
-    try_run(RUN_SSE4_1 COMPILE_SSE4_1 ${CMAKE_BINARY_DIR}/tmp ${TEST_DIR}/test_x86_sse41.cxx COMPILE_DEFINITIONS -msse4.1 -O0)
-    if(COMPILE_SSE4_1 AND RUN_SSE4_1 EQUAL 0)
-       set(HAS_SSE4_1 ON CACHE BOOL "Architecture has SSE 4.1 SIMD enabled")
-       if(C_GCC OR C_CLANG)
-           set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -msse4.1" )
-           set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -msse4.1" )
-           message(STATUS "Use SSE 4.1 SIMD instructions")
-           add_definitions(-DUSE_SSE4_1)
-       elseif(MSVC)
-           set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /arch:SSE4_1" )
-           set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /GL /Ot /Ox /arch:SSE4_1" )
-           set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG" )
-           add_definitions (/D "_CRT_SECURE_NO_WARNINGS")
-           add_definitions(-DUSE_SSE4_1)
-       endif()
-    else()
-       set(HAS_SSE4_1 OFF CACHE BOOL "Architecture does not have SSE 4.1 SIMD enabled")
-    endif()
-    try_run(RUN_SSE4_2 COMPILE_SSE4_2 ${CMAKE_BINARY_DIR}/tmp ${TEST_DIR}/test_x86_sse42.cxx COMPILE_DEFINITIONS -msse4.2 -O0)
-    if(COMPILE_SSE4_2 AND RUN_SSE4_2 EQUAL 0)
-       set(HAS_SSE4_2 ON CACHE BOOL "Architecture has SSE 4.2 SIMD enabled")
-       if(C_GCC OR C_CLANG)
-           set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -msse4.2" )
-           set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -msse4.2" )
-           message(STATUS "Use SSE 4.2 SIMD instructions")
-           add_definitions(-DUSE_SSE4_2)
-       elseif(MSVC)
-           set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /arch:SSE4_2" )
-           set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /GL /Ot /Ox /arch:SSE4_2" )
-           set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG" )
-           add_definitions (/D "_CRT_SECURE_NO_WARNINGS")
-           add_definitions(-DUSE_SSE4_2)
-       endif()
-    else()
-       set(HAS_SSE4_2 OFF CACHE BOOL "Architecture does not have SSE 4.2 SIMD enabled")
-    endif()
-    try_run(RUN_AVX COMPILE_AVX ${CMAKE_BINARY_DIR}/tmp ${TEST_DIR}/test_x86_avx.cxx COMPILE_DEFINITIONS -mavx -O0)
-    if(COMPILE_AVX AND RUN_AVX EQUAL 0)
-       set(HAS_AVX ON CACHE BOOL "Architecture has AVX SIMD enabled")
-       if(C_GCC OR C_CLANG)
-           set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mavx" )
-           set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mavx" )
-           message(STATUS "Use AVX SIMD instructions")
-           add_definitions(-DUSE_AVX)
-       endif()
-    else()
-       set(HAS_AVX OFF CACHE BOOL "Architecture does not have AVX SIMD enabled")
-    endif()
-    try_run(RUN_AVX2 COMPILE_AVX2 ${CMAKE_BINARY_DIR}/tmp ${TEST_DIR}/test_x86_avx2.cxx COMPILE_DEFINITIONS -mavx2 -O0)
-    if(COMPILE_AVX2 AND RUN_AVX2 EQUAL 0)
-       set(HAS_AVX2 ON CACHE BOOL "Architecture has AVX2 SIMD enabled")
-       if(C_GCC OR C_CLANG)
-           set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mavx2" )
-           set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mavx2" )
-           message(STATUS "Use AVX2 SIMD instructions")
-           add_definitions(-DUSE_AVX2)
-       endif()
-    else()
-       set(HAS_AVX2 OFF CACHE BOOL "Architecture does not have AVX2 SIMD enabled")
-    endif()
-    try_run(RUN_AVX512 COMPILE_AVX512 ${CMAKE_BINARY_DIR}/tmp ${TEST_DIR}/test_x86_avx512.cxx COMPILE_DEFINITIONS -mavx512f -O0)
-    if(COMPILE_AVX512 AND RUN_AVX512 EQUAL 0)
-       set(HAS_AVX512 ON CACHE BOOL "Architecture has AVX512 SIMD enabled")
-       if(C_GCC OR C_CLANG)
-           set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mavx512f" )
-           set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mavx512f" )
-           message(STATUS "Use AVX512 SIMD instructions")
-           add_definitions(-DUSE_AVX512)
-       endif()
-    else()
-       set(HAS_AVX512 OFF CACHE BOOL "Architecture does not have AVX512 SIMD enabled")
-    endif()
-elseif(ARCHITECTURE_ARM)
-    try_run(RUN_NEON COMPILE_NEON ${CMAKE_BINARY_DIR}/tmp ${TEST_DIR}/test_arm_neon.cxx COMPILE_DEFINITIONS -mfpu=neon -O0)
-    if(COMPILE_NEON AND RUN_NEON EQUAL 0)
-       set(HAS_NEON ON CACHE BOOL "Architecture has NEON SIMD enabled")
-       if(C_GCC OR C_CLANG)
-           set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mfpu=neon" )
-           set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -mfpu=neon" )
-           message(STATUS "Use NEON SIMD instructions")
-           add_definitions(-DUSE_NEON)
-       endif()
-    else()
-       set(HAS_NEON OFF CACHE BOOL "Architecture does not have NEON SIMD enabled")
-    endif()
-elseif(ARCHITECTURE_ARM64)
-    # Advanced SIMD (aka NEON) is mandatory for AArch64
-    set(HAS_NEON ON CACHE BOOL "Architecture has NEON SIMD enabled")
-    message(STATUS "Use NEON SIMD instructions")
-    add_definitions(-DUSE_NEON)
-endif()
-endif()
-
-# clear binary test folder
-FILE(REMOVE_RECURSE ${CMAKE_BINARY_DIR}/tmp)
-##############################################################################
-
-# Compiler flags.
+# enable 24 bit receiving path
 if (RX_SAMPLE_24BIT)
-	message(STATUS "Compiling for 24 bit Rx DSP chain")
+    message(STATUS "Compiling for 24 bit Rx DSP chain")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSDR_RX_SAMPLE_24BIT")
 else()
-	message(STATUS "Compiling for 16 bit Rx DSP chain")
+    message(STATUS "Compiling for 16 bit Rx DSP chain")
 endif()
 
 if (SANITIZE_ADDRESS)
@@ -328,225 +254,264 @@ if (SANITIZE_ADDRESS)
     set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -fsanitize=address")
 endif()
 
-if (NO_DSP_SIMD)
-    message(STATUS "Not compiling with SIMD instructions for DSP even if available")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_DSP_SIMD")
-else()
-    message(STATUS "Compiling with SIMD instructions for DSP if available")
-endif()
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if (C_CLANG OR C_GCC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wvla -Woverloaded-virtual -ffast-math -ftree-vectorize ${EXTRA_FLAGS}")
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+elseif (C_MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W3 -MP ${EXTRA_FLAGS}")
 endif()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    if (BUILD_DEBIAN)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=1")
-    else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=10")
-    endif()
+if (C_CLANG)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=1")
+elseif (C_GCC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=1")
 endif()
 
-##############################################################################
+# set compiler
+include(FindCompiler)
 
-execute_process(
-    COMMAND git describe --abbrev=8 --always --tags
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_COMMIT_HASH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-add_definitions("-DGIT_COMMIT_HASH=${GIT_COMMIT_HASH}")
+# find cpu flags (and set compiler)
+include(FindCPUflags)
 
-configure_file(
-    ${CMAKE_SOURCE_DIR}/version.h.in
-    ${CMAKE_BINARY_DIR}/generated/sdrangel_version.h
-)
+# Instruct CMake to run moc automatically when needed
+set(CMAKE_AUTOMOC ON)
 
-##############################################################################
-# base libraries
-add_subdirectory(sdrbase)
+# Create code from a list of Qt designer ui files
+set(CMAKE_AUTOUIC ON)
+
+# https://cmake.org/cmake/help/v3.0/manual/cmake-qt.7.html#autorcc
+set(CMAKE_AUTORCC TRUE)
+
+# As moc files are generated in the binary dir,
+# tell CMake to always look for includes there:
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+# Qt requirements
+set(_required_qt_version "5.6.0")
+find_package(Qt5 COMPONENTS Core REQUIRED)
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Multimedia REQUIRED)
+find_package(Qt5 COMPONENTS MultimediaWidgets REQUIRED)
+
+# for the server we don't need OpenGL components
 if (BUILD_GUI)
-add_subdirectory(sdrgui)
+    find_package(OpenGL REQUIRED)
+    find_package(Qt5 COMPONENTS OpenGL REQUIRED)
 endif()
-if (BUILD_SERVER)
-add_subdirectory(sdrsrv)
-endif()
-add_subdirectory(sdrbench)
-add_subdirectory(httpserver)
-add_subdirectory(logging)
-add_subdirectory(qrtplib)
-add_subdirectory(swagger)
 
-include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}/generated
-    ${CMAKE_SOURCE_DIR}/exports
-    ${CMAKE_SOURCE_DIR}/sdrbase
-    ${CMAKE_SOURCE_DIR}/sdrgui
-    ${CMAKE_SOURCE_DIR}/logging
-    ${OPENGL_INCLUDE_DIR}
-)
+# other requirements
+find_package(PkgConfig REQUIRED)
+find_package(Boost REQUIRED)
+find_package(FFTW3F REQUIRED)
+find_package(LibUSB REQUIRED)  # used by so many packages
+find_package(OpenCV REQUIRED core highgui imgproc) # channeltx/modatv
 
-##############################################################################
-# External binary resources
-include(${CMAKE_SOURCE_DIR}/cmake/include/Qt5ExternalResources.cmake)
-
-qt5_add_external_resources(sdrbase.rcc sdrbase/resources/res.qrc)
-
-
-##############################################################################
-# main GUI application
-if (BUILD_GUI)
-
-set(sdrangel_SOURCES
-    app/main.cpp
-)
-
+# unfortunately OpenCV library from windows doesn't set the cache option
 if(WIN32)
-    SET(sdrangel_SOURCES ${sdrangel_SOURCES} sdrgui/resources/sdrangel.rc)
-endif(WIN32)
+  set(OpenCV_INCLUDE_DIRS "${OpenCV_INCLUDE_DIRS}" CACHE INTERNAL "")
+  set(OpenCV_LIBS "${OpenCV_LIBS}" CACHE INTERNAL "")
 
-add_executable(sdrangel
-    ${sdrangel_SOURCES}
-)
-
-target_link_libraries(sdrangel
-    sdrbase
-    sdrgui
-    logging
-    ${QT_LIBRARIES}
-    ${OPENGL_LIBRARIES}
-)
-
-if(WIN32)
-    set_target_properties(sdrangel PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-    set_target_properties(sdrangel PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-    set_target_properties(sdrangel PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
-    set_target_properties(sdrangel PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
-endif(WIN32)
-
-target_link_libraries(sdrangel Qt5::Widgets Qt5::Multimedia)
+  # add libs folder for fixup_bundle()
+  get_filename_component(GFN_Boost_LIBS_DIR Boost_LIBS DIRECTORY)
+  get_filename_component(GFN_OpenCV_LIBS_DIR OpenCV_LIBS DIRECTORY)
+  set(WINDOWS_FIXUP_BUNDLE_LIB_DIRS
+    "${WINDOWS_FIXUP_BUNDLE_LIB_DIRS}"
+    "${GFN_Boost_LIBS_DIR}"
+    "${GFN_OpenCV_LIBS_DIR}"
+  )
 endif()
 
-##############################################################################
-# main server application
-if (BUILD_SERVER)
-
-set(sdrangelsrv_SOURCES
-    appsrv/main.cpp
-)
-
-add_executable(sdrangelsrv
-    ${sdrangelsrv_SOURCES}
-)
-
-target_include_directories(sdrangelsrv
-    PUBLIC ${CMAKE_SOURCE_DIR}/sdrsrv
-)
-
-target_link_libraries(sdrangelsrv
-    sdrbase
-    sdrsrv
-    logging
-    ${QT_LIBRARIES}
-)
-
-target_link_libraries(sdrangelsrv Qt5::Multimedia)
+# macOS compatibility
+if(APPLE)
+  find_package(ICONV)
 endif()
 
-##############################################################################
-# main benchmark application
+# include external cmake if needed
+if(ENABLE_EXTERNAL_LIBRARIES)
+    add_subdirectory(external)
+else()
+    find_package(Codec2)
+    find_package(CM256cc)
+    find_package(LibMbe)
+    find_package(SerialDV)
+    find_package(LibDSDcc)
+endif()
 
-set(sdrangelbench_SOURCES
-    appbench/main.cpp
-)
+# Devices
+if(ENABLE_AIRSPY)
+  find_package(LibAIRSPY)
+endif()
+if(ENABLE_AIRSPYHF)
+  find_package(LibAIRSPYHF)
+endif()
+if(ENABLE_BLADERF)
+  find_package(LibBLADERF 2.0)
+endif()
+if(ENABLE_HACKRF)
+  find_package(LibHACKRF)
+endif()
+if(ENABLE_LIMESUITE)
+  find_package(LimeSuite)
+endif()
+if(ENABLE_IIO) # PlutoSDR
+  find_package(LibIIO)
+endif()
+if(ENABLE_MIRISDR)
+  find_package(LibMiriSDR)
+endif()
+if(ENABLE_PERSEUS)
+  find_package(LibPerseus)
+endif()
+if(ENABLE_RTLSDR)
+  find_package(LibRTLSDR)
+endif()
+if(ENABLE_SOAPYSDR)
+  find_package(SoapySDR)
+endif()
+if(ENABLE_XTRX)
+  find_package(LibXTRX)
+endif()
 
-add_executable(sdrangelbench
-    ${sdrangelbench_SOURCES}
-)
-
-target_include_directories(sdrangelbench
-    PUBLIC ${CMAKE_SOURCE_DIR}/sdrbench
-)
-
-target_link_libraries(sdrangelbench
-    sdrbench
-    logging
-    ${QT_LIBRARIES}
-)
-
-target_compile_features(sdrangelbench PRIVATE cxx_generalized_initializers) # cmake >= 3.1.0
-target_link_libraries(sdrangelbench Qt5::Multimedia)
-
-##############################################################################
-
-if (BUILD_DEBIAN)
-    add_subdirectory(cm256cc)
-    add_subdirectory(mbelib)
-    add_subdirectory(serialdv)
-    add_subdirectory(dsdcc)
-    add_subdirectory(libairspy)
-    add_subdirectory(libairspyhf)
-    add_subdirectory(libhackrf)
-    add_subdirectory(librtlsdr)
-    add_subdirectory(libbladerf)
-    add_subdirectory(liblimesuite)
-    add_subdirectory(libmirisdr)
-    add_subdirectory(libperseus)
-    add_subdirectory(libiio)
-	add_subdirectory(libsoapysdr)
-endif (BUILD_DEBIAN)
-
-find_package(Codec2)
 if (CODEC2_FOUND)
     add_subdirectory(libfreedv)
 endif(CODEC2_FOUND)
 
-add_subdirectory(devices)
-if (BUILD_GUI)
-add_subdirectory(plugins)
-endif()
-if (BUILD_SERVER)
-add_subdirectory(pluginssrv)
-endif()
-
-if(LIBUSB_FOUND AND UNIX)
-    add_subdirectory(fcdhid)
+if(ENABLE_FUNCUBE AND UNIX AND LIBUSB_FOUND)
     add_subdirectory(fcdlib)
-endif(LIBUSB_FOUND AND UNIX)
+    add_subdirectory(fcdhid)
+endif()
 
-##############################################################################
+# base libraries
+add_subdirectory(sdrbase)
+add_subdirectory(httpserver)
+add_subdirectory(logging)
+add_subdirectory(qrtplib)
+add_subdirectory(swagger)
+add_subdirectory(devices)
 
-#install targets
+# strange symbol dependency
+#  mainbench.obj : error LNK2001: unresolved external
+#  symbol "public: static float const decimation_scale<12>::scaleIn" (?scaleIn@?$decimation_scale@$0M@@@2MB)
+if(NOT WIN32)
+  add_subdirectory(sdrbench)
+endif()
+
 if (BUILD_GUI)
-install(TARGETS sdrangel DESTINATION bin)
+    add_subdirectory(sdrgui)
+    add_subdirectory(plugins plugins)
+endif()
+
+if (BUILD_SERVER)
+    add_subdirectory(sdrsrv)
+    set(SERVER_MODE ON)
+    add_definitions(-DSERVER_MODE)
+    add_subdirectory(plugins pluginssrv)
+    remove_definitions(-DSERVER_MODE)
+    set(SERVER_MODE OFF)
+endif()
+
+# includes needed by the following target
+include_directories(
+    ${CMAKE_SOURCE_DIR}/sdrbase
+    ${CMAKE_SOURCE_DIR}/exports
+    ${CMAKE_SOURCE_DIR}/sdrgui
+    ${CMAKE_SOURCE_DIR}/sdrsrv
+    ${CMAKE_SOURCE_DIR}/sdrbench
+    ${CMAKE_SOURCE_DIR}/logging
+    ${OPENGL_INCLUDE_DIR}
+)
+
+############ build sdrangel benchmark ################
+if(NOT WIN32)
+  set(sdrangelbench_SOURCES
+    appbench/main.cpp
+  )
+
+  add_executable(sdrangelbench
+    ${sdrangelbench_SOURCES}
+  )
+
+  target_link_libraries(sdrangelbench
+    Qt5::Multimedia
+    sdrbench
+    logging
+  )
+endif()
+############ build sdrangel gui ################
+if (BUILD_GUI)
+    set(sdrangel_SOURCES
+        app/main.cpp
+        sdrgui/resources/sdrangel.rc
+    )
+
+  add_executable(${CMAKE_PROJECT_NAME}
+    ${sdrangel_SOURCES}
+    )
+
+  target_link_libraries(${CMAKE_PROJECT_NAME}
+    ${OPENGL_LIBRARIES}
+    Qt5::Widgets
+    Qt5::Multimedia
+    sdrbase
+    sdrgui
+    logging
+    )
+endif()
+
+############ build sdrangel server ################
+if (BUILD_SERVER)
+  set(sdrangelsrv_SOURCES
+    appsrv/main.cpp
+    )
+
+    add_executable(sdrangelsrv
+        ${sdrangelsrv_SOURCES}
+    )
+
+    target_link_libraries(sdrangelsrv
+        Qt5::Multimedia
+        sdrbase
+        sdrsrv
+        logging
+    )
+endif()
+
+############ install ##################
+if(NOT WIN32)
+  install(TARGETS sdrangelbench DESTINATION ${INSTALL_BIN_DIR})
+endif()
+if (BUILD_GUI)
+      install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION ${INSTALL_BIN_DIR})
 endif()
 if (BUILD_SERVER)
-install(TARGETS sdrangelsrv DESTINATION bin)
+  install(TARGETS sdrangelsrv DESTINATION ${INSTALL_BIN_DIR})
 endif()
-install(TARGETS sdrangelbench DESTINATION bin)
-#install(TARGETS sdrbase DESTINATION lib)
+
+# install documentation
+# TODO maybe install readme for every plugins
+if (LINUX OR APPLE)
+  install(FILES ${CMAKE_SOURCE_DIR}/Readme.md DESTINATION ${INSTALL_DOC_DIR})
+endif()
+
+if(APPLE)
+  install(FILES ${CMAKE_SOURCE_DIR}/CHANGELOG DESTINATION ${INSTALL_DOC_DIR})
+  install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION ${INSTALL_DOC_DIR})
+endif()
 
 #install files and directories (linux specific)
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-install(DIRECTORY udev-rules DESTINATION share/sdrangel)
-install(FILES udev-rules/install.sh DESTINATION share/sdrangel/udev-rules PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-install(FILES desktop/sdrangel.desktop DESTINATION share/applications)
-install(FILES desktop/sdrangel_icon.png DESTINATION share/pixmaps)
+if (LINUX)
+  install(FILES ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.desktop DESTINATION share/applications)
+  install(FILES ${CMAKE_SOURCE_DIR}/cmake/cpack/${CMAKE_PROJECT_NAME}_icon.png DESTINATION share/pixmaps)
 endif()
 
-# needed by REST API documentation
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sdrbase.rcc DESTINATION bin)
-
-##############################################################################
-
-# uninstall target
+############ uninstall target ################
 configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-    IMMEDIATE @ONLY)
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/include/uninstall.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake"
+  IMMEDIATE @ONLY)
 
 add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+  COMMAND ${CMAKE_COMMAND} -P
+  ${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake)
+
+############ packaging ################
+add_subdirectory(cmake/cpack)

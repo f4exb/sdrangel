@@ -114,9 +114,9 @@ PluginInterface::SamplingDevices Blderf2InputPlugin::enumSampleSources()
 
 #ifdef SERVER_MODE
 PluginInstanceGUI* Blderf2InputPlugin::createSampleSourcePluginInstanceGUI(
-        const QString& sourceId __attribute__((unused)),
-        QWidget **widget __attribute__((unused)),
-        DeviceUISet *deviceUISet __attribute__((unused)))
+        const QString& sourceId,
+        QWidget **widget,
+        DeviceUISet *deviceUISet)
 {
     return 0;
 }

@@ -26,11 +26,6 @@
 #include "loggerwithfile.h"
 #include "mainwindow.h"
 #include "dsp/dsptypes.h"
-#ifdef _MSC_VER
-#define GIT_COMMIT_HASH_STR "v4.8.0"
-#else
-#include "sdrangel_version.h"
-#endif
 
 static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *logger)
 {
@@ -39,12 +34,12 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 	QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 */
-	QCoreApplication::setOrganizationName("f4exb");
-	QCoreApplication::setApplicationName("SDRangel");
-    QCoreApplication::setApplicationVersion(GIT_COMMIT_HASH_STR);
+	QCoreApplication::setOrganizationName(COMPANY);
+	QCoreApplication::setApplicationName(APPLICATION_NAME);
+        QCoreApplication::setApplicationVersion(SDRANGEL_VERSION);
 #if QT_VERSION >= 0x050600
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling); // DPI support
-    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps); //HiDPI pixmaps
+        QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps); //HiDPI pixmaps
 #endif
 
 #if 1

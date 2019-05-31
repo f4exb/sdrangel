@@ -1,10 +1,7 @@
 project(udpsource)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(udpsource_SOURCES
 	udpsource.cpp
-	udpsourcegui.cpp
 	udpsourceplugin.cpp
 	udpsourceudphandler.cpp
 	udpsourcemsg.cpp
@@ -13,43 +10,50 @@ set(udpsource_SOURCES
 
 set(udpsource_HEADERS
 	udpsource.h
-	udpsourcegui.h
 	udpsourceplugin.h
 	udpsourceudphandler.h
 	udpsourcemsg.h
 	udpsourcesettings.h
 )
 
-set(udpsource_FORMS
-	udpsourcegui.ui
-)
-
 include_directories(
-	.
-	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
-#include(${QT_USE_FILE})
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(udpsource_SOURCES
+        ${udpsource_SOURCES}
+        udpsourcegui.cpp
 
-qt5_wrap_ui(udpsource_FORMS_HEADERS ${udpsource_FORMS})
+        udpsourcegui.ui
+    )
+    set(udpsource_HEADERS
+        ${udpsource_HEADERS}
+        udpsourcegui.h
+    )
 
-add_library(udpsource SHARED
+    set(TARGET_NAME udpsource)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+else()
+    set(TARGET_NAME udpsourcesrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
+endif()
+
+add_library(${TARGET_NAME} SHARED
 	${udpsource_SOURCES}
-	${udpsource_HEADERS_MOC}
-	${udpsource_FORMS_HEADERS}
 )
 
-target_link_libraries(udpsource
-	${QT_LIBRARIES}
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
+        Qt5::Network
 	sdrbase
-	sdrgui
-	swagger
+	${TARGET_LIB_GUI}
+        swagger
 )
 
-target_link_libraries(udpsource Qt5::Core Qt5::Widgets Qt5::Network)
-
-install(TARGETS udpsource DESTINATION lib/plugins/channeltx)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

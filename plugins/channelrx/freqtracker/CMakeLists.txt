@@ -1,51 +1,53 @@
 project(freqtracker)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(freqtracker_SOURCES
 	freqtracker.cpp
-	freqtrackergui.cpp
 	freqtrackersettings.cpp
 	freqtrackerplugin.cpp
 )
 
 set(freqtracker_HEADERS
 	freqtracker.h
-	freqtrackergui.h
 	freqtrackersettings.h
 	freqtrackerplugin.h
 )
 
-set(freqtracker_FORMS
-	freqtrackergui.ui
-)
-
 include_directories(
-	.
-	${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+        ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
-#include(${QT_USE_FILE})
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(freqtracker_SOURCES
+        ${freqtracker_SOURCES}
+        freqtrackergui.cpp
 
-#qt5_wrap_cpp(nfm_HEADERS_MOC ${nfm_HEADERS})
-qt5_wrap_ui(freqtracker_FORMS_HEADERS ${freqtracker_FORMS})
+	freqtrackergui.ui
+    )
+    set(freqtracker_HEADERS
+        ${freqtracker_HEADERS}
+        freqtrackergui.h
+    )
 
-add_library(freqtracker SHARED
+    set(TARGET_NAME freqtracker)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+else()
+    set(TARGET_NAME freqtrackersrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
+endif()
+
+add_library(${TARGET_NAME} SHARED
 	${freqtracker_SOURCES}
-	${freqtracker_HEADERS_MOC}
-	${freqtracker_FORMS_HEADERS}
 )
 
-target_link_libraries(freqtracker
-	${QT_LIBRARIES}
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
 	sdrbase
-	sdrgui
+	${TARGET_LIB_GUI}
 )
 
-target_link_libraries(freqtracker Qt5::Core Qt5::Widgets)
-
-install(TARGETS freqtracker DESTINATION lib/plugins/channelrx)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

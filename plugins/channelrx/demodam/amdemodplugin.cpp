@@ -37,8 +37,8 @@ void AMDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 
 #ifdef SERVER_MODE
 PluginInstanceGUI* AMDemodPlugin::createRxChannelGUI(
-        DeviceUISet *deviceUISet __attribute__((unused)),
-        BasebandSampleSink *rxChannel __attribute__((unused)))
+        DeviceUISet *deviceUISet,
+        BasebandSampleSink *rxChannel)
 {
     return 0;
 }

@@ -53,7 +53,7 @@ PluginManager::PluginManager(QObject* parent) :
 
 PluginManager::~PluginManager()
 {
-//	freeAll();
+  //  freeAll();
 }
 
 void PluginManager::loadPlugins(const QString& pluginsSubDir)
@@ -65,19 +65,40 @@ void PluginManager::loadPlugins(const QString& pluginsSubDir)
 void PluginManager::loadPluginsPart(const QString& pluginsSubDir)
 {
     QString applicationDirPath = QCoreApplication::instance()->applicationDirPath();
-    QString applicationLibPath = applicationDirPath + "/../lib/" + pluginsSubDir;
+    QStringList PluginsPath;
+
+    // NOTE: not the best solution but for now this is
+    // on make install [PREFIX]/bin and [PREFIX]/lib/sdrangel
+    PluginsPath << applicationDirPath + "/../lib/sdrangel/" + pluginsSubDir;
+    // on build
+    PluginsPath << applicationDirPath + "/lib/" + pluginsSubDir;
 #ifdef __APPLE__
-    applicationLibPath.clear();
-    applicationLibPath.append(applicationDirPath + "/../Frameworks/" + pluginsSubDir);
+    // on SDRAngel.app
+    PluginsPath << applicationDirPath + "/../Resources/lib/" + pluginsSubDir;
+#elif defined(_WIN32) || defined(WIN32)
+    PluginsPath << applicationDirPath + "/" + pluginsSubDir;
 #endif
-    QString applicationBuildPath = applicationDirPath + "/" + pluginsSubDir;
-    qDebug() << "PluginManager::loadPlugins: " << qPrintable(applicationLibPath) << "," << qPrintable(applicationBuildPath);
 
-    QDir pluginsLibDir = QDir(applicationLibPath);
-    QDir pluginsBuildDir = QDir(applicationBuildPath);
+    // NOTE: exit on the first folder found
+    bool found = false;
+    foreach (QString dir, PluginsPath)
+    {
+        QDir d(dir);
+        if (d.entryList(QDir::Files).count() == 0) {
+            qDebug("PluginManager::loadPluginsPart folder %s is empty", qPrintable(dir));
+            continue;
+        }
 
-    loadPluginsDir(pluginsLibDir);
-    loadPluginsDir(pluginsBuildDir);
+        found = true;
+        loadPluginsDir(d);
+        break;
+    }
+
+    if (!found)
+    {
+        qCritical("No plugins found. Exit immediately.");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void PluginManager::loadPluginsFinal()
@@ -131,45 +152,36 @@ void PluginManager::registerSampleSink(const QString& sinkName, PluginInterface*
 
 void PluginManager::loadPluginsDir(const QDir& dir)
 {
-	QDir pluginsDir(dir);
+    QDir pluginsDir(dir);
 
-	foreach (QString fileName, pluginsDir.entryList(QDir::Files))
-	{
-        if (fileName.endsWith(".so") || fileName.endsWith(".dll") || fileName.endsWith(".dylib"))
-		{
-			qDebug() << "PluginManager::loadPluginsDir: fileName: " << qPrintable(fileName);
+    foreach (QString fileName, pluginsDir.entryList(QDir::Files))
+    {
+        if (QLibrary::isLibrary(fileName))
+        {
+            qDebug("PluginManager::loadPluginsDir: fileName: %s", qPrintable(fileName));
 
-			QPluginLoader* loader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
-			PluginInterface* plugin = qobject_cast<PluginInterface*>(loader->instance());
+            QPluginLoader* pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
+            if (!pluginLoader->load())
+            {
+                qWarning("PluginManager::loadPluginsDir: %s", qPrintable(pluginLoader->errorString()));
+                delete pluginLoader;
+                continue;
+            }
 
-			if (loader->isLoaded())
-			{
-				qInfo("PluginManager::loadPluginsDir: loaded plugin %s", qPrintable(fileName));
-			}
-			else
-			{
-				qWarning() << "PluginManager::loadPluginsDir: " << qPrintable(loader->errorString());
-			}
+            PluginInterface* instance = qobject_cast<PluginInterface*>(pluginLoader->instance());
+            if (instance == nullptr)
+            {
+                qWarning("PluginManager::loadPluginsDir: Unable to get main instance of plugin: %s", qPrintable(fileName) );
+                delete pluginLoader;
+                continue;
+            }
 
-			if (plugin != 0)
-			{
-				m_plugins.append(Plugin(fileName, loader, plugin));
-			}
-			else
-			{
-				loader->unload();
-			}
+            delete(pluginLoader);
 
-			delete loader; // Valgrind memcheck
-		}
-	}
-
-	// recursive calls on subdirectories
-
-	foreach (QString dirName, pluginsDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
-	{
-		loadPluginsDir(pluginsDir.absoluteFilePath(dirName));
-	}
+            qInfo("PluginManager::loadPluginsDir: loaded plugin %s", qPrintable(fileName));
+            m_plugins.append(Plugin(fileName, instance));
+       }
+    }
 }
 
 void PluginManager::listTxChannels(QList<QString>& list)

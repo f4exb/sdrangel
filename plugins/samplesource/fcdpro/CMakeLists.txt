@@ -1,9 +1,6 @@
 project(fcdpro)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(fcdpro_SOURCES
-	fcdprogui.cpp
 	fcdproinput.cpp
 	fcdproplugin.cpp
 	fcdprosettings.cpp
@@ -11,48 +8,53 @@ set(fcdpro_SOURCES
 )
 
 set(fcdpro_HEADERS
-	fcdprogui.h
 	fcdproinput.h
 	fcdproplugin.h
 	fcdprosettings.h
 	fcdprothread.h
 )
 
-set(fcdpro_FORMS
-	fcdprogui.ui
-)
-
 include_directories(
-	.
-	${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
-	${CMAKE_SOURCE_DIR}/fcdhid
+        ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+        ${CMAKE_SOURCE_DIR}/fcdhid
 	${CMAKE_SOURCE_DIR}/fcdlib
 )
 
-#include(${QT_USE_FILE})
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(fcdpro_SOURCES
+        ${fcdpro_SOURCES}
+        fcdprogui.cpp
 
-#qt4_wrap_cpp(fcdpro_HEADERS_MOC ${fcdpro_HEADERS})
-qt5_wrap_ui(fcdpro_FORMS_HEADERS ${fcdpro_FORMS})
+        fcdprogui.ui
+    )
+    set(fcdpro_HEADERS
+        ${fcdpro_HEADERS}
+        fcdprogui.h
+    )
 
-add_library(inputfcdpro SHARED
+    set(TARGET_NAME inputfcdpro)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+else()
+    set(TARGET_NAME inputfcdprosrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
+endif()
+
+add_library(${TARGET_NAME} SHARED
 	${fcdpro_SOURCES}
-	${fcdpro_HEADERS_MOC}
-	${fcdpro_FORMS_HEADERS}
 )
 
-target_link_libraries(inputfcdpro
-	${QT_LIBRARIES}
-	fcdhid
-	fcdlib
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
 	sdrbase
-	sdrgui
-	swagger
+	${TARGET_LIB_GUI}
+        swagger
+        fcdhid
+        fcdlib
 )
 
-target_link_libraries(inputfcdpro Qt5::Core Qt5::Widgets)
-
-install(TARGETS inputfcdpro DESTINATION lib/plugins/samplesource)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

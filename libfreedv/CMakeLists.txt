@@ -1,7 +1,5 @@
 project(freedv)
 
-set(CMAKE_CXX_STANDARD 11)
-
 set(freedv_SOURCES
 	codec2_fft.cpp
 	cohpsk.cpp
@@ -67,19 +65,19 @@ set(freedv_HEADERS
 )
 
 include_directories(
-	.
-	${CMAKE_CURRENT_BINARY_DIR}
 	${CODEC2_INCLUDE_DIR}
 )
-
-add_definitions(-DQT_SHARED)
 
 add_library(freedv SHARED
 	${freedv_SOURCES}
 )
 
+if(ENABLE_EXTERNAL_LIBRARIES)
+    add_dependencies(freedv codec2)
+endif()
+
 target_link_libraries(freedv
 	${CODEC2_LIBRARIES}
 )
 
-install(TARGETS freedv DESTINATION lib)
+install(TARGETS freedv DESTINATION ${INSTALL_LIB_DIR})

@@ -1,9 +1,6 @@
 project(xtrxinput)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(xtrxinput_SOURCES
-	xtrxinputgui.cpp
 	xtrxinput.cpp
 	xtrxinputplugin.cpp
 	xtrxinputsettings.cpp
@@ -11,47 +8,53 @@ set(xtrxinput_SOURCES
 )
 
 set(xtrxinput_HEADERS
-	xtrxinputgui.h
 	xtrxinput.h
 	xtrxinputplugin.h
 	xtrxinputsettings.h
 	xtrxinputthread.h
 )
 
-set(xtrxinput_FORMS
-	xtrxinputgui.ui
-)
-
 include_directories(
-	.
-	${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    	
+        ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 	${CMAKE_SOURCE_DIR}/devices
 	${LIBXTRX_INCLUDE_DIRS}
 )
 
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(xtrxinput_SOURCES
+        ${xtrxinput_SOURCES}
+        xtrxinputgui.cpp
 
-qt5_wrap_ui(xtrxinput_FORMS_HEADERS ${xtrxinput_FORMS})
+        xtrxinputgui.ui
+    )
+    set(xtrxinput_HEADERS
+        ${xtrxinput_HEADERS}
+        xtrxinputgui.h
+    )
 
-add_library(inputxtrx SHARED
+    set(TARGET_NAME inputxtrx)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+else()
+    set(TARGET_NAME inputxtrxsrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
+endif()
+
+add_library(${TARGET_NAME} SHARED
 	${xtrxinput_SOURCES}
-	${xtrxinput_HEADERS_MOC}
-	${xtrxinput_FORMS_HEADERS}
 )
 
-
-target_link_libraries(inputxtrx
-	${QT_LIBRARIES}
-	${LIBXTRX_LIBRARY}
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
 	sdrbase
-	sdrgui
-	swagger
-	xtrxdevice
+	${TARGET_LIB_GUI}
+        swagger
+        ${LIBXTRX_LIBRARY}
+        xtrxdevice
 )
 
-qt5_use_modules(inputxtrx Core Widgets)
-
-install(TARGETS inputxtrx DESTINATION lib/plugins/samplesource)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

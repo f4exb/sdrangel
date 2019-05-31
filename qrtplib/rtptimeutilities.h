@@ -60,6 +60,10 @@
 #define CEPOCH 11644473600000000ULL
 #endif // RTP_HAVE_VSUINT64SUFFIX
 
+#ifdef __APPLE__
+#include "../custom/apple/apple_compat.h"
+#endif
+
 namespace qrtplib
 {
 

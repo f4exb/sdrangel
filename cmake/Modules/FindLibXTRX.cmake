@@ -28,9 +28,7 @@ if(NOT LIBXTRX_FOUND)
     set(LIBXTRX_FOUND FALSE CACHE INTERNAL "libxtrx found")
 	message(STATUS "libxtrx not found.")
   endif()
-	
 
-	
-  mark_as_advanced(LIBXTRX_INCLUDE_DIRS)
+  mark_as_advanced(LIBXTRX_INCLUDE_DIRS LIBXTRX_LIBRARY)
 
 endif(NOT LIBXTRX_FOUND)

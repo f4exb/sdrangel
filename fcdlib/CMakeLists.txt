@@ -13,12 +13,7 @@ set(fcdlib_HEADERS
 )
 
 include_directories(
-	.
-	${CMAKE_CURRENT_BINARY_DIR}
 )
-
-#add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
 
 add_library(fcdlib SHARED
 	${fcdlib_SOURCES}
@@ -26,4 +21,4 @@ add_library(fcdlib SHARED
 
 target_link_libraries(fcdlib)
 
-install(TARGETS fcdlib DESTINATION lib)
+install(TARGETS fcdlib DESTINATION ${INSTALL_LIB_DIR})

@@ -74,9 +74,9 @@ PluginInterface::SamplingDevices RemoteOutputPlugin::enumSampleSinks()
 
 #ifdef SERVER_MODE
 PluginInstanceGUI* RemoteOutputPlugin::createSampleSinkPluginInstanceGUI(
-        const QString& sinkId __attribute((unused)),
-        QWidget **widget __attribute((unused)),
-        DeviceUISet *deviceUISet __attribute((unused)))
+        const QString& sinkId,
+        QWidget **widget,
+        DeviceUISet *deviceUISet)
 {
     return 0;
 }

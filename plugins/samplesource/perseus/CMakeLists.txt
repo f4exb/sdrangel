@@ -1,9 +1,6 @@
 project(perseus)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(perseus_SOURCES
-    perseusgui.cpp
     perseusinput.cpp
     perseusplugin.cpp
     perseussettings.cpp
@@ -11,72 +8,53 @@ set(perseus_SOURCES
 )
 
 set(perseus_HEADERS
-    perseusgui.h
     perseusinput.h
     perseusplugin.h
     perseussettings.h
     perseusthread.h
 )
 
-set(perseus_FORMS
-    perseusgui.ui
-)
-
-if (BUILD_DEBIAN)
 include_directories(
-    .
-    ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${CMAKE_SOURCE_DIR}/devices        
-    ${LIBPERSEUSSRC}
-    ${LIBPERSEUSSRC}/libperseus/src
-)
-else (BUILD_DEBIAN)
-include_directories(
-    .
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${CMAKE_SOURCE_DIR}/devices        
+    ${CMAKE_SOURCE_DIR}/devices
     ${LIBPERSEUS_INCLUDE_DIR}
 )
-endif (BUILD_DEBIAN)
 
-#include(${QT_USE_FILE})
-#add_definitions(${QT_DEFINITIONS})
-add_definitions("${QT_DEFINITIONS} -DLIBAIRSPY_DYN_RATES")
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(perseus_SOURCES
+        ${perseus_SOURCES}
+        perseusgui.cpp
 
-#qt4_wrap_cpp(perseus_HEADERS_MOC ${perseus_HEADERS})
-qt5_wrap_ui(perseus_FORMS_HEADERS ${perseus_FORMS})
+        perseusgui.ui
+    )
+    set(perseus_HEADERS
+        ${perseus_HEADERS}
+        perseusgui.h
+    )
 
-add_library(inputperseus SHARED
-    ${perseus_SOURCES}
-    ${perseus_HEADERS_MOC}
-    ${perseus_FORMS_HEADERS}
+    set(TARGET_NAME inputperseus)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+else()
+    set(TARGET_NAME inputperseussrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
+endif()
+
+add_library(${TARGET_NAME} SHARED
+	${perseus_SOURCES}
 )
 
-if (BUILD_DEBIAN)
-target_link_libraries(inputperseus
-    ${QT_LIBRARIES}
-    perseus
-    sdrbase
-    sdrgui
-    swagger
-    perseusdevice
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
+	sdrbase
+	${TARGET_LIB_GUI}
+        swagger
+        ${LIBPERSEUS_LIBRARIES}
+        perseusdevice
 )
-else (BUILD_DEBIAN)
-target_link_libraries(inputperseus
-    ${QT_LIBRARIES}
-    ${LIBPERSEUS_LIBRARIES}
-    sdrbase
-    sdrgui
-    swagger
-    perseusdevice
-)
-endif (BUILD_DEBIAN)
 
-
-qt5_use_modules(inputperseus Core Widgets)
-
-install(TARGETS inputperseus DESTINATION lib/plugins/samplesource)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

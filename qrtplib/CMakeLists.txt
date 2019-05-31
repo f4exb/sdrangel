@@ -1,9 +1,6 @@
 project(qrtplib)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set (qrtplib_HEADERS
-    ../apple/apple_compat.h
     rtcpapppacket.h
     rtcpbyepacket.h
     rtcpcompoundpacket.h
@@ -46,7 +43,6 @@ set (qrtplib_HEADERS
     )
 
 set(qrtplib_SOURCES
-    ../apple/apple_compat.c
     rtcpapppacket.cpp
     rtcpbyepacket.cpp
     rtcpcompoundpacket.cpp
@@ -77,25 +73,16 @@ set(qrtplib_SOURCES
     )
 
 include_directories(
-    .
     ${CMAKE_SOURCE_DIR}/exports
-    ${CMAKE_CURRENT_BINARY_DIR}
 )
-
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_SHARED)
 
 add_library(qrtplib SHARED
     ${qrtplib_SOURCES}
-    ${qrtplib_HEADERS_MOC}
 )
-
-set_target_properties(qrtplib PROPERTIES DEFINE_SYMBOL "qrtplib_EXPORTS")
 
 target_link_libraries(qrtplib
-    ${QT_LIBRARIES}
+    Qt5::Core
+    Qt5::Network
 )
 
-target_link_libraries(qrtplib Qt5::Core Qt5::Network)
-
-install(TARGETS qrtplib DESTINATION lib)
+install(TARGETS qrtplib DESTINATION ${INSTALL_LIB_DIR})

@@ -1,7 +1,5 @@
 project(httpserver)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(httpserver_SOURCES
    httpglobal.cpp
    httplistener.cpp
@@ -34,26 +32,16 @@ set(httpserver_HEADERS
 )
 
 include_directories(
-	.
     ${CMAKE_SOURCE_DIR}/exports
-	${CMAKE_CURRENT_BINARY_DIR}
 )
-
-#include(${QT_USE_FILE})
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_SHARED)
 
 add_library(httpserver SHARED
 	${httpserver_SOURCES}
-	${httpserver_HEADERS_MOC}
 )
-
-set_target_properties(httpserver PROPERTIES DEFINE_SYMBOL "httpserver_EXPORTS")
 
 target_link_libraries(httpserver
-	${QT_LIBRARIES}
+    Qt5::Core
+    Qt5::Network
 )
 
-target_link_libraries(httpserver Qt5::Core Qt5::Network)
-
-install(TARGETS httpserver DESTINATION lib)
+install(TARGETS httpserver DESTINATION ${INSTALL_LIB_DIR})

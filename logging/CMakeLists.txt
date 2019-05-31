@@ -1,7 +1,5 @@
 project(logging)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(logging_SOURCES
    dualfilelogger.cpp
    loggerwithfile.cpp
@@ -20,26 +18,16 @@ set(httpserver_HEADERS
 )
 
 include_directories(
-	.
-    ${CMAKE_SOURCE_DIR}/exports 
-	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/exports
 )
-
-#include(${QT_USE_FILE})
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_SHARED)
 
 add_library(logging SHARED
-	${logging_SOURCES}
-	${logging_HEADERS_MOC}
+    ${logging_SOURCES}
 )
-
-set_target_properties(logging PROPERTIES DEFINE_SYMBOL "logging_EXPORTS")
 
 target_link_libraries(logging
-	${QT_LIBRARIES}
+    Qt5::Core
+    Qt5::Network
 )
 
-target_link_libraries(logging Qt5::Core Qt5::Network)
-
-install(TARGETS logging DESTINATION lib)
+install(TARGETS logging DESTINATION ${INSTALL_LIB_DIR})

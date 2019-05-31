@@ -1,53 +1,33 @@
 project(samplesink)
 
-find_package(LibUSB)
+add_subdirectory(filesink)
+add_subdirectory(localoutput)
 
-find_package(LibBLADERF)
-if(LIBUSB_FOUND AND LIBBLADERF_FOUND)
-    add_subdirectory(bladerf1output)
-    add_subdirectory(bladerf2output)
-endif(LIBUSB_FOUND AND LIBBLADERF_FOUND)
-
-find_package(LibHACKRF)
-if(LIBUSB_FOUND AND LIBHACKRF_FOUND)
-    add_subdirectory(hackrfoutput)
-endif(LIBUSB_FOUND AND LIBHACKRF_FOUND)
-
-find_package(LimeSuite)
-if(LIBUSB_FOUND AND LIMESUITE_FOUND)
-    add_subdirectory(limesdroutput)
-endif(LIBUSB_FOUND AND LIMESUITE_FOUND)
-
-find_package(LibIIO)
-if(LIBUSB_FOUND AND LIBIIO_FOUND)
-    add_subdirectory(plutosdroutput)
-endif(LIBUSB_FOUND AND LIBIIO_FOUND)
-
-find_package(CM256cc)
 if(CM256CC_FOUND)
     add_subdirectory(remoteoutput)
 endif(CM256CC_FOUND)
 
-find_package(SoapySDR)
-if(SOAPYSDR_FOUND)
-	add_subdirectory(soapysdroutput)
-endif()
-
-find_package(LibXTRX)
-if(LIBXTRX_FOUND)
-	add_subdirectory(xtrxoutput)
-endif(LIBXTRX_FOUND)
-
-if (BUILD_DEBIAN)
+if(ENABLE_BLADERF AND LIBBLADERF_FOUND)
     add_subdirectory(bladerf1output)
     add_subdirectory(bladerf2output)
+endif()
+
+if(ENABLE_HACKRF AND LIBHACKRF_FOUND)
     add_subdirectory(hackrfoutput)
+endif()
+
+if(ENABLE_LIMESUITE AND LIMESUITE_FOUND)
     add_subdirectory(limesdroutput)
+endif()
+
+if(ENABLE_XTRX AND LIBXTRX_FOUND)
+	add_subdirectory(xtrxoutput)
+endif()
+
+if(ENABLE_IIO AND LIBIIO_FOUND)
     add_subdirectory(plutosdroutput)
-    add_subdirectory(remoteoutput)
+endif()
+
+if(ENABLE_SOAPYSDR AND SOAPYSDR_FOUND)
     add_subdirectory(soapysdroutput)
-endif (BUILD_DEBIAN)
-
-add_subdirectory(filesink)
-add_subdirectory(localoutput)
-
+endif()

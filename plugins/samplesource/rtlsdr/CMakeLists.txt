@@ -1,9 +1,6 @@
 project(rtlsdr)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(rtlsdr_SOURCES
-    rtlsdrgui.cpp
     rtlsdrinput.cpp
     rtlsdrplugin.cpp
     rtlsdrsettings.cpp
@@ -11,67 +8,50 @@ set(rtlsdr_SOURCES
 )
 
 set(rtlsdr_HEADERS
-    rtlsdrgui.h
     rtlsdrinput.h
     rtlsdrplugin.h
     rtlsdrsettings.h
     rtlsdrthread.h
 )
-
-set(rtlsdr_FORMS
-    rtlsdrgui.ui
-)
-
-if (BUILD_DEBIAN)
 include_directories(
-    .
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${LIBRTLSDRSRC}/include
-    ${LIBRTLSDRSRC}/src
-)
-else (BUILD_DEBIAN)
-include_directories(
-    .
-    ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${LIBRTLSDR_INCLUDE_DIR}
 )
-endif (BUILD_DEBIAN)
 
-#include(${QT_USE_FILE})
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(rtlsdr_SOURCES
+        ${rtlsdr_SOURCES}
+        rtlsdrgui.cpp
 
-#qt4_wrap_cpp(rtlsdr_HEADERS_MOC ${rtlsdr_HEADERS})
-qt5_wrap_ui(rtlsdr_FORMS_HEADERS ${rtlsdr_FORMS})
+        rtlsdrgui.ui
+    )
+    set(rtlsdr_HEADERS
+        ${rtlsdr_HEADERS}
+        rtlsdrgui.h
+    )
 
-add_library(inputrtlsdr SHARED
-    ${rtlsdr_SOURCES}
-    ${rtlsdr_HEADERS_MOC}
-    ${rtlsdr_FORMS_HEADERS}
+    set(TARGET_NAME inputrtlsdr)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+else()
+    set(TARGET_NAME inputrtlsdrsrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
+endif()
+
+add_library(${TARGET_NAME} SHARED
+	${rtlsdr_SOURCES}
 )
 
-if (BUILD_DEBIAN)
-target_link_libraries(inputrtlsdr
-    ${QT_LIBRARIES}
-    rtlsdr
-    sdrbase
-    sdrgui
-    swagger
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
+	sdrbase
+	${TARGET_LIB_GUI}
+        swagger
+        ${LIBRTLSDR_LIBRARIES}
 )
-else (BUILD_DEBIAN)
-target_link_libraries(inputrtlsdr
-    ${QT_LIBRARIES}
-    ${LIBRTLSDR_LIBRARIES}
-    sdrbase
-    sdrgui
-    swagger
-)
-endif (BUILD_DEBIAN)
 
-
-target_link_libraries(inputrtlsdr Qt5::Core Qt5::Widgets)
-
-install(TARGETS inputrtlsdr DESTINATION lib/plugins/samplesource)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

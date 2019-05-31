@@ -54,8 +54,8 @@ void RemoteSourcePlugin::initPlugin(PluginAPI* pluginAPI)
 
 #ifdef SERVER_MODE
 PluginInstanceGUI* RemoteSourcePlugin::createTxChannelGUI(
-        DeviceUISet *deviceUISet __attribute__((unused)),
-        BasebandSampleSource *txChannel __attribute__((unused)))
+        DeviceUISet *deviceUISet,
+        BasebandSampleSource *txChannel)
 {
     return 0;
 }

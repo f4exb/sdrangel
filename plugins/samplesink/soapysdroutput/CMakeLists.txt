@@ -1,9 +1,6 @@
 project(soapysdroutput)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(soapysdroutput_SOURCES
-	soapysdroutputgui.cpp
 	soapysdroutput.cpp
 	soapysdroutputplugin.cpp
 	soapysdroutputsettings.cpp
@@ -11,68 +8,53 @@ set(soapysdroutput_SOURCES
 )
 
 set(soapysdroutput_HEADERS
-	soapysdroutputgui.h
 	soapysdroutput.h
 	soapysdroutputplugin.h
 	soapysdroutputsettings.h
 	soapysdroutputthread.h
 )
 
-set(soapysdroutput_FORMS
-	soapysdroutputgui.ui
-)
-
-if (BUILD_DEBIAN)
 include_directories(
-    .
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
-    ${CMAKE_SOURCE_DIR}/devices
-    ${SOAPYSDR_SOURCE_DIR}/include
-    ${SOAPYSDR_SOURCE_DIR}/src
-)
-else (BUILD_DEBIAN)
-include_directories(
-	.
-	${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client	
+        ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 	${CMAKE_SOURCE_DIR}/devices
 	${SOAPYSDR_INCLUDE_DIR}
 )
-endif (BUILD_DEBIAN)
 
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(soapysdroutput_SOURCES
+        ${soapysdroutput_SOURCES}
+        soapysdroutputgui.cpp
 
-qt5_wrap_ui(soapysdroutput_FORMS_HEADERS ${soapysdroutput_FORMS})
+        soapysdroutputgui.ui
+    )
+    set(soapysdroutput_HEADERS
+        ${soapysdroutput_HEADERS}
+        soapysdroutputgui.h
+    )
 
-add_library(outputsoapysdr SHARED
+    set(TARGET_NAME outputsoapysdr)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+else()
+    set(TARGET_NAME outputsoapysdrsrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
+endif()
+
+add_library(${TARGET_NAME} SHARED
 	${soapysdroutput_SOURCES}
-	${soapysdroutput_HEADERS_MOC}
-	${soapysdroutput_FORMS_HEADERS}
 )
 
-if (BUILD_DEBIAN)
-target_link_libraries(outputsoapysdr
-    ${QT_LIBRARIES}
-    SoapySDR
-    sdrbase
-    sdrgui
-    swagger
-    soapysdrdevice
-)
-else (BUILD_DEBIAN)
-target_link_libraries(outputsoapysdr
-	${QT_LIBRARIES}
-	${SOAPYSDR_LIBRARY}
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
 	sdrbase
-	sdrgui
-	swagger
-	soapysdrdevice
+	${TARGET_LIB_GUI}
+        swagger
+        ${SOAPYSDR_LIBRARY}
+        soapysdrdevice
 )
-endif (BUILD_DEBIAN)
 
-target_link_libraries(outputsoapysdr Qt5::Core Qt5::Widgets)
-
-install(TARGETS outputsoapysdr DESTINATION lib/plugins/samplesink)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

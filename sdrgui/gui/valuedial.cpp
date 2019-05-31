@@ -21,6 +21,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QWheelEvent>
+#include <cstdlib>
 
 #include "gui/valuedial.h"
 

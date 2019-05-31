@@ -54,8 +54,8 @@ void ATVModPlugin::initPlugin(PluginAPI* pluginAPI)
 
 #ifdef SERVER_MODE
 PluginInstanceGUI* ATVModPlugin::createTxChannelGUI(
-        DeviceUISet *deviceUISet __attribute__((unused)),
-        BasebandSampleSource *txChannel __attribute__((unused)))
+        DeviceUISet *deviceUISet,
+        BasebandSampleSource *txChannel)
 {
     return 0;
 }

@@ -45,7 +45,7 @@ namespace qtwebapp {
     class LoggerWithFile;
 }
 
-class MainCore : public QObject {
+class SDRSRV_API MainCore : public QObject {
     Q_OBJECT
 
 public:

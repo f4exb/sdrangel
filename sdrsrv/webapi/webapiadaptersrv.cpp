@@ -22,8 +22,6 @@
 #include <QTextStream>
 #include <QSysInfo>
 
-#include <unistd.h>
-
 #include "SWGInstanceSummaryResponse.h"
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGInstanceChannelsResponse.h"
@@ -70,7 +68,7 @@ WebAPIAdapterSrv::~WebAPIAdapterSrv()
 
 int WebAPIAdapterSrv::instanceSummary(
         SWGSDRangel::SWGInstanceSummaryResponse& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
     response.init();
     *response.getAppname() = QCoreApplication::applicationName();
@@ -103,7 +101,7 @@ int WebAPIAdapterSrv::instanceSummary(
 
 int WebAPIAdapterSrv::instanceDelete(
         SWGSDRangel::SWGSuccessResponse& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
     MainCore::MsgDeleteInstance *msg = MainCore::MsgDeleteInstance::create();
     m_mainCore.getInputMessageQueue()->push(msg);
@@ -117,7 +115,7 @@ int WebAPIAdapterSrv::instanceDelete(
 int WebAPIAdapterSrv::instanceDevices(
             int direction,
             SWGSDRangel::SWGInstanceDevicesResponse& response,
-            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGErrorResponse& error)
 {
     response.init();
 
@@ -165,7 +163,7 @@ int WebAPIAdapterSrv::instanceDevices(
 int WebAPIAdapterSrv::instanceChannels(
             int direction,
             SWGSDRangel::SWGInstanceChannelsResponse& response,
-            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGErrorResponse& error)
 {
     response.init();
     PluginAPI::ChannelRegistrations *channelRegistrations;
@@ -209,7 +207,7 @@ int WebAPIAdapterSrv::instanceChannels(
 
 int WebAPIAdapterSrv::instanceLoggingGet(
         SWGSDRangel::SWGLoggingInfo& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
     response.init();
     response.setDumpToFile(m_mainCore.m_logger->getUseFileLogger() ? 1 : 0);
@@ -227,7 +225,7 @@ int WebAPIAdapterSrv::instanceLoggingGet(
 int WebAPIAdapterSrv::instanceLoggingPut(
         SWGSDRangel::SWGLoggingInfo& query,
         SWGSDRangel::SWGLoggingInfo& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
     // response input is the query actually
     bool dumpToFile = (query.getDumpToFile() != 0);
@@ -264,7 +262,7 @@ int WebAPIAdapterSrv::instanceLoggingPut(
 
 int WebAPIAdapterSrv::instanceAudioGet(
         SWGSDRangel::SWGAudioDevices& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
     const QList<QAudioDeviceInfo>& audioInputDevices = m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputDevices();
     const QList<QAudioDeviceInfo>& audioOutputDevices = m_mainCore.m_dspEngine->getAudioDeviceManager()->getOutputDevices();
@@ -501,7 +499,7 @@ int WebAPIAdapterSrv::instanceAudioOutputDelete(
 
 int WebAPIAdapterSrv::instanceAudioInputCleanupPatch(
             SWGSDRangel::SWGSuccessResponse& response,
-            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGErrorResponse& error)
 {
     m_mainCore.m_dspEngine->getAudioDeviceManager()->inputInfosCleanup();
 
@@ -513,7 +511,7 @@ int WebAPIAdapterSrv::instanceAudioInputCleanupPatch(
 
 int WebAPIAdapterSrv::instanceAudioOutputCleanupPatch(
             SWGSDRangel::SWGSuccessResponse& response,
-            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGErrorResponse& error)
 {
     m_mainCore.m_dspEngine->getAudioDeviceManager()->outputInfosCleanup();
 
@@ -525,7 +523,7 @@ int WebAPIAdapterSrv::instanceAudioOutputCleanupPatch(
 
 int WebAPIAdapterSrv::instanceLocationGet(
         SWGSDRangel::SWGLocationInformation& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
     response.init();
     response.setLatitude(m_mainCore.m_settings.getLatitude());
@@ -536,7 +534,7 @@ int WebAPIAdapterSrv::instanceLocationGet(
 
 int WebAPIAdapterSrv::instanceLocationPut(
         SWGSDRangel::SWGLocationInformation& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
     float latitude = response.getLatitude();
     float longitude = response.getLongitude();
@@ -555,7 +553,7 @@ int WebAPIAdapterSrv::instanceLocationPut(
 
 int WebAPIAdapterSrv::instanceDVSerialGet(
             SWGSDRangel::SWGDVSeralDevices& response,
-            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGErrorResponse& error)
 {
     response.init();
 
@@ -580,7 +578,7 @@ int WebAPIAdapterSrv::instanceDVSerialGet(
 int WebAPIAdapterSrv::instanceDVSerialPatch(
             bool dvserial,
             SWGSDRangel::SWGDVSeralDevices& response,
-            SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+            SWGSDRangel::SWGErrorResponse& error)
 {
     m_mainCore.m_dspEngine->setDVSerialSupport(dvserial);
     response.init();
@@ -730,7 +728,7 @@ int WebAPIAdapterSrv::instancePresetFilePost(
 
 int WebAPIAdapterSrv::instancePresetsGet(
         SWGSDRangel::SWGPresets& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
     int nbPresets = m_mainCore.m_settings.getPresetCount();
     int nbGroups = 0;
@@ -992,7 +990,7 @@ int WebAPIAdapterSrv::instancePresetDelete(
 
 int WebAPIAdapterSrv::instanceDeviceSetsGet(
         SWGSDRangel::SWGDeviceSetList& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
     getDeviceSetList(&response);
     return 200;
@@ -1001,7 +999,7 @@ int WebAPIAdapterSrv::instanceDeviceSetsGet(
 int WebAPIAdapterSrv::instanceDeviceSetPost(
         int direction,
         SWGSDRangel::SWGSuccessResponse& response,
-        SWGSDRangel::SWGErrorResponse& error __attribute__((unused)))
+        SWGSDRangel::SWGErrorResponse& error)
 {
     MainCore::MsgAddDeviceSet *msg = MainCore::MsgAddDeviceSet::create(direction);
     m_mainCore.m_inputMessageQueue.push(msg);
@@ -1057,8 +1055,8 @@ int WebAPIAdapterSrv::devicesetGet(
 }
 
 int WebAPIAdapterSrv::devicesetFocusPatch(
-        int deviceSetIndex __attribute__((unused)),
-        SWGSDRangel::SWGSuccessResponse& response __attribute__((unused)),
+        int deviceSetIndex,
+        SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
     *error.getMessage() = QString("Not supported in server instance");

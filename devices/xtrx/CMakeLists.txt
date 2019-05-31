@@ -1,33 +1,31 @@
 project(xtrxdevice)
 
 set(xtrxdevice_SOURCES
-	devicextrx.cpp
+    devicextrx.cpp
     devicextrxparam.cpp
     devicextrxshared.cpp
 )
 
 set(xtrxdevice_HEADERS
-	devicextrx.h
+    devicextrx.h
     devicextrxparam.h
     devicextrxshared.h
 )
 
 include_directories(
-    .
-    ${CMAKE_CURRENT_BINARY_DIR}
     ${LIBXTRX_INCLUDE_DIRS}
 )
 
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_SHARED)
-
 add_library(xtrxdevice SHARED
-	${xtrxdevice_SOURCES}
+    ${xtrxdevice_SOURCES}
 )
 
+set_target_properties(xtrxdevice
+    PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
+
 target_link_libraries(xtrxdevice
-    ${LIBXTRX_LIBRARIES}
+    ${LIBXTRX_LIBRARY}
     sdrbase
 )
 
-install(TARGETS xtrxdevice DESTINATION lib)
+install(TARGETS xtrxdevice DESTINATION ${INSTALL_LIB_DIR})

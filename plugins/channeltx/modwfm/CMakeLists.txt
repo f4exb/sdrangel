@@ -1,50 +1,54 @@
 project(modwfm)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(modwfm_SOURCES
 	wfmmod.cpp
-	wfmmodgui.cpp
 	wfmmodplugin.cpp
 	wfmmodsettings.cpp
 )
 
 set(modwfm_HEADERS
 	wfmmod.h
-	wfmmodgui.h
 	wfmmodplugin.h
 	wfmmodsettings.h
 )
 
-set(modwfm_FORMS
-	wfmmodgui.ui
-)
-
 include_directories(
-	.
-	${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client	
+        ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
-add_definitions(${QT_DEFINITIONS})
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
+if(NOT SERVER_MODE)
+    set(modwfm_SOURCES
+        ${modwfm_SOURCES}
+        wfmmodgui.cpp
 
-qt5_wrap_ui(modwfm_FORMS_HEADERS ${modwfm_FORMS})
+        wfmmodgui.ui
+    )
+    set(modwfm_HEADERS
+        ${modwfm_HEADERS}
+        wfmmodgui.h
+    )
 
-add_library(modwfm SHARED
+    set(TARGET_NAME modwfm)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+else()
+    set(TARGET_NAME modwfmsrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
+endif()
+
+add_library(${TARGET_NAME} SHARED
 	${modwfm_SOURCES}
-	${modwfm_HEADERS_MOC}
-	${modwfm_FORMS_HEADERS}
 )
 
-target_link_libraries(modwfm
-	${QT_LIBRARIES}
+target_link_libraries(${TARGET_NAME}
+        Qt5::Core
+        ${TARGET_LIB}
 	sdrbase
-	sdrgui
-	swagger
+	${TARGET_LIB_GUI}
+        swagger
 )
 
-target_link_libraries(modwfm Qt5::Core Qt5::Widgets)
-
-install(TARGETS modwfm DESTINATION lib/plugins/channeltx)
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

@@ -1,19 +1,47 @@
 Source: sdrangel
+Maintainer: Edouard Griffiths, F4EXB <f4exb06@gmail.com>
 Section: hamradio
 Priority: optional
-Maintainer: Edouard Griffiths, F4EXB <f4exb06@gmail.com>
-Build-Depends: debhelper (>=9)
-Standards-Version: 3.9.6
+Standards-Version: 3.9.2
 Homepage: https://github.com/f4exb/sdrangel
-#Vcs-Git: git://anonscm.debian.org/collab-maint/sdrangel.git
-#Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/sdrangel.git
+Build-Depends: debhelper (>= 9),
+ libfftw3-dev,
+ qtbase5-dev,
+ libqt5opengl5-dev,
+ qttools5-dev,
+ qttools5-dev-tools,
+ qtmultimedia5-dev,
+ libqt5multimedia5-plugins,
+ libusb-1.0-0-dev,
+ libboost-all-dev,
+ librtlsdr-dev,
+ libasound2-dev,
+ libopencv-dev,
+ libopencv-dev,
+ libsqlite3-dev,
+ libxml2-dev,
+ bison,
+ flex,
+ ffmpeg,
+ libavcodec-dev,
+ libavformat-dev,
+ libopus-dev,
+ libcodec2-dev,
+ libairspy-dev,
+ libhackrf-dev,
+ librtlsdr-dev
+# TODO:
+#   - more dependencies based on version; newer has more devices
+#   - manage dependencies not present upstream
 
 Package: sdrangel
 Architecture: any
-Depends: libc6, libasound2, libfftw3-single3, libgcc1, libgl1-mesa-glx, libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5network5, libqt5opengl5, libqt5widgets5, libqt5multimedia5-plugins, libstdc++6, libusb-1.0-0, libopencv-dev, pulseaudio, libxml2, ffmpeg, libavcodec-dev, libavformat-dev, libopus-dev, libcodec2-dev, ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: SDR/Analyzer/Generator front-end for various hardware
- SDR/Analyzer/Generator front-end for Airspy, BladeRF, HackRF, RTL-SDR, FunCube, LimeSDR, PlutoSDR.
- Also File source and sink for I/Q samples, network I/Q sources with remote instance.
+ SDR/Analyzer/Generator front-end for Airspy, BladeRF, HackRF,
+ RTL-SDR, FunCube, LimeSDR, PlutoSDR.
+ Also File source and sink for I/Q samples, network I/Q sources with
+ remote instance.
  Based on Qt5 framework and OpenGL for the spectrum and scope rendering.
  Builds on Linux, Windows and Mac O/S
  Reception modes supported:
@@ -22,3 +50,4 @@ Description: SDR/Analyzer/Generator front-end for various hardware
    Analyzer: Generic channel
  Transmission modes supported:
    Analog: AM, ATV, NFM, SSB, WFM
+Homepage: https://github.com/f4exb/sdrangel

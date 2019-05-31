@@ -22,3 +22,4 @@ debian/debhelper-build-stamp
 obj-x86_64-linux-gnu/*
 **/venv*/
 *.pyc
+.DS_Store

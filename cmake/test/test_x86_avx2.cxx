@@ -1,4 +1,5 @@
 #include <signal.h>
+#include <stdlib.h>
 #include <immintrin.h>
 
 void signalHandler(int signum) {
