@@ -50,7 +50,7 @@ target_link_libraries(${TARGET_NAME}
 	sdrbase
 	${TARGET_LIB_GUI}
         swagger
-        "${OpenCV_LIBS};opencv_videoio"
+        "${OpenCV_LIBS}"
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

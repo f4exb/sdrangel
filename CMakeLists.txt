@@ -305,7 +305,7 @@ find_package(PkgConfig REQUIRED)
 find_package(Boost REQUIRED)
 find_package(FFTW3F REQUIRED)
 find_package(LibUSB REQUIRED)  # used by so many packages
-find_package(OpenCV REQUIRED core highgui imgproc) # channeltx/modatv
+find_package(OpenCV REQUIRED core highgui imgproc imgcodecs videoio) # channeltx/modatv
 
 # unfortunately OpenCV library from windows doesn't set the cache option
 if(WIN32)
