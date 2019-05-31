@@ -49,6 +49,7 @@ WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
     HttpRequestHandler(parent),
     m_adapter(0)
 {
+    Q_INIT_RESOURCE(webapi);
     qtwebapp::HttpDocrootSettings docrootSettings;
     docrootSettings.path = ":/webapi";
     m_staticFileController = new qtwebapp::StaticFileController(docrootSettings, parent);
@@ -57,6 +58,7 @@ WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
 WebAPIRequestMapper::~WebAPIRequestMapper()
 {
     delete m_staticFileController;
+    Q_CLEANUP_RESOURCE(webapi);
 }
 
 void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)

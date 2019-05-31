@@ -143,7 +143,7 @@ set(sdrbase_SOURCES
 
     mainparser.cpp
 
-    resources/res.qrc
+    resources/webapi.qrc
 )
 
 set(sdrbase_HEADERS
