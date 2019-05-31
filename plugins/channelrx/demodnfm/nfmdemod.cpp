@@ -310,7 +310,7 @@ void NFMDemod::processOneSample(Complex &ci)
                 if (m_settings.m_highPass) {
                     sample = m_bandpass.filter(m_squelchDelayLine.readBack(m_squelchGate)) * m_settings.m_volume;
                 } else {
-                    sample = m_lowpass.filter(m_squelchDelayLine.readBack(m_squelchGate)) * m_settings.m_volume;
+                    sample = m_lowpass.filter(m_squelchDelayLine.readBack(m_squelchGate)) * m_settings.m_volume * 301.0f;
                 }
             }
         }
@@ -518,7 +518,7 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
             << " m_squelch: " << settings.m_squelch
             << " m_ctcssIndex: " << settings.m_ctcssIndex
             << " m_ctcssOn: " << settings.m_ctcssOn
-            << " m_highPass: " << m_settings.m_highPass
+            << " m_highPass: " << settings.m_highPass
             << " m_audioMute: " << settings.m_audioMute
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_useReverseAPI: " << settings.m_useReverseAPI
