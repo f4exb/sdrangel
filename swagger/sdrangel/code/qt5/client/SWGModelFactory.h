@@ -133,6 +133,7 @@
 #include "SWGSoapySDRReport.h"
 #include "SWGSuccessResponse.h"
 #include "SWGTestMISettings.h"
+#include "SWGTestMiStreamSettings.h"
 #include "SWGTestSourceSettings.h"
 #include "SWGUDPSinkReport.h"
 #include "SWGUDPSinkSettings.h"
@@ -506,6 +507,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGTestMISettings").compare(type) == 0) {
       return new SWGTestMISettings();
+    }
+    if(QString("SWGTestMiStreamSettings").compare(type) == 0) {
+      return new SWGTestMiStreamSettings();
     }
     if(QString("SWGTestSourceSettings").compare(type) == 0) {
       return new SWGTestSourceSettings();

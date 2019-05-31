@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -52,8 +52,15 @@ TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
 {
     qDebug("TestMIGui::TestMIGui");
     m_sampleMIMO = m_deviceUISet->m_deviceAPI->getSampleMIMO();
+    m_streamIndex = 0;
+    m_deviceCenterFrequencies.push_back(m_settings.m_streams[0].m_centerFrequency);
+    m_deviceCenterFrequencies.push_back(m_settings.m_streams[1].m_centerFrequency);
+    m_deviceSampleRates.push_back(m_settings.m_streams[0].m_sampleRate / (1<<m_settings.m_streams[0].m_log2Decim));
+    m_deviceSampleRates.push_back(m_settings.m_streams[1].m_sampleRate / (1<<m_settings.m_streams[1].m_log2Decim));
 
     ui->setupUi(this);
+    ui->spectrumSource->addItem("0");
+    ui->spectrumSource->addItem("1");
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(7, 0, 9999999);
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
@@ -104,12 +111,12 @@ void TestMIGui::resetToDefaults()
 
 qint64 TestMIGui::getCenterFrequency() const
 {
-    return m_settings.m_centerFrequency;
+    return m_settings.m_streams[m_streamIndex].m_centerFrequency;
 }
 
 void TestMIGui::setCenterFrequency(qint64 centerFrequency)
 {
-    m_settings.m_centerFrequency = centerFrequency;
+    m_settings.m_streams[m_streamIndex].m_centerFrequency = centerFrequency;
     displaySettings();
     sendSettings();
 }
@@ -141,25 +148,68 @@ void TestMIGui::on_startStop_toggled(bool checked)
     }
 }
 
+void TestMIGui::on_streamIndex_currentIndexChanged(int index)
+{
+    if (ui->streamLock->isChecked())
+    {
+        m_spectrumStreamIndex = index;
+        m_deviceUISet->m_spectrum->setDisplayedStream(true, index);
+        m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(true, m_spectrumStreamIndex);
+        ui->spectrumSource->blockSignals(true);
+        ui->spectrumSource->setCurrentIndex(index);
+        ui->spectrumSource->blockSignals(false);
+    }
+
+    m_streamIndex = index;
+    updateFileRecordStatus();
+    updateSampleRateAndFrequency();
+    displaySettings();
+}
+
+void TestMIGui::on_spectrumSource_currentIndexChanged(int index)
+{
+    m_spectrumStreamIndex = index;
+    m_deviceUISet->m_spectrum->setDisplayedStream(true, index);
+    m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(true, m_spectrumStreamIndex);
+    updateSampleRateAndFrequency();
+
+    if (ui->streamLock->isChecked())
+    {
+        ui->streamIndex->blockSignals(true);
+        ui->streamIndex->setCurrentIndex(index);
+        ui->streamIndex->blockSignals(false);
+        m_streamIndex = index;
+        updateFileRecordStatus();
+        displaySettings();
+    }
+}
+
+void TestMIGui::on_streamLock_toggled(bool checked)
+{
+    if (checked && (ui->streamIndex->currentIndex() != ui->spectrumSource->currentIndex())) {
+        ui->spectrumSource->setCurrentIndex(ui->streamIndex->currentIndex());
+    }
+}
+
 void TestMIGui::on_centerFrequency_changed(quint64 value)
 {
-    m_settings.m_centerFrequency = value * 1000;
+    m_settings.m_streams[m_streamIndex].m_centerFrequency = value * 1000;
     sendSettings();
 }
 
 void TestMIGui::on_autoCorr_currentIndexChanged(int index)
 {
-    if ((index < 0) || (index > TestMISettings::AutoCorrLast)) {
+    if ((index < 0) || (index > TestMIStreamSettings::AutoCorrLast)) {
         return;
     }
 
-    m_settings.m_autoCorrOptions = (TestMISettings::AutoCorrOptions) index;
+    m_settings.m_streams[m_streamIndex].m_autoCorrOptions = (TestMIStreamSettings::AutoCorrOptions) index;
     sendSettings();
 }
 
 void TestMIGui::on_frequencyShift_changed(qint64 value)
 {
-    m_settings.m_frequencyShift = value;
+    m_settings.m_streams[m_streamIndex].m_frequencyShift = value;
     sendSettings();
 }
 
@@ -169,7 +219,7 @@ void TestMIGui::on_decimation_currentIndexChanged(int index)
         return;
     }
 
-    m_settings.m_log2Decim = index;
+    m_settings.m_streams[m_streamIndex].m_log2Decim = index;
     sendSettings();
 }
 
@@ -179,15 +229,15 @@ void TestMIGui::on_fcPos_currentIndexChanged(int index)
         return;
     }
 
-    m_settings.m_fcPos = (TestMISettings::fcPos_t) index;
+    m_settings.m_streams[m_streamIndex].m_fcPos = (TestMIStreamSettings::fcPos_t) index;
     sendSettings();
 }
 
 void TestMIGui::on_sampleRate_changed(quint64 value)
 {
     updateFrequencyShiftLimit();
-    m_settings.m_frequencyShift = ui->frequencyShift->getValueNew();
-    m_settings.m_sampleRate = value;
+    m_settings.m_streams[m_streamIndex].m_frequencyShift = ui->frequencyShift->getValueNew();
+    m_settings.m_streams[m_streamIndex].m_sampleRate = value;
     sendSettings();
 }
 
@@ -200,8 +250,8 @@ void TestMIGui::on_sampleSize_currentIndexChanged(int index)
     updateAmpCoarseLimit();
     updateAmpFineLimit();
     displayAmplitude();
-    m_settings.m_amplitudeBits = ui->amplitudeCoarse->value() * 100 + ui->amplitudeFine->value();
-    m_settings.m_sampleSizeIndex = index;
+    m_settings.m_streams[m_streamIndex].m_amplitudeBits = ui->amplitudeCoarse->value() * 100 + ui->amplitudeFine->value();
+    m_settings.m_streams[m_streamIndex].m_sampleSizeIndex = index;
     sendSettings();
 }
 
@@ -210,7 +260,7 @@ void TestMIGui::on_amplitudeCoarse_valueChanged(int value)
     (void) value;
     updateAmpFineLimit();
     displayAmplitude();
-    m_settings.m_amplitudeBits = ui->amplitudeCoarse->value() * 100 + ui->amplitudeFine->value();
+    m_settings.m_streams[m_streamIndex].m_amplitudeBits = ui->amplitudeCoarse->value() * 100 + ui->amplitudeFine->value();
     sendSettings();
 }
 
@@ -218,66 +268,66 @@ void TestMIGui::on_amplitudeFine_valueChanged(int value)
 {
     (void) value;
     displayAmplitude();
-    m_settings.m_amplitudeBits = ui->amplitudeCoarse->value() * 100 + ui->amplitudeFine->value();
+    m_settings.m_streams[m_streamIndex].m_amplitudeBits = ui->amplitudeCoarse->value() * 100 + ui->amplitudeFine->value();
     sendSettings();
 }
 
 void TestMIGui::on_modulation_currentIndexChanged(int index)
 {
-    if ((index < 0) || (index > TestMISettings::ModulationLast)) {
+    if ((index < 0) || (index > TestMIStreamSettings::ModulationLast)) {
         return;
     }
 
-    m_settings.m_modulation = (TestMISettings::Modulation) index;
+    m_settings.m_streams[m_streamIndex].m_modulation = (TestMIStreamSettings::Modulation) index;
     sendSettings();
 }
 
 void TestMIGui::on_modulationFrequency_valueChanged(int value)
 {
-    m_settings.m_modulationTone = value;
-    ui->modulationFrequencyText->setText(QString("%1").arg(m_settings.m_modulationTone / 100.0, 0, 'f', 2));
+    m_settings.m_streams[m_streamIndex].m_modulationTone = value;
+    ui->modulationFrequencyText->setText(QString("%1").arg(m_settings.m_streams[m_streamIndex].m_modulationTone / 100.0, 0, 'f', 2));
     sendSettings();
 }
 
 void TestMIGui::on_amModulation_valueChanged(int value)
 {
-    m_settings.m_amModulation = value;
-    ui->amModulationText->setText(QString("%1").arg(m_settings.m_amModulation));
+    m_settings.m_streams[m_streamIndex].m_amModulation = value;
+    ui->amModulationText->setText(QString("%1").arg(m_settings.m_streams[m_streamIndex].m_amModulation));
     sendSettings();
 }
 
 void TestMIGui::on_fmDeviation_valueChanged(int value)
 {
-    m_settings.m_fmDeviation = value;
-    ui->fmDeviationText->setText(QString("%1").arg(m_settings.m_fmDeviation / 10.0, 0, 'f', 1));
+    m_settings.m_streams[m_streamIndex].m_fmDeviation = value;
+    ui->fmDeviationText->setText(QString("%1").arg(m_settings.m_streams[m_streamIndex].m_fmDeviation / 10.0, 0, 'f', 1));
     sendSettings();
 }
 
 void TestMIGui::on_dcBias_valueChanged(int value)
 {
     ui->dcBiasText->setText(QString(tr("%1 %").arg(value)));
-    m_settings.m_dcFactor = value / 100.0f;
+    m_settings.m_streams[m_streamIndex].m_dcFactor = value / 100.0f;
     sendSettings();
 }
 
 void TestMIGui::on_iBias_valueChanged(int value)
 {
     ui->iBiasText->setText(QString(tr("%1 %").arg(value)));
-    m_settings.m_iFactor = value / 100.0f;
+    m_settings.m_streams[m_streamIndex].m_iFactor = value / 100.0f;
     sendSettings();
 }
 
 void TestMIGui::on_qBias_valueChanged(int value)
 {
     ui->qBiasText->setText(QString(tr("%1 %").arg(value)));
-    m_settings.m_qFactor = value / 100.0f;
+    m_settings.m_streams[m_streamIndex].m_qFactor = value / 100.0f;
     sendSettings();
 }
 
 void TestMIGui::on_phaseImbalance_valueChanged(int value)
 {
     ui->phaseImbalanceText->setText(QString(tr("%1 %").arg(value)));
-    m_settings.m_phaseImbalance = value / 100.0f;
+    m_settings.m_streams[m_streamIndex].m_phaseImbalance = value / 100.0f;
     sendSettings();
 }
 
@@ -289,7 +339,7 @@ void TestMIGui::on_record_toggled(bool checked)
         ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
     }
 
-    TestMI::MsgFileRecord* message = TestMI::MsgFileRecord::create(checked);
+    TestMI::MsgFileRecord* message = TestMI::MsgFileRecord::create(checked, m_streamIndex);
     m_sampleMIMO->getInputMessageQueue()->push(message);
 }
 
@@ -365,8 +415,18 @@ void TestMIGui::updateAmpFineLimit()
 
 void TestMIGui::updateFrequencyShiftLimit()
 {
-    int sampleRate = ui->sampleRate->getValueNew();
+    qint64 sampleRate = ui->sampleRate->getValueNew();
     ui->frequencyShift->setValueRange(false, 7, -sampleRate, sampleRate);
+    ui->frequencyShift->setValue(m_settings.m_streams[m_streamIndex].m_frequencyShift);
+}
+
+void TestMIGui::updateFileRecordStatus()
+{
+    if (((TestMI*) m_sampleMIMO)->isRecording(m_streamIndex)) {
+        ui->record->setStyleSheet("QToolButton { background-color : red; }");
+    } else {
+        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+    }
 }
 
 void TestMIGui::displaySettings()
@@ -374,40 +434,41 @@ void TestMIGui::displaySettings()
     blockApplySettings(true);
     ui->sampleSize->blockSignals(true);
 
-    ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
-    ui->decimation->setCurrentIndex(m_settings.m_log2Decim);
-    ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
-    ui->sampleRate->setValue(m_settings.m_sampleRate);
+    ui->streamIndex->setCurrentIndex(m_streamIndex);
+    ui->centerFrequency->setValue(m_settings.m_streams[m_streamIndex].m_centerFrequency / 1000);
+    ui->decimation->setCurrentIndex(m_settings.m_streams[m_streamIndex].m_log2Decim);
+    ui->fcPos->setCurrentIndex((int) m_settings.m_streams[m_streamIndex].m_fcPos);
+    ui->sampleRate->setValue(m_settings.m_streams[m_streamIndex].m_sampleRate);
     updateFrequencyShiftLimit();
-    ui->frequencyShift->setValue(m_settings.m_frequencyShift);
-    ui->sampleSize->setCurrentIndex(m_settings.m_sampleSizeIndex);
+    ui->frequencyShift->setValue(m_settings.m_streams[m_streamIndex].m_frequencyShift);
+    ui->sampleSize->setCurrentIndex(m_settings.m_streams[m_streamIndex].m_sampleSizeIndex);
     updateAmpCoarseLimit();
-    int amplitudeBits = m_settings.m_amplitudeBits;
+    int amplitudeBits = m_settings.m_streams[m_streamIndex].m_amplitudeBits;
     ui->amplitudeCoarse->setValue(amplitudeBits/100);
     updateAmpFineLimit();
     ui->amplitudeFine->setValue(amplitudeBits%100);
     displayAmplitude();
-    int dcBiasPercent = roundf(m_settings.m_dcFactor * 100.0f);
+    int dcBiasPercent = roundf(m_settings.m_streams[m_streamIndex].m_dcFactor * 100.0f);
     ui->dcBias->setValue((int) dcBiasPercent);
     ui->dcBiasText->setText(QString(tr("%1 %").arg(dcBiasPercent)));
-    int iBiasPercent = roundf(m_settings.m_iFactor * 100.0f);
+    int iBiasPercent = roundf(m_settings.m_streams[m_streamIndex].m_iFactor * 100.0f);
     ui->iBias->setValue((int) iBiasPercent);
     ui->iBiasText->setText(QString(tr("%1 %").arg(iBiasPercent)));
-    int qBiasPercent = roundf(m_settings.m_qFactor * 100.0f);
+    int qBiasPercent = roundf(m_settings.m_streams[m_streamIndex].m_qFactor * 100.0f);
     ui->qBias->setValue((int) qBiasPercent);
     ui->qBiasText->setText(QString(tr("%1 %").arg(qBiasPercent)));
-    int phaseImbalancePercent = roundf(m_settings.m_phaseImbalance * 100.0f);
+    int phaseImbalancePercent = roundf(m_settings.m_streams[m_streamIndex].m_phaseImbalance * 100.0f);
     ui->phaseImbalance->setValue((int) phaseImbalancePercent);
     ui->phaseImbalanceText->setText(QString(tr("%1 %").arg(phaseImbalancePercent)));
-    ui->autoCorr->setCurrentIndex(m_settings.m_autoCorrOptions);
+    ui->autoCorr->setCurrentIndex(m_settings.m_streams[m_streamIndex].m_autoCorrOptions);
     ui->sampleSize->blockSignals(false);
-    ui->modulation->setCurrentIndex((int) m_settings.m_modulation);
-    ui->modulationFrequency->setValue(m_settings.m_modulationTone);
-    ui->modulationFrequencyText->setText(QString("%1").arg(m_settings.m_modulationTone / 100.0, 0, 'f', 2));
-    ui->amModulation->setValue(m_settings.m_amModulation);
-    ui->amModulationText->setText(QString("%1").arg(m_settings.m_amModulation));
-    ui->fmDeviation->setValue(m_settings.m_fmDeviation);
-    ui->fmDeviationText->setText(QString("%1").arg(m_settings.m_fmDeviation / 10.0, 0, 'f', 1));
+    ui->modulation->setCurrentIndex((int) m_settings.m_streams[m_streamIndex].m_modulation);
+    ui->modulationFrequency->setValue(m_settings.m_streams[m_streamIndex].m_modulationTone);
+    ui->modulationFrequencyText->setText(QString("%1").arg(m_settings.m_streams[m_streamIndex].m_modulationTone / 100.0, 0, 'f', 2));
+    ui->amModulation->setValue(m_settings.m_streams[m_streamIndex].m_amModulation);
+    ui->amModulationText->setText(QString("%1").arg(m_settings.m_streams[m_streamIndex].m_amModulation));
+    ui->fmDeviation->setValue(m_settings.m_streams[m_streamIndex].m_fmDeviation);
+    ui->fmDeviationText->setText(QString("%1").arg(m_settings.m_streams[m_streamIndex].m_fmDeviation / 10.0, 0, 'f', 1));
     blockApplySettings(false);
 }
 
@@ -493,10 +554,14 @@ void TestMIGui::handleInputMessages()
         if (DSPDeviceMIMOEngine::SignalNotification::match(*message))
         {
             DSPDeviceMIMOEngine::SignalNotification* notif = (DSPDeviceMIMOEngine::SignalNotification*) message;
-            m_deviceSampleRate = notif->getSampleRate();
-            m_deviceCenterFrequency = notif->getCenterFrequency();
+            int istream = notif->getIndex();
+            bool sourceOrSink = notif->getSourceOrSink();
+            m_deviceSampleRates[istream] = notif->getSampleRate();
+            m_deviceCenterFrequencies[istream] = notif->getCenterFrequency();
             // Do not consider multiple sources at this time
-            qDebug("TestMIGui::handleInputMessages: DSPDeviceMIMOEngine::SignalNotification: SampleRate:%d, CenterFrequency:%llu",
+            qDebug("TestMIGui::handleInputMessages: DSPDeviceMIMOEngine::SignalNotification: %s stream: %d SampleRate:%d, CenterFrequency:%llu",
+                    sourceOrSink ? "source" : "sink",
+                    istream,
                     notif->getSampleRate(),
                     notif->getCenterFrequency());
             updateSampleRateAndFrequency();
@@ -515,9 +580,9 @@ void TestMIGui::handleInputMessages()
 
 void TestMIGui::updateSampleRateAndFrequency()
 {
-    m_deviceUISet->getSpectrum()->setSampleRate(m_deviceSampleRate);
-    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-    ui->deviceRateText->setText(tr("%1k").arg((float)m_deviceSampleRate / 1000));
+    m_deviceUISet->getSpectrum()->setSampleRate(m_deviceSampleRates[m_spectrumStreamIndex]);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequencies[m_spectrumStreamIndex]);
+    ui->deviceRateText->setText(tr("%1k").arg((float) m_deviceSampleRates[m_streamIndex] / 1000));
 }
 
 void TestMIGui::openDeviceSettingsDialog(const QPoint& p)

@@ -122,10 +122,10 @@ void DSPDeviceMIMOEngine::setMIMOSequence(int sequence)
 	m_sampleMIMOSequence = sequence;
 }
 
-void DSPDeviceMIMOEngine::addSourceStream()
+void DSPDeviceMIMOEngine::addSourceStream(bool connect)
 {
 	qDebug("DSPDeviceMIMOEngine::addSourceStream");
-    AddSourceStream cmd;
+    AddSourceStream cmd(connect);
     m_syncMessenger.sendWait(cmd);
 }
 
@@ -136,10 +136,10 @@ void DSPDeviceMIMOEngine::removeLastSourceStream()
     m_syncMessenger.sendWait(cmd);
 }
 
-void DSPDeviceMIMOEngine::addSinkStream()
+void DSPDeviceMIMOEngine::addSinkStream(bool connect)
 {
 	qDebug("DSPDeviceMIMOEngine::addSinkStream");
-    AddSinkStream cmd;
+    AddSinkStream cmd(connect);
     m_syncMessenger.sendWait(cmd);
 }
 
@@ -333,6 +333,87 @@ void DSPDeviceMIMOEngine::work(int nbWriteSamples)
     } // for stream source
 
     // TODO: sinks
+}
+
+void DSPDeviceMIMOEngine::workSampleSink(unsigned int sinkIndex)
+{
+    if (m_state != StRunning) {
+        return;
+    }
+
+	SampleSinkFifo* sampleFifo = m_deviceSampleMIMO->getSampleSinkFifo(sinkIndex);
+	int samplesDone = 0;
+	bool positiveOnly = false;
+
+	while ((sampleFifo->fill() > 0) && (m_inputMessageQueue.size() == 0) && (samplesDone < m_deviceSampleMIMO->getSourceSampleRate(sinkIndex)))
+	{
+		SampleVector::iterator part1begin;
+		SampleVector::iterator part1end;
+		SampleVector::iterator part2begin;
+		SampleVector::iterator part2end;
+
+		std::size_t count = sampleFifo->readBegin(sampleFifo->fill(), &part1begin, &part1end, &part2begin, &part2end);
+
+		// first part of FIFO data
+		if (part1begin != part1end)
+		{
+            // DC and IQ corrections
+            if (m_sourcesCorrections[sinkIndex].m_dcOffsetCorrection) {
+                iqCorrections(part1begin, part1end, sinkIndex, m_sourcesCorrections[sinkIndex].m_iqImbalanceCorrection);
+            }
+
+			// feed data to direct sinks
+            if (sinkIndex < m_basebandSampleSinks.size())
+            {
+                for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks[sinkIndex].begin(); it != m_basebandSampleSinks[sinkIndex].end(); ++it) {
+                    (*it)->feed(part1begin, part1end, positiveOnly);
+                }
+            }
+
+            // possibly feed data to spectrum sink
+            if ((m_spectrumSink) && (m_spectrumInputSourceElseSink) && (sinkIndex == m_spectrumInputIndex)) {
+                m_spectrumSink->feed(part1begin, part1end, positiveOnly);
+            }
+
+			// feed data to threaded sinks
+			for (ThreadedBasebandSampleSinks::const_iterator it = m_threadedBasebandSampleSinks[sinkIndex].begin(); it != m_threadedBasebandSampleSinks[sinkIndex].end(); ++it)
+			{
+				(*it)->feed(part1begin, part1end, positiveOnly);
+			}
+		}
+
+		// second part of FIFO data (used when block wraps around)
+		if(part2begin != part2end)
+		{
+            // DC and IQ corrections
+            if (m_sourcesCorrections[sinkIndex].m_dcOffsetCorrection) {
+                iqCorrections(part2begin, part2end, sinkIndex, m_sourcesCorrections[sinkIndex].m_iqImbalanceCorrection);
+            }
+
+			// feed data to direct sinks
+            if (sinkIndex < m_basebandSampleSinks.size())
+            {
+                for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks[sinkIndex].begin(); it != m_basebandSampleSinks[sinkIndex].end(); ++it) {
+                    (*it)->feed(part2begin, part2end, positiveOnly);
+                }
+            }
+
+            // possibly feed data to spectrum sink
+            if ((m_spectrumSink) && (m_spectrumInputSourceElseSink) && (sinkIndex == m_spectrumInputIndex)) {
+                m_spectrumSink->feed(part2begin, part2end, positiveOnly);
+            }
+
+			// feed data to threaded sinks
+			for (ThreadedBasebandSampleSinks::const_iterator it = m_threadedBasebandSampleSinks[sinkIndex].begin(); it != m_threadedBasebandSampleSinks[sinkIndex].end(); ++it)
+			{
+				(*it)->feed(part2begin, part2end, positiveOnly);
+			}
+		}
+
+		// adjust FIFO pointers
+		sampleFifo->readCommit((unsigned int) count);
+		samplesDone += count;
+	}
 }
 
 // notStarted -> idle -> init -> running -+
@@ -544,7 +625,7 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoError(const QString& errorMe
 
 void DSPDeviceMIMOEngine::handleData()
 {
-	if(m_state == StRunning)
+	if (m_state == StRunning)
 	{
 		work(0); // TODO: implement Tx side
 	}
@@ -554,14 +635,38 @@ void DSPDeviceMIMOEngine::handleSetMIMO(DeviceSampleMIMO* mimo)
 {
     m_deviceSampleMIMO = mimo;
 
-    if (mimo && (mimo->getNbSinkFifos() > 0))
+    if (mimo)
     {
-        // if there is at least one Rx then the first Rx drives the FIFOs
-		qDebug("DSPDeviceMIMOEngine::handleSetMIMO: set %s", qPrintable(mimo->getDeviceDescription()));
-		connect(m_deviceSampleMIMO->getSampleSinkFifo(0), SIGNAL(dataReady()), this, SLOT(handleData()), Qt::QueuedConnection);
+        if ((m_sampleSinkConnectionIndexes.size() == 1) && (m_sampleSourceConnectionIndexes.size() == 0)) // true MIMO (synchronous FIFOs)
+        {
+            qDebug("DSPDeviceMIMOEngine::handleSetMIMO: synchronous set %s", qPrintable(mimo->getDeviceDescription()));
+            // connect(m_deviceSampleMIMO->getSampleSinkFifo(m_sampleSinkConnectionIndexes[0]), SIGNAL(dataReady()), this, SLOT(handleData()), Qt::QueuedConnection);
+            QObject::connect(
+                m_deviceSampleMIMO->getSampleSinkFifo(m_sampleSinkConnectionIndexes[0]),
+                &SampleSinkFifo::dataReady,
+                this,
+                [=](){ this->handleData(); }, // lambda function is not strictly needed here
+                Qt::QueuedConnection
+            );
+        }
+        else if (m_sampleSinkConnectionIndexes.size() != 0) // asynchronous FIFOs
+        {
+            for (unsigned int isink = 0; isink < m_sampleSinkConnectionIndexes.size(); isink++)
+            {
+                qDebug("DSPDeviceMIMOEngine::handleSetMIMO: asynchronous sources set %s channel %u",
+                    qPrintable(mimo->getDeviceDescription()), isink);
+                QObject::connect(
+                    m_deviceSampleMIMO->getSampleSinkFifo(m_sampleSinkConnectionIndexes[isink]),
+                    &SampleSinkFifo::dataReady,
+                    this,
+                    [=](){ this->workSampleSink(isink); },
+                    Qt::QueuedConnection
+                );
+            }
+        }
     }
 
-    // TODO: only Tx
+    // TODO: Tx
 }
 
 void DSPDeviceMIMOEngine::handleSynchronousMessages()
@@ -601,8 +706,13 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
     else if (AddSourceStream::match(*message))
     {
         m_basebandSampleSinks.push_back(BasebandSampleSinks());
+        int currentIndex = m_threadedBasebandSampleSinks.size();
         m_threadedBasebandSampleSinks.push_back(ThreadedBasebandSampleSinks());
         m_sourcesCorrections.push_back(SourceCorrection());
+
+        if (((AddSourceStream *) message)->getConnect()) {
+            m_sampleSinkConnectionIndexes.push_back(currentIndex);
+        }
     }
     else if (RemoveLastSourceStream::match(*message))
     {
@@ -611,7 +721,12 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
     }
     else if (AddSinkStream::match(*message))
     {
+        int currentIndex = m_threadedBasebandSampleSources.size();
         m_threadedBasebandSampleSources.push_back(ThreadedBasebandSampleSources());
+
+        if (((AddSinkStream *) message)->getConnect()) {
+            m_sampleSourceConnectionIndexes.push_back(currentIndex);
+        }
     }
     else if (RemoveLastSinkStream::match(*message))
     {
@@ -839,7 +954,6 @@ void DSPDeviceMIMOEngine::handleInputMessages()
 				<< " sampleRate: " << sampleRate
 				<< " centerFrequency: " << centerFrequency;
 
-
             if (sourceElseSink)
             {
                 if ((istream < m_deviceSampleMIMO->getNbSourceStreams()))
@@ -875,6 +989,7 @@ void DSPDeviceMIMOEngine::handleInputMessages()
                         guiMessageQueue->push(rep);
                     }
 
+                    // forward changes to spectrum sink if currently active
                     if (m_spectrumSink && m_spectrumInputSourceElseSink && (m_spectrumInputIndex == istream))
                     {
                         DSPSignalNotification spectrumNotif(sampleRate, centerFrequency);
@@ -907,6 +1022,7 @@ void DSPDeviceMIMOEngine::handleInputMessages()
                         guiMessageQueue->push(rep);
                     }
 
+                    // forward changes to spectrum sink if currently active
                     if (m_spectrumSink && !m_spectrumInputSourceElseSink && (m_spectrumInputIndex == istream))
                     {
                         DSPSignalNotification spectrumNotif(sampleRate, centerFrequency);
@@ -937,4 +1053,93 @@ void DSPDeviceMIMOEngine::handleForwardToSpectrumSink(int nbSamples)
 		sampleFifo->getReadIterator(readUntil);
 		m_spectrumSink->feed(readUntil - nbSamples, readUntil, false);
 	}
+}
+
+void DSPDeviceMIMOEngine::iqCorrections(SampleVector::iterator begin, SampleVector::iterator end, int isource, bool imbalanceCorrection)
+{
+    for(SampleVector::iterator it = begin; it < end; it++)
+    {
+        m_sourcesCorrections[isource].m_iBeta(it->real());
+        m_sourcesCorrections[isource].m_qBeta(it->imag());
+
+        if (imbalanceCorrection)
+        {
+#if IMBALANCE_INT
+            // acquisition
+            int64_t xi = (it->m_real - (int32_t) m_sourcesCorrections[isource].m_iBeta) << 5;
+            int64_t xq = (it->m_imag - (int32_t) m_sourcesCorrections[isource].m_qBeta) << 5;
+
+            // phase imbalance
+            m_sourcesCorrections[isource].m_avgII((xi*xi)>>28); // <I", I">
+            m_sourcesCorrections[isource].m_avgIQ((xi*xq)>>28); // <I", Q">
+
+            if ((int64_t) m_sourcesCorrections[isource].m_avgII != 0)
+            {
+                int64_t phi = (((int64_t) m_sourcesCorrections[isource].m_avgIQ)<<28) / (int64_t) m_sourcesCorrections[isource].m_avgII;
+                m_sourcesCorrections[isource].m_avgPhi(phi);
+            }
+
+            int64_t corrPhi = (((int64_t) m_sourcesCorrections[isource].m_avgPhi) * xq) >> 28;  //(m_avgPhi.asDouble()/16777216.0) * ((double) xq);
+
+            int64_t yi = xi - corrPhi;
+            int64_t yq = xq;
+
+            // amplitude I/Q imbalance
+            m_sourcesCorrections[isource].m_avgII2((yi*yi)>>28); // <I, I>
+            m_sourcesCorrections[isource].m_avgQQ2((yq*yq)>>28); // <Q, Q>
+
+            if ((int64_t) m_sourcesCorrections[isource].m_avgQQ2 != 0)
+            {
+                int64_t a = (((int64_t) m_sourcesCorrections[isource].m_avgII2)<<28) / (int64_t) m_sourcesCorrections[isource].m_avgQQ2;
+                Fixed<int64_t, 28> fA(Fixed<int64_t, 28>::internal(), a);
+                Fixed<int64_t, 28> sqrtA = sqrt((Fixed<int64_t, 28>) fA);
+                m_sourcesCorrections[isource].m_avgAmp(sqrtA.as_internal());
+            }
+
+            int64_t zq = (((int64_t) m_sourcesCorrections[isource].m_avgAmp) * yq) >> 28;
+
+            it->m_real = yi >> 5;
+            it->m_imag = zq >> 5;
+
+#else
+            // DC correction and conversion
+            float xi = (it->m_real - (int32_t) m_sourcesCorrections[isource].m_iBeta) / SDR_RX_SCALEF;
+            float xq = (it->m_imag - (int32_t) m_sourcesCorrections[isource].m_qBeta) / SDR_RX_SCALEF;
+
+            // phase imbalance
+            m_sourcesCorrections[isource].m_avgII(xi*xi); // <I", I">
+            m_sourcesCorrections[isource].m_avgIQ(xi*xq); // <I", Q">
+
+
+            if (m_sourcesCorrections[isource].m_avgII.asDouble() != 0) {
+                m_sourcesCorrections[isource].m_avgPhi(m_sourcesCorrections[isource].m_avgIQ.asDouble()/m_sourcesCorrections[isource].m_avgII.asDouble());
+            }
+
+            float& yi = xi; // the in phase remains the reference
+            float yq = xq - m_sourcesCorrections[isource].m_avgPhi.asDouble()*xi;
+
+            // amplitude I/Q imbalance
+            m_sourcesCorrections[isource].m_avgII2(yi*yi); // <I, I>
+            m_sourcesCorrections[isource].m_avgQQ2(yq*yq); // <Q, Q>
+
+            if (m_sourcesCorrections[isource].m_avgQQ2.asDouble() != 0) {
+                m_sourcesCorrections[isource].m_avgAmp(sqrt(m_sourcesCorrections[isource].m_avgII2.asDouble() / m_sourcesCorrections[isource].m_avgQQ2.asDouble()));
+            }
+
+            // final correction
+            float& zi = yi; // the in phase remains the reference
+            float zq = m_sourcesCorrections[isource].m_avgAmp.asDouble() * yq;
+
+            // convert and store
+            it->m_real = zi * SDR_RX_SCALEF;
+            it->m_imag = zq * SDR_RX_SCALEF;
+#endif
+        }
+        else
+        {
+            // DC correction only
+            it->m_real -= (int32_t) m_sourcesCorrections[isource].m_iBeta;
+            it->m_imag -= (int32_t) m_sourcesCorrections[isource].m_qBeta;
+        }
+    }
 }

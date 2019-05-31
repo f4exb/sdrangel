@@ -5216,6 +5216,38 @@ margin-bottom: 20px;
 };
             defs.TestMISettings = {
   "properties" : {
+    "fileRecordName" : {
+      "type" : "string"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "streams" : {
+      "type" : "array",
+      "description" : "Settings for each of the streams",
+      "items" : {
+        "$ref" : "#/definitions/TestMiStreamSettings"
+      }
+    }
+  },
+  "description" : "TestMISettings"
+};
+            defs.TestMiStreamSettings = {
+  "properties" : {
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "Index of the stream to which the settings apply"
+    },
     "centerFrequency" : {
       "type" : "integer",
       "format" : "uint64"
@@ -5268,25 +5300,9 @@ margin-bottom: 20px;
     "phaseImbalance" : {
       "type" : "number",
       "format" : "float"
-    },
-    "fileRecordName" : {
-      "type" : "string"
-    },
-    "useReverseAPI" : {
-      "type" : "integer",
-      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
-    },
-    "reverseAPIAddress" : {
-      "type" : "string"
-    },
-    "reverseAPIPort" : {
-      "type" : "integer"
-    },
-    "reverseAPIDeviceIndex" : {
-      "type" : "integer"
     }
   },
-  "description" : "TestSourceMI"
+  "description" : "TestMiStreamSettings"
 };
             defs.TestSourceSettings = {
   "properties" : {
@@ -25084,7 +25100,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-05-20T16:12:41.467+02:00
+              Generated 2019-05-25T21:27:31.978+02:00
             </div>
           </div>
       </div>

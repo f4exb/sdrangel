@@ -159,6 +159,7 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     m_channelMarker.setTitle("UDP Sample Sink");
+    m_channelMarker.setSourceOrSinkStream(false);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 

@@ -356,6 +356,7 @@ void MainWindow::addSinkDevice()
     connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(channelAddClicked(bool)));
 
     dspDeviceSinkEngine->addSpectrumSink(m_deviceUIs.back()->m_spectrumVis);
+    m_deviceUIs.back()->m_spectrum->setDisplayedStream(false, 0);
     ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, tabNameCStr);
     ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, tabNameCStr);
     ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, tabNameCStr);
@@ -1831,7 +1832,7 @@ void MainWindow::sampleMIMOChanged()
         deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(
             DeviceEnumerator::instance()->getMIMOPluginInterface(deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex()));
 
-        // constructs new GUI and output object
+        // constructs new GUI and MIMO object
         DeviceSampleMIMO *mimo = deviceUI->m_deviceAPI->getPluginInterface()->createSampleMIMOPluginInstance(
                 deviceUI->m_deviceAPI->getSamplingDeviceId(), deviceUI->m_deviceAPI);
         deviceUI->m_deviceAPI->setSampleMIMO(mimo);

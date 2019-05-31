@@ -63,17 +63,20 @@ public:
 
     public:
         bool getStartStop() const { return m_startStop; }
+        int getStreamIndex() const { return m_streamIndex; }
 
-        static MsgFileRecord* create(bool startStop) {
-            return new MsgFileRecord(startStop);
+        static MsgFileRecord* create(bool startStop, int streamIndex) {
+            return new MsgFileRecord(startStop, streamIndex);
         }
 
     protected:
         bool m_startStop;
+        int m_streamIndex;
 
-        MsgFileRecord(bool startStop) :
+        MsgFileRecord(bool startStop, int streamIndex) :
             Message(),
-            m_startStop(startStop)
+            m_startStop(startStop),
+            m_streamIndex(streamIndex)
         { }
     };
 
@@ -141,12 +144,20 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    bool isRecording(unsigned int istream) const;
+
 private:
+    struct DeviceSettingsKeys
+    {
+        QList<QString> m_commonSettingsKeys;
+        QList<QList<QString>> m_streamsSettingsKeys;
+    };
+
 	DeviceAPI *m_deviceAPI;
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
+    std::vector<FileRecord *> m_fileSinks; //!< File sinks to record device I/Q output
 	QMutex m_mutex;
 	TestMISettings m_settings;
-	TestMIThread* m_testSourceThread;
+	std::vector<TestMIThread*> m_testSourceThreads;
 	QString m_deviceDescription;
 	bool m_running;
     const QTimer& m_masterTimer;
@@ -155,7 +166,7 @@ private:
 
 	bool applySettings(const TestMISettings& settings, bool force);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const TestMISettings& settings);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const TestMISettings& settings, bool force);
+    void webapiReverseSendSettings(const DeviceSettingsKeys& deviceSettingsKeys, const TestMISettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

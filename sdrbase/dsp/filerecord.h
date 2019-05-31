@@ -50,7 +50,7 @@ public:
     quint64 getByteCount() const { return m_byteCount; }
 
     void setFileName(const QString& filename);
-    void genUniqueFileName(uint deviceUID);
+    void genUniqueFileName(uint deviceUID, int istream = -1);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -58,6 +58,7 @@ public:
 	virtual bool handleMessage(const Message& message);
     void startRecording();
     void stopRecording();
+    bool isRecording() const { return m_recordOn; }
     static bool readHeader(std::ifstream& samplefile, Header& header); //!< returns true if CRC checksum is correct else false
     static void writeHeader(std::ofstream& samplefile, Header& header);
 

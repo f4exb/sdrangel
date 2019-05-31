@@ -28,7 +28,7 @@
 
 MESSAGE_CLASS_DEFINITION(TestMIThread::MsgStartStop, Message)
 
-TestMIThread::TestMIThread(SampleSinkFifo* sampleFifo, QObject* parent) :
+TestMIThread::TestMIThread(SampleSinkFifo* sampleFifo, int streamIndex, QObject* parent) :
 	QThread(parent),
 	m_running(false),
     m_buf(0),
@@ -36,9 +36,10 @@ TestMIThread::TestMIThread(SampleSinkFifo* sampleFifo, QObject* parent) :
     m_chunksize(0),
 	m_convertBuffer(TESTMI_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
+    m_streamIndex(streamIndex),
 	m_frequencyShift(0),
 	m_toneFrequency(440),
-	m_modulation(TestMISettings::ModulationNone),
+	m_modulation(TestMIStreamSettings::ModulationNone),
 	m_amModulation(0.5f),
 	m_fmDeviationUnit(0.0f),
 	m_fmPhasor(0.0f),
@@ -176,7 +177,7 @@ void TestMIThread::setToneFrequency(int toneFrequency)
     m_toneNco.setFreq(toneFrequency, m_samplerate);
 }
 
-void TestMIThread::setModulation(TestMISettings::Modulation modulation)
+void TestMIThread::setModulation(TestMIStreamSettings::Modulation modulation)
 {
     m_modulation = modulation;
 }
@@ -247,7 +248,7 @@ void TestMIThread::generate(quint32 chunksize)
     {
         switch (m_modulation)
         {
-        case TestMISettings::ModulationAM:
+        case TestMIStreamSettings::ModulationAM:
         {
             Complex c = m_nco.nextIQ();
             Real t, re, im;
@@ -259,7 +260,7 @@ void TestMIThread::generate(quint32 chunksize)
             m_buf[i++] = (int16_t) (im * (float) m_amplitudeBitsQ);
         }
         break;
-        case TestMISettings::ModulationFM:
+        case TestMIStreamSettings::ModulationFM:
         {
             Complex c = m_nco.nextIQ();
             Real t, re, im;
@@ -272,7 +273,7 @@ void TestMIThread::generate(quint32 chunksize)
             m_buf[i++] = (int16_t) (im * (float) m_amplitudeBitsQ);
         }
         break;
-        case TestMISettings::ModulationPattern0: // binary pattern
+        case TestMIStreamSettings::ModulationPattern0: // binary pattern
         {
             if (m_pulseSampleCount < m_pulseWidth) // sync pattern: 0
             {
@@ -314,7 +315,7 @@ void TestMIThread::generate(quint32 chunksize)
             }
         }
         break;
-        case TestMISettings::ModulationPattern1: // sawtooth pattern
+        case TestMIStreamSettings::ModulationPattern1: // sawtooth pattern
         {
             Real re, im;
             re = (float) (m_pulseWidth - m_pulseSampleCount) / (float) m_pulseWidth;
@@ -329,7 +330,7 @@ void TestMIThread::generate(quint32 chunksize)
             }
         }
         break;
-        case TestMISettings::ModulationPattern2: // 50% duty cycle square pattern
+        case TestMIStreamSettings::ModulationPattern2: // 50% duty cycle square pattern
         {
             if (m_pulseSampleCount < m_pulseWidth) // 1
             {
@@ -347,7 +348,7 @@ void TestMIThread::generate(quint32 chunksize)
             }
         }
         break;
-        case TestMISettings::ModulationNone:
+        case TestMIStreamSettings::ModulationNone:
         default:
         {
             Complex c = m_nco.nextIQ(m_phaseImbalance);

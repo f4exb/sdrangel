@@ -58,7 +58,7 @@ public:
         { }
     };
 
-	TestMIThread(SampleSinkFifo* sampleFifo, QObject* parent = 0);
+	TestMIThread(SampleSinkFifo* sampleFifo, int streamIndex, QObject* parent = 0);
 	~TestMIThread();
 
     void startStop(bool start);
@@ -73,7 +73,7 @@ public:
     void setPhaseImbalance(float phaseImbalance);
     void setFrequencyShift(int shift);
     void setToneFrequency(int toneFrequency);
-    void setModulation(TestMISettings::Modulation modulation);
+    void setModulation(TestMIStreamSettings::Modulation modulation);
     void setAMModulation(float amModulation);
     void setFMDeviation(float deviation);
     void setPattern0();
@@ -90,11 +90,12 @@ private:
     quint32 m_chunksize;
 	SampleVector m_convertBuffer;
 	SampleSinkFifo* m_sampleFifo;
+    int m_streamIndex;
 	NCOF m_nco;
     NCOF m_toneNco;
 	int m_frequencyShift;
 	int m_toneFrequency;
-	TestMISettings::Modulation m_modulation;
+	TestMIStreamSettings::Modulation m_modulation;
 	float m_amModulation;
 	float m_fmDeviationUnit;
 	float m_fmPhasor;

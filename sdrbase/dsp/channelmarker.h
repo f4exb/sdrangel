@@ -72,6 +72,11 @@ public:
     const QString& getDisplayAddressSend() const { return m_displayAddressSend; }
     const QString& getDisplayAddressReceive() const { return m_displayAddressReceive; }
 
+    void setSourceOrSinkStream(bool sourceOrSinkStream) { m_sourceOrSinkStream = sourceOrSinkStream; }
+    bool getSourceOrSinkStream() const { return m_sourceOrSinkStream; }
+    void setStreamIndex(int streamIndex) { m_streamIndex = streamIndex; }
+    int getStreamIndex() const { return m_streamIndex; }
+
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
@@ -92,6 +97,8 @@ protected:
 	QColor m_color;
 	bool m_movable;
     frequencyScaleDisplay_t m_fScaleDisplayType;
+    bool m_sourceOrSinkStream;
+    int m_streamIndex;
 
     void resetToDefaults();
 
