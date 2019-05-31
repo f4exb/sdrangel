@@ -57,6 +57,7 @@ XTRXInput::XTRXInput(DeviceAPI *deviceAPI) :
     openDevice();
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
+    m_deviceAPI->setNbSourceStreams(1);
     m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
@@ -158,7 +159,7 @@ bool XTRXInput::openDevice()
         }
     }
 
-    m_deviceShared.m_channel = m_deviceAPI->getItemIndex(); // publicly allocate channel
+    m_deviceShared.m_channel = m_deviceAPI->getDeviceItemIndex(); // publicly allocate channel
     m_deviceShared.m_source = this;
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
     return true;
@@ -277,7 +278,7 @@ bool XTRXInput::start()
         return false;
     }
 
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     XTRXInputThread *xtrxInputThread = findThread();
     bool needsStart = false;
 
@@ -376,7 +377,7 @@ void XTRXInput::stop()
         return;
     }
 
-    int removedChannel = m_deviceAPI->getItemIndex(); // channel to remove
+    int removedChannel = m_deviceAPI->getDeviceItemIndex(); // channel to remove
     int requestedChannel = removedChannel ^ 1; // channel to keep (opposite channel)
     XTRXInputThread *xtrxInputThread = findThread();
 
@@ -846,7 +847,7 @@ void XTRXInput::apply_gain_pga(double gain)
 
 bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, bool forceNCOFrequency)
 {
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     XTRXInputThread *inputThread = findThread();
     QList<QString> reverseAPIKeys;
 

@@ -74,6 +74,10 @@ The audio devices with Qt are supported through pulseaudio and unless you are us
 
 In case you cannot see anything related to HDMI or your desired audio device in pavucontrol just restart pulseaudio with `pulseaudio -k` (`-k` kills the previous instance before restarting) and do the above steps again.
 
+<h1>Note on udev rules</h1>
+
+On Linux you need specific files in `/etc/udev/rules.d` to be able to access the SDR hardware. Please refer to the respective hardware vendor instructions to install these files.
+
 <h1>Software build on Linux</h1>
 
 Plese consult the [Wiki page for compilation in Linux](https://github.com/f4exb/sdrangel/wiki/Compile-from-source-in-Linux). The notes below are left for further information if needed although you should be all set with the Wiki.
@@ -89,11 +93,11 @@ To be sure you will need at least Qt version 5.5. It definitely does not work wi
 
 <h2>Ubuntu</h2>
 
-  - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libsqlite3-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev libopus-dev`
+  - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev libopus-dev`
 
 <h2>Debian</h2>
 
-  - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libusb-1.0-0-dev libusb-dev qt5-default qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libsqlite3-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev libopus-dev`
+  - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libusb-1.0-0-dev libusb-dev qt5-default qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev  libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev libopus-dev`
 
 <h2>openSUSE</h2>
 
@@ -101,10 +105,7 @@ To be sure you will need at least Qt version 5.5. It definitely does not work wi
   - `sudo zypper install cmake fftw3-devel gcc-c++ libusb-1_0-devel libqt5-qtbase-devel libQt5OpenGL-devel libqt5-qtmultimedia-devel libqt5-qttools-devel libQt5Network-devel libQt5Widgets-devel boost-devel alsa-devel pulseaudio opencv-devel`
 
   - Note1: if you are on Leap you will need a more recent g++ compiler so in place of `gcc-c++` use `gcc6-c++` or `gcc7-c++` then add the following in the cmake command: `-DCMAKE_C_COMPILER=/usr/bin/gcc-7 -DCMAKE_CXX_COMPILER=/usr/bin/g++-7` (for gcc 7) and then `-DCMAKE_INSTALL_PREFIX:PATH=...` for the custom install path (not `-DCMAKE_INSTALL_PREFIX=...`)
-  - Note2 for udev rules: installed udev rules for BladeRF and HackRF are targeted at Debian or Ubuntu systems that have a plugdev group for USB hotplug devices. This is not the case in openSUSE. To fix it you can either:
-    - make the udev rules file compatible just remove the `GROUP` parameter on all lines and change `MODE` parameter to `666`.
-    - create a `plugdev` group and add it tou your user group list: `sudo groupadd plugdev` then `sudo usermod -G plugdev -a <user>`
-  - Note3: A package has been created in openSUSE thanks to Martin, see: [sdrangel](https://build.opensuse.org/package/show/hardware:sdr/sdrangel). It is based on the latest release on master branch.
+  - Note2: A package has been created in openSUSE thanks to Martin, see: [sdrangel](https://build.opensuse.org/package/show/hardware:sdr/sdrangel). It is based on the latest release on master branch.
 
 <h2>Fedora</h2>
 
@@ -114,16 +115,13 @@ This has been tested with Fedora 23 and 22:
   - `sudo dnf install mesa-libGL-devel`
   - `sudo dnf install cmake gcc-c++ pkgconfig fftw-devel libusb-devel qt5-qtbase-devel qt5-qtmultimedia-devel qt5-qttools-devel boost-devel pulseaudio alsa-lib-devel`
 
-  - Note for udev rules: the same as for openSUSE applies. This is detailed in the previous paragraph for openSUSE.
-
 <h2>Arch Linux / Manjaro</h2>
 
 Tested with the 15.09 version with LXDE desktop (community supported). The exact desktop environment should not matter anyway. Prerequisites should be similar for Arch and all derivatives.
 
 `sudo pacman -S cmake pkg-config fftw qt5-multimedia qt5-tools qt5-base libusb boost boost-libs pulseaudio`
 
-  - Note1 for udev rules: the same as for openSUSE and Fedora applies.
-  - Note2: Two package are avaliable in the AUR (thanks Mikos!), [sdrangel](https://aur.archlinux.org/packages/sdrangel), which provides the lastest tagged release (stable), and [sdrangel-git](https://aur.archlinux.org/packages/sdrangel-git), which builds the latest commit from this repository (unstable).
+  - Note1: Two package are avaliable in the AUR (thanks Mikos!), [sdrangel](https://aur.archlinux.org/packages/sdrangel), which provides the lastest tagged release (stable), and [sdrangel-git](https://aur.archlinux.org/packages/sdrangel-git), which builds the latest commit from this repository (unstable).
 
 <h1>Compile for Windows</h1>
 
@@ -354,8 +352,6 @@ Since apt-get v 1.1 installation is possible from a local file:
 
 The software is installed in `/opt/sdrangel` you can start it from the command line with:
   - `/opt/sdrangel/bin/sdrangel`
-
-**&#9888;** The udev rules are not set by the package installation so you will have to set it manually in order to be able to access the various SDR hardware. The `udev-rules` folder contains the rules file and the `install.sh` script that you can run as sudo to install all rules files. You may also adapt the script to copy only the required files.
 
 <h3>Ubuntu 18.04</h2>
 

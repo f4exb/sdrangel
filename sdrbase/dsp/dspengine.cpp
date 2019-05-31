@@ -22,15 +22,17 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
-
+#include "dsp/dspdevicemimoengine.h"
 
 DSPEngine::DSPEngine() :
     m_deviceSourceEnginesUIDSequence(0),
     m_deviceSinkEnginesUIDSequence(0),
+    m_deviceMIMOEnginesUIDSequence(0),
     m_audioInputDeviceIndex(-1),    // default device
     m_audioOutputDeviceIndex(-1)    // default device
 {
 	m_dvSerialSupport = false;
+    m_mimoSupport = false;
     m_masterTimer.start(50);
 }
 
@@ -87,21 +89,38 @@ void DSPEngine::removeLastDeviceSinkEngine()
     }
 }
 
+DSPDeviceMIMOEngine *DSPEngine::addDeviceMIMOEngine()
+{
+    m_deviceMIMOEngines.push_back(new DSPDeviceMIMOEngine(m_deviceMIMOEnginesUIDSequence));
+    m_deviceMIMOEnginesUIDSequence++;
+    return m_deviceMIMOEngines.back();
+}
+
+void DSPEngine::removeLastDeviceMIMOEngine()
+{
+    if (m_deviceMIMOEngines.size() > 0)
+    {
+        DSPDeviceMIMOEngine *lastDeviceEngine = m_deviceMIMOEngines.back();
+        delete lastDeviceEngine;
+        m_deviceMIMOEngines.pop_back();
+        m_deviceMIMOEnginesUIDSequence--;
+    }
+}
+
 DSPDeviceSourceEngine *DSPEngine::getDeviceSourceEngineByUID(uint uid)
 {
     std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceSourceEngines.begin();
 
     while (it != m_deviceSourceEngines.end())
     {
-        if ((*it)->getUID() == uid)
-        {
+        if ((*it)->getUID() == uid) {
             return *it;
         }
 
         ++it;
     }
 
-    return 0;
+    return nullptr;
 }
 
 DSPDeviceSinkEngine *DSPEngine::getDeviceSinkEngineByUID(uint uid)
@@ -110,15 +129,30 @@ DSPDeviceSinkEngine *DSPEngine::getDeviceSinkEngineByUID(uint uid)
 
     while (it != m_deviceSinkEngines.end())
     {
-        if ((*it)->getUID() == uid)
-        {
+        if ((*it)->getUID() == uid) {
             return *it;
         }
 
         ++it;
     }
 
-    return 0;
+    return nullptr;
+}
+
+DSPDeviceMIMOEngine *DSPEngine::getDeviceMIMOEngineByUID(uint uid)
+{
+    std::vector<DSPDeviceMIMOEngine*>::iterator it = m_deviceMIMOEngines.begin();
+
+    while (it != m_deviceMIMOEngines.end())
+    {
+        if ((*it)->getUID() == uid) {
+            return *it;
+        }
+
+        ++it;
+    }
+
+    return nullptr;
 }
 
 #ifdef DSD_USE_SERIALDV

@@ -66,6 +66,7 @@ BladeRF2Input::BladeRF2Input(DeviceAPI *deviceAPI) :
     }
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
+    m_deviceAPI->setNbSourceStreams(1);
     m_deviceAPI->addAncillarySink(m_fileSink);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -166,7 +167,7 @@ bool BladeRF2Input::openDevice()
         }
     }
 
-    m_deviceShared.m_channel = m_deviceAPI->getItemIndex(); // publicly allocate channel
+    m_deviceShared.m_channel = m_deviceAPI->getDeviceItemIndex(); // publicly allocate channel
     m_deviceShared.m_source = this;
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
     return true;
@@ -291,7 +292,7 @@ bool BladeRF2Input::start()
         return false;
     }
 
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     BladeRF2InputThread *bladerf2InputThread = findThread();
     bool needsStart = false;
 
@@ -406,7 +407,7 @@ void BladeRF2Input::stop()
         return;
     }
 
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     BladeRF2InputThread *bladerf2InputThread = findThread();
 
     if (bladerf2InputThread == 0) { // no thread allocated
@@ -629,7 +630,7 @@ bool BladeRF2Input::handleMessage(const Message& message)
 
         if (dev) // The BladeRF device must have been open to do so
         {
-            int requestedChannel = m_deviceAPI->getItemIndex();
+            int requestedChannel = m_deviceAPI->getDeviceItemIndex();
 
             if (report.getRxElseTx()) // Rx buddy change: check for: frequency, LO correction, gain mode and value, bias tee, sample rate, bandwidth
             {
@@ -771,7 +772,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
     bool forwardChangeTxBuddies = false;
 
     struct bladerf *dev = m_deviceShared.m_dev->getDev();
-    int requestedChannel = m_deviceAPI->getItemIndex();
+    int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     qint64 xlatedDeviceCenterFrequency = settings.m_centerFrequency;
     xlatedDeviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
     xlatedDeviceCenterFrequency = xlatedDeviceCenterFrequency < 0 ? 0 : xlatedDeviceCenterFrequency;

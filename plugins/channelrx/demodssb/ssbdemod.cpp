@@ -157,124 +157,133 @@ void SSBDemod::configure(MessageQueue* messageQueue,
 void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
     (void) positiveOnly;
-	Complex ci;
-	fftfilt::cmplx *sideband;
-	int n_out;
-
+    Complex ci;
 	m_settingsMutex.lock();
-
-	int decim = 1<<(m_spanLog2 - 1);
-	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it)
 	{
 		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
-		if(m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
-		{
-			if (m_dsb)
-			{
-				n_out = DSBFilter->runDSB(ci, &sideband);
-			}
-			else
-			{
-				n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
-			}
+        if (m_interpolatorDistance < 1.0f) // interpolate
+        {
+            while (!m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
+            {
+                processOneSample(ci);
+                m_interpolatorDistanceRemain += m_interpolatorDistance;
+            }
+        }
+        else
+        {
+            if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
+            {
+                processOneSample(ci);
+                m_interpolatorDistanceRemain += m_interpolatorDistance;
+            }
+        }
+    }
 
-			m_interpolatorDistanceRemain += m_interpolatorDistance;
-		}
-		else
-		{
-			n_out = 0;
-		}
+	m_settingsMutex.unlock();
+}
 
-		for (int i = 0; i < n_out; i++)
-		{
-			// Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
-			// smart decimation with bit gain using float arithmetic (23 bits significand)
+void SSBDemod::processOneSample(Complex &ci)
+{
+	fftfilt::cmplx *sideband;
+	int n_out = 0;
+	int decim = 1<<(m_spanLog2 - 1);
+	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
 
-			m_sum += sideband[i];
+    if (m_dsb) {
+        n_out = DSBFilter->runDSB(ci, &sideband);
+    } else {
+        n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
+    }
 
-			if (!(m_undersampleCount++ & decim_mask))
-			{
-				Real avgr = m_sum.real() / decim;
-				Real avgi = m_sum.imag() / decim;
-				m_magsq = (avgr * avgr + avgi * avgi) / (SDR_RX_SCALED*SDR_RX_SCALED);
+    for (int i = 0; i < n_out; i++)
+    {
+        // Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
+        // smart decimation with bit gain using float arithmetic (23 bits significand)
 
-                m_magsqSum += m_magsq;
+        m_sum += sideband[i];
 
-                if (m_magsq > m_magsqPeak)
+        if (!(m_undersampleCount++ & decim_mask))
+        {
+            Real avgr = m_sum.real() / decim;
+            Real avgi = m_sum.imag() / decim;
+            m_magsq = (avgr * avgr + avgi * avgi) / (SDR_RX_SCALED*SDR_RX_SCALED);
+
+            m_magsqSum += m_magsq;
+
+            if (m_magsq > m_magsqPeak)
+            {
+                m_magsqPeak = m_magsq;
+            }
+
+            m_magsqCount++;
+
+            if (!m_dsb & !m_usb)
+            { // invert spectrum for LSB
+                m_sampleBuffer.push_back(Sample(avgi, avgr));
+            }
+            else
+            {
+                m_sampleBuffer.push_back(Sample(avgr, avgi));
+            }
+
+            m_sum.real(0.0);
+            m_sum.imag(0.0);
+        }
+
+        float agcVal = m_agcActive ? m_agc.feedAndGetValue(sideband[i]) : 0.1;
+        fftfilt::cmplx& delayedSample = m_squelchDelayLine.readBack(m_agc.getStepDownDelay());
+        m_audioActive = delayedSample.real() != 0.0;
+        m_squelchDelayLine.write(sideband[i]*agcVal);
+
+        if (m_audioMute)
+        {
+            m_audioBuffer[m_audioBufferFill].r = 0;
+            m_audioBuffer[m_audioBufferFill].l = 0;
+        }
+        else
+        {
+            fftfilt::cmplx z = m_agcActive ? delayedSample * m_agc.getStepValue() : delayedSample;
+
+            if (m_audioBinaual)
+            {
+                if (m_audioFlipChannels)
                 {
-                    m_magsqPeak = m_magsq;
+                    m_audioBuffer[m_audioBufferFill].r = (qint16)(z.imag() * m_volume);
+                    m_audioBuffer[m_audioBufferFill].l = (qint16)(z.real() * m_volume);
                 }
+                else
+                {
+                    m_audioBuffer[m_audioBufferFill].r = (qint16)(z.real() * m_volume);
+                    m_audioBuffer[m_audioBufferFill].l = (qint16)(z.imag() * m_volume);
+                }
+            }
+            else
+            {
+                Real demod = (z.real() + z.imag()) * 0.7;
+                qint16 sample = (qint16)(demod * m_volume);
+                m_audioBuffer[m_audioBufferFill].l = sample;
+                m_audioBuffer[m_audioBufferFill].r = sample;
+            }
+        }
 
-                m_magsqCount++;
+        ++m_audioBufferFill;
 
-				if (!m_dsb & !m_usb)
-				{ // invert spectrum for LSB
-					m_sampleBuffer.push_back(Sample(avgi, avgr));
-				}
-				else
-				{
-					m_sampleBuffer.push_back(Sample(avgr, avgi));
-				}
+        if (m_audioBufferFill >= m_audioBuffer.size())
+        {
+            uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
-                m_sum.real(0.0);
-                m_sum.imag(0.0);
-			}
+            if (res != m_audioBufferFill)
+            {
+                qDebug("SSBDemod::feed: %u/%u samples written", res, m_audioBufferFill);
+            }
 
-            float agcVal = m_agcActive ? m_agc.feedAndGetValue(sideband[i]) : 10.0; // 10.0 for 3276.8, 1.0 for 327.68
-            fftfilt::cmplx& delayedSample = m_squelchDelayLine.readBack(m_agc.getStepDownDelay());
-            m_audioActive = delayedSample.real() != 0.0;
-            m_squelchDelayLine.write(sideband[i]*agcVal);
-
-			if (m_audioMute)
-			{
-				m_audioBuffer[m_audioBufferFill].r = 0;
-				m_audioBuffer[m_audioBufferFill].l = 0;
-			}
-			else
-			{
-			    fftfilt::cmplx z = delayedSample * m_agc.getStepValue();
-
-				if (m_audioBinaual)
-				{
-					if (m_audioFlipChannels)
-					{
-						m_audioBuffer[m_audioBufferFill].r = (qint16)(z.imag() * m_volume);
-						m_audioBuffer[m_audioBufferFill].l = (qint16)(z.real() * m_volume);
-					}
-					else
-					{
-						m_audioBuffer[m_audioBufferFill].r = (qint16)(z.real() * m_volume);
-						m_audioBuffer[m_audioBufferFill].l = (qint16)(z.imag() * m_volume);
-					}
-				}
-				else
-				{
-					Real demod = (z.real() + z.imag()) * 0.7;
-					qint16 sample = (qint16)(demod * m_volume);
-					m_audioBuffer[m_audioBufferFill].l = sample;
-					m_audioBuffer[m_audioBufferFill].r = sample;
-				}
-			}
-
-			++m_audioBufferFill;
-
-			if (m_audioBufferFill >= m_audioBuffer.size())
-			{
-				uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
-
-				if (res != m_audioBufferFill)
-				{
-				    qDebug("SSBDemod::feed: %u/%u samples written", res, m_audioBufferFill);
-				}
-
-				m_audioBufferFill = 0;
-			}
-		}
-	}
+            m_audioBufferFill = 0;
+        }
+    }
 
 	uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
@@ -292,7 +301,6 @@ void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 	m_sampleBuffer.clear();
 
-	m_settingsMutex.unlock();
 }
 
 void SSBDemod::start()
@@ -389,7 +397,8 @@ void SSBDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffse
     if ((m_inputSampleRate != inputSampleRate) || force)
     {
         m_settingsMutex.lock();
-        m_interpolator.create(16, inputSampleRate, m_Bandwidth * 1.5f, 2.0f);
+        Real interpolatorBandwidth = (m_Bandwidth * 1.5f) > inputSampleRate ? inputSampleRate : (m_Bandwidth * 1.5f);
+        m_interpolator.create(16, inputSampleRate, interpolatorBandwidth, 2.0f);
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) inputSampleRate / (Real) m_audioSampleRate;
         m_settingsMutex.unlock();
@@ -409,7 +418,8 @@ void SSBDemod::applyAudioSampleRate(int sampleRate)
 
     m_settingsMutex.lock();
 
-    m_interpolator.create(16, m_inputSampleRate, m_Bandwidth * 1.5f, 2.0f);
+    Real interpolatorBandwidth = (m_Bandwidth * 1.5f) > m_inputSampleRate ? m_inputSampleRate : (m_Bandwidth * 1.5f);
+    m_interpolator.create(16, m_inputSampleRate, interpolatorBandwidth, 2.0f);
     m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = (Real) m_inputSampleRate / (Real) sampleRate;
 
@@ -508,7 +518,8 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
         m_LowCutoff = lowCutoff;
 
         m_settingsMutex.lock();
-        m_interpolator.create(16, m_inputSampleRate, m_Bandwidth * 1.5f, 2.0f);
+        Real interpolatorBandwidth = (m_Bandwidth * 1.5f) > m_inputSampleRate ? m_inputSampleRate : (m_Bandwidth * 1.5f);
+        m_interpolator.create(16, m_inputSampleRate, interpolatorBandwidth, 2.0f);
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) m_inputSampleRate / (Real) m_audioSampleRate;
         SSBFilter->create_filter(m_LowCutoff / (float) m_audioSampleRate, m_Bandwidth / (float) m_audioSampleRate);

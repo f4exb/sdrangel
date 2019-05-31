@@ -41,7 +41,7 @@ public:
 	        const QString& sinkId,
 	        QWidget **widget,
 	        DeviceUISet *deviceUISet);
-	virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceAPI *deviceAPI);
+	virtual DeviceSampleSink* createSampleSinkPluginInstance(const QString& sinkId, DeviceAPI *deviceAPI);
 
 	static const QString m_hardwareID;
     static const QString m_deviceTypeID;

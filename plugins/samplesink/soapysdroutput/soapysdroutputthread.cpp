@@ -169,7 +169,7 @@ void SoapySDROutputThread::run()
                     break;
                 case InterpolatorFloat:
                 default:
-                    // TODO
+                    callbackSOIF((float*) buffs[0], numElems);
                     break;
                 }
             }
@@ -270,7 +270,7 @@ void SoapySDROutputThread::callbackMO(std::vector<void *>& buffs, qint32 samples
                 break;
             case InterpolatorFloat:
             default:
-                // TODO
+                std::fill((float*) buffs[ichan], (float*) buffs[ichan] + 2*samplesPerChannel, 0.0f);
                 break;
             }
         }
@@ -435,5 +435,59 @@ void SoapySDROutputThread::callbackSO16(qint16* buf, qint32 len, unsigned int ch
     else
     {
         std::fill(buf, buf+2*len, 0);
+    }
+}
+
+
+void SoapySDROutputThread::callbackSOIF(float* buf, qint32 len, unsigned int channel)
+{
+    if (m_channels[channel].m_sampleFifo)
+    {
+        float bal = m_channels[channel].m_sampleFifo->getRWBalance();
+
+        if (bal < -0.25) {
+            qDebug("SoapySDROutputThread::callbackSO16: read lags: %f", bal);
+        } else if (bal > 0.25) {
+            qDebug("SoapySDROutputThread::callbackSO16: read leads: %f", bal);
+        }
+
+        SampleVector::iterator beginRead;
+        m_channels[channel].m_sampleFifo->readAdvance(beginRead, len/(1<<m_channels[channel].m_log2Interp));
+        beginRead -= len;
+
+        if (m_channels[channel].m_log2Interp == 0)
+        {
+            m_channels[channel].m_interpolatorsIF.interpolate1(&beginRead, buf, len*2);
+        }
+        else
+        {
+            switch (m_channels[channel].m_log2Interp)
+            {
+            case 1:
+                m_channels[channel].m_interpolatorsIF.interpolate2_cen(&beginRead, buf, len*2);
+                break;
+            case 2:
+                m_channels[channel].m_interpolatorsIF.interpolate4_cen(&beginRead, buf, len*2);
+                break;
+            case 3:
+                m_channels[channel].m_interpolatorsIF.interpolate8_cen(&beginRead, buf, len*2);
+                break;
+            case 4:
+                m_channels[channel].m_interpolatorsIF.interpolate16_cen(&beginRead, buf, len*2);
+                break;
+            case 5:
+                m_channels[channel].m_interpolatorsIF.interpolate32_cen(&beginRead, buf, len*2);
+                break;
+            case 6:
+                m_channels[channel].m_interpolatorsIF.interpolate64_cen(&beginRead, buf, len*2);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+    else
+    {
+        std::fill(buf, buf+2*len, 0.0f);
     }
 }

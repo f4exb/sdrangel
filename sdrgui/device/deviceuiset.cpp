@@ -31,23 +31,27 @@
 
 #include "deviceuiset.h"
 
-DeviceUISet::DeviceUISet(int tabIndex, bool rxElseTx, QTimer& timer)
+DeviceUISet::DeviceUISet(int tabIndex, int deviceType, QTimer& timer)
 {
     m_spectrum = new GLSpectrum;
-    if (rxElseTx) {
+    if ((deviceType == 0) || (deviceType == 2)) { // Single Rx or MIMO
         m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF, m_spectrum);
-    } else {
+    } else if (deviceType == 1) { // Single Tx
         m_spectrumVis = new SpectrumVis(SDR_TX_SCALEF, m_spectrum);
     }
     m_spectrum->connectTimer(timer);
     m_spectrumGUI = new GLSpectrumGUI;
     m_spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, m_spectrum);
     m_channelWindow = new ChannelWindow;
-    m_samplingDeviceControl = new SamplingDeviceControl(tabIndex, rxElseTx);
-    m_deviceSourceEngine = 0;
-    m_deviceAPI = 0;
-    m_deviceSinkEngine = 0;
+    m_samplingDeviceControl = new SamplingDeviceControl(tabIndex, deviceType);
+    m_deviceAPI = nullptr;
+    m_deviceSourceEngine = nullptr;
+    m_deviceSinkEngine = nullptr;
+    m_deviceMIMOEngine = nullptr;
     m_deviceTabIndex = tabIndex;
+    m_nbAvailableRxChannels = 0;   // updated at enumeration for UI selector
+    m_nbAvailableTxChannels = 0;   // updated at enumeration for UI selector
+    m_nbAvailableMIMOChannels = 0; // updated at enumeration for UI selector
 
     // m_spectrum needs to have its font to be set since it cannot be inherited from the main window
     QFont font;

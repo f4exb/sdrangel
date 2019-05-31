@@ -151,6 +151,7 @@ private:
 
 	Real m_waterfallShare;
 
+    int m_leftMargin;
 	QPixmap m_leftMarginPixmap;
 	QPixmap m_frequencyPixmap;
 	ScaleEngine m_timeScale;
@@ -211,6 +212,7 @@ private:
 	void mouseMoveEvent(QMouseEvent* event);
 	void mousePressEvent(QMouseEvent* event);
 	void mouseReleaseEvent(QMouseEvent* event);
+    void wheelEvent(QWheelEvent*);
 
 	void enterEvent(QEvent* event);
 	void leaveEvent(QEvent* event);

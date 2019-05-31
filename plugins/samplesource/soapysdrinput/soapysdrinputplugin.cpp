@@ -115,7 +115,7 @@ PluginInstanceGUI* SoapySDRInputPlugin::createSampleSourcePluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSource *SoapySDRInputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceAPI *deviceAPI)
+DeviceSampleSource *SoapySDRInputPlugin::createSampleSourcePluginInstance(const QString& sourceId, DeviceAPI *deviceAPI)
 {
     if (sourceId == m_deviceTypeID)
     {

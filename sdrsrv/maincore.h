@@ -197,23 +197,23 @@ private:
     public:
         int getDeviceSetIndex() const { return m_deviceSetIndex; }
         int getDeviceIndex() const { return m_deviceIndex; }
-        bool isTx() const { return m_tx; }
+        int getDeviceType() const { return m_deviceType; }
 
-        static MsgSetDevice* create(int deviceSetIndex, int deviceIndex, bool tx)
+        static MsgSetDevice* create(int deviceSetIndex, int deviceIndex, int deviceType)
         {
-            return new MsgSetDevice(deviceSetIndex, deviceIndex, tx);
+            return new MsgSetDevice(deviceSetIndex, deviceIndex, deviceType);
         }
 
     private:
         int m_deviceSetIndex;
         int m_deviceIndex;
-        bool m_tx;
+        int m_deviceType;
 
-        MsgSetDevice(int deviceSetIndex, int deviceIndex, bool tx) :
+        MsgSetDevice(int deviceSetIndex, int deviceIndex, int deviceType) :
             Message(),
             m_deviceSetIndex(deviceSetIndex),
             m_deviceIndex(deviceIndex),
-            m_tx(tx)
+            m_deviceType(deviceType)
         { }
     };
 

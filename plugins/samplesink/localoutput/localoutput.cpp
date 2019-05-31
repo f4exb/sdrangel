@@ -44,7 +44,7 @@ LocalOutput::LocalOutput(DeviceAPI *deviceAPI) :
 	m_deviceDescription("LocalOutput")
 {
 	m_sampleSourceFifo.resize(96000 * 4);
-
+    m_deviceAPI->setNbSinkStreams(1);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }

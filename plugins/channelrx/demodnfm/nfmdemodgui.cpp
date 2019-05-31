@@ -201,6 +201,12 @@ void NFMDemodGUI::on_ctcssOn_toggled(bool checked)
 	applySettings();
 }
 
+void NFMDemodGUI::on_highPassFilter_toggled(bool checked)
+{
+    m_settings.m_highPass = checked;
+    applySettings();
+}
+
 void NFMDemodGUI::on_audioMute_toggled(bool checked)
 {
 	m_settings.m_audioMute = checked;
@@ -398,6 +404,7 @@ void NFMDemodGUI::displaySettings()
     }
 
     ui->ctcssOn->setChecked(m_settings.m_ctcssOn);
+    ui->highPassFilter->setChecked(m_settings.m_highPass);
     ui->audioMute->setChecked(m_settings.m_audioMute);
 
     ui->ctcss->setCurrentIndex(m_settings.m_ctcssIndex);

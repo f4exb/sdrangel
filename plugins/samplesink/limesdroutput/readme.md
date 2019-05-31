@@ -14,7 +14,6 @@ LimeSDR is a 2x2 MIMO device so it has two transmitting channels that can run co
 
 The plugin will be built only if LimeSuite is installed in your system. Please use version tagged v17.06.0 or maybe later. To build and install LimeSuite from source do:
 
-  - `sudo apt-get install libsqlite3-dev`
   - `git clone https://github.com/myriadrf/LimeSuite.git`
   - `cd LimeSuite`
   - `mkdir builddir`

@@ -36,7 +36,7 @@ class SDRGUI_API SamplingDeviceControl : public QWidget {
     Q_OBJECT
 
 public:
-    explicit SamplingDeviceControl(int tabIndex, bool rxElseTx, QWidget* parent = 0);
+    explicit SamplingDeviceControl(int tabIndex, int deviceType, QWidget* parent = 0);
     ~SamplingDeviceControl();
 
     int getSelectedDeviceIndex() const { return m_selectedDeviceIndex; }
@@ -55,7 +55,7 @@ private:
     Ui::SamplingDeviceControl* ui;
     PluginManager *m_pluginManager;
     int m_deviceTabIndex;
-    bool m_rxElseTx;
+    int m_deviceType;
     int m_selectedDeviceIndex;
 
 signals:

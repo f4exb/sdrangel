@@ -23,6 +23,7 @@ class PluginInstanceGUI;
 class QWidget;
 class DeviceSampleSource;
 class DeviceSampleSink;
+class DeviceSampleMIMO;
 class BasebandSampleSink;
 class BasebandSampleSource;
 class ChannelAPI;
@@ -41,7 +42,7 @@ public:
         {
             StreamSingleRx, //!< Exposes a single input stream that can be one of the streams of a physical device
             StreamSingleTx, //!< Exposes a single output stream that can be one of the streams of a physical device
-            StreamAny       //!< May expose any number of input and/or output streams
+            StreamMIMO      //!< May expose any number of input and/or output streams
         };
 
 		QString displayedName;    //!< The human readable name
@@ -148,7 +149,7 @@ public:
         return nullptr;
     }
 
-    virtual DeviceSampleSource* createSampleSourcePluginInstanceInput( // creates the input "core"
+    virtual DeviceSampleSource* createSampleSourcePluginInstance( // creates the input "core"
             const QString& sourceId,
             DeviceAPI *deviceAPI)
     {
@@ -174,7 +175,7 @@ public:
         return nullptr;
     }
 
-    virtual DeviceSampleSink* createSampleSinkPluginInstanceOutput( // creates the output "core"
+    virtual DeviceSampleSink* createSampleSinkPluginInstance( // creates the output "core"
             const QString& sinkId,
             DeviceAPI *deviceAPI)
     {
@@ -185,6 +186,34 @@ public:
 
     virtual void deleteSampleSinkPluginInstanceGUI(PluginInstanceGUI *ui);
     virtual void deleteSampleSinkPluginInstanceOutput(DeviceSampleSink *sink);
+
+    // device MIMO plugins only
+
+	virtual SamplingDevices enumSampleMIMO() { return SamplingDevices(); }
+
+	virtual PluginInstanceGUI* createSampleMIMOPluginInstanceGUI(
+            const QString& mimoId,
+            QWidget **widget,
+            DeviceUISet *deviceUISet)
+    {
+        (void) mimoId;
+        (void) widget;
+        (void) deviceUISet;
+        return nullptr;
+    }
+
+    virtual DeviceSampleMIMO* createSampleMIMOPluginInstance( // creates the MIMO "core"
+            const QString& mimoId,
+            DeviceAPI *deviceAPI)
+    {
+        (void) mimoId;
+        (void) deviceAPI;
+        return nullptr;
+    }
+
+    virtual void deleteSampleMIMOPluginInstanceGUI(PluginInstanceGUI *ui);
+    virtual void deleteSampleMIMOPluginInstanceMIMO(DeviceSampleMIMO *mimo);
+
 };
 
 Q_DECLARE_INTERFACE(PluginInterface, "SDRangel.PluginInterface/0.1");

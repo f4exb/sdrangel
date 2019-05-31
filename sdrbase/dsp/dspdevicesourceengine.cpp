@@ -32,7 +32,7 @@ DSPDeviceSourceEngine::DSPDeviceSourceEngine(uint uid, QObject* parent) :
 	QThread(parent),
     m_uid(uid),
 	m_state(StNotStarted),
-	m_deviceSampleSource(0),
+	m_deviceSampleSource(nullptr),
 	m_sampleSourceSequence(0),
 	m_basebandSampleSinks(),
 	m_sampleRate(0),

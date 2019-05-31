@@ -32,7 +32,6 @@
 class QLabel;
 class QTreeWidgetItem;
 class QDir;
-class SamplingDeviceControl;
 
 class DSPEngine;
 class DSPDeviceSourceEngine;
@@ -78,7 +77,7 @@ public:
 	void addViewAction(QAction* action);
 
     void addChannelRollup(int deviceTabIndex, QWidget* widget);
-	void setDeviceGUI(int deviceTabIndex, QWidget* gui, const QString& deviceDisplayName, bool sourceDevice = true);
+	void setDeviceGUI(int deviceTabIndex, QWidget* gui, const QString& deviceDisplayName, int deviceType = 0);
 
 	const QTimer& getMasterTimer() const { return m_masterTimer; }
 	const MainSettings& getMainSettings() const { return m_settings; }
@@ -196,7 +195,7 @@ private:
     public:
         int getDeviceSetIndex() const { return m_deviceSetIndex; }
         int getDeviceIndex() const { return m_deviceIndex; }
-        bool isTx() const { return m_tx; }
+        int getDeviceType() const { return m_deviceType; }
 
         static MsgSetDevice* create(int deviceSetIndex, int deviceIndex, bool tx)
         {
@@ -206,13 +205,13 @@ private:
     private:
         int m_deviceSetIndex;
         int m_deviceIndex;
-        bool m_tx;
+        int m_deviceType;
 
-        MsgSetDevice(int deviceSetIndex, int deviceIndex, bool tx) :
+        MsgSetDevice(int deviceSetIndex, int deviceIndex, int deviceType) :
             Message(),
             m_deviceSetIndex(deviceSetIndex),
             m_deviceIndex(deviceIndex),
-            m_tx(tx)
+            m_deviceType(deviceType)
         { }
     };
 
@@ -348,6 +347,7 @@ private:
 
 	void addSourceDevice(int deviceIndex);
 	void addSinkDevice();
+    void addMIMODevice();
     void removeLastDevice();
     void deleteChannel(int deviceSetIndex, int channelIndex);
 
@@ -383,11 +383,13 @@ private slots:
 	void on_action_My_Position_triggered();
 	void sampleSourceChanged();
 	void sampleSinkChanged();
+	void sampleMIMOChanged();
     void channelAddClicked(bool checked);
 	void on_action_Loaded_Plugins_triggered();
 	void on_action_About_triggered();
 	void on_action_addSourceDevice_triggered();
 	void on_action_addSinkDevice_triggered();
+    void on_action_addMIMODevice_triggered();
 	void on_action_removeLastDevice_triggered();
 	void on_action_Exit_triggered();
 	void tabInputViewIndexChanged();

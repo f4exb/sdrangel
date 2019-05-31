@@ -27,3 +27,29 @@ Normal sequence of operations:
   - Start `freqtracking.py` in a terminal
   - In SDRangel connect the Frequency Tracker plugin by clicking on the grey square at the left of the top bar of the Frequency Tracker GUI. It opens the channel settings dialog. Check the 'Reverse API' box. Next to this box is the address and port at which the channel will be connected. If you use the defaults for `freqtracking.py` you may leave it as it is else you have to adjust it to the address and port of `freqtracking.py` (options `-A` and `-P`).
   - In the same manner connect the channel you want to be controlled by `freqtracking.py`. You may connect any number of channels like this. When a channel is removed `freqtracking.py` will automatically remove it from its list at the first attempt to synchronize that will fail.
+
+<h2>ptt_active.py</h2>
+
+PTT (Push To Talk) actively listening system. For a pair of given device set indexes it actively listens to start and stop commands on the corresponding devices to swich over to the other
+
+Options are:
+
+  - `-h` or `--help` show help message and exit
+  - `-A` or `--address` listening IP address. Default `0.0.0.0` (all interfaces)
+  - `-P` or `--port` listening port. Default `8000`
+  - `-p` or `--port-sdr` SDRangel instance REST API listening port. Default `8091`
+  - `-l` or `--link` Pair of indexes of the device sets to link. Default `0 1`
+  - `-d` or `--delay` Switch over delay in seconds. Default `1`
+  - `-f` or `--freq-sync` Synchronize devices center frequencies
+
+Normal sequence of operations:
+
+In this example we have a Rx device on index 0 and a Tx device on index 1. All settings are assumed to be the default settings.
+
+  - Start `ptt_active.py` in a terminal
+  - On the Rx device right click on the start/stop button and activate reverse API at address `127.0.0.1` port `8000` (default)
+  - On the Tx device right click on the start/stop button and activate reverse API at address `127.0.0.1` port `8000` (default)
+  - Start the Rx or Tx device
+  - Stop the running device (Rx or Tx) this will switch over automatically to the other
+
+Important: you should initiate switch over by stopping the active device and not by starting the other.

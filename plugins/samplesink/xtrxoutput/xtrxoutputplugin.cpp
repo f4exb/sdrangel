@@ -112,7 +112,7 @@ PluginInstanceGUI* XTRXOutputPlugin::createSampleSinkPluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSink* XTRXOutputPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceAPI *deviceAPI)
+DeviceSampleSink* XTRXOutputPlugin::createSampleSinkPluginInstance(const QString& sinkId, DeviceAPI *deviceAPI)
 {
     if(sinkId == m_deviceTypeID)
     {

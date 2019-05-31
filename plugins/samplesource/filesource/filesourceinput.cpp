@@ -60,18 +60,21 @@ FileSourceInput::FileSourceInput(DeviceAPI *deviceAPI) :
 	m_sampleSize(0),
 	m_centerFrequency(0),
 	m_recordLength(0),
-    m_startingTimeStamp(0),
-    m_masterTimer(deviceAPI->getMasterTimer())
+    m_startingTimeStamp(0)
 {
+    m_deviceAPI->setNbSourceStreams(1);
     qDebug("FileSourceInput::FileSourceInput: device source engine: %p", m_deviceAPI->getDeviceSourceEngine());
     qDebug("FileSourceInput::FileSourceInput: device source engine message queue: %p", m_deviceAPI->getDeviceEngineInputMessageQueue());
     qDebug("FileSourceInput::FileSourceInput: device source: %p", m_deviceAPI->getDeviceSourceEngine()->getSource());
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    m_masterTimer.setTimerType(Qt::PreciseTimer);
+    m_masterTimer.start(50);
 }
 
 FileSourceInput::~FileSourceInput()
 {
+    m_masterTimer.stop();
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
 
@@ -91,7 +94,11 @@ void FileSourceInput::openFileStream()
 		m_ifstream.close();
 	}
 
+#ifdef Q_OS_WIN
+	m_ifstream.open(m_fileName.toStdWString().c_str(), std::ios::binary | std::ios::ate);
+#else
 	m_ifstream.open(m_fileName.toStdString().c_str(), std::ios::binary | std::ios::ate);
+#endif
 	quint64 fileSize = m_ifstream.tellg();
 
 	if (fileSize > sizeof(FileRecord::Header))

@@ -1,3 +1,27 @@
+sdrangel (4.8.2-1) unstable; urgency=medium
+
+  * SSB demod: fixes
+  * Audio input: set default volume factor to 1.0 (was 0.15)
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 30 May 2019 20:44:06 +0100
+
+sdrangel (4.8.1-1) unstable; urgency=medium
+
+  * AM demod: fixed audio interpolator. Issue #354
+  * Implemented interpolation to audio for NFM and SSB demods allowing the use of a 48k audio sink regardless of the channel sample rate
+  * AM demod: implemented low pass filter after the demod. Issue #352
+  * Spectrum window: added ability to use the mouse wheel to move the central channel marker line. Issue #343
+  * Frequency Tracker: make lock converge faster
+  * Added a splash screen on startup. Issue #343
+  * SoapySDR output: support floating point type samples. Issue #345
+  * NFM demod: made high pass audio filter optional to be able to pass DC to other programs via audio. Issue #343
+  * Added UHD rules in udev (and moved away to sdrangel-docker). Issue #343
+  * Use Qt precise timer for test and file sources
+  * "hidden" `--mimo` option to activate MIMO functionality (MIMO device set). Makes it optional until it can be officialy released
+  * Updated some base classes to adequately support new MIMO devices
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 20 May 2019 20:44:06 +0100
+
 sdrangel (4.8.0-1) unstable; urgency=medium
 
   * Local output plugin

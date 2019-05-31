@@ -99,7 +99,7 @@ PluginInstanceGUI* FileSinkPlugin::createSampleSinkPluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSink* FileSinkPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceAPI *deviceAPI)
+DeviceSampleSink* FileSinkPlugin::createSampleSinkPluginInstance(const QString& sinkId, DeviceAPI *deviceAPI)
 {
     if(sinkId == m_deviceTypeID)
     {

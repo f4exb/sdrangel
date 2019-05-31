@@ -25,7 +25,7 @@
 #include <QSet>
 #include <QDebug>
 
-const float AudioDeviceManager::m_defaultAudioInputVolume = 0.15f;
+const float AudioDeviceManager::m_defaultAudioInputVolume = 1.0f;
 const QString AudioDeviceManager::m_defaultUDPAddress = "127.0.0.1";
 const QString AudioDeviceManager::m_defaultDeviceName = "System default device";
 

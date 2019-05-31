@@ -366,7 +366,6 @@ void WebAPIRequestMapper::instanceAudioService(qtwebapp::HttpRequest& request, q
 
 void WebAPIRequestMapper::instanceAudioInputParametersService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
-    // TODO
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
     response.setHeader("Access-Control-Allow-Origin", "*");

@@ -115,7 +115,7 @@ PluginInstanceGUI* PlutoSDRInputPlugin::createSampleSourcePluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSource *PlutoSDRInputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceAPI *deviceAPI)
+DeviceSampleSource *PlutoSDRInputPlugin::createSampleSourcePluginInstance(const QString& sourceId, DeviceAPI *deviceAPI)
 {
     if (sourceId == m_deviceTypeID)
     {

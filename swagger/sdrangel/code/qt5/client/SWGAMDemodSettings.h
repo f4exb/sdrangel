@@ -75,6 +75,9 @@ public:
     qint32 getSyncAmOperation();
     void setSyncAmOperation(qint32 sync_am_operation);
 
+    qint32 getStreamIndex();
+    void setStreamIndex(qint32 stream_index);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -126,6 +129,9 @@ private:
 
     qint32 sync_am_operation;
     bool m_sync_am_operation_isSet;
+
+    qint32 stream_index;
+    bool m_stream_index_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

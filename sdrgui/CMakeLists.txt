@@ -22,6 +22,7 @@ set(sdrgui_SOURCES
     gui/comboboxnoarrow.cpp
     gui/crightclickenabler.cpp
     gui/cwkeyergui.cpp
+    gui/devicestreamselectiondialog.cpp
     gui/editcommanddialog.cpp
     gui/externalclockbutton.cpp
     gui/externalclockdialog.cpp
@@ -42,6 +43,7 @@ set(sdrgui_SOURCES
     gui/samplingdevicecontrol.cpp
     gui/samplingdevicedialog.cpp
     gui/scaleengine.cpp
+    gui/sdrangelsplash.cpp
     gui/tickedslider.cpp
     gui/transverterbutton.cpp
     gui/transverterdialog.cpp
@@ -88,6 +90,7 @@ set(sdrgui_HEADERS
     gui/comboboxnoarrow.h
     gui/crightclickenabler.h
     gui/cwkeyergui.h
+    gui/devicestreamselectiondialog.h
     gui/editcommanddialog.h
     gui/externalclockbutton.h
     gui/externalclockdialog.h
@@ -109,6 +112,7 @@ set(sdrgui_HEADERS
     gui/samplingdevicecontrol.h
     gui/samplingdevicedialog.h
     gui/scaleengine.h
+    gui/sdrangelsplash.h
     gui/tickedslider.h
     gui/transverterbutton.h
     gui/transverterdialog.h
@@ -144,6 +148,7 @@ set(sdrgui_FORMS
   gui/basicdevicesettingsdialog.ui
   gui/commandoutputdialog.ui
   gui/cwkeyergui.ui
+  gui/devicestreamselectiondialog.ui
   gui/editcommanddialog.ui
   gui/externalclockdialog.ui
   gui/glscopegui.ui

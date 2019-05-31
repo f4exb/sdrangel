@@ -150,7 +150,7 @@ PluginInstanceGUI* HackRFInputPlugin::createSampleSourcePluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSource *HackRFInputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceAPI *deviceAPI)
+DeviceSampleSource *HackRFInputPlugin::createSampleSourcePluginInstance(const QString& sourceId, DeviceAPI *deviceAPI)
 {
     if (sourceId == m_deviceTypeID)
     {

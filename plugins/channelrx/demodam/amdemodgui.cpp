@@ -31,6 +31,7 @@
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "gui/devicestreamselectiondialog.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 #include "gui/crightclickenabler.h"
@@ -230,6 +231,17 @@ void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
 
         applySettings();
     }
+    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
+    {
+        DeviceStreamSelectionDialog dialog(this);
+        dialog.setNumberOfStreams(m_amDemod->getNumberOfDeviceStreams());
+        dialog.setStreamIndex(m_settings.m_streamIndex);
+        dialog.move(p);
+        dialog.exec();
+
+        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+        applySettings();
+    }
 
     resetContextMenuType();
 }
@@ -379,7 +391,18 @@ void AMDemodGUI::displaySettings()
         ui->ssb->setIcon(m_iconDSBUSB);
     }
 
+    displayStreamIndex();
+
     blockApplySettings(false);
+}
+
+void AMDemodGUI::displayStreamIndex()
+{
+    if (m_deviceUISet->m_deviceMIMOEngine) {
+        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
+    } else {
+        setStreamIndicator("S"); // single channel indicator
+    }
 }
 
 void AMDemodGUI::leaveEvent(QEvent*)

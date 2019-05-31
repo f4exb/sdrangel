@@ -48,6 +48,7 @@ protected:
 	bool eventFilter(QObject* object, QEvent* event);
 
     void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
+	void setStreamIndicator(const QString& indicator);
 };
 
 #endif // INCLUDE_ROLLUPWIDGET_H

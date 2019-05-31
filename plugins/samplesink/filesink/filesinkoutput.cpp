@@ -49,6 +49,7 @@ FileSinkOutput::FileSinkOutput(DeviceAPI *deviceAPI) :
 	m_startingTimeStamp(0),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
+    m_deviceAPI->setNbSinkStreams(1);
 }
 
 FileSinkOutput::~FileSinkOutput()

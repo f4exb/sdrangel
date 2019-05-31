@@ -1,3 +1,20 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2016-2019 Edouard Griffiths, F4EXB                              //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+// (at your option) any later version.                                           //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
 #ifndef INCLUDE_PLUGINMANAGER_H
 #define INCLUDE_PLUGINMANAGER_H
 
@@ -48,10 +65,12 @@ public:
 	void registerRxChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin);
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 	void registerTxChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin);
-	void registerSampleSink(const QString& sourceName, PluginInterface* plugin);
+	void registerSampleSink(const QString& sinkName, PluginInterface* plugin);
+    void registerSampleMIMO(const QString& mimoName, PluginInterface* plugin);
 
 	PluginAPI::SamplingDeviceRegistrations& getSourceDeviceRegistrations() { return m_sampleSourceRegistrations; }
 	PluginAPI::SamplingDeviceRegistrations& getSinkDeviceRegistrations() { return m_sampleSinkRegistrations; }
+    PluginAPI::SamplingDeviceRegistrations& getMIMODeviceRegistrations() { return m_sampleMIMORegistrations; }
 	PluginAPI::ChannelRegistrations *getRxChannelRegistrations() { return &m_rxChannelRegistrations; }
 	PluginAPI::ChannelRegistrations *getTxChannelRegistrations() { return &m_txChannelRegistrations; }
 
@@ -63,6 +82,7 @@ public:
 
 	static const QString& getFileSourceDeviceId() { return m_fileSourceDeviceTypeID; }
 	static const QString& getFileSinkDeviceId() { return m_fileSinkDeviceTypeID; }
+	static const QString& getTestMIMODeviceId() { return m_testMIMODeviceTypeID; }
 
 private:
 	struct SamplingDevice { //!< This is the device registration
@@ -99,6 +119,8 @@ private:
 	PluginAPI::ChannelRegistrations m_txChannelRegistrations;         //!< Channel plugins register here
 	PluginAPI::SamplingDeviceRegistrations m_sampleSinkRegistrations; //!< Output sink plugins (one per device kind) register here
 
+	PluginAPI::SamplingDeviceRegistrations m_sampleMIMORegistrations; //!< MIMO sink plugins (one per device kind) register here
+
 	// "Local" sample source device IDs
     static const QString m_localInputHardwareID;     //!< Local input hardware ID
     static const QString m_localInputDeviceTypeID;   //!< Local input plugin ID
@@ -114,6 +136,10 @@ private:
     static const QString m_remoteOutputDeviceTypeID; //!< Remote output plugin ID
     static const QString m_fileSinkHardwareID;       //!< FileSource source hardware ID
     static const QString m_fileSinkDeviceTypeID;     //!< FileSink sink plugin ID
+
+    // "Local" sample MIMO device IDs
+    static const QString m_testMIMOHardwareID;       //!< Test MIMO hardware ID
+    static const QString m_testMIMODeviceTypeID;     //!< Test MIMO plugin ID
 
 	void loadPluginsDir(const QDir& dir);
 };

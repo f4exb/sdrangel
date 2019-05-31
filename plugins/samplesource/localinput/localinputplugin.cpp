@@ -99,7 +99,7 @@ PluginInstanceGUI* LocalInputPlugin::createSampleSourcePluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSource *LocalInputPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceAPI *deviceAPI)
+DeviceSampleSource *LocalInputPlugin::createSampleSourcePluginInstance(const QString& sourceId, DeviceAPI *deviceAPI)
 {
     if (sourceId == m_deviceTypeID)
     {

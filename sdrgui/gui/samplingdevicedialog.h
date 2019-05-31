@@ -35,13 +35,13 @@ class SDRGUI_API SamplingDeviceDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit SamplingDeviceDialog(bool rxElseTx, int deviceTabIndex, QWidget* parent = 0);
+    explicit SamplingDeviceDialog(int deviceType, int deviceTabIndex, QWidget* parent = 0);
     ~SamplingDeviceDialog();
     int getSelectedDeviceIndex() const { return m_selectedDeviceIndex; }
 
 private:
     Ui::SamplingDeviceDialog* ui;
-    bool m_rxElseTx;
+    int m_deviceType;
     int m_deviceTabIndex;
     int m_selectedDeviceIndex;
     std::vector<int> m_deviceIndexes;

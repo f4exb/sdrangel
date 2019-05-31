@@ -92,7 +92,7 @@ PluginInstanceGUI* RTLSDRPlugin::createSampleSourcePluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSource *RTLSDRPlugin::createSampleSourcePluginInstanceInput(const QString& sourceId, DeviceAPI *deviceAPI)
+DeviceSampleSource *RTLSDRPlugin::createSampleSourcePluginInstance(const QString& sourceId, DeviceAPI *deviceAPI)
 {
     if (sourceId == m_deviceTypeID)
     {

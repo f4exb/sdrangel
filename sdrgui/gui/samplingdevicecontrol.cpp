@@ -22,12 +22,12 @@
 #include "ui_samplingdevicecontrol.h"
 
 
-SamplingDeviceControl::SamplingDeviceControl(int tabIndex, bool rxElseTx, QWidget* parent) :
+SamplingDeviceControl::SamplingDeviceControl(int tabIndex, int deviceType, QWidget* parent) :
     QWidget(parent),
     ui(new Ui::SamplingDeviceControl),
     m_pluginManager(0),
     m_deviceTabIndex(tabIndex),
-    m_rxElseTx(rxElseTx),
+    m_deviceType(deviceType),
     m_selectedDeviceIndex(-1)
 {
     ui->setupUi(this);
@@ -41,7 +41,7 @@ SamplingDeviceControl::~SamplingDeviceControl()
 
 void SamplingDeviceControl::on_deviceChange_clicked()
 {
-    SamplingDeviceDialog dialog(m_rxElseTx, m_deviceTabIndex, this);
+    SamplingDeviceDialog dialog(m_deviceType, m_deviceTabIndex, this);
     dialog.exec();
 
     if (dialog.getSelectedDeviceIndex() >= 0)
@@ -61,16 +61,22 @@ void SamplingDeviceControl::on_deviceReload_clicked()
 
 void SamplingDeviceControl::setSelectedDeviceIndex(int index)
 {
-    if (m_rxElseTx)
+    if (m_deviceType == 0) // Single Rx
     {
         const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(index);
         DeviceEnumerator::instance()->changeRxSelection(m_deviceTabIndex, index);
         ui->deviceSelectedText->setText(samplingDevice->displayedName);
     }
-    else
+    else if (m_deviceType == 1) // Single Tx
     {
         const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(index);
         DeviceEnumerator::instance()->changeTxSelection(m_deviceTabIndex, index);
+        ui->deviceSelectedText->setText(samplingDevice->displayedName);
+    }
+    else if (m_deviceType == 2) // MIMO
+    {
+        const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(index);
+        DeviceEnumerator::instance()->changeMIMOSelection(m_deviceTabIndex, index);
         ui->deviceSelectedText->setText(samplingDevice->displayedName);
     }
 
@@ -79,12 +85,12 @@ void SamplingDeviceControl::setSelectedDeviceIndex(int index)
 
 void SamplingDeviceControl::removeSelectedDeviceIndex()
 {
-    if (m_rxElseTx)
+    if (m_deviceType == 0) // Single Rx
     {
         DeviceEnumerator::instance()->removeRxSelection(m_deviceTabIndex);
         ui->deviceSelectedText->setText("None");
     }
-    else
+    else if (m_deviceType == 1) // Single Tx
     {
         DeviceEnumerator::instance()->removeTxSelection(m_deviceTabIndex);
         ui->deviceSelectedText->setText("None");

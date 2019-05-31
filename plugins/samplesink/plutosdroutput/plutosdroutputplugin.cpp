@@ -113,7 +113,7 @@ PluginInstanceGUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSink *PlutoSDROutputPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceAPI *deviceAPI)
+DeviceSampleSink *PlutoSDROutputPlugin::createSampleSinkPluginInstance(const QString& sinkId, DeviceAPI *deviceAPI)
 {
     if (sinkId == m_deviceTypeID)
     {

@@ -19,9 +19,11 @@
 #include "plugin/plugininterface.h"
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
+#include "dsp/dspdevicemimoengine.h"
 #include "dsp/dspengine.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"
+#include "dsp/devicesamplemimo.h"
 #include "settings/preset.h"
 #include "channel/channelapi.h"
 
@@ -31,25 +33,57 @@ DeviceAPI::DeviceAPI(
         StreamType streamType,
         int deviceTabIndex,
         DSPDeviceSourceEngine *deviceSourceEngine,
-        DSPDeviceSinkEngine *deviceSinkEngine
+        DSPDeviceSinkEngine *deviceSinkEngine,
+        DSPDeviceMIMOEngine *deviceMIMOEngine
 ) :
     m_streamType(streamType),
     m_deviceTabIndex(deviceTabIndex),
-    m_nbItems(1),
-    m_itemIndex(0),
-    m_pluginInterface(0),
+    m_deviceNbItems(1),
+    m_deviceItemIndex(0),
+    m_nbSourceStreams(0),
+    m_nbSinkStreams(0),
+    m_pluginInterface(nullptr),
     m_masterTimer(DSPEngine::instance()->getMasterTimer()),
     m_samplingDeviceSequence(0),
     m_samplingDevicePluginInstanceUI(0),
-    m_buddySharedPtr(0),
+    m_buddySharedPtr(nullptr),
     m_isBuddyLeader(false),
     m_deviceSourceEngine(deviceSourceEngine),
-    m_deviceSinkEngine(deviceSinkEngine)
+    m_deviceSinkEngine(deviceSinkEngine),
+    m_deviceMIMOEngine(deviceMIMOEngine)
 {
 }
 
 DeviceAPI::~DeviceAPI()
 {
+}
+
+void DeviceAPI::addSourceStream()
+{
+    if (m_deviceMIMOEngine) {
+        m_deviceMIMOEngine->addSourceStream();
+    }
+}
+
+void DeviceAPI::removeLastSourceStream()
+{
+    if (m_deviceMIMOEngine) {
+        m_deviceMIMOEngine->removeLastSourceStream();
+    }
+}
+
+void DeviceAPI::addSinkStream()
+{
+    if (m_deviceMIMOEngine) {
+        m_deviceMIMOEngine->addSinkStream();
+    }
+}
+
+void DeviceAPI::removeLastSinkStream()
+{
+    if (m_deviceMIMOEngine) {
+        m_deviceMIMOEngine->removeLastSinkStream();
+    }
 }
 
 void DeviceAPI::addAncillarySink(BasebandSampleSink *sink)
@@ -70,12 +104,19 @@ void DeviceAPI::removeAncillarySink(BasebandSampleSink* sink)
     }
 }
 
+void DeviceAPI::setSpectrumSinkInput(bool sourceElseSink, unsigned int index)
+{
+    if (m_deviceMIMOEngine) { // In practice this is only used in the MIMO case
+        m_deviceMIMOEngine->setSpectrumSinkInput(sourceElseSink, index);
+    }
+}
+
 void DeviceAPI::addChannelSink(ThreadedBasebandSampleSink* sink, int streamIndex)
 {
-    (void) streamIndex;
-
     if (m_deviceSourceEngine) {
         m_deviceSourceEngine->addThreadedSink(sink);
+    } else if (m_deviceMIMOEngine) {
+        m_deviceMIMOEngine->addChannelSink(sink, streamIndex);
     }
 }
 
@@ -156,6 +197,13 @@ void DeviceAPI::setSampleSink(DeviceSampleSink* sink)
     }
 }
 
+void DeviceAPI::setSampleMIMO(DeviceSampleMIMO* mimo)
+{
+    if (m_deviceMIMOEngine) {
+        m_deviceMIMOEngine->setMIMO(mimo);
+    }
+}
+
 DeviceSampleSource *DeviceAPI::getSampleSource()
 {
     if (m_deviceSourceEngine) {
@@ -174,14 +222,25 @@ DeviceSampleSink *DeviceAPI::getSampleSink()
     }
 }
 
+DeviceSampleMIMO *DeviceAPI::getSampleMIMO()
+{
+    if (m_deviceMIMOEngine) {
+        return m_deviceMIMOEngine->getMIMO();
+    } else {
+        return nullptr;
+    }
+}
+
 bool DeviceAPI::initDeviceEngine()
 {
     if (m_deviceSourceEngine) {
         return m_deviceSourceEngine->initAcquisition();
     } else if (m_deviceSinkEngine) {
         return m_deviceSinkEngine->initGeneration();
+    } else if (m_deviceMIMOEngine) {
+        return m_deviceMIMOEngine->initProcess();
     } else {
-        return false; // TODO: not implemented
+        return false;
     }
 }
 
@@ -191,8 +250,10 @@ bool DeviceAPI::startDeviceEngine()
         return m_deviceSourceEngine->startAcquisition();
     } else if (m_deviceSinkEngine) {
         return m_deviceSinkEngine->startGeneration();
+    } else if (m_deviceMIMOEngine) {
+        return m_deviceMIMOEngine->startProcess();
     } else {
-        return false; // TODO: not implemented
+        return false;
     }
 }
 
@@ -202,6 +263,8 @@ void DeviceAPI::stopDeviceEngine()
         m_deviceSourceEngine->stopAcquistion();
     } else if (m_deviceSinkEngine) {
         m_deviceSinkEngine->stopGeneration();
+    } else if (m_deviceMIMOEngine) {
+        m_deviceMIMOEngine->stopProcess();
     }
 }
 
@@ -211,8 +274,10 @@ DeviceAPI::EngineState DeviceAPI::state() const
         return (DeviceAPI::EngineState) m_deviceSourceEngine->state();
     } else if (m_deviceSinkEngine) {
         return (DeviceAPI::EngineState) m_deviceSinkEngine->state();
+    } else if (m_deviceMIMOEngine) {
+        return (DeviceAPI::EngineState) m_deviceMIMOEngine->state();
     } else {
-        return StError; // TODO: not implemented
+        return StError;
     }
 }
 
@@ -222,8 +287,10 @@ QString DeviceAPI::errorMessage()
         return m_deviceSourceEngine->errorMessage();
     } else if (m_deviceSinkEngine) {
         return m_deviceSinkEngine->errorMessage();
+    } else if (m_deviceMIMOEngine) {
+        return m_deviceMIMOEngine->errorMessage();
     } else {
-        return "Not implemented"; // TODO: not implemented
+        return "Not implemented";
     }
 }
 
@@ -233,8 +300,10 @@ uint DeviceAPI::getDeviceUID() const
         return m_deviceSourceEngine->getUID();
     } else if (m_deviceSinkEngine) {
         return m_deviceSinkEngine->getUID();
+    } else if (m_deviceMIMOEngine) {
+        return m_deviceMIMOEngine->getUID();
     } else {
-        return 0; // TODO: not implemented
+        return 0;
     }
 }
 
@@ -244,8 +313,10 @@ MessageQueue *DeviceAPI::getDeviceEngineInputMessageQueue()
         return m_deviceSourceEngine->getInputMessageQueue();
     } else if (m_deviceSinkEngine) {
         return m_deviceSinkEngine->getInputMessageQueue();
+    } else if (m_deviceMIMOEngine) {
+        return m_deviceMIMOEngine->getInputMessageQueue();
     } else {
-        return nullptr; // TODO: not implemented
+        return nullptr;
     }
 }
 
@@ -255,8 +326,10 @@ MessageQueue *DeviceAPI::getSamplingDeviceInputMessageQueue()
         return m_deviceSourceEngine->getSource()->getInputMessageQueue();
     } else if (m_deviceSinkEngine) {
         return m_deviceSinkEngine->getSink()->getInputMessageQueue();
+    } else if (m_deviceMIMOEngine) {
+        return m_deviceMIMOEngine->getMIMO()->getInputMessageQueue();
     } else {
-        return nullptr; // TODO: not implemented
+        return nullptr;
     }
 }
 
@@ -266,17 +339,19 @@ MessageQueue *DeviceAPI::getSamplingDeviceGUIMessageQueue()
         return m_deviceSourceEngine->getSource()->getMessageQueueToGUI();
     } else if (m_deviceSinkEngine) {
         return m_deviceSinkEngine->getSink()->getMessageQueueToGUI();
+    } else if (m_deviceMIMOEngine) {
+        return m_deviceMIMOEngine->getMIMO()->getMessageQueueToGUI();
     } else {
-        return nullptr; // TODO: not implemented
+        return nullptr;
     }
 }
 
 void DeviceAPI::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection, int streamIndex)
 {
-    (void) streamIndex;
-
     if (m_deviceSourceEngine) {
         m_deviceSourceEngine->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection);
+    } else if (m_deviceMIMOEngine) {
+        m_deviceMIMOEngine->configureCorrections(dcOffsetCorrection, iqImbalanceCorrection, streamIndex);
     }
 }
 
@@ -285,14 +360,14 @@ void DeviceAPI::setHardwareId(const QString& id)
     m_hardwareId = id;
 }
 
-void DeviceAPI::setNbItems(uint32_t nbItems)
+void DeviceAPI::setDeviceNbItems(uint32_t nbItems)
 {
-    m_nbItems = nbItems;
+    m_deviceNbItems = nbItems;
 }
 
-void DeviceAPI::setItemIndex(uint32_t index)
+void DeviceAPI::setDeviceItemIndex(uint32_t index)
 {
-    m_itemIndex = index;
+    m_deviceItemIndex = index;
 }
 
 void DeviceAPI::setSamplingDevicePluginInterface(PluginInterface *iface)

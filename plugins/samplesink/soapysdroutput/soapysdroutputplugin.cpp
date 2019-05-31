@@ -116,7 +116,7 @@ PluginInstanceGUI* SoapySDROutputPlugin::createSampleSinkPluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSink* SoapySDROutputPlugin::createSampleSinkPluginInstanceOutput(const QString& sinkId, DeviceAPI *deviceAPI)
+DeviceSampleSink* SoapySDROutputPlugin::createSampleSinkPluginInstance(const QString& sinkId, DeviceAPI *deviceAPI)
 {
     if(sinkId == m_deviceTypeID)
     {

@@ -761,6 +761,10 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Synchronous AM sidebands mode (DSB, USB, LSB)"
     },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
     "useReverseAPI" : {
       "type" : "integer",
       "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
@@ -2335,6 +2339,9 @@ margin-bottom: 20px;
     "testSourceSettings" : {
       "$ref" : "#/definitions/TestSourceSettings"
     },
+    "testMISettings" : {
+      "$ref" : "#/definitions/TestMISettings"
+    },
     "xtrxInputSettings" : {
       "$ref" : "#/definitions/XtrxInputSettings"
     },
@@ -3574,6 +3581,9 @@ margin-bottom: 20px;
       "format" : "float"
     },
     "ctcssOn" : {
+      "type" : "integer"
+    },
+    "highPass" : {
       "type" : "integer"
     },
     "audioMute" : {
@@ -5203,6 +5213,80 @@ margin-bottom: 20px;
       "type" : "string"
     }
   }
+};
+            defs.TestMISettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "uint64"
+    },
+    "frequencyShift" : {
+      "type" : "integer"
+    },
+    "sampleRate" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "fcPos" : {
+      "type" : "integer"
+    },
+    "sampleSizeIndex" : {
+      "type" : "integer"
+    },
+    "amplitudeBits" : {
+      "type" : "integer"
+    },
+    "autoCorrOptions" : {
+      "type" : "integer"
+    },
+    "modulation" : {
+      "type" : "integer"
+    },
+    "modulationTone" : {
+      "type" : "integer"
+    },
+    "amModulation" : {
+      "type" : "integer"
+    },
+    "fmDeviation" : {
+      "type" : "integer"
+    },
+    "dcFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "iFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "qFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "phaseImbalance" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fileRecordName" : {
+      "type" : "string"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "TestSourceMI"
 };
             defs.TestSourceSettings = {
   "properties" : {
@@ -25000,7 +25084,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-05-10T14:58:45.508+02:00
+              Generated 2019-05-20T16:12:41.467+02:00
             </div>
           </div>
       </div>

@@ -332,7 +332,7 @@ public:
 	quint64 m_centerFrequency;
     quint64 m_recordLength; //!< record length in seconds computed from file size
     quint64 m_startingTimeStamp;
-	const QTimer& m_masterTimer;
+	QTimer m_masterTimer;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 

@@ -220,8 +220,9 @@ private:
 	Interpolator m_interpolator;
 	Real m_interpolatorDistance;
 	Real m_interpolatorDistanceRemain;
-	Lowpass<Real> m_lowpass;
+	Lowpass<Real> m_ctcssLowpass;
 	Bandpass<Real> m_bandpass;
+    Lowpass<Real> m_lowpass;
 	CTCSSDetector m_ctcssDetector;
 	int m_ctcssIndex; // 0 for nothing detected
 	int m_ctcssIndexSelected;
@@ -263,6 +264,8 @@ private:
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NFMDemodSettings& settings, bool force);
+
+    void processOneSample(Complex &ci);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

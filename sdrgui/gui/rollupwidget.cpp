@@ -119,11 +119,11 @@ int RollupWidget::arrangeRollups()
 	for(int i = 0; i < children().count(); ++i)
 	{
 		QWidget* r = qobject_cast<QWidget*>(children()[i]);
-		if(r != NULL)
+		if (r != nullptr)
 		{
 			pos += fm.height() + 2;
 
-			if(!r->isHidden() && (r->windowTitle() != "Basic channel settings"))
+			if (!r->isHidden() && (r->windowTitle() != "Basic channel settings") && (r->windowTitle() != "Select device stream"))
 			{
 				r->move(2, pos + 3);
 				int h = 0;
@@ -241,7 +241,9 @@ void RollupWidget::paintEvent(QPaintEvent*)
 
 int RollupWidget::paintRollup(QWidget* rollup, int pos, QPainter* p, bool last, const QColor& frame)
 {
-    if (rollup->windowTitle() == "Basic channel settings") return 0;
+    if ((rollup->windowTitle() == "Basic channel settings") || (rollup->windowTitle() == "Select device stream")) {
+		return 0;
+	}
 
 	QFontMetrics fm(font());
 	int height = 1;
@@ -322,7 +324,6 @@ void RollupWidget::mousePressEvent(QMouseEvent* event)
 		return;
 	}
 
-
 	// close button right
 	if(QRectF(width() - 3.5 - fm.ascent(), 3.5, fm.ascent(), fm.ascent()).contains(event->pos())) {
 		close();
@@ -383,4 +384,10 @@ bool RollupWidget::eventFilter(QObject* object, QEvent* event)
 			repaint();
 	}
 	return QWidget::eventFilter(object, event);
+}
+
+void RollupWidget::setStreamIndicator(const QString& indicator)
+{
+	m_streamIndicator = indicator;
+	update();
 }

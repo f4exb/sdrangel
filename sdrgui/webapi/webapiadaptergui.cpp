@@ -1052,7 +1052,7 @@ int WebAPIAdapterGUI::devicesetDevicePut(
                 continue;
             }
 
-            MainWindow::MsgSetDevice *msg = MainWindow::MsgSetDevice::create(deviceSetIndex, i, query.getDirection() == 1);
+            MainWindow::MsgSetDevice *msg = MainWindow::MsgSetDevice::create(deviceSetIndex, i, query.getDirection());
             m_mainWindow.m_inputMessageQueue.push(msg);
 
             response.init();
@@ -1749,8 +1749,8 @@ void WebAPIAdapterGUI::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const 
         *samplingDevice->getHwType() = deviceUISet->m_deviceAPI->getHardwareId();
         *samplingDevice->getSerial() = deviceUISet->m_deviceAPI->getSamplingDeviceSerial();
         samplingDevice->setSequence(deviceUISet->m_deviceAPI->getSamplingDeviceSequence());
-        samplingDevice->setDeviceNbStreams(deviceUISet->m_deviceAPI->getNbItems());
-        samplingDevice->setDeviceStreamIndex(deviceUISet->m_deviceAPI->getItemIndex());
+        samplingDevice->setDeviceNbStreams(deviceUISet->m_deviceAPI->getDeviceNbItems());
+        samplingDevice->setDeviceStreamIndex(deviceUISet->m_deviceAPI->getDeviceItemIndex());
         deviceUISet->m_deviceAPI->getDeviceEngineStateStr(*samplingDevice->getState());
         DeviceSampleSink *sampleSink = deviceUISet->m_deviceSinkEngine->getSink();
 
@@ -1781,8 +1781,8 @@ void WebAPIAdapterGUI::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const 
         *samplingDevice->getHwType() = deviceUISet->m_deviceAPI->getHardwareId();
         *samplingDevice->getSerial() = deviceUISet->m_deviceAPI->getSamplingDeviceSerial();
         samplingDevice->setSequence(deviceUISet->m_deviceAPI->getSamplingDeviceSequence());
-        samplingDevice->setDeviceNbStreams(deviceUISet->m_deviceAPI->getNbItems());
-        samplingDevice->setDeviceStreamIndex(deviceUISet->m_deviceAPI->getItemIndex());
+        samplingDevice->setDeviceNbStreams(deviceUISet->m_deviceAPI->getDeviceNbItems());
+        samplingDevice->setDeviceStreamIndex(deviceUISet->m_deviceAPI->getDeviceItemIndex());
         deviceUISet->m_deviceAPI->getDeviceEngineStateStr(*samplingDevice->getState());
         DeviceSampleSource *sampleSource = deviceUISet->m_deviceSourceEngine->getSource();
 

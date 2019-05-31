@@ -1830,6 +1830,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/SoapySDR.yaml#/SoapySDROutputSettings"
       testSourceSettings:
         $ref: "http://localhost:8081/api/swagger/include/TestSource.yaml#/TestSourceSettings"
+      testMISettings:
+        $ref: "http://localhost:8081/api/swagger/include/TestMI.yaml#/TestMISettings"
       xtrxInputSettings:
         $ref: "http://localhost:8081/api/swagger/include/Xtrx.yaml#/XtrxInputSettings"
       xtrxOutputSettings:

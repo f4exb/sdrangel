@@ -137,6 +137,7 @@ public:
     }
 
     uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
+    uint32_t getInputSampleRate() const { return m_inputSampleRate; }
     double getMagSq() const { return m_magsq; }
 	bool getAudioActive() const { return m_audioActive; }
 
@@ -337,6 +338,8 @@ private:
     void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SSBDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SSBDemodSettings& settings, bool force);
+
+    void processOneSample(Complex &ci);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

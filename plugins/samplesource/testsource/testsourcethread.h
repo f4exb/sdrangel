@@ -18,6 +18,8 @@
 #ifndef _TESTSOURCE_TESTSOURCETHREAD_H_
 #define _TESTSOURCE_TESTSOURCETHREAD_H_
 
+#include <map>
+
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
@@ -132,6 +134,9 @@ private:
 	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 8> m_decimators_8;
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators_12;
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16> m_decimators_16;
+
+    std::map<int, int> m_timerHistogram;
+    uint32_t m_histoCounter;
 
 	void startWork();
 	void stopWork();

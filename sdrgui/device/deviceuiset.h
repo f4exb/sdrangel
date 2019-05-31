@@ -28,9 +28,10 @@ class GLSpectrum;
 class GLSpectrumGUI;
 class ChannelWindow;
 class SamplingDeviceControl;
-class DSPDeviceSourceEngine;
 class DeviceAPI;
+class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
+class DSPDeviceMIMOEngine;
 class ChannelMarker;
 class PluginAPI;
 class PluginInstanceGUI;
@@ -44,12 +45,13 @@ public:
     GLSpectrumGUI *m_spectrumGUI;
     ChannelWindow *m_channelWindow;
     SamplingDeviceControl *m_samplingDeviceControl;
-    DSPDeviceSourceEngine *m_deviceSourceEngine;
     DeviceAPI *m_deviceAPI;
+    DSPDeviceSourceEngine *m_deviceSourceEngine;
     DSPDeviceSinkEngine *m_deviceSinkEngine;
+    DSPDeviceMIMOEngine *m_deviceMIMOEngine;
     QByteArray m_mainWindowState;
 
-    DeviceUISet(int tabIndex, bool rxElseTx, QTimer& timer);
+    DeviceUISet(int tabIndex, int deviceType, QTimer& timer);
     ~DeviceUISet();
 
     GLSpectrum *getSpectrum() { return m_spectrum; }     //!< Direct spectrum getter
@@ -70,6 +72,14 @@ public:
     void saveRxChannelSettings(Preset* preset);
     void loadTxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveTxChannelSettings(Preset* preset);
+
+    // These are the number of channel types available for selection
+    void setNumberOfAvailableRxChannels(int number) { m_nbAvailableRxChannels = number; }
+    void setNumberOfAvailableTxChannels(int number) { m_nbAvailableTxChannels = number; }
+    void setNumberOfAvailableMIMOChannels(int number) { m_nbAvailableMIMOChannels = number; }
+    int getNumberOfAvailableRxChannels() const { return m_nbAvailableRxChannels; }
+    int getNumberOfAvailableTxChannels() const { return m_nbAvailableTxChannels; }
+    int getNumberOfAvailableMIMOChannels() const { return m_nbAvailableMIMOChannels; }
 
 private:
     struct ChannelInstanceRegistration
@@ -95,6 +105,9 @@ private:
     ChannelInstanceRegistrations m_rxChannelInstanceRegistrations;
     ChannelInstanceRegistrations m_txChannelInstanceRegistrations;
     int m_deviceTabIndex;
+    int m_nbAvailableRxChannels;   //!< Number of Rx channels available for selection
+    int m_nbAvailableTxChannels;   //!< Number of Tx channels available for selection
+    int m_nbAvailableMIMOChannels; //!< Number of MIMO channels available for selection
 
     void renameRxChannelInstances();
     void renameTxChannelInstances();

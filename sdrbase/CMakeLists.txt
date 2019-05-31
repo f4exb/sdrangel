@@ -82,6 +82,7 @@ set(sdrbase_SOURCES
     dsp/dspengine.cpp
     dsp/dspdevicesourceengine.cpp
     dsp/dspdevicesinkengine.cpp
+    dsp/dspdevicemimoengine.cpp
     dsp/fftcorr.cpp
     dsp/fftengine.cpp
     dsp/fftfilt.cpp
@@ -111,6 +112,7 @@ set(sdrbase_SOURCES
     dsp/wfir.cpp
     dsp/devicesamplesource.cpp
     dsp/devicesamplesink.cpp
+    dsp/devicesamplemimo.cpp
 
     device/deviceapi.cpp
     device/deviceenumerator.cpp
@@ -180,10 +182,12 @@ set(sdrbase_HEADERS
     dsp/decimatorsfi.h
     dsp/decimatorsu.h
     dsp/interpolators.h
+    dsp/interpolatorsif.h
     dsp/dspcommands.h
     dsp/dspengine.h
     dsp/dspdevicesourceengine.h
     dsp/dspdevicesinkengine.h
+    dsp/dspdevicemimoengine.h
     dsp/dsptypes.h
     dsp/fftcorr.h
     dsp/fftengine.h
@@ -233,6 +237,7 @@ set(sdrbase_HEADERS
     dsp/wfir.h
     dsp/devicesamplesource.h
     dsp/devicesamplesink.h
+    dsp/devicesamplemimo.h
 
     device/deviceapi.h
     device/deviceenumerator.h

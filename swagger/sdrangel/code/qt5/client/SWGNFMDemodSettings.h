@@ -69,6 +69,9 @@ public:
     qint32 getCtcssOn();
     void setCtcssOn(qint32 ctcss_on);
 
+    qint32 getHighPass();
+    void setHighPass(qint32 high_pass);
+
     qint32 getAudioMute();
     void setAudioMute(qint32 audio_mute);
 
@@ -129,6 +132,9 @@ private:
 
     qint32 ctcss_on;
     bool m_ctcss_on_isSet;
+
+    qint32 high_pass;
+    bool m_high_pass_isSet;
 
     qint32 audio_mute;
     bool m_audio_mute_isSet;

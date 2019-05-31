@@ -48,6 +48,7 @@ Bladerf1Output::Bladerf1Output(DeviceAPI *deviceAPI) :
 {
     m_sampleSourceFifo.resize(16*BLADERFOUTPUT_BLOCKSIZE);
     openDevice();
+    m_deviceAPI->setNbSinkStreams(1);
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));

@@ -53,6 +53,7 @@ void NFMDemodSettings::resetToDefaults()
     m_rgbColor = QColor(255, 0, 0).rgb();
     m_title = "NFM Demodulator";
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_highPass = true;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -68,6 +69,7 @@ QByteArray NFMDemodSettings::serialize() const
     s.writeS32(3, m_afBandwidth/1000.0);
     s.writeS32(4, m_volume*10.0);
     s.writeS32(5, static_cast<int>(m_squelch));
+    s.writeBool(6, m_highPass);
     s.writeU32(7, m_rgbColor);
     s.writeS32(8, m_ctcssIndex);
     s.writeBool(9, m_ctcssOn);
@@ -123,6 +125,7 @@ bool NFMDemodSettings::deserialize(const QByteArray& data)
         m_volume = tmp / 10.0;
         d.readS32(5, &tmp, -30);
         m_squelch = (tmp < -100 ? tmp/10 : tmp) * 1.0;
+        d.readBool(6, &m_highPass, true);
         d.readU32(7, &m_rgbColor, QColor(255, 0, 0).rgb());
         d.readS32(8, &m_ctcssIndex, 0);
         d.readBool(9, &m_ctcssOn, false);

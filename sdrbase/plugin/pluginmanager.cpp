@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2016-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -17,7 +17,6 @@
 
 #include <QCoreApplication>
 #include <QPluginLoader>
-//#include <QComboBox>
 #include <QDebug>
 
 #include <cstdio>
@@ -44,6 +43,9 @@ const QString PluginManager::m_remoteOutputHardwareID = "RemoteOutput";
 const QString PluginManager::m_remoteOutputDeviceTypeID = "sdrangel.samplesink.remoteoutput";
 const QString PluginManager::m_fileSinkHardwareID = "FileSink";
 const QString PluginManager::m_fileSinkDeviceTypeID = "sdrangel.samplesink.filesink";
+
+const QString PluginManager::m_testMIMOHardwareID = "TestMI";
+const QString PluginManager::m_testMIMODeviceTypeID = "sdrangel.samplemimo.testmi";
 
 PluginManager::PluginManager(QObject* parent) :
 	QObject(parent),
@@ -112,6 +114,7 @@ void PluginManager::loadPluginsFinal()
 
     DeviceEnumerator::instance()->enumerateRxDevices(this);
     DeviceEnumerator::instance()->enumerateTxDevices(this);
+    DeviceEnumerator::instance()->enumerateMIMODevices(this);
 }
 
 void PluginManager::registerRxChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin)
@@ -148,6 +151,15 @@ void PluginManager::registerSampleSink(const QString& sinkName, PluginInterface*
 			<< " with sink name " << sinkName.toStdString().c_str();
 
 	m_sampleSinkRegistrations.append(PluginAPI::SamplingDeviceRegistration(sinkName, plugin));
+}
+
+void PluginManager::registerSampleMIMO(const QString& mimoName, PluginInterface* plugin)
+{
+	qDebug() << "PluginManager::registerSampleMIMO "
+			<< plugin->getPluginDescriptor().displayedName.toStdString().c_str()
+			<< " with MIMO name " << mimoName.toStdString().c_str();
+
+	m_sampleMIMORegistrations.append(PluginAPI::SamplingDeviceRegistration(mimoName, plugin));
 }
 
 void PluginManager::loadPluginsDir(const QDir& dir)
