@@ -59,8 +59,6 @@ macro(makeCopy src dest target)
   endif()
 endmacro()
 
-MESSAGE(STATUS "*** DEFAULT_OUTPUT_DIRECTORY is ${DEFAULT_OUTPUT_DIRECTORY}")
-
 # probably build with mingw64 on windows
 if(NOT WIN32)
   # needs boost
