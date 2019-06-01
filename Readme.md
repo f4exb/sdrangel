@@ -162,7 +162,3 @@ In the [releases](https://github.com/f4exb/sdrangel/releases) section one can fi
 This is the archive of the complete binary distribution that expands to the `sdrangel` directory. You can install it anywhere you like and click on `sdrangel.exe` to start.
 
 <b>&#9888; Windows distribution is provided as a by product thanks to the Qt toolchain. The platform of choice to run SDRangel is definitely Linux and very little support can be given for this Windows distribution.</b>
-
-<h1>Developer's notes</h1>
-
-Please check the developer's specific [readme](./ReadmeDeveloper.md)
