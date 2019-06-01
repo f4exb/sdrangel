@@ -488,6 +488,11 @@ if (BUILD_SERVER)
   install(TARGETS sdrangelsrv DESTINATION ${INSTALL_BIN_DIR})
 endif()
 
+# install external libraries dependencies (Linux)
+if (LINUX AND ENABLE_EXTERNAL_LIBRARIES)
+    install(DIRECTORY ${EXTERNAL_BUILD_LIBRARIES}/lib/ DESTINATION ${INSTALL_LIB_DIR})
+endif()
+
 # install documentation
 # TODO maybe install readme for every plugins
 if (LINUX OR APPLE)

@@ -31,6 +31,17 @@ if(WIN32)
     -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${SDRANGEL_BINARY_LIB_DIR}
     -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG=${SDRANGEL_BINARY_LIB_DIR}
     -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=${SDRANGEL_BINARY_LIB_DIR})
+elseif(LINUX)
+set(DEFAULT_OUTPUT_DIRECTORY
+    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${EXTERNAL_BUILD_LIBRARIES}/bin
+    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=${EXTERNAL_BUILD_LIBRARIES}/bin
+    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=${EXTERNAL_BUILD_LIBRARIES}/bin
+    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${EXTERNAL_BUILD_LIBRARIES}/lib
+    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG=${EXTERNAL_BUILD_LIBRARIES}/lib
+    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=${EXTERNAL_BUILD_LIBRARIES}/lib
+    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${EXTERNAL_BUILD_LIBRARIES}/lib
+    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG=${EXTERNAL_BUILD_LIBRARIES}/lib
+    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=${EXTERNAL_BUILD_LIBRARIES}/lib)
 endif()
 
 # macro that create symbolic links
@@ -47,6 +58,8 @@ macro(makeCopy src dest target)
       COMMAND ${CMAKE_COMMAND} -E copy_directory ${src} ${dest} DEPENDS ${dest} COMMENT "copy ${src} -> ${dest}")
   endif()
 endmacro()
+
+MESSAGE(STATUS "*** DEFAULT_OUTPUT_DIRECTORY is ${DEFAULT_OUTPUT_DIRECTORY}")
 
 # probably build with mingw64 on windows
 if(NOT WIN32)
@@ -65,6 +78,9 @@ if(NOT WIN32)
   if(WIN32)
     set(CODEC2_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/codec2.lib" CACHE INTERNAL "")
     makeCopy("${source_dir}/src" "${source_dir}/src/codec2" codec2)
+  elseif(LINUX)
+    set(CODEC2_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libcodec2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    makeLink("${source_dir}/src" "${source_dir}/src/codec2" codec2)
   else()
     set(CODEC2_LIBRARIES "${binary_dir}/src/libcodec2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     # some source include "codec2/comp.h" and some without codec2
@@ -87,6 +103,8 @@ set(CM256CC_FOUND ON CACHE INTERNAL "")
 set(CM256CC_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/cm256cc/src" CACHE INTERNAL "")
 if(WIN32)
   set(CM256CC_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/cm256cc.lib" CACHE INTERNAL "")
+elseif(LINUX)
+  set(CM256CC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libcm256cc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
 else()
   set(CM256CC_LIBRARIES "${binary_dir}/libcm256cc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
 endif()
@@ -108,6 +126,8 @@ set(LIBMBE_FOUND)
 set(LIBMBE_INCLUDE_DIR "${source_dir}")
 if(WIN32)
   set(LIBMBE_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/mbe.lib")
+elseif(LINUX)
+  set(LIBMBE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}")
 else()
   set(LIBMBE_LIBRARIES "${binary_dir}/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif()
@@ -129,6 +149,11 @@ if(WIN32 OR LINUX)
     if(WIN32)
       set(LIBSERIALDV_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/serialdv.lib" CACHE INTERNAL "")
       makeCopy("${source_dir}" "${source_dir}/dsp" serialdv)
+    elseif(LINUX)
+      set(LIBSERIALDV_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/lib/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+      # because sdrbase/dsp/dvserialworker.h use dsp/dvcontroller.h
+      # so we need a link
+      makeLink("${source_dir}" "${source_dir}/dsp" serialdv)
     else()
       set(LIBSERIALDV_LIBRARY "${binary_dir}/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
       # because sdrbase/dsp/dvserialworker.h use dsp/dvcontroller.h
@@ -136,8 +161,6 @@ if(WIN32 OR LINUX)
       makeLink("${source_dir}" "${source_dir}/dsp" serialdv)
     endif()
 endif()
-
-MESSAGE(STATUS "*** LibMBE: |${LIBMBE_INCLUDE_DIR}|")
 
 ExternalProject_Add(dsdcc
     GIT_REPOSITORY https://github.com/f4exb/dsdcc.git
@@ -153,6 +176,8 @@ set(LIBDSDCC_FOUND ON CACHE INTERNAL "")
 set(LIBDSDCC_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/dsdcc/src" CACHE INTERNAL "")
 if(WIN32)
   set(LIBDSDCC_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/dsdcc.lib" CACHE INTERNAL "")
+elseif(LINUX)
+  set(LIBDSDCC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libdsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
 else()
   set(LIBDSDCC_LIBRARIES "${binary_dir}/libdsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
 endif()
