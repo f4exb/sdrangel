@@ -9,7 +9,7 @@
 
 # which version/tag/checkout to use
 set(CODEC2_TAG 7a0187da3ffb06fd90c081216b50bab94d02d046)
-set(CM256CC_TAG 19f023d9d6c6f1a2e7dc5bcf466a1424c7918de4)
+set(CM256CC_TAG f21e8bc1e9afdb0b28672743dcec111aec1d32d9)
 set(MBELIB_TAG "debian/1.3.0")
 set(SERIALDV_TAG abd65a0fc2d5339808194862d14119b0cba70424)
 set(DSDCC_TAG 952fb5f5f7bf1928a290ad62acce35492df13f5d)
