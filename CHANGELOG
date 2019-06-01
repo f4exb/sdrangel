@@ -1,3 +1,10 @@
+sdrangel (4.9.0-1) unstable; urgency=medium
+
+  * New build system
+  * NFM demod: fixed low-pass audio filter
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 01 Jun 2019 20:44:06 +0100
+
 sdrangel (4.8.2-1) unstable; urgency=medium
 
   * SSB demod: fixes
