@@ -12,7 +12,7 @@ set(CODEC2_TAG 7a0187da3ffb06fd90c081216b50bab94d02d046)
 set(CM256CC_TAG 19f023d9d6c6f1a2e7dc5bcf466a1424c7918de4)
 set(MBELIB_TAG "debian/1.3.0")
 set(SERIALDV_TAG abd65a0fc2d5339808194862d14119b0cba70424)
-set(DSDCC_TAG 2d60d60f16c1ac778ba518310180f81043befdd0)
+set(DSDCC_TAG 952fb5f5f7bf1928a290ad62acce35492df13f5d)
 
 
 # For some external project macros
@@ -61,12 +61,12 @@ if(NOT WIN32)
   )
   ExternalProject_Get_Property(codec2 source_dir binary_dir)
   set(CODEC2_FOUND ON CACHE INTERNAL "")
-  set(CODEC2_INCLUDE_DIR "${source_dir}/src" CACHE INTERNAL "")
+  set(CODEC2_INCLUDE_DIR "${source_dir}/src" "${binary_dir}" CACHE INTERNAL "")
   if(WIN32)
     set(CODEC2_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/codec2.lib" CACHE INTERNAL "")
     makeCopy("${source_dir}/src" "${source_dir}/src/codec2" codec2)
   else()
-    set(CODEC2_LIBRARIES "${binary_dir}/libcodec2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    set(CODEC2_LIBRARIES "${binary_dir}/src/libcodec2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     # some source include "codec2/comp.h" and some without codec2
     makeLink("${source_dir}/src" "${source_dir}/src/codec2" codec2)
   endif()
@@ -137,12 +137,14 @@ if(WIN32 OR LINUX)
     endif()
 endif()
 
+MESSAGE(STATUS "*** LibMBE: |${LIBMBE_INCLUDE_DIR}|")
+
 ExternalProject_Add(dsdcc
     GIT_REPOSITORY https://github.com/f4exb/dsdcc.git
     GIT_TAG ${DSDCC_TAG}
     DEPENDS ${DSDCC_DEPENDS}
     PREFIX "${EXTERNAL_BUILD_LIBRARIES}/dsdcc"
-    CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORY} -DBUILD_TOOL=OFF -DUSE_MBELIB=${USE_MBELIB} -DLIBMBE_INCLUDE_DIR="${LIBMBE_INCLUDE_DIR}" -DLIBMBE_LIBRARY="${LIBMBE_LIBRARIES}" -DLIBSERIALDV_INCLUDE_DIR="${LIBSERIALDV_INCLUDE_DIR}" -DLIBSERIALDV_LIBRARY="${LIBSERIALDV_LIBRARY}"
+    CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORY} -DBUILD_TOOL=OFF -DUSE_MBELIB=${USE_MBELIB} -DLIBMBE_INCLUDE_DIR=${LIBMBE_INCLUDE_DIR} -DLIBMBE_LIBRARY=${LIBMBE_LIBRARIES} -DLIBSERIALDV_INCLUDE_DIR=${LIBSERIALDV_INCLUDE_DIR} -DLIBSERIALDV_LIBRARY=${LIBSERIALDV_LIBRARY}
     INSTALL_COMMAND ""
     TEST_COMMAND ""
 )
