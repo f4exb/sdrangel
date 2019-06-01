@@ -1517,7 +1517,7 @@ void GLSpectrum::applyChanges()
 			for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
 				ChannelMarkerState* dv = m_channelMarkerStates[i];
 
-				if (dv->m_channelMarker->getVisible()
+				if (dv->m_channelMarker->getHighlighted()
                     && (dv->m_channelMarker->getSourceOrSinkStream() == m_displaySourceOrSink)
                     && (dv->m_channelMarker->getStreamIndex() == m_displayStreamIndex))
 				{
