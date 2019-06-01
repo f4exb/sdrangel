@@ -126,6 +126,18 @@ This plugin will be built only if the [CM256cc library](https://github.com/f4exb
 
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `RemoteOutput` even if no physical device is connected.
 
+<h2>Local input</h2>
+
+The [Local input plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/localinput) is similar to the Remote input discussed above but is the output of an internal pipe of samples instead of the local end of a remote sender over the network. It receives its samples flow from a [Local sink channel plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/channelrx/localsink) present in another source device set.
+
+It can be used to use a narrow part of a receiver pass band to use it at a lower sample rate and thus "see" it in more detail.
+
+<h2>Local output</h2>
+
+The [Local output plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/localoutput) is similar to the Remote output discussed above but is the input of an internal pipe of samples instead of sending samples over the network to a distant SDRangel remote source. It sends its samples flow to a [Local source channel plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/channeltx/localsource) present in another source device set.
+
+It can be used to build a complex narrowband signal with multiple modulators and send it as part of a broader band transmission.
+
 <h1>Channel plugins with special conditions</h1>
 
 <h2>DSD (Digital Speech Decoder)</h2>
