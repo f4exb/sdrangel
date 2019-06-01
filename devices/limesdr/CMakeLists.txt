@@ -20,6 +20,10 @@ add_library(limesdrdevice SHARED
     ${limesdrdevice_SOURCES}
 )
 
+if(ENABLE_EXTERNAL_LIBRARIES)
+    add_dependencies(limesdrdevice limesuite)
+endif()
+
 set_target_properties(limesdrdevice
     PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
 

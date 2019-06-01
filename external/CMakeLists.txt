@@ -13,6 +13,7 @@ set(CM256CC_TAG f21e8bc1e9afdb0b28672743dcec111aec1d32d9)
 set(MBELIB_TAG "debian/1.3.0")
 set(SERIALDV_TAG abd65a0fc2d5339808194862d14119b0cba70424)
 set(DSDCC_TAG 952fb5f5f7bf1928a290ad62acce35492df13f5d)
+set(LIMESUITE_TAG "v19.01.0")
 
 
 # For some external project macros
@@ -180,6 +181,22 @@ else()
   set(LIBDSDCC_LIBRARIES "${binary_dir}/libdsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
 endif()
 
+if (LINUX)
+    # apt install liblimesuite-dev (only on ubuntu 18.04). Can be picky on version though so let's build it. Linux only for now.
+    # needs pkgconfig, libusb and sqlite3
+    ExternalProject_Add(limesuite
+        GIT_REPOSITORY https://github.com/myriadrf/LimeSuite.git
+        GIT_TAG ${LIMESUITE_TAG}
+        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/limesuite"
+        CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORY} -DLIME_SUITE_EXTVER=release -DENABLE_GUI=OFF -DENABLE_NOVENARF7=OFF -DENABLE_SOAPY_LMS7=OFF -DENABLE_OCTAVE=OFF
+        INSTALL_COMMAND ""
+        TEST_COMMAND ""
+    )
+    set(LIMESUITE_FOUND ON CACHE INTERNAL "")
+    set(LIMESUITE_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/limesuite/src/limesuite/src" CACHE INTERNAL "")
+    set(LIMESUITE_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/lib/libLimeSuite.so" CACHE INTERNAL "")
+endif()
+
 # already on the respository
 # TODO decide what to do
 if(OFF)
@@ -240,14 +257,6 @@ ExternalProject_Add(bladerf
     GIT_SUBMODULES
     PREFIX "${EXTERNAL_BUILD_LIBRARIES}/bladerf"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LIBRARIES}
-)
-# apt install liblimesuite-dev (only on ubuntu 18.04)
-# needs pkgconfig, libusb and sqlite3
-ExternalProject_Add(limesuite
-    GIT_REPOSITORY https://github.com/myriadrf/LimeSuite.git
-    GIT_TAG v19.01.0
-    PREFIX "${EXTERNAL_BUILD_LIBRARIES}/limesuite"
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LIBRARIES} -DLIME_SUITE_EXTVER=release -DENABLE_GUI=OFF -DENABLE_NOVENARF7=OFF -DENABLE_SOAPY_LMS7=OFF -DENABLE_OCTAVE=OFF
 )
 # apt install libmirisdr-dev
 # needs pkgconfig and libusb
