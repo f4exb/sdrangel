@@ -53,7 +53,7 @@ add_library(${TARGET_NAME} SHARED
 )
 
 if(ENABLE_EXTERNAL_LIBRARIES)
-    add_dependencies(${TARGET_NAME dsdcc)
+    add_dependencies(${TARGET_NAME} dsdcc)
 endif()
 
 target_link_libraries(${TARGET_NAME}

@@ -122,7 +122,7 @@ ExternalProject_Add(mbelib
 ExternalProject_Get_Property(mbelib source_dir binary_dir)
 set(USE_MBELIB ON)
 set(DSDCC_DEPENDS mbelib)
-set(LIBMBE_FOUND)
+set(LIBMBE_FOUND ON CACHE INTERNAL "")
 set(LIBMBE_INCLUDE_DIR "${source_dir}")
 if(WIN32)
   set(LIBMBE_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/mbe.lib")
