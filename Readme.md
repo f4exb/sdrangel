@@ -20,14 +20,6 @@ The server variant does not need a graphical display and therefore OpenGL suppor
 - dev: the development branch
 - legacy: the modified code from the parent application [hexameron rtl-sdrangelove](https://github.com/hexameron/rtl-sdrangelove) before a major redesign of the code was carried out and sync was lost.
 
-<h2>Untested plugins</h2>
-
-These plugins come from the parent code base and have been maintained so that they compile but they are not being actively tested:
-
-channelrx:
-
-  - demodlora
-
 <h1>Specific features</h1>
 
 <h2>Multiple device support</h2>
@@ -80,168 +72,11 @@ On Linux you need specific files in `/etc/udev/rules.d` to be able to access the
 
 <h1>Software build on Linux</h1>
 
-Plese consult the [Wiki page for compilation in Linux](https://github.com/f4exb/sdrangel/wiki/Compile-from-source-in-Linux). The notes below are left for further information if needed although you should be all set with the Wiki.
-
-<h2>Qt version</h2>
-
-To be sure you will need at least Qt version 5.5. It definitely does not work with versions earlier than 5.3 but neither 5.3 nor 5.4 were tested.
-
-  - Linux builds are made with 5.5.1 (Xenial), 5.9 (Artful, Stretch, Bionic) and 5.11 (Cosmic)
-  - Windows build is made with 5.10.1 and has Qt ANGLE support (OpenGL emulation with DirectX)
-
-&#9758; From version 3.12.0 the Linux binaries are built with the 24 bit Rx option.
-
-<h2>Ubuntu</h2>
-
-  - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev libusb-1.0 librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev libopus-dev`
-
-<h2>Debian</h2>
-
-  - `sudo apt-get install cmake g++ pkg-config libfftw3-dev libusb-1.0-0-dev libusb-dev qt5-default qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtbase5-dev librtlsdr-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev  libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev libopus-dev`
-
-<h2>openSUSE</h2>
-
-  - `sudo zypper install Mesa-libGL1 Mesa-libEGL-devel Mesa-libGL-devel Mesa-libGLESv1_CM-devel Mesa-libGLESv2-devel Mesa-libGLESv3-devel Mesa-libglapi-devel libOSMesa-devel`
-  - `sudo zypper install cmake fftw3-devel gcc-c++ libusb-1_0-devel libqt5-qtbase-devel libQt5OpenGL-devel libqt5-qtmultimedia-devel libqt5-qttools-devel libQt5Network-devel libQt5Widgets-devel boost-devel alsa-devel pulseaudio opencv-devel`
-
-  - Note1: if you are on Leap you will need a more recent g++ compiler so in place of `gcc-c++` use `gcc6-c++` or `gcc7-c++` then add the following in the cmake command: `-DCMAKE_C_COMPILER=/usr/bin/gcc-7 -DCMAKE_CXX_COMPILER=/usr/bin/g++-7` (for gcc 7) and then `-DCMAKE_INSTALL_PREFIX:PATH=...` for the custom install path (not `-DCMAKE_INSTALL_PREFIX=...`)
-  - Note2: A package has been created in openSUSE thanks to Martin, see: [sdrangel](https://build.opensuse.org/package/show/hardware:sdr/sdrangel). It is based on the latest release on master branch.
-
-<h2>Fedora</h2>
-
-This has been tested with Fedora 23 and 22:
-
-  - `sudo dnf groupinstall "C Development Tools and Libraries"`
-  - `sudo dnf install mesa-libGL-devel`
-  - `sudo dnf install cmake gcc-c++ pkgconfig fftw-devel libusb-devel qt5-qtbase-devel qt5-qtmultimedia-devel qt5-qttools-devel boost-devel pulseaudio alsa-lib-devel`
-
-<h2>Arch Linux / Manjaro</h2>
-
-Tested with the 15.09 version with LXDE desktop (community supported). The exact desktop environment should not matter anyway. Prerequisites should be similar for Arch and all derivatives.
-
-`sudo pacman -S cmake pkg-config fftw qt5-multimedia qt5-tools qt5-base libusb boost boost-libs pulseaudio`
-
-  - Note1: Two package are avaliable in the AUR (thanks Mikos!), [sdrangel](https://aur.archlinux.org/packages/sdrangel), which provides the lastest tagged release (stable), and [sdrangel-git](https://aur.archlinux.org/packages/sdrangel-git), which builds the latest commit from this repository (unstable).
-
-<h1>Compile for Windows</h1>
-
-This is a rather long story and one may prefer using the software distribution instead. However the brave may follow [this link](ReadmeWindowsBuild.md)
-
-<h1>Compile for Mac O/S</h1>
-
-A Mac O/S build was contributed from version 2.0.1. Please be aware that this is still experimental. In the [SDRangel discussion group](https://groups.io/g/sdrangel) Mac O/S users have discussed the matter extensively and produced builds. It could be a good idea to check it.
-
-<h1>Compile for Android</h1>
-
-Despite several attempts and the presence of Android related stuff still present in the .pro files there is no Android build available. An APK can be built but Qt fails miserably at porting applications other than its ridiculously simple examples. When multi-threading is involved a lot like in SDRangel this simply crashes at the very beginning of the application when starting the event loop.
-
-Contributors welcome!
+Plese consult the [Wiki page for compilation in Linux](https://github.com/f4exb/sdrangel/wiki/Compile-from-source-in-Linux).
 
 <h1>Supported hardware</h1>
 
-&#9758; Details on how to compile support libraries and integrate them in the final build of SDRangel are detailed in the [Wiki page for compilation in Linux](https://github.com/f4exb/sdrangel/wiki/Compile-from-source-in-Linux) mentioned earlier.
-
-The notes below are left for complementary information
-
-<h2>Airspy</h2>
-
-[Airspy R2](https://airspy.com/airspy-r2/) and [Airspy Mini](https://airspy.com/airspy-mini/) are supported through the libairspy library that should be installed in your system for proper build of the software and operation support.
-
-Please note that if you are using a recent version of libairspy (>= 1.0.6) the dynamic retrieval of sample rates is supported. To benefit from it you should modify the `plugins/samplesource/airspy/CMakeLists.txt` and change line `add_definitions(${QT_DEFINITIONS})` by `add_definitions("${QT_DEFINITIONS} -DLIBAIRSPY_DYN_RATES")`. In fact both lines are present with the last one commented out.
-
-Be also aware that the lower rates (2.5 MS/s or 5 MS/s with modified firmware) are affected by a noise artifact so 10 MS/s is preferable for weak signal work or instrumentation. A decimation by 64 was implemented to facilitate narrow band work at 10 MS/s input rate.
-
-<h2>Airspy HF+</h2>
-
-[Airspy HF+](https://airspy.com/airspy-hf-plus/) is supported through [the airspyhf library](https://github.com/airspy/airspyhf).
-
-It is recommended to add `-DRX_SAMPLE_24BIT=ON` on the cmake command line to activate the Rx 24 bit DSP build and take advantage of improved dynamic range when using decimation.
-
-&#9758; From version 3.12.0 the Linux binaries are built with the 24 bit Rx option.
-
-<h2>BladeRF classic (v.1)</h2>
-
-[BladeRF1](https://www.nuand.com/bladerf-1) is supported through the libbladeRF library. Note that libbladeRF v2 is used since version 4.2.0 (git tag 2018.08).
-
-&#9758; Please note that if you use your own library the FPGA image `hostedx40.rbf` or `hostedx115.rbf` shoud be placed in e.g. `/opt/install/libbladeRF/share/Nuand/bladeRF` unless you have flashed the FPGA image inside the BladeRF.
-
-The plugins used to support BladeRF classic are specific to this version of the BladeRF:
-  - [BladeRF1 input](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/bladerf1input)
-  - [BladeRF1 output](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerf1output)
-
-<h2>BladeRF micro (v.2)</h2>
-
-From version 4.2.0.
-
-[BladeRF 2 micro](https://www.nuand.com/bladerf-2-0-micro/) is also supported using libbladeRF library.
-
-The plugins used to support BladeRF 2 micro are specific to this version of the BladeRF:
-  - [BladeRF2 input](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/bladerf2input)
-  - [BladeRF2 output](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesink/bladerf2output)
-
-<h2>FunCube Dongle</h2>
-
-Linux only.
-
-Both Pro and Pro+ are supported with the plugins in fcdpro and fcdproplus respectively. For the Pro+ the band filter selection is not effective as it is handled by the firmware using the center frequency.
-
-The control interface is based on qthid and has been built in the software in the fcdhid library. You don't need anything else than libusb support. Library fcdlib is used to store the constants for each dongle type.
-
-The Pro+ has trouble starting. The sound card interface is not recognized when you just plug it in and start SDRAngel. The workaround is to start qthid then a recording program like Audacity and start recording in Audacity. Then just quit Audacity without saving and quit qthid. After this operation the Pro+ should be recognized by SDRAngel until you unplug it.
-
-<h2>HackRF</h2>
-
-[HackRF](https://greatscottgadgets.com/hackrf/) is supported through the libhackrf library. Please note that you will need a recent version (2015.07.2 at least) of libhackrf that supports the sequential listing of devices and the antenna power control (bias tee). To be safe anyway you may choose to build and install the Github version: `https://github.com/mossmann/hackrf.git`. Note also that the firmware must be updated to match the library version as per instructions found in the HackRF wiki.
-
-HackRF is better used with a sampling rate of 4.8 MS/s and above. The 2.4 and 3.2 MS/s rates are considered experimental and are way out of specs of the ADC. You may or may not achieve acceptable results depending on the unit. A too low sampling rate will typically create ghost signals (images) and/or raise the noise floor.
-
-<h2>LimeSDR</h2>
-
-[LimeSDR](https://myriadrf.org/projects/limesdr/) and its smaller clone LimeSDR Mini are supported using LimeSuite library (see next).
-
-<p>&#9888; Version 18.10.0 of LimeSuite is used in the builds and corresponding gateware loaded in the LimeSDR should be is used. If you compile from source version 18.10.0 of LimeSuite must be used.</p>
-
-<p>&#9888; LimeSDR-Mini seems to have problems with Zadig driver therefore it is supported in Linux only. A workaround is to use it through SoapySDR</p>
-
-<h2>Perseus</h2>
-
-Linux only.
-
-[The Perseus](http://microtelecom.it/perseus/) is supported with [my fork of libperseus-sdr library](https://github.com/f4exb/libperseus-sdr.git) on the `fixes` branch which is the default. There are a few fixes from the original mainly to make it work in a multi-device context.
-
-Please note that the Perseus input plugin will be built only if the 24 bit Rx DSP chain is activated in the compilation with the `-DRX_SAMPLE_24BIT=ON` option on the cmake command line.
-
-&#9758; From version 3.12.0 the Linux binaries are built with the 24 bit Rx option and Perseus input plugin.
-
-<h2>PlutoSDR</h2>
-
-[PlutoSDR](https://wiki.analog.com/university/tools/pluto) is supported with the libiio interface. Be aware that version 0.16 or higher is needed. Also the device should be flashed with firmware 0.29 or higher.
-
-<h2>RTL-SDR</h2>
-
-RTL-SDR based dongles are supported through the librtlsdr library.
-
-<h2>SDRplay RSP1</h2>
-
-Linux only.
-
-[SDRplay RSP1](https://www.sdrplay.com/rsp1/) is supported through the [libmirisdr-4](https://github.com/f4exb/libmirisdr-4) library found in this very same Github space. There is no package distribution for this library and you will have to clone it, build and install it in your system. However Debian packages of SDRangel contain a pre-compiled version of this library.
-
-&#9888; The RSP1 has been discontinued in favor of RSP1A. Unfortunately due to their closed source nature RSP1A nor RSP2 can be supported natively in SDRangel. As a workaround you may use it through SoapySDR.
-
-<h2>XTRX</h2>
-
-Experimental and Linux only. Compile from source.
-
-[XTRX](https://xtrx.io) is supported through the set of [xtrx libraries](https://github.com/xtrx-sdr/images).
-
-Before starting SDRangel you have to add the library directory to the `LD_LIBRARY_PATH` variable for example with `export LD_LIBRARY_PATH=/opt/install/xtrx-images/lib:$LD_LIBRARY_PATH`.
-
-&#9888; Reception may stall sometimes particularly with sample rates lower than 5 MS/s and also after changes. You may need to stop and restart the device (stop/start button) to recover.
-
-&#9888; Right after (re)start you may need to move the main frequency dial back and forth if you notice that you are not on the right frequency.
-
-&#9888; Simultaneous Rx and Tx is not supported. Dual Tx is not working either.
+Details on how to compile support libraries and integrate them in the final build of SDRangel are detailed in the [Wiki page for compilation in Linux](https://github.com/f4exb/sdrangel/wiki/Compile-from-source-in-Linux) mentioned earlier.
 
 <h1>Plugins for special devices</h1>
 
@@ -322,64 +157,11 @@ If you are not comfortable with this just do not install DSDcc and/or mbelib and
 
 <h1>Software distributions</h1>
 
-In the [releases](https://github.com/f4exb/sdrangel/releases) section one can find binary distributions for some Debian based distributions:
-
-  - Ubuntu 18.10 (Cosmic)
-  - Ubuntu 18.04 (Bionic)
-  - Ubuntu 16.04 (Xenial)
-  - Debian Stretch
-
-<h2>Debian distributions</h2>
-
-It is provided in the form of .deb packages for x86_64 architectures with SSE 4.1 support.
-
-Install it as usual for .deb packages:
-
-  - Make sure the `universe` repository is in your `/etc/apt/sources.list`
-
-Prior to apt-get v 1.1 (before Ubuntu 16.04) in a terminal do:
-
-  - `sudo apt-get update`
-  - `sudo apt-get upgrade`
-  - `sudo dpkg -i sdrangel_vx.y.z-1_amd64.deb` where x.y.z is the version number
-  - `sudo apt-get -f install` this will install missing dependencies
-
-Since apt-get v 1.1 installation is possible from a local file:
-
-  - cd to where the archive has been downloaded
-  - `sudo apt-get install ./sdrangel_vx.y.z-1_amd64.deb` where x.y.z is the version number
-  - `sudo apt-get -f install` this will install missing dependencies
-
-The software is installed in `/opt/sdrangel` you can start it from the command line with:
-  - `/opt/sdrangel/bin/sdrangel`
-
-<h3>Ubuntu 18.04</h2>
-
-The default CPU governor is now `powersave` which exhibits excessive CPU usage when running SDRangel. In the case of benchmarking and maybe high throughput usage it is recommended to switch to `performance` before running SDRangel by running the command: `sudo cpupower frequency-set --governor performance`. You can turn it back to `powersave` any time by running: `sudo cpupower frequency-set --governor powersave`. It is normal that with a lower CPU frequency the relative CPU usage rises for the same actual load. If not impairing operation this is normal and overall beneficial for heat and power consumption.
-
-<h2>Windows distribution</h2>
+In the [releases](https://github.com/f4exb/sdrangel/releases) section one can find binary distributions for Windows
 
 This is the archive of the complete binary distribution that expands to the `sdrangel` directory. You can install it anywhere you like and click on `sdrangel.exe` to start.
 
 <b>&#9888; Windows distribution is provided as a by product thanks to the Qt toolchain. The platform of choice to run SDRangel is definitely Linux and very little support can be given for this Windows distribution.</b>
-
-<h1>Features</h1>
-
-<h2>Changes from SDRangelove</h2>
-
-See the v1.0.1 first official release [release notes](https://github.com/f4exb/sdrangel/releases/tag/v1.0.1)
-
-<h2>To Do</h2>
-
-Since version 3.3.2 the "todos" are in the form of tickets opened in the Issues section with the label "feature". When a specific release is targeted it will appear as a milestone. Thus anyone can open a "feature" issue to request a new feature.
-
-Other ideas:
-
-  - Enhance presets management (Edit, Move, Import/Export from/to human readable format like JSON).
-  - Allow arbitrary sample rate for channelizers and demodulators (not multiple of 48 kHz). Prerequisite for polyphase channelizer
-  - Implement polyphase channelizer
-  - Level calibration
-  - Even more demods. Contributors welcome!
 
 <h1>Developer's notes</h1>
 
