@@ -21,6 +21,7 @@
 
 #include <QThread>
 
+#include "dsp/dsptypes.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "util/syncmessenger.h"
