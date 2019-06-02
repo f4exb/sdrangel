@@ -14,6 +14,7 @@ set(MBELIB_TAG "debian/1.3.0")
 set(SERIALDV_TAG abd65a0fc2d5339808194862d14119b0cba70424)
 set(DSDCC_TAG 952fb5f5f7bf1928a290ad62acce35492df13f5d)
 set(LIMESUITE_TAG "v19.01.0")
+set(BLADERF_TAG 896d2431b3a35a4b31b6e729386202ebf5fdc5c0)
 
 
 # For some external project macros
@@ -181,9 +182,10 @@ else()
   set(LIBDSDCC_LIBRARIES "${binary_dir}/libdsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
 endif()
 
+# Device interface libraries. Use external libraries build for these. Only Linux for now.
 if (LINUX)
-    # apt install liblimesuite-dev (only on ubuntu 18.04). Can be picky on version though so let's build it. Linux only for now.
-    # needs pkgconfig, libusb and sqlite3
+    # apt install liblimesuite-dev (only on ubuntu 18.04). Can be picky on version though so let's build it.
+    # needs pkgconfig and libusb
     ExternalProject_Add(limesuite
         GIT_REPOSITORY https://github.com/myriadrf/LimeSuite.git
         GIT_TAG ${LIMESUITE_TAG}
@@ -195,6 +197,22 @@ if (LINUX)
     set(LIMESUITE_FOUND ON CACHE INTERNAL "")
     set(LIMESUITE_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/limesuite/src/limesuite/src" CACHE INTERNAL "")
     set(LIMESUITE_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/lib/libLimeSuite.so" CACHE INTERNAL "")
+
+    # apt install libbladerf-dev
+    # needs pkgconfig and libusb
+    ExternalProject_Add(bladerf
+        GIT_REPOSITORY https://github.com/Nuand/bladeRF.git
+        GIT_TAG ${BLADERF_TAG}
+        GIT_SUBMODULES
+        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/bladerf"
+        CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORY}
+        SOURCE_SUBDIR host/
+        INSTALL_COMMAND ""
+        TEST_COMMAND ""
+    )
+    set(LIBBLADERF_FOUND ON CACHE INTERNAL "")
+    set(LIBBLADERF_INCLUDE_DIRS "${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf/host/libraries/libbladeRF/include" CACHE INTERNAL "")
+    set(LIBBLADERF_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libbladeRF.so" CACHE INTERNAL "")
 endif()
 
 # already on the respository
@@ -247,15 +265,6 @@ ExternalProject_Add(rtlsdr
     GIT_REPOSITORY https://github.com/osmocom/rtl-sdr.git
     GIT_TAG f68bb2fa772ad94f58c59babd78353667570630b
     PREFIX "${EXTERNAL_BUILD_LIBRARIES}/rtlsdr"
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LIBRARIES}
-)
-# apt install libbladerf-dev
-# needs pkgconfig and libusb
-ExternalProject_Add(bladerf
-    GIT_REPOSITORY https://github.com/Nuand/bladeRF.git
-    GIT_TAG 1da130cb5ac9e9f722737e9aee141ecccebef00d
-    GIT_SUBMODULES
-    PREFIX "${EXTERNAL_BUILD_LIBRARIES}/bladerf"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LIBRARIES}
 )
 # apt install libmirisdr-dev

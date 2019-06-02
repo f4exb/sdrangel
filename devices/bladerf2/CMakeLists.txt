@@ -18,6 +18,10 @@ add_library(bladerf2device SHARED
     ${bladerf2device_SOURCES}
 )
 
+if(ENABLE_EXTERNAL_LIBRARIES)
+    add_dependencies(bladerf2device bladerf)
+endif()
+
 set_target_properties(bladerf2device
     PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
 
