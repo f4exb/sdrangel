@@ -15,6 +15,7 @@ set(SERIALDV_TAG abd65a0fc2d5339808194862d14119b0cba70424)
 set(DSDCC_TAG 952fb5f5f7bf1928a290ad62acce35492df13f5d)
 set(LIMESUITE_TAG "v19.01.0")
 set(BLADERF_TAG 896d2431b3a35a4b31b6e729386202ebf5fdc5c0)
+set(LIBIIO_TAG 826563e41b5ce9890b75506f672017de8d76d52d)
 
 
 # For some external project macros
@@ -213,6 +214,20 @@ if (LINUX)
     set(LIBBLADERF_FOUND ON CACHE INTERNAL "")
     set(LIBBLADERF_INCLUDE_DIRS "${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf/host/libraries/libbladeRF/include" CACHE INTERNAL "")
     set(LIBBLADERF_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libbladeRF.so" CACHE INTERNAL "")
+
+    # apt install libiio-dev
+    # needs pkgconfig, libusb, libxml2, lzma, xz, libiconv
+    ExternalProject_Add(libiio
+        GIT_REPOSITORY https://github.com/analogdevicesinc/libiio.git
+        GIT_TAG ${LIBIIO_TAG}
+        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libiio"
+        CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORY} -DOSX_PACKAGE=OFF -DWITH_DOC=OFF
+        INSTALL_COMMAND ""
+        TEST_COMMAND ""
+    )
+    set(LIBIIO_FOUND ON CACHE INTERNAL "")
+    set(LIBIIO_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/libiio/src/libiio" CACHE INTERNAL "")
+    set(LIBIIO_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libiio.so" CACHE INTERNAL "")
 endif()
 
 # already on the respository

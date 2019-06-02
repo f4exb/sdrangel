@@ -47,6 +47,10 @@ add_library(${TARGET_NAME} SHARED
 	${plutosdroutput_SOURCES}
 )
 
+if(ENABLE_EXTERNAL_LIBRARIES)
+    add_dependencies(${TARGET_NAME} libiio)
+endif()
+
 target_link_libraries(${TARGET_NAME}
         Qt5::Core
         ${TARGET_LIB}

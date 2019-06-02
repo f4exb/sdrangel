@@ -25,6 +25,10 @@ add_library(plutosdrdevice SHARED
     ${plutosdrdevice_SOURCES}
 )
 
+if(ENABLE_EXTERNAL_LIBRARIES)
+    add_dependencies(plutosdrdevice libiio)
+endif()
+
 set_target_properties(plutosdrdevice
     PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
 
