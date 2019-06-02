@@ -17,6 +17,7 @@ set(LIMESUITE_TAG "v19.01.0")
 set(BLADERF_TAG 896d2431b3a35a4b31b6e729386202ebf5fdc5c0)
 set(LIBIIO_TAG 826563e41b5ce9890b75506f672017de8d76d52d)
 set(AIRSPYHF_TAG "1.1.5")
+set(PERSEUS_TAG afefa23e3140ac79d845acb68cf0beeb86d09028)
 
 
 # For some external project macros
@@ -245,19 +246,24 @@ if (LINUX)
     set(LIBAIRSPYHF_INCLUDE_DIR "${source_dir}/.." CACHE INTERNAL "")
     set(LIBAIRSPYHF_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libairspyhf.so" CACHE INTERNAL "")
     makeLink("${source_dir}/libairspyhf/src" "${source_dir}/../libairspyhf" airspyhf)
+
+    # needs pkgconfig, libusb, autoconf, automake and libtool
+    ExternalProject_Add(perseus
+        GIT_REPOSITORY https://github.com/f4exb/libperseus-sdr.git
+        GIT_TAG ${PERSEUS_TAG}
+        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/perseus"
+        CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORY}
+        INSTALL_COMMAND ""
+        TEST_COMMAND ""
+    )
+    set(LIBPERSEUS_FOUND ON CACHE INTERNAL "")
+    set(LIBPERSEUS_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/perseus/src/perseus" CACHE INTERNAL "")
+    set(LIBPERSEUS_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libperseus-sdr.so" CACHE INTERNAL "")
 endif()
 
 # already on the respository
 # TODO decide what to do
 if(OFF)
-# needs pkgconfig, libusb, autoconf, automake and libtool
-ExternalProject_Add(perseus
-    GIT_REPOSITORY https://github.com/f4exb/libperseus-sdr.git
-    GIT_TAG afefa23e3140ac79d845acb68cf0beeb86d09028
-    PREFIX "${EXTERNAL_BUILD_LIBRARIES}/perseus"
-    INSTALL_COMMAND ""
-    TEST_COMMAND ""
-)
 # apt install libcodec2-dev
 # needs speexdsp
 ExternalProject_Add(codec2

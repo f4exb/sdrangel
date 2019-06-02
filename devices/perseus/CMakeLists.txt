@@ -19,6 +19,10 @@ add_library(perseusdevice SHARED
     ${perseusdevice_SOURCES}
 )
 
+if(ENABLE_EXTERNAL_LIBRARIES)
+    add_dependencies(perseusdevice perseus)
+endif()
+
 set_target_properties(perseusdevice
     PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
 

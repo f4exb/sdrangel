@@ -167,10 +167,16 @@ If you are not comfortable with this just do not install DSDcc and/or mbelib and
   - For Linux distributions: `plugins/channel/libdemoddsd.so`
   - For Windows distribution: `dsdcc.dll`, `mbelib.dll`, `plugins\channel\demoddsd.dll`
 
-<h1>Software distributions</h1>
+<h1>Binary distributions</h1>
 
-In the [releases](https://github.com/f4exb/sdrangel/releases) section one can find binary distributions for Windows
+In the [releases](https://github.com/f4exb/sdrangel/releases) section of the Github repository one can find binary distributions for Ubuntu and Windows
 
-This is the archive of the complete binary distribution that expands to the `sdrangel` directory. You can install it anywhere you like and click on `sdrangel.exe` to start.
+<h2>Ubuntu</h2>
+
+The `.deb` file is a Debian package that can be installed with `sudo apt-get install` command. Occasionnally you may have to force the installation of dependencies with the `sudo apt-get install -f` command.
+
+<h2>Windows</h2>
+
+The `.7z` file is a [7Zip](https://www.7-zip.org/) archive of the complete binary distribution that expands to the `sdrangel` directory. You can install it anywhere you like and double click on `sdrangel.exe` to start.
 
 <b>&#9888; Windows distribution is provided as a by product thanks to the Qt toolchain. The platform of choice to run SDRangel is definitely Linux and very little support can be given for this Windows distribution.</b>
