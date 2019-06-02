@@ -175,6 +175,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(1000);
 
+	m_masterTimer.setTimerType(Qt::PreciseTimer);
 	m_masterTimer.start(50);
 
     splash->showStatusMessage("load settings...", Qt::white);
