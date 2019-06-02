@@ -16,6 +16,7 @@ set(DSDCC_TAG 952fb5f5f7bf1928a290ad62acce35492df13f5d)
 set(LIMESUITE_TAG "v19.01.0")
 set(BLADERF_TAG 896d2431b3a35a4b31b6e729386202ebf5fdc5c0)
 set(LIBIIO_TAG 826563e41b5ce9890b75506f672017de8d76d52d)
+set(AIRSPYHF_TAG "1.1.5")
 
 
 # For some external project macros
@@ -228,6 +229,22 @@ if (LINUX)
     set(LIBIIO_FOUND ON CACHE INTERNAL "")
     set(LIBIIO_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/libiio/src/libiio" CACHE INTERNAL "")
     set(LIBIIO_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libiio.so" CACHE INTERNAL "")
+
+    # apt install libairspyhf-dev (only on ubuntu 18.04)
+    # needs libusb and pkgconfig
+    ExternalProject_Add(airspyhf
+        GIT_REPOSITORY https://github.com/airspy/airspyhf.git
+        GIT_TAG ${AIRSPYHF_TAG}
+        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/airspyhf"
+        CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORY}
+        INSTALL_COMMAND ""
+        TEST_COMMAND ""
+    )
+    ExternalProject_Get_Property(airspyhf source_dir)
+    set(LIBAIRSPYHF_FOUND ON CACHE INTERNAL "")
+    set(LIBAIRSPYHF_INCLUDE_DIR "${source_dir}/.." CACHE INTERNAL "")
+    set(LIBAIRSPYHF_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libairspyhf.so" CACHE INTERNAL "")
+    makeLink("${source_dir}/libairspyhf/src" "${source_dir}/../libairspyhf" airspyhf)
 endif()
 
 # already on the respository
@@ -255,14 +272,6 @@ ExternalProject_Add(airspy
     GIT_REPOSITORY https://github.com/airspy/airspyone_host.git
     GIT_TAG bfb667080936ca5c2d23b3282f5893931ec38d3f
     PREFIX "${EXTERNAL_BUILD_LIBRARIES}/airspy"
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LIBRARIES}
-)
-# apt install libairspyhf-dev (only on ubuntu 18.04)
-# needs libusb and pkgconfig
-ExternalProject_Add(airspyhf
-    GIT_REPOSITORY https://github.com/airspy/airspyhf.git
-    GIT_TAG 1.1.5
-    PREFIX "${EXTERNAL_BUILD_LIBRARIES}/airspyhf"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LIBRARIES}
 )
 # apt install libhackrf-dev
