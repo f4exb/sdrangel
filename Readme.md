@@ -173,7 +173,9 @@ In the [releases](https://github.com/f4exb/sdrangel/releases) section of the Git
 
 <h2>Ubuntu</h2>
 
-The `.deb` file is a Debian package that can be installed with `sudo apt-get install` command. Occasionnally you may have to force the installation of dependencies with the `sudo apt-get install -f` command.
+The `.deb` file is a Debian package that can be installed with `sudo apt-get install <.deb>` command. Occasionnally after this command you may have to force the installation of dependencies with the `sudo apt-get -f install` command.
+
+The software is installed in `/usr/bin` for executables and `/usr/lib/sdrangel` for the dependent shared libraries. Therefore before executing `sdrangel` to start the program you have to set the `LD_LIBRARY_PATH` environment variable with: `export LD_LIBRARY_PATH=/usr/lib/sdrangel`. This is because not all libraries can have their `rpath` set.
 
 <h2>Windows</h2>
 
