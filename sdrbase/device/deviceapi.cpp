@@ -725,7 +725,7 @@ void DeviceAPI::removeSinkBuddy(DeviceAPI* buddy)
                     qPrintable(buddy->getSamplingDeviceSerial()),
                     (quint64) (*it),
                     (quint64) this);
-            m_sourceBuddies.erase(it);
+            m_sinkBuddies.erase(it);
             return;
         }
     }
