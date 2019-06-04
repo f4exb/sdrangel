@@ -41,7 +41,6 @@ MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::RemoveSpectrumSink, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::GetErrorMessage, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::GetMIMODeviceDescription, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::ConfigureCorrection, Message)
-MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::SignalNotification, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::SetSpectrumSinkInput, Message)
 
 DSPDeviceMIMOEngine::DSPDeviceMIMOEngine(uint32_t uid, QObject* parent) :
@@ -544,7 +543,7 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoInit()
         // MessageQueue *guiMessageQueue = m_deviceSampleMIMO->getMessageQueueToGUI();
 
         // if (guiMessageQueue) {
-        //     SignalNotification* rep = new SignalNotification(sourceStreamSampleRate, sourceCenterFrequency, true, isource); // make a copy for the MIMO GUI
+        //     DSPMIMOSignalNotification* rep = new DSPMIMOSignalNotification(sourceStreamSampleRate, sourceCenterFrequency, true, isource); // make a copy for the MIMO GUI
         //     guiMessageQueue->push(rep);
         // }
     }
@@ -937,9 +936,9 @@ void DSPDeviceMIMOEngine::handleInputMessages()
 
 			delete message;
 		}
-		else if (SignalNotification::match(*message))
+		else if (DSPMIMOSignalNotification::match(*message))
 		{
-			SignalNotification *notif = (SignalNotification *) message;
+			DSPMIMOSignalNotification *notif = (DSPMIMOSignalNotification *) message;
 
 			// update DSP values
 
@@ -948,7 +947,7 @@ void DSPDeviceMIMOEngine::handleInputMessages()
 			int sampleRate = notif->getSampleRate();
 			qint64 centerFrequency = notif->getCenterFrequency();
 
-			qDebug() << "DeviceMIMOEngine::handleInputMessages: SignalNotification:"
+			qDebug() << "DeviceMIMOEngine::handleInputMessages: DSPMIMOSignalNotification:"
                 << " sourceElseSink: " << sourceElseSink
                 << " istream: " << istream
 				<< " sampleRate: " << sampleRate
@@ -982,10 +981,10 @@ void DSPDeviceMIMOEngine::handleInputMessages()
 
                     // forward changes to MIMO GUI input queue
                     MessageQueue *guiMessageQueue = m_deviceSampleMIMO->getMessageQueueToGUI();
-                    qDebug("DeviceMIMOEngine::handleInputMessages: SignalNotification: guiMessageQueue: %p", guiMessageQueue);
+                    qDebug("DeviceMIMOEngine::handleInputMessages: DSPMIMOSignalNotification: guiMessageQueue: %p", guiMessageQueue);
 
                     if (guiMessageQueue) {
-                        SignalNotification* rep = new SignalNotification(*notif); // make a copy for the MIMO GUI
+                        DSPMIMOSignalNotification* rep = new DSPMIMOSignalNotification(*notif); // make a copy for the MIMO GUI
                         guiMessageQueue->push(rep);
                     }
 
@@ -1018,7 +1017,7 @@ void DSPDeviceMIMOEngine::handleInputMessages()
                     qDebug("DSPDeviceMIMOEngine::handleInputMessages: DSPSignalNotification: guiMessageQueue: %p", guiMessageQueue);
 
                     if (guiMessageQueue) {
-                        SignalNotification* rep = new SignalNotification(*notif); // make a copy for the source GUI
+                        DSPMIMOSignalNotification* rep = new DSPMIMOSignalNotification(*notif); // make a copy for the source GUI
                         guiMessageQueue->push(rep);
                     }
 

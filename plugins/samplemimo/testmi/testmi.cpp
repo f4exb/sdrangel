@@ -458,7 +458,7 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
             int sampleRate = settings.m_streams[istream].m_sampleRate/(1<<settings.m_streams[istream].m_log2Decim);
             DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_streams[istream].m_centerFrequency);
             m_fileSinks[istream]->handleMessage(*notif); // forward to file sink
-            DSPDeviceMIMOEngine::SignalNotification *engineNotif = new DSPDeviceMIMOEngine::SignalNotification(
+            DSPMIMOSignalNotification *engineNotif = new DSPMIMOSignalNotification(
                 sampleRate, settings.m_streams[istream].m_centerFrequency, true, istream);
             m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineNotif);
         }

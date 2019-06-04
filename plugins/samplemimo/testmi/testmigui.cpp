@@ -551,15 +551,15 @@ void TestMIGui::handleInputMessages()
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        if (DSPDeviceMIMOEngine::SignalNotification::match(*message))
+        if (DSPMIMOSignalNotification::match(*message))
         {
-            DSPDeviceMIMOEngine::SignalNotification* notif = (DSPDeviceMIMOEngine::SignalNotification*) message;
+            DSPMIMOSignalNotification* notif = (DSPMIMOSignalNotification*) message;
             int istream = notif->getIndex();
             bool sourceOrSink = notif->getSourceOrSink();
             m_deviceSampleRates[istream] = notif->getSampleRate();
             m_deviceCenterFrequencies[istream] = notif->getCenterFrequency();
             // Do not consider multiple sources at this time
-            qDebug("TestMIGui::handleInputMessages: DSPDeviceMIMOEngine::SignalNotification: %s stream: %d SampleRate:%d, CenterFrequency:%llu",
+            qDebug("TestMIGui::handleInputMessages: DSPMIMOSignalNotification: %s stream: %d SampleRate:%d, CenterFrequency:%llu",
                     sourceOrSink ? "source" : "sink",
                     istream,
                     notif->getSampleRate(),
