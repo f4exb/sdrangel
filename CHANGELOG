@@ -1,3 +1,10 @@
+sdrangel (4.9.1-1) unstable; urgency=medium
+
+  * WFM demod: variable RF bandwidth. Implements #320
+  * Fixed buddies list handling at buddy termination time. Fixes #359
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 08 Jun 2019 20:44:06 +0100
+
 sdrangel (4.9.0-1) unstable; urgency=medium
 
   * New build system

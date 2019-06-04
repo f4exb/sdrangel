@@ -42,17 +42,15 @@ struct WFMDemodSettings
 
     Serializable *m_channelMarker;
 
-    static const int m_nbRFBW;
-    static const int m_rfBW[];
+    static const int m_rfBWMin;
+    static const int m_rfBWMax;
+    static const int m_rfBWDigits;
 
     WFMDemodSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
-
-    static int getRFBW(int index);
-    static int getRFBWIndex(int rfbw);
 };
 
 #endif /* PLUGINS_CHANNELRX_DEMODWFM_WFMDEMODSETTINGS_H_ */

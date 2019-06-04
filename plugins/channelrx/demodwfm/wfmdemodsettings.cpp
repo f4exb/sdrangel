@@ -24,10 +24,9 @@
 
 #include "wfmdemodsettings.h"
 
-const int WFMDemodSettings::m_rfBW[] = {
-        12500, 25000, 40000, 60000, 75000, 80000, 100000, 125000, 140000, 160000, 180000, 200000, 220000, 250000
-};
-const int WFMDemodSettings::m_nbRFBW = 14;
+const int WFMDemodSettings::m_rfBWMin = 10000;
+const int WFMDemodSettings::m_rfBWMax = 300000;
+const int WFMDemodSettings::m_rfBWDigits = 6;
 
 WFMDemodSettings::WFMDemodSettings() :
     m_channelMarker(0)
@@ -38,7 +37,7 @@ WFMDemodSettings::WFMDemodSettings() :
 void WFMDemodSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
-    m_rfBandwidth = getRFBW(5);
+    m_rfBandwidth = 80000;
     m_afBandwidth = 15000;
     m_volume = 2.0;
     m_squelch = -60.0;
@@ -57,7 +56,7 @@ QByteArray WFMDemodSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeS32(1, m_inputFrequencyOffset);
-    s.writeS32(2, getRFBWIndex(m_rfBandwidth));
+    s.writeS32(2, m_rfBandwidth);
     s.writeS32(3, m_afBandwidth/1000.0);
     s.writeS32(4, m_volume*10.0);
     s.writeS32(5, m_squelch);
@@ -98,7 +97,7 @@ bool WFMDemodSettings::deserialize(const QByteArray& data)
         d.readS32(1, &tmp, 0);
         m_inputFrequencyOffset = tmp;
         d.readS32(2, &tmp, 4);
-        m_rfBandwidth = getRFBW(tmp);
+        m_rfBandwidth = tmp < m_rfBWMin ? m_rfBWMin : tmp > m_rfBWMax ? m_rfBWMax : tmp;
         d.readS32(3, &tmp, 3);
         m_afBandwidth = tmp * 1000.0;
         d.readS32(4, &tmp, 20);
@@ -138,28 +137,3 @@ bool WFMDemodSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
-
-int WFMDemodSettings::getRFBW(int index)
-{
-    if (index < 0) {
-        return m_rfBW[0];
-    } else if (index < m_nbRFBW) {
-        return m_rfBW[index];
-    } else {
-        return m_rfBW[m_nbRFBW-1];
-    }
-}
-
-int WFMDemodSettings::getRFBWIndex(int rfbw)
-{
-    for (int i = 0; i < m_nbRFBW; i++)
-    {
-        if (rfbw <= m_rfBW[i])
-        {
-            return i;
-        }
-    }
-
-    return m_nbRFBW-1;
-}
-

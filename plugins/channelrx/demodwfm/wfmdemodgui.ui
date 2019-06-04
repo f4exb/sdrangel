@@ -216,15 +216,56 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="rfBW">
-        <property name="maximumSize">
+       <widget class="ValueDial" name="rfBW" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
          <size>
-          <width>70</width>
-          <height>16777215</height>
+          <width>32</width>
+          <height>16</height>
          </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>12</pointsize>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>RF Bandwidth (Hz)</string>
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QLabel" name="rfBWUnits">
+        <property name="text">
+         <string>Hz</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="volumeLayout">
       <item>
        <widget class="QLabel" name="afBWLabel">
         <property name="text">
@@ -270,10 +311,6 @@
         </property>
        </widget>
       </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="volumeLayout">
       <item>
        <widget class="QLabel" name="volumeLabel">
         <property name="text">
@@ -414,6 +451,12 @@
    <class>ValueDialZ</class>
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDial</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedial.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
