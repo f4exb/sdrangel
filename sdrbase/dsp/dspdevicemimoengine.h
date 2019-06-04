@@ -217,27 +217,6 @@ public:
         unsigned int m_index;
     };
 
-    class SignalNotification : public Message {
-        MESSAGE_CLASS_DECLARATION
-    public:
-        SignalNotification(int samplerate, qint64 centerFrequency, bool sourceOrSink, unsigned int index) :
-            Message(),
-            m_sampleRate(samplerate),
-            m_centerFrequency(centerFrequency),
-            m_sourceOrSink(sourceOrSink),
-            m_index(index)
-        { }
-        int getSampleRate() const { return m_sampleRate; }
-        qint64 getCenterFrequency() const { return m_centerFrequency; }
-        bool getSourceOrSink() const { return m_sourceOrSink; }
-        unsigned int getIndex() const { return m_index; }
-    private:
-        int m_sampleRate;
-        qint64 m_centerFrequency;
-        bool m_sourceOrSink;
-        unsigned int m_index;
-    };
-
     class SetSpectrumSinkInput : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
