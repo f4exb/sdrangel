@@ -268,7 +268,7 @@ void WFMDemodGUI::applySettings(bool force)
 	if (m_doApplySettings)
 	{
         WFMDemod::MsgConfigureChannelizer *msgChan = WFMDemod::MsgConfigureChannelizer::create(
-                m_settings.m_rfBandwidth,
+                WFMDemod::requiredBW(m_settings.m_rfBandwidth),
                 m_channelMarker.getCenterFrequency());
         m_wfmDemod->getInputMessageQueue()->push(msgChan);
 
