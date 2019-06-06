@@ -34,18 +34,13 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 	QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 */
-#ifdef _MSC_VER
-    QCoreApplication::setOrganizationName("f4exb");
-    QCoreApplication::setApplicationName("SDRangel");
-    QCoreApplication::setApplicationVersion("4.8.2");
-#else
 	QCoreApplication::setOrganizationName(COMPANY);
 	QCoreApplication::setApplicationName(APPLICATION_NAME);
     QCoreApplication::setApplicationVersion(SDRANGEL_VERSION);
-#endif
+
 #if QT_VERSION >= 0x050600
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling); // DPI support
-        QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps); //HiDPI pixmaps
+    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps); //HiDPI pixmaps
 #endif
 
 #if 1
