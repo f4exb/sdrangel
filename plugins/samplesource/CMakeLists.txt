@@ -58,3 +58,4 @@ if(ENABLE_SOAPYSDR AND SOAPYSDR_FOUND)
     add_subdirectory(soapysdrinput)
 endif()
 
+add_subdirectory(kiwisdr)
