@@ -4,7 +4,7 @@ sdrangel (4.9.1-1) unstable; urgency=medium
   * Fixed buddies list handling at buddy termination time. Fixes #359
   * Fixed Debian builds using AVX instructions. Fixes #360
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  THu, 06 Jun 2019 20:44:06 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 06 Jun 2019 20:44:06 +0100
 
 sdrangel (4.9.0-1) unstable; urgency=medium
 
