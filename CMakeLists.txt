@@ -291,6 +291,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(_required_qt_version "5.6.0")
 find_package(Qt5 COMPONENTS Core REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt5 COMPONENTS WebSockets REQUIRED)
 find_package(Qt5 COMPONENTS Multimedia REQUIRED)
 find_package(Qt5 COMPONENTS MultimediaWidgets REQUIRED)
 
