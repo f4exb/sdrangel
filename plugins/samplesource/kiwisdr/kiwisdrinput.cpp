@@ -214,7 +214,12 @@ bool KiwiSDRInput::handleMessage(const Message& message)
 
         if (conf.getStartStop())
         {
-            m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink->setFileName(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
+            }
+
             m_fileSink->startRecording();
         }
         else
@@ -264,10 +269,32 @@ int KiwiSDRInput::getStatus() const
 
 bool KiwiSDRInput::applySettings(const KiwiSDRSettings& settings, bool force)
 {
+	qDebug() << "KiwiSDRInput::applySettings: "
+        << " m_serverAddress: " << settings.m_serverAddress
+        << " m_centerFrequency: " << settings.m_centerFrequency
+        << " m_gain: " << settings.m_gain
+        << " m_useAGC: " << settings.m_useAGC
+        << " m_fileRecordName: " << settings.m_fileRecordName
+        << " m_useAGC: " << settings.m_useAGC
+        << " m_useReverseAPI: " << settings.m_useReverseAPI
+        << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
+        << " m_reverseAPIPort: " << settings.m_reverseAPIPort
+        << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex;
+
     QList<QString> reverseAPIKeys;
 
 	if (m_settings.m_serverAddress != settings.m_serverAddress || force)
+    {
+        reverseAPIKeys.append("serverAddress");
 		emit setWorkerServerAddress(settings.m_serverAddress);
+    }
+
+	if (m_settings.m_gain != settings.m_gain || force) {
+        reverseAPIKeys.append("gain");
+    }
+	if (m_settings.m_useAGC != settings.m_useAGC || force) {
+        reverseAPIKeys.append("useAGC");
+    }
 
 	if (m_settings.m_gain != settings.m_gain ||
 		m_settings.m_useAGC != settings.m_useAGC || force)
@@ -361,6 +388,9 @@ int KiwiSDRInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("serverAddress")) {
         settings.m_serverAddress = *response.getKiwiSdrSettings()->getServerAddress();
     }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getKiwiSdrSettings()->getFileRecordName();
+    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getKiwiSdrSettings()->getUseReverseApi() != 0;
     }
@@ -409,6 +439,23 @@ void KiwiSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     } else {
         response.getKiwiSdrSettings()->setServerAddress(new QString(settings.m_serverAddress));
     }
+
+    if (response.getKiwiSdrSettings()->getFileRecordName()) {
+        *response.getKiwiSdrSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getKiwiSdrSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+
+    response.getKiwiSdrSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getKiwiSdrSettings()->getReverseApiAddress()) {
+        *response.getKiwiSdrSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getKiwiSdrSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getKiwiSdrSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getKiwiSdrSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 void KiwiSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
@@ -438,6 +485,9 @@ void KiwiSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
     }
     if (deviceSettingsKeys.contains("serverAddress") || force) {
         swgKiwiSDRSettings->setServerAddress(new QString(settings.m_serverAddress));
+    }
+    if (deviceSettingsKeys.contains("fileRecordName") || force) {
+        swgKiwiSDRSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

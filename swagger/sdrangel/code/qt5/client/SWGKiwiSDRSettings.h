@@ -54,6 +54,9 @@ public:
     QString* getServerAddress();
     void setServerAddress(QString* server_address);
 
+    QString* getFileRecordName();
+    void setFileRecordName(QString* file_record_name);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -81,6 +84,9 @@ private:
 
     QString* server_address;
     bool m_server_address_isSet;
+
+    QString* file_record_name;
+    bool m_file_record_name_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

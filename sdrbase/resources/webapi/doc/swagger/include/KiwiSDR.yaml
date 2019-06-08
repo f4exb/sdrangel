@@ -12,6 +12,8 @@ KiwiSDRSettings:
     serverAddress:
       description: Distant KiwiSDR instance URL or IPv4 address with port
       type: string
+    fileRecordName:
+      type: string
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

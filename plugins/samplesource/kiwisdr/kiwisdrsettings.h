@@ -28,6 +28,7 @@ struct KiwiSDRSettings {
 
     quint64 m_centerFrequency;
 	QString m_serverAddress;
+    QString  m_fileRecordName;
 
 	bool m_useReverseAPI;
     QString m_reverseAPIAddress;
