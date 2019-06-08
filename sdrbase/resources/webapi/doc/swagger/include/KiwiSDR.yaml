@@ -1,0 +1,23 @@
+KiwiSDRSettings:
+  description: KiwiSDR
+  properties:
+    gain:
+      type: integer
+    useAGC:
+      description: AGC active (1 for yes, 0 for no)
+      type: integer
+    centerFrequency:
+      type: integer
+      format: int64
+    serverAddress:
+      description: Distant KiwiSDR instance URL or IPv4 address with port
+      type: string
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer

@@ -2297,6 +2297,9 @@ margin-bottom: 20px;
     "hackRFOutputSettings" : {
       "$ref" : "#/definitions/HackRFOutputSettings"
     },
+    "kiwiSDRSettings" : {
+      "$ref" : "#/definitions/KiwiSDRSettings"
+    },
     "limeSdrInputSettings" : {
       "$ref" : "#/definitions/LimeSdrInputSettings"
     },
@@ -3073,6 +3076,39 @@ margin-bottom: 20px;
     }
   },
   "description" : "Summarized information about this SDRangel instance"
+};
+            defs.KiwiSDRSettings = {
+  "properties" : {
+    "gain" : {
+      "type" : "integer"
+    },
+    "useAGC" : {
+      "type" : "integer",
+      "description" : "AGC active (1 for yes, 0 for no)"
+    },
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "serverAddress" : {
+      "type" : "string",
+      "description" : "Distant KiwiSDR instance URL or IPv4 address with port"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "KiwiSDR"
 };
             defs.LimeSdrInputReport = {
   "properties" : {
@@ -25100,7 +25136,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-05-25T21:27:31.978+02:00
+              Generated 2019-06-08T11:06:14.976+02:00
             </div>
           </div>
       </div>

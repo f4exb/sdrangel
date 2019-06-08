@@ -1802,6 +1802,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/HackRF.yaml#/HackRFInputSettings"
       hackRFOutputSettings:
         $ref: "http://localhost:8081/api/swagger/include/HackRF.yaml#/HackRFOutputSettings"
+      kiwiSDRSettings:
+        $ref: "http://localhost:8081/api/swagger/include/KiwiSDR.yaml#/KiwiSDRSettings"
       limeSdrInputSettings:
         $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputSettings"
       limeSdrOutputSettings:

@@ -33,6 +33,7 @@
 #include "SWGFileSourceSettings.h"
 #include "SWGHackRFInputSettings.h"
 #include "SWGHackRFOutputSettings.h"
+#include "SWGKiwiSDRSettings.h"
 #include "SWGLimeSdrInputSettings.h"
 #include "SWGLimeSdrOutputSettings.h"
 #include "SWGLocalInputSettings.h"
@@ -111,6 +112,9 @@ public:
 
     SWGHackRFOutputSettings* getHackRfOutputSettings();
     void setHackRfOutputSettings(SWGHackRFOutputSettings* hack_rf_output_settings);
+
+    SWGKiwiSDRSettings* getKiwiSdrSettings();
+    void setKiwiSdrSettings(SWGKiwiSDRSettings* kiwi_sdr_settings);
 
     SWGLimeSdrInputSettings* getLimeSdrInputSettings();
     void setLimeSdrInputSettings(SWGLimeSdrInputSettings* lime_sdr_input_settings);
@@ -208,6 +212,9 @@ private:
 
     SWGHackRFOutputSettings* hack_rf_output_settings;
     bool m_hack_rf_output_settings_isSet;
+
+    SWGKiwiSDRSettings* kiwi_sdr_settings;
+    bool m_kiwi_sdr_settings_isSet;
 
     SWGLimeSdrInputSettings* lime_sdr_input_settings;
     bool m_lime_sdr_input_settings_isSet;

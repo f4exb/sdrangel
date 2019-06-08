@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2019 Vort                                                       //
-// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -23,6 +23,9 @@
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QBuffer>
+
+#include "SWGDeviceSettings.h"
+#include "SWGDeviceState.h"
 
 #include "kiwisdrinput.h"
 #include "device/deviceapi.h"
@@ -290,7 +293,9 @@ int KiwiSDRInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
 {
-    return 404;
+    (void) errorMessage;
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
 }
 
 int KiwiSDRInput::webapiRun(
@@ -298,14 +303,29 @@ int KiwiSDRInput::webapiRun(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
 {
-	return 404;
+    (void) errorMessage;
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    MsgStartStop *message = MsgStartStop::create(run);
+    m_inputMessageQueue.push(message);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgStartStop *msgToGUI = MsgStartStop::create(run);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    return 200;
 }
 
 int KiwiSDRInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
                 QString& errorMessage)
 {
-    return 404;
+    (void) errorMessage;
+    response.setKiwiSdrSettings(new SWGSDRangel::SWGKiwiSDRSettings());
+    response.getKiwiSdrSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
 }
 
 int KiwiSDRInput::webapiSettingsPutPatch(
@@ -314,19 +334,126 @@ int KiwiSDRInput::webapiSettingsPutPatch(
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage)
 {
-    return 404;
+    (void) errorMessage;
+    KiwiSDRSettings settings = m_settings;
+
+    if (deviceSettingsKeys.contains("gain")) {
+        settings.m_gain = response.getKiwiSdrSettings()->getGain();
+    }
+    if (deviceSettingsKeys.contains("useAGC")) {
+        settings.m_useAGC = response.getKiwiSdrSettings()->getUseAgc();
+    }
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getKiwiSdrSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("serverAddress")) {
+        settings.m_serverAddress = *response.getKiwiSdrSettings()->getServerAddress();
+    }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getKiwiSdrSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getKiwiSdrSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getKiwiSdrSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getKiwiSdrSettings()->getReverseApiDeviceIndex();
+    }
+
+    MsgConfigureKiwiSDR *msg = MsgConfigureKiwiSDR::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureKiwiSDR *msgToGUI = MsgConfigureKiwiSDR::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
 }
 
 void KiwiSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const KiwiSDRSettings& settings)
 {
+    response.getKiwiSdrSettings()->setGain(settings.m_gain);
+    response.getKiwiSdrSettings()->setUseAgc(settings.m_useAGC ? 1 : 0);
+    response.getKiwiSdrSettings()->setCenterFrequency(settings.m_centerFrequency);
+
+    if (response.getKiwiSdrSettings()->getServerAddress()) {
+        *response.getKiwiSdrSettings()->getServerAddress() = settings.m_serverAddress;
+    } else {
+        response.getKiwiSdrSettings()->setServerAddress(new QString(settings.m_serverAddress));
+    }
 }
 
 void KiwiSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const KiwiSDRSettings& settings, bool force)
 {
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setDirection(0); // single Rx
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
+    swgDeviceSettings->setDeviceHwType(new QString("KiwiSDR"));
+    swgDeviceSettings->setKiwiSdrSettings(new SWGSDRangel::SWGKiwiSDRSettings());
+    SWGSDRangel::SWGKiwiSDRSettings *swgKiwiSDRSettings = swgDeviceSettings->getKiwiSdrSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (deviceSettingsKeys.contains("gain")) {
+        swgKiwiSDRSettings->setGain(settings.m_gain);
+    }
+    if (deviceSettingsKeys.contains("useAGC")) {
+        swgKiwiSDRSettings->setUseAgc(settings.m_useAGC ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("centerFrequency") || force) {
+        swgKiwiSDRSettings->setCenterFrequency(settings.m_centerFrequency);
+    }
+    if (deviceSettingsKeys.contains("serverAddress") || force) {
+        swgKiwiSDRSettings->setServerAddress(new QString(settings.m_serverAddress));
+    }
+
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+
+    delete swgDeviceSettings;
 }
 
 void KiwiSDRInput::webapiReverseSendStartStop(bool start)
 {
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setDirection(0); // single Rx
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
+    swgDeviceSettings->setDeviceHwType(new QString("KiwiSDR"));
+
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer=new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    if (start) {
+        m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
+    } else {
+        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
+    }
 }
 
 void KiwiSDRInput::networkManagerFinished(QNetworkReply *reply)

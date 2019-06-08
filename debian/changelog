@@ -1,3 +1,9 @@
+sdrangel (4.10.0-1) unstable; urgency=medium
+
+  * Support for KiwiSDR
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 09 Jun 2019 20:44:06 +0100
+
 sdrangel (4.9.1-1) unstable; urgency=medium
 
   * WFM demod: variable RF bandwidth. Implements #320

@@ -1944,6 +1944,21 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
+    else if ((*deviceHwType == "KiwiSDR") && (deviceSettings.getDirection() == 0))
+    {
+        if (jsonObject.contains("kiwiSDRSettings") && jsonObject["kiwiSDRSettings"].isObject())
+        {
+            QJsonObject kiwiSDRSettingsJsonObject = jsonObject["kiwiSDRSettings"].toObject();
+            deviceSettingsKeys = kiwiSDRSettingsJsonObject.keys();
+            deviceSettings.setKiwiSdrSettings(new SWGSDRangel::SWGKiwiSDRSettings());
+            deviceSettings.getKiwiSdrSettings()->fromJsonObject(kiwiSDRSettingsJsonObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     else if ((*deviceHwType == "LimeSDR") && (deviceSettings.getDirection() == 0))
     {
         if (jsonObject.contains("limeSdrInputSettings") && jsonObject["limeSdrInputSettings"].isObject())

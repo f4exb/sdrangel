@@ -15,6 +15,7 @@ set(kiwisdr_HEADERS
 )
 
 include_directories(
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 	${Boost_INCLUDE_DIRS}
 )
 
@@ -22,7 +23,6 @@ if(NOT SERVER_MODE)
     set(kiwisdr_SOURCES
         ${kiwisdr_SOURCES}
         kiwisdrgui.cpp
-
         kiwisdrgui.ui
     )
     set(kiwisdr_HEADERS

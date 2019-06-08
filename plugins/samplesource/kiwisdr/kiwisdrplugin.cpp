@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2019 Vort                                   //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -29,7 +30,7 @@
 
 const PluginDescriptor KiwiSDRPlugin::m_pluginDescriptor = {
 	QString("KiwiSDR input"),
-	QString("0.0.1"),
+	QString("4.10.0"),
 	QString("(c) Vort (c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

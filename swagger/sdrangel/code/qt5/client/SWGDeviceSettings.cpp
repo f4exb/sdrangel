@@ -56,6 +56,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_hack_rf_input_settings_isSet = false;
     hack_rf_output_settings = nullptr;
     m_hack_rf_output_settings_isSet = false;
+    kiwi_sdr_settings = nullptr;
+    m_kiwi_sdr_settings_isSet = false;
     lime_sdr_input_settings = nullptr;
     m_lime_sdr_input_settings_isSet = false;
     lime_sdr_output_settings = nullptr;
@@ -126,6 +128,8 @@ SWGDeviceSettings::init() {
     m_hack_rf_input_settings_isSet = false;
     hack_rf_output_settings = new SWGHackRFOutputSettings();
     m_hack_rf_output_settings_isSet = false;
+    kiwi_sdr_settings = new SWGKiwiSDRSettings();
+    m_kiwi_sdr_settings_isSet = false;
     lime_sdr_input_settings = new SWGLimeSdrInputSettings();
     m_lime_sdr_input_settings_isSet = false;
     lime_sdr_output_settings = new SWGLimeSdrOutputSettings();
@@ -201,6 +205,9 @@ SWGDeviceSettings::cleanup() {
     }
     if(hack_rf_output_settings != nullptr) { 
         delete hack_rf_output_settings;
+    }
+    if(kiwi_sdr_settings != nullptr) { 
+        delete kiwi_sdr_settings;
     }
     if(lime_sdr_input_settings != nullptr) { 
         delete lime_sdr_input_settings;
@@ -294,6 +301,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&hack_rf_output_settings, pJson["hackRFOutputSettings"], "SWGHackRFOutputSettings", "SWGHackRFOutputSettings");
     
+    ::SWGSDRangel::setValue(&kiwi_sdr_settings, pJson["kiwiSDRSettings"], "SWGKiwiSDRSettings", "SWGKiwiSDRSettings");
+    
     ::SWGSDRangel::setValue(&lime_sdr_input_settings, pJson["limeSdrInputSettings"], "SWGLimeSdrInputSettings", "SWGLimeSdrInputSettings");
     
     ::SWGSDRangel::setValue(&lime_sdr_output_settings, pJson["limeSdrOutputSettings"], "SWGLimeSdrOutputSettings", "SWGLimeSdrOutputSettings");
@@ -385,6 +394,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((hack_rf_output_settings != nullptr) && (hack_rf_output_settings->isSet())){
         toJsonValue(QString("hackRFOutputSettings"), hack_rf_output_settings, obj, QString("SWGHackRFOutputSettings"));
+    }
+    if((kiwi_sdr_settings != nullptr) && (kiwi_sdr_settings->isSet())){
+        toJsonValue(QString("kiwiSDRSettings"), kiwi_sdr_settings, obj, QString("SWGKiwiSDRSettings"));
     }
     if((lime_sdr_input_settings != nullptr) && (lime_sdr_input_settings->isSet())){
         toJsonValue(QString("limeSdrInputSettings"), lime_sdr_input_settings, obj, QString("SWGLimeSdrInputSettings"));
@@ -581,6 +593,16 @@ SWGDeviceSettings::setHackRfOutputSettings(SWGHackRFOutputSettings* hack_rf_outp
     this->m_hack_rf_output_settings_isSet = true;
 }
 
+SWGKiwiSDRSettings*
+SWGDeviceSettings::getKiwiSdrSettings() {
+    return kiwi_sdr_settings;
+}
+void
+SWGDeviceSettings::setKiwiSdrSettings(SWGKiwiSDRSettings* kiwi_sdr_settings) {
+    this->kiwi_sdr_settings = kiwi_sdr_settings;
+    this->m_kiwi_sdr_settings_isSet = true;
+}
+
 SWGLimeSdrInputSettings*
 SWGDeviceSettings::getLimeSdrInputSettings() {
     return lime_sdr_input_settings;
@@ -770,6 +792,7 @@ SWGDeviceSettings::isSet(){
         if(file_source_settings != nullptr && file_source_settings->isSet()){ isObjectUpdated = true; break;}
         if(hack_rf_input_settings != nullptr && hack_rf_input_settings->isSet()){ isObjectUpdated = true; break;}
         if(hack_rf_output_settings != nullptr && hack_rf_output_settings->isSet()){ isObjectUpdated = true; break;}
+        if(kiwi_sdr_settings != nullptr && kiwi_sdr_settings->isSet()){ isObjectUpdated = true; break;}
         if(lime_sdr_input_settings != nullptr && lime_sdr_input_settings->isSet()){ isObjectUpdated = true; break;}
         if(lime_sdr_output_settings != nullptr && lime_sdr_output_settings->isSet()){ isObjectUpdated = true; break;}
         if(local_input_settings != nullptr && local_input_settings->isSet()){ isObjectUpdated = true; break;}
