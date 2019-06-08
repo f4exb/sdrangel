@@ -1865,6 +1865,8 @@ definitions:
         $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceReport"
       limeSdrInputReport:
         $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
+      kiwiSDRReport:
+        $ref: "/doc/swagger/include/KiwiSDR.yaml#/KiwiSDRReport"
       limeSdrOutputReport:
         $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
       localInputReport:

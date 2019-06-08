@@ -27,6 +27,7 @@
 #include "SWGBladeRF2InputReport.h"
 #include "SWGBladeRF2OutputReport.h"
 #include "SWGFileSourceReport.h"
+#include "SWGKiwiSDRReport.h"
 #include "SWGLimeSdrInputReport.h"
 #include "SWGLimeSdrOutputReport.h"
 #include "SWGLocalInputReport.h"
@@ -84,6 +85,9 @@ public:
 
     SWGLimeSdrInputReport* getLimeSdrInputReport();
     void setLimeSdrInputReport(SWGLimeSdrInputReport* lime_sdr_input_report);
+
+    SWGKiwiSDRReport* getKiwiSdrReport();
+    void setKiwiSdrReport(SWGKiwiSDRReport* kiwi_sdr_report);
 
     SWGLimeSdrOutputReport* getLimeSdrOutputReport();
     void setLimeSdrOutputReport(SWGLimeSdrOutputReport* lime_sdr_output_report);
@@ -154,6 +158,9 @@ private:
 
     SWGLimeSdrInputReport* lime_sdr_input_report;
     bool m_lime_sdr_input_report_isSet;
+
+    SWGKiwiSDRReport* kiwi_sdr_report;
+    bool m_kiwi_sdr_report_isSet;
 
     SWGLimeSdrOutputReport* lime_sdr_output_report;
     bool m_lime_sdr_output_report_isSet;

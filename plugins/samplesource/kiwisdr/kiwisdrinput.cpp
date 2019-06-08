@@ -26,6 +26,8 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGKiwiSDRReport.h"
 
 #include "kiwisdrinput.h"
 #include "device/deviceapi.h"
@@ -251,6 +253,15 @@ bool KiwiSDRInput::handleMessage(const Message& message)
     }
 }
 
+int KiwiSDRInput::getStatus() const
+{
+    if (m_kiwiSDRWorker) {
+        return m_kiwiSDRWorker->getStatus();
+    } else {
+        return 0;
+    }
+}
+
 bool KiwiSDRInput::applySettings(const KiwiSDRSettings& settings, bool force)
 {
     QList<QString> reverseAPIKeys;
@@ -376,6 +387,17 @@ int KiwiSDRInput::webapiSettingsPutPatch(
     return 200;
 }
 
+int KiwiSDRInput::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setKiwiSdrReport(new SWGSDRangel::SWGKiwiSDRReport());
+    response.getKiwiSdrReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
+
 void KiwiSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const KiwiSDRSettings& settings)
 {
     response.getKiwiSdrSettings()->setGain(settings.m_gain);
@@ -387,6 +409,11 @@ void KiwiSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     } else {
         response.getKiwiSdrSettings()->setServerAddress(new QString(settings.m_serverAddress));
     }
+}
+
+void KiwiSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    response.getKiwiSdrReport()->setStatus(getStatus());
 }
 
 void KiwiSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const KiwiSDRSettings& settings, bool force)

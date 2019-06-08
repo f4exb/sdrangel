@@ -156,6 +156,10 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            QString& errorMessage);
+
 private:
 	DeviceAPI *m_deviceAPI;
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
@@ -169,8 +173,10 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+    int getStatus() const;
 	bool applySettings(const KiwiSDRSettings& settings, bool force);
     void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const KiwiSDRSettings& settings);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const KiwiSDRSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 

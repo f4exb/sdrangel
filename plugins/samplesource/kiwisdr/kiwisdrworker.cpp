@@ -25,7 +25,8 @@ KiwiSDRWorker::KiwiSDRWorker(SampleSinkFifo* sampleFifo)
 	m_samplesBuf(),
 	m_centerFrequency(1450000),
 	m_gain(20),
-	m_useAGC(true)
+	m_useAGC(true),
+    m_status(0)
 {
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -48,11 +49,13 @@ void KiwiSDRWorker::onConnected()
 void KiwiSDRWorker::onDisconnected()
 {
     qDebug("KiwiSDRWorker::onDisconnected");
+    m_status = 4;
 	emit updateStatus(4);
 }
 
 void KiwiSDRWorker::onSocketError(QAbstractSocket::SocketError error)
 {
+    m_status = 3;
 	emit updateStatus(3);
 }
 
@@ -91,6 +94,7 @@ void KiwiSDRWorker::onBinaryMessageReceived(const QByteArray &message)
 			sendGain();
 			sendCenterFrequency();
 			m_timer.start(5000);
+            m_status = 2;
 			emit updateStatus(2);
 		}
 	}
@@ -139,6 +143,7 @@ void KiwiSDRWorker::onServerAddressChanged(QString serverAddress)
 		return;
 	m_serverAddress = serverAddress;
 
+    m_status = 1;
 	emit updateStatus(1);
 
 	QString url("ws://");

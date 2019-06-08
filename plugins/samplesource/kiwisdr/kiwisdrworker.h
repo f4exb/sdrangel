@@ -28,6 +28,7 @@ class KiwiSDRWorker : public QObject {
 
 public:
 	KiwiSDRWorker(SampleSinkFifo* sampleFifo);
+    int getStatus() const { return m_status; }
 
 private:
 	QTimer m_timer;
@@ -41,6 +42,8 @@ private:
 
 	uint32_t m_gain;
 	bool m_useAGC;
+
+    int m_status; //!< See GUI for status number detail
 
 	void sendCenterFrequency();
 	void sendGain();

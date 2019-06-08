@@ -2163,6 +2163,9 @@ margin-bottom: 20px;
     "limeSdrInputReport" : {
       "$ref" : "#/definitions/LimeSdrInputReport"
     },
+    "kiwiSDRReport" : {
+      "$ref" : "#/definitions/KiwiSDRReport"
+    },
     "limeSdrOutputReport" : {
       "$ref" : "#/definitions/LimeSdrOutputReport"
     },
@@ -3076,6 +3079,15 @@ margin-bottom: 20px;
     }
   },
   "description" : "Summarized information about this SDRangel instance"
+};
+            defs.KiwiSDRReport = {
+  "properties" : {
+    "status" : {
+      "type" : "integer",
+      "description" : "0 for Idle, 1 for Connecting, 2 for Connected, 3 for Error, 4 for Disconnected"
+    }
+  },
+  "description" : "KiwiSDR"
 };
             defs.KiwiSDRSettings = {
   "properties" : {
@@ -25136,7 +25148,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-06-08T11:06:14.976+02:00
+              Generated 2019-06-08T23:46:41.204+02:00
             </div>
           </div>
       </div>

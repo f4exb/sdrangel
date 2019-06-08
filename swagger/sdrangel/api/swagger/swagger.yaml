@@ -1865,6 +1865,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/FileSource.yaml#/FileSourceReport"
       limeSdrInputReport:
         $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
+      kiwiSDRReport:
+        $ref: "http://localhost:8081/api/swagger/include/KiwiSDR.yaml#/KiwiSDRReport"
       limeSdrOutputReport:
         $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
       localInputReport:
