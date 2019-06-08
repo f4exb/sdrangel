@@ -184,8 +184,9 @@ void KiwiSDRInput::setCenterFrequency(qint64 centerFrequency)
 
 void KiwiSDRInput::setWorkerStatus(int status)
 {
-	if (m_guiMessageQueue)
+	if (m_guiMessageQueue) {
 		m_guiMessageQueue->push(MsgSetStatus::create(status));
+    }
 }
 
 bool KiwiSDRInput::handleMessage(const Message& message)

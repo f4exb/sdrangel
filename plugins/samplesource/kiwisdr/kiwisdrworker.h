@@ -55,6 +55,7 @@ public slots:
 
 private slots:
 	void onConnected();
+    void onDisconnected();
 	void onBinaryMessageReceived(const QByteArray &message);
 	void onSocketError(QAbstractSocket::SocketError error);
 

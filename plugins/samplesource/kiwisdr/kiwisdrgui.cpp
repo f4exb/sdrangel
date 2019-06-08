@@ -53,15 +53,17 @@ KiwiSDRGui::KiwiSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
     qDebug("KiwiSDRGui::KiwiSDRGui");
     m_sampleSource = m_deviceUISet->m_deviceAPI->getSampleSource();
 
-	m_statusTooltips.push_back("Idle");
-	m_statusTooltips.push_back("Connecting...");
-	m_statusTooltips.push_back("Connected");
-	m_statusTooltips.push_back("Error");
+	m_statusTooltips.push_back("Idle");          // 0
+	m_statusTooltips.push_back("Connecting..."); // 1
+	m_statusTooltips.push_back("Connected");     // 2
+	m_statusTooltips.push_back("Error");         // 3
+	m_statusTooltips.push_back("Disconnected");  // 4
 
-	m_statusColors.push_back("gray");
-	m_statusColors.push_back("rgb(232, 212, 35)");
-	m_statusColors.push_back("rgb(35, 138, 35)");
-	m_statusColors.push_back("rgb(232, 85, 85)");
+	m_statusColors.push_back("gray");               // Idle
+	m_statusColors.push_back("rgb(232, 212, 35)");  // Connecting (yellow)
+	m_statusColors.push_back("rgb(35, 138, 35)");   // Connected (green)
+	m_statusColors.push_back("rgb(232, 85, 85)");   // Error (red)
+	m_statusColors.push_back("rgb(232, 85, 232)");  // Disconnected (magenta)
 
     ui->setupUi(this);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

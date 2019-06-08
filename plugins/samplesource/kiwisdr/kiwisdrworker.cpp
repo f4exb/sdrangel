@@ -36,11 +36,19 @@ KiwiSDRWorker::KiwiSDRWorker(SampleSinkFifo* sampleFifo)
 		this, &KiwiSDRWorker::onBinaryMessageReceived);
 	connect(&m_webSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
 		this, &KiwiSDRWorker::onSocketError);
+    connect(&m_webSocket, &QWebSocket::disconnected,
+        this, &KiwiSDRWorker::onDisconnected);
 }
 
 void KiwiSDRWorker::onConnected()
 {
 	m_webSocket.sendTextMessage("SET auth t=kiwi p=#");
+}
+
+void KiwiSDRWorker::onDisconnected()
+{
+    qDebug("KiwiSDRWorker::onDisconnected");
+	emit updateStatus(4);
 }
 
 void KiwiSDRWorker::onSocketError(QAbstractSocket::SocketError error)
