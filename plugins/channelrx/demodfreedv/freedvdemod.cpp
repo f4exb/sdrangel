@@ -266,62 +266,22 @@ void FreeDVDemod::feed(const SampleVector::const_iterator& begin, const SampleVe
 		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
-		if(m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
-		{
-            n_out = SSBFilter->runSSB(ci, &sideband, true);
-			m_interpolatorDistanceRemain += m_interpolatorDistance;
-		}
-		else
-		{
-			n_out = 0;
-		}
-
-		for (int i = 0; i < n_out; i++)
-		{
-			// Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
-			// smart decimation with bit gain using float arithmetic (23 bits significand)
-
-			m_sum += sideband[i];
-
-			if (!(m_undersampleCount++ & decim_mask))
-			{
-				Real avgr = m_sum.real() / decim;
-				Real avgi = m_sum.imag() / decim;
-				m_magsq = (avgr * avgr + avgi * avgi) / (SDR_RX_SCALED*SDR_RX_SCALED);
-
-                m_magsqSum += m_magsq;
-
-                if (m_magsq > m_magsqPeak)
-                {
-                    m_magsqPeak = m_magsq;
-                }
-
-                m_magsqCount++;
-                m_sampleBuffer.push_back(Sample(avgr, avgi));
-                m_sum.real(0.0);
-                m_sum.imag(0.0);
-			}
-
-            // fftfilt::cmplx z = sideband[i];
-            // Real demod = (z.real() + z.imag()) * 0.7;
-            Real demod = sideband[i].real(); // works as good
-
-            if (m_agcActive)
+        if (m_interpolatorDistance < 1.0f) // interpolate
+        {
+            while (!m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
             {
-                m_simpleAGC.feed(demod);
-                demod *= (m_settings.m_volumeIn * 3276.8f) / m_simpleAGC.getValue(); // provision for peak to average ratio (here 10) compensated by m_volumeIn
-                // if (i == 0) {
-                //     qDebug("FreeDVDemod::feed: m_simpleAGC: %f", m_simpleAGC.getValue());
-                // }
+                processOneSample(ci);
+                m_interpolatorDistanceRemain += m_interpolatorDistance;
             }
-            else
+        }
+        else
+        {
+            if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
             {
-                demod *= m_settings.m_volumeIn;
+                processOneSample(ci);
+                m_interpolatorDistanceRemain += m_interpolatorDistance;
             }
-
-
-            pushSampleToDV((qint16) demod);
-		}
+        }
 	}
 
 	uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
@@ -341,6 +301,62 @@ void FreeDVDemod::feed(const SampleVector::const_iterator& begin, const SampleVe
 	m_sampleBuffer.clear();
 
 	m_settingsMutex.unlock();
+}
+
+void FreeDVDemod::processOneSample(Complex &ci)
+{
+	fftfilt::cmplx *sideband;
+	int n_out = 0;
+	int decim = 1<<(m_spanLog2 - 1);
+	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
+
+    n_out = SSBFilter->runSSB(ci, &sideband, true); // always USB side
+
+    for (int i = 0; i < n_out; i++)
+    {
+        // Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
+        // smart decimation with bit gain using float arithmetic (23 bits significand)
+
+        m_sum += sideband[i];
+
+        if (!(m_undersampleCount++ & decim_mask))
+        {
+            Real avgr = m_sum.real() / decim;
+            Real avgi = m_sum.imag() / decim;
+            m_magsq = (avgr * avgr + avgi * avgi) / (SDR_RX_SCALED*SDR_RX_SCALED);
+
+            m_magsqSum += m_magsq;
+
+            if (m_magsq > m_magsqPeak)
+            {
+                m_magsqPeak = m_magsq;
+            }
+
+            m_magsqCount++;
+            m_sampleBuffer.push_back(Sample(avgr, avgi));
+            m_sum.real(0.0);
+            m_sum.imag(0.0);
+        }
+
+        // fftfilt::cmplx z = sideband[i];
+        // Real demod = (z.real() + z.imag()) * 0.7;
+        Real demod = sideband[i].real(); // works as good
+
+        if (m_agcActive)
+        {
+            m_simpleAGC.feed(demod);
+            demod *= (m_settings.m_volumeIn * 3276.8f) / m_simpleAGC.getValue(); // provision for peak to average ratio (here 10) compensated by m_volumeIn
+            // if (i == 0) {
+            //     qDebug("FreeDVDemod::feed: m_simpleAGC: %f", m_simpleAGC.getValue());
+            // }
+        }
+        else
+        {
+            demod *= m_settings.m_volumeIn;
+        }
+
+        pushSampleToDV((qint16) demod);
+    }
 }
 
 void FreeDVDemod::start()
