@@ -46,12 +46,11 @@ public:
     double getMagSq() const { return m_magsq; }
     void setThreshold(double threshold) { m_threshold = threshold; }
     void setThresholdEnable(bool enable);
-    void setGate(int gate) { m_gate = gate; }
-    void setStepDownDelay(int stepDownDelay) { m_stepDownDelay = stepDownDelay; }
+    void setGate(int gate) { m_gate = gate; m_gateCounter = 0; m_count = 0; }
+    void setStepDownDelay(int stepDownDelay) { m_stepDownDelay = stepDownDelay; m_gateCounter = 0; m_count = 0; }
     void setClamping(bool clamping) { m_clamping = clamping; }
     void setClampMax(double clampMax) { m_clampMax = clampMax; }
     int getStepDownDelay() const { return m_stepDownDelay; }
-    float getStepDownValue() const;
     float getStepValue() const;
     void setHardLimiting(bool hardLimiting) { m_hardLimiting = hardLimiting; }
 

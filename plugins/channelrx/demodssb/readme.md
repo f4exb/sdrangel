@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to listen to a single sideband or double sidebands modulated signal. 
+This plugin can be used to listen to a single sideband or double sidebands modulated signal.
 
 <h2>Interface</h2>
 
@@ -24,7 +24,7 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 
   - Monaural: the scalar signal is routed to both left and right audio channels
   - Binaural: the complex signal is fed with the real part on the left audio channel and the imaginary part to the right audio channel
-  
+
 <h3>4: Invert left and right channels</h3>
 
 Inverts left and right audio channels. Useful in binaural mode only.
@@ -91,7 +91,7 @@ This is how the Span (8) and bandpass (9, 10) filter controls look like in the 3
 Values are expressed in kHz and step is 100 Hz.
 
   - In SSB mode this is the upper (USB: positive frequencies) or lower (LSB: negative frequencies) cutoff of the in channel single side band bandpass filter. The value triggers LSB mode when negative and USB when positive
-  - In DSB mode this is half the bandwidth of the double side band in channel bandpass filter therefore the value is prefixed with the &#177; sign. 
+  - In DSB mode this is half the bandwidth of the double side band in channel bandpass filter therefore the value is prefixed with the &#177; sign.
 
 <h3>10: "Low cut": In channel bandpass filter cutoff frequency closest to zero</h3>
 
@@ -140,7 +140,7 @@ The signal power is calculated as the moving average over the AGC time constant 
 
 Active only in AGC mode with squelch enabled.
 
-To avoid unwanted squelch opening on short transient bursts only signals with power above threshold during this period in milliseconds will open the squelch.It can be varied from 0 to 20 ms in 1 ms steps.
+To avoid unwanted squelch opening on short transient bursts only signals with power above threshold during this period in milliseconds will open the squelch.It can be varied from 0 to 20 ms in 1 ms steps then from 30 to 500 ms in 10 ms steps.
 
 When the power threshold is close to the noise floor a few milliseconds help in preventing noise power wiggle to open the squelch.
 

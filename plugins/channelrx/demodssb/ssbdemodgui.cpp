@@ -202,9 +202,10 @@ void SSBDemodGUI::on_agcPowerThreshold_valueChanged(int value)
 
 void SSBDemodGUI::on_agcThresholdGate_valueChanged(int value)
 {
-    QString s = QString::number(value, 'f', 0);
+    int agcThresholdGate = value < 20 ? value : ((value - 20) * 10) + 20;
+    QString s = QString::number(agcThresholdGate, 'f', 0);
     ui->agcThresholdGateText->setText(s);
-    m_settings.m_agcThresholdGate = value;
+    m_settings.m_agcThresholdGate = agcThresholdGate;
     applySettings();
 }
 
@@ -565,10 +566,7 @@ void SSBDemodGUI::displaySettings()
 
     ui->agcPowerThreshold->setValue(m_settings.m_agcPowerThreshold);
     displayAGCPowerThreshold(ui->agcPowerThreshold->value());
-
-    ui->agcThresholdGate->setValue(m_settings.m_agcThresholdGate);
-    s = QString::number(ui->agcThresholdGate->value(), 'f', 0);
-    ui->agcThresholdGateText->setText(s);
+    displayAGCThresholdGate(m_settings.m_agcThresholdGate);
 
     blockApplySettings(false);
 }
@@ -584,6 +582,19 @@ void SSBDemodGUI::displayAGCPowerThreshold(int value)
         QString s = QString::number(value, 'f', 0);
         ui->agcPowerThresholdText->setText(s);
     }
+}
+
+void SSBDemodGUI::displayAGCThresholdGate(int value)
+{
+    QString s = QString::number(value, 'f', 0);
+    ui->agcThresholdGateText->setText(s);
+    int dialValue = value;
+
+    if (value > 20) {
+        dialValue = ((value - 20) / 10) + 20;
+    }
+
+    ui->agcThresholdGate->setValue(dialValue);
 }
 
 void SSBDemodGUI::leaveEvent(QEvent*)

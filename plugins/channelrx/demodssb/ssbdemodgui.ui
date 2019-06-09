@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>412</width>
+    <width>414</width>
     <height>190</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>412</width>
+    <width>414</width>
     <height>0</height>
    </size>
   </property>
@@ -36,13 +36,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>410</width>
+     <width>415</width>
      <height>171</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>410</width>
+     <width>415</width>
      <height>0</height>
     </size>
    </property>
@@ -836,7 +836,7 @@
          <string>Power threshold gate (ms)</string>
         </property>
         <property name="maximum">
-         <number>20</number>
+         <number>68</number>
         </property>
         <property name="pageStep">
          <number>1</number>
@@ -850,7 +850,7 @@
        <widget class="QLabel" name="agcThresholdGateText">
         <property name="minimumSize">
          <size>
-          <width>16</width>
+          <width>22</width>
           <height>0</height>
          </size>
         </property>
@@ -858,7 +858,7 @@
          <string>Power threshold gate (ms)</string>
         </property>
         <property name="text">
-         <string>00</string>
+         <string>000</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

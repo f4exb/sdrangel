@@ -73,8 +73,8 @@ private:
 	void applyBandwidths(int spanLog2, bool force = false);
     int spanLog2Limit(int spanLog2);
 	void displaySettings();
-
 	void displayAGCPowerThreshold(int value);
+    void displayAGCThresholdGate(int value);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
