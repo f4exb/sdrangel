@@ -70,8 +70,8 @@ if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git/")
     ERROR_QUIET
     OUTPUT_STRIP_TRAILING_WHITESPACE)
   if(NOT res)
-        string(REGEX REPLACE "^v([0-9]+)\.([0-9]+)\.([0-9]+)-" "" git_commit ${out})
-        set(sdrangel_VERSION_SUFFIX "-${git_commit}")
+        string(REGEX REPLACE "^v([0-9]+)\.([0-9]+)\.([0-9]+)" "" git_commit ${out})
+        set(sdrangel_VERSION_SUFFIX "${git_commit}")
     endif()
 endif()
 
