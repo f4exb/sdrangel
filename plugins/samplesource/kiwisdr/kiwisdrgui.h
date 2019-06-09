@@ -85,6 +85,7 @@ private slots:
 	void on_agc_toggled(bool checked);
 	void on_serverAddress_returnPressed();
 	void on_serverAddressApplyButton_clicked();
+  	void on_dcBlock_toggled(bool checked);
 	void openDeviceSettingsDialog(const QPoint& p);
     void updateStatus();
     void updateHardware();

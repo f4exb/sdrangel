@@ -31,7 +31,7 @@ sdrangel (4.8.2-1) unstable; urgency=medium
 sdrangel (4.8.1-1) unstable; urgency=medium
 
   * AM demod: fixed audio interpolator. Issue #354
-  * Implemented interpolation to audio for NFM and SSB demods allowing the use of a 48k audio sink regardless of the channel sample rate
+  * Interpolation to audio for NFM and SSB demods allowing the use of a 48k audio sink regardless of the channel sample rate
   * AM demod: implemented low pass filter after the demod. Issue #352
   * Spectrum window: added ability to use the mouse wheel to move the central channel marker line. Issue #343
   * Frequency Tracker: make lock converge faster

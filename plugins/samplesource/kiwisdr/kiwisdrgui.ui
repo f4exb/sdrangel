@@ -32,7 +32,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Test source</string>
+   <string>KiwiSDR</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -307,6 +307,16 @@
        </property>
        <property name="checked">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="dcBlock">
+       <property name="toolTip">
+        <string>Automatic DC offset removal</string>
+       </property>
+       <property name="text">
+        <string>DC</string>
        </property>
       </widget>
      </item>

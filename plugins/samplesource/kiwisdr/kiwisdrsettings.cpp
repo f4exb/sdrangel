@@ -30,6 +30,7 @@ void KiwiSDRSettings::resetToDefaults()
 
 	m_gain = 20;
 	m_useAGC = true;
+    m_dcBlock = false;
 
 	m_serverAddress = "127.0.0.1:8073";
 

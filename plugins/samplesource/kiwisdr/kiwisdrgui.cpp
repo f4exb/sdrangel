@@ -165,6 +165,12 @@ void KiwiSDRGui::on_serverAddressApplyButton_clicked()
 	sendSettings();
 }
 
+void KiwiSDRGui::on_dcBlock_toggled(bool checked)
+{
+	m_settings.m_dcBlock = checked;
+	sendSettings();
+}
+
 void KiwiSDRGui::on_record_toggled(bool checked)
 {
     if (checked) {

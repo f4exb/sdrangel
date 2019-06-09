@@ -302,6 +302,12 @@ bool KiwiSDRInput::applySettings(const KiwiSDRSettings& settings, bool force)
 		emit setWorkerGain(settings.m_gain, settings.m_useAGC);
 	}
 
+    if (m_settings.m_dcBlock != settings.m_dcBlock)
+    {
+        reverseAPIKeys.append("dcBlock");
+        m_deviceAPI->configureCorrections(settings.m_dcBlock, false);
+    }
+
     if (m_settings.m_centerFrequency != settings.m_centerFrequency || force)
     {
         reverseAPIKeys.append("centerFrequency");
@@ -382,6 +388,9 @@ int KiwiSDRInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("useAGC")) {
         settings.m_useAGC = response.getKiwiSdrSettings()->getUseAgc();
     }
+    if (deviceSettingsKeys.contains("dcBlock")) {
+        settings.m_dcBlock = response.getKiwiSdrSettings()->getDcBlock() != 0;
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getKiwiSdrSettings()->getCenterFrequency();
     }
@@ -432,6 +441,7 @@ void KiwiSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
 {
     response.getKiwiSdrSettings()->setGain(settings.m_gain);
     response.getKiwiSdrSettings()->setUseAgc(settings.m_useAGC ? 1 : 0);
+    response.getKiwiSdrSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getKiwiSdrSettings()->setCenterFrequency(settings.m_centerFrequency);
 
     if (response.getKiwiSdrSettings()->getServerAddress()) {
@@ -479,6 +489,9 @@ void KiwiSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
     }
     if (deviceSettingsKeys.contains("useAGC")) {
         swgKiwiSDRSettings->setUseAgc(settings.m_useAGC ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("dcBlock") || force) {
+        swgKiwiSDRSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgKiwiSDRSettings->setCenterFrequency(settings.m_centerFrequency);

@@ -25,6 +25,7 @@
 struct KiwiSDRSettings {
 	uint32_t m_gain;
 	bool m_useAGC;
+    bool m_dcBlock;
 
     quint64 m_centerFrequency;
 	QString m_serverAddress;

@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This plugin is designed to enable connection to publicly available [KiwiSDR](http://kiwisdr.com/) receivers. A list of on-line receiver is available [here](https://sdr.hu/?q=kiwisdr)
+This plugin is designed to enable connection to publicly available [KiwiSDR](http://kiwisdr.com/) receivers. A list of on-line receivers is available [here](https://sdr.hu/?q=kiwisdr)
 
 <h2>Interface</h2>
 
@@ -58,3 +58,7 @@ This is the RF gain control sent to the remote
 <h3>9: AGC</h3>
 
 Use this button to switch on or off the AGC in the remote
+
+<h3>10: DC block</h3>
+
+Some remote receivers exhibit a peak at DC. Use this button to filter DC out.
