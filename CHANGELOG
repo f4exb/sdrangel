@@ -1,8 +1,10 @@
 sdrangel (4.10.0-1) unstable; urgency=medium
 
   * Support for KiwiSDR
+  * SSB demod: reworked AGC to handle the threshold gate properly
+  * FreeDV demod: support interpolation as well as decimation from channel sample rate
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 09 Jun 2019 20:44:06 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 09 Jun 2019 16:44:06 +0100
 
 sdrangel (4.9.1-1) unstable; urgency=medium
 
@@ -14,7 +16,7 @@ sdrangel (4.9.1-1) unstable; urgency=medium
 
 sdrangel (4.9.0-1) unstable; urgency=medium
 
-  * New build system
+  * New build system introduction
   * NFM demod: fixed low-pass audio filter
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 01 Jun 2019 20:44:06 +0100

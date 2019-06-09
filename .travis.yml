@@ -41,6 +41,7 @@ addons:
       - qttools5-dev-tools
       - qtmultimedia5-dev
       - libqt5multimedia5-plugins
+      - libqt5websockets5-dev
       - libusb-1.0-0-dev
       - libboost-all-dev
       - librtlsdr-dev

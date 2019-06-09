@@ -96,6 +96,10 @@ The [File sink plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/sample
 
 Note that this plugin does not require any of the hardware support libraries nor the libusb library. It is always available in the list of devices as `FileSink[0]` even if no physical device is connected.
 
+<h2>KiwiSDR</h2>
+
+The [KiwiSDR plugin](https://github.com/f4exb/sdrangel/tree/dev/plugins/samplesource/kiwisdr) is designed to enable connection to publicly available [KiwiSDR](http://kiwisdr.com/) receivers.
+
 <h2>Test source</h2>
 
 The [Test source plugin](https://github.com/f4exb/sdrangel/tree/master/plugins/samplesource/testsource) is an internal continuous wave generator that can be used to carry out test of software internals.
