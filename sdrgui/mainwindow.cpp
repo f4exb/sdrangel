@@ -116,7 +116,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
     QPixmap logoPixmap(":/sdrangel_logo.png");
     SDRangelSplash *splash = new SDRangelSplash(logoPixmap);
-    splash->setMessageRect(QRect(10, 80, 350, 12));
+    splash->setMessageRect(QRect(10, 80, 350, 16));
     splash->show();
     splash->showStatusMessage("starting...", Qt::white);
 
