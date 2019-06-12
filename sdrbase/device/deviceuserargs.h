@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_DEVICE_DEVICEUSERARG_H_
-#define SDRBASE_DEVICE_DEVICEUSERARG_H_
+#ifndef SDRBASE_DEVICE_DEVICEUSERARGS_H_
+#define SDRBASE_DEVICE_DEVICEUSERARGS_H_
 
 #include <QMap>
 #include <QString>
@@ -24,18 +24,16 @@
 
 #include "export.h"
 
-struct DEVICES_API DeviceUserArg
+struct DEVICES_API DeviceUserArgs
 {
 public:
-    typedef QMap<QString, QString> UserArgs;
-
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 
     static void splitDeviceKey(const QString& key, QString& id, int& sequence);
     static void composeDeviceKey(const QString& id, int sequence, QString& key);
 
-    QMap<QString, UserArgs> m_argByDevice; //!< "id-index" to arg map
+    QMap<QString, QString> m_argsByDevice; //!< "id-sequence" to arg map. Id is hardwareId when referencing hardware device but not limited to it
 };
 
 

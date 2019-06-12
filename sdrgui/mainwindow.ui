@@ -64,7 +64,7 @@
      <x>0</x>
      <y>0</y>
      <width>1012</width>
-     <height>20</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -117,10 +117,17 @@
     <property name="title">
      <string>&amp;Preferences</string>
     </property>
+    <widget class="QMenu" name="menuDevices">
+     <property name="title">
+      <string>Devices</string>
+     </property>
+     <addaction name="action_DeviceUserArguments"/>
+    </widget>
     <addaction name="action_Audio"/>
     <addaction name="action_Logging"/>
     <addaction name="action_DV_Serial"/>
     <addaction name="action_My_Position"/>
+    <addaction name="menuDevices"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_View"/>
@@ -924,6 +931,11 @@
      <family>Liberation Sans</family>
      <pointsize>9</pointsize>
     </font>
+   </property>
+  </action>
+  <action name="action_DeviceUserArguments">
+   <property name="text">
+    <string>User arguments</string>
    </property>
   </action>
   <zorder>presetDock</zorder>

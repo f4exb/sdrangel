@@ -15,69 +15,57 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QDataStream>
+#ifndef SDRGUI_GUI_DEVICEUSERARGSDIALOG_H
+#define SDRGUI_GUI_DEVICEUSERARGSDIALOG_H
 
-#include "util/simpleserializer.h"
-#include "deviceuserarg.h"
+#include <QDialog>
+#include <QSet>
 
-QByteArray DeviceUserArg::serialize() const
-{
-    SimpleSerializer s(1);
-    QByteArray data;
-    QDataStream *stream = new QDataStream(&data, QIODevice::WriteOnly);
-    *stream << m_argByDevice;
-    s.writeBlob(1, data);
-    return s.final();
+#include "plugin/plugininterface.h"
+#include "export.h"
+
+class QTreeWidgetItem;
+class DeviceEnumerator;
+struct DeviceUserArgs;
+
+namespace Ui {
+	class DeviceUserArgsDialog;
 }
 
-bool DeviceUserArg::deserialize(const QByteArray& data)
-{
-    SimpleDeserializer d(data);
+class SDRGUI_API DeviceUserArgsDialog : public QDialog {
+	Q_OBJECT
 
-    if (!d.isValid()) {
-        return false;
-    }
+public:
+	explicit DeviceUserArgsDialog(
+        DeviceEnumerator* deviceEnumerator,
+        DeviceUserArgs& hardwareDeviceUserArgs,
+        QWidget* parent = 0);
+	~DeviceUserArgsDialog();
 
-    if(d.getVersion() == 1)
-    {
-        QByteArray data;
+private:
+    struct HWDeviceReference {
+        QString m_hardwareId;
+        int m_sequence;
+        QString m_description;
 
-        d.readBlob(1, &data);
-        QDataStream readStream(&data, QIODevice::ReadOnly);
-        readStream >> m_argByDevice;
-
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-void DeviceUserArg::splitDeviceKey(const QString& key, QString& driver, int& sequence)
-{
-    QStringList elms = key.split('-');
-
-    if (elms.size() > 0) {
-        driver = elms[0];
-    }
-
-    if (elms.size() > 1)
-    {
-        bool ok;
-        QString seqStr = elms[1];
-        int seq = seqStr.toInt(&ok);
-
-        if (ok) {
-            sequence = seq;
+        bool operator==(const HWDeviceReference& rhs) {
+            return (m_hardwareId == rhs.m_hardwareId) && (m_sequence == rhs.m_sequence);
         }
-    }
-}
+    };
 
-void DeviceUserArg::composeDeviceKey(const QString& driver, int sequence, QString& key)
-{
-    QStringList strList;
-    strList.append(driver);
-    strList.append(QString::number(sequence));
-    key = strList.join('-');
-}
+	Ui::DeviceUserArgsDialog* ui;
+    DeviceEnumerator* m_deviceEnumerator;
+    DeviceUserArgs& m_hardwareDeviceUserArgs;
+    std::vector<HWDeviceReference> m_availableHWDevices;
+
+    void pushHWDeviceReference(const PluginInterface::SamplingDevice *samplingDevice);
+
+private slots:
+	void accept();
+	void reject();
+    void on_importDevice_clicked(bool checked);
+    void on_deleteArgs_clicked(bool checked);
+    void on_argStringEdit_returnPressed();
+};
+
+#endif // SDRGUI_GUI_DEVICEUSERARGSDIALOG_H

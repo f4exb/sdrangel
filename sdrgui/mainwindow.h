@@ -381,6 +381,7 @@ private slots:
     void on_action_Logging_triggered();
 	void on_action_DV_Serial_triggered(bool checked);
 	void on_action_My_Position_triggered();
+    void on_action_DeviceUserArguments_triggered();
 	void sampleSourceChanged();
 	void sampleSinkChanged();
 	void sampleMIMOChanged();

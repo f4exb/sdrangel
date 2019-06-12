@@ -47,6 +47,7 @@
 #include "gui/channelwindow.h"
 #include "gui/audiodialog.h"
 #include "gui/loggingdialog.h"
+#include "gui/deviceuserargsdialog.h"
 #include "gui/samplingdevicecontrol.h"
 #include "gui/sdrangelsplash.h"
 #include "gui/mypositiondialog.h"
@@ -1592,6 +1593,13 @@ void MainWindow::on_action_My_Position_triggered()
 {
 	MyPositionDialog myPositionDialog(m_settings, this);
 	myPositionDialog.exec();
+}
+
+void MainWindow::on_action_DeviceUserArguments_triggered()
+{
+    qDebug("MainWindow::on_action_DeviceUserArguments_triggered");
+    DeviceUserArgsDialog deviceUserArgsDialog(DeviceEnumerator::instance(), m_settings.getDeviceUserArgs(), this);
+    deviceUserArgsDialog.exec();
 }
 
 void MainWindow::on_action_DV_Serial_triggered(bool checked)

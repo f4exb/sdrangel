@@ -1,8 +1,9 @@
 #ifndef INCLUDE_SETTINGS_H
 #define INCLUDE_SETTINGS_H
 
-#include <audio/audiodevicemanager.h>
 #include <QString>
+#include "audio/audiodevicemanager.h"
+#include "device/deviceuserargs.h"
 #include "preferences.h"
 #include "preset.h"
 #include "export.h"
@@ -58,6 +59,7 @@ public:
     QtMsgType getFileMinLogLevel() const { return m_preferences.getFileMinLogLevel(); }
     bool getUseLogFile() const { return m_preferences.getUseLogFile(); }
     const QString& getLogFileName() const { return m_preferences.getLogFileName(); }
+	DeviceUserArgs& getDeviceUserArgs() { return m_hardwareDeviceUserArgs; }
 
 	const AudioDeviceManager *getAudioDeviceManager() const { return m_audioDeviceManager; }
 	void setAudioDeviceManager(AudioDeviceManager *audioDeviceManager) { m_audioDeviceManager = audioDeviceManager; }
@@ -70,6 +72,7 @@ protected:
 	Presets m_presets;
     typedef QList<Command*> Commands;
     Commands m_commands;
+	DeviceUserArgs m_hardwareDeviceUserArgs;
 };
 
 #endif // INCLUDE_SETTINGS_H

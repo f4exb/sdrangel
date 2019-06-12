@@ -84,6 +84,8 @@ void MainSettings::load()
             s.endGroup();
         }
 	}
+
+    m_hardwareDeviceUserArgs.deserialize(qUncompress(QByteArray::fromBase64(s.value("hwDeviceUserArgs").toByteArray())));
 }
 
 void MainSettings::save() const
@@ -123,6 +125,8 @@ void MainSettings::save() const
         s.setValue("data", qCompress(m_commands[i]->serialize()).toBase64());
         s.endGroup();
     }
+
+    s.setValue("hwDeviceUserArgs", qCompress(m_hardwareDeviceUserArgs.serialize()).toBase64());
 }
 
 void MainSettings::resetToDefaults()

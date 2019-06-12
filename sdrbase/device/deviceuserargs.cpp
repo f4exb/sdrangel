@@ -15,40 +15,69 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRGUI_GUI_DEVICEUSERARGDIALOG_H
-#define SDRGUI_GUI_DEVICEUSERARGDIALOG_H
+#include <QDataStream>
 
-#include <QDialog>
+#include "util/simpleserializer.h"
+#include "deviceuserargs.h"
 
-#include "export.h"
-
-class QTreeWidgetItem;
-class DeviceEnumerator;
-
-namespace Ui {
-	class DeviceUserArgDialog;
+QByteArray DeviceUserArgs::serialize() const
+{
+    SimpleSerializer s(1);
+    QByteArray data;
+    QDataStream *stream = new QDataStream(&data, QIODevice::WriteOnly);
+    *stream << m_argsByDevice;
+    s.writeBlob(1, data);
+    return s.final();
 }
 
-class SDRGUI_API DeviceUserArgDialog : public QDialog {
-	Q_OBJECT
+bool DeviceUserArgs::deserialize(const QByteArray& data)
+{
+    SimpleDeserializer d(data);
 
-public:
-	explicit DeviceUserArgDialog(DeviceEnumerator* deviceEnumerator, QWidget* parent = 0);
-	~DeviceUserArgDialog();
+    if (!d.isValid()) {
+        return false;
+    }
 
-private:
-	Ui::DeviceUserArgDialog* ui;
-    DeviceEnumerator* m_deviceEnumerator;
+    if(d.getVersion() == 1)
+    {
+        QByteArray data;
 
-private slots:
-	void accept();
-	void reject();
-    void on_keySelect_currentIndexChanged(int index);
-    void on_deleteKey_clicked(bool checked);
-    void on_keyEdit_returnPressed();
-    void on_addKey_clicked(bool checked);
-    void on_refreshKeys_clicked(bool checked);
-    void on_valueEdit_returnPressed();
-};
+        d.readBlob(1, &data);
+        QDataStream readStream(&data, QIODevice::ReadOnly);
+        readStream >> m_argsByDevice;
 
-#endif // SDRGUI_GUI_DEVICEUSERARGDIALOG_H
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void DeviceUserArgs::splitDeviceKey(const QString& key, QString& id, int& sequence)
+{
+    QStringList elms = key.split('-');
+
+    if (elms.size() > 0) {
+        id = elms[0];
+    }
+
+    if (elms.size() > 1)
+    {
+        bool ok;
+        QString seqStr = elms[1];
+        int seq = seqStr.toInt(&ok);
+
+        if (ok) {
+            sequence = seq;
+        }
+    }
+}
+
+void DeviceUserArgs::composeDeviceKey(const QString& id, int sequence, QString& key)
+{
+    QStringList strList;
+    strList.append(id);
+    strList.append(QString::number(sequence));
+    key = strList.join('-');
+}
