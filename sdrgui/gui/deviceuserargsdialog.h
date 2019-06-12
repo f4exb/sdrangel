@@ -57,8 +57,10 @@ private:
     DeviceEnumerator* m_deviceEnumerator;
     DeviceUserArgs& m_hardwareDeviceUserArgs;
     std::vector<HWDeviceReference> m_availableHWDevices;
+    QMap<QString, QString> m_argsByDeviceCopy;
 
     void pushHWDeviceReference(const PluginInterface::SamplingDevice *samplingDevice);
+    void displayArgsByDevice();
 
 private slots:
 	void accept();
