@@ -116,6 +116,7 @@ set(sdrbase_SOURCES
 
     device/deviceapi.cpp
     device/deviceenumerator.cpp
+    device/deviceuserarg.cpp
 
     settings/preferences.cpp
     settings/preset.cpp
@@ -241,6 +242,7 @@ set(sdrbase_HEADERS
 
     device/deviceapi.h
     device/deviceenumerator.h
+    device/deviceuserarg.h
 
     plugin/plugininstancegui.h
     plugin/plugininterface.h
