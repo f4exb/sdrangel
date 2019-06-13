@@ -28,7 +28,7 @@ class DEVICES_API DeviceSoapySDR
 {
 public:
     static DeviceSoapySDR& instance();
-    SoapySDR::Device *openSoapySDR(uint32_t sequence);
+    SoapySDR::Device *openSoapySDR(uint32_t sequence, const QString& hardwareUserArguments);
     void closeSoapySdr(SoapySDR::Device *device);
 
     uint32_t getNbDevices() const { return m_scanner.getNbDevices(); }
@@ -43,7 +43,7 @@ protected:
     ~DeviceSoapySDR();
 
 private:
-    SoapySDR::Device *openopenSoapySDRFromSequence(uint32_t sequence);
+    SoapySDR::Device *openopenSoapySDRFromSequence(uint32_t sequence, const QString& hardwareUserArguments);
     DeviceSoapySDRScan m_scanner;
 };
 

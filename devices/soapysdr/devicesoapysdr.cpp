@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QStringList>
 #include "devicesoapysdr.h"
 
 DeviceSoapySDR::DeviceSoapySDR()
@@ -31,10 +32,10 @@ DeviceSoapySDR& DeviceSoapySDR::instance()
     return inst;
 }
 
-SoapySDR::Device *DeviceSoapySDR::openSoapySDR(uint32_t sequence)
+SoapySDR::Device *DeviceSoapySDR::openSoapySDR(uint32_t sequence, const QString& hardwareUserArguments)
 {
     instance();
-    return openopenSoapySDRFromSequence(sequence);
+    return openopenSoapySDRFromSequence(sequence, hardwareUserArguments);
 }
 
 void DeviceSoapySDR::closeSoapySdr(SoapySDR::Device *device)
@@ -42,7 +43,7 @@ void DeviceSoapySDR::closeSoapySdr(SoapySDR::Device *device)
     SoapySDR::Device::unmake(device);
 }
 
-SoapySDR::Device *DeviceSoapySDR::openopenSoapySDRFromSequence(uint32_t sequence)
+SoapySDR::Device *DeviceSoapySDR::openopenSoapySDRFromSequence(uint32_t sequence, const QString& hardwareUserArguments)
 {
     if (sequence > m_scanner.getNbDevices())
     {
@@ -57,8 +58,28 @@ SoapySDR::Device *DeviceSoapySDR::openopenSoapySDRFromSequence(uint32_t sequence
             SoapySDR::Kwargs kwargs;
             kwargs["driver"] = deviceEnum.m_driverName.toStdString();
 
-            if (deviceEnum.m_idKey.size() > 0)  {
+            if (hardwareUserArguments.size() > 0)
+            {
+                QStringList kvArgs = hardwareUserArguments.split(',');
+
+                for (int i = 0; i < kvArgs.size(); i++)
+                {
+                    QStringList kv = kvArgs.at(i).split('=');
+
+                    if (kv.size() > 1) {
+                        kwargs[kv.at(0).toStdString()] = kv.at(1).toStdString();
+                    }
+                }
+            }
+            else if (deviceEnum.m_idKey.size() > 0)
+            {
                 kwargs[deviceEnum.m_idKey.toStdString()] = deviceEnum.m_idValue.toStdString();
+            }
+
+            SoapySDR::Kwargs::const_iterator it = kwargs.begin();
+
+            for (; it != kwargs.end(); ++it) {
+                qDebug("DeviceSoapySDR::openopenSoapySDRFromSequence: %s=%s", it->first.c_str(), it->second.c_str());
             }
 
             SoapySDR::Device *device = SoapySDR::Device::make(kwargs);
