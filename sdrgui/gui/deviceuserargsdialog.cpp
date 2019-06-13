@@ -143,7 +143,14 @@ void DeviceUserArgsDialog::on_importDevice_clicked(bool checked)
 
 void DeviceUserArgsDialog::on_deleteArgs_clicked(bool checked)
 {
-
+    (void) checked;
+    QTreeWidgetItem *deviceItem = ui->argsTree->currentItem();
+    bool ok;
+    int sequence = deviceItem->text(1).toInt(&ok);
+    QString key;
+    DeviceUserArgs::composeDeviceKey(deviceItem->text(0), sequence, key);
+    m_argsByDeviceCopy.remove(key);
+    displayArgsByDevice();
 }
 
 void DeviceUserArgsDialog::on_argStringEdit_returnPressed()
