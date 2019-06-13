@@ -43,6 +43,7 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
     QList<Args>::iterator findDeviceArgs(const QString& id, int sequence);
+    QString findUserArgs(const QString& id, int sequence);
     void addDeviceArgs(const QString& id, int sequence, const QString& args);         //!< Will not add if it exists for same reference
     void addOrUpdateDeviceArgs(const QString& id, int sequence, const QString& args); //!< Add or update if it exists for same reference
     void updateDeviceArgs(const QString& id, int sequence, const QString& args);      //!< Will not update if reference does not exist

@@ -315,6 +315,12 @@ void MainWindow::addSourceDevice(int deviceIndex)
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(deviceIndex));
 
+    QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
+
+    if (userArgs.size() > 0) {
+        m_deviceUIs.back()->m_deviceAPI->setHardwareUserArguments(userArgs);
+    }
+
     m_deviceUIs.back()->m_samplingDeviceControl->setSelectedDeviceIndex(deviceIndex);
 
     // delete previous plugin GUI
@@ -387,6 +393,12 @@ void MainWindow::addSinkDevice()
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(fileSinkDeviceIndex));
+
+    QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
+
+    if (userArgs.size() > 0) {
+        m_deviceUIs.back()->m_deviceAPI->setHardwareUserArguments(userArgs);
+    }
 
     m_deviceUIs.back()->m_samplingDeviceControl->setSelectedDeviceIndex(fileSinkDeviceIndex);
 
@@ -468,6 +480,12 @@ void MainWindow::addMIMODevice()
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getMIMOPluginInterface(testMIMODeviceIndex));
+
+    QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
+
+    if (userArgs.size() > 0) {
+        m_deviceUIs.back()->m_deviceAPI->setHardwareUserArguments(userArgs);
+    }
 
     m_deviceUIs.back()->m_samplingDeviceControl->setSelectedDeviceIndex(testMIMODeviceIndex);
 
@@ -1676,6 +1694,12 @@ void MainWindow::sampleSourceChanged()
         deviceUI->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
         deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex()));
 
+        QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
+
+        if (userArgs.size() > 0) {
+            deviceUI->m_deviceAPI->setHardwareUserArguments(userArgs);
+        }
+
         // add to buddies list
         std::vector<DeviceUISet*>::iterator it = m_deviceUIs.begin();
         int nbOfBuddies = 0;
@@ -1765,6 +1789,12 @@ void MainWindow::sampleSinkChanged()
         deviceUI->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
         deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex()));
 
+        QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
+
+        if (userArgs.size() > 0) {
+            deviceUI->m_deviceAPI->setHardwareUserArguments(userArgs);
+        }
+
         // add to buddies list
         std::vector<DeviceUISet*>::iterator it = m_deviceUIs.begin();
         int nbOfBuddies = 0;
@@ -1848,6 +1878,12 @@ void MainWindow::sampleMIMOChanged()
         deviceUI->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
         deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(
             DeviceEnumerator::instance()->getMIMOPluginInterface(deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex()));
+
+        QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
+
+        if (userArgs.size() > 0) {
+            deviceUI->m_deviceAPI->setHardwareUserArguments(userArgs);
+        }
 
         // constructs new GUI and MIMO object
         DeviceSampleMIMO *mimo = deviceUI->m_deviceAPI->getPluginInterface()->createSampleMIMOPluginInstance(

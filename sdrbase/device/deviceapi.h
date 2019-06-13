@@ -102,50 +102,26 @@ public:
 
     MessageQueue *getDeviceEngineInputMessageQueue();   //!< Device engine message queue
     MessageQueue *getSamplingDeviceInputMessageQueue(); //!< Sampling device (ex: single Rx) input message queue
-    // MessageQueue *getSampleSinkInputMessageQueue();
-    // MessageQueue *getSampleSourceInputMessageQueue();
     MessageQueue *getSamplingDeviceGUIMessageQueue();   //!< Sampling device (ex: single Tx) GUI input message queue
-    // MessageQueue *getSampleSinkGUIMessageQueue();
-    // MessageQueue *getSampleSourceGUIMessageQueue();
 
     void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection, int streamIndex = 0); //!< Configure current device engine DSP corrections (Rx)
 
     void setHardwareId(const QString& id);
     void setSamplingDeviceId(const QString& id) { m_samplingDeviceId = id; }
-    // void setSampleSourceId(const QString& id);
-    // void setSampleSinkId(const QString& id);
     void resetSamplingDeviceId() { m_samplingDeviceId.clear(); }
-    // void resetSampleSourceId();
-    // void resetSampleSinkId();
     void setSamplingDeviceSerial(const QString& serial) { m_samplingDeviceSerial = serial; }
-    // void setSampleSourceSerial(const QString& serial);
-    // void setSampleSinkSerial(const QString& serial);
     void setSamplingDeviceDisplayName(const QString& name) { m_samplingDeviceDisplayName = name; }
-    // void setSampleSourceDisplayName(const QString& serial);
-    // void setSampleSinkDisplayName(const QString& serial);
     void setSamplingDeviceSequence(int sequence) { m_samplingDeviceSequence = sequence; }
-    // void setSampleSourceSequence(int sequence);
-    // void setSampleSinkSequence(int sequence);
+    void setHardwareUserArguments(const QString& userArguments) { m_hardwareUserArguments = userArguments; }
     void setSamplingDevicePluginInterface(PluginInterface *iface);
-    // void setSampleSourcePluginInterface(PluginInterface *iface);
-    // void setSampleSinkPluginInterface(PluginInterface *iface);
     void setSamplingDevicePluginInstanceGUI(PluginInstanceGUI *gui);
-    // void setSampleSourcePluginInstanceGUI(PluginInstanceGUI *gui);
-    // void setSampleSinkPluginInstanceUI(PluginInstanceGUI *gui);
 
     const QString& getHardwareId() const { return m_hardwareId; }
     const QString& getSamplingDeviceId() const { return m_samplingDeviceId; }
-    // const QString& getSampleSourceId() const { return m_sampleSourceId; }
-    // const QString& getSampleSinkId() const { return m_sampleSinkId; }
     const QString& getSamplingDeviceSerial() const { return m_samplingDeviceSerial; }
-    // const QString& getSampleSourceSerial() const { return m_sampleSourceSerial; }
-    // const QString& getSampleSinkSerial() const { return m_sampleSinkSerial; }
     const QString& getSamplingDeviceDisplayName() const { return m_samplingDeviceDisplayName; }
-    // const QString& getSampleSourceDisplayName() const { return m_sampleSourceDisplayName; }
-    // const QString& getSampleSinkDisplayName() const { return m_sampleSinkDisplayName; }
     uint32_t getSamplingDeviceSequence() const { return m_samplingDeviceSequence; }
-    // uint32_t getSampleSourceSequence() const { return m_sampleSourceSequence; }
-    // uint32_t getSampleSinkSequence() const { return m_sampleSinkSequence; }
+    const QString& getHardwareUserArguments() const { return m_hardwareUserArguments; }
 
     void setDeviceNbItems(uint32_t nbItems);
     void setDeviceItemIndex(uint32_t index);
@@ -212,6 +188,7 @@ protected:
     QString m_samplingDeviceSerial;      //!< The device serial number defined by the vendor or a fake one (SDRplay)
     QString m_samplingDeviceDisplayName; //!< The human readable name identifying this instance
     uint32_t m_samplingDeviceSequence;   //!< The device sequence. >0 when more than one device of the same type is connected
+    QString m_hardwareUserArguments;     //!< User given arguments to be used at hardware level i.e. for the hardware device and device sequence
     PluginInstanceGUI* m_samplingDevicePluginInstanceUI;
 
     // Buddies (single Rx or single Tx)

@@ -79,6 +79,17 @@ QList<DeviceUserArgs::Args>::iterator DeviceUserArgs::findDeviceArgs(const QStri
     }
 }
 
+QString DeviceUserArgs::findUserArgs(const QString& id, int sequence)
+{
+    QList<DeviceUserArgs::Args>::iterator it = findDeviceArgs(id, sequence);
+
+    if (it != m_argsByDevice.end()) {
+        return it->m_args;
+    } else {
+        return "";
+    }
+}
+
 void DeviceUserArgs::addDeviceArgs(const QString& id, int sequence, const QString& deviceArgs)
 {
     Args args;
