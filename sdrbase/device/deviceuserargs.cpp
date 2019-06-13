@@ -20,6 +20,16 @@
 #include "util/simpleserializer.h"
 #include "deviceuserargs.h"
 
+QDataStream &operator<<(QDataStream &ds, const DeviceUserArgs::Args &inObj)
+{
+	ds << inObj.m_id << inObj.m_sequence << inObj.m_args;
+}
+
+QDataStream &operator>>(QDataStream &ds, DeviceUserArgs::Args &outObj)
+{
+	ds >> outObj.m_id >> outObj.m_sequence >> outObj.m_args;
+}
+
 QByteArray DeviceUserArgs::serialize() const
 {
     SimpleSerializer s(1);
@@ -54,30 +64,96 @@ bool DeviceUserArgs::deserialize(const QByteArray& data)
     }
 }
 
-void DeviceUserArgs::splitDeviceKey(const QString& key, QString& id, int& sequence)
+QList<DeviceUserArgs::Args>::iterator DeviceUserArgs::findDeviceArgs(const QString& id, int sequence)
 {
-    QStringList elms = key.split('-');
+    DeviceUserArgs::Args args;
+    args.m_id = id;
+    args.m_sequence = sequence;
+    QList<DeviceUserArgs::Args>::iterator it = m_argsByDevice.begin();
 
-    if (elms.size() > 0) {
-        id = elms[0];
-    }
-
-    if (elms.size() > 1)
+    for (; it != m_argsByDevice.end(); ++it)
     {
-        bool ok;
-        QString seqStr = elms[1];
-        int seq = seqStr.toInt(&ok);
-
-        if (ok) {
-            sequence = seq;
+        if (*it == args) {
+            return it;
         }
     }
 }
 
-void DeviceUserArgs::composeDeviceKey(const QString& id, int sequence, QString& key)
+void DeviceUserArgs::addDeviceArgs(const QString& id, int sequence, const QString& deviceArgs)
 {
-    QStringList strList;
-    strList.append(id);
-    strList.append(QString::number(sequence));
-    key = strList.join('-');
+    Args args;
+    args.m_id = id;
+    args.m_sequence = sequence;
+    args.m_args = deviceArgs;
+
+    QList<DeviceUserArgs::Args>::iterator it = m_argsByDevice.begin();
+
+    for (; it != m_argsByDevice.end(); ++it)
+    {
+        if (*it == args) {
+            break;
+        }
+    }
+
+    if (it == m_argsByDevice.end()) {
+        m_argsByDevice.push_back(args);
+    }
+}
+
+void DeviceUserArgs::addOrUpdateDeviceArgs(const QString& id, int sequence, const QString& deviceArgs)
+{
+    Args args;
+    args.m_id = id;
+    args.m_sequence = sequence;
+    args.m_args = deviceArgs;
+
+    QList<DeviceUserArgs::Args>::iterator it = m_argsByDevice.begin();
+
+    for (; it != m_argsByDevice.end(); ++it)
+    {
+        if (*it == args)
+        {
+            it->m_args = deviceArgs;
+            return;
+        }
+    }
+
+    if (it == m_argsByDevice.end()) {
+        m_argsByDevice.push_back(args);
+    }
+}
+
+void DeviceUserArgs::updateDeviceArgs(const QString& id, int sequence, const QString& deviceArgs)
+{
+    Args args;
+    args.m_id = id;
+    args.m_sequence = sequence;
+
+    QList<DeviceUserArgs::Args>::iterator it = m_argsByDevice.begin();
+
+    for (; it != m_argsByDevice.end(); ++it)
+    {
+        if (*it == args)
+        {
+            it->m_args = deviceArgs;
+        }
+    }
+}
+
+void DeviceUserArgs::deleteDeviceArgs(const QString& id, int sequence)
+{
+    Args args;
+    args.m_id = id;
+    args.m_sequence = sequence;
+
+    QList<DeviceUserArgs::Args>::iterator it = m_argsByDevice.begin();
+
+    for (; it != m_argsByDevice.end(); ++it)
+    {
+        if (*it == args)
+        {
+            m_argsByDevice.erase(it);
+            return;
+        }
+    }
 }

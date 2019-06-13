@@ -18,7 +18,7 @@
 #ifndef SDRBASE_DEVICE_DEVICEUSERARGS_H_
 #define SDRBASE_DEVICE_DEVICEUSERARGS_H_
 
-#include <QMap>
+#include <QList>
 #include <QString>
 #include <QByteArray>
 
@@ -27,13 +27,29 @@
 struct DEVICES_API DeviceUserArgs
 {
 public:
+    struct Args {
+        QString m_id;
+        int m_sequence;
+        QString m_args;
+
+        bool operator==(const Args& rhs) { //!< reference equality
+            return (m_id == rhs.m_id) && (m_sequence == rhs.m_sequence);
+        }
+
+        friend QDataStream &operator << (QDataStream &ds, const Args &inObj);
+        friend QDataStream &operator >> (QDataStream &ds, Args &outObj);
+    };
+
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
+    QList<Args>::iterator findDeviceArgs(const QString& id, int sequence);
+    void addDeviceArgs(const QString& id, int sequence, const QString& args);         //!< Will not add if it exists for same reference
+    void addOrUpdateDeviceArgs(const QString& id, int sequence, const QString& args); //!< Add or update if it exists for same reference
+    void updateDeviceArgs(const QString& id, int sequence, const QString& args);      //!< Will not update if reference does not exist
+    void deleteDeviceArgs(const QString& id, int sequence);
+    const QList<Args>& getArgsByDevice() const { return m_argsByDevice; }
 
-    static void splitDeviceKey(const QString& key, QString& id, int& sequence);
-    static void composeDeviceKey(const QString& id, int sequence, QString& key);
-
-    QMap<QString, QString> m_argsByDevice; //!< "id-sequence" to arg map. Id is hardwareId when referencing hardware device but not limited to it
+    QList<Args> m_argsByDevice; //!< args corresponding to a device
 };
 
 

@@ -51,7 +51,7 @@
     </font>
    </property>
    <property name="toolTip">
-    <string>User argument string to open hardware</string>
+    <string>Arguments for hardware</string>
    </property>
    <property name="currentIndex">
     <number>0</number>
@@ -68,6 +68,9 @@
        <width>441</width>
        <height>151</height>
       </rect>
+     </property>
+     <property name="toolTip">
+      <string>List of available hardware</string>
      </property>
      <column>
       <property name="text">
@@ -104,7 +107,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Add the key</string>
+         <string>Add the selected hardware in the list below</string>
         </property>
         <property name="text">
          <string/>
@@ -136,7 +139,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Add the key</string>
+         <string>Delete arguments and remove hardware from list above</string>
         </property>
         <property name="text">
          <string/>
@@ -155,9 +158,6 @@
           <height>22</height>
          </size>
         </property>
-        <property name="toolTip">
-         <string>Edit value</string>
-        </property>
         <property name="text">
          <string>Args</string>
         </property>
@@ -166,7 +166,7 @@
       <item>
        <widget class="QLineEdit" name="argStringEdit">
         <property name="toolTip">
-         <string>Value</string>
+         <string>Edit user arguments of hardware selected above</string>
         </property>
        </widget>
       </item>
@@ -180,6 +180,9 @@
        <width>441</width>
        <height>151</height>
       </rect>
+     </property>
+     <property name="toolTip">
+      <string>List of hardware with user arguments</string>
      </property>
      <column>
       <property name="text">

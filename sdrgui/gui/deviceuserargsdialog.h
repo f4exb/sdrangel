@@ -22,11 +22,11 @@
 #include <QSet>
 
 #include "plugin/plugininterface.h"
+#include "device/deviceuserargs.h"
 #include "export.h"
 
 class QTreeWidgetItem;
 class DeviceEnumerator;
-struct DeviceUserArgs;
 
 namespace Ui {
 	class DeviceUserArgsDialog;
@@ -57,7 +57,7 @@ private:
     DeviceEnumerator* m_deviceEnumerator;
     DeviceUserArgs& m_hardwareDeviceUserArgs;
     std::vector<HWDeviceReference> m_availableHWDevices;
-    QMap<QString, QString> m_argsByDeviceCopy;
+    DeviceUserArgs m_deviceUserArgsCopy;
 
     void pushHWDeviceReference(const PluginInterface::SamplingDevice *samplingDevice);
     void displayArgsByDevice();
@@ -67,7 +67,8 @@ private slots:
 	void reject();
     void on_importDevice_clicked(bool checked);
     void on_deleteArgs_clicked(bool checked);
-    void on_argStringEdit_returnPressed();
+    void on_argsTree_currentItemChanged(QTreeWidgetItem* currentItem, QTreeWidgetItem* previousItem);
+    void on_argStringEdit_editingFinished();
 };
 
 #endif // SDRGUI_GUI_DEVICEUSERARGSDIALOG_H

@@ -16,7 +16,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "device/deviceenumerator.h"
-#include "device/deviceuserargs.h"
 #include "ui_deviceuserargsdialog.h"
 #include "deviceuserargsdialog.h"
 
@@ -29,9 +28,8 @@ DeviceUserArgsDialog::DeviceUserArgsDialog(
 	ui(new Ui::DeviceUserArgsDialog),
 	m_deviceEnumerator(deviceEnumerator),
 	m_hardwareDeviceUserArgs(hardwareDeviceUserArgs),
-    m_argsByDeviceCopy(hardwareDeviceUserArgs.m_argsByDevice)
+    m_deviceUserArgsCopy(hardwareDeviceUserArgs)
 {
-	qDebug("DeviceUserArgsDialog::DeviceUserArgsDialog");
 	ui->setupUi(this);
 
 	for (int i = 0; i < m_deviceEnumerator->getNbRxSamplingDevices(); i++) {
@@ -68,25 +66,24 @@ DeviceUserArgsDialog::~DeviceUserArgsDialog()
 
 void DeviceUserArgsDialog::displayArgsByDevice()
 {
+	ui->argsTree->blockSignals(true);
     ui->argsTree->clear();
     ui->argStringEdit->clear();
 
-    QMap<QString, QString>::iterator it = m_argsByDeviceCopy.begin();
+    QList<DeviceUserArgs::Args>::const_iterator it = m_deviceUserArgsCopy.getArgsByDevice().begin();
 
-    for (; it != m_argsByDeviceCopy.end(); ++it)
+    for (; it != m_deviceUserArgsCopy.getArgsByDevice().end(); ++it)
 	{
-		QString hardwareId;
-		int sequence;
-		DeviceUserArgs::splitDeviceKey(it.key(), hardwareId, sequence);
 		QTreeWidgetItem *treeItem = new QTreeWidgetItem(ui->argsTree);
-		treeItem->setText(0, hardwareId);
-		treeItem->setText(1, tr("%1").arg(sequence));
-		treeItem->setText(2, m_argsByDeviceCopy.value(it.value()));
+		treeItem->setText(0, it->m_id);
+		treeItem->setText(1, tr("%1").arg(it->m_sequence));
+		treeItem->setText(2, it->m_args);
 	}
 
     ui->argsTree->resizeColumnToContents(0);
     ui->argsTree->resizeColumnToContents(1);
     ui->argsTree->resizeColumnToContents(2);
+	ui->argsTree->blockSignals(false);
 }
 
 void DeviceUserArgsDialog::pushHWDeviceReference(const PluginInterface::SamplingDevice *samplingDevice)
@@ -113,7 +110,7 @@ void DeviceUserArgsDialog::pushHWDeviceReference(const PluginInterface::Sampling
 
 void DeviceUserArgsDialog::accept()
 {
-    m_hardwareDeviceUserArgs.m_argsByDevice = m_argsByDeviceCopy;
+    m_hardwareDeviceUserArgs = m_deviceUserArgsCopy;
     QDialog::accept();
 }
 
@@ -126,18 +123,9 @@ void DeviceUserArgsDialog::on_importDevice_clicked(bool checked)
 {
     (void) checked;
     QTreeWidgetItem *deviceItem = ui->deviceTree->currentItem();
-    QStringList strList;
-    strList.append(deviceItem->text(0));
-    strList.append(deviceItem->text(1));
-    QString key = strList.join('-');
-    qDebug("DeviceUserArgsDialog::on_importDevice_clicked: key: %s", qPrintable(key));
-
-    QMap<QString, QString>::iterator it = m_argsByDeviceCopy.find(key);
-
-    if (it == m_argsByDeviceCopy.end()) {
-        m_argsByDeviceCopy[key] = "";
-    }
-
+	bool ok;
+	int sequence = deviceItem->text(1).toInt(&ok);
+	m_deviceUserArgsCopy.addDeviceArgs(deviceItem->text(0), sequence, "");
     displayArgsByDevice();
 }
 
@@ -147,13 +135,21 @@ void DeviceUserArgsDialog::on_deleteArgs_clicked(bool checked)
     QTreeWidgetItem *deviceItem = ui->argsTree->currentItem();
     bool ok;
     int sequence = deviceItem->text(1).toInt(&ok);
-    QString key;
-    DeviceUserArgs::composeDeviceKey(deviceItem->text(0), sequence, key);
-    m_argsByDeviceCopy.remove(key);
+	m_deviceUserArgsCopy.deleteDeviceArgs(deviceItem->text(0), sequence);
     displayArgsByDevice();
 }
 
-void DeviceUserArgsDialog::on_argStringEdit_returnPressed()
+void DeviceUserArgsDialog::on_argsTree_currentItemChanged(QTreeWidgetItem* currentItem, QTreeWidgetItem* previousItem)
 {
+	(void) previousItem;
+	ui->argStringEdit->setText(currentItem->text(2));
+}
 
+void DeviceUserArgsDialog::on_argStringEdit_editingFinished()
+{
+	QTreeWidgetItem *deviceItem = ui->argsTree->currentItem();
+    bool ok;
+    int sequence = deviceItem->text(1).toInt(&ok);
+	m_deviceUserArgsCopy.updateDeviceArgs(deviceItem->text(0), sequence, ui->argStringEdit->text());
+	displayArgsByDevice();
 }
