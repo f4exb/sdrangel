@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This output sample sink plugin sends its samples to a device interfaced with [SoapySDR](https://github.com/pothosware/SoapySDR/wiki). 
+This output sample sink plugin sends its samples to a device interfaced with [SoapySDR](https://github.com/pothosware/SoapySDR/wiki).
 
 SoapySDR is a [C/C++ API](https://github.com/pothosware/SoapySDR/blob/master/include/SoapySDR/Device.hpp) that interfaces SDR hardware on one side and application software on the other. Due to its very generic nature it was fairly difficult to implement and specific UI widgets were developped to handle specific types of parameters. The level of control depends on how the device API was implemented by the vendors. On application side some parts of the API have not been implemented and can be left as possible enhancements (see next). In any case it is recommended to use the native plugins if they are available.
 
@@ -22,6 +22,12 @@ This works similarly to LimeSDR USB or BladeRF 2.0 micro
 
 The binary distributions provide only the SoapySDR base library. It is your responsibility to install SoapySDR in your system with the SoapySDR plugins suitable for your hardware.
 
+<h2>User arguments</h2>
+
+Occasionally some devices may require to have the user specifying keyword parameters in order to open the device correctly. Most noticeably the Red Pitaya (driver `redpitaya`) needs the IP address of the board specified as a `addr=x.x.x.x` key value pair as it does not get scanned automatically.
+
+In such a case you will use the device user arguments (Preferences -> Devices -> User arguments) with the dialog as described [here](../../../sdrgui/deviceuserargs.md)
+
 <h2>SoapySDR API implementation</h2>
 
 Not all parts are implemented. Currently the following have been left out:
@@ -35,7 +41,7 @@ Not all parts are implemented. Currently the following have been left out:
   - I2C API
   - SPI API
   - UART API
-  
+
 <h2>Particular considerations concerning hardware</h2>
 
 In general as previously stated you should choose the native plugins if they are available. These are:
@@ -44,9 +50,9 @@ In general as previously stated you should choose the native plugins if they are
   - HackRF
   - LimeSDR
   - PlutoSDR
-  
+
 The following paragraphs list the known issues or oddities.
-  
+
 <h3>BladeRF</h3>
 
 It is very important NOT to use SoapySDR. The default parameters are set to flash the FPGA but as this does not suceeds it results in a FPGA image wipe out and the device returns in "Cypress" mode. It is not too difficult to recover but there is no point risking the hassle.
@@ -63,16 +69,16 @@ The top part described by number tags is common for all devices. The bottom part
 
 <h3>1: Start/Stop</h3>
 
-Device start / stop button. 
+Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Red square icon: device is running and can be stopped
   - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
-  
+
 <h3>2: Stream sample rate</h3>
 
 Baseband I/Q sample rate in kS/s. This is the device sample rate (the "SR" SoapySDR control) divided by the interpolation factor (4).
-  
+
 <h3>3: Frequency</h3>
 
 This is the center frequency of transmission in kHz. The center frequency is usually the same for all Tx channels. The GUI of the sibling channel if present is adjusted automatically if necessary. This control corresponds to the first SoapySDR tuning element usually labeled as "RF" and would generally control the main local oscillator (LO).
@@ -95,7 +101,7 @@ Note that if you mouse over the button a tooltip appears that displays the trans
 
 You can set the translating frequency in Hz with this dial. The manipulation of the dial is described in (3: Frequency).
 
-The frequency set in the device is the frequency on the main dial (1) minus this frequency. Thus it is positive for down converters and negative for up converters. 
+The frequency set in the device is the frequency on the main dial (1) minus this frequency. Thus it is positive for down converters and negative for up converters.
 
 For example a mixer at 120 MHz for HF operation you would set the value to -120,000,000 Hz so that if the main dial frequency is set at 7,130 kHz the PlutoSDR will be set to 127.130 MHz.
 
@@ -111,7 +117,7 @@ Use this toggle button to activate or deactivate the frequency translation
 
 <h4>5.3: Confirmation buttons</h4>
 
-Use these buttons to confirm ("OK") or dismiss ("Cancel") your changes. 
+Use these buttons to confirm ("OK") or dismiss ("Cancel") your changes.
 
 <h3>6: Software LO ppm correction</h3>
 
@@ -129,7 +135,7 @@ The form of widgets is closely related to the type of setting defined in the [So
     - type: boolean, integer, floating point, string
     - nature: continuous or discrete
   - String list
-  
+
 <h3>A.1: Continuous range</h3>
 
 If the range is all in the positive domain the unsigned variation is used:

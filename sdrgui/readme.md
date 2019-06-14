@@ -50,6 +50,8 @@ The following items are presented hierarchically from left to right:
     - _Logging_: opens a dialog to choose logging options (see 1.2 below for details)
     - _DV Serial_: if you have one or more AMBE3000 serial devices for AMBE digital voice check to connect them. If unchecked DV decoding will resort to mbelib if available else no audio will be produced for AMBE digital voice
     - _My Position_: opens a dialog to enter your station ("My Position") coordinates in decimal degrees with north latitudes positive and east longitudes positive. This is used whenever positional data is to be displayed (APRS, DPRS, ...). For it now only works with D-Star $$CRC frames. See [DSD demod plugin](../plugins/channelrx/demoddsd/readme.md) for details on how to decode Digital Voice modes.
+    - _Devices_: section to deal with devices settings
+      - _User arguments_: opens a dialog to let the user give arguments specific to a device and its instance (sequence) in the system
   - Help:
     - _Loaded Plugins_: shows details about the loaded plugins (see 1.3 below for details)
     - _About_: current version and blah blah.
@@ -58,7 +60,7 @@ The following items are presented hierarchically from left to right:
 
 See the audio management documentation [here](audio.md).
 
-<h4>1.2. Logging preferences</h4>
+<h4>1.2. Preferences - Logging</h4>
 
 ![Main Window logging preferences](../doc/img/MainWindow_logging.png)
 
@@ -112,8 +114,11 @@ Use the "OK" button to validate all changes
 
 Use the "Cancel" button to dismiss all changes
 
+<h4>1.3 Preferences - Devices - User arguments</h4>
 
-<h4>1.3. Loaded plugins display</h4>
+See the devuces user arguments management documentation [here](deviceuserargs.md).
+
+<h4>1.4. Help - Loaded plugins display</h4>
 
 When clicking on Help -> Loaded Plugins from the main menu bar a dialog box appears that shows information about the plugins loaded in SDRangel:
 

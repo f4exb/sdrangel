@@ -24,7 +24,7 @@
 
 #include "export.h"
 
-struct DEVICES_API DeviceUserArgs
+struct SDRBASE_API DeviceUserArgs
 {
 public:
     struct Args {
