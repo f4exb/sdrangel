@@ -862,6 +862,8 @@ void RTLSDRInput::webapiReverseSendStartStop(bool start)
     } else {
         m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
     }
+
+    delete swgDeviceSettings;
 }
 
 void RTLSDRInput::networkManagerFinished(QNetworkReply *reply)

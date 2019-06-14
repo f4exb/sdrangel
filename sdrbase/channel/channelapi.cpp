@@ -24,6 +24,7 @@ ChannelAPI::ChannelAPI(const QString& name, StreamType streamType) :
     m_streamType(streamType),
     m_name(name),
     m_indexInDeviceSet(-1),
+    m_deviceSetIndex(0),
     m_deviceAPI(0),
     m_uid(UidCalculator::getNewObjectId())
 { }

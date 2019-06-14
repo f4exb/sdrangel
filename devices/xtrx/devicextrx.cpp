@@ -41,7 +41,9 @@ DeviceXTRX::DeviceXTRX() :
     m_inputRate(0),
     m_outputRate(0),
     m_masterRate(0),
-    m_clockGen(0)
+    m_clockGen(0),
+    m_actualInputRate(0),
+    m_actualOutputRate(0)
 {}
 
 DeviceXTRX::~DeviceXTRX()

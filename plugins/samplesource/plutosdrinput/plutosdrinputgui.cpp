@@ -230,11 +230,10 @@ void PlutoSDRInputGui::on_swDecim_currentIndexChanged(int index)
 {
     m_settings.m_log2Decim = index > 6 ? 6 : index;
     displaySampleRate();
+    m_settings.m_devSampleRate = ui->sampleRate->getValueNew();
 
-    if (m_sampleRateMode) {
-        m_settings.m_devSampleRate = ui->sampleRate->getValueNew();
-    } else {
-        m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2Decim);
+    if (!m_sampleRateMode) {
+        m_settings.m_devSampleRate <<= m_settings.m_log2Decim;
     }
 
     sendSettings();
@@ -249,10 +248,10 @@ void PlutoSDRInputGui::on_fcPos_currentIndexChanged(int index)
 
 void PlutoSDRInputGui::on_sampleRate_changed(quint64 value)
 {
-    if (m_sampleRateMode) {
-        m_settings.m_devSampleRate = value;
-    } else {
-        m_settings.m_devSampleRate = value * (1 << m_settings.m_log2Decim);
+    m_settings.m_devSampleRate = value;
+
+    if (!m_sampleRateMode) {
+        m_settings.m_devSampleRate <<= m_settings.m_log2Decim;
     }
 
     displayFcTooltip();

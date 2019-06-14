@@ -54,6 +54,7 @@ ScopeVis::ScopeVis(GLScope* glScope) :
     m_timeBase(1),
     m_timeOfsProMill(0),
     m_traceStart(true),
+    m_triggerLocation(0),
     m_sampleRate(0),
     m_liveSampleRate(0),
     m_liveLog2Decim(0),

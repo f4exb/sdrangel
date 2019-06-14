@@ -41,6 +41,9 @@ MESSAGE_CLASS_DEFINITION(LocalOutput::MsgReportSampleRateAndFrequency, Message)
 LocalOutput::LocalOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
+    m_centerFrequency(0),
+    m_sampleRate(48000),
+    m_fileSink(nullptr),
 	m_deviceDescription("LocalOutput")
 {
 	m_sampleSourceFifo.resize(96000 * 4);
@@ -376,6 +379,8 @@ void LocalOutput::webapiReverseSendStartStop(bool start)
     } else {
         m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
     }
+
+    delete swgDeviceSettings;
 }
 
 void LocalOutput::networkManagerFinished(QNetworkReply *reply)

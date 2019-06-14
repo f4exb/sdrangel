@@ -751,6 +751,8 @@ void HackRFOutput::webapiReverseSendStartStop(bool start)
     } else {
         m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
     }
+
+    delete swgDeviceSettings;
 }
 
 void HackRFOutput::networkManagerFinished(QNetworkReply *reply)

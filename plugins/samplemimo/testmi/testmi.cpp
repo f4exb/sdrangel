@@ -456,8 +456,8 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
             || (m_settings.m_streams[istream].m_fcPos != settings.m_streams[istream].m_fcPos) || force)
         {
             int sampleRate = settings.m_streams[istream].m_sampleRate/(1<<settings.m_streams[istream].m_log2Decim);
-            DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_streams[istream].m_centerFrequency);
-            m_fileSinks[istream]->handleMessage(*notif); // forward to file sink
+            DSPSignalNotification notif(sampleRate, settings.m_streams[istream].m_centerFrequency);
+            m_fileSinks[istream]->handleMessage(notif); // forward to file sink
             DSPMIMOSignalNotification *engineNotif = new DSPMIMOSignalNotification(
                 sampleRate, settings.m_streams[istream].m_centerFrequency, true, istream);
             m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineNotif);
@@ -837,6 +837,8 @@ void TestMI::webapiReverseSendStartStop(bool start)
     } else {
         m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
     }
+
+    delete swgDeviceSettings;
 }
 
 void TestMI::networkManagerFinished(QNetworkReply *reply)

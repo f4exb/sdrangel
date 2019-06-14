@@ -35,6 +35,7 @@ MainParser::MainParser() :
 {
     m_serverAddress = "127.0.0.1";
     m_serverPort = 8091;
+    m_mimoSupport = false;
     m_mimoOption.setFlags(QCommandLineOption::HiddenFromHelp);
 
     m_parser.setApplicationDescription("Software Defined Radio application");

@@ -1640,6 +1640,8 @@ void XTRXInput::webapiReverseSendStartStop(bool start)
     } else {
         m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
     }
+
+    delete swgDeviceSettings;
 }
 
 void XTRXInput::networkManagerFinished(QNetworkReply *reply)

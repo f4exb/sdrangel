@@ -301,10 +301,10 @@ void HackRFOutputGui::on_centerFrequency_changed(quint64 value)
 
 void HackRFOutputGui::on_sampleRate_changed(quint64 value)
 {
-    if (m_sampleRateMode) {
-        m_settings.m_devSampleRate = value;
-    } else {
-        m_settings.m_devSampleRate = value * (1 << m_settings.m_log2Interp);
+    m_settings.m_devSampleRate = value;
+
+    if (!m_sampleRateMode) {
+        m_settings.m_devSampleRate <<= m_settings.m_log2Interp;
     }
 
     displayFcTooltip();
@@ -345,11 +345,10 @@ void HackRFOutputGui::on_interp_currentIndexChanged(int index)
 
 	m_settings.m_log2Interp = index;
     displaySampleRate();
+    m_settings.m_devSampleRate = ui->sampleRate->getValueNew();
 
-    if (m_sampleRateMode) {
-        m_settings.m_devSampleRate = ui->sampleRate->getValueNew();
-    } else {
-        m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2Interp);
+    if (!m_sampleRateMode) {
+        m_settings.m_devSampleRate <<= m_settings.m_log2Interp;
     }
 
 	sendSettings();

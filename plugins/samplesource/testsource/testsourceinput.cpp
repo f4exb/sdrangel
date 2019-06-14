@@ -727,6 +727,8 @@ void TestSourceInput::webapiReverseSendStartStop(bool start)
     } else {
         m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
     }
+
+    delete swgDeviceSettings;
 }
 
 void TestSourceInput::networkManagerFinished(QNetworkReply *reply)

@@ -139,7 +139,7 @@ qint32 DeviceSampleSource::calculateFrequencyShift(
             }
         }
     }
-    else if (frequencyShiftScheme == FSHIFT_TXSYNC)
+    else // frequencyShiftScheme == FSHIFT_TXSYNC
     {
         if (fcPos == FC_POS_CENTER) {
             return 0;
@@ -165,9 +165,5 @@ qint32 DeviceSampleSource::calculateFrequencyShift(
         } else {
             return 0;
         }
-    }
-    else
-    {
-        return 0;
     }
 }
