@@ -1806,7 +1806,7 @@ struct spectrum : runnable
              pipebuf<float[NFFT]> &_out) : runnable(sch, "spectrum"),
                                            decimation(1048576),
                                            kavg(0.1),
-                                           decim(1), in(in),
+                                           decim(1), in(_in),
                                            out(_out),
                                            fft(NFFT),
                                            avgpower(NULL),
