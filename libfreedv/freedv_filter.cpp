@@ -19,6 +19,7 @@
 #include <string.h>
 #include <math.h>
 #include <complex.h>
+#include <algorithm>
 
 #include "freedv_filter.h"
 #include "freedv_filter_coef.h"
@@ -45,16 +46,17 @@ namespace FreeDV
 
 \*---------------------------------------------------------------------------*/
 
-void quisk_filt_cfInit(struct quisk_cfFilter * filter, float * coefs, int taps) {
+void quisk_filt_cfInit(struct quisk_cfFilter * filter, float * coefs, int taps)
+{
     // Prepare a new filter using coefs and taps.  Samples are complex. Coefficients can
     // be real or complex.
     filter->dCoefs = coefs;
-    filter->cpxCoefs = NULL;
-    filter->cSamples = (std::complex<float> *) malloc(taps * sizeof(std::complex<float>));
-    memset(filter->cSamples, 0, taps * sizeof(std::complex<float>));
+    filter->cpxCoefs = nullptr;
+    filter->cSamples = new std::complex<float>[taps];
+    std::fill(filter->cSamples, filter->cSamples + taps, std::complex<float>{0.0, 0.0});
     filter->ptcSamp = filter->cSamples;
     filter->nTaps = taps;
-    filter->cBuf = NULL;
+    filter->cBuf = nullptr;
     filter->nBuf = 0;
     filter->decim_index = 0;
 }
@@ -70,20 +72,24 @@ void quisk_filt_cfInit(struct quisk_cfFilter * filter, float * coefs, int taps) 
 
 \*---------------------------------------------------------------------------*/
 
-void quisk_filt_destroy(struct quisk_cfFilter * filter) {
-    if (filter->cSamples) {
-        free(filter->cSamples);
-        filter->cSamples = NULL;
+void quisk_filt_destroy(struct quisk_cfFilter * filter)
+{
+    if (filter->cSamples)
+    {
+        delete[] filter->cSamples;
+        filter->cSamples = nullptr;
     }
 
-    if (filter->cBuf) {
-        free(filter->cBuf);
-        filter->cBuf = NULL;
+    if (filter->cBuf)
+    {
+        delete[] filter->cBuf;
+        filter->cBuf = nullptr;
     }
 
-    if (filter->cpxCoefs) {
-        free(filter->cpxCoefs);
-        filter->cpxCoefs = NULL;
+    if (filter->cpxCoefs)
+    {
+        delete[] filter->cpxCoefs;
+        filter->cpxCoefs = nullptr;
     }
 }
 
@@ -115,7 +121,7 @@ int quisk_cfInterpDecim(std::complex<float> * cSamples, int count, struct quisk_
         if (filter->cBuf)
             free(filter->cBuf);
 
-        filter->cBuf = (std::complex<float> *) malloc(filter->nBuf * sizeof(std::complex<float>));
+        filter->cBuf = new std::complex<float>[filter->nBuf];
     }
 
     memcpy(filter->cBuf, cSamples, count * sizeof(std::complex<float>));
@@ -232,8 +238,9 @@ void quisk_cfTune(struct quisk_cfFilter * filter, float freq) {
     float D, tune;
     int i;
 
-    if ( ! filter->cpxCoefs)
-        filter->cpxCoefs = (std::complex<float> *) malloc(filter->nTaps * sizeof(std::complex<float>));
+    if ( ! filter->cpxCoefs) {
+        filter->cpxCoefs = new std::complex<float>[filter->nTaps];
+    }
 
     tune = 2.0 * M_PI * freq;
     D = (filter->nTaps - 1.0) / 2.0;

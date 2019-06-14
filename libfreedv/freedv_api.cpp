@@ -119,32 +119,41 @@ struct freedv *freedv_open_advanced(int mode, struct freedv_advanced *adv) {
     if ((mode != FREEDV_MODE_1600) && (mode != FREEDV_MODE_700) &&
         (mode != FREEDV_MODE_700B) && (mode != FREEDV_MODE_2400A) &&
         (mode != FREEDV_MODE_2400B) && (mode != FREEDV_MODE_800XA) &&
-        (mode != FREEDV_MODE_700C) && (mode != FREEDV_MODE_700D) )
-        return NULL;
+        (mode != FREEDV_MODE_700C) && (mode != FREEDV_MODE_700D)) {
+        return nullptr;
+    }
 
     f = (struct freedv*) malloc(sizeof(struct freedv));
-    if (f == NULL)
-        return NULL;
+
+    if (f == nullptr) {
+        return nullptr;
+    }
 
     f->mode = mode;
     f->verbose = 0;
     f->test_frames = f->smooth_symbols = 0;
-    f->freedv_put_error_pattern = NULL;
-    f->error_pattern_callback_state = NULL;
+    f->freedv_put_error_pattern = nullptr;
+    f->error_pattern_callback_state = nullptr;
     f->n_protocol_bits = 0;
     f->frames = 0;
 
     /* Init states for this mode, and set up samples in/out -----------------------------------------*/
 
-    if (mode == FREEDV_MODE_1600) {
+    if (mode == FREEDV_MODE_1600)
+    {
         f->snr_squelch_thresh = 2.0;
         f->squelch_en = 1;
         Nc = 16;
         f->tx_sync_bit = 0;
         codec2_mode = CODEC2_MODE_1300;
         f->fdmdv = fdmdv_create(Nc);
-        if (f->fdmdv == NULL)
-            return NULL;
+
+        if (f->fdmdv == nullptr)
+        {
+            free(f);
+            return nullptr;
+        }
+
         golay23_init();
         f->nin = FDMDV_NOM_SAMPLES_PER_FRAME;
         f->n_nom_modem_samples = 2*FDMDV_NOM_SAMPLES_PER_FRAME;
@@ -153,22 +162,32 @@ struct freedv *freedv_open_advanced(int mode, struct freedv_advanced *adv) {
         f->modem_sample_rate = FS;
         nbit = fdmdv_bits_per_frame(f->fdmdv);
         f->fdmdv_bits = (int*) malloc(nbit*sizeof(int));
-        if (f->fdmdv_bits == NULL)
-            return NULL;
+
+        if (f->fdmdv_bits == nullptr) {
+            return nullptr;
+        }
+
         nbit = 2*fdmdv_bits_per_frame(f->fdmdv);
         f->tx_bits = (int*) malloc(nbit*sizeof(int));
         f->rx_bits = (int*) malloc(nbit*sizeof(int));
-        if ((f->tx_bits == NULL) || (f->rx_bits == NULL)) {
-            if (f->tx_bits != NULL) {
+
+        if ((f->tx_bits == nullptr) || (f->rx_bits == nullptr))
+        {
+            if (f->tx_bits != nullptr)
+            {
               free(f->tx_bits);
-              f->tx_bits = NULL;
+              f->tx_bits = nullptr;
             }
-            if (f->rx_bits != NULL) {
+
+            if (f->rx_bits != nullptr)
+            {
                 free(f->rx_bits);
-              f->rx_bits = NULL;
+                f->rx_bits = nullptr;
             }
-            return NULL;
+
+            return nullptr;
         }
+
         f->evenframe = 0;
         f->sz_error_pattern = fdmdv_error_pattern_size(f->fdmdv);
     }
@@ -310,8 +329,8 @@ struct freedv *freedv_open_advanced(int mode, struct freedv_advanced *adv) {
     }
 #endif
 
-    if ((mode == FREEDV_MODE_2400A) || (mode == FREEDV_MODE_2400B)) {
-
+    if ((mode == FREEDV_MODE_2400A) || (mode == FREEDV_MODE_2400B))
+    {
         /* Set up the C2 mode */
         codec2_mode = CODEC2_MODE_1300;
         /* Set the number of protocol bits */
@@ -320,22 +339,25 @@ struct freedv *freedv_open_advanced(int mode, struct freedv_advanced *adv) {
         f->ext_vco = 0;
     }
 
-    if (mode == FREEDV_MODE_2400A) {
+    if (mode == FREEDV_MODE_2400A)
+    {
         /* Create the framer|deframer */
-        f->deframer = fvhff_create_deframer(FREEDV_VHF_FRAME_A,0);
-        if(f->deframer == NULL)
-            return NULL;
+        f->deframer = fvhff_create_deframer(FREEDV_VHF_FRAME_A, 0);
+
+        if (f->deframer == nullptr) {
+            return nullptr;
+        }
 
         f->fsk = fsk_create_hbr(48000,1200,10,4,1200,1200);
 
-        /* Note: fsk expects tx/rx bits as an array of uint8_ts, not ints */
-        f->tx_bits = (int*) malloc(f->fsk->Nbits*sizeof(uint8_t));
-
-        if(f->fsk == NULL){
+        if (f->fsk == nullptr)
+        {
             fvhff_destroy_deframer(f->deframer);
-            return NULL;
+            return nullptr;
         }
 
+        /* Note: fsk expects tx/rx bits as an array of uint8_ts, not ints */
+        f->tx_bits = (int*) malloc(f->fsk->Nbits*sizeof(int));
         f->n_nom_modem_samples = f->fsk->N;
         f->n_max_modem_samples = f->fsk->N + (f->fsk->Ts);
         f->n_nat_modem_samples = f->fsk->N;
@@ -343,53 +365,63 @@ struct freedv *freedv_open_advanced(int mode, struct freedv_advanced *adv) {
         f->modem_sample_rate = 48000;
         f->modem_symbol_rate = 1200;
         /* Malloc something to appease freedv_init and freedv_destroy */
-        f->codec_bits = (int*) malloc(1);
+        f->codec_bits = (int*) malloc(1*sizeof(int));
     }
 
-    if (mode == FREEDV_MODE_2400B) {
+    if (mode == FREEDV_MODE_2400B)
+    {
         /* Create the framer|deframer */
-        f->deframer = fvhff_create_deframer(FREEDV_VHF_FRAME_A,1);
-        if(f->deframer == NULL) {
-            if (f->codec_bits != NULL) { free(f->codec_bits); }
-            return NULL;
+        f->deframer = fvhff_create_deframer(FREEDV_VHF_FRAME_A, 1);
+
+        if (f->deframer == nullptr)
+        {
+            if (f->codec_bits != nullptr) {
+                free(f->codec_bits);
+            }
+
+            return nullptr;
         }
 
-        f->fmfsk = fmfsk_create(48000,2400);
+        f->fmfsk = fmfsk_create(48000, 2400);
 
-        if(f->fmfsk == NULL){
+        if (f->fmfsk == nullptr)
+        {
             fvhff_destroy_deframer(f->deframer);
-            return NULL;
+            return nullptr;
         }
-        /* Note: fsk expects tx/rx bits as an array of uint8_ts, not ints */
-        f->tx_bits = (int*) malloc(f->fmfsk->nbit*sizeof(uint8_t));
 
+        /* Note: fsk expects tx/rx bits as an array of uint8_ts, not ints */
+        f->tx_bits = (int*) malloc(f->fmfsk->nbit*sizeof(int));
         f->n_nom_modem_samples = f->fmfsk->N;
         f->n_max_modem_samples = f->fmfsk->N + (f->fmfsk->Ts);
         f->n_nat_modem_samples = f->fmfsk->N;
         f->nin = fmfsk_nin(f->fmfsk);
         f->modem_sample_rate = 48000;
         /* Malloc something to appease freedv_init and freedv_destroy */
-        f->codec_bits = (int*) malloc(1);
+        f->codec_bits = (int*) malloc(1*sizeof(int));
     }
 
 #ifdef CODEC2_MODE_700C
-    if (mode == FREEDV_MODE_800XA) {
+    if (mode == FREEDV_MODE_800XA)
+    {
         /* Create the framer|deframer */
-        f->deframer = fvhff_create_deframer(FREEDV_HF_FRAME_B,0);
-        if(f->deframer == NULL)
-            return NULL;
+        f->deframer = fvhff_create_deframer(FREEDV_HF_FRAME_B, 0);
 
-        f->fsk = fsk_create_hbr(8000,400,10,4,800,400);
-        fsk_set_nsym(f->fsk,32);
-
-        /* Note: fsk expects tx/rx bits as an array of uint8_ts, not ints */
-        f->tx_bits = (int*) malloc(f->fsk->Nbits*sizeof(uint8_t));
-
-        if(f->fsk == NULL){
-            fvhff_destroy_deframer(f->deframer);
-            return NULL;
+        if (f->deframer == nullptr) {
+            return nullptr;
         }
 
+        f->fsk = fsk_create_hbr(8000, 400, 10, 4, 800, 400);
+        fsk_set_nsym(f->fsk,32);
+
+        if (f->fsk == nullptr)
+        {
+            fvhff_destroy_deframer(f->deframer);
+            return nullptr;
+        }
+
+        /* Note: fsk expects tx/rx bits as an array of uint8_ts, not ints */
+        f->tx_bits = (int*) malloc(f->fsk->Nbits*sizeof(int));
         f->n_nom_modem_samples = f->fsk->N;
         f->n_max_modem_samples = f->fsk->N + (f->fsk->Ts);
         f->n_nat_modem_samples = f->fsk->N;
@@ -398,7 +430,7 @@ struct freedv *freedv_open_advanced(int mode, struct freedv_advanced *adv) {
         f->modem_symbol_rate = 400;
 
         /* Malloc something to appease freedv_init and freedv_destroy */
-        f->codec_bits = (int*) malloc(1);
+        f->codec_bits = (int*) malloc(1*sizeof(int));
 
         f->n_protocol_bits = 0;
         codec2_mode = CODEC2_MODE_700C;
@@ -2410,15 +2442,18 @@ void freedv_set_carrier_ampl(struct freedv *freedv, int c, float ampl) {
 
 \*---------------------------------------------------------------------------*/
 
-int freedv_set_alt_modem_samp_rate(struct freedv *f, int samp_rate){
-	if(f->mode == FREEDV_MODE_2400A){
-		if(samp_rate == 24000 || samp_rate == 48000 || samp_rate == 96000){
+int freedv_set_alt_modem_samp_rate(struct freedv *f, int samp_rate)
+{
+	if (f->mode == FREEDV_MODE_2400A)
+    {
+		if (samp_rate == 24000 || samp_rate == 48000 || samp_rate == 96000)
+        {
 			fsk_destroy(f->fsk);
-			f->fsk = fsk_create_hbr(samp_rate,1200,10,4,1200,1200);
+			f->fsk = fsk_create_hbr(samp_rate, 1200, 10, 4, 1200, 1200);
 
 			free(f->tx_bits);
 			/* Note: fsk expects tx/rx bits as an array of uint8_ts, not ints */
-			f->tx_bits = (int*) malloc(f->fsk->Nbits*sizeof(uint8_t));
+			f->tx_bits = (int*) malloc(f->fsk->Nbits*sizeof(int));
 
 			f->n_nom_modem_samples = f->fsk->N;
 			f->n_max_modem_samples = f->fsk->N + (f->fsk->Ts);
@@ -2426,14 +2461,21 @@ int freedv_set_alt_modem_samp_rate(struct freedv *f, int samp_rate){
 			f->nin = fsk_nin(f->fsk);
 			f->modem_sample_rate = samp_rate;
 			return 0;
-		}else
+		}
+        else
+        {
 			return -1;
-	}else if(f->mode == FREEDV_MODE_2400B){
-		if(samp_rate == 48000 || samp_rate == 96000){
-			return -1;
-		}else
-			return -1;
+        }
 	}
+    else if (f->mode == FREEDV_MODE_2400B)
+    {
+		if (samp_rate == 48000 || samp_rate == 96000) {
+			return -1;
+		} else {
+			return -1;
+        }
+	}
+
 	return -1;
 }
 

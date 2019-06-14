@@ -68,7 +68,8 @@ int choose_interleaver_b(int Nbits)
 {
     unsigned int i;
 
-    for(i=0; i<sizeof(b_table)/(2*sizeof(int)); i+=2) {
+    for (i = 0; i < sizeof(b_table)/(2*sizeof(int)); i += 2)
+    {
         if (b_table[i] == Nbits) {
             return b_table[i+1];
         }

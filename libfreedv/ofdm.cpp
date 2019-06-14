@@ -222,14 +222,10 @@ struct OFDM *ofdm_create(const struct OFDM_CONFIG *config) {
     ofdm_nuwbits = (ofdm_ns - 1) * ofdm_bps - ofdm_ntxtbits;    // 10
 
     /* Were ready to start filling in the OFDM structure now */
-
-    if ((ofdm = (struct OFDM *) malloc(sizeof (struct OFDM))) == NULL) {
-        return NULL;
-    }
-
-    ofdm->pilot_samples = (std::complex<float>*) malloc(sizeof (std::complex<float>) * (ofdm_m + ofdm_ncp));
-    ofdm->rxbuf = (std::complex<float>*) malloc(sizeof (std::complex<float>) * ofdm_rxbuf);
-    ofdm->pilots = (std::complex<float>*) malloc(sizeof (std::complex<float>) * (ofdm_nc + 2));
+    ofdm = new OFDM();
+    ofdm->pilot_samples = new std::complex<float>[ofdm_m + ofdm_ncp];
+    ofdm->rxbuf = new std::complex<float>[ofdm_rxbuf];
+    ofdm->pilots = new std::complex<float>[ofdm_nc + 2];
 
     /*
      * rx_sym is a 2D array of variable size
@@ -237,14 +233,14 @@ struct OFDM *ofdm_create(const struct OFDM_CONFIG *config) {
      * allocate rx_sym row storage. It is a pointer to a pointer
      */
 
-    ofdm->rx_sym = (std::complex<float>**) malloc(sizeof (std::complex<float>) * (ofdm_ns + 3));
+    ofdm->rx_sym = new std::complex<float>*[ofdm_ns + 3];
 
     /* allocate rx_sym column storage */
 
     int free_last_rx_sym = 0;
     for (i = 0; i < (ofdm_ns + 3); i++)
     {
-        ofdm->rx_sym[i] = (std::complex<float> *) malloc(sizeof(std::complex<float>) * (ofdm_nc + 2));
+        ofdm->rx_sym[i] = new std::complex<float>[ofdm_nc + 2];
 
         if (ofdm->rx_sym[i] == NULL) {
             free_last_rx_sym = i;
@@ -255,7 +251,7 @@ struct OFDM *ofdm_create(const struct OFDM_CONFIG *config) {
 
     /* The rest of these are 1D arrays of variable size */
 
-    ofdm->rx_np = (std::complex<float>*) malloc(sizeof (std::complex<float>) * (ofdm_rowsperframe * ofdm_nc));
+    ofdm->rx_np = new std::complex<float>[ofdm_rowsperframe * ofdm_nc];
     ofdm->rx_amp = (float*) malloc(sizeof (float) * (ofdm_rowsperframe * ofdm_nc));
     ofdm->aphase_est_pilot_log = (float*) malloc(sizeof (float) * (ofdm_rowsperframe * ofdm_nc));
     ofdm->tx_uw = (uint8_t*) malloc(sizeof (uint8_t) * ofdm_nuwbits);
@@ -346,7 +342,7 @@ struct OFDM *ofdm_create(const struct OFDM_CONFIG *config) {
         uw_ind[j + 1] = (val * 2) + 1;   // bit index 2
     }
 
-    tx_uw_syms = (std::complex<float>*) malloc(sizeof (std::complex<float>) * (ofdm_nuwbits / 2));
+    tx_uw_syms = new std::complex<float>[ofdm_nuwbits / 2];
 
     for (i = 0; i < (ofdm_nuwbits / 2); i++) {
         tx_uw_syms[i] = 1.0f;      // qpsk_mod(0:0)
@@ -369,7 +365,7 @@ struct OFDM *ofdm_create(const struct OFDM_CONFIG *config) {
 
     /* create the OFDM waveform */
 
-    std::complex<float> *temp = (std::complex<float>*) malloc(sizeof (std::complex<float>) * ofdm_m);
+    std::complex<float> *temp = new std::complex<float>[ofdm_m];
 
     idft(ofdm, temp, ofdm->pilots);
 
@@ -390,7 +386,8 @@ struct OFDM *ofdm_create(const struct OFDM_CONFIG *config) {
     for (i = ofdm_ncp, j = 0; j < ofdm_m; i++, j++) {
         ofdm->pilot_samples[i] = temp[j];
     }
-    free(temp);
+
+    delete[] temp;
 
     /* calculate constant used to normalise timing correlation maximum */
 
@@ -409,25 +406,25 @@ struct OFDM *ofdm_create(const struct OFDM_CONFIG *config) {
 
     //// Error return points with free call in the reverse order of allocation:
 
-    free(tx_uw_syms);
+    delete[] tx_uw_syms;
     free(uw_ind);
     free(uw_ind_sym);
     free(ofdm->tx_uw);
     free(ofdm->aphase_est_pilot_log);
     free(ofdm->rx_amp);
-    free(ofdm->rx_np);
+    delete[] ofdm->rx_np;
 
     for (i = 0; i < free_last_rx_sym; i++) {
-        free(ofdm->rx_sym[i]);
+        delete[] ofdm->rx_sym[i];
     }
 
-    free(ofdm->rx_sym);
-    free(ofdm->pilots);
-    free(ofdm->rxbuf);
-    free(ofdm->pilot_samples);
-    free(ofdm);
+    delete[] ofdm->rx_sym;
+    delete[] ofdm->pilots;
+    delete[] ofdm->rxbuf;
+    delete[] ofdm->pilot_samples;
+    delete ofdm;
 
-    return(NULL);
+    return(nullptr);
 }
 
 void allocate_tx_bpf(struct OFDM *ofdm) {
@@ -451,16 +448,16 @@ void ofdm_destroy(struct OFDM *ofdm) {
     if (ofdm->ofdm_tx_bpf)
         deallocate_tx_bpf(ofdm);
 
-    free(ofdm->pilot_samples);
-    free(ofdm->rxbuf);
-    free(ofdm->pilots);
+    delete[] ofdm->pilot_samples;
+    delete[] ofdm->rxbuf;
+    delete[] ofdm->pilots;
 
     for (i = 0; i < (ofdm_ns + 3); i++) { /* 2D array */
-        free(ofdm->rx_sym[i]);
+        delete[] ofdm->rx_sym[i];
     }
 
-    free(ofdm->rx_sym);
-    free(ofdm->rx_np);
+    delete[] ofdm->rx_sym;
+    delete[] ofdm->rx_np;
     free(ofdm->rx_amp);
     free(ofdm->aphase_est_pilot_log);
     free(ofdm->tx_uw);

@@ -671,7 +671,8 @@ void fsk_demod_freq_est(struct FSK *fsk, COMP fsk_in[],float *freqs,int M){
     free(fftout);
 }
 
-void fsk2_demod(struct FSK *fsk, uint8_t rx_bits[], float rx_sd[], COMP fsk_in[]){
+void fsk2_demod(struct FSK *fsk, uint8_t rx_bits[], float rx_sd[], COMP fsk_in[])
+{
     int N = fsk->N;
     int Ts = fsk->Ts;
     int Rs = fsk->Rs;
@@ -687,7 +688,7 @@ void fsk2_demod(struct FSK *fsk, uint8_t rx_bits[], float rx_sd[], COMP fsk_in[]
 
     COMP* *f_int = new COMP*[M];    /* Filtered and downsampled symbol tones */
     COMP *t = new COMP[M];          /* complex number temps */
-    COMP t_c;           /* another complex temp */
+    COMP t_c;                       /* another complex temp */
     COMP *phi_c = new COMP[M];
     COMP phi_ft;
     int nold = Nmem-nin;
@@ -863,7 +864,12 @@ void fsk2_demod(struct FSK *fsk, uint8_t rx_bits[], float rx_sd[], COMP fsk_in[]
 
     /* Check for NaNs in the fine timing estimate, return if found */
     /* otherwise segfaults happen */
-    if( std::isnan(t_c.real) || std::isnan(t_c.imag)){
+    if (std::isnan(t_c.real) || std::isnan(t_c.imag))
+    {
+        free(f_intbuf_m);
+        delete[] dphi;
+        delete[] phi_c;
+        delete[] t;
         return;
     }
 

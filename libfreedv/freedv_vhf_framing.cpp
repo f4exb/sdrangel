@@ -294,46 +294,65 @@ void fvhff_frame_data_bits(struct freedv_vhf_deframer * def, int frame_type,
 }
 
 /* Init and allocate memory for a freedv-vhf framer/deframer */
-struct freedv_vhf_deframer * fvhff_create_deframer(uint8_t frame_type, int enable_bit_flip){
+struct freedv_vhf_deframer * fvhff_create_deframer(uint8_t frame_type, int enable_bit_flip)
+{
     struct freedv_vhf_deframer * deframer;
     uint8_t *bits,*invbits;
     int frame_size;
     int uw_size;
 
-    assert( (frame_type == FREEDV_VHF_FRAME_A) || (frame_type == FREEDV_HF_FRAME_B) );
+    assert((frame_type == FREEDV_VHF_FRAME_A) || (frame_type == FREEDV_HF_FRAME_B));
 
     /* It's a Type A frame */
-    if(frame_type == FREEDV_VHF_FRAME_A){
+    if (frame_type == FREEDV_VHF_FRAME_A)
+    {
         frame_size = 96;
         uw_size = 16;
-    }else if(frame_type == FREEDV_HF_FRAME_B){
+    }
+    else if (frame_type == FREEDV_HF_FRAME_B)
+    {
         frame_size = 64;
         uw_size = 8;
-    }else{
-        return NULL;
+    }
+    else
+    {
+        return nullptr;
     }
 
     /* Allocate memory for the thing */
     deframer = (freedv_vhf_deframer*) malloc(sizeof(struct freedv_vhf_deframer));
-    if(deframer == NULL)
-        return NULL;
+
+    if (deframer == nullptr) {
+        return nullptr;
+    }
 
     /* Allocate the not-bit buffer */
-    if(enable_bit_flip){
+    if (enable_bit_flip)
+    {
         invbits = (uint8_t*) malloc(sizeof(uint8_t)*frame_size);
-        if(invbits == NULL) {
+
+        if (invbits == nullptr)
+        {
             free(deframer);
-            return NULL;
+            return nullptr;
         }
-    }else{
-        invbits = NULL;
+    }
+    else
+    {
+        invbits = nullptr;
     }
 
     /* Allocate the bit buffer */
     bits = (uint8_t*) malloc(sizeof(uint8_t)*frame_size);
-    if(bits == NULL) {
+
+    if (bits == nullptr)
+    {
+        if (invbits) {
+            free(invbits);
+        }
+
         free(deframer);
-        return NULL;
+        return nullptr;
     }
 
     deframer->bits = bits;
