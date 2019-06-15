@@ -46,9 +46,7 @@ class DeviceAPI;
 class ThreadedBasebandSampleSource;
 class UpChannelizer;
 
-namespace FreeDV {
 struct freedv;
-}
 
 class FreeDVMod : public BasebandSampleSource, public ChannelAPI {
     Q_OBJECT
@@ -332,7 +330,7 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    struct FreeDV::freedv *m_freeDV;
+    struct freedv *m_freeDV;
     int m_nSpeechSamples;
     int m_nNomModemSamples;
     int m_iSpeech;

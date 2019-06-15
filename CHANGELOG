@@ -1,3 +1,11 @@
+sdrangel (4.10.1-1) unstable; urgency=medium
+
+  * Implemented device user arguments
+  * PVS-Studio static analysis corrections (5)
+  * FreeDV demod: use mainstream library from codec2 instead of internal
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 15 Jun 2019 06:44:06 +0100
+
 sdrangel (4.10.0-1) unstable; urgency=medium
 
   * Support for KiwiSDR

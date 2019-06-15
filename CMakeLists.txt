@@ -18,7 +18,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # configure version
 set(sdrangel_VERSION_MAJOR "4")
 set(sdrangel_VERSION_MINOR "10")
-set(sdrangel_VERSION_PATCH "0")
+set(sdrangel_VERSION_PATCH "1")
 set(sdrangel_VERSION_SUFFIX "")
 
 # SDRAngel cmake options
@@ -373,10 +373,6 @@ endif()
 if(ENABLE_XTRX)
   find_package(LibXTRX)
 endif()
-
-if (CODEC2_FOUND)
-    add_subdirectory(libfreedv)
-endif(CODEC2_FOUND)
 
 if(ENABLE_FUNCUBE AND UNIX AND LIBUSB_FOUND)
     add_subdirectory(fcdlib)
