@@ -598,10 +598,10 @@ private:
             switch(m_settings.m_atvModInput)
             {
             case ATVModSettings::ATVModInputHBars:
-                sample = (pointIndex / m_pointsPerHBar) * m_hBarIncrement + m_blackLevel;
+                sample = (((float)pointIndex) / m_pointsPerHBar) * m_hBarIncrement + m_blackLevel;
                 break;
             case ATVModSettings::ATVModInputVBars:
-                sample = (iLine / m_linesPerVBar) * m_vBarIncrement + m_blackLevel;
+                sample = (((float)iLine) / m_linesPerVBar) * m_vBarIncrement + m_blackLevel;
                 break;
             case ATVModSettings::ATVModInputChessboard:
                 sample = (((iLine / m_linesPerVBar)*5 + (pointIndex / m_pointsPerHBar)) % 2) * m_spanLevel * m_settings.m_uniformLevel + m_blackLevel;

@@ -30,6 +30,7 @@ SampleSourceFifo::SampleSourceFifo(uint32_t size, QObject* parent) :
 
 SampleSourceFifo::SampleSourceFifo(const SampleSourceFifo& other) :
     QObject(other.parent()),
+    m_size(other.m_size),
     m_data(other.m_data)
 {
     init();

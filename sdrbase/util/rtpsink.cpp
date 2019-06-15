@@ -343,8 +343,6 @@ unsigned int RTPSink::elemLength(PayloadType payloadType)
         return sizeof(int8_t);
         break;
     case PayloadL16Stereo:
-        return sizeof(int16_t);
-        break;
     case PayloadL16Mono:
     default:
         return sizeof(int16_t);

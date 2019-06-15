@@ -1285,7 +1285,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
 
         if (getMessageQueueToGUI())
         {
-            MsgReportGainChange *report = MsgReportGainChange::create(m_settings, individualGainsChanged, globalGainChanged);
+            MsgReportGainChange *report = MsgReportGainChange::create(m_settings, globalGainChanged, individualGainsChanged);
             getMessageQueueToGUI()->push(report);
         }
     }

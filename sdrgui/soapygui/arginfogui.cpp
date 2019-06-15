@@ -36,6 +36,15 @@ ArgInfoGUI::ArgInfoGUI(ArgInfoType type, ArgInfoValueType valueType, QWidget *pa
     ui->setupUi(this);
     QHBoxLayout *layout = ui->argLayout;
 
+    if ((m_valueType == ArgInfoValueInt) || (m_valueType == ArgInfoValueFloat))
+    {
+        if (m_type == ArgInfoContinuous) {
+            ui->argEdit->setAlignment(Qt::AlignRight);
+        } else if (m_type == ArgInfoDiscrete) {
+            ui->argCombo->setLayoutDirection(Qt::RightToLeft);
+        }
+    }
+
     if (m_type != ArgInfoBinary)
     {
         layout->removeWidget(ui->argCheck);
@@ -52,15 +61,6 @@ ArgInfoGUI::ArgInfoGUI(ArgInfoType type, ArgInfoValueType valueType, QWidget *pa
     {
         layout->removeWidget(ui->argCombo);
         delete ui->argCombo;
-    }
-
-    if ((m_valueType == ArgInfoValueInt) || (m_valueType == ArgInfoValueFloat))
-    {
-        if (m_type == ArgInfoContinuous) {
-            ui->argEdit->setAlignment(Qt::AlignRight);
-        } else if (m_type == ArgInfoDiscrete) {
-            ui->argCombo->setLayoutDirection(Qt::RightToLeft);
-        }
     }
 }
 

@@ -54,7 +54,7 @@ void AudioOpus::setEncoder(int32_t fs, int nChannels)
 
     if (error != OPUS_OK)
     {
-        qWarning("AudioOpus::setEncoder: %s error: %s", newInstance ? "create" : "init", opus_strerror(error));
+        qWarning("AudioOpus::setEncoder: error: %s", opus_strerror(error));
         m_encoderOK = false;
         return;
     }

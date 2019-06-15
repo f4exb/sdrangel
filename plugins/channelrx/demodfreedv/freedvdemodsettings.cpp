@@ -152,8 +152,6 @@ int FreeDVDemodSettings::getHiCutoff(FreeDVMode freeDVMode)
     switch(freeDVMode)
     {
         case FreeDVMode800XA: // C4FM NB
-            return 2400.0;
-            break;
         case FreeDVMode700C: // OFDM
         case FreeDVMode700D: // OFDM
         case FreeDVMode1600: // OFDM
