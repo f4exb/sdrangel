@@ -26,7 +26,6 @@ Build-Depends: debhelper (>= 9),
  libavcodec-dev,
  libavformat-dev,
  libopus-dev,
- libcodec2-dev,
  libairspy-dev,
  libhackrf-dev,
  librtlsdr-dev
