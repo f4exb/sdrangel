@@ -23,11 +23,13 @@
 QDataStream &operator<<(QDataStream &ds, const DeviceUserArgs::Args &inObj)
 {
 	ds << inObj.m_id << inObj.m_sequence << inObj.m_args;
+    return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, DeviceUserArgs::Args &outObj)
 {
 	ds >> outObj.m_id >> outObj.m_sequence >> outObj.m_args;
+    return ds;
 }
 
 QByteArray DeviceUserArgs::serialize() const
