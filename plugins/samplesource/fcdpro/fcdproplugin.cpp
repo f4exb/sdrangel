@@ -86,6 +86,9 @@ PluginInstanceGUI* FCDProPlugin::createSampleSourcePluginInstanceGUI(
         QWidget **widget,
         DeviceUISet *deviceUISet)
 {
+    (void) sourceId;
+    (void) widget;
+    (void) deviceUISet;
     return 0;
 }
 #else

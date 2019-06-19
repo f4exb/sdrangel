@@ -74,10 +74,13 @@ PluginInterface::SamplingDevices TestMIPlugin::enumSampleMIMO()
 
 #ifdef SERVER_MODE
 PluginInstanceGUI* TestMIPlugin::createSampleMIMOPluginInstanceGUI(
-        const QString& sourceId __attribute((unused)),
-        QWidget **widget __attribute((unused)),
-        DeviceUISet *deviceUISet __attribute((unused)))
+        const QString& sourceId,
+        QWidget **widget,
+        DeviceUISet *deviceUISet)
 {
+    (void) sourceId;
+    (void) widget;
+    (void) deviceUISet;
     return 0;
 }
 #else

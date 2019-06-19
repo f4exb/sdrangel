@@ -95,6 +95,9 @@ PluginInstanceGUI* SoapySDROutputPlugin::createSampleSinkPluginInstanceGUI(
         QWidget **widget,
         DeviceUISet *deviceUISet)
 {
+    (void) sinkId;
+    (void) widget;
+    (void) deviceUISet;
     return 0;
 }
 #else
