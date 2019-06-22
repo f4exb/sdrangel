@@ -241,7 +241,7 @@
         {
           "type": "git",
           "url": "git://github.com/EttusResearch/uhd.git",
-          "commit": "e0e61"
+          "commit": "e0e61a5"
         }
       ]
     },
@@ -254,8 +254,7 @@
       "sources": [
         {
           "type": "git",
-          "url": "git://github.com/f4exb/libmirisdr-4.git",
-          "commit": "e0e61"
+          "url": "git://github.com/f4exb/libmirisdr-4.git"
         }
       ]
     },
@@ -319,7 +318,7 @@
         {
           "type": "git",
           "url": "https://github.com/pothosware/SoapyUHD.git",
-          "commit": "5838bc9"
+          "commit": "2900fff"
         }
       ]
     },
