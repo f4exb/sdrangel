@@ -17,8 +17,6 @@
   "modules": [
     {
       "name": "libusb",
-      "config-opts": [""],
-      "make-args": [""],
       "sources": [
         {
           "type": "git",
@@ -27,9 +25,165 @@
       ]
     },
     {
-      "name": "limesuite",
+      "name": "cm256cc",
       "buildsystem": "cmake-ninja",
       "config-opts": [
+        "-Wno-dev"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/f4exb/cm256cc.git",
+          "commit": "f21e8bc"
+        }
+      ]
+    },
+    {
+      "name": "mbelib",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/szechyjs/mbelib.git",
+          "commit": "e2d84c1"
+        }
+      ]
+    },
+    {
+      "name": "serialdv",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/f4exb/serialDV.git",
+          "commit": "abd65a0"
+        }
+      ]
+    },
+    {
+      "name": "dsdcc",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev",
+        "-DUSE_MBELIB=ON"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/f4exb/dsdcc.git",
+          "commit": "a0f4694"
+        }
+      ]
+    },
+    {
+      "name": "codec2",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/drowe67/codec2.git",
+          "commit": "76a20416d715ee06f8b36a9953506876689a3bd2"
+        }
+      ]
+    },
+    {
+      "name": "sdrplay",
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-2.13.1.run",
+          "sha256": "e2320b9eafffa3cb5d49e956207af2521ccf098aacc1fd9abecc8fb96b364522"
+        }
+      ]
+    },
+    {
+      "name": "airspy",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/airspy/host.git",
+          "commit": "5c86e53"
+        }
+      ]
+    },
+    {
+      "name": "rtlsdr",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev",
+        "-DDETACH_KERNEL_DRIVER=ON"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/librtlsdr/librtlsdr.git",
+          "commit": "c7d970a"
+        }
+      ]
+    },
+    {
+      "name": "plutosdr",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev",
+        "-DINSTALL_UDEV_RULE=OFF"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/analogdevicesinc/libiio.git",
+          "commit": "5bdc242"
+        }
+      ]
+    },
+    {
+      "name": "bladerf",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev",
+        "-DINSTALL_UDEV_RULE=OFF"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/Nuand/bladeRF.git",
+          "commit": "32058c4"
+        }
+      ]
+    },
+    {
+      "name": "hackrf",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev",
+        "-DINSTALL_UDEV_RULE=OFF"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/mossmann/hackrf.git",
+          "commit": "9bbbbbf"
+        }
+      ]
+    },
+    {
+      "name": "limesdr",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev",
         "-DENABLE_QUICKTEST=OFF",
         "-DENABLE_GUI=OFF",
         "-DENABLE_SOAPY_LMS7=OFF",
@@ -47,9 +201,147 @@
       ]
     },
     {
+      "name": "perseus",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/f4exb/libperseus-sdr.git",
+          "commit": "afefa23"
+        }
+      ]
+    },
+    {
+      "name": "xtrx",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev",
+        "-DENABLE_SOAPY=NO"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/xtrx-sdr/images.git",
+          "commit": "053ec82"
+        }
+      ]
+    },
+    {
+      "name": "uhd",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev",
+        "-DENABLE_PYTHON_API=OFF",
+        "-DINSTALL_UDEV_RULES=OFF"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "git://github.com/EttusResearch/uhd.git",
+          "commit": "e0e61"
+        }
+      ]
+    },
+    {
+      "name": "libmirisdr",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "git://github.com/f4exb/libmirisdr-4.git",
+          "commit": "e0e61"
+        }
+      ]
+    },
+    {
+      "name": "soapy",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "git://github.com/pothosware/SoapySDR.git",
+          "commit": "5838bc9"
+        }
+      ]
+    },
+    {
+      "name": "soapy_remote",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "git://github.com/pothosware/SoapyRemote.git",
+          "commit": "4f5d717"
+        }
+      ]
+    },
+    {
+      "name": "soapy_sdrplay",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "git://github.com/pothosware/SoapySDRPlay.git",
+          "commit": "12c3db6"
+        }
+      ]
+    },
+    {
+      "name": "soapy_limesdr",
+      "// TODO": "Basis is contained in build modules limesdr and soapy_remote",
+      "// buildsystem": "cmake-ninja",
+      "// config-opts": [
+        "-Wno-dev"
+      ]
+    },
+    {
+      "name": "soapy_uhd",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/pothosware/SoapyUHD.git",
+          "commit": "5838bc9"
+        }
+      ]
+    },
+    {
+      "name": "soapy_redpitaya",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/pothosware/SoapyRedPitaya.git",
+          "commit": "3d576f83b3bde52104b2a88150516ca8c9a78c7a"
+        }
+      ]
+    },
+    {
       "name": "sdrangel",
       "buildsystem": "cmake-ninja",
       "config-opts": [
+        "-Wno-dev",
         "-DDEBUG_OUTPUT=ON",
         "-DBUILD_TYPE=RELEASE",
         "-DRX_SAMPLE_24BIT=ON"
