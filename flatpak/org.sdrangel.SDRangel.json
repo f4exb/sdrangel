@@ -16,15 +16,6 @@
   ],
   "modules": [
     {
-      "name": "libusb",
-      "sources": [
-        {
-          "type": "git",
-          "url": "https://github.com/libusb/libusb.git"
-        }
-      ]
-    },
-    {
       "name": "cm256cc",
       "buildsystem": "cmake-ninja",
       "config-opts": [
