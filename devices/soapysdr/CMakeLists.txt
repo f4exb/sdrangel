@@ -30,7 +30,7 @@ target_link_libraries(soapysdrdevice
     sdrbase
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES)
+if(ENABLE_EXTERNAL_LIBRARIES AND NOT LINUX)
     add_dependencies(soapysdrdevice soapysdr)
 endif()
 

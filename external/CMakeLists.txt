@@ -143,7 +143,7 @@ ExternalProject_Add(cm256cc
     GIT_TAG ${CM256CC_TAG}
     PREFIX "${EXTERNAL_BUILD_LIBRARIES}/cm256cc"
     CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
-      -DBUILD_TOOLS=OFF 
+      -DBUILD_TOOLS=OFF
       -DBOOST_ROOT="${BOOST_ROOT}"
       -DBoost_INCLUDE_DIR=${Boost_INCLUDE_DIRS}
       -DBoost_INCLUDE_DIRS=${Boost_INCLUDE_DIRS}
@@ -211,7 +211,7 @@ if(WIN32 OR LINUX)
       makeCopyDir("${source_dir}" "${source_dir}/dsp" serialdv)
       install(FILES "${SDRANGEL_BINARY_BIN_DIR}/serialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     elseif(LINUX)
-      set(LIBSERIALDV_LIBRARY "${binary_dir}/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+      set(LIBSERIALDV_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/lib/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
       # because sdrbase/dsp/dvserialworker.h use dsp/dvcontroller.h
       # so we need a link
       makeLink("${source_dir}" "${source_dir}/dsp" serialdv)
@@ -231,11 +231,11 @@ ExternalProject_Add(dsdcc
     GIT_TAG ${DSDCC_TAG}
     DEPENDS ${DSDCC_DEPENDS}
     PREFIX "${EXTERNAL_BUILD_LIBRARIES}/dsdcc"
-    CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES} 
-      -DBUILD_TOOL=OFF -DUSE_MBELIB=${USE_MBELIB} 
-      -DLIBMBE_INCLUDE_DIR=${LIBMBE_INCLUDE_DIR} 
-      -DLIBMBE_LIBRARY=${LIBMBE_LIBRARIES} 
-      -DLIBSERIALDV_INCLUDE_DIR=${LIBSERIALDV_INCLUDE_DIR} 
+    CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
+      -DBUILD_TOOL=OFF -DUSE_MBELIB=${USE_MBELIB}
+      -DLIBMBE_INCLUDE_DIR=${LIBMBE_INCLUDE_DIR}
+      -DLIBMBE_LIBRARY=${LIBMBE_LIBRARIES}
+      -DLIBSERIALDV_INCLUDE_DIR=${LIBSERIALDV_INCLUDE_DIR}
       -DLIBSERIALDV_LIBRARY=${LIBSERIALDV_LIBRARY}
     INSTALL_COMMAND ""
     TEST_COMMAND ""
@@ -411,7 +411,7 @@ if(WIN32 OR APPLE)
       install(DIRECTORY "${binary_dir}/lib/" DESTINATION "${INSTALL_LIB_DIR}"
       FILES_MATCHING PATTERN "libSoapySDR*${CMAKE_SHARED_LIBRARY_SUFFIX}")
       set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/lib/")
-    endif()  
+    endif()
   endif(ENABLE_SOAPYSDR)
 
   if(ENABLE_AIRSPY)
@@ -487,7 +487,7 @@ if(WIN32 OR APPLE)
       FILES_MATCHING PATTERN "libairspyhf*${CMAKE_SHARED_LIBRARY_SUFFIX}")
       set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/libairspyhf/src")
     endif()
-  endif(ENABLE_AIRSPYHF)  
+  endif(ENABLE_AIRSPYHF)
 
   if(ENABLE_HACKRF)
     # SOURCE_SUBDIR require cmake 3.7.0
@@ -533,7 +533,7 @@ if(WIN32 OR APPLE)
       install(DIRECTORY "${binary_dir}/src/" DESTINATION "${INSTALL_LIB_DIR}"
       FILES_MATCHING PATTERN "libhackrf*${CMAKE_SHARED_LIBRARY_SUFFIX}")
     endif()
-  endif(ENABLE_HACKRF)  
+  endif(ENABLE_HACKRF)
 
   if(ENABLE_IIO)
     if(WIN32)
@@ -611,7 +611,7 @@ if(WIN32 OR APPLE)
       add_custom_command(TARGET libiio POST_BUILD COMMAND install_name_tool -id "${binary_dir}/libiio${CMAKE_SHARED_LIBRARY_SUFFIX}" "${binary_dir}/libiio${CMAKE_SHARED_LIBRARY_SUFFIX}")
       set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
     endif()
-  endif(ENABLE_IIO)  
+  endif(ENABLE_IIO)
 
   if(ENABLE_BLADERF)
     # needs pkgconfig, libusb, pthreads
