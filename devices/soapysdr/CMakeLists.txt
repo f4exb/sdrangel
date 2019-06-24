@@ -30,4 +30,8 @@ target_link_libraries(soapysdrdevice
     sdrbase
 )
 
+if(ENABLE_EXTERNAL_LIBRARIES)
+    add_dependencies(soapysdrdevice soapysdr)
+endif()
+
 install(TARGETS soapysdrdevice DESTINATION ${INSTALL_LIB_DIR})

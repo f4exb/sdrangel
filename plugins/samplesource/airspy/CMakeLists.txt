@@ -46,6 +46,10 @@ add_library(${TARGET_NAME} SHARED
 	${airspy_SOURCES}
 )
 
+if(ENABLE_EXTERNAL_LIBRARIES AND NOT LINUX)
+    add_dependencies(${TARGET_NAME} airspy)
+endif()
+
 target_link_libraries(${TARGET_NAME}
         Qt5::Core
         ${TARGET_LIB}

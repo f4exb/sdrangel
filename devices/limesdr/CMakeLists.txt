@@ -20,10 +20,6 @@ add_library(limesdrdevice SHARED
     ${limesdrdevice_SOURCES}
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES)
-    add_dependencies(limesdrdevice limesuite)
-endif()
-
 set_target_properties(limesdrdevice
     PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
 
@@ -31,5 +27,9 @@ target_link_libraries(limesdrdevice
     ${LIMESUITE_LIBRARY}
     sdrbase
 )
+
+if(ENABLE_EXTERNAL_LIBRARIES)
+    add_dependencies(limesdrdevice limesuite)
+endif()
 
 install(TARGETS limesdrdevice DESTINATION ${INSTALL_LIB_DIR})

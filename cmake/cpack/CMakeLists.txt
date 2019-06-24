@@ -89,7 +89,7 @@ Plugins = ../PlugIns
 
   set(BU_CHMOD_BUNDLE_ITEMS ON)
   include(BundleUtilities)
-  fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/${CMAKE_PROJECT_NAME}\" \"\${SDRANGEL_PLUGINS};\${SDRANGEL_PLUGINSSRV};\${QTPLUGINS};\${SOAPYSDR_PLUGINS}\" \"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\")
+  fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/${CMAKE_PROJECT_NAME}\" \"\${SDRANGEL_PLUGINS};\${SDRANGEL_PLUGINSSRV};\${QTPLUGINS};\${SOAPYSDR_PLUGINS}\" \"${CMAKE_LIBRARY_OUTPUT_DIRECTORY};${MACOS_EXTERNAL_LIBS_FIXUP}\")
 
   # remove non distribuitable file
   if(ENABLE_MIRSDRAPI AND OFF)
@@ -173,41 +173,134 @@ elseif(LINUX AND BUNDLE)
 
 elseif(WIN32 OR MINGW)
 
-  # Copy Qt Plugins; fixup_bundle doesn't do that
-  install (
-    DIRECTORY
+  set(QT_PLUGINS_DIR_SET
     "${QT_PLUGINS_DIR}/platforms"
     "${QT_PLUGINS_DIR}/audio"
-    "${QT_PLUGINS_DIR}/accessible"
     "${QT_PLUGINS_DIR}/imageformats"
     "${QT_PLUGINS_DIR}/mediaservice"
     "${QT_PLUGINS_DIR}/playlistformats"
-    "${QT_PLUGINS_DIR}/styles"
+    "${QT_PLUGINS_DIR}/renderplugins"
     "${QT_PLUGINS_DIR}/iconengines"
-    DESTINATION "${SDRANGEL_BINARY_BIN_DIR}"
-    CONFIGURATIONS Release MinSizeRel
-    COMPONENT runtime
-    FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}"
-    PATTERN "*minimal*${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
-    PATTERN "*offscreen*${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
-    PATTERN "*quick*${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
-    PATTERN "*_debug${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
-    )
+  )
 
-install(CODE "
-  include(BundleUtilities)
-  fixup_bundle("${SDRANGEL_BINARY_BIN_DIR}" "" "${WINDOWS_FIXUP_BUNDLE_LIB_DIRS}")
-" COMPONENT Runtime)
+  # Copy Qt Plugins; fixup_bundle doesn't do that
+  foreach(qt_plugin ${QT_PLUGINS_DIR_SET})
+    get_filename_component(qt_plugin_name "${qt_plugin}"  NAME)
+    add_custom_target(copy_qt_plugin_${qt_plugin_name} ALL
+      COMMAND ${CMAKE_COMMAND} -E copy_directory "${qt_plugin}" "${SDRANGEL_BINARY_BIN_DIR}/${qt_plugin_name}"
+    )
+  endforeach(qt_plugins)
+
+  # unfortunately some libraries are dependencies of dll so we copy by hand
+  # TODO check if we can use fixup_bundle() and have libraries on root path
+
+  # demoddatv.dll
+  file(GLOB FFMPEG_DLLS "${FFMPEG_LIBRARIES}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  foreach(ffmpeg_dll ${FFMPEG_DLLS})
+    get_filename_component(ffmpeg_dll_name "${ffmpeg_dll}"  NAME)
+    add_custom_target(copy_ffmpeg_${ffmpeg_dll_name} ALL
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${ffmpeg_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
+    )
+  endforeach(ffmpeg_dll)
+
+  # modatv.dll
+  file(GLOB OPENCV_DLLS "${OpenCV_LIBS_BIN_DIR}/opencv_world*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  foreach(opencv_dll ${OPENCV_DLLS})
+    get_filename_component(opencv_dll_name "${opencv_dll}"  NAME)
+    add_custom_target(copy_ffmpeg_${opencv_dll_name} ALL
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${opencv_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
+    )
+  endforeach(opencv_dll)
+
+  # TODO we need a way to fixup_bundle() on the build bin/ directory without call install
+  if(BUILD_GUI)
+    install(CODE "
+      include(BundleUtilities)
+      fixup_bundle(\"${SDRANGEL_BINARY_BIN_DIR}/sdrangel${CMAKE_EXECUTABLE_SUFFIX}\" \"\" \"${WINDOWS_FIXUP_BUNDLE_LIB_DIRS}\")
+    " COMPONENT Runtime)
+  elseif(BUILD_SERVER)
+    install(CODE "
+      include(BundleUtilities)
+      fixup_bundle(\"${SDRANGEL_BINARY_BIN_DIR}/sdrangelsrv${CMAKE_EXECUTABLE_SUFFIX}\" \"\" \"${WINDOWS_FIXUP_BUNDLE_LIB_DIRS}\")
+    " COMPONENT Runtime)
+  endif(BUILD_GUI)
 
   if(BUNDLE)
+    if(BUILD_GUI)
+      install(CODE "
+        include(BundleUtilities)
+        fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/sdrangel${CMAKE_EXECUTABLE_SUFFIX}\" \"\" \"${WINDOWS_FIXUP_BUNDLE_LIB_DIRS}\")
+      " COMPONENT Runtime)
+    elseif(BUILD_SERVER)
+      install(CODE "
+        include(BundleUtilities)
+        fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/sdrangelsrv${CMAKE_EXECUTABLE_SUFFIX}\" \"\" \"${WINDOWS_FIXUP_BUNDLE_LIB_DIRS}\")
+      " COMPONENT Runtime)
+    endif(BUILD_GUI)
 
-    set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
+    # Copy Qt Plugins; fixup_bundle doesn't do that
+    install (
+      DIRECTORY ${QT_PLUGINS_DIR_SET}
+      DESTINATION "${INSTALL_BIN_DIR}"
+      CONFIGURATIONS Release MinSizeRel
+      COMPONENT runtime
+      FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}"
+      PATTERN "*minimal*${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
+      PATTERN "*offscreen*${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
+      PATTERN "*quick*${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
+      PATTERN "*_debug${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
+    )
+
+    # unfortunately some libraries are dependencies of dll so we copy by hand
+    # TODO check if we can use fixup_bundle() and have libraries on root path
+    # demoddatv.dll
+    install(DIRECTORY "${FFMPEG_LIBRARIES}/" DESTINATION "${INSTALL_LIB_DIR}"
+      FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    # modatv.dll
+    install(DIRECTORY "${OpenCV_LIBS_BIN_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
+      FILES_MATCHING PATTERN "opencv_world*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    # libusb
+    get_filename_component(GFN_LIBUSB_DIR "${LIBUSB_LIBRARIES}" DIRECTORY)
+    install(FILES "${GFN_LIBUSB_DIR}/libusb-1.0${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+
+    install(CODE "
+      # remove *.lib files
+      # TODO find a better way
+      file(GLOB NSIS_REMOVE_LIB \"\${CMAKE_INSTALL_PREFIX}/*.lib\")
+      foreach(file \${NSIS_REMOVE_LIB})
+        file(REMOVE \"\${file}\")
+      endforeach()
+      file(GLOB NSIS_REMOVE_LIB \"\${CMAKE_INSTALL_PREFIX}/${INSTALL_PLUGINS_DIR}/*.lib\")
+      foreach(file \${NSIS_REMOVE_LIB})
+        file(REMOVE \"\${file}\")
+      endforeach()
+      file(GLOB NSIS_REMOVE_LIB \"\${CMAKE_INSTALL_PREFIX}/${INSTALL_PLUGINSSRV_DIR}/*.lib\")
+      foreach(file \${NSIS_REMOVE_LIB})
+        file(REMOVE \"\${file}\")
+      endforeach()
+    " COMPONENT Runtime)
 
     list(APPEND CPACK_GENERATOR "ZIP;NSIS")
+    set(CPACK_MONOLITHIC_INSTALL ON)
+    set(CPACK_NSIS_HELP_LINK ${CPACK_PACKAGE_CONTACT})
+    set(CPACK_NSIS_URL_INFO_ABOUT ${CPACK_PACKAGE_CONTACT})
+    set(CPACK_NSIS_CONTACT ${APPLICATION_MAINTAINER})
+    set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/cmake/cpack/sdrangel_icon.ico")
+    set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/cmake/cpack/sdrangel_icon.ico")
     set(CPACK_NSIS_PACKAGE_NAME "${APPLICATION_NAME}")
     set(CPACK_NSIS_CONTACT "${APPLICATION_MAINTAINER}")
     set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
     set(CPACK_NSIS_MODIFY_PATH ON)
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY ${APPLICATION_NAME})
+    set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY ${APPLICATION_NAME})
+    list(APPEND CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+      ExecWait '$INSTDIR\\\\${VCREDIST_FILE} /passive /norestart'
+      Delete '$INSTDIR\\\\${VCREDIST_FILE}'
+    ")
+    set(CPACK_NSIS_CREATE_ICONS_EXTRA
+      "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\SDRangel.lnk' '$INSTDIR\\\\sdrangel.exe'")
+    set(CPACK_NSIS_DELETE_ICONS_EXTRA
+      "Delete '$SMPROGRAMS\\\\$START_MENU\\\\SDRangel.lnk'")
   endif()
 
 endif(APPLE AND BUNDLE AND BUILD_GUI)

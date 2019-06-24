@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.1.0)
 
 # force 64bit on windows because we have only that library
 # TODO discuss because, at this days, a dsp software should be 64bit
-if(WIN32 AND NOT CMAKE_GENERATOR_PLATFORM AND NOT CMAKE_C_COMPILER AND NOT CMAKE_CXX_COMPILER)
-  set(CMAKE_GENERATOR_PLATFORM "x64" CACHE INTERNAL "")
-endif()
+# if(WIN32 AND NOT CMAKE_GENERATOR_PLATFORM AND NOT CMAKE_C_COMPILER AND NOT CMAKE_CXX_COMPILER)
+#   set(CMAKE_GENERATOR_PLATFORM "x64" CACHE INTERNAL "")
+# endif()
 
 project(sdrangel)
 
@@ -46,8 +46,11 @@ option(ENABLE_PACK_MIRSDRAPI "Enable inclusion of the mirsdr-api library - for p
 # on windows always build external libraries
 if(WIN32)
   option(ENABLE_EXTERNAL_LIBRARIES "Build external libraries" ON)
+  # to run fixup_bundle()
+  option(BUNDLE "Enable distribution bundle" ON)
 else()
   option(ENABLE_EXTERNAL_LIBRARIES "Build external libraries" OFF)
+  option(BUNDLE "Enable distribution bundle" OFF)
 endif()
 
 # Set additional project information
@@ -136,6 +139,11 @@ if(APPLE AND BUNDLE AND BUILD_GUI)
   set(INSTALL_BIN_DIR ".")
   set(INSTALL_LIB_DIR "lib")
   set(INSTALL_DOC_DIR "doc")
+elseif(WIN32)
+  # used to create package
+  set(INSTALL_BIN_DIR ".")
+  set(INSTALL_LIB_DIR ".")
+  set(INSTALL_DOC_DIR ".")
 else()
   set(INSTALL_BIN_DIR "bin")
   set(INSTALL_LIB_DIR "lib/${CMAKE_PROJECT_NAME}")
@@ -308,24 +316,36 @@ find_package(FFTW3F REQUIRED)
 find_package(LibUSB REQUIRED)  # used by so many packages
 find_package(OpenCV REQUIRED core highgui imgproc imgcodecs videoio) # channeltx/modatv
 
+# macOS compatibility
+if(APPLE)
+  find_package(ICONV)
+endif()
+
 # unfortunately OpenCV library from windows doesn't set the cache option
 if(WIN32)
   set(OpenCV_INCLUDE_DIRS "${OpenCV_INCLUDE_DIRS}" CACHE INTERNAL "")
   set(OpenCV_LIBS "${OpenCV_LIBS}" CACHE INTERNAL "")
 
   # add libs folder for fixup_bundle()
-  get_filename_component(GFN_Boost_LIBS_DIR Boost_LIBS DIRECTORY)
-  get_filename_component(GFN_OpenCV_LIBS_DIR OpenCV_LIBS DIRECTORY)
+  get_filename_component(GFN_Boost_LIBS_DIR "${Boost_LIBS}" DIRECTORY)
+
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(OpenCV_ARCH "64")
+  elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    set(OpenCV_ARCH "86")
+  endif()
+
+  if(VS2015)
+    set(OpenCV_LIBS_BIN_DIR "${OpenCV_DIR}/x${OpenCV_ARCH}/vc14/bin" CACHE INTERNAL "")
+  elseif(VS2017)
+    set(OpenCV_LIBS_BIN_DIR "${OpenCV_DIR}/x${OpenCV_ARCH}/vc15/bin" CACHE INTERNAL "")
+  endif()
+
   set(WINDOWS_FIXUP_BUNDLE_LIB_DIRS
     "${WINDOWS_FIXUP_BUNDLE_LIB_DIRS}"
     "${GFN_Boost_LIBS_DIR}"
-    "${GFN_OpenCV_LIBS_DIR}"
+    "${OpenCV_LIBS_BIN_DIR}"
   )
-endif()
-
-# macOS compatibility
-if(APPLE)
-  find_package(ICONV)
 endif()
 
 # include external cmake if needed
@@ -492,11 +512,9 @@ endif()
 
 # install documentation
 # TODO maybe install readme for every plugins
-if (LINUX OR APPLE)
-  install(FILES ${CMAKE_SOURCE_DIR}/Readme.md DESTINATION ${INSTALL_DOC_DIR})
-endif()
+install(FILES ${CMAKE_SOURCE_DIR}/Readme.md DESTINATION ${INSTALL_DOC_DIR})
 
-if(APPLE)
+if(APPLE OR WIN32)
   install(FILES ${CMAKE_SOURCE_DIR}/CHANGELOG DESTINATION ${INSTALL_DOC_DIR})
   install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION ${INSTALL_DOC_DIR})
 endif()

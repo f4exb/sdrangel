@@ -29,4 +29,8 @@ target_link_libraries(hackrfdevice
     sdrbase
 )
 
+if(ENABLE_EXTERNAL_LIBRARIES AND NOT LINUX)
+    add_dependencies(hackrfdevice hackrf)
+endif()
+
 install(TARGETS hackrfdevice DESTINATION ${INSTALL_LIB_DIR})
