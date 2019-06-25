@@ -187,8 +187,15 @@ elseif(APPLE)
     "${CMAKE_BINARY_DIR}/Info.plist" @ONLY)
 elseif (WIN32)
   # check compiler version
-  if(MSVC_VERSION GREATER 1919 AND MSVC_VERSION LESS 1910)
-    message(FATAL_ERROR "You must use Microsoft Visual Studio 2017 as compiler, aka MSVC 14.1")
+  # check compiler version
+  if(MSVC_VERSION GREATER 1910 AND MSVC_VERSION LESS 1919)
+    set(VS2017 ON)
+  elseif(MSVC_VERSION GREATER 1899 AND MSVC_VERSION LESS 1910)
+    set(VS2015 ON)
+  endif()
+
+  if(NOT VS2015 AND NOT VS2017)
+    message(FATAL_ERROR "You must use Microsoft Visual Studio 2015 or 2017 as compiler")
   endif()
 
   # used on code but not defined on VS2017
@@ -199,6 +206,9 @@ elseif (WIN32)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 
   # find Qt folder
+  if(DEFINED QT_PATH)
+    set (QT_MISSING False)
+  endif()
   include(QtLocator)
 
   # in alternative we can use ExternalProject
@@ -214,7 +224,7 @@ elseif (WIN32)
 
   # ffmpeg
   set(FFMPEG_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
-  #set(FFMPEG_LIBRARIES)
+  set(FFMPEG_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/bin" CACHE INTERNAL "")
   set(AVCODEC_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
   set(AVCODEC_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/avcodec.lib" CACHE INTERNAL "")
   set(AVFORMAT_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
@@ -228,7 +238,7 @@ elseif (WIN32)
 
   # used on fixup_bundle phase
   set(WINDOWS_FIXUP_BUNDLE_LIB_DIRS
-    "${Qt5_DIR}/../../../bin"
+    "${Qt5_DIR}../../../bin"
     "${EXTERNAL_LIBRARY_FOLDER}/fftw-3"
     "${EXTERNAL_LIBRARY_FOLDER}/libusb/MS64/dll"
     "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/bin"

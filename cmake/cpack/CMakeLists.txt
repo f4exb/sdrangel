@@ -54,7 +54,6 @@ if(APPLE AND BUNDLE AND BUILD_GUI)
     PATTERN "*quick*${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
     PATTERN "*_debug${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
     )
-
   # add plugins path for Mac Bundle
   install (CODE "
   get_filename_component (the_qt_conf \"\${CMAKE_INSTALL_PREFIX}/qt.conf\" REALPATH)
@@ -141,7 +140,7 @@ elseif(LINUX AND BUNDLE)
     set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${APPLICATION_MAINTAINER}")
     set(CPACK_DEBIAN_PACKAGE_SECTION "hamradio")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libasound2, libfftw3-single3, libgcc1, libgl1-mesa-glx, libqt5core5a, libqt5gui5, libqt5multimedia5, libqt5network5, libqt5opengl5, libqt5widgets5, libqt5multimedia5-plugins, libstdc++6, libusb-1.0-0, pulseaudio, libxml2, ffmpeg, libopus0, codec2, libairspy0, libhackrf0, librtlsdr0, libbladerf1, libmirisdr0, libiio0")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libasound2, libfftw3-single3, libgcc1, libgl1-mesa-glx, libqt5core5a, libqt5gui5, libqt5websockets5, libqt5multimedia5, libqt5network5, libqt5opengl5, libqt5widgets5, libqt5multimedia5-plugins, libstdc++6, libusb-1.0-0, pulseaudio, libxml2, ffmpeg, libopus0, codec2, libairspy0, libhackrf0, librtlsdr0, libbladerf1, libmirisdr0, libiio0")
 
     if ("${LSB_CODENAME}" STREQUAL "buster") # Debian 10
       set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libavcodec58, libavformat58, libairspyhf1, libopencv-imgproc3.2, libopencv-highgui3.2, limesuite, soapysdr-tools")
@@ -253,6 +252,8 @@ elseif(WIN32 OR MINGW)
 
     # unfortunately some libraries are dependencies of dll so we copy by hand
     # TODO check if we can use fixup_bundle() and have libraries on root path
+    # inputkiwisdr.dll
+    install(FILES "${Qt5_DIR}/../../../bin/Qt5WebSockets${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     # demoddatv.dll
     install(DIRECTORY "${FFMPEG_LIBRARIES}/" DESTINATION "${INSTALL_LIB_DIR}"
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
