@@ -8,7 +8,12 @@ This input sample source plugin gets its samples from a [BladeRF1 device](https:
 
 The plugin will be built only if the [BladeRF host library](https://github.com/Nuand/bladeRF) is installed in your system. If you build it from source and install it in a custom location say: `/opt/install/libbladeRF` you will have to add `-DBLADERF_INCLUDE_DIR=/opt/install/libbladeRF` to the cmake command line.
 
-Note that libbladeRF v2 with git tag 2018.08 should be used (official release). The FPGA image v0.7.3 should be used accordingly. The FPGA .rbf file should be copied to the folder where the `sdrangel` binary resides. You can download FPGA images from [here](https://www.nuand.com/fpga_images/)
+Note that libbladeRF v2 with git tag 2018.10-rc1 should be used (official release) thus:
+
+  - The FX3 firmware version should be v2.3.1
+  - The FPGA image version should be v0.9.0
+
+The FPGA .rbf file should be copied to the folder where the `sdrangel` binary resides. You can download FPGA images from [here](https://www.nuand.com/fpga_images/)
 
 The BladeRF Host library is also provided by many Linux distributions (check its version) and is built in the SDRangel binary releases.
 

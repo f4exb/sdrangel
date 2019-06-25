@@ -26,7 +26,12 @@ This works similarly to LimeSDR USB or BladeRF 2.0 micro
 
 The plugin will be built only if the [BladeRF host library](https://github.com/Nuand/bladeRF) is installed in your system. If you build it from source and install it in a custom location say: `/opt/install/libbladeRF` you will have to add `-DBLADERF_INCLUDE_DIR=/opt/install/libbladeRF` to the cmake command line.
 
-Note that since version 4.2.0 the libbladeRF v2 (specifically the git tag 2018.08) is used.
+Note that libbladeRF v2 with git tag 2018.10-rc1 should be used (official release) thus:
+
+  - The FX3 firmware version should be v2.3.1
+  - The FPGA image version should be v0.9.0
+
+The FPGA .rbf file should be copied to the folder where the `sdrangel` binary resides. You can download FPGA images from [here](https://www.nuand.com/fpga_images/)
 
 The BladeRF Host library is also provided by many Linux distributions (check its version) and is built in the SDRangel binary releases.
 
