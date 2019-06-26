@@ -1,3 +1,3 @@
 [submodule "external/windows"]
 	path = external/windows
-	url = https://github.com/ra1nb0w/sdrangel-windows-libraries.git
+	url = https://github.com/f4exb/sdrangel-windows-libraries.git
