@@ -40,6 +40,7 @@ void DeviceEnumerator::enumerateRxDevices(PluginManager *pluginManager)
 
     for (int i = 0; i < rxDeviceRegistrations.count(); i++)
     {
+        qDebug("DeviceEnumerator::enumerateRxDevices: %s", qPrintable(rxDeviceRegistrations[i].m_deviceId));
         PluginInterface::SamplingDevices samplingDevices = rxDeviceRegistrations[i].m_plugin->enumSampleSources();
 
         for (int j = 0; j < samplingDevices.count(); j++)
@@ -64,6 +65,7 @@ void DeviceEnumerator::enumerateTxDevices(PluginManager *pluginManager)
 
     for (int i = 0; i < txDeviceRegistrations.count(); i++)
     {
+        qDebug("DeviceEnumerator::enumerateTxDevices: %s", qPrintable(txDeviceRegistrations[i].m_deviceId));
         PluginInterface::SamplingDevices samplingDevices = txDeviceRegistrations[i].m_plugin->enumSampleSinks();
 
         for (int j = 0; j < samplingDevices.count(); j++)
@@ -88,6 +90,7 @@ void DeviceEnumerator::enumerateMIMODevices(PluginManager *pluginManager)
 
     for (int i = 0; i < mimoDeviceRegistrations.count(); i++)
     {
+        qDebug("DeviceEnumerator::enumerateMIMODevices: %s", qPrintable(mimoDeviceRegistrations[i].m_deviceId));
         PluginInterface::SamplingDevices samplingDevices = mimoDeviceRegistrations[i].m_plugin->enumSampleMIMO();
 
         for (int j = 0; j < samplingDevices.count(); j++)

@@ -58,7 +58,7 @@ void Blderf1InputPlugin::initPlugin(PluginAPI* pluginAPI)
 PluginInterface::SamplingDevices Blderf1InputPlugin::enumSampleSources()
 {
 	SamplingDevices result;
-	struct bladerf_devinfo *devinfo = 0;
+	struct bladerf_devinfo *devinfo = nullptr;
 
 	int count = bladerf_get_device_list(&devinfo);
 
