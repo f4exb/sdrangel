@@ -302,9 +302,9 @@ elseif(WIN32 OR MINGW)
       "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\SDRangel.lnk' '$INSTDIR\\\\sdrangel.exe'")
     set(CPACK_NSIS_DELETE_ICONS_EXTRA
       "Delete '$SMPROGRAMS\\\\$START_MENU\\\\SDRangel.lnk'")
-  endif()
+  endif(BUNDLE)
 
-endif(APPLE AND BUNDLE AND BUILD_GUI)
+endif(WIN32 OR MINGW)
 
 message(STATUS "CPack generators: ${CPACK_GENERATOR}")
 include(CPack)

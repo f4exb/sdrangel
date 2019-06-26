@@ -45,12 +45,9 @@ option(ENABLE_XTRX "Enable XTRX support" ON)
 option(ENABLE_PACK_MIRSDRAPI "Enable inclusion of the mirsdr-api library - for personal use only" OFF)
 # on windows always build external libraries
 if(WIN32)
-  option(ENABLE_EXTERNAL_LIBRARIES "Build external libraries" ON)
+  set(ENABLE_EXTERNAL_LIBRARIES ON CACHE BOOL "Build external libraries" FORCE)
   # to run fixup_bundle()
-  option(BUNDLE "Enable distribution bundle" ON)
-else()
-  option(ENABLE_EXTERNAL_LIBRARIES "Build external libraries" OFF)
-  option(BUNDLE "Enable distribution bundle" OFF)
+  set(BUNDLE ON CACHE BOOL "Enable distribution bundle" FORCE)
 endif()
 
 # Set additional project information
@@ -186,7 +183,6 @@ elseif(APPLE)
   configure_file("${CMAKE_SOURCE_DIR}/cmake/cpack/MacOSXBundleInfo.plist.in"
     "${CMAKE_BINARY_DIR}/Info.plist" @ONLY)
 elseif (WIN32)
-  # check compiler version
   # check compiler version
   if(MSVC_VERSION GREATER 1910 AND MSVC_VERSION LESS 1919)
     set(VS2017 ON)
