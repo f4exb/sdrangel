@@ -1,10 +1,19 @@
+sdrangel (4.10.2-1) unstable; urgency=medium
+
+  * Windows MSVC with cmake build introduction
+  * Fixed BladeRF support with libbladeRF 2018.10-rc1
+  * Fixed possible missing dependencies in Debian builds
+  * Fixed missing return value in deviceuserargs data stream functions
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 26 Jun 2019 20:44:06 +0200
+
 sdrangel (4.10.1-1) unstable; urgency=medium
 
   * Implemented device user arguments
   * PVS-Studio static analysis corrections (5)
   * FreeDV demod: use mainstream library from codec2 instead of internal
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 15 Jun 2019 06:44:06 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 15 Jun 2019 06:44:06 +0200
 
 sdrangel (4.10.0-1) unstable; urgency=medium
 
@@ -12,7 +21,7 @@ sdrangel (4.10.0-1) unstable; urgency=medium
   * SSB demod: reworked AGC to handle the threshold gate properly
   * FreeDV demod: support interpolation as well as decimation from channel sample rate
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 09 Jun 2019 16:44:06 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 09 Jun 2019 16:44:06 +0200
 
 sdrangel (4.9.1-1) unstable; urgency=medium
 
@@ -20,14 +29,14 @@ sdrangel (4.9.1-1) unstable; urgency=medium
   * Fixed buddies list handling at buddy termination time. Fixes #359
   * Fixed Debian builds using AVX instructions. Fixes #360
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 06 Jun 2019 20:44:06 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 06 Jun 2019 20:44:06 +0200
 
 sdrangel (4.9.0-1) unstable; urgency=medium
 
   * New build system introduction
   * NFM demod: fixed low-pass audio filter
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 01 Jun 2019 20:44:06 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 01 Jun 2019 20:44:06 +0200
 
 sdrangel (4.8.2-1) unstable; urgency=medium
 
@@ -51,39 +60,39 @@ sdrangel (4.8.1-1) unstable; urgency=medium
   * "hidden" `--mimo` option to activate MIMO functionality (MIMO device set). Makes it optional until it can be officialy released
   * Updated some base classes to adequately support new MIMO devices
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 20 May 2019 20:44:06 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 20 May 2019 20:44:06 +0200
 
 sdrangel (4.8.0-1) unstable; urgency=medium
 
   * Local output plugin
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 10 May 2019 20:44:06 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 10 May 2019 20:44:06 +0200
 
 sdrangel (4.7.2-1) unstable; urgency=medium
 
   * Unique DeviceAPI interface for sources and sinks
   * REST API: fixes over last version
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 08 May 2019 22:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 08 May 2019 22:14:18 +0200
 
 sdrangel (4.7.1-1) unstable; urgency=medium
 
   * SSB modulator: fixed compressor overloading
   * REST API: tx, nbStreams and streamIndex names change
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 07 May 2019 14:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 07 May 2019 14:14:18 +0200
 
 sdrangel (4.7.0-1) unstable; urgency=medium
 
   * New Frequency Tracker Rx channel plugin
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 05 May 2019 16:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 05 May 2019 16:14:18 +0200
 
 sdrangel (4.6.0-1) unstable; urgency=medium
 
   * New LocalSink and LocalInput plugin pair to use sub basebands internally
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 02 May 2019 11:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 02 May 2019 11:14:18 +0200
 
 sdrangel (4.5.6-1) unstable; urgency=medium
 
@@ -91,7 +100,7 @@ sdrangel (4.5.6-1) unstable; urgency=medium
   * Remote input: fixed version display
   * DSD demod: save PLL enable and autio mute in preset
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 28 Apr 2019 20:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 28 Apr 2019 20:14:18 +0200
 
 sdrangel (4.5.5-1) unstable; urgency=medium
 
@@ -99,19 +108,19 @@ sdrangel (4.5.5-1) unstable; urgency=medium
   * LimeSDR: fixed Rx and Tx antenna labels for Lime mini
   * HackRF output: fixed setting of Fc pos from REST API
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 20 Apr 2019 20:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 20 Apr 2019 20:14:18 +0200
 
 sdrangel (4.5.4-1) unstable; urgency=medium
 
   * Fixed RTL-SDR gain setting sequence. Fixes issue #321.
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 05 Apr 2019 20:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 05 Apr 2019 20:14:18 +0200
 
 sdrangel (4.5.3-1) unstable; urgency=medium
 
   * Fixed HackRF Rx/Tx frequency setting. Fixes issue #318.
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 01 Apr 2019 20:14:18 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 01 Apr 2019 20:14:18 +0200
 
 sdrangel (4.5.2-1) unstable; urgency=medium
 
