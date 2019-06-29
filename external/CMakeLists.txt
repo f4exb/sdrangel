@@ -372,6 +372,41 @@ if (LINUX)
 endif(LINUX)
 
 if(WIN32 OR APPLE)
+  if(ENABLE_RTLSDR)
+    if(WIN32)
+      set(RTLSDR_LIBUSB_INCLUDE "${LIBUSB_INCLUDE_DIR}/libusb-1.0")
+    else()
+      set(RTLSDR_LIBUSB_INCLUDE "${LIBUSB_INCLUDE_DIR}")
+    endif()
+    # needs pkgconfig and libusb
+    ExternalProject_Add(rtlsdr
+      GIT_REPOSITORY https://github.com/osmocom/rtl-sdr.git
+      GIT_TAG ${RTLSDR_TAG}
+      DEPENDS ${PTHREADS4W_DEPENDS}
+      PREFIX "${EXTERNAL_BUILD_LIBRARIES}/rtlsdr"
+      CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
+          -DINSTALL_UDEV_RULES=${RTLSDR_UDEV}
+          -DLIBUSB_LIBRARIES=${LIBUSB_LIBRARIES}
+          -DLIBUSB_INCLUDE_DIR=${RTLSDR_LIBUSB_INCLUDE}
+          -DTHREADS_PTHREADS_INCLUDE_DIR=${PTHREADS4W_INCLUDE_DIR}
+          -DTHREADS_PTHREADS_WIN32_LIBRARY=${PTHREADS4W_LIBRARIES}
+      INSTALL_COMMAND ""
+      TEST_COMMAND ""
+    )
+    ExternalProject_Get_Property(rtlsdr source_dir binary_dir)
+    set(LIBRTLSDR_FOUND ON CACHE INTERNAL "")
+    set(LIBRTLSDR_INCLUDE_DIR "${source_dir}/include" CACHE INTERNAL "")
+    if(WIN32)
+      set(LIBRTLSDR_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/rtlsdr.lib" CACHE INTERNAL "")
+      install(FILES "${SDRANGEL_BINARY_BIN_DIR}/rtlsdr${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+    elseif(APPLE)
+      set(LIBRTLSDR_LIBRARIES "${binary_dir}/src/librtlsdr${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+      install(DIRECTORY "${binary_dir}/src/" DESTINATION "${INSTALL_LIB_DIR}"
+        FILES_MATCHING PATTERN "librtlsdr*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+      set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src/")
+    endif()
+  endif(ENABLE_RTLSDR)
+
   if(ENABLE_LIMESUITE)
     # needs pkgconfig, libusb
     ExternalProject_Add(limesuite
