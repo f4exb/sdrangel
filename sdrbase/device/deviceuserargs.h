@@ -32,9 +32,17 @@ public:
         int m_sequence;
         QString m_args;
 
-        bool operator==(const Args& rhs) { //!< reference equality
-            return (m_id == rhs.m_id) && (m_sequence == rhs.m_sequence);
-        }
+        Args() :
+            m_id(""),
+            m_sequence(0),
+            m_args("")
+        {}
+
+        Args(const QString id, int sequence, const QString& args) :
+            m_id(id),
+            m_sequence(sequence),
+            m_args(args)
+        {}
 
         friend QDataStream &operator << (QDataStream &ds, const Args &inObj);
         friend QDataStream &operator >> (QDataStream &ds, Args &outObj);
@@ -42,7 +50,6 @@ public:
 
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-    QList<Args>::iterator findDeviceArgs(const QString& id, int sequence);
     QString findUserArgs(const QString& id, int sequence);
     void addDeviceArgs(const QString& id, int sequence, const QString& args);         //!< Will not add if it exists for same reference
     void addOrUpdateDeviceArgs(const QString& id, int sequence, const QString& args); //!< Add or update if it exists for same reference

@@ -66,106 +66,71 @@ bool DeviceUserArgs::deserialize(const QByteArray& data)
     }
 }
 
-QList<DeviceUserArgs::Args>::iterator DeviceUserArgs::findDeviceArgs(const QString& id, int sequence)
-{
-    DeviceUserArgs::Args args;
-    args.m_id = id;
-    args.m_sequence = sequence;
-    QList<DeviceUserArgs::Args>::iterator it = m_argsByDevice.begin();
-
-    for (; it != m_argsByDevice.end(); ++it)
-    {
-        if (*it == args) {
-            return it;
-        }
-    }
-}
-
 QString DeviceUserArgs::findUserArgs(const QString& id, int sequence)
 {
-    QList<DeviceUserArgs::Args>::iterator it = findDeviceArgs(id, sequence);
-
-    if (it != m_argsByDevice.end()) {
-        return it->m_args;
-    } else {
-        return "";
+    for (int i = 0; i < m_argsByDevice.size(); i++)
+    {
+        if ((m_argsByDevice.at(i).m_id == id) && (m_argsByDevice.at(i).m_sequence == sequence)) {
+            return m_argsByDevice.at(i).m_args;
+        }
     }
+
+    return "";
 }
 
 void DeviceUserArgs::addDeviceArgs(const QString& id, int sequence, const QString& deviceArgs)
 {
-    Args args;
-    args.m_id = id;
-    args.m_sequence = sequence;
-    args.m_args = deviceArgs;
+    int i = 0;
 
-    QList<DeviceUserArgs::Args>::iterator it = m_argsByDevice.begin();
-
-    for (; it != m_argsByDevice.end(); ++it)
+    for (; i < m_argsByDevice.size(); i++)
     {
-        if (*it == args) {
+        if ((m_argsByDevice.at(i).m_id == id) && (m_argsByDevice.at(i).m_sequence == sequence)) {
             break;
         }
     }
 
-    if (it == m_argsByDevice.end()) {
-        m_argsByDevice.push_back(args);
+    if (i == m_argsByDevice.size()) {
+        m_argsByDevice.push_back(Args(id, sequence, deviceArgs));
     }
 }
 
 void DeviceUserArgs::addOrUpdateDeviceArgs(const QString& id, int sequence, const QString& deviceArgs)
 {
-    Args args;
-    args.m_id = id;
-    args.m_sequence = sequence;
-    args.m_args = deviceArgs;
+    int i = 0;
 
-    QList<DeviceUserArgs::Args>::iterator it = m_argsByDevice.begin();
-
-    for (; it != m_argsByDevice.end(); ++it)
+    for (; i < m_argsByDevice.size(); i++)
     {
-        if (*it == args)
-        {
-            it->m_args = deviceArgs;
-            return;
+        if ((m_argsByDevice.at(i).m_id == id) && (m_argsByDevice.at(i).m_sequence == sequence)) {
+            m_argsByDevice[i].m_args = deviceArgs;
         }
     }
 
-    if (it == m_argsByDevice.end()) {
-        m_argsByDevice.push_back(args);
+    if (i == m_argsByDevice.size()) {
+        m_argsByDevice.push_back(Args(id, sequence, deviceArgs));
     }
 }
 
 void DeviceUserArgs::updateDeviceArgs(const QString& id, int sequence, const QString& deviceArgs)
 {
-    Args args;
-    args.m_id = id;
-    args.m_sequence = sequence;
+    int i = 0;
 
-    QList<DeviceUserArgs::Args>::iterator it = m_argsByDevice.begin();
-
-    for (; it != m_argsByDevice.end(); ++it)
+    for (; i < m_argsByDevice.size(); i++)
     {
-        if (*it == args)
-        {
-            it->m_args = deviceArgs;
+        if ((m_argsByDevice.at(i).m_id == id) && (m_argsByDevice.at(i).m_sequence == sequence)) {
+            m_argsByDevice[i].m_args = deviceArgs;
         }
     }
 }
 
 void DeviceUserArgs::deleteDeviceArgs(const QString& id, int sequence)
 {
-    Args args;
-    args.m_id = id;
-    args.m_sequence = sequence;
+    int i = 0;
 
-    QList<DeviceUserArgs::Args>::iterator it = m_argsByDevice.begin();
-
-    for (; it != m_argsByDevice.end(); ++it)
+    for (; i < m_argsByDevice.size(); i++)
     {
-        if (*it == args)
+        if ((m_argsByDevice.at(i).m_id == id) && (m_argsByDevice.at(i).m_sequence == sequence))
         {
-            m_argsByDevice.erase(it);
+            m_argsByDevice.takeAt(i);
             return;
         }
     }
