@@ -111,7 +111,12 @@ bool AirspyInput::openDevice()
         return false;
     }
 
-#ifdef LIBAIRSPY_DYN_RATES
+#ifdef LIBAIRSPY_DEFAULT_RATES
+    qDebug("AirspyInput::start: detault rates");
+    m_sampleRates.clear();
+    m_sampleRates.push_back(10000000);
+    m_sampleRates.push_back(2500000);
+#else
     uint32_t nbSampleRates;
     uint32_t *sampleRates;
 
@@ -140,11 +145,6 @@ bool AirspyInput::openDevice()
     }
 
     delete[] sampleRates;
-#else
-    qDebug("AirspyInput::start: detault rates");
-    m_sampleRates.clear();
-    m_sampleRates.push_back(10000000);
-    m_sampleRates.push_back(2500000);
 #endif
 
 //    MsgReportAirspy *message = MsgReportAirspy::create(m_sampleRates);
