@@ -123,20 +123,28 @@ void DeviceUserArgsDialog::on_importDevice_clicked(bool checked)
 {
     (void) checked;
     QTreeWidgetItem *deviceItem = ui->deviceTree->currentItem();
-	bool ok;
-	int sequence = deviceItem->text(1).toInt(&ok);
-	m_deviceUserArgsCopy.addDeviceArgs(deviceItem->text(0), sequence, "");
-    displayArgsByDevice();
+
+    if (deviceItem)
+    {
+        bool ok;
+        int sequence = deviceItem->text(1).toInt(&ok);
+        m_deviceUserArgsCopy.addDeviceArgs(deviceItem->text(0), sequence, "");
+        displayArgsByDevice();
+    }
 }
 
 void DeviceUserArgsDialog::on_deleteArgs_clicked(bool checked)
 {
     (void) checked;
     QTreeWidgetItem *deviceItem = ui->argsTree->currentItem();
-    bool ok;
-    int sequence = deviceItem->text(1).toInt(&ok);
-	m_deviceUserArgsCopy.deleteDeviceArgs(deviceItem->text(0), sequence);
-    displayArgsByDevice();
+
+    if (deviceItem)
+    {
+        bool ok;
+        int sequence = deviceItem->text(1).toInt(&ok);
+        m_deviceUserArgsCopy.deleteDeviceArgs(deviceItem->text(0), sequence);
+        displayArgsByDevice();
+    }
 }
 
 void DeviceUserArgsDialog::on_argsTree_currentItemChanged(QTreeWidgetItem* currentItem, QTreeWidgetItem* previousItem)
@@ -148,8 +156,12 @@ void DeviceUserArgsDialog::on_argsTree_currentItemChanged(QTreeWidgetItem* curre
 void DeviceUserArgsDialog::on_argStringEdit_editingFinished()
 {
 	QTreeWidgetItem *deviceItem = ui->argsTree->currentItem();
-    bool ok;
-    int sequence = deviceItem->text(1).toInt(&ok);
-	m_deviceUserArgsCopy.updateDeviceArgs(deviceItem->text(0), sequence, ui->argStringEdit->text());
-	displayArgsByDevice();
+
+    if (deviceItem)
+    {
+        bool ok;
+        int sequence = deviceItem->text(1).toInt(&ok);
+        m_deviceUserArgsCopy.updateDeviceArgs(deviceItem->text(0), sequence, ui->argStringEdit->text());
+        displayArgsByDevice();
+    }
 }
