@@ -2352,6 +2352,20 @@ bool WebAPIRequestMapper::validateChannelSettings(
             return false;
         }
     }
+    else if (*channelType == "FreqTracker")
+    {
+        if (channelSettings.getDirection() == 0)
+        {
+            QJsonObject freqTrackerSettingsJsonObject = jsonObject["FreqTrackerSettings"].toObject();
+            channelSettingsKeys = freqTrackerSettingsJsonObject.keys();
+            channelSettings.setFreqTrackerSettings(new SWGSDRangel::SWGFreqTrackerSettings());
+            channelSettings.getFreqTrackerSettings()->fromJsonObject(freqTrackerSettingsJsonObject);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     else if (*channelType == "NFMDemod")
     {
         if (channelSettings.getDirection() == 0)

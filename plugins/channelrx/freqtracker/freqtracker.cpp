@@ -594,6 +594,9 @@ int FreqTracker::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("rrcRolloff")) {
         settings.m_rrcRolloff = response.getFreqTrackerSettings()->getRrcRolloff();
     }
+    if (channelSettingsKeys.contains("squelchGate")) {
+        settings.m_squelchGate = response.getFreqTrackerSettings()->getSquelchGate();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getAmDemodSettings()->getUseReverseApi() != 0;
     }
@@ -640,8 +643,9 @@ void FreqTracker::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
 {
     response.getFreqTrackerSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getFreqTrackerSettings()->setRfBandwidth(settings.m_rfBandwidth);
-    response.getFreqTrackerSettings()->setRgbColor(settings.m_rgbColor);
+    response.getFreqTrackerSettings()->setLog2Decim(settings.m_log2Decim);
     response.getFreqTrackerSettings()->setSquelch(settings.m_squelch);
+    response.getFreqTrackerSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getFreqTrackerSettings()->getTitle()) {
         *response.getFreqTrackerSettings()->getTitle() = settings.m_title;
@@ -649,7 +653,13 @@ void FreqTracker::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
         response.getFreqTrackerSettings()->setTitle(new QString(settings.m_title));
     }
 
+    response.getFreqTrackerSettings()->setAlphaEma(m_settings.m_alphaEMA);
+    response.getFreqTrackerSettings()->setTracking(m_settings.m_tracking ? 1 : 0);
     response.getFreqTrackerSettings()->setTrackerType((int) m_settings.m_trackerType);
+    response.getFreqTrackerSettings()->setPllPskOrder(m_settings.m_pllPskOrder);
+    response.getFreqTrackerSettings()->setRrc(m_settings.m_rrc ? 1 : 0);
+    response.getFreqTrackerSettings()->setRrcRolloff(m_settings.m_rrcRolloff);
+    response.getFreqTrackerSettings()->setSquelchGate(m_settings.m_squelchGate);
     response.getFreqTrackerSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getFreqTrackerSettings()->getReverseApiAddress()) {
