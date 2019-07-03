@@ -205,6 +205,7 @@ void KiwiSDRGui::displaySettings()
 	ui->gain->setValue(m_settings.m_gain);
 	ui->gainText->setText(QString::number(m_settings.m_gain) + " dB");
 	ui->agc->setChecked(m_settings.m_useAGC);
+    ui->dcBlock->setChecked(m_settings.m_dcBlock);
 
     blockApplySettings(false);
 }
