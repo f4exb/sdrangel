@@ -413,8 +413,8 @@ int LocalSource::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setLocalSinkSettings(new SWGSDRangel::SWGLocalSinkSettings());
-    response.getLocalSinkSettings()->init();
+    response.setLocalSourceSettings(new SWGSDRangel::SWGLocalSourceSettings());
+    response.getLocalSourceSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
     return 200;
 }
