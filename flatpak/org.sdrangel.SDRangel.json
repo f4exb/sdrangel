@@ -338,9 +338,8 @@
       ],
       "sources": [
         {
-          "type": "git",
-          "url": "https://github.com/f4exb/sdrangel.git",
-          "tag": "v4.5.6"
+          "type": "dir",
+          "path": ".."
         }
       ]
     }
