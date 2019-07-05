@@ -2,7 +2,7 @@ SET(QT_MISSING True)
 # msvc only; mingw will need different logic
 IF(MSVC)
     # look for user-registry pointing to qtcreator
-    GET_FILENAME_COMPONENT(QT_BIN [HKEY_CURRENT_USER\\Software\\Classes\\Applications\\QtProject.QtCreator.cpp\\shell\\Open\\Command] PATH)
+    GET_FILENAME_COMPONENT(QT_BIN [HKEY_CURRENT_USER\\Software\\Classes\\Applications\\QtProject.QtCreator.pro\\shell\\Open\\Command] PATH)
 
     # get root path so we can search for 5.3, 5.4, 5.5, etc
     STRING(REPLACE "/Tools" ";" QT_BIN "${QT_BIN}")
@@ -22,7 +22,14 @@ IF(MSVC)
     # - qt uses (e.g.) "msvc2012"
     # - cmake uses (e.g.) "1800"
     # - see also https://cmake.org/cmake/help/v3.0/variable/MSVC_VERSION.html
-    MATH(EXPR QT_MSVC "2000 + (${MSVC_VERSION} - 200) / 100")
+    # checkcompiler version
+    if(MSVC_VERSION GREATER 1910 AND MSVC_VERSION LESS 1919)
+        set(QT_MSVC 2017)
+    elseif(MSVC_VERSION GREATER 1899 AND MSVC_VERSION LESS 1910)
+        set(QT_MSVC 2015)
+    else()
+        MATH(EXPR QT_MSVC "2000 + (${MSVC_VERSION} - 600) / 100")
+    endif()    
 
     # check for 64-bit os
     # may need to be removed for older compilers as it wasn't always offered

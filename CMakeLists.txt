@@ -480,6 +480,10 @@ if (BUILD_GUI)
     sdrgui
     logging
     )
+
+    if (MSVC)
+        set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+    endif()
 endif()
 
 ############ build sdrangel server ################
