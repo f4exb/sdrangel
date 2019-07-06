@@ -232,6 +232,9 @@ elseif (WIN32)
   set(SWSCALE_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
   set(SWSCALE_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/swscale.lib" CACHE INTERNAL "")
 
+  # LimeSuite FX3 support
+  set(FX3SDK_DIR "${EXTERNAL_LIBRARY_FOLDER}/FX3SDK" CACHE INTERNAL "")
+
   # used on fixup_bundle phase
   set(WINDOWS_FIXUP_BUNDLE_LIB_DIRS
     "${Qt5_DIR}../../../bin"
