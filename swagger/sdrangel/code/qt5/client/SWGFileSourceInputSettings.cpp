@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGFileSourceSettings.h"
+#include "SWGFileSourceInputSettings.h"
 
 #include "SWGHelpers.h"
 
@@ -22,12 +22,12 @@
 
 namespace SWGSDRangel {
 
-SWGFileSourceSettings::SWGFileSourceSettings(QString* json) {
+SWGFileSourceInputSettings::SWGFileSourceInputSettings(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGFileSourceSettings::SWGFileSourceSettings() {
+SWGFileSourceInputSettings::SWGFileSourceInputSettings() {
     file_name = nullptr;
     m_file_name_isSet = false;
     acceleration_factor = 0;
@@ -44,12 +44,12 @@ SWGFileSourceSettings::SWGFileSourceSettings() {
     m_reverse_api_device_index_isSet = false;
 }
 
-SWGFileSourceSettings::~SWGFileSourceSettings() {
+SWGFileSourceInputSettings::~SWGFileSourceInputSettings() {
     this->cleanup();
 }
 
 void
-SWGFileSourceSettings::init() {
+SWGFileSourceInputSettings::init() {
     file_name = new QString("");
     m_file_name_isSet = false;
     acceleration_factor = 0;
@@ -67,7 +67,7 @@ SWGFileSourceSettings::init() {
 }
 
 void
-SWGFileSourceSettings::cleanup() {
+SWGFileSourceInputSettings::cleanup() {
     if(file_name != nullptr) { 
         delete file_name;
     }
@@ -81,8 +81,8 @@ SWGFileSourceSettings::cleanup() {
 
 }
 
-SWGFileSourceSettings*
-SWGFileSourceSettings::fromJson(QString &json) {
+SWGFileSourceInputSettings*
+SWGFileSourceInputSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -91,7 +91,7 @@ SWGFileSourceSettings::fromJson(QString &json) {
 }
 
 void
-SWGFileSourceSettings::fromJsonObject(QJsonObject &pJson) {
+SWGFileSourceInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&file_name, pJson["fileName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&acceleration_factor, pJson["accelerationFactor"], "qint32", "");
@@ -109,7 +109,7 @@ SWGFileSourceSettings::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGFileSourceSettings::asJson ()
+SWGFileSourceInputSettings::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -120,7 +120,7 @@ SWGFileSourceSettings::asJson ()
 }
 
 QJsonObject*
-SWGFileSourceSettings::asJsonObject() {
+SWGFileSourceInputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(file_name != nullptr && *file_name != QString("")){
         toJsonValue(QString("fileName"), file_name, obj, QString("QString"));
@@ -148,78 +148,78 @@ SWGFileSourceSettings::asJsonObject() {
 }
 
 QString*
-SWGFileSourceSettings::getFileName() {
+SWGFileSourceInputSettings::getFileName() {
     return file_name;
 }
 void
-SWGFileSourceSettings::setFileName(QString* file_name) {
+SWGFileSourceInputSettings::setFileName(QString* file_name) {
     this->file_name = file_name;
     this->m_file_name_isSet = true;
 }
 
 qint32
-SWGFileSourceSettings::getAccelerationFactor() {
+SWGFileSourceInputSettings::getAccelerationFactor() {
     return acceleration_factor;
 }
 void
-SWGFileSourceSettings::setAccelerationFactor(qint32 acceleration_factor) {
+SWGFileSourceInputSettings::setAccelerationFactor(qint32 acceleration_factor) {
     this->acceleration_factor = acceleration_factor;
     this->m_acceleration_factor_isSet = true;
 }
 
 qint32
-SWGFileSourceSettings::getLoop() {
+SWGFileSourceInputSettings::getLoop() {
     return loop;
 }
 void
-SWGFileSourceSettings::setLoop(qint32 loop) {
+SWGFileSourceInputSettings::setLoop(qint32 loop) {
     this->loop = loop;
     this->m_loop_isSet = true;
 }
 
 qint32
-SWGFileSourceSettings::getUseReverseApi() {
+SWGFileSourceInputSettings::getUseReverseApi() {
     return use_reverse_api;
 }
 void
-SWGFileSourceSettings::setUseReverseApi(qint32 use_reverse_api) {
+SWGFileSourceInputSettings::setUseReverseApi(qint32 use_reverse_api) {
     this->use_reverse_api = use_reverse_api;
     this->m_use_reverse_api_isSet = true;
 }
 
 QString*
-SWGFileSourceSettings::getReverseApiAddress() {
+SWGFileSourceInputSettings::getReverseApiAddress() {
     return reverse_api_address;
 }
 void
-SWGFileSourceSettings::setReverseApiAddress(QString* reverse_api_address) {
+SWGFileSourceInputSettings::setReverseApiAddress(QString* reverse_api_address) {
     this->reverse_api_address = reverse_api_address;
     this->m_reverse_api_address_isSet = true;
 }
 
 qint32
-SWGFileSourceSettings::getReverseApiPort() {
+SWGFileSourceInputSettings::getReverseApiPort() {
     return reverse_api_port;
 }
 void
-SWGFileSourceSettings::setReverseApiPort(qint32 reverse_api_port) {
+SWGFileSourceInputSettings::setReverseApiPort(qint32 reverse_api_port) {
     this->reverse_api_port = reverse_api_port;
     this->m_reverse_api_port_isSet = true;
 }
 
 qint32
-SWGFileSourceSettings::getReverseApiDeviceIndex() {
+SWGFileSourceInputSettings::getReverseApiDeviceIndex() {
     return reverse_api_device_index;
 }
 void
-SWGFileSourceSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
+SWGFileSourceInputSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
     this->reverse_api_device_index = reverse_api_device_index;
     this->m_reverse_api_device_index_isSet = true;
 }
 
 
 bool
-SWGFileSourceSettings::isSet(){
+SWGFileSourceInputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(file_name != nullptr && *file_name != QString("")){ isObjectUpdated = true; break;}

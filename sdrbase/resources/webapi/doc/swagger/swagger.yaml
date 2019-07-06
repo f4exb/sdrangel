@@ -1796,8 +1796,8 @@ definitions:
         $ref: "/doc/swagger/include/FCDPro.yaml#/FCDProSettings"
       fcdProPlusSettings:
         $ref: "/doc/swagger/include/FCDProPlus.yaml#/FCDProPlusSettings"
-      fileSourceSettings:
-        $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceSettings"
+      fileSourceInputSettings:
+        $ref: "/doc/swagger/include/FileSourceInput.yaml#/FileSourceInputSettings"
       hackRFInputSettings:
         $ref: "/doc/swagger/include/HackRF.yaml#/HackRFInputSettings"
       hackRFOutputSettings:
@@ -1861,8 +1861,8 @@ definitions:
         $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2InputReport"
       bladeRF2OutputReport:
         $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2OutputReport"
-      fileSourceReport:
-        $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceReport"
+      fileSourceInputReport:
+        $ref: "/doc/swagger/include/FileSourceInput.yaml#/FileSourceInputReport"
       limeSdrInputReport:
         $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
       kiwiSDRReport:

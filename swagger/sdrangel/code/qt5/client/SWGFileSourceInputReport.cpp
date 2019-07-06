@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGFileSourceReport.h"
+#include "SWGFileSourceInputReport.h"
 
 #include "SWGHelpers.h"
 
@@ -22,12 +22,12 @@
 
 namespace SWGSDRangel {
 
-SWGFileSourceReport::SWGFileSourceReport(QString* json) {
+SWGFileSourceInputReport::SWGFileSourceInputReport(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGFileSourceReport::SWGFileSourceReport() {
+SWGFileSourceInputReport::SWGFileSourceInputReport() {
     file_name = nullptr;
     m_file_name_isSet = false;
     sample_rate = 0;
@@ -42,12 +42,12 @@ SWGFileSourceReport::SWGFileSourceReport() {
     m_duration_time_isSet = false;
 }
 
-SWGFileSourceReport::~SWGFileSourceReport() {
+SWGFileSourceInputReport::~SWGFileSourceInputReport() {
     this->cleanup();
 }
 
 void
-SWGFileSourceReport::init() {
+SWGFileSourceInputReport::init() {
     file_name = new QString("");
     m_file_name_isSet = false;
     sample_rate = 0;
@@ -63,7 +63,7 @@ SWGFileSourceReport::init() {
 }
 
 void
-SWGFileSourceReport::cleanup() {
+SWGFileSourceInputReport::cleanup() {
     if(file_name != nullptr) { 
         delete file_name;
     }
@@ -80,8 +80,8 @@ SWGFileSourceReport::cleanup() {
     }
 }
 
-SWGFileSourceReport*
-SWGFileSourceReport::fromJson(QString &json) {
+SWGFileSourceInputReport*
+SWGFileSourceInputReport::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -90,7 +90,7 @@ SWGFileSourceReport::fromJson(QString &json) {
 }
 
 void
-SWGFileSourceReport::fromJsonObject(QJsonObject &pJson) {
+SWGFileSourceInputReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&file_name, pJson["fileName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
@@ -106,7 +106,7 @@ SWGFileSourceReport::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGFileSourceReport::asJson ()
+SWGFileSourceInputReport::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -117,7 +117,7 @@ SWGFileSourceReport::asJson ()
 }
 
 QJsonObject*
-SWGFileSourceReport::asJsonObject() {
+SWGFileSourceInputReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(file_name != nullptr && *file_name != QString("")){
         toJsonValue(QString("fileName"), file_name, obj, QString("QString"));
@@ -142,68 +142,68 @@ SWGFileSourceReport::asJsonObject() {
 }
 
 QString*
-SWGFileSourceReport::getFileName() {
+SWGFileSourceInputReport::getFileName() {
     return file_name;
 }
 void
-SWGFileSourceReport::setFileName(QString* file_name) {
+SWGFileSourceInputReport::setFileName(QString* file_name) {
     this->file_name = file_name;
     this->m_file_name_isSet = true;
 }
 
 qint32
-SWGFileSourceReport::getSampleRate() {
+SWGFileSourceInputReport::getSampleRate() {
     return sample_rate;
 }
 void
-SWGFileSourceReport::setSampleRate(qint32 sample_rate) {
+SWGFileSourceInputReport::setSampleRate(qint32 sample_rate) {
     this->sample_rate = sample_rate;
     this->m_sample_rate_isSet = true;
 }
 
 qint32
-SWGFileSourceReport::getSampleSize() {
+SWGFileSourceInputReport::getSampleSize() {
     return sample_size;
 }
 void
-SWGFileSourceReport::setSampleSize(qint32 sample_size) {
+SWGFileSourceInputReport::setSampleSize(qint32 sample_size) {
     this->sample_size = sample_size;
     this->m_sample_size_isSet = true;
 }
 
 QString*
-SWGFileSourceReport::getAbsoluteTime() {
+SWGFileSourceInputReport::getAbsoluteTime() {
     return absolute_time;
 }
 void
-SWGFileSourceReport::setAbsoluteTime(QString* absolute_time) {
+SWGFileSourceInputReport::setAbsoluteTime(QString* absolute_time) {
     this->absolute_time = absolute_time;
     this->m_absolute_time_isSet = true;
 }
 
 QString*
-SWGFileSourceReport::getElapsedTime() {
+SWGFileSourceInputReport::getElapsedTime() {
     return elapsed_time;
 }
 void
-SWGFileSourceReport::setElapsedTime(QString* elapsed_time) {
+SWGFileSourceInputReport::setElapsedTime(QString* elapsed_time) {
     this->elapsed_time = elapsed_time;
     this->m_elapsed_time_isSet = true;
 }
 
 QString*
-SWGFileSourceReport::getDurationTime() {
+SWGFileSourceInputReport::getDurationTime() {
     return duration_time;
 }
 void
-SWGFileSourceReport::setDurationTime(QString* duration_time) {
+SWGFileSourceInputReport::setDurationTime(QString* duration_time) {
     this->duration_time = duration_time;
     this->m_duration_time_isSet = true;
 }
 
 
 bool
-SWGFileSourceReport::isSet(){
+SWGFileSourceInputReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(file_name != nullptr && *file_name != QString("")){ isObjectUpdated = true; break;}

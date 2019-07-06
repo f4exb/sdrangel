@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGFileSourceReport.h
+ * SWGFileSourceInputSettings.h
  *
  * FileSource
  */
 
-#ifndef SWGFileSourceReport_H_
-#define SWGFileSourceReport_H_
+#ifndef SWGFileSourceInputSettings_H_
+#define SWGFileSourceInputSettings_H_
 
 #include <QJsonObject>
 
@@ -29,36 +29,39 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGFileSourceReport: public SWGObject {
+class SWG_API SWGFileSourceInputSettings: public SWGObject {
 public:
-    SWGFileSourceReport();
-    SWGFileSourceReport(QString* json);
-    virtual ~SWGFileSourceReport();
+    SWGFileSourceInputSettings();
+    SWGFileSourceInputSettings(QString* json);
+    virtual ~SWGFileSourceInputSettings();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGFileSourceReport* fromJson(QString &jsonString) override;
+    virtual SWGFileSourceInputSettings* fromJson(QString &jsonString) override;
 
     QString* getFileName();
     void setFileName(QString* file_name);
 
-    qint32 getSampleRate();
-    void setSampleRate(qint32 sample_rate);
+    qint32 getAccelerationFactor();
+    void setAccelerationFactor(qint32 acceleration_factor);
 
-    qint32 getSampleSize();
-    void setSampleSize(qint32 sample_size);
+    qint32 getLoop();
+    void setLoop(qint32 loop);
 
-    QString* getAbsoluteTime();
-    void setAbsoluteTime(QString* absolute_time);
+    qint32 getUseReverseApi();
+    void setUseReverseApi(qint32 use_reverse_api);
 
-    QString* getElapsedTime();
-    void setElapsedTime(QString* elapsed_time);
+    QString* getReverseApiAddress();
+    void setReverseApiAddress(QString* reverse_api_address);
 
-    QString* getDurationTime();
-    void setDurationTime(QString* duration_time);
+    qint32 getReverseApiPort();
+    void setReverseApiPort(qint32 reverse_api_port);
+
+    qint32 getReverseApiDeviceIndex();
+    void setReverseApiDeviceIndex(qint32 reverse_api_device_index);
 
 
     virtual bool isSet() override;
@@ -67,23 +70,26 @@ private:
     QString* file_name;
     bool m_file_name_isSet;
 
-    qint32 sample_rate;
-    bool m_sample_rate_isSet;
+    qint32 acceleration_factor;
+    bool m_acceleration_factor_isSet;
 
-    qint32 sample_size;
-    bool m_sample_size_isSet;
+    qint32 loop;
+    bool m_loop_isSet;
 
-    QString* absolute_time;
-    bool m_absolute_time_isSet;
+    qint32 use_reverse_api;
+    bool m_use_reverse_api_isSet;
 
-    QString* elapsed_time;
-    bool m_elapsed_time_isSet;
+    QString* reverse_api_address;
+    bool m_reverse_api_address_isSet;
 
-    QString* duration_time;
-    bool m_duration_time_isSet;
+    qint32 reverse_api_port;
+    bool m_reverse_api_port_isSet;
+
+    qint32 reverse_api_device_index;
+    bool m_reverse_api_device_index_isSet;
 
 };
 
 }
 
-#endif /* SWGFileSourceReport_H_ */
+#endif /* SWGFileSourceInputSettings_H_ */

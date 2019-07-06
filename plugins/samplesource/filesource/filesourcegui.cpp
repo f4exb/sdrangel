@@ -242,7 +242,7 @@ void FileSourceGui::displaySettings()
 {
     blockApplySettings(true);
     ui->playLoop->setChecked(m_settings.m_loop);
-    ui->acceleration->setCurrentIndex(FileSourceSettings::getAccelerationIndex(m_settings.m_accelerationFactor));
+    ui->acceleration->setCurrentIndex(FileSourceInputSettings::getAccelerationIndex(m_settings.m_accelerationFactor));
     blockApplySettings(false);
 }
 
@@ -335,7 +335,7 @@ void FileSourceGui::on_acceleration_currentIndexChanged(int index)
 {
     if (m_doApplySettings)
     {
-        m_settings.m_accelerationFactor = FileSourceSettings::getAccelerationValue(index);
+        m_settings.m_accelerationFactor = FileSourceInputSettings::getAccelerationValue(index);
         FileSourceInput::MsgConfigureFileSource *message = FileSourceInput::MsgConfigureFileSource::create(m_settings, false);
         m_sampleSource->getInputMessageQueue()->push(message);
     }
@@ -412,7 +412,7 @@ void FileSourceGui::setAccelerationCombo()
     ui->acceleration->clear();
     ui->acceleration->addItem(QString("1"));
 
-    for (unsigned int i = 0; i <= FileSourceSettings::m_accelerationMaxScale; i++)
+    for (unsigned int i = 0; i <= FileSourceInputSettings::m_accelerationMaxScale; i++)
     {
         QString s;
         int m = pow(10.0, i);

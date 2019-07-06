@@ -1905,8 +1905,8 @@ bool WebAPIRequestMapper::validateDeviceSettings(
         {
             QJsonObject fileSourceSettingsJsonObject = jsonObject["fileSourceSettings"].toObject();
             deviceSettingsKeys = fileSourceSettingsJsonObject.keys();
-            deviceSettings.setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
-            deviceSettings.getFileSourceSettings()->fromJsonObject(fileSourceSettingsJsonObject);
+            deviceSettings.setFileSourceInputSettings(new SWGSDRangel::SWGFileSourceInputSettings());
+            deviceSettings.getFileSourceInputSettings()->fromJsonObject(fileSourceSettingsJsonObject);
             return true;
         }
         else
@@ -2685,7 +2685,7 @@ void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& de
     deviceSettings.setBladeRf1OutputSettings(0);
     deviceSettings.setFcdProPlusSettings(0);
     deviceSettings.setFcdProSettings(0);
-    deviceSettings.setFileSourceSettings(0);
+    deviceSettings.setFileSourceInputSettings(0);
     deviceSettings.setHackRfInputSettings(0);
     deviceSettings.setHackRfOutputSettings(0);
     deviceSettings.setLimeSdrInputSettings(0);
@@ -2706,7 +2706,7 @@ void WebAPIRequestMapper::resetDeviceReport(SWGSDRangel::SWGDeviceReport& device
     deviceReport.setDeviceHwType(0);
     deviceReport.setAirspyHfReport(0);
     deviceReport.setAirspyReport(0);
-    deviceReport.setFileSourceReport(0);
+    deviceReport.setFileSourceInputReport(0);
     deviceReport.setLimeSdrInputReport(0);
     deviceReport.setLimeSdrOutputReport(0);
     deviceReport.setPerseusReport(0);

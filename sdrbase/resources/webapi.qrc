@@ -14,7 +14,7 @@
         <file>webapi/doc/swagger/include/DSDDemod.yaml</file>
         <file>webapi/doc/swagger/include/FCDPro.yaml</file>
         <file>webapi/doc/swagger/include/FCDProPlus.yaml</file>
-        <file>webapi/doc/swagger/include/FileSource.yaml</file>
+        <file>webapi/doc/swagger/include/FileSourceInput.yaml</file>
         <file>webapi/doc/swagger/include/FreeDVDemod.yaml</file>
         <file>webapi/doc/swagger/include/FreeDVMod.yaml</file>
         <file>webapi/doc/swagger/include/FreqTracker.yaml</file>

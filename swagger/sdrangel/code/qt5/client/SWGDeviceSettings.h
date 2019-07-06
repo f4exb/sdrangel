@@ -30,7 +30,7 @@
 #include "SWGBladeRF2OutputSettings.h"
 #include "SWGFCDProPlusSettings.h"
 #include "SWGFCDProSettings.h"
-#include "SWGFileSourceSettings.h"
+#include "SWGFileSourceInputSettings.h"
 #include "SWGHackRFInputSettings.h"
 #include "SWGHackRFOutputSettings.h"
 #include "SWGKiwiSDRSettings.h"
@@ -104,8 +104,8 @@ public:
     SWGFCDProPlusSettings* getFcdProPlusSettings();
     void setFcdProPlusSettings(SWGFCDProPlusSettings* fcd_pro_plus_settings);
 
-    SWGFileSourceSettings* getFileSourceSettings();
-    void setFileSourceSettings(SWGFileSourceSettings* file_source_settings);
+    SWGFileSourceInputSettings* getFileSourceInputSettings();
+    void setFileSourceInputSettings(SWGFileSourceInputSettings* file_source_input_settings);
 
     SWGHackRFInputSettings* getHackRfInputSettings();
     void setHackRfInputSettings(SWGHackRFInputSettings* hack_rf_input_settings);
@@ -204,8 +204,8 @@ private:
     SWGFCDProPlusSettings* fcd_pro_plus_settings;
     bool m_fcd_pro_plus_settings_isSet;
 
-    SWGFileSourceSettings* file_source_settings;
-    bool m_file_source_settings_isSet;
+    SWGFileSourceInputSettings* file_source_input_settings;
+    bool m_file_source_input_settings_isSet;
 
     SWGHackRFInputSettings* hack_rf_input_settings;
     bool m_hack_rf_input_settings_isSet;

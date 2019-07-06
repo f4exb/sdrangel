@@ -58,8 +58,8 @@
 #include "SWGErrorResponse.h"
 #include "SWGFCDProPlusSettings.h"
 #include "SWGFCDProSettings.h"
-#include "SWGFileSourceReport.h"
-#include "SWGFileSourceSettings.h"
+#include "SWGFileSourceInputReport.h"
+#include "SWGFileSourceInputSettings.h"
 #include "SWGFreeDVDemodReport.h"
 #include "SWGFreeDVDemodSettings.h"
 #include "SWGFreeDVModReport.h"
@@ -285,11 +285,11 @@ namespace SWGSDRangel {
     if(QString("SWGFCDProSettings").compare(type) == 0) {
       return new SWGFCDProSettings();
     }
-    if(QString("SWGFileSourceReport").compare(type) == 0) {
-      return new SWGFileSourceReport();
+    if(QString("SWGFileSourceInputReport").compare(type) == 0) {
+      return new SWGFileSourceInputReport();
     }
-    if(QString("SWGFileSourceSettings").compare(type) == 0) {
-      return new SWGFileSourceSettings();
+    if(QString("SWGFileSourceInputSettings").compare(type) == 0) {
+      return new SWGFileSourceInputSettings();
     }
     if(QString("SWGFreeDVDemodReport").compare(type) == 0) {
       return new SWGFreeDVDemodReport();

@@ -1,4 +1,4 @@
-FileSourceSettings:
+FileSourceInputSettings:
   description: FileSource
   properties:
     fileName:
@@ -20,7 +20,7 @@ FileSourceSettings:
     reverseAPIDeviceIndex:
       type: integer
 
-FileSourceReport:
+FileSourceInputReport:
   description: FileSource
   properties:
     fileName:

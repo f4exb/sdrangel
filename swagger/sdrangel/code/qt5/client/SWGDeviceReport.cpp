@@ -40,8 +40,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_blade_rf2_input_report_isSet = false;
     blade_rf2_output_report = nullptr;
     m_blade_rf2_output_report_isSet = false;
-    file_source_report = nullptr;
-    m_file_source_report_isSet = false;
+    file_source_input_report = nullptr;
+    m_file_source_input_report_isSet = false;
     lime_sdr_input_report = nullptr;
     m_lime_sdr_input_report_isSet = false;
     kiwi_sdr_report = nullptr;
@@ -94,8 +94,8 @@ SWGDeviceReport::init() {
     m_blade_rf2_input_report_isSet = false;
     blade_rf2_output_report = new SWGBladeRF2OutputReport();
     m_blade_rf2_output_report_isSet = false;
-    file_source_report = new SWGFileSourceReport();
-    m_file_source_report_isSet = false;
+    file_source_input_report = new SWGFileSourceInputReport();
+    m_file_source_input_report_isSet = false;
     lime_sdr_input_report = new SWGLimeSdrInputReport();
     m_lime_sdr_input_report_isSet = false;
     kiwi_sdr_report = new SWGKiwiSDRReport();
@@ -148,8 +148,8 @@ SWGDeviceReport::cleanup() {
     if(blade_rf2_output_report != nullptr) { 
         delete blade_rf2_output_report;
     }
-    if(file_source_report != nullptr) { 
-        delete file_source_report;
+    if(file_source_input_report != nullptr) { 
+        delete file_source_input_report;
     }
     if(lime_sdr_input_report != nullptr) { 
         delete lime_sdr_input_report;
@@ -224,7 +224,7 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&blade_rf2_output_report, pJson["bladeRF2OutputReport"], "SWGBladeRF2OutputReport", "SWGBladeRF2OutputReport");
     
-    ::SWGSDRangel::setValue(&file_source_report, pJson["fileSourceReport"], "SWGFileSourceReport", "SWGFileSourceReport");
+    ::SWGSDRangel::setValue(&file_source_input_report, pJson["fileSourceInputReport"], "SWGFileSourceInputReport", "SWGFileSourceInputReport");
     
     ::SWGSDRangel::setValue(&lime_sdr_input_report, pJson["limeSdrInputReport"], "SWGLimeSdrInputReport", "SWGLimeSdrInputReport");
     
@@ -292,8 +292,8 @@ SWGDeviceReport::asJsonObject() {
     if((blade_rf2_output_report != nullptr) && (blade_rf2_output_report->isSet())){
         toJsonValue(QString("bladeRF2OutputReport"), blade_rf2_output_report, obj, QString("SWGBladeRF2OutputReport"));
     }
-    if((file_source_report != nullptr) && (file_source_report->isSet())){
-        toJsonValue(QString("fileSourceReport"), file_source_report, obj, QString("SWGFileSourceReport"));
+    if((file_source_input_report != nullptr) && (file_source_input_report->isSet())){
+        toJsonValue(QString("fileSourceInputReport"), file_source_input_report, obj, QString("SWGFileSourceInputReport"));
     }
     if((lime_sdr_input_report != nullptr) && (lime_sdr_input_report->isSet())){
         toJsonValue(QString("limeSdrInputReport"), lime_sdr_input_report, obj, QString("SWGLimeSdrInputReport"));
@@ -407,14 +407,14 @@ SWGDeviceReport::setBladeRf2OutputReport(SWGBladeRF2OutputReport* blade_rf2_outp
     this->m_blade_rf2_output_report_isSet = true;
 }
 
-SWGFileSourceReport*
-SWGDeviceReport::getFileSourceReport() {
-    return file_source_report;
+SWGFileSourceInputReport*
+SWGDeviceReport::getFileSourceInputReport() {
+    return file_source_input_report;
 }
 void
-SWGDeviceReport::setFileSourceReport(SWGFileSourceReport* file_source_report) {
-    this->file_source_report = file_source_report;
-    this->m_file_source_report_isSet = true;
+SWGDeviceReport::setFileSourceInputReport(SWGFileSourceInputReport* file_source_input_report) {
+    this->file_source_input_report = file_source_input_report;
+    this->m_file_source_input_report_isSet = true;
 }
 
 SWGLimeSdrInputReport*
@@ -588,7 +588,7 @@ SWGDeviceReport::isSet(){
         if(airspy_hf_report != nullptr && airspy_hf_report->isSet()){ isObjectUpdated = true; break;}
         if(blade_rf2_input_report != nullptr && blade_rf2_input_report->isSet()){ isObjectUpdated = true; break;}
         if(blade_rf2_output_report != nullptr && blade_rf2_output_report->isSet()){ isObjectUpdated = true; break;}
-        if(file_source_report != nullptr && file_source_report->isSet()){ isObjectUpdated = true; break;}
+        if(file_source_input_report != nullptr && file_source_input_report->isSet()){ isObjectUpdated = true; break;}
         if(lime_sdr_input_report != nullptr && lime_sdr_input_report->isSet()){ isObjectUpdated = true; break;}
         if(kiwi_sdr_report != nullptr && kiwi_sdr_report->isSet()){ isObjectUpdated = true; break;}
         if(lime_sdr_output_report != nullptr && lime_sdr_output_report->isSet()){ isObjectUpdated = true; break;}

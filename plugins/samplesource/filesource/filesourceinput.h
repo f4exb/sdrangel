@@ -28,7 +28,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/devicesamplesource.h"
-#include "filesourcesettings.h"
+#include "filesourceinputsettings.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -42,19 +42,19 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const FileSourceSettings& getSettings() const { return m_settings; }
+		const FileSourceInputSettings& getSettings() const { return m_settings; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureFileSource* create(const FileSourceSettings& settings, bool force)
+		static MsgConfigureFileSource* create(const FileSourceInputSettings& settings, bool force)
 		{
 			return new MsgConfigureFileSource(settings, force);
 		}
 
 	private:
-		FileSourceSettings m_settings;
+		FileSourceInputSettings m_settings;
         bool m_force;
 
-		MsgConfigureFileSource(const FileSourceSettings& settings, bool force) :
+		MsgConfigureFileSource(const FileSourceInputSettings& settings, bool force) :
 			Message(),
 			m_settings(settings),
 			m_force(force)
@@ -322,7 +322,7 @@ public:
 	private:
 	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
-	FileSourceSettings m_settings;
+	FileSourceInputSettings m_settings;
 	std::ifstream m_ifstream;
 	FileSourceThread* m_fileSourceThread;
 	QString m_deviceDescription;
@@ -338,10 +338,10 @@ public:
 
 	void openFileStream();
 	void seekFileStream(int seekMillis);
-	bool applySettings(const FileSourceSettings& settings, bool force = false);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FileSourceSettings& settings);
+	bool applySettings(const FileSourceInputSettings& settings, bool force = false);
+    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FileSourceInputSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FileSourceSettings& settings, bool force);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FileSourceInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

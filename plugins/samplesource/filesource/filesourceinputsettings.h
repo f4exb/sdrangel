@@ -15,13 +15,13 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_FILESOURCE_FILESOURCESETTINGS_H_
-#define PLUGINS_SAMPLESOURCE_FILESOURCE_FILESOURCESETTINGS_H_
+#ifndef PLUGINS_SAMPLESOURCE_FILESOURCE_FILESOURCEINPUTSETTINGS_H_
+#define PLUGINS_SAMPLESOURCE_FILESOURCE_FILESOURCEINPUTSETTINGS_H_
 
 #include <QString>
 #include <QByteArray>
 
-struct FileSourceSettings {
+struct FileSourceInputSettings {
     quint64 m_centerFrequency;
     qint32  m_sampleRate;
     QString m_fileName;
@@ -34,8 +34,8 @@ struct FileSourceSettings {
 
     static const unsigned int m_accelerationMaxScale; //!< Max power of 10 multiplier to 2,5,10 base ex: 2 -> 2,5,10,20,50,100,200,500,1000
 
-    FileSourceSettings();
-    ~FileSourceSettings() {}
+    FileSourceInputSettings();
+    ~FileSourceInputSettings() {}
 
     void resetToDefaults();
     QByteArray serialize() const;
@@ -44,4 +44,4 @@ struct FileSourceSettings {
     static int getAccelerationValue(int averagingIndex);
 };
 
-#endif /* PLUGINS_SAMPLESOURCE_FILESOURCE_FILESOURCESETTINGS_H_ */
+#endif /* PLUGINS_SAMPLESOURCE_FILESOURCE_FILESOURCEINPUTSETTINGS_H_ */

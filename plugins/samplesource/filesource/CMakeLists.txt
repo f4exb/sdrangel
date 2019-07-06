@@ -4,14 +4,14 @@ set(filesource_SOURCES
 	filesourceinput.cpp
 	filesourceplugin.cpp
 	filesourcethread.cpp
-	filesourcesettings.cpp
+	filesourceinputsettings.cpp
 )
 
 set(filesource_HEADERS
 	filesourceinput.h
 	filesourceplugin.h
 	filesourcethread.h
-	filesourcesettings.h
+	filesourceinputsettings.h
 )
 
 include_directories(

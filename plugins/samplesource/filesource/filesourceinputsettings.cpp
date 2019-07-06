@@ -17,16 +17,16 @@
 
 #include "util/simpleserializer.h"
 
-#include "filesourcesettings.h"
+#include "filesourceinputsettings.h"
 
-const unsigned int FileSourceSettings::m_accelerationMaxScale = 2;
+const unsigned int FileSourceInputSettings::m_accelerationMaxScale = 2;
 
-FileSourceSettings::FileSourceSettings()
+FileSourceInputSettings::FileSourceInputSettings()
 {
     resetToDefaults();
 }
 
-void FileSourceSettings::resetToDefaults()
+void FileSourceInputSettings::resetToDefaults()
 {
     m_centerFrequency = 435000000;
     m_sampleRate = 48000;
@@ -39,7 +39,7 @@ void FileSourceSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
 }
 
-QByteArray FileSourceSettings::serialize() const
+QByteArray FileSourceInputSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeString(1, m_fileName);
@@ -53,7 +53,7 @@ QByteArray FileSourceSettings::serialize() const
     return s.final();
 }
 
-bool FileSourceSettings::deserialize(const QByteArray& data)
+bool FileSourceInputSettings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 
@@ -91,7 +91,7 @@ bool FileSourceSettings::deserialize(const QByteArray& data)
     }
 }
 
-int FileSourceSettings::getAccelerationIndex(int accelerationValue)
+int FileSourceInputSettings::getAccelerationIndex(int accelerationValue)
 {
     if (accelerationValue <= 1) {
         return 0;
@@ -123,7 +123,7 @@ int FileSourceSettings::getAccelerationIndex(int accelerationValue)
     return 3*m_accelerationMaxScale + 3;
 }
 
-int FileSourceSettings::getAccelerationValue(int accelerationIndex)
+int FileSourceInputSettings::getAccelerationValue(int accelerationIndex)
 {
     if (accelerationIndex <= 0) {
         return 1;
