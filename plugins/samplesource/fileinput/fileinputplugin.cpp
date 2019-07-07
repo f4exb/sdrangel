@@ -28,7 +28,7 @@
 #include "fileinputplugin.h"
 
 const PluginDescriptor FileInputPlugin::m_pluginDescriptor = {
-	QString("File input"),
+	QString("File device input"),
     QString("4.11.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),

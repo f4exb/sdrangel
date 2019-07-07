@@ -6,6 +6,7 @@ add_subdirectory(modssb)
 add_subdirectory(modwfm)
 add_subdirectory(udpsource)
 add_subdirectory(localsource)
+add_subdirectory(filesource)
 
 if(CM256CC_FOUND)
     add_subdirectory(remotesource)
