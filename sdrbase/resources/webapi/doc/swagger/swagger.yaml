@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.8.0"
+  version: "4.11.0"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -1796,8 +1796,8 @@ definitions:
         $ref: "/doc/swagger/include/FCDPro.yaml#/FCDProSettings"
       fcdProPlusSettings:
         $ref: "/doc/swagger/include/FCDProPlus.yaml#/FCDProPlusSettings"
-      fileSourceInputSettings:
-        $ref: "/doc/swagger/include/FileSourceInput.yaml#/FileSourceInputSettings"
+      fileInputSettings:
+        $ref: "/doc/swagger/include/FileInput.yaml#/FileInputSettings"
       hackRFInputSettings:
         $ref: "/doc/swagger/include/HackRF.yaml#/HackRFInputSettings"
       hackRFOutputSettings:
@@ -1861,8 +1861,8 @@ definitions:
         $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2InputReport"
       bladeRF2OutputReport:
         $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2OutputReport"
-      fileSourceInputReport:
-        $ref: "/doc/swagger/include/FileSourceInput.yaml#/FileSourceInputReport"
+      fileInputReport:
+        $ref: "/doc/swagger/include/FileInput.yaml#/FileInputReport"
       limeSdrInputReport:
         $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
       kiwiSDRReport:
@@ -1925,6 +1925,8 @@ definitions:
         $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
       DSDDemodSettings:
         $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodSettings"
+      FileSourceSettings:
+        $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceSettings"
       FreeDVDemodSettings:
         $ref: "/doc/swagger/include/FreeDVDemod.yaml#/FreeDVDemodSettings"
       FreeDVModSettings:
@@ -1976,6 +1978,8 @@ definitions:
         $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodReport"
       DSDDemodReport:
         $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodReport"
+      FileSourceReport:
+        $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceReport"
       FreeDVDemodReport:
         $ref: "/doc/swagger/include/FreeDVDemod.yaml#/FreeDVDemodReport"
       FreeDVModReport:

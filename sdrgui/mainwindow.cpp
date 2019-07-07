@@ -190,11 +190,11 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     m_pluginManager = new PluginManager(this);
     m_pluginManager->loadPlugins(QString("plugins"));
 
-    splash->showStatusMessage("load file source...", Qt::white);
-    qDebug() << "MainWindow::MainWindow: select SampleSource from settings or default (file source)...";
+    splash->showStatusMessage("load file input...", Qt::white);
+    qDebug() << "MainWindow::MainWindow: select SampleSource from settings or default (file input)...";
 
 	int deviceIndex = DeviceEnumerator::instance()->getRxSamplingDeviceIndex(m_settings.getSourceDeviceId(), m_settings.getSourceIndex());
-	addSourceDevice(deviceIndex);  // add the first device set with file source device as default if device in settings is not enumerated
+	addSourceDevice(deviceIndex);  // add the first device set with file input device as default if device in settings is not enumerated
 	m_deviceUIs.back()->m_deviceAPI->setBuddyLeader(true); // the first device is always the leader
 
     splash->showStatusMessage("load current preset settings...", Qt::white);
@@ -302,7 +302,7 @@ void MainWindow::addSourceDevice(int deviceIndex)
 
     // Create a file source instance by default if requested device was not enumerated (index = -1)
     if (deviceIndex < 0) {
-        deviceIndex = DeviceEnumerator::instance()->getFileSourceDeviceIndex();
+        deviceIndex = DeviceEnumerator::instance()->getFileInputDeviceIndex();
     }
 
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);

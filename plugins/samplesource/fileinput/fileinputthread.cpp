@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2015-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -21,13 +21,13 @@
 #include <QDebug>
 
 #include "dsp/filerecord.h"
-#include "filesourcethread.h"
+#include "fileinputthread.h"
 #include "dsp/samplesinkfifo.h"
 #include "util/messagequeue.h"
 
-MESSAGE_CLASS_DEFINITION(FileSourceThread::MsgReportEOF, Message)
+MESSAGE_CLASS_DEFINITION(FileInputThread::MsgReportEOF, Message)
 
-FileSourceThread::FileSourceThread(std::ifstream *samplesStream,
+FileInputThread::FileInputThread(std::ifstream *samplesStream,
         SampleSinkFifo* sampleFifo,
         const QTimer& timer,
         MessageQueue *fileInputMessageQueue,
@@ -52,7 +52,7 @@ FileSourceThread::FileSourceThread(std::ifstream *samplesStream,
     assert(m_ifstream != 0);
 }
 
-FileSourceThread::~FileSourceThread()
+FileInputThread::~FileInputThread()
 {
 	if (m_running) {
 		stopWork();
@@ -67,13 +67,13 @@ FileSourceThread::~FileSourceThread()
 	}
 }
 
-void FileSourceThread::startWork()
+void FileInputThread::startWork()
 {
-	qDebug() << "FileSourceThread::startWork: ";
+	qDebug() << "FileInputThread::startWork: ";
 
     if (m_ifstream->is_open())
     {
-        qDebug() << "FileSourceThread::startWork: file stream open, starting...";
+        qDebug() << "FileInputThread::startWork: file stream open, starting...";
         m_startWaitMutex.lock();
         m_elapsedTimer.start();
         start();
@@ -84,21 +84,21 @@ void FileSourceThread::startWork()
     }
     else
     {
-        qDebug() << "FileSourceThread::startWork: file stream closed, not starting.";
+        qDebug() << "FileInputThread::startWork: file stream closed, not starting.";
     }
 }
 
-void FileSourceThread::stopWork()
+void FileInputThread::stopWork()
 {
-	qDebug() << "FileSourceThread::stopWork";
+	qDebug() << "FileInputThread::stopWork";
 	disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 	m_running = false;
 	wait();
 }
 
-void FileSourceThread::setSampleRateAndSize(int samplerate, quint32 samplesize)
+void FileInputThread::setSampleRateAndSize(int samplerate, quint32 samplesize)
 {
-	qDebug() << "FileSourceThread::setSampleRateAndSize:"
+	qDebug() << "FileInputThread::setSampleRateAndSize:"
 			<< " new rate:" << samplerate
 			<< " new size:" << samplesize
 			<< " old rate:" << m_samplerate
@@ -121,7 +121,7 @@ void FileSourceThread::setSampleRateAndSize(int samplerate, quint32 samplesize)
 	//m_samplerate = samplerate;
 }
 
-void FileSourceThread::setBuffers(std::size_t chunksize)
+void FileInputThread::setBuffers(std::size_t chunksize)
 {
     if (chunksize > m_bufsize)
     {
@@ -130,12 +130,12 @@ void FileSourceThread::setBuffers(std::size_t chunksize)
 
         if (m_fileBuf == 0)
         {
-            qDebug() << "FileSourceThread::setBuffers: Allocate file buffer";
+            qDebug() << "FileInputThread::setBuffers: Allocate file buffer";
             m_fileBuf = (quint8*) malloc(m_bufsize);
         }
         else
         {
-            qDebug() << "FileSourceThread::setBuffers: Re-allocate file buffer";
+            qDebug() << "FileInputThread::setBuffers: Re-allocate file buffer";
             quint8 *buf = m_fileBuf;
             m_fileBuf = (quint8*) realloc((void*) m_fileBuf, m_bufsize);
             if (!m_fileBuf) free(buf);
@@ -143,23 +143,23 @@ void FileSourceThread::setBuffers(std::size_t chunksize)
 
         if (m_convertBuf == 0)
         {
-            qDebug() << "FileSourceThread::setBuffers: Allocate conversion buffer";
+            qDebug() << "FileInputThread::setBuffers: Allocate conversion buffer";
             m_convertBuf = (quint8*) malloc(nbSamples*sizeof(Sample));
         }
         else
         {
-            qDebug() << "FileSourceThread::setBuffers: Re-allocate conversion buffer";
+            qDebug() << "FileInputThread::setBuffers: Re-allocate conversion buffer";
             quint8 *buf = m_convertBuf;
             m_convertBuf = (quint8*) realloc((void*) m_convertBuf, nbSamples*sizeof(Sample));
             if (!m_convertBuf) free(buf);
         }
 
-        qDebug() << "FileSourceThread::setBuffers: size: " << m_bufsize
+        qDebug() << "FileInputThread::setBuffers: size: " << m_bufsize
                 << " #samples: " << nbSamples;
     }
 }
 
-void FileSourceThread::run()
+void FileInputThread::run()
 {
 	m_running = true;
 	m_startWaiter.wakeAll();
@@ -172,7 +172,7 @@ void FileSourceThread::run()
 	m_running = false;
 }
 
-void FileSourceThread::tick()
+void FileInputThread::tick()
 {
 	if (m_running)
 	{
@@ -203,7 +203,7 @@ void FileSourceThread::tick()
 	}
 }
 
-void FileSourceThread::writeToSampleFifo(const quint8* buf, qint32 nbBytes)
+void FileInputThread::writeToSampleFifo(const quint8* buf, qint32 nbBytes)
 {
 	if (m_samplesize == 16)
 	{

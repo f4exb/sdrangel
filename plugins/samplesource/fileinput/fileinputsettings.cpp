@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2017-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -17,16 +17,16 @@
 
 #include "util/simpleserializer.h"
 
-#include "filesourceinputsettings.h"
+#include "fileinputsettings.h"
 
-const unsigned int FileSourceInputSettings::m_accelerationMaxScale = 2;
+const unsigned int FileInputSettings::m_accelerationMaxScale = 2;
 
-FileSourceInputSettings::FileSourceInputSettings()
+FileInputSettings::FileInputSettings()
 {
     resetToDefaults();
 }
 
-void FileSourceInputSettings::resetToDefaults()
+void FileInputSettings::resetToDefaults()
 {
     m_centerFrequency = 435000000;
     m_sampleRate = 48000;
@@ -39,7 +39,7 @@ void FileSourceInputSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
 }
 
-QByteArray FileSourceInputSettings::serialize() const
+QByteArray FileInputSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeString(1, m_fileName);
@@ -53,7 +53,7 @@ QByteArray FileSourceInputSettings::serialize() const
     return s.final();
 }
 
-bool FileSourceInputSettings::deserialize(const QByteArray& data)
+bool FileInputSettings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 
@@ -91,7 +91,7 @@ bool FileSourceInputSettings::deserialize(const QByteArray& data)
     }
 }
 
-int FileSourceInputSettings::getAccelerationIndex(int accelerationValue)
+int FileInputSettings::getAccelerationIndex(int accelerationValue)
 {
     if (accelerationValue <= 1) {
         return 0;
@@ -123,7 +123,7 @@ int FileSourceInputSettings::getAccelerationIndex(int accelerationValue)
     return 3*m_accelerationMaxScale + 3;
 }
 
-int FileSourceInputSettings::getAccelerationValue(int accelerationIndex)
+int FileInputSettings::getAccelerationValue(int accelerationIndex)
 {
     if (accelerationIndex <= 0) {
         return 1;

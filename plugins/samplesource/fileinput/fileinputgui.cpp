@@ -23,7 +23,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "ui_filesourcegui.h"
+#include "ui_fileinputgui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
@@ -34,13 +34,13 @@
 
 #include "mainwindow.h"
 
-#include "filesourcegui.h"
+#include "fileinputgui.h"
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 
-FileSourceGui::FileSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
+FileInputGUI::FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
-	ui(new Ui::FileSourceGui),
+	ui(new Ui::FileInputGUI),
 	m_deviceUISet(deviceUISet),
 	m_settings(),
 	m_doApplySettings(true),
@@ -81,51 +81,51 @@ FileSourceGui::FileSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 }
 
-FileSourceGui::~FileSourceGui()
+FileInputGUI::~FileInputGUI()
 {
 	delete ui;
 }
 
-void FileSourceGui::destroy()
+void FileInputGUI::destroy()
 {
 	delete this;
 }
 
-void FileSourceGui::setName(const QString& name)
+void FileInputGUI::setName(const QString& name)
 {
 	setObjectName(name);
 }
 
-QString FileSourceGui::getName() const
+QString FileInputGUI::getName() const
 {
 	return objectName();
 }
 
-void FileSourceGui::resetToDefaults()
+void FileInputGUI::resetToDefaults()
 {
 	m_settings.resetToDefaults();
 	displaySettings();
 	sendSettings();
 }
 
-qint64 FileSourceGui::getCenterFrequency() const
+qint64 FileInputGUI::getCenterFrequency() const
 {
 	return m_centerFrequency;
 }
 
-void FileSourceGui::setCenterFrequency(qint64 centerFrequency)
+void FileInputGUI::setCenterFrequency(qint64 centerFrequency)
 {
 	m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }
 
-QByteArray FileSourceGui::serialize() const
+QByteArray FileInputGUI::serialize() const
 {
 	return m_settings.serialize();
 }
 
-bool FileSourceGui::deserialize(const QByteArray& data)
+bool FileInputGUI::deserialize(const QByteArray& data)
 {
 	if(m_settings.deserialize(data)) {
 		displaySettings();
@@ -137,7 +137,7 @@ bool FileSourceGui::deserialize(const QByteArray& data)
 	}
 }
 
-void FileSourceGui::handleInputMessages()
+void FileInputGUI::handleInputMessages()
 {
     Message* message;
 
@@ -148,7 +148,7 @@ void FileSourceGui::handleInputMessages()
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_deviceSampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
-            qDebug("FileSourceGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("FileInputGUI::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
 
             delete message;
@@ -163,49 +163,49 @@ void FileSourceGui::handleInputMessages()
     }
 }
 
-bool FileSourceGui::handleMessage(const Message& message)
+bool FileInputGUI::handleMessage(const Message& message)
 {
-    if (FileSourceInput::MsgConfigureFileSource::match(message))
+    if (FileInput::MsgConfigureFileInput::match(message))
     {
-        const FileSourceInput::MsgConfigureFileSource& cfg = (FileSourceInput::MsgConfigureFileSource&) message;
+        const FileInput::MsgConfigureFileInput& cfg = (FileInput::MsgConfigureFileInput&) message;
         m_settings = cfg.getSettings();
         displaySettings();
         return true;
     }
-    else if (FileSourceInput::MsgReportFileSourceAcquisition::match(message))
+    else if (FileInput::MsgReportFileSourceAcquisition::match(message))
 	{
-		m_acquisition = ((FileSourceInput::MsgReportFileSourceAcquisition&)message).getAcquisition();
+		m_acquisition = ((FileInput::MsgReportFileSourceAcquisition&)message).getAcquisition();
 		updateWithAcquisition();
 		return true;
 	}
-	else if (FileSourceInput::MsgReportFileSourceStreamData::match(message))
+	else if (FileInput::MsgReportFileInputStreamData::match(message))
 	{
-		m_sampleRate = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getSampleRate();
-		m_sampleSize = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getSampleSize();
-		m_centerFrequency = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getCenterFrequency();
-		m_startingTimeStamp = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getStartingTimeStamp();
-		m_recordLength = ((FileSourceInput::MsgReportFileSourceStreamData&)message).getRecordLength();
+		m_sampleRate = ((FileInput::MsgReportFileInputStreamData&)message).getSampleRate();
+		m_sampleSize = ((FileInput::MsgReportFileInputStreamData&)message).getSampleSize();
+		m_centerFrequency = ((FileInput::MsgReportFileInputStreamData&)message).getCenterFrequency();
+		m_startingTimeStamp = ((FileInput::MsgReportFileInputStreamData&)message).getStartingTimeStamp();
+		m_recordLength = ((FileInput::MsgReportFileInputStreamData&)message).getRecordLength();
 		updateWithStreamData();
 		return true;
 	}
-	else if (FileSourceInput::MsgReportFileSourceStreamTiming::match(message))
+	else if (FileInput::MsgReportFileInputStreamTiming::match(message))
 	{
-		m_samplesCount = ((FileSourceInput::MsgReportFileSourceStreamTiming&)message).getSamplesCount();
+		m_samplesCount = ((FileInput::MsgReportFileInputStreamTiming&)message).getSamplesCount();
 		updateWithStreamTime();
 		return true;
 	}
-	else if (FileSourceInput::MsgStartStop::match(message))
+	else if (FileInput::MsgStartStop::match(message))
     {
-	    FileSourceInput::MsgStartStop& notif = (FileSourceInput::MsgStartStop&) message;
+	    FileInput::MsgStartStop& notif = (FileInput::MsgStartStop&) message;
         blockApplySettings(true);
         ui->startStop->setChecked(notif.getStartStop());
         blockApplySettings(false);
 
         return true;
     }
-	else if (FileSourceInput::MsgPlayPause::match(message))
+	else if (FileInput::MsgPlayPause::match(message))
 	{
-	    FileSourceInput::MsgPlayPause& notif = (FileSourceInput::MsgPlayPause&) message;
+	    FileInput::MsgPlayPause& notif = (FileInput::MsgPlayPause&) message;
 	    bool checked = notif.getPlayPause();
 	    ui->play->setChecked(checked);
 	    ui->navTimeSlider->setEnabled(!checked);
@@ -214,9 +214,9 @@ bool FileSourceGui::handleMessage(const Message& message)
 
 	    return true;
 	}
-	else if (FileSourceInput::MsgReportHeaderCRC::match(message))
+	else if (FileInput::MsgReportHeaderCRC::match(message))
 	{
-		FileSourceInput::MsgReportHeaderCRC& notif = (FileSourceInput::MsgReportHeaderCRC&) message;
+		FileInput::MsgReportHeaderCRC& notif = (FileInput::MsgReportHeaderCRC&) message;
 		if (notif.isOK()) {
 			ui->crcLabel->setStyleSheet("QLabel { background-color : green; }");
 		} else {
@@ -231,45 +231,45 @@ bool FileSourceGui::handleMessage(const Message& message)
 	}
 }
 
-void FileSourceGui::updateSampleRateAndFrequency()
+void FileInputGUI::updateSampleRateAndFrequency()
 {
     m_deviceUISet->getSpectrum()->setSampleRate(m_deviceSampleRate);
     m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateText->setText(tr("%1k").arg((float)m_deviceSampleRate / 1000));
 }
 
-void FileSourceGui::displaySettings()
+void FileInputGUI::displaySettings()
 {
     blockApplySettings(true);
     ui->playLoop->setChecked(m_settings.m_loop);
-    ui->acceleration->setCurrentIndex(FileSourceInputSettings::getAccelerationIndex(m_settings.m_accelerationFactor));
+    ui->acceleration->setCurrentIndex(FileInputSettings::getAccelerationIndex(m_settings.m_accelerationFactor));
     blockApplySettings(false);
 }
 
-void FileSourceGui::sendSettings()
+void FileInputGUI::sendSettings()
 {
 }
 
-void FileSourceGui::on_playLoop_toggled(bool checked)
+void FileInputGUI::on_playLoop_toggled(bool checked)
 {
     if (m_doApplySettings)
     {
         m_settings.m_loop = checked;
-        FileSourceInput::MsgConfigureFileSource *message = FileSourceInput::MsgConfigureFileSource::create(m_settings, false);
+        FileInput::MsgConfigureFileInput *message = FileInput::MsgConfigureFileInput::create(m_settings, false);
         m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
 
-void FileSourceGui::on_startStop_toggled(bool checked)
+void FileInputGUI::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
     {
-        FileSourceInput::MsgStartStop *message = FileSourceInput::MsgStartStop::create(checked);
+        FileInput::MsgStartStop *message = FileInput::MsgStartStop::create(checked);
         m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
 
-void FileSourceGui::updateStatus()
+void FileInputGUI::updateStatus()
 {
     int state = m_deviceUISet->m_deviceAPI->state();
 
@@ -298,25 +298,25 @@ void FileSourceGui::updateStatus()
     }
 }
 
-void FileSourceGui::on_play_toggled(bool checked)
+void FileInputGUI::on_play_toggled(bool checked)
 {
-	FileSourceInput::MsgConfigureFileSourceWork* message = FileSourceInput::MsgConfigureFileSourceWork::create(checked);
+	FileInput::MsgConfigureFileInputWork* message = FileInput::MsgConfigureFileInputWork::create(checked);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	ui->navTimeSlider->setEnabled(!checked);
 	ui->acceleration->setEnabled(!checked);
 	m_enableNavTime = !checked;
 }
 
-void FileSourceGui::on_navTimeSlider_valueChanged(int value)
+void FileInputGUI::on_navTimeSlider_valueChanged(int value)
 {
 	if (m_enableNavTime && ((value >= 0) && (value <= 1000)))
 	{
-		FileSourceInput::MsgConfigureFileSourceSeek* message = FileSourceInput::MsgConfigureFileSourceSeek::create(value);
+		FileInput::MsgConfigureFileSourceSeek* message = FileInput::MsgConfigureFileSourceSeek::create(value);
 		m_sampleSource->getInputMessageQueue()->push(message);
 	}
 }
 
-void FileSourceGui::on_showFileDialog_clicked(bool checked)
+void FileInputGUI::on_showFileDialog_clicked(bool checked)
 {
     (void) checked;
 	QString fileName = QFileDialog::getOpenFileName(this,
@@ -331,31 +331,31 @@ void FileSourceGui::on_showFileDialog_clicked(bool checked)
 	}
 }
 
-void FileSourceGui::on_acceleration_currentIndexChanged(int index)
+void FileInputGUI::on_acceleration_currentIndexChanged(int index)
 {
     if (m_doApplySettings)
     {
-        m_settings.m_accelerationFactor = FileSourceInputSettings::getAccelerationValue(index);
-        FileSourceInput::MsgConfigureFileSource *message = FileSourceInput::MsgConfigureFileSource::create(m_settings, false);
+        m_settings.m_accelerationFactor = FileInputSettings::getAccelerationValue(index);
+        FileInput::MsgConfigureFileInput *message = FileInput::MsgConfigureFileInput::create(m_settings, false);
         m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
 
-void FileSourceGui::configureFileName()
+void FileInputGUI::configureFileName()
 {
-	qDebug() << "FileSourceGui::configureFileName: " << m_fileName.toStdString().c_str();
-	FileSourceInput::MsgConfigureFileSourceName* message = FileSourceInput::MsgConfigureFileSourceName::create(m_fileName);
+	qDebug() << "FileInputGUI::configureFileName: " << m_fileName.toStdString().c_str();
+	FileInput::MsgConfigureFileSourceName* message = FileInput::MsgConfigureFileSourceName::create(m_fileName);
 	m_sampleSource->getInputMessageQueue()->push(message);
 }
 
-void FileSourceGui::updateWithAcquisition()
+void FileInputGUI::updateWithAcquisition()
 {
 	ui->play->setEnabled(m_acquisition);
 	ui->play->setChecked(m_acquisition);
 	ui->showFileDialog->setEnabled(!m_acquisition);
 }
 
-void FileSourceGui::updateWithStreamData()
+void FileInputGUI::updateWithStreamData()
 {
 	ui->centerFrequency->setValue(m_centerFrequency/1000);
 	ui->sampleRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
@@ -368,7 +368,7 @@ void FileSourceGui::updateWithStreamData()
 	updateWithStreamTime();
 }
 
-void FileSourceGui::updateWithStreamTime()
+void FileInputGUI::updateWithStreamTime()
 {
     qint64 t_sec = 0;
     qint64 t_msec = 0;
@@ -398,21 +398,21 @@ void FileSourceGui::updateWithStreamTime()
 	}
 }
 
-void FileSourceGui::tick()
+void FileInputGUI::tick()
 {
 	if ((++m_tickCount & 0xf) == 0) {
-		FileSourceInput::MsgConfigureFileSourceStreamTiming* message = FileSourceInput::MsgConfigureFileSourceStreamTiming::create();
+		FileInput::MsgConfigureFileInputStreamTiming* message = FileInput::MsgConfigureFileInputStreamTiming::create();
 		m_sampleSource->getInputMessageQueue()->push(message);
 	}
 }
 
-void FileSourceGui::setAccelerationCombo()
+void FileInputGUI::setAccelerationCombo()
 {
     ui->acceleration->blockSignals(true);
     ui->acceleration->clear();
     ui->acceleration->addItem(QString("1"));
 
-    for (unsigned int i = 0; i <= FileSourceInputSettings::m_accelerationMaxScale; i++)
+    for (unsigned int i = 0; i <= FileInputSettings::m_accelerationMaxScale; i++)
     {
         QString s;
         int m = pow(10.0, i);
@@ -430,7 +430,7 @@ void FileSourceGui::setAccelerationCombo()
     ui->acceleration->blockSignals(false);
 }
 
-void FileSourceGui::setNumberStr(int n, QString& s)
+void FileInputGUI::setNumberStr(int n, QString& s)
 {
     if (n < 1000) {
         s = tr("%1").arg(n);
@@ -445,7 +445,7 @@ void FileSourceGui::setNumberStr(int n, QString& s)
     }
 }
 
-void FileSourceGui::openDeviceSettingsDialog(const QPoint& p)
+void FileInputGUI::openDeviceSettingsDialog(const QPoint& p)
 {
     BasicDeviceSettingsDialog dialog(this);
     dialog.setUseReverseAPI(m_settings.m_useReverseAPI);

@@ -212,11 +212,11 @@ void DeviceEnumerator::removeMIMOSelection(int tabIndex)
     }
 }
 
-int DeviceEnumerator::getFileSourceDeviceIndex() const
+int DeviceEnumerator::getFileInputDeviceIndex() const
 {
     for (DevicesEnumeration::const_iterator it = m_rxEnumeration.begin(); it != m_rxEnumeration.end(); ++it)
     {
-        if (it->m_samplingDevice.id == PluginManager::getFileSourceDeviceId()) {
+        if (it->m_samplingDevice.id == PluginManager::getFileInputDeviceId()) {
             return it->m_index;
         }
     }

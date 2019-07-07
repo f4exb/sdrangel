@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2015-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FILESOURCEGUI_H
-#define INCLUDE_FILESOURCEGUI_H
+#ifndef INCLUDE_FILEINPUTGUI_H
+#define INCLUDE_FILEINPUTGUI_H
 
 #include <plugin/plugininstancegui.h>
 #include <QTimer>
@@ -24,21 +24,21 @@
 
 #include "util/messagequeue.h"
 
-#include "filesourceinputsettings.h"
-#include "filesourceinput.h"
+#include "fileinputsettings.h"
+#include "fileinput.h"
 
 class DeviceUISet;
 
 namespace Ui {
-	class FileSourceGui;
+	class FileInputGUI;
 }
 
-class FileSourceGui : public QWidget, public PluginInstanceGUI {
+class FileInputGUI : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit FileSourceGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
-	virtual ~FileSourceGui();
+	explicit FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent = 0);
+	virtual ~FileInputGUI();
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -53,10 +53,10 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	Ui::FileSourceGui* ui;
+	Ui::FileInputGUI* ui;
 
 	DeviceUISet* m_deviceUISet;
-	FileSourceInputSettings m_settings;
+	FileInputSettings m_settings;
 	bool m_doApplySettings;
 	QTimer m_statusTimer;
 	std::vector<int> m_gains;
@@ -101,4 +101,4 @@ private slots:
     void openDeviceSettingsDialog(const QPoint& p);
 };
 
-#endif // INCLUDE_FILESOURCEGUI_H
+#endif // INCLUDE_FILEINPUTGUI_H

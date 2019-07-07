@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2017-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,39 +15,33 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FILESOURCEPLUGIN_H
-#define INCLUDE_FILESOURCEPLUGIN_H
+#ifndef PLUGINS_SAMPLESOURCE_FILEINPUT_FILEINPUTSETTINGS_H_
+#define PLUGINS_SAMPLESOURCE_FILEINPUT_FILEINPUTSETTINGS_H_
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include <QString>
+#include <QByteArray>
 
-#define FILESOURCE_DEVICE_TYPE_ID "sdrangel.samplesource.filesource"
+struct FileInputSettings {
+    quint64 m_centerFrequency;
+    qint32  m_sampleRate;
+    QString m_fileName;
+    quint32 m_accelerationFactor;
+    bool m_loop;
+    bool     m_useReverseAPI;
+    QString  m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
 
-class PluginAPI;
+    static const unsigned int m_accelerationMaxScale; //!< Max power of 10 multiplier to 2,5,10 base ex: 2 -> 2,5,10,20,50,100,200,500,1000
 
-class FileSourcePlugin : public QObject, public PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID FILESOURCE_DEVICE_TYPE_ID)
+    FileInputSettings();
+    ~FileInputSettings() {}
 
-public:
-	explicit FileSourcePlugin(QObject* parent = NULL);
-
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
-
-	virtual SamplingDevices enumSampleSources();
-	virtual PluginInstanceGUI* createSampleSourcePluginInstanceGUI(
-	        const QString& sourceId,
-	        QWidget **widget,
-	        DeviceUISet *deviceUISet);
-	virtual DeviceSampleSource* createSampleSourcePluginInstance(const QString& sourceId, DeviceAPI *deviceAPI);
-
-	static const QString m_hardwareID;
-    static const QString m_deviceTypeID;
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
+    void resetToDefaults();
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
+    static int getAccelerationIndex(int averaging);
+    static int getAccelerationValue(int averagingIndex);
 };
 
-#endif // INCLUDE_FILESOURCEPLUGIN_H
+#endif /* PLUGINS_SAMPLESOURCE_FILEINPUT_FILEINPUTSETTINGS_H_ */

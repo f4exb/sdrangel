@@ -1899,14 +1899,14 @@ bool WebAPIRequestMapper::validateDeviceSettings(
             return false;
         }
     }
-    else if (*deviceHwType == "FileSource")
+    else if (*deviceHwType == "FileInput")
     {
-        if (jsonObject.contains("fileSourceSettings") && jsonObject["fileSourceSettings"].isObject())
+        if (jsonObject.contains("fileInputSettings") && jsonObject["fileInputSettings"].isObject())
         {
-            QJsonObject fileSourceSettingsJsonObject = jsonObject["fileSourceSettings"].toObject();
-            deviceSettingsKeys = fileSourceSettingsJsonObject.keys();
-            deviceSettings.setFileSourceInputSettings(new SWGSDRangel::SWGFileSourceInputSettings());
-            deviceSettings.getFileSourceInputSettings()->fromJsonObject(fileSourceSettingsJsonObject);
+            QJsonObject fileInputSettingsJsonObject = jsonObject["fileInputSettings"].toObject();
+            deviceSettingsKeys = fileInputSettingsJsonObject.keys();
+            deviceSettings.setFileInputSettings(new SWGSDRangel::SWGFileInputSettings());
+            deviceSettings.getFileInputSettings()->fromJsonObject(fileInputSettingsJsonObject);
             return true;
         }
         else
@@ -2685,7 +2685,7 @@ void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& de
     deviceSettings.setBladeRf1OutputSettings(0);
     deviceSettings.setFcdProPlusSettings(0);
     deviceSettings.setFcdProSettings(0);
-    deviceSettings.setFileSourceInputSettings(0);
+    deviceSettings.setFileInputSettings(0);
     deviceSettings.setHackRfInputSettings(0);
     deviceSettings.setHackRfOutputSettings(0);
     deviceSettings.setLimeSdrInputSettings(0);
@@ -2706,7 +2706,7 @@ void WebAPIRequestMapper::resetDeviceReport(SWGSDRangel::SWGDeviceReport& device
     deviceReport.setDeviceHwType(0);
     deviceReport.setAirspyHfReport(0);
     deviceReport.setAirspyReport(0);
-    deviceReport.setFileSourceInputReport(0);
+    deviceReport.setFileInputReport(0);
     deviceReport.setLimeSdrInputReport(0);
     deviceReport.setLimeSdrOutputReport(0);
     deviceReport.setPerseusReport(0);

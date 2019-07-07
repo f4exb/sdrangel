@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.8.0"
+  version: "4.11.0"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -1796,8 +1796,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/FCDPro.yaml#/FCDProSettings"
       fcdProPlusSettings:
         $ref: "http://localhost:8081/api/swagger/include/FCDProPlus.yaml#/FCDProPlusSettings"
-      fileSourceInputSettings:
-        $ref: "http://localhost:8081/api/swagger/include/FileSourceInput.yaml#/FileSourceInputSettings"
+      fileInputSettings:
+        $ref: "http://localhost:8081/api/swagger/include/FileInput.yaml#/FileInputSettings"
       hackRFInputSettings:
         $ref: "http://localhost:8081/api/swagger/include/HackRF.yaml#/HackRFInputSettings"
       hackRFOutputSettings:
@@ -1861,8 +1861,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2InputReport"
       bladeRF2OutputReport:
         $ref: "http://localhost:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2OutputReport"
-      fileSourceInputReport:
-        $ref: "http://localhost:8081/api/swagger/include/FileSourceInput.yaml#/FileSourceInputReport"
+      fileInputReport:
+        $ref: "http://localhost:8081/api/swagger/include/FileInput.yaml#/FileInputReport"
       limeSdrInputReport:
         $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
       kiwiSDRReport:
@@ -1925,6 +1925,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
       DSDDemodSettings:
         $ref: "http://localhost:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodSettings"
+      FileSourceSettings:
+        $ref: "http://localhost:8081/api/swagger/include/FileSource.yaml#/FileSourceSettings"
       FreeDVDemodSettings:
         $ref: "http://localhost:8081/api/swagger/include/FreeDVDemod.yaml#/FreeDVDemodSettings"
       FreeDVModSettings:
@@ -1976,6 +1978,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/BFMDemod.yaml#/BFMDemodReport"
       DSDDemodReport:
         $ref: "http://localhost:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodReport"
+      FileSourceReport:
+        $ref: "http://localhost:8081/api/swagger/include/FileSource.yaml#/FileSourceReport"
       FreeDVDemodReport:
         $ref: "http://localhost:8081/api/swagger/include/FreeDVDemod.yaml#/FreeDVDemodReport"
       FreeDVModReport:

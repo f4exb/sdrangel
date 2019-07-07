@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2015-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -21,14 +21,14 @@
 #include "util/simpleserializer.h"
 
 #ifdef SERVER_MODE
-#include "filesourceinput.h"
+#include "fileinput.h"
 #else
-#include "filesourcegui.h"
+#include "fileinputgui.h"
 #endif
-#include "filesourceplugin.h"
+#include "fileinputplugin.h"
 
-const PluginDescriptor FileSourcePlugin::m_pluginDescriptor = {
-	QString("File source input"),
+const PluginDescriptor FileInputPlugin::m_pluginDescriptor = {
+	QString("File input"),
     QString("4.11.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
@@ -36,30 +36,30 @@ const PluginDescriptor FileSourcePlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString FileSourcePlugin::m_hardwareID = "FileSource";
-const QString FileSourcePlugin::m_deviceTypeID = FILESOURCE_DEVICE_TYPE_ID;
+const QString FileInputPlugin::m_hardwareID = "FileInput";
+const QString FileInputPlugin::m_deviceTypeID = FILEINPUT_DEVICE_TYPE_ID;
 
-FileSourcePlugin::FileSourcePlugin(QObject* parent) :
+FileInputPlugin::FileInputPlugin(QObject* parent) :
 	QObject(parent)
 {
 }
 
-const PluginDescriptor& FileSourcePlugin::getPluginDescriptor() const
+const PluginDescriptor& FileInputPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void FileSourcePlugin::initPlugin(PluginAPI* pluginAPI)
+void FileInputPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices FileSourcePlugin::enumSampleSources()
+PluginInterface::SamplingDevices FileInputPlugin::enumSampleSources()
 {
 	SamplingDevices result;
 
     result.append(SamplingDevice(
-            "FileSource",
+            "FileInput",
             m_hardwareID,
             m_deviceTypeID,
             QString::null,
@@ -73,7 +73,7 @@ PluginInterface::SamplingDevices FileSourcePlugin::enumSampleSources()
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* FileSourcePlugin::createSampleSourcePluginInstanceGUI(
+PluginInstanceGUI* FileInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -84,14 +84,14 @@ PluginInstanceGUI* FileSourcePlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* FileSourcePlugin::createSampleSourcePluginInstanceGUI(
+PluginInstanceGUI* FileInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
 {
 	if(sourceId == m_deviceTypeID)
 	{
-		FileSourceGui* gui = new FileSourceGui(deviceUISet);
+		FileInputGUI* gui = new FileInputGUI(deviceUISet);
 		*widget = gui;
 		return gui;
 	}
@@ -102,11 +102,11 @@ PluginInstanceGUI* FileSourcePlugin::createSampleSourcePluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSource *FileSourcePlugin::createSampleSourcePluginInstance(const QString& sourceId, DeviceAPI *deviceAPI)
+DeviceSampleSource *FileInputPlugin::createSampleSourcePluginInstance(const QString& sourceId, DeviceAPI *deviceAPI)
 {
     if (sourceId == m_deviceTypeID)
     {
-        FileSourceInput* input = new FileSourceInput(deviceAPI);
+        FileInput* input = new FileInput(deviceAPI);
         return input;
     }
     else

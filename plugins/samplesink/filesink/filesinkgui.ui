@@ -29,7 +29,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>FileSource</string>
+   <string>FileSink</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">

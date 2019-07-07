@@ -322,7 +322,7 @@ void MainCore::addSourceDevice()
     m_deviceSets.back()->m_deviceAPI = deviceAPI;
 
     // Create a file source instance by default
-    int fileSourceDeviceIndex = DeviceEnumerator::instance()->getFileSourceDeviceIndex();
+    int fileSourceDeviceIndex = DeviceEnumerator::instance()->getFileInputDeviceIndex();
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(fileSourceDeviceIndex);
     m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
     m_deviceSets.back()->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);

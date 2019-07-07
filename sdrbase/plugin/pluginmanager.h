@@ -80,7 +80,7 @@ public:
 	void createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI);
 	void listTxChannels(QList<QString>& list);
 
-	static const QString& getFileSourceDeviceId() { return m_fileSourceDeviceTypeID; }
+	static const QString& getFileInputDeviceId() { return m_fileInputDeviceTypeID; }
 	static const QString& getFileSinkDeviceId() { return m_fileSinkDeviceTypeID; }
 	static const QString& getTestMIMODeviceId() { return m_testMIMODeviceTypeID; }
 
@@ -126,15 +126,15 @@ private:
     static const QString m_localInputDeviceTypeID;   //!< Local input plugin ID
     static const QString m_remoteInputHardwareID;    //!< Remote input hardware ID
     static const QString m_remoteInputDeviceTypeID;  //!< Remote input plugin ID
-    static const QString m_fileSourceHardwareID;     //!< FileSource source hardware ID
-    static const QString m_fileSourceDeviceTypeID;   //!< FileSource source plugin ID
+    static const QString m_fileInputHardwareID;      //!< File input hardware ID
+    static const QString m_fileInputDeviceTypeID;    //!< File input plugin ID
 
     // "Local" sample sink device IDs
     static const QString m_localOutputHardwareID;    //!< Local output hardware ID
     static const QString m_localOutputDeviceTypeID;  //!< Local output plugin ID
     static const QString m_remoteOutputHardwareID;   //!< Remote output hardware ID
     static const QString m_remoteOutputDeviceTypeID; //!< Remote output plugin ID
-    static const QString m_fileSinkHardwareID;       //!< FileSource source hardware ID
+    static const QString m_fileSinkHardwareID;       //!< FileSink sink hardware ID
     static const QString m_fileSinkDeviceTypeID;     //!< FileSink sink plugin ID
 
     // "Local" sample MIMO device IDs

@@ -64,7 +64,7 @@ def getInputOptions():
         options.device_index = 0
 
     if options.device_hwid == None:
-        options.device_hwid = "FileSource"
+        options.device_hwid = "FileInput"
 
     if options.device_freq == None:
         options.device_freq = 435000

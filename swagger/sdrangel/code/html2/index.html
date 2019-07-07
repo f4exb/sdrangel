@@ -1762,6 +1762,9 @@ margin-bottom: 20px;
     "DSDDemodReport" : {
       "$ref" : "#/definitions/DSDDemodReport"
     },
+    "FileSourceReport" : {
+      "$ref" : "#/definitions/FileSourceReport"
+    },
     "FreeDVDemodReport" : {
       "$ref" : "#/definitions/FreeDVDemodReport"
     },
@@ -1835,6 +1838,9 @@ margin-bottom: 20px;
     },
     "DSDDemodSettings" : {
       "$ref" : "#/definitions/DSDDemodSettings"
+    },
+    "FileSourceSettings" : {
+      "$ref" : "#/definitions/FileSourceSettings"
     },
     "FreeDVDemodSettings" : {
       "$ref" : "#/definitions/FreeDVDemodSettings"
@@ -2157,8 +2163,8 @@ margin-bottom: 20px;
     "bladeRF2OutputReport" : {
       "$ref" : "#/definitions/BladeRF2OutputReport"
     },
-    "fileSourceInputReport" : {
-      "$ref" : "#/definitions/FileSourceInputReport"
+    "fileInputReport" : {
+      "$ref" : "#/definitions/FileInputReport"
     },
     "limeSdrInputReport" : {
       "$ref" : "#/definitions/LimeSdrInputReport"
@@ -2291,8 +2297,8 @@ margin-bottom: 20px;
     "fcdProPlusSettings" : {
       "$ref" : "#/definitions/FCDProPlusSettings"
     },
-    "fileSourceInputSettings" : {
-      "$ref" : "#/definitions/FileSourceInputSettings"
+    "fileInputSettings" : {
+      "$ref" : "#/definitions/FileInputSettings"
     },
     "hackRFInputSettings" : {
       "$ref" : "#/definitions/HackRFInputSettings"
@@ -2543,7 +2549,7 @@ margin-bottom: 20px;
   },
   "description" : "FCDPro"
 };
-            defs.FileSourceInputReport = {
+            defs.FileInputReport = {
   "properties" : {
     "fileName" : {
       "type" : "string"
@@ -2569,9 +2575,9 @@ margin-bottom: 20px;
       "description" : "Duration time string representation"
     }
   },
-  "description" : "FileSource"
+  "description" : "FileInput"
 };
-            defs.FileSourceInputSettings = {
+            defs.FileInputSettings = {
   "properties" : {
     "fileName" : {
       "type" : "string",
@@ -2596,6 +2602,79 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "FileInput"
+};
+            defs.FileSourceReport = {
+  "properties" : {
+    "fileName" : {
+      "type" : "string"
+    },
+    "fileSampleRate" : {
+      "type" : "integer",
+      "description" : "Record sample rate in S/s"
+    },
+    "fileSampleSize" : {
+      "type" : "integer",
+      "description" : "Record sample size in number of bits"
+    },
+    "absoluteTime" : {
+      "type" : "string",
+      "description" : "Absolute record time string representation"
+    },
+    "elapsedTime" : {
+      "type" : "string",
+      "description" : "Elapsed time since beginning string representation"
+    },
+    "durationTime" : {
+      "type" : "string",
+      "description" : "Duration time string representation"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "description" : "Channel sample rate in S/s"
+    }
+  },
+  "description" : "FileSource"
+};
+            defs.FileSourceSettings = {
+  "properties" : {
+    "fileName" : {
+      "type" : "string",
+      "description" : "The name (path) of the file being read"
+    },
+    "loop" : {
+      "type" : "integer",
+      "description" : "1 if playing in a loop else 0"
+    },
+    "log2Interp" : {
+      "type" : "integer"
+    },
+    "filterChainHash" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
       "type" : "integer"
     }
   },
@@ -6180,7 +6259,7 @@ margin-bottom: 20px;
         <div id="header">
           <div id="api-_">
             <h2 id="welcome-to-apidoc">API and SDK Documentation</h2>
-              <div class="app-desc">Version: 4.8.0</div>
+              <div class="app-desc">Version: 4.11.0</div>
             <hr>
             <div><p>This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube</p>
 <hr />
@@ -25154,7 +25233,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-07-07T00:08:06.460+02:00
+              Generated 2019-07-08T00:35:02.822+02:00
             </div>
           </div>
       </div>

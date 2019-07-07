@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FileSourceGui</class>
- <widget class="QWidget" name="FileSourceGui">
+ <class>FileInputGUI</class>
+ <widget class="QWidget" name="FileInputGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -32,7 +32,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>FileSource</string>
+   <string>FileInput</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">

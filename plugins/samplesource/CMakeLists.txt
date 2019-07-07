@@ -1,6 +1,6 @@
 project(samplesource)
 
-add_subdirectory(filesource)
+add_subdirectory(fileinput)
 add_subdirectory(testsource)
 add_subdirectory(localinput)
 

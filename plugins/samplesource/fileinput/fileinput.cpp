@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2015-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -23,7 +23,7 @@
 #include <QBuffer>
 
 #include "SWGDeviceSettings.h"
-#include "SWGFileSourceInputSettings.h"
+#include "SWGFileInputSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
 
@@ -34,25 +34,25 @@
 #include "dsp/filerecord.h"
 #include "device/deviceapi.h"
 
-#include "filesourceinput.h"
-#include "filesourcethread.h"
+#include "fileinput.h"
+#include "fileinputthread.h"
 
-MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSource, Message)
-MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceName, Message)
-MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceWork, Message)
-MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceSeek, Message)
-MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgConfigureFileSourceStreamTiming, Message)
-MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgPlayPause, Message)
-MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceAcquisition, Message)
-MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamData, Message)
-MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportFileSourceStreamTiming, Message)
-MESSAGE_CLASS_DEFINITION(FileSourceInput::MsgReportHeaderCRC, Message)
+MESSAGE_CLASS_DEFINITION(FileInput::MsgConfigureFileInput, Message)
+MESSAGE_CLASS_DEFINITION(FileInput::MsgConfigureFileSourceName, Message)
+MESSAGE_CLASS_DEFINITION(FileInput::MsgConfigureFileInputWork, Message)
+MESSAGE_CLASS_DEFINITION(FileInput::MsgConfigureFileSourceSeek, Message)
+MESSAGE_CLASS_DEFINITION(FileInput::MsgConfigureFileInputStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(FileInput::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(FileInput::MsgPlayPause, Message)
+MESSAGE_CLASS_DEFINITION(FileInput::MsgReportFileSourceAcquisition, Message)
+MESSAGE_CLASS_DEFINITION(FileInput::MsgReportFileInputStreamData, Message)
+MESSAGE_CLASS_DEFINITION(FileInput::MsgReportFileInputStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(FileInput::MsgReportHeaderCRC, Message)
 
-FileSourceInput::FileSourceInput(DeviceAPI *deviceAPI) :
+FileInput::FileInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
-	m_fileSourceThread(NULL),
+	m_fileInputThread(nullptr),
 	m_deviceDescription(),
 	m_fileName("..."),
 	m_sampleRate(0),
@@ -62,16 +62,16 @@ FileSourceInput::FileSourceInput(DeviceAPI *deviceAPI) :
     m_startingTimeStamp(0)
 {
     m_deviceAPI->setNbSourceStreams(1);
-    qDebug("FileSourceInput::FileSourceInput: device source engine: %p", m_deviceAPI->getDeviceSourceEngine());
-    qDebug("FileSourceInput::FileSourceInput: device source engine message queue: %p", m_deviceAPI->getDeviceEngineInputMessageQueue());
-    qDebug("FileSourceInput::FileSourceInput: device source: %p", m_deviceAPI->getDeviceSourceEngine()->getSource());
+    qDebug("FileInput::FileInput: device source engine: %p", m_deviceAPI->getDeviceSourceEngine());
+    qDebug("FileInput::FileInput: device source engine message queue: %p", m_deviceAPI->getDeviceEngineInputMessageQueue());
+    qDebug("FileInput::FileInput: device source: %p", m_deviceAPI->getDeviceSourceEngine()->getSource());
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     m_masterTimer.setTimerType(Qt::PreciseTimer);
     m_masterTimer.start(50);
 }
 
-FileSourceInput::~FileSourceInput()
+FileInput::~FileInput()
 {
     m_masterTimer.stop();
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -80,12 +80,12 @@ FileSourceInput::~FileSourceInput()
 	stop();
 }
 
-void FileSourceInput::destroy()
+void FileInput::destroy()
 {
     delete this;
 }
 
-void FileSourceInput::openFileStream()
+void FileInput::openFileStream()
 {
 	//stopInput();
 
@@ -113,12 +113,12 @@ void FileSourceInput::openFileStream()
 
 	    if (crcOK)
 	    {
-	        qDebug("FileSourceInput::openFileStream: CRC32 OK for header: %s", qPrintable(crcHex));
+	        qDebug("FileInput::openFileStream: CRC32 OK for header: %s", qPrintable(crcHex));
 	        m_recordLength = (fileSize - sizeof(FileRecord::Header)) / ((m_sampleSize == 24 ? 8 : 4) * m_sampleRate);
 	    }
 	    else
 	    {
-	        qCritical("FileSourceInput::openFileStream: bad CRC32 for header: %s", qPrintable(crcHex));
+	        qCritical("FileInput::openFileStream: bad CRC32 for header: %s", qPrintable(crcHex));
 	        m_recordLength = 0;
 	    }
 
@@ -132,7 +132,7 @@ void FileSourceInput::openFileStream()
 		m_recordLength = 0;
 	}
 
-	qDebug() << "FileSourceInput::openFileStream: " << m_fileName.toStdString().c_str()
+	qDebug() << "FileInput::openFileStream: " << m_fileName.toStdString().c_str()
 			<< " fileSize: " << fileSize << " bytes"
 			<< " length: " << m_recordLength << " seconds"
 			<< " sample rate: " << m_sampleRate << " S/s"
@@ -140,7 +140,7 @@ void FileSourceInput::openFileStream()
 			<< " sample size: " << m_sampleSize << " bits";
 
 	if (getMessageQueueToGUI()) {
-	    MsgReportFileSourceStreamData *report = MsgReportFileSourceStreamData::create(m_sampleRate,
+	    MsgReportFileInputStreamData *report = MsgReportFileInputStreamData::create(m_sampleRate,
 	            m_sampleSize,
 	            m_centerFrequency,
 	            m_startingTimeStamp,
@@ -153,36 +153,36 @@ void FileSourceInput::openFileStream()
 	}
 }
 
-void FileSourceInput::seekFileStream(int seekMillis)
+void FileInput::seekFileStream(int seekMillis)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if ((m_ifstream.is_open()) && m_fileSourceThread && !m_fileSourceThread->isRunning())
+	if ((m_ifstream.is_open()) && m_fileInputThread && !m_fileInputThread->isRunning())
 	{
         quint64 seekPoint = ((m_recordLength * seekMillis) / 1000) * m_sampleRate;
-		m_fileSourceThread->setSamplesCount(seekPoint);
+		m_fileInputThread->setSamplesCount(seekPoint);
         seekPoint *= (m_sampleSize == 24 ? 8 : 4); // + sizeof(FileSink::Header)
 		m_ifstream.clear();
 		m_ifstream.seekg(seekPoint + sizeof(FileRecord::Header), std::ios::beg);
 	}
 }
 
-void FileSourceInput::init()
+void FileInput::init()
 {
     DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate, m_settings.m_centerFrequency);
     m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 }
 
-bool FileSourceInput::start()
+bool FileInput::start()
 {
     if (!m_ifstream.is_open())
     {
-        qWarning("FileSourceInput::start: file not open. not starting");
+        qWarning("FileInput::start: file not open. not starting");
         return false;
     }
 
 	QMutexLocker mutexLocker(&m_mutex);
-	qDebug() << "FileSourceInput::start";
+	qDebug() << "FileInput::start";
 
 	if (m_ifstream.tellg() != (std::streampos)0) {
 		m_ifstream.clear();
@@ -194,13 +194,13 @@ bool FileSourceInput::start()
 		return false;
 	}
 
-	m_fileSourceThread = new FileSourceThread(&m_ifstream, &m_sampleFifo, m_masterTimer, &m_inputMessageQueue);
-	m_fileSourceThread->setSampleRateAndSize(m_settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
-	m_fileSourceThread->startWork();
-	m_deviceDescription = "FileSource";
+	m_fileInputThread = new FileInputThread(&m_ifstream, &m_sampleFifo, m_masterTimer, &m_inputMessageQueue);
+	m_fileInputThread->setSampleRateAndSize(m_settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
+	m_fileInputThread->startWork();
+	m_deviceDescription = "FileInput";
 
 	mutexLocker.unlock();
-	qDebug("FileSourceInput::startInput: started");
+	qDebug("FileInput::startInput: started");
 
 	if (getMessageQueueToGUI()) {
         MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(true); // acquisition on
@@ -210,16 +210,16 @@ bool FileSourceInput::start()
 	return true;
 }
 
-void FileSourceInput::stop()
+void FileInput::stop()
 {
-	qDebug() << "FileSourceInput::stop";
+	qDebug() << "FileInput::stop";
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_fileSourceThread != 0)
+	if (m_fileInputThread)
 	{
-		m_fileSourceThread->stopWork();
-		delete m_fileSourceThread;
-		m_fileSourceThread = 0;
+		m_fileInputThread->stopWork();
+		delete m_fileInputThread;
+		m_fileInputThread = nullptr;
 	}
 
 	m_deviceDescription.clear();
@@ -230,12 +230,12 @@ void FileSourceInput::stop()
 	}
 }
 
-QByteArray FileSourceInput::serialize() const
+QByteArray FileInput::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool FileSourceInput::deserialize(const QByteArray& data)
+bool FileInput::deserialize(const QByteArray& data)
 {
     bool success = true;
 
@@ -245,59 +245,59 @@ bool FileSourceInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureFileSource* message = MsgConfigureFileSource::create(m_settings, true);
+    MsgConfigureFileInput* message = MsgConfigureFileInput::create(m_settings, true);
     m_inputMessageQueue.push(message);
 
     if (getMessageQueueToGUI())
     {
-        MsgConfigureFileSource* messageToGUI = MsgConfigureFileSource::create(m_settings, true);
+        MsgConfigureFileInput* messageToGUI = MsgConfigureFileInput::create(m_settings, true);
         getMessageQueueToGUI()->push(messageToGUI);
     }
 
     return success;
 }
 
-const QString& FileSourceInput::getDeviceDescription() const
+const QString& FileInput::getDeviceDescription() const
 {
 	return m_deviceDescription;
 }
 
-int FileSourceInput::getSampleRate() const
+int FileInput::getSampleRate() const
 {
 	return m_sampleRate;
 }
 
-quint64 FileSourceInput::getCenterFrequency() const
+quint64 FileInput::getCenterFrequency() const
 {
 	return m_centerFrequency;
 }
 
-void FileSourceInput::setCenterFrequency(qint64 centerFrequency)
+void FileInput::setCenterFrequency(qint64 centerFrequency)
 {
-    FileSourceInputSettings settings = m_settings;
+    FileInputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureFileSource* message = MsgConfigureFileSource::create(m_settings, false);
+    MsgConfigureFileInput* message = MsgConfigureFileInput::create(m_settings, false);
     m_inputMessageQueue.push(message);
 
     if (getMessageQueueToGUI())
     {
-        MsgConfigureFileSource* messageToGUI = MsgConfigureFileSource::create(m_settings, false);
+        MsgConfigureFileInput* messageToGUI = MsgConfigureFileInput::create(m_settings, false);
         getMessageQueueToGUI()->push(messageToGUI);
     }
 }
 
-quint64 FileSourceInput::getStartingTimeStamp() const
+quint64 FileInput::getStartingTimeStamp() const
 {
 	return m_startingTimeStamp;
 }
 
-bool FileSourceInput::handleMessage(const Message& message)
+bool FileInput::handleMessage(const Message& message)
 {
-    if (MsgConfigureFileSource::match(message))
+    if (MsgConfigureFileInput::match(message))
     {
-        MsgConfigureFileSource& conf = (MsgConfigureFileSource&) message;
-        FileSourceInputSettings settings = conf.getSettings();
+        MsgConfigureFileInput& conf = (MsgConfigureFileInput&) message;
+        FileInputSettings settings = conf.getSettings();
         applySettings(settings);
         return true;
     }
@@ -308,17 +308,17 @@ bool FileSourceInput::handleMessage(const Message& message)
 		openFileStream();
 		return true;
 	}
-	else if (MsgConfigureFileSourceWork::match(message))
+	else if (MsgConfigureFileInputWork::match(message))
 	{
-		MsgConfigureFileSourceWork& conf = (MsgConfigureFileSourceWork&) message;
+		MsgConfigureFileInputWork& conf = (MsgConfigureFileInputWork&) message;
 		bool working = conf.isWorking();
 
-		if (m_fileSourceThread != 0)
+		if (m_fileInputThread != 0)
 		{
 			if (working) {
-				m_fileSourceThread->startWork();
+				m_fileInputThread->startWork();
 			} else {
-				m_fileSourceThread->stopWork();
+				m_fileInputThread->stopWork();
 			}
 		}
 
@@ -332,15 +332,15 @@ bool FileSourceInput::handleMessage(const Message& message)
 
 		return true;
 	}
-	else if (MsgConfigureFileSourceStreamTiming::match(message))
+	else if (MsgConfigureFileInputStreamTiming::match(message))
 	{
-		MsgReportFileSourceStreamTiming *report;
+		MsgReportFileInputStreamTiming *report;
 
-		if (m_fileSourceThread != 0)
+		if (m_fileInputThread != 0)
 		{
 			if (getMessageQueueToGUI())
 			{
-                report = MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
+                report = MsgReportFileInputStreamTiming::create(m_fileInputThread->getSamplesCount());
                 getMessageQueueToGUI()->push(report);
 			}
 		}
@@ -350,7 +350,7 @@ bool FileSourceInput::handleMessage(const Message& message)
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
-        qDebug() << "FileSourceInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+        qDebug() << "FileInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
 
         if (cmd.getStartStop())
         {
@@ -370,21 +370,21 @@ bool FileSourceInput::handleMessage(const Message& message)
 
         return true;
     }
-    else if (FileSourceThread::MsgReportEOF::match(message))
+    else if (FileInputThread::MsgReportEOF::match(message))
     {
-        qDebug() << "FileSourceInput::handleMessage: MsgReportEOF";
-        m_fileSourceThread->stopWork();
+        qDebug() << "FileInput::handleMessage: MsgReportEOF";
+        m_fileInputThread->stopWork();
 
         if (getMessageQueueToGUI())
         {
-            MsgReportFileSourceStreamTiming *report = MsgReportFileSourceStreamTiming::create(m_fileSourceThread->getSamplesCount());
+            MsgReportFileInputStreamTiming *report = MsgReportFileInputStreamTiming::create(m_fileInputThread->getSamplesCount());
             getMessageQueueToGUI()->push(report);
         }
 
         if (m_settings.m_loop)
         {
             seekFileStream(0);
-            m_fileSourceThread->startWork();
+            m_fileInputThread->startWork();
         }
         else
         {
@@ -403,7 +403,7 @@ bool FileSourceInput::handleMessage(const Message& message)
 	}
 }
 
-bool FileSourceInput::applySettings(const FileSourceInputSettings& settings, bool force)
+bool FileInput::applySettings(const FileInputSettings& settings, bool force)
 {
     QList<QString> reverseAPIKeys;
 
@@ -415,14 +415,14 @@ bool FileSourceInput::applySettings(const FileSourceInputSettings& settings, boo
     {
         reverseAPIKeys.append("accelerationFactor");
 
-        if (m_fileSourceThread)
+        if (m_fileInputThread)
         {
             QMutexLocker mutexLocker(&m_mutex);
             if (!m_sampleFifo.setSize(m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample))) {
-                qCritical("FileSourceInput::applySettings: could not reallocate sample FIFO size to %lu",
+                qCritical("FileInput::applySettings: could not reallocate sample FIFO size to %lu",
                         m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample));
             }
-            m_fileSourceThread->setSampleRateAndSize(settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
+            m_fileInputThread->setSampleRateAndSize(settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
         }
     }
 
@@ -446,54 +446,54 @@ bool FileSourceInput::applySettings(const FileSourceInputSettings& settings, boo
     return true;
 }
 
-int FileSourceInput::webapiSettingsGet(
+int FileInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
                 QString& errorMessage)
 {
     (void) errorMessage;
-    response.setFileSourceInputSettings(new SWGSDRangel::SWGFileSourceInputSettings());
-    response.getFileSourceInputSettings()->init();
+    response.setFileInputSettings(new SWGSDRangel::SWGFileInputSettings());
+    response.getFileInputSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }
 
-int FileSourceInput::webapiSettingsPutPatch(
+int FileInput::webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage)
 {
     (void) errorMessage;
-    FileSourceInputSettings settings = m_settings;
+    FileInputSettings settings = m_settings;
 
     if (deviceSettingsKeys.contains("fileName")) {
-        settings.m_fileName = *response.getFileSourceInputSettings()->getFileName();
+        settings.m_fileName = *response.getFileInputSettings()->getFileName();
     }
     if (deviceSettingsKeys.contains("accelerationFactor")) {
-        settings.m_accelerationFactor = response.getFileSourceInputSettings()->getAccelerationFactor();
+        settings.m_accelerationFactor = response.getFileInputSettings()->getAccelerationFactor();
     }
     if (deviceSettingsKeys.contains("loop")) {
-        settings.m_loop = response.getFileSourceInputSettings()->getLoop() != 0;
+        settings.m_loop = response.getFileInputSettings()->getLoop() != 0;
     }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getFileSourceInputSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getFileInputSettings()->getUseReverseApi() != 0;
     }
     if (deviceSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getFileSourceInputSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getFileInputSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getFileSourceInputSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getFileInputSettings()->getReverseApiPort();
     }
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getFileSourceInputSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getFileInputSettings()->getReverseApiDeviceIndex();
     }
 
-    MsgConfigureFileSource *msg = MsgConfigureFileSource::create(settings, force);
+    MsgConfigureFileInput *msg = MsgConfigureFileInput::create(settings, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureFileSource *msgToGUI = MsgConfigureFileSource::create(settings, force);
+        MsgConfigureFileInput *msgToGUI = MsgConfigureFileInput::create(settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -501,7 +501,7 @@ int FileSourceInput::webapiSettingsPutPatch(
     return 200;
 }
 
-int FileSourceInput::webapiRunGet(
+int FileInput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
 {
@@ -510,7 +510,7 @@ int FileSourceInput::webapiRunGet(
     return 200;
 }
 
-int FileSourceInput::webapiRun(
+int FileInput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
@@ -529,43 +529,43 @@ int FileSourceInput::webapiRun(
     return 200;
 }
 
-int FileSourceInput::webapiReportGet(
+int FileInput::webapiReportGet(
         SWGSDRangel::SWGDeviceReport& response,
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setFileSourceInputReport(new SWGSDRangel::SWGFileSourceInputReport());
-    response.getFileSourceInputReport()->init();
+    response.setFileInputReport(new SWGSDRangel::SWGFileInputReport());
+    response.getFileInputReport()->init();
     webapiFormatDeviceReport(response);
     return 200;
 }
 
-void FileSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FileSourceInputSettings& settings)
+void FileInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FileInputSettings& settings)
 {
-    response.getFileSourceInputSettings()->setFileName(new QString(settings.m_fileName));
-    response.getFileSourceInputSettings()->setAccelerationFactor(settings.m_accelerationFactor);
-    response.getFileSourceInputSettings()->setLoop(settings.m_loop ? 1 : 0);
+    response.getFileInputSettings()->setFileName(new QString(settings.m_fileName));
+    response.getFileInputSettings()->setAccelerationFactor(settings.m_accelerationFactor);
+    response.getFileInputSettings()->setLoop(settings.m_loop ? 1 : 0);
 
-    response.getFileSourceInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getFileInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getFileSourceInputSettings()->getReverseApiAddress()) {
-        *response.getFileSourceInputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getFileInputSettings()->getReverseApiAddress()) {
+        *response.getFileInputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getFileSourceInputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getFileInputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getFileSourceInputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getFileSourceInputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getFileInputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getFileInputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
-void FileSourceInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+void FileInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
     qint64 t_sec = 0;
     qint64 t_msec = 0;
     quint64 samplesCount = 0;
 
-    if (m_fileSourceThread) {
-        samplesCount = m_fileSourceThread->getSamplesCount();
+    if (m_fileInputThread) {
+        samplesCount = m_fileInputThread->getSamplesCount();
     }
 
     if (m_sampleRate > 0)
@@ -577,42 +577,42 @@ void FileSourceInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& res
     QTime t(0, 0, 0, 0);
     t = t.addSecs(t_sec);
     t = t.addMSecs(t_msec);
-    response.getFileSourceInputReport()->setElapsedTime(new QString(t.toString("HH:mm:ss.zzz")));
+    response.getFileInputReport()->setElapsedTime(new QString(t.toString("HH:mm:ss.zzz")));
 
     qint64 startingTimeStampMsec = m_startingTimeStamp * 1000LL;
     QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
     dt = dt.addSecs(t_sec);
     dt = dt.addMSecs(t_msec);
-    response.getFileSourceInputReport()->setAbsoluteTime(new QString(dt.toString("yyyy-MM-dd HH:mm:ss.zzz")));
+    response.getFileInputReport()->setAbsoluteTime(new QString(dt.toString("yyyy-MM-dd HH:mm:ss.zzz")));
 
     QTime recordLength(0, 0, 0, 0);
     recordLength = recordLength.addSecs(m_recordLength);
-    response.getFileSourceInputReport()->setDurationTime(new QString(recordLength.toString("HH:mm:ss")));
+    response.getFileInputReport()->setDurationTime(new QString(recordLength.toString("HH:mm:ss")));
 
-    response.getFileSourceInputReport()->setFileName(new QString(m_fileName));
-    response.getFileSourceInputReport()->setSampleRate(m_sampleRate);
-    response.getFileSourceInputReport()->setSampleSize(m_sampleSize);
+    response.getFileInputReport()->setFileName(new QString(m_fileName));
+    response.getFileInputReport()->setSampleRate(m_sampleRate);
+    response.getFileInputReport()->setSampleSize(m_sampleSize);
 }
 
-void FileSourceInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FileSourceInputSettings& settings, bool force)
+void FileInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FileInputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
-    swgDeviceSettings->setDeviceHwType(new QString("FileSource"));
-    swgDeviceSettings->setFileSourceInputSettings(new SWGSDRangel::SWGFileSourceInputSettings());
-    SWGSDRangel::SWGFileSourceInputSettings *swgFileSourceInputSettings = swgDeviceSettings->getFileSourceInputSettings();
+    swgDeviceSettings->setDeviceHwType(new QString("FileInput"));
+    swgDeviceSettings->setFileInputSettings(new SWGSDRangel::SWGFileInputSettings());
+    SWGSDRangel::SWGFileInputSettings *swgFileInputSettings = swgDeviceSettings->getFileInputSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
     if (deviceSettingsKeys.contains("accelerationFactor") || force) {
-        swgFileSourceInputSettings->setAccelerationFactor(settings.m_accelerationFactor);
+        swgFileInputSettings->setAccelerationFactor(settings.m_accelerationFactor);
     }
     if (deviceSettingsKeys.contains("loop") || force) {
-        swgFileSourceInputSettings->setLoop(settings.m_loop);
+        swgFileInputSettings->setLoop(settings.m_loop);
     }
     if (deviceSettingsKeys.contains("fileName") || force) {
-        swgFileSourceInputSettings->setFileName(new QString(settings.m_fileName));
+        swgFileInputSettings->setFileName(new QString(settings.m_fileName));
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
@@ -633,12 +633,12 @@ void FileSourceInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKe
     delete swgDeviceSettings;
 }
 
-void FileSourceInput::webapiReverseSendStartStop(bool start)
+void FileInput::webapiReverseSendStartStop(bool start)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
-    swgDeviceSettings->setDeviceHwType(new QString("FileSource"));
+    swgDeviceSettings->setDeviceHwType(new QString("FileInput"));
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
             .arg(m_settings.m_reverseAPIAddress)
@@ -661,13 +661,13 @@ void FileSourceInput::webapiReverseSendStartStop(bool start)
     delete swgDeviceSettings;
 }
 
-void FileSourceInput::networkManagerFinished(QNetworkReply *reply)
+void FileInput::networkManagerFinished(QNetworkReply *reply)
 {
     QNetworkReply::NetworkError replyError = reply->error();
 
     if (replyError)
     {
-        qWarning() << "FileSourceInput::networkManagerFinished:"
+        qWarning() << "FileInput::networkManagerFinished:"
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();
@@ -676,5 +676,5 @@ void FileSourceInput::networkManagerFinished(QNetworkReply *reply)
 
     QString answer = reply->readAll();
     answer.chop(1); // remove last \n
-    qDebug("FileSourceInput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    qDebug("FileInput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
 }

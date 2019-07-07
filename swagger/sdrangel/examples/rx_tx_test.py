@@ -35,7 +35,7 @@ def getInputOptions():
         options.address = "127.0.0.1:8091"
 
     if options.device_hwid_rx == None:
-        options.device_hwid_rx = "FileSource"
+        options.device_hwid_rx = "FileInput"
 
     if options.device_hwid_tx == None:
         options.device_hwid_tx = "FileSink"

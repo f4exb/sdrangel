@@ -1,4 +1,4 @@
-<h1>File source input plugin</h1>
+<h1>File input plugin</h1>
 
 <h2>Introduction</h2>
 
@@ -46,16 +46,16 @@ The header takes an integer number of 16 (4 bytes) or 24 (8 bytes) bits samples.
 
 <h2>Interface</h2>
 
-![FileSource input plugin GUI](../../../doc/img/FileSource_plugin.png)
+![File input plugin GUI](../../../doc/img/FileInput_plugin.png)
 
 <h3>1: Start/Stop</h3>
 
-Device start / stop button. 
+Device start / stop button.
 
   - Blue triangle icon: ready to be started
   - Green square icon: currently running and can be stopped
   - Magenta (or pink) square icon: an error occurred. The file may not be found or this can be a header CRC error or the file is too small (less than the header length). You may stop and choose another file.
-  
+
 <h3>2: Stream sample rate</h3>
 
 Baseband I/Q sample rate in kS/s. This is the sample rate present in the header.
@@ -111,4 +111,3 @@ Left is the relative timestamp of the current pointer from the start of the reco
 <h3>14: Current pointer gauge</h3>
 
 This represents the position of the current pointer position in the complete recording. It can be used it paused mode to position the current pointer by moving the slider.
- 

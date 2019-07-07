@@ -1,0 +1,42 @@
+FileInputSettings:
+  description: FileInput
+  properties:
+    fileName:
+      description: The name (path) of the file being read
+      type: string
+    accelerationFactor:
+      description: Playback acceleration (1 if normal speed)
+      type: integer
+    loop:
+      description: 1 if playing in a loop else 0
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+
+FileInputReport:
+  description: FileInput
+  properties:
+    fileName:
+      type: string
+    sampleRate:
+      description: Record sample rate in S/s
+      type: integer
+    sampleSize:
+      description: Record sample size in number of bits
+      type: integer
+    absoluteTime:
+      description: Absolute record time string representation
+      type: string
+    elapsedTime:
+      description: Elapsed time since beginning string representation
+      type: string
+    durationTime:
+      description: Duration time string representation
+      type: string

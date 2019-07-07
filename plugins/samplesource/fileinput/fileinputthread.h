@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2015-2019 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FILESOURCETHREAD_H
-#define INCLUDE_FILESOURCETHREAD_H
+#ifndef INCLUDE_FILEINPUTTHREAD_H
+#define INCLUDE_FILEINPUTTHREAD_H
 
 #include <QThread>
 #include <QMutex>
@@ -35,7 +35,7 @@
 class SampleSinkFifo;
 class MessageQueue;
 
-class FileSourceThread : public QThread {
+class FileInputThread : public QThread {
 	Q_OBJECT
 
 public:
@@ -43,25 +43,22 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-
-        static MsgReportEOF* create()
-        {
+        static MsgReportEOF* create() {
             return new MsgReportEOF();
         }
 
     private:
-
         MsgReportEOF() :
             Message()
         { }
     };
 
-	FileSourceThread(std::ifstream *samplesStream,
+	FileInputThread(std::ifstream *samplesStream,
 	        SampleSinkFifo* sampleFifo,
 	        const QTimer& timer,
 	        MessageQueue *fileInputMessageQueue,
 	        QObject* parent = NULL);
-	~FileSourceThread();
+	~FileInputThread();
 
 	void startWork();
 	void stopWork();
@@ -96,8 +93,9 @@ private:
 	void run();
 	//void decimate1(SampleVector::iterator* it, const qint16* buf, qint32 len);
 	void writeToSampleFifo(const quint8* buf, qint32 nbBytes);
+
 private slots:
 	void tick();
 };
 
-#endif // INCLUDE_FILESOURCETHREAD_H
+#endif // INCLUDE_FILEINPUTTHREAD_H
