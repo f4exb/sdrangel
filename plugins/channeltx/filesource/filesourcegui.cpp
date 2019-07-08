@@ -102,6 +102,49 @@ bool FileSourceGUI::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
+    else if (FileSource::MsgReportFileSourceAcquisition::match(message))
+	{
+		m_acquisition = ((FileSource::MsgReportFileSourceAcquisition&)message).getAcquisition();
+		updateWithAcquisition();
+		return true;
+	}
+	else if (FileSource::MsgReportFileSourceStreamData::match(message))
+	{
+		m_fileSampleRate = ((FileSource::MsgReportFileSourceStreamData&)message).getSampleRate();
+		m_fileSampleSize = ((FileSource::MsgReportFileSourceStreamData&)message).getSampleSize();
+		m_startingTimeStamp = ((FileSource::MsgReportFileSourceStreamData&)message).getStartingTimeStamp();
+		m_recordLength = ((FileSource::MsgReportFileSourceStreamData&)message).getRecordLength();
+		updateWithStreamData();
+		return true;
+	}
+	else if (FileSource::MsgReportFileSourceStreamTiming::match(message))
+	{
+		m_samplesCount = ((FileSource::MsgReportFileSourceStreamTiming&)message).getSamplesCount();
+		updateWithStreamTime();
+		return true;
+	}
+	else if (FileSource::MsgPlayPause::match(message))
+	{
+	    FileSource::MsgPlayPause& notif = (FileSource::MsgPlayPause&) message;
+	    bool checked = notif.getPlayPause();
+	    ui->play->setChecked(checked);
+	    ui->navTime->setEnabled(!checked);
+	    m_enableNavTime = !checked;
+
+	    return true;
+	}
+	else if (FileSource::MsgReportHeaderCRC::match(message))
+	{
+		FileSource::MsgReportHeaderCRC& notif = (FileSource::MsgReportHeaderCRC&) message;
+
+        if (notif.isOK()) {
+			ui->crcLabel->setStyleSheet("QLabel { background-color : green; }");
+		} else {
+			ui->crcLabel->setStyleSheet("QLabel { background-color : red; }");
+		}
+
+		return true;
+	}
     else
     {
         return false;
@@ -113,6 +156,16 @@ FileSourceGUI::FileSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
         ui(new Ui::FileSourceGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
+        m_sampleRate(0),
+        m_shiftFrequencyFactor(0.0),
+        m_fileSampleRate(0),
+        m_fileSampleSize(0),
+        m_recordLength(0),
+        m_startingTimeStamp(0),
+        m_samplesCount(0),
+        m_acquisition(false),
+        m_enableNavTime(false),
+        m_doApplySettings(true),
         m_tickCount(0)
 {
     (void) channelTx;
@@ -188,6 +241,54 @@ void FileSourceGUI::configureFileName()
 	qDebug() << "FileSourceGui::configureFileName: " << m_fileName.toStdString().c_str();
 	FileSource::MsgConfigureFileSourceName* message = FileSource::MsgConfigureFileSourceName::create(m_fileName);
 	m_fileSource->getInputMessageQueue()->push(message);
+}
+
+void FileSourceGUI::updateWithAcquisition()
+{
+	ui->play->setChecked(m_acquisition);
+	ui->showFileDialog->setEnabled(!m_acquisition);
+}
+
+void FileSourceGUI::updateWithStreamData()
+{
+	ui->sampleRateText->setText(tr("%1k").arg((float) m_fileSampleRate / 1000));
+	ui->sampleSizeText->setText(tr("%1b").arg(m_fileSampleSize));
+	QTime recordLength(0, 0, 0, 0);
+	recordLength = recordLength.addSecs(m_recordLength);
+	QString s_time = recordLength.toString("HH:mm:ss");
+	ui->recordLengthText->setText(s_time);
+	updateWithStreamTime();
+}
+
+void FileSourceGUI::updateWithStreamTime()
+{
+    qint64 t_sec = 0;
+    qint64 t_msec = 0;
+
+	if (m_fileSampleRate > 0)
+    {
+		t_sec = m_samplesCount / m_fileSampleRate;
+        t_msec = (m_samplesCount - (t_sec * m_fileSampleRate)) * 1000LL / m_fileSampleRate;
+	}
+
+	QTime t(0, 0, 0, 0);
+	t = t.addSecs(t_sec);
+	t = t.addMSecs(t_msec);
+	QString s_timems = t.toString("HH:mm:ss.zzz");
+	ui->relTimeText->setText(s_timems);
+
+    qint64 startingTimeStampMsec = m_startingTimeStamp * 1000LL;
+	QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
+    dt = dt.addSecs(t_sec);
+    dt = dt.addMSecs(t_msec);
+	QString s_date = dt.toString("yyyy-MM-dd HH:mm:ss.zzz");
+	ui->absTimeText->setText(s_date);
+
+	if (!m_enableNavTime)
+	{
+		float posRatio = (float) t_sec / (float) m_recordLength;
+		ui->navTime->setValue((int) (posRatio * 1000.0));
+	}
 }
 
 void FileSourceGUI::displaySettings()
@@ -362,6 +463,8 @@ void FileSourceGUI::tick()
 {
     if (++m_tickCount == 20) // once per second
     {
+		FileSource::MsgConfigureFileSourceStreamTiming* message = FileSource::MsgConfigureFileSourceStreamTiming::create();
+		m_fileSource->getInputMessageQueue()->push(message);
         m_tickCount = 0;
     }
 }

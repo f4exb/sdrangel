@@ -198,18 +198,25 @@ void FileSource::pullAudio(int nbSamples)
 void FileSource::start()
 {
     qDebug("FileSource::start");
-
-    if (m_running) {
-        stop();
-    }
-
     m_running = true;
+
+	if (getMessageQueueToGUI())
+    {
+        MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(true); // acquisition on
+        getMessageQueueToGUI()->push(report);
+	}
 }
 
 void FileSource::stop()
 {
     qDebug("FileSource::stop");
     m_running = false;
+
+	if (getMessageQueueToGUI())
+    {
+        MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(false); // acquisition off
+        getMessageQueueToGUI()->push(report);
+	}
 }
 
 bool FileSource::handleMessage(const Message& cmd)
@@ -361,6 +368,7 @@ void FileSource::openFileStream()
 	m_ifstream.open(m_fileName.toStdString().c_str(), std::ios::binary | std::ios::ate);
 #endif
 	quint64 fileSize = m_ifstream.tellg();
+    m_samplesCount = 0;
 
 	if (fileSize > sizeof(FileRecord::Header))
 	{
@@ -399,7 +407,8 @@ void FileSource::openFileStream()
 			<< " length: " << m_recordLength << " seconds"
 			<< " sample rate: " << m_fileSampleRate << " S/s"
 			<< " center frequency: " << m_centerFrequency << " Hz"
-			<< " sample size: " << m_sampleSize << " bits";
+			<< " sample size: " << m_sampleSize << " bits"
+            << " starting TS: " << m_startingTimeStamp << "s";
 
 	if (getMessageQueueToGUI()) {
 	    MsgReportFileSourceStreamData *report = MsgReportFileSourceStreamData::create(m_fileSampleRate,
@@ -422,6 +431,7 @@ void FileSource::seekFileStream(int seekMillis)
 	if ((m_ifstream.is_open()) && !m_running)
 	{
         quint64 seekPoint = ((m_recordLength * seekMillis) / 1000) * m_fileSampleRate;
+        m_samplesCount = seekPoint;
         seekPoint *= (m_sampleSize == 24 ? 8 : 4); // + sizeof(FileSink::Header)
 		m_ifstream.clear();
 		m_ifstream.seekg(seekPoint + sizeof(FileRecord::Header), std::ios::beg);
@@ -441,6 +451,7 @@ void FileSource::handleEOF()
     if (m_settings.m_loop)
     {
         seekFileStream(0);
+        m_samplesCount = 0;
         start();
     }
     else

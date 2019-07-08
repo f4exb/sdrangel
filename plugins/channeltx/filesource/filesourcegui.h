@@ -66,6 +66,12 @@ private:
     int m_sampleRate;
     double m_shiftFrequencyFactor; //!< Channel frequency shift factor
     QString m_fileName;
+    int m_fileSampleRate;
+    quint32 m_fileSampleSize;
+    quint64 m_recordLength;
+    quint64 m_startingTimeStamp;
+    quint64 m_samplesCount;
+    bool m_acquisition;
   	bool m_enableNavTime;
     bool m_doApplySettings;
 
@@ -82,6 +88,9 @@ private:
     void applySettings(bool force = false);
     void applyChannelSettings();
     void configureFileName();
+	void updateWithAcquisition();
+	void updateWithStreamData();
+	void updateWithStreamTime();
     void displaySettings();
     void displayRateAndShift();
 
