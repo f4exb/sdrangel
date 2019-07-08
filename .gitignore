@@ -6,6 +6,7 @@ presets/*
 LOCAL/*
 sdrangelove.supp
 .cproject
+.flatpak-builder/
 .project
 .pydevproject
 .vscode/
