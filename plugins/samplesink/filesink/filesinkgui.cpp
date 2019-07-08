@@ -134,6 +134,7 @@ bool FileSinkGui::handleMessage(const Message& message)
 {
     if (FileSinkOutput::MsgConfigureFileSink::match(message))
     {
+        qDebug("FileSinkGui::handleMessage: message: MsgConfigureFileSink");
         const FileSinkOutput::MsgConfigureFileSink& cfg = (FileSinkOutput::MsgConfigureFileSink&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
@@ -144,6 +145,7 @@ bool FileSinkGui::handleMessage(const Message& message)
     else if (FileSinkOutput::MsgReportFileSinkGeneration::match(message))
 	{
 		m_generation = ((FileSinkOutput::MsgReportFileSinkGeneration&)message).getAcquisition();
+        qDebug("FileSinkGui::handleMessage: message: MsgReportFileSinkGeneration: %s", m_generation ? "start" : "stop");
 		updateWithGeneration();
 		return true;
 	}
@@ -156,6 +158,7 @@ bool FileSinkGui::handleMessage(const Message& message)
 	else if (FileSinkOutput::MsgStartStop::match(message))
 	{
 	    FileSinkOutput::MsgStartStop& notif = (FileSinkOutput::MsgStartStop&) message;
+        qDebug("FileSinkGui::handleMessage: message: MsgStartStop: %s", notif.getStartStop() ? "start" : "stop");
 	    blockApplySettings(true);
 	    ui->startStop->setChecked(notif.getStartStop());
 	    blockApplySettings(false);
@@ -173,7 +176,6 @@ void FileSinkGui::handleInputMessages()
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("FileSinkGui::handleInputMessages: message: %s", message->getIdentifier());
 
         if (DSPSignalNotification::match(*message))
         {
