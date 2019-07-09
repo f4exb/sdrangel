@@ -29,6 +29,7 @@ struct FileSourceSettings
     bool m_loop;
     uint32_t m_log2Interp;
     uint32_t m_filterChainHash;
+    int m_gainDB;
     quint32 m_rgbColor;
     QString m_title;
     bool m_useReverseAPI;

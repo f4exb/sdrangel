@@ -36,6 +36,8 @@ SWGFileSourceSettings::SWGFileSourceSettings() {
     m_log2_interp_isSet = false;
     filter_chain_hash = 0;
     m_filter_chain_hash_isSet = false;
+    gain_db = 0;
+    m_gain_db_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -66,6 +68,8 @@ SWGFileSourceSettings::init() {
     m_log2_interp_isSet = false;
     filter_chain_hash = 0;
     m_filter_chain_hash_isSet = false;
+    gain_db = 0;
+    m_gain_db_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -87,6 +91,7 @@ SWGFileSourceSettings::cleanup() {
     if(file_name != nullptr) { 
         delete file_name;
     }
+
 
 
 
@@ -121,6 +126,8 @@ SWGFileSourceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&log2_interp, pJson["log2Interp"], "qint32", "");
     
     ::SWGSDRangel::setValue(&filter_chain_hash, pJson["filterChainHash"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&gain_db, pJson["gainDB"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -163,6 +170,9 @@ SWGFileSourceSettings::asJsonObject() {
     }
     if(m_filter_chain_hash_isSet){
         obj->insert("filterChainHash", QJsonValue(filter_chain_hash));
+    }
+    if(m_gain_db_isSet){
+        obj->insert("gainDB", QJsonValue(gain_db));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -227,6 +237,16 @@ void
 SWGFileSourceSettings::setFilterChainHash(qint32 filter_chain_hash) {
     this->filter_chain_hash = filter_chain_hash;
     this->m_filter_chain_hash_isSet = true;
+}
+
+qint32
+SWGFileSourceSettings::getGainDb() {
+    return gain_db;
+}
+void
+SWGFileSourceSettings::setGainDb(qint32 gain_db) {
+    this->gain_db = gain_db;
+    this->m_gain_db_isSet = true;
 }
 
 qint32
@@ -308,6 +328,7 @@ SWGFileSourceSettings::isSet(){
         if(m_loop_isSet){ isObjectUpdated = true; break;}
         if(m_log2_interp_isSet){ isObjectUpdated = true; break;}
         if(m_filter_chain_hash_isSet){ isObjectUpdated = true; break;}
+        if(m_gain_db_isSet){ isObjectUpdated = true; break;}
         if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
         if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
         if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}

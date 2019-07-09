@@ -42,6 +42,8 @@ SWGFileSourceReport::SWGFileSourceReport() {
     m_duration_time_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
+    channel_power_db = 0.0f;
+    m_channel_power_db_isSet = false;
 }
 
 SWGFileSourceReport::~SWGFileSourceReport() {
@@ -64,6 +66,8 @@ SWGFileSourceReport::init() {
     m_duration_time_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
+    channel_power_db = 0.0f;
+    m_channel_power_db_isSet = false;
 }
 
 void
@@ -82,6 +86,7 @@ SWGFileSourceReport::cleanup() {
     if(duration_time != nullptr) { 
         delete duration_time;
     }
+
 
 }
 
@@ -109,6 +114,8 @@ SWGFileSourceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&duration_time, pJson["durationTime"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&channel_power_db, pJson["channelPowerDB"], "float", "");
     
 }
 
@@ -146,6 +153,9 @@ SWGFileSourceReport::asJsonObject() {
     }
     if(m_sample_rate_isSet){
         obj->insert("sampleRate", QJsonValue(sample_rate));
+    }
+    if(m_channel_power_db_isSet){
+        obj->insert("channelPowerDB", QJsonValue(channel_power_db));
     }
 
     return obj;
@@ -221,6 +231,16 @@ SWGFileSourceReport::setSampleRate(qint32 sample_rate) {
     this->m_sample_rate_isSet = true;
 }
 
+float
+SWGFileSourceReport::getChannelPowerDb() {
+    return channel_power_db;
+}
+void
+SWGFileSourceReport::setChannelPowerDb(float channel_power_db) {
+    this->channel_power_db = channel_power_db;
+    this->m_channel_power_db_isSet = true;
+}
+
 
 bool
 SWGFileSourceReport::isSet(){
@@ -233,6 +253,7 @@ SWGFileSourceReport::isSet(){
         if(elapsed_time != nullptr && *elapsed_time != QString("")){ isObjectUpdated = true; break;}
         if(duration_time != nullptr && *duration_time != QString("")){ isObjectUpdated = true; break;}
         if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
+        if(m_channel_power_db_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

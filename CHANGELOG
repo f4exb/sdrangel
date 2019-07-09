@@ -1,3 +1,10 @@
+sdrangel (4.11.0-1) unstable; urgency=medium
+
+  * File Source channel plugin
+  * Flatpak build update
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 09 Jul 2019 23:04:06 +0200
+
 sdrangel (4.10.5-1) unstable; urgency=medium
 
   * Windows: removed console display

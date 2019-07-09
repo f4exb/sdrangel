@@ -54,6 +54,9 @@ public:
     qint32 getFilterChainHash();
     void setFilterChainHash(qint32 filter_chain_hash);
 
+    qint32 getGainDb();
+    void setGainDb(qint32 gain_db);
+
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -90,6 +93,9 @@ private:
 
     qint32 filter_chain_hash;
     bool m_filter_chain_hash_isSet;
+
+    qint32 gain_db;
+    bool m_gain_db_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;

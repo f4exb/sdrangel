@@ -6,26 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
-    <height>177</height>
+    <width>382</width>
+    <height>228</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>320</width>
+    <width>382</width>
     <height>140</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>320</width>
-    <height>16777215</height>
    </size>
   </property>
   <property name="font">
@@ -40,11 +34,17 @@
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>301</width>
-     <height>161</height>
+     <x>0</x>
+     <y>0</y>
+     <width>380</width>
+     <height>221</height>
     </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>380</width>
+     <height>0</height>
+    </size>
    </property>
    <property name="windowTitle">
     <string>Settings</string>
@@ -254,6 +254,117 @@
      </layout>
     </item>
     <item>
+     <layout class="QVBoxLayout" name="powerLayer">
+      <property name="spacing">
+       <number>3</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" name="powerMeterLayer">
+        <property name="rightMargin">
+         <number>6</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="channelPowerUnits">
+          <property name="text">
+           <string>dB</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="LevelMeterSignalDB" name="channelPowerMeter" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Liberation Mono</family>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="channelPower">
+          <property name="minimumSize">
+           <size>
+            <width>40</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>-100.0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="gainLayer">
+        <property name="rightMargin">
+         <number>10</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="gainLabel">
+          <property name="text">
+           <string>Gain</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="gain">
+          <property name="toolTip">
+           <string>Gain (dB)</string>
+          </property>
+          <property name="minimum">
+           <number>-10</number>
+          </property>
+          <property name="maximum">
+           <number>50</number>
+          </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="gainText">
+          <property name="minimumSize">
+           <size>
+            <width>45</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Filter chain hash code</string>
+          </property>
+          <property name="text">
+           <string>-10.0 dB</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="fileSelectionLayout">
       <item>
        <widget class="QPushButton" name="showFileDialog">
@@ -299,13 +410,13 @@
        <widget class="QLabel" name="sampleRateText">
         <property name="minimumSize">
          <size>
-          <width>40</width>
+          <width>54</width>
           <height>0</height>
          </size>
         </property>
         <property name="font">
          <font>
-          <pointsize>8</pointsize>
+          <pointsize>9</pointsize>
          </font>
         </property>
         <property name="toolTip">
@@ -330,13 +441,13 @@
        <widget class="QLabel" name="sampleSizeText">
         <property name="minimumSize">
          <size>
-          <width>22</width>
+          <width>24</width>
           <height>0</height>
          </size>
         </property>
         <property name="font">
          <font>
-          <pointsize>8</pointsize>
+          <pointsize>9</pointsize>
          </font>
         </property>
         <property name="toolTip">
@@ -361,7 +472,7 @@
        <widget class="QLabel" name="crcLabel">
         <property name="font">
          <font>
-          <pointsize>8</pointsize>
+          <pointsize>9</pointsize>
          </font>
         </property>
         <property name="toolTip">
@@ -594,6 +705,12 @@
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>LevelMeterSignalDB</class>
+   <extends>QWidget</extends>
+   <header>gui/levelmeter.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

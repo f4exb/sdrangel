@@ -34,6 +34,7 @@ void FileSourceSettings::resetToDefaults()
     m_loop = false;
     m_log2Interp = 0;
     m_filterChainHash = 0;
+    m_gainDB = 0;
     m_rgbColor = QColor(140, 4, 4).rgb();
     m_title = "File source";
     m_channelMarker = nullptr;
@@ -51,13 +52,14 @@ QByteArray FileSourceSettings::serialize() const
     s.writeBool(2, m_loop);
     s.writeU32(3, m_log2Interp);
     s.writeU32(4, m_filterChainHash);
-    s.writeU32(5, m_rgbColor);
-    s.writeString(6, m_title);
-    s.writeBool(7, m_useReverseAPI);
-    s.writeString(8, m_reverseAPIAddress);
-    s.writeU32(9, m_reverseAPIPort);
-    s.writeU32(10, m_reverseAPIDeviceIndex);
-    s.writeU32(11, m_reverseAPIChannelIndex);
+    s.writeS32(5, m_gainDB);
+    s.writeU32(6, m_rgbColor);
+    s.writeString(7, m_title);
+    s.writeBool(8, m_useReverseAPI);
+    s.writeString(9, m_reverseAPIAddress);
+    s.writeU32(10, m_reverseAPIPort);
+    s.writeU32(11, m_reverseAPIDeviceIndex);
+    s.writeU32(12, m_reverseAPIChannelIndex);
 
     return s.final();
 }
@@ -75,6 +77,7 @@ bool FileSourceSettings::deserialize(const QByteArray& data)
     if(d.getVersion() == 1)
     {
         uint32_t tmp;
+        int itmp;
         QString strtmp;
 
         d.readString(1, &m_fileName, "test.sdriq");
@@ -82,6 +85,8 @@ bool FileSourceSettings::deserialize(const QByteArray& data)
         d.readU32(3, &tmp, 0);
         m_log2Interp = tmp > 6 ? 6 : tmp;
         d.readU32(4, &m_filterChainHash, 0);
+        d.readS32(5, &itmp, 20);
+        m_gainDB = itmp < -10 ? -10 : itmp > 50 ? 50 : itmp;
         d.readU32(5, &m_rgbColor, QColor(140, 4, 4).rgb());
         d.readString(6, &m_title, "File source");
         d.readBool(7, &m_useReverseAPI, false);

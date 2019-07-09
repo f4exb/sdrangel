@@ -25,6 +25,8 @@
 #include "device/deviceuiset.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "util/db.h"
+
 #include "mainwindow.h"
 
 #include "filesource.h"
@@ -169,7 +171,10 @@ FileSourceGUI::FileSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
         m_tickCount(0)
 {
     (void) channelTx;
+
     ui->setupUi(this);
+    ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
+
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
@@ -307,6 +312,8 @@ void FileSourceGUI::displaySettings()
     setWindowTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
+    ui->gain->setValue(m_settings.m_gainDB);
+    ui->gainText->setText(tr("%1 dB").arg(m_settings.m_gainDB));
     ui->interpolationFactor->setCurrentIndex(m_settings.m_log2Interp);
     applyInterpolation();
     blockApplySettings(false);
@@ -395,6 +402,13 @@ void FileSourceGUI::on_position_valueChanged(int value)
     applyPosition();
 }
 
+void FileSourceGUI::on_gain_valueChanged(int value)
+{
+    ui->gainText->setText(tr("%1 dB").arg(value));
+    m_settings.m_gainDB = value;
+    applySettings();
+}
+
 void FileSourceGUI::on_showFileDialog_clicked(bool checked)
 {
     (void) checked;
@@ -464,6 +478,21 @@ void FileSourceGUI::applyPosition()
 
 void FileSourceGUI::tick()
 {
+    double magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    m_fileSource->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+    double powDbAvg = CalcDb::dbPower(magsqAvg);
+    double powDbPeak = CalcDb::dbPower(magsqPeak);
+
+    ui->channelPowerMeter->levelChanged(
+            (100.0f + powDbAvg) / 100.0f,
+            (100.0f + powDbPeak) / 100.0f,
+            nbMagsqSamples);
+
+    if (m_tickCount % 4 == 0) {
+        ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
+    }
+
     if (++m_tickCount == 20) // once per second
     {
 		FileSource::MsgConfigureFileSourceStreamTiming* message = FileSource::MsgConfigureFileSourceStreamTiming::create();

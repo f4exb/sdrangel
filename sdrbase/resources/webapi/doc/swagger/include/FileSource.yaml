@@ -11,6 +11,8 @@ FileSourceSettings:
       type: integer
     filterChainHash:
       type: integer
+    gainDB:
+      type: integer
     rgbColor:
       type: integer
     title:
@@ -50,3 +52,7 @@ FileSourceReport:
     sampleRate:
       description: Channel sample rate in S/s
       type: integer
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float

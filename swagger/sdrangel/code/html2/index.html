@@ -2635,6 +2635,11 @@ margin-bottom: 20px;
     "sampleRate" : {
       "type" : "integer",
       "description" : "Channel sample rate in S/s"
+    },
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
     }
   },
   "description" : "FileSource"
@@ -2653,6 +2658,9 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "filterChainHash" : {
+      "type" : "integer"
+    },
+    "gainDB" : {
       "type" : "integer"
     },
     "rgbColor" : {
@@ -25233,7 +25241,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-07-08T00:35:02.822+02:00
+              Generated 2019-07-10T00:43:21.317+02:00
             </div>
           </div>
       </div>

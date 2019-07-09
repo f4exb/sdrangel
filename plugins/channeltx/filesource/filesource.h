@@ -31,7 +31,7 @@
 #include "dsp/basebandsamplesource.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
-
+#include "util/movingaverage.h"
 #include "filesourcesettings.h"
 
 class ThreadedBasebandSampleSource;
@@ -354,11 +354,40 @@ public:
     void setSampleRate(uint32_t sampleRate) { m_sampleRate = sampleRate; }
 
     quint64 getSamplesCount() const { return m_samplesCount; }
+    double getMagSq() const { return m_magsq; }
+
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
+    {
+        if (m_magsqCount > 0)
+        {
+            m_magsq = m_magsqSum / m_magsqCount;
+            m_magSqLevelStore.m_magsq = m_magsq;
+            m_magSqLevelStore.m_magsqPeak = m_magsqPeak;
+        }
+
+        avg = m_magSqLevelStore.m_magsq;
+        peak = m_magSqLevelStore.m_magsqPeak;
+        nbSamples = m_magsqCount == 0 ? 1 : m_magsqCount;
+
+        m_magsqSum = 0.0f;
+        m_magsqPeak = 0.0f;
+        m_magsqCount = 0;
+    }
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
 private:
+    struct MagSqLevelsStore
+    {
+        MagSqLevelsStore() :
+            m_magsq(1e-12),
+            m_magsqPeak(1e-12)
+        {}
+        double m_magsq;
+        double m_magsqPeak;
+    };
+
     DeviceAPI* m_deviceAPI;
     QMutex m_mutex;
     ThreadedBasebandSampleSource* m_threadedChannelizer;
@@ -379,6 +408,14 @@ private:
     bool m_running;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+
+    double m_linearGain;
+	double m_magsq;
+	double m_magsqSum;
+	double m_magsqPeak;
+    int  m_magsqCount;
+    MagSqLevelsStore m_magSqLevelStore;
+	MovingAverageUtil<Real, double, 16> m_movingAverage;
 
 	void openFileStream();
 	void seekFileStream(int seekMillis);

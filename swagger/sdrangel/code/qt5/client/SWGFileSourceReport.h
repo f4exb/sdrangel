@@ -63,6 +63,9 @@ public:
     qint32 getSampleRate();
     void setSampleRate(qint32 sample_rate);
 
+    float getChannelPowerDb();
+    void setChannelPowerDb(float channel_power_db);
+
 
     virtual bool isSet() override;
 
@@ -87,6 +90,9 @@ private:
 
     qint32 sample_rate;
     bool m_sample_rate_isSet;
+
+    float channel_power_db;
+    bool m_channel_power_db_isSet;
 
 };
 

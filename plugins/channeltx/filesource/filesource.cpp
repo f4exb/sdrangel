@@ -41,6 +41,7 @@
 #include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/filerecord.h"
+#include "util/db.h"
 
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgSampleRateNotification, Message)
@@ -82,6 +83,12 @@ FileSource::FileSource(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+
+    m_linearGain = 1.0f;
+	m_magsq = 0.0f;
+	m_magsqSum = 0.0f;
+	m_magsqPeak = 0.0f;
+	m_magsqCount = 0;
 }
 
 FileSource::~FileSource()
@@ -96,6 +103,9 @@ FileSource::~FileSource()
 
 void FileSource::pull(Sample& sample)
 {
+    Real re;
+    Real im;
+
     struct Sample16
     {
         int16_t real;
@@ -110,12 +120,10 @@ void FileSource::pull(Sample& sample)
 
     if (!m_running)
     {
-        sample.setReal(0);
-        sample.setImag(0);
-        return;
+        re = 0;
+        im = 0;
     }
-
-	if (m_sampleSize == 16)
+	else if (m_sampleSize == 16)
 	{
         Sample16 sample16;
         m_ifstream.read(reinterpret_cast<char*>(&sample16), sizeof(Sample16));
@@ -126,24 +134,12 @@ void FileSource::pull(Sample& sample)
             m_samplesCount++;
         }
 
-		if (SDR_TX_SAMP_SZ == 16)
-		{
-            sample.setReal(sample16.real);
-            sample.setImag(sample16.imag);
-		}
-		else if (SDR_TX_SAMP_SZ == 24)
-		{
-            sample.setReal(sample16.real << 8);
-            sample.setImag(sample16.imag << 8);
-		}
-        else
-        {
-            sample.setReal(0);
-            sample.setImag(0);
-        }
-	}
-	else if (m_sampleSize == 24)
-	{
+        // scale to +/-1.0
+        re = (sample16.real * m_linearGain) / 32760.0f;
+        im = (sample16.imag * m_linearGain) / 32760.0f;
+    }
+    else if (m_sampleSize == 24)
+    {
         Sample24 sample24;
         m_ifstream.read(reinterpret_cast<char*>(&sample24), sizeof(Sample24));
 
@@ -153,27 +149,43 @@ void FileSource::pull(Sample& sample)
             m_samplesCount++;
         }
 
-		if (SDR_TX_SAMP_SZ == 24)
-		{
-            sample.setReal(sample24.real);
-            sample.setImag(sample24.imag);
-		}
-		else if (SDR_TX_SAMP_SZ == 16)
-		{
-            sample.setReal(sample24.real >> 8);
-            sample.setImag(sample24.imag >> 8);
-		}
-        else
-        {
-            sample.setReal(0);
-            sample.setImag(0);
-        }
-	}
+        // scale to +/-1.0
+        re = (sample24.real * m_linearGain) / 8388608.0f;
+        im = (sample24.imag * m_linearGain) / 8388608.0f;
+    }
+    else
+    {
+        re = 0;
+        im = 0;
+    }
+
+
+    if (SDR_TX_SAMP_SZ == 16)
+    {
+        sample.setReal(re * 32768.0f);
+        sample.setImag(im * 32768.0f);
+    }
+    else if (SDR_TX_SAMP_SZ == 24)
+    {
+        sample.setReal(re * 8388608.0f);
+        sample.setImag(im * 8388608.0f);
+    }
     else
     {
         sample.setReal(0);
         sample.setImag(0);
     }
+
+    Real magsq = re*re + im*im;
+    m_movingAverage(magsq);
+    m_magsq = m_movingAverage.asDouble();
+    m_magsqSum += magsq;
+
+    if (magsq > m_magsqPeak) {
+        m_magsqPeak = magsq;
+    }
+
+    m_magsqCount++;
 }
 
 void FileSource::pullAudio(int nbSamples)
@@ -457,11 +469,17 @@ void FileSource::applySettings(const FileSourceSettings& settings, bool force)
 
     QList<QString> reverseAPIKeys;
 
-    if ((m_settings.m_loop != settings.m_loop)) {
+    if ((m_settings.m_loop != settings.m_loop) || force) {
         reverseAPIKeys.append("loop");
     }
-    if ((m_settings.m_fileName != settings.m_fileName)) {
+    if ((m_settings.m_fileName != settings.m_fileName) || force) {
         reverseAPIKeys.append("fileName");
+    }
+
+    if ((m_settings.m_gainDB != settings.m_gainDB) || force)
+    {
+        m_linearGain = CalcDb::powerFromdB(settings.m_gainDB);
+        reverseAPIKeys.append("gainDB");
     }
 
     if (settings.m_useReverseAPI)
@@ -530,6 +548,9 @@ int FileSource::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getFileSourceSettings()->getTitle();
     }
+    if (channelSettingsKeys.contains("gainDB")) {
+        settings.m_gainDB = response.getFileSourceSettings()->getGainDb();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getFileSourceSettings()->getUseReverseApi() != 0;
     }
@@ -576,6 +597,7 @@ void FileSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
 {
     response.getFileSourceSettings()->setLog2Interp(settings.m_log2Interp);
     response.getFileSourceSettings()->setFilterChainHash(settings.m_filterChainHash);
+    response.getFileSourceSettings()->setGainDb(settings.m_gainDB);
     response.getFileSourceSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getFileSourceSettings()->getTitle()) {
@@ -599,9 +621,36 @@ void FileSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
 
 void FileSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
+    qint64 t_sec = 0;
+    qint64 t_msec = 0;
+    quint64 samplesCount = getSamplesCount();
+
+    if (m_fileSampleRate > 0)
+    {
+        t_sec = samplesCount / m_fileSampleRate;
+        t_msec = (samplesCount - (t_sec * m_fileSampleRate)) * 1000 / m_fileSampleRate;
+    }
+
+    QTime t(0, 0, 0, 0);
+    t = t.addSecs(t_sec);
+    t = t.addMSecs(t_msec);
+    response.getFileSourceReport()->setElapsedTime(new QString(t.toString("HH:mm:ss.zzz")));
+
+    qint64 startingTimeStampMsec = m_startingTimeStamp * 1000LL;
+    QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
+    dt = dt.addSecs(t_sec);
+    dt = dt.addMSecs(t_msec);
+    response.getFileSourceReport()->setAbsoluteTime(new QString(dt.toString("yyyy-MM-dd HH:mm:ss.zzz")));
+
+    QTime recordLength(0, 0, 0, 0);
+    recordLength = recordLength.addSecs(m_recordLength);
+    response.getFileSourceReport()->setDurationTime(new QString(recordLength.toString("HH:mm:ss")));
+
+    response.getFileSourceReport()->setFileName(new QString(m_settings.m_fileName));
     response.getFileSourceReport()->setFileSampleRate(m_fileSampleRate);
     response.getFileSourceReport()->setFileSampleSize(m_sampleSize);
     response.getFileSourceReport()->setSampleRate(m_sampleRate);
+    response.getFileSourceReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
 }
 
 void FileSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FileSourceSettings& settings, bool force)
@@ -621,6 +670,9 @@ void FileSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, 
     }
     if (channelSettingsKeys.contains("filterChainHash") || force) {
         swgFileSourceSettings->setFilterChainHash(settings.m_filterChainHash);
+    }
+    if (channelSettingsKeys.contains("gainDB") || force) {
+        swgFileSourceSettings->setGainDb(settings.m_gainDB);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgFileSourceSettings->setRgbColor(settings.m_rgbColor);
