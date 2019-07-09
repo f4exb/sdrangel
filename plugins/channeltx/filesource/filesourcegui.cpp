@@ -182,7 +182,8 @@ FileSourceGUI::FileSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     m_channelMarker.blockSignals(true);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     m_channelMarker.setCenterFrequency(0);
-    m_channelMarker.setTitle("Remote source");
+    m_channelMarker.setTitle("File source");
+    m_channelMarker.setMovable(false); // do not let user move the center arbitrarily
     m_channelMarker.setSourceOrSinkStream(false);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
@@ -245,7 +246,9 @@ void FileSourceGUI::configureFileName()
 
 void FileSourceGUI::updateWithAcquisition()
 {
+    ui->play->blockSignals(true);
 	ui->play->setChecked(m_acquisition);
+    ui->play->blockSignals(false);
 	ui->showFileDialog->setEnabled(!m_acquisition);
 }
 

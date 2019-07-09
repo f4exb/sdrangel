@@ -117,31 +117,24 @@ void FileSource::pull(Sample& sample)
 
 	if (m_sampleSize == 16)
 	{
-		if (SDR_RX_SAMP_SZ == 16)
-		{
-            m_ifstream.read(reinterpret_cast<char*>(&sample), sizeof(Sample));
+        Sample16 sample16;
+        m_ifstream.read(reinterpret_cast<char*>(&sample16), sizeof(Sample16));
 
-            if (m_ifstream.eof()) {
-                handleEOF();
-            } else {
-                m_samplesCount++;
-            }
+        if (m_ifstream.eof()) {
+            handleEOF();
+        } else {
+            m_samplesCount++;
+        }
+
+		if (SDR_TX_SAMP_SZ == 16)
+		{
+            sample.setReal(sample16.real);
+            sample.setImag(sample16.imag);
 		}
-		else if (SDR_RX_SAMP_SZ == 24)
+		else if (SDR_TX_SAMP_SZ == 24)
 		{
-            Sample16 sample16;
-            m_ifstream.read(reinterpret_cast<char*>(&sample16), sizeof(Sample16));
-
-            if (m_ifstream.eof())
-            {
-                handleEOF();
-            }
-            else
-            {
-                sample.setReal(sample16.real << 8);
-                sample.setImag(sample16.imag << 8);
-                m_samplesCount++;
-            }
+            sample.setReal(sample16.real << 8);
+            sample.setImag(sample16.imag << 8);
 		}
         else
         {
@@ -151,31 +144,24 @@ void FileSource::pull(Sample& sample)
 	}
 	else if (m_sampleSize == 24)
 	{
-		if (SDR_RX_SAMP_SZ == 24)
-		{
-            m_ifstream.read(reinterpret_cast<char*>(&sample), sizeof(Sample));
+        Sample24 sample24;
+        m_ifstream.read(reinterpret_cast<char*>(&sample24), sizeof(Sample24));
 
-            if (m_ifstream.eof()) {
-                handleEOF();
-            } else {
-                m_samplesCount++;
-            }
+        if (m_ifstream.eof()) {
+            handleEOF();
+        } else {
+            m_samplesCount++;
+        }
+
+		if (SDR_TX_SAMP_SZ == 24)
+		{
+            sample.setReal(sample24.real);
+            sample.setImag(sample24.imag);
 		}
-		else if (SDR_RX_SAMP_SZ == 16)
+		else if (SDR_TX_SAMP_SZ == 16)
 		{
-            Sample24 sample24;
-            m_ifstream.read(reinterpret_cast<char*>(&sample24), sizeof(Sample24));
-
-            if (m_ifstream.eof())
-            {
-                handleEOF();
-            }
-            else
-            {
-                sample.setReal(sample24.real >> 8);
-                sample.setImag(sample24.imag >> 8);
-                m_samplesCount++;
-            }
+            sample.setReal(sample24.real >> 8);
+            sample.setImag(sample24.imag >> 8);
 		}
         else
         {
@@ -440,8 +426,6 @@ void FileSource::seekFileStream(int seekMillis)
 
 void FileSource::handleEOF()
 {
-    stop();
-
     if (getMessageQueueToGUI())
     {
         MsgReportFileSourceStreamTiming *report = MsgReportFileSourceStreamTiming::create(getSamplesCount());
@@ -450,12 +434,14 @@ void FileSource::handleEOF()
 
     if (m_settings.m_loop)
     {
+        stop();
         seekFileStream(0);
-        m_samplesCount = 0;
         start();
     }
     else
     {
+        stop();
+
         if (getMessageQueueToGUI())
         {
             MsgPlayPause *report = MsgPlayPause::create(false);
