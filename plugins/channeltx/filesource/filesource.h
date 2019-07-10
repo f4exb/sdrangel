@@ -429,7 +429,6 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-    void handleData();
 };
 
 #endif // PLUGINS_CHANNELTX_FILESOURCE_FILESOURCE_H_
