@@ -183,6 +183,10 @@ The software is installed in `/usr/bin` for executables and `/usr/lib/sdrangel` 
 
 <h2>Windows</h2>
 
-The `.7z` file is a [7Zip](https://www.7-zip.org/) archive of the complete binary distribution that expands to the `sdrangel` directory. You can install it anywhere you like and double click on `sdrangel.exe` to start.
+The `.exe` file is a self extracting installation program. Just click on it and follow instructions on the successive panels.
+
+The installation program creates a menu entry that can be invoked like any other Windows program.
+
+Note that the archive can be opened, inspected and extracted using [7Zip](https://www.7-zip.org/).
 
 <b>&#9888; Windows distribution is provided as a by product thanks to the Qt toolchain. The platform of choice to run SDRangel is definitely Linux and very little support can be given for this Windows distribution.</b>
