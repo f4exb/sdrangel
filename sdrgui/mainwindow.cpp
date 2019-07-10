@@ -417,7 +417,7 @@ void MainWindow::addSinkDevice()
     m_deviceUIs.back()->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
     m_deviceUIs.back()->m_deviceAPI->setSamplingDevicePluginInstanceGUI(pluginUI);
     m_deviceUIs.back()->m_deviceAPI->getSampleSink()->init();
-    setDeviceGUI(deviceTabIndex, gui, m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceDisplayName(), false);
+    setDeviceGUI(deviceTabIndex, gui, m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceDisplayName(), 1);
 }
 
 void MainWindow::addMIMODevice()
