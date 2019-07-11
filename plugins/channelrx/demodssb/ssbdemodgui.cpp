@@ -66,14 +66,14 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
     if(m_settings.deserialize(data))
     {
         displaySettings();
-        applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
+        applyBandwidths(m_settings.m_spanLog2, true); // does applySettings(true)
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
         displaySettings();
-        applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
+        applyBandwidths(m_settings.m_spanLog2, true); // does applySettings(true)
         return false;
     }
 }
@@ -341,7 +341,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_iconDSBLSB.addPixmap(QPixmap("://lsb.png"), QIcon::Normal, QIcon::Off);
 
 	displaySettings();
-	applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
+	applyBandwidths(m_settings.m_spanLog2, true); // does applySettings(true)
 }
 
 SSBDemodGUI::~SSBDemodGUI()
