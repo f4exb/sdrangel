@@ -581,7 +581,7 @@
         <string>Symbol rate</string>
        </property>
        <property name="minimum">
-        <number>1</number>
+        <number>100000</number>
        </property>
        <property name="maximum">
         <number>1024000000</number>

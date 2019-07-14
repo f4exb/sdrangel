@@ -638,12 +638,6 @@ void DATVDemodGUI::on_StreamDataAvailable(int *intPackets, int *intBytes, int *i
     m_intReadyDecodedData = *intBytes;
 }
 
-void DATVDemodGUI::on_spiBandwidth_valueChanged(int arg1)
-{
-    (void) arg1;
-    applySettings();
-}
-
 void DATVDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     (void) value;

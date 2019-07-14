@@ -85,7 +85,6 @@ private slots:
     void on_mouseEvent(QMouseEvent* obj);
     void on_StreamDataAvailable(int *intPackets, int *intBytes, int *intPercent, qint64 *intTotalReceived);
     void on_StreamMetaDataChanged(DataTSMetaData2 *objMetaData);
-    void on_spiBandwidth_valueChanged(int arg1);
     void on_chkFastlock_clicked();
     void on_cmbFilter_currentIndexChanged(int index);
     void on_spiRollOff_valueChanged(int arg1);
