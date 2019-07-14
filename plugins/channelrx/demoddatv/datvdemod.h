@@ -29,16 +29,14 @@ class DownChannelizer;
 //LeanSDR
 #include "leansdr/framework.h"
 #include "leansdr/generic.h"
-#include "leansdr/dsp.h"
-#include "leansdr/sdr.h"
 #include "leansdr/dvb.h"
-#include "leansdr/rs.h"
 #include "leansdr/filtergen.h"
 
 #include "leansdr/hdlc.h"
 #include "leansdr/iess.h"
 
 #include "datvconstellation.h"
+#include "datvdvbs2constellation.h"
 #include "datvvideoplayer.h"
 #include "datvideostream.h"
 #include "datvideorender.h"
@@ -185,6 +183,7 @@ public:
     void CleanUpDATVFramework(bool blnRelease);
     int GetSampleRate();
     void InitDATVFramework();
+    void InitDATVS2Framework();
     double getMagSq() const { return m_objMagSqAverage; } //!< Beware this is scaled to 2^30
 
     static const QString m_channelIdURI;
@@ -246,6 +245,13 @@ private:
     unsigned long BUF_PACKETS;
     unsigned long BUF_SLOW;
 
+
+    //dvbs2
+    unsigned long BUF_SLOTS;
+    unsigned long BUF_FRAMES;
+    unsigned long BUF_S2PACKETS;
+    unsigned long S2_MAX_SYMBOLS;
+
     //************** LEANDBV Scheduler ***************
 
     leansdr::scheduler * m_objScheduler;
@@ -289,6 +295,18 @@ private:
     leansdr::pipebuf<leansdr::f32> *p_ss;
     leansdr::pipebuf<leansdr::f32> *p_mer;
     leansdr::pipebuf<leansdr::cf32> *p_sampled;
+
+    //dvb-s2
+    void *p_slots_dvbs2;
+    leansdr::pipebuf<leansdr::cf32> *p_cstln;
+    leansdr::pipebuf<leansdr::cf32> *p_cstln_pls;
+    leansdr::pipebuf<int> *p_framelock;
+    void *m_objDemodulatorDVBS2;
+    void *p_fecframes;
+    void *p_bbframes;
+    void *p_s2_deinterleaver;
+    void *r_fecdec;
+    void *p_deframer;
 
     //DECIMATION
     leansdr::pipebuf<leansdr::cf32> *p_decimated;
@@ -341,6 +359,7 @@ private:
 
     //CONSTELLATION
     leansdr::datvconstellation<leansdr::f32> *r_scope_symbols;
+    leansdr::datvdvbs2constellation<leansdr::f32> *r_scope_symbols_dvbs2;
 
     DeviceAPI* m_deviceAPI;
 
@@ -368,6 +387,7 @@ private:
     //DATVConfig m_objRunning;
     DATVDemodSettings m_settings;
     int m_sampleRate;
+    int m_inputFrequencyOffset;
     MovingAverageUtil<double, double, 32> m_objMagSqAverage;
 
     QMutex m_objSettingsMutex;

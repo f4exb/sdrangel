@@ -24,7 +24,10 @@ set(datv_HEADERS
     datvdemodsettings.h
     datvideostream.h
     datvideorender.h
+    datvconstellation.h
+    datvdvbs2constellation.h
     leansdr/dvb.h
+    leansdr/dvbs2.h
     leansdr/filtergen.h
     leansdr/framework.h
     leansdr/math.h

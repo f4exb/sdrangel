@@ -249,6 +249,8 @@ void DATVDemodGUI::applySettings(bool force)
 
     if (m_blnDoApplySettings)
     {
+        qDebug("DATVDemodGUI::applySettings");
+
         //Bandwidth and center frequency
         m_objChannelMarker.setCenterFrequency(ui->deltaFrequency->getValueNew());
         m_objChannelMarker.setBandwidth(ui->rfBandwidth->getValueNew());
@@ -440,6 +442,25 @@ void DATVDemodGUI::tick()
 void DATVDemodGUI::on_cmbStandard_currentIndexChanged(const QString &arg1)
 {
     (void) arg1;
+    QString strStandard;
+
+    strStandard = ui->cmbStandard->currentText();
+
+    if(strStandard=="DVB-S2")
+    {
+        ui->cmbFEC->addItem("4/5");
+        ui->cmbFEC->addItem("4/6");
+        ui->cmbFEC->addItem("8/9");
+        ui->cmbFEC->addItem("9/10");
+    }
+    else
+    {
+        ui->cmbFEC->removeItem(8);
+        ui->cmbFEC->removeItem(7);
+        ui->cmbFEC->removeItem(6);
+        ui->cmbFEC->removeItem(5);
+    }
+
     applySettings();
 }
 

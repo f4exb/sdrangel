@@ -156,6 +156,7 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
 void DATVDemodSettings::debug(const QString& msg) const
 {
     qDebug() << msg
+        << " m_standard: " << m_standard         
         << " m_allowDrift: " << m_allowDrift
         << " m_rfBandwidth: " << m_rfBandwidth
         << " m_centerFrequency: " << m_centerFrequency
@@ -191,5 +192,6 @@ bool DATVDemodSettings::isDifferent(const DATVDemodSettings& other)
         || (m_standard != other.m_standard)
         || (m_notchFilters != other.m_notchFilters)
         || (m_symbolRate != other.m_symbolRate)
-        || (m_excursion != other.m_excursion));
+        || (m_excursion != other.m_excursion)
+        || (m_standard != other.m_standard));
 }

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 F4HKW                                                      //
+// Copyright (C) 2019 F4HKW                                                      //
 // for F4EXB / SDRAngel                                                          //
 // using LeanSDR Framework (C) 2016 F4DAV                                        //
 //                                                                               //
@@ -17,8 +17,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DATVCONSTELLATION_H
-#define DATVCONSTELLATION_H
+#ifndef DATVDVBS2CONSTELLATION_H
+#define DATVDVBS2CONSTELLATION_H
 
 #include <vector>
 
@@ -27,16 +27,19 @@
 
 namespace leansdr {
 
-static const int DEFAULT_GUI_DECIMATION = 64;
+static const int DEFAULT_GUI_DVBS2_DECIMATION = 64;
 
-static inline cstln_lut<eucl_ss, 256> * make_dvbs_constellation(cstln_lut<eucl_ss, 256>::predef c,
+static inline cstln_lut<llr_ss, 256> * make_dvbs2_constellation(cstln_lut<llr_ss, 256>::predef c,
         code_rate r)
 {
     float gamma1 = 1, gamma2 = 1, gamma3 = 1;
+    
+    
     switch (c)
-    {
-    case cstln_lut<eucl_ss, 256>::APSK16:
+    {    
+    case cstln_lut<llr_ss, 256>::APSK16:
         // EN 302 307, section 5.4.3, Table 9
+        
         switch (r)
         {
         case FEC23:
@@ -59,11 +62,11 @@ static inline cstln_lut<eucl_ss, 256> * make_dvbs_constellation(cstln_lut<eucl_s
             gamma1 = 2.57;
             break;
         default:
-            fail("cstln_lut<256>::make_dvbs_constellation: Code rate not supported with APSK16");
+            fail("cstln_lut<256>::make_dvbs2_constellation: Code rate not supported with APSK16");
             return 0;
         }
         break;
-    case cstln_lut<eucl_ss, 256>::APSK32:
+    case cstln_lut<llr_ss, 256>::APSK32:
         // EN 302 307, section 5.4.4, Table 10
         switch (r)
         {
@@ -88,11 +91,11 @@ static inline cstln_lut<eucl_ss, 256> * make_dvbs_constellation(cstln_lut<eucl_s
             gamma2 = 4.30;
             break;
         default:
-            fail("cstln_lut<eucl_ss, 256>::make_dvbs_constellation: Code rate not supported with APSK32");
+            fail("cstln_lut<llr_ss, 256>::make_dvbs2_constellation: Code rate not supported with APSK32");
             return 0;
         }
         break;
-    case cstln_lut<eucl_ss, 256>::APSK64E:
+    case cstln_lut<llr_ss, 256>::APSK64E:
         // EN 302 307-2, section 5.4.5, Table 13f
         gamma1 = 2.4;
         gamma2 = 4.3;
@@ -101,22 +104,23 @@ static inline cstln_lut<eucl_ss, 256> * make_dvbs_constellation(cstln_lut<eucl_s
     default:
         break;
     }
-    return new cstln_lut<eucl_ss, 256>(c, gamma1, gamma2, gamma3);
+    
+    return new cstln_lut<llr_ss, 256>(c, gamma1, gamma2, gamma3);
 }
 
-template<typename T> struct datvconstellation: runnable
+template<typename T> struct datvdvbs2constellation: runnable
 {
     T xymin, xymax;
     unsigned long decimation;
     long pixels_per_frame;
-    cstln_lut<eucl_ss, 256> **cstln;  // Optional ptr to optional constellation
+    /*cstln_lut<llr_ss, 256>*/ cstln_base **cstln;  // Optional ptr to optional constellation
     TVScreen *m_objDATVScreen;
     pipereader<complex<T> > in;
     unsigned long phase;
     std::vector<int> cstln_rows;
     std::vector<int> cstln_cols;
 
-    datvconstellation(
+    datvdvbs2constellation(
             scheduler *sch,
             pipebuf<complex<T> > &_in,
             T _xymin,
@@ -126,7 +130,7 @@ template<typename T> struct datvconstellation: runnable
         runnable(sch, _name ? _name : _in.name),
         xymin(_xymin),
         xymax(_xymax),
-        decimation(DEFAULT_GUI_DECIMATION),
+        decimation(DEFAULT_GUI_DVBS2_DECIMATION),
         pixels_per_frame(1024),
         cstln(0),
         m_objDATVScreen(objDATVScreen),
@@ -136,10 +140,12 @@ template<typename T> struct datvconstellation: runnable
     }
 
     void run()
-    {
+    {       
+        
+        phase=0;
         //Symbols
         while (in.readable() >= pixels_per_frame)
-        {
+        {            
             if ((!phase) && m_objDATVScreen)
             {
                 m_objDATVScreen->resetImage();
@@ -163,7 +169,7 @@ template<typename T> struct datvconstellation: runnable
                     for (;(row_it != cstln_rows.end()) && (col_it != cstln_cols.end()); ++row_it, ++col_it)
                     {
                         m_objDATVScreen->selectRow(*row_it);
-                        m_objDATVScreen->setDataColor(*col_it, 250, 250, 5);
+                        m_objDATVScreen->setDataColor(*col_it, 250, 250, 250);
                     }
                 }
 
@@ -210,4 +216,4 @@ template<typename T> struct datvconstellation: runnable
 
 } // leansdr
 
-#endif // DATVCONSTELLATION_H
+#endif // DATVDVBS2CONSTELLATION_H

@@ -17,12 +17,23 @@
 #ifndef LEANSDR_DVBS2_H
 #define LEANSDR_DVBS2_H
 
+/*
 #include "leansdr/bch.h"
 #include "leansdr/crc.h"
 #include "leansdr/dvb.h"
 #include "leansdr/ldpc.h"
 #include "leansdr/sdr.h"
 #include "leansdr/softword.h"
+*/
+
+#include "bch.h"
+
+#include "crc.h"
+
+#include "dvb.h"
+#include "softword.h"
+#include "ldpc.h"
+#include "sdr.h"
 
 namespace leansdr
 {
@@ -819,7 +830,7 @@ struct s2_frame_receiver : runnable
         // Slots to skip until next PL slot (pilot or sof)
         int till_next_pls = pls.pilots ? 16 : S;
 
-        for (int slots = S; slots--; ++pout, --till_next_pls)
+        for (int leansdr_slots = S; leansdr_slots--; ++pout, --till_next_pls)
         {
             if (till_next_pls == 0)
             {
