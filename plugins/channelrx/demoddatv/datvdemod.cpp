@@ -1242,8 +1242,8 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
                 lngWritable = p_rawiq_writer->writable();
 
                 //Leave +1 by safety
-                if(((m_lngReadIQ+1)>=lngWritable) || (m_lngReadIQ>=768))
-                //if((m_lngReadIQ+1)>=lngWritable)
+                //if(((m_lngReadIQ+1)>=lngWritable) || (m_lngReadIQ>=768))
+                if((m_lngReadIQ+1)>=lngWritable)
                 {
                     m_objScheduler->step();
 

@@ -33,13 +33,11 @@ static inline cstln_lut<llr_ss, 256> * make_dvbs2_constellation(cstln_lut<llr_ss
         code_rate r)
 {
     float gamma1 = 1, gamma2 = 1, gamma3 = 1;
-    
-    
+
     switch (c)
-    {    
+    {
     case cstln_lut<llr_ss, 256>::APSK16:
         // EN 302 307, section 5.4.3, Table 9
-        
         switch (r)
         {
         case FEC23:
@@ -104,8 +102,8 @@ static inline cstln_lut<llr_ss, 256> * make_dvbs2_constellation(cstln_lut<llr_ss
     default:
         break;
     }
-    
-    return new cstln_lut<llr_ss, 256>(c, gamma1, gamma2, gamma3);
+
+    return new cstln_lut<llr_ss, 256>(c, 10, gamma1, gamma2, gamma3);
 }
 
 template<typename T> struct datvdvbs2constellation: runnable
@@ -140,12 +138,12 @@ template<typename T> struct datvdvbs2constellation: runnable
     }
 
     void run()
-    {       
-        
+    {
+
         phase=0;
         //Symbols
         while (in.readable() >= pixels_per_frame)
-        {            
+        {
             if ((!phase) && m_objDATVScreen)
             {
                 m_objDATVScreen->resetImage();

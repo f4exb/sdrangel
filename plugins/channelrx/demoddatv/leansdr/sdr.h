@@ -500,9 +500,11 @@ struct cstln_lut : cstln_base
 #if 0 // BPSK at 0°
             symbols[0] = polar(1, 2, 0);
             symbols[1] = polar(1, 2, 1);
+            printf("cstln_lut::cstln_lut: BPSK at 0 degrees\n");
 #else // BPSK at 45°
             symbols[0] = polar(1, 8, 1);
             symbols[1] = polar(1, 8, 5);
+            printf("cstln_lut::cstln_lut: BPSK at 45 degrees\n");
 #endif
             make_lut_from_symbols(mer);
             break;
@@ -518,6 +520,7 @@ struct cstln_lut : cstln_base
             symbols[2] = polar(1, 4, 1.5);
             symbols[3] = polar(1, 4, 2.5);
             make_lut_from_symbols(mer);
+            printf("cstln_lut::cstln_lut: QPSK\n");
             break;
         case PSK8:
             amp_max = 1;
@@ -534,14 +537,15 @@ struct cstln_lut : cstln_base
             symbols[6] = polar(1, 8, 3);
             symbols[7] = polar(1, 8, 6);
             make_lut_from_symbols(mer);
+            printf("cstln_lut::cstln_lut: PSK8\n");
             break;
         case APSK16:
         {
             // Default gamma for non-DVB-S2 applications.
-            if (!gamma1)
+            if (gamma1 == 0)
                 gamma1 = 2.57;
             // EN 302 307, section 5.4.3
-            float r1 = sqrtf(4 / (1 + 3 * gamma1 * gamma1));
+            float r1 = sqrtf(4.0f / (1.0f + 3.0f * gamma1 * gamma1));
             float r2 = gamma1 * r1;
             amp_max = r2;
             nrotations = 4;
@@ -564,18 +568,19 @@ struct cstln_lut : cstln_base
             symbols[14] = polar(r1, 4, 1.5);
             symbols[15] = polar(r1, 4, 2.5);
             make_lut_from_symbols(mer);
+            printf("cstln_lut::cstln_lut: APSK16: gamma1=%f r1=%f r2=%f\n", gamma1, r1, r2);
             break;
         }
         case APSK32:
         {
             // Default gammas for non-DVB-S2 applications.
-            if (!gamma1)
+            if (gamma1 == 0)
                 gamma1 = 2.53;
-            if (!gamma2)
+            if (gamma2 == 0)
                 gamma2 = 4.30;
             // EN 302 307, section 5.4.3
             float r1 = sqrtf(
-                8 / (1 + 3 * gamma1 * gamma1 + 4 * gamma2 * gamma2));
+                8.0f / (1.0f + 3.0f * gamma1 * gamma1 + 4 * gamma2 * gamma2));
             float r2 = gamma1 * r1;
             float r3 = gamma2 * r1;
             amp_max = r3;
@@ -615,20 +620,21 @@ struct cstln_lut : cstln_base
             symbols[30] = polar(r3, 16, 8);
             symbols[31] = polar(r3, 16, 10);
             make_lut_from_symbols(mer);
+            printf("cstln_lut::cstln_lut: APSK32: gamma1=%f gamma2=%f, r1=%f r2=%f r3=%f\n", gamma1, gamma2, r1, r2, r3);
             break;
         }
         case APSK64E:
         {
             // Default gammas for non-DVB-S2 applications.
-            if (!gamma1)
+            if (gamma1 == 0)
                 gamma1 = 2.4;
-            if (!gamma2)
+            if (gamma2 == 0)
                 gamma2 = 4.3;
-            if (!gamma3)
+            if (gamma3 == 0)
                 gamma3 = 7.0;
             // EN 302 307-2, section 5.4.5, Table 13e
             float r1 = sqrtf(
-                64 / (4 + 12 * gamma1 * gamma1 + 20 * gamma2 * gamma2 + 28 * gamma3 * gamma3));
+                64.0f / (4.0f + 12.0f * gamma1 * gamma1 + 20.0f * gamma2 * gamma2 + 28.0f * gamma3 * gamma3));
             float r2 = gamma1 * r1;
             float r3 = gamma2 * r1;
             float r4 = gamma3 * r1;
@@ -653,6 +659,7 @@ struct cstln_lut : cstln_base
             polar2(56, r3, 3.0 / 20, 37.0 / 20, 17.0 / 20, 23.0 / 20);
             polar2(60, r2, 1.0 / 4, 7.0 / 4, 3.0 / 4, 5.0 / 4);
             make_lut_from_symbols(mer);
+            printf("cstln_lut::cstln_lut: APSK64E: gamma1=%f gamma2=%f, gamm3=%f r1=%f r2=%f r3=%f r4=%f\n", gamma1, gamma2, gamma3, r1, r2, r3, r4);
             break;
         }
         case QAM16:

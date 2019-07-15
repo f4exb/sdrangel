@@ -101,7 +101,7 @@ static inline cstln_lut<eucl_ss, 256> * make_dvbs_constellation(cstln_lut<eucl_s
     default:
         break;
     }
-    return new cstln_lut<eucl_ss, 256>(c, gamma1, gamma2, gamma3);
+    return new cstln_lut<eucl_ss, 256>(c, 10, gamma1, gamma2, gamma3);
 }
 
 template<typename T> struct datvconstellation: runnable
