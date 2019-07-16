@@ -51,6 +51,7 @@ endif(LIBSERIALDV_FOUND)
 set(sdrbase_SOURCES
     ${sdrbase_SOURCES}
     audio/audiocompressor.cpp
+    audio/audiocompressorsnd.cpp
     audio/audiodevicemanager.cpp
     audio/audiofifo.cpp
     audio/audiofilter.cpp
@@ -152,6 +153,7 @@ set(sdrbase_SOURCES
 set(sdrbase_HEADERS
     ${sdrbase_HEADERS}
     audio/audiocompressor.h
+    audio/audiocompressorsnd.h
     audio/audiodevicemanager.h
     audio/audiofifo.h
     audio/audiofilter.h
