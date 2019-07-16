@@ -38,7 +38,7 @@ void DATVDemodSettings::resetToDefaults()
     m_centerFrequency = 0;
     m_standard = DVB_S;
     m_modulation = BPSK;
-    m_fec = leansdr::FEC12;
+    m_fec = FEC12;
     m_symbolRate = 250000;
     m_notchFilters = 1;
     m_allowDrift = false;
@@ -122,9 +122,9 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         d.readU32(7, &m_rgbColor, QColor(Qt::magenta).rgb());
         d.readString(8, &m_title, "DATV Demodulator");
 
-        d.readS32(9, &tmp, (int) leansdr::code_rate::FEC12);
-        tmp = tmp < 0 ? 0 : tmp >= (int) leansdr::code_rate::FEC_COUNT ? (int) leansdr::code_rate::FEC_COUNT - 1 : tmp;
-        m_fec = (leansdr::code_rate) tmp;
+        d.readS32(9, &tmp, (int) FEC12);
+        tmp = tmp < 0 ? 0 : tmp >= (int) FEC_COUNT ? (int) FEC_COUNT - 1 : tmp;
+        m_fec = (DATVCodeRate) tmp;
 
         d.readBool(10, &m_audioMute, false);
         d.readS32(11, &m_symbolRate, 250000);
@@ -156,7 +156,7 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
 void DATVDemodSettings::debug(const QString& msg) const
 {
     qDebug() << msg
-        << " m_standard: " << m_standard         
+        << " m_standard: " << m_standard
         << " m_allowDrift: " << m_allowDrift
         << " m_rfBandwidth: " << m_rfBandwidth
         << " m_centerFrequency: " << m_centerFrequency

@@ -22,8 +22,6 @@
 #include <QString>
 #include <stdint.h>
 
-#include "leansdr/dvb.h"
-
 class Serializable;
 
 struct DATVDemodSettings
@@ -47,7 +45,7 @@ struct DATVDemodSettings
         QAM256
     };
 
-    enum DATVCodeRates
+    enum DATVCodeRate
     {
         FEC12,
         FEC23,
@@ -61,7 +59,8 @@ struct DATVDemodSettings
         FEC14,
         FEC13,
         FEC25,
-        FEC35
+        FEC35,
+        FEC_COUNT
     };
 
     enum dvb_sampler
@@ -78,7 +77,7 @@ struct DATVDemodSettings
     int m_centerFrequency;
     dvb_version m_standard;
     DATVModulation m_modulation;
-    leansdr::code_rate m_fec;
+    DATVCodeRate m_fec;
     bool m_audioMute;
     QString m_audioDeviceName;
     int m_symbolRate;

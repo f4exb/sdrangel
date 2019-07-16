@@ -314,23 +314,23 @@ void DATVDemodGUI::applySettings(bool force)
         strFEC = ui->cmbFEC->currentText();
 
         if (strFEC == "1/2") {
-            m_settings.m_fec = leansdr::FEC12;
+            m_settings.m_fec = DATVDemodSettings::FEC12;
         } else if (strFEC == "2/3") {
-            m_settings.m_fec = leansdr::FEC23;
+            m_settings.m_fec = DATVDemodSettings::FEC23;
         } else if (strFEC == "3/4") {
-            m_settings.m_fec = leansdr::FEC34;
+            m_settings.m_fec = DATVDemodSettings::FEC34;
         } else if (strFEC == "5/6") {
-            m_settings.m_fec = leansdr::FEC56;
+            m_settings.m_fec = DATVDemodSettings::FEC56;
         } else if (strFEC == "7/8") {
-            m_settings.m_fec = leansdr::FEC78;
+            m_settings.m_fec = DATVDemodSettings::FEC78;
         } else if (strFEC == "4/5") {
-            m_settings.m_fec = leansdr::FEC45;
+            m_settings.m_fec = DATVDemodSettings::FEC45;
         } else if (strFEC == "8/9") {
-            m_settings.m_fec = leansdr::FEC89;
+            m_settings.m_fec = DATVDemodSettings::FEC89;
         } else if (strFEC == "9/10") {
-            m_settings.m_fec = leansdr::FEC910;
+            m_settings.m_fec = DATVDemodSettings::FEC910;
         } else {
-            m_settings.m_fec = leansdr::FEC12;
+            m_settings.m_fec = DATVDemodSettings::FEC12;
         }
 
         if (ui->cmbFilter->currentIndex() == 0) {

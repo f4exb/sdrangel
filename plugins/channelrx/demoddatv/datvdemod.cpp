@@ -556,7 +556,7 @@ void DATVDemod::InitDATVFramework()
 
     m_objCfg.standard = m_settings.m_standard;
 
-    m_objCfg.fec = m_settings.m_fec;
+    m_objCfg.fec = (leansdr::code_rate) getLeanDVBCodeRateFromDATV(m_settings.m_fec);
     m_objCfg.Fs = (float) m_sampleRate;
     m_objCfg.Fm = (float) m_settings.m_symbolRate;
     m_objCfg.fastlock = m_settings.m_fastLock;
@@ -888,7 +888,7 @@ void DATVDemod::InitDATVS2Framework()
 
     m_objCfg.standard = m_settings.m_standard;
 
-    m_objCfg.fec = m_settings.m_fec;
+    m_objCfg.fec = (leansdr::code_rate) getLeanDVBCodeRateFromDATV(m_settings.m_fec);
     m_objCfg.Fs = (float) m_sampleRate;
     m_objCfg.Fm = (float) m_settings.m_symbolRate;
     m_objCfg.fastlock = m_settings.m_fastLock;
@@ -1444,40 +1444,40 @@ int DATVDemod::GetSampleRate()
     return m_sampleRate;
 }
 
-DATVDemodSettings::DATVCodeRates getCodeRateFromLeanDVBCode(int leanDVBCodeRate)
+DATVDemodSettings::DATVCodeRate DATVDemod::getCodeRateFromLeanDVBCode(int leanDVBCodeRate)
 {
     if (leanDVBCodeRate == leansdr::code_rate::FEC12) {
-        return DATVDemodSettings::DATVCodeRates::FEC12;
+        return DATVDemodSettings::DATVCodeRate::FEC12;
     } else if (leanDVBCodeRate == leansdr::code_rate::FEC13) {
-        return DATVDemodSettings::DATVCodeRates::FEC13;
+        return DATVDemodSettings::DATVCodeRate::FEC13;
     } else if (leanDVBCodeRate == leansdr::code_rate::FEC14) {
-        return DATVDemodSettings::DATVCodeRates::FEC14;
+        return DATVDemodSettings::DATVCodeRate::FEC14;
     } else if (leanDVBCodeRate == leansdr::code_rate::FEC23) {
-        return DATVDemodSettings::DATVCodeRates::FEC23;
+        return DATVDemodSettings::DATVCodeRate::FEC23;
     } else if (leanDVBCodeRate == leansdr::code_rate::FEC25) {
-        return DATVDemodSettings::DATVCodeRates::FEC25;
+        return DATVDemodSettings::DATVCodeRate::FEC25;
     } else if (leanDVBCodeRate == leansdr::code_rate::FEC34) {
-        return DATVDemodSettings::DATVCodeRates::FEC34;
+        return DATVDemodSettings::DATVCodeRate::FEC34;
     } else if (leanDVBCodeRate == leansdr::code_rate::FEC35) {
-        return DATVDemodSettings::DATVCodeRates::FEC35;
+        return DATVDemodSettings::DATVCodeRate::FEC35;
     } else if (leanDVBCodeRate == leansdr::code_rate::FEC45) {
-        return DATVDemodSettings::DATVCodeRates::FEC45;
+        return DATVDemodSettings::DATVCodeRate::FEC45;
     } else if (leanDVBCodeRate == leansdr::code_rate::FEC46) {
-        return DATVDemodSettings::DATVCodeRates::FEC46;
+        return DATVDemodSettings::DATVCodeRate::FEC46;
     } else if (leanDVBCodeRate == leansdr::code_rate::FEC56) {
-        return DATVDemodSettings::DATVCodeRates::FEC56;
+        return DATVDemodSettings::DATVCodeRate::FEC56;
     } else if (leanDVBCodeRate == leansdr::code_rate::FEC78) {
-        return DATVDemodSettings::DATVCodeRates::FEC78;
+        return DATVDemodSettings::DATVCodeRate::FEC78;
     } else if (leanDVBCodeRate == leansdr::code_rate::FEC89) {
-        return DATVDemodSettings::DATVCodeRates::FEC89;
+        return DATVDemodSettings::DATVCodeRate::FEC89;
     } else if (leanDVBCodeRate == leansdr::code_rate::FEC910) {
-        return DATVDemodSettings::DATVCodeRates::FEC910;
+        return DATVDemodSettings::DATVCodeRate::FEC910;
     } else {
-        return DATVDemodSettings::DATVCodeRates::FEC12;
+        return DATVDemodSettings::DATVCodeRate::FEC12;
     }
 }
 
-DATVDemodSettings::DATVModulation getModulationFromLeanDVBCode(int leanDVBModulation)
+DATVDemodSettings::DATVModulation DATVDemod::getModulationFromLeanDVBCode(int leanDVBModulation)
 {
     if (leanDVBModulation == leansdr::cstln_base::predef::APSK16) {
         return DATVDemodSettings::DATVModulation::APSK16;
@@ -1499,5 +1499,63 @@ DATVDemodSettings::DATVModulation getModulationFromLeanDVBCode(int leanDVBModula
         return DATVDemodSettings::DATVModulation::QPSK;
     } else {
         return DATVDemodSettings::DATVModulation::BPSK;
+    }
+}
+
+int DATVDemod::getLeanDVBCodeRateFromDATV(DATVDemodSettings::DATVCodeRate datvCodeRate)
+{
+    if (datvCodeRate == DATVDemodSettings::DATVCodeRate::FEC12) {
+        return (int)  leansdr::code_rate::FEC12;
+    } else if (datvCodeRate == DATVDemodSettings::DATVCodeRate::FEC13) {
+        return (int) leansdr::code_rate::FEC13;
+    } else if (datvCodeRate == DATVDemodSettings::DATVCodeRate::FEC14) {
+        return (int) leansdr::code_rate::FEC14;
+    } else if (datvCodeRate == DATVDemodSettings::DATVCodeRate::FEC23) {
+        return (int) leansdr::code_rate::FEC23;
+    } else if (datvCodeRate == DATVDemodSettings::DATVCodeRate::FEC25) {
+        return (int) leansdr::code_rate::FEC25;
+    } else if (datvCodeRate == DATVDemodSettings::DATVCodeRate::FEC34) {
+        return (int) leansdr::code_rate::FEC34;
+    } else if (datvCodeRate == DATVDemodSettings::DATVCodeRate::FEC35) {
+        return (int) leansdr::code_rate::FEC35;
+    } else if (datvCodeRate == DATVDemodSettings::DATVCodeRate::FEC45) {
+        return (int) leansdr::code_rate::FEC45;
+    } else if (datvCodeRate == DATVDemodSettings::DATVCodeRate::FEC46) {
+        return (int) leansdr::code_rate::FEC46;
+    } else if (datvCodeRate == DATVDemodSettings::DATVCodeRate::FEC56) {
+        return (int) leansdr::code_rate::FEC56;
+    } else if (datvCodeRate == DATVDemodSettings::DATVCodeRate::FEC78) {
+        return (int) leansdr::code_rate::FEC78;
+    } else if (datvCodeRate == DATVDemodSettings::DATVCodeRate::FEC89) {
+        return (int) leansdr::code_rate::FEC89;
+    } else if (datvCodeRate == DATVDemodSettings::DATVCodeRate::FEC910) {
+        return (int) leansdr::code_rate::FEC910;
+    } else {
+        return (int) leansdr::code_rate::FEC12;
+    }
+}
+
+int DATVDemod::getLeanDVBModulationFromDATV(DATVDemodSettings::DATVModulation datvModulation)
+{
+    if (datvModulation == DATVDemodSettings::DATVModulation::APSK16) {
+        return (int) leansdr::cstln_base::predef::APSK16;
+    } else if (datvModulation == DATVDemodSettings::DATVModulation::APSK32) {
+        return (int) leansdr::cstln_base::predef::APSK32;
+    } else if (datvModulation == DATVDemodSettings::DATVModulation::APSK64E) {
+        return (int) leansdr::cstln_base::predef::APSK64E;
+    } else if (datvModulation == DATVDemodSettings::DATVModulation::BPSK) {
+        return (int) leansdr::cstln_base::predef::BPSK;
+    } else if (datvModulation == DATVDemodSettings::DATVModulation::PSK8) {
+        return (int) leansdr::cstln_base::predef::PSK8;
+    } else if (datvModulation == DATVDemodSettings::DATVModulation::QAM16) {
+        return (int) leansdr::cstln_base::predef::QAM16;
+    } else if (datvModulation == DATVDemodSettings::DATVModulation::QAM64) {
+        return (int) leansdr::cstln_base::predef::QAM64;
+    } else if (datvModulation == DATVDemodSettings::DATVModulation::QAM256) {
+        return (int) leansdr::cstln_base::predef::QAM256;
+    } else if (datvModulation == DATVDemodSettings::DATVModulation::QPSK) {
+        return (int) leansdr::cstln_base::predef::QPSK;
+    } else {
+        return (int) leansdr::cstln_base::predef::BPSK;
     }
 }
