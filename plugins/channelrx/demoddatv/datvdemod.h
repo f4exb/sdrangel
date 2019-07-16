@@ -185,6 +185,8 @@ public:
     void InitDATVFramework();
     void InitDATVS2Framework();
     double getMagSq() const { return m_objMagSqAverage; } //!< Beware this is scaled to 2^30
+    static DATVDemodSettings::DATVCodeRates getCodeRateFromLeanDVBCode(int leanDVBCodeRate);
+    static DATVDemodSettings::DATVModulation getModulationFromLeanDVBCode(int leanDVBModulation);
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
@@ -381,6 +383,7 @@ private:
     bool m_blnInitialized;
     bool m_blnRenderingVideo;
     bool m_blnStartStopVideo;
+    bool m_cstlnSetByModcod;
 
     DATVDemodSettings::DATVModulation m_enmModulation;
 

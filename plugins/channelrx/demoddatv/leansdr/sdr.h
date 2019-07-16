@@ -875,6 +875,10 @@ struct cstln_lut : cstln_base
                 softsymb_harden(&lut[i][q].ss);
         }
     }
+
+    int m_typeCode;
+    int m_rateCode;
+    bool m_setByModcod;
 };
 // cstln_lut
 

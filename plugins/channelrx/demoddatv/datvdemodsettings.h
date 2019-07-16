@@ -47,6 +47,23 @@ struct DATVDemodSettings
         QAM256
     };
 
+    enum DATVCodeRates
+    {
+        FEC12,
+        FEC23,
+        FEC46,
+        FEC34,
+        FEC56,
+        FEC78, // DVB-S
+        FEC45,
+        FEC89,
+        FEC910, // DVB-S2
+        FEC14,
+        FEC13,
+        FEC25,
+        FEC35
+    };
+
     enum dvb_sampler
     {
         SAMP_NEAREST,

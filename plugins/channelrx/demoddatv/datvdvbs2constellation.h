@@ -103,7 +103,11 @@ static inline cstln_lut<llr_ss, 256> * make_dvbs2_constellation(cstln_lut<llr_ss
         break;
     }
 
-    return new cstln_lut<llr_ss, 256>(c, 10, gamma1, gamma2, gamma3);
+    cstln_lut<llr_ss, 256> *newCstln = new cstln_lut<llr_ss, 256>(c, 10, gamma1, gamma2, gamma3);
+    newCstln->m_rateCode = (int) r;
+    newCstln->m_typeCode = (int) c;
+    newCstln->m_setByModcod = false;
+    return newCstln;
 }
 
 template<typename T> struct datvdvbs2constellation: runnable

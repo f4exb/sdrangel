@@ -808,6 +808,9 @@ struct s2_frame_receiver : runnable
                     cstln_base::names[mcinfo->c], mcinfo->rate);
             cstln = new cstln_lut<SOFTSYMB, 256>(mcinfo->c, mcinfo->esn0_nf,
                                                  mcinfo->g1, mcinfo->g2, mcinfo->g3);
+            cstln->m_rateCode = (int) mcinfo->rate;
+            cstln->m_typeCode = (int) mcinfo->c;
+            cstln->m_setByModcod = true;
 #if 0
 	fprintf(stderr, "Dumping constellation LUT to stdout.\n");
 	cstln->dump(stdout);
