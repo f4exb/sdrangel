@@ -73,7 +73,6 @@ SSBMod::SSBMod(DeviceAPI *deviceAPI) :
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
-	m_inAGC(9600, 0.2, 1e-4),
 	m_agcStepLength(2400)
 {
 	setObjectName(m_channelId);
@@ -107,10 +106,16 @@ SSBMod::SSBMod(DeviceAPI *deviceAPI) :
 	m_cwKeyer.setWPM(13);
 	m_cwKeyer.setMode(CWKeyerSettings::CWNone);
 
-	m_inAGC.setGate(m_settings.m_agcThresholdGate);
-	m_inAGC.setStepDownDelay(m_settings.m_agcThresholdDelay);
-	m_inAGC.setClamping(true);
-    m_inAGC.setHardLimiting(true);
+
+    m_audioCompressor.initSimple(
+        48000, // fixed 48 kS/s sample rate for audio
+        50,    // pregain (dB)
+        -30,   // threshold (dB)
+        20,    // knee (dB)
+        12,    // ratio (dB)
+        0.003, // attack (s)
+        0.25   // release (s)
+    );
 
     applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
@@ -282,9 +287,9 @@ void SSBMod::pullAF(Complex& sample)
 
                 	if (m_settings.m_agc)
                 	{
+                        real = m_audioCompressor.compress(real);
                         ci.real(real);
                         ci.imag(0.0f);
-                        m_inAGC.feed(ci);
                         ci *= m_settings.m_volumeFactor;
                 	}
                 	else
@@ -320,8 +325,8 @@ void SSBMod::pullAF(Complex& sample)
             if (m_settings.m_agc)
             {
                 ci.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r)  / 65536.0f));
+                ci.real(m_audioCompressor.compress(ci.real()));
                 ci.imag(0.0f);
-                m_inAGC.feed(ci);
                 ci *= m_settings.m_volumeFactor;
             }
             else
@@ -706,8 +711,6 @@ void SSBMod::applyAudioSampleRate(int sampleRate)
     m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
     m_cwKeyer.setSampleRate(sampleRate);
 
-    m_agcStepLength = std::min(sampleRate/20, m_settings.m_agcTime/2); // 50 ms or half the AGC length whichever is smaller
-
     m_settingsMutex.unlock();
 
     m_audioSampleRate = sampleRate;
@@ -795,24 +798,6 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
     if ((settings.m_agc != m_settings.m_agc) || force) {
         reverseAPIKeys.append("agc");
     }
-    if ((settings.m_agcOrder != m_settings.m_agcOrder) || force) {
-        reverseAPIKeys.append("agcOrder");
-    }
-    if ((settings.m_agcTime != m_settings.m_agcTime) || force) {
-        reverseAPIKeys.append("agcTime");
-    }
-    if ((settings.m_agcThresholdEnable != m_settings.m_agcThresholdEnable) || force) {
-        reverseAPIKeys.append("agcThresholdEnable");
-    }
-    if ((settings.m_agcThreshold != m_settings.m_agcThreshold) || force) {
-        reverseAPIKeys.append("agcThreshold");
-    }
-    if ((settings.m_agcThresholdGate != m_settings.m_agcThresholdGate) || force) {
-        reverseAPIKeys.append("agcThresholdGate");
-    }
-    if ((settings.m_agcThresholdDelay != m_settings.m_agcThresholdDelay) || force) {
-        reverseAPIKeys.append("agcThresholdDelay");
-    }
     if ((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
         reverseAPIKeys.append("rgbColor");
     }
@@ -870,34 +855,6 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
             //memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
             m_SSBFilterBufferIndex = 0;
         }
-    }
-
-    if ((settings.m_agcTime != m_settings.m_agcTime) ||
-        (settings.m_agcOrder != m_settings.m_agcOrder) || force)
-    {
-        m_settingsMutex.lock();
-        m_inAGC.resize(settings.m_agcTime, m_agcStepLength, settings.m_agcOrder);
-        m_settingsMutex.unlock();
-    }
-
-    if ((settings.m_agcThresholdEnable != m_settings.m_agcThresholdEnable) || force)
-    {
-        m_inAGC.setThresholdEnable(settings.m_agcThresholdEnable);
-    }
-
-    if ((settings.m_agcThreshold != m_settings.m_agcThreshold) || force)
-    {
-        m_inAGC.setThreshold(settings.m_agcThreshold);
-    }
-
-    if ((settings.m_agcThresholdGate != m_settings.m_agcThresholdGate) || force)
-    {
-        m_inAGC.setGate(settings.m_agcThresholdGate);
-    }
-
-    if ((settings.m_agcThresholdDelay != m_settings.m_agcThresholdDelay) || force)
-    {
-        m_inAGC.setStepDownDelay(settings.m_agcThresholdDelay);
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
@@ -1012,24 +969,6 @@ int SSBMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("agc")) {
         settings.m_agc = response.getSsbModSettings()->getAgc() != 0;
     }
-    if (channelSettingsKeys.contains("agcOrder")) {
-        settings.m_agcOrder = response.getSsbModSettings()->getAgcOrder();
-    }
-    if (channelSettingsKeys.contains("agcTime")) {
-        settings.m_agcTime = response.getSsbModSettings()->getAgcTime();
-    }
-    if (channelSettingsKeys.contains("agcThresholdEnable")) {
-        settings.m_agcThresholdEnable = response.getSsbModSettings()->getAgcThresholdEnable() != 0;
-    }
-    if (channelSettingsKeys.contains("agcThreshold")) {
-        settings.m_agcThreshold = response.getSsbModSettings()->getAgcThreshold();
-    }
-    if (channelSettingsKeys.contains("agcThresholdGate")) {
-        settings.m_agcThresholdGate = response.getSsbModSettings()->getAgcThresholdGate();
-    }
-    if (channelSettingsKeys.contains("agcThresholdDelay")) {
-        settings.m_agcThresholdDelay = response.getSsbModSettings()->getAgcThresholdDelay();
-    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getSsbModSettings()->getRgbColor();
     }
@@ -1139,12 +1078,6 @@ void SSBMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getSsbModSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getSsbModSettings()->setPlayLoop(settings.m_playLoop ? 1 : 0);
     response.getSsbModSettings()->setAgc(settings.m_agc ? 1 : 0);
-    response.getSsbModSettings()->setAgcOrder(settings.m_agcOrder);
-    response.getSsbModSettings()->setAgcTime(settings.m_agcTime);
-    response.getSsbModSettings()->setAgcThresholdEnable(settings.m_agcThresholdEnable ? 1 : 0);
-    response.getSsbModSettings()->setAgcThreshold(settings.m_agcThreshold);
-    response.getSsbModSettings()->setAgcThresholdGate(settings.m_agcThresholdGate);
-    response.getSsbModSettings()->setAgcThresholdDelay(settings.m_agcThresholdDelay);
     response.getSsbModSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getSsbModSettings()->getTitle()) {
@@ -1249,24 +1182,6 @@ void SSBMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
     }
     if (channelSettingsKeys.contains("agc") || force) {
         swgSSBModSettings->setAgc(settings.m_agc ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("agcOrder") || force) {
-        swgSSBModSettings->setAgcOrder(settings.m_agcOrder);
-    }
-    if (channelSettingsKeys.contains("agcTime") || force) {
-        swgSSBModSettings->setAgcTime(settings.m_agcTime);
-    }
-    if (channelSettingsKeys.contains("agcThresholdEnable") || force) {
-        swgSSBModSettings->setAgcThresholdEnable(settings.m_agcThresholdEnable ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("agcThreshold") || force) {
-        swgSSBModSettings->setAgcThreshold(settings.m_agcThreshold);
-    }
-    if (channelSettingsKeys.contains("agcThresholdGate") || force) {
-        swgSSBModSettings->setAgcThresholdGate(settings.m_agcThresholdGate);
-    }
-    if (channelSettingsKeys.contains("agcThresholdDelay") || force) {
-        swgSSBModSettings->setAgcThresholdDelay(settings.m_agcThresholdDelay);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgSSBModSettings->setRgbColor(settings.m_rgbColor);

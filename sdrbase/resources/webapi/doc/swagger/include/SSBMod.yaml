@@ -6,7 +6,7 @@ SSBModSettings:
       format: int64
     bandwidth:
       type: number
-      format: float    
+      format: float
     lowCutoff:
       type: number
       format: float
@@ -32,19 +32,6 @@ SSBModSettings:
       type: integer
     agc:
       type: integer
-    agcOrder:
-      type: number
-      format: float
-    agcTime:
-      type: integer
-    agcThresholdEnable:
-      type: integer
-    agcThreshold:
-      type: integer
-    agcThresholdGate:
-      type: integer
-    agcThresholdDelay:
-      type: integer
     rgbColor:
       type: integer
     title:
@@ -61,12 +48,12 @@ SSBModSettings:
     reverseAPIPort:
       type: integer
     reverseAPIDeviceIndex:
-      type: integer      
+      type: integer
     reverseAPIChannelIndex:
-      type: integer       
+      type: integer
     cwKeyer:
       $ref: "/doc/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
-      
+
 SSBModReport:
   description: SSBMod
   properties:

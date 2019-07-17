@@ -57,18 +57,19 @@ void AudioCompressorSnd::initState()
 
 float AudioCompressorSnd::compress(float sample)
 {
+    float compressedSample;
+
     if (m_sampleIndex >= AUDIOCOMPRESSORSND_SF_COMPRESSOR_CHUNKSIZE)
     {
         sf_compressor_process(&m_compressorState, AUDIOCOMPRESSORSND_SF_COMPRESSOR_CHUNKSIZE, m_storageBuffer, m_processedBuffer);
         m_sampleIndex = 0;
     }
-    else
-    {
-        m_storageBuffer[m_sampleIndex] = sample;
-        m_sampleIndex++;
-    }
 
-    return m_processedBuffer[m_sampleIndex];
+    compressedSample = m_processedBuffer[m_sampleIndex];
+    m_storageBuffer[m_sampleIndex] = sample;
+    m_sampleIndex++;
+
+    return compressedSample;
 }
 
 // populate the compressor state with advanced parameters

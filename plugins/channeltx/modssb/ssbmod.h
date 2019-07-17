@@ -35,6 +35,7 @@
 #include "dsp/fftfilt.h"
 #include "dsp/cwkeyer.h"
 #include "audio/audiofifo.h"
+#include "audio/audiocompressorsnd.h"
 #include "util/message.h"
 
 #include "ssbmodsettings.h"
@@ -321,7 +322,7 @@ private:
     Real m_levelSum;
     CWKeyer m_cwKeyer;
 
-    MagAGC m_inAGC;
+    AudioCompressorSnd m_audioCompressor;
     int m_agcStepLength;
 
     QNetworkAccessManager *m_networkManager;

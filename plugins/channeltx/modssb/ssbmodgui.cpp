@@ -297,43 +297,6 @@ void SSBModGUI::on_agc_toggled(bool checked)
     applySettings();
 }
 
-void SSBModGUI::on_agcOrder_valueChanged(int value){
-    QString s = QString::number(value / 100.0, 'f', 2);
-    ui->agcOrderText->setText(s);
-    m_settings.m_agcOrder = value / 100.0;
-    applySettings();
-}
-
-void SSBModGUI::on_agcTime_valueChanged(int value){
-    QString s = QString::number(SSBModSettings::getAGCTimeConstant(value), 'f', 0);
-    ui->agcTimeText->setText(s);
-    m_settings.m_agcTime = SSBModSettings::getAGCTimeConstant(value) * 48;
-    applySettings();
-}
-
-void SSBModGUI::on_agcThreshold_valueChanged(int value)
-{
-    m_settings.m_agcThreshold = value; // dB
-    displayAGCPowerThreshold();
-    applySettings();
-}
-
-void SSBModGUI::on_agcThresholdGate_valueChanged(int value)
-{
-    QString s = QString::number(value, 'f', 0);
-    ui->agcThresholdGateText->setText(s);
-    m_settings.m_agcThresholdGate = value * 48;
-    applySettings();
-}
-
-void SSBModGUI::on_agcThresholdDelay_valueChanged(int value)
-{
-    QString s = QString::number(value * 10, 'f', 0);
-    ui->agcThresholdDelayText->setText(s);
-    m_settings.m_agcThresholdDelay = value * 480;
-    applySettings();
-}
-
 void SSBModGUI::on_navTimeSlider_valueChanged(int value)
 {
     if (m_enableNavTime && ((value >= 0) && (value <= 100)))
@@ -658,20 +621,6 @@ void SSBModGUI::displaySettings()
 
     blockApplySettings(true);
 
-    QString s = QString::number(m_settings.m_agcTime / 48, 'f', 0);
-    ui->agcTimeText->setText(s);
-    ui->agcTime->setValue(SSBModSettings::getAGCTimeConstantIndex(m_settings.m_agcTime / 48));
-    displayAGCPowerThreshold();
-    s = QString::number(m_settings.m_agcThresholdGate / 48, 'f', 0);
-    ui->agcThresholdGateText->setText(s);
-    ui->agcThresholdGate->setValue(m_settings.m_agcThresholdGate / 48);
-    s = QString::number(m_settings.m_agcThresholdDelay / 48, 'f', 0);
-    ui->agcThresholdDelayText->setText(s);
-    ui->agcThresholdDelay->setValue(m_settings.m_agcThresholdDelay / 480);
-    s = QString::number(m_settings.m_agcOrder, 'f', 2);
-    ui->agcOrderText->setText(s);
-    ui->agcOrder->setValue(roundf(m_settings.m_agcOrder * 100.0));
-
     ui->agc->setChecked(m_settings.m_agc);
     ui->audioBinaural->setChecked(m_settings.m_audioBinaural);
     ui->audioFlipChannels->setChecked(m_settings.m_audioFlipChannels);
@@ -687,7 +636,7 @@ void SSBModGUI::displaySettings()
     ui->spanLog2->setValue(5 - m_settings.m_spanLog2);
 
     ui->BW->setValue(roundf(m_settings.m_bandwidth/100.0));
-    s = QString::number(m_settings.m_bandwidth/1000.0, 'f', 1);
+    QString s = QString::number(m_settings.m_bandwidth/1000.0, 'f', 1);
 
     if (m_settings.m_dsb)
     {
@@ -730,21 +679,6 @@ void SSBModGUI::displaySettings()
     ui->morseKeyer->setChecked(m_settings.m_modAFInput == SSBModSettings::SSBModInputAF::SSBModInputCWTone);
 
     blockApplySettings(false);
-}
-
-void SSBModGUI::displayAGCPowerThreshold()
-{
-    if (m_settings.m_agcThreshold == -99)
-    {
-        ui->agcThresholdText->setText("---");
-    }
-    else
-    {
-        QString s = QString::number(m_settings.m_agcThreshold, 'f', 0);
-        ui->agcThresholdText->setText(s);
-    }
-
-    ui->agcThreshold->setValue(m_settings.m_agcThreshold);
 }
 
 void SSBModGUI::leaveEvent(QEvent*)

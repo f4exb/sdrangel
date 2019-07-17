@@ -51,12 +51,6 @@ struct SSBModSettings
     bool m_audioMute;
     bool m_playLoop;
     bool m_agc;
-    float m_agcOrder;
-    int m_agcTime;
-    bool m_agcThresholdEnable;
-    int m_agcThreshold;
-    int m_agcThresholdGate;
-    int m_agcThresholdDelay;
     quint32 m_rgbColor;
 
     QString m_title;
@@ -80,9 +74,6 @@ struct SSBModSettings
     void setCWKeyerGUI(Serializable *cwKeyerGUI) { m_cwKeyerGUI = cwKeyerGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
-
-    static int getAGCTimeConstant(int index);
-    static int getAGCTimeConstantIndex(int agcTimeConstant);
 };
 
 

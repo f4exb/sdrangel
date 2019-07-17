@@ -53,7 +53,16 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
      <number>2</number>
     </property>
     <item>
@@ -709,7 +718,14 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_agc">
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="inputSelectLayout">
       <item>
        <widget class="ButtonSwitch" name="agc">
         <property name="toolTip">
@@ -723,226 +739,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QDial" name="agcOrder">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>AGC volume order in fraction of maximum amplitude</string>
-        </property>
-        <property name="maximum">
-         <number>100</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>20</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="agcOrderText">
-        <property name="toolTip">
-         <string>AGC volume order in fraction of maximum amplitude</string>
-        </property>
-        <property name="text">
-         <string>0.00</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDial" name="agcTime">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Compressor time constant (attack) in ms</string>
-        </property>
-        <property name="minimum">
-         <number>0</number>
-        </property>
-        <property name="maximum">
-         <number>9</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>7</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="agcTimeText">
-        <property name="minimumSize">
-         <size>
-          <width>25</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Compressor time constant in ms</string>
-        </property>
-        <property name="text">
-         <string>000</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDial" name="agcThreshold">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Audio squelch threshold (db power)</string>
-        </property>
-        <property name="minimum">
-         <number>-99</number>
-        </property>
-        <property name="maximum">
-         <number>0</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>-40</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="agcThresholdText">
-        <property name="minimumSize">
-         <size>
-          <width>14</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Audio squelch threshold (dB power)</string>
-        </property>
-        <property name="text">
-         <string>-00</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDial" name="agcThresholdGate">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Audio squelch gate in ms</string>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>4</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="agcThresholdGateText">
-        <property name="minimumSize">
-         <size>
-          <width>18</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Audio squelch gate in ms</string>
-        </property>
-        <property name="text">
-         <string>00</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDial" name="agcThresholdDelay">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Audio squelch delay (release) in ms</string>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="agcThresholdDelayText">
-        <property name="minimumSize">
-         <size>
-          <width>25</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Audio squelch delay in ms</string>
-        </property>
-        <property name="text">
-         <string>000</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <widget class="Line" name="line">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="inputSelectLayout">
       <item>
        <widget class="ButtonSwitch" name="tone">
         <property name="toolTip">
@@ -1245,7 +1041,16 @@
     <property name="spacing">
      <number>2</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
      <number>3</number>
     </property>
     <item>
