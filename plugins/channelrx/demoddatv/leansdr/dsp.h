@@ -327,7 +327,7 @@ struct fir_filter : runnable
     {
         for (int i = 0; i < ncoeffs; ++i)
         {
-            float a = 2 * M_PI * f * (i - ncoeffs / 2);
+            float a = 2 * M_PI * f * (i - ncoeffs / 2.0);
             float c = cosf(a), s = sinf(a);
             // TBD Support T=complex
             shifted_coeffs[i].re = coeffs[i] * c;
