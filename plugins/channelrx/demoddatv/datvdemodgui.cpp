@@ -251,10 +251,28 @@ void DATVDemodGUI::displaySettings()
     ui->chkFastlock->setChecked(m_settings.m_fastLock);
     ui->chkViterbi->setChecked(m_settings.m_viterbi);
 
-    ui->chkAllowDrift->setEnabled(m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S);
-    ui->chkHardMetric->setEnabled(m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S);
-    ui->chkFastlock->setEnabled(m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S);
-    ui->chkViterbi->setEnabled(m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S);
+    if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S)
+    {
+        ui->chkAllowDrift->setEnabled(true);
+        ui->chkHardMetric->setEnabled(true);
+        ui->chkFastlock->setEnabled(true);
+        ui->chkViterbi->setEnabled(true);
+        ui->chkAllowDrift->setStyleSheet("QCheckBox { color: white }");
+        ui->chkHardMetric->setStyleSheet("QCheckBox { color: white }");
+        ui->chkFastlock->setStyleSheet("QCheckBox { color: white }");
+        ui->chkViterbi->setStyleSheet("QCheckBox { color: white }");
+    }
+    else
+    {
+        ui->chkAllowDrift->setEnabled(false);
+        ui->chkHardMetric->setEnabled(false);
+        ui->chkFastlock->setEnabled(false);
+        ui->chkViterbi->setEnabled(false);
+        ui->chkAllowDrift->setStyleSheet("QCheckBox { color: gray }");
+        ui->chkHardMetric->setStyleSheet("QCheckBox { color: gray }");
+        ui->chkFastlock->setStyleSheet("QCheckBox { color: gray }");
+        ui->chkViterbi->setStyleSheet("QCheckBox { color: gray }");
+    }
 
     if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S) {
         ui->statusText->clear();
@@ -470,10 +488,28 @@ void DATVDemodGUI::on_cmbStandard_currentIndexChanged(int index)
 {
     m_settings.m_standard = (DATVDemodSettings::dvb_version) index;
 
-    ui->chkAllowDrift->setEnabled(m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S);
-    ui->chkHardMetric->setEnabled(m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S);
-    ui->chkFastlock->setEnabled(m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S);
-    ui->chkViterbi->setEnabled(m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S);
+    if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S)
+    {
+        ui->chkAllowDrift->setEnabled(true);
+        ui->chkHardMetric->setEnabled(true);
+        ui->chkFastlock->setEnabled(true);
+        ui->chkViterbi->setEnabled(true);
+        ui->chkAllowDrift->setStyleSheet("QCheckBox { color: white }");
+        ui->chkHardMetric->setStyleSheet("QCheckBox { color: white }");
+        ui->chkFastlock->setStyleSheet("QCheckBox { color: white }");
+        ui->chkViterbi->setStyleSheet("QCheckBox { color: white }");
+    }
+    else
+    {
+        ui->chkAllowDrift->setEnabled(false);
+        ui->chkHardMetric->setEnabled(false);
+        ui->chkFastlock->setEnabled(false);
+        ui->chkViterbi->setEnabled(false);
+        ui->chkAllowDrift->setStyleSheet("QCheckBox { color: gray }");
+        ui->chkHardMetric->setStyleSheet("QCheckBox { color: gray }");
+        ui->chkFastlock->setStyleSheet("QCheckBox { color: gray }");
+        ui->chkViterbi->setStyleSheet("QCheckBox { color: gray }");
+    }
 
     if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S) {
         ui->statusText->clear();
