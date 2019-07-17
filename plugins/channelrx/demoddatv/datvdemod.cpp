@@ -1427,27 +1427,24 @@ void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
         }
     }
 
+    if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth)
+        || force)
+    {
+
+        //Bandpass filter shaping
+        Real fltLowCut = -((float) settings.m_rfBandwidth / 2.0) / (float) m_sampleRate;
+        Real fltHiCut  = ((float) settings.m_rfBandwidth / 2.0) / (float) m_sampleRate;
+        m_objRFFilter->create_filter(fltLowCut, fltHiCut);
+    }
+
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+        || force)
+    {
+        m_objNCO.setFreq(-(float) settings.m_centerFrequency, (float) m_sampleRate);
+    }
+
     if (m_settings.isDifferent(settings) || force)
     {
-        //m_objSettingsMutex.lock();
-
-        if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth)
-            || force)
-        {
-
-            //Bandpass filter shaping
-            Real fltLowCut = -((float) settings.m_rfBandwidth / 2.0) / (float) m_sampleRate;
-            Real fltHiCut  = ((float) settings.m_rfBandwidth / 2.0) / (float) m_sampleRate;
-            m_objRFFilter->create_filter(fltLowCut, fltHiCut);
-        }
-
-        if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
-            || force)
-        {
-            m_objNCO.setFreq(-(float) settings.m_centerFrequency, (float) m_sampleRate);
-        }
-
-        //m_objSettingsMutex.unlock();
         m_blnNeedConfigUpdate = true;
     }
 

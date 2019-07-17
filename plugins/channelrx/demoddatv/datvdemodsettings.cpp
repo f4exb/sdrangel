@@ -182,8 +182,6 @@ void DATVDemodSettings::debug(const QString& msg) const
 bool DATVDemodSettings::isDifferent(const DATVDemodSettings& other)
 {
     return ((m_allowDrift != other.m_allowDrift)
-        || (m_rfBandwidth != other.m_rfBandwidth)
-        || (m_centerFrequency != other.m_centerFrequency)
         || (m_fastLock != other.m_fastLock)
         || (m_hardMetric != other.m_hardMetric)
         || (m_filter != other.m_filter)

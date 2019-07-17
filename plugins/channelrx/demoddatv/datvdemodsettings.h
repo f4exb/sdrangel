@@ -100,7 +100,7 @@ struct DATVDemodSettings
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     void debug(const QString& msg) const;
-    bool isDifferent(const DATVDemodSettings& other);
+    bool isDifferent(const DATVDemodSettings& other); // true if a change of settings should trigger DVB framework config update
     void validateSystemConfiguration();
 
     static DATVModulation getModulationFromStr(const QString& str);
