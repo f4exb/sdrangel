@@ -25,6 +25,7 @@
 #ifndef SDRBASE_AUDIO_AUDIOCOMPRESSORSND_H_
 #define SDRBASE_AUDIO_AUDIOCOMPRESSORSND_H_
 
+#define _USE_MATH_DEFINES
 #include <math.h>
 
 // maximum number of samples in the delay buffer
