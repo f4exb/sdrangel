@@ -40,7 +40,7 @@ void DATVDemodSettings::resetToDefaults()
     m_modulation = BPSK;
     m_fec = FEC12;
     m_symbolRate = 250000;
-    m_notchFilters = 1;
+    m_notchFilters = 0;
     m_allowDrift = false;
     m_fastLock = false;
     m_filter = SAMP_LINEAR;
@@ -110,7 +110,7 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         m_standard = (dvb_version) tmp;
 
         d.readS32(5, &tmp, (int) BPSK);
-        tmp = tmp < 0 ? 0 : tmp > (int) QAM256 ? (int) QAM256 : tmp;
+        tmp = tmp < 0 ? 0 : tmp >= (int) MOD_UNSET ? (int) MOD_UNSET - 1 : tmp;
         m_modulation = (DATVModulation) tmp;
 
         d.readBlob(6, &bytetmp);
@@ -123,12 +123,12 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         d.readString(8, &m_title, "DATV Demodulator");
 
         d.readS32(9, &tmp, (int) FEC12);
-        tmp = tmp < 0 ? 0 : tmp >= (int) FEC_COUNT ? (int) FEC_COUNT - 1 : tmp;
+        tmp = tmp < 0 ? 0 : tmp >= (int) RATE_UNSET ? (int) RATE_UNSET - 1 : tmp;
         m_fec = (DATVCodeRate) tmp;
 
         d.readBool(10, &m_audioMute, false);
         d.readS32(11, &m_symbolRate, 250000);
-        d.readS32(12, &m_notchFilters, 1);
+        d.readS32(12, &m_notchFilters, 0);
         d.readBool(13, &m_allowDrift, false);
         d.readBool(14, &m_fastLock, false);
 
@@ -143,6 +143,8 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         d.readString(20, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readS32(21, &m_audioVolume, 0);
         d.readBool(22, &m_videoMute, false);
+
+        validateSystemConfiguration();
 
         return true;
     }
@@ -194,4 +196,253 @@ bool DATVDemodSettings::isDifferent(const DATVDemodSettings& other)
         || (m_symbolRate != other.m_symbolRate)
         || (m_excursion != other.m_excursion)
         || (m_standard != other.m_standard));
+}
+
+void DATVDemodSettings::validateSystemConfiguration()
+{
+    qDebug("DATVDemodSettings::validateSystemConfiguration: m_standard: %d m_modulation: %d m_fec: %d",
+        (int) m_standard, (int) m_modulation, (int) m_fec);
+
+    if (m_standard == DVB_S)
+    {
+        // The ETSI standard for DVB-S specify only QPSK (EN 300 421) with a later extension to BPSK (TR 101 198)
+        // but amateur radio also use extra modes thus only the modes very specific to DVB-S2(X) are restricted
+        if ((m_modulation == APSK16) || (m_modulation == APSK32) || (m_modulation == APSK64E))
+        {
+            m_modulation = QPSK; // Fall back to QPSK
+        }
+        // Here we follow ETSI standard for DVB-S retaining only the valod code rates
+        if ((m_fec != FEC12) && (m_fec!= FEC23) && (m_fec!= FEC34) && (m_fec!= FEC56) && (m_fec!= FEC78)) {
+            m_fec = FEC12;
+        }
+    }
+    else if (m_standard == DVB_S2)
+    {
+        // Here we try to follow ETSI standard for DVB-S2 (EN 300 307 1) and DVB-S2X (EN 302 307 2) together for the available modes
+        if ((m_modulation == BPSK) || (m_modulation == QAM16) || (m_modulation == QAM64) || (m_modulation == QAM256))
+        {
+            m_modulation = QPSK; // Fall back to QPSK
+        }
+        // Here we also try to follow ETSI standard depending on the modulation (EN 300 307 1 Table 1)
+        if (m_modulation == QPSK)
+        {
+            if ((m_fec != FEC14) && (m_fec != FEC13) && (m_fec != FEC25)
+             && (m_fec != FEC12) && (m_fec != FEC35) && (m_fec != FEC23)
+             && (m_fec != FEC34) && (m_fec != FEC45) && (m_fec != FEC56)
+             && (m_fec != FEC89) && (m_fec != FEC910)) {
+                 m_fec = FEC12;
+             }
+        }
+        else if (m_modulation == PSK8)
+        {
+            if ((m_fec != FEC35) && (m_fec != FEC23) && (m_fec != FEC34)
+             && (m_fec != FEC56) && (m_fec != FEC89) && (m_fec != FEC910)) {
+                 m_fec = FEC34;
+             }
+        }
+        else if (m_modulation == APSK16)
+        {
+            if ((m_fec != FEC23) && (m_fec != FEC34) && (m_fec != FEC45)
+             && (m_fec != FEC56) && (m_fec != FEC89) && (m_fec != FEC910)) {
+                 m_fec = FEC34;
+             }
+        }
+        else if (m_modulation == APSK32)
+        {
+            if ((m_fec != FEC34) && (m_fec != FEC45) && (m_fec != FEC56)
+             && (m_fec != FEC89) && (m_fec != FEC910)) {
+                 m_fec = FEC34;
+             }
+        }
+        // DVB-S2X has many mode code rates but here we deal only with the ones available
+        else if (m_modulation == APSK64E)
+        {
+            if ((m_fec != FEC45) && (m_fec != FEC56)) {
+                m_fec = FEC45;
+            }
+        }
+    }
+}
+
+DATVDemodSettings::DATVModulation DATVDemodSettings::getModulationFromStr(const QString& str)
+{
+    if (str == "BPSK") {
+        return BPSK;
+    } else if (str == "QPSK") {
+        return QPSK;
+    } else if (str == "PSK8") {
+        return PSK8;
+    } else if (str == "APSK16") {
+        return APSK16;
+    } else if (str == "APSK32") {
+        return APSK32;
+    } else if (str == "APSK64E") {
+        return APSK64E;
+    } else if (str == "QAM16") {
+        return QAM16;
+    } else if (str == "QAM64") {
+        return QAM64;
+    } else if (str == "QAM256") {
+        return QAM256;
+    } else {
+        return MOD_UNSET;
+    }
+
+}
+
+DATVDemodSettings::DATVCodeRate DATVDemodSettings::getCodeRateFromStr(const QString& str)
+{
+    if (str == "1/4") {
+        return FEC14;
+    } else if (str == "1/3") {
+        return FEC13;
+    } else if (str == "2/5") {
+        return FEC25;
+    } else if (str == "1/2") {
+        return FEC12;
+    } else if (str == "3/5") {
+        return FEC35;
+    } else if (str == "2/3") {
+        return FEC23;
+    } else if (str == "3/4") {
+        return FEC34;
+    } else if (str == "4/5") {
+        return FEC45;
+    } else if (str == "5/6") {
+        return FEC56;
+    } else if (str == "8/9") {
+        return FEC89;
+    } else if (str == "9/10") {
+        return FEC910;
+    } else {
+        return RATE_UNSET;
+    }
+}
+
+QString DATVDemodSettings::getStrFromModulation(const DATVModulation modulation)
+{
+    if (modulation == BPSK) {
+        return "BPSK";
+    } else if (modulation == QPSK) {
+        return "QPSK";
+    } else if (modulation == PSK8) {
+        return "PSK8";
+    } else if (modulation == APSK16) {
+        return "APSK16";
+    } else if (modulation == APSK32) {
+        return "APSK32";
+    } else if (modulation == APSK64E) {
+        return "APSK64E";
+    } else if (modulation == QAM16) {
+        return "QAM16";
+    } else if (modulation == QAM64) {
+        return "QAM64";
+    } else if (modulation == QAM256) {
+        return "QAM256";
+    } else {
+        return "N/A";
+    }
+}
+
+QString DATVDemodSettings::getStrFromCodeRate(const DATVCodeRate codeRate)
+{
+    if (codeRate == FEC14) {
+        return "1/4";
+    } else if (codeRate == FEC13) {
+        return "1/3";
+    } else if (codeRate == FEC25) {
+        return "2/5";
+    } else if (codeRate == FEC12) {
+        return "1/2";
+    } else if (codeRate == FEC35) {
+        return "3/5";
+    } else if (codeRate == FEC23) {
+        return "2/3";
+    } else if (codeRate == FEC34) {
+        return "3/4";
+    } else if (codeRate == FEC45) {
+        return "4/5";
+    } else if (codeRate == FEC56) {
+        return "5/6";
+    } else if (codeRate == FEC78) {
+        return "7/8";
+    } else if (codeRate == FEC89) {
+        return "8/9";
+    } else if (codeRate == FEC910) {
+        return "9/10";
+    } else {
+        return "N/A";
+    }
+}
+
+void DATVDemodSettings::getAvailableModulations(dvb_version dvbStandard, std::vector<DATVModulation>& modulations)
+{
+    modulations.clear();
+
+    if (dvbStandard == DVB_S)
+    {
+        modulations.push_back(BPSK);
+        modulations.push_back(QPSK);
+        modulations.push_back(PSK8);
+        modulations.push_back(QAM16);
+        modulations.push_back(QAM64);
+        modulations.push_back(QAM256);
+    }
+    else if (dvbStandard == DVB_S2)
+    {
+        modulations.push_back(QPSK);
+        modulations.push_back(PSK8);
+        modulations.push_back(APSK16);
+        modulations.push_back(APSK32);
+        modulations.push_back(APSK64E);
+    }
+}
+
+void DATVDemodSettings::getAvailableCodeRates(dvb_version dvbStandard, DATVModulation modulation, std::vector<DATVCodeRate>& codeRates)
+{
+    codeRates.clear();
+
+    if (dvbStandard == DVB_S)
+    {
+        codeRates.push_back(FEC12);
+        codeRates.push_back(FEC23);
+        codeRates.push_back(FEC34);
+        codeRates.push_back(FEC56);
+        codeRates.push_back(FEC78);
+    }
+    else if (dvbStandard == DVB_S2)
+    {
+        if (modulation == QPSK)
+        {
+            codeRates.push_back(FEC14);
+            codeRates.push_back(FEC13);
+            codeRates.push_back(FEC25);
+            codeRates.push_back(FEC12);
+        }
+        if ((modulation == QPSK) || (modulation == PSK8))
+        {
+            codeRates.push_back(FEC35);
+        }
+        if ((modulation == QPSK) || (modulation == PSK8) || (modulation == APSK16))
+        {
+            codeRates.push_back(FEC23);
+        }
+        if ((modulation == QPSK) || (modulation == PSK8) || (modulation == APSK16) || (modulation == APSK32))
+        {
+            codeRates.push_back(FEC34);
+        }
+        if ((modulation == QPSK) || (modulation == APSK16) || (modulation == APSK32) || (modulation == APSK64E))
+        {
+            codeRates.push_back(FEC45);
+        }
+        if ((modulation == QPSK) || (modulation == PSK8) || (modulation == APSK16) || (modulation == APSK32) || (modulation == APSK64E))
+        {
+            codeRates.push_back(FEC56);
+        }
+        if ((modulation == QPSK) || (modulation == PSK8) || (modulation == APSK16) || (modulation == APSK32))
+        {
+            codeRates.push_back(FEC89);
+            codeRates.push_back(FEC910);
+        }
+    }
 }

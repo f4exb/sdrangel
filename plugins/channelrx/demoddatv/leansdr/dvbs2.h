@@ -472,7 +472,9 @@ struct s2_frame_receiver : runnable
           symbols_out(opt_writer(_symbols_out, MAX_SYMBOLS_PER_FRAME)),
           state_out(opt_writer(_state_out)),
           report_state(false),
-          scrambling(0)
+          scrambling(0),
+          m_modcodType(-1),
+          m_modcodRate(-1)
     {
         // Constellation for PLS
         qpsk = new cstln_lut<SOFTSYMB, 256>(cstln_base::QPSK);
@@ -795,6 +797,13 @@ struct s2_frame_receiver : runnable
             return;
         }
 #endif
+        // Store current MODCOD info
+        if (mcinfo->c != m_modcodType) {
+            m_modcodType = mcinfo->c;
+        }
+        if (mcinfo->rate != m_modcodRate) {
+            m_modcodRate = mcinfo->rate;
+        }
 
         // TBD Comparison of nsymbols is insufficient for DVB-S2X.
         if (!cstln || cstln->nsymbols != mcinfo->nsymbols)
@@ -1196,6 +1205,8 @@ struct s2_frame_receiver : runnable
     // S2 constants
     s2_scrambling scrambling;
     s2_sof<T> sof;
+    int m_modcodType;
+    int m_modcodRate;
     // Max size of one frame
     //    static const int MAX_SLOTS = 360;
     static const int MAX_SLOTS = 240; // DEBUG match test signal

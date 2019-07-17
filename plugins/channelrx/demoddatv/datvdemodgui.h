@@ -58,7 +58,6 @@ public:
     bool deserialize(const QByteArray& arrData);
 
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-
     virtual bool handleMessage(const Message& objMessage);
 
     static const QString m_strChannelID;
@@ -69,10 +68,11 @@ private slots:
 
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDoubleClicked();
+    void handleInputMessages();
     void audioSelect();
     void tick();
 
-    void on_cmbStandard_currentIndexChanged(const QString &arg1);
+    void on_cmbStandard_currentIndexChanged(int index);
     void on_cmbModulation_currentIndexChanged(const QString &arg1);
     void on_cmbFEC_currentIndexChanged(const QString &arg1);
     void on_chkViterbi_clicked();
@@ -117,6 +117,9 @@ private:
     bool m_blnBasicSettingsShown;
     bool m_blnDoApplySettings;
     bool m_blnButtonPlayClicked;
+    int m_modcodModulationIndex;
+    int m_modcodCodeRateIndex;
+    bool m_cstlnSetByModcod;
 
     MovingAverageUtil<double, double, 4> m_objMagSqAverage;
 
@@ -126,6 +129,7 @@ private:
     void blockApplySettings(bool blnBlock);
 	void applySettings(bool force = false);
     void displaySettings();
+    void displaySystemConfiguration();
     QString formatBytes(qint64 intBytes);
 
     void displayRRCParameters(bool blnVisible);

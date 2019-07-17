@@ -717,6 +717,19 @@
         <number>10</number>
        </property>
       </widget>
+      <widget class="QLabel" name="statusText">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>10</y>
+         <width>151</width>
+         <height>19</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
      </widget>
     </widget>
    </widget>

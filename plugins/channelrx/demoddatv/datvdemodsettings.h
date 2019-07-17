@@ -21,6 +21,7 @@
 #include <QByteArray>
 #include <QString>
 #include <stdint.h>
+#include <vector>
 
 class Serializable;
 
@@ -34,33 +35,34 @@ struct DATVDemodSettings
 
     enum DATVModulation
     {
-        BPSK,
+        BPSK,    // not DVB-S2
         QPSK,
         PSK8,
-        APSK16,
-        APSK32,
-        APSK64E,
-        QAM16,
-        QAM64,
-        QAM256
+        APSK16,  // not DVB-S
+        APSK32,  // not DVB-S
+        APSK64E, // not DVB-S
+        QAM16,   // not DVB-S2
+        QAM64,   // not DVB-S2
+        QAM256,  // not DVB-S2
+        MOD_UNSET
     };
 
     enum DATVCodeRate
     {
-        FEC12,
-        FEC23,
+        FEC12, // DVB-S
+        FEC23, // DVB-S
         FEC46,
-        FEC34,
-        FEC56,
+        FEC34, // DVB-S
+        FEC56, // DVB-S
         FEC78, // DVB-S
         FEC45,
         FEC89,
-        FEC910, // DVB-S2
+        FEC910,
         FEC14,
         FEC13,
         FEC25,
         FEC35,
-        FEC_COUNT
+        RATE_UNSET
     };
 
     enum dvb_sampler
@@ -99,6 +101,14 @@ struct DATVDemodSettings
     bool deserialize(const QByteArray& data);
     void debug(const QString& msg) const;
     bool isDifferent(const DATVDemodSettings& other);
+    void validateSystemConfiguration();
+
+    static DATVModulation getModulationFromStr(const QString& str);
+    static DATVCodeRate getCodeRateFromStr(const QString& str);
+    static QString getStrFromModulation(const DATVModulation modulation);
+    static QString getStrFromCodeRate(const DATVCodeRate codeRate);
+    static void getAvailableModulations(dvb_version dvbStandard, std::vector<DATVModulation>& modulations);
+    static void getAvailableCodeRates(dvb_version dvbStandard, DATVModulation modulation, std::vector<DATVCodeRate>& codeRates);
 };
 
 #endif // PLUGINS_CHANNELRX_DEMODATV_DATVDEMODSETTINGS_H_

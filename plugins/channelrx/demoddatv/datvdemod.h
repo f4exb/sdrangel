@@ -185,6 +185,9 @@ public:
     void InitDATVFramework();
     void InitDATVS2Framework();
     double getMagSq() const { return m_objMagSqAverage; } //!< Beware this is scaled to 2^30
+    int getModcodModulation() const { return m_modcodModulation; }
+    int getModcodCodeRate() const { return m_modcodCodeRate; }
+    bool isCstlnSetByModcod() const { return m_cstlnSetByModcod; }
     static DATVDemodSettings::DATVCodeRate getCodeRateFromLeanDVBCode(int leanDVBCodeRate);
     static DATVDemodSettings::DATVModulation getModulationFromLeanDVBCode(int leanDVBModulation);
     static int getLeanDVBCodeRateFromDATV(DATVDemodSettings::DATVCodeRate datvCodeRate);
@@ -233,6 +236,33 @@ public:
             Message(),
             m_settings(settings),
             m_force(force)
+        { }
+    };
+
+    class MsgReportModcodCstlnChange : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        DATVDemodSettings::DATVModulation getModulation() const { return m_modulation; }
+        DATVDemodSettings::DATVCodeRate getCodeRate() const { return m_codeRate; }
+
+        static MsgReportModcodCstlnChange* create(const DATVDemodSettings::DATVModulation& modulation,
+            const DATVDemodSettings::DATVCodeRate& codeRate)
+        {
+            return new MsgReportModcodCstlnChange(modulation, codeRate);
+        }
+
+    private:
+        DATVDemodSettings::DATVModulation m_modulation;
+        DATVDemodSettings::DATVCodeRate m_codeRate;
+
+        MsgReportModcodCstlnChange(
+            const DATVDemodSettings::DATVModulation& modulation,
+            const DATVDemodSettings::DATVCodeRate& codeRate
+        ) :
+            Message(),
+            m_modulation(modulation),
+            m_codeRate(codeRate)
         { }
     };
 
@@ -386,6 +416,8 @@ private:
     bool m_blnRenderingVideo;
     bool m_blnStartStopVideo;
     bool m_cstlnSetByModcod;
+    int m_modcodModulation;
+    int m_modcodCodeRate;
 
     DATVDemodSettings::DATVModulation m_enmModulation;
 
