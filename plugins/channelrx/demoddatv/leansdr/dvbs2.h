@@ -1878,36 +1878,36 @@ static const struct fec_info
     const s2_ldpc_table *ldpc;
 } fec_infos[2][FEC_COUNT] = {
     {
-        // Normal frames
-        [FEC12] = {32208, 32400, 12, &ldpc_nf_fec12},
-        [FEC23] = {43040, 43200, 10, &ldpc_nf_fec23},
-        [FEC46] = {0},
-        [FEC34] = {48408, 48600, 12, &ldpc_nf_fec34},
-        [FEC56] = {53840, 54000, 10, &ldpc_nf_fec56},
-        [FEC78] = {0},
-        [FEC45] = {51648, 51840, 12, &ldpc_nf_fec45},
-        [FEC89] = {57472, 57600, 8, &ldpc_nf_fec89},
-        [FEC910] = {58192, 58320, 8, &ldpc_nf_fec910},
-        [FEC14] = {16008, 16200, 12, &ldpc_nf_fec14},
-        [FEC13] = {21408, 21600, 12, &ldpc_nf_fec13},
-        [FEC25] = {25728, 25920, 12, &ldpc_nf_fec25},
-        [FEC35] = {38688, 38880, 12, &ldpc_nf_fec35},
+        // Normal frames - must respect enum code_rate order
+        {32208, 32400, 12, &ldpc_nf_fec12},  // FEC12 (was [FEC12] = {...} and so on. Does not compile with MSVC)
+        {43040, 43200, 10, &ldpc_nf_fec23},  // FEC23
+        {0},                                 // FEC46
+        {48408, 48600, 12, &ldpc_nf_fec34},  // FEC34
+        {53840, 54000, 10, &ldpc_nf_fec56},  // FEC56
+        {0},                                 // FEC78
+        {51648, 51840, 12, &ldpc_nf_fec45},  // FEC45
+        {57472, 57600, 8, &ldpc_nf_fec89},   // FEC89
+        {58192, 58320, 8, &ldpc_nf_fec910},  // FEC910
+        {16008, 16200, 12, &ldpc_nf_fec14},  // FEC14
+        {21408, 21600, 12, &ldpc_nf_fec13},  // FEC13
+        {25728, 25920, 12, &ldpc_nf_fec25},  // FEC25
+        {38688, 38880, 12, &ldpc_nf_fec35},  // FEC35
     },
     {
-        // Short frames
-        [FEC12] = {7032, 7200, 12, &ldpc_sf_fec12},
-        [FEC23] = {10632, 10800, 12, &ldpc_sf_fec23},
-        [FEC46] = {},
-        [FEC34] = {11712, 11880, 12, &ldpc_sf_fec34},
-        [FEC56] = {13152, 13320, 12, &ldpc_sf_fec56},
-        [FEC78] = {},
-        [FEC45] = {12432, 12600, 12, &ldpc_sf_fec45},
-        [FEC89] = {14232, 14400, 12, &ldpc_sf_fec89},
-        [FEC910] = {},
-        [FEC14] = {3072, 3240, 12, &ldpc_sf_fec14},
-        [FEC13] = {5232, 5400, 12, &ldpc_sf_fec13},
-        [FEC25] = {6312, 6480, 12, &ldpc_sf_fec25},
-        [FEC35] = {9552, 9720, 12, &ldpc_sf_fec35},
+        // Short frames - must respect enum code_rate order
+        {7032, 7200, 12, &ldpc_sf_fec12},    // FEC12 (was [FEC12] = {...} and so on. Does not compile with MSVC)
+        {10632, 10800, 12, &ldpc_sf_fec23},  // FEC23
+        {},                                  // FEC46
+        {11712, 11880, 12, &ldpc_sf_fec34},  // FEC34
+        {13152, 13320, 12, &ldpc_sf_fec56},  // FEC56
+        {},                                  // FEC78
+        {12432, 12600, 12, &ldpc_sf_fec45},  // FEC45
+        {14232, 14400, 12, &ldpc_sf_fec89},  // FEC89
+        {},                                  // FEC910
+        {3072, 3240, 12, &ldpc_sf_fec14},    // FEC14
+        {5232, 5400, 12, &ldpc_sf_fec13},    // FEC13
+        {6312, 6480, 12, &ldpc_sf_fec25},    // FEC25
+        {9552, 9720, 12, &ldpc_sf_fec35},    // FEC35
     },
 };
 

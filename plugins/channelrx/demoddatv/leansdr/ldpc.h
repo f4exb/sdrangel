@@ -291,14 +291,14 @@ struct ldpc_engine
         int n_k = n - k;
 
         // Compute the expected check bits (without the final mixing)
-        SOFTWORD expected[n_k / SWSIZE];
+        SOFTWORD *expected = new SOFTWORD[n_k / SWSIZE]; // Forbidden to statically allocate with non constant size
         encode(table, cw, k, n, expected, false);
         // Reverse the integrator mixing from the received check bits
-        SOFTWORD received[n_k / SWSIZE];
+        SOFTWORD *received = new SOFTWORD[n_k / SWSIZE]; // Forbidden to statically allocate with non constant size
         diff_bits(cw + k / SWSIZE, received, n_k / SWSIZE);
 
         // Compute initial scores
-        score_t score[k];
+        score_t *score = new score_t[k]; // Forbidden to statically allocate with non constant size
         score_t tots = compute_scores(cw, expected, received, n_k, score, k);
         lfprintf(stderr, "Initial score %d\n", (int)tots);
 
@@ -438,6 +438,11 @@ struct ldpc_engine
 	if ( tots2 != tots ) fail("bad tots update");
 #endif
         }
+
+        delete[] score;
+        delete[] received;
+        delete[] expected;
+
         return nflipped;
     }
 

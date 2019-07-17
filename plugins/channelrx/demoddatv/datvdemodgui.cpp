@@ -108,6 +108,7 @@ bool DATVDemodGUI::handleMessage(const Message& message)
         m_settings.m_modulation = notif.getModulation();
         m_settings.validateSystemConfiguration();
         displaySystemConfiguration();
+        return true;
     }
     else
     {
