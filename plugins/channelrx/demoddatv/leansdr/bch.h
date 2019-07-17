@@ -105,9 +105,12 @@ struct bch_engine : bch_interface
             if (S[i])
                 corrupted = true;
         }
-        delete[] rem;
         if (!corrupted)
+        {
+            delete[] S;
+            delete[] rem;
             return 0;
+        }
 #if 0
       fprintf(stderr, "synd:");
       for ( int i=0; i<2*npolys; ++i ) fprintf(stderr, " %04x", S[i]);
@@ -124,9 +127,9 @@ struct bch_engine : bch_interface
 
         int NN = 2 * npolys;
         TGF *C = new TGF[NN];
-        std::fill(C, C+NN, 1);
+        C[0] = 1;
         TGF *B = new TGF[NN];
-        std::fill(C, C+NN, 1);
+        B[0] = 1;
         // TGF C[NN] = { crap code
         //     1,
         // },
@@ -165,7 +168,6 @@ struct bch_engine : bch_interface
                 }
             }
         }
-        delete[] S;
         // L is the number of errors.
         // C of degree L is the error locator polynomial (Lambda).
         // C(X) = sum(l=1..L)(1-X_l*X).
@@ -197,6 +199,8 @@ struct bch_engine : bch_interface
                     // This may happen if the code is used truncated.
                     delete[] C;
                     delete[] B;
+                    delete[] S;
+                    delete[] rem;
                     return -1;
                 }
                 cw[rloc / 8] ^= 128 >> (rloc & 7);
@@ -208,6 +212,8 @@ struct bch_engine : bch_interface
 
         delete[] C;
         delete[] B;
+        delete[] S;
+        delete[] rem;
 
         if (roots_found != L)
             return -1;
