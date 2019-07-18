@@ -108,7 +108,7 @@ SSBMod::SSBMod(DeviceAPI *deviceAPI) :
 
 
     m_audioCompressor.initSimple(
-        48000, // fixed 48 kS/s sample rate for audio
+        m_audioSampleRate,
         50,    // pregain (dB)
         -30,   // threshold (dB)
         20,    // knee (dB)
@@ -710,6 +710,9 @@ void SSBMod::applyAudioSampleRate(int sampleRate)
 
     m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
     m_cwKeyer.setSampleRate(sampleRate);
+
+    m_audioCompressor.m_rate = sampleRate;
+    m_audioCompressor.initState();
 
     m_settingsMutex.unlock();
 

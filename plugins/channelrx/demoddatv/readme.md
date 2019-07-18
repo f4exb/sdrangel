@@ -51,7 +51,7 @@ This is the constellation of the PSK or QAM synchronized signal. When the demodu
 <h5>B.2a.1: DATV standard</h5>
 
   - DVB-S: DVB-S
-  - DVB-S2: DVB-S3 and some DVB-S2X
+  - DVB-S2: DVB-S2 and some DVB-S2X
 
 <h5>B.2a.2: Modulation type</h5>
 
