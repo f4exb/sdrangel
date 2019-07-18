@@ -125,6 +125,8 @@ ParserBench::TestType ParserBench::getTestType() const
         return TestDecimatorsInfII;
     } else if (m_testStr == "decimatesupii") {
         return TestDecimatorsSupII;
+    } else if (m_testStr == "ambe") {
+        return TestAMBE;
     } else {
         return TestDecimatorsII;
     }

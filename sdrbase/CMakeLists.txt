@@ -50,6 +50,9 @@ endif(LIBSERIALDV_FOUND)
 
 set(sdrbase_SOURCES
     ${sdrbase_SOURCES}
+    ambe/ambeengine.cpp
+    ambe/ambeworker.cpp
+
     audio/audiocompressor.cpp
     audio/audiocompressorsnd.cpp
     audio/audiodevicemanager.cpp
@@ -152,6 +155,9 @@ set(sdrbase_SOURCES
 
 set(sdrbase_HEADERS
     ${sdrbase_HEADERS}
+    ambe/ambeengine.h
+    ambe/ambeworker.h
+
     audio/audiocompressor.h
     audio/audiocompressorsnd.h
     audio/audiodevicemanager.h

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 F4EXB                                                      //
+// Copyright (C) 2019 F4EXB                                                      //
 // written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -16,50 +16,28 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBENCH_PARSERBENCH_H_
-#define SDRBENCH_PARSERBENCH_H_
+#ifndef SDRBASE_AMBE_AMBEWORKER_H_
+#define SDRBASE_AMBE_AMBEWORKER_H_
 
-#include <QCommandLineParser>
-#include <stdint.h>
+#include <QObject>
 
-class ParserBench
-{
+#include "util/messagequeue.h"
+#include "export.h"
+#include "dvcontroller.h"
+
+class SDRBASE_API AMBEWorker : public QObject {
+    Q_OBJECT
 public:
-    typedef enum
-    {
-        TestDecimatorsII,
-        TestDecimatorsIF,
-        TestDecimatorsFI,
-        TestDecimatorsFF,
-        TestDecimatorsInfII,
-        TestDecimatorsSupII,
-        TestAMBE
-    } TestType;
+    AMBEWorker();
+    ~AMBEWorker();
 
-    ParserBench();
-    ~ParserBench();
+    bool open(const std::string& serialDevice);
+    void close();
 
-    void parse(const QCoreApplication& app);
-
-    const QString& getTestStr() const { return m_testStr; }
-    TestType getTestType() const;
-    uint32_t getNbSamples() const { return m_nbSamples; }
-    uint32_t getRepetition() const { return m_repetition; }
-    uint32_t getLog2Factor() const { return m_log2Factor; }
+    MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
 
 private:
-    QString  m_testStr;
-    uint32_t m_nbSamples;
-    uint32_t m_repetition;
-    uint32_t m_log2Factor;
-
-    QCommandLineParser m_parser;
-    QCommandLineOption m_testOption;
-    QCommandLineOption m_nbSamplesOption;
-    QCommandLineOption m_repetitionOption;
-    QCommandLineOption m_log2FactorOption;
+    SerialDV::DVController m_dvController;
 };
 
-
-
-#endif /* SDRBENCH_PARSERBENCH_H_ */
+#endif // SDRBASE_AMBE_AMBEWORKER_H_

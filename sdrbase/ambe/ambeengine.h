@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 F4EXB                                                      //
+// Copyright (C) 2019 F4EXB                                                      //
 // written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -16,50 +16,53 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBENCH_PARSERBENCH_H_
-#define SDRBENCH_PARSERBENCH_H_
+#ifndef SDRBASE_AMBE_AMBEENGINE_H_
+#define SDRBASE_AMBE_AMBEENGINE_H_
 
-#include <QCommandLineParser>
-#include <stdint.h>
+#include <QObject>
+#include <QMutex>
+#include <vector>
+#include <string>
+#include <list>
 
-class ParserBench
+#include "export.h"
+
+class QThread;
+class AMBEWorker;
+
+class SDRBASE_API AMBEEngine : public QObject
 {
+    Q_OBJECT
 public:
-    typedef enum
-    {
-        TestDecimatorsII,
-        TestDecimatorsIF,
-        TestDecimatorsFI,
-        TestDecimatorsFF,
-        TestDecimatorsInfII,
-        TestDecimatorsSupII,
-        TestAMBE
-    } TestType;
+    AMBEEngine();
+    ~AMBEEngine();
 
-    ParserBench();
-    ~ParserBench();
-
-    void parse(const QCoreApplication& app);
-
-    const QString& getTestStr() const { return m_testStr; }
-    TestType getTestType() const;
-    uint32_t getNbSamples() const { return m_nbSamples; }
-    uint32_t getRepetition() const { return m_repetition; }
-    uint32_t getLog2Factor() const { return m_log2Factor; }
+    bool scan(std::vector<std::string>& ambeDevices);
+    void getDevicesNames(std::vector<std::string>& devicesNames);
+    bool registerController(const std::string& ambeRef);
 
 private:
-    QString  m_testStr;
-    uint32_t m_nbSamples;
-    uint32_t m_repetition;
-    uint32_t m_log2Factor;
+    struct AMBEController
+    {
+        QThread *thread;
+        AMBEWorker *worker;
+        std::string device;
+    };
 
-    QCommandLineParser m_parser;
-    QCommandLineOption m_testOption;
-    QCommandLineOption m_nbSamplesOption;
-    QCommandLineOption m_repetitionOption;
-    QCommandLineOption m_log2FactorOption;
+#ifndef __WINDOWS__
+    static std::string get_driver(const std::string& tty);
+    static void register_comport(std::list<std::string>& comList, std::list<std::string>& comList8250, const std::string& dir);
+    static void probe_serial8250_comports(std::list<std::string>& comList, std::list<std::string> comList8250);
+#endif
+    void getComList();
+
+    std::list<std::string> m_comList;
+    std::list<std::string> m_comList8250;
+    std::vector<std::string> m_ambeSerial;
+    std::vector<AMBEController>  m_controllers;
+    QMutex m_mutex;
 };
 
 
 
-#endif /* SDRBENCH_PARSERBENCH_H_ */
+#endif /* SDRBASE_AMBE_AMBEENGINE_H_ */
