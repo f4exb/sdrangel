@@ -1,3 +1,10 @@
+sdrangel (4.11.1-1) unstable; urgency=medium
+
+  * DATV demod: implemented DVB-S2 (experimental)
+  * SSB modulator: use real audio compressor with just an on off toggle
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 18 Jul 2019 00:04:06 +0200
+
 sdrangel (4.11.0-1) unstable; urgency=medium
 
   * File Source channel plugin

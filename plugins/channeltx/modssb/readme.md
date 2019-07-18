@@ -28,7 +28,7 @@ When in monaural mode the icon shows a single loudspeaker and when in binaural m
 
 <h3>4: Reverse left and right channels in binaural mode</h3>
 
-Effective only in binaural mode: reverses left and right audio channels so that the left is connected to Q and the right to the I complex signal channel. 
+Effective only in binaural mode: reverses left and right audio channels so that the left is connected to Q and the right to the I complex signal channel.
 
 <h3>5: Sideband flip</h3>
 
@@ -86,7 +86,7 @@ This is how the Span (7) and bandpass (8, 9) filter controls look like in the 3 
 Values are expressed in kHz and step is 100 Hz.
 
   - In SSB mode this is the upper (USB: positive frequencies) or lower (LSB: negative frequencies) cutoff of the in channel single side band bandpass filter. The value triggers LSB mode when negative and USB when positive
-  - In DSB mode this is half the bandwidth of the double side band in channel bandpass filter therefore the value is prefixed with the &#177; sign. 
+  - In DSB mode this is half the bandwidth of the double side band in channel bandpass filter therefore the value is prefixed with the &#177; sign.
 
 <h3>9: "Low cut": In channel bandpass filter cutoff frequency closest to zero</h3>
 
@@ -109,43 +109,7 @@ You should aim at keeping the peak value below 100% using the volume control
 
 <h3>12: Audio compression</h3>
 
-![SSB Modulator plugin compressor GUI](../../../doc/img/SSBModulator_plugin_cmp.png)
-
-The audio compressor uses the same AGC as on the receive side (SSB demodulator) with the following changes:
-
-  - The clamping is always active to prevent modulation overload
-  - The amplitude (magnitude) order control is tunable (2.2)
-  - The squelch delay after return below threshold is tunable (2.6) 
-
-The audio compressor works only in monaural mode controlled by (4)
-
-<h4>12.1: Audio compressor toggle</h4>
-
-Use this button to toggle audio compressor on and off. In "on" mode the button is lit as on the picture.
-
-<h4>12.2: AGC magnitude order</h4>
-
-This is the ratio to maximum signal magnitude aimed by the AGC. The higher the stronger is the compression but the signal will have more chances to get clamped and therefore will get more severely distorted.
-
-The default value is 0.2 which is rather mild. For normal voice you should not exceed 0.4 however the criteria is rather subjective. It is flexible enough to be tuned between 0 and 1 in 0.01 increments.
-
-<h4>12.3: AGC time constant</h4>
-
-Audio power is averaged during this period in ms. The lower the closer the compression reacts to audio signal variations and the "harder" it feels. This period can be set among these values: 1, 2, 5, 10, 20, 50, 100, 200, 500, 990 ms
-
-The default value is 200 ms which is relatively "soft". Most practically useful values are between 20 and 500 ms.
-
-<h4>12.4: Power threshold</h4>
-
-in order to avoid small signals due to background noise or power wiggle to enter the system and raise to normal voice level a power based squelch is in place. This control allows to select a threshold in dB above which a signal will open the squelch if it lasts longer than the squelch gate (2.5). Default is -40 dB.
-
-<h4>12.5: Squelch gate</h4>
-
-This prevents short bursts to open the squelch. This is the time in ms after a signal with a power constantly above the threshold will effectively open the squelch. Default is 4 ms.
-
-<h4>12.6: Squelch cut-off delay</h4>
-
-This controls the delay in ms after which a signal drop below threshold will close the squelch. Default value is 50 ms.
+Use this button to toggle audio compression on or off.
 
 <h3>13: Input source control</h3>
 
@@ -189,7 +153,7 @@ Sets the CW speed in Words Per Minute (WPM). This is based on the word "PARIS" s
   - Dash: 3 dot lengths
   - Character silence separator: 3 dot lengths
   - Word silence separator: 7 dot lengths
-  
+
 <h4>16.2: Dots keying</h4>
 
 Switch this button to send dots continuously
