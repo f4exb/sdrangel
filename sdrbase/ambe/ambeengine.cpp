@@ -198,16 +198,16 @@ bool AMBEEngine::scan(std::vector<std::string>& ambeDevices)
     }
 }
 
-bool AMBEEngine::registerController(const std::string& ambeRef)
+bool AMBEEngine::registerController(const std::string& deviceRef)
 {
     AMBEWorker *worker = new AMBEWorker();
 
-    if (worker->open(ambeRef))
+    if (worker->open(deviceRef))
     {
         m_controllers.push_back(AMBEController());
         m_controllers.back().worker = worker;
         m_controllers.back().thread = new QThread();
-        m_controllers.back().device = ambeRef;
+        m_controllers.back().device = deviceRef;
 
         m_controllers.back().worker->moveToThread(m_controllers.back().thread);
         connect(m_controllers.back().worker, SIGNAL(finished()), m_controllers.back().thread, SLOT(quit()));
@@ -220,4 +220,101 @@ bool AMBEEngine::registerController(const std::string& ambeRef)
     }
 
     return false;
+}
+
+void AMBEEngine::releaseController(const std::string& deviceRef)
+{
+    qDebug("AMBEEngine::releaseController");
+    std::vector<AMBEController>::iterator it = m_controllers.begin();
+
+    while (it != m_controllers.end())
+    {
+        if (it->device == deviceRef)
+        {
+            disconnect(&it->worker->m_inputMessageQueue, SIGNAL(messageEnqueued()), it->worker, SLOT(handleInputMessages()));
+            it->worker->stop();
+            it->thread->wait(100);
+            it->worker->m_inputMessageQueue.clear();
+            it->worker->close();
+            qDebug() << "DVSerialEngine::releaseController: closed device at: " << it->device.c_str();
+            break;
+        }
+
+        ++it;
+    }
+}
+
+void AMBEEngine::releaseAll()
+{
+    qDebug("AMBEEngine::releaseAll");
+    std::vector<AMBEController>::iterator it = m_controllers.begin();
+
+    while (it != m_controllers.end())
+    {
+        disconnect(&it->worker->m_inputMessageQueue, SIGNAL(messageEnqueued()), it->worker, SLOT(handleInputMessages()));
+        it->worker->stop();
+        it->thread->wait(100);
+        it->worker->m_inputMessageQueue.clear();
+        it->worker->close();
+        qDebug() << "DVSerialEngine::release: closed device at: " << it->device.c_str();
+        ++it;
+    }
+
+    m_controllers.clear();
+}
+
+void AMBEEngine::getDeviceRefs(std::vector<std::string>& deviceNames)
+{
+    std::vector<AMBEController>::iterator it = m_controllers.begin();
+
+    while (it != m_controllers.end())
+    {
+        deviceNames.push_back(it->device);
+        ++it;
+    }
+}
+
+void AMBEEngine::pushMbeFrame(
+        const unsigned char *mbeFrame,
+        int mbeRateIndex,
+        int mbeVolumeIndex,
+        unsigned char channels,
+        bool useLP,
+        int upsampling,
+        AudioFifo *audioFifo)
+{
+    std::vector<AMBEController>::iterator it = m_controllers.begin();
+    std::vector<AMBEController>::iterator itAvail = m_controllers.end();
+    bool done = false;
+    QMutexLocker locker(&m_mutex);
+
+    while (it != m_controllers.end())
+    {
+        if (it->worker->hasFifo(audioFifo))
+        {
+            it->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useLP, upsampling, audioFifo);
+            done = true;
+        }
+        else if (it->worker->isAvailable())
+        {
+            itAvail = it;
+        }
+
+        ++it;
+    }
+
+    if (!done)
+    {
+        if (itAvail != m_controllers.end())
+        {
+            int wNum = itAvail - m_controllers.begin();
+
+            qDebug("AMBEEngine::pushMbeFrame: push %p on empty queue %d", audioFifo, wNum);
+            itAvail->worker->pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useLP, upsampling, audioFifo);
+        }
+        else
+        {
+            qDebug("AMBEEngine::pushMbeFrame: no DV device available. MBE frame dropped");
+        }
+    }
 }

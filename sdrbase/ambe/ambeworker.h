@@ -20,24 +20,137 @@
 #define SDRBASE_AMBE_AMBEWORKER_H_
 
 #include <QObject>
+#include <QDebug>
+#include <QDateTime>
 
-#include "util/messagequeue.h"
 #include "export.h"
 #include "dvcontroller.h"
+
+#include "util/messagequeue.h"
+#include "util/message.h"
+#include "dsp/filtermbe.h"
+#include "dsp/dsptypes.h"
+#include "audio/audiocompressor.h"
+
+class AudioFifo;
 
 class SDRBASE_API AMBEWorker : public QObject {
     Q_OBJECT
 public:
+    class MsgTest : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        static MsgTest* create() { return new MsgTest(); }
+    private:
+        MsgTest() {}
+    };
+
+    class MsgMbeDecode : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        const unsigned char *getMbeFrame() const { return m_mbeFrame; }
+        SerialDV::DVRate getMbeRate() const { return m_mbeRate; }
+        int getVolumeIndex() const { return m_volumeIndex; }
+        unsigned char getChannels() const { return m_channels % 4; }
+        bool getUseHP() const { return m_useHP; }
+        int getUpsampling() const { return m_upsampling; }
+        AudioFifo *getAudioFifo() { return m_audioFifo; }
+
+        static MsgMbeDecode* create(
+                const unsigned char *mbeFrame,
+                int mbeRateIndex,
+                int volumeIndex,
+                unsigned char channels,
+                bool useHP,
+                int upsampling,
+                AudioFifo *audioFifo)
+        {
+            return new MsgMbeDecode(mbeFrame, (SerialDV::DVRate) mbeRateIndex, volumeIndex, channels, useHP, upsampling, audioFifo);
+        }
+
+    private:
+        unsigned char m_mbeFrame[SerialDV::MBE_FRAME_MAX_LENGTH_BYTES];
+        SerialDV::DVRate m_mbeRate;
+        int m_volumeIndex;
+        unsigned char m_channels;
+        bool m_useHP;
+        int m_upsampling;
+        AudioFifo *m_audioFifo;
+
+        MsgMbeDecode(const unsigned char *mbeFrame,
+                SerialDV::DVRate mbeRate,
+                int volumeIndex,
+                unsigned char channels,
+                bool useHP,
+                int upsampling,
+                AudioFifo *audioFifo) :
+            Message(),
+            m_mbeRate(mbeRate),
+            m_volumeIndex(volumeIndex),
+            m_channels(channels),
+            m_useHP(useHP),
+            m_upsampling(upsampling),
+            m_audioFifo(audioFifo)
+        {
+            memcpy((void *) m_mbeFrame, (const void *) mbeFrame, SerialDV::DVController::getNbMbeBytes(m_mbeRate));
+        }
+    };
+
     AMBEWorker();
     ~AMBEWorker();
 
-    bool open(const std::string& serialDevice);
+    void pushMbeFrame(const unsigned char *mbeFrame,
+            int mbeRateIndex,
+            int mbeVolumeIndex,
+            unsigned char channels,
+            bool useHP,
+            int upsampling,
+            AudioFifo *audioFifo);
+
+    bool open(const std::string& deviceRef); //!< Either serial device or ip:port
     void close();
+    void process();
+    void stop();
+    bool isAvailable();
+    bool hasFifo(AudioFifo *audioFifo);
+
+    void postTest()
+    {
+        //emit inputMessageReady();
+        m_inputMessageQueue.push(MsgTest::create());
+    }
 
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
 
+signals:
+    void finished();
+
+public slots:
+    void handleInputMessages();
+
 private:
+    void upsample(int upsampling, short *in, int nbSamplesIn, unsigned char channels);
+    void noUpsample(short *in, int nbSamplesIn, unsigned char channels);
+    void setVolumeFactors();
+
     SerialDV::DVController m_dvController;
+    AudioFifo *m_audioFifo;
+    QDateTime m_timestamp;
+    volatile bool m_running;
+    int m_currentGainIn;
+    int m_currentGainOut;
+    short m_dvAudioSamples[SerialDV::MBE_AUDIO_BLOCK_SIZE];
+    AudioVector m_audioBuffer;
+    uint m_audioBufferFill;
+    float m_upsamplerLastValue;
+    float m_phase;
+    MBEAudioInterpolatorFilter m_upsampleFilter;
+    int m_upsampling;
+    float m_volume;
+    float m_upsamplingFactors[7];
+    AudioCompressor m_compressor;
 };
 
 #endif // SDRBASE_AMBE_AMBEWORKER_H_

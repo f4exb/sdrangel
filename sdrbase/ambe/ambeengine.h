@@ -29,6 +29,7 @@
 
 class QThread;
 class AMBEWorker;
+class AudioFifo;
 
 class SDRBASE_API AMBEEngine : public QObject
 {
@@ -38,8 +39,21 @@ public:
     ~AMBEEngine();
 
     bool scan(std::vector<std::string>& ambeDevices);
-    void getDevicesNames(std::vector<std::string>& devicesNames);
-    bool registerController(const std::string& ambeRef);
+    void releaseAll();
+
+    int getNbDevices() const { return m_controllers.size(); }   //!< number of devices used
+    void getDeviceRefs(std::vector<std::string>& devicesRefs);  //!< reference of the devices used (device path or url)
+    bool registerController(const std::string& deviceRef);      //!< create a new controller for the device in reference
+    void releaseController(const std::string& deviceRef);       //!< release controller resources for the device in reference
+
+    void pushMbeFrame(
+            const unsigned char *mbeFrame,
+            int mbeRateIndex,
+            int mbeVolumeIndex,
+            unsigned char channels,
+            bool useHP,
+            int upsampling,
+            AudioFifo *audioFifo);
 
 private:
     struct AMBEController
