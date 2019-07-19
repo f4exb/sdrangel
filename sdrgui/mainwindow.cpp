@@ -51,6 +51,7 @@
 #include "gui/samplingdevicecontrol.h"
 #include "gui/sdrangelsplash.h"
 #include "gui/mypositiondialog.h"
+#include "gui/ambedevicesdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspcommands.h"
@@ -1618,6 +1619,13 @@ void MainWindow::on_action_DeviceUserArguments_triggered()
     qDebug("MainWindow::on_action_DeviceUserArguments_triggered");
     DeviceUserArgsDialog deviceUserArgsDialog(DeviceEnumerator::instance(), m_settings.getDeviceUserArgs(), this);
     deviceUserArgsDialog.exec();
+}
+
+void MainWindow::on_action_AMBE_triggered()
+{
+    qDebug("MainWindow::on_action_AMBE_triggered");
+    AMBEDevicesDialog ambeDevicesDialog(m_dspEngine->getAMBEEngine(), this);
+    ambeDevicesDialog.exec();
 }
 
 void MainWindow::on_action_DV_Serial_triggered(bool checked)

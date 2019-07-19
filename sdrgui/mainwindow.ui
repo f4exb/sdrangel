@@ -125,6 +125,7 @@
     </widget>
     <addaction name="action_Audio"/>
     <addaction name="action_Logging"/>
+    <addaction name="action_AMBE"/>
     <addaction name="action_DV_Serial"/>
     <addaction name="action_My_Position"/>
     <addaction name="menuDevices"/>
@@ -936,6 +937,11 @@
   <action name="action_DeviceUserArguments">
    <property name="text">
     <string>User arguments</string>
+   </property>
+  </action>
+  <action name="action_AMBE">
+   <property name="text">
+    <string>AMBE</string>
    </property>
   </action>
   <zorder>presetDock</zorder>

@@ -19,11 +19,13 @@
 #ifndef SDRBASE_AMBE_AMBEENGINE_H_
 #define SDRBASE_AMBE_AMBEENGINE_H_
 
-#include <QObject>
-#include <QMutex>
 #include <vector>
 #include <string>
 #include <list>
+
+#include <QObject>
+#include <QMutex>
+#include <QString>
 
 #include "export.h"
 
@@ -38,7 +40,7 @@ public:
     AMBEEngine();
     ~AMBEEngine();
 
-    bool scan(std::vector<std::string>& ambeDevices);
+    bool scan(std::vector<QString>& ambeDevices);
     void releaseAll();
 
     int getNbDevices() const { return m_controllers.size(); }   //!< number of devices used

@@ -30,6 +30,7 @@
 #ifdef DSD_USE_SERIALDV
 #include "dsp/dvserialengine.h"
 #endif
+#include "ambe/ambeengine.h"
 
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
@@ -81,6 +82,7 @@ public:
 	        bool useHP,
 	        int upsampling,
 	        AudioFifo *audioFifo);
+	AMBEEngine& getAMBEEngine() { return m_ambeEngine; }
 
     const QTimer& getMasterTimer() const { return m_masterTimer; }
     void setMIMOSupport(bool mimoSupport) { m_mimoSupport = mimoSupport; }
@@ -102,6 +104,7 @@ private:
 #ifdef DSD_USE_SERIALDV
 	DVSerialEngine m_dvSerialEngine;
 #endif
+	AMBEEngine m_ambeEngine;
 };
 
 #endif // INCLUDE_DSPENGINE_H

@@ -177,7 +177,7 @@ std::string AMBEEngine::get_driver(const std::string& tty)
 }
 #endif // not Windows
 
-bool AMBEEngine::scan(std::vector<std::string>& ambeDevices)
+bool AMBEEngine::scan(std::vector<QString>& ambeDevices)
 {
     getComList();
     std::list<std::string>::iterator it = m_comList.begin();
@@ -189,7 +189,7 @@ bool AMBEEngine::scan(std::vector<std::string>& ambeDevices)
         qDebug("AMBEEngine::scan: com: %s", it->c_str());
         if (worker->open(*it))
         {
-            ambeDevices.push_back(*it);
+            ambeDevices.push_back(QString(it->c_str()));
             worker->close();
         }
 

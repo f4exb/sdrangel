@@ -199,11 +199,11 @@ void MainBench::testAMBE()
 {
     qDebug() << "MainBench::testAMBE";
     AMBEEngine ambeEngine;
-    std::vector<std::string> ambeDevices;
+    std::vector<QString> ambeDevices;
     ambeEngine.scan(ambeDevices);
 
-    for (std::vector<std::string>::const_iterator it = ambeDevices.begin(); it != ambeDevices.end(); ++it) {
-        qDebug("MainBench::testAMBE: detected AMBE device %s", it->c_str());
+    for (std::vector<QString>::const_iterator it = ambeDevices.begin(); it != ambeDevices.end(); ++it) {
+        qDebug("MainBench::testAMBE: detected AMBE device %s", qPrintable(*it));
     }
 }
 

@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.11.1"
+  version: "4.11.2"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -405,6 +405,100 @@ paths:
           description: On success return list of devices or empty list if unset
           schema:
             $ref: "#/definitions/DVSeralDevices"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/ambe/serial:
+    x-swagger-router-controller: instance
+    get:
+      description: get a list of available DV serial devices
+      operationId: instanceAMBESerialGet
+      tags:
+        - Instance
+      responses:
+        "200":
+          description: On success return list of device paths possibly empty
+          schema:
+            $ref: "#/definitions/DVSeralDevices"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/ambe/devices:
+    x-swagger-router-controller: instance
+    get:
+      description: get the list of AMBE devices (serial or address) used for AMBE frames decoding in digital voice modes
+      operationId: InstanceAMBEDevicesGet
+      tags:
+        - Instance
+      responses:
+        "200":
+          description: On success return list of devices possibly empty
+          schema:
+            $ref: "#/definitions/AMBEDevices"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    put:
+      description: Replace the list of active devices
+      operationId: InstanceAMBEDevicesPut
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: List of AMBE devices (serial or address)
+          required: true
+          schema:
+            $ref: "#/definitions/AMBEDevices"
+      responses:
+        "200":
+          description: On success return list of devices
+          schema:
+            $ref: "#/definitions/AMBEDevices"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    delete:
+      description: Emtpy the active devices thus effectively closing down AMBE devices support
+      operationId: InstanceAMBEDevicesDelete
+      tags:
+        - Instance
+      responses:
+        "200":
+          description: Success.
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    patch:
+      description: Add and/or delete devices to/from the active list
+      operationId: InstanceAMBEDevicesPatch
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: List of AMBE devices (serial or address)
+          required: true
+          schema:
+            $ref: "#/definitions/AMBEDevices"
+      responses:
+        "200":
+          description: On success return list of devices
+          schema:
+            $ref: "#/definitions/AMBEDevices"
         "500":
           $ref: "#/responses/Response_500"
         "501":
@@ -1657,6 +1751,30 @@ definitions:
       deviceName:
         description: "Name of the serial device in the system"
         type: string
+
+  AMBEDevices:
+    description: "List of AMBE devices (serial or server address)"
+    required:
+      - nbDevices
+    properties:
+      nbDevices:
+        description: "Number of DV serial devices"
+        type: integer
+      ambeDevices:
+        description: "List of AMBE devices"
+        type: array
+        items:
+          $ref: "#/definitions/AMBEDevice"
+
+  AMBEDevice:
+    description: "AMBE devices actibe in the system"
+    properties:
+      deviceRef:
+        description: "Serial device name or server address"
+        type: string
+      delete:
+        description: "1 if device is to be removed from active list"
+        type: integer
 
   Presets:
     description: "Settings presets"
