@@ -34,7 +34,7 @@ class SDRGUI_API AMBEDevicesDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit AMBEDevicesDialog(AMBEEngine& ambeEngine, QWidget* parent = nullptr);
+    explicit AMBEDevicesDialog(AMBEEngine* ambeEngine, QWidget* parent = nullptr);
     ~AMBEDevicesDialog();
 
 private:
@@ -42,7 +42,7 @@ private:
     void refreshInUseList();
 
     Ui::AMBEDevicesDialog* ui;
-    AMBEEngine& m_ambeEngine;
+    AMBEEngine* m_ambeEngine;
 
 private slots:
     void on_importSerial_clicked(bool checked);

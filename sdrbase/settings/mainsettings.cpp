@@ -3,8 +3,12 @@
 
 #include "settings/mainsettings.h"
 #include "commands/command.h"
+#include "audio/audiodevicemanager.h"
+#include "ambe/ambeengine.h"
 
-MainSettings::MainSettings() : m_audioDeviceManager(0)
+MainSettings::MainSettings() :
+    m_audioDeviceManager(nullptr),
+    m_ambeEngine(nullptr)
 {
 	resetToDefaults();
     qInfo("MainSettings::MainSettings: settings file: format: %d location: %s", getFileFormat(), qPrintable(getFileLocation()));
@@ -42,10 +46,13 @@ void MainSettings::load()
 	m_preferences.deserialize(qUncompress(QByteArray::fromBase64(s.value("preferences").toByteArray())));
 	m_workingPreset.deserialize(qUncompress(QByteArray::fromBase64(s.value("current").toByteArray())));
 
-	if (m_audioDeviceManager)
-	{
+	if (m_audioDeviceManager) {
 	    m_audioDeviceManager->deserialize(qUncompress(QByteArray::fromBase64(s.value("audio").toByteArray())));
 	}
+
+    if (m_ambeEngine) {
+        m_ambeEngine->deserialize(qUncompress(QByteArray::fromBase64(s.value("ambe").toByteArray())));
+    }
 
 	QStringList groups = s.childGroups();
 
@@ -95,10 +102,13 @@ void MainSettings::save() const
 	s.setValue("preferences", qCompress(m_preferences.serialize()).toBase64());
 	s.setValue("current", qCompress(m_workingPreset.serialize()).toBase64());
 
-	if (m_audioDeviceManager)
-	{
+	if (m_audioDeviceManager) {
 	    s.setValue("audio", qCompress(m_audioDeviceManager->serialize()).toBase64());
 	}
+
+    if (m_ambeEngine) {
+        s.setValue("ambe", qCompress(m_ambeEngine->serialize()).toBase64());
+    }
 
 	QStringList groups = s.childGroups();
 

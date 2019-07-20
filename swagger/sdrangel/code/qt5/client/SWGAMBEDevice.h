@@ -13,7 +13,7 @@
 /*
  * SWGAMBEDevice.h
  *
- * AMBE devices actibe in the system
+ * AMBE devices active in the system
  */
 
 #ifndef SWGAMBEDevice_H_

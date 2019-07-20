@@ -27,9 +27,6 @@
 #include "audio/audiooutput.h"
 #include "audio/audioinput.h"
 #include "export.h"
-#ifdef DSD_USE_SERIALDV
-#include "dsp/dvserialengine.h"
-#endif
 #include "ambe/ambeengine.h"
 
 class DSPDeviceSourceEngine;
@@ -56,6 +53,7 @@ public:
 	void removeLastDeviceMIMOEngine();
 
 	AudioDeviceManager *getAudioDeviceManager() { return &m_audioDeviceManager; }
+	AMBEEngine *getAMBEEngine() { return &m_ambeEngine; }
 
     uint32_t getDeviceSourceEnginesNumber() const { return m_deviceSourceEngines.size(); }
     DSPDeviceSourceEngine *getDeviceSourceEngineByIndex(uint deviceIndex) { return m_deviceSourceEngines[deviceIndex]; }
@@ -82,7 +80,6 @@ public:
 	        bool useHP,
 	        int upsampling,
 	        AudioFifo *audioFifo);
-	AMBEEngine& getAMBEEngine() { return m_ambeEngine; }
 
     const QTimer& getMasterTimer() const { return m_masterTimer; }
     void setMIMOSupport(bool mimoSupport) { m_mimoSupport = mimoSupport; }
@@ -101,9 +98,6 @@ private:
     QTimer m_masterTimer;
 	bool m_dvSerialSupport;
     bool m_mimoSupport;
-#ifdef DSD_USE_SERIALDV
-	DVSerialEngine m_dvSerialEngine;
-#endif
 	AMBEEngine m_ambeEngine;
 };
 

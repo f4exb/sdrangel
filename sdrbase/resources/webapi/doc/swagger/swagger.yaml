@@ -1767,7 +1767,7 @@ definitions:
           $ref: "#/definitions/AMBEDevice"
 
   AMBEDevice:
-    description: "AMBE devices actibe in the system"
+    description: "AMBE devices active in the system"
     properties:
       deviceRef:
         description: "Serial device name or server address"

@@ -64,7 +64,7 @@
      <x>0</x>
      <y>0</y>
      <width>1012</width>
-     <height>19</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -126,7 +126,6 @@
     <addaction name="action_Audio"/>
     <addaction name="action_Logging"/>
     <addaction name="action_AMBE"/>
-    <addaction name="action_DV_Serial"/>
     <addaction name="action_My_Position"/>
     <addaction name="menuDevices"/>
    </widget>

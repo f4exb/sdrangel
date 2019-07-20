@@ -200,7 +200,7 @@ void AMBEWorker::noUpsample(short *in, int nbSamplesIn, unsigned char channels)
         }
         else
         {
-            qDebug("DVSerialWorker::noUpsample: audio buffer is full check its size");
+            qDebug("AMBEWorker::noUpsample: audio buffer is full check its size");
         }
     }
 }

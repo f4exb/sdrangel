@@ -2,13 +2,14 @@
 #define INCLUDE_SETTINGS_H
 
 #include <QString>
-#include "audio/audiodevicemanager.h"
 #include "device/deviceuserargs.h"
 #include "preferences.h"
 #include "preset.h"
 #include "export.h"
 
 class Command;
+class AudioDeviceManager;
+class AMBEEngine;
 
 class SDRBASE_API MainSettings {
 public:
@@ -63,6 +64,7 @@ public:
 
 	const AudioDeviceManager *getAudioDeviceManager() const { return m_audioDeviceManager; }
 	void setAudioDeviceManager(AudioDeviceManager *audioDeviceManager) { m_audioDeviceManager = audioDeviceManager; }
+    void setAMBEEngine(AMBEEngine *ambeEngine) { m_ambeEngine = ambeEngine; }
 
 protected:
 	Preferences m_preferences;
@@ -73,6 +75,7 @@ protected:
     typedef QList<Command*> Commands;
     Commands m_commands;
 	DeviceUserArgs m_hardwareDeviceUserArgs;
+    AMBEEngine *m_ambeEngine;
 };
 
 #endif // INCLUDE_SETTINGS_H

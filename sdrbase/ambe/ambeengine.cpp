@@ -33,7 +33,12 @@
 #endif
 #endif
 
+#include <chrono>
+#include <thread>
+
 #include <QThread>
+#include <QBuffer>
+#include <QDataStream>
 
 #include "ambeworker.h"
 #include "ambeengine.h"
@@ -42,10 +47,12 @@ AMBEEngine::AMBEEngine()
 {}
 
 AMBEEngine::~AMBEEngine()
-{}
+{
+    qDebug("AMBEEngine::~AMBEEngine: %lu controllers", m_controllers.size());
+}
 
 #ifdef __WINDOWS__
-void DVSerialEngine::getComList()
+void AMBEEngine::getComList()
 {
     m_comList.clear();
     m_comList8250.clear();
@@ -100,8 +107,8 @@ void AMBEEngine::getComList()
 
 #ifndef __WINDOWS__
 void AMBEEngine::register_comport(
-    std::list<std::string>& comList,
-    std::list<std::string>& comList8250,
+    std::vector<std::string>& comList,
+    std::vector<std::string>& comList8250,
     const std::string& dir)
 {
     // Get the driver the device is using
@@ -123,11 +130,11 @@ void AMBEEngine::register_comport(
 }
 
 void AMBEEngine::probe_serial8250_comports(
-    std::list<std::string>& comList,
-    std::list<std::string> comList8250)
+    std::vector<std::string>& comList,
+    std::vector<std::string> comList8250)
 {
     struct serial_struct serinfo;
-    std::list<std::string>::iterator it = comList8250.begin();
+    std::vector<std::string>::iterator it = comList8250.begin();
 
     // Iterate over all serial8250-devices
     while (it != comList8250.end())
@@ -177,16 +184,17 @@ std::string AMBEEngine::get_driver(const std::string& tty)
 }
 #endif // not Windows
 
-bool AMBEEngine::scan(std::vector<QString>& ambeDevices)
+void AMBEEngine::scan(std::vector<QString>& ambeDevices)
 {
     getComList();
-    std::list<std::string>::const_iterator it = m_comList.begin();
+    std::vector<std::string>::const_iterator it = m_comList.begin();
     ambeDevices.clear();
 
     while (it != m_comList.end())
     {
         AMBEWorker *worker = new AMBEWorker();
         qDebug("AMBEEngine::scan: com: %s", it->c_str());
+
         if (worker->open(*it))
         {
             ambeDevices.push_back(QString(it->c_str()));
@@ -214,6 +222,7 @@ bool AMBEEngine::registerController(const std::string& deviceRef)
         connect(m_controllers.back().worker, SIGNAL(finished()), m_controllers.back().worker, SLOT(deleteLater()));
         connect(m_controllers.back().thread, SIGNAL(finished()), m_controllers.back().thread, SLOT(deleteLater()));
         connect(&m_controllers.back().worker->m_inputMessageQueue, SIGNAL(messageEnqueued()), m_controllers.back().worker, SLOT(handleInputMessages()));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
         m_controllers.back().thread->start();
 
         return true;
@@ -224,7 +233,6 @@ bool AMBEEngine::registerController(const std::string& deviceRef)
 
 void AMBEEngine::releaseController(const std::string& deviceRef)
 {
-    qDebug("AMBEEngine::releaseController");
     std::vector<AMBEController>::iterator it = m_controllers.begin();
 
     while (it != m_controllers.end())
@@ -237,7 +245,7 @@ void AMBEEngine::releaseController(const std::string& deviceRef)
             it->worker->m_inputMessageQueue.clear();
             it->worker->close();
             m_controllers.erase(it);
-            qDebug() << "DVSerialEngine::releaseController: closed device at: " << it->device.c_str();
+            qDebug() << "AMBEEngine::releaseController: closed device at: " << it->device.c_str();
             break;
         }
 
@@ -247,7 +255,6 @@ void AMBEEngine::releaseController(const std::string& deviceRef)
 
 void AMBEEngine::releaseAll()
 {
-    qDebug("AMBEEngine::releaseAll");
     std::vector<AMBEController>::iterator it = m_controllers.begin();
 
     while (it != m_controllers.end())
@@ -257,7 +264,7 @@ void AMBEEngine::releaseAll()
         it->thread->wait(100);
         it->worker->m_inputMessageQueue.clear();
         it->worker->close();
-        qDebug() << "DVSerialEngine::release: closed device at: " << it->device.c_str();
+        qDebug() << "AMBEEngine::release: closed device at: " << it->device.c_str();
         ++it;
     }
 
@@ -318,4 +325,48 @@ void AMBEEngine::pushMbeFrame(
             qDebug("AMBEEngine::pushMbeFrame: no DV device available. MBE frame dropped");
         }
     }
+}
+
+QByteArray AMBEEngine::serialize() const
+{
+    QStringList qDeviceList;
+    std::vector<AMBEController>::const_iterator it = m_controllers.begin();
+
+    while (it != m_controllers.end())
+    {
+        qDebug("AMBEEngine::serialize: %s", it->device.c_str());
+        qDeviceList << QString(it->device.c_str());
+        ++it;
+    }
+
+    QByteArray data;
+    QDataStream *stream = new QDataStream(&data, QIODevice::WriteOnly);
+    (*stream) << qDeviceList;
+    delete stream;
+
+    return data;
+}
+
+bool AMBEEngine::deserialize(const QByteArray& data)
+{
+    if (data.size() <= 0)
+    {
+        qDebug("AMBEEngine::deserialize: invalid or no data");
+        return false;
+    }
+
+    QStringList qDeviceList;
+    QDataStream *stream = new QDataStream(data);
+    (*stream) >> qDeviceList;
+    delete stream;
+
+    releaseAll();
+
+    for (int i = 0; i < qDeviceList.size(); ++i)
+    {
+        qDebug(" AMBEEngine::deserialize: %s", qDeviceList.at(i).toStdString().c_str());
+        registerController(qDeviceList.at(i).toStdString());
+    }
+
+    return true;
 }

@@ -123,6 +123,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     splash->showStatusMessage("starting...", Qt::white);
 
 	m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
+    m_settings.setAMBEEngine(m_dspEngine->getAMBEEngine());
 
 	ui->setupUi(this);
 	createStatusBar();
@@ -1626,48 +1627,6 @@ void MainWindow::on_action_AMBE_triggered()
     qDebug("MainWindow::on_action_AMBE_triggered");
     AMBEDevicesDialog ambeDevicesDialog(m_dspEngine->getAMBEEngine(), this);
     ambeDevicesDialog.exec();
-}
-
-void MainWindow::on_action_DV_Serial_triggered(bool checked)
-{
-    m_dspEngine->setDVSerialSupport(checked);
-
-    if (checked)
-    {
-        if (m_dspEngine->hasDVSerialSupport())
-        {
-            std::vector<std::string> deviceNames;
-            m_dspEngine->getDVSerialNames(deviceNames);
-
-            if (deviceNames.size() == 0)
-            {
-                QMessageBox::information(this, tr("Message"), tr("No DV serial devices found"));
-                qDebug("MainWindow::on_action_DV_Serial_triggered: No DV serial devices found");
-            }
-            else
-            {
-                std::vector<std::string>::iterator it = deviceNames.begin();
-                std::string deviceNamesStr = "DV Serial devices found: ";
-
-                while (it != deviceNames.end())
-                {
-                    if (it != deviceNames.begin()) {
-                        deviceNamesStr += ",";
-                    }
-
-                    deviceNamesStr += *it;
-                    ++it;
-                }
-
-                QMessageBox::information(this, tr("Message"), tr(deviceNamesStr.c_str()));
-            }
-        }
-        else
-        {
-            QMessageBox::information(this, tr("Message"), tr("No DV serial support"));
-            qDebug("MainWindow::on_action_DV_Serial_triggered: No DV serial support");
-        }
-    }
 }
 
 void MainWindow::sampleSourceChanged()

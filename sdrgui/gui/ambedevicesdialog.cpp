@@ -22,7 +22,7 @@
 #include "ambedevicesdialog.h"
 #include "ui_ambedevicesdialog.h"
 
-AMBEDevicesDialog::AMBEDevicesDialog(AMBEEngine& ambeEngine, QWidget* parent) :
+AMBEDevicesDialog::AMBEDevicesDialog(AMBEEngine* ambeEngine, QWidget* parent) :
     QDialog(parent),
     ui(new Ui::AMBEDevicesDialog),
     m_ambeEngine(ambeEngine)
@@ -40,7 +40,7 @@ AMBEDevicesDialog::~AMBEDevicesDialog()
 void AMBEDevicesDialog::populateSerialList()
 {
     std::vector<QString> ambeSerialDevices;
-    m_ambeEngine.scan(ambeSerialDevices);
+    m_ambeEngine->scan(ambeSerialDevices);
     ui->ambeSerialDevices->clear();
     std::vector<QString>::const_iterator it = ambeSerialDevices.begin();
 
@@ -53,7 +53,7 @@ void AMBEDevicesDialog::populateSerialList()
 void AMBEDevicesDialog::refreshInUseList()
 {
     std::vector<QString> inUseDevices;
-    m_ambeEngine.getDeviceRefs(inUseDevices);
+    m_ambeEngine->getDeviceRefs(inUseDevices);
     ui->ambeDeviceRefs->clear();
     std::vector<QString>::const_iterator it = inUseDevices.begin();
 
@@ -80,7 +80,7 @@ void AMBEDevicesDialog::on_importSerial_clicked(bool checked)
 
     if (foundItems.size() == 0)
     {
-        if (m_ambeEngine.registerController(serialName.toStdString()))
+        if (m_ambeEngine->registerController(serialName.toStdString()))
         {
             ui->ambeDeviceRefs->addItem(serialName);
             ui->statusText->setText(tr("%1 added").arg(serialName));
@@ -109,7 +109,7 @@ void AMBEDevicesDialog::on_importAllSerial_clicked(bool checked)
 
         if (foundItems.size() == 0)
         {
-            if (m_ambeEngine.registerController(serialName.toStdString()))
+            if (m_ambeEngine->registerController(serialName.toStdString()))
             {
                 ui->ambeDeviceRefs->addItem(serialName);
                 count++;
@@ -132,7 +132,7 @@ void AMBEDevicesDialog::on_removeAmbeDevice_clicked(bool checked)
     }
 
     QString deviceName = deviceItem->text();
-    m_ambeEngine.releaseController(deviceName.toStdString());
+    m_ambeEngine->releaseController(deviceName.toStdString());
     ui->statusText->setText(tr("%1 removed").arg(deviceName));
     refreshInUseList();
 }
@@ -151,7 +151,7 @@ void AMBEDevicesDialog::on_clearAmbeList_clicked(bool checked)
         return;
     }
 
-    m_ambeEngine.releaseAll();
+    m_ambeEngine->releaseAll();
     ui->ambeDeviceRefs->clear();
     ui->statusText->setText("All items released");
 }
@@ -164,7 +164,7 @@ void AMBEDevicesDialog::on_importAddress_clicked(bool checked)
 
     if (foundItems.size() == 0)
     {
-        if (m_ambeEngine.registerController(addressAndPort.toStdString()))
+        if (m_ambeEngine->registerController(addressAndPort.toStdString()))
         {
             ui->ambeDeviceRefs->addItem(addressAndPort);
             ui->statusText->setText(tr("%1 added").arg(addressAndPort));

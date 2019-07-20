@@ -21,11 +21,11 @@
 
 #include <vector>
 #include <string>
-#include <list>
 
 #include <QObject>
 #include <QMutex>
 #include <QString>
+#include <QByteArray>
 
 #include "export.h"
 
@@ -40,7 +40,7 @@ public:
     AMBEEngine();
     ~AMBEEngine();
 
-    bool scan(std::vector<QString>& ambeDevices);
+    void scan(std::vector<QString>& ambeDevices);
     void releaseAll();
 
     int getNbDevices() const { return m_controllers.size(); }   //!< number of devices used
@@ -57,9 +57,17 @@ public:
             int upsampling,
             AudioFifo *audioFifo);
 
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
+
 private:
     struct AMBEController
     {
+        AMBEController() :
+            thread(nullptr),
+            worker(nullptr)
+        {}
+
         QThread *thread;
         AMBEWorker *worker;
         std::string device;
@@ -67,14 +75,14 @@ private:
 
 #ifndef __WINDOWS__
     static std::string get_driver(const std::string& tty);
-    static void register_comport(std::list<std::string>& comList, std::list<std::string>& comList8250, const std::string& dir);
-    static void probe_serial8250_comports(std::list<std::string>& comList, std::list<std::string> comList8250);
+    static void register_comport(std::vector<std::string>& comList, std::vector<std::string>& comList8250, const std::string& dir);
+    static void probe_serial8250_comports(std::vector<std::string>& comList, std::vector<std::string> comList8250);
 #endif
     void getComList();
 
-    std::list<std::string> m_comList;
-    std::list<std::string> m_comList8250;
     std::vector<AMBEController> m_controllers;
+    std::vector<std::string> m_comList;
+    std::vector<std::string> m_comList8250;
     QMutex m_mutex;
 };
 

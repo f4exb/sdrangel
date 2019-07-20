@@ -59,6 +59,7 @@ MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, Q
 
     m_instance = this;
     m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
+    m_settings.setAMBEEngine(m_dspEngine->getAMBEEngine());
 
     m_pluginManager = new PluginManager(this);
     m_pluginManager->loadPlugins(QString("pluginssrv"));
