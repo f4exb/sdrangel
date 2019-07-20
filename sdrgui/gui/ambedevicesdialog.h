@@ -39,9 +39,18 @@ public:
 
 private:
     void populateSerialList();
+    void refreshInUseList();
 
     Ui::AMBEDevicesDialog* ui;
     AMBEEngine& m_ambeEngine;
+
+private slots:
+    void on_importSerial_clicked(bool checked);
+    void on_importAllSerial_clicked(bool checked);
+    void on_removeAmbeDevice_clicked(bool checked);
+    void on_refreshAmbeList_clicked(bool checked);
+    void on_clearAmbeList_clicked(bool checked);
+    void on_importAddress_clicked(bool checked);
 };
 
 #endif // SDRGUI_GUI_AMBEDEVICESDIALOG_H_

@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
+    <file>double_arrow_up.png</file>
     <file>no_film.png</file>
     <file>gps.png</file>
     <file>linear.png</file>

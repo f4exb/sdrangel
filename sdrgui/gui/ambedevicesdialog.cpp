@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QString>
+#include <QListWidgetItem>
 
 #include "ambedevicesdialog.h"
 #include "ui_ambedevicesdialog.h"
@@ -28,6 +29,7 @@ AMBEDevicesDialog::AMBEDevicesDialog(AMBEEngine& ambeEngine, QWidget* parent) :
 {
     ui->setupUi(this);
     populateSerialList();
+    refreshInUseList();
 }
 
 AMBEDevicesDialog::~AMBEDevicesDialog()
@@ -39,10 +41,141 @@ void AMBEDevicesDialog::populateSerialList()
 {
     std::vector<QString> ambeSerialDevices;
     m_ambeEngine.scan(ambeSerialDevices);
+    ui->ambeSerialDevices->clear();
     std::vector<QString>::const_iterator it = ambeSerialDevices.begin();
 
     for (; it != ambeSerialDevices.end(); ++it)
     {
         ui->ambeSerialDevices->addItem(QString(*it));
+    }
+}
+
+void AMBEDevicesDialog::refreshInUseList()
+{
+    std::vector<QString> inUseDevices;
+    m_ambeEngine.getDeviceRefs(inUseDevices);
+    ui->ambeDeviceRefs->clear();
+    std::vector<QString>::const_iterator it = inUseDevices.begin();
+
+    for (; it != inUseDevices.end(); ++it)
+    {
+        qDebug("AMBEDevicesDialog::refreshInUseList: %s", qPrintable(*it));
+        ui->ambeDeviceRefs->addItem(*it);
+    }
+}
+
+void AMBEDevicesDialog::on_importSerial_clicked(bool checked)
+{
+    (void) checked;
+    QListWidgetItem *serialItem = ui->ambeSerialDevices->currentItem();
+
+    if (!serialItem)
+    {
+        ui->statusText->setText("No selection");
+        return;
+    }
+
+    QString serialName = serialItem->text();
+    QList<QListWidgetItem*> foundItems = ui->ambeDeviceRefs->findItems(serialName, Qt::MatchFixedString|Qt::MatchCaseSensitive);
+
+    if (foundItems.size() == 0)
+    {
+        if (m_ambeEngine.registerController(serialName.toStdString()))
+        {
+            ui->ambeDeviceRefs->addItem(serialName);
+            ui->statusText->setText(tr("%1 added").arg(serialName));
+        }
+        else
+        {
+            ui->statusText->setText(tr("Cannot open %1").arg(serialName));
+        }
+    }
+    else
+    {
+        ui->statusText->setText("Device already in use");
+    }
+}
+
+void AMBEDevicesDialog::on_importAllSerial_clicked(bool checked)
+{
+    (void) checked;
+    int count = 0;
+
+    for (int i = 0; i < ui->ambeSerialDevices->count(); i++)
+    {
+        const QListWidgetItem *serialItem = ui->ambeSerialDevices->item(i);
+        QString serialName = serialItem->text();
+        QList<QListWidgetItem*> foundItems = ui->ambeDeviceRefs->findItems(serialName, Qt::MatchFixedString|Qt::MatchCaseSensitive);
+
+        if (foundItems.size() == 0)
+        {
+            if (m_ambeEngine.registerController(serialName.toStdString()))
+            {
+                ui->ambeDeviceRefs->addItem(serialName);
+                count++;
+            }
+        }
+    }
+
+    ui->statusText->setText(tr("%1 devices added").arg(count));
+}
+
+void AMBEDevicesDialog::on_removeAmbeDevice_clicked(bool checked)
+{
+    (void) checked;
+    QListWidgetItem *deviceItem = ui->ambeDeviceRefs->currentItem();
+
+    if (!deviceItem)
+    {
+        ui->statusText->setText("No selection");
+        return;
+    }
+
+    QString deviceName = deviceItem->text();
+    m_ambeEngine.releaseController(deviceName.toStdString());
+    ui->statusText->setText(tr("%1 removed").arg(deviceName));
+    refreshInUseList();
+}
+
+void AMBEDevicesDialog::on_refreshAmbeList_clicked(bool checked)
+{
+    refreshInUseList();
+    ui->statusText->setText("In use refreshed");
+}
+
+void AMBEDevicesDialog::on_clearAmbeList_clicked(bool checked)
+{
+    if (ui->ambeDeviceRefs->count() == 0)
+    {
+        ui->statusText->setText("No active items");
+        return;
+    }
+
+    m_ambeEngine.releaseAll();
+    ui->ambeDeviceRefs->clear();
+    ui->statusText->setText("All items released");
+}
+
+void AMBEDevicesDialog::on_importAddress_clicked(bool checked)
+{
+    QString addressAndPort = ui->ambeAddressText->text();
+
+    QList<QListWidgetItem*> foundItems = ui->ambeDeviceRefs->findItems(addressAndPort, Qt::MatchFixedString|Qt::MatchCaseSensitive);
+
+    if (foundItems.size() == 0)
+    {
+        if (m_ambeEngine.registerController(addressAndPort.toStdString()))
+        {
+            ui->ambeDeviceRefs->addItem(addressAndPort);
+            ui->statusText->setText(tr("%1 added").arg(addressAndPort));
+        }
+        else
+        {
+            ui->statusText->setText(tr("Cannot open %1").arg(addressAndPort));
+        }
+    }
+    else
+    {
+        ui->statusText->setText("Address already in use");
     }
 }

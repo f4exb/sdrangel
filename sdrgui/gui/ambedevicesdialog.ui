@@ -16,9 +16,9 @@
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
-     <x>50</x>
+     <x>310</x>
      <y>410</y>
-     <width>341</width>
+     <width>81</width>
      <height>32</height>
     </rect>
    </property>
@@ -73,7 +73,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>171</width>
+     <width>201</width>
      <height>17</height>
     </rect>
    </property>
@@ -92,6 +92,9 @@
    </property>
    <property name="toolTip">
     <string>AMBE server address as ip:port</string>
+   </property>
+   <property name="inputMask">
+    <string>000.000.000.000:00000</string>
    </property>
   </widget>
   <widget class="QPushButton" name="refreshAmbeList">
@@ -114,7 +117,7 @@
      <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
    </property>
   </widget>
-  <widget class="ButtonSwitch" name="removeAmbeDevice">
+  <widget class="QPushButton" name="removeAmbeDevice">
    <property name="geometry">
     <rect>
      <x>280</x>
@@ -147,17 +150,17 @@
     <string>In use</string>
    </property>
   </widget>
-  <widget class="ButtonSwitch" name="importSerial">
+  <widget class="QPushButton" name="importSerial">
    <property name="geometry">
     <rect>
-     <x>110</x>
+     <x>120</x>
      <y>250</y>
      <width>24</width>
      <height>23</height>
     </rect>
    </property>
    <property name="toolTip">
-    <string>Use device</string>
+    <string>Use serial device</string>
    </property>
    <property name="text">
     <string/>
@@ -167,10 +170,10 @@
      <normaloff>:/arrow_up.png</normaloff>:/arrow_up.png</iconset>
    </property>
   </widget>
-  <widget class="ButtonSwitch" name="importAddress">
+  <widget class="QPushButton" name="importAddress">
    <property name="geometry">
     <rect>
-     <x>110</x>
+     <x>120</x>
      <y>60</y>
      <width>24</width>
      <height>23</height>
@@ -197,7 +200,7 @@
     </rect>
    </property>
    <property name="toolTip">
-    <string>Refresh list of devices and servers in use</string>
+    <string>Remove all devices</string>
    </property>
    <property name="text">
     <string/>
@@ -207,14 +210,40 @@
      <normaloff>:/sweep.png</normaloff>:/sweep.png</iconset>
    </property>
   </widget>
+  <widget class="QLabel" name="statusText">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>420</y>
+     <width>291</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>...</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="importAllSerial">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>250</y>
+     <width>24</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Use all serial devices</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/res.qrc">
+     <normaloff>:/double_arrow_up.png</normaloff>:/double_arrow_up.png</iconset>
+   </property>
+  </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="../resources/res.qrc"/>
  </resources>

@@ -180,7 +180,7 @@ std::string AMBEEngine::get_driver(const std::string& tty)
 bool AMBEEngine::scan(std::vector<QString>& ambeDevices)
 {
     getComList();
-    std::list<std::string>::iterator it = m_comList.begin();
+    std::list<std::string>::const_iterator it = m_comList.begin();
     ambeDevices.clear();
 
     while (it != m_comList.end())
@@ -236,6 +236,7 @@ void AMBEEngine::releaseController(const std::string& deviceRef)
             it->thread->wait(100);
             it->worker->m_inputMessageQueue.clear();
             it->worker->close();
+            m_controllers.erase(it);
             qDebug() << "DVSerialEngine::releaseController: closed device at: " << it->device.c_str();
             break;
         }
@@ -263,13 +264,13 @@ void AMBEEngine::releaseAll()
     m_controllers.clear();
 }
 
-void AMBEEngine::getDeviceRefs(std::vector<std::string>& deviceNames)
+void AMBEEngine::getDeviceRefs(std::vector<QString>& deviceNames)
 {
-    std::vector<AMBEController>::iterator it = m_controllers.begin();
+    std::vector<AMBEController>::const_iterator it = m_controllers.begin();
 
     while (it != m_controllers.end())
     {
-        deviceNames.push_back(it->device);
+        deviceNames.push_back(QString(it->device.c_str()));
         ++it;
     }
 }

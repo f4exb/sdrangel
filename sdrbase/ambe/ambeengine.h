@@ -44,7 +44,7 @@ public:
     void releaseAll();
 
     int getNbDevices() const { return m_controllers.size(); }   //!< number of devices used
-    void getDeviceRefs(std::vector<std::string>& devicesRefs);  //!< reference of the devices used (device path or url)
+    void getDeviceRefs(std::vector<QString>& devicesRefs);  //!< reference of the devices used (device path or url)
     bool registerController(const std::string& deviceRef);      //!< create a new controller for the device in reference
     void releaseController(const std::string& deviceRef);       //!< release controller resources for the device in reference
 
@@ -74,8 +74,7 @@ private:
 
     std::list<std::string> m_comList;
     std::list<std::string> m_comList8250;
-    std::vector<std::string> m_ambeSerial;
-    std::vector<AMBEController>  m_controllers;
+    std::vector<AMBEController> m_controllers;
     QMutex m_mutex;
 };
 
