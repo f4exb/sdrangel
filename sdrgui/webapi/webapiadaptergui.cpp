@@ -44,6 +44,7 @@
 #include "SWGLocationInformation.h"
 #include "SWGDVSeralDevices.h"
 #include "SWGDVSerialDevice.h"
+#include "SWGAMBEDevices.h"
 #include "SWGPresets.h"
 #include "SWGPresetGroup.h"
 #include "SWGPresetItem.h"
@@ -623,6 +624,113 @@ int WebAPIAdapterGUI::instanceDVSerialPatch(
         response.setNbDevices(0);
     }
 
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceAMBESerialGet(
+        SWGSDRangel::SWGDVSeralDevices& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    (void) error;
+    response.init();
+
+    std::vector<std::string> deviceNames;
+    std::vector<QString> qDeviceNames;
+    m_mainWindow.m_dspEngine->getAMBEEngine()->scan(qDeviceNames);
+
+    for (std::vector<QString>::const_iterator it = qDeviceNames.begin(); it != qDeviceNames.end(); ++it) {
+        deviceNames.push_back(it->toStdString());
+    }
+
+    response.setNbDevices((int) deviceNames.size());
+    QList<SWGSDRangel::SWGDVSerialDevice*> *deviceNamesList = response.getDvSerialDevices();
+
+    std::vector<std::string>::iterator it = deviceNames.begin();
+
+    while (it != deviceNames.end())
+    {
+        deviceNamesList->append(new SWGSDRangel::SWGDVSerialDevice);
+        deviceNamesList->back()->init();
+        *deviceNamesList->back()->getDeviceName() = QString::fromStdString(*it);
+        ++it;
+    }
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceAMBEDevicesGet(
+        SWGSDRangel::SWGAMBEDevices& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    (void) error;
+    response.init();
+
+    std::vector<std::string> deviceNames;
+    m_mainWindow.m_dspEngine->getDVSerialNames(deviceNames);
+    response.setNbDevices((int) deviceNames.size());
+    QList<SWGSDRangel::SWGAMBEDevice*> *deviceNamesList = response.getAmbeDevices();
+
+    std::vector<std::string>::iterator it = deviceNames.begin();
+
+    while (it != deviceNames.end())
+    {
+        deviceNamesList->append(new SWGSDRangel::SWGAMBEDevice);
+        deviceNamesList->back()->init();
+        *deviceNamesList->back()->getDeviceRef() = QString::fromStdString(*it);
+        deviceNamesList->back()->setDelete(0);
+        ++it;
+    }
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceAMBEDevicesDelete(
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    (void) error;
+    m_mainWindow.m_dspEngine->getAMBEEngine()->releaseAll();
+
+    response.init();
+    *response.getMessage() = QString("All AMBE devices released");
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceAMBEDevicesPut(
+        SWGSDRangel::SWGAMBEDevices& query,
+        SWGSDRangel::SWGAMBEDevices& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    m_mainWindow.m_dspEngine->getAMBEEngine()->releaseAll();
+
+    QList<SWGSDRangel::SWGAMBEDevice *> *ambeList = query.getAmbeDevices();
+
+    for (QList<SWGSDRangel::SWGAMBEDevice *>::const_iterator it = ambeList->begin(); it != ambeList->end(); ++it) {
+        m_mainWindow.m_dspEngine->getAMBEEngine()->registerController((*it)->getDeviceRef()->toStdString());
+    }
+
+    instanceAMBEDevicesGet(response, error);
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceAMBEDevicesPatch(
+        SWGSDRangel::SWGAMBEDevices& query,
+        SWGSDRangel::SWGAMBEDevices& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    QList<SWGSDRangel::SWGAMBEDevice *> *ambeList = query.getAmbeDevices();
+
+    for (QList<SWGSDRangel::SWGAMBEDevice *>::const_iterator it = ambeList->begin(); it != ambeList->end(); ++it)
+    {
+        if ((*it)->getDelete()) {
+            m_mainWindow.m_dspEngine->getAMBEEngine()->releaseController((*it)->getDeviceRef()->toStdString());
+        } else {
+            m_mainWindow.m_dspEngine->getAMBEEngine()->registerController((*it)->getDeviceRef()->toStdString());
+        }
+    }
+
+    instanceAMBEDevicesGet(response, error);
     return 200;
 }
 

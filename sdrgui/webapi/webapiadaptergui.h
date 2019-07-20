@@ -107,6 +107,28 @@ public:
             SWGSDRangel::SWGDVSeralDevices& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instanceAMBESerialGet(
+            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceAMBEDevicesGet(
+            SWGSDRangel::SWGAMBEDevices& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceAMBEDevicesPut(
+            SWGSDRangel::SWGAMBEDevices& query,
+            SWGSDRangel::SWGAMBEDevices& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceAMBEDevicesPatch(
+            SWGSDRangel::SWGAMBEDevices& query,
+            SWGSDRangel::SWGAMBEDevices& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceAMBEDevicesDelete(
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int instancePresetsGet(
             SWGSDRangel::SWGPresets& response,
             SWGSDRangel::SWGErrorResponse& error);

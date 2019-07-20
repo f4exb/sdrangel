@@ -59,6 +59,8 @@ private:
     void instanceAudioOutputCleanupService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceLocationService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceDVSerialService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceAMBESerialService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceAMBEDevicesService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instancePresetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instancePresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instancePresetFileService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
@@ -85,6 +87,7 @@ private:
     bool validateChannelSettings(SWGSDRangel::SWGChannelSettings& deviceSettings, QJsonObject& jsonObject, QStringList& channelSettingsKeys);
     bool validateAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice, QJsonObject& jsonObject, QStringList& audioInputDeviceKeys);
     bool validateAudioOutputDevice(SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice, QJsonObject& jsonObject, QStringList& audioOutputDeviceKeys);
+    bool validateAMBEDevices(SWGSDRangel::SWGAMBEDevices& ambeDevices, QJsonObject& jsonObject);
 
     void appendSettingsSubKeys(
             const QJsonObject& parentSettingsJsonObject,

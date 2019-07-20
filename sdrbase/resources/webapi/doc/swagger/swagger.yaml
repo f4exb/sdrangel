@@ -431,7 +431,7 @@ paths:
     x-swagger-router-controller: instance
     get:
       description: get the list of AMBE devices (serial or address) used for AMBE frames decoding in digital voice modes
-      operationId: InstanceAMBEDevicesGet
+      operationId: instanceAMBEDevicesGet
       tags:
         - Instance
       responses:
@@ -445,7 +445,7 @@ paths:
           $ref: "#/responses/Response_501"
     put:
       description: Replace the list of active devices
-      operationId: InstanceAMBEDevicesPut
+      operationId: instanceAMBEDevicesPut
       tags:
         - Instance
       consumes:
@@ -468,7 +468,7 @@ paths:
           $ref: "#/responses/Response_501"
     delete:
       description: Emtpy the active devices thus effectively closing down AMBE devices support
-      operationId: InstanceAMBEDevicesDelete
+      operationId: instanceAMBEDevicesDelete
       tags:
         - Instance
       responses:
@@ -482,7 +482,7 @@ paths:
           $ref: "#/responses/Response_501"
     patch:
       description: Add and/or delete devices to/from the active list
-      operationId: InstanceAMBEDevicesPatch
+      operationId: instanceAMBEDevicesPatch
       tags:
         - Instance
       consumes:

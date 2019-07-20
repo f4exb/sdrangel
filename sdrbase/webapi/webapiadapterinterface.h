@@ -38,6 +38,7 @@ namespace SWGSDRangel
     class SWGAudioOutputDevice;
     class SWGLocationInformation;
     class SWGDVSeralDevices;
+    class SWGAMBEDevices;
     class SWGPresets;
     class SWGPresetTransfer;
     class SWGPresetIdentifier;
@@ -308,6 +309,80 @@ public:
         error.init();
         *error.getMessage() = QString("Function not implemented");
         return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/ambe/serial (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceAMBESerialGet(
+            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) response;
+        error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/ambe/devices (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceAMBEDevicesGet(
+            SWGSDRangel::SWGAMBEDevices& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) response;
+        error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/ambe/devices (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceAMBEDevicesPut(
+            SWGSDRangel::SWGAMBEDevices& query,
+            SWGSDRangel::SWGAMBEDevices& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) query;
+        (void) response;
+        error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/ambe/devices (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceAMBEDevicesPatch(
+            SWGSDRangel::SWGAMBEDevices& query,
+            SWGSDRangel::SWGAMBEDevices& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) query;
+        (void) response;
+        error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/ambe/devices (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceAMBEDevicesDelete(
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
     }
 
     /**
@@ -735,6 +810,8 @@ public:
     static QString instanceAudioOutputCleanupURL;
     static QString instanceLocationURL;
     static QString instanceDVSerialURL;
+    static QString instanceAMBESerialURL;
+    static QString instanceAMBEDevicesURL;
     static QString instancePresetsURL;
     static QString instancePresetURL;
     static QString instancePresetFileURL;
