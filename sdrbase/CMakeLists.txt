@@ -31,22 +31,10 @@ else(FFTW3F_FOUND)
     add_definitions(-DUSE_KISSFFT)
 endif(FFTW3F_FOUND)
 
-if (LIBSERIALDV_FOUND)
-    set(sdrbase_SOURCES
-        ${sdrbase_SOURCES}
-        dsp/dvserialworker.cpp
-        dsp/dvserialengine.cpp
-    )
-    set(sdrbase_HEADERS
-        ${sdrbase_HEADERS}
-        dsp/dvserialworker.h
-        dsp/dvserialengine.h
-    )
-    message(STATUS "Will have SerialDV support")
-    add_definitions(-DDSD_USE_SERIALDV)
-    include_directories(${LIBSERIALDV_INCLUDE_DIR})
-    set(sdrbase_SERIALDV_LIB ${LIBSERIALDV_LIBRARY})
-endif(LIBSERIALDV_FOUND)
+# serialdv now required
+add_definitions(-DDSD_USE_SERIALDV)
+include_directories(${LIBSERIALDV_INCLUDE_DIR})
+set(sdrbase_SERIALDV_LIB ${LIBSERIALDV_LIBRARY})
 
 set(sdrbase_SOURCES
     ${sdrbase_SOURCES}

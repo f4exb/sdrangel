@@ -364,7 +364,7 @@ else()
     find_package(Codec2)
     find_package(CM256cc)
     find_package(LibMbe)
-    find_package(SerialDV)
+    find_package(SerialDV REQUIRED)
     find_package(LibDSDcc)
 endif()
 

@@ -18,16 +18,17 @@ To enable this plugin at compile time you will need to have DSDcc installed in y
 
 <h2>DV serial device support</h2>
 
-You can use a serial device connected to your system that implements and exposes the packet interface of the AMBE3000 chip. This can be for example a ThumbDV USB dongle. In order to support DV serial devices in your system you will need two things:
+You can use a serial device connected to your system that implements and exposes the packet interface of the AMBE3000 chip. This can be for example a ThumbDV USB dongle. You may also connect to an AMBE server instance over the network.
 
-  - Compile with [SerialDV](https://github.com/f4exb/serialDV) support Please refer to this project Readme.md to compile and install SerialDV. If you install it in a custom location say `/opt/install/serialdv` you will need to add these defines to the cmake command: `-DSERIALDV_DIR=/opt/install/serialdv`
-  - Enable DV serial devices in your system by checking the option in the Preferences menu. You will need to enable the DV serial devices each time you start SDRangel.
-  
-Although such serial devices work with a serial interface at 400 kb in practice maybe for other reasons they are capable of handling only one conversation at a time. The software will allocate the device dynamically to a conversation with an inactivity timeout of 1 second so that conversations do not get interrupted constantly making the audio output too choppy. In practice you will have to have as many devices connected to your system as the number of conversations you would like to be handled in parallel. 
+DV serial devices are supported using the [SerialDV](https://github.com/f4exb/serialDV) library that is a mandatory requirement. Therefore you have to compile and install it in your system. Please refer to this project Readme.md to compile and install SerialDV. f you install it in a custom location say `/opt/install/serialdv` you will need to add this define to the cmake command: `-DSERIALDV_DIR=/opt/install/serialdv`
 
-Note also that this is not supported in Windows because of trouble with COM port support (contributors welcome!).
+To effectively use serial DV devices for AMBE decoding you will have to add at least one device to the list of AMBE devices in use using the `AMBE devices control` dialog opened with the `AMBE` option in the `Preferences` menu. The list of devices is saved in the program preferences so that they are persistent across program stop/start. However if the device name or server address changes in between the corresponding reference will be lost.
 
-Alternatively you can use software decoding with Mbelib. Possible copyright issues apart (see next) the audio quality with the DVSI AMBE chip is much better.
+Although such serial devices work with a serial interface at 400 kb in practice maybe for other reasons they are capable of handling only one conversation at a time. The software will allocate the device dynamically to a conversation with an inactivity timeout of 1 second so that conversations do not get interrupted constantly making the audio output too choppy. In practice you will have to have as many devices connected to your system as the number of conversations you would like to be handled in parallel.
+
+Note also that hardware serial devices are not supported in Windows because of trouble with COM port support (contributors welcome!).
+
+If no AMBE devices or servers are activated with the `AMBE devices control` AMBE decoding will take place with Mbelib. Possible copyright issues apart (see next) the audio quality with the DVSI AMBE chip is much better.
 
 ---
 &#9888; With kernel 4.4.52 and maybe other 4.4 versions the default for FTDI devices (that is in the ftdi_sio kernel module) is not to set it as low latency. This results in the ThumbDV dongle not working anymore because its response is too slow to sustain the normal AMBE packets flow. The solution is to force low latency by changing the variable for your device (ex: /dev/ttyUSB0) as follows:
@@ -101,7 +102,7 @@ One line per status text
 
 <h4>A.7: Audio volume</h4>
 
-When working with mbelib this is a linear multiplication factor. A value of zero triggers the auto gain feature. 
+When working with mbelib this is a linear multiplication factor. A value of zero triggers the auto gain feature.
 
 With the DV serial device(s) amplification factor in dB is given by `(value - 3.0)*5.0`. In most practical cases the middle value of 5.0 (+10 dB) is a comfortable level.
 
@@ -145,21 +146,21 @@ When the display is active the background turns from the surrounding gray color 
 
 <h5>A11.1.3: Informative text</h5>
 
-When slow data can be decoded this is the 20 character string that is sent in the text frames 
+When slow data can be decoded this is the 20 character string that is sent in the text frames
 
 <h5>A11.1.4: Geopositional data</h5>
 
-When a `$$CRC` frame that carries geographical position can be successfully decoded from the slow data the geopositional information is displayed:  
+When a `$$CRC` frame that carries geographical position can be successfully decoded from the slow data the geopositional information is displayed:
 
    - at the left of the colon `:` is the QTH 6 character locator a.k.a. Maidenhead locator
-   - at the right of the colon `:` is the bearing in degrees and distance in kilometers from the location entered in the main window `Preferences\My Position` dialog. The bearing and distance are separated by a slash `/`. 
+   - at the right of the colon `:` is the bearing in degrees and distance in kilometers from the location entered in the main window `Preferences\My Position` dialog. The bearing and distance are separated by a slash `/`.
 
 <h4>A11.2: DMR status display</h4>
 
 ![DSD DMR status](../../../doc/img/DSDdemod_plugin_dmr_status.png)
 
   - Note 1: statuses are polled at ~1s rate and therefore do not reflect values instantaneously. As a consequence some block types that occur during the conversation may not appear.
-  - Note 2: status values remain unchanged until a new value is available for the channel or the transmissions stops then all values of both channels are cleared 
+  - Note 2: status values remain unchanged until a new value is available for the channel or the transmissions stops then all values of both channels are cleared
 
 <h5>A11.2.1: Station role</h5>
 
@@ -178,16 +179,16 @@ For mobile stations on an inbound channel there is no channel identification (no
 This applies to base stations and mobile stations in continuous mode that is transmissions including the CACH sequences.
 
   - The first character is either:
-  
+
     - `*`: Busy. That is the AT bit on the opposite channel is on
     - `.`: Clear. That is the AT bit on the opposite channel is off
     - `/`: The CACH could not be decoded and information is missing
-    
+
   - The two next characters are either:
-  
+
     - The color code from 0 to 15 (4 bits)
     - `--`: The color code could not be decoded and information is missing
-  
+
 <h5>A11.2.5: Slot type</h5>
 
 This is either:
@@ -203,7 +204,7 @@ This is either:
    - `D12`: 1/2 rate data block
    - `D34`: 3/4 rate data block
    - `DB1`: full rate data block
-   - `RES`: reserved data block 
+   - `RES`: reserved data block
    - `UNK`: unknown data type or could not be decoded
 
 <h5>A11.2.6: Addressing information</h5>
@@ -231,7 +232,7 @@ String is in the form: `02223297>G00000222`
   - `D2`: Data with FEC frame
   - `XS`: Extended search: looking for a new payload frame when out of sequence
   - `EN`: End frame
-  
+
 <h5>A11.3.2: Colour code</h5>
 
 Colour code in decimal (12 bits)
@@ -257,21 +258,21 @@ This displays a summary of FICH (Frame Identification CHannel) block data. From 
     - `C`: channel (as in the example)
     - `T`: terminator
     - `S`: test
-    
+
   - Channel type:
     - `V1`: voice/data mode 1
     - `V2`: voice/data mode 2 (as in the example)
     - `VF`: voice full rate
     - `DF`: data full rate
-     
+
   - Call mode:
     - `GC`: group call (as in the example)
     - `RI`: radio ID
     - `RE`: reserved
     - `IN`: individual call
-    
+
   - Number of total blocks and number of total frames separated by a colon `:`
-  
+
   - Miscellaneous information in a single string
     - first character is the bandwidth mode:
       - `N`: narrow band mode
@@ -280,7 +281,7 @@ This displays a summary of FICH (Frame Identification CHannel) block data. From 
       - `I`: Internet path
       - `L`: local path (as in the example)
     - last three characters are the YSF squelch code (0..127) or dashes `---` if the YSF squelch is not active
-    
+
 <h5>A11.4.2: Origin and destination callsigns</h5>
 
   - at the left of the `>` sign is the origin callsign
@@ -289,7 +290,7 @@ This displays a summary of FICH (Frame Identification CHannel) block data. From 
 <h5>A11.4.3: Origin and destination repeaters callsigns</h5>
 
   - at the left of the `>` sign is the origin repeater callsign
-  - at the right of the `>` sign is the destination repeater callsign. 
+  - at the right of the `>` sign is the destination repeater callsign.
 
 <h5>A11.4.4: Originator radio ID</h5>
 
@@ -333,17 +334,17 @@ This is the 3 byte location Id associated to the site displayed in hexadecimal
 This is a 16 bit collection of flags to indicate which services are available displayed in hexadecimal. The breakdown is listed in the NXDN documentation `NXDN TS 1-A Version 1.3` section 6.5.33. From MSB to LSB:
 
   - first nibble (here `B`):
-    - `b15`: Multi-site service 
-    - `b14`: Multi-system service 
-    - `b13`: Location Registration service 
+    - `b15`: Multi-site service
+    - `b14`: Multi-system service
+    - `b13`: Location Registration service
     - `b12`: Group Registration Service
   - second nibble (here `3`):
-    - `b11`: Authentication Service 
-    - `b10`: Composite Control Channel Service 
-    - `b9`: Voice Call Service 
+    - `b11`: Authentication Service
+    - `b10`: Composite Control Channel Service
+    - `b9`: Voice Call Service
     - `b8`: Data Call Service
   - third nibble (here `C`):
-    - `b7`: Short Data Call Service 
+    - `b7`: Short Data Call Service
     - `b6`: Status Call & Remote Control Service
     - `b5`: PSTN Network Connection Service
     - `b4`: IP Network Connection Service
@@ -399,7 +400,7 @@ In this case the display is simply "RU" for "unknown"
 This display shows the sampled points of the demodulated FM signal in a XY plane with either:
 
   - X as the signal at time t and Y the signal at time t minus symbol time if "transitions constellation" is selected by button (B.13)
-  - X as the signal and Y as the synchronization signal if "symbol synchronization" is selected by button (B.13) 
+  - X as the signal and Y as the synchronization signal if "symbol synchronization" is selected by button (B.13)
 
 The display shows 16 points as yellow crosses that can be used to tune the center frequency (A.1) and FM deviation (B.17) so that symbol recovery can be done with the best conditions. In the rest of the documentation they will be referenced with numbers from 0 to 15 starting at the top left corner and going from left to right and top to bottom.
 
@@ -423,14 +424,14 @@ Depending on the type of modulation the figure will have different characteristi
 This concerns the following standards:
 
   - D-Star
-  
+
 There are 4 possible points corresponding to the 4 possible transitions. x represents the current symbol and y the previous symbol. The 4 points given by their (y,x) coordinates correspond to the following:
 
   - (1, 1): upper right corner. The pointer can stay there or move to (1, -1). Ideally this should be placed at point 3.
   - (1, -1): upper left corner. The pointer can move to (-1, -1) or (-1, 1). Ideally this should be placed at point 0.
   - (-1, 1): lower right corner. The pointer can move to (1, -1) or (1, 1). Ideally this should be placed at point 15.
   - (-1, -1): lower left corner. The pointer can stay there or move to (-1, 1). Ideally this should be placed at point 12.
- 
+
 As you can see the pointer can make all moves except between (-1, -1) and (1,1) hence all vertices between the 4 points can appear except the one between the lower left corner and the upper right corner.
 
 <h6>4-FSK or 4-GFSK</h6>
@@ -491,7 +492,7 @@ This can be one of the following:
   - `+YSF`: non-inverted Yaesu System Fusion frame
 
 <h4>B.4: Matched filter toggle</h4>
- 
+
 Normally you would always want to have a matched filter however on some strong D-Star signals more synchronization points could be obtained without. When engaged the background of the button is lit in orange.
 
 <h4>B.5: Symbol PLL lock indicator</h4>
@@ -514,12 +515,12 @@ This is the percentage per symbols for which a valid zero crossing has been dete
 With the PLL engaged the figure should be 100% all the time in presence of a locked signal. Occasional small drops may occur without noticeable impact on decoding.
 
 <h4>B.7: Zero crossing shift</h4>
- 
+
 This is the current (at display polling time) zero crossing shift. It should be the closest to 0 as possible. However some jitter is acceptable for good symbol synchronization:
 
   - `2400 S/s`: +/- 5 inclusive
   - `4800 S/s`: +/- 2 inclusive
- 
+
 <h4>B.8: Discriminator input signal median level in %</h4>
 
 This is the estimated median level (center) of the discriminator input signal in percentage of half the total range. When the signal is correctly aligned in the input range it should be 0
@@ -546,9 +547,9 @@ Toggle button to select slot #2 voice output. When on waves appear on the icon. 
 
   - When off the icon shows a single loudspeaker. It mixes slot #1 and slot #2 voice as a mono audio signal
   - When on the icon shows a pair of loudspeakers. It sends slot #1 voice to the left stereo audio channel and slot #2 to the right one
-  
+
 For FDMA standards you may want to leave this as mono mode.
- 
+
 <h4>B.13: Transition constellation or symbol synchronization signal toggle</h4>
 
 Using this button you can either:
@@ -577,7 +578,7 @@ This button tunes the persistence decay of the points displayer on B.1. The trac
 <h4>B.17: Maximum expected FM deviation</h4>
 
 This is the one side deviation in kHz (&#177;) leading to maximum (100%) deviation at the discriminator output. The correct value depends on the maximum deviation imposed by the modulation scheme with some guard margin. In practice you should adjust this value to make the figure on the signal scope fill the entire screen as shown in the screenshots above. The typical deviations by mode for a unit gain (1.0 at B.18) are:
-  
+
   - DMR: &#177;5.4k
   - dPMR: &#177;2.7k
   - D-Star: &#177;3.5k
