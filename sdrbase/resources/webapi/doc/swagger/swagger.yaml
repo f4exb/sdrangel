@@ -373,43 +373,6 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
-  /sdrangel/dvserial:
-    x-swagger-router-controller: instance
-    get:
-      description: Get DV serial processing parameters for AMBE frames decoding in digital voice modes
-      operationId: instanceDVSerialGet
-      tags:
-        - Instance
-      responses:
-        "200":
-          description: On success return list of devices or empty list if unset
-          schema:
-            $ref: "#/definitions/DVSeralDevices"
-        "500":
-          $ref: "#/responses/Response_500"
-        "501":
-          $ref: "#/responses/Response_501"
-    patch:
-      description: Set or reset DV serial processing for AMBE frames decoding in digital voice modes
-      operationId: instanceDVSerialPatch
-      tags:
-        - Instance
-      parameters:
-        - name: dvserial
-          in: query
-          description: Set to non zero (true) to set DV serial processing
-          required: false
-          type: integer
-      responses:
-        "200":
-          description: On success return list of devices or empty list if unset
-          schema:
-            $ref: "#/definitions/DVSeralDevices"
-        "500":
-          $ref: "#/responses/Response_500"
-        "501":
-          $ref: "#/responses/Response_501"
-
   /sdrangel/ambe/serial:
     x-swagger-router-controller: instance
     get:
@@ -421,7 +384,7 @@ paths:
         "200":
           description: On success return list of device paths possibly empty
           schema:
-            $ref: "#/definitions/DVSeralDevices"
+            $ref: "#/definitions/DVSerialDevices"
         "500":
           $ref: "#/responses/Response_500"
         "501":
@@ -431,7 +394,7 @@ paths:
     x-swagger-router-controller: instance
     get:
       description: get the list of AMBE devices (serial or address) used for AMBE frames decoding in digital voice modes
-      operationId: instanceAMBEDevicesGet
+      operationId: InstanceAMBEDevicesGet
       tags:
         - Instance
       responses:
@@ -445,7 +408,7 @@ paths:
           $ref: "#/responses/Response_501"
     put:
       description: Replace the list of active devices
-      operationId: instanceAMBEDevicesPut
+      operationId: InstanceAMBEDevicesPut
       tags:
         - Instance
       consumes:
@@ -468,7 +431,7 @@ paths:
           $ref: "#/responses/Response_501"
     delete:
       description: Emtpy the active devices thus effectively closing down AMBE devices support
-      operationId: instanceAMBEDevicesDelete
+      operationId: InstanceAMBEDevicesDelete
       tags:
         - Instance
       responses:
@@ -482,7 +445,7 @@ paths:
           $ref: "#/responses/Response_501"
     patch:
       description: Add and/or delete devices to/from the active list
-      operationId: instanceAMBEDevicesPatch
+      operationId: InstanceAMBEDevicesPatch
       tags:
         - Instance
       consumes:
@@ -1731,7 +1694,7 @@ definitions:
         type: number
         format: float
 
-  DVSeralDevices:
+  DVSerialDevices:
     description: "List of DV serial devices available in the system"
     required:
       - nbDevices

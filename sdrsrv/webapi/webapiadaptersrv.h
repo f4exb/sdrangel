@@ -99,16 +99,16 @@ public:
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceDVSerialGet(
-            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGDVSerialDevices& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceDVSerialPatch(
             bool dvserial,
-            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGDVSerialDevices& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceAMBESerialGet(
-            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGDVSerialDevices& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceAMBEDevicesGet(

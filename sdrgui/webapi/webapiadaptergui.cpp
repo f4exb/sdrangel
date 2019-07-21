@@ -42,7 +42,7 @@
 #include "SWGDeviceListItem.h"
 #include "SWGAudioDevices.h"
 #include "SWGLocationInformation.h"
-#include "SWGDVSeralDevices.h"
+#include "SWGDVSerialDevices.h"
 #include "SWGDVSerialDevice.h"
 #include "SWGAMBEDevices.h"
 #include "SWGPresets.h"
@@ -568,7 +568,7 @@ int WebAPIAdapterGUI::instanceLocationPut(
 }
 
 int WebAPIAdapterGUI::instanceDVSerialGet(
-            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGDVSerialDevices& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;
@@ -594,7 +594,7 @@ int WebAPIAdapterGUI::instanceDVSerialGet(
 
 int WebAPIAdapterGUI::instanceDVSerialPatch(
             bool dvserial,
-            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGDVSerialDevices& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;
@@ -628,7 +628,7 @@ int WebAPIAdapterGUI::instanceDVSerialPatch(
 }
 
 int WebAPIAdapterGUI::instanceAMBESerialGet(
-        SWGSDRangel::SWGDVSeralDevices& response,
+        SWGSDRangel::SWGDVSerialDevices& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;

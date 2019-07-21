@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGDVSeralDevices.h
+ * SWGDVSerialDevices.h
  *
  * List of DV serial devices available in the system
  */
 
-#ifndef SWGDVSeralDevices_H_
-#define SWGDVSeralDevices_H_
+#ifndef SWGDVSerialDevices_H_
+#define SWGDVSerialDevices_H_
 
 #include <QJsonObject>
 
@@ -30,18 +30,18 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGDVSeralDevices: public SWGObject {
+class SWG_API SWGDVSerialDevices: public SWGObject {
 public:
-    SWGDVSeralDevices();
-    SWGDVSeralDevices(QString* json);
-    virtual ~SWGDVSeralDevices();
+    SWGDVSerialDevices();
+    SWGDVSerialDevices(QString* json);
+    virtual ~SWGDVSerialDevices();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGDVSeralDevices* fromJson(QString &jsonString) override;
+    virtual SWGDVSerialDevices* fromJson(QString &jsonString) override;
 
     qint32 getNbDevices();
     void setNbDevices(qint32 nb_devices);
@@ -63,4 +63,4 @@ private:
 
 }
 
-#endif /* SWGDVSeralDevices_H_ */
+#endif /* SWGDVSerialDevices_H_ */

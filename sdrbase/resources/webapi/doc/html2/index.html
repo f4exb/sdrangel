@@ -2102,7 +2102,16 @@ margin-bottom: 20px;
   },
   "description" : "DSDDemod"
 };
-            defs.DVSeralDevices = {
+            defs.DVSerialDevice = {
+  "properties" : {
+    "deviceName" : {
+      "type" : "string",
+      "description" : "Name of the serial device in the system"
+    }
+  },
+  "description" : "DV serial device details"
+};
+            defs.DVSerialDevices = {
   "required" : [ "nbDevices" ],
   "properties" : {
     "nbDevices" : {
@@ -2118,15 +2127,6 @@ margin-bottom: 20px;
     }
   },
   "description" : "List of DV serial devices available in the system"
-};
-            defs.DVSerialDevice = {
-  "properties" : {
-    "deviceName" : {
-      "type" : "string",
-      "description" : "Name of the serial device in the system"
-    }
-  },
-  "description" : "DV serial device details"
 };
             defs.DeviceListItem = {
   "properties" : {
@@ -6228,12 +6228,6 @@ margin-bottom: 20px;
                     </li>
                     <li data-group="Instance" data-name="instanceChannels" class="">
                       <a href="#api-Instance-instanceChannels">instanceChannels</a>
-                    </li>
-                    <li data-group="Instance" data-name="instanceDVSerialGet" class="">
-                      <a href="#api-Instance-instanceDVSerialGet">instanceDVSerialGet</a>
-                    </li>
-                    <li data-group="Instance" data-name="instanceDVSerialPatch" class="">
-                      <a href="#api-Instance-instanceDVSerialPatch">instanceDVSerialPatch</a>
                     </li>
                     <li data-group="Instance" data-name="instanceDelete" class="">
                       <a href="#api-Instance-instanceDelete">instanceDelete</a>
@@ -16808,7 +16802,7 @@ public class InstanceApiExample {
         
         InstanceApi apiInstance = new InstanceApi();
         try {
-            DVSeralDevices result = apiInstance.instanceAMBESerialGet();
+            DVSerialDevices result = apiInstance.instanceAMBESerialGet();
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling InstanceApi#instanceAMBESerialGet");
@@ -16826,7 +16820,7 @@ public class InstanceApiExample {
     public static void main(String[] args) {
         InstanceApi apiInstance = new InstanceApi();
         try {
-            DVSeralDevices result = apiInstance.instanceAMBESerialGet();
+            DVSerialDevices result = apiInstance.instanceAMBESerialGet();
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling InstanceApi#instanceAMBESerialGet");
@@ -16844,7 +16838,7 @@ public class InstanceApiExample {
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
 [apiInstance instanceAMBESerialGetWithCompletionHandler: 
-              ^(DVSeralDevices output, NSError* error) {
+              ^(DVSerialDevices output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
                             }
@@ -16892,7 +16886,7 @@ namespace Example
 
             try
             {
-                DVSeralDevices result = apiInstance.instanceAMBESerialGet();
+                DVSerialDevices result = apiInstance.instanceAMBESerialGet();
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -16979,7 +16973,7 @@ except ApiException as e:
                                         var schemaWrapper = {
   "description" : "On success return list of device paths possibly empty",
   "schema" : {
-    "$ref" : "#/definitions/DVSeralDevices"
+    "$ref" : "#/definitions/DVSerialDevices"
   }
 };
                                         var schema = schemaWrapper.schema;
@@ -20186,714 +20180,6 @@ except ApiException as e:
                                     </script>
                                   </div>
                                   <input id='responses-instanceChannels-501-schema-data' type='hidden' value=''></input>
-                                </div>
-                            </div>
-
-                        </article>
-                      </div>
-                      <hr>
-                    <div id="api-Instance-instanceDVSerialGet">
-                      <article id="api-Instance-instanceDVSerialGet-0" data-group="User" data-name="instanceDVSerialGet" data-version="0">
-                        <div class="pull-left">
-                          <h1>instanceDVSerialGet</h1>
-                          <p></p>
-                        </div>
-                        <div class="pull-right"></div>
-                        <div class="clearfix"></div>
-                        <p></p>
-                        <p class="marked">Get DV serial processing parameters for AMBE frames decoding in digital voice modes</p>
-                        <p></p>
-                        <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/dvserial</span></code></pre>
-                        <p>
-                          <h3>Usage and SDK Samples</h3>
-                        </p>
-                        <ul class="nav nav-tabs nav-tabs-examples">
-                          <li class="active"><a href="#examples-Instance-instanceDVSerialGet-0-curl">Curl</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDVSerialGet-0-java">Java</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDVSerialGet-0-android">Android</a></li>
-                          <!--<li class=""><a href="#examples-Instance-instanceDVSerialGet-0-groovy">Groovy</a></li>-->
-                          <li class=""><a href="#examples-Instance-instanceDVSerialGet-0-objc">Obj-C</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDVSerialGet-0-javascript">JavaScript</a></li>
-                          <!--<li class=""><a href="#examples-Instance-instanceDVSerialGet-0-angular">Angular</a></li>-->
-                          <li class=""><a href="#examples-Instance-instanceDVSerialGet-0-csharp">C#</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDVSerialGet-0-php">PHP</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDVSerialGet-0-perl">Perl</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDVSerialGet-0-python">Python</a></li>
-                        </ul>
-
-                        <div class="tab-content">
-                          <div class="tab-pane active" id="examples-Instance-instanceDVSerialGet-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/dvserial"</code></pre>
-                          </div>
-                          <div class="tab-pane" id="examples-Instance-instanceDVSerialGet-0-java">
-                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
-import SWGSDRangel.auth.*;
-import SWGSDRangel.model.*;
-import SWGSDRangel.api.InstanceApi;
-
-import java.io.File;
-import java.util.*;
-
-public class InstanceApiExample {
-
-    public static void main(String[] args) {
-        
-        InstanceApi apiInstance = new InstanceApi();
-        try {
-            DVSeralDevices result = apiInstance.instanceDVSerialGet();
-            System.out.println(result);
-        } catch (ApiException e) {
-            System.err.println("Exception when calling InstanceApi#instanceDVSerialGet");
-            e.printStackTrace();
-        }
-    }
-}</code></pre>
-                          </div>
-
-                          <div class="tab-pane" id="examples-Instance-instanceDVSerialGet-0-android">
-                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
-
-public class InstanceApiExample {
-
-    public static void main(String[] args) {
-        InstanceApi apiInstance = new InstanceApi();
-        try {
-            DVSeralDevices result = apiInstance.instanceDVSerialGet();
-            System.out.println(result);
-        } catch (ApiException e) {
-            System.err.println("Exception when calling InstanceApi#instanceDVSerialGet");
-            e.printStackTrace();
-        }
-    }
-}</code></pre>
-                          </div>
-  <!--
-  <div class="tab-pane" id="examples-Instance-instanceDVSerialGet-0-groovy">
-  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
-  </div> -->
-                            <div class="tab-pane" id="examples-Instance-instanceDVSerialGet-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">
-InstanceApi *apiInstance = [[InstanceApi alloc] init];
-
-[apiInstance instanceDVSerialGetWithCompletionHandler: 
-              ^(DVSeralDevices output, NSError* error) {
-                            if (output) {
-                                NSLog(@"%@", output);
-                            }
-                            if (error) {
-                                NSLog(@"Error: %@", error);
-                            }
-                        }];
-</code></pre>
-                            </div>
-
-                            <div class="tab-pane" id="examples-Instance-instanceDVSerialGet-0-javascript">
-                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
-
-var api = new SdRangel.InstanceApi()
-
-var callback = function(error, data, response) {
-  if (error) {
-    console.error(error);
-  } else {
-    console.log('API called successfully. Returned data: ' + data);
-  }
-};
-api.instanceDVSerialGet(callback);
-</code></pre>
-                            </div>
-
-                            <!--<div class="tab-pane" id="examples-Instance-instanceDVSerialGet-0-angular">
-              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
-            </div>-->
-                            <div class="tab-pane" id="examples-Instance-instanceDVSerialGet-0-csharp">
-                              <pre class="prettyprint"><code class="language-cs">using System;
-using System.Diagnostics;
-using SWGSDRangel.Api;
-using SWGSDRangel.Client;
-using SWGSDRangel.Model;
-
-namespace Example
-{
-    public class instanceDVSerialGetExample
-    {
-        public void main()
-        {
-            
-            var apiInstance = new InstanceApi();
-
-            try
-            {
-                DVSeralDevices result = apiInstance.instanceDVSerialGet();
-                Debug.WriteLine(result);
-            }
-            catch (Exception e)
-            {
-                Debug.Print("Exception when calling InstanceApi.instanceDVSerialGet: " + e.Message );
-            }
-        }
-    }
-}
-</code></pre>
-                            </div>
-
-                            <div class="tab-pane" id="examples-Instance-instanceDVSerialGet-0-php">
-                              <pre class="prettyprint"><code class="language-php"><&#63;php
-require_once(__DIR__ . '/vendor/autoload.php');
-
-$api_instance = new Swagger\Client\Api\InstanceApi();
-
-try {
-    $result = $api_instance->instanceDVSerialGet();
-    print_r($result);
-} catch (Exception $e) {
-    echo 'Exception when calling InstanceApi->instanceDVSerialGet: ', $e->getMessage(), PHP_EOL;
-}
-?></code></pre>
-                            </div>
-
-                            <div class="tab-pane" id="examples-Instance-instanceDVSerialGet-0-perl">
-                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
-use SWGSDRangel::Configuration;
-use SWGSDRangel::InstanceApi;
-
-my $api_instance = SWGSDRangel::InstanceApi->new();
-
-eval { 
-    my $result = $api_instance->instanceDVSerialGet();
-    print Dumper($result);
-};
-if ($@) {
-    warn "Exception when calling InstanceApi->instanceDVSerialGet: $@\n";
-}</code></pre>
-                            </div>
-
-                            <div class="tab-pane" id="examples-Instance-instanceDVSerialGet-0-python">
-                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
-import time
-import swagger_sdrangel
-from swagger_sdrangel.rest import ApiException
-from pprint import pprint
-
-# create an instance of the API class
-api_instance = swagger_sdrangel.InstanceApi()
-
-try: 
-    api_response = api_instance.instance_dv_serial_get()
-    pprint(api_response)
-except ApiException as e:
-    print("Exception when calling InstanceApi->instanceDVSerialGet: %s\n" % e)</code></pre>
-                            </div>
-                          </div>
-
-                          <h2>Parameters</h2>
-
-
-
-
-
-
-                          <h2>Responses</h2>
-                            <h3> Status: 200 - On success return list of devices or empty list if unset </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                                <li class="active">
-                                  <a data-toggle="tab" href="#responses-instanceDVSerialGet-200-schema">Schema</a>
-                                </li>
-
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instanceDVSerialGet-200-schema">
-                                  <div id='responses-instanceDVSerialGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
-                                    <script>
-                                      $(document).ready(function() {
-                                        var schemaWrapper = {
-  "description" : "On success return list of devices or empty list if unset",
-  "schema" : {
-    "$ref" : "#/definitions/DVSeralDevices"
-  }
-};
-                                        var schema = schemaWrapper.schema;
-                                        if (schema.$ref != null) {
-                                          schema = defsParser.$refs.get(schema.$ref);
-                                        } else {
-                                          schemaWrapper.definitions = Object.assign({}, defs);
-                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
-                                            console.log(err);
-                                          });
-                                        }
-
-                                        //console.log(JSON.stringify(schema));
-                                        var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instanceDVSerialGet-200-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instanceDVSerialGet-200-schema-200');
-                                        result.empty();
-                                        result.append(view.render());
-                                      });
-                                    </script>
-                                  </div>
-                                  <input id='responses-instanceDVSerialGet-200-schema-data' type='hidden' value=''></input>
-                                </div>
-                            </div>
-
-                            <h3> Status: 500 - Error </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                                <li class="active">
-                                  <a data-toggle="tab" href="#responses-instanceDVSerialGet-500-schema">Schema</a>
-                                </li>
-
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instanceDVSerialGet-500-schema">
-                                  <div id='responses-instanceDVSerialGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
-                                    <script>
-                                      $(document).ready(function() {
-                                        var schemaWrapper = {
-  "description" : "Error",
-  "schema" : {
-    "$ref" : "#/definitions/ErrorResponse"
-  }
-};
-                                        var schema = schemaWrapper.schema;
-                                        if (schema.$ref != null) {
-                                          schema = defsParser.$refs.get(schema.$ref);
-                                        } else {
-                                          schemaWrapper.definitions = Object.assign({}, defs);
-                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
-                                            console.log(err);
-                                          });
-                                        }
-
-                                        //console.log(JSON.stringify(schema));
-                                        var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instanceDVSerialGet-500-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instanceDVSerialGet-500-schema-500');
-                                        result.empty();
-                                        result.append(view.render());
-                                      });
-                                    </script>
-                                  </div>
-                                  <input id='responses-instanceDVSerialGet-500-schema-data' type='hidden' value=''></input>
-                                </div>
-                            </div>
-
-                            <h3> Status: 501 - Function not implemented </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                                <li class="active">
-                                  <a data-toggle="tab" href="#responses-instanceDVSerialGet-501-schema">Schema</a>
-                                </li>
-
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instanceDVSerialGet-501-schema">
-                                  <div id='responses-instanceDVSerialGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
-                                    <script>
-                                      $(document).ready(function() {
-                                        var schemaWrapper = {
-  "description" : "Function not implemented",
-  "schema" : {
-    "$ref" : "#/definitions/ErrorResponse"
-  }
-};
-                                        var schema = schemaWrapper.schema;
-                                        if (schema.$ref != null) {
-                                          schema = defsParser.$refs.get(schema.$ref);
-                                        } else {
-                                          schemaWrapper.definitions = Object.assign({}, defs);
-                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
-                                            console.log(err);
-                                          });
-                                        }
-
-                                        //console.log(JSON.stringify(schema));
-                                        var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instanceDVSerialGet-501-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instanceDVSerialGet-501-schema-501');
-                                        result.empty();
-                                        result.append(view.render());
-                                      });
-                                    </script>
-                                  </div>
-                                  <input id='responses-instanceDVSerialGet-501-schema-data' type='hidden' value=''></input>
-                                </div>
-                            </div>
-
-                        </article>
-                      </div>
-                      <hr>
-                    <div id="api-Instance-instanceDVSerialPatch">
-                      <article id="api-Instance-instanceDVSerialPatch-0" data-group="User" data-name="instanceDVSerialPatch" data-version="0">
-                        <div class="pull-left">
-                          <h1>instanceDVSerialPatch</h1>
-                          <p></p>
-                        </div>
-                        <div class="pull-right"></div>
-                        <div class="clearfix"></div>
-                        <p></p>
-                        <p class="marked">Set or reset DV serial processing for AMBE frames decoding in digital voice modes</p>
-                        <p></p>
-                        <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="patch"><code><span class="pln">/sdrangel/dvserial</span></code></pre>
-                        <p>
-                          <h3>Usage and SDK Samples</h3>
-                        </p>
-                        <ul class="nav nav-tabs nav-tabs-examples">
-                          <li class="active"><a href="#examples-Instance-instanceDVSerialPatch-0-curl">Curl</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDVSerialPatch-0-java">Java</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDVSerialPatch-0-android">Android</a></li>
-                          <!--<li class=""><a href="#examples-Instance-instanceDVSerialPatch-0-groovy">Groovy</a></li>-->
-                          <li class=""><a href="#examples-Instance-instanceDVSerialPatch-0-objc">Obj-C</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDVSerialPatch-0-javascript">JavaScript</a></li>
-                          <!--<li class=""><a href="#examples-Instance-instanceDVSerialPatch-0-angular">Angular</a></li>-->
-                          <li class=""><a href="#examples-Instance-instanceDVSerialPatch-0-csharp">C#</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDVSerialPatch-0-php">PHP</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDVSerialPatch-0-perl">Perl</a></li>
-                          <li class=""><a href="#examples-Instance-instanceDVSerialPatch-0-python">Python</a></li>
-                        </ul>
-
-                        <div class="tab-content">
-                          <div class="tab-pane active" id="examples-Instance-instanceDVSerialPatch-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrangel/dvserial?dvserial="</code></pre>
-                          </div>
-                          <div class="tab-pane" id="examples-Instance-instanceDVSerialPatch-0-java">
-                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
-import SWGSDRangel.auth.*;
-import SWGSDRangel.model.*;
-import SWGSDRangel.api.InstanceApi;
-
-import java.io.File;
-import java.util.*;
-
-public class InstanceApiExample {
-
-    public static void main(String[] args) {
-        
-        InstanceApi apiInstance = new InstanceApi();
-        Integer dvserial = 56; // Integer | Set to non zero (true) to set DV serial processing
-        try {
-            DVSeralDevices result = apiInstance.instanceDVSerialPatch(dvserial);
-            System.out.println(result);
-        } catch (ApiException e) {
-            System.err.println("Exception when calling InstanceApi#instanceDVSerialPatch");
-            e.printStackTrace();
-        }
-    }
-}</code></pre>
-                          </div>
-
-                          <div class="tab-pane" id="examples-Instance-instanceDVSerialPatch-0-android">
-                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
-
-public class InstanceApiExample {
-
-    public static void main(String[] args) {
-        InstanceApi apiInstance = new InstanceApi();
-        Integer dvserial = 56; // Integer | Set to non zero (true) to set DV serial processing
-        try {
-            DVSeralDevices result = apiInstance.instanceDVSerialPatch(dvserial);
-            System.out.println(result);
-        } catch (ApiException e) {
-            System.err.println("Exception when calling InstanceApi#instanceDVSerialPatch");
-            e.printStackTrace();
-        }
-    }
-}</code></pre>
-                          </div>
-  <!--
-  <div class="tab-pane" id="examples-Instance-instanceDVSerialPatch-0-groovy">
-  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
-  </div> -->
-                            <div class="tab-pane" id="examples-Instance-instanceDVSerialPatch-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *dvserial = 56; // Set to non zero (true) to set DV serial processing (optional)
-
-InstanceApi *apiInstance = [[InstanceApi alloc] init];
-
-[apiInstance instanceDVSerialPatchWith:dvserial
-              completionHandler: ^(DVSeralDevices output, NSError* error) {
-                            if (output) {
-                                NSLog(@"%@", output);
-                            }
-                            if (error) {
-                                NSLog(@"Error: %@", error);
-                            }
-                        }];
-</code></pre>
-                            </div>
-
-                            <div class="tab-pane" id="examples-Instance-instanceDVSerialPatch-0-javascript">
-                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
-
-var api = new SdRangel.InstanceApi()
-
-var opts = { 
-  'dvserial': 56 // {Integer} Set to non zero (true) to set DV serial processing
-};
-
-var callback = function(error, data, response) {
-  if (error) {
-    console.error(error);
-  } else {
-    console.log('API called successfully. Returned data: ' + data);
-  }
-};
-api.instanceDVSerialPatch(opts, callback);
-</code></pre>
-                            </div>
-
-                            <!--<div class="tab-pane" id="examples-Instance-instanceDVSerialPatch-0-angular">
-              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
-            </div>-->
-                            <div class="tab-pane" id="examples-Instance-instanceDVSerialPatch-0-csharp">
-                              <pre class="prettyprint"><code class="language-cs">using System;
-using System.Diagnostics;
-using SWGSDRangel.Api;
-using SWGSDRangel.Client;
-using SWGSDRangel.Model;
-
-namespace Example
-{
-    public class instanceDVSerialPatchExample
-    {
-        public void main()
-        {
-            
-            var apiInstance = new InstanceApi();
-            var dvserial = 56;  // Integer | Set to non zero (true) to set DV serial processing (optional) 
-
-            try
-            {
-                DVSeralDevices result = apiInstance.instanceDVSerialPatch(dvserial);
-                Debug.WriteLine(result);
-            }
-            catch (Exception e)
-            {
-                Debug.Print("Exception when calling InstanceApi.instanceDVSerialPatch: " + e.Message );
-            }
-        }
-    }
-}
-</code></pre>
-                            </div>
-
-                            <div class="tab-pane" id="examples-Instance-instanceDVSerialPatch-0-php">
-                              <pre class="prettyprint"><code class="language-php"><&#63;php
-require_once(__DIR__ . '/vendor/autoload.php');
-
-$api_instance = new Swagger\Client\Api\InstanceApi();
-$dvserial = 56; // Integer | Set to non zero (true) to set DV serial processing
-
-try {
-    $result = $api_instance->instanceDVSerialPatch($dvserial);
-    print_r($result);
-} catch (Exception $e) {
-    echo 'Exception when calling InstanceApi->instanceDVSerialPatch: ', $e->getMessage(), PHP_EOL;
-}
-?></code></pre>
-                            </div>
-
-                            <div class="tab-pane" id="examples-Instance-instanceDVSerialPatch-0-perl">
-                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
-use SWGSDRangel::Configuration;
-use SWGSDRangel::InstanceApi;
-
-my $api_instance = SWGSDRangel::InstanceApi->new();
-my $dvserial = 56; # Integer | Set to non zero (true) to set DV serial processing
-
-eval { 
-    my $result = $api_instance->instanceDVSerialPatch(dvserial => $dvserial);
-    print Dumper($result);
-};
-if ($@) {
-    warn "Exception when calling InstanceApi->instanceDVSerialPatch: $@\n";
-}</code></pre>
-                            </div>
-
-                            <div class="tab-pane" id="examples-Instance-instanceDVSerialPatch-0-python">
-                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
-import time
-import swagger_sdrangel
-from swagger_sdrangel.rest import ApiException
-from pprint import pprint
-
-# create an instance of the API class
-api_instance = swagger_sdrangel.InstanceApi()
-dvserial = 56 # Integer | Set to non zero (true) to set DV serial processing (optional)
-
-try: 
-    api_response = api_instance.instance_dv_serial_patch(dvserial=dvserial)
-    pprint(api_response)
-except ApiException as e:
-    print("Exception when calling InstanceApi->instanceDVSerialPatch: %s\n" % e)</code></pre>
-                            </div>
-                          </div>
-
-                          <h2>Parameters</h2>
-
-
-
-
-
-                            <div class="methodsubtabletitle">Query parameters</div>
-                            <table id="methodsubtable">
-                              <tr>
-                                <th width="150px">Name</th>
-                                <th>Description</th>
-                              </tr>
-                                <tr><td style="width:150px;">dvserial</td>
-<td>
-
-
-    <div id="d2e199_instanceDVSerialPatch_dvserial">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    Integer
-                </span>
-
-                    <div class="inner description">
-                        Set to non zero (true) to set DV serial processing
-                    </div>
-            </div>
-        </div>
-    </div>
-</td>
-</tr>
-
-                            </table>
-
-                          <h2>Responses</h2>
-                            <h3> Status: 200 - On success return list of devices or empty list if unset </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                                <li class="active">
-                                  <a data-toggle="tab" href="#responses-instanceDVSerialPatch-200-schema">Schema</a>
-                                </li>
-
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instanceDVSerialPatch-200-schema">
-                                  <div id='responses-instanceDVSerialPatch-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
-                                    <script>
-                                      $(document).ready(function() {
-                                        var schemaWrapper = {
-  "description" : "On success return list of devices or empty list if unset",
-  "schema" : {
-    "$ref" : "#/definitions/DVSeralDevices"
-  }
-};
-                                        var schema = schemaWrapper.schema;
-                                        if (schema.$ref != null) {
-                                          schema = defsParser.$refs.get(schema.$ref);
-                                        } else {
-                                          schemaWrapper.definitions = Object.assign({}, defs);
-                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
-                                            console.log(err);
-                                          });
-                                        }
-
-                                        //console.log(JSON.stringify(schema));
-                                        var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instanceDVSerialPatch-200-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instanceDVSerialPatch-200-schema-200');
-                                        result.empty();
-                                        result.append(view.render());
-                                      });
-                                    </script>
-                                  </div>
-                                  <input id='responses-instanceDVSerialPatch-200-schema-data' type='hidden' value=''></input>
-                                </div>
-                            </div>
-
-                            <h3> Status: 500 - Error </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                                <li class="active">
-                                  <a data-toggle="tab" href="#responses-instanceDVSerialPatch-500-schema">Schema</a>
-                                </li>
-
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instanceDVSerialPatch-500-schema">
-                                  <div id='responses-instanceDVSerialPatch-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
-                                    <script>
-                                      $(document).ready(function() {
-                                        var schemaWrapper = {
-  "description" : "Error",
-  "schema" : {
-    "$ref" : "#/definitions/ErrorResponse"
-  }
-};
-                                        var schema = schemaWrapper.schema;
-                                        if (schema.$ref != null) {
-                                          schema = defsParser.$refs.get(schema.$ref);
-                                        } else {
-                                          schemaWrapper.definitions = Object.assign({}, defs);
-                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
-                                            console.log(err);
-                                          });
-                                        }
-
-                                        //console.log(JSON.stringify(schema));
-                                        var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instanceDVSerialPatch-500-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instanceDVSerialPatch-500-schema-500');
-                                        result.empty();
-                                        result.append(view.render());
-                                      });
-                                    </script>
-                                  </div>
-                                  <input id='responses-instanceDVSerialPatch-500-schema-data' type='hidden' value=''></input>
-                                </div>
-                            </div>
-
-                            <h3> Status: 501 - Function not implemented </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                                <li class="active">
-                                  <a data-toggle="tab" href="#responses-instanceDVSerialPatch-501-schema">Schema</a>
-                                </li>
-
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-instanceDVSerialPatch-501-schema">
-                                  <div id='responses-instanceDVSerialPatch-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
-                                    <script>
-                                      $(document).ready(function() {
-                                        var schemaWrapper = {
-  "description" : "Function not implemented",
-  "schema" : {
-    "$ref" : "#/definitions/ErrorResponse"
-  }
-};
-                                        var schema = schemaWrapper.schema;
-                                        if (schema.$ref != null) {
-                                          schema = defsParser.$refs.get(schema.$ref);
-                                        } else {
-                                          schemaWrapper.definitions = Object.assign({}, defs);
-                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
-                                            console.log(err);
-                                          });
-                                        }
-
-                                        //console.log(JSON.stringify(schema));
-                                        var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-instanceDVSerialPatch-501-schema-data').val(stringify(schema));
-                                        var result = $('#responses-instanceDVSerialPatch-501-schema-501');
-                                        result.empty();
-                                        result.append(view.render());
-                                      });
-                                    </script>
-                                  </div>
-                                  <input id='responses-instanceDVSerialPatch-501-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -27046,7 +26332,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-07-20T20:43:22.760+02:00
+              Generated 2019-07-21T09:34:48.176+02:00
             </div>
           </div>
       </div>

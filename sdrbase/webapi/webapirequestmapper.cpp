@@ -30,7 +30,7 @@
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGAudioDevices.h"
 #include "SWGLocationInformation.h"
-#include "SWGDVSeralDevices.h"
+#include "SWGDVSerialDevices.h"
 #include "SWGAMBEDevices.h"
 #include "SWGPresets.h"
 #include "SWGPresetTransfer.h"
@@ -114,8 +114,6 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instanceAudioOutputCleanupService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceLocationURL) {
             instanceLocationService(request, response);
-        } else if (path == WebAPIAdapterInterface::instanceDVSerialURL) {
-            instanceDVSerialService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceAMBESerialURL) {
             instanceAMBESerialService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceAMBEDevicesURL) {
@@ -621,54 +619,6 @@ void WebAPIRequestMapper::instanceLocationService(qtwebapp::HttpRequest& request
     }
 }
 
-void WebAPIRequestMapper::instanceDVSerialService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
-{
-    SWGSDRangel::SWGErrorResponse errorResponse;
-    response.setHeader("Content-Type", "application/json");
-    response.setHeader("Access-Control-Allow-Origin", "*");
-
-    if (request.getMethod() == "GET")
-    {
-        SWGSDRangel::SWGDVSeralDevices normalResponse;
-
-        int status = m_adapter->instanceDVSerialGet(normalResponse, errorResponse);
-        response.setStatus(status);
-
-        if (status/100 == 2) {
-            response.write(normalResponse.asJson().toUtf8());
-        } else {
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else if (request.getMethod() == "PATCH")
-    {
-        QByteArray dvserialStr = request.getParameter("dvserial");
-        bool dvserial = false;
-
-        if (dvserialStr.length() != 0) {
-            dvserial = !(dvserialStr == "0");
-        }
-
-        SWGSDRangel::SWGDVSeralDevices normalResponse;
-
-        int status = m_adapter->instanceDVSerialPatch(dvserial, normalResponse, errorResponse);
-        response.setStatus(status);
-
-        if (status/100 == 2) {
-            response.write(normalResponse.asJson().toUtf8());
-        } else {
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else
-    {
-        response.setStatus(405,"Invalid HTTP method");
-        errorResponse.init();
-        *errorResponse.getMessage() = "Invalid HTTP method";
-        response.write(errorResponse.asJson().toUtf8());
-    }
-}
-
 void WebAPIRequestMapper::instanceAMBESerialService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
@@ -677,7 +627,7 @@ void WebAPIRequestMapper::instanceAMBESerialService(qtwebapp::HttpRequest& reque
 
     if (request.getMethod() == "GET")
     {
-        SWGSDRangel::SWGDVSeralDevices normalResponse;
+        SWGSDRangel::SWGDVSerialDevices normalResponse;
 
         int status = m_adapter->instanceAMBESerialGet(normalResponse, errorResponse);
         response.setStatus(status);

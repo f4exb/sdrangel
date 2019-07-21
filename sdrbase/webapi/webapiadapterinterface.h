@@ -37,7 +37,7 @@ namespace SWGSDRangel
     class SWGAudioInputDevice;
     class SWGAudioOutputDevice;
     class SWGLocationInformation;
-    class SWGDVSeralDevices;
+    class SWGDVSerialDevices;
     class SWGAMBEDevices;
     class SWGPresets;
     class SWGPresetTransfer;
@@ -282,41 +282,11 @@ public:
     }
 
     /**
-     * Handler of /sdrangel/dvserial (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
-     * returns the Http status code (default 501: not implemented)
-     */
-    virtual int instanceDVSerialGet(
-            SWGSDRangel::SWGDVSeralDevices& response,
-            SWGSDRangel::SWGErrorResponse& error)
-    {
-        (void) response;
-    	error.init();
-    	*error.getMessage() = QString("Function not implemented");
-    	return 501;
-    }
-
-    /**
-     * Handler of /sdrangel/dvserial (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
-     * returns the Http status code (default 501: not implemented)
-     */
-    virtual int instanceDVSerialPatch(
-            bool dvserial,
-            SWGSDRangel::SWGDVSeralDevices& response,
-            SWGSDRangel::SWGErrorResponse& error)
-    {
-        (void) dvserial;
-        (void) response;
-        error.init();
-        *error.getMessage() = QString("Function not implemented");
-        return 501;
-    }
-
-    /**
      * Handler of /sdrangel/ambe/serial (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceAMBESerialGet(
-            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGDVSerialDevices& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
         (void) response;
@@ -809,7 +779,6 @@ public:
     static QString instanceAudioInputCleanupURL;
     static QString instanceAudioOutputCleanupURL;
     static QString instanceLocationURL;
-    static QString instanceDVSerialURL;
     static QString instanceAMBESerialURL;
     static QString instanceAMBEDevicesURL;
     static QString instancePresetsURL;

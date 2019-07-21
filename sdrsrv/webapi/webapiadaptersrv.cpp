@@ -28,7 +28,7 @@
 #include "SWGLoggingInfo.h"
 #include "SWGAudioDevices.h"
 #include "SWGLocationInformation.h"
-#include "SWGDVSeralDevices.h"
+#include "SWGDVSerialDevices.h"
 #include "SWGAMBEDevices.h"
 #include "SWGPresetImport.h"
 #include "SWGPresetExport.h"
@@ -553,7 +553,7 @@ int WebAPIAdapterSrv::instanceLocationPut(
 }
 
 int WebAPIAdapterSrv::instanceDVSerialGet(
-            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGDVSerialDevices& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
     response.init();
@@ -578,7 +578,7 @@ int WebAPIAdapterSrv::instanceDVSerialGet(
 
 int WebAPIAdapterSrv::instanceDVSerialPatch(
             bool dvserial,
-            SWGSDRangel::SWGDVSeralDevices& response,
+            SWGSDRangel::SWGDVSerialDevices& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
     m_mainCore.m_dspEngine->setDVSerialSupport(dvserial);
@@ -611,7 +611,7 @@ int WebAPIAdapterSrv::instanceDVSerialPatch(
 }
 
 int WebAPIAdapterSrv::instanceAMBESerialGet(
-        SWGSDRangel::SWGDVSeralDevices& response,
+        SWGSDRangel::SWGDVSerialDevices& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;

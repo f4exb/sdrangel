@@ -49,8 +49,8 @@
 #include "SWGComplex.h"
 #include "SWGDSDDemodReport.h"
 #include "SWGDSDDemodSettings.h"
-#include "SWGDVSeralDevices.h"
 #include "SWGDVSerialDevice.h"
+#include "SWGDVSerialDevices.h"
 #include "SWGDeviceListItem.h"
 #include "SWGDeviceReport.h"
 #include "SWGDeviceSet.h"
@@ -262,11 +262,11 @@ namespace SWGSDRangel {
     if(QString("SWGDSDDemodSettings").compare(type) == 0) {
       return new SWGDSDDemodSettings();
     }
-    if(QString("SWGDVSeralDevices").compare(type) == 0) {
-      return new SWGDVSeralDevices();
-    }
     if(QString("SWGDVSerialDevice").compare(type) == 0) {
       return new SWGDVSerialDevice();
+    }
+    if(QString("SWGDVSerialDevices").compare(type) == 0) {
+      return new SWGDVSerialDevices();
     }
     if(QString("SWGDeviceListItem").compare(type) == 0) {
       return new SWGDeviceListItem();

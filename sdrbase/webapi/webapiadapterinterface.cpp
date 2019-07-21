@@ -29,7 +29,6 @@ QString WebAPIAdapterInterface::instanceAudioOutputParametersURL = "/sdrangel/au
 QString WebAPIAdapterInterface::instanceAudioInputCleanupURL = "/sdrangel/audio/input/cleanup";
 QString WebAPIAdapterInterface::instanceAudioOutputCleanupURL = "/sdrangel/audio/output/cleanup";
 QString WebAPIAdapterInterface::instanceLocationURL = "/sdrangel/location";
-QString WebAPIAdapterInterface::instanceDVSerialURL = "/sdrangel/dvserial";
 QString WebAPIAdapterInterface::instanceAMBESerialURL = "/sdrangel/ambe/serial";
 QString WebAPIAdapterInterface::instanceAMBEDevicesURL = "/sdrangel/ambe/devices";
 QString WebAPIAdapterInterface::instancePresetsURL = "/sdrangel/presets";

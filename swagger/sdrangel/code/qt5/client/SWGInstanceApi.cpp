@@ -283,7 +283,7 @@ SWGInstanceApi::instanceAMBESerialGetCallback(SWGHttpRequestWorker * worker) {
 
 
     QString json(worker->response);
-    SWGDVSeralDevices* output = static_cast<SWGDVSeralDevices*>(create(json, QString("SWGDVSeralDevices")));
+    SWGDVSerialDevices* output = static_cast<SWGDVSerialDevices*>(create(json, QString("SWGDVSerialDevices")));
     worker->deleteLater();
 
     if (worker->error_type == QNetworkReply::NoError) {
@@ -727,118 +727,6 @@ SWGInstanceApi::instanceChannelsCallback(SWGHttpRequestWorker * worker) {
     } else {
         emit instanceChannelsSignalE(output, error_type, error_str);
         emit instanceChannelsSignalEFull(worker, error_type, error_str);
-    }
-}
-
-void
-SWGInstanceApi::instanceDVSerialGet() {
-    QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/dvserial");
-
-
-
-    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
-    SWGHttpRequestInput input(fullPath, "GET");
-
-
-
-
-
-    foreach(QString key, this->defaultHeaders.keys()) {
-        input.headers.insert(key, this->defaultHeaders.value(key));
-    }
-
-    connect(worker,
-            &SWGHttpRequestWorker::on_execution_finished,
-            this,
-            &SWGInstanceApi::instanceDVSerialGetCallback);
-
-    worker->execute(&input);
-}
-
-void
-SWGInstanceApi::instanceDVSerialGetCallback(SWGHttpRequestWorker * worker) {
-    QString msg;
-    QString error_str = worker->error_str;
-    QNetworkReply::NetworkError error_type = worker->error_type;
-
-    if (worker->error_type == QNetworkReply::NoError) {
-        msg = QString("Success! %1 bytes").arg(worker->response.length());
-    }
-    else {
-        msg = "Error: " + worker->error_str;
-    }
-
-
-    QString json(worker->response);
-    SWGDVSeralDevices* output = static_cast<SWGDVSeralDevices*>(create(json, QString("SWGDVSeralDevices")));
-    worker->deleteLater();
-
-    if (worker->error_type == QNetworkReply::NoError) {
-        emit instanceDVSerialGetSignal(output);
-    } else {
-        emit instanceDVSerialGetSignalE(output, error_type, error_str);
-        emit instanceDVSerialGetSignalEFull(worker, error_type, error_str);
-    }
-}
-
-void
-SWGInstanceApi::instanceDVSerialPatch(qint32 dvserial) {
-    QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/dvserial");
-
-
-    if (fullPath.indexOf("?") > 0)
-      fullPath.append("&");
-    else
-      fullPath.append("?");
-    fullPath.append(QUrl::toPercentEncoding("dvserial"))
-        .append("=")
-        .append(QUrl::toPercentEncoding(stringValue(dvserial)));
-
-
-    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
-    SWGHttpRequestInput input(fullPath, "PATCH");
-
-
-
-
-
-    foreach(QString key, this->defaultHeaders.keys()) {
-        input.headers.insert(key, this->defaultHeaders.value(key));
-    }
-
-    connect(worker,
-            &SWGHttpRequestWorker::on_execution_finished,
-            this,
-            &SWGInstanceApi::instanceDVSerialPatchCallback);
-
-    worker->execute(&input);
-}
-
-void
-SWGInstanceApi::instanceDVSerialPatchCallback(SWGHttpRequestWorker * worker) {
-    QString msg;
-    QString error_str = worker->error_str;
-    QNetworkReply::NetworkError error_type = worker->error_type;
-
-    if (worker->error_type == QNetworkReply::NoError) {
-        msg = QString("Success! %1 bytes").arg(worker->response.length());
-    }
-    else {
-        msg = "Error: " + worker->error_str;
-    }
-
-
-    QString json(worker->response);
-    SWGDVSeralDevices* output = static_cast<SWGDVSeralDevices*>(create(json, QString("SWGDVSeralDevices")));
-    worker->deleteLater();
-
-    if (worker->error_type == QNetworkReply::NoError) {
-        emit instanceDVSerialPatchSignal(output);
-    } else {
-        emit instanceDVSerialPatchSignalE(output, error_type, error_str);
-        emit instanceDVSerialPatchSignalEFull(worker, error_type, error_str);
     }
 }
 
