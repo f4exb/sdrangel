@@ -812,8 +812,19 @@ void MainWindow::createStatusBar()
 	statusBar()->addPermanentWidget(m_dateTimeWidget);
 }
 
-void MainWindow::closeEvent(QCloseEvent*)
+void MainWindow::closeEvent(QCloseEvent *closeEvent)
 {
+    qDebug("MainWindow::closeEvent");
+
+    savePresetSettings(m_settings.getWorkingPreset(), 0);
+    m_settings.save();
+
+    while (m_deviceUIs.size() > 0)
+    {
+        removeLastDevice();
+    }
+
+    closeEvent->accept();
 }
 
 void MainWindow::updatePresetControls()
@@ -1937,17 +1948,6 @@ void MainWindow::on_action_addMIMODevice_triggered()
 void MainWindow::on_action_removeLastDevice_triggered()
 {
     if (m_deviceUIs.size() > 1)
-    {
-        removeLastDevice();
-    }
-}
-
-void MainWindow::on_action_Exit_triggered()
-{
-    savePresetSettings(m_settings.getWorkingPreset(), 0);
-    m_settings.save();
-
-    while (m_deviceUIs.size() > 0)
     {
         removeLastDevice();
     }
