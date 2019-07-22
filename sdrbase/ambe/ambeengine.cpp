@@ -65,6 +65,11 @@ void AMBEEngine::getComList()
         m_comList.push_back(std::string(comCStr));
     }
 }
+
+// Do not activate serial support at all for windows
+void AMBEEngine::scan(std::vector<QString>& ambeDevices)
+{
+}
 #else
 void AMBEEngine::getComList()
 {
@@ -182,7 +187,6 @@ std::string AMBEEngine::get_driver(const std::string& tty)
 
     return "";
 }
-#endif // not Windows
 
 void AMBEEngine::scan(std::vector<QString>& ambeDevices)
 {
@@ -205,6 +209,7 @@ void AMBEEngine::scan(std::vector<QString>& ambeDevices)
         ++it;
     }
 }
+#endif // not Windows
 
 bool AMBEEngine::registerController(const std::string& deviceRef)
 {
@@ -244,8 +249,8 @@ void AMBEEngine::releaseController(const std::string& deviceRef)
             it->thread->wait(100);
             it->worker->m_inputMessageQueue.clear();
             it->worker->close();
-            m_controllers.erase(it);
             qDebug() << "AMBEEngine::releaseController: closed device at: " << it->device.c_str();
+            m_controllers.erase(it);
             break;
         }
 
