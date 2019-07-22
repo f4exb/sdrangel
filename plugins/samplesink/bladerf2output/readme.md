@@ -121,4 +121,4 @@ Use this slider to adjust gain in manual mode. The gain varies from -89 to 0 dB 
 
 <h3>10: Bias tee control</h3>
 
-Use this toggle button to activate or de-activate the bias tee. Note that according to BladeRF v2 specs the bias tee is simultanously present on all Tx RF ports. The GUI of the sibling channel if present is adjusted automatically.
+Use this toggle button to activate or de-activate the bias tee. Note that according to BladeRF v2 specs the bias tee is simultaneously present on all Tx RF ports. The GUI of the sibling channel if present is adjusted automatically.

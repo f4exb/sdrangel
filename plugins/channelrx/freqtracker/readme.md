@@ -74,7 +74,7 @@ You may select the type of tracker with this combo box:
 
 This is the order of m-ary PSK modulation for the PLL. It can be selected in powers of 2:
 
-  - **1**: Continous Wave (no modulation)
+  - **1**: Continuous Wave (no modulation)
   - **2**: BPSK
   - **4**: QPSK
   - **8**: 8-PSK

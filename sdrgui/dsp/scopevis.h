@@ -574,7 +574,7 @@ private:
         TriggerData m_triggerData;    //!< Trigger data
         bool m_prevCondition;         //!< Condition (above threshold) at previous sample
         uint32_t m_triggerDelayCount; //!< Counter of samples for delay
-        uint32_t m_triggerCounter;    //!< Counter of trigger occurences
+        uint32_t m_triggerCounter;    //!< Counter of trigger occurrences
         uint32_t m_trues;             //!< Count of true conditions for holdoff processing
         uint32_t m_falses;            //!< Count of false conditions for holdoff processing
 

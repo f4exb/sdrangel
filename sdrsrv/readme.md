@@ -5,7 +5,7 @@ This folder holds the objects specific to the server (headless) version of SDRan
 This document focuses on the functional description of SDRangel server. More details on the technical architecture can be found in the developer's documentation.
 
 The main motivations are:
-  - be able to run SDRangel on hardware with less CPU/GPU requirements in particular without OpenGL suport. 
+  - be able to run SDRangel on hardware with less CPU/GPU requirements in particular without OpenGL support. 
   - be used in sophisticated remote transponders or repeaters in a headless server configuration. 
   - possibility to use Docker technology to host SDRangel server instances in a distributed environment.
   - possibility to use SDRangel remotely for the RF device interface even more distributed architectures can be supported to share workload in a cluster.   

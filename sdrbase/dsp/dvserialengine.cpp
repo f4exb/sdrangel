@@ -106,7 +106,7 @@ void DVSerialEngine::register_comport(std::list<std::string>& comList,
         //std::cerr << "register_comport: dir: "<< dir << " driver: " << driver << std::endl;
         std::string devfile = std::string("/dev/") + basename((char *) dir.c_str());
 
-        // Put serial8250-devices in a seperate list
+        // Put serial8250-devices in a separate list
         if (driver == "serial8250")
         {
             comList8250.push_back(devfile);
