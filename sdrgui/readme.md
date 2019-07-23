@@ -48,7 +48,7 @@ The following items are presented hierarchically from left to right:
   - Preferences:
     - _Audio_: opens a dialog to choose the audio output device (see 1.1 below for details)
     - _Logging_: opens a dialog to choose logging options (see 1.2 below for details)
-    - _DV Serial_: if you have one or more AMBE3000 serial devices for AMBE digital voice check to connect them. If unchecked DV decoding will resort to mbelib if available else no audio will be produced for AMBE digital voice
+    - _AMBE_: Opens a dialog to select AMBE3000 serial devices or AMBE server addresses to use for AMBE digital voice processing. If none is selected AMBE frames decoding will be done with mbelib if available else no audio will be produced for AMBE digital voice (see 1.3 below for details)
     - _My Position_: opens a dialog to enter your station ("My Position") coordinates in decimal degrees with north latitudes positive and east longitudes positive. This is used whenever positional data is to be displayed (APRS, DPRS, ...). For it now only works with D-Star $$CRC frames. See [DSD demod plugin](../plugins/channelrx/demoddsd/readme.md) for details on how to decode Digital Voice modes.
     - _Devices_: section to deal with devices settings
       - _User arguments_: opens a dialog to let the user give arguments specific to a device and its instance (sequence) in the system
@@ -114,11 +114,61 @@ Use the "OK" button to validate all changes
 
 Use the "Cancel" button to dismiss all changes
 
-<h4>1.3 Preferences - Devices - User arguments</h4>
+<h4>1.3 Preferences - AMBE</h4>
+
+When clicking on the AMBE submenu a dialog opens to let you specify physical AMBE devices to decode AMBE frames produced by digital voice signals (using DSD decoder plugin).
+
+![Main Window AMBE](../doc/img/MainWindow_ambe.png)
+
+<h5>1.3.1 AMBE server address and port or direct input</h5>
+
+Use this freeflow text input box to specify either the address and port of an AMBE server in the form: &lt;IPv4 address&gt;:&lt;port&gt; or any directly attached physical device address like a COM port on Windows.
+
+<h5>1.3.2 Import above address or device</h5>
+
+Import the address or device specified in (1) into the list of used devices. The system will try to open the device or contact the server and will add it to the list only if successful.
+
+<h5>1.3.3 Remove in use device or address</h5>
+
+When a device or address is selected in the in use list (6) push this button to remove it from the list. The corresponding resources will be released.
+
+<h5>1.3.4 Refresh in use list</h5>
+
+Checks the list of devices or addresses currently in use and update the in use list (6).
+
+<h5>1.3.5 Empty in use list</h5>
+
+Removes all devices or addresses in use. The in use list (6) is cleared consequently. This removes all AMBE devices related resources attached to the current instance of the SDRangel program. Therefore consecutive AMBE frames decoding will be handled by the mbelib library if available or no audio will be output.
+
+<h5>1.3.6 In use list</h5>
+
+List of devices or addresses currently in use for AMBE frames decoding by this instance of the SDRangel program.
+
+<h5>1.3.7 Import serial device</h5>
+
+Imports a serial device scanned in the list of available AMBE 3000 serial devices (9) in the in use list. If this device is already in the in use list then nothing happens and this is reported in the status text (10)
+
+<h5>1.3.8 Import all serial devices</h5>
+
+Imports all serial devices scanned in the list of available AMBE 3000 serial devices (9) in the in use list. If any device is already in the in use list then it is not added twice.
+
+<h5>1.3.9 List of available AMBE 3000 serial devices</h5>
+
+This is the list of AMBE 3000 currently attached to the system directly. This list gets updated at every opening of the dialog.
+
+<h5>1.3.10 Status text</h5>
+
+A brief text reports the result of the current action
+
+<h5>1.3.11 Close button</h5>
+
+Use this button to dismiss the dialog
+
+<h4>1.4 Preferences - Devices - User arguments</h4>
 
 See the devuces user arguments management documentation [here](deviceuserargs.md).
 
-<h4>1.4. Help - Loaded plugins display</h4>
+<h4>1.5. Help - Loaded plugins display</h4>
 
 When clicking on Help -> Loaded Plugins from the main menu bar a dialog box appears that shows information about the plugins loaded in SDRangel:
 
