@@ -31,7 +31,7 @@ void FileLogger::refreshSettings()
 
 void FileLogger::refreshQtSettings()
 {
-    // Save old file name for later comparision with new settings
+    // Save old file name for later comparison with new settings
     QString oldFileName = fileName;
 
     // Load new config settings
@@ -67,7 +67,7 @@ void FileLogger::refreshQtSettings()
 
 void FileLogger::refreshFileLogSettings()
 {
-    // Save old file name for later comparision with new settings
+    // Save old file name for later comparison with new settings
     QString oldFileName = fileName;
 
     // Load new config settings

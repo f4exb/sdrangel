@@ -132,7 +132,7 @@ public slots:
 
 private slots:
 
-    /** Received from the socket when a read-timeout occured */
+    /** Received from the socket when a read-timeout occurred */
     void readTimeout();
 
     /** Received from the socket when incoming data can be read */

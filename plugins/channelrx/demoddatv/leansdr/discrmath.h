@@ -103,7 +103,7 @@ struct bitvect
 
 // Return m modulo (X^N+p).
 // p is typically a generator polynomial of degree N
-// with the highest-coefficient monomial ommitted.
+// with the highest-coefficient monomial omitted.
 // m is packed into nm words of type Tm.
 // The MSB of m[0] is the highest-order coefficient of m.
 

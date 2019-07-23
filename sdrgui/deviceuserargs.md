@@ -34,7 +34,7 @@ Use this button to delete the arguments currently selected in the above panel (3
 
 <h2>5 Edit arguments</h2>
 
-Use this line editor to change the arguments currently selected in the above panel (3). The text will be commited when the focus is lost.
+Use this line editor to change the arguments currently selected in the above panel (3). The text will be committed when the focus is lost.
 
 <h2>6 Cancel button</h2>
 
