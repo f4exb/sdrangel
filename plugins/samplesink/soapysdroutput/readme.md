@@ -4,7 +4,7 @@
 
 This output sample sink plugin sends its samples to a device interfaced with [SoapySDR](https://github.com/pothosware/SoapySDR/wiki).
 
-SoapySDR is a [C/C++ API](https://github.com/pothosware/SoapySDR/blob/master/include/SoapySDR/Device.hpp) that interfaces SDR hardware on one side and application software on the other. Due to its very generic nature it was fairly difficult to implement and specific UI widgets were developped to handle specific types of parameters. The level of control depends on how the device API was implemented by the vendors. On application side some parts of the API have not been implemented and can be left as possible enhancements (see next). In any case it is recommended to use the native plugins if they are available.
+SoapySDR is a [C/C++ API](https://github.com/pothosware/SoapySDR/blob/master/include/SoapySDR/Device.hpp) that interfaces SDR hardware on one side and application software on the other. Due to its very generic nature it was fairly difficult to implement and specific UI widgets were developed to handle specific types of parameters. The level of control depends on how the device API was implemented by the vendors. On application side some parts of the API have not been implemented and can be left as possible enhancements (see next). In any case it is recommended to use the native plugins if they are available.
 
 SoapySDR devices appear in the list of available devices in the order they are listed in the API call to SoapySDR. If more than one device controlled by SoapySDR is listed then its sequence number is incremented like:
 
@@ -55,7 +55,7 @@ The following paragraphs list the known issues or oddities.
 
 <h3>BladeRF</h3>
 
-It is very important NOT to use SoapySDR. The default parameters are set to flash the FPGA but as this does not suceeds it results in a FPGA image wipe out and the device returns in "Cypress" mode. It is not too difficult to recover but there is no point risking the hassle.
+It is very important NOT to use SoapySDR. The default parameters are set to flash the FPGA but as this does not succeeds it results in a FPGA image wipe out and the device returns in "Cypress" mode. It is not too difficult to recover but there is no point risking the hassle.
 
 <h3>Red Pitaya</h3>
 

@@ -14,7 +14,7 @@ This plugin can be used to view digital amateur analog television transmissions 
 
 The whole bandwidth available to the channel is used. That is it runs at the device sample rate possibly downsampled by a power of two in the source plugin.
 
-&#9888; Note that DVB-S2 support is experimental. You may need to move some settings back and forth to achieve constellation lock and decode. For exmple change mode or slightly move back adn forth center frequency.
+&#9888; Note that DVB-S2 support is experimental. You may need to move some settings back and forth to achieve constellation lock and decode. For exmple change mode or slightly move back and forth center frequency.
 
 <h2>Interface</h2>
 

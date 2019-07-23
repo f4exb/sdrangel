@@ -90,7 +90,7 @@ func copyContent(reader *bufio.Reader, writer *bufio.Writer, blockSize uint) {
 				sz += int64(n)
 				break
 			} else {
-				fmt.Println("An error occured during content copy. Aborting")
+				fmt.Println("An error occurred during content copy. Aborting")
 				break
 			}
 		} else {

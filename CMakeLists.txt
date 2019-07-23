@@ -80,7 +80,7 @@ message(STATUS "${APPLICATION_NAME} Version: ${sdrangel_VERSION}")
 add_definitions("-DSDRANGEL_LIB_VERSION=\"${sdrangel_VERSION_MAJOR}.${sdrangel_VERSION_MINOR}.${sdrangel_VERSION_PATCH}\"")
 add_definitions("-DSDRANGEL_VERSION=\"${sdrangel_VERSION}\"")
 
-# configure CPACK infomation
+# configure CPACK information
 set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "SDR Rx/Tx software for Airspy, Airspy HF+, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube")
 set(CPACK_PACKAGE_VENDOR "${COMPANY}")

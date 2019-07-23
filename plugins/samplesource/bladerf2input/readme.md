@@ -138,9 +138,9 @@ This selects the gain processing in use. Values are fetched automatically from t
 
 <h3>10: Manual gain control</h3>
 
-Use this slider to adjust gain in manual mode. This control is disabled in non manual modes (all modes but manual). The minumum, maximum and step values are fetched automatically from the device and may vary depending on the center frequency. For frequencies around 400 MHz the gain varies from -16 to 60 dB in 1 dB steps.
+Use this slider to adjust gain in manual mode. This control is disabled in non manual modes (all modes but manual). The minimum, maximum and step values are fetched automatically from the device and may vary depending on the center frequency. For frequencies around 400 MHz the gain varies from -16 to 60 dB in 1 dB steps.
 
 <h3>11: Bias tee control</h3>
 
-Use this toggle button to activate or de-activate the bias tee. Note that according to BladeRF v2 specs the bias tee is simultanously present on all Rx RF ports. The GUI of the sibling channel if present is adjusted automatically.
+Use this toggle button to activate or de-activate the bias tee. Note that according to BladeRF v2 specs the bias tee is simultaneously present on all Rx RF ports. The GUI of the sibling channel if present is adjusted automatically.
 
