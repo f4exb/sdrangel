@@ -108,6 +108,17 @@ void AMBEWorker::handleInputMessages()
                 }
 
                 audioFifo = decodeMsg->getAudioFifo();
+
+                if (audioFifo && (m_audioBufferFill >= m_audioBuffer.size() - 960))
+                {
+                    uint res = audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
+
+                    if (res != m_audioBufferFill) {
+                        qDebug("AMBEWorker::handleInputMessages: %u/%u audio samples written", res, m_audioBufferFill);
+                    }
+
+                    m_audioBufferFill = 0;
+                }
             }
             else
             {
@@ -116,16 +127,24 @@ void AMBEWorker::handleInputMessages()
         }
 
         delete message;
+
+        if (m_inputMessageQueue.size() > 100)
+        {
+            qDebug("AMBEWorker::handleInputMessages: MsgMbeDecode: too many messages in queue. Flushing...");
+            m_inputMessageQueue.clear();
+            break;
+        }
     }
 
     if (audioFifo)
     {
         uint res = audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
-        if (res != m_audioBufferFill)
-        {
+        if (res != m_audioBufferFill) {
             qDebug("AMBEWorker::handleInputMessages: %u/%u audio samples written", res, m_audioBufferFill);
         }
+
+        m_audioBufferFill = 0;
     }
 
     m_timestamp = QDateTime::currentDateTime();
@@ -172,17 +191,16 @@ void AMBEWorker::upsample(int upsampling, short *in, int nbSamplesIn, unsigned c
             m_audioBuffer[m_audioBufferFill].l = channels & 1 ? m_compressor.compress(upsample) : 0;
             m_audioBuffer[m_audioBufferFill].r = (channels>>1) & 1 ? m_compressor.compress(upsample) : 0;
 
-            if (m_audioBufferFill < m_audioBuffer.size() - 1)
-            {
+            if (m_audioBufferFill < m_audioBuffer.size() - 1) {
                 ++m_audioBufferFill;
-            }
-            else
-            {
-                qDebug("AMBEWorker::upsample6: audio buffer is full check its size");
             }
         }
 
         m_upsamplerLastValue = cur;
+    }
+
+    if (m_audioBufferFill >= m_audioBuffer.size() - 1) {
+        qDebug("AMBEWorker::upsample(%d): audio buffer is full check its size", upsampling);
     }
 }
 
@@ -194,14 +212,13 @@ void AMBEWorker::noUpsample(short *in, int nbSamplesIn, unsigned char channels)
         m_audioBuffer[m_audioBufferFill].l = channels & 1 ? cur*m_upsamplingFactors[0] : 0;
         m_audioBuffer[m_audioBufferFill].r = (channels>>1) & 1 ? cur*m_upsamplingFactors[0] : 0;
 
-        if (m_audioBufferFill < m_audioBuffer.size() - 1)
-        {
+        if (m_audioBufferFill < m_audioBuffer.size() - 1) {
             ++m_audioBufferFill;
         }
-        else
-        {
-            qDebug("AMBEWorker::noUpsample: audio buffer is full check its size");
-        }
+    }
+
+    if (m_audioBufferFill >= m_audioBuffer.size() - 1) {
+        qDebug("AMBEWorker::noUpsample: audio buffer is full check its size");
     }
 }
 

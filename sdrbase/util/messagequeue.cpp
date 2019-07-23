@@ -78,5 +78,8 @@ int MessageQueue::size()
 void MessageQueue::clear()
 {
 	QMutexLocker locker(&m_lock);
-	m_queue.clear();
+
+    while (!m_queue.isEmpty()) {
+        delete m_queue.takeFirst();
+    }
 }
