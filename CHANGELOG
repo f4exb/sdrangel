@@ -1,3 +1,12 @@
+sdrangel (4.11.2-1) unstable; urgency=medium
+
+  * New AMBE devices support including AMBE servers
+  * Fixed closing main window with the corner X
+  * Fixed some typos here and there
+  * SSB mod: base audio compressor sample rate on audio sample rate
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 23 Jul 2019 21:04:06 +0200
+
 sdrangel (4.11.1-1) unstable; urgency=medium
 
   * DATV demod: implemented DVB-S2 (experimental)
