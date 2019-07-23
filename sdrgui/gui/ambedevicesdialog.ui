@@ -73,12 +73,12 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>201</width>
+     <width>211</width>
      <height>17</height>
     </rect>
    </property>
    <property name="text">
-    <string>AMBE server IP and port</string>
+    <string>AMBE server IP and port or direct input</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="ambeAddressText">
@@ -91,10 +91,10 @@
     </rect>
    </property>
    <property name="toolTip">
-    <string>AMBE server address as ip:port</string>
+    <string>AMBE server address as ip:port or direct input</string>
    </property>
    <property name="inputMask">
-    <string>000.000.000.000:00000</string>
+    <string/>
    </property>
   </widget>
   <widget class="QPushButton" name="refreshAmbeList">
