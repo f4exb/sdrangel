@@ -308,6 +308,8 @@ DATVDemodSettings::DATVCodeRate DATVDemodSettings::getCodeRateFromStr(const QStr
         return FEC45;
     } else if (str == "5/6") {
         return FEC56;
+    } else if (str == "7/8") {
+        return FEC78;
     } else if (str == "8/9") {
         return FEC89;
     } else if (str == "9/10") {
