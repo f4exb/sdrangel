@@ -226,6 +226,25 @@ void PlutoSDRInputGui::on_iqImbalance_toggled(bool checked)
     sendSettings();
 }
 
+void PlutoSDRInputGui::on_rfDCOffset_toggled(bool checked)
+{
+    m_settings.m_hwRFDCBlock = checked;
+    sendSettings();
+}
+
+void PlutoSDRInputGui::on_bbDCOffset_toggled(bool checked)
+{
+    m_settings.m_hwBBDCBlock = checked;
+    sendSettings();
+}
+
+void PlutoSDRInputGui::on_hwIQImbalance_toggled(bool checked)
+{
+    m_settings.m_hwIQCorrection = checked;
+    sendSettings();
+}
+
+
 void PlutoSDRInputGui::on_swDecim_currentIndexChanged(int index)
 {
     m_settings.m_log2Decim = index > 6 ? 6 : index;
@@ -378,6 +397,9 @@ void PlutoSDRInputGui::displaySettings()
 
     ui->dcOffset->setChecked(m_settings.m_dcBlock);
     ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
+    ui->bbDCOffset->setChecked(m_settings.m_hwBBDCBlock);
+    ui->rfDCOffset->setChecked(m_settings.m_hwRFDCBlock);
+    ui->hwIQImbalance->setChecked(m_settings.m_hwIQCorrection);
     ui->loPPM->setValue(m_settings.m_LOppmTenths);
     ui->loPPMText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 

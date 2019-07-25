@@ -27,6 +27,12 @@ PlutoSdrInputSettings:
       type: integer
     iqCorrection:
       type: integer
+    hwBBDCBlock:
+      type: integer
+    hwRFDCBlock:
+      type: integer
+    hwIQCorrection:
+      type: integer
     log2Decim:
       type: integer
     lpfBW:

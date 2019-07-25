@@ -371,6 +371,9 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
             << " m_LOppmTenths: " << m_settings.m_LOppmTenths
             << " m_dcBlock: " << m_settings.m_dcBlock
             << " m_iqCorrection: " << m_settings.m_iqCorrection
+            << " m_hwBBDCBlock: " << m_settings.m_hwBBDCBlock
+            << " m_hwRFDCBlock: " << m_settings.m_hwRFDCBlock
+            << " m_hwIQCorrection: " << m_settings.m_hwIQCorrection
             << " m_lpfFIREnable: " << m_settings.m_lpfFIREnable
             << " m_lpfFIRBW: " << loc.toString(m_settings.m_lpfFIRBW)
             << " m_lpfFIRlog2Decim: " << m_settings.m_lpfFIRlog2Decim
@@ -399,6 +402,15 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
     }
     if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force) {
         reverseAPIKeys.append("iqCorrection");
+    }
+    if ((m_settings.m_hwBBDCBlock != settings.m_hwBBDCBlock) || force) {
+        reverseAPIKeys.append("hwBBDCBlock");
+    }
+    if ((m_settings.m_hwRFDCBlock != settings.m_hwRFDCBlock) || force) {
+        reverseAPIKeys.append("hwRFDCBlock");
+    }
+    if ((m_settings.m_hwIQCorrection != settings.m_hwIQCorrection) || force) {
+        reverseAPIKeys.append("hwIQCorrection");
     }
     if ((m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) || force) {
         reverseAPIKeys.append("lpfFIREnable");
@@ -589,6 +601,24 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
     if ((m_settings.m_gain != settings.m_gain) || force)
     {
         params.push_back(QString(tr("in_voltage0_hardwaregain=%1").arg(settings.m_gain)).toStdString());
+        paramsToSet = true;
+    }
+
+    if ((m_settings.m_hwBBDCBlock != settings.m_hwBBDCBlock) || force)
+    {
+        params.push_back(QString(tr("in_voltage_bb_dc_offset_tracking_en=%1").arg(settings.m_hwBBDCBlock ? 1 : 0)).toStdString());
+        paramsToSet = true;
+    }
+
+    if ((m_settings.m_hwRFDCBlock != settings.m_hwRFDCBlock) || force)
+    {
+        params.push_back(QString(tr("in_voltage_rf_dc_offset_tracking_en=%1").arg(settings.m_hwRFDCBlock ? 1 : 0)).toStdString());
+        paramsToSet = true;
+    }
+
+    if ((m_settings.m_hwIQCorrection != settings.m_hwIQCorrection) || force)
+    {
+        params.push_back(QString(tr("in_voltage_quadrature_tracking_en=%1").arg(settings.m_hwIQCorrection ? 1 : 0)).toStdString());
         paramsToSet = true;
     }
 
@@ -798,6 +828,15 @@ int PlutoSDRInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("iqCorrection")) {
         settings.m_iqCorrection = response.getPlutoSdrInputSettings()->getIqCorrection() != 0;
     }
+    if (deviceSettingsKeys.contains("hwBBDCBlock")) {
+        settings.m_hwBBDCBlock = response.getPlutoSdrInputSettings()->getHwBbdcBlock() != 0;
+    }
+    if (deviceSettingsKeys.contains("hwRFDCBlock")) {
+        settings.m_hwBBDCBlock = response.getPlutoSdrInputSettings()->getHwRfdcBlock() != 0;
+    }
+    if (deviceSettingsKeys.contains("hwIQCorrection")) {
+        settings.m_hwBBDCBlock = response.getPlutoSdrInputSettings()->getHwIqCorrection() != 0;
+    }
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getPlutoSdrInputSettings()->getLog2Decim();
     }
@@ -875,6 +914,9 @@ void PlutoSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     response.getPlutoSdrInputSettings()->setFcPos((int) settings.m_fcPos);
     response.getPlutoSdrInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getPlutoSdrInputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    response.getPlutoSdrInputSettings()->setHwBbdcBlock(settings.m_hwBBDCBlock ? 1 : 0);
+    response.getPlutoSdrInputSettings()->setHwRfdcBlock(settings.m_hwRFDCBlock ? 1 : 0);
+    response.getPlutoSdrInputSettings()->setHwIqCorrection(settings.m_hwIQCorrection ? 1 : 0);
     response.getPlutoSdrInputSettings()->setLog2Decim(settings.m_log2Decim);
     response.getPlutoSdrInputSettings()->setLpfBw(settings.m_lpfBW);
     response.getPlutoSdrInputSettings()->setGain(settings.m_gain);
@@ -954,6 +996,15 @@ void PlutoSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
     }
     if (deviceSettingsKeys.contains("iqCorrection") || force) {
         swgPlutoSdrInputSettings->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("hwBBDCBlock") || force) {
+        swgPlutoSdrInputSettings->setHwBbdcBlock(settings.m_hwBBDCBlock ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("hwRFDCBlock") || force) {
+        swgPlutoSdrInputSettings->setHwRfdcBlock(settings.m_hwRFDCBlock ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("hwIQCorrection") || force) {
+        swgPlutoSdrInputSettings->setHwIqCorrection(settings.m_hwIQCorrection ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("log2Decim") || force) {
         swgPlutoSdrInputSettings->setLog2Decim(settings.m_log2Decim);

@@ -85,6 +85,9 @@ private slots:
     void on_centerFrequency_changed(quint64 value);
     void on_loPPM_valueChanged(int value);
     void on_dcOffset_toggled(bool checked);
+    void on_rfDCOffset_toggled(bool checked);
+    void on_bbDCOffset_toggled(bool checked);
+    void on_hwIQImbalance_toggled(bool checked);
     void on_iqImbalance_toggled(bool checked);
     void on_swDecim_currentIndexChanged(int index);
     void on_fcPos_currentIndexChanged(int index);

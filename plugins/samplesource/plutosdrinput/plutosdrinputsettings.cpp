@@ -35,6 +35,9 @@ void PlutoSDRInputSettings::resetToDefaults()
 	m_devSampleRate = 2500 * 1000;
 	m_dcBlock = false;
 	m_iqCorrection = false;
+    m_hwBBDCBlock = true;
+    m_hwRFDCBlock = true;
+    m_hwIQCorrection = true;
 	m_lpfBW = 1500000;
 	m_lpfFIREnable = false;
 	m_lpfFIRBW = 500000U;
@@ -76,6 +79,9 @@ QByteArray PlutoSDRInputSettings::serialize() const
     s.writeString(19, m_reverseAPIAddress);
     s.writeU32(20, m_reverseAPIPort);
     s.writeU32(21, m_reverseAPIDeviceIndex);
+    s.writeBool(22, m_hwBBDCBlock);
+    s.writeBool(23, m_hwRFDCBlock);
+    s.writeBool(24, m_hwIQCorrection);
 
 	return s.final();
 }
@@ -143,6 +149,10 @@ bool PlutoSDRInputSettings::deserialize(const QByteArray& data)
 
         d.readU32(21, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+
+        d.readBool(22, &m_hwBBDCBlock, true);
+        d.readBool(23, &m_hwRFDCBlock, true);
+        d.readBool(24, &m_hwIQCorrection, true);
 
 		return true;
 	}

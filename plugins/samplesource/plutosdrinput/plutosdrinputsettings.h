@@ -68,6 +68,9 @@ struct PlutoSDRInputSettings {
     fcPos_t m_fcPos;
     bool    m_dcBlock;
     bool    m_iqCorrection;
+    bool    m_hwBBDCBlock;     //!< Hardware baseband DC blocking
+    bool    m_hwRFDCBlock;     //!< Hardware RF DC blocking
+    bool    m_hwIQCorrection;  //!< Hardware IQ correction
     quint32 m_log2Decim;
     quint32 m_lpfBW;           //!< analog lowpass filter bandwidth (Hz)
     quint32 m_gain;            //!< "hardware" gain

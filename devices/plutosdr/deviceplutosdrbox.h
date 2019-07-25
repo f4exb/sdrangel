@@ -133,7 +133,6 @@ private:
     void formatFIRHeader(std::ostringstream& str, uint32_t intdec);
     void formatFIRCoefficients(std::ostringstream& str, uint32_t nbTaps, double normalizedBW);
     void getXO();
-    void setTracking();
 };
 
 #endif /* DEVICES_PLUTOSDR_DEVICEPLUTOSDRBOX_H_ */
