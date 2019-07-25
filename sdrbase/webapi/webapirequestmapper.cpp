@@ -2737,16 +2737,12 @@ bool WebAPIRequestMapper::validateAMBEDevices(SWGSDRangel::SWGAMBEDevices& ambeD
                     return false;
                 }
             }
-        }
-        else
-        {
-            return false;
+
+            return true;
         }
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 void WebAPIRequestMapper::appendSettingsSubKeys(
