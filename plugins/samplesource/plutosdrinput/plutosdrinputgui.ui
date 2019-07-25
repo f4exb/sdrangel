@@ -204,7 +204,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="loppmLayout">
      <property name="topMargin">
       <number>2</number>
      </property>
@@ -254,26 +254,6 @@
       </widget>
      </item>
      <item>
-      <widget class="ButtonSwitch" name="dcOffset">
-       <property name="toolTip">
-        <string>Automatic DC offset removal</string>
-       </property>
-       <property name="text">
-        <string>DC</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="ButtonSwitch" name="iqImbalance">
-       <property name="toolTip">
-        <string>Automatic IQ imbalance correction</string>
-       </property>
-       <property name="text">
-        <string>IQ</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="TransverterButton" name="transverter">
        <property name="maximumSize">
         <size>
@@ -288,6 +268,94 @@
         <string>X</string>
        </property>
       </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="correctionsLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>SW</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="dcOffset">
+       <property name="toolTip">
+        <string>Software DC offset removal</string>
+       </property>
+       <property name="text">
+        <string>DC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="iqImbalance">
+       <property name="toolTip">
+        <string>Software automatic IQ imbalance correction</string>
+       </property>
+       <property name="text">
+        <string>IQ</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>HW</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="rfDCOffset">
+       <property name="toolTip">
+        <string>Hardware RF DC removal</string>
+       </property>
+       <property name="text">
+        <string>RFDC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="bbDCOffset">
+       <property name="toolTip">
+        <string>Hardware baseband DC removal</string>
+       </property>
+       <property name="text">
+        <string>BBDC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="hwIQImbalance">
+       <property name="toolTip">
+        <string>Hardware IQ imbalance correction</string>
+       </property>
+       <property name="text">
+        <string>IQ</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
