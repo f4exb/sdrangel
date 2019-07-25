@@ -304,7 +304,7 @@ elseif(WIN32 OR MINGW)
       "Delete '$SMPROGRAMS\\\\$START_MENU\\\\SDRangel.lnk'")
   endif(BUNDLE)
 
-endif(WIN32 OR MINGW)
+endif(APPLE AND BUNDLE AND BUILD_GUI)
 
 message(STATUS "CPack generators: ${CPACK_GENERATOR}")
 include(CPack)
