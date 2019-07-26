@@ -1,3 +1,12 @@
+sdrangel (4.11.3-1) unstable; urgency=medium
+
+  * PlutoSDR input: options for HW DC and IQ corrections. Implements #378
+  * DATV demod: fix DVB-S FEC 7/8 not recognized from the GUI. Fixes #383
+  * Fixed API request mapper validator not returning value in all cases. Fixes issue #386
+  * Corrected endif in cpack/CMakeLists.txt. Fixes #377
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 25 Jul 2019 21:04:06 +0200
+
 sdrangel (4.11.2-1) unstable; urgency=medium
 
   * New AMBE devices support including AMBE servers
