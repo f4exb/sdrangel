@@ -4,18 +4,18 @@ if(NOT LIBPERSEUS_FOUND)
 
   find_path(LIBPERSEUS_INCLUDE_DIR
     NAMES perseus-sdr.h
-    PATHS ${PERSEUS_DIR}/include
+    HINTS ${PERSEUS_DIR}/include
           ${LIBPERSEUS_PKG_INCLUDE_DIRS}
-          /usr/include
+    PATHS /usr/include
           /usr/local/include
   )
 
   find_library(LIBPERSEUS_LIBRARIES
     NAMES perseus-sdr
-    PATHS ${PERSEUS_DIR}/lib
+    HINTS ${PERSEUS_DIR}/lib
           ${PERSEUS_DIR}/lib64
           ${LIBPERSEUS_PKG_LIBRARY_DIRS}
-          /usr/lib
+    PATHS /usr/lib
           /usr/local/lib
   )
 

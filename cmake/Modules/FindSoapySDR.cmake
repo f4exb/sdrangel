@@ -15,23 +15,23 @@ if(NOT SOAPYSDR_FOUND)
 
     find_path (SOAPYSDR_INCLUDE_DIR
       NAMES SoapySDR/Version.h
-      PATHS ${SOAPYSDR_DIR}/include
-      ${LIBSOAPYSDR_PKG_INCLUDE_DIRS}
-      /usr/include
-      /usr/local/include
+      HINTS ${SOAPYSDR_DIR}/include
+            ${LIBSOAPYSDR_PKG_INCLUDE_DIRS}
+      PATHS /usr/include
+            /usr/local/include
       )
 
     find_library (SOAPYSDR_LIBRARY
       NAMES SoapySDR
-      HINTS ${CMAKE_INSTALL_PREFIX}/lib
-      ${CMAKE_INSTALL_PREFIX}/lib64
-      PATHS ${SOAPYSDR_DIR}/lib
-      ${SOAPYSDR_DIR}/lib64
-      ${LIBSOAPYSDR_PKG_LIBRARY_DIRS}
-      /usr/local/lib
-      /usr/local/lib64
-      /usr/lib
-      /usr/lib64
+      HINTS ${SOAPYSDR_DIR}/lib
+            ${SOAPYSDR_DIR}/lib64
+            ${CMAKE_INSTALL_PREFIX}/lib
+            ${CMAKE_INSTALL_PREFIX}/lib64
+            ${LIBSOAPYSDR_PKG_LIBRARY_DIRS}
+      PATHS /usr/local/lib
+            /usr/local/lib64
+            /usr/lib
+            /usr/lib64
       )
 
     if (SOAPYSDR_INCLUDE_DIR AND SOAPYSDR_LIBRARY)

@@ -3,21 +3,21 @@ PKG_CHECK_MODULES(PC_CODEC2 "codec2")
 
 FIND_PATH(CODEC2_INCLUDE_DIR
     NAMES codec2/codec2.h
-    HINTS ${PC_CODEC2_INCLUDE_DIR}
+    HINTS ${CODEC2_DIR}/include
+          ${PC_CODEC2_INCLUDE_DIR}
           ${CMAKE_INSTALL_PREFIX}/include
-    PATHS ${CODEC2_DIR}/include
-          /usr/local/include
+    PATHS /usr/local/include
           /usr/include
 )
 
 FIND_LIBRARY(CODEC2_LIBRARIES
     NAMES codec2 libcodec2
-    HINTS ${PC_CODEC2_LIBDIR}
+    HINTS ${CODEC2_DIR}/lib
+          ${CODEC2_DIR}/lib64
+          ${PC_CODEC2_LIBDIR}
           ${CMAKE_INSTALL_PREFIX}/lib
           ${CMAKE_INSTALL_PREFIX}/lib64
-    PATHS ${CODEC2_DIR}/lib
-          ${CODEC2_DIR}/lib64
-          /usr/local/lib
+    PATHS /usr/local/lib
           /usr/local/lib64
           /usr/lib
           /usr/lib64

@@ -1,18 +1,18 @@
 # Find libmbe
 
-find_path(LIBMBE_INCLUDE_DIR 
+find_path(LIBMBE_INCLUDE_DIR
   NAMES mbelib.h
-  PATHS ${MBE_DIR}/include
-        /usr/include
+  HINTS ${MBE_DIR}/include
+  PATHS /usr/include
         /usr/local/include
 )
 
 set(LIBMBE_NAMES ${LIBMBE_NAMES} mbe libmbe)
 
-find_library(LIBMBE_LIBRARY 
-  NAMES ${LIBMBE_NAMES} 
-  PATHS ${MBE_DIR}/lib
-        /usr/include
+find_library(LIBMBE_LIBRARY
+  NAMES ${LIBMBE_NAMES}
+  HINTS ${MBE_DIR}/lib
+  PATHS /usr/include
         /usr/local/include
 )
 

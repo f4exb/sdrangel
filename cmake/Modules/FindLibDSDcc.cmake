@@ -3,21 +3,21 @@
 if(NOT LIBDSDCC_FOUND)
 
   pkg_check_modules(LIBDSDCC_PKG libdsdcc)
-  
-  find_path(LIBDSDCC_INCLUDE_DIR 
+
+  find_path(LIBDSDCC_INCLUDE_DIR
     NAMES dsdcc/dsd_decoder.h
-    PATHS ${DSDCC_DIR}/include
+    HINTS ${DSDCC_DIR}/include
           ${LIBDSDCC_PKG_INCLUDE_DIRS}
-          /usr/include/dsdcc
+    PATHS /usr/include/dsdcc
           /usr/local/include/dsdcc
   )
 
-  find_library(LIBDSDCC_LIBRARIES 
+  find_library(LIBDSDCC_LIBRARIES
     NAMES dsdcc
-    PATHS ${DSDCC_DIR}/lib
+    HINTS ${DSDCC_DIR}/lib
           ${DSDCC_DIR}/lib64
           ${LIBDSDCC_PKG_LIBRARY_DIRS}
-          /usr/lib
+    PATHS /usr/lib
           /usr/lib64
           /usr/local/lib
           /usr/local/lib64

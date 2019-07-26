@@ -5,18 +5,18 @@ if(NOT LIBIIO_FOUND)
   if(LIBIIO_PKG_FOUND OR (DEFINED IIO_DIR))
     find_path(LIBIIO_INCLUDE_DIR
       NAMES iio.h
-      PATHS ${IIO_DIR}/include
-      ${LIBIIO_PKG_INCLUDE_DIRS}
-      /usr/include
-      /usr/local/include
+      HINTS ${IIO_DIR}/include
+            ${LIBIIO_PKG_INCLUDE_DIRS}
+      PATHS /usr/include
+             /usr/local/include
       )
 
     find_library(LIBIIO_LIBRARIES
       NAMES iio
-      PATHS ${IIO_DIR}/lib
-      ${LIBIIO_PKG_LIBRARY_DIRS}
-      /usr/lib
-      /usr/local/lib
+      HINTS ${IIO_DIR}/lib
+            ${LIBIIO_PKG_LIBRARY_DIRS}
+      PATHS /usr/lib
+            /usr/local/lib
       )
 
     if(LIBIIO_INCLUDE_DIR AND LIBIIO_LIBRARIES)

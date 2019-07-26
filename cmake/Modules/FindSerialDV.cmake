@@ -2,8 +2,8 @@
 
 find_path(LIBSERIALDV_INCLUDE_DIR
   NAMES dvcontroller.h
-  PATHS ${SERIALDV_DIR}/include/serialdv
-        /usr/include/serialdv
+  HINTS ${SERIALDV_DIR}/include/serialdv
+  PATHS /usr/include/serialdv
         /usr/local/include/serialdv
 )
 
@@ -11,8 +11,8 @@ set(LIBSERIAL_NAMES ${LIBSERIAL_NAMES} serialdv libserialdv)
 
 find_library(LIBSERIALDV_LIBRARY
   NAMES serialdv
-  PATHS ${SERIALDV_DIR}/lib
-        /usr/lib
+  HINTS ${SERIALDV_DIR}/lib
+  PATHS /usr/lib
         /usr/local/lib
 )
 

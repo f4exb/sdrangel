@@ -3,8 +3,8 @@
 if (NOT LIMESUITE_INCLUDE_DIR)
     find_path (LIMESUITE_INCLUDE_DIR
         NAMES lime/LimeSuite.h
-        PATHS ${LIMESUITE_DIR}/include
-              /usr/include
+        HINTS ${LIMESUITE_DIR}/include
+        PATHS /usr/include
               /usr/local/include
     )
 endif()
@@ -12,10 +12,10 @@ endif()
 if (NOT LIMESUITE_LIBRARY)
     find_library (LIMESUITE_LIBRARY
         NAMES LimeSuite
-        HINTS ${CMAKE_INSTALL_PREFIX}/lib
+        HINTS ${LIMESUITE_DIR}/lib
+              ${CMAKE_INSTALL_PREFIX}/lib
               ${CMAKE_INSTALL_PREFIX}/lib64
-        PATHS ${LIMESUITE_DIR}/lib
-              /usr/local/lib
+        PATHS /usr/local/lib
               /usr/local/lib64
               /usr/lib
               /usr/lib64

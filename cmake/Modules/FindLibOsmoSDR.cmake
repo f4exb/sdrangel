@@ -2,17 +2,15 @@ if(NOT LIBOSMOSDR_FOUND)
 
   pkg_check_modules (LIBOSMOSDR_PKG libosmosdr)
   find_path(LIBOSMOSDR_INCLUDE_DIR NAMES osmosdr.h
-	PATHS
-	${LIBOSMOSDR_PKG_INCLUDE_DIRS}
-	/usr/include
-	/usr/local/include
+	HINTS ${LIBOSMOSDR_PKG_INCLUDE_DIRS}
+	PATHS /usr/include
+	      /usr/local/include
   )
 
   find_library(LIBOSMOSDR_LIBRARIES NAMES osmosdr
-	PATHS
-	${LIBOSMOSDR_PKG_LIBRARY_DIRS}
-	/usr/lib
-	/usr/local/lib
+	HINTS ${LIBOSMOSDR_PKG_LIBRARY_DIRS}
+	PATHS /usr/lib
+	      /usr/local/lib
   )
 
   if(LIBOSMOSDR_INCLUDE_DIR AND LIBOSMOSDR_LIBRARIES)

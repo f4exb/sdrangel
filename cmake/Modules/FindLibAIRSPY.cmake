@@ -1,20 +1,20 @@
 if(NOT LIBAIRSPY_FOUND)
 
   pkg_check_modules (LIBAIRSPY_PKG libairspy)
-  
-  find_path(LIBAIRSPY_INCLUDE_DIR 
+
+  find_path(LIBAIRSPY_INCLUDE_DIR
     NAMES libairspy/airspy.h
-    PATHS ${AIRSPY_DIR}/include
+    HINTS ${AIRSPY_DIR}/include
           ${LIBAIRSPY_PKG_INCLUDE_DIRS}
-          /usr/include
+    PATHS /usr/include
           /usr/local/include
   )
 
-  find_library(LIBAIRSPY_LIBRARIES 
+  find_library(LIBAIRSPY_LIBRARIES
     NAMES airspy
-    PATHS ${AIRSPY_DIR}/lib
+    HINTS ${AIRSPY_DIR}/lib
           ${LIBAIRSPY_PKG_LIBRARY_DIRS}
-          /usr/lib
+    PATHS /usr/lib
           /usr/local/lib
   )
 
