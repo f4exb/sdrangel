@@ -188,7 +188,7 @@ elseif(WIN32 OR MINGW)
     add_custom_target(copy_qt_plugin_${qt_plugin_name} ALL
       COMMAND ${CMAKE_COMMAND} -E copy_directory "${qt_plugin}" "${SDRANGEL_BINARY_BIN_DIR}/${qt_plugin_name}"
     )
-  endforeach(qt_plugins)
+  endforeach(qt_plugin)
 
   # unfortunately some libraries are dependencies of dll so we copy by hand
   # TODO check if we can use fixup_bundle() and have libraries on root path
