@@ -109,7 +109,7 @@ def adjust_channels(sdrangel_ip, sdrangel_port):
         frequency = tracking_item['channelFrequency'] + frequency_correction
         update_frequency_setting(tracking_item['requestContent'], frequency)
         r = requests.patch(url=base_url + f'/deviceset/{device_index}/channel/{channel_index}/settings', json=tracking_item['requestContent'])
-        if r.status_code / 100 != 2:
+        if r.status_code // 100 != 2:
             remove_keys.append(k)
     for k in remove_keys:
         tracking_item = TRACKING_DICT.pop(k, None)
