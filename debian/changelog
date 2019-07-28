@@ -1,3 +1,9 @@
+sdrangel (4.11.4-1) unstable; urgency=medium
+
+  * DATV demod: option to output transport stream to UDP. Implements #313
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 28 Jul 2019 09:04:06 +0200
+
 sdrangel (4.11.3-1) unstable; urgency=medium
 
   * PlutoSDR input: options for HW DC and IQ corrections. Implements #378

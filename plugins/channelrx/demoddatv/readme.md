@@ -40,6 +40,18 @@ Power of signal received in the channel (dB)
 
 ![DATV Demodulator plugin DATV GUI](../../../doc/img/DATVDemod_pluginDATV.png)
 
+<h4>B.3: Output transport stream to UDP</h4>
+
+Activate output of transport stream to UDP with 7 TS blocks per UDP frame
+
+<h4>B.4: UDP address</h4>
+
+This is the address of the TS UDP
+
+<h4>B.5: UDP port</h4>
+
+This is the port of the TS UDP
+
 <h4>B.1: Symbol constellation</h4>
 
 This is the constellation of the PSK or QAM synchronized signal. When the demodulation parameters are set correctly (modulation type, symbol rate and filtering) and signal is strong enough to recover symbol synchronization the purple dots appear close to the white crosses. White crosses represent the ideal symbols positions in the I/Q plane.
@@ -143,17 +155,17 @@ The mode and rate selection can be done manually but if a discrepancy in the num
 
 The controls specific to DVB-S are disabled and greyed out. These are: Fast Lock, Allow Drift, Hard Metric and Viterbi.
 
-<h4>B.2c: DATV video stream</h4>
+<h3>C: DATV video stream</h3>
 
 ![DATV Demodulator plugin video GUI](../../../doc/img/DATVDemod_pluginVideo.png)
 
-<h5>B.2c.1: Image</h5>
+<h4>C.1: Image</h4>
 
 The decoded video is displayed here
 
-<h5>B.2c.2: Stream information</h5>
+<h4>C.2: Stream information</h4>
 
-<h5>B.2c.3: Stream decoding status</h5>
+<h4>C.3: Stream decoding status</h4>
 
 These non clickable checkboxes report the decoding status (checked when OK):
 
@@ -162,7 +174,7 @@ These non clickable checkboxes report the decoding status (checked when OK):
   - video: video data detected
   - decoding: video being decoded
 
-<h5>B.2c.4: Video mute</h5>
+<h4>C.4: Video mute</h4>
 
 Toggle button to pause/run video decoding. This also indicates the video status:
 
@@ -170,7 +182,7 @@ Toggle button to pause/run video decoding. This also indicates the video status:
   - Green: a video stream is present and successfully decoded
   - Red: a video stream is present but decoding fails
 
-<h5>B.2c.5: Audio mute</h5>
+<h4>C.5: Audio mute</h4>
 
 Toggle button to pause/run audio decoding. This also indicates the audio status:
 
@@ -180,11 +192,11 @@ Toggle button to pause/run audio decoding. This also indicates the audio status:
 
 In addition right clicking on the button will give you access to the audio device selection dialog
 
-<h5>B.2c.6: Audio volume</h5>
+<h4>C.6: Audio volume</h4>
 
 Show the audio volume on a 0 to 100 scale. The actual coefficient applied to the audio samples follows a logarithmic rule where 0 corresponds to 0.01, 50 to 0.1 and 100 to 1.0
 
-<h5>B.2c.7: Audio volume control</h5>
+<h4>C.7: Audio volume control</h4>
 
 Use this slider to control the value (0 to 100) of the audio volume.
 
