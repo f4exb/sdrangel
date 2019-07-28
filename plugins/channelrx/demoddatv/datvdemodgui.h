@@ -94,6 +94,9 @@ private slots:
     void on_audioMute_toggled(bool checked);
     void on_audioVolume_valueChanged(int value);
     void on_videoMute_toggled(bool checked);
+    void on_udpTS_clicked(bool checked);
+    void on_udpTSAddress_editingFinished();
+    void on_udpTSPort_editingFinished();
 
 private:
     Ui::DATVDemodGUI* ui;

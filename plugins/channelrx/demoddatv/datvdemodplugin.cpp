@@ -28,7 +28,7 @@
 const PluginDescriptor DATVDemodPlugin::m_ptrPluginDescriptor =
 {
     QString("DATV Demodulator"),
-    QString("4.11.3"),
+    QString("4.11.4"),
     QString("(c) F4HKW for SDRAngel using LeanSDR framework (c) F4DAV"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

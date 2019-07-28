@@ -46,6 +46,7 @@ DATVDemod::DATVDemod(DeviceAPI *deviceAPI) :
     m_objRegisteredTVScreen(0),
     m_objRegisteredVideoRender(0),
     m_objVideoStream(nullptr),
+    m_udpStream(leansdr::tspacket::SIZE),
     m_objRenderThread(nullptr),
     m_audioFifo(48000),
     m_blnRenderingVideo(false),
@@ -859,7 +860,7 @@ void DATVDemod::InitDATVFramework()
     r_derand = new leansdr::derandomizer(m_objScheduler, *p_rtspackets, *p_tspackets);
 
     // OUTPUT
-    r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, m_objVideoStream);
+    r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, m_objVideoStream, &m_udpStream);
 
     m_blnDVBInitialized = true;
 }
@@ -1144,7 +1145,7 @@ void DATVDemod::InitDATVS2Framework()
     //**********************************************
 
     // OUTPUT
-    r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, m_objVideoStream);
+    r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, m_objVideoStream, &m_udpStream);
 
     m_blnDVBInitialized = true;
 }
@@ -1358,29 +1359,31 @@ void DATVDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffs
             << " inputSampleRate: " << inputSampleRate
             << " inputFrequencyOffset: " << inputFrequencyOffset;
 
+    bool callApplySettings = false;
+
     if ((m_settings.m_centerFrequency != inputFrequencyOffset) ||
         (m_sampleRate != inputSampleRate) || force)
     {
         m_objNCO.setFreq(-(float) inputFrequencyOffset, (float) inputSampleRate);
         qDebug("DATVDemod::applyChannelSettings: NCO: IF: %d <> TF: %d ISR: %d",
             inputFrequencyOffset, m_settings.m_centerFrequency, inputSampleRate);
+        callApplySettings = true;
     }
 
     if ((m_sampleRate != inputSampleRate) || force)
     {
-        //m_objSettingsMutex.lock();
         //Bandpass filter shaping
         Real fltLowCut = -((float) m_settings.m_rfBandwidth / 2.0) / (float) inputSampleRate;
         Real fltHiCut  = ((float) m_settings.m_rfBandwidth / 2.0) / (float) inputSampleRate;
         m_objRFFilter->create_filter(fltLowCut, fltHiCut);
-        //m_blnNeedConfigUpdate = true;
-        //applySettings(m_settings,true);
-        //m_objSettingsMutex.unlock();
     }
 
     m_sampleRate = inputSampleRate;
     m_settings.m_centerFrequency = inputFrequencyOffset;
-    applySettings(m_settings,true);
+
+    if (callApplySettings) {
+        applySettings(m_settings, true);
+    }
 }
 
 void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
@@ -1441,6 +1444,18 @@ void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
         || force)
     {
         m_objNCO.setFreq(-(float) settings.m_centerFrequency, (float) m_sampleRate);
+    }
+
+    if ((m_settings.m_udpTS != settings.m_udpTS) || force) {
+        m_udpStream.setActive(settings.m_udpTS);
+    }
+
+    if ((m_settings.m_udpTSAddress != settings.m_udpTSAddress) || force) {
+        m_udpStream.setAddress(settings.m_udpTSAddress);
+    }
+
+    if ((m_settings.m_udpTSPort != settings.m_udpTSPort) || force) {
+        m_udpStream.setPort(settings.m_udpTSPort);
     }
 
     if (m_settings.isDifferent(settings) || force)

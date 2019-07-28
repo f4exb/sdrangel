@@ -52,6 +52,9 @@ void DATVDemodSettings::resetToDefaults()
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_audioVolume = 0;
     m_videoMute = false;
+    m_udpTSAddress = "127.0.0.1";
+    m_udpTSPort = 8882;
+    m_udpTS = false;
 }
 
 QByteArray DATVDemodSettings::serialize() const
@@ -82,6 +85,9 @@ QByteArray DATVDemodSettings::serialize() const
     s.writeString(20, m_audioDeviceName);
     s.writeS32(21, m_audioVolume);
     s.writeBool(22, m_videoMute);
+    s.writeString(23, m_udpTSAddress);
+    s.writeU32(24, m_udpTSPort);
+    s.writeBool(25, m_udpTS);
 
     return s.final();
 }
@@ -100,6 +106,7 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
     {
         QByteArray bytetmp;
         qint32 tmp;
+        quint32 utmp;
         QString strtmp;
 
         d.readS32(2, &m_rfBandwidth, 512000);
@@ -143,6 +150,10 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         d.readString(20, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readS32(21, &m_audioVolume, 0);
         d.readBool(22, &m_videoMute, false);
+        d.readString(23, &m_udpTSAddress, "127.0.0.1");
+        d.readU32(24, &utmp, 8882);
+        m_udpTSPort = utmp < 1024 ? 1024 : utmp > 65536 ? 65535 : utmp;
+        d.readBool(25, &m_udpTS, false);
 
         validateSystemConfiguration();
 

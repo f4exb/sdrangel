@@ -243,6 +243,7 @@ void DATVDemodGUI::displaySettings()
     blockApplySettings(true);
 
     m_objChannelMarker.setCenterFrequency(m_settings.m_centerFrequency);
+    m_objChannelMarker.setBandwidth(m_settings.m_rfBandwidth);
     ui->deltaFrequency->setValue(m_settings.m_centerFrequency);
     m_objChannelMarker.setColor(m_settings.m_rgbColor);
 
@@ -292,6 +293,9 @@ void DATVDemodGUI::displaySettings()
     ui->audioVolume->setValue(m_settings.m_audioVolume);
     ui->audioVolumeText->setText(tr("%1").arg(m_settings.m_audioVolume));
     ui->videoMute->setChecked(m_settings.m_videoMute);
+    ui->udpTS->setChecked(m_settings.m_udpTS);
+    ui->udpTSAddress->setText(m_settings.m_udpTSAddress);
+    ui->udpTSPort->setText(tr("%1").arg(m_settings.m_udpTSPort));
 
     blockApplySettings(false);
     m_objChannelMarker.blockSignals(false);
@@ -347,38 +351,12 @@ void DATVDemodGUI::applySettings(bool force)
     {
         qDebug("DATVDemodGUI::applySettings");
 
-        //Bandwidth and center frequency
-        m_objChannelMarker.setCenterFrequency(ui->deltaFrequency->getValueNew());
-        m_objChannelMarker.setBandwidth(ui->rfBandwidth->getValueNew());
-
         DATVDemod::MsgConfigureChannelizer *msgChan = DATVDemod::MsgConfigureChannelizer::create(m_objChannelMarker.getCenterFrequency());
         m_objDATVDemod->getInputMessageQueue()->push(msgChan);
 
         setTitleColor(m_objChannelMarker.getColor());
 
-        if (ui->cmbFilter->currentIndex() == 0) {
-            m_settings.m_filter = DATVDemodSettings::SAMP_LINEAR;
-        } else if (ui->cmbFilter->currentIndex() == 1) {
-            m_settings.m_filter = DATVDemodSettings::SAMP_NEAREST;
-        } else {
-            m_settings.m_filter = DATVDemodSettings::SAMP_RRC;
-        }
-
-        m_settings.m_rfBandwidth = m_objChannelMarker.getBandwidth();
-        m_settings.m_centerFrequency = m_objChannelMarker.getCenterFrequency();
-        m_settings.m_symbolRate = ui->spiSymbolRate->value();
-        m_settings.m_notchFilters = ui->spiNotchFilters->value();
-        m_settings.m_allowDrift = ui->chkAllowDrift->isChecked();
-        m_settings.m_fastLock = ui->chkFastlock->isChecked();
-        m_settings.m_hardMetric = ui->chkHardMetric->isChecked();
-        m_settings.m_rollOff = ((float)ui->spiRollOff->value()) / 100.0f;
-        m_settings.m_viterbi = ui->chkViterbi->isChecked();
-        m_settings.m_excursion = ui->spiExcursion->value();
-        m_settings.m_audioMute = ui->audioMute->isChecked();
-        m_settings.m_audioVolume = ui->audioVolume->value();
-        m_settings.m_videoMute = ui->videoMute->isChecked();
-
-        QString msg = tr("DATVDemodGUI::applySettings: force: %1").arg(force);
+        QString msg = tr("DATVDemodGUI::applySettings: force: %1").arg(force ? "true" : "false");
         m_settings.debug(msg);
 
         DATVDemod::MsgConfigureDATVDemod* message = DATVDemod::MsgConfigureDATVDemod::create(m_settings, force);
@@ -548,11 +526,13 @@ void DATVDemodGUI::on_cmbFEC_currentIndexChanged(const QString &arg1)
 
 void DATVDemodGUI::on_chkViterbi_clicked()
 {
+    m_settings.m_viterbi = ui->chkViterbi->isChecked();
     applySettings();
 }
 
 void DATVDemodGUI::on_chkHardMetric_clicked()
 {
+    m_settings.m_hardMetric = ui->chkHardMetric->isChecked();
     applySettings();
 }
 
@@ -561,21 +541,22 @@ void DATVDemodGUI::on_resetDefaults_clicked()
     resetToDefaults();
 }
 
-void DATVDemodGUI::on_spiSymbolRate_valueChanged(int arg1)
+void DATVDemodGUI::on_spiSymbolRate_valueChanged(int value)
 {
-    (void) arg1;
+    m_settings.m_symbolRate = value;
     applySettings();
 }
 
-void DATVDemodGUI::on_spiNotchFilters_valueChanged(int arg1)
+void DATVDemodGUI::on_spiNotchFilters_valueChanged(int value)
 {
-    (void) arg1;
+    m_settings.m_notchFilters = value;
     applySettings();
 }
 
 void DATVDemodGUI::on_chkAllowDrift_clicked()
 {
-     applySettings();
+    m_settings.m_allowDrift = ui->chkAllowDrift->isChecked();
+    applySettings();
 }
 
 void DATVDemodGUI::on_fullScreen_clicked()
@@ -619,36 +600,46 @@ void DATVDemodGUI::on_StreamDataAvailable(int *intPackets, int *intBytes, int *i
 
 void DATVDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
-    (void) value;
+    m_objChannelMarker.setCenterFrequency(value);
+    m_settings.m_centerFrequency = m_objChannelMarker.getCenterFrequency();
     applySettings();
 }
 
 void DATVDemodGUI::on_rfBandwidth_changed(qint64 value)
 {
-    (void) value;
+    m_objChannelMarker.setBandwidth(value);
+    m_settings.m_rfBandwidth = m_objChannelMarker.getBandwidth();
     applySettings();
 }
 
 void DATVDemodGUI::on_chkFastlock_clicked()
 {
+    m_settings.m_fastLock = ui->chkFastlock->isChecked();
     applySettings();
 }
 
 void DATVDemodGUI::on_audioMute_toggled(bool checked)
 {
-    (void) checked;
+    m_settings.m_audioMute = checked;
 	applySettings();
 }
 
 void DATVDemodGUI::on_videoMute_toggled(bool checked)
 {
-    (void) checked;
+    m_settings.m_videoMute = checked;
 	applySettings();
 }
 
 void DATVDemodGUI::on_audioVolume_valueChanged(int value)
 {
     ui->audioVolumeText->setText(tr("%1").arg(value));
+    m_settings.m_audioVolume = value;
+    applySettings();
+}
+
+void DATVDemodGUI::on_udpTS_clicked(bool checked)
+{
+    m_settings.m_udpTS = checked;
     applySettings();
 }
 
@@ -669,7 +660,7 @@ void DATVDemodGUI::on_StreamMetaDataChanged(DataTSMetaData2 *objMetaData)
                 objMetaData->CodecDescription.toStdString().c_str());
         }
 
-        ui->textEdit->setText(strMetaData);
+        ui->streamInfo->setText(strMetaData);
         ui->chkData->setChecked(objMetaData->OK_Data);
         ui->chkTS->setChecked(objMetaData->OK_TransportStream);
         ui->chkVS->setChecked(objMetaData->OK_VideoStream);
@@ -691,19 +682,46 @@ void DATVDemodGUI::displayRRCParameters(bool blnVisible)
 
 void DATVDemodGUI::on_cmbFilter_currentIndexChanged(int index)
 {
-    (void) index;
-    displayRRCParameters((ui->cmbFilter->currentIndex() == 2));
+    if (index == 0) {
+        m_settings.m_filter = DATVDemodSettings::SAMP_LINEAR;
+    } else if (index == 1) {
+        m_settings.m_filter = DATVDemodSettings::SAMP_NEAREST;
+    } else {
+        m_settings.m_filter = DATVDemodSettings::SAMP_RRC;
+    }
+
+    displayRRCParameters(index == 2);
     applySettings();
 }
 
-void DATVDemodGUI::on_spiRollOff_valueChanged(int arg1)
+void DATVDemodGUI::on_spiRollOff_valueChanged(int value)
 {
-    (void) arg1;
+    m_settings.m_rollOff = ((float) value) / 100.0f;
     applySettings();
 }
 
-void DATVDemodGUI::on_spiExcursion_valueChanged(int arg1)
+void DATVDemodGUI::on_spiExcursion_valueChanged(int value)
 {
-    (void) arg1;
+    m_settings.m_excursion = value;
+    applySettings();
+}
+
+void DATVDemodGUI::on_udpTSAddress_editingFinished()
+{
+    m_settings.m_udpTSAddress = ui->udpTSAddress->text();
+    applySettings();
+}
+
+void DATVDemodGUI::on_udpTSPort_editingFinished()
+{
+    bool ok;
+    quint16 udpPort = ui->udpTSPort->text().toInt(&ok);
+
+    if((!ok) || (udpPort < 1024)) {
+        udpPort = 8882;
+    }
+
+    m_settings.m_udpTSPort = udpPort;
+    ui->udpTSPort->setText(tr("%1").arg(udpPort));
     applySettings();
 }

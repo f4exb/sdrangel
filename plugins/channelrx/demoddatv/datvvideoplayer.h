@@ -21,14 +21,22 @@
 
 #include "leansdr/framework.h"
 #include "datvideostream.h"
+#include "datvudpstream.h"
 
 namespace leansdr
 {
 
 template<typename T> struct datvvideoplayer: runnable
 {
-    datvvideoplayer(scheduler *sch, pipebuf<T> &_in, DATVideostream * objVideoStream) :
-        runnable(sch, _in.name), in(_in), m_objVideoStream(objVideoStream)
+    datvvideoplayer(
+            scheduler *sch,
+            pipebuf<T> &_in,
+            DATVideostream *objVideoStream,
+            DATVUDPStream *udpStream) :
+        runnable(sch, _in.name),
+        in(_in),
+        m_objVideoStream(objVideoStream),
+        m_udpStream(udpStream)
     {
     }
 
@@ -40,6 +48,7 @@ template<typename T> struct datvvideoplayer: runnable
             return;
         }
 
+        m_udpStream->pushData((const char *) in.rd(), in.readable());
         int nw = m_objVideoStream->pushData((const char *) in.rd(), size);
 
         if (!nw)
@@ -60,12 +69,17 @@ template<typename T> struct datvvideoplayer: runnable
             return;
         }
 
+        if (nw != size) {
+            fprintf(stderr, "leansdr::datvvideoplayer::run: nw: %d size: %d\n", nw, size);
+        }
+
         in.read(nw / sizeof(T));
     }
 
 private:
     pipereader<T> in;
-    DATVideostream * m_objVideoStream;
+    DATVideostream *m_objVideoStream;
+    DATVUDPStream *m_udpStream;
 };
 
 }

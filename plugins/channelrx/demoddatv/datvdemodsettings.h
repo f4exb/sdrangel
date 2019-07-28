@@ -93,6 +93,9 @@ struct DATVDemodSettings
     int m_excursion;
     int m_audioVolume;
     bool m_videoMute;
+    QString m_udpTSAddress;
+    quint32 m_udpTSPort;
+    bool m_udpTS;
 
     DATVDemodSettings();
     void resetToDefaults();

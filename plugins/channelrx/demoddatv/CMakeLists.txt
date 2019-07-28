@@ -7,6 +7,7 @@ set(datv_SOURCES
     datvdemodplugin.cpp
     datvdemodsettings.cpp
     datvideostream.cpp
+    datvudpstream.cpp
     datvideorender.cpp
     leansdr/dvb.cpp
     leansdr/filtergen.cpp
@@ -23,6 +24,7 @@ set(datv_HEADERS
     datvdemodplugin.h
     datvdemodsettings.h
     datvideostream.h
+    datvudpstream.h
     datvideorender.h
     datvconstellation.h
     datvdvbs2constellation.h

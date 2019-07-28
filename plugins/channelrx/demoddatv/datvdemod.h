@@ -39,6 +39,7 @@ class DownChannelizer;
 #include "datvdvbs2constellation.h"
 #include "datvvideoplayer.h"
 #include "datvideostream.h"
+#include "datvudpstream.h"
 #include "datvideorender.h"
 #include "datvdemodsettings.h"
 
@@ -404,6 +405,7 @@ private:
     TVScreen *m_objRegisteredTVScreen;
     DATVideoRender *m_objRegisteredVideoRender;
     DATVideostream *m_objVideoStream;
+    DATVUDPStream m_udpStream;
     DATVideoRenderThread *m_objRenderThread;
 
     // Audio
