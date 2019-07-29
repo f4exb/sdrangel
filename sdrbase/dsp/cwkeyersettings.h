@@ -32,7 +32,8 @@ public:
         CWNone,
         CWText,
         CWDots,
-        CWDashes
+        CWDashes,
+        CWKeyboard
     } CWMode;
 
     bool m_loop;
@@ -40,6 +41,10 @@ public:
     int m_sampleRate;
     QString m_text;
     int m_wpm;
+    Qt::Key m_dotKey;
+    Qt::KeyboardModifiers m_dotKeyModifiers;
+    Qt::Key m_dashKey;
+    Qt::KeyboardModifiers m_dashKeyModifiers;
 
     CWKeyerSettings();
     void resetToDefaults();

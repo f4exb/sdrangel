@@ -106,6 +106,10 @@ public:
     void setMode(CWKeyerSettings::CWMode mode);
     void setLoop(bool loop) { m_settings.m_loop = loop; }
     const CWKeyerSettings& getSettings() const { return m_settings; }
+    void setDotKey(Qt::Key key) { m_settings.m_dotKey = key; }
+    void setDotKeyModifiers(Qt::KeyboardModifiers keyboardModifiers) { m_settings.m_dotKeyModifiers = keyboardModifiers; }
+    void setDashKey(Qt::Key key) { m_settings.m_dashKey = key; }
+    void setDashKeyModifiers(Qt::KeyboardModifiers keyboardModifiers) { m_settings.m_dashKeyModifiers = keyboardModifiers; }
 
     void reset() { m_keyIambicState = KeySilent; }
 

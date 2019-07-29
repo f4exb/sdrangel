@@ -31,6 +31,10 @@ void CWKeyerSettings::resetToDefaults()
     m_sampleRate = 48000;
     m_text = "";
     m_wpm = 13;
+    m_dotKey = Qt::Key_Period;
+    m_dotKeyModifiers = Qt::NoModifier;
+    m_dashKey = Qt::Key_Minus;
+    m_dashKeyModifiers = Qt::NoModifier;
 }
 
 QByteArray CWKeyerSettings::serialize() const
@@ -42,6 +46,10 @@ QByteArray CWKeyerSettings::serialize() const
     s.writeS32(4, m_sampleRate);
     s.writeString(5, m_text);
     s.writeS32(6, m_wpm);
+    s.writeS32(7, (int) m_dotKey);
+    s.writeU32(8, (unsigned int) m_dotKeyModifiers);
+    s.writeS32(9, (int) m_dashKey);
+    s.writeU32(10, (unsigned int) m_dashKeyModifiers);
 
     return s.final();
 }
@@ -59,6 +67,7 @@ bool CWKeyerSettings::deserialize(const QByteArray& data)
     if (d.getVersion() == 1)
     {
         int intval;
+        unsigned int uintval;
 
         d.readBool(2, &m_loop, false);
         d.readS32(3, &intval, 0);
@@ -66,6 +75,14 @@ bool CWKeyerSettings::deserialize(const QByteArray& data)
         d.readS32(4, &m_sampleRate, 48000);
         d.readString(5, &m_text, "");
         d.readS32(6, &m_wpm, 13);
+        d.readS32(7, &intval, (int) Qt::Key_Period);
+        m_dotKey = (Qt::Key) (intval < 0 ? 0 : intval);
+        d.readU32(8, &uintval, 0);
+        m_dotKeyModifiers = (Qt::KeyboardModifiers) uintval;
+        d.readS32(9, &intval, (int) Qt::Key_Minus);
+        m_dashKey = (Qt::Key) (intval < 0 ? 0 : intval);
+        d.readU32(10, &uintval, 0);
+        m_dashKeyModifiers = (Qt::KeyboardModifiers) uintval;
 
         return true;
     }

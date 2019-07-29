@@ -28,15 +28,17 @@ namespace Ui {
     class CWKeyerGUI;
 }
 
+class QLabel;
 class MessageQueue;
 class CWKeyer;
 class CWKeyerSettings;
+class CommandKeyReceiver;
 
 class SDRGUI_API CWKeyerGUI : public QWidget, public Serializable {
     Q_OBJECT
 
 public:
-    explicit CWKeyerGUI(QWidget* parent = NULL);
+    explicit CWKeyerGUI(QWidget* parent = nullptr);
     ~CWKeyerGUI();
 
     void setBuddies(MessageQueue* messageQueue, CWKeyer* cwKeyer);
@@ -48,15 +50,29 @@ public:
     void displaySettings(const CWKeyerSettings& settings);
 
 private:
+    enum KeyScope
+    {
+        NoKeyScope,
+        DotKeyScope,
+        DashKeyScope
+    };
+
     Ui::CWKeyerGUI* ui;
 
     MessageQueue* m_messageQueue;
     CWKeyer* m_cwKeyer;
     bool m_doApplySettings;
+    CommandKeyReceiver *m_commandKeyReceiver;
+    KeyScope m_keyScope;
+    Qt::Key m_dotKey;
+    Qt::KeyboardModifiers m_dotKeyModifiers;
+    Qt::Key m_dashKey;
+    Qt::KeyboardModifiers m_dashKeyModifiers;
 
     void applySettings();
     void sendSettings();
     void blockApplySettings(bool block);
+    void setKeyLabel(QLabel *label, Qt::Key key, Qt::KeyboardModifiers keyModifiers);
 
 private slots:
     void on_cwTextClear_clicked(bool checked);
@@ -67,6 +83,11 @@ private slots:
     void on_playText_toggled(bool checked);
     void on_playLoopCW_toggled(bool checked);
     void on_playStop_toggled(bool checked);
+    void on_keyDotCapture_toggled(bool checked);
+    void on_keyDashCapture_toggled(bool checked);
+    void on_keyboardKeyer_toggled(bool checked);
+    void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
+    void keyboardKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
 };
 
 

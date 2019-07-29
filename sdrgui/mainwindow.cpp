@@ -1273,20 +1273,30 @@ void MainWindow::on_commandsSave_clicked()
     m_settings.save();
 }
 
+void MainWindow::commandKeysConnect(QObject *object, const char *slot)
+{
+    setFocus();
+    connect(m_commandKeyReceiver, SIGNAL(capturedKey(Qt::Key, Qt::KeyboardModifiers, bool)),
+            object, slot);
+}
+
+void MainWindow::commandKeysDisconnect(QObject *object, const char *slot)
+{
+    disconnect(m_commandKeyReceiver, SIGNAL(capturedKey(Qt::Key, Qt::KeyboardModifiers, bool)),
+            object, slot);
+}
+
 void MainWindow::on_commandKeyboardConnect_toggled(bool checked)
 {
     qDebug("on_commandKeyboardConnect_toggled: %s", checked ? "true" : "false");
 
     if (checked)
     {
-        setFocus();
-        connect(m_commandKeyReceiver, SIGNAL(capturedKey(Qt::Key, Qt::KeyboardModifiers, bool)),
-                this, SLOT(commandKeyPressed(Qt::Key, Qt::KeyboardModifiers, bool)));
+        commandKeysConnect(this, SLOT(commandKeyPressed(Qt::Key, Qt::KeyboardModifiers, bool)));
     }
     else
     {
-        disconnect(m_commandKeyReceiver, SIGNAL(capturedKey(Qt::Key, Qt::KeyboardModifiers, bool)),
-                this, SLOT(commandKeyPressed(Qt::Key, Qt::KeyboardModifiers, bool)));
+        commandKeysDisconnect(this, SLOT(commandKeyPressed(Qt::Key, Qt::KeyboardModifiers, bool)));
     }
 }
 
