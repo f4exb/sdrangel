@@ -100,12 +100,8 @@ SSBMod::SSBMod(DeviceAPI *deviceAPI) :
 	m_magsq = 0.0;
 
 	m_toneNco.setFreq(1000.0, m_audioSampleRate);
-
-	// CW keyer
 	m_cwKeyer.setSampleRate(48000);
-	m_cwKeyer.setWPM(13);
-	m_cwKeyer.setMode(CWKeyerSettings::CWNone);
-
+    m_cwKeyer.reset();
 
     m_audioCompressor.initSimple(
         m_audioSampleRate,
@@ -1021,16 +1017,13 @@ int SSBMod::webapiSettingsPutPatch(
             cwKeyerSettings.m_wpm = apiCwKeyerSettings->getWpm();
         }
 
-        m_cwKeyer.setLoop(cwKeyerSettings.m_loop);
-        m_cwKeyer.setMode(cwKeyerSettings.m_mode);
-        m_cwKeyer.setSampleRate(cwKeyerSettings.m_sampleRate);
-        m_cwKeyer.setText(cwKeyerSettings.m_text);
-        m_cwKeyer.setWPM(cwKeyerSettings.m_wpm);
+        CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+        m_cwKeyer.getInputMessageQueue()->push(msgCwKeyer);
 
         if (m_guiMessageQueue) // forward to GUI if any
         {
-            CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
-            m_guiMessageQueue->push(msgCwKeyer);
+            CWKeyer::MsgConfigureCWKeyer *msgCwKeyerToGUI = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+            m_guiMessageQueue->push(msgCwKeyerToGUI);
         }
     }
 

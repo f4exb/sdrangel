@@ -24,6 +24,7 @@
 
 #include "export.h"
 #include "util/message.h"
+#include "util/messagequeue.h"
 #include "cwkeyersettings.h"
 
 /**
@@ -74,14 +75,14 @@ public:
         { }
     };
 
-    typedef enum
+    enum CWKeyIambicState
     {
         KeySilent,
         KeyDot,
         KeyDash
-    } CWKeyIambicState;
+    };
 
-    typedef enum
+    enum CWTextState
     {
     	TextStart,
 		TextStartChar,
@@ -91,7 +92,7 @@ public:
 		TextWordSpace,
 		TextEnd,
 		TextStop
-    } CWTextState;
+    };
 
     CWKeyer();
     ~CWKeyer();
@@ -99,17 +100,10 @@ public:
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
 
     void setSampleRate(int sampleRate);
-    void setWPM(int wpm);
-    void setText(const QString& text);
-    void setMode(CWKeyerSettings::CWMode mode);
-    void setLoop(bool loop) { m_settings.m_loop = loop; }
     const CWKeyerSettings& getSettings() const { return m_settings; }
-    void setDotKey(Qt::Key key) { m_settings.m_dotKey = key; }
-    void setDotKeyModifiers(Qt::KeyboardModifiers keyboardModifiers) { m_settings.m_dotKeyModifiers = keyboardModifiers; }
-    void setDashKey(Qt::Key key) { m_settings.m_dashKey = key; }
-    void setDashKeyModifiers(Qt::KeyboardModifiers keyboardModifiers) { m_settings.m_dashKeyModifiers = keyboardModifiers; }
 
     void reset() { m_keyIambicState = KeySilent; }
 
@@ -122,6 +116,7 @@ public:
 private:
     QMutex m_mutex;
     CWKeyerSettings m_settings;
+    MessageQueue m_inputMessageQueue;
     int m_dotLength;   //!< dot length in samples
     int m_textPointer;
     int m_elementPointer;
@@ -139,8 +134,13 @@ private:
 
     static const signed char m_asciiToMorse[128][7];
 
+    void applySettings(const CWKeyerSettings& settings, bool force = false);
+    bool handleMessage(const Message& cmd);
     void nextStateIambic();
     void nextStateText();
+
+private slots:
+    void handleInputMessages();
 };
 
 #endif /* SDRBASE_DSP_CWKEYER_H_ */

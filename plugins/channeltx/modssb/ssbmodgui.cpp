@@ -136,7 +136,8 @@ bool SSBModGUI::handleMessage(const Message& message)
     else if (CWKeyer::MsgConfigureCWKeyer::match(message))
     {
         const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) message;
-        ui->cwKeyerGUI->displaySettings(cfg.getSettings());
+        ui->cwKeyerGUI->setSettings(cfg.getSettings());
+        ui->cwKeyerGUI->displaySettings();
         return true;
     }
     else
@@ -430,7 +431,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
 
-    ui->cwKeyerGUI->setBuddies(m_ssbMod->getInputMessageQueue(), m_ssbMod->getCWKeyer());
+    ui->cwKeyerGUI->setCWKeyer(m_ssbMod->getCWKeyer());
     ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
     m_settings.setChannelMarker(&m_channelMarker);

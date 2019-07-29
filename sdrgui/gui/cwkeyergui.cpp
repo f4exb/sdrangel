@@ -30,7 +30,6 @@
 CWKeyerGUI::CWKeyerGUI(QWidget* parent) :
     QWidget(parent),
     ui(new Ui::CWKeyerGUI),
-    m_messageQueue(nullptr),
     m_cwKeyer(nullptr),
     m_doApplySettings(true),
     m_keyScope(NoKeyScope)
@@ -48,58 +47,36 @@ CWKeyerGUI::~CWKeyerGUI()
     delete ui;
 }
 
-void CWKeyerGUI::setBuddies(MessageQueue* messageQueue, CWKeyer* cwKeyer)
+void CWKeyerGUI::setCWKeyer(CWKeyer* cwKeyer)
 {
-    m_messageQueue = messageQueue;
     m_cwKeyer = cwKeyer;
-    applySettings();
-    sendSettings();
-    displaySettings(m_cwKeyer->getSettings());
+    setSettings(cwKeyer->getSettings());
+	displaySettings();
 }
 
 void CWKeyerGUI::resetToDefaults()
 {
-    ui->cwTextEdit->setText("");
-    ui->cwSpeed->setValue(13);
+    m_settings.resetToDefaults();
+    displaySettings();
+    applySettings(true);
 }
 
 QByteArray CWKeyerGUI::serialize() const
 {
-    SimpleSerializer s(1);
-
-    s.writeString(1, ui->cwTextEdit->text());
-    s.writeS32(2, ui->cwSpeed->value());
-
-    return s.final();
+    return m_settings.serialize();
 }
 
 bool CWKeyerGUI::deserialize(const QByteArray& data)
 {
-    SimpleDeserializer d(data);
-
-    if(!d.isValid())
+    if (m_settings.deserialize(data))
     {
-        resetToDefaults();
-        return false;
-    }
-
-    if(d.getVersion() == 1)
-    {
-        QString aString;
-        int aValue;
-
-        d.readString(1, &aString, "");
-        ui->cwTextEdit->setText(aString);
-        d.readS32(2, &aValue, 13);
-        ui->cwSpeed->setValue(aValue);
-
-        applySettings();
-        sendSettings();
-
+        displaySettings();
+        applySettings(true);
         return true;
     }
     else
     {
+        resetToDefaults();
         return false;
     }
 }
@@ -110,27 +87,21 @@ void CWKeyerGUI::on_cwTextClear_clicked(bool checked)
 {
     (void) checked;
     ui->cwTextEdit->clear();
-    m_cwKeyer->setText("");
+    m_settings.m_text = "";
+    applySettings();
 }
 
 void CWKeyerGUI::on_cwTextEdit_editingFinished()
 {
-    if (m_doApplySettings)
-    {
-        m_cwKeyer->setText(ui->cwTextEdit->text());
-        sendSettings();
-    }
+    m_settings.m_text = ui->cwTextEdit->text();
+    applySettings();
 }
 
 void CWKeyerGUI::on_cwSpeed_valueChanged(int value)
 {
     ui->cwSpeedText->setText(QString("%1").arg(value));
-
-    if (m_doApplySettings)
-    {
-        m_cwKeyer->setWPM(value);
-        sendSettings();
-    }
+    m_settings.m_wpm = value;
+    applySettings();
 }
 
 void CWKeyerGUI::on_playDots_toggled(bool checked)
@@ -139,12 +110,8 @@ void CWKeyerGUI::on_playDots_toggled(bool checked)
     ui->playDashes->setEnabled(!checked);
     ui->playText->setEnabled(!checked);
     ui->keyboardKeyer->setEnabled(!checked);
-
-    if (m_doApplySettings)
-    {
-        m_cwKeyer->setMode(checked ? CWKeyerSettings::CWDots : CWKeyerSettings::CWNone);
-        sendSettings();
-    }
+    m_settings.m_mode = checked ? CWKeyerSettings::CWDots : CWKeyerSettings::CWNone;
+    applySettings();
 }
 
 void CWKeyerGUI::on_playDashes_toggled(bool checked)
@@ -153,12 +120,8 @@ void CWKeyerGUI::on_playDashes_toggled(bool checked)
     //ui->playDashes->setEnabled(!checked);
     ui->playText->setEnabled(!checked);
     ui->keyboardKeyer->setEnabled(!checked);
-
-    if (m_doApplySettings)
-    {
-        m_cwKeyer->setMode(checked ? CWKeyerSettings::CWDashes : CWKeyerSettings::CWNone);
-        sendSettings();
-    }
+    m_settings.m_mode = checked ? CWKeyerSettings::CWDashes : CWKeyerSettings::CWNone;
+    applySettings();
 }
 
 void CWKeyerGUI::on_playText_toggled(bool checked)
@@ -168,26 +131,20 @@ void CWKeyerGUI::on_playText_toggled(bool checked)
     //ui->playText->setEnabled(!checked);
     ui->keyboardKeyer->setEnabled(!checked);
 
-    if (m_doApplySettings)
-    {
-        m_cwKeyer->setMode(checked ? CWKeyerSettings::CWText : CWKeyerSettings::CWNone);
-        sendSettings();
-    }
-
     if (checked) {
         ui->playStop->setChecked(true);
     } else {
         ui->playStop->setChecked(false);
     }
+
+    m_settings.m_mode = checked ? CWKeyerSettings::CWText : CWKeyerSettings::CWNone;
+    applySettings();
 }
 
 void CWKeyerGUI::on_playLoopCW_toggled(bool checked)
 {
-    if (m_doApplySettings)
-    {
-        m_cwKeyer->setLoop(checked);
-        sendSettings();
-    }
+    m_settings.m_loop = checked;
+    applySettings();
 }
 
 void CWKeyerGUI::on_playStop_toggled(bool checked)
@@ -258,36 +215,25 @@ void CWKeyerGUI::on_keyDashCapture_toggled(bool checked)
 void CWKeyerGUI::commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release)
 {
     (void) release;
-//    qDebug("CWKeyerGUI::commandKeyPressed: key: %x", m_key);
-//    qDebug("CWKeyerGUI::commandKeyPressed: has modifiers: %x", QFlags<Qt::KeyboardModifier>::Int(keyModifiers));
+    // qDebug("CWKeyerGUI::commandKeyPressed: key scope: %d", (int) m_keyScope);
+    // qDebug("CWKeyerGUI::commandKeyPressed: key: %x", key);
+    // qDebug("CWKeyerGUI::commandKeyPressed: has modifiers: %x", QFlags<Qt::KeyboardModifier>::Int(keyModifiers));
 
     if (m_keyScope == DotKeyScope)
     {
-        m_dotKey = key;
-        m_dotKeyModifiers = keyModifiers;
         setKeyLabel(ui->keyDotLabel, key, keyModifiers);
         ui->keyDotCapture->setChecked(false);
-
-        if (m_doApplySettings)
-        {
-            m_cwKeyer->setDotKey(key);
-            m_cwKeyer->setDotKeyModifiers(keyModifiers);
-            sendSettings();
-        }
+        m_settings.m_dotKey = key;
+        m_settings.m_dotKeyModifiers = keyModifiers;
+        applySettings();
     }
     else if (m_keyScope == DashKeyScope)
     {
-        m_dashKey = key;
-        m_dashKeyModifiers = keyModifiers;
         setKeyLabel(ui->keyDashLabel, key, keyModifiers);
         ui->keyDashCapture->setChecked(false);
-
-        if (m_doApplySettings)
-        {
-            m_cwKeyer->setDashKey(key);
-            m_cwKeyer->setDashKeyModifiers(keyModifiers);
-            sendSettings();
-        }
+        m_settings.m_dashKey = key;
+        m_settings.m_dashKeyModifiers = keyModifiers;
+        applySettings();
     }
 
     m_commandKeyReceiver->setRelease(true);
@@ -299,12 +245,8 @@ void CWKeyerGUI::on_keyboardKeyer_toggled(bool checked)
     ui->playDots->setEnabled(!checked);   // block or release other source inputs
     ui->playDashes->setEnabled(!checked);
     ui->playText->setEnabled(!checked);
-
-    if (m_doApplySettings)
-    {
-        m_cwKeyer->setMode(checked ? CWKeyerSettings::CWKeyboard : CWKeyerSettings::CWNone);
-        sendSettings();
-    }
+    m_settings.m_mode = checked ? CWKeyerSettings::CWKeyboard : CWKeyerSettings::CWNone;
+    applySettings();
 
     if (checked) {
         MainWindow::getInstance()->commandKeysConnect(this, SLOT(keyboardKeyPressed(Qt::Key, Qt::KeyboardModifiers, bool)));
@@ -329,43 +271,39 @@ void CWKeyerGUI::keyboardKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifi
 
 // === End SLOTS ==============================================================
 
-void CWKeyerGUI::applySettings()
+void CWKeyerGUI::applySettings(bool force)
 {
-    int value;
-
-    m_cwKeyer->setText(ui->cwTextEdit->text());
-
-    value = ui->cwSpeed->value();
-    ui->cwSpeedText->setText(QString("%1").arg(value));
-    m_cwKeyer->setWPM(value);
-
-    m_cwKeyer->setDotKey(m_dotKey);
-    m_cwKeyer->setDotKeyModifiers(m_dotKeyModifiers);
-    m_cwKeyer->setDashKey(m_dashKey);
-    m_cwKeyer->setDashKeyModifiers(m_dashKeyModifiers);
+    if (m_doApplySettings && m_cwKeyer)
+    {
+        CWKeyer::MsgConfigureCWKeyer* message = CWKeyer::MsgConfigureCWKeyer::create(m_settings, force);
+        m_cwKeyer->getInputMessageQueue()->push(message);
+    }
 }
 
-void CWKeyerGUI::displaySettings(const CWKeyerSettings& settings)
+void CWKeyerGUI::displaySettings()
 {
     blockApplySettings(true);
 
-    ui->playLoopCW->setChecked(settings.m_loop);
+    ui->playLoopCW->setChecked(m_settings.m_loop);
 
-    ui->playDots->setEnabled((settings.m_mode == CWKeyerSettings::CWDots) || (settings.m_mode == CWKeyerSettings::CWNone));
-    ui->playDots->setChecked(settings.m_mode == CWKeyerSettings::CWDots);
+    ui->playDots->setEnabled((m_settings.m_mode == CWKeyerSettings::CWDots) || (m_settings.m_mode == CWKeyerSettings::CWNone));
+    ui->playDots->setChecked(m_settings.m_mode == CWKeyerSettings::CWDots);
 
-    ui->playDashes->setEnabled((settings.m_mode == CWKeyerSettings::CWDashes) || (settings.m_mode == CWKeyerSettings::CWNone));
-    ui->playDashes->setChecked(settings.m_mode == CWKeyerSettings::CWDashes);
+    ui->playDashes->setEnabled((m_settings.m_mode == CWKeyerSettings::CWDashes) || (m_settings.m_mode == CWKeyerSettings::CWNone));
+    ui->playDashes->setChecked(m_settings.m_mode == CWKeyerSettings::CWDashes);
 
-    ui->playText->setEnabled((settings.m_mode == CWKeyerSettings::CWText) || (settings.m_mode == CWKeyerSettings::CWNone));
-    ui->playText->setChecked(settings.m_mode == CWKeyerSettings::CWText);
+    ui->playText->setEnabled((m_settings.m_mode == CWKeyerSettings::CWText) || (m_settings.m_mode == CWKeyerSettings::CWNone));
+    ui->playText->setChecked(m_settings.m_mode == CWKeyerSettings::CWText);
 
-    ui->cwTextEdit->setText(settings.m_text);
-    ui->cwSpeed->setValue(settings.m_wpm);
-    ui->cwSpeedText->setText(QString("%1").arg(settings.m_wpm));
+    ui->keyboardKeyer->setEnabled((m_settings.m_mode == CWKeyerSettings::CWKeyboard) || (m_settings.m_mode == CWKeyerSettings::CWNone));
+    ui->keyboardKeyer->setChecked(m_settings.m_mode == CWKeyerSettings::CWKeyboard);
 
-    setKeyLabel(ui->keyDotLabel, settings.m_dotKey, settings.m_dotKeyModifiers);
-    setKeyLabel(ui->keyDashLabel, settings.m_dashKey, settings.m_dashKeyModifiers);
+    ui->cwTextEdit->setText(m_settings.m_text);
+    ui->cwSpeed->setValue(m_settings.m_wpm);
+    ui->cwSpeedText->setText(QString("%1").arg(m_settings.m_wpm));
+
+    setKeyLabel(ui->keyDotLabel, m_settings.m_dotKey, m_settings.m_dotKeyModifiers);
+    setKeyLabel(ui->keyDashLabel, m_settings.m_dashKey, m_settings.m_dashKeyModifiers);
 
     blockApplySettings(false);
 }
@@ -391,13 +329,4 @@ void CWKeyerGUI::setKeyLabel(QLabel *label, Qt::Key key, Qt::KeyboardModifiers k
 void CWKeyerGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
-}
-
-void CWKeyerGUI::sendSettings()
-{
-    if (m_cwKeyer && m_messageQueue)
-    {
-        CWKeyer::MsgConfigureCWKeyer *msg = CWKeyer::MsgConfigureCWKeyer::create(m_cwKeyer->getSettings(), false);
-        m_messageQueue->push(msg);
-    }
 }

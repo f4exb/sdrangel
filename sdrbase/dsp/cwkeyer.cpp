@@ -175,7 +175,8 @@ CWKeyer::CWKeyer() :
     m_keyIambicState(KeySilent),
 	m_textState(TextStart)
 {
-    setWPM(13);
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    applySettings(m_settings, true);
 }
 
 CWKeyer::~CWKeyer()
@@ -184,55 +185,10 @@ CWKeyer::~CWKeyer()
 
 void CWKeyer::setSampleRate(int sampleRate)
 {
-    m_mutex.lock();
-    m_settings.m_sampleRate = sampleRate;
-    m_mutex.unlock();
-    setWPM(m_settings.m_wpm);
-}
-
-void CWKeyer::setWPM(int wpm)
-{
-    if ((wpm > 0) && (wpm < 27))
-    {
-        QMutexLocker mutexLocker(&m_mutex);
-        m_dotLength = (int) (0.24f * m_settings.m_sampleRate * (5.0f / wpm));
-        m_settings.m_wpm = wpm;
-        m_cwSmoother.setNbFadeSamples(m_dotLength/5); // 20% the dot time
-    }
-}
-
-void CWKeyer::setText(const QString& text)
-{
-    QMutexLocker mutexLocker(&m_mutex);
-    m_settings.m_text = text;
-    m_textState = TextStart;
-}
-
-void CWKeyer::setMode(CWKeyerSettings::CWMode mode)
-{
-    if (mode != m_settings.m_mode)
-    {
-        QMutexLocker mutexLocker(&m_mutex);
-
-        if (mode == CWKeyerSettings::CWText)
-        {
-            m_textState = TextStart;
-        }
-        else if (mode == CWKeyerSettings::CWDots)
-        {
-            m_dot = true;
-            m_dash = false;
-            m_keyIambicState = KeySilent;
-        }
-        else if (mode == CWKeyerSettings::CWDashes)
-        {
-            m_dot = false;
-            m_dash = true;
-            m_keyIambicState = KeySilent;
-        }
-
-        m_settings.m_mode = mode;
-    }
+    CWKeyerSettings settings = m_settings;
+    settings.m_sampleRate = sampleRate;
+    MsgConfigureCWKeyer *msg = MsgConfigureCWKeyer::create(settings, false);
+    m_inputMessageQueue.push(msg);
 }
 
 int CWKeyer::getSample()
@@ -532,4 +488,72 @@ bool CWSmoother::getFadeSample(bool on, float& sample)
             return false;
         }
     }
+}
+
+bool CWKeyer::handleMessage(const Message& cmd)
+{
+    if (MsgConfigureCWKeyer::match(cmd))
+    {
+        MsgConfigureCWKeyer& cfg = (MsgConfigureCWKeyer&) cmd;
+        qDebug() << "CWKeyer::handleMessage: MsgConfigureCWKeyer";
+
+        applySettings(cfg.getSettings(), cfg.getForce());
+
+        return true;
+    }
+
+    return true;
+}
+
+void CWKeyer::handleInputMessages()
+{
+	Message* message;
+
+	while ((message = m_inputMessageQueue.pop()) != 0)
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
+}
+
+void CWKeyer::applySettings(const CWKeyerSettings& settings, bool force)
+{
+    if ((m_settings.m_wpm != settings.m_wpm)
+     || (m_settings.m_sampleRate != settings.m_sampleRate) || force)
+    {
+        QMutexLocker mutexLocker(&m_mutex);
+        m_dotLength = (int) (0.24f * settings.m_sampleRate * (5.0f / settings.m_wpm));
+        m_cwSmoother.setNbFadeSamples(m_dotLength/5); // 20% the dot time
+    }
+
+    if ((m_settings.m_mode != settings.m_mode) || force)
+    {
+        QMutexLocker mutexLocker(&m_mutex);
+
+        if (settings.m_mode == CWKeyerSettings::CWText)
+        {
+            m_textState = TextStart;
+        }
+        else if (settings.m_mode == CWKeyerSettings::CWDots)
+        {
+            m_dot = true;
+            m_dash = false;
+            m_keyIambicState = KeySilent;
+        }
+        else if (settings.m_mode == CWKeyerSettings::CWDashes)
+        {
+            m_dot = false;
+            m_dash = true;
+            m_keyIambicState = KeySilent;
+        }
+    }
+
+    if ((m_settings.m_text != settings.m_text) || force)
+    {
+        QMutexLocker mutexLocker(&m_mutex);
+        m_textState = TextStart;
+    }
+
+    m_settings = settings;
 }

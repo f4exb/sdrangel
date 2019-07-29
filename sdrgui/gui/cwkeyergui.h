@@ -23,6 +23,7 @@
 #include "dsp/dsptypes.h"
 #include "export.h"
 #include "settings/serializable.h"
+#include "dsp/cwkeyersettings.h"
 
 namespace Ui {
     class CWKeyerGUI;
@@ -41,13 +42,14 @@ public:
     explicit CWKeyerGUI(QWidget* parent = nullptr);
     ~CWKeyerGUI();
 
-    void setBuddies(MessageQueue* messageQueue, CWKeyer* cwKeyer);
+    void setCWKeyer(CWKeyer* cwKeyer);
 
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 
-    void displaySettings(const CWKeyerSettings& settings);
+    void setSettings(const CWKeyerSettings& settings) { m_settings = settings; }
+    void displaySettings();
 
 private:
     enum KeyScope
@@ -59,18 +61,13 @@ private:
 
     Ui::CWKeyerGUI* ui;
 
-    MessageQueue* m_messageQueue;
     CWKeyer* m_cwKeyer;
+    CWKeyerSettings m_settings;
     bool m_doApplySettings;
     CommandKeyReceiver *m_commandKeyReceiver;
     KeyScope m_keyScope;
-    Qt::Key m_dotKey;
-    Qt::KeyboardModifiers m_dotKeyModifiers;
-    Qt::Key m_dashKey;
-    Qt::KeyboardModifiers m_dashKeyModifiers;
 
-    void applySettings();
-    void sendSettings();
+    void applySettings(bool force = false);
     void blockApplySettings(bool block);
     void setKeyLabel(QLabel *label, Qt::Key key, Qt::KeyboardModifiers keyModifiers);
 

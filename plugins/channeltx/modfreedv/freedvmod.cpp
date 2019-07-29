@@ -104,11 +104,8 @@ FreeDVMod::FreeDVMod(DeviceAPI *deviceAPI) :
 	m_magsq = 0.0;
 
 	m_toneNco.setFreq(1000.0, m_inputSampleRate);
-
-	// CW keyer
-	m_cwKeyer.setSampleRate(m_inputSampleRate);
-	m_cwKeyer.setWPM(13);
-	m_cwKeyer.setMode(CWKeyerSettings::CWNone);
+    m_cwKeyer.setSampleRate(m_inputSampleRate);
+    m_cwKeyer.reset();
 
     m_channelizer = new UpChannelizer(this);
     m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
@@ -933,16 +930,13 @@ int FreeDVMod::webapiSettingsPutPatch(
             cwKeyerSettings.m_wpm = apiCwKeyerSettings->getWpm();
         }
 
-        m_cwKeyer.setLoop(cwKeyerSettings.m_loop);
-        m_cwKeyer.setMode(cwKeyerSettings.m_mode);
-        //m_cwKeyer.setSampleRate(cwKeyerSettings.m_sampleRate);
-        m_cwKeyer.setText(cwKeyerSettings.m_text);
-        m_cwKeyer.setWPM(cwKeyerSettings.m_wpm);
+        CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+        m_cwKeyer.getInputMessageQueue()->push(msgCwKeyer);
 
         if (m_guiMessageQueue) // forward to GUI if any
         {
-            CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
-            m_guiMessageQueue->push(msgCwKeyer);
+            CWKeyer::MsgConfigureCWKeyer *msgCwKeyerToGUI = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+            m_guiMessageQueue->push(msgCwKeyerToGUI);
         }
     }
 

@@ -119,7 +119,8 @@ bool AMModGUI::handleMessage(const Message& message)
     else if (CWKeyer::MsgConfigureCWKeyer::match(message))
     {
         const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) message;
-        ui->cwKeyerGUI->displaySettings(cfg.getSettings());
+        ui->cwKeyerGUI->setSettings(cfg.getSettings());
+        ui->cwKeyerGUI->displaySettings();
         return true;
     }
     else
@@ -361,7 +362,7 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampl
     ui->morseKeyer->setChecked(false);
     ui->mic->setChecked(false);
 
-    ui->cwKeyerGUI->setBuddies(m_amMod->getInputMessageQueue(), m_amMod->getCWKeyer());
+    ui->cwKeyerGUI->setCWKeyer(m_amMod->getCWKeyer());
 
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 	connect(m_amMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
@@ -384,7 +385,6 @@ void AMModGUI::blockApplySettings(bool block)
 
 void AMModGUI::applySettings(bool force)
 {
-    (void) force;
 	if (m_doApplySettings)
 	{
 		setTitleColor(m_channelMarker.getColor());

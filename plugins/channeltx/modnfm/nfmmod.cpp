@@ -81,11 +81,8 @@ NFMMod::NFMMod(DeviceAPI *deviceAPI) :
     m_lowpass.create(301, m_audioSampleRate, 250.0);
 	m_toneNco.setFreq(1000.0, m_audioSampleRate);
 	m_ctcssNco.setFreq(88.5, m_audioSampleRate);
-
-    // CW keyer
     m_cwKeyer.setSampleRate(m_audioSampleRate);
-    m_cwKeyer.setWPM(13);
-    m_cwKeyer.setMode(CWKeyerSettings::CWNone);
+    m_cwKeyer.reset();
 
     applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
@@ -724,16 +721,13 @@ int NFMMod::webapiSettingsPutPatch(
             cwKeyerSettings.m_wpm = apiCwKeyerSettings->getWpm();
         }
 
-        m_cwKeyer.setLoop(cwKeyerSettings.m_loop);
-        m_cwKeyer.setMode(cwKeyerSettings.m_mode);
-        m_cwKeyer.setSampleRate(cwKeyerSettings.m_sampleRate);
-        m_cwKeyer.setText(cwKeyerSettings.m_text);
-        m_cwKeyer.setWPM(cwKeyerSettings.m_wpm);
+        CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+        m_cwKeyer.getInputMessageQueue()->push(msgCwKeyer);
 
         if (m_guiMessageQueue) // forward to GUI if any
         {
-            CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
-            m_guiMessageQueue->push(msgCwKeyer);
+            CWKeyer::MsgConfigureCWKeyer *msgCwKeyerToGUI = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+            m_guiMessageQueue->push(msgCwKeyerToGUI);
         }
     }
 
