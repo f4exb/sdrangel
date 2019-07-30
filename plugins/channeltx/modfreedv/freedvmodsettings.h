@@ -55,6 +55,8 @@ struct FreeDVModSettings
     QString m_title;
     FreeDVModInputAF m_modAFInput;
     QString m_audioDeviceName;
+    QString m_feedbackAudioDeviceName; //!< This is the audio device you send the audio samples to for audio feedback
+    float m_feedbackVolumeFactor;
     FreeDVMode m_freeDVMode;
     bool m_gaugeInputElseModem; //!< Volume gauge shows speech input level else modem level
 

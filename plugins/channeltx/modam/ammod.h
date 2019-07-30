@@ -273,7 +273,6 @@ private:
     int m_outputSampleRate;
     int m_inputFrequencyOffset;
     AMModSettings m_settings;
-    quint32 m_audioSampleRate;
 
     NCO m_carrierNco;
     NCOF m_toneNco;
@@ -286,10 +285,16 @@ private:
     double m_magsq;
     MovingAverageUtil<double, double, 16> m_movingAverage;
 
+    quint32 m_audioSampleRate;
     AudioVector m_audioBuffer;
     uint m_audioBufferFill;
-
     AudioFifo m_audioFifo;
+
+    quint32 m_feedbackAudioSampleRate;
+    AudioVector m_feedbackAudioBuffer;
+    uint m_feedbackAudioBufferFill;
+    AudioFifo m_feedbackAudioFifo;
+
     SampleVector m_sampleBuffer;
     QMutex m_settingsMutex;
 

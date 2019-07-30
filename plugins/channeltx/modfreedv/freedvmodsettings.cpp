@@ -42,6 +42,8 @@ void FreeDVModSettings::resetToDefaults()
     m_title = "FreeDV Modulator";
     m_modAFInput = FreeDVModInputAF::FreeDVModInputNone;
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_feedbackAudioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_feedbackVolumeFactor = 1.0f;
     m_freeDVMode = FreeDVMode::FreeDVMode2400A;
     m_gaugeInputElseModem = false;
     m_useReverseAPI = false;
@@ -84,6 +86,8 @@ QByteArray FreeDVModSettings::serialize() const
     s.writeU32(24, m_reverseAPIPort);
     s.writeU32(25, m_reverseAPIDeviceIndex);
     s.writeU32(26, m_reverseAPIChannelIndex);
+    s.writeString(27, m_feedbackAudioDeviceName);
+    s.writeReal(28, m_feedbackVolumeFactor);
 
     return s.final();
 }
@@ -162,6 +166,8 @@ bool FreeDVModSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(26, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readString(27, &m_feedbackAudioDeviceName, AudioDeviceManager::m_defaultDeviceName);
+        d.readReal(28, &m_feedbackVolumeFactor, 1.0);
 
         return true;
     }

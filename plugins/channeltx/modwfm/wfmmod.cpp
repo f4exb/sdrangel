@@ -60,6 +60,7 @@ WFMMod::WFMMod(DeviceAPI *deviceAPI) :
     m_inputFrequencyOffset(0),
 	m_modPhasor(0.0f),
     m_audioFifo(4800),
+    m_feedbackAudioFifo(4800),
 	m_settingsMutex(QMutex::Recursive),
     m_fileSize(0),
 	m_recordLength(0),
@@ -79,10 +80,16 @@ WFMMod::WFMMod(DeviceAPI *deviceAPI) :
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 
+	m_feedbackAudioBuffer.resize(1<<14);
+	m_feedbackAudioBufferFill = 0;
+
 	m_magsq = 0.0;
 
 	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo, getInputMessageQueue());
     m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getInputSampleRate();
+
+    DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_feedbackAudioFifo, getInputMessageQueue());
+    m_feedbackAudioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
 
 	m_toneNcoRF.setFreq(1000.0, m_outputSampleRate);
     m_cwKeyer.setSampleRate(m_outputSampleRate);
@@ -104,6 +111,7 @@ WFMMod::~WFMMod()
 {
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
+    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_feedbackAudioFifo);
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(&m_audioFifo);
     m_deviceAPI->removeChannelSourceAPI(this);
     m_deviceAPI->removeChannelSource(m_threadedChannelizer);

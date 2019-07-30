@@ -57,6 +57,7 @@ AMMod::AMMod(DeviceAPI *deviceAPI) :
     m_outputSampleRate(48000),
     m_inputFrequencyOffset(0),
     m_audioFifo(4800),
+    m_feedbackAudioFifo(4800),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
 	m_recordLength(0),
@@ -70,10 +71,17 @@ AMMod::AMMod(DeviceAPI *deviceAPI) :
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 
+	m_feedbackAudioBuffer.resize(1<<14);
+	m_feedbackAudioBufferFill = 0;
+
 	m_magsq = 0.0;
 
 	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo, getInputMessageQueue());
 	m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getInputSampleRate();
+
+    DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_feedbackAudioFifo, getInputMessageQueue());
+    m_feedbackAudioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
+
 	m_toneNco.setFreq(1000.0, m_audioSampleRate);
     m_cwKeyer.setSampleRate(m_audioSampleRate);
     m_cwKeyer.reset();
@@ -98,6 +106,7 @@ AMMod::~AMMod()
     m_deviceAPI->removeChannelSource(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_feedbackAudioFifo);
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(&m_audioFifo);
 }
 

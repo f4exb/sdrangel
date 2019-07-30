@@ -55,7 +55,9 @@ struct SSBModSettings
 
     QString m_title;
     SSBModInputAF m_modAFInput;
-    QString m_audioDeviceName;
+    QString m_audioDeviceName;         //!< This is the audio device you get the audio samples from
+    QString m_feedbackAudioDeviceName; //!< This is the audio device you send the audio samples to for audio feedback
+    float m_feedbackVolumeFactor;
 
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;

@@ -278,7 +278,6 @@ private:
     int m_outputSampleRate;
     int m_inputFrequencyOffset;
     SSBModSettings m_settings;
-    quint32 m_audioSampleRate;
 
     NCOF m_carrierNco;
     NCOF m_toneNco;
@@ -305,10 +304,16 @@ private:
     double m_magsq;
     MovingAverageUtil<double, double, 16> m_movingAverage;
 
+    quint32 m_audioSampleRate;
     AudioVector m_audioBuffer;
     uint m_audioBufferFill;
-
     AudioFifo m_audioFifo;
+
+    quint32 m_feedbackAudioSampleRate;
+    AudioVector m_feedbackAudioBuffer;
+    uint m_feedbackAudioBufferFill;
+    AudioFifo m_feedbackAudioFifo;
+
     QMutex m_settingsMutex;
 
     std::ifstream m_ifstream;
