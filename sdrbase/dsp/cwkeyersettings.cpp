@@ -31,6 +31,7 @@ void CWKeyerSettings::resetToDefaults()
     m_sampleRate = 48000;
     m_text = "";
     m_wpm = 13;
+    m_keyboardIambic = true;
     m_dotKey = Qt::Key_Period;
     m_dotKeyModifiers = Qt::NoModifier;
     m_dashKey = Qt::Key_Minus;
@@ -50,6 +51,7 @@ QByteArray CWKeyerSettings::serialize() const
     s.writeU32(8, (unsigned int) m_dotKeyModifiers);
     s.writeS32(9, (int) m_dashKey);
     s.writeU32(10, (unsigned int) m_dashKeyModifiers);
+    s.writeBool(11, m_keyboardIambic);
 
     return s.final();
 }
@@ -83,6 +85,7 @@ bool CWKeyerSettings::deserialize(const QByteArray& data)
         m_dashKey = (Qt::Key) (intval < 0 ? 0 : intval);
         d.readU32(10, &uintval, 0);
         m_dashKeyModifiers = (Qt::KeyboardModifiers) uintval;
+        d.readBool(11, &m_keyboardIambic, true);
 
         return true;
     }

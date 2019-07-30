@@ -80,6 +80,7 @@ private slots:
     void on_playText_toggled(bool checked);
     void on_playLoopCW_toggled(bool checked);
     void on_playStop_toggled(bool checked);
+    void on_keyingStyle_toggled(bool checked);
     void on_keyDotCapture_toggled(bool checked);
     void on_keyDashCapture_toggled(bool checked);
     void on_keyboardKeyer_toggled(bool checked);

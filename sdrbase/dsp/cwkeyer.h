@@ -112,6 +112,9 @@ public:
     bool eom();
     void resetText() { m_textState = TextStart; }
     void stopText() { m_textState = TextStop; }
+    void setKeyboardDots();
+    void setKeyboardDashes();
+    void setKeyboardSilence();
 
 private:
     QMutex m_mutex;

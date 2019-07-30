@@ -156,6 +156,12 @@ void CWKeyerGUI::on_playStop_toggled(bool checked)
     }
 }
 
+void CWKeyerGUI::on_keyingStyle_toggled(bool checked)
+{
+    m_settings.m_keyboardIambic = !checked;
+    applySettings();
+}
+
 void CWKeyerGUI::on_keyDotCapture_toggled(bool checked)
 {
     if (checked && ui->keyDashCapture->isChecked())
@@ -262,10 +268,20 @@ void CWKeyerGUI::keyboardKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifi
     if ((key == settings.m_dotKey) && (keyModifiers == settings.m_dotKeyModifiers))
     {
         qDebug("CWKeyerGUI::keyboardKeyPressed: dot %s", release ? "released" : "pressed");
+        if (release) {
+            m_cwKeyer->setKeyboardSilence();
+        } else {
+            m_cwKeyer->setKeyboardDots();
+        }
     }
     else if ((key == settings.m_dashKey) && (keyModifiers == settings.m_dashKeyModifiers))
     {
         qDebug("CWKeyerGUI::keyboardKeyPressed: dash %s", release ? "released" : "pressed");
+        if (release) {
+            m_cwKeyer->setKeyboardSilence();
+        } else {
+            m_cwKeyer->setKeyboardDashes();
+        }
     }
 }
 
@@ -301,6 +317,7 @@ void CWKeyerGUI::displaySettings()
     ui->cwTextEdit->setText(m_settings.m_text);
     ui->cwSpeed->setValue(m_settings.m_wpm);
     ui->cwSpeedText->setText(QString("%1").arg(m_settings.m_wpm));
+    ui->keyingStyle->setChecked(!m_settings.m_keyboardIambic);
 
     setKeyLabel(ui->keyDotLabel, m_settings.m_dotKey, m_settings.m_dotKeyModifiers);
     setKeyLabel(ui->keyDashLabel, m_settings.m_dashKey, m_settings.m_dashKeyModifiers);

@@ -205,6 +205,18 @@ int CWKeyer::getSample()
         nextStateIambic();
         return m_key ? 1 : 0;
     }
+    else if (m_settings.m_mode == CWKeyerSettings::CWKeyboard)
+    {
+        if (m_settings.m_keyboardIambic)
+        {
+            nextStateIambic();
+            return m_key ? 1 : 0;
+        }
+        else
+        {
+            return (m_dot || m_dash) ? 1 : 0;
+        }
+    }
     else
     {
     	return 0;
@@ -408,6 +420,27 @@ bool CWKeyer::eom()
     return !(m_textPointer < m_settings.m_text.length());
 }
 
+void CWKeyer::setKeyboardDots()
+{
+    m_dot = true;
+    m_dash = false;
+    m_keyIambicState = KeySilent;
+}
+
+void CWKeyer::setKeyboardDashes()
+{
+    m_dot = false;
+    m_dash = true;
+    m_keyIambicState = KeySilent;
+}
+
+void CWKeyer::setKeyboardSilence()
+{
+    m_dot = false;
+    m_dash = false;
+    m_keyIambicState = KeySilent;
+}
+
 CWSmoother::CWSmoother() :
         m_fadeInCounter(0),
         m_fadeOutCounter(0),
@@ -545,6 +578,12 @@ void CWKeyer::applySettings(const CWKeyerSettings& settings, bool force)
         {
             m_dot = false;
             m_dash = true;
+            m_keyIambicState = KeySilent;
+        }
+        else if (settings.m_mode == CWKeyerSettings::CWKeyboard)
+        {
+            m_dot = false;
+            m_dash = false;
             m_keyIambicState = KeySilent;
         }
     }

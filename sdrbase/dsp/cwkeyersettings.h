@@ -41,6 +41,7 @@ public:
     int m_sampleRate;
     QString m_text;
     int m_wpm;
+    bool m_keyboardIambic;
     Qt::Key m_dotKey;
     Qt::KeyboardModifiers m_dotKeyModifiers;
     Qt::Key m_dashKey;
