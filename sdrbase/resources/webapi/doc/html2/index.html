@@ -1693,16 +1693,39 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "wpm" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "Words Per Minute keying speed"
     },
     "mode" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "see enum CWKeyerSettings::CWMode"
     },
     "text" : {
       "type" : "string"
     },
     "loop" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "1 to loop on text keying"
+    },
+    "keyboardIambic" : {
+      "type" : "integer",
+      "description" : "1 for iambic input 0 for straight input using the keyboard"
+    },
+    "dotKey" : {
+      "type" : "integer",
+      "description" : "key for dots keyboard input. See enum Qt::Key"
+    },
+    "dotKeyModifiers" : {
+      "type" : "integer",
+      "description" : "key modifier for dots keyboard input. See flags Qt::KeyboardModifiers"
+    },
+    "dashKey" : {
+      "type" : "integer",
+      "description" : "key for dashes keyboard input. See enum Qt::Key"
+    },
+    "dashKeyModifiers" : {
+      "type" : "integer",
+      "description" : "key modifier for dashes keyboard input. See flags Qt::KeyboardModifiers"
     }
   }
 };
@@ -26341,7 +26364,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-07-25T13:46:45.997+02:00
+              Generated 2019-07-30T10:33:29.454+02:00
             </div>
           </div>
       </div>

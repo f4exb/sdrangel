@@ -26,6 +26,7 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "cwkeyersettings.h"
+#include "SWGChannelSettings.h"
 
 /**
  * Ancillary class to smooth out CW transitions with a sine shape
@@ -115,6 +116,17 @@ public:
     void setKeyboardDots();
     void setKeyboardDashes();
     void setKeyboardSilence();
+
+    void webapiSettingsPutPatch(
+        const QStringList& channelSettingsKeys,
+        CWKeyerSettings& cwKeyerSettings,
+        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings
+    );
+
+    void webapiFormatChannelSettings(
+        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings,
+        const CWKeyerSettings& cwKeyerSettings
+    );
 
 private:
     QMutex m_mutex;

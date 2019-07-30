@@ -3,10 +3,28 @@ CWKeyerSettings:
     sampleRate:
       type: integer
     wpm:
+      description: Words Per Minute keying speed
       type: integer
     mode:
+      description: see enum CWKeyerSettings::CWMode
       type: integer
     text:
       type: string
     loop:
+      description: 1 to loop on text keying
+      type: integer
+    keyboardIambic:
+      description: 1 for iambic input 0 for straight input using the keyboard
+      type: integer
+    dotKey:
+      description: key for dots keyboard input. See enum Qt::Key
+      type: integer
+    dotKeyModifiers:
+      description: key modifier for dots keyboard input. See flags Qt::KeyboardModifiers
+      type: integer
+    dashKey:
+      description: key for dashes keyboard input. See enum Qt::Key
+      type: integer
+    dashKeyModifiers:
+      description: key modifier for dashes keyboard input. See flags Qt::KeyboardModifiers
       type: integer

@@ -38,6 +38,16 @@ SWGCWKeyerSettings::SWGCWKeyerSettings() {
     m_text_isSet = false;
     loop = 0;
     m_loop_isSet = false;
+    keyboard_iambic = 0;
+    m_keyboard_iambic_isSet = false;
+    dot_key = 0;
+    m_dot_key_isSet = false;
+    dot_key_modifiers = 0;
+    m_dot_key_modifiers_isSet = false;
+    dash_key = 0;
+    m_dash_key_isSet = false;
+    dash_key_modifiers = 0;
+    m_dash_key_modifiers_isSet = false;
 }
 
 SWGCWKeyerSettings::~SWGCWKeyerSettings() {
@@ -56,6 +66,16 @@ SWGCWKeyerSettings::init() {
     m_text_isSet = false;
     loop = 0;
     m_loop_isSet = false;
+    keyboard_iambic = 0;
+    m_keyboard_iambic_isSet = false;
+    dot_key = 0;
+    m_dot_key_isSet = false;
+    dot_key_modifiers = 0;
+    m_dot_key_modifiers_isSet = false;
+    dash_key = 0;
+    m_dash_key_isSet = false;
+    dash_key_modifiers = 0;
+    m_dash_key_modifiers_isSet = false;
 }
 
 void
@@ -66,6 +86,11 @@ SWGCWKeyerSettings::cleanup() {
     if(text != nullptr) { 
         delete text;
     }
+
+
+
+
+
 
 }
 
@@ -89,6 +114,16 @@ SWGCWKeyerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&text, pJson["text"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&loop, pJson["loop"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&keyboard_iambic, pJson["keyboardIambic"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&dot_key, pJson["dotKey"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&dot_key_modifiers, pJson["dotKeyModifiers"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&dash_key, pJson["dashKey"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&dash_key_modifiers, pJson["dashKeyModifiers"], "qint32", "");
     
 }
 
@@ -120,6 +155,21 @@ SWGCWKeyerSettings::asJsonObject() {
     }
     if(m_loop_isSet){
         obj->insert("loop", QJsonValue(loop));
+    }
+    if(m_keyboard_iambic_isSet){
+        obj->insert("keyboardIambic", QJsonValue(keyboard_iambic));
+    }
+    if(m_dot_key_isSet){
+        obj->insert("dotKey", QJsonValue(dot_key));
+    }
+    if(m_dot_key_modifiers_isSet){
+        obj->insert("dotKeyModifiers", QJsonValue(dot_key_modifiers));
+    }
+    if(m_dash_key_isSet){
+        obj->insert("dashKey", QJsonValue(dash_key));
+    }
+    if(m_dash_key_modifiers_isSet){
+        obj->insert("dashKeyModifiers", QJsonValue(dash_key_modifiers));
     }
 
     return obj;
@@ -175,6 +225,56 @@ SWGCWKeyerSettings::setLoop(qint32 loop) {
     this->m_loop_isSet = true;
 }
 
+qint32
+SWGCWKeyerSettings::getKeyboardIambic() {
+    return keyboard_iambic;
+}
+void
+SWGCWKeyerSettings::setKeyboardIambic(qint32 keyboard_iambic) {
+    this->keyboard_iambic = keyboard_iambic;
+    this->m_keyboard_iambic_isSet = true;
+}
+
+qint32
+SWGCWKeyerSettings::getDotKey() {
+    return dot_key;
+}
+void
+SWGCWKeyerSettings::setDotKey(qint32 dot_key) {
+    this->dot_key = dot_key;
+    this->m_dot_key_isSet = true;
+}
+
+qint32
+SWGCWKeyerSettings::getDotKeyModifiers() {
+    return dot_key_modifiers;
+}
+void
+SWGCWKeyerSettings::setDotKeyModifiers(qint32 dot_key_modifiers) {
+    this->dot_key_modifiers = dot_key_modifiers;
+    this->m_dot_key_modifiers_isSet = true;
+}
+
+qint32
+SWGCWKeyerSettings::getDashKey() {
+    return dash_key;
+}
+void
+SWGCWKeyerSettings::setDashKey(qint32 dash_key) {
+    this->dash_key = dash_key;
+    this->m_dash_key_isSet = true;
+}
+
+qint32
+SWGCWKeyerSettings::getDashKeyModifiers() {
+    return dash_key_modifiers;
+}
+void
+SWGCWKeyerSettings::setDashKeyModifiers(qint32 dash_key_modifiers) {
+    this->dash_key_modifiers = dash_key_modifiers;
+    this->m_dash_key_modifiers_isSet = true;
+}
+
 
 bool
 SWGCWKeyerSettings::isSet(){
@@ -185,6 +285,11 @@ SWGCWKeyerSettings::isSet(){
         if(m_mode_isSet){ isObjectUpdated = true; break;}
         if(text != nullptr && *text != QString("")){ isObjectUpdated = true; break;}
         if(m_loop_isSet){ isObjectUpdated = true; break;}
+        if(m_keyboard_iambic_isSet){ isObjectUpdated = true; break;}
+        if(m_dot_key_isSet){ isObjectUpdated = true; break;}
+        if(m_dot_key_modifiers_isSet){ isObjectUpdated = true; break;}
+        if(m_dash_key_isSet){ isObjectUpdated = true; break;}
+        if(m_dash_key_modifiers_isSet){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;
 }

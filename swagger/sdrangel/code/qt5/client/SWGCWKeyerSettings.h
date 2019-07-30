@@ -57,6 +57,21 @@ public:
     qint32 getLoop();
     void setLoop(qint32 loop);
 
+    qint32 getKeyboardIambic();
+    void setKeyboardIambic(qint32 keyboard_iambic);
+
+    qint32 getDotKey();
+    void setDotKey(qint32 dot_key);
+
+    qint32 getDotKeyModifiers();
+    void setDotKeyModifiers(qint32 dot_key_modifiers);
+
+    qint32 getDashKey();
+    void setDashKey(qint32 dash_key);
+
+    qint32 getDashKeyModifiers();
+    void setDashKeyModifiers(qint32 dash_key_modifiers);
+
 
     virtual bool isSet() override;
 
@@ -75,6 +90,21 @@ private:
 
     qint32 loop;
     bool m_loop_isSet;
+
+    qint32 keyboard_iambic;
+    bool m_keyboard_iambic_isSet;
+
+    qint32 dot_key;
+    bool m_dot_key_isSet;
+
+    qint32 dot_key_modifiers;
+    bool m_dot_key_modifiers_isSet;
+
+    qint32 dash_key;
+    bool m_dash_key_isSet;
+
+    qint32 dash_key_modifiers;
+    bool m_dash_key_modifiers_isSet;
 
 };
 

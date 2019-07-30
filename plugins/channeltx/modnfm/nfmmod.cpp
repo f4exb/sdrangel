@@ -704,22 +704,7 @@ int NFMMod::webapiSettingsPutPatch(
     {
         SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
         CWKeyerSettings cwKeyerSettings = m_cwKeyer.getSettings();
-
-        if (channelSettingsKeys.contains("cwKeyer.loop")) {
-            cwKeyerSettings.m_loop = apiCwKeyerSettings->getLoop() != 0;
-        }
-        if (channelSettingsKeys.contains("cwKeyer.mode")) {
-            cwKeyerSettings.m_mode = (CWKeyerSettings::CWMode) apiCwKeyerSettings->getMode();
-        }
-        if (channelSettingsKeys.contains("cwKeyer.text")) {
-            cwKeyerSettings.m_text = *apiCwKeyerSettings->getText();
-        }
-        if (channelSettingsKeys.contains("cwKeyer.sampleRate")) {
-            cwKeyerSettings.m_sampleRate = apiCwKeyerSettings->getSampleRate();
-        }
-        if (channelSettingsKeys.contains("cwKeyer.wpm")) {
-            cwKeyerSettings.m_wpm = apiCwKeyerSettings->getWpm();
-        }
+        m_cwKeyer.webapiSettingsPutPatch(channelSettingsKeys, cwKeyerSettings, apiCwKeyerSettings);
 
         CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
         m_cwKeyer.getInputMessageQueue()->push(msgCwKeyer);
@@ -791,15 +776,7 @@ void NFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
 
     SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
     const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
-    apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
-    apiCwKeyerSettings->setMode((int) cwKeyerSettings.m_mode);
-    apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
-
-    if (apiCwKeyerSettings->getText()) {
-        *apiCwKeyerSettings->getText() = cwKeyerSettings.m_text;
-    } else {
-        apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
-    }
+    m_cwKeyer.webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
 
     if (response.getNfmModSettings()->getAudioDeviceName()) {
         *response.getNfmModSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
@@ -889,11 +866,7 @@ void NFMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
         const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
         swgNFMModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
         SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgNFMModSettings->getCwKeyer();
-        apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
-        apiCwKeyerSettings->setMode(cwKeyerSettings.m_mode);
-        apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
-        apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
-        apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+        m_cwKeyer.webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
@@ -925,11 +898,7 @@ void NFMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 
     swgNFModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
     SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgNFModSettings->getCwKeyer();
-    apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
-    apiCwKeyerSettings->setMode(cwKeyerSettings.m_mode);
-    apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
-    apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
-    apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
+    m_cwKeyer.webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
             .arg(m_settings.m_reverseAPIAddress)
