@@ -376,13 +376,23 @@ class SDRBASE_API DSPConfigureAudio : public Message {
     MESSAGE_CLASS_DECLARATION
 
 public:
-    DSPConfigureAudio(int sampleRate) : m_sampleRate(sampleRate)
+    enum AudioType
+    {
+        AudioInput,
+        AudioOutput
+    };
+
+    DSPConfigureAudio(int sampleRate, AudioType audioType) :
+        m_sampleRate(sampleRate),
+        m_autioType(audioType)
     { }
 
     int getSampleRate() const { return m_sampleRate; }
+    bool getAudioType() const { return m_autioType; }
 
 private:
     int m_sampleRate;
+    AudioType m_autioType;
 };
 
 #endif // INCLUDE_DSPCOMMANDS_H

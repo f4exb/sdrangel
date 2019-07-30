@@ -639,7 +639,7 @@ void FreeDVMod::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
 
         if (getMessageQueueToGUI())
         {
-            DSPConfigureAudio *cfg = new DSPConfigureAudio(m_modemSampleRate);
+            DSPConfigureAudio *cfg = new DSPConfigureAudio(m_modemSampleRate, DSPConfigureAudio::AudioInput);
             getMessageQueueToGUI()->push(cfg);
         }
     }

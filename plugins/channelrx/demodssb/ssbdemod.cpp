@@ -450,7 +450,7 @@ void SSBDemod::applyAudioSampleRate(int sampleRate)
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        DSPConfigureAudio *cfg = new DSPConfigureAudio(m_audioSampleRate);
+        DSPConfigureAudio *cfg = new DSPConfigureAudio(m_audioSampleRate, DSPConfigureAudio::AudioOutput);
         m_guiMessageQueue->push(cfg);
     }
 }

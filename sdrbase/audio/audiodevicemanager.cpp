@@ -558,7 +558,7 @@ void AudioDeviceManager::setInputDeviceInfo(int inputDeviceIndex, const InputDev
 
         for (; it != m_inputDeviceSourceMessageQueues[inputDeviceIndex].end(); ++it)
         {
-            DSPConfigureAudio *msg = new DSPConfigureAudio(m_audioInputInfos[deviceName].sampleRate);
+            DSPConfigureAudio *msg = new DSPConfigureAudio(m_audioInputInfos[deviceName].sampleRate, DSPConfigureAudio::AudioInput);
             (*it)->push(msg);
         }
     }
@@ -605,7 +605,7 @@ void AudioDeviceManager::setOutputDeviceInfo(int outputDeviceIndex, const Output
 
         for (; it != m_outputDeviceSinkMessageQueues[outputDeviceIndex].end(); ++it)
         {
-            DSPConfigureAudio *msg = new DSPConfigureAudio(m_audioOutputInfos[deviceName].sampleRate);
+            DSPConfigureAudio *msg = new DSPConfigureAudio(m_audioOutputInfos[deviceName].sampleRate, DSPConfigureAudio::AudioOutput);
             (*it)->push(msg);
         }
     }
@@ -655,7 +655,7 @@ void AudioDeviceManager::unsetOutputDeviceInfo(int outputDeviceIndex)
 
         for (; it != m_outputDeviceSinkMessageQueues[outputDeviceIndex].end(); ++it)
         {
-            DSPConfigureAudio *msg = new DSPConfigureAudio(m_audioOutputInfos[deviceName].sampleRate);
+            DSPConfigureAudio *msg = new DSPConfigureAudio(m_audioOutputInfos[deviceName].sampleRate, DSPConfigureAudio::AudioOutput);
             (*it)->push(msg);
         }
     }
@@ -695,7 +695,7 @@ void AudioDeviceManager::unsetInputDeviceInfo(int inputDeviceIndex)
 
         for (; it != m_inputDeviceSourceMessageQueues[inputDeviceIndex].end(); ++it)
         {
-            DSPConfigureAudio *msg = new DSPConfigureAudio(m_audioInputInfos[deviceName].sampleRate);
+            DSPConfigureAudio *msg = new DSPConfigureAudio(m_audioInputInfos[deviceName].sampleRate, DSPConfigureAudio::AudioInput);
             (*it)->push(msg);
         }
     }

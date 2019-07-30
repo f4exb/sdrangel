@@ -724,7 +724,7 @@ void SSBMod::applyAudioSampleRate(int sampleRate)
 
     if (getMessageQueueToGUI())
     {
-        DSPConfigureAudio *cfg = new DSPConfigureAudio(m_audioSampleRate);
+        DSPConfigureAudio *cfg = new DSPConfigureAudio(m_audioSampleRate, DSPConfigureAudio::AudioInput);
         getMessageQueueToGUI()->push(cfg);
     }
 }

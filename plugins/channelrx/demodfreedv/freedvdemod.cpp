@@ -576,7 +576,7 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
 
         if (getMessageQueueToGUI())
         {
-            DSPConfigureAudio *cfg = new DSPConfigureAudio(m_modemSampleRate);
+            DSPConfigureAudio *cfg = new DSPConfigureAudio(m_modemSampleRate, DSPConfigureAudio::AudioOutput);
             getMessageQueueToGUI()->push(cfg);
         }
     }
