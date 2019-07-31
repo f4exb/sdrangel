@@ -60,7 +60,7 @@ NFMMod::NFMMod(DeviceAPI *deviceAPI) :
 	m_inputFrequencyOffset(0),
 	m_modPhasor(0.0f),
     m_audioFifo(4800),
-    m_feedbackAudioFifo(4800),
+    m_feedbackAudioFifo(48000),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
 	m_recordLength(0),
@@ -84,6 +84,7 @@ NFMMod::NFMMod(DeviceAPI *deviceAPI) :
 
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_feedbackAudioFifo, getInputMessageQueue());
     m_feedbackAudioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
+    applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
 
     m_lowpass.create(301, m_audioSampleRate, 250.0);
 	m_toneNco.setFreq(1000.0, m_audioSampleRate);
@@ -178,6 +179,11 @@ void NFMMod::modulateSample()
 	Real t;
 
     pullAF(t);
+
+    if (m_settings.m_feedbackAudioEnable) {
+        pushFeedback(t * m_settings.m_feedbackVolumeFactor * 16384.0f);
+    }
+
     calculateLevel(t);
     m_audioBufferFill++;
 
@@ -259,6 +265,50 @@ void NFMMod::pullAF(Real& sample)
     default:
         sample = 0.0f;
         break;
+    }
+}
+
+void NFMMod::pushFeedback(Real sample)
+{
+    Complex c(sample, sample);
+    Complex ci;
+
+    if (m_feedbackInterpolatorDistance < 1.0f) // interpolate
+    {
+        while (!m_feedbackInterpolator.interpolate(&m_feedbackInterpolatorDistanceRemain, c, &ci))
+        {
+            processOneSample(ci);
+            m_feedbackInterpolatorDistanceRemain += m_feedbackInterpolatorDistance;
+        }
+    }
+    else // decimate
+    {
+        if (m_feedbackInterpolator.decimate(&m_feedbackInterpolatorDistanceRemain, c, &ci))
+        {
+            processOneSample(ci);
+            m_feedbackInterpolatorDistanceRemain += m_feedbackInterpolatorDistance;
+        }
+    }
+}
+
+void NFMMod::processOneSample(Complex& ci)
+{
+    m_feedbackAudioBuffer[m_feedbackAudioBufferFill].l = ci.real();
+    m_feedbackAudioBuffer[m_feedbackAudioBufferFill].r = ci.imag();
+    ++m_feedbackAudioBufferFill;
+
+    if (m_feedbackAudioBufferFill >= m_feedbackAudioBuffer.size())
+    {
+        uint res = m_feedbackAudioFifo.write((const quint8*)&m_feedbackAudioBuffer[0], m_feedbackAudioBufferFill);
+
+        if (res != m_feedbackAudioBufferFill)
+        {
+            qDebug("AMDemod::pushFeedback: %u/%u audio samples written m_feedbackInterpolatorDistance: %f",
+                res, m_feedbackAudioBufferFill, m_feedbackInterpolatorDistance);
+            m_feedbackAudioFifo.clear();
+        }
+
+        m_feedbackAudioBufferFill = 0;
     }
 }
 
@@ -376,12 +426,23 @@ bool NFMMod::handleMessage(const Message& cmd)
     {
         DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
         uint32_t sampleRate = cfg.getSampleRate();
+        DSPConfigureAudio::AudioType audioType = cfg.getAudioType();
 
         qDebug() << "NFMMod::handleMessage: DSPConfigureAudio:"
-                << " sampleRate: " << sampleRate;
+                << " sampleRate: " << sampleRate
+                << " audioType: " << audioType;
 
-        if (sampleRate != m_audioSampleRate) {
-            applyAudioSampleRate(sampleRate);
+        if (audioType == DSPConfigureAudio::AudioInput)
+        {
+            if (sampleRate != m_audioSampleRate) {
+                applyAudioSampleRate(sampleRate);
+            }
+        }
+        else if (audioType == DSPConfigureAudio::AudioOutput)
+        {
+            if (sampleRate != m_audioSampleRate) {
+                applyFeedbackAudioSampleRate(sampleRate);
+            }
         }
 
         return true;
@@ -454,6 +515,24 @@ void NFMMod::applyAudioSampleRate(int sampleRate)
     m_settingsMutex.unlock();
 
     m_audioSampleRate = sampleRate;
+    applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
+}
+
+void NFMMod::applyFeedbackAudioSampleRate(unsigned int sampleRate)
+{
+    qDebug("AMMod::applyFeedbackAudioSampleRate: %u", sampleRate);
+
+    m_settingsMutex.lock();
+
+    m_feedbackInterpolatorDistanceRemain = 0;
+    m_feedbackInterpolatorConsumed = false;
+    m_feedbackInterpolatorDistance = (Real) sampleRate / (Real) m_audioSampleRate;
+    Real cutoff = std::min(sampleRate, m_audioSampleRate) / 2.2f;
+    m_feedbackInterpolator.create(48, sampleRate, cutoff, 3.0);
+
+    m_settingsMutex.unlock();
+
+    m_feedbackAudioSampleRate = sampleRate;
 }
 
 void NFMMod::applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force)
@@ -585,6 +664,20 @@ void NFMMod::applySettings(const NFMModSettings& settings, bool force)
         if (m_audioSampleRate != audioSampleRate) {
             reverseAPIKeys.append("audioSampleRate");
             applyAudioSampleRate(audioSampleRate);
+        }
+    }
+
+    if ((settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName) || force)
+    {
+        reverseAPIKeys.append("feedbackAudioDeviceName");
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_feedbackAudioDeviceName);
+        audioDeviceManager->addAudioSink(&m_feedbackAudioFifo, getInputMessageQueue(), audioDeviceIndex);
+        uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
+
+        if (m_feedbackAudioSampleRate != audioSampleRate) {
+            reverseAPIKeys.append("feedbackAudioSampleRate");
+            applyFeedbackAudioSampleRate(audioSampleRate);
         }
     }
 

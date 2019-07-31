@@ -68,7 +68,6 @@ FreeDVMod::FreeDVMod(DeviceAPI *deviceAPI) :
 	m_SSBFilterBufferIndex(0),
     m_sampleSink(0),
     m_audioFifo(4800),
-    m_feedbackAudioFifo(4800),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
 	m_recordLength(0),
@@ -90,18 +89,12 @@ FreeDVMod::FreeDVMod(DeviceAPI *deviceAPI) :
 	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo, getInputMessageQueue());
     m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getInputSampleRate();
 
-    DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_feedbackAudioFifo, getInputMessageQueue());
-    m_feedbackAudioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
-
     m_SSBFilter = new fftfilt(m_lowCutoff / m_audioSampleRate, m_hiCutoff / m_audioSampleRate, m_ssbFftLen);
     m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
     std::fill(m_SSBFilterBuffer, m_SSBFilterBuffer+(m_ssbFftLen>>1), Complex{0,0});
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
-
-	m_feedbackAudioBuffer.resize(1<<14);
-	m_feedbackAudioBufferFill = 0;
 
     m_sum.real(0.0f);
     m_sum.imag(0.0f);
@@ -131,7 +124,6 @@ FreeDVMod::~FreeDVMod()
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
 
-    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_feedbackAudioFifo);
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(&m_audioFifo);
 
     m_deviceAPI->removeChannelSourceAPI(this);

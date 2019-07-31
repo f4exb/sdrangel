@@ -282,11 +282,18 @@ private:
     NCOF m_carrierNco;
     NCOF m_toneNco;
     Complex m_modSample;
+
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
     bool m_interpolatorConsumed;
-	fftfilt* m_SSBFilter;
+
+    Interpolator m_feedbackInterpolator;
+    Real m_feedbackInterpolatorDistance;
+    Real m_feedbackInterpolatorDistanceRemain;
+    bool m_feedbackInterpolatorConsumed;
+
+    fftfilt* m_SSBFilter;
 	fftfilt* m_DSBFilter;
 	Complex* m_SSBFilterBuffer;
 	Complex* m_DSBFilterBuffer;
@@ -336,9 +343,12 @@ private:
     static const int m_levelNbSamples;
 
     void applyAudioSampleRate(int sampleRate);
+    void applyFeedbackAudioSampleRate(unsigned int sampleRate);
+    void processOneSample(Complex& ci);
     void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const SSBModSettings& settings, bool force = false);
     void pullAF(Complex& sample);
+    void pushFeedback(Complex sample);
     void calculateLevel(Complex& sample);
     void modulateSample();
     void openFileStream();

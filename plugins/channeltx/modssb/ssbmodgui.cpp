@@ -292,6 +292,19 @@ void SSBModGUI::on_mic_toggled(bool checked)
     applySettings();
 }
 
+void SSBModGUI::on_feedbackEnable_toggled(bool checked)
+{
+    m_settings.m_feedbackAudioEnable = checked;
+    applySettings();
+}
+
+void SSBModGUI::on_feedbackVolume_valueChanged(int value)
+{
+    ui->feedbackVolumeText->setText(QString("%1").arg(value / 100.0, 0, 'f', 2));
+    m_settings.m_feedbackVolumeFactor = value / 100.0;
+    applySettings();
+}
+
 void SSBModGUI::on_agc_toggled(bool checked)
 {
     m_settings.m_agc = checked;
@@ -678,6 +691,10 @@ void SSBModGUI::displaySettings()
     ui->mic->setChecked(m_settings.m_modAFInput == SSBModSettings::SSBModInputAF::SSBModInputAudio);
     ui->play->setChecked(m_settings.m_modAFInput == SSBModSettings::SSBModInputAF::SSBModInputFile);
     ui->morseKeyer->setChecked(m_settings.m_modAFInput == SSBModSettings::SSBModInputAF::SSBModInputCWTone);
+
+    ui->feedbackEnable->setChecked(m_settings.m_feedbackAudioEnable);
+    ui->feedbackVolume->setValue(roundf(m_settings.m_feedbackVolumeFactor * 100.0));
+    ui->feedbackVolumeText->setText(QString("%1").arg(m_settings.m_feedbackVolumeFactor, 0, 'f', 2));
 
     blockApplySettings(false);
 }

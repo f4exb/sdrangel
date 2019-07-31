@@ -66,7 +66,7 @@ SSBMod::SSBMod(DeviceAPI *deviceAPI) :
 	m_DSBFilterBufferIndex(0),
     m_sampleSink(0),
     m_audioFifo(4800),
-    m_feedbackAudioFifo(4800),
+    m_feedbackAudioFifo(48000),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
 	m_recordLength(0),
@@ -83,6 +83,7 @@ SSBMod::SSBMod(DeviceAPI *deviceAPI) :
 
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_feedbackAudioFifo, getInputMessageQueue());
     m_feedbackAudioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
+    applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
 
     m_SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_audioSampleRate, m_settings.m_bandwidth / m_audioSampleRate, m_ssbFftLen);
     m_DSBFilter = new fftfilt((2.0f * m_settings.m_bandwidth) / m_audioSampleRate, 2 * m_ssbFftLen);
@@ -206,6 +207,11 @@ void SSBMod::pullAudio(int nbSamples)
 void SSBMod::modulateSample()
 {
     pullAF(m_modSample);
+
+    if (m_settings.m_feedbackAudioEnable) {
+        pushFeedback(m_modSample * m_settings.m_feedbackVolumeFactor * 16384.0f);
+    }
+
     calculateLevel(m_modSample);
     m_audioBufferFill++;
 }
@@ -503,6 +509,49 @@ void SSBMod::pullAF(Complex& sample)
     }
 }
 
+void SSBMod::pushFeedback(Complex c)
+{
+    Complex ci;
+
+    if (m_feedbackInterpolatorDistance < 1.0f) // interpolate
+    {
+        while (!m_feedbackInterpolator.interpolate(&m_feedbackInterpolatorDistanceRemain, c, &ci))
+        {
+            processOneSample(ci);
+            m_feedbackInterpolatorDistanceRemain += m_feedbackInterpolatorDistance;
+        }
+    }
+    else // decimate
+    {
+        if (m_feedbackInterpolator.decimate(&m_feedbackInterpolatorDistanceRemain, c, &ci))
+        {
+            processOneSample(ci);
+            m_feedbackInterpolatorDistanceRemain += m_feedbackInterpolatorDistance;
+        }
+    }
+}
+
+void SSBMod::processOneSample(Complex& ci)
+{
+    m_feedbackAudioBuffer[m_feedbackAudioBufferFill].l = ci.real();
+    m_feedbackAudioBuffer[m_feedbackAudioBufferFill].r = ci.imag();
+    ++m_feedbackAudioBufferFill;
+
+    if (m_feedbackAudioBufferFill >= m_feedbackAudioBuffer.size())
+    {
+        uint res = m_feedbackAudioFifo.write((const quint8*)&m_feedbackAudioBuffer[0], m_feedbackAudioBufferFill);
+
+        if (res != m_feedbackAudioBufferFill)
+        {
+            qDebug("AMDemod::pushFeedback: %u/%u audio samples written m_feedbackInterpolatorDistance: %f",
+                res, m_feedbackAudioBufferFill, m_feedbackInterpolatorDistance);
+            m_feedbackAudioFifo.clear();
+        }
+
+        m_feedbackAudioBufferFill = 0;
+    }
+}
+
 void SSBMod::calculateLevel(Complex& sample)
 {
     Real t = sample.real(); // TODO: possibly adjust depending on sample type
@@ -617,12 +666,23 @@ bool SSBMod::handleMessage(const Message& cmd)
     {
         DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
         uint32_t sampleRate = cfg.getSampleRate();
+        DSPConfigureAudio::AudioType audioType = cfg.getAudioType();
 
         qDebug() << "SSBMod::handleMessage: DSPConfigureAudio:"
-                << " sampleRate: " << sampleRate;
+                << " sampleRate: " << sampleRate
+                << " audioType: " << audioType;
 
-        if (sampleRate != m_audioSampleRate) {
-            applyAudioSampleRate(sampleRate);
+        if (audioType == DSPConfigureAudio::AudioInput)
+        {
+            if (sampleRate != m_audioSampleRate) {
+                applyAudioSampleRate(sampleRate);
+            }
+        }
+        else if (audioType == DSPConfigureAudio::AudioOutput)
+        {
+            if (sampleRate != m_audioSampleRate) {
+                applyFeedbackAudioSampleRate(sampleRate);
+            }
         }
 
         return true;
@@ -727,6 +787,25 @@ void SSBMod::applyAudioSampleRate(int sampleRate)
         DSPConfigureAudio *cfg = new DSPConfigureAudio(m_audioSampleRate, DSPConfigureAudio::AudioInput);
         getMessageQueueToGUI()->push(cfg);
     }
+
+    applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
+}
+
+void SSBMod::applyFeedbackAudioSampleRate(unsigned int sampleRate)
+{
+    qDebug("AMMod::applyFeedbackAudioSampleRate: %u", sampleRate);
+
+    m_settingsMutex.lock();
+
+    m_feedbackInterpolatorDistanceRemain = 0;
+    m_feedbackInterpolatorConsumed = false;
+    m_feedbackInterpolatorDistance = (Real) sampleRate / (Real) m_audioSampleRate;
+    Real cutoff = std::min(sampleRate, m_audioSampleRate) / 2.2f;
+    m_feedbackInterpolator.create(48, sampleRate, cutoff, 3.0);
+
+    m_settingsMutex.unlock();
+
+    m_feedbackAudioSampleRate = sampleRate;
 }
 
 void SSBMod::applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force)
@@ -873,6 +952,20 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
 
         if (m_audioSampleRate != audioSampleRate) {
             applyAudioSampleRate(audioSampleRate);
+        }
+    }
+
+    if ((settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName) || force)
+    {
+        reverseAPIKeys.append("feedbackAudioDeviceName");
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_feedbackAudioDeviceName);
+        audioDeviceManager->addAudioSink(&m_feedbackAudioFifo, getInputMessageQueue(), audioDeviceIndex);
+        uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
+
+        if (m_feedbackAudioSampleRate != audioSampleRate) {
+            reverseAPIKeys.append("feedbackAudioSampleRate");
+            applyFeedbackAudioSampleRate(audioSampleRate);
         }
     }
 

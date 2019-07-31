@@ -110,6 +110,9 @@ private slots:
     void on_ctcss_currentIndexChanged(int index);
     void on_ctcssOn_toggled(bool checked);
 
+    void on_feedbackEnable_toggled(bool checked);
+    void on_feedbackVolume_valueChanged(int value);
+
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
 

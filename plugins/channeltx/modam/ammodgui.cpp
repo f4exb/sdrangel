@@ -236,6 +236,19 @@ void AMModGUI::on_mic_toggled(bool checked)
     applySettings();
 }
 
+void AMModGUI::on_feedbackEnable_toggled(bool checked)
+{
+    m_settings.m_feedbackAudioEnable = checked;
+    applySettings();
+}
+
+void AMModGUI::on_feedbackVolume_valueChanged(int value)
+{
+    ui->feedbackVolumeText->setText(QString("%1").arg(value / 100.0, 0, 'f', 2));
+    m_settings.m_feedbackVolumeFactor = value / 100.0;
+    applySettings();
+}
+
 void AMModGUI::on_navTimeSlider_valueChanged(int value)
 {
     if (m_enableNavTime && ((value >= 0) && (value <= 100)))
@@ -439,6 +452,10 @@ void AMModGUI::displaySettings()
     ui->mic->setChecked(m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputAudio);
     ui->play->setChecked(m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputFile);
     ui->morseKeyer->setChecked(m_settings.m_modAFInput == AMModSettings::AMModInputAF::AMModInputCWTone);
+
+    ui->feedbackEnable->setChecked(m_settings.m_feedbackAudioEnable);
+    ui->feedbackVolume->setValue(roundf(m_settings.m_feedbackVolumeFactor * 100.0));
+    ui->feedbackVolumeText->setText(QString("%1").arg(m_settings.m_feedbackVolumeFactor, 0, 'f', 2));
 
     blockApplySettings(false);
 }

@@ -314,11 +314,6 @@ private:
     uint m_audioBufferFill;
     AudioFifo m_audioFifo;
 
-    quint32 m_feedbackAudioSampleRate;
-    AudioVector m_feedbackAudioBuffer;
-    uint m_feedbackAudioBufferFill;
-    AudioFifo m_feedbackAudioFifo;
-
     QMutex m_settingsMutex;
 
     std::ifstream m_ifstream;

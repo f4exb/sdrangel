@@ -388,7 +388,7 @@ public:
     { }
 
     int getSampleRate() const { return m_sampleRate; }
-    bool getAudioType() const { return m_autioType; }
+    AudioType getAudioType() const { return m_autioType; }
 
 private:
     int m_sampleRate;

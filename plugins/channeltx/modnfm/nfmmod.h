@@ -281,10 +281,17 @@ private:
     NCOF m_ctcssNco;
     float m_modPhasor; //!< baseband modulator phasor
     Complex m_modSample;
+
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
     bool m_interpolatorConsumed;
+
+    Interpolator m_feedbackInterpolator;
+    Real m_feedbackInterpolatorDistance;
+    Real m_feedbackInterpolatorDistanceRemain;
+    bool m_feedbackInterpolatorConsumed;
+
     Lowpass<Real> m_lowpass;
     Bandpass<Real> m_bandpass;
 
@@ -322,9 +329,12 @@ private:
     static const int m_levelNbSamples;
 
     void applyAudioSampleRate(int sampleRate);
+    void applyFeedbackAudioSampleRate(unsigned int sampleRate);
+    void processOneSample(Complex& ci);
     void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const NFMModSettings& settings, bool force = false);
     void pullAF(Real& sample);
+    void pushFeedback(Real sample);
     void calculateLevel(Real& sample);
     void modulateSample();
     void openFileStream();

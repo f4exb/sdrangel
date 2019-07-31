@@ -43,7 +43,7 @@ void AMModSettings::resetToDefaults()
     m_modAFInput = AMModInputAF::AMModInputNone;
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_feedbackAudioDeviceName = AudioDeviceManager::m_defaultDeviceName;
-    m_feedbackVolumeFactor = 1.0f;
+    m_feedbackVolumeFactor = 0.5f;
     m_feedbackAudioEnable = false;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
