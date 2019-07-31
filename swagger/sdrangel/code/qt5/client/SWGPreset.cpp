@@ -42,12 +42,6 @@ SWGPreset::SWGPreset() {
     m_dc_offset_correction_isSet = false;
     iq_imbalance_correction = 0;
     m_iq_imbalance_correction_isSet = false;
-    source_id = nullptr;
-    m_source_id_isSet = false;
-    source_serial = nullptr;
-    m_source_serial_isSet = false;
-    source_sequence = 0;
-    m_source_sequence_isSet = false;
     channel_configs = nullptr;
     m_channel_configs_isSet = false;
     device_configs = nullptr;
@@ -76,12 +70,6 @@ SWGPreset::init() {
     m_dc_offset_correction_isSet = false;
     iq_imbalance_correction = 0;
     m_iq_imbalance_correction_isSet = false;
-    source_id = new QString("");
-    m_source_id_isSet = false;
-    source_serial = new QString("");
-    m_source_serial_isSet = false;
-    source_sequence = 0;
-    m_source_sequence_isSet = false;
     channel_configs = new QList<SWGChannelConfig*>();
     m_channel_configs_isSet = false;
     device_configs = new QList<SWGDeviceConfig*>();
@@ -104,13 +92,6 @@ SWGPreset::cleanup() {
         delete m_spectrum_config;
     }
 
-
-    if(source_id != nullptr) { 
-        delete source_id;
-    }
-    if(source_serial != nullptr) { 
-        delete source_serial;
-    }
 
     if(channel_configs != nullptr) { 
         auto arr = channel_configs;
@@ -156,12 +137,6 @@ SWGPreset::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&iq_imbalance_correction, pJson["iqImbalanceCorrection"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&source_id, pJson["sourceId"], "QString", "QString");
-    
-    ::SWGSDRangel::setValue(&source_serial, pJson["sourceSerial"], "QString", "QString");
-    
-    ::SWGSDRangel::setValue(&source_sequence, pJson["sourceSequence"], "qint32", "");
-    
     
     ::SWGSDRangel::setValue(&channel_configs, pJson["channelConfigs"], "QList", "SWGChannelConfig");
     
@@ -204,15 +179,6 @@ SWGPreset::asJsonObject() {
     }
     if(m_iq_imbalance_correction_isSet){
         obj->insert("iqImbalanceCorrection", QJsonValue(iq_imbalance_correction));
-    }
-    if(source_id != nullptr && *source_id != QString("")){
-        toJsonValue(QString("sourceId"), source_id, obj, QString("QString"));
-    }
-    if(source_serial != nullptr && *source_serial != QString("")){
-        toJsonValue(QString("sourceSerial"), source_serial, obj, QString("QString"));
-    }
-    if(m_source_sequence_isSet){
-        obj->insert("sourceSequence", QJsonValue(source_sequence));
     }
     if(channel_configs->size() > 0){
         toJsonArray((QList<void*>*)channel_configs, obj, "channelConfigs", "SWGChannelConfig");
@@ -297,36 +263,6 @@ SWGPreset::setIqImbalanceCorrection(qint32 iq_imbalance_correction) {
     this->m_iq_imbalance_correction_isSet = true;
 }
 
-QString*
-SWGPreset::getSourceId() {
-    return source_id;
-}
-void
-SWGPreset::setSourceId(QString* source_id) {
-    this->source_id = source_id;
-    this->m_source_id_isSet = true;
-}
-
-QString*
-SWGPreset::getSourceSerial() {
-    return source_serial;
-}
-void
-SWGPreset::setSourceSerial(QString* source_serial) {
-    this->source_serial = source_serial;
-    this->m_source_serial_isSet = true;
-}
-
-qint32
-SWGPreset::getSourceSequence() {
-    return source_sequence;
-}
-void
-SWGPreset::setSourceSequence(qint32 source_sequence) {
-    this->source_sequence = source_sequence;
-    this->m_source_sequence_isSet = true;
-}
-
 QList<SWGChannelConfig*>*
 SWGPreset::getChannelConfigs() {
     return channel_configs;
@@ -369,9 +305,6 @@ SWGPreset::isSet(){
         if(m_spectrum_config != nullptr && m_spectrum_config->isSet()){ isObjectUpdated = true; break;}
         if(m_dc_offset_correction_isSet){ isObjectUpdated = true; break;}
         if(m_iq_imbalance_correction_isSet){ isObjectUpdated = true; break;}
-        if(source_id != nullptr && *source_id != QString("")){ isObjectUpdated = true; break;}
-        if(source_serial != nullptr && *source_serial != QString("")){ isObjectUpdated = true; break;}
-        if(m_source_sequence_isSet){ isObjectUpdated = true; break;}
         if(channel_configs->size() > 0){ isObjectUpdated = true; break;}
         if(device_configs->size() > 0){ isObjectUpdated = true; break;}
         if(layout != nullptr && *layout != QString("")){ isObjectUpdated = true; break;}

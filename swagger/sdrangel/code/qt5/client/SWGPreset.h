@@ -67,15 +67,6 @@ public:
     qint32 getIqImbalanceCorrection();
     void setIqImbalanceCorrection(qint32 iq_imbalance_correction);
 
-    QString* getSourceId();
-    void setSourceId(QString* source_id);
-
-    QString* getSourceSerial();
-    void setSourceSerial(QString* source_serial);
-
-    qint32 getSourceSequence();
-    void setSourceSequence(qint32 source_sequence);
-
     QList<SWGChannelConfig*>* getChannelConfigs();
     void setChannelConfigs(QList<SWGChannelConfig*>* channel_configs);
 
@@ -109,15 +100,6 @@ private:
 
     qint32 iq_imbalance_correction;
     bool m_iq_imbalance_correction_isSet;
-
-    QString* source_id;
-    bool m_source_id_isSet;
-
-    QString* source_serial;
-    bool m_source_serial_isSet;
-
-    qint32 source_sequence;
-    bool m_source_sequence_isSet;
 
     QList<SWGChannelConfig*>* channel_configs;
     bool m_channel_configs_isSet;

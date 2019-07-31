@@ -17,10 +17,8 @@ void Preset::resetToDefaults()
 	m_spectrumConfig.clear();
 	m_layout.clear();
 	m_channelConfigs.clear();
-	m_sourceId.clear();
 	m_dcOffsetCorrection = false;
 	m_iqImbalanceCorrection = false;
-	m_sourceSequence = 0;
 }
 
 QByteArray Preset::serialize() const
