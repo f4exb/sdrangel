@@ -10,6 +10,7 @@
         <file>webapi/doc/swagger/include/BFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/BladeRF1.yaml</file>
         <file>webapi/doc/swagger/include/BladeRF2.yaml</file>
+        <file>webapi/doc/swagger/include/Command.yaml</file>
         <file>webapi/doc/swagger/include/CWKeyer.yaml</file>
         <file>webapi/doc/swagger/include/DSDDemod.yaml</file>
         <file>webapi/doc/swagger/include/FCDPro.yaml</file>
@@ -19,6 +20,7 @@
         <file>webapi/doc/swagger/include/FreeDVDemod.yaml</file>
         <file>webapi/doc/swagger/include/FreeDVMod.yaml</file>
         <file>webapi/doc/swagger/include/FreqTracker.yaml</file>
+        <file>webapi/doc/swagger/include/GLSpectrum.yaml</file>
         <file>webapi/doc/swagger/include/HackRF.yaml</file>
         <file>webapi/doc/swagger/include/LimeSdr.yaml</file>
         <file>webapi/doc/swagger/include/KiwiSDR.yaml</file>
@@ -28,6 +30,8 @@
         <file>webapi/doc/swagger/include/NFMMod.yaml</file>
         <file>webapi/doc/swagger/include/Perseus.yaml</file>
         <file>webapi/doc/swagger/include/PlutoSdr.yaml</file>
+        <file>webapi/doc/swagger/include/Preferences.yaml</file>
+        <file>webapi/doc/swagger/include/Preset.yaml</file>
         <file>webapi/doc/swagger/include/RtlSdr.yaml</file>
         <file>webapi/doc/swagger/include/LocalSink.yaml</file>
         <file>webapi/doc/swagger/include/LocalSource.yaml</file>

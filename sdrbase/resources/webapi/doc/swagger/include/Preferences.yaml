@@ -1,0 +1,30 @@
+Preferences:
+  description: Repreents a Prefernce object
+  properties:
+    sourceType:
+      type: string
+    sourceDevice:
+      type: string
+    audioType:
+      type: string
+    audioDevice:
+      type: string
+    sourceIndex:
+      type: integer
+    latitude:
+      type: number
+      format: float
+    longitude:
+      type: number
+      format: float
+    consoleMinLogLevel:
+      description: See QtMsgType
+      type: integer
+    useLogFile:
+      description: boolean
+      type: integer
+    logFileName:
+      type: string
+    fileMinLogLevel:
+      description: See QtMsgType
+      type: integer

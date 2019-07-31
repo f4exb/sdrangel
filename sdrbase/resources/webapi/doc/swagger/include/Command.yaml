@@ -1,0 +1,23 @@
+Command:
+  description: Represents a Command object
+  properties:
+    group:
+      type: string
+    description:
+      type: string
+    command:
+      type: string
+    argString:
+      type: string
+    key:
+      description: Qt::Key
+      type: integer
+    keyModifiers:
+      sdescription: Qt::KeyboardModifiers
+      type: integer
+    associateKey:
+      description: boolean
+      type: integer
+    release:
+      description: boolean
+      type: integer

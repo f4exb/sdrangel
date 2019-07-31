@@ -113,11 +113,10 @@ protected:
 	bool m_dcOffsetCorrection;
 	bool m_iqImbalanceCorrection;
 
-	// sample source and sample source configuration
+	// sample source and sample source configuration TODO: obsolete?
 	QString m_sourceId;
 	QString m_sourceSerial;
 	int m_sourceSequence;
-	QByteArray m_sourceConfig;
 
 	// channels and configurations
 	ChannelConfigs m_channelConfigs;

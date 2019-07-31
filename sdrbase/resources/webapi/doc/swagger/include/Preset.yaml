@@ -1,0 +1,62 @@
+DeviceConfig:
+  description: Represents a Preset::DeviceConfig object
+  properties:
+    deviceId:
+      type: string
+    deviceSerial:
+      type: string
+    deviceSequence:
+      type: integer
+    config:
+      $ref: "http://localhost:8081/api/swagger/swagger.yaml#/definitions/DeviceSettings"
+
+ChannelConfig:
+  description: Represents a Preset::ChannelConfig object
+  properties:
+    channelIdURI:
+      description: Channel type ID in URI form
+      type: string
+    channelId:
+      description: Channel type ID in short form from object name
+      type: string
+    config:
+      $ref: "http://localhost:8081/api/swagger/swagger.yaml#/definitions/ChannelSettings"
+
+Preset:
+  description: Represents a Preset object
+  properties:
+    sourcePreset:
+      description: boolean
+      type: integer
+    group:
+      type: string
+    description:
+      type: string
+    centerFrequency:
+      type: integer
+      format: int64
+    m_spectrumConfig:
+      $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+    dcOffsetCorrection:
+      description: boolean
+      type: integer
+    iqImbalanceCorrection:
+      description: boolean
+      type: integer
+    sourceId:
+      type: string
+    sourceSerial:
+      type: string
+    sourceSequence:
+      type: integer
+    channelConfigs:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Preset.yaml#/ChannelConfig"
+    deviceConfigs:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Preset.yaml#/DeviceConfig"
+    layout:
+      description: screen and dock layout is a QByteArray handled by Qt::QMainWindow translated to base64
+      type: string

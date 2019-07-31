@@ -75,6 +75,24 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
+  /sdrangel/config:
+    x-swagger-router-controller: instance
+    get:
+      description: Get the Preferences, Presets and Commands of the MainSettings saved by Qt
+      operationId: instanceConfig
+      tags:
+        - Instance
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/InstanceConfigResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
   /sdrangel/devices:
     x-swagger-router-controller: instance
     get:
@@ -1352,6 +1370,22 @@ definitions:
         $ref: "#/definitions/LoggingInfo"
       devicesetlist:
         $ref: "#/definitions/DeviceSetList"
+
+  InstanceConfigResponse:
+    description: Preferences, Presets and Commands of the MainSettings saved by Qt
+    properties:
+      preferences:
+        $ref: "/doc/swagger/include/Preferences.yaml#/Preferences"
+      workingPreset:
+        $ref: "/doc/swagger/include/Preset.yaml#/Preset"
+      presets:
+        type: array
+        items:
+          $ref: "/doc/swagger/include/Preset.yaml#/Preset"
+      commands:
+        type: array
+        items:
+          $ref: "/doc/swagger/include/Command.yaml#/Command"
 
   InstanceDevicesResponse:
     description: "Summarized information about logical devices from hardware devices attached to this SDRangel instance"

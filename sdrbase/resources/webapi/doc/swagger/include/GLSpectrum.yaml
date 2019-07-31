@@ -1,0 +1,58 @@
+GLSpectrum:
+  description: GLSpectrumGUI settings
+  properties:
+    fftSize:
+      type: integer
+    fftOverlap:
+      type: integer
+    m_fftWindow:
+      description: See FFTWindow
+      type: integer
+    refLevel:
+      type: number
+      format: float
+    powerRange:
+      type: number
+      format: float
+    displayWaterfall:
+      description: boolean
+      type: integer
+    invertedWaterfall:
+      description: boolean
+      type: integer
+    displayMaxHold:
+      description: boolean
+      type: integer
+    displayHistogram:
+      description: boolean
+      type: integer
+    decay:
+      type: integer
+    displayGrid:
+      description: boolean
+      type: integer
+    invert:
+      description: boolean
+      type: integer
+    displayGridIntensity:
+      type: integer
+    decayDivisor:
+      type: integer
+    histogramStroke:
+      type: integer
+    displayCurrent:
+      description: boolean
+      type: integer
+    displayTraceIntensity:
+      type: integer
+    waterfallShare:
+      type: number
+      format: float
+    averagingMode:
+      description: See GLSpectrumGUI::AveragingMode
+      type: integer
+    averagingValue:
+      type: integer
+    linear:
+      description: boolean
+      type: integer

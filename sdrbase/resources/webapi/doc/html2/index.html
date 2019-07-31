@@ -1759,6 +1759,22 @@ margin-bottom: 20px;
   },
   "description" : "Channel summarized information"
 };
+            defs.ChannelConfig = {
+  "properties" : {
+    "channelIdURI" : {
+      "type" : "string",
+      "description" : "Channel type ID in URI form"
+    },
+    "channelId" : {
+      "type" : "string",
+      "description" : "Channel type ID in short form from object name"
+    },
+    "config" : {
+      "$ref" : "#/definitions/ChannelSettings_2"
+    }
+  },
+  "description" : "Represents a Preset::ChannelConfig object"
+};
             defs.ChannelListItem = {
   "required" : [ "id" ],
   "properties" : {
@@ -1943,6 +1959,92 @@ margin-bottom: 20px;
   },
   "description" : "Base channel settings. Only the channel settings corresponding to the channel specified in the channelType field is or should be present."
 };
+            defs.ChannelSettings_2 = {
+  "required" : [ "channelType", "direction" ],
+  "discriminator" : "channelType",
+  "properties" : {
+    "channelType" : {
+      "type" : "string",
+      "description" : "Channel type code"
+    },
+    "direction" : {
+      "type" : "integer",
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
+    },
+    "originatorDeviceSetIndex" : {
+      "type" : "integer",
+      "description" : "Optional for reverse API. This is the device set index from where the message comes from."
+    },
+    "originatorChannelIndex" : {
+      "type" : "integer",
+      "description" : "Optional for reverse API. This is the channel index from where the message comes from."
+    },
+    "AMDemodSettings" : {
+      "$ref" : "#/definitions/AMDemodSettings"
+    },
+    "AMModSettings" : {
+      "$ref" : "#/definitions/AMModSettings"
+    },
+    "ATVModSettings" : {
+      "$ref" : "#/definitions/ATVModSettings"
+    },
+    "BFMDemodSettings" : {
+      "$ref" : "#/definitions/BFMDemodSettings"
+    },
+    "DSDDemodSettings" : {
+      "$ref" : "#/definitions/DSDDemodSettings"
+    },
+    "FileSourceSettings" : {
+      "$ref" : "#/definitions/FileSourceSettings"
+    },
+    "FreeDVDemodSettings" : {
+      "$ref" : "#/definitions/FreeDVDemodSettings"
+    },
+    "FreeDVModSettings" : {
+      "$ref" : "#/definitions/FreeDVModSettings"
+    },
+    "FreqTrackerSettings" : {
+      "$ref" : "#/definitions/FreqTrackerSettings"
+    },
+    "NFMDemodSettings" : {
+      "$ref" : "#/definitions/NFMDemodSettings"
+    },
+    "NFMModSettings" : {
+      "$ref" : "#/definitions/NFMModSettings"
+    },
+    "LocalSinkSettings" : {
+      "$ref" : "#/definitions/LocalSinkSettings"
+    },
+    "LocalSourceSettings" : {
+      "$ref" : "#/definitions/LocalSourceSettings"
+    },
+    "RemoteSinkSettings" : {
+      "$ref" : "#/definitions/RemoteSinkSettings"
+    },
+    "RemoteSourceSettings" : {
+      "$ref" : "#/definitions/RemoteSourceSettings"
+    },
+    "SSBModSettings" : {
+      "$ref" : "#/definitions/SSBModSettings"
+    },
+    "SSBDemodSettings" : {
+      "$ref" : "#/definitions/SSBDemodSettings"
+    },
+    "UDPSourceSettings" : {
+      "$ref" : "#/definitions/UDPSourceSettings"
+    },
+    "UDPSinkSettings" : {
+      "$ref" : "#/definitions/UDPSinkSettings"
+    },
+    "WFMDemodSettings" : {
+      "$ref" : "#/definitions/WFMDemodSettings"
+    },
+    "WFMModSettings" : {
+      "$ref" : "#/definitions/WFMModSettings"
+    }
+  },
+  "description" : "Base channel settings. Only the channel settings corresponding to the channel specified in the channelType field is or should be present."
+};
             defs.ChannelsDetail = {
   "required" : [ "channelcount" ],
   "properties" : {
@@ -1959,6 +2061,38 @@ margin-bottom: 20px;
     }
   },
   "description" : "All channels detailed information"
+};
+            defs.Command = {
+  "properties" : {
+    "group" : {
+      "type" : "string"
+    },
+    "description" : {
+      "type" : "string"
+    },
+    "command" : {
+      "type" : "string"
+    },
+    "argString" : {
+      "type" : "string"
+    },
+    "key" : {
+      "type" : "integer",
+      "description" : "Qt::Key"
+    },
+    "keyModifiers" : {
+      "type" : "integer"
+    },
+    "associateKey" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "release" : {
+      "type" : "integer",
+      "description" : "boolean"
+    }
+  },
+  "description" : "Represents a Command object"
 };
             defs.Complex = {
   "properties" : {
@@ -2151,6 +2285,23 @@ margin-bottom: 20px;
   },
   "description" : "List of DV serial devices available in the system"
 };
+            defs.DeviceConfig = {
+  "properties" : {
+    "deviceId" : {
+      "type" : "string"
+    },
+    "deviceSerial" : {
+      "type" : "string"
+    },
+    "deviceSequence" : {
+      "type" : "integer"
+    },
+    "config" : {
+      "$ref" : "#/definitions/DeviceSettings_2"
+    }
+  },
+  "description" : "Represents a Preset::DeviceConfig object"
+};
             defs.DeviceListItem = {
   "properties" : {
     "displayedName" : {
@@ -2311,6 +2462,112 @@ margin-bottom: 20px;
   "description" : "List of device sets opened in this instance"
 };
             defs.DeviceSettings = {
+  "required" : [ "deviceHwType", "direction" ],
+  "discriminator" : "deviceHwType",
+  "properties" : {
+    "deviceHwType" : {
+      "type" : "string",
+      "description" : "Device hardware type code"
+    },
+    "direction" : {
+      "type" : "integer",
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
+    },
+    "originatorIndex" : {
+      "type" : "integer",
+      "description" : "Optional for reverse API. This is the device set index from where the message comes from."
+    },
+    "airspySettings" : {
+      "$ref" : "#/definitions/AirspySettings"
+    },
+    "airspyHFSettings" : {
+      "$ref" : "#/definitions/AirspyHFSettings"
+    },
+    "bladeRF1InputSettings" : {
+      "$ref" : "#/definitions/BladeRF1InputSettings"
+    },
+    "bladeRF2InputSettings" : {
+      "$ref" : "#/definitions/BladeRF2InputSettings"
+    },
+    "bladeRF1OutputSettings" : {
+      "$ref" : "#/definitions/BladeRF1OutputSettings"
+    },
+    "bladeRF2OutputSettings" : {
+      "$ref" : "#/definitions/BladeRF2OutputSettings"
+    },
+    "fcdProSettings" : {
+      "$ref" : "#/definitions/FCDProSettings"
+    },
+    "fcdProPlusSettings" : {
+      "$ref" : "#/definitions/FCDProPlusSettings"
+    },
+    "fileInputSettings" : {
+      "$ref" : "#/definitions/FileInputSettings"
+    },
+    "hackRFInputSettings" : {
+      "$ref" : "#/definitions/HackRFInputSettings"
+    },
+    "hackRFOutputSettings" : {
+      "$ref" : "#/definitions/HackRFOutputSettings"
+    },
+    "kiwiSDRSettings" : {
+      "$ref" : "#/definitions/KiwiSDRSettings"
+    },
+    "limeSdrInputSettings" : {
+      "$ref" : "#/definitions/LimeSdrInputSettings"
+    },
+    "limeSdrOutputSettings" : {
+      "$ref" : "#/definitions/LimeSdrOutputSettings"
+    },
+    "localInputSettings" : {
+      "$ref" : "#/definitions/LocalInputSettings"
+    },
+    "localOutputSettings" : {
+      "$ref" : "#/definitions/LocalOutputSettings"
+    },
+    "perseusSettings" : {
+      "$ref" : "#/definitions/PerseusSettings"
+    },
+    "plutoSdrInputSettings" : {
+      "$ref" : "#/definitions/PlutoSdrInputSettings"
+    },
+    "plutoSdrOutputSettings" : {
+      "$ref" : "#/definitions/PlutoSdrOutputSettings"
+    },
+    "rtlSdrSettings" : {
+      "$ref" : "#/definitions/RtlSdrSettings"
+    },
+    "remoteOutputSettings" : {
+      "$ref" : "#/definitions/RemoteOutputSettings"
+    },
+    "remoteInputSettings" : {
+      "$ref" : "#/definitions/RemoteInputSettings"
+    },
+    "sdrPlaySettings" : {
+      "$ref" : "#/definitions/SDRPlaySettings"
+    },
+    "soapySDRInputSettings" : {
+      "$ref" : "#/definitions/SoapySDRInputSettings"
+    },
+    "soapySDROutputSettings" : {
+      "$ref" : "#/definitions/SoapySDROutputSettings"
+    },
+    "testSourceSettings" : {
+      "$ref" : "#/definitions/TestSourceSettings"
+    },
+    "testMISettings" : {
+      "$ref" : "#/definitions/TestMISettings"
+    },
+    "xtrxInputSettings" : {
+      "$ref" : "#/definitions/XtrxInputSettings"
+    },
+    "xtrxOutputSettings" : {
+      "$ref" : "#/definitions/XtrxOutputSettings"
+    }
+  },
+  "description" : "Base device settings. Only the device settings corresponding to the device specified in the deviceHwType field is or should be present."
+};
+            defs.DeviceSettings_2 = {
   "required" : [ "deviceHwType", "direction" ],
   "discriminator" : "deviceHwType",
   "properties" : {
@@ -3030,6 +3287,87 @@ margin-bottom: 20px;
   },
   "description" : "An frequency range with 64 bit support for min and max"
 };
+            defs.GLSpectrum = {
+  "properties" : {
+    "fftSize" : {
+      "type" : "integer"
+    },
+    "fftOverlap" : {
+      "type" : "integer"
+    },
+    "m_fftWindow" : {
+      "type" : "integer",
+      "description" : "See FFTWindow"
+    },
+    "refLevel" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "powerRange" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "displayWaterfall" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "invertedWaterfall" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "displayMaxHold" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "displayHistogram" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "decay" : {
+      "type" : "integer"
+    },
+    "displayGrid" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "invert" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "displayGridIntensity" : {
+      "type" : "integer"
+    },
+    "decayDivisor" : {
+      "type" : "integer"
+    },
+    "histogramStroke" : {
+      "type" : "integer"
+    },
+    "displayCurrent" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "displayTraceIntensity" : {
+      "type" : "integer"
+    },
+    "waterfallShare" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "averagingMode" : {
+      "type" : "integer",
+      "description" : "See GLSpectrumGUI::AveragingMode"
+    },
+    "averagingValue" : {
+      "type" : "integer"
+    },
+    "linear" : {
+      "type" : "integer",
+      "description" : "boolean"
+    }
+  },
+  "description" : "GLSpectrumGUI settings"
+};
             defs.Gain = {
   "properties" : {
     "gainCB" : {
@@ -3159,6 +3497,29 @@ margin-bottom: 20px;
     }
   },
   "description" : "Summarized information about channel plugins available in this SDRangel instance"
+};
+            defs.InstanceConfigResponse = {
+  "properties" : {
+    "preferences" : {
+      "$ref" : "#/definitions/Preferences"
+    },
+    "workingPreset" : {
+      "$ref" : "#/definitions/Preset"
+    },
+    "presets" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/Preset"
+      }
+    },
+    "commands" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/Command"
+      }
+    }
+  },
+  "description" : "Preferences, Presets and Commands of the MainSettings saved by Qt"
 };
             defs.InstanceDevicesResponse = {
   "required" : [ "devicecount" ],
@@ -4168,6 +4529,104 @@ margin-bottom: 20px;
     }
   },
   "description" : "PlutoSDR"
+};
+            defs.Preferences = {
+  "properties" : {
+    "sourceType" : {
+      "type" : "string"
+    },
+    "sourceDevice" : {
+      "type" : "string"
+    },
+    "audioType" : {
+      "type" : "string"
+    },
+    "audioDevice" : {
+      "type" : "string"
+    },
+    "sourceIndex" : {
+      "type" : "integer"
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "consoleMinLogLevel" : {
+      "type" : "integer",
+      "description" : "See QtMsgType"
+    },
+    "useLogFile" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "logFileName" : {
+      "type" : "string"
+    },
+    "fileMinLogLevel" : {
+      "type" : "integer",
+      "description" : "See QtMsgType"
+    }
+  },
+  "description" : "Repreents a Prefernce object"
+};
+            defs.Preset = {
+  "properties" : {
+    "sourcePreset" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "group" : {
+      "type" : "string"
+    },
+    "description" : {
+      "type" : "string"
+    },
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "m_spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
+    },
+    "dcOffsetCorrection" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "iqImbalanceCorrection" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "sourceId" : {
+      "type" : "string"
+    },
+    "sourceSerial" : {
+      "type" : "string"
+    },
+    "sourceSequence" : {
+      "type" : "integer"
+    },
+    "channelConfigs" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ChannelConfig"
+      }
+    },
+    "deviceConfigs" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/DeviceConfig"
+      }
+    },
+    "layout" : {
+      "type" : "string",
+      "description" : "screen and dock layout is a QByteArray handled by Qt::QMainWindow translated to base64"
+    }
+  },
+  "description" : "Represents a Preset object"
 };
             defs.PresetExport = {
   "properties" : {
@@ -6260,6 +6719,9 @@ margin-bottom: 20px;
                     </li>
                     <li data-group="Instance" data-name="instanceChannels" class="">
                       <a href="#api-Instance-instanceChannels">instanceChannels</a>
+                    </li>
+                    <li data-group="Instance" data-name="instanceConfig" class="">
+                      <a href="#api-Instance-instanceConfig">instanceConfig</a>
                     </li>
                     <li data-group="Instance" data-name="instanceDelete" class="">
                       <a href="#api-Instance-instanceDelete">instanceDelete</a>
@@ -20218,6 +20680,341 @@ except ApiException as e:
                         </article>
                       </div>
                       <hr>
+                    <div id="api-Instance-instanceConfig">
+                      <article id="api-Instance-instanceConfig-0" data-group="User" data-name="instanceConfig" data-version="0">
+                        <div class="pull-left">
+                          <h1>instanceConfig</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Get the Preferences, Presets and Commands of the MainSettings saved by Qt</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/config</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Instance-instanceConfig-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceConfig-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Instance-instanceConfig-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceConfig-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceConfig-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Instance-instanceConfig-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceConfig-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceConfig-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Instance-instanceConfig-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Instance-instanceConfig-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceConfig-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Instance-instanceConfig-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/config"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Instance-instanceConfig-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.InstanceApi;
+
+import java.io.File;
+import java.util.*;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        
+        InstanceApi apiInstance = new InstanceApi();
+        try {
+            InstanceConfigResponse result = apiInstance.instanceConfig();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceConfig");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Instance-instanceConfig-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        InstanceApi apiInstance = new InstanceApi();
+        try {
+            InstanceConfigResponse result = apiInstance.instanceConfig();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceConfig");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Instance-instanceConfig-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Instance-instanceConfig-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+InstanceApi *apiInstance = [[InstanceApi alloc] init];
+
+[apiInstance instanceConfigWithCompletionHandler: 
+              ^(InstanceConfigResponse output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceConfig-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.InstanceApi()
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.instanceConfig(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Instance-instanceConfig-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Instance-instanceConfig-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class instanceConfigExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new InstanceApi();
+
+            try
+            {
+                InstanceConfigResponse result = apiInstance.instanceConfig();
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling InstanceApi.instanceConfig: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceConfig-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\InstanceApi();
+
+try {
+    $result = $api_instance->instanceConfig();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling InstanceApi->instanceConfig: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceConfig-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::InstanceApi;
+
+my $api_instance = SWGSDRangel::InstanceApi->new();
+
+eval { 
+    my $result = $api_instance->instanceConfig();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling InstanceApi->instanceConfig: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceConfig-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.InstanceApi()
+
+try: 
+    api_response = api_instance.instance_config()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling InstanceApi->instanceConfig: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - Success </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceConfig-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceConfig-200-schema">
+                                  <div id='responses-instanceConfig-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Success",
+  "schema" : {
+    "$ref" : "#/definitions/InstanceConfigResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceConfig-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceConfig-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceConfig-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceConfig-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceConfig-500-schema">
+                                  <div id='responses-instanceConfig-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceConfig-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceConfig-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceConfig-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceConfig-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceConfig-501-schema">
+                                  <div id='responses-instanceConfig-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceConfig-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceConfig-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceConfig-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-Instance-instanceDelete">
                       <article id="api-Instance-instanceDelete-0" data-group="User" data-name="instanceDelete" data-version="0">
                         <div class="pull-left">
@@ -26364,7 +27161,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-07-30T10:33:29.454+02:00
+              Generated 2019-07-31T18:41:04.524+02:00
             </div>
           </div>
       </div>
