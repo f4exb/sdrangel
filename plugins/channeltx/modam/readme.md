@@ -72,7 +72,7 @@ Clears the CW (Morse) text
 
 <h3>12: Morse keyer controls</h3>
 
-![Morse keyer control GUI](../../../doc/img/ModCWControls.png)
+![Morse keyer control GUI1](../../../doc/img/ModCWControls1.png)
 
 <h4>12.1: CW keying speed</h4>
 
@@ -82,7 +82,7 @@ Sets the CW speed in Words Per Minute (WPM). This is based on the word "PARIS" s
   - Dash: 3 dot lengths
   - Character silence separator: 3 dot lengths
   - Word silence separator: 7 dot lengths
-  
+
 <h4>12.2: Dots keying</h4>
 
 Switch this button to send dots continuously
@@ -102,6 +102,26 @@ Switch this button to auto repeat the text keying
 <h4>12.6: Text play/stop</h4>
 
 Use this button to stop sending text. When resuming keying restarts at the start of text
+
+![Morse keyer control GUI2](../../../doc/img/ModCWControls2.png)
+
+&#9888; WARNING: what follows is not really useful if you do not use a proper Morse keyer with direct audio feedback. There is a significant audio delay either with the direct monitoring or by monitoring the transmitted signal so keying with this audio as feedback is not practical
+
+12.7: Activate morse keys keyboard control
+
+This disables text or continuous dots or dashes. Toggle input from keyboard. Occasionnaly the focus may get lost and you will have to deactivate and reactivate it to recover the key bindings.
+
+12.8: Iambic or straight
+
+Choose iambic or straight keying style. When straight is selected the dot or dash key may be used.
+
+12.9: Register dot key
+
+Click on the button and while selected type a character or character and modifier (Shift + key for example) to select which key is used for dots. The key or key sequence appears next (here dot `.`)
+
+12.10: Register dash key
+
+Click on the button and while selected type a character or character and modifier (Shift + key for example) to select which key is used for dashes. The key or key sequence appears next (here dot `.`)
 
 <h3>13: Audio file path</h3>
 

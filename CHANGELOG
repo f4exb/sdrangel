@@ -1,3 +1,9 @@
+sdrangel (4.11.5-1) unstable; urgency=medium
+
+  * CW keyer from keyboard. Audio monitor AM, NFM, SSB modulators. Implements #385
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 30 Jul 2019 23:04:06 +0200
+
 sdrangel (4.11.4-1) unstable; urgency=medium
 
   * DATV demod: option to output transport stream to UDP. Implements #313
