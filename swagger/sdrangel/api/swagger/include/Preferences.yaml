@@ -1,16 +1,16 @@
 Preferences:
   description: Repreents a Prefernce object
   properties:
-    sourceType:
-      type: string
     sourceDevice:
+      description: Identification of the source used in R0 tab (GUI flavor) at startup
       type: string
+    sourceIndex:
+      description: Index of the source used in R0 tab (GUI flavor) at startup
+      type: integer
     audioType:
       type: string
     audioDevice:
       type: string
-    sourceIndex:
-      type: integer
     latitude:
       type: number
       format: float

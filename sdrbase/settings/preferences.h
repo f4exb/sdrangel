@@ -13,8 +13,6 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 
-	void setSourceType(const QString& value) { m_sourceType = value; }
-	const QString& getSourceType() const { return m_sourceType; }
 	void setSourceDevice(const QString& value) { m_sourceDevice= value; }
 	const QString& getSourceDevice() const { return m_sourceDevice; }
 	void setSourceIndex(const int value) { m_sourceIndex = value; }
@@ -40,9 +38,8 @@ public:
 	const QString& getLogFileName() const { return m_logFileName; }
 
 protected:
-	QString m_sourceType;
-	QString m_sourceDevice;
-	int m_sourceIndex;
+	QString m_sourceDevice; //!< Identification of the source used in R0 tab (GUI flavor) at startup
+	int m_sourceIndex;      //!< Index of the source used in R0 tab (GUI flavor) at startup
 
 	QString m_audioType;
 	QString m_audioDevice;
