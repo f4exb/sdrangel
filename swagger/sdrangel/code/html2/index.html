@@ -1770,7 +1770,7 @@ margin-bottom: 20px;
       "description" : "Channel type ID in short form from object name"
     },
     "config" : {
-      "$ref" : "#/definitions/ChannelSettings_2"
+      "$ref" : "#/definitions/ChannelSettings"
     }
   },
   "description" : "Represents a Preset::ChannelConfig object"
@@ -1874,92 +1874,6 @@ margin-bottom: 20px;
   "description" : "Base channel report. Only the channel report corresponding to the channel specified in the channelType field is or should be present."
 };
             defs.ChannelSettings = {
-  "required" : [ "channelType", "direction" ],
-  "discriminator" : "channelType",
-  "properties" : {
-    "channelType" : {
-      "type" : "string",
-      "description" : "Channel type code"
-    },
-    "direction" : {
-      "type" : "integer",
-      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
-    },
-    "originatorDeviceSetIndex" : {
-      "type" : "integer",
-      "description" : "Optional for reverse API. This is the device set index from where the message comes from."
-    },
-    "originatorChannelIndex" : {
-      "type" : "integer",
-      "description" : "Optional for reverse API. This is the channel index from where the message comes from."
-    },
-    "AMDemodSettings" : {
-      "$ref" : "#/definitions/AMDemodSettings"
-    },
-    "AMModSettings" : {
-      "$ref" : "#/definitions/AMModSettings"
-    },
-    "ATVModSettings" : {
-      "$ref" : "#/definitions/ATVModSettings"
-    },
-    "BFMDemodSettings" : {
-      "$ref" : "#/definitions/BFMDemodSettings"
-    },
-    "DSDDemodSettings" : {
-      "$ref" : "#/definitions/DSDDemodSettings"
-    },
-    "FileSourceSettings" : {
-      "$ref" : "#/definitions/FileSourceSettings"
-    },
-    "FreeDVDemodSettings" : {
-      "$ref" : "#/definitions/FreeDVDemodSettings"
-    },
-    "FreeDVModSettings" : {
-      "$ref" : "#/definitions/FreeDVModSettings"
-    },
-    "FreqTrackerSettings" : {
-      "$ref" : "#/definitions/FreqTrackerSettings"
-    },
-    "NFMDemodSettings" : {
-      "$ref" : "#/definitions/NFMDemodSettings"
-    },
-    "NFMModSettings" : {
-      "$ref" : "#/definitions/NFMModSettings"
-    },
-    "LocalSinkSettings" : {
-      "$ref" : "#/definitions/LocalSinkSettings"
-    },
-    "LocalSourceSettings" : {
-      "$ref" : "#/definitions/LocalSourceSettings"
-    },
-    "RemoteSinkSettings" : {
-      "$ref" : "#/definitions/RemoteSinkSettings"
-    },
-    "RemoteSourceSettings" : {
-      "$ref" : "#/definitions/RemoteSourceSettings"
-    },
-    "SSBModSettings" : {
-      "$ref" : "#/definitions/SSBModSettings"
-    },
-    "SSBDemodSettings" : {
-      "$ref" : "#/definitions/SSBDemodSettings"
-    },
-    "UDPSourceSettings" : {
-      "$ref" : "#/definitions/UDPSourceSettings"
-    },
-    "UDPSinkSettings" : {
-      "$ref" : "#/definitions/UDPSinkSettings"
-    },
-    "WFMDemodSettings" : {
-      "$ref" : "#/definitions/WFMDemodSettings"
-    },
-    "WFMModSettings" : {
-      "$ref" : "#/definitions/WFMModSettings"
-    }
-  },
-  "description" : "Base channel settings. Only the channel settings corresponding to the channel specified in the channelType field is or should be present."
-};
-            defs.ChannelSettings_2 = {
   "required" : [ "channelType", "direction" ],
   "discriminator" : "channelType",
   "properties" : {
@@ -2297,7 +2211,7 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "config" : {
-      "$ref" : "#/definitions/DeviceSettings_2"
+      "$ref" : "#/definitions/DeviceSettings"
     }
   },
   "description" : "Represents a Preset::DeviceConfig object"
@@ -2462,112 +2376,6 @@ margin-bottom: 20px;
   "description" : "List of device sets opened in this instance"
 };
             defs.DeviceSettings = {
-  "required" : [ "deviceHwType", "direction" ],
-  "discriminator" : "deviceHwType",
-  "properties" : {
-    "deviceHwType" : {
-      "type" : "string",
-      "description" : "Device hardware type code"
-    },
-    "direction" : {
-      "type" : "integer",
-      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
-    },
-    "originatorIndex" : {
-      "type" : "integer",
-      "description" : "Optional for reverse API. This is the device set index from where the message comes from."
-    },
-    "airspySettings" : {
-      "$ref" : "#/definitions/AirspySettings"
-    },
-    "airspyHFSettings" : {
-      "$ref" : "#/definitions/AirspyHFSettings"
-    },
-    "bladeRF1InputSettings" : {
-      "$ref" : "#/definitions/BladeRF1InputSettings"
-    },
-    "bladeRF2InputSettings" : {
-      "$ref" : "#/definitions/BladeRF2InputSettings"
-    },
-    "bladeRF1OutputSettings" : {
-      "$ref" : "#/definitions/BladeRF1OutputSettings"
-    },
-    "bladeRF2OutputSettings" : {
-      "$ref" : "#/definitions/BladeRF2OutputSettings"
-    },
-    "fcdProSettings" : {
-      "$ref" : "#/definitions/FCDProSettings"
-    },
-    "fcdProPlusSettings" : {
-      "$ref" : "#/definitions/FCDProPlusSettings"
-    },
-    "fileInputSettings" : {
-      "$ref" : "#/definitions/FileInputSettings"
-    },
-    "hackRFInputSettings" : {
-      "$ref" : "#/definitions/HackRFInputSettings"
-    },
-    "hackRFOutputSettings" : {
-      "$ref" : "#/definitions/HackRFOutputSettings"
-    },
-    "kiwiSDRSettings" : {
-      "$ref" : "#/definitions/KiwiSDRSettings"
-    },
-    "limeSdrInputSettings" : {
-      "$ref" : "#/definitions/LimeSdrInputSettings"
-    },
-    "limeSdrOutputSettings" : {
-      "$ref" : "#/definitions/LimeSdrOutputSettings"
-    },
-    "localInputSettings" : {
-      "$ref" : "#/definitions/LocalInputSettings"
-    },
-    "localOutputSettings" : {
-      "$ref" : "#/definitions/LocalOutputSettings"
-    },
-    "perseusSettings" : {
-      "$ref" : "#/definitions/PerseusSettings"
-    },
-    "plutoSdrInputSettings" : {
-      "$ref" : "#/definitions/PlutoSdrInputSettings"
-    },
-    "plutoSdrOutputSettings" : {
-      "$ref" : "#/definitions/PlutoSdrOutputSettings"
-    },
-    "rtlSdrSettings" : {
-      "$ref" : "#/definitions/RtlSdrSettings"
-    },
-    "remoteOutputSettings" : {
-      "$ref" : "#/definitions/RemoteOutputSettings"
-    },
-    "remoteInputSettings" : {
-      "$ref" : "#/definitions/RemoteInputSettings"
-    },
-    "sdrPlaySettings" : {
-      "$ref" : "#/definitions/SDRPlaySettings"
-    },
-    "soapySDRInputSettings" : {
-      "$ref" : "#/definitions/SoapySDRInputSettings"
-    },
-    "soapySDROutputSettings" : {
-      "$ref" : "#/definitions/SoapySDROutputSettings"
-    },
-    "testSourceSettings" : {
-      "$ref" : "#/definitions/TestSourceSettings"
-    },
-    "testMISettings" : {
-      "$ref" : "#/definitions/TestMISettings"
-    },
-    "xtrxInputSettings" : {
-      "$ref" : "#/definitions/XtrxInputSettings"
-    },
-    "xtrxOutputSettings" : {
-      "$ref" : "#/definitions/XtrxOutputSettings"
-    }
-  },
-  "description" : "Base device settings. Only the device settings corresponding to the device specified in the deviceHwType field is or should be present."
-};
-            defs.DeviceSettings_2 = {
   "required" : [ "deviceHwType", "direction" ],
   "discriminator" : "deviceHwType",
   "properties" : {
@@ -27161,7 +26969,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-07-31T18:41:04.524+02:00
+              Generated 2019-07-31T22:38:42.618+02:00
             </div>
           </div>
       </div>

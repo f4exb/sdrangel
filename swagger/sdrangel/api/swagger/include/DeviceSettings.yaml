@@ -1,0 +1,74 @@
+DeviceSettings:
+  description: Base device settings. Only the device settings corresponding to the device specified in the deviceHwType field is or should be present.
+  discriminator: deviceHwType
+  required:
+    - deviceHwType
+    - direction
+  properties:
+    deviceHwType:
+      description: Device hardware type code
+      type: string
+    direction:
+      description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
+      type: integer
+    originatorIndex:
+      description: Optional for reverse API. This is the device set index from where the message comes from.
+      type: integer
+    airspySettings:
+      $ref: "http://localhost:8081/api/swagger/include/Airspy.yaml#/AirspySettings"
+    airspyHFSettings:
+      $ref: "http://localhost:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFSettings"
+    bladeRF1InputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/BladeRF1.yaml#/BladeRF1InputSettings"
+    bladeRF2InputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2InputSettings"
+    bladeRF1OutputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/BladeRF1.yaml#/BladeRF1OutputSettings"
+    bladeRF2OutputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2OutputSettings"
+    fcdProSettings:
+      $ref: "http://localhost:8081/api/swagger/include/FCDPro.yaml#/FCDProSettings"
+    fcdProPlusSettings:
+      $ref: "http://localhost:8081/api/swagger/include/FCDProPlus.yaml#/FCDProPlusSettings"
+    fileInputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/FileInput.yaml#/FileInputSettings"
+    hackRFInputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/HackRF.yaml#/HackRFInputSettings"
+    hackRFOutputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/HackRF.yaml#/HackRFOutputSettings"
+    kiwiSDRSettings:
+      $ref: "http://localhost:8081/api/swagger/include/KiwiSDR.yaml#/KiwiSDRSettings"
+    limeSdrInputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputSettings"
+    limeSdrOutputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputSettings"
+    localInputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/LocalInput.yaml#/LocalInputSettings"
+    localOutputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/LocalOutput.yaml#/LocalOutputSettings"
+    perseusSettings:
+      $ref: "http://localhost:8081/api/swagger/include/Perseus.yaml#/PerseusSettings"
+    plutoSdrInputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrInputSettings"
+    plutoSdrOutputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputSettings"
+    rtlSdrSettings:
+      $ref: "http://localhost:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
+    remoteOutputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/RemoteOutput.yaml#/RemoteOutputSettings"
+    remoteInputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/RemoteInput.yaml#/RemoteInputSettings"
+    sdrPlaySettings:
+      $ref: "http://localhost:8081/api/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
+    soapySDRInputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRInputSettings"
+    soapySDROutputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/SoapySDR.yaml#/SoapySDROutputSettings"
+    testSourceSettings:
+      $ref: "http://localhost:8081/api/swagger/include/TestSource.yaml#/TestSourceSettings"
+    testMISettings:
+      $ref: "http://localhost:8081/api/swagger/include/TestMI.yaml#/TestMISettings"
+    xtrxInputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/Xtrx.yaml#/XtrxInputSettings"
+    xtrxOutputSettings:
+      $ref: "http://localhost:8081/api/swagger/include/Xtrx.yaml#/XtrxOutputSettings"

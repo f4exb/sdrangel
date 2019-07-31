@@ -46,7 +46,7 @@ SWGChannelConfig::init() {
     m_channel_id_uri_isSet = false;
     channel_id = new QString("");
     m_channel_id_isSet = false;
-    config = new SWGChannelSettings_2();
+    config = new SWGChannelSettings();
     m_config_isSet = false;
 }
 
@@ -78,7 +78,7 @@ SWGChannelConfig::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&channel_id, pJson["channelId"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&config, pJson["config"], "SWGChannelSettings_2", "SWGChannelSettings_2");
+    ::SWGSDRangel::setValue(&config, pJson["config"], "SWGChannelSettings", "SWGChannelSettings");
     
 }
 
@@ -103,7 +103,7 @@ SWGChannelConfig::asJsonObject() {
         toJsonValue(QString("channelId"), channel_id, obj, QString("QString"));
     }
     if((config != nullptr) && (config->isSet())){
-        toJsonValue(QString("config"), config, obj, QString("SWGChannelSettings_2"));
+        toJsonValue(QString("config"), config, obj, QString("SWGChannelSettings"));
     }
 
     return obj;
@@ -129,12 +129,12 @@ SWGChannelConfig::setChannelId(QString* channel_id) {
     this->m_channel_id_isSet = true;
 }
 
-SWGChannelSettings_2*
+SWGChannelSettings*
 SWGChannelConfig::getConfig() {
     return config;
 }
 void
-SWGChannelConfig::setConfig(SWGChannelSettings_2* config) {
+SWGChannelConfig::setConfig(SWGChannelSettings* config) {
     this->config = config;
     this->m_config_isSet = true;
 }

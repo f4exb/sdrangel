@@ -46,7 +46,6 @@
 #include "SWGChannelListItem.h"
 #include "SWGChannelReport.h"
 #include "SWGChannelSettings.h"
-#include "SWGChannelSettings_2.h"
 #include "SWGChannelsDetail.h"
 #include "SWGCommand.h"
 #include "SWGComplex.h"
@@ -60,7 +59,6 @@
 #include "SWGDeviceSet.h"
 #include "SWGDeviceSetList.h"
 #include "SWGDeviceSettings.h"
-#include "SWGDeviceSettings_2.h"
 #include "SWGDeviceState.h"
 #include "SWGErrorResponse.h"
 #include "SWGFCDProPlusSettings.h"
@@ -262,9 +260,6 @@ namespace SWGSDRangel {
     if(QString("SWGChannelSettings").compare(type) == 0) {
       return new SWGChannelSettings();
     }
-    if(QString("SWGChannelSettings_2").compare(type) == 0) {
-      return new SWGChannelSettings_2();
-    }
     if(QString("SWGChannelsDetail").compare(type) == 0) {
       return new SWGChannelsDetail();
     }
@@ -303,9 +298,6 @@ namespace SWGSDRangel {
     }
     if(QString("SWGDeviceSettings").compare(type) == 0) {
       return new SWGDeviceSettings();
-    }
-    if(QString("SWGDeviceSettings_2").compare(type) == 0) {
-      return new SWGDeviceSettings_2();
     }
     if(QString("SWGDeviceState").compare(type) == 0) {
       return new SWGDeviceState();

@@ -8,7 +8,7 @@ DeviceConfig:
     deviceSequence:
       type: integer
     config:
-      $ref: "http://localhost:8081/api/swagger/swagger.yaml#/definitions/DeviceSettings"
+      $ref: "/doc/swagger/include/DeviceSettings.yaml#/DeviceSettings"
 
 ChannelConfig:
   description: Represents a Preset::ChannelConfig object
@@ -20,7 +20,7 @@ ChannelConfig:
       description: Channel type ID in short form from object name
       type: string
     config:
-      $ref: "http://localhost:8081/api/swagger/swagger.yaml#/definitions/ChannelSettings"
+      $ref: "/doc/swagger/include/ChannelSettings.yaml#/ChannelSettings"
 
 Preset:
   description: Represents a Preset object

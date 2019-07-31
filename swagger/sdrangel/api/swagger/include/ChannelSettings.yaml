@@ -1,0 +1,61 @@
+ChannelSettings:
+  description: Base channel settings. Only the channel settings corresponding to the channel specified in the channelType field is or should be present.
+  discriminator: channelType
+  required:
+    - channelType
+    - direction
+  properties:
+    channelType:
+      description: Channel type code
+      type: string
+    direction:
+      description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
+      type: integer
+    originatorDeviceSetIndex:
+      description: Optional for reverse API. This is the device set index from where the message comes from.
+      type: integer
+    originatorChannelIndex:
+      description: Optional for reverse API. This is the channel index from where the message comes from.
+      type: integer
+    AMDemodSettings:
+      $ref: "http://localhost:8081/api/swagger/include/AMDemod.yaml#/AMDemodSettings"
+    AMModSettings:
+      $ref: "http://localhost:8081/api/swagger/include/AMMod.yaml#/AMModSettings"
+    ATVModSettings:
+      $ref: "http://localhost:8081/api/swagger/include/ATVMod.yaml#/ATVModSettings"
+    BFMDemodSettings:
+      $ref: "http://localhost:8081/api/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
+    DSDDemodSettings:
+      $ref: "http://localhost:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodSettings"
+    FileSourceSettings:
+      $ref: "http://localhost:8081/api/swagger/include/FileSource.yaml#/FileSourceSettings"
+    FreeDVDemodSettings:
+      $ref: "http://localhost:8081/api/swagger/include/FreeDVDemod.yaml#/FreeDVDemodSettings"
+    FreeDVModSettings:
+      $ref: "http://localhost:8081/api/swagger/include/FreeDVMod.yaml#/FreeDVModSettings"
+    FreqTrackerSettings:
+      $ref: "http://localhost:8081/api/swagger/include/FreqTracker.yaml#/FreqTrackerSettings"
+    NFMDemodSettings:
+      $ref: "http://localhost:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
+    NFMModSettings:
+      $ref: "http://localhost:8081/api/swagger/include/NFMMod.yaml#/NFMModSettings"
+    LocalSinkSettings:
+      $ref: "http://localhost:8081/api/swagger/include/LocalSink.yaml#/LocalSinkSettings"
+    LocalSourceSettings:
+      $ref: "http://localhost:8081/api/swagger/include/LocalSource.yaml#/LocalSourceSettings"
+    RemoteSinkSettings:
+      $ref: "http://localhost:8081/api/swagger/include/RemoteSink.yaml#/RemoteSinkSettings"
+    RemoteSourceSettings:
+      $ref: "http://localhost:8081/api/swagger/include/RemoteSource.yaml#/RemoteSourceSettings"
+    SSBModSettings:
+      $ref: "http://localhost:8081/api/swagger/include/SSBMod.yaml#/SSBModSettings"
+    SSBDemodSettings:
+      $ref: "http://localhost:8081/api/swagger/include/SSBDemod.yaml#/SSBDemodSettings"
+    UDPSourceSettings:
+      $ref: "http://localhost:8081/api/swagger/include/UDPSource.yaml#/UDPSourceSettings"
+    UDPSinkSettings:
+      $ref: "http://localhost:8081/api/swagger/include/UDPSink.yaml#/UDPSinkSettings"
+    WFMDemodSettings:
+      $ref: "http://localhost:8081/api/swagger/include/WFMDemod.yaml#/WFMDemodSettings"
+    WFMModSettings:
+      $ref: "http://localhost:8081/api/swagger/include/WFMMod.yaml#/WFMModSettings"

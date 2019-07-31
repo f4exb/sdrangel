@@ -22,7 +22,7 @@
 #include <QJsonObject>
 
 
-#include "SWGChannelSettings_2.h"
+#include "SWGChannelSettings.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -49,8 +49,8 @@ public:
     QString* getChannelId();
     void setChannelId(QString* channel_id);
 
-    SWGChannelSettings_2* getConfig();
-    void setConfig(SWGChannelSettings_2* config);
+    SWGChannelSettings* getConfig();
+    void setConfig(SWGChannelSettings* config);
 
 
     virtual bool isSet() override;
@@ -62,7 +62,7 @@ private:
     QString* channel_id;
     bool m_channel_id_isSet;
 
-    SWGChannelSettings_2* config;
+    SWGChannelSettings* config;
     bool m_config_isSet;
 
 };

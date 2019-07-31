@@ -22,7 +22,7 @@
 #include <QJsonObject>
 
 
-#include "SWGDeviceSettings_2.h"
+#include "SWGDeviceSettings.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -52,8 +52,8 @@ public:
     qint32 getDeviceSequence();
     void setDeviceSequence(qint32 device_sequence);
 
-    SWGDeviceSettings_2* getConfig();
-    void setConfig(SWGDeviceSettings_2* config);
+    SWGDeviceSettings* getConfig();
+    void setConfig(SWGDeviceSettings* config);
 
 
     virtual bool isSet() override;
@@ -68,7 +68,7 @@ private:
     qint32 device_sequence;
     bool m_device_sequence_isSet;
 
-    SWGDeviceSettings_2* config;
+    SWGDeviceSettings* config;
     bool m_config_isSet;
 
 };

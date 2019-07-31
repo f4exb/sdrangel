@@ -50,7 +50,7 @@ SWGDeviceConfig::init() {
     m_device_serial_isSet = false;
     device_sequence = 0;
     m_device_sequence_isSet = false;
-    config = new SWGDeviceSettings_2();
+    config = new SWGDeviceSettings();
     m_config_isSet = false;
 }
 
@@ -85,7 +85,7 @@ SWGDeviceConfig::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&device_sequence, pJson["deviceSequence"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&config, pJson["config"], "SWGDeviceSettings_2", "SWGDeviceSettings_2");
+    ::SWGSDRangel::setValue(&config, pJson["config"], "SWGDeviceSettings", "SWGDeviceSettings");
     
 }
 
@@ -113,7 +113,7 @@ SWGDeviceConfig::asJsonObject() {
         obj->insert("deviceSequence", QJsonValue(device_sequence));
     }
     if((config != nullptr) && (config->isSet())){
-        toJsonValue(QString("config"), config, obj, QString("SWGDeviceSettings_2"));
+        toJsonValue(QString("config"), config, obj, QString("SWGDeviceSettings"));
     }
 
     return obj;
@@ -149,12 +149,12 @@ SWGDeviceConfig::setDeviceSequence(qint32 device_sequence) {
     this->m_device_sequence_isSet = true;
 }
 
-SWGDeviceSettings_2*
+SWGDeviceSettings*
 SWGDeviceConfig::getConfig() {
     return config;
 }
 void
-SWGDeviceConfig::setConfig(SWGDeviceSettings_2* config) {
+SWGDeviceConfig::setConfig(SWGDeviceSettings* config) {
     this->config = config;
     this->m_config_isSet = true;
 }

@@ -1,0 +1,61 @@
+ChannelSettings:
+  description: Base channel settings. Only the channel settings corresponding to the channel specified in the channelType field is or should be present.
+  discriminator: channelType
+  required:
+    - channelType
+    - direction
+  properties:
+    channelType:
+      description: Channel type code
+      type: string
+    direction:
+      description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
+      type: integer
+    originatorDeviceSetIndex:
+      description: Optional for reverse API. This is the device set index from where the message comes from.
+      type: integer
+    originatorChannelIndex:
+      description: Optional for reverse API. This is the channel index from where the message comes from.
+      type: integer
+    AMDemodSettings:
+      $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodSettings"
+    AMModSettings:
+      $ref: "/doc/swagger/include/AMMod.yaml#/AMModSettings"
+    ATVModSettings:
+      $ref: "/doc/swagger/include/ATVMod.yaml#/ATVModSettings"
+    BFMDemodSettings:
+      $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
+    DSDDemodSettings:
+      $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodSettings"
+    FileSourceSettings:
+      $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceSettings"
+    FreeDVDemodSettings:
+      $ref: "/doc/swagger/include/FreeDVDemod.yaml#/FreeDVDemodSettings"
+    FreeDVModSettings:
+      $ref: "/doc/swagger/include/FreeDVMod.yaml#/FreeDVModSettings"
+    FreqTrackerSettings:
+      $ref: "/doc/swagger/include/FreqTracker.yaml#/FreqTrackerSettings"
+    NFMDemodSettings:
+      $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
+    NFMModSettings:
+      $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModSettings"
+    LocalSinkSettings:
+      $ref: "/doc/swagger/include/LocalSink.yaml#/LocalSinkSettings"
+    LocalSourceSettings:
+      $ref: "/doc/swagger/include/LocalSource.yaml#/LocalSourceSettings"
+    RemoteSinkSettings:
+      $ref: "/doc/swagger/include/RemoteSink.yaml#/RemoteSinkSettings"
+    RemoteSourceSettings:
+      $ref: "/doc/swagger/include/RemoteSource.yaml#/RemoteSourceSettings"
+    SSBModSettings:
+      $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModSettings"
+    SSBDemodSettings:
+      $ref: "/doc/swagger/include/SSBDemod.yaml#/SSBDemodSettings"
+    UDPSourceSettings:
+      $ref: "/doc/swagger/include/UDPSource.yaml#/UDPSourceSettings"
+    UDPSinkSettings:
+      $ref: "/doc/swagger/include/UDPSink.yaml#/UDPSinkSettings"
+    WFMDemodSettings:
+      $ref: "/doc/swagger/include/WFMDemod.yaml#/WFMDemodSettings"
+    WFMModSettings:
+      $ref: "/doc/swagger/include/WFMMod.yaml#/WFMModSettings"
