@@ -793,7 +793,7 @@ void SSBMod::applyAudioSampleRate(int sampleRate)
 
 void SSBMod::applyFeedbackAudioSampleRate(unsigned int sampleRate)
 {
-    qDebug("AMMod::applyFeedbackAudioSampleRate: %u", sampleRate);
+    qDebug("SSBMod::applyFeedbackAudioSampleRate: %u", sampleRate);
 
     m_settingsMutex.lock();
 

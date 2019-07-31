@@ -118,6 +118,7 @@ private slots:
 
     void configureFileName();
     void audioSelect();
+    void audioFeedbackSelect();
     void tick();
 };
 

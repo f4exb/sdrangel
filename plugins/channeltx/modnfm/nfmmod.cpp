@@ -520,7 +520,7 @@ void NFMMod::applyAudioSampleRate(int sampleRate)
 
 void NFMMod::applyFeedbackAudioSampleRate(unsigned int sampleRate)
 {
-    qDebug("AMMod::applyFeedbackAudioSampleRate: %u", sampleRate);
+    qDebug("NFMMod::applyFeedbackAudioSampleRate: %u", sampleRate);
 
     m_settingsMutex.lock();
 
@@ -993,7 +993,7 @@ void NFMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setDirection(1); // single source (Tx)
-    swgChannelSettings->setChannelType(new QString("AMMod"));
+    swgChannelSettings->setChannelType(new QString("NFMMod"));
     swgChannelSettings->setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
     SWGSDRangel::SWGNFMModSettings *swgNFModSettings = swgChannelSettings->getNfmModSettings();
 
