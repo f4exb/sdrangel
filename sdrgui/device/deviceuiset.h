@@ -111,8 +111,6 @@ private:
 
     void renameRxChannelInstances();
     void renameTxChannelInstances();
-    /** Use this function to support possible older identifiers in presets */
-    bool compareRxChannelURIs(const QString& registerdChannelURI, const QString& xChannelURI);
 };
 
 

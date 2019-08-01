@@ -54,6 +54,7 @@ set(sdrbase_SOURCES
     audio/audioresampler.cpp
 
     channel/channelapi.cpp
+    channel/channelutils.cpp
     channel/remotedataqueue.cpp
     channel/remotedatareadqueue.cpp
 
@@ -160,6 +161,7 @@ set(sdrbase_HEADERS
     audio/audioresampler.h
 
     channel/channelapi.h
+    channel/channelutils.h
     channel/remotedataqueue.h
     channel/remotedatareadqueue.h
     channel/remotedatablock.h

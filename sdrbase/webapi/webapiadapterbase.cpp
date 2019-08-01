@@ -19,6 +19,7 @@
 
 #include "plugin/pluginmanager.h"
 #include "channel/channelapi.h"
+#include "channel/channelutils.h"
 #include "webapiadapterbase.h"
 
 WebAPIAdapterBase::WebAPIAdapterBase()
@@ -67,6 +68,7 @@ void WebAPIAdapterBase::webapiFormatPreset(
         const Preset::ChannelConfig& channelConfig = preset.getChannelConfig(i);
         QList<SWGSDRangel::SWGChannelConfig *> *swgChannelConfigs = apiPreset->getChannelConfigs();
         swgChannelConfigs->append(new SWGSDRangel::SWGChannelConfig);
+        swgChannelConfigs->back()->init();
         swgChannelConfigs->back()->setChannelIdUri(new QString(channelConfig.m_channelIdURI));
         const QByteArray& channelSettings = channelConfig.m_config;
         SWGSDRangel::SWGChannelSettings *swgChannelSettings = swgChannelConfigs->back()->getConfig();
@@ -87,12 +89,13 @@ void WebAPIAdapterBase::webapiFormatPreset(
         const Preset::DeviceConfig& deviceConfig = preset.getDeviceConfig(i);
         QList<SWGSDRangel::SWGDeviceConfig *> *swgdeviceConfigs = apiPreset->getDeviceConfigs();
         swgdeviceConfigs->append(new SWGSDRangel::SWGDeviceConfig);
+        swgdeviceConfigs->back()->init();
         swgdeviceConfigs->back()->setDeviceId(new QString(deviceConfig.m_deviceId));
         swgdeviceConfigs->back()->setDeviceSerial(new QString(deviceConfig.m_deviceSerial));
         swgdeviceConfigs->back()->setDeviceSequence(deviceConfig.m_deviceSequence);
-        const QByteArray& deviceSettings = deviceConfig.m_config;
-        SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = swgdeviceConfigs->back()->getConfig();
-        swgDeviceSettings->init();
+        // const QByteArray& deviceSettings = deviceConfig.m_config;
+        // SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = swgdeviceConfigs->back()->getConfig();
+        // swgDeviceSettings->init();
     }
 }
 
@@ -114,13 +117,24 @@ void WebAPIAdapterBase::webapiFormatCommand(
 
 ChannelAPI *WebAPIAdapterBase::WebAPIChannelAdapters::getChannelAPI(const QString& channelURI, const PluginManager *pluginManager)
 {
-    QMap<QString, ChannelAPI*>::iterator it = m_webAPIChannelAdapters.find(channelURI);
+    QString registeredChannelURI = ChannelUtils::getRegisteredChannelURI(channelURI);
+    QMap<QString, ChannelAPI*>::iterator it = m_webAPIChannelAdapters.find(registeredChannelURI);
 
     if (it == m_webAPIChannelAdapters.end())
     {
-        ChannelAPI *channelAPI = pluginManager->getChannelPluginInterface(channelURI)->createChannelWebAPIAdapter();
-        m_webAPIChannelAdapters.insert(channelURI, channelAPI);
-        return channelAPI;
+        const PluginInterface *pluginInterface = pluginManager->getChannelPluginInterface(registeredChannelURI);
+
+        if (pluginInterface)
+        {
+            ChannelAPI *channelAPI = pluginInterface->createChannelWebAPIAdapter();
+            m_webAPIChannelAdapters.insert(registeredChannelURI, channelAPI);
+            return channelAPI;
+        }
+        else
+        {
+            m_webAPIChannelAdapters.insert(registeredChannelURI, nullptr);
+            return nullptr;
+        }
     }
     else
     {

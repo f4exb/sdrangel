@@ -21,6 +21,7 @@
 #include "plugin/plugininterface.h"
 #include "settings/preset.h"
 #include "channel/channelapi.h"
+#include "channel/channelutils.h"
 #include "settings/preset.h"
 
 #include "deviceset.h"
@@ -184,7 +185,7 @@ void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
                 qDebug("DeviceSet::loadChannelSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channelIdURI));
 
                 //if(openChannels[i].m_channelName == channelConfig.m_channelIdURI)
-                if (compareRxChannelURIs(openChannels[i].m_channelName, channelConfig.m_channelIdURI))
+                if (ChannelUtils::compareRxChannelURIs(openChannels[i].m_channelName, channelConfig.m_channelIdURI))
                 {
                     qDebug("DeviceSet::loadChannelSettings: channel [%s] found", qPrintable(openChannels[i].m_channelName));
                     reg = openChannels.takeAt(i);
@@ -200,7 +201,7 @@ void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
                 for (int i = 0; i < channelRegistrations->count(); i++)
                 {
                     //if((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
-                    if (compareRxChannelURIs((*channelRegistrations)[i].m_channelIdURI, channelConfig.m_channelIdURI))
+                    if (ChannelUtils::compareRxChannelURIs((*channelRegistrations)[i].m_channelIdURI, channelConfig.m_channelIdURI))
                     {
                         qDebug("DeviceSet::loadChannelSettings: creating new channel [%s] from config [%s]",
                                 qPrintable((*channelRegistrations)[i].m_channelIdURI),
@@ -392,19 +393,3 @@ bool DeviceSet::ChannelInstanceRegistration::operator<(const ChannelInstanceRegi
     }
 }
 
-bool DeviceSet::compareRxChannelURIs(const QString& registerdChannelURI, const QString& xChannelURI)
-{
-    if ((xChannelURI == "sdrangel.channel.chanalyzerng") || (xChannelURI == "sdrangel.channel.chanalyzer")) { // renamed ChanalyzerNG to Chanalyzer in 4.0.0
-        return registerdChannelURI == "sdrangel.channel.chanalyzer";
-    } else  if ((xChannelURI == "de.maintech.sdrangelove.channel.am") || (xChannelURI == "sdrangel.channel.amdemod")) {
-        return registerdChannelURI == "sdrangel.channel.amdemod";
-    } else  if ((xChannelURI == "de.maintech.sdrangelove.channel.nfm") || (xChannelURI == "sdrangel.channel.nfmdemod")) {
-        return registerdChannelURI == "sdrangel.channel.nfmdemod";
-    } else  if ((xChannelURI == "de.maintech.sdrangelove.channel.ssb") || (xChannelURI == "sdrangel.channel.ssbdemod")) {
-        return registerdChannelURI == "sdrangel.channel.ssbdemod";
-    } else  if ((xChannelURI == "de.maintech.sdrangelove.channel.wfm") || (xChannelURI == "sdrangel.channel.wfmdemod")) {
-        return registerdChannelURI == "sdrangel.channel.wfmdemod";
-    } else {
-        return registerdChannelURI == xChannelURI;
-    }
-}
