@@ -58,8 +58,8 @@ public:
     qint64 getCenterFrequency();
     void setCenterFrequency(qint64 center_frequency);
 
-    SWGGLSpectrum* getMSpectrumConfig();
-    void setMSpectrumConfig(SWGGLSpectrum* m_spectrum_config);
+    SWGGLSpectrum* getSpectrumConfig();
+    void setSpectrumConfig(SWGGLSpectrum* spectrum_config);
 
     qint32 getDcOffsetCorrection();
     void setDcOffsetCorrection(qint32 dc_offset_correction);
@@ -92,8 +92,8 @@ private:
     qint64 center_frequency;
     bool m_center_frequency_isSet;
 
-    SWGGLSpectrum* m_spectrum_config;
-    bool m_m_spectrum_config_isSet;
+    SWGGLSpectrum* spectrum_config;
+    bool m_spectrum_config_isSet;
 
     qint32 dc_offset_correction;
     bool m_dc_offset_correction_isSet;

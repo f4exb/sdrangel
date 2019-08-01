@@ -16,9 +16,6 @@ ChannelConfig:
     channelIdURI:
       description: Channel type ID in URI form
       type: string
-    channelId:
-      description: Channel type ID in short form from object name
-      type: string
     config:
       $ref: "http://localhost:8081/api/swagger/include/ChannelSettings.yaml#/ChannelSettings"
 

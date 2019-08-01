@@ -1765,10 +1765,6 @@ margin-bottom: 20px;
       "type" : "string",
       "description" : "Channel type ID in URI form"
     },
-    "channelId" : {
-      "type" : "string",
-      "description" : "Channel type ID in short form from object name"
-    },
     "config" : {
       "$ref" : "#/definitions/ChannelSettings"
     }
@@ -4340,20 +4336,19 @@ margin-bottom: 20px;
 };
             defs.Preferences = {
   "properties" : {
-    "sourceType" : {
-      "type" : "string"
-    },
     "sourceDevice" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "Identification of the source used in R0 tab (GUI flavor) at startup"
+    },
+    "sourceIndex" : {
+      "type" : "integer",
+      "description" : "Index of the source used in R0 tab (GUI flavor) at startup"
     },
     "audioType" : {
       "type" : "string"
     },
     "audioDevice" : {
       "type" : "string"
-    },
-    "sourceIndex" : {
-      "type" : "integer"
     },
     "latitude" : {
       "type" : "number",
@@ -4397,7 +4392,7 @@ margin-bottom: 20px;
       "type" : "integer",
       "format" : "int64"
     },
-    "m_spectrumConfig" : {
+    "spectrumConfig" : {
       "$ref" : "#/definitions/GLSpectrum"
     },
     "dcOffsetCorrection" : {
@@ -26960,7 +26955,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-07-31T23:30:54.359+02:00
+              Generated 2019-08-01T08:47:20.086+02:00
             </div>
           </div>
       </div>

@@ -28,16 +28,14 @@ SWGPreferences::SWGPreferences(QString* json) {
 }
 
 SWGPreferences::SWGPreferences() {
-    source_type = nullptr;
-    m_source_type_isSet = false;
     source_device = nullptr;
     m_source_device_isSet = false;
+    source_index = 0;
+    m_source_index_isSet = false;
     audio_type = nullptr;
     m_audio_type_isSet = false;
     audio_device = nullptr;
     m_audio_device_isSet = false;
-    source_index = 0;
-    m_source_index_isSet = false;
     latitude = 0.0f;
     m_latitude_isSet = false;
     longitude = 0.0f;
@@ -58,16 +56,14 @@ SWGPreferences::~SWGPreferences() {
 
 void
 SWGPreferences::init() {
-    source_type = new QString("");
-    m_source_type_isSet = false;
     source_device = new QString("");
     m_source_device_isSet = false;
+    source_index = 0;
+    m_source_index_isSet = false;
     audio_type = new QString("");
     m_audio_type_isSet = false;
     audio_device = new QString("");
     m_audio_device_isSet = false;
-    source_index = 0;
-    m_source_index_isSet = false;
     latitude = 0.0f;
     m_latitude_isSet = false;
     longitude = 0.0f;
@@ -84,19 +80,16 @@ SWGPreferences::init() {
 
 void
 SWGPreferences::cleanup() {
-    if(source_type != nullptr) { 
-        delete source_type;
-    }
     if(source_device != nullptr) { 
         delete source_device;
     }
+
     if(audio_type != nullptr) { 
         delete audio_type;
     }
     if(audio_device != nullptr) { 
         delete audio_device;
     }
-
 
 
 
@@ -118,15 +111,13 @@ SWGPreferences::fromJson(QString &json) {
 
 void
 SWGPreferences::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&source_type, pJson["sourceType"], "QString", "QString");
-    
     ::SWGSDRangel::setValue(&source_device, pJson["sourceDevice"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&source_index, pJson["sourceIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&audio_type, pJson["audioType"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&audio_device, pJson["audioDevice"], "QString", "QString");
-    
-    ::SWGSDRangel::setValue(&source_index, pJson["sourceIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&latitude, pJson["latitude"], "float", "");
     
@@ -156,20 +147,17 @@ SWGPreferences::asJson ()
 QJsonObject*
 SWGPreferences::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(source_type != nullptr && *source_type != QString("")){
-        toJsonValue(QString("sourceType"), source_type, obj, QString("QString"));
-    }
     if(source_device != nullptr && *source_device != QString("")){
         toJsonValue(QString("sourceDevice"), source_device, obj, QString("QString"));
+    }
+    if(m_source_index_isSet){
+        obj->insert("sourceIndex", QJsonValue(source_index));
     }
     if(audio_type != nullptr && *audio_type != QString("")){
         toJsonValue(QString("audioType"), audio_type, obj, QString("QString"));
     }
     if(audio_device != nullptr && *audio_device != QString("")){
         toJsonValue(QString("audioDevice"), audio_device, obj, QString("QString"));
-    }
-    if(m_source_index_isSet){
-        obj->insert("sourceIndex", QJsonValue(source_index));
     }
     if(m_latitude_isSet){
         obj->insert("latitude", QJsonValue(latitude));
@@ -194,16 +182,6 @@ SWGPreferences::asJsonObject() {
 }
 
 QString*
-SWGPreferences::getSourceType() {
-    return source_type;
-}
-void
-SWGPreferences::setSourceType(QString* source_type) {
-    this->source_type = source_type;
-    this->m_source_type_isSet = true;
-}
-
-QString*
 SWGPreferences::getSourceDevice() {
     return source_device;
 }
@@ -211,6 +189,16 @@ void
 SWGPreferences::setSourceDevice(QString* source_device) {
     this->source_device = source_device;
     this->m_source_device_isSet = true;
+}
+
+qint32
+SWGPreferences::getSourceIndex() {
+    return source_index;
+}
+void
+SWGPreferences::setSourceIndex(qint32 source_index) {
+    this->source_index = source_index;
+    this->m_source_index_isSet = true;
 }
 
 QString*
@@ -231,16 +219,6 @@ void
 SWGPreferences::setAudioDevice(QString* audio_device) {
     this->audio_device = audio_device;
     this->m_audio_device_isSet = true;
-}
-
-qint32
-SWGPreferences::getSourceIndex() {
-    return source_index;
-}
-void
-SWGPreferences::setSourceIndex(qint32 source_index) {
-    this->source_index = source_index;
-    this->m_source_index_isSet = true;
 }
 
 float
@@ -308,11 +286,10 @@ bool
 SWGPreferences::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(source_type != nullptr && *source_type != QString("")){ isObjectUpdated = true; break;}
         if(source_device != nullptr && *source_device != QString("")){ isObjectUpdated = true; break;}
+        if(m_source_index_isSet){ isObjectUpdated = true; break;}
         if(audio_type != nullptr && *audio_type != QString("")){ isObjectUpdated = true; break;}
         if(audio_device != nullptr && *audio_device != QString("")){ isObjectUpdated = true; break;}
-        if(m_source_index_isSet){ isObjectUpdated = true; break;}
         if(m_latitude_isSet){ isObjectUpdated = true; break;}
         if(m_longitude_isSet){ isObjectUpdated = true; break;}
         if(m_console_min_log_level_isSet){ isObjectUpdated = true; break;}

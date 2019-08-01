@@ -36,8 +36,8 @@ SWGPreset::SWGPreset() {
     m_description_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
-    m_spectrum_config = nullptr;
-    m_m_spectrum_config_isSet = false;
+    spectrum_config = nullptr;
+    m_spectrum_config_isSet = false;
     dc_offset_correction = 0;
     m_dc_offset_correction_isSet = false;
     iq_imbalance_correction = 0;
@@ -64,8 +64,8 @@ SWGPreset::init() {
     m_description_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
-    m_spectrum_config = new SWGGLSpectrum();
-    m_m_spectrum_config_isSet = false;
+    spectrum_config = new SWGGLSpectrum();
+    m_spectrum_config_isSet = false;
     dc_offset_correction = 0;
     m_dc_offset_correction_isSet = false;
     iq_imbalance_correction = 0;
@@ -88,8 +88,8 @@ SWGPreset::cleanup() {
         delete description;
     }
 
-    if(m_spectrum_config != nullptr) { 
-        delete m_spectrum_config;
+    if(spectrum_config != nullptr) { 
+        delete spectrum_config;
     }
 
 
@@ -131,7 +131,7 @@ SWGPreset::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
-    ::SWGSDRangel::setValue(&m_spectrum_config, pJson["m_spectrumConfig"], "SWGGLSpectrum", "SWGGLSpectrum");
+    ::SWGSDRangel::setValue(&spectrum_config, pJson["spectrumConfig"], "SWGGLSpectrum", "SWGGLSpectrum");
     
     ::SWGSDRangel::setValue(&dc_offset_correction, pJson["dcOffsetCorrection"], "qint32", "");
     
@@ -171,8 +171,8 @@ SWGPreset::asJsonObject() {
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
-    if((m_spectrum_config != nullptr) && (m_spectrum_config->isSet())){
-        toJsonValue(QString("m_spectrumConfig"), m_spectrum_config, obj, QString("SWGGLSpectrum"));
+    if((spectrum_config != nullptr) && (spectrum_config->isSet())){
+        toJsonValue(QString("spectrumConfig"), spectrum_config, obj, QString("SWGGLSpectrum"));
     }
     if(m_dc_offset_correction_isSet){
         obj->insert("dcOffsetCorrection", QJsonValue(dc_offset_correction));
@@ -234,13 +234,13 @@ SWGPreset::setCenterFrequency(qint64 center_frequency) {
 }
 
 SWGGLSpectrum*
-SWGPreset::getMSpectrumConfig() {
-    return m_spectrum_config;
+SWGPreset::getSpectrumConfig() {
+    return spectrum_config;
 }
 void
-SWGPreset::setMSpectrumConfig(SWGGLSpectrum* m_spectrum_config) {
-    this->m_spectrum_config = m_spectrum_config;
-    this->m_m_spectrum_config_isSet = true;
+SWGPreset::setSpectrumConfig(SWGGLSpectrum* spectrum_config) {
+    this->spectrum_config = spectrum_config;
+    this->m_spectrum_config_isSet = true;
 }
 
 qint32
@@ -302,7 +302,7 @@ SWGPreset::isSet(){
         if(group != nullptr && *group != QString("")){ isObjectUpdated = true; break;}
         if(description != nullptr && *description != QString("")){ isObjectUpdated = true; break;}
         if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_spectrum_config != nullptr && m_spectrum_config->isSet()){ isObjectUpdated = true; break;}
+        if(spectrum_config != nullptr && spectrum_config->isSet()){ isObjectUpdated = true; break;}
         if(m_dc_offset_correction_isSet){ isObjectUpdated = true; break;}
         if(m_iq_imbalance_correction_isSet){ isObjectUpdated = true; break;}
         if(channel_configs->size() > 0){ isObjectUpdated = true; break;}

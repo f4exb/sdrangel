@@ -42,20 +42,17 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGPreferences* fromJson(QString &jsonString) override;
 
-    QString* getSourceType();
-    void setSourceType(QString* source_type);
-
     QString* getSourceDevice();
     void setSourceDevice(QString* source_device);
+
+    qint32 getSourceIndex();
+    void setSourceIndex(qint32 source_index);
 
     QString* getAudioType();
     void setAudioType(QString* audio_type);
 
     QString* getAudioDevice();
     void setAudioDevice(QString* audio_device);
-
-    qint32 getSourceIndex();
-    void setSourceIndex(qint32 source_index);
 
     float getLatitude();
     void setLatitude(float latitude);
@@ -79,20 +76,17 @@ public:
     virtual bool isSet() override;
 
 private:
-    QString* source_type;
-    bool m_source_type_isSet;
-
     QString* source_device;
     bool m_source_device_isSet;
+
+    qint32 source_index;
+    bool m_source_index_isSet;
 
     QString* audio_type;
     bool m_audio_type_isSet;
 
     QString* audio_device;
     bool m_audio_device_isSet;
-
-    qint32 source_index;
-    bool m_source_index_isSet;
 
     float latitude;
     bool m_latitude_isSet;

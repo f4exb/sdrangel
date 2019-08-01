@@ -46,9 +46,6 @@ public:
     QString* getChannelIdUri();
     void setChannelIdUri(QString* channel_id_uri);
 
-    QString* getChannelId();
-    void setChannelId(QString* channel_id);
-
     SWGChannelSettings* getConfig();
     void setConfig(SWGChannelSettings* config);
 
@@ -58,9 +55,6 @@ public:
 private:
     QString* channel_id_uri;
     bool m_channel_id_uri_isSet;
-
-    QString* channel_id;
-    bool m_channel_id_isSet;
 
     SWGChannelSettings* config;
     bool m_config_isSet;

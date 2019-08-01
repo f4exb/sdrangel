@@ -16,9 +16,6 @@ ChannelConfig:
     channelIdURI:
       description: Channel type ID in URI form
       type: string
-    channelId:
-      description: Channel type ID in short form from object name
-      type: string
     config:
       $ref: "/doc/swagger/include/ChannelSettings.yaml#/ChannelSettings"
 
@@ -35,7 +32,7 @@ Preset:
     centerFrequency:
       type: integer
       format: int64
-    m_spectrumConfig:
+    spectrumConfig:
       $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
     dcOffsetCorrection:
       description: boolean

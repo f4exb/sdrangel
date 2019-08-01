@@ -30,8 +30,6 @@ SWGChannelConfig::SWGChannelConfig(QString* json) {
 SWGChannelConfig::SWGChannelConfig() {
     channel_id_uri = nullptr;
     m_channel_id_uri_isSet = false;
-    channel_id = nullptr;
-    m_channel_id_isSet = false;
     config = nullptr;
     m_config_isSet = false;
 }
@@ -44,8 +42,6 @@ void
 SWGChannelConfig::init() {
     channel_id_uri = new QString("");
     m_channel_id_uri_isSet = false;
-    channel_id = new QString("");
-    m_channel_id_isSet = false;
     config = new SWGChannelSettings();
     m_config_isSet = false;
 }
@@ -54,9 +50,6 @@ void
 SWGChannelConfig::cleanup() {
     if(channel_id_uri != nullptr) { 
         delete channel_id_uri;
-    }
-    if(channel_id != nullptr) { 
-        delete channel_id;
     }
     if(config != nullptr) { 
         delete config;
@@ -75,8 +68,6 @@ SWGChannelConfig::fromJson(QString &json) {
 void
 SWGChannelConfig::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_id_uri, pJson["channelIdURI"], "QString", "QString");
-    
-    ::SWGSDRangel::setValue(&channel_id, pJson["channelId"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&config, pJson["config"], "SWGChannelSettings", "SWGChannelSettings");
     
@@ -99,9 +90,6 @@ SWGChannelConfig::asJsonObject() {
     if(channel_id_uri != nullptr && *channel_id_uri != QString("")){
         toJsonValue(QString("channelIdURI"), channel_id_uri, obj, QString("QString"));
     }
-    if(channel_id != nullptr && *channel_id != QString("")){
-        toJsonValue(QString("channelId"), channel_id, obj, QString("QString"));
-    }
     if((config != nullptr) && (config->isSet())){
         toJsonValue(QString("config"), config, obj, QString("SWGChannelSettings"));
     }
@@ -117,16 +105,6 @@ void
 SWGChannelConfig::setChannelIdUri(QString* channel_id_uri) {
     this->channel_id_uri = channel_id_uri;
     this->m_channel_id_uri_isSet = true;
-}
-
-QString*
-SWGChannelConfig::getChannelId() {
-    return channel_id;
-}
-void
-SWGChannelConfig::setChannelId(QString* channel_id) {
-    this->channel_id = channel_id;
-    this->m_channel_id_isSet = true;
 }
 
 SWGChannelSettings*
@@ -145,7 +123,6 @@ SWGChannelConfig::isSet(){
     bool isObjectUpdated = false;
     do{
         if(channel_id_uri != nullptr && *channel_id_uri != QString("")){ isObjectUpdated = true; break;}
-        if(channel_id != nullptr && *channel_id != QString("")){ isObjectUpdated = true; break;}
         if(config != nullptr && config->isSet()){ isObjectUpdated = true; break;}
     }while(false);
     return isObjectUpdated;

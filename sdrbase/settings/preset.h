@@ -29,7 +29,6 @@ class SDRBASE_API Preset {
 public:
 	struct ChannelConfig {
 		QString m_channelIdURI; //!< Channel type ID in URI form
-		QString m_channelId;    //!< Channel type ID in short form from object name TODO: use in the future
 		QByteArray m_config;
 
 		ChannelConfig(const QString& channelIdURI, const QByteArray& config) :
@@ -86,10 +85,12 @@ public:
 	int getChannelCount() const { return m_channelConfigs.count(); }
 	const ChannelConfig& getChannelConfig(int index) const { return m_channelConfigs.at(index); }
 
-	void setDeviceConfig(const QString& deviceId, const QString& deviceSerial, int deviceSequence, const QByteArray& config)
-	{
+    void clearDevices() { m_deviceConfigs.clear(); }
+	void setDeviceConfig(const QString& deviceId, const QString& deviceSerial, int deviceSequence, const QByteArray& config) {
 		addOrUpdateDeviceConfig(deviceId, deviceSerial, deviceSequence, config);
 	}
+    int getDeviceCount() const { return m_deviceConfigs.count(); }
+    const DeviceConfig& getDeviceConfig(int index) const { return m_deviceConfigs.at(index); }
 
 	void addOrUpdateDeviceConfig(const QString& deviceId,
 			const QString& deviceSerial,

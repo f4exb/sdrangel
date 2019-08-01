@@ -46,9 +46,27 @@ void WebAPIAdapterBase::webapiFormatPreset(
     apiPreset->setGroup(new QString(preset.m_group));
     apiPreset->setDescription(new QString(preset.m_description));
     apiPreset->setCenterFrequency(preset.m_centerFrequency);
-    apiPreset->getMSpectrumConfig()->init(); // TODO when spectrum config is extracted to sdrbase
+    apiPreset->getSpectrumConfig()->init(); // TODO when spectrum config is extracted to sdrbase
     apiPreset->setDcOffsetCorrection(preset.m_dcOffsetCorrection ? 1 : 0);
     apiPreset->setIqImbalanceCorrection(preset.m_iqImbalanceCorrection ? 1 : 0);
-    // TODO: channel configs
-    // TODO: device configs
+
+    int nbChannels = preset.getChannelCount();
+    for (int i = 0; i < nbChannels; i++)
+    {
+        const Preset::ChannelConfig& channelConfig = preset.getChannelConfig(i);
+        QList<SWGSDRangel::SWGChannelConfig *> *swgChannelConfigs = apiPreset->getChannelConfigs();
+        swgChannelConfigs->append(new SWGSDRangel::SWGChannelConfig);
+        swgChannelConfigs->back()->setChannelIdUri(new QString(channelConfig.m_channelIdURI));
+    }
+
+    int nbDevices = preset.getDeviceCount();
+    for (int i = 0; i < nbDevices; i++)
+    {
+        const Preset::DeviceConfig& deviceConfig = preset.getDeviceConfig(i);
+        QList<SWGSDRangel::SWGDeviceConfig *> *swgdeviceConfigs = apiPreset->getDeviceConfigs();
+        swgdeviceConfigs->append(new SWGSDRangel::SWGDeviceConfig);
+        swgdeviceConfigs->back()->setDeviceId(new QString(deviceConfig.m_deviceId));
+        swgdeviceConfigs->back()->setDeviceSerial(new QString(deviceConfig.m_deviceSerial));
+        swgdeviceConfigs->back()->setDeviceSequence(deviceConfig.m_deviceSequence);
+    }
 }
