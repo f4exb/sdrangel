@@ -24,10 +24,12 @@
 #include "dsddemodgui.h"
 #endif
 #include "dsddemod.h"
+#include "dsddemodwebapiadapter.h"
+#include "dsddemodplugin.h"
 
 const PluginDescriptor DSDDemodPlugin::m_pluginDescriptor = {
 	QString("DSD Demodulator"),
-    QString("4.5.6"),
+    QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -77,3 +79,7 @@ ChannelAPI* DSDDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new DSDDemod(deviceAPI);
 }
 
+ChannelAPI* DSDDemodPlugin::createChannelWebAPIAdapter() const
+{
+	return new DSDDemodWebAPIAdapter();
+}

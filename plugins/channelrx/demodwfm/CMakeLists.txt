@@ -2,13 +2,15 @@ project(wfm)
 
 set(wfm_SOURCES
 	wfmdemod.cpp
-	wfmdemodsettings.cpp
+    wfmdemodsettings.cpp
+    wfmdemodwebapiadapter.cpp
 	wfmplugin.cpp
 )
 
 set(wfm_HEADERS
 	wfmdemod.h
-	wfmdemodsettings.h
+    wfmdemodsettings.h
+    wfmdemodwebapiadapter.h
 	wfmplugin.h
 )
 

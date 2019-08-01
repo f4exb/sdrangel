@@ -23,11 +23,12 @@
 #include "udpsinkgui.h"
 #endif
 #include "udpsink.h"
+#include "udpsinkwebapiadapter.h"
 #include "udpsinkplugin.h"
 
 const PluginDescriptor UDPSinkPlugin::m_pluginDescriptor = {
 	QString("UDP Channel Sink"),
-	QString("4.5.2"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -77,3 +78,7 @@ ChannelAPI* UDPSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new UDPSink(deviceAPI);
 }
 
+ChannelAPI* UDPSinkPlugin::createChannelWebAPIAdapter() const
+{
+	return new UDPSinkWebAPIAdapter();
+}

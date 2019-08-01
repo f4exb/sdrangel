@@ -24,10 +24,12 @@
 #include "localsinkgui.h"
 #endif
 #include "localsink.h"
+#include "localsinkwebapiadapter.h"
+#include "localsinkplugin.h"
 
 const PluginDescriptor LocalSinkPlugin::m_pluginDescriptor = {
     QString("Local channel sink"),
-    QString("4.6.0"),
+    QString("4.11.6"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -75,4 +77,9 @@ BasebandSampleSink* LocalSinkPlugin::createRxChannelBS(DeviceAPI *deviceAPI) con
 ChannelAPI* LocalSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
 {
     return new LocalSink(deviceAPI);
+}
+
+ChannelAPI* LocalSinkPlugin::createChannelWebAPIAdapter() const
+{
+	return new LocalSinkWebAPIAdapter();
 }

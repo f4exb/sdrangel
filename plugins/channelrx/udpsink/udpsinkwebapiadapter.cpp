@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 F4EXB                                                      //
-// written by Edouard Griffiths                                                  //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -16,35 +15,37 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_DSDDEMODLUGIN_H
-#define INCLUDE_DSDDEMODLUGIN_H
+#include "SWGChannelSettings.h"
+#include "udpsink.h"
+#include "udpsinkwebapiadapter.h"
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+UDPSinkWebAPIAdapter::UDPSinkWebAPIAdapter() :
+    ChannelAPI(UDPSink::m_channelIdURI, ChannelAPI::StreamSingleSink)
+{}
 
-class DeviceUISet;
-class BasebandSampleSink;
+UDPSinkWebAPIAdapter::~UDPSinkWebAPIAdapter()
+{}
 
-class DSDDemodPlugin : public QObject, PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "sdrangel.channel.dsddemod")
+int UDPSinkWebAPIAdapter::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setUdpSinkSettings(new SWGSDRangel::SWGUDPSinkSettings());
+    response.getUdpSinkSettings()->init();
+    UDPSink::webapiFormatChannelSettings(response, m_settings);
 
-public:
-	explicit DSDDemodPlugin(QObject* parent = NULL);
+    return 200;
+}
 
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
+int UDPSinkWebAPIAdapter::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    UDPSink::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 
-	virtual PluginInstanceGUI* createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const;
-	virtual BasebandSampleSink* createRxChannelBS(DeviceAPI *deviceAPI) const;
-	virtual ChannelAPI* createRxChannelCS(DeviceAPI *deviceAPI) const;
-    virtual ChannelAPI* createChannelWebAPIAdapter() const;
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
-
-	PluginAPI* m_pluginAPI;
-};
-
-#endif // INCLUDE_DSDDEMODLUGIN_H
+    return 200;
+}

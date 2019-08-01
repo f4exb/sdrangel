@@ -22,11 +22,12 @@
 #include "freqtrackergui.h"
 #endif
 #include "freqtracker.h"
+#include "freqtrackerwebapiadapter.h"
 #include "freqtrackerplugin.h"
 
 const PluginDescriptor FreqTrackerPlugin::m_pluginDescriptor = {
 	QString("Frequency Tracker"),
-	QString("4.7.0"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -76,3 +77,7 @@ ChannelAPI* FreqTrackerPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new FreqTracker(deviceAPI);
 }
 
+ChannelAPI* FreqTrackerPlugin::createChannelWebAPIAdapter() const
+{
+	return new FreqTrackerWebAPIAdapter();
+}

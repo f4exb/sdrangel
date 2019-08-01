@@ -2,13 +2,15 @@ project(ssb)
 
 set(ssb_SOURCES
 	ssbdemod.cpp
-	ssbdemodsettings.cpp
+    ssbdemodsettings.cpp
+    ssbdemodwebapiadapter.cpp
 	ssbplugin.cpp
 )
 
 set(ssb_HEADERS
 	ssbdemod.h
-	ssbdemodsettings.h
+    ssbdemodsettings.h
+    ssbdemodwebapiadapter.h
 	ssbplugin.h
 )
 

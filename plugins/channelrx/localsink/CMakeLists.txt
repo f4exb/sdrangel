@@ -3,13 +3,15 @@ project(localsink)
 set(localsink_SOURCES
   localsink.cpp
   localsinksettings.cpp
+  localsinkwebapiadapter.cpp
   localsinkthread.cpp
   localsinkplugin.cpp
 )
 
 set(localsink_HEADERS
 	localsink.h
-	localsinksettings.h
+    localsinksettings.h
+    localsinkwebapiadapter.h
 	localsinkthread.h
 	localsinkplugin.h
         )

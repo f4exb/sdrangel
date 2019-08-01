@@ -7,10 +7,12 @@
 #include "wfmdemodgui.h"
 #endif
 #include "wfmdemod.h"
+#include "wfmdemodwebapiadapter.h"
+#include "wfmplugin.h"
 
 const PluginDescriptor WFMPlugin::m_pluginDescriptor = {
 	QString("WFM Demodulator"),
-	QString("4.9.1"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -60,3 +62,7 @@ ChannelAPI* WFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new WFMDemod(deviceAPI);
 }
 
+ChannelAPI* WFMPlugin::createChannelWebAPIAdapter() const
+{
+	return new WFMDemodWebAPIAdapter();
+}

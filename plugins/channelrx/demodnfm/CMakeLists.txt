@@ -2,13 +2,15 @@ project(nfm)
 
 set(nfm_SOURCES
 	nfmdemod.cpp
-	nfmdemodsettings.cpp
+    nfmdemodsettings.cpp
+    nfmdemodwebapiadapter.cpp
 	nfmplugin.cpp
 )
 
 set(nfm_HEADERS
 	nfmdemod.h
-	nfmdemodsettings.h
+    nfmdemodsettings.h
+    nfmdemodwebapiadapter.h
 	nfmplugin.h
 )
 

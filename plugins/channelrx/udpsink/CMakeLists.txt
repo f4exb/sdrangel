@@ -3,13 +3,15 @@ project(udpsink)
 set(udpsink_SOURCES
 	udpsink.cpp
 	udpsinkplugin.cpp
-	udpsinksettings.cpp
+    udpsinksettings.cpp
+    udpsinkwebapiadapter.cpp
 )
 
 set(udpsink_HEADERS
 	udpsink.h
 	udpsinkplugin.h
-	udpsinksettings.h
+    udpsinksettings.h
+    udpsinkwebapiadapter.h
 )
 
 include_directories(

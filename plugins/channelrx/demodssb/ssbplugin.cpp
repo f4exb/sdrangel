@@ -6,10 +6,12 @@
 #include "ssbdemodgui.h"
 #endif
 #include "ssbdemod.h"
+#include "ssbdemodwebapiadapter.h"
+#include "ssbplugin.h"
 
 const PluginDescriptor SSBPlugin::m_pluginDescriptor = {
 	QString("SSB Demodulator"),
-	QString("4.10.0"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -59,3 +61,7 @@ ChannelAPI* SSBPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new SSBDemod(deviceAPI);
 }
 
+ChannelAPI* SSBPlugin::createChannelWebAPIAdapter() const
+{
+	return new SSBDemodWebAPIAdapter();
+}

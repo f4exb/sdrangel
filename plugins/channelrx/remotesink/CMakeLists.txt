@@ -11,14 +11,16 @@ endif()
 
 set(remotesink_SOURCES
 	remotesink.cpp
-	remotesinksettings.cpp
+    remotesinksettings.cpp
+    remotesinkwebapiadapter.cpp
 	remotesinkthread.cpp
 	remotesinkplugin.cpp
 )
 
 set(remotesink_HEADERS
 	remotesink.h
-	remotesinksettings.h
+    remotesinksettings.h
+    remotesinkwebapiadapter.h
 	remotesinkthread.h
 	remotesinkplugin.h
 )

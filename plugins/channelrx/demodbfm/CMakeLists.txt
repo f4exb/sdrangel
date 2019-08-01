@@ -2,7 +2,8 @@ project(bfm)
 
 set(bfm_SOURCES
 	bfmdemod.cpp
-	bfmdemodsettings.cpp
+    bfmdemodsettings.cpp
+    bfmdemodwebapiadapter.cpp
 	bfmplugin.cpp
 	rdsdemod.cpp
 	rdsdecoder.cpp
@@ -12,7 +13,8 @@ set(bfm_SOURCES
 
 set(bfm_HEADERS
 	bfmdemod.h
-	bfmdemodsettings.h
+    bfmdemodsettings.h
+    bfmdemodwebapiadapter.h
 	bfmplugin.h
 	rdsdemod.h
 	rdsdecoder.h

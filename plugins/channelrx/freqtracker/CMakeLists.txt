@@ -2,13 +2,15 @@ project(freqtracker)
 
 set(freqtracker_SOURCES
 	freqtracker.cpp
-	freqtrackersettings.cpp
+    freqtrackersettings.cpp
+    freqtrackerwebapiadapter.cpp
 	freqtrackerplugin.cpp
 )
 
 set(freqtracker_HEADERS
 	freqtracker.h
-	freqtrackersettings.h
+    freqtrackersettings.h
+    freqtrackerwebapiadapter.h
 	freqtrackerplugin.h
 )
 
