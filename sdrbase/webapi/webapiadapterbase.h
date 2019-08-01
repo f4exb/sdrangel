@@ -22,8 +22,10 @@
 #include "export.h"
 #include "SWGPreferences.h"
 #include "SWGPreset.h"
+#include "SWGCommand.h"
 #include "settings/preferences.h"
 #include "settings/preset.h"
+#include "commands/command.h"
 
 /**
  * Adapter between API and objects in sdrbase library
@@ -38,6 +40,10 @@ public:
     static void webapiFormatPreset(
         SWGSDRangel::SWGPreset *apiPreset,
         const Preset& preset
+    );
+    static void webapiFormatCommand(
+        SWGSDRangel::SWGCommand *apiCommand,
+        const Command& command
     );
 };
 

@@ -135,6 +135,16 @@ int WebAPIAdapterSrv::instanceConfigGet(
         WebAPIAdapterBase::webapiFormatPreset(swgPresets->back(), *preset);
     }
 
+    int nbCommands = m_mainCore.m_settings.getCommandCount();
+    QList<SWGSDRangel::SWGCommand*> *swgCommands = response.getCommands();
+
+    for (int i = 0; i < nbCommands; i++)
+    {
+        const Command *command = m_mainCore.m_settings.getCommand(i);
+        swgCommands->append(new SWGSDRangel::SWGCommand);
+        WebAPIAdapterBase::webapiFormatCommand(swgCommands->back(), *command);
+    }
+
     return 200;
 }
 

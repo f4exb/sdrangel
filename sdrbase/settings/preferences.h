@@ -37,8 +37,6 @@ public:
 	bool getUseLogFile() const { return m_useLogFile; }
 	const QString& getLogFileName() const { return m_logFileName; }
 
-    friend class WebAPIAdapterBase;
-
 protected:
 	QString m_sourceDevice; //!< Identification of the source used in R0 tab (GUI flavor) at startup
 	int m_sourceIndex;      //!< Index of the source used in R0 tab (GUI flavor) at startup

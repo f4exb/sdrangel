@@ -77,6 +77,9 @@ public:
 	void setSpectrumConfig(const QByteArray& data) { m_spectrumConfig = data; }
 	const QByteArray& getSpectrumConfig() const { return m_spectrumConfig; }
 
+	bool hasDCOffsetCorrection() const { return m_dcOffsetCorrection; }
+	bool hasIQImbalanceCorrection() const { return m_iqImbalanceCorrection; }
+
 	void setLayout(const QByteArray& data) { m_layout = data; }
 	const QByteArray& getLayout() const { return m_layout; }
 
@@ -116,8 +119,6 @@ public:
             }
 	    }
 	}
-
-    friend class WebAPIAdapterBase;
 
 protected:
     bool m_sourcePreset;

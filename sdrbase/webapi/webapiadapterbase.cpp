@@ -24,16 +24,16 @@ void WebAPIAdapterBase::webapiFormatPreferences(
 )
 {
     apiPreferences->init();
-    apiPreferences->setSourceDevice(new QString(preferences.m_sourceDevice));
-    apiPreferences->setSourceIndex(preferences.m_sourceIndex);
-    apiPreferences->setAudioType(new QString(preferences.m_audioType));
-    apiPreferences->setAudioDevice(new QString(preferences.m_audioDevice));
-    apiPreferences->setLatitude(preferences.m_latitude);
-    apiPreferences->setLongitude(preferences.m_longitude);
-    apiPreferences->setConsoleMinLogLevel((int) preferences.m_consoleMinLogLevel);
-    apiPreferences->setUseLogFile(preferences.m_useLogFile ? 1 : 0);
-    apiPreferences->setLogFileName(new QString(preferences.m_logFileName));
-    apiPreferences->setFileMinLogLevel((int) preferences.m_fileMinLogLevel);
+    apiPreferences->setSourceDevice(new QString(preferences.getSourceDevice()));
+    apiPreferences->setSourceIndex(preferences.getSourceIndex());
+    apiPreferences->setAudioType(new QString(preferences.getAudioType()));
+    apiPreferences->setAudioDevice(new QString(preferences.getAudioDevice()));
+    apiPreferences->setLatitude(preferences.getLatitude());
+    apiPreferences->setLongitude(preferences.getLongitude());
+    apiPreferences->setConsoleMinLogLevel((int) preferences.getConsoleMinLogLevel());
+    apiPreferences->setUseLogFile(preferences.getUseLogFile() ? 1 : 0);
+    apiPreferences->setLogFileName(new QString(preferences.getLogFileName()));
+    apiPreferences->setFileMinLogLevel((int) preferences.getFileMinLogLevel());
 }
 
 void WebAPIAdapterBase::webapiFormatPreset(
@@ -42,13 +42,13 @@ void WebAPIAdapterBase::webapiFormatPreset(
 )
 {
     apiPreset->init();
-    apiPreset->setSourcePreset(preset.m_sourcePreset ? 1 : 0);
-    apiPreset->setGroup(new QString(preset.m_group));
-    apiPreset->setDescription(new QString(preset.m_description));
-    apiPreset->setCenterFrequency(preset.m_centerFrequency);
+    apiPreset->setSourcePreset(preset.isSourcePreset() ? 1 : 0);
+    apiPreset->setGroup(new QString(preset.getGroup()));
+    apiPreset->setDescription(new QString(preset.getDescription()));
+    apiPreset->setCenterFrequency(preset.getCenterFrequency());
     apiPreset->getSpectrumConfig()->init(); // TODO when spectrum config is extracted to sdrbase
-    apiPreset->setDcOffsetCorrection(preset.m_dcOffsetCorrection ? 1 : 0);
-    apiPreset->setIqImbalanceCorrection(preset.m_iqImbalanceCorrection ? 1 : 0);
+    apiPreset->setDcOffsetCorrection(preset.hasDCOffsetCorrection() ? 1 : 0);
+    apiPreset->setIqImbalanceCorrection(preset.hasIQImbalanceCorrection() ? 1 : 0);
 
     int nbChannels = preset.getChannelCount();
     for (int i = 0; i < nbChannels; i++)
@@ -69,4 +69,20 @@ void WebAPIAdapterBase::webapiFormatPreset(
         swgdeviceConfigs->back()->setDeviceSerial(new QString(deviceConfig.m_deviceSerial));
         swgdeviceConfigs->back()->setDeviceSequence(deviceConfig.m_deviceSequence);
     }
+}
+
+void WebAPIAdapterBase::webapiFormatCommand(
+        SWGSDRangel::SWGCommand *apiCommand,
+        const Command& command
+)
+{
+    apiCommand->init();
+    apiCommand->setGroup(new QString(command.getGroup()));
+    apiCommand->setDescription(new QString(command.getDescription()));
+    apiCommand->setCommand(new QString(command.getCommand()));
+    apiCommand->setArgString(new QString(command.getArgString()));
+    apiCommand->setKey((int) command.getKey());
+    apiCommand->setKeyModifiers((int) command.getKeyModifiers());
+    apiCommand->setAssociateKey(command.getAssociateKey() ? 1 : 0);
+    apiCommand->setRelease(command.getRelease() ? 1 : 0);
 }
