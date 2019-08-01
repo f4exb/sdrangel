@@ -5,6 +5,7 @@
 #include "amdemodgui.h"
 #endif
 #include "amdemod.h"
+#include "amdemodwebapiadapter.h"
 #include "amdemodplugin.h"
 
 const PluginDescriptor AMDemodPlugin::m_pluginDescriptor = {
@@ -59,3 +60,7 @@ ChannelAPI* AMDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
     return new AMDemod(deviceAPI);
 }
 
+ChannelAPI* AMDemodPlugin::createChannelWebAPIAdapter() const
+{
+	return new AMDemodWebAPIAdapter();
+}

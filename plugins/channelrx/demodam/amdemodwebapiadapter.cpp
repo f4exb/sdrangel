@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,35 +15,37 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_AMPLUGIN_H
-#define INCLUDE_AMPLUGIN_H
+#include "SWGChannelSettings.h"
+#include "amdemod.h"
+#include "amdemodwebapiadapter.h"
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+AMDemodWebAPIAdapter::AMDemodWebAPIAdapter() :
+    ChannelAPI(AMDemod::m_channelIdURI, ChannelAPI::StreamSingleSink)
+{}
 
-class DeviceUISet;
-class BasebandSampleSink;
+AMDemodWebAPIAdapter::~AMDemodWebAPIAdapter()
+{}
 
-class AMDemodPlugin : public QObject, PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "sdrangel.channel.amdemod")
+int AMDemodWebAPIAdapter::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
+    response.getAmDemodSettings()->init();
+    AMDemod::webapiFormatChannelSettings(response, m_settings);
 
-public:
-	explicit AMDemodPlugin(QObject* parent = NULL);
+    return 200;
+}
 
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
+int AMDemodWebAPIAdapter::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    AMDemod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 
-	virtual PluginInstanceGUI* createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
-	virtual BasebandSampleSink* createRxChannelBS(DeviceAPI *deviceAPI);
-	virtual ChannelAPI* createRxChannelCS(DeviceAPI *deviceAPI);
-	virtual ChannelAPI* createChannelWebAPIAdapter() const;
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
-
-	PluginAPI* m_pluginAPI;
-};
-
-#endif // INCLUDE_AMPLUGIN_H
+    return 200;
+}

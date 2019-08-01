@@ -81,6 +81,7 @@ public:
 
 	const QTimer& getMasterTimer() const { return m_masterTimer; }
 	const MainSettings& getMainSettings() const { return m_settings; }
+    const PluginManager *getPluginManager() const { return m_pluginManager; }
     void commandKeysConnect(QObject *object, const char *slot);
     void commandKeysDisconnect(QObject *object, const char *slot);
 

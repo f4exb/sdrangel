@@ -16,7 +16,16 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
+
+#include "plugin/pluginmanager.h"
+#include "channel/channelapi.h"
 #include "webapiadapterbase.h"
+
+WebAPIAdapterBase::WebAPIAdapterBase()
+{}
+
+WebAPIAdapterBase::~WebAPIAdapterBase()
+{}
 
 void WebAPIAdapterBase::webapiFormatPreferences(
     SWGSDRangel::SWGPreferences *apiPreferences,
@@ -57,6 +66,18 @@ void WebAPIAdapterBase::webapiFormatPreset(
         QList<SWGSDRangel::SWGChannelConfig *> *swgChannelConfigs = apiPreset->getChannelConfigs();
         swgChannelConfigs->append(new SWGSDRangel::SWGChannelConfig);
         swgChannelConfigs->back()->setChannelIdUri(new QString(channelConfig.m_channelIdURI));
+        const QByteArray& channelSettings = channelConfig.m_config;
+        SWGSDRangel::SWGChannelSettings *swgChannelSettings = swgChannelConfigs->back()->getConfig();
+        swgChannelSettings->init();
+        const PluginInterface *pluginInterface = m_pluginManager->getChannelPluginInterface(channelConfig.m_channelIdURI);
+
+        if (pluginInterface)  // TODO: optimize by caching web API adapters
+        {
+            ChannelAPI *channelWebAPIAdapter = pluginInterface->createChannelWebAPIAdapter();
+            channelWebAPIAdapter->deserialize(channelSettings);
+            QString errorMessage;
+            channelWebAPIAdapter->webapiSettingsGet(*swgChannelSettings, errorMessage);
+        }
     }
 
     int nbDevices = preset.getDeviceCount();
@@ -68,6 +89,9 @@ void WebAPIAdapterBase::webapiFormatPreset(
         swgdeviceConfigs->back()->setDeviceId(new QString(deviceConfig.m_deviceId));
         swgdeviceConfigs->back()->setDeviceSerial(new QString(deviceConfig.m_deviceSerial));
         swgdeviceConfigs->back()->setDeviceSequence(deviceConfig.m_deviceSequence);
+        const QByteArray& deviceSettings = deviceConfig.m_config;
+        SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = swgdeviceConfigs->back()->getConfig();
+        swgDeviceSettings->init();
     }
 }
 

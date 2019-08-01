@@ -200,7 +200,7 @@ void PluginManager::listTxChannels(QList<QString>& list)
 {
     list.clear();
 
-    for(PluginAPI::ChannelRegistrations::iterator it = m_txChannelRegistrations.begin(); it != m_txChannelRegistrations.end(); ++it)
+    for (PluginAPI::ChannelRegistrations::iterator it = m_txChannelRegistrations.begin(); it != m_txChannelRegistrations.end(); ++it)
     {
         const PluginDescriptor& pluginDescipror = it->m_plugin->getPluginDescriptor();
         list.append(pluginDescipror.displayedName);
@@ -211,7 +211,7 @@ void PluginManager::listRxChannels(QList<QString>& list)
 {
     list.clear();
 
-    for(PluginAPI::ChannelRegistrations::iterator it = m_rxChannelRegistrations.begin(); it != m_rxChannelRegistrations.end(); ++it)
+    for (PluginAPI::ChannelRegistrations::iterator it = m_rxChannelRegistrations.begin(); it != m_rxChannelRegistrations.end(); ++it)
     {
         const PluginDescriptor& pluginDesciptor = it->m_plugin->getPluginDescriptor();
         list.append(pluginDesciptor.displayedName);
@@ -236,4 +236,23 @@ void PluginManager::createTxChannelInstance(int channelPluginIndex, DeviceUISet 
         BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(deviceAPI);
         pluginInterface->createTxChannelGUI(deviceUISet, txChannel);
     }
+}
+
+const PluginInterface *PluginManager::getChannelPluginInterface(const QString& channelIdURI) const
+{
+    for(PluginAPI::ChannelRegistrations::const_iterator it = m_rxChannelRegistrations.begin(); it != m_rxChannelRegistrations.end(); ++it)
+    {
+        if (it->m_channelIdURI == channelIdURI) {
+            return it->m_plugin;
+        }
+    }
+
+    for(PluginAPI::ChannelRegistrations::const_iterator it = m_txChannelRegistrations.begin(); it != m_txChannelRegistrations.end(); ++it)
+    {
+        if (it->m_channelIdURI == channelIdURI) {
+            return it->m_plugin;
+        }
+    }
+
+    return nullptr;
 }

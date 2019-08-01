@@ -27,17 +27,24 @@
 #include "settings/preset.h"
 #include "commands/command.h"
 
+class PluginManager;
+
 /**
  * Adapter between API and objects in sdrbase library
  */
 class SDRBASE_API WebAPIAdapterBase
 {
 public:
+    WebAPIAdapterBase();
+    ~WebAPIAdapterBase();
+
+    void setPluginManager(const PluginManager *pluginManager) { m_pluginManager = pluginManager; }
+
     static void webapiFormatPreferences(
         SWGSDRangel::SWGPreferences *apiPreferences,
         const Preferences& preferences
     );
-    static void webapiFormatPreset(
+    void webapiFormatPreset(
         SWGSDRangel::SWGPreset *apiPreset,
         const Preset& preset
     );
@@ -45,6 +52,9 @@ public:
         SWGSDRangel::SWGCommand *apiCommand,
         const Command& command
     );
+
+private:
+    const PluginManager *m_pluginManager;
 };
 
 #endif // SDRBASE_WEBAPI_WEBAPIADAPTERBASE_H_

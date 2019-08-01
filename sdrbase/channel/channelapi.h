@@ -56,6 +56,9 @@ public:
     virtual QByteArray serialize() const = 0;
     virtual bool deserialize(const QByteArray& data) = 0;
 
+    /**
+     * API adapter for the channel settings GET requests
+     */
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage)
@@ -64,6 +67,9 @@ public:
         errorMessage = "Not implemented"; return 501;
     }
 
+    /**
+     * API adapter for the channel settings PUT and PATCH requests
+     */
     virtual int webapiSettingsPutPatch(
             bool force,
             const QStringList& channelSettingsKeys,
@@ -76,6 +82,9 @@ public:
         errorMessage = "Not implemented"; return 501;
     }
 
+    /**
+     * API adapter for the channel report GET requests
+     */
     virtual int webapiReportGet(
             SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage)

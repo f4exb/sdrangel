@@ -3,13 +3,15 @@ project(am)
 set(am_SOURCES
 	amdemod.cpp
 	amdemodsettings.cpp
-	amdemodplugin.cpp
+    amdemodplugin.cpp
+    amdemodwebapiadapter.cpp
 )
 
 set(am_HEADERS
 	amdemod.h
 	amdemodsettings.h
-	amdemodplugin.h
+    amdemodplugin.h
+    amdemodwebapiadapter.h
 )
 
 

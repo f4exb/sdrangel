@@ -598,17 +598,41 @@ int AMDemod::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
-    (void) errorMessage;
     AMDemodSettings settings = m_settings;
-    bool frequencyOffsetChanged = false;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
+    if (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)
+    {
+        MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
+                m_audioSampleRate, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(channelConfigMsg);
+    }
+
+    MsgConfigureAMDemod *msg = MsgConfigureAMDemod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    qDebug("AMDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureAMDemod *msgToGUI = MsgConfigureAMDemod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void AMDemod::webapiUpdateChannelSettings(
+        AMDemodSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
     if (channelSettingsKeys.contains("audioMute")) {
         settings.m_audioMute = response.getAmDemodSettings()->getAudioMute() != 0;
     }
-    if (channelSettingsKeys.contains("inputFrequencyOffset"))
-    {
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getAmDemodSettings()->getInputFrequencyOffset();
-        frequencyOffsetChanged = true;
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getAmDemodSettings()->getRfBandwidth();
@@ -661,27 +685,6 @@ int AMDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getAmDemodSettings()->getReverseApiChannelIndex();
     }
-
-    if (frequencyOffsetChanged)
-    {
-        MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
-                m_audioSampleRate, settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(channelConfigMsg);
-    }
-
-    MsgConfigureAMDemod *msg = MsgConfigureAMDemod::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    qDebug("AMDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureAMDemod *msgToGUI = MsgConfigureAMDemod::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 int AMDemod::webapiReportGet(
@@ -718,8 +721,8 @@ void AMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
     }
 
     response.getAmDemodSettings()->setPll(settings.m_pll ? 1 : 0);
-    response.getAmDemodSettings()->setSyncAmOperation((int) m_settings.m_syncAMOperation);
-    response.getAmDemodSettings()->setStreamIndex(m_settings.m_streamIndex);
+    response.getAmDemodSettings()->setSyncAmOperation((int) settings.m_syncAMOperation);
+    response.getAmDemodSettings()->setStreamIndex(settings.m_streamIndex);
     response.getAmDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getAmDemodSettings()->getReverseApiAddress()) {

@@ -120,10 +120,12 @@ int WebAPIAdapterSrv::instanceConfigGet(
             SWGSDRangel::SWGErrorResponse& error)
 {
     response.init();
+    WebAPIAdapterBase webAPIAdapterBase;
+    webAPIAdapterBase.setPluginManager(m_mainCore.getPluginManager());
     SWGSDRangel::SWGPreferences *preferences = response.getPreferences();
     WebAPIAdapterBase::webapiFormatPreferences(preferences, m_mainCore.getMainSettings().getPreferences());
     SWGSDRangel::SWGPreset *workingPreset = response.getWorkingPreset();
-    WebAPIAdapterBase::webapiFormatPreset(workingPreset, m_mainCore.getMainSettings().getWorkingPresetConst());
+    webAPIAdapterBase.webapiFormatPreset(workingPreset, m_mainCore.getMainSettings().getWorkingPresetConst());
 
     int nbPresets = m_mainCore.m_settings.getPresetCount();
     QList<SWGSDRangel::SWGPreset*> *swgPresets = response.getPresets();
@@ -132,7 +134,7 @@ int WebAPIAdapterSrv::instanceConfigGet(
     {
         const Preset *preset = m_mainCore.m_settings.getPreset(i);
         swgPresets->append(new SWGSDRangel::SWGPreset);
-        WebAPIAdapterBase::webapiFormatPreset(swgPresets->back(), *preset);
+        webAPIAdapterBase.webapiFormatPreset(swgPresets->back(), *preset);
     }
 
     int nbCommands = m_mainCore.m_settings.getCommandCount();

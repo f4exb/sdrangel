@@ -134,6 +134,15 @@ public:
             SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage);
 
+    static void webapiFormatChannelSettings(
+            SWGSDRangel::SWGChannelSettings& response,
+            const AMDemodSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            AMDemodSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
 	double getMagSq() const { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }
@@ -230,7 +239,6 @@ private:
 	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const AMDemodSettings& settings, bool force = false);
     void applyAudioSampleRate(int sampleRate);
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const AMDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AMDemodSettings& settings, bool force);
 

@@ -134,6 +134,13 @@ public:
         return nullptr;
     }
 
+    // any channel
+
+    virtual ChannelAPI* createChannelWebAPIAdapter() const
+    {
+        return nullptr;
+    }
+
     // device source plugins only
 
 	virtual SamplingDevices enumSampleSources() { return SamplingDevices(); }

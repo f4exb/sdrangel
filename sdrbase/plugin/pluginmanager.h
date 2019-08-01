@@ -80,6 +80,8 @@ public:
 	void createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI);
 	void listTxChannels(QList<QString>& list);
 
+	const PluginInterface *getChannelPluginInterface(const QString& channelIdURI) const;
+
 	static const QString& getFileInputDeviceId() { return m_fileInputDeviceTypeID; }
 	static const QString& getFileSinkDeviceId() { return m_fileSinkDeviceTypeID; }
 	static const QString& getTestMIMODeviceId() { return m_testMIMODeviceTypeID; }
