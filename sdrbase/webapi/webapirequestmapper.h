@@ -49,6 +49,7 @@ private:
     qtwebapp::StaticFileController *m_staticFileController;
 
     void instanceSummaryService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceConfigService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceDevicesService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceChannelsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceLoggingService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);

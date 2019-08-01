@@ -132,6 +132,7 @@ set(sdrbase_SOURCES
     plugin/pluginapi.cpp
     plugin/pluginmanager.cpp
 
+    webapi/webapiadapterbase.cpp
     webapi/webapiadapterinterface.cpp
     webapi/webapirequestmapper.cpp
     webapi/webapiserver.cpp
@@ -266,6 +267,7 @@ set(sdrbase_HEADERS
     util/uid.h
     util/timeutil.h
 
+    webapi/webapiadapterbase.h
     webapi/webapiadapterinterface.h
     webapi/webapirequestmapper.h
     webapi/webapiserver

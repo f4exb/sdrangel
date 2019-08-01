@@ -30,6 +30,7 @@
 namespace SWGSDRangel
 {
     class SWGInstanceSummaryResponse;
+    class SWGInstanceConfigResponse;
     class SWGInstanceDevicesResponse;
     class SWGInstanceChannelsResponse;
     class SWGLoggingInfo;
@@ -81,6 +82,20 @@ public:
      */
     virtual int instanceDelete(
             SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/config (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceSummary
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceConfigGet(
+            SWGSDRangel::SWGInstanceConfigResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
         (void) response;
@@ -770,6 +785,7 @@ public:
     }
 
     static QString instanceSummaryURL;
+    static QString instanceConfigURL;
     static QString instanceDevicesURL;
     static QString instanceChannelsURL;
     static QString instanceLoggingURL;

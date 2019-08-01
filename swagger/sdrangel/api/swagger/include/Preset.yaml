@@ -35,7 +35,7 @@ Preset:
     centerFrequency:
       type: integer
       format: int64
-    m_spectrumConfig:
+    spectrumConfig:
       $ref: "http://localhost:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
     dcOffsetCorrection:
       description: boolean

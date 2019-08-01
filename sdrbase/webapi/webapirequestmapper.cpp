@@ -26,6 +26,7 @@
 #include "httpdocrootsettings.h"
 #include "webapirequestmapper.h"
 #include "SWGInstanceSummaryResponse.h"
+#include "SWGInstanceConfigResponse.h"
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGAudioDevices.h"
@@ -96,6 +97,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
 
         if (path == WebAPIAdapterInterface::instanceSummaryURL) {
             instanceSummaryService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceConfigURL) {
+            instanceConfigService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceDevicesURL) {
             instanceDevicesService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceChannelsURL) {
@@ -209,6 +212,26 @@ void WebAPIRequestMapper::instanceSummaryService(qtwebapp::HttpRequest& request,
         errorResponse.init();
         *errorResponse.getMessage() = "Invalid HTTP method";
         response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::instanceConfigService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    if (request.getMethod() == "GET")
+    {
+        SWGSDRangel::SWGInstanceConfigResponse normalResponse;
+        int status = m_adapter->instanceConfigGet(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status/100 == 2) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
     }
 }
 

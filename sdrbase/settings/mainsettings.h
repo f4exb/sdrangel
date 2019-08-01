@@ -23,6 +23,8 @@ public:
 	QString getFileLocation() const;
 	int getFileFormat() const; //!< see QSettings::Format for the values
 
+    const Preferences& getPreferences() const { return m_preferences; }
+
 	Preset* newPreset(const QString& group, const QString& description);
 	void deletePreset(const Preset* preset);
 	int getPresetCount() const { return m_presets.count(); }
@@ -41,6 +43,7 @@ public:
     void renameCommandGroup(const QString& oldGroupName, const QString& newGroupName);
     void deleteCommandGroup(const QString& groupName);
 
+    const Preset& getWorkingPresetConst() const { return m_workingPreset; }
 	Preset* getWorkingPreset() { return &m_workingPreset; }
 	int getSourceIndex() const { return m_preferences.getSourceIndex(); }
 	void setSourceIndex(int value) { m_preferences.setSourceIndex(value); }

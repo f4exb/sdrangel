@@ -35,8 +35,10 @@
 #include "plugin/pluginapi.h"
 #include "plugin/pluginmanager.h"
 #include "channel/channelapi.h"
+#include "webapi/webapiadapterbase.h"
 
 #include "SWGInstanceSummaryResponse.h"
+#include "SWGInstanceConfigResponse.h"
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGDeviceListItem.h"
@@ -112,6 +114,29 @@ int WebAPIAdapterGUI::instanceDelete(
     (void) response;
     *error.getMessage() = QString("Not supported in GUI instance");
     return 400;
+}
+
+int WebAPIAdapterGUI::instanceConfigGet(
+            SWGSDRangel::SWGInstanceConfigResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    response.init();
+    SWGSDRangel::SWGPreferences *preferences = response.getPreferences();
+    WebAPIAdapterBase::webapiFormatPreferences(preferences, m_mainWindow.getMainSettings().getPreferences());
+    SWGSDRangel::SWGPreset *workingPreset = response.getWorkingPreset();
+    WebAPIAdapterBase::webapiFormatPreset(workingPreset, m_mainWindow.getMainSettings().getWorkingPresetConst());
+
+    int nbPresets = m_mainWindow.m_settings.getPresetCount();
+    QList<SWGSDRangel::SWGPreset*> *swgPresets = response.getPresets();
+
+    for (int i = 0; i < nbPresets; i++)
+    {
+        const Preset *preset = m_mainWindow.m_settings.getPreset(i);
+        swgPresets->append(new SWGSDRangel::SWGPreset);
+        WebAPIAdapterBase::webapiFormatPreset(swgPresets->back(), *preset);
+    }
+
+    return 200;
 }
 
 int WebAPIAdapterGUI::instanceDevices(

@@ -23,6 +23,7 @@
 #include <QSysInfo>
 
 #include "SWGInstanceSummaryResponse.h"
+#include "SWGInstanceConfigResponse.h"
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGLoggingInfo.h"
@@ -56,6 +57,7 @@
 #include "channel/channelapi.h"
 #include "plugin/pluginapi.h"
 #include "plugin/pluginmanager.h"
+#include "webapi/webapiadapterbase.h"
 #include "webapiadaptersrv.h"
 
 WebAPIAdapterSrv::WebAPIAdapterSrv(MainCore& mainCore) :
@@ -111,6 +113,29 @@ int WebAPIAdapterSrv::instanceDelete(
     *response.getMessage() = QString("Message to stop the SDRangel instance (MsgDeleteInstance) was submitted successfully");
 
     return 202;
+}
+
+int WebAPIAdapterSrv::instanceConfigGet(
+            SWGSDRangel::SWGInstanceConfigResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    response.init();
+    SWGSDRangel::SWGPreferences *preferences = response.getPreferences();
+    WebAPIAdapterBase::webapiFormatPreferences(preferences, m_mainCore.getMainSettings().getPreferences());
+    SWGSDRangel::SWGPreset *workingPreset = response.getWorkingPreset();
+    WebAPIAdapterBase::webapiFormatPreset(workingPreset, m_mainCore.getMainSettings().getWorkingPresetConst());
+
+    int nbPresets = m_mainCore.m_settings.getPresetCount();
+    QList<SWGSDRangel::SWGPreset*> *swgPresets = response.getPresets();
+
+    for (int i = 0; i < nbPresets; i++)
+    {
+        const Preset *preset = m_mainCore.m_settings.getPreset(i);
+        swgPresets->append(new SWGSDRangel::SWGPreset);
+        WebAPIAdapterBase::webapiFormatPreset(swgPresets->back(), *preset);
+    }
+
+    return 200;
 }
 
 int WebAPIAdapterSrv::instanceDevices(
