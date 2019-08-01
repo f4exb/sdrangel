@@ -117,13 +117,13 @@ public:
     void setKeyboardDashes();
     void setKeyboardSilence();
 
-    void webapiSettingsPutPatch(
+    static void webapiSettingsPutPatch(
         const QStringList& channelSettingsKeys,
         CWKeyerSettings& cwKeyerSettings,
         SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings
     );
 
-    void webapiFormatChannelSettings(
+    static void webapiFormatChannelSettings(
         SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings,
         const CWKeyerSettings& cwKeyerSettings
     );
