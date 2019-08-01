@@ -552,7 +552,28 @@ int FreqTracker::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     FreqTrackerSettings settings = m_settings;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
+    MsgConfigureFreqTracker *msg = MsgConfigureFreqTracker::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    qDebug("FreqTracker::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureFreqTracker *msgToGUI = MsgConfigureFreqTracker::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void FreqTracker::webapiUpdateChannelSettings(
+        FreqTrackerSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getFreqTrackerSettings()->getInputFrequencyOffset();
     }
@@ -612,20 +633,6 @@ int FreqTracker::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getAmDemodSettings()->getReverseApiChannelIndex();
     }
-
-    MsgConfigureFreqTracker *msg = MsgConfigureFreqTracker::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    qDebug("FreqTracker::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureFreqTracker *msgToGUI = MsgConfigureFreqTracker::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 int FreqTracker::webapiReportGet(
@@ -653,13 +660,13 @@ void FreqTracker::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
         response.getFreqTrackerSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getFreqTrackerSettings()->setAlphaEma(m_settings.m_alphaEMA);
-    response.getFreqTrackerSettings()->setTracking(m_settings.m_tracking ? 1 : 0);
-    response.getFreqTrackerSettings()->setTrackerType((int) m_settings.m_trackerType);
-    response.getFreqTrackerSettings()->setPllPskOrder(m_settings.m_pllPskOrder);
-    response.getFreqTrackerSettings()->setRrc(m_settings.m_rrc ? 1 : 0);
-    response.getFreqTrackerSettings()->setRrcRolloff(m_settings.m_rrcRolloff);
-    response.getFreqTrackerSettings()->setSquelchGate(m_settings.m_squelchGate);
+    response.getFreqTrackerSettings()->setAlphaEma(settings.m_alphaEMA);
+    response.getFreqTrackerSettings()->setTracking(settings.m_tracking ? 1 : 0);
+    response.getFreqTrackerSettings()->setTrackerType((int) settings.m_trackerType);
+    response.getFreqTrackerSettings()->setPllPskOrder(settings.m_pllPskOrder);
+    response.getFreqTrackerSettings()->setRrc(settings.m_rrc ? 1 : 0);
+    response.getFreqTrackerSettings()->setRrcRolloff(settings.m_rrcRolloff);
+    response.getFreqTrackerSettings()->setSquelchGate(settings.m_squelchGate);
     response.getFreqTrackerSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getFreqTrackerSettings()->getReverseApiAddress()) {

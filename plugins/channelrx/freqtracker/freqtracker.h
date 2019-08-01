@@ -157,6 +157,15 @@ public:
             SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage);
 
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const FreqTrackerSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            FreqTrackerSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     uint32_t getSampleRate() const { return m_channelSampleRate; }
 	double getMagSq() const { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }
@@ -250,7 +259,6 @@ private:
     void configureChannelizer();
     void connectTimer();
     void disconnectTimer();
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const FreqTrackerSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreqTrackerSettings& settings, bool force);
 

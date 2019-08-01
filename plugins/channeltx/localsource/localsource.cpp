@@ -427,7 +427,34 @@ int LocalSource::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     LocalSourceSettings settings = m_settings;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
+    MsgConfigureLocalSource *msg = MsgConfigureLocalSource::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if ((settings.m_log2Interp != m_settings.m_log2Interp) || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
+    {
+        MsgConfigureChannelizer *msg = MsgConfigureChannelizer::create(settings.m_log2Interp, settings.m_filterChainHash);
+        m_inputMessageQueue.push(msg);
+    }
+
+    qDebug("LocalSource::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureLocalSource *msgToGUI = MsgConfigureLocalSource::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void LocalSource::webapiUpdateChannelSettings(
+        LocalSourceSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
     if (channelSettingsKeys.contains("localDeviceIndex")) {
         settings.m_localDeviceIndex = response.getLocalSourceSettings()->getLocalDeviceIndex();
     }
@@ -462,26 +489,6 @@ int LocalSource::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getLocalSourceSettings()->getReverseApiChannelIndex();
     }
-
-    MsgConfigureLocalSource *msg = MsgConfigureLocalSource::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if ((settings.m_log2Interp != m_settings.m_log2Interp) || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
-    {
-        MsgConfigureChannelizer *msg = MsgConfigureChannelizer::create(settings.m_log2Interp, settings.m_filterChainHash);
-        m_inputMessageQueue.push(msg);
-    }
-
-    qDebug("LocalSource::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureLocalSource *msgToGUI = MsgConfigureLocalSource::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 void LocalSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const LocalSourceSettings& settings)

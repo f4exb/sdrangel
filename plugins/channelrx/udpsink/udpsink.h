@@ -142,6 +142,15 @@ public:
             SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage);
 
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const UDPSinkSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            UDPSinkSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     static const QString m_channelIdURI;
     static const QString m_channelId;
 	static const int udpBlockSize = 512; // UDP block size in number of bytes
@@ -252,7 +261,6 @@ protected:
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = true);
     void applySettings(const UDPSinkSettings& settings, bool force = false);
 
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const UDPSinkSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const UDPSinkSettings& settings, bool force);
 

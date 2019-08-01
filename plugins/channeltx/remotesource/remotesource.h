@@ -223,6 +223,15 @@ public:
             SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage);
 
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const RemoteSourceSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            RemoteSourceSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     void setDataLink(const QString& dataAddress, uint16_t dataPort);
 
     static const QString m_channelIdURI;
@@ -255,7 +264,6 @@ private:
     void handleDataBlock(RemoteDataBlock *dataBlock);
     void printMeta(const QString& header, RemoteMetaDataFEC *metaData);
     uint32_t calculateDataReadQueueSize(int sampleRate);
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const RemoteSourceSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteSourceSettings& settings, bool force);
 

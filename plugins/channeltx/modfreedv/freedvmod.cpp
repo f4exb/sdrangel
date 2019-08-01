@@ -842,6 +842,11 @@ int FreeDVMod::webapiSettingsGet(
     response.setFreeDvModSettings(new SWGSDRangel::SWGFreeDVModSettings());
     response.getFreeDvModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getFreeDvModSettings()->getCwKeyer();
+    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
+    CWKeyer::webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+
     return 200;
 }
 
@@ -853,12 +858,52 @@ int FreeDVMod::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     FreeDVModSettings settings = m_settings;
-    bool frequencyOffsetChanged = false;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    if (channelSettingsKeys.contains("cwKeyer"))
     {
+        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getFreeDvModSettings()->getCwKeyer();
+        CWKeyerSettings cwKeyerSettings = m_cwKeyer.getSettings();
+        CWKeyer::webapiSettingsPutPatch(channelSettingsKeys, cwKeyerSettings, apiCwKeyerSettings);
+
+        CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+        m_cwKeyer.getInputMessageQueue()->push(msgCwKeyer);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            CWKeyer::MsgConfigureCWKeyer *msgCwKeyerToGUI = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+            m_guiMessageQueue->push(msgCwKeyerToGUI);
+        }
+    }
+
+    if (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)
+    {
+        FreeDVMod::MsgConfigureChannelizer *msgChan = FreeDVMod::MsgConfigureChannelizer::create(
+                m_audioSampleRate, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(msgChan);
+    }
+
+    MsgConfigureFreeDVMod *msg = MsgConfigureFreeDVMod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureFreeDVMod *msgToGUI = MsgConfigureFreeDVMod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void FreeDVMod::webapiUpdateChannelSettings(
+        FreeDVModSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getFreeDvModSettings()->getInputFrequencyOffset();
-        frequencyOffsetChanged = true;
     }
     if (channelSettingsKeys.contains("toneFrequency")) {
         settings.m_toneFrequency = response.getFreeDvModSettings()->getToneFrequency();
@@ -908,42 +953,6 @@ int FreeDVMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getFreeDvModSettings()->getReverseApiChannelIndex();
     }
-
-    if (channelSettingsKeys.contains("cwKeyer"))
-    {
-        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getFreeDvModSettings()->getCwKeyer();
-        CWKeyerSettings cwKeyerSettings = m_cwKeyer.getSettings();
-        m_cwKeyer.webapiSettingsPutPatch(channelSettingsKeys, cwKeyerSettings, apiCwKeyerSettings);
-
-        CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
-        m_cwKeyer.getInputMessageQueue()->push(msgCwKeyer);
-
-        if (m_guiMessageQueue) // forward to GUI if any
-        {
-            CWKeyer::MsgConfigureCWKeyer *msgCwKeyerToGUI = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
-            m_guiMessageQueue->push(msgCwKeyerToGUI);
-        }
-    }
-
-    if (frequencyOffsetChanged)
-    {
-        FreeDVMod::MsgConfigureChannelizer *msgChan = FreeDVMod::MsgConfigureChannelizer::create(
-                m_audioSampleRate, settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(msgChan);
-    }
-
-    MsgConfigureFreeDVMod *msg = MsgConfigureFreeDVMod::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureFreeDVMod *msgToGUI = MsgConfigureFreeDVMod::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 int FreeDVMod::webapiReportGet(
@@ -986,10 +995,6 @@ void FreeDVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     if (!response.getFreeDvModSettings()->getCwKeyer()) {
         response.getFreeDvModSettings()->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings);
     }
-
-    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getFreeDvModSettings()->getCwKeyer();
-    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
-    m_cwKeyer.webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
 
     response.getFreeDvModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 

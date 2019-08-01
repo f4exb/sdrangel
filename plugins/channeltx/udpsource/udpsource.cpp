@@ -690,18 +690,43 @@ int UDPSource::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     UDPSourceSettings settings = m_settings;
-    bool frequencyOffsetChanged = false;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
+    if (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)
+    {
+        UDPSource::MsgConfigureChannelizer *msgChan = UDPSource::MsgConfigureChannelizer::create(
+                settings.m_inputSampleRate,
+                settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(msgChan);
+    }
+
+    MsgConfigureUDPSource *msg = MsgConfigureUDPSource::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureUDPSource *msgToGUI = MsgConfigureUDPSource::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void UDPSource::webapiUpdateChannelSettings(
+        UDPSourceSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
     if (channelSettingsKeys.contains("sampleFormat")) {
         settings.m_sampleFormat = (UDPSourceSettings::SampleFormat) response.getUdpSourceSettings()->getSampleFormat();
     }
     if (channelSettingsKeys.contains("inputSampleRate")) {
         settings.m_inputSampleRate = response.getUdpSourceSettings()->getInputSampleRate();
     }
-    if (channelSettingsKeys.contains("inputFrequencyOffset"))
-    {
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getUdpSourceSettings()->getInputFrequencyOffset();
-        frequencyOffsetChanged = true;
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getUdpSourceSettings()->getRfBandwidth();
@@ -766,27 +791,6 @@ int UDPSource::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getUdpSourceSettings()->getReverseApiChannelIndex();
     }
-
-    if (frequencyOffsetChanged)
-    {
-        UDPSource::MsgConfigureChannelizer *msgChan = UDPSource::MsgConfigureChannelizer::create(
-                settings.m_inputSampleRate,
-                settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(msgChan);
-    }
-
-    MsgConfigureUDPSource *msg = MsgConfigureUDPSource::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureUDPSource *msgToGUI = MsgConfigureUDPSource::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 int UDPSource::webapiReportGet(

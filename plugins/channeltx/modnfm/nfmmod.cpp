@@ -727,6 +727,11 @@ int NFMMod::webapiSettingsGet(
     response.setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
     response.getNfmModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
+    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
+    CWKeyer::webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+
     return 200;
 }
 
@@ -738,12 +743,50 @@ int NFMMod::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     NFMModSettings settings = m_settings;
-    bool frequencyOffsetChanged = false;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-//    for (int i = 0; i < channelSettingsKeys.size(); i++) {
-//        qDebug("NFMMod::webapiSettingsPutPatch: settingKey: %s", qPrintable(channelSettingsKeys.at(i)));
-//    }
+    if (channelSettingsKeys.contains("cwKeyer"))
+    {
+        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
+        CWKeyerSettings cwKeyerSettings = m_cwKeyer.getSettings();
+        CWKeyer::webapiSettingsPutPatch(channelSettingsKeys, cwKeyerSettings, apiCwKeyerSettings);
 
+        CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+        m_cwKeyer.getInputMessageQueue()->push(msgCwKeyer);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            CWKeyer::MsgConfigureCWKeyer *msgCwKeyerToGUI = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+            m_guiMessageQueue->push(msgCwKeyerToGUI);
+        }
+    }
+
+    if (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)
+    {
+        NFMMod::MsgConfigureChannelizer *msgChan = NFMMod::MsgConfigureChannelizer::create(
+                m_audioSampleRate, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(msgChan);
+    }
+
+    MsgConfigureNFMMod *msg = MsgConfigureNFMMod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureNFMMod *msgToGUI = MsgConfigureNFMMod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void NFMMod::webapiUpdateChannelSettings(
+        NFMModSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
     if (channelSettingsKeys.contains("afBandwidth")) {
         settings.m_afBandwidth = response.getNfmModSettings()->getAfBandwidth();
     }
@@ -759,10 +802,8 @@ int NFMMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("fmDeviation")) {
         settings.m_fmDeviation = response.getNfmModSettings()->getFmDeviation();
     }
-    if (channelSettingsKeys.contains("inputFrequencyOffset"))
-    {
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getNfmModSettings()->getInputFrequencyOffset();
-        frequencyOffsetChanged = true;
     }
     if (channelSettingsKeys.contains("modAFInput")) {
         settings.m_modAFInput = (NFMModSettings::NFMModInputAF) response.getNfmModSettings()->getModAfInput();
@@ -800,42 +841,6 @@ int NFMMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getNfmModSettings()->getReverseApiChannelIndex();
     }
-
-    if (channelSettingsKeys.contains("cwKeyer"))
-    {
-        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
-        CWKeyerSettings cwKeyerSettings = m_cwKeyer.getSettings();
-        m_cwKeyer.webapiSettingsPutPatch(channelSettingsKeys, cwKeyerSettings, apiCwKeyerSettings);
-
-        CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
-        m_cwKeyer.getInputMessageQueue()->push(msgCwKeyer);
-
-        if (m_guiMessageQueue) // forward to GUI if any
-        {
-            CWKeyer::MsgConfigureCWKeyer *msgCwKeyerToGUI = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
-            m_guiMessageQueue->push(msgCwKeyerToGUI);
-        }
-    }
-
-    if (frequencyOffsetChanged)
-    {
-        NFMMod::MsgConfigureChannelizer *msgChan = NFMMod::MsgConfigureChannelizer::create(
-                m_audioSampleRate, settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(msgChan);
-    }
-
-    MsgConfigureNFMMod *msg = MsgConfigureNFMMod::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureNFMMod *msgToGUI = MsgConfigureNFMMod::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 int NFMMod::webapiReportGet(
@@ -875,17 +880,11 @@ void NFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
         response.getNfmModSettings()->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings);
     }
 
-    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
-    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
-    m_cwKeyer.webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
-
     if (response.getNfmModSettings()->getAudioDeviceName()) {
         *response.getNfmModSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
     } else {
         response.getNfmModSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
-
-    apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
 
     response.getNfmModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 

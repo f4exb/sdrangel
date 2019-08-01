@@ -347,6 +347,15 @@ public:
             SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage);
 
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const FileSourceSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            FileSourceSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     /** Set center frequency given in Hz */
     void setCenterFrequency(uint64_t centerFrequency) { m_centerFrequency = centerFrequency; }
 
@@ -421,9 +430,8 @@ private:
 	void seekFileStream(int seekMillis);
     void handleEOF();
     void applySettings(const FileSourceSettings& settings, bool force = false);
-    void validateFilterChainHash(FileSourceSettings& settings);
+    static void validateFilterChainHash(FileSourceSettings& settings);
     void calculateFrequencyOffset();
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const FileSourceSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FileSourceSettings& settings, bool force);
 

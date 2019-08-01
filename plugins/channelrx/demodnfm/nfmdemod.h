@@ -156,6 +156,15 @@ public:
             SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage);
 
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const NFMDemodSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            NFMDemodSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
 	const Real *getCtcssToneSet(int& nbTones) const {
 		nbTones = m_ctcssDetector.getNTones();
 		return m_ctcssDetector.getToneSet();
@@ -261,7 +270,6 @@ private:
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const NFMDemodSettings& settings, bool force = false);
     void applyAudioSampleRate(int sampleRate);
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NFMDemodSettings& settings, bool force);
 

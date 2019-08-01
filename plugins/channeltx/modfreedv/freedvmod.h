@@ -248,6 +248,15 @@ public:
                 SWGSDRangel::SWGChannelReport& response,
                 QString& errorMessage);
 
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const FreeDVModSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            FreeDVModSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
     uint32_t getModemSampleRate() const { return m_modemSampleRate; }
     double getMagSq() const { return m_magsq; }
@@ -352,7 +361,6 @@ private:
     void modulateSample();
     void openFileStream();
     void seekFileStream(int seekPercentage);
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const FreeDVModSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreeDVModSettings& settings, bool force);
     void webapiReverseSendCWSettings(const CWKeyerSettings& settings);

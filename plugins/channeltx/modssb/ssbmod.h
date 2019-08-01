@@ -246,6 +246,15 @@ public:
                 SWGSDRangel::SWGChannelReport& response,
                 QString& errorMessage);
 
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const SSBModSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            SSBModSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
     double getMagSq() const { return m_magsq; }
 
@@ -353,7 +362,6 @@ private:
     void modulateSample();
     void openFileStream();
     void seekFileStream(int seekPercentage);
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SSBModSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SSBModSettings& settings, bool force);
     void webapiReverseSendCWSettings(const CWKeyerSettings& settings);

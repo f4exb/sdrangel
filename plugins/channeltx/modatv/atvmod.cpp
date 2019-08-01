@@ -812,7 +812,7 @@ void ATVMod::openImage(const QString& fileName)
 
 	if (m_imageOK)
 	{
-        m_imageFileName = fileName;
+        m_settings.m_imageFileName = fileName;
         m_imageFromFile.copyTo(m_imageOriginal);
 
         if (m_settings.m_showOverlayText) {
@@ -823,7 +823,7 @@ void ATVMod::openImage(const QString& fileName)
 	}
 	else
 	{
-	    m_imageFileName.clear();
+	    m_settings.m_imageFileName.clear();
         qDebug("ATVMod::openImage: cannot open image file %s", qPrintable(fileName));
 	}
 }
@@ -836,7 +836,7 @@ void ATVMod::openVideo(const QString& fileName)
 
     if (m_videoOK)
     {
-        m_videoFileName = fileName;
+        m_settings.m_videoFileName = fileName;
         m_videoFPS = m_video.get(CV_CAP_PROP_FPS);
         m_videoWidth = (int) m_video.get(CV_CAP_PROP_FRAME_WIDTH);
         m_videoHeight = (int) m_video.get(CV_CAP_PROP_FRAME_HEIGHT);
@@ -864,7 +864,7 @@ void ATVMod::openVideo(const QString& fileName)
     }
     else
     {
-        m_videoFileName.clear();
+        m_settings.m_videoFileName.clear();
         qDebug("ATVMod::openVideo: cannot open video file %s", qPrintable(fileName));
     }
 }
@@ -1469,15 +1469,15 @@ void ATVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     }
 
     if (response.getAtvModSettings()->getImageFileName()) {
-        *response.getAtvModSettings()->getImageFileName() = m_imageFileName;
+        *response.getAtvModSettings()->getImageFileName() = settings.m_imageFileName;
     } else {
-        response.getAtvModSettings()->setImageFileName(new QString(m_imageFileName));
+        response.getAtvModSettings()->setImageFileName(new QString(settings.m_imageFileName));
     }
 
     if (response.getAtvModSettings()->getVideoFileName()) {
-        *response.getAtvModSettings()->getVideoFileName() = m_videoFileName;
+        *response.getAtvModSettings()->getVideoFileName() = settings.m_videoFileName;
     } else {
-        response.getAtvModSettings()->setVideoFileName(new QString(m_videoFileName));
+        response.getAtvModSettings()->setVideoFileName(new QString(settings.m_videoFileName));
     }
 
     response.getAtvModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);

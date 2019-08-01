@@ -682,6 +682,11 @@ int AMMod::webapiSettingsGet(
     response.setAmModSettings(new SWGSDRangel::SWGAMModSettings());
     response.getAmModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getAmModSettings()->getCwKeyer();
+    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
+    CWKeyer::webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+
     return 200;
 }
 
@@ -693,15 +698,55 @@ int AMMod::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     AMModSettings settings = m_settings;
-    bool frequencyOffsetChanged = false;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
+    if (channelSettingsKeys.contains("cwKeyer"))
+    {
+        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getAmModSettings()->getCwKeyer();
+        CWKeyerSettings cwKeyerSettings = m_cwKeyer.getSettings();
+        CWKeyer::webapiSettingsPutPatch(channelSettingsKeys, cwKeyerSettings, apiCwKeyerSettings);
+
+        CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+        m_cwKeyer.getInputMessageQueue()->push(msgCwKeyer);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            CWKeyer::MsgConfigureCWKeyer *msgCwKeyerToGUI = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+            m_guiMessageQueue->push(msgCwKeyerToGUI);
+        }
+    }
+
+    if (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)
+    {
+        AMMod::MsgConfigureChannelizer *msgChan = AMMod::MsgConfigureChannelizer::create(
+                m_audioSampleRate, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(msgChan);
+    }
+
+    MsgConfigureAMMod *msg = MsgConfigureAMMod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureAMMod *msgToGUI = MsgConfigureAMMod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void AMMod::webapiUpdateChannelSettings(
+        AMModSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
     if (channelSettingsKeys.contains("channelMute")) {
         settings.m_channelMute = response.getAmModSettings()->getChannelMute() != 0;
     }
-    if (channelSettingsKeys.contains("inputFrequencyOffset"))
-    {
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getAmModSettings()->getInputFrequencyOffset();
-        frequencyOffsetChanged = true;
     }
     if (channelSettingsKeys.contains("modAFInput")) {
         settings.m_modAFInput = (AMModSettings::AMModInputAF) response.getAmModSettings()->getModAfInput();
@@ -745,42 +790,6 @@ int AMMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getAmModSettings()->getReverseApiChannelIndex();
     }
-
-    if (channelSettingsKeys.contains("cwKeyer"))
-    {
-        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getAmModSettings()->getCwKeyer();
-        CWKeyerSettings cwKeyerSettings = m_cwKeyer.getSettings();
-        m_cwKeyer.webapiSettingsPutPatch(channelSettingsKeys, cwKeyerSettings, apiCwKeyerSettings);
-
-        CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
-        m_cwKeyer.getInputMessageQueue()->push(msgCwKeyer);
-
-        if (m_guiMessageQueue) // forward to GUI if any
-        {
-            CWKeyer::MsgConfigureCWKeyer *msgCwKeyerToGUI = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
-            m_guiMessageQueue->push(msgCwKeyerToGUI);
-        }
-    }
-
-    if (frequencyOffsetChanged)
-    {
-        AMMod::MsgConfigureChannelizer *msgChan = AMMod::MsgConfigureChannelizer::create(
-                m_audioSampleRate, settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(msgChan);
-    }
-
-    MsgConfigureAMMod *msg = MsgConfigureAMMod::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureAMMod *msgToGUI = MsgConfigureAMMod::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 int AMMod::webapiReportGet(
@@ -816,10 +825,6 @@ void AMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respons
     if (!response.getAmModSettings()->getCwKeyer()) {
         response.getAmModSettings()->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings);
     }
-
-    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getAmModSettings()->getCwKeyer();
-    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
-    m_cwKeyer.webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
 
     if (response.getAmModSettings()->getAudioDeviceName()) {
         *response.getAmModSettings()->getAudioDeviceName() = settings.m_audioDeviceName;

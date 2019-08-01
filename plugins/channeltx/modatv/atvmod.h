@@ -396,6 +396,15 @@ public:
                 SWGSDRangel::SWGChannelReport& response,
                 QString& errorMessage);
 
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const ATVModSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            ATVModSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     int getEffectiveSampleRate() const { return m_tvSampleRate; };
     double getMagSq() const { return m_movingAverage.asDouble(); }
     void getCameraNumbers(std::vector<int>& numbers);
@@ -574,7 +583,6 @@ private:
     void resizeCamera();
     void mixImageAndText(cv::Mat& image);
 
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const ATVModSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ATVModSettings& settings, bool force);
 

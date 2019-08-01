@@ -138,6 +138,15 @@ public:
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage);
 
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const LocalSinkSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            LocalSinkSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     /** Set center frequency given in Hz */
     void setCenterFrequency(uint64_t centerFrequency) { m_centerFrequency = centerFrequency; }
 
@@ -173,9 +182,8 @@ private:
     void applySettings(const LocalSinkSettings& settings, bool force = false);
     DeviceSampleSource *getLocalDevice(uint32_t index);
     void propagateSampleRateAndFrequency(uint32_t index);
-    void validateFilterChainHash(LocalSinkSettings& settings);
+    static void validateFilterChainHash(LocalSinkSettings& settings);
     void calculateFrequencyOffset();
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const LocalSinkSettings& settings);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const LocalSinkSettings& settings, bool force);
 
 private slots:

@@ -1015,6 +1015,11 @@ int SSBMod::webapiSettingsGet(
     response.setSsbModSettings(new SWGSDRangel::SWGSSBModSettings());
     response.getSsbModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getSsbModSettings()->getCwKeyer();
+    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
+    CWKeyer::webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+
     return 200;
 }
 
@@ -1026,12 +1031,52 @@ int SSBMod::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     SSBModSettings settings = m_settings;
-    bool frequencyOffsetChanged = false;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    if (channelSettingsKeys.contains("cwKeyer"))
     {
+        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getSsbModSettings()->getCwKeyer();
+        CWKeyerSettings cwKeyerSettings = m_cwKeyer.getSettings();
+        CWKeyer::webapiSettingsPutPatch(channelSettingsKeys, cwKeyerSettings, apiCwKeyerSettings);
+
+        CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+        m_cwKeyer.getInputMessageQueue()->push(msgCwKeyer);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            CWKeyer::MsgConfigureCWKeyer *msgCwKeyerToGUI = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
+            m_guiMessageQueue->push(msgCwKeyerToGUI);
+        }
+    }
+
+    if (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)
+    {
+        SSBMod::MsgConfigureChannelizer *msgChan = SSBMod::MsgConfigureChannelizer::create(
+                m_audioSampleRate, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(msgChan);
+    }
+
+    MsgConfigureSSBMod *msg = MsgConfigureSSBMod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureSSBMod *msgToGUI = MsgConfigureSSBMod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void SSBMod::webapiUpdateChannelSettings(
+        SSBModSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getSsbModSettings()->getInputFrequencyOffset();
-        frequencyOffsetChanged = true;
     }
     if (channelSettingsKeys.contains("bandwidth")) {
         settings.m_bandwidth = response.getSsbModSettings()->getBandwidth();
@@ -1096,42 +1141,6 @@ int SSBMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getSsbModSettings()->getReverseApiChannelIndex();
     }
-
-    if (channelSettingsKeys.contains("cwKeyer"))
-    {
-        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getSsbModSettings()->getCwKeyer();
-        CWKeyerSettings cwKeyerSettings = m_cwKeyer.getSettings();
-        m_cwKeyer.webapiSettingsPutPatch(channelSettingsKeys, cwKeyerSettings, apiCwKeyerSettings);
-
-        CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
-        m_cwKeyer.getInputMessageQueue()->push(msgCwKeyer);
-
-        if (m_guiMessageQueue) // forward to GUI if any
-        {
-            CWKeyer::MsgConfigureCWKeyer *msgCwKeyerToGUI = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
-            m_guiMessageQueue->push(msgCwKeyerToGUI);
-        }
-    }
-
-    if (frequencyOffsetChanged)
-    {
-        SSBMod::MsgConfigureChannelizer *msgChan = SSBMod::MsgConfigureChannelizer::create(
-                m_audioSampleRate, settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(msgChan);
-    }
-
-    MsgConfigureSSBMod *msg = MsgConfigureSSBMod::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureSSBMod *msgToGUI = MsgConfigureSSBMod::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 int SSBMod::webapiReportGet(
@@ -1179,10 +1188,6 @@ void SSBMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     if (!response.getSsbModSettings()->getCwKeyer()) {
         response.getSsbModSettings()->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings);
     }
-
-    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getSsbModSettings()->getCwKeyer();
-    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
-    m_cwKeyer.webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
 
     response.getSsbModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 

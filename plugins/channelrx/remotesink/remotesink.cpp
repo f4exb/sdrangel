@@ -448,7 +448,34 @@ int RemoteSink::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     RemoteSinkSettings settings = m_settings;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
+    MsgConfigureRemoteSink *msg = MsgConfigureRemoteSink::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if ((settings.m_log2Decim != m_settings.m_log2Decim) || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
+    {
+        MsgConfigureChannelizer *msg = MsgConfigureChannelizer::create(settings.m_log2Decim, settings.m_filterChainHash);
+        m_inputMessageQueue.push(msg);
+    }
+
+    qDebug("RemoteSink::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureRemoteSink *msgToGUI = MsgConfigureRemoteSink::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void RemoteSink::webapiUpdateChannelSettings(
+        RemoteSinkSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
     if (channelSettingsKeys.contains("nbFECBlocks"))
     {
         int nbFECBlocks = response.getRemoteSinkSettings()->getNbFecBlocks();
@@ -517,26 +544,6 @@ int RemoteSink::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getRemoteSinkSettings()->getReverseApiChannelIndex();
     }
-
-    MsgConfigureRemoteSink *msg = MsgConfigureRemoteSink::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if ((settings.m_log2Decim != m_settings.m_log2Decim) || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
-    {
-        MsgConfigureChannelizer *msg = MsgConfigureChannelizer::create(settings.m_log2Decim, settings.m_filterChainHash);
-        m_inputMessageQueue.push(msg);
-    }
-
-    qDebug("RemoteSink::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureRemoteSink *msgToGUI = MsgConfigureRemoteSink::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 void RemoteSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const RemoteSinkSettings& settings)

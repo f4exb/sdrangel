@@ -193,6 +193,15 @@ public:
             SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage);
 
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const FreeDVDemodSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            FreeDVDemodSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
@@ -416,7 +425,6 @@ private:
     void applyAudioSampleRate(int sampleRate);
 	void applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode);
     void processOneSample(Complex &ci);
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const FreeDVDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreeDVDemodSettings& settings, bool force);
 

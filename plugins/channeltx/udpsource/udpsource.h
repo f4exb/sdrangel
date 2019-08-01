@@ -132,6 +132,15 @@ public:
                 SWGSDRangel::SWGChannelReport& response,
                 QString& errorMessage);
 
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const UDPSourceSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            UDPSourceSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     double getMagSq() const { return m_magsq; }
     double getInMagSq() const { return m_inMagsq; }
     int32_t getBufferGauge() const { return m_udpHandler.getBufferGauge(); }
@@ -257,7 +266,6 @@ private:
     void calculateLevel(Real sample);
     void calculateLevel(Complex sample);
 
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const UDPSourceSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const UDPSourceSettings& settings, bool force);
 

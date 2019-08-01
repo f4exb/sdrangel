@@ -531,7 +531,28 @@ int FileSource::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     FileSourceSettings settings = m_settings;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
+    MsgConfigureFileSource *msg = MsgConfigureFileSource::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    qDebug("FileSource::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureFileSource *msgToGUI = MsgConfigureFileSource::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void FileSource::webapiUpdateChannelSettings(
+        FileSourceSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
     if (channelSettingsKeys.contains("log2Interp")) {
         settings.m_log2Interp = response.getFileSourceSettings()->getLog2Interp();
     }
@@ -566,20 +587,6 @@ int FileSource::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getFileSourceSettings()->getReverseApiChannelIndex();
     }
-
-    MsgConfigureFileSource *msg = MsgConfigureFileSource::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    qDebug("FileSource::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureFileSource *msgToGUI = MsgConfigureFileSource::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 int FileSource::webapiReportGet(

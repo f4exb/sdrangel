@@ -685,12 +685,37 @@ int SSBDemod::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     SSBDemodSettings settings = m_settings;
-    bool frequencyOffsetChanged = false;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    if (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)
     {
+        MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
+                m_audioSampleRate, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(channelConfigMsg);
+    }
+
+    MsgConfigureSSBDemod *msg = MsgConfigureSSBDemod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    qDebug("SSBDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureSSBDemod *msgToGUI = MsgConfigureSSBDemod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void SSBDemod::webapiUpdateChannelSettings(
+        SSBDemodSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getSsbDemodSettings()->getInputFrequencyOffset();
-        frequencyOffsetChanged = true;
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getSsbDemodSettings()->getRfBandwidth();
@@ -755,27 +780,6 @@ int SSBDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getSsbDemodSettings()->getReverseApiChannelIndex();
     }
-
-    if (frequencyOffsetChanged)
-    {
-        MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
-                m_audioSampleRate, settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(channelConfigMsg);
-    }
-
-    MsgConfigureSSBDemod *msg = MsgConfigureSSBDemod::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    qDebug("SSBDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureSSBDemod *msgToGUI = MsgConfigureSSBDemod::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 int SSBDemod::webapiReportGet(

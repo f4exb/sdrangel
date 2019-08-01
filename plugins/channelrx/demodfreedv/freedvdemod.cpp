@@ -820,12 +820,37 @@ int FreeDVDemod::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     FreeDVDemodSettings settings = m_settings;
-    bool frequencyOffsetChanged = false;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    if (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)
     {
+        MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
+                m_modemSampleRate, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(channelConfigMsg);
+    }
+
+    MsgConfigureFreeDVDemod *msg = MsgConfigureFreeDVDemod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    qDebug("FreeDVDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureFreeDVDemod *msgToGUI = MsgConfigureFreeDVDemod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void FreeDVDemod::webapiUpdateChannelSettings(
+        FreeDVDemodSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getFreeDvDemodSettings()->getInputFrequencyOffset();
-        frequencyOffsetChanged = true;
     }
     if (channelSettingsKeys.contains("freeDVMode")) {
         settings.m_freeDVMode = (FreeDVDemodSettings::FreeDVMode) response.getFreeDvDemodSettings()->getFreeDvMode();
@@ -869,27 +894,6 @@ int FreeDVDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getFreeDvDemodSettings()->getReverseApiChannelIndex();
     }
-
-    if (frequencyOffsetChanged)
-    {
-        MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
-                m_modemSampleRate, settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(channelConfigMsg);
-    }
-
-    MsgConfigureFreeDVDemod *msg = MsgConfigureFreeDVDemod::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    qDebug("FreeDVDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureFreeDVDemod *msgToGUI = MsgConfigureFreeDVDemod::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 int FreeDVDemod::webapiReportGet(

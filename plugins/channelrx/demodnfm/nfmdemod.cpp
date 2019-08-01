@@ -687,8 +687,34 @@ int NFMDemod::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     NFMDemodSettings settings = m_settings;
-    bool frequencyOffsetChanged = false;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
+    if (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)
+    {
+        MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
+                m_audioSampleRate, settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(channelConfigMsg);
+    }
+
+    MsgConfigureNFMDemod *msg = MsgConfigureNFMDemod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureNFMDemod *msgToGUI = MsgConfigureNFMDemod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void NFMDemod::webapiUpdateChannelSettings(
+        NFMDemodSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
     if (channelSettingsKeys.contains("afBandwidth")) {
         settings.m_afBandwidth = response.getNfmDemodSettings()->getAfBandwidth();
     }
@@ -710,10 +736,8 @@ int NFMDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("fmDeviation")) {
         settings.m_fmDeviation = response.getNfmDemodSettings()->getFmDeviation();
     }
-    if (channelSettingsKeys.contains("inputFrequencyOffset"))
-    {
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getNfmDemodSettings()->getInputFrequencyOffset();
-        frequencyOffsetChanged = true;
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getNfmDemodSettings()->getRfBandwidth();
@@ -751,26 +775,6 @@ int NFMDemod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getNfmDemodSettings()->getReverseApiChannelIndex();
     }
-
-    if (frequencyOffsetChanged)
-    {
-        MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
-                m_audioSampleRate, settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(channelConfigMsg);
-    }
-
-    MsgConfigureNFMDemod *msg = MsgConfigureNFMDemod::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureNFMDemod *msgToGUI = MsgConfigureNFMDemod::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 int NFMDemod::webapiReportGet(

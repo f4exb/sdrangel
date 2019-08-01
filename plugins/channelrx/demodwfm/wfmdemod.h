@@ -155,6 +155,15 @@ public:
             SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage);
 
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const WFMDemodSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            WFMDemodSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     static int requiredBW(int rfBW)
     {
         if (rfBW <= 48000) {
@@ -228,7 +237,6 @@ private:
     void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const WFMDemodSettings& settings, bool force = false);
 
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const WFMDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const WFMDemodSettings& settings, bool force);
 

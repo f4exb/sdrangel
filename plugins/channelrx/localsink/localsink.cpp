@@ -355,7 +355,34 @@ int LocalSink::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     LocalSinkSettings settings = m_settings;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
+    MsgConfigureLocalSink *msg = MsgConfigureLocalSink::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if ((settings.m_log2Decim != m_settings.m_log2Decim) || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
+    {
+        MsgConfigureChannelizer *msg = MsgConfigureChannelizer::create(settings.m_log2Decim, settings.m_filterChainHash);
+        m_inputMessageQueue.push(msg);
+    }
+
+    qDebug("LocalSink::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureLocalSink *msgToGUI = MsgConfigureLocalSink::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void LocalSink::webapiUpdateChannelSettings(
+        LocalSinkSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
     if (channelSettingsKeys.contains("localDeviceIndex")) {
         settings.m_localDeviceIndex = response.getLocalSinkSettings()->getLocalDeviceIndex();
     }
@@ -390,26 +417,6 @@ int LocalSink::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getLocalSinkSettings()->getReverseApiChannelIndex();
     }
-
-    MsgConfigureLocalSink *msg = MsgConfigureLocalSink::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if ((settings.m_log2Decim != m_settings.m_log2Decim) || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
-    {
-        MsgConfigureChannelizer *msg = MsgConfigureChannelizer::create(settings.m_log2Decim, settings.m_filterChainHash);
-        m_inputMessageQueue.push(msg);
-    }
-
-    qDebug("LocalSink::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureLocalSink *msgToGUI = MsgConfigureLocalSink::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 void LocalSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const LocalSinkSettings& settings)

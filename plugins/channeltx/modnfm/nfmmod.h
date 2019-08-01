@@ -244,6 +244,15 @@ public:
                 SWGSDRangel::SWGChannelReport& response,
                 QString& errorMessage);
 
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const NFMModSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            NFMModSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     double getMagSq() const { return m_magsq; }
 
     CWKeyer *getCWKeyer() { return &m_cwKeyer; }
@@ -339,7 +348,6 @@ private:
     void modulateSample();
     void openFileStream();
     void seekFileStream(int seekPercentage);
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NFMModSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NFMModSettings& settings, bool force);
     void webapiReverseSendCWSettings(const CWKeyerSettings& settings);

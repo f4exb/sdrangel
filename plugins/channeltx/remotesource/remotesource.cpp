@@ -404,7 +404,28 @@ int RemoteSource::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     RemoteSourceSettings settings = m_settings;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
+    MsgConfigureRemoteSource *msg = MsgConfigureRemoteSource::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    qDebug("RemoteSource::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureRemoteSource *msgToGUI = MsgConfigureRemoteSource::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void RemoteSource::webapiUpdateChannelSettings(
+        RemoteSourceSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
     if (channelSettingsKeys.contains("dataAddress")) {
         settings.m_dataAddress = *response.getRemoteSourceSettings()->getDataAddress();
     }
@@ -439,20 +460,6 @@ int RemoteSource::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getRemoteSourceSettings()->getReverseApiChannelIndex();
     }
-
-    MsgConfigureRemoteSource *msg = MsgConfigureRemoteSource::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    qDebug("RemoteSource::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureRemoteSource *msgToGUI = MsgConfigureRemoteSource::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 int RemoteSource::webapiReportGet(

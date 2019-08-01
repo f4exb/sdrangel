@@ -164,6 +164,15 @@ public:
             SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage);
 
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const DSDDemodSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            DSDDemodSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
@@ -272,7 +281,6 @@ private:
 	void applySettings(const DSDDemodSettings& settings, bool force = false);
 	void formatStatusText();
 
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DSDDemodSettings& settings);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DSDDemodSettings& settings, bool force);
 

@@ -736,18 +736,44 @@ int UDPSink::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     UDPSinkSettings settings = m_settings;
-    bool frequencyOffsetChanged = false;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
+    if (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)
+    {
+        UDPSink::MsgConfigureChannelizer *msgChan = UDPSink::MsgConfigureChannelizer::create(
+                (int) settings.m_outputSampleRate,
+                (int) settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(msgChan);
+    }
+
+    MsgConfigureUDPSource *msg = MsgConfigureUDPSource::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    qDebug("getUdpSinkSettings::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureUDPSource *msgToGUI = MsgConfigureUDPSource::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void UDPSink::webapiUpdateChannelSettings(
+        UDPSinkSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
     if (channelSettingsKeys.contains("outputSampleRate")) {
         settings.m_outputSampleRate = response.getUdpSinkSettings()->getOutputSampleRate();
     }
     if (channelSettingsKeys.contains("sampleFormat")) {
         settings.m_sampleFormat = (UDPSinkSettings::SampleFormat) response.getUdpSinkSettings()->getSampleFormat();
     }
-    if (channelSettingsKeys.contains("inputFrequencyOffset"))
-    {
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getUdpSinkSettings()->getInputFrequencyOffset();
-        frequencyOffsetChanged = true;
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getUdpSinkSettings()->getRfBandwidth();
@@ -812,28 +838,6 @@ int UDPSink::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getUdpSinkSettings()->getReverseApiChannelIndex();
     }
-
-    if (frequencyOffsetChanged)
-    {
-        UDPSink::MsgConfigureChannelizer *msgChan = UDPSink::MsgConfigureChannelizer::create(
-                (int) settings.m_outputSampleRate,
-                (int) settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(msgChan);
-    }
-
-    MsgConfigureUDPSource *msg = MsgConfigureUDPSource::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    qDebug("getUdpSinkSettings::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureUDPSource *msgToGUI = MsgConfigureUDPSource::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 int UDPSink::webapiReportGet(

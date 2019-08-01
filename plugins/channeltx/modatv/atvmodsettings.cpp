@@ -87,6 +87,8 @@ QByteArray ATVModSettings::serialize() const
     s.writeU32(19, m_reverseAPIPort);
     s.writeU32(20, m_reverseAPIDeviceIndex);
     s.writeU32(21, m_reverseAPIChannelIndex);
+    s.writeString(22, m_imageFileName);
+    s.writeString(23, m_videoFileName);
 
     return s.final();
 }
@@ -150,6 +152,9 @@ bool ATVModSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(21, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readString(22, &m_imageFileName);
+        d.readString(23, &m_videoFileName);
+
         return true;
     }
     else

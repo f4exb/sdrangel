@@ -145,6 +145,15 @@ public:
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage);
 
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const RemoteSinkSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            RemoteSinkSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     /** Set center frequency given in Hz */
     void setCenterFrequency(uint64_t centerFrequency) { m_centerFrequency = centerFrequency; }
 
@@ -192,9 +201,8 @@ private:
     QNetworkRequest m_networkRequest;
 
     void applySettings(const RemoteSinkSettings& settings, bool force = false);
-    void validateFilterChainHash(RemoteSinkSettings& settings);
+    static void validateFilterChainHash(RemoteSinkSettings& settings);
     void calculateFrequencyOffset();
-    void webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const RemoteSinkSettings& settings);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteSinkSettings& settings, bool force);
 
 private slots:
