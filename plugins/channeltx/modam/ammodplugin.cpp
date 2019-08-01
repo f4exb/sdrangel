@@ -55,23 +55,23 @@ void AMModPlugin::initPlugin(PluginAPI* pluginAPI)
 #ifdef SERVER_MODE
 PluginInstanceGUI* AMModPlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
-        BasebandSampleSource *txChannel)
+        BasebandSampleSource *txChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* AMModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
+PluginInstanceGUI* AMModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
 {
 	return AMModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 #endif
 
-BasebandSampleSource* AMModPlugin::createTxChannelBS(DeviceAPI *deviceAPI)
+BasebandSampleSource* AMModPlugin::createTxChannelBS(DeviceAPI *deviceAPI) const
 {
     return new AMMod(deviceAPI);
 }
 
-ChannelAPI* AMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* AMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
 {
     return new AMMod(deviceAPI);
 }

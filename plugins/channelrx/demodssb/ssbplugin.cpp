@@ -38,23 +38,23 @@ void SSBPlugin::initPlugin(PluginAPI* pluginAPI)
 #ifdef SERVER_MODE
 PluginInstanceGUI* SSBPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
-        BasebandSampleSink *rxChannel)
+        BasebandSampleSink *rxChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* SSBPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+PluginInstanceGUI* SSBPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
 	return SSBDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
 
-BasebandSampleSink* SSBPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
+BasebandSampleSink* SSBPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
 {
     return new SSBDemod(deviceAPI);
 }
 
-ChannelAPI* SSBPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* SSBPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
 {
     return new SSBDemod(deviceAPI);
 }

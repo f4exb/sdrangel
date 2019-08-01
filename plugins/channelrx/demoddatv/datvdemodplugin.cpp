@@ -56,17 +56,17 @@ void DATVDemodPlugin::initPlugin(PluginAPI* ptrPluginAPI)
     m_ptrPluginAPI->registerRxChannel(DATVDemod::m_channelIdURI, DATVDemod::m_channelId, this);
 }
 
-PluginInstanceGUI* DATVDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+PluginInstanceGUI* DATVDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
     return DATVDemodGUI::create(m_ptrPluginAPI, deviceUISet, rxChannel);
 }
 
-BasebandSampleSink* DATVDemodPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
+BasebandSampleSink* DATVDemodPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
 {
     return new DATVDemod(deviceAPI);
 }
 
-ChannelAPI* DATVDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* DATVDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
 {
     return new DATVDemod(deviceAPI);
 }

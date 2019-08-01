@@ -56,23 +56,23 @@ void UDPSinkPlugin::initPlugin(PluginAPI* pluginAPI)
 #ifdef SERVER_MODE
 PluginInstanceGUI* UDPSinkPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
-        BasebandSampleSink *rxChannel)
+        BasebandSampleSink *rxChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* UDPSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+PluginInstanceGUI* UDPSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
 	return UDPSinkGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
 
-BasebandSampleSink* UDPSinkPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
+BasebandSampleSink* UDPSinkPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
 {
     return new UDPSink(deviceAPI);
 }
 
-ChannelAPI* UDPSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* UDPSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
 {
     return new UDPSink(deviceAPI);
 }

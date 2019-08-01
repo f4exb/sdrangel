@@ -19,6 +19,8 @@
 #ifndef SDRBASE_WEBAPI_WEBAPIADAPTERBASE_H_
 #define SDRBASE_WEBAPI_WEBAPIADAPTERBASE_H_
 
+#include <QMap>
+
 #include "export.h"
 #include "SWGPreferences.h"
 #include "SWGPreset.h"
@@ -28,6 +30,7 @@
 #include "commands/command.h"
 
 class PluginManager;
+class ChannelAPI;
 
 /**
  * Adapter between API and objects in sdrbase library
@@ -54,7 +57,17 @@ public:
     );
 
 private:
+    class WebAPIChannelAdapters
+    {
+    public:
+        ChannelAPI *getChannelAPI(const QString& channelURI, const PluginManager *pluginManager);
+        void flush();
+    private:
+        QMap<QString, ChannelAPI*> m_webAPIChannelAdapters;
+    };
+
     const PluginManager *m_pluginManager;
+    WebAPIChannelAdapters m_webAPIChannelAdapters;
 };
 
 #endif // SDRBASE_WEBAPI_WEBAPIADAPTERBASE_H_

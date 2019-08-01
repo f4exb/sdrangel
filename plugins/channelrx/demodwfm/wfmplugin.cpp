@@ -39,23 +39,23 @@ void WFMPlugin::initPlugin(PluginAPI* pluginAPI)
 #ifdef SERVER_MODE
 PluginInstanceGUI* WFMPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
-        BasebandSampleSink *rxChannel)
+        BasebandSampleSink *rxChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* WFMPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+PluginInstanceGUI* WFMPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
 	return WFMDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
 
-BasebandSampleSink* WFMPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
+BasebandSampleSink* WFMPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
 {
     return new WFMDemod(deviceAPI);
 }
 
-ChannelAPI* WFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* WFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
 {
     return new WFMDemod(deviceAPI);
 }

@@ -56,23 +56,23 @@ void LocalSinkPlugin::initPlugin(PluginAPI* pluginAPI)
 #ifdef SERVER_MODE
 PluginInstanceGUI* LocalSinkPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
-        BasebandSampleSink *rxChannel)
+        BasebandSampleSink *rxChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* LocalSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+PluginInstanceGUI* LocalSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
     return LocalSinkGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
 
-BasebandSampleSink* LocalSinkPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
+BasebandSampleSink* LocalSinkPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
 {
     return new LocalSink(deviceAPI);
 }
 
-ChannelAPI* LocalSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* LocalSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
 {
     return new LocalSink(deviceAPI);
 }

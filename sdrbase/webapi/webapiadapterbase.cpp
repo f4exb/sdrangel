@@ -25,7 +25,9 @@ WebAPIAdapterBase::WebAPIAdapterBase()
 {}
 
 WebAPIAdapterBase::~WebAPIAdapterBase()
-{}
+{
+    m_webAPIChannelAdapters.flush();
+}
 
 void WebAPIAdapterBase::webapiFormatPreferences(
     SWGSDRangel::SWGPreferences *apiPreferences,
@@ -69,11 +71,10 @@ void WebAPIAdapterBase::webapiFormatPreset(
         const QByteArray& channelSettings = channelConfig.m_config;
         SWGSDRangel::SWGChannelSettings *swgChannelSettings = swgChannelConfigs->back()->getConfig();
         swgChannelSettings->init();
-        const PluginInterface *pluginInterface = m_pluginManager->getChannelPluginInterface(channelConfig.m_channelIdURI);
+        ChannelAPI *channelWebAPIAdapter = m_webAPIChannelAdapters.getChannelAPI(channelConfig.m_channelIdURI, m_pluginManager);
 
-        if (pluginInterface)  // TODO: optimize by caching web API adapters
+        if (channelWebAPIAdapter)
         {
-            ChannelAPI *channelWebAPIAdapter = pluginInterface->createChannelWebAPIAdapter();
             channelWebAPIAdapter->deserialize(channelSettings);
             QString errorMessage;
             channelWebAPIAdapter->webapiSettingsGet(*swgChannelSettings, errorMessage);
@@ -109,4 +110,29 @@ void WebAPIAdapterBase::webapiFormatCommand(
     apiCommand->setKeyModifiers((int) command.getKeyModifiers());
     apiCommand->setAssociateKey(command.getAssociateKey() ? 1 : 0);
     apiCommand->setRelease(command.getRelease() ? 1 : 0);
+}
+
+ChannelAPI *WebAPIAdapterBase::WebAPIChannelAdapters::getChannelAPI(const QString& channelURI, const PluginManager *pluginManager)
+{
+    QMap<QString, ChannelAPI*>::iterator it = m_webAPIChannelAdapters.find(channelURI);
+
+    if (it == m_webAPIChannelAdapters.end())
+    {
+        ChannelAPI *channelAPI = pluginManager->getChannelPluginInterface(channelURI)->createChannelWebAPIAdapter();
+        m_webAPIChannelAdapters.insert(channelURI, channelAPI);
+        return channelAPI;
+    }
+    else
+    {
+        return *it;
+    }
+}
+
+void WebAPIAdapterBase::WebAPIChannelAdapters::flush()
+{
+    foreach(ChannelAPI *ChannelAPI, m_webAPIChannelAdapters) {
+        delete ChannelAPI;
+    }
+
+    m_webAPIChannelAdapters.clear();
 }

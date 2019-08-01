@@ -56,23 +56,23 @@ void LocalSourcePlugin::initPlugin(PluginAPI* pluginAPI)
 #ifdef SERVER_MODE
 PluginInstanceGUI* LocalSourcePlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
-        BasebandSampleSource *txChannel)
+        BasebandSampleSource *txChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* LocalSourcePlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
+PluginInstanceGUI* LocalSourcePlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
 {
     return LocalSourceGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 #endif
 
-BasebandSampleSource* LocalSourcePlugin::createTxChannelBS(DeviceAPI *deviceAPI)
+BasebandSampleSource* LocalSourcePlugin::createTxChannelBS(DeviceAPI *deviceAPI) const
 {
     return new LocalSource(deviceAPI);
 }
 
-ChannelAPI* LocalSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* LocalSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
 {
     return new LocalSource(deviceAPI);
 }

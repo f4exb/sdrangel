@@ -88,22 +88,20 @@ public:
 
     virtual PluginInstanceGUI* createRxChannelGUI(
             DeviceUISet *deviceUISet,
-            BasebandSampleSink *rxChannel)
+            BasebandSampleSink *rxChannel) const
     {
         (void) deviceUISet;
         (void) rxChannel;
         return nullptr;
     }
 
-    virtual BasebandSampleSink* createRxChannelBS(
-            DeviceAPI *deviceAPI)
+    virtual BasebandSampleSink* createRxChannelBS(DeviceAPI *deviceAPI) const
     {
         (void) deviceAPI;
         return nullptr;
     }
 
-    virtual ChannelAPI* createRxChannelCS(
-            DeviceAPI *deviceAPI)
+    virtual ChannelAPI* createRxChannelCS(DeviceAPI *deviceAPI) const
     {
         (void) deviceAPI;
         return nullptr;
@@ -113,22 +111,20 @@ public:
 
 	virtual PluginInstanceGUI* createTxChannelGUI(
             DeviceUISet *deviceUISet,
-            BasebandSampleSource *txChannel)
+            BasebandSampleSource *txChannel) const
     {
         (void) deviceUISet;
         (void) txChannel;
         return nullptr;
     }
 
-    virtual BasebandSampleSource* createTxChannelBS(
-            DeviceAPI *deviceAPI)
+    virtual BasebandSampleSource* createTxChannelBS(DeviceAPI *deviceAPI) const
     {
         (void) deviceAPI;
         return nullptr;
     }
 
-    virtual ChannelAPI* createTxChannelCS(
-            DeviceAPI *deviceAPI)
+    virtual ChannelAPI* createTxChannelCS(DeviceAPI *deviceAPI) const
     {
         (void) deviceAPI;
         return nullptr;

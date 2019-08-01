@@ -55,23 +55,23 @@ void FreeDVModPlugin::initPlugin(PluginAPI* pluginAPI)
 #ifdef SERVER_MODE
 PluginInstanceGUI* FreeDVModPlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
-        BasebandSampleSource *txChannel)
+        BasebandSampleSource *txChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* FreeDVModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel)
+PluginInstanceGUI* FreeDVModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
 {
     return FreeDVModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 #endif
 
-BasebandSampleSource* FreeDVModPlugin::createTxChannelBS(DeviceAPI *deviceAPI)
+BasebandSampleSource* FreeDVModPlugin::createTxChannelBS(DeviceAPI *deviceAPI) const
 {
     return new FreeDVMod(deviceAPI);
 }
 
-ChannelAPI* FreeDVModPlugin::createTxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* FreeDVModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
 {
     return new FreeDVMod(deviceAPI);
 }

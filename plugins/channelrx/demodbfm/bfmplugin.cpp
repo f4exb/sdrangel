@@ -57,23 +57,23 @@ void BFMPlugin::initPlugin(PluginAPI* pluginAPI)
 #ifdef SERVER_MODE
 PluginInstanceGUI* BFMPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
-        BasebandSampleSink *rxChannel)
+        BasebandSampleSink *rxChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* BFMPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+PluginInstanceGUI* BFMPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
 	return BFMDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
 
-BasebandSampleSink* BFMPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
+BasebandSampleSink* BFMPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
 {
     return new BFMDemod(deviceAPI);
 }
 
-ChannelAPI* BFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* BFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
 {
     return new BFMDemod(deviceAPI);
 }

@@ -55,23 +55,23 @@ void FreqTrackerPlugin::initPlugin(PluginAPI* pluginAPI)
 #ifdef SERVER_MODE
 PluginInstanceGUI* FreqTrackerPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
-        BasebandSampleSink *rxChannel)
+        BasebandSampleSink *rxChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* FreqTrackerPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+PluginInstanceGUI* FreqTrackerPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
 	return FreqTrackerGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
 
-BasebandSampleSink* FreqTrackerPlugin::createRxChannelBS(DeviceAPI *deviceAPI)
+BasebandSampleSink* FreqTrackerPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
 {
     return new FreqTracker(deviceAPI);
 }
 
-ChannelAPI* FreqTrackerPlugin::createRxChannelCS(DeviceAPI *deviceAPI)
+ChannelAPI* FreqTrackerPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
 {
     return new FreqTracker(deviceAPI);
 }
