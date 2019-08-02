@@ -22,11 +22,12 @@
 #include "atvmodgui.h"
 #endif
 #include "atvmod.h"
+#include "atvmodwebapiadapter.h"
 #include "atvmodplugin.h"
 
 const PluginDescriptor ATVModPlugin::m_pluginDescriptor = {
     QString("ATV Modulator"),
-    QString("4.5.2"),
+    QString("4.11.6"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -76,5 +77,7 @@ ChannelAPI* ATVModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
     return new ATVMod(deviceAPI);
 }
 
-
-
+ChannelAPI* ATVModPlugin::createChannelWebAPIAdapter() const
+{
+	return new ATVModWebAPIAdapter();
+}

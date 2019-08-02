@@ -3,13 +3,15 @@ project(modatv)
 set(modatv_SOURCES
 	atvmod.cpp
 	atvmodplugin.cpp
-	atvmodsettings.cpp
+    atvmodsettings.cpp
+    atvmodwebapiadapter.cpp
 )
 
 set(modatv_HEADERS
 	atvmod.h
 	atvmodplugin.h
-	atvmodsettings.h
+    atvmodsettings.h
+    atvmodwebapiadapter.h
 )
 
 include_directories(

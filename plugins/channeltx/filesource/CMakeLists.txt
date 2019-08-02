@@ -12,13 +12,15 @@ endif()
 set(filesource_SOURCES
 	filesource.cpp
 	filesourceplugin.cpp
-	filesourcesettings.cpp
+    filesourcesettings.cpp
+    filesourcewebapiadapter.cpp
 )
 
 set(filesource_HEADERS
 	filesource.h
 	filesourceplugin.h
-	filesourcesettings.h
+    filesourcesettings.h
+    filesourcewebapiadapter.h
 )
 
 include_directories(

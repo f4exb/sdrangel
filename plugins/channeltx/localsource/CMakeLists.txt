@@ -4,14 +4,16 @@ set(localsource_SOURCES
 	localsource.cpp
 	localsourcethread.cpp
 	localsourceplugin.cpp
-	localsourcesettings.cpp
+    localsourcesettings.cpp
+    localsourcewebapiadapter.cpp
 )
 
 set(localsource_HEADERS
 	localsource.h
 	localsourcethread.h
 	localsourceplugin.h
-	localsourcesettings.h
+    localsourcesettings.h
+    localsourcewebapiadapter.h
 )
 
 include_directories(

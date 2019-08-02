@@ -25,10 +25,12 @@
 #include "udpsourcegui.h"
 #endif
 #include "udpsource.h"
+#include "udpsourcewebapiadapter.h"
+#include "udpsourceplugin.h"
 
 const PluginDescriptor UDPSourcePlugin::m_pluginDescriptor = {
 	QString("UDP Channel Source"),
-	QString("4.5.2"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -78,4 +80,7 @@ ChannelAPI* UDPSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
     return new UDPSource(deviceAPI);
 }
 
-
+ChannelAPI* UDPSourcePlugin::createChannelWebAPIAdapter() const
+{
+	return new UDPSourceWebAPIAdapter();
+}

@@ -22,11 +22,12 @@
 #include "filesourcegui.h"
 #endif
 #include "filesource.h"
+#include "filesourcewebapiadapter.h"
 #include "filesourceplugin.h"
 
 const PluginDescriptor FileSourcePlugin::m_pluginDescriptor = {
     QString("File channel source"),
-    QString("4.11.0"),
+    QString("4.11.6"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -76,5 +77,7 @@ ChannelAPI* FileSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
     return new FileSource(deviceAPI);
 }
 
-
-
+ChannelAPI* FileSourcePlugin::createChannelWebAPIAdapter() const
+{
+	return new FileSourceWebAPIAdapter();
+}

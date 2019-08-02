@@ -22,11 +22,12 @@
 #include "remotesourcegui.h"
 #endif
 #include "remotesource.h"
+#include "remotesourcewebapiadapter.h"
 #include "remotesourceplugin.h"
 
 const PluginDescriptor RemoteSourcePlugin::m_pluginDescriptor = {
     QString("Remote channel source"),
-    QString("4.5.2"),
+    QString("4.11.6"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -76,5 +77,7 @@ ChannelAPI* RemoteSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
     return new RemoteSource(deviceAPI);
 }
 
-
-
+ChannelAPI* RemoteSourcePlugin::createChannelWebAPIAdapter() const
+{
+	return new RemoteSourceWebAPIAdapter();
+}

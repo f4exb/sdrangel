@@ -5,7 +5,8 @@ set(udpsource_SOURCES
 	udpsourceplugin.cpp
 	udpsourceudphandler.cpp
 	udpsourcemsg.cpp
-	udpsourcesettings.cpp
+    udpsourcesettings.cpp
+    udpsourcewebapiadapter.cpp
 )
 
 set(udpsource_HEADERS
@@ -13,7 +14,8 @@ set(udpsource_HEADERS
 	udpsourceplugin.h
 	udpsourceudphandler.h
 	udpsourcemsg.h
-	udpsourcesettings.h
+    udpsourcesettings.h
+    udpsourcewebapiadapter.h
 )
 
 include_directories(

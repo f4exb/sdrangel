@@ -13,14 +13,16 @@ set(remotesource_SOURCES
 	remotesource.cpp
 	remotesourcethread.cpp
 	remotesourceplugin.cpp
-	remotesourcesettings.cpp
+    remotesourcesettings.cpp
+    remotesourcewebapiadapter.cpp
 )
 
 set(remotesource_HEADERS
 	remotesource.h
 	remotesourcethread.h
 	remotesourceplugin.h
-	remotesourcesettings.h
+    remotesourcesettings.h
+    remotesourcewebapiadapter.cpp
 )
 
 include_directories(

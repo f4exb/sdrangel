@@ -24,10 +24,12 @@
 #include "localsourcegui.h"
 #endif
 #include "localsource.h"
+#include "localsourcewebapiadapter.h"
+#include "localsourceplugin.h"
 
 const PluginDescriptor LocalSourcePlugin::m_pluginDescriptor = {
     QString("Local channel source"),
-    QString("4.8.0"),
+    QString("4.11.6"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -75,4 +77,9 @@ BasebandSampleSource* LocalSourcePlugin::createTxChannelBS(DeviceAPI *deviceAPI)
 ChannelAPI* LocalSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
 {
     return new LocalSource(deviceAPI);
+}
+
+ChannelAPI* LocalSourcePlugin::createChannelWebAPIAdapter() const
+{
+	return new LocalSourceWebAPIAdapter();
 }

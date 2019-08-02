@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,34 +15,37 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_FILESOURCE_FILESOURCEPLUGIN_H_
-#define PLUGINS_CHANNELTX_FILESOURCE_FILESOURCEPLUGIN_H_
+#include "SWGChannelSettings.h"
+#include "filesource.h"
+#include "filesourcewebapiadapter.h"
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+FileSourceWebAPIAdapter::FileSourceWebAPIAdapter() :
+    ChannelAPI(FileSource::m_channelIdURI, ChannelAPI::StreamSingleSource)
+{}
 
-class DeviceUISet;
-class BasebandSampleSource;
+FileSourceWebAPIAdapter::~FileSourceWebAPIAdapter()
+{}
 
-class FileSourcePlugin : public QObject, PluginInterface {
-    Q_OBJECT
-    Q_INTERFACES(PluginInterface)
-    Q_PLUGIN_METADATA(IID "sdrangel.channeltx.filesrc")
+int FileSourceWebAPIAdapter::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
+    response.getFileSourceSettings()->init();
+    FileSource::webapiFormatChannelSettings(response, m_settings);
 
-public:
-    explicit FileSourcePlugin(QObject* parent = nullptr);
+    return 200;
+}
 
-    const PluginDescriptor& getPluginDescriptor() const;
-    void initPlugin(PluginAPI* pluginAPI);
+int FileSourceWebAPIAdapter::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    FileSource::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 
-    virtual PluginInstanceGUI* createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const;
-    virtual BasebandSampleSource* createTxChannelBS(DeviceAPI *deviceAPI) const;
-    virtual ChannelAPI* createTxChannelCS(DeviceAPI *deviceAPI) const;
-    virtual ChannelAPI* createChannelWebAPIAdapter() const;
-
-private:
-    static const PluginDescriptor m_pluginDescriptor;
-    PluginAPI* m_pluginAPI;
-};
-
-#endif /* PLUGINS_CHANNELTX_FILESOURCE_FILESOURCEPLUGIN_H_ */
+    return 200;
+}
