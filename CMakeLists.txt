@@ -448,6 +448,45 @@ include_directories(
     ${OPENGL_INCLUDE_DIR}
 )
 
+# Set up optional make target for developer doc
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+  option(WITH_DOC "Generate developer doc with Doxygen" ON)
+  message(STATUS "added optional 'make dev_docs' for developer documentation generation")
+
+  # It is not an error when 'dot' is not found, just switching off the Doxygen's HAVE_DOT option
+  find_package_handle_standard_args (Dot REQUIRED_VARS DOXYGEN_DOT_EXECUTABLE)
+
+  # This sets HAVE_CASE_SENSITIVE_FILESYSTEM which is 0 or 1, we need "YES" or "NO"
+  include(cmake/Modules/CheckCaseSensitiveFileSystem.cmake)
+  if (HAVE_CASE_SENSITIVE_FILESYSTEM)
+    set(CMAKE_CASE_SENSITIVE_FILESYSTEM "YES")
+  else()
+    set(CMAKE_CASE_SENSITIVE_FILESYSTEM "NO")
+  endif()
+
+  if(WIN32 OR APPLE)
+    set(CMAKE_SHORT_NAMES "YES")
+  else()
+    set(CMAKE_SHORT_NAMES "NO")
+  endif()
+
+  set(DOX_HTML_OUT ${CMAKE_CURRENT_BINARY_DIR}/dev_docs)
+
+  if (WITH_DOC)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/include/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+    add_custom_target(dev_docs)
+    add_custom_command(TARGET dev_docs POST_BUILD
+        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating developer documentation with Doxygen" VERBATIM
+    )
+
+  endif()
+else()
+  message(STATUS "Doxygen not found, developer documentation can not be generated")
+endif()
+
 ############ build sdrangel benchmark ################
 if(NOT WIN32)
   set(sdrangelbench_SOURCES
