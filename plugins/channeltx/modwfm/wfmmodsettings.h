@@ -20,6 +20,8 @@
 
 #include <QByteArray>
 
+#include "dsp/cwkeyersettings.h"
+
 class Serializable;
 
 struct WFMModSettings
@@ -57,12 +59,16 @@ struct WFMModSettings
     Serializable *m_channelMarker;
     Serializable *m_cwKeyerGUI;
 
+    CWKeyerSettings m_cwKeyerSettings; //!< For standalone deserialize operation (without m_cwKeyerGUI)
+
     WFMModSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     void setCWKeyerGUI(Serializable *cwKeyerGUI) { m_cwKeyerGUI = cwKeyerGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    const CWKeyerSettings& getCWKeyerSettings() const { return m_cwKeyerSettings; }
+    void setCWKeyerSettings(const CWKeyerSettings& cwKeyerSettings) { m_cwKeyerSettings = cwKeyerSettings; }
 
     static int getRFBW(int index);
     static int getRFBWIndex(int rfbw);

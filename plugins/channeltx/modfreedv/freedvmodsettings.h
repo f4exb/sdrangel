@@ -22,6 +22,8 @@
 #include <QString>
 #include <stdint.h>
 
+#include "dsp/cwkeyersettings.h"
+
 class Serializable;
 
 struct FreeDVModSettings
@@ -68,6 +70,8 @@ struct FreeDVModSettings
     Serializable *m_spectrumGUI;
     Serializable *m_cwKeyerGUI;
 
+    CWKeyerSettings m_cwKeyerSettings; //!< For standalone deserialize operation (without m_cwKeyerGUI)
+
     FreeDVModSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
@@ -75,6 +79,8 @@ struct FreeDVModSettings
     void setCWKeyerGUI(Serializable *cwKeyerGUI) { m_cwKeyerGUI = cwKeyerGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    const CWKeyerSettings& getCWKeyerSettings() const { return m_cwKeyerSettings; }
+    void setCWKeyerSettings(const CWKeyerSettings& cwKeyerSettings) { m_cwKeyerSettings = cwKeyerSettings; }
 
     static int getHiCutoff(FreeDVMode freeDVMode);
     static int getLowCutoff(FreeDVMode freeDVMode);

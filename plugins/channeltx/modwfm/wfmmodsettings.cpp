@@ -71,6 +71,8 @@ QByteArray WFMModSettings::serialize() const
 
     if (m_cwKeyerGUI) {
         s.writeBlob(8, m_cwKeyerGUI->serialize());
+    } else { // standalone operation with presets
+        s.writeBlob(6, m_cwKeyerSettings.serialize());
     }
 
     if (m_channelMarker) {
@@ -113,10 +115,12 @@ bool WFMModSettings::deserialize(const QByteArray& data)
         d.readU32(5, &m_rgbColor);
         d.readReal(6, &m_toneFrequency, 1000.0);
         d.readReal(7, &m_volumeFactor, 1.0);
+        d.readBlob(8, &bytetmp);
 
         if (m_cwKeyerGUI) {
-            d.readBlob(8, &bytetmp);
             m_cwKeyerGUI->deserialize(bytetmp);
+        } else { // standalone operation with presets
+            m_cwKeyerSettings.deserialize(bytetmp);
         }
 
         if (m_channelMarker) {

@@ -16,7 +16,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "SWGChannelSettings.h"
-#include "settings/serializable.h"
 #include "nfmmod.h"
 #include "nfmmodwebapiadapter.h"
 
@@ -35,19 +34,11 @@ int NFMModWebAPIAdapter::webapiSettingsGet(
     response.setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
     response.getNfmModSettings()->init();
     NFMMod::webapiFormatChannelSettings(response, m_settings);
-    Serializable *cwKeyerGUI = m_settings.m_cwKeyerGUI;
 
-    if (cwKeyerGUI)
-    {
-        const QByteArray& serializedCWKeyerSettings = cwKeyerGUI->serialize();
-        CWKeyerSettings cwKeyerSettings;
-
-        if (cwKeyerSettings.deserialize(serializedCWKeyerSettings))
-        {
-            SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
-            CWKeyer::webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
-        }
-    }
+    const CWKeyerSettings& cwKeyerSettings = m_settings.getCWKeyerSettings();
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
+    apiCwKeyerSettings->init();
+    CWKeyer::webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
 
     return 200;
 }
@@ -60,20 +51,14 @@ int NFMModWebAPIAdapter::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     NFMMod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
-    Serializable *cwKeyerGUI = m_settings.m_cwKeyerGUI;
 
-    if (channelSettingsKeys.contains("cwKeyer") && cwKeyerGUI)
+    if (channelSettingsKeys.contains("cwKeyer"))
     {
-        const QByteArray& serializedCWKeyerSettings = cwKeyerGUI->serialize();
-        CWKeyerSettings cwKeyerSettings;
-
-        if (cwKeyerSettings.deserialize(serializedCWKeyerSettings))
-        {
-            SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
-            CWKeyer::webapiSettingsPutPatch(channelSettingsKeys, cwKeyerSettings, apiCwKeyerSettings);
-            const QByteArray& serializedNewCWKeyerSettings = cwKeyerSettings.serialize();
-            cwKeyerGUI->deserialize(serializedNewCWKeyerSettings);
-        }
+        CWKeyerSettings newCWKeyerSettings;
+        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
+        CWKeyer::webapiSettingsPutPatch(channelSettingsKeys, newCWKeyerSettings, apiCwKeyerSettings);
+        m_settings.setCWKeyerSettings(newCWKeyerSettings);
+        const QByteArray& serializedNewSettings = m_settings.serialize(); // effectively update CW keyer settings
     }
 
     NFMMod::webapiFormatChannelSettings(response, m_settings);

@@ -66,6 +66,8 @@ QByteArray FreeDVModSettings::serialize() const
 
     if (m_cwKeyerGUI) {
         s.writeBlob(6, m_cwKeyerGUI->serialize());
+    } else { // standalone operation with presets
+        s.writeBlob(6, m_cwKeyerSettings.serialize());
     }
 
     s.writeBool(7, m_gaugeInputElseModem);
@@ -117,10 +119,12 @@ bool FreeDVModSettings::deserialize(const QByteArray& data)
         }
 
         d.readU32(5, &m_rgbColor);
+        d.readBlob(6, &bytetmp);
 
         if (m_cwKeyerGUI) {
-            d.readBlob(6, &bytetmp);
             m_cwKeyerGUI->deserialize(bytetmp);
+        } else { // standalone operation with presets
+            m_cwKeyerSettings.deserialize(bytetmp);
         }
 
         d.readBool(7, &m_gaugeInputElseModem, false);

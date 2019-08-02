@@ -112,10 +112,11 @@ bool AMModSettings::deserialize(const QByteArray& data)
         d.readU32(5, &m_rgbColor);
         d.readReal(6, &m_volumeFactor, 1.0);
         d.readBlob(7, &bytetmp);
-        m_cwKeyerSettings.deserialize(bytetmp);
 
         if (m_cwKeyerGUI) {
             m_cwKeyerGUI->deserialize(bytetmp);
+        } else { // standalone operation with presets
+            m_cwKeyerSettings.deserialize(bytetmp);
         }
 
         if (m_channelMarker) {
