@@ -3,13 +3,15 @@ project(modnfm)
 set(modnfm_SOURCES
 	nfmmod.cpp
 	nfmmodplugin.cpp
-	nfmmodsettings.cpp
+    nfmmodsettings.cpp
+    nfmmodwebapiadapter.cpp
 )
 
 set(modnfm_HEADERS
 	nfmmod.h
 	nfmmodplugin.h
-	nfmmodsettings.h
+    nfmmodsettings.h
+    nfmmodwebapiadapter.h
 )
 
 include_directories(

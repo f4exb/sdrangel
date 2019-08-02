@@ -22,11 +22,12 @@
 #include "wfmmodgui.h"
 #endif
 #include "wfmmod.h"
+#include "wfmmodwebapiadapter.h"
 #include "wfmmodplugin.h"
 
 const PluginDescriptor WFMModPlugin::m_pluginDescriptor = {
     QString("WFM Modulator"),
-    QString("4.11.5"),
+    QString("4.11.6"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -76,4 +77,7 @@ ChannelAPI* WFMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
     return new WFMMod(deviceAPI);
 }
 
-
+ChannelAPI* WFMModPlugin::createChannelWebAPIAdapter() const
+{
+	return new WFMModWebAPIAdapter();
+}

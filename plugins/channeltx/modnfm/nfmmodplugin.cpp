@@ -22,11 +22,12 @@
 #include "nfmmodgui.h"
 #endif
 #include "nfmmod.h"
+#include "nfmmodwebapiadapter.h"
 #include "nfmmodplugin.h"
 
 const PluginDescriptor NFMModPlugin::m_pluginDescriptor = {
     QString("NFM Modulator"),
-    QString("4.11.5"),
+    QString("4.11.6"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -76,4 +77,7 @@ ChannelAPI* NFMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
     return new NFMMod(deviceAPI);
 }
 
-
+ChannelAPI* NFMModPlugin::createChannelWebAPIAdapter() const
+{
+	return new NFMModWebAPIAdapter();
+}

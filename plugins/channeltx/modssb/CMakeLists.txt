@@ -4,12 +4,14 @@ set(modssb_SOURCES
     ssbmod.cpp
     ssbmodplugin.cpp
     ssbmodsettings.cpp
+    ssbmodwebapiadapter.cpp
 )
 
 set(modssb_HEADERS
     ssbmod.h
     ssbmodplugin.h
     ssbmodsettings.h
+    ssbmodwebapiadapter.h
 )
 
 include_directories(

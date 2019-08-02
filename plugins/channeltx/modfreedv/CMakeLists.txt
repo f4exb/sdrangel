@@ -4,12 +4,14 @@ set(modfreedv_SOURCES
     freedvmod.cpp
     freedvmodplugin.cpp
     freedvmodsettings.cpp
+    freedvmodwebapiadapter.cpp
 )
 
 set(modfreedv_HEADERS
     freedvmod.h
     freedvmodplugin.h
     freedvmodsettings.h
+    freedvmodwebapiadapter.h
 )
 
 include_directories(

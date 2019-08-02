@@ -3,13 +3,15 @@ project(modam)
 set(modam_SOURCES
 	ammod.cpp
 	ammodplugin.cpp
-	ammodsettings.cpp
+    ammodsettings.cpp
+    ammodwebapiadapter.cpp
 )
 
 set(modam_HEADERS
 	ammod.h
 	ammodplugin.h
-	ammodsettings.h
+    ammodsettings.h
+    ammodwebapiadapter.h
 )
 
 include_directories(

@@ -65,6 +65,8 @@ QByteArray AMModSettings::serialize() const
 
     if (m_cwKeyerGUI) {
         s.writeBlob(7, m_cwKeyerGUI->serialize());
+    } else { // standalone operation with presets
+        s.writeBlob(7, m_cwKeyerSettings.serialize());
     }
 
     if (m_channelMarker) {
@@ -109,9 +111,10 @@ bool AMModSettings::deserialize(const QByteArray& data)
         d.readReal(4, &m_modFactor, 0.2f);
         d.readU32(5, &m_rgbColor);
         d.readReal(6, &m_volumeFactor, 1.0);
+        d.readBlob(7, &bytetmp);
+        m_cwKeyerSettings.deserialize(bytetmp);
 
         if (m_cwKeyerGUI) {
-            d.readBlob(7, &bytetmp);
             m_cwKeyerGUI->deserialize(bytetmp);
         }
 

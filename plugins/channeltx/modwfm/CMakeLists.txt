@@ -3,13 +3,15 @@ project(modwfm)
 set(modwfm_SOURCES
 	wfmmod.cpp
 	wfmmodplugin.cpp
-	wfmmodsettings.cpp
+    wfmmodsettings.cpp
+    wfmmodwebapiadapter.cpp
 )
 
 set(modwfm_HEADERS
 	wfmmod.h
 	wfmmodplugin.h
-	wfmmodsettings.h
+    wfmmodsettings.h
+    wfmmodwebapiadapter.h
 )
 
 include_directories(

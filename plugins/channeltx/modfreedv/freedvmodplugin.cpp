@@ -22,11 +22,12 @@
 #include "freedvmodgui.h"
 #endif
 #include "freedvmod.h"
+#include "freedvmodwebapiadapter.h"
 #include "freedvmodplugin.h"
 
 const PluginDescriptor FreeDVModPlugin::m_pluginDescriptor = {
     QString("FreeDV Modulator"),
-    QString("4.11.5"),
+    QString("4.11.6"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -76,4 +77,7 @@ ChannelAPI* FreeDVModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
     return new FreeDVMod(deviceAPI);
 }
 
-
+ChannelAPI* FreeDVModPlugin::createChannelWebAPIAdapter() const
+{
+	return new FreeDVModWebAPIAdapter();
+}
