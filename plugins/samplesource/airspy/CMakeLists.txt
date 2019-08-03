@@ -4,6 +4,7 @@ set(airspy_SOURCES
     airspyinput.cpp
     airspyplugin.cpp
     airspysettings.cpp
+    airspywebapiadapter.cpp
     airspythread.cpp
 )
 
@@ -11,6 +12,7 @@ set(airspy_HEADERS
     airspyinput.h
     airspyplugin.h
     airspysettings.h
+    airspywebapiadapter.h
     airspythread.h
 )
 
@@ -23,7 +25,6 @@ if(NOT SERVER_MODE)
     set(airspy_SOURCES
         ${airspy_SOURCES}
         airspygui.cpp
-
         airspygui.ui
     )
     set(airspy_HEADERS
@@ -51,12 +52,12 @@ if(ENABLE_EXTERNAL_LIBRARIES AND NOT LINUX)
 endif()
 
 target_link_libraries(${TARGET_NAME}
-        Qt5::Core
-        ${TARGET_LIB}
+    Qt5::Core
+    ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
-        swagger
-        ${LIBAIRSPY_LIBRARIES}
+    swagger
+    ${LIBAIRSPY_LIBRARIES}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

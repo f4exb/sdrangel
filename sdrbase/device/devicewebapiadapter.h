@@ -1,5 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// Interface for static web API adapters used for preset serialization and       //
+// deserialization                                                               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,41 +18,37 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_AIRSPYPLUGIN_H
-#define INCLUDE_AIRSPYPLUGIN_H
+#ifndef SDRBASE_DEVICE_DEVICEWEBAPIADAPER_H_
+#define SDRBASE_DEVICE_DEVICEWEBAPIADAPER_H_
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include <QByteArray>
+#include <QStringList>
 
-#define AIRSPY_DEVICE_TYPE_ID "sdrangel.samplesource.airspy"
+#include "export.h"
 
-class PluginAPI;
+namespace SWGSDRangel
+{
+    class SWGDeviceSettings;
+}
 
-class AirspyPlugin : public QObject, public PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID AIRSPY_DEVICE_TYPE_ID)
-
+class SDRBASE_API DeviceWebAPIAdapter
+{
 public:
-	explicit AirspyPlugin(QObject* parent = NULL);
+    DeviceWebAPIAdapter() {}
+    virtual ~DeviceWebAPIAdapter() {}
+    virtual QByteArray serialize() = 0;
+    virtual bool deserialize(const QByteArray& data)  = 0;
 
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGDeviceSettings& response,
+            QString& errorMessage) = 0;
 
-	virtual SamplingDevices enumSampleSources();
-	virtual PluginInstanceGUI* createSampleSourcePluginInstanceGUI(
-	        const QString& sourceId,
-	        QWidget **widget,
-	        DeviceUISet *deviceUISet);
-	virtual DeviceSampleSource* createSampleSourcePluginInstance(const QString& sourceId, DeviceAPI *deviceAPI);
-    virtual DeviceWebAPIAdapter* createDeviceWebAPIAdapter() const;
-
-	static const QString m_hardwareID;
-    static const QString m_deviceTypeID;
-    static const int m_maxDevices;
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& deviceSettingsKeys,
+            SWGSDRangel::SWGDeviceSettings& response, // query + response
+            QString& errorMessage) = 0;
 };
 
-#endif // INCLUDE_AIRSPYPLUGIN_H
+
+#endif // SDRBASE_DEVICE_DEVICEWEBAPIADAPER_H_

@@ -27,6 +27,7 @@ class DeviceSampleMIMO;
 class BasebandSampleSink;
 class BasebandSampleSource;
 class ChannelAPI;
+class DeviceWebAPIAdapter;
 
 class SDRBASE_API PluginInterface {
 public:
@@ -217,6 +218,11 @@ public:
     virtual void deleteSampleMIMOPluginInstanceGUI(PluginInstanceGUI *ui);
     virtual void deleteSampleMIMOPluginInstanceMIMO(DeviceSampleMIMO *mimo);
 
+    // all devices
+
+    virtual DeviceWebAPIAdapter* createDeviceWebAPIAdapter() const {
+        return nullptr;
+    }
 };
 
 Q_DECLARE_INTERFACE(PluginInterface, "SDRangel.PluginInterface/0.1");

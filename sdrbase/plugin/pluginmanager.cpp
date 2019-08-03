@@ -240,16 +240,42 @@ void PluginManager::createTxChannelInstance(int channelPluginIndex, DeviceUISet 
 
 const PluginInterface *PluginManager::getChannelPluginInterface(const QString& channelIdURI) const
 {
-    for(PluginAPI::ChannelRegistrations::const_iterator it = m_rxChannelRegistrations.begin(); it != m_rxChannelRegistrations.end(); ++it)
+    for (PluginAPI::ChannelRegistrations::const_iterator it = m_rxChannelRegistrations.begin(); it != m_rxChannelRegistrations.end(); ++it)
     {
         if (it->m_channelIdURI == channelIdURI) {
             return it->m_plugin;
         }
     }
 
-    for(PluginAPI::ChannelRegistrations::const_iterator it = m_txChannelRegistrations.begin(); it != m_txChannelRegistrations.end(); ++it)
+    for (PluginAPI::ChannelRegistrations::const_iterator it = m_txChannelRegistrations.begin(); it != m_txChannelRegistrations.end(); ++it)
     {
         if (it->m_channelIdURI == channelIdURI) {
+            return it->m_plugin;
+        }
+    }
+
+    return nullptr;
+}
+
+const PluginInterface *PluginManager::getDevicePluginInterface(const QString& deviceId) const
+{
+    for (PluginAPI::SamplingDeviceRegistrations::const_iterator it = m_sampleSourceRegistrations.begin(); it != m_sampleSourceRegistrations.end(); ++it)
+    {
+        if (it->m_deviceId == deviceId) {
+            return it->m_plugin;
+        }
+    }
+
+    for (PluginAPI::SamplingDeviceRegistrations::const_iterator it = m_sampleSinkRegistrations.begin(); it != m_sampleSinkRegistrations.end(); ++it)
+    {
+        if (it->m_deviceId == deviceId) {
+            return it->m_plugin;
+        }
+    }
+
+    for (PluginAPI::SamplingDeviceRegistrations::const_iterator it = m_sampleMIMORegistrations.begin(); it != m_sampleMIMORegistrations.end(); ++it)
+    {
+        if (it->m_deviceId == deviceId) {
             return it->m_plugin;
         }
     }

@@ -31,6 +31,7 @@
 
 class PluginManager;
 class ChannelAPI;
+class DeviceWebAPIAdapter;
 
 /**
  * Adapter between API and objects in sdrbase library
@@ -66,8 +67,18 @@ private:
         QMap<QString, ChannelAPI*> m_webAPIChannelAdapters;
     };
 
+    class WebAPIDeviceAdapters
+    {
+    public:
+        DeviceWebAPIAdapter *getDeviceWebAPIAdapter(const QString& deviceId, const PluginManager *pluginManager);
+        void flush();
+    private:
+        QMap<QString, DeviceWebAPIAdapter*> m_webAPIDeviceAdapters;
+    };
+
     const PluginManager *m_pluginManager;
     WebAPIChannelAdapters m_webAPIChannelAdapters;
+    WebAPIDeviceAdapters m_webAPIDeviceAdapters;
 };
 
 #endif // SDRBASE_WEBAPI_WEBAPIADAPTERBASE_H_

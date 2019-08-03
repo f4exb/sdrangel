@@ -81,6 +81,7 @@ public:
 	void listTxChannels(QList<QString>& list);
 
 	const PluginInterface *getChannelPluginInterface(const QString& channelIdURI) const;
+	const PluginInterface *getDevicePluginInterface(const QString& deviceId) const;
 
 	static const QString& getFileInputDeviceId() { return m_fileInputDeviceTypeID; }
 	static const QString& getFileSinkDeviceId() { return m_fileSinkDeviceTypeID; }

@@ -1,5 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// Implementation of static web API adapters used for preset serialization and   //
+// deserialization                                                               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,41 +18,34 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_AIRSPYPLUGIN_H
-#define INCLUDE_AIRSPYPLUGIN_H
+#include "SWGDeviceSettings.h"
+#include "airspyinput.h"
+#include "airspywebapiadapter.h"
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+AirspyWebAPIAdapter::AirspyWebAPIAdapter()
+{}
 
-#define AIRSPY_DEVICE_TYPE_ID "sdrangel.samplesource.airspy"
+AirspyWebAPIAdapter::~AirspyWebAPIAdapter()
+{}
 
-class PluginAPI;
+int AirspyWebAPIAdapter::webapiSettingsGet(
+        SWGSDRangel::SWGDeviceSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setAirspySettings(new SWGSDRangel::SWGAirspySettings());
+    response.getAirspySettings()->init();
+    AirspyInput::webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
 
-class AirspyPlugin : public QObject, public PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID AIRSPY_DEVICE_TYPE_ID)
-
-public:
-	explicit AirspyPlugin(QObject* parent = NULL);
-
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
-
-	virtual SamplingDevices enumSampleSources();
-	virtual PluginInstanceGUI* createSampleSourcePluginInstanceGUI(
-	        const QString& sourceId,
-	        QWidget **widget,
-	        DeviceUISet *deviceUISet);
-	virtual DeviceSampleSource* createSampleSourcePluginInstance(const QString& sourceId, DeviceAPI *deviceAPI);
-    virtual DeviceWebAPIAdapter* createDeviceWebAPIAdapter() const;
-
-	static const QString m_hardwareID;
-    static const QString m_deviceTypeID;
-    static const int m_maxDevices;
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
-};
-
-#endif // INCLUDE_AIRSPYPLUGIN_H
+int AirspyWebAPIAdapter::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response, // query + response
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    AirspyInput::webapiUpdateDeviceSettings(m_settings, deviceSettingsKeys, response);
+    return 200;
+}

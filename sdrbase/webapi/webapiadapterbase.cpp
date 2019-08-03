@@ -20,6 +20,7 @@
 #include "plugin/pluginmanager.h"
 #include "channel/channelapi.h"
 #include "channel/channelutils.h"
+#include "device/devicewebapiadapter.h"
 #include "webapiadapterbase.h"
 
 WebAPIAdapterBase::WebAPIAdapterBase()
@@ -93,9 +94,17 @@ void WebAPIAdapterBase::webapiFormatPreset(
         swgdeviceConfigs->back()->setDeviceId(new QString(deviceConfig.m_deviceId));
         swgdeviceConfigs->back()->setDeviceSerial(new QString(deviceConfig.m_deviceSerial));
         swgdeviceConfigs->back()->setDeviceSequence(deviceConfig.m_deviceSequence);
-        // const QByteArray& deviceSettings = deviceConfig.m_config;
-        // SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = swgdeviceConfigs->back()->getConfig();
-        // swgDeviceSettings->init();
+        const QByteArray& deviceSettings = deviceConfig.m_config;
+        SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = swgdeviceConfigs->back()->getConfig();
+        swgDeviceSettings->init();
+        DeviceWebAPIAdapter *deviceWebAPIAdapter = m_webAPIDeviceAdapters.getDeviceWebAPIAdapter(deviceConfig.m_deviceId, m_pluginManager);
+
+        if (deviceWebAPIAdapter)
+        {
+            deviceWebAPIAdapter->deserialize(deviceSettings);
+            QString errorMessage;
+            deviceWebAPIAdapter->webapiSettingsGet(*swgDeviceSettings, errorMessage);
+        }
     }
 }
 
@@ -144,9 +153,44 @@ ChannelAPI *WebAPIAdapterBase::WebAPIChannelAdapters::getChannelAPI(const QStrin
 
 void WebAPIAdapterBase::WebAPIChannelAdapters::flush()
 {
-    foreach(ChannelAPI *ChannelAPI, m_webAPIChannelAdapters) {
-        delete ChannelAPI;
+    foreach(ChannelAPI *channelAPI, m_webAPIChannelAdapters) {
+        delete channelAPI;
     }
 
     m_webAPIChannelAdapters.clear();
+}
+
+DeviceWebAPIAdapter *WebAPIAdapterBase::WebAPIDeviceAdapters::getDeviceWebAPIAdapter(const QString& deviceId, const PluginManager *pluginManager)
+{
+    QMap<QString, DeviceWebAPIAdapter*>::iterator it = m_webAPIDeviceAdapters.find(deviceId);
+
+    if (it == m_webAPIDeviceAdapters.end())
+    {
+        const PluginInterface *pluginInterface = pluginManager->getDevicePluginInterface(deviceId);
+
+        if (pluginInterface)
+        {
+            DeviceWebAPIAdapter *deviceWebAPIAdapter = pluginInterface->createDeviceWebAPIAdapter();
+            m_webAPIDeviceAdapters.insert(deviceId, deviceWebAPIAdapter);
+            return deviceWebAPIAdapter;
+        }
+        else
+        {
+            m_webAPIDeviceAdapters.insert(deviceId, nullptr);
+            return nullptr;
+        }
+    }
+    else
+    {
+        return *it;
+    }
+}
+
+void WebAPIAdapterBase::WebAPIDeviceAdapters::flush()
+{
+    foreach(DeviceWebAPIAdapter *deviceWebAPIAdapter, m_webAPIDeviceAdapters) {
+        delete deviceWebAPIAdapter;
+    }
+
+    m_webAPIDeviceAdapters.clear();
 }

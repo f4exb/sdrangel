@@ -23,6 +23,7 @@
 #else
 #include "airspygui.h"
 #endif
+#include "airspywebapiadapter.h"
 #include "airspyplugin.h"
 
 #include "plugin/pluginapi.h"
@@ -32,7 +33,7 @@ const int AirspyPlugin::m_maxDevices = 32;
 
 const PluginDescriptor AirspyPlugin::m_pluginDescriptor = {
 	QString("Airspy Input"),
-	QString("4.5.2"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -137,7 +138,7 @@ PluginInstanceGUI* AirspyPlugin::createSampleSourcePluginInstanceGUI(
     (void) sourceId;
     (void) widget;
     (void) deviceUISet;
-    return 0;
+    return nullptr;
 }
 #else
 PluginInstanceGUI* AirspyPlugin::createSampleSourcePluginInstanceGUI(
@@ -153,7 +154,7 @@ PluginInstanceGUI* AirspyPlugin::createSampleSourcePluginInstanceGUI(
 	}
 	else
 	{
-		return 0;
+		return nullptr;
 	}
 }
 #endif
@@ -167,6 +168,11 @@ DeviceSampleSource *AirspyPlugin::createSampleSourcePluginInstance(const QString
     }
     else
     {
-        return 0;
+        return nullptr;
     }
+}
+
+DeviceWebAPIAdapter *AirspyPlugin::createDeviceWebAPIAdapter() const
+{
+    return new AirspyWebAPIAdapter();
 }
