@@ -19,8 +19,7 @@
 #include "freedvmod.h"
 #include "freedvmodwebapiadapter.h"
 
-FreeDVModWebAPIAdapter::FreeDVModWebAPIAdapter() :
-    ChannelAPI(FreeDVMod::m_channelIdURI, ChannelAPI::StreamSingleSource)
+FreeDVModWebAPIAdapter::FreeDVModWebAPIAdapter()
 {}
 
 FreeDVModWebAPIAdapter::~FreeDVModWebAPIAdapter()

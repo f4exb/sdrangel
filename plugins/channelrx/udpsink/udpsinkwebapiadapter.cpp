@@ -19,8 +19,7 @@
 #include "udpsink.h"
 #include "udpsinkwebapiadapter.h"
 
-UDPSinkWebAPIAdapter::UDPSinkWebAPIAdapter() :
-    ChannelAPI(UDPSink::m_channelIdURI, ChannelAPI::StreamSingleSink)
+UDPSinkWebAPIAdapter::UDPSinkWebAPIAdapter()
 {}
 
 UDPSinkWebAPIAdapter::~UDPSinkWebAPIAdapter()

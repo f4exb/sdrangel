@@ -1,5 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// Interface for static web API adapters used for preset serialization and       //
+// deserialization                                                               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,35 +18,52 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_REMOTESINK_WEBAPIADAPTER_H
-#define INCLUDE_REMOTESINK_WEBAPIADAPTER_H
+#ifndef SDRBASE_CHANNEL_CHANNELWEBAPIADAPER_H_
+#define SDRBASE_CHANNEL_CHANNELWEBAPIADAPER_H_
 
-#include "channel/channelwebapiadapter.h"
-#include "remotesinksettings.h"
+#include <QByteArray>
+#include <QStringList>
 
-/**
- * Standalone API adapter only for the settings
- */
-class RemoteSinkWebAPIAdapter : public ChannelWebAPIAdapter {
+#include "export.h"
+
+namespace SWGSDRangel
+{
+    class SWGChannelSettings;
+}
+
+class SDRBASE_API ChannelWebAPIAdapter
+{
 public:
-    RemoteSinkWebAPIAdapter();
-    virtual ~RemoteSinkWebAPIAdapter();
+    ChannelWebAPIAdapter() {}
+    virtual ~ChannelWebAPIAdapter() {}
+    virtual QByteArray serialize() const = 0;
+    virtual bool deserialize(const QByteArray& data)  = 0;
 
-    virtual QByteArray serialize() const { return m_settings.serialize(); }
-    virtual bool deserialize(const QByteArray& data) { m_settings.deserialize(data); }
-
+    /**
+     * API adapter for the channel settings GET requests
+     */
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
-            QString& errorMessage);
+            QString& errorMessage)
+    {
+        (void) response;
+        errorMessage = "Not implemented"; return 501;
+    }
 
+    /**
+     * API adapter for the channel settings PUT and PATCH requests
+     */
     virtual int webapiSettingsPutPatch(
             bool force,
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response,
-            QString& errorMessage);
-
-private:
-    RemoteSinkSettings m_settings;
+            QString& errorMessage)
+    {
+        (void) force;
+        (void) channelSettingsKeys;
+        (void) response;
+        errorMessage = "Not implemented"; return 501;
+    }
 };
 
-#endif // INCLUDE_REMOTESINK_WEBAPIADAPTER_H
+#endif // SDRBASE_CHANNEL_CHANNELWEBAPIADAPER_H_

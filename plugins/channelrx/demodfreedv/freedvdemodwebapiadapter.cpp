@@ -19,8 +19,7 @@
 #include "freedvdemod.h"
 #include "freedvdemodwebapiadapter.h"
 
-FreeDVDemodWebAPIAdapter::FreeDVDemodWebAPIAdapter() :
-    ChannelAPI(FreeDVDemod::m_channelIdURI, ChannelAPI::StreamSingleSink)
+FreeDVDemodWebAPIAdapter::FreeDVDemodWebAPIAdapter()
 {}
 
 FreeDVDemodWebAPIAdapter::~FreeDVDemodWebAPIAdapter()

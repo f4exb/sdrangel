@@ -21,7 +21,7 @@ public:
 	virtual PluginInstanceGUI* createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const;
 	virtual BasebandSampleSink* createRxChannelBS(DeviceAPI *deviceAPI) const;
 	virtual ChannelAPI* createRxChannelCS(DeviceAPI *deviceAPI) const;
-    virtual ChannelAPI* createChannelWebAPIAdapter() const;
+    virtual ChannelWebAPIAdapter* createChannelWebAPIAdapter() const;
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;

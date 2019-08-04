@@ -80,7 +80,7 @@ ChannelAPI* UDPSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
     return new UDPSource(deviceAPI);
 }
 
-ChannelAPI* UDPSourcePlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* UDPSourcePlugin::createChannelWebAPIAdapter() const
 {
 	return new UDPSourceWebAPIAdapter();
 }

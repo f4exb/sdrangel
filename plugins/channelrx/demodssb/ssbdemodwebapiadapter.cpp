@@ -19,8 +19,7 @@
 #include "ssbdemod.h"
 #include "ssbdemodwebapiadapter.h"
 
-SSBDemodWebAPIAdapter::SSBDemodWebAPIAdapter() :
-    ChannelAPI(SSBDemod::m_channelIdURI, ChannelAPI::StreamSingleSink)
+SSBDemodWebAPIAdapter::SSBDemodWebAPIAdapter()
 {}
 
 SSBDemodWebAPIAdapter::~SSBDemodWebAPIAdapter()

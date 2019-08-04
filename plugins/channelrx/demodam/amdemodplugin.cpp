@@ -60,7 +60,7 @@ ChannelAPI* AMDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new AMDemod(deviceAPI);
 }
 
-ChannelAPI* AMDemodPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* AMDemodPlugin::createChannelWebAPIAdapter() const
 {
 	return new AMDemodWebAPIAdapter();
 }

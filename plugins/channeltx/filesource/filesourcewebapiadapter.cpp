@@ -19,8 +19,7 @@
 #include "filesource.h"
 #include "filesourcewebapiadapter.h"
 
-FileSourceWebAPIAdapter::FileSourceWebAPIAdapter() :
-    ChannelAPI(FileSource::m_channelIdURI, ChannelAPI::StreamSingleSource)
+FileSourceWebAPIAdapter::FileSourceWebAPIAdapter()
 {}
 
 FileSourceWebAPIAdapter::~FileSourceWebAPIAdapter()

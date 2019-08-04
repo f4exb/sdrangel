@@ -79,7 +79,7 @@ ChannelAPI* DSDDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new DSDDemod(deviceAPI);
 }
 
-ChannelAPI* DSDDemodPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* DSDDemodPlugin::createChannelWebAPIAdapter() const
 {
 	return new DSDDemodWebAPIAdapter();
 }

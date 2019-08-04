@@ -77,7 +77,7 @@ ChannelAPI* FileSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
     return new FileSource(deviceAPI);
 }
 
-ChannelAPI* FileSourcePlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* FileSourcePlugin::createChannelWebAPIAdapter() const
 {
 	return new FileSourceWebAPIAdapter();
 }

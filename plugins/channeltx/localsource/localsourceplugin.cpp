@@ -79,7 +79,7 @@ ChannelAPI* LocalSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
     return new LocalSource(deviceAPI);
 }
 
-ChannelAPI* LocalSourcePlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* LocalSourcePlugin::createChannelWebAPIAdapter() const
 {
 	return new LocalSourceWebAPIAdapter();
 }

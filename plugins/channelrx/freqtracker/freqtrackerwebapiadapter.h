@@ -18,33 +18,17 @@
 #ifndef INCLUDE_FREQTRACKER_WEBAPIADAPTER_H
 #define INCLUDE_FREQTRACKER_WEBAPIADAPTER_H
 
-#include "channel/channelapi.h"
+#include "channel/channelwebapiadapter.h"
 #include "freqtrackersettings.h"
 
 /**
  * Standalone API adapter only for the settings
  */
-class FreqTrackerWebAPIAdapter : public ChannelAPI {
+class FreqTrackerWebAPIAdapter : public ChannelWebAPIAdapter {
 public:
     FreqTrackerWebAPIAdapter();
     virtual ~FreqTrackerWebAPIAdapter();
 
-    // unused pure virtual methods
-    virtual void destroy() {}
-    virtual void getIdentifier(QString& id) {}
-    virtual void getTitle(QString& title) {}
-    virtual qint64 getCenterFrequency() const { return 0; }
-    virtual int getNbSinkStreams() const { return 1; }
-    virtual int getNbSourceStreams() const { return 0; }
-
-    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
-    {
-        (void) streamIndex;
-        (void) sinkElseSource;
-        return 0;
-    }
-
-    // virtual methods actually implemented
     virtual QByteArray serialize() const { return m_settings.serialize(); }
     virtual bool deserialize(const QByteArray& data) { m_settings.deserialize(data); }
 

@@ -27,6 +27,7 @@ class DeviceSampleMIMO;
 class BasebandSampleSink;
 class BasebandSampleSource;
 class ChannelAPI;
+class ChannelWebAPIAdapter;
 class DeviceWebAPIAdapter;
 
 class SDRBASE_API PluginInterface {
@@ -133,7 +134,7 @@ public:
 
     // any channel
 
-    virtual ChannelAPI* createChannelWebAPIAdapter() const
+    virtual ChannelWebAPIAdapter* createChannelWebAPIAdapter() const
     {
         return nullptr;
     }

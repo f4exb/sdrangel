@@ -18,13 +18,13 @@
 #ifndef INCLUDE_SSBMOD_WEBAPIADAPTER_H
 #define INCLUDE_SSBMOD_WEBAPIADAPTER_H
 
-#include "channel/channelapi.h"
+#include "channel/channelwebapiadapter.h"
 #include "ssbmodsettings.h"
 
 /**
  * Standalone API adapter only for the settings
  */
-class SSBModWebAPIAdapter : public ChannelAPI {
+class SSBModWebAPIAdapter : public ChannelWebAPIAdapter {
 public:
     SSBModWebAPIAdapter();
     virtual ~SSBModWebAPIAdapter();

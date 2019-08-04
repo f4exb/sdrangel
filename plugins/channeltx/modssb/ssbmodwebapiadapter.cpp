@@ -19,8 +19,7 @@
 #include "ssbmod.h"
 #include "ssbmodwebapiadapter.h"
 
-SSBModWebAPIAdapter::SSBModWebAPIAdapter() :
-    ChannelAPI(SSBMod::m_channelIdURI, ChannelAPI::StreamSingleSource)
+SSBModWebAPIAdapter::SSBModWebAPIAdapter()
 {}
 
 SSBModWebAPIAdapter::~SSBModWebAPIAdapter()

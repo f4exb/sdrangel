@@ -77,7 +77,7 @@ ChannelAPI* FreqTrackerPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new FreqTracker(deviceAPI);
 }
 
-ChannelAPI* FreqTrackerPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* FreqTrackerPlugin::createChannelWebAPIAdapter() const
 {
 	return new FreqTrackerWebAPIAdapter();
 }

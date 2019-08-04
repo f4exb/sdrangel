@@ -19,8 +19,7 @@
 #include "wfmmod.h"
 #include "wfmmodwebapiadapter.h"
 
-WFMModWebAPIAdapter::WFMModWebAPIAdapter() :
-    ChannelAPI(WFMMod::m_channelIdURI, ChannelAPI::StreamSingleSource)
+WFMModWebAPIAdapter::WFMModWebAPIAdapter()
 {}
 
 WFMModWebAPIAdapter::~WFMModWebAPIAdapter()

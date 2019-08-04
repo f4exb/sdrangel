@@ -30,7 +30,7 @@
 #include "commands/command.h"
 
 class PluginManager;
-class ChannelAPI;
+class ChannelWebAPIAdapter;
 class DeviceWebAPIAdapter;
 
 /**
@@ -61,10 +61,10 @@ private:
     class WebAPIChannelAdapters
     {
     public:
-        ChannelAPI *getChannelAPI(const QString& channelURI, const PluginManager *pluginManager);
+        ChannelWebAPIAdapter *getChannelWebAPIAdapter(const QString& channelURI, const PluginManager *pluginManager);
         void flush();
     private:
-        QMap<QString, ChannelAPI*> m_webAPIChannelAdapters;
+        QMap<QString, ChannelWebAPIAdapter*> m_webAPIChannelAdapters;
     };
 
     class WebAPIDeviceAdapters

@@ -77,7 +77,7 @@ ChannelAPI* SSBModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
     return new SSBMod(deviceAPI);
 }
 
-ChannelAPI* SSBModPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* SSBModPlugin::createChannelWebAPIAdapter() const
 {
 	return new SSBModWebAPIAdapter();
 }

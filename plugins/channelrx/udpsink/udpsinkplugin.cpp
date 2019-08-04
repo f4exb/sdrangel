@@ -78,7 +78,7 @@ ChannelAPI* UDPSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new UDPSink(deviceAPI);
 }
 
-ChannelAPI* UDPSinkPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* UDPSinkPlugin::createChannelWebAPIAdapter() const
 {
 	return new UDPSinkWebAPIAdapter();
 }

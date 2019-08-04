@@ -18,7 +18,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "plugin/pluginmanager.h"
-#include "channel/channelapi.h"
+#include "channel/channelwebapiadapter.h"
 #include "channel/channelutils.h"
 #include "device/devicewebapiadapter.h"
 #include "device/deviceutils.h"
@@ -75,7 +75,7 @@ void WebAPIAdapterBase::webapiFormatPreset(
         const QByteArray& channelSettings = channelConfig.m_config;
         SWGSDRangel::SWGChannelSettings *swgChannelSettings = swgChannelConfigs->back()->getConfig();
         swgChannelSettings->init();
-        ChannelAPI *channelWebAPIAdapter = m_webAPIChannelAdapters.getChannelAPI(channelConfig.m_channelIdURI, m_pluginManager);
+        ChannelWebAPIAdapter *channelWebAPIAdapter = m_webAPIChannelAdapters.getChannelWebAPIAdapter(channelConfig.m_channelIdURI, m_pluginManager);
 
         if (channelWebAPIAdapter)
         {
@@ -125,10 +125,10 @@ void WebAPIAdapterBase::webapiFormatCommand(
     apiCommand->setRelease(command.getRelease() ? 1 : 0);
 }
 
-ChannelAPI *WebAPIAdapterBase::WebAPIChannelAdapters::getChannelAPI(const QString& channelURI, const PluginManager *pluginManager)
+ChannelWebAPIAdapter *WebAPIAdapterBase::WebAPIChannelAdapters::getChannelWebAPIAdapter(const QString& channelURI, const PluginManager *pluginManager)
 {
     QString registeredChannelURI = ChannelUtils::getRegisteredChannelURI(channelURI);
-    QMap<QString, ChannelAPI*>::iterator it = m_webAPIChannelAdapters.find(registeredChannelURI);
+    QMap<QString, ChannelWebAPIAdapter*>::iterator it = m_webAPIChannelAdapters.find(registeredChannelURI);
 
     if (it == m_webAPIChannelAdapters.end())
     {
@@ -136,7 +136,7 @@ ChannelAPI *WebAPIAdapterBase::WebAPIChannelAdapters::getChannelAPI(const QStrin
 
         if (pluginInterface)
         {
-            ChannelAPI *channelAPI = pluginInterface->createChannelWebAPIAdapter();
+            ChannelWebAPIAdapter *channelAPI = pluginInterface->createChannelWebAPIAdapter();
             m_webAPIChannelAdapters.insert(registeredChannelURI, channelAPI);
             return channelAPI;
         }
@@ -154,7 +154,7 @@ ChannelAPI *WebAPIAdapterBase::WebAPIChannelAdapters::getChannelAPI(const QStrin
 
 void WebAPIAdapterBase::WebAPIChannelAdapters::flush()
 {
-    foreach(ChannelAPI *channelAPI, m_webAPIChannelAdapters) {
+    foreach(ChannelWebAPIAdapter *channelAPI, m_webAPIChannelAdapters) {
         delete channelAPI;
     }
 

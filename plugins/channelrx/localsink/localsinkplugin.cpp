@@ -79,7 +79,7 @@ ChannelAPI* LocalSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new LocalSink(deviceAPI);
 }
 
-ChannelAPI* LocalSinkPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* LocalSinkPlugin::createChannelWebAPIAdapter() const
 {
 	return new LocalSinkWebAPIAdapter();
 }

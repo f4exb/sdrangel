@@ -19,8 +19,7 @@
 #include "localsource.h"
 #include "localsourcewebapiadapter.h"
 
-LocalSourceWebAPIAdapter::LocalSourceWebAPIAdapter() :
-    ChannelAPI(LocalSource::m_channelIdURI, ChannelAPI::StreamSingleSource)
+LocalSourceWebAPIAdapter::LocalSourceWebAPIAdapter()
 {}
 
 LocalSourceWebAPIAdapter::~LocalSourceWebAPIAdapter()

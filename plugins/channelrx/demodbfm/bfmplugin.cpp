@@ -80,7 +80,7 @@ ChannelAPI* BFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new BFMDemod(deviceAPI);
 }
 
-ChannelAPI* BFMPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* BFMPlugin::createChannelWebAPIAdapter() const
 {
 	return new BFMDemodWebAPIAdapter();
 }

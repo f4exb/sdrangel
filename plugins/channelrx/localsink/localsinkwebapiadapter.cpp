@@ -19,8 +19,7 @@
 #include "localsink.h"
 #include "localsinkwebapiadapter.h"
 
-LocalSinkWebAPIAdapter::LocalSinkWebAPIAdapter() :
-    ChannelAPI(LocalSink::m_channelIdURI, ChannelAPI::StreamSingleSink)
+LocalSinkWebAPIAdapter::LocalSinkWebAPIAdapter()
 {}
 
 LocalSinkWebAPIAdapter::~LocalSinkWebAPIAdapter()

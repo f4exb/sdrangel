@@ -19,8 +19,7 @@
 #include "freqtracker.h"
 #include "freqtrackerwebapiadapter.h"
 
-FreqTrackerWebAPIAdapter::FreqTrackerWebAPIAdapter() :
-    ChannelAPI(FreqTracker::m_channelIdURI, ChannelAPI::StreamSingleSink)
+FreqTrackerWebAPIAdapter::FreqTrackerWebAPIAdapter()
 {}
 
 FreqTrackerWebAPIAdapter::~FreqTrackerWebAPIAdapter()

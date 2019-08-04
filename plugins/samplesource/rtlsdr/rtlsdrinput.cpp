@@ -682,7 +682,6 @@ void RTLSDRInput::webapiUpdateDeviceSettings(
 
 void RTLSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RTLSDRSettings& settings)
 {
-    qDebug("RTLSDRInput::webapiFormatDeviceSettings: m_lowSampleRate: %s", settings.m_lowSampleRate ? "true" : "false");
     response.getRtlSdrSettings()->setAgc(settings.m_agc ? 1 : 0);
     response.getRtlSdrSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getRtlSdrSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);

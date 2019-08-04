@@ -19,8 +19,7 @@
 #include "nfmmod.h"
 #include "nfmmodwebapiadapter.h"
 
-NFMModWebAPIAdapter::NFMModWebAPIAdapter() :
-    ChannelAPI(NFMMod::m_channelIdURI, ChannelAPI::StreamSingleSource)
+NFMModWebAPIAdapter::NFMModWebAPIAdapter()
 {}
 
 NFMModWebAPIAdapter::~NFMModWebAPIAdapter()

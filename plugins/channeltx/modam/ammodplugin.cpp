@@ -77,7 +77,7 @@ ChannelAPI* AMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
     return new AMMod(deviceAPI);
 }
 
-ChannelAPI* AMModPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* AMModPlugin::createChannelWebAPIAdapter() const
 {
 	return new AMModWebAPIAdapter();
 }

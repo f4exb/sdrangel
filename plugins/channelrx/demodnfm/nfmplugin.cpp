@@ -61,7 +61,7 @@ ChannelAPI* NFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new NFMDemod(deviceAPI);
 }
 
-ChannelAPI* NFMPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* NFMPlugin::createChannelWebAPIAdapter() const
 {
 	return new NFMDemodWebAPIAdapter();
 }

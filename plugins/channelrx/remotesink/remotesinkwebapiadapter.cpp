@@ -19,8 +19,7 @@
 #include "remotesink.h"
 #include "remotesinkwebapiadapter.h"
 
-RemoteSinkWebAPIAdapter::RemoteSinkWebAPIAdapter() :
-    ChannelAPI(RemoteSink::m_channelIdURI, ChannelAPI::StreamSingleSink)
+RemoteSinkWebAPIAdapter::RemoteSinkWebAPIAdapter()
 {}
 
 RemoteSinkWebAPIAdapter::~RemoteSinkWebAPIAdapter()

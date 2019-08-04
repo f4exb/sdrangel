@@ -77,7 +77,7 @@ ChannelAPI* FreeDVModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
     return new FreeDVMod(deviceAPI);
 }
 
-ChannelAPI* FreeDVModPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* FreeDVModPlugin::createChannelWebAPIAdapter() const
 {
 	return new FreeDVModWebAPIAdapter();
 }

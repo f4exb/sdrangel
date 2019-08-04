@@ -77,7 +77,7 @@ ChannelAPI* WFMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
     return new WFMMod(deviceAPI);
 }
 
-ChannelAPI* WFMModPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* WFMModPlugin::createChannelWebAPIAdapter() const
 {
 	return new WFMModWebAPIAdapter();
 }

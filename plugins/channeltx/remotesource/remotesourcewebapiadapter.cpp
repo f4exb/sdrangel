@@ -19,8 +19,7 @@
 #include "remotesource.h"
 #include "remotesourcewebapiadapter.h"
 
-RemoteSourceWebAPIAdapter::RemoteSourceWebAPIAdapter() :
-    ChannelAPI(RemoteSource::m_channelIdURI, ChannelAPI::StreamSingleSource)
+RemoteSourceWebAPIAdapter::RemoteSourceWebAPIAdapter()
 {}
 
 RemoteSourceWebAPIAdapter::~RemoteSourceWebAPIAdapter()

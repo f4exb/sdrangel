@@ -19,8 +19,7 @@
 #include "nfmdemod.h"
 #include "nfmdemodwebapiadapter.h"
 
-NFMDemodWebAPIAdapter::NFMDemodWebAPIAdapter() :
-    ChannelAPI(NFMDemod::m_channelIdURI, ChannelAPI::StreamSingleSink)
+NFMDemodWebAPIAdapter::NFMDemodWebAPIAdapter()
 {}
 
 NFMDemodWebAPIAdapter::~NFMDemodWebAPIAdapter()

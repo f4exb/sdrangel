@@ -79,7 +79,7 @@ ChannelAPI* RemoteSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new RemoteSink(deviceAPI);
 }
 
-ChannelAPI* RemoteSinkPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* RemoteSinkPlugin::createChannelWebAPIAdapter() const
 {
 	return new RemoteSinkWebAPIAdapter();
 }

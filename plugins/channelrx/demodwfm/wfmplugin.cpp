@@ -62,7 +62,7 @@ ChannelAPI* WFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new WFMDemod(deviceAPI);
 }
 
-ChannelAPI* WFMPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* WFMPlugin::createChannelWebAPIAdapter() const
 {
 	return new WFMDemodWebAPIAdapter();
 }

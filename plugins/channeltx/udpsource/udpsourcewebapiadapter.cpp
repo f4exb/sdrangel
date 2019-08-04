@@ -19,8 +19,7 @@
 #include "udpsource.h"
 #include "udpsourcewebapiadapter.h"
 
-UDPSourceWebAPIAdapter::UDPSourceWebAPIAdapter() :
-    ChannelAPI(UDPSource::m_channelIdURI, ChannelAPI::StreamSingleSource)
+UDPSourceWebAPIAdapter::UDPSourceWebAPIAdapter()
 {}
 
 UDPSourceWebAPIAdapter::~UDPSourceWebAPIAdapter()

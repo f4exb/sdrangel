@@ -19,8 +19,7 @@
 #include "bfmdemod.h"
 #include "bfmdemodwebapiadapter.h"
 
-BFMDemodWebAPIAdapter::BFMDemodWebAPIAdapter() :
-    ChannelAPI(BFMDemod::m_channelIdURI, ChannelAPI::StreamSingleSink)
+BFMDemodWebAPIAdapter::BFMDemodWebAPIAdapter()
 {}
 
 BFMDemodWebAPIAdapter::~BFMDemodWebAPIAdapter()

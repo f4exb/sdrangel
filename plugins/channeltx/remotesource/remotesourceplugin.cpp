@@ -77,7 +77,7 @@ ChannelAPI* RemoteSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
     return new RemoteSource(deviceAPI);
 }
 
-ChannelAPI* RemoteSourcePlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* RemoteSourcePlugin::createChannelWebAPIAdapter() const
 {
 	return new RemoteSourceWebAPIAdapter();
 }

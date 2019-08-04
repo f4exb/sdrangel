@@ -61,7 +61,7 @@ ChannelAPI* SSBPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new SSBDemod(deviceAPI);
 }
 
-ChannelAPI* SSBPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* SSBPlugin::createChannelWebAPIAdapter() const
 {
 	return new SSBDemodWebAPIAdapter();
 }

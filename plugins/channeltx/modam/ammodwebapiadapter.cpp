@@ -19,8 +19,7 @@
 #include "ammod.h"
 #include "ammodwebapiadapter.h"
 
-AMModWebAPIAdapter::AMModWebAPIAdapter() :
-    ChannelAPI(AMMod::m_channelIdURI, ChannelAPI::StreamSingleSource)
+AMModWebAPIAdapter::AMModWebAPIAdapter()
 {}
 
 AMModWebAPIAdapter::~AMModWebAPIAdapter()

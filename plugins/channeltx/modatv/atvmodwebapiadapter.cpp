@@ -19,8 +19,7 @@
 #include "atvmod.h"
 #include "atvmodwebapiadapter.h"
 
-ATVModWebAPIAdapter::ATVModWebAPIAdapter() :
-    ChannelAPI(ATVMod::m_channelIdURI, ChannelAPI::StreamSingleSource)
+ATVModWebAPIAdapter::ATVModWebAPIAdapter()
 {}
 
 ATVModWebAPIAdapter::~ATVModWebAPIAdapter()

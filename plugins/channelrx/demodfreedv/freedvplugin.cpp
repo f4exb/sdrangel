@@ -77,7 +77,7 @@ ChannelAPI* FreeDVPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new FreeDVDemod(deviceAPI);
 }
 
-ChannelAPI* FreeDVPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* FreeDVPlugin::createChannelWebAPIAdapter() const
 {
 	return new FreeDVDemodWebAPIAdapter();
 }

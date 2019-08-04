@@ -77,7 +77,7 @@ ChannelAPI* ATVModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
     return new ATVMod(deviceAPI);
 }
 
-ChannelAPI* ATVModPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* ATVModPlugin::createChannelWebAPIAdapter() const
 {
 	return new ATVModWebAPIAdapter();
 }
