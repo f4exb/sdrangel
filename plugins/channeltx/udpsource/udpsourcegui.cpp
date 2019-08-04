@@ -147,7 +147,7 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
             64, // FFT size
             10, // overlapping %
             0,  // number of averaging samples
-            0,  // no averaging
+            SpectrumVis::AvgModeNone,  // no averaging
             FFTWindow::BlackmanHarris,
             false); // logarithmic scale
 

@@ -33,18 +33,17 @@ public:
 		        int fftSize,
 		        int overlapPercent,
 		        unsigned int averageNb,
-		        int preProcessMode,
+		        AvgMode avgMode,
 		        FFTWindow::Function window,
 		        bool linear) :
 			Message(),
 			m_fftSize(fftSize),
 			m_overlapPercent(overlapPercent),
 			m_averageNb(averageNb),
+            m_avgMode(avgMode),
 			m_window(window),
 			m_linear(linear)
-		{
-		    m_avgMode = preProcessMode < 0 ? AvgModeNone : preProcessMode > 3 ? AvgModeMax : (SpectrumVis::AvgMode) preProcessMode;
-		}
+		{}
 
 		int getFFTSize() const { return m_fftSize; }
 		int getOverlapPercent() const { return m_overlapPercent; }
@@ -69,7 +68,7 @@ public:
 	        int fftSize,
 	        int overlapPercent,
 	        unsigned int averagingNb,
-	        int averagingMode,
+	        AvgMode averagingMode,
 	        FFTWindow::Function window,
 	        bool m_linear);
 

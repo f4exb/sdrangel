@@ -386,7 +386,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
             64, // FFT size
             10, // overlapping %
             0,  // number of averaging samples
-            0,  // no averaging
+            SpectrumVis::AvgModeNone,  // no averaging
 	        FFTWindow::BlackmanHarris,
 	        false); // logarithmic scale
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
