@@ -204,12 +204,24 @@ bool
 SWGChannel::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_index_isSet){ isObjectUpdated = true; break;}
-        if(id != nullptr && *id != QString("")){ isObjectUpdated = true; break;}
-        if(m_uid_isSet){ isObjectUpdated = true; break;}
-        if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
-        if(m_delta_frequency_isSet){ isObjectUpdated = true; break;}
-        if(report != nullptr && report->isSet()){ isObjectUpdated = true; break;}
+        if(m_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(id && *id != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_uid_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_delta_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(report && report->isSet()){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

@@ -98,7 +98,9 @@ bool
 SWGGain::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_gain_cb_isSet){ isObjectUpdated = true; break;}
+        if(m_gain_cb_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

@@ -92,7 +92,7 @@ SWGAMBEDevices::asJsonObject() {
     if(m_nb_devices_isSet){
         obj->insert("nbDevices", QJsonValue(nb_devices));
     }
-    if(ambe_devices->size() > 0){
+    if(ambe_devices && ambe_devices->size() > 0){
         toJsonArray((QList<void*>*)ambe_devices, obj, "ambeDevices", "SWGAMBEDevice");
     }
 
@@ -124,8 +124,12 @@ bool
 SWGAMBEDevices::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_nb_devices_isSet){ isObjectUpdated = true; break;}
-        if(ambe_devices->size() > 0){ isObjectUpdated = true; break;}
+        if(m_nb_devices_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(ambe_devices && (ambe_devices->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

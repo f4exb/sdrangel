@@ -144,9 +144,15 @@ bool
 SWGPresetImport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(group_name != nullptr && *group_name != QString("")){ isObjectUpdated = true; break;}
-        if(description != nullptr && *description != QString("")){ isObjectUpdated = true; break;}
-        if(file_path != nullptr && *file_path != QString("")){ isObjectUpdated = true; break;}
+        if(group_name && *group_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(description && *description != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(file_path && *file_path != QString("")){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

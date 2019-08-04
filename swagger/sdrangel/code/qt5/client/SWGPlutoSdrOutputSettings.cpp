@@ -420,23 +420,57 @@ bool
 SWGPlutoSdrOutputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_dev_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_l_oppm_tenths_isSet){ isObjectUpdated = true; break;}
-        if(m_lpf_fir_enable_isSet){ isObjectUpdated = true; break;}
-        if(m_lpf_firbw_isSet){ isObjectUpdated = true; break;}
-        if(m_lpf_fi_rlog2_interp_isSet){ isObjectUpdated = true; break;}
-        if(m_lpf_fir_gain_isSet){ isObjectUpdated = true; break;}
-        if(m_log2_interp_isSet){ isObjectUpdated = true; break;}
-        if(m_lpf_bw_isSet){ isObjectUpdated = true; break;}
-        if(m_att_isSet){ isObjectUpdated = true; break;}
-        if(m_antenna_path_isSet){ isObjectUpdated = true; break;}
-        if(m_transverter_mode_isSet){ isObjectUpdated = true; break;}
-        if(m_transverter_delta_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
+        if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dev_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_l_oppm_tenths_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_lpf_fir_enable_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_lpf_firbw_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_lpf_fi_rlog2_interp_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_lpf_fir_gain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_log2_interp_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_lpf_bw_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_att_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_antenna_path_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_transverter_mode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_transverter_delta_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

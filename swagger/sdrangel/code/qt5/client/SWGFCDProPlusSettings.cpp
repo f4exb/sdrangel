@@ -482,26 +482,66 @@ bool
 SWGFCDProPlusSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_log2_decim_isSet){ isObjectUpdated = true; break;}
-        if(m_fc_pos_isSet){ isObjectUpdated = true; break;}
-        if(m_range_low_isSet){ isObjectUpdated = true; break;}
-        if(m_lna_gain_isSet){ isObjectUpdated = true; break;}
-        if(m_mix_gain_isSet){ isObjectUpdated = true; break;}
-        if(m_bias_t_isSet){ isObjectUpdated = true; break;}
-        if(m_if_gain_isSet){ isObjectUpdated = true; break;}
-        if(m_if_filter_index_isSet){ isObjectUpdated = true; break;}
-        if(m_rf_filter_index_isSet){ isObjectUpdated = true; break;}
-        if(m_l_oppm_tenths_isSet){ isObjectUpdated = true; break;}
-        if(m_dc_block_isSet){ isObjectUpdated = true; break;}
-        if(m_iq_imbalance_isSet){ isObjectUpdated = true; break;}
-        if(m_transverter_mode_isSet){ isObjectUpdated = true; break;}
-        if(m_transverter_delta_frequency_isSet){ isObjectUpdated = true; break;}
-        if(file_record_name != nullptr && *file_record_name != QString("")){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
+        if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_log2_decim_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fc_pos_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_range_low_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_lna_gain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_mix_gain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_bias_t_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_if_gain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_if_filter_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rf_filter_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_l_oppm_tenths_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dc_block_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_iq_imbalance_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_transverter_mode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_transverter_delta_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(file_record_name && *file_record_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

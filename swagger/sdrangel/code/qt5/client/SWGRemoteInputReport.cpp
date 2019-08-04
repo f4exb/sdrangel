@@ -200,12 +200,24 @@ bool
 SWGRemoteInputReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_buffer_rw_balance_isSet){ isObjectUpdated = true; break;}
-        if(remote_timestamp != nullptr && *remote_timestamp != QString("")){ isObjectUpdated = true; break;}
-        if(m_min_nb_blocks_isSet){ isObjectUpdated = true; break;}
-        if(m_max_nb_recovery_isSet){ isObjectUpdated = true; break;}
+        if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_buffer_rw_balance_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(remote_timestamp && *remote_timestamp != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_min_nb_blocks_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_max_nb_recovery_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

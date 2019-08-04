@@ -100,7 +100,9 @@ bool
 SWGDVSerialDevice::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(device_name != nullptr && *device_name != QString("")){ isObjectUpdated = true; break;}
+        if(device_name && *device_name != QString("")){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

@@ -564,30 +564,78 @@ bool
 SWGUDPSinkSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_output_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_sample_format_isSet){ isObjectUpdated = true; break;}
-        if(m_input_frequency_offset_isSet){ isObjectUpdated = true; break;}
-        if(m_rf_bandwidth_isSet){ isObjectUpdated = true; break;}
-        if(m_fm_deviation_isSet){ isObjectUpdated = true; break;}
-        if(m_channel_mute_isSet){ isObjectUpdated = true; break;}
-        if(m_gain_isSet){ isObjectUpdated = true; break;}
-        if(m_squelch_db_isSet){ isObjectUpdated = true; break;}
-        if(m_squelch_gate_isSet){ isObjectUpdated = true; break;}
-        if(m_squelch_enabled_isSet){ isObjectUpdated = true; break;}
-        if(m_agc_isSet){ isObjectUpdated = true; break;}
-        if(m_audio_active_isSet){ isObjectUpdated = true; break;}
-        if(m_audio_stereo_isSet){ isObjectUpdated = true; break;}
-        if(m_volume_isSet){ isObjectUpdated = true; break;}
-        if(udp_address != nullptr && *udp_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_udp_port_isSet){ isObjectUpdated = true; break;}
-        if(m_audio_port_isSet){ isObjectUpdated = true; break;}
-        if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
-        if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_channel_index_isSet){ isObjectUpdated = true; break;}
+        if(m_output_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_format_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_input_frequency_offset_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rf_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fm_deviation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_channel_mute_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_gain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_squelch_db_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_squelch_gate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_squelch_enabled_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_agc_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_audio_active_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_audio_stereo_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_volume_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(udp_address && *udp_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_audio_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rgb_color_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

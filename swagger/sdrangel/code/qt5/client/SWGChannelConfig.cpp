@@ -122,8 +122,12 @@ bool
 SWGChannelConfig::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(channel_id_uri != nullptr && *channel_id_uri != QString("")){ isObjectUpdated = true; break;}
-        if(config != nullptr && config->isSet()){ isObjectUpdated = true; break;}
+        if(channel_id_uri && *channel_id_uri != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(config && config->isSet()){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

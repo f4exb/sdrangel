@@ -286,16 +286,36 @@ bool
 SWGPreferences::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(source_device != nullptr && *source_device != QString("")){ isObjectUpdated = true; break;}
-        if(m_source_index_isSet){ isObjectUpdated = true; break;}
-        if(audio_type != nullptr && *audio_type != QString("")){ isObjectUpdated = true; break;}
-        if(audio_device != nullptr && *audio_device != QString("")){ isObjectUpdated = true; break;}
-        if(m_latitude_isSet){ isObjectUpdated = true; break;}
-        if(m_longitude_isSet){ isObjectUpdated = true; break;}
-        if(m_console_min_log_level_isSet){ isObjectUpdated = true; break;}
-        if(m_use_log_file_isSet){ isObjectUpdated = true; break;}
-        if(log_file_name != nullptr && *log_file_name != QString("")){ isObjectUpdated = true; break;}
-        if(m_file_min_log_level_isSet){ isObjectUpdated = true; break;}
+        if(source_device && *source_device != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_source_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(audio_type && *audio_type != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(audio_device && *audio_device != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_latitude_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_longitude_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_console_min_log_level_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_log_file_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(log_file_name && *log_file_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_file_min_log_level_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

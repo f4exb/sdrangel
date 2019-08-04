@@ -418,23 +418,57 @@ bool
 SWGTestMiStreamSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_stream_index_isSet){ isObjectUpdated = true; break;}
-        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_frequency_shift_isSet){ isObjectUpdated = true; break;}
-        if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_log2_decim_isSet){ isObjectUpdated = true; break;}
-        if(m_fc_pos_isSet){ isObjectUpdated = true; break;}
-        if(m_sample_size_index_isSet){ isObjectUpdated = true; break;}
-        if(m_amplitude_bits_isSet){ isObjectUpdated = true; break;}
-        if(m_auto_corr_options_isSet){ isObjectUpdated = true; break;}
-        if(m_modulation_isSet){ isObjectUpdated = true; break;}
-        if(m_modulation_tone_isSet){ isObjectUpdated = true; break;}
-        if(m_am_modulation_isSet){ isObjectUpdated = true; break;}
-        if(m_fm_deviation_isSet){ isObjectUpdated = true; break;}
-        if(m_dc_factor_isSet){ isObjectUpdated = true; break;}
-        if(m_i_factor_isSet){ isObjectUpdated = true; break;}
-        if(m_q_factor_isSet){ isObjectUpdated = true; break;}
-        if(m_phase_imbalance_isSet){ isObjectUpdated = true; break;}
+        if(m_stream_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_frequency_shift_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_log2_decim_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fc_pos_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_size_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_amplitude_bits_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_auto_corr_options_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_modulation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_modulation_tone_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_am_modulation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fm_deviation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dc_factor_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_i_factor_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_q_factor_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_phase_imbalance_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

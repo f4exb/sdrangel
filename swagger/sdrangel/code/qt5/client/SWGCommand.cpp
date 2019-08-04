@@ -246,14 +246,30 @@ bool
 SWGCommand::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(group != nullptr && *group != QString("")){ isObjectUpdated = true; break;}
-        if(description != nullptr && *description != QString("")){ isObjectUpdated = true; break;}
-        if(command != nullptr && *command != QString("")){ isObjectUpdated = true; break;}
-        if(arg_string != nullptr && *arg_string != QString("")){ isObjectUpdated = true; break;}
-        if(m_key_isSet){ isObjectUpdated = true; break;}
-        if(m_key_modifiers_isSet){ isObjectUpdated = true; break;}
-        if(m_associate_key_isSet){ isObjectUpdated = true; break;}
-        if(m_release_isSet){ isObjectUpdated = true; break;}
+        if(group && *group != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(description && *description != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(command && *command != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(arg_string && *arg_string != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_key_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_key_modifiers_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_associate_key_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_release_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

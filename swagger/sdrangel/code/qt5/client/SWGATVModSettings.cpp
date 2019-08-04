@@ -648,34 +648,90 @@ bool
 SWGATVModSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_input_frequency_offset_isSet){ isObjectUpdated = true; break;}
-        if(m_rf_bandwidth_isSet){ isObjectUpdated = true; break;}
-        if(m_rf_opp_bandwidth_isSet){ isObjectUpdated = true; break;}
-        if(m_atv_std_isSet){ isObjectUpdated = true; break;}
-        if(m_nb_lines_isSet){ isObjectUpdated = true; break;}
-        if(m_fps_isSet){ isObjectUpdated = true; break;}
-        if(m_atv_mod_input_isSet){ isObjectUpdated = true; break;}
-        if(m_uniform_level_isSet){ isObjectUpdated = true; break;}
-        if(m_atv_modulation_isSet){ isObjectUpdated = true; break;}
-        if(m_video_play_loop_isSet){ isObjectUpdated = true; break;}
-        if(m_video_play_isSet){ isObjectUpdated = true; break;}
-        if(m_camera_play_isSet){ isObjectUpdated = true; break;}
-        if(m_channel_mute_isSet){ isObjectUpdated = true; break;}
-        if(m_inverted_video_isSet){ isObjectUpdated = true; break;}
-        if(m_rf_scaling_factor_isSet){ isObjectUpdated = true; break;}
-        if(m_fm_excursion_isSet){ isObjectUpdated = true; break;}
-        if(m_force_decimator_isSet){ isObjectUpdated = true; break;}
-        if(m_show_overlay_text_isSet){ isObjectUpdated = true; break;}
-        if(overlay_text != nullptr && *overlay_text != QString("")){ isObjectUpdated = true; break;}
-        if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
-        if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
-        if(image_file_name != nullptr && *image_file_name != QString("")){ isObjectUpdated = true; break;}
-        if(video_file_name != nullptr && *video_file_name != QString("")){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_channel_index_isSet){ isObjectUpdated = true; break;}
+        if(m_input_frequency_offset_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rf_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rf_opp_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_atv_std_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_nb_lines_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fps_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_atv_mod_input_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_uniform_level_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_atv_modulation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_video_play_loop_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_video_play_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_camera_play_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_channel_mute_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_inverted_video_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rf_scaling_factor_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fm_excursion_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_force_decimator_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_show_overlay_text_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(overlay_text && *overlay_text != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_rgb_color_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(image_file_name && *image_file_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(video_file_name && *video_file_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

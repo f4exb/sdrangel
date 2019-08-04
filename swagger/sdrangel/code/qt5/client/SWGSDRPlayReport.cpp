@@ -121,16 +121,16 @@ SWGSDRPlayReport::asJson ()
 QJsonObject*
 SWGSDRPlayReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(sample_rates->size() > 0){
+    if(sample_rates && sample_rates->size() > 0){
         toJsonArray((QList<void*>*)sample_rates, obj, "sampleRates", "SWGSampleRate");
     }
-    if(bandwidths->size() > 0){
+    if(bandwidths && bandwidths->size() > 0){
         toJsonArray((QList<void*>*)bandwidths, obj, "bandwidths", "SWGBandwidth");
     }
-    if(intermediate_frequencies->size() > 0){
+    if(intermediate_frequencies && intermediate_frequencies->size() > 0){
         toJsonArray((QList<void*>*)intermediate_frequencies, obj, "intermediateFrequencies", "SWGFrequency");
     }
-    if(frequency_bands->size() > 0){
+    if(frequency_bands && frequency_bands->size() > 0){
         toJsonArray((QList<void*>*)frequency_bands, obj, "frequencyBands", "SWGFrequencyBand");
     }
 
@@ -182,10 +182,18 @@ bool
 SWGSDRPlayReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(sample_rates->size() > 0){ isObjectUpdated = true; break;}
-        if(bandwidths->size() > 0){ isObjectUpdated = true; break;}
-        if(intermediate_frequencies->size() > 0){ isObjectUpdated = true; break;}
-        if(frequency_bands->size() > 0){ isObjectUpdated = true; break;}
+        if(sample_rates && (sample_rates->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(bandwidths && (bandwidths->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(intermediate_frequencies && (intermediate_frequencies->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(frequency_bands && (frequency_bands->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

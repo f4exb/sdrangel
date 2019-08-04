@@ -306,17 +306,39 @@ bool
 SWGRemoteInputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(api_address != nullptr && *api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_api_port_isSet){ isObjectUpdated = true; break;}
-        if(data_address != nullptr && *data_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_data_port_isSet){ isObjectUpdated = true; break;}
-        if(m_dc_block_isSet){ isObjectUpdated = true; break;}
-        if(m_iq_correction_isSet){ isObjectUpdated = true; break;}
-        if(file_record_name != nullptr && *file_record_name != QString("")){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
+        if(api_address && *api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(data_address && *data_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_data_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dc_block_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_iq_correction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(file_record_name && *file_record_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

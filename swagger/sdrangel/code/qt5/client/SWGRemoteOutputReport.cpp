@@ -118,8 +118,12 @@ bool
 SWGRemoteOutputReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_buffer_rw_balance_isSet){ isObjectUpdated = true; break;}
-        if(m_sample_count_isSet){ isObjectUpdated = true; break;}
+        if(m_buffer_rw_balance_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_count_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

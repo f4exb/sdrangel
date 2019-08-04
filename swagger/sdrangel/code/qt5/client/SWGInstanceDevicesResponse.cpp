@@ -92,7 +92,7 @@ SWGInstanceDevicesResponse::asJsonObject() {
     if(m_devicecount_isSet){
         obj->insert("devicecount", QJsonValue(devicecount));
     }
-    if(devices->size() > 0){
+    if(devices && devices->size() > 0){
         toJsonArray((QList<void*>*)devices, obj, "devices", "SWGDeviceListItem");
     }
 
@@ -124,8 +124,12 @@ bool
 SWGInstanceDevicesResponse::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_devicecount_isSet){ isObjectUpdated = true; break;}
-        if(devices->size() > 0){ isObjectUpdated = true; break;}
+        if(m_devicecount_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(devices && (devices->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

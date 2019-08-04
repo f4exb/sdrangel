@@ -140,9 +140,15 @@ bool
 SWGFrequencyBand::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(name != nullptr && *name != QString("")){ isObjectUpdated = true; break;}
-        if(m_lower_bound_isSet){ isObjectUpdated = true; break;}
-        if(m_higher_bound_isSet){ isObjectUpdated = true; break;}
+        if(name && *name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_lower_bound_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_higher_bound_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

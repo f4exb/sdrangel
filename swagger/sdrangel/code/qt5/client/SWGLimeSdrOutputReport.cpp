@@ -318,18 +318,42 @@ bool
 SWGLimeSdrOutputReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_success_isSet){ isObjectUpdated = true; break;}
-        if(m_stream_active_isSet){ isObjectUpdated = true; break;}
-        if(m_fifo_size_isSet){ isObjectUpdated = true; break;}
-        if(m_fifo_fill_isSet){ isObjectUpdated = true; break;}
-        if(m_underrun_count_isSet){ isObjectUpdated = true; break;}
-        if(m_overrun_count_isSet){ isObjectUpdated = true; break;}
-        if(m_dropped_packets_count_isSet){ isObjectUpdated = true; break;}
-        if(m_link_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_hw_timestamp_isSet){ isObjectUpdated = true; break;}
-        if(m_temperature_isSet){ isObjectUpdated = true; break;}
-        if(m_gpio_dir_isSet){ isObjectUpdated = true; break;}
-        if(m_gpio_pins_isSet){ isObjectUpdated = true; break;}
+        if(m_success_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_stream_active_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fifo_size_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fifo_fill_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_underrun_count_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_overrun_count_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dropped_packets_count_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_link_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_hw_timestamp_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_temperature_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_gpio_dir_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_gpio_pins_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

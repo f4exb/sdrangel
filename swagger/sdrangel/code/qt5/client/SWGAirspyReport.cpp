@@ -82,7 +82,7 @@ SWGAirspyReport::asJson ()
 QJsonObject*
 SWGAirspyReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(sample_rates->size() > 0){
+    if(sample_rates && sample_rates->size() > 0){
         toJsonArray((QList<void*>*)sample_rates, obj, "sampleRates", "SWGSampleRate");
     }
 
@@ -104,7 +104,9 @@ bool
 SWGAirspyReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(sample_rates->size() > 0){ isObjectUpdated = true; break;}
+        if(sample_rates && (sample_rates->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

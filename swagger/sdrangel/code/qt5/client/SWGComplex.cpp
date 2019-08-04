@@ -118,8 +118,12 @@ bool
 SWGComplex::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_real_isSet){ isObjectUpdated = true; break;}
-        if(m_imag_isSet){ isObjectUpdated = true; break;}
+        if(m_real_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_imag_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

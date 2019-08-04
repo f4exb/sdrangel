@@ -342,19 +342,45 @@ bool
 SWGDSDDemodReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_channel_power_db_isSet){ isObjectUpdated = true; break;}
-        if(m_audio_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_channel_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_squelch_isSet){ isObjectUpdated = true; break;}
-        if(m_pll_locked_isSet){ isObjectUpdated = true; break;}
-        if(m_slot1_on_isSet){ isObjectUpdated = true; break;}
-        if(m_slot2_on_isSet){ isObjectUpdated = true; break;}
-        if(sync_type != nullptr && *sync_type != QString("")){ isObjectUpdated = true; break;}
-        if(m_in_level_isSet){ isObjectUpdated = true; break;}
-        if(m_carier_position_isSet){ isObjectUpdated = true; break;}
-        if(m_zero_crossing_position_isSet){ isObjectUpdated = true; break;}
-        if(m_sync_rate_isSet){ isObjectUpdated = true; break;}
-        if(status_text != nullptr && *status_text != QString("")){ isObjectUpdated = true; break;}
+        if(m_channel_power_db_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_audio_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_channel_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_squelch_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_pll_locked_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_slot1_on_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_slot2_on_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(sync_type && *sync_type != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_in_level_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_carier_position_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_zero_crossing_position_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sync_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(status_text && *status_text != QString("")){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

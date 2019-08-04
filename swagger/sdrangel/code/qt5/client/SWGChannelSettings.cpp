@@ -622,31 +622,81 @@ bool
 SWGChannelSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(channel_type != nullptr && *channel_type != QString("")){ isObjectUpdated = true; break;}
-        if(m_direction_isSet){ isObjectUpdated = true; break;}
-        if(m_originator_device_set_index_isSet){ isObjectUpdated = true; break;}
-        if(m_originator_channel_index_isSet){ isObjectUpdated = true; break;}
-        if(am_demod_settings != nullptr && am_demod_settings->isSet()){ isObjectUpdated = true; break;}
-        if(am_mod_settings != nullptr && am_mod_settings->isSet()){ isObjectUpdated = true; break;}
-        if(atv_mod_settings != nullptr && atv_mod_settings->isSet()){ isObjectUpdated = true; break;}
-        if(bfm_demod_settings != nullptr && bfm_demod_settings->isSet()){ isObjectUpdated = true; break;}
-        if(dsd_demod_settings != nullptr && dsd_demod_settings->isSet()){ isObjectUpdated = true; break;}
-        if(file_source_settings != nullptr && file_source_settings->isSet()){ isObjectUpdated = true; break;}
-        if(free_dv_demod_settings != nullptr && free_dv_demod_settings->isSet()){ isObjectUpdated = true; break;}
-        if(free_dv_mod_settings != nullptr && free_dv_mod_settings->isSet()){ isObjectUpdated = true; break;}
-        if(freq_tracker_settings != nullptr && freq_tracker_settings->isSet()){ isObjectUpdated = true; break;}
-        if(nfm_demod_settings != nullptr && nfm_demod_settings->isSet()){ isObjectUpdated = true; break;}
-        if(nfm_mod_settings != nullptr && nfm_mod_settings->isSet()){ isObjectUpdated = true; break;}
-        if(local_sink_settings != nullptr && local_sink_settings->isSet()){ isObjectUpdated = true; break;}
-        if(local_source_settings != nullptr && local_source_settings->isSet()){ isObjectUpdated = true; break;}
-        if(remote_sink_settings != nullptr && remote_sink_settings->isSet()){ isObjectUpdated = true; break;}
-        if(remote_source_settings != nullptr && remote_source_settings->isSet()){ isObjectUpdated = true; break;}
-        if(ssb_mod_settings != nullptr && ssb_mod_settings->isSet()){ isObjectUpdated = true; break;}
-        if(ssb_demod_settings != nullptr && ssb_demod_settings->isSet()){ isObjectUpdated = true; break;}
-        if(udp_source_settings != nullptr && udp_source_settings->isSet()){ isObjectUpdated = true; break;}
-        if(udp_sink_settings != nullptr && udp_sink_settings->isSet()){ isObjectUpdated = true; break;}
-        if(wfm_demod_settings != nullptr && wfm_demod_settings->isSet()){ isObjectUpdated = true; break;}
-        if(wfm_mod_settings != nullptr && wfm_mod_settings->isSet()){ isObjectUpdated = true; break;}
+        if(channel_type && *channel_type != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_direction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_originator_device_set_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_originator_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(am_demod_settings && am_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(am_mod_settings && am_mod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(atv_mod_settings && atv_mod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(bfm_demod_settings && bfm_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(dsd_demod_settings && dsd_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(file_source_settings && file_source_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(free_dv_demod_settings && free_dv_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(free_dv_mod_settings && free_dv_mod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(freq_tracker_settings && freq_tracker_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(nfm_demod_settings && nfm_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(nfm_mod_settings && nfm_mod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(local_sink_settings && local_sink_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(local_source_settings && local_source_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(remote_sink_settings && remote_sink_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(remote_source_settings && remote_source_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(ssb_mod_settings && ssb_mod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(ssb_demod_settings && ssb_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(udp_source_settings && udp_source_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(udp_sink_settings && udp_sink_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(wfm_demod_settings && wfm_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(wfm_mod_settings && wfm_mod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

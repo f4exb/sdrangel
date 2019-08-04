@@ -166,10 +166,18 @@ bool
 SWGBladeRF2OutputReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(frequency_range != nullptr && frequency_range->isSet()){ isObjectUpdated = true; break;}
-        if(sample_rate_range != nullptr && sample_rate_range->isSet()){ isObjectUpdated = true; break;}
-        if(bandwidth_range != nullptr && bandwidth_range->isSet()){ isObjectUpdated = true; break;}
-        if(global_gain_range != nullptr && global_gain_range->isSet()){ isObjectUpdated = true; break;}
+        if(frequency_range && frequency_range->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(sample_rate_range && sample_rate_range->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(bandwidth_range && bandwidth_range->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(global_gain_range && global_gain_range->isSet()){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

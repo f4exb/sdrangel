@@ -179,10 +179,10 @@ SWGArgInfo::asJsonObject() {
     if((range != nullptr) && (range->isSet())){
         toJsonValue(QString("range"), range, obj, QString("SWGRangeFloat"));
     }
-    if(value_options->size() > 0){
+    if(value_options && value_options->size() > 0){
         toJsonArray((QList<void*>*)value_options, obj, "valueOptions", "QString");
     }
-    if(option_names->size() > 0){
+    if(option_names && option_names->size() > 0){
         toJsonArray((QList<void*>*)option_names, obj, "optionNames", "QString");
     }
 
@@ -284,15 +284,33 @@ bool
 SWGArgInfo::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(key != nullptr && *key != QString("")){ isObjectUpdated = true; break;}
-        if(value_type != nullptr && *value_type != QString("")){ isObjectUpdated = true; break;}
-        if(value_string != nullptr && *value_string != QString("")){ isObjectUpdated = true; break;}
-        if(name != nullptr && *name != QString("")){ isObjectUpdated = true; break;}
-        if(description != nullptr && *description != QString("")){ isObjectUpdated = true; break;}
-        if(units != nullptr && *units != QString("")){ isObjectUpdated = true; break;}
-        if(range != nullptr && range->isSet()){ isObjectUpdated = true; break;}
-        if(value_options->size() > 0){ isObjectUpdated = true; break;}
-        if(option_names->size() > 0){ isObjectUpdated = true; break;}
+        if(key && *key != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(value_type && *value_type != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(value_string && *value_string != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(name && *name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(description && *description != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(units && *units != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(range && range->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(value_options && (value_options->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(option_names && (option_names->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

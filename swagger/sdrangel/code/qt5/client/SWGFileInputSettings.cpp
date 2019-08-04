@@ -222,13 +222,27 @@ bool
 SWGFileInputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(file_name != nullptr && *file_name != QString("")){ isObjectUpdated = true; break;}
-        if(m_acceleration_factor_isSet){ isObjectUpdated = true; break;}
-        if(m_loop_isSet){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
+        if(file_name && *file_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_acceleration_factor_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_loop_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

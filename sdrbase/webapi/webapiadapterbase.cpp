@@ -96,6 +96,11 @@ void WebAPIAdapterBase::webapiFormatPreset(
         swgdeviceConfigs->back()->setDeviceSequence(deviceConfig.m_deviceSequence);
         const QByteArray& deviceSettings = deviceConfig.m_config;
         SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = swgdeviceConfigs->back()->getConfig();
+        // qDebug("WebAPIAdapterBase::webapiFormatPreset: preset: %s:%s(%lld) device: %s",
+        //     qPrintable(preset.getGroup()),
+        //     qPrintable(preset.getDescription()),
+        //     preset.getCenterFrequency(),
+        //     qPrintable(deviceConfig.m_deviceId));
         swgDeviceSettings->init();
         DeviceWebAPIAdapter *deviceWebAPIAdapter = m_webAPIDeviceAdapters.getDeviceWebAPIAdapter(deviceConfig.m_deviceId, m_pluginManager);
 

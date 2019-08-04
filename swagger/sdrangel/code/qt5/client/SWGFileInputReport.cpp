@@ -206,12 +206,24 @@ bool
 SWGFileInputReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(file_name != nullptr && *file_name != QString("")){ isObjectUpdated = true; break;}
-        if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_sample_size_isSet){ isObjectUpdated = true; break;}
-        if(absolute_time != nullptr && *absolute_time != QString("")){ isObjectUpdated = true; break;}
-        if(elapsed_time != nullptr && *elapsed_time != QString("")){ isObjectUpdated = true; break;}
-        if(duration_time != nullptr && *duration_time != QString("")){ isObjectUpdated = true; break;}
+        if(file_name && *file_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_size_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(absolute_time && *absolute_time != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(elapsed_time && *elapsed_time != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(duration_time && *duration_time != QString("")){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

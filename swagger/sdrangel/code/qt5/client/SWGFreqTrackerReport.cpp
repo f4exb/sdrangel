@@ -158,10 +158,18 @@ bool
 SWGFreqTrackerReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_channel_power_db_isSet){ isObjectUpdated = true; break;}
-        if(m_squelch_isSet){ isObjectUpdated = true; break;}
-        if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_channel_sample_rate_isSet){ isObjectUpdated = true; break;}
+        if(m_channel_power_db_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_squelch_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_channel_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

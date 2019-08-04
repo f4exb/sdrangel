@@ -118,8 +118,12 @@ bool
 SWGLocationInformation::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_latitude_isSet){ isObjectUpdated = true; break;}
-        if(m_longitude_isSet){ isObjectUpdated = true; break;}
+        if(m_latitude_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_longitude_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

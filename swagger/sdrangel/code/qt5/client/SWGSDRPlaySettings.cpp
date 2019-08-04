@@ -482,26 +482,66 @@ bool
 SWGSDRPlaySettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_tuner_gain_isSet){ isObjectUpdated = true; break;}
-        if(m_l_oppm_tenths_isSet){ isObjectUpdated = true; break;}
-        if(m_frequency_band_index_isSet){ isObjectUpdated = true; break;}
-        if(m_if_frequency_index_isSet){ isObjectUpdated = true; break;}
-        if(m_bandwidth_index_isSet){ isObjectUpdated = true; break;}
-        if(m_dev_sample_rate_index_isSet){ isObjectUpdated = true; break;}
-        if(m_log2_decim_isSet){ isObjectUpdated = true; break;}
-        if(m_fc_pos_isSet){ isObjectUpdated = true; break;}
-        if(m_dc_block_isSet){ isObjectUpdated = true; break;}
-        if(m_iq_correction_isSet){ isObjectUpdated = true; break;}
-        if(m_tuner_gain_mode_isSet){ isObjectUpdated = true; break;}
-        if(m_lna_on_isSet){ isObjectUpdated = true; break;}
-        if(m_mixer_amp_on_isSet){ isObjectUpdated = true; break;}
-        if(m_baseband_gain_isSet){ isObjectUpdated = true; break;}
-        if(file_record_name != nullptr && *file_record_name != QString("")){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
+        if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tuner_gain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_l_oppm_tenths_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_frequency_band_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_if_frequency_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_bandwidth_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dev_sample_rate_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_log2_decim_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fc_pos_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dc_block_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_iq_correction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tuner_gain_mode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_lna_on_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_mixer_amp_on_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_baseband_gain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(file_record_name && *file_record_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

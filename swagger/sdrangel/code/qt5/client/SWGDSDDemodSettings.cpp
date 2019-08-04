@@ -624,33 +624,87 @@ bool
 SWGDSDDemodSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_input_frequency_offset_isSet){ isObjectUpdated = true; break;}
-        if(m_rf_bandwidth_isSet){ isObjectUpdated = true; break;}
-        if(m_fm_deviation_isSet){ isObjectUpdated = true; break;}
-        if(m_demod_gain_isSet){ isObjectUpdated = true; break;}
-        if(m_volume_isSet){ isObjectUpdated = true; break;}
-        if(m_baud_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_squelch_gate_isSet){ isObjectUpdated = true; break;}
-        if(m_squelch_isSet){ isObjectUpdated = true; break;}
-        if(m_audio_mute_isSet){ isObjectUpdated = true; break;}
-        if(m_enable_cosine_filtering_isSet){ isObjectUpdated = true; break;}
-        if(m_sync_or_constellation_isSet){ isObjectUpdated = true; break;}
-        if(m_slot1_on_isSet){ isObjectUpdated = true; break;}
-        if(m_slot2_on_isSet){ isObjectUpdated = true; break;}
-        if(m_tdma_stereo_isSet){ isObjectUpdated = true; break;}
-        if(m_pll_lock_isSet){ isObjectUpdated = true; break;}
-        if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
-        if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
-        if(audio_device_name != nullptr && *audio_device_name != QString("")){ isObjectUpdated = true; break;}
-        if(m_high_pass_filter_isSet){ isObjectUpdated = true; break;}
-        if(m_trace_length_mutliplier_isSet){ isObjectUpdated = true; break;}
-        if(m_trace_stroke_isSet){ isObjectUpdated = true; break;}
-        if(m_trace_decay_isSet){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_channel_index_isSet){ isObjectUpdated = true; break;}
+        if(m_input_frequency_offset_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rf_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fm_deviation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_demod_gain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_volume_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_baud_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_squelch_gate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_squelch_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_audio_mute_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_enable_cosine_filtering_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sync_or_constellation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_slot1_on_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_slot2_on_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tdma_stereo_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_pll_lock_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rgb_color_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(audio_device_name && *audio_device_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_high_pass_filter_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_trace_length_mutliplier_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_trace_stroke_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_trace_decay_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

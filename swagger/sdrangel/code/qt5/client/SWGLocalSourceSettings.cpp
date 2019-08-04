@@ -282,16 +282,36 @@ bool
 SWGLocalSourceSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_local_device_index_isSet){ isObjectUpdated = true; break;}
-        if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
-        if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
-        if(m_log2_interp_isSet){ isObjectUpdated = true; break;}
-        if(m_filter_chain_hash_isSet){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_channel_index_isSet){ isObjectUpdated = true; break;}
+        if(m_local_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rgb_color_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_log2_interp_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_filter_chain_hash_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

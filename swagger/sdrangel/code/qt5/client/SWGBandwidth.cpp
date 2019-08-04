@@ -98,7 +98,9 @@ bool
 SWGBandwidth::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_bandwidth_isSet){ isObjectUpdated = true; break;}
+        if(m_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

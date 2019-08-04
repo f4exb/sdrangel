@@ -180,10 +180,10 @@ SWGPreset::asJsonObject() {
     if(m_iq_imbalance_correction_isSet){
         obj->insert("iqImbalanceCorrection", QJsonValue(iq_imbalance_correction));
     }
-    if(channel_configs->size() > 0){
+    if(channel_configs && channel_configs->size() > 0){
         toJsonArray((QList<void*>*)channel_configs, obj, "channelConfigs", "SWGChannelConfig");
     }
-    if(device_configs->size() > 0){
+    if(device_configs && device_configs->size() > 0){
         toJsonArray((QList<void*>*)device_configs, obj, "deviceConfigs", "SWGDeviceConfig");
     }
     if(layout != nullptr && *layout != QString("")){
@@ -298,16 +298,36 @@ bool
 SWGPreset::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_source_preset_isSet){ isObjectUpdated = true; break;}
-        if(group != nullptr && *group != QString("")){ isObjectUpdated = true; break;}
-        if(description != nullptr && *description != QString("")){ isObjectUpdated = true; break;}
-        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
-        if(spectrum_config != nullptr && spectrum_config->isSet()){ isObjectUpdated = true; break;}
-        if(m_dc_offset_correction_isSet){ isObjectUpdated = true; break;}
-        if(m_iq_imbalance_correction_isSet){ isObjectUpdated = true; break;}
-        if(channel_configs->size() > 0){ isObjectUpdated = true; break;}
-        if(device_configs->size() > 0){ isObjectUpdated = true; break;}
-        if(layout != nullptr && *layout != QString("")){ isObjectUpdated = true; break;}
+        if(m_source_preset_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(group && *group != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(description && *description != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(spectrum_config && spectrum_config->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(m_dc_offset_correction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_iq_imbalance_correction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(channel_configs && (channel_configs->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(device_configs && (device_configs->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(layout && *layout != QString("")){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

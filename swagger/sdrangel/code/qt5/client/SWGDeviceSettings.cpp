@@ -778,38 +778,102 @@ bool
 SWGDeviceSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(device_hw_type != nullptr && *device_hw_type != QString("")){ isObjectUpdated = true; break;}
-        if(m_direction_isSet){ isObjectUpdated = true; break;}
-        if(m_originator_index_isSet){ isObjectUpdated = true; break;}
-        if(airspy_settings != nullptr && airspy_settings->isSet()){ isObjectUpdated = true; break;}
-        if(airspy_hf_settings != nullptr && airspy_hf_settings->isSet()){ isObjectUpdated = true; break;}
-        if(blade_rf1_input_settings != nullptr && blade_rf1_input_settings->isSet()){ isObjectUpdated = true; break;}
-        if(blade_rf2_input_settings != nullptr && blade_rf2_input_settings->isSet()){ isObjectUpdated = true; break;}
-        if(blade_rf1_output_settings != nullptr && blade_rf1_output_settings->isSet()){ isObjectUpdated = true; break;}
-        if(blade_rf2_output_settings != nullptr && blade_rf2_output_settings->isSet()){ isObjectUpdated = true; break;}
-        if(fcd_pro_settings != nullptr && fcd_pro_settings->isSet()){ isObjectUpdated = true; break;}
-        if(fcd_pro_plus_settings != nullptr && fcd_pro_plus_settings->isSet()){ isObjectUpdated = true; break;}
-        if(file_input_settings != nullptr && file_input_settings->isSet()){ isObjectUpdated = true; break;}
-        if(hack_rf_input_settings != nullptr && hack_rf_input_settings->isSet()){ isObjectUpdated = true; break;}
-        if(hack_rf_output_settings != nullptr && hack_rf_output_settings->isSet()){ isObjectUpdated = true; break;}
-        if(kiwi_sdr_settings != nullptr && kiwi_sdr_settings->isSet()){ isObjectUpdated = true; break;}
-        if(lime_sdr_input_settings != nullptr && lime_sdr_input_settings->isSet()){ isObjectUpdated = true; break;}
-        if(lime_sdr_output_settings != nullptr && lime_sdr_output_settings->isSet()){ isObjectUpdated = true; break;}
-        if(local_input_settings != nullptr && local_input_settings->isSet()){ isObjectUpdated = true; break;}
-        if(local_output_settings != nullptr && local_output_settings->isSet()){ isObjectUpdated = true; break;}
-        if(perseus_settings != nullptr && perseus_settings->isSet()){ isObjectUpdated = true; break;}
-        if(pluto_sdr_input_settings != nullptr && pluto_sdr_input_settings->isSet()){ isObjectUpdated = true; break;}
-        if(pluto_sdr_output_settings != nullptr && pluto_sdr_output_settings->isSet()){ isObjectUpdated = true; break;}
-        if(rtl_sdr_settings != nullptr && rtl_sdr_settings->isSet()){ isObjectUpdated = true; break;}
-        if(remote_output_settings != nullptr && remote_output_settings->isSet()){ isObjectUpdated = true; break;}
-        if(remote_input_settings != nullptr && remote_input_settings->isSet()){ isObjectUpdated = true; break;}
-        if(sdr_play_settings != nullptr && sdr_play_settings->isSet()){ isObjectUpdated = true; break;}
-        if(soapy_sdr_input_settings != nullptr && soapy_sdr_input_settings->isSet()){ isObjectUpdated = true; break;}
-        if(soapy_sdr_output_settings != nullptr && soapy_sdr_output_settings->isSet()){ isObjectUpdated = true; break;}
-        if(test_source_settings != nullptr && test_source_settings->isSet()){ isObjectUpdated = true; break;}
-        if(test_mi_settings != nullptr && test_mi_settings->isSet()){ isObjectUpdated = true; break;}
-        if(xtrx_input_settings != nullptr && xtrx_input_settings->isSet()){ isObjectUpdated = true; break;}
-        if(xtrx_output_settings != nullptr && xtrx_output_settings->isSet()){ isObjectUpdated = true; break;}
+        if(device_hw_type && *device_hw_type != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_direction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_originator_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(airspy_settings && airspy_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(airspy_hf_settings && airspy_hf_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(blade_rf1_input_settings && blade_rf1_input_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(blade_rf2_input_settings && blade_rf2_input_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(blade_rf1_output_settings && blade_rf1_output_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(blade_rf2_output_settings && blade_rf2_output_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(fcd_pro_settings && fcd_pro_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(fcd_pro_plus_settings && fcd_pro_plus_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(file_input_settings && file_input_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(hack_rf_input_settings && hack_rf_input_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(hack_rf_output_settings && hack_rf_output_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(kiwi_sdr_settings && kiwi_sdr_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(lime_sdr_input_settings && lime_sdr_input_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(lime_sdr_output_settings && lime_sdr_output_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(local_input_settings && local_input_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(local_output_settings && local_output_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(perseus_settings && perseus_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(pluto_sdr_input_settings && pluto_sdr_input_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(pluto_sdr_output_settings && pluto_sdr_output_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(rtl_sdr_settings && rtl_sdr_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(remote_output_settings && remote_output_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(remote_input_settings && remote_input_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(sdr_play_settings && sdr_play_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(soapy_sdr_input_settings && soapy_sdr_input_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(soapy_sdr_output_settings && soapy_sdr_output_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(test_source_settings && test_source_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(test_mi_settings && test_mi_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(xtrx_input_settings && xtrx_input_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(xtrx_output_settings && xtrx_output_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

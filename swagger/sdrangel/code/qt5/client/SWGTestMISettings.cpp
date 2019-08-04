@@ -136,7 +136,7 @@ SWGTestMISettings::asJsonObject() {
     if(m_reverse_api_device_index_isSet){
         obj->insert("reverseAPIDeviceIndex", QJsonValue(reverse_api_device_index));
     }
-    if(streams->size() > 0){
+    if(streams && streams->size() > 0){
         toJsonArray((QList<void*>*)streams, obj, "streams", "SWGTestMiStreamSettings");
     }
 
@@ -208,12 +208,24 @@ bool
 SWGTestMISettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(file_record_name != nullptr && *file_record_name != QString("")){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
-        if(streams->size() > 0){ isObjectUpdated = true; break;}
+        if(file_record_name && *file_record_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(streams && (streams->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

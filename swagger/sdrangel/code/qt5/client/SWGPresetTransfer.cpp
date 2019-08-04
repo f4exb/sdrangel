@@ -120,8 +120,12 @@ bool
 SWGPresetTransfer::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_device_set_index_isSet){ isObjectUpdated = true; break;}
-        if(preset != nullptr && preset->isSet()){ isObjectUpdated = true; break;}
+        if(m_device_set_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(preset && preset->isSet()){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

@@ -200,12 +200,24 @@ bool
 SWGAudioInputDevice::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(name != nullptr && *name != QString("")){ isObjectUpdated = true; break;}
-        if(m_index_isSet){ isObjectUpdated = true; break;}
-        if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_is_system_default_isSet){ isObjectUpdated = true; break;}
-        if(m_default_unregistered_isSet){ isObjectUpdated = true; break;}
-        if(m_volume_isSet){ isObjectUpdated = true; break;}
+        if(name && *name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_is_system_default_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_default_unregistered_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_volume_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

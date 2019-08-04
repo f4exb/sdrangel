@@ -98,7 +98,9 @@ bool
 SWGKiwiSDRReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_status_isSet){ isObjectUpdated = true; break;}
+        if(m_status_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

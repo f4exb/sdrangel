@@ -582,29 +582,75 @@ bool
 SWGDeviceReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(device_hw_type != nullptr && *device_hw_type != QString("")){ isObjectUpdated = true; break;}
-        if(m_direction_isSet){ isObjectUpdated = true; break;}
-        if(airspy_report != nullptr && airspy_report->isSet()){ isObjectUpdated = true; break;}
-        if(airspy_hf_report != nullptr && airspy_hf_report->isSet()){ isObjectUpdated = true; break;}
-        if(blade_rf2_input_report != nullptr && blade_rf2_input_report->isSet()){ isObjectUpdated = true; break;}
-        if(blade_rf2_output_report != nullptr && blade_rf2_output_report->isSet()){ isObjectUpdated = true; break;}
-        if(file_input_report != nullptr && file_input_report->isSet()){ isObjectUpdated = true; break;}
-        if(lime_sdr_input_report != nullptr && lime_sdr_input_report->isSet()){ isObjectUpdated = true; break;}
-        if(kiwi_sdr_report != nullptr && kiwi_sdr_report->isSet()){ isObjectUpdated = true; break;}
-        if(lime_sdr_output_report != nullptr && lime_sdr_output_report->isSet()){ isObjectUpdated = true; break;}
-        if(local_input_report != nullptr && local_input_report->isSet()){ isObjectUpdated = true; break;}
-        if(local_output_report != nullptr && local_output_report->isSet()){ isObjectUpdated = true; break;}
-        if(perseus_report != nullptr && perseus_report->isSet()){ isObjectUpdated = true; break;}
-        if(pluto_sdr_input_report != nullptr && pluto_sdr_input_report->isSet()){ isObjectUpdated = true; break;}
-        if(pluto_sdr_output_report != nullptr && pluto_sdr_output_report->isSet()){ isObjectUpdated = true; break;}
-        if(rtl_sdr_report != nullptr && rtl_sdr_report->isSet()){ isObjectUpdated = true; break;}
-        if(remote_output_report != nullptr && remote_output_report->isSet()){ isObjectUpdated = true; break;}
-        if(remote_input_report != nullptr && remote_input_report->isSet()){ isObjectUpdated = true; break;}
-        if(sdr_play_report != nullptr && sdr_play_report->isSet()){ isObjectUpdated = true; break;}
-        if(soapy_sdr_input_report != nullptr && soapy_sdr_input_report->isSet()){ isObjectUpdated = true; break;}
-        if(soapy_sdr_output_report != nullptr && soapy_sdr_output_report->isSet()){ isObjectUpdated = true; break;}
-        if(xtrx_input_report != nullptr && xtrx_input_report->isSet()){ isObjectUpdated = true; break;}
-        if(xtrx_output_report != nullptr && xtrx_output_report->isSet()){ isObjectUpdated = true; break;}
+        if(device_hw_type && *device_hw_type != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_direction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(airspy_report && airspy_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(airspy_hf_report && airspy_hf_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(blade_rf2_input_report && blade_rf2_input_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(blade_rf2_output_report && blade_rf2_output_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(file_input_report && file_input_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(lime_sdr_input_report && lime_sdr_input_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(kiwi_sdr_report && kiwi_sdr_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(lime_sdr_output_report && lime_sdr_output_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(local_input_report && local_input_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(local_output_report && local_output_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(perseus_report && perseus_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(pluto_sdr_input_report && pluto_sdr_input_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(pluto_sdr_output_report && pluto_sdr_output_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(rtl_sdr_report && rtl_sdr_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(remote_output_report && remote_output_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(remote_input_report && remote_input_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(sdr_play_report && sdr_play_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(soapy_sdr_input_report && soapy_sdr_input_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(soapy_sdr_output_report && soapy_sdr_output_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(xtrx_input_report && xtrx_input_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(xtrx_output_report && xtrx_output_report->isSet()){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

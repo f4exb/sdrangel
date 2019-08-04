@@ -92,7 +92,7 @@ SWGDVSerialDevices::asJsonObject() {
     if(m_nb_devices_isSet){
         obj->insert("nbDevices", QJsonValue(nb_devices));
     }
-    if(dv_serial_devices->size() > 0){
+    if(dv_serial_devices && dv_serial_devices->size() > 0){
         toJsonArray((QList<void*>*)dv_serial_devices, obj, "dvSerialDevices", "SWGDVSerialDevice");
     }
 
@@ -124,8 +124,12 @@ bool
 SWGDVSerialDevices::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_nb_devices_isSet){ isObjectUpdated = true; break;}
-        if(dv_serial_devices->size() > 0){ isObjectUpdated = true; break;}
+        if(m_nb_devices_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(dv_serial_devices && (dv_serial_devices->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

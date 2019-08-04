@@ -82,7 +82,7 @@ SWGRtlSdrReport::asJson ()
 QJsonObject*
 SWGRtlSdrReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(gains->size() > 0){
+    if(gains && gains->size() > 0){
         toJsonArray((QList<void*>*)gains, obj, "gains", "SWGGain");
     }
 
@@ -104,7 +104,9 @@ bool
 SWGRtlSdrReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(gains->size() > 0){ isObjectUpdated = true; break;}
+        if(gains && (gains->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

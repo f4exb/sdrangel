@@ -338,19 +338,45 @@ bool
 SWGRemoteSourceReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_queue_length_isSet){ isObjectUpdated = true; break;}
-        if(m_queue_size_isSet){ isObjectUpdated = true; break;}
-        if(m_samples_count_isSet){ isObjectUpdated = true; break;}
-        if(m_correctable_errors_count_isSet){ isObjectUpdated = true; break;}
-        if(m_uncorrectable_errors_count_isSet){ isObjectUpdated = true; break;}
-        if(m_tv_sec_isSet){ isObjectUpdated = true; break;}
-        if(m_tv_u_sec_isSet){ isObjectUpdated = true; break;}
-        if(m_nb_original_blocks_isSet){ isObjectUpdated = true; break;}
-        if(m_nb_fec_blocks_isSet){ isObjectUpdated = true; break;}
-        if(m_center_freq_isSet){ isObjectUpdated = true; break;}
-        if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_device_center_freq_isSet){ isObjectUpdated = true; break;}
-        if(m_device_sample_rate_isSet){ isObjectUpdated = true; break;}
+        if(m_queue_length_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_queue_size_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_samples_count_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_correctable_errors_count_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_uncorrectable_errors_count_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tv_sec_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tv_u_sec_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_nb_original_blocks_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_nb_fec_blocks_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_center_freq_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_device_center_freq_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_device_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

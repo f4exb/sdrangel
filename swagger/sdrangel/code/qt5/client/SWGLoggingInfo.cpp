@@ -164,10 +164,18 @@ bool
 SWGLoggingInfo::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(console_level != nullptr && *console_level != QString("")){ isObjectUpdated = true; break;}
-        if(file_level != nullptr && *file_level != QString("")){ isObjectUpdated = true; break;}
-        if(m_dump_to_file_isSet){ isObjectUpdated = true; break;}
-        if(file_name != nullptr && *file_name != QString("")){ isObjectUpdated = true; break;}
+        if(console_level && *console_level != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(file_level && *file_level != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_dump_to_file_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(file_name && *file_name != QString("")){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

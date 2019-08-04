@@ -140,9 +140,15 @@ bool
 SWGPlutoSdrOutputReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_dac_rate_isSet){ isObjectUpdated = true; break;}
-        if(rssi != nullptr && *rssi != QString("")){ isObjectUpdated = true; break;}
-        if(m_temperature_isSet){ isObjectUpdated = true; break;}
+        if(m_dac_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(rssi && *rssi != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_temperature_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

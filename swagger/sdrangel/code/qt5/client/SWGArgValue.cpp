@@ -144,9 +144,15 @@ bool
 SWGArgValue::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(key != nullptr && *key != QString("")){ isObjectUpdated = true; break;}
-        if(value_type != nullptr && *value_type != QString("")){ isObjectUpdated = true; break;}
-        if(value_string != nullptr && *value_string != QString("")){ isObjectUpdated = true; break;}
+        if(key && *key != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(value_type && *value_type != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(value_string && *value_string != QString("")){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

@@ -100,7 +100,9 @@ bool
 SWGDeviceState::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(state != nullptr && *state != QString("")){ isObjectUpdated = true; break;}
+        if(state && *state != QString("")){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

@@ -206,12 +206,24 @@ bool
 SWGChannelListItem::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(name != nullptr && *name != QString("")){ isObjectUpdated = true; break;}
-        if(id_uri != nullptr && *id_uri != QString("")){ isObjectUpdated = true; break;}
-        if(id != nullptr && *id != QString("")){ isObjectUpdated = true; break;}
-        if(m_direction_isSet){ isObjectUpdated = true; break;}
-        if(version != nullptr && *version != QString("")){ isObjectUpdated = true; break;}
-        if(m_index_isSet){ isObjectUpdated = true; break;}
+        if(name && *name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(id_uri && *id_uri != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(id && *id != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_direction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(version && *version != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

@@ -119,10 +119,10 @@ SWGInstanceConfigResponse::asJsonObject() {
     if((working_preset != nullptr) && (working_preset->isSet())){
         toJsonValue(QString("workingPreset"), working_preset, obj, QString("SWGPreset"));
     }
-    if(presets->size() > 0){
+    if(presets && presets->size() > 0){
         toJsonArray((QList<void*>*)presets, obj, "presets", "SWGPreset");
     }
-    if(commands->size() > 0){
+    if(commands && commands->size() > 0){
         toJsonArray((QList<void*>*)commands, obj, "commands", "SWGCommand");
     }
 
@@ -174,10 +174,18 @@ bool
 SWGInstanceConfigResponse::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(preferences != nullptr && preferences->isSet()){ isObjectUpdated = true; break;}
-        if(working_preset != nullptr && working_preset->isSet()){ isObjectUpdated = true; break;}
-        if(presets->size() > 0){ isObjectUpdated = true; break;}
-        if(commands->size() > 0){ isObjectUpdated = true; break;}
+        if(preferences && preferences->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(working_preset && working_preset->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(presets && (presets->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(commands && (commands->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

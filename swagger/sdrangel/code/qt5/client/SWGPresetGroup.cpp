@@ -104,7 +104,7 @@ SWGPresetGroup::asJsonObject() {
     if(m_nb_presets_isSet){
         obj->insert("nbPresets", QJsonValue(nb_presets));
     }
-    if(presets->size() > 0){
+    if(presets && presets->size() > 0){
         toJsonArray((QList<void*>*)presets, obj, "presets", "SWGPresetItem");
     }
 
@@ -146,9 +146,15 @@ bool
 SWGPresetGroup::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(group_name != nullptr && *group_name != QString("")){ isObjectUpdated = true; break;}
-        if(m_nb_presets_isSet){ isObjectUpdated = true; break;}
-        if(presets->size() > 0){ isObjectUpdated = true; break;}
+        if(group_name && *group_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_nb_presets_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(presets && (presets->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

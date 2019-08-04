@@ -280,16 +280,36 @@ bool
 SWGCWKeyerSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_wpm_isSet){ isObjectUpdated = true; break;}
-        if(m_mode_isSet){ isObjectUpdated = true; break;}
-        if(text != nullptr && *text != QString("")){ isObjectUpdated = true; break;}
-        if(m_loop_isSet){ isObjectUpdated = true; break;}
-        if(m_keyboard_iambic_isSet){ isObjectUpdated = true; break;}
-        if(m_dot_key_isSet){ isObjectUpdated = true; break;}
-        if(m_dot_key_modifiers_isSet){ isObjectUpdated = true; break;}
-        if(m_dash_key_isSet){ isObjectUpdated = true; break;}
-        if(m_dash_key_modifiers_isSet){ isObjectUpdated = true; break;}
+        if(m_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_wpm_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_mode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(text && *text != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_loop_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_keyboard_iambic_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dot_key_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dot_key_modifiers_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dash_key_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dash_key_modifiers_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

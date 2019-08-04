@@ -130,7 +130,7 @@ SWGBladeRF2InputReport::asJsonObject() {
     if((global_gain_range != nullptr) && (global_gain_range->isSet())){
         toJsonValue(QString("globalGainRange"), global_gain_range, obj, QString("SWGRange"));
     }
-    if(gain_modes->size() > 0){
+    if(gain_modes && gain_modes->size() > 0){
         toJsonArray((QList<void*>*)gain_modes, obj, "gainModes", "SWGNamedEnum");
     }
 
@@ -192,11 +192,21 @@ bool
 SWGBladeRF2InputReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(frequency_range != nullptr && frequency_range->isSet()){ isObjectUpdated = true; break;}
-        if(sample_rate_range != nullptr && sample_rate_range->isSet()){ isObjectUpdated = true; break;}
-        if(bandwidth_range != nullptr && bandwidth_range->isSet()){ isObjectUpdated = true; break;}
-        if(global_gain_range != nullptr && global_gain_range->isSet()){ isObjectUpdated = true; break;}
-        if(gain_modes->size() > 0){ isObjectUpdated = true; break;}
+        if(frequency_range && frequency_range->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(sample_rate_range && sample_rate_range->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(bandwidth_range && bandwidth_range->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(global_gain_range && global_gain_range->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(gain_modes && (gain_modes->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

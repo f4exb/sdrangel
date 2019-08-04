@@ -98,7 +98,9 @@ bool
 SWGRDSReport_altFrequencies::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_frequency_isSet){ isObjectUpdated = true; break;}
+        if(m_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

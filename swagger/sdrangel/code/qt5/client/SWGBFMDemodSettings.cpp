@@ -424,23 +424,57 @@ bool
 SWGBFMDemodSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_input_frequency_offset_isSet){ isObjectUpdated = true; break;}
-        if(m_rf_bandwidth_isSet){ isObjectUpdated = true; break;}
-        if(m_af_bandwidth_isSet){ isObjectUpdated = true; break;}
-        if(m_volume_isSet){ isObjectUpdated = true; break;}
-        if(m_squelch_isSet){ isObjectUpdated = true; break;}
-        if(m_audio_stereo_isSet){ isObjectUpdated = true; break;}
-        if(m_lsb_stereo_isSet){ isObjectUpdated = true; break;}
-        if(m_show_pilot_isSet){ isObjectUpdated = true; break;}
-        if(m_rds_active_isSet){ isObjectUpdated = true; break;}
-        if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
-        if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
-        if(audio_device_name != nullptr && *audio_device_name != QString("")){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_channel_index_isSet){ isObjectUpdated = true; break;}
+        if(m_input_frequency_offset_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rf_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_af_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_volume_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_squelch_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_audio_stereo_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_lsb_stereo_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_show_pilot_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rds_active_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rgb_color_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(audio_device_name && *audio_device_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

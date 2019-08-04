@@ -178,11 +178,21 @@ bool
 SWGXtrxInputReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_success_isSet){ isObjectUpdated = true; break;}
-        if(m_fifo_size_isSet){ isObjectUpdated = true; break;}
-        if(m_fifo_fill_isSet){ isObjectUpdated = true; break;}
-        if(m_temperature_isSet){ isObjectUpdated = true; break;}
-        if(m_gps_lock_isSet){ isObjectUpdated = true; break;}
+        if(m_success_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fifo_size_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fifo_fill_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_temperature_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_gps_lock_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

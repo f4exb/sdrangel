@@ -164,10 +164,18 @@ bool
 SWGDeviceConfig::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(device_id != nullptr && *device_id != QString("")){ isObjectUpdated = true; break;}
-        if(device_serial != nullptr && *device_serial != QString("")){ isObjectUpdated = true; break;}
-        if(m_device_sequence_isSet){ isObjectUpdated = true; break;}
-        if(config != nullptr && config->isSet()){ isObjectUpdated = true; break;}
+        if(device_id && *device_id != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(device_serial && *device_serial != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_device_sequence_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(config && config->isSet()){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

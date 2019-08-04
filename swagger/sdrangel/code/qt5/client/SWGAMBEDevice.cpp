@@ -120,8 +120,12 @@ bool
 SWGAMBEDevice::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(device_ref != nullptr && *device_ref != QString("")){ isObjectUpdated = true; break;}
-        if(m__delete_isSet){ isObjectUpdated = true; break;}
+        if(device_ref && *device_ref != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m__delete_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

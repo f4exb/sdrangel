@@ -321,13 +321,13 @@ SWGSoapySDRInputSettings::asJsonObject() {
     if(m_bandwidth_isSet){
         obj->insert("bandwidth", QJsonValue(bandwidth));
     }
-    if(tunable_elements->size() > 0){
+    if(tunable_elements && tunable_elements->size() > 0){
         toJsonArray((QList<void*>*)tunable_elements, obj, "tunableElements", "SWGArgValue");
     }
     if(m_global_gain_isSet){
         obj->insert("globalGain", QJsonValue(global_gain));
     }
-    if(individual_gains->size() > 0){
+    if(individual_gains && individual_gains->size() > 0){
         toJsonArray((QList<void*>*)individual_gains, obj, "individualGains", "SWGArgValue");
     }
     if(m_auto_gain_isSet){
@@ -345,10 +345,10 @@ SWGSoapySDRInputSettings::asJsonObject() {
     if((iq_correction != nullptr) && (iq_correction->isSet())){
         toJsonValue(QString("iqCorrection"), iq_correction, obj, QString("SWGComplex"));
     }
-    if(stream_arg_settings->size() > 0){
+    if(stream_arg_settings && stream_arg_settings->size() > 0){
         toJsonArray((QList<void*>*)stream_arg_settings, obj, "streamArgSettings", "SWGArgValue");
     }
-    if(device_arg_settings->size() > 0){
+    if(device_arg_settings && device_arg_settings->size() > 0){
         toJsonArray((QList<void*>*)device_arg_settings, obj, "deviceArgSettings", "SWGArgValue");
     }
     if(m_use_reverse_api_isSet){
@@ -632,32 +632,84 @@ bool
 SWGSoapySDRInputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_l_oppm_tenths_isSet){ isObjectUpdated = true; break;}
-        if(m_dev_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_log2_decim_isSet){ isObjectUpdated = true; break;}
-        if(m_fc_pos_isSet){ isObjectUpdated = true; break;}
-        if(m_soft_dc_correction_isSet){ isObjectUpdated = true; break;}
-        if(m_soft_iq_correction_isSet){ isObjectUpdated = true; break;}
-        if(m_transverter_mode_isSet){ isObjectUpdated = true; break;}
-        if(m_transverter_delta_frequency_isSet){ isObjectUpdated = true; break;}
-        if(file_record_name != nullptr && *file_record_name != QString("")){ isObjectUpdated = true; break;}
-        if(antenna != nullptr && *antenna != QString("")){ isObjectUpdated = true; break;}
-        if(m_bandwidth_isSet){ isObjectUpdated = true; break;}
-        if(tunable_elements->size() > 0){ isObjectUpdated = true; break;}
-        if(m_global_gain_isSet){ isObjectUpdated = true; break;}
-        if(individual_gains->size() > 0){ isObjectUpdated = true; break;}
-        if(m_auto_gain_isSet){ isObjectUpdated = true; break;}
-        if(m_auto_dc_correction_isSet){ isObjectUpdated = true; break;}
-        if(m_auto_iq_correction_isSet){ isObjectUpdated = true; break;}
-        if(dc_correction != nullptr && dc_correction->isSet()){ isObjectUpdated = true; break;}
-        if(iq_correction != nullptr && iq_correction->isSet()){ isObjectUpdated = true; break;}
-        if(stream_arg_settings->size() > 0){ isObjectUpdated = true; break;}
-        if(device_arg_settings->size() > 0){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
+        if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_l_oppm_tenths_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dev_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_log2_decim_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fc_pos_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_soft_dc_correction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_soft_iq_correction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_transverter_mode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_transverter_delta_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(file_record_name && *file_record_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(antenna && *antenna != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(tunable_elements && (tunable_elements->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_global_gain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(individual_gains && (individual_gains->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_auto_gain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_auto_dc_correction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_auto_iq_correction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(dc_correction && dc_correction->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(iq_correction && iq_correction->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(stream_arg_settings && (stream_arg_settings->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(device_arg_settings && (device_arg_settings->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

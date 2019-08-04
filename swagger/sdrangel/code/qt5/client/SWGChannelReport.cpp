@@ -516,26 +516,66 @@ bool
 SWGChannelReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(channel_type != nullptr && *channel_type != QString("")){ isObjectUpdated = true; break;}
-        if(m_direction_isSet){ isObjectUpdated = true; break;}
-        if(am_demod_report != nullptr && am_demod_report->isSet()){ isObjectUpdated = true; break;}
-        if(am_mod_report != nullptr && am_mod_report->isSet()){ isObjectUpdated = true; break;}
-        if(atv_mod_report != nullptr && atv_mod_report->isSet()){ isObjectUpdated = true; break;}
-        if(bfm_demod_report != nullptr && bfm_demod_report->isSet()){ isObjectUpdated = true; break;}
-        if(dsd_demod_report != nullptr && dsd_demod_report->isSet()){ isObjectUpdated = true; break;}
-        if(file_source_report != nullptr && file_source_report->isSet()){ isObjectUpdated = true; break;}
-        if(free_dv_demod_report != nullptr && free_dv_demod_report->isSet()){ isObjectUpdated = true; break;}
-        if(free_dv_mod_report != nullptr && free_dv_mod_report->isSet()){ isObjectUpdated = true; break;}
-        if(freq_tracker_report != nullptr && freq_tracker_report->isSet()){ isObjectUpdated = true; break;}
-        if(nfm_demod_report != nullptr && nfm_demod_report->isSet()){ isObjectUpdated = true; break;}
-        if(nfm_mod_report != nullptr && nfm_mod_report->isSet()){ isObjectUpdated = true; break;}
-        if(ssb_demod_report != nullptr && ssb_demod_report->isSet()){ isObjectUpdated = true; break;}
-        if(remote_source_report != nullptr && remote_source_report->isSet()){ isObjectUpdated = true; break;}
-        if(ssb_mod_report != nullptr && ssb_mod_report->isSet()){ isObjectUpdated = true; break;}
-        if(udp_source_report != nullptr && udp_source_report->isSet()){ isObjectUpdated = true; break;}
-        if(udp_sink_report != nullptr && udp_sink_report->isSet()){ isObjectUpdated = true; break;}
-        if(wfm_demod_report != nullptr && wfm_demod_report->isSet()){ isObjectUpdated = true; break;}
-        if(wfm_mod_report != nullptr && wfm_mod_report->isSet()){ isObjectUpdated = true; break;}
+        if(channel_type && *channel_type != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_direction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(am_demod_report && am_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(am_mod_report && am_mod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(atv_mod_report && atv_mod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(bfm_demod_report && bfm_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(dsd_demod_report && dsd_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(file_source_report && file_source_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(free_dv_demod_report && free_dv_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(free_dv_mod_report && free_dv_mod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(freq_tracker_report && freq_tracker_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(nfm_demod_report && nfm_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(nfm_mod_report && nfm_mod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(ssb_demod_report && ssb_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(remote_source_report && remote_source_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(ssb_mod_report && ssb_mod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(udp_source_report && udp_source_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(udp_sink_report && udp_sink_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(wfm_demod_report && wfm_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(wfm_mod_report && wfm_mod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

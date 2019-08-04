@@ -422,23 +422,57 @@ bool
 SWGHackRFInputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_l_oppm_tenths_isSet){ isObjectUpdated = true; break;}
-        if(m_bandwidth_isSet){ isObjectUpdated = true; break;}
-        if(m_lna_gain_isSet){ isObjectUpdated = true; break;}
-        if(m_vga_gain_isSet){ isObjectUpdated = true; break;}
-        if(m_log2_decim_isSet){ isObjectUpdated = true; break;}
-        if(m_fc_pos_isSet){ isObjectUpdated = true; break;}
-        if(m_dev_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_bias_t_isSet){ isObjectUpdated = true; break;}
-        if(m_lna_ext_isSet){ isObjectUpdated = true; break;}
-        if(m_dc_block_isSet){ isObjectUpdated = true; break;}
-        if(m_iq_correction_isSet){ isObjectUpdated = true; break;}
-        if(file_record_name != nullptr && *file_record_name != QString("")){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
+        if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_l_oppm_tenths_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_lna_gain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_vga_gain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_log2_decim_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fc_pos_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dev_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_bias_t_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_lna_ext_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dc_block_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_iq_correction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(file_record_name && *file_record_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

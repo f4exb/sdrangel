@@ -322,18 +322,42 @@ bool
 SWGAudioOutputDevice::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(name != nullptr && *name != QString("")){ isObjectUpdated = true; break;}
-        if(m_index_isSet){ isObjectUpdated = true; break;}
-        if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_is_system_default_isSet){ isObjectUpdated = true; break;}
-        if(m_default_unregistered_isSet){ isObjectUpdated = true; break;}
-        if(m_copy_to_udp_isSet){ isObjectUpdated = true; break;}
-        if(m_udp_uses_rtp_isSet){ isObjectUpdated = true; break;}
-        if(m_udp_channel_mode_isSet){ isObjectUpdated = true; break;}
-        if(m_udp_channel_codec_isSet){ isObjectUpdated = true; break;}
-        if(m_udp_decimation_factor_isSet){ isObjectUpdated = true; break;}
-        if(udp_address != nullptr && *udp_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_udp_port_isSet){ isObjectUpdated = true; break;}
+        if(name && *name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_is_system_default_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_default_unregistered_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_copy_to_udp_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_uses_rtp_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_channel_mode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_channel_codec_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_decimation_factor_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(udp_address && *udp_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_port_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

@@ -364,20 +364,48 @@ bool
 SWGRemoteOutputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_tx_delay_isSet){ isObjectUpdated = true; break;}
-        if(m_nb_fec_blocks_isSet){ isObjectUpdated = true; break;}
-        if(api_address != nullptr && *api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_api_port_isSet){ isObjectUpdated = true; break;}
-        if(data_address != nullptr && *data_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_data_port_isSet){ isObjectUpdated = true; break;}
-        if(m_device_index_isSet){ isObjectUpdated = true; break;}
-        if(m_channel_index_isSet){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
+        if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tx_delay_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_nb_fec_blocks_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(api_address && *api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(data_address && *data_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_data_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

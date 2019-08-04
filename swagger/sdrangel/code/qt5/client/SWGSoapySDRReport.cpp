@@ -217,10 +217,10 @@ SWGSoapySDRReport::asJson ()
 QJsonObject*
 SWGSoapySDRReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(device_settings_args->size() > 0){
+    if(device_settings_args && device_settings_args->size() > 0){
         toJsonArray((QList<void*>*)device_settings_args, obj, "deviceSettingsArgs", "SWGArgInfo");
     }
-    if(stream_settings_args->size() > 0){
+    if(stream_settings_args && stream_settings_args->size() > 0){
         toJsonArray((QList<void*>*)stream_settings_args, obj, "streamSettingsArgs", "SWGArgInfo");
     }
     if(m_has_dc_auto_correction_isSet){
@@ -235,7 +235,7 @@ SWGSoapySDRReport::asJsonObject() {
     if(m_has_frequency_correction_value_isSet){
         obj->insert("hasFrequencyCorrectionValue", QJsonValue(has_frequency_correction_value));
     }
-    if(antennas->size() > 0){
+    if(antennas && antennas->size() > 0){
         toJsonArray((QList<void*>*)antennas, obj, "antennas", "QString");
     }
     if(m_has_agc_isSet){
@@ -244,19 +244,19 @@ SWGSoapySDRReport::asJsonObject() {
     if((gain_range != nullptr) && (gain_range->isSet())){
         toJsonValue(QString("gainRange"), gain_range, obj, QString("SWGRangeFloat"));
     }
-    if(gain_settings->size() > 0){
+    if(gain_settings && gain_settings->size() > 0){
         toJsonArray((QList<void*>*)gain_settings, obj, "gainSettings", "SWGSoapySDRGainSetting");
     }
-    if(frequency_settings->size() > 0){
+    if(frequency_settings && frequency_settings->size() > 0){
         toJsonArray((QList<void*>*)frequency_settings, obj, "frequencySettings", "SWGSoapySDRFrequencySetting");
     }
-    if(frequency_settings_args->size() > 0){
+    if(frequency_settings_args && frequency_settings_args->size() > 0){
         toJsonArray((QList<void*>*)frequency_settings_args, obj, "frequencySettingsArgs", "SWGArgInfo");
     }
-    if(rates_ranges->size() > 0){
+    if(rates_ranges && rates_ranges->size() > 0){
         toJsonArray((QList<void*>*)rates_ranges, obj, "ratesRanges", "SWGRangeFloat");
     }
-    if(bandwidths_ranges->size() > 0){
+    if(bandwidths_ranges && bandwidths_ranges->size() > 0){
         toJsonArray((QList<void*>*)bandwidths_ranges, obj, "bandwidthsRanges", "SWGRangeFloat");
     }
 
@@ -408,20 +408,48 @@ bool
 SWGSoapySDRReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(device_settings_args->size() > 0){ isObjectUpdated = true; break;}
-        if(stream_settings_args->size() > 0){ isObjectUpdated = true; break;}
-        if(m_has_dc_auto_correction_isSet){ isObjectUpdated = true; break;}
-        if(m_has_dc_offset_value_isSet){ isObjectUpdated = true; break;}
-        if(m_has_iq_balance_value_isSet){ isObjectUpdated = true; break;}
-        if(m_has_frequency_correction_value_isSet){ isObjectUpdated = true; break;}
-        if(antennas->size() > 0){ isObjectUpdated = true; break;}
-        if(m_has_agc_isSet){ isObjectUpdated = true; break;}
-        if(gain_range != nullptr && gain_range->isSet()){ isObjectUpdated = true; break;}
-        if(gain_settings->size() > 0){ isObjectUpdated = true; break;}
-        if(frequency_settings->size() > 0){ isObjectUpdated = true; break;}
-        if(frequency_settings_args->size() > 0){ isObjectUpdated = true; break;}
-        if(rates_ranges->size() > 0){ isObjectUpdated = true; break;}
-        if(bandwidths_ranges->size() > 0){ isObjectUpdated = true; break;}
+        if(device_settings_args && (device_settings_args->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(stream_settings_args && (stream_settings_args->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_has_dc_auto_correction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_has_dc_offset_value_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_has_iq_balance_value_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_has_frequency_correction_value_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(antennas && (antennas->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_has_agc_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(gain_range && gain_range->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(gain_settings && (gain_settings->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(frequency_settings && (frequency_settings->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(frequency_settings_args && (frequency_settings_args->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(rates_ranges && (rates_ranges->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(bandwidths_ranges && (bandwidths_ranges->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

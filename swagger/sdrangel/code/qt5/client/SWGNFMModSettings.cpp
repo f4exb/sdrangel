@@ -486,26 +486,66 @@ bool
 SWGNFMModSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_input_frequency_offset_isSet){ isObjectUpdated = true; break;}
-        if(m_rf_bandwidth_isSet){ isObjectUpdated = true; break;}
-        if(m_af_bandwidth_isSet){ isObjectUpdated = true; break;}
-        if(m_fm_deviation_isSet){ isObjectUpdated = true; break;}
-        if(m_tone_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_volume_factor_isSet){ isObjectUpdated = true; break;}
-        if(m_channel_mute_isSet){ isObjectUpdated = true; break;}
-        if(m_play_loop_isSet){ isObjectUpdated = true; break;}
-        if(m_ctcss_on_isSet){ isObjectUpdated = true; break;}
-        if(m_ctcss_index_isSet){ isObjectUpdated = true; break;}
-        if(m_rgb_color_isSet){ isObjectUpdated = true; break;}
-        if(title != nullptr && *title != QString("")){ isObjectUpdated = true; break;}
-        if(audio_device_name != nullptr && *audio_device_name != QString("")){ isObjectUpdated = true; break;}
-        if(m_mod_af_input_isSet){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_channel_index_isSet){ isObjectUpdated = true; break;}
-        if(cw_keyer != nullptr && cw_keyer->isSet()){ isObjectUpdated = true; break;}
+        if(m_input_frequency_offset_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rf_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_af_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fm_deviation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tone_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_volume_factor_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_channel_mute_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_play_loop_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_ctcss_on_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_ctcss_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rgb_color_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(audio_device_name && *audio_device_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_mod_af_input_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(cw_keyer && cw_keyer->isSet()){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

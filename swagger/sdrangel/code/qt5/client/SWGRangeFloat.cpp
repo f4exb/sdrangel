@@ -138,9 +138,15 @@ bool
 SWGRangeFloat::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_min_isSet){ isObjectUpdated = true; break;}
-        if(m_max_isSet){ isObjectUpdated = true; break;}
-        if(m_step_isSet){ isObjectUpdated = true; break;}
+        if(m_min_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_max_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_step_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

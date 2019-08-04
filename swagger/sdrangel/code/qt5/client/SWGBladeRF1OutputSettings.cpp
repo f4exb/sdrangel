@@ -340,19 +340,45 @@ bool
 SWGBladeRF1OutputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_dev_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_vga1_isSet){ isObjectUpdated = true; break;}
-        if(m_vga2_isSet){ isObjectUpdated = true; break;}
-        if(m_bandwidth_isSet){ isObjectUpdated = true; break;}
-        if(m_log2_interp_isSet){ isObjectUpdated = true; break;}
-        if(m_xb200_isSet){ isObjectUpdated = true; break;}
-        if(m_xb200_path_isSet){ isObjectUpdated = true; break;}
-        if(m_xb200_filter_isSet){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
+        if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dev_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_vga1_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_vga2_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_log2_interp_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_xb200_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_xb200_path_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_xb200_filter_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

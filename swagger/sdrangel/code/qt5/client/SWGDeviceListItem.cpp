@@ -264,15 +264,33 @@ bool
 SWGDeviceListItem::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(displayed_name != nullptr && *displayed_name != QString("")){ isObjectUpdated = true; break;}
-        if(hw_type != nullptr && *hw_type != QString("")){ isObjectUpdated = true; break;}
-        if(serial != nullptr && *serial != QString("")){ isObjectUpdated = true; break;}
-        if(m_sequence_isSet){ isObjectUpdated = true; break;}
-        if(m_direction_isSet){ isObjectUpdated = true; break;}
-        if(m_device_nb_streams_isSet){ isObjectUpdated = true; break;}
-        if(m_device_stream_index_isSet){ isObjectUpdated = true; break;}
-        if(m_device_set_index_isSet){ isObjectUpdated = true; break;}
-        if(m_index_isSet){ isObjectUpdated = true; break;}
+        if(displayed_name && *displayed_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(hw_type && *hw_type != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(serial && *serial != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_sequence_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_direction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_device_nb_streams_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_device_stream_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_device_set_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

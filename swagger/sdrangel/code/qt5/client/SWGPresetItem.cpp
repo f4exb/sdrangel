@@ -142,9 +142,15 @@ bool
 SWGPresetItem::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
-        if(type != nullptr && *type != QString("")){ isObjectUpdated = true; break;}
-        if(name != nullptr && *name != QString("")){ isObjectUpdated = true; break;}
+        if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(type && *type != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(name && *name != QString("")){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

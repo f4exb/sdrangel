@@ -122,8 +122,12 @@ bool
 SWGPresetExport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(file_path != nullptr && *file_path != QString("")){ isObjectUpdated = true; break;}
-        if(preset != nullptr && preset->isSet()){ isObjectUpdated = true; break;}
+        if(file_path && *file_path != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(preset && preset->isSet()){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

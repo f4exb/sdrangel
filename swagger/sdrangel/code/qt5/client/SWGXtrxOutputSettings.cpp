@@ -400,22 +400,54 @@ bool
 SWGXtrxOutputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_dev_sample_rate_isSet){ isObjectUpdated = true; break;}
-        if(m_log2_hard_interp_isSet){ isObjectUpdated = true; break;}
-        if(m_log2_soft_interp_isSet){ isObjectUpdated = true; break;}
-        if(m_lpf_bw_isSet){ isObjectUpdated = true; break;}
-        if(m_gain_isSet){ isObjectUpdated = true; break;}
-        if(m_nco_enable_isSet){ isObjectUpdated = true; break;}
-        if(m_nco_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_antenna_path_isSet){ isObjectUpdated = true; break;}
-        if(m_ext_clock_isSet){ isObjectUpdated = true; break;}
-        if(m_ext_clock_freq_isSet){ isObjectUpdated = true; break;}
-        if(m_pwrmode_isSet){ isObjectUpdated = true; break;}
-        if(m_use_reverse_api_isSet){ isObjectUpdated = true; break;}
-        if(reverse_api_address != nullptr && *reverse_api_address != QString("")){ isObjectUpdated = true; break;}
-        if(m_reverse_api_port_isSet){ isObjectUpdated = true; break;}
-        if(m_reverse_api_device_index_isSet){ isObjectUpdated = true; break;}
+        if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dev_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_log2_hard_interp_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_log2_soft_interp_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_lpf_bw_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_gain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_nco_enable_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_nco_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_antenna_path_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_ext_clock_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_ext_clock_freq_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_pwrmode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

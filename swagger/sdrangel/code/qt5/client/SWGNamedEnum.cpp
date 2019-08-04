@@ -120,8 +120,12 @@ bool
 SWGNamedEnum::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(name != nullptr && *name != QString("")){ isObjectUpdated = true; break;}
-        if(m_value_isSet){ isObjectUpdated = true; break;}
+        if(name && *name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_value_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

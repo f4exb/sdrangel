@@ -284,16 +284,36 @@ bool
 SWGSamplingDevice::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_index_isSet){ isObjectUpdated = true; break;}
-        if(hw_type != nullptr && *hw_type != QString("")){ isObjectUpdated = true; break;}
-        if(m_direction_isSet){ isObjectUpdated = true; break;}
-        if(m_device_nb_streams_isSet){ isObjectUpdated = true; break;}
-        if(m_device_stream_index_isSet){ isObjectUpdated = true; break;}
-        if(m_sequence_isSet){ isObjectUpdated = true; break;}
-        if(serial != nullptr && *serial != QString("")){ isObjectUpdated = true; break;}
-        if(m_center_frequency_isSet){ isObjectUpdated = true; break;}
-        if(m_bandwidth_isSet){ isObjectUpdated = true; break;}
-        if(state != nullptr && *state != QString("")){ isObjectUpdated = true; break;}
+        if(m_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(hw_type && *hw_type != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_direction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_device_nb_streams_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_device_stream_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sequence_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(serial && *serial != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(state && *state != QString("")){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

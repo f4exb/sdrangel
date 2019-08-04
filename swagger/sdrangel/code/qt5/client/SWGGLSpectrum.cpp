@@ -498,27 +498,69 @@ bool
 SWGGLSpectrum::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_fft_size_isSet){ isObjectUpdated = true; break;}
-        if(m_fft_overlap_isSet){ isObjectUpdated = true; break;}
-        if(m_m_fft_window_isSet){ isObjectUpdated = true; break;}
-        if(m_ref_level_isSet){ isObjectUpdated = true; break;}
-        if(m_power_range_isSet){ isObjectUpdated = true; break;}
-        if(m_display_waterfall_isSet){ isObjectUpdated = true; break;}
-        if(m_inverted_waterfall_isSet){ isObjectUpdated = true; break;}
-        if(m_display_max_hold_isSet){ isObjectUpdated = true; break;}
-        if(m_display_histogram_isSet){ isObjectUpdated = true; break;}
-        if(m_decay_isSet){ isObjectUpdated = true; break;}
-        if(m_display_grid_isSet){ isObjectUpdated = true; break;}
-        if(m_invert_isSet){ isObjectUpdated = true; break;}
-        if(m_display_grid_intensity_isSet){ isObjectUpdated = true; break;}
-        if(m_decay_divisor_isSet){ isObjectUpdated = true; break;}
-        if(m_histogram_stroke_isSet){ isObjectUpdated = true; break;}
-        if(m_display_current_isSet){ isObjectUpdated = true; break;}
-        if(m_display_trace_intensity_isSet){ isObjectUpdated = true; break;}
-        if(m_waterfall_share_isSet){ isObjectUpdated = true; break;}
-        if(m_averaging_mode_isSet){ isObjectUpdated = true; break;}
-        if(m_averaging_value_isSet){ isObjectUpdated = true; break;}
-        if(m_linear_isSet){ isObjectUpdated = true; break;}
+        if(m_fft_size_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fft_overlap_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_m_fft_window_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_ref_level_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_power_range_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_waterfall_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_inverted_waterfall_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_max_hold_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_histogram_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_decay_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_grid_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_invert_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_grid_intensity_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_decay_divisor_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_histogram_stroke_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_current_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_trace_intensity_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_waterfall_share_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_averaging_mode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_averaging_value_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_linear_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

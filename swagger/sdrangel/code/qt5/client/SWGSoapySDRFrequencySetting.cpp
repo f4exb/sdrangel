@@ -94,7 +94,7 @@ SWGSoapySDRFrequencySetting::asJsonObject() {
     if(name != nullptr && *name != QString("")){
         toJsonValue(QString("name"), name, obj, QString("QString"));
     }
-    if(ranges->size() > 0){
+    if(ranges && ranges->size() > 0){
         toJsonArray((QList<void*>*)ranges, obj, "ranges", "SWGRangeFloat");
     }
 
@@ -126,8 +126,12 @@ bool
 SWGSoapySDRFrequencySetting::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(name != nullptr && *name != QString("")){ isObjectUpdated = true; break;}
-        if(ranges->size() > 0){ isObjectUpdated = true; break;}
+        if(name && *name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(ranges && (ranges->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

@@ -102,7 +102,7 @@ SWGDeviceSetList::asJsonObject() {
     if(m_devicesetfocus_isSet){
         obj->insert("devicesetfocus", QJsonValue(devicesetfocus));
     }
-    if(device_sets->size() > 0){
+    if(device_sets && device_sets->size() > 0){
         toJsonArray((QList<void*>*)device_sets, obj, "deviceSets", "SWGDeviceSet");
     }
 
@@ -144,9 +144,15 @@ bool
 SWGDeviceSetList::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_devicesetcount_isSet){ isObjectUpdated = true; break;}
-        if(m_devicesetfocus_isSet){ isObjectUpdated = true; break;}
-        if(device_sets->size() > 0){ isObjectUpdated = true; break;}
+        if(m_devicesetcount_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_devicesetfocus_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(device_sets && (device_sets->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

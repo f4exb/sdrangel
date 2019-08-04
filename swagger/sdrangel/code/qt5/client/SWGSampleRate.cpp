@@ -98,7 +98,9 @@ bool
 SWGSampleRate::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_rate_isSet){ isObjectUpdated = true; break;}
+        if(m_rate_isSet){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

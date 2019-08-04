@@ -100,7 +100,9 @@ bool
 SWGErrorResponse::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(message != nullptr && *message != QString("")){ isObjectUpdated = true; break;}
+        if(message && *message != QString("")){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

@@ -112,13 +112,13 @@ SWGAudioDevices::asJsonObject() {
     if(m_nb_input_devices_isSet){
         obj->insert("nbInputDevices", QJsonValue(nb_input_devices));
     }
-    if(input_devices->size() > 0){
+    if(input_devices && input_devices->size() > 0){
         toJsonArray((QList<void*>*)input_devices, obj, "inputDevices", "SWGAudioInputDevice");
     }
     if(m_nb_output_devices_isSet){
         obj->insert("nbOutputDevices", QJsonValue(nb_output_devices));
     }
-    if(output_devices->size() > 0){
+    if(output_devices && output_devices->size() > 0){
         toJsonArray((QList<void*>*)output_devices, obj, "outputDevices", "SWGAudioOutputDevice");
     }
 
@@ -170,10 +170,18 @@ bool
 SWGAudioDevices::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_nb_input_devices_isSet){ isObjectUpdated = true; break;}
-        if(input_devices->size() > 0){ isObjectUpdated = true; break;}
-        if(m_nb_output_devices_isSet){ isObjectUpdated = true; break;}
-        if(output_devices->size() > 0){ isObjectUpdated = true; break;}
+        if(m_nb_input_devices_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(input_devices && (input_devices->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_nb_output_devices_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(output_devices && (output_devices->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

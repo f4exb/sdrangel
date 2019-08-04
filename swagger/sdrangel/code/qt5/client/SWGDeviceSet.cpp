@@ -104,7 +104,7 @@ SWGDeviceSet::asJsonObject() {
     if(m_channelcount_isSet){
         obj->insert("channelcount", QJsonValue(channelcount));
     }
-    if(channels->size() > 0){
+    if(channels && channels->size() > 0){
         toJsonArray((QList<void*>*)channels, obj, "channels", "SWGChannel");
     }
 
@@ -146,9 +146,15 @@ bool
 SWGDeviceSet::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(sampling_device != nullptr && sampling_device->isSet()){ isObjectUpdated = true; break;}
-        if(m_channelcount_isSet){ isObjectUpdated = true; break;}
-        if(channels->size() > 0){ isObjectUpdated = true; break;}
+        if(sampling_device && sampling_device->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(m_channelcount_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(channels && (channels->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

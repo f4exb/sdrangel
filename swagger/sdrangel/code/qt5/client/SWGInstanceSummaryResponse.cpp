@@ -292,16 +292,36 @@ bool
 SWGInstanceSummaryResponse::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(version != nullptr && *version != QString("")){ isObjectUpdated = true; break;}
-        if(qt_version != nullptr && *qt_version != QString("")){ isObjectUpdated = true; break;}
-        if(m_dsp_rx_bits_isSet){ isObjectUpdated = true; break;}
-        if(m_dsp_tx_bits_isSet){ isObjectUpdated = true; break;}
-        if(m_pid_isSet){ isObjectUpdated = true; break;}
-        if(appname != nullptr && *appname != QString("")){ isObjectUpdated = true; break;}
-        if(architecture != nullptr && *architecture != QString("")){ isObjectUpdated = true; break;}
-        if(os != nullptr && *os != QString("")){ isObjectUpdated = true; break;}
-        if(logging != nullptr && logging->isSet()){ isObjectUpdated = true; break;}
-        if(devicesetlist != nullptr && devicesetlist->isSet()){ isObjectUpdated = true; break;}
+        if(version && *version != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(qt_version && *qt_version != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_dsp_rx_bits_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dsp_tx_bits_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_pid_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(appname && *appname != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(architecture && *architecture != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(os && *os != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(logging && logging->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(devicesetlist && devicesetlist->isSet()){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }

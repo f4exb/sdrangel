@@ -218,7 +218,7 @@ SWGRDSReport::asJsonObject() {
     if(time != nullptr && *time != QString("")){
         toJsonValue(QString("time"), time, obj, QString("QString"));
     }
-    if(alt_frequencies->size() > 0){
+    if(alt_frequencies && alt_frequencies->size() > 0){
         toJsonArray((QList<void*>*)alt_frequencies, obj, "altFrequencies", "SWGRDSReport_altFrequencies");
     }
 
@@ -360,19 +360,45 @@ bool
 SWGRDSReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_demod_status_isSet){ isObjectUpdated = true; break;}
-        if(m_decod_status_isSet){ isObjectUpdated = true; break;}
-        if(m_rds_demod_accum_db_isSet){ isObjectUpdated = true; break;}
-        if(m_rds_demod_frequency_isSet){ isObjectUpdated = true; break;}
-        if(pid != nullptr && *pid != QString("")){ isObjectUpdated = true; break;}
-        if(pi_type != nullptr && *pi_type != QString("")){ isObjectUpdated = true; break;}
-        if(pi_coverage != nullptr && *pi_coverage != QString("")){ isObjectUpdated = true; break;}
-        if(prog_service_name != nullptr && *prog_service_name != QString("")){ isObjectUpdated = true; break;}
-        if(music_speech != nullptr && *music_speech != QString("")){ isObjectUpdated = true; break;}
-        if(mono_stereo != nullptr && *mono_stereo != QString("")){ isObjectUpdated = true; break;}
-        if(radio_text != nullptr && *radio_text != QString("")){ isObjectUpdated = true; break;}
-        if(time != nullptr && *time != QString("")){ isObjectUpdated = true; break;}
-        if(alt_frequencies->size() > 0){ isObjectUpdated = true; break;}
+        if(m_demod_status_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_decod_status_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rds_demod_accum_db_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rds_demod_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(pid && *pid != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(pi_type && *pi_type != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(pi_coverage && *pi_coverage != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(prog_service_name && *prog_service_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(music_speech && *music_speech != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(mono_stereo && *mono_stereo != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(radio_text && *radio_text != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(time && *time != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(alt_frequencies && (alt_frequencies->size() > 0)){
+            isObjectUpdated = true; break;
+        }
     }while(false);
     return isObjectUpdated;
 }
