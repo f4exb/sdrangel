@@ -30,11 +30,12 @@
 #else
 #include "xtrxoutputgui.h"
 #endif
-#include "../xtrxoutput/xtrxoutputplugin.h"
+#include "xtrxoutputplugin.h"
+#include "xtrxoutputwebapiadapter.h"
 
 const PluginDescriptor XTRXOutputPlugin::m_pluginDescriptor = {
     QString("XTRX Output"),
-    QString("4.5.4"),
+    QString("4.11.6"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -128,3 +129,7 @@ DeviceSampleSink* XTRXOutputPlugin::createSampleSinkPluginInstance(const QString
     }
 }
 
+DeviceWebAPIAdapter *XTRXOutputPlugin::createDeviceWebAPIAdapter() const
+{
+    return new XTRXOutputWebAPIAdapter();
+}

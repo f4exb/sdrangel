@@ -12,19 +12,21 @@ endif()
 set(remoteoutput_SOURCES
 	remoteoutput.cpp
 	remoteoutputplugin.cpp
-	remoteoutputsettings.cpp
+    remoteoutputsettings.cpp
+    remoteoutputwebapiadapter.cpp
 	remoteoutputthread.cpp
-        udpsinkfec.cpp
-        udpsinkfecworker.cpp
+    udpsinkfec.cpp
+    udpsinkfecworker.cpp
 )
 
 set(remoteoutput_HEADERS
 	remoteoutput.h
 	remoteoutputplugin.h
-	remoteoutputsettings.h
+    remoteoutputsettings.h
+    remoteoutputwebapiadapter.h
 	remoteoutputthread.h
-        udpsinkfec.h
-        udpsinkfecworker.h
+    udpsinkfec.h
+    udpsinkfecworker.h
 )
 
 include_directories(

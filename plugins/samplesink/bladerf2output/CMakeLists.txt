@@ -3,14 +3,16 @@ project(bladerf2output)
 set(bladerf2output_SOURCES
 	bladerf2output.cpp
 	bladerf2outputplugin.cpp
-	bladerf2outputsettings.cpp
+    bladerf2outputsettings.cpp
+    bladerf2outputwebapiadapter.cpp
 	bladerf2outputthread.cpp
 )
 
 set(bladerf2output_HEADERS
 	bladerf2output.h
 	bladerf2outputplugin.h
-	bladerf2outputsettings.h
+    bladerf2outputsettings.h
+    bladerf2outputwebapiadapter.h
 	bladerf2outputthread.h
 )
 

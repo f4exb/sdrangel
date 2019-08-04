@@ -26,10 +26,11 @@
 #include "remoteoutputgui.h"
 #endif
 #include "remoteoutputplugin.h"
+#include "remoteoutputwebapiadapter.h"
 
 const PluginDescriptor RemoteOutputPlugin::m_pluginDescriptor = {
 	QString("Remote device output"),
-	QString("4.5.2"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -114,4 +115,9 @@ DeviceSampleSink* RemoteOutputPlugin::createSampleSinkPluginInstance(const QStri
         return 0;
     }
 
+}
+
+DeviceWebAPIAdapter *RemoteOutputPlugin::createDeviceWebAPIAdapter() const
+{
+    return new RemoteOutputWebAPIAdapter();
 }

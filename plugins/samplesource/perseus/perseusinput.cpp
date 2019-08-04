@@ -496,7 +496,26 @@ int PerseusInput::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     PerseusSettings settings = m_settings;
+    webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
+    MsgConfigurePerseus *msg = MsgConfigurePerseus::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigurePerseus *msgToGUI = MsgConfigurePerseus::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void PerseusInput::webapiUpdateDeviceSettings(
+    PerseusSettings& settings,
+    const QStringList& deviceSettingsKeys,
+    SWGSDRangel::SWGDeviceSettings& response)
+{
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getPerseusSettings()->getCenterFrequency();
     }
@@ -544,18 +563,6 @@ int PerseusInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
         settings.m_reverseAPIDeviceIndex = response.getPerseusSettings()->getReverseApiDeviceIndex();
     }
-
-    MsgConfigurePerseus *msg = MsgConfigurePerseus::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigurePerseus *msgToGUI = MsgConfigurePerseus::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatDeviceSettings(response, settings);
-    return 200;
 }
 
 int PerseusInput::webapiReportGet(

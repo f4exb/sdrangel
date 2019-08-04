@@ -3,14 +3,16 @@ project(bladerf1input)
 set(bladerf1input_SOURCES
 	bladerf1input.cpp
 	bladerf1inputplugin.cpp
-	bladerf1inputsettings.cpp
+    bladerf1inputsettings.cpp
+    bladerf1inputwebapiadapter.cpp
 	bladerf1inputthread.cpp
 )
 
 set(bladerf1input_HEADERS
 	bladerf1input.h
 	bladerf1inputplugin.h
-	bladerf1inputsettings.h
+    bladerf1inputsettings.h
+    bladerf1inputwebapiadapter.h
 	bladerf1inputthread.h
 )
 

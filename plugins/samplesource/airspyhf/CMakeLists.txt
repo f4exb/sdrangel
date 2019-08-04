@@ -4,6 +4,7 @@ set(airspyhf_SOURCES
     airspyhfinput.cpp
     airspyhfplugin.cpp
     airspyhfsettings.cpp
+    airspyhfwebapiadapter.cpp
     airspyhfthread.cpp
 )
 
@@ -11,6 +12,7 @@ set(airspyhf_HEADERS
     airspyhfinput.h
     airspyhfplugin.h
     airspyhfsettings.h
+    airspyhfwebapiadapter.h
     airspyhfthread.h
 )
 

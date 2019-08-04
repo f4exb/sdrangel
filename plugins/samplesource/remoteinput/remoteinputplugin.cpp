@@ -26,10 +26,11 @@
 #include "remoteinputgui.h"
 #endif
 #include "remoteinputplugin.h"
+#include "remoteinputwebapiadapter.h"
 
 const PluginDescriptor RemoteInputPlugin::m_pluginDescriptor = {
 	QString("Remote device input"),
-	QString("4.5.6"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -113,4 +114,9 @@ DeviceSampleSource *RemoteInputPlugin::createSampleSourcePluginInstance(const QS
     {
         return 0;
     }
+}
+
+DeviceWebAPIAdapter *RemoteInputPlugin::createDeviceWebAPIAdapter() const
+{
+    return new RemoteInputWebAPIAdapter();
 }

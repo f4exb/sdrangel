@@ -26,10 +26,11 @@
 #include "plutosdroutputgui.h"
 #endif
 #include "plutosdroutputplugin.h"
+#include "plutosdroutputwebapiadapter.h"
 
 const PluginDescriptor PlutoSDROutputPlugin::m_pluginDescriptor = {
 	QString("PlutoSDR Output"),
-	QString("4.5.4"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -129,3 +130,7 @@ DeviceSampleSink *PlutoSDROutputPlugin::createSampleSinkPluginInstance(const QSt
     }
 }
 
+DeviceWebAPIAdapter *PlutoSDROutputPlugin::createDeviceWebAPIAdapter() const
+{
+    return new PlutoSDROutputWebAPIAdapter();
+}

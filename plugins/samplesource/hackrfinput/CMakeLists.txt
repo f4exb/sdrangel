@@ -4,6 +4,7 @@ set(hackrfinput_SOURCES
     hackrfinput.cpp
     hackrfinputplugin.cpp
     hackrfinputsettings.cpp
+    hackrfinputwebapiadapter.cpp
     hackrfinputthread.cpp
 )
 
@@ -11,6 +12,7 @@ set(hackrfinput_HEADERS
     hackrfinput.h
     hackrfinputplugin.h
     hackrfinputsettings.h
+    hackrfinputwebapiadapter.h
     hackrfinputthread.h
 )
 

@@ -21,6 +21,7 @@
 #include <libbladeRF.h>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "bladerf1inputwebapiadapter.h"
 
 #ifdef SERVER_MODE
 #include "bladerf1input.h"
@@ -150,3 +151,7 @@ DeviceSampleSource *Blderf1InputPlugin::createSampleSourcePluginInstance(const Q
     }
 }
 
+DeviceWebAPIAdapter *Blderf1InputPlugin::createDeviceWebAPIAdapter() const
+{
+    return new BladeRF1InputWebAPIAdapter();
+}

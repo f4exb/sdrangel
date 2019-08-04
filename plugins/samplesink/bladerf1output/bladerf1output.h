@@ -133,6 +133,15 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    static void webapiFormatDeviceSettings(
+            SWGSDRangel::SWGDeviceSettings& response,
+            const BladeRF1OutputSettings& settings);
+
+    static void webapiUpdateDeviceSettings(
+            BladeRF1OutputSettings& settings,
+            const QStringList& deviceSettingsKeys,
+            SWGSDRangel::SWGDeviceSettings& response);
+
 private:
 	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
@@ -148,7 +157,6 @@ private:
     bool openDevice();
     void closeDevice();
 	bool applySettings(const BladeRF1OutputSettings& settings, bool force);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF1OutputSettings& settings);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const BladeRF1OutputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 

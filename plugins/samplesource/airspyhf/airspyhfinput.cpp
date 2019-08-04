@@ -661,7 +661,26 @@ int AirspyHFInput::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     AirspyHFSettings settings = m_settings;
+    webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
+    MsgConfigureAirspyHF *msg = MsgConfigureAirspyHF::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureAirspyHF *msgToGUI = MsgConfigureAirspyHF::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void AirspyHFInput::webapiUpdateDeviceSettings(
+        AirspyHFSettings& settings,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response)
+{
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getAirspyHfSettings()->getCenterFrequency();
     }
@@ -719,18 +738,6 @@ int AirspyHFInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("iqCorrection")) {
         settings.m_iqCorrection = response.getAirspyHfSettings()->getIqCorrection() != 0;
     }
-
-    MsgConfigureAirspyHF *msg = MsgConfigureAirspyHF::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureAirspyHF *msgToGUI = MsgConfigureAirspyHF::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatDeviceSettings(response, settings);
-    return 200;
 }
 
 void AirspyHFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AirspyHFSettings& settings)

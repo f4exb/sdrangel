@@ -4,6 +4,7 @@ set(plutosdrinput_SOURCES
     plutosdrinput.cpp
     plutosdrinputplugin.cpp
     plutosdrinputsettings.cpp
+    plutosdrinputwebapiadapter.cpp
     plutosdrinputthread.cpp
 )
 
@@ -11,6 +12,7 @@ set(plutosdrinput_HEADERS
     plutosdrinput.h
     plutosdrinputplugin.h
     plutosdrinputsettings.h
+    plutosdrinputwebapiadapter.h
     plutosdrinputthread.h
 )
 

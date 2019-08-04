@@ -267,19 +267,7 @@ int LocalOutput::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     LocalOutputSettings settings = m_settings;
-
-    if (deviceSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getLocalOutputSettings()->getUseReverseApi() != 0;
-    }
-    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getLocalOutputSettings()->getReverseApiAddress();
-    }
-    if (deviceSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getLocalOutputSettings()->getReverseApiPort();
-    }
-    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getLocalOutputSettings()->getReverseApiDeviceIndex();
-    }
+    webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
     MsgConfigureLocalOutput *msg = MsgConfigureLocalOutput::create(settings, force);
     m_inputMessageQueue.push(msg);
@@ -292,6 +280,25 @@ int LocalOutput::webapiSettingsPutPatch(
 
     webapiFormatDeviceSettings(response, settings);
     return 200;
+}
+
+void LocalOutput::webapiUpdateDeviceSettings(
+        LocalOutputSettings& settings,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response)
+{
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getLocalOutputSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getLocalOutputSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getLocalOutputSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getLocalOutputSettings()->getReverseApiDeviceIndex();
+    }
 }
 
 void LocalOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const LocalOutputSettings& settings)

@@ -21,6 +21,7 @@
 #include "channel/channelapi.h"
 #include "channel/channelutils.h"
 #include "device/devicewebapiadapter.h"
+#include "device/deviceutils.h"
 #include "webapiadapterbase.h"
 
 WebAPIAdapterBase::WebAPIAdapterBase()
@@ -96,11 +97,6 @@ void WebAPIAdapterBase::webapiFormatPreset(
         swgdeviceConfigs->back()->setDeviceSequence(deviceConfig.m_deviceSequence);
         const QByteArray& deviceSettings = deviceConfig.m_config;
         SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = swgdeviceConfigs->back()->getConfig();
-        // qDebug("WebAPIAdapterBase::webapiFormatPreset: preset: %s:%s(%lld) device: %s",
-        //     qPrintable(preset.getGroup()),
-        //     qPrintable(preset.getDescription()),
-        //     preset.getCenterFrequency(),
-        //     qPrintable(deviceConfig.m_deviceId));
         swgDeviceSettings->init();
         DeviceWebAPIAdapter *deviceWebAPIAdapter = m_webAPIDeviceAdapters.getDeviceWebAPIAdapter(deviceConfig.m_deviceId, m_pluginManager);
 
@@ -167,21 +163,22 @@ void WebAPIAdapterBase::WebAPIChannelAdapters::flush()
 
 DeviceWebAPIAdapter *WebAPIAdapterBase::WebAPIDeviceAdapters::getDeviceWebAPIAdapter(const QString& deviceId, const PluginManager *pluginManager)
 {
-    QMap<QString, DeviceWebAPIAdapter*>::iterator it = m_webAPIDeviceAdapters.find(deviceId);
+    QString registeredDeviceId = DeviceUtils::getRegisteredDeviceURI(deviceId);
+    QMap<QString, DeviceWebAPIAdapter*>::iterator it = m_webAPIDeviceAdapters.find(registeredDeviceId);
 
     if (it == m_webAPIDeviceAdapters.end())
     {
-        const PluginInterface *pluginInterface = pluginManager->getDevicePluginInterface(deviceId);
+        const PluginInterface *pluginInterface = pluginManager->getDevicePluginInterface(registeredDeviceId);
 
         if (pluginInterface)
         {
             DeviceWebAPIAdapter *deviceWebAPIAdapter = pluginInterface->createDeviceWebAPIAdapter();
-            m_webAPIDeviceAdapters.insert(deviceId, deviceWebAPIAdapter);
+            m_webAPIDeviceAdapters.insert(registeredDeviceId, deviceWebAPIAdapter);
             return deviceWebAPIAdapter;
         }
         else
         {
-            m_webAPIDeviceAdapters.insert(deviceId, nullptr);
+            m_webAPIDeviceAdapters.insert(registeredDeviceId, nullptr);
             return nullptr;
         }
     }

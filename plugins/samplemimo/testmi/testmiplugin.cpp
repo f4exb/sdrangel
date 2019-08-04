@@ -26,10 +26,11 @@
 #include "testmigui.h"
 #endif
 #include "testmiplugin.h"
+#include "testmiwebapiadapter.h"
 
 const PluginDescriptor TestMIPlugin::m_pluginDescriptor = {
 	QString("Test Multiple Input"),
-	QString("4.8.1"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -112,3 +113,7 @@ DeviceSampleMIMO *TestMIPlugin::createSampleMIMOPluginInstance(const QString& mi
     }
 }
 
+DeviceWebAPIAdapter *TestMIPlugin::createDeviceWebAPIAdapter() const
+{
+    return new TestMIWebAPIAdapter();
+}

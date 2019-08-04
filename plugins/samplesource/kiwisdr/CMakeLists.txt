@@ -4,14 +4,16 @@ set(kiwisdr_SOURCES
 	kiwisdrinput.cpp
 	kiwisdrplugin.cpp
 	kiwisdrworker.cpp
-	kiwisdrsettings.cpp
+    kiwisdrsettings.cpp
+    kiwisdrwebapiadapter.cpp
 )
 
 set(kiwisdr_HEADERS
 	kiwisdrinput.h
 	kiwisdrplugin.h
 	kiwisdrworker.h
-	kiwisdrsettings.h
+    kiwisdrsettings.h
+    kiwisdrwebapiadapter.h
 )
 
 include_directories(

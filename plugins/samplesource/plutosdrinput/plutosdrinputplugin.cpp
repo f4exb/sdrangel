@@ -26,6 +26,7 @@
 #include "plutosdrinputgui.h"
 #endif
 #include "plutosdrinputplugin.h"
+#include "plutosdrinputwebapiadapter.h"
 
 class DeviceAPI;
 
@@ -131,3 +132,7 @@ DeviceSampleSource *PlutoSDRInputPlugin::createSampleSourcePluginInstance(const 
     }
 }
 
+DeviceWebAPIAdapter *PlutoSDRInputPlugin::createDeviceWebAPIAdapter() const
+{
+    return new PlutoSDRInputWebAPIAdapter();
+}

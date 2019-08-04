@@ -319,6 +319,15 @@ public:
             SWGSDRangel::SWGDeviceReport& response,
             QString& errorMessage);
 
+    static void webapiFormatDeviceSettings(
+            SWGSDRangel::SWGDeviceSettings& response,
+            const FileInputSettings& settings);
+
+    static void webapiUpdateDeviceSettings(
+            FileInputSettings& settings,
+            const QStringList& deviceSettingsKeys,
+            SWGSDRangel::SWGDeviceSettings& response);
+
 	private:
 	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
@@ -339,7 +348,6 @@ public:
 	void openFileStream();
 	void seekFileStream(int seekMillis);
 	bool applySettings(const FileInputSettings& settings, bool force = false);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FileInputSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FileInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);

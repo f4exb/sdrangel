@@ -178,6 +178,15 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    static void webapiFormatDeviceSettings(
+            SWGSDRangel::SWGDeviceSettings& response,
+            const SDRPlaySettings& settings);
+
+    static void webapiUpdateDeviceSettings(
+            SDRPlaySettings& settings,
+            const QStringList& deviceSettingsKeys,
+            SWGSDRangel::SWGDeviceSettings& response);
+
     SDRPlayVariant getVariant() const { return m_variant; }
 
 private:
@@ -198,7 +207,6 @@ private:
     void closeDevice();
     bool applySettings(const SDRPlaySettings& settings, bool forwardChange, bool force);
     bool setDeviceCenterFrequency(quint64 freq);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRPlaySettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SDRPlaySettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);

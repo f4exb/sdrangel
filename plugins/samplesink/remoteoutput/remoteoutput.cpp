@@ -385,7 +385,26 @@ int RemoteOutput::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     RemoteOutputSettings settings = m_settings;
+    webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
+    MsgConfigureRemoteOutput *msg = MsgConfigureRemoteOutput::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureRemoteOutput *msgToGUI = MsgConfigureRemoteOutput::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void RemoteOutput::webapiUpdateDeviceSettings(
+        RemoteOutputSettings& settings,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response)
+{
     if (deviceSettingsKeys.contains("sampleRate")) {
         settings.m_sampleRate = response.getRemoteOutputSettings()->getSampleRate();
     }
@@ -425,18 +444,6 @@ int RemoteOutput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
         settings.m_reverseAPIDeviceIndex = response.getRemoteOutputSettings()->getReverseApiDeviceIndex();
     }
-
-    MsgConfigureRemoteOutput *msg = MsgConfigureRemoteOutput::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureRemoteOutput *msgToGUI = MsgConfigureRemoteOutput::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatDeviceSettings(response, settings);
-    return 200;
 }
 
 int RemoteOutput::webapiReportGet(
@@ -452,7 +459,7 @@ int RemoteOutput::webapiReportGet(
 
 void RemoteOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RemoteOutputSettings& settings)
 {
-    response.getRemoteOutputSettings()->setCenterFrequency(m_centerFrequency);
+    response.getRemoteOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getRemoteOutputSettings()->setSampleRate(settings.m_sampleRate);
     response.getRemoteOutputSettings()->setTxDelay(settings.m_txDelay);
     response.getRemoteOutputSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
@@ -538,7 +545,8 @@ void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString&
     if (jsonObject.contains("RemoteSourceReport"))
     {
         QJsonObject report = jsonObject["RemoteSourceReport"].toObject();
-        m_centerFrequency = report["deviceCenterFreq"].toInt() * 1000;
+        m_settings.m_centerFrequency = report["deviceCenterFreq"].toInt();
+        m_centerFrequency = m_settings.m_centerFrequency * 1000;
 
         if (!m_remoteOutputThread) {
             return;

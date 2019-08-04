@@ -4,14 +4,16 @@ set(testsource_SOURCES
 	testsourceinput.cpp
 	testsourceplugin.cpp
 	testsourcethread.cpp
-	testsourcesettings.cpp
+    testsourcesettings.cpp
+    testsourcewebapiadapter.cpp
 )
 
 set(testsource_HEADERS
 	testsourceinput.h
 	testsourceplugin.h
 	testsourcethread.h
-	testsourcesettings.h
+    testsourcesettings.h
+    testsourcewebapiadapter.h
 )
 
 include_directories(

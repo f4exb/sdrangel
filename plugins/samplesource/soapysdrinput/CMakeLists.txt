@@ -3,14 +3,16 @@ project(soapysdrinput)
 set(soapysdrinput_SOURCES
 	soapysdrinput.cpp
 	soapysdrinputplugin.cpp
-	soapysdrinputsettings.cpp
+    soapysdrinputsettings.cpp
+    soapysdrinputwebapiadapter.cpp
 	soapysdrinputthread.cpp
 )
 
 set(soapysdrinput_HEADERS
 	soapysdrinput.h
 	soapysdrinputplugin.h
-	soapysdrinputsettings.h
+    soapysdrinputsettings.h
+    soapysdrinputwebapiadapter.h
 	soapysdrinputthread.h
 )
 

@@ -4,14 +4,16 @@ set(testmi_SOURCES
 	testmi.cpp
 	testmiplugin.cpp
 	testmithread.cpp
-	testmisettings.cpp
+    testmisettings.cpp
+    testmiwebapiadapter.cpp
 )
 
 set(testmi_HEADERS
 	testmi.h
 	testmiplugin.h
 	testmithread.h
-	testmisettings.h
+    testmisettings.h
+    testmiwebapiadapter.h
 )
 
 include_directories(

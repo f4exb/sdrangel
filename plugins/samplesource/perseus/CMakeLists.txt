@@ -4,6 +4,7 @@ set(perseus_SOURCES
     perseusinput.cpp
     perseusplugin.cpp
     perseussettings.cpp
+    perseuswebapiadapter.cpp
     perseusthread.cpp
 )
 
@@ -11,6 +12,7 @@ set(perseus_HEADERS
     perseusinput.h
     perseusplugin.h
     perseussettings.h
+    perseuswebapiadapter.h
     perseusthread.h
 )
 

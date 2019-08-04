@@ -153,6 +153,15 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    static void webapiFormatDeviceSettings(
+            SWGSDRangel::SWGDeviceSettings& response,
+            const BladeRF2OutputSettings& settings);
+
+    static void webapiUpdateDeviceSettings(
+            BladeRF2OutputSettings& settings,
+            const QStringList& deviceSettingsKeys,
+            SWGSDRangel::SWGDeviceSettings& response);
+
 private:
     DeviceAPI *m_deviceAPI;
     QMutex m_mutex;
@@ -172,7 +181,6 @@ private:
     bool applySettings(const BladeRF2OutputSettings& settings, bool force);
     int getNbChannels();
     bool setDeviceCenterFrequency(struct bladerf *dev, int requestedChannel, quint64 freq_hz, int loPpmTenths);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF2OutputSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const BladeRF2OutputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);

@@ -26,10 +26,11 @@
 #include "localoutputgui.h"
 #endif
 #include "localoutputplugin.h"
+#include "localoutputwebapiadapter.h"
 
 const PluginDescriptor LocalOutputPlugin::m_pluginDescriptor = {
 	QString("Local device output"),
-	QString("4.8.0"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -113,4 +114,9 @@ DeviceSampleSink *LocalOutputPlugin::createSampleSinkPluginInstance(const QStrin
     {
         return 0;
     }
+}
+
+DeviceWebAPIAdapter *LocalOutputPlugin::createDeviceWebAPIAdapter() const
+{
+    return new LocalOutputWebAPIAdapter();
 }

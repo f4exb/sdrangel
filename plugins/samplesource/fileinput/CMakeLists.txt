@@ -4,14 +4,16 @@ set(fileinput_SOURCES
 	fileinput.cpp
 	fileinputplugin.cpp
 	fileinputthread.cpp
-	fileinputsettings.cpp
+    fileinputsettings.cpp
+    fileinputwebapiadapter.cpp
 )
 
 set(fileinput_HEADERS
 	fileinput.h
 	fileinputplugin.h
 	fileinputthread.h
-	fileinputsettings.h
+    fileinputsettings.h
+    fileinputwebapiadapter.h
 )
 
 include_directories(

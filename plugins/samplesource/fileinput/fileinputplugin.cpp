@@ -26,10 +26,11 @@
 #include "fileinputgui.h"
 #endif
 #include "fileinputplugin.h"
+#include "fileinputwebapiadapter.h"
 
 const PluginDescriptor FileInputPlugin::m_pluginDescriptor = {
 	QString("File device input"),
-    QString("4.11.0"),
+    QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -115,3 +116,7 @@ DeviceSampleSource *FileInputPlugin::createSampleSourcePluginInstance(const QStr
     }
 }
 
+DeviceWebAPIAdapter *FileInputPlugin::createDeviceWebAPIAdapter() const
+{
+    return new FileInputWebAPIAdapter();
+}

@@ -3,12 +3,14 @@ project(localinput)
 set(localinput_SOURCES
   localinput.cpp
   localinputsettings.cpp
+  localinputwebapiadapter.cpp
   localinputplugin.cpp
   )
 
 set(localinput_HEADERS
   localinput.h
   localinputsettings.h
+  localinputwebapiadapter.h
   localinputplugin.h
   )
 

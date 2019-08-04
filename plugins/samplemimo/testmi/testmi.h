@@ -144,6 +144,15 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    static void webapiFormatDeviceSettings(
+            SWGSDRangel::SWGDeviceSettings& response,
+            const TestMISettings& settings);
+
+    static void webapiUpdateDeviceSettings(
+            TestMISettings& settings,
+            const QStringList& deviceSettingsKeys,
+            SWGSDRangel::SWGDeviceSettings& response);
+
     bool isRecording(unsigned int istream) const;
 
 private:
@@ -165,7 +174,6 @@ private:
     QNetworkRequest m_networkRequest;
 
 	bool applySettings(const TestMISettings& settings, bool force);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const TestMISettings& settings);
     void webapiReverseSendSettings(const DeviceSettingsKeys& deviceSettingsKeys, const TestMISettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 

@@ -3,14 +3,16 @@ project(limesdroutput)
 set(limesdroutput_SOURCES
 	limesdroutput.cpp
 	limesdroutputplugin.cpp
-	limesdroutputsettings.cpp
+    limesdroutputsettings.cpp
+    limesdroutputwebapiadapter.cpp
 	limesdroutputthread.cpp
 )
 
 set(limesdroutput_HEADERS
 	limesdroutput.h
 	limesdroutputplugin.h
-	limesdroutputsettings.h
+    limesdroutputsettings.h
+    limesdroutputwebapiadapter.h
 	limesdroutputthread.h
 )
 

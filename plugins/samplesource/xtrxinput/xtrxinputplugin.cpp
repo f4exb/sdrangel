@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "xtrxinputplugin.h"
+#include "xtrxinputwebapiadapter.h"
 
 #include <QtPlugin>
 
@@ -35,7 +36,7 @@
 
 const PluginDescriptor XTRXInputPlugin::m_pluginDescriptor = {
     QString("XTRX Input"),
-    QString("4.5.4"),
+    QString("4.11.6"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -127,4 +128,9 @@ DeviceSampleSource *XTRXInputPlugin::createSampleSourcePluginInstance(const QStr
     {
         return 0;
     }
+}
+
+DeviceWebAPIAdapter *XTRXInputPlugin::createDeviceWebAPIAdapter() const
+{
+    return new XTRXInputWebAPIAdapter();
 }

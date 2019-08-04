@@ -14,6 +14,7 @@ set(remoteinput_SOURCES
     remoteinputudphandler.cpp
     remoteinput.cpp
     remoteinputsettings.cpp
+    remoteinputwebapiadapter.cpp
     remoteinputplugin.cpp
 )
 
@@ -22,6 +23,7 @@ set(remoteinput_HEADERS
     remoteinputudphandler.h
     remoteinput.h
     remoteinputsettings.h
+    remoteinputwebapiadapter.h
     remoteinputplugin.h
 )
 

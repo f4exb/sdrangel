@@ -26,10 +26,11 @@
 #include "localinputgui.h"
 #endif
 #include "localinputplugin.h"
+#include "localinputwebapiadapter.h"
 
 const PluginDescriptor LocalInputPlugin::m_pluginDescriptor = {
 	QString("Local device input"),
-	QString("4.6.0"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -113,4 +114,9 @@ DeviceSampleSource *LocalInputPlugin::createSampleSourcePluginInstance(const QSt
     {
         return 0;
     }
+}
+
+DeviceWebAPIAdapter *LocalInputPlugin::createDeviceWebAPIAdapter() const
+{
+    return new LocalInputWebAPIAdapter();
 }

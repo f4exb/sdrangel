@@ -21,6 +21,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "airspyhfplugin.h"
+#include "airspyhfwebapiadapter.h"
 #ifdef SERVER_MODE
 #include "airspyhfinput.h"
 #else
@@ -30,7 +31,7 @@
 
 const PluginDescriptor AirspyHFPlugin::m_pluginDescriptor = {
 	QString("AirspyHF Input"),
-	QString("4.5.2"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -139,4 +140,9 @@ DeviceSampleSource *AirspyHFPlugin::createSampleSourcePluginInstance(const QStri
     {
         return 0;
     }
+}
+
+DeviceWebAPIAdapter *AirspyHFPlugin::createDeviceWebAPIAdapter() const
+{
+    return new AirspyHFWebAPIAdapter();
 }

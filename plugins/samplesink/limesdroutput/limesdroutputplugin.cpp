@@ -31,10 +31,11 @@
 #include "limesdroutputgui.h"
 #endif
 #include "limesdroutputplugin.h"
+#include "limesdroutputwebapiadapter.h"
 
 const PluginDescriptor LimeSDROutputPlugin::m_pluginDescriptor = {
     QString("LimeSDR Output"),
-    QString("4.5.5"),
+    QString("4.11.6"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -172,3 +173,7 @@ DeviceSampleSink* LimeSDROutputPlugin::createSampleSinkPluginInstance(const QStr
     }
 }
 
+DeviceWebAPIAdapter *LimeSDROutputPlugin::createDeviceWebAPIAdapter() const
+{
+    return new LimeSDROutputWebAPIAdapter();
+}

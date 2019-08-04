@@ -23,7 +23,7 @@
 class ChannelUtils
 {
 public:
-    static bool compareRxChannelURIs(const QString& registerdChannelURI, const QString& xChannelURI);
+    static bool compareChannelURIs(const QString& registerdChannelURI, const QString& xChannelURI);
     static QString getRegisteredChannelURI(const QString& xChannelURI);
 };
 

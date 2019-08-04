@@ -26,10 +26,11 @@
 #include "testsourcegui.h"
 #endif
 #include "testsourceplugin.h"
+#include "testsourcewebapiadapter.h"
 
 const PluginDescriptor TestSourcePlugin::m_pluginDescriptor = {
 	QString("Test Source input"),
-	QString("4.5.2"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -112,3 +113,7 @@ DeviceSampleSource *TestSourcePlugin::createSampleSourcePluginInstance(const QSt
     }
 }
 
+DeviceWebAPIAdapter *TestSourcePlugin::createDeviceWebAPIAdapter() const
+{
+    return new TestSourceWebAPIAdapter();
+}

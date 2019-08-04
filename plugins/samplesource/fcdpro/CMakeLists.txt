@@ -3,14 +3,16 @@ project(fcdpro)
 set(fcdpro_SOURCES
 	fcdproinput.cpp
 	fcdproplugin.cpp
-	fcdprosettings.cpp
+    fcdprosettings.cpp
+    fcdprowebapiadapter.cpp
 	fcdprothread.cpp
 )
 
 set(fcdpro_HEADERS
 	fcdproinput.h
 	fcdproplugin.h
-	fcdprosettings.h
+    fcdprosettings.h
+    fcdprowebapiadapter.h
 	fcdprothread.h
 )
 

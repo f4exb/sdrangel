@@ -138,6 +138,15 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    static void webapiFormatDeviceSettings(
+            SWGSDRangel::SWGDeviceSettings& response,
+            const BladeRF1InputSettings& settings);
+
+    static void webapiUpdateDeviceSettings(
+            BladeRF1InputSettings& settings,
+            const QStringList& deviceSettingsKeys,
+            SWGSDRangel::SWGDeviceSettings& response);
+
 private:
 	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
@@ -155,7 +164,6 @@ private:
     void closeDevice();
 	bool applySettings(const BladeRF1InputSettings& settings, bool force);
 	bladerf_lna_gain getLnaGain(int lnaGain);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF1InputSettings& settings);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const BladeRF1InputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 

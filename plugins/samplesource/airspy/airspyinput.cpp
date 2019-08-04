@@ -671,7 +671,7 @@ int AirspyInput::webapiSettingsPutPatch(
     return 200;
 }
 
-void webapiUpdateDeviceSettings(
+void AirspyInput::webapiUpdateDeviceSettings(
         AirspySettings& settings,
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)

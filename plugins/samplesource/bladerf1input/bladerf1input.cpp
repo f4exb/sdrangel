@@ -667,7 +667,26 @@ int Bladerf1Input::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     BladeRF1InputSettings settings = m_settings;
+    webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
+    MsgConfigureBladerf1 *msg = MsgConfigureBladerf1::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureBladerf1 *msgToGUI = MsgConfigureBladerf1::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void Bladerf1Input::webapiUpdateDeviceSettings(
+        BladeRF1InputSettings& settings,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response)
+{
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getBladeRf1InputSettings()->getCenterFrequency();
     }
@@ -722,18 +741,6 @@ int Bladerf1Input::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
         settings.m_reverseAPIDeviceIndex = response.getBladeRf1InputSettings()->getReverseApiDeviceIndex();
     }
-
-    MsgConfigureBladerf1 *msg = MsgConfigureBladerf1::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureBladerf1 *msgToGUI = MsgConfigureBladerf1::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatDeviceSettings(response, settings);
-    return 200;
 }
 
 int Bladerf1Input::webapiRunGet(

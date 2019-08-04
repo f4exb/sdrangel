@@ -381,7 +381,26 @@ int KiwiSDRInput::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     KiwiSDRSettings settings = m_settings;
+    webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
+    MsgConfigureKiwiSDR *msg = MsgConfigureKiwiSDR::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureKiwiSDR *msgToGUI = MsgConfigureKiwiSDR::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void KiwiSDRInput::webapiUpdateDeviceSettings(
+        KiwiSDRSettings& settings,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response)
+{
     if (deviceSettingsKeys.contains("gain")) {
         settings.m_gain = response.getKiwiSdrSettings()->getGain();
     }
@@ -412,18 +431,6 @@ int KiwiSDRInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
         settings.m_reverseAPIDeviceIndex = response.getKiwiSdrSettings()->getReverseApiDeviceIndex();
     }
-
-    MsgConfigureKiwiSDR *msg = MsgConfigureKiwiSDR::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureKiwiSDR *msgToGUI = MsgConfigureKiwiSDR::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatDeviceSettings(response, settings);
-    return 200;
 }
 
 int KiwiSDRInput::webapiReportGet(

@@ -465,7 +465,26 @@ int FileInput::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     FileInputSettings settings = m_settings;
+    webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
+    MsgConfigureFileInput *msg = MsgConfigureFileInput::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureFileInput *msgToGUI = MsgConfigureFileInput::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void FileInput::webapiUpdateDeviceSettings(
+        FileInputSettings& settings,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response)
+{
     if (deviceSettingsKeys.contains("fileName")) {
         settings.m_fileName = *response.getFileInputSettings()->getFileName();
     }
@@ -487,18 +506,6 @@ int FileInput::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
         settings.m_reverseAPIDeviceIndex = response.getFileInputSettings()->getReverseApiDeviceIndex();
     }
-
-    MsgConfigureFileInput *msg = MsgConfigureFileInput::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureFileInput *msgToGUI = MsgConfigureFileInput::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatDeviceSettings(response, settings);
-    return 200;
 }
 
 int FileInput::webapiRunGet(

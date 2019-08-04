@@ -4,6 +4,7 @@ set(hackrfoutput_SOURCES
     hackrfoutput.cpp
     hackrfoutputplugin.cpp
     hackrfoutputsettings.cpp
+    hackrfoutputwebapiadapter.cpp
     hackrfoutputthread.cpp
 )
 
@@ -11,6 +12,7 @@ set(hackrfoutput_HEADERS
     hackrfoutput.h
     hackrfoutputplugin.h
     hackrfoutputsettings.h
+    hackrfoutputwebapiadapter.h
     hackrfoutputthread.h
 )
 

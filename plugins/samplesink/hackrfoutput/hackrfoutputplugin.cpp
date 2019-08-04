@@ -27,10 +27,11 @@
 #include "hackrfoutputgui.h"
 #endif
 #include "hackrfoutputplugin.h"
+#include "hackrfoutputwebapiadapter.h"
 
 const PluginDescriptor HackRFOutputPlugin::m_pluginDescriptor = {
 	QString("HackRF Output"),
-	QString("4.5.5"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -57,13 +58,6 @@ void HackRFOutputPlugin::initPlugin(PluginAPI* pluginAPI)
 
 PluginInterface::SamplingDevices HackRFOutputPlugin::enumSampleSinks()
 {
-//	hackrf_error rc = (hackrf_error) hackrf_init();
-//
-//	if (rc != HACKRF_SUCCESS)
-//	{
-//		qCritical("HackRFOutputPlugin::enumSampleSinks: failed to initiate HackRF library: %s", hackrf_error_name(rc));
-//	}
-
 	SamplingDevices result;
 	hackrf_device_list_t *hackrf_devices = hackrf_device_list();
 	hackrf_device *hackrf_ptr;
@@ -115,9 +109,6 @@ PluginInterface::SamplingDevices HackRFOutputPlugin::enumSampleSinks()
 	}
 
 	hackrf_device_list_free(hackrf_devices);
-//	rc = (hackrf_error) hackrf_exit();
-//	qDebug("HackRFOutputPlugin::enumSampleSinks: hackrf_exit: %s", hackrf_error_name(rc));
-
 	return result;
 }
 
@@ -165,4 +156,7 @@ DeviceSampleSink* HackRFOutputPlugin::createSampleSinkPluginInstance(const QStri
 
 }
 
-
+DeviceWebAPIAdapter *HackRFOutputPlugin::createDeviceWebAPIAdapter() const
+{
+    return new HackRFOutputWebAPIAdapter();
+}

@@ -27,10 +27,11 @@
 #include "kiwisdrgui.h"
 #endif
 #include "kiwisdrplugin.h"
+#include "kiwisdrwebapiadapter.h"
 
 const PluginDescriptor KiwiSDRPlugin::m_pluginDescriptor = {
 	QString("KiwiSDR input"),
-	QString("4.10.0"),
+	QString("4.11.6"),
 	QString("(c) Vort (c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -113,3 +114,7 @@ DeviceSampleSource *KiwiSDRPlugin::createSampleSourcePluginInstance(const QStrin
     }
 }
 
+DeviceWebAPIAdapter *KiwiSDRPlugin::createDeviceWebAPIAdapter() const
+{
+    return new KiwiSDRWebAPIAdapter();
+}

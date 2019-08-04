@@ -28,10 +28,11 @@
 #include "hackrfinputgui.h"
 #endif
 #include "hackrfinputplugin.h"
+#include "hackrfinputwebapiadapter.h"
 
 const PluginDescriptor HackRFInputPlugin::m_pluginDescriptor = {
 	QString("HackRF Input"),
-	QString("4.5.4"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -164,4 +165,9 @@ DeviceSampleSource *HackRFInputPlugin::createSampleSourcePluginInstance(const QS
     {
         return 0;
     }
+}
+
+DeviceWebAPIAdapter *HackRFInputPlugin::createDeviceWebAPIAdapter() const
+{
+    return new HackRFInputWebAPIAdapter();
 }

@@ -4,6 +4,7 @@ set(plutosdroutput_SOURCES
     plutosdroutput.cpp
     plutosdroutputplugin.cpp
     plutosdroutputsettings.cpp
+    plutosdroutputwebapiadapter.cpp
     plutosdroutputthread.cpp
 )
 
@@ -11,6 +12,7 @@ set(plutosdroutput_HEADERS
     plutosdroutput.h
     plutosdroutputplugin.h
     plutosdroutputsettings.h
+    plutosdroutputwebapiadapter.h
     plutosdroutputthread.h
 )
 

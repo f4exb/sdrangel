@@ -44,6 +44,7 @@ public:
 	        DeviceUISet *deviceUISet);
 
 	virtual DeviceSampleSink* createSampleSinkPluginInstance(const QString& sinkId, DeviceAPI *deviceAPI);
+    virtual DeviceWebAPIAdapter* createDeviceWebAPIAdapter() const;
 
 	static const QString m_hardwareID;
     static const QString m_deviceTypeID;

@@ -21,6 +21,7 @@
 #include "soapysdr/devicesoapysdr.h"
 
 #include "soapysdrinputplugin.h"
+#include "soapysdrinputwebapiadapter.h"
 
 #ifdef SERVER_MODE
 #include "soapysdrinput.h"
@@ -30,7 +31,7 @@
 
 const PluginDescriptor SoapySDRInputPlugin::m_pluginDescriptor = {
     QString("SoapySDR Input"),
-    QString("4.5.2"),
+    QString("4.11.6"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -131,7 +132,7 @@ DeviceSampleSource *SoapySDRInputPlugin::createSampleSourcePluginInstance(const 
     }
 }
 
-
-
-
-
+DeviceWebAPIAdapter *SoapySDRInputPlugin::createDeviceWebAPIAdapter() const
+{
+    return new SoapySDRInputWebAPIAdapter();
+}

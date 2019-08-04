@@ -185,7 +185,7 @@ void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
                 qDebug("DeviceSet::loadChannelSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channelIdURI));
 
                 //if(openChannels[i].m_channelName == channelConfig.m_channelIdURI)
-                if (ChannelUtils::compareRxChannelURIs(openChannels[i].m_channelName, channelConfig.m_channelIdURI))
+                if (ChannelUtils::compareChannelURIs(openChannels[i].m_channelName, channelConfig.m_channelIdURI))
                 {
                     qDebug("DeviceSet::loadChannelSettings: channel [%s] found", qPrintable(openChannels[i].m_channelName));
                     reg = openChannels.takeAt(i);
@@ -201,7 +201,7 @@ void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
                 for (int i = 0; i < channelRegistrations->count(); i++)
                 {
                     //if((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
-                    if (ChannelUtils::compareRxChannelURIs((*channelRegistrations)[i].m_channelIdURI, channelConfig.m_channelIdURI))
+                    if (ChannelUtils::compareChannelURIs((*channelRegistrations)[i].m_channelIdURI, channelConfig.m_channelIdURI))
                     {
                         qDebug("DeviceSet::loadChannelSettings: creating new channel [%s] from config [%s]",
                                 qPrintable((*channelRegistrations)[i].m_channelIdURI),

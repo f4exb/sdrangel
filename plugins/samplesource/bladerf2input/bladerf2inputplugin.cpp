@@ -21,6 +21,7 @@
 #include <libbladeRF.h>
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "bladerf2inputwebapiadapter.h"
 
 #ifdef SERVER_MODE
 #include "bladerf2input.h"
@@ -30,7 +31,7 @@
 
 const PluginDescriptor Blderf2InputPlugin::m_pluginDescriptor = {
     QString("BladeRF2 Input"),
-    QString("4.5.4"),
+    QString("4.11.6"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -120,7 +121,7 @@ PluginInstanceGUI* Blderf2InputPlugin::createSampleSourcePluginInstanceGUI(
 {
     (void) sourceId;
     (void) widget;
-    (void) deviceUISet;    
+    (void) deviceUISet;
     return 0;
 }
 #else
@@ -155,6 +156,7 @@ DeviceSampleSource *Blderf2InputPlugin::createSampleSourcePluginInstance(const Q
     }
 }
 
-
-
-
+DeviceWebAPIAdapter *Blderf2InputPlugin::createDeviceWebAPIAdapter() const
+{
+    return new BladeRF2InputWebAPIAdapter();
+}

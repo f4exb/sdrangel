@@ -26,10 +26,11 @@
 #include "sdrplaygui.h"
 #endif
 #include "sdrplayplugin.h"
+#include "sdrplaywebapiadapter.h"
 
 const PluginDescriptor SDRPlayPlugin::m_pluginDescriptor = {
     QString("SDRPlay RSP1 Input"),
-    QString("4.5.2"),
+    QString("4.11.6"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -134,3 +135,7 @@ DeviceSampleSource *SDRPlayPlugin::createSampleSourcePluginInstance(const QStrin
     }
 }
 
+DeviceWebAPIAdapter *SDRPlayPlugin::createDeviceWebAPIAdapter() const
+{
+    return new SDRPlayWebAPIAdapter();
+}

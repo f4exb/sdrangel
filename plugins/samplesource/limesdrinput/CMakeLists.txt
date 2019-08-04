@@ -3,14 +3,16 @@ project(limesdrinput)
 set(limesdrinput_SOURCES
 	limesdrinput.cpp
 	limesdrinputplugin.cpp
-	limesdrinputsettings.cpp
+    limesdrinputsettings.cpp
+    limesdrinputwebapiadapter.cpp
 	limesdrinputthread.cpp
 )
 
 set(limesdrinput_HEADERS
 	limesdrinput.h
 	limesdrinputplugin.h
-	limesdrinputsettings.h
+    limesdrinputsettings.h
+    limesdrinputwebapiadapter.h
 	limesdrinputthread.h
 )
 

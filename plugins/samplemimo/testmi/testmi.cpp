@@ -570,7 +570,26 @@ int TestMI::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     TestMISettings settings = m_settings;
+    webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
+    MsgConfigureTestSource *msg = MsgConfigureTestSource::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureTestSource *msgToGUI = MsgConfigureTestSource::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void webapiUpdateDeviceSettings(
+        TestMISettings& settings,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response)
+{
     if (deviceSettingsKeys.contains("streams"))
     {
         QList<SWGSDRangel::SWGTestMiStreamSettings*> *streamsSettings = response.getTestMiSettings()->getStreams();
@@ -580,60 +599,60 @@ int TestMI::webapiSettingsPutPatch(
         {
             int istream = (*it)->getStreamIndex();
 
-            if (deviceSettingsKeys.contains(tr("streams[%1].centerFrequency").arg(istream))) {
+            if (deviceSettingsKeys.contains(QString("streams[%1].centerFrequency").arg(istream))) {
                 settings.m_streams[istream].m_centerFrequency = (*it)->getCenterFrequency();
             }
-            if (deviceSettingsKeys.contains(tr("streams[%1].frequencyShift").arg(istream))) {
+            if (deviceSettingsKeys.contains(QString("streams[%1].frequencyShift").arg(istream))) {
                 settings.m_streams[istream].m_frequencyShift = (*it)->getFrequencyShift();
             }
-            if (deviceSettingsKeys.contains(tr("streams[%1].sampleRate").arg(istream))) {
+            if (deviceSettingsKeys.contains(QString("streams[%1].sampleRate").arg(istream))) {
                 settings.m_streams[istream].m_sampleRate = (*it)->getSampleRate();
             }
-            if (deviceSettingsKeys.contains(tr("streams[%1].log2Decim").arg(istream))) {
+            if (deviceSettingsKeys.contains(QString("streams[%1].log2Decim").arg(istream))) {
                 settings.m_streams[istream].m_log2Decim = (*it)->getLog2Decim();
             }
-            if (deviceSettingsKeys.contains(tr("streams[%1].fcPos").arg(istream))) {
+            if (deviceSettingsKeys.contains(QString("streams[%1].fcPos").arg(istream))) {
                 int fcPos = (*it)->getFcPos();
                 fcPos = fcPos < 0 ? 0 : fcPos > 2 ? 2 : fcPos;
                 settings.m_streams[istream].m_fcPos = (TestMIStreamSettings::fcPos_t) fcPos;
             }
-            if (deviceSettingsKeys.contains(tr("streams[%1].sampleSizeIndex").arg(istream))) {
+            if (deviceSettingsKeys.contains(QString("streams[%1].sampleSizeIndex").arg(istream))) {
                 int sampleSizeIndex = (*it)->getSampleSizeIndex();
                 sampleSizeIndex = sampleSizeIndex < 0 ? 0 : sampleSizeIndex > 1 ? 2 : sampleSizeIndex;
                 settings.m_streams[istream].m_sampleSizeIndex = sampleSizeIndex;
             }
-            if (deviceSettingsKeys.contains(tr("streams[%1].amplitudeBits").arg(istream))) {
+            if (deviceSettingsKeys.contains(QString("streams[%1].amplitudeBits").arg(istream))) {
                 settings.m_streams[istream].m_amplitudeBits = (*it)->getAmplitudeBits();
             }
-            if (deviceSettingsKeys.contains(tr("streams[%1].autoCorrOptions").arg(istream))) {
+            if (deviceSettingsKeys.contains(QString("streams[%1].autoCorrOptions").arg(istream))) {
                 int autoCorrOptions = (*it)->getAutoCorrOptions();
                 autoCorrOptions = autoCorrOptions < 0 ? 0 : autoCorrOptions >= TestMIStreamSettings::AutoCorrLast ? TestMIStreamSettings::AutoCorrLast-1 : autoCorrOptions;
                 settings.m_streams[istream].m_sampleSizeIndex = (TestMIStreamSettings::AutoCorrOptions) autoCorrOptions;
             }
-            if (deviceSettingsKeys.contains(tr("streams[%1].modulation").arg(istream))) {
+            if (deviceSettingsKeys.contains(QString("streams[%1].modulation").arg(istream))) {
                 int modulation = (*it)->getModulation();
                 modulation = modulation < 0 ? 0 : modulation >= TestMIStreamSettings::ModulationLast ? TestMIStreamSettings::ModulationLast-1 : modulation;
                 settings.m_streams[istream].m_modulation = (TestMIStreamSettings::Modulation) modulation;
             }
-            if (deviceSettingsKeys.contains(tr("streams[%1].modulationTone").arg(istream))) {
+            if (deviceSettingsKeys.contains(QString("streams[%1].modulationTone").arg(istream))) {
                 settings.m_streams[istream].m_modulationTone = (*it)->getModulationTone();
             }
-            if (deviceSettingsKeys.contains(tr("streams[%1].amModulation").arg(istream))) {
+            if (deviceSettingsKeys.contains(QString("streams[%1].amModulation").arg(istream))) {
                 settings.m_streams[istream].m_amModulation = (*it)->getAmModulation();
             };
-            if (deviceSettingsKeys.contains(tr("streams[%1].fmDeviation").arg(istream))) {
+            if (deviceSettingsKeys.contains(QString("streams[%1].fmDeviation").arg(istream))) {
                 settings.m_streams[istream].m_fmDeviation = (*it)->getFmDeviation();
             };
-            if (deviceSettingsKeys.contains(tr("streams[%1].dcFactor").arg(istream))) {
+            if (deviceSettingsKeys.contains(QString("streams[%1].dcFactor").arg(istream))) {
                 settings.m_streams[istream].m_dcFactor = (*it)->getDcFactor();
             };
-            if (deviceSettingsKeys.contains(tr("streams[%1].iFactor").arg(istream))) {
+            if (deviceSettingsKeys.contains(QString("streams[%1].iFactor").arg(istream))) {
                 settings.m_streams[istream].m_iFactor = (*it)->getIFactor();
             };
-            if (deviceSettingsKeys.contains(tr("streams[%1].qFactor").arg(istream))) {
+            if (deviceSettingsKeys.contains(QString("streams[%1].qFactor").arg(istream))) {
                 settings.m_streams[istream].m_qFactor = (*it)->getQFactor();
             };
-            if (deviceSettingsKeys.contains(tr("streams[%1].phaseImbalance").arg(istream))) {
+            if (deviceSettingsKeys.contains(QString("streams[%1].phaseImbalance").arg(istream))) {
                 settings.m_streams[istream].m_phaseImbalance = (*it)->getPhaseImbalance();
             };
         }
@@ -655,18 +674,6 @@ int TestMI::webapiSettingsPutPatch(
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
         settings.m_reverseAPIDeviceIndex = response.getTestMiSettings()->getReverseApiDeviceIndex();
     }
-
-    MsgConfigureTestSource *msg = MsgConfigureTestSource::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureTestSource *msgToGUI = MsgConfigureTestSource::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    webapiFormatDeviceSettings(response, settings);
-    return 200;
 }
 
 void TestMI::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const TestMISettings& settings)

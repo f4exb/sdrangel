@@ -3,13 +3,15 @@ project(localoutput)
 set(localoutput_SOURCES
 	localoutput.cpp
 	localoutputplugin.cpp
-	localoutputsettings.cpp
+    localoutputsettings.cpp
+    localoutputwebapiadapter.cpp
 )
 
 set(localoutput_HEADERS
 	localoutput.h
 	localoutputplugin.h
-	localoutputsettings.h
+    localoutputsettings.h
+    localoutputwebapiadapter.h
 )
 
 include_directories(

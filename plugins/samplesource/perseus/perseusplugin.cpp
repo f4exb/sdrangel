@@ -22,6 +22,7 @@
 #include "util/simpleserializer.h"
 #include "perseus/deviceperseus.h"
 #include "perseusplugin.h"
+#include "perseuswebapiadapter.h"
 
 #ifdef SERVER_MODE
 #include "perseusinput.h"
@@ -31,7 +32,7 @@
 
 const PluginDescriptor PerseusPlugin::m_pluginDescriptor = {
 	QString("Perseus Input"),
-	QString("4.5.2"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -129,4 +130,9 @@ DeviceSampleSource *PerseusPlugin::createSampleSourcePluginInstance(const QStrin
     {
         return 0;
     }
+}
+
+DeviceWebAPIAdapter *PerseusPlugin::createDeviceWebAPIAdapter() const
+{
+    return new PerseusWebAPIAdapter();
 }

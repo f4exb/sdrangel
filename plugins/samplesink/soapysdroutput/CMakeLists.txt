@@ -3,14 +3,16 @@ project(soapysdroutput)
 set(soapysdroutput_SOURCES
 	soapysdroutput.cpp
 	soapysdroutputplugin.cpp
-	soapysdroutputsettings.cpp
+    soapysdroutputsettings.cpp
+    soapysdroutputwebapiadapter.cpp
 	soapysdroutputthread.cpp
 )
 
 set(soapysdroutput_HEADERS
 	soapysdroutput.h
 	soapysdroutputplugin.h
-	soapysdroutputsettings.h
+    soapysdroutputsettings.h
+    soapysdroutputwebapiadapter.h
 	soapysdroutputthread.h
 )
 

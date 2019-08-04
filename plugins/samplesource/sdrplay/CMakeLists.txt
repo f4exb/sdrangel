@@ -4,6 +4,7 @@ set(sdrplay_SOURCES
     sdrplayinput.cpp
     sdrplayplugin.cpp
     sdrplaysettings.cpp
+    sdrplaywebapiadapter.cpp
     sdrplaythread.cpp
 )
 
@@ -11,6 +12,7 @@ set(sdrplay_HEADERS
     sdrplayinput.h
     sdrplayplugin.h
     sdrplaysettings.h
+    sdrplaywebapiadapter.h
     sdrplaythread.h
 )
 

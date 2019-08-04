@@ -21,6 +21,7 @@
 #include "util/simpleserializer.h"
 
 #include "bladerf2outputplugin.h"
+#include "bladerf2outputwebapiadapter.h"
 
 #ifdef SERVER_MODE
 #include "bladerf2output.h"
@@ -30,7 +31,7 @@
 
 const PluginDescriptor BladeRF2OutputPlugin::m_pluginDescriptor = {
     QString("BladeRF2 Output"),
-    QString("4.5.4"),
+    QString("4.11.6"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -155,6 +156,7 @@ DeviceSampleSink* BladeRF2OutputPlugin::createSampleSinkPluginInstance(const QSt
     }
 }
 
-
-
-
+DeviceWebAPIAdapter *BladeRF2OutputPlugin::createDeviceWebAPIAdapter() const
+{
+    return new BladeRF2OutputWebAPIAdapter();
+}

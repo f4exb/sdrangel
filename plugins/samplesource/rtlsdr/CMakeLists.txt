@@ -4,6 +4,7 @@ set(rtlsdr_SOURCES
     rtlsdrinput.cpp
     rtlsdrplugin.cpp
     rtlsdrsettings.cpp
+    rtlsdrwebapiadapter.cpp
     rtlsdrthread.cpp
 )
 
@@ -11,6 +12,7 @@ set(rtlsdr_HEADERS
     rtlsdrinput.h
     rtlsdrplugin.h
     rtlsdrsettings.h
+    rtlsdrwebapiadapter.h
     rtlsdrthread.h
 )
 include_directories(

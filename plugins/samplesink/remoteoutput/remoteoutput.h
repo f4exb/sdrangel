@@ -166,6 +166,15 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    static void webapiFormatDeviceSettings(
+            SWGSDRangel::SWGDeviceSettings& response,
+            const RemoteOutputSettings& settings);
+
+    static void webapiUpdateDeviceSettings(
+            RemoteOutputSettings& settings,
+            const QStringList& deviceSettingsKeys,
+            SWGSDRangel::SWGDeviceSettings& response);
+
 private:
     DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
@@ -192,7 +201,6 @@ private:
     static const uint32_t NbSamplesForRateCorrection;
 
 	void applySettings(const RemoteOutputSettings& settings, bool force = false);
-    void webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RemoteOutputSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 
     void analyzeApiReply(const QJsonObject& jsonObject, const QString& answer);

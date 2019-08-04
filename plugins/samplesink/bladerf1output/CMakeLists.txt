@@ -3,14 +3,16 @@ project(bladerf1output)
 set(bladerf1output_SOURCES
 	bladerf1output.cpp
 	bladerf1outputplugin.cpp
-	bladerf1outputsettings.cpp
+    bladerf1outputsettings.cpp
+    bladerf1outputwebapiadapter.cpp
 	bladerf1outputthread.cpp
 )
 
 set(bladerf1output_HEADERS
 	bladerf1output.h
 	bladerf1soutputplugin.h
-	bladerf1outputsettings.h
+    bladerf1outputsettings.h
+    bladerf1outputwebapiadapter.h
 	bladerf1outputthread.h
 )
 

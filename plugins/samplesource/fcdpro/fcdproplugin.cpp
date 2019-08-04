@@ -19,6 +19,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "fcdproplugin.h"
+#include "fcdprowebapiadapter.h"
 
 #ifdef SERVER_MODE
 #include "fcdproinput.h"
@@ -121,4 +122,9 @@ DeviceSampleSource *FCDProPlugin::createSampleSourcePluginInstance(const QString
     {
         return 0;
     }
+}
+
+DeviceWebAPIAdapter *FCDProPlugin::createDeviceWebAPIAdapter() const
+{
+    return new FCDProWebAPIAdapter();
 }

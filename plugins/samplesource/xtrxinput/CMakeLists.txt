@@ -3,14 +3,16 @@ project(xtrxinput)
 set(xtrxinput_SOURCES
 	xtrxinput.cpp
 	xtrxinputplugin.cpp
-	xtrxinputsettings.cpp
+    xtrxinputsettings.cpp
+    xtrxinputwebapiadapter.cpp
 	xtrxinputthread.cpp
 )
 
 set(xtrxinput_HEADERS
 	xtrxinput.h
 	xtrxinputplugin.h
-	xtrxinputsettings.h
+    xtrxinputsettings.h
+    xtrxinputwebapiadapter.h
 	xtrxinputthread.h
 )
 

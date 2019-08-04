@@ -17,7 +17,7 @@
 
 #include "channelutils.h"
 
-bool ChannelUtils::compareRxChannelURIs(const QString& registerdChannelURI, const QString& xChannelURI)
+bool ChannelUtils::compareChannelURIs(const QString& registerdChannelURI, const QString& xChannelURI)
 {
     return registerdChannelURI == getRegisteredChannelURI(xChannelURI);
 }
