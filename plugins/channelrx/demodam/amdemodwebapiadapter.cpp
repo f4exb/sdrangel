@@ -25,16 +25,6 @@ AMDemodWebAPIAdapter::AMDemodWebAPIAdapter()
 AMDemodWebAPIAdapter::~AMDemodWebAPIAdapter()
 {}
 
-QByteArray AMDemodWebAPIAdapter::serialize() const
-{
-    return m_settings.serialize();
-}
-
-bool AMDemodWebAPIAdapter::deserialize(const QByteArray& data)
-{
-    return m_settings.deserialize(data);
-}
-
 int AMDemodWebAPIAdapter::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)

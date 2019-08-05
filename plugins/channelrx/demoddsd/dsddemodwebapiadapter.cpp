@@ -25,16 +25,6 @@ DSDDemodWebAPIAdapter::DSDDemodWebAPIAdapter()
 DSDDemodWebAPIAdapter::~DSDDemodWebAPIAdapter()
 {}
 
-QByteArray DSDDemodWebAPIAdapter::serialize() const
-{
-    return m_settings.serialize();
-}
-
-bool DSDDemodWebAPIAdapter::deserialize(const QByteArray& data)
-{
-    return m_settings.deserialize(data);
-}
-
 int DSDDemodWebAPIAdapter::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)

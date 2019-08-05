@@ -31,7 +31,7 @@ public:
     virtual ~AMModWebAPIAdapter();
 
     virtual QByteArray serialize() const { return m_settings.serialize(); }
-    virtual bool deserialize(const QByteArray& data) { m_settings.deserialize(data); }
+    virtual bool deserialize(const QByteArray& data) { return m_settings.deserialize(data); }
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
