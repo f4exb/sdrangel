@@ -47,8 +47,8 @@ public:
     qint32 getFftOverlap();
     void setFftOverlap(qint32 fft_overlap);
 
-    qint32 getMFftWindow();
-    void setMFftWindow(qint32 m_fft_window);
+    qint32 getFftWindow();
+    void setFftWindow(qint32 fft_window);
 
     float getRefLevel();
     void setRefLevel(float ref_level);
@@ -114,8 +114,8 @@ private:
     qint32 fft_overlap;
     bool m_fft_overlap_isSet;
 
-    qint32 m_fft_window;
-    bool m_m_fft_window_isSet;
+    qint32 fft_window;
+    bool m_fft_window_isSet;
 
     float ref_level;
     bool m_ref_level_isSet;

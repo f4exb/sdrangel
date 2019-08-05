@@ -19,6 +19,11 @@
 #include "util/simpleserializer.h"
 #include "glspectrumsettings.h"
 
+GLSpectrumSettings::GLSpectrumSettings()
+{
+    resetToDefaults();
+}
+
 void GLSpectrumSettings::resetToDefaults()
 {
 	m_fftSize = 1024;

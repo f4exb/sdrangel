@@ -5,7 +5,7 @@ GLSpectrum:
       type: integer
     fftOverlap:
       type: integer
-    m_fftWindow:
+    fftWindow:
       description: See FFTWindow
       type: integer
     refLevel:

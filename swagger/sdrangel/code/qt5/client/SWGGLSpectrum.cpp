@@ -32,8 +32,8 @@ SWGGLSpectrum::SWGGLSpectrum() {
     m_fft_size_isSet = false;
     fft_overlap = 0;
     m_fft_overlap_isSet = false;
-    m_fft_window = 0;
-    m_m_fft_window_isSet = false;
+    fft_window = 0;
+    m_fft_window_isSet = false;
     ref_level = 0.0f;
     m_ref_level_isSet = false;
     power_range = 0.0f;
@@ -82,8 +82,8 @@ SWGGLSpectrum::init() {
     m_fft_size_isSet = false;
     fft_overlap = 0;
     m_fft_overlap_isSet = false;
-    m_fft_window = 0;
-    m_m_fft_window_isSet = false;
+    fft_window = 0;
+    m_fft_window_isSet = false;
     ref_level = 0.0f;
     m_ref_level_isSet = false;
     power_range = 0.0f;
@@ -162,7 +162,7 @@ SWGGLSpectrum::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&fft_overlap, pJson["fftOverlap"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&m_fft_window, pJson["m_fftWindow"], "qint32", "");
+    ::SWGSDRangel::setValue(&fft_window, pJson["fftWindow"], "qint32", "");
     
     ::SWGSDRangel::setValue(&ref_level, pJson["refLevel"], "float", "");
     
@@ -222,8 +222,8 @@ SWGGLSpectrum::asJsonObject() {
     if(m_fft_overlap_isSet){
         obj->insert("fftOverlap", QJsonValue(fft_overlap));
     }
-    if(m_m_fft_window_isSet){
-        obj->insert("m_fftWindow", QJsonValue(m_fft_window));
+    if(m_fft_window_isSet){
+        obj->insert("fftWindow", QJsonValue(fft_window));
     }
     if(m_ref_level_isSet){
         obj->insert("refLevel", QJsonValue(ref_level));
@@ -304,13 +304,13 @@ SWGGLSpectrum::setFftOverlap(qint32 fft_overlap) {
 }
 
 qint32
-SWGGLSpectrum::getMFftWindow() {
-    return m_fft_window;
+SWGGLSpectrum::getFftWindow() {
+    return fft_window;
 }
 void
-SWGGLSpectrum::setMFftWindow(qint32 m_fft_window) {
-    this->m_fft_window = m_fft_window;
-    this->m_m_fft_window_isSet = true;
+SWGGLSpectrum::setFftWindow(qint32 fft_window) {
+    this->fft_window = fft_window;
+    this->m_fft_window_isSet = true;
 }
 
 float
@@ -504,7 +504,7 @@ SWGGLSpectrum::isSet(){
         if(m_fft_overlap_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_m_fft_window_isSet){
+        if(m_fft_window_isSet){
             isObjectUpdated = true; break;
         }
         if(m_ref_level_isSet){
