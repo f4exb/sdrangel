@@ -26,6 +26,8 @@ QString DeviceUtils::getRegisteredDeviceURI(const QString& xDeviceURI)
 {
     if (xDeviceURI == "sdrangel.samplesource.bladerf") {
         return "sdrangel.samplesource.bladerf1input";
+    } else if (xDeviceURI == "sdrangel.samplesource.filesource") {
+        return "sdrangel.samplesource.fileinput";
     } else  {
         return xDeviceURI;
     }

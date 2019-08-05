@@ -1200,7 +1200,7 @@ int XTRXOutput::webapiSettingsPutPatch(
     return 200;
 }
 
-void webapiUpdateDeviceSettings(
+void XTRXOutput::webapiUpdateDeviceSettings(
         XTRXOutputSettings& settings,
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)

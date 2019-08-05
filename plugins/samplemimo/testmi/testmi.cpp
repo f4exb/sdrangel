@@ -585,7 +585,7 @@ int TestMI::webapiSettingsPutPatch(
     return 200;
 }
 
-void webapiUpdateDeviceSettings(
+void TestMI::webapiUpdateDeviceSettings(
         TestMISettings& settings,
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)

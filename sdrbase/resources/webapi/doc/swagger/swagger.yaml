@@ -78,8 +78,8 @@ paths:
   /sdrangel/config:
     x-swagger-router-controller: instance
     get:
-      description: Get the Preferences, Presets and Commands of the MainSettings saved by Qt
-      operationId: instanceConfig
+      description: Get the Preferences, Presets and Commands of the MainSettings saved by Qt. Supports config backup.
+      operationId: instanceConfigGet
       tags:
         - Instance
       responses:
@@ -88,6 +88,29 @@ paths:
           schema:
             # a pointer to a definition
             $ref: "#/definitions/InstanceConfigResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    put:
+      description: Replace the Preferences, Presets and Commands of the MainSettings object with the contents of the payload. Supports config restore.
+      operationId: instanceConfigPut
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Config information
+          required: true
+          schema:
+            $ref: "#/definitions/InstanceConfigResponse"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SuccessResponse"
         "500":
           $ref: "#/responses/Response_500"
         "501":

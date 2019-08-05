@@ -605,7 +605,7 @@ int Bladerf1Output::webapiSettingsPutPatch(
     return 200;
 }
 
-void webapiUpdateDeviceSettings(
+void Bladerf1Output::webapiUpdateDeviceSettings(
     BladeRF1OutputSettings& settings,
     const QStringList& deviceSettingsKeys,
     SWGSDRangel::SWGDeviceSettings& response)

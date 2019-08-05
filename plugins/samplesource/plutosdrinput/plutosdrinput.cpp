@@ -810,7 +810,7 @@ int PlutoSDRInput::webapiSettingsPutPatch(
     return 200;
 }
 
-void webapiUpdateDeviceSettings(
+void PlutoSDRInput::webapiUpdateDeviceSettings(
         PlutoSDRInputSettings& settings,
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)

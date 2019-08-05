@@ -348,7 +348,7 @@ int RemoteInput::webapiSettingsPutPatch(
     return 200;
 }
 
-void webapiUpdateDeviceSettings(
+void RemoteInput::webapiUpdateDeviceSettings(
     RemoteInputSettings& settings,
     const QStringList& deviceSettingsKeys,
     SWGSDRangel::SWGDeviceSettings& response)
