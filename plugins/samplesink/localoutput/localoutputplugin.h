@@ -21,7 +21,7 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
-#define LOCALOUTPUT_DEVICE_TYPE_ID "sdrangel.samplesource.localoutput"
+#define LOCALOUTPUT_DEVICE_TYPE_ID "sdrangel.samplesink.localoutput"
 
 class PluginAPI;
 

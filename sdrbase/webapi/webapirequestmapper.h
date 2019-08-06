@@ -101,7 +101,7 @@ private:
 
     bool appendPresetChannelKeys(
             SWGSDRangel::SWGChannelConfig *channel,
-            const QJsonObject& channelJson,
+            const QJsonObject& channelSettngsJson,
             WebAPIAdapterInterface::ChannelKeys& channelKeys
     );
 
@@ -114,8 +114,15 @@ private:
 
     bool appendPresetDeviceKeys(
             SWGSDRangel::SWGDeviceConfig *device,
-            const QJsonObject& deviceJson,
-            WebAPIAdapterInterface::DeviceKeys& deviceKeys
+            const QJsonObject& deviceSettngsJson,
+            WebAPIAdapterInterface::DeviceKeys& devicelKeys
+    );
+
+    bool getDevice(
+        const QString& deviceSettingsKey,
+        SWGSDRangel::SWGDeviceSettings *deviceSettings,
+        const QJsonObject& deviceSettingsJson,
+        QStringList& deviceSettingsKeys
     );
 
     void appendSettingsSubKeys(
@@ -139,6 +146,11 @@ private:
     void resetAudioOutputDevice(SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice);
 
     static const QMap<QString, QString> m_channelURIToSettingsKey;
+    static const QMap<QString, QString> m_deviceIdToSettingsKey;
+    static const QMap<QString, QString> m_channelTypeToSettingsKey;
+    static const QMap<QString, QString> m_sourceDeviceHwIdToSettingsKey;
+    static const QMap<QString, QString> m_sinkDeviceHwIdToSettingsKey;
+    static const QMap<QString, QString> m_mimoDeviceHwIdToSettingsKey;
 };
 
 #endif /* SDRBASE_WEBAPI_WEBAPIREQUESTMAPPER_H_ */

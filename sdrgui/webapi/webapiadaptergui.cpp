@@ -164,6 +164,8 @@ int WebAPIAdapterGUI::instanceConfigPutPatch(
     if (force) {
         webAPIAdapterBase.webapiInitConfig(m_mainWindow.m_settings);
     }
+
+    // TODO
 }
 
 int WebAPIAdapterGUI::instanceDevices(

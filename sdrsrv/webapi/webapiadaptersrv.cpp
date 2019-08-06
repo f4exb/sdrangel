@@ -150,6 +150,23 @@ int WebAPIAdapterSrv::instanceConfigGet(
     return 200;
 }
 
+int WebAPIAdapterSrv::instanceConfigPutPatch(
+        bool force, // PUT else PATCH
+        SWGSDRangel::SWGInstanceConfigResponse& query,
+        const ConfigKeys& configKeys,
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    WebAPIAdapterBase webAPIAdapterBase;
+    webAPIAdapterBase.setPluginManager(m_mainCore.getPluginManager());
+
+    if (force) {
+        webAPIAdapterBase.webapiInitConfig(m_mainCore.m_settings);
+    }
+
+    // TODO
+}
+
 int WebAPIAdapterSrv::instanceDevices(
             int direction,
             SWGSDRangel::SWGInstanceDevicesResponse& response,

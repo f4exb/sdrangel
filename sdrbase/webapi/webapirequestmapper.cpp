@@ -48,7 +48,130 @@
 #include "SWGErrorResponse.h"
 
 const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
-    {"sdrangel.channel.bfm", "BFMDemodSettings"}
+    {"de.maintech.sdrangelove.channel.am", "AMDemodSettings"},
+    {"sdrangel.channel.amdemod", "AMDemodSettings"},
+    {"sdrangel.channeltx.ammod", "AMModSettings"},
+    {"sdrangel.channeltx.atvmod", "ATVModSettings"},
+    {"sdrangel.channel.bfm", "BFMDemodSettings"},
+    {"sdrangel.channel.dsddemod", "DSDDemodSettings"},
+    {"sdrangel.channeltx.filesrc", "FileSourceSettings"},
+    {"sdrangel.channel.freedvdemod", "FreeDVDemodSettings"},
+    {"sdrangel.channeltx.freedvmod", "FreeDVModSettings"},
+    {"sdrangel.channel.freqtracker", "FreqTrackerSettings"},
+    {"sdrangel.channel.nfmdemod", "NFMDemodSettings"},
+    {"de.maintech.sdrangelove.channel.nfm", "NFMDemodSettings"},
+    {"sdrangel.channeltx.nfmmod", "NFMModSettings"},
+    {"sdrangel.demod.localsink", "LocalSinkSettings"},
+    {"sdrangel.demod.localsource", "LocalSourceSettings"},
+    {"sdrangel.demod.remotesink", "RemoteSinkSettings"},
+    {"sdrangel.channeltx.remotesrc", "RemoteSourceSettings"},
+    {"sdrangel.channeltx.ssbmod", "SSBModSettings"},
+    {"sdrangel.channel.ssbdemod", "SSBDemodSettings"},
+    {"de.maintech.sdrangelove.channel.ssb", "SSBDemodSettings"},
+    {"sdrangel.channeltx.udpsink", "UDPSourceSettings"},
+    {"sdrangel.demod.udpsrc", "UDPSinkSettings"},
+    {"sdrangel.channel.wfmdemod", "WFMDemodSettings"},
+    {"de.maintech.sdrangelove.channel.wfm", "WFMDemodSettings"},
+    {"sdrangel.channeltx.wfmmod", "WFMModSettings"}
+};
+
+const QMap<QString, QString> WebAPIRequestMapper::m_deviceIdToSettingsKey = {
+    {"sdrangel.samplesource.airspy", "airspySettings"},
+    {"sdrangel.samplesource.airspyhf", "airspyHFSettings"},
+    {"sdrangel.samplesource.bladerf1input", "bladeRF1InputSettings"},
+    {"sdrangel.samplesource.bladerf", "bladeRF1InputSettings"}, // remap
+    {"sdrangel.samplesink.bladerf1output", "bladeRF1OutputSettings"},
+    {"sdrangel.samplesource.bladerf1output", "bladeRF1OutputSettings"}, // remap
+    {"sdrangel.samplesource.bladerf2input", "bladeRF2InputSettings"},
+    {"sdrangel.samplesink.bladerf2output", "bladeRF2OutputSettings"},
+    {"sdrangel.samplesource.fcdpro", "fcdProSettings"},
+    {"sdrangel.samplesource.fcdproplus", "fcdProPlusSettings"},
+    {"sdrangel.samplesource.fileinput", "fileInputSettings"},
+    {"sdrangel.samplesource.filesource", "fileInputSettings"}, // remap
+    {"sdrangel.samplesource.hackrf", "hackRFInputSettings"},
+    {"sdrangel.samplesink.hackrf", "hackRFOutputSettings"},
+    {"sdrangel.samplesource.hackrfoutput", "hackRFOutputSettings"}, // remap
+    {"sdrangel.samplesource.kiwisdrsource", "kiwiSDRSettings"},
+    {"sdrangel.samplesource.limesdr", "limeSdrInputSettings"},
+    {"sdrangel.samplesink.limesdr", "limeSdrOutputSettings"},
+    {"sdrangel.samplesource.localinput", "localInputSettings"},
+    {"sdrangel.samplesink.localoutput", "localOutputSettings"},
+    {"sdrangel.samplesource.localoutput", "localOutputSettings"}, // remap
+    {"sdrangel.samplesource.perseus", "perseusSettings"},
+    {"sdrangel.samplesource.plutosdr", "plutoSdrInputSettings"},
+    {"sdrangel.samplesink.plutosdr", "plutoSdrOutputSettings"},
+    {"sdrangel.samplesource.rtlsdr", "rtlSdrSettings"},
+    {"sdrangel.samplesource.remoteinput", "remoteInputSettings"},
+    {"sdrangel.samplesink.remoteoutput", "remoteOutputSettings"},
+    {"sdrangel.samplesource.sdrplay", "sdrPlaySettings"},
+    {"sdrangel.samplesource.soapysdrinput", "soapySDRInputSettings"},
+    {"sdrangel.samplesink.soapysdroutput", "soapySDROutputSettings"},
+    {"sdrangel.samplesource.testsource", "testSourceSettings"},
+    {"sdrangel.samplemimo.testmi", "testMISettings"},
+    {"sdrangel.samplesource.xtrx", "xtrxInputSettings"},
+    {"sdrangel.samplesink.xtrx", "xtrxOutputSettings"}
+};
+
+const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
+    {"AMDemod", "AMDemodSettings"},
+    {"AMMod", "AMModSettings"},
+    {"ATVMod", "ATVModSettings"},
+    {"BFMDemod", "BFMDemodSettings"},
+    {"DSDDemod", "DSDDemodSettings"},
+    {"FileSource", "FileSourceSettings"},
+    {"FreeDVDemod", "FreeDVDemodSettings"},
+    {"FreeDVMod", "FreeDVModSettings"},
+    {"FreqTracker", "FreqTrackerSettings"},
+    {"NFMDemod", "NFMDemodSettings"},
+    {"NFMMod", "NFMModSettings"},
+    {"LocalSink", "LocalSinkSettings"},
+    {"LocalSource", "LocalSourceSettings"},
+    {"RemoteSink", "RemoteSinkSettings"},
+    {"RemoteSource", "RemoteSourceSettings"},
+    {"SSBMod", "SSBModSettings"},
+    {"SSBDemod", "SSBDemodSettings"},
+    {"UDPSink", "UDPSourceSettings"},
+    {"UDPSource", "UDPSinkSettings"},
+    {"WFMDemod", "WFMDemodSettings"},
+    {"WFMMod", "WFMModSettings"}
+};
+
+const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToSettingsKey = {
+    {"Airspy", "airspySettings"},
+    {"AirspyHF", "airspyHFSettings"},
+    {"BladeRFI", "bladeRF1InputSettings"},
+    {"BladeRF2", "bladeRF2InputSettings"},
+    {"FCDPro", "fcdProSettings"},
+    {"FCDPro+", "fcdProPlusSettings"},
+    {"FileInput", "fileInputSettings"},
+    {"HackRF", "hackRFInputSettings"},
+    {"KiwiSDR", "kiwiSDRSettings"},
+    {"LimeSDR", "limeSdrInputSettings"},
+    {"LocalInput", "localInputSettings"},
+    {"Perseus", "perseusSettings"},
+    {"PlutoSDR", "plutoSdrInputSettings"},
+    {"RTLSDR", "rtlSdrSettings"},
+    {"RemoteInput", "remoteInputSettings"},
+    {"SDRplay1", "sdrPlaySettings"},
+    {"SoapySDR", "soapySDRInputSettings"},
+    {"TestSource", "testSourceSettings"},
+    {"XTRX", "xtrxInputSettings"}
+};
+
+const QMap<QString, QString> WebAPIRequestMapper::m_sinkDeviceHwIdToSettingsKey = {
+    {"BladeRF1", "bladeRF1OutputSettings"},
+    {"BladeRF2", "bladeRF2OutputSettings"},
+    {"HackRF", "hackRFOutputSettings"},
+    {"LimeSDR", "limeSdrOutputSettings"},
+    {"LocalOutput", "localOutputSettings"},
+    {"PlutoSDR", "plutoSdrOutputSettings"},
+    {"RemoteOutput", "remoteOutputSettings"},
+    {"SoapySDR", "soapySDROutputSettings"},
+    {"XTRX", "xtrxOutputSettings"}
+};
+
+const QMap<QString, QString> WebAPIRequestMapper::m_mimoDeviceHwIdToSettingsKey= {
+    {"TestMI", "testMISettings"}
 };
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
@@ -222,7 +345,6 @@ void WebAPIRequestMapper::instanceSummaryService(qtwebapp::HttpRequest& request,
 void WebAPIRequestMapper::instanceConfigService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGInstanceConfigResponse query;
-    SWGSDRangel::SWGSuccessResponse normalResponse;
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
     response.setHeader("Access-Control-Allow-Origin", "*");
@@ -246,7 +368,36 @@ void WebAPIRequestMapper::instanceConfigService(qtwebapp::HttpRequest& request, 
 
         if (parseJsonBody(jsonStr, jsonObject, response))
         {
-            // TODO
+            WebAPIAdapterInterface::ConfigKeys configKeys;
+            SWGSDRangel::SWGInstanceConfigResponse query;
+            SWGSDRangel::SWGSuccessResponse normalResponse;
+            query.init();
+
+            if (validateConfig(query, jsonObject, configKeys))
+            {
+                int status = m_adapter->instanceConfigPutPatch(
+                    true,
+                    query,
+                    configKeys,
+                    normalResponse,
+                    errorResponse
+                );
+                response.setStatus(status);
+
+                if (status/100 == 2) {
+                    response.write(normalResponse.asJson().toUtf8());
+                } else {
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+
         }
         else
         {
@@ -1898,447 +2049,29 @@ bool WebAPIRequestMapper::validateDeviceSettings(
     }
 
     QString *deviceHwType = deviceSettings.getDeviceHwType();
+    QString deviceSettingsKey;
 
-    if ((*deviceHwType == "Airspy") && (deviceSettings.getDirection() == 0))
+    if (deviceSettings.getDirection() == 0) // source
     {
-        if (jsonObject.contains("airspySettings") && jsonObject["airspySettings"].isObject())
-        {
-            QJsonObject airspySettingsJsonObject = jsonObject["airspySettings"].toObject();
-            deviceSettingsKeys = airspySettingsJsonObject.keys();
-            deviceSettings.setAirspySettings(new SWGSDRangel::SWGAirspySettings());
-            deviceSettings.getAirspySettings()->fromJsonObject(airspySettingsJsonObject);
-            return true;
-        }
-        else
-        {
+        if (m_sourceDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
+            deviceSettingsKey = m_sourceDeviceHwIdToSettingsKey[*deviceHwType];
+        } else {
             return false;
         }
     }
-    else if ((*deviceHwType == "AirspyHF") && (deviceSettings.getDirection() == 0))
+    else if (deviceSettings.getDirection() == 1) // sink
     {
-        if (jsonObject.contains("airspyHFSettings") && jsonObject["airspyHFSettings"].isObject())
-        {
-            QJsonObject airspyHFSettingsJsonObject = jsonObject["airspyHFSettings"].toObject();
-            deviceSettingsKeys = airspyHFSettingsJsonObject.keys();
-            deviceSettings.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-            deviceSettings.getAirspyHfSettings()->fromJsonObject(airspyHFSettingsJsonObject);
-            return true;
-        }
-        else
-        {
+        if (m_sinkDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
+            deviceSettingsKey = m_sinkDeviceHwIdToSettingsKey[*deviceHwType];
+        } else {
             return false;
         }
     }
-    else if ((*deviceHwType == "BladeRF1") && (deviceSettings.getDirection() == 0))
+    else if (deviceSettings.getDirection() == 2) // MIMO
     {
-        if (jsonObject.contains("bladeRF1InputSettings") && jsonObject["bladeRF1InputSettings"].isObject())
-        {
-            QJsonObject bladeRF1InputSettingsJsonObject = jsonObject["bladeRF1InputSettings"].toObject();
-            deviceSettingsKeys = bladeRF1InputSettingsJsonObject.keys();
-            deviceSettings.setBladeRf1InputSettings(new SWGSDRangel::SWGBladeRF1InputSettings());
-            deviceSettings.getBladeRf1InputSettings()->fromJsonObject(bladeRF1InputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "BladeRF1") && (deviceSettings.getDirection() == 1))
-    {
-        if (jsonObject.contains("bladeRF1OutputSettings") && jsonObject["bladeRF1OutputSettings"].isObject())
-        {
-            QJsonObject bladeRF1OutputSettingsJsonObject = jsonObject["bladeRF1OutputSettings"].toObject();
-            deviceSettingsKeys = bladeRF1OutputSettingsJsonObject.keys();
-            deviceSettings.setBladeRf1OutputSettings(new SWGSDRangel::SWGBladeRF1OutputSettings());
-            deviceSettings.getBladeRf1OutputSettings()->fromJsonObject(bladeRF1OutputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "BladeRF2") && (deviceSettings.getDirection() == 0))
-    {
-        if (jsonObject.contains("bladeRF2InputSettings") && jsonObject["bladeRF2InputSettings"].isObject())
-        {
-            QJsonObject bladeRF2InputSettingsJsonObject = jsonObject["bladeRF2InputSettings"].toObject();
-            deviceSettingsKeys = bladeRF2InputSettingsJsonObject.keys();
-            deviceSettings.setBladeRf2InputSettings(new SWGSDRangel::SWGBladeRF2InputSettings());
-            deviceSettings.getBladeRf2InputSettings()->fromJsonObject(bladeRF2InputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "BladeRF2") && (deviceSettings.getDirection() == 1))
-    {
-        if (jsonObject.contains("bladeRF2OutputSettings") && jsonObject["bladeRF2OutputSettings"].isObject())
-        {
-            QJsonObject bladeRF2OutputSettingsJsonObject = jsonObject["bladeRF2OutputSettings"].toObject();
-            deviceSettingsKeys = bladeRF2OutputSettingsJsonObject.keys();
-            deviceSettings.setBladeRf2OutputSettings(new SWGSDRangel::SWGBladeRF2OutputSettings());
-            deviceSettings.getBladeRf2OutputSettings()->fromJsonObject(bladeRF2OutputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if (*deviceHwType == "FCDPro")
-    {
-        if (jsonObject.contains("fcdProSettings") && jsonObject["fcdProSettings"].isObject())
-        {
-            QJsonObject fcdProSettingsJsonObject = jsonObject["fcdProSettings"].toObject();
-            deviceSettingsKeys = fcdProSettingsJsonObject.keys();
-            deviceSettings.setFcdProSettings(new SWGSDRangel::SWGFCDProSettings());
-            deviceSettings.getFcdProSettings()->fromJsonObject(fcdProSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if (*deviceHwType == "FCDPro+")
-    {
-        if (jsonObject.contains("fcdProPlusSettings") && jsonObject["fcdProPlusSettings"].isObject())
-        {
-            QJsonObject fcdProPlusSettingsJsonObject = jsonObject["fcdProPlusSettings"].toObject();
-            deviceSettingsKeys = fcdProPlusSettingsJsonObject.keys();
-            deviceSettings.setFcdProPlusSettings(new SWGSDRangel::SWGFCDProPlusSettings());
-            deviceSettings.getFcdProPlusSettings()->fromJsonObject(fcdProPlusSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if (*deviceHwType == "FileInput")
-    {
-        if (jsonObject.contains("fileInputSettings") && jsonObject["fileInputSettings"].isObject())
-        {
-            QJsonObject fileInputSettingsJsonObject = jsonObject["fileInputSettings"].toObject();
-            deviceSettingsKeys = fileInputSettingsJsonObject.keys();
-            deviceSettings.setFileInputSettings(new SWGSDRangel::SWGFileInputSettings());
-            deviceSettings.getFileInputSettings()->fromJsonObject(fileInputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "HackRF") && (deviceSettings.getDirection() == 0))
-    {
-        if (jsonObject.contains("hackRFInputSettings") && jsonObject["hackRFInputSettings"].isObject())
-        {
-            QJsonObject hackRFInputSettingsJsonObject = jsonObject["hackRFInputSettings"].toObject();
-            deviceSettingsKeys = hackRFInputSettingsJsonObject.keys();
-            deviceSettings.setHackRfInputSettings(new SWGSDRangel::SWGHackRFInputSettings());
-            deviceSettings.getHackRfInputSettings()->fromJsonObject(hackRFInputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "HackRF") && (deviceSettings.getDirection() == 1))
-    {
-        if (jsonObject.contains("hackRFOutputSettings") && jsonObject["hackRFOutputSettings"].isObject())
-        {
-            QJsonObject hackRFOutputSettingsJsonObject = jsonObject["hackRFOutputSettings"].toObject();
-            deviceSettingsKeys = hackRFOutputSettingsJsonObject.keys();
-            deviceSettings.setHackRfOutputSettings(new SWGSDRangel::SWGHackRFOutputSettings());
-            deviceSettings.getHackRfOutputSettings()->fromJsonObject(hackRFOutputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "KiwiSDR") && (deviceSettings.getDirection() == 0))
-    {
-        if (jsonObject.contains("kiwiSDRSettings") && jsonObject["kiwiSDRSettings"].isObject())
-        {
-            QJsonObject kiwiSDRSettingsJsonObject = jsonObject["kiwiSDRSettings"].toObject();
-            deviceSettingsKeys = kiwiSDRSettingsJsonObject.keys();
-            deviceSettings.setKiwiSdrSettings(new SWGSDRangel::SWGKiwiSDRSettings());
-            deviceSettings.getKiwiSdrSettings()->fromJsonObject(kiwiSDRSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "LimeSDR") && (deviceSettings.getDirection() == 0))
-    {
-        if (jsonObject.contains("limeSdrInputSettings") && jsonObject["limeSdrInputSettings"].isObject())
-        {
-            QJsonObject limeSdrInputSettingsJsonObject = jsonObject["limeSdrInputSettings"].toObject();
-            deviceSettingsKeys = limeSdrInputSettingsJsonObject.keys();
-            deviceSettings.setLimeSdrInputSettings(new SWGSDRangel::SWGLimeSdrInputSettings());
-            deviceSettings.getLimeSdrInputSettings()->fromJsonObject(limeSdrInputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "LimeSDR") && (deviceSettings.getDirection() == 1))
-    {
-        if (jsonObject.contains("limeSdrOutputSettings") && jsonObject["limeSdrOutputSettings"].isObject())
-        {
-            QJsonObject limeSdrOutputSettingsJsonObject = jsonObject["limeSdrOutputSettings"].toObject();
-            deviceSettingsKeys = limeSdrOutputSettingsJsonObject.keys();
-            deviceSettings.setLimeSdrOutputSettings(new SWGSDRangel::SWGLimeSdrOutputSettings());
-            deviceSettings.getLimeSdrOutputSettings()->fromJsonObject(limeSdrOutputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if (*deviceHwType == "Perseus")
-    {
-        if (jsonObject.contains("perseusSettings") && jsonObject["perseusSettings"].isObject())
-        {
-            QJsonObject perseusSettingsJsonObject = jsonObject["perseusSettings"].toObject();
-            deviceSettingsKeys = perseusSettingsJsonObject.keys();
-            deviceSettings.setPerseusSettings(new SWGSDRangel::SWGPerseusSettings());
-            deviceSettings.getPerseusSettings()->fromJsonObject(perseusSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "PlutoSDR") && (deviceSettings.getDirection() == 0))
-    {
-        if (jsonObject.contains("plutoSdrInputSettings") && jsonObject["plutoSdrInputSettings"].isObject())
-        {
-            QJsonObject plutoSdrInputSettingsJsonObject = jsonObject["plutoSdrInputSettings"].toObject();
-            deviceSettingsKeys = plutoSdrInputSettingsJsonObject.keys();
-            deviceSettings.setPlutoSdrInputSettings(new SWGSDRangel::SWGPlutoSdrInputSettings());
-            deviceSettings.getPlutoSdrInputSettings()->fromJsonObject(plutoSdrInputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "PlutoSDR") && (deviceSettings.getDirection() == 1))
-    {
-        if (jsonObject.contains("plutoSdrOutputSettings") && jsonObject["plutoSdrOutputSettings"].isObject())
-        {
-            QJsonObject plutoSdrOutputSettingsJsonObject = jsonObject["plutoSdrOutputSettings"].toObject();
-            deviceSettingsKeys = plutoSdrOutputSettingsJsonObject.keys();
-            deviceSettings.setPlutoSdrOutputSettings(new SWGSDRangel::SWGPlutoSdrOutputSettings());
-            deviceSettings.getPlutoSdrOutputSettings()->fromJsonObject(plutoSdrOutputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if (*deviceHwType == "RTLSDR")
-    {
-        if (jsonObject.contains("rtlSdrSettings") && jsonObject["rtlSdrSettings"].isObject())
-        {
-            QJsonObject rtlSdrSettingsJsonObject = jsonObject["rtlSdrSettings"].toObject();
-            deviceSettingsKeys = rtlSdrSettingsJsonObject.keys();
-            deviceSettings.setRtlSdrSettings(new SWGSDRangel::SWGRtlSdrSettings());
-            deviceSettings.getRtlSdrSettings()->fromJsonObject(rtlSdrSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if (*deviceHwType == "SDRplay1")
-    {
-        if (jsonObject.contains("sdrPlaySettings") && jsonObject["sdrPlaySettings"].isObject())
-        {
-            QJsonObject sdrPlaySettingsJsonObject = jsonObject["sdrPlaySettings"].toObject();
-            deviceSettingsKeys = sdrPlaySettingsJsonObject.keys();
-            deviceSettings.setSdrPlaySettings(new SWGSDRangel::SWGSDRPlaySettings());
-            deviceSettings.getSdrPlaySettings()->fromJsonObject(sdrPlaySettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "SoapySDR")  && (deviceSettings.getDirection() == 0))
-    {
-        if (jsonObject.contains("soapySDRInputSettings") && jsonObject["soapySDRInputSettings"].isObject())
-        {
-            QJsonObject soapySdrInputSettingsJsonObject = jsonObject["soapySDRInputSettings"].toObject();
-            deviceSettingsKeys = soapySdrInputSettingsJsonObject.keys();
-            deviceSettings.setSoapySdrInputSettings(new SWGSDRangel::SWGSoapySDRInputSettings());
-            deviceSettings.getSoapySdrInputSettings()->init(); // contains complex objects
-            deviceSettings.getSoapySdrInputSettings()->fromJsonObject(soapySdrInputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "SoapySDR")  && (deviceSettings.getDirection() == 1))
-    {
-        if (jsonObject.contains("soapySDROutputSettings") && jsonObject["soapySDROutputSettings"].isObject())
-        {
-            QJsonObject soapySdrOutputSettingsJsonObject = jsonObject["soapySDROutputSettings"].toObject();
-            deviceSettingsKeys = soapySdrOutputSettingsJsonObject.keys();
-            deviceSettings.setSoapySdrOutputSettings(new SWGSDRangel::SWGSoapySDROutputSettings());
-            deviceSettings.getSoapySdrInputSettings()->init(); // contains complex objects
-            deviceSettings.getSoapySdrOutputSettings()->fromJsonObject(soapySdrOutputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if (*deviceHwType == "TestSource")
-    {
-        if (jsonObject.contains("testSourceSettings") && jsonObject["testSourceSettings"].isObject())
-        {
-            QJsonObject testSourceSettingsJsonObject = jsonObject["testSourceSettings"].toObject();
-            deviceSettingsKeys = testSourceSettingsJsonObject.keys();
-            deviceSettings.setTestSourceSettings(new SWGSDRangel::SWGTestSourceSettings());
-            deviceSettings.getTestSourceSettings()->fromJsonObject(testSourceSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "TestMI") && (deviceSettings.getDirection() == 2))
-    {
-        if (jsonObject.contains("TestMISettings") && jsonObject["TestMISettings"].isObject())
-        {
-            QJsonObject testMISettingsJsonObject = jsonObject["TestMISettings"].toObject();
-            deviceSettingsKeys = testMISettingsJsonObject.keys();
-
-            if (deviceSettingsKeys.contains("streams") && testMISettingsJsonObject["streams"].isArray())
-            {
-                appendSettingsArrayKeys(testMISettingsJsonObject, "streams", deviceSettingsKeys);
-            }
-
-            deviceSettings.setTestMiSettings(new SWGSDRangel::SWGTestMISettings());
-            deviceSettings.getTestMiSettings()->fromJsonObject(testMISettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "XTRX") && (deviceSettings.getDirection() == 0))
-    {
-        if (jsonObject.contains("xtrxInputSettings") && jsonObject["xtrxInputSettings"].isObject())
-        {
-            QJsonObject xtrxInputSettingsJsonObject = jsonObject["xtrxInputSettings"].toObject();
-            deviceSettingsKeys = xtrxInputSettingsJsonObject.keys();
-            deviceSettings.setXtrxInputSettings(new SWGSDRangel::SWGXtrxInputSettings());
-            deviceSettings.getXtrxInputSettings()->fromJsonObject(xtrxInputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "XTRX") && (deviceSettings.getDirection() == 1))
-    {
-        if (jsonObject.contains("xtrxOutputSettings") && jsonObject["xtrxOutputSettings"].isObject())
-        {
-            QJsonObject xtrxOutputSettingsJsonObject = jsonObject["xtrxOutputSettings"].toObject();
-            deviceSettingsKeys = xtrxOutputSettingsJsonObject.keys();
-            deviceSettings.setXtrxOutputSettings(new SWGSDRangel::SWGXtrxOutputSettings());
-            deviceSettings.getXtrxOutputSettings()->fromJsonObject(xtrxOutputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "RemoteInput") && (deviceSettings.getDirection() == 0))
-    {
-        if (jsonObject.contains("remoteInputSettings") && jsonObject["remoteInputSettings"].isObject())
-        {
-            QJsonObject remoteInputSettingsJsonObject = jsonObject["remoteInputSettings"].toObject();
-            deviceSettingsKeys = remoteInputSettingsJsonObject.keys();
-            deviceSettings.setRemoteInputSettings(new SWGSDRangel::SWGRemoteInputSettings());
-            deviceSettings.getRemoteInputSettings()->fromJsonObject(remoteInputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "LocalInput") && (deviceSettings.getDirection() == 0))
-    {
-        if (jsonObject.contains("localInputSettings") && jsonObject["localInputSettings"].isObject())
-        {
-            QJsonObject localInputSettingsJsonObject = jsonObject["localInputSettings"].toObject();
-            deviceSettingsKeys = localInputSettingsJsonObject.keys();
-            deviceSettings.setLocalInputSettings(new SWGSDRangel::SWGLocalInputSettings());
-            deviceSettings.getLocalInputSettings()->fromJsonObject(localInputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "RemoteOutput") && (deviceSettings.getDirection() == 1))
-    {
-        if (jsonObject.contains("remoteOutputSettings") && jsonObject["remoteOutputSettings"].isObject())
-        {
-            QJsonObject remoteOutputSettingsJsonObject = jsonObject["remoteOutputSettings"].toObject();
-            deviceSettingsKeys = remoteOutputSettingsJsonObject.keys();
-            deviceSettings.setRemoteOutputSettings(new SWGSDRangel::SWGRemoteOutputSettings());
-            deviceSettings.getRemoteOutputSettings()->fromJsonObject(remoteOutputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else if ((*deviceHwType == "LocalOutput") && (deviceSettings.getDirection() == 1))
-    {
-        if (jsonObject.contains("localOutputSettings") && jsonObject["localOutputSettings"].isObject())
-        {
-            QJsonObject localOutputSettingsJsonObject = jsonObject["localOutputSettings"].toObject();
-            deviceSettingsKeys = localOutputSettingsJsonObject.keys();
-            deviceSettings.setLocalOutputSettings(new SWGSDRangel::SWGLocalOutputSettings());
-            deviceSettings.getLocalOutputSettings()->fromJsonObject(localOutputSettingsJsonObject);
-            return true;
-        }
-        else
-        {
+        if (m_mimoDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
+            deviceSettingsKey = m_mimoDeviceHwIdToSettingsKey[*deviceHwType];
+        } else {
             return false;
         }
     }
@@ -2346,6 +2079,8 @@ bool WebAPIRequestMapper::validateDeviceSettings(
     {
         return false;
     }
+
+    return getDevice(deviceSettingsKey, &deviceSettings, jsonObject, deviceSettingsKeys);
 }
 
 bool WebAPIRequestMapper::validateChannelSettings(
@@ -2367,316 +2102,9 @@ bool WebAPIRequestMapper::validateChannelSettings(
 
     QString *channelType = channelSettings.getChannelType();
 
-    if (*channelType == "AMDemod")
-    {
-        if (channelSettings.getDirection() == 0)
-        {
-            QJsonObject amDemodSettingsJsonObject = jsonObject["AMDemodSettings"].toObject();
-            channelSettingsKeys = amDemodSettingsJsonObject.keys();
-            channelSettings.setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
-            channelSettings.getAmDemodSettings()->fromJsonObject(amDemodSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "AMMod")
-    {
-        if (channelSettings.getDirection() == 1)
-        {
-            QJsonObject amModSettingsJsonObject = jsonObject["AMModSettings"].toObject();
-            channelSettingsKeys = amModSettingsJsonObject.keys();
-
-            if (channelSettingsKeys.contains("cwKeyer"))
-            {
-                QJsonObject cwKeyerSettingsJsonObject;
-                appendSettingsSubKeys(amModSettingsJsonObject, cwKeyerSettingsJsonObject, "cwKeyer", channelSettingsKeys);
-            }
-
-            channelSettings.setAmModSettings(new SWGSDRangel::SWGAMModSettings());
-            channelSettings.getAmModSettings()->fromJsonObject(amModSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "ATVMod")
-    {
-        if (channelSettings.getDirection() == 1)
-        {
-            QJsonObject atvModSettingsJsonObject = jsonObject["ATVModSettings"].toObject();
-            channelSettingsKeys = atvModSettingsJsonObject.keys();
-            channelSettings.setAtvModSettings(new SWGSDRangel::SWGATVModSettings());
-            channelSettings.getAtvModSettings()->fromJsonObject(atvModSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "BFMDemod")
-    {
-        if (channelSettings.getDirection() == 0)
-        {
-            QJsonObject bfmDemodSettingsJsonObject = jsonObject["BFMDemodSettings"].toObject();
-            channelSettingsKeys = bfmDemodSettingsJsonObject.keys();
-            channelSettings.setBfmDemodSettings(new SWGSDRangel::SWGBFMDemodSettings());
-            channelSettings.getBfmDemodSettings()->fromJsonObject(bfmDemodSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "DSDDemod")
-    {
-        if (channelSettings.getDirection() == 0)
-        {
-            QJsonObject dsdDemodSettingsJsonObject = jsonObject["DSDDemodSettings"].toObject();
-            channelSettingsKeys = dsdDemodSettingsJsonObject.keys();
-            channelSettings.setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());
-            channelSettings.getDsdDemodSettings()->fromJsonObject(dsdDemodSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "FreeDVDemod")
-    {
-        if (channelSettings.getDirection() == 0)
-        {
-            QJsonObject freeDVDemodSettingsJsonObject = jsonObject["FreeDVDemodSettings"].toObject();
-            channelSettingsKeys = freeDVDemodSettingsJsonObject.keys();
-            channelSettings.setFreeDvDemodSettings(new SWGSDRangel::SWGFreeDVDemodSettings());
-            channelSettings.getFreeDvDemodSettings()->fromJsonObject(freeDVDemodSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "FreeDVMod")
-    {
-        if (channelSettings.getDirection() == 1)
-        {
-            QJsonObject freeDVModSettingsJsonObject = jsonObject["FreeDVModSettings"].toObject();
-            channelSettingsKeys = freeDVModSettingsJsonObject.keys();
-            channelSettings.setFreeDvModSettings(new SWGSDRangel::SWGFreeDVModSettings());
-            channelSettings.getFreeDvModSettings()->fromJsonObject(freeDVModSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "FreqTracker")
-    {
-        if (channelSettings.getDirection() == 0)
-        {
-            QJsonObject freqTrackerSettingsJsonObject = jsonObject["FreqTrackerSettings"].toObject();
-            channelSettingsKeys = freqTrackerSettingsJsonObject.keys();
-            channelSettings.setFreqTrackerSettings(new SWGSDRangel::SWGFreqTrackerSettings());
-            channelSettings.getFreqTrackerSettings()->fromJsonObject(freqTrackerSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "NFMDemod")
-    {
-        if (channelSettings.getDirection() == 0)
-        {
-            QJsonObject nfmDemodSettingsJsonObject = jsonObject["NFMDemodSettings"].toObject();
-            channelSettingsKeys = nfmDemodSettingsJsonObject.keys();
-            channelSettings.setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
-            channelSettings.getNfmDemodSettings()->fromJsonObject(nfmDemodSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "NFMMod")
-    {
-        if (channelSettings.getDirection() == 1)
-        {
-            QJsonObject nfmModSettingsJsonObject = jsonObject["NFMModSettings"].toObject();
-            channelSettingsKeys = nfmModSettingsJsonObject.keys();
-
-            if (channelSettingsKeys.contains("cwKeyer"))
-            {
-                QJsonObject cwKeyerSettingsJsonObject;
-                appendSettingsSubKeys(nfmModSettingsJsonObject, cwKeyerSettingsJsonObject, "cwKeyer", channelSettingsKeys);
-            }
-
-            channelSettings.setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
-            channelSettings.getNfmModSettings()->fromJsonObject(nfmModSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "LocalSink")
-    {
-        if (channelSettings.getDirection() == 0)
-        {
-            QJsonObject localChannelSinkSettingsJsonObject = jsonObject["LocalSinkSettings"].toObject();
-            channelSettingsKeys = localChannelSinkSettingsJsonObject.keys();
-            channelSettings.setLocalSinkSettings(new SWGSDRangel::SWGLocalSinkSettings());
-            channelSettings.getLocalSinkSettings()->fromJsonObject(localChannelSinkSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "LocalSource")
-    {
-        if (channelSettings.getDirection() == 1)
-        {
-            QJsonObject localChannelSourceSettingsJsonObject = jsonObject["LocalSourceSettings"].toObject();
-            channelSettingsKeys = localChannelSourceSettingsJsonObject.keys();
-            channelSettings.setLocalSourceSettings(new SWGSDRangel::SWGLocalSourceSettings());
-            channelSettings.getLocalSourceSettings()->fromJsonObject(localChannelSourceSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "RemoteSink")
-    {
-        if (channelSettings.getDirection() == 0)
-        {
-            QJsonObject remoteChannelSinkSettingsJsonObject = jsonObject["RemoteSinkSettings"].toObject();
-            channelSettingsKeys = remoteChannelSinkSettingsJsonObject.keys();
-            channelSettings.setRemoteSinkSettings(new SWGSDRangel::SWGRemoteSinkSettings());
-            channelSettings.getRemoteSinkSettings()->fromJsonObject(remoteChannelSinkSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "RemoteSource")
-    {
-        if (channelSettings.getDirection() == 1)
-        {
-            QJsonObject remoteChannelSourceSettingsJsonObject = jsonObject["RemoteSourceSettings"].toObject();
-            channelSettingsKeys = remoteChannelSourceSettingsJsonObject.keys();
-            channelSettings.setRemoteSourceSettings(new SWGSDRangel::SWGRemoteSourceSettings());
-            channelSettings.getRemoteSourceSettings()->fromJsonObject(remoteChannelSourceSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "SSBDemod")
-    {
-        if (channelSettings.getDirection() == 0)
-        {
-            QJsonObject ssbDemodSettingsJsonObject = jsonObject["SSBDemodSettings"].toObject();
-            channelSettingsKeys = ssbDemodSettingsJsonObject.keys();
-            channelSettings.setSsbDemodSettings(new SWGSDRangel::SWGSSBDemodSettings());
-            channelSettings.getSsbDemodSettings()->fromJsonObject(ssbDemodSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "SSBMod")
-    {
-        if (channelSettings.getDirection() == 1)
-        {
-            QJsonObject ssbModSettingsJsonObject = jsonObject["SSBModSettings"].toObject();
-            channelSettingsKeys = ssbModSettingsJsonObject.keys();
-
-            if (channelSettingsKeys.contains("cwKeyer"))
-            {
-                QJsonObject cwKeyerSettingsJsonObject;
-                appendSettingsSubKeys(ssbModSettingsJsonObject, cwKeyerSettingsJsonObject, "cwKeyer", channelSettingsKeys);
-            }
-
-            channelSettings.setSsbModSettings(new SWGSDRangel::SWGSSBModSettings());
-            channelSettings.getSsbModSettings()->fromJsonObject(ssbModSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "UDPSource")
-    {
-        if (channelSettings.getDirection() == 1)
-        {
-            QJsonObject udpSourceSettingsJsonObject = jsonObject["UDPSourceSettings"].toObject();
-            channelSettingsKeys = udpSourceSettingsJsonObject.keys();
-            channelSettings.setUdpSourceSettings(new SWGSDRangel::SWGUDPSourceSettings());
-            channelSettings.getUdpSourceSettings()->fromJsonObject(udpSourceSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "UDPSink")
-    {
-        if (channelSettings.getDirection() == 0)
-        {
-            QJsonObject udpSinkSettingsJsonObject = jsonObject["UDPSinkSettings"].toObject();
-            channelSettingsKeys = udpSinkSettingsJsonObject.keys();
-            channelSettings.setUdpSinkSettings(new SWGSDRangel::SWGUDPSinkSettings());
-            channelSettings.getUdpSinkSettings()->fromJsonObject(udpSinkSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "WFMDemod")
-    {
-        if (channelSettings.getDirection() == 0)
-        {
-            QJsonObject wfmDemodSettingsJsonObject = jsonObject["WFMDemodSettings"].toObject();
-            channelSettingsKeys = wfmDemodSettingsJsonObject.keys();
-            channelSettings.setWfmDemodSettings(new SWGSDRangel::SWGWFMDemodSettings());
-            channelSettings.getWfmDemodSettings()->fromJsonObject(wfmDemodSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else if (*channelType == "WFMMod")
-    {
-        if (channelSettings.getDirection() == 1)
-        {
-            QJsonObject wfmModSettingsJsonObject = jsonObject["WFMModSettings"].toObject();
-            channelSettingsKeys = wfmModSettingsJsonObject.keys();
-
-            if (channelSettingsKeys.contains("cwKeyer"))
-            {
-                QJsonObject cwKeyerSettingsJsonObject;
-                appendSettingsSubKeys(wfmModSettingsJsonObject, cwKeyerSettingsJsonObject, "cwKeyer", channelSettingsKeys);
-            }
-
-            channelSettings.setWfmModSettings(new SWGSDRangel::SWGWFMModSettings());
-            channelSettings.getWfmModSettings()->fromJsonObject(wfmModSettingsJsonObject);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else
-    {
+    if (m_channelTypeToSettingsKey.contains(*channelType)) {
+        return getChannel(m_channelTypeToSettingsKey[*channelType], &channelSettings, jsonObject, channelSettingsKeys);
+    } else {
         return false;
     }
 }
@@ -2925,20 +2353,20 @@ bool WebAPIRequestMapper::appendPresetKeys(
 
 bool WebAPIRequestMapper::appendPresetChannelKeys(
         SWGSDRangel::SWGChannelConfig *channel,
-        const QJsonObject& channelJson,
+        const QJsonObject& channelSettingsJson,
         WebAPIAdapterInterface::ChannelKeys& channelKeys
 )
 {
-    if (channelJson.contains("channelIdURI"))
+    if (channelSettingsJson.contains("channelIdURI"))
     {
-        QString *channelURI = new QString(channelJson["channelIdURI"].toString());
+        QString *channelURI = new QString(channelSettingsJson["channelIdURI"].toString());
         channel->setChannelIdUri(channelURI);
         channelKeys.m_keys.append("channelIdURI");
 
-        if (channelJson.contains("config") && m_channelURIToSettingsKey.contains(*channelURI))
+        if (channelSettingsJson.contains("config") && m_channelURIToSettingsKey.contains(*channelURI))
         {
             SWGSDRangel::SWGChannelSettings *channelSettings = new SWGSDRangel::SWGChannelSettings();
-            return getChannel(m_channelURIToSettingsKey[*channelURI], channelSettings, channelJson["config"].toObject(), channelKeys.m_channelKeys);
+            return getChannel(m_channelURIToSettingsKey[*channelURI], channelSettings, channelSettingsJson["config"].toObject(), channelKeys.m_channelKeys);
         }
         else
         {
@@ -3080,11 +2508,221 @@ bool WebAPIRequestMapper::getChannel(
 
 bool WebAPIRequestMapper::appendPresetDeviceKeys(
         SWGSDRangel::SWGDeviceConfig *device,
-        const QJsonObject& deviceJson,
-        WebAPIAdapterInterface::DeviceKeys& deviceKeys
+        const QJsonObject& deviceSettngsJson,
+        WebAPIAdapterInterface::DeviceKeys& devicelKeys
 )
 {
-    return true;
+    if (deviceSettngsJson.contains("deviceId"))
+    {
+        QString *deviceId = new QString(deviceSettngsJson["deviceId"].toString());
+        device->setDeviceId(deviceId);
+        devicelKeys.m_keys.append("deviceId");
+
+        if (deviceSettngsJson.contains("deviceSerial"))
+        {
+            device->setDeviceSerial(new QString(deviceSettngsJson["deviceSerial"].toString()));
+            devicelKeys.m_keys.append("deviceSerial");
+        }
+
+        if (deviceSettngsJson.contains("deviceSequence"))
+        {
+            device->setDeviceSequence(deviceSettngsJson["deviceSequence"].toInt());
+            devicelKeys.m_keys.append("deviceSequence");
+        }
+
+        if (deviceSettngsJson.contains("config") && m_deviceIdToSettingsKey.contains(*deviceId))
+        {
+            SWGSDRangel::SWGDeviceSettings *deviceSettings = new SWGSDRangel::SWGDeviceSettings();
+            return getDevice(m_deviceIdToSettingsKey[*deviceId], deviceSettings, deviceSettngsJson["config"].toObject(), devicelKeys.m_deviceKeys);
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool WebAPIRequestMapper::getDevice(
+        const QString& deviceSettingsKey,
+        SWGSDRangel::SWGDeviceSettings *deviceSettings,
+        const QJsonObject& deviceSettingsJson,
+        QStringList& deviceSettingsKeys
+)
+{
+    QStringList deviceKeys = deviceSettingsJson.keys();
+
+    if (deviceKeys.contains(deviceSettingsKey) && deviceSettingsJson[deviceSettingsKey].isObject())
+    {
+        QJsonObject settingsJsonObject = deviceSettingsJson[deviceSettingsKey].toObject();
+        deviceSettingsKeys = settingsJsonObject.keys();
+
+        if (deviceSettingsKey == "airspySettings")
+        {
+            deviceSettings->setAirspySettings(new SWGSDRangel::SWGAirspySettings());
+            deviceSettings->getAirspySettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "airspyHFSettings")
+        {
+            deviceSettings->setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
+            deviceSettings->getAirspyHfSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "bladeRF1InputSettings")
+        {
+            deviceSettings->setBladeRf1InputSettings(new SWGSDRangel::SWGBladeRF1InputSettings());
+            deviceSettings->getBladeRf1InputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "bladeRF1OutputSettings")
+        {
+            deviceSettings->setBladeRf1OutputSettings(new SWGSDRangel::SWGBladeRF1OutputSettings());
+            deviceSettings->getBladeRf1OutputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "bladeRF2InputSettings")
+        {
+            deviceSettings->setBladeRf2InputSettings(new SWGSDRangel::SWGBladeRF2InputSettings());
+            deviceSettings->getBladeRf2InputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "bladeRF2InputSettings")
+        {
+            deviceSettings->setBladeRf2OutputSettings(new SWGSDRangel::SWGBladeRF2OutputSettings());
+            deviceSettings->getBladeRf2OutputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "fcdProSettings")
+        {
+            deviceSettings->setFcdProSettings(new SWGSDRangel::SWGFCDProSettings());
+            deviceSettings->getFcdProSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "fcdProPlusSettings")
+        {
+            deviceSettings->setFcdProPlusSettings(new SWGSDRangel::SWGFCDProPlusSettings());
+            deviceSettings->getFcdProPlusSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "fileInputSettings")
+        {
+            deviceSettings->setFileInputSettings(new SWGSDRangel::SWGFileInputSettings());
+            deviceSettings->getFileInputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "hackRFInputSettings")
+        {
+            deviceSettings->setHackRfInputSettings(new SWGSDRangel::SWGHackRFInputSettings());
+            deviceSettings->getHackRfInputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "hackRFOutputSettings")
+        {
+            deviceSettings->setHackRfOutputSettings(new SWGSDRangel::SWGHackRFOutputSettings());
+            deviceSettings->getHackRfOutputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "kiwiSDRSettings")
+        {
+            deviceSettings->setKiwiSdrSettings(new SWGSDRangel::SWGKiwiSDRSettings());
+            deviceSettings->getKiwiSdrSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "limeSdrInputSettings")
+        {
+            deviceSettings->setLimeSdrInputSettings(new SWGSDRangel::SWGLimeSdrInputSettings());
+            deviceSettings->getLimeSdrInputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "limeSdrOutputSettings")
+        {
+            deviceSettings->setLimeSdrOutputSettings(new SWGSDRangel::SWGLimeSdrOutputSettings());
+            deviceSettings->getLimeSdrOutputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "perseusSettings")
+        {
+            deviceSettings->setPerseusSettings(new SWGSDRangel::SWGPerseusSettings());
+            deviceSettings->getPerseusSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "plutoSdrInputSettings")
+        {
+            deviceSettings->setPlutoSdrInputSettings(new SWGSDRangel::SWGPlutoSdrInputSettings());
+            deviceSettings->getPlutoSdrInputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "plutoSdrOutputSettings")
+        {
+            deviceSettings->setPlutoSdrOutputSettings(new SWGSDRangel::SWGPlutoSdrOutputSettings());
+            deviceSettings->getPlutoSdrOutputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "rtlSdrSettings")
+        {
+            deviceSettings->setRtlSdrSettings(new SWGSDRangel::SWGRtlSdrSettings());
+            deviceSettings->getRtlSdrSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "sdrPlaySettings")
+        {
+            deviceSettings->setSdrPlaySettings(new SWGSDRangel::SWGSDRPlaySettings());
+            deviceSettings->getSdrPlaySettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "soapySDRInputSettings")
+        {
+            deviceSettings->setSoapySdrInputSettings(new SWGSDRangel::SWGSoapySDRInputSettings());
+            deviceSettings->getSoapySdrInputSettings()->init(); // contains complex objects
+            deviceSettings->getSoapySdrInputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "soapySDROutputSettings")
+        {
+            deviceSettings->setSoapySdrOutputSettings(new SWGSDRangel::SWGSoapySDROutputSettings());
+            deviceSettings->getSoapySdrOutputSettings()->init(); // contains complex objects
+            deviceSettings->getSoapySdrOutputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "testSourceSettings")
+        {
+            deviceSettings->setTestSourceSettings(new SWGSDRangel::SWGTestSourceSettings());
+            deviceSettings->getTestSourceSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "TestMISettings")
+        {
+            if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
+                appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
+            }
+
+            deviceSettings->setTestMiSettings(new SWGSDRangel::SWGTestMISettings());
+            deviceSettings->getTestMiSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "xtrxInputSettings")
+        {
+            deviceSettings->setXtrxInputSettings(new SWGSDRangel::SWGXtrxInputSettings());
+            deviceSettings->getXtrxInputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "xtrxOutputSettings")
+        {
+            deviceSettings->setXtrxOutputSettings(new SWGSDRangel::SWGXtrxOutputSettings());
+            deviceSettings->getXtrxOutputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "remoteInputSettings")
+        {
+            deviceSettings->setRemoteInputSettings(new SWGSDRangel::SWGRemoteInputSettings());
+            deviceSettings->getRemoteInputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "localInputSettings")
+        {
+            deviceSettings->setLocalInputSettings(new SWGSDRangel::SWGLocalInputSettings());
+            deviceSettings->getLocalInputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "remoteOutputSettings")
+        {
+            deviceSettings->setRemoteOutputSettings(new SWGSDRangel::SWGRemoteOutputSettings());
+            deviceSettings->getRemoteOutputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "localOutputSettings")
+        {
+            deviceSettings->setLocalOutputSettings(new SWGSDRangel::SWGLocalOutputSettings());
+            deviceSettings->getLocalOutputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else
+        {
+            return false;
+        }
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+
 }
 
 void WebAPIRequestMapper::appendSettingsSubKeys(

@@ -45,6 +45,13 @@ public:
             SWGSDRangel::SWGInstanceConfigResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instanceConfigPutPatch(
+            bool force, // PUT else PATCH
+            SWGSDRangel::SWGInstanceConfigResponse& query,
+            const ConfigKeys& configKeys,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int instanceDevices(
             int direction,
             SWGSDRangel::SWGInstanceDevicesResponse& response,
