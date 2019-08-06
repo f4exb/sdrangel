@@ -151,6 +151,13 @@ int WebAPIAdapterGUI::instanceConfigGet(
     return 200;
 }
 
+void WebAPIAdapterGUI::instanceConfigInit()
+{
+    WebAPIAdapterBase webAPIAdapterBase;
+    webAPIAdapterBase.setPluginManager(m_mainWindow.getPluginManager());
+    webAPIAdapterBase.webapiInitConfig(m_mainWindow.m_settings);
+}
+
 int WebAPIAdapterGUI::instanceDevices(
             int direction,
             SWGSDRangel::SWGInstanceDevicesResponse& response,

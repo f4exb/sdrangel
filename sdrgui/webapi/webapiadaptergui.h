@@ -45,6 +45,8 @@ public:
             SWGSDRangel::SWGInstanceConfigResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual void instanceConfigInit();
+
     virtual int instanceDevices(
             int direction,
             SWGSDRangel::SWGInstanceDevicesResponse& response,

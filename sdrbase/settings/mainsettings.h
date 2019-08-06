@@ -20,12 +20,15 @@ public:
 	void save() const;
 
 	void resetToDefaults();
+    void initialize();
 	QString getFileLocation() const;
 	int getFileFormat() const; //!< see QSettings::Format for the values
 
     const Preferences& getPreferences() const { return m_preferences; }
+    void setPreferences(const Preferences& preferences) { m_preferences = preferences; }
 
 	Preset* newPreset(const QString& group, const QString& description);
+    void addPreset(Preset *preset);
 	void deletePreset(const Preset* preset);
 	int getPresetCount() const { return m_presets.count(); }
 	const Preset* getPreset(int index) const { return m_presets[index]; }
@@ -33,6 +36,7 @@ public:
 	void sortPresets();
 	void renamePresetGroup(const QString& oldGroupName, const QString& newGroupName);
 	void deletePresetGroup(const QString& groupName);
+    void clearPresets();
 
     void addCommand(Command *command);
     void deleteCommand(const Command* command);
@@ -42,6 +46,7 @@ public:
     void sortCommands();
     void renameCommandGroup(const QString& oldGroupName, const QString& newGroupName);
     void deleteCommandGroup(const QString& groupName);
+    void clearCommands();
 
     const Preset& getWorkingPresetConst() const { return m_workingPreset; }
 	Preset* getWorkingPreset() { return &m_workingPreset; }

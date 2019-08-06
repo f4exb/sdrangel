@@ -51,6 +51,38 @@ void WebAPIAdapterBase::webapiFormatPreferences(
     apiPreferences->setFileMinLogLevel((int) preferences.getFileMinLogLevel());
 }
 
+void WebAPIAdapterBase::webapiInitConfig(
+    MainSettings& mainSettings
+)
+{
+    mainSettings.initialize();
+}
+
+void WebAPIAdapterBase::webapiUpdatePreferences(
+    SWGSDRangel::SWGPreferences *apiPreferences,
+    Preferences& preferences
+)
+{
+    if (apiPreferences->getSourceDevice()) {
+        preferences.setSourceDevice(*apiPreferences->getSourceDevice());
+    }
+    preferences.setSourceIndex(apiPreferences->getSourceIndex());
+    if (apiPreferences->getAudioType()) {
+        preferences.setAudioType(*apiPreferences->getAudioType());
+    }
+    if (apiPreferences->getAudioDevice()) {
+        preferences.setAudioDevice(*apiPreferences->getAudioDevice());
+    }
+    preferences.setLatitude(apiPreferences->getLatitude());
+    preferences.setLongitude(apiPreferences->getLongitude());
+    preferences.setConsoleMinLogLevel((QtMsgType) apiPreferences->getConsoleMinLogLevel());
+    preferences.setUseLogFile(apiPreferences->getUseLogFile() != 0);
+    if (apiPreferences->getLogFileName()) {
+        preferences.setLogFileName(*apiPreferences->getLogFileName());
+    }
+    preferences.setFileMinLogLevel((QtMsgType) apiPreferences->getFileMinLogLevel());
+}
+
 void WebAPIAdapterBase::webapiFormatPreset(
         SWGSDRangel::SWGPreset *apiPreset,
         const Preset& preset

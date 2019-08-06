@@ -217,6 +217,8 @@ void WebAPIRequestMapper::instanceSummaryService(qtwebapp::HttpRequest& request,
 
 void WebAPIRequestMapper::instanceConfigService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
+    SWGSDRangel::SWGInstanceConfigResponse query;
+    SWGSDRangel::SWGSuccessResponse normalResponse;
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
     response.setHeader("Access-Control-Allow-Origin", "*");
@@ -232,6 +234,30 @@ void WebAPIRequestMapper::instanceConfigService(qtwebapp::HttpRequest& request, 
         } else {
             response.write(errorResponse.asJson().toUtf8());
         }
+    }
+    else if (request.getMethod() == "PUT")
+    {
+        QString jsonStr = request.getBody();
+        QJsonObject jsonObject;
+
+        if (parseJsonBody(jsonStr, jsonObject, response))
+        {
+            m_adapter->instanceConfigInit();
+        }
+        else
+        {
+            response.setStatus(400,"Invalid JSON format");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid JSON format";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
     }
 }
 
@@ -2809,96 +2835,96 @@ void WebAPIRequestMapper::appendSettingsArrayKeys(
 void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings)
 {
     deviceSettings.cleanup();
-    deviceSettings.setDeviceHwType(0);
-    deviceSettings.setAirspySettings(0);
-    deviceSettings.setAirspyHfSettings(0);
-    deviceSettings.setBladeRf1InputSettings(0);
-    deviceSettings.setBladeRf1OutputSettings(0);
-    deviceSettings.setFcdProPlusSettings(0);
-    deviceSettings.setFcdProSettings(0);
-    deviceSettings.setFileInputSettings(0);
-    deviceSettings.setHackRfInputSettings(0);
-    deviceSettings.setHackRfOutputSettings(0);
-    deviceSettings.setLimeSdrInputSettings(0);
-    deviceSettings.setLimeSdrOutputSettings(0);
-    deviceSettings.setPerseusSettings(0);
-    deviceSettings.setPlutoSdrInputSettings(0);
-    deviceSettings.setPlutoSdrOutputSettings(0);
-    deviceSettings.setRtlSdrSettings(0);
-    deviceSettings.setRemoteOutputSettings(0);
-    deviceSettings.setRemoteInputSettings(0);
-    deviceSettings.setSdrPlaySettings(0);
-    deviceSettings.setTestSourceSettings(0);
+    deviceSettings.setDeviceHwType(nullptr);
+    deviceSettings.setAirspySettings(nullptr);
+    deviceSettings.setAirspyHfSettings(nullptr);
+    deviceSettings.setBladeRf1InputSettings(nullptr);
+    deviceSettings.setBladeRf1OutputSettings(nullptr);
+    deviceSettings.setFcdProPlusSettings(nullptr);
+    deviceSettings.setFcdProSettings(nullptr);
+    deviceSettings.setFileInputSettings(nullptr);
+    deviceSettings.setHackRfInputSettings(nullptr);
+    deviceSettings.setHackRfOutputSettings(nullptr);
+    deviceSettings.setLimeSdrInputSettings(nullptr);
+    deviceSettings.setLimeSdrOutputSettings(nullptr);
+    deviceSettings.setPerseusSettings(nullptr);
+    deviceSettings.setPlutoSdrInputSettings(nullptr);
+    deviceSettings.setPlutoSdrOutputSettings(nullptr);
+    deviceSettings.setRtlSdrSettings(nullptr);
+    deviceSettings.setRemoteOutputSettings(nullptr);
+    deviceSettings.setRemoteInputSettings(nullptr);
+    deviceSettings.setSdrPlaySettings(nullptr);
+    deviceSettings.setTestSourceSettings(nullptr);
 }
 
 void WebAPIRequestMapper::resetDeviceReport(SWGSDRangel::SWGDeviceReport& deviceReport)
 {
     deviceReport.cleanup();
-    deviceReport.setDeviceHwType(0);
-    deviceReport.setAirspyHfReport(0);
-    deviceReport.setAirspyReport(0);
-    deviceReport.setFileInputReport(0);
-    deviceReport.setLimeSdrInputReport(0);
-    deviceReport.setLimeSdrOutputReport(0);
-    deviceReport.setPerseusReport(0);
-    deviceReport.setPlutoSdrInputReport(0);
-    deviceReport.setPlutoSdrOutputReport(0);
-    deviceReport.setRtlSdrReport(0);
-    deviceReport.setRemoteOutputReport(0);
-    deviceReport.setRemoteInputReport(0);
-    deviceReport.setSdrPlayReport(0);
+    deviceReport.setDeviceHwType(nullptr);
+    deviceReport.setAirspyHfReport(nullptr);
+    deviceReport.setAirspyReport(nullptr);
+    deviceReport.setFileInputReport(nullptr);
+    deviceReport.setLimeSdrInputReport(nullptr);
+    deviceReport.setLimeSdrOutputReport(nullptr);
+    deviceReport.setPerseusReport(nullptr);
+    deviceReport.setPlutoSdrInputReport(nullptr);
+    deviceReport.setPlutoSdrOutputReport(nullptr);
+    deviceReport.setRtlSdrReport(nullptr);
+    deviceReport.setRemoteOutputReport(nullptr);
+    deviceReport.setRemoteInputReport(nullptr);
+    deviceReport.setSdrPlayReport(nullptr);
 }
 
 void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings)
 {
     channelSettings.cleanup();
-    channelSettings.setChannelType(0);
-    channelSettings.setAmDemodSettings(0);
-    channelSettings.setAmModSettings(0);
-    channelSettings.setAtvModSettings(0);
-    channelSettings.setBfmDemodSettings(0);
-    channelSettings.setDsdDemodSettings(0);
-    channelSettings.setNfmDemodSettings(0);
-    channelSettings.setNfmModSettings(0);
-    channelSettings.setRemoteSinkSettings(0);
-    channelSettings.setRemoteSourceSettings(0);
-    channelSettings.setSsbDemodSettings(0);
-    channelSettings.setSsbModSettings(0);
-    channelSettings.setUdpSourceSettings(0);
-    channelSettings.setUdpSinkSettings(0);
-    channelSettings.setWfmDemodSettings(0);
-    channelSettings.setWfmModSettings(0);
+    channelSettings.setChannelType(nullptr);
+    channelSettings.setAmDemodSettings(nullptr);
+    channelSettings.setAmModSettings(nullptr);
+    channelSettings.setAtvModSettings(nullptr);
+    channelSettings.setBfmDemodSettings(nullptr);
+    channelSettings.setDsdDemodSettings(nullptr);
+    channelSettings.setNfmDemodSettings(nullptr);
+    channelSettings.setNfmModSettings(nullptr);
+    channelSettings.setRemoteSinkSettings(nullptr);
+    channelSettings.setRemoteSourceSettings(nullptr);
+    channelSettings.setSsbDemodSettings(nullptr);
+    channelSettings.setSsbModSettings(nullptr);
+    channelSettings.setUdpSourceSettings(nullptr);
+    channelSettings.setUdpSinkSettings(nullptr);
+    channelSettings.setWfmDemodSettings(nullptr);
+    channelSettings.setWfmModSettings(nullptr);
 }
 
 void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& channelReport)
 {
     channelReport.cleanup();
-    channelReport.setChannelType(0);
-    channelReport.setAmDemodReport(0);
-    channelReport.setAmModReport(0);
-    channelReport.setAtvModReport(0);
-    channelReport.setBfmDemodReport(0);
-    channelReport.setDsdDemodReport(0);
-    channelReport.setNfmDemodReport(0);
-    channelReport.setNfmModReport(0);
-    channelReport.setRemoteSourceReport(0);
-    channelReport.setSsbDemodReport(0);
-    channelReport.setSsbModReport(0);
-    channelReport.setUdpSourceReport(0);
-    channelReport.setUdpSinkReport(0);
-    channelReport.setWfmDemodReport(0);
-    channelReport.setWfmModReport(0);
+    channelReport.setChannelType(nullptr);
+    channelReport.setAmDemodReport(nullptr);
+    channelReport.setAmModReport(nullptr);
+    channelReport.setAtvModReport(nullptr);
+    channelReport.setBfmDemodReport(nullptr);
+    channelReport.setDsdDemodReport(nullptr);
+    channelReport.setNfmDemodReport(nullptr);
+    channelReport.setNfmModReport(nullptr);
+    channelReport.setRemoteSourceReport(nullptr);
+    channelReport.setSsbDemodReport(nullptr);
+    channelReport.setSsbModReport(nullptr);
+    channelReport.setUdpSourceReport(nullptr);
+    channelReport.setUdpSinkReport(nullptr);
+    channelReport.setWfmDemodReport(nullptr);
+    channelReport.setWfmModReport(nullptr);
 }
 
 void WebAPIRequestMapper::resetAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice)
 {
     audioInputDevice.cleanup();
-    audioInputDevice.setName(0);
+    audioInputDevice.setName(nullptr);
 }
 
 void WebAPIRequestMapper::resetAudioOutputDevice(SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice)
 {
     audioOutputDevice.cleanup();
-    audioOutputDevice.setName(0);
-    audioOutputDevice.setUdpAddress(0);
+    audioOutputDevice.setName(nullptr);
+    audioOutputDevice.setUdpAddress(nullptr);
 }

@@ -33,6 +33,7 @@ namespace SWGSDRangel
     class SWGInstanceConfigResponse;
     class SWGInstanceDevicesResponse;
     class SWGInstanceChannelsResponse;
+    class SWGPreferences;
     class SWGLoggingInfo;
     class SWGAudioDevices;
     class SWGAudioInputDevice;
@@ -102,6 +103,27 @@ public:
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
     	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/config (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceSummary
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual void instanceConfigInit()
+    {
+    }
+
+    virtual int instanceConfigPutPreferences(
+        SWGSDRangel::SWGPreferences& preferences,
+        const QStringList& preferenceKeys,
+        SWGSDRangel::SWGErrorResponse& error
+    )
+    {
+        (void) preferences;
+        (void) preferenceKeys;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+        return 501;
     }
 
     /**

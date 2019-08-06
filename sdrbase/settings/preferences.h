@@ -13,14 +13,14 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 
-	void setSourceDevice(const QString& value) { m_sourceDevice= value; }
+	void setSourceDevice(const QString& value) { m_sourceDevice = value; }
 	const QString& getSourceDevice() const { return m_sourceDevice; }
 	void setSourceIndex(const int value) { m_sourceIndex = value; }
 	int getSourceIndex() const { return m_sourceIndex; }
 
 	void setAudioType(const QString& value) { m_audioType = value; }
 	const QString& getAudioType() const { return m_audioType; }
-	void setAudioDevice(const QString& value) { m_audioDevice= value; }
+	void setAudioDevice(const QString& value) { m_audioDevice = value; }
 	const QString& getAudioDevice() const { return m_audioDevice; }
 
 	void setLatitude(float latitude) { m_latitude = latitude; }

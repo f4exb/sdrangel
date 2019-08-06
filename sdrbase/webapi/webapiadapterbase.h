@@ -27,6 +27,7 @@
 #include "SWGCommand.h"
 #include "settings/preferences.h"
 #include "settings/preset.h"
+#include "settings/mainsettings.h"
 #include "commands/command.h"
 
 class PluginManager;
@@ -55,6 +56,13 @@ public:
     static void webapiFormatCommand(
         SWGSDRangel::SWGCommand *apiCommand,
         const Command& command
+    );
+    static void webapiInitConfig(
+        MainSettings& mainSettings
+    );
+    static void webapiUpdatePreferences(
+        SWGSDRangel::SWGPreferences *apiPreferences,
+        Preferences& preferences
     );
 
 private:

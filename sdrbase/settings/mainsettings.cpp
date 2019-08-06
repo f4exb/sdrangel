@@ -139,6 +139,13 @@ void MainSettings::save() const
     s.setValue("hwDeviceUserArgs", qCompress(m_hardwareDeviceUserArgs.serialize()).toBase64());
 }
 
+void MainSettings::initialize()
+{
+    resetToDefaults();
+    clearCommands();
+    clearPresets();
+}
+
 void MainSettings::resetToDefaults()
 {
 	m_preferences.resetToDefaults();
@@ -150,8 +157,13 @@ Preset* MainSettings::newPreset(const QString& group, const QString& description
 	Preset* preset = new Preset();
 	preset->setGroup(group);
 	preset->setDescription(description);
-	m_presets.append(preset);
+	addPreset(preset);
 	return preset;
+}
+
+void MainSettings::addPreset(Preset *preset)
+{
+    m_presets.append(preset);
 }
 
 void MainSettings::deletePreset(const Preset* preset)
@@ -214,6 +226,15 @@ const Preset* MainSettings::getPreset(const QString& groupName, quint64 centerFr
     return 0;
 }
 
+void MainSettings::clearPresets()
+{
+    foreach (Preset *preset, m_presets) {
+        delete preset;
+    }
+
+    m_presets.clear();
+}
+
 void MainSettings::addCommand(Command *command)
 {
     m_commands.append(command);
@@ -272,4 +293,13 @@ const Command* MainSettings::getCommand(const QString& groupName, const QString&
     }
 
     return 0;
+}
+
+void MainSettings::clearCommands()
+{
+    foreach (Command *command, m_commands) {
+        delete command;
+    }
+
+    m_commands.clear();
 }
