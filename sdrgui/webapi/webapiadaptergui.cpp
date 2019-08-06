@@ -117,8 +117,8 @@ int WebAPIAdapterGUI::instanceDelete(
 }
 
 int WebAPIAdapterGUI::instanceConfigGet(
-            SWGSDRangel::SWGInstanceConfigResponse& response,
-            SWGSDRangel::SWGErrorResponse& error)
+        SWGSDRangel::SWGInstanceConfigResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
 {
     response.init();
     WebAPIAdapterBase webAPIAdapterBase;
@@ -151,11 +151,19 @@ int WebAPIAdapterGUI::instanceConfigGet(
     return 200;
 }
 
-void WebAPIAdapterGUI::instanceConfigInit()
+int WebAPIAdapterGUI::instanceConfigPutPatch(
+        bool force, // PUT else PATCH
+        SWGSDRangel::SWGInstanceConfigResponse& query,
+        const ConfigKeys& configKeys,
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
 {
     WebAPIAdapterBase webAPIAdapterBase;
     webAPIAdapterBase.setPluginManager(m_mainWindow.getPluginManager());
-    webAPIAdapterBase.webapiInitConfig(m_mainWindow.m_settings);
+
+    if (force) {
+        webAPIAdapterBase.webapiInitConfig(m_mainWindow.m_settings);
+    }
 }
 
 int WebAPIAdapterGUI::instanceDevices(

@@ -47,6 +47,10 @@
 #include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
 
+const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
+    {"sdrangel.channel.bfm", "BFMDemodSettings"}
+};
+
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
     HttpRequestHandler(parent),
     m_adapter(0)
@@ -242,7 +246,7 @@ void WebAPIRequestMapper::instanceConfigService(qtwebapp::HttpRequest& request, 
 
         if (parseJsonBody(jsonStr, jsonObject, response))
         {
-            m_adapter->instanceConfigInit();
+            // TODO
         }
         else
         {
@@ -2792,6 +2796,295 @@ bool WebAPIRequestMapper::validateAMBEDevices(SWGSDRangel::SWGAMBEDevices& ambeD
     }
 
     return false;
+}
+
+bool WebAPIRequestMapper::validateConfig(SWGSDRangel::SWGInstanceConfigResponse& config, QJsonObject& jsonObject, WebAPIAdapterInterface::ConfigKeys& configKeys)
+{
+    if (jsonObject.contains("preferences"))
+    {
+        SWGSDRangel::SWGPreferences *preferences = new SWGSDRangel::SWGPreferences();
+        config.setPreferences(preferences);
+        QJsonObject preferencesJson = jsonObject["preferences"].toObject();
+        configKeys.m_preferencesKeys = preferencesJson.keys();
+        preferences->fromJsonObject(preferencesJson);
+    }
+
+    if (jsonObject.contains("commands"))
+    {
+        QList<SWGSDRangel::SWGCommand *> *commands = new QList<SWGSDRangel::SWGCommand *>();
+        config.setCommands(commands);
+        QJsonArray commandsJson = jsonObject["commands"].toArray();
+        QJsonArray::const_iterator commandsIt = commandsJson.begin();
+
+        for (; commandsIt != commandsJson.end(); ++commandsIt)
+        {
+            QJsonObject commandJson = commandsIt->toObject();
+            commands->append(new SWGSDRangel::SWGCommand());
+            configKeys.m_commandKeys.append(WebAPIAdapterInterface::CommandKeys());
+            configKeys.m_commandKeys.back().m_keys = commandJson.keys();
+            commands->back()->fromJsonObject(commandJson);
+        }
+    }
+
+    if (jsonObject.contains("workingPreset"))
+    {
+        SWGSDRangel::SWGPreset *workingPreset = new SWGSDRangel::SWGPreset();
+        QJsonObject presetJson = jsonObject["workingPreset"].toObject();
+        appendPresetKeys(workingPreset, presetJson, configKeys.m_workingPresetKeys);
+    }
+
+    return true;
+}
+
+bool WebAPIRequestMapper::appendPresetKeys(
+    SWGSDRangel::SWGPreset *preset,
+    const QJsonObject& presetJson,
+    WebAPIAdapterInterface::PresetKeys& presetKeys
+)
+{
+    if (presetJson.contains("centerFrequency"))
+    {
+        preset->setCenterFrequency(presetJson["centerFrequency"].toInt());
+        presetKeys.m_keys.append("centerFrequency");
+    }
+    if (presetJson.contains("dcOffsetCorrection"))
+    {
+        preset->setDcOffsetCorrection(presetJson["dcOffsetCorrection"].toInt());
+        presetKeys.m_keys.append("dcOffsetCorrection");
+    }
+    if (presetJson.contains("iqImbalanceCorrection"))
+    {
+        preset->setIqImbalanceCorrection(presetJson["iqImbalanceCorrection"].toInt());
+        presetKeys.m_keys.append("iqImbalanceCorrection");
+    }
+    if (presetJson.contains("iqImbalanceCorrection"))
+    {
+        preset->setIqImbalanceCorrection(presetJson["sourcePreset"].toInt());
+        presetKeys.m_keys.append("sourcePreset");
+    }
+    if (presetJson.contains("description"))
+    {
+        preset->setDescription(new QString(presetJson["description"].toString()));
+        presetKeys.m_keys.append("description");
+    }
+    if (presetJson.contains("group"))
+    {
+        preset->setGroup(new QString(presetJson["group"].toString()));
+        presetKeys.m_keys.append("group");
+    }
+
+    if (presetJson.contains("spectrumConfig"))
+    {
+        QJsonObject spectrumJson = presetJson["spectrumConfig"].toObject();
+        presetKeys.m_spectrumKeys = spectrumJson.keys();
+        SWGSDRangel::SWGGLSpectrum *spectrum = new SWGSDRangel::SWGGLSpectrum();
+        preset->setSpectrumConfig(spectrum);
+        spectrum->fromJsonObject(spectrumJson);
+    }
+
+    if (presetJson.contains("channelConfigs"))
+    {
+        QJsonArray channelsJson = presetJson["channelConfigs"].toArray();
+        QJsonArray::const_iterator channelsIt = channelsJson.begin();
+        QList<SWGSDRangel::SWGChannelConfig*> *channels = new QList<SWGSDRangel::SWGChannelConfig*>();
+        preset->setChannelConfigs(channels);
+
+        for (; channelsIt != channelsJson.end(); ++channelsIt)
+        {
+            QJsonObject channelJson = channelsIt->toObject();
+            channels->append(new SWGSDRangel::SWGChannelConfig());
+            presetKeys.m_channelsKeys.append(WebAPIAdapterInterface::ChannelKeys());
+
+            if (!appendPresetChannelKeys(channels->back(), channelJson, presetKeys.m_channelsKeys.back())) {
+                return false;
+            }
+        }
+    }
+
+    if (presetJson.contains("deviceConfigs"))
+    {
+        QJsonArray devicesJson = presetJson["deviceConfigs"].toArray();
+        QJsonArray::const_iterator devicesIt = devicesJson.begin();
+        QList<SWGSDRangel::SWGDeviceConfig*> *devices = new QList<SWGSDRangel::SWGDeviceConfig*>();
+        preset->setDeviceConfigs(devices);
+
+        for (; devicesIt != devicesJson.end(); ++devicesIt)
+        {
+            QJsonObject deviceJson = devicesIt->toObject();
+            devices->append(new SWGSDRangel::SWGDeviceConfig());
+            presetKeys.m_devicesKeys.append(WebAPIAdapterInterface::DeviceKeys());
+
+            if (!appendPresetDeviceKeys(devices->back(), deviceJson, presetKeys.m_devicesKeys.back())) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool WebAPIRequestMapper::appendPresetChannelKeys(
+        SWGSDRangel::SWGChannelConfig *channel,
+        const QJsonObject& channelJson,
+        WebAPIAdapterInterface::ChannelKeys& channelKeys
+)
+{
+    if (channelJson.contains("channelIdURI"))
+    {
+        QString *channelURI = new QString(channelJson["channelIdURI"].toString());
+        channel->setChannelIdUri(channelURI);
+        channelKeys.m_keys.append("channelIdURI");
+
+        if (channelJson.contains("config") && m_channelURIToSettingsKey.contains(*channelURI))
+        {
+            SWGSDRangel::SWGChannelSettings *channelSettings = new SWGSDRangel::SWGChannelSettings();
+            return getChannel(m_channelURIToSettingsKey[*channelURI], channelSettings, channelJson["config"].toObject(), channelKeys.m_channelKeys);
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool WebAPIRequestMapper::getChannel(
+    const QString& channelSettingsKey,
+    SWGSDRangel::SWGChannelSettings *channelSettings,
+    const QJsonObject& channelSettingsJson,
+    QStringList& channelSettingsKeys
+)
+{
+    QStringList channelKeys = channelSettingsJson.keys();
+
+    if (channelKeys.contains(channelSettingsKey) && channelSettingsJson[channelSettingsKey].isObject())
+    {
+        QJsonObject settingsJsonObject = channelSettingsJson[channelSettingsKey].toObject();
+        channelSettingsKeys = settingsJsonObject.keys();
+
+        if (channelSettingsKey == "AMDemodSettings")
+        {
+            channelSettings->setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
+            channelSettings->getAmDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "AMModSettings")
+        {
+            channelSettings->setAmModSettings(new SWGSDRangel::SWGAMModSettings());
+            channelSettings->getAmModSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "ATVModSettings")
+        {
+            channelSettings->setAtvModSettings(new SWGSDRangel::SWGATVModSettings());
+            channelSettings->getAtvModSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "BFMDemodSettings")
+        {
+            channelSettings->setBfmDemodSettings(new SWGSDRangel::SWGBFMDemodSettings());
+            channelSettings->getBfmDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "DSDDemodSettings")
+        {
+            channelSettings->setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());
+            channelSettings->getDsdDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "FreeDVDemodSettings")
+        {
+            channelSettings->setFreeDvDemodSettings(new SWGSDRangel::SWGFreeDVDemodSettings());
+            channelSettings->getFreeDvDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "FreeDVModSettings")
+        {
+            channelSettings->setFreeDvModSettings(new SWGSDRangel::SWGFreeDVModSettings());
+            channelSettings->getFreeDvModSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "FreqTrackerSettings")
+        {
+            channelSettings->setFreqTrackerSettings(new SWGSDRangel::SWGFreqTrackerSettings());
+            channelSettings->getFreqTrackerSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "NFMDemodSettings")
+        {
+            channelSettings->setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
+            channelSettings->getNfmDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "NFMModSettings")
+        {
+            channelSettings->setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
+            channelSettings->getNfmModSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "LocalSinkSettings")
+        {
+            channelSettings->setLocalSinkSettings(new SWGSDRangel::SWGLocalSinkSettings());
+            channelSettings->getLocalSinkSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "LocalSourceSettings")
+        {
+            channelSettings->setLocalSourceSettings(new SWGSDRangel::SWGLocalSourceSettings());
+            channelSettings->getLocalSourceSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "RemoteSinkSettings")
+        {
+            channelSettings->setRemoteSinkSettings(new SWGSDRangel::SWGRemoteSinkSettings());
+            channelSettings->getRemoteSinkSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "RemoteSourceSettings")
+        {
+            channelSettings->setRemoteSourceSettings(new SWGSDRangel::SWGRemoteSourceSettings());
+            channelSettings->getRemoteSourceSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "SSBDemodSettings")
+        {
+            channelSettings->setSsbDemodSettings(new SWGSDRangel::SWGSSBDemodSettings());
+            channelSettings->getSsbDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "SSBModSettings")
+        {
+            channelSettings->setSsbModSettings(new SWGSDRangel::SWGSSBModSettings());
+            channelSettings->getSsbModSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "UDPSourceSettings")
+        {
+            channelSettings->setUdpSourceSettings(new SWGSDRangel::SWGUDPSourceSettings());
+            channelSettings->getUdpSourceSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "UDPSinkSettings")
+        {
+            channelSettings->setUdpSinkSettings(new SWGSDRangel::SWGUDPSinkSettings());
+            channelSettings->getUdpSinkSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "WFMDemodSettings")
+        {
+            channelSettings->setWfmDemodSettings(new SWGSDRangel::SWGWFMDemodSettings());
+            channelSettings->getWfmDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "WFMModSettings")
+        {
+            channelSettings->setWfmModSettings(new SWGSDRangel::SWGWFMModSettings());
+            channelSettings->getWfmModSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else
+        {
+            return false;
+        }
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool WebAPIRequestMapper::appendPresetDeviceKeys(
+        SWGSDRangel::SWGDeviceConfig *device,
+        const QJsonObject& deviceJson,
+        WebAPIAdapterInterface::DeviceKeys& deviceKeys
+)
+{
+    return true;
 }
 
 void WebAPIRequestMapper::appendSettingsSubKeys(

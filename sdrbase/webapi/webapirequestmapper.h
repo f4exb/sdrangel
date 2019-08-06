@@ -34,6 +34,9 @@ namespace SWGSDRangel
 {
     class SWGPresetTransfer;
     class SWGPresetIdentifier;
+    class SWGPreset;
+    class SWGChannelConfig;
+    class SWGDeviceConfig;
 }
 
 class SDRBASE_API WebAPIRequestMapper : public qtwebapp::HttpRequestHandler {
@@ -89,6 +92,31 @@ private:
     bool validateAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice, QJsonObject& jsonObject, QStringList& audioInputDeviceKeys);
     bool validateAudioOutputDevice(SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice, QJsonObject& jsonObject, QStringList& audioOutputDeviceKeys);
     bool validateAMBEDevices(SWGSDRangel::SWGAMBEDevices& ambeDevices, QJsonObject& jsonObject);
+    bool validateConfig(SWGSDRangel::SWGInstanceConfigResponse& config, QJsonObject& jsonObject, WebAPIAdapterInterface::ConfigKeys& configKeys);
+
+    bool appendPresetKeys(
+            SWGSDRangel::SWGPreset *preset,
+            const QJsonObject& presetJson,
+            WebAPIAdapterInterface::PresetKeys& presetKeys);
+
+    bool appendPresetChannelKeys(
+            SWGSDRangel::SWGChannelConfig *channel,
+            const QJsonObject& channelJson,
+            WebAPIAdapterInterface::ChannelKeys& channelKeys
+    );
+
+    bool getChannel(
+        const QString& channelSettingsKey,
+        SWGSDRangel::SWGChannelSettings *channelSettings,
+        const QJsonObject& channelSettingsJson,
+        QStringList& channelSettingsKeys
+    );
+
+    bool appendPresetDeviceKeys(
+            SWGSDRangel::SWGDeviceConfig *device,
+            const QJsonObject& deviceJson,
+            WebAPIAdapterInterface::DeviceKeys& deviceKeys
+    );
 
     void appendSettingsSubKeys(
             const QJsonObject& parentSettingsJsonObject,
@@ -109,6 +137,8 @@ private:
     void resetChannelReport(SWGSDRangel::SWGChannelReport& deviceSettings);
     void resetAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice);
     void resetAudioOutputDevice(SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice);
+
+    static const QMap<QString, QString> m_channelURIToSettingsKey;
 };
 
 #endif /* SDRBASE_WEBAPI_WEBAPIREQUESTMAPPER_H_ */

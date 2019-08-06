@@ -21,6 +21,7 @@
 #define SDRBASE_WEBAPI_WEBAPIADAPTERINTERFACE_H_
 
 #include <QString>
+#include <QStringList>
 #include <regex>
 
 #include "SWGErrorResponse.h"
@@ -61,6 +62,35 @@ namespace SWGSDRangel
 class SDRBASE_API WebAPIAdapterInterface
 {
 public:
+    struct ChannelKeys
+    {
+        QStringList m_keys;
+        QStringList m_channelKeys;
+    };
+    struct DeviceKeys
+    {
+        QStringList m_keys;
+        QStringList m_deviceKeys;
+    };
+    struct PresetKeys
+    {
+        QStringList m_keys;
+        QStringList m_spectrumKeys;
+        QList<ChannelKeys> m_channelsKeys;
+        QList<DeviceKeys> m_devicesKeys;
+    };
+    struct CommandKeys
+    {
+        QStringList m_keys;
+    };
+    struct ConfigKeys
+    {
+        QStringList m_preferencesKeys;
+        PresetKeys m_workingPresetKeys;
+        QList<PresetKeys> m_presetKeys;
+        QList<CommandKeys> m_commandKeys;
+    };
+
     virtual ~WebAPIAdapterInterface() {}
 
     /**
@@ -106,21 +136,21 @@ public:
     }
 
     /**
-     * Handler of /sdrangel/config (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceSummary
+     * Handler of /sdrangel/config (PUT, PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceSummary
      * returns the Http status code (default 501: not implemented)
      */
-    virtual void instanceConfigInit()
-    {
-    }
-
-    virtual int instanceConfigPutPreferences(
-        SWGSDRangel::SWGPreferences& preferences,
-        const QStringList& preferenceKeys,
+    virtual int instanceConfigPutPatch(
+        bool force, // PUT else PATCH
+        SWGSDRangel::SWGInstanceConfigResponse& query,
+        const ConfigKeys& configKeys,
+        SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error
     )
     {
-        (void) preferences;
-        (void) preferenceKeys;
+        (void) force;
+        (void) query;
+        (void) configKeys;
+        (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
         return 501;
