@@ -19,8 +19,9 @@
 
 #include "export.h"
 #include "dsp/dsptypes.h"
+#include "settings/serializable.h"
 
-class SDRBASE_API GLSpectrumSettings
+class SDRBASE_API GLSpectrumSettings : public Serializable
 {
 public:
     enum AveragingMode
@@ -56,10 +57,11 @@ public:
 	bool m_linear; //!< linear else logarithmic scale
 
     GLSpectrumSettings();
+	virtual ~GLSpectrumSettings();
     void resetToDefaults();
 
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
 
     static int getAveragingMaxScale(AveragingMode averagingMode);
     static int getAveragingValue(int averagingIndex, AveragingMode averagingMode);

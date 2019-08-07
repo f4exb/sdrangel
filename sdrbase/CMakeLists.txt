@@ -85,6 +85,7 @@ set(sdrbase_SOURCES
     dsp/filerecord.cpp
     dsp/freqlockcomplex.cpp
     dsp/interpolator.cpp
+    dsp/glscopesettings.cpp
     dsp/glspectrumsettings.cpp
     dsp/hbfilterchainconverter.cpp
     dsp/hbfiltertraits.cpp
@@ -201,6 +202,7 @@ set(sdrbase_HEADERS
     dsp/filerecord.h
     dsp/freqlockcomplex.h
     dsp/gfft.h
+    dsp/glscopesettings.h
     dsp/glspectrumsettings.h
     dsp/hbfilterchainconverter.h
     dsp/iirfilter.h

@@ -24,6 +24,10 @@ GLSpectrumSettings::GLSpectrumSettings()
     resetToDefaults();
 }
 
+GLSpectrumSettings::~GLSpectrumSettings()
+{}
+
+
 void GLSpectrumSettings::resetToDefaults()
 {
 	m_fftSize = 1024;
