@@ -44,6 +44,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_atv_mod_settings_isSet = false;
     bfm_demod_settings = nullptr;
     m_bfm_demod_settings_isSet = false;
+    channel_analyzer_settings = nullptr;
+    m_channel_analyzer_settings_isSet = false;
     dsd_demod_settings = nullptr;
     m_dsd_demod_settings_isSet = false;
     file_source_settings = nullptr;
@@ -102,6 +104,8 @@ SWGChannelSettings::init() {
     m_atv_mod_settings_isSet = false;
     bfm_demod_settings = new SWGBFMDemodSettings();
     m_bfm_demod_settings_isSet = false;
+    channel_analyzer_settings = new SWGChannelAnalyzerSettings();
+    m_channel_analyzer_settings_isSet = false;
     dsd_demod_settings = new SWGDSDDemodSettings();
     m_dsd_demod_settings_isSet = false;
     file_source_settings = new SWGFileSourceSettings();
@@ -157,6 +161,9 @@ SWGChannelSettings::cleanup() {
     }
     if(bfm_demod_settings != nullptr) { 
         delete bfm_demod_settings;
+    }
+    if(channel_analyzer_settings != nullptr) { 
+        delete channel_analyzer_settings;
     }
     if(dsd_demod_settings != nullptr) { 
         delete dsd_demod_settings;
@@ -238,6 +245,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&bfm_demod_settings, pJson["BFMDemodSettings"], "SWGBFMDemodSettings", "SWGBFMDemodSettings");
     
+    ::SWGSDRangel::setValue(&channel_analyzer_settings, pJson["ChannelAnalyzerSettings"], "SWGChannelAnalyzerSettings", "SWGChannelAnalyzerSettings");
+    
     ::SWGSDRangel::setValue(&dsd_demod_settings, pJson["DSDDemodSettings"], "SWGDSDDemodSettings", "SWGDSDDemodSettings");
     
     ::SWGSDRangel::setValue(&file_source_settings, pJson["FileSourceSettings"], "SWGFileSourceSettings", "SWGFileSourceSettings");
@@ -311,6 +320,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((bfm_demod_settings != nullptr) && (bfm_demod_settings->isSet())){
         toJsonValue(QString("BFMDemodSettings"), bfm_demod_settings, obj, QString("SWGBFMDemodSettings"));
+    }
+    if((channel_analyzer_settings != nullptr) && (channel_analyzer_settings->isSet())){
+        toJsonValue(QString("ChannelAnalyzerSettings"), channel_analyzer_settings, obj, QString("SWGChannelAnalyzerSettings"));
     }
     if((dsd_demod_settings != nullptr) && (dsd_demod_settings->isSet())){
         toJsonValue(QString("DSDDemodSettings"), dsd_demod_settings, obj, QString("SWGDSDDemodSettings"));
@@ -445,6 +457,16 @@ void
 SWGChannelSettings::setBfmDemodSettings(SWGBFMDemodSettings* bfm_demod_settings) {
     this->bfm_demod_settings = bfm_demod_settings;
     this->m_bfm_demod_settings_isSet = true;
+}
+
+SWGChannelAnalyzerSettings*
+SWGChannelSettings::getChannelAnalyzerSettings() {
+    return channel_analyzer_settings;
+}
+void
+SWGChannelSettings::setChannelAnalyzerSettings(SWGChannelAnalyzerSettings* channel_analyzer_settings) {
+    this->channel_analyzer_settings = channel_analyzer_settings;
+    this->m_channel_analyzer_settings_isSet = true;
 }
 
 SWGDSDDemodSettings*
@@ -644,6 +666,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(bfm_demod_settings && bfm_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(channel_analyzer_settings && channel_analyzer_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(dsd_demod_settings && dsd_demod_settings->isSet()){

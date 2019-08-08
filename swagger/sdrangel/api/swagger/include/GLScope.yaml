@@ -1,0 +1,146 @@
+TraceData:
+  description: see GLScopeSettings::TraceData
+  properties:
+    projectionType:
+      description: Complex to real projection type. See Projector::ProjectionType
+      type: integer
+    inputIndex:
+      description: Input or feed index this trace is associated with
+      type: integer
+    amp:
+      description: Amplification factor
+      type: number
+      format: float
+    ampIndex:
+      description: Index in list of amplification factors
+      type: integer
+    ofs:
+      description: Offset factor
+      type: number
+      format: float
+    ofsCoarse:
+      description: Coarse offset slider value
+      type: integer
+    ofsFine:
+      description: Fine offset slider value
+      type: integer
+    traceDelay:
+      description: Trace delay in number of samples
+      type: integer
+    traceDelayCoarse:
+      description: Coarse delay slider value
+      type: integer
+    traceDelayFine:
+      description: Fine delay slider value
+      type: integer
+    triggerDisplayLevel:
+      description: Displayable trigger display level in -1:+1 scale. Off scale if not displayable.
+      type: number
+      format: float
+    traceColor:
+      description: Trace display color. QColor
+      type: integer
+    traceColorR:
+      description: Trace display color - red shortcut
+      type: number
+      format: float
+    traceColorG:
+      description: Trace display color - green shortcut
+      type: number
+      format: float
+    traceColorB:
+      description: Trace display color - blue shortcut
+      type: number
+      format: float
+    hasTextOverlay:
+      description: True if a text overlay has to be displayed. Boolean
+      type: integer
+    textOverlay:
+      description: Text overlay to display
+      type: string
+    viewTrace:
+      description: Trace visibility. Boolean
+      type: integer
+
+TriggerData:
+  description: see GLScopeSettings::TriggerData
+  properties:
+    projectionType:
+      description: Complex to real projection type. See Projector::ProjectionType
+      type: integer
+    inputIndex:
+      description: Input or feed index this trigger is associated with
+      type: integer
+    triggerLevel:
+      description: Level in real units
+      type: number
+      format: float
+    triggerLevelCoarse:
+      type: integer
+    triggerLevelFine:
+      type: integer
+    triggerPositiveEdge:
+      description: Trigger on the positive edge (else negative). Boolean
+      type: integer
+    triggerBothEdges:
+      description: Trigger on both edges (else only one). Boolean
+      type: integer
+    triggerHoldoff:
+      description: Trigger holdoff in number of samples
+      type: integer
+    triggerDelay:
+      description: Delay before the trigger is kicked off in number of samples (trigger delay)
+      type: integer
+    triggerDelayMult:
+      description: Trigger delay as a multiplier of trace length
+      type: number
+      format: float
+    triggerDelayCoarse:
+      type: integer
+    triggerDelayFine:
+      type: integer
+    triggerRepeat:
+      description: Number of trigger conditions before the final decisive trigger
+      type: integer
+    triggerColor:
+      description: Trigger line display color. QColor
+      type: integer
+    triggerColorR:
+      description: Trigger line display color - red shortcut
+      type: number
+      format: float
+    triggerColorG:
+      description: Trigger line display color - green shortcut
+      type: number
+      format: float
+    triggerColorB:
+      description: Trigger line display color - blue shortcut
+      type: number
+      format: float
+
+GLScope:
+  description: GLScopeGUI settings
+  properties:
+    displayMode:
+      description: see GLScopeSettings::DisplayMode
+      type: integer
+    traceIntensity:
+      type: integer
+    gridIntensity:
+      type: integer
+    time:
+      type: integer
+    timeOfs:
+      type: integer
+    traceLen:
+      type: integer
+    trigPre:
+      type: integer
+    tracesData:
+      type: array
+      items:
+        $ref: "http://localhost:8081/api/swagger/include/GLScope.yaml#/TraceData"
+    m_triggersData:
+      type: array
+      items:
+        $ref: "http://localhost:8081/api/swagger/include/GLScope.yaml#/TriggerData"

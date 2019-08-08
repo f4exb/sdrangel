@@ -25,6 +25,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/ATVMod.yaml#/ATVModSettings"
     BFMDemodSettings:
       $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
+    ChannelAnalyzerSettings:
+      $ref: "/doc/swagger/include/ChannelAnalyzer.yaml#/ChannelAnalyzerSettings"
     DSDDemodSettings:
       $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodSettings"
     FileSourceSettings:

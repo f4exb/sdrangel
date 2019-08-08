@@ -26,6 +26,7 @@
 #include "SWGAMModSettings.h"
 #include "SWGATVModSettings.h"
 #include "SWGBFMDemodSettings.h"
+#include "SWGChannelAnalyzerSettings.h"
 #include "SWGDSDDemodSettings.h"
 #include "SWGFileSourceSettings.h"
 #include "SWGFreeDVDemodSettings.h"
@@ -86,6 +87,9 @@ public:
 
     SWGBFMDemodSettings* getBfmDemodSettings();
     void setBfmDemodSettings(SWGBFMDemodSettings* bfm_demod_settings);
+
+    SWGChannelAnalyzerSettings* getChannelAnalyzerSettings();
+    void setChannelAnalyzerSettings(SWGChannelAnalyzerSettings* channel_analyzer_settings);
 
     SWGDSDDemodSettings* getDsdDemodSettings();
     void setDsdDemodSettings(SWGDSDDemodSettings* dsd_demod_settings);
@@ -165,6 +169,9 @@ private:
 
     SWGBFMDemodSettings* bfm_demod_settings;
     bool m_bfm_demod_settings_isSet;
+
+    SWGChannelAnalyzerSettings* channel_analyzer_settings;
+    bool m_channel_analyzer_settings_isSet;
 
     SWGDSDDemodSettings* dsd_demod_settings;
     bool m_dsd_demod_settings_isSet;

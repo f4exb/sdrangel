@@ -25,6 +25,8 @@ ChannelSettings:
       $ref: "http://localhost:8081/api/swagger/include/ATVMod.yaml#/ATVModSettings"
     BFMDemodSettings:
       $ref: "http://localhost:8081/api/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
+    ChannelAnalyzerSettings:
+      $ref: "http://localhost:8081/api/swagger/include/ChannelAnalyzer.yaml#/ChannelAnalyzerSettings"
     DSDDemodSettings:
       $ref: "http://localhost:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodSettings"
     FileSourceSettings:

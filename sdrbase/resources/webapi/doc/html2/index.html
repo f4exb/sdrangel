@@ -1759,6 +1759,69 @@ margin-bottom: 20px;
   },
   "description" : "Channel summarized information"
 };
+            defs.ChannelAnalyzerSettings = {
+  "properties" : {
+    "frequency" : {
+      "type" : "integer"
+    },
+    "downSample" : {
+      "type" : "integer",
+      "description" : "Boolean"
+    },
+    "downSampleRate" : {
+      "type" : "integer"
+    },
+    "bandwidth" : {
+      "type" : "integer"
+    },
+    "lowCutoff" : {
+      "type" : "integer"
+    },
+    "spanLog2" : {
+      "type" : "integer"
+    },
+    "ssb" : {
+      "type" : "integer",
+      "description" : "Boolean"
+    },
+    "pll" : {
+      "type" : "integer",
+      "description" : "Boolean"
+    },
+    "fll" : {
+      "type" : "integer",
+      "description" : "Boolean"
+    },
+    "rrc" : {
+      "type" : "integer",
+      "description" : "Boolean"
+    },
+    "rrcRolloff" : {
+      "type" : "integer",
+      "description" : "in 100ths"
+    },
+    "pllPskOrder" : {
+      "type" : "integer"
+    },
+    "inputType" : {
+      "type" : "integer",
+      "description" : "see ChannelAnalyzer::InputType"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
+    },
+    "scopeConfig" : {
+      "$ref" : "#/definitions/GLScope"
+    }
+  },
+  "description" : "ChannelAnalyzer"
+};
             defs.ChannelConfig = {
   "properties" : {
     "channelIdURI" : {
@@ -1900,6 +1963,9 @@ margin-bottom: 20px;
     },
     "BFMDemodSettings" : {
       "$ref" : "#/definitions/BFMDemodSettings"
+    },
+    "ChannelAnalyzerSettings" : {
+      "$ref" : "#/definitions/ChannelAnalyzerSettings"
     },
     "DSDDemodSettings" : {
       "$ref" : "#/definitions/DSDDemodSettings"
@@ -3090,6 +3156,45 @@ margin-bottom: 20px;
     }
   },
   "description" : "An frequency range with 64 bit support for min and max"
+};
+            defs.GLScope = {
+  "properties" : {
+    "displayMode" : {
+      "type" : "integer",
+      "description" : "see GLScopeSettings::DisplayMode"
+    },
+    "traceIntensity" : {
+      "type" : "integer"
+    },
+    "gridIntensity" : {
+      "type" : "integer"
+    },
+    "time" : {
+      "type" : "integer"
+    },
+    "timeOfs" : {
+      "type" : "integer"
+    },
+    "traceLen" : {
+      "type" : "integer"
+    },
+    "trigPre" : {
+      "type" : "integer"
+    },
+    "tracesData" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/TraceData"
+      }
+    },
+    "m_triggersData" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/TriggerData"
+      }
+    }
+  },
+  "description" : "GLScopeGUI settings"
 };
             defs.GLSpectrum = {
   "properties" : {
@@ -5814,6 +5919,163 @@ margin-bottom: 20px;
     }
   },
   "description" : "TestSource"
+};
+            defs.TraceData = {
+  "properties" : {
+    "projectionType" : {
+      "type" : "integer",
+      "description" : "Complex to real projection type. See Projector::ProjectionType"
+    },
+    "inputIndex" : {
+      "type" : "integer",
+      "description" : "Input or feed index this trace is associated with"
+    },
+    "amp" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Amplification factor"
+    },
+    "ampIndex" : {
+      "type" : "integer",
+      "description" : "Index in list of amplification factors"
+    },
+    "ofs" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Offset factor"
+    },
+    "ofsCoarse" : {
+      "type" : "integer",
+      "description" : "Coarse offset slider value"
+    },
+    "ofsFine" : {
+      "type" : "integer",
+      "description" : "Fine offset slider value"
+    },
+    "traceDelay" : {
+      "type" : "integer",
+      "description" : "Trace delay in number of samples"
+    },
+    "traceDelayCoarse" : {
+      "type" : "integer",
+      "description" : "Coarse delay slider value"
+    },
+    "traceDelayFine" : {
+      "type" : "integer",
+      "description" : "Fine delay slider value"
+    },
+    "triggerDisplayLevel" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Displayable trigger display level in -1:+1 scale. Off scale if not displayable."
+    },
+    "traceColor" : {
+      "type" : "integer",
+      "description" : "Trace display color. QColor"
+    },
+    "traceColorR" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Trace display color - red shortcut"
+    },
+    "traceColorG" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Trace display color - green shortcut"
+    },
+    "traceColorB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Trace display color - blue shortcut"
+    },
+    "hasTextOverlay" : {
+      "type" : "integer",
+      "description" : "True if a text overlay has to be displayed. Boolean"
+    },
+    "textOverlay" : {
+      "type" : "string",
+      "description" : "Text overlay to display"
+    },
+    "viewTrace" : {
+      "type" : "integer",
+      "description" : "Trace visibility. Boolean"
+    }
+  },
+  "description" : "see GLScopeSettings::TraceData"
+};
+            defs.TriggerData = {
+  "properties" : {
+    "projectionType" : {
+      "type" : "integer",
+      "description" : "Complex to real projection type. See Projector::ProjectionType"
+    },
+    "inputIndex" : {
+      "type" : "integer",
+      "description" : "Input or feed index this trigger is associated with"
+    },
+    "triggerLevel" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Level in real units"
+    },
+    "triggerLevelCoarse" : {
+      "type" : "integer"
+    },
+    "triggerLevelFine" : {
+      "type" : "integer"
+    },
+    "triggerPositiveEdge" : {
+      "type" : "integer",
+      "description" : "Trigger on the positive edge (else negative). Boolean"
+    },
+    "triggerBothEdges" : {
+      "type" : "integer",
+      "description" : "Trigger on both edges (else only one). Boolean"
+    },
+    "triggerHoldoff" : {
+      "type" : "integer",
+      "description" : "Trigger holdoff in number of samples"
+    },
+    "triggerDelay" : {
+      "type" : "integer",
+      "description" : "Delay before the trigger is kicked off in number of samples (trigger delay)"
+    },
+    "triggerDelayMult" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Trigger delay as a multiplier of trace length"
+    },
+    "triggerDelayCoarse" : {
+      "type" : "integer"
+    },
+    "triggerDelayFine" : {
+      "type" : "integer"
+    },
+    "triggerRepeat" : {
+      "type" : "integer",
+      "description" : "Number of trigger conditions before the final decisive trigger"
+    },
+    "triggerColor" : {
+      "type" : "integer",
+      "description" : "Trigger line display color. QColor"
+    },
+    "triggerColorR" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Trigger line display color - red shortcut"
+    },
+    "triggerColorG" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Trigger line display color - green shortcut"
+    },
+    "triggerColorB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Trigger line display color - blue shortcut"
+    }
+  },
+  "description" : "see GLScopeSettings::TriggerData"
 };
             defs.UDPSinkReport = {
   "properties" : {
@@ -27345,7 +27607,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-08-05T18:13:15.915+02:00
+              Generated 2019-08-07T23:30:36.250+02:00
             </div>
           </div>
       </div>

@@ -42,6 +42,7 @@
 #include "SWGBladeRF2OutputSettings.h"
 #include "SWGCWKeyerSettings.h"
 #include "SWGChannel.h"
+#include "SWGChannelAnalyzerSettings.h"
 #include "SWGChannelConfig.h"
 #include "SWGChannelListItem.h"
 #include "SWGChannelReport.h"
@@ -76,6 +77,7 @@
 #include "SWGFrequency.h"
 #include "SWGFrequencyBand.h"
 #include "SWGFrequencyRange.h"
+#include "SWGGLScope.h"
 #include "SWGGLSpectrum.h"
 #include "SWGGain.h"
 #include "SWGHackRFInputSettings.h"
@@ -148,6 +150,8 @@
 #include "SWGTestMISettings.h"
 #include "SWGTestMiStreamSettings.h"
 #include "SWGTestSourceSettings.h"
+#include "SWGTraceData.h"
+#include "SWGTriggerData.h"
 #include "SWGUDPSinkReport.h"
 #include "SWGUDPSinkSettings.h"
 #include "SWGUDPSourceReport.h"
@@ -247,6 +251,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGChannel").compare(type) == 0) {
       return new SWGChannel();
+    }
+    if(QString("SWGChannelAnalyzerSettings").compare(type) == 0) {
+      return new SWGChannelAnalyzerSettings();
     }
     if(QString("SWGChannelConfig").compare(type) == 0) {
       return new SWGChannelConfig();
@@ -349,6 +356,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFrequencyRange").compare(type) == 0) {
       return new SWGFrequencyRange();
+    }
+    if(QString("SWGGLScope").compare(type) == 0) {
+      return new SWGGLScope();
     }
     if(QString("SWGGLSpectrum").compare(type) == 0) {
       return new SWGGLSpectrum();
@@ -565,6 +575,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGTestSourceSettings").compare(type) == 0) {
       return new SWGTestSourceSettings();
+    }
+    if(QString("SWGTraceData").compare(type) == 0) {
+      return new SWGTraceData();
+    }
+    if(QString("SWGTriggerData").compare(type) == 0) {
+      return new SWGTriggerData();
     }
     if(QString("SWGUDPSinkReport").compare(type) == 0) {
       return new SWGUDPSinkReport();

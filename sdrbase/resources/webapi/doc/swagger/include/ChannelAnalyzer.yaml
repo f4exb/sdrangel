@@ -1,0 +1,44 @@
+ChannelAnalyzerSettings:
+  description: ChannelAnalyzer
+  properties:
+    frequency:
+      type: integer
+    downSample:
+      description: Boolean
+      type: integer
+    downSampleRate:
+      type: integer
+    bandwidth:
+      type: integer
+    lowCutoff:
+      type: integer
+    spanLog2:
+      type: integer
+    ssb:
+      description: Boolean
+      type: integer
+    pll:
+      description: Boolean
+      type: integer
+    fll:
+      description: Boolean
+      type: integer
+    rrc:
+      description: Boolean
+      type: integer
+    rrcRolloff:
+      description: in 100ths
+      type: integer
+    pllPskOrder:
+      type: integer
+    inputType:
+      description: see ChannelAnalyzer::InputType
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    spectrumConfig:
+      $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+    scopeConfig:
+      $ref: "/doc/swagger/include/GLScope.yaml#/GLScope"
