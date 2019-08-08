@@ -68,8 +68,8 @@ public:
     QList<SWGTraceData*>* getTracesData();
     void setTracesData(QList<SWGTraceData*>* traces_data);
 
-    QList<SWGTriggerData*>* getMTriggersData();
-    void setMTriggersData(QList<SWGTriggerData*>* m_triggers_data);
+    QList<SWGTriggerData*>* getTriggersData();
+    void setTriggersData(QList<SWGTriggerData*>* triggers_data);
 
 
     virtual bool isSet() override;
@@ -99,8 +99,8 @@ private:
     QList<SWGTraceData*>* traces_data;
     bool m_traces_data_isSet;
 
-    QList<SWGTriggerData*>* m_triggers_data;
-    bool m_m_triggers_data_isSet;
+    QList<SWGTriggerData*>* triggers_data;
+    bool m_triggers_data_isSet;
 
 };
 

@@ -49,3 +49,78 @@ std::regex WebAPIAdapterInterface::devicesetChannelURLRe("^/sdrangel/deviceset/(
 std::regex WebAPIAdapterInterface::devicesetChannelIndexURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})$");
 std::regex WebAPIAdapterInterface::devicesetChannelSettingsURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})/settings$");
 std::regex WebAPIAdapterInterface::devicesetChannelReportURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})/report");
+
+void WebAPIAdapterInterface::ConfigKeys::debug()
+{
+    qDebug("WebAPIAdapterInterface::ConfigKeys::debug");
+
+    qDebug("preferences:");
+    foreach(QString preferenceKey, m_preferencesKeys) {
+        qDebug("  %s", qPrintable(preferenceKey));
+    }
+
+    qDebug("commands:");
+    foreach(CommandKeys commandKeys, m_commandKeys)
+    {
+        qDebug("  {");
+        foreach(QString commandKey, commandKeys.m_keys) {
+            qDebug("    %s", qPrintable(commandKey));
+        }
+        qDebug("  }");
+    }
+
+    qDebug("presets:");
+    foreach(PresetKeys presetKeys, m_presetKeys)
+    {
+        qDebug("  {");
+        foreach(QString presetKey, presetKeys.m_keys) {
+            qDebug("    %s", qPrintable(presetKey));
+        }
+        qDebug("    deviceConfigs:");
+        foreach(DeviceKeys deviceKeys, presetKeys.m_devicesKeys)
+        {
+            qDebug("      {");
+            qDebug("        config:");
+            foreach(QString deviceKey, deviceKeys.m_deviceKeys) {
+                qDebug("          %s", qPrintable(deviceKey));
+            }
+            qDebug("      }");
+        }
+        qDebug("    channelConfigs");
+        foreach(ChannelKeys channelKeys, presetKeys.m_channelsKeys)
+        {
+            qDebug("      {");
+            qDebug("        config:");
+            foreach(QString channelKey, channelKeys.m_channelKeys) {
+                qDebug("          %s", qPrintable(channelKey));
+            }
+            qDebug("      }");
+        }
+        qDebug("  }");
+    }
+
+    qDebug("workingPreset:");
+    foreach(QString presetKey, m_workingPresetKeys.m_keys) {
+        qDebug("  %s", qPrintable(presetKey));
+    }
+    qDebug("  deviceConfigs:");
+    foreach(DeviceKeys deviceKeys, m_workingPresetKeys.m_devicesKeys)
+    {
+        qDebug("    {");
+        qDebug("      config:");
+        foreach(QString deviceKey, deviceKeys.m_deviceKeys) {
+            qDebug("        %s", qPrintable(deviceKey));
+        }
+        qDebug("    }");
+    }
+    qDebug("  channelConfigs:");
+    foreach(ChannelKeys channelKeys, m_workingPresetKeys.m_channelsKeys)
+    {
+        qDebug("    {");
+        qDebug("      config:");
+        foreach(QString channelKey, channelKeys.m_channelKeys) {
+            qDebug("        %s", qPrintable(channelKey));
+        }
+        qDebug("    }");
+    }
+}

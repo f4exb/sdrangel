@@ -44,8 +44,8 @@ SWGGLScope::SWGGLScope() {
     m_trig_pre_isSet = false;
     traces_data = nullptr;
     m_traces_data_isSet = false;
-    m_triggers_data = nullptr;
-    m_m_triggers_data_isSet = false;
+    triggers_data = nullptr;
+    m_triggers_data_isSet = false;
 }
 
 SWGGLScope::~SWGGLScope() {
@@ -70,8 +70,8 @@ SWGGLScope::init() {
     m_trig_pre_isSet = false;
     traces_data = new QList<SWGTraceData*>();
     m_traces_data_isSet = false;
-    m_triggers_data = new QList<SWGTriggerData*>();
-    m_m_triggers_data_isSet = false;
+    triggers_data = new QList<SWGTriggerData*>();
+    m_triggers_data_isSet = false;
 }
 
 void
@@ -90,12 +90,12 @@ SWGGLScope::cleanup() {
         }
         delete traces_data;
     }
-    if(m_triggers_data != nullptr) { 
-        auto arr = m_triggers_data;
+    if(triggers_data != nullptr) { 
+        auto arr = triggers_data;
         for(auto o: *arr) { 
             delete o;
         }
-        delete m_triggers_data;
+        delete triggers_data;
     }
 }
 
@@ -127,7 +127,7 @@ SWGGLScope::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&traces_data, pJson["tracesData"], "QList", "SWGTraceData");
     
-    ::SWGSDRangel::setValue(&m_triggers_data, pJson["m_triggersData"], "QList", "SWGTriggerData");
+    ::SWGSDRangel::setValue(&triggers_data, pJson["triggersData"], "QList", "SWGTriggerData");
 }
 
 QString
@@ -168,8 +168,8 @@ SWGGLScope::asJsonObject() {
     if(traces_data && traces_data->size() > 0){
         toJsonArray((QList<void*>*)traces_data, obj, "tracesData", "SWGTraceData");
     }
-    if(m_triggers_data && m_triggers_data->size() > 0){
-        toJsonArray((QList<void*>*)m_triggers_data, obj, "m_triggersData", "SWGTriggerData");
+    if(triggers_data && triggers_data->size() > 0){
+        toJsonArray((QList<void*>*)triggers_data, obj, "triggersData", "SWGTriggerData");
     }
 
     return obj;
@@ -256,13 +256,13 @@ SWGGLScope::setTracesData(QList<SWGTraceData*>* traces_data) {
 }
 
 QList<SWGTriggerData*>*
-SWGGLScope::getMTriggersData() {
-    return m_triggers_data;
+SWGGLScope::getTriggersData() {
+    return triggers_data;
 }
 void
-SWGGLScope::setMTriggersData(QList<SWGTriggerData*>* m_triggers_data) {
-    this->m_triggers_data = m_triggers_data;
-    this->m_m_triggers_data_isSet = true;
+SWGGLScope::setTriggersData(QList<SWGTriggerData*>* triggers_data) {
+    this->triggers_data = triggers_data;
+    this->m_triggers_data_isSet = true;
 }
 
 
@@ -294,7 +294,7 @@ SWGGLScope::isSet(){
         if(traces_data && (traces_data->size() > 0)){
             isObjectUpdated = true; break;
         }
-        if(m_triggers_data && (m_triggers_data->size() > 0)){
+        if(triggers_data && (triggers_data->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);

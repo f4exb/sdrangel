@@ -61,6 +61,9 @@ private:
     ChannelAnalyzerSettings m_settings;
     GLScopeSettings m_glScopeSettings;
     GLSpectrumSettings m_glSpectrumSettings;
+
+    static int qColorToInt(const QColor& color);
+    static QColor intToQColor(int intColor);
 };
 
 #endif // INCLUDE_CHANALYZER_WEBAPIADAPTER_H

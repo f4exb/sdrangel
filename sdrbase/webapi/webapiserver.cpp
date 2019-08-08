@@ -29,6 +29,7 @@ WebAPIServer::WebAPIServer(const QString& host, uint16_t port, WebAPIRequestMapp
 {
     m_settings.host = host;
     m_settings.port = port;
+    m_settings.maxRequestSize = 1<<23; // 8M
 }
 
 WebAPIServer::~WebAPIServer()

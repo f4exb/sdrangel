@@ -15,10 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <vector>
+
 #include <QByteArray>
 #include <QColor>
-
-#include <vector>
 
 #include "export.h"
 #include "dsp/dsptypes.h"

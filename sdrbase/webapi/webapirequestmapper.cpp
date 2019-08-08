@@ -53,6 +53,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
     {"sdrangel.channeltx.ammod", "AMModSettings"},
     {"sdrangel.channeltx.atvmod", "ATVModSettings"},
     {"sdrangel.channel.bfm", "BFMDemodSettings"},
+    {"sdrangel.channel.chanalyzer", "ChannelAnalyzerSettings"},
     {"sdrangel.channel.dsddemod", "DSDDemodSettings"},
     {"sdrangel.channeltx.filesrc", "FileSourceSettings"},
     {"sdrangel.channel.freedvdemod", "FreeDVDemodSettings"},
@@ -117,6 +118,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
     {"AMMod", "AMModSettings"},
     {"ATVMod", "ATVModSettings"},
     {"BFMDemod", "BFMDemodSettings"},
+    {"ChannelAnalyzer", "ChannelAnalyzerSettings"},
     {"DSDDemod", "DSDDemodSettings"},
     {"FileSource", "FileSourceSettings"},
     {"FreeDVDemod", "FreeDVDemodSettings"},
@@ -375,6 +377,7 @@ void WebAPIRequestMapper::instanceConfigService(qtwebapp::HttpRequest& request, 
 
             if (validateConfig(query, jsonObject, configKeys))
             {
+                configKeys.debug();
                 int status = m_adapter->instanceConfigPutPatch(
                     true,
                     query,
@@ -2254,11 +2257,26 @@ bool WebAPIRequestMapper::validateConfig(SWGSDRangel::SWGInstanceConfigResponse&
         }
     }
 
+    if (jsonObject.contains("presets"))
+    {
+        QJsonArray presetsJson = jsonObject["presets"].toArray();
+        QJsonArray::const_iterator presetsIt = presetsJson.begin();
+
+        for (; presetsIt != presetsJson.end(); ++presetsIt)
+        {
+            SWGSDRangel::SWGPreset *preset = new SWGSDRangel::SWGPreset();
+            QJsonObject presetJson = presetsIt->toObject();
+            configKeys.m_presetKeys.append(WebAPIAdapterInterface::PresetKeys());
+            appendPresetKeys(preset, presetJson, configKeys.m_presetKeys.back());
+        }
+    }
+
     if (jsonObject.contains("workingPreset"))
     {
-        SWGSDRangel::SWGPreset *workingPreset = new SWGSDRangel::SWGPreset();
+        SWGSDRangel::SWGPreset *preset = new SWGSDRangel::SWGPreset();
+        config.setWorkingPreset(preset);
         QJsonObject presetJson = jsonObject["workingPreset"].toObject();
-        appendPresetKeys(workingPreset, presetJson, configKeys.m_workingPresetKeys);
+        appendPresetKeys(preset, presetJson, configKeys.m_workingPresetKeys);
     }
 
     return true;
@@ -2412,6 +2430,11 @@ bool WebAPIRequestMapper::getChannel(
         {
             channelSettings->setBfmDemodSettings(new SWGSDRangel::SWGBFMDemodSettings());
             channelSettings->getBfmDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "ChannelAnalyzerSettings")
+        {
+            channelSettings->setChannelAnalyzerSettings(new SWGSDRangel::SWGChannelAnalyzerSettings());
+            channelSettings->getChannelAnalyzerSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "DSDDemodSettings")
         {

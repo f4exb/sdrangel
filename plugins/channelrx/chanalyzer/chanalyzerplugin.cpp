@@ -21,10 +21,11 @@
 #include "chanalyzer.h"
 #include "chanalyzerplugin.h"
 #include "chanalyzergui.h"
+#include "chanalyzerwebapiadapter.h"
 
 const PluginDescriptor ChannelAnalyzerPlugin::m_pluginDescriptor = {
 	QString("Channel Analyzer"),
-	QString("4.5.1"),
+	QString("4.11.6"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -65,3 +66,7 @@ ChannelAPI* ChannelAnalyzerPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new ChannelAnalyzer(deviceAPI);
 }
 
+ChannelWebAPIAdapter* ChannelAnalyzerPlugin::createChannelWebAPIAdapter() const
+{
+	return new ChannelAnalyzerWebAPIAdapter();
+}

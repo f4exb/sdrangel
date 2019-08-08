@@ -140,7 +140,7 @@ GLScope:
       type: array
       items:
         $ref: "http://localhost:8081/api/swagger/include/GLScope.yaml#/TraceData"
-    m_triggersData:
+    triggersData:
       type: array
       items:
         $ref: "http://localhost:8081/api/swagger/include/GLScope.yaml#/TriggerData"

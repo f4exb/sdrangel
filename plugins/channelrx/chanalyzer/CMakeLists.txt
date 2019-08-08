@@ -5,7 +5,7 @@ set(chanalyzer_SOURCES
 	chanalyzergui.cpp
 	chanalyzerplugin.cpp
 	chanalyzersettings.cpp
-
+	chanalyzerwebapiadapter.cpp
 	chanalyzergui.ui
 )
 
@@ -14,6 +14,11 @@ set(chanalyzer_HEADERS
 	chanalyzergui.h
 	chanalyzerplugin.h
 	chanalyzersettings.h
+	chanalyzerwebapiadapter.h
+)
+
+include_directories(
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
 include_directories(
@@ -25,8 +30,8 @@ add_library(chanalyzer SHARED
 )
 
 target_link_libraries(chanalyzer
-        Qt5::Core
-        Qt5::Widgets
+    Qt5::Core
+    Qt5::Widgets
 	sdrbase
 	sdrgui
 )
