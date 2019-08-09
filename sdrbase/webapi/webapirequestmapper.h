@@ -145,6 +145,12 @@ private:
     void resetAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice);
     void resetAudioOutputDevice(SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice);
 
+    void processChannelAnalyzerSettings(
+        SWGSDRangel::SWGChannelSettings *channelSettings,
+        const QJsonObject& channelSettingsJson,
+        QStringList& channelSettingsKeys
+    );
+
     static const QMap<QString, QString> m_channelURIToSettingsKey;
     static const QMap<QString, QString> m_deviceIdToSettingsKey;
     static const QMap<QString, QString> m_channelTypeToSettingsKey;

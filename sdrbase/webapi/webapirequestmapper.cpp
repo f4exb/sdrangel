@@ -48,19 +48,20 @@
 #include "SWGErrorResponse.h"
 
 const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
-    {"de.maintech.sdrangelove.channel.am", "AMDemodSettings"},
     {"sdrangel.channel.amdemod", "AMDemodSettings"},
+    {"de.maintech.sdrangelove.channel.am", "AMDemodSettings"}, // remap
     {"sdrangel.channeltx.ammod", "AMModSettings"},
     {"sdrangel.channeltx.atvmod", "ATVModSettings"},
     {"sdrangel.channel.bfm", "BFMDemodSettings"},
     {"sdrangel.channel.chanalyzer", "ChannelAnalyzerSettings"},
+    {"sdrangel.channel.chanalyzerng", "ChannelAnalyzerSettings"}, // remap
     {"sdrangel.channel.dsddemod", "DSDDemodSettings"},
     {"sdrangel.channeltx.filesrc", "FileSourceSettings"},
     {"sdrangel.channel.freedvdemod", "FreeDVDemodSettings"},
     {"sdrangel.channeltx.freedvmod", "FreeDVModSettings"},
     {"sdrangel.channel.freqtracker", "FreqTrackerSettings"},
     {"sdrangel.channel.nfmdemod", "NFMDemodSettings"},
-    {"de.maintech.sdrangelove.channel.nfm", "NFMDemodSettings"},
+    {"de.maintech.sdrangelove.channel.nfm", "NFMDemodSettings"}, // remap
     {"sdrangel.channeltx.nfmmod", "NFMModSettings"},
     {"sdrangel.demod.localsink", "LocalSinkSettings"},
     {"sdrangel.demod.localsource", "LocalSourceSettings"},
@@ -68,11 +69,11 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
     {"sdrangel.channeltx.remotesrc", "RemoteSourceSettings"},
     {"sdrangel.channeltx.ssbmod", "SSBModSettings"},
     {"sdrangel.channel.ssbdemod", "SSBDemodSettings"},
-    {"de.maintech.sdrangelove.channel.ssb", "SSBDemodSettings"},
+    {"de.maintech.sdrangelove.channel.ssb", "SSBDemodSettings"}, // remap
     {"sdrangel.channeltx.udpsink", "UDPSourceSettings"},
     {"sdrangel.demod.udpsrc", "UDPSinkSettings"},
     {"sdrangel.channel.wfmdemod", "WFMDemodSettings"},
-    {"de.maintech.sdrangelove.channel.wfm", "WFMDemodSettings"},
+    {"de.maintech.sdrangelove.channel.wfm", "WFMDemodSettings"}, // remap
     {"sdrangel.channeltx.wfmmod", "WFMModSettings"}
 };
 
@@ -378,13 +379,14 @@ void WebAPIRequestMapper::instanceConfigService(qtwebapp::HttpRequest& request, 
             if (validateConfig(query, jsonObject, configKeys))
             {
                 configKeys.debug();
-                int status = m_adapter->instanceConfigPutPatch(
-                    true,
-                    query,
-                    configKeys,
-                    normalResponse,
-                    errorResponse
-                );
+                int status = 200;
+                // int status = m_adapter->instanceConfigPutPatch(
+                //     true,
+                //     query,
+                //     configKeys,
+                //     normalResponse,
+                //     errorResponse
+                // );
                 response.setStatus(status);
 
                 if (status/100 == 2) {
@@ -2433,8 +2435,7 @@ bool WebAPIRequestMapper::getChannel(
         }
         else if (channelSettingsKey == "ChannelAnalyzerSettings")
         {
-            channelSettings->setChannelAnalyzerSettings(new SWGSDRangel::SWGChannelAnalyzerSettings());
-            channelSettings->getChannelAnalyzerSettings()->fromJsonObject(settingsJsonObject);
+            processChannelAnalyzerSettings(channelSettings, settingsJsonObject, channelSettingsKeys);
         }
         else if (channelSettingsKey == "DSDDemodSettings")
         {
@@ -2758,6 +2759,7 @@ void WebAPIRequestMapper::appendSettingsSubKeys(
     QStringList childSettingsKeys = childSettingsJsonObject.keys();
 
     for (int i = 0; i < childSettingsKeys.size(); i++) {
+        qDebug("WebAPIRequestMapper::appendSettingsSubKeys: %s", qPrintable(childSettingsKeys.at(i)));
         keyList.append(parentKey + QString(".") + childSettingsKeys.at(i));
     }
 }
@@ -2767,24 +2769,24 @@ void WebAPIRequestMapper::appendSettingsArrayKeys(
         const QString& parentKey,
         QStringList& keyList)
 {
-    QJsonArray streams = parentSettingsJsonObject[parentKey].toArray();
+    QJsonArray arrayJson = parentSettingsJsonObject[parentKey].toArray();
 
-    for (int istream = 0; istream < streams.count(); istream++)
+    for (int arrayIndex = 0; arrayIndex < arrayJson.count(); arrayIndex++)
     {
-        QJsonValue v = streams.takeAt(istream);
+        QJsonValue v = arrayJson.takeAt(arrayIndex);
 
         if (v.isObject())
         {
-            QJsonObject streamSettingsJsonObject = v.toObject();
-            QStringList streamSettingsKeys = streamSettingsJsonObject.keys();
+            QJsonObject itemSettingsJsonObject = v.toObject();
+            QStringList itemSettingsKeys = itemSettingsJsonObject.keys();
+            keyList.append(tr("%1[%2]").arg(parentKey).arg(arrayIndex));
 
-            for (int i = 0; i < streamSettingsKeys.size(); i++) {
-                keyList.append(tr("streams[%1].%2").arg(istream).arg(streamSettingsKeys[i]));
+            for (int i = 0; i < itemSettingsKeys.size(); i++) {
+                keyList.append(tr("%1[%2].%3").arg(parentKey).arg(arrayIndex).arg(itemSettingsKeys[i]));
             }
         }
     }
 }
-
 
 void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings)
 {
@@ -2881,4 +2883,116 @@ void WebAPIRequestMapper::resetAudioOutputDevice(SWGSDRangel::SWGAudioOutputDevi
     audioOutputDevice.cleanup();
     audioOutputDevice.setName(nullptr);
     audioOutputDevice.setUdpAddress(nullptr);
+}
+
+void WebAPIRequestMapper::processChannelAnalyzerSettings(
+        SWGSDRangel::SWGChannelSettings *channelSettings,
+        const QJsonObject& channelSettingsJson,
+        QStringList& channelSettingsKeys
+)
+{
+    SWGSDRangel::SWGChannelAnalyzerSettings *channelAnalyzerSettings = new SWGSDRangel::SWGChannelAnalyzerSettings();
+    channelSettings->setChannelAnalyzerSettings(channelAnalyzerSettings);
+    channelAnalyzerSettings->init();
+
+    if (channelSettingsJson.contains("bandwidth")) {
+        channelAnalyzerSettings->setBandwidth(channelSettingsJson["bandwidth"].toInt());
+    }
+    if (channelSettingsJson.contains("downSample")) {
+        channelAnalyzerSettings->setDownSample(channelSettingsJson["downSample"].toInt());
+    }
+    if (channelSettingsJson.contains("downSampleRate")) {
+        channelAnalyzerSettings->setDownSampleRate(channelSettingsJson["downSampleRate"].toInt());
+    }
+    if (channelSettingsJson.contains("fll")) {
+        channelAnalyzerSettings->setFll(channelSettingsJson["fll"].toInt());
+    }
+    if (channelSettingsJson.contains("inputType")) {
+        channelAnalyzerSettings->setInputType(channelSettingsJson["inputType"].toInt());
+    }
+    if (channelSettingsJson.contains("lowCutoff")) {
+        channelAnalyzerSettings->setLowCutoff(channelSettingsJson["lowCutoff"].toInt());
+    }
+    if (channelSettingsJson.contains("pll")) {
+        channelAnalyzerSettings->setPll(channelSettingsJson["pll"].toInt());
+    }
+    if (channelSettingsJson.contains("pllPskOrder")) {
+        channelAnalyzerSettings->setPllPskOrder(channelSettingsJson["pllPskOrder"].toInt());
+    }
+    if (channelSettingsJson.contains("rgbColor")) {
+        channelAnalyzerSettings->setRgbColor(channelSettingsJson["rgbColor"].toInt());
+    }
+    if (channelSettingsJson.contains("rrc")) {
+        channelAnalyzerSettings->setRrc(channelSettingsJson["rrc"].toInt());
+    }
+    if (channelSettingsJson.contains("rrcRolloff")) {
+        channelAnalyzerSettings->setRrcRolloff(channelSettingsJson["rrcRolloff"].toInt());
+    }
+    if (channelSettingsJson.contains("spanLog2")) {
+        channelAnalyzerSettings->setSpanLog2(channelSettingsJson["spanLog2"].toInt());
+    }
+
+    if (channelSettingsJson.contains("spectrumConfig"))
+    {
+        SWGSDRangel::SWGGLSpectrum *spectrum = new SWGSDRangel::SWGGLSpectrum();
+        spectrum->init();
+        channelAnalyzerSettings->setSpectrumConfig(spectrum);
+        QJsonObject spectrumJson;
+        appendSettingsSubKeys(channelSettingsJson, spectrumJson, "spectrumConfig", channelSettingsKeys);
+        spectrum->fromJsonObject(spectrumJson);
+    }
+
+    if (channelSettingsJson.contains("scopeConfig") && channelSettingsJson["scopeConfig"].isObject())
+    {
+        SWGSDRangel::SWGGLScope *scopeConfig = new SWGSDRangel::SWGGLScope();
+        scopeConfig->init();
+        channelAnalyzerSettings->setScopeConfig(scopeConfig);
+        QJsonObject scopeConfigJson;
+        appendSettingsSubKeys(channelSettingsJson, scopeConfigJson, "scopeConfig", channelSettingsKeys);
+        scopeConfig->fromJsonObject(scopeConfigJson);
+
+        if (scopeConfigJson.contains("tracesData") && scopeConfigJson["tracesData"].isArray())
+        {
+            QList<SWGSDRangel::SWGTraceData *> *tracesData = new QList<SWGSDRangel::SWGTraceData *>();
+            scopeConfig->setTracesData(tracesData);
+            QJsonArray tracesJson = scopeConfigJson["tracesData"].toArray();
+
+            for (int i = 0; i < tracesJson.size(); i++)
+            {
+                SWGSDRangel::SWGTraceData *traceData = new SWGSDRangel::SWGTraceData();
+                tracesData->append(traceData);
+                QJsonObject traceJson = tracesJson.at(i).toObject();
+                traceData->fromJsonObject(traceJson);
+            }
+
+            QStringList tracesDataKeys;
+            appendSettingsArrayKeys(scopeConfigJson, "tracesData", tracesDataKeys);
+
+            for (int i = 0; i < tracesDataKeys.size(); i++) {
+                channelSettingsKeys.append(QString("scopeConfig.") + tracesDataKeys.at(i));
+            }
+        }
+
+        if (scopeConfigJson.contains("triggersData") && scopeConfigJson["triggersData"].isArray())
+        {
+            QList<SWGSDRangel::SWGTriggerData *> *triggersData = new QList<SWGSDRangel::SWGTriggerData *>();
+            scopeConfig->setTriggersData(triggersData);
+            QJsonArray triggersJson = scopeConfigJson["triggersData"].toArray();
+
+            for (int i = 0; i < triggersJson.size(); i++)
+            {
+                SWGSDRangel::SWGTriggerData *triggerData = new SWGSDRangel::SWGTriggerData();
+                triggersData->append(triggerData);
+                QJsonObject triggerJson = triggersJson.at(i).toObject();
+                triggerData->fromJsonObject(triggerJson);
+            }
+
+            QStringList triggersDataKeys;
+            appendSettingsArrayKeys(scopeConfigJson, "triggersData", triggersDataKeys);
+
+            for (int i = 0; i < triggersDataKeys.size(); i++) {
+                channelSettingsKeys.append(QString("scopeConfig.") + triggersDataKeys.at(i));
+            }
+        }
+    }
 }
