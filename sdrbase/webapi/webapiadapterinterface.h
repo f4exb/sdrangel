@@ -89,7 +89,7 @@ public:
         PresetKeys m_workingPresetKeys;
         QList<PresetKeys> m_presetKeys;
         QList<CommandKeys> m_commandKeys;
-        void debug();
+        void debug() const;
     };
 
     virtual ~WebAPIAdapterInterface() {}

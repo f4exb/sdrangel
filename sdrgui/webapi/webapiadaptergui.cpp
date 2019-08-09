@@ -160,12 +160,40 @@ int WebAPIAdapterGUI::instanceConfigPutPatch(
 {
     WebAPIAdapterBase webAPIAdapterBase;
     webAPIAdapterBase.setPluginManager(m_mainWindow.getPluginManager());
+    qDebug("WebAPIAdapterGUI::instanceConfigPutPatch: configKeys:");
+    configKeys.debug();
+    return 200;
 
     if (force) {
         webAPIAdapterBase.webapiInitConfig(m_mainWindow.m_settings);
     }
 
-    // TODO
+    Preferences newPreferences = m_mainWindow.m_settings.getPreferences();
+    webAPIAdapterBase.webapiUpdatePreferences(query.getPreferences(), configKeys.m_preferencesKeys, newPreferences);
+    m_mainWindow.m_settings.setPreferences(newPreferences);
+
+    Preset *workingPreset = m_mainWindow.m_settings.getWorkingPreset();
+    webAPIAdapterBase.webapiUpdatePreset(query.getWorkingPreset(), configKeys.m_workingPresetKeys, *workingPreset);
+
+    QList<PresetKeys>::const_iterator presetKeysIt = configKeys.m_presetKeys.begin();
+    int i = 0;
+    for (; presetKeysIt != configKeys.m_presetKeys.end(); ++presetKeysIt, i++)
+    {
+        Preset *newPreset = new Preset(); // created with default values
+        SWGSDRangel::SWGPreset *swgPreset = query.getPresets()->at(i);
+        webAPIAdapterBase.webapiUpdatePreset(swgPreset, *presetKeysIt, *newPreset);
+        m_mainWindow.m_settings.addPreset(newPreset);
+    }
+
+    QList<CommandKeys>::const_iterator commandKeysIt = configKeys.m_commandKeys.begin();
+    i = 0;
+    for (; commandKeysIt != configKeys.m_commandKeys.end(); ++commandKeysIt, i++)
+    {
+        Command *newCommand = new Command(); // created with default values
+        SWGSDRangel::SWGCommand *swgCommand = query.getCommands()->at(i);
+        webAPIAdapterBase.webapiUpdateCommand(swgCommand, *commandKeysIt, *newCommand);
+        m_mainWindow.m_settings.addCommand(newCommand);
+    }
 }
 
 int WebAPIAdapterGUI::instanceDevices(

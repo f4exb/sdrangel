@@ -60,9 +60,38 @@ void WebAPIAdapterBase::webapiInitConfig(
 
 void WebAPIAdapterBase::webapiUpdatePreferences(
     SWGSDRangel::SWGPreferences *apiPreferences,
+    const QStringList& preferenceKeys,
     Preferences& preferences
 )
 {
+    if (preferenceKeys.contains("consoleMinLogLevel")) {
+        preferences.setConsoleMinLogLevel((QtMsgType) apiPreferences->getConsoleMinLogLevel());
+    }
+    if (preferenceKeys.contains("fileMinLogLevel")) {
+        preferences.setFileMinLogLevel((QtMsgType) apiPreferences->getFileMinLogLevel());
+    }
+    if (preferenceKeys.contains("latitude")) {
+        preferences.setLatitude(apiPreferences->getLatitude());
+    }
+    if (preferenceKeys.contains("logFileName")) {
+        preferences.setLogFileName(*apiPreferences->getLogFileName());
+    }
+    if (preferenceKeys.contains("longitude")) {
+        preferences.setLongitude(apiPreferences->getLongitude());
+    }
+    if (preferenceKeys.contains("sourceDevice")) {
+        preferences.setSourceDevice(*apiPreferences->getSourceDevice());
+    }
+    if (preferenceKeys.contains("sourceIndex")) {
+        preferences.setSourceIndex(apiPreferences->getSourceIndex());
+    }
+    if (preferenceKeys.contains("useLogFile")) {
+        preferences.setUseLogFile(apiPreferences->getUseLogFile() != 0);
+    }
+
+    if (preferenceKeys.contains("consoleMinLogLevel"))
+
+
     if (apiPreferences->getSourceDevice()) {
         preferences.setSourceDevice(*apiPreferences->getSourceDevice());
     }
@@ -170,6 +199,14 @@ void WebAPIAdapterBase::webapiFormatPreset(
     }
 }
 
+void WebAPIAdapterBase::webapiUpdatePreset(
+        SWGSDRangel::SWGPreset *apiPreset,
+        const WebAPIAdapterInterface::PresetKeys& presetKeys,
+        Preset& preset
+)
+{
+}
+
 void WebAPIAdapterBase::webapiFormatCommand(
         SWGSDRangel::SWGCommand *apiCommand,
         const Command& command
@@ -184,6 +221,38 @@ void WebAPIAdapterBase::webapiFormatCommand(
     apiCommand->setKeyModifiers((int) command.getKeyModifiers());
     apiCommand->setAssociateKey(command.getAssociateKey() ? 1 : 0);
     apiCommand->setRelease(command.getRelease() ? 1 : 0);
+}
+
+void WebAPIAdapterBase::webapiUpdateCommand(
+        SWGSDRangel::SWGCommand *apiCommand,
+        const WebAPIAdapterInterface::CommandKeys& commandKeys,
+        Command& command
+)
+{
+    if (commandKeys.m_keys.contains("argString")) {
+        command.setArgString(*apiCommand->getArgString());
+    }
+    if (commandKeys.m_keys.contains("associateKey")) {
+        command.setAssociateKey(apiCommand->getAssociateKey());
+    }
+    if (commandKeys.m_keys.contains("command")) {
+        command.setCommand(*apiCommand->getCommand());
+    }
+    if (commandKeys.m_keys.contains("description")) {
+        command.setDescription(*apiCommand->getDescription());
+    }
+    if (commandKeys.m_keys.contains("group")) {
+        command.setGroup(*apiCommand->getGroup());
+    }
+    if (commandKeys.m_keys.contains("key")) {
+        command.setKey((Qt::Key) apiCommand->getKey());
+    }
+    if (commandKeys.m_keys.contains("keyModifiers")) {
+        command.setKeyModifiers((Qt::KeyboardModifiers) apiCommand->getKeyModifiers());
+    }
+    if (commandKeys.m_keys.contains("release")) {
+        command.setRelease(apiCommand->getRelease() != 0);
+    }
 }
 
 ChannelWebAPIAdapter *WebAPIAdapterBase::WebAPIChannelAdapters::getChannelWebAPIAdapter(const QString& channelURI, const PluginManager *pluginManager)

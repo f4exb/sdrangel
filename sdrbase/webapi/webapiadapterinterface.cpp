@@ -50,7 +50,7 @@ std::regex WebAPIAdapterInterface::devicesetChannelIndexURLRe("^/sdrangel/device
 std::regex WebAPIAdapterInterface::devicesetChannelSettingsURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})/settings$");
 std::regex WebAPIAdapterInterface::devicesetChannelReportURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})/report");
 
-void WebAPIAdapterInterface::ConfigKeys::debug()
+void WebAPIAdapterInterface::ConfigKeys::debug() const
 {
     qDebug("WebAPIAdapterInterface::ConfigKeys::debug");
 

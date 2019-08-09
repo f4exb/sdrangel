@@ -29,6 +29,7 @@
 #include "settings/preset.h"
 #include "settings/mainsettings.h"
 #include "commands/command.h"
+#include "webapiadapterinterface.h"
 
 class PluginManager;
 class ChannelWebAPIAdapter;
@@ -62,7 +63,18 @@ public:
     );
     static void webapiUpdatePreferences(
         SWGSDRangel::SWGPreferences *apiPreferences,
+        const QStringList& preferenceKeys,
         Preferences& preferences
+    );
+    static void webapiUpdatePreset(
+        SWGSDRangel::SWGPreset *apiPreset,
+        const WebAPIAdapterInterface::PresetKeys& presetKeys,
+        Preset& preset
+    );
+    static void webapiUpdateCommand(
+        SWGSDRangel::SWGCommand *apiCommand,
+        const WebAPIAdapterInterface::CommandKeys& commandKeys,
+        Command& command
     );
 
 private:

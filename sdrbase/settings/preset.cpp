@@ -27,6 +27,18 @@ Preset::Preset()
 	resetToDefaults();
 }
 
+Preset::Preset(const Preset& other) :
+	m_group(other.m_group),
+	m_description(other.m_description),
+	m_centerFrequency(other.m_centerFrequency),
+	m_spectrumConfig(other.m_spectrumConfig),
+	m_dcOffsetCorrection(other.m_dcOffsetCorrection),
+	m_iqImbalanceCorrection(other.m_iqImbalanceCorrection),
+	m_channelConfigs(other.m_channelConfigs),
+	m_deviceConfigs(other.m_deviceConfigs),
+	m_layout(other.m_layout)
+{}
+
 void Preset::resetToDefaults()
 {
     m_sourcePreset = true;

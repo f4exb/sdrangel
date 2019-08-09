@@ -378,20 +378,24 @@ void WebAPIRequestMapper::instanceConfigService(qtwebapp::HttpRequest& request, 
 
             if (validateConfig(query, jsonObject, configKeys))
             {
-                configKeys.debug();
-                int status = 200;
-                // int status = m_adapter->instanceConfigPutPatch(
-                //     true,
-                //     query,
-                //     configKeys,
-                //     normalResponse,
-                //     errorResponse
-                // );
+                int status = m_adapter->instanceConfigPutPatch(
+                    true,
+                    query,
+                    configKeys,
+                    normalResponse,
+                    errorResponse
+                );
                 response.setStatus(status);
+                qDebug("WebAPIRequestMapper::instanceConfigService: PUT: %d", status);
 
-                if (status/100 == 2) {
+                if (status/100 == 2)
+                {
+                    normalResponse.setMessage(new QString("Configuration updated successfully"));
                     response.write(normalResponse.asJson().toUtf8());
-                } else {
+                }
+                else
+                {
+                    normalResponse.setMessage(new QString("Error occured while updating configuration"));
                     response.write(errorResponse.asJson().toUtf8());
                 }
             }

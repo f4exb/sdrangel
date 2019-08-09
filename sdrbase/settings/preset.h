@@ -58,6 +58,7 @@ public:
 	typedef QList<DeviceConfig> DeviceeConfigs;
 
 	Preset();
+	Preset(const Preset& other);
 
 	void resetToDefaults();
 
