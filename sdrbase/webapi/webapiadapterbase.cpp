@@ -88,28 +88,6 @@ void WebAPIAdapterBase::webapiUpdatePreferences(
     if (preferenceKeys.contains("useLogFile")) {
         preferences.setUseLogFile(apiPreferences->getUseLogFile() != 0);
     }
-
-    if (preferenceKeys.contains("consoleMinLogLevel"))
-
-
-    if (apiPreferences->getSourceDevice()) {
-        preferences.setSourceDevice(*apiPreferences->getSourceDevice());
-    }
-    preferences.setSourceIndex(apiPreferences->getSourceIndex());
-    if (apiPreferences->getAudioType()) {
-        preferences.setAudioType(*apiPreferences->getAudioType());
-    }
-    if (apiPreferences->getAudioDevice()) {
-        preferences.setAudioDevice(*apiPreferences->getAudioDevice());
-    }
-    preferences.setLatitude(apiPreferences->getLatitude());
-    preferences.setLongitude(apiPreferences->getLongitude());
-    preferences.setConsoleMinLogLevel((QtMsgType) apiPreferences->getConsoleMinLogLevel());
-    preferences.setUseLogFile(apiPreferences->getUseLogFile() != 0);
-    if (apiPreferences->getLogFileName()) {
-        preferences.setLogFileName(*apiPreferences->getLogFileName());
-    }
-    preferences.setFileMinLogLevel((QtMsgType) apiPreferences->getFileMinLogLevel());
 }
 
 void WebAPIAdapterBase::webapiFormatPreset(
@@ -200,11 +178,124 @@ void WebAPIAdapterBase::webapiFormatPreset(
 }
 
 void WebAPIAdapterBase::webapiUpdatePreset(
+        bool force,
         SWGSDRangel::SWGPreset *apiPreset,
         const WebAPIAdapterInterface::PresetKeys& presetKeys,
         Preset& preset
 )
 {
+    if (presetKeys.m_keys.contains("centerFrequency")) {
+        preset.setCenterFrequency(apiPreset->getCenterFrequency());
+    }
+    if (presetKeys.m_keys.contains("dcOffsetCorrection")) {
+        preset.setDCOffsetCorrection(apiPreset->getDcOffsetCorrection() != 0);
+    }
+    if (presetKeys.m_keys.contains("iqImbalanceCorrection")) {
+        preset.setIQImbalanceCorrection(apiPreset->getIqImbalanceCorrection() != 0);
+    }
+    if (presetKeys.m_keys.contains("sourcePreset")) {
+        preset.setSourcePreset(apiPreset->getSourcePreset() != 0);
+    }
+    if (presetKeys.m_keys.contains("description")) {
+        preset.setDescription(*apiPreset->getDescription());
+    }
+    if (presetKeys.m_keys.contains("group")) {
+        preset.setGroup(*apiPreset->getGroup());
+    }
+
+    if (force) { // PUT replaces devices list possibly erasing it if no devices are given
+        preset.clearDevices();
+    }
+
+    QString errorMessage;
+    QList<WebAPIAdapterInterface::DeviceKeys>::const_iterator deviceKeysIt = presetKeys.m_devicesKeys.begin();
+    int i = 0;
+    for (; deviceKeysIt != presetKeys.m_devicesKeys.end(); ++deviceKeysIt, i++)
+    {
+        SWGSDRangel::SWGDeviceConfig *swgDeviceConfig = apiPreset->getDeviceConfigs()->at(i);
+        if (!swgDeviceConfig) { // safety measure but should not happen
+            continue;
+        }
+
+        QString deviceId;
+        int deviceSequence = 0;
+        QString deviceSerial;
+
+        if (deviceKeysIt->m_keys.contains("deviceId")) {
+            deviceId = *swgDeviceConfig->getDeviceId();
+        }
+        if (deviceKeysIt->m_keys.contains("deviceSequence")) {
+            deviceSequence = swgDeviceConfig->getDeviceSequence();
+        }
+        if (deviceKeysIt->m_keys.contains("deviceSerial")) {
+            deviceSerial = *swgDeviceConfig->getDeviceSerial();
+        }
+
+        DeviceWebAPIAdapter *deviceWebAPIAdapter = m_webAPIDeviceAdapters.getDeviceWebAPIAdapter(deviceId, m_pluginManager);
+
+        if (deviceWebAPIAdapter)
+        {
+            if (!force) // In PATCH mode you must find the exact device and deserialize its current settings to be able to patch it
+            {
+                const QByteArray *config = preset.findDeviceConfig(deviceId, deviceSerial, deviceSequence);
+
+                if (!config) {
+                    continue;
+                }
+
+                if (!deviceWebAPIAdapter->deserialize(*config)) {
+                    continue;
+                }
+            }
+
+            deviceWebAPIAdapter->webapiSettingsPutPatch(
+                force,
+                deviceKeysIt->m_deviceKeys,
+                *swgDeviceConfig->getConfig(),
+                errorMessage
+            );
+
+            QByteArray config = deviceWebAPIAdapter->serialize();
+            preset.setDeviceConfig(deviceId, deviceSerial, deviceSequence, config); // add or update device
+        }
+    }
+
+    if (force) { // PUT replaces channel list possibly erasing it if no channels are given
+        preset.clearChannels();
+    }
+
+    QList<WebAPIAdapterInterface::ChannelKeys>::const_iterator channelKeysIt = presetKeys.m_channelsKeys.begin();
+    i = 0;
+    for (; channelKeysIt != presetKeys.m_channelsKeys.end(); ++channelKeysIt, i++)
+    {
+        SWGSDRangel::SWGChannelConfig *swgChannelConfig = apiPreset->getChannelConfigs()->at(i);
+        if (!swgChannelConfig) { // safety measure but should not happen
+            continue;
+        }
+
+        if (channelKeysIt->m_keys.contains("channelIdURI"))
+        {
+            QString *channelIdURI = swgChannelConfig->getChannelIdUri();
+            if (!channelIdURI) {
+                continue;
+            }
+
+            ChannelWebAPIAdapter *channelWebAPIAdapter = m_webAPIChannelAdapters.getChannelWebAPIAdapter(*channelIdURI, m_pluginManager);
+            if (!channelWebAPIAdapter) {
+                continue;
+            }
+
+            channelWebAPIAdapter->webapiSettingsPutPatch(
+                true, // channels are always appended
+                channelKeysIt->m_channelKeys,
+                *swgChannelConfig->getConfig(),
+                errorMessage
+            );
+
+            QByteArray config = channelWebAPIAdapter->serialize();
+            preset.addChannel(*channelIdURI, config);
+        }
+    }
 }
 
 void WebAPIAdapterBase::webapiFormatCommand(

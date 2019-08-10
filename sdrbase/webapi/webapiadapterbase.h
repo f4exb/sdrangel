@@ -66,7 +66,8 @@ public:
         const QStringList& preferenceKeys,
         Preferences& preferences
     );
-    static void webapiUpdatePreset(
+    void webapiUpdatePreset(
+        bool force,
         SWGSDRangel::SWGPreset *apiPreset,
         const WebAPIAdapterInterface::PresetKeys& presetKeys,
         Preset& preset

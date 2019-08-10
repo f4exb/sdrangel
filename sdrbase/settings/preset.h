@@ -79,7 +79,9 @@ public:
 	const QByteArray& getSpectrumConfig() const { return m_spectrumConfig; }
 
 	bool hasDCOffsetCorrection() const { return m_dcOffsetCorrection; }
+    void setDCOffsetCorrection(bool dcOffsetCorrection) { m_dcOffsetCorrection = dcOffsetCorrection; }
 	bool hasIQImbalanceCorrection() const { return m_iqImbalanceCorrection; }
+    void setIQImbalanceCorrection(bool iqImbalanceCorrection) { m_iqImbalanceCorrection = iqImbalanceCorrection; }
 
 	void setLayout(const QByteArray& data) { m_layout = data; }
 	const QByteArray& getLayout() const { return m_layout; }
@@ -101,7 +103,13 @@ public:
 			int deviceSequence,
 			const QByteArray& config);
 
-	const QByteArray* findBestDeviceConfig(const QString& deviceId,
+	const QByteArray* findBestDeviceConfig(
+            const QString& deviceId,
+			const QString& deviceSerial,
+			int deviceSequence) const;
+
+	const QByteArray* findDeviceConfig(
+            const QString& deviceId,
 			const QString& deviceSerial,
 			int deviceSequence) const;
 

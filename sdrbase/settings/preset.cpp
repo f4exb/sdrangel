@@ -224,7 +224,25 @@ void Preset::addOrUpdateDeviceConfig(const QString& sourceId,
 	}
 }
 
-const QByteArray* Preset::findBestDeviceConfig(const QString& sourceId,
+const QByteArray* Preset::findDeviceConfig(
+        const QString& deviceId,
+        const QString& deviceSerial,
+        int deviceSequence) const
+{
+    DeviceeConfigs::const_iterator it = m_deviceConfigs.begin();
+
+    for (; it != m_deviceConfigs.end(); ++it)
+	{
+        if ((it->m_deviceId == deviceId) && (it->m_deviceSerial == deviceSerial) && (it->m_deviceSerial == deviceSerial)) {
+            return &it->m_config;
+        }
+    }
+
+    return nullptr;
+}
+
+const QByteArray* Preset::findBestDeviceConfig(
+        const QString& sourceId,
 		const QString& sourceSerial,
 		int sourceSequence) const
 {
