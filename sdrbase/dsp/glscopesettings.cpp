@@ -75,7 +75,7 @@ QByteArray GLScopeSettings::serialize() const
     std::vector<TriggerData>::const_iterator triggerDataIt = m_triggersData.begin();
     i = 0;
 
-    for (; triggerDataIt != m_triggersData.end(); i++)
+    for (; triggerDataIt != m_triggersData.end(); ++triggerDataIt, i++)
     {
         s.writeS32(210 + 16*i, (int) triggerDataIt->m_projectionType);
         s.writeS32(211 + 16*i, triggerDataIt->m_triggerRepeat);
@@ -96,7 +96,6 @@ QByteArray GLScopeSettings::serialize() const
 
 bool GLScopeSettings::deserialize(const QByteArray& data)
 {
-    qDebug("GLScopeGUI::deserialize");
     SimpleDeserializer d(data);
 
     if(!d.isValid()) {

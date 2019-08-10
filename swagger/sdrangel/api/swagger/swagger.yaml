@@ -93,8 +93,31 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
     put:
-      description: Replace the Preferences, Presets and Commands of the MainSettings object with the contents of the payload. Supports config restore.
+      description: Replace the Preferences, Working preset, Presets and Commands of the MainSettings object with the contents of the payload. Supports config restore.
       operationId: instanceConfigPut
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Config information
+          required: true
+          schema:
+            $ref: "#/definitions/InstanceConfigResponse"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    patch:
+      description: Replace the Preferences, Working preset, Presets and Commands of the MainSettings object with the contents of the payload. Presets and Commands if available in the payload are added. Channels in the working preset are added. Devices in the working preset are patched or added (upsert).
+      operationId: instanceConfigPatch
       tags:
         - Instance
       consumes:

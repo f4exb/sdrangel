@@ -1805,7 +1805,7 @@ margin-bottom: 20px;
     },
     "inputType" : {
       "type" : "integer",
-      "description" : "see ChannelAnalyzer::InputType"
+      "description" : "see ChannelAnalyzerSettings::InputType"
     },
     "rgbColor" : {
       "type" : "integer"
@@ -6778,6 +6778,9 @@ margin-bottom: 20px;
                     </li>
                     <li data-group="Instance" data-name="instanceConfigGet" class="">
                       <a href="#api-Instance-instanceConfigGet">instanceConfigGet</a>
+                    </li>
+                    <li data-group="Instance" data-name="instanceConfigPatch" class="">
+                      <a href="#api-Instance-instanceConfigPatch">instanceConfigPatch</a>
                     </li>
                     <li data-group="Instance" data-name="instanceConfigPut" class="">
                       <a href="#api-Instance-instanceConfigPut">instanceConfigPut</a>
@@ -21074,6 +21077,393 @@ except ApiException as e:
                         </article>
                       </div>
                       <hr>
+                    <div id="api-Instance-instanceConfigPatch">
+                      <article id="api-Instance-instanceConfigPatch-0" data-group="User" data-name="instanceConfigPatch" data-version="0">
+                        <div class="pull-left">
+                          <h1>instanceConfigPatch</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Replace the Preferences, Working preset, Presets and Commands of the MainSettings object with the contents of the payload. Presets and Commands if available in the payload are added. Channels in the working preset are added. Devices in the working preset are patched or added (upsert).</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="patch"><code><span class="pln">/sdrangel/config</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Instance-instanceConfigPatch-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceConfigPatch-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Instance-instanceConfigPatch-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceConfigPatch-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceConfigPatch-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Instance-instanceConfigPatch-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceConfigPatch-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceConfigPatch-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Instance-instanceConfigPatch-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Instance-instanceConfigPatch-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceConfigPatch-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Instance-instanceConfigPatch-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrangel/config"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Instance-instanceConfigPatch-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.InstanceApi;
+
+import java.io.File;
+import java.util.*;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        
+        InstanceApi apiInstance = new InstanceApi();
+        InstanceConfigResponse body = ; // InstanceConfigResponse | Config information
+        try {
+            SuccessResponse result = apiInstance.instanceConfigPatch(body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceConfigPatch");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Instance-instanceConfigPatch-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        InstanceApi apiInstance = new InstanceApi();
+        InstanceConfigResponse body = ; // InstanceConfigResponse | Config information
+        try {
+            SuccessResponse result = apiInstance.instanceConfigPatch(body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceConfigPatch");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Instance-instanceConfigPatch-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Instance-instanceConfigPatch-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">InstanceConfigResponse *body = ; // Config information
+
+InstanceApi *apiInstance = [[InstanceApi alloc] init];
+
+[apiInstance instanceConfigPatchWith:body
+              completionHandler: ^(SuccessResponse output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceConfigPatch-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.InstanceApi()
+
+var body = ; // {InstanceConfigResponse} Config information
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.instanceConfigPatch(body, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Instance-instanceConfigPatch-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Instance-instanceConfigPatch-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class instanceConfigPatchExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new InstanceApi();
+            var body = new InstanceConfigResponse(); // InstanceConfigResponse | Config information
+
+            try
+            {
+                SuccessResponse result = apiInstance.instanceConfigPatch(body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling InstanceApi.instanceConfigPatch: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceConfigPatch-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\InstanceApi();
+$body = ; // InstanceConfigResponse | Config information
+
+try {
+    $result = $api_instance->instanceConfigPatch($body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling InstanceApi->instanceConfigPatch: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceConfigPatch-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::InstanceApi;
+
+my $api_instance = SWGSDRangel::InstanceApi->new();
+my $body = SWGSDRangel::Object::InstanceConfigResponse->new(); # InstanceConfigResponse | Config information
+
+eval { 
+    my $result = $api_instance->instanceConfigPatch(body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling InstanceApi->instanceConfigPatch: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceConfigPatch-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.InstanceApi()
+body =  # InstanceConfigResponse | Config information
+
+try: 
+    api_response = api_instance.instance_config_patch(body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling InstanceApi->instanceConfigPatch: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Config information",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/InstanceConfigResponse"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_instanceConfigPatch_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_instanceConfigPatch_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - Success </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceConfigPatch-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceConfigPatch-200-schema">
+                                  <div id='responses-instanceConfigPatch-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Success",
+  "schema" : {
+    "$ref" : "#/definitions/SuccessResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceConfigPatch-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceConfigPatch-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceConfigPatch-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceConfigPatch-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceConfigPatch-500-schema">
+                                  <div id='responses-instanceConfigPatch-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceConfigPatch-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceConfigPatch-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceConfigPatch-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceConfigPatch-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceConfigPatch-501-schema">
+                                  <div id='responses-instanceConfigPatch-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceConfigPatch-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceConfigPatch-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceConfigPatch-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-Instance-instanceConfigPut">
                       <article id="api-Instance-instanceConfigPut-0" data-group="User" data-name="instanceConfigPut" data-version="0">
                         <div class="pull-left">
@@ -21083,7 +21473,7 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Replace the Preferences, Presets and Commands of the MainSettings object with the contents of the payload. Supports config restore.</p>
+                        <p class="marked">Replace the Preferences, Working preset, Presets and Commands of the MainSettings object with the contents of the payload. Supports config restore.</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrangel/config</span></code></pre>
@@ -27607,7 +27997,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-08-08T13:54:12.590+02:00
+              Generated 2019-08-10T05:46:27.219+02:00
             </div>
           </div>
       </div>

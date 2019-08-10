@@ -155,6 +155,7 @@ int ChannelAnalyzerWebAPIAdapter::webapiSettingsPutPatch(
     (void) force;
     (void) errorMessage;
     webapiUpdateChannelSettings(m_settings, m_glScopeSettings, m_glSpectrumSettings, channelSettingsKeys, response);
+    return 200;
 }
 
 void ChannelAnalyzerWebAPIAdapter::webapiUpdateChannelSettings(

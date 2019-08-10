@@ -53,6 +53,7 @@ void GLSpectrumSettings::resetToDefaults()
 QByteArray GLSpectrumSettings::serialize() const
 {
 	SimpleSerializer s(1);
+
 	s.writeS32(1, m_fftSize);
 	s.writeS32(2, m_fftOverlap);
 	s.writeS32(3, m_fftWindow);
@@ -74,6 +75,7 @@ QByteArray GLSpectrumSettings::serialize() const
 	s.writeS32(19, (int) m_averagingMode);
 	s.writeS32(20, (qint32) getAveragingValue(m_averagingIndex, m_averagingMode));
 	s.writeBool(21, m_linear);
+
 	return s.final();
 }
 
@@ -88,7 +90,8 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
 
 	int tmp;
 
-	if(d.getVersion() == 1) {
+	if (d.getVersion() == 1)
+    {
 		d.readS32(1, &m_fftSize, 1024);
 		d.readS32(2, &m_fftOverlap, 0);
 		d.readS32(3, &m_fftWindow, FFTWindow::Hamming);
@@ -115,7 +118,9 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
 	    d.readBool(21, &m_linear, false);
 
 		return true;
-	} else {
+	}
+    else
+    {
 		resetToDefaults();
 		return false;
 	}

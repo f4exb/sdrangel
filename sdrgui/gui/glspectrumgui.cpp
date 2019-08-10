@@ -85,6 +85,7 @@ void GLSpectrumGUI::resetToDefaults()
 QByteArray GLSpectrumGUI::serialize() const
 {
 	SimpleSerializer s(1);
+
 	s.writeS32(1, m_fftSize);
 	s.writeS32(2, m_fftOverlap);
 	s.writeS32(3, m_fftWindow);
@@ -106,7 +107,8 @@ QByteArray GLSpectrumGUI::serialize() const
 	s.writeS32(19, (int) m_averagingMode);
 	s.writeS32(20, (qint32) getAveragingValue(m_averagingIndex));
 	s.writeBool(21, m_linear);
-	return s.final();
+
+    return s.final();
 }
 
 bool GLSpectrumGUI::deserialize(const QByteArray& data)
@@ -120,7 +122,8 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 
 	int tmp;
 
-	if(d.getVersion() == 1) {
+	if (d.getVersion() == 1)
+    {
 		d.readS32(1, &m_fftSize, 1024);
 		d.readS32(2, &m_fftOverlap, 0);
 		d.readS32(3, &m_fftWindow, FFTWindow::Hamming);
@@ -147,10 +150,12 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 	    m_averagingNb = getAveragingValue(m_averagingIndex);
 	    d.readBool(21, &m_linear, false);
 
-		m_glSpectrum->setWaterfallShare(waterfallShare);
-		applySettings();
+        m_glSpectrum->setWaterfallShare(waterfallShare);
+    	applySettings();
 		return true;
-	} else {
+	}
+    else
+    {
 		resetToDefaults();
 		return false;
 	}

@@ -181,30 +181,108 @@ void WebAPIAdapterBase::webapiUpdatePreset(
         bool force,
         SWGSDRangel::SWGPreset *apiPreset,
         const WebAPIAdapterInterface::PresetKeys& presetKeys,
-        Preset& preset
+        Preset *preset
 )
 {
     if (presetKeys.m_keys.contains("centerFrequency")) {
-        preset.setCenterFrequency(apiPreset->getCenterFrequency());
+        preset->setCenterFrequency(apiPreset->getCenterFrequency());
     }
     if (presetKeys.m_keys.contains("dcOffsetCorrection")) {
-        preset.setDCOffsetCorrection(apiPreset->getDcOffsetCorrection() != 0);
+        preset->setDCOffsetCorrection(apiPreset->getDcOffsetCorrection() != 0);
     }
     if (presetKeys.m_keys.contains("iqImbalanceCorrection")) {
-        preset.setIQImbalanceCorrection(apiPreset->getIqImbalanceCorrection() != 0);
+        preset->setIQImbalanceCorrection(apiPreset->getIqImbalanceCorrection() != 0);
     }
     if (presetKeys.m_keys.contains("sourcePreset")) {
-        preset.setSourcePreset(apiPreset->getSourcePreset() != 0);
+        preset->setSourcePreset(apiPreset->getSourcePreset() != 0);
     }
     if (presetKeys.m_keys.contains("description")) {
-        preset.setDescription(*apiPreset->getDescription());
+        preset->setDescription(*apiPreset->getDescription());
     }
     if (presetKeys.m_keys.contains("group")) {
-        preset.setGroup(*apiPreset->getGroup());
+        preset->setGroup(*apiPreset->getGroup());
     }
 
+    GLSpectrumSettings spectrumSettings;
+
+    if (!force) {
+        spectrumSettings.deserialize(preset->getSpectrumConfig());
+    }
+
+    QStringList::const_iterator spectrumIt = presetKeys.m_spectrumKeys.begin();
+    for (; spectrumIt != presetKeys.m_spectrumKeys.end(); ++spectrumIt)
+    {
+        if (spectrumIt->contains("averagingMode")) {
+            spectrumSettings.m_averagingMode = (GLSpectrumSettings::AveragingMode) apiPreset->getSpectrumConfig()->getAveragingMode();
+        }
+        if (spectrumIt->contains("averagingValue"))
+        {
+            spectrumSettings.m_averagingNb = apiPreset->getSpectrumConfig()->getAveragingValue();
+            spectrumSettings.m_averagingIndex = GLSpectrumSettings::getAveragingIndex(spectrumSettings.m_averagingNb, spectrumSettings.m_averagingMode);
+        }
+        if (spectrumIt->contains("decay")) {
+            spectrumSettings.m_decay = apiPreset->getSpectrumConfig()->getDecay();
+        }
+        if (spectrumIt->contains("decayDivisor")) {
+            spectrumSettings.m_decayDivisor = apiPreset->getSpectrumConfig()->getDecayDivisor();
+        }
+        if (spectrumIt->contains("displayCurrent")) {
+            spectrumSettings.m_displayCurrent = apiPreset->getSpectrumConfig()->getDisplayCurrent() != 0;
+        }
+        if (spectrumIt->contains("displayGrid")) {
+            spectrumSettings.m_displayGrid = apiPreset->getSpectrumConfig()->getDisplayGrid() != 0;
+        }
+        if (spectrumIt->contains("displayGridIntensity")) {
+            spectrumSettings.m_displayGridIntensity = apiPreset->getSpectrumConfig()->getDisplayGridIntensity();
+        }
+        if (spectrumIt->contains("displayHistogram")) {
+            spectrumSettings.m_displayHistogram = apiPreset->getSpectrumConfig()->getDisplayHistogram() != 0;
+        }
+        if (spectrumIt->contains("displayMaxHold")) {
+            spectrumSettings.m_displayMaxHold = apiPreset->getSpectrumConfig()->getDisplayMaxHold() != 0;
+        }
+        if (spectrumIt->contains("displayTraceIntensity")) {
+            spectrumSettings.m_displayTraceIntensity = apiPreset->getSpectrumConfig()->getDisplayTraceIntensity();
+        }
+        if (spectrumIt->contains("displayWaterfall")) {
+            spectrumSettings.m_displayWaterfall = apiPreset->getSpectrumConfig()->getDisplayWaterfall();
+        }
+        if (spectrumIt->contains("fftOverlap")) {
+            spectrumSettings.m_fftOverlap = apiPreset->getSpectrumConfig()->getFftOverlap();
+        }
+        if (spectrumIt->contains("fftSize")) {
+            spectrumSettings.m_fftSize = apiPreset->getSpectrumConfig()->getFftSize();
+        }
+        if (spectrumIt->contains("fftWindow")) {
+            spectrumSettings.m_fftWindow = apiPreset->getSpectrumConfig()->getFftWindow();
+        }
+        if (spectrumIt->contains("histogramStroke")) {
+            spectrumSettings.m_histogramStroke = apiPreset->getSpectrumConfig()->getHistogramStroke();
+        }
+        if (spectrumIt->contains("invert")) {
+            spectrumSettings.m_invert = apiPreset->getSpectrumConfig()->getInvert() != 0;
+        }
+        if (spectrumIt->contains("invertedWaterfall")) {
+            spectrumSettings.m_invertedWaterfall = apiPreset->getSpectrumConfig()->getInvertedWaterfall() != 0;
+        }
+        if (spectrumIt->contains("linear")) {
+            spectrumSettings.m_linear = apiPreset->getSpectrumConfig()->getLinear() != 0;
+        }
+        if (spectrumIt->contains("powerRange")) {
+            spectrumSettings.m_powerRange = apiPreset->getSpectrumConfig()->getPowerRange();
+        }
+        if (spectrumIt->contains("refLevel")) {
+            spectrumSettings.m_refLevel = apiPreset->getSpectrumConfig()->getRefLevel();
+        }
+        if (spectrumIt->contains("waterfallShare")) {
+            spectrumSettings.m_waterfallShare = apiPreset->getSpectrumConfig()->getWaterfallShare();
+        }
+    }
+
+    preset->setSpectrumConfig(spectrumSettings.serialize());
+
     if (force) { // PUT replaces devices list possibly erasing it if no devices are given
-        preset.clearDevices();
+        preset->clearDevices();
     }
 
     QString errorMessage;
@@ -237,7 +315,7 @@ void WebAPIAdapterBase::webapiUpdatePreset(
         {
             if (!force) // In PATCH mode you must find the exact device and deserialize its current settings to be able to patch it
             {
-                const QByteArray *config = preset.findDeviceConfig(deviceId, deviceSerial, deviceSequence);
+                const QByteArray *config = preset->findDeviceConfig(deviceId, deviceSerial, deviceSequence);
 
                 if (!config) {
                     continue;
@@ -256,12 +334,12 @@ void WebAPIAdapterBase::webapiUpdatePreset(
             );
 
             QByteArray config = deviceWebAPIAdapter->serialize();
-            preset.setDeviceConfig(deviceId, deviceSerial, deviceSequence, config); // add or update device
+            preset->setDeviceConfig(deviceId, deviceSerial, deviceSequence, config); // add or update device
         }
     }
 
     if (force) { // PUT replaces channel list possibly erasing it if no channels are given
-        preset.clearChannels();
+        preset->clearChannels();
     }
 
     QList<WebAPIAdapterInterface::ChannelKeys>::const_iterator channelKeysIt = presetKeys.m_channelsKeys.begin();
@@ -285,15 +363,17 @@ void WebAPIAdapterBase::webapiUpdatePreset(
                 continue;
             }
 
+            SWGSDRangel::SWGChannelSettings *channelSettings = swgChannelConfig->getConfig();
+
             channelWebAPIAdapter->webapiSettingsPutPatch(
                 true, // channels are always appended
                 channelKeysIt->m_channelKeys,
-                *swgChannelConfig->getConfig(),
+                *channelSettings,
                 errorMessage
             );
 
             QByteArray config = channelWebAPIAdapter->serialize();
-            preset.addChannel(*channelIdURI, config);
+            preset->addChannel(*channelIdURI, config);
         }
     }
 }

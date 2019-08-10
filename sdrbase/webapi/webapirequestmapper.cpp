@@ -364,7 +364,7 @@ void WebAPIRequestMapper::instanceConfigService(qtwebapp::HttpRequest& request, 
             response.write(errorResponse.asJson().toUtf8());
         }
     }
-    else if (request.getMethod() == "PUT")
+    else if ((request.getMethod() == "PUT") || (request.getMethod() == "PATCH"))
     {
         QString jsonStr = request.getBody();
         QJsonObject jsonObject;
@@ -379,14 +379,15 @@ void WebAPIRequestMapper::instanceConfigService(qtwebapp::HttpRequest& request, 
             if (validateConfig(query, jsonObject, configKeys))
             {
                 int status = m_adapter->instanceConfigPutPatch(
-                    true,
+                    request.getMethod() == "PUT",
                     query,
                     configKeys,
                     normalResponse,
                     errorResponse
                 );
                 response.setStatus(status);
-                qDebug("WebAPIRequestMapper::instanceConfigService: PUT: %d", status);
+                qDebug("WebAPIRequestMapper::instanceConfigService: %s: %d",
+                    request.getMethod() == "PUT" ? "PUT" : "PATCH", status);
 
                 if (status/100 == 2)
                 {
@@ -2311,7 +2312,7 @@ bool WebAPIRequestMapper::appendPresetKeys(
     }
     if (presetJson.contains("iqImbalanceCorrection"))
     {
-        preset->setIqImbalanceCorrection(presetJson["sourcePreset"].toInt());
+        preset->setSourcePreset(presetJson["sourcePreset"].toInt());
         presetKeys.m_keys.append("sourcePreset");
     }
     if (presetJson.contains("description"))
@@ -2390,6 +2391,7 @@ bool WebAPIRequestMapper::appendPresetChannelKeys(
         if (channelSettingsJson.contains("config") && m_channelURIToSettingsKey.contains(*channelURI))
         {
             SWGSDRangel::SWGChannelSettings *channelSettings = new SWGSDRangel::SWGChannelSettings();
+            channel->setConfig(channelSettings);
             return getChannel(m_channelURIToSettingsKey[*channelURI], channelSettings, channelSettingsJson["config"].toObject(), channelKeys.m_channelKeys);
         }
         else
@@ -2561,6 +2563,7 @@ bool WebAPIRequestMapper::appendPresetDeviceKeys(
         if (deviceSettngsJson.contains("config") && m_deviceIdToSettingsKey.contains(*deviceId))
         {
             SWGSDRangel::SWGDeviceSettings *deviceSettings = new SWGSDRangel::SWGDeviceSettings();
+            device->setConfig(deviceSettings);
             return getDevice(m_deviceIdToSettingsKey[*deviceId], deviceSettings, deviceSettngsJson["config"].toObject(), devicelKeys.m_deviceKeys);
         }
         else
@@ -2763,7 +2766,6 @@ void WebAPIRequestMapper::appendSettingsSubKeys(
     QStringList childSettingsKeys = childSettingsJsonObject.keys();
 
     for (int i = 0; i < childSettingsKeys.size(); i++) {
-        qDebug("WebAPIRequestMapper::appendSettingsSubKeys: %s", qPrintable(childSettingsKeys.at(i)));
         keyList.append(parentKey + QString(".") + childSettingsKeys.at(i));
     }
 }

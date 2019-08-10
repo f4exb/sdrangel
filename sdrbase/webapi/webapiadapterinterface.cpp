@@ -76,6 +76,10 @@ void WebAPIAdapterInterface::ConfigKeys::debug() const
         foreach(QString presetKey, presetKeys.m_keys) {
             qDebug("    %s", qPrintable(presetKey));
         }
+        qDebug("    spectrumConfig:");
+        foreach(QString spectrumKey, presetKeys.m_spectrumKeys) {
+            qDebug("      %s", qPrintable(spectrumKey));
+        }
         qDebug("    deviceConfigs:");
         foreach(DeviceKeys deviceKeys, presetKeys.m_devicesKeys)
         {
@@ -102,6 +106,10 @@ void WebAPIAdapterInterface::ConfigKeys::debug() const
     qDebug("workingPreset:");
     foreach(QString presetKey, m_workingPresetKeys.m_keys) {
         qDebug("  %s", qPrintable(presetKey));
+    }
+    qDebug("  spectrumConfig:");
+    foreach(QString spectrumKey, m_workingPresetKeys.m_spectrumKeys) {
+        qDebug("    %s", qPrintable(spectrumKey));
     }
     qDebug("  deviceConfigs:");
     foreach(DeviceKeys deviceKeys, m_workingPresetKeys.m_devicesKeys)

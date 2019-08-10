@@ -70,7 +70,7 @@ public:
         bool force,
         SWGSDRangel::SWGPreset *apiPreset,
         const WebAPIAdapterInterface::PresetKeys& presetKeys,
-        Preset& preset
+        Preset *preset
     );
     static void webapiUpdateCommand(
         SWGSDRangel::SWGCommand *apiCommand,

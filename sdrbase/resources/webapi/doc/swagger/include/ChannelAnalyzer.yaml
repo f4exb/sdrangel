@@ -32,7 +32,7 @@ ChannelAnalyzerSettings:
     pllPskOrder:
       type: integer
     inputType:
-      description: see ChannelAnalyzer::InputType
+      description: see ChannelAnalyzerSettings::InputType
       type: integer
     rgbColor:
       type: integer

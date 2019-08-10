@@ -65,6 +65,7 @@ public:
     void instanceAudioOutputPatch(SWGAudioOutputDevice& body);
     void instanceChannels(qint32 direction);
     void instanceConfigGet();
+    void instanceConfigPatch(SWGInstanceConfigResponse& body);
     void instanceConfigPut(SWGInstanceConfigResponse& body);
     void instanceDelete();
     void instanceDeviceSetsGet();
@@ -97,6 +98,7 @@ private:
     void instanceAudioOutputPatchCallback (SWGHttpRequestWorker * worker);
     void instanceChannelsCallback (SWGHttpRequestWorker * worker);
     void instanceConfigGetCallback (SWGHttpRequestWorker * worker);
+    void instanceConfigPatchCallback (SWGHttpRequestWorker * worker);
     void instanceConfigPutCallback (SWGHttpRequestWorker * worker);
     void instanceDeleteCallback (SWGHttpRequestWorker * worker);
     void instanceDeviceSetsGetCallback (SWGHttpRequestWorker * worker);
@@ -129,6 +131,7 @@ signals:
     void instanceAudioOutputPatchSignal(SWGAudioOutputDevice* summary);
     void instanceChannelsSignal(SWGInstanceChannelsResponse* summary);
     void instanceConfigGetSignal(SWGInstanceConfigResponse* summary);
+    void instanceConfigPatchSignal(SWGSuccessResponse* summary);
     void instanceConfigPutSignal(SWGSuccessResponse* summary);
     void instanceDeleteSignal(SWGInstanceSummaryResponse* summary);
     void instanceDeviceSetsGetSignal(SWGDeviceSetList* summary);
@@ -160,6 +163,7 @@ signals:
     void instanceAudioOutputPatchSignalE(SWGAudioOutputDevice* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceChannelsSignalE(SWGInstanceChannelsResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceConfigGetSignalE(SWGInstanceConfigResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigPatchSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceConfigPutSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeleteSignalE(SWGInstanceSummaryResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetsGetSignalE(SWGDeviceSetList* summary, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -191,6 +195,7 @@ signals:
     void instanceAudioOutputPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceChannelsSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceConfigGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceConfigPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);

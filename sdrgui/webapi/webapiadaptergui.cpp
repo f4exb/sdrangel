@@ -173,7 +173,7 @@ int WebAPIAdapterGUI::instanceConfigPutPatch(
     m_mainWindow.m_settings.setPreferences(newPreferences);
 
     Preset *workingPreset = m_mainWindow.m_settings.getWorkingPreset();
-    webAPIAdapterBase.webapiUpdatePreset(force, query.getWorkingPreset(), configKeys.m_workingPresetKeys, *workingPreset);
+    webAPIAdapterBase.webapiUpdatePreset(force, query.getWorkingPreset(), configKeys.m_workingPresetKeys, workingPreset);
 
     QList<PresetKeys>::const_iterator presetKeysIt = configKeys.m_presetKeys.begin();
     int i = 0;
@@ -181,7 +181,7 @@ int WebAPIAdapterGUI::instanceConfigPutPatch(
     {
         Preset *newPreset = new Preset(); // created with default values
         SWGSDRangel::SWGPreset *swgPreset = query.getPresets()->at(i);
-        webAPIAdapterBase.webapiUpdatePreset(force, swgPreset, *presetKeysIt, *newPreset);
+        webAPIAdapterBase.webapiUpdatePreset(force, swgPreset, *presetKeysIt, newPreset);
         m_mainWindow.m_settings.addPreset(newPreset);
     }
 
@@ -194,6 +194,11 @@ int WebAPIAdapterGUI::instanceConfigPutPatch(
         webAPIAdapterBase.webapiUpdateCommand(swgCommand, *commandKeysIt, *newCommand);
         m_mainWindow.m_settings.addCommand(newCommand);
     }
+
+    MainWindow::MsgApplySettings *msg = MainWindow::MsgApplySettings::create();
+    m_mainWindow.m_inputMessageQueue.push(msg);
+
+    return 200;
 }
 
 int WebAPIAdapterGUI::instanceDevices(

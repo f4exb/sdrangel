@@ -89,6 +89,7 @@ MESSAGE_CLASS_DEFINITION(MainWindow::MsgSetDevice, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgAddChannel, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeleteChannel, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeviceSetFocus, Message)
+MESSAGE_CLASS_DEFINITION(MainWindow::MsgApplySettings, Message)
 
 MainWindow *MainWindow::m_instance = 0;
 
@@ -203,11 +204,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	qDebug() << "MainWindow::MainWindow: load current preset settings...";
 
 	loadPresetSettings(m_settings.getWorkingPreset(), 0);
-
-    splash->showStatusMessage("apply settings...", Qt::white);
-	qDebug() << "MainWindow::MainWindow: apply settings...";
-
-	applySettings();
 
     splash->showStatusMessage("update preset controls...", Qt::white);
 	qDebug() << "MainWindow::MainWindow: update preset controls...";
@@ -742,17 +738,12 @@ void MainWindow::loadPresetSettings(const Preset* preset, int tabIndex)
 	if (tabIndex >= 0)
 	{
         DeviceUISet *deviceUI = m_deviceUIs[tabIndex];
+        deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
+        deviceUI->m_deviceAPI->loadSamplingDeviceSettings(preset);
 
-        if (deviceUI->m_deviceSourceEngine) // source device
-        {
-            deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
-            deviceUI->m_deviceAPI->loadSamplingDeviceSettings(preset);
+        if (deviceUI->m_deviceSourceEngine) { // source device
             deviceUI->loadRxChannelSettings(preset, m_pluginManager->getPluginAPI());
-        }
-        else if (deviceUI->m_deviceSinkEngine) // sink device
-        {
-            deviceUI->m_spectrumGUI->deserialize(preset->getSpectrumConfig());
-            deviceUI->m_deviceAPI->loadSamplingDeviceSettings(preset);
+        } else if (deviceUI->m_deviceSinkEngine) { // sink device
             deviceUI->loadTxChannelSettings(preset, m_pluginManager->getPluginAPI());
         }
 	}
@@ -920,6 +911,7 @@ QTreeWidgetItem* MainWindow::addCommandToTree(const Command* command)
 
 void MainWindow::applySettings()
 {
+ 	loadPresetSettings(m_settings.getWorkingPreset(), 0);
 }
 
 bool MainWindow::handleMessage(const Message& cmd)
@@ -1033,6 +1025,11 @@ bool MainWindow::handleMessage(const Message& cmd)
         if ((index >= 0) && (index < (int) m_deviceUIs.size())) {
             ui->tabInputsView->setCurrentIndex(index);
         }
+    }
+    else if (MsgApplySettings::match(cmd))
+    {
+        applySettings();
+        return true;
     }
 
     return false;
@@ -1552,7 +1549,6 @@ void MainWindow::on_presetLoad_clicked()
 	}
 
 	loadPresetSettings(preset, ui->tabInputsView->currentIndex());
-	applySettings();
 }
 
 void MainWindow::on_presetDelete_clicked()

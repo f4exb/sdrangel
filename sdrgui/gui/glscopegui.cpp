@@ -229,7 +229,6 @@ QByteArray GLScopeGUI::serialize() const
 
 bool GLScopeGUI::deserialize(const QByteArray& data)
 {
-    qDebug("GLScopeGUI::deserialize");
     SimpleDeserializer d(data);
 
     if(!d.isValid()) {

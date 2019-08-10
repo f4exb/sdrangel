@@ -302,6 +302,20 @@ private:
         { }
     };
 
+    class MsgApplySettings : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgApplySettings* create() {
+            return new MsgApplySettings();
+        }
+
+    private:
+        MsgApplySettings() :
+            Message()
+        { }
+    };
+
 	static MainWindow *m_instance;
 	Ui::MainWindow* ui;
 	MessageQueue m_inputMessageQueue;
