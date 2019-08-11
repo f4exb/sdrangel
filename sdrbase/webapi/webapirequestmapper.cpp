@@ -56,6 +56,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
     {"sdrangel.channel.chanalyzer", "ChannelAnalyzerSettings"},
     {"sdrangel.channel.chanalyzerng", "ChannelAnalyzerSettings"}, // remap
     {"sdrangel.channel.demodatv", "ATVDemodSettings"},
+    {"sdrangel.channel.demoddatv", "DATVDemodSettings"},
     {"sdrangel.channel.dsddemod", "DSDDemodSettings"},
     {"sdrangel.channeltx.filesrc", "FileSourceSettings"},
     {"sdrangel.channel.freedvdemod", "FreeDVDemodSettings"},
@@ -122,6 +123,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
     {"ATVMod", "ATVModSettings"},
     {"BFMDemod", "BFMDemodSettings"},
     {"ChannelAnalyzer", "ChannelAnalyzerSettings"},
+    {"DATVDemod", "DATVDemodSettings"},
     {"DSDDemod", "DSDDemodSettings"},
     {"FileSource", "FileSourceSettings"},
     {"FreeDVDemod", "FreeDVDemodSettings"},
@@ -2449,6 +2451,11 @@ bool WebAPIRequestMapper::getChannel(
         else if (channelSettingsKey == "ChannelAnalyzerSettings")
         {
             processChannelAnalyzerSettings(channelSettings, settingsJsonObject, channelSettingsKeys);
+        }
+        else if (channelSettingsKey == "DATVDemodSettings")
+        {
+            channelSettings->setDatvDemodSettings(new SWGSDRangel::SWGDATVDemodSettings());
+            channelSettings->getDatvDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "DSDDemodSettings")
         {

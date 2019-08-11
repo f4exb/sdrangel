@@ -6,6 +6,7 @@ set(datv_SOURCES
     datvdemodgui.cpp
     datvdemodplugin.cpp
     datvdemodsettings.cpp
+    datvdemodwebapiadapter.cpp
     datvideostream.cpp
     datvudpstream.cpp
     datvideorender.cpp
@@ -14,7 +15,6 @@ set(datv_SOURCES
     leansdr/framework.cpp
     leansdr/math.cpp
     leansdr/sdr.cpp
-
     datvdemodgui.ui
 )
 
@@ -23,6 +23,7 @@ set(datv_HEADERS
     datvdemodgui.h
     datvdemodplugin.h
     datvdemodsettings.h
+    datvdemodwebapiadapter.h
     datvideostream.h
     datvudpstream.h
     datvideorender.h
@@ -42,6 +43,7 @@ include_directories(
     ${AVUTIL_INCLUDE_DIRS}
     ${SWSCALE_INCLUDE_DIRS}
     ${SWRESAMPLE_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
 add_library(demoddatv SHARED

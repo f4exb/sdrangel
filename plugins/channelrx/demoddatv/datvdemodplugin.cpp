@@ -24,11 +24,12 @@
 
 #include "datvdemodgui.h"
 #include "datvdemodplugin.h"
+#include "datvdemodwebapiadapter.h"
 
 const PluginDescriptor DATVDemodPlugin::m_ptrPluginDescriptor =
 {
     QString("DATV Demodulator"),
-    QString("4.11.4"),
+    QString("4.11.6"),
     QString("(c) F4HKW for SDRAngel using LeanSDR framework (c) F4DAV"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -69,4 +70,9 @@ BasebandSampleSink* DATVDemodPlugin::createRxChannelBS(DeviceAPI *deviceAPI) con
 ChannelAPI* DATVDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
 {
     return new DATVDemod(deviceAPI);
+}
+
+ChannelWebAPIAdapter* DATVDemodPlugin::createChannelWebAPIAdapter() const
+{
+	return new DATVDemodWebAPIAdapter();
 }
