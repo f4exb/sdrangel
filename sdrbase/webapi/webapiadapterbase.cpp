@@ -175,6 +175,8 @@ void WebAPIAdapterBase::webapiFormatPreset(
             deviceWebAPIAdapter->webapiSettingsGet(*swgDeviceSettings, errorMessage);
         }
     }
+
+    apiPreset->setLayout(new QString(preset.getLayout().toBase64().toStdString().c_str()));
 }
 
 void WebAPIAdapterBase::webapiUpdatePreset(
@@ -201,6 +203,9 @@ void WebAPIAdapterBase::webapiUpdatePreset(
     }
     if (presetKeys.m_keys.contains("group")) {
         preset->setGroup(*apiPreset->getGroup());
+    }
+    if (presetKeys.m_keys.contains("layout")) {
+        preset->setLayout(QByteArray::fromBase64(apiPreset->getLayout()->toUtf8()));
     }
 
     GLSpectrumSettings spectrumSettings;
