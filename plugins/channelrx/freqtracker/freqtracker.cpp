@@ -619,19 +619,19 @@ void FreqTracker::webapiUpdateChannelSettings(
         settings.m_squelchGate = response.getFreqTrackerSettings()->getSquelchGate();
     }
     if (channelSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getAmDemodSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getFreqTrackerSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getAmDemodSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getFreqTrackerSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getAmDemodSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getFreqTrackerSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getAmDemodSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getFreqTrackerSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getAmDemodSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = response.getFreqTrackerSettings()->getReverseApiChannelIndex();
     }
 }
 

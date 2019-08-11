@@ -122,6 +122,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     splash->setMessageRect(QRect(10, 80, 350, 16));
     splash->show();
     splash->showStatusMessage("starting...", Qt::white);
+    splash->showStatusMessage("starting...", Qt::white);
 
 	m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
     m_settings.setAMBEEngine(m_dspEngine->getAMBEEngine());
@@ -912,6 +913,29 @@ QTreeWidgetItem* MainWindow::addCommandToTree(const Command* command)
 void MainWindow::applySettings()
 {
  	loadPresetSettings(m_settings.getWorkingPreset(), 0);
+
+    m_settings.sortPresets();
+    int middleIndex = m_settings.getPresetCount() / 2;
+    QTreeWidgetItem *treeItem;
+    ui->presetTree->clear();
+
+    for (int i = 0; i < m_settings.getPresetCount(); ++i)
+    {
+        treeItem = addPresetToTree(m_settings.getPreset(i));
+
+        if (i == middleIndex) {
+            ui->presetTree->setCurrentItem(treeItem);
+        }
+    }
+
+    m_settings.sortCommands();
+    ui->commandTree->clear();
+
+    for (int i = 0; i < m_settings.getCommandCount(); ++i) {
+        treeItem = addCommandToTree(m_settings.getCommand(i));
+    }
+
+    setLoggingOptions();
 }
 
 bool MainWindow::handleMessage(const Message& cmd)

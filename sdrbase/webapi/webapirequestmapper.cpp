@@ -2270,13 +2270,16 @@ bool WebAPIRequestMapper::validateConfig(SWGSDRangel::SWGInstanceConfigResponse&
 
     if (jsonObject.contains("presets"))
     {
+        QList<SWGSDRangel::SWGPreset *> *presets = new QList<SWGSDRangel::SWGPreset *>();
+        config.setPresets(presets);
         QJsonArray presetsJson = jsonObject["presets"].toArray();
         QJsonArray::const_iterator presetsIt = presetsJson.begin();
 
         for (; presetsIt != presetsJson.end(); ++presetsIt)
         {
-            SWGSDRangel::SWGPreset *preset = new SWGSDRangel::SWGPreset();
             QJsonObject presetJson = presetsIt->toObject();
+            SWGSDRangel::SWGPreset *preset = new SWGSDRangel::SWGPreset();
+            presets->append(preset);
             configKeys.m_presetKeys.append(WebAPIAdapterInterface::PresetKeys());
             appendPresetKeys(preset, presetJson, configKeys.m_presetKeys.back());
         }
@@ -2349,11 +2352,17 @@ bool WebAPIRequestMapper::appendPresetKeys(
         for (; channelsIt != channelsJson.end(); ++channelsIt)
         {
             QJsonObject channelJson = channelsIt->toObject();
-            channels->append(new SWGSDRangel::SWGChannelConfig());
+            SWGSDRangel::SWGChannelConfig *channelConfig = new SWGSDRangel::SWGChannelConfig();
             presetKeys.m_channelsKeys.append(WebAPIAdapterInterface::ChannelKeys());
 
-            if (!appendPresetChannelKeys(channels->back(), channelJson, presetKeys.m_channelsKeys.back())) {
-                return false;
+            if (appendPresetChannelKeys(channelConfig, channelJson, presetKeys.m_channelsKeys.back()))
+            {
+                channels->append(channelConfig);
+            }
+            else
+            {
+                delete channelConfig;
+                presetKeys.m_channelsKeys.takeLast(); // remove channel keys
             }
         }
     }
@@ -2368,11 +2377,17 @@ bool WebAPIRequestMapper::appendPresetKeys(
         for (; devicesIt != devicesJson.end(); ++devicesIt)
         {
             QJsonObject deviceJson = devicesIt->toObject();
-            devices->append(new SWGSDRangel::SWGDeviceConfig());
+            SWGSDRangel::SWGDeviceConfig *deviceConfig = new SWGSDRangel::SWGDeviceConfig();
             presetKeys.m_devicesKeys.append(WebAPIAdapterInterface::DeviceKeys());
 
-            if (!appendPresetDeviceKeys(devices->back(), deviceJson, presetKeys.m_devicesKeys.back())) {
-                return false;
+            if (appendPresetDeviceKeys(deviceConfig, deviceJson, presetKeys.m_devicesKeys.back()))
+            {
+                devices->append(deviceConfig);
+            }
+            else
+            {
+                delete deviceConfig;
+                presetKeys.m_devicesKeys.takeLast(); // remove device keys
             }
         }
     }

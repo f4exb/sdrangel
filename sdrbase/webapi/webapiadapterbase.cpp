@@ -114,10 +114,10 @@ void WebAPIAdapterBase::webapiFormatPreset(
         swgSpectrumConfig->setFftWindow((int) m_spectrumSettings.m_fftWindow);
         swgSpectrumConfig->setRefLevel(m_spectrumSettings.m_refLevel);
         swgSpectrumConfig->setPowerRange(m_spectrumSettings.m_powerRange);
-        swgSpectrumConfig->setDisplayWaterfall(m_spectrumSettings.m_displayWaterfall ? 0 : 1);
-        swgSpectrumConfig->setInvertedWaterfall(m_spectrumSettings.m_invertedWaterfall ? 0 : 1);
-        swgSpectrumConfig->setDisplayMaxHold(m_spectrumSettings.m_displayMaxHold ? 0 : 1);
-        swgSpectrumConfig->setDisplayHistogram(m_spectrumSettings.m_displayHistogram ? 0 : 1);
+        swgSpectrumConfig->setDisplayWaterfall(m_spectrumSettings.m_displayWaterfall ? 1 : 0);
+        swgSpectrumConfig->setInvertedWaterfall(m_spectrumSettings.m_invertedWaterfall ? 1 : 0);
+        swgSpectrumConfig->setDisplayMaxHold(m_spectrumSettings.m_displayMaxHold ? 1 : 0);
+        swgSpectrumConfig->setDisplayHistogram(m_spectrumSettings.m_displayHistogram ? 1 : 0);
         swgSpectrumConfig->setDecay(m_spectrumSettings.m_decay);
         swgSpectrumConfig->setDisplayGrid(m_spectrumSettings.m_displayGrid ? 1 : 0);
         swgSpectrumConfig->setInvert(m_spectrumSettings.m_invert ? 1 : 0);
