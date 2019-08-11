@@ -6,6 +6,7 @@
         <file>webapi/doc/swagger/include/AirspyHF.yaml</file>
         <file>webapi/doc/swagger/include/AMDemod.yaml</file>
         <file>webapi/doc/swagger/include/AMMod.yaml</file>
+        <file>webapi/doc/swagger/include/ATVDemod.yaml</file>
         <file>webapi/doc/swagger/include/ATVMod.yaml</file>
         <file>webapi/doc/swagger/include/BFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/BladeRF1.yaml</file>
@@ -14,6 +15,7 @@
         <file>webapi/doc/swagger/include/ChannelSettings.yaml</file>
         <file>webapi/doc/swagger/include/Command.yaml</file>
         <file>webapi/doc/swagger/include/CWKeyer.yaml</file>
+        <file>webapi/doc/swagger/include/DATVDemod.yaml</file>
         <file>webapi/doc/swagger/include/DSDDemod.yaml</file>
         <file>webapi/doc/swagger/include/DeviceSettings.yaml</file>
         <file>webapi/doc/swagger/include/FCDPro.yaml</file>

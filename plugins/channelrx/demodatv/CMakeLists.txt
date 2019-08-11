@@ -2,22 +2,24 @@ project(atv)
 
 set(atv_SOURCES
 	atvdemod.cpp
-	atvdemodsettings.cpp
+    atvdemodsettings.cpp
+    atvdemodwebapiadapter.cpp
 	atvdemodgui.cpp
 	atvdemodplugin.cpp
-
 	atvdemodgui.ui
 )
 
 set(atv_HEADERS
 	atvdemod.h
-        atvdemodsettings.h
+    atvdemodsettings.h
+    atvdemodwebapiadapter.h
 	atvdemodgui.h
 	atvdemodplugin.h
 )
 
 include_directories(
-	${Boost_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
 add_library(demodatv SHARED
@@ -25,8 +27,8 @@ add_library(demodatv SHARED
 )
 
 target_link_libraries(demodatv
-        Qt5::Core
-        Qt5::Widgets
+    Qt5::Core
+    Qt5::Widgets
 	sdrbase
 	sdrgui
 )

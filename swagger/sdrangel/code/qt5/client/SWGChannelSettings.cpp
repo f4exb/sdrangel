@@ -40,12 +40,16 @@ SWGChannelSettings::SWGChannelSettings() {
     m_am_demod_settings_isSet = false;
     am_mod_settings = nullptr;
     m_am_mod_settings_isSet = false;
+    atv_demod_settings = nullptr;
+    m_atv_demod_settings_isSet = false;
     atv_mod_settings = nullptr;
     m_atv_mod_settings_isSet = false;
     bfm_demod_settings = nullptr;
     m_bfm_demod_settings_isSet = false;
     channel_analyzer_settings = nullptr;
     m_channel_analyzer_settings_isSet = false;
+    datv_demod_settings = nullptr;
+    m_datv_demod_settings_isSet = false;
     dsd_demod_settings = nullptr;
     m_dsd_demod_settings_isSet = false;
     file_source_settings = nullptr;
@@ -100,12 +104,16 @@ SWGChannelSettings::init() {
     m_am_demod_settings_isSet = false;
     am_mod_settings = new SWGAMModSettings();
     m_am_mod_settings_isSet = false;
+    atv_demod_settings = new SWGATVDemodSettings();
+    m_atv_demod_settings_isSet = false;
     atv_mod_settings = new SWGATVModSettings();
     m_atv_mod_settings_isSet = false;
     bfm_demod_settings = new SWGBFMDemodSettings();
     m_bfm_demod_settings_isSet = false;
     channel_analyzer_settings = new SWGChannelAnalyzerSettings();
     m_channel_analyzer_settings_isSet = false;
+    datv_demod_settings = new SWGDATVDemodSettings();
+    m_datv_demod_settings_isSet = false;
     dsd_demod_settings = new SWGDSDDemodSettings();
     m_dsd_demod_settings_isSet = false;
     file_source_settings = new SWGFileSourceSettings();
@@ -156,6 +164,9 @@ SWGChannelSettings::cleanup() {
     if(am_mod_settings != nullptr) { 
         delete am_mod_settings;
     }
+    if(atv_demod_settings != nullptr) { 
+        delete atv_demod_settings;
+    }
     if(atv_mod_settings != nullptr) { 
         delete atv_mod_settings;
     }
@@ -164,6 +175,9 @@ SWGChannelSettings::cleanup() {
     }
     if(channel_analyzer_settings != nullptr) { 
         delete channel_analyzer_settings;
+    }
+    if(datv_demod_settings != nullptr) { 
+        delete datv_demod_settings;
     }
     if(dsd_demod_settings != nullptr) { 
         delete dsd_demod_settings;
@@ -241,11 +255,15 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&am_mod_settings, pJson["AMModSettings"], "SWGAMModSettings", "SWGAMModSettings");
     
+    ::SWGSDRangel::setValue(&atv_demod_settings, pJson["ATVDemodSettings"], "SWGATVDemodSettings", "SWGATVDemodSettings");
+    
     ::SWGSDRangel::setValue(&atv_mod_settings, pJson["ATVModSettings"], "SWGATVModSettings", "SWGATVModSettings");
     
     ::SWGSDRangel::setValue(&bfm_demod_settings, pJson["BFMDemodSettings"], "SWGBFMDemodSettings", "SWGBFMDemodSettings");
     
     ::SWGSDRangel::setValue(&channel_analyzer_settings, pJson["ChannelAnalyzerSettings"], "SWGChannelAnalyzerSettings", "SWGChannelAnalyzerSettings");
+    
+    ::SWGSDRangel::setValue(&datv_demod_settings, pJson["DATVDemodSettings"], "SWGDATVDemodSettings", "SWGDATVDemodSettings");
     
     ::SWGSDRangel::setValue(&dsd_demod_settings, pJson["DSDDemodSettings"], "SWGDSDDemodSettings", "SWGDSDDemodSettings");
     
@@ -315,6 +333,9 @@ SWGChannelSettings::asJsonObject() {
     if((am_mod_settings != nullptr) && (am_mod_settings->isSet())){
         toJsonValue(QString("AMModSettings"), am_mod_settings, obj, QString("SWGAMModSettings"));
     }
+    if((atv_demod_settings != nullptr) && (atv_demod_settings->isSet())){
+        toJsonValue(QString("ATVDemodSettings"), atv_demod_settings, obj, QString("SWGATVDemodSettings"));
+    }
     if((atv_mod_settings != nullptr) && (atv_mod_settings->isSet())){
         toJsonValue(QString("ATVModSettings"), atv_mod_settings, obj, QString("SWGATVModSettings"));
     }
@@ -323,6 +344,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((channel_analyzer_settings != nullptr) && (channel_analyzer_settings->isSet())){
         toJsonValue(QString("ChannelAnalyzerSettings"), channel_analyzer_settings, obj, QString("SWGChannelAnalyzerSettings"));
+    }
+    if((datv_demod_settings != nullptr) && (datv_demod_settings->isSet())){
+        toJsonValue(QString("DATVDemodSettings"), datv_demod_settings, obj, QString("SWGDATVDemodSettings"));
     }
     if((dsd_demod_settings != nullptr) && (dsd_demod_settings->isSet())){
         toJsonValue(QString("DSDDemodSettings"), dsd_demod_settings, obj, QString("SWGDSDDemodSettings"));
@@ -439,6 +463,16 @@ SWGChannelSettings::setAmModSettings(SWGAMModSettings* am_mod_settings) {
     this->m_am_mod_settings_isSet = true;
 }
 
+SWGATVDemodSettings*
+SWGChannelSettings::getAtvDemodSettings() {
+    return atv_demod_settings;
+}
+void
+SWGChannelSettings::setAtvDemodSettings(SWGATVDemodSettings* atv_demod_settings) {
+    this->atv_demod_settings = atv_demod_settings;
+    this->m_atv_demod_settings_isSet = true;
+}
+
 SWGATVModSettings*
 SWGChannelSettings::getAtvModSettings() {
     return atv_mod_settings;
@@ -467,6 +501,16 @@ void
 SWGChannelSettings::setChannelAnalyzerSettings(SWGChannelAnalyzerSettings* channel_analyzer_settings) {
     this->channel_analyzer_settings = channel_analyzer_settings;
     this->m_channel_analyzer_settings_isSet = true;
+}
+
+SWGDATVDemodSettings*
+SWGChannelSettings::getDatvDemodSettings() {
+    return datv_demod_settings;
+}
+void
+SWGChannelSettings::setDatvDemodSettings(SWGDATVDemodSettings* datv_demod_settings) {
+    this->datv_demod_settings = datv_demod_settings;
+    this->m_datv_demod_settings_isSet = true;
 }
 
 SWGDSDDemodSettings*
@@ -662,6 +706,9 @@ SWGChannelSettings::isSet(){
         if(am_mod_settings && am_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
+        if(atv_demod_settings && atv_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(atv_mod_settings && atv_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
@@ -669,6 +716,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(channel_analyzer_settings && channel_analyzer_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(datv_demod_settings && datv_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(dsd_demod_settings && dsd_demod_settings->isSet()){

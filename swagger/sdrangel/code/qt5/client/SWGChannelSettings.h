@@ -24,9 +24,11 @@
 
 #include "SWGAMDemodSettings.h"
 #include "SWGAMModSettings.h"
+#include "SWGATVDemodSettings.h"
 #include "SWGATVModSettings.h"
 #include "SWGBFMDemodSettings.h"
 #include "SWGChannelAnalyzerSettings.h"
+#include "SWGDATVDemodSettings.h"
 #include "SWGDSDDemodSettings.h"
 #include "SWGFileSourceSettings.h"
 #include "SWGFreeDVDemodSettings.h"
@@ -82,6 +84,9 @@ public:
     SWGAMModSettings* getAmModSettings();
     void setAmModSettings(SWGAMModSettings* am_mod_settings);
 
+    SWGATVDemodSettings* getAtvDemodSettings();
+    void setAtvDemodSettings(SWGATVDemodSettings* atv_demod_settings);
+
     SWGATVModSettings* getAtvModSettings();
     void setAtvModSettings(SWGATVModSettings* atv_mod_settings);
 
@@ -90,6 +95,9 @@ public:
 
     SWGChannelAnalyzerSettings* getChannelAnalyzerSettings();
     void setChannelAnalyzerSettings(SWGChannelAnalyzerSettings* channel_analyzer_settings);
+
+    SWGDATVDemodSettings* getDatvDemodSettings();
+    void setDatvDemodSettings(SWGDATVDemodSettings* datv_demod_settings);
 
     SWGDSDDemodSettings* getDsdDemodSettings();
     void setDsdDemodSettings(SWGDSDDemodSettings* dsd_demod_settings);
@@ -164,6 +172,9 @@ private:
     SWGAMModSettings* am_mod_settings;
     bool m_am_mod_settings_isSet;
 
+    SWGATVDemodSettings* atv_demod_settings;
+    bool m_atv_demod_settings_isSet;
+
     SWGATVModSettings* atv_mod_settings;
     bool m_atv_mod_settings_isSet;
 
@@ -172,6 +183,9 @@ private:
 
     SWGChannelAnalyzerSettings* channel_analyzer_settings;
     bool m_channel_analyzer_settings_isSet;
+
+    SWGDATVDemodSettings* datv_demod_settings;
+    bool m_datv_demod_settings_isSet;
 
     SWGDSDDemodSettings* dsd_demod_settings;
     bool m_dsd_demod_settings_isSet;

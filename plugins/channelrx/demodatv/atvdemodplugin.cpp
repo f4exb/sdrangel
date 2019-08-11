@@ -24,11 +24,12 @@
 #include "atvdemodgui.h"
 #include "atvdemod.h"
 #include "atvdemodplugin.h"
+#include "atvdemodwebapiadapter.h"
 
 const PluginDescriptor ATVDemodPlugin::m_ptrPluginDescriptor =
 {
 	QString("ATV Demodulator"),
-	QString("4.3.0"),
+	QString("4.11.6"),
     QString("(c) F4HKW for F4EXB / SDRAngel"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -70,3 +71,7 @@ ChannelAPI* ATVDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
     return new ATVDemod(deviceAPI);
 }
 
+ChannelWebAPIAdapter* ATVDemodPlugin::createChannelWebAPIAdapter() const
+{
+	return new ATVDemodWebAPIAdapter();
+}

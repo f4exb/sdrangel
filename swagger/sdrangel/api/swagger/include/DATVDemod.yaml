@@ -1,0 +1,61 @@
+DATVDemodSettings:
+  description: DATVDemod
+  properties:
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    rfBandwidth:
+      type: integer
+    centerFrequency:
+      type: integer
+    standard:
+      description: see DATVDemodSettings::dvb_version
+      type: integer
+    modulation:
+      description: see DATVDemodSettings::DATVModulation
+      type: integer
+    fec:
+      description: see DATVDemodSettings::DATVCodeRate
+      type: integer
+    audioMute:
+      description: boolean
+      type: integer
+    audioDeviceName:
+      type: string
+    symbolRate:
+      type: integer
+    notchFilters:
+      type: integer
+    allowDrift:
+      description: boolean
+      type: integer
+    fastLock:
+      description: boolean
+      type: integer
+    filter:
+      description: see DATVDemodSettings::dvb_sampler
+      type: integer
+    hardMetric:
+      description: boolean
+      type: integer
+    rollOff:
+      type: number
+      format: float
+    viterbi:
+      description: boolean
+      type: integer
+    excursion:
+      type: integer
+    audioVolume:
+      type: integer
+    videoMute:
+      description: boolean
+      type: integer
+    udpTSAddress:
+      type: string
+    udpTSPort:
+      type: integer
+    udpTS:
+      description: boolean
+      type: integer

@@ -20,6 +20,7 @@
 #include "SWGAMDemodSettings.h"
 #include "SWGAMModReport.h"
 #include "SWGAMModSettings.h"
+#include "SWGATVDemodSettings.h"
 #include "SWGATVModReport.h"
 #include "SWGATVModSettings.h"
 #include "SWGAirspyHFReport.h"
@@ -50,6 +51,7 @@
 #include "SWGChannelsDetail.h"
 #include "SWGCommand.h"
 #include "SWGComplex.h"
+#include "SWGDATVDemodSettings.h"
 #include "SWGDSDDemodReport.h"
 #include "SWGDSDDemodSettings.h"
 #include "SWGDVSerialDevice.h"
@@ -186,6 +188,9 @@ namespace SWGSDRangel {
     if(QString("SWGAMModSettings").compare(type) == 0) {
       return new SWGAMModSettings();
     }
+    if(QString("SWGATVDemodSettings").compare(type) == 0) {
+      return new SWGATVDemodSettings();
+    }
     if(QString("SWGATVModReport").compare(type) == 0) {
       return new SWGATVModReport();
     }
@@ -275,6 +280,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGComplex").compare(type) == 0) {
       return new SWGComplex();
+    }
+    if(QString("SWGDATVDemodSettings").compare(type) == 0) {
+      return new SWGDATVDemodSettings();
     }
     if(QString("SWGDSDDemodReport").compare(type) == 0) {
       return new SWGDSDDemodReport();

@@ -893,6 +893,131 @@ margin-bottom: 20px;
   },
   "description" : "AMMod"
 };
+            defs.ATVDemodSettings = {
+  "properties" : {
+    "lineTimeFactor" : {
+      "type" : "integer"
+    },
+    "topTimeFactor" : {
+      "type" : "integer"
+    },
+    "fpsIndex" : {
+      "type" : "integer"
+    },
+    "halfImage" : {
+      "type" : "integer",
+      "description" : "(boolean) 1 for m_fltRatioOfRowsToDisplay = 0.5, 0 for m_fltRatioOfRowsToDisplay = 1.0"
+    },
+    "RFBandwidthFactor" : {
+      "type" : "integer"
+    },
+    "OppBandwidthFactor" : {
+      "type" : "integer"
+    },
+    "nbLinesIndex" : {
+      "type" : "integer"
+    },
+    "intFrequencyOffset" : {
+      "type" : "integer"
+    },
+    "enmModulation" : {
+      "type" : "integer",
+      "description" : "see ATVDemodSettings::ATVModulation"
+    },
+    "fltRFBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fltRFOppBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "blnFFTFiltering" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "blndecimatorEnable" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "fltBFOFrequency" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fmDeviation" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "intSampleRate" : {
+      "type" : "integer"
+    },
+    "enmATVStandard" : {
+      "type" : "integer",
+      "description" : "see ATVDemodSettings::ATVStd"
+    },
+    "intNumberOfLines" : {
+      "type" : "integer"
+    },
+    "fltLineDuration" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fltTopDuration" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fltFramePerS" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fltRatioOfRowsToDisplay" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fltVoltLevelSynchroTop" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fltVoltLevelSynchroBlack" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "blnHSync" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "blnVSync" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "blnInvertVideo" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "intVideoTabIndex" : {
+      "type" : "integer"
+    },
+    "intTVSampleRate" : {
+      "type" : "integer"
+    },
+    "intNumberSamplePerLine" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "udpAddress" : {
+      "type" : "string"
+    },
+    "udpPort" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "ATVDemod"
+};
             defs.ATVModReport = {
   "properties" : {
     "channelPowerDB" : {
@@ -1958,6 +2083,9 @@ margin-bottom: 20px;
     "AMModSettings" : {
       "$ref" : "#/definitions/AMModSettings"
     },
+    "ATVDemodSettings" : {
+      "$ref" : "#/definitions/ATVDemodSettings"
+    },
     "ATVModSettings" : {
       "$ref" : "#/definitions/ATVModSettings"
     },
@@ -1966,6 +2094,9 @@ margin-bottom: 20px;
     },
     "ChannelAnalyzerSettings" : {
       "$ref" : "#/definitions/ChannelAnalyzerSettings"
+    },
+    "DATVDemodSettings" : {
+      "$ref" : "#/definitions/DATVDemodSettings"
     },
     "DSDDemodSettings" : {
       "$ref" : "#/definitions/DSDDemodSettings"
@@ -2082,6 +2213,92 @@ margin-bottom: 20px;
     }
   },
   "description" : "A complex number"
+};
+            defs.DATVDemodSettings = {
+  "properties" : {
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "rfBandwidth" : {
+      "type" : "integer"
+    },
+    "centerFrequency" : {
+      "type" : "integer"
+    },
+    "standard" : {
+      "type" : "integer",
+      "description" : "see DATVDemodSettings::dvb_version"
+    },
+    "modulation" : {
+      "type" : "integer",
+      "description" : "see DATVDemodSettings::DATVModulation"
+    },
+    "fec" : {
+      "type" : "integer",
+      "description" : "see DATVDemodSettings::DATVCodeRate"
+    },
+    "audioMute" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
+    "symbolRate" : {
+      "type" : "integer"
+    },
+    "notchFilters" : {
+      "type" : "integer"
+    },
+    "allowDrift" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "fastLock" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "filter" : {
+      "type" : "integer",
+      "description" : "see DATVDemodSettings::dvb_sampler"
+    },
+    "hardMetric" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "rollOff" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "viterbi" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "excursion" : {
+      "type" : "integer"
+    },
+    "audioVolume" : {
+      "type" : "integer"
+    },
+    "videoMute" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "udpTSAddress" : {
+      "type" : "string"
+    },
+    "udpTSPort" : {
+      "type" : "integer"
+    },
+    "udpTS" : {
+      "type" : "integer",
+      "description" : "boolean"
+    }
+  },
+  "description" : "DATVDemod"
 };
             defs.DSDDemodReport = {
   "properties" : {
@@ -27997,7 +28214,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-08-10T05:46:27.219+02:00
+              Generated 2019-08-11T10:07:35.543+02:00
             </div>
           </div>
       </div>

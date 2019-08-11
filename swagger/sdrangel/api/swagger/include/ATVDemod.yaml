@@ -1,0 +1,89 @@
+ATVDemodSettings:
+  description: ATVDemod
+  properties:
+    lineTimeFactor:
+      type: integer
+    topTimeFactor:
+      type: integer
+    fpsIndex:
+      type: integer
+    halfImage:
+      description: (boolean) 1 for m_fltRatioOfRowsToDisplay = 0.5, 0 for m_fltRatioOfRowsToDisplay = 1.0
+      type: integer
+    RFBandwidthFactor:
+      type: integer
+    OppBandwidthFactor:
+      type: integer
+    nbLinesIndex:
+      type: integer
+    intFrequencyOffset:
+      type: integer
+    enmModulation:
+      description: see ATVDemodSettings::ATVModulation
+      type: integer
+    fltRFBandwidth:
+      type: number
+      format: float
+    fltRFOppBandwidth:
+      type: number
+      format: float
+    blnFFTFiltering:
+      description: boolean
+      type: integer
+    blndecimatorEnable:
+      description: boolean
+      type: integer
+    fltBFOFrequency:
+      type: number
+      format: float
+    fmDeviation:
+      type: number
+      format: float
+    intSampleRate:
+      type: integer
+    enmATVStandard:
+      description: see ATVDemodSettings::ATVStd
+      type: integer
+    intNumberOfLines:
+      type: integer
+    fltLineDuration:
+      type: number
+      format: float
+    fltTopDuration:
+      type: number
+      format: float
+    fltFramePerS:
+      type: number
+      format: float
+    fltRatioOfRowsToDisplay:
+      type: number
+      format: float
+    fltVoltLevelSynchroTop:
+      type: number
+      format: float
+    fltVoltLevelSynchroBlack:
+      type: number
+      format: float
+    blnHSync:
+      description: boolean
+      type: integer
+    blnVSync:
+      description: boolean
+      type: integer
+    blnInvertVideo:
+      description: boolean
+      type: integer
+    intVideoTabIndex:
+      type: integer
+    intTVSampleRate:
+      type: integer
+    intNumberSamplePerLine:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    udpAddress:
+      type: string
+    udpPort:
+      type: integer
