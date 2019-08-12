@@ -1291,12 +1291,64 @@ int ATVMod::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     ATVModSettings settings = m_settings;
-    bool frequencyOffsetChanged = false;
+    webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    if (channelSettingsKeys.contains("inputFrequencyOffset"))
+    if (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)
     {
+        ATVMod::MsgConfigureChannelizer *msgChan = ATVMod::MsgConfigureChannelizer::create(
+                settings.m_inputFrequencyOffset);
+        m_inputMessageQueue.push(msgChan);
+    }
+
+    MsgConfigureATVMod *msg = MsgConfigureATVMod::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureATVMod *msgToGUI = MsgConfigureATVMod::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    if (channelSettingsKeys.contains("imageFileName"))
+    {
+        MsgConfigureImageFileName *msg = MsgConfigureImageFileName::create(
+                *response.getAtvModSettings()->getImageFileName());
+        m_inputMessageQueue.push(msg);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            MsgConfigureImageFileName *msgToGUI = MsgConfigureImageFileName::create(
+                    *response.getAtvModSettings()->getImageFileName());
+            m_guiMessageQueue->push(msgToGUI);
+        }
+    }
+
+    if (channelSettingsKeys.contains("videoFileName"))
+    {
+        MsgConfigureVideoFileName *msg = MsgConfigureVideoFileName::create(
+                *response.getAtvModSettings()->getVideoFileName());
+        m_inputMessageQueue.push(msg);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            MsgConfigureVideoFileName *msgToGUI = MsgConfigureVideoFileName::create(
+                    *response.getAtvModSettings()->getVideoFileName());
+            m_guiMessageQueue->push(msgToGUI);
+        }
+    }
+
+    webapiFormatChannelSettings(response, settings);
+
+    return 200;
+}
+
+void ATVMod::webapiUpdateChannelSettings(
+        ATVModSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response)
+{
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getAtvModSettings()->getInputFrequencyOffset();
-        frequencyOffsetChanged = true;
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getAtvModSettings()->getRfBandwidth();
@@ -1373,53 +1425,6 @@ int ATVMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getAtvModSettings()->getReverseApiChannelIndex();
     }
-    if (frequencyOffsetChanged)
-    {
-        ATVMod::MsgConfigureChannelizer *msgChan = ATVMod::MsgConfigureChannelizer::create(
-                settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(msgChan);
-    }
-
-    MsgConfigureATVMod *msg = MsgConfigureATVMod::create(settings, force);
-    m_inputMessageQueue.push(msg);
-
-    if (m_guiMessageQueue) // forward to GUI if any
-    {
-        MsgConfigureATVMod *msgToGUI = MsgConfigureATVMod::create(settings, force);
-        m_guiMessageQueue->push(msgToGUI);
-    }
-
-    if (channelSettingsKeys.contains("imageFileName"))
-    {
-        MsgConfigureImageFileName *msg = MsgConfigureImageFileName::create(
-                *response.getAtvModSettings()->getImageFileName());
-        m_inputMessageQueue.push(msg);
-
-        if (m_guiMessageQueue) // forward to GUI if any
-        {
-            MsgConfigureImageFileName *msgToGUI = MsgConfigureImageFileName::create(
-                    *response.getAtvModSettings()->getImageFileName());
-            m_guiMessageQueue->push(msgToGUI);
-        }
-    }
-
-    if (channelSettingsKeys.contains("videoFileName"))
-    {
-        MsgConfigureVideoFileName *msg = MsgConfigureVideoFileName::create(
-                *response.getAtvModSettings()->getVideoFileName());
-        m_inputMessageQueue.push(msg);
-
-        if (m_guiMessageQueue) // forward to GUI if any
-        {
-            MsgConfigureVideoFileName *msgToGUI = MsgConfigureVideoFileName::create(
-                    *response.getAtvModSettings()->getVideoFileName());
-            m_guiMessageQueue->push(msgToGUI);
-        }
-    }
-
-    webapiFormatChannelSettings(response, settings);
-
-    return 200;
 }
 
 int ATVMod::webapiReportGet(
