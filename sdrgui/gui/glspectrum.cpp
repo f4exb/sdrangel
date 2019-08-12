@@ -174,6 +174,7 @@ GLSpectrum::~GLSpectrum()
 
 void GLSpectrum::setCenterFrequency(qint64 frequency)
 {
+    QMutexLocker mutexLocker(&m_mutex);
 	m_centerFrequency = frequency;
 	m_changesPending = true;
 	update();
@@ -181,6 +182,7 @@ void GLSpectrum::setCenterFrequency(qint64 frequency)
 
 void GLSpectrum::setReferenceLevel(Real referenceLevel)
 {
+    QMutexLocker mutexLocker(&m_mutex);
 	m_referenceLevel = referenceLevel;
 	m_changesPending = true;
 	update();
@@ -188,6 +190,7 @@ void GLSpectrum::setReferenceLevel(Real referenceLevel)
 
 void GLSpectrum::setPowerRange(Real powerRange)
 {
+    QMutexLocker mutexLocker(&m_mutex);
 	m_powerRange = powerRange;
 	m_changesPending = true;
 	update();
@@ -210,6 +213,7 @@ void GLSpectrum::setHistoStroke(int stroke)
 
 void GLSpectrum::setSampleRate(qint32 sampleRate)
 {
+    QMutexLocker mutexLocker(&m_mutex);
 	m_sampleRate = sampleRate;
 	if (m_messageQueueToGUI) {
 	    m_messageQueueToGUI->push(new MsgReportSampleRate(m_sampleRate));
@@ -220,6 +224,7 @@ void GLSpectrum::setSampleRate(qint32 sampleRate)
 
 void GLSpectrum::setTimingRate(qint32 timingRate)
 {
+    QMutexLocker mutexLocker(&m_mutex);
     m_timingRate = timingRate;
     m_changesPending = true;
     update();
@@ -227,6 +232,7 @@ void GLSpectrum::setTimingRate(qint32 timingRate)
 
 void GLSpectrum::setDisplayWaterfall(bool display)
 {
+    QMutexLocker mutexLocker(&m_mutex);
 	m_displayWaterfall = display;
 	m_changesPending = true;
 	stopDrag();
@@ -247,6 +253,7 @@ void GLSpectrum::setLsbDisplay(bool lsbDisplay)
 
 void GLSpectrum::setInvertedWaterfall(bool inv)
 {
+    QMutexLocker mutexLocker(&m_mutex);
 	m_invertedWaterfall = inv;
 	m_changesPending = true;
 	stopDrag();
@@ -255,6 +262,7 @@ void GLSpectrum::setInvertedWaterfall(bool inv)
 
 void GLSpectrum::setDisplayMaxHold(bool display)
 {
+    QMutexLocker mutexLocker(&m_mutex);
 	m_displayMaxHold = display;
 	m_changesPending = true;
 	stopDrag();
@@ -263,6 +271,7 @@ void GLSpectrum::setDisplayMaxHold(bool display)
 
 void GLSpectrum::setDisplayCurrent(bool display)
 {
+    QMutexLocker mutexLocker(&m_mutex);
 	m_displayCurrent = display;
 	m_changesPending = true;
 	stopDrag();
@@ -271,6 +280,7 @@ void GLSpectrum::setDisplayCurrent(bool display)
 
 void GLSpectrum::setDisplayHistogram(bool display)
 {
+    QMutexLocker mutexLocker(&m_mutex);
 	m_displayHistogram = display;
 	m_changesPending = true;
 	stopDrag();
@@ -307,6 +317,7 @@ void GLSpectrum::setDisplayTraceIntensity(int intensity)
 
 void GLSpectrum::setLinear(bool linear)
 {
+    QMutexLocker mutexLocker(&m_mutex);
     m_linear = linear;
     m_changesPending = true;
     update();
@@ -527,6 +538,7 @@ void GLSpectrum::initializeGL()
 
 void GLSpectrum::resizeGL(int width, int height)
 {
+    QMutexLocker mutexLocker(&m_mutex);
 	QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
 	glFunctions->glViewport(0, 0, width, height);
 	m_changesPending = true;
@@ -1640,6 +1652,7 @@ void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
 
     if (m_cursorState == CSSplitterMoving)
     {
+        QMutexLocker mutexLocker(&m_mutex);
         float newShare;
 
         if (!m_invertedWaterfall) {
@@ -1841,6 +1854,7 @@ void GLSpectrum::tick()
 
 void GLSpectrum::channelMarkerChanged()
 {
+    QMutexLocker mutexLocker(&m_mutex);
 	m_changesPending = true;
 	update();
 }
@@ -1852,6 +1866,7 @@ void GLSpectrum::channelMarkerDestroyed(QObject* object)
 
 void GLSpectrum::setWaterfallShare(Real waterfallShare)
 {
+    QMutexLocker mutexLocker(&m_mutex);
 	if (waterfallShare < 0.1f) {
 		m_waterfallShare = 0.1f;
 	}
