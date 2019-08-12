@@ -1,3 +1,9 @@
+sdrangel (4.11.6-1) unstable; urgency=medium
+
+  * REST API /sdrange/config endpoint with GET, PUT, PATCH. Implements #241
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 12 Aug 2019 05:04:06 +0200
+
 sdrangel (4.11.5-1) unstable; urgency=medium
 
   * CW keyer from keyboard. Audio monitor AM, NFM, SSB modulators. Implements #385

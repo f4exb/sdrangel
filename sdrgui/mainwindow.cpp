@@ -750,7 +750,10 @@ void MainWindow::loadPresetSettings(const Preset* preset, int tabIndex)
 	}
 
 	// has to be last step
-	restoreState(preset->getLayout());
+    if (!preset->getLayout().isEmpty()) {
+	    restoreState(preset->getLayout());
+    }
+
     tabifyDockWidget(ui->presetDock, ui->commandsDock); // override this setting
     ui->presetDock->raise();
 }
