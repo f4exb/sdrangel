@@ -165,6 +165,7 @@ int WebAPIAdapterSrv::instanceConfigPutPatch(
     }
 
     // TODO
+    return 200;
 }
 
 int WebAPIAdapterSrv::instanceDevices(

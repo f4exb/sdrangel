@@ -19,8 +19,9 @@
 #define SDRBASE_CHANNEL_CHANNELUTILS_H_
 
 #include <QString>
+#include "export.h"
 
-class ChannelUtils
+class SDRBASE_API ChannelUtils
 {
 public:
     static bool compareChannelURIs(const QString& registerdChannelURI, const QString& xChannelURI);
