@@ -238,6 +238,7 @@ void ChannelAnalyzerWebAPIAdapter::webapiUpdateChannelSettings(
         if (channelSettingsKeys.contains("scopeConfig.tracesData"))
         {
             QList<SWGSDRangel::SWGTraceData *> *tracesData = response.getChannelAnalyzerSettings()->getScopeConfig()->getTracesData();
+            scopeSettings.m_tracesData.clear();
 
             for (int i = 0; i < 10; i++) // no more than 10 traces anyway
             {
@@ -308,6 +309,7 @@ void ChannelAnalyzerWebAPIAdapter::webapiUpdateChannelSettings(
         if (channelSettingsKeys.contains("scopeConfig.triggersData"))
         {
             QList<SWGSDRangel::SWGTriggerData *> *triggersData = response.getChannelAnalyzerSettings()->getScopeConfig()->getTriggersData();
+            scopeSettings.m_triggersData.clear();
 
             for (int i = 0; i < 10; i++) // no more than 10 triggers anyway
             {

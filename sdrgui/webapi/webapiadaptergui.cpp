@@ -160,9 +160,6 @@ int WebAPIAdapterGUI::instanceConfigPutPatch(
 {
     WebAPIAdapterBase webAPIAdapterBase;
     webAPIAdapterBase.setPluginManager(m_mainWindow.getPluginManager());
-    // qDebug("WebAPIAdapterGUI::instanceConfigPutPatch: configKeys:");
-    // configKeys.debug();
-    // return 200;
 
     if (force) {
         webAPIAdapterBase.webapiInitConfig(m_mainWindow.m_settings);

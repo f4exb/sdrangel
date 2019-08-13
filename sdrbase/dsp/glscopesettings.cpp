@@ -18,6 +18,18 @@
 #include "util/simpleserializer.h"
 #include "glscopesettings.h"
 
+const double GLScopeSettings::AMPS[27] = {
+        2e-1, 1e-1, 5e-2,
+        2e-2, 1e-2, 5e-3,
+        2e-3, 1e-3, 5e-4,
+        2e-4, 1e-4, 5e-5,
+        2e-5, 1e-5, 5e-6,
+        2e-6, 1e-6, 5e-7,
+        2e-7, 1e-7, 5e-8,
+        2e-8, 1e-8, 5e-9,
+        2e-9, 1e-9, 5e-10,
+};
+
 GLScopeSettings::GLScopeSettings()
 {
     resetToDefaults();
@@ -134,7 +146,8 @@ bool GLScopeSettings::deserialize(const QByteArray& data)
             d.readS32(20 + 16*iTrace, &intValue, 0);
             m_tracesData.back().m_projectionType = (Projector::ProjectionType) intValue;
             d.readU32(21 + 16*iTrace, &uintValue, 0);
-            m_tracesData.back().m_amp = uintValue;
+            m_tracesData.back().m_ampIndex = uintValue;
+            m_tracesData.back().m_amp = 0.2 / AMPS[m_tracesData.back().m_ampIndex < 27 ? m_tracesData.back().m_ampIndex : 26];
             d.readS32(22 + 16*iTrace, &intValue, 0);
             m_tracesData.back().m_ofsCoarse = intValue;
             d.readS32(23 + 16*iTrace, &intValue, 0);

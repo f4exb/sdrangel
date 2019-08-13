@@ -50,33 +50,37 @@
 const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
     {"sdrangel.channel.amdemod", "AMDemodSettings"},
     {"de.maintech.sdrangelove.channel.am", "AMDemodSettings"}, // remap
-    {"sdrangel.channeltx.ammod", "AMModSettings"},
-    {"sdrangel.channeltx.atvmod", "ATVModSettings"},
+    {"sdrangel.channeltx.modam", "AMModSettings"},
+    {"sdrangel.channeltx.modatv", "ATVModSettings"},
     {"sdrangel.channel.bfm", "BFMDemodSettings"},
     {"sdrangel.channel.chanalyzer", "ChannelAnalyzerSettings"},
     {"sdrangel.channel.chanalyzerng", "ChannelAnalyzerSettings"}, // remap
+    {"org.f4exb.sdrangelove.channel.chanalyzer", "ChannelAnalyzerSettings"}, // remap
     {"sdrangel.channel.demodatv", "ATVDemodSettings"},
     {"sdrangel.channel.demoddatv", "DATVDemodSettings"},
     {"sdrangel.channel.dsddemod", "DSDDemodSettings"},
-    {"sdrangel.channeltx.filesrc", "FileSourceSettings"},
+    {"sdrangel.channeltx.filesource", "FileSourceSettings"},
     {"sdrangel.channel.freedvdemod", "FreeDVDemodSettings"},
     {"sdrangel.channeltx.freedvmod", "FreeDVModSettings"},
     {"sdrangel.channel.freqtracker", "FreqTrackerSettings"},
     {"sdrangel.channel.nfmdemod", "NFMDemodSettings"},
     {"de.maintech.sdrangelove.channel.nfm", "NFMDemodSettings"}, // remap
-    {"sdrangel.channeltx.nfmmod", "NFMModSettings"},
+    {"sdrangel.channeltx.modnfm", "NFMModSettings"},
     {"sdrangel.demod.localsink", "LocalSinkSettings"},
-    {"sdrangel.demod.localsource", "LocalSourceSettings"},
+    {"sdrangel.channel.localsink", "LocalSinkSettings"}, // remap
+    {"sdrangel.channel.localsource", "LocalSourceSettings"},
     {"sdrangel.demod.remotesink", "RemoteSinkSettings"},
-    {"sdrangel.channeltx.remotesrc", "RemoteSourceSettings"},
-    {"sdrangel.channeltx.ssbmod", "SSBModSettings"},
+    {"sdrangel.channeltx.remotesource", "RemoteSourceSettings"},
+    {"sdrangel.channeltx.modssb", "SSBModSettings"},
     {"sdrangel.channel.ssbdemod", "SSBDemodSettings"},
     {"de.maintech.sdrangelove.channel.ssb", "SSBDemodSettings"}, // remap
-    {"sdrangel.channeltx.udpsink", "UDPSourceSettings"},
-    {"sdrangel.demod.udpsrc", "UDPSinkSettings"},
+    {"sdrangel.channeltx.udpsource", "UDPSourceSettings"},
+    {"sdrangel.channeltx.udpsink", "UDPSourceSettings"}, // remap
+    {"sdrangel.channel.udpsink", "UDPSinkSettings"},
+    {"sdrangel.channel.udpsrc", "UDPSinkSettings"}, // remap
     {"sdrangel.channel.wfmdemod", "WFMDemodSettings"},
     {"de.maintech.sdrangelove.channel.wfm", "WFMDemodSettings"}, // remap
-    {"sdrangel.channeltx.wfmmod", "WFMModSettings"}
+    {"sdrangel.channeltx.modwfm", "WFMModSettings"}
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_deviceIdToSettingsKey = {
@@ -86,8 +90,10 @@ const QMap<QString, QString> WebAPIRequestMapper::m_deviceIdToSettingsKey = {
     {"sdrangel.samplesource.bladerf", "bladeRF1InputSettings"}, // remap
     {"sdrangel.samplesink.bladerf1output", "bladeRF1OutputSettings"},
     {"sdrangel.samplesource.bladerf1output", "bladeRF1OutputSettings"}, // remap
+    {"sdrangel.samplesource.bladerfoutput", "bladeRF1OutputSettings"}, // remap
     {"sdrangel.samplesource.bladerf2input", "bladeRF2InputSettings"},
     {"sdrangel.samplesink.bladerf2output", "bladeRF2OutputSettings"},
+    {"sdrangel.samplesource.bladerf2output", "bladeRF2OutputSettings"}, // remap
     {"sdrangel.samplesource.fcdpro", "fcdProSettings"},
     {"sdrangel.samplesource.fcdproplus", "fcdProPlusSettings"},
     {"sdrangel.samplesource.fileinput", "fileInputSettings"},
@@ -112,8 +118,8 @@ const QMap<QString, QString> WebAPIRequestMapper::m_deviceIdToSettingsKey = {
     {"sdrangel.samplesink.soapysdroutput", "soapySDROutputSettings"},
     {"sdrangel.samplesource.testsource", "testSourceSettings"},
     {"sdrangel.samplemimo.testmi", "testMISettings"},
-    {"sdrangel.samplesource.xtrx", "xtrxInputSettings"},
-    {"sdrangel.samplesink.xtrx", "xtrxOutputSettings"}
+    {"sdrangel.samplesource.xtrx", "XtrxInputSettings"},
+    {"sdrangel.samplesink.xtrx", "XtrxOutputSettings"}
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
@@ -162,7 +168,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToSettingsKe
     {"SDRplay1", "sdrPlaySettings"},
     {"SoapySDR", "soapySDRInputSettings"},
     {"TestSource", "testSourceSettings"},
-    {"XTRX", "xtrxInputSettings"}
+    {"XTRX", "XtrxInputSettings"}
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_sinkDeviceHwIdToSettingsKey = {
@@ -174,7 +180,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_sinkDeviceHwIdToSettingsKey 
     {"PlutoSDR", "plutoSdrOutputSettings"},
     {"RemoteOutput", "remoteOutputSettings"},
     {"SoapySDR", "soapySDROutputSettings"},
-    {"XTRX", "xtrxOutputSettings"}
+    {"XTRX", "XtrxOutputSettings"}
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_mimoDeviceHwIdToSettingsKey= {
@@ -2332,6 +2338,11 @@ bool WebAPIRequestMapper::appendPresetKeys(
         preset->setGroup(new QString(presetJson["group"].toString()));
         presetKeys.m_keys.append("group");
     }
+    if (presetJson.contains("layout"))
+    {
+        preset->setLayout(new QString(presetJson["layout"].toString()));
+        presetKeys.m_keys.append("layout");
+    }
 
     if (presetJson.contains("spectrumConfig"))
     {
@@ -2476,6 +2487,11 @@ bool WebAPIRequestMapper::getChannel(
         {
             channelSettings->setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());
             channelSettings->getDsdDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "FileSourceSettings")
+        {
+            channelSettings->setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
+            channelSettings->getFileSourceSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "FreeDVDemodSettings")
         {
@@ -2717,15 +2733,17 @@ bool WebAPIRequestMapper::getDevice(
         }
         else if (deviceSettingsKey == "soapySDRInputSettings")
         {
-            deviceSettings->setSoapySdrInputSettings(new SWGSDRangel::SWGSoapySDRInputSettings());
-            deviceSettings->getSoapySdrInputSettings()->init(); // contains complex objects
-            deviceSettings->getSoapySdrInputSettings()->fromJsonObject(settingsJsonObject);
+            processSoapySDRSettings(deviceSettings, settingsJsonObject, deviceSettingsKeys, true);
+            // deviceSettings->setSoapySdrInputSettings(new SWGSDRangel::SWGSoapySDRInputSettings());
+            // deviceSettings->getSoapySdrInputSettings()->init(); // contains complex objects
+            // deviceSettings->getSoapySdrInputSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (deviceSettingsKey == "soapySDROutputSettings")
         {
-            deviceSettings->setSoapySdrOutputSettings(new SWGSDRangel::SWGSoapySDROutputSettings());
-            deviceSettings->getSoapySdrOutputSettings()->init(); // contains complex objects
-            deviceSettings->getSoapySdrOutputSettings()->fromJsonObject(settingsJsonObject);
+            processSoapySDRSettings(deviceSettings, settingsJsonObject, deviceSettingsKeys, false);
+            // deviceSettings->setSoapySdrOutputSettings(new SWGSDRangel::SWGSoapySDROutputSettings());
+            // deviceSettings->getSoapySdrOutputSettings()->init(); // contains complex objects
+            // deviceSettings->getSoapySdrOutputSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (deviceSettingsKey == "testSourceSettings")
         {
@@ -2741,12 +2759,12 @@ bool WebAPIRequestMapper::getDevice(
             deviceSettings->setTestMiSettings(new SWGSDRangel::SWGTestMISettings());
             deviceSettings->getTestMiSettings()->fromJsonObject(settingsJsonObject);
         }
-        else if (deviceSettingsKey == "xtrxInputSettings")
+        else if (deviceSettingsKey == "XtrxInputSettings")
         {
             deviceSettings->setXtrxInputSettings(new SWGSDRangel::SWGXtrxInputSettings());
             deviceSettings->getXtrxInputSettings()->fromJsonObject(settingsJsonObject);
         }
-        else if (deviceSettingsKey == "xtrxOutputSettings")
+        else if (deviceSettingsKey == "XtrxOutputSettings")
         {
             deviceSettings->setXtrxOutputSettings(new SWGSDRangel::SWGXtrxOutputSettings());
             deviceSettings->getXtrxOutputSettings()->fromJsonObject(settingsJsonObject);
@@ -2808,7 +2826,7 @@ void WebAPIRequestMapper::appendSettingsArrayKeys(
 
     for (int arrayIndex = 0; arrayIndex < arrayJson.count(); arrayIndex++)
     {
-        QJsonValue v = arrayJson.takeAt(arrayIndex);
+        QJsonValue v = arrayJson.at(arrayIndex);
 
         if (v.isObject())
         {
@@ -2942,6 +2960,9 @@ void WebAPIRequestMapper::processChannelAnalyzerSettings(
     if (channelSettingsJson.contains("fll")) {
         channelAnalyzerSettings->setFll(channelSettingsJson["fll"].toInt());
     }
+    if (channelSettingsJson.contains("frequency")) {
+        channelAnalyzerSettings->setFrequency(channelSettingsJson["frequency"].toInt());
+    }
     if (channelSettingsJson.contains("inputType")) {
         channelAnalyzerSettings->setInputType(channelSettingsJson["inputType"].toInt());
     }
@@ -2965,6 +2986,12 @@ void WebAPIRequestMapper::processChannelAnalyzerSettings(
     }
     if (channelSettingsJson.contains("spanLog2")) {
         channelAnalyzerSettings->setSpanLog2(channelSettingsJson["spanLog2"].toInt());
+    }
+    if (channelSettingsJson.contains("ssb")) {
+        channelAnalyzerSettings->setSsb(channelSettingsJson["ssb"].toInt());
+    }
+    if (channelSettingsJson.contains("title")) {
+        channelAnalyzerSettings->setTitle(new QString(channelSettingsJson["title"].toString()));
     }
 
     if (channelSettingsJson.contains("spectrumConfig"))
@@ -3029,5 +3056,276 @@ void WebAPIRequestMapper::processChannelAnalyzerSettings(
                 channelSettingsKeys.append(QString("scopeConfig.") + triggersDataKeys.at(i));
             }
         }
+    }
+}
+
+void WebAPIRequestMapper::processSoapySDRSettings(
+        SWGSDRangel::SWGDeviceSettings *deviceSettings,
+        QJsonObject& deviceSettingsJson,
+        QStringList& deviceSettingsKeys,
+        bool inputElseOutput
+)
+{
+    if (inputElseOutput)
+    {
+        SWGSDRangel::SWGSoapySDRInputSettings *swgSoapySDRInputSettings = new SWGSDRangel::SWGSoapySDRInputSettings();
+        deviceSettings->setSoapySdrInputSettings(swgSoapySDRInputSettings);
+        swgSoapySDRInputSettings->init();
+
+        if (deviceSettingsJson.contains("centerFrequency")) {
+            swgSoapySDRInputSettings->setCenterFrequency(deviceSettingsJson["centerFrequency"].toInt());
+        }
+        if (deviceSettingsJson.contains("LOppmTenths")) {
+            swgSoapySDRInputSettings->setLOppmTenths(deviceSettingsJson["LOppmTenths"].toInt());
+        }
+        if (deviceSettingsJson.contains("devSampleRate")) {
+            swgSoapySDRInputSettings->setDevSampleRate(deviceSettingsJson["devSampleRate"].toInt());
+        }
+        if (deviceSettingsJson.contains("log2Decim")) {
+            swgSoapySDRInputSettings->setLog2Decim(deviceSettingsJson["log2Decim"].toInt());
+        }
+        if (deviceSettingsJson.contains("fcPos")) {
+            swgSoapySDRInputSettings->setFcPos(deviceSettingsJson["fcPos"].toInt());
+        }
+        if (deviceSettingsJson.contains("softDCCorrection")) {
+            swgSoapySDRInputSettings->setSoftDcCorrection(deviceSettingsJson["softDCCorrection"].toInt());
+        }
+        if (deviceSettingsJson.contains("softIQCorrection")) {
+            swgSoapySDRInputSettings->setSoftIqCorrection(deviceSettingsJson["softIQCorrection"].toInt());
+        }
+        if (deviceSettingsJson.contains("transverterMode")) {
+            swgSoapySDRInputSettings->setTransverterMode(deviceSettingsJson["transverterMode"].toInt());
+        }
+        if (deviceSettingsJson.contains("transverterDeltaFrequency")) {
+            swgSoapySDRInputSettings->setTransverterDeltaFrequency(deviceSettingsJson["transverterDeltaFrequency"].toInt());
+        }
+        if (deviceSettingsJson.contains("fileRecordName")) {
+            swgSoapySDRInputSettings->setFileRecordName(new QString(deviceSettingsJson["fileRecordName"].toString()));
+        }
+        if (deviceSettingsJson.contains("antenna")) {
+            swgSoapySDRInputSettings->setAntenna(new QString(deviceSettingsJson["antenna"].toString()));
+        }
+        if (deviceSettingsJson.contains("bandwidth")) {
+            swgSoapySDRInputSettings->setBandwidth(deviceSettingsJson["bandwidth"].toInt());
+        }
+        if (deviceSettingsJson.contains("globalGain")) {
+            swgSoapySDRInputSettings->setGlobalGain(deviceSettingsJson["globalGain"].toInt());
+        }
+        if (deviceSettingsJson.contains("autoGain")) {
+            swgSoapySDRInputSettings->setAutoGain(deviceSettingsJson["autoGain"].toInt());
+        }
+        if (deviceSettingsJson.contains("autoDCCorrection")) {
+            swgSoapySDRInputSettings->setAutoDcCorrection(deviceSettingsJson["autoDCCorrection"].toInt());
+        }
+        if (deviceSettingsJson.contains("autoIQCorrection")) {
+            swgSoapySDRInputSettings->setAutoIqCorrection(deviceSettingsJson["autoIQCorrection"].toInt());
+        }
+        if (deviceSettingsJson.contains("dcCorrection"))
+        {
+            SWGSDRangel::SWGComplex *swgComplex = new SWGSDRangel::SWGComplex;
+            swgSoapySDRInputSettings->setDcCorrection(swgComplex);
+            QJsonObject complexJson = deviceSettingsJson["dcCorrection"].toObject();
+
+            if (complexJson.contains("real")) {
+                swgComplex->setReal(complexJson["real"].toDouble());
+            }
+            if (complexJson.contains("imag")) {
+                swgComplex->setImag(complexJson["imag"].toDouble());
+            }
+        }
+        if (deviceSettingsJson.contains("iqCorrection"))
+        {
+            SWGSDRangel::SWGComplex *swgComplex = new SWGSDRangel::SWGComplex;
+            swgSoapySDRInputSettings->setIqCorrection(swgComplex);
+            QJsonObject complexJson = deviceSettingsJson["iqCorrection"].toObject();
+
+            if (complexJson.contains("real")) {
+                swgComplex->setReal(complexJson["real"].toDouble());
+            }
+            if (complexJson.contains("imag")) {
+                swgComplex->setImag(complexJson["imag"].toDouble());
+            }
+        }
+        if (deviceSettingsJson.contains("useReverseAPI")) {
+            swgSoapySDRInputSettings->setUseReverseApi(deviceSettingsJson["useReverseAPI"].toInt());
+        }
+        if (deviceSettingsJson.contains("reverseAPIAddress")) {
+            swgSoapySDRInputSettings->setReverseApiAddress(new QString(deviceSettingsJson["reverseAPIAddress"].toString()));
+        }
+        if (deviceSettingsJson.contains("reverseAPIPort")) {
+            swgSoapySDRInputSettings->setReverseApiPort(deviceSettingsJson["reverseAPIPort"].toInt());
+        }
+        if (deviceSettingsJson.contains("reverseAPIDeviceIndex")) {
+            swgSoapySDRInputSettings->setReverseApiDeviceIndex(deviceSettingsJson["reverseAPIDeviceIndex"].toInt());
+        }
+    }
+    else
+    {
+        SWGSDRangel::SWGSoapySDROutputSettings *swgSoapySDROutputSettings = new SWGSDRangel::SWGSoapySDROutputSettings();
+        deviceSettings->setSoapySdrOutputSettings(swgSoapySDROutputSettings);
+        swgSoapySDROutputSettings->init();
+
+        if (deviceSettingsJson.contains("centerFrequency")) {
+            swgSoapySDROutputSettings->setCenterFrequency(deviceSettingsJson["centerFrequency"].toInt());
+        }
+        if (deviceSettingsJson.contains("LOppmTenths")) {
+            swgSoapySDROutputSettings->setLOppmTenths(deviceSettingsJson["LOppmTenths"].toInt());
+        }
+        if (deviceSettingsJson.contains("devSampleRate")) {
+            swgSoapySDROutputSettings->setDevSampleRate(deviceSettingsJson["devSampleRate"].toInt());
+        }
+        if (deviceSettingsJson.contains("log2Interp")) {
+            swgSoapySDROutputSettings->setLog2Interp(deviceSettingsJson["log2Interp"].toInt());
+        }
+        if (deviceSettingsJson.contains("transverterMode")) {
+            swgSoapySDROutputSettings->setTransverterMode(deviceSettingsJson["transverterMode"].toInt());
+        }
+        if (deviceSettingsJson.contains("transverterDeltaFrequency")) {
+            swgSoapySDROutputSettings->setTransverterDeltaFrequency(deviceSettingsJson["transverterDeltaFrequency"].toInt());
+        }
+        if (deviceSettingsJson.contains("antenna")) {
+            swgSoapySDROutputSettings->setAntenna(new QString(deviceSettingsJson["antenna"].toString()));
+        }
+        if (deviceSettingsJson.contains("bandwidth")) {
+            swgSoapySDROutputSettings->setBandwidth(deviceSettingsJson["bandwidth"].toInt());
+        }
+        if (deviceSettingsJson.contains("globalGain")) {
+            swgSoapySDROutputSettings->setGlobalGain(deviceSettingsJson["globalGain"].toInt());
+        }
+        if (deviceSettingsJson.contains("autoGain")) {
+            swgSoapySDROutputSettings->setAutoGain(deviceSettingsJson["autoGain"].toInt());
+        }
+        if (deviceSettingsJson.contains("autoDCCorrection")) {
+            swgSoapySDROutputSettings->setAutoDcCorrection(deviceSettingsJson["autoDCCorrection"].toInt());
+        }
+        if (deviceSettingsJson.contains("autoIQCorrection")) {
+            swgSoapySDROutputSettings->setAutoIqCorrection(deviceSettingsJson["autoIQCorrection"].toInt());
+        }
+        if (deviceSettingsJson.contains("dcCorrection"))
+        {
+            SWGSDRangel::SWGComplex *swgComplex = new SWGSDRangel::SWGComplex;
+            swgSoapySDROutputSettings->setDcCorrection(swgComplex);
+            QJsonObject complexJson = deviceSettingsJson["dcCorrection"].toObject();
+
+            if (complexJson.contains("real")) {
+                swgComplex->setReal(complexJson["real"].toDouble());
+            }
+            if (complexJson.contains("imag")) {
+                swgComplex->setImag(complexJson["imag"].toDouble());
+            }
+        }
+        if (deviceSettingsJson.contains("iqCorrection"))
+        {
+            SWGSDRangel::SWGComplex *swgComplex = new SWGSDRangel::SWGComplex;
+            swgSoapySDROutputSettings->setIqCorrection(swgComplex);
+            QJsonObject complexJson = deviceSettingsJson["iqCorrection"].toObject();
+
+            if (complexJson.contains("real")) {
+                swgComplex->setReal(complexJson["real"].toDouble());
+            }
+            if (complexJson.contains("imag")) {
+                swgComplex->setImag(complexJson["imag"].toDouble());
+            }
+        }
+        if (deviceSettingsJson.contains("useReverseAPI")) {
+            swgSoapySDROutputSettings->setUseReverseApi(deviceSettingsJson["useReverseAPI"].toInt());
+        }
+        if (deviceSettingsJson.contains("reverseAPIAddress")) {
+            swgSoapySDROutputSettings->setReverseApiAddress(new QString(deviceSettingsJson["reverseAPIAddress"].toString()));
+        }
+        if (deviceSettingsJson.contains("reverseAPIPort")) {
+            swgSoapySDROutputSettings->setReverseApiPort(deviceSettingsJson["reverseAPIPort"].toInt());
+        }
+        if (deviceSettingsJson.contains("reverseAPIDeviceIndex")) {
+            swgSoapySDROutputSettings->setReverseApiDeviceIndex(deviceSettingsJson["reverseAPIDeviceIndex"].toInt());
+        }
+    }
+
+    if (deviceSettingsKeys.contains("deviceArgSettings"))
+    {
+        QList<SWGSDRangel::SWGArgValue *> *swgArgSettings = new QList<SWGSDRangel::SWGArgValue *>;
+        QJsonArray argsJson = deviceSettingsJson["deviceArgSettings"].toArray();
+
+        if (inputElseOutput) {
+            deviceSettings->getSoapySdrInputSettings()->setDeviceArgSettings(swgArgSettings);
+        } else {
+            deviceSettings->getSoapySdrOutputSettings()->setDeviceArgSettings(swgArgSettings);
+        }
+
+        for (int i = 0; i < argsJson.count(); i++)
+        {
+            SWGSDRangel::SWGArgValue *argValue = new SWGSDRangel::SWGArgValue();
+            swgArgSettings->append(argValue);
+            QJsonObject argValueJson = argsJson.at(i).toObject();
+            argValue->fromJsonObject(argValueJson);
+        }
+
+        appendSettingsArrayKeys(deviceSettingsJson, "deviceArgSettings", deviceSettingsKeys);
+    }
+
+    if (deviceSettingsKeys.contains("individualGains"))
+    {
+        QList<SWGSDRangel::SWGArgValue *> *swgIndividualGains = new QList<SWGSDRangel::SWGArgValue *>;
+        QJsonArray argsJson = deviceSettingsJson["individualGains"].toArray();
+
+        if (inputElseOutput) {
+            deviceSettings->getSoapySdrInputSettings()->setIndividualGains(swgIndividualGains);
+        } else {
+            deviceSettings->getSoapySdrOutputSettings()->setIndividualGains(swgIndividualGains);
+        }
+
+        for (int i = 0; i < argsJson.count(); i++)
+        {
+            SWGSDRangel::SWGArgValue *argValue = new SWGSDRangel::SWGArgValue();
+            swgIndividualGains->append(argValue);
+            QJsonObject argValueJson = argsJson.at(i).toObject();
+            argValue->fromJsonObject(argValueJson);
+        }
+
+        appendSettingsArrayKeys(deviceSettingsJson, "individualGains", deviceSettingsKeys);
+    }
+
+    if (deviceSettingsKeys.contains("streamArgSettings"))
+    {
+        QList<SWGSDRangel::SWGArgValue *> *swgStreamArgSettings = new QList<SWGSDRangel::SWGArgValue *>;
+        QJsonArray argsJson = deviceSettingsJson["streamArgSettings"].toArray();
+
+        if (inputElseOutput) {
+            deviceSettings->getSoapySdrInputSettings()->setStreamArgSettings(swgStreamArgSettings);
+        } else {
+            deviceSettings->getSoapySdrOutputSettings()->setStreamArgSettings(swgStreamArgSettings);
+        }
+
+        for (int i = 0; i < argsJson.count(); i++)
+        {
+            SWGSDRangel::SWGArgValue *argValue = new SWGSDRangel::SWGArgValue();
+            swgStreamArgSettings->append(argValue);
+            QJsonObject argValueJson = argsJson.at(i).toObject();
+            argValue->fromJsonObject(argValueJson);
+        }
+
+        appendSettingsArrayKeys(deviceSettingsJson, "streamArgSettings", deviceSettingsKeys);
+    }
+
+    if (deviceSettingsKeys.contains("tunableElements"))
+    {
+        QList<SWGSDRangel::SWGArgValue *> *swgTunableElements = new QList<SWGSDRangel::SWGArgValue *>;
+        QJsonArray argsJson = deviceSettingsJson["tunableElements"].toArray();
+
+        if (inputElseOutput) {
+            deviceSettings->getSoapySdrInputSettings()->setTunableElements(swgTunableElements);
+        } else {
+            deviceSettings->getSoapySdrOutputSettings()->setTunableElements(swgTunableElements);
+        }
+
+        for (int i = 0; i < argsJson.count(); i++)
+        {
+            SWGSDRangel::SWGArgValue *argValue = new SWGSDRangel::SWGArgValue();
+            swgTunableElements->append(argValue);
+            QJsonObject argValueJson = argsJson.at(i).toObject();
+            argValue->fromJsonObject(argValueJson);
+        }
+
+        appendSettingsArrayKeys(deviceSettingsJson, "tunableElements", deviceSettingsKeys);
     }
 }

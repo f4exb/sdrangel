@@ -24,7 +24,8 @@ bool ChannelUtils::compareChannelURIs(const QString& registerdChannelURI, const 
 
 QString ChannelUtils::getRegisteredChannelURI(const QString& xChannelURI)
 {
-    if (xChannelURI == "sdrangel.channel.chanalyzerng") {
+    if ((xChannelURI == "sdrangel.channel.chanalyzerng")
+     || (xChannelURI == "org.f4exb.sdrangelove.channel.chanalyzer")) {
         return "sdrangel.channel.chanalyzer";
     } else if (xChannelURI == "de.maintech.sdrangelove.channel.am") {
         return "sdrangel.channel.amdemod";
@@ -34,6 +35,10 @@ QString ChannelUtils::getRegisteredChannelURI(const QString& xChannelURI)
         return "sdrangel.channel.ssbdemod";
     } else if (xChannelURI == "de.maintech.sdrangelove.channel.wfm") {
         return "sdrangel.channel.wfmdemod";
+    } else if (xChannelURI == "sdrangel.channel.udpsrc") {
+        return "sdrangel.channel.udpsink";
+    } else if (xChannelURI == "sdrangel.channeltx.udpsink") {
+        return "sdrangel.channeltx.udpsource";
     } else  {
         return xChannelURI;
     }

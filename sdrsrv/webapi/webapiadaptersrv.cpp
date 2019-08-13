@@ -164,7 +164,36 @@ int WebAPIAdapterSrv::instanceConfigPutPatch(
         webAPIAdapterBase.webapiInitConfig(m_mainCore.m_settings);
     }
 
-    // TODO
+    Preferences newPreferences = m_mainCore.m_settings.getPreferences();
+    webAPIAdapterBase.webapiUpdatePreferences(query.getPreferences(), configKeys.m_preferencesKeys, newPreferences);
+    m_mainCore.m_settings.setPreferences(newPreferences);
+
+    Preset *workingPreset = m_mainCore.m_settings.getWorkingPreset();
+    webAPIAdapterBase.webapiUpdatePreset(force, query.getWorkingPreset(), configKeys.m_workingPresetKeys, workingPreset);
+
+    QList<PresetKeys>::const_iterator presetKeysIt = configKeys.m_presetKeys.begin();
+    int i = 0;
+    for (; presetKeysIt != configKeys.m_presetKeys.end(); ++presetKeysIt, i++)
+    {
+        Preset *newPreset = new Preset(); // created with default values
+        SWGSDRangel::SWGPreset *swgPreset = query.getPresets()->at(i);
+        webAPIAdapterBase.webapiUpdatePreset(force, swgPreset, *presetKeysIt, newPreset);
+        m_mainCore.m_settings.addPreset(newPreset);
+    }
+
+    QList<CommandKeys>::const_iterator commandKeysIt = configKeys.m_commandKeys.begin();
+    i = 0;
+    for (; commandKeysIt != configKeys.m_commandKeys.end(); ++commandKeysIt, i++)
+    {
+        Command *newCommand = new Command(); // created with default values
+        SWGSDRangel::SWGCommand *swgCommand = query.getCommands()->at(i);
+        webAPIAdapterBase.webapiUpdateCommand(swgCommand, *commandKeysIt, *newCommand);
+        m_mainCore.m_settings.addCommand(newCommand);
+    }
+
+    MainCore::MsgApplySettings *msg = MainCore::MsgApplySettings::create();
+    m_mainCore.m_inputMessageQueue.push(msg);
+
     return 200;
 }
 

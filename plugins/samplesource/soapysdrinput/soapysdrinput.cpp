@@ -1440,6 +1440,10 @@ void SoapySDRInput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    for (int i = 0; i < deviceSettingsKeys.count(); i++) {
+        qDebug("SoapySDRInput::webapiUpdateDeviceSettings %s", qPrintable(deviceSettingsKeys.at(i)));
+    }
+
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getSoapySdrInputSettings()->getCenterFrequency();
     }
@@ -1490,6 +1494,11 @@ void SoapySDRInput::webapiUpdateDeviceSettings(
                 QVariant v = webapiVariantFromArgValue(itArg);
                 itSettings.value() = v.toDouble();
             }
+            else
+            {
+                QVariant v = webapiVariantFromArgValue(itArg);
+                settings.m_tunableElements.insert(*itArg->getKey(), v.toDouble());
+            }
         }
     }
 
@@ -1509,6 +1518,11 @@ void SoapySDRInput::webapiUpdateDeviceSettings(
             {
                 QVariant v = webapiVariantFromArgValue(itArg);
                 itSettings.value() = v.toDouble();
+            }
+            else
+            {
+                QVariant v = webapiVariantFromArgValue(itArg);
+                settings.m_individualGains.insert(*itArg->getKey(), v.toDouble());
             }
         }
     }
@@ -1543,6 +1557,8 @@ void SoapySDRInput::webapiUpdateDeviceSettings(
 
             if (itSettings != settings.m_streamArgSettings.end()) {
                 itSettings.value() = webapiVariantFromArgValue(itArg);
+            } else {
+                settings.m_streamArgSettings.insert(*itArg->getKey(), webapiVariantFromArgValue(itArg));
             }
         }
     }
@@ -1557,6 +1573,8 @@ void SoapySDRInput::webapiUpdateDeviceSettings(
 
             if (itSettings != settings.m_deviceArgSettings.end()) {
                 itSettings.value() = webapiVariantFromArgValue(itArg);
+            } else {
+                settings.m_deviceArgSettings.insert(*itArg->getKey(), webapiVariantFromArgValue(itArg));
             }
         }
     }

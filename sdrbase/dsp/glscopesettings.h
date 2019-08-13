@@ -157,6 +157,7 @@ public:
     int m_trigPre;
     std::vector<TraceData> m_tracesData;
     std::vector<TriggerData> m_triggersData;
+    static const double AMPS[27];
 
     GLScopeSettings();
     virtual ~GLScopeSettings();

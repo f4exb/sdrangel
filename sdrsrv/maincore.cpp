@@ -44,6 +44,7 @@ MESSAGE_CLASS_DEFINITION(MainCore::MsgRemoveLastDeviceSet, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgSetDevice, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgAddChannel, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteChannel, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgApplySettings, Message)
 
 MainCore *MainCore::m_instance = 0;
 
@@ -179,6 +180,11 @@ bool MainCore::handleMessage(const Message& cmd)
         deleteChannel(notif.getDeviceSetIndex(), notif.getChannelIndex());
         return true;
     }
+    else if (MsgApplySettings::match(cmd))
+    {
+        applySettings();
+        return true;
+    }
     else
     {
         return false;
@@ -202,6 +208,12 @@ void MainCore::loadSettings()
 	qDebug() << "MainCore::loadSettings";
 
     m_settings.load();
+    m_settings.sortPresets();
+    setLoggingOptions();
+}
+
+void MainCore::applySettings()
+{
     m_settings.sortPresets();
     setLoggingOptions();
 }

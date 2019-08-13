@@ -318,19 +318,6 @@ void WebAPIAdapterBase::webapiUpdatePreset(
 
         if (deviceWebAPIAdapter)
         {
-            if (!force) // In PATCH mode you must find the exact device and deserialize its current settings to be able to patch it
-            {
-                const QByteArray *config = preset->findDeviceConfig(deviceId, deviceSerial, deviceSequence);
-
-                if (!config) {
-                    continue;
-                }
-
-                if (!deviceWebAPIAdapter->deserialize(*config)) {
-                    continue;
-                }
-            }
-
             deviceWebAPIAdapter->webapiSettingsPutPatch(
                 force,
                 deviceKeysIt->m_deviceKeys,

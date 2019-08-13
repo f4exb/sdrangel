@@ -270,6 +270,20 @@ private:
         { }
     };
 
+    class MsgApplySettings : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgApplySettings* create() {
+            return new MsgApplySettings();
+        }
+
+    private:
+        MsgApplySettings() :
+            Message()
+        { }
+    };
+
     static MainCore *m_instance;
     MainSettings m_settings;
     int m_masterTabIndex;
@@ -287,6 +301,7 @@ private:
     WebAPIAdapterSrv *m_apiAdapter;
 
 	void loadSettings();
+    void applySettings();
 	void loadPresetSettings(const Preset* preset, int tabIndex);
 	void savePresetSettings(Preset* preset, int tabIndex);
     void setLoggingOptions();

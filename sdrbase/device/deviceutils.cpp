@@ -26,8 +26,11 @@ QString DeviceUtils::getRegisteredDeviceURI(const QString& xDeviceURI)
 {
     if (xDeviceURI == "sdrangel.samplesource.bladerf") {
         return "sdrangel.samplesource.bladerf1input";
-    } else if (xDeviceURI == "sdrangel.samplesource.bladerf1output") {
+    } else if ((xDeviceURI == "sdrangel.samplesource.bladerf1output")
+            || (xDeviceURI == "sdrangel.samplesource.bladerfoutput")) {
         return "sdrangel.samplesink.bladerf1output";
+    } else if (xDeviceURI == "sdrangel.samplesource.bladerf2output") {
+        return "sdrangel.samplesink.bladerf2output";
     } else if (xDeviceURI == "sdrangel.samplesource.filesource") {
         return "sdrangel.samplesource.fileinput";
     } else if (xDeviceURI == "sdrangel.samplesource.hackrfoutput") {
