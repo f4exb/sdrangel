@@ -121,10 +121,10 @@ void DSPDeviceMIMOEngine::setMIMOSequence(int sequence)
 	m_sampleMIMOSequence = sequence;
 }
 
-void DSPDeviceMIMOEngine::addSourceStream(bool connect)
+void DSPDeviceMIMOEngine::addSourceStream()
 {
 	qDebug("DSPDeviceMIMOEngine::addSourceStream");
-    AddSourceStream cmd(connect);
+    AddSourceStream cmd;
     m_syncMessenger.sendWait(cmd);
 }
 
@@ -135,10 +135,10 @@ void DSPDeviceMIMOEngine::removeLastSourceStream()
     m_syncMessenger.sendWait(cmd);
 }
 
-void DSPDeviceMIMOEngine::addSinkStream(bool connect)
+void DSPDeviceMIMOEngine::addSinkStream()
 {
 	qDebug("DSPDeviceMIMOEngine::addSinkStream");
-    AddSinkStream cmd(connect);
+    AddSinkStream cmd;
     m_syncMessenger.sendWait(cmd);
 }
 
@@ -252,94 +252,8 @@ QString DSPDeviceMIMOEngine::deviceDescription()
  * Routes samples from device source FIFO to sink channels that are registered for the FIFO
  * Routes samples from source channels registered for the FIFO to the device sink FIFO
  */
-void DSPDeviceMIMOEngine::work(int nbWriteSamples)
-{
-    (void) nbWriteSamples;
-    // Sources
-    for (unsigned int isource = 0; isource < m_deviceSampleMIMO->getNbSourceStreams(); isource++)
-    {
-        SampleSinkFifo* sampleFifo = m_deviceSampleMIMO->getSampleSinkFifo(isource); // sink FIFO is for Rx
-	    int samplesDone = 0;
-	    bool positiveOnly = false;
-
-        while ((sampleFifo->fill() > 0) && (m_inputMessageQueue.size() == 0) && (samplesDone < m_deviceSampleMIMO->getSourceSampleRate(isource)))
-        {
-            SampleVector::iterator part1begin;
-            SampleVector::iterator part1end;
-            SampleVector::iterator part2begin;
-            SampleVector::iterator part2end;
-
-            std::size_t count = sampleFifo->readBegin(sampleFifo->fill(), &part1begin, &part1end, &part2begin, &part2end);
-
-            // first part of FIFO data
-            if (part1begin != part1end)
-            {
-                // TODO: DC and IQ corrections
-
-                // feed data to direct sinks
-                if (isource < m_basebandSampleSinks.size())
-                {
-                    for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks[isource].begin(); it != m_basebandSampleSinks[isource].end(); ++it) {
-                        (*it)->feed(part1begin, part1end, positiveOnly);
-                    }
-                }
-
-                // possibly feed data to spectrum sink
-                if ((m_spectrumSink) && (m_spectrumInputSourceElseSink) && (isource == m_spectrumInputIndex)) {
-                    m_spectrumSink->feed(part1begin, part1end, positiveOnly);
-                }
-
-                // feed data to threaded sinks
-                if (isource < m_threadedBasebandSampleSinks.size())
-                {
-                    for (ThreadedBasebandSampleSinks::const_iterator it = m_threadedBasebandSampleSinks[isource].begin(); it != m_threadedBasebandSampleSinks[isource].end(); ++it) {
-                        (*it)->feed(part1begin, part1end, positiveOnly);
-                    }
-                }
-            }
-
-       		// second part of FIFO data (used when block wraps around)
-            if(part2begin != part2end)
-            {
-                // TODO: DC and IQ corrections
-
-                // feed data to direct sinks
-                if (isource < m_basebandSampleSinks.size())
-                {
-                    for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks[isource].begin(); it != m_basebandSampleSinks[isource].end(); ++it) {
-                        (*it)->feed(part2begin, part2end, positiveOnly);
-                    }
-                }
-
-                // possibly feed data to spectrum sink
-                if ((m_spectrumSink) && (m_spectrumInputSourceElseSink) && (isource == m_spectrumInputIndex)) {
-                    m_spectrumSink->feed(part2begin, part2end, positiveOnly);
-                }
-
-                // feed data to threaded sinks
-                if (isource < m_threadedBasebandSampleSinks.size())
-                {
-                    for (ThreadedBasebandSampleSinks::const_iterator it = m_threadedBasebandSampleSinks[isource].begin(); it != m_threadedBasebandSampleSinks[isource].end(); ++it) {
-                        (*it)->feed(part2begin, part2end, positiveOnly);
-                    }
-                }
-            }
-
-            // adjust FIFO pointers
-            sampleFifo->readCommit((unsigned int) count);
-            samplesDone += count;
-        } // while stream FIFO
-    } // for stream source
-
-    // TODO: sinks
-}
-
 void DSPDeviceMIMOEngine::workSampleSink(unsigned int sinkIndex)
 {
-    if (m_state != StRunning) {
-        return;
-    }
-
 	SampleSinkFifo* sampleFifo = m_deviceSampleMIMO->getSampleSinkFifo(sinkIndex);
 	int samplesDone = 0;
 	bool positiveOnly = false;
@@ -622,11 +536,21 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoError(const QString& errorMe
 	return StError;
 }
 
-void DSPDeviceMIMOEngine::handleData()
+void DSPDeviceMIMOEngine::handleDataRxSync()
 {
 	if (m_state == StRunning)
-	{
-		work(0); // TODO: implement Tx side
+    {
+        // Sources (move their samples into sinks)
+        for (unsigned int isource = 0; isource < m_deviceSampleMIMO->getNbSourceStreams(); isource++) {
+            workSampleSink(isource);
+        }
+	}
+}
+
+void DSPDeviceMIMOEngine::handleDataRxAsync(unsigned int sinkIndex)
+{
+	if (m_state == StRunning) {
+		workSampleSink(sinkIndex);
 	}
 }
 
@@ -634,34 +558,52 @@ void DSPDeviceMIMOEngine::handleSetMIMO(DeviceSampleMIMO* mimo)
 {
     m_deviceSampleMIMO = mimo;
 
-    if (mimo)
+    if (!mimo) { // Early leave
+        return;
+    }
+
+    for (int i = 0; i < m_deviceSampleMIMO->getNbSinkFifos(); i++)
     {
-        if ((m_sampleSinkConnectionIndexes.size() == 1) && (m_sampleSourceConnectionIndexes.size() == 0)) // true MIMO (synchronous FIFOs)
+        m_basebandSampleSinks.push_back(BasebandSampleSinks());
+        m_threadedBasebandSampleSinks.push_back(ThreadedBasebandSampleSinks());
+        m_sourcesCorrections.push_back(SourceCorrection());
+    }
+
+    for (int i = 0; i < m_deviceSampleMIMO->getNbSourceFifos(); i++) {
+        m_threadedBasebandSampleSources.push_back(ThreadedBasebandSampleSources());
+    }
+
+    if (m_deviceSampleMIMO->getMIMOType() == DeviceSampleMIMO::MIMOHalfSynchronous) // synchronous FIFOs on Rx and not with Tx
+    {
+        qDebug("DSPDeviceMIMOEngine::handleSetMIMO: synchronous sources set %s", qPrintable(mimo->getDeviceDescription()));
+        // connect(m_deviceSampleMIMO->getSampleSinkFifo(m_sampleSinkConnectionIndexes[0]), SIGNAL(dataReady()), this, SLOT(handleData()), Qt::QueuedConnection);
+        for (unsigned int isink = 0; isink < m_deviceSampleMIMO->getNbSinkFifos(); isink++)
         {
-            qDebug("DSPDeviceMIMOEngine::handleSetMIMO: synchronous set %s", qPrintable(mimo->getDeviceDescription()));
-            // connect(m_deviceSampleMIMO->getSampleSinkFifo(m_sampleSinkConnectionIndexes[0]), SIGNAL(dataReady()), this, SLOT(handleData()), Qt::QueuedConnection);
+            qDebug("DSPDeviceMIMOEngine::handleSetMIMO: synchronous sources set %s channel %u",
+                qPrintable(mimo->getDeviceDescription()), isink);
             QObject::connect(
-                m_deviceSampleMIMO->getSampleSinkFifo(m_sampleSinkConnectionIndexes[0]),
+                m_deviceSampleMIMO->getSampleSinkFifo(isink),
                 &SampleSinkFifo::dataReady,
                 this,
-                [=](){ this->handleData(); }, // lambda function is not strictly needed here
+                [=](){ this->handleDataRxSync(); }, // lambda function is not strictly needed here
                 Qt::QueuedConnection
             );
+            break; // use first available FIFO for sync signal
         }
-        else if (m_sampleSinkConnectionIndexes.size() != 0) // asynchronous FIFOs
+    }
+    else if (m_deviceSampleMIMO->getMIMOType() == DeviceSampleMIMO::MIMOAsynchronous) // asynchronous FIFOs
+    {
+        for (unsigned int isink = 0; isink < m_deviceSampleMIMO->getNbSinkFifos(); isink++)
         {
-            for (unsigned int isink = 0; isink < m_sampleSinkConnectionIndexes.size(); isink++)
-            {
-                qDebug("DSPDeviceMIMOEngine::handleSetMIMO: asynchronous sources set %s channel %u",
-                    qPrintable(mimo->getDeviceDescription()), isink);
-                QObject::connect(
-                    m_deviceSampleMIMO->getSampleSinkFifo(m_sampleSinkConnectionIndexes[isink]),
-                    &SampleSinkFifo::dataReady,
-                    this,
-                    [=](){ this->workSampleSink(isink); },
-                    Qt::QueuedConnection
-                );
-            }
+            qDebug("DSPDeviceMIMOEngine::handleSetMIMO: asynchronous sources set %s channel %u",
+                qPrintable(mimo->getDeviceDescription()), isink);
+            QObject::connect(
+                m_deviceSampleMIMO->getSampleSinkFifo(isink),
+                &SampleSinkFifo::dataReady,
+                this,
+                [=](){ this->handleDataRxAsync(isink); },
+                Qt::QueuedConnection
+            );
         }
     }
 
@@ -705,13 +647,8 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
     else if (AddSourceStream::match(*message))
     {
         m_basebandSampleSinks.push_back(BasebandSampleSinks());
-        int currentIndex = m_threadedBasebandSampleSinks.size();
         m_threadedBasebandSampleSinks.push_back(ThreadedBasebandSampleSinks());
         m_sourcesCorrections.push_back(SourceCorrection());
-
-        if (((AddSourceStream *) message)->getConnect()) {
-            m_sampleSinkConnectionIndexes.push_back(currentIndex);
-        }
     }
     else if (RemoveLastSourceStream::match(*message))
     {
@@ -720,12 +657,7 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
     }
     else if (AddSinkStream::match(*message))
     {
-        int currentIndex = m_threadedBasebandSampleSources.size();
         m_threadedBasebandSampleSources.push_back(ThreadedBasebandSampleSources());
-
-        if (((AddSinkStream *) message)->getConnect()) {
-            m_sampleSourceConnectionIndexes.push_back(currentIndex);
-        }
     }
     else if (RemoveLastSinkStream::match(*message))
     {

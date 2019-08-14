@@ -58,10 +58,10 @@ DeviceAPI::~DeviceAPI()
 {
 }
 
-void DeviceAPI::addSourceStream(bool connect)
+void DeviceAPI::addSourceStream()
 {
     if (m_deviceMIMOEngine) {
-        m_deviceMIMOEngine->addSourceStream(connect);
+        m_deviceMIMOEngine->addSourceStream();
     }
 }
 
@@ -72,10 +72,10 @@ void DeviceAPI::removeLastSourceStream()
     }
 }
 
-void DeviceAPI::addSinkStream(bool connect)
+void DeviceAPI::addSinkStream()
 {
     if (m_deviceMIMOEngine) {
-        m_deviceMIMOEngine->addSinkStream(connect);
+        m_deviceMIMOEngine->addSinkStream();
     }
 }
 

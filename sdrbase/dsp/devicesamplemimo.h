@@ -37,6 +37,13 @@ namespace SWGSDRangel
 class SDRBASE_API DeviceSampleMIMO : public QObject {
 	Q_OBJECT
 public:
+    enum MIMOType //!< Type of MIMO
+    {
+        MIMOAsynchronous,    //!< All streams are asynchronous (false MIMO)
+        MIMOHalfSynchronous, //!< MI + MO (synchronous inputs on one side and synchronous outputs on the other side)
+        MIMOFullSynchronous, //!< True MIMO (all streams synchronous)
+    };
+
     typedef enum {
         FC_POS_INFRA = 0,
         FC_POS_SUPRA,
@@ -118,6 +125,7 @@ public:
         return 501;
     }
 
+    MIMOType getMIMOType() const { return m_mimoType; }
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual void setMessageQueueToGUI(MessageQueue *queue) = 0; // pure virtual so that child classes must have to deal with this
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
@@ -136,6 +144,7 @@ protected slots:
 	void handleInputMessages();
 
 protected:
+    MIMOType m_mimoType;
     std::vector<SampleSourceFifo> m_sampleSourceFifos; //!< Tx FIFOs
     std::vector<SampleSinkFifo> m_sampleSinkFifos;     //!< Rx FIFOs
 	MessageQueue m_inputMessageQueue; //!< Input queue to the sink

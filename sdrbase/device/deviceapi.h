@@ -67,9 +67,9 @@ public:
     ~DeviceAPI();
 
     // MIMO Engine baseband / channel lists management
-    void addSourceStream(bool connect);
+    void addSourceStream();
     void removeLastSourceStream();
-    void addSinkStream(bool connect);
+    void addSinkStream();
     void removeLastSinkStream();
 
     void addAncillarySink(BasebandSampleSink* sink, unsigned int index = 0);       //!< Adds a sink to receive full baseband and that is not a channel (e.g. spectrum)

@@ -49,11 +49,10 @@ TestMI::TestMI(DeviceAPI *deviceAPI) :
 	m_running(false),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
+    m_mimoType = MIMOAsynchronous;
+    m_sampleSinkFifos.push_back(SampleSinkFifo(96000 * 4));
+    m_sampleSinkFifos.push_back(SampleSinkFifo(96000 * 4));
     m_deviceAPI->setNbSourceStreams(2);
-    m_deviceAPI->addSourceStream(true); // Add a new source stream data set in the engine - asynchronous handling of FIFOs
-    m_deviceAPI->addSourceStream(true); // Add a new source stream data set in the engine - asynchronous handling of FIFOs
-    m_sampleSinkFifos.push_back(SampleSinkFifo(96000 * 4));
-    m_sampleSinkFifos.push_back(SampleSinkFifo(96000 * 4));
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }

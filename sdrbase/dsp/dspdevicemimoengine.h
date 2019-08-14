@@ -63,11 +63,6 @@ public:
 
     class AddSourceStream : public Message {
         MESSAGE_CLASS_DECLARATION
-    public:
-        AddSourceStream(bool connect) : Message(), m_connect(connect) { }
-        bool getConnect() const { return m_connect; }
-    private:
-        bool m_connect;
     };
 
     class RemoveLastSourceStream : public Message {
@@ -76,11 +71,6 @@ public:
 
     class AddSinkStream : public Message {
         MESSAGE_CLASS_DECLARATION
-    public:
-        AddSinkStream(bool connect) : Message(), m_connect(connect) { }
-        bool getConnect() const { return m_connect; }
-    private:
-        bool m_connect;
     };
 
     class RemoveLastSinkStream : public Message {
@@ -256,9 +246,9 @@ public:
 	void setMIMOSequence(int sequence); //!< Set the sample MIMO sequence in type
     uint getUID() const { return m_uid; }
 
-    void addSourceStream(bool connect);
+    void addSourceStream();
     void removeLastSourceStream();
-    void addSinkStream(bool connect);
+    void addSinkStream();
     void removeLastSinkStream();
 
 	void addChannelSource(ThreadedBasebandSampleSource* source, int index = 0);    //!< Add a channel source that will run on its own thread
@@ -348,11 +338,9 @@ private:
 
 	typedef std::list<ThreadedBasebandSampleSink*> ThreadedBasebandSampleSinks;
 	std::vector<ThreadedBasebandSampleSinks> m_threadedBasebandSampleSinks; //!< channel sample sinks on their own thread (per input stream)
-    std::vector<int> m_sampleSinkConnectionIndexes;
 
 	typedef std::list<ThreadedBasebandSampleSource*> ThreadedBasebandSampleSources;
 	std::vector<ThreadedBasebandSampleSources> m_threadedBasebandSampleSources; //!< channel sample sources on their own threads (per output stream)
-    std::vector<int> m_sampleSourceConnectionIndexes;
 
     std::vector<SourceCorrection> m_sourcesCorrections;
 
@@ -361,7 +349,7 @@ private:
     unsigned int m_spectrumInputIndex;  //!< Index of the stream to be used as spectrum sink input
 
   	void run();
-	void work(int nbWriteSamples); //!< transfer samples if in running state
+    void workSampleSink(unsigned int sinkIndex); //!< transfer samples of one sink (asynchronously)
 
 	State gotoIdle();     //!< Go to the idle state
 	State gotoInit();     //!< Go to the acquisition init state from idle
@@ -372,8 +360,8 @@ private:
    	void iqCorrections(SampleVector::iterator begin, SampleVector::iterator end, int isource, bool imbalanceCorrection);
 
 private slots:
-	void handleData();                 //!< Handle data when samples have to be processed
-    void workSampleSink(unsigned int sinkIndex);
+	void handleDataRxSync();           //!< Handle data when Rx samples have to be processed synchronously
+	void handleDataRxAsync(unsigned int sinkIndex); //!< Handle data when Rx samples have to be processed asynchronously
 	void handleSynchronousMessages();  //!< Handle synchronous messages with the thread
 	void handleInputMessages();        //!< Handle input message queue
 	void handleForwardToSpectrumSink(int nbSamples);
