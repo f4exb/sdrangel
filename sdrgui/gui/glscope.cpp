@@ -191,6 +191,7 @@ void GLScope::initializeGL()
 
 void GLScope::resizeGL(int width, int height)
 {
+    QMutexLocker mutexLocker(&m_mutex);
     QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
     glFunctions->glViewport(0, 0, width, height);
     m_configChanged = true;
@@ -198,7 +199,7 @@ void GLScope::resizeGL(int width, int height)
 
 void GLScope::paintGL()
 {
-    if (!m_mutex.tryLock(0)) {
+    if (!m_mutex.tryLock(2)) {
         return;
     }
 
@@ -949,6 +950,7 @@ void GLScope::paintGL()
 
 void GLScope::setSampleRate(int sampleRate)
 {
+    QMutexLocker mutexLocker(&m_mutex);
     m_sampleRate = sampleRate;
     m_configChanged = true;
     update();
@@ -957,6 +959,7 @@ void GLScope::setSampleRate(int sampleRate)
 
 void GLScope::setTimeBase(int timeBase)
 {
+    QMutexLocker mutexLocker(&m_mutex);
     m_timeBase = timeBase;
     m_configChanged = true;
     update();
@@ -964,6 +967,7 @@ void GLScope::setTimeBase(int timeBase)
 
 void GLScope::setTriggerPre(uint32_t triggerPre, bool emitSignal)
 {
+    QMutexLocker mutexLocker(&m_mutex);
     m_triggerPre = triggerPre;
     m_configChanged = true;
     update();
@@ -975,6 +979,7 @@ void GLScope::setTriggerPre(uint32_t triggerPre, bool emitSignal)
 
 void GLScope::setTimeOfsProMill(int timeOfsProMill)
 {
+    QMutexLocker mutexLocker(&m_mutex);
     m_timeOfsProMill = timeOfsProMill;
     m_configChanged = true;
     update();
@@ -982,6 +987,7 @@ void GLScope::setTimeOfsProMill(int timeOfsProMill)
 
 void GLScope::setFocusedTraceIndex(uint32_t traceIndex)
 {
+    QMutexLocker mutexLocker(&m_mutex);
     m_focusedTraceIndex = traceIndex;
     m_configChanged = true;
     update();
@@ -989,6 +995,7 @@ void GLScope::setFocusedTraceIndex(uint32_t traceIndex)
 
 void GLScope::setDisplayMode(DisplayMode displayMode)
 {
+    QMutexLocker mutexLocker(&m_mutex);
     m_displayMode = displayMode;
     m_configChanged = true;
     update();
@@ -996,6 +1003,7 @@ void GLScope::setDisplayMode(DisplayMode displayMode)
 
 void GLScope::setTraceSize(int traceSize, bool emitSignal)
 {
+    QMutexLocker mutexLocker(&m_mutex);
     m_traceSize = traceSize;
     m_configChanged = true;
     update();
@@ -1007,6 +1015,7 @@ void GLScope::setTraceSize(int traceSize, bool emitSignal)
 
 void GLScope::updateDisplay()
 {
+    QMutexLocker mutexLocker(&m_mutex);
     m_configChanged = true;
     update();
 }
