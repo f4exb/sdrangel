@@ -52,7 +52,7 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
 	SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_inputSampleRate, m_settings.m_bandwidth / m_inputSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt(m_settings.m_bandwidth / m_inputSampleRate, 2*ssbFftLen);
 	RRCFilter = new fftfilt(m_settings.m_bandwidth / m_inputSampleRate, 2*ssbFftLen);
-	m_corr = new fftcorr(8*ssbFftLen); // 8k for 4k effective samples
+	m_corr = new fftcorr2(8*ssbFftLen); // 8k for 4k effective samples
 	m_pll.computeCoefficients(0.002f, 0.5f, 10.0f); // bandwidth, damping factor, loop gain
 
 	applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);
@@ -73,6 +73,7 @@ ChannelAnalyzer::~ChannelAnalyzer()
     delete SSBFilter;
     delete DSBFilter;
     delete RRCFilter;
+    delete m_corr;
 }
 
 void ChannelAnalyzer::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)

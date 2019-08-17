@@ -25,7 +25,7 @@
 #include "channel/channelapi.h"
 #include "dsp/interpolator.h"
 #include "dsp/ncof.h"
-#include "dsp/fftcorr.h"
+#include "dsp/fftcorr2.h"
 #include "dsp/fftfilt.h"
 #include "dsp/phaselockcomplex.h"
 #include "dsp/freqlockcomplex.h"
@@ -181,7 +181,7 @@ private:
 	fftfilt* SSBFilter;
 	fftfilt* DSBFilter;
 	fftfilt* RRCFilter;
-	fftcorr* m_corr;
+	fftcorr2* m_corr;
 
 	BasebandSampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;
@@ -209,7 +209,8 @@ private:
 	            break;
 	        case ChannelAnalyzerSettings::InputAutoCorr:
 	        {
-	            std::complex<float> a = m_corr->run(s/(SDR_RX_SCALEF/768.0f), 0);
+	            //std::complex<float> a = m_corr->run(s/(SDR_RX_SCALEF/768.0f), 0);
+                std::complex<float> a = m_corr->run(s/SDR_RX_SCALEF, 0);
 
                 if (m_settings.m_ssb & !m_usb) { // invert spectrum for LSB
                     m_sampleBuffer.push_back(Sample(a.imag(), a.real()));
