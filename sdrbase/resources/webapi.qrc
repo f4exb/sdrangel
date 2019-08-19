@@ -30,6 +30,7 @@
         <file>webapi/doc/swagger/include/GLScope.yaml</file>
         <file>webapi/doc/swagger/include/GLSpectrum.yaml</file>
         <file>webapi/doc/swagger/include/HackRF.yaml</file>
+        <file>webapi/doc/swagger/include/Interferometer.yaml</file>
         <file>webapi/doc/swagger/include/LimeSdr.yaml</file>
         <file>webapi/doc/swagger/include/KiwiSDR.yaml</file>
         <file>webapi/doc/swagger/include/LocalInput.yaml</file>

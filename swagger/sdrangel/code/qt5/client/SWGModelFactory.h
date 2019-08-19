@@ -89,6 +89,7 @@
 #include "SWGInstanceConfigResponse.h"
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGInstanceSummaryResponse.h"
+#include "SWGInterferometerSettings.h"
 #include "SWGKiwiSDRReport.h"
 #include "SWGKiwiSDRSettings.h"
 #include "SWGLimeSdrInputReport.h"
@@ -395,6 +396,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGInstanceSummaryResponse").compare(type) == 0) {
       return new SWGInstanceSummaryResponse();
+    }
+    if(QString("SWGInterferometerSettings").compare(type) == 0) {
+      return new SWGInterferometerSettings();
     }
     if(QString("SWGKiwiSDRReport").compare(type) == 0) {
       return new SWGKiwiSDRReport();

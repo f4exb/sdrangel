@@ -34,6 +34,7 @@
 #include "SWGFreeDVDemodSettings.h"
 #include "SWGFreeDVModSettings.h"
 #include "SWGFreqTrackerSettings.h"
+#include "SWGInterferometerSettings.h"
 #include "SWGLocalSinkSettings.h"
 #include "SWGLocalSourceSettings.h"
 #include "SWGNFMDemodSettings.h"
@@ -113,6 +114,9 @@ public:
 
     SWGFreqTrackerSettings* getFreqTrackerSettings();
     void setFreqTrackerSettings(SWGFreqTrackerSettings* freq_tracker_settings);
+
+    SWGInterferometerSettings* getInterferometerSettings();
+    void setInterferometerSettings(SWGInterferometerSettings* interferometer_settings);
 
     SWGNFMDemodSettings* getNfmDemodSettings();
     void setNfmDemodSettings(SWGNFMDemodSettings* nfm_demod_settings);
@@ -201,6 +205,9 @@ private:
 
     SWGFreqTrackerSettings* freq_tracker_settings;
     bool m_freq_tracker_settings_isSet;
+
+    SWGInterferometerSettings* interferometer_settings;
+    bool m_interferometer_settings_isSet;
 
     SWGNFMDemodSettings* nfm_demod_settings;
     bool m_nfm_demod_settings_isSet;

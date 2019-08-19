@@ -1,0 +1,16 @@
+InterferometerSettings:
+  description: Interferometer
+  properties:
+    inputFrequencyOffset:
+      type: integer
+    correlationType:
+      description: see InterferometerSettings::CorrelationType
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    spectrumConfig:
+      $ref: "http://localhost:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+    scopeConfig:
+      $ref: "http://localhost:8081/api/swagger/include/GLScope.yaml#/GLScope"
