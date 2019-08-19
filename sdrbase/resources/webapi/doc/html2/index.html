@@ -2226,6 +2226,9 @@ margin-bottom: 20px;
     "FreqTrackerSettings" : {
       "$ref" : "#/definitions/FreqTrackerSettings"
     },
+    "InterferometerSettings" : {
+      "$ref" : "#/definitions/InterferometerSettings"
+    },
     "NFMDemodSettings" : {
       "$ref" : "#/definitions/NFMDemodSettings"
     },
@@ -3856,6 +3859,30 @@ margin-bottom: 20px;
     }
   },
   "description" : "Summarized information about this SDRangel instance"
+};
+            defs.InterferometerSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer"
+    },
+    "correlationType" : {
+      "type" : "integer",
+      "description" : "see InterferometerSettings::CorrelationType"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
+    },
+    "scopeConfig" : {
+      "$ref" : "#/definitions/GLScope"
+    }
+  },
+  "description" : "Interferometer"
 };
             defs.KiwiSDRReport = {
   "properties" : {
