@@ -26,6 +26,8 @@ SDRANGEL_API_PORT = 8091
 TRACKER_OFFSET = 0
 TRACKER_DEVICE = 0
 TRACKING_DICT = {}
+TRACKER_FREQUENCY = None
+XVTR_DEVICE = None
 
 app = Flask(__name__)
 
@@ -35,9 +37,11 @@ def getInputOptions():
 # ----------------------------------------------------------------------
     parser = argparse.ArgumentParser(description="Manages PTT from an SDRangel instance automatically")
     parser.add_argument("-A", "--address", dest="addr", help="listening address (default 0.0.0.0)", metavar="IP", type=str)
-    parser.add_argument("-P", "--port", dest="port", help="listening port (default 8000)", metavar="PORT", type=int)
+    parser.add_argument("-P", "--port", dest="port", help="listening port (default 8888)", metavar="PORT", type=int)
     parser.add_argument("-a", "--address-sdr", dest="sdrangel_address", help="SDRangel REST API address (defaults to calling address)", metavar="ADDRESS", type=str)
     parser.add_argument("-p", "--port-sdr", dest="sdrangel_port", help="SDRangel REST API port (default 8091)", metavar="PORT", type=int)
+    parser.add_argument("-f", "--tracker-frequency", dest="tracker_frequency", help="Absolute frequency the tracker should aim at (Hz, optional)", metavar="FREQ", type=int)
+    parser.add_argument("-d", "--transverter-device", dest="transverter_device", help="Transverter device index to use for tracker frequency correction (optional)", metavar="DEVICE", type=int)
 
     options = parser.parse_args()
 
@@ -48,7 +52,7 @@ def getInputOptions():
     if options.sdrangel_port == None:
         options.sdrangel_port = 8091
 
-    return options.addr, options.port, options.sdrangel_address, options.sdrangel_port
+    return options.addr, options.port, options.sdrangel_address, options.sdrangel_port, options.tracker_frequency, options.transverter_device
 
 # ======================================================================
 def get_sdrangel_ip(request):
@@ -78,7 +82,7 @@ def gen_dict_extract(key, var):
                         yield result
 
 # ======================================================================
-def update_frequency_setting(request_content, frequency):
+def update_frequency_setting(request_content, frequency_key, frequency):
     """ Finds the channel settings key that contains the inputFrequencyOffset key
         and replace it with a single inputFrequencyOffset key with new frequency
     """
@@ -86,11 +90,34 @@ def update_frequency_setting(request_content, frequency):
     for k in request_content:
         setting_item = request_content[k]
         if isinstance(setting_item, dict):
-            if 'inputFrequencyOffset' in setting_item:
+            if frequency_key in setting_item:
                 setting_item.update({
-                    'inputFrequencyOffset': frequency
+                    frequency_key: frequency
                 })
 
+# ======================================================================
+def get_device_frequency(sdrangel_ip, sdrangel_port, device_index):
+    """ Obtain the device center frequency from either the settings or
+        the report
+    """
+# ----------------------------------------------------------------------
+    base_url = f'http://{sdrangel_ip}:{sdrangel_port}/sdrangel'
+    device_frequency = None
+    # get frequency from settings
+    r = requests.get(url=base_url + f'/deviceset/{device_index}/device/settings')
+    if r.status_code // 100 == 2:
+        device_content = r.json()
+        for freq in gen_dict_extract('centerFrequency', device_content):
+            device_frequency = freq
+    # get frequency from report
+    if device_frequency is None:
+        r = requests.get(url=base_url + f'/deviceset/{device_index}/device/report')
+        if r.status_code // 100 != 2:
+            return None
+        device_content = r.json()
+        for freq in gen_dict_extract('centerFrequency', device_content):
+            device_frequency = freq
+    return device_frequency
 
 # ======================================================================
 def adjust_channels(sdrangel_ip, sdrangel_port):
@@ -107,7 +134,7 @@ def adjust_channels(sdrangel_ip, sdrangel_port):
         tracking_item = TRACKING_DICT[k]
         frequency_correction = TRACKER_OFFSET - tracking_item['trackerFrequency']
         frequency = tracking_item['channelFrequency'] + frequency_correction
-        update_frequency_setting(tracking_item['requestContent'], frequency)
+        update_frequency_setting(tracking_item['requestContent'], 'inputFrequencyOffset', frequency)
         r = requests.patch(url=base_url + f'/deviceset/{device_index}/channel/{channel_index}/settings', json=tracking_item['requestContent'])
         if r.status_code // 100 != 2:
             remove_keys.append(k)
@@ -123,6 +150,44 @@ def adjust_channels(sdrangel_ip, sdrangel_port):
             channel_index = k[1]
             print(f'SDRangel: {sdrangel_ip}:{sdrangel_port} Removed {channel_type} [{device_index}:{channel_index}]')
 
+# ======================================================================
+def adjust_xvtr(sdrangel_ip, sdrangel_port, tracker_device_index, tracker_channel_index, tracker_content, tracker_offset):
+    """ Adjust transverter frequency so that the frequency tracker absolute frequency is loosely locked to the
+        carrier it is supposed to track
+    """
+# ----------------------------------------------------------------------
+    global TRACKER_OFFSET
+    base_url = f'http://{sdrangel_ip}:{sdrangel_port}/sdrangel'
+    correction = 0
+    tracker_device_frequency = get_device_frequency(sdrangel_ip, sdrangel_port, tracker_device_index)
+    # get correction from report
+    if tracker_device_frequency is None:
+        print(f'SDRangel::adjust_xvtr: {sdrangel_ip}:{SDRANGEL_API_PORT} get tracker device {tracker_device_index} frequency failed')
+        return
+    tracker_frequency = tracker_device_frequency + tracker_offset
+    correction = TRACKER_FREQUENCY - tracker_frequency
+    # do not correct if correction is too small
+    if correction > -1000 and correction < 1000:
+        return
+    # apply correction
+    r = requests.get(url=base_url + f'/deviceset/{XVTR_DEVICE}/device/settings')
+    if r.status_code // 100 != 2:
+        print(f'SDRangel::adjust_xvtr: {sdrangel_ip}:{SDRANGEL_API_PORT} get transverter device {XVTR_DEVICE} settings failed')
+        return
+    device_content = r.json()
+    for xvtr_freq in gen_dict_extract('transverterDeltaFrequency', device_content):
+        # device
+        update_frequency_setting(device_content, 'transverterDeltaFrequency', xvtr_freq + correction)
+        r = requests.patch(url=base_url + f'/deviceset/{XVTR_DEVICE}/device/settings', json=device_content)
+        if r.status_code // 100 != 2:
+            print(f'SDRangel::adjust_xvtr: {sdrangel_ip}:{SDRANGEL_API_PORT} transverter device {XVTR_DEVICE} adjust failed')
+            return
+        # tracker
+        TRACKER_OFFSET = tracker_offset + correction
+        update_frequency_setting(tracker_content, 'inputFrequencyOffset', tracker_offset + correction)
+        r = requests.patch(url=base_url + f'/deviceset/{tracker_device_index}/channel/{tracker_channel_index}/settings', json=tracker_content)
+        if r.status_code // 100 != 2:
+            print(f'SDRangel::adjust_xvtr: {sdrangel_ip}:{SDRANGEL_API_PORT} tracker [{tracker_device_index}:{tracker_channel_index}] adjust failed')
 
 # ======================================================================
 def register_channel(device_index, channel_index, channel_frequency, request_content):
@@ -171,6 +236,8 @@ def channel_settings(deviceset_index, channel_index):
             TRACKER_OFFSET = freq_offset
             TRACKER_DEVICE = orig_device_index
             adjust_channels(sdrangel_ip, SDRANGEL_API_PORT)
+            if TRACKER_FREQUENCY is not None and XVTR_DEVICE is not None: # optionally lock tracker to the beacon it is supposed to follow
+                adjust_xvtr(sdrangel_ip, SDRANGEL_API_PORT, orig_device_index, orig_channel_index, content, freq_offset)
         else:
             register_channel(orig_device_index, orig_channel_index, freq_offset, content)
             print(f'SDRangel: {sdrangel_ip}:{SDRANGEL_API_PORT} {channel_type} [{orig_device_index}:{orig_channel_index}] at {freq_offset} Hz')
@@ -183,7 +250,9 @@ def main():
 # ----------------------------------------------------------------------
     global SDRANGEL_API_ADDR
     global SDRANGEL_API_PORT
-    addr, port, SDRANGEL_API_ADDR, SDRANGEL_API_PORT = getInputOptions()
+    global TRACKER_FREQUENCY
+    global XVTR_DEVICE
+    addr, port, SDRANGEL_API_ADDR, SDRANGEL_API_PORT, TRACKER_FREQUENCY, XVTR_DEVICE = getInputOptions()
     print(f'main: starting at: {addr}:{port}')
     app.run(debug=True, host=addr, port=port)
 
