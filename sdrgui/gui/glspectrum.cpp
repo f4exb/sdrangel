@@ -156,8 +156,6 @@ GLSpectrum::~GLSpectrum()
 
 	QMutexLocker mutexLocker(&m_mutex);
 
-	m_changesPending = true;
-
 	if(m_waterfallBuffer != NULL) {
 		delete m_waterfallBuffer;
 		m_waterfallBuffer = NULL;
@@ -174,25 +172,28 @@ GLSpectrum::~GLSpectrum()
 
 void GLSpectrum::setCenterFrequency(qint64 frequency)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+	m_mutex.lock();
 	m_centerFrequency = frequency;
 	m_changesPending = true;
+	m_mutex.unlock();
 	update();
 }
 
 void GLSpectrum::setReferenceLevel(Real referenceLevel)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+	m_mutex.lock();
 	m_referenceLevel = referenceLevel;
 	m_changesPending = true;
+	m_mutex.unlock();
 	update();
 }
 
 void GLSpectrum::setPowerRange(Real powerRange)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+	m_mutex.lock();
 	m_powerRange = powerRange;
 	m_changesPending = true;
+	m_mutex.unlock();
 	update();
 }
 
@@ -213,29 +214,32 @@ void GLSpectrum::setHistoStroke(int stroke)
 
 void GLSpectrum::setSampleRate(qint32 sampleRate)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    m_mutex.lock();
 	m_sampleRate = sampleRate;
 	if (m_messageQueueToGUI) {
 	    m_messageQueueToGUI->push(new MsgReportSampleRate(m_sampleRate));
 	}
 	m_changesPending = true;
+	m_mutex.unlock();
 	update();
 }
 
 void GLSpectrum::setTimingRate(qint32 timingRate)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    m_mutex.lock();
     m_timingRate = timingRate;
     m_changesPending = true;
+	m_mutex.unlock();
     update();
 }
 
 void GLSpectrum::setDisplayWaterfall(bool display)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    m_mutex.lock();
 	m_displayWaterfall = display;
 	m_changesPending = true;
 	stopDrag();
+	m_mutex.unlock();
 	update();
 }
 
@@ -253,37 +257,41 @@ void GLSpectrum::setLsbDisplay(bool lsbDisplay)
 
 void GLSpectrum::setInvertedWaterfall(bool inv)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    m_mutex.lock();
 	m_invertedWaterfall = inv;
 	m_changesPending = true;
 	stopDrag();
+	m_mutex.unlock();
 	update();
 }
 
 void GLSpectrum::setDisplayMaxHold(bool display)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    m_mutex.lock();
 	m_displayMaxHold = display;
 	m_changesPending = true;
 	stopDrag();
+	m_mutex.unlock();
 	update();
 }
 
 void GLSpectrum::setDisplayCurrent(bool display)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    m_mutex.lock();
 	m_displayCurrent = display;
 	m_changesPending = true;
 	stopDrag();
+	m_mutex.unlock();
 	update();
 }
 
 void GLSpectrum::setDisplayHistogram(bool display)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    m_mutex.lock();
 	m_displayHistogram = display;
 	m_changesPending = true;
 	stopDrag();
+	m_mutex.unlock();
 	update();
 }
 
@@ -317,38 +325,44 @@ void GLSpectrum::setDisplayTraceIntensity(int intensity)
 
 void GLSpectrum::setLinear(bool linear)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+	m_mutex.lock();
     m_linear = linear;
     m_changesPending = true;
+	m_mutex.unlock();
     update();
 }
 
 void GLSpectrum::addChannelMarker(ChannelMarker* channelMarker)
 {
-	QMutexLocker mutexLocker(&m_mutex);
-
+	m_mutex.lock();
 	connect(channelMarker, SIGNAL(changedByAPI()), this, SLOT(channelMarkerChanged()));
 	connect(channelMarker, SIGNAL(destroyed(QObject*)), this, SLOT(channelMarkerDestroyed(QObject*)));
 	m_channelMarkerStates.append(new ChannelMarkerState(channelMarker));
 	m_changesPending = true;
 	stopDrag();
+	m_mutex.unlock();
 	update();
 }
 
 void GLSpectrum::removeChannelMarker(ChannelMarker* channelMarker)
 {
-	QMutexLocker mutexLocker(&m_mutex);
+	m_mutex.lock();
 
-	for(int i = 0; i < m_channelMarkerStates.size(); ++i) {
-		if(m_channelMarkerStates[i]->m_channelMarker == channelMarker) {
+	for (int i = 0; i < m_channelMarkerStates.size(); ++i)
+	{
+		if (m_channelMarkerStates[i]->m_channelMarker == channelMarker)
+		{
 			channelMarker->disconnect(this);
 			delete m_channelMarkerStates.takeAt(i);
 			m_changesPending = true;
 			stopDrag();
+			m_mutex.unlock();
 			update();
 			return;
 		}
 	}
+
+	m_mutex.unlock();
 }
 
 void GLSpectrum::newSpectrum(const std::vector<Real>& spectrum, int fftSize)
@@ -546,8 +560,9 @@ void GLSpectrum::resizeGL(int width, int height)
 
 void GLSpectrum::clearSpectrumHistogram()
 {
-	if(!m_mutex.tryLock(2))
+	if (!m_mutex.tryLock(2)) {
 		return;
+	}
 
 	memset(m_histogram, 0x00, 100 * m_fftSize);
 
@@ -557,13 +572,18 @@ void GLSpectrum::clearSpectrumHistogram()
 
 void GLSpectrum::paintGL()
 {
-	if(!m_mutex.tryLock(2))
+	if (!m_mutex.tryLock(2)) {
 		return;
+	}
 
-	if(m_changesPending)
+	if (m_changesPending)
+	{
 		applyChanges();
+		m_changesPending = false;
+	}
 
-	if(m_fftSize <= 0) {
+	if (m_fftSize <= 0)
+	{
 		m_mutex.unlock();
 		return;
 	}
@@ -1042,10 +1062,9 @@ void GLSpectrum::stopDrag()
 
 void GLSpectrum::applyChanges()
 {
-	m_changesPending = false;
-
-	if(m_fftSize <= 0)
+	if (m_fftSize <= 0) {
 		return;
+	}
 
 	QFontMetrics fm(font());
 	int M = fm.width("-");

@@ -203,8 +203,10 @@ void GLScope::paintGL()
         return;
     }
 
-    if (m_configChanged) {
+    if (m_configChanged)
+    {
         applyConfig();
+        m_configChanged = false;
     }
 
 //    qDebug("GLScope::paintGL: m_traceCounter: %d", m_traceCounter);
@@ -950,26 +952,29 @@ void GLScope::paintGL()
 
 void GLScope::setSampleRate(int sampleRate)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    m_mutex.lock();
     m_sampleRate = sampleRate;
     m_configChanged = true;
+    m_mutex.unlock();
     update();
     emit sampleRateChanged(m_sampleRate);
 }
 
 void GLScope::setTimeBase(int timeBase)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    m_mutex.lock();
     m_timeBase = timeBase;
     m_configChanged = true;
+    m_mutex.unlock();
     update();
 }
 
 void GLScope::setTriggerPre(uint32_t triggerPre, bool emitSignal)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    m_mutex.lock();
     m_triggerPre = triggerPre;
     m_configChanged = true;
+    m_mutex.unlock();
     update();
 
     if (emitSignal) {
@@ -979,33 +984,37 @@ void GLScope::setTriggerPre(uint32_t triggerPre, bool emitSignal)
 
 void GLScope::setTimeOfsProMill(int timeOfsProMill)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    m_mutex.lock();
     m_timeOfsProMill = timeOfsProMill;
     m_configChanged = true;
+    m_mutex.unlock();
     update();
 }
 
 void GLScope::setFocusedTraceIndex(uint32_t traceIndex)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    m_mutex.lock();
     m_focusedTraceIndex = traceIndex;
     m_configChanged = true;
+    m_mutex.unlock();
     update();
 }
 
 void GLScope::setDisplayMode(DisplayMode displayMode)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    m_mutex.lock();
     m_displayMode = displayMode;
     m_configChanged = true;
+    m_mutex.unlock();
     update();
 }
 
 void GLScope::setTraceSize(int traceSize, bool emitSignal)
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    m_mutex.lock();
     m_traceSize = traceSize;
     m_configChanged = true;
+    m_mutex.unlock();
     update();
 
     if (emitSignal) {
@@ -1015,15 +1024,14 @@ void GLScope::setTraceSize(int traceSize, bool emitSignal)
 
 void GLScope::updateDisplay()
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    m_mutex.lock();
     m_configChanged = true;
+    m_mutex.unlock();
     update();
 }
 
 void GLScope::applyConfig()
 {
-    m_configChanged = false;
-
     QFontMetrics fm(font());
     //float t_start = ((m_timeOfsProMill / 1000.0) * ((float) m_traceSize / m_sampleRate)) - ((float) m_triggerPre / m_sampleRate);
     float t_start = (((m_timeOfsProMill / 1000.0f) * (float) m_traceSize) / m_sampleRate) - ((float) m_triggerPre / m_sampleRate);
