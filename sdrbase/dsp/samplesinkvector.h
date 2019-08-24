@@ -28,10 +28,11 @@ class SDRBASE_API SampleSinkVector : public QObject {
 
 public:
     SampleSinkVector(QObject* parent = nullptr);
+    SampleSinkVector(const SampleSinkVector& other);
     ~SampleSinkVector();
 
     void write(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
-    void read(SampleVector::const_iterator& begin, SampleVector::const_iterator& end);
+    void read(SampleVector::iterator& begin, SampleVector::iterator& end);
 
 signals:
 	void dataReady();
@@ -39,9 +40,8 @@ signals:
 private:
     SampleVector m_sampleVector;
     int m_dataSize;
-    int m_sampleVectorSize;
-    SampleVector::const_iterator m_begin;
-    SampleVector::const_iterator m_end;
+    // SampleVector::const_iterator m_begin;
+    // SampleVector::const_iterator m_end;
 };
 
 

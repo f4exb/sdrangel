@@ -22,6 +22,11 @@ SampleSinkVector::SampleSinkVector(QObject* parent) :
     m_dataSize(0)
 {}
 
+SampleSinkVector::SampleSinkVector(const SampleSinkVector& other) :
+    m_sampleVector(other.m_sampleVector),
+    m_dataSize(other.m_dataSize)
+{}
+
 SampleSinkVector::~SampleSinkVector()
 {}
 
@@ -38,7 +43,7 @@ void SampleSinkVector::write(const SampleVector::const_iterator& begin, const Sa
     emit dataReady();
 }
 
-void SampleSinkVector::read(SampleVector::const_iterator& begin, SampleVector::const_iterator& end)
+void SampleSinkVector::read(SampleVector::iterator& begin, SampleVector::iterator& end)
 {
     begin = m_sampleVector.begin();
     end = m_sampleVector.begin() + m_dataSize;

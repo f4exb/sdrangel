@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "samplesourcefifo.h"
-#include "samplesinkfifo.h"
+#include "samplesinkvector.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "export.h"
@@ -133,7 +133,7 @@ public:
     unsigned int getNbSourceFifos() const { return m_sampleSourceFifos.size(); } //!< Get the number of Tx FIFOs
     unsigned int getNbSinkFifos() const { return m_sampleSinkFifos.size(); }     //!< Get the number of Rx FIFOs
 	SampleSourceFifo* getSampleSourceFifo(unsigned int index); //!< Get Tx FIFO at index
-    SampleSinkFifo* getSampleSinkFifo(unsigned int index);     //!< Get Rx FIFO at index
+    SampleSinkVector* getSampleSinkFifo(unsigned int index);   //!< Get Rx FIFO at index
     // Streams and FIFOs are in opposed source/sink type whick makes it confusing when stream direction is involved:
     //   Rx: source stream -> sink FIFO    -> channel sinks
     //   Tx: sink stream   <- source FIFO  <- channel sources
@@ -146,7 +146,7 @@ protected slots:
 protected:
     MIMOType m_mimoType;
     std::vector<SampleSourceFifo> m_sampleSourceFifos; //!< Tx FIFOs
-    std::vector<SampleSinkFifo> m_sampleSinkFifos;     //!< Rx FIFOs
+    std::vector<SampleSinkVector> m_sampleSinkFifos;   //!< Rx FIFOs
 	MessageQueue m_inputMessageQueue; //!< Input queue to the sink
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 };

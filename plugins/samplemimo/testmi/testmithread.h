@@ -25,7 +25,7 @@
 #include <QElapsedTimer>
 #include <QDebug>
 
-#include "dsp/samplesinkfifo.h"
+#include "dsp/samplesinkvector.h"
 #include "dsp/decimators.h"
 #include "dsp/ncof.h"
 #include "util/message.h"
@@ -58,7 +58,7 @@ public:
         { }
     };
 
-	TestMIThread(SampleSinkFifo* sampleFifo, int streamIndex, QObject* parent = 0);
+	TestMIThread(SampleSinkVector* sampleFifo, int streamIndex, QObject* parent = 0);
 	~TestMIThread();
 
     void startStop(bool start);
@@ -89,7 +89,7 @@ private:
     quint32 m_bufsize;
     quint32 m_chunksize;
 	SampleVector m_convertBuffer;
-	SampleSinkFifo* m_sampleFifo;
+	SampleSinkVector* m_sampleFifo;
     int m_streamIndex;
 	NCOF m_nco;
     NCOF m_toneNco;

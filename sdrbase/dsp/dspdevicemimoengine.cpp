@@ -254,79 +254,35 @@ QString DSPDeviceMIMOEngine::deviceDescription()
  */
 void DSPDeviceMIMOEngine::workSampleSink(unsigned int sinkIndex)
 {
-	SampleSinkFifo* sampleFifo = m_deviceSampleMIMO->getSampleSinkFifo(sinkIndex);
-	int samplesDone = 0;
+	SampleSinkVector* sampleFifo = m_deviceSampleMIMO->getSampleSinkFifo(sinkIndex);
+    SampleVector::iterator vbegin;
+    SampleVector::iterator vend;
 	bool positiveOnly = false;
+    sampleFifo->read(vbegin, vend);
 
-	while ((sampleFifo->fill() > 0) && (m_inputMessageQueue.size() == 0) && (samplesDone < m_deviceSampleMIMO->getSourceSampleRate(sinkIndex)))
-	{
-		SampleVector::iterator part1begin;
-		SampleVector::iterator part1end;
-		SampleVector::iterator part2begin;
-		SampleVector::iterator part2end;
+    // DC and IQ corrections
+    if (m_sourcesCorrections[sinkIndex].m_dcOffsetCorrection) {
+        iqCorrections(vbegin, vend, sinkIndex, m_sourcesCorrections[sinkIndex].m_iqImbalanceCorrection);
+    }
 
-		std::size_t count = sampleFifo->readBegin(sampleFifo->fill(), &part1begin, &part1end, &part2begin, &part2end);
+    // feed data to direct sinks
+    if (sinkIndex < m_basebandSampleSinks.size())
+    {
+        for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks[sinkIndex].begin(); it != m_basebandSampleSinks[sinkIndex].end(); ++it) {
+            (*it)->feed(vbegin, vend, positiveOnly);
+        }
+    }
 
-		// first part of FIFO data
-		if (part1begin != part1end)
-		{
-            // DC and IQ corrections
-            if (m_sourcesCorrections[sinkIndex].m_dcOffsetCorrection) {
-                iqCorrections(part1begin, part1end, sinkIndex, m_sourcesCorrections[sinkIndex].m_iqImbalanceCorrection);
-            }
+    // possibly feed data to spectrum sink
+    if ((m_spectrumSink) && (m_spectrumInputSourceElseSink) && (sinkIndex == m_spectrumInputIndex)) {
+        m_spectrumSink->feed(vbegin, vend, positiveOnly);
+    }
 
-			// feed data to direct sinks
-            if (sinkIndex < m_basebandSampleSinks.size())
-            {
-                for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks[sinkIndex].begin(); it != m_basebandSampleSinks[sinkIndex].end(); ++it) {
-                    (*it)->feed(part1begin, part1end, positiveOnly);
-                }
-            }
-
-            // possibly feed data to spectrum sink
-            if ((m_spectrumSink) && (m_spectrumInputSourceElseSink) && (sinkIndex == m_spectrumInputIndex)) {
-                m_spectrumSink->feed(part1begin, part1end, positiveOnly);
-            }
-
-			// feed data to threaded sinks
-			for (ThreadedBasebandSampleSinks::const_iterator it = m_threadedBasebandSampleSinks[sinkIndex].begin(); it != m_threadedBasebandSampleSinks[sinkIndex].end(); ++it)
-			{
-				(*it)->feed(part1begin, part1end, positiveOnly);
-			}
-		}
-
-		// second part of FIFO data (used when block wraps around)
-		if(part2begin != part2end)
-		{
-            // DC and IQ corrections
-            if (m_sourcesCorrections[sinkIndex].m_dcOffsetCorrection) {
-                iqCorrections(part2begin, part2end, sinkIndex, m_sourcesCorrections[sinkIndex].m_iqImbalanceCorrection);
-            }
-
-			// feed data to direct sinks
-            if (sinkIndex < m_basebandSampleSinks.size())
-            {
-                for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks[sinkIndex].begin(); it != m_basebandSampleSinks[sinkIndex].end(); ++it) {
-                    (*it)->feed(part2begin, part2end, positiveOnly);
-                }
-            }
-
-            // possibly feed data to spectrum sink
-            if ((m_spectrumSink) && (m_spectrumInputSourceElseSink) && (sinkIndex == m_spectrumInputIndex)) {
-                m_spectrumSink->feed(part2begin, part2end, positiveOnly);
-            }
-
-			// feed data to threaded sinks
-			for (ThreadedBasebandSampleSinks::const_iterator it = m_threadedBasebandSampleSinks[sinkIndex].begin(); it != m_threadedBasebandSampleSinks[sinkIndex].end(); ++it)
-			{
-				(*it)->feed(part2begin, part2end, positiveOnly);
-			}
-		}
-
-		// adjust FIFO pointers
-		sampleFifo->readCommit((unsigned int) count);
-		samplesDone += count;
-	}
+    // feed data to threaded sinks
+    for (ThreadedBasebandSampleSinks::const_iterator it = m_threadedBasebandSampleSinks[sinkIndex].begin(); it != m_threadedBasebandSampleSinks[sinkIndex].end(); ++it)
+    {
+        (*it)->feed(vbegin, vend, positiveOnly);
+    }
 }
 
 // notStarted -> idle -> init -> running -+
@@ -583,7 +539,7 @@ void DSPDeviceMIMOEngine::handleSetMIMO(DeviceSampleMIMO* mimo)
                 qPrintable(mimo->getDeviceDescription()), isink);
             QObject::connect(
                 m_deviceSampleMIMO->getSampleSinkFifo(isink),
-                &SampleSinkFifo::dataReady,
+                &SampleSinkVector::dataReady,
                 this,
                 [=](){ this->handleDataRxSync(); }, // lambda function is not strictly needed here
                 Qt::QueuedConnection
@@ -599,7 +555,7 @@ void DSPDeviceMIMOEngine::handleSetMIMO(DeviceSampleMIMO* mimo)
                 qPrintable(mimo->getDeviceDescription()), isink);
             QObject::connect(
                 m_deviceSampleMIMO->getSampleSinkFifo(isink),
-                &SampleSinkFifo::dataReady,
+                &SampleSinkVector::dataReady,
                 this,
                 [=](){ this->handleDataRxAsync(isink); },
                 Qt::QueuedConnection

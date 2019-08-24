@@ -26,8 +26,8 @@ void ThreadedBasebandSampleSinkFifo::writeToFifo(SampleVector::const_iterator& b
 
 void ThreadedBasebandSampleSinkFifo::handleVectorData()
 {
-    SampleVector::const_iterator vbegin;
-    SampleVector::const_iterator vend;
+    SampleVector::iterator vbegin;
+    SampleVector::iterator vend;
 
     if (m_sampleSink)
     {
