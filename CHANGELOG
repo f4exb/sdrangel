@@ -1,3 +1,12 @@
+sdrangel (4.11.7-1) unstable; urgency=medium
+
+  * GLSpectrum and GLScope: fixed possible issues with mutex handling
+  * Channel Analyzer: use FFTW engine with Hamming window for auto correlation
+  * Package build: use DSDcc v1.8.6 to fix issue #406 with DSD decoder
+  * Use a simplified version of sample FIFOs in the threaded baseband sample sink
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 24 Aug 2019 06:04:06 +0200
+
 sdrangel (4.11.6-1) unstable; urgency=medium
 
   * REST API /sdrange/config endpoint with GET, PUT, PATCH. Implements #241

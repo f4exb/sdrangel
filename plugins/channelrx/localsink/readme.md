@@ -12,6 +12,8 @@ These Local Sinks can then be coupled with two Local Input device source plugins
 
 Note that because it uses only the channelizer half band filter chain to achieve decimation and center frequency shift you have a limited choice on the center frequencies that may be used (similarly to the Remote Sink). The available center frequencies depend on the baseband sample rate, the channel decimation and the filter chain that is used so you have to play with these parameters to obtain a suitable center frequency and pass band.
 
+<b>&#9888; Important warning</b> When closing the application or before closing the local input device the local sink is connected to you have to stop the device where the local sink operates. This is because there is no reverse link for the local input to notify the local sink that it closes. Therefore closing the local input while the local sink runs will crash the program.
+
 <h2>Interface</h2>
 
 ![Local sink channel plugin GUI](../../../doc/img/LocalSink.png)
