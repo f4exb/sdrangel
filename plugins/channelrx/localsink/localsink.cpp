@@ -111,6 +111,11 @@ void LocalSink::stop()
 {
     qDebug("LocalSink::stop");
 
+    disconnect(this,
+            SIGNAL(samplesAvailable(const quint8*, uint)),
+            m_sinkThread,
+            SLOT(processSamples(const quint8*, uint)));
+
     if (m_sinkThread != 0)
     {
         m_sinkThread->startStop(false);

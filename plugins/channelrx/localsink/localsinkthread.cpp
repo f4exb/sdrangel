@@ -74,7 +74,7 @@ void LocalSinkThread::run()
 
 void LocalSinkThread::processSamples(const quint8* data, uint count)
 {
-    if (m_sampleFifo) {
+    if (m_sampleFifo && m_running) {
         m_sampleFifo->write(data, count);
     }
 }
