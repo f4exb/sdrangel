@@ -687,6 +687,7 @@ void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
 {
     qDebug() << "FreeDVDemod::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
+            << " m_freeDVMode: " << (int) settings.m_freeDVMode
             << " m_volume: " << settings.m_volume
             << " m_volumeIn: " << settings.m_volumeIn
             << " m_spanLog2: " << settings.m_spanLog2

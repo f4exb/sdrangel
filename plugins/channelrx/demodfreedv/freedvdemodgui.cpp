@@ -342,7 +342,7 @@ void FreeDVDemodGUI::applySettings(bool force)
 
 void FreeDVDemodGUI::applyBandwidths(int spanLog2, bool force)
 {
-    displayBandwidths(m_settings.m_spanLog2);
+    displayBandwidths(spanLog2);
     m_settings.m_spanLog2 = spanLog2;
     applySettings(force);
 }
