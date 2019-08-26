@@ -963,7 +963,7 @@ void FreeDVDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys,
     swgChannelSettings->setDirection(0); // single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("SSBDemod"));
+    swgChannelSettings->setChannelType(new QString("FreeDVDemod"));
     swgChannelSettings->setFreeDvDemodSettings(new SWGSDRangel::SWGFreeDVDemodSettings());
     SWGSDRangel::SWGFreeDVDemodSettings *swgFreeDVDemodSettings = swgChannelSettings->getFreeDvDemodSettings();
 
