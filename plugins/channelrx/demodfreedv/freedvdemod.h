@@ -20,6 +20,7 @@
 
 #include <vector>
 
+#include <QTimer>
 #include <QMutex>
 #include <QNetworkRequest>
 
@@ -416,6 +417,8 @@ private:
 	LevelRMS m_levelIn;
 	int m_levelInNbSamples;
 
+    QTimer m_timer;
+    bool m_enable;
 	QMutex m_settingsMutex;
 
 	void pushSampleToDV(int16_t sample);
@@ -430,6 +433,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
+    void timerHandlerFunction();
 };
 
 #endif // INCLUDE_FREEDVDEMOD_H

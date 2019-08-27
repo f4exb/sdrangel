@@ -172,6 +172,7 @@ FreeDVDemod::FreeDVDemod(DeviceAPI *deviceAPI) :
         m_speechOut(0),
         m_modIn(0),
         m_levelInNbSamples(480), // 10ms @ 48 kS/s
+        m_enable(true),
         m_settingsMutex(QMutex::Recursive)
 {
 	setObjectName(m_channelId);
@@ -203,6 +204,7 @@ FreeDVDemod::FreeDVDemod(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(timerHandlerFunction()));
 }
 
 FreeDVDemod::~FreeDVDemod()
@@ -253,11 +255,22 @@ void FreeDVDemod::configure(MessageQueue* messageQueue,
 void FreeDVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
     (void) positiveOnly;
+
+    if (!m_freeDV) {
+        return;
+    }
+
 	Complex ci;
 	fftfilt::cmplx *sideband;
 	int n_out;
 
 	m_settingsMutex.lock();
+
+    if (!m_enable)
+    {
+        m_settingsMutex.unlock();
+        return;
+    }
 
 	int decim = 1<<(m_spanLog2 - 1);
 	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
@@ -639,7 +652,7 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
         int Rs = freedv_get_modem_symbol_rate(m_freeDV);
         m_freeDVStats.init();
 
-        if (nSpeechSamples != m_nSpeechSamples)
+        if (nSpeechSamples > m_nSpeechSamples)
         {
             if (m_speechOut) {
                 delete[] m_speechOut;
@@ -649,7 +662,7 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
             m_nSpeechSamples = nSpeechSamples;
         }
 
-        if (nMaxModemSamples != m_nMaxModemSamples)
+        if (nMaxModemSamples > m_nMaxModemSamples)
         {
             if (m_modIn) {
                 delete[] m_modIn;
@@ -679,6 +692,14 @@ void FreeDVDemod::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
                 << " m_nin: " << m_nin
                 << " FPS: " << m_freeDVStats.m_fps;
     }
+    else
+    {
+        qCritical("FreeDVMod::applyFreeDVMode: m_freeDV was not allocated");
+    }
+
+    m_enable = false;
+    m_timer.setSingleShot(true);
+    m_timer.start(2000);
 
     m_settingsMutex.unlock();
 }
@@ -1035,4 +1056,9 @@ void FreeDVDemod::networkManagerFinished(QNetworkReply *reply)
     QString answer = reply->readAll();
     answer.chop(1); // remove last \n
     qDebug("FreeDVDemod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+}
+
+void FreeDVDemod::timerHandlerFunction()
+{
+    m_enable = true;
 }
