@@ -102,7 +102,7 @@ bool RTLSDRSettings::deserialize(const QByteArray& data)
         d.readBool(11, &m_noModMode, false);
         d.readBool(12, &m_transverterMode, false);
         d.readS64(13, &m_transverterDeltaFrequency, 0);
-        d.readU32(4, &m_rfBandwidth, 2500 * 1000);
+        d.readU32(14, &m_rfBandwidth, 2500 * 1000);
         d.readBool(15, &m_offsetTuning, false);
         d.readBool(16, &m_useReverseAPI, false);
         d.readString(17, &m_reverseAPIAddress, "127.0.0.1");
