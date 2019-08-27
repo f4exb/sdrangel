@@ -41,6 +41,8 @@ struct HackRFInputSettings {
 	bool m_dcBlock;
 	bool m_iqCorrection;
 	QString m_fileRecordName;
+    bool   m_transverterMode;
+	qint64 m_transverterDeltaFrequency;
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

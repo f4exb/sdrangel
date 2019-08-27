@@ -196,6 +196,21 @@ void HackRFInputGui::updateSampleRateAndFrequency()
     displaySampleRate();
 }
 
+void HackRFInputGui::updateFrequencyLimits()
+{
+    // values in kHz
+    qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
+    qint64 minLimit = (0U) + deltaFrequency;
+    qint64 maxLimit = (7250000U) + deltaFrequency;
+
+    minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
+    maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+
+    qDebug("HackRFInputGui::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
+
+    ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+}
+
 void HackRFInputGui::displaySampleRate()
 {
     ui->sampleRate->blockSignals(true);
@@ -242,6 +257,8 @@ void HackRFInputGui::displaySettings()
     blockApplySettings(true);
 
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+    ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
+    ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
 
 	ui->LOppm->setValue(m_settings.m_LOppmTenths);
 	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
@@ -436,6 +453,16 @@ void HackRFInputGui::updateHardware()
         m_forceSettings = false;
         m_updateTimer.stop();
     }
+}
+
+void HackRFInputGui::on_transverter_clicked()
+{
+    m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
+    m_settings.m_transverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+    qDebug("HackRFInputGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
+    updateFrequencyLimits();
+    m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
+    sendSettings();
 }
 
 void HackRFInputGui::blockApplySettings(bool block)

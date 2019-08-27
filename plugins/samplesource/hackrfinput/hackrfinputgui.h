@@ -83,6 +83,7 @@ private:
 	void displayBandwidths();
 	void sendSettings();
     void updateSampleRateAndFrequency();
+    void updateFrequencyLimits();
     void blockApplySettings(bool block);
 
 private slots:
@@ -102,6 +103,7 @@ private slots:
 	void on_startStop_toggled(bool checked);
     void on_record_toggled(bool checked);
     void on_sampleRateMode_toggled(bool checked);
+    void on_transverter_clicked();
 	void updateHardware();
 	void updateStatus();
     void openDeviceSettingsDialog(const QPoint& p);

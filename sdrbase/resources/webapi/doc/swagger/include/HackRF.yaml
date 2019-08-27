@@ -29,6 +29,11 @@ HackRFInputSettings:
       type: integer
     fileRecordName:
       type: string
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

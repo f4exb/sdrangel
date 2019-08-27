@@ -54,6 +54,10 @@ SWGHackRFInputSettings::SWGHackRFInputSettings() {
     m_iq_correction_isSet = false;
     file_record_name = nullptr;
     m_file_record_name_isSet = false;
+    transverter_mode = 0;
+    m_transverter_mode_isSet = false;
+    transverter_delta_frequency = 0L;
+    m_transverter_delta_frequency_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -96,6 +100,10 @@ SWGHackRFInputSettings::init() {
     m_iq_correction_isSet = false;
     file_record_name = new QString("");
     m_file_record_name_isSet = false;
+    transverter_mode = 0;
+    m_transverter_mode_isSet = false;
+    transverter_delta_frequency = 0L;
+    m_transverter_delta_frequency_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -123,6 +131,8 @@ SWGHackRFInputSettings::cleanup() {
     if(file_record_name != nullptr) { 
         delete file_record_name;
     }
+
+
 
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
@@ -167,6 +177,10 @@ SWGHackRFInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&iq_correction, pJson["iqCorrection"], "qint32", "");
     
     ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -230,6 +244,12 @@ SWGHackRFInputSettings::asJsonObject() {
     }
     if(file_record_name != nullptr && *file_record_name != QString("")){
         toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
+    }
+    if(m_transverter_mode_isSet){
+        obj->insert("transverterMode", QJsonValue(transverter_mode));
+    }
+    if(m_transverter_delta_frequency_isSet){
+        obj->insert("transverterDeltaFrequency", QJsonValue(transverter_delta_frequency));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -378,6 +398,26 @@ SWGHackRFInputSettings::setFileRecordName(QString* file_record_name) {
 }
 
 qint32
+SWGHackRFInputSettings::getTransverterMode() {
+    return transverter_mode;
+}
+void
+SWGHackRFInputSettings::setTransverterMode(qint32 transverter_mode) {
+    this->transverter_mode = transverter_mode;
+    this->m_transverter_mode_isSet = true;
+}
+
+qint64
+SWGHackRFInputSettings::getTransverterDeltaFrequency() {
+    return transverter_delta_frequency;
+}
+void
+SWGHackRFInputSettings::setTransverterDeltaFrequency(qint64 transverter_delta_frequency) {
+    this->transverter_delta_frequency = transverter_delta_frequency;
+    this->m_transverter_delta_frequency_isSet = true;
+}
+
+qint32
 SWGHackRFInputSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -459,6 +499,12 @@ SWGHackRFInputSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(file_record_name && *file_record_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_transverter_mode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_transverter_delta_frequency_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){
