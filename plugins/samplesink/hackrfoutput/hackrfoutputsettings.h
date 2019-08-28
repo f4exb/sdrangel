@@ -37,6 +37,8 @@ struct HackRFOutputSettings {
 	quint64 m_devSampleRate;
 	bool m_biasT;
 	bool m_lnaExt;
+    bool   m_transverterMode;
+	qint64 m_transverterDeltaFrequency;
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

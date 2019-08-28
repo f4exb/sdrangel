@@ -69,6 +69,12 @@ public:
     qint32 getLnaExt();
     void setLnaExt(qint32 lna_ext);
 
+    qint32 getTransverterMode();
+    void setTransverterMode(qint32 transverter_mode);
+
+    qint64 getTransverterDeltaFrequency();
+    void setTransverterDeltaFrequency(qint64 transverter_delta_frequency);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -111,6 +117,12 @@ private:
 
     qint32 lna_ext;
     bool m_lna_ext_isSet;
+
+    qint32 transverter_mode;
+    bool m_transverter_mode_isSet;
+
+    qint64 transverter_delta_frequency;
+    bool m_transverter_delta_frequency_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

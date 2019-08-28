@@ -419,19 +419,28 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
     if ((m_settings.m_fcPos != settings.m_fcPos) || force) {
         reverseAPIKeys.append("fcPos");
     }
+    if ((m_settings.m_transverterMode != settings.m_transverterMode) || force) {
+        reverseAPIKeys.append("transverterMode");
+    }
+    if ((m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force) {
+        reverseAPIKeys.append("transverterDeltaFrequency");
+    }
 
 	if ((m_settings.m_centerFrequency != settings.m_centerFrequency) ||
 	    (m_settings.m_devSampleRate != settings.m_devSampleRate) ||
         (m_settings.m_LOppmTenths != settings.m_LOppmTenths) ||
         (m_settings.m_log2Interp != settings.m_log2Interp) ||
-        (m_settings.m_fcPos != settings.m_fcPos) || force)
+        (m_settings.m_fcPos != settings.m_fcPos) ||
+        (m_settings.m_transverterMode != settings.m_transverterMode) ||
+        (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force)
 	{
         qint64 deviceCenterFrequency = DeviceSampleSink::calculateDeviceCenterFrequency(
                 settings.m_centerFrequency,
-                0,
+                settings.m_transverterDeltaFrequency,
                 settings.m_log2Interp,
                 (DeviceSampleSink::fcPos_t) settings.m_fcPos,
-                settings.m_devSampleRate);
+                settings.m_devSampleRate,
+                m_settings.m_transverterMode);
         setDeviceCenterFrequency(deviceCenterFrequency, settings.m_LOppmTenths);
 
         if (m_deviceAPI->getSourceBuddies().size() > 0)
@@ -611,6 +620,12 @@ void HackRFOutput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("lnaExt")) {
         settings.m_lnaExt = response.getHackRfOutputSettings()->getLnaExt() != 0;
     }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
+        settings.m_transverterDeltaFrequency = response.getHackRfInputSettings()->getTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("transverterMode")) {
+        settings.m_transverterMode = response.getHackRfInputSettings()->getTransverterMode() != 0;
+    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getHackRfOutputSettings()->getUseReverseApi() != 0;
     }
@@ -636,6 +651,8 @@ void HackRFOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getHackRfOutputSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getHackRfOutputSettings()->setBiasT(settings.m_biasT ? 1 : 0);
     response.getHackRfOutputSettings()->setLnaExt(settings.m_lnaExt ? 1 : 0);
+    response.getHackRfOutputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    response.getHackRfOutputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
 
     response.getHackRfOutputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -714,6 +731,12 @@ void HackRFOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
     }
     if (deviceSettingsKeys.contains("lnaExt") || force) {
         swgHackRFOutputSettings->setLnaExt(settings.m_lnaExt ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency") || force) {
+        swgHackRFOutputSettings->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    }
+    if (deviceSettingsKeys.contains("transverterMode") || force) {
+        swgHackRFOutputSettings->setTransverterMode(settings.m_transverterMode ? 1 : 0);
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

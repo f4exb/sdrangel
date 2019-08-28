@@ -46,6 +46,10 @@ SWGHackRFOutputSettings::SWGHackRFOutputSettings() {
     m_bias_t_isSet = false;
     lna_ext = 0;
     m_lna_ext_isSet = false;
+    transverter_mode = 0;
+    m_transverter_mode_isSet = false;
+    transverter_delta_frequency = 0L;
+    m_transverter_delta_frequency_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -80,6 +84,10 @@ SWGHackRFOutputSettings::init() {
     m_bias_t_isSet = false;
     lna_ext = 0;
     m_lna_ext_isSet = false;
+    transverter_mode = 0;
+    m_transverter_mode_isSet = false;
+    transverter_delta_frequency = 0L;
+    m_transverter_delta_frequency_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -92,6 +100,8 @@ SWGHackRFOutputSettings::init() {
 
 void
 SWGHackRFOutputSettings::cleanup() {
+
+
 
 
 
@@ -137,6 +147,10 @@ SWGHackRFOutputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&bias_t, pJson["biasT"], "qint32", "");
     
     ::SWGSDRangel::setValue(&lna_ext, pJson["lnaExt"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -188,6 +202,12 @@ SWGHackRFOutputSettings::asJsonObject() {
     }
     if(m_lna_ext_isSet){
         obj->insert("lnaExt", QJsonValue(lna_ext));
+    }
+    if(m_transverter_mode_isSet){
+        obj->insert("transverterMode", QJsonValue(transverter_mode));
+    }
+    if(m_transverter_delta_frequency_isSet){
+        obj->insert("transverterDeltaFrequency", QJsonValue(transverter_delta_frequency));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -296,6 +316,26 @@ SWGHackRFOutputSettings::setLnaExt(qint32 lna_ext) {
 }
 
 qint32
+SWGHackRFOutputSettings::getTransverterMode() {
+    return transverter_mode;
+}
+void
+SWGHackRFOutputSettings::setTransverterMode(qint32 transverter_mode) {
+    this->transverter_mode = transverter_mode;
+    this->m_transverter_mode_isSet = true;
+}
+
+qint64
+SWGHackRFOutputSettings::getTransverterDeltaFrequency() {
+    return transverter_delta_frequency;
+}
+void
+SWGHackRFOutputSettings::setTransverterDeltaFrequency(qint64 transverter_delta_frequency) {
+    this->transverter_delta_frequency = transverter_delta_frequency;
+    this->m_transverter_delta_frequency_isSet = true;
+}
+
+qint32
 SWGHackRFOutputSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -365,6 +405,12 @@ SWGHackRFOutputSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_lna_ext_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_transverter_mode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_transverter_delta_frequency_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

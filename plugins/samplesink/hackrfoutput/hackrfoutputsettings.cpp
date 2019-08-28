@@ -37,6 +37,8 @@ void HackRFOutputSettings::resetToDefaults()
 	m_vgaGain = 22;
 	m_bandwidth = 1750000;
 	m_devSampleRate = 2400000;
+    m_transverterMode = false;
+	m_transverterDeltaFrequency = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -59,6 +61,8 @@ QByteArray HackRFOutputSettings::serialize() const
     s.writeString(10, m_reverseAPIAddress);
     s.writeU32(11, m_reverseAPIPort);
     s.writeU32(12, m_reverseAPIDeviceIndex);
+    s.writeBool(13, m_transverterMode);
+    s.writeS64(14, m_transverterDeltaFrequency);
 
 	return s.final();
 }
@@ -99,6 +103,8 @@ bool HackRFOutputSettings::deserialize(const QByteArray& data)
 
         d.readU32(12, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readBool(13, &m_transverterMode, false);
+        d.readS64(14, &m_transverterDeltaFrequency, 0);
 
 		return true;
 	}

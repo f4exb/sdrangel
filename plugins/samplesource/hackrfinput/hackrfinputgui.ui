@@ -31,6 +31,9 @@
   <property name="windowTitle">
    <string>HackRF</string>
   </property>
+  <property name="toolTip">
+   <string>Transverter frequency translation dialog</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
     <number>3</number>
