@@ -1,3 +1,11 @@
+sdrangel (4.11.8-1) unstable; urgency=medium
+
+  * HackRF: implemented transverter functionality
+  * FreeDV demod: fixed spectrum span and channel id
+  * RTL-SDR: RF bandwidth deserialization fix
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 31 Aug 2019 06:04:06 +0200
+
 sdrangel (4.11.7-1) unstable; urgency=medium
 
   * GLSpectrum and GLScope: fixed possible issues with mutex handling
