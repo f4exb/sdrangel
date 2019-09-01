@@ -63,7 +63,6 @@ private:
     ChannelMarker m_channelMarker;
     LocalSinkSettings m_settings;
     int m_sampleRate;
-    quint64 m_deviceCenterFrequency; //!< Center frequency in device
     double m_shiftFrequencyFactor; //!< Channel frequency shift factor
     bool m_doApplySettings;
 
