@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2019 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,45 +16,25 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_INTERFEROMETERSETTINGS_H
-#define INCLUDE_INTERFEROMETERSETTINGS_H
+#include "mimosamplesink.h"
 
-#include <QByteArray>
-#include <QString>
-
-class Serializable;
-
-struct InterferometerSettings
+MIMOSampleSink::MIMOSampleSink()
 {
-    enum CorrelationType
-    {
-        CorrelationAdd,
-        CorrelationMultiply,
-        CorrelationCorrelation
-    };
+	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+}
 
-    CorrelationType m_correlationType;
-    quint32 m_rgbColor;
-    QString m_title;
-    uint32_t m_log2Decim;
-    uint32_t m_filterChainHash;
-    bool m_useReverseAPI;
-    QString m_reverseAPIAddress;
-    uint16_t m_reverseAPIPort;
-    uint16_t m_reverseAPIDeviceIndex;
-    uint16_t m_reverseAPIChannelIndex;
+MIMOSampleSink::~MIMOSampleSink()
+{
+}
 
-    Serializable *m_channelMarker;
-    Serializable *m_spectrumGUI;
-    Serializable *m_scopeGUI;
+void MIMOSampleSink::handleInputMessages()
+{
+	Message* message;
 
-    InterferometerSettings();
-    void resetToDefaults();
-    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
-    void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
-    void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
-};
-
-#endif // INCLUDE_INTERFEROMETERSETTINGS_H
+	while ((message = m_inputMessageQueue.pop()) != 0)
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
+}

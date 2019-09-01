@@ -44,9 +44,6 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGInterferometerSettings* fromJson(QString &jsonString) override;
 
-    qint32 getInputFrequencyOffset();
-    void setInputFrequencyOffset(qint32 input_frequency_offset);
-
     qint32 getCorrelationType();
     void setCorrelationType(qint32 correlation_type);
 
@@ -55,6 +52,27 @@ public:
 
     QString* getTitle();
     void setTitle(QString* title);
+
+    qint32 getLog2Decim();
+    void setLog2Decim(qint32 log2_decim);
+
+    qint32 getFilterChainHash();
+    void setFilterChainHash(qint32 filter_chain_hash);
+
+    qint32 getUseReverseApi();
+    void setUseReverseApi(qint32 use_reverse_api);
+
+    QString* getReverseApiAddress();
+    void setReverseApiAddress(QString* reverse_api_address);
+
+    qint32 getReverseApiPort();
+    void setReverseApiPort(qint32 reverse_api_port);
+
+    qint32 getReverseApiDeviceIndex();
+    void setReverseApiDeviceIndex(qint32 reverse_api_device_index);
+
+    qint32 getReverseApiChannelIndex();
+    void setReverseApiChannelIndex(qint32 reverse_api_channel_index);
 
     SWGGLSpectrum* getSpectrumConfig();
     void setSpectrumConfig(SWGGLSpectrum* spectrum_config);
@@ -66,9 +84,6 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint32 input_frequency_offset;
-    bool m_input_frequency_offset_isSet;
-
     qint32 correlation_type;
     bool m_correlation_type_isSet;
 
@@ -77,6 +92,27 @@ private:
 
     QString* title;
     bool m_title_isSet;
+
+    qint32 log2_decim;
+    bool m_log2_decim_isSet;
+
+    qint32 filter_chain_hash;
+    bool m_filter_chain_hash_isSet;
+
+    qint32 use_reverse_api;
+    bool m_use_reverse_api_isSet;
+
+    QString* reverse_api_address;
+    bool m_reverse_api_address_isSet;
+
+    qint32 reverse_api_port;
+    bool m_reverse_api_port_isSet;
+
+    qint32 reverse_api_device_index;
+    bool m_reverse_api_device_index_isSet;
+
+    qint32 reverse_api_channel_index;
+    bool m_reverse_api_channel_index_isSet;
 
     SWGGLSpectrum* spectrum_config;
     bool m_spectrum_config_isSet;
