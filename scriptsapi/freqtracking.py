@@ -28,6 +28,7 @@ TRACKER_DEVICE = 0
 TRACKING_DICT = {}
 TRACKER_FREQUENCY = None
 XVTR_DEVICE = None
+REFCORR_LIMIT = 1000
 
 app = Flask(__name__)
 
@@ -41,6 +42,7 @@ def getInputOptions():
     parser.add_argument("-a", "--address-sdr", dest="sdrangel_address", help="SDRangel REST API address (defaults to calling address)", metavar="ADDRESS", type=str)
     parser.add_argument("-p", "--port-sdr", dest="sdrangel_port", help="SDRangel REST API port (default 8091)", metavar="PORT", type=int)
     parser.add_argument("-f", "--tracker-frequency", dest="tracker_frequency", help="Absolute frequency the tracker should aim at (Hz, optional)", metavar="FREQ", type=int)
+    parser.add_argument("-r", "--refcorr-limit", dest="refcorr_limit", help="Limit of the tracker frequency reference correction (Hz, optional, default 1000 Hz)", metavar="DFREQ", type=int)
     parser.add_argument("-d", "--transverter-device", dest="transverter_device", help="Transverter device index to use for tracker frequency correction (optional)", metavar="DEVICE", type=int)
 
     options = parser.parse_args()
@@ -52,7 +54,7 @@ def getInputOptions():
     if options.sdrangel_port == None:
         options.sdrangel_port = 8091
 
-    return options.addr, options.port, options.sdrangel_address, options.sdrangel_port, options.tracker_frequency, options.transverter_device
+    return options.addr, options.port, options.sdrangel_address, options.sdrangel_port, options.tracker_frequency, options.transverter_device, options.refcorr_limit
 
 # ======================================================================
 def get_sdrangel_ip(request):
@@ -167,7 +169,7 @@ def adjust_xvtr(sdrangel_ip, sdrangel_port, tracker_device_index, tracker_channe
     tracker_frequency = tracker_device_frequency + tracker_offset
     correction = TRACKER_FREQUENCY - tracker_frequency
     # do not correct if correction is too small
-    if correction > -1000 and correction < 1000:
+    if correction > -REFCORR_LIMIT and correction < REFCORR_LIMIT:
         return
     # apply correction
     r = requests.get(url=base_url + f'/deviceset/{XVTR_DEVICE}/device/settings')
@@ -201,6 +203,18 @@ def register_channel(device_index, channel_index, channel_frequency, request_con
             'requestContent': request_content
         }
     })
+
+# ======================================================================
+@app.route('/ftrack/refcorr/<int:correction>', methods=['PUT'])
+def ftrack_set_corr(correction):
+    """ Frequency tracker set reference correction limit """
+# ----------------------------------------------------------------------
+    global REFCORR_LIMIT
+    sdrangel_ip = get_sdrangel_ip(request)
+    print(f'ftrack_set_corr: {correction}')
+    REFCORR_LIMIT = correction
+    return 'OK processed'
+
 
 # ======================================================================
 @app.route('/sdrangel')
@@ -252,7 +266,10 @@ def main():
     global SDRANGEL_API_PORT
     global TRACKER_FREQUENCY
     global XVTR_DEVICE
-    addr, port, SDRANGEL_API_ADDR, SDRANGEL_API_PORT, TRACKER_FREQUENCY, XVTR_DEVICE = getInputOptions()
+    global REFCORR_LIMIT
+    addr, port, SDRANGEL_API_ADDR, SDRANGEL_API_PORT, TRACKER_FREQUENCY, XVTR_DEVICE, refcorr_limit = getInputOptions()
+    if refcorr_limit is not None:
+        REFCORR_LIMIT = refcorr_limit
     print(f'main: starting at: {addr}:{port}')
     app.run(debug=True, host=addr, port=port)
 
