@@ -33,20 +33,31 @@ InterferometerSettings::InterferometerSettings() :
 
 void InterferometerSettings::resetToDefaults()
 {
-    m_inputFrequencyOffset = 0;
     m_correlationType = CorrelationAdd;
     m_rgbColor = QColor(128, 128, 128).rgb();
     m_title = "Interferometer";
+    m_log2Decim = 0;
+    m_filterChainHash = 0;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
+    m_reverseAPIChannelIndex = 0;
 }
 
 QByteArray InterferometerSettings::serialize() const
 {
     SimpleSerializer s(1);
 
-    s.writeS32(1, m_inputFrequencyOffset);
     s.writeS32(2, (int) m_correlationType);
     s.writeU32(3, m_rgbColor);
     s.writeString(4, m_title);
+    s.writeU32(5, m_log2Decim);
+    s.writeU32(6, m_filterChainHash);
+    s.writeBool(7, m_useReverseAPI);
+    s.writeString(8, m_reverseAPIAddress);
+    s.writeU32(9, m_reverseAPIPort);
+    s.writeU32(10, m_reverseAPIDeviceIndex);
+    s.writeU32(11, m_reverseAPIChannelIndex);
 
     if (m_spectrumGUI) {
         s.writeBlob(20, m_spectrumGUI->serialize());
@@ -73,12 +84,29 @@ bool InterferometerSettings::deserialize(const QByteArray& data)
     {
         QByteArray bytetmp;
         int tmp;
+        quint32 utmp;
 
-        d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readS32(2, &tmp, 0);
         m_correlationType = (CorrelationType) tmp;
         d.readU32(3, &m_rgbColor);
         d.readString(4, &m_title, "Interpolator");
+        d.readU32(5, &utmp, 0);
+        m_log2Decim = utmp > 6 ? 6 : utmp;
+        d.readU32(6, &m_filterChainHash, 0);
+        d.readBool(7, &m_useReverseAPI, false);
+        d.readString(8, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(9, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(10, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(11, &utmp, 0);
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
 
         if (m_spectrumGUI) {
             d.readBlob(20, &bytetmp);

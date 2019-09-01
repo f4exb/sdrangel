@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ChannelAnalyzerGUI</class>
- <widget class="RollupWidget" name="ChannelAnalyzerGUI">
+ <class>InterferometerGUI</class>
+ <widget class="RollupWidget" name="InterferometerGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -54,141 +54,29 @@
      <number>2</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="HeaderLayout">
-      <property name="topMargin">
-       <number>2</number>
+     <layout class="QVBoxLayout" name="decimationLayer">
+      <property name="spacing">
+       <number>3</number>
       </property>
       <item>
-       <layout class="QHBoxLayout" name="DeltaFrequencyLayout">
+       <layout class="QHBoxLayout" name="decimationStageLayer">
         <item>
-         <widget class="QLabel" name="deltaFrequencyLabel">
-          <property name="minimumSize">
-           <size>
-            <width>16</width>
-            <height>0</height>
-           </size>
-          </property>
+         <widget class="QLabel" name="decimationLabel">
           <property name="text">
-           <string>Df</string>
+           <string>Dec</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="ValueDialZ" name="deltaFrequency" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>32</width>
-            <height>16</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <family>Liberation Mono</family>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="cursor">
-           <cursorShape>PointingHandCursor</cursorShape>
-          </property>
-          <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
-          </property>
-          <property name="toolTip">
-           <string>Demod shift frequency from center in Hz</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="deltaUnits">
-          <property name="palette">
-           <palette>
-            <active>
-             <colorrole role="Text">
-              <brush brushstyle="SolidPattern">
-               <color alpha="255">
-                <red>26</red>
-                <green>26</green>
-                <blue>26</blue>
-               </color>
-              </brush>
-             </colorrole>
-             <colorrole role="BrightText">
-              <brush brushstyle="SolidPattern">
-               <color alpha="255">
-                <red>255</red>
-                <green>255</green>
-                <blue>255</blue>
-               </color>
-              </brush>
-             </colorrole>
-            </active>
-            <inactive>
-             <colorrole role="Text">
-              <brush brushstyle="SolidPattern">
-               <color alpha="255">
-                <red>26</red>
-                <green>26</green>
-                <blue>26</blue>
-               </color>
-              </brush>
-             </colorrole>
-             <colorrole role="BrightText">
-              <brush brushstyle="SolidPattern">
-               <color alpha="255">
-                <red>255</red>
-                <green>255</green>
-                <blue>255</blue>
-               </color>
-              </brush>
-             </colorrole>
-            </inactive>
-            <disabled>
-             <colorrole role="Text">
-              <brush brushstyle="SolidPattern">
-               <color alpha="255">
-                <red>118</red>
-                <green>118</green>
-                <blue>117</blue>
-               </color>
-              </brush>
-             </colorrole>
-             <colorrole role="BrightText">
-              <brush brushstyle="SolidPattern">
-               <color alpha="255">
-                <red>255</red>
-                <green>255</green>
-                <blue>255</blue>
-               </color>
-              </brush>
-             </colorrole>
-            </disabled>
-           </palette>
-          </property>
-          <property name="text">
-           <string> Hz</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="ChannelSamplingLayout">
-        <item>
-         <widget class="QComboBox" name="spanLog2">
+         <widget class="QComboBox" name="decimationFactor">
           <property name="maximumSize">
            <size>
-            <width>50</width>
+            <width>55</width>
             <height>16777215</height>
            </size>
           </property>
           <property name="toolTip">
-           <string>Channel decimation</string>
+           <string>Decimation factor</string>
           </property>
           <item>
            <property name="text">
@@ -228,18 +116,18 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="spanText">
+         <widget class="QLabel" name="channelRateText">
           <property name="minimumSize">
            <size>
-            <width>80</width>
+            <width>50</width>
             <height>0</height>
            </size>
           </property>
           <property name="toolTip">
-           <string>Channel final sample rate</string>
+           <string>Effective channel rate (kS/s)</string>
           </property>
           <property name="text">
-           <string>00000.0 kS/s</string>
+           <string>0000k</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -247,63 +135,125 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="signalSelect">
-          <property name="toolTip">
-           <string>Select input signal</string>
+         <widget class="QLabel" name="filterChainText">
+          <property name="minimumSize">
+           <size>
+            <width>50</width>
+            <height>0</height>
+           </size>
           </property>
-          <item>
-           <property name="text">
-            <string>Sig</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Lock</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>ACorr</string>
-           </property>
-          </item>
+          <property name="toolTip">
+           <string>Filter chain stages left to right (L: low, C: center, H: high) </string>
+          </property>
+          <property name="text">
+           <string>LLLLLL</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="offsetFrequencyText">
+          <property name="minimumSize">
+           <size>
+            <width>85</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Offset frequency with thousands separator (Hz)</string>
+          </property>
+          <property name="text">
+           <string>-9,999,999 Hz</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="channelPower">
+          <property name="minimumSize">
+           <size>
+            <width>52</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Channel power</string>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="text">
+           <string>-100.0 dB</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
          </widget>
         </item>
        </layout>
       </item>
       <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+       <layout class="QHBoxLayout" name="decimationShiftLayer">
+        <property name="rightMargin">
+         <number>10</number>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="channelPower">
-        <property name="minimumSize">
-         <size>
-          <width>52</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Channel power</string>
-        </property>
-        <property name="layoutDirection">
-         <enum>Qt::LeftToRight</enum>
-        </property>
-        <property name="text">
-         <string>-100.0 dB</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
+        <item>
+         <widget class="QLabel" name="positionLabel">
+          <property name="text">
+           <string>Pos</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="position">
+          <property name="toolTip">
+           <string>Center frequency position</string>
+          </property>
+          <property name="maximum">
+           <number>2</number>
+          </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="filterChainIndex">
+          <property name="minimumSize">
+           <size>
+            <width>24</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Filter chain hash code</string>
+          </property>
+          <property name="text">
+           <string>000</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
@@ -492,12 +442,6 @@
    <class>GLSpectrumGUI</class>
    <extends>QWidget</extends>
    <header>gui/glspectrumgui.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ValueDialZ</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

@@ -18,27 +18,66 @@
 #ifndef INCLUDE_INTERFEROMETERSINK_H
 #define INCLUDE_INTERFEROMETERSINK_H
 
-#include "dsp/basebandsamplesink.h"
+#include <QObject>
 
-class InterferometerCorrelator;
+#include "dsp/mimosamplesink.h"
+#include "dsp/samplesinkvector.h"
+#include "interferometerstreamsink.h"
+#include "interferometercorr.h"
 
-class InterferometerSink : public BasebandSampleSink
+class DownChannelizer;
+class BasebandSampleSink;
+
+class InterferometerSink : public QObject
 {
+    Q_OBJECT
 public:
-    InterferometerSink(InterferometerCorrelator *correlator);
-    virtual ~InterferometerSink();
+    class MsgConfigureChannelizer : public Message {
+        MESSAGE_CLASS_DECLARATION
 
-	virtual void start();
-	virtual void stop();
-	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
-	virtual bool handleMessage(const Message& cmd);
+    public:
+        int getLog2Decim() const { return m_log2Decim; }
+        int getFilterChainHash() const { return m_filterChainHash; }
 
-    void setProcessingUnit(bool) { m_processingUnit = m_processingUnit; }
-    bool isProcessingUnit() const { return m_processingUnit; }
+        static MsgConfigureChannelizer* create(unsigned int log2Decim, unsigned int filterChainHash) {
+            return new MsgConfigureChannelizer(log2Decim, filterChainHash);
+        }
+
+    private:
+        unsigned int m_log2Decim;
+        unsigned int m_filterChainHash;
+
+        MsgConfigureChannelizer(unsigned int log2Decim, unsigned int filterChainHash) :
+            Message(),
+            m_log2Decim(log2Decim),
+            m_filterChainHash(filterChainHash)
+        { }
+    };
+
+    InterferometerSink();
+    ~InterferometerSink();
+    MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
+
+    void setSpectrumSink(BasebandSampleSink *spectrumSink) { m_spectrumSink = spectrumSink; }
+    void setScopeSink(BasebandSampleSink *scopeSink) { m_scopeSink = scopeSink; }
+
+	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int streamIndex);
 
 private:
-    bool m_processingUnit; //!< True if it is responsible of starting the correlation process
-    InterferometerCorrelator *m_correlator;
+    void run();
+    bool handleMessage(const Message& cmd);
+
+    InterferometerCorrelator m_correlator;
+    SampleSinkVector m_sinkBuffers[2];
+    InterferometerStreamSink m_sinks[2];
+    DownChannelizer *m_channelizers[2];
+    BasebandSampleSink *m_spectrumSink;
+    BasebandSampleSink *m_scopeSink;
+	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
+
+private slots:
+	void handleSinkBuffer(unsigned int sinkIndex); //!< Handle data when samples have to be processed
+    void handleInputMessages();
 };
 
 #endif // INCLUDE_INTERFEROMETERSINK_H

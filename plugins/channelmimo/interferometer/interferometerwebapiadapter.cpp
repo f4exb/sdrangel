@@ -46,7 +46,6 @@ void InterferometerWebAPIAdapter::webapiFormatChannelSettings(
         const GLScopeSettings& scopeSettings,
         const GLSpectrumSettings& spectrumSettings)
 {
-    response.getInterferometerSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getInterferometerSettings()->setCorrelationType((int) settings.m_correlationType);
     response.getInterferometerSettings()->setRgbColor(settings.m_rgbColor);
     response.getInterferometerSettings()->setTitle(new QString(settings.m_title));
@@ -154,9 +153,6 @@ void InterferometerWebAPIAdapter::webapiUpdateChannelSettings(
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
-    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
-        settings.m_inputFrequencyOffset = response.getInterferometerSettings()->getInputFrequencyOffset();
-    }
     if (channelSettingsKeys.contains("correlationType")) {
         settings.m_correlationType = (InterferometerSettings::CorrelationType) response.getInterferometerSettings()->getCorrelationType();
     }

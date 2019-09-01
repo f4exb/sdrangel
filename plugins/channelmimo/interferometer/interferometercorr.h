@@ -35,37 +35,33 @@ public:
     InterferometerCorrelator(int fftSize);
     ~InterferometerCorrelator();
 
-    void setCorrIndex(unsigned int corrIndex) { m_corrIndex = corrIndex; }
     void setCorrType(InterferometerSettings::CorrelationType corrType) { m_corrType = corrType; }
-    void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int argIndex);
+    InterferometerSettings::CorrelationType getCorrType() const { return m_corrType; }
+    void performCorr(const SampleVector& data0, const SampleVector& data1);
+    int getFullFFTSize() const { return 2*m_fftSize; }
 
     SampleVector m_scorr; //!< raw correlation result (spectrum) - Sample vector expected
     SampleVector m_tcorr; //!< correlation result (time or spectrum inverse FFT) - Sample vector expected
+    int m_processed;      //!< number of samples processed at the end of correlation
+    int m_remaining;      //!< number of samples remaining at the end of correlation
 
 signals:
     void dataReady(int start, int stop);
 
 private:
-    void feedOp(
-        const SampleVector::const_iterator& begin,
-        const SampleVector::const_iterator& end,
-        unsigned int argIndex,
-        Sample complexOp(std::complex<float>& a, const std::complex<float>& b)
-    );
-    void feedCorr(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int argIndex);
-    void processFFTBlocks(unsigned int argIndex, unsigned int dataIndex, int length);
-    void processFFT(unsigned int argIndex, int blockIndex);
+    void performOpCorr(const SampleVector& data0, const SampleVector& data1, Sample sampleOp(const Sample& a, const Sample& b));
+    void performFFTCorr(const SampleVector& data0, const SampleVector& data1);
+    void adjustSCorrSize(int size);
+    void adjustTCorrSize(int size);
 
     InterferometerSettings::CorrelationType m_corrType;
     int m_fftSize;                   //!< FFT length
     FFTEngine *m_fft[2];             //!< FFT engines
     FFTEngine *m_invFFT;             //!< Inverse FFT engine
     FFTWindow m_window;              //!< FFT window
-    std::complex<float> *m_data[2];  //!< from input
     std::complex<float> *m_dataj;    //!< conjuate of FFT transform
-    unsigned int m_dataIndex[2];     //!< Current sample index in A
-    unsigned int m_corrIndex;        //!< Input index on which correlation is actioned
-    static const unsigned int m_nbFFTBlocks; //!< number of buffered FFT blocks
+    int m_scorrSize;                 //!< spectrum correlations vector size
+    int m_tcorrSize;                 //!< time correlations vector size
 };
 
 #endif // INCLUDE_INTERFEROMETERCORR_H

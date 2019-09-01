@@ -15,45 +15,44 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_INTERFEROMETERSETTINGS_H
-#define INCLUDE_INTERFEROMETERSETTINGS_H
+#ifndef SDRBASE_INTERFEROMETERSTREAMSINK_H_
+#define SDRBASE_INTERFEROMETERSTREAMSINK_H_
 
-#include <QByteArray>
-#include <QString>
+#include <QMutex>
 
-class Serializable;
+#include "dsp/basebandsamplesink.h"
+#include "dsp/nco.h"
+#include "dsp/interpolator.h"
 
-struct InterferometerSettings
+
+class InterferometerStreamSink : public BasebandSampleSink
 {
-    enum CorrelationType
-    {
-        CorrelationAdd,
-        CorrelationMultiply,
-        CorrelationCorrelation
-    };
+public:
+    InterferometerStreamSink();
+    virtual ~InterferometerStreamSink();
 
-    CorrelationType m_correlationType;
-    quint32 m_rgbColor;
-    QString m_title;
+	virtual void start();
+	virtual void stop();
+	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
+	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
+
+    unsigned int getStreamIndex() const { return m_streamIndex; }
+    void setStreamIndex(unsigned int streamIndex) { m_streamIndex = streamIndex; }
+    SampleVector& getData() { return m_data; }
+    void setDataStart(int dataStart) { m_dataStart = dataStart; }
+
+private:
+    unsigned int m_streamIndex;
+    SampleVector m_data;
+    int m_dataSize;
+    int m_bufferSize;
+    int m_dataStart;
+
+    int m_sampleRate;
     uint32_t m_log2Decim;
     uint32_t m_filterChainHash;
-    bool m_useReverseAPI;
-    QString m_reverseAPIAddress;
-    uint16_t m_reverseAPIPort;
-    uint16_t m_reverseAPIDeviceIndex;
-    uint16_t m_reverseAPIChannelIndex;
-
-    Serializable *m_channelMarker;
-    Serializable *m_spectrumGUI;
-    Serializable *m_scopeGUI;
-
-    InterferometerSettings();
-    void resetToDefaults();
-    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
-    void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
-    void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+    QMutex m_settingsMutex;
 };
 
-#endif // INCLUDE_INTERFEROMETERSETTINGS_H
+
+#endif // SDRBASE_INTERFEROMETERSTREAMSINK_H_

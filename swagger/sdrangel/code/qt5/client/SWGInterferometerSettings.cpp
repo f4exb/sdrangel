@@ -28,14 +28,26 @@ SWGInterferometerSettings::SWGInterferometerSettings(QString* json) {
 }
 
 SWGInterferometerSettings::SWGInterferometerSettings() {
-    input_frequency_offset = 0;
-    m_input_frequency_offset_isSet = false;
     correlation_type = 0;
     m_correlation_type_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
     m_title_isSet = false;
+    log2_decim = 0;
+    m_log2_decim_isSet = false;
+    filter_chain_hash = 0;
+    m_filter_chain_hash_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = nullptr;
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_device_index = 0;
+    m_reverse_api_device_index_isSet = false;
+    reverse_api_channel_index = 0;
+    m_reverse_api_channel_index_isSet = false;
     spectrum_config = nullptr;
     m_spectrum_config_isSet = false;
     scope_config = nullptr;
@@ -48,14 +60,26 @@ SWGInterferometerSettings::~SWGInterferometerSettings() {
 
 void
 SWGInterferometerSettings::init() {
-    input_frequency_offset = 0;
-    m_input_frequency_offset_isSet = false;
     correlation_type = 0;
     m_correlation_type_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
     m_title_isSet = false;
+    log2_decim = 0;
+    m_log2_decim_isSet = false;
+    filter_chain_hash = 0;
+    m_filter_chain_hash_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = new QString("");
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_device_index = 0;
+    m_reverse_api_device_index_isSet = false;
+    reverse_api_channel_index = 0;
+    m_reverse_api_channel_index_isSet = false;
     spectrum_config = new SWGGLSpectrum();
     m_spectrum_config_isSet = false;
     scope_config = new SWGGLScope();
@@ -66,10 +90,18 @@ void
 SWGInterferometerSettings::cleanup() {
 
 
-
     if(title != nullptr) { 
         delete title;
     }
+
+
+
+    if(reverse_api_address != nullptr) { 
+        delete reverse_api_address;
+    }
+
+
+
     if(spectrum_config != nullptr) { 
         delete spectrum_config;
     }
@@ -89,13 +121,25 @@ SWGInterferometerSettings::fromJson(QString &json) {
 
 void
 SWGInterferometerSettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint32", "");
-    
     ::SWGSDRangel::setValue(&correlation_type, pJson["correlationType"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&log2_decim, pJson["log2Decim"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&filter_chain_hash, pJson["filterChainHash"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_address, pJson["reverseAPIAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&reverse_api_port, pJson["reverseAPIPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&spectrum_config, pJson["spectrumConfig"], "SWGGLSpectrum", "SWGGLSpectrum");
     
@@ -117,9 +161,6 @@ SWGInterferometerSettings::asJson ()
 QJsonObject*
 SWGInterferometerSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_input_frequency_offset_isSet){
-        obj->insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
-    }
     if(m_correlation_type_isSet){
         obj->insert("correlationType", QJsonValue(correlation_type));
     }
@@ -129,6 +170,27 @@ SWGInterferometerSettings::asJsonObject() {
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
     }
+    if(m_log2_decim_isSet){
+        obj->insert("log2Decim", QJsonValue(log2_decim));
+    }
+    if(m_filter_chain_hash_isSet){
+        obj->insert("filterChainHash", QJsonValue(filter_chain_hash));
+    }
+    if(m_use_reverse_api_isSet){
+        obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
+    }
+    if(reverse_api_address != nullptr && *reverse_api_address != QString("")){
+        toJsonValue(QString("reverseAPIAddress"), reverse_api_address, obj, QString("QString"));
+    }
+    if(m_reverse_api_port_isSet){
+        obj->insert("reverseAPIPort", QJsonValue(reverse_api_port));
+    }
+    if(m_reverse_api_device_index_isSet){
+        obj->insert("reverseAPIDeviceIndex", QJsonValue(reverse_api_device_index));
+    }
+    if(m_reverse_api_channel_index_isSet){
+        obj->insert("reverseAPIChannelIndex", QJsonValue(reverse_api_channel_index));
+    }
     if((spectrum_config != nullptr) && (spectrum_config->isSet())){
         toJsonValue(QString("spectrumConfig"), spectrum_config, obj, QString("SWGGLSpectrum"));
     }
@@ -137,16 +199,6 @@ SWGInterferometerSettings::asJsonObject() {
     }
 
     return obj;
-}
-
-qint32
-SWGInterferometerSettings::getInputFrequencyOffset() {
-    return input_frequency_offset;
-}
-void
-SWGInterferometerSettings::setInputFrequencyOffset(qint32 input_frequency_offset) {
-    this->input_frequency_offset = input_frequency_offset;
-    this->m_input_frequency_offset_isSet = true;
 }
 
 qint32
@@ -179,6 +231,76 @@ SWGInterferometerSettings::setTitle(QString* title) {
     this->m_title_isSet = true;
 }
 
+qint32
+SWGInterferometerSettings::getLog2Decim() {
+    return log2_decim;
+}
+void
+SWGInterferometerSettings::setLog2Decim(qint32 log2_decim) {
+    this->log2_decim = log2_decim;
+    this->m_log2_decim_isSet = true;
+}
+
+qint32
+SWGInterferometerSettings::getFilterChainHash() {
+    return filter_chain_hash;
+}
+void
+SWGInterferometerSettings::setFilterChainHash(qint32 filter_chain_hash) {
+    this->filter_chain_hash = filter_chain_hash;
+    this->m_filter_chain_hash_isSet = true;
+}
+
+qint32
+SWGInterferometerSettings::getUseReverseApi() {
+    return use_reverse_api;
+}
+void
+SWGInterferometerSettings::setUseReverseApi(qint32 use_reverse_api) {
+    this->use_reverse_api = use_reverse_api;
+    this->m_use_reverse_api_isSet = true;
+}
+
+QString*
+SWGInterferometerSettings::getReverseApiAddress() {
+    return reverse_api_address;
+}
+void
+SWGInterferometerSettings::setReverseApiAddress(QString* reverse_api_address) {
+    this->reverse_api_address = reverse_api_address;
+    this->m_reverse_api_address_isSet = true;
+}
+
+qint32
+SWGInterferometerSettings::getReverseApiPort() {
+    return reverse_api_port;
+}
+void
+SWGInterferometerSettings::setReverseApiPort(qint32 reverse_api_port) {
+    this->reverse_api_port = reverse_api_port;
+    this->m_reverse_api_port_isSet = true;
+}
+
+qint32
+SWGInterferometerSettings::getReverseApiDeviceIndex() {
+    return reverse_api_device_index;
+}
+void
+SWGInterferometerSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
+    this->reverse_api_device_index = reverse_api_device_index;
+    this->m_reverse_api_device_index_isSet = true;
+}
+
+qint32
+SWGInterferometerSettings::getReverseApiChannelIndex() {
+    return reverse_api_channel_index;
+}
+void
+SWGInterferometerSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
+    this->reverse_api_channel_index = reverse_api_channel_index;
+    this->m_reverse_api_channel_index_isSet = true;
+}
+
 SWGGLSpectrum*
 SWGInterferometerSettings::getSpectrumConfig() {
     return spectrum_config;
@@ -204,9 +326,6 @@ bool
 SWGInterferometerSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_input_frequency_offset_isSet){
-            isObjectUpdated = true; break;
-        }
         if(m_correlation_type_isSet){
             isObjectUpdated = true; break;
         }
@@ -214,6 +333,27 @@ SWGInterferometerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_log2_decim_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_filter_chain_hash_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_channel_index_isSet){
             isObjectUpdated = true; break;
         }
         if(spectrum_config && spectrum_config->isSet()){

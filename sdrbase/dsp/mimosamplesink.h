@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2019 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,45 +16,35 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_INTERFEROMETERSETTINGS_H
-#define INCLUDE_INTERFEROMETERSETTINGS_H
+#ifndef SDRBASE_MIMOSAMPLESINK_H
+#define SDRBASE_MIMOSAMPLESINK_H
 
-#include <QByteArray>
-#include <QString>
+#include <QObject>
 
-class Serializable;
+#include "export.h"
+#include "dsp/dsptypes.h"
+#include "util/messagequeue.h"
+#include "util/message.h"
 
-struct InterferometerSettings
-{
-    enum CorrelationType
-    {
-        CorrelationAdd,
-        CorrelationMultiply,
-        CorrelationCorrelation
-    };
 
-    CorrelationType m_correlationType;
-    quint32 m_rgbColor;
-    QString m_title;
-    uint32_t m_log2Decim;
-    uint32_t m_filterChainHash;
-    bool m_useReverseAPI;
-    QString m_reverseAPIAddress;
-    uint16_t m_reverseAPIPort;
-    uint16_t m_reverseAPIDeviceIndex;
-    uint16_t m_reverseAPIChannelIndex;
+class SDRBASE_API MIMOSampleSink : public QObject {
+	Q_OBJECT
+public:
+	MIMOSampleSink();
+	virtual ~MIMOSampleSink();
 
-    Serializable *m_channelMarker;
-    Serializable *m_spectrumGUI;
-    Serializable *m_scopeGUI;
+	virtual void start() = 0;
+	virtual void stop() = 0;
+	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex) = 0;
+	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
 
-    InterferometerSettings();
-    void resetToDefaults();
-    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
-    void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
-    void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
+
+protected:
+	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
+
+protected slots:
+	void handleInputMessages();
 };
 
-#endif // INCLUDE_INTERFEROMETERSETTINGS_H
+#endif // SDRBASE_MIMOSAMPLESINK_H
