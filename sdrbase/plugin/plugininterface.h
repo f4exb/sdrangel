@@ -26,6 +26,7 @@ class DeviceSampleSink;
 class DeviceSampleMIMO;
 class BasebandSampleSink;
 class BasebandSampleSource;
+class MIMOSampleSink;
 class ChannelAPI;
 class ChannelWebAPIAdapter;
 class DeviceWebAPIAdapter;
@@ -127,6 +128,29 @@ public:
     }
 
     virtual ChannelAPI* createTxChannelCS(DeviceAPI *deviceAPI) const
+    {
+        (void) deviceAPI;
+        return nullptr;
+    }
+
+    // channel MIMO plugins
+
+	virtual PluginInstanceGUI* createMIMOChannelGUI(
+            DeviceUISet *deviceUISet,
+            MIMOSampleSink *mimoChannel) const
+    {
+        (void) deviceUISet;
+        (void) mimoChannel;
+        return nullptr;
+    }
+
+    virtual MIMOSampleSink* createMIMOChannelBS(DeviceAPI *deviceAPI) const
+    {
+        (void) deviceAPI;
+        return nullptr;
+    }
+
+    virtual ChannelAPI* createMIMOChannelCS(DeviceAPI *deviceAPI) const
     {
         (void) deviceAPI;
         return nullptr;

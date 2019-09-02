@@ -51,6 +51,10 @@ public:
 	void registerTxChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin);
 	ChannelRegistrations *getTxChannelRegistrations();
 
+    // MIMO Channel stuff
+	void registerMIMOChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin);
+	ChannelRegistrations *getMIMOChannelRegistrations();
+
 	// Sample Source stuff
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 

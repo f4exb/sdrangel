@@ -135,6 +135,15 @@ void PluginManager::registerTxChannel(const QString& channelIdURI, const QString
 	m_txChannelRegistrations.append(PluginAPI::ChannelRegistration(channelIdURI, channelId, plugin));
 }
 
+void PluginManager::registerMIMOChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin)
+{
+    qDebug() << "PluginManager::registerMIMOChannel "
+            << plugin->getPluginDescriptor().displayedName.toStdString().c_str()
+            << " with channel name " << channelIdURI;
+
+	m_mimoChannelRegistrations.append(PluginAPI::ChannelRegistration(channelIdURI, channelId, plugin));
+}
+
 void PluginManager::registerSampleSource(const QString& sourceName, PluginInterface* plugin)
 {
 	qDebug() << "PluginManager::registerSampleSource "
@@ -218,6 +227,17 @@ void PluginManager::listRxChannels(QList<QString>& list)
     }
 }
 
+void PluginManager::listMIMOChannels(QList<QString>& list)
+{
+    list.clear();
+
+    for (PluginAPI::ChannelRegistrations::iterator it = m_mimoChannelRegistrations.begin(); it != m_mimoChannelRegistrations.end(); ++it)
+    {
+        const PluginDescriptor& pluginDesciptor = it->m_plugin->getPluginDescriptor();
+        list.append(pluginDesciptor.displayedName);
+    }
+}
+
 void PluginManager::createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI)
 {
     if (channelPluginIndex < m_rxChannelRegistrations.size())
@@ -235,6 +255,16 @@ void PluginManager::createTxChannelInstance(int channelPluginIndex, DeviceUISet 
         PluginInterface *pluginInterface = m_txChannelRegistrations[channelPluginIndex].m_plugin;
         BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(deviceAPI);
         pluginInterface->createTxChannelGUI(deviceUISet, txChannel);
+    }
+}
+
+void PluginManager::createMIMOChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI)
+{
+    if (channelPluginIndex < m_mimoChannelRegistrations.size())
+    {
+        PluginInterface *pluginInterface = m_mimoChannelRegistrations[channelPluginIndex].m_plugin;
+        MIMOSampleSink *mimoChannel = pluginInterface->createMIMOChannelBS(deviceAPI);
+        pluginInterface->createMIMOChannelGUI(deviceUISet, mimoChannel);
     }
 }
 
