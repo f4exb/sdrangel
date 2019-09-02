@@ -24,6 +24,8 @@
 #include "device/deviceapi.h"
 #include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
+#include "dsp/hbfilterchainconverter.h"
+#include "dsp/dspcommands.h"
 
 #include "SWGChannelSettings.h"
 
@@ -41,7 +43,9 @@ Interferometer::Interferometer(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
     m_deviceAPI(deviceAPI),
     m_spectrumSink(nullptr),
-    m_scopeSink(nullptr)
+    m_scopeSink(nullptr),
+    m_frequencyOffset(0),
+    m_deviceSampleRate(48000)
 {
     m_deviceAPI->addChannelSinkAPI(this);
     m_thread = new QThread(this);
@@ -110,8 +114,56 @@ bool Interferometer::handleMessage(const Message& cmd)
         applySettings(cfg.getSettings(), cfg.getForce());
         return true;
     }
+    else if (DSPSignalNotification::match(cmd))
+    {
+        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+
+        qDebug() << "Interferometer::handleMessage: DSPSignalNotification:"
+                << " inputSampleRate: " << notif.getSampleRate()
+                << " centerFrequency: " << notif.getCenterFrequency();
+
+        m_deviceSampleRate = notif.getSampleRate();
+        calculateFrequencyOffset(); // This is when device sample rate changes
+
+        // Redo the channelizer stuff with the new sample rate to re-synchronize everything
+        InterferometerSink::MsgConfigureChannelizer *msg = InterferometerSink::MsgConfigureChannelizer::create(
+            m_settings.m_log2Decim,
+            m_settings.m_filterChainHash);
+        m_sink->getInputMessageQueue()->push(msg);
+
+        if (m_guiMessageQueue)
+        {
+            MsgSampleRateNotification *msg = MsgSampleRateNotification::create(notif.getSampleRate());
+            m_guiMessageQueue->push(msg);
+        }
+
+        return true;
+    }
     else
     {
+        return false;
+    }
+}
+
+QByteArray Interferometer::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool Interferometer::deserialize(const QByteArray& data)
+{
+    (void) data;
+    if (m_settings.deserialize(data))
+    {
+        MsgConfigureInterferometer *msg = MsgConfigureInterferometer::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
+        return true;
+    }
+    else
+    {
+        m_settings.resetToDefaults();
+        MsgConfigureInterferometer *msg = MsgConfigureInterferometer::create(m_settings, true);
+        m_inputMessageQueue.push(msg);
         return false;
     }
 }
@@ -125,6 +177,12 @@ void Interferometer::validateFilterChainHash(InterferometerSettings& settings)
     }
 
     settings.m_filterChainHash = settings.m_filterChainHash >= s ? s-1 : settings.m_filterChainHash;
+}
+
+void Interferometer::calculateFrequencyOffset()
+{
+    double shiftFactor = HBFilterChainConverter::getShiftFactor(m_settings.m_log2Decim, m_settings.m_filterChainHash);
+    m_frequencyOffset = m_deviceSampleRate * shiftFactor;
 }
 
 int Interferometer::webapiSettingsGet(

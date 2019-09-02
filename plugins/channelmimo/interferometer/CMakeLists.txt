@@ -1,6 +1,7 @@
 project(interferometer)
 
 set(interferometer_SOURCES
+    interferometerplugin.cpp
     interferometer.cpp
     interferometercorr.cpp
     interferometersettings.cpp
@@ -10,6 +11,7 @@ set(interferometer_SOURCES
 )
 
 set(interferometer_HEADERS
+    interferometerplugin.h
     interferometer.h
     interferometercorr.h
     interferometersettings.h

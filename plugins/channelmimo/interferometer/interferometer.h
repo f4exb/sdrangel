@@ -35,7 +35,7 @@ class QNetworkReply;
 class QNetworkAccessManager;
 class BasebandSampleSink;
 
-class Interferometer: public MIMOSampleSink, ChannelAPI
+class Interferometer: public MIMOSampleSink, public ChannelAPI
 {
     Q_OBJECT
 public:
@@ -113,6 +113,23 @@ public:
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex);
 	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
 
+    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual void getTitle(QString& title) { title = "Interferometer"; }
+    virtual qint64 getCenterFrequency() const { return m_frequencyOffset; }
+
+    virtual QByteArray serialize() const;
+    virtual bool deserialize(const QByteArray& data);
+
+    virtual int getNbSinkStreams() const { return 2; }
+    virtual int getNbSourceStreams() const { return 0; }
+
+    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
+    {
+        (void) streamIndex;
+        (void) sinkElseSource;
+        return m_frequencyOffset;
+    }
+
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
@@ -155,8 +172,12 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+    int64_t m_frequencyOffset;
+    uint32_t m_deviceSampleRate;
+
     void applySettings(const InterferometerSettings& settings, bool force = false);
     static void validateFilterChainHash(InterferometerSettings& settings);
+    void calculateFrequencyOffset();
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const InterferometerSettings& settings, bool force);
 
 private slots:
