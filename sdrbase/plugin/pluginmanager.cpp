@@ -263,7 +263,7 @@ void PluginManager::createMIMOChannelInstance(int channelPluginIndex, DeviceUISe
     if (channelPluginIndex < m_mimoChannelRegistrations.size())
     {
         PluginInterface *pluginInterface = m_mimoChannelRegistrations[channelPluginIndex].m_plugin;
-        MIMOSampleSink *mimoChannel = pluginInterface->createMIMOChannelBS(deviceAPI);
+        MIMOChannel *mimoChannel = pluginInterface->createMIMOChannelBS(deviceAPI);
         pluginInterface->createMIMOChannelGUI(deviceUISet, mimoChannel);
     }
 }

@@ -26,7 +26,7 @@ class DeviceSampleSink;
 class DeviceSampleMIMO;
 class BasebandSampleSink;
 class BasebandSampleSource;
-class MIMOSampleSink;
+class MIMOChannel;
 class ChannelAPI;
 class ChannelWebAPIAdapter;
 class DeviceWebAPIAdapter;
@@ -137,14 +137,14 @@ public:
 
 	virtual PluginInstanceGUI* createMIMOChannelGUI(
             DeviceUISet *deviceUISet,
-            MIMOSampleSink *mimoChannel) const
+            MIMOChannel *mimoChannel) const
     {
         (void) deviceUISet;
         (void) mimoChannel;
         return nullptr;
     }
 
-    virtual MIMOSampleSink* createMIMOChannelBS(DeviceAPI *deviceAPI) const
+    virtual MIMOChannel* createMIMOChannelBS(DeviceAPI *deviceAPI) const
     {
         (void) deviceAPI;
         return nullptr;

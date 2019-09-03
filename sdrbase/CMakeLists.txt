@@ -91,6 +91,7 @@ set(sdrbase_SOURCES
     dsp/hbfilterchainconverter.cpp
     dsp/hbfiltertraits.cpp
     dsp/lowpass.cpp
+    dsp/mimochannel.cpp
     dsp/nco.cpp
     dsp/ncof.cpp
     dsp/phaselock.cpp
@@ -224,6 +225,7 @@ set(sdrbase_HEADERS
     dsp/kissfft.h
     dsp/kissengine.h
     dsp/lowpass.h
+    dsp/mimochannel.h
     dsp/misc.h
     dsp/movingaverage.h
     dsp/nco.h
