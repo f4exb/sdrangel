@@ -18,10 +18,11 @@
 
 #include <QDebug>
 
-#include "dsp/dspcommands.h"
+#include "dspcommands.h"
 #include "threadedbasebandsamplesource.h"
 #include "threadedbasebandsamplesink.h"
 #include "devicesamplemimo.h"
+#include "mimochannel.h"
 
 #include "dspdevicemimoengine.h"
 
@@ -34,6 +35,8 @@ MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddThreadedBasebandSampleSource, M
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::RemoveThreadedBasebandSampleSource, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddThreadedBasebandSampleSink, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::RemoveThreadedBasebandSampleSink, Message)
+MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddMIMOChannel, Message)
+MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::RemoveMIMOChannel, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddBasebandSampleSink, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::RemoveBasebandSampleSink, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddSpectrumSink, Message)
@@ -187,6 +190,22 @@ void DSPDeviceMIMOEngine::removeChannelSink(ThreadedBasebandSampleSink* sink, in
         << index;
 	RemoveThreadedBasebandSampleSink cmd(sink, index);
 	m_syncMessenger.sendWait(cmd);
+}
+
+void DSPDeviceMIMOEngine::addMIMOChannel(MIMOChannel *channel)
+{
+	qDebug() << "DSPDeviceMIMOEngine::addMIMOChannel: "
+        << channel->objectName().toStdString().c_str();
+    AddMIMOChannel cmd(channel);
+    m_syncMessenger.sendWait(cmd);
+}
+
+void DSPDeviceMIMOEngine::removeMIMOChannel(MIMOChannel *channel)
+{
+	qDebug() << "DSPDeviceMIMOEngine::removeMIMOChannel: "
+        << channel->objectName().toStdString().c_str();
+    RemoveMIMOChannel cmd(channel);
+    m_syncMessenger.sendWait(cmd);
 }
 
 void DSPDeviceMIMOEngine::addAncillarySink(BasebandSampleSink* sink, int index)
@@ -718,6 +737,45 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
             m_threadedBasebandSampleSources[isink].remove(threadedSource);
         }
 	}
+    else if (AddMIMOChannel::match(*message))
+    {
+        const AddMIMOChannel *msg = (AddMIMOChannel *) message;
+        MIMOChannel *channel = msg->getChannel();
+        m_mimoChannels.push_back(channel);
+
+        for (int isource = 0; isource < m_deviceSampleMIMO->getNbSourceStreams(); isource++)
+        {
+            DSPMIMOSignalNotification notif(
+                m_deviceSampleMIMO->getSourceSampleRate(isource),
+                m_deviceSampleMIMO->getSourceCenterFrequency(isource),
+                true,
+                isource
+            );
+            channel->handleMessage(notif);
+        }
+
+        for (int isink = 0; isink < m_deviceSampleMIMO->getNbSinkStreams(); isink++)
+        {
+            DSPMIMOSignalNotification notif(
+                m_deviceSampleMIMO->getSourceSampleRate(isink),
+                m_deviceSampleMIMO->getSourceCenterFrequency(isink),
+                false,
+                isink
+            );
+            channel->handleMessage(notif);
+        }
+
+        if (m_state == StRunning) {
+            channel->start();
+        }
+    }
+    else if (RemoveMIMOChannel::match(*message))
+    {
+        const RemoveMIMOChannel *msg = (RemoveMIMOChannel *) message;
+        MIMOChannel *channel = msg->getChannel();
+        channel->stop();
+        m_mimoChannels.remove(channel);
+    }
 	else if (AddSpectrumSink::match(*message))
 	{
 		m_spectrumSink = ((AddSpectrumSink*) message)->getSampleSink();
@@ -840,6 +898,12 @@ void DSPDeviceMIMOEngine::handleInputMessages()
                 << " istream: " << istream
 				<< " sampleRate: " << sampleRate
 				<< " centerFrequency: " << centerFrequency;
+
+            for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it)
+            {
+                DSPMIMOSignalNotification *message = new DSPMIMOSignalNotification(*notif);
+                (*it)->handleMessage(*message);
+            }
 
             if (sourceElseSink)
             {

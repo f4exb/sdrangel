@@ -27,6 +27,7 @@
 class BasebandSampleSink;
 class ThreadedBasebandSampleSink;
 class ThreadedBasebandSampleSource;
+class MIMOChannel;
 class ChannelAPI;
 class DeviceSampleSink;
 class DeviceSampleSource;
@@ -80,11 +81,15 @@ public:
     void removeChannelSink(ThreadedBasebandSampleSink* sink, int streamIndex = 0);     //!< Remove a channel sink (Rx)
     void addChannelSource(ThreadedBasebandSampleSource* sink, int streamIndex = 0);    //!< Add a channel source (Tx)
     void removeChannelSource(ThreadedBasebandSampleSource* sink, int streamIndex = 0); //!< Remove a channel source (Tx)
+    void addMIMOChannel(MIMOChannel* channel);   //!< Add a MIMO channel (n Rx and m Tx combination)
+    void removeMIMOChannel(MIMOChannel* channe); //!< Remove a MIMO channel (n Rx and m Tx combination)
 
     void addChannelSinkAPI(ChannelAPI* channelAPI, int streamIndex = 0);
     void removeChannelSinkAPI(ChannelAPI* channelAPI, int streamIndex = 0);
     void addChannelSourceAPI(ChannelAPI* channelAPI, int streamIndex = 0);
     void removeChannelSourceAPI(ChannelAPI* channelAPI, int streamIndex = 0);
+    void addMIMOChannelAPI(ChannelAPI* channelAPI);
+    void removeMIMOChannelAPI(ChannelAPI* channelAPI);
 
     void setSampleSource(DeviceSampleSource* source); //!< Set the device sample source (single Rx)
     void setSampleSink(DeviceSampleSink* sink);       //!< Set the device sample sink (single Tx)
@@ -211,6 +216,7 @@ protected:
     // MIMO
 
     DSPDeviceMIMOEngine *m_deviceMIMOEngine;
+    QList<ChannelAPI*> m_mimoChannelAPIs;
 
 private:
     void renumerateChannels();

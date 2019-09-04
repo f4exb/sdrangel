@@ -141,6 +141,8 @@ void DeviceAPI::addChannelSource(ThreadedBasebandSampleSource* source, int strea
 
     if (m_deviceSinkEngine) {
         m_deviceSinkEngine->addThreadedSource(source);
+    } else if (m_deviceMIMOEngine) {
+        m_deviceMIMOEngine->addChannelSource(source);
     }
 }
 
@@ -150,6 +152,22 @@ void DeviceAPI::removeChannelSource(ThreadedBasebandSampleSource* source, int st
 
     if (m_deviceSinkEngine) {
         m_deviceSinkEngine->removeThreadedSource(source);
+    } else if (m_deviceMIMOEngine) {
+        m_deviceMIMOEngine->removeChannelSource(source);
+    }
+}
+
+void DeviceAPI::addMIMOChannel(MIMOChannel* channel)
+{
+    if (m_deviceMIMOEngine) {
+        m_deviceMIMOEngine->addMIMOChannel(channel);
+    }
+}
+
+void DeviceAPI::removeMIMOChannel(MIMOChannel* channel)
+{
+    if (m_deviceMIMOEngine) {
+        m_deviceMIMOEngine->removeMIMOChannel(channel);
     }
 }
 
@@ -187,6 +205,18 @@ void DeviceAPI::removeChannelSourceAPI(ChannelAPI* channelAPI, int streamIndex)
     }
 
     channelAPI->setIndexInDeviceSet(-1);
+}
+
+void DeviceAPI::addMIMOChannelAPI(ChannelAPI* channelAPI)
+{
+    m_mimoChannelAPIs.append(channelAPI);
+}
+
+void DeviceAPI::removeMIMOChannelAPI(ChannelAPI *channelAPI)
+{
+    if (m_mimoChannelAPIs.removeOne(channelAPI)) {
+        renumerateChannels();
+    }
 }
 
 void DeviceAPI::setSampleSource(DeviceSampleSource* source)
@@ -788,6 +818,15 @@ void DeviceAPI::renumerateChannels()
             m_channelSourceAPIs.at(i)->setIndexInDeviceSet(i);
             m_channelSourceAPIs.at(i)->setDeviceSetIndex(m_deviceTabIndex);
             m_channelSourceAPIs.at(i)->setDeviceAPI(this);
+        }
+    }
+    else if (m_streamType == StreamMIMO)
+    {
+        for (int i = 0; i < m_mimoChannelAPIs.size(); ++i)
+        {
+            m_mimoChannelAPIs.at(i)->setIndexInDeviceSet(i);
+            m_mimoChannelAPIs.at(i)->setDeviceSetIndex(m_deviceTabIndex);
+            m_mimoChannelAPIs.at(i)->setDeviceAPI(this);
         }
     }
 }

@@ -32,6 +32,7 @@ class DeviceSampleMIMO;
 class ThreadedBasebandSampleSource;
 class ThreadedBasebandSampleSink;
 class BasebandSampleSink;
+class MIMOChannel;
 
 class SDRBASE_API DSPDeviceMIMOEngine : public QThread {
 	Q_OBJECT
@@ -121,6 +122,30 @@ public:
     private:
         ThreadedBasebandSampleSink* m_threadedSampleSink;
         unsigned int m_index;
+    };
+
+    class AddMIMOChannel : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        AddMIMOChannel(MIMOChannel* channel) :
+            Message(),
+            m_channel(channel)
+        { }
+        MIMOChannel* getChannel() const { return m_channel; }
+    private:
+        MIMOChannel* m_channel;
+    };
+
+    class RemoveMIMOChannel : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        RemoveMIMOChannel(MIMOChannel* channel) :
+            Message(),
+            m_channel(channel)
+        { }
+        MIMOChannel* getChannel() const { return m_channel; }
+    private:
+        MIMOChannel* m_channel;
     };
 
     class AddBasebandSampleSink : public Message {
@@ -255,6 +280,8 @@ public:
 	void removeChannelSource(ThreadedBasebandSampleSource* source, int index = 0); //!< Remove a channel source that runs on its own thread
 	void addChannelSink(ThreadedBasebandSampleSink* sink, int index = 0);          //!< Add a channel sink that will run on its own thread
 	void removeChannelSink(ThreadedBasebandSampleSink* sink, int index = 0);       //!< Remove a channel sink that runs on its own thread
+    void addMIMOChannel(MIMOChannel *channel);                                     //!< Add a MIMO channel
+    void removeMIMOChannel(MIMOChannel *channel);                                  //!< Remove a MIMO channel
 
 	void addAncillarySink(BasebandSampleSink* sink, int index = 0);    //!< Add an ancillary sink like a I/Q recorder
 	void removeAncillarySink(BasebandSampleSink* sink, int index = 0); //!< Remove an ancillary sample sink
@@ -341,6 +368,9 @@ private:
 
 	typedef std::list<ThreadedBasebandSampleSource*> ThreadedBasebandSampleSources;
 	std::vector<ThreadedBasebandSampleSources> m_threadedBasebandSampleSources; //!< channel sample sources on their own threads (per output stream)
+
+    typedef std::list<MIMOChannel*> MIMOChannels;
+    MIMOChannels m_mimoChannels; //!< MIMO channels
 
     std::vector<SourceCorrection> m_sourcesCorrections;
 
