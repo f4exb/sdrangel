@@ -45,7 +45,7 @@ MESSAGE_CLASS_DEFINITION(TestMI::MsgStartStop, Message)
 TestMI::TestMI(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
-	m_deviceDescription(),
+	m_deviceDescription("TestMI"),
 	m_running(false),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {

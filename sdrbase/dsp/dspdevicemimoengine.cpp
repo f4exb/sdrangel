@@ -89,7 +89,7 @@ void DSPDeviceMIMOEngine::stop()
 
 bool DSPDeviceMIMOEngine::initProcess()
 {
-	qDebug() << "DSPDeviceMIMOEngine::initGeneration";
+	qDebug() << "DSPDeviceMIMOEngine::initProcess";
 	DSPGenerationInit cmd;
 
 	return m_syncMessenger.sendWait(cmd) == StReady;
@@ -97,7 +97,7 @@ bool DSPDeviceMIMOEngine::initProcess()
 
 bool DSPDeviceMIMOEngine::startProcess()
 {
-	qDebug() << "DSPDeviceMIMOEngine::startGeneration";
+	qDebug() << "DSPDeviceMIMOEngine::startProcess";
 	DSPGenerationStart cmd;
 
 	return m_syncMessenger.sendWait(cmd) == StRunning;
@@ -105,7 +105,7 @@ bool DSPDeviceMIMOEngine::startProcess()
 
 void DSPDeviceMIMOEngine::stopProcess()
 {
-	qDebug() << "DSPDeviceMIMOEngine::stopGeneration";
+	qDebug() << "DSPDeviceMIMOEngine::stopProcess";
 	DSPGenerationStop cmd;
 	m_syncMessenger.storeMessage(cmd);
 	handleSynchronousMessages();
@@ -302,6 +302,11 @@ void DSPDeviceMIMOEngine::workSampleSink(unsigned int sinkIndex)
     {
         (*it)->feed(vbegin, vend, positiveOnly);
     }
+
+    // feed data to MIMO channels
+    for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it) {
+        (*it)->feed(vbegin, vend, sinkIndex);
+    }
 }
 
 // notStarted -> idle -> init -> running -+
@@ -335,18 +340,39 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoIdle()
 
 	for (; vbit != m_basebandSampleSinks.end(); ++vbit)
 	{
-        for (BasebandSampleSinks::const_iterator it = vbit->begin(); it != vbit->end(); ++it) {
+        for (BasebandSampleSinks::const_iterator it = vbit->begin(); it != vbit->end(); ++it)
+        {
+            qDebug() << "DSPDeviceMIMOEngine::gotoIdle: stopping BasebandSampleSink: " << (*it)->objectName().toStdString().c_str();
 		    (*it)->stop();
         }
 	}
 
-    std::vector<ThreadedBasebandSampleSinks>::const_iterator vtit = m_threadedBasebandSampleSinks.begin();
+    std::vector<ThreadedBasebandSampleSinks>::const_iterator vtSinkIt = m_threadedBasebandSampleSinks.begin();
 
-    for (; vtit != m_threadedBasebandSampleSinks.end(); vtit++)
+    for (; vtSinkIt != m_threadedBasebandSampleSinks.end(); vtSinkIt++)
     {
-        for (ThreadedBasebandSampleSinks::const_iterator it = vtit->begin(); it != vtit->end(); ++it) {
+        for (ThreadedBasebandSampleSinks::const_iterator it = vtSinkIt->begin(); it != vtSinkIt->end(); ++it)
+        {
+    		qDebug() << "DSPDeviceMIMOEngine::gotoIdle: stopping ThreadedBasebandSampleSource(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
             (*it)->stop();
         }
+    }
+
+    std::vector<ThreadedBasebandSampleSources>::const_iterator vtSourceIt = m_threadedBasebandSampleSources.begin();
+
+    for (; vtSourceIt != m_threadedBasebandSampleSources.end(); vtSourceIt++)
+    {
+        for (ThreadedBasebandSampleSources::const_iterator it = vtSourceIt->begin(); it != vtSourceIt->end(); ++it)
+        {
+    		qDebug() << "DSPDeviceMIMOEngine::gotoIdle: stopping ThreadedBasebandSampleSource(" << (*it)->getSampleSourceObjectName().toStdString().c_str() << ")";
+            (*it)->stop();
+        }
+    }
+
+    for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it)
+    {
+        qDebug() << "DSPDeviceMIMOEngine::gotoIdle: stopping MIMOChannel: " << (*it)->objectName().toStdString().c_str();
+        (*it)->stop();
     }
 
 	m_deviceSampleMIMO->stop();
@@ -381,8 +407,8 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoInit()
 
 	m_deviceDescription = m_deviceSampleMIMO->getDeviceDescription();
 
-	qDebug() << "DSPDeviceMIMOEngine::gotoInit: "
-	        << " m_deviceDescription: " << m_deviceDescription.toStdString().c_str();
+	qDebug() << "DSPDeviceMIMOEngine::gotoInit:"
+	        << "m_deviceDescription: " << m_deviceDescription.toStdString().c_str();
 
     // Rx
 
@@ -466,7 +492,7 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoRunning()
 		return gotoError("DSPDeviceMIMOEngine::gotoRunning: No sample source configured");
 	}
 
-	qDebug() << "DSPDeviceMIMOEngine::gotoRunning: " << m_deviceDescription.toStdString().c_str() << " started";
+	qDebug() << "DSPDeviceMIMOEngine::gotoRunning:" << m_deviceDescription.toStdString().c_str() << "started";
 
 	// Start everything
 
@@ -480,20 +506,37 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoRunning()
 	{
         for (BasebandSampleSinks::const_iterator it = vbit->begin(); it != vbit->end(); ++it)
         {
-            qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting " << (*it)->objectName().toStdString().c_str();
+            qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting BasebandSampleSink: " << (*it)->objectName().toStdString().c_str();
 		    (*it)->start();
         }
 	}
 
-    std::vector<ThreadedBasebandSampleSinks>::const_iterator vtit = m_threadedBasebandSampleSinks.begin();
+    std::vector<ThreadedBasebandSampleSinks>::const_iterator vtSinkIt = m_threadedBasebandSampleSinks.begin();
 
-    for (; vtit != m_threadedBasebandSampleSinks.end(); vtit++)
+    for (; vtSinkIt != m_threadedBasebandSampleSinks.end(); vtSinkIt++)
     {
-        for (ThreadedBasebandSampleSinks::const_iterator it = vtit->begin(); it != vtit->end(); ++it)
+        for (ThreadedBasebandSampleSinks::const_iterator it = vtSinkIt->begin(); it != vtSinkIt->end(); ++it)
         {
-    		qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting ThreadedSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
+    		qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting ThreadedBasebandSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
             (*it)->start();
         }
+    }
+
+    std::vector<ThreadedBasebandSampleSources>::const_iterator vtSourceIt = m_threadedBasebandSampleSources.begin();
+
+    for (; vtSourceIt != m_threadedBasebandSampleSources.end(); vtSourceIt++)
+    {
+        for (ThreadedBasebandSampleSources::const_iterator it = vtSourceIt->begin(); it != vtSourceIt->end(); ++it)
+        {
+    		qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting ThreadedBasebandSampleSource(" << (*it)->getSampleSourceObjectName().toStdString().c_str() << ")";
+            (*it)->start();
+        }
+    }
+
+    for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it)
+    {
+        qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting MIMOChannel: " << (*it)->objectName().toStdString().c_str();
+        (*it)->start();
     }
 
 	qDebug() << "DSPDeviceMIMOEngine::gotoRunning:input message queue pending: " << m_inputMessageQueue.size();
