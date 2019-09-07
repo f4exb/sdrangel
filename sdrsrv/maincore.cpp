@@ -365,7 +365,7 @@ void MainCore::removeLastDevice()
         lastDeviceEngine->stopAcquistion();
 
         // deletes old UI and input object
-        m_deviceSets.back()->freeRxChannels();      // destroys the channel instances
+        m_deviceSets.back()->freeChannels();      // destroys the channel instances
         m_deviceSets.back()->m_deviceAPI->resetSamplingDeviceId();
         m_deviceSets.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
                 m_deviceSets.back()->m_deviceAPI->getSampleSource());
@@ -385,7 +385,7 @@ void MainCore::removeLastDevice()
         lastDeviceEngine->stopGeneration();
 
         // deletes old UI and output object
-        m_deviceSets.back()->freeTxChannels();
+        m_deviceSets.back()->freeChannels();
         m_deviceSets.back()->m_deviceAPI->resetSamplingDeviceId();
         m_deviceSets.back()->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
                 m_deviceSets.back()->m_deviceAPI->getSampleSink());
@@ -561,15 +561,7 @@ void MainCore::deleteChannel(int deviceSetIndex, int channelIndex)
     if (deviceSetIndex >= 0)
     {
         DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
-
-        if (deviceSet->m_deviceSourceEngine) // source device => Rx channels
-        {
-            deviceSet->deleteRxChannel(channelIndex);
-        }
-        else if (deviceSet->m_deviceSinkEngine) // sink device => Tx channels
-        {
-            deviceSet->deleteTxChannel(channelIndex);
-        }
+        deviceSet->deleteChannel(channelIndex);
     }
 }
 

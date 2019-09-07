@@ -58,20 +58,20 @@ public:
     void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
     void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
 
-    int getNumberOfRxChannels() const { return m_rxChannelInstanceRegistrations.size(); }
-    int getNumberOfTxChannels() const { return m_txChannelInstanceRegistrations.size(); }
+    int getNumberOfChannels() const { return m_channelInstanceRegistrations.size(); }
     void registerRxChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
     void registerTxChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
+    void registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
     void removeRxChannelInstance(PluginInstanceGUI* pluginGUI);
     void removeTxChannelInstance(PluginInstanceGUI* pluginGUI);
-    void freeRxChannels();
-    void freeTxChannels();
-    void deleteRxChannel(int channelIndex);
-    void deleteTxChannel(int channelIndex);
+    void removeChannelInstance(PluginInstanceGUI* pluginGUI);
+    void freeChannels();
+    void deleteChannel(int channelIndex);
     void loadRxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveRxChannelSettings(Preset* preset);
     void loadTxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveTxChannelSettings(Preset* preset);
+    //TODO: load and save MIMO channel settings when preset has MIMO type defined
 
     // These are the number of channel types available for selection
     void setNumberOfAvailableRxChannels(int number) { m_nbAvailableRxChannels = number; }
@@ -86,15 +86,18 @@ private:
     {
         QString m_channelName;
         PluginInstanceGUI* m_gui;
+        int m_channelType;
 
         ChannelInstanceRegistration() :
             m_channelName(),
-            m_gui(nullptr)
+            m_gui(nullptr),
+            m_channelType(0)
         { }
 
-        ChannelInstanceRegistration(const QString& channelName, PluginInstanceGUI* pluginGUI) :
+        ChannelInstanceRegistration(const QString& channelName, PluginInstanceGUI* pluginGUI, int channelType) :
             m_channelName(channelName),
-            m_gui(pluginGUI)
+            m_gui(pluginGUI),
+            m_channelType(channelType)
         { }
 
         bool operator<(const ChannelInstanceRegistration& other) const;
@@ -102,15 +105,16 @@ private:
 
     typedef QList<ChannelInstanceRegistration> ChannelInstanceRegistrations;
 
-    ChannelInstanceRegistrations m_rxChannelInstanceRegistrations;
-    ChannelInstanceRegistrations m_txChannelInstanceRegistrations;
+    // ChannelInstanceRegistrations m_rxChannelInstanceRegistrations;
+    // ChannelInstanceRegistrations m_txChannelInstanceRegistrations;
+    ChannelInstanceRegistrations m_channelInstanceRegistrations;
+    QList<int> m_channelInstanceTypes;
     int m_deviceTabIndex;
     int m_nbAvailableRxChannels;   //!< Number of Rx channels available for selection
     int m_nbAvailableTxChannels;   //!< Number of Tx channels available for selection
     int m_nbAvailableMIMOChannels; //!< Number of MIMO channels available for selection
 
-    void renameRxChannelInstances();
-    void renameTxChannelInstances();
+    void renameChannelInstances();
 };
 
 

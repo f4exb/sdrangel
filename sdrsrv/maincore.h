@@ -250,23 +250,20 @@ private:
     public:
         int getDeviceSetIndex() const { return m_deviceSetIndex; }
         int getChannelIndex() const { return m_channelIndex; }
-        bool isTx() const { return m_tx; }
 
-        static MsgDeleteChannel* create(int deviceSetIndex, int channelIndex, bool tx)
+        static MsgDeleteChannel* create(int deviceSetIndex, int channelIndex)
         {
-            return new MsgDeleteChannel(deviceSetIndex, channelIndex, tx);
+            return new MsgDeleteChannel(deviceSetIndex, channelIndex);
         }
 
     private:
         int m_deviceSetIndex;
         int m_channelIndex;
-        bool m_tx;
 
-        MsgDeleteChannel(int deviceSetIndex, int channelIndex, bool tx) :
+        MsgDeleteChannel(int deviceSetIndex, int channelIndex) :
             Message(),
             m_deviceSetIndex(deviceSetIndex),
-            m_channelIndex(channelIndex),
-            m_tx(tx)
+            m_channelIndex(channelIndex)
         { }
     };
 

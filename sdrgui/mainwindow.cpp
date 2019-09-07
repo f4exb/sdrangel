@@ -518,7 +518,7 @@ void MainWindow::removeLastDevice()
 	    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
 
         // deletes old UI and input object
-        m_deviceUIs.back()->freeRxChannels();      // destroys the channel instances
+        m_deviceUIs.back()->freeChannels();      // destroys the channel instances
         m_deviceUIs.back()->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(0); // have source stop sending messages to the GUI
         m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
                 m_deviceUIs.back()->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
@@ -560,7 +560,7 @@ void MainWindow::removeLastDevice()
 	    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
 
         // deletes old UI and output object
-        m_deviceUIs.back()->freeTxChannels();
+        m_deviceUIs.back()->freeChannels();
         m_deviceUIs.back()->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(0); // have sink stop sending messages to the GUI
 	    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
 	            m_deviceUIs.back()->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
@@ -602,8 +602,7 @@ void MainWindow::removeLastDevice()
 	    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
 
         // deletes old UI and output object
-        m_deviceUIs.back()->freeRxChannels();
-        m_deviceUIs.back()->freeTxChannels();
+        m_deviceUIs.back()->freeChannels();
         m_deviceUIs.back()->m_deviceAPI->getSampleMIMO()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
 	    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleMIMOPluginInstanceGUI(
 	            m_deviceUIs.back()->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
@@ -642,15 +641,7 @@ void MainWindow::deleteChannel(int deviceSetIndex, int channelIndex)
     if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_deviceUIs.size()))
     {
         DeviceUISet *deviceSet = m_deviceUIs[deviceSetIndex];
-
-        if (deviceSet->m_deviceSourceEngine) // source device => Rx channels
-        {
-            deviceSet->deleteRxChannel(channelIndex);
-        }
-        else if (deviceSet->m_deviceSinkEngine) // sink device => Tx channels
-        {
-            deviceSet->deleteTxChannel(channelIndex);
-        }
+        deviceSet->deleteChannel(channelIndex);
     }
 }
 

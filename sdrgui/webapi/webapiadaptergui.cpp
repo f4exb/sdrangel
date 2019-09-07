@@ -1648,53 +1648,23 @@ int WebAPIAdapterGUI::devicesetChannelDelete(
     {
         DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
 
-        if (deviceSet->m_deviceSourceEngine) // Rx
+        if (channelIndex < deviceSet->getNumberOfChannels())
         {
-            if (channelIndex < deviceSet->getNumberOfRxChannels())
-            {
-                MainWindow::MsgDeleteChannel *msg = MainWindow::MsgDeleteChannel::create(deviceSetIndex, channelIndex, false);
-                m_mainWindow.m_inputMessageQueue.push(msg);
+            MainWindow::MsgDeleteChannel *msg = MainWindow::MsgDeleteChannel::create(deviceSetIndex, channelIndex);
+            m_mainWindow.m_inputMessageQueue.push(msg);
 
-                response.init();
-                *response.getMessage() = QString("Message to delete a channel (MsgDeleteChannel) was submitted successfully");
+            response.init();
+            *response.getMessage() = QString("Message to delete a channel (MsgDeleteChannel) was submitted successfully");
 
-                return 202;
-            }
-            else
-            {
-                error.init();
-                *error.getMessage() = QString("There is no channel at index %1. There are %2 Rx channels")
-                        .arg(channelIndex)
-                        .arg(channelIndex < deviceSet->getNumberOfRxChannels());
-                return 400;
-            }
-        }
-        else if (deviceSet->m_deviceSinkEngine) // Tx
-        {
-            if (channelIndex < deviceSet->getNumberOfTxChannels())
-            {
-                MainWindow::MsgDeleteChannel *msg = MainWindow::MsgDeleteChannel::create(deviceSetIndex, channelIndex, true);
-                m_mainWindow.m_inputMessageQueue.push(msg);
-
-                response.init();
-                *response.getMessage() = QString("Message to delete a channel (MsgDeleteChannel) was submitted successfully");
-
-                return 202;
-            }
-            else
-            {
-                error.init();
-                *error.getMessage() = QString("There is no channel at index %1. There are %2 Tx channels")
-                        .arg(channelIndex)
-                        .arg(channelIndex < deviceSet->getNumberOfRxChannels());
-                return 400;
-            }
+            return 202;
         }
         else
         {
             error.init();
-            *error.getMessage() = QString("DeviceSet error");
-            return 500;
+            *error.getMessage() = QString("There is no channel at index %1. There are %2 channels")
+                    .arg(channelIndex)
+                    .arg(channelIndex < deviceSet->getNumberOfChannels());
+            return 400;
         }
     }
     else
