@@ -642,7 +642,7 @@ void GLSpectrum::paintGL()
 
 				if (dv->m_channelMarker->getVisible()
                     && (dv->m_channelMarker->getSourceOrSinkStream() == m_displaySourceOrSink)
-                    && (dv->m_channelMarker->getStreamIndex() == m_displayStreamIndex))
+                    && dv->m_channelMarker->streamIndexApplies(m_displayStreamIndex))
 				{
 					{
 						GLfloat q3[] {
@@ -733,7 +733,7 @@ void GLSpectrum::paintGL()
 
 				if (dv->m_channelMarker->getVisible()
                     && (dv->m_channelMarker->getSourceOrSinkStream() == m_displaySourceOrSink)
-                    && (dv->m_channelMarker->getStreamIndex() == m_displayStreamIndex))
+                    && dv->m_channelMarker->streamIndexApplies(m_displayStreamIndex))
 				{
 					{
 						GLfloat q3[] {
@@ -826,7 +826,7 @@ void GLSpectrum::paintGL()
 			// frequency scale channel overlay
             if (dv->m_channelMarker->getVisible()
                 && (dv->m_channelMarker->getSourceOrSinkStream() == m_displaySourceOrSink)
-                && (dv->m_channelMarker->getStreamIndex() == m_displayStreamIndex))
+                && dv->m_channelMarker->streamIndexApplies(m_displayStreamIndex))
 			{
 				{
 					GLfloat q3[] {
@@ -1550,7 +1550,7 @@ void GLSpectrum::applyChanges()
 
 				if (dv->m_channelMarker->getHighlighted()
                     && (dv->m_channelMarker->getSourceOrSinkStream() == m_displaySourceOrSink)
-                    && (dv->m_channelMarker->getStreamIndex() == m_displayStreamIndex))
+                    && dv->m_channelMarker->streamIndexApplies(m_displayStreamIndex))
 				{
 					qreal xc;
 					int shift;
@@ -1698,7 +1698,7 @@ void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
 
         if (m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getMovable()
             && (m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getSourceOrSinkStream() == m_displaySourceOrSink)
-            && (m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getStreamIndex() == m_displayStreamIndex))
+            && m_channelMarkerStates[m_cursorChannel]->m_channelMarker->streamIndexApplies(m_displayStreamIndex))
         {
             m_channelMarkerStates[m_cursorChannel]->m_channelMarker->setCenterFrequencyByCursor(freq);
             channelMarkerChanged();
@@ -1710,7 +1710,7 @@ void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
         for (int i = 0; i < m_channelMarkerStates.size(); ++i)
         {
             if ((m_channelMarkerStates[i]->m_channelMarker->getSourceOrSinkStream() != m_displaySourceOrSink)
-                || (m_channelMarkerStates[i]->m_channelMarker->getStreamIndex() != m_displayStreamIndex))
+                || !m_channelMarkerStates[i]->m_channelMarker->streamIndexApplies(m_displayStreamIndex))
             {
                 continue;
             }
@@ -1776,7 +1776,7 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
 
 		if (m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getMovable()
             && (m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getSourceOrSinkStream() == m_displaySourceOrSink)
-            && (m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getStreamIndex() == m_displayStreamIndex))
+            && m_channelMarkerStates[m_cursorChannel]->m_channelMarker->streamIndexApplies(m_displayStreamIndex))
 		{
 			m_channelMarkerStates[m_cursorChannel]->m_channelMarker->setCenterFrequencyByCursor(freq);
 			channelMarkerChanged();
@@ -1812,7 +1812,7 @@ void GLSpectrum::wheelEvent(QWheelEvent *event)
     for (int i = 0; i < m_channelMarkerStates.size(); ++i)
     {
         if ((m_channelMarkerStates[i]->m_channelMarker->getSourceOrSinkStream() != m_displaySourceOrSink)
-            || (m_channelMarkerStates[i]->m_channelMarker->getStreamIndex() != m_displayStreamIndex))
+            || !m_channelMarkerStates[i]->m_channelMarker->streamIndexApplies(m_displayStreamIndex))
         {
             continue;
         }

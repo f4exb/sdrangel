@@ -1,3 +1,20 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015-2019 Edouard Griffiths, F4EXB                              //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+// (at your option) any later version.                                           //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
 #include "dsp/channelmarker.h"
 #include "util/simpleserializer.h"
 
@@ -39,7 +56,7 @@ ChannelMarker::ChannelMarker(QObject* parent) :
 	m_movable(true),
 	m_fScaleDisplayType(FScaleDisplay_freq),
     m_sourceOrSinkStream(true),
-    m_streamIndex(0)
+    m_enabledStreamsBits(1)
 {
 	++m_nextColor;
 	if(m_colorTable[m_nextColor] == 0)
@@ -178,3 +195,17 @@ bool ChannelMarker::deserialize(const QByteArray& data)
     }
 }
 
+void ChannelMarker::addStreamIndex(int streamIndex)
+{
+    m_enabledStreamsBits |= (1<<streamIndex);
+}
+
+void ChannelMarker::removeStreamIndex(int streamIndex)
+{
+    m_enabledStreamsBits &= ~(1<<streamIndex);
+}
+
+void ChannelMarker::clearStreamIndexes()
+{
+    m_enabledStreamsBits = 0;
+}
