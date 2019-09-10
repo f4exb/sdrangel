@@ -108,7 +108,6 @@ private:
     // ChannelInstanceRegistrations m_rxChannelInstanceRegistrations;
     // ChannelInstanceRegistrations m_txChannelInstanceRegistrations;
     ChannelInstanceRegistrations m_channelInstanceRegistrations;
-    QList<int> m_channelInstanceTypes;
     int m_deviceTabIndex;
     int m_nbAvailableRxChannels;   //!< Number of Rx channels available for selection
     int m_nbAvailableTxChannels;   //!< Number of Tx channels available for selection

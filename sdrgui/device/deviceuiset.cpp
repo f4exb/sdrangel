@@ -318,15 +318,8 @@ void DeviceUISet::saveTxChannelSettings(Preset *preset)
 
 void DeviceUISet::renameChannelInstances()
 {
-    int mimoCount = 0;
-
-    for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
-    {
-        if (m_channelInstanceTypes[i] == 2)
-        {
-            m_channelInstanceRegistrations[i].m_gui->setName(QString("%1:%2").arg(m_channelInstanceRegistrations[i].m_channelName).arg(i));
-            mimoCount++;
-        }
+    for (int i = 0; i < m_channelInstanceRegistrations.count(); i++) {
+        m_channelInstanceRegistrations[i].m_gui->setName(QString("%1:%2").arg(m_channelInstanceRegistrations[i].m_channelName).arg(i));
     }
 }
 
