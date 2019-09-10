@@ -379,7 +379,9 @@ private:
     unsigned int m_spectrumInputIndex;  //!< Index of the stream to be used as spectrum sink input
 
   	void run();
-    void workSampleSink(unsigned int sinkIndex); //!< transfer samples of one sink (asynchronously)
+    void workSampleSinkFifo(unsigned int sinkIndex); //!< transfer samples of one sink (asynchronously)
+    void workSampleSinkVector(unsigned int sinkIndex); //!< same but sample sink vector flavor (TODO: remove if unused)
+    void workSamplePart(const SampleVector::iterator& vbegin, const SampleVector::iterator& vend, unsigned int sinkIndex);
 
 	State gotoIdle();     //!< Go to the idle state
 	State gotoInit();     //!< Go to the acquisition init state from idle

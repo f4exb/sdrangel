@@ -28,7 +28,7 @@
 
 MESSAGE_CLASS_DEFINITION(TestMIThread::MsgStartStop, Message)
 
-TestMIThread::TestMIThread(SampleSinkVector* sampleFifo, int streamIndex, QObject* parent) :
+TestMIThread::TestMIThread(SampleSinkFifo* sampleFifo, int streamIndex, QObject* parent) :
 	QThread(parent),
 	m_running(false),
     m_buf(0),

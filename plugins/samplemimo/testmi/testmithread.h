@@ -25,7 +25,6 @@
 #include <QElapsedTimer>
 #include <QDebug>
 
-#include "dsp/samplesinkvector.h"
 #include "dsp/decimators.h"
 #include "dsp/ncof.h"
 #include "util/message.h"
@@ -34,6 +33,8 @@
 #include "testmisettings.h"
 
 #define TESTMI_THROTTLE_MS 50
+
+class SampleSinkFifo;
 
 class TestMIThread : public QThread {
 	Q_OBJECT
@@ -58,7 +59,7 @@ public:
         { }
     };
 
-	TestMIThread(SampleSinkVector* sampleFifo, int streamIndex, QObject* parent = 0);
+	TestMIThread(SampleSinkFifo* sampleFifo, int streamIndex, QObject* parent = 0);
 	~TestMIThread();
 
     void startStop(bool start);
@@ -89,7 +90,7 @@ private:
     quint32 m_bufsize;
     quint32 m_chunksize;
 	SampleVector m_convertBuffer;
-	SampleSinkVector* m_sampleFifo;
+    SampleSinkFifo* m_sampleFifo;
     int m_streamIndex;
 	NCOF m_nco;
     NCOF m_toneNco;

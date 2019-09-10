@@ -52,11 +52,20 @@ SampleSourceFifo* DeviceSampleMIMO::getSampleSourceFifo(unsigned int index)
     }
 }
 
-SampleSinkVector* DeviceSampleMIMO::getSampleSinkFifo(unsigned int index)
+SampleSinkFifo* DeviceSampleMIMO::getSampleSinkFifo(unsigned int index)
 {
     if (index >= m_sampleSinkFifos.size()) {
         return nullptr;
     } else {
         return &m_sampleSinkFifos[index];
+    }
+}
+
+SampleSinkVector* DeviceSampleMIMO::getSampleSinkVector(unsigned int index)
+{
+    if (index >= m_sampleSinkVectors.size()) {
+        return nullptr;
+    } else {
+        return &m_sampleSinkVectors[index];
     }
 }
