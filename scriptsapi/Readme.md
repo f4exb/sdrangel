@@ -19,6 +19,9 @@ Options are:
   - `-P` or `--port`  listening port (default `8888`)
   - `-a` or `--address-sdr` SDRangel REST API address (defaults to calling address)
   - `-p` or `--port-sdr` SDRangel REST API port (default `8091`)
+  - `-f` or `--tracker-frequency` Absolute frequency the tracker should aim at (in Hz optional)
+  - `-r` or `--refcorr-limit` Limit of the tracker frequency reference correction. Correction is not apply if error is in this +/- frequency range (Hz, optional, default 1000 Hz)
+  - `-d` or `--transverter-device` Transverter device index to use for tracker frequency correction (optional)
 
 With default options (no parameters) it will listen on all available interfaces including loopback at `127.0.0.1` and at port `8888`. It will identify the SDRangel API address with the first request from SDRangel and connect back at port `8091`.
 

@@ -1,3 +1,11 @@
+sdrangel (4.11.9-1) unstable; urgency=medium
+
+  * Fixed regression in v4.11.7 due to FIFO system
+  * Upgraded SerialDV. Removed unused attribute in LocalSink GUI
+  * Preparatory works for MIMO channels support
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 10 Sep 2019 21:04:06 +0200
+
 sdrangel (4.11.8-1) unstable; urgency=medium
 
   * HackRF: implemented transverter functionality
