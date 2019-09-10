@@ -23,7 +23,6 @@
 #include <QMutex>
 
 #include "samplesinkfifo.h"
-#include "samplesinkvector.h"
 #include "util/messagequeue.h"
 #include "export.h"
 
@@ -44,11 +43,9 @@ public:
 
 	BasebandSampleSink* m_sampleSink;
 	SampleSinkFifo m_sampleFifo;
-    SampleSinkVector m_sampleVector;
 
 public slots:
 	void handleFifoData();
-    void handleVectorData();
 };
 
 /**

@@ -8,8 +8,7 @@
 ThreadedBasebandSampleSinkFifo::ThreadedBasebandSampleSinkFifo(BasebandSampleSink *sampleSink, std::size_t size) :
 	m_sampleSink(sampleSink)
 {
-	//connect(&m_sampleFifo, SIGNAL(dataReady()), this, SLOT(handleFifoData()));
-    connect(&m_sampleVector, SIGNAL(dataReady()), this, SLOT(handleVectorData()));
+	connect(&m_sampleFifo, SIGNAL(dataReady()), this, SLOT(handleFifoData()));
 	m_sampleFifo.setSize(size);
 }
 
@@ -20,20 +19,7 @@ ThreadedBasebandSampleSinkFifo::~ThreadedBasebandSampleSinkFifo()
 
 void ThreadedBasebandSampleSinkFifo::writeToFifo(SampleVector::const_iterator& begin, SampleVector::const_iterator& end)
 {
-	//m_sampleFifo.write(begin, end);
-    m_sampleVector.write(begin, end);
-}
-
-void ThreadedBasebandSampleSinkFifo::handleVectorData()
-{
-    SampleVector::iterator vbegin;
-    SampleVector::iterator vend;
-
-    if (m_sampleSink)
-    {
-        m_sampleVector.read(vbegin, vend);
-        m_sampleSink->feed(vbegin, vend, false);
-    }
+	m_sampleFifo.write(begin, end);
 }
 
 void ThreadedBasebandSampleSinkFifo::handleFifoData() // FIXME: Fixed? Move it to the new threadable sink class
