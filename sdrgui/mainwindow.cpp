@@ -446,6 +446,12 @@ void MainWindow::addMIMODevice()
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
     QComboBox *channelSelector = m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector();
+    // add MIMO channels
+    QList<QString> mimoChannelNames;
+    m_pluginManager->listMIMOChannels(mimoChannelNames);
+    QStringList mimoChannelNamesList(mimoChannelNames);
+    channelSelector->addItems(mimoChannelNamesList);
+    m_deviceUIs.back()->setNumberOfAvailableMIMOChannels(mimoChannelNamesList.size());
     // Add Rx channels
     QList<QString> rxChannelNames;
     m_pluginManager->listRxChannels(rxChannelNames);
@@ -1944,18 +1950,22 @@ void MainWindow::channelAddClicked(bool checked)
         }
         else if (deviceUI->m_deviceMIMOEngine) // MIMO device => all possible channels. Depends on index range
         {
+            int nbMIMOChannels = deviceUI->getNumberOfAvailableMIMOChannels();
             int nbRxChannels = deviceUI->getNumberOfAvailableRxChannels();
             int nbTxChannels = deviceUI->getNumberOfAvailableTxChannels();
             int selectedIndex = deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex();
-            qDebug("MainWindow::channelAddClicked: MIMO: tab: %d nbRx: %d nbTx: %d selected: %d",
-                currentSourceTabIndex, nbRxChannels, nbTxChannels, selectedIndex);
+            qDebug("MainWindow::channelAddClicked: MIMO: tab: %d nbMIMO: %d nbRx: %d nbTx: %d selected: %d",
+                currentSourceTabIndex, nbMIMOChannels, nbRxChannels, nbTxChannels, selectedIndex);
 
-            if (selectedIndex < nbRxChannels) {
-                m_pluginManager->createRxChannelInstance(
+            if (selectedIndex < nbMIMOChannels) {
+                m_pluginManager->createMIMOChannelInstance(
                     selectedIndex, deviceUI, deviceUI->m_deviceAPI);
-            } else if (selectedIndex < nbRxChannels + nbTxChannels) {
+            } else if (selectedIndex < nbMIMOChannels + nbRxChannels) {
+                m_pluginManager->createRxChannelInstance(
+                    selectedIndex - nbMIMOChannels, deviceUI, deviceUI->m_deviceAPI);
+            } else if (selectedIndex < nbMIMOChannels + nbRxChannels + nbTxChannels) {
                 m_pluginManager->createTxChannelInstance(
-                    selectedIndex - nbRxChannels, deviceUI, deviceUI->m_deviceAPI);
+                    selectedIndex - nbMIMOChannels - nbRxChannels, deviceUI, deviceUI->m_deviceAPI);
             }
         }
     }

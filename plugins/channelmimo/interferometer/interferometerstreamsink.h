@@ -39,6 +39,7 @@ public:
     unsigned int getStreamIndex() const { return m_streamIndex; }
     void setStreamIndex(unsigned int streamIndex) { m_streamIndex = streamIndex; }
     SampleVector& getData() { return m_data; }
+    int getSize() const { return m_dataSize; }
     void setDataStart(int dataStart) { m_dataStart = dataStart; }
 
 private:

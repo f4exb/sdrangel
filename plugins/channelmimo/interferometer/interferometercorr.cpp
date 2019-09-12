@@ -25,13 +25,23 @@ Sample sAdd(const Sample& a, const Sample& b) { //!< Sample addition
 }
 
 Sample sMulConj(const Sample& a, const Sample& b) { //!< Sample multiply with conjugate
-    return Sample{a.real()*b.real() + a.imag()*b.imag(), a.imag()*b.real() - a.real()*b.imag()};
+    Sample s;
+    s.setReal((a.real()*b.real() + a.imag()*b.imag()) / (1<<(SDR_RX_SAMP_SZ - 16 + 1)));
+    s.setImag((a.imag()*b.real() - a.real()*b.imag()) / (1<<(SDR_RX_SAMP_SZ - 16 + 1)));
+    return s;
 }
 
 Sample cf2s(const std::complex<float>& a) { //!< Complex float to Sample
     Sample s;
     s.setReal(a.real()*SDR_RX_SCALEF);
     s.setImag(a.imag()*SDR_RX_SCALEF);
+    return s;
+}
+
+Sample invfft2s(const std::complex<float>& a) { //!< Complex float to Sample
+    Sample s;
+    s.setReal(a.real());
+    s.setImag(a.imag());
     return s;
 }
 
@@ -55,35 +65,50 @@ InterferometerCorrelator::InterferometerCorrelator(int fftSize) :
 
 InterferometerCorrelator::~InterferometerCorrelator()
 {
-    for (int i = 0; i < 2; i++)
-    {
-        delete[] m_fft[i];
-    }
-
     delete[] m_dataj;
+    delete m_invFFT;
+
+    for (int i = 0; i < 2; i++) {
+        delete m_fft[i];
+    }
 }
 
-void InterferometerCorrelator::performCorr(const SampleVector& data0, const SampleVector& data1)
+bool InterferometerCorrelator::performCorr(
+    const SampleVector& data0,
+    int size0,
+    const SampleVector& data1,
+    int size1
+)
 {
+    bool results = false;
+
     switch (m_corrType)
     {
         case InterferometerSettings::CorrelationAdd:
-            performOpCorr(data0, data1, sAdd);
+            results = performOpCorr(data0, size0, data1, size1, sAdd);
             break;
         case InterferometerSettings::CorrelationMultiply:
-            performOpCorr(data0, data1, sMulConj);
+            results = performOpCorr(data0, size0, data1, size1, sMulConj);
             break;
-        case InterferometerSettings::CorrelationCorrelation:
-            performFFTCorr(data0, data1);
+        case InterferometerSettings::CorrelationFFT:
+            results = performFFTCorr(data0, size0, data1, size1);
             break;
         default:
             break;
     }
+
+    return results;
 }
 
-void InterferometerCorrelator::performOpCorr(const SampleVector& data0, const SampleVector& data1, Sample sampleOp(const Sample& a, const Sample& b))
+bool InterferometerCorrelator::performOpCorr(
+    const SampleVector& data0,
+    int size0,
+    const SampleVector& data1,
+    int size1,
+    Sample sampleOp(const Sample& a, const Sample& b)
+)
 {
-    unsigned int size = std::min(data0.size(), data1.size());
+    unsigned int size = std::min(size0, size1);
     adjustTCorrSize(size);
 
     std::transform(
@@ -95,12 +120,20 @@ void InterferometerCorrelator::performOpCorr(const SampleVector& data0, const Sa
     );
 
     m_processed = size;
-    m_remaining = 0;
+    m_remaining[0] = size0 - size;
+    m_remaining[1] = size1 - size;
+    return true;
 }
 
-void InterferometerCorrelator::performFFTCorr(const SampleVector& data0, const SampleVector& data1)
+bool InterferometerCorrelator::performFFTCorr(
+    const SampleVector& data0,
+    int size0,
+    const SampleVector& data1,
+    int size1
+)
 {
-    unsigned int size = std::min(data0.size(), data1.size());
+    unsigned int size = std::min(size0, size1);
+    int nfft = 0;
     SampleVector::const_iterator begin0 = data0.begin();
     SampleVector::const_iterator begin1 = data1.begin();
     adjustSCorrSize(size);
@@ -167,18 +200,21 @@ void InterferometerCorrelator::performFFTCorr(const SampleVector& data0, const S
             m_invFFT->out(),
             m_invFFT->out() + 2*m_fftSize,
             m_tcorr.begin(),
-            cf2s
+            invfft2s
         );
 
-        // TODO: do something with the result
         size -= m_fftSize;
         begin0 += m_fftSize;
         begin1 += m_fftSize;
+        nfft++;
     }
 
     // update the samples counters
-    m_processed = begin0 - data0.begin();
-    m_remaining = size - m_fftSize;
+    m_processed = nfft*m_fftSize;
+    m_remaining[0] = size0 - nfft*m_fftSize;
+    m_remaining[1] = size1 - nfft*m_fftSize;
+
+    return nfft > 0;
 }
 
 void InterferometerCorrelator::adjustSCorrSize(int size)

@@ -21,7 +21,7 @@
 #include <vector>
 #include <QNetworkRequest>
 
-#include "dsp/mimosamplesink.h"
+#include "dsp/mimochannel.h"
 #include "channel/channelapi.h"
 #include "util/messagequeue.h"
 #include "util/message.h"
@@ -35,7 +35,7 @@ class QNetworkReply;
 class QNetworkAccessManager;
 class BasebandSampleSink;
 
-class Interferometer: public MIMOSampleSink, public ChannelAPI
+class Interferometer: public MIMOChannel, public ChannelAPI
 {
     Q_OBJECT
 public:
@@ -62,46 +62,27 @@ public:
         { }
     };
 
-    class MsgConfigureChannelizer : public Message {
+    class MsgBasebandNotification : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        int getLog2Decim() const { return m_log2Decim; }
-        int getFilterChainHash() const { return m_filterChainHash; }
-
-        static MsgConfigureChannelizer* create(unsigned int log2Decim, unsigned int filterChainHash) {
-            return new MsgConfigureChannelizer(log2Decim, filterChainHash);
-        }
-
-    private:
-        unsigned int m_log2Decim;
-        unsigned int m_filterChainHash;
-
-        MsgConfigureChannelizer(unsigned int log2Decim, unsigned int filterChainHash) :
-            Message(),
-            m_log2Decim(log2Decim),
-            m_filterChainHash(filterChainHash)
-        { }
-    };
-
-    class MsgSampleRateNotification : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        static MsgSampleRateNotification* create(int sampleRate) {
-            return new MsgSampleRateNotification(sampleRate);
+        static MsgBasebandNotification* create(int sampleRate, qint64 centerFrequency) {
+            return new MsgBasebandNotification(sampleRate, centerFrequency);
         }
 
         int getSampleRate() const { return m_sampleRate; }
+        qint64 getCenterFrequency() const { return m_centerFrequency; }
 
     private:
 
-        MsgSampleRateNotification(int sampleRate) :
+        MsgBasebandNotification(int sampleRate, qint64 centerFrequency) :
             Message(),
-            m_sampleRate(sampleRate)
+            m_sampleRate(sampleRate),
+            m_centerFrequency(centerFrequency)
         { }
 
         int m_sampleRate;
+        qint64 m_centerFrequency;
     };
 
     Interferometer(DeviceAPI *deviceAPI);
@@ -111,6 +92,7 @@ public:
 	virtual void start(); //!< thread start()
 	virtual void stop(); //!< thread exit() and wait()
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex);
+    virtual void pull(Sample& sample, unsigned int sourceIndex);
 	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
@@ -136,6 +118,7 @@ public:
 
     void setSpectrumSink(BasebandSampleSink *spectrumSink);
     void setScopeSink(BasebandSampleSink *scopeSink);
+    void applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash);
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
@@ -158,6 +141,7 @@ public:
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
+    static const int m_fftSize;
 
 private:
     DeviceAPI *m_deviceAPI;
@@ -181,6 +165,7 @@ private:
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const InterferometerSettings& settings, bool force);
 
 private slots:
+    void handleInputMessages();
     void networkManagerFinished(QNetworkReply *reply);
     void handleData(int start, int stop);
 };

@@ -58,18 +58,18 @@ void InterferometerPlugin::initPlugin(PluginAPI* pluginAPI)
 #ifdef SERVER_MODE
 PluginInstanceGUI* InterferometerPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
-        MIMOSampleSink *mimoChannel) const
+        MIMOChannel *mimoChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* InterferometerPlugin::createMIMOChannelGUI(DeviceUISet *deviceUISet, MIMOSampleSink *mimoChannel) const
+PluginInstanceGUI* InterferometerPlugin::createMIMOChannelGUI(DeviceUISet *deviceUISet, MIMOChannel *mimoChannel) const
 {
     return InterferometerGUI::create(m_pluginAPI, deviceUISet, mimoChannel);
 }
 #endif
 
-MIMOSampleSink* InterferometerPlugin::createMIMOChannelBS(DeviceAPI *deviceAPI) const
+MIMOChannel* InterferometerPlugin::createMIMOChannelBS(DeviceAPI *deviceAPI) const
 {
     return new Interferometer(deviceAPI);
 }

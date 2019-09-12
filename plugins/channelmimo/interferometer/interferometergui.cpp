@@ -20,12 +20,15 @@
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "dsp/hbfilterchainconverter.h"
+#include "dsp/scopevis.h"
+#include "dsp/spectrumvis.h"
+#include "mainwindow.h"
 
 #include "interferometergui.h"
 #include "interferometer.h"
 #include "ui_interferometergui.h"
 
-InterferometerGUI* InterferometerGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOSampleSink *channelMIMO)
+InterferometerGUI* InterferometerGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *channelMIMO)
 {
     InterferometerGUI* gui = new InterferometerGUI(pluginAPI, deviceUISet, channelMIMO);
     return gui;
@@ -47,7 +50,7 @@ QString InterferometerGUI::getName() const
 }
 
 qint64 InterferometerGUI::getCenterFrequency() const {
-    return 0;
+    return m_centerFrequency;
 }
 
 void InterferometerGUI::setCenterFrequency(qint64 centerFrequency)
@@ -79,13 +82,18 @@ bool InterferometerGUI::deserialize(const QByteArray& data)
     }
 }
 
+MessageQueue* InterferometerGUI::getInputMessageQueue()
+{
+    return &m_inputMessageQueue;
+}
+
 bool InterferometerGUI::handleMessage(const Message& message)
 {
-    if (Interferometer::MsgSampleRateNotification::match(message))
+    if (Interferometer::MsgBasebandNotification::match(message))
     {
-        Interferometer::MsgSampleRateNotification& notif = (Interferometer::MsgSampleRateNotification&) message;
-        m_channelMarker.setBandwidth(notif.getSampleRate());
+        Interferometer::MsgBasebandNotification& notif = (Interferometer::MsgBasebandNotification&) message;
         m_sampleRate = notif.getSampleRate();
+        m_centerFrequency = notif.getCenterFrequency();
         displayRateAndShift();
         return true;
     }
@@ -95,23 +103,42 @@ bool InterferometerGUI::handleMessage(const Message& message)
     }
 }
 
-InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOSampleSink *channelMIMO, QWidget* parent) :
+InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *channelMIMO, QWidget* parent) :
         RollupWidget(parent),
         ui(new Ui::InterferometerGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
-        m_sampleRate(0),
+        m_sampleRate(48000),
+        m_centerFrequency(435000000),
         m_tickCount(0)
 {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
+    setStreamIndicator("M");
+
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
+	m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF, ui->glSpectrum);
+	m_scopeVis = new ScopeVis(ui->glScope);
+
     m_interferometer = (Interferometer*) channelMIMO;
+    m_interferometer->setScopeSink(m_scopeVis);
+    m_interferometer->setSpectrumSink(m_spectrumVis);
     m_interferometer->setMessageQueueToGUI(getInputMessageQueue());
 
+	ui->glSpectrum->setDisplayWaterfall(true);
+	ui->glSpectrum->setDisplayMaxHold(true);
+    ui->glSpectrum->setCenterFrequency(0);
+	ui->glSpectrum->setSsbSpectrum(false);
+    ui->glSpectrum->setLsbDisplay(false);
+
+	ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
+	ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
+	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+
     m_channelMarker.blockSignals(true);
+    m_channelMarker.addStreamIndex(1);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle("Interferometer");
@@ -120,21 +147,30 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 
     m_settings.setChannelMarker(&m_channelMarker);
 
-    // m_deviceUISet->registerRxChannelInstance(LocalSink::m_channelIdURI, this);
+    m_deviceUISet->registerChannelInstance(Interferometer::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
+
+	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
+	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
+
+    m_scopeVis->setTraceChunkSize(Interferometer::m_fftSize); // Set scope trace length unit to FFT size
+    ui->scopeGUI->traceLengthChange();
 
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
     //connect(&(m_deviceUISet->m_deviceSourceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
     displaySettings();
+    displayRateAndShift();
     applySettings(true);
 }
 
 InterferometerGUI::~InterferometerGUI()
 {
-    //m_deviceUISet->removeRxChannelInstance(this);
+    m_deviceUISet->removeChannelInstance(this);
     delete m_interferometer; // TODO: check this: when the GUI closes it has to delete the demodulator
+	delete m_spectrumVis;
+	delete m_scopeVis;
     delete ui;
 }
 
@@ -151,17 +187,6 @@ void InterferometerGUI::applySettings(bool force)
 
         Interferometer::MsgConfigureInterferometer* message = Interferometer::MsgConfigureInterferometer::create(m_settings, force);
         m_interferometer->getInputMessageQueue()->push(message);
-    }
-}
-
-void InterferometerGUI::applyChannelSettings()
-{
-    if (m_doApplySettings)
-    {
-        Interferometer::MsgConfigureChannelizer *msgChan = Interferometer::MsgConfigureChannelizer::create(
-                m_settings.m_log2Decim,
-                m_settings.m_filterChainHash);
-        m_interferometer->getInputMessageQueue()->push(msgChan);
     }
 }
 
@@ -193,6 +218,8 @@ void InterferometerGUI::displayRateAndShift()
     ui->channelRateText->setText(tr("%1k").arg(QString::number(channelSampleRate / 1000.0, 'g', 5)));
     m_channelMarker.setCenterFrequency(shift);
     m_channelMarker.setBandwidth(channelSampleRate);
+    ui->glSpectrum->setSampleRate(channelSampleRate);
+    m_scopeVis->setLiveRate(channelSampleRate);
 }
 
 void InterferometerGUI::leaveEvent(QEvent*)
@@ -267,6 +294,12 @@ void InterferometerGUI::on_position_valueChanged(int value)
     applyPosition();
 }
 
+void InterferometerGUI::on_correlationType_currentIndexChanged(int index)
+{
+    m_settings.m_correlationType = (InterferometerSettings::CorrelationType) index;
+    applySettings();
+}
+
 void InterferometerGUI::applyDecimation()
 {
     uint32_t maxHash = 1;
@@ -289,7 +322,7 @@ void InterferometerGUI::applyPosition()
     ui->filterChainText->setText(s);
 
     displayRateAndShift();
-    applyChannelSettings();
+    applySettings();
 }
 
 void InterferometerGUI::tick()

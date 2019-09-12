@@ -29,7 +29,7 @@ struct InterferometerSettings
     {
         CorrelationAdd,
         CorrelationMultiply,
-        CorrelationCorrelation
+        CorrelationFFT
     };
 
     CorrelationType m_correlationType;

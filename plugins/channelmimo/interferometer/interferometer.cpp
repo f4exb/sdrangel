@@ -33,35 +33,41 @@
 #include "interferometer.h"
 
 MESSAGE_CLASS_DEFINITION(Interferometer::MsgConfigureInterferometer, Message)
-MESSAGE_CLASS_DEFINITION(Interferometer::MsgConfigureChannelizer, Message)
-MESSAGE_CLASS_DEFINITION(Interferometer::MsgSampleRateNotification, Message)
+MESSAGE_CLASS_DEFINITION(Interferometer::MsgBasebandNotification, Message)
 
 const QString Interferometer::m_channelIdURI = "sdrangel.channel.interferometer";
 const QString Interferometer::m_channelId = "Interferometer";
+const int Interferometer::m_fftSize = 4096;
 
 Interferometer::Interferometer(DeviceAPI *deviceAPI) :
-    ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
+    ChannelAPI(m_channelIdURI, ChannelAPI::StreamMIMO),
     m_deviceAPI(deviceAPI),
     m_spectrumSink(nullptr),
     m_scopeSink(nullptr),
+    m_guiMessageQueue(nullptr),
     m_frequencyOffset(0),
     m_deviceSampleRate(48000)
 {
-    m_deviceAPI->addChannelSinkAPI(this);
+    setObjectName(m_channelId);
+
     m_thread = new QThread(this);
-    m_sink = new InterferometerSink();
+    m_sink = new InterferometerSink(m_fftSize);
     m_sink->moveToThread(m_thread);
-    start();
+    m_deviceAPI->addMIMOChannel(this);
+    m_deviceAPI->addMIMOChannelAPI(this);
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 Interferometer::~Interferometer()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
+
     m_deviceAPI->removeChannelSinkAPI(this);
-
-    if (m_thread->isRunning()) {
-        stop();
-    }
-
+    m_deviceAPI->removeMIMOChannel(this);
     delete m_sink;
     delete m_thread;
 }
@@ -94,14 +100,54 @@ void Interferometer::feed(const SampleVector::const_iterator& begin, const Sampl
     m_sink->feed(begin, end, sinkIndex);
 }
 
+void Interferometer::pull(Sample& sample, unsigned int sourceIndex)
+{
+    (void) sample;
+    (void) sourceIndex;
+}
+
 void Interferometer::applySettings(const InterferometerSettings& settings, bool force)
 {
+    qDebug() << "Interferometer::applySettings: "
+        << "m_correlationType: " << settings.m_correlationType
+        << "m_filterChainHash: " << settings.m_filterChainHash
+        << "m_log2Decim: " << settings.m_log2Decim
+        << "m_correlationType: " << settings.m_correlationType
+        << "m_useReverseAPI: " << settings.m_useReverseAPI
+        << "m_reverseAPIAddress: " << settings.m_reverseAPIAddress
+        << "m_reverseAPIPort: " << settings.m_reverseAPIPort
+        << "m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
+        << "m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
+        << "m_title: " << settings.m_title;
+
     if ((m_settings.m_log2Decim != settings.m_log2Decim)
      || (m_settings.m_filterChainHash != settings.m_filterChainHash) || force)
     {
         InterferometerSink::MsgConfigureChannelizer *msg = InterferometerSink::MsgConfigureChannelizer::create(
             settings.m_log2Decim, settings.m_filterChainHash);
         m_sink->getInputMessageQueue()->push(msg);
+    }
+
+    if ((m_settings.m_correlationType != settings.m_correlationType) || force)
+    {
+        InterferometerSink::MsgConfigureCorrelation *msg = InterferometerSink::MsgConfigureCorrelation::create(
+            settings.m_correlationType);
+        m_sink->getInputMessageQueue()->push(msg);
+    }
+
+    m_settings = settings;
+}
+
+void Interferometer::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = m_inputMessageQueue.pop()) != 0)
+    {
+        if (handleMessage(*message))
+        {
+            delete message;
+        }
     }
 }
 
@@ -114,27 +160,39 @@ bool Interferometer::handleMessage(const Message& cmd)
         applySettings(cfg.getSettings(), cfg.getForce());
         return true;
     }
-    else if (DSPSignalNotification::match(cmd))
+    else if (DSPMIMOSignalNotification::match(cmd))
     {
-        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        DSPMIMOSignalNotification& notif = (DSPMIMOSignalNotification&) cmd;
 
-        qDebug() << "Interferometer::handleMessage: DSPSignalNotification:"
+        qDebug() << "Interferometer::handleMessage: DSPMIMOSignalNotification:"
                 << " inputSampleRate: " << notif.getSampleRate()
-                << " centerFrequency: " << notif.getCenterFrequency();
+                << " centerFrequency: " << notif.getCenterFrequency()
+                << " sourceElseSink: " << notif.getSourceOrSink()
+                << " streamIndex: " << notif.getIndex();
 
-        m_deviceSampleRate = notif.getSampleRate();
-        calculateFrequencyOffset(); // This is when device sample rate changes
-
-        // Redo the channelizer stuff with the new sample rate to re-synchronize everything
-        InterferometerSink::MsgConfigureChannelizer *msg = InterferometerSink::MsgConfigureChannelizer::create(
-            m_settings.m_log2Decim,
-            m_settings.m_filterChainHash);
-        m_sink->getInputMessageQueue()->push(msg);
-
-        if (m_guiMessageQueue)
+        if (notif.getSourceOrSink()) // deals with source messages only
         {
-            MsgSampleRateNotification *msg = MsgSampleRateNotification::create(notif.getSampleRate());
-            m_guiMessageQueue->push(msg);
+            m_deviceSampleRate = notif.getSampleRate();
+            calculateFrequencyOffset(); // This is when device sample rate changes
+
+            // Notify sink of input sample rate change
+            InterferometerSink::MsgSignalNotification *sig = InterferometerSink::MsgSignalNotification::create(
+                m_deviceSampleRate, notif.getCenterFrequency(), notif.getIndex()
+            );
+            m_sink->getInputMessageQueue()->push(sig);
+
+            // Redo the channelizer stuff with the new sample rate to re-synchronize everything
+            InterferometerSink::MsgConfigureChannelizer *msg = InterferometerSink::MsgConfigureChannelizer::create(
+                m_settings.m_log2Decim,
+                m_settings.m_filterChainHash);
+            m_sink->getInputMessageQueue()->push(msg);
+
+            if (m_guiMessageQueue)
+            {
+                MsgBasebandNotification *msg = MsgBasebandNotification::create(
+                    notif.getSampleRate(), notif.getCenterFrequency());
+                m_guiMessageQueue->push(msg);
+            }
         }
 
         return true;
@@ -183,6 +241,12 @@ void Interferometer::calculateFrequencyOffset()
 {
     double shiftFactor = HBFilterChainConverter::getShiftFactor(m_settings.m_log2Decim, m_settings.m_filterChainHash);
     m_frequencyOffset = m_deviceSampleRate * shiftFactor;
+}
+
+void Interferometer::applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash)
+{
+    InterferometerSink::MsgConfigureChannelizer *msg = InterferometerSink::MsgConfigureChannelizer::create(log2Decim, filterChainHash);
+    m_sink->getInputMessageQueue()->push(msg);
 }
 
 int Interferometer::webapiSettingsGet(

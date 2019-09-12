@@ -24,6 +24,7 @@ InterferometerStreamSink::InterferometerStreamSink() :
     m_streamIndex(0),
     m_dataSize(0),
     m_bufferSize(0),
+    m_dataStart(0),
     m_sampleRate(48000),
     m_settingsMutex(QMutex::Recursive)
 {}
@@ -42,8 +43,10 @@ void InterferometerStreamSink::feed(const SampleVector::const_iterator& begin, c
     m_settingsMutex.lock();
     m_dataSize = (end - begin) + m_dataStart;
 
-    if (m_dataSize > m_bufferSize) {
+    if (m_dataSize > m_bufferSize)
+    {
         m_data.resize(m_dataSize);
+        m_bufferSize = m_dataSize;
     }
 
     std::copy(begin, end, m_data.begin() + m_dataStart);
@@ -57,6 +60,7 @@ bool InterferometerStreamSink::handleMessage(const Message& cmd)
 		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
 
         qDebug() << "InterferometerStreamSink::handleMessage: MsgChannelizerNotification:"
+                << " streamIndex: " << m_streamIndex
                 << " inputSampleRate: " << notif.getSampleRate()
                 << " inputFrequencyOffset: " << notif.getFrequencyOffset();
         m_sampleRate = notif.getSampleRate();

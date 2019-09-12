@@ -37,20 +37,36 @@ public:
 
     void setCorrType(InterferometerSettings::CorrelationType corrType) { m_corrType = corrType; }
     InterferometerSettings::CorrelationType getCorrType() const { return m_corrType; }
-    void performCorr(const SampleVector& data0, const SampleVector& data1);
+    bool performCorr( //!< Returns true if results were produced
+        const SampleVector& data0,
+        int size0,
+        const SampleVector& data1,
+        int size1
+    );
     int getFullFFTSize() const { return 2*m_fftSize; }
 
     SampleVector m_scorr; //!< raw correlation result (spectrum) - Sample vector expected
     SampleVector m_tcorr; //!< correlation result (time or spectrum inverse FFT) - Sample vector expected
     int m_processed;      //!< number of samples processed at the end of correlation
-    int m_remaining;      //!< number of samples remaining at the end of correlation
+    int m_remaining[2];   //!< number of samples remaining per member at the end of correlation
 
 signals:
     void dataReady(int start, int stop);
 
 private:
-    void performOpCorr(const SampleVector& data0, const SampleVector& data1, Sample sampleOp(const Sample& a, const Sample& b));
-    void performFFTCorr(const SampleVector& data0, const SampleVector& data1);
+    bool performOpCorr( //!< Returns true if results were produced
+        const SampleVector& data0,
+        int size0,
+        const SampleVector& data1,
+        int size1,
+        Sample sampleOp(const Sample& a, const Sample& b)
+    );
+    bool performFFTCorr( //!< Returns true if results were produced
+        const SampleVector& data0,
+        int size0,
+        const SampleVector& data1,
+        int size1
+    );
     void adjustSCorrSize(int size);
     void adjustTCorrSize(int size);
 
