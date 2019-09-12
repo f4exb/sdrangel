@@ -28,7 +28,7 @@
 
 class PluginAPI;
 class DeviceUISet;
-class MIMOSampleSink;
+class MIMOChannel;
 class Interferometer;
 class SpectrumVis;
 class ScopeVis;
@@ -40,7 +40,7 @@ namespace Ui {
 class InterferometerGUI : public RollupWidget, public PluginInstanceGUI {
 	Q_OBJECT
 public:
-    static InterferometerGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOSampleSink *mimoChannel);
+    static InterferometerGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel);
 
   	virtual void destroy();
     virtual void setName(const QString& name);
@@ -64,6 +64,7 @@ private:
 	ChannelMarker m_channelMarker;
     InterferometerSettings m_settings;
     int m_sampleRate;
+    qint64 m_centerFrequency;
     double m_shiftFrequencyFactor; //!< Channel frequency shift factor
     bool m_doApplySettings;
     MovingAverageUtil<double, double, 40> m_channelPowerAvg;
@@ -73,12 +74,11 @@ private:
 	MessageQueue m_inputMessageQueue;
     uint32_t m_tickCount;
 
-	explicit InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOSampleSink *rxChannel, QWidget* parent = nullptr);
+	explicit InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *rxChannel, QWidget* parent = nullptr);
 	virtual ~InterferometerGUI();
 
 	void blockApplySettings(bool block);
 	void applySettings(bool force = false);
-    void applyChannelSettings();
     void applyDecimation();
     void applyPosition();
 	void displaySettings();
@@ -91,6 +91,7 @@ private slots:
     void handleSourceMessages();
     void on_decimationFactor_currentIndexChanged(int index);
     void on_position_valueChanged(int value);
+    void on_correlationType_currentIndexChanged(int index);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();

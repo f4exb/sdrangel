@@ -20,8 +20,8 @@
 
 #include <QObject>
 
-#include "dsp/mimosamplesink.h"
-#include "dsp/samplesinkvector.h"
+//#include "dsp/samplesinkvector.h"
+#include "dsp/samplesinkfifo.h"
 #include "interferometerstreamsink.h"
 #include "interferometercorr.h"
 
@@ -54,7 +54,50 @@ public:
         { }
     };
 
-    InterferometerSink();
+    class MsgConfigureCorrelation : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        InterferometerSettings::CorrelationType getCorrelationType() const { return m_correlationType; }
+
+        static MsgConfigureCorrelation *create(InterferometerSettings::CorrelationType correlationType) {
+            return new MsgConfigureCorrelation(correlationType);
+        }
+
+    private:
+        InterferometerSettings::CorrelationType m_correlationType;
+
+        MsgConfigureCorrelation(InterferometerSettings::CorrelationType correlationType) :
+            Message(),
+            m_correlationType(correlationType)
+        {}
+    };
+
+    class MsgSignalNotification : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getInputSampleRate() const { return m_inputSampleRate; }
+        qint64 getCenterFrequency() const { return m_centerFrequency; }
+        int getStreamIndex() const { return m_streamIndex; }
+
+        static MsgSignalNotification* create(int inputSampleRate, qint64 centerFrequency, int streamIndex) {
+            return new MsgSignalNotification(inputSampleRate, centerFrequency, streamIndex);
+        }
+    private:
+        int m_inputSampleRate;
+        qint64 m_centerFrequency;
+        int m_streamIndex;
+
+        MsgSignalNotification(int inputSampleRate, qint64 centerFrequency, int streamIndex) :
+            Message(),
+            m_inputSampleRate(inputSampleRate),
+            m_centerFrequency(centerFrequency),
+            m_streamIndex(streamIndex)
+        { }
+    };
+
+    InterferometerSink(int fftSize);
     ~InterferometerSink();
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
 
@@ -64,11 +107,13 @@ public:
 	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int streamIndex);
 
 private:
+    void processFifo(const SampleVector::iterator& vbegin, const SampleVector::iterator& vend, unsigned int sinkIndex);
     void run();
     bool handleMessage(const Message& cmd);
 
     InterferometerCorrelator m_correlator;
-    SampleSinkVector m_sinkBuffers[2];
+    //SampleSinkVector m_sinkBuffers[2];
+    SampleSinkFifo m_sinkFifos[2];
     InterferometerStreamSink m_sinks[2];
     DownChannelizer *m_channelizers[2];
     BasebandSampleSink *m_spectrumSink;
@@ -76,7 +121,8 @@ private:
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
 
 private slots:
-	void handleSinkBuffer(unsigned int sinkIndex); //!< Handle data when samples have to be processed
+	//void handleSinkBuffer(unsigned int sinkIndex); //!< Handle data when samples have to be processed
+    void handleSinkFifo(unsigned int sinkIndex); //!< Handle data when samples have to be processed
     void handleInputMessages();
 };
 

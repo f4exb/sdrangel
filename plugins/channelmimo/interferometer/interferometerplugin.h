@@ -23,7 +23,7 @@
 #include "plugin/plugininterface.h"
 
 class DeviceUISet;
-class MIMOSampleSink;
+class MIMOChannel;
 
 class InterferometerPlugin : public QObject, PluginInterface {
     Q_OBJECT
@@ -36,8 +36,8 @@ public:
     const PluginDescriptor& getPluginDescriptor() const;
     void initPlugin(PluginAPI* pluginAPI);
 
-    virtual PluginInstanceGUI* createMIMOChannelGUI(DeviceUISet *deviceUISet, MIMOSampleSink *mimoChannel) const;
-    virtual MIMOSampleSink* createMIMOChannelBS(DeviceAPI *deviceAPI) const;
+    virtual PluginInstanceGUI* createMIMOChannelGUI(DeviceUISet *deviceUISet, MIMOChannel *mimoChannel) const;
+    virtual MIMOChannel* createMIMOChannelBS(DeviceAPI *deviceAPI) const;
     virtual ChannelAPI* createMIMOChannelCS(DeviceAPI *deviceAPI) const;
     virtual ChannelWebAPIAdapter* createChannelWebAPIAdapter() const;
 
