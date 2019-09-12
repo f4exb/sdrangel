@@ -37,7 +37,7 @@ MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGFocusOnTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGOneShot, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGMemoryTrace, Message)
 
-const uint ScopeVis::m_traceChunkSize = 4800;
+const uint ScopeVis::m_traceChunkDefaultSize = 4800;
 
 
 ScopeVis::ScopeVis(GLScope* glScope) :
@@ -48,8 +48,9 @@ ScopeVis::ScopeVis(GLScope* glScope) :
     m_focusedTriggerIndex(0),
     m_triggerState(TriggerUntriggered),
     m_focusedTraceIndex(0),
-    m_traceSize(m_traceChunkSize),
-    m_liveTraceSize(m_traceChunkSize),
+    m_traceChunkSize(m_traceChunkDefaultSize),
+    m_traceSize(m_traceChunkDefaultSize),
+    m_liveTraceSize(m_traceChunkDefaultSize),
     m_nbSamples(0),
     m_timeBase(1),
     m_timeOfsProMill(0),
@@ -66,7 +67,7 @@ ScopeVis::ScopeVis(GLScope* glScope) :
     m_currentTraceMemoryIndex(0)
 {
     setObjectName("ScopeVis");
-    m_traceDiscreteMemory.resize(m_traceChunkSize); // arbitrary
+    m_traceDiscreteMemory.resize(m_traceChunkDefaultSize); // arbitrary
     m_glScope->setTraces(&m_traces.m_tracesData, &m_traces.m_traces[0]);
     for (int i = 0; i < (int) Projector::nbProjectionTypes; i++) {
         m_projectorCache[i] = 0.0;

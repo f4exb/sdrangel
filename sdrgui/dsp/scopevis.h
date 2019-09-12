@@ -147,7 +147,7 @@ public:
         }
     };
 
-    static const uint32_t m_traceChunkSize;
+    static const uint32_t m_traceChunkDefaultSize;
     static const uint32_t m_maxNbTriggers = 10;
     static const uint32_t m_maxNbTraces = 10;
     static const uint32_t m_nbTraceMemories = 50;
@@ -170,6 +170,8 @@ public:
     void focusOnTrigger(uint32_t triggerIndex);
     void setOneShot(bool oneShot);
     void setMemoryIndex(uint32_t memoryIndex);
+    void setTraceChunkSize(uint32_t chunkSize) { m_traceChunkSize = chunkSize; }
+    uint32_t getTraceChunkSize() const { return m_traceChunkSize; }
 
     QByteArray serializeMemory() const
     {
@@ -199,7 +201,7 @@ public:
             QByteArray buf;
             bool traceDiscreteMemorySuccess;
 
-            d.readU32(1, &traceSize, m_traceChunkSize);
+            d.readU32(1, &traceSize, m_traceChunkDefaultSize);
             d.readU32(2, &preTriggerDelay, 0);
             d.readS32(3, &sampleRate, 0);
             setSampleRate(sampleRate);
@@ -1127,6 +1129,7 @@ private:
     TriggerState m_triggerState;                   //!< Current trigger state
     Traces m_traces;                               //!< Displayable traces
     int m_focusedTraceIndex;                       //!< Index of the trace that has focus
+    uint32_t m_traceChunkSize;                     //!< Trace length unit size in number of samples
     uint32_t m_traceSize;                          //!< Size of traces in number of samples
     uint32_t m_liveTraceSize;                      //!< Size of traces in number of samples in live mode
     int m_nbSamples;                               //!< Number of samples yet to process in one complex trace

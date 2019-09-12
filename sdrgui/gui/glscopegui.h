@@ -76,6 +76,7 @@ public:
     void changeTrigger(int triggerIndex, const ScopeVis::TriggerData& triggerData);
     void addTrigger(const ScopeVis::TriggerData& triggerData);
     void focusOnTrigger(int triggerIndex);
+    void traceLengthChange();
 
 private:
     class TrigUIBlocker
