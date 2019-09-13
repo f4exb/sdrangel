@@ -217,7 +217,9 @@ const Preset* MainSettings::getPreset(const QString& groupName, quint64 centerFr
         {
             if (type == "R" && getPreset(i)->isSourcePreset()) {
                 return getPreset(i);
-            } else if (type == "T" && !getPreset(i)->isSourcePreset()) {
+            } else if (type == "T" && getPreset(i)->isSinkPreset()) {
+                return getPreset(i);
+            } else if (type == "M" && getPreset(i)->isMIMOPreset()) {
                 return getPreset(i);
             }
         }

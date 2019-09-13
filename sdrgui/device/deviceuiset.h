@@ -71,7 +71,8 @@ public:
     void saveRxChannelSettings(Preset* preset);
     void loadTxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveTxChannelSettings(Preset* preset);
-    //TODO: load and save MIMO channel settings when preset has MIMO type defined
+    void loadMIMOChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
+    void saveMIMOChannelSettings(Preset* preset);
 
     // These are the number of channel types available for selection
     void setNumberOfAvailableRxChannels(int number) { m_nbAvailableRxChannels = number; }

@@ -123,6 +123,8 @@ public:
 	virtual quint64 getSinkCenterFrequency(int index) const { return 0; (void) index; }
     virtual void setSinkCenterFrequency(qint64 centerFrequency, int index) { (void) centerFrequency; (void) index; }
 
+    virtual quint64 getMIMOCenterFrequency() const { return getSourceCenterFrequency(0); }
+
 	virtual bool handleMessage(const Message& message);
 
     virtual int webapiSettingsGet(

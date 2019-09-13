@@ -2325,8 +2325,8 @@ bool WebAPIRequestMapper::appendPresetKeys(
     }
     if (presetJson.contains("iqImbalanceCorrection"))
     {
-        preset->setSourcePreset(presetJson["sourcePreset"].toInt());
-        presetKeys.m_keys.append("sourcePreset");
+        preset->setPresetType(presetJson["presetType"].toInt());
+        presetKeys.m_keys.append("presetType");
     }
     if (presetJson.contains("description"))
     {

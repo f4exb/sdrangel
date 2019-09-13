@@ -249,13 +249,9 @@ void DeviceSet::saveRxChannelSettings(Preset *preset)
 
 void DeviceSet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginAPI)
 {
-    if (preset->isSourcePreset())
+    if (preset->isSinkPreset())
     {
-        qDebug("DeviceSet::loadChannelSettings: Loading preset [%s | %s] not a sink preset", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
-    }
-    else
-    {
-        qDebug("DeviceSet::loadChannelSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+        qDebug("DeviceSet::loadTxChannelSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
         // Available channel plugins
         PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getTxChannelRegistrations();
@@ -264,7 +260,7 @@ void DeviceSet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
         ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
         m_channelInstanceRegistrations.clear();
 
-        qDebug("DeviceSet::loadChannelSettings: %d channel(s) in preset", preset->getChannelCount());
+        qDebug("DeviceSet::loadTxChannelSettings: %d channel(s) in preset", preset->getChannelCount());
 
         for (int i = 0; i < preset->getChannelCount(); i++)
         {
@@ -275,11 +271,11 @@ void DeviceSet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
 
             for (int i = 0; i < openChannels.count(); i++)
             {
-                qDebug("DeviceSet::loadChannelSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channelIdURI));
+                qDebug("DeviceSet::loadTxChannelSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channelIdURI));
 
                 if (openChannels[i].m_channelName == channelConfig.m_channelIdURI)
                 {
-                    qDebug("DeviceSet::loadChannelSettings: channel [%s] found", qPrintable(openChannels[i].m_channelName));
+                    qDebug("DeviceSet::loadTxChannelSettings: channel [%s] found", qPrintable(openChannels[i].m_channelName));
                     reg = openChannels.takeAt(i);
                     m_channelInstanceRegistrations.append(reg);
                     break;
@@ -294,7 +290,7 @@ void DeviceSet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
                 {
                     if ((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
                     {
-                        qDebug("DeviceSet::loadChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channelIdURI));
+                        qDebug("DeviceSet::loadTxChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channelIdURI));
                         ChannelAPI *txChannel = (*channelRegistrations)[i].m_plugin->createTxChannelCS(m_deviceAPI);
                         reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, txChannel);
                         m_channelInstanceRegistrations.append(reg);
@@ -305,7 +301,7 @@ void DeviceSet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
 
             if (reg.m_channelAPI != nullptr)
             {
-                qDebug("DeviceSet::loadChannelSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channelIdURI));
+                qDebug("DeviceSet::loadTxChannelSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channelIdURI));
                 reg.m_channelAPI->deserialize(channelConfig.m_config);
             }
         }
@@ -313,29 +309,130 @@ void DeviceSet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
         // everything, that is still "available" is not needed anymore
         for (int i = 0; i < openChannels.count(); i++)
         {
-            qDebug("DeviceSet::loadChannelSettings: destroying spare channel [%s]", qPrintable(openChannels[i].m_channelName));
+            qDebug("DeviceSet::loadTxChannelSettings: destroying spare channel [%s]", qPrintable(openChannels[i].m_channelName));
             openChannels[i].m_channelAPI->destroy();
         }
 
         renameChannelInstances();
     }
+    else
+    {
+        qDebug("DeviceSet::loadTxChannelSettings: Loading preset [%s | %s] not a sink preset", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+    }
+
 }
 
 void DeviceSet::saveTxChannelSettings(Preset *preset)
 {
-    if (preset->isSourcePreset())
-    {
-        qDebug("DeviceSet::saveChannelSettings: not a sink preset");
-    }
-    else
+    if (preset->isSinkPreset())
     {
         qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
 
         for (int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
-            qDebug("DeviceSet::saveChannelSettings: channel [%s] saved", qPrintable(m_channelInstanceRegistrations[i].m_channelName));
+            qDebug("DeviceSet::saveTxChannelSettings: channel [%s] saved", qPrintable(m_channelInstanceRegistrations[i].m_channelName));
             preset->addChannel(m_channelInstanceRegistrations[i].m_channelName, m_channelInstanceRegistrations[i].m_channelAPI->serialize());
         }
+    }
+    else
+    {
+        qDebug("DeviceSet::saveTxChannelSettings: not a sink preset");
+    }
+}
+
+void DeviceSet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *pluginAPI)
+{
+    if (preset->isMIMOPreset())
+    {
+        qDebug("DeviceSet::loadMIMOChannelSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+
+        // Available channel plugins
+        PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getMIMOChannelRegistrations();
+
+        // copy currently open channels and clear list
+        ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
+        m_channelInstanceRegistrations.clear();
+
+        qDebug("DeviceSet::loadMIMOChannelSettings: %d channel(s) in preset", preset->getChannelCount());
+
+        for (int i = 0; i < preset->getChannelCount(); i++)
+        {
+            const Preset::ChannelConfig& channelConfig = preset->getChannelConfig(i);
+            ChannelInstanceRegistration reg;
+
+            // if we have one instance available already, use it
+
+            for (int i = 0; i < openChannels.count(); i++)
+            {
+                qDebug("DeviceSet::loadMIMOChannelSettings: channels compare [%s] vs [%s]", qPrintable(openChannels[i].m_channelName), qPrintable(channelConfig.m_channelIdURI));
+
+                //if(openChannels[i].m_channelName == channelConfig.m_channelIdURI)
+                if (ChannelUtils::compareChannelURIs(openChannels[i].m_channelName, channelConfig.m_channelIdURI))
+                {
+                    qDebug("DeviceSet::loadMIMOChannelSettings: channel [%s] found", qPrintable(openChannels[i].m_channelName));
+                    reg = openChannels.takeAt(i);
+                    m_channelInstanceRegistrations.append(reg);
+                    break;
+                }
+            }
+
+            // if we haven't one already, create one
+
+            if (reg.m_channelAPI == nullptr)
+            {
+                for (int i = 0; i < channelRegistrations->count(); i++)
+                {
+                    //if((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
+                    if (ChannelUtils::compareChannelURIs((*channelRegistrations)[i].m_channelIdURI, channelConfig.m_channelIdURI))
+                    {
+                        qDebug("DeviceSet::loadMIMOChannelSettings: creating new channel [%s] from config [%s]",
+                                qPrintable((*channelRegistrations)[i].m_channelIdURI),
+                                qPrintable(channelConfig.m_channelIdURI));
+                        ChannelAPI *mimoChannel = (*channelRegistrations)[i].m_plugin->createMIMOChannelCS(m_deviceAPI);
+                        reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, mimoChannel);
+                        m_channelInstanceRegistrations.append(reg);
+                        break;
+                    }
+                }
+            }
+
+            if (reg.m_channelAPI != nullptr)
+            {
+                qDebug("DeviceSet::loadMIMOChannelSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channelIdURI));
+                reg.m_channelAPI->deserialize(channelConfig.m_config);
+            }
+        }
+
+        // everything, that is still "available" is not needed anymore
+        for (int i = 0; i < openChannels.count(); i++)
+        {
+            qDebug("DeviceSet::loadMIMOChannelSettings: destroying spare channel [%s]", qPrintable(openChannels[i].m_channelName));
+            openChannels[i].m_channelAPI->destroy();
+        }
+
+        renameChannelInstances();
+    }
+    else
+    {
+        qDebug("DeviceSet::loadChannelSettings: Loading preset [%s | %s] not a MIMO preset", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+    }
+}
+
+void DeviceSet::saveMIMOChannelSettings(Preset *preset)
+{
+    if (preset->isMIMOPreset())
+    {
+        qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
+
+        for (int i = 0; i < m_channelInstanceRegistrations.count(); i++)
+        {
+            qDebug("DeviceSet::saveMIMOChannelSettings: channel [%s] saved", qPrintable(m_channelInstanceRegistrations[i].m_channelName));
+            preset->addChannel(m_channelInstanceRegistrations[i].m_channelName, m_channelInstanceRegistrations[i].m_channelAPI->serialize());
+        }
+    }
+    else
+    {
+        qDebug("DeviceSet::saveMIMOChannelSettings: not a MIMO preset");
     }
 }
 

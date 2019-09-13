@@ -28,8 +28,8 @@ SWGPreset::SWGPreset(QString* json) {
 }
 
 SWGPreset::SWGPreset() {
-    source_preset = 0;
-    m_source_preset_isSet = false;
+    preset_type = 0;
+    m_preset_type_isSet = false;
     group = nullptr;
     m_group_isSet = false;
     description = nullptr;
@@ -56,8 +56,8 @@ SWGPreset::~SWGPreset() {
 
 void
 SWGPreset::init() {
-    source_preset = 0;
-    m_source_preset_isSet = false;
+    preset_type = 0;
+    m_preset_type_isSet = false;
     group = new QString("");
     m_group_isSet = false;
     description = new QString("");
@@ -123,7 +123,7 @@ SWGPreset::fromJson(QString &json) {
 
 void
 SWGPreset::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&source_preset, pJson["sourcePreset"], "qint32", "");
+    ::SWGSDRangel::setValue(&preset_type, pJson["presetType"], "qint32", "");
     
     ::SWGSDRangel::setValue(&group, pJson["group"], "QString", "QString");
     
@@ -159,8 +159,8 @@ SWGPreset::asJson ()
 QJsonObject*
 SWGPreset::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_source_preset_isSet){
-        obj->insert("sourcePreset", QJsonValue(source_preset));
+    if(m_preset_type_isSet){
+        obj->insert("presetType", QJsonValue(preset_type));
     }
     if(group != nullptr && *group != QString("")){
         toJsonValue(QString("group"), group, obj, QString("QString"));
@@ -194,13 +194,13 @@ SWGPreset::asJsonObject() {
 }
 
 qint32
-SWGPreset::getSourcePreset() {
-    return source_preset;
+SWGPreset::getPresetType() {
+    return preset_type;
 }
 void
-SWGPreset::setSourcePreset(qint32 source_preset) {
-    this->source_preset = source_preset;
-    this->m_source_preset_isSet = true;
+SWGPreset::setPresetType(qint32 preset_type) {
+    this->preset_type = preset_type;
+    this->m_preset_type_isSet = true;
 }
 
 QString*
@@ -298,7 +298,7 @@ bool
 SWGPreset::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_source_preset_isSet){
+        if(m_preset_type_isSet){
             isObjectUpdated = true; break;
         }
         if(group && *group != QString("")){

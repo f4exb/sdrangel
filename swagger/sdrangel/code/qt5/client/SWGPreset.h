@@ -46,8 +46,8 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGPreset* fromJson(QString &jsonString) override;
 
-    qint32 getSourcePreset();
-    void setSourcePreset(qint32 source_preset);
+    qint32 getPresetType();
+    void setPresetType(qint32 preset_type);
 
     QString* getGroup();
     void setGroup(QString* group);
@@ -80,8 +80,8 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint32 source_preset;
-    bool m_source_preset_isSet;
+    qint32 preset_type;
+    bool m_preset_type_isSet;
 
     QString* group;
     bool m_group_isSet;

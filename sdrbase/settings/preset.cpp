@@ -41,7 +41,7 @@ Preset::Preset(const Preset& other) :
 
 void Preset::resetToDefaults()
 {
-    m_sourcePreset = true;
+    m_presetType == PresetSource; // Rx
 	m_group = "default";
 	m_description = "no name";
 	m_centerFrequency = 0;
@@ -67,7 +67,8 @@ QByteArray Preset::serialize() const
 	s.writeU64(3, m_centerFrequency);
 	s.writeBlob(4, m_layout);
 	s.writeBlob(5, m_spectrumConfig);
-	s.writeBool(6, m_sourcePreset);
+    s.writeBool(6, m_presetType == PresetSource);
+	s.writeS32(7, (int) m_presetType);
 
 	s.writeS32(20, m_deviceConfigs.size());
 
@@ -115,12 +116,21 @@ bool Preset::deserialize(const QByteArray& data)
 
 	if (d.getVersion() == 1)
 	{
+        bool tmpBool;
+        int tmp;
+
 		d.readString(1, &m_group, "default");
 		d.readString(2, &m_description, "no name");
 		d.readU64(3, &m_centerFrequency, 0);
 		d.readBlob(4, &m_layout);
 		d.readBlob(5, &m_spectrumConfig);
-		d.readBool(6, &m_sourcePreset, true);
+		d.readBool(6, &tmpBool, true);
+        d.readS32(7, &tmp, PresetSource);
+        m_presetType = tmp < (int) PresetSource ? PresetSource : tmp > (int) PresetMIMO ? PresetMIMO : (PresetType) tmp;
+
+        if (m_presetType != PresetMIMO) {
+            m_presetType = tmpBool ? PresetSource : PresetSink;
+        }
 
 //		qDebug("Preset::deserialize: m_group: %s mode: %s m_description: %s m_centerFrequency: %llu",
 //				qPrintable(m_group),
@@ -291,25 +301,25 @@ const QByteArray* Preset::findBestDeviceConfig(
 	{
 		if (itMatchSequence != m_deviceConfigs.end()) // match sequence ?
 		{
-			qDebug("Preset::findBestSourceConfig: sequence matched: id: %s ser: %s seq: %d",
+			qDebug("Preset::findBestDeviceConfig: sequence matched: id: %s ser: %s seq: %d",
 				qPrintable(itMatchSequence->m_deviceId), qPrintable(itMatchSequence->m_deviceSerial), itMatchSequence->m_deviceSequence);
 			return &(itMatchSequence->m_config);
 		}
 		else if (itFirstOfKind != m_deviceConfigs.end()) // match source type ?
 		{
-			qDebug("Preset::findBestSourceConfig: first of kind matched: id: %s ser: %s seq: %d",
+			qDebug("Preset::findBestDeviceConfig: first of kind matched: id: %s ser: %s seq: %d",
 				qPrintable(itFirstOfKind->m_deviceId), qPrintable(itFirstOfKind->m_deviceSerial), itFirstOfKind->m_deviceSequence);
 			return &(itFirstOfKind->m_config);
 		}
 		else // definitely not found !
 		{
-			qDebug("Preset::findBestSourceConfig: no match");
-			return 0;
+			qDebug("Preset::findBestDeviceConfig: no match");
+			return nullptr;
 		}
 	}
 	else // exact match
 	{
-		qDebug("Preset::findBestSourceConfig: serial matched (exact): id: %s ser: %s",
+		qDebug("Preset::findBestDeviceConfig: serial matched (exact): id: %s ser: %s",
 			qPrintable(it->m_deviceId), qPrintable(it->m_deviceSerial));
 		return &(it->m_config);
 	}
@@ -364,7 +374,7 @@ const QByteArray* Preset::findBestDeviceConfigSoapy(const QString& sourceId, con
 		}
 		else
 		{
-			qDebug("Preset::findBestSourceConfig: first of kind matched: id: %s ser: %s seq: %d",
+			qDebug("Preset::findBestDeviceConfigSoapy: first of kind matched: id: %s ser: %s seq: %d",
 				qPrintable(itFirstOfKind->m_deviceId), qPrintable(itFirstOfKind->m_deviceSerial), itFirstOfKind->m_deviceSequence);
 			return &(itFirstOfKind->m_config);
 		}

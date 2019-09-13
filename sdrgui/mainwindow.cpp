@@ -737,6 +737,8 @@ void MainWindow::loadPresetSettings(const Preset* preset, int tabIndex)
             deviceUI->loadRxChannelSettings(preset, m_pluginManager->getPluginAPI());
         } else if (deviceUI->m_deviceSinkEngine) { // sink device
             deviceUI->loadTxChannelSettings(preset, m_pluginManager->getPluginAPI());
+        } else if (deviceUI->m_deviceMIMOEngine) { // MIMO device
+            deviceUI->loadMIMOChannelSettings(preset, m_pluginManager->getPluginAPI());
         }
 	}
 
@@ -763,6 +765,7 @@ void MainWindow::savePresetSettings(Preset* preset, int tabIndex)
     {
         preset->setSpectrumConfig(deviceUI->m_spectrumGUI->serialize());
         preset->clearChannels();
+        preset->setSourcePreset();
         deviceUI->saveRxChannelSettings(preset);
         deviceUI->m_deviceAPI->saveSamplingDeviceSettings(preset);
     }
@@ -770,8 +773,16 @@ void MainWindow::savePresetSettings(Preset* preset, int tabIndex)
     {
         preset->setSpectrumConfig(deviceUI->m_spectrumGUI->serialize());
         preset->clearChannels();
-        preset->setSourcePreset(false);
+        preset->setSinkPreset();
         deviceUI->saveTxChannelSettings(preset);
+        deviceUI->m_deviceAPI->saveSamplingDeviceSettings(preset);
+    }
+    else if (deviceUI->m_deviceMIMOEngine) // MIMO device
+    {
+        preset->setSpectrumConfig(deviceUI->m_spectrumGUI->serialize());
+        preset->clearChannels();
+        preset->setMIMOPreset();
+        deviceUI->saveMIMOChannelSettings(preset);
         deviceUI->m_deviceAPI->saveSamplingDeviceSettings(preset);
     }
 
@@ -854,7 +865,7 @@ QTreeWidgetItem* MainWindow::addPresetToTree(const Preset* preset)
 
 	QStringList sl;
 	sl.append(QString("%1").arg(preset->getCenterFrequency() / 1e6f, 0, 'f', 3)); // frequency column
-	sl.append(QString("%1").arg(preset->isSourcePreset() ? 'R' : 'T'));           // mode column
+	sl.append(QString("%1").arg(preset->isSourcePreset() ? 'R' : preset->isSinkPreset() ? 'T' : preset->isMIMOPreset() ? 'M' : 'X'));           // mode column
 	sl.append(preset->getDescription());                                          // description column
 	PresetItem* item = new PresetItem(group, sl, preset->getCenterFrequency(), PItem);
 	item->setTextAlignment(0, Qt::AlignRight);
@@ -968,7 +979,7 @@ bool MainWindow::handleMessage(const Message& cmd)
                     if ((preset->getGroup() == presetToDelete->getGroup()) &&
                         (preset->getCenterFrequency() == presetToDelete->getCenterFrequency()) &&
                         (preset->getDescription() == presetToDelete->getDescription()) &&
-                        (preset->isSourcePreset() == presetToDelete->isSourcePreset()))
+                        (preset->getPresetType() == presetToDelete->getPresetType()))
                     {
                         groupItem->takeChild(ip);
                     }

@@ -55,6 +55,8 @@ public:
     void saveRxChannelSettings(Preset* preset);
     void loadTxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveTxChannelSettings(Preset* preset);
+    void loadMIMOChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
+    void saveMIMOChannelSettings(Preset* preset);
 
 private:
     struct ChannelInstanceRegistration

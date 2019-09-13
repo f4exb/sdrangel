@@ -853,7 +853,7 @@ int WebAPIAdapterGUI::instancePresetsGet(
         swgPresets->append(new SWGSDRangel::SWGPresetItem);
         swgPresets->back()->init();
         swgPresets->back()->setCenterFrequency(preset->getCenterFrequency());
-        *swgPresets->back()->getType() = preset->isSourcePreset() ? "R" : "T";
+        *swgPresets->back()->getType() = preset->isSourcePreset() ? "R" : preset->isSinkPreset() ? "T" : preset->isMIMOPreset() ? "M" : "X";
         *swgPresets->back()->getName() = preset->getDescription();
         nbPresetsThisGroup++;
     }
@@ -901,14 +901,21 @@ int WebAPIAdapterGUI::instancePresetPatch(
     if (deviceUI->m_deviceSourceEngine && !selectedPreset->isSourcePreset())
     {
         error.init();
-        *error.getMessage() = QString("Preset type (T) and device set type (Rx) mismatch");
+        *error.getMessage() = QString("Preset type and device set type (Rx) mismatch");
         return 404;
     }
 
-    if (deviceUI->m_deviceSinkEngine && selectedPreset->isSourcePreset())
+    if (deviceUI->m_deviceSinkEngine && !selectedPreset->isSinkPreset())
     {
         error.init();
-        *error.getMessage() = QString("Preset type (R) and device set type (Tx) mismatch");
+        *error.getMessage() = QString("Preset type and device set type (Tx) mismatch");
+        return 404;
+    }
+
+    if (deviceUI->m_deviceMIMOEngine && !selectedPreset->isMIMOPreset())
+    {
+        error.init();
+        *error.getMessage() = QString("Preset type and device set type (MIMO) mismatch");
         return 404;
     }
 
@@ -918,7 +925,7 @@ int WebAPIAdapterGUI::instancePresetPatch(
     response.init();
     response.setCenterFrequency(selectedPreset->getCenterFrequency());
     *response.getGroupName() = selectedPreset->getGroup();
-    *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
+    *response.getType() = selectedPreset->isSourcePreset() ? "R" : selectedPreset->isSinkPreset() ? "T" : selectedPreset->isMIMOPreset() ? "M" : "X";
     *response.getName() = selectedPreset->getDescription();
 
     return 202;
@@ -962,14 +969,21 @@ int WebAPIAdapterGUI::instancePresetPut(
         if (deviceUI->m_deviceSourceEngine && !selectedPreset->isSourcePreset())
         {
             error.init();
-            *error.getMessage() = QString("Preset type (T) and device set type (Rx) mismatch");
+            *error.getMessage() = QString("Preset type and device set type (Rx) mismatch");
             return 404;
         }
 
-        if (deviceUI->m_deviceSinkEngine && selectedPreset->isSourcePreset())
+        if (deviceUI->m_deviceSinkEngine && !selectedPreset->isSinkPreset())
         {
             error.init();
-            *error.getMessage() = QString("Preset type (R) and device set type (Tx) mismatch");
+            *error.getMessage() = QString("Preset type and device set type (Tx) mismatch");
+            return 404;
+        }
+
+        if (deviceUI->m_deviceMIMOEngine && !selectedPreset->isMIMOPreset())
+        {
+            error.init();
+            *error.getMessage() = QString("Preset type and device set type (MIMO) mismatch");
             return 404;
         }
     }
@@ -980,7 +994,7 @@ int WebAPIAdapterGUI::instancePresetPut(
     response.init();
     response.setCenterFrequency(selectedPreset->getCenterFrequency());
     *response.getGroupName() = selectedPreset->getGroup();
-    *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
+    *response.getType() = selectedPreset->isSourcePreset() ? "R" : selectedPreset->isSinkPreset() ? "T": selectedPreset->isMIMOPreset() ? "M" : "X";
     *response.getName() = selectedPreset->getDescription();
 
     return 202;
@@ -1041,7 +1055,7 @@ int WebAPIAdapterGUI::instancePresetPost(
     response.init();
     response.setCenterFrequency(selectedPreset->getCenterFrequency());
     *response.getGroupName() = selectedPreset->getGroup();
-    *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
+    *response.getType() = selectedPreset->isSourcePreset() ? "R" : selectedPreset->isSinkPreset() ? "T" : selectedPreset->isMIMOPreset() ? "M" : "X";
     *response.getName() = selectedPreset->getDescription();
 
     return 202;
@@ -1068,7 +1082,7 @@ int WebAPIAdapterGUI::instancePresetDelete(
 
     response.setCenterFrequency(selectedPreset->getCenterFrequency());
     *response.getGroupName() = selectedPreset->getGroup();
-    *response.getType() = selectedPreset->isSourcePreset() ? "R" : "T";
+    *response.getType() = selectedPreset->isSourcePreset() ? "R" : selectedPreset->isSinkPreset() ? "T" : selectedPreset->isMIMOPreset() ? "M" : "X";
     *response.getName() = selectedPreset->getDescription();
 
     MainWindow::MsgDeletePreset *msg = MainWindow::MsgDeletePreset::create(const_cast<Preset*>(selectedPreset));

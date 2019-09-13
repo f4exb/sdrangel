@@ -96,7 +96,7 @@ void WebAPIAdapterBase::webapiFormatPreset(
 )
 {
     apiPreset->init();
-    apiPreset->setSourcePreset(preset.isSourcePreset() ? 1 : 0);
+    apiPreset->setPresetType(preset.getPresetType());
     apiPreset->setGroup(new QString(preset.getGroup()));
     apiPreset->setDescription(new QString(preset.getDescription()));
     apiPreset->setCenterFrequency(preset.getCenterFrequency());
@@ -195,8 +195,8 @@ void WebAPIAdapterBase::webapiUpdatePreset(
     if (presetKeys.m_keys.contains("iqImbalanceCorrection")) {
         preset->setIQImbalanceCorrection(apiPreset->getIqImbalanceCorrection() != 0);
     }
-    if (presetKeys.m_keys.contains("sourcePreset")) {
-        preset->setSourcePreset(apiPreset->getSourcePreset() != 0);
+    if (presetKeys.m_keys.contains("presetType")) {
+        preset->setPresetType((Preset::PresetType) apiPreset->getPresetType());
     }
     if (presetKeys.m_keys.contains("description")) {
         preset->setDescription(*apiPreset->getDescription());

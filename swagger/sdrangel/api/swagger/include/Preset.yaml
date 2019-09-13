@@ -22,8 +22,8 @@ ChannelConfig:
 Preset:
   description: Represents a Preset object
   properties:
-    sourcePreset:
-      description: boolean
+    presetType:
+      description: See Preset::PresetType
       type: integer
     group:
       type: string

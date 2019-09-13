@@ -574,16 +574,14 @@ void MainCore::loadPresetSettings(const Preset* preset, int tabIndex)
 	if (tabIndex >= 0)
 	{
         DeviceSet *deviceSet = m_deviceSets[tabIndex];
+        deviceSet->m_deviceAPI->loadSamplingDeviceSettings(preset);
 
-        if (deviceSet->m_deviceSourceEngine) // source device
-        {
-        	deviceSet->m_deviceAPI->loadSamplingDeviceSettings(preset);
+        if (deviceSet->m_deviceSourceEngine) { // source device
         	deviceSet->loadRxChannelSettings(preset, m_pluginManager->getPluginAPI());
-        }
-        else if (deviceSet->m_deviceSinkEngine) // sink device
-        {
-        	deviceSet->m_deviceAPI->loadSamplingDeviceSettings(preset);
+        } else if (deviceSet->m_deviceSinkEngine) { // sink device
         	deviceSet->loadTxChannelSettings(preset, m_pluginManager->getPluginAPI());
+        } else if (deviceSet->m_deviceMIMOEngine) { // MIMO device
+        	deviceSet->loadMIMOChannelSettings(preset, m_pluginManager->getPluginAPI());
         }
 	}
 }
@@ -601,14 +599,22 @@ void MainCore::savePresetSettings(Preset* preset, int tabIndex)
     if (deviceSet->m_deviceSourceEngine) // source device
     {
         preset->clearChannels();
+        preset->setSourcePreset();
         deviceSet->saveRxChannelSettings(preset);
         deviceSet->m_deviceAPI->saveSamplingDeviceSettings(preset);
     }
     else if (deviceSet->m_deviceSinkEngine) // sink device
     {
         preset->clearChannels();
-        preset->setSourcePreset(false);
+        preset->setSinkPreset();
         deviceSet->saveTxChannelSettings(preset);
+        deviceSet->m_deviceAPI->saveSamplingDeviceSettings(preset);
+    }
+    else if (deviceSet->m_deviceMIMOEngine) // MIMO device
+    {
+        preset->clearChannels();
+        preset->setMIMOPreset();
+        deviceSet->saveMIMOChannelSettings(preset);
         deviceSet->m_deviceAPI->saveSamplingDeviceSettings(preset);
     }
 }

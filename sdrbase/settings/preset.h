@@ -57,13 +57,26 @@ public:
 	};
 	typedef QList<DeviceConfig> DeviceeConfigs;
 
+    enum PresetType
+    {
+        PresetSource, // Rx
+        PresetSink,   // Tx
+        PresetMIMO    // MIMO
+    };
+
 	Preset();
 	Preset(const Preset& other);
 
 	void resetToDefaults();
 
-	void setSourcePreset(bool isSourcePreset) { m_sourcePreset = isSourcePreset; }
-	bool isSourcePreset() const { return m_sourcePreset; }
+	void setSourcePreset() { m_presetType = PresetSource; }
+	bool isSourcePreset() const { return m_presetType == PresetSource; }
+	void setSinkPreset() { m_presetType = PresetSink; }
+	bool isSinkPreset() const { return m_presetType == PresetSink; }
+	void setMIMOPreset() { m_presetType = PresetMIMO; }
+	bool isMIMOPreset() const { return m_presetType == PresetMIMO; }
+    PresetType getPresetType() const { return m_presetType; }
+    void setPresetType(PresetType presetType) { m_presetType = presetType; }
 
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
@@ -130,7 +143,7 @@ public:
 	}
 
 protected:
-    bool m_sourcePreset;
+    PresetType m_presetType;
 
     // group and preset description
 	QString m_group;
