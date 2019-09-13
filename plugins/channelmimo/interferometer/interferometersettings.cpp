@@ -68,6 +68,8 @@ QByteArray InterferometerSettings::serialize() const
     if (m_channelMarker) {
         s.writeBlob(22, m_channelMarker->serialize());
     }
+
+    return s.final();
 }
 
 bool InterferometerSettings::deserialize(const QByteArray& data)

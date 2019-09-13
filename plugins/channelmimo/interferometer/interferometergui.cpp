@@ -146,6 +146,8 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setScopeGUI(ui->scopeGUI);
+    m_settings.setSpectrumGUI(ui->spectrumGUI);
 
     m_deviceUISet->registerChannelInstance(Interferometer::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
@@ -192,6 +194,8 @@ void InterferometerGUI::applySettings(bool force)
 
 void InterferometerGUI::displaySettings()
 {
+    ui->correlationType->setCurrentIndex((int) m_settings.m_correlationType);
+
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle(m_settings.m_title);
