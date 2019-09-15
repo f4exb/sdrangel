@@ -183,7 +183,7 @@ void BladeRF2OutputThread::callbackMO(qint16* buf, qint32 samplesPerChannel)
 
     if (status < 0)
     {
-        qCritical("BladeRF2OutputThread::callbackMI: cannot interleave buffer: %s", bladerf_strerror(status));
+        qCritical("BladeRF2OutputThread::callbackMO: cannot interleave buffer: %s", bladerf_strerror(status));
         return;
     }
 }

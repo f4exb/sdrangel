@@ -874,9 +874,6 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
     if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
         reverseAPIKeys.append("LOppmTenths");
     }
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force) {
-        reverseAPIKeys.append("devSampleRate");
-    }
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
         || (m_settings.m_transverterMode != settings.m_transverterMode)
@@ -940,9 +937,6 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
 
     if ((m_settings.m_globalGain != settings.m_globalGain) || force) {
         reverseAPIKeys.append("globalGain");
-    }
-    if ((m_settings.m_gainMode != settings.m_gainMode) || force) {
-        reverseAPIKeys.append("gainMode");
     }
 
     if ((m_settings.m_globalGain != settings.m_globalGain)

@@ -440,7 +440,7 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
                 settings.m_log2Interp,
                 (DeviceSampleSink::fcPos_t) settings.m_fcPos,
                 settings.m_devSampleRate,
-                m_settings.m_transverterMode);
+                settings.m_transverterMode);
         setDeviceCenterFrequency(deviceCenterFrequency, settings.m_LOppmTenths);
 
         if (m_deviceAPI->getSourceBuddies().size() > 0)
