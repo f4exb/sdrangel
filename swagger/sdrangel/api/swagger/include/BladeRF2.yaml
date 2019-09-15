@@ -101,3 +101,75 @@ BladeRF2OutputReport:
       $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Range"
     globalGainRange:
       $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Range"
+
+BladeRF2MIMOSettings:
+  description: BladeRF2
+  properties:
+    devSampleRate:
+      type: integer
+    LOppmTenths:
+      type: integer
+    rxCenterFrequency:
+      type: integer
+      format: int64
+    log2Decim:
+      type: integer
+    fcPos:
+      description: See BladeRF2MIMO::fcPos_t
+      type: integer
+    rxBandwidth:
+      type: integer
+    rx0GainMode:
+      type: integer
+    rx0GlobalGain:
+      type: integer
+    rx1GainMode:
+      type: integer
+    rx1GlobalGain:
+      type: integer
+    rxBiasTee:
+      description: boolean
+      type: integer
+    dcBlock:
+      description: boolean
+      type: integer
+    iqCorrection:
+      description: boolean
+      type: integer
+    rxTransverterMode:
+      description: boolean
+      type: integer
+    rxTransverterDeltaFrequency:
+      type: integer
+      format: int64
+    txCenterFrequency:
+      type: integer
+      format: int64
+    log2Interp:
+      type: integer
+    txBandwidth:
+      type: integer
+    tx0GlobalGain:
+      type: integer
+    tx1GlobalGain:
+      type: integer
+    txBiasTee:
+      description: boolean
+      type: integer
+    txTransverterMode:
+      description: boolean
+      type: integer
+    txTransverterDeltaFrequency:
+      type: integer
+      format: int64
+    fileRecordName:
+      type: string
+    useReverseAPI:
+      description: boolean
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer

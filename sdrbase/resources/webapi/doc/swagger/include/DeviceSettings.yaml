@@ -26,6 +26,8 @@ DeviceSettings:
       $ref: "/doc/swagger/include/BladeRF1.yaml#/BladeRF1OutputSettings"
     bladeRF2OutputSettings:
       $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2OutputSettings"
+    bladeRF2MIMOSettings:
+      $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2MIMOSettings"
     fcdProSettings:
       $ref: "/doc/swagger/include/FCDPro.yaml#/FCDProSettings"
     fcdProPlusSettings:

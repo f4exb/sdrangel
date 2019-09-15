@@ -26,6 +26,8 @@ DeviceSettings:
       $ref: "http://localhost:8081/api/swagger/include/BladeRF1.yaml#/BladeRF1OutputSettings"
     bladeRF2OutputSettings:
       $ref: "http://localhost:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2OutputSettings"
+    bladeRF2MIMOSettings:
+      $ref: "http://localhost:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2MIMOSettings"
     fcdProSettings:
       $ref: "http://localhost:8081/api/swagger/include/FCDPro.yaml#/FCDProSettings"
     fcdProPlusSettings:

@@ -27,6 +27,7 @@
 #include "SWGBladeRF1InputSettings.h"
 #include "SWGBladeRF1OutputSettings.h"
 #include "SWGBladeRF2InputSettings.h"
+#include "SWGBladeRF2MIMOSettings.h"
 #include "SWGBladeRF2OutputSettings.h"
 #include "SWGFCDProPlusSettings.h"
 #include "SWGFCDProSettings.h"
@@ -97,6 +98,9 @@ public:
 
     SWGBladeRF2OutputSettings* getBladeRf2OutputSettings();
     void setBladeRf2OutputSettings(SWGBladeRF2OutputSettings* blade_rf2_output_settings);
+
+    SWGBladeRF2MIMOSettings* getBladeRf2MimoSettings();
+    void setBladeRf2MimoSettings(SWGBladeRF2MIMOSettings* blade_rf2_mimo_settings);
 
     SWGFCDProSettings* getFcdProSettings();
     void setFcdProSettings(SWGFCDProSettings* fcd_pro_settings);
@@ -197,6 +201,9 @@ private:
 
     SWGBladeRF2OutputSettings* blade_rf2_output_settings;
     bool m_blade_rf2_output_settings_isSet;
+
+    SWGBladeRF2MIMOSettings* blade_rf2_mimo_settings;
+    bool m_blade_rf2_mimo_settings_isSet;
 
     SWGFCDProSettings* fcd_pro_settings;
     bool m_fcd_pro_settings_isSet;
