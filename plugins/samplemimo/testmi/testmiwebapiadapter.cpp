@@ -33,8 +33,8 @@ int TestMIWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setTestMiSettings(new SWGSDRangel::SWGTestMISettings());
+    response.getTestMiSettings()->init();
     TestMI::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }
