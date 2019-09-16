@@ -31,7 +31,7 @@
 
 const PluginDescriptor Bladerf1OutputPlugin::m_pluginDescriptor = {
 	QString("BladeRF1 Output"),
-	QString("4.11.6"),
+	QString("4.11.10"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -56,9 +56,12 @@ void Bladerf1OutputPlugin::initPlugin(PluginAPI* pluginAPI)
 	pluginAPI->registerSampleSink(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices Bladerf1OutputPlugin::enumSampleSinks()
+void Bladerf1OutputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
 {
-	SamplingDevices result;
+    if (listedHwIds.contains(m_hardwareID)) { // check if it was done
+        return;
+    }
+
 	struct bladerf_devinfo *devinfo = 0;
 
 	int count = bladerf_get_device_list(&devinfo);
@@ -73,12 +76,12 @@ PluginInterface::SamplingDevices Bladerf1OutputPlugin::enumSampleSinks()
 
             if (status == BLADERF_ERR_NODEV)
             {
-                qCritical("BladerfOutputPlugin::enumSampleSinks: No device at index %d", i);
+                qCritical("BladerfOutputPlugin::enumOriginDevices: No device at index %d", i);
                 continue;
             }
             else if (status != 0)
             {
-                qCritical("BladerfOutputPlugin::enumSampleSinks: Failed to open device at index %d", i);
+                qCritical("BladerfOutputPlugin::enumOriginDevices: Failed to open device at index %d", i);
                 continue;
             }
 
@@ -86,18 +89,16 @@ PluginInterface::SamplingDevices Bladerf1OutputPlugin::enumSampleSinks()
 
             if (strcmp(boardName, "bladerf1") == 0)
             {
-                QString displayedName(QString("BladeRF1[%1] %2").arg(devinfo[i].instance).arg(devinfo[i].serial));
+                QString displayableName(QString("BladeRF1[%1] %2").arg(devinfo[i].instance).arg(devinfo[i].serial));
 
-                result.append(SamplingDevice(displayedName,
-                        m_hardwareID,
-                        m_deviceTypeID,
-                        QString(devinfo[i].serial),
-                        i,
-                        PluginInterface::SamplingDevice::PhysicalDevice,
-                        PluginInterface::SamplingDevice::StreamSingleTx,
-                        1,
-                        0));
-
+                originDevices.append(OriginDevice(
+                    displayableName,
+                    m_hardwareID,
+                    QString(devinfo[i].serial),
+                    i, // Sequence
+                    1, // Has 1 Rx known by construction
+                    1  // Has 1 Tx known by construction
+                ));
             }
 
             bladerf_close(dev);
@@ -105,6 +106,31 @@ PluginInterface::SamplingDevices Bladerf1OutputPlugin::enumSampleSinks()
 
 		bladerf_free_device_list(devinfo); // Valgrind memcheck
 	}
+
+    listedHwIds.append(m_hardwareID);
+}
+
+PluginInterface::SamplingDevices Bladerf1OutputPlugin::enumSampleSinks(const OriginDevices& originDevices)
+{
+	SamplingDevices result;
+
+    for (OriginDevices::const_iterator it = originDevices.begin(); it != originDevices.end(); ++it)
+    {
+        if (it->hardwareId == m_hardwareID)
+        {
+            result.append(SamplingDevice(
+                it->displayableName,
+                it->hardwareId,
+                m_deviceTypeID,
+                it->serial,
+                it->sequence,
+                PluginInterface::SamplingDevice::PhysicalDevice,
+                PluginInterface::SamplingDevice::StreamSingleTx,
+                1,    // Nb of Tx streams
+                0     // Stream index
+            ));
+        }
+    }
 
 	return result;
 }

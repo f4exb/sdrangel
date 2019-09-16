@@ -32,7 +32,7 @@
 
 const PluginDescriptor SoapySDROutputPlugin::m_pluginDescriptor = {
     QString("SoapySDR Output"),
-    QString("4.11.6"),
+    QString("4.11.10"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -57,33 +57,62 @@ void SoapySDROutputPlugin::initPlugin(PluginAPI* pluginAPI)
     pluginAPI->registerSampleSink(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices SoapySDROutputPlugin::enumSampleSinks()
+void SoapySDROutputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
 {
-    SamplingDevices result;
+    if (listedHwIds.contains(m_hardwareID)) { // check if it was done
+        return;
+    }
+
     DeviceSoapySDR& deviceSoapySDR = DeviceSoapySDR::instance();
     const std::vector<DeviceSoapySDRScan::SoapySDRDeviceEnum>& devicesEnumeration = deviceSoapySDR.getDevicesEnumeration();
-    qDebug("SoapySDROutputPlugin::enumSampleSinks: %lu SoapySDR devices. Enumerate these with Tx channel(s):", devicesEnumeration.size());
+    qDebug("SoapySDROutputPlugin::enumOriginDevices: %lu SoapySDR devices", devicesEnumeration.size());
     std::vector<DeviceSoapySDRScan::SoapySDRDeviceEnum>::const_iterator it = devicesEnumeration.begin();
 
     for (int idev = 0; it != devicesEnumeration.end(); ++it, idev++)
     {
-        unsigned int nbTxChannels = it->m_nbTx;
+        QString displayedName(QString("SoapySDR[%1:%2] %3").arg(idev).arg("%1").arg(it->m_label));
+        QString serial(QString("%1-%2").arg(it->m_driverName).arg(it->m_sequence));
 
-        for (unsigned int ichan = 0; ichan < nbTxChannels; ichan++)
+        originDevices.append(OriginDevice(
+            displayedName,
+            m_hardwareID,
+            serial,
+            idev, // Sequence
+            it->m_nbRx, // nb Rx
+            it->m_nbTx  // nb Tx
+        ));
+    }
+
+    listedHwIds.append(m_hardwareID);
+}
+
+PluginInterface::SamplingDevices SoapySDROutputPlugin::enumSampleSinks(const OriginDevices& originDevices)
+{
+    SamplingDevices result;
+
+    for (OriginDevices::const_iterator it = originDevices.begin(); it != originDevices.end(); ++it)
+    {
+        if (it->hardwareId == m_hardwareID)
         {
-            QString displayedName(QString("SoapySDR[%1:%2] %3").arg(idev).arg(ichan).arg(it->m_label));
-            QString serial(QString("%1-%2").arg(it->m_driverName).arg(it->m_sequence));
-            qDebug("SoapySDROutputPlugin::enumSampleSinks: device #%d (%s) serial %s channel %u",
-                    idev, it->m_label.toStdString().c_str(), serial.toStdString().c_str(), ichan);
-            result.append(SamplingDevice(displayedName,
-                    m_hardwareID,
+            unsigned int nbTxChannels = it->nbTxStreams;
+
+            for (unsigned int ichan = 0; ichan < nbTxChannels; ichan++)
+            {
+                QString displayedName(it->displayableName.arg(ichan));
+                qDebug("SoapySDROutputPlugin::enumSampleSinks: device #%d serial %s channel %u",
+                        it->sequence, it->serial.toStdString().c_str(), ichan);
+                result.append(SamplingDevice(
+                    displayedName,
+                    it->hardwareId,
                     m_deviceTypeID,
-                    serial,
-                    idev,
+                    it->serial,
+                    it->sequence,
                     PluginInterface::SamplingDevice::PhysicalDevice,
                     PluginInterface::SamplingDevice::StreamSingleTx,
                     nbTxChannels,
-                    ichan));
+                    ichan
+                ));
+            }
         }
     }
 

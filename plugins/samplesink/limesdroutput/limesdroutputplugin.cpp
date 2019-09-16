@@ -35,7 +35,7 @@
 
 const PluginDescriptor LimeSDROutputPlugin::m_pluginDescriptor = {
     QString("LimeSDR Output"),
-    QString("4.11.6"),
+    QString("4.11.10"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -60,25 +60,29 @@ void LimeSDROutputPlugin::initPlugin(PluginAPI* pluginAPI)
     pluginAPI->registerSampleSink(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices LimeSDROutputPlugin::enumSampleSinks()
+void LimeSDROutputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
 {
+    if (listedHwIds.contains(m_hardwareID)) { // check if it was done
+        return;
+    }
+
     lms_info_str_t* deviceList;
     int nbDevices;
     SamplingDevices result;
 
     if ((nbDevices = LMS_GetDeviceList(0)) <= 0)
     {
-        qDebug("LimeSDROutputPlugin::enumSampleSources: Could not find any LimeSDR device");
-        return result; // empty result
+        qDebug("LimeSDROutputPlugin::enumOriginDevices: Could not find any LimeSDR device");
+        return; // do nothing
     }
 
     deviceList = new lms_info_str_t[nbDevices];
 
     if (LMS_GetDeviceList(deviceList) < 0)
     {
-        qDebug("LimeSDROutputPlugin::enumSampleSources: Could not obtain LimeSDR devices information");
+        qDebug("LimeSDROutputPlugin::enumOriginDevices: Could not obtain LimeSDR devices information");
         delete[] deviceList;
-        return result; // empty result
+        return; // do nothing
     }
     else
     {
@@ -91,24 +95,51 @@ PluginInterface::SamplingDevices LimeSDROutputPlugin::enumSampleSinks()
             limeSDRParams.open(deviceList[i]);
             limeSDRParams.close();
 
-            for (unsigned int j = 0; j < limeSDRParams.m_nbTxChannels; j++)
-            {
-                qDebug("LimeSDROutputPlugin::enumSampleSources: device #%d channel %u: %s", i, j, (char *) deviceList[i]);
-                QString displayedName(QString("LimeSDR[%1:%2] %3").arg(i).arg(j).arg(serial.c_str()));
-                result.append(SamplingDevice(displayedName,
-                        m_hardwareID,
-                        m_deviceTypeID,
-                        QString(deviceList[i]),
-                        i,
-                        PluginInterface::SamplingDevice::PhysicalDevice,
-                        PluginInterface::SamplingDevice::StreamSingleTx,
-                        limeSDRParams.m_nbTxChannels,
-                        j));
-            }
+            QString displayedName(QString("LimeSDR[%1:%2] %3").arg(i).arg("%1").arg(serial.c_str()));
+
+            originDevices.append(OriginDevice(
+                displayedName,
+                m_hardwareID,
+                QString(deviceList[i]),
+                i,
+                limeSDRParams.m_nbRxChannels,
+                limeSDRParams.m_nbTxChannels
+            ));
         }
     }
 
     delete[] deviceList;
+
+	listedHwIds.append(m_hardwareID);
+}
+
+PluginInterface::SamplingDevices LimeSDROutputPlugin::enumSampleSinks(const OriginDevices& originDevices)
+{
+	SamplingDevices result;
+
+	for (OriginDevices::const_iterator it = originDevices.begin(); it != originDevices.end(); ++it)
+    {
+        if (it->hardwareId == m_hardwareID)
+        {
+            for (unsigned int j = 0; j < it->nbTxStreams; j++)
+            {
+                qDebug("LimeSDROutputPlugin::enumSampleSinks: device #%d channel %u: %s", it->sequence, j, qPrintable(it->serial));
+                QString displayedName(it->displayableName.arg(j));
+                result.append(SamplingDevice(
+                    displayedName,
+                    it->hardwareId,
+                    m_deviceTypeID,
+                    it->serial,
+                    it->sequence,
+                    PluginInterface::SamplingDevice::PhysicalDevice,
+                    PluginInterface::SamplingDevice::StreamSingleTx,
+                    it->nbTxStreams,
+                    j
+                ));
+            }
+        }
+    }
+
     return result;
 }
 

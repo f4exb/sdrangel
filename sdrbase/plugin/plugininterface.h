@@ -82,6 +82,37 @@ public:
 	};
 	typedef QList<SamplingDevice> SamplingDevices;
 
+    /** This is the device from which the sampling devices are derived. For physical devices this represents
+     * a single physical unit (a LimeSDR, HackRF, BladeRF, RTL-SDR dongle, ...) that is enumerated once and
+     * reported in the system so that the "sampling devices" used in the system can be registered
+    */
+    struct OriginDevice
+    {
+        QString displayableName; //!< A human readable name
+        QString hardwareId;      //!< The internal id that identifies the type of hardware (i.e. HackRF, BladeRF, ...)
+        QString serial;          //!< The device serial number defined by the vendor or a fake one (SDRplay)
+        int sequence;            //!< The device sequence in order of enumeration
+        int nbRxStreams;         //!< Number of receiver streams
+        int nbTxStreams;         //!< Number of transmitter streams
+
+        OriginDevice(
+                const QString& _displayableName,
+                const QString& _hardwareId,
+				const QString& _serial,
+				int _sequence,
+                int _nbRxStreams,
+                int _nbTxStreams
+        ) :
+            displayableName(_displayableName),
+            hardwareId(_hardwareId),
+            serial(_serial),
+            sequence(_sequence),
+            nbRxStreams(_nbRxStreams),
+            nbTxStreams(_nbTxStreams)
+        {}
+    };
+    typedef QList<OriginDevice> OriginDevices;
+
     virtual ~PluginInterface() { }
 
 	virtual const PluginDescriptor& getPluginDescriptor() const = 0;
@@ -163,9 +194,21 @@ public:
         return nullptr;
     }
 
+    // any device
+
+    virtual void enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
+    {
+        (void) listedHwIds;
+        (void) originDevices;
+    }
+
     // device source plugins only
 
-	virtual SamplingDevices enumSampleSources() { return SamplingDevices(); }
+	virtual SamplingDevices enumSampleSources(const OriginDevices& originDevices)
+    {
+        (void) originDevices;
+        return SamplingDevices();
+    }
 
 	virtual PluginInstanceGUI* createSampleSourcePluginInstanceGUI(
             const QString& sourceId,
@@ -191,7 +234,11 @@ public:
 
 	// device sink plugins only
 
-	virtual SamplingDevices enumSampleSinks() { return SamplingDevices(); }
+	virtual SamplingDevices enumSampleSinks(const OriginDevices& originDevices)
+    {
+        (void) originDevices;
+        return SamplingDevices();
+    }
 
 	virtual PluginInstanceGUI* createSampleSinkPluginInstanceGUI(
             const QString& sinkId,
@@ -218,7 +265,11 @@ public:
 
     // device MIMO plugins only
 
-	virtual SamplingDevices enumSampleMIMO() { return SamplingDevices(); }
+	virtual SamplingDevices enumSampleMIMO(const OriginDevices& originDevices)
+    {
+        (void) originDevices;
+        return SamplingDevices();
+    }
 
 	virtual PluginInstanceGUI* createSampleMIMOPluginInstanceGUI(
             const QString& mimoId,

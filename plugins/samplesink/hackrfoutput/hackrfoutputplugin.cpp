@@ -31,7 +31,7 @@
 
 const PluginDescriptor HackRFOutputPlugin::m_pluginDescriptor = {
 	QString("HackRF Output"),
-	QString("4.11.8"),
+	QString("4.11.10"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -56,9 +56,12 @@ void HackRFOutputPlugin::initPlugin(PluginAPI* pluginAPI)
 	pluginAPI->registerSampleSink(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices HackRFOutputPlugin::enumSampleSinks()
+void HackRFOutputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
 {
-	SamplingDevices result;
+    if (listedHwIds.contains(m_hardwareID)) { // check if it was done
+        return;
+    }
+
 	hackrf_device_list_t *hackrf_devices = hackrf_device_list();
 	hackrf_device *hackrf_ptr;
 	read_partid_serialno_t read_partid_serialno;
@@ -70,13 +73,13 @@ PluginInterface::SamplingDevices HackRFOutputPlugin::enumSampleSinks()
 
 		if (rc == HACKRF_SUCCESS)
 		{
-			qDebug("HackRFOutputPlugin::enumSampleSinks: try to enumerate HackRF device #%d", i);
+			qDebug("HackRFOutputPlugin::enumOriginDevices: try to enumerate HackRF device #%d", i);
 
 			rc = (hackrf_error) hackrf_board_partid_serialno_read(hackrf_ptr, &read_partid_serialno);
 
 			if (rc != HACKRF_SUCCESS)
 			{
-				qDebug("HackRFOutputPlugin::enumSampleSinks: failed to read serial no: %s", hackrf_error_name(rc));
+				qDebug("HackRFOutputPlugin::enumOriginDevices: failed to read serial no: %s", hackrf_error_name(rc));
 				hackrf_close(hackrf_ptr);
 				continue; // next
 			}
@@ -88,27 +91,51 @@ PluginInterface::SamplingDevices HackRFOutputPlugin::enumSampleSinks()
 			//uint64_t serial_num = (((uint64_t) serial_msb)<<32) + serial_lsb;
 			QString displayedName(QString("HackRF[%1] %2").arg(i).arg(serial_str));
 
-			result.append(SamplingDevice(displayedName,
-			        m_hardwareID,
-			        m_deviceTypeID,
-					serial_str,
-					i,
-					PluginInterface::SamplingDevice::PhysicalDevice,
-					PluginInterface::SamplingDevice::StreamSingleTx,
-					1,
-					0));
+			originDevices.append(OriginDevice(
+				displayedName,
+				m_hardwareID,
+				serial_str,
+				i,
+				1,
+				1
+			));
 
-			qDebug("HackRFOutputPlugin::enumSampleSinks: enumerated HackRF device #%d", i);
+			qDebug("HackRFOutputPlugin::enumOriginDevices: enumerated HackRF device #%d", i);
 
 			hackrf_close(hackrf_ptr);
 		}
 		else
 		{
-			qDebug("HackRFOutputPlugin::enumSampleSinks: failed to enumerate HackRF device #%d: %s", i, hackrf_error_name(rc));
+			qDebug("HackRFOutputPlugin::enumOriginDevices: failed to enumerate HackRF device #%d: %s", i, hackrf_error_name(rc));
 		}
 	}
 
 	hackrf_device_list_free(hackrf_devices);
+	listedHwIds.append(m_hardwareID);
+}
+
+PluginInterface::SamplingDevices HackRFOutputPlugin::enumSampleSinks(const OriginDevices& originDevices)
+{
+	SamplingDevices result;
+
+	for (OriginDevices::const_iterator it = originDevices.begin(); it != originDevices.end(); ++it)
+    {
+        if (it->hardwareId == m_hardwareID)
+        {
+			result.append(SamplingDevice(
+				it->displayableName,
+				it->hardwareId,
+				m_deviceTypeID,
+				it->serial,
+				it->sequence,
+				PluginInterface::SamplingDevice::PhysicalDevice,
+				PluginInterface::SamplingDevice::StreamSingleTx,
+				1,
+				0
+			));
+		}
+	}
+
 	return result;
 }
 

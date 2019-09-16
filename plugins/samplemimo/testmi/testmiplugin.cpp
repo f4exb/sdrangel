@@ -30,7 +30,7 @@
 
 const PluginDescriptor TestMIPlugin::m_pluginDescriptor = {
 	QString("Test Multiple Input"),
-	QString("4.11.6"),
+	QString("4.11.10"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -55,20 +55,44 @@ void TestMIPlugin::initPlugin(PluginAPI* pluginAPI)
 	pluginAPI->registerSampleMIMO(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices TestMIPlugin::enumSampleMIMO()
+void TestMIPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
+{
+    if (listedHwIds.contains(m_hardwareID)) { // check if it was done
+        return;
+    }
+
+    originDevices.append(OriginDevice(
+        "TestMI",         // Displayable name
+        m_hardwareID,     // Hardware ID
+        QString::null,    // Serial
+        0,                // Sequence
+        2,                // Number of Rx streams
+        0                 // Number of Tx streams
+    ));
+
+    listedHwIds.append(m_hardwareID);
+}
+
+PluginInterface::SamplingDevices TestMIPlugin::enumSampleMIMO(const OriginDevices& originDevices)
 {
 	SamplingDevices result;
 
-    result.append(SamplingDevice(
-            "TestMI",
-            m_hardwareID,
-            m_deviceTypeID,
-            QString::null,
-            0,
-            PluginInterface::SamplingDevice::BuiltInDevice,
-            PluginInterface::SamplingDevice::StreamMIMO,
-            1,
-            0));
+    for (OriginDevices::const_iterator it = originDevices.begin(); it != originDevices.end(); ++it)
+    {
+        if (it->hardwareId == m_hardwareID)
+        {
+            result.append(SamplingDevice(
+                    "TestMI",
+                    m_hardwareID,
+                    m_deviceTypeID,
+                    it->serial,
+                    it->sequence,
+                    PluginInterface::SamplingDevice::BuiltInDevice,
+                    PluginInterface::SamplingDevice::StreamMIMO,
+                    1,    // MIMO is always considered as a single device
+                    0));
+        }
+    }
 
 	return result;
 }

@@ -31,7 +31,7 @@
 
 const PluginDescriptor Blderf1InputPlugin::m_pluginDescriptor = {
 	QString("BladeRF1 Input"),
-	QString("4.5.4"),
+	QString("4.11.10"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -56,11 +56,13 @@ void Blderf1InputPlugin::initPlugin(PluginAPI* pluginAPI)
 	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices Blderf1InputPlugin::enumSampleSources()
+void Blderf1InputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
 {
-	SamplingDevices result;
-	struct bladerf_devinfo *devinfo = nullptr;
+    if (listedHwIds.contains(m_hardwareID)) { // check if it was done
+        return;
+    }
 
+	struct bladerf_devinfo *devinfo = nullptr;
 	int count = bladerf_get_device_list(&devinfo);
 
     if (devinfo)
@@ -86,17 +88,16 @@ PluginInterface::SamplingDevices Blderf1InputPlugin::enumSampleSources()
 
             if (strcmp(boardName, "bladerf1") == 0)
             {
-                QString displayedName(QString("BladeRF1[%1] %2").arg(devinfo[i].instance).arg(devinfo[i].serial));
+                QString displayableName(QString("BladeRF1[%1] %2").arg(devinfo[i].instance).arg(devinfo[i].serial));
 
-                result.append(SamplingDevice(displayedName,
-                        m_hardwareID,
-                        m_deviceTypeID,
-                        QString(devinfo[i].serial),
-                        i,
-                        PluginInterface::SamplingDevice::PhysicalDevice,
-                        PluginInterface::SamplingDevice::StreamSingleRx,
-                        1,
-                        0));
+                originDevices.append(OriginDevice(
+                    displayableName,
+                    m_hardwareID,
+                    devinfo[i].serial,
+                    i,
+                    1, // nb Rx
+                    1  // nb Tx
+                ));
             }
 
             bladerf_close(dev);
@@ -104,6 +105,30 @@ PluginInterface::SamplingDevices Blderf1InputPlugin::enumSampleSources()
 
 		bladerf_free_device_list(devinfo); // Valgrind memcheck
 	}
+
+    listedHwIds.append(m_hardwareID);
+}
+
+PluginInterface::SamplingDevices Blderf1InputPlugin::enumSampleSources(const OriginDevices& originDevices)
+{
+	SamplingDevices result;
+
+	for (OriginDevices::const_iterator it = originDevices.begin(); it != originDevices.end(); ++it)
+    {
+        if (it->hardwareId == m_hardwareID)
+        {
+            result.append(SamplingDevice(
+                it->displayableName,
+                m_hardwareID,
+                m_deviceTypeID,
+                it->serial,
+                it->sequence,
+                PluginInterface::SamplingDevice::PhysicalDevice,
+                PluginInterface::SamplingDevice::StreamSingleRx,
+                1,
+                0));
+        }
+    }
 
 	return result;
 }

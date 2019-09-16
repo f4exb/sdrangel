@@ -31,7 +31,7 @@
 
 const PluginDescriptor AirspyHFPlugin::m_pluginDescriptor = {
 	QString("AirspyHF Input"),
-	QString("4.11.6"),
+	QString("4.11.10"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -57,9 +57,12 @@ void AirspyHFPlugin::initPlugin(PluginAPI* pluginAPI)
 	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices AirspyHFPlugin::enumSampleSources()
+void AirspyHFPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
 {
-	SamplingDevices result;
+    if (listedHwIds.contains(m_hardwareID)) { // check if it was done
+        return;
+    }
+
 	int nbDevices;
 	uint64_t deviceSerials[m_maxDevices];
 
@@ -67,7 +70,7 @@ PluginInterface::SamplingDevices AirspyHFPlugin::enumSampleSources()
 
     if (nbDevices < 0)
     {
-        qCritical("AirspyHFPlugin::enumSampleSources: failed to list Airspy HF devices");
+        qCritical("AirspyHFPlugin::enumOriginDevices: failed to list Airspy HF devices");
     }
 
 	for (int i = 0; i < nbDevices; i++)
@@ -75,26 +78,51 @@ PluginInterface::SamplingDevices AirspyHFPlugin::enumSampleSources()
 	    if (deviceSerials[i])
 	    {
             QString serial_str = QString::number(deviceSerials[i], 16);
-            QString displayedName(QString("AirspyHF[%1] %2").arg(i).arg(serial_str));
+            QString displayableName(QString("AirspyHF[%1] %2").arg(i).arg(serial_str));
 
-            result.append(SamplingDevice(displayedName,
-                    m_hardwareID,
-                    m_deviceTypeID,
-                    serial_str,
-                    i,
-                    PluginInterface::SamplingDevice::PhysicalDevice,
-                    PluginInterface::SamplingDevice::StreamSingleRx,
-                    1,
-                    0));
+            originDevices.append(OriginDevice(
+                displayableName,
+                m_hardwareID,
+                serial_str,
+                i,
+                1,
+                0
+            ));
 
-            qDebug("AirspyHFPlugin::enumSampleSources: enumerated Airspy HF device #%d", i);
+            qDebug("AirspyHFPlugin::enumOriginDevices: enumerated Airspy HF device #%d", i);
 	    }
 	    else
 	    {
-            qDebug("AirspyHFPlugin::enumSampleSources: finished to enumerate Airspy HF. %d devices found", i);
+            qDebug("AirspyHFPlugin::enumOriginDevices: finished to enumerate Airspy HF. %d devices found", i);
 	        break; // finished
 	    }
 	}
+
+    listedHwIds.append(m_hardwareID);
+}
+
+PluginInterface::SamplingDevices AirspyHFPlugin::enumSampleSources(const OriginDevices& originDevices)
+{
+	SamplingDevices result;
+
+	for (OriginDevices::const_iterator it = originDevices.begin(); it != originDevices.end(); ++it)
+    {
+        if (it->hardwareId == m_hardwareID)
+        {
+            result.append(SamplingDevice(
+                it->displayableName,
+                m_hardwareID,
+                m_deviceTypeID,
+                it->serial,
+                it->sequence,
+                PluginInterface::SamplingDevice::PhysicalDevice,
+                PluginInterface::SamplingDevice::StreamSingleRx,
+                1,
+                0
+            ));
+            qDebug("AirspyHFPlugin::enumSampleSources: enumerated Airspy HF device #%d", it->sequence);
+        }
+    }
 
 	return result;
 }

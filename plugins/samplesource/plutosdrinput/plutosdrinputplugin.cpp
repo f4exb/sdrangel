@@ -32,7 +32,7 @@ class DeviceAPI;
 
 const PluginDescriptor PlutoSDRInputPlugin::m_pluginDescriptor = {
 	QString("PlutoSDR Input"),
-	QString("4.11.3"),
+	QString("4.11.10"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -58,33 +58,61 @@ void PlutoSDRInputPlugin::initPlugin(PluginAPI* pluginAPI)
 	DevicePlutoSDR::instance(); // create singleton
 }
 
-PluginInterface::SamplingDevices PlutoSDRInputPlugin::enumSampleSources()
+void PlutoSDRInputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
 {
+    if (listedHwIds.contains(m_hardwareID)) { // check if it was done
+        return;
+    }
+
     DevicePlutoSDR::instance().scan();
     std::vector<std::string> serials;
     DevicePlutoSDR::instance().getSerials(serials);
 
     std::vector<std::string>::const_iterator it = serials.begin();
     int i;
-	SamplingDevices result;
 
 	for (i = 0; it != serials.end(); ++it, ++i)
 	{
 	    QString serial_str = QString::fromLocal8Bit(it->c_str());
-	    QString displayedName(QString("PlutoSDR[%1] %2").arg(i).arg(serial_str));
+	    QString displayableName(QString("PlutoSDR[%1] %2").arg(i).arg(serial_str));
 
-        result.append(SamplingDevice(displayedName,
-                m_hardwareID,
+        originDevices.append(OriginDevice(
+            displayableName,
+            m_hardwareID,
+            serial_str,
+            i, // sequence
+            1, // Nb Rx
+            1  // Nb Tx
+        ));
+
+        qDebug("PlutoSDRInputPlugin::enumOriginDevices: enumerated PlutoSDR device #%d", i);
+	}
+
+    listedHwIds.append(m_hardwareID);
+}
+
+PluginInterface::SamplingDevices PlutoSDRInputPlugin::enumSampleSources(const OriginDevices& originDevices)
+{
+	SamplingDevices result;
+
+	for (OriginDevices::const_iterator it = originDevices.begin(); it != originDevices.end(); ++it)
+    {
+        if (it->hardwareId == m_hardwareID)
+        {
+            result.append(SamplingDevice(
+                it->displayableName,
+                it->hardwareId,
                 m_deviceTypeID,
-                serial_str,
-                i,
+                it->serial,
+                it->sequence,
                 PluginInterface::SamplingDevice::PhysicalDevice,
                 PluginInterface::SamplingDevice::StreamSingleRx,
                 1,
-                0));
-
-        qDebug("PlutoSDRInputPlugin::enumSampleSources: enumerated PlutoSDR device #%d", i);
-	}
+                0
+            ));
+            qDebug("PlutoSDRInputPlugin::enumSampleSources: enumerated PlutoSDR device #%d", it->sequence);
+        }
+    }
 
 	return result;
 }

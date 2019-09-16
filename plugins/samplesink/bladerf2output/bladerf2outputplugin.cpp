@@ -31,7 +31,7 @@
 
 const PluginDescriptor BladeRF2OutputPlugin::m_pluginDescriptor = {
     QString("BladeRF2 Output"),
-    QString("4.11.6"),
+    QString("4.11.10"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -56,9 +56,12 @@ void BladeRF2OutputPlugin::initPlugin(PluginAPI* pluginAPI)
     pluginAPI->registerSampleSink(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices BladeRF2OutputPlugin::enumSampleSinks()
+void BladeRF2OutputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
 {
-    SamplingDevices result;
+    if (listedHwIds.contains(m_hardwareID)) { // check if it was done
+        return;
+    }
+
     struct bladerf_devinfo *devinfo = 0;
 
     int count = bladerf_get_device_list(&devinfo);
@@ -73,12 +76,12 @@ PluginInterface::SamplingDevices BladeRF2OutputPlugin::enumSampleSinks()
 
             if (status == BLADERF_ERR_NODEV)
             {
-                qCritical("Bladerf2OutputPlugin::enumSampleSinks: No device at index %d", i);
+                qCritical("Bladerf2OutputPlugin::enumOriginDevices: No device at index %d", i);
                 continue;
             }
             else if (status != 0)
             {
-                qCritical("Bladerf2OutputPlugin::enumSampleSinks: Failed to open device at index %d", i);
+                qCritical("Bladerf2OutputPlugin::enumOriginDevices: Failed to open device at index %d", i);
                 continue;
             }
 
@@ -86,28 +89,54 @@ PluginInterface::SamplingDevices BladeRF2OutputPlugin::enumSampleSinks()
 
             if (strcmp(boardName, "bladerf2") == 0)
             {
+                unsigned int nbRxChannels = bladerf_get_channel_count(dev, BLADERF_RX);
                 unsigned int nbTxChannels = bladerf_get_channel_count(dev, BLADERF_TX);
+                // make the stream index a placeholder for future arg() hence the arg("%1")
+                QString displayableName(QString("BladeRF2[%1:%2] %3").arg(devinfo[i].instance).arg("%1").arg(devinfo[i].serial));
 
-                for (unsigned int j = 0; j < nbTxChannels; j++)
-                {
-                    qDebug("Blderf2InputPlugin::enumSampleSinks: device #%d (%s) channel %u", i, devinfo[i].serial, j);
-                    QString displayedName(QString("BladeRF2[%1:%2] %3").arg(devinfo[i].instance).arg(j).arg(devinfo[i].serial));
-                    result.append(SamplingDevice(displayedName,
-                            m_hardwareID,
-                            m_deviceTypeID,
-                            QString(devinfo[i].serial),
-                            i,
-                            PluginInterface::SamplingDevice::PhysicalDevice,
-                            PluginInterface::SamplingDevice::StreamSingleTx,
-                            nbTxChannels,
-                            j));
-                }
+                originDevices.append(OriginDevice(
+                    displayableName,
+                    m_hardwareID,
+                    QString(devinfo[i].serial),
+                    i, // Sequence
+                    nbRxChannels,
+                    nbTxChannels
+                ));
             }
 
             bladerf_close(dev);
         }
 
         bladerf_free_device_list(devinfo); // Valgrind memcheck
+    }
+
+    listedHwIds.append(m_hardwareID);
+}
+
+PluginInterface::SamplingDevices BladeRF2OutputPlugin::enumSampleSinks(const OriginDevices& originDevices)
+{
+    SamplingDevices result;
+
+    for (OriginDevices::const_iterator it = originDevices.begin(); it != originDevices.end(); ++it)
+    {
+        if (it->hardwareId == m_hardwareID)
+        {
+            for (int j = 0; j < it->nbTxStreams; j++)
+            {
+                QString displayedName(it->displayableName.arg(j));
+                result.append(SamplingDevice(
+                    displayedName,
+                    it->hardwareId,
+                    m_deviceTypeID,
+                    it->serial,
+                    it->sequence,
+                    PluginInterface::SamplingDevice::PhysicalDevice,
+                    PluginInterface::SamplingDevice::StreamSingleTx,
+                    it->nbTxStreams,
+                    j
+                ));
+            }
+        }
     }
 
     return result;

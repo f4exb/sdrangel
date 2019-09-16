@@ -35,7 +35,7 @@
 
 const PluginDescriptor XTRXOutputPlugin::m_pluginDescriptor = {
     QString("XTRX Output"),
-    QString("4.11.6"),
+    QString("4.11.10"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -60,29 +60,61 @@ void XTRXOutputPlugin::initPlugin(PluginAPI* pluginAPI)
     pluginAPI->registerSampleSink(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices XTRXOutputPlugin::enumSampleSinks()
+void XTRXOutputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
 {
-    SamplingDevices result;
+    if (listedHwIds.contains(m_hardwareID)) { // check if it was done
+        return;
+    }
+
     xtrx_device_info_t devs[32];
     int res = xtrx_discovery(devs, 32);
     int i;
-    for (i = 0; i < res; i++) {
+
+    for (i = 0; i < res; i++)
+    {
         DeviceXTRXParams XTRXParams;
-        for (unsigned int j = 0; j < XTRXParams.m_nbTxChannels; j++)
+        QString displayableName(QString("XTRX[%1:%2] %3").arg(i).arg("%1").arg(devs[i].uniqname));
+
+        originDevices.append(OriginDevice(
+            displayableName,
+            m_hardwareID,
+            QString(devs[i].uniqname),
+            i,
+            XTRXParams.m_nbRxChannels,
+            XTRXParams.m_nbTxChannels
+        ));
+    }
+
+    listedHwIds.append(m_hardwareID);
+}
+
+PluginInterface::SamplingDevices XTRXOutputPlugin::enumSampleSinks(const OriginDevices& originDevices)
+{
+    SamplingDevices result;
+
+	for (OriginDevices::const_iterator it = originDevices.begin(); it != originDevices.end(); ++it)
+    {
+        if (it->hardwareId == m_hardwareID)
         {
-            qDebug("XTRXInputPlugin::enumSampleSinks: device #%d channel %u: %s", i, j, devs[i].uniqname);
-            QString displayedName(QString("XTRX[%1:%2] %3").arg(i).arg(j).arg(devs[i].uniqname));
-            result.append(SamplingDevice(displayedName,
-                                         m_hardwareID,
-                                         m_deviceTypeID,
-                                         QString(devs[i].uniqname),
-                                         i,
-                                         PluginInterface::SamplingDevice::PhysicalDevice,
-                                         PluginInterface::SamplingDevice::StreamSingleTx,
-                                         XTRXParams.m_nbTxChannels,
-                                         j));
+            for (unsigned int j = 0; j < it->nbTxStreams; j++)
+            {
+                qDebug("XTRXInputPlugin::enumSampleSinks: device #%d channel %u: %s", it->sequence, j, qPrintable(it->serial));
+                QString displayedName(it->displayableName.arg(j));
+                result.append(SamplingDevice(
+                    displayedName,
+                    it->hardwareId,
+                    m_deviceTypeID,
+                    it->serial,
+                    it->sequence,
+                    PluginInterface::SamplingDevice::PhysicalDevice,
+                    PluginInterface::SamplingDevice::StreamSingleTx,
+                    it->nbTxStreams,
+                    j
+                ));
+            }
         }
     }
+
     return result;
 }
 

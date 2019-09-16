@@ -80,6 +80,8 @@ private:
     DevicesEnumeration m_rxEnumeration;
     DevicesEnumeration m_txEnumeration;
     DevicesEnumeration m_mimoEnumeration;
+    PluginInterface::OriginDevices m_originDevices;
+    QStringList m_originDevicesHwIds;
 };
 
 #endif /* SDRBASE_DEVICE_DEVICEENUMERATOR_H_ */

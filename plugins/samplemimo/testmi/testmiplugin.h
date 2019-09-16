@@ -36,7 +36,8 @@ public:
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
 
-	virtual SamplingDevices enumSampleMIMO();
+	virtual void enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices);
+	virtual SamplingDevices enumSampleMIMO(const OriginDevices& originDevices);
 	virtual PluginInstanceGUI* createSampleMIMOPluginInstanceGUI(
 	        const QString& sourceId,
 	        QWidget **widget,

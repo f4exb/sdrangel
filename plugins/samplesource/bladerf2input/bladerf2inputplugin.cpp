@@ -31,7 +31,7 @@
 
 const PluginDescriptor Blderf2InputPlugin::m_pluginDescriptor = {
     QString("BladeRF2 Input"),
-    QString("4.11.6"),
+    QString("4.11.10"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -56,9 +56,12 @@ void Blderf2InputPlugin::initPlugin(PluginAPI* pluginAPI)
     pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-PluginInterface::SamplingDevices Blderf2InputPlugin::enumSampleSources()
+void Blderf2InputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
 {
-    SamplingDevices result;
+    if (listedHwIds.contains(m_hardwareID)) { // check if it was done
+        return;
+    }
+
     struct bladerf_devinfo *devinfo = 0;
 
     int count = bladerf_get_device_list(&devinfo);
@@ -73,12 +76,12 @@ PluginInterface::SamplingDevices Blderf2InputPlugin::enumSampleSources()
 
             if (status == BLADERF_ERR_NODEV)
             {
-                qCritical("Blderf2InputPlugin::enumSampleSources: No device at index %d", i);
+                qCritical("Blderf2InputPlugin::enumOriginDevices: No device at index %d", i);
                 continue;
             }
             else if (status != 0)
             {
-                qCritical("Blderf2InputPlugin::enumSampleSources: Failed to open device at index %d", i);
+                qCritical("Blderf2InputPlugin::enumOriginDevices: Failed to open device at index %d", i);
                 continue;
             }
 
@@ -87,27 +90,51 @@ PluginInterface::SamplingDevices Blderf2InputPlugin::enumSampleSources()
             if (strcmp(boardName, "bladerf2") == 0)
             {
                 unsigned int nbRxChannels = bladerf_get_channel_count(dev, BLADERF_RX);
+                unsigned int nbTxChannels = bladerf_get_channel_count(dev, BLADERF_TX);
+                qDebug("Blderf2InputPlugin::enumOriginDevices: device #%d (%s)", i, devinfo[i].serial);
+                QString displayableName(QString("BladeRF2[%1:%2] %3").arg(devinfo[i].instance).arg("%1").arg(devinfo[i].serial));
 
-                for (unsigned int j = 0; j < nbRxChannels; j++)
-                {
-                    qDebug("Blderf2InputPlugin::enumSampleSources: device #%d (%s) channel %u", i, devinfo[i].serial, j);
-                    QString displayedName(QString("BladeRF2[%1:%2] %3").arg(devinfo[i].instance).arg(j).arg(devinfo[i].serial));
-                    result.append(SamplingDevice(displayedName,
-                            m_hardwareID,
-                            m_deviceTypeID,
-                            QString(devinfo[i].serial),
-                            i,
-                            PluginInterface::SamplingDevice::PhysicalDevice,
-                            PluginInterface::SamplingDevice::StreamSingleRx,
-                            nbRxChannels,
-                            j));
-                }
+                originDevices.append(OriginDevice(
+                    displayableName,
+                    m_hardwareID,
+                    devinfo[i].serial,
+                    i,
+                    2, // nb Rx
+                    2  // nb Tx
+                ));
             }
 
             bladerf_close(dev);
         }
 
         bladerf_free_device_list(devinfo); // Valgrind memcheck
+    }
+
+    listedHwIds.append(m_hardwareID);
+}
+
+PluginInterface::SamplingDevices Blderf2InputPlugin::enumSampleSources(const OriginDevices& originDevices)
+{
+    SamplingDevices result;
+
+	for (OriginDevices::const_iterator it = originDevices.begin(); it != originDevices.end(); ++it)
+    {
+        if (it->hardwareId == m_hardwareID)
+        {
+            for (int j=0; j < it->nbRxStreams; j++)
+            {
+                result.append(SamplingDevice(
+                    it->displayableName,
+                    m_hardwareID,
+                    m_deviceTypeID,
+                    it->serial,
+                    it->sequence,
+                    PluginInterface::SamplingDevice::PhysicalDevice,
+                    PluginInterface::SamplingDevice::StreamSingleRx,
+                    it->nbRxStreams,
+                    j));
+            }
+        }
     }
 
     return result;

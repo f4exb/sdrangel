@@ -36,7 +36,8 @@ public:
     const PluginDescriptor& getPluginDescriptor() const;
     void initPlugin(PluginAPI* pluginAPI);
 
-    virtual SamplingDevices enumSampleSinks();
+	virtual void enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices);
+	virtual SamplingDevices enumSampleSinks(const OriginDevices& originDevices);
 
     virtual PluginInstanceGUI* createSampleSinkPluginInstanceGUI(
             const QString& sinkId,
