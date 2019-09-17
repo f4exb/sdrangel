@@ -18,6 +18,7 @@
 
 #include <QDebug>
 
+#include "dsp/devicesamplestatic.h"
 #include "dsp/devicesamplesink.h"
 
 DeviceSampleSink::DeviceSampleSink() :
@@ -52,23 +53,14 @@ qint64 DeviceSampleSink::calculateDeviceCenterFrequency(
             quint32 devSampleRate,
             bool transverterMode)
 {
-    qint64 deviceCenterFrequency = centerFrequency;
-    deviceCenterFrequency -= transverterMode ? transverterDeltaFrequency : 0;
-    deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
-    qint64 f_img = deviceCenterFrequency;
-
-    deviceCenterFrequency -= calculateFrequencyShift(log2Interp, fcPos, devSampleRate);
-    f_img -= 2*calculateFrequencyShift(log2Interp, fcPos, devSampleRate);
-
-    qDebug() << "DeviceSampleSink::calculateDeviceCenterFrequency:"
-            << " desired center freq: " << centerFrequency << " Hz"
-            << " device center freq: " << deviceCenterFrequency << " Hz"
-            << " device sample rate: " << devSampleRate << "S/s"
-            << " Actual sample rate: " << devSampleRate/(1<<log2Interp) << "S/s"
-            << " center freq position code: " << fcPos
-            << " image frequency: " << f_img << "Hz";
-
-    return deviceCenterFrequency;
+    return DeviceSampleStatic::calculateSinkDeviceCenterFrequency(
+        centerFrequency,
+        transverterDeltaFrequency,
+        log2Interp,
+        (DeviceSampleStatic::fcPos_t) fcPos,
+        devSampleRate,
+        transverterMode
+    );
 }
 
 qint64 DeviceSampleSink::calculateCenterFrequency(
@@ -79,19 +71,14 @@ qint64 DeviceSampleSink::calculateCenterFrequency(
             quint32 devSampleRate,
             bool transverterMode)
 {
-    qint64 centerFrequency = deviceCenterFrequency;
-    centerFrequency += calculateFrequencyShift(log2Interp, fcPos, devSampleRate);
-    centerFrequency += transverterMode ? transverterDeltaFrequency : 0;
-    centerFrequency = centerFrequency < 0 ? 0 : centerFrequency;
-
-    qDebug() << "DeviceSampleSink::calculateCenterFrequency:"
-            << " desired center freq: " << centerFrequency << " Hz"
-            << " device center freq: " << deviceCenterFrequency << " Hz"
-            << " device sample rate: " << devSampleRate << "S/s"
-            << " Actual sample rate: " << devSampleRate/(1<<log2Interp) << "S/s"
-            << " center freq position code: " << fcPos;
-
-    return centerFrequency;
+    return DeviceSampleStatic::calculateSinkCenterFrequency(
+        deviceCenterFrequency,
+        transverterDeltaFrequency,
+        log2Interp,
+        (DeviceSampleStatic::fcPos_t) fcPos,
+        devSampleRate,
+        transverterMode
+    );
 }
 
 /**
@@ -116,29 +103,10 @@ qint32 DeviceSampleSink::calculateFrequencyShift(
             fcPos_t fcPos,
             quint32 devSampleRate)
 {
-    if (fcPos == FC_POS_CENTER) {
-        return 0;
-    }
-
-    int sign = fcPos == FC_POS_INFRA ? -1 : 1;
-    int halfSampleRate = devSampleRate / 2; // fractions are relative to sideband thus based on half the sample rate
-
-    if (log2Interp == 0) {
-        return 0;
-    } else if (log2Interp == 1) {
-        return sign * (halfSampleRate / 2);
-    } else if (log2Interp == 2) {
-        return sign * ((halfSampleRate * 3) / 4);
-    } else if (log2Interp == 3) {
-        return sign * ((halfSampleRate * 5) / 8);
-    } else if (log2Interp == 4) {
-        return sign * ((halfSampleRate * 11) / 16);
-    } else if (log2Interp == 5) {
-        return sign * ((halfSampleRate * 21) / 32);
-    } else if (log2Interp == 6) {
-        return sign * ((halfSampleRate * 21) / 64);
-    } else {
-        return 0;
-    }
+    return DeviceSampleStatic::calculateSinkFrequencyShift(
+        log2Interp,
+        (DeviceSampleStatic::fcPos_t) fcPos,
+        devSampleRate
+    );
 }
 
