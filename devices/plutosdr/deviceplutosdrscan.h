@@ -18,10 +18,13 @@
 #ifndef DEVICES_PLUTOSDR_DEVICEPLUTOSDRSCAN_H_
 #define DEVICES_PLUTOSDR_DEVICEPLUTOSDRSCAN_H_
 
+#include <QString>
+
 #include <string>
 #include <vector>
 #include <map>
 
+#include "plugin/plugininterface.h"
 #include "export.h"
 
 class DEVICES_API DevicePlutoSDRScan
@@ -40,6 +43,7 @@ public:
     const std::string* getSerialAt(unsigned int index) const ;
     const std::string* getURIFromSerial(const std::string& serial) const;
     void getSerials(std::vector<std::string>& serials) const;
+    void enumOriginDevices(const QString& hardwareId, PluginInterface::OriginDevices& originDevices);
 
 private:
     std::vector<DeviceScan> m_scans;

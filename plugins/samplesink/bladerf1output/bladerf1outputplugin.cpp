@@ -62,51 +62,7 @@ void Bladerf1OutputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDev
         return;
     }
 
-	struct bladerf_devinfo *devinfo = 0;
-
-	int count = bladerf_get_device_list(&devinfo);
-
-	if (devinfo)
-	{
-        for(int i = 0; i < count; i++)
-        {
-            struct bladerf *dev;
-
-            int status = bladerf_open_with_devinfo(&dev, &devinfo[i]);
-
-            if (status == BLADERF_ERR_NODEV)
-            {
-                qCritical("BladerfOutputPlugin::enumOriginDevices: No device at index %d", i);
-                continue;
-            }
-            else if (status != 0)
-            {
-                qCritical("BladerfOutputPlugin::enumOriginDevices: Failed to open device at index %d", i);
-                continue;
-            }
-
-            const char *boardName = bladerf_get_board_name(dev);
-
-            if (strcmp(boardName, "bladerf1") == 0)
-            {
-                QString displayableName(QString("BladeRF1[%1] %2").arg(devinfo[i].instance).arg(devinfo[i].serial));
-
-                originDevices.append(OriginDevice(
-                    displayableName,
-                    m_hardwareID,
-                    QString(devinfo[i].serial),
-                    i, // Sequence
-                    1, // Has 1 Rx known by construction
-                    1  // Has 1 Tx known by construction
-                ));
-            }
-
-            bladerf_close(dev);
-        }
-
-		bladerf_free_device_list(devinfo); // Valgrind memcheck
-	}
-
+    DeviceBladeRF1::enumOriginDevices(m_hardwareID, originDevices);
     listedHwIds.append(m_hardwareID);
 }
 

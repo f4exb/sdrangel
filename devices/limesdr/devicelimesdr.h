@@ -18,8 +18,11 @@
 #ifndef DEVICES_LIMESDR_DEVICELIMESDR_H_
 #define DEVICES_LIMESDR_DEVICELIMESDR_H_
 
+#include <QString>
+
 #include "lime/LimeSuite.h"
 
+#include "plugin/plugininterface.h"
 #include "export.h"
 
 class DEVICES_API DeviceLimeSDR
@@ -42,6 +45,8 @@ public:
         PATH_RFE_TXRF2,
     };
 
+    /** Enumeration of LimeSDR hardware devices */
+    static void enumOriginDevices(const QString& hardwareId, PluginInterface::OriginDevices& originDevices);
     /** set NCO frequency with positive or negative frequency (deals with up/down convert). Enables or disables NCO */
     static bool setNCOFrequency(lms_device_t *device, bool dir_tx, std::size_t chan, bool enable, float frequency);
     /** set LNA gain Range: [1-30] (dB) **/
@@ -56,6 +61,9 @@ public:
     static bool setTxAntennaPath(lms_device_t *device, std::size_t chan, int path);
     /** Set clock source and external clock frequency if required */
     static bool setClockSource(lms_device_t *device, bool extClock, uint32_t extClockFrequency);
+
+private:
+    static bool findSerial(const char *lmsInfoStr, std::string& serial);
 };
 
 #endif /* DEVICES_LIMESDR_DEVICELIMESDR_H_ */

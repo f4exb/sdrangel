@@ -20,6 +20,7 @@
 
 #include "libhackrf/hackrf.h"
 
+#include "plugin/plugininterface.h"
 #include "export.h"
 
 class DEVICES_API DeviceHackRF
@@ -28,6 +29,7 @@ public:
     static DeviceHackRF& instance();
     static hackrf_device *open_hackrf(int sequence);
     static hackrf_device *open_hackrf(const char * const serial);
+    static void enumOriginDevices(const QString& hardwareId, PluginInterface::OriginDevices& originDevices);
 protected:
     DeviceHackRF();
     DeviceHackRF(const DeviceHackRF&) {}

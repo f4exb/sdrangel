@@ -26,7 +26,7 @@
 #include "bladerf2/devicebladerf2shared.h"
 #include "dsp/interpolators.h"
 
-class SampleSinkFifo;
+class SampleSourceFifo;
 
 class BladeRF2OutputThread : public QThread {
     Q_OBJECT

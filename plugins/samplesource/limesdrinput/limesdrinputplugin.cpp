@@ -17,12 +17,12 @@
 
 #include <QtPlugin>
 
-#include <regex>
 #include <string>
 
 #include "lime/LimeSuite.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "limesdr/devicelimesdr.h"
 
 #ifdef SERVER_MODE
 #include "limesdrinput.h"
@@ -65,50 +65,7 @@ void LimeSDRInputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevic
         return;
     }
 
-    lms_info_str_t* deviceList;
-    int nbDevices;
-    SamplingDevices result;
-
-    if ((nbDevices = LMS_GetDeviceList(0)) <= 0)
-    {
-        qDebug("LimeSDRInputPlugin::enumOriginDevices: Could not find any LimeSDR device");
-        return; // do nothing
-    }
-
-    deviceList = new lms_info_str_t[nbDevices];
-
-    if (LMS_GetDeviceList(deviceList) < 0)
-    {
-        qDebug("LimeSDRInputPlugin::enumOriginDevices: Could not obtain LimeSDR devices information");
-        delete[] deviceList;
-        return; // do nothing
-    }
-    else
-    {
-        for (int i = 0; i < nbDevices; i++)
-        {
-            std::string serial("N/D");
-            findSerial((const char *) deviceList[i], serial);
-
-            DeviceLimeSDRParams limeSDRParams;
-            limeSDRParams.open(deviceList[i]);
-            limeSDRParams.close();
-
-            QString displayedName(QString("LimeSDR[%1:%2] %3").arg(i).arg("%1").arg(serial.c_str()));
-
-            originDevices.append(OriginDevice(
-                displayedName,
-                m_hardwareID,
-                QString(deviceList[i]),
-                i,
-                limeSDRParams.m_nbRxChannels,
-                limeSDRParams.m_nbTxChannels
-            ));
-        }
-    }
-
-    delete[] deviceList;
-
+    DeviceLimeSDR::enumOriginDevices(m_hardwareID, originDevices);
 	listedHwIds.append(m_hardwareID);
 }
 
@@ -171,24 +128,6 @@ PluginInstanceGUI* LimeSDRInputPlugin::createSampleSourcePluginInstanceGUI(
     }
 }
 #endif
-
-bool LimeSDRInputPlugin::findSerial(const char *lmsInfoStr, std::string& serial)
-{
-    std::regex serial_reg("serial=([0-9,A-F]+)");
-    std::string input(lmsInfoStr);
-    std::smatch result;
-    std::regex_search(input, result, serial_reg);
-
-    if (result[1].str().length()>0)
-    {
-        serial = result[1].str();
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
 
 DeviceSampleSource *LimeSDRInputPlugin::createSampleSourcePluginInstance(const QString& sourceId, DeviceAPI *deviceAPI)
 {

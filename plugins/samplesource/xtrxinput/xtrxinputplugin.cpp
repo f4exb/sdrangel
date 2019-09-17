@@ -27,6 +27,7 @@
 #include "xtrx_api.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "xtrx/devicextrx.h"
 
 #ifdef SERVER_MODE
 #include "xtrxinput.h"
@@ -67,25 +68,7 @@ void XTRXInputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices&
         return;
     }
 
-    xtrx_device_info_t devs[32];
-    int res = xtrx_discovery(devs, 32);
-    int i;
-
-    for (i = 0; i < res; i++)
-    {
-        DeviceXTRXParams XTRXParams;
-        QString displayableName(QString("XTRX[%1:%2] %3").arg(i).arg("%1").arg(devs[i].uniqname));
-
-        originDevices.append(OriginDevice(
-            displayableName,
-            m_hardwareID,
-            QString(devs[i].uniqname),
-            i,
-            XTRXParams.m_nbRxChannels,
-            XTRXParams.m_nbTxChannels
-        ));
-    }
-
+    DeviceXTRX::enumOriginDevices(m_hardwareID, originDevices);
     listedHwIds.append(m_hardwareID);
 }
 

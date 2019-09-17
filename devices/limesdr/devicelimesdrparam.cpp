@@ -122,4 +122,3 @@ void DeviceLimeSDRParams::getHardwareType(const char *device_str)
         m_type = LimeUndefined;
     }
 }
-

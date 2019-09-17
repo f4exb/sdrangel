@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <libbladeRF.h>
 
+#include "plugin/plugininterface.h"
 #include "export.h"
 
 class DEVICES_API DeviceBladeRF2
@@ -29,6 +30,7 @@ public:
     DeviceBladeRF2();
     ~DeviceBladeRF2();
 
+    static void enumOriginDevices(const QString& hardwareId, PluginInterface::OriginDevices& originDevices);
     bool open(const char *serial);
     void close();
 

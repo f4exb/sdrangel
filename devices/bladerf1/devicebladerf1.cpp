@@ -28,7 +28,7 @@ bool DeviceBladeRF1::open_bladerf(struct bladerf **dev, const char *serial)
 
     if ((*dev = open_bladerf_from_serial(serial)) == 0)
     {
-        qCritical("DeviceBladeRF::open_bladerf: could not open BladeRF");
+        qCritical("DeviceBladeRF1::open_bladerf: could not open BladeRF");
         return false;
     }
 
@@ -36,17 +36,64 @@ bool DeviceBladeRF1::open_bladerf(struct bladerf **dev, const char *serial)
 
     if (fpga_loaded < 0)
     {
-        qCritical("DeviceBladeRF::open_bladerf: failed to check FPGA state: %s",
+        qCritical("DeviceBladeRF1::open_bladerf: failed to check FPGA state: %s",
                 bladerf_strerror(fpga_loaded));
         return false;
     }
     else if (fpga_loaded == 0)
     {
-        qCritical("BladerfOutput::start: the device's FPGA is not loaded.");
+        qCritical("DeviceBladeRF1::start: the device's FPGA is not loaded.");
         return false;
     }
 
     return true;
+}
+
+void DeviceBladeRF1::enumOriginDevices(const QString& hardwareId, PluginInterface::OriginDevices& originDevices)
+{
+	struct bladerf_devinfo *devinfo = nullptr;
+	int count = bladerf_get_device_list(&devinfo);
+
+    if (devinfo)
+    {
+        for(int i = 0; i < count; i++)
+        {
+            struct bladerf *dev;
+
+            int status = bladerf_open_with_devinfo(&dev, &devinfo[i]);
+
+            if (status == BLADERF_ERR_NODEV)
+            {
+                qCritical("DeviceBladeRF1::enumSampleSources: No device at index %d", i);
+                continue;
+            }
+            else if (status != 0)
+            {
+                qCritical("DeviceBladeRF1::enumSampleSources: Failed to open device at index %d", i);
+                continue;
+            }
+
+            const char *boardName = bladerf_get_board_name(dev);
+
+            if (strcmp(boardName, "bladerf1") == 0)
+            {
+                QString displayableName(QString("BladeRF1[%1] %2").arg(devinfo[i].instance).arg(devinfo[i].serial));
+
+                originDevices.append(PluginInterface::OriginDevice(
+                    displayableName,
+                    hardwareId,
+                    devinfo[i].serial,
+                    i,
+                    1, // nb Rx
+                    1  // nb Tx
+                ));
+            }
+
+            bladerf_close(dev);
+        }
+
+		bladerf_free_device_list(devinfo); // Valgrind memcheck
+	}
 }
 
 struct bladerf *DeviceBladeRF1::open_bladerf_from_serial(const char *serial)
@@ -73,12 +120,12 @@ struct bladerf *DeviceBladeRF1::open_bladerf_from_serial(const char *serial)
 
     if (status == BLADERF_ERR_NODEV)
     {
-        qCritical("DeviceBladeRF::open_bladerf_from_serial: No devices available with serial %s", serial);
+        qCritical("DeviceBladeRF1::open_bladerf_from_serial: No devices available with serial %s", serial);
         return 0;
     }
     else if (status != 0)
     {
-        qCritical("DeviceBladeRF::open_bladerf_from_serial: Failed to open device with serial %s (%s)",
+        qCritical("DeviceBladeRF1::open_bladerf_from_serial: Failed to open device with serial %s (%s)",
                 serial, bladerf_strerror(status));
         return 0;
     }

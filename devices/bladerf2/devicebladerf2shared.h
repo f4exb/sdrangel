@@ -21,8 +21,6 @@
 #include "util/message.h"
 #include "devicebladerf2.h"
 
-class SampleSinkFifo;
-class SampleSourceFifo;
 class BladeRF2Input;
 class BladeRF2Output;
 

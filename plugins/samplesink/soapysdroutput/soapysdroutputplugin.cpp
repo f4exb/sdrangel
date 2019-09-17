@@ -64,25 +64,7 @@ void SoapySDROutputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDev
     }
 
     DeviceSoapySDR& deviceSoapySDR = DeviceSoapySDR::instance();
-    const std::vector<DeviceSoapySDRScan::SoapySDRDeviceEnum>& devicesEnumeration = deviceSoapySDR.getDevicesEnumeration();
-    qDebug("SoapySDROutputPlugin::enumOriginDevices: %lu SoapySDR devices", devicesEnumeration.size());
-    std::vector<DeviceSoapySDRScan::SoapySDRDeviceEnum>::const_iterator it = devicesEnumeration.begin();
-
-    for (int idev = 0; it != devicesEnumeration.end(); ++it, idev++)
-    {
-        QString displayedName(QString("SoapySDR[%1:%2] %3").arg(idev).arg("%1").arg(it->m_label));
-        QString serial(QString("%1-%2").arg(it->m_driverName).arg(it->m_sequence));
-
-        originDevices.append(OriginDevice(
-            displayedName,
-            m_hardwareID,
-            serial,
-            idev, // Sequence
-            it->m_nbRx, // nb Rx
-            it->m_nbTx  // nb Tx
-        ));
-    }
-
+    deviceSoapySDR.enumOriginDevices(m_hardwareID, originDevices);
     listedHwIds.append(m_hardwareID);
 }
 

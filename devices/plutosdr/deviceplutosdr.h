@@ -36,6 +36,9 @@ public:
     const std::string* getSerialAt(unsigned int index) const { return m_scan.getSerialAt(index); }
     DevicePlutoSDRBox* getDeviceFromURI(const std::string& uri);
     DevicePlutoSDRBox* getDeviceFromSerial(const std::string& serial);
+    void enumOriginDevices(const QString& hardwareId, PluginInterface::OriginDevices& originDevices) {
+        m_scan.enumOriginDevices(hardwareId, originDevices);
+    }
 
     static const uint64_t rxLOLowLimitFreq;  //!< Rx LO hard coded lower frequency limit (Hz)
     static const uint64_t rxLOHighLimitFreq; //!< Rx LO hard coded lower frequency limit (Hz)

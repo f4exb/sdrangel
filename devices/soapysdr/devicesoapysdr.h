@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <SoapySDR/Device.hpp>
 
+#include "plugin/plugininterface.h"
 #include "export.h"
 #include "devicesoapysdrscan.h"
 
@@ -30,6 +31,7 @@ public:
     static DeviceSoapySDR& instance();
     SoapySDR::Device *openSoapySDR(uint32_t sequence, const QString& hardwareUserArguments);
     void closeSoapySdr(SoapySDR::Device *device);
+    void enumOriginDevices(const QString& hardwareId, PluginInterface::OriginDevices& originDevices);
 
     uint32_t getNbDevices() const { return m_scanner.getNbDevices(); }
     const std::vector<DeviceSoapySDRScan::SoapySDRDeviceEnum>& getDevicesEnumeration() const { return m_scanner.getDevicesEnumeration(); }

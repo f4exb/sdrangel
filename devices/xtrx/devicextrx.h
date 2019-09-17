@@ -18,8 +18,10 @@
 #ifndef DEVICES_XTRX_DEVICEXTRX_H_
 #define DEVICES_XTRX_DEVICEXTRX_H_
 
+#include <QString>
 #include <stdint.h>
 
+#include "plugin/plugininterface.h"
 #include "export.h"
 
 struct strx_dev;
@@ -32,6 +34,7 @@ public:
 
     bool open(const char* deviceStr);
     void close();
+    static void enumOriginDevices(const QString& hardwareId, PluginInterface::OriginDevices& originDevices);
     struct xtrx_dev *getDevice() { return m_dev; }
     double set_samplerate(double rate, double master, bool output);
     double getMasterRate() const { return m_masterRate; }
