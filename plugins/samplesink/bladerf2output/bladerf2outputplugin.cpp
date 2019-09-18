@@ -76,7 +76,8 @@ PluginInterface::SamplingDevices BladeRF2OutputPlugin::enumSampleSinks(const Ori
         {
             for (int j = 0; j < it->nbTxStreams; j++)
             {
-                QString displayedName(it->displayableName.arg(j));
+                QString displayedName = it->displayableName;
+                displayedName.replace(QString("$1]"), QString("%1]").arg(j));
                 result.append(SamplingDevice(
                     displayedName,
                     it->hardwareId,

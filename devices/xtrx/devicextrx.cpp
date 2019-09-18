@@ -86,7 +86,7 @@ void DeviceXTRX::enumOriginDevices(const QString& hardwareId, PluginInterface::O
     for (i = 0; i < res; i++)
     {
         DeviceXTRXParams XTRXParams;
-        QString displayableName(QString("XTRX[%1:%2] %3").arg(i).arg("%1").arg(devs[i].uniqname));
+        QString displayableName(QString("XTRX[%1:$1] %2").arg(i).arg(devs[i].uniqname));
 
         originDevices.append(PluginInterface::OriginDevice(
             displayableName,

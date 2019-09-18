@@ -102,7 +102,7 @@ void DeviceSoapySDR::enumOriginDevices(const QString& hardwareId, PluginInterfac
 
     for (int idev = 0; it != devicesEnumeration.end(); ++it, idev++)
     {
-        QString displayedName(QString("SoapySDR[%1:%2] %3").arg(idev).arg("%1").arg(it->m_label));
+        QString displayedName(QString("SoapySDR[%1:$1] %2").arg(idev).arg(it->m_label));
         QString serial(QString("%1-%2").arg(it->m_driverName).arg(it->m_sequence));
 
         originDevices.append(PluginInterface::OriginDevice(

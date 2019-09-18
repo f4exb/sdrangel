@@ -80,7 +80,8 @@ PluginInterface::SamplingDevices LimeSDRInputPlugin::enumSampleSources(const Ori
             for (unsigned int j = 0; j < it->nbRxStreams; j++)
             {
                 qDebug("LimeSDRInputPlugin::enumSampleSources: device #%d channel %u: %s", it->sequence, j, qPrintable(it->serial));
-                QString displayedName(it->displayableName.arg(j));
+                QString displayedName = it->displayableName;
+                displayedName.replace(QString("$1]"), QString("%1]").arg(j));
                 result.append(SamplingDevice(
                     displayedName,
                     it->hardwareId,

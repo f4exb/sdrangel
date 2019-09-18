@@ -76,8 +76,10 @@ PluginInterface::SamplingDevices Blderf2InputPlugin::enumSampleSources(const Ori
         {
             for (int j=0; j < it->nbRxStreams; j++)
             {
+                QString displayedName = it->displayableName;
+                displayedName.replace(QString("$1]"), QString("%1]").arg(j));
                 result.append(SamplingDevice(
-                    it->displayableName,
+                    displayedName,
                     m_hardwareID,
                     m_deviceTypeID,
                     it->serial,

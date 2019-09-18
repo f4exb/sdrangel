@@ -79,7 +79,8 @@ PluginInterface::SamplingDevices SoapySDRInputPlugin::enumSampleSources(const Or
 
             for (unsigned int ichan = 0; ichan < nbRxChannels; ichan++)
             {
-                QString displayedName(it->displayableName.arg(ichan));
+                QString displayedName = it->displayableName;
+                displayedName.replace(QString("$1]"), QString("%1]").arg(ichan));
                 qDebug("SoapySDRInputPlugin::enumSampleSources: device #%d serial %s channel %u",
                         it->sequence, it->serial.toStdString().c_str(), ichan);
                 result.append(SamplingDevice(

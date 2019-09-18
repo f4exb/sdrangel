@@ -80,7 +80,8 @@ PluginInterface::SamplingDevices SoapySDROutputPlugin::enumSampleSinks(const Ori
 
             for (unsigned int ichan = 0; ichan < nbTxChannels; ichan++)
             {
-                QString displayedName(it->displayableName.arg(ichan));
+                QString displayedName = it->displayableName;
+                displayedName.replace(QString("$1]"), QString("%1]").arg(ichan));
                 qDebug("SoapySDROutputPlugin::enumSampleSinks: device #%d serial %s channel %u",
                         it->sequence, it->serial.toStdString().c_str(), ichan);
                 result.append(SamplingDevice(

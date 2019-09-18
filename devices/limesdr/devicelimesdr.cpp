@@ -54,7 +54,7 @@ void DeviceLimeSDR::enumOriginDevices(const QString& hardwareId, PluginInterface
             limeSDRParams.open(deviceList[i]);
             limeSDRParams.close();
 
-            QString displayedName(QString("LimeSDR[%1:%2] %3").arg(i).arg("%1").arg(serial.c_str()));
+            QString displayedName(QString("LimeSDR[%1:$1] %2").arg(i).arg(serial.c_str()));
 
             originDevices.append(PluginInterface::OriginDevice(
                 displayedName,
