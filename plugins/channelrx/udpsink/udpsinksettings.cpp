@@ -45,6 +45,7 @@ void UDPSinkSettings::resetToDefaults()
     m_audioActive = false;
     m_audioStereo = false;
     m_volume = 20;
+    m_streamIndex = 0;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9998;
     m_audioPort = 9997;
@@ -91,6 +92,7 @@ QByteArray UDPSinkSettings::serialize() const
     s.writeU32(25, m_reverseAPIPort);
     s.writeU32(26, m_reverseAPIDeviceIndex);
     s.writeU32(27, m_reverseAPIChannelIndex);
+    s.writeS32(28, m_streamIndex);
 
     return s.final();
 
@@ -180,6 +182,7 @@ bool UDPSinkSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = u32tmp > 99 ? 99 : u32tmp;
         d.readU32(27, &u32tmp, 0);
         m_reverseAPIChannelIndex = u32tmp > 99 ? 99 : u32tmp;
+        d.readS32(28, &m_streamIndex, 0);
 
         return true;
     }

@@ -34,6 +34,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/hbfilterchainconverter.h"
+#include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
 
 #include "localsinkthread.h"
@@ -74,6 +75,11 @@ LocalSink::~LocalSink()
     m_deviceAPI->removeChannelSink(m_threadedChannelizer);
     delete m_threadedChannelizer;
     delete m_channelizer;
+}
+
+uint32_t LocalSink::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSourceStreams();
 }
 
 void LocalSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
@@ -288,6 +294,7 @@ void LocalSink::applySettings(const LocalSinkSettings& settings, bool force)
 {
     qDebug() << "LocalSink::applySettings:"
             << " m_localDeviceIndex: " << settings.m_localDeviceIndex
+            << " m_streamIndex: " << settings.m_streamIndex
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
@@ -309,6 +316,21 @@ void LocalSink::applySettings(const LocalSinkSettings& settings, bool force)
         {
             qWarning("LocalSink::applySettings: invalid local device for index %u", settings.m_localDeviceIndex);
         }
+    }
+
+    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    {
+        if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
+        {
+            m_deviceAPI->removeChannelSinkAPI(this, m_settings.m_streamIndex);
+            m_deviceAPI->removeChannelSink(m_threadedChannelizer, m_settings.m_streamIndex);
+            m_deviceAPI->addChannelSink(m_threadedChannelizer, settings.m_streamIndex);
+            m_deviceAPI->addChannelSinkAPI(this, settings.m_streamIndex);
+            // apply stream sample rate to itself
+            //applyChannelSettings(m_deviceAPI->getSampleMIMO()->getSourceSampleRate(settings.m_streamIndex), m_inputFrequencyOffset);
+        }
+
+        reverseAPIKeys.append("streamIndex");
     }
 
     if ((settings.m_useReverseAPI) && (reverseAPIKeys.size() != 0))
@@ -407,6 +429,9 @@ void LocalSink::webapiUpdateChannelSettings(
         validateFilterChainHash(settings);
     }
 
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getLocalSinkSettings()->getStreamIndex();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getLocalSinkSettings()->getUseReverseApi() != 0;
     }
@@ -437,6 +462,7 @@ void LocalSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
 
     response.getLocalSinkSettings()->setLog2Decim(settings.m_log2Decim);
     response.getLocalSinkSettings()->setFilterChainHash(settings.m_filterChainHash);
+    response.getLocalSinkSettings()->setStreamIndex(settings.m_streamIndex);
     response.getLocalSinkSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getLocalSinkSettings()->getReverseApiAddress()) {
@@ -476,6 +502,9 @@ void LocalSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     }
     if (channelSettingsKeys.contains("filterChainHash") || force) {
         swgLocalSinkSettings->setFilterChainHash(settings.m_filterChainHash);
+    }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgLocalSinkSettings->setStreamIndex(settings.m_streamIndex);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")

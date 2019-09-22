@@ -38,6 +38,7 @@
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/downchannelizer.h"
 #include "dsp/dspcommands.h"
+#include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
 #include "util/db.h"
 
@@ -120,6 +121,11 @@ void DSDDemod::configureMyPosition(MessageQueue* messageQueue, float myLatitude,
 {
 	Message* cmd = MsgConfigureMyPosition::create(myLatitude, myLongitude);
 	messageQueue->push(cmd);
+}
+
+uint32_t DSDDemod::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSourceStreams();
 }
 
 void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
@@ -492,6 +498,7 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
             << " m_traceLengthMutliplier: " << settings.m_traceLengthMutliplier
             << " m_traceStroke: " << settings.m_traceStroke
             << " m_traceDecay: " << settings.m_traceDecay
+            << " m_streamIndex: " << settings.m_streamIndex
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
@@ -601,6 +608,21 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
         if (m_audioSampleRate != audioSampleRate) {
             applyAudioSampleRate(audioSampleRate);
         }
+    }
+
+    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    {
+        if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
+        {
+            m_deviceAPI->removeChannelSinkAPI(this, m_settings.m_streamIndex);
+            m_deviceAPI->removeChannelSink(m_threadedChannelizer, m_settings.m_streamIndex);
+            m_deviceAPI->addChannelSink(m_threadedChannelizer, settings.m_streamIndex);
+            m_deviceAPI->addChannelSinkAPI(this, settings.m_streamIndex);
+            // apply stream sample rate to itself
+            applyChannelSettings(m_deviceAPI->getSampleMIMO()->getSourceSampleRate(settings.m_streamIndex), m_inputFrequencyOffset);
+        }
+
+        reverseAPIKeys.append("streamIndex");
     }
 
     if (settings.m_useReverseAPI)
@@ -941,6 +963,9 @@ void DSDDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("traceDecay")) {
         settings.m_traceDecay = response.getDsdDemodSettings()->getTraceDecay();
     }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getDsdDemodSettings()->getStreamIndex();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getDsdDemodSettings()->getUseReverseApi() != 0;
     }
@@ -1004,6 +1029,7 @@ void DSDDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getDsdDemodSettings()->setTraceLengthMutliplier(settings.m_traceLengthMutliplier);
     response.getDsdDemodSettings()->setTraceStroke(settings.m_traceStroke);
     response.getDsdDemodSettings()->setTraceDecay(settings.m_traceDecay);
+    response.getDsdDemodSettings()->setStreamIndex(settings.m_streamIndex);
     response.getDsdDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getDsdDemodSettings()->getReverseApiAddress()) {
@@ -1116,6 +1142,9 @@ void DSDDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
     }
     if (channelSettingsKeys.contains("traceDecay") || force) {
         swgDSDDemodSettings->setTraceDecay(settings.m_traceDecay);
+    }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgDSDDemodSettings->setStreamIndex(settings.m_streamIndex);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")

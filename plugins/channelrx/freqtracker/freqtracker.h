@@ -191,6 +191,8 @@ public:
         m_magsqCount = 0;
     }
 
+    uint32_t getNumberOfDeviceStreams() const;
+
     static const QString m_channelIdURI;
     static const QString m_channelId;
 

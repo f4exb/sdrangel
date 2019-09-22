@@ -86,6 +86,7 @@ private:
 	void applySettings(bool force = false);
 	void applySettingsImmediate(bool force = false);
 	void displaySettings();
+    void displayStreamIndex();
 	void setSampleFormat(int index);
 	void setSampleFormatIndex(const UDPSinkSettings::SampleFormat& sampleFormat);
 

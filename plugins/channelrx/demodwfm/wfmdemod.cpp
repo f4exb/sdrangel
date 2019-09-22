@@ -37,6 +37,8 @@
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
+#include "dsp/devicesamplemimo.h"
+#include "device/deviceapi.h"
 #include "util/db.h"
 
 #include "wfmdemod.h"
@@ -95,6 +97,11 @@ WFMDemod::~WFMDemod()
     delete m_threadedChannelizer;
     delete m_channelizer;
     delete m_rfFilter;
+}
+
+uint32_t WFMDemod::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSourceStreams();
 }
 
 void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
@@ -328,6 +335,7 @@ void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
             << " m_squelch: " << settings.m_squelch
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_audioMute: " << settings.m_audioMute
+            << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
             << " m_reverseAPIPort: " << settings.m_reverseAPIPort
@@ -400,6 +408,21 @@ void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
         if (m_audioSampleRate != audioSampleRate) {
             applyAudioSampleRate(audioSampleRate);
         }
+    }
+
+    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    {
+        if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
+        {
+            m_deviceAPI->removeChannelSinkAPI(this, m_settings.m_streamIndex);
+            m_deviceAPI->removeChannelSink(m_threadedChannelizer, m_settings.m_streamIndex);
+            m_deviceAPI->addChannelSink(m_threadedChannelizer, settings.m_streamIndex);
+            m_deviceAPI->addChannelSinkAPI(this, settings.m_streamIndex);
+            // apply stream sample rate to itself
+            applyChannelSettings(m_deviceAPI->getSampleMIMO()->getSourceSampleRate(settings.m_streamIndex), m_inputFrequencyOffset);
+        }
+
+        reverseAPIKeys.append("streamIndex");
     }
 
     if (settings.m_useReverseAPI)
@@ -512,6 +535,9 @@ void WFMDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("audioDeviceName")) {
         settings.m_audioDeviceName = *response.getWfmDemodSettings()->getAudioDeviceName();
     }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getWfmDemodSettings()->getStreamIndex();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getWfmDemodSettings()->getUseReverseApi() != 0;
     }
@@ -562,6 +588,7 @@ void WFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
         response.getWfmDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
 
+    response.getWfmDemodSettings()->setStreamIndex(settings.m_streamIndex);
     response.getWfmDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getWfmDemodSettings()->getReverseApiAddress()) {
@@ -625,6 +652,9 @@ void WFMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
         swgWFMDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgWFMDemodSettings->setStreamIndex(settings.m_streamIndex);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")

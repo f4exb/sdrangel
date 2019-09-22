@@ -45,6 +45,7 @@ struct FreeDVDemodSettings
     QString m_title;
     QString m_audioDeviceName;
     FreeDVMode m_freeDVMode;
+    int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

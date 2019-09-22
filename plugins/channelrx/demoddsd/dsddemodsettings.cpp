@@ -53,6 +53,7 @@ void DSDDemodSettings::resetToDefaults()
     m_traceStroke = 100;
     m_traceDecay = 200;
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -100,6 +101,7 @@ QByteArray DSDDemodSettings::serialize() const
     s.writeU32(27, m_reverseAPIDeviceIndex);
     s.writeU32(28, m_reverseAPIChannelIndex);
     s.writeBool(29, m_audioMute);
+    s.writeS32(30, m_streamIndex);
 
     return s.final();
 }
@@ -177,6 +179,7 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         d.readU32(28, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readBool(29, &m_audioMute, false);
+        d.readS32(30, &m_streamIndex, 0);
 
         return true;
     }

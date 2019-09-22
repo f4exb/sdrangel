@@ -49,6 +49,7 @@ void FreeDVDemodSettings::resetToDefaults()
     m_title = "FreeDV Demodulator";
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_freeDVMode = FreeDVMode2400A;
+    m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -78,6 +79,7 @@ QByteArray FreeDVDemodSettings::serialize() const
     s.writeU32(21, m_reverseAPIDeviceIndex);
     s.writeU32(22, m_reverseAPIChannelIndex);
     s.writeS32(23, (int) m_freeDVMode);
+    s.writeS32(24, m_streamIndex);
 
     return s.final();
 }
@@ -137,6 +139,8 @@ bool FreeDVDemodSettings::deserialize(const QByteArray& data)
         } else {
             m_freeDVMode = (FreeDVMode) tmp;
         }
+
+        d.readS32(24, &m_streamIndex, 0);
 
         return true;
     }

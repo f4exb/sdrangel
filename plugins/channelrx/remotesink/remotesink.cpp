@@ -44,6 +44,7 @@
 #include "dsp/downchannelizer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/hbfilterchainconverter.h"
+#include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
 
 #include "remotesinkthread.h"
@@ -118,6 +119,11 @@ void RemoteSink::setNbBlocksFEC(int nbBlocksFEC)
 {
     qDebug() << "RemoteSink::setNbBlocksFEC: nbBlocksFEC: " << nbBlocksFEC;
     m_nbBlocksFEC = nbBlocksFEC;
+}
+
+uint32_t RemoteSink::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSourceStreams();
 }
 
 void RemoteSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
@@ -370,6 +376,7 @@ void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
             << " m_txDelay: " << settings.m_txDelay
             << " m_dataAddress: " << settings.m_dataAddress
             << " m_dataPort: " << settings.m_dataPort
+            << " m_streamIndex: " << settings.m_streamIndex
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
@@ -397,6 +404,21 @@ void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
     {
         reverseAPIKeys.append("dataPort");
         m_dataPort = settings.m_dataPort;
+    }
+
+    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    {
+        if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
+        {
+            m_deviceAPI->removeChannelSinkAPI(this, m_settings.m_streamIndex);
+            m_deviceAPI->removeChannelSink(m_threadedChannelizer, m_settings.m_streamIndex);
+            m_deviceAPI->addChannelSink(m_threadedChannelizer, settings.m_streamIndex);
+            m_deviceAPI->addChannelSinkAPI(this, settings.m_streamIndex);
+            // apply stream sample rate to itself
+            //applyChannelSettings(m_deviceAPI->getSampleMIMO()->getSourceSampleRate(settings.m_streamIndex), m_inputFrequencyOffset);
+        }
+
+        reverseAPIKeys.append("streamIndex");
     }
 
     if ((settings.m_useReverseAPI) && (reverseAPIKeys.size() != 0))
@@ -529,6 +551,10 @@ void RemoteSink::webapiUpdateChannelSettings(
         validateFilterChainHash(settings);
     }
 
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getRemoteSinkSettings()->getStreamIndex();
+    }
+
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getRemoteSinkSettings()->getUseReverseApi() != 0;
     }
@@ -568,6 +594,7 @@ void RemoteSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
 
     response.getRemoteSinkSettings()->setLog2Decim(settings.m_log2Decim);
     response.getRemoteSinkSettings()->setFilterChainHash(settings.m_filterChainHash);
+    response.getRemoteSinkSettings()->setStreamIndex(settings.m_streamIndex);
     response.getRemoteSinkSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getRemoteSinkSettings()->getReverseApiAddress()) {
@@ -617,6 +644,9 @@ void RemoteSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, 
     }
     if (channelSettingsKeys.contains("filterChainHash") || force) {
         swgRemoteSinkSettings->setFilterChainHash(settings.m_filterChainHash);
+    }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgRemoteSinkSettings->setStreamIndex(settings.m_streamIndex);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")

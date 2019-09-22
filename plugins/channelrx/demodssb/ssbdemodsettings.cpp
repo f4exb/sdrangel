@@ -56,6 +56,7 @@ void SSBDemodSettings::resetToDefaults()
     m_rgbColor = QColor(0, 255, 0).rgb();
     m_title = "SSB Demodulator";
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -92,6 +93,7 @@ QByteArray SSBDemodSettings::serialize() const
     s.writeU32(20, m_reverseAPIPort);
     s.writeU32(21, m_reverseAPIDeviceIndex);
     s.writeU32(22, m_reverseAPIChannelIndex);
+    s.writeS32(23, m_streamIndex);
 
     return s.final();
 }
@@ -152,6 +154,7 @@ bool SSBDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(22, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readS32(23, &m_streamIndex, 0);
 
         return true;
     }

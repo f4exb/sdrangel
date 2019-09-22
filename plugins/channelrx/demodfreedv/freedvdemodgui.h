@@ -90,6 +90,7 @@ private:
 	void applyBandwidths(int spanLog2, bool force = false);
 	void displayBandwidths(int spanLog2);
 	void displaySettings();
+    void displayStreamIndex();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

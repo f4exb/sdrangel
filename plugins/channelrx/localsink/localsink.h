@@ -155,6 +155,7 @@ public:
 
     void setChannelizer(unsigned int log2Decim, unsigned int filterChainHash);
     void getLocalDevices(std::vector<uint32_t>& indexes);
+    uint32_t getNumberOfDeviceStreams() const;
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

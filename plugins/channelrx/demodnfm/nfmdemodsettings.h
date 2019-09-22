@@ -43,6 +43,7 @@ struct NFMDemodSettings
     QString m_title;
     QString m_audioDeviceName;
     bool m_highPass;
+    int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

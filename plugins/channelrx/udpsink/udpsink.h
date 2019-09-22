@@ -151,6 +151,8 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
+    uint32_t getNumberOfDeviceStreams() const;
+
     static const QString m_channelIdURI;
     static const QString m_channelId;
 	static const int udpBlockSize = 512; // UDP block size in number of bytes

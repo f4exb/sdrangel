@@ -49,6 +49,7 @@ void BFMDemodSettings::resetToDefaults()
     m_rgbColor = QColor(80, 120, 228).rgb();
     m_title = "Broadcast FM Demod";
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -84,6 +85,7 @@ QByteArray BFMDemodSettings::serialize() const
     s.writeU32(16, m_reverseAPIPort);
     s.writeU32(17, m_reverseAPIDeviceIndex);
     s.writeU32(18, m_reverseAPIChannelIndex);
+    s.writeS32(19, m_streamIndex);
 
     return s.final();
 }
@@ -148,6 +150,7 @@ bool BFMDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(18, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readS32(19, &m_streamIndex, 0);
 
         return true;
     }

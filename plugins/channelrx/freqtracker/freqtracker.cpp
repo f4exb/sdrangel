@@ -38,6 +38,7 @@
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/dspcommands.h"
 #include "dsp/fftfilt.h"
+#include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
 #include "util/db.h"
 #include "util/stepfunctions.h"
@@ -107,6 +108,11 @@ FreqTracker::~FreqTracker()
     delete m_threadedChannelizer;
     delete m_channelizer;
     delete m_rrcFilter;
+}
+
+uint32_t FreqTracker::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSourceStreams();
 }
 
 void FreqTracker::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
@@ -333,6 +339,7 @@ void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
                 << " m_pllPskOrder: " << settings.m_pllPskOrder
                 << " m_rrc: " << settings.m_rrc
                 << " m_rrcRolloff: " << settings.m_rrcRolloff
+                << " m_streamIndex: " << settings.m_streamIndex
                 << " m_useReverseAPI: " << settings.m_useReverseAPI
                 << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
                 << " m_reverseAPIPort: " << settings.m_reverseAPIPort
@@ -432,6 +439,21 @@ void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
     {
         reverseAPIKeys.append("squelchGate");
         updateInterpolator = true;
+    }
+
+    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    {
+        if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
+        {
+            m_deviceAPI->removeChannelSinkAPI(this, m_settings.m_streamIndex);
+            m_deviceAPI->removeChannelSink(m_threadedChannelizer, m_settings.m_streamIndex);
+            m_deviceAPI->addChannelSink(m_threadedChannelizer, settings.m_streamIndex);
+            m_deviceAPI->addChannelSinkAPI(this, settings.m_streamIndex);
+            // apply stream sample rate to itself
+            applyChannelSettings(m_deviceAPI->getSampleMIMO()->getSourceSampleRate(settings.m_streamIndex), m_inputFrequencyOffset);
+        }
+
+        reverseAPIKeys.append("streamIndex");
     }
 
     if (settings.m_useReverseAPI)
@@ -618,6 +640,9 @@ void FreqTracker::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("squelchGate")) {
         settings.m_squelchGate = response.getFreqTrackerSettings()->getSquelchGate();
     }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getFreqTrackerSettings()->getStreamIndex();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getFreqTrackerSettings()->getUseReverseApi() != 0;
     }
@@ -667,6 +692,7 @@ void FreqTracker::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     response.getFreqTrackerSettings()->setRrc(settings.m_rrc ? 1 : 0);
     response.getFreqTrackerSettings()->setRrcRolloff(settings.m_rrcRolloff);
     response.getFreqTrackerSettings()->setSquelchGate(settings.m_squelchGate);
+    response.getFreqTrackerSettings()->setStreamIndex(settings.m_streamIndex);
     response.getFreqTrackerSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getFreqTrackerSettings()->getReverseApiAddress()) {
@@ -721,6 +747,9 @@ void FreqTracker::webapiReverseSendSettings(QList<QString>& channelSettingsKeys,
     }
     if (channelSettingsKeys.contains("trackerType") || force) {
         swgFreqTrackerSettings->setTrackerType((int) settings.m_trackerType);
+    }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgFreqTrackerSettings->setStreamIndex(settings.m_streamIndex);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")

@@ -80,6 +80,7 @@ private:
     void applySettings(bool force = false);
     void applyChannelSettings();
     void displaySettings();
+    void displayStreamIndex();
     void displayRateAndShift();
     void updateTxDelayTime();
 

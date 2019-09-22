@@ -73,6 +73,7 @@ private:
 	void applyBandwidths(int spanLog2, bool force = false);
     int spanLog2Limit(int spanLog2);
 	void displaySettings();
+    void displayStreamIndex();
 	void displayAGCPowerThreshold(int value);
     void displayAGCThresholdGate(int value);
 

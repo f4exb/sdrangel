@@ -79,6 +79,7 @@ private:
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
 	void displaySettings();
+    void displayStreamIndex();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

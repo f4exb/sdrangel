@@ -32,6 +32,7 @@
 #include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/dspcommands.h"
+#include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
 
 #include "udpsink.h"
@@ -140,6 +141,11 @@ void UDPSink::setSpectrum(MessageQueue* messageQueue, bool enabled)
 {
 	Message* cmd = MsgUDPSinkSpectrum::create(enabled);
 	messageQueue->push(cmd);
+}
+
+uint32_t UDPSink::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSourceStreams();
 }
 
 void UDPSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
@@ -512,6 +518,7 @@ void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
             << " m_udpAddressStr: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
             << " m_audioPort: " << settings.m_audioPort
+            << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
             << " m_reverseAPIPort: " << settings.m_reverseAPIPort
@@ -682,6 +689,21 @@ void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
 
     m_settingsMutex.unlock();
 
+    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    {
+        if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
+        {
+            m_deviceAPI->removeChannelSinkAPI(this, m_settings.m_streamIndex);
+            m_deviceAPI->removeChannelSink(m_threadedChannelizer, m_settings.m_streamIndex);
+            m_deviceAPI->addChannelSink(m_threadedChannelizer, settings.m_streamIndex);
+            m_deviceAPI->addChannelSinkAPI(this, settings.m_streamIndex);
+            // apply stream sample rate to itself
+            applyChannelSettings(m_deviceAPI->getSampleMIMO()->getSourceSampleRate(settings.m_streamIndex), m_inputFrequencyOffset);
+        }
+
+        reverseAPIKeys.append("streamIndex");
+    }
+
     if (settings.m_useReverseAPI)
     {
         bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
@@ -823,6 +845,9 @@ void UDPSink::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getUdpSinkSettings()->getTitle();
     }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getUdpSinkSettings()->getStreamIndex();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getUdpSinkSettings()->getUseReverseApi() != 0;
     }
@@ -884,6 +909,7 @@ void UDPSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
         response.getUdpSinkSettings()->setTitle(new QString(settings.m_title));
     }
 
+    response.getUdpSinkSettings()->setStreamIndex(settings.m_streamIndex);
     response.getUdpSinkSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getUdpSinkSettings()->getReverseApiAddress()) {
@@ -973,6 +999,9 @@ void UDPSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, con
     }
     if (channelSettingsKeys.contains("title") || force) {
         swgUDPSinkSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgUDPSinkSettings->setStreamIndex(settings.m_streamIndex);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")

@@ -166,6 +166,8 @@ public:
     void setDataPort(uint16_t port) { m_dataPort = port; }
     void setChannelizer(unsigned int log2Decim, unsigned int filterChainHash);
 
+    uint32_t getNumberOfDeviceStreams() const;
+
     static const QString m_channelIdURI;
     static const QString m_channelId;
 

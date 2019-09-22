@@ -43,6 +43,7 @@ void FreqTrackerSettings::resetToDefaults()
     m_rrc = false;
     m_rrcRolloff = 35;
     m_squelchGate = 5; // 50 ms
+    m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -76,6 +77,7 @@ QByteArray FreqTrackerSettings::serialize() const
     s.writeU32(19, m_reverseAPIDeviceIndex);
     s.writeU32(20, m_reverseAPIChannelIndex);
     s.writeS32(21, m_squelchGate);
+    s.writeS32(22, m_streamIndex);
 
     return s.final();
 }
@@ -140,6 +142,7 @@ bool FreqTrackerSettings::deserialize(const QByteArray& data)
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readS32(21, &tmp, 5);
         m_squelchGate = tmp < 0 ? 0 : tmp > 99 ? 99 : tmp;
+        d.readS32(22, &m_streamIndex, 0);
 
         return true;
     }

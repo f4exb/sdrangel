@@ -46,6 +46,7 @@ struct DSDDemodSettings
     int m_traceStroke; // [0..255]
     int m_traceDecay; // [0..255]
     QString m_audioDeviceName;
+    int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

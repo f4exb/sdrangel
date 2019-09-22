@@ -45,6 +45,7 @@ void WFMDemodSettings::resetToDefaults()
     m_rgbColor = QColor(0, 0, 255).rgb();
     m_title = "WFM Demodulator";
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -73,6 +74,7 @@ QByteArray WFMDemodSettings::serialize() const
     s.writeU32(14, m_reverseAPIPort);
     s.writeU32(15, m_reverseAPIDeviceIndex);
     s.writeU32(16, m_reverseAPIChannelIndex);
+    s.writeS32(17, m_streamIndex);
 
     return s.final();
 }
@@ -128,6 +130,7 @@ bool WFMDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(16, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readS32(17, &m_streamIndex, 0);
 
         return true;
     }

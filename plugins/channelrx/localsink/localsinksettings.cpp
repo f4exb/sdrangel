@@ -36,6 +36,7 @@ void LocalSinkSettings::resetToDefaults()
     m_log2Decim = 0;
     m_filterChainHash = 0;
     m_channelMarker = nullptr;
+    m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -56,6 +57,7 @@ QByteArray LocalSinkSettings::serialize() const
     s.writeU32(11, m_reverseAPIChannelIndex);
     s.writeU32(12, m_log2Decim);
     s.writeU32(13, m_filterChainHash);
+    s.writeS32(14, m_streamIndex);
 
     return s.final();
 }
@@ -95,6 +97,7 @@ bool LocalSinkSettings::deserialize(const QByteArray& data)
         d.readU32(12, &tmp, 0);
         m_log2Decim = tmp > 6 ? 6 : tmp;
         d.readU32(13, &m_filterChainHash, 0);
+        d.readS32(14, &m_streamIndex, 0);
 
         return true;
     }

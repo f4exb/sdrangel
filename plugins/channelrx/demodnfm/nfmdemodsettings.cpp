@@ -54,6 +54,7 @@ void NFMDemodSettings::resetToDefaults()
     m_title = "NFM Demodulator";
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_highPass = true;
+    m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -88,6 +89,7 @@ QByteArray NFMDemodSettings::serialize() const
     s.writeU32(18, m_reverseAPIPort);
     s.writeU32(19, m_reverseAPIDeviceIndex);
     s.writeU32(20, m_reverseAPIChannelIndex);
+    s.writeS32(21, m_streamIndex);
 
     return s.final();
 }
@@ -148,6 +150,7 @@ bool NFMDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(20, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readS32(21, &m_streamIndex, 0);
 
         return true;
     }
