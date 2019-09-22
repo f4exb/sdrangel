@@ -42,6 +42,8 @@ SWGFileSourceSettings::SWGFileSourceSettings() {
     m_rgb_color_isSet = false;
     title = nullptr;
     m_title_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -74,6 +76,8 @@ SWGFileSourceSettings::init() {
     m_rgb_color_isSet = false;
     title = new QString("");
     m_title_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -99,6 +103,7 @@ SWGFileSourceSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
 
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
@@ -132,6 +137,8 @@ SWGFileSourceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -179,6 +186,9 @@ SWGFileSourceSettings::asJsonObject() {
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
+    if(m_stream_index_isSet){
+        obj->insert("streamIndex", QJsonValue(stream_index));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -270,6 +280,16 @@ SWGFileSourceSettings::setTitle(QString* title) {
 }
 
 qint32
+SWGFileSourceSettings::getStreamIndex() {
+    return stream_index;
+}
+void
+SWGFileSourceSettings::setStreamIndex(qint32 stream_index) {
+    this->stream_index = stream_index;
+    this->m_stream_index_isSet = true;
+}
+
+qint32
 SWGFileSourceSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -343,6 +363,9 @@ SWGFileSourceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_stream_index_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

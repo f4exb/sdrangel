@@ -54,6 +54,8 @@ SWGFreqTrackerSettings::SWGFreqTrackerSettings() {
     m_rrc_rolloff_isSet = false;
     squelch_gate = 0;
     m_squelch_gate_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -98,6 +100,8 @@ SWGFreqTrackerSettings::init() {
     m_rrc_rolloff_isSet = false;
     squelch_gate = 0;
     m_squelch_gate_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -120,6 +124,7 @@ SWGFreqTrackerSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
 
 
 
@@ -172,6 +177,8 @@ SWGFreqTrackerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rrc_rolloff, pJson["rrcRolloff"], "qint32", "");
     
     ::SWGSDRangel::setValue(&squelch_gate, pJson["squelchGate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -237,6 +244,9 @@ SWGFreqTrackerSettings::asJsonObject() {
     }
     if(m_squelch_gate_isSet){
         obj->insert("squelchGate", QJsonValue(squelch_gate));
+    }
+    if(m_stream_index_isSet){
+        obj->insert("streamIndex", QJsonValue(stream_index));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -388,6 +398,16 @@ SWGFreqTrackerSettings::setSquelchGate(qint32 squelch_gate) {
 }
 
 qint32
+SWGFreqTrackerSettings::getStreamIndex() {
+    return stream_index;
+}
+void
+SWGFreqTrackerSettings::setStreamIndex(qint32 stream_index) {
+    this->stream_index = stream_index;
+    this->m_stream_index_isSet = true;
+}
+
+qint32
 SWGFreqTrackerSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -479,6 +499,9 @@ SWGFreqTrackerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_squelch_gate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_stream_index_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

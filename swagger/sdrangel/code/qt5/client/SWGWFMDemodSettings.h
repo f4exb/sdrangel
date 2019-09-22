@@ -69,6 +69,9 @@ public:
     QString* getAudioDeviceName();
     void setAudioDeviceName(QString* audio_device_name);
 
+    qint32 getStreamIndex();
+    void setStreamIndex(qint32 stream_index);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -114,6 +117,9 @@ private:
 
     QString* audio_device_name;
     bool m_audio_device_name_isSet;
+
+    qint32 stream_index;
+    bool m_stream_index_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

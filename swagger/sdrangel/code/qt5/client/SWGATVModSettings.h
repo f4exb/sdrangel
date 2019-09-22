@@ -111,6 +111,9 @@ public:
     QString* getVideoFileName();
     void setVideoFileName(QString* video_file_name);
 
+    qint32 getStreamIndex();
+    void setStreamIndex(qint32 stream_index);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -198,6 +201,9 @@ private:
 
     QString* video_file_name;
     bool m_video_file_name_isSet;
+
+    qint32 stream_index;
+    bool m_stream_index_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

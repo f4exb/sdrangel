@@ -63,6 +63,9 @@ public:
     QString* getTitle();
     void setTitle(QString* title);
 
+    qint32 getStreamIndex();
+    void setStreamIndex(qint32 stream_index);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -102,6 +105,9 @@ private:
 
     QString* title;
     bool m_title_isSet;
+
+    qint32 stream_index;
+    bool m_stream_index_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

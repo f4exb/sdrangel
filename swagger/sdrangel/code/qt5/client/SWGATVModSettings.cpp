@@ -74,6 +74,8 @@ SWGATVModSettings::SWGATVModSettings() {
     m_image_file_name_isSet = false;
     video_file_name = nullptr;
     m_video_file_name_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -138,6 +140,8 @@ SWGATVModSettings::init() {
     m_image_file_name_isSet = false;
     video_file_name = new QString("");
     m_video_file_name_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -183,6 +187,7 @@ SWGATVModSettings::cleanup() {
     if(video_file_name != nullptr) { 
         delete video_file_name;
     }
+
 
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
@@ -248,6 +253,8 @@ SWGATVModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&image_file_name, pJson["imageFileName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&video_file_name, pJson["videoFileName"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -343,6 +350,9 @@ SWGATVModSettings::asJsonObject() {
     }
     if(video_file_name != nullptr && *video_file_name != QString("")){
         toJsonValue(QString("videoFileName"), video_file_name, obj, QString("QString"));
+    }
+    if(m_stream_index_isSet){
+        obj->insert("streamIndex", QJsonValue(stream_index));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -594,6 +604,16 @@ SWGATVModSettings::setVideoFileName(QString* video_file_name) {
 }
 
 qint32
+SWGATVModSettings::getStreamIndex() {
+    return stream_index;
+}
+void
+SWGATVModSettings::setStreamIndex(qint32 stream_index) {
+    this->stream_index = stream_index;
+    this->m_stream_index_isSet = true;
+}
+
+qint32
 SWGATVModSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -715,6 +735,9 @@ SWGATVModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(video_file_name && *video_file_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_stream_index_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

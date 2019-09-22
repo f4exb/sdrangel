@@ -57,6 +57,9 @@ public:
     qint32 getFilterChainHash();
     void setFilterChainHash(qint32 filter_chain_hash);
 
+    qint32 getStreamIndex();
+    void setStreamIndex(qint32 stream_index);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -90,6 +93,9 @@ private:
 
     qint32 filter_chain_hash;
     bool m_filter_chain_hash_isSet;
+
+    qint32 stream_index;
+    bool m_stream_index_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

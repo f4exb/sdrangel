@@ -52,6 +52,8 @@ SWGBFMDemodSettings::SWGBFMDemodSettings() {
     m_title_isSet = false;
     audio_device_name = nullptr;
     m_audio_device_name_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -94,6 +96,8 @@ SWGBFMDemodSettings::init() {
     m_title_isSet = false;
     audio_device_name = new QString("");
     m_audio_device_name_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -124,6 +128,7 @@ SWGBFMDemodSettings::cleanup() {
     if(audio_device_name != nullptr) { 
         delete audio_device_name;
     }
+
 
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
@@ -167,6 +172,8 @@ SWGBFMDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -229,6 +236,9 @@ SWGBFMDemodSettings::asJsonObject() {
     }
     if(audio_device_name != nullptr && *audio_device_name != QString("")){
         toJsonValue(QString("audioDeviceName"), audio_device_name, obj, QString("QString"));
+    }
+    if(m_stream_index_isSet){
+        obj->insert("streamIndex", QJsonValue(stream_index));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -370,6 +380,16 @@ SWGBFMDemodSettings::setAudioDeviceName(QString* audio_device_name) {
 }
 
 qint32
+SWGBFMDemodSettings::getStreamIndex() {
+    return stream_index;
+}
+void
+SWGBFMDemodSettings::setStreamIndex(qint32 stream_index) {
+    this->stream_index = stream_index;
+    this->m_stream_index_isSet = true;
+}
+
+qint32
 SWGBFMDemodSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -458,6 +478,9 @@ SWGBFMDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(audio_device_name && *audio_device_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_stream_index_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

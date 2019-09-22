@@ -32,8 +32,11 @@ NFMModSettings:
     title:
       type: string
     audioDeviceName:
-      type: string      
+      type: string
     modAFInput:
+      type: integer
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
@@ -43,12 +46,12 @@ NFMModSettings:
     reverseAPIPort:
       type: integer
     reverseAPIDeviceIndex:
-      type: integer      
+      type: integer
     reverseAPIChannelIndex:
-      type: integer     
+      type: integer
     cwKeyer:
       $ref: "http://localhost:8081/api/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
-    
+
 NFMModReport:
   description: NFMMod
   properties:
@@ -60,4 +63,3 @@ NFMModReport:
       type: integer
     channelSampleRate:
       type: integer
-    

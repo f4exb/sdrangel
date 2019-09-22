@@ -38,6 +38,8 @@ SWGLocalSinkSettings::SWGLocalSinkSettings() {
     m_log2_decim_isSet = false;
     filter_chain_hash = 0;
     m_filter_chain_hash_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -66,6 +68,8 @@ SWGLocalSinkSettings::init() {
     m_log2_decim_isSet = false;
     filter_chain_hash = 0;
     m_filter_chain_hash_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -85,6 +89,7 @@ SWGLocalSinkSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
 
 
 
@@ -116,6 +121,8 @@ SWGLocalSinkSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&log2_decim, pJson["log2Decim"], "qint32", "");
     
     ::SWGSDRangel::setValue(&filter_chain_hash, pJson["filterChainHash"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -157,6 +164,9 @@ SWGLocalSinkSettings::asJsonObject() {
     }
     if(m_filter_chain_hash_isSet){
         obj->insert("filterChainHash", QJsonValue(filter_chain_hash));
+    }
+    if(m_stream_index_isSet){
+        obj->insert("streamIndex", QJsonValue(stream_index));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -228,6 +238,16 @@ SWGLocalSinkSettings::setFilterChainHash(qint32 filter_chain_hash) {
 }
 
 qint32
+SWGLocalSinkSettings::getStreamIndex() {
+    return stream_index;
+}
+void
+SWGLocalSinkSettings::setStreamIndex(qint32 stream_index) {
+    this->stream_index = stream_index;
+    this->m_stream_index_isSet = true;
+}
+
+qint32
 SWGLocalSinkSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -295,6 +315,9 @@ SWGLocalSinkSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_filter_chain_hash_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_stream_index_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

@@ -36,6 +36,8 @@ SWGRemoteSourceSettings::SWGRemoteSourceSettings() {
     m_rgb_color_isSet = false;
     title = nullptr;
     m_title_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -62,6 +64,8 @@ SWGRemoteSourceSettings::init() {
     m_rgb_color_isSet = false;
     title = new QString("");
     m_title_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -84,6 +88,7 @@ SWGRemoteSourceSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
 
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
@@ -111,6 +116,8 @@ SWGRemoteSourceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -149,6 +156,9 @@ SWGRemoteSourceSettings::asJsonObject() {
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
+    if(m_stream_index_isSet){
+        obj->insert("streamIndex", QJsonValue(stream_index));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -207,6 +217,16 @@ void
 SWGRemoteSourceSettings::setTitle(QString* title) {
     this->title = title;
     this->m_title_isSet = true;
+}
+
+qint32
+SWGRemoteSourceSettings::getStreamIndex() {
+    return stream_index;
+}
+void
+SWGRemoteSourceSettings::setStreamIndex(qint32 stream_index) {
+    this->stream_index = stream_index;
+    this->m_stream_index_isSet = true;
 }
 
 qint32
@@ -274,6 +294,9 @@ SWGRemoteSourceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_stream_index_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

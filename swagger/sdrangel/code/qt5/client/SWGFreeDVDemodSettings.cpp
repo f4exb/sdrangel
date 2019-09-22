@@ -48,6 +48,8 @@ SWGFreeDVDemodSettings::SWGFreeDVDemodSettings() {
     m_audio_device_name_isSet = false;
     free_dv_mode = 0;
     m_free_dv_mode_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -86,6 +88,8 @@ SWGFreeDVDemodSettings::init() {
     m_audio_device_name_isSet = false;
     free_dv_mode = 0;
     m_free_dv_mode_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -113,6 +117,7 @@ SWGFreeDVDemodSettings::cleanup() {
     if(audio_device_name != nullptr) { 
         delete audio_device_name;
     }
+
 
 
     if(reverse_api_address != nullptr) { 
@@ -153,6 +158,8 @@ SWGFreeDVDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&free_dv_mode, pJson["freeDVMode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -209,6 +216,9 @@ SWGFreeDVDemodSettings::asJsonObject() {
     }
     if(m_free_dv_mode_isSet){
         obj->insert("freeDVMode", QJsonValue(free_dv_mode));
+    }
+    if(m_stream_index_isSet){
+        obj->insert("streamIndex", QJsonValue(stream_index));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -330,6 +340,16 @@ SWGFreeDVDemodSettings::setFreeDvMode(qint32 free_dv_mode) {
 }
 
 qint32
+SWGFreeDVDemodSettings::getStreamIndex() {
+    return stream_index;
+}
+void
+SWGFreeDVDemodSettings::setStreamIndex(qint32 stream_index) {
+    this->stream_index = stream_index;
+    this->m_stream_index_isSet = true;
+}
+
+qint32
 SWGFreeDVDemodSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -412,6 +432,9 @@ SWGFreeDVDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_free_dv_mode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_stream_index_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

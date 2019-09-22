@@ -62,6 +62,8 @@ SWGSSBModSettings::SWGSSBModSettings() {
     m_audio_device_name_isSet = false;
     mod_af_input = 0;
     m_mod_af_input_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -116,6 +118,8 @@ SWGSSBModSettings::init() {
     m_audio_device_name_isSet = false;
     mod_af_input = 0;
     m_mod_af_input_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -152,6 +156,7 @@ SWGSSBModSettings::cleanup() {
     if(audio_device_name != nullptr) { 
         delete audio_device_name;
     }
+
 
 
     if(reverse_api_address != nullptr) { 
@@ -209,6 +214,8 @@ SWGSSBModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&mod_af_input, pJson["modAFInput"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -288,6 +295,9 @@ SWGSSBModSettings::asJsonObject() {
     }
     if(m_mod_af_input_isSet){
         obj->insert("modAFInput", QJsonValue(mod_af_input));
+    }
+    if(m_stream_index_isSet){
+        obj->insert("streamIndex", QJsonValue(stream_index));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -482,6 +492,16 @@ SWGSSBModSettings::setModAfInput(qint32 mod_af_input) {
 }
 
 qint32
+SWGSSBModSettings::getStreamIndex() {
+    return stream_index;
+}
+void
+SWGSSBModSettings::setStreamIndex(qint32 stream_index) {
+    this->stream_index = stream_index;
+    this->m_stream_index_isSet = true;
+}
+
+qint32
 SWGSSBModSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -595,6 +615,9 @@ SWGSSBModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_mod_af_input_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_stream_index_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

@@ -94,6 +94,9 @@ public:
     qint32 getModAfInput();
     void setModAfInput(qint32 mod_af_input);
 
+    qint32 getStreamIndex();
+    void setStreamIndex(qint32 stream_index);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -166,6 +169,9 @@ private:
 
     qint32 mod_af_input;
     bool m_mod_af_input_isSet;
+
+    qint32 stream_index;
+    bool m_stream_index_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

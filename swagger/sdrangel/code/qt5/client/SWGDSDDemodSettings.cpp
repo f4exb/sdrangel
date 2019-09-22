@@ -72,6 +72,8 @@ SWGDSDDemodSettings::SWGDSDDemodSettings() {
     m_trace_stroke_isSet = false;
     trace_decay = 0;
     m_trace_decay_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -134,6 +136,8 @@ SWGDSDDemodSettings::init() {
     m_trace_stroke_isSet = false;
     trace_decay = 0;
     m_trace_decay_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -170,6 +174,7 @@ SWGDSDDemodSettings::cleanup() {
     if(audio_device_name != nullptr) { 
         delete audio_device_name;
     }
+
 
 
 
@@ -237,6 +242,8 @@ SWGDSDDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&trace_stroke, pJson["traceStroke"], "qint32", "");
     
     ::SWGSDRangel::setValue(&trace_decay, pJson["traceDecay"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -329,6 +336,9 @@ SWGDSDDemodSettings::asJsonObject() {
     }
     if(m_trace_decay_isSet){
         obj->insert("traceDecay", QJsonValue(trace_decay));
+    }
+    if(m_stream_index_isSet){
+        obj->insert("streamIndex", QJsonValue(stream_index));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -570,6 +580,16 @@ SWGDSDDemodSettings::setTraceDecay(qint32 trace_decay) {
 }
 
 qint32
+SWGDSDDemodSettings::getStreamIndex() {
+    return stream_index;
+}
+void
+SWGDSDDemodSettings::setStreamIndex(qint32 stream_index) {
+    this->stream_index = stream_index;
+    this->m_stream_index_isSet = true;
+}
+
+qint32
 SWGDSDDemodSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -688,6 +708,9 @@ SWGDSDDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_trace_decay_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_stream_index_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){
