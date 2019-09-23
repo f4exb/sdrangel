@@ -305,7 +305,7 @@ void DSPDeviceMIMOEngine::workSampleSinkFifo(unsigned int sinkIndex)
         }
 
         if (part2begin != part2end) { // second part of FIFO data (used when block wraps around)
-            workSamplePart(part1begin, part1end, sinkIndex);
+            workSamplePart(part2begin, part2end, sinkIndex);
         }
 
         sampleFifo->readCommit((unsigned int) count); // adjust FIFO pointers
