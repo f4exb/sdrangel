@@ -90,6 +90,11 @@ hackrf_device *DeviceHackRF::open_hackrf_from_sequence(int sequence)
 void DeviceHackRF::enumOriginDevices(const QString& hardwareId, PluginInterface::OriginDevices& originDevices)
 {
 	hackrf_device_list_t *hackrf_devices = hackrf_device_list();
+
+    if (hackrf_devices == nullptr) {
+        return;
+    }
+
 	hackrf_device *hackrf_ptr;
 	read_partid_serialno_t read_partid_serialno;
 	int i;
