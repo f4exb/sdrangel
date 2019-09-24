@@ -301,12 +301,18 @@ void DSPDeviceMIMOEngine::workSampleSinkFifo(unsigned int sinkIndex)
         std::size_t count = sampleFifo->readBegin(sampleFifo->fill(), &part1begin, &part1end, &part2begin, &part2end);
 
         if (part1begin != part1end) { // first part of FIFO data
-            workSamplePart(part1begin, part1end, sinkIndex);
+            m_vectorBuffer.write(part1begin, part1end, false);
+            //workSamplePart(part1begin, part1end, sinkIndex);
         }
 
         if (part2begin != part2end) { // second part of FIFO data (used when block wraps around)
-            workSamplePart(part2begin, part2end, sinkIndex);
+            m_vectorBuffer.append(part2begin, part2end);
+            //workSamplePart(part2begin, part2end, sinkIndex);
         }
+
+        SampleVector::iterator vbegin, vend;
+        m_vectorBuffer.read(vbegin, vend);
+        workSamplePart(vbegin, vend, sinkIndex);
 
         sampleFifo->readCommit((unsigned int) count); // adjust FIFO pointers
         samplesDone += count;

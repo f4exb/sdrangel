@@ -31,7 +31,8 @@ public:
     SampleSinkVector(const SampleSinkVector& other);
     ~SampleSinkVector();
 
-    void write(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
+    void write(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool signal = true);
+    void append(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool signal = false);
     void read(SampleVector::iterator& begin, SampleVector::iterator& end);
 
 signals:

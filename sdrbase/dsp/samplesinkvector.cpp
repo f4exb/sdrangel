@@ -30,7 +30,7 @@ SampleSinkVector::SampleSinkVector(const SampleSinkVector& other) :
 SampleSinkVector::~SampleSinkVector()
 {}
 
-void SampleSinkVector::write(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
+void SampleSinkVector::write(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool signal)
 {
     if (end - begin > m_sampleVector.size()) {
         m_sampleVector.resize(end - begin);
@@ -40,7 +40,22 @@ void SampleSinkVector::write(const SampleVector::const_iterator& begin, const Sa
     m_dataSize = end - begin;
     // m_begin = begin;
     // m_end = end;
-    emit dataReady();
+    if (signal) {
+        emit dataReady();
+    }
+}
+
+void SampleSinkVector::append(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool signal)
+{
+    if ((end - begin) + m_dataSize > m_sampleVector.size()) {
+        m_sampleVector.resize((end - begin) + m_dataSize);
+    }
+
+    std::copy(begin, end, m_sampleVector.begin() + m_dataSize);
+    m_dataSize += (end - begin);
+    if (signal) {
+        emit dataReady();
+    }
 }
 
 void SampleSinkVector::read(SampleVector::iterator& begin, SampleVector::iterator& end)
