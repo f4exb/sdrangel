@@ -22,6 +22,7 @@
 
 //#include "dsp/samplesinkvector.h"
 #include "dsp/samplesinkfifo.h"
+#include "dsp/samplesinkvector.h"
 #include "interferometerstreamsink.h"
 #include "interferometercorr.h"
 
@@ -119,11 +120,13 @@ private:
     BasebandSampleSink *m_spectrumSink;
     BasebandSampleSink *m_scopeSink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
+    SampleSinkVector m_vectorBuffer;
+    int m_count0, m_count1;
 
 private slots:
 	//void handleSinkBuffer(unsigned int sinkIndex); //!< Handle data when samples have to be processed
-    void handleSinkFifo(unsigned int sinkIndex); //!< Handle data when samples have to be processed
     void handleInputMessages();
+    void handleSinkFifo(unsigned int sinkIndex); //!< Handle data when samples have to be processed
 };
 
 #endif // INCLUDE_INTERFEROMETERSINK_H
