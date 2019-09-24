@@ -36,7 +36,7 @@ InterferometerSink::InterferometerSink(int fftSize) :
     {
         m_sinkFifos[i].setSize(96000 * 4);
         m_sinks[i].setStreamIndex(i);
-        m_channelizers[i] = new DownChannelizer(&m_sinks[i]);
+        //m_channelizers[i] = new DownChannelizer(&m_sinks[i]);
         // QObject::connect(
         //     &m_sinkBuffers[i],
         //     &SampleSinkVector::dataReady,
@@ -60,7 +60,7 @@ InterferometerSink::~InterferometerSink()
 {
     for (int i = 0; i < 2; i++)
     {
-        delete m_channelizers[i];
+        //delete m_channelizers[i];
     }
 }
 
@@ -91,7 +91,9 @@ void InterferometerSink::handleSinkFifo(unsigned int sinkIndex)
 {
     int samplesDone = 0;
 
-    while ((m_sinkFifos[sinkIndex].fill() > 0) && (m_inputMessageQueue.size() == 0) && (samplesDone < m_channelizers[sinkIndex]->getInputSampleRate()))
+    while ((m_sinkFifos[sinkIndex].fill() > 0)
+        && (m_inputMessageQueue.size() == 0))
+        //&& (samplesDone < m_channelizers[sinkIndex]->getInputSampleRate()))
     {
 		SampleVector::iterator part1begin;
 		SampleVector::iterator part1end;
@@ -102,13 +104,19 @@ void InterferometerSink::handleSinkFifo(unsigned int sinkIndex)
 
         if (part1begin != part1end) { // first part of FIFO data
             //qDebug("InterferometerSink::handleSinkFifo: part1-stream: %u count: %u", sinkIndex, count);
-            processFifo(part1begin, part1end, sinkIndex);
+            m_vectorBuffer.write(part1begin, part1end, false);
+            //processFifo(part1begin, part1end, sinkIndex);
         }
 
         if (part2begin != part2end) { // second part of FIFO data (used when block wraps around)
             //qDebug("InterferometerSink::handleSinkFifo: part2-stream: %u count: %u", sinkIndex, count);
-            processFifo(part2begin, part2end, sinkIndex);
+            m_vectorBuffer.append(part2begin, part2end);
+            //processFifo(part2begin, part2end, sinkIndex);
         }
+
+        SampleVector::iterator vbegin, vend;
+        m_vectorBuffer.read(vbegin, vend);
+        processFifo(vbegin, vend, sinkIndex);
 
         m_sinkFifos[sinkIndex].readCommit((unsigned int) count); // adjust FIFO pointers
         samplesDone += count;
@@ -119,7 +127,17 @@ void InterferometerSink::handleSinkFifo(unsigned int sinkIndex)
 
 void InterferometerSink::processFifo(const SampleVector::iterator& vbegin, const SampleVector::iterator& vend, unsigned int sinkIndex)
 {
-    m_channelizers[sinkIndex]->feed(vbegin, vend, false);
+    if (sinkIndex == 0) {
+        m_count0 = vend - vbegin;
+    } else if (sinkIndex == 1) {
+        m_count1 = vend - vbegin;
+        if (m_count1 != m_count0) {
+            qDebug("InterferometerSink::processFifo: c0: %d 1: %d", m_count0, m_count1);
+        }
+    }
+
+    //m_channelizers[sinkIndex]->feed(vbegin, vend, false);
+    m_sinks[sinkIndex].feed(vbegin, vend, false);
 
     if (sinkIndex == 1) {
         run();
@@ -128,6 +146,10 @@ void InterferometerSink::processFifo(const SampleVector::iterator& vbegin, const
 
 void InterferometerSink::run()
 {
+    if (m_sinks[0].getSize() != m_sinks[1].getSize()) {
+        qDebug("InterferometerSink::run: size0: %d, size1: %d", m_sinks[0].getSize(), m_sinks[1].getSize());
+    }
+
     if (m_correlator.performCorr(m_sinks[0].getData(), m_sinks[0].getSize(), m_sinks[1].getData(), m_sinks[1].getSize()))
     {
         if (m_scopeSink) {
@@ -144,20 +166,21 @@ void InterferometerSink::run()
         }
     }
 
-    for (int i = 0; i < 2; i++)
-    {
-        std::copy(
-            m_sinks[i].getData().begin() + m_correlator.m_processed,
-            m_sinks[i].getData().begin() + m_correlator.m_processed + m_correlator.m_remaining[i],
-            m_sinks[i].getData().begin()
-        );
+    // for (int i = 0; i < 2; i++)
+    // {
+    //     std::copy(
+    //         m_sinks[i].getData().begin() + m_correlator.m_processed,
+    //         m_sinks[i].getData().begin() + m_correlator.m_processed + m_correlator.m_remaining[i],
+    //         m_sinks[i].getData().begin()
+    //     );
 
-        m_sinks[i].setDataStart(m_correlator.m_remaining[i]);
-    }
+    //     m_sinks[i].setDataStart(m_correlator.m_remaining[i]);
+    // }
 }
 
 void InterferometerSink::handleInputMessages()
 {
+    qDebug("InterferometerSink::handleInputMessage");
 	Message* message;
 
 	while ((message = m_inputMessageQueue.pop()) != 0)
@@ -183,9 +206,9 @@ bool InterferometerSink::handleMessage(const Message& cmd)
 
         for (int i = 0; i < 2; i++)
         {
-            m_channelizers[i]->set(m_channelizers[i]->getInputMessageQueue(),
-                log2Decim,
-                filterChainHash);
+            // m_channelizers[i]->set(m_channelizers[i]->getInputMessageQueue(),
+            //     log2Decim,
+            //     filterChainHash);
         }
 
         return true;
@@ -204,8 +227,8 @@ bool InterferometerSink::handleMessage(const Message& cmd)
 
         if (streamIndex < 2)
         {
-            DSPSignalNotification *notif = new DSPSignalNotification(inputSampleRate, centerFrequency);
-            m_channelizers[streamIndex]->getInputMessageQueue()->push(notif);
+            // DSPSignalNotification *notif = new DSPSignalNotification(inputSampleRate, centerFrequency);
+            // m_channelizers[streamIndex]->getInputMessageQueue()->push(notif);
         }
 
         return true;

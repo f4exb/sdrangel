@@ -158,6 +158,7 @@ private:
 
     int64_t m_frequencyOffset;
     uint32_t m_deviceSampleRate;
+    int m_count0, m_count1;
 
     void applySettings(const InterferometerSettings& settings, bool force = false);
     static void validateFilterChainHash(InterferometerSettings& settings);

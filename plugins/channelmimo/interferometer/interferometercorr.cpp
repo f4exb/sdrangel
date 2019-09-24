@@ -109,6 +109,9 @@ bool InterferometerCorrelator::performOpCorr(
 )
 {
     unsigned int size = std::min(size0, size1);
+    // if (size0 != size1) {
+    //     qDebug("InterferometerCorrelator::performOpCorr: size0: %d, size1: %d", size0, size1);
+    // }
     adjustTCorrSize(size);
 
     std::transform(
