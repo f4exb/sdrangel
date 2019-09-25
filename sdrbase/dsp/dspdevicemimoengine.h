@@ -381,10 +381,9 @@ private:
     SampleSinkVector m_vectorBuffer;
 
   	void run();
-    void workSampleSinkFifo(unsigned int sinkIndex); //!< transfer samples of one sink (asynchronously)
-    void workSampleSinkVector(unsigned int sinkIndex); //!< same but sample sink vector flavor (TODO: remove if unused)
-    void workSamplePart(const SampleVector::iterator& vbegin, const SampleVector::iterator& vend, unsigned int sinkIndex);
-    void workSamplePart(int count);
+    void workSampleSinkFifos(); //!< transfer samples of all sinks (sync mode)
+    void workSampleSinkFifo(unsigned int stream); //!< transfer samples of one sink (async mode)
+    void workSamples(const SampleVector::iterator& vbegin, const SampleVector::iterator& vend, unsigned int sinkIndex);
 
 	State gotoIdle();     //!< Go to the idle state
 	State gotoInit();     //!< Go to the acquisition init state from idle
@@ -396,7 +395,7 @@ private:
 
 private slots:
 	void handleDataRxSync();           //!< Handle data when Rx samples have to be processed synchronously
-	void handleDataRxAsync(unsigned int sinkIndex); //!< Handle data when Rx samples have to be processed asynchronously
+	void handleDataRxAsync(int streamIndex); //!< Handle data when Rx samples have to be processed asynchronously
 	void handleSynchronousMessages();  //!< Handle synchronous messages with the thread
 	void handleInputMessages();        //!< Handle input message queue
 	void handleForwardToSpectrumSink(int nbSamples);

@@ -34,7 +34,7 @@
 
 #define TESTMI_THROTTLE_MS 50
 
-class SampleSinkFifo;
+class SampleMIFifo;
 
 class TestMIThread : public QThread {
 	Q_OBJECT
@@ -59,7 +59,7 @@ public:
         { }
     };
 
-	TestMIThread(SampleSinkFifo* sampleFifo, int streamIndex, QObject* parent = 0);
+	TestMIThread(SampleMIFifo* sampleFifo, int streamIndex, QObject* parent = nullptr);
 	~TestMIThread();
 
     void startStop(bool start);
@@ -90,7 +90,7 @@ private:
     quint32 m_bufsize;
     quint32 m_chunksize;
 	SampleVector m_convertBuffer;
-    SampleSinkFifo* m_sampleFifo;
+    SampleMIFifo* m_sampleFifo;
     int m_streamIndex;
 	NCOF m_nco;
     NCOF m_toneNco;

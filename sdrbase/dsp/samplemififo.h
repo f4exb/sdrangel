@@ -37,11 +37,17 @@ public:
         std::vector<SampleVector::const_iterator>& vpart1Begin, std::vector<SampleVector::const_iterator>& vpart1End,
         std::vector<SampleVector::const_iterator>& vpart2Begin, std::vector<SampleVector::const_iterator>& vpart2End
     );
-    void readSync(int& part1Begin, int& part1End, int& part2Begin, int& part2End);
+    void readSync(
+        std::vector<int>& vPart1Begin, std::vector<int>& vPart1End,
+        std::vector<int>& vPart2Begin, std::vector<int>& vPart2End
+    );
 	void readAsync(unsigned int stream,
 		SampleVector::const_iterator& part1Begin, SampleVector::const_iterator& part1End,
 		SampleVector::const_iterator& part2Begin, SampleVector::const_iterator& part2End);
     const std::vector<SampleVector>& getData() { return m_data; }
+    unsigned int getNbStreams() const { return m_data.size(); }
+    bool dataAvailable();
+    bool dataAvailable(unsigned int stream);
 
 
 signals:
@@ -52,8 +58,6 @@ private:
     std::vector<SampleVector> m_data;
     std::vector<int> m_vFill; //!< Number of samples written from beginning of samples vector
     std::vector<int> m_vHead; //!< Number of samples read from beginning of samples vector
-    int m_fill;
-    int m_head;
 	QMutex m_mutex;
 };
 

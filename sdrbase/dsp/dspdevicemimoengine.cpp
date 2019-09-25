@@ -267,55 +267,71 @@ QString DSPDeviceMIMOEngine::deviceDescription()
 	return cmd.getDeviceDescription();
 }
 
-void DSPDeviceMIMOEngine::workSampleSinkVector(unsigned int sinkIndex)
+void DSPDeviceMIMOEngine::workSampleSinkFifos()
 {
-	SampleSinkVector* sampleFifo = m_deviceSampleMIMO->getSampleSinkVector(sinkIndex);
+    SampleMIFifo* sampleFifo = m_deviceSampleMIMO->getSampleMIFifo();
 
     if (!sampleFifo) {
         return;
     }
 
-    SampleVector::iterator vbegin;
-    SampleVector::iterator vend;
-    sampleFifo->read(vbegin, vend);
+    std::vector<int> vPart1Begin;
+    std::vector<int> vPart1End;
+    std::vector<int> vPart2Begin;
+    std::vector<int> vPart2End;
+    std::vector<SampleVector> data = sampleFifo->getData();
 
-    workSamplePart(vbegin, vend, sinkIndex);
+    while (sampleFifo->dataAvailable())
+    {
+        sampleFifo->readSync(vPart1Begin, vPart1End, vPart2Begin, vPart2End);
+
+        for (unsigned int stream = 0; stream < data.size(); stream++)
+        {
+            SampleVector::const_iterator begin = data[stream].begin();
+
+            if (vPart1Begin[stream] != vPart1End[stream]) {
+                m_vectorBuffer.write(begin + vPart1Begin[stream], begin + vPart1End[stream], false);
+            }
+
+            if (vPart2Begin[stream] != vPart2End[stream]) {
+                m_vectorBuffer.write(begin + vPart2Begin[stream], begin + vPart2End[stream], false);
+            }
+
+            SampleVector::iterator vbegin, vend;
+            m_vectorBuffer.read(vbegin, vend);
+            workSamples(vbegin, vend, stream);
+        }
+    }
 }
 
-void DSPDeviceMIMOEngine::workSampleSinkFifo(unsigned int sinkIndex)
+void DSPDeviceMIMOEngine::workSampleSinkFifo(unsigned int stream)
 {
-    SampleSinkFifo* sampleFifo = m_deviceSampleMIMO->getSampleSinkFifo(sinkIndex);
-    int samplesDone = 0;
+    SampleMIFifo* sampleFifo = m_deviceSampleMIMO->getSampleMIFifo();
 
     if (!sampleFifo) {
         return;
     }
 
-    while ((sampleFifo->fill() > 0) && (m_inputMessageQueue.size() == 0) && (samplesDone < m_deviceSampleMIMO->getSourceSampleRate(sinkIndex)))
-    {
-		SampleVector::iterator part1begin;
-		SampleVector::iterator part1end;
-		SampleVector::iterator part2begin;
-		SampleVector::iterator part2end;
+    SampleVector::const_iterator part1begin;
+    SampleVector::const_iterator part1end;
+    SampleVector::const_iterator part2begin;
+    SampleVector::const_iterator part2end;
 
-        std::size_t count = sampleFifo->readBegin(sampleFifo->fill(), &part1begin, &part1end, &part2begin, &part2end);
+    while (sampleFifo->dataAvailable(stream))
+    {
+        sampleFifo->readAsync(stream, part1begin, part1end, part2begin, part2end);
 
         if (part1begin != part1end) { // first part of FIFO data
             m_vectorBuffer.write(part1begin, part1end, false);
-            //workSamplePart(part1begin, part1end, sinkIndex);
         }
 
         if (part2begin != part2end) { // second part of FIFO data (used when block wraps around)
             m_vectorBuffer.append(part2begin, part2end);
-            //workSamplePart(part2begin, part2end, sinkIndex);
         }
 
         SampleVector::iterator vbegin, vend;
         m_vectorBuffer.read(vbegin, vend);
-        workSamplePart(vbegin, vend, sinkIndex);
-
-        sampleFifo->readCommit((unsigned int) count); // adjust FIFO pointers
-        samplesDone += count;
+        workSamples(vbegin, vend, stream);
     }
 }
 
@@ -323,7 +339,7 @@ void DSPDeviceMIMOEngine::workSampleSinkFifo(unsigned int sinkIndex)
  * Routes samples from device source FIFO to sink channels that are registered for the FIFO
  * Routes samples from source channels registered for the FIFO to the device sink FIFO
  */
-void DSPDeviceMIMOEngine::workSamplePart(const SampleVector::iterator& vbegin, const SampleVector::iterator& vend, unsigned int sinkIndex)
+void DSPDeviceMIMOEngine::workSamples(const SampleVector::iterator& vbegin, const SampleVector::iterator& vend, unsigned int sinkIndex)
 {
 	bool positiveOnly = false;
     // DC and IQ corrections
@@ -603,15 +619,12 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoError(const QString& errorMe
 
 void DSPDeviceMIMOEngine::handleDataRxSync()
 {
-	if (m_state == StRunning)
-    {
-        for (unsigned int isink = 0; isink < m_deviceSampleMIMO->getNbSinkFifos(); isink++) {
-            workSampleSinkFifo(isink);
-        }
+	if (m_state == StRunning) {
+        workSampleSinkFifos();
 	}
 }
 
-void DSPDeviceMIMOEngine::handleDataRxAsync(unsigned int sinkIndex)
+void DSPDeviceMIMOEngine::handleDataRxAsync(int sinkIndex)
 {
 	if (m_state == StRunning) {
 		workSampleSinkFifo(sinkIndex);
@@ -641,33 +654,34 @@ void DSPDeviceMIMOEngine::handleSetMIMO(DeviceSampleMIMO* mimo)
     {
         qDebug("DSPDeviceMIMOEngine::handleSetMIMO: synchronous sources set %s", qPrintable(mimo->getDeviceDescription()));
         // connect(m_deviceSampleMIMO->getSampleSinkFifo(m_sampleSinkConnectionIndexes[0]), SIGNAL(dataReady()), this, SLOT(handleData()), Qt::QueuedConnection);
-        for (unsigned int isink = 0; isink < m_deviceSampleMIMO->getNbSinkFifos(); isink++)
-        {
-            qDebug("DSPDeviceMIMOEngine::handleSetMIMO: synchronous sources set %s channel %u",
-                qPrintable(mimo->getDeviceDescription()), isink);
-            QObject::connect(
-                m_deviceSampleMIMO->getSampleSinkFifo(isink),
-                &SampleSinkFifo::dataReady,
-                this,
-                [=](){ this->handleDataRxSync(); }, // lambda function is not strictly needed here
-                Qt::QueuedConnection
-            );
-            break; // use first available FIFO for sync signal
-        }
+        QObject::connect(
+            m_deviceSampleMIMO->getSampleMIFifo(),
+            &SampleMIFifo::dataSyncReady,
+            this,
+            &DSPDeviceMIMOEngine::handleDataRxSync,
+            Qt::QueuedConnection
+        );
     }
     else if (m_deviceSampleMIMO->getMIMOType() == DeviceSampleMIMO::MIMOAsynchronous) // asynchronous FIFOs
     {
-        for (unsigned int isink = 0; isink < m_deviceSampleMIMO->getNbSinkFifos(); isink++)
+        for (unsigned int stream = 0; stream < m_deviceSampleMIMO->getNbSourceStreams(); stream++)
         {
             qDebug("DSPDeviceMIMOEngine::handleSetMIMO: asynchronous sources set %s channel %u",
-                qPrintable(mimo->getDeviceDescription()), isink);
+                qPrintable(mimo->getDeviceDescription()), stream);
             QObject::connect(
-                m_deviceSampleMIMO->getSampleSinkFifo(isink),
-                &SampleSinkFifo::dataReady,
+                m_deviceSampleMIMO->getSampleMIFifo(),
+                &SampleMIFifo::dataAsyncReady,
                 this,
-                [=](){ this->handleDataRxAsync(isink); },
+                &DSPDeviceMIMOEngine::handleDataRxAsync,
                 Qt::QueuedConnection
             );
+            // QObject::connect(
+            //     m_deviceSampleMIMO->getSampleSinkFifo(stream),
+            //     &SampleSinkFifo::dataReady,
+            //     this,
+            //     [=](){ this->handleDataRxAsync(stream); },
+            //     Qt::QueuedConnection
+            // );
         }
     }
 

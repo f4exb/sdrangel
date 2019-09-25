@@ -50,8 +50,7 @@ TestMI::TestMI(DeviceAPI *deviceAPI) :
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
     m_mimoType = MIMOAsynchronous;
-    m_sampleSinkFifos.push_back(SampleSinkFifo(96000 * 4));
-    m_sampleSinkFifos.push_back(SampleSinkFifo(96000 * 4));
+    m_sampleMIFifo.init(2, 96000 * 4);
     //m_sampleSinkVectors.resize(2);
     m_deviceAPI->setNbSourceStreams(2);
     m_networkManager = new QNetworkAccessManager();
@@ -104,11 +103,11 @@ bool TestMI::start()
         stop();
     }
 
-    m_testSourceThreads.push_back(new TestMIThread(&m_sampleSinkFifos[0], 0));
+    m_testSourceThreads.push_back(new TestMIThread(&m_sampleMIFifo, 0));
 	m_testSourceThreads.back()->setSamplerate(m_settings.m_streams[0].m_sampleRate);
 	m_testSourceThreads.back()->startStop(true);
 
-    m_testSourceThreads.push_back(new TestMIThread(&m_sampleSinkFifos[1], 1));
+    m_testSourceThreads.push_back(new TestMIThread(&m_sampleMIFifo, 1));
 	m_testSourceThreads.back()->setSamplerate(m_settings.m_streams[1].m_sampleRate);
 	m_testSourceThreads.back()->startStop(true);
 

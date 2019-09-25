@@ -78,9 +78,6 @@ void SampleMIFifo::writeSync(const std::vector<SampleVector::const_iterator>& vb
         }
     }
 
-    m_head = m_vHead[0];
-    m_fill = m_vFill[0];
-
     emit dataSyncReady();
 }
 
@@ -138,34 +135,38 @@ void SampleMIFifo::readSync(
     }
 }
 
-void SampleMIFifo::readSync(int& part1Begin, int& part1End, int& part2Begin, int& part2End)
+void SampleMIFifo::readSync(
+        std::vector<int>& vPart1Begin, std::vector<int>& vPart1End,
+        std::vector<int>& vPart2Begin, std::vector<int>& vPart2End
+)
 {
     if (m_data.size() == 0) {
         return;
     }
 
     QMutexLocker mutexLocker(&m_mutex);
+    std::vector<SampleVector>::iterator dataIt = m_data.begin();
+    int stream = 0;
 
-    if (m_head < m_fill)
+    for (; dataIt != m_data.end(); ++dataIt, ++stream)
     {
-        part1Begin = m_head;
-        part1End = m_fill;
-        part2Begin = 0;
-        part2End = 0;
-    }
-    else
-    {
-        part1Begin = m_head;
-        part2End = m_data[0].size();
-        part2Begin = 0;
-        part2End = m_fill;
-    }
+        if (m_vHead[stream] < m_vFill[stream])
+        {
+            vPart1Begin.push_back(m_vHead[stream]);
+            vPart1End.push_back(m_vFill[stream]);
+            vPart2Begin.push_back(0);
+            vPart2End.push_back(0);
+        }
+        else
+        {
+            vPart1Begin.push_back(m_vHead[stream]);
+            vPart1End.push_back(dataIt->size());
+            vPart2Begin.push_back(0);
+            vPart2End.push_back(m_vFill[stream]);
+        }
 
-    for (unsigned int stream = 0; stream < m_data.size(); stream++) {
         m_vHead[stream] = m_vFill[stream];
     }
-
-    m_head = m_fill;
 }
 
 void SampleMIFifo::readAsync(unsigned int stream,
@@ -193,4 +194,31 @@ void SampleMIFifo::readAsync(unsigned int stream,
 
         m_vHead[stream] = m_vFill[stream];
     }
+}
+
+bool SampleMIFifo::dataAvailable()
+{
+    if (m_data.size() == 0) {
+        return false;
+    }
+
+    QMutexLocker mutexLocker(&m_mutex);
+    bool value;
+    value = m_vHead[0] != m_vFill[0];
+
+    return value;
+}
+
+bool SampleMIFifo::dataAvailable(unsigned int stream)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+    bool value;
+
+    if (stream < m_data.size()) {
+        value = m_vHead[stream] != m_vFill[stream];
+    } else {
+        value = false;
+    }
+
+    return value;
 }

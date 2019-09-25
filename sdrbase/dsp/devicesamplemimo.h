@@ -22,8 +22,7 @@
 #include <vector>
 
 #include "samplesourcefifo.h"
-#include "samplesinkfifo.h"
-#include "samplesinkvector.h"
+#include "samplemififo.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "export.h"
@@ -134,14 +133,13 @@ public:
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
 
     unsigned int getNbSourceFifos() const { return m_sampleSourceFifos.size(); } //!< Get the number of Tx FIFOs
-    unsigned int getNbSinkFifos() const { return m_sampleSinkFifos.size(); }     //!< Get the number of Rx FIFOs
+    unsigned int getNbSinkFifos() const { return m_sampleMIFifo.getNbStreams(); }     //!< Get the number of Rx FIFOs
 	SampleSourceFifo* getSampleSourceFifo(unsigned int index); //!< Get Tx FIFO at index
-    SampleSinkFifo* getSampleSinkFifo(unsigned int index);   //!< Get Rx FIFO at index
-    SampleSinkVector* getSampleSinkVector(unsigned int index); //!< Get Rx vector buffer at index (TODO: remove if not used)
+    SampleMIFifo* getSampleMIFifo() { return &m_sampleMIFifo; }
     // Streams and FIFOs are in opposed source/sink type whick makes it confusing when stream direction is involved:
     //   Rx: source stream -> sink FIFO    -> channel sinks
     //   Tx: sink stream   <- source FIFO  <- channel sources
-    unsigned int getNbSourceStreams() const { return m_sampleSinkFifos.size(); } //!< Commodity function same as getNbSinkFifos (Rx or source streams)
+    unsigned int getNbSourceStreams() const { return m_sampleMIFifo.getNbStreams(); } //!< Commodity function same as getNbSinkFifos (Rx or source streams)
     unsigned int getNbSinkStreams() const { return m_sampleSourceFifos.size(); } //!< Commodity function same as getNbSourceFifos (Tx or sink streams)
 
 protected slots:
@@ -150,8 +148,7 @@ protected slots:
 protected:
     MIMOType m_mimoType;
     std::vector<SampleSourceFifo> m_sampleSourceFifos; //!< Tx FIFOs
-    std::vector<SampleSinkFifo> m_sampleSinkFifos;   //!< Rx FIFOs
-    std::vector<SampleSinkVector> m_sampleSinkVectors; //!< Rx vector buffer (TODO: remove if not used)
+    SampleMIFifo m_sampleMIFifo;      //!< Multiple Input FIFO
 	MessageQueue m_inputMessageQueue; //!< Input queue to the sink
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 };

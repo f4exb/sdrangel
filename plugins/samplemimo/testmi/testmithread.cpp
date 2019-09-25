@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "dsp/samplesinkfifo.h"
+#include "dsp/samplemififo.h"
 
 #include "testmithread.h"
 
@@ -28,7 +28,7 @@
 
 MESSAGE_CLASS_DEFINITION(TestMIThread::MsgStartStop, Message)
 
-TestMIThread::TestMIThread(SampleSinkFifo* sampleFifo, int streamIndex, QObject* parent) :
+TestMIThread::TestMIThread(SampleMIFifo* sampleFifo, int streamIndex, QObject* parent) :
 	QThread(parent),
 	m_running(false),
     m_buf(0),
@@ -386,7 +386,7 @@ void TestMIThread::callback(const qint16* buf, qint32 len)
         break;
 	}
 
-	m_sampleFifo->write(m_convertBuffer.begin(), it);
+	m_sampleFifo->writeAsync(m_streamIndex, m_convertBuffer.begin(), it - m_convertBuffer.begin());
 }
 
 void TestMIThread::tick()
