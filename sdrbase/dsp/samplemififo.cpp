@@ -56,24 +56,21 @@ void SampleMIFifo::writeSync(const std::vector<SampleVector::const_iterator>& vb
     }
 
     QMutexLocker mutexLocker(&m_mutex);
-    std::vector<SampleVector>::iterator dataIt = m_data.begin();
-    std::vector<SampleVector::const_iterator>::const_iterator vbeginIt = vbegin.begin();
-    int stream = 0;
 
-    for (; dataIt != m_data.end(); ++dataIt, ++vbeginIt, ++stream)
+    for (unsigned int stream = 0; stream < m_data.size(); stream++)
     {
-        int spaceLeft = dataIt->size() - m_vFill[stream];
+        int spaceLeft = m_data[stream].size() - m_vFill[stream];
 
         if (size < spaceLeft)
         {
-            std::copy(*vbeginIt, *vbeginIt + size, dataIt->begin() + m_vFill[stream]);
+            std::copy(vbegin[stream], vbegin[stream] + size, m_data[stream].begin() + m_vFill[stream]);
             m_vFill[stream] += size;
         }
         else
         {
             int remaining = size - spaceLeft;
-            std::copy(*vbeginIt, *vbeginIt + spaceLeft, dataIt->begin() + m_vFill[stream]);
-            std::copy(*vbeginIt + spaceLeft, *vbeginIt + size,   dataIt->begin());
+            std::copy(vbegin[stream], vbegin[stream] + spaceLeft, m_data[stream].begin() + m_vFill[stream]);
+            std::copy(vbegin[stream] + spaceLeft, vbegin[stream] + size, m_data[stream].begin());
             m_vFill[stream] = remaining;
         }
     }
