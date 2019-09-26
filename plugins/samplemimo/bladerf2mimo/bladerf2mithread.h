@@ -29,7 +29,7 @@
 
 #include "dsp/decimators.h"
 
-class SampleSinkFifo;
+class SampleMIFifo;
 
 class BladeRF2MIThread : public QThread {
     Q_OBJECT
@@ -45,8 +45,8 @@ public:
     unsigned int getLog2Decimation() const;
     void setFcPos(int fcPos);
     int getFcPos() const;
-    void setFifo(unsigned int channel, SampleSinkFifo *sampleFifo);
-    SampleSinkFifo *getFifo(unsigned int channel);
+    void setFifo(SampleMIFifo *sampleFifo) { m_sampleFifo = sampleFifo; }
+    SampleMIFifo *getFifo() { return m_sampleFifo; }
 
 private:
     QMutex m_startWaitMutex;
@@ -56,7 +56,7 @@ private:
 
     qint16 *m_buf;
 	SampleVector m_convertBuffer[2];
-    SampleSinkFifo* m_sampleFifo[2];
+    SampleMIFifo* m_sampleFifo;
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators[2];
     unsigned int m_log2Decim;
     int m_fcPos;
