@@ -16,14 +16,15 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "bladerf2/devicebladerf2shared.h"
-#include "dsp/samplesinkfifo.h"
+#include "dsp/samplemififo.h"
 
 #include "bladerf2mithread.h"
 
 BladeRF2MIThread::BladeRF2MIThread(struct bladerf* dev, QObject* parent) :
     QThread(parent),
     m_running(false),
-    m_dev(dev)
+    m_dev(dev),
+    m_sampleFifo(nullptr)
 {
     qDebug("BladeRF2MIThread::BladeRF2MIThread");
     m_buf = new qint16[2*DeviceBladeRF2::blockSize*2];
@@ -82,22 +83,6 @@ int BladeRF2MIThread::getFcPos() const
     return m_fcPos;
 }
 
-void BladeRF2MIThread::setFifo(unsigned int channel, SampleSinkFifo *sampleFifo)
-{
-    if (channel < 2) {
-        m_sampleFifo[channel] = sampleFifo;
-    }
-}
-
-SampleSinkFifo *BladeRF2MIThread::getFifo(unsigned int channel)
-{
-    if (channel < 2) {
-        return m_sampleFifo[channel];
-    } else {
-        return nullptr;
-    }
-}
-
 void BladeRF2MIThread::run()
 {
     int res;
@@ -143,12 +128,15 @@ void BladeRF2MIThread::callback(const qint16* buf, qint32 samplesPerChannel)
         return;
     }
 
+    std::vector<SampleVector::const_iterator> vbegin;
+
     for (unsigned int channel = 0; channel < 2; channel++)
     {
-        if (m_sampleFifo[channel]) {
-            channelCallback(&buf[2*samplesPerChannel*channel], 2*samplesPerChannel, channel);
-        }
+        channelCallback(&buf[2*samplesPerChannel*channel], 2*samplesPerChannel, channel);
+        vbegin.push_back(m_convertBuffer[channel].begin());
     }
+
+    m_sampleFifo->writeSync(vbegin, samplesPerChannel/(1<<m_log2Decim));
 }
 
 void BladeRF2MIThread::channelCallback(const qint16* buf, qint32 len, int channel)
@@ -240,6 +228,4 @@ void BladeRF2MIThread::channelCallback(const qint16* buf, qint32 len, int channe
             }
         }
     }
-
-    m_sampleFifo[channel]->write(m_convertBuffer[channel].begin(), it);
 }

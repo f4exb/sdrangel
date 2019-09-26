@@ -73,8 +73,7 @@ BladeRF2MIMO::BladeRF2MIMO(DeviceAPI *deviceAPI) :
     }
 
     m_mimoType = MIMOHalfSynchronous;
-    m_sampleSinkFifos.push_back(SampleSinkFifo(96000 * 4));
-    m_sampleSinkFifos.push_back(SampleSinkFifo(96000 * 4));
+    m_sampleMIFifo.init(2, 96000 * 4);
     m_deviceAPI->setNbSourceStreams(2);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -177,8 +176,7 @@ void BladeRF2MIMO::startRx()
     }
 
     m_sourceThread = new BladeRF2MIThread(m_dev->getDev());
-    m_sourceThread->setFifo(0, &m_sampleSinkFifos[0]);
-    m_sourceThread->setFifo(1, &m_sampleSinkFifos[1]);
+    m_sourceThread->setFifo(&m_sampleMIFifo);
     m_sourceThread->setFcPos(m_settings.m_fcPos);
     m_sourceThread->setLog2Decimation(m_settings.m_log2Decim);
 
