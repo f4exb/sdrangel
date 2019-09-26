@@ -283,6 +283,10 @@ void DSPDeviceMIMOEngine::workSampleSinkFifos()
 
     while (sampleFifo->dataAvailable())
     {
+        vPart1Begin.clear();
+        vPart1End.clear();
+        vPart2Begin.clear();
+        vPart2End.clear();
         sampleFifo->readSync(vPart1Begin, vPart1End, vPart2Begin, vPart2End);
 
         for (unsigned int stream = 0; stream < data.size(); stream++)
@@ -294,7 +298,7 @@ void DSPDeviceMIMOEngine::workSampleSinkFifos()
             }
 
             if (vPart2Begin[stream] != vPart2End[stream]) {
-                m_vectorBuffer.write(begin + vPart2Begin[stream], begin + vPart2End[stream], false);
+                m_vectorBuffer.write(begin + vPart2Begin[stream], begin + vPart2End[stream]);
             }
 
             SampleVector::iterator vbegin, vend;
