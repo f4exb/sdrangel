@@ -56,3 +56,130 @@ In this example we have a Rx device on index 0 and a Tx device on index 1. All s
   - Stop the running device (Rx or Tx) this will switch over automatically to the other
 
 Important: you should initiate switch over by stopping the active device and not by starting the other.
+
+<h2>config.py</h2>
+
+Sends a sequence of commands recorded in a JSON file which is in the form of a list of commands.
+
+Each command is a JSON document with the following keys:
+
+  - `endpoint`: URL suffix (API function) - mandatory
+  - `method`: HTTP method (GET, PATCH, POST, PUT, DELETE) - mandatory
+  - `params`: pairs of argument and values - optional
+  - `payload`: request body in JSON format - optional
+  - `msg`: descriptive message for console display - optional
+  - `delay`: delay in milliseconds after command - optional
+
+Example of a JSON file (delay is an example you normally do not need it):
+
+```json
+[
+    {
+        "endpoint": "/deviceset/0/device",
+        "method": "PUT",
+        "payload": {
+            "hwType": "HackRF"
+        },
+        "msg": "Set HackRF on Rx 0"
+    },
+    {
+        "endpoint": "/deviceset/0/device/settings",
+        "method": "PUT",
+        "payload": {
+            "deviceHwType": "HackRF",
+            "hackRFInputSettings": {
+              "LOppmTenths": 0,
+              "bandwidth": 1750000,
+              "biasT": 0,
+              "centerFrequency": 433800000,
+              "dcBlock": 1,
+              "devSampleRate": 1536000,
+              "fcPos": 2,
+              "iqCorrection": 0,
+              "lnaExt": 1,
+              "lnaGain": 32,
+              "log2Decim": 2,
+              "reverseAPIAddress": "127.0.0.1",
+              "reverseAPIDeviceIndex": 0,
+              "reverseAPIPort": 8888,
+              "useReverseAPI": 0,
+              "vgaGain": 24
+            },
+            "direction": 0
+        },
+        "msg": "Setup HackRF on Rx 0"
+    },
+    {
+        "endpoint": "/deviceset/0/channel",
+        "method": "POST",
+        "payload": {
+            "channelType": "RemoteSink",
+            "direction": 0
+        },
+        "msg": "Add a remote sink channel"
+    },
+    {
+        "endpoint": "/deviceset/0/channel/0/settings",
+        "method": "PUT",
+        "payload": {
+            "RemoteSinkSettings": {
+              "dataAddress": "192.168.1.5",
+              "dataPort": 9094,
+              "filterChainHash": 0,
+              "log2Decim": 3,
+              "nbFECBlocks": 8,
+              "reverseAPIAddress": "127.0.0.1",
+              "reverseAPIChannelIndex": 0,
+              "reverseAPIDeviceIndex": 0,
+              "reverseAPIPort": 8888,
+              "rgbColor": -7601148,
+              "title": "Channel 0",
+              "txDelay": 0,
+              "useReverseAPI": 0
+            },
+            "channelType": "RemoteSink",
+            "direction": 0
+        },
+        "msg": "Setup remote sink on channel 0",
+        "delay": 1000
+    },
+    {
+        "endpoint": "/deviceset/0/device/run",
+        "method": "POST",
+        "msg": "Start device on deviceset R0"
+    }
+]
+```
+If you have presets defined you may also use presets instead of having to set up the device and channels. In this case you only "PUT" the right device and apply the preset like this:
+
+```json
+[
+    {
+        "endpoint": "/deviceset/0/device",
+        "method": "PUT",
+        "payload": {
+            "hwType": "RTLSDR"
+        },
+        "msg": "setup RTLSDR on Rx 0"
+    },
+    {
+        "endpoint": "/preset",
+        "method": "PATCH",
+        "payload": {
+            "deviceSetIndex": 0,
+            "preset": {
+                "groupName": "QO100",
+                "centerFrequency": 489675000,
+                "type": "R",
+                "name": "Narrowband master"
+            }
+        },
+        "msg": "load preset on Rx 0"
+    },
+    {
+        "endpoint": "/deviceset/0/device/run",
+        "method": "POST",
+        "msg": "Start device on deviceset R0"
+    }
+]
+```
