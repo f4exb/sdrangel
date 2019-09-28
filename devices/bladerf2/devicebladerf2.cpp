@@ -505,13 +505,13 @@ int DeviceBladeRF2::getGainModesRx(const bladerf_gain_modes **modes)
 {
     if (m_dev)
     {
-        int n = bladerf_get_gain_modes(m_dev, BLADERF_CHANNEL_RX(0), 0);
+        // int n = bladerf_get_gain_modes(m_dev, BLADERF_CHANNEL_RX(0), 0); // does not work anymore with libbladerf 2.2.1
 
-        if (n < 0)
-        {
-            qCritical("DeviceBladeRF2::getGainModesRx: Failed to get the number of Rx gain modes: %s", bladerf_strerror(n));
-            return 0;
-        }
+        // if (n < 0)
+        // {
+        //     qCritical("DeviceBladeRF2::getGainModesRx: Failed to get the number of Rx gain modes: %s", bladerf_strerror(n));
+        //     return 0;
+        // }
 
         int status = bladerf_get_gain_modes(m_dev, BLADERF_CHANNEL_RX(0), modes);
 
@@ -522,7 +522,7 @@ int DeviceBladeRF2::getGainModesRx(const bladerf_gain_modes **modes)
         }
         else
         {
-            return n;
+            return status; // This is the number of gain modes (libbladerf 2.2.1)
         }
     }
     else
