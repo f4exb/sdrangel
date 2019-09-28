@@ -26,8 +26,24 @@ Sample sAdd(const Sample& a, const Sample& b) { //!< Sample addition
 
 Sample sMulConj(const Sample& a, const Sample& b) { //!< Sample multiply with conjugate
     Sample s;
-    s.setReal((a.real()*b.real() + a.imag()*b.imag()) / (1<<(SDR_RX_SAMP_SZ - 16 + 1)));
-    s.setImag((a.imag()*b.real() - a.real()*b.imag()) / (1<<(SDR_RX_SAMP_SZ - 16 + 1)));
+    // Integer processing
+    int64_t ax = a.real();
+    int64_t ay = a.imag();
+    int64_t bx = b.real();
+    int64_t by = b.imag();
+    int64_t x = ax*bx + ay*by;
+    int64_t y = ay*bx - ax*by;
+    s.setReal(x>>SDR_RX_SAMP_SZ);
+    s.setImag(y>>SDR_RX_SAMP_SZ);
+    // Floating point processing (in practice there is no significant performance difference)
+    // float ax = a.real() / SDR_RX_SCALEF;
+    // float ay = a.imag() / SDR_RX_SCALEF;
+    // float bx = b.real() / SDR_RX_SCALEF;
+    // float by = b.imag() / SDR_RX_SCALEF;
+    // float x = ax*bx + ay*by;
+    // float y = ay*bx - ax*by;
+    // s.setReal(x*SDR_RX_SCALEF);
+    // s.setImag(y*SDR_RX_SCALEF);
     return s;
 }
 

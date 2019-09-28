@@ -113,7 +113,6 @@ private:
     bool handleMessage(const Message& cmd);
 
     InterferometerCorrelator m_correlator;
-    //SampleSinkVector m_sinkBuffers[2];
     SampleSinkFifo m_sinkFifos[2];
     InterferometerStreamSink m_sinks[2];
     DownChannelizer *m_channelizers[2];
@@ -124,7 +123,6 @@ private:
     int m_count0, m_count1;
 
 private slots:
-	//void handleSinkBuffer(unsigned int sinkIndex); //!< Handle data when samples have to be processed
     void handleInputMessages();
     void handleSinkFifo(unsigned int sinkIndex); //!< Handle data when samples have to be processed
 };
