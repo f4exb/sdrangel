@@ -90,7 +90,7 @@ void BladeRF2MIThread::run()
     m_running = true;
     m_startWaiter.wakeAll();
 
-    int status = bladerf_sync_config(m_dev, BLADERF_RX_X2, BLADERF_FORMAT_SC16_Q11, 64, 8192, 32, 10000);
+    int status = bladerf_sync_config(m_dev, BLADERF_RX_X2, BLADERF_FORMAT_SC16_Q11, 64, DeviceBladeRF2::blockSize, 32, 1500);
 
     if (status < 0)
     {
