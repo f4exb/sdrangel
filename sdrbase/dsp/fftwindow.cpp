@@ -57,18 +57,36 @@ void FFTWindow::create(Function function, int n)
 
 void FFTWindow::apply(const std::vector<Real>& in, std::vector<Real>* out)
 {
-	for(size_t i = 0; i < m_window.size(); i++)
+	for(size_t i = 0; i < m_window.size(); i++) {
 		(*out)[i] = in[i] * m_window[i];
+    }
 }
 
 void FFTWindow::apply(const std::vector<Complex>& in, std::vector<Complex>* out)
 {
-	for(size_t i = 0; i < m_window.size(); i++)
+	for(size_t i = 0; i < m_window.size(); i++) {
 		(*out)[i] = in[i] * m_window[i];
+    }
+}
+
+void FFTWindow::apply(std::vector<Complex>& in)
+{
+	for(size_t i = 0; i < m_window.size(); i++) {
+		in[i] *= m_window[i];
+    }
 }
 
 void FFTWindow::apply(const Complex* in, Complex* out)
 {
-	for(size_t i = 0; i < m_window.size(); i++)
+	for(size_t i = 0; i < m_window.size(); i++) {
 		out[i] = in[i] * m_window[i];
+    }
 }
+
+void FFTWindow::apply(Complex* in)
+{
+	for(size_t i = 0; i < m_window.size(); i++) {
+		in[i] *= m_window[i];
+    }
+}
+

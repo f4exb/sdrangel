@@ -42,7 +42,9 @@ public:
 	void create(Function function, int n);
 	void apply(const std::vector<Real>& in, std::vector<Real>* out);
 	void apply(const std::vector<Complex>& in, std::vector<Complex>* out);
+    void apply(std::vector<Complex>& in);
 	void apply(const Complex* in, Complex* out);
+    void apply(Complex* in);
 
 private:
 	std::vector<float> m_window;
