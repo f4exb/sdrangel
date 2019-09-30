@@ -187,6 +187,51 @@
          </widget>
         </item>
         <item>
+         <widget class="QLabel" name="phaseCorrectionLabel">
+          <property name="text">
+           <string>Ph</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="phaseCorrection">
+          <property name="toolTip">
+           <string>Phase correction on stream 1</string>
+          </property>
+          <property name="minimum">
+           <number>-180</number>
+          </property>
+          <property name="maximum">
+           <number>180</number>
+          </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="phaseCorrectionText">
+          <property name="minimumSize">
+           <size>
+            <width>28</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Phase correction on stream 1 in degrees</string>
+          </property>
+          <property name="text">
+           <string>-180</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="horizontalSpacer_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>

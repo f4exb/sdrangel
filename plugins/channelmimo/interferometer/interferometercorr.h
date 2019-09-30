@@ -44,6 +44,7 @@ public:
         int size1
     );
     int getFullFFTSize() const { return 2*m_fftSize; }
+    void setPhase(int phase);
 
     SampleVector m_scorr; //!< raw correlation result (spectrum) - Sample vector expected
     SampleVector m_tcorr; //!< correlation result (time or spectrum inverse FFT) - Sample vector expected
@@ -76,8 +77,14 @@ private:
     FFTEngine *m_invFFT;             //!< Inverse FFT engine
     FFTWindow m_window;              //!< FFT window
     std::complex<float> *m_dataj;    //!< conjuate of FFT transform
+    SampleVector m_data0w;           //!< windowed data 0
+    SampleVector m_data1w;           //!< windowed data 1
+    SampleVector m_data1p;           //!< data1 with phase correction
     int m_scorrSize;                 //!< spectrum correlations vector size
     int m_tcorrSize;                 //!< time correlations vector size
+    int m_phase;   //!< phase correction
+    int64_t m_sin; //!< scaled sine of phase correction
+    int64_t m_cos; //!< scaled cosine of phase correction
 };
 
 #endif // INCLUDE_INTERFEROMETERCORR_H

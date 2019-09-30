@@ -91,6 +91,7 @@ private slots:
     void handleSourceMessages();
     void on_decimationFactor_currentIndexChanged(int index);
     void on_position_valueChanged(int value);
+    void on_phaseCorrection_valueChanged(int value);
     void on_correlationType_currentIndexChanged(int index);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);

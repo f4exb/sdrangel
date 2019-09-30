@@ -122,6 +122,7 @@ void Interferometer::applySettings(const InterferometerSettings& settings, bool 
         << "m_filterChainHash: " << settings.m_filterChainHash
         << "m_log2Decim: " << settings.m_log2Decim
         << "m_correlationType: " << settings.m_correlationType
+        << "m_phase: " << settings.m_phase
         << "m_useReverseAPI: " << settings.m_useReverseAPI
         << "m_reverseAPIAddress: " << settings.m_reverseAPIAddress
         << "m_reverseAPIPort: " << settings.m_reverseAPIPort
@@ -142,6 +143,10 @@ void Interferometer::applySettings(const InterferometerSettings& settings, bool 
         InterferometerSink::MsgConfigureCorrelation *msg = InterferometerSink::MsgConfigureCorrelation::create(
             settings.m_correlationType);
         m_sink->getInputMessageQueue()->push(msg);
+    }
+
+    if ((m_settings.m_phase != settings.m_phase) || force) {
+        m_sink->setPhase(settings.m_phase);
     }
 
     m_settings = settings;
