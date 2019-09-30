@@ -104,6 +104,7 @@ public:
 
     void setSpectrumSink(BasebandSampleSink *spectrumSink) { m_spectrumSink = spectrumSink; }
     void setScopeSink(BasebandSampleSink *scopeSink) { m_scopeSink = scopeSink; }
+    void setPhase(int phase) { m_correlator.setPhase(phase); }
 
 	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int streamIndex);
 

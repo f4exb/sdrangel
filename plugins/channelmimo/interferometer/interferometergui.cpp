@@ -210,6 +210,8 @@ void InterferometerGUI::displaySettings()
     blockApplySettings(true);
     ui->decimationFactor->setCurrentIndex(m_settings.m_log2Decim);
     applyDecimation();
+    ui->phaseCorrection->setValue(m_settings.m_phase);
+    ui->phaseCorrectionText->setText(tr("%1").arg(m_settings.m_phase));
     blockApplySettings(false);
 }
 
@@ -296,6 +298,13 @@ void InterferometerGUI::on_position_valueChanged(int value)
 {
     m_settings.m_filterChainHash = value;
     applyPosition();
+}
+
+void InterferometerGUI::on_phaseCorrection_valueChanged(int value)
+{
+    m_settings.m_phase = value;
+    ui->phaseCorrectionText->setText(tr("%1").arg(value));
+    applySettings();
 }
 
 void InterferometerGUI::on_correlationType_currentIndexChanged(int index)
