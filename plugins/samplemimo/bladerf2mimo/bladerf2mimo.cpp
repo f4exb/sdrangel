@@ -173,6 +173,7 @@ void BladeRF2MIMO::startRx()
     }
 
     m_sourceThread = new BladeRF2MIThread(m_dev->getDev());
+    m_sampleMIFifo.reset();
     m_sourceThread->setFifo(&m_sampleMIFifo);
     m_sourceThread->setFcPos(m_settings.m_fcPos);
     m_sourceThread->setLog2Decimation(m_settings.m_log2Decim);
