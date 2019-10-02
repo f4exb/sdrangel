@@ -83,19 +83,13 @@ void InterferometerSink::handleSinkFifo(unsigned int sinkIndex)
 
         if (part1begin != part1end) { // first part of FIFO data
             //qDebug("InterferometerSink::handleSinkFifo: part1-stream: %u count: %u", sinkIndex, count);
-            m_vectorBuffer.write(part1begin, part1end, false);
-            //processFifo(part1begin, part1end, sinkIndex);
+            processFifo(part1begin, part1end, sinkIndex);
         }
 
         if (part2begin != part2end) { // second part of FIFO data (used when block wraps around)
             //qDebug("InterferometerSink::handleSinkFifo: part2-stream: %u count: %u", sinkIndex, count);
-            m_vectorBuffer.append(part2begin, part2end);
-            //processFifo(part2begin, part2end, sinkIndex);
+            processFifo(part2begin, part2end, sinkIndex);
         }
-
-        SampleVector::iterator vbegin, vend;
-        m_vectorBuffer.read(vbegin, vend);
-        processFifo(vbegin, vend, sinkIndex);
 
         m_sinkFifos[sinkIndex].readCommit((unsigned int) count); // adjust FIFO pointers
         samplesDone += count;
@@ -163,8 +157,7 @@ void InterferometerSink::handleInputMessages()
 
 	while ((message = m_inputMessageQueue.pop()) != 0)
 	{
-		if (handleMessage(*message))
-		{
+		if (handleMessage(*message)) {
 			delete message;
 		}
 	}
@@ -225,6 +218,7 @@ bool InterferometerSink::handleMessage(const Message& cmd)
     }
     else
     {
+        qDebug("InterferometerSink::handleMessage: unhandled: %s", cmd.getIdentifier());
         return false;
     }
 }
