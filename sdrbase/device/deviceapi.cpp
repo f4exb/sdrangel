@@ -58,34 +58,6 @@ DeviceAPI::~DeviceAPI()
 {
 }
 
-void DeviceAPI::addSourceStream()
-{
-    if (m_deviceMIMOEngine) {
-        m_deviceMIMOEngine->addSourceStream();
-    }
-}
-
-void DeviceAPI::removeLastSourceStream()
-{
-    if (m_deviceMIMOEngine) {
-        m_deviceMIMOEngine->removeLastSourceStream();
-    }
-}
-
-void DeviceAPI::addSinkStream()
-{
-    if (m_deviceMIMOEngine) {
-        m_deviceMIMOEngine->addSinkStream();
-    }
-}
-
-void DeviceAPI::removeLastSinkStream()
-{
-    if (m_deviceMIMOEngine) {
-        m_deviceMIMOEngine->removeLastSinkStream();
-    }
-}
-
 void DeviceAPI::addAncillarySink(BasebandSampleSink *sink, unsigned int index)
 {
     if (m_deviceSourceEngine) {

@@ -63,22 +63,6 @@ public:
         unsigned int m_index;
     };
 
-    class AddSourceStream : public Message {
-        MESSAGE_CLASS_DECLARATION
-    };
-
-    class RemoveLastSourceStream : public Message {
-        MESSAGE_CLASS_DECLARATION
-    };
-
-    class AddSinkStream : public Message {
-        MESSAGE_CLASS_DECLARATION
-    };
-
-    class RemoveLastSinkStream : public Message {
-        MESSAGE_CLASS_DECLARATION
-    };
-
     class RemoveThreadedBasebandSampleSource : public Message {
 	    MESSAGE_CLASS_DECLARATION
 
@@ -272,11 +256,6 @@ public:
 	void setMIMOSequence(int sequence); //!< Set the sample MIMO sequence in type
     uint getUID() const { return m_uid; }
 
-    void addSourceStream();
-    void removeLastSourceStream();
-    void addSinkStream();
-    void removeLastSinkStream();
-
 	void addChannelSource(ThreadedBasebandSampleSource* source, int index = 0);    //!< Add a channel source that will run on its own thread
 	void removeChannelSource(ThreadedBasebandSampleSource* source, int index = 0); //!< Remove a channel source that runs on its own thread
 	void addChannelSink(ThreadedBasebandSampleSink* sink, int index = 0);          //!< Add a channel sink that will run on its own thread
@@ -383,7 +362,7 @@ private:
   	void run();
     void workSampleSinkFifos(); //!< transfer samples of all sinks (sync mode)
     void workSampleSinkFifo(unsigned int stream); //!< transfer samples of one sink (async mode)
-    void workSamples(const SampleVector::iterator& vbegin, const SampleVector::iterator& vend, unsigned int sinkIndex);
+    void workSamples(const SampleVector::const_iterator& vbegin, const SampleVector::const_iterator& vend, unsigned int sinkIndex);
 
 	State gotoIdle();     //!< Go to the idle state
 	State gotoInit();     //!< Go to the acquisition init state from idle

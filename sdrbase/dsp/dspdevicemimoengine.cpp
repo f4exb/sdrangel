@@ -27,10 +27,6 @@
 #include "dspdevicemimoengine.h"
 
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::SetSampleMIMO, Message)
-MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddSourceStream, Message)
-MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::RemoveLastSourceStream, Message)
-MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddSinkStream, Message)
-MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::RemoveLastSinkStream, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddThreadedBasebandSampleSource, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::RemoveThreadedBasebandSampleSource, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddThreadedBasebandSampleSink, Message)
@@ -122,34 +118,6 @@ void DSPDeviceMIMOEngine::setMIMOSequence(int sequence)
 {
 	qDebug("DSPDeviceMIMOEngine::setSinkSequence: seq: %d", sequence);
 	m_sampleMIMOSequence = sequence;
-}
-
-void DSPDeviceMIMOEngine::addSourceStream()
-{
-	qDebug("DSPDeviceMIMOEngine::addSourceStream");
-    AddSourceStream cmd;
-    m_syncMessenger.sendWait(cmd);
-}
-
-void DSPDeviceMIMOEngine::removeLastSourceStream()
-{
-	qDebug("DSPDeviceMIMOEngine::removeLastSourceStream");
-    RemoveLastSourceStream cmd;
-    m_syncMessenger.sendWait(cmd);
-}
-
-void DSPDeviceMIMOEngine::addSinkStream()
-{
-	qDebug("DSPDeviceMIMOEngine::addSinkStream");
-    AddSinkStream cmd;
-    m_syncMessenger.sendWait(cmd);
-}
-
-void DSPDeviceMIMOEngine::removeLastSinkStream()
-{
-	qDebug("DSPDeviceMIMOEngine::removeLastSinkStream");
-    RemoveLastSourceStream cmd;
-    m_syncMessenger.sendWait(cmd);
 }
 
 void DSPDeviceMIMOEngine::addChannelSource(ThreadedBasebandSampleSource* source, int index)
@@ -275,36 +243,34 @@ void DSPDeviceMIMOEngine::workSampleSinkFifos()
         return;
     }
 
-    std::vector<int> vPart1Begin;
-    std::vector<int> vPart1End;
-    std::vector<int> vPart2Begin;
-    std::vector<int> vPart2End;
+    int iPart1Begin;
+    int iPart1End;
+    int iPart2Begin;
+    int iPart2End;
     std::vector<SampleVector> data = sampleFifo->getData();
 
-    while (sampleFifo->dataAvailable())
+    while (sampleFifo->fillSync() > 0)
     {
-        vPart1Begin.clear();
-        vPart1End.clear();
-        vPart2Begin.clear();
-        vPart2End.clear();
-        sampleFifo->readSync(vPart1Begin, vPart1End, vPart2Begin, vPart2End);
+        unsigned int count = sampleFifo->readSync(sampleFifo->fillSync(), iPart1Begin, iPart1End, iPart2Begin, iPart2End);
 
         for (unsigned int stream = 0; stream < data.size(); stream++)
         {
             SampleVector::const_iterator begin = data[stream].begin();
 
-            if (vPart1Begin[stream] != vPart1End[stream]) {
-                m_vectorBuffer.write(begin + vPart1Begin[stream], begin + vPart1End[stream], false);
+            if (iPart1Begin != iPart1End) {
+                m_vectorBuffer.write(data[stream].begin() + iPart1Begin, data[stream].begin() + iPart1End, false);
             }
 
-            if (vPart2Begin[stream] != vPart2End[stream]) {
-                m_vectorBuffer.write(begin + vPart2Begin[stream], begin + vPart2End[stream]);
+            if (iPart2Begin != iPart2End) {
+                m_vectorBuffer.write(data[stream].begin() + iPart2Begin, data[stream].begin() + iPart2End);
             }
 
             SampleVector::iterator vbegin, vend;
             m_vectorBuffer.read(vbegin, vend);
             workSamples(vbegin, vend, stream);
         }
+
+        sampleFifo->readCommitSync(count);
     }
 }
 
@@ -321,9 +287,9 @@ void DSPDeviceMIMOEngine::workSampleSinkFifo(unsigned int stream)
     SampleVector::const_iterator part2begin;
     SampleVector::const_iterator part2end;
 
-    while (sampleFifo->dataAvailable(stream))
+    while (sampleFifo->fillAsync(stream) > 0)
     {
-        sampleFifo->readAsync(stream, part1begin, part1end, part2begin, part2end);
+        unsigned int count = sampleFifo->readAsync(sampleFifo->fillAsync(stream), &part1begin, &part1end, &part2begin, &part2end, stream);
 
         if (part1begin != part1end) { // first part of FIFO data
             m_vectorBuffer.write(part1begin, part1end, false);
@@ -336,6 +302,8 @@ void DSPDeviceMIMOEngine::workSampleSinkFifo(unsigned int stream)
         SampleVector::iterator vbegin, vend;
         m_vectorBuffer.read(vbegin, vend);
         workSamples(vbegin, vend, stream);
+
+        sampleFifo->readCommitAsync(count, stream);
     }
 }
 
@@ -343,13 +311,13 @@ void DSPDeviceMIMOEngine::workSampleSinkFifo(unsigned int stream)
  * Routes samples from device source FIFO to sink channels that are registered for the FIFO
  * Routes samples from source channels registered for the FIFO to the device sink FIFO
  */
-void DSPDeviceMIMOEngine::workSamples(const SampleVector::iterator& vbegin, const SampleVector::iterator& vend, unsigned int sinkIndex)
+void DSPDeviceMIMOEngine::workSamples(const SampleVector::const_iterator& vbegin, const SampleVector::const_iterator& vend, unsigned int sinkIndex)
 {
 	bool positiveOnly = false;
     // DC and IQ corrections
-    if (m_sourcesCorrections[sinkIndex].m_dcOffsetCorrection) {
-        iqCorrections(vbegin, vend, sinkIndex, m_sourcesCorrections[sinkIndex].m_iqImbalanceCorrection);
-    }
+    // if (m_sourcesCorrections[sinkIndex].m_dcOffsetCorrection) {
+    //     iqCorrections(vbegin, vend, sinkIndex, m_sourcesCorrections[sinkIndex].m_iqImbalanceCorrection);
+    // }
 
     // feed data to direct sinks
     if (sinkIndex < m_basebandSampleSinks.size())
@@ -726,25 +694,6 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
 	else if (SetSampleMIMO::match(*message)) {
 		handleSetMIMO(((SetSampleMIMO*) message)->getSampleMIMO());
 	}
-    else if (AddSourceStream::match(*message))
-    {
-        m_basebandSampleSinks.push_back(BasebandSampleSinks());
-        m_threadedBasebandSampleSinks.push_back(ThreadedBasebandSampleSinks());
-        m_sourcesCorrections.push_back(SourceCorrection());
-    }
-    else if (RemoveLastSourceStream::match(*message))
-    {
-        m_basebandSampleSinks.pop_back();
-        m_threadedBasebandSampleSinks.pop_back();
-    }
-    else if (AddSinkStream::match(*message))
-    {
-        m_threadedBasebandSampleSources.push_back(ThreadedBasebandSampleSources());
-    }
-    else if (RemoveLastSinkStream::match(*message))
-    {
-        m_threadedBasebandSampleSources.pop_back();
-    }
 	else if (AddBasebandSampleSink::match(*message))
 	{
         const AddBasebandSampleSink *msg = (AddBasebandSampleSink *) message;

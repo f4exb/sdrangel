@@ -386,7 +386,7 @@ void TestMIThread::callback(const qint16* buf, qint32 len)
         break;
 	}
 
-	m_sampleFifo->writeAsync(m_streamIndex, m_convertBuffer.begin(), it - m_convertBuffer.begin());
+	m_sampleFifo->writeAsync(m_convertBuffer.begin(), it - m_convertBuffer.begin(), m_streamIndex);
 }
 
 void TestMIThread::tick()
