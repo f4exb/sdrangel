@@ -243,34 +243,51 @@ void DSPDeviceMIMOEngine::workSampleSinkFifos()
         return;
     }
 
-    int iPart1Begin;
-    int iPart1End;
-    int iPart2Begin;
-    int iPart2End;
-    std::vector<SampleVector> data = sampleFifo->getData();
+    unsigned int iPart1Begin;
+    unsigned int iPart1End;
+    unsigned int iPart2Begin;
+    unsigned int iPart2End;
+    const std::vector<SampleVector>& data = sampleFifo->getData();
+    //unsigned int samplesDone = 0;
 
-    while (sampleFifo->fillSync() > 0)
+    while ((sampleFifo->fillSync() > 0) && (m_inputMessageQueue.size() == 0))
     {
-        unsigned int count = sampleFifo->readSync(sampleFifo->fillSync(), iPart1Begin, iPart1End, iPart2Begin, iPart2End);
+        //unsigned int count = sampleFifo->readSync(sampleFifo->fillSync(), iPart1Begin, iPart1End, iPart2Begin, iPart2End);
+        sampleFifo->readSync(iPart1Begin, iPart1End, iPart2Begin, iPart2End);
 
-        for (unsigned int stream = 0; stream < data.size(); stream++)
+        if (iPart1Begin != iPart1End)
         {
-            SampleVector::const_iterator begin = data[stream].begin();
-
-            if (iPart1Begin != iPart1End) {
-                m_vectorBuffer.write(data[stream].begin() + iPart1Begin, data[stream].begin() + iPart1End, false);
+            for (unsigned int stream = 0; stream < data.size(); stream++) {
+                workSamples(data[stream].begin() + iPart1Begin, data[stream].begin() + iPart1End, stream);
             }
-
-            if (iPart2Begin != iPart2End) {
-                m_vectorBuffer.write(data[stream].begin() + iPart2Begin, data[stream].begin() + iPart2End);
-            }
-
-            SampleVector::iterator vbegin, vend;
-            m_vectorBuffer.read(vbegin, vend);
-            workSamples(vbegin, vend, stream);
         }
 
-        sampleFifo->readCommitSync(count);
+        if (iPart2Begin != iPart2End)
+        {
+            for (unsigned int stream = 0; stream < data.size(); stream++) {
+                workSamples(data[stream].begin() + iPart2Begin, data[stream].begin() + iPart2End, stream);
+            }
+        }
+
+        // for (unsigned int stream = 0; stream < data.size(); stream++)
+        // {
+        //     SampleVector::const_iterator begin = data[stream].begin();
+
+        //     if (iPart1Begin != iPart1End) {
+        //         m_vectorBuffer.write(data[stream].begin() + iPart1Begin, data[stream].begin() + iPart1End, false);
+        //     }
+
+        //     if (iPart2Begin != iPart2End) {
+        //         m_vectorBuffer.write(data[stream].begin() + iPart2Begin, data[stream].begin() + iPart2End, false);
+        //     }
+
+        //     SampleVector::iterator vbegin, vend;
+        //     m_vectorBuffer.read(vbegin, vend);
+        //     workSamples(vbegin, vend, stream);
+        // }
+
+        //sampleFifo->readCommitSync(count);
+        //samplesDone += count;
     }
 }
 
@@ -287,9 +304,10 @@ void DSPDeviceMIMOEngine::workSampleSinkFifo(unsigned int stream)
     SampleVector::const_iterator part2begin;
     SampleVector::const_iterator part2end;
 
-    while (sampleFifo->fillAsync(stream) > 0)
+    while ((sampleFifo->fillAsync(stream) > 0) && (m_inputMessageQueue.size() == 0))
     {
-        unsigned int count = sampleFifo->readAsync(sampleFifo->fillAsync(stream), &part1begin, &part1end, &part2begin, &part2end, stream);
+        //unsigned int count = sampleFifo->readAsync(sampleFifo->fillAsync(stream), &part1begin, &part1end, &part2begin, &part2end, stream);
+        sampleFifo->readAsync(&part1begin, &part1end, &part2begin, &part2end, stream);
 
         if (part1begin != part1end) { // first part of FIFO data
             m_vectorBuffer.write(part1begin, part1end, false);
@@ -303,7 +321,7 @@ void DSPDeviceMIMOEngine::workSampleSinkFifo(unsigned int stream)
         m_vectorBuffer.read(vbegin, vend);
         workSamples(vbegin, vend, stream);
 
-        sampleFifo->readCommitAsync(count, stream);
+        //sampleFifo->readCommitAsync(count, stream);
     }
 }
 

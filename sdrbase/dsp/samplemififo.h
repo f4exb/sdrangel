@@ -20,7 +20,7 @@
 
 #include <QObject>
 #include <QMutex>
-#include <QTime>
+#include <vector>
 #include "dsp/dsptypes.h"
 #include "export.h"
 
@@ -28,16 +28,46 @@ class SDRBASE_API SampleMIFifo : public QObject {
 	Q_OBJECT
 
 public:
-	SampleMIFifo(QObject* parent = nullptr);
-	SampleMIFifo(unsigned int nbStreams, unsigned int size, QObject* parent = nullptr);
+    SampleMIFifo(QObject *parent = nullptr);
+    SampleMIFifo(unsigned int nbStreams, unsigned int size, QObject *parent = nullptr);
+    void init(unsigned int nbStreams, unsigned int size);
+    void reset();
 
-	void init(unsigned int nbStreams, unsigned int size);
-	inline unsigned int size() const { return m_size; }
+    void writeSync(const quint8* data, unsigned int count); //!< de-interleaved data in input with count bytes for each stream
+    void writeSync(const std::vector<SampleVector::const_iterator>& vbegin, unsigned int size);
+    void readSync(
+		std::vector<SampleVector::const_iterator*> vpart1Begin, std::vector<SampleVector::const_iterator*> vpart1End,
+		std::vector<SampleVector::const_iterator*> vpart2Begin, std::vector<SampleVector::const_iterator*> vpart2End
+    );
+    void readSync(
+        std::vector<unsigned int>& vPart1Begin, std::vector<unsigned int>& vPart1End,
+        std::vector<unsigned int>& vPart2Begin, std::vector<unsigned int>& vPart2End
+    );
+    void readSync(
+		unsigned int& ipart1Begin, unsigned int& ipart1End,
+		unsigned int& ipart2Begin, unsigned int& ipart2End
+    );
+
+    void writeAsync(const quint8* data, unsigned int count, unsigned int stream);
+    void writeAsync(const SampleVector::const_iterator& begin, unsigned int size, unsigned int stream);
+    void readAsync(
+		SampleVector::const_iterator* part1Begin, SampleVector::const_iterator* part1End,
+		SampleVector::const_iterator* part2Begin, SampleVector::const_iterator* part2End,
+        unsigned int stream);
+    void readAsync(
+		unsigned int& ipart1Begin, unsigned int& ipart1End,
+		unsigned int& ipart2Begin, unsigned int& ipart2End,
+        unsigned int stream);
+
+
+    const std::vector<SampleVector>& getData() { return m_data; }
+    const SampleVector& getData(unsigned int stream) { return m_data[stream]; }
+    unsigned int getNbStreams() const { return m_data.size(); }
 
     inline unsigned int fillSync()
     {
         QMutexLocker mutexLocker(&m_mutex);
-        unsigned int fill = m_fill;
+        unsigned int fill = m_head <= m_fill ? m_fill - m_head : m_size - (m_head - m_fill);
         return fill;
     }
 
@@ -48,55 +78,23 @@ public:
         }
 
         QMutexLocker mutexLocker(&m_mutex);
-        unsigned int fill = m_vfill[stream];
+        unsigned int fill = m_vHead[stream] <= m_vFill[stream] ? m_vFill[stream] - m_vHead[stream] : m_size - (m_vHead[stream] - m_vFill[stream]);
         return fill;
     }
 
-    const std::vector<SampleVector>& getData() { return m_data; }
-    unsigned int getNbStreams() const { return m_nbStreams; }
-
-	unsigned int writeSync(const quint8* data, unsigned int count); //!< de-interleaved data in input with count bytes for each stream
-	unsigned int writeSync(std::vector<SampleVector::const_iterator> vbegin, unsigned int count);
-	unsigned int readSync(unsigned int count,
-		std::vector<SampleVector::const_iterator*> vpart1Begin, std::vector<SampleVector::const_iterator*> vpart1End,
-		std::vector<SampleVector::const_iterator*> vpart2Begin, std::vector<SampleVector::const_iterator*> vpart2End);
-	unsigned int readSync(unsigned int count,
-		int& ipart1Begin, int& ipart1End,
-		int& ipart2Begin, int& ipart2End);
-	unsigned int readCommitSync(unsigned int count);
-
-	unsigned int writeAsync(const quint8* data, unsigned int count, unsigned int stream);
-	unsigned int writeAsync(SampleVector::const_iterator begin, unsigned int count, unsigned int stream);
-	unsigned int readAsync(unsigned int count,
-		SampleVector::const_iterator* part1Begin, SampleVector::const_iterator* part1End,
-		SampleVector::const_iterator* part2Begin, SampleVector::const_iterator* part2End,
-        unsigned int stream);
-	unsigned int readCommitAsync(unsigned int count, unsigned int stream);
-
 signals:
 	void dataSyncReady();
-	void dataAsyncReady(int streamIndex);
+    void dataAsyncReady(int streamIndex);
 
 private:
-	QMutex m_mutex;
-
-	std::vector<SampleVector> m_data;
+    std::vector<SampleVector> m_data;
     unsigned int m_nbStreams;
-	unsigned int m_size;
-
-    // Synchronous
-	int m_suppressed;
-	QTime m_msgRateTimer;
-	unsigned int m_fill;
-	unsigned int m_head;
-	unsigned int m_tail;
-
-    // Asynchronous
-	std::vector<int> m_vsuppressed;
-	std::vector<QTime> m_vmsgRateTimer;
-	std::vector<unsigned int> m_vfill;
-	std::vector<unsigned int> m_vhead;
-	std::vector<unsigned int> m_vtail;
+    unsigned int m_size;
+    unsigned int m_fill;               //!< Number of samples written from beginning of samples vector (sync)
+    unsigned int m_head;               //!< Number of samples read from beginning of samples vector (sync)
+    std::vector<unsigned int> m_vFill; //!< Number of samples written from beginning of samples vector (async)
+    std::vector<unsigned int> m_vHead; //!< Number of samples read from beginning of samples vector (async)
+	QMutex m_mutex;
 };
 
 #endif // INCLUDE_SAMPLEMIFIFO_H
