@@ -96,9 +96,6 @@ BladeRF2MIMO::~BladeRF2MIMO()
         m_deviceAPI->removeAncillarySink(*it, istream);
         delete *it;
     }
-
-    m_deviceAPI->removeLastSourceStream(); // Remove the last source stream data set in the engine
-    m_deviceAPI->removeLastSourceStream(); // Remove the last source stream data set in the engine
 }
 
 void BladeRF2MIMO::destroy()
