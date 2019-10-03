@@ -35,12 +35,12 @@ private:
 
 	SampleVector m_data;
 
-	uint m_size;
-	uint m_fill;
-	uint m_head;
-	uint m_tail;
+	unsigned int m_size;
+	unsigned int m_fill;
+	unsigned int m_head;
+	unsigned int m_tail;
 
-	void create(uint s);
+	void create(unsigned int s);
 
 public:
 	SampleSinkFifo(QObject* parent = nullptr);
@@ -49,18 +49,18 @@ public:
 	~SampleSinkFifo();
 
 	bool setSize(int size);
-	inline uint size() const { return m_size; }
-	inline uint fill() { QMutexLocker mutexLocker(&m_mutex); uint fill = m_fill; return fill; }
+	inline unsigned int size() const { return m_size; }
+	inline unsigned int fill() { QMutexLocker mutexLocker(&m_mutex); unsigned int fill = m_fill; return fill; }
 
-	uint write(const quint8* data, uint count);
-	uint write(SampleVector::const_iterator begin, SampleVector::const_iterator end);
+	unsigned int write(const quint8* data, unsigned int count);
+	unsigned int write(SampleVector::const_iterator begin, SampleVector::const_iterator end);
 
-	uint read(SampleVector::iterator begin, SampleVector::iterator end);
+	unsigned int read(SampleVector::iterator begin, SampleVector::iterator end);
 
-	uint readBegin(uint count,
+	unsigned int readBegin(unsigned int count,
 		SampleVector::iterator* part1Begin, SampleVector::iterator* part1End,
 		SampleVector::iterator* part2Begin, SampleVector::iterator* part2End);
-	uint readCommit(uint count);
+	unsigned int readCommit(unsigned int count);
 
 signals:
 	void dataReady();
