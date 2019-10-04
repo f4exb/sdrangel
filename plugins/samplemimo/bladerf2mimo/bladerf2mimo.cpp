@@ -142,8 +142,6 @@ void BladeRF2MIMO::init()
     m_fileSinks.push_back(new FileRecord(QString("test_1_%1.sdriq").arg(m_deviceAPI->getDeviceUID())));
     m_deviceAPI->addAncillarySink(m_fileSinks[0], 0);
     m_deviceAPI->addAncillarySink(m_fileSinks[1], 1);
-
-    applySettings(m_settings, true);
 }
 
 bool BladeRF2MIMO::start()
@@ -153,6 +151,8 @@ bool BladeRF2MIMO::start()
         qCritical("BladeRF2MIMO::start: device could not be opened");
         return false;
     }
+
+    applySettings(m_settings, true);
 
     if (m_rxElseTx) {
         startRx();
@@ -186,10 +186,7 @@ void BladeRF2MIMO::startRx()
     }
 
 	m_sourceThread->startWork();
-
 	mutexLocker.unlock();
-
-	applySettings(m_settings, true);
 	m_runningRx = true;
 }
 
@@ -426,7 +423,8 @@ bool BladeRF2MIMO::applySettings(const BladeRF2MIMOSettings& settings, bool forc
         << " m_useReverseAPI: " << settings.m_useReverseAPI
         << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
         << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-        << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex;
+        << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
+        << " force: " << force;
 
     struct bladerf *dev = m_dev ? m_dev->getDev() : nullptr;
 

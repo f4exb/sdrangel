@@ -32,19 +32,21 @@ InterferometerSink::InterferometerSink(int fftSize) :
     m_spectrumSink(nullptr),
     m_scopeSink(nullptr)
 {
+    m_sampleMIFifo.init(2, 96000 * 4);
+
     for (int i = 0; i < 2; i++)
     {
-        m_sinkFifos[i].setSize(96000 * 4);
         m_sinks[i].setStreamIndex(i);
         m_channelizers[i] = new DownChannelizer(&m_sinks[i]);
-        QObject::connect(
-            &m_sinkFifos[i],
-            &SampleSinkFifo::dataReady,
-            this,
-            [=](){ this->handleSinkFifo(i); },
-            Qt::QueuedConnection
-        );
     }
+
+    QObject::connect(
+        &m_sampleMIFifo,
+        &SampleMIFifo::dataAsyncReady,
+        this,
+        &InterferometerSink::handleDataAsync,
+        Qt::QueuedConnection
+    );
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
@@ -57,29 +59,30 @@ InterferometerSink::~InterferometerSink()
     }
 }
 
+void InterferometerSink::reset()
+{
+    m_sampleMIFifo.reset();
+}
+
 void InterferometerSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int streamIndex)
 {
     if (streamIndex > 1) {
         return;
     }
 
-    m_sinkFifos[streamIndex].write(begin, end);
+    m_sampleMIFifo.writeAsync(begin, end - begin, streamIndex);
 }
 
-void InterferometerSink::handleSinkFifo(unsigned int sinkIndex)
+void InterferometerSink::handleDataAsync(int sinkIndex)
 {
-    int samplesDone = 0;
+    SampleVector::const_iterator part1begin;
+    SampleVector::const_iterator part1end;
+    SampleVector::const_iterator part2begin;
+    SampleVector::const_iterator part2end;
 
-    while ((m_sinkFifos[sinkIndex].fill() > 0)
-        && (m_inputMessageQueue.size() == 0))
-        //&& (samplesDone < m_channelizers[sinkIndex]->getInputSampleRate()))
+    while ((m_sampleMIFifo.fillAsync(sinkIndex) > 0) && (m_inputMessageQueue.size() == 0))
     {
-		SampleVector::iterator part1begin;
-		SampleVector::iterator part1end;
-		SampleVector::iterator part2begin;
-		SampleVector::iterator part2end;
-
-        unsigned int count = m_sinkFifos[sinkIndex].readBegin(m_sinkFifos[sinkIndex].fill(), &part1begin, &part1end, &part2begin, &part2end);
+        m_sampleMIFifo.readAsync(&part1begin, &part1end, &part2begin, &part2end, sinkIndex);
 
         if (part1begin != part1end) { // first part of FIFO data
             //qDebug("InterferometerSink::handleSinkFifo: part1-stream: %u count: %u", sinkIndex, count);
@@ -91,14 +94,39 @@ void InterferometerSink::handleSinkFifo(unsigned int sinkIndex)
             processFifo(part2begin, part2end, sinkIndex);
         }
 
-        m_sinkFifos[sinkIndex].readCommit((unsigned int) count); // adjust FIFO pointers
-        samplesDone += count;
     }
+
+    // int samplesDone = 0;
+
+    // while ((m_sinkFifos[sinkIndex].fill() > 0)
+    //     && (m_inputMessageQueue.size() == 0))
+    //     //&& (samplesDone < m_channelizers[sinkIndex]->getInputSampleRate()))
+    // {
+	// 	SampleVector::iterator part1begin;
+	// 	SampleVector::iterator part1end;
+	// 	SampleVector::iterator part2begin;
+	// 	SampleVector::iterator part2end;
+
+    //     unsigned int count = m_sinkFifos[sinkIndex].readBegin(m_sinkFifos[sinkIndex].fill(), &part1begin, &part1end, &part2begin, &part2end);
+
+    //     if (part1begin != part1end) { // first part of FIFO data
+    //         //qDebug("InterferometerSink::handleSinkFifo: part1-stream: %u count: %u", sinkIndex, count);
+    //         processFifo(part1begin, part1end, sinkIndex);
+    //     }
+
+    //     if (part2begin != part2end) { // second part of FIFO data (used when block wraps around)
+    //         //qDebug("InterferometerSink::handleSinkFifo: part2-stream: %u count: %u", sinkIndex, count);
+    //         processFifo(part2begin, part2end, sinkIndex);
+    //     }
+
+    //     m_sinkFifos[sinkIndex].readCommit((unsigned int) count); // adjust FIFO pointers
+    //     samplesDone += count;
+    // }
 
     //qDebug("InterferometerSink::handleSinkFifo: done");
 }
 
-void InterferometerSink::processFifo(const SampleVector::iterator& vbegin, const SampleVector::iterator& vend, unsigned int sinkIndex)
+void InterferometerSink::processFifo(const SampleVector::const_iterator& vbegin, const SampleVector::const_iterator& vend, unsigned int sinkIndex)
 {
     // if (sinkIndex == 0) {
     //     m_count0 = vend - vbegin;

@@ -21,7 +21,7 @@
 #include <QObject>
 
 //#include "dsp/samplesinkvector.h"
-#include "dsp/samplesinkfifo.h"
+#include "dsp/samplemififo.h"
 #include "interferometerstreamsink.h"
 #include "interferometercorr.h"
 
@@ -99,6 +99,8 @@ public:
 
     InterferometerSink(int fftSize);
     ~InterferometerSink();
+    void reset();
+
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
 
     void setSpectrumSink(BasebandSampleSink *spectrumSink) { m_spectrumSink = spectrumSink; }
@@ -108,12 +110,12 @@ public:
 	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int streamIndex);
 
 private:
-    void processFifo(const SampleVector::iterator& vbegin, const SampleVector::iterator& vend, unsigned int sinkIndex);
+    void processFifo(const SampleVector::const_iterator& vbegin, const SampleVector::const_iterator& vend, unsigned int sinkIndex);
     void run();
     bool handleMessage(const Message& cmd);
 
     InterferometerCorrelator m_correlator;
-    SampleSinkFifo m_sinkFifos[2];
+    SampleMIFifo m_sampleMIFifo;
     InterferometerStreamSink m_sinks[2];
     DownChannelizer *m_channelizers[2];
     BasebandSampleSink *m_spectrumSink;
@@ -123,7 +125,7 @@ private:
 
 private slots:
     void handleInputMessages();
-    void handleSinkFifo(unsigned int sinkIndex); //!< Handle data when samples have to be processed
+    void handleDataAsync(int sinkIndex); //!< Handle data when samples have to be processed
 };
 
 #endif // INCLUDE_INTERFEROMETERSINK_H
