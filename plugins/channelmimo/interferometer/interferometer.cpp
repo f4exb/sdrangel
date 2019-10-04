@@ -86,6 +86,7 @@ void Interferometer::setScopeSink(BasebandSampleSink *scopeSink)
 
 void Interferometer::start()
 {
+    m_sink->reset();
     m_thread->start();
 }
 
