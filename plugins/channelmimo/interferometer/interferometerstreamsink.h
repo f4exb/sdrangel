@@ -36,6 +36,7 @@ public:
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
 
+    void reset();
     unsigned int getStreamIndex() const { return m_streamIndex; }
     void setStreamIndex(unsigned int streamIndex) { m_streamIndex = streamIndex; }
     SampleVector& getData() { return m_data; }

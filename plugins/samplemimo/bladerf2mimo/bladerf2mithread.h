@@ -63,7 +63,7 @@ private:
 
     void run();
     void callback(const qint16* buf, qint32 samplesPerChannel);
-    void channelCallback(const qint16* buf, qint32 len, int channel);
+    int channelCallback(const qint16* buf, qint32 len, int channel);
 };
 
 #endif // PLUGINS_SAMPLEMIMO_BLADERF2MIMO_BLADERF2MITHREAD_H_

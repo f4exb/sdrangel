@@ -15,7 +15,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QMutexLocker>
 #include <QDebug>
+
 #include "dsp/downchannelizer.h"
 
 #include "interferometerstreamsink.h"
@@ -40,7 +42,7 @@ void InterferometerStreamSink::stop()
 
 void InterferometerStreamSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
-    m_settingsMutex.lock();
+    QMutexLocker mutexLocker(&m_settingsMutex);
     m_dataSize = (end - begin) + m_dataStart;
 
     if (m_dataSize > m_bufferSize)
@@ -50,7 +52,6 @@ void InterferometerStreamSink::feed(const SampleVector::const_iterator& begin, c
     }
 
     std::copy(begin, end, m_data.begin() + m_dataStart);
-    m_settingsMutex.unlock();
 }
 
 bool InterferometerStreamSink::handleMessage(const Message& cmd)
@@ -71,4 +72,10 @@ bool InterferometerStreamSink::handleMessage(const Message& cmd)
 	{
 		return false;
 	}
+}
+
+void InterferometerStreamSink::reset()
+{
+    QMutexLocker mutexLocker(&m_settingsMutex);
+    m_dataStart = 0;
 }

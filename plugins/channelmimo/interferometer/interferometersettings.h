@@ -27,6 +27,8 @@ struct InterferometerSettings
 {
     enum CorrelationType
     {
+        Correlation0,
+        Correlation1,
         CorrelationAdd,
         CorrelationMultiply,
         CorrelationFFT

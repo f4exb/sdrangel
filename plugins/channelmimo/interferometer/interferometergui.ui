@@ -171,12 +171,22 @@
           </property>
           <item>
            <property name="text">
-            <string>Add</string>
+            <string>A</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Mul*</string>
+            <string>B</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>A+B</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>A.B*</string>
            </property>
           </item>
           <item>
