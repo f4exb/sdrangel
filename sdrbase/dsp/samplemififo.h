@@ -30,6 +30,7 @@ class SDRBASE_API SampleMIFifo : public QObject {
 public:
     SampleMIFifo(QObject *parent = nullptr);
     SampleMIFifo(unsigned int nbStreams, unsigned int size, QObject *parent = nullptr);
+    ~SampleMIFifo();
     void init(unsigned int nbStreams, unsigned int size);
     void reset();
 
@@ -49,7 +50,7 @@ public:
     );
 
     void writeAsync(const quint8* data, unsigned int count, unsigned int stream);
-    void writeAsync(const SampleVector::const_iterator& begin, unsigned int size, unsigned int stream);
+    void writeAsync(const SampleVector::const_iterator& begin, unsigned int inputSize, unsigned int stream);
     void readAsync(
 		SampleVector::const_iterator* part1Begin, SampleVector::const_iterator* part1End,
 		SampleVector::const_iterator* part2Begin, SampleVector::const_iterator* part2End,
