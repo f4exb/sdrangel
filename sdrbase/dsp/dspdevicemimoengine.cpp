@@ -389,6 +389,8 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoIdle()
 
 	// stop everything
 
+    m_deviceSampleMIMO->stop();
+
     std::vector<BasebandSampleSinks>::const_iterator vbit = m_basebandSampleSinks.begin();
 
 	for (; vbit != m_basebandSampleSinks.end(); ++vbit)
@@ -428,7 +430,6 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoIdle()
         (*it)->stop();
     }
 
-	m_deviceSampleMIMO->stop();
 	m_deviceDescription.clear();
 
 	return StIdle;

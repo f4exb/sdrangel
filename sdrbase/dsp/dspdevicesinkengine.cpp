@@ -232,6 +232,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoIdle()
 	}
 
 	// stop everything
+	m_deviceSampleSink->stop();
 
 	for(BasebandSampleSources::const_iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); it++)
 	{
@@ -251,7 +252,6 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoIdle()
         m_spectrumSink->stop();
 	}
 
-	m_deviceSampleSink->stop();
 	m_deviceDescription.clear();
 	m_sampleRate = 0;
 
