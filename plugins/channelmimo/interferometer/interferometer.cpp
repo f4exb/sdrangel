@@ -98,15 +98,6 @@ void Interferometer::stop()
 
 void Interferometer::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex)
 {
-    // if (sinkIndex == 0) {
-    //     m_count0 = end - begin;
-    // } else if (sinkIndex == 1) {
-    //     m_count1 = end - begin;
-    //     if (m_count1 != m_count0) {
-    //         qDebug("Interferometer::feed: c0: %d 1: %d", m_count0, m_count1);
-    //     }
-    // }
-
     m_sink->feed(begin, end, sinkIndex);
 }
 

@@ -19,6 +19,7 @@
 #define INCLUDE_INTERFEROMETERSINK_H
 
 #include <QObject>
+#include <QMutex>
 
 //#include "dsp/samplesinkvector.h"
 #include "dsp/samplemififo.h"
@@ -110,22 +111,25 @@ public:
 	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int streamIndex);
 
 private:
-    void processFifo(const SampleVector::const_iterator& vbegin, const SampleVector::const_iterator& vend, unsigned int sinkIndex);
+    void processFifo(const std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend);
     void run();
     bool handleMessage(const Message& cmd);
 
     InterferometerCorrelator m_correlator;
     SampleMIFifo m_sampleMIFifo;
+    std::vector<SampleVector::const_iterator> m_vbegin;
+    int m_sizes[2];
     InterferometerStreamSink m_sinks[2];
     DownChannelizer *m_channelizers[2];
     BasebandSampleSink *m_spectrumSink;
     BasebandSampleSink *m_scopeSink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
-    int m_count0, m_count1;
+    QMutex m_mutex;
+    unsigned int m_lastStream;
 
 private slots:
     void handleInputMessages();
-    void handleDataAsync(int sinkIndex); //!< Handle data when samples have to be processed
+    void handleData(); //!< Handle data when samples have to be processed
 };
 
 #endif // INCLUDE_INTERFEROMETERSINK_H

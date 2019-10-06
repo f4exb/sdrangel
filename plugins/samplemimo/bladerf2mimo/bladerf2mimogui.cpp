@@ -490,6 +490,7 @@ void BladeRF2MIMOGui::on_sampleRate_changed(quint64 value)
         }
     }
 
+    displaySampleRate();
     displayFcTooltip();
     sendSettings();
 }

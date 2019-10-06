@@ -129,17 +129,26 @@ void BladeRF2MIThread::callback(const qint16* buf, qint32 samplesPerChannel)
     }
 
     std::vector<SampleVector::const_iterator> vbegin;
+    int lengths[2];
 
     for (unsigned int channel = 0; channel < 2; channel++)
     {
-        channelCallback(&buf[2*samplesPerChannel*channel], 2*samplesPerChannel, channel);
+        lengths[channel] = channelCallback(&buf[2*samplesPerChannel*channel], 2*samplesPerChannel, channel);
         vbegin.push_back(m_convertBuffer[channel].begin());
     }
 
-    m_sampleFifo->writeSync(vbegin, samplesPerChannel/(1<<m_log2Decim));
+    if (lengths[0] == lengths[1])
+    {
+        m_sampleFifo->writeSync(vbegin, lengths[0]);
+    }
+    else
+    {
+        qWarning("BladeRF2MIThread::callback: unequal channel lengths: [0]=%d [1]=%d", lengths[0], lengths[1]);
+        m_sampleFifo->writeSync(vbegin, std::min(lengths[0], lengths[1]));
+    }
 }
 
-void BladeRF2MIThread::channelCallback(const qint16* buf, qint32 len, int channel)
+int BladeRF2MIThread::channelCallback(const qint16* buf, qint32 len, int channel)
 {
     SampleVector::iterator it = m_convertBuffer[channel].begin();
 
@@ -228,4 +237,6 @@ void BladeRF2MIThread::channelCallback(const qint16* buf, qint32 len, int channe
             }
         }
     }
+
+    return it - m_convertBuffer[channel].begin();
 }

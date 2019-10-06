@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QMutexLocker>
 #include <QDebug>
 
 #include "dsp/downchannelizer.h"
@@ -30,25 +31,29 @@ MESSAGE_CLASS_DEFINITION(InterferometerSink::MsgConfigureCorrelation, Message)
 InterferometerSink::InterferometerSink(int fftSize) :
     m_correlator(fftSize),
     m_spectrumSink(nullptr),
-    m_scopeSink(nullptr)
+    m_scopeSink(nullptr),
+    m_mutex(QMutex::Recursive)
 {
-    m_sampleMIFifo.init(2, 96000 * 4);
+    m_sampleMIFifo.init(2, 96000 * 8);
+    m_vbegin.resize(2);
 
     for (int i = 0; i < 2; i++)
     {
         m_sinks[i].setStreamIndex(i);
         m_channelizers[i] = new DownChannelizer(&m_sinks[i]);
+        m_sizes[i] = 0;
     }
 
     QObject::connect(
         &m_sampleMIFifo,
-        &SampleMIFifo::dataAsyncReady,
+        &SampleMIFifo::dataSyncReady,
         this,
-        &InterferometerSink::handleDataAsync,
+        &InterferometerSink::handleData,
         Qt::QueuedConnection
     );
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    m_lastStream = 0;
 }
 
 InterferometerSink::~InterferometerSink()
@@ -61,7 +66,12 @@ InterferometerSink::~InterferometerSink()
 
 void InterferometerSink::reset()
 {
+    QMutexLocker mutexLocker(&m_mutex);
     m_sampleMIFifo.reset();
+
+    for (int i = 0; i < 2; i++) {
+        m_sinks[i].reset();
+    }
 }
 
 void InterferometerSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int streamIndex)
@@ -70,86 +80,64 @@ void InterferometerSink::feed(const SampleVector::const_iterator& begin, const S
         return;
     }
 
-    m_sampleMIFifo.writeAsync(begin, end - begin, streamIndex);
-}
+    if (streamIndex == m_lastStream) {
+        qWarning("InterferometerSink::feed: twice same stream in a row: %u", streamIndex);
+    }
 
-void InterferometerSink::handleDataAsync(int sinkIndex)
-{
-    SampleVector::const_iterator part1begin;
-    SampleVector::const_iterator part1end;
-    SampleVector::const_iterator part2begin;
-    SampleVector::const_iterator part2end;
+    m_lastStream = streamIndex;
+    m_vbegin[streamIndex] = begin;
+    m_sizes[streamIndex] = end - begin;
 
-    while ((m_sampleMIFifo.fillAsync(sinkIndex) > 0) && (m_inputMessageQueue.size() == 0))
+    if (streamIndex == 1)
     {
-        m_sampleMIFifo.readAsync(&part1begin, &part1end, &part2begin, &part2end, sinkIndex);
-
-        if (part1begin != part1end) { // first part of FIFO data
-            //qDebug("InterferometerSink::handleSinkFifo: part1-stream: %u count: %u", sinkIndex, count);
-            processFifo(part1begin, part1end, sinkIndex);
+        if (m_sizes[0] != m_sizes[1])
+        {
+            qWarning("InterferometerSink::feed: unequal sizes: [0]: %d [1]: %d", m_sizes[0], m_sizes[1]);
+            m_sampleMIFifo.writeSync(m_vbegin, std::min(m_sizes[0], m_sizes[1]));
         }
-
-        if (part2begin != part2end) { // second part of FIFO data (used when block wraps around)
-            //qDebug("InterferometerSink::handleSinkFifo: part2-stream: %u count: %u", sinkIndex, count);
-            processFifo(part2begin, part2end, sinkIndex);
+        else
+        {
+            m_sampleMIFifo.writeSync(m_vbegin, m_sizes[0]);
         }
-
     }
-
-    // int samplesDone = 0;
-
-    // while ((m_sinkFifos[sinkIndex].fill() > 0)
-    //     && (m_inputMessageQueue.size() == 0))
-    //     //&& (samplesDone < m_channelizers[sinkIndex]->getInputSampleRate()))
-    // {
-	// 	SampleVector::iterator part1begin;
-	// 	SampleVector::iterator part1end;
-	// 	SampleVector::iterator part2begin;
-	// 	SampleVector::iterator part2end;
-
-    //     unsigned int count = m_sinkFifos[sinkIndex].readBegin(m_sinkFifos[sinkIndex].fill(), &part1begin, &part1end, &part2begin, &part2end);
-
-    //     if (part1begin != part1end) { // first part of FIFO data
-    //         //qDebug("InterferometerSink::handleSinkFifo: part1-stream: %u count: %u", sinkIndex, count);
-    //         processFifo(part1begin, part1end, sinkIndex);
-    //     }
-
-    //     if (part2begin != part2end) { // second part of FIFO data (used when block wraps around)
-    //         //qDebug("InterferometerSink::handleSinkFifo: part2-stream: %u count: %u", sinkIndex, count);
-    //         processFifo(part2begin, part2end, sinkIndex);
-    //     }
-
-    //     m_sinkFifos[sinkIndex].readCommit((unsigned int) count); // adjust FIFO pointers
-    //     samplesDone += count;
-    // }
-
-    //qDebug("InterferometerSink::handleSinkFifo: done");
 }
 
-void InterferometerSink::processFifo(const SampleVector::const_iterator& vbegin, const SampleVector::const_iterator& vend, unsigned int sinkIndex)
+void InterferometerSink::handleData()
 {
-    // if (sinkIndex == 0) {
-    //     m_count0 = vend - vbegin;
-    // } else if (sinkIndex == 1) {
-    //     m_count1 = vend - vbegin;
-    //     if (m_count1 != m_count0) {
-    //         qDebug("InterferometerSink::processFifo: c0: %d 1: %d", m_count0, m_count1);
-    //     }
-    // }
+    QMutexLocker mutexLocker(&m_mutex);
 
-    m_channelizers[sinkIndex]->feed(vbegin, vend, false);
+    const std::vector<SampleVector>& data = m_sampleMIFifo.getData();
 
-    if (sinkIndex == 1) {
-        run();
+    unsigned int ipart1begin;
+    unsigned int ipart1end;
+    unsigned int ipart2begin;
+    unsigned int ipart2end;
+
+    while ((m_sampleMIFifo.fillSync() > 0) && (m_inputMessageQueue.size() == 0))
+    {
+        m_sampleMIFifo.readSync(ipart1begin, ipart1end, ipart2begin, ipart2end);
+
+        if (ipart1begin != ipart1end) { // first part of FIFO data
+            processFifo(data, ipart1begin, ipart1end);
+        }
+
+        if (ipart2begin != ipart2end) { // second part of FIFO data (used when block wraps around)
+            processFifo(data, ipart2begin, ipart2end);
+        }
     }
+}
+
+void InterferometerSink::processFifo(const std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend)
+{
+    for (unsigned int stream = 0; stream < 2; stream++) {
+        m_channelizers[stream]->feed(data[stream].begin() + ibegin, data[stream].begin() + iend, false);
+    }
+
+    run();
 }
 
 void InterferometerSink::run()
 {
-    // if (m_sinks[0].getSize() != m_sinks[1].getSize()) {
-    //     qDebug("InterferometerSink::run: size0: %d, size1: %d", m_sinks[0].getSize(), m_sinks[1].getSize());
-    // }
-
     if (m_correlator.performCorr(m_sinks[0].getData(), m_sinks[0].getSize(), m_sinks[1].getData(), m_sinks[1].getSize()))
     {
         if (m_scopeSink) {
@@ -195,6 +183,7 @@ bool InterferometerSink::handleMessage(const Message& cmd)
 {
     if (MsgConfigureChannelizer::match(cmd))
     {
+        QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
         int log2Decim = cfg.getLog2Decim();
         int filterChainHash = cfg.getFilterChainHash();
@@ -208,6 +197,7 @@ bool InterferometerSink::handleMessage(const Message& cmd)
             m_channelizers[i]->set(m_channelizers[i]->getInputMessageQueue(),
                 log2Decim,
                 filterChainHash);
+            m_sinks[i].reset();
         }
 
         return true;
