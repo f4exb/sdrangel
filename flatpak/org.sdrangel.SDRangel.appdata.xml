@@ -1,33 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component type="desktop">
   <id>org.sdrangel.SDRangel</id>
-  <launchable type="desktop-id">org.sdrangel.SDRangel</launchable>
-  <metadata_license></metadata_license>
+  <launchable type="desktop-id">org.sdrangel.SDRangel.desktop</launchable>
+  <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
   <name>SDRangel</name>
-  <summary>SDRangel</summary>
+  <summary>SDR and signal analyzer frontend to various hardware</summary>
   <description>
-    <p>SDRangel</p>
-    <p xml:lang="en-GB">SDRangel</p>
-    <p xml:lang="de-DE">SDRangel</p>
+    <p>
+      SDRangel is an Open Source Qt5 / OpenGL 3.0+ SDR and signal analyzer frontend to various hardware.
+    </p>
   </description>
   <releases>
-    <release version="1.0.0" date="2019-05-03"/>
+    <release version="4.11.9" date="2019-09-11"/>
   </releases>
+<!--
   <screenshots>
     <screenshot type="default">
-      <!--image type="source">https://github.com/f4exb/sdrangel/.../screenshot.png</image-->
+      <image type="source">https://raw.githubusercontent.com/f4exb/sdrangel/master/flatpak/screenshot.png</image>
     </screenshot>
   </screenshots>
-  <categories>
-    <category>Documentation</category>
-    <category>Development</category>
-    <category>Qt</category>
-  </categories>
+-->
   <url type="homepage">https://github.com/f4exb/sdrangel</url>
   <url type="bugtracker">https://github.com/f4exb/sdrangel/issues</url>
   <project_group>SDRangel</project_group>
-  <update_contact></update_contact>
   <provides>
     <binary>sdrangel</binary>
   </provides>

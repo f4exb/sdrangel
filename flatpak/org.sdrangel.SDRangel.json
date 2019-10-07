@@ -4,17 +4,179 @@
   "runtime-version": "5.12",
   "sdk": "org.kde.Sdk",
   "command": "sdrangel",
+  "rename-desktop-file": "sdrangel.desktop",
+  "rename-icon": "sdrangel_icon",
+  "copy-icon": true,
   "finish-args": [
-    "--filesystem=host",
     "--filesystem=xdg-documents",
-    "--device=dri",
+    "--device=all",
     "--share=network",
-    "--socket=ipc",
+    "--share=ipc",
     "--socket=pulseaudio",
     "--socket=x11",
     "--socket=wayland"
   ],
   "modules": [
+    {
+      "name": "boost",
+      "buildsystem": "simple",
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.bz2",
+          "sha256": "d73a8da01e8bf8c7eda40b4c84915071a8c8a0df4a6734537ddde4a8580524ee"
+        }
+      ],
+      "build-commands": [
+        "./bootstrap.sh --prefix=/app",
+        "./b2 -j $FLATPAK_BUILDER_N_JOBS",
+        "./b2 install"
+      ]
+    },
+    {
+      "name" : "libusb",
+      "config-opts" : [
+        "--disable-udev"
+      ],
+      "sources" : [
+        {
+          "type" : "archive",
+          "url" : "https://github.com/libusb/libusb/releases/download/v1.0.23/libusb-1.0.23.tar.bz2",
+          "sha256" : "db11c06e958a82dac52cf3c65cb4dd2c3f339c8a988665110e0d24d19312ad8d"
+        }
+      ]
+    },
+    {
+      "name": "libxml2",
+      "config-opts": [
+        "--with-python=no"
+      ],
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://github.com/GNOME/libxml2/archive/v2.9.9.tar.gz",
+          "sha256": "d673f0284cec867ee00872a8152e0c3c09852f17fd9aa93f07579a37534f0bfe"
+        }
+      ]
+    },
+    {
+      "name": "fftw3",
+      "config-opts" : [
+        "--enable-shared",
+        "--disable-static",
+        "--enable-threads",
+        "--enable-float"
+      ],
+      "sources" : [
+        {
+          "type" : "archive",
+          "url" : "http://www.fftw.org/fftw-3.3.8.tar.gz",
+          "md5": "8aac833c943d8e90d51b697b27d4384d"
+        }
+      ]
+    },
+    {
+      "name": "xxd",
+      "build-options": {
+        "env": {
+          "LIBS": "-lm"
+        }
+      },
+      "cleanup": [
+        "/bin/vim*",
+        "/bin/rvim",
+        "/bin/view",
+        "/bin/rview",
+        "/bin/ex",
+        "/share"
+      ],
+      "config-opts": [
+        "--disable-gui",
+        "--disable-gtk3",
+        "--disable-luainterp",
+        "--disable-python3interp",
+        "--disable-xim",
+        "--disable-xsmp",
+        "--disable-xsmp-interact",
+        "--disable-desktop-database-update",
+        "--disable-icon-cache-update",
+        "--disable-gnome-check",
+        "--disable-motif-check",
+        "--disable-athena-check",
+        "--disable-fontset"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/vim/vim",
+          "tag": "v8.1.2102",
+          "commit": "d17a57a43330977b8f4eb36f1f7a4a66a7bb26c8"
+        }
+      ]
+    },
+    {
+      "name": "python-cheetah",
+      "buildsystem": "simple",
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://files.pythonhosted.org/packages/4e/72/e6a7d92279e3551db1b68fd336fd7a6e3d2f2ec742bf486486e6150d77d2/Cheetah3-3.2.4.tar.gz",
+          "sha256": "caabb9c22961a3413ac85cd1e5525ec9ca80daeba6555f4f60802b6c256e252b"
+        }
+      ],
+      "build-commands": [
+        "python setup.py install --prefix=/app --root=/"
+      ]
+    },
+    {
+      "name": "python-mako",
+      "buildsystem": "simple",
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://files.pythonhosted.org/packages/b0/3c/8dcd6883d009f7cae0f3157fb53e9afb05a0d3d33b3db1268ec2e6f4a56b/Mako-1.1.0.tar.gz",
+          "sha256": "a36919599a9b7dc5d86a7a8988f23a9a3a3d083070023bab23d64f7f1d1e0a4b"
+        }
+      ],
+      "build-commands": [
+        "python setup.py install --prefix=/app --root=/"
+      ]
+    },
+    {
+      "name": "opencv",
+      "buildsystem": "cmake-ninja",
+      "builddir": true,
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://github.com/opencv/opencv/archive/3.4.6.tar.gz",
+          "sha256": "e7d311ff97f376b8ee85112e2b536dbf4bdf1233673500175ed7cf21a0089f6d"
+        }
+      ]
+    },
+    {
+      "name": "libpostproc",
+      "config-opts": [
+        "--disable-debug",
+        "--disable-doc",
+        "--disable-static",
+        "--enable-shared",
+        "--enable-gpl",
+        "--disable-libvpx",
+        "--disable-ffplay",
+        "--disable-ffprobe",
+        "--disable-ffserver",
+        "--disable-everything",
+        "--enable-postproc"
+      ],
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://ffmpeg.org/releases/ffmpeg-3.4.1.tar.xz",
+          "sha256": "5a77278a63741efa74e26bf197b9bb09ac6381b9757391b922407210f0f991c0"
+        }
+      ]
+    },
     {
       "name": "cm256cc",
       "buildsystem": "cmake-ninja",
@@ -75,6 +237,7 @@
     {
       "name": "codec2",
       "buildsystem": "cmake-ninja",
+      "builddir": true,
       "config-opts": [
         "-Wno-dev"
       ],
@@ -83,16 +246,6 @@
           "type": "git",
           "url": "https://github.com/drowe67/codec2.git",
           "commit": "76a20416d715ee06f8b36a9953506876689a3bd2"
-        }
-      ]
-    },
-    {
-      "name": "sdrplay",
-      "sources": [
-        {
-          "type": "archive",
-          "url": "https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-2.13.1.run",
-          "sha256": "e2320b9eafffa3cb5d49e956207af2521ccf098aacc1fd9abecc8fb96b364522"
         }
       ]
     },
@@ -107,6 +260,21 @@
           "type": "git",
           "url": "https://github.com/airspy/host.git",
           "commit": "5c86e53"
+        }
+      ]
+    },
+    {
+      "name": "airspyhf",
+      "buildsystem": "cmake-ninja",
+      "config-opts": [
+        "-Wno-dev",
+        "-DINSTALL_UDEV_RULES=OFF"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/airspy/airspyhf.git",
+          "commit": "99b1d38"
         }
       ]
     },
@@ -158,6 +326,7 @@
     {
       "name": "hackrf",
       "buildsystem": "cmake-ninja",
+      "subdir": "host",
       "config-opts": [
         "-Wno-dev",
         "-DINSTALL_UDEV_RULE=OFF"
@@ -208,6 +377,7 @@
     {
       "name": "xtrx",
       "buildsystem": "cmake-ninja",
+      "subdir": "sources",
       "config-opts": [
         "-Wno-dev",
         "-DENABLE_SOAPY=NO"
@@ -223,6 +393,7 @@
     {
       "name": "uhd",
       "buildsystem": "cmake-ninja",
+      "subdir": "host",
       "config-opts": [
         "-Wno-dev",
         "-DENABLE_PYTHON_API=OFF",
@@ -233,6 +404,14 @@
           "type": "git",
           "url": "git://github.com/EttusResearch/uhd.git",
           "commit": "e0e61a5"
+        },
+        {
+          "type": "patch",
+          "path": "uhd-disable-ascii-art-dft.patch"
+        },
+        {
+          "type": "patch",
+          "path": "uhd-disable-latency-utils.patch"
         }
       ]
     },
@@ -274,20 +453,6 @@
           "type": "git",
           "url": "git://github.com/pothosware/SoapyRemote.git",
           "commit": "4f5d717"
-        }
-      ]
-    },
-    {
-      "name": "soapy_sdrplay",
-      "buildsystem": "cmake-ninja",
-      "config-opts": [
-        "-Wno-dev"
-      ],
-      "sources": [
-        {
-          "type": "git",
-          "url": "git://github.com/pothosware/SoapySDRPlay.git",
-          "commit": "12c3db6"
         }
       ]
     },
@@ -340,7 +505,22 @@
         {
           "type": "dir",
           "path": ".."
+        },
+        {
+          "type": "patch",
+          "path": "sdrangel-set-serialdv-path.patch"
+        },
+        {
+          "type": "patch",
+          "path": "sdrangel-fix-icon-file.patch"
+        },
+        {
+          "type": "file",
+          "path": "org.sdrangel.SDRangel.appdata.xml"
         }
+      ],
+      "post-install": [
+        "install -Dm644 org.sdrangel.SDRangel.appdata.xml /app/share/appdata/org.sdrangel.SDRangel.appdata.xml"
       ]
     }
   ]

@@ -1,0 +1,33 @@
+diff --git a/host/examples/CMakeLists.txt b/host/examples/CMakeLists.txt
+index 5894bb0a2..637a48082 100644
+--- a/host/examples/CMakeLists.txt
++++ b/host/examples/CMakeLists.txt
+@@ -55,18 +55,18 @@ endforeach(example_source)
+ ########################################################################
+ # ASCII Art DFT - requires curses, so this part is optional
+ ########################################################################
+-find_package(Curses)
++#find_package(Curses)
+ 
+-if(CURSES_FOUND)
+-    include_directories(${CURSES_INCLUDE_DIR})
+-    add_executable(rx_ascii_art_dft rx_ascii_art_dft.cpp)
+-    target_link_libraries(rx_ascii_art_dft uhd ${CURSES_LIBRARIES} ${Boost_LIBRARIES})
+-    UHD_INSTALL(TARGETS rx_ascii_art_dft RUNTIME DESTINATION ${PKG_LIB_DIR}/examples COMPONENT examples)
++#if(CURSES_FOUND)
++#    include_directories(${CURSES_INCLUDE_DIR})
++#    add_executable(rx_ascii_art_dft rx_ascii_art_dft.cpp)
++#    target_link_libraries(rx_ascii_art_dft uhd ${CURSES_LIBRARIES} ${Boost_LIBRARIES})
++#    UHD_INSTALL(TARGETS rx_ascii_art_dft RUNTIME DESTINATION ${PKG_LIB_DIR}/examples COMPONENT examples)
+ 
+-    add_executable(twinrx_freq_hopping twinrx_freq_hopping.cpp)
+-    target_link_libraries(twinrx_freq_hopping uhd ${CURSES_LIBRARIES} ${Boost_LIBRARIES})
+-    UHD_INSTALL(TARGETS twinrx_freq_hopping RUNTIME DESTINATION ${PKG_LIB_DIR}/examples COMPONENT examples)
+-endif(CURSES_FOUND)
++#    add_executable(twinrx_freq_hopping twinrx_freq_hopping.cpp)
++#    target_link_libraries(twinrx_freq_hopping uhd ${CURSES_LIBRARIES} ${Boost_LIBRARIES})
++#    UHD_INSTALL(TARGETS twinrx_freq_hopping RUNTIME DESTINATION ${PKG_LIB_DIR}/examples COMPONENT examples)
++#endif(CURSES_FOUND)
+ 
+ ########################################################################
+ # Examples using C API

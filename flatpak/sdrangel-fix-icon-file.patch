@@ -1,0 +1,26 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a58eef70f..4f75350d6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -574,7 +574,7 @@ endif()
+ #install files and directories (linux specific)
+ if (LINUX)
+   install(FILES ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.desktop DESTINATION share/applications)
+-  install(FILES ${CMAKE_SOURCE_DIR}/cmake/cpack/${CMAKE_PROJECT_NAME}_icon.png DESTINATION share/pixmaps)
++  install(FILES ${CMAKE_SOURCE_DIR}/cmake/cpack/${CMAKE_PROJECT_NAME}_icon.svg DESTINATION share/icons/hicolor/scalable/apps)
+ endif()
+ 
+ ############ uninstall target ################
+diff --git a/cmake/cpack/sdrangel.desktop.in b/cmake/cpack/sdrangel.desktop.in
+index 88aa2b9a5..918c5ff03 100644
+--- a/cmake/cpack/sdrangel.desktop.in
++++ b/cmake/cpack/sdrangel.desktop.in
+@@ -3,7 +3,7 @@ Name=@APPLICATION_NAME@
+ GenericName=SDR/Analyzer frontend
+ Comment=SDR/Analyzer frontend for Airspy, Airspy HF+, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube
+ Exec=@CMAKE_PROJECT_NAME@
+-Icon=@CMAKE_PROJECT_NAME@_icon.png
++Icon=@CMAKE_PROJECT_NAME@_icon
+ StartupNotify=true
+ Terminal=false
+ Type=Application
