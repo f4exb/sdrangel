@@ -32,7 +32,8 @@ struct InterferometerSettings
         CorrelationAdd,
         CorrelationMultiply,
         CorrelationFFT,
-        CorrelationFFT2
+        CorrelationFFT2,
+        CorrelationFFTStar
     };
 
     CorrelationType m_correlationType;

@@ -199,6 +199,11 @@
             <string>FFT2</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>FFT*</string>
+           </property>
+          </item>
          </widget>
         </item>
         <item>
