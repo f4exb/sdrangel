@@ -78,10 +78,17 @@ Sample sMulConjInv(const Sample& a, const Sample& b) { //!< Sample multiply with
     return s;
 }
 
-Sample invfft2s(const std::complex<float>& a) { //!< Complex float to Sample
+Sample invfft2s(const std::complex<float>& a) { //!< Complex float to Sample for 1 side time correlation
     Sample s;
     s.setReal(a.real()/2.0f);
     s.setImag(a.imag()/2.0f);
+    return s;
+}
+
+Sample invfft2s2(const std::complex<float>& a) { //!< Complex float to Sample for 2 sides time correlation
+    Sample s;
+    s.setReal(a.real());
+    s.setImag(a.imag());
     return s;
 }
 
@@ -98,10 +105,14 @@ InterferometerCorrelator::InterferometerCorrelator(int fftSize) :
     {
         m_fft[i] = FFTEngine::create();
         m_fft[i]->configure(2*fftSize, false); // internally twice the data FFT size
+        m_fft2[i] = FFTEngine::create();
+        m_fft2[i]->configure(fftSize, false);
     }
 
     m_invFFT = FFTEngine::create();
     m_invFFT->configure(2*fftSize, true);
+    m_invFFT2 = FFTEngine::create();
+    m_invFFT2->configure(fftSize, true);
 
     m_dataj = new std::complex<float>[2*fftSize]; // receives actual FFT result hence twice the data FFT size
     m_scorr.resize(fftSize);
@@ -114,9 +125,12 @@ InterferometerCorrelator::~InterferometerCorrelator()
 {
     delete[] m_dataj;
     delete m_invFFT;
+    delete m_invFFT2;
 
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++)
+    {
         delete m_fft[i];
+        delete m_fft2[i];
     }
 }
 
@@ -148,6 +162,9 @@ bool InterferometerCorrelator::performCorr(
             case InterferometerSettings::CorrelationFFT:
                 results = performFFTCorr(data0, size0, data1, size1);
                 break;
+            case InterferometerSettings::CorrelationFFT2:
+                results = performFFT2Corr(data0, size0, data1, size1);
+                break;
             default:
                 break;
         }
@@ -170,6 +187,9 @@ bool InterferometerCorrelator::performCorr(
                 break;
             case InterferometerSettings::CorrelationFFT:
                 results = performFFTCorr(data0, size0, m_data1p, size1);
+                break;
+            case InterferometerSettings::CorrelationFFT2:
+                results = performFFT2Corr(data0, size0, m_data1p, size1);
                 break;
             default:
                 break;
@@ -213,6 +233,9 @@ bool InterferometerCorrelator::performCorr(
                 break;
             case InterferometerSettings::CorrelationFFT:
                 results = performFFTCorr(data0, size0, m_data1p, size1);
+                break;
+            case InterferometerSettings::CorrelationFFT2:
+                results = performFFT2Corr(data0, size0, m_data1p, size1);
                 break;
             default:
                 break;
@@ -330,6 +353,109 @@ bool InterferometerCorrelator::performFFTCorr(
             m_invFFT->out() + m_fftSize,
             m_tcorr.begin() + nfft*m_fftSize,
             invfft2s
+        );
+
+        size -= m_fftSize;
+        begin0 += m_fftSize;
+        begin1 += m_fftSize;
+        nfft++;
+    }
+
+    // update the samples counters
+    m_processed = nfft*m_fftSize;
+    m_remaining[0] = size0 - nfft*m_fftSize;
+    m_remaining[1] = size1 - nfft*m_fftSize;
+
+    return nfft > 0;
+}
+
+bool InterferometerCorrelator::performFFT2Corr(
+    const SampleVector& data0,
+    int size0,
+    const SampleVector& data1,
+    int size1
+)
+{
+    unsigned int size = std::min(size0, size1);
+    int nfft = 0;
+    SampleVector::const_iterator begin0 = data0.begin();
+    SampleVector::const_iterator begin1 = data1.begin();
+    adjustSCorrSize(size);
+    adjustTCorrSize(size);
+
+    while (size >= m_fftSize)
+    {
+        // FFT[0]
+        std::transform(
+            begin0,
+            begin0 + m_fftSize,
+            m_fft2[0]->in(),
+            [](const Sample& s) -> std::complex<float> {
+                return std::complex<float>{s.real() / SDR_RX_SCALEF, s.imag() / SDR_RX_SCALEF};
+            }
+        );
+        m_window.apply(m_fft2[0]->in());
+        m_fft2[0]->transform();
+
+        // FFT[1]
+        std::transform(
+            begin1,
+            begin1 + m_fftSize,
+            m_fft2[1]->in(),
+            [](const Sample& s) -> std::complex<float> {
+                return std::complex<float>{s.real() / SDR_RX_SCALEF, s.imag() / SDR_RX_SCALEF};
+            }
+        );
+        m_window.apply(m_fft2[1]->in());
+        m_fft2[1]->transform();
+
+        // conjugate FFT[1]
+        std::transform(
+            m_fft2[1]->out(),
+            m_fft2[1]->out() + m_fftSize,
+            m_dataj,
+            [](const std::complex<float>& c) -> std::complex<float> {
+                return std::conj(c);
+            }
+        );
+
+        // product of FFT[1]* with FFT[0] and store in inverse FFT input
+        std::transform(
+            m_fft2[0]->out(),
+            m_fft2[0]->out() + m_fftSize,
+            m_dataj,
+            m_invFFT2->in(),
+            [](std::complex<float>& a, const std::complex<float>& b) -> std::complex<float> {
+                return (a*b);
+            }
+        );
+
+        // copy product to correlation spectrum - convert and scale to FFT size
+        std::transform(
+            m_invFFT2->in(),
+            m_invFFT2->in() + m_fftSize,
+            m_scorr.begin() + nfft*m_fftSize,
+            [this](const std::complex<float>& a) -> Sample {
+                Sample s;
+                s.setReal(a.real()*(SDR_RX_SCALEF/m_fftSize));
+                s.setImag(a.imag()*(SDR_RX_SCALEF/m_fftSize));
+                return s;
+            }
+        );
+
+        // do the inverse FFT to get time correlation
+        m_invFFT2->transform();
+        std::transform(
+            m_invFFT2->out() + m_fftSize/2 + 1,
+            m_invFFT2->out() + m_fftSize,
+            m_tcorr.begin() + nfft*m_fftSize,
+            invfft2s2
+        );
+        std::transform(
+            m_invFFT2->out(),
+            m_invFFT2->out() + m_fftSize/2,
+            m_tcorr.begin() + nfft*m_fftSize + m_fftSize/2,
+            invfft2s2
         );
 
         size -= m_fftSize;
