@@ -66,7 +66,8 @@ private:
         const SampleVector& data0,
         int size0,
         const SampleVector& data1,
-        int size1
+        int size1,
+        bool star = false
     );
     bool performFFT2Corr( //!< Returns true if results were produced
         const SampleVector& data0,

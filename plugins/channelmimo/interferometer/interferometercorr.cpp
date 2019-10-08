@@ -92,6 +92,13 @@ Sample invfft2s2(const std::complex<float>& a) { //!< Complex float to Sample fo
     return s;
 }
 
+Sample invfft2star(const std::complex<float>& a) { //!< Complex float to Sample for 1 side time correlation
+    Sample s;
+    s.setReal(a.real()/2.82842712475f); // 2*sqrt(2)
+    s.setImag(a.imag()/2.82842712475f);
+    return s;
+}
+
 InterferometerCorrelator::InterferometerCorrelator(int fftSize) :
     m_corrType(InterferometerSettings::CorrelationAdd),
     m_fftSize(fftSize)
@@ -165,6 +172,9 @@ bool InterferometerCorrelator::performCorr(
             case InterferometerSettings::CorrelationFFT2:
                 results = performFFT2Corr(data0, size0, data1, size1);
                 break;
+            case InterferometerSettings::CorrelationFFTStar:
+                results = performFFTCorr(data0, size0, data1, size1, true);
+                break;
             default:
                 break;
         }
@@ -190,6 +200,9 @@ bool InterferometerCorrelator::performCorr(
                 break;
             case InterferometerSettings::CorrelationFFT2:
                 results = performFFT2Corr(data0, size0, m_data1p, size1);
+                break;
+            case InterferometerSettings::CorrelationFFTStar:
+                results = performFFTCorr(data0, size0, m_data1p, size1, true);
                 break;
             default:
                 break;
@@ -237,6 +250,9 @@ bool InterferometerCorrelator::performCorr(
             case InterferometerSettings::CorrelationFFT2:
                 results = performFFT2Corr(data0, size0, m_data1p, size1);
                 break;
+            case InterferometerSettings::CorrelationFFTStar:
+                results = performFFTCorr(data0, size0, m_data1p, size1, true);
+                break;
             default:
                 break;
         }
@@ -274,7 +290,8 @@ bool InterferometerCorrelator::performFFTCorr(
     const SampleVector& data0,
     int size0,
     const SampleVector& data1,
-    int size1
+    int size1,
+    bool star
 )
 {
     unsigned int size = std::min(size0, size1);
@@ -348,12 +365,27 @@ bool InterferometerCorrelator::performFFTCorr(
 
         // do the inverse FFT to get time correlation
         m_invFFT->transform();
-        std::transform(
-            m_invFFT->out(),
-            m_invFFT->out() + m_fftSize,
-            m_tcorr.begin() + nfft*m_fftSize,
-            invfft2s
-        );
+
+        if (star)
+        {
+            *m_tcorr.begin() = invfft2star(m_invFFT->out()[0]); // t = 0
+            SampleVector::iterator it = m_tcorr.begin() + 1;
+
+            for (int i = 1; i < m_fftSize; i++)
+            {
+                *it = invfft2star(m_invFFT->out()[i] + m_invFFT->out()[2*m_fftSize-i]);
+                ++it;
+            }
+        }
+        else
+        {
+            std::transform(
+                m_invFFT->out(),
+                m_invFFT->out() + m_fftSize,
+                m_tcorr.begin() + nfft*m_fftSize,
+                invfft2s
+            );
+        }
 
         size -= m_fftSize;
         begin0 += m_fftSize;
