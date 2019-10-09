@@ -1,0 +1,26 @@
+diff --git a/cmake/Modules/FindSerialDV.cmake b/cmake/Modules/FindSerialDV.cmake
+index e4c40b00a..07470e628 100644
+--- a/cmake/Modules/FindSerialDV.cmake
++++ b/cmake/Modules/FindSerialDV.cmake
+@@ -3,8 +3,8 @@
+ find_path(LIBSERIALDV_INCLUDE_DIR
+   NAMES dvcontroller.h
+   HINTS ${SERIALDV_DIR}/include/serialdv
+-  PATHS /usr/include/serialdv
+-        /usr/local/include/serialdv
++  PATHS /app/include/serialdv
++        /app/local/include/serialdv
+ )
+ 
+ set(LIBSERIAL_NAMES ${LIBSERIAL_NAMES} serialdv libserialdv)
+@@ -12,8 +12,8 @@ set(LIBSERIAL_NAMES ${LIBSERIAL_NAMES} serialdv libserialdv)
+ find_library(LIBSERIALDV_LIBRARY
+   NAMES serialdv
+   HINTS ${SERIALDV_DIR}/lib
+-  PATHS /usr/lib
+-        /usr/local/lib
++  PATHS /app/lib
++        /app/local/lib
+ )
+ 
+ if (LIBSERIALDV_INCLUDE_DIR AND LIBSERIALDV_LIBRARY)
