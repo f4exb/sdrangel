@@ -1,3 +1,16 @@
+sdrangel (4.11.10-1) unstable; urgency=medium
+
+  * Plugins device enumeration optimization
+  * Scope: added possibility to change trace chunk size
+  * Upgraded to libbladerf 2019.07 release
+  * Added a config.py API script to scriptsapi folder
+  * Added sanity check in HackRF devices enumeration
+  * Device engines: stop device before channels when going idle
+  * Fixes to Flatpack build (PR #422)
+  * More preparatory works for MIMO channels support
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 09 Oct 2019 05:14:22 +0200
+
 sdrangel (4.11.9-1) unstable; urgency=medium
 
   * Fixed regression in v4.11.7 due to FIFO system

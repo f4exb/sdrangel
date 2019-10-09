@@ -61,7 +61,13 @@ Important: you should initiate switch over by stopping the active device and not
 
 Sends a sequence of commands recorded in a JSON file which is in the form of a list of commands.
 
-Each command is a JSON document with the following keys:
+Options are:
+
+  - `-h` or `--help` show help message and exit
+  - `-a` or `--address` address and port of SDRangel instance. Default is `127.0.0.1:8091`
+  - `-j` or `--json-file` JSON file containing description of API commands
+
+Each command in the JSON file is a JSON document with the following keys:
 
   - `endpoint`: URL suffix (API function) - mandatory
   - `method`: HTTP method (GET, PATCH, POST, PUT, DELETE) - mandatory
