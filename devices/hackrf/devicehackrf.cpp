@@ -68,13 +68,19 @@ hackrf_device *DeviceHackRF::open_hackrf(const char * const serial)
 
 hackrf_device *DeviceHackRF::open_hackrf_from_sequence(int sequence)
 {
+    instance();
+
     hackrf_device_list_t *hackrf_devices = hackrf_device_list();
+
+    if (hackrf_devices == nullptr) {
+        return nullptr;
+    }
+
     hackrf_device *hackrf_ptr;
     hackrf_error rc;
 
-    instance();
-
     rc = (hackrf_error) hackrf_device_list_open(hackrf_devices, sequence, &hackrf_ptr);
+    hackrf_device_list_free(hackrf_devices);
 
     if (rc == HACKRF_SUCCESS)
     {
@@ -89,6 +95,8 @@ hackrf_device *DeviceHackRF::open_hackrf_from_sequence(int sequence)
 
 void DeviceHackRF::enumOriginDevices(const QString& hardwareId, PluginInterface::OriginDevices& originDevices)
 {
+    instance();
+
 	hackrf_device_list_t *hackrf_devices = hackrf_device_list();
 
     if (hackrf_devices == nullptr) {
