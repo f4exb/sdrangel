@@ -95,7 +95,6 @@ private:
     SampleVector m_data0w;           //!< windowed data 0
     SampleVector m_data1w;           //!< windowed data 1
     SampleVector m_data1p;           //!< data1 with phase correction
-    float m_fftProdScale;            //!< scaling factor for FFT products
     int m_scorrSize;                 //!< spectrum correlations vector size
     int m_tcorrSize;                 //!< time correlations vector size
     int m_phase;   //!< phase correction
