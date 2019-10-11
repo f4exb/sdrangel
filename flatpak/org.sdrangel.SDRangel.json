@@ -511,10 +511,6 @@
           "path": "sdrangel-set-serialdv-path.patch"
         },
         {
-          "type": "patch",
-          "path": "sdrangel-fix-icon-file.patch"
-        },
-        {
           "type": "file",
           "path": "org.sdrangel.SDRangel.appdata.xml"
         }
