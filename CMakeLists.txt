@@ -574,7 +574,7 @@ endif()
 #install files and directories (linux specific)
 if (LINUX)
   install(FILES ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.desktop DESTINATION share/applications)
-  install(FILES ${CMAKE_SOURCE_DIR}/cmake/cpack/${CMAKE_PROJECT_NAME}_icon.png DESTINATION share/pixmaps)
+  install(FILES ${CMAKE_SOURCE_DIR}/cmake/cpack/${CMAKE_PROJECT_NAME}_icon.svg DESTINATION share/icons/hicolor/scalable/apps)
 endif()
 
 ############ uninstall target ################
