@@ -11,9 +11,6 @@
       SDRangel is an Open Source Qt5 / OpenGL 3.0+ SDR and signal analyzer frontend to various hardware.
     </p>
   </description>
-  <releases>
-    <release version="4.11.9" date="2019-09-11"/>
-  </releases>
 <!--
   <screenshots>
     <screenshot type="default">
