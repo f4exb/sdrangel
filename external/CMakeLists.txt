@@ -209,37 +209,36 @@ elseif(APPLE)
   set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
 endif()
 
-if(WIN32 OR LINUX)
-    ExternalProject_Add(serialdv
-        GIT_REPOSITORY https://github.com/f4exb/serialDV.git
-        GIT_TAG ${SERIALDV_TAG}
-        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/serialdv"
-        CMAKE_ARGS -DBUILD_TOOL=OFF ${DEFAULT_OUTPUT_DIRECTORIES}
-        INSTALL_COMMAND ""
-        TEST_COMMAND ""
-    )
-    ExternalProject_Get_Property(serialdv source_dir binary_dir)
-    set(DSDCC_DEPENDS ${DSDCC_DEPENDS} serialdv)
-    set(LIBSERIALDV_FOUND ON CACHE INTERNAL "")
-    set(LIBSERIALDV_INCLUDE_DIR "${source_dir}" CACHE INTERNAL "")
-    if(WIN32)
-      set(LIBSERIALDV_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/serialdv.lib" CACHE INTERNAL "")
-      makeCopyDir("${source_dir}" "${source_dir}/dsp" serialdv)
-      install(FILES "${SDRANGEL_BINARY_BIN_DIR}/serialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
-    elseif(LINUX)
-      set(LIBSERIALDV_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/lib/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-      # because sdrbase/dsp/dvserialworker.h use dsp/dvcontroller.h
-      # so we need a link
-      makeLink("${source_dir}" "${source_dir}/dsp" serialdv)
-    elseif(APPLE)
-      set(LIBSERIALDV_LIBRARY "${binary_dir}/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-      # because sdrbase/dsp/dvserialworker.h use dsp/dvcontroller.h
-      # so we need a link
-      makeLink("${source_dir}" "${source_dir}/dsp" serialdv)
-      install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
-      FILES_MATCHING PATTERN "libserialdv*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-      set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
-    endif()
+# Works on MacOS with a dummy serialDV
+ExternalProject_Add(serialdv
+    GIT_REPOSITORY https://github.com/f4exb/serialDV.git
+    GIT_TAG ${SERIALDV_TAG}
+    PREFIX "${EXTERNAL_BUILD_LIBRARIES}/serialdv"
+    CMAKE_ARGS -DBUILD_TOOL=OFF ${DEFAULT_OUTPUT_DIRECTORIES}
+    INSTALL_COMMAND ""
+    TEST_COMMAND ""
+)
+ExternalProject_Get_Property(serialdv source_dir binary_dir)
+set(DSDCC_DEPENDS ${DSDCC_DEPENDS} serialdv)
+set(LIBSERIALDV_FOUND ON CACHE INTERNAL "")
+set(LIBSERIALDV_INCLUDE_DIR "${source_dir}" CACHE INTERNAL "")
+if(WIN32)
+    set(LIBSERIALDV_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/serialdv.lib" CACHE INTERNAL "")
+    makeCopyDir("${source_dir}" "${source_dir}/dsp" serialdv)
+    install(FILES "${SDRANGEL_BINARY_BIN_DIR}/serialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+elseif(LINUX)
+    set(LIBSERIALDV_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/lib/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    # because sdrbase/dsp/dvserialworker.h use dsp/dvcontroller.h
+    # so we need a link
+    makeLink("${source_dir}" "${source_dir}/dsp" serialdv)
+elseif(APPLE)
+    set(LIBSERIALDV_LIBRARY "${binary_dir}/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    # because sdrbase/dsp/dvserialworker.h use dsp/dvcontroller.h
+    # so we need a link
+    makeLink("${source_dir}" "${source_dir}/dsp" serialdv)
+    install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
+    FILES_MATCHING PATTERN "libserialdv*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
 endif()
 
 ExternalProject_Add(dsdcc

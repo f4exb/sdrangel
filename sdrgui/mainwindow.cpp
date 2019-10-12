@@ -1671,8 +1671,10 @@ void MainWindow::on_action_DeviceUserArguments_triggered()
 void MainWindow::on_action_AMBE_triggered()
 {
     qDebug("MainWindow::on_action_AMBE_triggered");
+#ifndef __APPLE__
     AMBEDevicesDialog ambeDevicesDialog(m_dspEngine->getAMBEEngine(), this);
     ambeDevicesDialog.exec();
+#endif
 }
 
 void MainWindow::sampleSourceChanged()
