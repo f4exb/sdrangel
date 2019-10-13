@@ -614,7 +614,7 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, const Sa
     float traceTime = ((float) m_traceSize) / m_sampleRate;
 
     if (traceTime >= 1.0f) { // display continuously if trace time is 1 second or more
-        m_glScope->newTraces(m_traces.m_traces, m_traces.currentBufferIndex());
+        m_glScope->newTraces(m_traces.m_traces, m_traces.currentBufferIndex(), &m_traces.m_projectionTypes);
     }
 
     if (m_nbSamples == 0) // finished
@@ -623,7 +623,7 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, const Sa
         if (traceTime < 1.0f)
         {
             if (m_glScope->getProcessingTraceIndex().load() < 0) {
-                m_glScope->newTraces(m_traces.m_traces, m_traces.currentBufferIndex());
+                m_glScope->newTraces(m_traces.m_traces, m_traces.currentBufferIndex(), &m_traces.m_projectionTypes);
             }
         }
 

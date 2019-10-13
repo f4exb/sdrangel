@@ -281,6 +281,21 @@
       </widget>
      </item>
      <item>
+      <widget class="ButtonSwitch" name="polarGrid">
+       <property name="toolTip">
+        <string>Toggle between polar and rectangular grid for XY display</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/gridrect.png</normaloff>
+         <normalon>:/gridpolar.png</normalon>:/gridrect.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QDial" name="traceIntensity">
        <property name="minimumSize">
         <size>

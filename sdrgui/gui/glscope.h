@@ -56,8 +56,7 @@ public:
     void connectTimer(const QTimer& timer);
 
     void setTraces(std::vector<ScopeVis::TraceData>* tracesData, std::vector<float *>* traces);
-    void newTraces(std::vector<float *>* traces);
-    void newTraces(std::vector<float *>* traces, int traceIndex);
+    void newTraces(std::vector<float *>* traces, int traceIndex, std::vector<Projector::ProjectionType>* projectionTypes);
 
     int getSampleRate() const { return m_sampleRate; }
     int getTraceSize() const { return m_traceSize; }
@@ -79,6 +78,7 @@ public:
     bool getDataChanged() const { return m_dataChanged; }
     DisplayMode getDisplayMode() const { return m_displayMode; }
     void setDisplayXYPoints(bool value) { m_displayXYPoints = value; }
+    void setDisplayXYPolarGrid(bool value) { m_displayPolGrid = value; }
     const QAtomicInt& getProcessingTraceIndex() const { return m_processingTraceIndex; }
 
 signals:
@@ -89,11 +89,13 @@ signals:
 private:
     std::vector<ScopeVis::TraceData> *m_tracesData;
     std::vector<float *> *m_traces;
+    std::vector<Projector::ProjectionType> *m_projectionTypes;
     QAtomicInt m_processingTraceIndex;
     ScopeVis::TriggerData m_focusedTriggerData;
     //int m_traceCounter;
     uint32_t m_bufferIndex;
     DisplayMode m_displayMode;
+    bool m_displayPolGrid;
     QTimer m_timer;
     QMutex m_mutex;
     QAtomicInt m_dataChanged;
@@ -169,6 +171,13 @@ private:
             const QColor& color,
             QPixmap& channelOverlayPixmap,
             const QRectF& glScopeRect);
+
+    static bool isPositiveProjection(Projector::ProjectionType& projectionType)
+    {
+        return (projectionType == Projector::ProjectionMagLin)
+            || (projectionType == Projector::ProjectionMagDB)
+            || (projectionType == Projector::ProjectionMagSq);
+    }
 
 protected slots:
     void cleanup();

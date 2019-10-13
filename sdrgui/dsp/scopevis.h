@@ -878,6 +878,7 @@ private:
         std::vector<TraceControl*> m_tracesControl;   //!< Corresponding traces control data
         std::vector<TraceData> m_tracesData;          //!< Corresponding traces data
         std::vector<float *> m_traces[2];             //!< Double buffer of traces processed by glScope
+        std::vector<Projector::ProjectionType> m_projectionTypes;
         int m_traceSize;                              //!< Current size of a trace in buffer
         int m_maxTraceSize;                           //!< Maximum Size of a trace in buffer
         bool evenOddIndex;                            //!< Even (true) or odd (false) index
@@ -924,6 +925,7 @@ private:
                 m_traces[0].push_back(0);
                 m_traces[1].push_back(0);
                 m_tracesData.push_back(traceData);
+                m_projectionTypes.push_back(traceData.m_projectionType);
                 m_tracesControl.push_back(new TraceControl());
                 TraceControl *traceControl = m_tracesControl.back();
                 traceControl->initProjector(traceData.m_projectionType);
@@ -939,6 +941,7 @@ private:
                 traceControl->releaseProjector();
                 traceControl->initProjector(traceData.m_projectionType);
                 m_tracesData[traceIndex] = traceData;
+                m_projectionTypes[traceIndex] = traceData.m_projectionType;
             }
         }
 
@@ -949,6 +952,7 @@ private:
                 qDebug("ScopeVis::removeTrace");
                 m_traces[0].erase(m_traces[0].begin() + traceIndex);
                 m_traces[1].erase(m_traces[1].begin() + traceIndex);
+                m_projectionTypes.erase(m_projectionTypes.begin() + traceIndex);
                 TraceControl *traceControl = m_tracesControl[traceIndex];
                 traceControl->releaseProjector();
                 m_tracesControl.erase(m_tracesControl.begin() + traceIndex);
@@ -967,6 +971,11 @@ private:
 
             int nextControlIndex = (traceIndex + (upElseDown ? 1 : -1)) % (m_tracesControl.size());
             int nextDataIndex = (traceIndex + (upElseDown ? 1 : -1)) % (m_tracesData.size()); // should be the same
+            int nextProjectionTypeIndex = (traceIndex + (upElseDown ? 1 : -1)) % (m_projectionTypes.size()); // should be the same
+
+            Projector::ProjectionType nextType = m_projectionTypes[traceIndex];
+            m_projectionTypes[nextProjectionTypeIndex] = m_projectionTypes[traceIndex];
+            m_projectionTypes[traceIndex] = nextType;
 
             TraceControl *traceControl = m_tracesControl[traceIndex];
             TraceControl *nextTraceControl = m_tracesControl[nextControlIndex];

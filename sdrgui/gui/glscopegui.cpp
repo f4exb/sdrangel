@@ -540,6 +540,11 @@ void GLScopeGUI::on_polarPoints_toggled(bool checked)
     m_glScope->setDisplayXYPoints(checked);
 }
 
+void GLScopeGUI::on_polarGrid_toggled(bool checked)
+{
+    m_glScope->setDisplayXYPolarGrid(checked);
+}
+
 void GLScopeGUI::on_traceIntensity_valueChanged(int value)
 {
     ui->traceIntensity->setToolTip(QString("Trace intensity: %1").arg(value));
