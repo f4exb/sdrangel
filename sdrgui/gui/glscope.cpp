@@ -192,6 +192,7 @@ void GLScope::initializeGL()
 
     //glDisable(GL_DEPTH_TEST);
     m_glShaderSimple.initializeGL();
+    m_glShaderColors.initializeGL();
     m_glShaderLeft1Scale.initializeGL();
     m_glShaderBottom1Scale.initializeGL();
     m_glShaderLeft2Scale.initializeGL();
@@ -663,7 +664,12 @@ void GLScope::paintGL()
                 mat.setToIdentity();
                 mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
                 mat.scale(2.0f * rectW, -2.0f * rectH);
-                m_glShaderSimple.drawPolyline(mat, color, (GLfloat *)&trace[2 * start], end - start);
+
+                if (i == 1) { // Y1 in rainbow color
+                    m_glShaderColors.drawPolyline(mat, (GLfloat *)&trace[2 * start], m_q3Colors.m_array, m_displayTraceIntensity / 100.0f, end - start);
+                } else {
+                    m_glShaderSimple.drawPolyline(mat, color, (GLfloat *)&trace[2 * start], end - start);
+                }
 
                 // Paint trigger level if any
                 if ((traceData.m_triggerDisplayLevel > -1.0f) && (traceData.m_triggerDisplayLevel < 1.0f))
@@ -796,10 +802,21 @@ void GLScope::paintGL()
                 mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
                 mat.scale(2.0f * rectW, -2.0f * rectH);
 
-                if (m_displayXYPoints) {
-                    m_glShaderSimple.drawPoints(mat, color, q3, end - start);
-                } else {
-                    m_glShaderSimple.drawPolyline(mat, color, q3, end - start);
+                if (i == 1) // Y1 in rainbow color
+                {
+                    if (m_displayXYPoints) {
+                        m_glShaderColors.drawPoints(mat, q3, m_q3Colors.m_array, m_displayTraceIntensity / 100.0f, end - start);
+                    } else {
+                        m_glShaderColors.drawPolyline(mat, q3, m_q3Colors.m_array, m_displayTraceIntensity / 100.0f, end - start);
+                    }
+                }
+                else
+                {
+                    if (m_displayXYPoints) {
+                        m_glShaderSimple.drawPoints(mat, color, q3, end - start);
+                    } else {
+                        m_glShaderSimple.drawPolyline(mat, color, q3, end - start);
+                    }
                 }
             } // XY polar display
         } // trace length > 0
@@ -873,6 +890,8 @@ void GLScope::setTraceSize(int traceSize, bool emitSignal)
 {
     m_mutex.lock();
     m_traceSize = traceSize;
+    m_q3Colors.allocate(3*traceSize);
+    setColorPalette(traceSize, m_q3Colors.m_array);
     m_configChanged = true;
     m_mutex.unlock();
     update();
@@ -1950,4 +1969,17 @@ void GLScope::drawCircle(float cx, float cy, float r, int num_segments, bool dot
             vertices[4*ii+3] = y + cy;
         }
 	}
+}
+
+// https://stackoverflow.com/questions/19452530/how-to-render-a-rainbow-spectrum
+void GLScope::setColorPalette(int nbVertices, GLfloat *colors)
+{
+    for (int v = 0; v < nbVertices; v++)
+    {
+        float x = 0.8f*(((float) v)/nbVertices);
+        QColor c = QColor::fromHslF(x, 0.8f, 0.6f);
+        colors[3*v] = c.redF();
+        colors[3*v+1] = c.greenF();
+        colors[3*v+2] = c.blueF();
+    }
 }

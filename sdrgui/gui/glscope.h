@@ -30,6 +30,7 @@
 #include "dsp/dsptypes.h"
 #include "dsp/scopevis.h"
 #include "gui/scaleengine.h"
+#include "gui/glshadercolors.h"
 #include "gui/glshadersimple.h"
 #include "gui/glshadertextured.h"
 #include "export.h"
@@ -138,6 +139,7 @@ private:
     QFont m_channelOverlayFont;
 
     GLShaderSimple m_glShaderSimple;
+    GLShaderColors m_glShaderColors;
     GLShaderTextured m_glShaderLeft1Scale;
     GLShaderTextured m_glShaderBottom1Scale;
     GLShaderTextured m_glShaderLeft2Scale;
@@ -151,6 +153,7 @@ private:
     IncrementalArray<GLfloat> m_q3TickX2;
     IncrementalArray<GLfloat> m_q3Radii;  //!< Polar grid radii
     IncrementalArray<GLfloat> m_q3Circle; //!< Polar grid unit circle
+    IncrementalArray<GLfloat> m_q3Colors; //!< Colors for trace rainbow palette
 
     static const int m_topMargin = 5;
     static const int m_botMargin = 20;
@@ -186,6 +189,7 @@ private:
     void drawRectGrid2();
     void drawPolarGrid2();
     static void drawCircle(float cx, float cy, float r, int num_segments, bool dotted, GLfloat *vertices);
+    static void setColorPalette(int nbVertices, GLfloat *colors);
 
 protected slots:
     void cleanup();

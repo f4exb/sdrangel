@@ -30,6 +30,7 @@ set(sdrgui_SOURCES
     gui/externalclockdialog.cpp
     gui/glscope.cpp
     gui/glscopegui.cpp
+    gui/glshadercolors.cpp
     gui/glshadersimple.cpp
     gui/glshadertextured.cpp
     gui/glshadertvarray.cpp
@@ -100,6 +101,7 @@ set(sdrgui_HEADERS
     gui/externalclockdialog.h
     gui/glscope.h
     gui/glscopegui.h
+    gui/glshadercolors.h
     gui/glshadersimple.h
     gui/glshadertvarray.h
     gui/glshadertextured.h
