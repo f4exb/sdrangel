@@ -149,11 +149,15 @@ private:
     IncrementalArray<GLfloat> m_q3TickY2;
     IncrementalArray<GLfloat> m_q3TickX1;
     IncrementalArray<GLfloat> m_q3TickX2;
+    IncrementalArray<GLfloat> m_q3Radii;  //!< Polar grid radii
+    IncrementalArray<GLfloat> m_q3Circle; //!< Polar grid unit circle
 
     static const int m_topMargin = 5;
     static const int m_botMargin = 20;
     static const int m_leftMargin = 35;
     static const int m_rightMargin = 5;
+
+    static const GLfloat m_q3RadiiConst[];
 
     void initializeGL();
     void resizeGL(int width, int height);
@@ -178,6 +182,10 @@ private:
             || (projectionType == Projector::ProjectionMagDB)
             || (projectionType == Projector::ProjectionMagSq);
     }
+
+    void drawRectGrid2();
+    void drawPolarGrid2();
+    static void drawCircle(float cx, float cy, float r, int num_segments, bool dotted, GLfloat *vertices);
 
 protected slots:
     void cleanup();

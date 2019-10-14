@@ -27,6 +27,17 @@
 
 #include "glscope.h"
 
+const GLfloat GLScope::m_q3RadiiConst[] = {
+    0.0f,  0.5f,  1.0f,  0.5f,  // 0
+    0.0f,  0.75f, 1.0f,  0.25f, // 30
+    0.0f,  1.0f,  1.0f,  0.0f,  // 45
+    0.25f, 1.0f,  0.75f, 0.0f,  // 60
+    0.5f,  1.0f,  0.5f,  0.0f,  // 90
+    0.75f, 1.0f,  0.25f, 0.0f,  // 120
+    1.0f,  1.0f,  0.0f,  0.0f,  // 135
+    1.0f,  0.75f, 0.0f,  0.25f  // 150
+};
+
 GLScope::GLScope(QWidget *parent) : QGLWidget(parent),
     m_tracesData(nullptr),
     m_traces(nullptr),
@@ -65,6 +76,10 @@ GLScope::GLScope(QWidget *parent) : QGLWidget(parent),
     m_channelOverlayFont.setBold(true);
     m_channelOverlayFont.setPointSize(font().pointSize() + 1);
 
+    m_q3Radii.allocate(4*8);
+    std::copy(m_q3RadiiConst, m_q3RadiiConst + 4*8, m_q3Radii.m_array);
+    m_q3Circle.allocate(4*96); // 96 segments = 4*24 with 1/24 being 15 degrees
+    drawCircle(0.5f, 0.5f, 0.5f, 96, false, m_q3Circle.m_array);
     //m_traceCounter = 0;
 }
 
@@ -395,93 +410,8 @@ void GLScope::paintGL()
         }
 
         // paint grid
-        const ScaleEngine::TickList *tickList;
-        const ScaleEngine::Tick *tick;
 
-        // Y2 (Focused Y trace)
-        {
-            tickList = &m_y2Scale.getTickList();
-
-            //GLfloat q3[4*tickList->count()];
-            GLfloat *q3 = m_q3TickY2.m_array;
-            int effectiveTicks = 0;
-
-            for (int i = 0; i < tickList->count(); i++)
-            {
-                tick = &(*tickList)[i];
-
-                if ((tick->major) && (tick->textSize > 0))
-                {
-                    float y = 1 - (tick->pos / m_y2Scale.getSize());
-                    q3[4 * effectiveTicks] = 0;
-                    q3[4 * effectiveTicks + 1] = y;
-                    q3[4 * effectiveTicks + 2] = 1;
-                    q3[4 * effectiveTicks + 3] = y;
-                    effectiveTicks++;
-                }
-            }
-
-            float blue = 1.0f;
-            QVector4D color(1.0f, 1.0f, blue, (float)m_displayGridIntensity / 100.0f);
-            m_glShaderSimple.drawSegments(m_glScopeMatrix2, color, q3, 2 * effectiveTicks);
-        }
-
-        // X2 (time)
-        {
-            tickList = &m_x2Scale.getTickList();
-
-            //GLfloat q3[4*tickList->count()];
-            GLfloat *q3 = m_q3TickX2.m_array;
-            int effectiveTicks = 0;
-
-            for (int i = 0; i < tickList->count(); i++)
-            {
-                tick = &(*tickList)[i];
-
-                if ((tick->major) && (tick->textSize > 0))
-                {
-                    float x = tick->pos / m_x2Scale.getSize();
-                    q3[4 * effectiveTicks] = x;
-                    q3[4 * effectiveTicks + 1] = 0;
-                    q3[4 * effectiveTicks + 2] = x;
-                    q3[4 * effectiveTicks + 3] = 1;
-                    effectiveTicks++;
-                }
-            }
-
-            QVector4D color(1.0f, 1.0f, 1.0f, (float)m_displayGridIntensity / 100.0f);
-            m_glShaderSimple.drawSegments(m_glScopeMatrix2, color, q3, 2 * effectiveTicks);
-        }
-
-        // paint left #2 scale
-        {
-            GLfloat vtx1[] = {
-                0, 1,
-                1, 1,
-                1, 0,
-                0, 0};
-            GLfloat tex1[] = {
-                0, 1,
-                1, 1,
-                1, 0,
-                0, 0};
-            m_glShaderLeft2Scale.drawSurface(m_glLeft2ScaleMatrix, tex1, vtx1, 4);
-        }
-
-        // paint bottom #2 scale
-        {
-            GLfloat vtx1[] = {
-                0, 1,
-                1, 1,
-                1, 0,
-                0, 0};
-            GLfloat tex1[] = {
-                0, 1,
-                1, 1,
-                1, 0,
-                0, 0};
-            m_glShaderBottom2Scale.drawSurface(m_glBot2ScaleMatrix, tex1, vtx1, 4);
-        }
+        drawRectGrid2();
 
         // paint traces #1..n
         if (m_traceSize > 0)
@@ -787,88 +717,10 @@ void GLScope::paintGL()
 
         // paint grid
 
-        // Horizontal Y2
-        tickList = &m_y2Scale.getTickList();
-        {
-            //GLfloat q3[4*tickList->count()];
-            GLfloat *q3 = m_q3TickY2.m_array;
-            int effectiveTicks = 0;
-
-            for (int i = 0; i < tickList->count(); i++)
-            {
-                tick = &(*tickList)[i];
-
-                if ((tick->major) && (tick->textSize > 0))
-                {
-                    float y = 1 - (tick->pos / m_y2Scale.getSize());
-                    q3[4 * effectiveTicks] = 0;
-                    q3[4 * effectiveTicks + 1] = y;
-                    q3[4 * effectiveTicks + 2] = 1;
-                    q3[4 * effectiveTicks + 3] = y;
-                    effectiveTicks++;
-                }
-            }
-
-            QVector4D color(1.0f, 1.0f, 1.0f, (float)m_displayGridIntensity / 100.0f);
-            m_glShaderSimple.drawSegments(m_glScopeMatrix2, color, q3, 2 * effectiveTicks);
-        }
-
-        // Vertical X2
-        tickList = &m_x2Scale.getTickList();
-        {
-            //GLfloat q3[4*tickList->count()];
-            GLfloat *q3 = m_q3TickX2.m_array;
-            int effectiveTicks = 0;
-
-            for (int i = 0; i < tickList->count(); i++)
-            {
-                tick = &(*tickList)[i];
-
-                if ((tick->major) && (tick->textSize > 0))
-                {
-                    float x = tick->pos / m_x2Scale.getSize();
-                    q3[4 * effectiveTicks] = x;
-                    q3[4 * effectiveTicks + 1] = 0;
-                    q3[4 * effectiveTicks + 2] = x;
-                    q3[4 * effectiveTicks + 3] = 1;
-                    effectiveTicks++;
-                }
-            }
-
-            QVector4D color(1.0f, 1.0f, 1.0f, (float)m_displayGridIntensity / 100.0f);
-            m_glShaderSimple.drawSegments(m_glScopeMatrix2, color, q3, 2 * effectiveTicks);
-        }
-
-        // paint left #2 scale
-        {
-            GLfloat vtx1[] = {
-                0, 1,
-                1, 1,
-                1, 0,
-                0, 0};
-            GLfloat tex1[] = {
-                0, 1,
-                1, 1,
-                1, 0,
-                0, 0};
-
-            m_glShaderLeft2Scale.drawSurface(m_glLeft2ScaleMatrix, tex1, vtx1, 4);
-        }
-
-        // paint bottom #2 scale
-        {
-            GLfloat vtx1[] = {
-                0, 1,
-                1, 1,
-                1, 0,
-                0, 0};
-            GLfloat tex1[] = {
-                0, 1,
-                1, 1,
-                1, 0,
-                0, 0};
-
-            m_glShaderBottom2Scale.drawSurface(m_glBot2ScaleMatrix, tex1, vtx1, 4);
+        if (m_displayPolGrid) {
+            drawPolarGrid2();
+        } else {
+            drawRectGrid2();
         }
 
         // paint polar traces
@@ -899,8 +751,6 @@ void GLScope::paintGL()
             {
                 const float *trace = (*m_traces)[i];
                 const ScopeVis::TraceData &traceData = (*m_tracesData)[i];
-                bool positiveProjection = m_projectionTypes && (i < m_projectionTypes->size()) ?
-                    isPositiveProjection((*m_projectionTypes)[i]) : false;
 
                 if (!traceData.m_viewTrace) {
                     continue;
@@ -908,6 +758,9 @@ void GLScope::paintGL()
 
                 if (polarConversion)
                 {
+                    bool positiveProjection = m_projectionTypes && (i < m_projectionTypes->size()) ?
+                        isPositiveProjection((*m_projectionTypes)[i]) : false;
+
                     for (int j = start; j < end; j++)
                     {
                         float r;
@@ -1954,4 +1807,147 @@ void GLScope::cleanup()
     m_glShaderLeft1Scale.cleanup();
     m_glShaderPowerOverlay.cleanup();
     //doneCurrent();
+}
+
+void GLScope::drawRectGrid2()
+{
+    const ScaleEngine::TickList *tickList;
+    const ScaleEngine::Tick *tick;
+
+    // Horizontal Y2
+    tickList = &m_y2Scale.getTickList();
+    {
+        //GLfloat q3[4*tickList->count()];
+        GLfloat *q3 = m_q3TickY2.m_array;
+        int effectiveTicks = 0;
+
+        for (int i = 0; i < tickList->count(); i++)
+        {
+            tick = &(*tickList)[i];
+
+            if ((tick->major) && (tick->textSize > 0))
+            {
+                float y = 1 - (tick->pos / m_y2Scale.getSize());
+                q3[4 * effectiveTicks] = 0;
+                q3[4 * effectiveTicks + 1] = y;
+                q3[4 * effectiveTicks + 2] = 1;
+                q3[4 * effectiveTicks + 3] = y;
+                effectiveTicks++;
+            }
+        }
+
+        QVector4D color(1.0f, 1.0f, 1.0f, (float)m_displayGridIntensity / 100.0f);
+        m_glShaderSimple.drawSegments(m_glScopeMatrix2, color, q3, 2 * effectiveTicks);
+    }
+
+    // Vertical X2
+    tickList = &m_x2Scale.getTickList();
+    {
+        //GLfloat q3[4*tickList->count()];
+        GLfloat *q3 = m_q3TickX2.m_array;
+        int effectiveTicks = 0;
+
+        for (int i = 0; i < tickList->count(); i++)
+        {
+            tick = &(*tickList)[i];
+
+            if ((tick->major) && (tick->textSize > 0))
+            {
+                float x = tick->pos / m_x2Scale.getSize();
+                q3[4 * effectiveTicks] = x;
+                q3[4 * effectiveTicks + 1] = 0;
+                q3[4 * effectiveTicks + 2] = x;
+                q3[4 * effectiveTicks + 3] = 1;
+                effectiveTicks++;
+            }
+        }
+
+        QVector4D color(1.0f, 1.0f, 1.0f, (float)m_displayGridIntensity / 100.0f);
+        m_glShaderSimple.drawSegments(m_glScopeMatrix2, color, q3, 2 * effectiveTicks);
+    }
+
+    // paint left #2 scale
+    {
+        GLfloat vtx1[] = {
+            0, 1,
+            1, 1,
+            1, 0,
+            0, 0};
+        GLfloat tex1[] = {
+            0, 1,
+            1, 1,
+            1, 0,
+            0, 0};
+
+        m_glShaderLeft2Scale.drawSurface(m_glLeft2ScaleMatrix, tex1, vtx1, 4);
+    }
+
+    // paint bottom #2 scale
+    {
+        GLfloat vtx1[] = {
+            0, 1,
+            1, 1,
+            1, 0,
+            0, 0};
+        GLfloat tex1[] = {
+            0, 1,
+            1, 1,
+            1, 0,
+            0, 0};
+
+        m_glShaderBottom2Scale.drawSurface(m_glBot2ScaleMatrix, tex1, vtx1, 4);
+    }
+}
+
+void GLScope::drawPolarGrid2()
+{
+    QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+    m_glShaderSimple.drawSegments(m_glScopeMatrix2, color, m_q3Radii.m_array, 2*8);  // Radii
+    m_glShaderSimple.drawSegments(m_glScopeMatrix2, color, m_q3Circle.m_array, 2*96); // Unit circle
+}
+
+// inspired by http://slabode.exofire.net/circle_draw.shtml
+void GLScope::drawCircle(float cx, float cy, float r, int num_segments, bool dotted, GLfloat *vertices)
+{
+	float theta = 2*M_PI / float(num_segments);
+	float tangential_factor = tanf(theta); //calculate the tangential factor
+	float radial_factor = cosf(theta);     //calculate the radial factor
+
+	float x = r; //we start at angle = 0
+	float y = 0;
+
+	for (int ii = 0; ii < num_segments; ii++)
+	{
+		//output vertex
+        if (dotted)
+        {
+            vertices[2*ii]   = x + cx;
+            vertices[2*ii+1] = y + cy;
+        }
+        else
+        {
+            vertices[4*ii]   = x + cx;
+            vertices[4*ii+1] = y + cy;
+        }
+
+		// calculate the tangential vector
+		// remember, the radial vector is (x, y)
+		// to get the tangential vector we flip those coordinates and negate one of them
+		float tx = -y;
+		float ty = x;
+
+		//add the tangential vector
+		x += tx * tangential_factor;
+		y += ty * tangential_factor;
+
+		//correct using the radial factor
+		x *= radial_factor;
+		y *= radial_factor;
+
+        if (!dotted)
+        {
+            vertices[4*ii+2] = x + cx;
+            vertices[4*ii+3] = y + cy;
+        }
+	}
 }
