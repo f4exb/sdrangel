@@ -146,9 +146,15 @@ void InterferometerSink::run()
 
         if (m_spectrumSink)
         {
-            if (m_correlator.getCorrType() == InterferometerSettings::CorrelationFFT) {
+            if ((m_correlator.getCorrType() == InterferometerSettings::CorrelationFFT)
+             || (m_correlator.getCorrType() == InterferometerSettings::CorrelationIFFT)
+             || (m_correlator.getCorrType() == InterferometerSettings::CorrelationIFFT2)
+             || (m_correlator.getCorrType() == InterferometerSettings::CorrelationIFFTStar))
+            {
                 m_spectrumSink->feed(m_correlator.m_scorr.begin(), m_correlator.m_scorr.begin() + m_correlator.m_processed, false);
-            } else {
+            }
+            else
+            {
                 m_spectrumSink->feed(m_correlator.m_tcorr.begin(), m_correlator.m_tcorr.begin() + m_correlator.m_processed, false);
             }
         }
