@@ -21,6 +21,19 @@
 #include "dsp/fftengine.h"
 #include "interferometercorr.h"
 
+std::complex<float> s2c(const Sample& s)
+{
+    return std::complex<float>{s.real() / SDR_RX_SCALEF, s.imag() / SDR_RX_SCALEF};
+}
+
+std::complex<float> s2cNorm(const Sample& s)
+{
+    float x = s.real() / SDR_RX_SCALEF;
+    float y = s.imag() / SDR_RX_SCALEF;
+    float m = sqrt(x*x + y*y);
+    return std::complex<float>{x/m, y/m};
+}
+
 Sample sFirst(const Sample& a, const Sample& b) {
     return a;
 }
@@ -34,11 +47,11 @@ Sample sSecondInv(const Sample& a, const Sample& b) {
 }
 
 Sample sAdd(const Sample& a, const Sample& b) { //!< Sample addition
-    return Sample{a.real() + b.real(), a.imag() + b.imag()};
+    return Sample{(a.real()+b.real())/2, (a.imag()+b.imag())/2};
 }
 
 Sample sAddInv(const Sample& a, const Sample& b) { //!< Sample addition
-    return Sample{a.real() - b.real(), a.imag() + b.imag()};
+    return Sample{(a.real()-b.real())/2, (a.imag()+b.imag())/2};
 }
 
 Sample sMulConj(const Sample& a, const Sample& b) { //!< Sample multiply with conjugate
@@ -167,16 +180,16 @@ bool InterferometerCorrelator::performCorr(
                 results = performOpCorr(data0, size0, data1, size1, sMulConj);
                 break;
             case InterferometerSettings::CorrelationIFFT:
-                results = performFFTCorr(data0, size0, data1, size1);
-                break;
-            case InterferometerSettings::CorrelationIFFT2:
-                results = performFFT2Corr(data0, size0, data1, size1);
+                results = performIFFTCorr(data0, size0, data1, size1);
                 break;
             case InterferometerSettings::CorrelationIFFTStar:
-                results = performFFTCorr(data0, size0, data1, size1, true);
+                results = performIFFTCorr(data0, size0, data1, size1, true);
                 break;
             case InterferometerSettings::CorrelationFFT:
                 results = performFFTProd(data0, size0, data1, size1);
+                break;
+            case InterferometerSettings::CorrelationIFFT2:
+                results = performIFFT2Corr(data0, size0, data1, size1);
                 break;
             default:
                 break;
@@ -218,16 +231,16 @@ bool InterferometerCorrelator::performCorr(
                 results = performOpCorr(data0, size0, data1, size1, sMulConjInv);
                 break;
             case InterferometerSettings::CorrelationIFFT:
-                results = performFFTCorr(data0, size0, m_data1p, size1);
-                break;
-            case InterferometerSettings::CorrelationIFFT2:
-                results = performFFT2Corr(data0, size0, m_data1p, size1);
+                results = performIFFTCorr(data0, size0, m_data1p, size1);
                 break;
             case InterferometerSettings::CorrelationIFFTStar:
-                results = performFFTCorr(data0, size0, m_data1p, size1, true);
+                results = performIFFTCorr(data0, size0, m_data1p, size1, true);
                 break;
             case InterferometerSettings::CorrelationFFT:
                 results = performFFTProd(data0, size0, m_data1p, size1);
+                break;
+            case InterferometerSettings::CorrelationIFFT2:
+                results = performIFFT2Corr(data0, size0, m_data1p, size1);
                 break;
             default:
                 break;
@@ -270,16 +283,16 @@ bool InterferometerCorrelator::performCorr(
                 results = performOpCorr(data0, size0, m_data1p, size1, sMulConj);
                 break;
             case InterferometerSettings::CorrelationIFFT:
-                results = performFFTCorr(data0, size0, m_data1p, size1);
-                break;
-            case InterferometerSettings::CorrelationIFFT2:
-                results = performFFT2Corr(data0, size0, m_data1p, size1);
+                results = performIFFTCorr(data0, size0, m_data1p, size1);
                 break;
             case InterferometerSettings::CorrelationIFFTStar:
-                results = performFFTCorr(data0, size0, m_data1p, size1, true);
+                results = performIFFTCorr(data0, size0, m_data1p, size1, true);
                 break;
             case InterferometerSettings::CorrelationFFT:
                 results = performFFTProd(data0, size0, m_data1p, size1);
+                break;
+            case InterferometerSettings::CorrelationIFFT2:
+                results = performIFFT2Corr(data0, size0, m_data1p, size1);
                 break;
             default:
                 break;
@@ -314,7 +327,7 @@ bool InterferometerCorrelator::performOpCorr(
     return true;
 }
 
-bool InterferometerCorrelator::performFFTCorr(
+bool InterferometerCorrelator::performIFFTCorr(
     const SampleVector& data0,
     int size0,
     const SampleVector& data1,
@@ -336,9 +349,7 @@ bool InterferometerCorrelator::performFFTCorr(
             begin0,
             begin0 + m_fftSize,
             m_fft[0]->in(),
-            [](const Sample& s) -> std::complex<float> {
-                return std::complex<float>{s.real() / SDR_RX_SCALEF, s.imag() / SDR_RX_SCALEF};
-            }
+            s2c
         );
         m_window.apply(m_fft[0]->in());
         std::fill(m_fft[0]->in() + m_fftSize, m_fft[0]->in() + 2*m_fftSize, std::complex<float>{0, 0});
@@ -349,9 +360,7 @@ bool InterferometerCorrelator::performFFTCorr(
             begin1,
             begin1 + m_fftSize,
             m_fft[1]->in(),
-            [](const Sample& s) -> std::complex<float> {
-                return std::complex<float>{s.real() / SDR_RX_SCALEF, s.imag() / SDR_RX_SCALEF};
-            }
+            s2c
         );
         m_window.apply(m_fft[1]->in());
         std::fill(m_fft[1]->in() + m_fftSize, m_fft[1]->in() + 2*m_fftSize, std::complex<float>{0, 0});
@@ -378,7 +387,7 @@ bool InterferometerCorrelator::performFFTCorr(
             }
         );
 
-        // copy product to correlation spectrum - convert and scale to FFT size
+        // copy product to correlation spectrum - convert and scale to FFT size and Hanning window
         std::transform(
             m_invFFT->in(),
             m_invFFT->in() + m_fftSize,
@@ -407,8 +416,8 @@ bool InterferometerCorrelator::performFFTCorr(
                 [](const std::complex<float>& a, const std::complex<float>& b) -> Sample {
                     Sample s;
                     std::complex<float> sum = a + b;
-                    s.setReal(sum.real()/2.82842712475f); // 2*sqrt(2)
-                    s.setImag(sum.imag()/2.82842712475f);
+                    s.setReal(sum.real()/12.0f);
+                    s.setImag(sum.imag()/12.0f);
                     return s;
                 }
             );
@@ -419,7 +428,12 @@ bool InterferometerCorrelator::performFFTCorr(
                 m_invFFT->out(),
                 m_invFFT->out() + m_fftSize,
                 m_tcorr.begin() + nfft*m_fftSize,
-                invfft2s
+                [](const std::complex<float>& a) -> Sample {
+                    Sample s;
+                    s.setReal(a.real()/6.0f);
+                    s.setImag(a.imag()/6.0f);
+                    return s;
+                }
             );
         }
 
@@ -437,7 +451,7 @@ bool InterferometerCorrelator::performFFTCorr(
     return nfft > 0;
 }
 
-bool InterferometerCorrelator::performFFT2Corr(
+bool InterferometerCorrelator::performIFFT2Corr(
     const SampleVector& data0,
     int size0,
     const SampleVector& data1,
@@ -458,9 +472,7 @@ bool InterferometerCorrelator::performFFT2Corr(
             begin0,
             begin0 + m_fftSize,
             m_fft2[0]->in(),
-            [](const Sample& s) -> std::complex<float> {
-                return std::complex<float>{s.real() / SDR_RX_SCALEF, s.imag() / SDR_RX_SCALEF};
-            }
+            s2c
         );
         m_window.apply(m_fft2[0]->in());
         m_fft2[0]->transform();
@@ -470,9 +482,7 @@ bool InterferometerCorrelator::performFFT2Corr(
             begin1,
             begin1 + m_fftSize,
             m_fft2[1]->in(),
-            [](const Sample& s) -> std::complex<float> {
-                return std::complex<float>{s.real() / SDR_RX_SCALEF, s.imag() / SDR_RX_SCALEF};
-            }
+            s2c
         );
         m_window.apply(m_fft2[1]->in());
         m_fft2[1]->transform();
@@ -514,16 +524,26 @@ bool InterferometerCorrelator::performFFT2Corr(
         // do the inverse FFT to get time correlation
         m_invFFT2->transform();
         std::transform(
-            m_invFFT2->out() + m_fftSize/2 + 1,
+            m_invFFT2->out() + m_fftSize/2,
             m_invFFT2->out() + m_fftSize,
             m_tcorr.begin() + nfft*m_fftSize,
-            invfft2s2
+            [](const std::complex<float>& a) -> Sample {
+                Sample s;
+                s.setReal(a.real()/3.0f);
+                s.setImag(a.imag()/3.0f);
+                return s;
+            }
         );
         std::transform(
             m_invFFT2->out(),
             m_invFFT2->out() + m_fftSize/2,
             m_tcorr.begin() + nfft*m_fftSize + m_fftSize/2,
-            invfft2s2
+            [](const std::complex<float>& a) -> Sample {
+                Sample s;
+                s.setReal(a.real()/3.0f);
+                s.setImag(a.imag()/3.0f);
+                return s;
+            }
         );
 
         size -= m_fftSize;
@@ -561,9 +581,7 @@ bool InterferometerCorrelator::performFFTProd(
             begin0,
             begin0 + m_fftSize,
             m_fft2[0]->in(),
-            [](const Sample& s) -> std::complex<float> {
-                return std::complex<float>{s.real() / SDR_RX_SCALEF, s.imag() / SDR_RX_SCALEF};
-            }
+            s2cNorm
         );
         m_window.apply(m_fft2[0]->in());
         m_fft2[0]->transform();
@@ -573,9 +591,7 @@ bool InterferometerCorrelator::performFFTProd(
             begin1,
             begin1 + m_fftSize,
             m_fft2[1]->in(),
-            [](const Sample& s) -> std::complex<float> {
-                return std::complex<float>{s.real() / SDR_RX_SCALEF, s.imag() / SDR_RX_SCALEF};
-            }
+            s2cNorm
         );
         m_window.apply(m_fft2[1]->in());
         m_fft2[1]->transform();
@@ -608,8 +624,8 @@ bool InterferometerCorrelator::performFFTProd(
             m_tcorr.begin() + nfft*m_fftSize + m_fftSize/2,
             [](const std::complex<float>& a) -> Sample {
                 Sample s;
-                s.setReal(a.real()*16.0f);
-                s.setImag(a.imag()*16.0f);
+                s.setReal(a.real()/2.0f);
+                s.setImag(a.imag()/2.0f);
                 return s;
             }
         );
@@ -619,19 +635,19 @@ bool InterferometerCorrelator::performFFTProd(
             m_tcorr.begin() + nfft*m_fftSize,
             [](const std::complex<float>& a) -> Sample {
                 Sample s;
-                s.setReal(a.real()*16.0f);
-                s.setImag(a.imag()*16.0f);
+                s.setReal(a.real()/2.0f);
+                s.setImag(a.imag()/2.0f);
                 return s;
             }
         );
 
-        // feed spectrum with the direct conjugate product
+        // feed spectrum with the sum
         std::transform(
             begin0,
             begin0 + m_fftSize,
             begin1,
             m_scorr.begin() + nfft*m_fftSize,
-            sMulConj
+            sAdd
         );
 
         size -= m_fftSize;

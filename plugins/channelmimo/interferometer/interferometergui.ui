@@ -196,17 +196,17 @@
           </item>
           <item>
            <property name="text">
-            <string>IFFT2</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
             <string>IFFT*</string>
            </property>
           </item>
           <item>
            <property name="text">
             <string>FFT</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>IFFT2</string>
            </property>
           </item>
          </widget>

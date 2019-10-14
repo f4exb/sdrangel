@@ -62,14 +62,14 @@ private:
         int size1,
         Sample sampleOp(const Sample& a, const Sample& b)
     );
-    bool performFFTCorr( //!< Returns true if results were produced
+    bool performIFFTCorr( //!< Returns true if results were produced
         const SampleVector& data0,
         int size0,
         const SampleVector& data1,
         int size1,
         bool star = false
     );
-    bool performFFT2Corr( //!< Returns true if results were produced
+    bool performIFFT2Corr( //!< Returns true if results were produced
         const SampleVector& data0,
         int size0,
         const SampleVector& data1,
