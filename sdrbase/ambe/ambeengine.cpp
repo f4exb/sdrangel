@@ -16,8 +16,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#ifndef __APPLE__
 #include <fcntl.h>
 #include <sys/stat.h>
+#endif
 
 #ifndef _MSC_VER
 #include <dirent.h>
@@ -25,12 +27,10 @@
 #include <libgen.h>
 #endif
 
-#ifndef __WINDOWS__
+#if !defined(__WINDOWS__) && !defined(__APPLE__)
 #include <termios.h>
 #include <sys/ioctl.h>
-#ifndef __APPLE__
 #include <linux/serial.h>
-#endif
 #endif
 
 #include <chrono>
@@ -51,7 +51,7 @@ AMBEEngine::~AMBEEngine()
     qDebug("AMBEEngine::~AMBEEngine: %lu controllers", m_controllers.size());
 }
 
-#ifdef __WINDOWS__
+#if defined(__WINDOWS__)
 void AMBEEngine::getComList()
 {
     m_comList.clear();
@@ -69,6 +69,15 @@ void AMBEEngine::getComList()
 // Do not activate serial support at all for windows
 void AMBEEngine::scan(std::vector<QString>& ambeDevices)
 {
+    (void) ambeDevices;
+}
+#elif defined(__APPLE__)
+void AMBEEngine::getComList()
+{
+}
+void AMBEEngine::scan(std::vector<QString>& ambeDevices)
+{
+    (void) ambeDevices;
 }
 #else
 void AMBEEngine::getComList()
@@ -108,9 +117,9 @@ void AMBEEngine::getComList()
     // serial8250-devices must be probe to check for validity
     probe_serial8250_comports(m_comList, m_comList8250);
 }
-#endif // not Windows
+#endif // not Windows nor Apple
 
-#ifndef __WINDOWS__
+#if !defined(__WINDOWS__) && !defined(__APPLE__)
 void AMBEEngine::register_comport(
     std::vector<std::string>& comList,
     std::vector<std::string>& comList8250,
@@ -209,7 +218,7 @@ void AMBEEngine::scan(std::vector<QString>& ambeDevices)
         ++it;
     }
 }
-#endif // not Windows
+#endif // not Windows nor Apple
 
 bool AMBEEngine::registerController(const std::string& deviceRef)
 {
