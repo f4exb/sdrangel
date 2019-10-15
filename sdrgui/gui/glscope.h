@@ -81,6 +81,7 @@ public:
     void setDisplayXYPoints(bool value) { m_displayXYPoints = value; }
     void setDisplayXYPolarGrid(bool value) { m_displayPolGrid = value; }
     const QAtomicInt& getProcessingTraceIndex() const { return m_processingTraceIndex; }
+    void setTraceModulo(int modulo) { m_traceModulo = modulo; }
 
 signals:
     void sampleRateChanged(int);
@@ -105,6 +106,7 @@ private:
     int m_timeOfsProMill;
     uint32_t m_triggerPre;
     int m_traceSize;
+    int m_traceModulo; //!< ineffective if <2
     int m_timeBase;
     int m_timeOffset;
     uint32_t m_focusedTraceIndex;
@@ -189,7 +191,7 @@ private:
     void drawRectGrid2();
     void drawPolarGrid2();
     static void drawCircle(float cx, float cy, float r, int num_segments, bool dotted, GLfloat *vertices);
-    static void setColorPalette(int nbVertices, GLfloat *colors);
+    static void setColorPalette(int nbVertices, int modulo, GLfloat *colors);
 
 protected slots:
     void cleanup();

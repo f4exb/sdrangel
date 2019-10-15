@@ -52,6 +52,7 @@ GLScope::GLScope(QWidget *parent) : QGLWidget(parent),
     m_timeOfsProMill(0),
     m_triggerPre(0),
     m_traceSize(0),
+    m_traceModulo(0),
     m_timeBase(1),
     m_timeOffset(0),
     m_focusedTraceIndex(0),
@@ -891,7 +892,7 @@ void GLScope::setTraceSize(int traceSize, bool emitSignal)
     m_mutex.lock();
     m_traceSize = traceSize;
     m_q3Colors.allocate(3*traceSize);
-    setColorPalette(traceSize, m_q3Colors.m_array);
+    setColorPalette(traceSize, m_traceModulo, m_q3Colors.m_array);
     m_configChanged = true;
     m_mutex.unlock();
     update();
@@ -1972,11 +1973,12 @@ void GLScope::drawCircle(float cx, float cy, float r, int num_segments, bool dot
 }
 
 // https://stackoverflow.com/questions/19452530/how-to-render-a-rainbow-spectrum
-void GLScope::setColorPalette(int nbVertices, GLfloat *colors)
+void GLScope::setColorPalette(int nbVertices, int modulo, GLfloat *colors)
 {
     for (int v = 0; v < nbVertices; v++)
     {
-        float x = 0.8f*(((float) v)/nbVertices);
+        int ci = modulo < 2 ? v : v % modulo;
+        float x = 0.8f*(((float) ci)/modulo);
         QColor c = QColor::fromHslF(x, 0.8f, 0.6f);
         colors[3*v] = c.redF();
         colors[3*v+1] = c.greenF();
