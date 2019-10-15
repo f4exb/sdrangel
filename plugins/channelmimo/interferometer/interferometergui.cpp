@@ -132,6 +132,7 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     ui->glSpectrum->setCenterFrequency(0);
 	ui->glSpectrum->setSsbSpectrum(false);
     ui->glSpectrum->setLsbDisplay(false);
+    ui->glScope->setTraceModulo(Interferometer::m_fftSize);
 
 	ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
 	ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
