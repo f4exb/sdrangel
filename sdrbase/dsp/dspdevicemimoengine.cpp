@@ -268,26 +268,6 @@ void DSPDeviceMIMOEngine::workSampleSinkFifos()
                 workSamples(data[stream].begin() + iPart2Begin, data[stream].begin() + iPart2End, stream);
             }
         }
-
-        // for (unsigned int stream = 0; stream < data.size(); stream++)
-        // {
-        //     SampleVector::const_iterator begin = data[stream].begin();
-
-        //     if (iPart1Begin != iPart1End) {
-        //         m_vectorBuffer.write(data[stream].begin() + iPart1Begin, data[stream].begin() + iPart1End, false);
-        //     }
-
-        //     if (iPart2Begin != iPart2End) {
-        //         m_vectorBuffer.write(data[stream].begin() + iPart2Begin, data[stream].begin() + iPart2End, false);
-        //     }
-
-        //     SampleVector::iterator vbegin, vend;
-        //     m_vectorBuffer.read(vbegin, vend);
-        //     workSamples(vbegin, vend, stream);
-        // }
-
-        //sampleFifo->readCommitSync(count);
-        //samplesDone += count;
     }
 }
 
@@ -310,18 +290,12 @@ void DSPDeviceMIMOEngine::workSampleSinkFifo(unsigned int stream)
         sampleFifo->readAsync(&part1begin, &part1end, &part2begin, &part2end, stream);
 
         if (part1begin != part1end) { // first part of FIFO data
-            m_vectorBuffer.write(part1begin, part1end, false);
+            workSamples(part1begin, part1end, stream);
         }
 
         if (part2begin != part2end) { // second part of FIFO data (used when block wraps around)
-            m_vectorBuffer.append(part2begin, part2end);
+            workSamples(part2begin, part2end, stream);
         }
-
-        SampleVector::iterator vbegin, vend;
-        m_vectorBuffer.read(vbegin, vend);
-        workSamples(vbegin, vend, stream);
-
-        //sampleFifo->readCommitAsync(count, stream);
     }
 }
 

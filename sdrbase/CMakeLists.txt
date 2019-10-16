@@ -99,9 +99,7 @@ set(sdrbase_SOURCES
     dsp/projector.cpp
     dsp/samplemififo.cpp
     dsp/samplesinkfifo.cpp
-    dsp/samplesinkvector.cpp
     dsp/samplesourcefifo.cpp
-    dsp/samplesinkfifodoublebuffered.cpp
     dsp/basebandsamplesink.cpp
     dsp/basebandsamplesource.cpp
     dsp/nullsink.cpp
@@ -239,10 +237,7 @@ set(sdrbase_HEADERS
     dsp/recursivefilters.h
     dsp/samplemififo.h
     dsp/samplesinkfifo.h
-    dsp/samplesinkvector.h
     dsp/samplesourcefifo.h
-    dsp/samplesinkfifodoublebuffered.h
-    dsp/samplesinkfifodecimator.h
     dsp/basebandsamplesink.h
     dsp/basebandsamplesource.h
     dsp/nullsink.h

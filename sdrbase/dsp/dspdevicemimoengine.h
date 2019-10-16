@@ -22,7 +22,6 @@
 #include <QThread>
 
 #include "dsp/dsptypes.h"
-#include "dsp/samplesinkvector.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "util/syncmessenger.h"
@@ -357,7 +356,6 @@ private:
     BasebandSampleSink *m_spectrumSink; //!< The spectrum sink
     bool m_spectrumInputSourceElseSink; //!< Source else sink stream to be used as spectrum sink input
     unsigned int m_spectrumInputIndex;  //!< Index of the stream to be used as spectrum sink input
-    SampleSinkVector m_vectorBuffer;
 
   	void run();
     void workSampleSinkFifos(); //!< transfer samples of all sinks (sync mode)
