@@ -48,6 +48,10 @@ public:
     );
     void writeAsync(const SampleVector::const_iterator& begin, unsigned int amount, unsigned int stream);
 
+    const std::vector<SampleVector>& getData() { return m_data; }
+    const SampleVector& getData(unsigned int stream) { return m_data[stream]; }
+    unsigned int getNbStreams() const { return m_data.size(); }
+
     unsigned int remainderSync()
     {
         QMutexLocker mutexLocker(&m_mutex);

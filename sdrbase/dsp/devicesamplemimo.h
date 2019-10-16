@@ -23,6 +23,7 @@
 
 #include "samplesourcefifo.h"
 #include "samplemififo.h"
+#include "samplemofifo.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "export.h"
@@ -132,23 +133,23 @@ public:
     virtual void setMessageQueueToGUI(MessageQueue *queue) = 0; // pure virtual so that child classes must have to deal with this
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
 
-    unsigned int getNbSourceFifos() const { return m_sampleSourceFifos.size(); } //!< Get the number of Tx FIFOs
-    unsigned int getNbSinkFifos() const { return m_sampleMIFifo.getNbStreams(); }     //!< Get the number of Rx FIFOs
-	SampleSourceFifo* getSampleSourceFifo(unsigned int index); //!< Get Tx FIFO at index
+    unsigned int getNbSourceFifos() const { return m_sampleMOFifo.getNbStreams(); } //!< Get the number of Tx FIFOs
+    unsigned int getNbSinkFifos() const { return m_sampleMIFifo.getNbStreams(); }   //!< Get the number of Rx FIFOs
     SampleMIFifo* getSampleMIFifo() { return &m_sampleMIFifo; }
+    SampleMOFifo* getSampleMOFifo() { return &m_sampleMOFifo; }
     // Streams and FIFOs are in opposed source/sink type whick makes it confusing when stream direction is involved:
     //   Rx: source stream -> sink FIFO    -> channel sinks
     //   Tx: sink stream   <- source FIFO  <- channel sources
     unsigned int getNbSourceStreams() const { return m_sampleMIFifo.getNbStreams(); } //!< Commodity function same as getNbSinkFifos (Rx or source streams)
-    unsigned int getNbSinkStreams() const { return m_sampleSourceFifos.size(); } //!< Commodity function same as getNbSourceFifos (Tx or sink streams)
+    unsigned int getNbSinkStreams() const { return m_sampleMOFifo.getNbStreams(); }   //!< Commodity function same as getNbSourceFifos (Tx or sink streams)
 
 protected slots:
 	void handleInputMessages();
 
 protected:
     MIMOType m_mimoType;
-    std::vector<SampleSourceFifo> m_sampleSourceFifos; //!< Tx FIFOs
     SampleMIFifo m_sampleMIFifo;      //!< Multiple Input FIFO
+    SampleMOFifo m_sampleMOFifo;      //!< Multiple Output FIFO
 	MessageQueue m_inputMessageQueue; //!< Input queue to the sink
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 };

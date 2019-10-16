@@ -375,7 +375,6 @@ private slots:
 	void handleDataRxAsync(int streamIndex); //!< Handle data when Rx samples have to be processed asynchronously
 	void handleSynchronousMessages();  //!< Handle synchronous messages with the thread
 	void handleInputMessages();        //!< Handle input message queue
-	void handleForwardToSpectrumSink(int nbSamples);
 };
 
 #endif // SDRBASE_DSP_DSPDEVICEMIMOENGINE_H_

@@ -834,11 +834,11 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
         BasebandSampleSink* spectrumSink = ((DSPRemoveSpectrumSink*) message)->getSampleSink();
         spectrumSink->stop();
 
-        if (!m_spectrumInputSourceElseSink && m_deviceSampleMIMO && (m_spectrumInputIndex <  m_deviceSampleMIMO->getNbSinkStreams()))
-        {
-            SampleSourceFifo *inputFIFO = m_deviceSampleMIMO->getSampleSourceFifo(m_spectrumInputIndex);
-            disconnect(inputFIFO, SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
-        }
+        // if (!m_spectrumInputSourceElseSink && m_deviceSampleMIMO && (m_spectrumInputIndex <  m_deviceSampleMIMO->getNbSinkStreams()))
+        // {
+        //     SampleSourceFifo *inputFIFO = m_deviceSampleMIMO->getSampleSourceFifo(m_spectrumInputIndex);
+        //     disconnect(inputFIFO, SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
+        // }
 
         m_spectrumSink = nullptr;
     }
@@ -850,16 +850,16 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
 
         if ((spectrumInputSourceElseSink != m_spectrumInputSourceElseSink) || (spectrumInputIndex != m_spectrumInputIndex))
         {
-            if (!m_spectrumInputSourceElseSink) // remove the source listener
-            {
-                SampleSourceFifo *inputFIFO = m_deviceSampleMIMO->getSampleSourceFifo(m_spectrumInputIndex);
-                disconnect(inputFIFO, SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
-            }
+            // if (!m_spectrumInputSourceElseSink) // remove the source listener
+            // {
+            //     SampleSourceFifo *inputFIFO = m_deviceSampleMIMO->getSampleSourceFifo(m_spectrumInputIndex);
+            //     disconnect(inputFIFO, SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
+            // }
 
             if ((!spectrumInputSourceElseSink) && (spectrumInputIndex <  m_deviceSampleMIMO->getNbSinkStreams())) // add the source listener
             {
-                SampleSourceFifo *inputFIFO = m_deviceSampleMIMO->getSampleSourceFifo(spectrumInputIndex);
-                connect(inputFIFO, SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
+                // SampleSourceFifo *inputFIFO = m_deviceSampleMIMO->getSampleSourceFifo(spectrumInputIndex);
+                // connect(inputFIFO, SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
 
                 if (m_spectrumSink)
                 {
@@ -1041,18 +1041,6 @@ void DSPDeviceMIMOEngine::configureCorrections(bool dcOffsetCorrection, bool iqI
 	qDebug() << "DSPDeviceMIMOEngine::configureCorrections";
 	ConfigureCorrection* cmd = new ConfigureCorrection(dcOffsetCorrection, iqImbalanceCorrection, isource);
 	m_inputMessageQueue.push(cmd);
-}
-
-// This is used for the Tx (sink streams) side
-void DSPDeviceMIMOEngine::handleForwardToSpectrumSink(int nbSamples)
-{
-	if ((m_spectrumSink) && (m_spectrumInputIndex < m_deviceSampleMIMO->getNbSinkStreams()))
-	{
-		SampleSourceFifo* sampleFifo = m_deviceSampleMIMO->getSampleSourceFifo(m_spectrumInputIndex);
-		SampleVector::iterator readUntil;
-		sampleFifo->getReadIterator(readUntil);
-		m_spectrumSink->feed(readUntil - nbSamples, readUntil, false);
-	}
 }
 
 void DSPDeviceMIMOEngine::iqCorrections(SampleVector::iterator begin, SampleVector::iterator end, int isource, bool imbalanceCorrection)

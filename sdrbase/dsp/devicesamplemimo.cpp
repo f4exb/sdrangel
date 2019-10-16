@@ -42,12 +42,3 @@ void DeviceSampleMIMO::handleInputMessages()
 		}
 	}
 }
-
-SampleSourceFifo* DeviceSampleMIMO::getSampleSourceFifo(unsigned int index)
-{
-    if (index >= m_sampleSourceFifos.size()) {
-        return nullptr;
-    } else {
-        return &m_sampleSourceFifos[index];
-    }
-}
