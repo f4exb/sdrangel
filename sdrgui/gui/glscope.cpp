@@ -1978,7 +1978,8 @@ void GLScope::setColorPalette(int nbVertices, int modulo, GLfloat *colors)
     for (int v = 0; v < nbVertices; v++)
     {
         int ci = modulo < 2 ? v : v % modulo;
-        float x = 0.8f*(((float) ci)/modulo);
+        int nbColors = modulo < 2 ? nbVertices : modulo;
+        float x = 0.8f*(((float) ci)/nbColors);
         QColor c = QColor::fromHslF(x, 0.8f, 0.6f);
         colors[3*v] = c.redF();
         colors[3*v+1] = c.greenF();
