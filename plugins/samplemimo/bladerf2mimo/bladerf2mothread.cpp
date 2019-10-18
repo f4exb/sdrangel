@@ -16,7 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "bladerf2/devicebladerf2shared.h"
-#include "dsp/samplesourcefifo.h"
+#include "dsp/samplemofifo.h"
 
 #include "bladerf2mothread.h"
 
@@ -106,31 +106,30 @@ unsigned int BladeRF2MOThread::getLog2Interpolation() const
     return m_log2Interp;
 }
 
-void BladeRF2MOThread::setFifo(unsigned int channel, SampleSourceFifo *sampleFifo)
+void BladeRF2MOThread::setFcPos(int fcPos)
 {
-    if (channel < 2) {
-        m_sampleFifo[channel] = sampleFifo;
-    }
+    m_fcPos = fcPos;
 }
 
-SampleSourceFifo *BladeRF2MOThread::getFifo(unsigned int channel)
+int BladeRF2MOThread::getFcPos() const
 {
-    if (channel < 2) {
-        return m_sampleFifo[channel];
-    } else {
-        return nullptr;
-    }
+    return m_fcPos;
 }
 
 void BladeRF2MOThread::callback(qint16* buf, qint32 samplesPerChannel)
 {
-    for (unsigned int channel = 0; channel < 2; channel++)
+    unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
+    m_sampleFifo->readSync(samplesPerChannel, iPart1Begin, iPart1End, iPart2Begin, iPart2End);
+
+    if (iPart1Begin != iPart1End)
     {
-        if (m_sampleFifo[channel]) {
-           channelCallback(&buf[2*samplesPerChannel*channel], samplesPerChannel, channel);
-        } else {
-            std::fill(&buf[2*samplesPerChannel*channel], &buf[2*samplesPerChannel*channel]+2*samplesPerChannel, 0); // fill with zero samples
-        }
+        callbackPart(buf, samplesPerChannel, iPart1Begin, iPart1End - iPart1Begin);
+    }
+
+    if (iPart2Begin != iPart2End)
+    {
+        unsigned int part1Size = iPart1End - iPart1End;
+        callbackPart(buf + 2*part1Size, samplesPerChannel, iPart2Begin, iPart2End - iPart2Begin);
     }
 
     int status = bladerf_interleave_stream_buffer(BLADERF_TX_X2, BLADERF_FORMAT_SC16_Q11 , samplesPerChannel*2, (void *) buf);
@@ -143,55 +142,96 @@ void BladeRF2MOThread::callback(qint16* buf, qint32 samplesPerChannel)
 }
 
 //  Interpolate according to specified log2 (ex: log2=4 => decim=16). len is a number of samples (not a number of I or Q)
-void BladeRF2MOThread::channelCallback(qint16* buf, qint32 len, unsigned int channel)
+void BladeRF2MOThread::callbackPart(qint16* buf, qint32 samplesPerChannel, int iBegin, qint32 nSamples)
 {
-    if (m_sampleFifo[channel])
+    for (unsigned int channel = 0; channel < 2; channel++)
     {
-        float bal = m_sampleFifo[channel]->getRWBalance();
-
-        if (bal < -0.25) {
-            qDebug("BladeRF2MOThread::channelCallback: read lags: %f", bal);
-        } else if (bal > 0.25) {
-            qDebug("BladeRF2MOThread::channelCallback: read leads: %f", bal);
-        }
-
-        SampleVector::iterator beginRead;
-        m_sampleFifo[channel]->readAdvance(beginRead, len/(1<<m_log2Interp));
-        beginRead -= len;
+        SampleVector::iterator begin = m_sampleFifo->getData(channel).begin() + iBegin;
 
         if (m_log2Interp == 0)
         {
-            m_interpolators[channel].interpolate1(&beginRead, buf, len*2);
+            m_interpolators[channel].interpolate1(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
         }
         else
         {
-            switch (m_log2Interp)
+            if (m_fcPos == 0) // Infra
             {
-            case 1:
-                m_interpolators[channel].interpolate2_cen(&beginRead, buf, len*2);
-                break;
-            case 2:
-                m_interpolators[channel].interpolate4_cen(&beginRead, buf, len*2);
-                break;
-            case 3:
-                m_interpolators[channel].interpolate8_cen(&beginRead, buf, len*2);
-                break;
-            case 4:
-                m_interpolators[channel].interpolate16_cen(&beginRead, buf, len*2);
-                break;
-            case 5:
-                m_interpolators[channel].interpolate32_cen(&beginRead, buf, len*2);
-                break;
-            case 6:
-                m_interpolators[channel].interpolate64_cen(&beginRead, buf, len*2);
-                break;
-            default:
-                break;
+                switch (m_log2Interp)
+                {
+                case 1:
+                    m_interpolators[channel].interpolate2_inf(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                case 2:
+                    m_interpolators[channel].interpolate4_inf(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                case 3:
+                    m_interpolators[channel].interpolate8_inf(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                case 4:
+                    m_interpolators[channel].interpolate16_inf(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                case 5:
+                    m_interpolators[channel].interpolate32_inf(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                case 6:
+                    m_interpolators[channel].interpolate64_inf(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                default:
+                    break;
+                }
+            }
+            else if (m_fcPos == 1) // Supra
+            {
+                switch (m_log2Interp)
+                {
+                case 1:
+                    m_interpolators[channel].interpolate2_sup(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                case 2:
+                    m_interpolators[channel].interpolate4_sup(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                case 3:
+                    m_interpolators[channel].interpolate8_sup(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                case 4:
+                    m_interpolators[channel].interpolate16_sup(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                case 5:
+                    m_interpolators[channel].interpolate32_sup(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                case 6:
+                    m_interpolators[channel].interpolate64_sup(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                default:
+                    break;
+                }
+            }
+            else if (m_fcPos == 2) // Center
+            {
+                switch (m_log2Interp)
+                {
+                case 1:
+                    m_interpolators[channel].interpolate2_cen(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                case 2:
+                    m_interpolators[channel].interpolate4_cen(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                case 3:
+                    m_interpolators[channel].interpolate8_cen(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                case 4:
+                    m_interpolators[channel].interpolate16_cen(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                case 5:
+                    m_interpolators[channel].interpolate32_cen(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                case 6:
+                    m_interpolators[channel].interpolate64_cen(&begin, &buf[channel*2*samplesPerChannel], nSamples*2);
+                    break;
+                default:
+                    break;
+                }
             }
         }
-    }
-    else
-    {
-        std::fill(buf, buf+2*len, 0);
     }
 }

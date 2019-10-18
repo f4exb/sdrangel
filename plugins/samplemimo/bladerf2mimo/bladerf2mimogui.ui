@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
+    <width>366</width>
     <height>220</height>
    </rect>
   </property>
@@ -183,6 +183,57 @@
       </widget>
      </item>
      <item>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="startStopRxLabel">
+       <property name="text">
+        <string>Rx</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="startStopRx">
+       <property name="toolTip">
+        <string>start/stop acquisition (Rx)</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/play.png</normaloff>
+         <normalon>:/stop.png</normalon>:/play.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="startStopTxLabel">
+       <property name="text">
+        <string>Tx</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="startStopTx">
+       <property name="toolTip">
+        <string>start/stop generation (Tx)</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/play.png</normaloff>
+         <normalon>:/stop.png</normalon>:/play.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -206,21 +257,6 @@
       <layout class="QVBoxLayout" name="deviceUILayout">
        <item>
         <layout class="QHBoxLayout" name="deviceButtonsLayout">
-         <item>
-          <widget class="ButtonSwitch" name="startStop">
-           <property name="toolTip">
-            <string>start/stop acquisition</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset resource="../../../sdrgui/resources/res.qrc">
-             <normaloff>:/play.png</normaloff>
-             <normalon>:/stop.png</normalon>:/play.png</iconset>
-           </property>
-          </widget>
-         </item>
          <item>
           <widget class="ButtonSwitch" name="record">
            <property name="toolTip">

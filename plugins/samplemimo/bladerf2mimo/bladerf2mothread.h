@@ -25,7 +25,7 @@
 
 #include "dsp/interpolators.h"
 
-class SampleSourceFifo;
+class SampleMOFifo;
 
 class BladeRF2MOThread : public QThread {
     Q_OBJECT
@@ -39,8 +39,10 @@ public:
     bool isRunning() const { return m_running; }
     void setLog2Interpolation(unsigned int log2_interp);
     unsigned int getLog2Interpolation() const;
-    void setFifo(unsigned int channel, SampleSourceFifo *sampleFifo);
-    SampleSourceFifo *getFifo(unsigned int channel);
+    void setFcPos(int fcPos);
+    int getFcPos() const;
+    void setFifo(SampleMOFifo *sampleFifo) { m_sampleFifo = sampleFifo; }
+    SampleMOFifo *getFifo() { return m_sampleFifo; }
 
 private:
     QMutex m_startWaitMutex;
@@ -49,13 +51,14 @@ private:
     struct bladerf* m_dev;
 
     qint16 *m_buf; //!< Full buffer for SISO or MIMO operation
-    SampleSourceFifo* m_sampleFifo[2];
+    SampleMOFifo* m_sampleFifo;
     Interpolators<qint16, SDR_TX_SAMP_SZ, 12>  m_interpolators[2];
     unsigned int m_log2Interp;
+    int m_fcPos;
 
     void run();
     unsigned int getNbFifos();
-    void channelCallback(qint16* buf, qint32 len, unsigned int channel = 0);
+    void callbackPart(qint16* buf, qint32 samplesPerChannel, int iBegin, qint32 nSamples);
     void callback(qint16* buf, qint32 samplesPerChannel);
 };
 

@@ -33,7 +33,7 @@ struct BladeRF2MIMOSettings {
 
     quint64  m_rxCenterFrequency;
     quint32  m_log2Decim;
-    fcPos_t  m_fcPos;
+    fcPos_t  m_fcPosRx;
     qint32   m_rxBandwidth;
     int      m_rx0GainMode;
     int      m_rx0GlobalGain;
@@ -47,6 +47,7 @@ struct BladeRF2MIMOSettings {
 
     quint64  m_txCenterFrequency;
     quint32  m_log2Interp;
+    fcPos_t  m_fcPosTx;
     qint32   m_txBandwidth;
     int      m_tx0GlobalGain;
     int      m_tx1GlobalGain;

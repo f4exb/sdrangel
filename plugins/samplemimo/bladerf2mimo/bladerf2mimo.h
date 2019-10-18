@@ -212,6 +212,9 @@ public:
     void getTxBandwidthRange(int& min, int& max, int& step);
     void getTxGlobalGainRange(int& min, int& max, int& step);
 
+    bool getRxRunning() const { return m_runningRx; }
+    bool getTxRunning() const { return m_runningTx; }
+
 private:
 	DeviceAPI *m_deviceAPI;
     std::vector<FileRecord *> m_fileSinks; //!< File sinks to record device I/Q output
@@ -220,7 +223,7 @@ private:
 	BladeRF2MIThread* m_sourceThread;
     BladeRF2MOThread* m_sinkThread;
 	QString m_deviceDescription;
-    bool m_rxElseTx;
+    bool m_startStopRxElseTx;
 	bool m_runningRx;
 	bool m_runningTx;
     QNetworkAccessManager *m_networkManager;
