@@ -100,7 +100,8 @@ private slots:
 	void on_streamIndex_currentIndexChanged(int index);
 	void on_spectrumSide_currentIndexChanged(int index);
 	void on_spectrumIndex_currentIndexChanged(int index);
-	void on_startStop_toggled(bool checked);
+	void on_startStopRx_toggled(bool checked);
+	void on_startStopTx_toggled(bool checked);
 	void on_record_toggled(bool checked);
     void on_centerFrequency_changed(quint64 value);
 	void on_LOppm_valueChanged(int value);

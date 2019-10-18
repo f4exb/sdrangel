@@ -31,7 +31,7 @@ void BladeRF2MIMOSettings::resetToDefaults()
 
     m_rxCenterFrequency = 435000*1000;
     m_log2Decim = 0;
-    m_fcPos = FC_POS_INFRA;
+    m_fcPosRx = FC_POS_INFRA;
     m_rxBandwidth = 1500000;
     m_rx0GainMode = 0;
     m_rx0GlobalGain = 0;
@@ -45,6 +45,7 @@ void BladeRF2MIMOSettings::resetToDefaults()
 
     m_txCenterFrequency = 435000*1000;
     m_log2Interp = 0;
+    m_fcPosTx = FC_POS_CENTER;
     m_txBandwidth = 1500000;
     m_tx0GlobalGain = -3;
     m_tx1GlobalGain = -3;
@@ -68,7 +69,7 @@ QByteArray BladeRF2MIMOSettings::serialize() const
 
     s.writeU64(10, m_rxCenterFrequency);
     s.writeU32(11, m_log2Decim);
-    s.writeS32(12, (int) m_fcPos);
+    s.writeS32(12, (int) m_fcPosRx);
     s.writeS32(13, m_rxBandwidth);
     s.writeS32(14, m_rx0GainMode);
     s.writeS32(15, m_rx0GlobalGain);
@@ -88,6 +89,7 @@ QByteArray BladeRF2MIMOSettings::serialize() const
     s.writeBool(35, m_txBiasTee);
     s.writeBool(36, m_txTransverterMode);
     s.writeS64(37, m_txTransverterDeltaFrequency);
+    s.writeS32(38, (int) m_fcPosTx);
 
     s.writeString(50, m_fileRecordName);
     s.writeBool(51, m_useReverseAPI);
@@ -118,8 +120,8 @@ bool BladeRF2MIMOSettings::deserialize(const QByteArray& data)
 
         d.readU64(10, &m_rxCenterFrequency, 435000*1000);
         d.readU32(11, &m_log2Decim);
-        d.readS32(12, &intval);
-        m_fcPos = (fcPos_t) intval;
+        d.readS32(12, &intval, 0);
+        m_fcPosRx = (fcPos_t) intval;
         d.readS32(13, &m_rxBandwidth);
         d.readS32(14, &m_rx0GainMode);
         d.readS32(15, &m_rx0GlobalGain);
@@ -139,6 +141,8 @@ bool BladeRF2MIMOSettings::deserialize(const QByteArray& data)
         d.readBool(35, &m_txBiasTee);
         d.readBool(36, &m_txTransverterMode, false);
         d.readS64(37, &m_txTransverterDeltaFrequency, 0);
+        d.readS32(38, &intval, 2);
+        m_fcPosTx = (fcPos_t) intval;
 
         d.readString(50, &m_fileRecordName, "");
         d.readBool(51, &m_useReverseAPI, false);

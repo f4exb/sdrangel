@@ -90,7 +90,7 @@ BladeRF2MIMOGui::BladeRF2MIMOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleMIMO->setMessageQueueToGUI(&m_inputMessageQueue);
 
-    CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
+    CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStopRx);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 }
 
@@ -173,6 +173,7 @@ void BladeRF2MIMOGui::displaySettings()
         ui->label_decim->setText(QString("Dec"));
         ui->decim->setToolTip(QString("Decimation factor"));
         ui->gainMode->setEnabled(true);
+        ui->fcPos->setCurrentIndex((int) m_settings.m_fcPosRx);
 
         if (m_streamIndex == 0)
         {
@@ -205,6 +206,7 @@ void BladeRF2MIMOGui::displaySettings()
         ui->label_decim->setText(QString("Int"));
         ui->decim->setToolTip(QString("Interpolation factor"));
         ui->gainMode->setEnabled(false);
+        ui->fcPos->setCurrentIndex((int) m_settings.m_fcPosTx);
 
         if (m_streamIndex == 0)
         {
@@ -221,7 +223,6 @@ void BladeRF2MIMOGui::displaySettings()
     ui->sampleRate->setValue(m_settings.m_devSampleRate);
     ui->LOppm->setValue(m_settings.m_LOppmTenths);
     ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
-    ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
 
     displaySampleRate();
 }
@@ -267,7 +268,7 @@ void BladeRF2MIMOGui::displayFcTooltip()
     {
         fShift = DeviceSampleStatic::calculateSourceFrequencyShift(
             m_settings.m_log2Decim,
-            (DeviceSampleStatic::fcPos_t) m_settings.m_fcPos,
+            (DeviceSampleStatic::fcPos_t) m_settings.m_fcPosRx,
             m_settings.m_devSampleRate,
             DeviceSampleStatic::FrequencyShiftScheme::FSHIFT_STD
         );
@@ -275,8 +276,8 @@ void BladeRF2MIMOGui::displayFcTooltip()
     else
     {
         fShift = DeviceSampleStatic::calculateSinkFrequencyShift(
-            m_settings.m_log2Decim,
-            (DeviceSampleStatic::fcPos_t) m_settings.m_fcPos,
+            m_settings.m_log2Interp,
+            (DeviceSampleStatic::fcPos_t) m_settings.m_fcPosTx,
             m_settings.m_devSampleRate
         );
     }
@@ -300,6 +301,7 @@ void BladeRF2MIMOGui::displayGainModes()
     else
     {
         ui->gainMode->clear();
+        ui->gainMode->addItem("automatic");
     }
 
     ui->gainMode->blockSignals(false);
@@ -413,11 +415,20 @@ void BladeRF2MIMOGui::on_spectrumIndex_currentIndexChanged(int index)
     updateSampleRateAndFrequency();
 }
 
-void BladeRF2MIMOGui::on_startStop_toggled(bool checked)
+void BladeRF2MIMOGui::on_startStopRx_toggled(bool checked)
 {
     if (m_doApplySettings)
     {
-        BladeRF2MIMO::MsgStartStop *message = BladeRF2MIMO::MsgStartStop::create(checked, m_rxElseTx);
+        BladeRF2MIMO::MsgStartStop *message = BladeRF2MIMO::MsgStartStop::create(checked, true);
+        m_sampleMIMO->getInputMessageQueue()->push(message);
+    }
+}
+
+void BladeRF2MIMOGui::on_startStopTx_toggled(bool checked)
+{
+    if (m_doApplySettings)
+    {
+        BladeRF2MIMO::MsgStartStop *message = BladeRF2MIMO::MsgStartStop::create(checked, false);
         m_sampleMIMO->getInputMessageQueue()->push(message);
     }
 }
@@ -497,7 +508,12 @@ void BladeRF2MIMOGui::on_sampleRate_changed(quint64 value)
 
 void BladeRF2MIMOGui::on_fcPos_currentIndexChanged(int index)
 {
-    m_settings.m_fcPos = (BladeRF2MIMOSettings::fcPos_t) (index < 0 ? 0 : index > 2 ? 2 : index);
+    if (m_rxElseTx) {
+        m_settings.m_fcPosRx = (BladeRF2MIMOSettings::fcPos_t) (index < 0 ? 0 : index > 2 ? 2 : index);
+    } else {
+        m_settings.m_fcPosTx = (BladeRF2MIMOSettings::fcPos_t) (index < 0 ? 0 : index > 2 ? 2 : index);
+    }
+
     displayFcTooltip();
     sendSettings();
 }
@@ -681,21 +697,38 @@ void BladeRF2MIMOGui::updateStatus()
 {
     int state = m_deviceUISet->m_deviceAPI->state();
 
-    if(m_lastEngineState != state)
+    if (m_lastEngineState != state)
     {
         switch(state)
         {
             case DeviceAPI::StNotStarted:
-                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+                ui->startStopRx->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+                ui->startStopTx->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
                 break;
             case DeviceAPI::StIdle:
-                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
+                ui->startStopRx->setStyleSheet("QToolButton { background-color : blue; }");
+                ui->startStopTx->setStyleSheet("QToolButton { background-color : blue; }");
                 break;
             case DeviceAPI::StRunning:
-                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+            {
+                if (m_sampleMIMO->getRxRunning()) {
+                    ui->startStopRx->setStyleSheet("QToolButton { background-color : green; }");
+                } else {
+                    ui->startStopRx->setStyleSheet("QToolButton { background-color : blue; }");
+                }
+                if (m_sampleMIMO->getTxRunning()) {
+                    ui->startStopTx->setStyleSheet("QToolButton { background-color : green; }");
+                } else {
+                    ui->startStopTx->setStyleSheet("QToolButton { background-color : blue; }");
+                }
+            }
                 break;
             case DeviceAPI::StError:
-                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+                if (m_rxElseTx) {
+                    ui->startStopRx->setStyleSheet("QToolButton { background-color : red; }");
+                } else {
+                    ui->startStopTx->setStyleSheet("QToolButton { background-color : red; }");
+                }
                 QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
