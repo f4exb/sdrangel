@@ -36,8 +36,8 @@ SWGBladeRF2MIMOSettings::SWGBladeRF2MIMOSettings() {
     m_rx_center_frequency_isSet = false;
     log2_decim = 0;
     m_log2_decim_isSet = false;
-    fc_pos = 0;
-    m_fc_pos_isSet = false;
+    fc_pos_rx = 0;
+    m_fc_pos_rx_isSet = false;
     rx_bandwidth = 0;
     m_rx_bandwidth_isSet = false;
     rx0_gain_mode = 0;
@@ -62,6 +62,8 @@ SWGBladeRF2MIMOSettings::SWGBladeRF2MIMOSettings() {
     m_tx_center_frequency_isSet = false;
     log2_interp = 0;
     m_log2_interp_isSet = false;
+    fc_pos_tx = 0;
+    m_fc_pos_tx_isSet = false;
     tx_bandwidth = 0;
     m_tx_bandwidth_isSet = false;
     tx0_global_gain = 0;
@@ -100,8 +102,8 @@ SWGBladeRF2MIMOSettings::init() {
     m_rx_center_frequency_isSet = false;
     log2_decim = 0;
     m_log2_decim_isSet = false;
-    fc_pos = 0;
-    m_fc_pos_isSet = false;
+    fc_pos_rx = 0;
+    m_fc_pos_rx_isSet = false;
     rx_bandwidth = 0;
     m_rx_bandwidth_isSet = false;
     rx0_gain_mode = 0;
@@ -126,6 +128,8 @@ SWGBladeRF2MIMOSettings::init() {
     m_tx_center_frequency_isSet = false;
     log2_interp = 0;
     m_log2_interp_isSet = false;
+    fc_pos_tx = 0;
+    m_fc_pos_tx_isSet = false;
     tx_bandwidth = 0;
     m_tx_bandwidth_isSet = false;
     tx0_global_gain = 0;
@@ -152,6 +156,7 @@ SWGBladeRF2MIMOSettings::init() {
 
 void
 SWGBladeRF2MIMOSettings::cleanup() {
+
 
 
 
@@ -205,7 +210,7 @@ SWGBladeRF2MIMOSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&log2_decim, pJson["log2Decim"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&fc_pos, pJson["fcPos"], "qint32", "");
+    ::SWGSDRangel::setValue(&fc_pos_rx, pJson["fcPosRx"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rx_bandwidth, pJson["rxBandwidth"], "qint32", "");
     
@@ -230,6 +235,8 @@ SWGBladeRF2MIMOSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&tx_center_frequency, pJson["txCenterFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&log2_interp, pJson["log2Interp"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&fc_pos_tx, pJson["fcPosTx"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tx_bandwidth, pJson["txBandwidth"], "qint32", "");
     
@@ -281,8 +288,8 @@ SWGBladeRF2MIMOSettings::asJsonObject() {
     if(m_log2_decim_isSet){
         obj->insert("log2Decim", QJsonValue(log2_decim));
     }
-    if(m_fc_pos_isSet){
-        obj->insert("fcPos", QJsonValue(fc_pos));
+    if(m_fc_pos_rx_isSet){
+        obj->insert("fcPosRx", QJsonValue(fc_pos_rx));
     }
     if(m_rx_bandwidth_isSet){
         obj->insert("rxBandwidth", QJsonValue(rx_bandwidth));
@@ -319,6 +326,9 @@ SWGBladeRF2MIMOSettings::asJsonObject() {
     }
     if(m_log2_interp_isSet){
         obj->insert("log2Interp", QJsonValue(log2_interp));
+    }
+    if(m_fc_pos_tx_isSet){
+        obj->insert("fcPosTx", QJsonValue(fc_pos_tx));
     }
     if(m_tx_bandwidth_isSet){
         obj->insert("txBandwidth", QJsonValue(tx_bandwidth));
@@ -398,13 +408,13 @@ SWGBladeRF2MIMOSettings::setLog2Decim(qint32 log2_decim) {
 }
 
 qint32
-SWGBladeRF2MIMOSettings::getFcPos() {
-    return fc_pos;
+SWGBladeRF2MIMOSettings::getFcPosRx() {
+    return fc_pos_rx;
 }
 void
-SWGBladeRF2MIMOSettings::setFcPos(qint32 fc_pos) {
-    this->fc_pos = fc_pos;
-    this->m_fc_pos_isSet = true;
+SWGBladeRF2MIMOSettings::setFcPosRx(qint32 fc_pos_rx) {
+    this->fc_pos_rx = fc_pos_rx;
+    this->m_fc_pos_rx_isSet = true;
 }
 
 qint32
@@ -525,6 +535,16 @@ void
 SWGBladeRF2MIMOSettings::setLog2Interp(qint32 log2_interp) {
     this->log2_interp = log2_interp;
     this->m_log2_interp_isSet = true;
+}
+
+qint32
+SWGBladeRF2MIMOSettings::getFcPosTx() {
+    return fc_pos_tx;
+}
+void
+SWGBladeRF2MIMOSettings::setFcPosTx(qint32 fc_pos_tx) {
+    this->fc_pos_tx = fc_pos_tx;
+    this->m_fc_pos_tx_isSet = true;
 }
 
 qint32
@@ -654,7 +674,7 @@ SWGBladeRF2MIMOSettings::isSet(){
         if(m_log2_decim_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_fc_pos_isSet){
+        if(m_fc_pos_rx_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rx_bandwidth_isSet){
@@ -691,6 +711,9 @@ SWGBladeRF2MIMOSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_log2_interp_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fc_pos_tx_isSet){
             isObjectUpdated = true; break;
         }
         if(m_tx_bandwidth_isSet){

@@ -54,8 +54,8 @@ public:
     qint32 getLog2Decim();
     void setLog2Decim(qint32 log2_decim);
 
-    qint32 getFcPos();
-    void setFcPos(qint32 fc_pos);
+    qint32 getFcPosRx();
+    void setFcPosRx(qint32 fc_pos_rx);
 
     qint32 getRxBandwidth();
     void setRxBandwidth(qint32 rx_bandwidth);
@@ -92,6 +92,9 @@ public:
 
     qint32 getLog2Interp();
     void setLog2Interp(qint32 log2_interp);
+
+    qint32 getFcPosTx();
+    void setFcPosTx(qint32 fc_pos_tx);
 
     qint32 getTxBandwidth();
     void setTxBandwidth(qint32 tx_bandwidth);
@@ -142,8 +145,8 @@ private:
     qint32 log2_decim;
     bool m_log2_decim_isSet;
 
-    qint32 fc_pos;
-    bool m_fc_pos_isSet;
+    qint32 fc_pos_rx;
+    bool m_fc_pos_rx_isSet;
 
     qint32 rx_bandwidth;
     bool m_rx_bandwidth_isSet;
@@ -180,6 +183,9 @@ private:
 
     qint32 log2_interp;
     bool m_log2_interp_isSet;
+
+    qint32 fc_pos_tx;
+    bool m_fc_pos_tx_isSet;
 
     qint32 tx_bandwidth;
     bool m_tx_bandwidth_isSet;

@@ -114,7 +114,7 @@ BladeRF2MIMOSettings:
       format: int64
     log2Decim:
       type: integer
-    fcPos:
+    fcPosRx:
       description: See BladeRF2MIMO::fcPos_t
       type: integer
     rxBandwidth:
@@ -146,6 +146,9 @@ BladeRF2MIMOSettings:
       type: integer
       format: int64
     log2Interp:
+      type: integer
+    fcPosTx:
+      description: See BladeRF2MIMO::fcPos_t
       type: integer
     txBandwidth:
       type: integer
