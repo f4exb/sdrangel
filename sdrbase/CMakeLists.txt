@@ -270,6 +270,8 @@ set(sdrbase_HEADERS
     util/doublebuffer.h
     util/doublebufferfifo.h
     util/fixedtraits.h
+    util/incrementalarray.h
+    util/incrementalvector.h
     util/message.h
     util/messagequeue.h
     util/movingaverage.h

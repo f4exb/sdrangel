@@ -38,6 +38,7 @@ public:
     void init();
     /** advance read pointer for the given length and activate R/W signals */
     void readAdvance(SampleVector::iterator& readUntil, unsigned int nbSamples);
+    void readAdvance(SampleVector::const_iterator& readUntil, unsigned int nbSamples);
 
     void getReadIterator(SampleVector::iterator& readUntil); //!< get iterator past the last sample of a read advance operation (i.e. current read iterator)
     void getWriteIterator(SampleVector::iterator& writeAt);  //!< get iterator to current item for update - write phase 1

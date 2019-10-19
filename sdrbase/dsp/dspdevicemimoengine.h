@@ -26,6 +26,7 @@
 #include "util/messagequeue.h"
 #include "util/syncmessenger.h"
 #include "util/movingaverage.h"
+#include "util/incrementalvector.h"
 #include "export.h"
 
 class DeviceSampleMIMO;
@@ -347,6 +348,7 @@ private:
 
 	typedef std::list<ThreadedBasebandSampleSource*> ThreadedBasebandSampleSources;
 	std::vector<ThreadedBasebandSampleSources> m_threadedBasebandSampleSources; //!< channel sample sources on their own threads (per output stream)
+    std::vector<IncrementalVector<Sample>> m_sourceSampleBuffers;
 
     typedef std::list<MIMOChannel*> MIMOChannels;
     MIMOChannels m_mimoChannels; //!< MIMO channels
@@ -358,9 +360,12 @@ private:
     unsigned int m_spectrumInputIndex;  //!< Index of the stream to be used as spectrum sink input
 
   	void run();
-    void workSampleSinkFifos(); //!< transfer samples of all sinks (sync mode)
-    void workSampleSinkFifo(unsigned int stream); //!< transfer samples of one sink (async mode)
-    void workSamples(const SampleVector::const_iterator& vbegin, const SampleVector::const_iterator& vend, unsigned int sinkIndex);
+    void workSampleSinkFifos(); //!< transfer samples of all sink streams (sync mode)
+    void workSampleSinkFifo(unsigned int streamIndex); //!< transfer samples of one sink stream (async mode)
+    void workSamplesSink(const SampleVector::const_iterator& vbegin, const SampleVector::const_iterator& vend, unsigned int streamIndex);
+    void workSampleSourceFifos(); //!< transfer samples of all source streams (sync mode)
+    void workSampleSourceFifo(unsigned int streamIndex); //!< transfer samples of one source stream (async mode)
+    void workSamplesSource(SampleVector::const_iterator& begin, unsigned int nbSamples, unsigned int streamIndex);
 
 	State gotoIdle();     //!< Go to the idle state
 	State gotoInit();     //!< Go to the acquisition init state from idle
@@ -373,6 +378,8 @@ private:
 private slots:
 	void handleDataRxSync();           //!< Handle data when Rx samples have to be processed synchronously
 	void handleDataRxAsync(int streamIndex); //!< Handle data when Rx samples have to be processed asynchronously
+	void handleDataTxSync();           //!< Handle data when Tx samples have to be processed synchronously
+	void handleDataTxAsync(int streamIndex); //!< Handle data when Tx samples have to be processed asynchronously
 	void handleSynchronousMessages();  //!< Handle synchronous messages with the thread
 	void handleInputMessages();        //!< Handle input message queue
 };
