@@ -51,7 +51,6 @@ BladeRF2MIMO::BladeRF2MIMO(DeviceAPI *deviceAPI) :
     m_sourceThread(nullptr),
     m_sinkThread(nullptr),
 	m_deviceDescription("BladeRF2MIMO"),
-    m_startStopRxElseTx(true),
 	m_runningRx(false),
     m_runningTx(false),
     m_dev(nullptr),
@@ -147,30 +146,19 @@ void BladeRF2MIMO::init()
     m_fileSinks.push_back(new FileRecord(QString("test_1_%1.sdriq").arg(m_deviceAPI->getDeviceUID())));
     m_deviceAPI->addAncillarySink(m_fileSinks[0], 0);
     m_deviceAPI->addAncillarySink(m_fileSinks[1], 1);
+    applySettings(m_settings, true);
 }
 
-bool BladeRF2MIMO::start()
+bool BladeRF2MIMO::startRx()
 {
+    qDebug("BladeRF2MIMO::startRx");
+
     if (!m_open)
     {
-        qCritical("BladeRF2MIMO::start: device could not be opened");
+        qCritical("BladeRF2MIMO::startRx: device was not opened");
         return false;
     }
 
-    applySettings(m_settings, true);
-
-    if (m_startStopRxElseTx) {
-        startRx();
-    } else {
-        startTx();
-    }
-
-    return true;
-}
-
-void BladeRF2MIMO::startRx()
-{
-    qDebug("BladeRF2MIMO::startRx");
 	QMutexLocker mutexLocker(&m_mutex);
 
     if (m_runningRx) {
@@ -193,11 +181,20 @@ void BladeRF2MIMO::startRx()
 	m_sourceThread->startWork();
 	mutexLocker.unlock();
 	m_runningRx = true;
+
+    return true;
 }
 
-void BladeRF2MIMO::startTx()
+bool BladeRF2MIMO::startTx()
 {
     qDebug("BladeRF2MIMO::startTx");
+
+    if (!m_open)
+    {
+        qCritical("BladeRF2MIMO::startRx: device was not opened");
+        return false;
+    }
+
 	QMutexLocker mutexLocker(&m_mutex);
 
     if (m_runningTx) {
@@ -212,23 +209,16 @@ void BladeRF2MIMO::startTx()
 
     for (int i = 0; i < 2; i++)
     {
-        if (!m_dev->openRx(i)) {
-            qCritical("BladeRF2MIMO::startTx: Rx channel %u cannot be enabled", i);
+        if (!m_dev->openTx(i)) {
+            qCritical("BladeRF2MIMO::startTx: Tx channel %u cannot be enabled", i);
         }
     }
 
-	m_sourceThread->startWork();
+	m_sinkThread->startWork();
 	mutexLocker.unlock();
-	m_runningRx = true;
-}
+	m_runningTx = true;
 
-void BladeRF2MIMO::stop()
-{
-    if (m_startStopRxElseTx) {
-        stopRx();
-    } else {
-        stopTx();
-    }
+    return true;
 }
 
 void BladeRF2MIMO::stopRx()
@@ -406,22 +396,17 @@ bool BladeRF2MIMO::handleMessage(const Message& message)
             << " " << (cmd.getRxElseTx() ? "Rx" : "Tx")
             << " MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
 
-        m_startStopRxElseTx = cmd.getRxElseTx();
+        bool startStopRxElseTx = cmd.getRxElseTx();
 
-        if (cmd.getStartStop()) // start engine if not started yet
+        if (cmd.getStartStop())
         {
-            if ((m_deviceAPI->state() == DeviceAPI::StNotStarted) || (m_deviceAPI->state() == DeviceAPI::StIdle))
-            {
-                if (m_deviceAPI->initDeviceEngine()) {
-                    m_deviceAPI->startDeviceEngine();
-                }
+            if (m_deviceAPI->initDeviceEngine(startStopRxElseTx ? 0 : 1)) {
+                m_deviceAPI->startDeviceEngine(startStopRxElseTx ? 0 : 1);
             }
         }
-        else // stop engine if the other part is not running
+        else
         {
-            if ((m_startStopRxElseTx && !m_runningTx) || (!m_startStopRxElseTx && m_runningRx)) {
-                m_deviceAPI->stopDeviceEngine();
-            }
+            m_deviceAPI->stopDeviceEngine(startStopRxElseTx ? 0 : 1);
         }
 
         if (m_settings.m_useReverseAPI) {
@@ -738,6 +723,7 @@ bool BladeRF2MIMO::applySettings(const BladeRF2MIMOSettings& settings, bool forc
         || (m_settings.m_txTransverterMode != settings.m_txTransverterMode)
         || (m_settings.m_txTransverterDeltaFrequency != settings.m_txTransverterDeltaFrequency)
         || (m_settings.m_fcPosTx != settings.m_fcPosTx)
+        || (m_settings.m_log2Interp != settings.m_log2Interp)
         || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
         || (m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
     {
@@ -869,9 +855,9 @@ bool BladeRF2MIMO::applySettings(const BladeRF2MIMOSettings& settings, bool forc
     if (forwardChangeTxDSP)
     {
         int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Interp);
-        DSPMIMOSignalNotification *notif0 = new DSPMIMOSignalNotification(sampleRate, settings.m_rxCenterFrequency, false, 0);
+        DSPMIMOSignalNotification *notif0 = new DSPMIMOSignalNotification(sampleRate, settings.m_txCenterFrequency, false, 0);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif0);
-        DSPMIMOSignalNotification *notif1 = new DSPMIMOSignalNotification(sampleRate, settings.m_rxCenterFrequency, false, 1);
+        DSPMIMOSignalNotification *notif1 = new DSPMIMOSignalNotification(sampleRate, settings.m_txCenterFrequency, false, 1);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif1);
     }
 

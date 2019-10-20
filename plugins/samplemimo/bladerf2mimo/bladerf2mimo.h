@@ -148,8 +148,10 @@ public:
 	virtual void destroy();
 
 	virtual void init();
-	virtual bool start();
-	virtual void stop();
+	virtual bool startRx();
+	virtual void stopRx();
+	virtual bool startTx();
+	virtual void stopTx();
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
@@ -223,7 +225,6 @@ private:
 	BladeRF2MIThread* m_sourceThread;
     BladeRF2MOThread* m_sinkThread;
 	QString m_deviceDescription;
-    bool m_startStopRxElseTx;
 	bool m_runningRx;
 	bool m_runningTx;
     QNetworkAccessManager *m_networkManager;
@@ -235,10 +236,6 @@ private:
 
     bool openDevice();
     void closeDevice();
-    void startRx();
-    void stopRx();
-    void startTx();
-    void stopTx();
 
 	bool applySettings(const BladeRF2MIMOSettings& settings, bool force);
     bool setRxDeviceCenterFrequency(struct bladerf *dev, quint64 freq_hz, int loPpmTenths);
