@@ -55,10 +55,12 @@ BladeRF2MIMOGui::BladeRF2MIMOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_forceSettings(true),
     m_sampleMIMO(nullptr),
     m_tickCount(0),
-    m_deviceSampleRate(3072000),
+    m_rxBasebandSampleRate(3072000),
+    m_txBasebandSampleRate(3072000),
     m_rxDeviceCenterFrequency(435000*1000),
     m_txDeviceCenterFrequency(435000*1000),
-    m_lastEngineState(DeviceAPI::StNotStarted),
+    m_lastRxEngineState(DeviceAPI::StNotStarted),
+    m_lastTxEngineState(DeviceAPI::StNotStarted),
     m_sampleRateMode(true)
 {
     qDebug("BladeRF2MIMOGui::BladeRF2MIMOGui");
@@ -92,6 +94,8 @@ BladeRF2MIMOGui::BladeRF2MIMOGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStopRx);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+
+    sendSettings();
 }
 
 BladeRF2MIMOGui::~BladeRF2MIMOGui()
@@ -140,12 +144,15 @@ QByteArray BladeRF2MIMOGui::serialize() const
 
 bool BladeRF2MIMOGui::deserialize(const QByteArray& data)
 {
-    if(m_settings.deserialize(data)) {
+    if (m_settings.deserialize(data))
+    {
         displaySettings();
         m_forceSettings = true;
         sendSettings();
         return true;
-    } else {
+    }
+    else
+    {
         resetToDefaults();
         return false;
     }
@@ -314,11 +321,15 @@ bool BladeRF2MIMOGui::handleMessage(const Message& message)
         const DSPMIMOSignalNotification& notif = (const DSPMIMOSignalNotification&) message;
         int istream = notif.getIndex();
         bool sourceOrSink = notif.getSourceOrSink();
-        m_deviceSampleRate = notif.getSampleRate();
 
-        if (sourceOrSink) {
+        if (sourceOrSink)
+        {
+            m_rxBasebandSampleRate = notif.getSampleRate();
             m_rxDeviceCenterFrequency = notif.getCenterFrequency();
-        } else {
+        }
+        else
+        {
+            m_txBasebandSampleRate = notif.getSampleRate();
             m_txDeviceCenterFrequency = notif.getCenterFrequency();
         }
 
@@ -370,11 +381,14 @@ void BladeRF2MIMOGui::updateHardware()
 
 void BladeRF2MIMOGui::updateSampleRateAndFrequency()
 {
-    m_deviceUISet->getSpectrum()->setSampleRate(m_deviceSampleRate);
-
-    if (m_rxElseTx) {
+    if (m_spectrumRxElseTx)
+    {
+        m_deviceUISet->getSpectrum()->setSampleRate(m_rxBasebandSampleRate);
         m_deviceUISet->getSpectrum()->setCenterFrequency(m_rxDeviceCenterFrequency);
-    } else {
+    }
+    else
+    {
+        m_deviceUISet->getSpectrum()->setSampleRate(m_txBasebandSampleRate);
         m_deviceUISet->getSpectrum()->setCenterFrequency(m_txDeviceCenterFrequency);
     }
 }
@@ -403,7 +417,8 @@ void BladeRF2MIMOGui::on_streamIndex_currentIndexChanged(int index)
 
 void BladeRF2MIMOGui::on_spectrumSide_currentIndexChanged(int index)
 {
-    m_spectrumRxElseTx = index == 0;
+    m_spectrumRxElseTx = (index == 0);
+    updateSampleRateAndFrequency();
     // TODO
 }
 
@@ -695,46 +710,56 @@ void BladeRF2MIMOGui::setCenterFrequencySetting(uint64_t kHzValue)
 
 void BladeRF2MIMOGui::updateStatus()
 {
-    int state = m_deviceUISet->m_deviceAPI->state();
+    int stateRx = m_deviceUISet->m_deviceAPI->state(0);
+    int stateTx = m_deviceUISet->m_deviceAPI->state(1);
 
-    if (m_lastEngineState != state)
+    if (m_lastRxEngineState != stateRx)
     {
-        switch(state)
+        qDebug("BladeRF2MIMOGui::updateStatus: stateRx: %d", (int) stateRx);
+        switch(stateRx)
         {
             case DeviceAPI::StNotStarted:
                 ui->startStopRx->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-                ui->startStopTx->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
                 break;
             case DeviceAPI::StIdle:
                 ui->startStopRx->setStyleSheet("QToolButton { background-color : blue; }");
-                ui->startStopTx->setStyleSheet("QToolButton { background-color : blue; }");
                 break;
             case DeviceAPI::StRunning:
-            {
-                if (m_sampleMIMO->getRxRunning()) {
-                    ui->startStopRx->setStyleSheet("QToolButton { background-color : green; }");
-                } else {
-                    ui->startStopRx->setStyleSheet("QToolButton { background-color : blue; }");
-                }
-                if (m_sampleMIMO->getTxRunning()) {
-                    ui->startStopTx->setStyleSheet("QToolButton { background-color : green; }");
-                } else {
-                    ui->startStopTx->setStyleSheet("QToolButton { background-color : blue; }");
-                }
-            }
+                ui->startStopRx->setStyleSheet("QToolButton { background-color : green; }");
                 break;
             case DeviceAPI::StError:
-                if (m_rxElseTx) {
-                    ui->startStopRx->setStyleSheet("QToolButton { background-color : red; }");
-                } else {
-                    ui->startStopTx->setStyleSheet("QToolButton { background-color : red; }");
-                }
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
+                ui->startStopRx->setStyleSheet("QToolButton { background-color : red; }");
+                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage(0));
                 break;
             default:
                 break;
         }
 
-        m_lastEngineState = state;
+        m_lastRxEngineState = stateRx;
+    }
+
+    if (m_lastTxEngineState != stateTx)
+    {
+        qDebug("BladeRF2MIMOGui::updateStatus: stateTx: %d", (int) stateTx);
+        switch(stateTx)
+        {
+            case DeviceAPI::StNotStarted:
+                ui->startStopTx->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+                break;
+            case DeviceAPI::StIdle:
+                ui->startStopTx->setStyleSheet("QToolButton { background-color : blue; }");
+                break;
+            case DeviceAPI::StRunning:
+                ui->startStopTx->setStyleSheet("QToolButton { background-color : green; }");
+                break;
+            case DeviceAPI::StError:
+                ui->startStopTx->setStyleSheet("QToolButton { background-color : red; }");
+                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage(1));
+                break;
+            default:
+                break;
+        }
+
+        m_lastTxEngineState = stateTx;
     }
 }

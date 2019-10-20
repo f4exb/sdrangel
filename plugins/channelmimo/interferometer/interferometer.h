@@ -89,8 +89,10 @@ public:
 	virtual ~Interferometer();
 	virtual void destroy() { delete this; }
 
-	virtual void start(); //!< thread start()
-	virtual void stop(); //!< thread exit() and wait()
+	virtual void startSinks(); //!< thread start()
+	virtual void stopSinks();  //!< thread exit() and wait()
+    virtual void startSources() {}
+    virtual void stopSources() {}
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex);
     virtual void pull(Sample& sample, unsigned int sourceIndex);
 	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed

@@ -66,10 +66,12 @@ private:
     bool m_forceSettings;
 	BladeRF2MIMO* m_sampleMIMO;
 	std::size_t m_tickCount;
-    int m_deviceSampleRate;
+    int m_rxBasebandSampleRate;
+    int m_txBasebandSampleRate;
     quint64 m_rxDeviceCenterFrequency; //!< Center frequency in Rx device
     quint64 m_txDeviceCenterFrequency; //!< Center frequency in Tx device
-	int m_lastEngineState;
+	int m_lastRxEngineState;
+	int m_lastTxEngineState;
 	MessageQueue m_inputMessageQueue;
 
     bool m_sampleRateMode;
