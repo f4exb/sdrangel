@@ -418,15 +418,16 @@ void BladeRF2MIMOGui::on_streamIndex_currentIndexChanged(int index)
 void BladeRF2MIMOGui::on_spectrumSide_currentIndexChanged(int index)
 {
     m_spectrumRxElseTx = (index == 0);
+    m_deviceUISet->m_spectrum->setDisplayedStream(m_spectrumRxElseTx, m_spectrumStreamIndex);
+    m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(m_spectrumRxElseTx, m_spectrumStreamIndex);
     updateSampleRateAndFrequency();
-    // TODO
 }
 
 void BladeRF2MIMOGui::on_spectrumIndex_currentIndexChanged(int index)
 {
     m_spectrumStreamIndex = index < 0 ? 0 : index > 1 ? 1 : index;
-    m_deviceUISet->m_spectrum->setDisplayedStream(true, m_spectrumStreamIndex);
-    m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(true, m_spectrumStreamIndex);
+    m_deviceUISet->m_spectrum->setDisplayedStream(m_spectrumRxElseTx, m_spectrumStreamIndex);
+    m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(m_spectrumRxElseTx, m_spectrumStreamIndex);
     updateSampleRateAndFrequency();
 }
 
