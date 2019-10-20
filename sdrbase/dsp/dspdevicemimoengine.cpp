@@ -455,6 +455,11 @@ void DSPDeviceMIMOEngine::workSamplesSource(SampleVector::const_iterator& begin,
 
         begin = m_sourceSampleBuffers[streamIndex].m_vector.begin();
     }
+
+    // possibly feed data to spectrum sink
+    if ((m_spectrumSink) && (!m_spectrumInputSourceElseSink) && (streamIndex == m_spectrumInputIndex)) {
+        m_spectrumSink->feed(begin, begin + nbSamples, false);
+    }
 }
 
 // notStarted -> idle -> init -> running -+
