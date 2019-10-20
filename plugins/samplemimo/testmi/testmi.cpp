@@ -63,7 +63,7 @@ TestMI::~TestMI()
     delete m_networkManager;
 
     if (m_running) {
-        stop();
+        stopRx();
     }
 
     std::vector<FileRecord*>::iterator it = m_fileSinks.begin();
@@ -91,13 +91,13 @@ void TestMI::init()
     applySettings(m_settings, true);
 }
 
-bool TestMI::start()
+bool TestMI::startRx()
 {
-    qDebug("TestMI::start");
+    qDebug("TestMI::startRx");
 	QMutexLocker mutexLocker(&m_mutex);
 
     if (m_running) {
-        stop();
+        stopRx();
     }
 
     m_testSourceThreads.push_back(new TestMIThread(&m_sampleMIFifo, 0));
@@ -116,9 +116,15 @@ bool TestMI::start()
 	return true;
 }
 
-void TestMI::stop()
+bool TestMI::startTx()
 {
-    qDebug("TestMI::stop");
+    qDebug("TestMI::startTx");
+    return false;
+}
+
+void TestMI::stopRx()
+{
+    qDebug("TestMI::stopRx");
 	QMutexLocker mutexLocker(&m_mutex);
 
     std::vector<TestMIThread*>::iterator it = m_testSourceThreads.begin();
@@ -131,6 +137,11 @@ void TestMI::stop()
 
     m_testSourceThreads.clear();
 	m_running = false;
+}
+
+void TestMI::stopTx()
+{
+    qDebug("TestMI::stopTx");
 }
 
 QByteArray TestMI::serialize() const

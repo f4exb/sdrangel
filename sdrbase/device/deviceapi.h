@@ -92,11 +92,11 @@ public:
     DeviceSampleSink *getSampleSink();                //!< Return pointer to the device sample sink (single Tx) or nullptr
     DeviceSampleMIMO *getSampleMIMO();                //!< Return pointer to the device sample MIMO or nullptr
 
-    bool initDeviceEngine();    //!< Init the device engine corresponding to the stream type
-    bool startDeviceEngine();   //!< Start the device engine corresponding to the stream type
-    void stopDeviceEngine();    //!< Stop the device engine corresponding to the stream type
-    EngineState state() const;  //!< Return the state of the device engine corresponding to the stream type
-    QString errorMessage();     //!< Last error message from the device engine
+    bool initDeviceEngine(int subsystemIndex = 0);    //!< Init the device engine corresponding to the stream type
+    bool startDeviceEngine(int subsystemIndex = 0);   //!< Start the device engine corresponding to the stream type
+    void stopDeviceEngine(int subsystemIndex = 0);    //!< Stop the device engine corresponding to the stream type
+    EngineState state(int subsystemIndex = 0) const;  //!< Return the state of the device engine corresponding to the stream type
+    QString errorMessage(int subsystemIndex = 0);     //!< Last error message from the device engine
     uint getDeviceUID() const;  //!< Return the current device engine unique ID
 
     MessageQueue *getDeviceEngineInputMessageQueue();   //!< Device engine message queue

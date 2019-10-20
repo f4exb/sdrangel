@@ -31,6 +31,7 @@ public:
     ~IncrementalVector();
 
     void allocate(uint32_t size);
+    void allocate(uint32_t size, const T& init);
 
 private:
     uint32_t m_size;
@@ -52,6 +53,15 @@ void IncrementalVector<T>::allocate(uint32_t size)
 {
     if (size <= m_size) { return; }
     m_vector.resize(size);
+    m_size = size;
+}
+
+template<typename T>
+void IncrementalVector<T>::allocate(uint32_t size, const T& init)
+{
+    if (size <= m_size) { return; }
+    m_vector.resize(size);
+    std::fill(m_vector.begin(), m_vector.end(), init);
     m_size = size;
 }
 

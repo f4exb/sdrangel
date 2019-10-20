@@ -108,11 +108,11 @@ void SampleMOFifo::writeSync(const std::vector<SampleVector::const_iterator>& vb
 
     if (amount <= spaceLeft)
     {
-        for (unsigned int stream = 0; stream < m_nbStreams; stream++)
-        {
+        for (unsigned int stream = 0; stream < m_nbStreams; stream++) {
             std::copy(vbegin[stream], vbegin[stream] + amount, m_data[stream].begin() + m_writeHead);
-            m_writeHead += amount;
         }
+
+        m_writeHead += amount;
     }
     else
     {
@@ -122,8 +122,9 @@ void SampleMOFifo::writeSync(const std::vector<SampleVector::const_iterator>& vb
         {
             std::copy(vbegin[stream], vbegin[stream] + spaceLeft, m_data[stream].begin() + m_writeHead);
             std::copy(vbegin[stream] + spaceLeft, vbegin[stream] + amount, m_data[stream].begin());
-            m_writeHead = remaining;
         }
+
+        m_writeHead = remaining;
     }
 }
 

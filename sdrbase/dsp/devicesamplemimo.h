@@ -56,8 +56,10 @@ public:
 	virtual void destroy() = 0;
 
     virtual void init() = 0;  //!< initializations to be done when all collaborating objects are created and possibly connected
-	virtual bool start() = 0;
-	virtual void stop() = 0;
+	virtual bool startRx() = 0;
+	virtual void stopRx() = 0;
+	virtual bool startTx() = 0;
+	virtual void stopTx() = 0;
 
     virtual QByteArray serialize() const = 0;
     virtual bool deserialize(const QByteArray& data) = 0;

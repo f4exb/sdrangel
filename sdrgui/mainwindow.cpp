@@ -595,7 +595,8 @@ void MainWindow::removeLastDevice()
 	else if (m_deviceUIs.back()->m_deviceMIMOEngine) // MIMO tab
 	{
 	    DSPDeviceMIMOEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceMIMOEngine;
-	    lastDeviceEngine->stopProcess();
+	    lastDeviceEngine->stopProcess(1); // Tx side
+        lastDeviceEngine->stopProcess(0); // Rx side
 	    lastDeviceEngine->removeSpectrumSink(m_deviceUIs.back()->m_spectrumVis);
 
 	    ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);

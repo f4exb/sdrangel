@@ -104,8 +104,10 @@ public:
 	virtual void destroy();
 
 	virtual void init();
-	virtual bool start();
-	virtual void stop();
+	virtual bool startRx();
+	virtual void stopRx();
+	virtual bool startTx();
+	virtual void stopTx();
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);

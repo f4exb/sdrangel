@@ -184,9 +184,14 @@ public:
     class GetErrorMessage : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
+        GetErrorMessage(unsigned int subsystemIndex) :
+            m_subsystemIndex(subsystemIndex)
+        {}
         void setErrorMessage(const QString& text) { m_errorMessage = text; }
+        int getSubsystemIndex() const { return m_subsystemIndex; }
         const QString& getErrorMessage() const { return m_errorMessage; }
     private:
+        int m_subsystemIndex;
         QString m_errorMessage;
     };
 
@@ -247,9 +252,9 @@ public:
 	void start(); //!< This thread start
 	void stop();  //!< This thread stop
 
-	bool initProcess();  //!< Initialize process sequence
-	bool startProcess(); //!< Start process sequence
-	void stopProcess();  //!< Stop process sequence
+	bool initProcess(int subsystemIndex);  //!< Initialize process sequence
+	bool startProcess(int subsystemIndex); //!< Start process sequence
+	void stopProcess(int subsystemIndex);  //!< Stop process sequence
 
 	void setMIMO(DeviceSampleMIMO* mimo); //!< Set the sample MIMO type
 	DeviceSampleMIMO *getMIMO() { return m_deviceSampleMIMO; }
@@ -270,9 +275,18 @@ public:
 	void removeSpectrumSink(BasebandSampleSink* spectrumSink); //!< Add a spectrum vis baseband sample sink
     void setSpectrumSinkInput(bool sourceElseSink, int index);
 
-	State state() const { return m_state; } //!< Return DSP engine current state
+	State state(int subsystemIndex) const //!< Return DSP engine current state
+    {
+        if (subsystemIndex == 0) {
+            return m_stateRx;
+        } else if (subsystemIndex == 1) {
+            return m_stateTx;
+        } else {
+            return StNotStarted;
+        }
+    }
 
-	QString errorMessage(); //!< Return the current error message
+	QString errorMessage(int subsystemIndex); //!< Return the current error message
 	QString deviceDescription(); //!< Return the device description
 
    	void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection, int isource); //!< Configure source DSP corrections
@@ -329,9 +343,11 @@ private:
     };
 
 	uint32_t m_uid; //!< unique ID
-    State m_state;
+    State m_stateRx;
+    State m_stateTx;
 
-    QString m_errorMessage;
+    QString m_errorMessageRx;
+    QString m_errorMessageTx;
 	QString m_deviceDescription;
 
 	DeviceSampleMIMO* m_deviceSampleMIMO;
@@ -349,6 +365,7 @@ private:
 	typedef std::list<ThreadedBasebandSampleSource*> ThreadedBasebandSampleSources;
 	std::vector<ThreadedBasebandSampleSources> m_threadedBasebandSampleSources; //!< channel sample sources on their own threads (per output stream)
     std::vector<IncrementalVector<Sample>> m_sourceSampleBuffers;
+    std::vector<IncrementalVector<Sample>> m_sourceZeroBuffers;
 
     typedef std::list<MIMOChannel*> MIMOChannels;
     MIMOChannels m_mimoChannels; //!< MIMO channels
@@ -367,10 +384,10 @@ private:
     void workSampleSourceFifo(unsigned int streamIndex); //!< transfer samples of one source stream (async mode)
     void workSamplesSource(SampleVector::const_iterator& begin, unsigned int nbSamples, unsigned int streamIndex);
 
-	State gotoIdle();     //!< Go to the idle state
-	State gotoInit();     //!< Go to the acquisition init state from idle
-	State gotoRunning();  //!< Go to the running state from ready state
-	State gotoError(const QString& errorMsg); //!< Go to an error state
+	State gotoIdle(int subsystemIndex);     //!< Go to the idle state
+	State gotoInit(int subsystemIndex);     //!< Go to the acquisition init state from idle
+	State gotoRunning(int subsystemIndex);  //!< Go to the running state from ready state
+	State gotoError(int subsystemIndex, const QString& errorMsg); //!< Go to an error state
 
     void handleSetMIMO(DeviceSampleMIMO* mimo); //!< Manage MIMO device setting
    	void iqCorrections(SampleVector::iterator begin, SampleVector::iterator end, int isource, bool imbalanceCorrection);

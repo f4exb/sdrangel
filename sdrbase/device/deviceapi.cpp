@@ -239,64 +239,64 @@ DeviceSampleMIMO *DeviceAPI::getSampleMIMO()
     }
 }
 
-bool DeviceAPI::initDeviceEngine()
+bool DeviceAPI::initDeviceEngine(int subsystemIndex)
 {
     if (m_deviceSourceEngine) {
         return m_deviceSourceEngine->initAcquisition();
     } else if (m_deviceSinkEngine) {
         return m_deviceSinkEngine->initGeneration();
     } else if (m_deviceMIMOEngine) {
-        return m_deviceMIMOEngine->initProcess();
+        return m_deviceMIMOEngine->initProcess(subsystemIndex);
     } else {
         return false;
     }
 }
 
-bool DeviceAPI::startDeviceEngine()
+bool DeviceAPI::startDeviceEngine(int subsystemIndex)
 {
     if (m_deviceSourceEngine) {
         return m_deviceSourceEngine->startAcquisition();
     } else if (m_deviceSinkEngine) {
         return m_deviceSinkEngine->startGeneration();
     } else if (m_deviceMIMOEngine) {
-        return m_deviceMIMOEngine->startProcess();
+        return m_deviceMIMOEngine->startProcess(subsystemIndex);
     } else {
         return false;
     }
 }
 
-void DeviceAPI::stopDeviceEngine()
+void DeviceAPI::stopDeviceEngine(int subsystemIndex)
 {
     if (m_deviceSourceEngine) {
         m_deviceSourceEngine->stopAcquistion();
     } else if (m_deviceSinkEngine) {
         m_deviceSinkEngine->stopGeneration();
     } else if (m_deviceMIMOEngine) {
-        m_deviceMIMOEngine->stopProcess();
+        m_deviceMIMOEngine->stopProcess(subsystemIndex);
     }
 }
 
-DeviceAPI::EngineState DeviceAPI::state() const
+DeviceAPI::EngineState DeviceAPI::state(int subsystemIndex) const
 {
     if (m_deviceSourceEngine) {
         return (DeviceAPI::EngineState) m_deviceSourceEngine->state();
     } else if (m_deviceSinkEngine) {
         return (DeviceAPI::EngineState) m_deviceSinkEngine->state();
     } else if (m_deviceMIMOEngine) {
-        return (DeviceAPI::EngineState) m_deviceMIMOEngine->state();
+        return (DeviceAPI::EngineState) m_deviceMIMOEngine->state(subsystemIndex);
     } else {
         return StError;
     }
 }
 
-QString DeviceAPI::errorMessage()
+QString DeviceAPI::errorMessage(int subsystemIndex)
 {
     if (m_deviceSourceEngine) {
         return m_deviceSourceEngine->errorMessage();
     } else if (m_deviceSinkEngine) {
         return m_deviceSinkEngine->errorMessage();
     } else if (m_deviceMIMOEngine) {
-        return m_deviceMIMOEngine->errorMessage();
+        return m_deviceMIMOEngine->errorMessage(subsystemIndex);
     } else {
         return "Not implemented";
     }
