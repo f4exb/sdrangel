@@ -45,6 +45,7 @@ void AMModSettings::resetToDefaults()
     m_feedbackAudioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_feedbackVolumeFactor = 0.5f;
     m_feedbackAudioEnable = false;
+    m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -84,6 +85,7 @@ QByteArray AMModSettings::serialize() const
     s.writeString(17, m_feedbackAudioDeviceName);
     s.writeReal(18, m_feedbackVolumeFactor);
     s.writeBool(19, m_feedbackAudioEnable);
+    s.writeS32(20, m_streamIndex);
 
     return s.final();
 }
@@ -151,6 +153,7 @@ bool AMModSettings::deserialize(const QByteArray& data)
         d.readString(17, &m_feedbackAudioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readReal(18, &m_feedbackVolumeFactor, 1.0);
         d.readBool(19, &m_feedbackAudioEnable, false);
+        d.readS32(20, &m_streamIndex, 0);
 
         return true;
     }

@@ -252,6 +252,7 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     double getMagSq() const { return m_magsq; }
+    uint32_t getNumberOfDeviceStreams() const;
 
     CWKeyer *getCWKeyer() { return &m_cwKeyer; }
 

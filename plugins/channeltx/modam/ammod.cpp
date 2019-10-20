@@ -35,6 +35,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/dspcommands.h"
+#include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
 #include "util/db.h"
 
@@ -109,6 +110,11 @@ AMMod::~AMMod()
     delete m_channelizer;
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_feedbackAudioFifo);
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(&m_audioFifo);
+}
+
+uint32_t AMMod::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSinkStreams();
 }
 
 void AMMod::pull(Sample& sample)
@@ -559,6 +565,7 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
             << " m_playLoop: " << settings.m_playLoop
             << " m_modAFInput " << settings.m_modAFInput
             << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
             << " m_reverseAPIAddress: " << settings.m_reverseAPIPort
@@ -637,6 +644,25 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
             reverseAPIKeys.append("feedbackAudioSampleRate");
             applyFeedbackAudioSampleRate(audioSampleRate);
         }
+    }
+
+    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    {
+        if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
+        {
+            m_deviceAPI->removeChannelSourceAPI(this, m_settings.m_streamIndex);
+            m_deviceAPI->removeChannelSource(m_threadedChannelizer, m_settings.m_streamIndex);
+            m_deviceAPI->addChannelSource(m_threadedChannelizer, settings.m_streamIndex);
+            m_deviceAPI->addChannelSourceAPI(this, settings.m_streamIndex);
+            // apply stream sample rate to itself
+            applyChannelSettings(
+                m_basebandSampleRate,
+                m_deviceAPI->getSampleMIMO()->getSinkSampleRate(settings.m_streamIndex),
+                m_inputFrequencyOffset
+            );
+        }
+
+        reverseAPIKeys.append("streamIndex");
     }
 
     if (settings.m_useReverseAPI)

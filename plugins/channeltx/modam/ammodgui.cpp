@@ -31,6 +31,7 @@
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "gui/devicestreamselectiondialog.h"
 #include "mainwindow.h"
 
 #include "ui_ammodgui.h"
@@ -317,6 +318,20 @@ void AMModGUI::onMenuDialogCalled(const QPoint &p)
 
         applySettings();
     }
+    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
+    {
+        DeviceStreamSelectionDialog dialog(this);
+        dialog.setNumberOfStreams(m_amMod->getNumberOfDeviceStreams());
+        dialog.setStreamIndex(m_settings.m_streamIndex);
+        dialog.move(p);
+        dialog.exec();
+
+        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+        m_channelMarker.clearStreamIndexes();
+        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+        displayStreamIndex();
+        applySettings();
+    }
 
     resetContextMenuType();
 }
@@ -460,7 +475,18 @@ void AMModGUI::displaySettings()
     ui->feedbackVolume->setValue(roundf(m_settings.m_feedbackVolumeFactor * 100.0));
     ui->feedbackVolumeText->setText(QString("%1").arg(m_settings.m_feedbackVolumeFactor, 0, 'f', 2));
 
+    displayStreamIndex();
+
     blockApplySettings(false);
+}
+
+void AMModGUI::displayStreamIndex()
+{
+    if (m_deviceUISet->m_deviceMIMOEngine) {
+        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
+    } else {
+        setStreamIndicator("S"); // single channel indicator
+    }
 }
 
 void AMModGUI::leaveEvent(QEvent*)
