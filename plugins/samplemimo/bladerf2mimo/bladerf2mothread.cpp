@@ -119,7 +119,7 @@ int BladeRF2MOThread::getFcPos() const
 void BladeRF2MOThread::callback(qint16* buf, qint32 samplesPerChannel)
 {
     unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
-    m_sampleFifo->readSync(samplesPerChannel, iPart1Begin, iPart1End, iPart2Begin, iPart2End);
+    m_sampleFifo->readSync(samplesPerChannel/(1<<m_log2Interp), iPart1Begin, iPart1End, iPart2Begin, iPart2End);
 
     if (iPart1Begin != iPart1End)
     {
