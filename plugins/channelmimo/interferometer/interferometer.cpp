@@ -101,9 +101,10 @@ void Interferometer::feed(const SampleVector::const_iterator& begin, const Sampl
     m_sink->feed(begin, end, sinkIndex);
 }
 
-void Interferometer::pull(Sample& sample, unsigned int sourceIndex)
+void Interferometer::pull(const SampleVector::const_iterator& begin, unsigned int nbSamples, unsigned int sourceIndex)
 {
-    (void) sample;
+    (void) begin;
+    (void) nbSamples;
     (void) sourceIndex;
 }
 
