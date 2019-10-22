@@ -71,7 +71,7 @@ protected:
 
 protected slots:
 	void handleInputMessages();
-	void handleWriteToFifo(int nbSamples);
+	void handleWriteToSampleFifo(int nbSamples);
     void handleWriteToDeviceFifo(int nbSamples);
 };
 

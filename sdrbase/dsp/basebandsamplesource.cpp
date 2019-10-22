@@ -25,7 +25,7 @@ BasebandSampleSource::BasebandSampleSource() :
 	m_deviceSampleFifo(0)
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-	connect(&m_sampleFifo, SIGNAL(dataWrite(int)), this, SLOT(handleWriteToFifo(int)));
+	connect(&m_sampleFifo, SIGNAL(dataWrite(int)), this, SLOT(handleWriteToSampleFifo(int)));
 }
 
 BasebandSampleSource::~BasebandSampleSource()
@@ -45,7 +45,7 @@ void BasebandSampleSource::handleInputMessages()
 	}
 }
 
-void BasebandSampleSource::handleWriteToFifo(int nbSamples)
+void BasebandSampleSource::handleWriteToSampleFifo(int nbSamples)
 {
     handleWriteToFifo(&m_sampleFifo, nbSamples);
 }
