@@ -380,36 +380,36 @@ void DSPDeviceMIMOEngine::workSampleSourceFifo(unsigned int streamIndex)
  * Routes samples from device source FIFO to sink channels that are registered for the FIFO
  * Routes samples from source channels registered for the FIFO to the device sink FIFO
  */
-void DSPDeviceMIMOEngine::workSamplesSink(const SampleVector::const_iterator& vbegin, const SampleVector::const_iterator& vend, unsigned int sinkIndex)
+void DSPDeviceMIMOEngine::workSamplesSink(const SampleVector::const_iterator& vbegin, const SampleVector::const_iterator& vend, unsigned int streamIndex)
 {
 	bool positiveOnly = false;
     // DC and IQ corrections
-    // if (m_sourcesCorrections[sinkIndex].m_dcOffsetCorrection) {
-    //     iqCorrections(vbegin, vend, sinkIndex, m_sourcesCorrections[sinkIndex].m_iqImbalanceCorrection);
+    // if (m_sourcesCorrections[streamIndex].m_dcOffsetCorrection) {
+    //     iqCorrections(vbegin, vend, streamIndex, m_sourcesCorrections[streamIndex].m_iqImbalanceCorrection);
     // }
 
     // feed data to direct sinks
-    if (sinkIndex < m_basebandSampleSinks.size())
+    if (streamIndex < m_basebandSampleSinks.size())
     {
-        for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks[sinkIndex].begin(); it != m_basebandSampleSinks[sinkIndex].end(); ++it) {
+        for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks[streamIndex].begin(); it != m_basebandSampleSinks[streamIndex].end(); ++it) {
             (*it)->feed(vbegin, vend, positiveOnly);
         }
     }
 
     // possibly feed data to spectrum sink
-    if ((m_spectrumSink) && (m_spectrumInputSourceElseSink) && (sinkIndex == m_spectrumInputIndex)) {
+    if ((m_spectrumSink) && (m_spectrumInputSourceElseSink) && (streamIndex == m_spectrumInputIndex)) {
         m_spectrumSink->feed(vbegin, vend, positiveOnly);
     }
 
     // feed data to threaded sinks
-    for (ThreadedBasebandSampleSinks::const_iterator it = m_threadedBasebandSampleSinks[sinkIndex].begin(); it != m_threadedBasebandSampleSinks[sinkIndex].end(); ++it)
+    for (ThreadedBasebandSampleSinks::const_iterator it = m_threadedBasebandSampleSinks[streamIndex].begin(); it != m_threadedBasebandSampleSinks[streamIndex].end(); ++it)
     {
         (*it)->feed(vbegin, vend, positiveOnly);
     }
 
     // feed data to MIMO channels
     for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it) {
-        (*it)->feed(vbegin, vend, sinkIndex);
+        (*it)->feed(vbegin, vend, streamIndex);
     }
 }
 
@@ -454,6 +454,11 @@ void DSPDeviceMIMOEngine::workSamplesSource(SampleVector::const_iterator& begin,
         }
 
         begin = m_sourceSampleBuffers[streamIndex].m_vector.begin();
+    }
+
+    // pull data from MIMO channels
+    for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it) {
+        (*it)->pull(begin, nbSamples, streamIndex);
     }
 
     // possibly feed data to spectrum sink
