@@ -64,8 +64,10 @@ set(sdrbase_SOURCES
     dsp/agc.cpp
     dsp/downchannelizer.cpp
     dsp/upchannelizer.cpp
+    dsp/upsamplechannelizer.cpp
     dsp/channelmarker.cpp
     dsp/ctcssdetector.cpp
+    dsp/channelsamplesource.cpp
     dsp/cwkeyer.cpp
     dsp/cwkeyersettings.cpp
     dsp/decimatorsif.cpp
@@ -179,7 +181,9 @@ set(sdrbase_HEADERS
     dsp/autocorrector.h
     dsp/downchannelizer.h
     dsp/upchannelizer.h
+    dsp/upsamplechannelizer.h
     dsp/channelmarker.h
+    dsp/channelsamplesource.h
     dsp/complex.h
     dsp/cwkeyer.h
     dsp/cwkeyersettings.h
