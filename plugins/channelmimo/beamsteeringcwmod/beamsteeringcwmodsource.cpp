@@ -18,16 +18,16 @@
 #include <QMutexLocker>
 #include <QDebug>
 
-#include "dsp/upchannelizer.h"
+#include "dsp/upsamplechannelizer.h"
 #include "dsp/dspcommands.h"
 
-#include "beamsteeringcwsourceworker.h"
+#include "beamsteeringcwmodsource.h"
 
 
-MESSAGE_CLASS_DEFINITION(BeamSteeringCWSourceWorker::MsgConfigureChannelizer, Message)
-MESSAGE_CLASS_DEFINITION(BeamSteeringCWSourceWorker::MsgSignalNotification, Message)
+MESSAGE_CLASS_DEFINITION(BeamSteeringCWModSource::MsgConfigureChannelizer, Message)
+MESSAGE_CLASS_DEFINITION(BeamSteeringCWModSource::MsgSignalNotification, Message)
 
-BeamSteeringCWSourceWorker::BeamSteeringCWSourceWorker() :
+BeamSteeringCWModSource::BeamSteeringCWModSource() :
     m_mutex(QMutex::Recursive)
 {
     m_sampleMOFifo.init(2, 96000 * 8);
@@ -43,7 +43,7 @@ BeamSteeringCWSourceWorker::BeamSteeringCWSourceWorker() :
         &m_sampleMOFifo,
         &SampleMOFifo::dataSyncRead,
         this,
-        &BeamSteeringCWSourceWorker::handleData,
+        &BeamSteeringCWModSource::handleData,
         Qt::QueuedConnection
     );
 
@@ -51,7 +51,7 @@ BeamSteeringCWSourceWorker::BeamSteeringCWSourceWorker() :
     m_lastStream = 0;
 }
 
-BeamSteeringCWSourceWorker::~BeamSteeringCWSourceWorker()
+BeamSteeringCWModSource::~BeamSteeringCWModSource()
 {
     for (int i = 0; i < 2; i++)
     {
@@ -59,7 +59,7 @@ BeamSteeringCWSourceWorker::~BeamSteeringCWSourceWorker()
     }
 }
 
-void BeamSteeringCWSourceWorker::reset()
+void BeamSteeringCWModSource::reset()
 {
     QMutexLocker mutexLocker(&m_mutex);
     m_sampleMOFifo.reset();
@@ -69,14 +69,14 @@ void BeamSteeringCWSourceWorker::reset()
     }
 }
 
-void BeamSteeringCWSourceWorker::pull(const SampleVector::const_iterator& begin, unsigned int nbSamples, unsigned int streamIndex)
+void BeamSteeringCWModSource::pull(const SampleVector::const_iterator& begin, unsigned int nbSamples, unsigned int streamIndex)
 {
     if (streamIndex > 1) {
         return;
     }
 
     if (streamIndex == m_lastStream) {
-        qWarning("BeamSteeringCWSourceWorker::pull: twice same stream in a row: %u", streamIndex);
+        qWarning("BeamSteeringCWModSource::pull: twice same stream in a row: %u", streamIndex);
     }
 
     m_lastStream = streamIndex;
@@ -87,7 +87,7 @@ void BeamSteeringCWSourceWorker::pull(const SampleVector::const_iterator& begin,
     {
         if (m_sizes[0] != m_sizes[1])
         {
-            qWarning("BeamSteeringCWSourceWorker::pull: unequal sizes: [0]: %d [1]: %d", m_sizes[0], m_sizes[1]);
+            qWarning("BeamSteeringCWModSource::pull: unequal sizes: [0]: %d [1]: %d", m_sizes[0], m_sizes[1]);
             m_sampleMOFifo.writeSync(m_vbegin, std::min(m_sizes[0], m_sizes[1]));
         }
         else
@@ -97,7 +97,7 @@ void BeamSteeringCWSourceWorker::pull(const SampleVector::const_iterator& begin,
     }
 }
 
-void BeamSteeringCWSourceWorker::handleData()
+void BeamSteeringCWModSource::handleData()
 {
     QMutexLocker mutexLocker(&m_mutex);
 
@@ -126,7 +126,7 @@ void BeamSteeringCWSourceWorker::handleData()
     }
 }
 
-void BeamSteeringCWSourceWorker::processFifo(const std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend)
+void BeamSteeringCWModSource::processFifo(const std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend)
 {
     for (unsigned int stream = 0; stream < 2; stream++) {
         //TODO: m_channelizers[stream]->pull(data[stream].begin() + ibegin, iend - ibegin);
@@ -135,14 +135,14 @@ void BeamSteeringCWSourceWorker::processFifo(const std::vector<SampleVector>& da
     run();
 }
 
-void BeamSteeringCWSourceWorker::run()
+void BeamSteeringCWModSource::run()
 {
     // TODO
 }
 
-void BeamSteeringCWSourceWorker::handleInputMessages()
+void BeamSteeringCWModSource::handleInputMessages()
 {
-    qDebug("BeamSteeringCWSourceWorker::handleInputMessage");
+    qDebug("BeamSteeringCWModSource::handleInputMessage");
 	Message* message;
 
 	while ((message = m_inputMessageQueue.pop()) != 0)
@@ -153,7 +153,7 @@ void BeamSteeringCWSourceWorker::handleInputMessages()
 	}
 }
 
-bool BeamSteeringCWSourceWorker::handleMessage(const Message& cmd)
+bool BeamSteeringCWModSource::handleMessage(const Message& cmd)
 {
     if (MsgConfigureChannelizer::match(cmd))
     {
@@ -162,16 +162,17 @@ bool BeamSteeringCWSourceWorker::handleMessage(const Message& cmd)
         int log2Interp = cfg.getLog2Interp();
         int filterChainHash = cfg.getFilterChainHash();
 
-        qDebug() << "BeamSteeringCWSourceWorker::handleMessage: MsgConfigureChannelizer:"
+        qDebug() << "BeamSteeringCWModSource::handleMessage: MsgConfigureChannelizer:"
                 << " log2Interp: " << log2Interp
                 << " filterChainHash: " << filterChainHash;
 
         for (int i = 0; i < 2; i++)
         {
-            m_channelizers[i]->set(m_channelizers[i]->getInputMessageQueue(),
-                log2Interp,
-                filterChainHash);
-            //TODO: m_sinks[i].reset();
+            // TODO
+            // m_channelizers[i]->set(m_channelizers[i]->getInputMessageQueue(),
+            //     log2Interp,
+            //     filterChainHash);
+            // m_sinks[i].reset();
         }
 
         return true;
@@ -183,7 +184,7 @@ bool BeamSteeringCWSourceWorker::handleMessage(const Message& cmd)
         qint64 centerFrequency = cfg.getCenterFrequency();
         int streamIndex = cfg.getStreamIndex();
 
-        qDebug() << "BeamSteeringCWSourceWorker::handleMessage: MsgSignalNotification:"
+        qDebug() << "BeamSteeringCWModSource::handleMessage: MsgSignalNotification:"
                 << " outputSampleRate: " << outputSampleRate
                 << " centerFrequency: " << centerFrequency
                 << " streamIndex: " << streamIndex;
@@ -191,14 +192,14 @@ bool BeamSteeringCWSourceWorker::handleMessage(const Message& cmd)
         if (streamIndex < 2)
         {
             DSPSignalNotification *notif = new DSPSignalNotification(outputSampleRate, centerFrequency);
-            m_channelizers[streamIndex]->getInputMessageQueue()->push(notif);
+            // TODO: m_channelizers[streamIndex]->getInputMessageQueue()->push(notif);
         }
 
         return true;
     }
     else
     {
-        qDebug("BeamSteeringCWSourceWorker::handleMessage: unhandled: %s", cmd.getIdentifier());
+        qDebug("BeamSteeringCWModSource::handleMessage: unhandled: %s", cmd.getIdentifier());
         return false;
     }
 }

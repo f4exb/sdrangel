@@ -1,6 +1,6 @@
 project(channelmimo)
 
-add_subdirectory(beamsteeringcwsource)
+add_subdirectory(beamsteeringcwmod)
 
 if (NOT SERVER_MODE)
     add_subdirectory(interferometer)

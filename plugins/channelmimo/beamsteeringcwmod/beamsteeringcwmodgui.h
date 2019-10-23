@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_BEAMSTEERINGCWSOURCEGUI_H_
-#define INCLUDE_BEAMSTEERINGCWSOURCEGUI_H_
+#ifndef INCLUDE_BEAMSTEERINGCWMODGUI_H_
+#define INCLUDE_BEAMSTEERINGCWMODGUI_H_
 
 #include <stdint.h>
 
@@ -28,21 +28,21 @@
 #include "gui/rollupwidget.h"
 #include "util/messagequeue.h"
 
-#include "beamsteeringcwsourcesettings.h"
+#include "beamsteeringcwmodsettings.h"
 
 class PluginAPI;
 class DeviceUISet;
-class BeamSteeringCWSource;
+class BeamSteeringCWMod;
 class MIMOChannel;
 
 namespace Ui {
-    class BeamSteeringCWSourceGUI;
+    class BeamSteeringCWModGUI;
 }
 
-class BeamSteeringCWSourceGUI : public RollupWidget, public PluginInstanceGUI {
+class BeamSteeringCWModGUI : public RollupWidget, public PluginInstanceGUI {
     Q_OBJECT
 public:
-    static BeamSteeringCWSourceGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel);
+    static BeamSteeringCWModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel);
 
     virtual void destroy();
     void setName(const QString& name);
@@ -56,24 +56,24 @@ public:
     virtual bool handleMessage(const Message& message);
 
 private:
-    Ui::BeamSteeringCWSourceGUI* ui;
+    Ui::BeamSteeringCWModGUI* ui;
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
-    BeamSteeringCWSourceSettings m_settings;
+    BeamSteeringCWModSettings m_settings;
     int m_sampleRate;
     qint64 m_centerFrequency;
     double m_shiftFrequencyFactor; //!< Channel frequency shift factor
     bool m_doApplySettings;
 
-    BeamSteeringCWSource* m_bsCWSource;
+    BeamSteeringCWMod* m_bsCWSource;
     MessageQueue m_inputMessageQueue;
 
     QTime m_time;
     uint32_t m_tickCount;
 
-    explicit BeamSteeringCWSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel, QWidget* parent = nullptr);
-    virtual ~BeamSteeringCWSourceGUI();
+    explicit BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel, QWidget* parent = nullptr);
+    virtual ~BeamSteeringCWModGUI();
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);

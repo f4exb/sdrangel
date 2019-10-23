@@ -15,35 +15,36 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_BEAMSTEERINGCWSOURCE_WEBAPIADAPTER_H
-#define INCLUDE_BEAMSTEERINGCWSOURCE_WEBAPIADAPTER_H
+#include "SWGChannelSettings.h"
+#include "beamsteeringcwmod.h"
+#include "beamsteeringcwmodwebapiadapter.h"
 
-#include "channel/channelwebapiadapter.h"
-#include "beamsteeringcwsourcesettings.h"
+BeamSteeringCWModWebAPIAdapter::BeamSteeringCWModWebAPIAdapter()
+{}
 
-/**
- * Standalone API adapter only for the settings
- */
-class BeamSteeringCWSourceWebAPIAdapter : public ChannelWebAPIAdapter {
-public:
-    BeamSteeringCWSourceWebAPIAdapter();
-    virtual ~BeamSteeringCWSourceWebAPIAdapter();
+BeamSteeringCWModWebAPIAdapter::~BeamSteeringCWModWebAPIAdapter()
+{}
 
-    virtual QByteArray serialize() const { return m_settings.serialize(); }
-    virtual bool deserialize(const QByteArray& data) { return m_settings.deserialize(data); }
+int BeamSteeringCWModWebAPIAdapter::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setBeamSteeringCwModSettings(new SWGSDRangel::SWGBeamSteeringCWModSettings());
+    response.getBeamSteeringCwModSettings()->init();
+    BeamSteeringCWMod::webapiFormatChannelSettings(response, m_settings);
 
-    virtual int webapiSettingsGet(
-            SWGSDRangel::SWGChannelSettings& response,
-            QString& errorMessage);
+    return 200;
+}
 
-    virtual int webapiSettingsPutPatch(
-            bool force,
-            const QStringList& channelSettingsKeys,
-            SWGSDRangel::SWGChannelSettings& response,
-            QString& errorMessage);
+int BeamSteeringCWModWebAPIAdapter::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    BeamSteeringCWMod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 
-private:
-    BeamSteeringCWSourceSettings m_settings;
-};
-
-#endif // INCLUDE_BEAMSTEERINGCWSOURCE_WEBAPIADAPTER_H
+    return 200;
+}
