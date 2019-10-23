@@ -111,7 +111,7 @@ void BeamSteeringCWSourceWorker::handleData()
 
     while ((remainder > 0) && (m_inputMessageQueue.size() == 0))
     {
-        m_sampleMOFifo.readSync(remainder, ipart1begin, ipart1end, ipart2begin, ipart2end);
+        m_sampleMOFifo.writeSync(remainder, ipart1begin, ipart1end, ipart2begin, ipart2end);
 
         if (ipart1begin != ipart1end) { // first part of FIFO data
             processFifo(data, ipart1begin, ipart1end);
@@ -121,6 +121,7 @@ void BeamSteeringCWSourceWorker::handleData()
             processFifo(data, ipart2begin, ipart2end);
         }
 
+        m_sampleMOFifo.commitWriteSync(remainder);
         remainder = m_sampleMOFifo.remainderSync();
     }
 }
@@ -128,7 +129,7 @@ void BeamSteeringCWSourceWorker::handleData()
 void BeamSteeringCWSourceWorker::processFifo(const std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend)
 {
     for (unsigned int stream = 0; stream < 2; stream++) {
-        //TODO: m_channelizers[stream]->pull(data[stream].begin() + ibegin, data[stream].begin() + iend, false);
+        //TODO: m_channelizers[stream]->pull(data[stream].begin() + ibegin, iend - ibegin);
     }
 
     run();
