@@ -35,10 +35,16 @@ public:
 
     void readSync(
         unsigned int amount,
-		unsigned int& ipart1Begin, unsigned int& ipart1End,
-		unsigned int& ipart2Begin, unsigned int& ipart2End
+		unsigned int& ipart1Begin, unsigned int& ipart1End, // first part offsets where to read
+		unsigned int& ipart2Begin, unsigned int& ipart2End  // second part offsets
     );
-    void writeSync(const std::vector<SampleVector::const_iterator>& vbegin, unsigned int amount);
+    void writeSync(const std::vector<SampleVector::const_iterator>& vbegin, unsigned int amount); //!< copy write
+    void writeSync( //!< in place write
+        unsigned int amount,
+		unsigned int& ipart1Begin, unsigned int& ipart1End, // first part offsets where to write
+		unsigned int& ipart2Begin, unsigned int& ipart2End  // second part offsets
+    );
+    void commitWriteSync(unsigned int amount); //!< For in place write tells how much samples were written once done
 
     void readAsync(
         unsigned int amount,
@@ -46,7 +52,14 @@ public:
 		unsigned int& ipart2Begin, unsigned int& ipart2End,
         unsigned int stream
     );
-    void writeAsync(const SampleVector::const_iterator& begin, unsigned int amount, unsigned int stream);
+    void writeAsync(const SampleVector::const_iterator& begin, unsigned int amount, unsigned int stream); //!< copy write
+    void writeAsync( //!< in place write
+        unsigned int amount,
+		unsigned int& ipart1Begin, unsigned int& ipart1End,
+		unsigned int& ipart2Begin, unsigned int& ipart2End,
+        unsigned int stream
+    );
+    void commitWriteAsync(unsigned int amount, unsigned int stream); //!< For in place write tells how much samples were written once done
 
     std::vector<SampleVector>& getData() { return m_data; }
     SampleVector& getData(unsigned int stream) { return m_data[stream]; }
