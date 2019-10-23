@@ -22,53 +22,53 @@
 #include "dsp/hbfilterchainconverter.h"
 #include "mainwindow.h"
 
-#include "beamsteeringcwsourcegui.h"
-#include "beamsteeringcwsource.h"
-#include "ui_beamsteeringcwsourcegui.h"
+#include "beamsteeringcwmodgui.h"
+#include "beamsteeringcwmod.h"
+#include "ui_beamsteeringcwmodgui.h"
 
-BeamSteeringCWSourceGUI* BeamSteeringCWSourceGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel)
+BeamSteeringCWModGUI* BeamSteeringCWModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel)
 {
-    BeamSteeringCWSourceGUI* gui = new BeamSteeringCWSourceGUI(pluginAPI, deviceUISet, mimoChannel);
+    BeamSteeringCWModGUI* gui = new BeamSteeringCWModGUI(pluginAPI, deviceUISet, mimoChannel);
     return gui;
 }
 
-void BeamSteeringCWSourceGUI::destroy()
+void BeamSteeringCWModGUI::destroy()
 {
     delete this;
 }
 
-void BeamSteeringCWSourceGUI::setName(const QString& name)
+void BeamSteeringCWModGUI::setName(const QString& name)
 {
     setObjectName(name);
 }
 
-QString BeamSteeringCWSourceGUI::getName() const
+QString BeamSteeringCWModGUI::getName() const
 {
     return objectName();
 }
 
-qint64 BeamSteeringCWSourceGUI::getCenterFrequency() const {
+qint64 BeamSteeringCWModGUI::getCenterFrequency() const {
     return 0;
 }
 
-void BeamSteeringCWSourceGUI::setCenterFrequency(qint64 centerFrequency)
+void BeamSteeringCWModGUI::setCenterFrequency(qint64 centerFrequency)
 {
     (void) centerFrequency;
 }
 
-void BeamSteeringCWSourceGUI::resetToDefaults()
+void BeamSteeringCWModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
     applySettings(true);
 }
 
-QByteArray BeamSteeringCWSourceGUI::serialize() const
+QByteArray BeamSteeringCWModGUI::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool BeamSteeringCWSourceGUI::deserialize(const QByteArray& data)
+bool BeamSteeringCWModGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
@@ -80,19 +80,19 @@ bool BeamSteeringCWSourceGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool BeamSteeringCWSourceGUI::handleMessage(const Message& message)
+bool BeamSteeringCWModGUI::handleMessage(const Message& message)
 {
-    if (BeamSteeringCWSource::MsgBasebandNotification::match(message))
+    if (BeamSteeringCWMod::MsgBasebandNotification::match(message))
     {
-        BeamSteeringCWSource::MsgBasebandNotification& notif = (BeamSteeringCWSource::MsgBasebandNotification&) message;
+        BeamSteeringCWMod::MsgBasebandNotification& notif = (BeamSteeringCWMod::MsgBasebandNotification&) message;
         m_sampleRate = notif.getSampleRate();
         m_centerFrequency = notif.getCenterFrequency();
         displayRateAndShift();
         return true;
     }
-    else if (BeamSteeringCWSource::MsgConfigureBeamSteeringCWSource::match(message))
+    else if (BeamSteeringCWMod::MsgConfigureBeamSteeringCWMod::match(message))
     {
-        const BeamSteeringCWSource::MsgConfigureBeamSteeringCWSource& cfg = (BeamSteeringCWSource::MsgConfigureBeamSteeringCWSource&) message;
+        const BeamSteeringCWMod::MsgConfigureBeamSteeringCWMod& cfg = (BeamSteeringCWMod::MsgConfigureBeamSteeringCWMod&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
@@ -105,9 +105,9 @@ bool BeamSteeringCWSourceGUI::handleMessage(const Message& message)
     }
 }
 
-BeamSteeringCWSourceGUI::BeamSteeringCWSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel, QWidget* parent) :
+BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel, QWidget* parent) :
         RollupWidget(parent),
-        ui(new Ui::BeamSteeringCWSourceGUI),
+        ui(new Ui::BeamSteeringCWModGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
         m_sampleRate(0),
@@ -118,7 +118,7 @@ BeamSteeringCWSourceGUI::BeamSteeringCWSourceGUI(PluginAPI* pluginAPI, DeviceUIS
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-    m_bsCWSource = (BeamSteeringCWSource*) mimoChannel;
+    m_bsCWSource = (BeamSteeringCWMod*) mimoChannel;
     m_bsCWSource->setMessageQueueToGUI(getInputMessageQueue());
 
     m_channelMarker.blockSignals(true);
@@ -131,7 +131,7 @@ BeamSteeringCWSourceGUI::BeamSteeringCWSourceGUI(PluginAPI* pluginAPI, DeviceUIS
 
     m_settings.setChannelMarker(&m_channelMarker);
 
-    m_deviceUISet->registerChannelInstance(BeamSteeringCWSource::m_channelIdURI, this);
+    m_deviceUISet->registerChannelInstance(BeamSteeringCWMod::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 
@@ -144,30 +144,30 @@ BeamSteeringCWSourceGUI::BeamSteeringCWSourceGUI(PluginAPI* pluginAPI, DeviceUIS
     applySettings(true);
 }
 
-BeamSteeringCWSourceGUI::~BeamSteeringCWSourceGUI()
+BeamSteeringCWModGUI::~BeamSteeringCWModGUI()
 {
     m_deviceUISet->removeChannelInstance(this);
     delete m_bsCWSource; // TODO: check this: when the GUI closes it has to delete the demodulator
     delete ui;
 }
 
-void BeamSteeringCWSourceGUI::blockApplySettings(bool block)
+void BeamSteeringCWModGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
 }
 
-void BeamSteeringCWSourceGUI::applySettings(bool force)
+void BeamSteeringCWModGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
         setTitleColor(m_channelMarker.getColor());
 
-        BeamSteeringCWSource::MsgConfigureBeamSteeringCWSource* message = BeamSteeringCWSource::MsgConfigureBeamSteeringCWSource::create(m_settings, force);
+        BeamSteeringCWMod::MsgConfigureBeamSteeringCWMod* message = BeamSteeringCWMod::MsgConfigureBeamSteeringCWMod::create(m_settings, force);
         m_bsCWSource->getInputMessageQueue()->push(message);
     }
 }
 
-void BeamSteeringCWSourceGUI::displaySettings()
+void BeamSteeringCWModGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(0);
@@ -186,7 +186,7 @@ void BeamSteeringCWSourceGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void BeamSteeringCWSourceGUI::displayRateAndShift()
+void BeamSteeringCWModGUI::displayRateAndShift()
 {
     int shift = m_shiftFrequencyFactor * m_sampleRate;
     double channelSampleRate = ((double) m_sampleRate) / (1<<m_settings.m_log2Interp);
@@ -197,17 +197,17 @@ void BeamSteeringCWSourceGUI::displayRateAndShift()
     m_channelMarker.setBandwidth(channelSampleRate);
 }
 
-void BeamSteeringCWSourceGUI::leaveEvent(QEvent*)
+void BeamSteeringCWModGUI::leaveEvent(QEvent*)
 {
     m_channelMarker.setHighlighted(false);
 }
 
-void BeamSteeringCWSourceGUI::enterEvent(QEvent*)
+void BeamSteeringCWModGUI::enterEvent(QEvent*)
 {
     m_channelMarker.setHighlighted(true);
 }
 
-void BeamSteeringCWSourceGUI::handleSourceMessages()
+void BeamSteeringCWModGUI::handleSourceMessages()
 {
     Message* message;
 
@@ -220,13 +220,13 @@ void BeamSteeringCWSourceGUI::handleSourceMessages()
     }
 }
 
-void BeamSteeringCWSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void BeamSteeringCWModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
 }
 
-void BeamSteeringCWSourceGUI::onMenuDialogCalled(const QPoint &p)
+void BeamSteeringCWModGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)
     {
@@ -257,19 +257,19 @@ void BeamSteeringCWSourceGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
-void BeamSteeringCWSourceGUI::on_interpolationFactor_currentIndexChanged(int index)
+void BeamSteeringCWModGUI::on_interpolationFactor_currentIndexChanged(int index)
 {
     m_settings.m_log2Interp = index;
     applyInterpolation();
 }
 
-void BeamSteeringCWSourceGUI::on_position_valueChanged(int value)
+void BeamSteeringCWModGUI::on_position_valueChanged(int value)
 {
     m_settings.m_filterChainHash = value;
     applyPosition();
 }
 
-void BeamSteeringCWSourceGUI::applyInterpolation()
+void BeamSteeringCWModGUI::applyInterpolation()
 {
     uint32_t maxHash = 1;
 
@@ -283,7 +283,7 @@ void BeamSteeringCWSourceGUI::applyInterpolation()
     applyPosition();
 }
 
-void BeamSteeringCWSourceGUI::applyPosition()
+void BeamSteeringCWModGUI::applyPosition()
 {
     ui->filterChainIndex->setText(tr("%1").arg(m_settings.m_filterChainHash));
     QString s;
@@ -294,7 +294,7 @@ void BeamSteeringCWSourceGUI::applyPosition()
     applySettings();
 }
 
-void BeamSteeringCWSourceGUI::tick()
+void BeamSteeringCWModGUI::tick()
 {
     if (++m_tickCount == 20) { // once per second
         m_tickCount = 0;

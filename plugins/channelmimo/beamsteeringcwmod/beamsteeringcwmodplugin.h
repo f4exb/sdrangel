@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,34 +15,36 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_BEAMSTEERINGCWSOURCESETTINGS_H_
-#define INCLUDE_BEAMSTEERINGCWSOURCESETTINGS_H_
+#ifndef INCLUDE_BEAMSTEERINGCWMODPLUGIN_H_
+#define INCLUDE_BEAMSTEERINGCWMODPLUGIN_H_
 
-#include <QByteArray>
-#include <QString>
 
-class Serializable;
+#include <QObject>
+#include "plugin/plugininterface.h"
 
-struct BeamSteeringCWSourceSettings
-{
-    int m_steerDegrees;
-    quint32 m_rgbColor;
-    QString m_title;
-    uint32_t m_log2Interp;
-    uint32_t m_filterChainHash;
-    bool m_useReverseAPI;
-    QString m_reverseAPIAddress;
-    uint16_t m_reverseAPIPort;
-    uint16_t m_reverseAPIDeviceIndex;
-    uint16_t m_reverseAPIChannelIndex;
+class DeviceUISet;
+class MIMOChannel;
 
-    Serializable *m_channelMarker;
+class BeamSteeringCWModPlugin : public QObject, PluginInterface {
+    Q_OBJECT
+    Q_INTERFACES(PluginInterface)
+    Q_PLUGIN_METADATA(IID "sdrangel.channelmimo.beamsteeringcwmod")
 
-    BeamSteeringCWSourceSettings();
-    void resetToDefaults();
-    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+public:
+    explicit BeamSteeringCWModPlugin(QObject* parent = nullptr);
+
+    const PluginDescriptor& getPluginDescriptor() const;
+    void initPlugin(PluginAPI* pluginAPI);
+
+    virtual PluginInstanceGUI* createMIMOChannelGUI(DeviceUISet *deviceUISet, MIMOChannel *mimoChannel) const;
+    virtual MIMOChannel* createMIMOChannelBS(DeviceAPI *deviceAPI) const;
+    virtual ChannelAPI* createMIMOChannelCS(DeviceAPI *deviceAPI) const;
+    virtual ChannelWebAPIAdapter* createChannelWebAPIAdapter() const;
+
+private:
+    static const PluginDescriptor m_pluginDescriptor;
+
+    PluginAPI* m_pluginAPI;
 };
 
-#endif /* INCLUDE_BEAMSTEERINGCWSOURCESETTINGS_H_ */
+#endif /* INCLUDE_BEAMSTEERINGCWMODPLUGIN_H_ */

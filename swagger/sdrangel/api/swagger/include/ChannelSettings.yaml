@@ -25,8 +25,8 @@ ChannelSettings:
       $ref: "http://localhost:8081/api/swagger/include/ATVDemod.yaml#/ATVDemodSettings"
     ATVModSettings:
       $ref: "http://localhost:8081/api/swagger/include/ATVMod.yaml#/ATVModSettings"
-    BeamSteeringCWSourceSettings:
-      $ref: "http://localhost:8081/api/swagger/include/BeamSteeringCWSource.yaml#/BeamSteeringCWSourceSettings"
+    BeamSteeringCWModSettings:
+      $ref: "http://localhost:8081/api/swagger/include/BeamSteeringCWMod.yaml#/BeamSteeringCWModSettings"
     BFMDemodSettings:
       $ref: "http://localhost:8081/api/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
     ChannelAnalyzerSettings:

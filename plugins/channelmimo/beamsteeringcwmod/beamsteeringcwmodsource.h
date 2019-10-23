@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_BEAMSTEERINGCWSOURCEWORKER_H
-#define INCLUDE_BEAMSTEERINGCWSOURCEWORKER_H
+#ifndef INCLUDE_BEAMSTEERINGCWMODSOURCE_H
+#define INCLUDE_BEAMSTEERINGCWMODSOURCE_H
 
 #include <QObject>
 #include <QMutex>
@@ -25,10 +25,9 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 
-class UpChannelizer;
-class BasebandSampleSource;
+class UpSampleChannelizer;
 
-class BeamSteeringCWSourceWorker : public QObject
+class BeamSteeringCWModSource : public QObject
 {
     Q_OBJECT
 public:
@@ -78,8 +77,8 @@ public:
         { }
     };
 
-    BeamSteeringCWSourceWorker();
-    ~BeamSteeringCWSourceWorker();
+    BeamSteeringCWModSource();
+    ~BeamSteeringCWModSource();
     void reset();
 
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
@@ -96,7 +95,7 @@ private:
     SampleMOFifo m_sampleMOFifo;
     std::vector<SampleVector::const_iterator> m_vbegin;
     int m_sizes[2];
-    UpChannelizer *m_channelizers[2];
+    UpSampleChannelizer *m_channelizers[2];
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     QMutex m_mutex;
     unsigned int m_lastStream;
@@ -107,4 +106,4 @@ private slots:
 };
 
 
-#endif // INCLUDE_BEAMSTEERINGCWSOURCEWORKER_H
+#endif // INCLUDE_BEAMSTEERINGCWMODSOURCE_H

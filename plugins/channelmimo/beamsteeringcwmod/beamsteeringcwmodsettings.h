@@ -15,36 +15,34 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "SWGChannelSettings.h"
-#include "beamsteeringcwsource.h"
-#include "beamsteeringcwsourcewebapiadapter.h"
+#ifndef INCLUDE_BEAMSTEERINGCWMODSETTINGS_H_
+#define INCLUDE_BEAMSTEERINGCWMODSETTINGS_H_
 
-BeamSteeringCWSourceWebAPIAdapter::BeamSteeringCWSourceWebAPIAdapter()
-{}
+#include <QByteArray>
+#include <QString>
 
-BeamSteeringCWSourceWebAPIAdapter::~BeamSteeringCWSourceWebAPIAdapter()
-{}
+class Serializable;
 
-int BeamSteeringCWSourceWebAPIAdapter::webapiSettingsGet(
-        SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage)
+struct BeamSteeringCWModSettings
 {
-    (void) errorMessage;
-    response.setBeamSteeringCwSourceSettings(new SWGSDRangel::SWGBeamSteeringCWSourceSettings());
-    response.getBeamSteeringCwSourceSettings()->init();
-    BeamSteeringCWSource::webapiFormatChannelSettings(response, m_settings);
+    int m_steerDegrees;
+    quint32 m_rgbColor;
+    QString m_title;
+    uint32_t m_log2Interp;
+    uint32_t m_filterChainHash;
+    bool m_useReverseAPI;
+    QString m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
+    uint16_t m_reverseAPIChannelIndex;
 
-    return 200;
-}
+    Serializable *m_channelMarker;
 
-int BeamSteeringCWSourceWebAPIAdapter::webapiSettingsPutPatch(
-        bool force,
-        const QStringList& channelSettingsKeys,
-        SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage)
-{
-    (void) errorMessage;
-    BeamSteeringCWSource::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
+    BeamSteeringCWModSettings();
+    void resetToDefaults();
+    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
+};
 
-    return 200;
-}
+#endif /* INCLUDE_BEAMSTEERINGCWMODSETTINGS_H_ */

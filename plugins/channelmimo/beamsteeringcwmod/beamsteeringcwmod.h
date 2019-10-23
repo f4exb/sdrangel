@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_BEAMSTEERINGCWSOURCE_H
-#define INCLUDE_BEAMSTEERINGCWSOURCE_H
+#ifndef INCLUDE_BEAMSTEERINGCWMOD_H
+#define INCLUDE_BEAMSTEERINGCWMOD_H
 
 #include <vector>
 #include <QNetworkRequest>
@@ -26,36 +26,36 @@
 #include "util/messagequeue.h"
 #include "util/message.h"
 
-#include "beamsteeringcwsourcesettings.h"
+#include "beamsteeringcwmodsettings.h"
 
 class QThread;
 class DeviceAPI;
-class BeamSteeringCWSourceWorker;
+class BeamSteeringCWModSource;
 class QNetworkReply;
 class QNetworkAccessManager;
 class BasebandSampleSink;
 
-class BeamSteeringCWSource: public MIMOChannel, public ChannelAPI
+class BeamSteeringCWMod: public MIMOChannel, public ChannelAPI
 {
     Q_OBJECT
 public:
-    class MsgConfigureBeamSteeringCWSource : public Message {
+    class MsgConfigureBeamSteeringCWMod : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const BeamSteeringCWSourceSettings& getSettings() const { return m_settings; }
+        const BeamSteeringCWModSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureBeamSteeringCWSource* create(const BeamSteeringCWSourceSettings& settings, bool force)
+        static MsgConfigureBeamSteeringCWMod* create(const BeamSteeringCWModSettings& settings, bool force)
         {
-            return new MsgConfigureBeamSteeringCWSource(settings, force);
+            return new MsgConfigureBeamSteeringCWMod(settings, force);
         }
 
     private:
-        BeamSteeringCWSourceSettings m_settings;
+        BeamSteeringCWModSettings m_settings;
         bool m_force;
 
-        MsgConfigureBeamSteeringCWSource(const BeamSteeringCWSourceSettings& settings, bool force) :
+        MsgConfigureBeamSteeringCWMod(const BeamSteeringCWModSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
@@ -85,8 +85,8 @@ public:
         qint64 m_centerFrequency;
     };
 
-    BeamSteeringCWSource(DeviceAPI *deviceAPI);
-	virtual ~BeamSteeringCWSource();
+    BeamSteeringCWMod(DeviceAPI *deviceAPI);
+	virtual ~BeamSteeringCWMod();
 	virtual void destroy() { delete this; }
 
 	virtual void startSinks() {}
@@ -98,7 +98,7 @@ public:
 	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
-    virtual void getTitle(QString& title) { title = "BeamSteeringCWSource"; }
+    virtual void getTitle(QString& title) { title = "BeamSteeringCWMod"; }
     virtual qint64 getCenterFrequency() const { return m_frequencyOffset; }
 
     virtual QByteArray serialize() const;
@@ -132,10 +132,10 @@ public:
 
     static void webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings& response,
-        const BeamSteeringCWSourceSettings& settings);
+        const BeamSteeringCWModSettings& settings);
 
     static void webapiUpdateChannelSettings(
-            BeamSteeringCWSourceSettings& settings,
+            BeamSteeringCWModSettings& settings,
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
@@ -146,10 +146,10 @@ public:
 private:
     DeviceAPI *m_deviceAPI;
     QThread *m_thread;
-    BeamSteeringCWSourceWorker* m_sourceWorker;
+    BeamSteeringCWModSource* m_source;
     BasebandSampleSink* m_spectrumSink;
     BasebandSampleSink* m_scopeSink;
-    BeamSteeringCWSourceSettings m_settings;
+    BeamSteeringCWModSettings m_settings;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 
@@ -160,10 +160,10 @@ private:
     uint32_t m_deviceSampleRate;
     int m_count0, m_count1;
 
-    void applySettings(const BeamSteeringCWSourceSettings& settings, bool force = false);
-    static void validateFilterChainHash(BeamSteeringCWSourceSettings& settings);
+    void applySettings(const BeamSteeringCWModSettings& settings, bool force = false);
+    static void validateFilterChainHash(BeamSteeringCWModSettings& settings);
     void calculateFrequencyOffset();
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const BeamSteeringCWSourceSettings& settings, bool force);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const BeamSteeringCWModSettings& settings, bool force);
 
 private slots:
     void handleInputMessages();

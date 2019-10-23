@@ -1,0 +1,24 @@
+BeamSteeringCWModSettings:
+  description: BeamSteeringCWMod
+  properties:
+    steerDegrees:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    log2Interp:
+      type: integer
+    filterChainHash:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer

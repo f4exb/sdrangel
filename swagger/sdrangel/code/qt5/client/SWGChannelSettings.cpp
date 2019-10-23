@@ -44,8 +44,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_atv_demod_settings_isSet = false;
     atv_mod_settings = nullptr;
     m_atv_mod_settings_isSet = false;
-    beam_steering_cw_source_settings = nullptr;
-    m_beam_steering_cw_source_settings_isSet = false;
+    beam_steering_cw_mod_settings = nullptr;
+    m_beam_steering_cw_mod_settings_isSet = false;
     bfm_demod_settings = nullptr;
     m_bfm_demod_settings_isSet = false;
     channel_analyzer_settings = nullptr;
@@ -112,8 +112,8 @@ SWGChannelSettings::init() {
     m_atv_demod_settings_isSet = false;
     atv_mod_settings = new SWGATVModSettings();
     m_atv_mod_settings_isSet = false;
-    beam_steering_cw_source_settings = new SWGBeamSteeringCWSourceSettings();
-    m_beam_steering_cw_source_settings_isSet = false;
+    beam_steering_cw_mod_settings = new SWGBeamSteeringCWModSettings();
+    m_beam_steering_cw_mod_settings_isSet = false;
     bfm_demod_settings = new SWGBFMDemodSettings();
     m_bfm_demod_settings_isSet = false;
     channel_analyzer_settings = new SWGChannelAnalyzerSettings();
@@ -178,8 +178,8 @@ SWGChannelSettings::cleanup() {
     if(atv_mod_settings != nullptr) { 
         delete atv_mod_settings;
     }
-    if(beam_steering_cw_source_settings != nullptr) { 
-        delete beam_steering_cw_source_settings;
+    if(beam_steering_cw_mod_settings != nullptr) { 
+        delete beam_steering_cw_mod_settings;
     }
     if(bfm_demod_settings != nullptr) { 
         delete bfm_demod_settings;
@@ -273,7 +273,7 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&atv_mod_settings, pJson["ATVModSettings"], "SWGATVModSettings", "SWGATVModSettings");
     
-    ::SWGSDRangel::setValue(&beam_steering_cw_source_settings, pJson["BeamSteeringCWSourceSettings"], "SWGBeamSteeringCWSourceSettings", "SWGBeamSteeringCWSourceSettings");
+    ::SWGSDRangel::setValue(&beam_steering_cw_mod_settings, pJson["BeamSteeringCWModSettings"], "SWGBeamSteeringCWModSettings", "SWGBeamSteeringCWModSettings");
     
     ::SWGSDRangel::setValue(&bfm_demod_settings, pJson["BFMDemodSettings"], "SWGBFMDemodSettings", "SWGBFMDemodSettings");
     
@@ -357,8 +357,8 @@ SWGChannelSettings::asJsonObject() {
     if((atv_mod_settings != nullptr) && (atv_mod_settings->isSet())){
         toJsonValue(QString("ATVModSettings"), atv_mod_settings, obj, QString("SWGATVModSettings"));
     }
-    if((beam_steering_cw_source_settings != nullptr) && (beam_steering_cw_source_settings->isSet())){
-        toJsonValue(QString("BeamSteeringCWSourceSettings"), beam_steering_cw_source_settings, obj, QString("SWGBeamSteeringCWSourceSettings"));
+    if((beam_steering_cw_mod_settings != nullptr) && (beam_steering_cw_mod_settings->isSet())){
+        toJsonValue(QString("BeamSteeringCWModSettings"), beam_steering_cw_mod_settings, obj, QString("SWGBeamSteeringCWModSettings"));
     }
     if((bfm_demod_settings != nullptr) && (bfm_demod_settings->isSet())){
         toJsonValue(QString("BFMDemodSettings"), bfm_demod_settings, obj, QString("SWGBFMDemodSettings"));
@@ -507,14 +507,14 @@ SWGChannelSettings::setAtvModSettings(SWGATVModSettings* atv_mod_settings) {
     this->m_atv_mod_settings_isSet = true;
 }
 
-SWGBeamSteeringCWSourceSettings*
-SWGChannelSettings::getBeamSteeringCwSourceSettings() {
-    return beam_steering_cw_source_settings;
+SWGBeamSteeringCWModSettings*
+SWGChannelSettings::getBeamSteeringCwModSettings() {
+    return beam_steering_cw_mod_settings;
 }
 void
-SWGChannelSettings::setBeamSteeringCwSourceSettings(SWGBeamSteeringCWSourceSettings* beam_steering_cw_source_settings) {
-    this->beam_steering_cw_source_settings = beam_steering_cw_source_settings;
-    this->m_beam_steering_cw_source_settings_isSet = true;
+SWGChannelSettings::setBeamSteeringCwModSettings(SWGBeamSteeringCWModSettings* beam_steering_cw_mod_settings) {
+    this->beam_steering_cw_mod_settings = beam_steering_cw_mod_settings;
+    this->m_beam_steering_cw_mod_settings_isSet = true;
 }
 
 SWGBFMDemodSettings*
@@ -756,7 +756,7 @@ SWGChannelSettings::isSet(){
         if(atv_mod_settings && atv_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
-        if(beam_steering_cw_source_settings && beam_steering_cw_source_settings->isSet()){
+        if(beam_steering_cw_mod_settings && beam_steering_cw_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(bfm_demod_settings && bfm_demod_settings->isSet()){

@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "beamsteeringcwsourcesettings.h"
+#include "beamsteeringcwmodsettings.h"
 
 #include <QColor>
 
@@ -23,12 +23,12 @@
 #include "settings/serializable.h"
 
 
-BeamSteeringCWSourceSettings::BeamSteeringCWSourceSettings()
+BeamSteeringCWModSettings::BeamSteeringCWModSettings()
 {
     resetToDefaults();
 }
 
-void BeamSteeringCWSourceSettings::resetToDefaults()
+void BeamSteeringCWModSettings::resetToDefaults()
 {
     m_steerDegrees = 90;
     m_rgbColor = QColor(140, 4, 4).rgb();
@@ -43,7 +43,7 @@ void BeamSteeringCWSourceSettings::resetToDefaults()
     m_reverseAPIChannelIndex = 0;
 }
 
-QByteArray BeamSteeringCWSourceSettings::serialize() const
+QByteArray BeamSteeringCWModSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeS32(1, m_steerDegrees);
@@ -60,7 +60,7 @@ QByteArray BeamSteeringCWSourceSettings::serialize() const
     return s.final();
 }
 
-bool BeamSteeringCWSourceSettings::deserialize(const QByteArray& data)
+bool BeamSteeringCWModSettings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 
