@@ -60,7 +60,7 @@ public:
 	bool readDouble(quint32 id, double* result, double def = 0) const;
 	bool readReal(quint32 id, Real* result, Real def = 0) const;
 	bool readBool(quint32 id, bool* result, bool def = false) const;
-	bool readString(quint32 id, QString* result, const QString& def = QString::null) const;
+	bool readString(quint32 id, QString* result, const QString& def = QString()) const;
 	bool readBlob(quint32 id, QByteArray* result, const QByteArray& def = QByteArray()) const;
 
 	bool isValid() const { return m_valid; }

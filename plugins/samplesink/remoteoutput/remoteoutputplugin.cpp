@@ -64,7 +64,7 @@ void RemoteOutputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevic
     originDevices.append(OriginDevice(
         "RemoteOutput",
         m_hardwareID,
-        QString::null,
+        QString(),
         0, // Sequence
         0, // nb Rx
         1  // nb Tx

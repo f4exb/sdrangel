@@ -64,7 +64,7 @@ void RemoteInputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevice
     originDevices.append(OriginDevice(
         "RemoteInput",
         m_hardwareID,
-        QString::null,
+        QString(),
         0,
         1, // nb Rx
         0  // nb Tx

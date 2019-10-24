@@ -64,7 +64,7 @@ void TestMIPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& or
     originDevices.append(OriginDevice(
         "TestMI",         // Displayable name
         m_hardwareID,     // Hardware ID
-        QString::null,    // Serial
+        QString(),        // Serial
         0,                // Sequence
         2,                // Number of Rx streams
         0                 // Number of Tx streams

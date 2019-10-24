@@ -101,6 +101,8 @@ bool DSPDeviceMIMOEngine::initProcess(int subsystemIndex)
         DSPGenerationInit cmd;
         return m_syncMessenger.sendWait(cmd) == StReady;
     }
+
+    return false;
 }
 
 bool DSPDeviceMIMOEngine::startProcess(int subsystemIndex)
@@ -116,6 +118,8 @@ bool DSPDeviceMIMOEngine::startProcess(int subsystemIndex)
 	    DSPGenerationStart cmd;
 	    return m_syncMessenger.sendWait(cmd) == StRunning;
     }
+
+    return false;
 }
 
 void DSPDeviceMIMOEngine::stopProcess(int subsystemIndex)

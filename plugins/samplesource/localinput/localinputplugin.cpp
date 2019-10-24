@@ -64,7 +64,7 @@ void LocalInputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices
     originDevices.append(OriginDevice(
         "LocalInput",
         m_hardwareID,
-        QString::null,
+        QString(),
         0,
         1, // nb Rx
         0  // nb Tx

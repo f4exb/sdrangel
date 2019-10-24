@@ -64,7 +64,7 @@ void FileInputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices&
     originDevices.append(OriginDevice(
         "FileInput",
         m_hardwareID,
-        QString::null,
+        QString(),
         0,
         1, // nb Rx
         0  // nb Tx

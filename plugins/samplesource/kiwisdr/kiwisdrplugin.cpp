@@ -65,7 +65,7 @@ void KiwiSDRPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& o
     originDevices.append(OriginDevice(
         "KiwiSDR",
         m_hardwareID,
-        QString::null,
+        QString(),
         0,
         1, // nb Rx
         0  // nb Tx
