@@ -138,18 +138,28 @@ void UpSampleChannelizer::applyConfiguration()
             << ", fc=" << m_currentCenterFrequency;
 }
 
-void UpSampleChannelizer::applySetting(unsigned int log2Interp, unsigned int filterChainHash)
+void UpSampleChannelizer::applyConfiguration(int requestedSampleRate, qint64 requestedCenterFrequency)
+{
+    m_requestedInputSampleRate = requestedSampleRate;
+    m_requestedCenterFrequency = requestedCenterFrequency;
+    applyConfiguration();
+}
+
+void UpSampleChannelizer::setOutputSampleRate(int outputSampleRate)
+{
+    m_outputSampleRate = outputSampleRate;
+    applyConfiguration();
+}
+
+void UpSampleChannelizer::setInterpolation(unsigned int log2Interp, unsigned int filterChainHash)
 {
     m_filterChainSetMode = true;
     std::vector<unsigned int> stageIndexes;
     m_currentCenterFrequency = m_outputSampleRate * HBFilterChainConverter::convertToIndexes(log2Interp, filterChainHash, stageIndexes);
     m_requestedCenterFrequency = m_currentCenterFrequency;
 
-    m_mutex.lock();
     freeFilterChain();
     m_currentCenterFrequency = m_outputSampleRate * setFilterChain(stageIndexes);
-    m_mutex.unlock();
-
     m_currentInputSampleRate = m_outputSampleRate / (1 << m_filterStages.size());
     m_requestedInputSampleRate = m_currentInputSampleRate;
 

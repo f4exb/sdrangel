@@ -382,7 +382,7 @@ private:
     void workSamplesSink(const SampleVector::const_iterator& vbegin, const SampleVector::const_iterator& vend, unsigned int streamIndex);
     void workSampleSourceFifos(); //!< transfer samples of all source streams (sync mode)
     void workSampleSourceFifo(unsigned int streamIndex); //!< transfer samples of one source stream (async mode)
-    void workSamplesSource(SampleVector::const_iterator& begin, unsigned int nbSamples, unsigned int streamIndex);
+    void workSamplesSource(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int streamIndex);
 
 	State gotoIdle(int subsystemIndex);     //!< Go to the idle state
 	State gotoInit(int subsystemIndex);     //!< Go to the acquisition init state from idle

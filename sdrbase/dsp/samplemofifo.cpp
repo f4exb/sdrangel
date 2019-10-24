@@ -100,7 +100,7 @@ void SampleMOFifo::readSync(
     emit dataSyncRead();
 }
 
-void SampleMOFifo::writeSync(const std::vector<SampleVector::const_iterator>& vbegin, unsigned int amount)
+void SampleMOFifo::writeSync(const std::vector<SampleVector::iterator>& vbegin, unsigned int amount)
 {
     QMutexLocker mutexLocker(&m_mutex);
     unsigned int spaceLeft = m_size - m_writeHead;
@@ -198,7 +198,7 @@ void SampleMOFifo::readAsync(
     emit dataAsyncRead(stream);
 }
 
-void SampleMOFifo::writeAsync(const SampleVector::const_iterator& begin, unsigned int amount, unsigned int stream)
+void SampleMOFifo::writeAsync(const SampleVector::iterator& begin, unsigned int amount, unsigned int stream)
 {
     QMutexLocker mutexLocker(&m_mutex);
     unsigned int spaceLeft = m_size - m_vWriteHead[stream];

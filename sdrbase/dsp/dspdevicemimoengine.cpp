@@ -308,7 +308,7 @@ void DSPDeviceMIMOEngine::workSampleSourceFifos()
         return;
     }
 
-    std::vector<SampleVector::const_iterator> vbegin;
+    std::vector<SampleVector::iterator> vbegin;
     vbegin.resize(sampleFifo->getNbStreams());
     unsigned int amount = sampleFifo->remainderSync();
 
@@ -362,7 +362,7 @@ void DSPDeviceMIMOEngine::workSampleSourceFifo(unsigned int streamIndex)
         return;
     }
 
-    SampleVector::const_iterator begin;
+    SampleVector::iterator begin;
     unsigned int amount = sampleFifo->remainderAsync(streamIndex);
 
     while ((amount > 0) && (m_inputMessageQueue.size() == 0))
@@ -413,7 +413,7 @@ void DSPDeviceMIMOEngine::workSamplesSink(const SampleVector::const_iterator& vb
     }
 }
 
-void DSPDeviceMIMOEngine::workSamplesSource(SampleVector::const_iterator& begin, unsigned int nbSamples, unsigned int streamIndex)
+void DSPDeviceMIMOEngine::workSamplesSource(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int streamIndex)
 {
     if (m_threadedBasebandSampleSources[streamIndex].size() == 0)
     {

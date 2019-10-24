@@ -20,7 +20,6 @@
 #define SDRBASE_DSP_UPSAMPLECHANNELIZER_H_
 
 #include <QObject>
-#include <QMutex>
 #include <algorithm>
 
 #include "export.h"
@@ -41,6 +40,10 @@ public:
 
     virtual void pull(SampleVector::iterator begin, unsigned int nbSamples);
     virtual void pullOne(Sample& sample);
+
+    void setInterpolation(unsigned int log2Interp, unsigned int filterChainHash);      //!< Define channelizer with interpolation factor and filter chain definition
+    void applyConfiguration(int requestedSampleRate, qint64 requestedCenterFrequency); //!< Define channelizer with requested sample rate and center frequency (shift in the baseband)
+    void setOutputSampleRate(int outputSampleRate);
 
 protected:
     struct FilterStage {
@@ -79,10 +82,8 @@ protected:
     int m_currentCenterFrequency;
     SampleVector m_sampleBuffer;
     Sample m_sampleIn;
-    QMutex m_mutex;
 
     void applyConfiguration();
-    void applySetting(unsigned int log2Interp, unsigned int filterChainHash);
     bool signalContainsChannel(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd) const;
     Real createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd);
     double setFilterChain(const std::vector<unsigned int>& stageIndexes); //!< returns offset in ratio of sample rate

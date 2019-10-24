@@ -38,7 +38,7 @@ public:
 		unsigned int& ipart1Begin, unsigned int& ipart1End, // first part offsets where to read
 		unsigned int& ipart2Begin, unsigned int& ipart2End  // second part offsets
     );
-    void writeSync(const std::vector<SampleVector::const_iterator>& vbegin, unsigned int amount); //!< copy write
+    void writeSync(const std::vector<SampleVector::iterator>& vbegin, unsigned int amount); //!< copy write
     void writeSync( //!< in place write
         unsigned int amount,
 		unsigned int& ipart1Begin, unsigned int& ipart1End, // first part offsets where to write
@@ -52,7 +52,7 @@ public:
 		unsigned int& ipart2Begin, unsigned int& ipart2End,
         unsigned int stream
     );
-    void writeAsync(const SampleVector::const_iterator& begin, unsigned int amount, unsigned int stream); //!< copy write
+    void writeAsync(const SampleVector::iterator& begin, unsigned int amount, unsigned int stream); //!< copy write
     void writeAsync( //!< in place write
         unsigned int amount,
 		unsigned int& ipart1Begin, unsigned int& ipart1End,
