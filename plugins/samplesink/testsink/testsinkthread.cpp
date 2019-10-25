@@ -167,12 +167,6 @@ void TestSinkThread::tick()
             m_throttleToggle = !m_throttleToggle;
         }
 
-//        if (m_throttlems > m_maxThrottlems)
-//        {
-//            qDebug("FileSinkThread::tick: m_maxThrottlems: %d", m_maxThrottlems);
-//            m_maxThrottlems = m_throttlems;
-//        }
-
         SampleVector::iterator readUntil;
 
         m_sampleFifo->readAdvance(readUntil, m_samplesChunkSize);
@@ -214,6 +208,5 @@ void TestSinkThread::tick()
 
             //m_ofstream->write(reinterpret_cast<char*>(m_buf), m_samplesChunkSize*(1<<m_log2Interpolation)*2*sizeof(int16_t));
         }
-
 	}
 }

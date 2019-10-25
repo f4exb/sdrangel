@@ -74,9 +74,7 @@ private:
 
 	void blockApplySettings(bool block) { m_doApplySettings = !block; }
 	void displaySettings();
-	void displayTime();
 	void sendSettings();
-	void configureFileName();
 	void updateSampleRateAndFrequency();
 
 private slots:

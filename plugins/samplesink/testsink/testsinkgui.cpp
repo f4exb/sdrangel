@@ -139,7 +139,7 @@ bool TestSinkGui::handleMessage(const Message& message)
 	else if (TestSinkOutput::MsgStartStop::match(message))
 	{
 	    TestSinkOutput::MsgStartStop& notif = (TestSinkOutput::MsgStartStop&) message;
-        qDebug("TestSinkOutput::handleMessage: message: MsgStartStop: %s", notif.getStartStop() ? "start" : "stop");
+        qDebug("TestSinkGui::handleMessage: message: MsgStartStop: %s", notif.getStartStop() ? "start" : "stop");
 	    blockApplySettings(true);
 	    ui->startStop->setChecked(notif.getStartStop());
 	    blockApplySettings(false);
@@ -161,7 +161,7 @@ void TestSinkGui::handleInputMessages()
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
-            qDebug("FileSinkGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("TestSinkGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
             updateSampleRateAndFrequency();
@@ -197,7 +197,6 @@ void TestSinkGui::sendSettings()
         m_updateTimer.start(100);
     }
 }
-
 
 void TestSinkGui::updateHardware()
 {
