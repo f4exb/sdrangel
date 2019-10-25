@@ -1,6 +1,7 @@
 project(samplesink)
 
 add_subdirectory(filesink)
+add_subdirectory(testsink)
 add_subdirectory(localoutput)
 
 if(CM256CC_FOUND)
