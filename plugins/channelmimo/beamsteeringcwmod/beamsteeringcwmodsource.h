@@ -24,6 +24,7 @@
 #include "dsp/samplemofifo.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
+#include "beamsteeringcwmodstreamsource.h"
 
 class UpSampleChannelizer;
 
@@ -59,22 +60,37 @@ public:
     public:
         int getOutputSampleRate() const { return m_outputSampleRate; }
         qint64 getCenterFrequency() const { return m_centerFrequency; }
-        int getStreamIndex() const { return m_streamIndex; }
 
-        static MsgSignalNotification* create(int outputSampleRate, qint64 centerFrequency, int streamIndex) {
-            return new MsgSignalNotification(outputSampleRate, centerFrequency, streamIndex);
+        static MsgSignalNotification* create(int outputSampleRate, qint64 centerFrequency) {
+            return new MsgSignalNotification(outputSampleRate, centerFrequency);
         }
     private:
         int m_outputSampleRate;
         qint64 m_centerFrequency;
-        int m_streamIndex;
 
-        MsgSignalNotification(int outputSampleRate, qint64 centerFrequency, int streamIndex) :
+        MsgSignalNotification(int outputSampleRate, qint64 centerFrequency) :
             Message(),
             m_outputSampleRate(outputSampleRate),
-            m_centerFrequency(centerFrequency),
-            m_streamIndex(streamIndex)
+            m_centerFrequency(centerFrequency)
         { }
+    };
+
+    class MsgConfigureSteeringAngle : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        float getSteeringAngle() const { return m_steeringAngle; }
+
+        static MsgConfigureSteeringAngle* create(float steeringAngle) {
+            return new MsgConfigureSteeringAngle(steeringAngle);
+        }
+    private:
+        float m_steeringAngle;
+
+        MsgConfigureSteeringAngle(float steeringAngle) :
+            Message(),
+            m_steeringAngle(steeringAngle)
+        {}
     };
 
     BeamSteeringCWModSource();
@@ -83,19 +99,19 @@ public:
 
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
 
-    void setSteeringDegrees(int steeringDegrees) { m_steeringDegrees = steeringDegrees; }
-	void pull(const SampleVector::const_iterator& begin, unsigned int nbSamples, unsigned int streamIndex);
+    void setSteeringDegrees(int steeringDegrees);
+	void pull(const SampleVector::iterator& begin, unsigned int nbSamples, unsigned int streamIndex);
 
 private:
-    void processFifo(const std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend);
-    void run();
+    void processFifo(std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend);
     bool handleMessage(const Message& cmd);
 
     int m_steeringDegrees;
     SampleMOFifo m_sampleMOFifo;
-    std::vector<SampleVector::const_iterator> m_vbegin;
+    std::vector<SampleVector::iterator> m_vbegin;
     int m_sizes[2];
     UpSampleChannelizer *m_channelizers[2];
+    BeamSteeringCWModStreamSource m_streamSources[2];
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     QMutex m_mutex;
     unsigned int m_lastStream;

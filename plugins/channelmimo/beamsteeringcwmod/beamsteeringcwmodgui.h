@@ -21,7 +21,6 @@
 #include <stdint.h>
 
 #include <QObject>
-#include <QTime>
 
 #include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
@@ -69,7 +68,6 @@ private:
     BeamSteeringCWMod* m_bsCWSource;
     MessageQueue m_inputMessageQueue;
 
-    QTime m_time;
     uint32_t m_tickCount;
 
     explicit BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel, QWidget* parent = nullptr);
@@ -90,8 +88,6 @@ private slots:
     void handleSourceMessages();
     void on_interpolationFactor_currentIndexChanged(int index);
     void on_position_valueChanged(int value);
-    void on_localDevice_currentIndexChanged(int index);
-    void on_localDevicesRefresh_clicked(bool checked);
     void on_steeringDegrees_valueChanged(int value);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);

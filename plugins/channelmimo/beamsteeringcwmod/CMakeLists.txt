@@ -5,6 +5,7 @@ set(beamsteeringcwmod_SOURCES
     beamsteeringcwmod.cpp
     beamsteeringcwmodsettings.cpp
     beamsteeringcwmodsource.cpp
+    beamsteeringcwmodstreamsource.cpp
     beamsteeringcwmodwebapiadapter.cpp
 )
 
@@ -13,6 +14,7 @@ set(beamsteeringcwmod_HEADERS
     beamsteeringcwmod.h
     beamsteeringcwmodsettings.h
     beamsteeringcwmodsource.h
+    beamsteeringcwmodstreamsource.h
     beamsteeringcwmodwebapiadapter.h
 )
 
