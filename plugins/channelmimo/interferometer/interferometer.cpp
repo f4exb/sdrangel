@@ -101,7 +101,7 @@ void Interferometer::feed(const SampleVector::const_iterator& begin, const Sampl
     m_sink->feed(begin, end, sinkIndex);
 }
 
-void Interferometer::pull(const SampleVector::const_iterator& begin, unsigned int nbSamples, unsigned int sourceIndex)
+void Interferometer::pull(const SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex)
 {
     (void) begin;
     (void) nbSamples;
@@ -197,6 +197,7 @@ bool Interferometer::handleMessage(const Message& cmd)
 
             if (m_guiMessageQueue)
             {
+                qDebug() << "Interferometer::handleMessage: DSPMIMOSignalNotification: push to GUI";
                 MsgBasebandNotification *msg = MsgBasebandNotification::create(
                     notif.getSampleRate(), notif.getCenterFrequency());
                 m_guiMessageQueue->push(msg);

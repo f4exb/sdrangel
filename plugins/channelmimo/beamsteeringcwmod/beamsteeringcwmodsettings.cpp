@@ -32,7 +32,7 @@ void BeamSteeringCWModSettings::resetToDefaults()
 {
     m_steerDegrees = 90;
     m_rgbColor = QColor(140, 4, 4).rgb();
-    m_title = "Local Source";
+    m_title = "Beam Steering CW Modulator";
     m_log2Interp = 0;
     m_filterChainHash = 0;
     m_channelMarker = nullptr;

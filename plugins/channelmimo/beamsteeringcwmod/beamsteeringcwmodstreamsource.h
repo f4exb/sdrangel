@@ -15,44 +15,32 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_INTERFEROMETERSTREAMSINK_H_
-#define SDRBASE_INTERFEROMETERSTREAMSINK_H_
+#ifndef INCLUDE_BEAMSTEERINGCWMODSTREAMSOURCE_H
+#define INCLUDE_BEAMSTEERINGCWMODSTREAMSOURCE_H
 
-#include <QMutex>
+#include "dsp/channelsamplesource.h"
 
-#include "dsp/basebandsamplesink.h"
-
-
-class InterferometerStreamSink : public BasebandSampleSink
+class BeamSteeringCWModStreamSource : public ChannelSampleSource
 {
 public:
-    InterferometerStreamSink();
-    virtual ~InterferometerStreamSink();
+    BeamSteeringCWModStreamSource();
+    virtual ~BeamSteeringCWModStreamSource();
 
-	virtual void start();
-	virtual void stop();
-	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
-	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
+    virtual void pull(SampleVector::iterator begin, unsigned int nbSamples);
+    virtual void pullOne(Sample& sample);
 
     void reset();
+    void setPhase(float phase);
     unsigned int getStreamIndex() const { return m_streamIndex; }
     void setStreamIndex(unsigned int streamIndex) { m_streamIndex = streamIndex; }
-    SampleVector& getData() { return m_data; }
-    int getSize() const { return m_dataSize; }
-    void setDataStart(int dataStart) { m_dataStart = dataStart; }
 
 private:
     unsigned int m_streamIndex;
-    SampleVector m_data;
-    int m_dataSize;
-    int m_bufferSize;
-    int m_dataStart;
-
-    int m_sampleRate;
-    uint32_t m_log2Decim;
-    uint32_t m_filterChainHash;
-    QMutex m_settingsMutex;
+    float m_amp;
+    FixReal m_real;
+    FixReal m_imag;
 };
 
 
-#endif // SDRBASE_INTERFEROMETERSTREAMSINK_H_
+
+#endif // INCLUDE_BEAMSTEERINGCWMODSTREAMSOURCE_H

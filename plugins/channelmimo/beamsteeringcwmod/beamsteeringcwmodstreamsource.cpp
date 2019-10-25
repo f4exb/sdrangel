@@ -15,44 +15,35 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_INTERFEROMETERSTREAMSINK_H_
-#define SDRBASE_INTERFEROMETERSTREAMSINK_H_
+#include "beamsteeringcwmodstreamsource.h"
 
-#include <QMutex>
-
-#include "dsp/basebandsamplesink.h"
-
-
-class InterferometerStreamSink : public BasebandSampleSink
+BeamSteeringCWModStreamSource::BeamSteeringCWModStreamSource() :
+    m_amp(0.5f)
 {
-public:
-    InterferometerStreamSink();
-    virtual ~InterferometerStreamSink();
+    m_real = m_amp;
+    m_imag = 0.0f;
+}
 
-	virtual void start();
-	virtual void stop();
-	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
-	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
+BeamSteeringCWModStreamSource::~BeamSteeringCWModStreamSource()
+{}
 
-    void reset();
-    unsigned int getStreamIndex() const { return m_streamIndex; }
-    void setStreamIndex(unsigned int streamIndex) { m_streamIndex = streamIndex; }
-    SampleVector& getData() { return m_data; }
-    int getSize() const { return m_dataSize; }
-    void setDataStart(int dataStart) { m_dataStart = dataStart; }
+void BeamSteeringCWModStreamSource::setPhase(float phase)
+{
+    float normPhase = phase < -M_PI ? -M_PI : phase > M_PI ? M_PI : phase;
+    m_real = m_amp * cos(normPhase);
+    m_imag = m_amp * sin(normPhase);
+}
 
-private:
-    unsigned int m_streamIndex;
-    SampleVector m_data;
-    int m_dataSize;
-    int m_bufferSize;
-    int m_dataStart;
+void BeamSteeringCWModStreamSource::pull(SampleVector::iterator begin, unsigned int nbSamples)
+{
+    std::fill(begin, begin + nbSamples, Sample{m_real, m_imag});
+}
 
-    int m_sampleRate;
-    uint32_t m_log2Decim;
-    uint32_t m_filterChainHash;
-    QMutex m_settingsMutex;
-};
+void BeamSteeringCWModStreamSource::pullOne(Sample& sample)
+{
+    sample.setReal(m_real);
+    sample.setImag(m_imag);
+}
 
-
-#endif // SDRBASE_INTERFEROMETERSTREAMSINK_H_
+void BeamSteeringCWModStreamSource::reset()
+{}

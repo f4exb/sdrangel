@@ -26,8 +26,10 @@
 
 MESSAGE_CLASS_DEFINITION(BeamSteeringCWModSource::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(BeamSteeringCWModSource::MsgSignalNotification, Message)
+MESSAGE_CLASS_DEFINITION(BeamSteeringCWModSource::MsgConfigureSteeringAngle, Message)
 
 BeamSteeringCWModSource::BeamSteeringCWModSource() :
+    m_steeringDegrees(90),
     m_mutex(QMutex::Recursive)
 {
     m_sampleMOFifo.init(2, 96000 * 8);
@@ -35,7 +37,8 @@ BeamSteeringCWModSource::BeamSteeringCWModSource() :
 
     for (int i = 0; i < 2; i++)
     {
-        //TODO: m_channelizers[i] = new UpChannelizer(&m_sinks[i]);
+        m_streamSources[i].setStreamIndex(i);
+        m_channelizers[i] = new UpSampleChannelizer(&m_streamSources[i]);
         m_sizes[i] = 0;
     }
 
@@ -53,8 +56,7 @@ BeamSteeringCWModSource::BeamSteeringCWModSource() :
 
 BeamSteeringCWModSource::~BeamSteeringCWModSource()
 {
-    for (int i = 0; i < 2; i++)
-    {
+    for (int i = 0; i < 2; i++) {
         delete m_channelizers[i];
     }
 }
@@ -65,11 +67,18 @@ void BeamSteeringCWModSource::reset()
     m_sampleMOFifo.reset();
 
     for (int i = 0; i < 2; i++) {
-        //TODO: m_sinks[i].reset();
+        m_streamSources[i].reset();
     }
 }
 
-void BeamSteeringCWModSource::pull(const SampleVector::const_iterator& begin, unsigned int nbSamples, unsigned int streamIndex)
+void BeamSteeringCWModSource::setSteeringDegrees(int steeringDegrees)
+{
+    m_steeringDegrees = steeringDegrees < -180 ? -180 : steeringDegrees > 180 ? 180 : steeringDegrees;
+    MsgConfigureSteeringAngle *msg = MsgConfigureSteeringAngle::create((m_steeringDegrees/180.0f)*M_PI);
+    m_inputMessageQueue.push(msg);
+}
+
+void BeamSteeringCWModSource::pull(const SampleVector::iterator& begin, unsigned int nbSamples, unsigned int streamIndex)
 {
     if (streamIndex > 1) {
         return;
@@ -85,14 +94,31 @@ void BeamSteeringCWModSource::pull(const SampleVector::const_iterator& begin, un
 
     if (streamIndex == 1)
     {
+        unsigned int part1Begin, part1End, part2Begin, part2End, size;
+
         if (m_sizes[0] != m_sizes[1])
         {
             qWarning("BeamSteeringCWModSource::pull: unequal sizes: [0]: %d [1]: %d", m_sizes[0], m_sizes[1]);
-            m_sampleMOFifo.writeSync(m_vbegin, std::min(m_sizes[0], m_sizes[1]));
+            size = std::min(m_sizes[0], m_sizes[1]);
         }
         else
         {
-            m_sampleMOFifo.writeSync(m_vbegin, m_sizes[0]);
+            size = m_sizes[0];
+        }
+
+        std::vector<SampleVector>& data = m_sampleMOFifo.getData();
+        m_sampleMOFifo.readSync(size, part1Begin, part1End, part2Begin, part2End);
+
+        if (part1Begin != part1End)
+        {
+            std::copy(data[0].begin() + part1Begin, data[0].begin() + part1End, m_vbegin[0]);
+            std::copy(data[1].begin() + part1Begin, data[1].begin() + part1End, m_vbegin[1]);
+        }
+
+        if (part2Begin != part2End)
+        {
+            std::copy(data[0].begin() + part2Begin, data[0].begin() + part2End, m_vbegin[0]);
+            std::copy(data[1].begin() + part2Begin, data[1].begin() + part2End, m_vbegin[1]);
         }
     }
 }
@@ -101,7 +127,7 @@ void BeamSteeringCWModSource::handleData()
 {
     QMutexLocker mutexLocker(&m_mutex);
 
-    const std::vector<SampleVector>& data = m_sampleMOFifo.getData();
+    std::vector<SampleVector>& data = m_sampleMOFifo.getData();
 
     unsigned int ipart1begin;
     unsigned int ipart1end;
@@ -126,18 +152,11 @@ void BeamSteeringCWModSource::handleData()
     }
 }
 
-void BeamSteeringCWModSource::processFifo(const std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend)
+void BeamSteeringCWModSource::processFifo(std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend)
 {
     for (unsigned int stream = 0; stream < 2; stream++) {
-        //TODO: m_channelizers[stream]->pull(data[stream].begin() + ibegin, iend - ibegin);
+        m_channelizers[stream]->pull(data[stream].begin() + ibegin, iend - ibegin);
     }
-
-    run();
-}
-
-void BeamSteeringCWModSource::run()
-{
-    // TODO
 }
 
 void BeamSteeringCWModSource::handleInputMessages()
@@ -168,32 +187,41 @@ bool BeamSteeringCWModSource::handleMessage(const Message& cmd)
 
         for (int i = 0; i < 2; i++)
         {
-            // TODO
-            // m_channelizers[i]->set(m_channelizers[i]->getInputMessageQueue(),
-            //     log2Interp,
-            //     filterChainHash);
-            // m_sinks[i].reset();
+            m_channelizers[i]->setInterpolation(log2Interp, filterChainHash);
+            m_streamSources[i].reset();
         }
 
         return true;
     }
     else if (MsgSignalNotification::match(cmd))
     {
+        QMutexLocker mutexLocker(&m_mutex);
         MsgSignalNotification& cfg = (MsgSignalNotification&) cmd;
         int outputSampleRate = cfg.getOutputSampleRate();
-        qint64 centerFrequency = cfg.getCenterFrequency();
-        int streamIndex = cfg.getStreamIndex();
 
         qDebug() << "BeamSteeringCWModSource::handleMessage: MsgSignalNotification:"
                 << " outputSampleRate: " << outputSampleRate
-                << " centerFrequency: " << centerFrequency
-                << " streamIndex: " << streamIndex;
+                << " centerFrequency: " << cfg.getCenterFrequency();
 
-        if (streamIndex < 2)
+        for (int i = 0; i < 2; i++)
         {
-            DSPSignalNotification *notif = new DSPSignalNotification(outputSampleRate, centerFrequency);
-            // TODO: m_channelizers[streamIndex]->getInputMessageQueue()->push(notif);
+            m_channelizers[i]->setOutputSampleRate(outputSampleRate);
+            m_streamSources[i].reset();
         }
+
+        return true;
+    }
+    else if (MsgConfigureSteeringAngle::match(cmd))
+    {
+        QMutexLocker mutexLocker(&m_mutex);
+        MsgConfigureSteeringAngle& cfg = (MsgConfigureSteeringAngle&) cmd;
+        float steeringAngle = cfg.getSteeringAngle();
+        steeringAngle = steeringAngle < -M_PI ? -M_PI : steeringAngle > M_PI ? M_PI : steeringAngle;
+
+        qDebug() << "BeamSteeringCWModSource::handleMessage: MsgConfigureSteeringAngle:"
+                << " steeringAngle: " << steeringAngle;
+
+        m_streamSources[1].setPhase(M_PI*cos(steeringAngle));
 
         return true;
     }

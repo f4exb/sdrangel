@@ -110,22 +110,29 @@ BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *de
         ui(new Ui::BeamSteeringCWModGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
-        m_sampleRate(0),
+        m_sampleRate(48000),
+        m_centerFrequency(435000000),
         m_tickCount(0)
 {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
+    setStreamIndicator("M");
+
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_bsCWSource = (BeamSteeringCWMod*) mimoChannel;
     m_bsCWSource->setMessageQueueToGUI(getInputMessageQueue());
+    m_sampleRate = m_bsCWSource->getDeviceSampleRate();
+
+    connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.addStreamIndex(1);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle("Beam Steering CW Source");
+    m_channelMarker.setSourceOrSinkStream(false);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
@@ -138,9 +145,8 @@ BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
     //connect(&(m_deviceUISet->m_deviceSourceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
-    m_time.start();
-
     displaySettings();
+    displayRateAndShift();
     applySettings(true);
 }
 
@@ -172,7 +178,7 @@ void BeamSteeringCWModGUI::displaySettings()
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle(m_settings.m_title);
-    m_channelMarker.setBandwidth(m_sampleRate); // TODO
+    m_channelMarker.setBandwidth(m_sampleRate);
     m_channelMarker.setMovable(false); // do not let user move the center arbitrarily
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
@@ -183,6 +189,7 @@ void BeamSteeringCWModGUI::displaySettings()
     blockApplySettings(true);
     ui->interpolationFactor->setCurrentIndex(m_settings.m_log2Interp);
     applyInterpolation();
+    ui->steeringDegreesText->setText(tr("%1").arg(m_settings.m_steerDegrees));
     blockApplySettings(false);
 }
 
@@ -267,6 +274,12 @@ void BeamSteeringCWModGUI::on_position_valueChanged(int value)
 {
     m_settings.m_filterChainHash = value;
     applyPosition();
+}
+
+void BeamSteeringCWModGUI::on_steeringDegrees_valueChanged(int value)
+{
+    m_settings.m_steerDegrees = value;
+    applySettings();
 }
 
 void BeamSteeringCWModGUI::applyInterpolation()

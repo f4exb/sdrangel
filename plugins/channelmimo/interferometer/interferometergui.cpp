@@ -126,6 +126,7 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_interferometer->setScopeSink(m_scopeVis);
     m_interferometer->setSpectrumSink(m_spectrumVis);
     m_interferometer->setMessageQueueToGUI(getInputMessageQueue());
+    m_sampleRate = m_interferometer->getDeviceSampleRate();
 
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);

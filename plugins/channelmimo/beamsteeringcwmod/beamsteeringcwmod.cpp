@@ -81,7 +81,7 @@ void BeamSteeringCWMod::stopSources()
 	m_thread->wait();
 }
 
-void BeamSteeringCWMod::pull(const SampleVector::const_iterator& begin, unsigned int nbSamples, unsigned int sourceIndex)
+void BeamSteeringCWMod::pull(const SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex)
 {
     m_source->pull(begin, nbSamples, sourceIndex);
 }
@@ -158,11 +158,11 @@ bool BeamSteeringCWMod::handleMessage(const Message& cmd)
             m_deviceSampleRate = notif.getSampleRate();
             calculateFrequencyOffset(); // This is when device sample rate changes
 
-            // Notify sink of input sample rate change
+            // Notify source of input sample rate change
             BeamSteeringCWModSource::MsgSignalNotification *sig = BeamSteeringCWModSource::MsgSignalNotification::create(
-                m_deviceSampleRate, notif.getCenterFrequency(), notif.getIndex()
+                m_deviceSampleRate, notif.getCenterFrequency()
             );
-            qDebug() << "BeamSteeringCWMod::handleMessage: DSPMIMOSignalNotification: push to worker";
+            qDebug() << "BeamSteeringCWMod::handleMessage: DSPMIMOSignalNotification: push to source";
             m_source->getInputMessageQueue()->push(sig);
 
             // Redo the channelizer stuff with the new sample rate to re-synchronize everything
@@ -173,6 +173,7 @@ bool BeamSteeringCWMod::handleMessage(const Message& cmd)
 
             if (m_guiMessageQueue)
             {
+                qDebug() << "BeamSteeringCWMod::handleMessage: DSPMIMOSignalNotification: push to GUI";
                 MsgBasebandNotification *msg = MsgBasebandNotification::create(
                     notif.getSampleRate(), notif.getCenterFrequency());
                 m_guiMessageQueue->push(msg);

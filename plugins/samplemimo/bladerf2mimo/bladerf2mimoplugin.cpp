@@ -20,18 +20,16 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 
-#ifdef SERVER_MODE
-#include "bladerf2mimo.h"
-#else
+#ifndef SERVER_MODE
 #include "bladerf2mimogui.h"
-#include "bladerf2mimo.h" // TODO
 #endif
+#include "bladerf2mimo.h"
 #include "bladerf2mimoplugin.h"
-//#include "testmiwebapiadapter.h"
+#include "bladerf2mimowebapiadapter.h"
 
 const PluginDescriptor BladeRF2MIMOPlugin::m_pluginDescriptor = {
 	QString("BladeRF2 MIMO"),
-	QString("4.12.0"),
+	QString("5.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
@@ -138,7 +136,5 @@ DeviceSampleMIMO *BladeRF2MIMOPlugin::createSampleMIMOPluginInstance(const QStri
 
 DeviceWebAPIAdapter *BladeRF2MIMOPlugin::createDeviceWebAPIAdapter() const
 {
-    // TODO
-    //return new BladeRF2MIMOWebAPIAdapter();
-    return nullptr;
+    return new BladeRF2MIMOWebAPIAdapter();
 }
