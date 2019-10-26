@@ -13,6 +13,7 @@ inline double log2f(double n)
 #endif
 
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureSpectrumVis, Message)
+MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureScalingFactor, Message)
 
 const Real SpectrumVis::m_mult = (10.0f / log2f(10.0f));
 
@@ -51,6 +52,12 @@ void SpectrumVis::configure(MessageQueue* msgQueue,
 {
 	MsgConfigureSpectrumVis* cmd = new MsgConfigureSpectrumVis(fftSize, overlapPercent, averagingNb, averagingMode, window, linear);
 	msgQueue->push(cmd);
+}
+
+void SpectrumVis::setScalef(MessageQueue* msgQueue, Real scalef)
+{
+    MsgConfigureScalingFactor* cmd = new MsgConfigureScalingFactor(scalef);
+    getInputMessageQueue()->push(cmd);
 }
 
 void SpectrumVis::feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& end, bool positiveOnly)
@@ -322,6 +329,12 @@ bool SpectrumVis::handleMessage(const Message& message)
 		        conf.getLinear());
 		return true;
 	}
+    else if (MsgConfigureScalingFactor::match(message))
+    {
+        MsgConfigureScalingFactor& conf = (MsgConfigureScalingFactor&) message;
+        handleScalef(conf.getScalef());
+        return true;
+    }
 	else
 	{
 		return false;
@@ -375,4 +388,10 @@ void SpectrumVis::handleConfigure(int fftSize,
 	m_linear = linear;
 	m_ofs = 20.0f * log10f(1.0f / m_fftSize);
 	m_powFFTDiv = m_fftSize*m_fftSize;
+}
+
+void SpectrumVis::handleScalef(Real scalef)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+    m_scalef = scalef;
 }

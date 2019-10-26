@@ -61,6 +61,22 @@ public:
 		bool m_linear;
 	};
 
+    class MsgConfigureScalingFactor : public Message
+    {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+        MsgConfigureScalingFactor(Real scalef) :
+            Message(),
+            m_scalef(scalef)
+        {}
+
+        Real getScalef() const { return m_scalef; }
+
+    private:
+        Real m_scalef;
+    };
+
 	SpectrumVis(Real scalef, GLSpectrum* glSpectrum = 0);
 	virtual ~SpectrumVis();
 
@@ -71,6 +87,7 @@ public:
 	        AvgMode averagingMode,
 	        FFTWindow::Function window,
 	        bool m_linear);
+    void setScalef(MessageQueue* msgQueue, Real scalef);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	void feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& end, bool positiveOnly);
@@ -113,6 +130,7 @@ private:
 	        AvgMode averagingMode,
 	        FFTWindow::Function window,
 	        bool linear);
+    void handleScalef(Real scalef);
 };
 
 #endif // INCLUDE_SPECTRUMVIS_H
