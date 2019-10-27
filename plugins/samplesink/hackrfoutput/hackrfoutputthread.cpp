@@ -120,7 +120,7 @@ void HackRFOutputThread::callback(qint8* buf, qint32 len)
 {
     SampleVector::iterator beginRead;
     m_sampleFifo->readAdvance(beginRead, len/(2*(1<<m_log2Interp)));
-    beginRead -= len/2;
+    beginRead -= len/(2*(1<<m_log2Interp));
 
 	if (m_log2Interp == 0)
 	{

@@ -203,7 +203,7 @@ void BladeRF2OutputThread::callbackSO(qint16* buf, qint32 len, unsigned int chan
 
         SampleVector::iterator beginRead;
         m_channels[channel].m_sampleFifo->readAdvance(beginRead, len/(1<<m_channels[channel].m_log2Interp));
-        beginRead -= len;
+        beginRead -= len/(1<<m_channels[channel].m_log2Interp);
 
         if (m_channels[channel].m_log2Interp == 0)
         {

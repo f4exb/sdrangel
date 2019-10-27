@@ -110,7 +110,7 @@ void LimeSDROutputThread::callback(qint16* buf, qint32 len)
 {
     SampleVector::iterator beginRead;
     m_sampleFifo->readAdvance(beginRead, len/(1<<m_log2Interp));
-    beginRead -= len;
+    beginRead -= len/(1<<m_log2Interp);
 
     if (m_log2Interp == 0)
     {

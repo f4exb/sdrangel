@@ -236,7 +236,7 @@ void XTRXOutputThread::callback(qint16* buf, qint32 len)
 
         SampleVector::iterator beginRead;
         m_channels[m_uniqueChannelIndex].m_sampleFifo->readAdvance(beginRead, len/(1<<m_channels[m_uniqueChannelIndex].m_log2Interp));
-        beginRead -= len;
+        beginRead -= len/(1<<m_channels[m_uniqueChannelIndex].m_log2Interp);
 
         if (m_channels[m_uniqueChannelIndex].m_log2Interp == 0)
         {
@@ -289,7 +289,7 @@ void XTRXOutputThread::callbackSO(qint16* buf, qint32 len)
 
         SampleVector::iterator beginRead;
         m_channels[m_uniqueChannelIndex].m_sampleFifo->readAdvance(beginRead, len/(1<<m_channels[m_uniqueChannelIndex].m_log2Interp));
-        beginRead -= len;
+        beginRead -= len/(1<<m_channels[m_uniqueChannelIndex].m_log2Interp);
 
         if (m_channels[m_uniqueChannelIndex].m_log2Interp == 0)
         {

@@ -117,7 +117,7 @@ void PlutoSDROutputThread::convert(qint16* buf, qint32 len)
     // pull samples from baseband generator
     SampleVector::iterator beginRead;
     m_sampleFifo->readAdvance(beginRead, len/(2*(1<<m_log2Interp)));
-    beginRead -= len/2;
+    beginRead -= len/(2*(1<<m_log2Interp));
 
     if (m_log2Interp == 0)
     {
