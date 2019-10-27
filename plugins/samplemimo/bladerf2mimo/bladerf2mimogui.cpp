@@ -51,6 +51,7 @@ BladeRF2MIMOGui::BladeRF2MIMOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_streamIndex(0),
     m_spectrumRxElseTx(true),
     m_spectrumStreamIndex(0),
+    m_gainLock(false),
     m_doApplySettings(true),
     m_forceSettings(true),
     m_sampleMIMO(nullptr),
@@ -420,6 +421,7 @@ void BladeRF2MIMOGui::on_spectrumSide_currentIndexChanged(int index)
     m_spectrumRxElseTx = (index == 0);
     m_deviceUISet->m_spectrum->setDisplayedStream(m_spectrumRxElseTx, m_spectrumStreamIndex);
     m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(m_spectrumRxElseTx, m_spectrumStreamIndex);
+    m_deviceUISet->setSpectrumScalingFactor(m_spectrumRxElseTx ? SDR_RX_SCALEF : SDR_TX_SCALEF);
     updateSampleRateAndFrequency();
 }
 
@@ -557,6 +559,19 @@ void BladeRF2MIMOGui::on_decim_currentIndexChanged(int index)
     sendSettings();
 }
 
+void BladeRF2MIMOGui::on_gainLock_toggled(bool checked)
+{
+    if (!m_gainLock && checked)
+    {
+        m_settings.m_rx1GlobalGain = m_settings.m_rx0GlobalGain;
+        m_settings.m_rx1GainMode = m_settings.m_rx0GainMode;
+        m_settings.m_tx1GlobalGain = m_settings.m_tx0GlobalGain;
+        sendSettings();
+    }
+
+    m_gainLock = checked;
+}
+
 void BladeRF2MIMOGui::on_gainMode_currentIndexChanged(int index)
 {
     if (!m_rxElseTx) { // not for Tx
@@ -570,7 +585,7 @@ void BladeRF2MIMOGui::on_gainMode_currentIndexChanged(int index)
     {
         BladeRF2MIMO::GainMode mode = modes[index];
 
-        if (m_streamIndex == 0)
+        if (m_streamIndex == 0 || m_gainLock)
         {
             if (m_settings.m_rx0GainMode != mode.m_value)
             {
@@ -585,7 +600,8 @@ void BladeRF2MIMOGui::on_gainMode_currentIndexChanged(int index)
 
             m_settings.m_rx0GainMode = mode.m_value;
         }
-        else if (m_streamIndex == 1)
+
+        if (m_streamIndex == 1 || m_gainLock)
         {
             if (m_settings.m_rx1GainMode != mode.m_value)
             {
@@ -611,17 +627,19 @@ void BladeRF2MIMOGui::on_gain_valueChanged(int value)
 
     if (m_rxElseTx)
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0 || m_gainLock) {
             m_settings.m_rx0GlobalGain = value;
-        } else {
+        }
+        if (m_streamIndex == 1 || m_gainLock) {
             m_settings.m_rx1GlobalGain = value;
         }
     }
     else
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0 || m_gainLock) {
             m_settings.m_tx0GlobalGain = value;
-        } else {
+        }
+        if (m_streamIndex == 1 || m_gainLock) {
             m_settings.m_tx1GlobalGain = value;
         }
     }

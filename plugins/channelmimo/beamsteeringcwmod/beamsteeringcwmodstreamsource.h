@@ -33,10 +33,12 @@ public:
     void setPhase(float phase);
     unsigned int getStreamIndex() const { return m_streamIndex; }
     void setStreamIndex(unsigned int streamIndex) { m_streamIndex = streamIndex; }
+    void muteChannel(bool mute);
 
 private:
     unsigned int m_streamIndex;
     float m_amp;
+    float m_phase;
     FixReal m_real;
     FixReal m_imag;
 };

@@ -72,8 +72,8 @@ BladeRF2MIMO::BladeRF2MIMO(DeviceAPI *deviceAPI) :
     }
 
     m_mimoType = MIMOHalfSynchronous;
-    m_sampleMIFifo.init(2, 96000 * 4);
-    m_sampleMOFifo.init(2, 96000 * 4);
+    m_sampleMIFifo.init(2, 4096 * 64);
+    m_sampleMOFifo.init(2, 4096 * 64);
     m_deviceAPI->setNbSourceStreams(2);
     m_deviceAPI->setNbSinkStreams(2);
     m_networkManager = new QNetworkAccessManager();
@@ -885,26 +885,26 @@ bool BladeRF2MIMO::setRxDeviceCenterFrequency(struct bladerf *dev, quint64 freq_
 
     if (status < 0)
     {
-        qWarning("BladeRF2MIMO::setDeviceCenterFrequency: RX0: bladerf_set_frequency(%lld) failed: %s",
+        qWarning("BladeRF2MIMO::setRxDeviceCenterFrequency: RX0: bladerf_set_frequency(%lld) failed: %s",
                 freq_hz, bladerf_strerror(status));
         return false;
     }
     else
     {
-        qDebug("BladeRF2MIMO::setDeviceCenterFrequency: RX0: bladerf_set_frequency(%lld)", freq_hz);
+        qDebug("BladeRF2MIMO::setRxDeviceCenterFrequency: RX0: bladerf_set_frequency(%lld)", freq_hz);
     }
 
     status = bladerf_set_frequency(dev, BLADERF_CHANNEL_RX(1), freq_hz);
 
     if (status < 0)
     {
-        qWarning("BladeRF2MIMO::setDeviceCenterFrequency: RX1: bladerf_set_frequency(%lld) failed: %s",
+        qWarning("BladeRF2MIMO::setRxDeviceCenterFrequency: RX1: bladerf_set_frequency(%lld) failed: %s",
                 freq_hz, bladerf_strerror(status));
         return false;
     }
     else
     {
-        qDebug("BladeRF2MIMO::setDeviceCenterFrequency: RX1: bladerf_set_frequency(%lld)", freq_hz);
+        qDebug("BladeRF2MIMO::setRxDeviceCenterFrequency: RX1: bladerf_set_frequency(%lld)", freq_hz);
     }
 
     return true;
@@ -918,28 +918,28 @@ bool BladeRF2MIMO::setTxDeviceCenterFrequency(struct bladerf *dev, quint64 freq_
     int status = bladerf_set_frequency(dev, BLADERF_CHANNEL_TX(0), freq_hz);
 
     if (status < 0) {
-        qWarning("BladeRF2Output::setDeviceCenterFrequency: TX0: bladerf_set_frequency(%lld) failed: %s",
+        qWarning("BladeRF2Output::setTxDeviceCenterFrequency: TX0: bladerf_set_frequency(%lld) failed: %s",
                 freq_hz, bladerf_strerror(status));
         return false;
     }
     else
     {
-        qDebug("BladeRF2Output::setDeviceCenterFrequency: TX0: bladerf_set_frequency(%lld)", freq_hz);
-        return true;
+        qDebug("BladeRF2Output::setTxDeviceCenterFrequency: TX0: bladerf_set_frequency(%lld)", freq_hz);
     }
 
     status = bladerf_set_frequency(dev, BLADERF_CHANNEL_TX(1), freq_hz);
 
     if (status < 0) {
-        qWarning("BladeRF2Output::setDeviceCenterFrequency: TX1: bladerf_set_frequency(%lld) failed: %s",
+        qWarning("BladeRF2Output::setTxDeviceCenterFrequency: TX1: bladerf_set_frequency(%lld) failed: %s",
                 freq_hz, bladerf_strerror(status));
         return false;
     }
     else
     {
-        qDebug("BladeRF2Output::setDeviceCenterFrequency: TX1: bladerf_set_frequency(%lld)", freq_hz);
-        return true;
+        qDebug("BladeRF2Output::setTxDeviceCenterFrequency: TX1: bladerf_set_frequency(%lld)", freq_hz);
     }
+
+    return true;
 }
 
 void BladeRF2MIMO::getRxFrequencyRange(uint64_t& min, uint64_t& max, int& step)

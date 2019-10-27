@@ -86,6 +86,7 @@ private:
 
 private slots:
     void handleSourceMessages();
+    void on_channelOutput_currentIndexChanged(int index);
     void on_interpolationFactor_currentIndexChanged(int index);
     void on_position_valueChanged(int value);
     void on_steeringDegrees_valueChanged(int value);

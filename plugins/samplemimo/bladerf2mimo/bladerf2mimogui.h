@@ -60,6 +60,7 @@ private:
     int m_streamIndex; //!< Current stream index being dealt with
 	bool m_spectrumRxElseTx;
     int m_spectrumStreamIndex; //!< Index of the stream displayed on main spectrum
+    bool m_gainLock; //!< Lock Rx or Tx channel gains (set channel gains to gain of channel 0 when engaged)
     QTimer m_updateTimer;
     QTimer m_statusTimer;
 	bool m_doApplySettings;
@@ -113,6 +114,7 @@ private slots:
 	void on_sampleRate_changed(quint64 value);
 	void on_fcPos_currentIndexChanged(int index);
 	void on_decim_currentIndexChanged(int index);
+    void on_gainLock_toggled(bool checked);
 	void on_gainMode_currentIndexChanged(int index);
 	void on_gain_valueChanged(int value);
 	void on_biasTee_toggled(bool checked);

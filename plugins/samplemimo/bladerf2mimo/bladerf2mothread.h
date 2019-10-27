@@ -37,7 +37,7 @@ public:
     void startWork();
     void stopWork();
     bool isRunning() const { return m_running; }
-    void setLog2Interpolation(unsigned int log2_interp);
+    void setLog2Interpolation(unsigned int log2Interp);
     unsigned int getLog2Interpolation() const;
     void setFcPos(int fcPos);
     int getFcPos() const;
@@ -58,7 +58,7 @@ private:
 
     void run();
     unsigned int getNbFifos();
-    void callbackPart(qint16* buf, qint32 samplesPerChannel, int iBegin, qint32 nSamples);
+    void callbackPart(qint16* buf, qint32 nSamples, int iBegin);
     void callback(qint16* buf, qint32 samplesPerChannel);
 };
 

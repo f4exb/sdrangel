@@ -116,7 +116,7 @@ bool BladeRF2MIMOSettings::deserialize(const QByteArray& data)
         uint32_t uintval;
 
         d.readS32(1, &m_devSampleRate, 3072000);
-        d.readS32(2, &m_LOppmTenths);
+        d.readS32(2, &m_LOppmTenths, 0);
 
         d.readU64(10, &m_rxCenterFrequency, 435000*1000);
         d.readU32(11, &m_log2Decim);

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>366</width>
-    <height>220</height>
+    <height>228</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -700,21 +700,24 @@
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0,0,0">
+    <layout class="QGridLayout" name="gridLayout_decim" columnstretch="0,0,0,0,0,0">
      <property name="spacing">
       <number>3</number>
      </property>
-     <item row="0" column="2">
+     <item row="0" column="3">
       <widget class="QSlider" name="gain">
        <property name="toolTip">
         <string>Gain value</string>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
+     <item row="0" column="2">
       <widget class="QComboBox" name="gainMode">
        <property name="toolTip">
         <string>Gain mode</string>
@@ -728,7 +731,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="3">
+     <item row="0" column="4">
       <widget class="QLabel" name="gainText">
        <property name="minimumSize">
         <size>
@@ -744,13 +747,31 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="4">
+     <item row="0" column="5">
       <widget class="ButtonSwitch" name="biasTee">
        <property name="toolTip">
         <string>Bias Tee</string>
        </property>
        <property name="text">
         <string>BT</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QToolButton" name="gainLock">
+       <property name="toolTip">
+        <string>Lock both channels gain</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/unlocked.png</normaloff>
+         <normalon>:/locked.png</normalon>:/unlocked.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

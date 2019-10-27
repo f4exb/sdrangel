@@ -30,6 +30,7 @@ struct BeamSteeringCWModSettings
     QString m_title;
     uint32_t m_log2Interp;
     uint32_t m_filterChainHash;
+    int m_channelOutput; //!< 0: 1&2, 1: 1, 2: 2
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

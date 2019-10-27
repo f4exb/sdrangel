@@ -76,6 +76,28 @@
       <item>
        <layout class="QHBoxLayout" name="decimationStageLayer">
         <item>
+         <widget class="QComboBox" name="channelOutput">
+          <property name="toolTip">
+           <string>Channel output</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>A,B</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>A</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>B</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
          <widget class="QLabel" name="interpolationLabel">
           <property name="text">
            <string>Int</string>

@@ -97,6 +97,7 @@ void BeamSteeringCWMod::applySettings(const BeamSteeringCWModSettings& settings,
 {
     qDebug() << "BeamSteeringCWMod::applySettings: "
         << "m_steerDegrees: " << settings.m_steerDegrees
+        << "m_channelOutput: " << settings.m_channelOutput
         << "m_filterChainHash: " << settings.m_filterChainHash
         << "m_log2Interp: " << settings.m_log2Interp
         << "m_useReverseAPI: " << settings.m_useReverseAPI
@@ -116,6 +117,17 @@ void BeamSteeringCWMod::applySettings(const BeamSteeringCWModSettings& settings,
 
     if ((m_settings.m_steerDegrees != settings.m_steerDegrees) || force) {
         m_source->setSteeringDegrees(settings.m_steerDegrees);
+    }
+
+    if ((m_settings.m_channelOutput != settings.m_channelOutput) || force)
+    {
+        if (settings.m_channelOutput == 0) { // A and B
+            m_source->muteChannel(false, false);
+        } else if (settings.m_channelOutput == 1) { // A only
+            m_source->muteChannel(false, true);
+        } else if (settings.m_channelOutput == 2) { // B only
+            m_source->muteChannel(true, false);
+        }
     }
 
     m_settings = settings;

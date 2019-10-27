@@ -93,6 +93,27 @@ public:
         {}
     };
 
+    class MsgConfigureChannelMute : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getMute0() const { return m_mute0; }
+        bool getMute1() const { return m_mute1; }
+
+        static MsgConfigureChannelMute* create(bool mute0, bool mute1) {
+            return new MsgConfigureChannelMute(mute0, mute1);
+        }
+    private:
+        bool m_mute0;
+        bool m_mute1;
+
+        MsgConfigureChannelMute(bool mute0, bool mute1) :
+            Message(),
+            m_mute0(mute0),
+            m_mute1(mute1)
+        {}
+    };
+
     BeamSteeringCWModSource();
     ~BeamSteeringCWModSource();
     void reset();
@@ -100,6 +121,7 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
 
     void setSteeringDegrees(int steeringDegrees);
+    void muteChannel(bool mute0, bool mute1);
 	void pull(const SampleVector::iterator& begin, unsigned int nbSamples, unsigned int streamIndex);
 
 private:
