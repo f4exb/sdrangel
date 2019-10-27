@@ -292,6 +292,14 @@ int ChannelAnalyzerGUI::getRequestedChannelSampleRate()
 void ChannelAnalyzerGUI::on_signalSelect_currentIndexChanged(int index)
 {
     m_settings.m_inputType = (ChannelAnalyzerSettings::InputType) index;
+
+    if (m_settings.m_inputType == ChannelAnalyzerSettings::InputAutoCorr) {
+        m_scopeVis->setTraceChunkSize(ChannelAnalyzer::m_corrFFTLen);
+    } else {
+        m_scopeVis->setTraceChunkSize(ScopeVis::m_traceChunkDefaultSize);
+    }
+
+    ui->scopeGUI->traceLengthChange();
     applySettings();
 }
 

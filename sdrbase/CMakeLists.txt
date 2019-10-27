@@ -79,7 +79,6 @@ set(sdrbase_SOURCES
     dsp/dspdevicesinkengine.cpp
     dsp/dspdevicemimoengine.cpp
     dsp/fftcorr.cpp
-    dsp/fftcorr2.cpp
     dsp/fftengine.cpp
     dsp/fftfilt.cpp
     dsp/fftwindow.cpp
@@ -201,7 +200,6 @@ set(sdrbase_HEADERS
     dsp/dspdevicemimoengine.h
     dsp/dsptypes.h
     dsp/fftcorr.h
-    dsp/fftcorr2.h
     dsp/fftengine.h
     dsp/fftfilt.h
     dsp/fftwengine.h

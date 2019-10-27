@@ -31,6 +31,7 @@ MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgReportChannelSampleRateChanged, Mes
 
 const QString ChannelAnalyzer::m_channelIdURI = "sdrangel.channel.chanalyzer";
 const QString ChannelAnalyzer::m_channelId = "ChannelAnalyzer";
+const unsigned int ChannelAnalyzer::m_corrFFTLen = 4*ssbFftLen;
 
 ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
@@ -52,7 +53,7 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
 	SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_inputSampleRate, m_settings.m_bandwidth / m_inputSampleRate, ssbFftLen);
 	DSBFilter = new fftfilt(m_settings.m_bandwidth / m_inputSampleRate, 2*ssbFftLen);
 	RRCFilter = new fftfilt(m_settings.m_bandwidth / m_inputSampleRate, 2*ssbFftLen);
-	m_corr = new fftcorr2(8*ssbFftLen); // 8k for 4k effective samples
+	m_corr = new fftcorr(2*m_corrFFTLen); // 8k for 4k effective samples
 	m_pll.computeCoefficients(0.002f, 0.5f, 10.0f); // bandwidth, damping factor, loop gain
 
 	applyChannelSettings(m_inputSampleRate, m_inputFrequencyOffset, true);

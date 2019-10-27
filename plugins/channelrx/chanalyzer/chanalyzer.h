@@ -25,7 +25,7 @@
 #include "channel/channelapi.h"
 #include "dsp/interpolator.h"
 #include "dsp/ncof.h"
-#include "dsp/fftcorr2.h"
+#include "dsp/fftcorr.h"
 #include "dsp/fftfilt.h"
 #include "dsp/phaselockcomplex.h"
 #include "dsp/freqlockcomplex.h"
@@ -156,6 +156,7 @@ public:
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
+    static const unsigned int m_corrFFTLen;
 
 private:
 	DeviceAPI *m_deviceAPI;
@@ -181,7 +182,7 @@ private:
 	fftfilt* SSBFilter;
 	fftfilt* DSBFilter;
 	fftfilt* RRCFilter;
-	fftcorr2* m_corr;
+	fftcorr* m_corr;
 
 	BasebandSampleSink* m_sampleSink;
 	SampleVector m_sampleBuffer;

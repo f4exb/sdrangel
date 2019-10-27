@@ -1,13 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 F4EXB                                                      //
+// Copyright (C) 2019 F4EXB                                                      //
 // written by Edouard Griffiths                                                  //
 //                                                                               //
-// FFT based cross correlation                                                   //
-//                                                                               //
-// See: http://liquidsdr.org/blog/pll-howto/                                     //
-// Fixed filter registers saturation                                             //
-// Added order for PSK locking. This brilliant idea actually comes from this     //
-// post: https://www.dsprelated.com/showthread/comp.dsp/36356-1.php              //
+// FFT based cross correlation. Uses FFTW/Kiss engine.                           //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -24,17 +19,21 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <algorithm>
+
+#include "dsp/fftengine.h"
 #include "fftcorr.h"
 
 void fftcorr::init_fft()
 {
-    fftA = new g_fft<float>(flen);
-    fftB = new g_fft<float>(flen);
+    fftA->configure(flen, false);
+    fftB->configure(flen, false);
+    fftInvA->configure(flen, true);
+    m_window.create(FFTWindow::Hanning, flen);
 
-    dataA   = new cmplx[flen];
-    dataB   = new cmplx[flen];
-    dataBj  = new cmplx[flen];
-    dataP   = new cmplx[flen];
+    dataA    = new cmplx[flen];
+    dataB    = new cmplx[flen];
+    dataBj   = new cmplx[flen];
+    dataP    = new cmplx[flen];
 
     std::fill(dataA, dataA+flen, 0);
     std::fill(dataB, dataB+flen, 0);
@@ -44,7 +43,12 @@ void fftcorr::init_fft()
     outptr = 0;
 }
 
-fftcorr::fftcorr(int len) : flen(len), flen2(len>>1)
+fftcorr::fftcorr(int len) :
+    flen(len),
+    flen2(len>>1),
+    fftA(FFTEngine::create()),
+    fftB(FFTEngine::create()),
+    fftInvA(FFTEngine::create())
 {
     init_fft();
 }
@@ -71,21 +75,25 @@ int fftcorr::run(const cmplx& inA, const cmplx* inB, cmplx **out)
         return 0;
     }
 
-    fftA->ComplexFFT(dataA);
+    m_window.apply(dataA, fftA->in());
+    fftA->transform();
 
-    if (inB) {
-        fftB->ComplexFFT(dataB);
+    if (inB)
+    {
+        m_window.apply(dataB, fftB->in());
+        fftB->transform();
     }
 
     if (inB) {
-        std::transform(dataB, dataB+flen, dataBj, [](const cmplx& c) -> cmplx { return std::conj(c); });
+        std::transform(fftB->out(), fftB->out()+flen, dataBj, [](const cmplx& c) -> cmplx { return std::conj(c); });
     } else {
-        std::transform(dataA, dataA+flen, dataBj, [](const cmplx& c) -> cmplx { return std::conj(c); });
+        std::transform(fftA->out(), fftA->out()+flen, dataBj, [](const cmplx& c) -> cmplx { return std::conj(c); });
     }
 
-    std::transform(dataA, dataA+flen, dataBj, dataP, [](const cmplx& a, const cmplx& b) -> cmplx { return a*b; });
+    std::transform(fftA->out(), fftA->out()+flen, dataBj, fftInvA->in(), [](const cmplx& a, const cmplx& b) -> cmplx { return a*b; });
 
-    fftA->InverseComplexFFT(dataP);
+    fftInvA->transform();
+    std::copy(fftInvA->out(), fftInvA->out()+flen, dataP);
 
     std::fill(dataA, dataA+flen, 0);
     inptrA = 0;
