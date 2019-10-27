@@ -27,6 +27,7 @@
 MESSAGE_CLASS_DEFINITION(BeamSteeringCWModSource::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(BeamSteeringCWModSource::MsgSignalNotification, Message)
 MESSAGE_CLASS_DEFINITION(BeamSteeringCWModSource::MsgConfigureSteeringAngle, Message)
+MESSAGE_CLASS_DEFINITION(BeamSteeringCWModSource::MsgConfigureChannelMute, Message)
 
 BeamSteeringCWModSource::BeamSteeringCWModSource() :
     m_steeringDegrees(90),
@@ -75,6 +76,12 @@ void BeamSteeringCWModSource::setSteeringDegrees(int steeringDegrees)
 {
     m_steeringDegrees = steeringDegrees < -180 ? -180 : steeringDegrees > 180 ? 180 : steeringDegrees;
     MsgConfigureSteeringAngle *msg = MsgConfigureSteeringAngle::create((m_steeringDegrees/180.0f)*M_PI);
+    m_inputMessageQueue.push(msg);
+}
+
+void BeamSteeringCWModSource::muteChannel(bool mute0, bool mute1)
+{
+    MsgConfigureChannelMute *msg = MsgConfigureChannelMute::create(mute0, mute1);
     m_inputMessageQueue.push(msg);
 }
 
@@ -222,6 +229,19 @@ bool BeamSteeringCWModSource::handleMessage(const Message& cmd)
                 << " steeringAngle: " << steeringAngle;
 
         m_streamSources[1].setPhase(M_PI*cos(steeringAngle));
+
+        return true;
+    }
+    else if (MsgConfigureChannelMute::match(cmd))
+    {
+        QMutexLocker mutexLocker(&m_mutex);
+        MsgConfigureChannelMute& cfg = (MsgConfigureChannelMute&) cmd;
+        m_streamSources[0].muteChannel(cfg.getMute0());
+        m_streamSources[1].muteChannel(cfg.getMute1());
+
+        qDebug() << "BeamSteeringCWModSource::handleMessage: MsgConfigureChannelMute:"
+                << " mute0: " << cfg.getMute0()
+                << " mute1: " << cfg.getMute1();
 
         return true;
     }

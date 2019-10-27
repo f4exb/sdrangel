@@ -264,6 +264,12 @@ void BeamSteeringCWModGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
+void BeamSteeringCWModGUI::on_channelOutput_currentIndexChanged(int index)
+{
+    m_settings.m_channelOutput = index;
+    applySettings();
+}
+
 void BeamSteeringCWModGUI::on_interpolationFactor_currentIndexChanged(int index)
 {
     m_settings.m_log2Interp = index;
@@ -279,6 +285,7 @@ void BeamSteeringCWModGUI::on_position_valueChanged(int value)
 void BeamSteeringCWModGUI::on_steeringDegrees_valueChanged(int value)
 {
     m_settings.m_steerDegrees = value;
+    ui->steeringDegreesText->setText(tr("%1").arg(m_settings.m_steerDegrees));
     applySettings();
 }
 

@@ -35,6 +35,7 @@ void BeamSteeringCWModSettings::resetToDefaults()
     m_title = "Beam Steering CW Modulator";
     m_log2Interp = 0;
     m_filterChainHash = 0;
+    m_channelOutput = 0;
     m_channelMarker = nullptr;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -56,6 +57,7 @@ QByteArray BeamSteeringCWModSettings::serialize() const
     s.writeU32(11, m_reverseAPIChannelIndex);
     s.writeU32(12, m_log2Interp);
     s.writeU32(13, m_filterChainHash);
+    s.writeS32(14, m_channelOutput);
 
     return s.final();
 }
@@ -97,6 +99,8 @@ bool BeamSteeringCWModSettings::deserialize(const QByteArray& data)
         d.readU32(12, &tmp, 0);
         m_log2Interp = tmp > 6 ? 6 : tmp;
         d.readU32(13, &m_filterChainHash, 0);
+        d.readS32(14, &stmp, 0);
+        m_channelOutput = tmp < 0 ? 0 : tmp > 2 ? 2 : tmp;
 
         return true;
     }

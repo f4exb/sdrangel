@@ -15,10 +15,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "dsp/dsptypes.h"
 #include "beamsteeringcwmodstreamsource.h"
 
 BeamSteeringCWModStreamSource::BeamSteeringCWModStreamSource() :
-    m_amp(0.5f)
+    m_amp(SDR_TX_SCALEF/sqrt(2.0f)),
+    m_phase(0)
 {
     m_real = m_amp;
     m_imag = 0.0f;
@@ -27,16 +29,30 @@ BeamSteeringCWModStreamSource::BeamSteeringCWModStreamSource() :
 BeamSteeringCWModStreamSource::~BeamSteeringCWModStreamSource()
 {}
 
+void BeamSteeringCWModStreamSource::muteChannel(bool mute)
+{
+    if (mute)
+    {
+        m_real = 0;
+        m_imag = 0;
+    }
+    else
+    {
+        setPhase(m_phase);
+    }
+}
+
 void BeamSteeringCWModStreamSource::setPhase(float phase)
 {
     float normPhase = phase < -M_PI ? -M_PI : phase > M_PI ? M_PI : phase;
     m_real = m_amp * cos(normPhase);
     m_imag = m_amp * sin(normPhase);
+    m_phase = phase;
 }
 
 void BeamSteeringCWModStreamSource::pull(SampleVector::iterator begin, unsigned int nbSamples)
 {
-    std::fill(begin, begin + nbSamples, Sample{m_real, m_imag});
+    std::fill(begin, begin + nbSamples, Sample{(int) m_real, m_imag});
 }
 
 void BeamSteeringCWModStreamSource::pullOne(Sample& sample)
