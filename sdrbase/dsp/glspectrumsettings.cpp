@@ -32,7 +32,7 @@ void GLSpectrumSettings::resetToDefaults()
 {
 	m_fftSize = 1024;
 	m_fftOverlap = 0;
-	m_fftWindow = FFTWindow::Hamming;
+	m_fftWindow = FFTWindow::Hanning;
 	m_refLevel = 0;
 	m_powerRange = 100;
 	m_decay = 1;
@@ -94,7 +94,7 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
     {
 		d.readS32(1, &m_fftSize, 1024);
 		d.readS32(2, &m_fftOverlap, 0);
-		d.readS32(3, &m_fftWindow, FFTWindow::Hamming);
+		d.readS32(3, &m_fftWindow, FFTWindow::Hanning);
 		d.readReal(4, &m_refLevel, 0);
 		d.readReal(5, &m_powerRange, 100);
 		d.readBool(6, &m_displayWaterfall, true);

@@ -357,8 +357,8 @@ Use this combo box to select which window is applied to the FFT:
   - **Bart**: Bartlett
   - **B-H**: Blackmann-Harris
   - **FT**: Flat top
-  - **Ham**: Hamming (default)
-  - **Han**: Hanning
+  - **Ham**: Hamming
+  - **Han**: Hanning (default)
   - **Rec**: Rectangular (no window)
 
 <h4>4.2. FFT size</h4>
