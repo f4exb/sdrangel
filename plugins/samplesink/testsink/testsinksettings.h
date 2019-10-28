@@ -20,15 +20,19 @@
 
 #include <QByteArray>
 
+class Serializable;
+
 struct TestSinkSettings {
     quint64 m_centerFrequency;
     quint64 m_sampleRate;
     quint32 m_log2Interp;
+    Serializable *m_spectrumGUI;
 
     TestSinkSettings();
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
 };
 
 #endif /* PLUGINS_SAMPLESINK_TESTSINK_TESTSINKSETTINGS_H_ */

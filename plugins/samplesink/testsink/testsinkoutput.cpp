@@ -25,6 +25,7 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
+#include "dsp/basebandsamplesink.h"
 
 #include "device/deviceapi.h"
 
@@ -39,7 +40,8 @@ TestSinkOutput::TestSinkOutput(DeviceAPI *deviceAPI) :
 	m_settings(),
 	m_testSinkThread(nullptr),
 	m_deviceDescription("TestSink"),
-	m_masterTimer(deviceAPI->getMasterTimer())
+	m_masterTimer(deviceAPI->getMasterTimer()),
+    m_spectrumSink(nullptr)
 {
     m_deviceAPI->setNbSinkStreams(1);
 }
@@ -65,6 +67,7 @@ bool TestSinkOutput::start()
 	qDebug() << "TestSinkOutput::start";
 
 	m_testSinkThread = new TestSinkThread(&m_sampleSourceFifo);
+    m_testSinkThread->setSpectrumSink(m_spectrumSink);
 	m_testSinkThread->setSamplerate(m_settings.m_sampleRate);
 	m_testSinkThread->setLog2Interpolation(m_settings.m_log2Interp);
 	m_testSinkThread->connectTimer(m_masterTimer);

@@ -25,6 +25,7 @@
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
+#include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 
@@ -41,7 +42,6 @@ TestSinkGui::TestSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_doApplySettings(true),
 	m_forceSettings(true),
 	m_settings(),
-    m_deviceSampleSink(0),
     m_sampleRate(0),
     m_generation(false),
 	m_samplesCount(0),
@@ -49,12 +49,20 @@ TestSinkGui::TestSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
 	ui->setupUi(this);
+    m_sampleSink = (TestSinkOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
 
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(7, 32000U, 9000000U);
+
+    m_spectrumVis = new SpectrumVis(SDR_TX_SCALEF, ui->glSpectrum);
+    m_sampleSink->setSpectrumSink(m_spectrumVis);
+    ui->glSpectrum->setCenterFrequency(m_settings.m_centerFrequency);
+    ui->glSpectrum->setSampleRate(m_settings.m_sampleRate*(1<<m_settings.m_log2Interp));
+    ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
+    ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
 	connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
@@ -63,12 +71,12 @@ TestSinkGui::TestSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	displaySettings();
 
-    m_deviceSampleSink = (TestSinkOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
 TestSinkGui::~TestSinkGui()
 {
+    delete m_spectrumVis;
 	delete ui;
 }
 
@@ -202,7 +210,7 @@ void TestSinkGui::updateHardware()
 {
     qDebug() << "TestSinkGui::updateHardware";
     TestSinkOutput::MsgConfigureTestSink* message = TestSinkOutput::MsgConfigureTestSink::create(m_settings, m_forceSettings);
-    m_deviceSampleSink->getInputMessageQueue()->push(message);
+    m_sampleSink->getInputMessageQueue()->push(message);
     m_forceSettings = false;
     m_updateTimer.stop();
 }
@@ -239,12 +247,14 @@ void TestSinkGui::updateStatus()
 void TestSinkGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
+    ui->glSpectrum->setCenterFrequency(m_settings.m_centerFrequency);
     sendSettings();
 }
 
 void TestSinkGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_sampleRate = value;
+    ui->glSpectrum->setSampleRate(m_settings.m_sampleRate*(1<<m_settings.m_log2Interp));
     sendSettings();
 }
 
@@ -255,6 +265,7 @@ void TestSinkGui::on_interp_currentIndexChanged(int index)
     }
 
     m_settings.m_log2Interp = index;
+    ui->glSpectrum->setSampleRate(m_settings.m_sampleRate*(1<<m_settings.m_log2Interp));
     updateSampleRateAndFrequency();
     sendSettings();
 }
@@ -264,7 +275,7 @@ void TestSinkGui::on_startStop_toggled(bool checked)
     if (m_doApplySettings)
     {
         TestSinkOutput::MsgStartStop *message = TestSinkOutput::MsgStartStop::create(checked);
-        m_deviceSampleSink->getInputMessageQueue()->push(message);
+        m_sampleSink->getInputMessageQueue()->push(message);
     }
 }
 

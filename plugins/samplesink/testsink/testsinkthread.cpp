@@ -22,6 +22,7 @@
 #include <QDebug>
 
 #include "dsp/samplesourcefifo.h"
+#include "dsp/basebandsamplesink.h"
 #include "testsinkthread.h"
 
 TestSinkThread::TestSinkThread(SampleSourceFifo* sampleFifo, QObject* parent) :
@@ -177,6 +178,7 @@ void TestSinkThread::tick()
         if (m_log2Interpolation == 0)
         {
             m_interpolators.interpolate1(&beginRead, m_buf, 2*chunkSize);
+            feedSpectrum(m_buf, 2*chunkSize);
             //m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), m_samplesChunkSize*sizeof(Sample));
         }
         else
@@ -206,7 +208,29 @@ void TestSinkThread::tick()
                 break;
             }
 
+            feedSpectrum(m_buf, 2*chunkSize*(1<<m_log2Interpolation));
             //m_ofstream->write(reinterpret_cast<char*>(m_buf), m_samplesChunkSize*(1<<m_log2Interpolation)*2*sizeof(int16_t));
         }
 	}
+}
+
+void TestSinkThread::feedSpectrum(int16_t *buf, unsigned int bufSize)
+{
+    if (!m_spectrumSink) {
+        return;
+    }
+
+    m_samplesVector.allocate(bufSize/2);
+    Sample16 *s16Buf = (Sample16*) buf;
+
+    std::transform(
+        s16Buf,
+        s16Buf + (bufSize/2),
+        m_samplesVector.m_vector.begin(),
+        [](Sample16 s) -> Sample {
+            return Sample{s.m_real, s.m_imag};
+        }
+    );
+
+    m_spectrumSink->feed(m_samplesVector.m_vector.begin(), m_samplesVector.m_vector.begin() + (bufSize/2), false);
 }

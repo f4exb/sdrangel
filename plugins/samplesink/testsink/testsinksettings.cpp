@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "util/simpleserializer.h"
+#include "settings/serializable.h"
 #include "testsinksettings.h"
 
 TestSinkSettings::TestSinkSettings()
@@ -28,14 +29,20 @@ void TestSinkSettings::resetToDefaults()
     m_centerFrequency = 435000*1000;
     m_sampleRate = 48000;
     m_log2Interp = 0;
+    m_spectrumGUI = nullptr;
 }
 
 QByteArray TestSinkSettings::serialize() const
 {
     SimpleSerializer s(1);
 
-    s.writeU64(1, m_sampleRate);
-    s.writeU32(2, m_log2Interp);
+    s.writeU64(1, m_centerFrequency);
+    s.writeU64(2, m_sampleRate);
+    s.writeU32(3, m_log2Interp);
+
+    if (m_spectrumGUI) {
+        s.writeBlob(4, m_spectrumGUI->serialize());
+    }
 
     return s.final();
 }
@@ -52,8 +59,18 @@ bool TestSinkSettings::deserialize(const QByteArray& data)
 
     if (d.getVersion() == 1)
     {
-        d.readU64(1, &m_sampleRate, 48000);
-        d.readU32(2, &m_log2Interp, 0);
+        QByteArray bytetmp;
+
+        d.readU64(1, &m_sampleRate, 435000*1000);
+        d.readU64(2, &m_sampleRate, 48000);
+        d.readU32(3, &m_log2Interp, 0);
+
+        if (m_spectrumGUI)
+        {
+            d.readBlob(4, &bytetmp);
+            m_spectrumGUI->deserialize(bytetmp);
+        }
+
         return true;
     }
     else

@@ -29,6 +29,7 @@
 
 class TestSinkThread;
 class DeviceAPI;
+class BasebandSampleSink;
 
 class TestSinkOutput : public DeviceSampleSink {
 public:
@@ -103,6 +104,8 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_spectrumSink = spectrumSink; }
+
 private:
     DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
@@ -111,6 +114,7 @@ private:
 	TestSinkThread* m_testSinkThread;
 	QString m_deviceDescription;
 	const QTimer& m_masterTimer;
+    BasebandSampleSink* m_spectrumSink;
 
 	void applySettings(const TestSinkSettings& settings, bool force = false);
 };

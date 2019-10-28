@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>350</width>
-    <height>190</height>
+    <height>400</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>350</width>
-    <height>190</height>
+    <height>400</height>
    </size>
   </property>
   <property name="font">
@@ -293,6 +293,35 @@
     </layout>
    </item>
    <item>
+    <layout class="QVBoxLayout" name="spectrumLayout">
+     <property name="topMargin">
+      <number>6</number>
+     </property>
+     <property name="bottomMargin">
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="GLSpectrum" name="glSpectrum" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>200</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Liberation Mono</family>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="GLSpectrumGUI" name="spectrumGUI" native="true"/>
+     </item>
+    </layout>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="padLayout">
      <item>
       <spacer name="verticaPadlSpacer">
@@ -322,6 +351,18 @@
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>GLSpectrum</class>
+   <extends>QWidget</extends>
+   <header>gui/glspectrum.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GLSpectrumGUI</class>
+   <extends>QWidget</extends>
+   <header>gui/glspectrumgui.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

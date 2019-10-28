@@ -30,10 +30,12 @@
 
 #include "dsp/inthalfbandfilter.h"
 #include "dsp/interpolators.h"
+#include "util/incrementalvector.h"
 
 #define TESTSINK_THROTTLE_MS 50
 
 class SampleSourceFifo;
+class BasebandSampleSink;
 
 class TestSinkThread : public QThread {
 	Q_OBJECT
@@ -50,10 +52,18 @@ public:
 	bool isRunning() const { return m_running; }
     std::size_t getSamplesCount() const { return m_samplesCount; }
     void setSamplesCount(int samplesCount) { m_samplesCount = samplesCount; }
+    void setSpectrumSink(BasebandSampleSink *spectrumSink) { m_spectrumSink = spectrumSink; }
 
 	void connectTimer(const QTimer& timer);
 
 private:
+#pragma pack(push, 1)
+    struct Sample16
+    {
+        int16_t m_real;
+        int16_t m_imag;
+    };
+#pragma pack(pop)
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
 	volatile bool m_running;
@@ -72,8 +82,11 @@ private:
 
     Interpolators<qint16, SDR_TX_SAMP_SZ, 16> m_interpolators;
     int16_t *m_buf;
+    BasebandSampleSink* m_spectrumSink;
+    IncrementalVector<Sample> m_samplesVector;
 
 	void run();
+    void feedSpectrum(int16_t *buf, unsigned int bufSize);
 
 private slots:
 	void tick();

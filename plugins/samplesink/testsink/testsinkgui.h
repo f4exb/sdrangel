@@ -28,8 +28,9 @@
 #include "testsinksettings.h"
 
 
-class DeviceSampleSink;
+class TestSinkOutput;
 class DeviceUISet;
+class SpectrumVis;
 
 namespace Ui {
 	class TestSinkGui;
@@ -63,7 +64,7 @@ private:
 	TestSinkSettings m_settings;
 	QTimer m_updateTimer;
     QTimer m_statusTimer;
-	DeviceSampleSink* m_deviceSampleSink;
+	TestSinkOutput* m_sampleSink;
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     bool m_generation;
@@ -71,6 +72,7 @@ private:
 	std::size_t m_tickCount;
 	int m_lastEngineState;
 	MessageQueue m_inputMessageQueue;
+    SpectrumVis* m_spectrumVis;
 
 	void blockApplySettings(bool block) { m_doApplySettings = !block; }
 	void displaySettings();
