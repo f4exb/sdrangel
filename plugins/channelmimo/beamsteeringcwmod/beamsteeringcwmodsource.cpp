@@ -144,7 +144,7 @@ void BeamSteeringCWModSource::handleData()
 
     while ((remainder > 0) && (m_inputMessageQueue.size() == 0))
     {
-        m_sampleMOFifo.writeSync(remainder, ipart1begin, ipart1end, ipart2begin, ipart2end);
+        m_sampleMOFifo.writeSync(ipart1begin, ipart1end, ipart2begin, ipart2end);
 
         if (ipart1begin != ipart1end) { // first part of FIFO data
             processFifo(data, ipart1begin, ipart1end);
@@ -154,7 +154,6 @@ void BeamSteeringCWModSource::handleData()
             processFifo(data, ipart2begin, ipart2end);
         }
 
-        m_sampleMOFifo.commitWriteSync(remainder);
         remainder = m_sampleMOFifo.remainderSync();
     }
 }
