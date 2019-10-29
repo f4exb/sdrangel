@@ -42,10 +42,13 @@ TestMOSync::TestMOSync(DeviceAPI *deviceAPI) :
 	m_settings(),
     m_sinkThread(nullptr),
 	m_deviceDescription("TestMOSync"),
-    m_runningTx(false)
+    m_runningTx(false),
+    m_masterTimer(deviceAPI->getMasterTimer()),
+    m_spectrumSink(nullptr),
+    m_feedSpectrumIndex(0)
 {
     m_mimoType = MIMOHalfSynchronous;
-    m_sampleMOFifo.init(2, 96000 * 4);
+    m_sampleMOFifo.init(2, 4096*64);
     m_deviceAPI->setNbSourceStreams(0);
     m_deviceAPI->setNbSinkStreams(2);
 }
@@ -76,7 +79,11 @@ bool TestMOSync::startTx()
     m_sampleMOFifo.reset();
     m_sinkThread->setFifo(&m_sampleMOFifo);
     m_sinkThread->setFcPos(m_settings.m_fcPosTx);
+    m_sinkThread->setSamplerate(m_settings.m_sampleRate);
     m_sinkThread->setLog2Interpolation(m_settings.m_log2Interp);
+    m_sinkThread->setSpectrumSink(m_spectrumSink);
+    m_sinkThread->setFeedSpectrumIndex(m_feedSpectrumIndex);
+    m_sinkThread->connectTimer(m_masterTimer);
 	m_sinkThread->startWork();
 	mutexLocker.unlock();
 	m_runningTx = true;
@@ -218,6 +225,15 @@ bool TestMOSync::handleMessage(const Message& message)
     else
     {
         return false;
+    }
+}
+
+void TestMOSync::setFeedSpectrumIndex(unsigned int feedSpectrumIndex)
+{
+    m_feedSpectrumIndex = feedSpectrumIndex > 1 ? 1 : feedSpectrumIndex;
+
+    if (m_sinkThread) {
+        m_sinkThread->setFeedSpectrumIndex(m_feedSpectrumIndex);
     }
 }
 

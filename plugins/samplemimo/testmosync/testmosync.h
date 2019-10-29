@@ -22,12 +22,14 @@
 
 #include <QString>
 #include <QByteArray>
+#include <QTimer>
 
 #include "dsp/devicesamplemimo.h"
 #include "testmosyncsettings.h"
 
 class DeviceAPI;
 class TestMOSyncThread;
+class BasebandSampleSink;
 
 class TestMOSync : public DeviceSampleMIMO {
     Q_OBJECT
@@ -119,6 +121,8 @@ public:
 
     bool getRxRunning() const { return false; }
     bool getTxRunning() const { return m_runningTx; }
+    void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_spectrumSink = spectrumSink; }
+    void setFeedSpectrumIndex(unsigned int  feedSpectrumIndex);
 
 private:
 	DeviceAPI *m_deviceAPI;
@@ -127,6 +131,9 @@ private:
     TestMOSyncThread* m_sinkThread;
 	QString m_deviceDescription;
 	bool m_runningTx;
+    const QTimer& m_masterTimer;
+    BasebandSampleSink* m_spectrumSink;
+    unsigned int m_feedSpectrumIndex;
 
 	bool applySettings(const TestMOSyncSettings& settings, bool force);
 };
