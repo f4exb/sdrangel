@@ -39,7 +39,11 @@ public:
 		unsigned int& ipart2Begin, unsigned int& ipart2End  // second part offsets
     );
     void writeSync(const std::vector<SampleVector::iterator>& vbegin, unsigned int amount); //!< copy write
-    void writeSync( //!< in place write
+    void writeSync( //!< in place write with auto amount
+		unsigned int& ipart1Begin, unsigned int& ipart1End, // first part offsets where to write
+		unsigned int& ipart2Begin, unsigned int& ipart2End  // second part offsets
+    );
+    void writeSync( //!< in place write with given amount
         unsigned int amount,
 		unsigned int& ipart1Begin, unsigned int& ipart1End, // first part offsets where to write
 		unsigned int& ipart2Begin, unsigned int& ipart2End  // second part offsets
@@ -53,7 +57,12 @@ public:
         unsigned int stream
     );
     void writeAsync(const SampleVector::iterator& begin, unsigned int amount, unsigned int stream); //!< copy write
-    void writeAsync( //!< in place write
+    void writeAsync( //!< in place write with auto amount
+		unsigned int& ipart1Begin, unsigned int& ipart1End,
+		unsigned int& ipart2Begin, unsigned int& ipart2End,
+        unsigned int stream
+    );
+    void writeAsync( //!< in place write with given amount
         unsigned int amount,
 		unsigned int& ipart1Begin, unsigned int& ipart1End,
 		unsigned int& ipart2Begin, unsigned int& ipart2End,

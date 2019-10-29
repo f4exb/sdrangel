@@ -22,8 +22,8 @@ void SampleMOFifo::init(unsigned int nbStreams, unsigned int size)
     m_nbStreams = nbStreams;
     m_size = size;
 	m_readCount = 0;
-    m_readHead = size/2;
-    m_writeHead = 0;
+    m_readHead = 0;
+    m_writeHead = size/8;
     m_data.resize(nbStreams);
     m_vReadCount.clear();
     m_vReadHead.clear();
@@ -33,8 +33,8 @@ void SampleMOFifo::init(unsigned int nbStreams, unsigned int size)
     {
         m_data[stream].resize(size);
         m_vReadCount.push_back(0);
-        m_vReadHead.push_back(size/2);
-        m_vWriteHead.push_back(0);
+        m_vReadHead.push_back(0);
+        m_vWriteHead.push_back(size/8);
     }
 }
 
@@ -57,15 +57,15 @@ SampleMOFifo::~SampleMOFifo()
 void SampleMOFifo::reset()
 {
 	m_readCount = 0;
-    m_readHead = m_size/2;
-    m_writeHead = 0;
+    m_readHead = 0;
+    m_writeHead = m_size/8;
 
     for (unsigned int stream = 0; stream < m_nbStreams; stream++)
     {
         m_data[stream].resize(m_size);
         m_vReadCount[stream] = 0;
-        m_vReadHead[stream] = m_size/2;
-        m_vWriteHead[stream] = 0;
+        m_vReadHead[stream] = 0;
+        m_vWriteHead[stream] = m_size/8;
     }
 }
 
@@ -162,6 +162,36 @@ void SampleMOFifo::commitWriteSync(unsigned int amount)
     m_readCount = amount < m_readCount ? m_readCount - amount : 0;
 }
 
+void SampleMOFifo::writeSync(
+    unsigned int& ipart1Begin, unsigned int& ipart1End, // first part offsets where to write
+    unsigned int& ipart2Begin, unsigned int& ipart2End  // second part offsets
+)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+    unsigned int spaceLeft = m_size - m_writeHead;
+    unsigned int amount = m_readHead >= m_writeHead ? m_readHead - m_writeHead : m_size + m_readHead - m_writeHead;
+
+    if (amount <= spaceLeft)
+    {
+        ipart1Begin = m_writeHead;
+        ipart1End = m_writeHead + amount;
+        ipart2Begin = m_size;
+        ipart2End = m_size;
+        m_writeHead += amount;
+    }
+    else
+    {
+        unsigned int remaining = amount - spaceLeft;
+        ipart1Begin = m_writeHead;
+        ipart1End = m_size;
+        ipart2Begin = 0;
+        ipart2End = remaining;
+        m_writeHead = remaining;
+    }
+
+    m_readCount = amount < m_readCount ? m_readCount - amount : 0;
+}
+
 void SampleMOFifo::readAsync(
     unsigned int amount,
     unsigned int& ipart1Begin, unsigned int& ipart1End,
@@ -254,5 +284,36 @@ void SampleMOFifo::writeAsync(
 void SampleMOFifo::commitWriteAsync(unsigned int amount, unsigned int stream)
 {
     QMutexLocker mutexLocker(&m_mutex);
+    m_vReadCount[stream] = amount < m_vReadCount[stream] ? m_vReadCount[stream] - amount : 0;
+}
+
+void SampleMOFifo::writeAsync(
+    unsigned int& ipart1Begin, unsigned int& ipart1End,
+    unsigned int& ipart2Begin, unsigned int& ipart2End,
+    unsigned int stream
+)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+    unsigned int spaceLeft = m_size - m_vWriteHead[stream];
+    unsigned int amount = m_vReadHead[stream] >= m_vWriteHead[stream] ? m_vReadHead[stream] - m_vWriteHead[stream] : m_size + m_vReadHead[stream] - m_vWriteHead[stream];
+
+    if (amount <= spaceLeft)
+    {
+        ipart1Begin = m_vWriteHead[stream];
+        ipart1End = m_vWriteHead[stream] + amount;
+        ipart2Begin = m_size;
+        ipart2End = m_size;
+        m_vWriteHead[stream] += amount;
+    }
+    else
+    {
+        unsigned int remaining = amount - spaceLeft;
+        ipart1Begin = m_vWriteHead[stream];
+        ipart1End = m_size;
+        ipart2Begin = 0;
+        ipart2End = remaining;
+        m_vWriteHead[stream] = remaining;
+    }
+
     m_vReadCount[stream] = amount < m_vReadCount[stream] ? m_vReadCount[stream] - amount : 0;
 }
