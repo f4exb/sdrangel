@@ -26,11 +26,13 @@
 #include <QElapsedTimer>
 
 #include "dsp/interpolators.h"
+#include "util/incrementalvector.h"
 
 #define TESTMOSYNC_THROTTLE_MS 50
 
 class QTimer;
 class SampleMOFifo;
+class BasebandSampleSink;
 
 class TestMOSyncThread : public QThread {
     Q_OBJECT
@@ -50,15 +52,24 @@ public:
     void setFifo(SampleMOFifo *sampleFifo) { m_sampleFifo = sampleFifo; }
     SampleMOFifo *getFifo() { return m_sampleFifo; }
     void connectTimer(const QTimer& timer);
+    void setSpectrumSink(BasebandSampleSink *spectrumSink) { m_spectrumSink = spectrumSink; }
+    void setFeedSpectrumIndex(unsigned int  feedSpectrumIndex) { m_feedSpectrumIndex = feedSpectrumIndex > 1 ? 1 : feedSpectrumIndex; }
 
 private:
+#pragma pack(push, 1)
+    struct Sample16
+    {
+        int16_t m_real;
+        int16_t m_imag;
+    };
+#pragma pack(pop)
     QMutex m_startWaitMutex;
     QWaitCondition m_startWaiter;
     bool m_running;
 
     qint16 *m_buf; //!< Full buffer for SISO or MIMO operation
     SampleMOFifo* m_sampleFifo;
-    Interpolators<qint16, SDR_TX_SAMP_SZ, 12>  m_interpolators[2];
+    Interpolators<qint16, SDR_TX_SAMP_SZ, 16>  m_interpolators[2];
     unsigned int m_log2Interp;
     int m_fcPos;
 
@@ -66,13 +77,19 @@ private:
     QElapsedTimer m_elapsedTimer;
     bool m_throttleToggle;
 	unsigned int m_samplesChunkSize;
+    unsigned int m_blockSize;
     unsigned int m_samplesRemainder;
 	int m_samplerate;
 
+    unsigned int m_feedSpectrumIndex;
+    BasebandSampleSink* m_spectrumSink;
+    IncrementalVector<Sample> m_samplesVector;
+
     void run();
     unsigned int getNbFifos();
-    void callbackPart(qint16* buf, qint32 samplesPerChannel, int iBegin, qint32 nSamples);
+    void callbackPart(qint16* buf, qint32 nSamples, int iBegin);
     void callback(qint16* buf, qint32 samplesPerChannel);
+    void feedSpectrum(int16_t *buf, unsigned int bufSize);
 
 private slots:
 	void tick();

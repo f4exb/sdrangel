@@ -29,6 +29,7 @@
 
 class DeviceUISet;
 class TestMOSync;
+class SpectrumVis;
 
 namespace Ui {
 	class TestMOSyncGui;
@@ -70,6 +71,7 @@ private:
 	std::size_t m_tickCount;
 	int m_lastEngineState;
 	MessageQueue m_inputMessageQueue;
+	SpectrumVis* m_spectrumVis;
 
 	void blockApplySettings(bool block) { m_doApplySettings = !block; }
 	void displaySettings();
@@ -82,6 +84,7 @@ private slots:
     void on_sampleRate_changed(quint64 value);
 	void on_startStop_toggled(bool checked);
 	void on_interp_currentIndexChanged(int index);
+    void on_spectrumIndex_currentIndexChanged(int index);
     void updateHardware();
     void updateStatus();
 	void tick();
