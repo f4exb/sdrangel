@@ -38,6 +38,22 @@ void SampleMOFifo::init(unsigned int nbStreams, unsigned int size)
     }
 }
 
+void SampleMOFifo::resize(unsigned int size)
+{
+    m_size = size;
+	m_readCount = 0;
+    m_readHead = 0;
+    m_writeHead = size/8;
+
+    for (unsigned int stream = 0; stream < m_nbStreams; stream++)
+    {
+        m_data[stream].resize(size);
+        m_vReadCount.push_back(0);
+        m_vReadHead.push_back(0);
+        m_vWriteHead.push_back(size/8);
+    }
+}
+
 SampleMOFifo::SampleMOFifo(QObject *parent) :
     QObject(parent),
     m_nbStreams(0),

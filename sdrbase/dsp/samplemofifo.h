@@ -31,6 +31,7 @@ public:
     SampleMOFifo(unsigned int nbStreams, unsigned int size, QObject *parent = nullptr);
     ~SampleMOFifo();
     void init(unsigned int nbStreams, unsigned int size);
+    void resize(unsigned int size);
     void reset();
 
     void readSync(
