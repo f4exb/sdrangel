@@ -33,7 +33,7 @@ BeamSteeringCWModSource::BeamSteeringCWModSource() :
     m_steeringDegrees(90),
     m_mutex(QMutex::Recursive)
 {
-    m_sampleMOFifo.init(2, 4096*64);
+    m_sampleMOFifo.init(2, 1200*64);
     m_vbegin.resize(2);
 
     for (int i = 0; i < 2; i++)
