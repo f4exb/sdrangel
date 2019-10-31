@@ -314,18 +314,18 @@ void DSPDeviceMIMOEngine::workSampleSourceFifos()
 
     std::vector<SampleVector::iterator> vbegin;
     vbegin.resize(sampleFifo->getNbStreams());
-    unsigned int amount = sampleFifo->remainderSync();
+    unsigned int remainder = sampleFifo->remainderSync();
 
-    while ((amount > 0) && (m_inputMessageQueue.size() == 0))
+    while ((remainder > 0) && (m_inputMessageQueue.size() == 0))
     {
-        // pull remainderSync() samples from the sources by stream
+        // pull samples from the sources by stream
         for (unsigned int streamIndex = 0; streamIndex < sampleFifo->getNbStreams(); streamIndex++) {
-            workSamplesSource(vbegin[streamIndex], amount, streamIndex);
+            workSamplesSource(vbegin[streamIndex], remainder, streamIndex);
         }
         // write pulled samples to FIFO
-        sampleFifo->writeSync(vbegin, amount);
-        // get new amount
-        amount = sampleFifo->remainderSync();
+        sampleFifo->writeSync(vbegin, remainder);
+        // get new remainder
+        remainder = sampleFifo->remainderSync();
     }
 }
 
