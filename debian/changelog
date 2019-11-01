@@ -1,3 +1,13 @@
+sdrangel (4.11.12-1) unstable; urgency=medium
+
+  * Test sink output plugin
+  * ChannelAnalyzer: set trace length to FFT length  when auto-correlation by IFFT is used
+  * Tx plugins: corrected FIFO begin iterator vs number of samples read
+  * GLSpectrum: set default window to Hanning
+  * More preparatory works for MIMO channels support
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 01 Nov 2019 14:14:22 +0100
+
 sdrangel (4.11.11-1) unstable; urgency=medium
 
   * Channel Analyzer polar grid option for XY display (Issue #424)
