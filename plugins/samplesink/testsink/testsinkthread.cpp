@@ -21,11 +21,11 @@
 #include <algorithm>
 #include <QDebug>
 
-#include "dsp/samplesourcefifo.h"
+#include "dsp/samplesourcefifodb.h"
 #include "dsp/basebandsamplesink.h"
 #include "testsinkthread.h"
 
-TestSinkThread::TestSinkThread(SampleSourceFifo* sampleFifo, QObject* parent) :
+TestSinkThread::TestSinkThread(SampleSourceFifoDB* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_bufsize(0),

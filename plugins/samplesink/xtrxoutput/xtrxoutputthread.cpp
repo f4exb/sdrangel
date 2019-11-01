@@ -20,7 +20,7 @@
 #include <thread>
 
 #include "xtrx/devicextrx.h"
-#include "dsp/samplesourcefifo.h"
+#include "dsp/samplesourcefifodb.h"
 #include "xtrxoutputthread.h"
 
 
@@ -94,14 +94,14 @@ unsigned int XTRXOutputThread::getLog2Interpolation(unsigned int channel) const
     }
 }
 
-void XTRXOutputThread::setFifo(unsigned int channel, SampleSourceFifo *sampleFifo)
+void XTRXOutputThread::setFifo(unsigned int channel, SampleSourceFifoDB *sampleFifo)
 {
     if (channel < 2) {
         m_channels[channel].m_sampleFifo = sampleFifo;
     }
 }
 
-SampleSourceFifo *XTRXOutputThread::getFifo(unsigned int channel)
+SampleSourceFifoDB *XTRXOutputThread::getFifo(unsigned int channel)
 {
     if (channel < 2) {
         return m_channels[channel].m_sampleFifo;

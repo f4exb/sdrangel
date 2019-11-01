@@ -24,7 +24,7 @@
 
 #include "lime/LimeSuite.h"
 
-#include "dsp/samplesourcefifo.h"
+#include "dsp/samplesourcefifodb.h"
 #include "dsp/interpolators.h"
 #include "limesdr/devicelimesdrshared.h"
 
@@ -35,7 +35,7 @@ class LimeSDROutputThread : public QThread, public DeviceLimeSDRShared::ThreadIn
     Q_OBJECT
 
 public:
-    LimeSDROutputThread(lms_stream_t* stream, SampleSourceFifo* sampleFifo, QObject* parent = 0);
+    LimeSDROutputThread(lms_stream_t* stream, SampleSourceFifoDB* sampleFifo, QObject* parent = 0);
     ~LimeSDROutputThread();
 
     virtual void startWork();
@@ -51,7 +51,7 @@ private:
 
     lms_stream_t* m_stream;
     qint16 m_buf[2*LIMESDROUTPUT_BLOCKSIZE]; //must hold I+Q values of each sample hence 2xcomplex size
-    SampleSourceFifo* m_sampleFifo;
+    SampleSourceFifoDB* m_sampleFifo;
 
     unsigned int m_log2Interp; // soft decimation
 

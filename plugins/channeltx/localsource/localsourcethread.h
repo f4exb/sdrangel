@@ -26,7 +26,7 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 
-class SampleSourceFifo;
+class SampleSourceFifoDB;
 
 class LocalSourceThread : public QThread {
     Q_OBJECT
@@ -55,7 +55,7 @@ public:
     ~LocalSourceThread();
 
     void startStop(bool start);
-    void setSampleFifo(SampleSourceFifo *sampleFifo);
+    void setSampleFifo(SampleSourceFifoDB *sampleFifo);
 
 public slots:
     void pullSamples(unsigned int count);
@@ -67,7 +67,7 @@ private:
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
 	volatile bool m_running;
-    SampleSourceFifo *m_sampleFifo;
+    SampleSourceFifoDB *m_sampleFifo;
 
     MessageQueue m_inputMessageQueue;
 

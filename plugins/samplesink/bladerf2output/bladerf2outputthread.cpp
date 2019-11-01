@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-#include "dsp/samplesourcefifo.h"
+#include "dsp/samplesourcefifodb.h"
 
 #include "bladerf2outputthread.h"
 
@@ -151,14 +151,14 @@ unsigned int BladeRF2OutputThread::getLog2Interpolation(unsigned int channel) co
     }
 }
 
-void BladeRF2OutputThread::setFifo(unsigned int channel, SampleSourceFifo *sampleFifo)
+void BladeRF2OutputThread::setFifo(unsigned int channel, SampleSourceFifoDB *sampleFifo)
 {
     if (channel < m_nbChannels) {
         m_channels[channel].m_sampleFifo = sampleFifo;
     }
 }
 
-SampleSourceFifo *BladeRF2OutputThread::getFifo(unsigned int channel)
+SampleSourceFifoDB *BladeRF2OutputThread::getFifo(unsigned int channel)
 {
     if (channel < m_nbChannels) {
         return m_channels[channel].m_sampleFifo;

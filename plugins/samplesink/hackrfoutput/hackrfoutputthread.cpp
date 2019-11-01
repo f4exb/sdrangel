@@ -20,9 +20,9 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "dsp/samplesourcefifo.h"
+#include "dsp/samplesourcefifodb.h"
 
-HackRFOutputThread::HackRFOutputThread(hackrf_device* dev, SampleSourceFifo* sampleFifo, QObject* parent) :
+HackRFOutputThread::HackRFOutputThread(hackrf_device* dev, SampleSourceFifoDB* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),

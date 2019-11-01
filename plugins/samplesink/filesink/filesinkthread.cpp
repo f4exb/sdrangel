@@ -21,10 +21,10 @@
 #include <algorithm>
 #include <QDebug>
 
-#include "dsp/samplesourcefifo.h"
+#include "dsp/samplesourcefifodb.h"
 #include "filesinkthread.h"
 
-FileSinkThread::FileSinkThread(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent) :
+FileSinkThread::FileSinkThread(std::ofstream *samplesStream, SampleSourceFifoDB* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_ofstream(samplesStream),

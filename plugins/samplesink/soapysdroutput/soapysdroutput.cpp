@@ -463,7 +463,7 @@ bool SoapySDROutput::start()
         {
             qDebug("SoapySDROutput::start: expand channels. Re-allocate thread and take ownership");
 
-            SampleSourceFifo **fifos = new SampleSourceFifo*[nbOriginalChannels];
+            SampleSourceFifoDB **fifos = new SampleSourceFifoDB*[nbOriginalChannels];
             unsigned int *log2Interps = new unsigned int[nbOriginalChannels];
 
             for (int i = 0; i < nbOriginalChannels; i++) // save original FIFO references and data
@@ -574,7 +574,7 @@ void SoapySDROutput::stop()
     {
         qDebug("SoapySDROutput::stop: MO mode. Reduce by deleting and re-creating the thread");
         soapySDROutputThread->stopWork();
-        SampleSourceFifo **fifos = new SampleSourceFifo*[nbOriginalChannels-1];
+        SampleSourceFifoDB **fifos = new SampleSourceFifoDB*[nbOriginalChannels-1];
         unsigned int *log2Interps = new unsigned int[nbOriginalChannels-1];
         int highestActiveChannelIndex = -1;
 
@@ -871,7 +871,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
     {
         SoapySDROutputThread *soapySDROutputThread = findThread();
-        SampleSourceFifo *fifo = 0;
+        SampleSourceFifoDB *fifo = 0;
 
         if (soapySDROutputThread)
         {

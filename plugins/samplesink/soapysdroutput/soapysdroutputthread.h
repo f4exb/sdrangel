@@ -29,7 +29,7 @@
 #include "dsp/interpolators.h"
 #include "dsp/interpolatorsif.h"
 
-class SampleSourceFifo;
+class SampleSourceFifoDB;
 
 class SoapySDROutputThread : public QThread {
     Q_OBJECT
@@ -46,13 +46,13 @@ public:
     unsigned int getLog2Interpolation(unsigned int channel) const;
     void setSampleRate(unsigned int sampleRate) { m_sampleRate = sampleRate; }
     unsigned int getSampleRate() const { return m_sampleRate; }
-    void setFifo(unsigned int channel, SampleSourceFifo *sampleFifo);
-    SampleSourceFifo *getFifo(unsigned int channel);
+    void setFifo(unsigned int channel, SampleSourceFifoDB *sampleFifo);
+    SampleSourceFifoDB *getFifo(unsigned int channel);
 
 private:
     struct Channel
     {
-        SampleSourceFifo* m_sampleFifo;
+        SampleSourceFifoDB* m_sampleFifo;
         unsigned int m_log2Interp;
         Interpolators<qint8, SDR_TX_SAMP_SZ, 8> m_interpolators8;
         Interpolators<qint16, SDR_TX_SAMP_SZ, 12> m_interpolators12;

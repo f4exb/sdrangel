@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "dsp/samplesourcefifo.h"
+#include "dsp/samplesourcefifodb.h"
 
 #include "localsourcethread.h"
 
@@ -40,7 +40,7 @@ void LocalSourceThread::startStop(bool start)
     m_inputMessageQueue.push(msg);
 }
 
-void LocalSourceThread::setSampleFifo(SampleSourceFifo *sampleFifo)
+void LocalSourceThread::setSampleFifo(SampleSourceFifoDB *sampleFifo)
 {
     m_sampleFifo = sampleFifo;
 }

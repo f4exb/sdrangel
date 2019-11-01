@@ -279,7 +279,7 @@ bool BladeRF2Output::start()
         {
             qDebug("BladeRF2Output::start: expand channels. Re-allocate thread and take ownership");
 
-            SampleSourceFifo **fifos = new SampleSourceFifo*[nbOriginalChannels];
+            SampleSourceFifoDB **fifos = new SampleSourceFifoDB*[nbOriginalChannels];
             unsigned int *log2Interps = new unsigned int[nbOriginalChannels];
 
             for (int i = 0; i < nbOriginalChannels; i++) // save original FIFO references and data
@@ -407,7 +407,7 @@ void BladeRF2Output::stop()
     {
         qDebug("BladeRF2Output::stop: MO mode. Reduce by deleting and re-creating the thread");
         bladeRF2OutputThread->stopWork();
-        SampleSourceFifo **fifos = new SampleSourceFifo*[nbOriginalChannels-1];
+        SampleSourceFifoDB **fifos = new SampleSourceFifoDB*[nbOriginalChannels-1];
         unsigned int *log2Interps = new unsigned int[nbOriginalChannels-1];
         bool stillActiveFIFO = false;
 
@@ -714,7 +714,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
     {
         reverseAPIKeys.append("devSampleRate");
         BladeRF2OutputThread *bladeRF2OutputThread = findThread();
-        SampleSourceFifo *fifo = 0;
+        SampleSourceFifoDB *fifo = 0;
 
         if (bladeRF2OutputThread)
         {

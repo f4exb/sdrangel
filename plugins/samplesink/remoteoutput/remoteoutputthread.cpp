@@ -21,11 +21,11 @@
 #include <algorithm>
 #include <QDebug>
 
-#include "dsp/samplesourcefifo.h"
+#include "dsp/samplesourcefifodb.h"
 #include "util/timeutil.h"
 #include "remoteoutputthread.h"
 
-RemoteOutputThread::RemoteOutputThread(SampleSourceFifo* sampleFifo, QObject* parent) :
+RemoteOutputThread::RemoteOutputThread(SampleSourceFifoDB* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_samplesChunkSize(0),

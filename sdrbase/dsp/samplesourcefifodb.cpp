@@ -17,9 +17,9 @@
 
 #include <algorithm>
 #include <assert.h>
-#include "samplesourcefifo.h"
+#include "samplesourcefifodb.h"
 
-SampleSourceFifo::SampleSourceFifo(uint32_t size, QObject* parent) :
+SampleSourceFifoDB::SampleSourceFifoDB(uint32_t size, QObject* parent) :
     QObject(parent),
     m_size(size),
     m_init(false)
@@ -28,7 +28,7 @@ SampleSourceFifo::SampleSourceFifo(uint32_t size, QObject* parent) :
     init();
 }
 
-SampleSourceFifo::SampleSourceFifo(const SampleSourceFifo& other) :
+SampleSourceFifoDB::SampleSourceFifoDB(const SampleSourceFifoDB& other) :
     QObject(other.parent()),
     m_size(other.m_size),
     m_data(other.m_data)
@@ -36,19 +36,19 @@ SampleSourceFifo::SampleSourceFifo(const SampleSourceFifo& other) :
     init();
 }
 
-SampleSourceFifo::~SampleSourceFifo()
+SampleSourceFifoDB::~SampleSourceFifoDB()
 {}
 
-void SampleSourceFifo::resize(uint32_t size)
+void SampleSourceFifoDB::resize(uint32_t size)
 {
-    qDebug("SampleSourceFifo::resize: %d", size);
+    qDebug("SampleSourceFifoDB::resize: %d", size);
 
     m_size = size;
     m_data.resize(2*m_size);
     init();
 }
 
-void SampleSourceFifo::init()
+void SampleSourceFifoDB::init()
 {
     static Sample zero = {0,0};
     std::fill(m_data.begin(), m_data.end(), zero);
@@ -57,7 +57,7 @@ void SampleSourceFifo::init()
     m_init = true;
 }
 
-void SampleSourceFifo::readAdvance(SampleVector::iterator& readUntil, unsigned int nbSamples)
+void SampleSourceFifoDB::readAdvance(SampleVector::iterator& readUntil, unsigned int nbSamples)
 {
 //    QMutexLocker mutexLocker(&m_mutex);
     assert(nbSamples <= m_size/2);
@@ -68,7 +68,7 @@ void SampleSourceFifo::readAdvance(SampleVector::iterator& readUntil, unsigned i
     emit dataRead(nbSamples);
 }
 
-void SampleSourceFifo::readAdvance(SampleVector::const_iterator& readUntil, unsigned int nbSamples)
+void SampleSourceFifoDB::readAdvance(SampleVector::const_iterator& readUntil, unsigned int nbSamples)
 {
 //    QMutexLocker mutexLocker(&m_mutex);
     assert(nbSamples <= m_size/2);
@@ -79,7 +79,7 @@ void SampleSourceFifo::readAdvance(SampleVector::const_iterator& readUntil, unsi
     emit dataRead(nbSamples);
 }
 
-void SampleSourceFifo::write(const Sample& sample)
+void SampleSourceFifoDB::write(const Sample& sample)
 {
     m_data[m_iw] = sample;
     m_data[m_iw+m_size] = sample;
@@ -90,17 +90,17 @@ void SampleSourceFifo::write(const Sample& sample)
     }
 }
 
-void SampleSourceFifo::getReadIterator(SampleVector::iterator& readUntil)
+void SampleSourceFifoDB::getReadIterator(SampleVector::iterator& readUntil)
 {
     readUntil = m_data.begin() + m_size + m_ir;
 }
 
-void SampleSourceFifo::getWriteIterator(SampleVector::iterator& writeAt)
+void SampleSourceFifoDB::getWriteIterator(SampleVector::iterator& writeAt)
 {
     writeAt = m_data.begin() + m_iw;
 }
 
-void SampleSourceFifo::bumpIndex(SampleVector::iterator& writeAt)
+void SampleSourceFifoDB::bumpIndex(SampleVector::iterator& writeAt)
 {
     m_data[m_iw+m_size] = m_data[m_iw];
 
@@ -112,12 +112,12 @@ void SampleSourceFifo::bumpIndex(SampleVector::iterator& writeAt)
     writeAt = m_data.begin() + m_iw;
 }
 
-int SampleSourceFifo::getIteratorOffset(const SampleVector::iterator& iterator)
+int SampleSourceFifoDB::getIteratorOffset(const SampleVector::iterator& iterator)
 {
     return iterator - m_data.begin();
 }
 
-void SampleSourceFifo::setIteratorFromOffset(SampleVector::iterator& iterator, int offset)
+void SampleSourceFifoDB::setIteratorFromOffset(SampleVector::iterator& iterator, int offset)
 {
     iterator = m_data.begin() + offset;
 }

@@ -48,11 +48,11 @@ public:
 	void pullAudio(int nbSamples) { if (m_basebandSampleSource) m_basebandSampleSource->pullAudio(nbSamples); }
 
     /** direct feeding of sample source FIFO */
-	void feed(SampleSourceFifo* sampleFifo,
+	void feed(SampleSourceFifoDB* sampleFifo,
 		int nbSamples);
 
-	SampleSourceFifo& getSampleSourceFifo() { return m_basebandSampleSource->getSampleSourceFifo(); }
-	void setDeviceSampleSourceFifo(SampleSourceFifo *deviceSampleFifo) { m_basebandSampleSource->setDeviceSampleSourceFifo(deviceSampleFifo); }
+	SampleSourceFifoDB& getSampleSourceFifo() { return m_basebandSampleSource->getSampleSourceFifo(); }
+	void setDeviceSampleSourceFifo(SampleSourceFifoDB *deviceSampleFifo) { m_basebandSampleSource->setDeviceSampleSourceFifo(deviceSampleFifo); }
 
 	QString getSampleSourceObjectName() const;
 

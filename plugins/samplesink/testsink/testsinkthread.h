@@ -34,14 +34,14 @@
 
 #define TESTSINK_THROTTLE_MS 50
 
-class SampleSourceFifo;
+class SampleSourceFifoDB;
 class BasebandSampleSink;
 
 class TestSinkThread : public QThread {
 	Q_OBJECT
 
 public:
-	TestSinkThread(SampleSourceFifo* sampleFifo, QObject* parent = nullptr);
+	TestSinkThread(SampleSourceFifoDB* sampleFifo, QObject* parent = nullptr);
 	~TestSinkThread();
 
 	void startWork();
@@ -70,7 +70,7 @@ private:
 
 	std::size_t m_bufsize;
 	unsigned int m_samplesChunkSize;
-	SampleSourceFifo* m_sampleFifo;
+	SampleSourceFifoDB* m_sampleFifo;
     std::size_t m_samplesCount;
 
 	int m_samplerate;

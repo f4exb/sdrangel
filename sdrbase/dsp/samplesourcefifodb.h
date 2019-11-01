@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_DSP_SAMPLESOURCEFIFO_H_
-#define SDRBASE_DSP_SAMPLESOURCEFIFO_H_
+#ifndef SDRBASE_DSP_SAMPLESOURCEFIFODB_H_
+#define SDRBASE_DSP_SAMPLESOURCEFIFODB_H_
 
 #include <QObject>
 #include <QMutex>
@@ -25,13 +25,13 @@
 #include "export.h"
 #include "dsp/dsptypes.h"
 
-class SDRBASE_API SampleSourceFifo : public QObject {
+class SDRBASE_API SampleSourceFifoDB : public QObject {
     Q_OBJECT
 
 public:
-    SampleSourceFifo(uint32_t size, QObject* parent = nullptr);
-    SampleSourceFifo(const SampleSourceFifo& other);
-    ~SampleSourceFifo();
+    SampleSourceFifoDB(uint32_t size, QObject* parent = nullptr);
+    SampleSourceFifoDB(const SampleSourceFifoDB& other);
+    ~SampleSourceFifoDB();
 
     void resize(uint32_t size);
     uint32_t size() const { return m_size; }

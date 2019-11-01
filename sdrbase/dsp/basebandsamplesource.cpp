@@ -55,7 +55,7 @@ void BasebandSampleSource::handleWriteToDeviceFifo(int nbSamples)
     handleWriteToFifo(m_deviceSampleFifo, nbSamples);
 }
 
-void BasebandSampleSource::handleWriteToFifo(SampleSourceFifo *sampleFifo, int nbSamples)
+void BasebandSampleSource::handleWriteToFifo(SampleSourceFifoDB *sampleFifo, int nbSamples)
 {
     SampleVector::iterator writeAt;
     sampleFifo->getWriteIterator(writeAt);
@@ -69,7 +69,7 @@ void BasebandSampleSource::handleWriteToFifo(SampleSourceFifo *sampleFifo, int n
 }
 
 
-void BasebandSampleSource::setDeviceSampleSourceFifo(SampleSourceFifo *deviceSampleFifo)
+void BasebandSampleSource::setDeviceSampleSourceFifo(SampleSourceFifoDB *deviceSampleFifo)
 {
     if (m_deviceSampleFifo != deviceSampleFifo)
     {

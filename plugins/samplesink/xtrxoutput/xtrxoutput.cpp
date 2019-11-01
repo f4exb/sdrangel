@@ -278,7 +278,7 @@ bool XTRXOutput::start()
         {
             qDebug("XTRXOutput::start: expand channels. Re-allocate thread and take ownership");
 
-            SampleSourceFifo **fifos = new SampleSourceFifo*[2];
+            SampleSourceFifoDB **fifos = new SampleSourceFifoDB*[2];
             unsigned int *log2Interps = new unsigned int[2];
 
             for (int i = 0; i < 2; i++) // save original FIFO references and data

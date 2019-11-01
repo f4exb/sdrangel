@@ -26,7 +26,7 @@
 #include "bladerf2/devicebladerf2shared.h"
 #include "dsp/interpolators.h"
 
-class SampleSourceFifo;
+class SampleSourceFifoDB;
 
 class BladeRF2OutputThread : public QThread {
     Q_OBJECT
@@ -41,13 +41,13 @@ public:
     unsigned int getNbChannels() const { return m_nbChannels; }
     void setLog2Interpolation(unsigned int channel, unsigned int log2_interp);
     unsigned int getLog2Interpolation(unsigned int channel) const;
-    void setFifo(unsigned int channel, SampleSourceFifo *sampleFifo);
-    SampleSourceFifo *getFifo(unsigned int channel);
+    void setFifo(unsigned int channel, SampleSourceFifoDB *sampleFifo);
+    SampleSourceFifoDB *getFifo(unsigned int channel);
 
 private:
     struct Channel
     {
-        SampleSourceFifo* m_sampleFifo;
+        SampleSourceFifoDB* m_sampleFifo;
         unsigned int m_log2Interp;
         Interpolators<qint16, SDR_TX_SAMP_SZ, 12>  m_interpolators;
 

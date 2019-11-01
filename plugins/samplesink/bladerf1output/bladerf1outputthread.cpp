@@ -23,7 +23,7 @@
 
 
 
-Bladerf1OutputThread::Bladerf1OutputThread(struct bladerf* dev, SampleSourceFifo* sampleFifo, QObject* parent) :
+Bladerf1OutputThread::Bladerf1OutputThread(struct bladerf* dev, SampleSourceFifoDB* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),

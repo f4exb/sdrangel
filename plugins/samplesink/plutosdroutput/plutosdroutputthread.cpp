@@ -20,7 +20,7 @@
 #include "iio.h"
 #include "plutosdroutputthread.h"
 
-PlutoSDROutputThread::PlutoSDROutputThread(uint32_t blocksizeSamples, DevicePlutoSDRBox* plutoBox, SampleSourceFifo* sampleFifo, QObject* parent) :
+PlutoSDROutputThread::PlutoSDROutputThread(uint32_t blocksizeSamples, DevicePlutoSDRBox* plutoBox, SampleSourceFifoDB* sampleFifo, QObject* parent) :
     QThread(parent),
     m_running(false),
     m_plutoBox(plutoBox),

@@ -22,7 +22,7 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <libbladeRF.h>
-#include "dsp/samplesourcefifo.h"
+#include "dsp/samplesourcefifodb.h"
 #include "dsp/interpolators.h"
 
 #define BLADERFOUTPUT_BLOCKSIZE (1<<16)
@@ -31,7 +31,7 @@ class Bladerf1OutputThread : public QThread {
 	Q_OBJECT
 
 public:
-	Bladerf1OutputThread(struct bladerf* dev, SampleSourceFifo* sampleFifo, QObject* parent = NULL);
+	Bladerf1OutputThread(struct bladerf* dev, SampleSourceFifoDB* sampleFifo, QObject* parent = NULL);
 	~Bladerf1OutputThread();
 
 	void startWork();
@@ -46,7 +46,7 @@ private:
 
 	struct bladerf* m_dev;
 	qint16 m_buf[2*BLADERFOUTPUT_BLOCKSIZE];
-    SampleSourceFifo* m_sampleFifo;
+    SampleSourceFifoDB* m_sampleFifo;
 
 	unsigned int m_log2Interp;
 

@@ -20,7 +20,7 @@
 #include <SoapySDR/Formats.hpp>
 #include <SoapySDR/Errors.hpp>
 
-#include "dsp/samplesourcefifo.h"
+#include "dsp/samplesourcefifodb.h"
 
 #include "soapysdroutputthread.h"
 
@@ -218,14 +218,14 @@ unsigned int SoapySDROutputThread::getLog2Interpolation(unsigned int channel) co
     }
 }
 
-void SoapySDROutputThread::setFifo(unsigned int channel, SampleSourceFifo *sampleFifo)
+void SoapySDROutputThread::setFifo(unsigned int channel, SampleSourceFifoDB *sampleFifo)
 {
     if (channel < m_nbChannels) {
         m_channels[channel].m_sampleFifo = sampleFifo;
     }
 }
 
-SampleSourceFifo *SoapySDROutputThread::getFifo(unsigned int channel)
+SampleSourceFifoDB *SoapySDROutputThread::getFifo(unsigned int channel)
 {
     if (channel < m_nbChannels) {
         return m_channels[channel].m_sampleFifo;

@@ -21,7 +21,7 @@
 
 #include <QObject>
 #include "dsp/dsptypes.h"
-#include "dsp/samplesourcefifo.h"
+#include "dsp/samplesourcefifodb.h"
 #include "export.h"
 #include "util/messagequeue.h"
 
@@ -39,7 +39,7 @@ public:
     virtual void pullAudio(int nbSamples) { (void) nbSamples; }
 
     /** direct feeding of sample source FIFO */
-	void feed(SampleSourceFifo* sampleFifo, int nbSamples)
+	void feed(SampleSourceFifoDB* sampleFifo, int nbSamples)
 	{
 	    SampleVector::iterator writeAt;
 	    sampleFifo->getWriteIterator(writeAt);
@@ -52,22 +52,22 @@ public:
 	    }
 	}
 
-	SampleSourceFifo& getSampleSourceFifo() { return m_sampleFifo; }
+	SampleSourceFifoDB& getSampleSourceFifo() { return m_sampleFifo; }
 
 	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
 
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
-    void setDeviceSampleSourceFifo(SampleSourceFifo *deviceSampleFifo);
+    void setDeviceSampleSourceFifo(SampleSourceFifoDB *deviceSampleFifo);
 
 protected:
 	MessageQueue m_inputMessageQueue;     //!< Queue for asynchronous inbound communication
     MessageQueue *m_guiMessageQueue;      //!< Input message queue to the GUI
-	SampleSourceFifo m_sampleFifo;        //!< Internal FIFO for multi-channel processing
-	SampleSourceFifo *m_deviceSampleFifo; //!< Reference to the device FIFO for single channel processing
+	SampleSourceFifoDB m_sampleFifo;        //!< Internal FIFO for multi-channel processing
+	SampleSourceFifoDB *m_deviceSampleFifo; //!< Reference to the device FIFO for single channel processing
 
-	void handleWriteToFifo(SampleSourceFifo *sampleFifo, int nbSamples);
+	void handleWriteToFifo(SampleSourceFifoDB *sampleFifo, int nbSamples);
 
 protected slots:
 	void handleInputMessages();

@@ -23,7 +23,7 @@
 #include <QWaitCondition>
 #include <libhackrf/hackrf.h>
 
-#include "dsp/samplesourcefifo.h"
+#include "dsp/samplesourcefifodb.h"
 #include "dsp/interpolators.h"
 
 #define HACKRF_BLOCKSIZE (1<<17)
@@ -32,7 +32,7 @@ class HackRFOutputThread : public QThread {
 	Q_OBJECT
 
 public:
-	HackRFOutputThread(hackrf_device* dev, SampleSourceFifo* sampleFifo, QObject* parent = NULL);
+	HackRFOutputThread(hackrf_device* dev, SampleSourceFifoDB* sampleFifo, QObject* parent = NULL);
 	~HackRFOutputThread();
 
 	void startWork();
@@ -47,7 +47,7 @@ private:
 
 	hackrf_device* m_dev;
 	qint8 m_buf[2*HACKRF_BLOCKSIZE];
-	SampleSourceFifo* m_sampleFifo;
+	SampleSourceFifoDB* m_sampleFifo;
 
 	unsigned int m_log2Interp;
     int m_fcPos;

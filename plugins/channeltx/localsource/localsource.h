@@ -172,7 +172,7 @@ private:
 
     LocalSourceSettings m_settings;
     LocalSourceThread *m_sinkThread;
-    SampleSourceFifo *m_localSampleSourceFifo;
+    SampleSourceFifoDB *m_localSampleSourceFifo;
     int m_chunkSize;
     SampleVector m_localSamples;
     int m_localSamplesIndex;

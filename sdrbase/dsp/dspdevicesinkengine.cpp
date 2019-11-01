@@ -26,7 +26,7 @@
 #include "dsp/basebandsamplesink.h"
 #include "dsp/devicesamplesink.h"
 #include "dsp/dspcommands.h"
-#include "samplesourcefifo.h"
+#include "samplesourcefifodb.h"
 #include "threadedbasebandsamplesource.h"
 
 DSPDeviceSinkEngine::DSPDeviceSinkEngine(uint32_t uid, QObject* parent) :
@@ -165,7 +165,7 @@ void DSPDeviceSinkEngine::work(int nbWriteSamples)
 //	    qDebug("DSPDeviceSinkEngine::work: multiple channel sources handling: %u", m_multipleSourcesDivisionFactor);
 
 	    SampleVector::iterator writeBegin;
-	    SampleSourceFifo* sampleFifo = m_deviceSampleSink->getSampleFifo();
+	    SampleSourceFifoDB* sampleFifo = m_deviceSampleSink->getSampleFifo();
 	    sampleFifo->getWriteIterator(writeBegin);
 	    SampleVector::iterator writeAt = writeBegin;
 	    std::vector<SampleVector::iterator> sampleSourceIterators;
@@ -560,7 +560,7 @@ void DSPDeviceSinkEngine::handleForwardToSpectrumSink(int nbSamples)
 {
 	if (m_spectrumSink)
 	{
-		SampleSourceFifo* sampleFifo = m_deviceSampleSink->getSampleFifo();
+		SampleSourceFifoDB* sampleFifo = m_deviceSampleSink->getSampleFifo();
 		SampleVector::iterator readUntil;
 		sampleFifo->getReadIterator(readUntil);
 		m_spectrumSink->feed(readUntil - nbSamples, readUntil, false);
@@ -569,7 +569,7 @@ void DSPDeviceSinkEngine::handleForwardToSpectrumSink(int nbSamples)
 
 void DSPDeviceSinkEngine::checkNumberOfBasebandSources()
 {
-    SampleSourceFifo* sampleFifo = m_deviceSampleSink->getSampleFifo();
+    SampleSourceFifoDB* sampleFifo = m_deviceSampleSink->getSampleFifo();
 
     // single channel source handling
     if ((m_threadedBasebandSampleSources.size() + m_basebandSampleSources.size()) == 1)

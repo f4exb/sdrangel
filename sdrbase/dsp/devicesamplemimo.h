@@ -21,7 +21,7 @@
 
 #include <vector>
 
-#include "samplesourcefifo.h"
+#include "samplesourcefifodb.h"
 #include "samplemififo.h"
 #include "samplemofifo.h"
 #include "util/message.h"
