@@ -249,6 +249,11 @@ bool TestMOSync::applySettings(const TestMOSyncSettings& settings, bool force)
         << " m_fcPosTx: " << settings.m_fcPosTx
         << " force: " << force;
 
+    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
+    {
+        forwardChangeTxDSP = true;
+    }
+
     if ((m_settings.m_sampleRate != settings.m_sampleRate) || force)
     {
         if (m_sinkThread) {
