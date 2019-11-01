@@ -115,11 +115,11 @@ void UpSampleChannelizer::applyConfiguration()
 
     if (m_outputSampleRate == 0)
     {
-        qDebug() << "UpChannelizer::applyConfiguration: aborting (out=0):"
-                << " out =" << m_outputSampleRate
-                << ", req =" << m_requestedInputSampleRate
-                << ", in =" << m_currentInputSampleRate
-                << ", fc =" << m_currentCenterFrequency;
+        qDebug() << "UpSampleChannelizer::applyConfiguration: aborting (out=0):"
+                << " out:" << m_outputSampleRate
+                << " req:" << m_requestedInputSampleRate
+                << " in:" << m_currentInputSampleRate
+                << " fc:" << m_currentCenterFrequency;
         return;
     }
 
@@ -131,11 +131,11 @@ void UpSampleChannelizer::applyConfiguration()
 
     m_currentInputSampleRate = m_outputSampleRate / (1 << m_filterStages.size());
 
-    qDebug() << "UpChannelizer::applyConfiguration:"
-            << " out=" << m_outputSampleRate
-            << ", req=" << m_requestedInputSampleRate
-            << ", in=" << m_currentInputSampleRate
-            << ", fc=" << m_currentCenterFrequency;
+    qDebug() << "UpSampleChannelizer::applyConfiguration: done: "
+            << " out:" << m_outputSampleRate
+            << " req:" << m_requestedInputSampleRate
+            << " in:" << m_currentInputSampleRate
+            << " fc:" << m_currentCenterFrequency;
 }
 
 void UpSampleChannelizer::applyConfiguration(int requestedSampleRate, qint64 requestedCenterFrequency)
@@ -163,9 +163,10 @@ void UpSampleChannelizer::setInterpolation(unsigned int log2Interp, unsigned int
     m_currentInputSampleRate = m_outputSampleRate / (1 << m_filterStages.size());
     m_requestedInputSampleRate = m_currentInputSampleRate;
 
-	qDebug() << "UpChannelizer::applySetting in=" << m_outputSampleRate
-			<< ", out=" << m_currentInputSampleRate
-			<< ", fc=" << m_currentCenterFrequency;
+	qDebug() << "UpSampleChannelizer::setInterpolation: done:"
+            << " in:" << m_outputSampleRate
+			<< " out:" << m_currentInputSampleRate
+			<< " fc:" << m_currentCenterFrequency;
 }
 
 #ifdef USE_SSE4_1
@@ -297,21 +298,28 @@ double UpSampleChannelizer::setFilterChain(const std::vector<unsigned int>& stag
             m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
             m_stageSamples.push_back(s);
             ofs -= ofs_stage;
+            qDebug("UpSampleChannelizer::setFilterChain: lower half: ofs: %f", ofs);
         }
         else if (*rit == 1)
         {
             m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
             m_stageSamples.push_back(s);
+            qDebug("UpSampleChannelizer::setFilterChain: center: ofs: %f", ofs);
         }
         else if (*rit == 2)
         {
             m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
             m_stageSamples.push_back(s);
             ofs += ofs_stage;
+            qDebug("UpSampleChannelizer::setFilterChain: upper half: ofs: %f", ofs);
         }
 
         ofs_stage /= 2;
     }
+
+    qDebug() << "UpSampleChannelizer::setFilterChain: complete:"
+            << " #stages: " << m_filterStages.size()
+            << " ofs: " << ofs;
 
     return ofs;
 }
