@@ -167,10 +167,9 @@ void BeamSteeringCWModSource::processFifo(std::vector<SampleVector>& data, unsig
 
 void BeamSteeringCWModSource::handleInputMessages()
 {
-    qDebug("BeamSteeringCWModSource::handleInputMessage");
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != 0)
+	while ((message = m_inputMessageQueue.pop()) != nullptr)
 	{
 		if (handleMessage(*message)) {
 			delete message;
@@ -208,6 +207,8 @@ bool BeamSteeringCWModSource::handleMessage(const Message& cmd)
         qDebug() << "BeamSteeringCWModSource::handleMessage: MsgSignalNotification:"
                 << " outputSampleRate: " << outputSampleRate
                 << " centerFrequency: " << cfg.getCenterFrequency();
+
+        m_sampleMOFifo.resize((outputSampleRate/40)*64);
 
         for (int i = 0; i < 2; i++)
         {
