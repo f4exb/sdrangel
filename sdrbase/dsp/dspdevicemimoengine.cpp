@@ -129,15 +129,13 @@ void DSPDeviceMIMOEngine::stopProcess(int subsystemIndex)
     if (subsystemIndex == 0) // Rx side
     {
         DSPAcquisitionStop cmd;
-        m_syncMessenger.storeMessage(cmd);
+        m_syncMessenger.sendWait(cmd);
     }
     else if (subsystemIndex == 1) // Tx side
     {
         DSPGenerationStop cmd;
-        m_syncMessenger.storeMessage(cmd);
+        m_syncMessenger.sendWait(cmd);
     }
-
-	handleSynchronousMessages();
 }
 
 void DSPDeviceMIMOEngine::setMIMO(DeviceSampleMIMO* mimo)
