@@ -105,7 +105,7 @@ void SampleMOFifo::readSync(
     }
     else
     {
-        unsigned int remaining = amount - spaceLeft;
+        unsigned int remaining = (amount < m_size ? amount : m_size) - spaceLeft;
         ipart1Begin = m_readHead;
         ipart1End = m_size;
         ipart2Begin = 0;
@@ -132,7 +132,7 @@ void SampleMOFifo::writeSync(const std::vector<SampleVector::iterator>& vbegin, 
     }
     else
     {
-        unsigned int remaining = amount - spaceLeft;
+        unsigned int remaining = (amount < m_size ? amount : m_size) - spaceLeft;
 
         for (unsigned int stream = 0; stream < m_nbStreams; stream++)
         {
@@ -163,7 +163,7 @@ void SampleMOFifo::writeSync(
     }
     else
     {
-        unsigned int remaining = amount - spaceLeft;
+        unsigned int remaining = (amount < m_size ? amount : m_size) - spaceLeft;
         ipart1Begin = m_writeHead;
         ipart1End = m_size;
         ipart2Begin = 0;
@@ -233,7 +233,7 @@ void SampleMOFifo::readAsync(
     }
     else
     {
-        unsigned int remaining = amount - spaceLeft;
+        unsigned int remaining = (amount < m_size ? amount : m_size) - spaceLeft;
         ipart1Begin = m_vReadHead[stream];
         ipart1End = m_size;
         ipart2Begin = 0;
@@ -257,7 +257,7 @@ void SampleMOFifo::writeAsync(const SampleVector::iterator& begin, unsigned int 
     }
     else
     {
-        unsigned int remaining = amount - spaceLeft;
+        unsigned int remaining = (amount < m_size ? amount : m_size) - spaceLeft;
 
         for (unsigned int stream = 0; stream < m_nbStreams; stream++)
         {
@@ -288,7 +288,7 @@ void SampleMOFifo::writeAsync(
     }
     else
     {
-        unsigned int remaining = amount - spaceLeft;
+        unsigned int remaining = (amount < m_size ? amount : m_size) - spaceLeft;
         ipart1Begin = m_vWriteHead[stream];
         ipart1End = m_size;
         ipart2Begin = 0;
