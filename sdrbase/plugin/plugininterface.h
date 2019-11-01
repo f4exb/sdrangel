@@ -301,6 +301,6 @@ public:
     }
 };
 
-Q_DECLARE_INTERFACE(PluginInterface, "SDRangel.PluginInterface/0.1");
+Q_DECLARE_INTERFACE(PluginInterface, "SDRangel.PluginInterface/0.1")
 
 #endif // INCLUDE_PLUGININTERFACE_H

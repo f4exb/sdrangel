@@ -170,7 +170,7 @@ private:
 	const QByteArray* findBestDeviceConfigSoapy(const QString& sourceId, const QString& deviceSerial) const;
 };
 
-Q_DECLARE_METATYPE(const Preset*);
-Q_DECLARE_METATYPE(Preset*);
+Q_DECLARE_METATYPE(const Preset*)
+Q_DECLARE_METATYPE(Preset*)
 
 #endif // INCLUDE_PRESET_H
