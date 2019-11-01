@@ -277,7 +277,7 @@ bool TestMOSync::applySettings(const TestMOSyncSettings& settings, bool force)
         if (m_sinkThread)
         {
             m_sinkThread->setLog2Interpolation(settings.m_log2Interp);
-            qDebug() << "BladeRF2Input::applySettings: set interpolation to " << (1<<settings.m_log2Interp);
+            qDebug() << "TestMOSync::applySettings: set interpolation to " << (1<<settings.m_log2Interp);
         }
 
         forwardChangeTxDSP = true;
@@ -285,10 +285,9 @@ bool TestMOSync::applySettings(const TestMOSyncSettings& settings, bool force)
 
     if (forwardChangeTxDSP)
     {
-        int sampleRate = settings.m_sampleRate/(1<<settings.m_log2Interp);
-        DSPMIMOSignalNotification *notif0 = new DSPMIMOSignalNotification(sampleRate, settings.m_centerFrequency, false, 0);
+        DSPMIMOSignalNotification *notif0 = new DSPMIMOSignalNotification(settings.m_sampleRate, settings.m_centerFrequency, false, 0);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif0);
-        DSPMIMOSignalNotification *notif1 = new DSPMIMOSignalNotification(sampleRate, settings.m_centerFrequency, false, 1);
+        DSPMIMOSignalNotification *notif1 = new DSPMIMOSignalNotification(settings.m_sampleRate, settings.m_centerFrequency, false, 1);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif1);
     }
 
