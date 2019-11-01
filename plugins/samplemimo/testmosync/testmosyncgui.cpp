@@ -82,6 +82,7 @@ TestMOSyncGui::TestMOSyncGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 TestMOSyncGui::~TestMOSyncGui()
 {
+    delete m_spectrumVis;
 	delete ui;
 }
 
@@ -283,7 +284,6 @@ void TestMOSyncGui::on_interp_currentIndexChanged(int index)
 
     m_settings.m_log2Interp = index;
     ui->glSpectrum->setSampleRate(m_settings.m_sampleRate*(1<<m_settings.m_log2Interp));
-    updateSampleRateAndFrequency();
     sendSettings();
 }
 
