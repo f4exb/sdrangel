@@ -733,7 +733,7 @@ struct s2_frame_receiver : runnable
         // Read PLSCODE
 
         uint64_t plscode = 0;
-        complex<float> pls_symbols[plscodes.LENGTH];
+        complex<float> pls_symbols[s2_plscodes<T>::LENGTH];
         for (int s = 0; s < plscodes.LENGTH; ++s)
         {
             complex<float> p = interp_next(&ss) * agc_gain;
@@ -1091,8 +1091,8 @@ struct s2_frame_receiver : runnable
         {
             float kph, kfw, kmu;
         } gains[2] = {
-            {4e-2, 1e-4, 0.001 / (cstln_amp * cstln_amp)},
-            {4e-2, 1e-4, 0.001 / (cstln_amp * cstln_amp)}};
+            {4e-2, 1e-4, (float) 0.001 / (cstln_amp * cstln_amp)},
+            {4e-2, 1e-4, (float) 0.001 / (cstln_amp * cstln_amp)}};
         // Decision
         typename cstln_lut<SOFTSYMB, 256>::result *cr = c->lookup(p.re, p.im);
         // Carrier tracking
@@ -2329,6 +2329,9 @@ struct s2_fecdec_helper : runnable
             fatal("pipe");
         // Size the pipes so that the helper never runs out of work to do.
         int pipesize = 64800 * batch_size;
+// macOS does not have F_SETPIPE_SZ and there
+// is no way to change the buffer size
+#ifndef __APPLE__
         if (fcntl(tx[0], F_SETPIPE_SZ, pipesize) < 0 ||
             fcntl(rx[0], F_SETPIPE_SZ, pipesize) < 0 ||
             fcntl(tx[1], F_SETPIPE_SZ, pipesize) < 0 ||
@@ -2343,6 +2346,7 @@ struct s2_fecdec_helper : runnable
             else
                 fprintf(stderr, "*** Throughput will be suboptimal.\n");
         }
+#endif
         int child = vfork();
         if (!child)
         {
