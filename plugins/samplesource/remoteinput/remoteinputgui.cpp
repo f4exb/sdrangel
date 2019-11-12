@@ -580,38 +580,41 @@ void RemoteInputGui::networkManagerFinished(QNetworkReply *reply)
     {
         ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
         ui->statusText->setText(reply->errorString());
-        return;
     }
-
-    QString answer = reply->readAll();
-
-    try
+    else
     {
-        QByteArray jsonBytes(answer.toStdString().c_str());
-        QJsonParseError error;
-        QJsonDocument doc = QJsonDocument::fromJson(jsonBytes, &error);
+        QString answer = reply->readAll();
 
-        if (error.error == QJsonParseError::NoError)
+        try
         {
-            ui->apiAddressLabel->setStyleSheet("QLabel { background-color : green; }");
-            ui->statusText->setText(QString("API OK"));
-            analyzeApiReply(doc.object());
+            QByteArray jsonBytes(answer.toStdString().c_str());
+            QJsonParseError error;
+            QJsonDocument doc = QJsonDocument::fromJson(jsonBytes, &error);
+
+            if (error.error == QJsonParseError::NoError)
+            {
+                ui->apiAddressLabel->setStyleSheet("QLabel { background-color : green; }");
+                ui->statusText->setText(QString("API OK"));
+                analyzeApiReply(doc.object());
+            }
+            else
+            {
+                ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+                QString errorMsg = QString("Reply JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
+                ui->statusText->setText(QString("JSON error. See log"));
+                qInfo().noquote() << "RemoteInputGui::networkManagerFinished" << errorMsg;
+            }
         }
-        else
+        catch (const std::exception& ex)
         {
             ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-            QString errorMsg = QString("Reply JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
-            ui->statusText->setText(QString("JSON error. See log"));
+            QString errorMsg = QString("Error parsing request: ") + ex.what();
+            ui->statusText->setText("Error parsing request. See log for details");
             qInfo().noquote() << "RemoteInputGui::networkManagerFinished" << errorMsg;
         }
     }
-    catch (const std::exception& ex)
-    {
-        ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-        QString errorMsg = QString("Error parsing request: ") + ex.what();
-        ui->statusText->setText("Error parsing request. See log for details");
-        qInfo().noquote() << "RemoteInputGui::networkManagerFinished" << errorMsg;
-    }
+
+    reply->deleteLater();
 }
 
 void RemoteInputGui::analyzeApiReply(const QJsonObject& jsonObject)
