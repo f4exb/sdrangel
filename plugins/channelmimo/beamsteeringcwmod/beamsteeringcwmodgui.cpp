@@ -85,7 +85,7 @@ bool BeamSteeringCWModGUI::handleMessage(const Message& message)
     if (BeamSteeringCWMod::MsgBasebandNotification::match(message))
     {
         BeamSteeringCWMod::MsgBasebandNotification& notif = (BeamSteeringCWMod::MsgBasebandNotification&) message;
-        m_sampleRate = notif.getSampleRate();
+        m_basebandSampleRate = notif.getSampleRate();
         m_centerFrequency = notif.getCenterFrequency();
         displayRateAndShift();
         return true;
@@ -110,7 +110,7 @@ BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *de
         ui(new Ui::BeamSteeringCWModGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
-        m_sampleRate(48000),
+        m_basebandSampleRate(48000),
         m_centerFrequency(435000000),
         m_tickCount(0)
 {
@@ -123,7 +123,7 @@ BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *de
 
     m_bsCWSource = (BeamSteeringCWMod*) mimoChannel;
     m_bsCWSource->setMessageQueueToGUI(getInputMessageQueue());
-    m_sampleRate = m_bsCWSource->getDeviceSampleRate();
+    m_basebandSampleRate = m_bsCWSource->getBasebandSampleRate();
 
     connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -178,7 +178,7 @@ void BeamSteeringCWModGUI::displaySettings()
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle(m_settings.m_title);
-    m_channelMarker.setBandwidth(m_sampleRate);
+    m_channelMarker.setBandwidth(m_basebandSampleRate);
     m_channelMarker.setMovable(false); // do not let user move the center arbitrarily
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
@@ -195,8 +195,8 @@ void BeamSteeringCWModGUI::displaySettings()
 
 void BeamSteeringCWModGUI::displayRateAndShift()
 {
-    int shift = m_shiftFrequencyFactor * m_sampleRate;
-    double channelSampleRate = ((double) m_sampleRate) / (1<<m_settings.m_log2Interp);
+    int shift = m_shiftFrequencyFactor * m_basebandSampleRate;
+    double channelSampleRate = ((double) m_basebandSampleRate) / (1<<m_settings.m_log2Interp);
     QLocale loc;
     ui->offsetFrequencyText->setText(tr("%1 Hz").arg(loc.toString(shift)));
     ui->channelRateText->setText(tr("%1k").arg(QString::number(channelSampleRate / 1000.0, 'g', 5)));

@@ -30,7 +30,7 @@
 
 class QThread;
 class DeviceAPI;
-class BeamSteeringCWModSource;
+class BeamSteeringCWModBaseband;
 class QNetworkReply;
 class QNetworkAccessManager;
 class BasebandSampleSink;
@@ -94,13 +94,13 @@ public:
     virtual void startSources(); //!< thread start()
     virtual void stopSources(); //!< thread exit() and wait()
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex);
-    virtual void pull(const SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex);
+    virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex);
 	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = "BeamSteeringCWMod"; }
     virtual qint64 getCenterFrequency() const { return m_frequencyOffset; }
-    uint32_t getDeviceSampleRate() const { return m_deviceSampleRate; }
+    uint32_t getBasebandSampleRate() const { return m_basebandSampleRate; }
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
@@ -118,8 +118,6 @@ public:
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
-
-    void applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash);
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
@@ -147,7 +145,7 @@ public:
 private:
     DeviceAPI *m_deviceAPI;
     QThread *m_thread;
-    BeamSteeringCWModSource* m_source;
+    BeamSteeringCWModBaseband* m_basebandSource;
     BasebandSampleSink* m_spectrumSink;
     BasebandSampleSink* m_scopeSink;
     BeamSteeringCWModSettings m_settings;
@@ -158,7 +156,7 @@ private:
     QNetworkRequest m_networkRequest;
 
     int64_t m_frequencyOffset;
-    uint32_t m_deviceSampleRate;
+    uint32_t m_basebandSampleRate;
     int m_count0, m_count1;
 
     void applySettings(const BeamSteeringCWModSettings& settings, bool force = false);

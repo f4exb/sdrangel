@@ -84,6 +84,7 @@ private:
     unsigned int m_feedSpectrumIndex;
     BasebandSampleSink* m_spectrumSink;
     IncrementalVector<Sample> m_samplesVector;
+    IncrementalVector<Sample> m_testVector;
 
     void run();
     unsigned int getNbFifos();

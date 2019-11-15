@@ -48,7 +48,7 @@ TestMOSync::TestMOSync(DeviceAPI *deviceAPI) :
     m_feedSpectrumIndex(0)
 {
     m_mimoType = MIMOHalfSynchronous;
-    m_sampleMOFifo.init(2, 4096*64);
+    m_sampleMOFifo.init(2, SampleMOFifo::getSizePolicy(m_settings.m_sampleRate));
     m_deviceAPI->setNbSourceStreams(0);
     m_deviceAPI->setNbSinkStreams(2);
 }
@@ -252,6 +252,12 @@ bool TestMOSync::applySettings(const TestMOSyncSettings& settings, bool force)
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
     {
         forwardChangeTxDSP = true;
+    }
+
+    if ((m_settings.m_sampleRate != settings.m_sampleRate)
+       || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
+    {
+        m_sampleMOFifo.resize(SampleMOFifo::getSizePolicy(m_settings.m_sampleRate));
     }
 
     if ((m_settings.m_sampleRate != settings.m_sampleRate) || force)

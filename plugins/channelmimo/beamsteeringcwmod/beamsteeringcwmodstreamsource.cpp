@@ -52,7 +52,7 @@ void BeamSteeringCWModStreamSource::setPhase(float phase)
 
 void BeamSteeringCWModStreamSource::pull(SampleVector::iterator begin, unsigned int nbSamples)
 {
-    std::fill(begin, begin + nbSamples, Sample{(int) m_real, m_imag});
+    std::fill(begin, begin + nbSamples, Sample{m_real, m_imag});
 }
 
 void BeamSteeringCWModStreamSource::pullOne(Sample& sample)

@@ -60,7 +60,7 @@ private:
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     BeamSteeringCWModSettings m_settings;
-    int m_sampleRate;
+    int m_basebandSampleRate;
     qint64 m_centerFrequency;
     double m_shiftFrequencyFactor; //!< Channel frequency shift factor
     bool m_doApplySettings;

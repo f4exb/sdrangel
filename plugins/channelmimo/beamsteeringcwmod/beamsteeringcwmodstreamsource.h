@@ -28,6 +28,7 @@ public:
 
     virtual void pull(SampleVector::iterator begin, unsigned int nbSamples);
     virtual void pullOne(Sample& sample);
+    virtual void prefetch(unsigned int nbSamples) {} // prefetching of samples is not implemented
 
     void reset();
     void setPhase(float phase);
@@ -42,7 +43,5 @@ private:
     FixReal m_real;
     FixReal m_imag;
 };
-
-
 
 #endif // INCLUDE_BEAMSTEERINGCWMODSTREAMSOURCE_H

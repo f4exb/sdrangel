@@ -22,14 +22,12 @@
 #include <QNetworkReply>
 
 #include "device/deviceapi.h"
-#include "dsp/upchannelizer.h"
-#include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/dspcommands.h"
 
 #include "SWGChannelSettings.h"
 
-#include "beamsteeringcwmodsource.h"
+#include "beamsteeringcwmodbaseband.h"
 #include "beamsteeringcwmod.h"
 
 MESSAGE_CLASS_DEFINITION(BeamSteeringCWMod::MsgConfigureBeamSteeringCWMod, Message)
@@ -43,13 +41,13 @@ BeamSteeringCWMod::BeamSteeringCWMod(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_guiMessageQueue(nullptr),
     m_frequencyOffset(0),
-    m_deviceSampleRate(48000)
+    m_basebandSampleRate(48000)
 {
     setObjectName(m_channelId);
 
     m_thread = new QThread(this);
-    m_source = new BeamSteeringCWModSource();
-    m_source->moveToThread(m_thread);
+    m_basebandSource = new BeamSteeringCWModBaseband();
+    m_basebandSource->moveToThread(m_thread);
     m_deviceAPI->addMIMOChannel(this);
     m_deviceAPI->addMIMOChannelAPI(this);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
@@ -65,25 +63,27 @@ BeamSteeringCWMod::~BeamSteeringCWMod()
 
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeMIMOChannel(this);
-    delete m_source;
+    delete m_basebandSource;
     delete m_thread;
 }
 
 void BeamSteeringCWMod::startSources()
 {
-    m_source->reset();
+    qDebug("BeamSteeringCWMod::startSources");
+    m_basebandSource->reset();
     m_thread->start();
 }
 
 void BeamSteeringCWMod::stopSources()
 {
+    qDebug("BeamSteeringCWMod::stopSources");
 	m_thread->exit();
 	m_thread->wait();
 }
 
-void BeamSteeringCWMod::pull(const SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex)
+void BeamSteeringCWMod::pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex)
 {
-    m_source->pull(begin, nbSamples, sourceIndex);
+    m_basebandSource->pull(begin, nbSamples, sourceIndex);
 }
 
 void BeamSteeringCWMod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex)
@@ -107,28 +107,8 @@ void BeamSteeringCWMod::applySettings(const BeamSteeringCWModSettings& settings,
         << "m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
         << "m_title: " << settings.m_title;
 
-    if ((m_settings.m_log2Interp != settings.m_log2Interp)
-     || (m_settings.m_filterChainHash != settings.m_filterChainHash) || force)
-    {
-        BeamSteeringCWModSource::MsgConfigureChannelizer *msg = BeamSteeringCWModSource::MsgConfigureChannelizer::create(
-            settings.m_log2Interp, settings.m_filterChainHash);
-        m_source->getInputMessageQueue()->push(msg);
-    }
-
-    if ((m_settings.m_steerDegrees != settings.m_steerDegrees) || force) {
-        m_source->setSteeringDegrees(settings.m_steerDegrees);
-    }
-
-    if ((m_settings.m_channelOutput != settings.m_channelOutput) || force)
-    {
-        if (settings.m_channelOutput == 0) { // A and B
-            m_source->muteChannel(false, false);
-        } else if (settings.m_channelOutput == 1) { // A only
-            m_source->muteChannel(false, true);
-        } else if (settings.m_channelOutput == 2) { // B only
-            m_source->muteChannel(true, false);
-        }
-    }
+    BeamSteeringCWModBaseband::MsgConfigureBeamSteeringCWModBaseband *msg = BeamSteeringCWModBaseband::MsgConfigureBeamSteeringCWModBaseband::create(settings, force);
+    m_basebandSource->getInputMessageQueue()->push(msg);
 
     m_settings = settings;
 }
@@ -160,28 +140,21 @@ bool BeamSteeringCWMod::handleMessage(const Message& cmd)
         DSPMIMOSignalNotification& notif = (DSPMIMOSignalNotification&) cmd;
 
         qDebug() << "BeamSteeringCWMod::handleMessage: DSPMIMOSignalNotification:"
-                << " outputSampleRate: " << notif.getSampleRate()
+                << " basebandSampleRate: " << notif.getSampleRate()
                 << " centerFrequency: " << notif.getCenterFrequency()
                 << " sourceElseSink: " << notif.getSourceOrSink()
                 << " streamIndex: " << notif.getIndex();
 
         if (!notif.getSourceOrSink()) // deals with sink messages only
         {
-            m_deviceSampleRate = notif.getSampleRate();
+            m_basebandSampleRate = notif.getSampleRate();
             calculateFrequencyOffset(); // This is when device sample rate changes
 
             // Notify source of input sample rate change
-            BeamSteeringCWModSource::MsgSignalNotification *sig = BeamSteeringCWModSource::MsgSignalNotification::create(
-                m_deviceSampleRate, notif.getCenterFrequency()
-            );
+            BeamSteeringCWModBaseband::MsgSignalNotification *sig = BeamSteeringCWModBaseband::MsgSignalNotification::create(
+                m_basebandSampleRate);
             qDebug() << "BeamSteeringCWMod::handleMessage: DSPMIMOSignalNotification: push to source";
-            m_source->getInputMessageQueue()->push(sig);
-
-            // Redo the channelizer stuff with the new sample rate to re-synchronize everything
-            BeamSteeringCWModSource::MsgConfigureChannelizer *msg = BeamSteeringCWModSource::MsgConfigureChannelizer::create(
-                m_settings.m_log2Interp,
-                m_settings.m_filterChainHash);
-            m_source->getInputMessageQueue()->push(msg);
+            m_basebandSource->getInputMessageQueue()->push(sig);
 
             if (m_guiMessageQueue)
             {
@@ -237,13 +210,7 @@ void BeamSteeringCWMod::validateFilterChainHash(BeamSteeringCWModSettings& setti
 void BeamSteeringCWMod::calculateFrequencyOffset()
 {
     double shiftFactor = HBFilterChainConverter::getShiftFactor(m_settings.m_log2Interp, m_settings.m_filterChainHash);
-    m_frequencyOffset = m_deviceSampleRate * shiftFactor;
-}
-
-void BeamSteeringCWMod::applyChannelSettings(uint32_t log2Interp, uint32_t filterChainHash)
-{
-    BeamSteeringCWModSource::MsgConfigureChannelizer *msg = BeamSteeringCWModSource::MsgConfigureChannelizer::create(log2Interp, filterChainHash);
-    m_source->getInputMessageQueue()->push(msg);
+    m_frequencyOffset = m_basebandSampleRate * shiftFactor;
 }
 
 int BeamSteeringCWMod::webapiSettingsGet(
@@ -379,13 +346,14 @@ void BeamSteeringCWMod::webapiReverseSendSettings(QList<QString>& channelSetting
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgChannelSettings->asJson().toUtf8());
     buffer->seek(0);
 
     // Always use PATCH to avoid passing reverse API settings
-    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
 
     delete swgChannelSettings;
 }
@@ -400,10 +368,13 @@ void BeamSteeringCWMod::networkManagerFinished(QNetworkReply *reply)
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();
-        return;
+    }
+    else
+    {
+        QString answer = reply->readAll();
+        answer.chop(1); // remove last \n
+        qDebug("BeamSteeringCWMod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
     }
 
-    QString answer = reply->readAll();
-    answer.chop(1); // remove last \n
-    qDebug("BeamSteeringCWMod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    reply->deleteLater();
 }
