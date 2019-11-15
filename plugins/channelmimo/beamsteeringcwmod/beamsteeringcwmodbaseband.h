@@ -27,7 +27,7 @@
 #include "beamsteeringcwmodstreamsource.h"
 #include "beamsteeringcwmodsettings.h"
 
-class UpSampleChannelizer;
+class UpChannelizer;
 
 class BeamSteeringCWModBaseband : public QObject
 {
@@ -90,7 +90,7 @@ private:
     SampleMOFifo m_sampleMOFifo;
     std::vector<SampleVector::iterator> m_vbegin;
     int m_sizes[2];
-    UpSampleChannelizer *m_channelizers[2];
+    UpChannelizer *m_channelizers[2];
     BeamSteeringCWModStreamSource m_streamSources[2];
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     QMutex m_mutex;
