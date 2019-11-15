@@ -30,7 +30,6 @@
 #include "export.h"
 
 class DeviceSampleMIMO;
-class ThreadedBasebandSampleSource;
 class ThreadedBasebandSampleSink;
 class BasebandSampleSink;
 class MIMOChannel;

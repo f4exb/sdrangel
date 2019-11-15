@@ -29,7 +29,6 @@ class BasebandSampleSink;
 class ThreadedBasebandSampleSink;
 class DeviceSampleSink;
 class BasebandSampleSource;
-class ThreadedBasebandSampleSource;
 class AudioFifo;
 
 class SDRBASE_API DSPAcquisitionInit : public Message {
