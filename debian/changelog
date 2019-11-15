@@ -1,3 +1,11 @@
+sdrangel (4.12.0-1) unstable; urgency=medium
+
+  * Refactoring of Tx part with new FIFO and code reorganization
+  * Corrected network manager process memory leaks
+  * leansdr: fixes for macos
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 15 Nov 2019 00:14:22 +0100
+
 sdrangel (4.11.12-1) unstable; urgency=medium
 
   * Test sink output plugin
