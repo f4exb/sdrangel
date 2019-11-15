@@ -341,9 +341,14 @@ bool Bladerf1Output::applySettings(const BladeRF1OutputSettings& settings, bool 
 
 	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
 	{
+#if defined(_MSC_VER)
+        unsigned int fifoRate = (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2Interp);
+        fifoRate = fifoRate < 48000U ? 48000U : fifoRate;
+#else        
         unsigned int fifoRate = std::max(
             (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2Interp),
             DeviceBladeRF1Shared::m_sampleFifoMinRate);
+#endif
         m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(fifoRate));
 	}
 

@@ -823,9 +823,14 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         reverseAPIKeys.append("devSampleRate");
         reverseAPIKeys.append("log2SoftInterp");
 
+#if defined(_MSC_VER)
+        unsigned int fifoRate = (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2SoftInterp);
+        fifoRate = fifoRate < 48000U ? 48000U : fifoRate;
+#else
         unsigned int fifoRate = std::max(
             (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2SoftInterp),
             DeviceLimeSDRShared::m_sampleFifoMinRate);
+#endif
         m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(fifoRate));
         qDebug("LimeSDROutput::applySettings: resize FIFO: rate %u", fifoRate);
     }

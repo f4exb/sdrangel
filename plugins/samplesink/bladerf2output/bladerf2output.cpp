@@ -722,9 +722,14 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
             bladeRF2OutputThread->setFifo(requestedChannel, 0);
         }
 
+#if defined(_MSC_VER)
+        unsigned int fifoRate = (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2Interp);
+        fifoRate = fifoRate < 48000U ? 48000U : fifoRate;
+#else
         unsigned int fifoRate = std::max(
             (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2Interp),
             DeviceBladeRF2Shared::m_sampleFifoMinRate);
+#endif
         m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(fifoRate));
 
         if (fifo) {

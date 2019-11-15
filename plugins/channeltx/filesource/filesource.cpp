@@ -17,14 +17,6 @@
 
 #include "filesource.h"
 
-#if (defined _WIN32_) || (defined _MSC_VER)
-#include "windows_time.h"
-#include <stdint.h>
-#else
-#include <sys/time.h>
-#include <unistd.h>
-#endif
-
 #include <QDebug>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
