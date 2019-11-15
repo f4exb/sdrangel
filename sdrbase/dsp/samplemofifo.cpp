@@ -18,14 +18,18 @@
 #include "samplemofifo.h"
 
 const unsigned int SampleMOFifo::m_rwDivisor = 2;
+const unsigned int SampleMOFifo::m_guardDivisor = 10;
 
 void SampleMOFifo::init(unsigned int nbStreams, unsigned int size)
 {
     m_nbStreams = nbStreams;
     m_size = size;
+    m_lowGuard = m_size / m_guardDivisor;
+    m_highGuard = m_size - (m_size/m_guardDivisor);
+    m_midPoint = m_size / m_rwDivisor;
 	m_readCount = 0;
     m_readHead = 0;
-    m_writeHead = size/m_rwDivisor;
+    m_writeHead = m_midPoint;
     m_data.resize(nbStreams);
     m_vReadCount.clear();
     m_vReadHead.clear();
@@ -36,23 +40,26 @@ void SampleMOFifo::init(unsigned int nbStreams, unsigned int size)
         m_data[stream].resize(size);
         m_vReadCount.push_back(0);
         m_vReadHead.push_back(0);
-        m_vWriteHead.push_back(size/m_rwDivisor);
+        m_vWriteHead.push_back(m_midPoint);
     }
 }
 
 void SampleMOFifo::resize(unsigned int size)
 {
     m_size = size;
+    m_lowGuard = m_size / m_guardDivisor;
+    m_highGuard = m_size - (m_size/m_guardDivisor);
+    m_midPoint = m_size / m_rwDivisor;
 	m_readCount = 0;
     m_readHead = 0;
-    m_writeHead = size/m_rwDivisor;
+    m_writeHead = m_midPoint;
 
     for (unsigned int stream = 0; stream < m_nbStreams; stream++)
     {
         m_data[stream].resize(size);
         m_vReadCount.push_back(0);
         m_vReadHead.push_back(0);
-        m_vWriteHead.push_back(size/m_rwDivisor);
+        m_vWriteHead.push_back(m_midPoint);
     }
 }
 
@@ -60,6 +67,8 @@ SampleMOFifo::SampleMOFifo(QObject *parent) :
     QObject(parent),
     m_nbStreams(0),
     m_size(0),
+    m_lowGuard(0),
+    m_highGuard(0),
     m_readCount(0)
 {}
 
@@ -118,34 +127,6 @@ void SampleMOFifo::readSync(
     emit dataSyncRead();
 }
 
-void SampleMOFifo::writeSync(const std::vector<SampleVector::iterator>& vbegin, unsigned int amount)
-{
-    QMutexLocker mutexLocker(&m_mutex);
-    unsigned int spaceLeft = m_size - m_writeHead;
-    m_readCount = amount < m_readCount ? m_readCount - amount : 0;
-
-    if (amount <= spaceLeft)
-    {
-        for (unsigned int stream = 0; stream < m_nbStreams; stream++) {
-            std::copy(vbegin[stream], vbegin[stream] + amount, m_data[stream].begin() + m_writeHead);
-        }
-
-        m_writeHead += amount;
-    }
-    else
-    {
-        unsigned int remaining = (amount < m_size ? amount : m_size) - spaceLeft;
-
-        for (unsigned int stream = 0; stream < m_nbStreams; stream++)
-        {
-            std::copy(vbegin[stream], vbegin[stream] + spaceLeft, m_data[stream].begin() + m_writeHead);
-            std::copy(vbegin[stream] + spaceLeft, vbegin[stream] + amount, m_data[stream].begin());
-        }
-
-        m_writeHead = remaining;
-    }
-}
-
 void SampleMOFifo::writeSync(
     unsigned int amount,
     unsigned int& ipart1Begin, unsigned int& ipart1End, // first part offsets where to write
@@ -153,6 +134,19 @@ void SampleMOFifo::writeSync(
 )
 {
     QMutexLocker mutexLocker(&m_mutex);
+    unsigned int rwDelta = m_writeHead >= m_readHead ? m_writeHead - m_readHead : m_size - (m_readHead - m_writeHead);
+
+    if (rwDelta < m_lowGuard)
+    {
+        qWarning("SampleMOFifo::writeSync: underrun (write too slow) using %d old samples", m_midPoint - m_lowGuard);
+        m_writeHead = m_readHead + m_midPoint < m_size ? m_readHead + m_midPoint : m_readHead + m_midPoint - m_size;
+    }
+    else if (rwDelta > m_highGuard)
+    {
+        qWarning("SampleMOFifo::writeSync: overrrun (read too slow) dropping %d samples", m_highGuard - m_midPoint);
+        m_writeHead = m_readHead + m_midPoint < m_size ? m_readHead + m_midPoint : m_readHead + m_midPoint - m_size;
+    }
+
     unsigned int spaceLeft = m_size - m_writeHead;
 
     if (amount <= spaceLeft)
@@ -212,30 +206,6 @@ void SampleMOFifo::readAsync(
     emit dataAsyncRead(stream);
 }
 
-void SampleMOFifo::writeAsync(const SampleVector::iterator& begin, unsigned int amount, unsigned int stream)
-{
-    QMutexLocker mutexLocker(&m_mutex);
-    unsigned int spaceLeft = m_size - m_vWriteHead[stream];
-    m_vReadCount[stream] = amount < m_vReadCount[stream] ? m_vReadCount[stream] - amount : 0;
-
-    if (amount <= spaceLeft)
-    {
-        std::copy(begin, begin + amount, m_data[stream].begin() + m_vWriteHead[stream]);
-        m_vWriteHead[stream] += amount;
-    }
-    else
-    {
-        unsigned int remaining = (amount < m_size ? amount : m_size) - spaceLeft;
-
-        for (unsigned int stream = 0; stream < m_nbStreams; stream++)
-        {
-            std::copy(begin, begin + spaceLeft, m_data[stream].begin() + m_vWriteHead[stream]);
-            std::copy(begin + spaceLeft, begin + amount, m_data[stream].begin());
-            m_vWriteHead[stream] = remaining;
-        }
-    }
-}
-
 void SampleMOFifo::writeAsync(
     unsigned int amount,
     unsigned int& ipart1Begin, unsigned int& ipart1End,
@@ -244,6 +214,21 @@ void SampleMOFifo::writeAsync(
 )
 {
     QMutexLocker mutexLocker(&m_mutex);
+    unsigned int rwDelta = m_vWriteHead[stream] >= m_vReadHead[stream] ? m_vWriteHead[stream] - m_vReadHead[stream] : m_size - (m_vReadHead[stream] - m_vWriteHead[stream]);
+
+    if (rwDelta < m_lowGuard)
+    {
+        qWarning("SampleMOFifo::writeAsync: underrun (write too slow) on stream %u using %d old samples",
+            stream, m_midPoint - m_lowGuard);
+        m_vWriteHead[stream] = m_vReadHead[stream] + m_midPoint < m_size ? m_vReadHead[stream] + m_midPoint : m_vReadHead[stream] + m_midPoint - m_size;
+    }
+    else if (rwDelta > m_highGuard)
+    {
+        qWarning("SampleMOFifo::writeAsync: overrrun (read too slow) on stream %u dropping %d samples",
+            stream, m_highGuard - m_midPoint);
+        m_vWriteHead[stream] = m_vReadHead[stream] + m_midPoint < m_size ? m_vReadHead[stream] + m_midPoint : m_vReadHead[stream] + m_midPoint - m_size;
+    }
+
     unsigned int spaceLeft = m_size - m_vWriteHead[stream];
 
     if (amount <= spaceLeft)

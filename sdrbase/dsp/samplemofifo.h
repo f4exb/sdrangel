@@ -30,6 +30,7 @@ public:
     SampleMOFifo(QObject *parent = nullptr);
     SampleMOFifo(unsigned int nbStreams, unsigned int size, QObject *parent = nullptr);
     ~SampleMOFifo();
+
     void init(unsigned int nbStreams, unsigned int size);
     void resize(unsigned int size);
     void reset();
@@ -39,7 +40,7 @@ public:
 		unsigned int& ipart1Begin, unsigned int& ipart1End, // first part offsets where to read
 		unsigned int& ipart2Begin, unsigned int& ipart2End  // second part offsets
     );
-    void writeSync(const std::vector<SampleVector::iterator>& vbegin, unsigned int amount); //!< copy write
+
     void writeSync( //!< in place write with given amount
         unsigned int amount,
 		unsigned int& ipart1Begin, unsigned int& ipart1End, // first part offsets where to write
@@ -52,7 +53,7 @@ public:
 		unsigned int& ipart2Begin, unsigned int& ipart2End,
         unsigned int stream
     );
-    void writeAsync(const SampleVector::iterator& begin, unsigned int amount, unsigned int stream); //!< copy write
+
     void writeAsync( //!< in place write with given amount
         unsigned int amount,
 		unsigned int& ipart1Begin, unsigned int& ipart1End,
@@ -69,6 +70,7 @@ public:
         QMutexLocker mutexLocker(&m_mutex);
         return m_readCount;
     }
+
     unsigned int remainderAsync(unsigned int stream)
     {
         if (stream >= m_nbStreams) {
@@ -81,6 +83,7 @@ public:
 
     static unsigned int getSizePolicy(unsigned int sampleRate);
     static const unsigned int m_rwDivisor;
+    static const unsigned int m_guardDivisor;
 
 signals:
 	void dataSyncRead();
@@ -90,6 +93,9 @@ private:
     std::vector<SampleVector> m_data;
     unsigned int m_nbStreams;
     unsigned int m_size;
+    unsigned int m_lowGuard;
+    unsigned int m_highGuard;
+    unsigned int m_midPoint;
     unsigned int m_readCount;
     unsigned int m_readHead;
     unsigned int m_writeHead;
