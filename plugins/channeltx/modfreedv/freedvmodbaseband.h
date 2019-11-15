@@ -27,7 +27,7 @@
 
 #include "freedvmodsource.h"
 
-class UpSampleChannelizer;
+class UpChannelizer;
 
 class FreeDVModBaseband : public QObject
 {
@@ -106,7 +106,7 @@ signals:
 
 private:
     SampleSourceFifo m_sampleFifo;
-    UpSampleChannelizer *m_channelizer;
+    UpChannelizer *m_channelizer;
     FreeDVModSource m_source;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     FreeDVModSettings m_settings;

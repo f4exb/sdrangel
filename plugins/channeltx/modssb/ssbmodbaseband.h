@@ -27,7 +27,7 @@
 
 #include "ssbmodsource.h"
 
-class UpSampleChannelizer;
+class UpChannelizer;
 class BasebandSampleSink;
 
 class SSBModBaseband : public QObject
@@ -106,7 +106,7 @@ signals:
 
 private:
     SampleSourceFifo m_sampleFifo;
-    UpSampleChannelizer *m_channelizer;
+    UpChannelizer *m_channelizer;
     SSBModSource m_source;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     SSBModSettings m_settings;

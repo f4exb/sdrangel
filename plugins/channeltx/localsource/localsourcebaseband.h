@@ -28,7 +28,7 @@
 #include "localsourcesource.h"
 #include "localsourcesettings.h"
 
-class UpSampleChannelizer;
+class UpChannelizer;
 
 class LocalSourceBaseband : public QObject
 {
@@ -150,7 +150,7 @@ public:
 
 private:
     SampleSourceFifo m_sampleFifo;
-    UpSampleChannelizer *m_channelizer;
+    UpChannelizer *m_channelizer;
     LocalSourceSource m_source;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     LocalSourceSettings m_settings;

@@ -28,7 +28,7 @@
 #include "remotesourcesource.h"
 #include "remotesourcesettings.h"
 
-class UpSampleChannelizer;
+class UpChannelizer;
 
 class RemoteSourceBaseband : public QObject
 {
@@ -90,7 +90,7 @@ public:
 
 private:
     SampleSourceFifo m_sampleFifo;
-    UpSampleChannelizer *m_channelizer;
+    UpChannelizer *m_channelizer;
     RemoteSourceSource m_source;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     RemoteSourceSettings m_settings;

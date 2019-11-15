@@ -27,7 +27,7 @@
 
 #include "wfmmodsource.h"
 
-class UpSampleChannelizer;
+class UpChannelizer;
 
 class WFMModBaseband : public QObject
 {
@@ -102,7 +102,7 @@ signals:
 
 private:
     SampleSourceFifo m_sampleFifo;
-    UpSampleChannelizer *m_channelizer;
+    UpChannelizer *m_channelizer;
     WFMModSource m_source;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     WFMModSettings m_settings;

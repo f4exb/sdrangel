@@ -27,7 +27,7 @@
 
 #include "nfmmodsource.h"
 
-class UpSampleChannelizer;
+class UpChannelizer;
 
 class NFMModBaseband : public QObject
 {
@@ -104,7 +104,7 @@ signals:
 
 private:
     SampleSourceFifo m_sampleFifo;
-    UpSampleChannelizer *m_channelizer;
+    UpChannelizer *m_channelizer;
     NFMModSource m_source;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     NFMModSettings m_settings;

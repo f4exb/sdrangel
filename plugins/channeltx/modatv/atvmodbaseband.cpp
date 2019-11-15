@@ -17,7 +17,7 @@
 
 #include <QDebug>
 
-#include "dsp/upsamplechannelizer.h"
+#include "dsp/upchannelizer.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 
@@ -36,7 +36,7 @@ ATVModBaseband::ATVModBaseband() :
     m_mutex(QMutex::Recursive)
 {
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
-    m_channelizer = new UpSampleChannelizer(&m_source);
+    m_channelizer = new UpChannelizer(&m_source);
 
     qDebug("AMModBaseband::AMModBaseband");
     QObject::connect(

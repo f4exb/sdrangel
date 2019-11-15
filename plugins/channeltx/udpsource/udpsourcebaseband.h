@@ -27,7 +27,7 @@
 
 #include "udpsourcesource.h"
 
-class UpSampleChannelizer;
+class UpChannelizer;
 
 class UDPSourceBaseband : public QObject
 {
@@ -137,7 +137,7 @@ signals:
 
 private:
     SampleSourceFifo m_sampleFifo;
-    UpSampleChannelizer *m_channelizer;
+    UpChannelizer *m_channelizer;
     UDPSourceSource m_source;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     UDPSourceSettings m_settings;

@@ -27,7 +27,7 @@
 
 #include "ammodsource.h"
 
-class UpSampleChannelizer;
+class UpChannelizer;
 
 class AMModBaseband : public QObject
 {
@@ -104,7 +104,7 @@ signals:
 
 private:
     SampleSourceFifo m_sampleFifo;
-    UpSampleChannelizer *m_channelizer;
+    UpChannelizer *m_channelizer;
     AMModSource m_source;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     AMModSettings m_settings;

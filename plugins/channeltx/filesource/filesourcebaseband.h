@@ -27,7 +27,7 @@
 
 #include "filesourcesource.h"
 
-class UpSampleChannelizer;
+class UpChannelizer;
 
 class FileSourceBaseband : public QObject
 {
@@ -162,7 +162,7 @@ public:
 
 private:
     SampleSourceFifo m_sampleFifo;
-    UpSampleChannelizer *m_channelizer;
+    UpChannelizer *m_channelizer;
     FileSourceSource m_source;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     FileSourceSettings m_settings;

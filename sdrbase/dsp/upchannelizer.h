@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_DSP_UPSAMPLECHANNELIZER_H_
-#define SDRBASE_DSP_UPSAMPLECHANNELIZER_H_
+#ifndef SDRBASE_DSP_UPCHANNELIZER_H_
+#define SDRBASE_DSP_UPCHANNELIZER_H_
 
 #include <QObject>
 #include <algorithm>
@@ -33,12 +33,12 @@
 #include "dsp/inthalfbandfilterdb.h"
 #endif
 
-#define UPSAMPLECHANNELIZER_HB_FILTER_ORDER 96
+#define UPCHANNELIZER_HB_FILTER_ORDER 96
 
-class SDRBASE_API UpSampleChannelizer : public ChannelSampleSource {
+class SDRBASE_API UpChannelizer : public ChannelSampleSource {
 public:
-    UpSampleChannelizer(ChannelSampleSource* sampleSource);
-    virtual ~UpSampleChannelizer();
+    UpChannelizer(ChannelSampleSource* sampleSource);
+    virtual ~UpChannelizer();
 
     virtual void pull(SampleVector::iterator begin, unsigned int nbSamples);
     virtual void pullOne(Sample& sample);
@@ -59,11 +59,11 @@ protected:
         };
 
 #ifdef USE_SSE4_1
-        typedef bool (IntHalfbandFilterEO1<UPSAMPLECHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* sIn, Sample *sOut);
-        IntHalfbandFilterEO1<UPSAMPLECHANNELIZER_HB_FILTER_ORDER>* m_filter;
+        typedef bool (IntHalfbandFilterEO1<UPCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* sIn, Sample *sOut);
+        IntHalfbandFilterEO1<UPCHANNELIZER_HB_FILTER_ORDER>* m_filter;
 #else
-        typedef bool (IntHalfbandFilterDB<qint32, UPSAMPLECHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* sIn, Sample *sOut);
-        IntHalfbandFilterDB<qint32, UPSAMPLECHANNELIZER_HB_FILTER_ORDER>* m_filter;
+        typedef bool (IntHalfbandFilterDB<qint32, UPCHANNELIZER_HB_FILTER_ORDER>::*WorkFunction)(Sample* sIn, Sample *sOut);
+        IntHalfbandFilterDB<qint32, UPCHANNELIZER_HB_FILTER_ORDER>* m_filter;
 #endif
         WorkFunction m_workFunction;
 
@@ -101,4 +101,4 @@ protected:
 
 
 
-#endif // SDRBASE_DSP_UPSAMPLECHANNELIZER_H_
+#endif // SDRBASE_DSP_UPCHANNELIZER_H_

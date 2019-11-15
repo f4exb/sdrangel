@@ -24,9 +24,9 @@
 #include "inthalfbandfilter.h"
 #include "dspcommands.h"
 #include "hbfilterchainconverter.h"
-#include "upsamplechannelizer.h"
+#include "upchannelizer.h"
 
-UpSampleChannelizer::UpSampleChannelizer(ChannelSampleSource* sampleSource) :
+UpChannelizer::UpChannelizer(ChannelSampleSource* sampleSource) :
     m_filterChainSetMode(false),
     m_sampleSource(sampleSource),
     m_basebandSampleRate(0),
@@ -39,12 +39,12 @@ UpSampleChannelizer::UpSampleChannelizer(ChannelSampleSource* sampleSource) :
 {
 }
 
-UpSampleChannelizer::~UpSampleChannelizer()
+UpChannelizer::~UpChannelizer()
 {
     freeFilterChain();
 }
 
-void UpSampleChannelizer::pullOne(Sample& sample)
+void UpChannelizer::pullOne(Sample& sample)
 {
     if (m_sampleSource == nullptr)
     {
@@ -85,7 +85,7 @@ void UpSampleChannelizer::pullOne(Sample& sample)
     }
 }
 
-void UpSampleChannelizer::pull(SampleVector::iterator begin, unsigned int nbSamples)
+void UpChannelizer::pull(SampleVector::iterator begin, unsigned int nbSamples)
 {
     if (m_sampleSource == nullptr)
     {
@@ -111,20 +111,20 @@ void UpSampleChannelizer::pull(SampleVector::iterator begin, unsigned int nbSamp
     }
 }
 
-void UpSampleChannelizer::prefetch(unsigned int nbSamples)
+void UpChannelizer::prefetch(unsigned int nbSamples)
 {
     unsigned int log2Interp = m_filterStages.size();
     m_sampleSource->prefetch(nbSamples/(1<<log2Interp)); // 2^n less samples will be produced by the source
 }
 
-void UpSampleChannelizer::setChannelization(int requestedSampleRate, qint64 requestedCenterFrequency)
+void UpChannelizer::setChannelization(int requestedSampleRate, qint64 requestedCenterFrequency)
 {
     m_requestedInputSampleRate = requestedSampleRate;
     m_requestedCenterFrequency = requestedCenterFrequency;
     applyChannelization();
 }
 
-void UpSampleChannelizer::setBasebandSampleRate(int basebandSampleRate, bool interp)
+void UpChannelizer::setBasebandSampleRate(int basebandSampleRate, bool interp)
 {
     m_basebandSampleRate = basebandSampleRate;
 
@@ -135,13 +135,13 @@ void UpSampleChannelizer::setBasebandSampleRate(int basebandSampleRate, bool int
     }
 }
 
-void UpSampleChannelizer::applyChannelization()
+void UpChannelizer::applyChannelization()
 {
     m_filterChainSetMode = false;
 
     if (m_basebandSampleRate == 0)
     {
-        qDebug() << "UpSampleChannelizer::applyConfiguration: aborting (out=0):"
+        qDebug() << "UpChannelizer::applyConfiguration: aborting (out=0):"
                 << " out:" << m_basebandSampleRate
                 << " req:" << m_requestedInputSampleRate
                 << " in:" << m_channelSampleRate
@@ -157,21 +157,21 @@ void UpSampleChannelizer::applyChannelization()
 
     m_channelSampleRate = m_basebandSampleRate / (1 << m_filterStages.size());
 
-    qDebug() << "UpSampleChannelizer::applyConfiguration: done: "
+    qDebug() << "UpChannelizer::applyConfiguration: done: "
             << " out:" << m_basebandSampleRate
             << " req:" << m_requestedInputSampleRate
             << " in:" << m_channelSampleRate
             << " fc:" << m_channelFrequencyOffset;
 }
 
-void UpSampleChannelizer::setInterpolation(unsigned int log2Interp, unsigned int filterChainHash)
+void UpChannelizer::setInterpolation(unsigned int log2Interp, unsigned int filterChainHash)
 {
     m_log2Interp = log2Interp;
     m_filterChainHash = filterChainHash;
     applyInterpolation();
 }
 
-void UpSampleChannelizer::applyInterpolation()
+void UpChannelizer::applyInterpolation()
 {
     m_filterChainSetMode = true;
     std::vector<unsigned int> stageIndexes;
@@ -184,7 +184,7 @@ void UpSampleChannelizer::applyInterpolation()
     m_channelSampleRate = m_basebandSampleRate / (1 << m_filterStages.size());
     m_requestedInputSampleRate = m_channelSampleRate;
 
-	qDebug() << "UpSampleChannelizer::applyInterpolation:"
+	qDebug() << "UpChannelizer::applyInterpolation:"
             << " m_log2Interp:" << m_log2Interp
             << " m_filterChainHash:" << m_filterChainHash
             << " out:" << m_basebandSampleRate
@@ -193,51 +193,51 @@ void UpSampleChannelizer::applyInterpolation()
 }
 
 #ifdef USE_SSE4_1
-UpSampleChannelizer::FilterStage::FilterStage(Mode mode) :
-    m_filter(new IntHalfbandFilterEO1<UPSAMPLECHANNELIZER_HB_FILTER_ORDER>),
+UpChannelizer::FilterStage::FilterStage(Mode mode) :
+    m_filter(new IntHalfbandFilterEO1<UPCHANNELIZER_HB_FILTER_ORDER>),
     m_workFunction(0)
 {
     switch(mode) {
         case ModeCenter:
-            m_workFunction = &IntHalfbandFilterEO1<UPSAMPLECHANNELIZER_HB_FILTER_ORDER>::workInterpolateCenter;
+            m_workFunction = &IntHalfbandFilterEO1<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateCenter;
             break;
 
         case ModeLowerHalf:
-            m_workFunction = &IntHalfbandFilterEO1<UPSAMPLECHANNELIZER_HB_FILTER_ORDER>::workInterpolateLowerHalf;
+            m_workFunction = &IntHalfbandFilterEO1<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateLowerHalf;
             break;
 
         case ModeUpperHalf:
-            m_workFunction = &IntHalfbandFilterEO1<UPSAMPLECHANNELIZER_HB_FILTER_ORDER>::workInterpolateUpperHalf;
+            m_workFunction = &IntHalfbandFilterEO1<UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateUpperHalf;
             break;
     }
 }
 #else
-UpSampleChannelizer::FilterStage::FilterStage(Mode mode) :
-    m_filter(new IntHalfbandFilterDB<qint32, UPSAMPLECHANNELIZER_HB_FILTER_ORDER>),
+UpChannelizer::FilterStage::FilterStage(Mode mode) :
+    m_filter(new IntHalfbandFilterDB<qint32, UPCHANNELIZER_HB_FILTER_ORDER>),
     m_workFunction(0)
 {
     switch(mode) {
         case ModeCenter:
-            m_workFunction = &IntHalfbandFilterDB<qint32, UPSAMPLECHANNELIZER_HB_FILTER_ORDER>::workInterpolateCenter;
+            m_workFunction = &IntHalfbandFilterDB<qint32, UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateCenter;
             break;
 
         case ModeLowerHalf:
-            m_workFunction = &IntHalfbandFilterDB<qint32, UPSAMPLECHANNELIZER_HB_FILTER_ORDER>::workInterpolateLowerHalf;
+            m_workFunction = &IntHalfbandFilterDB<qint32, UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateLowerHalf;
             break;
 
         case ModeUpperHalf:
-            m_workFunction = &IntHalfbandFilterDB<qint32, UPSAMPLECHANNELIZER_HB_FILTER_ORDER>::workInterpolateUpperHalf;
+            m_workFunction = &IntHalfbandFilterDB<qint32, UPCHANNELIZER_HB_FILTER_ORDER>::workInterpolateUpperHalf;
             break;
     }
 }
 #endif
 
-UpSampleChannelizer::FilterStage::~FilterStage()
+UpChannelizer::FilterStage::~FilterStage()
 {
     delete m_filter;
 }
 
-bool UpSampleChannelizer::signalContainsChannel(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd) const
+bool UpChannelizer::signalContainsChannel(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd) const
 {
     //qDebug("   testing signal [%f, %f], channel [%f, %f]", sigStart, sigEnd, chanStart, chanEnd);
     if(sigEnd <= sigStart)
@@ -247,13 +247,13 @@ bool UpSampleChannelizer::signalContainsChannel(Real sigStart, Real sigEnd, Real
     return (sigStart <= chanStart) && (sigEnd >= chanEnd);
 }
 
-Real UpSampleChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd)
+Real UpChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd)
 {
     Real sigBw = sigEnd - sigStart;
     Real rot = sigBw / 4;
     Sample s;
 
-    qDebug() << "UpSampleChannelizer::createFilterChain: start:"
+    qDebug() << "UpChannelizer::createFilterChain: start:"
             << " sig: ["  << sigStart << ":" << sigEnd << "]"
             << " BW: " << sigBw
             << " chan: [" << chanStart << ":" << chanEnd << "]"
@@ -262,7 +262,7 @@ Real UpSampleChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real cha
     // check if it fits into the left half
     if(signalContainsChannel(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd))
     {
-        qDebug() << "UpSampleChannelizer::createFilterChain: take left half (rotate by +1/4 and decimate by 2):"
+        qDebug() << "UpChannelizer::createFilterChain: take left half (rotate by +1/4 and decimate by 2):"
                 << " [" << m_filterStages.size() << "]"
                 << " sig: ["  << sigStart << ":" << sigStart + sigBw / 2.0 << "]";
         m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
@@ -273,7 +273,7 @@ Real UpSampleChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real cha
     // check if it fits into the right half
     if(signalContainsChannel(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd))
     {
-        qDebug() << "UpSampleChannelizer::createFilterChain: take right half (rotate by -1/4 and decimate by 2):"
+        qDebug() << "UpChannelizer::createFilterChain: take right half (rotate by -1/4 and decimate by 2):"
                 << " [" << m_filterStages.size() << "]"
                 << " sig: ["  << sigEnd - sigBw / 2.0f << ":" << sigEnd << "]";
         m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
@@ -285,7 +285,7 @@ Real UpSampleChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real cha
     // Was: if(signalContainsChannel(sigStart + rot + safetyMargin, sigStart + rot + sigBw / 2.0f - safetyMargin, chanStart, chanEnd)) {
     if(signalContainsChannel(sigStart + rot, sigEnd - rot, chanStart, chanEnd))
     {
-        qDebug() << "UpSampleChannelizer::createFilterChain: take center half (decimate by 2):"
+        qDebug() << "UpChannelizer::createFilterChain: take center half (decimate by 2):"
                 << " [" << m_filterStages.size() << "]"
                 << " sig: ["  << sigStart + rot << ":" << sigEnd - rot << "]";
         m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
@@ -296,7 +296,7 @@ Real UpSampleChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real cha
 
     Real ofs = ((chanEnd - chanStart) / 2.0 + chanStart) - ((sigEnd - sigStart) / 2.0 + sigStart);
 
-    qDebug() << "UpSampleChannelizer::createFilterChain: complete:"
+    qDebug() << "UpChannelizer::createFilterChain: complete:"
             << " #stages: " << m_filterStages.size()
             << " BW: "  << sigBw
             << " ofs: " << ofs;
@@ -304,7 +304,7 @@ Real UpSampleChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real cha
     return ofs;
 }
 
-double UpSampleChannelizer::setFilterChain(const std::vector<unsigned int>& stageIndexes)
+double UpChannelizer::setFilterChain(const std::vector<unsigned int>& stageIndexes)
 {
     // filters are described from lower to upper level but the chain is constructed the other way round
     std::vector<unsigned int>::const_reverse_iterator rit = stageIndexes.rbegin();
@@ -321,33 +321,33 @@ double UpSampleChannelizer::setFilterChain(const std::vector<unsigned int>& stag
             m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
             m_stageSamples.push_back(s);
             ofs -= ofs_stage;
-            qDebug("UpSampleChannelizer::setFilterChain: lower half: ofs: %f", ofs);
+            qDebug("UpChannelizer::setFilterChain: lower half: ofs: %f", ofs);
         }
         else if (*rit == 1)
         {
             m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
             m_stageSamples.push_back(s);
-            qDebug("UpSampleChannelizer::setFilterChain: center: ofs: %f", ofs);
+            qDebug("UpChannelizer::setFilterChain: center: ofs: %f", ofs);
         }
         else if (*rit == 2)
         {
             m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
             m_stageSamples.push_back(s);
             ofs += ofs_stage;
-            qDebug("UpSampleChannelizer::setFilterChain: upper half: ofs: %f", ofs);
+            qDebug("UpChannelizer::setFilterChain: upper half: ofs: %f", ofs);
         }
 
         ofs_stage /= 2;
     }
 
-    qDebug() << "UpSampleChannelizer::setFilterChain: complete:"
+    qDebug() << "UpChannelizer::setFilterChain: complete:"
             << " #stages: " << m_filterStages.size()
             << " ofs: " << ofs;
 
     return ofs;
 }
 
-void UpSampleChannelizer::freeFilterChain()
+void UpChannelizer::freeFilterChain()
 {
     for(FilterStages::iterator it = m_filterStages.begin(); it != m_filterStages.end(); ++it)
         delete *it;
