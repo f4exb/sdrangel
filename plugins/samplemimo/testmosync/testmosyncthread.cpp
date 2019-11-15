@@ -27,16 +27,17 @@
 TestMOSyncThread::TestMOSyncThread(QObject* parent) :
     QThread(parent),
     m_running(false),
+    m_buf(nullptr),
     m_log2Interp(0),
     m_throttlems(TestMOSyncSettings::m_msThrottle),
     m_throttleToggle(false),
-    m_blockSize(TestMOSyncSettings::m_blockSize),
     m_samplesRemainder(0),
+    m_samplerate(0),
     m_feedSpectrumIndex(0),
     m_spectrumSink(nullptr)
 {
     qDebug("TestMOSyncThread::TestMOSyncThread");
-    m_buf = new qint16[2*m_blockSize*2];
+    setSamplerate(48000);
 }
 
 TestMOSyncThread::~TestMOSyncThread()
@@ -52,6 +53,7 @@ TestMOSyncThread::~TestMOSyncThread()
 
 void TestMOSyncThread::startWork()
 {
+    qDebug("TestMOSyncThread::startWork");
     m_startWaitMutex.lock();
     m_elapsedTimer.start();
     start();
@@ -65,6 +67,7 @@ void TestMOSyncThread::startWork()
 
 void TestMOSyncThread::stopWork()
 {
+    qDebug("TestMOSyncThread::stopWork");
     m_running = false;
     wait();
 }
@@ -107,7 +110,11 @@ void TestMOSyncThread::setSamplerate(int samplerate)
         m_samplerate = samplerate;
         m_samplesChunkSize = (m_samplerate * m_throttlems) / 1000;
         m_blockSize = (m_samplerate * 50) / 1000;
-        delete[] m_buf;
+
+        if (m_buf) {
+            delete[] m_buf;
+        }
+
         m_buf = new qint16[2*m_blockSize*2];
 
         if (wasRunning) {
@@ -181,7 +188,14 @@ void TestMOSyncThread::callbackPart(qint16* buf, qint32 nSamples, int iBegin)
 {
     for (unsigned int channel = 0; channel < 2; channel++)
     {
+        qDebug("TestMOSyncThread::callbackPart: nSamples: %d channel: %u", nSamples, channel);
         SampleVector::iterator begin = m_sampleFifo->getData(channel).begin() + iBegin;
+        // m_testVector.allocate(nSamples/(1<<m_log2Interp), Sample{16384, 0});
+        // std::copy(
+        //     m_testVector.m_vector.begin(),
+        //     m_testVector.m_vector.begin() + nSamples/(1<<m_log2Interp),
+        //     begin
+        // );
 
         if (m_log2Interp == 0)
         {
@@ -289,6 +303,7 @@ void TestMOSyncThread::tick()
         }
 
         int chunkSize = std::min((int) m_samplesChunkSize, m_samplerate) + m_samplesRemainder;
+        qDebug("TestMOSyncThread::tick: chunkSize: %d m_samplesRemainder: %u m_blockSize: %u",chunkSize, m_samplesRemainder, m_blockSize);
 
         while (chunkSize >= m_blockSize)
         {
@@ -306,6 +321,7 @@ void TestMOSyncThread::feedSpectrum(int16_t *buf, unsigned int bufSize)
         return;
     }
 
+    qDebug("TestMOSyncThread::feedSpectrum: bufSize: %u", bufSize);
     m_samplesVector.allocate(bufSize/2);
     Sample16 *s16Buf = (Sample16*) buf;
 

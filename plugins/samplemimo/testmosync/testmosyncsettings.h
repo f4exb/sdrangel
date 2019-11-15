@@ -33,7 +33,6 @@ struct TestMOSyncSettings {
     fcPos_t  m_fcPosTx;
 
     static const unsigned int m_msThrottle;
-    static const unsigned int m_blockSize;
 
     TestMOSyncSettings();
     void resetToDefaults();

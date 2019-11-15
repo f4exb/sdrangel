@@ -94,7 +94,7 @@ public:
     virtual void startSources() {}
     virtual void stopSources() {}
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex);
-    virtual void pull(const SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex);
+    virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex);
 	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
 
     virtual void getIdentifier(QString& id) { id = objectName(); }

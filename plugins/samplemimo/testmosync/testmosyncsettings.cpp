@@ -19,7 +19,6 @@
 #include "testmosyncsettings.h"
 
 const unsigned int TestMOSyncSettings::m_msThrottle = 50U;
-const unsigned int TestMOSyncSettings::m_blockSize = 16384U;
 
 TestMOSyncSettings::TestMOSyncSettings()
 {
