@@ -4,6 +4,8 @@ set(modam_SOURCES
 	ammod.cpp
 	ammodplugin.cpp
     ammodsettings.cpp
+    ammodbaseband.cpp
+    ammodsource.cpp
     ammodwebapiadapter.cpp
 )
 
@@ -11,6 +13,8 @@ set(modam_HEADERS
 	ammod.h
 	ammodplugin.h
     ammodsettings.h
+    ammodbaseband.h
+    ammodsource.h
     ammodwebapiadapter.h
 )
 

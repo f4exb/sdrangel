@@ -24,9 +24,7 @@
 class DEVICES_API DeviceBladeRF1Shared
 {
 public:
-    static const float  m_sampleFifoLengthInSeconds;
-    static const int    m_sampleFifoMinSize;
-    static const int    m_sampleFifoMinSize32;
+    static const unsigned int m_sampleFifoMinRate;
 };
 
 

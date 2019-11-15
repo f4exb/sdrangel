@@ -551,6 +551,18 @@ void CWKeyer::handleInputMessages()
 
 void CWKeyer::applySettings(const CWKeyerSettings& settings, bool force)
 {
+    qDebug() << "CWKeyer::applySettings: "
+        << " m_dashKey: " << settings.m_dashKey
+        << " m_dashKeyModifiers: " << settings.m_dashKeyModifiers
+        << " m_dotKey: " << settings.m_dotKey
+        << " m_dotKeyModifiers: " << settings.m_dotKeyModifiers
+        << " m_keyboardIambic: " << settings.m_keyboardIambic
+        << " m_loop: " << settings.m_loop
+        << " m_mode: " << settings.m_mode
+        << " m_sampleRate: " << settings.m_sampleRate
+        << " m_text: " << settings.m_text
+        << " m_wpm: " << settings.m_wpm;
+
     if ((m_settings.m_wpm != settings.m_wpm)
      || (m_settings.m_sampleRate != settings.m_sampleRate) || force)
     {
@@ -618,7 +630,7 @@ void CWKeyer::webapiSettingsPutPatch(
         cwKeyerSettings.m_wpm = apiCwKeyerSettings->getWpm();
     }
     if (channelSettingsKeys.contains("cwKeyer.keyboardIambic")) {
-        cwKeyerSettings.m_wpm = apiCwKeyerSettings->getKeyboardIambic() != 0;
+        cwKeyerSettings.m_keyboardIambic = apiCwKeyerSettings->getKeyboardIambic() != 0;
     }
     if (channelSettingsKeys.contains("cwKeyer.dotKey")) {
         cwKeyerSettings.m_dotKey = (Qt::Key) apiCwKeyerSettings->getDotKey();

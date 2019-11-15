@@ -22,12 +22,12 @@
 #include <QDebug>
 
 #include "device/deviceuiset.h"
-#include "dsp/upchannelizer.h"
 
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "dsp/dspengine.h"
+#include "dsp/cwkeyer.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -396,7 +396,7 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampl
     ui->cwKeyerGUI->setCWKeyer(m_amMod->getCWKeyer());
 
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-	connect(m_amMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
+    m_amMod->setLevelMeter(ui->volumeMeter);
 
 	displaySettings();
     applySettings(true);

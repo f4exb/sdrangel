@@ -21,9 +21,9 @@
 #include <errno.h>
 #include <algorithm>
 
+#include "dsp/samplesourcefifo.h"
 
-
-Bladerf1OutputThread::Bladerf1OutputThread(struct bladerf* dev, SampleSourceFifoDB* sampleFifo, QObject* parent) :
+Bladerf1OutputThread::Bladerf1OutputThread(struct bladerf* dev, SampleSourceFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),
@@ -82,35 +82,51 @@ void Bladerf1OutputThread::run()
 //  Interpolate according to specified log2 (ex: log2=4 => decim=16)
 void Bladerf1OutputThread::callback(qint16* buf, qint32 len)
 {
-    SampleVector::iterator beginRead;
-    m_sampleFifo->readAdvance(beginRead, len/(1<<m_log2Interp));
-    beginRead -= len/(1<<m_log2Interp);
+    SampleVector& data = m_sampleFifo->getData();
+    unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
+    m_sampleFifo->read(len/(1<<m_log2Interp), iPart1Begin, iPart1End, iPart2Begin, iPart2End);
+
+    if (iPart1Begin != iPart1End) {
+        callbackPart(buf, data, iPart1Begin, iPart1End);
+    }
+
+    unsigned int shift = (iPart1End - iPart1Begin)*(1<<m_log2Interp);
+
+    if (iPart2Begin != iPart2End) {
+        callbackPart(buf + 2*shift, data, iPart2Begin, iPart2End);
+    }
+}
+
+void Bladerf1OutputThread::callbackPart(qint16* buf, SampleVector& data, unsigned int iBegin, unsigned int iEnd)
+{
+    SampleVector::iterator beginRead = data.begin() + iBegin;
+    int len = 2*(iEnd - iBegin)*(1<<m_log2Interp);
 
     if (m_log2Interp == 0)
 	{
-		m_interpolators.interpolate1(&beginRead, buf, len*2);
+		m_interpolators.interpolate1(&beginRead, buf, len);
 	}
 	else
 	{
         switch (m_log2Interp)
         {
         case 1:
-            m_interpolators.interpolate2_cen(&beginRead, buf, len*2, true);
+            m_interpolators.interpolate2_cen(&beginRead, buf, len, true);
             break;
         case 2:
-            m_interpolators.interpolate4_cen(&beginRead, buf, len*2, true);
+            m_interpolators.interpolate4_cen(&beginRead, buf, len, true);
             break;
         case 3:
-            m_interpolators.interpolate8_cen(&beginRead, buf, len*2, true);
+            m_interpolators.interpolate8_cen(&beginRead, buf, len, true);
             break;
         case 4:
-            m_interpolators.interpolate16_cen(&beginRead, buf, len*2, true);
+            m_interpolators.interpolate16_cen(&beginRead, buf, len, true);
             break;
         case 5:
-            m_interpolators.interpolate32_cen(&beginRead, buf, len*2, true);
+            m_interpolators.interpolate32_cen(&beginRead, buf, len, true);
             break;
         case 6:
-            m_interpolators.interpolate64_cen(&beginRead, buf, len*2, true);
+            m_interpolators.interpolate64_cen(&beginRead, buf, len, true);
             break;
         default:
             break;

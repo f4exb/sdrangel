@@ -1,7 +1,9 @@
 project(modnfm)
 
 set(modnfm_SOURCES
-	nfmmod.cpp
+    nfmmod.cpp
+    nfmmodbaseband.cpp
+    nfmmodsource.cpp
 	nfmmodplugin.cpp
     nfmmodsettings.cpp
     nfmmodwebapiadapter.cpp
@@ -9,6 +11,8 @@ set(modnfm_SOURCES
 
 set(modnfm_HEADERS
 	nfmmod.h
+    nfmmodbaseband.h
+    nfmmodsource.h
 	nfmmodplugin.h
     nfmmodsettings.h
     nfmmodwebapiadapter.h

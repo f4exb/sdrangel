@@ -23,18 +23,20 @@
 #include <QTimer>
 #include <QMutex>
 #include <QWaitCondition>
+
 #include <stdint.h>
 #include <list>
 #include <map>
+
 #include "dsp/dsptypes.h"
 #include "dsp/fftwindow.h"
 #include "util/messagequeue.h"
 #include "util/syncmessenger.h"
+#include "util/incrementalvector.h"
 #include "export.h"
 
 class DeviceSampleSink;
 class BasebandSampleSource;
-class ThreadedBasebandSampleSource;
 class BasebandSampleSink;
 
 class SDRBASE_API DSPDeviceSinkEngine : public QThread {
@@ -67,8 +69,8 @@ public:
 	DeviceSampleSink *getSink() { return m_deviceSampleSink; }
 	void setSinkSequence(int sequence); //!< Set the sample sink sequence in type
 
-	void addThreadedSource(ThreadedBasebandSampleSource* source); //!< Add a baseband sample source that will run on its own thread
-	void removeThreadedSource(ThreadedBasebandSampleSource* source); //!< Remove a baseband sample source that runs on its own thread
+	void addChannelSource(BasebandSampleSource* source);       //!< Add a baseband sample source
+	void removeChannelSource(BasebandSampleSource* source);    //!< Remove a baseband sample source
 
 	void addSpectrumSink(BasebandSampleSink* spectrumSink);    //!< Add a spectrum vis baseband sample sink
 	void removeSpectrumSink(BasebandSampleSink* spectrumSink); //!< Add a spectrum vis baseband sample sink
@@ -95,25 +97,18 @@ private:
 	typedef std::list<BasebandSampleSource*> BasebandSampleSources;
 	BasebandSampleSources m_basebandSampleSources; //!< baseband sample sources within main thread (usually file input)
 
-	typedef std::list<ThreadedBasebandSampleSource*> ThreadedBasebandSampleSources;
-	ThreadedBasebandSampleSources m_threadedBasebandSampleSources; //!< baseband sample sources on their own threads (usually channels)
-
-	typedef std::map<BasebandSampleSource*, SampleVector::iterator> BasebandSampleSourcesIteratorMap;
-	typedef std::pair<BasebandSampleSource*, SampleVector::iterator> BasebandSampleSourcesIteratorMapKV;
-	BasebandSampleSourcesIteratorMap m_basebandSampleSourcesIteratorMap;
-
-    typedef std::map<ThreadedBasebandSampleSource*, SampleVector::iterator> ThreadedBasebandSampleSourcesIteratorMap;
-    typedef std::pair<ThreadedBasebandSampleSource*, SampleVector::iterator> ThreadedBasebandSampleSourcesIteratorMapKV;
-    ThreadedBasebandSampleSourcesIteratorMap m_threadedBasebandSampleSourcesIteratorMap;
-
 	BasebandSampleSink *m_spectrumSink;
+    IncrementalVector<Sample> m_sourceSampleBuffer;
+    IncrementalVector<Sample> m_sourceZeroBuffer;
 
 	uint32_t m_sampleRate;
 	quint64 m_centerFrequency;
 	uint32_t m_multipleSourcesDivisionFactor;
+    unsigned int m_sumIndex; //!< channel index when summing channels
 
 	void run();
-	void work(int nbWriteSamples); //!< transfer samples from beseband sources to sink if in running state
+	void workSampleFifo(); //!< transfer samples from baseband sources to sink if in running state
+    void workSamples(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
 
 	State gotoIdle();     //!< Go to the idle state
 	State gotoInit();     //!< Go to the acquisition init state from idle
@@ -121,13 +116,11 @@ private:
 	State gotoError(const QString& errorMsg); //!< Go to an error state
 
 	void handleSetSink(DeviceSampleSink* sink); //!< Manage sink setting
-	void checkNumberOfBasebandSources();
 
 private slots:
-	void handleData(int nbSamples); //!< Handle data when samples have to be written to the sample FIFO
+	void handleData(); //!< Handle data when samples have to be written to the sample FIFO
 	void handleInputMessages(); //!< Handle input message queue
 	void handleSynchronousMessages(); //!< Handle synchronous messages with the thread
-	void handleForwardToSpectrumSink(int nbSamples);
 };
 
 

@@ -22,12 +22,11 @@
 #include <QDebug>
 
 #include "device/deviceuiset.h"
-#include "dsp/upchannelizer.h"
-#include "dsp/threadedbasebandsamplesource.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "dsp/dspengine.h"
+#include "dsp/cwkeyer.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -382,7 +381,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_settings.setCWKeyerGUI(ui->cwKeyerGUI);
 
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-	connect(m_wfmMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
+    m_wfmMod->setLevelMeter(ui->volumeMeter);
 
 	displaySettings();
     applySettings(true);

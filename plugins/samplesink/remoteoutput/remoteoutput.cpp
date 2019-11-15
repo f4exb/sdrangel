@@ -512,32 +512,35 @@ void RemoteOutput::networkManagerFinished(QNetworkReply *reply)
     if (reply->error())
     {
         qInfo("RemoteOutput::networkManagerFinished: error: %s", qPrintable(reply->errorString()));
-        return;
     }
-
-    QString answer = reply->readAll();
-
-    try
+    else
     {
-        QByteArray jsonBytes(answer.toStdString().c_str());
-        QJsonParseError error;
-        QJsonDocument doc = QJsonDocument::fromJson(jsonBytes, &error);
+        QString answer = reply->readAll();
 
-        if (error.error == QJsonParseError::NoError)
+        try
         {
-            analyzeApiReply(doc.object(), answer);
+            QByteArray jsonBytes(answer.toStdString().c_str());
+            QJsonParseError error;
+            QJsonDocument doc = QJsonDocument::fromJson(jsonBytes, &error);
+
+            if (error.error == QJsonParseError::NoError)
+            {
+                analyzeApiReply(doc.object(), answer);
+            }
+            else
+            {
+                QString errorMsg = QString("Reply JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
+                qInfo().noquote() << "RemoteOutput::networkManagerFinished" << errorMsg;
+            }
         }
-        else
+        catch (const std::exception& ex)
         {
-            QString errorMsg = QString("Reply JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
+            QString errorMsg = QString("Error parsing request: ") + ex.what();
             qInfo().noquote() << "RemoteOutput::networkManagerFinished" << errorMsg;
         }
     }
-    catch (const std::exception& ex)
-    {
-        QString errorMsg = QString("Error parsing request: ") + ex.what();
-        qInfo().noquote() << "RemoteOutput::networkManagerFinished" << errorMsg;
-    }
+
+    reply->deleteLater();
 }
 
 void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString& answer)
@@ -675,13 +678,14 @@ void RemoteOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
 
     // Always use PATCH to avoid passing reverse API settings
-    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
 
     delete swgDeviceSettings;
 }
@@ -700,16 +704,18 @@ void RemoteOutput::webapiReverseSendStartStop(bool start)
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
+    QNetworkReply *reply;
 
     if (start) {
-        m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
     } else {
-        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
     }
 
+    buffer->setParent(reply);
     delete swgDeviceSettings;
 }

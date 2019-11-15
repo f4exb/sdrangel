@@ -86,7 +86,6 @@ private:
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
-    void applyChannelSettings();
     void configureFileName();
 	void updateWithAcquisition();
 	void updateWithStreamData();

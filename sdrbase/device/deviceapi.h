@@ -26,7 +26,7 @@
 
 class BasebandSampleSink;
 class ThreadedBasebandSampleSink;
-class ThreadedBasebandSampleSource;
+class BasebandSampleSource;
 class MIMOChannel;
 class ChannelAPI;
 class DeviceSampleSink;
@@ -73,8 +73,8 @@ public:
 
     void addChannelSink(ThreadedBasebandSampleSink* sink, int streamIndex = 0);        //!< Add a channel sink (Rx)
     void removeChannelSink(ThreadedBasebandSampleSink* sink, int streamIndex = 0);     //!< Remove a channel sink (Rx)
-    void addChannelSource(ThreadedBasebandSampleSource* sink, int streamIndex = 0);    //!< Add a channel source (Tx)
-    void removeChannelSource(ThreadedBasebandSampleSource* sink, int streamIndex = 0); //!< Remove a channel source (Tx)
+    void addChannelSource(BasebandSampleSource* sink, int streamIndex = 0);            //!< Add a channel source (Tx)
+    void removeChannelSource(BasebandSampleSource* sink, int streamIndex = 0);         //!< Remove a channel source (Tx)
     void addMIMOChannel(MIMOChannel* channel);   //!< Add a MIMO channel (n Rx and m Tx combination)
     void removeMIMOChannel(MIMOChannel* channe); //!< Remove a MIMO channel (n Rx and m Tx combination)
 

@@ -21,11 +21,11 @@
 #include <algorithm>
 #include <QDebug>
 
-#include "dsp/samplesourcefifodb.h"
+#include "dsp/samplesourcefifo.h"
 #include "util/timeutil.h"
 #include "remoteoutputthread.h"
 
-RemoteOutputThread::RemoteOutputThread(SampleSourceFifoDB* sampleFifo, QObject* parent) :
+RemoteOutputThread::RemoteOutputThread(SampleSourceFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_samplesChunkSize(0),
@@ -84,8 +84,12 @@ void RemoteOutputThread::setSamplerate(int samplerate)
 		}
 
 		// resize sample FIFO
-		if (m_sampleFifo) {
-		    m_sampleFifo->resize(samplerate); // 1s buffer
+		if (m_sampleFifo)
+        {
+            unsigned int fifoRate = std::max(
+                (unsigned int) samplerate,
+                48000U);
+            m_sampleFifo->resize(SampleSourceFifo::getSizePolicy(fifoRate));
 		}
 
         m_samplerate = samplerate;
@@ -133,11 +137,23 @@ void RemoteOutputThread::tick()
 
         SampleVector::iterator readUntil;
 
-        m_sampleFifo->readAdvance(readUntil, m_samplesChunkSize); // pull samples
-        SampleVector::iterator beginRead = readUntil - m_samplesChunkSize;
-        m_samplesCount += m_samplesChunkSize;
+        SampleVector& data = m_sampleFifo->getData();
+        unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
+        m_sampleFifo->read(m_samplesChunkSize, iPart1Begin, iPart1End, iPart2Begin, iPart2End);
 
-        m_udpSinkFEC.write(beginRead, m_samplesChunkSize);
+        if (iPart1Begin != iPart1End)
+        {
+            SampleVector::iterator beginRead = data.begin() + iPart1Begin;
+            unsigned int partSize = iPart1End - iPart1Begin;
+            m_udpSinkFEC.write(beginRead, partSize);
+        }
+
+        if (iPart2Begin != iPart2End)
+        {
+            SampleVector::iterator beginRead = data.begin() + iPart2Begin;
+            unsigned int partSize = iPart2End - iPart2Begin;
+            m_udpSinkFEC.write(beginRead, partSize);
+        }
 	}
 }
 

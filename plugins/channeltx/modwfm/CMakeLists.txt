@@ -1,7 +1,9 @@
 project(modwfm)
 
 set(modwfm_SOURCES
-	wfmmod.cpp
+    wfmmod.cpp
+    wfmmodbaseband.cpp
+    wfmmodsource.cpp
 	wfmmodplugin.cpp
     wfmmodsettings.cpp
     wfmmodwebapiadapter.cpp
@@ -9,6 +11,8 @@ set(modwfm_SOURCES
 
 set(modwfm_HEADERS
 	wfmmod.h
+    wfmmodbaseband.h
+    wfmmodsource.h
 	wfmmodplugin.h
     wfmmodsettings.h
     wfmmodwebapiadapter.h

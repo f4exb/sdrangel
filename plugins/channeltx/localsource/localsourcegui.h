@@ -62,7 +62,7 @@ private:
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     LocalSourceSettings m_settings;
-    int m_sampleRate;
+    int m_basebandSampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     double m_shiftFrequencyFactor; //!< Channel frequency shift factor
     bool m_doApplySettings;
@@ -78,7 +78,6 @@ private:
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
-    void applyChannelSettings();
     void displaySettings();
     void displayRateAndShift();
     void updateLocalDevices();
@@ -95,6 +94,7 @@ private slots:
     void on_position_valueChanged(int value);
     void on_localDevice_currentIndexChanged(int index);
     void on_localDevicesRefresh_clicked(bool checked);
+    void on_localDevicePlay_toggled(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void tick();

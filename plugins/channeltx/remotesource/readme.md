@@ -24,11 +24,13 @@ Local port from where the I/Q samples are fetched via UDP
 
 <h3>3: Validation button</h3>
 
-When the return key is hit within the address (1) or port (2) the changes are effective immediately. You can also use this button to set again these values. 
+When the return key is hit within the address (1) or port (2) the changes are effective immediately. You can also use this button to set again these values.
 
 <h3>4: Stream sample rate</h3>
 
-Stream sample rate as specified in the stream meta data
+Stream sample rate as specified in the stream meta data. Interpolation may occur to match the baseband sample rate. This will be done around the baseband center frequency (no NCO shift). Decimation is not provisionned so unpredictable results may occur if the remote stream sample rate is larger than the baseband sample rate.
+
+To minimize processing an exact match of baseband sample rate and remote stream sample rate is recommended. If this is not possible then a power of two ratio is still preferable.
 
 <h3>5: Stream status</h3>
 
@@ -49,7 +51,7 @@ The color of the icon indicates stream status:
   - Green: all original blocks have been received for all frames during the last polling timeframe (ex: 136)
   - No color: some original blocks were reconstructed from FEC blocks for some frames during the last polling timeframe (ex: between 128 and 135)
   - Red: some original blocks were definitely lost for some frames during the last polling timeframe (ex: less than 128)
-  
+
 <h4>5.3: Actual stream sample rate</h4>
 
 This is the sample rate calculated using the counter of samples between two consecutive polls

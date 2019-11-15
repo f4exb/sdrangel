@@ -48,34 +48,34 @@ public:
         DeviceSampleMIMO* m_sampleMIMO;
     };
 
-    class AddThreadedBasebandSampleSource : public Message {
+    class AddBasebandSampleSource : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
-        AddThreadedBasebandSampleSource(ThreadedBasebandSampleSource* threadedSampleSource, unsigned int index) :
+        AddBasebandSampleSource(BasebandSampleSource* sampleSource, unsigned int index) :
             Message(),
-            m_threadedSampleSource(threadedSampleSource),
+            m_sampleSource(sampleSource),
             m_index(index)
         { }
-        ThreadedBasebandSampleSource* getThreadedSampleSource() const { return m_threadedSampleSource; }
+        BasebandSampleSource* getSampleSource() const { return m_sampleSource; }
         unsigned int getIndex() const { return m_index; }
     private:
-        ThreadedBasebandSampleSource* m_threadedSampleSource;
+        BasebandSampleSource* m_sampleSource;
         unsigned int m_index;
     };
 
-    class RemoveThreadedBasebandSampleSource : public Message {
+    class RemoveBasebandSampleSource : public Message {
 	    MESSAGE_CLASS_DECLARATION
 
     public:
-        RemoveThreadedBasebandSampleSource(ThreadedBasebandSampleSource* threadedSampleSource, unsigned int index) :
+        RemoveBasebandSampleSource(BasebandSampleSource* sampleSource, unsigned int index) :
             Message(),
-            m_threadedSampleSource(threadedSampleSource),
+            m_sampleSource(sampleSource),
             m_index(index)
         { }
-        ThreadedBasebandSampleSource* getThreadedSampleSource() const { return m_threadedSampleSource; }
+        BasebandSampleSource* getSampleSource() const { return m_sampleSource; }
         unsigned int getIndex() const { return m_index; }
     private:
-        ThreadedBasebandSampleSource* m_threadedSampleSource;
+        BasebandSampleSource* m_sampleSource;
         unsigned int m_index;
     };
 
@@ -261,8 +261,8 @@ public:
 	void setMIMOSequence(int sequence); //!< Set the sample MIMO sequence in type
     uint getUID() const { return m_uid; }
 
-	void addChannelSource(ThreadedBasebandSampleSource* source, int index = 0);    //!< Add a channel source that will run on its own thread
-	void removeChannelSource(ThreadedBasebandSampleSource* source, int index = 0); //!< Remove a channel source that runs on its own thread
+	void addChannelSource(BasebandSampleSource* source, int index = 0);            //!< Add a channel source
+	void removeChannelSource(BasebandSampleSource* source, int index = 0);         //!< Remove a channel source
 	void addChannelSink(ThreadedBasebandSampleSink* sink, int index = 0);          //!< Add a channel sink that will run on its own thread
 	void removeChannelSink(ThreadedBasebandSampleSink* sink, int index = 0);       //!< Remove a channel sink that runs on its own thread
     void addMIMOChannel(MIMOChannel *channel);                                     //!< Add a MIMO channel
@@ -358,12 +358,11 @@ private:
 
 	typedef std::list<BasebandSampleSink*> BasebandSampleSinks;
 	std::vector<BasebandSampleSinks> m_basebandSampleSinks; //!< ancillary sample sinks on main thread (per input stream)
-
 	typedef std::list<ThreadedBasebandSampleSink*> ThreadedBasebandSampleSinks;
 	std::vector<ThreadedBasebandSampleSinks> m_threadedBasebandSampleSinks; //!< channel sample sinks on their own thread (per input stream)
 
-	typedef std::list<ThreadedBasebandSampleSource*> ThreadedBasebandSampleSources;
-	std::vector<ThreadedBasebandSampleSources> m_threadedBasebandSampleSources; //!< channel sample sources on their own threads (per output stream)
+	typedef std::list<BasebandSampleSource*> BasebandSampleSources;
+	std::vector<BasebandSampleSources> m_basebandSampleSources; //!< channel sample sources (per output stream)
     std::vector<IncrementalVector<Sample>> m_sourceSampleBuffers;
     std::vector<IncrementalVector<Sample>> m_sourceZeroBuffers;
 
@@ -382,7 +381,7 @@ private:
     void workSamplesSink(const SampleVector::const_iterator& vbegin, const SampleVector::const_iterator& vend, unsigned int streamIndex);
     void workSampleSourceFifos(); //!< transfer samples of all source streams (sync mode)
     void workSampleSourceFifo(unsigned int streamIndex); //!< transfer samples of one source stream (async mode)
-    void workSamplesSource(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int streamIndex);
+    void workSamplesSource(SampleVector& data, unsigned int iBegin, unsigned int iEnd, unsigned int streamIndex);
 
 	State gotoIdle(int subsystemIndex);     //!< Go to the idle state
 	State gotoInit(int subsystemIndex);     //!< Go to the acquisition init state from idle

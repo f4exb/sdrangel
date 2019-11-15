@@ -31,7 +31,7 @@
 
 const PluginDescriptor HackRFOutputPlugin::m_pluginDescriptor = {
 	QString("HackRF Output"),
-	QString("4.11.10"),
+	QString("4.12.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

@@ -22,18 +22,18 @@
 #include <QMutex>
 #include <QWaitCondition>
 
-#include "dsp/samplesourcefifodb.h"
 #include "dsp/interpolators.h"
 #include "plutosdr/deviceplutosdrshared.h"
 
 class DevicePlutoSDRBox;
+class SampleSourceFifo;
 
 class PlutoSDROutputThread : public QThread, public DevicePlutoSDRShared::ThreadInterface
 {
     Q_OBJECT
 
 public:
-    PlutoSDROutputThread(uint32_t blocksize, DevicePlutoSDRBox* plutoBox, SampleSourceFifoDB* sampleFifo, QObject* parent = 0);
+    PlutoSDROutputThread(uint32_t blocksize, DevicePlutoSDRBox* plutoBox, SampleSourceFifo* sampleFifo, QObject* parent = nullptr);
     ~PlutoSDROutputThread();
 
     virtual void startWork();
@@ -51,7 +51,7 @@ private:
     int16_t *m_buf;                 //!< holds I+Q values of each sample from devce
 //    int16_t *m_bufConv;             //!< holds I+Q values of each sample converted to host format via iio_channel_convert
     uint32_t m_blockSizeSamples;    //!< buffer sizes in number of (I,Q) samples
-    SampleSourceFifoDB* m_sampleFifo; //!< DSP sample FIFO (I,Q)
+    SampleSourceFifo* m_sampleFifo; //!< DSP sample FIFO (I,Q)
 
     unsigned int m_log2Interp; // soft interpolation
 
@@ -59,6 +59,7 @@ private:
 
     void run();
     void convert(qint16* buf, qint32 len);
+    void convertPart(qint16* buf, SampleVector& data, unsigned int iBegin, unsigned int iEnd);
 
 };
 

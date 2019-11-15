@@ -1,7 +1,9 @@
 project(localsource)
 
 set(localsource_SOURCES
-	localsource.cpp
+    localsource.cpp
+    localsourcebaseband.cpp
+    localsourcesource.cpp
 	localsourcethread.cpp
 	localsourceplugin.cpp
     localsourcesettings.cpp
@@ -9,7 +11,9 @@ set(localsource_SOURCES
 )
 
 set(localsource_HEADERS
-	localsource.h
+    localsource.h
+    localsourcebaseband.h
+    localsourcesource.h
 	localsourcethread.h
 	localsourceplugin.h
     localsourcesettings.h

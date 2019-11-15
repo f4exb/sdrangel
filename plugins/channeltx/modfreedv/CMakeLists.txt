@@ -2,6 +2,8 @@ project(modfreedv)
 
 set(modfreedv_SOURCES
     freedvmod.cpp
+    freedvmodbaseband.cpp
+    freedvmodsource.cpp
     freedvmodplugin.cpp
     freedvmodsettings.cpp
     freedvmodwebapiadapter.cpp
@@ -9,6 +11,8 @@ set(modfreedv_SOURCES
 
 set(modfreedv_HEADERS
     freedvmod.h
+    freedvmodbaseband.h
+    freedvmodsource.h
     freedvmodplugin.h
     freedvmodsettings.h
     freedvmodwebapiadapter.h

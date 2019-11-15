@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "SWGChannelSettings.h"
+#include "dsp/cwkeyer.h"
 #include "freedvmod.h"
 #include "freedvmodwebapiadapter.h"
 

@@ -17,18 +17,14 @@
 
 #include "localsource.h"
 
-#include <boost/crc.hpp>
-#include <boost/cstdint.hpp>
-
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QThread>
 
 #include "SWGChannelSettings.h"
 
 #include "util/simpleserializer.h"
-#include "dsp/threadedbasebandsamplesource.h"
-#include "dsp/upchannelizer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspdevicesinkengine.h"
 #include "dsp/dspengine.h"
@@ -36,11 +32,10 @@
 #include "dsp/hbfilterchainconverter.h"
 #include "device/deviceapi.h"
 
-#include "localsourcethread.h"
+#include "localsourcebaseband.h"
 
 MESSAGE_CLASS_DEFINITION(LocalSource::MsgConfigureLocalSource, Message)
-MESSAGE_CLASS_DEFINITION(LocalSource::MsgSampleRateNotification, Message)
-MESSAGE_CLASS_DEFINITION(LocalSource::MsgConfigureChannelizer, Message)
+MESSAGE_CLASS_DEFINITION(LocalSource::MsgBasebandSampleRateNotification, Message)
 
 const QString LocalSource::m_channelIdURI = "sdrangel.channel.localsource";
 const QString LocalSource::m_channelId = "LocalSource";
@@ -48,23 +43,20 @@ const QString LocalSource::m_channelId = "LocalSource";
 LocalSource::LocalSource(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
         m_deviceAPI(deviceAPI),
-        m_running(false),
-        m_sinkThread(nullptr),
-        m_localSampleSourceFifo(nullptr),
-        m_chunkSize(0),
-        m_localSamplesIndex(0),
-        m_localSamplesIndexOffset(0),
         m_centerFrequency(0),
         m_frequencyOffset(0),
-        m_sampleRate(48000),
-        m_deviceSampleRate(48000),
+        m_basebandSampleRate(48000),
         m_settingsMutex(QMutex::Recursive)
 {
     setObjectName(m_channelId);
 
-    m_channelizer = new UpChannelizer(this);
-    m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-    m_deviceAPI->addChannelSource(m_threadedChannelizer);
+    m_thread = new QThread(this);
+    m_basebandSource = new LocalSourceBaseband();
+    m_basebandSource->moveToThread(m_thread);
+
+    applySettings(m_settings, true);
+
+    m_deviceAPI->addChannelSource(this);
     m_deviceAPI->addChannelSourceAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
@@ -76,190 +68,61 @@ LocalSource::~LocalSource()
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
-    m_deviceAPI->removeChannelSource(m_threadedChannelizer);
-    delete m_threadedChannelizer;
-    delete m_channelizer;
-}
-
-void LocalSource::pull(Sample& sample)
-{
-    if (m_localSampleSourceFifo)
-    {
-        QMutexLocker mutexLocker(&m_settingsMutex);
-        sample = m_localSamples[m_localSamplesIndex + m_localSamplesIndexOffset];
-
-        if (m_localSamplesIndex < m_chunkSize - 1)
-        {
-            m_localSamplesIndex++;
-        }
-        else
-        {
-            m_localSamplesIndex = 0;
-
-            if (m_localSamplesIndexOffset == 0) {
-                m_localSamplesIndexOffset = m_chunkSize;
-            } else {
-                m_localSamplesIndexOffset = 0;
-            }
-
-            emit pullSamples(m_chunkSize);
-        }
-    }
-    else
-    {
-        sample = Sample{0, 0};
-    }
-}
-
-void LocalSource::processSamples(int offset)
-{
-    if (m_localSampleSourceFifo)
-    {
-        int destOffset = (m_localSamplesIndexOffset == 0 ? m_chunkSize : 0);
-        SampleVector::iterator beginSource;
-        SampleVector::iterator beginDestination = m_localSamples.begin() + destOffset;
-        m_localSampleSourceFifo->setIteratorFromOffset(beginSource, offset);
-        std::copy(beginSource, beginSource + m_chunkSize, beginDestination);
-    }
-}
-
-void LocalSource::pullAudio(int nbSamples)
-{
-    (void) nbSamples;
+    m_deviceAPI->removeChannelSource(this);
+    delete m_basebandSource;
+    delete m_thread;
 }
 
 void LocalSource::start()
 {
-    qDebug("LocalSource::start");
-
-    if (m_running) {
-        stop();
-    }
-
-    m_sinkThread = new LocalSourceThread();
-    DeviceSampleSink *deviceSink = getLocalDevice(m_settings.m_localDeviceIndex);
-
-    if (deviceSink)
-    {
-        m_localSampleSourceFifo = deviceSink->getSampleFifo();
-        m_chunkSize = m_localSampleSourceFifo->size() / 16;
-        m_localSamples.resize(2*m_chunkSize);
-        m_localSamplesIndex = 0;
-        m_sinkThread->setSampleFifo(m_localSampleSourceFifo);
-    }
-    else
-    {
-        m_localSampleSourceFifo = nullptr;
-    }
-
-    connect(this,
-            SIGNAL(pullSamples(unsigned int)),
-            m_sinkThread,
-            SLOT(pullSamples(unsigned int)),
-            Qt::QueuedConnection);
-
-    connect(m_sinkThread,
-            SIGNAL(samplesAvailable(int)),
-            this,
-            SLOT(processSamples(int)),
-            Qt::QueuedConnection);
-
-    m_sinkThread->startStop(true);
-    m_running = true;
+	qDebug("LocalSource::start");
+    m_basebandSource->reset();
+    m_thread->start();
 }
 
 void LocalSource::stop()
 {
     qDebug("LocalSource::stop");
+	m_thread->exit();
+	m_thread->wait();
+}
 
-    if (m_sinkThread != 0)
-    {
-        m_sinkThread->startStop(false);
-        m_sinkThread->deleteLater();
-        m_sinkThread = 0;
-    }
-
-    m_running = false;
+void LocalSource::pull(SampleVector::iterator& begin, unsigned int nbSamples)
+{
+    m_basebandSource->pull(begin, nbSamples);
 }
 
 bool LocalSource::handleMessage(const Message& cmd)
 {
-	if (UpChannelizer::MsgChannelizerNotification::match(cmd))
-	{
-		UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
-        int sampleRate = notif.getSampleRate();
-
-        qDebug() << "LocalSource::handleMessage: MsgChannelizerNotification:"
-                << " channelSampleRate: " << sampleRate
-                << " offsetFrequency: " << notif.getFrequencyOffset();
-
-        if (sampleRate > 0)
-        {
-            if (m_localSampleSourceFifo)
-            {
-                QMutexLocker mutexLocker(&m_settingsMutex);
-                m_localSampleSourceFifo->resize(sampleRate);
-                m_chunkSize = sampleRate / 8;
-                m_localSamplesIndex = 0;
-                m_localSamplesIndexOffset = 0;
-                m_localSamples.resize(2*m_chunkSize);
-            }
-
-            setSampleRate(sampleRate);
-        }
-
-		return true;
-	}
-    else if (DSPSignalNotification::match(cmd))
+    if (DSPSignalNotification::match(cmd))
     {
-        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        DSPSignalNotification& cfg = (DSPSignalNotification&) cmd;
+        qDebug() << "LocalSource::handleMessage: DSPSignalNotification: "
+            << "basband sample rate: " << cfg.getSampleRate()
+            << "center frequency: " << cfg.getCenterFrequency();
 
-        qDebug() << "LocalSource::handleMessage: DSPSignalNotification:"
-                << " inputSampleRate: " << notif.getSampleRate()
-                << " centerFrequency: " << notif.getCenterFrequency();
+        m_basebandSampleRate = cfg.getSampleRate();
+        m_centerFrequency = cfg.getCenterFrequency();
 
-        setCenterFrequency(notif.getCenterFrequency());
-        m_deviceSampleRate = notif.getSampleRate();
-        calculateFrequencyOffset(); // This is when device sample rate changes
-        propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex);
+        calculateFrequencyOffset(m_settings.m_log2Interp, m_settings.m_filterChainHash);
+        propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex, m_settings.m_log2Interp);
 
-        // Redo the channelizer stuff with the new sample rate to re-synchronize everything
-        m_channelizer->set(m_channelizer->getInputMessageQueue(),
-            m_settings.m_log2Interp,
-            m_settings.m_filterChainHash);
+        MsgBasebandSampleRateNotification *msg = MsgBasebandSampleRateNotification::create(cfg.getSampleRate());
+        m_basebandSource->getInputMessageQueue()->push(msg);
 
         if (m_guiMessageQueue)
         {
-            MsgSampleRateNotification *msg = MsgSampleRateNotification::create(notif.getSampleRate());
+            MsgBasebandSampleRateNotification *msg = MsgBasebandSampleRateNotification::create(cfg.getSampleRate());
             m_guiMessageQueue->push(msg);
         }
 
         return true;
     }
-    else if (MsgConfigureLocalSource::match(cmd))
+    if (MsgConfigureLocalSource::match(cmd))
     {
         MsgConfigureLocalSource& cfg = (MsgConfigureLocalSource&) cmd;
         qDebug() << "LocalSource::handleMessage: MsgConfigureLocalSink";
         applySettings(cfg.getSettings(), cfg.getForce());
-
-        return true;
-    }
-    else if (MsgConfigureChannelizer::match(cmd))
-    {
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        m_settings.m_log2Interp = cfg.getLog2Interp();
-        m_settings.m_filterChainHash =  cfg.getFilterChainHash();
-
-        qDebug() << "LocalSource::handleMessage: MsgConfigureChannelizer:"
-                << " log2Interp: " << m_settings.m_log2Interp
-                << " filterChainHash: " << m_settings.m_filterChainHash;
-
-        m_channelizer->set(m_channelizer->getInputMessageQueue(),
-            m_settings.m_log2Interp,
-            m_settings.m_filterChainHash);
-
-        calculateFrequencyOffset(); // This is when decimation or filter chain changes
-        propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex);
 
         return true;
     }
@@ -302,8 +165,14 @@ void LocalSource::getLocalDevices(std::vector<uint32_t>& indexes)
         DSPDeviceSinkEngine *deviceSinkEngine = dspEngine->getDeviceSinkEngineByIndex(i);
         DeviceSampleSink *deviceSink = deviceSinkEngine->getSink();
 
-        if (deviceSink->getDeviceDescription() == "LocalOutput") {
+        if (deviceSink->getDeviceDescription() == "LocalOutput")
+        {
+            qDebug("LocalSource::getLocalDevices: index: %u: LocalOutput found", i);
             indexes.push_back(i);
+        }
+        else
+        {
+            qDebug("LocalSource::getLocalDevices: index: %u: %s", i, qPrintable(deviceSink->getDeviceDescription()));
         }
     }
 }
@@ -340,42 +209,81 @@ DeviceSampleSink *LocalSource::getLocalDevice(uint32_t index)
     return nullptr;
 }
 
-void LocalSource::propagateSampleRateAndFrequency(uint32_t index)
+void LocalSource::propagateSampleRateAndFrequency(uint32_t index, uint32_t log2Interp)
 {
+    qDebug() << "LocalSource::propagateSampleRateAndFrequency:"
+        << " index: " << index
+        << " baseband_freq: " << m_basebandSampleRate
+        << " log2interp: " <<  log2Interp
+        << " frequency: " << m_centerFrequency + m_frequencyOffset;
+
     DeviceSampleSink *deviceSink = getLocalDevice(index);
 
     if (deviceSink)
     {
-        deviceSink->setSampleRate(m_deviceSampleRate / (1<<m_settings.m_log2Interp));
+        deviceSink->setSampleRate(m_basebandSampleRate / (1 << log2Interp));
         deviceSink->setCenterFrequency(m_centerFrequency + m_frequencyOffset);
+    }
+    else
+    {
+        qDebug("LocalSource::propagateSampleRateAndFrequency: no suitable device at index %u", index);
     }
 }
 
 void LocalSource::applySettings(const LocalSourceSettings& settings, bool force)
 {
     qDebug() << "LocalSource::applySettings:"
-            << " m_localDeviceIndex: " << settings.m_localDeviceIndex
-            << " force: " << force;
+        << "m_localDeviceIndex:" << settings.m_localDeviceIndex
+        << "m_log2Interp:" << settings.m_log2Interp
+        << "m_filterChainHash:" << settings.m_filterChainHash
+        << "m_play:" << settings.m_play
+        << "m_rgbColor:" << settings.m_rgbColor
+        << "m_title:" << settings.m_title
+        << "m_useReverseAPI:" << settings.m_useReverseAPI
+        << "m_reverseAPIAddress:" << settings.m_reverseAPIAddress
+        << "m_reverseAPIChannelIndex:" << settings.m_reverseAPIChannelIndex
+        << "m_reverseAPIDeviceIndex:" << settings.m_reverseAPIDeviceIndex
+        << "m_reverseAPIPort:" << settings.m_reverseAPIPort
+        << " force: " << force;
 
     QList<QString> reverseAPIKeys;
 
+    if ((settings.m_log2Interp != m_settings.m_log2Interp) || force) {
+        reverseAPIKeys.append("log2Interp");
+    }
+    if ((settings.m_filterChainHash != m_settings.m_filterChainHash) || force) {
+        reverseAPIKeys.append("filterChainHash");
+    }
     if ((settings.m_localDeviceIndex != m_settings.m_localDeviceIndex) || force)
     {
         reverseAPIKeys.append("localDeviceIndex");
-        DeviceSampleSink *deviceSink = getLocalDevice(settings.m_localDeviceIndex);
+        calculateFrequencyOffset(settings.m_log2Interp, settings.m_filterChainHash);
+        propagateSampleRateAndFrequency(settings.m_localDeviceIndex, settings.m_log2Interp);
+        DeviceSampleSink *deviceSampleSink = getLocalDevice(settings.m_localDeviceIndex);
+        LocalSourceBaseband::MsgConfigureLocalDeviceSampleSink *msg =
+            LocalSourceBaseband::MsgConfigureLocalDeviceSampleSink::create(deviceSampleSink);
+        m_basebandSource->getInputMessageQueue()->push(msg);
+    }
 
-        if (deviceSink)
-        {
-            if (m_sinkThread) {
-                m_sinkThread->setSampleFifo(deviceSink->getSampleFifo());
-            }
+    if ((settings.m_log2Interp != m_settings.m_log2Interp)
+     || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
+    {
+        calculateFrequencyOffset(settings.m_log2Interp, settings.m_filterChainHash);
+        propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex, settings.m_log2Interp);
+        LocalSourceBaseband::MsgConfigureChannelizer *msg = LocalSourceBaseband::MsgConfigureChannelizer::create(
+            settings.m_log2Interp,
+            settings.m_filterChainHash
+        );
+        m_basebandSource->getInputMessageQueue()->push(msg);
+    }
 
-            propagateSampleRateAndFrequency(settings.m_localDeviceIndex);
-        }
-        else
-        {
-            qWarning("LocalSource::applySettings: invalid local device for index %u", settings.m_localDeviceIndex);
-        }
+    if ((settings.m_play != m_settings.m_play) || force)
+    {
+        reverseAPIKeys.append("play");
+        LocalSourceBaseband::MsgConfigureLocalSourceWork *msg = LocalSourceBaseband::MsgConfigureLocalSourceWork::create(
+            settings.m_play
+        );
+        m_basebandSource->getInputMessageQueue()->push(msg);
     }
 
     if ((settings.m_useReverseAPI) && (reverseAPIKeys.size() != 0))
@@ -402,10 +310,10 @@ void LocalSource::validateFilterChainHash(LocalSourceSettings& settings)
     settings.m_filterChainHash = settings.m_filterChainHash >= s ? s-1 : settings.m_filterChainHash;
 }
 
-void LocalSource::calculateFrequencyOffset()
+void LocalSource::calculateFrequencyOffset(uint32_t log2Interp, uint32_t filterChainHash)
 {
-    double shiftFactor = HBFilterChainConverter::getShiftFactor(m_settings.m_log2Interp, m_settings.m_filterChainHash);
-    m_frequencyOffset = m_deviceSampleRate * shiftFactor;
+    double shiftFactor = HBFilterChainConverter::getShiftFactor(log2Interp, filterChainHash);
+    m_frequencyOffset = m_basebandSampleRate * shiftFactor;
 }
 
 int LocalSource::webapiSettingsGet(
@@ -431,12 +339,6 @@ int LocalSource::webapiSettingsPutPatch(
 
     MsgConfigureLocalSource *msg = MsgConfigureLocalSource::create(settings, force);
     m_inputMessageQueue.push(msg);
-
-    if ((settings.m_log2Interp != m_settings.m_log2Interp) || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
-    {
-        MsgConfigureChannelizer *msg = MsgConfigureChannelizer::create(settings.m_log2Interp, settings.m_filterChainHash);
-        m_inputMessageQueue.push(msg);
-    }
 
     qDebug("LocalSource::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
@@ -553,13 +455,14 @@ void LocalSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys,
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgChannelSettings->asJson().toUtf8());
     buffer->seek(0);
 
     // Always use PATCH to avoid passing reverse API settings
-    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
 
     delete swgChannelSettings;
 }
@@ -574,10 +477,13 @@ void LocalSource::networkManagerFinished(QNetworkReply *reply)
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();
-        return;
+    }
+    else
+    {
+        QString answer = reply->readAll();
+        answer.chop(1); // remove last \n
+        qDebug("LocalSource::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
     }
 
-    QString answer = reply->readAll();
-    answer.chop(1); // remove last \n
-    qDebug("LocalSource::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    reply->deleteLater();
 }

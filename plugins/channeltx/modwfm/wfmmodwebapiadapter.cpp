@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "SWGChannelSettings.h"
+#include "dsp/cwkeyer.h"
 #include "wfmmod.h"
 #include "wfmmodwebapiadapter.h"
 

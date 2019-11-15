@@ -40,8 +40,8 @@ MESSAGE_CLASS_DEFINITION(HackRFOutput::MsgReportHackRF, Message)
 HackRFOutput::HackRFOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
-	m_dev(0),
-	m_hackRFThread(0),
+	m_dev(nullptr),
+	m_hackRFThread(nullptr),
 	m_deviceDescription("HackRFOutput"),
 	m_running(false)
 {
@@ -77,7 +77,7 @@ bool HackRFOutput::openDevice()
         closeDevice();
     }
 
-    m_sampleSourceFifo.resize(m_settings.m_devSampleRate/(1<<(m_settings.m_log2Interp <= 4 ? m_settings.m_log2Interp : 4)));
+    m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_settings.m_devSampleRate));
 
     if (m_deviceAPI->getSourceBuddies().size() > 0)
     {
@@ -373,10 +373,10 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
     {
         forwardChange = true;
-        int fifoSize = std::max(
-                (int) ((settings.m_devSampleRate/(1<<settings.m_log2Interp)) * DeviceHackRFShared::m_sampleFifoLengthInSeconds),
-                DeviceHackRFShared::m_sampleFifoMinSize);
-        m_sampleSourceFifo.resize(fifoSize);
+        unsigned int fifoRate = std::max(
+            (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2Interp),
+            DeviceHackRFShared::m_sampleFifoMinRate);
+        m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(fifoRate));
     }
 
 	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
@@ -621,10 +621,10 @@ void HackRFOutput::webapiUpdateDeviceSettings(
         settings.m_lnaExt = response.getHackRfOutputSettings()->getLnaExt() != 0;
     }
     if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
-        settings.m_transverterDeltaFrequency = response.getHackRfInputSettings()->getTransverterDeltaFrequency();
+        settings.m_transverterDeltaFrequency = response.getHackRfOutputSettings()->getTransverterDeltaFrequency();
     }
     if (deviceSettingsKeys.contains("transverterMode")) {
-        settings.m_transverterMode = response.getHackRfInputSettings()->getTransverterMode() != 0;
+        settings.m_transverterMode = response.getHackRfOutputSettings()->getTransverterMode() != 0;
     }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getHackRfOutputSettings()->getUseReverseApi() != 0;
@@ -746,13 +746,14 @@ void HackRFOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
 
     // Always use PATCH to avoid passing reverse API settings
-    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
 
     delete swgDeviceSettings;
 }
@@ -771,17 +772,19 @@ void HackRFOutput::webapiReverseSendStartStop(bool start)
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
+    QNetworkReply *reply;
 
     if (start) {
-        m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
     } else {
-        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
     }
 
+    buffer->setParent(reply);
     delete swgDeviceSettings;
 }
 
@@ -795,10 +798,13 @@ void HackRFOutput::networkManagerFinished(QNetworkReply *reply)
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();
-        return;
+    }
+    else
+    {
+        QString answer = reply->readAll();
+        answer.chop(1); // remove last \n
+        qDebug("HackRFOutput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
     }
 
-    QString answer = reply->readAll();
-    answer.chop(1); // remove last \n
-    qDebug("HackRFOutput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    reply->deleteLater();
 }

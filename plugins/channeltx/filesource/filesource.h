@@ -33,40 +33,18 @@
 #include "util/message.h"
 #include "util/movingaverage.h"
 #include "filesourcesettings.h"
+#include "filesourcereport.h"
 
-class ThreadedBasebandSampleSource;
-class UpChannelizer;
-class DeviceAPI;
-class FileSourceThread;
 class QNetworkAccessManager;
 class QNetworkReply;
+
+class DeviceAPI;
+class FileSourceBaseband;
 
 class FileSource : public BasebandSampleSource, public ChannelAPI {
     Q_OBJECT
 
 public:
-    class MsgConfigureChannelizer : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getLog2Interp() const { return m_log2Interp; }
-        int getFilterChainHash() const { return m_filterChainHash; }
-
-        static MsgConfigureChannelizer* create(unsigned int m_log2Interp, unsigned int m_filterChainHash) {
-            return new MsgConfigureChannelizer(m_log2Interp, m_filterChainHash);
-        }
-
-    private:
-        unsigned int m_log2Interp;
-        unsigned int m_filterChainHash;
-
-        MsgConfigureChannelizer(unsigned int log2Interp, unsigned int filterChainHash) :
-            Message(),
-            m_log2Interp(log2Interp),
-            m_filterChainHash(filterChainHash)
-        { }
-    };
-
     class MsgConfigureFileSource : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -207,113 +185,13 @@ public:
 		{ }
 	};
 
-    class MsgPlayPause : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        bool getPlayPause() const { return m_playPause; }
-
-        static MsgPlayPause* create(bool playPause) {
-            return new MsgPlayPause(playPause);
-        }
-
-    protected:
-        bool m_playPause;
-
-        MsgPlayPause(bool playPause) :
-            Message(),
-            m_playPause(playPause)
-        { }
-    };
-
-	class MsgReportFileSourceStreamData : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		int getSampleRate() const { return m_sampleRate; }
-		quint32 getSampleSize() const { return m_sampleSize; }
-		quint64 getCenterFrequency() const { return m_centerFrequency; }
-        quint64 getStartingTimeStamp() const { return m_startingTimeStamp; }
-        quint64 getRecordLength() const { return m_recordLength; }
-
-		static MsgReportFileSourceStreamData* create(int sampleRate,
-		        quint32 sampleSize,
-				quint64 centerFrequency,
-                quint64 startingTimeStamp,
-                quint64 recordLength)
-		{
-			return new MsgReportFileSourceStreamData(sampleRate, sampleSize, centerFrequency, startingTimeStamp, recordLength);
-		}
-
-	protected:
-		int m_sampleRate;
-		quint32 m_sampleSize;
-		quint64 m_centerFrequency;
-        quint64 m_startingTimeStamp;
-        quint64 m_recordLength;
-
-		MsgReportFileSourceStreamData(int sampleRate,
-		        quint32 sampleSize,
-				quint64 centerFrequency,
-                quint64 startingTimeStamp,
-                quint64 recordLength) :
-			Message(),
-			m_sampleRate(sampleRate),
-			m_sampleSize(sampleSize),
-			m_centerFrequency(centerFrequency),
-			m_startingTimeStamp(startingTimeStamp),
-			m_recordLength(recordLength)
-		{ }
-	};
-
-	class MsgReportFileSourceStreamTiming : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-        quint64 getSamplesCount() const { return m_samplesCount; }
-
-        static MsgReportFileSourceStreamTiming* create(quint64 samplesCount)
-		{
-			return new MsgReportFileSourceStreamTiming(samplesCount);
-		}
-
-	protected:
-        quint64 m_samplesCount;
-
-        MsgReportFileSourceStreamTiming(quint64 samplesCount) :
-			Message(),
-			m_samplesCount(samplesCount)
-		{ }
-	};
-
-	class MsgReportHeaderCRC : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		bool isOK() const { return m_ok; }
-
-		static MsgReportHeaderCRC* create(bool ok) {
-			return new MsgReportHeaderCRC(ok);
-		}
-
-	protected:
-		bool m_ok;
-
-		MsgReportHeaderCRC(bool ok) :
-			Message(),
-			m_ok(ok)
-		{ }
-	};
-
     FileSource(DeviceAPI *deviceAPI);
     ~FileSource();
-
     virtual void destroy() { delete this; }
 
-    virtual void pull(Sample& sample);
-    virtual void pullAudio(int nbSamples);
     virtual void start();
     virtual void stop();
+    virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples);
     virtual bool handleMessage(const Message& cmd);
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
@@ -357,78 +235,33 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     /** Set center frequency given in Hz */
-    void setCenterFrequency(uint64_t centerFrequency) { m_centerFrequency = centerFrequency; }
+    void setCenterFrequency(uint64_t centerFrequency) { m_frequencyOffset = centerFrequency; }
 
     /** Set sample rate given in Hz */
-    void setSampleRate(uint32_t sampleRate) { m_sampleRate = sampleRate; }
+    void setSampleRate(uint32_t sampleRate) { m_basebandSampleRate = sampleRate; }
 
-    quint64 getSamplesCount() const { return m_samplesCount; }
-    double getMagSq() const { return m_magsq; }
-
-    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
-    {
-        if (m_magsqCount > 0)
-        {
-            m_magsq = m_magsqSum / m_magsqCount;
-            m_magSqLevelStore.m_magsq = m_magsq;
-            m_magSqLevelStore.m_magsqPeak = m_magsqPeak;
-        }
-
-        avg = m_magSqLevelStore.m_magsq;
-        peak = m_magSqLevelStore.m_magsqPeak;
-        nbSamples = m_magsqCount == 0 ? 1 : m_magsqCount;
-
-        m_magsqSum = 0.0f;
-        m_magsqPeak = 0.0f;
-        m_magsqCount = 0;
-    }
+    double getMagSq() const;
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples) const;
+    void propagateMessageQueueToGUI();
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
 private:
-    struct MagSqLevelsStore
-    {
-        MagSqLevelsStore() :
-            m_magsq(1e-12),
-            m_magsqPeak(1e-12)
-        {}
-        double m_magsq;
-        double m_magsqPeak;
-    };
-
     DeviceAPI* m_deviceAPI;
-    QMutex m_mutex;
-    ThreadedBasebandSampleSource* m_threadedChannelizer;
-    UpChannelizer* m_channelizer;
+    QThread *m_thread;
+    FileSourceBaseband* m_basebandSource;
     FileSourceSettings m_settings;
-	std::ifstream m_ifstream;
-	QString m_fileName;
-	quint32 m_sampleSize;
-	quint64 m_centerFrequency;
-    int64_t m_frequencyOffset;
-    uint32_t m_fileSampleRate;
-    quint64 m_samplesCount;
-    uint32_t m_sampleRate;
-    uint32_t m_deviceSampleRate;
-    quint64 m_recordLength; //!< record length in seconds computed from file size
-    quint64 m_startingTimeStamp;
-	QTimer m_masterTimer;
-    bool m_running;
+
+    SampleVector m_sampleBuffer;
+    QMutex m_settingsMutex;
+    uint64_t m_frequencyOffset;
+    uint32_t m_basebandSampleRate;
+    double m_linearGain;
+
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    double m_linearGain;
-	double m_magsq;
-	double m_magsqSum;
-	double m_magsqPeak;
-    int  m_magsqCount;
-    MagSqLevelsStore m_magSqLevelStore;
-	MovingAverageUtil<Real, double, 16> m_movingAverage;
-
-	void openFileStream();
-	void seekFileStream(int seekMillis);
-    void handleEOF();
     void applySettings(const FileSourceSettings& settings, bool force = false);
     static void validateFilterChainHash(FileSourceSettings& settings);
     void calculateFrequencyOffset();

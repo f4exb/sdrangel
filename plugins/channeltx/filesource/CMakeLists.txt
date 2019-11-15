@@ -10,7 +10,10 @@ else()
 endif()
 
 set(filesource_SOURCES
-	filesource.cpp
+    filesource.cpp
+    filesourcebaseband.cpp
+    filesourcereport.cpp
+    filesourcesource.cpp
 	filesourceplugin.cpp
     filesourcesettings.cpp
     filesourcewebapiadapter.cpp
@@ -18,6 +21,9 @@ set(filesource_SOURCES
 
 set(filesource_HEADERS
 	filesource.h
+    filesourcebaseband.h
+    filesourcereport.h
+    filesourcesource.h
 	filesourceplugin.h
     filesourcesettings.h
     filesourcewebapiadapter.h

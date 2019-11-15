@@ -24,20 +24,21 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QThread>
 
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGAMModReport.h"
 
-#include "ammod.h"
-
-#include "dsp/upchannelizer.h"
 #include "dsp/dspengine.h"
-#include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplemimo.h"
+#include "dsp/cwkeyer.h"
 #include "device/deviceapi.h"
 #include "util/db.h"
+
+#include "ammodbaseband.h"
+#include "ammod.h"
 
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureAMMod, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureChannelizer, Message)
@@ -49,51 +50,25 @@ MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamTiming, Message)
 
 const QString AMMod::m_channelIdURI = "sdrangel.channeltx.modam";
 const QString AMMod::m_channelId ="AMMod";
-const int AMMod::m_levelNbSamples = 480; // every 10ms
 
 AMMod::AMMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
-    m_basebandSampleRate(48000),
-    m_outputSampleRate(48000),
-    m_inputFrequencyOffset(0),
-    m_audioFifo(4800),
-    m_feedbackAudioFifo(48000),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
 	m_recordLength(0),
-	m_sampleRate(48000),
-	m_levelCalcCount(0),
-	m_peakLevel(0.0f),
-	m_levelSum(0.0f)
+	m_sampleRate(48000)
 {
 	setObjectName(m_channelId);
 
-	m_audioBuffer.resize(1<<14);
-	m_audioBufferFill = 0;
+    m_thread = new QThread(this);
+    m_basebandSource = new AMModBaseband();
+    m_basebandSource->setInputFileStream(&m_ifstream);
+    m_basebandSource->moveToThread(m_thread);
 
-	m_feedbackAudioBuffer.resize(1<<14);
-	m_feedbackAudioBufferFill = 0;
-
-	m_magsq = 0.0;
-
-	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(&m_audioFifo, getInputMessageQueue());
-	m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getInputSampleRate();
-
-    DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_feedbackAudioFifo, getInputMessageQueue());
-    m_feedbackAudioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
-    applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
-
-	m_toneNco.setFreq(1000.0, m_audioSampleRate);
-    m_cwKeyer.setSampleRate(m_audioSampleRate);
-    m_cwKeyer.reset();
-
-    applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
     applySettings(m_settings, true);
 
-    m_channelizer = new UpChannelizer(this);
-    m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-    m_deviceAPI->addChannelSource(m_threadedChannelizer);
+    m_deviceAPI->addChannelSource(this);
     m_deviceAPI->addChannelSourceAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
@@ -105,11 +80,9 @@ AMMod::~AMMod()
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
-    m_deviceAPI->removeChannelSource(m_threadedChannelizer);
-    delete m_threadedChannelizer;
-    delete m_channelizer;
-    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_feedbackAudioFifo);
-    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(&m_audioFifo);
+    m_deviceAPI->removeChannelSource(this);
+    delete m_basebandSource;
+    delete m_thread;
 }
 
 uint32_t AMMod::getNumberOfDeviceStreams() const
@@ -117,249 +90,37 @@ uint32_t AMMod::getNumberOfDeviceStreams() const
     return m_deviceAPI->getNbSinkStreams();
 }
 
-void AMMod::pull(Sample& sample)
-{
-	if (m_settings.m_channelMute)
-	{
-		sample.m_real = 0.0f;
-		sample.m_imag = 0.0f;
-		return;
-	}
-
-	Complex ci;
-
-	m_settingsMutex.lock();
-
-    if (m_interpolatorDistance > 1.0f) // decimate
-    {
-    	modulateSample();
-
-        while (!m_interpolator.decimate(&m_interpolatorDistanceRemain, m_modSample, &ci))
-        {
-        	modulateSample();
-        }
-    }
-    else
-    {
-        if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci))
-        {
-        	modulateSample();
-        }
-    }
-
-    m_interpolatorDistanceRemain += m_interpolatorDistance;
-
-    ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
-
-    m_settingsMutex.unlock();
-
-    double magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
-	magsq /= (SDR_TX_SCALED*SDR_TX_SCALED);
-	m_movingAverage(magsq);
-	m_magsq = m_movingAverage.asDouble();
-
-	sample.m_real = (FixReal) ci.real();
-	sample.m_imag = (FixReal) ci.imag();
-}
-
-void AMMod::pullAudio(int nbSamples)
-{
-//    qDebug("AMMod::pullAudio: %d", nbSamples);
-    unsigned int nbAudioSamples = nbSamples * ((Real) m_audioSampleRate / (Real) m_basebandSampleRate);
-
-    if (nbAudioSamples > m_audioBuffer.size())
-    {
-        m_audioBuffer.resize(nbAudioSamples);
-    }
-
-    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbAudioSamples);
-    m_audioBufferFill = 0;
-}
-
-void AMMod::modulateSample()
-{
-	Real t;
-
-    pullAF(t);
-
-    if (m_settings.m_feedbackAudioEnable) {
-        pushFeedback(t * m_settings.m_feedbackVolumeFactor * 16384.0f);
-    }
-
-    calculateLevel(t);
-    m_audioBufferFill++;
-
-    m_modSample.real((t*m_settings.m_modFactor + 1.0f) * 16384.0f); // modulate and scale zero frequency carrier
-    m_modSample.imag(0.0f);
-}
-
-void AMMod::pullAF(Real& sample)
-{
-    switch (m_settings.m_modAFInput)
-    {
-    case AMModSettings::AMModInputTone:
-        sample = m_toneNco.next();
-        break;
-    case AMModSettings::AMModInputFile:
-        // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
-        // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
-        if (m_ifstream.is_open())
-        {
-            if (m_ifstream.eof())
-            {
-            	if (m_settings.m_playLoop)
-            	{
-                    m_ifstream.clear();
-                    m_ifstream.seekg(0, std::ios::beg);
-            	}
-            }
-
-            if (m_ifstream.eof())
-            {
-            	sample = 0.0f;
-            }
-            else
-            {
-            	m_ifstream.read(reinterpret_cast<char*>(&sample), sizeof(Real));
-            	sample *= m_settings.m_volumeFactor;
-            }
-        }
-        else
-        {
-            sample = 0.0f;
-        }
-        break;
-    case AMModSettings::AMModInputAudio:
-        sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_settings.m_volumeFactor;
-        break;
-    case AMModSettings::AMModInputCWTone:
-        Real fadeFactor;
-
-        if (m_cwKeyer.getSample())
-        {
-            m_cwKeyer.getCWSmoother().getFadeSample(true, fadeFactor);
-            sample = m_toneNco.next() * fadeFactor;
-        }
-        else
-        {
-            if (m_cwKeyer.getCWSmoother().getFadeSample(false, fadeFactor))
-            {
-                sample = m_toneNco.next() * fadeFactor;
-            }
-            else
-            {
-                sample = 0.0f;
-                m_toneNco.setPhase(0);
-            }
-        }
-        break;
-    case AMModSettings::AMModInputNone:
-    default:
-        sample = 0.0f;
-        break;
-    }
-}
-
-void AMMod::pushFeedback(Real sample)
-{
-    Complex c(sample, sample);
-    Complex ci;
-
-    if (m_feedbackInterpolatorDistance < 1.0f) // interpolate
-    {
-        while (!m_feedbackInterpolator.interpolate(&m_feedbackInterpolatorDistanceRemain, c, &ci))
-        {
-            processOneSample(ci);
-            m_feedbackInterpolatorDistanceRemain += m_feedbackInterpolatorDistance;
-        }
-    }
-    else // decimate
-    {
-        if (m_feedbackInterpolator.decimate(&m_feedbackInterpolatorDistanceRemain, c, &ci))
-        {
-            processOneSample(ci);
-            m_feedbackInterpolatorDistanceRemain += m_feedbackInterpolatorDistance;
-        }
-    }
-}
-
-void AMMod::processOneSample(Complex& ci)
-{
-    m_feedbackAudioBuffer[m_feedbackAudioBufferFill].l = ci.real();
-    m_feedbackAudioBuffer[m_feedbackAudioBufferFill].r = ci.imag();
-    ++m_feedbackAudioBufferFill;
-
-    if (m_feedbackAudioBufferFill >= m_feedbackAudioBuffer.size())
-    {
-        uint res = m_feedbackAudioFifo.write((const quint8*)&m_feedbackAudioBuffer[0], m_feedbackAudioBufferFill);
-
-        if (res != m_feedbackAudioBufferFill)
-        {
-            qDebug("AMDemod::pushFeedback: %u/%u audio samples written m_feedbackInterpolatorDistance: %f",
-                res, m_feedbackAudioBufferFill, m_feedbackInterpolatorDistance);
-            m_feedbackAudioFifo.clear();
-        }
-
-        m_feedbackAudioBufferFill = 0;
-    }
-}
-
-void AMMod::calculateLevel(Real& sample)
-{
-    if (m_levelCalcCount < m_levelNbSamples)
-    {
-        m_peakLevel = std::max(std::fabs(m_peakLevel), sample);
-        m_levelSum += sample * sample;
-        m_levelCalcCount++;
-    }
-    else
-    {
-        qreal rmsLevel = sqrt(m_levelSum / m_levelNbSamples);
-        //qDebug("NFMMod::calculateLevel: %f %f", rmsLevel, m_peakLevel);
-        emit levelChanged(rmsLevel, m_peakLevel, m_levelNbSamples);
-        m_peakLevel = 0.0f;
-        m_levelSum = 0.0f;
-        m_levelCalcCount = 0;
-    }
-}
-
 void AMMod::start()
 {
-	qDebug() << "AMMod::start: m_outputSampleRate: " << m_outputSampleRate
-			<< " m_inputFrequencyOffset: " << m_settings.m_inputFrequencyOffset;
-
-	m_audioFifo.clear();
-	applyChannelSettings(m_basebandSampleRate, m_outputSampleRate, m_inputFrequencyOffset, true);
+	qDebug("AMMod::start");
+    m_basebandSource->reset();
+    m_thread->start();
 }
 
 void AMMod::stop()
 {
+    qDebug("AMMod::stop");
+	m_thread->exit();
+	m_thread->wait();
+}
+
+void AMMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
+{
+    m_basebandSource->pull(begin, nbSamples);
 }
 
 bool AMMod::handleMessage(const Message& cmd)
 {
-	if (UpChannelizer::MsgChannelizerNotification::match(cmd))
-	{
-		UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
-		qDebug() << "AMMod::handleMessage: MsgChannelizerNotification:"
-				<< " basebandSampleRate: " << notif.getBasebandSampleRate()
-                << " outputSampleRate: " << notif.getSampleRate()
-				<< " inputFrequencyOffset: " << notif.getFrequencyOffset();
-
-		applyChannelSettings(notif.getBasebandSampleRate(), notif.getSampleRate(), notif.getFrequencyOffset());
-
-		return true;
-	}
-    else if (MsgConfigureChannelizer::match(cmd))
+    if (MsgConfigureChannelizer::match(cmd))
     {
         MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
         qDebug() << "AMMod::handleMessage: MsgConfigureChannelizer:"
-                << " getSampleRate: " << cfg.getSampleRate()
-                << " getCenterFrequency: " << cfg.getCenterFrequency();
+                << " getSourceSampleRate: " << cfg.getSourceSampleRate()
+                << " getSourceCenterFrequency: " << cfg.getSourceCenterFrequency();
 
-        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-            cfg.getSampleRate(),
-            cfg.getCenterFrequency());
+        AMModBaseband::MsgConfigureChannelizer *msg
+            = AMModBaseband::MsgConfigureChannelizer::create(cfg.getSourceSampleRate(), cfg.getSourceCenterFrequency());
+        m_basebandSource->getInputMessageQueue()->push(msg);
 
         return true;
     }
@@ -376,6 +137,7 @@ bool AMMod::handleMessage(const Message& cmd)
     {
         MsgConfigureFileSourceName& conf = (MsgConfigureFileSourceName&) cmd;
         m_fileName = conf.getFileName();
+        qDebug() << "AMMod::handleMessage: MsgConfigureFileSourceName";
         openFileStream();
         return true;
     }
@@ -383,6 +145,7 @@ bool AMMod::handleMessage(const Message& cmd)
     {
         MsgConfigureFileSourceSeek& conf = (MsgConfigureFileSourceSeek&) cmd;
         int seekPercentage = conf.getPercentage();
+        qDebug() << "AMMod::handleMessage: MsgConfigureFileSourceSeek";
         seekFileStream(seekPercentage);
 
         return true;
@@ -406,6 +169,7 @@ bool AMMod::handleMessage(const Message& cmd)
     else if (CWKeyer::MsgConfigureCWKeyer::match(cmd))
     {
         const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) cmd;
+        qDebug() << "AMMod::handleMessage: MsgConfigureCWKeyer";
 
         if (m_settings.m_useReverseAPI) {
             webapiReverseSendCWSettings(cfg.getSettings());
@@ -413,33 +177,14 @@ bool AMMod::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (DSPConfigureAudio::match(cmd))
-    {
-        DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
-        uint32_t sampleRate = cfg.getSampleRate();
-        DSPConfigureAudio::AudioType audioType = cfg.getAudioType();
-
-        qDebug() << "AMMod::handleMessage: DSPConfigureAudio:"
-                << " sampleRate: " << sampleRate
-                << " audioType: " << audioType;
-
-        if (audioType == DSPConfigureAudio::AudioInput)
-        {
-            if (sampleRate != m_audioSampleRate) {
-                applyAudioSampleRate(sampleRate);
-            }
-        }
-        else if (audioType == DSPConfigureAudio::AudioOutput)
-        {
-            if (sampleRate != m_audioSampleRate) {
-                applyFeedbackAudioSampleRate(sampleRate);
-            }
-        }
-
-        return true;
-    }
     else if (DSPSignalNotification::match(cmd))
     {
+        // Forward to the source
+        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
+        qDebug() << "AMMod::handleMessage: DSPSignalNotification";
+        m_basebandSource->getInputMessageQueue()->push(rep);
+
         return true;
     }
 	else
@@ -481,76 +226,6 @@ void AMMod::seekFileStream(int seekPercentage)
         m_ifstream.clear();
         m_ifstream.seekg(seekPoint, std::ios::beg);
     }
-}
-
-void AMMod::applyAudioSampleRate(int sampleRate)
-{
-    qDebug("AMMod::applyAudioSampleRate: %d", sampleRate);
-
-    MsgConfigureChannelizer* channelConfigMsg = MsgConfigureChannelizer::create(
-            sampleRate, m_settings.m_inputFrequencyOffset);
-    m_inputMessageQueue.push(channelConfigMsg);
-
-    m_settingsMutex.lock();
-
-    m_interpolatorDistanceRemain = 0;
-    m_interpolatorConsumed = false;
-    m_interpolatorDistance = (Real) sampleRate / (Real) m_outputSampleRate;
-    m_interpolator.create(48, sampleRate, m_settings.m_rfBandwidth / 2.2, 3.0);
-    m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
-    m_cwKeyer.setSampleRate(sampleRate);
-
-    m_settingsMutex.unlock();
-
-    m_audioSampleRate = sampleRate;
-    applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
-}
-
-void AMMod::applyFeedbackAudioSampleRate(unsigned int sampleRate)
-{
-    qDebug("AMMod::applyFeedbackAudioSampleRate: %u", sampleRate);
-
-    m_settingsMutex.lock();
-
-    m_feedbackInterpolatorDistanceRemain = 0;
-    m_feedbackInterpolatorConsumed = false;
-    m_feedbackInterpolatorDistance = (Real) sampleRate / (Real) m_audioSampleRate;
-    Real cutoff = std::min(sampleRate, m_audioSampleRate) / 2.2f;
-    m_feedbackInterpolator.create(48, sampleRate, cutoff, 3.0);
-
-    m_settingsMutex.unlock();
-
-    m_feedbackAudioSampleRate = sampleRate;
-}
-
-void AMMod::applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force)
-{
-    qDebug() << "AMMod::applyChannelSettings:"
-            << " basebandSampleRate: " << basebandSampleRate
-            << " outputSampleRate: " << outputSampleRate
-            << " inputFrequencyOffset: " << inputFrequencyOffset;
-
-    if ((inputFrequencyOffset != m_inputFrequencyOffset) ||
-        (outputSampleRate != m_outputSampleRate) || force)
-    {
-        m_settingsMutex.lock();
-        m_carrierNco.setFreq(inputFrequencyOffset, outputSampleRate);
-        m_settingsMutex.unlock();
-    }
-
-    if ((outputSampleRate != m_outputSampleRate) || force)
-    {
-        m_settingsMutex.lock();
-        m_interpolatorDistanceRemain = 0;
-        m_interpolatorConsumed = false;
-        m_interpolatorDistance = (Real) m_audioSampleRate / (Real) outputSampleRate;
-        m_interpolator.create(48, m_audioSampleRate, m_settings.m_rfBandwidth / 2.2, 3.0);
-        m_settingsMutex.unlock();
-    }
-
-    m_basebandSampleRate = basebandSampleRate;
-    m_outputSampleRate = outputSampleRate;
-    m_inputFrequencyOffset = inputFrequencyOffset;
 }
 
 void AMMod::applySettings(const AMModSettings& settings, bool force)
@@ -599,23 +274,12 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
         reverseAPIKeys.append("modAFInput");
     }
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
-    {
+    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
         reverseAPIKeys.append("rfBandwidth");
-        m_settingsMutex.lock();
-        m_interpolatorDistanceRemain = 0;
-        m_interpolatorConsumed = false;
-        m_interpolatorDistance = (Real) m_audioSampleRate / (Real) m_outputSampleRate;
-        m_interpolator.create(48, m_audioSampleRate, settings.m_rfBandwidth / 2.2, 3.0);
-        m_settingsMutex.unlock();
     }
 
-    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force)
-    {
+    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
         reverseAPIKeys.append("toneFrequency");
-        m_settingsMutex.lock();
-        m_toneNco.setFreq(settings.m_toneFrequency, m_audioSampleRate);
-        m_settingsMutex.unlock();
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
@@ -623,12 +287,14 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
         reverseAPIKeys.append("audioDeviceName");
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
-        audioDeviceManager->addAudioSource(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
+        audioDeviceManager->addAudioSource(m_basebandSource->getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
         uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
 
-        if (m_audioSampleRate != audioSampleRate) {
+        if (m_basebandSource->getAudioSampleRate() != audioSampleRate)
+        {
             reverseAPIKeys.append("audioSampleRate");
-            applyAudioSampleRate(audioSampleRate);
+            DSPConfigureAudio *msg = new DSPConfigureAudio(audioSampleRate, DSPConfigureAudio::AudioInput);
+            m_basebandSource->getInputMessageQueue()->push(msg);
         }
     }
 
@@ -637,12 +303,14 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
         reverseAPIKeys.append("feedbackAudioDeviceName");
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_feedbackAudioDeviceName);
-        audioDeviceManager->addAudioSink(&m_feedbackAudioFifo, getInputMessageQueue(), audioDeviceIndex);
+        audioDeviceManager->addAudioSink(m_basebandSource->getFeedbackAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
         uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
 
-        if (m_feedbackAudioSampleRate != audioSampleRate) {
+        if (m_basebandSource->getFeedbackAudioSampleRate() != audioSampleRate)
+        {
             reverseAPIKeys.append("feedbackAudioSampleRate");
-            applyFeedbackAudioSampleRate(audioSampleRate);
+            DSPConfigureAudio *msg = new DSPConfigureAudio(audioSampleRate, DSPConfigureAudio::AudioOutput);
+            m_basebandSource->getInputMessageQueue()->push(msg);
         }
     }
 
@@ -651,19 +319,16 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
             m_deviceAPI->removeChannelSourceAPI(this, m_settings.m_streamIndex);
-            m_deviceAPI->removeChannelSource(m_threadedChannelizer, m_settings.m_streamIndex);
-            m_deviceAPI->addChannelSource(m_threadedChannelizer, settings.m_streamIndex);
+            m_deviceAPI->removeChannelSource(this, m_settings.m_streamIndex);
+            m_deviceAPI->addChannelSource(this, settings.m_streamIndex);
             m_deviceAPI->addChannelSourceAPI(this, settings.m_streamIndex);
-            // apply stream sample rate to itself
-            applyChannelSettings(
-                m_basebandSampleRate,
-                m_deviceAPI->getSampleMIMO()->getSinkSampleRate(settings.m_streamIndex),
-                m_inputFrequencyOffset
-            );
         }
 
         reverseAPIKeys.append("streamIndex");
     }
+
+    AMModBaseband::MsgConfigureAMModBaseband *msg = AMModBaseband::MsgConfigureAMModBaseband::create(settings, force);
+    m_basebandSource->getInputMessageQueue()->push(msg);
 
     if (settings.m_useReverseAPI)
     {
@@ -710,7 +375,7 @@ int AMMod::webapiSettingsGet(
     webapiFormatChannelSettings(response, m_settings);
 
     SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getAmModSettings()->getCwKeyer();
-    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
+    const CWKeyerSettings& cwKeyerSettings = m_basebandSource->getCWKeyer().getSettings();
     CWKeyer::webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
 
     return 200;
@@ -729,11 +394,11 @@ int AMMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("cwKeyer"))
     {
         SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getAmModSettings()->getCwKeyer();
-        CWKeyerSettings cwKeyerSettings = m_cwKeyer.getSettings();
+        CWKeyerSettings cwKeyerSettings = m_basebandSource->getCWKeyer().getSettings();
         CWKeyer::webapiSettingsPutPatch(channelSettingsKeys, cwKeyerSettings, apiCwKeyerSettings);
 
         CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
-        m_cwKeyer.getInputMessageQueue()->push(msgCwKeyer);
+        m_basebandSource->getCWKeyer().getInputMessageQueue()->push(msgCwKeyer);
 
         if (m_guiMessageQueue) // forward to GUI if any
         {
@@ -744,8 +409,8 @@ int AMMod::webapiSettingsPutPatch(
 
     if (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)
     {
-        AMMod::MsgConfigureChannelizer *msgChan = AMMod::MsgConfigureChannelizer::create(
-                m_audioSampleRate, settings.m_inputFrequencyOffset);
+        AMModBaseband::MsgConfigureChannelizer *msgChan = AMModBaseband::MsgConfigureChannelizer::create(
+                m_basebandSource->getAudioSampleRate(), settings.m_inputFrequencyOffset);
         m_inputMessageQueue.push(msgChan);
     }
 
@@ -874,8 +539,8 @@ void AMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respons
 void AMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
     response.getAmModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
-    response.getAmModReport()->setAudioSampleRate(m_audioSampleRate);
-    response.getAmModReport()->setChannelSampleRate(m_outputSampleRate);
+    response.getAmModReport()->setAudioSampleRate(m_basebandSource->getAudioSampleRate());
+    response.getAmModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
 }
 
 void AMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AMModSettings& settings, bool force)
@@ -926,10 +591,10 @@ void AMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const
 
     if (force)
     {
-        const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
+        const CWKeyerSettings& cwKeyerSettings = m_basebandSource->getCWKeyer().getSettings();
         swgAMModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
         SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgAMModSettings->getCwKeyer();
-        m_cwKeyer.webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+        m_basebandSource->getCWKeyer().webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
@@ -940,13 +605,14 @@ void AMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgChannelSettings->asJson().toUtf8());
     buffer->seek(0);
 
     // Always use PATCH to avoid passing reverse API settings
-    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
 
     delete swgChannelSettings;
 }
@@ -961,7 +627,7 @@ void AMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 
     swgAMModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
     SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgAMModSettings->getCwKeyer();
-    m_cwKeyer.webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+    m_basebandSource->getCWKeyer().webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
             .arg(m_settings.m_reverseAPIAddress)
@@ -971,13 +637,14 @@ void AMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgChannelSettings->asJson().toUtf8());
     buffer->seek(0);
 
     // Always use PATCH to avoid passing reverse API settings
-    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
 
     delete swgChannelSettings;
 }
@@ -992,10 +659,28 @@ void AMMod::networkManagerFinished(QNetworkReply *reply)
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();
-        return;
+    }
+    else
+    {
+        QString answer = reply->readAll();
+        answer.chop(1); // remove last \n
+        qDebug("AMMod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
     }
 
-    QString answer = reply->readAll();
-    answer.chop(1); // remove last \n
-    qDebug("AMMod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    reply->deleteLater();
+}
+
+double AMMod::getMagSq() const
+{
+    return m_basebandSource->getMagSq();
+}
+
+CWKeyer *AMMod::getCWKeyer()
+{
+    return &m_basebandSource->getCWKeyer();
+}
+
+void AMMod::setLevelMeter(QObject *levelMeter)
+{
+    connect(m_basebandSource, SIGNAL(levelChanged(qreal, qreal, int)), levelMeter, SLOT(levelChanged(qreal, qreal, int)));
 }

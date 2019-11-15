@@ -49,13 +49,13 @@ MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgReportStreamInfo, Message)
 LimeSDROutput::LimeSDROutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
-    m_limeSDROutputThread(0),
+    m_limeSDROutputThread(nullptr),
     m_deviceDescription("LimeSDROutput"),
     m_running(false),
     m_channelAcquired(false)
 {
     m_deviceAPI->setNbSinkStreams(1);
-    m_sampleSourceFifo.resize(16*LIMESDROUTPUT_BLOCKSIZE);
+    m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_settings.m_devSampleRate));
     m_streamId.handle = 0;
     suspendRxBuddies();
     suspendTxBuddies();
@@ -823,11 +823,11 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         reverseAPIKeys.append("devSampleRate");
         reverseAPIKeys.append("log2SoftInterp");
 
-        int fifoSize = (std::max)(
-                (int) ((settings.m_devSampleRate/(1<<settings.m_log2SoftInterp)) * DeviceLimeSDRShared::m_sampleFifoLengthInSeconds),
-                DeviceLimeSDRShared::m_sampleFifoMinSize);
-        qDebug("LimeSDROutput::applySettings: resize FIFO: %d", fifoSize);
-        m_sampleSourceFifo.resize(fifoSize);
+        unsigned int fifoRate = std::max(
+            (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2SoftInterp),
+            DeviceLimeSDRShared::m_sampleFifoMinRate);
+        m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(fifoRate));
+        qDebug("LimeSDROutput::applySettings: resize FIFO: rate %u", fifoRate);
     }
 
     if ((m_settings.m_lpfBW != settings.m_lpfBW) || force)
@@ -1518,13 +1518,14 @@ void LimeSDROutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
 
     // Always use PATCH to avoid passing reverse API settings
-    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
 
     delete swgDeviceSettings;
 }
@@ -1543,17 +1544,19 @@ void LimeSDROutput::webapiReverseSendStartStop(bool start)
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
+    QNetworkReply *reply;
 
     if (start) {
-        m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
     } else {
-        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
     }
 
+    buffer->setParent(reply);
     delete swgDeviceSettings;
 }
 
@@ -1567,10 +1570,13 @@ void LimeSDROutput::networkManagerFinished(QNetworkReply *reply)
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();
-        return;
+    }
+    else
+    {
+        QString answer = reply->readAll();
+        answer.chop(1); // remove last \n
+        qDebug("LimeSDROutput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
     }
 
-    QString answer = reply->readAll();
-    answer.chop(1); // remove last \n
-    qDebug("LimeSDROutput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    reply->deleteLater();
 }

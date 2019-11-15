@@ -63,7 +63,7 @@ set(sdrbase_SOURCES
     dsp/afsquelch.cpp
     dsp/agc.cpp
     dsp/downchannelizer.cpp
-    dsp/upchannelizer.cpp
+    #dsp/upchannelizer.cpp
     dsp/upsamplechannelizer.cpp
     dsp/channelmarker.cpp
     dsp/ctcssdetector.cpp
@@ -101,13 +101,14 @@ set(sdrbase_SOURCES
     dsp/samplemififo.cpp
     dsp/samplemofifo.cpp
     dsp/samplesinkfifo.cpp
+    dsp/samplesourcefifo.cpp
     dsp/samplesourcefifodb.cpp
     dsp/basebandsamplesink.cpp
     dsp/basebandsamplesource.cpp
     dsp/nullsink.cpp
     dsp/recursivefilters.cpp
     dsp/threadedbasebandsamplesink.cpp
-    dsp/threadedbasebandsamplesource.cpp
+    #dsp/threadedbasebandsamplesource.cpp
     dsp/wfir.cpp
     dsp/devicesamplesource.cpp
     dsp/devicesamplesink.cpp
@@ -179,7 +180,7 @@ set(sdrbase_HEADERS
     dsp/afsquelch.h
     dsp/autocorrector.h
     dsp/downchannelizer.h
-    dsp/upchannelizer.h
+    #dsp/upchannelizer.h
     dsp/upsamplechannelizer.h
     dsp/channelmarker.h
     dsp/channelsamplesource.h
@@ -241,12 +242,13 @@ set(sdrbase_HEADERS
     dsp/samplemififo.h
     dsp/samplemofifo.h
     dsp/samplesinkfifo.h
+    dsp/samplesourcefifo.h
     dsp/samplesourcefifodb.h
     dsp/basebandsamplesink.h
     dsp/basebandsamplesource.h
     dsp/nullsink.h
     dsp/threadedbasebandsamplesink.h
-    dsp/threadedbasebandsamplesource.h
+    #dsp/threadedbasebandsamplesource.h
     dsp/wfir.h
     dsp/devicesamplesource.h
     dsp/devicesamplesink.h

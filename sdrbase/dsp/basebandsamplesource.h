@@ -35,44 +35,19 @@ public:
 
 	virtual void start() = 0;
 	virtual void stop() = 0;
-	virtual void pull(Sample& sample) = 0;
-    virtual void pullAudio(int nbSamples) { (void) nbSamples; }
-
-    /** direct feeding of sample source FIFO */
-	void feed(SampleSourceFifoDB* sampleFifo, int nbSamples)
-	{
-	    SampleVector::iterator writeAt;
-	    sampleFifo->getWriteIterator(writeAt);
-	    pullAudio(nbSamples); // Pre-fetch input audio samples this is mandatory to keep things running smoothly
-
-	    for (int i = 0; i < nbSamples; i++)
-	    {
-	        pull((*writeAt));
-	        sampleFifo->bumpIndex(writeAt);
-	    }
-	}
-
-	SampleSourceFifoDB& getSampleSourceFifo() { return m_sampleFifo; }
-
+	virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples) = 0;
 	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
 
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
-    void setDeviceSampleSourceFifo(SampleSourceFifoDB *deviceSampleFifo);
 
 protected:
 	MessageQueue m_inputMessageQueue;     //!< Queue for asynchronous inbound communication
     MessageQueue *m_guiMessageQueue;      //!< Input message queue to the GUI
-	SampleSourceFifoDB m_sampleFifo;        //!< Internal FIFO for multi-channel processing
-	SampleSourceFifoDB *m_deviceSampleFifo; //!< Reference to the device FIFO for single channel processing
-
-	void handleWriteToFifo(SampleSourceFifoDB *sampleFifo, int nbSamples);
 
 protected slots:
 	void handleInputMessages();
-	void handleWriteToSampleFifo(int nbSamples);
-    void handleWriteToDeviceFifo(int nbSamples);
 };
 
 #endif /* SDRBASE_DSP_BASEBANDSAMPLESOURCE_H_ */

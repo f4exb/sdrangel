@@ -29,6 +29,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QThread>
 
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
@@ -37,13 +38,12 @@
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplesink.h"
-#include "dsp/upchannelizer.h"
-#include "dsp/threadedbasebandsamplesource.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/filerecord.h"
 #include "util/db.h"
 
-MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureChannelizer, Message)
+#include "filesourcebaseband.h"
+
 MESSAGE_CLASS_DEFINITION(FileSource::MsgSampleRateNotification, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSource, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSourceName, Message)
@@ -51,10 +51,6 @@ MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSourceWork, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgReportFileSourceAcquisition, Message)
-MESSAGE_CLASS_DEFINITION(FileSource::MsgPlayPause, Message)
-MESSAGE_CLASS_DEFINITION(FileSource::MsgReportFileSourceStreamData, Message)
-MESSAGE_CLASS_DEFINITION(FileSource::MsgReportFileSourceStreamTiming, Message)
-MESSAGE_CLASS_DEFINITION(FileSource::MsgReportHeaderCRC, Message)
 
 const QString FileSource::m_channelIdURI = "sdrangel.channeltx.filesource";
 const QString FileSource::m_channelId ="FileSource";
@@ -62,33 +58,24 @@ const QString FileSource::m_channelId ="FileSource";
 FileSource::FileSource(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
-	m_fileName("..."),
-	m_sampleSize(0),
-	m_centerFrequency(0),
-    m_frequencyOffset(0),
-    m_fileSampleRate(0),
-    m_samplesCount(0),
-	m_sampleRate(0),
-    m_deviceSampleRate(0),
-	m_recordLength(0),
-    m_startingTimeStamp(0),
-    m_running(false)
+	m_settingsMutex(QMutex::Recursive),
+	m_frequencyOffset(0),
+	m_basebandSampleRate(0),
+    m_linearGain(0.0)
 {
     setObjectName(m_channelId);
 
-    m_channelizer = new UpChannelizer(this);
-    m_threadedChannelizer = new ThreadedBasebandSampleSource(m_channelizer, this);
-    m_deviceAPI->addChannelSource(m_threadedChannelizer);
+    m_thread = new QThread(this);
+    m_basebandSource = new FileSourceBaseband();
+    m_basebandSource->moveToThread(m_thread);
+
+    applySettings(m_settings, true);
+
+    m_deviceAPI->addChannelSource(this);
     m_deviceAPI->addChannelSourceAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-
-    m_linearGain = 1.0f;
-	m_magsq = 0.0f;
-	m_magsqSum = 0.0f;
-	m_magsqPeak = 0.0f;
-	m_magsqCount = 0;
 }
 
 FileSource::~FileSource()
@@ -96,145 +83,33 @@ FileSource::~FileSource()
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
-    m_deviceAPI->removeChannelSource(m_threadedChannelizer);
-    delete m_threadedChannelizer;
-    delete m_channelizer;
-}
-
-void FileSource::pull(Sample& sample)
-{
-    Real re;
-    Real im;
-
-    struct Sample16
-    {
-        int16_t real;
-        int16_t imag;
-    };
-
-    struct Sample24
-    {
-        int32_t real;
-        int32_t imag;
-    };
-
-    if (!m_running)
-    {
-        re = 0;
-        im = 0;
-    }
-	else if (m_sampleSize == 16)
-	{
-        Sample16 sample16;
-        m_ifstream.read(reinterpret_cast<char*>(&sample16), sizeof(Sample16));
-
-        if (m_ifstream.eof()) {
-            handleEOF();
-        } else {
-            m_samplesCount++;
-        }
-
-        // scale to +/-1.0
-        re = (sample16.real * m_linearGain) / 32760.0f;
-        im = (sample16.imag * m_linearGain) / 32760.0f;
-    }
-    else if (m_sampleSize == 24)
-    {
-        Sample24 sample24;
-        m_ifstream.read(reinterpret_cast<char*>(&sample24), sizeof(Sample24));
-
-        if (m_ifstream.eof()) {
-            handleEOF();
-        } else {
-            m_samplesCount++;
-        }
-
-        // scale to +/-1.0
-        re = (sample24.real * m_linearGain) / 8388608.0f;
-        im = (sample24.imag * m_linearGain) / 8388608.0f;
-    }
-    else
-    {
-        re = 0;
-        im = 0;
-    }
-
-
-    if (SDR_TX_SAMP_SZ == 16)
-    {
-        sample.setReal(re * 32768.0f);
-        sample.setImag(im * 32768.0f);
-    }
-    else if (SDR_TX_SAMP_SZ == 24)
-    {
-        sample.setReal(re * 8388608.0f);
-        sample.setImag(im * 8388608.0f);
-    }
-    else
-    {
-        sample.setReal(0);
-        sample.setImag(0);
-    }
-
-    Real magsq = re*re + im*im;
-    m_movingAverage(magsq);
-    m_magsq = m_movingAverage.asDouble();
-    m_magsqSum += magsq;
-
-    if (magsq > m_magsqPeak) {
-        m_magsqPeak = magsq;
-    }
-
-    m_magsqCount++;
-}
-
-void FileSource::pullAudio(int nbSamples)
-{
-    (void) nbSamples;
+    m_deviceAPI->removeChannelSource(this);
+    delete m_basebandSource;
+    delete m_thread;
 }
 
 void FileSource::start()
 {
-    qDebug("FileSource::start");
-    m_running = true;
-
-	if (getMessageQueueToGUI())
-    {
-        MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(true); // acquisition on
-        getMessageQueueToGUI()->push(report);
-	}
+	qDebug("FileSource::start");
+    m_basebandSource->reset();
+    m_thread->start();
 }
 
 void FileSource::stop()
 {
     qDebug("FileSource::stop");
-    m_running = false;
+	m_thread->exit();
+	m_thread->wait();
+}
 
-	if (getMessageQueueToGUI())
-    {
-        MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(false); // acquisition off
-        getMessageQueueToGUI()->push(report);
-	}
+void FileSource::pull(SampleVector::iterator& begin, unsigned int nbSamples)
+{
+    m_basebandSource->pull(begin, nbSamples);
 }
 
 bool FileSource::handleMessage(const Message& cmd)
 {
-	if (UpChannelizer::MsgChannelizerNotification::match(cmd))
-	{
-		UpChannelizer::MsgChannelizerNotification& notif = (UpChannelizer::MsgChannelizerNotification&) cmd;
-        int sampleRate = notif.getSampleRate();
-
-        qDebug() << "FileSource::handleMessage: MsgChannelizerNotification:"
-                << " channelSampleRate: " << sampleRate
-                << " offsetFrequency: " << notif.getFrequencyOffset();
-
-        if (sampleRate > 0) {
-            setSampleRate(sampleRate);
-        }
-
-		return true;
-	}
-    else if (DSPSignalNotification::match(cmd))
+    if (DSPSignalNotification::match(cmd))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
 
@@ -242,17 +117,18 @@ bool FileSource::handleMessage(const Message& cmd)
                 << " inputSampleRate: " << notif.getSampleRate()
                 << " centerFrequency: " << notif.getCenterFrequency();
 
-        setCenterFrequency(notif.getCenterFrequency());
-        m_deviceSampleRate = notif.getSampleRate();
+        m_basebandSampleRate = notif.getSampleRate();
         calculateFrequencyOffset(); // This is when device sample rate changes
+        setCenterFrequency(notif.getCenterFrequency());
 
-        // Redo the channelizer stuff with the new sample rate to re-synchronize everything
-        m_channelizer->set(m_channelizer->getInputMessageQueue(),
-            m_settings.m_log2Interp,
-            m_settings.m_filterChainHash);
+        // Notify source of input sample rate change
+        qDebug() << "FileSource::handleMessage: DSPSignalNotification: push to source";
+        DSPSignalNotification *sig = new DSPSignalNotification(notif);
+        m_basebandSource->getInputMessageQueue()->push(sig);
 
         if (m_guiMessageQueue)
         {
+            qDebug() << "FileSource::handleMessage: DSPSignalNotification: push to GUI";
             MsgSampleRateNotification *msg = MsgSampleRateNotification::create(notif.getSampleRate());
             m_guiMessageQueue->push(msg);
         }
@@ -266,58 +142,37 @@ bool FileSource::handleMessage(const Message& cmd)
         applySettings(cfg.getSettings(), cfg.getForce());
         return true;
     }
-    else if (MsgConfigureChannelizer::match(cmd))
-    {
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        m_settings.m_log2Interp = cfg.getLog2Interp();
-        m_settings.m_filterChainHash =  cfg.getFilterChainHash();
-
-        qDebug() << "FileSource::handleMessage: MsgConfigureChannelizer:"
-                << " log2Interp: " << m_settings.m_log2Interp
-                << " filterChainHash: " << m_settings.m_filterChainHash;
-
-        m_channelizer->set(m_channelizer->getInputMessageQueue(),
-            m_settings.m_log2Interp,
-            m_settings.m_filterChainHash);
-
-        calculateFrequencyOffset(); // This is when decimation or filter chain changes
-
-        return true;
-    }
     else if (MsgConfigureFileSourceName::match(cmd))
 	{
 		MsgConfigureFileSourceName& conf = (MsgConfigureFileSourceName&) cmd;
-		m_fileName = conf.getFileName();
-		openFileStream();
+        qDebug() << "FileSource::handleMessage: MsgConfigureFileSourceName:" << conf.getFileName();
+        FileSourceBaseband::MsgConfigureFileSourceName *msg = FileSourceBaseband::MsgConfigureFileSourceName::create(conf.getFileName());
+        m_basebandSource->getInputMessageQueue()->push(msg);
+
 		return true;
 	}
 	else if (MsgConfigureFileSourceWork::match(cmd))
 	{
 		MsgConfigureFileSourceWork& conf = (MsgConfigureFileSourceWork&) cmd;
-
-        if (conf.isWorking()) {
-            start();
-        } else {
-            stop();
-        }
+        FileSourceBaseband::MsgConfigureFileSourceWork *msg = FileSourceBaseband::MsgConfigureFileSourceWork::create(conf.isWorking());
+        m_basebandSource->getInputMessageQueue()->push(msg);
 
 		return true;
 	}
 	else if (MsgConfigureFileSourceSeek::match(cmd))
 	{
 		MsgConfigureFileSourceSeek& conf = (MsgConfigureFileSourceSeek&) cmd;
-		int seekMillis = conf.getMillis();
-		seekFileStream(seekMillis);
+        FileSourceBaseband::MsgConfigureFileSourceSeek *msg = FileSourceBaseband::MsgConfigureFileSourceSeek::create(conf.getMillis());
+        m_basebandSource->getInputMessageQueue()->push(msg);
 
 		return true;
 	}
 	else if (MsgConfigureFileSourceStreamTiming::match(cmd))
 	{
-		MsgReportFileSourceStreamTiming *report;
-
         if (getMessageQueueToGUI())
         {
-            report = MsgReportFileSourceStreamTiming::create(getSamplesCount());
+            FileSourceReport::MsgReportFileSourceStreamTiming *report =
+                FileSourceReport::MsgReportFileSourceStreamTiming::create(m_basebandSource->getSamplesCount());
             getMessageQueueToGUI()->push(report);
         }
 
@@ -352,120 +207,22 @@ bool FileSource::deserialize(const QByteArray& data)
     }
 }
 
-void FileSource::openFileStream()
-{
-	//stop();
-
-	if (m_ifstream.is_open()) {
-		m_ifstream.close();
-	}
-
-#ifdef Q_OS_WIN
-	m_ifstream.open(m_fileName.toStdWString().c_str(), std::ios::binary | std::ios::ate);
-#else
-	m_ifstream.open(m_fileName.toStdString().c_str(), std::ios::binary | std::ios::ate);
-#endif
-	quint64 fileSize = m_ifstream.tellg();
-    m_samplesCount = 0;
-
-	if (fileSize > sizeof(FileRecord::Header))
-	{
-	    FileRecord::Header header;
-	    m_ifstream.seekg(0,std::ios_base::beg);
-		bool crcOK = FileRecord::readHeader(m_ifstream, header);
-		m_fileSampleRate = header.sampleRate;
-		m_centerFrequency = header.centerFrequency;
-		m_startingTimeStamp = header.startTimeStamp;
-		m_sampleSize = header.sampleSize;
-		QString crcHex = QString("%1").arg(header.crc32 , 0, 16);
-
-	    if (crcOK)
-	    {
-	        qDebug("FileSource::openFileStream: CRC32 OK for header: %s", qPrintable(crcHex));
-	        m_recordLength = (fileSize - sizeof(FileRecord::Header)) / ((m_sampleSize == 24 ? 8 : 4) * m_fileSampleRate);
-	    }
-	    else
-	    {
-	        qCritical("FileSource::openFileStream: bad CRC32 for header: %s", qPrintable(crcHex));
-	        m_recordLength = 0;
-	    }
-
-		if (getMessageQueueToGUI()) {
-			MsgReportHeaderCRC *report = MsgReportHeaderCRC::create(crcOK);
-			getMessageQueueToGUI()->push(report);
-		}
-	}
-	else
-	{
-		m_recordLength = 0;
-	}
-
-	qDebug() << "FileSource::openFileStream: " << m_fileName.toStdString().c_str()
-			<< " fileSize: " << fileSize << " bytes"
-			<< " length: " << m_recordLength << " seconds"
-			<< " sample rate: " << m_fileSampleRate << " S/s"
-			<< " center frequency: " << m_centerFrequency << " Hz"
-			<< " sample size: " << m_sampleSize << " bits"
-            << " starting TS: " << m_startingTimeStamp << "s";
-
-	if (getMessageQueueToGUI()) {
-	    MsgReportFileSourceStreamData *report = MsgReportFileSourceStreamData::create(m_fileSampleRate,
-	            m_sampleSize,
-	            m_centerFrequency,
-	            m_startingTimeStamp,
-	            m_recordLength); // file stream data
-	    getMessageQueueToGUI()->push(report);
-	}
-
-	if (m_recordLength == 0) {
-	    m_ifstream.close();
-	}
-}
-
-void FileSource::seekFileStream(int seekMillis)
-{
-	QMutexLocker mutexLocker(&m_mutex);
-
-	if ((m_ifstream.is_open()) && !m_running)
-	{
-        quint64 seekPoint = ((m_recordLength * seekMillis) / 1000) * m_fileSampleRate;
-        m_samplesCount = seekPoint;
-        seekPoint *= (m_sampleSize == 24 ? 8 : 4); // + sizeof(FileSink::Header)
-		m_ifstream.clear();
-		m_ifstream.seekg(seekPoint + sizeof(FileRecord::Header), std::ios::beg);
-	}
-}
-
-void FileSource::handleEOF()
-{
-    if (getMessageQueueToGUI())
-    {
-        MsgReportFileSourceStreamTiming *report = MsgReportFileSourceStreamTiming::create(getSamplesCount());
-        getMessageQueueToGUI()->push(report);
-    }
-
-    if (m_settings.m_loop)
-    {
-        stop();
-        seekFileStream(0);
-        start();
-    }
-    else
-    {
-        stop();
-
-        if (getMessageQueueToGUI())
-        {
-            MsgPlayPause *report = MsgPlayPause::create(false);
-            getMessageQueueToGUI()->push(report);
-        }
-    }
-}
-
 void FileSource::applySettings(const FileSourceSettings& settings, bool force)
 {
     qDebug() << "FileSource::applySettings:"
-            << " force: " << force;
+        << "m_fileName:" << settings.m_fileName
+        << "m_loop:" << settings.m_loop
+        << "m_gainDB:" << settings.m_gainDB
+        << "m_log2Interp:" << settings.m_log2Interp
+        << "m_filterChainHash:" << settings.m_filterChainHash
+        << "m_useReverseAPI:" << settings.m_useReverseAPI
+        << "m_reverseAPIAddress:" << settings.m_reverseAPIAddress
+        << "m_reverseAPIChannelIndex:" << settings.m_reverseAPIChannelIndex
+        << "m_reverseAPIDeviceIndex:" << settings.m_reverseAPIDeviceIndex
+        << "m_reverseAPIPort:" << settings.m_reverseAPIPort
+        << "m_rgbColor:" << settings.m_rgbColor
+        << "m_title:" << settings.m_title
+        << " force: " << force;
 
     QList<QString> reverseAPIKeys;
 
@@ -475,12 +232,14 @@ void FileSource::applySettings(const FileSourceSettings& settings, bool force)
     if ((m_settings.m_fileName != settings.m_fileName) || force) {
         reverseAPIKeys.append("fileName");
     }
-
     if ((m_settings.m_gainDB != settings.m_gainDB) || force)
     {
         m_linearGain = CalcDb::powerFromdB(settings.m_gainDB);
         reverseAPIKeys.append("gainDB");
     }
+
+    FileSourceBaseband::MsgConfigureFileSourceBaseband *msg = FileSourceBaseband::MsgConfigureFileSourceBaseband::create(settings, force);
+    m_basebandSource->getInputMessageQueue()->push(msg);
 
     if (settings.m_useReverseAPI)
     {
@@ -509,7 +268,7 @@ void FileSource::validateFilterChainHash(FileSourceSettings& settings)
 void FileSource::calculateFrequencyOffset()
 {
     double shiftFactor = HBFilterChainConverter::getShiftFactor(m_settings.m_log2Interp, m_settings.m_filterChainHash);
-    m_frequencyOffset = m_deviceSampleRate * shiftFactor;
+    m_frequencyOffset = m_basebandSampleRate * shiftFactor;
 }
 
 int FileSource::webapiSettingsGet(
@@ -630,12 +389,16 @@ void FileSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
 {
     qint64 t_sec = 0;
     qint64 t_msec = 0;
-    quint64 samplesCount = getSamplesCount();
+    quint64 samplesCount = m_basebandSource->getSamplesCount();
+    uint32_t fileSampleRate = m_basebandSource->getFileSampleRate();
+    quint64 startingTimeStamp = m_basebandSource->getStartingTimeStamp();
+    quint64 fileRecordLength = m_basebandSource->getRecordLength();
+    quint32 fileSampleSize = m_basebandSource->getFileSampleSize();
 
-    if (m_fileSampleRate > 0)
+    if (fileSampleRate > 0)
     {
-        t_sec = samplesCount / m_fileSampleRate;
-        t_msec = (samplesCount - (t_sec * m_fileSampleRate)) * 1000 / m_fileSampleRate;
+        t_sec = samplesCount / fileSampleRate;
+        t_msec = (samplesCount - (t_sec * fileSampleRate)) * 1000 / fileSampleRate;
     }
 
     QTime t(0, 0, 0, 0);
@@ -643,20 +406,20 @@ void FileSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
     t = t.addMSecs(t_msec);
     response.getFileSourceReport()->setElapsedTime(new QString(t.toString("HH:mm:ss.zzz")));
 
-    qint64 startingTimeStampMsec = m_startingTimeStamp * 1000LL;
+    qint64 startingTimeStampMsec = startingTimeStamp * 1000LL;
     QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
     dt = dt.addSecs(t_sec);
     dt = dt.addMSecs(t_msec);
     response.getFileSourceReport()->setAbsoluteTime(new QString(dt.toString("yyyy-MM-dd HH:mm:ss.zzz")));
 
     QTime recordLength(0, 0, 0, 0);
-    recordLength = recordLength.addSecs(m_recordLength);
+    recordLength = recordLength.addSecs(fileRecordLength);
     response.getFileSourceReport()->setDurationTime(new QString(recordLength.toString("HH:mm:ss")));
 
     response.getFileSourceReport()->setFileName(new QString(m_settings.m_fileName));
-    response.getFileSourceReport()->setFileSampleRate(m_fileSampleRate);
-    response.getFileSourceReport()->setFileSampleSize(m_sampleSize);
-    response.getFileSourceReport()->setSampleRate(m_sampleRate);
+    response.getFileSourceReport()->setFileSampleRate(fileSampleRate);
+    response.getFileSourceReport()->setFileSampleSize(fileSampleSize);
+    response.getFileSourceReport()->setSampleRate(m_basebandSampleRate);
     response.getFileSourceReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
 }
 
@@ -696,13 +459,14 @@ void FileSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, 
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgChannelSettings->asJson().toUtf8());
     buffer->seek(0);
 
     // Always use PATCH to avoid passing reverse API settings
-    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
 
     delete swgChannelSettings;
 }
@@ -717,10 +481,23 @@ void FileSource::networkManagerFinished(QNetworkReply *reply)
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();
-        return;
+    }
+    else
+    {
+        QString answer = reply->readAll();
+        answer.chop(1); // remove last \n
+        qDebug("FileSource::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
     }
 
-    QString answer = reply->readAll();
-    answer.chop(1); // remove last \n
-    qDebug("FileSource::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    reply->deleteLater();
+}
+
+void FileSource::getMagSqLevels(double& avg, double& peak, int& nbSamples) const
+{
+    m_basebandSource->getMagSqLevels(avg, peak, nbSamples);
+}
+
+void FileSource::propagateMessageQueueToGUI()
+{
+    m_basebandSource->setMessageQueueToGUI(getMessageQueueToGUI());
 }

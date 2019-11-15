@@ -47,8 +47,7 @@ public:
         { }
     };
 
-    static const float  m_sampleFifoLengthInSeconds;
-    static const int    m_sampleFifoMinSize;
+    static const unsigned int m_sampleFifoMinRate;
 };
 
 

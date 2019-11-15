@@ -37,7 +37,34 @@ public:
     /**
      * Reconfigure filter with new time constant
      */
-    void configure(Real timeout);
+    void configure(Real timeconst);
+
+    /** Process samples. */
+    void process(const Real& sample_in, Real& sample_out);
+
+private:
+    Real m_timeconst;
+    Real m_y1;
+    Real m_a1;
+    Real m_b0;
+};
+
+/** First order high-pass IIR filter for real-valued signals. */
+class SDRBASE_API HighPassFilterRC
+{
+public:
+
+    /**
+     * Construct 1st order high-pass IIR filter.
+     *
+     * timeconst :: RC time constant in seconds (1 / (2 * PI * cutoff_freq)
+     */
+    HighPassFilterRC(Real timeconst);
+
+    /**
+     * Reconfigure filter with new time constant
+     */
+    void configure(Real timeconst);
 
     /** Process samples. */
     void process(const Real& sample_in, Real& sample_out);

@@ -26,6 +26,7 @@
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "dsp/dspengine.h"
+#include "dsp/cwkeyer.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -410,7 +411,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     ui->cwKeyerGUI->setCWKeyer(m_nfmMod->getCWKeyer());
 
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-	connect(m_nfmMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
+    m_nfmMod->setLevelMeter(ui->volumeMeter);
 
     m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setCWKeyerGUI(ui->cwKeyerGUI);

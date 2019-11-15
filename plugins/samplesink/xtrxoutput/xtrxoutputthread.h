@@ -24,11 +24,11 @@
 
 #include "xtrx_api.h"
 
-#include "dsp/samplesourcefifodb.h"
 #include "dsp/interpolators.h"
 #include "xtrx/devicextrxshared.h"
 
 struct xtrx_dev;
+class SampleSourceFifo;
 
 class XTRXOutputThread : public QThread, public DeviceXTRXShared::ThreadInterface
 {
@@ -44,13 +44,13 @@ public:
     unsigned int getNbChannels() const { return m_nbChannels; }
     void setLog2Interpolation(unsigned int channel, unsigned int log2_interp);
     unsigned int getLog2Interpolation(unsigned int channel) const;
-    void setFifo(unsigned int channel, SampleSourceFifoDB *sampleFifo);
-    SampleSourceFifoDB *getFifo(unsigned int channel);
+    void setFifo(unsigned int channel, SampleSourceFifo *sampleFifo);
+    SampleSourceFifo *getFifo(unsigned int channel);
 
 private:
     struct Channel
     {
-        SampleSourceFifoDB* m_sampleFifo;
+        SampleSourceFifo* m_sampleFifo;
         unsigned int m_log2Interp;
         Interpolators<qint16, SDR_TX_SAMP_SZ, 12> m_interpolators;
 
@@ -74,9 +74,9 @@ private:
 
     void run();
     unsigned int getNbFifos();
-    void callback(qint16* buf, qint32 len);
     void callbackSO(qint16* buf, qint32 len);
     void callbackMO(qint16* buf0, qint16* buf1, qint32 len);
+    void callbackPart(qint16* buf, SampleVector& data, unsigned int iBegin, unsigned int iEnd);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_XTRXOUTPUT_XTRXOUTPUTTHREAD_H_ */

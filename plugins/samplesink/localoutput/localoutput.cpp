@@ -46,7 +46,7 @@ LocalOutput::LocalOutput(DeviceAPI *deviceAPI) :
     m_fileSink(nullptr),
 	m_deviceDescription("LocalOutput")
 {
-	m_sampleSourceFifo.resize(96000 * 4);
+	m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_sampleRate));
     m_deviceAPI->setNbSinkStreams(1);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -125,6 +125,7 @@ int LocalOutput::getSampleRate() const
 void LocalOutput::setSampleRate(int sampleRate)
 {
     m_sampleRate = sampleRate;
+    m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_sampleRate));
 
     DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency); // Frequency in Hz for the DSP engine
     m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
@@ -351,13 +352,14 @@ void LocalOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
 
     // Always use PATCH to avoid passing reverse API settings
-    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
 
     delete swgDeviceSettings;
 }
@@ -376,17 +378,19 @@ void LocalOutput::webapiReverseSendStartStop(bool start)
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
+    QNetworkReply *reply;
 
     if (start) {
-        m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
     } else {
-        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
     }
 
+    buffer->setParent(reply);
     delete swgDeviceSettings;
 }
 
@@ -400,10 +404,13 @@ void LocalOutput::networkManagerFinished(QNetworkReply *reply)
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();
-        return;
+    }
+    else
+    {
+        QString answer = reply->readAll();
+        answer.chop(1); // remove last \n
+        qDebug("LocalOutput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
     }
 
-    QString answer = reply->readAll();
-    answer.chop(1); // remove last \n
-    qDebug("LocalOutput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    reply->deleteLater();
 }

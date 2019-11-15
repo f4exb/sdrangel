@@ -41,12 +41,12 @@ MESSAGE_CLASS_DEFINITION(Bladerf1Output::MsgReportBladerf1, Message)
 Bladerf1Output::Bladerf1Output(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
-	m_dev(0),
-	m_bladerfThread(0),
+	m_dev(nullptr),
+	m_bladerfThread(nullptr),
 	m_deviceDescription("BladeRFOutput"),
 	m_running(false)
 {
-    m_sampleSourceFifo.resize(16*BLADERFOUTPUT_BLOCKSIZE);
+    m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_settings.m_devSampleRate));
     openDevice();
     m_deviceAPI->setNbSinkStreams(1);
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
@@ -81,7 +81,7 @@ bool Bladerf1Output::openDevice()
 
     int res;
 
-    m_sampleSourceFifo.resize(m_settings.m_devSampleRate/(1<<(m_settings.m_log2Interp <= 4 ? m_settings.m_log2Interp : 4)));
+    m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_settings.m_devSampleRate));
 
     if (m_deviceAPI->getSourceBuddies().size() > 0)
     {
@@ -341,20 +341,10 @@ bool Bladerf1Output::applySettings(const BladeRF1OutputSettings& settings, bool 
 
 	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
 	{
-	    int fifoSize;
-
-	    if (settings.m_log2Interp >= 5)
-	    {
-	        fifoSize = DeviceBladeRF1Shared::m_sampleFifoMinSize32;
-	    }
-	    else
-	    {
-            fifoSize = (std::max)(
-	            (int) ((settings.m_devSampleRate/(1<<settings.m_log2Interp)) * DeviceBladeRF1Shared::m_sampleFifoLengthInSeconds),
-	            DeviceBladeRF1Shared::m_sampleFifoMinSize);
-	    }
-
-        m_sampleSourceFifo.resize(fifoSize);
+        unsigned int fifoRate = std::max(
+            (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2Interp),
+            DeviceBladeRF1Shared::m_sampleFifoMinRate);
+        m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(fifoRate));
 	}
 
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
@@ -725,13 +715,14 @@ void Bladerf1Output::webapiReverseSendSettings(QList<QString>& deviceSettingsKey
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
 
     // Always use PATCH to avoid passing reverse API settings
-    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
 
     delete swgDeviceSettings;
 }
@@ -750,17 +741,19 @@ void Bladerf1Output::webapiReverseSendStartStop(bool start)
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
+    QNetworkReply *reply;
 
     if (start) {
-        m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
     } else {
-        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
     }
 
+    buffer->setParent(reply);
     delete swgDeviceSettings;
 }
 
@@ -774,10 +767,13 @@ void Bladerf1Output::networkManagerFinished(QNetworkReply *reply)
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();
-        return;
+    }
+    else
+    {
+        QString answer = reply->readAll();
+        answer.chop(1); // remove last \n
+        qDebug("Bladerf1Output::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
     }
 
-    QString answer = reply->readAll();
-    answer.chop(1); // remove last \n
-    qDebug("Bladerf1Output::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    reply->deleteLater();
 }

@@ -33,13 +33,13 @@
 
 #define FILESINK_THROTTLE_MS 50
 
-class SampleSourceFifoDB;
+class SampleSourceFifo;
 
 class FileSinkThread : public QThread {
 	Q_OBJECT
 
 public:
-	FileSinkThread(std::ofstream *samplesStream, SampleSourceFifoDB* sampleFifo, QObject* parent = 0);
+	FileSinkThread(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent = 0);
 	~FileSinkThread();
 
 	void startWork();
@@ -61,7 +61,7 @@ private:
 	std::ofstream* m_ofstream;
 	std::size_t m_bufsize;
 	unsigned int m_samplesChunkSize;
-	SampleSourceFifoDB* m_sampleFifo;
+	SampleSourceFifo* m_sampleFifo;
     std::size_t m_samplesCount;
 
 	int m_samplerate;
@@ -75,6 +75,7 @@ private:
     int16_t *m_buf;
 
 	void run();
+	void callbackPart(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
 
 private slots:
 	void tick();

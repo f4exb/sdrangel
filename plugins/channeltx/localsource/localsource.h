@@ -27,13 +27,13 @@
 #include "channel/channelapi.h"
 #include "localsourcesettings.h"
 
-class DeviceAPI;
-class DeviceSampleSink;
-class ThreadedBasebandSampleSource;
-class UpChannelizer;
-class LocalSourceThread;
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
+
+class DeviceAPI;
+class DeviceSampleSink;
+class LocalSourceBaseband;
 
 class LocalSource : public BasebandSampleSource, public ChannelAPI {
     Q_OBJECT
@@ -61,19 +61,19 @@ public:
         { }
     };
 
-    class MsgSampleRateNotification : public Message {
+    class MsgBasebandSampleRateNotification : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgSampleRateNotification* create(int sampleRate) {
-            return new MsgSampleRateNotification(sampleRate);
+        static MsgBasebandSampleRateNotification* create(int sampleRate) {
+            return new MsgBasebandSampleRateNotification(sampleRate);
         }
 
-        int getSampleRate() const { return m_sampleRate; }
+        int getBasebandSampleRate() const { return m_sampleRate; }
 
     private:
 
-        MsgSampleRateNotification(int sampleRate) :
+        MsgBasebandSampleRateNotification(int sampleRate) :
             Message(),
             m_sampleRate(sampleRate)
         { }
@@ -81,36 +81,13 @@ public:
         int m_sampleRate;
     };
 
-    class MsgConfigureChannelizer : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getLog2Interp() const { return m_log2Interp; }
-        int getFilterChainHash() const { return m_filterChainHash; }
-
-        static MsgConfigureChannelizer* create(unsigned int m_log2Interp, unsigned int m_filterChainHash) {
-            return new MsgConfigureChannelizer(m_log2Interp, m_filterChainHash);
-        }
-
-    private:
-        unsigned int m_log2Interp;
-        unsigned int m_filterChainHash;
-
-        MsgConfigureChannelizer(unsigned int log2Interp, unsigned int filterChainHash) :
-            Message(),
-            m_log2Interp(log2Interp),
-            m_filterChainHash(filterChainHash)
-        { }
-    };
-
     LocalSource(DeviceAPI *deviceAPI);
     virtual ~LocalSource();
     virtual void destroy() { delete this; }
 
-    virtual void pull(Sample& sample);
-    virtual void pullAudio(int nbSamples);
     virtual void start();
     virtual void stop();
+    virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples);
     virtual bool handleMessage(const Message& cmd);
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
@@ -149,39 +126,20 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-    /** Set center frequency given in Hz */
-    void setCenterFrequency(uint64_t centerFrequency) { m_centerFrequency = centerFrequency; }
-
-    /** Set sample rate given in Hz */
-    void setSampleRate(uint32_t sampleRate) { m_sampleRate = sampleRate; }
-
-    void setChannelizer(unsigned int log2Interp, unsigned int filterChainHash);
     void getLocalDevices(std::vector<uint32_t>& indexes);
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
-signals:
-    void pullSamples(unsigned int count);
-
 private:
     DeviceAPI *m_deviceAPI;
-    ThreadedBasebandSampleSource* m_threadedChannelizer;
-    UpChannelizer* m_channelizer;
-    bool m_running;
-
+    QThread *m_thread;
+    LocalSourceBaseband *m_basebandSource;
     LocalSourceSettings m_settings;
-    LocalSourceThread *m_sinkThread;
-    SampleSourceFifoDB *m_localSampleSourceFifo;
-    int m_chunkSize;
-    SampleVector m_localSamples;
-    int m_localSamplesIndex;
-    int m_localSamplesIndexOffset;
 
     uint64_t m_centerFrequency;
     int64_t m_frequencyOffset;
-    uint32_t m_sampleRate;
-    uint32_t m_deviceSampleRate;
+    uint32_t m_basebandSampleRate;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -189,15 +147,15 @@ private:
     QMutex m_settingsMutex;
 
     void applySettings(const LocalSourceSettings& settings, bool force = false);
-    DeviceSampleSink *getLocalDevice(uint32_t index);
-    void propagateSampleRateAndFrequency(uint32_t index);
+    void propagateSampleRateAndFrequency(uint32_t index, uint32_t log2Interp);
     static void validateFilterChainHash(LocalSourceSettings& settings);
-    void calculateFrequencyOffset();
+    void calculateFrequencyOffset(uint32_t log2Interp, uint32_t filterChainHash);
+    DeviceSampleSink *getLocalDevice(uint32_t index);
+
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const LocalSourceSettings& settings, bool force);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-    void processSamples(int offset);
 };
 
 #endif /* INCLUDE_LOCALSOURCE_H_ */

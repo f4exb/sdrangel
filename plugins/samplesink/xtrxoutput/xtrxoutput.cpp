@@ -77,7 +77,7 @@ void XTRXOutput::destroy()
 
 bool XTRXOutput::openDevice()
 {
-    m_sampleSourceFifo.resize(m_settings.m_devSampleRate/(1<<(m_settings.m_log2SoftInterp <= 4 ? m_settings.m_log2SoftInterp : 4)));
+    m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_settings.m_devSampleRate));
 
     // look for Tx buddies and get reference to the device object
     if (m_deviceAPI->getSinkBuddies().size() > 0) // then sink
@@ -278,7 +278,7 @@ bool XTRXOutput::start()
         {
             qDebug("XTRXOutput::start: expand channels. Re-allocate thread and take ownership");
 
-            SampleSourceFifoDB **fifos = new SampleSourceFifoDB*[2];
+            SampleSourceFifo **fifos = new SampleSourceFifo*[2];
             unsigned int *log2Interps = new unsigned int[2];
 
             for (int i = 0; i < 2; i++) // save original FIFO references and data
@@ -909,6 +909,15 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         }
     }
 
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
+     || (m_settings.m_log2SoftInterp != settings.m_log2SoftInterp) || force)
+    {
+        unsigned int fifoRate = std::max(
+            (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2SoftInterp),
+            DeviceXTRXShared::m_sampleFifoMinRate);
+        m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(fifoRate));
+    }
+
     if ((m_settings.m_antennaPath != settings.m_antennaPath) || force)
     {
         reverseAPIKeys.append("antennaPath");
@@ -1400,13 +1409,14 @@ void XTRXOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, c
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
 
     // Always use PATCH to avoid passing reverse API settings
-    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
 
     delete swgDeviceSettings;
 }
@@ -1425,17 +1435,19 @@ void XTRXOutput::webapiReverseSendStartStop(bool start)
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
+    QNetworkReply *reply;
 
     if (start) {
-        m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
     } else {
-        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
     }
 
+    buffer->setParent(reply);
     delete swgDeviceSettings;
 }
 
@@ -1449,10 +1461,13 @@ void XTRXOutput::networkManagerFinished(QNetworkReply *reply)
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();
-        return;
+    }
+    else
+    {
+        QString answer = reply->readAll();
+        answer.chop(1); // remove last \n
+        qDebug("XTRXOutput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
     }
 
-    QString answer = reply->readAll();
-    answer.chop(1); // remove last \n
-    qDebug("XTRXOutput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    reply->deleteLater();
 }

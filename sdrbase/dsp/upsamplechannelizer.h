@@ -23,6 +23,8 @@
 #include <algorithm>
 
 #include "export.h"
+#include "util/message.h"
+
 #include "channelsamplesource.h"
 
 #ifdef USE_SSE4_1
@@ -40,10 +42,13 @@ public:
 
     virtual void pull(SampleVector::iterator begin, unsigned int nbSamples);
     virtual void pullOne(Sample& sample);
+    virtual void prefetch(unsigned int nbSamples);
 
-    void setInterpolation(unsigned int log2Interp, unsigned int filterChainHash);      //!< Define channelizer with interpolation factor and filter chain definition
-    void applyConfiguration(int requestedSampleRate, qint64 requestedCenterFrequency); //!< Define channelizer with requested sample rate and center frequency (shift in the baseband)
-    void setOutputSampleRate(int outputSampleRate);
+    void setInterpolation(unsigned int log2Interp, unsigned int filterChainHash);     //!< Define channelizer with interpolation factor and filter chain definition
+    void setChannelization(int requestedSampleRate, qint64 requestedCenterFrequency); //!< Define channelizer with requested sample rate and center frequency (shift in the baseband)
+    void setBasebandSampleRate(int basebandSampleRate, bool interp = false); //!< interp: true => use direct interpolation false => use channel configuration
+    int getChannelSampleRate() const { return m_channelSampleRate; };
+    int getChannelFrequencyOffset() const { return m_channelFrequencyOffset; }
 
 protected:
     struct FilterStage {
@@ -75,22 +80,22 @@ protected:
     bool m_filterChainSetMode;
     std::vector<Sample> m_stageSamples;
     ChannelSampleSource* m_sampleSource; //!< Modulator
-    int m_outputSampleRate;
+    int m_basebandSampleRate;
     int m_requestedInputSampleRate;
     int m_requestedCenterFrequency;
-    int m_currentInputSampleRate;
-    int m_currentCenterFrequency;
+    int m_channelSampleRate;
+    int m_channelFrequencyOffset;
+    unsigned int m_log2Interp;
+    unsigned int m_filterChainHash;
     SampleVector m_sampleBuffer;
     Sample m_sampleIn;
 
-    void applyConfiguration();
+    void applyChannelization();
+    void applyInterpolation();
     bool signalContainsChannel(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd) const;
     Real createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd);
     double setFilterChain(const std::vector<unsigned int>& stageIndexes); //!< returns offset in ratio of sample rate
     void freeFilterChain();
-
-signals:
-    void outputSampleRateChanged();
 };
 
 

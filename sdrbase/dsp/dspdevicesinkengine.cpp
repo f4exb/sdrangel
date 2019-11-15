@@ -27,7 +27,6 @@
 #include "dsp/devicesamplesink.h"
 #include "dsp/dspcommands.h"
 #include "samplesourcefifodb.h"
-#include "threadedbasebandsamplesource.h"
 
 DSPDeviceSinkEngine::DSPDeviceSinkEngine(uint32_t uid, QObject* parent) :
 	QThread(parent),
@@ -113,17 +112,17 @@ void DSPDeviceSinkEngine::setSinkSequence(int sequence)
 	m_sampleSinkSequence = sequence;
 }
 
-void DSPDeviceSinkEngine::addThreadedSource(ThreadedBasebandSampleSource* source)
+void DSPDeviceSinkEngine::addChannelSource(BasebandSampleSource* source)
 {
-	qDebug() << "DSPDeviceSinkEngine::addThreadedSource: " << source->objectName().toStdString().c_str();
-	DSPAddThreadedBasebandSampleSource cmd(source);
+	qDebug() << "DSPDeviceSinkEngine::addChannelSource: " << source->objectName().toStdString().c_str();
+	DSPAddBasebandSampleSource cmd(source);
 	m_syncMessenger.sendWait(cmd);
 }
 
-void DSPDeviceSinkEngine::removeThreadedSource(ThreadedBasebandSampleSource* source)
+void DSPDeviceSinkEngine::removeChannelSource(BasebandSampleSource* source)
 {
-	qDebug() << "DSPDeviceSinkEngine::removeThreadedSource: " << source->objectName().toStdString().c_str();
-	DSPRemoveThreadedBasebandSampleSource cmd(source);
+	qDebug() << "DSPDeviceSinkEngine::removeChannelSource: " << source->objectName().toStdString().c_str();
+	DSPRemoveBasebandSampleSource cmd(source);
 	m_syncMessenger.sendWait(cmd);
 }
 
@@ -157,52 +156,88 @@ QString DSPDeviceSinkEngine::sinkDeviceDescription()
 	return cmd.getDeviceDescription();
 }
 
-void DSPDeviceSinkEngine::work(int nbWriteSamples)
+void DSPDeviceSinkEngine::workSampleFifo()
 {
-	// multiple channel sources handling
-	if ((m_threadedBasebandSampleSources.size() + m_basebandSampleSources.size()) > 1)
-	{
-//	    qDebug("DSPDeviceSinkEngine::work: multiple channel sources handling: %u", m_multipleSourcesDivisionFactor);
+    SampleSourceFifo *sourceFifo = m_deviceSampleSink->getSampleFifo();
 
-	    SampleVector::iterator writeBegin;
-	    SampleSourceFifoDB* sampleFifo = m_deviceSampleSink->getSampleFifo();
-	    sampleFifo->getWriteIterator(writeBegin);
-	    SampleVector::iterator writeAt = writeBegin;
-	    std::vector<SampleVector::iterator> sampleSourceIterators;
+    if (!sourceFifo) {
+        return;
+    }
 
-	    for (ThreadedBasebandSampleSources::iterator it = m_threadedBasebandSampleSources.begin(); it != m_threadedBasebandSampleSources.end(); ++it)
-	    {
-	        sampleSourceIterators.push_back(SampleVector::iterator());
-	        (*it)->getSampleSourceFifo().readAdvance(sampleSourceIterators.back(), nbWriteSamples);
-	        sampleSourceIterators.back() -= nbWriteSamples;
-	    }
+    SampleVector& data = sourceFifo->getData();
+    unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
+    unsigned int remainder = sourceFifo->remainder();
 
-	    for (BasebandSampleSources::iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); ++it)
-	    {
-            sampleSourceIterators.push_back(SampleVector::iterator());
-            (*it)->getSampleSourceFifo().readAdvance(sampleSourceIterators.back(), nbWriteSamples);
-            sampleSourceIterators.back() -= nbWriteSamples;
-	    }
+    while ((remainder > 0) && (m_inputMessageQueue.size() == 0))
+    {
+        sourceFifo->write(remainder, iPart1Begin, iPart1End, iPart2Begin, iPart2End);
 
-	    for (int is = 0; is < nbWriteSamples; is++)
-		{
-			// pull data from sources FIFOs and merge them in the device sample FIFO
-	        for (std::vector<SampleVector::iterator>::iterator it = sampleSourceIterators.begin(); it != sampleSourceIterators.end(); ++it)
-	        {
-	            Sample s = (**it);
-	            s /= m_multipleSourcesDivisionFactor;
-	            ++(*it);
+        if (iPart1Begin != iPart1End) {
+            workSamples(data, iPart1Begin, iPart1End);
+        }
 
-	            if (it == sampleSourceIterators.begin()) {
-	                (*writeAt) = s;
-	            } else {
-	                (*writeAt) += s;
-	            }
-	        }
+        if (iPart2Begin != iPart2End) {
+            workSamples(data, iPart2Begin, iPart2End);
+        }
 
-			sampleFifo->bumpIndex(writeAt);
-		}
-	}
+        remainder = sourceFifo->remainder();
+    }
+}
+
+void DSPDeviceSinkEngine::workSamples(SampleVector& data, unsigned int iBegin, unsigned int iEnd)
+{
+    unsigned int nbSamples = iEnd - iBegin;
+    SampleVector::iterator begin = data.begin() + iBegin;
+
+    if (m_basebandSampleSources.size() == 0)
+    {
+        m_sourceZeroBuffer.allocate(nbSamples, Sample{0,0});
+        std::copy(
+            m_sourceZeroBuffer.m_vector.begin(),
+            m_sourceZeroBuffer.m_vector.begin() + nbSamples,
+            data.begin() + iBegin
+        );
+    }
+    else if (m_basebandSampleSources.size() == 1)
+    {
+        BasebandSampleSource *source = m_basebandSampleSources.front();
+        source->pull(begin, nbSamples);
+    }
+    else
+    {
+        m_sourceSampleBuffer.allocate(nbSamples);
+        SampleVector::iterator sBegin = m_sourceSampleBuffer.m_vector.begin();
+        BasebandSampleSources::const_iterator srcIt = m_basebandSampleSources.begin();
+        BasebandSampleSource *source = *srcIt;
+        source->pull(begin, nbSamples);
+        srcIt++;
+        m_sumIndex = 1;
+
+        for (; srcIt != m_basebandSampleSources.end(); ++srcIt, m_sumIndex++)
+        {
+            source = *srcIt;
+            source->pull(sBegin, nbSamples);
+            std::transform(
+                sBegin,
+                sBegin + nbSamples,
+                data.begin() + iBegin,
+                data.begin() + iBegin,
+                [this](Sample& a, const Sample& b) -> Sample {
+                    int den = m_sumIndex + 1; // at each stage scale sum by n/n+1 and input by 1/n+1
+                    int nom = m_sumIndex;     // so that final sum is scaled by N (number of channels)
+                    return Sample{
+                        a.real()/den + nom*(b.real()/den),
+                        a.imag()/den + nom*(b.imag()/den)
+                    };
+                }
+            );
+        }
+    }
+
+    // possibly feed data to spectrum sink
+    if (m_spectrumSink) {
+        m_spectrumSink->feed(data.begin() + iBegin, data.begin() + iEnd, false);
+    }
 }
 
 // notStarted -> idle -> init -> running -+
@@ -238,18 +273,6 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoIdle()
 	{
         qDebug() << "DSPDeviceSinkEngine::gotoIdle: stopping " << (*it)->objectName().toStdString().c_str();
 		(*it)->stop();
-	}
-
-	for(ThreadedBasebandSampleSources::const_iterator it = m_threadedBasebandSampleSources.begin(); it != m_threadedBasebandSampleSources.end(); it++)
-	{
-	    qDebug() << "DSPDeviceSinkEngine::gotoIdle: stopping ThreadedSampleSource(" << (*it)->getSampleSourceObjectName().toStdString().c_str() << ")";
-		(*it)->stop();
-	}
-
-	if (m_spectrumSink)
-	{
-        disconnect(m_deviceSampleSink->getSampleFifo(), SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
-        m_spectrumSink->stop();
 	}
 
 	m_deviceDescription.clear();
@@ -297,12 +320,6 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoInit()
 	{
 		qDebug() << "DSPDeviceSinkEngine::gotoInit: initializing " << (*it)->objectName().toStdString().c_str();
 		(*it)->handleMessage(notif);
-	}
-
-	for (ThreadedBasebandSampleSources::const_iterator it = m_threadedBasebandSampleSources.begin(); it != m_threadedBasebandSampleSources.end(); ++it)
-	{
-		qDebug() << "DSPDeviceSinkEngine::gotoInit: initializing ThreadedSampleSource(" << (*it)->getSampleSourceObjectName().toStdString().c_str() << ")";
-		(*it)->handleSourceMessage(notif);
 	}
 
 	if (m_spectrumSink) {
@@ -358,15 +375,8 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoRunning()
 		(*it)->start();
 	}
 
-	for (ThreadedBasebandSampleSources::const_iterator it = m_threadedBasebandSampleSources.begin(); it != m_threadedBasebandSampleSources.end(); ++it)
-	{
-		qDebug() << "DSPDeviceSinkEngine::gotoRunning: starting ThreadedSampleSource(" << (*it)->getSampleSourceObjectName().toStdString().c_str() << ")";
-		(*it)->start();
-	}
-
 	if (m_spectrumSink)
 	{
-        connect(m_deviceSampleSink->getSampleFifo(), SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
         m_spectrumSink->start();
 	}
 
@@ -387,22 +397,28 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoError(const QString& errorMe
 
 void DSPDeviceSinkEngine::handleSetSink(DeviceSampleSink* sink)
 {
-	gotoIdle();
-
 	m_deviceSampleSink = sink;
 
-	if(m_deviceSampleSink != 0) {
-		qDebug("DSPDeviceSinkEngine::handleSetSink: set %s", qPrintable(sink->getDeviceDescription()));
-	} else {
-		qDebug("DSPDeviceSinkEngine::handleSetSource: set none");
-	}
+    if (!m_deviceSampleSink) { // Early leave
+        return;
+    }
+
+    qDebug("DSPDeviceSinkEngine::handleSetSink: set %s", qPrintable(sink->getDeviceDescription()));
+
+    QObject::connect(
+        m_deviceSampleSink->getSampleFifo(),
+        &SampleSourceFifo::dataRead,
+        this,
+        &DSPDeviceSinkEngine::handleData,
+        Qt::QueuedConnection
+    );
+
 }
 
-void DSPDeviceSinkEngine::handleData(int nbSamples)
+void DSPDeviceSinkEngine::handleData()
 {
-	if(m_state == StRunning)
-	{
-		work(nbSamples);
+	if (m_state == StRunning) {
+		 workSampleFifo();
 	}
 }
 
@@ -452,7 +468,7 @@ void DSPDeviceSinkEngine::handleSynchronousMessages()
 			spectrumSink->stop();
 		}
 
-		m_spectrumSink = 0;
+		m_spectrumSink = nullptr;
 	}
 	else if (DSPAddBasebandSampleSource::match(*message))
 	{
@@ -460,7 +476,6 @@ void DSPDeviceSinkEngine::handleSynchronousMessages()
 		m_basebandSampleSources.push_back(source);
         DSPSignalNotification notif(m_sampleRate, m_centerFrequency);
         source->handleMessage(notif);
-		checkNumberOfBasebandSources();
 
         if (m_state == StRunning)
         {
@@ -476,30 +491,6 @@ void DSPDeviceSinkEngine::handleSynchronousMessages()
 		}
 
 		m_basebandSampleSources.remove(source);
-		checkNumberOfBasebandSources();
-	}
-	else if (DSPAddThreadedBasebandSampleSource::match(*message))
-	{
-		ThreadedBasebandSampleSource *threadedSource = ((DSPAddThreadedBasebandSampleSource*) message)->getThreadedSampleSource();
-		m_threadedBasebandSampleSources.push_back(threadedSource);
-        DSPSignalNotification notif(m_sampleRate, m_centerFrequency);
-        threadedSource->handleSourceMessage(notif);
-		checkNumberOfBasebandSources();
-
-        if (m_state == StRunning)
-        {
-            threadedSource->start();
-        }
-	}
-	else if (DSPRemoveThreadedBasebandSampleSource::match(*message))
-	{
-		ThreadedBasebandSampleSource* threadedSource = ((DSPRemoveThreadedBasebandSampleSource*) message)->getThreadedSampleSource();
-		if (m_state == StRunning) {
-		    threadedSource->stop();
-		}
-
-		m_threadedBasebandSampleSources.remove(threadedSource);
-		checkNumberOfBasebandSources();
 	}
 
 	m_syncMessenger.done(m_state);
@@ -534,12 +525,6 @@ void DSPDeviceSinkEngine::handleInputMessages()
 				(*it)->handleMessage(*message);
 			}
 
-			for (ThreadedBasebandSampleSources::const_iterator it = m_threadedBasebandSampleSources.begin(); it != m_threadedBasebandSampleSources.end(); ++it)
-			{
-				qDebug() << "DSPDeviceSinkEngine::handleSourceMessages: forward message to ThreadedSampleSource(" << (*it)->getSampleSourceObjectName().toStdString().c_str() << ")";
-				(*it)->handleSourceMessage(*message);
-			}
-
 			// forward changes to listeners on DSP output queue
 
 			MessageQueue *guiMessageQueue = m_deviceSampleSink->getMessageQueueToGUI();
@@ -554,66 +539,4 @@ void DSPDeviceSinkEngine::handleInputMessages()
 			delete message;
 		}
 	}
-}
-
-void DSPDeviceSinkEngine::handleForwardToSpectrumSink(int nbSamples)
-{
-	if (m_spectrumSink)
-	{
-		SampleSourceFifoDB* sampleFifo = m_deviceSampleSink->getSampleFifo();
-		SampleVector::iterator readUntil;
-		sampleFifo->getReadIterator(readUntil);
-		m_spectrumSink->feed(readUntil - nbSamples, readUntil, false);
-	}
-}
-
-void DSPDeviceSinkEngine::checkNumberOfBasebandSources()
-{
-    SampleSourceFifoDB* sampleFifo = m_deviceSampleSink->getSampleFifo();
-
-    // single channel source handling
-    if ((m_threadedBasebandSampleSources.size() + m_basebandSampleSources.size()) == 1)
-    {
-        qDebug("DSPDeviceSinkEngine::checkNumberOfBasebandSources: single channel mode");
-        disconnect(sampleFifo, SIGNAL(dataWrite(int)), this, SLOT(handleData(int)));
-
-        if (m_threadedBasebandSampleSources.size() == 1) {
-            m_threadedBasebandSampleSources.back()->setDeviceSampleSourceFifo(sampleFifo);
-        } else if (m_basebandSampleSources.size() == 1) {
-            m_basebandSampleSources.back()->setDeviceSampleSourceFifo(sampleFifo);
-        }
-
-        m_multipleSourcesDivisionFactor = 1; // for consistency but it is not used in this case
-    }
-    // null or multiple channel sources handling
-    else
-    {
-        int nbSources = 0;
-
-        for (ThreadedBasebandSampleSources::iterator it = m_threadedBasebandSampleSources.begin(); it != m_threadedBasebandSampleSources.end(); ++it)
-        {
-            (*it)->setDeviceSampleSourceFifo(0);
-            nbSources++;
-        }
-
-        for (BasebandSampleSources::iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); ++it)
-        {
-            (*it)->setDeviceSampleSourceFifo(0);
-            nbSources++;
-        }
-
-        if (nbSources == 0) {
-            m_multipleSourcesDivisionFactor = 1;
-        } else if (nbSources < 3) {
-            m_multipleSourcesDivisionFactor = nbSources;
-        } else {
-            m_multipleSourcesDivisionFactor = 1<<nbSources;
-        }
-
-        if (nbSources > 1) {
-            connect(sampleFifo, SIGNAL(dataWrite(int)), this, SLOT(handleData(int)), Qt::QueuedConnection);
-        }
-
-        qDebug("DSPDeviceSinkEngine::checkNumberOfBasebandSources: handle %d channel(s)", nbSources);
-    }
 }

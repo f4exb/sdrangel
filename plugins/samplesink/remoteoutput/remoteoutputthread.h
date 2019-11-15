@@ -36,14 +36,14 @@
 
 #define REMOTEOUTPUT_THROTTLE_MS 50
 
-class SampleSourceFifoDB;
+class SampleSourceFifo;
 struct timeval;
 
 class RemoteOutputThread : public QThread {
 	Q_OBJECT
 
 public:
-	RemoteOutputThread(SampleSourceFifoDB* sampleFifo, QObject* parent = 0);
+	RemoteOutputThread(SampleSourceFifo* sampleFifo, QObject* parent = 0);
 	~RemoteOutputThread();
 
 	void startWork();
@@ -68,7 +68,7 @@ private:
 	volatile bool m_running;
 
 	int m_samplesChunkSize;
-	SampleSourceFifoDB* m_sampleFifo;
+	SampleSourceFifo* m_sampleFifo;
     uint32_t m_samplesCount;
     int m_chunkCorrection;
 

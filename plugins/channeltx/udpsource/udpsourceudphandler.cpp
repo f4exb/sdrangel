@@ -26,7 +26,7 @@
 MESSAGE_CLASS_DEFINITION(UDPSourceUDPHandler::MsgUDPAddressAndPort, Message)
 
 UDPSourceUDPHandler::UDPSourceUDPHandler() :
-    m_dataSocket(0),
+    m_dataSocket(nullptr),
     m_dataAddress(QHostAddress::LocalHost),
     m_remoteAddress(QHostAddress::LocalHost),
     m_dataPort(9999),
@@ -41,7 +41,7 @@ UDPSourceUDPHandler::UDPSourceUDPHandler() :
     m_rwDelta(m_minNbUDPFrames/2),
     m_d(0),
     m_autoRWBalance(true),
-    m_feedbackMessageQueue(0)
+    m_feedbackMessageQueue(nullptr)
 {
     m_udpBuf = new udpBlk_t[m_minNbUDPFrames];
     std::fill(m_udpDump, m_udpDump + m_udpBlockSize + 8192, 0);

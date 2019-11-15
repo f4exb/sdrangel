@@ -1,7 +1,10 @@
 project(modatv)
 
 set(modatv_SOURCES
-	atvmod.cpp
+    atvmod.cpp
+    atvmodbaseband.cpp
+    atvmodreport.cpp
+    atvmodsource.cpp
 	atvmodplugin.cpp
     atvmodsettings.cpp
     atvmodwebapiadapter.cpp
@@ -9,6 +12,9 @@ set(modatv_SOURCES
 
 set(modatv_HEADERS
 	atvmod.h
+    atvmodbaseband.h
+    atvmodreport.h
+    atvmodsource.h
 	atvmodplugin.h
     atvmodsettings.h
     atvmodwebapiadapter.h

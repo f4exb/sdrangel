@@ -172,7 +172,7 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-    connect(m_udpSource, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
+    m_udpSource->setLevelMeter(ui->volumeMeter);
 
     displaySettings();
     applySettings(true);

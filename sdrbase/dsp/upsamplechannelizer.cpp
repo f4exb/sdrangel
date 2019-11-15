@@ -29,11 +29,13 @@
 UpSampleChannelizer::UpSampleChannelizer(ChannelSampleSource* sampleSource) :
     m_filterChainSetMode(false),
     m_sampleSource(sampleSource),
-    m_outputSampleRate(0),
+    m_basebandSampleRate(0),
     m_requestedInputSampleRate(0),
     m_requestedCenterFrequency(0),
-    m_currentInputSampleRate(0),
-    m_currentCenterFrequency(0)
+    m_channelSampleRate(0),
+    m_channelFrequencyOffset(0),
+    m_log2Interp(0),
+    m_filterChainHash(0)
 {
 }
 
@@ -109,64 +111,85 @@ void UpSampleChannelizer::pull(SampleVector::iterator begin, unsigned int nbSamp
     }
 }
 
-void UpSampleChannelizer::applyConfiguration()
+void UpSampleChannelizer::prefetch(unsigned int nbSamples)
+{
+    unsigned int log2Interp = m_filterStages.size();
+    m_sampleSource->prefetch(nbSamples/(1<<log2Interp)); // 2^n less samples will be produced by the source
+}
+
+void UpSampleChannelizer::setChannelization(int requestedSampleRate, qint64 requestedCenterFrequency)
+{
+    m_requestedInputSampleRate = requestedSampleRate;
+    m_requestedCenterFrequency = requestedCenterFrequency;
+    applyChannelization();
+}
+
+void UpSampleChannelizer::setBasebandSampleRate(int basebandSampleRate, bool interp)
+{
+    m_basebandSampleRate = basebandSampleRate;
+
+    if (interp) {
+        applyInterpolation();
+    } else {
+        applyChannelization();
+    }
+}
+
+void UpSampleChannelizer::applyChannelization()
 {
     m_filterChainSetMode = false;
 
-    if (m_outputSampleRate == 0)
+    if (m_basebandSampleRate == 0)
     {
         qDebug() << "UpSampleChannelizer::applyConfiguration: aborting (out=0):"
-                << " out:" << m_outputSampleRate
+                << " out:" << m_basebandSampleRate
                 << " req:" << m_requestedInputSampleRate
-                << " in:" << m_currentInputSampleRate
-                << " fc:" << m_currentCenterFrequency;
+                << " in:" << m_channelSampleRate
+                << " fc:" << m_channelFrequencyOffset;
         return;
     }
 
     freeFilterChain();
 
-    m_currentCenterFrequency = createFilterChain(
-        m_outputSampleRate / -2, m_outputSampleRate / 2,
+    m_channelFrequencyOffset = createFilterChain(
+        m_basebandSampleRate / -2, m_basebandSampleRate / 2,
         m_requestedCenterFrequency - m_requestedInputSampleRate / 2, m_requestedCenterFrequency + m_requestedInputSampleRate / 2);
 
-    m_currentInputSampleRate = m_outputSampleRate / (1 << m_filterStages.size());
+    m_channelSampleRate = m_basebandSampleRate / (1 << m_filterStages.size());
 
     qDebug() << "UpSampleChannelizer::applyConfiguration: done: "
-            << " out:" << m_outputSampleRate
+            << " out:" << m_basebandSampleRate
             << " req:" << m_requestedInputSampleRate
-            << " in:" << m_currentInputSampleRate
-            << " fc:" << m_currentCenterFrequency;
-}
-
-void UpSampleChannelizer::applyConfiguration(int requestedSampleRate, qint64 requestedCenterFrequency)
-{
-    m_requestedInputSampleRate = requestedSampleRate;
-    m_requestedCenterFrequency = requestedCenterFrequency;
-    applyConfiguration();
-}
-
-void UpSampleChannelizer::setOutputSampleRate(int outputSampleRate)
-{
-    m_outputSampleRate = outputSampleRate;
-    applyConfiguration();
+            << " in:" << m_channelSampleRate
+            << " fc:" << m_channelFrequencyOffset;
 }
 
 void UpSampleChannelizer::setInterpolation(unsigned int log2Interp, unsigned int filterChainHash)
 {
+    m_log2Interp = log2Interp;
+    m_filterChainHash = filterChainHash;
+    applyInterpolation();
+}
+
+void UpSampleChannelizer::applyInterpolation()
+{
     m_filterChainSetMode = true;
     std::vector<unsigned int> stageIndexes;
-    m_currentCenterFrequency = m_outputSampleRate * HBFilterChainConverter::convertToIndexes(log2Interp, filterChainHash, stageIndexes);
-    m_requestedCenterFrequency = m_currentCenterFrequency;
+    m_channelFrequencyOffset = m_basebandSampleRate * HBFilterChainConverter::convertToIndexes(m_log2Interp, m_filterChainHash, stageIndexes);
+    m_requestedCenterFrequency = m_channelFrequencyOffset;
 
     freeFilterChain();
-    m_currentCenterFrequency = m_outputSampleRate * setFilterChain(stageIndexes);
-    m_currentInputSampleRate = m_outputSampleRate / (1 << m_filterStages.size());
-    m_requestedInputSampleRate = m_currentInputSampleRate;
 
-	qDebug() << "UpSampleChannelizer::setInterpolation: done:"
-            << " in:" << m_outputSampleRate
-			<< " out:" << m_currentInputSampleRate
-			<< " fc:" << m_currentCenterFrequency;
+    m_channelFrequencyOffset = m_basebandSampleRate * setFilterChain(stageIndexes);
+    m_channelSampleRate = m_basebandSampleRate / (1 << m_filterStages.size());
+    m_requestedInputSampleRate = m_channelSampleRate;
+
+	qDebug() << "UpSampleChannelizer::applyInterpolation:"
+            << " m_log2Interp:" << m_log2Interp
+            << " m_filterChainHash:" << m_filterChainHash
+            << " out:" << m_basebandSampleRate
+			<< " in:" << m_channelSampleRate
+			<< " fc:" << m_channelFrequencyOffset;
 }
 
 #ifdef USE_SSE4_1

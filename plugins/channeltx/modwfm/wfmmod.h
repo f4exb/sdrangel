@@ -27,23 +27,16 @@
 
 #include "dsp/basebandsamplesource.h"
 #include "channel/channelapi.h"
-#include "dsp/nco.h"
-#include "dsp/ncof.h"
-#include "dsp/interpolator.h"
-#include "dsp/fftfilt.h"
-#include "util/movingaverage.h"
-#include "dsp/agc.h"
-#include "dsp/cwkeyer.h"
-#include "audio/audiofifo.h"
 #include "util/message.h"
 
 #include "wfmmodsettings.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 class DeviceAPI;
-class ThreadedBasebandSampleSource;
-class UpChannelizer;
+class CWKeyer;
+class WFMModBaseband;
 
 class WFMMod : public BasebandSampleSource, public ChannelAPI {
     Q_OBJECT
@@ -72,26 +65,33 @@ public:
         { }
     };
 
+    /**
+    * |<------ Baseband from device (before device soft interpolation) -------------------------->|
+    * |<- Channel SR ------->|<- Channel SR ------->|<- Channel SR ------->|<- Channel SR ------->|
+    * |             ^-------------------------------|
+    * |             |        Source CF
+    * |      | Source SR   |
+    */
     class MsgConfigureChannelizer : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        int getSampleRate() const { return m_sampleRate; }
-        int getCenterFrequency() const { return m_centerFrequency; }
+        int getSourceSampleRate() const { return m_sourceSampleRate; }
+        int getSourceCenterFrequency() const { return m_sourceCenterFrequency; }
 
-        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
+        static MsgConfigureChannelizer* create(int sourceSampleRate, int sourceCenterFrequency)
         {
-            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
+            return new MsgConfigureChannelizer(sourceSampleRate, sourceCenterFrequency);
         }
 
     private:
-        int m_sampleRate;
-        int  m_centerFrequency;
+        int m_sourceSampleRate;
+        int m_sourceCenterFrequency;
 
-        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
+        MsgConfigureChannelizer(int sourceSampleRate, int sourceCenterFrequency) :
             Message(),
-            m_sampleRate(sampleRate),
-            m_centerFrequency(centerFrequency)
+            m_sourceSampleRate(sourceSampleRate),
+            m_sourceCenterFrequency(sourceCenterFrequency)
         { }
     };
 
@@ -206,10 +206,9 @@ public:
     ~WFMMod();
     virtual void destroy() { delete this; }
 
-    virtual void pull(Sample& sample);
-    virtual void pullAudio(int nbSamples);
     virtual void start();
     virtual void stop();
+    virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples);
     virtual bool handleMessage(const Message& cmd);
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
@@ -252,9 +251,9 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-    double getMagSq() const { return m_magsq; }
-
-    CWKeyer *getCWKeyer() { return &m_cwKeyer; }
+    double getMagSq() const;
+    CWKeyer *getCWKeyer();
+    void setLevelMeter(QObject *levelMeter);
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
@@ -276,35 +275,9 @@ private:
     };
 
     DeviceAPI* m_deviceAPI;
-    ThreadedBasebandSampleSource* m_threadedChannelizer;
-    UpChannelizer* m_channelizer;
-
-    int m_basebandSampleRate;
-    int m_outputSampleRate;
-    int m_inputFrequencyOffset;
+    QThread *m_thread;
+    WFMModBaseband* m_basebandSource;
     WFMModSettings m_settings;
-
-    NCO m_carrierNco;
-    NCOF m_toneNcoRF;
-    float m_modPhasor; //!< baseband modulator phasor
-    Complex m_modSample;
-    Interpolator m_interpolator;
-    Real m_interpolatorDistance;
-    Real m_interpolatorDistanceRemain;
-    bool m_interpolatorConsumed;
-
-    fftfilt* m_rfFilter;
-    static const int m_rfFilterFFTLength;
-    fftfilt::cmplx *m_rfFilterBuffer;
-    int m_rfFilterBufferIndex;
-
-    double m_magsq;
-    MovingAverageUtil<double, double, 16> m_movingAverage;
-
-    quint32 m_audioSampleRate;
-    AudioVector m_audioBuffer;
-    uint m_audioBufferFill;
-    AudioFifo m_audioFifo;
 
     SampleVector m_sampleBuffer;
     QMutex m_settingsMutex;
@@ -315,21 +288,12 @@ private:
     quint32 m_recordLength; //!< record length in seconds computed from file size
     int m_sampleRate;
 
-    quint32 m_levelCalcCount;
-    Real m_peakLevel;
-    Real m_levelSum;
-    CWKeyer m_cwKeyer;
-
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
     static const int m_levelNbSamples;
 
-    void applyAudioSampleRate(int sampleRate);
-    void applyChannelSettings(int basebandSampleRate, int outputSampleRate, int inputFrequencyOffset, bool force = false);
     void applySettings(const WFMModSettings& settings, bool force = false);
-    void pullAF(Complex& sample);
-    void calculateLevel(const Real& sample);
     void openFileStream();
     void seekFileStream(int seekPercentage);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);

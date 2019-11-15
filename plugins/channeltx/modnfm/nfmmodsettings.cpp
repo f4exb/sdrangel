@@ -49,7 +49,7 @@ void NFMModSettings::resetToDefaults()
     m_afBandwidth = 3000;
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 12500.0f;
-    m_fmDeviation = 5000.0f;
+    m_fmDeviation = 3000.0f;
     m_toneFrequency = 1000.0f;
     m_volumeFactor = 1.0f;
     m_channelMute = false;
@@ -129,7 +129,7 @@ bool NFMModSettings::deserialize(const QByteArray& data)
         m_inputFrequencyOffset = tmp;
         d.readReal(2, &m_rfBandwidth, 12500.0);
         d.readReal(3, &m_afBandwidth, 1000.0);
-        d.readReal(4, &m_fmDeviation, 5000.0);
+        d.readReal(4, &m_fmDeviation, 3000.0);
         d.readU32(5, &m_rgbColor);
         d.readReal(6, &m_toneFrequency, 1000.0);
         d.readReal(7, &m_volumeFactor, 1.0);

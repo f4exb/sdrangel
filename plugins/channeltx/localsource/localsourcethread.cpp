@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "dsp/samplesourcefifodb.h"
+#include "dsp/samplesourcefifo.h"
 
 #include "localsourcethread.h"
 
@@ -24,7 +24,7 @@ MESSAGE_CLASS_DEFINITION(LocalSourceThread::MsgStartStop, Message)
 LocalSourceThread::LocalSourceThread(QObject* parent) :
     QThread(parent),
     m_running(false),
-    m_sampleFifo(0)
+    m_sampleFifo(nullptr)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
@@ -40,16 +40,16 @@ void LocalSourceThread::startStop(bool start)
     m_inputMessageQueue.push(msg);
 }
 
-void LocalSourceThread::setSampleFifo(SampleSourceFifoDB *sampleFifo)
+void LocalSourceThread::setSampleFifo(SampleSourceFifo *sampleFifo)
 {
     m_sampleFifo = sampleFifo;
 }
 
 void LocalSourceThread::pullSamples(unsigned int count)
 {
-    SampleVector::iterator beginRead;
-    m_sampleFifo->readAdvance(beginRead, count);
-    emit samplesAvailable(m_sampleFifo->getIteratorOffset(beginRead));
+    unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
+    m_sampleFifo->read(count, iPart1Begin, iPart1End, iPart2Begin, iPart2End);
+    emit samplesAvailable(iPart1Begin, iPart1End, iPart2Begin, iPart2End);
 }
 
 void LocalSourceThread::startWork()

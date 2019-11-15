@@ -2,6 +2,8 @@ project(modssb)
 
 set(modssb_SOURCES
     ssbmod.cpp
+    ssbmodbaseband.cpp
+    ssbmodsource.cpp
     ssbmodplugin.cpp
     ssbmodsettings.cpp
     ssbmodwebapiadapter.cpp
@@ -9,6 +11,8 @@ set(modssb_SOURCES
 
 set(modssb_HEADERS
     ssbmod.h
+    ssbmodbaseband.h
+    ssbmodsource.h
     ssbmodplugin.h
     ssbmodsettings.h
     ssbmodwebapiadapter.h

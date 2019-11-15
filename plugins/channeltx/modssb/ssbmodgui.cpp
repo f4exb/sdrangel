@@ -31,6 +31,7 @@
 #include "util/db.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
+#include "dsp/cwkeyer.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -405,7 +406,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 	m_spectrumVis = new SpectrumVis(SDR_TX_SCALEF, ui->glSpectrum);
 	m_ssbMod = (SSBMod*) channelTx; //new SSBMod(m_deviceUISet->m_deviceSinkAPI);
-	m_ssbMod->setSpectrumSampleSink(m_spectrumVis);
+	m_ssbMod->setSpectrumSink(m_spectrumVis);
 	m_ssbMod->setMessageQueueToGUI(getInputMessageQueue());
 
     resetToDefaults();
@@ -455,7 +456,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_settings.setCWKeyerGUI(ui->cwKeyerGUI);
 
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-	connect(m_ssbMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
+    m_ssbMod->setLevelMeter(ui->volumeMeter);
 
     m_iconDSBUSB.addPixmap(QPixmap("://dsb.png"), QIcon::Normal, QIcon::On);
     m_iconDSBUSB.addPixmap(QPixmap("://usb.png"), QIcon::Normal, QIcon::Off);

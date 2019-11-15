@@ -1,7 +1,9 @@
 project(udpsource)
 
 set(udpsource_SOURCES
-	udpsource.cpp
+    udpsource.cpp
+    udpsourcebaseband.cpp
+    udpsourcesource.cpp
 	udpsourceplugin.cpp
 	udpsourceudphandler.cpp
 	udpsourcemsg.cpp
@@ -11,6 +13,8 @@ set(udpsource_SOURCES
 
 set(udpsource_HEADERS
 	udpsource.h
+    udpsourcebaseband.h
+    udpsourcesource.h
 	udpsourceplugin.h
 	udpsourceudphandler.h
 	udpsourcemsg.h

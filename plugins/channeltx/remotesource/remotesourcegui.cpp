@@ -81,13 +81,7 @@ bool RemoteSourceGUI::deserialize(const QByteArray& data)
 
 bool RemoteSourceGUI::handleMessage(const Message& message)
 {
-    if (RemoteSource::MsgSampleRateNotification::match(message))
-    {
-        RemoteSource::MsgSampleRateNotification& notif = (RemoteSource::MsgSampleRateNotification&) message;
-        m_channelMarker.setBandwidth(notif.getSampleRate());
-        return true;
-    }
-    else if (RemoteSource::MsgConfigureRemoteSource::match(message))
+    if (RemoteSource::MsgConfigureRemoteSource::match(message))
     {
         const RemoteSource::MsgConfigureRemoteSource& cfg = (RemoteSource::MsgConfigureRemoteSource&) message;
         m_settings = cfg.getSettings();
@@ -99,7 +93,16 @@ bool RemoteSourceGUI::handleMessage(const Message& message)
     else if (RemoteSource::MsgReportStreamData::match(message))
     {
         const RemoteSource::MsgReportStreamData& report = (RemoteSource::MsgReportStreamData&) message;
-        ui->sampleRate->setText(QString("%1").arg(report.get_sampleRate()));
+
+        uint32_t remoteSampleRate = report.get_sampleRate();
+
+        if (remoteSampleRate != m_remoteSampleRate)
+        {
+            m_channelMarker.setBandwidth(remoteSampleRate);
+            m_remoteSampleRate = remoteSampleRate;
+        }
+
+        ui->sampleRate->setText(QString("%1").arg(remoteSampleRate));
         QString nominalNbBlocksText = QString("%1/%2")
                 .arg(report.get_nbOriginalBlocks() + report.get_nbFECBlocks())
                 .arg(report.get_nbFECBlocks());
@@ -160,6 +163,7 @@ RemoteSourceGUI::RemoteSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
         ui(new Ui::RemoteSourceGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
+        m_remoteSampleRate(48000),
         m_countUnrecoverable(0),
         m_countRecovered(0),
         m_lastCountUnrecoverable(0),
@@ -231,7 +235,7 @@ void RemoteSourceGUI::displaySettings()
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle(m_settings.m_title);
-    m_channelMarker.setBandwidth(5000); // TODO
+    m_channelMarker.setBandwidth(m_remoteSampleRate);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
 

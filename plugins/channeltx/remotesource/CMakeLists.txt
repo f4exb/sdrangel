@@ -10,7 +10,9 @@ else()
 endif()
 
 set(remotesource_SOURCES
-	remotesource.cpp
+    remotesource.cpp
+    remotesourcebaseband.cpp
+    remotesourcesource.cpp
 	remotesourcethread.cpp
 	remotesourceplugin.cpp
     remotesourcesettings.cpp
@@ -18,7 +20,9 @@ set(remotesource_SOURCES
 )
 
 set(remotesource_HEADERS
-	remotesource.h
+    remotesource.h
+    remotesourcebaseband.h
+    remotesourcesource.h
 	remotesourcethread.h
 	remotesourceplugin.h
     remotesourcesettings.h

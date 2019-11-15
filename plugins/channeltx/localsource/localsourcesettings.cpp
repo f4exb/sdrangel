@@ -36,6 +36,7 @@ void LocalSourceSettings::resetToDefaults()
     m_log2Interp = 0;
     m_filterChainHash = 0;
     m_channelMarker = nullptr;
+    m_play = false;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;

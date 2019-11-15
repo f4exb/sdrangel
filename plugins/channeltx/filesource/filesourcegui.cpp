@@ -19,8 +19,6 @@
 #include <QMessageBox>
 #include <QDebug>
 
-#include "filesourcegui.h"
-
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "dsp/hbfilterchainconverter.h"
@@ -29,6 +27,8 @@
 
 #include "mainwindow.h"
 
+#include "filesourcereport.h"
+#include "filesourcegui.h"
 #include "filesource.h"
 #include "ui_filesourcegui.h"
 
@@ -110,24 +110,24 @@ bool FileSourceGUI::handleMessage(const Message& message)
 		updateWithAcquisition();
 		return true;
 	}
-	else if (FileSource::MsgReportFileSourceStreamData::match(message))
+	else if (FileSourceReport::MsgReportFileSourceStreamData::match(message))
 	{
-		m_fileSampleRate = ((FileSource::MsgReportFileSourceStreamData&)message).getSampleRate();
-		m_fileSampleSize = ((FileSource::MsgReportFileSourceStreamData&)message).getSampleSize();
-		m_startingTimeStamp = ((FileSource::MsgReportFileSourceStreamData&)message).getStartingTimeStamp();
-		m_recordLength = ((FileSource::MsgReportFileSourceStreamData&)message).getRecordLength();
+		m_fileSampleRate = ((FileSourceReport::MsgReportFileSourceStreamData&)message).getSampleRate();
+		m_fileSampleSize = ((FileSourceReport::MsgReportFileSourceStreamData&)message).getSampleSize();
+		m_startingTimeStamp = ((FileSourceReport::MsgReportFileSourceStreamData&)message).getStartingTimeStamp();
+		m_recordLength = ((FileSourceReport::MsgReportFileSourceStreamData&)message).getRecordLength();
 		updateWithStreamData();
 		return true;
 	}
-	else if (FileSource::MsgReportFileSourceStreamTiming::match(message))
+	else if (FileSourceReport::MsgReportFileSourceStreamTiming::match(message))
 	{
-		m_samplesCount = ((FileSource::MsgReportFileSourceStreamTiming&)message).getSamplesCount();
+		m_samplesCount = ((FileSourceReport::MsgReportFileSourceStreamTiming&)message).getSamplesCount();
 		updateWithStreamTime();
 		return true;
 	}
-	else if (FileSource::MsgPlayPause::match(message))
+	else if (FileSourceReport::MsgPlayPause::match(message))
 	{
-	    FileSource::MsgPlayPause& notif = (FileSource::MsgPlayPause&) message;
+	    FileSourceReport::MsgPlayPause& notif = (FileSourceReport::MsgPlayPause&) message;
 	    bool checked = notif.getPlayPause();
 	    ui->play->setChecked(checked);
 	    ui->navTime->setEnabled(!checked);
@@ -135,9 +135,9 @@ bool FileSourceGUI::handleMessage(const Message& message)
 
 	    return true;
 	}
-	else if (FileSource::MsgReportHeaderCRC::match(message))
+	else if (FileSourceReport::MsgReportHeaderCRC::match(message))
 	{
-		FileSource::MsgReportHeaderCRC& notif = (FileSource::MsgReportHeaderCRC&) message;
+		FileSourceReport::MsgReportHeaderCRC& notif = (FileSourceReport::MsgReportHeaderCRC&) message;
 
         if (notif.isOK()) {
 			ui->crcLabel->setStyleSheet("QLabel { background-color : green; }");
@@ -181,6 +181,7 @@ FileSourceGUI::FileSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
     m_fileSource = (FileSource*) channelTx;
     m_fileSource->setMessageQueueToGUI(getInputMessageQueue());
+    m_fileSource->propagateMessageQueueToGUI();
 
     connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -228,17 +229,6 @@ void FileSourceGUI::applySettings(bool force)
 
         FileSource::MsgConfigureFileSource* message = FileSource::MsgConfigureFileSource::create(m_settings, force);
         m_fileSource->getInputMessageQueue()->push(message);
-    }
-}
-
-void FileSourceGUI::applyChannelSettings()
-{
-    if (m_doApplySettings)
-    {
-        FileSource::MsgConfigureChannelizer *msgChan = FileSource::MsgConfigureChannelizer::create(
-                m_settings.m_log2Interp,
-                m_settings.m_filterChainHash);
-        m_fileSource->getInputMessageQueue()->push(msgChan);
     }
 }
 
@@ -473,7 +463,7 @@ void FileSourceGUI::applyPosition()
     ui->filterChainText->setText(s);
 
     displayRateAndShift();
-    applyChannelSettings();
+    applySettings();
 }
 
 void FileSourceGUI::tick()

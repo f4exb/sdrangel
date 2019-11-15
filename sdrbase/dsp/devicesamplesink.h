@@ -21,7 +21,7 @@
 
 #include <QtGlobal>
 
-#include "samplesourcefifodb.h"
+#include "samplesourcefifo.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "export.h"
@@ -114,7 +114,7 @@ public:
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual void setMessageQueueToGUI(MessageQueue *queue) = 0; // pure virtual so that child classes must have to deal with this
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
-	SampleSourceFifoDB* getSampleFifo() { return &m_sampleSourceFifo; }
+	SampleSourceFifo* getSampleFifo() { return &m_sampleSourceFifo; }
 
     static qint64 calculateDeviceCenterFrequency(
             quint64 centerFrequency,
@@ -141,7 +141,7 @@ protected slots:
 	void handleInputMessages();
 
 protected:
-    SampleSourceFifoDB m_sampleSourceFifo;
+    SampleSourceFifo m_sampleSourceFifo;
 	MessageQueue m_inputMessageQueue; //!< Input queue to the sink
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 };

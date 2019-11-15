@@ -28,11 +28,13 @@
 
 #define HACKRF_BLOCKSIZE (1<<17)
 
+class SampleSourceFifo;
+
 class HackRFOutputThread : public QThread {
 	Q_OBJECT
 
 public:
-	HackRFOutputThread(hackrf_device* dev, SampleSourceFifoDB* sampleFifo, QObject* parent = NULL);
+	HackRFOutputThread(hackrf_device* dev, SampleSourceFifo* sampleFifo, QObject* parent = nullptr);
 	~HackRFOutputThread();
 
 	void startWork();
@@ -47,7 +49,7 @@ private:
 
 	hackrf_device* m_dev;
 	qint8 m_buf[2*HACKRF_BLOCKSIZE];
-	SampleSourceFifoDB* m_sampleFifo;
+	SampleSourceFifo* m_sampleFifo;
 
 	unsigned int m_log2Interp;
     int m_fcPos;
@@ -56,6 +58,7 @@ private:
 
 	void run();
 	void callback(qint8* buf, qint32 len);
+    void callbackPart(qint8* buf, SampleVector& data, unsigned int iBegin, unsigned int iEnd);
 	static int tx_callback(hackrf_transfer* transfer);
 };
 

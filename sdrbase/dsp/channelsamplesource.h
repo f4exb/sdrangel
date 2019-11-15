@@ -33,6 +33,7 @@ public:
 
 	virtual void pull(SampleVector::iterator begin, unsigned int nbSamples) = 0; //!< pull nbSamples from the source and write them starting at begin
     virtual void pullOne(Sample& sample) = 0; //!< pull a single sample from the source
+	virtual void prefetch(unsigned int nbSamples) = 0; //!< Do operation(s) before pulling nbSamples
 };
 
 #endif // SDRBASE_DSP_CHANNELSAMPLESOURCE_H_

@@ -2449,6 +2449,13 @@ bool WebAPIRequestMapper::getChannel(
         QJsonObject settingsJsonObject = channelSettingsJson[channelSettingsKey].toObject();
         channelSettingsKeys = settingsJsonObject.keys();
 
+        // get possible sub-keys
+        if (channelSettingsKeys.contains("cwKeyer"))
+        {
+            QJsonObject cwJson; // unused
+            appendSettingsSubKeys(settingsJsonObject, cwJson, "cwKeyer", channelSettingsKeys);
+        }
+
         if (channelSettingsKey == "AMDemodSettings")
         {
             channelSettings->setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());

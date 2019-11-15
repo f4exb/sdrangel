@@ -20,12 +20,9 @@
 #include "util/message.h"
 
 BasebandSampleSource::BasebandSampleSource() :
-    m_guiMessageQueue(0),
-	m_sampleFifo(48000), // arbitrary, will be adjusted to match device sink FIFO size
-	m_deviceSampleFifo(0)
+    m_guiMessageQueue(nullptr)
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-	connect(&m_sampleFifo, SIGNAL(dataWrite(int)), this, SLOT(handleWriteToSampleFifo(int)));
 }
 
 BasebandSampleSource::~BasebandSampleSource()
@@ -38,51 +35,8 @@ void BasebandSampleSource::handleInputMessages()
 
 	while ((message = m_inputMessageQueue.pop()) != 0)
 	{
-		if (handleMessage(*message))
-		{
+		if (handleMessage(*message)) {
 			delete message;
 		}
 	}
-}
-
-void BasebandSampleSource::handleWriteToSampleFifo(int nbSamples)
-{
-    handleWriteToFifo(&m_sampleFifo, nbSamples);
-}
-
-void BasebandSampleSource::handleWriteToDeviceFifo(int nbSamples)
-{
-    handleWriteToFifo(m_deviceSampleFifo, nbSamples);
-}
-
-void BasebandSampleSource::handleWriteToFifo(SampleSourceFifoDB *sampleFifo, int nbSamples)
-{
-    SampleVector::iterator writeAt;
-    sampleFifo->getWriteIterator(writeAt);
-    pullAudio(nbSamples); // Pre-fetch input audio samples this is mandatory to keep things running smoothly
-
-    for (int i = 0; i < nbSamples; i++)
-    {
-        pull((*writeAt));
-        sampleFifo->bumpIndex(writeAt);
-    }
-}
-
-
-void BasebandSampleSource::setDeviceSampleSourceFifo(SampleSourceFifoDB *deviceSampleFifo)
-{
-    if (m_deviceSampleFifo != deviceSampleFifo)
-    {
-        if (m_deviceSampleFifo) {
-            qDebug("BasebandSampleSource::setDeviceSampleSourceFifo: disconnect device FIFO %p", m_deviceSampleFifo);
-            disconnect(m_deviceSampleFifo, SIGNAL(dataWrite(int)), this, SLOT(handleWriteToDeviceFifo(int)));
-        }
-
-        if (deviceSampleFifo) {
-            qDebug("BasebandSampleSource::setDeviceSampleSourceFifo: connect device FIFO %p", deviceSampleFifo);
-            connect(deviceSampleFifo, SIGNAL(dataWrite(int)), this, SLOT(handleWriteToDeviceFifo(int)));
-        }
-
-        m_deviceSampleFifo = deviceSampleFifo;
-    }
 }

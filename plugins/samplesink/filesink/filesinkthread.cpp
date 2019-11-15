@@ -21,10 +21,10 @@
 #include <algorithm>
 #include <QDebug>
 
-#include "dsp/samplesourcefifodb.h"
+#include "dsp/samplesourcefifo.h"
 #include "filesinkthread.h"
 
-FileSinkThread::FileSinkThread(std::ofstream *samplesStream, SampleSourceFifoDB* sampleFifo, QObject* parent) :
+FileSinkThread::FileSinkThread(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_ofstream(samplesStream),
@@ -97,7 +97,7 @@ void FileSinkThread::setSamplerate(int samplerate)
 
 		// resize sample FIFO
 		if (m_sampleFifo) {
-		    m_sampleFifo->resize(samplerate); // 1s buffer
+		    m_sampleFifo->resize(SampleSourceFifo::getSizePolicy(samplerate)); // 1s buffer
 		}
 
         // resize output buffer
@@ -178,52 +178,56 @@ void FileSinkThread::tick()
             m_throttleToggle = !m_throttleToggle;
         }
 
-//        if (m_throttlems > m_maxThrottlems)
-//        {
-//            qDebug("FileSinkThread::tick: m_maxThrottlems: %d", m_maxThrottlems);
-//            m_maxThrottlems = m_throttlems;
-//        }
-
-        SampleVector::iterator readUntil;
-
-        m_sampleFifo->readAdvance(readUntil, m_samplesChunkSize);
-        SampleVector::iterator beginRead = readUntil - m_samplesChunkSize;
+        unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
+        SampleVector& data = m_sampleFifo->getData();
+        m_sampleFifo->read(m_samplesChunkSize, iPart1Begin, iPart1End, iPart2Begin, iPart2End);
         m_samplesCount += m_samplesChunkSize;
 
-        if (m_log2Interpolation == 0)
-        {
-            m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), m_samplesChunkSize*sizeof(Sample));
-        }
-        else
-        {
-            int chunkSize = std::min((int) m_samplesChunkSize, m_samplerate);
-
-            switch (m_log2Interpolation)
-            {
-            case 1:
-                m_interpolators.interpolate2_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-                break;
-            case 2:
-                m_interpolators.interpolate4_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-                break;
-            case 3:
-                m_interpolators.interpolate8_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-                break;
-            case 4:
-                m_interpolators.interpolate16_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-                break;
-            case 5:
-                m_interpolators.interpolate32_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-                break;
-            case 6:
-                m_interpolators.interpolate64_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
-                break;
-            default:
-                break;
-            }
-
-            m_ofstream->write(reinterpret_cast<char*>(m_buf), m_samplesChunkSize*(1<<m_log2Interpolation)*2*sizeof(int16_t));
+        if (iPart1Begin != iPart1End) {
+            callbackPart(data, iPart1Begin, iPart1End);
         }
 
-	}
+        if (iPart2Begin != iPart2End) {
+            callbackPart(data, iPart2Begin, iPart2End);
+        }
+    }
+}
+
+void FileSinkThread::callbackPart(SampleVector& data, unsigned int iBegin, unsigned int iEnd)
+{
+    SampleVector::iterator beginRead = data.begin() + iBegin;
+    unsigned int chunkSize = iEnd - iBegin;
+
+    if (m_log2Interpolation == 0)
+    {
+        m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), chunkSize*sizeof(Sample));
+    }
+    else
+    {
+        switch (m_log2Interpolation)
+        {
+        case 1:
+            m_interpolators.interpolate2_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
+            break;
+        case 2:
+            m_interpolators.interpolate4_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
+            break;
+        case 3:
+            m_interpolators.interpolate8_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
+            break;
+        case 4:
+            m_interpolators.interpolate16_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
+            break;
+        case 5:
+            m_interpolators.interpolate32_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
+            break;
+        case 6:
+            m_interpolators.interpolate64_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interpolation)*2);
+            break;
+        default:
+            break;
+        }
+
+        m_ofstream->write(reinterpret_cast<char*>(m_buf), chunkSize*(1<<m_log2Interpolation)*2*sizeof(int16_t));
+    }
 }

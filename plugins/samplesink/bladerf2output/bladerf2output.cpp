@@ -45,8 +45,8 @@ MESSAGE_CLASS_DEFINITION(BladeRF2Output::MsgReportGainRange, Message)
 BladeRF2Output::BladeRF2Output(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
-    m_dev(0),
-    m_thread(0),
+    m_dev(nullptr),
+    m_thread(nullptr),
     m_deviceDescription("BladeRF2Output"),
     m_running(false)
 {
@@ -75,7 +75,7 @@ void BladeRF2Output::destroy()
 
 bool BladeRF2Output::openDevice()
 {
-    m_sampleSourceFifo.resize(m_settings.m_devSampleRate/(1<<(m_settings.m_log2Interp <= 4 ? m_settings.m_log2Interp : 4)));
+    m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_settings.m_devSampleRate));
 
     // look for Tx buddies and get reference to the device object
     if (m_deviceAPI->getSinkBuddies().size() > 0) // look sink sibling first
@@ -279,7 +279,7 @@ bool BladeRF2Output::start()
         {
             qDebug("BladeRF2Output::start: expand channels. Re-allocate thread and take ownership");
 
-            SampleSourceFifoDB **fifos = new SampleSourceFifoDB*[nbOriginalChannels];
+            SampleSourceFifo **fifos = new SampleSourceFifo*[nbOriginalChannels];
             unsigned int *log2Interps = new unsigned int[nbOriginalChannels];
 
             for (int i = 0; i < nbOriginalChannels; i++) // save original FIFO references and data
@@ -407,7 +407,7 @@ void BladeRF2Output::stop()
     {
         qDebug("BladeRF2Output::stop: MO mode. Reduce by deleting and re-creating the thread");
         bladeRF2OutputThread->stopWork();
-        SampleSourceFifoDB **fifos = new SampleSourceFifoDB*[nbOriginalChannels-1];
+        SampleSourceFifo **fifos = new SampleSourceFifo*[nbOriginalChannels-1];
         unsigned int *log2Interps = new unsigned int[nbOriginalChannels-1];
         bool stillActiveFIFO = false;
 
@@ -714,7 +714,7 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
     {
         reverseAPIKeys.append("devSampleRate");
         BladeRF2OutputThread *bladeRF2OutputThread = findThread();
-        SampleSourceFifoDB *fifo = 0;
+        SampleSourceFifo *fifo = nullptr;
 
         if (bladeRF2OutputThread)
         {
@@ -722,20 +722,10 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
             bladeRF2OutputThread->setFifo(requestedChannel, 0);
         }
 
-        int fifoSize;
-
-        if (settings.m_log2Interp >= 5)
-        {
-            fifoSize = DeviceBladeRF2Shared::m_sampleFifoMinSize32;
-        }
-        else
-        {
-            fifoSize = (std::max)(
-                (int) ((settings.m_devSampleRate/(1<<settings.m_log2Interp)) * DeviceBladeRF2Shared::m_sampleFifoLengthInSeconds),
-                DeviceBladeRF2Shared::m_sampleFifoMinSize);
-        }
-
-        m_sampleSourceFifo.resize(fifoSize);
+        unsigned int fifoRate = std::max(
+            (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2Interp),
+            DeviceBladeRF2Shared::m_sampleFifoMinRate);
+        m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(fifoRate));
 
         if (fifo) {
             bladeRF2OutputThread->setFifo(requestedChannel, &m_sampleSourceFifo);
@@ -1173,13 +1163,14 @@ void BladeRF2Output::webapiReverseSendSettings(QList<QString>& deviceSettingsKey
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
 
     // Always use PATCH to avoid passing reverse API settings
-    m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
 
     delete swgDeviceSettings;
 }
@@ -1198,17 +1189,19 @@ void BladeRF2Output::webapiReverseSendStartStop(bool start)
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer=new QBuffer();
+    QBuffer *buffer = new QBuffer();
     buffer->open((QBuffer::ReadWrite));
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
+    QNetworkReply *reply;
 
     if (start) {
-        m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
     } else {
-        m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
     }
 
+    buffer->setParent(reply);
     delete swgDeviceSettings;
 }
 
@@ -1222,10 +1215,11 @@ void BladeRF2Output::networkManagerFinished(QNetworkReply *reply)
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();
-        return;
     }
-
-    QString answer = reply->readAll();
-    answer.chop(1); // remove last \n
-    qDebug("BladeRF2Output::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    else
+    {
+        QString answer = reply->readAll();
+        answer.chop(1); // remove last \n
+        qDebug("BladeRF2Output::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    }
 }

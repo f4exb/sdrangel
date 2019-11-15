@@ -161,8 +161,7 @@ public:
     uint32_t            m_log2Soft;
     bool                m_threadWasRunning; //!< flag to know if thread needs to be resumed after suspend
 
-    static const float  m_sampleFifoLengthInSeconds;
-    static const int    m_sampleFifoMinSize;
+    static const unsigned int m_sampleFifoMinRate;
 
     DeviceLimeSDRShared() :
         m_deviceParams(0),

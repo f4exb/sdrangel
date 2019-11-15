@@ -22,5 +22,4 @@ MESSAGE_CLASS_DEFINITION(DeviceLimeSDRShared::MsgReportClockSourceChange, Messag
 MESSAGE_CLASS_DEFINITION(DeviceLimeSDRShared::MsgReportGPIOChange, Message)
 MESSAGE_CLASS_DEFINITION(DeviceLimeSDRShared::MsgReportDeviceInfo, Message)
 
-const float  DeviceLimeSDRShared::m_sampleFifoLengthInSeconds = 0.25;
-const int    DeviceLimeSDRShared::m_sampleFifoMinSize = 48000; // 192kS/s knee
+const unsigned int  DeviceLimeSDRShared::m_sampleFifoMinRate = 48000;

@@ -30,6 +30,7 @@
 #include "util/db.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
+#include "dsp/cwkeyer.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -393,7 +394,7 @@ FreeDVModGUI::FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_settings.setCWKeyerGUI(ui->cwKeyerGUI);
 
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-	connect(m_freeDVMod, SIGNAL(levelChanged(qreal, qreal, int)), ui->volumeMeter, SLOT(levelChanged(qreal, qreal, int)));
+    m_freeDVMod->setLevelMeter(ui->volumeMeter);
 
     displaySettings();
     applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)

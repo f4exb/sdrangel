@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "SWGChannelSettings.h"
+#include "dsp/cwkeyer.h"
 #include "ammod.h"
 #include "ammodwebapiadapter.h"
 

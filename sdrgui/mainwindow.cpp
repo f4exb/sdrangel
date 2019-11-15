@@ -448,12 +448,12 @@ void MainWindow::addMIMODevice()
     QStringList rxChannelNamesList(rxChannelNames);
     channelSelector->addItems(rxChannelNamesList);
     m_deviceUIs.back()->setNumberOfAvailableRxChannels(rxChannelNamesList.size());
-    // Add Tx channels TODO: restore when channel sinks fixed for MIMO
-    // QList<QString> txChannelNames;
-    // m_pluginManager->listTxChannels(txChannelNames);
-    // QStringList txChannelNamesList(txChannelNames);
-    // channelSelector->addItems(txChannelNamesList);
-    // m_deviceUIs.back()->setNumberOfAvailableTxChannels(txChannelNamesList.size());
+    // Add Tx channels
+    QList<QString> txChannelNames;
+    m_pluginManager->listTxChannels(txChannelNames);
+    QStringList txChannelNamesList(txChannelNames);
+    channelSelector->addItems(txChannelNamesList);
+    m_deviceUIs.back()->setNumberOfAvailableTxChannels(txChannelNamesList.size());
 
     connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(channelAddClicked(bool)));
 
