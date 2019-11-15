@@ -72,6 +72,18 @@ Real Projector::run(const Sample& s)
         case ProjectionPhase:
             v = std::atan2((float) s.m_imag, (float) s.m_real) / M_PI;
             break;
+        case ProjectionDOAP:
+        {
+            Real p = std::atan2((float) s.m_imag, (float) s.m_real) / M_PI; // calculate phase. Assume phase difference between
+            v = acos(p) / M_PI; // two sources at half wavelength distance with sources axis as reference (positive side)
+        }
+            break;
+        case ProjectionDOAN:
+        {
+            Real p = std::atan2((float) s.m_imag, (float) s.m_real) / M_PI; // calculate phase. Assume phase difference between
+            v = -(acos(p) / M_PI); // two sources at half wavelength distance with sources axis as reference (negative source)
+        }
+            break;
         case ProjectionDPhase:
         {
             Real curArg = std::atan2((float) s.m_imag, (float) s.m_real);

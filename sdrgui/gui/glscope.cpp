@@ -746,7 +746,11 @@ void GLScope::paintGL()
 
             // If X is an angle and XY display is in polar grid we will perform polar conversion of traces
             bool polarConversion = m_projectionTypes ?
-                (*m_projectionTypes).size() > 0 ? (*m_projectionTypes)[0] == Projector::ProjectionPhase : false
+                (*m_projectionTypes).size() > 0 ?
+                    ((*m_projectionTypes)[0] == Projector::ProjectionPhase)
+                    || ((*m_projectionTypes)[0] == Projector::ProjectionDOAP)
+                    || ((*m_projectionTypes)[0] == Projector::ProjectionDOAN)
+                    : false
                 : false;
             polarConversion &= m_displayPolGrid;
 
@@ -1730,6 +1734,8 @@ void GLScope::setYScale(ScaleEngine &scale, uint32_t highlightedTraceIndex)
         }
         break;
     case Projector::ProjectionPhase: // Phase or frequency
+    case Projector::ProjectionDOAP:
+    case Projector::ProjectionDOAN:
     case Projector::ProjectionDPhase:
         scale.setRange(Unit::None, -1.0 / traceData.m_amp + amp_ofs, 1.0 / traceData.m_amp + amp_ofs);
         break;

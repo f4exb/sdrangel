@@ -1314,6 +1314,8 @@ void GLScopeGUI::fillProjectionCombo(QComboBox* comboBox)
     comboBox->addItem("MagSq", Projector::ProjectionMagSq);
     comboBox->addItem("MagdB", Projector::ProjectionMagDB);
     comboBox->addItem("Phi", Projector::ProjectionPhase);
+    comboBox->addItem("DOAP", Projector::ProjectionDOAP);
+    comboBox->addItem("DOAN", Projector::ProjectionDOAN);
     comboBox->addItem("dPhi", Projector::ProjectionDPhase);
     comboBox->addItem("BPSK", Projector::ProjectionBPSK);
     comboBox->addItem("QPSK", Projector::ProjectionQPSK);

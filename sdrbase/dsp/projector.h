@@ -30,6 +30,8 @@ public:
         ProjectionMagSq,    //!< Calculate linear squared magnitude or power
         ProjectionMagDB,    //!< Calculate logarithmic (dB) of squared magnitude
         ProjectionPhase,    //!< Calculate phase
+        ProjectionDOAP,     //!< Calculate ambiguous DOA from phase as phase difference (assuming positive)
+        ProjectionDOAN,     //!< Calculate ambiguous DOA from phase as phase difference (assuming negative)
         ProjectionDPhase,   //!< Calculate phase derivative i.e. instantaneous frequency scaled to sample rate
         ProjectionBPSK,     //!< Phase comparator BPSK evaluation
         ProjectionQPSK,     //!< Phase comparator QPSK evaluation
