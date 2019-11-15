@@ -144,7 +144,7 @@ public:
     double getMagSq() const;
     double getInMagSq() const;
     int32_t getBufferGauge() const;
-    bool getSquelchOpen();
+    bool getSquelchOpen() const;
     void setSpectrumSink(BasebandSampleSink* spectrum);
     void setSpectrum(bool enabled);
     void resetReadIndex();

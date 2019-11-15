@@ -501,3 +501,8 @@ void FileSource::propagateMessageQueueToGUI()
 {
     m_basebandSource->setMessageQueueToGUI(getMessageQueueToGUI());
 }
+
+double FileSource::getMagSq() const
+{
+    return m_basebandSource->getMagSq();
+}

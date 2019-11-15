@@ -561,3 +561,22 @@ void UDPSource::setLevelMeter(QObject *levelMeter)
 {
     connect(m_basebandSource, SIGNAL(levelChanged(qreal, qreal, int)), levelMeter, SLOT(levelChanged(qreal, qreal, int)));
 }
+
+double UDPSource::getMagSq() const
+{
+    return m_basebandSource->getMagSq();
+}
+double UDPSource::getInMagSq() const
+{
+    return m_basebandSource->getInMagSq();
+}
+
+int32_t UDPSource::getBufferGauge() const
+{
+    return m_basebandSource->getBufferGauge();
+}
+
+bool UDPSource::getSquelchOpen() const
+{
+    return m_basebandSource->getSquelchOpen();
+}

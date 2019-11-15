@@ -122,6 +122,9 @@ public:
 	void pull(const SampleVector::iterator& begin, unsigned int nbSamples);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     double getMagSq() const { return m_source.getMagSq(); }
+    double getInMagSq() const { return m_source.getInMagSq(); }
+    int32_t getBufferGauge() const { return m_source.getBufferGauge(); }
+    bool getSquelchOpen() const { return m_source.getSquelchOpen(); }
     int getChannelSampleRate() const;
     bool isSquelchOpen() const;
     void setSpectrumSink(BasebandSampleSink *spectrumSink) { m_source.setSpectrumSink(spectrumSink); }
