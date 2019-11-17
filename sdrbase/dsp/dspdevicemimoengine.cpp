@@ -311,7 +311,7 @@ void DSPDeviceMIMOEngine::workSampleSourceFifos()
     }
 
     std::vector<SampleVector::iterator> vbegin;
-    std::vector<SampleVector> data = sampleFifo->getData();
+    std::vector<SampleVector>& data = sampleFifo->getData();
     unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
     unsigned int remainder = sampleFifo->remainderSync();
 
@@ -441,10 +441,7 @@ void DSPDeviceMIMOEngine::workSamplesSource(SampleVector& data, unsigned int iBe
 
     // pull data from MIMO channels
 
-    for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it)
-    {
-        qDebug("DSPDeviceMIMOEngine::workSamplesSource: %s: nbSamples: %u stream: %u",
-            qPrintable((*it)->objectName()), nbSamples, streamIndex);
+    for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it) {
         (*it)->pull(begin, nbSamples, streamIndex);
     }
 
@@ -462,8 +459,6 @@ void DSPDeviceMIMOEngine::workSamplesSource(SampleVector& data, unsigned int iBe
         else if (m_basebandSampleSources[streamIndex].size() == 1)
         {
             BasebandSampleSource *sampleSource = m_basebandSampleSources[streamIndex].front();
-            qDebug("DSPDeviceMIMOEngine::workSamplesSource: %s: nbSamples: %u stream: %u",
-                qPrintable(sampleSource->objectName()), nbSamples, streamIndex);
             sampleSource->pull(begin, nbSamples);
         }
         else
@@ -495,8 +490,6 @@ void DSPDeviceMIMOEngine::workSamplesSource(SampleVector& data, unsigned int iBe
                     }
                 );
             }
-
-            begin = m_sourceSampleBuffers[streamIndex].m_vector.begin();
         }
     }
 
