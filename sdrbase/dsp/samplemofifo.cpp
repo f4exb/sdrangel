@@ -83,7 +83,7 @@ void SampleMOFifo::readSync(
 {
     QMutexLocker mutexLocker(&m_mutex);
     unsigned int spaceLeft = m_size - m_readHead;
-    m_readCount += amount;
+    m_readCount = m_readCount + amount < m_size ? m_readCount + amount : m_size; // cannot exceed FIFO size
 
     if (amount <= spaceLeft)
     {
@@ -146,7 +146,7 @@ void SampleMOFifo::writeSync(
         m_writeHead = remaining;
     }
 
-    m_readCount = amount < m_readCount ? m_readCount - amount : 0;
+    m_readCount = amount < m_readCount ? m_readCount - amount : 0; // cannot be less than 0
 }
 
 void SampleMOFifo::readAsync(
@@ -158,7 +158,7 @@ void SampleMOFifo::readAsync(
 {
     QMutexLocker mutexLocker(&m_mutex);
     unsigned int spaceLeft = m_size - m_vReadHead[stream];
-    m_vReadCount[stream] += amount;
+    m_vReadCount[stream] = m_vReadCount[stream] + amount < m_size ? m_vReadCount[stream] + amount : m_size; // cannot exceed FIFO size
 
     if (amount <= spaceLeft)
     {
@@ -225,7 +225,7 @@ void SampleMOFifo::writeAsync( //!< in place write with given amount
         m_vWriteHead[stream] = remaining;
     }
 
-    m_vReadCount[stream] = amount < m_vReadCount[stream] ? m_vReadCount[stream] - amount : 0;
+    m_vReadCount[stream] = amount < m_vReadCount[stream] ? m_vReadCount[stream] - amount : 0; // cannot be less than 0
 }
 
 unsigned int SampleMOFifo::getSizePolicy(unsigned int sampleRate)
