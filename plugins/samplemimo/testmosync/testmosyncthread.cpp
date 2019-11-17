@@ -188,14 +188,7 @@ void TestMOSyncThread::callbackPart(qint16* buf, qint32 nSamples, int iBegin)
 {
     for (unsigned int channel = 0; channel < 2; channel++)
     {
-        qDebug("TestMOSyncThread::callbackPart: nSamples: %d channel: %u", nSamples, channel);
         SampleVector::iterator begin = m_sampleFifo->getData(channel).begin() + iBegin;
-        // m_testVector.allocate(nSamples/(1<<m_log2Interp), Sample{16384, 0});
-        // std::copy(
-        //     m_testVector.m_vector.begin(),
-        //     m_testVector.m_vector.begin() + nSamples/(1<<m_log2Interp),
-        //     begin
-        // );
 
         if (m_log2Interp == 0)
         {
@@ -302,17 +295,67 @@ void TestMOSyncThread::tick()
             m_throttleToggle = !m_throttleToggle;
         }
 
-        int chunkSize = std::min((int) m_samplesChunkSize, m_samplerate) + m_samplesRemainder;
-        qDebug("TestMOSyncThread::tick: chunkSize: %d m_samplesRemainder: %u m_blockSize: %u",chunkSize, m_samplesRemainder, m_blockSize);
+        unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
+        std::vector<SampleVector>& data = m_sampleFifo->getData();
+        m_sampleFifo->readSync(m_samplesChunkSize, iPart1Begin, iPart1End, iPart2Begin, iPart2End);
 
-        while (chunkSize >= m_blockSize)
-        {
-            callback(m_buf, m_blockSize);
-            chunkSize -= m_blockSize;
+        if (iPart1Begin != iPart1End) {
+            callbackPart(data, iPart1Begin, iPart1End);
         }
 
-        m_samplesRemainder = chunkSize;
+        if (iPart2Begin != iPart2End) {
+            callbackPart(data, iPart2Begin, iPart2End);
+        }
 	}
+}
+
+void TestMOSyncThread::callbackPart(std::vector<SampleVector>& data, unsigned int iBegin, unsigned int iEnd)
+{
+    unsigned int chunkSize = iEnd - iBegin;
+
+    for (unsigned int channel = 0; channel < 2; channel++)
+    {
+        SampleVector::iterator beginRead = data[channel].begin()  + iBegin;
+
+        if (m_log2Interp == 0)
+        {
+            m_interpolators[channel].interpolate1(&beginRead, m_buf, 2*chunkSize);
+
+            if (channel == m_feedSpectrumIndex) {
+                feedSpectrum(m_buf, 2*chunkSize);
+            }
+        }
+        else
+        {
+            switch (m_log2Interp)
+            {
+            case 1:
+                m_interpolators[channel].interpolate2_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interp)*2);
+                break;
+            case 2:
+                m_interpolators[channel].interpolate4_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interp)*2);
+                break;
+            case 3:
+                m_interpolators[channel].interpolate8_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interp)*2);
+                break;
+            case 4:
+                m_interpolators[channel].interpolate16_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interp)*2);
+                break;
+            case 5:
+                m_interpolators[channel].interpolate32_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interp)*2);
+                break;
+            case 6:
+                m_interpolators[channel].interpolate64_cen(&beginRead, m_buf, chunkSize*(1<<m_log2Interp)*2);
+                break;
+            default:
+                break;
+            }
+
+            if (channel == m_feedSpectrumIndex) {
+                feedSpectrum(m_buf, 2*chunkSize*(1<<m_log2Interp));
+            }
+        }
+    }
 }
 
 void TestMOSyncThread::feedSpectrum(int16_t *buf, unsigned int bufSize)
@@ -321,7 +364,6 @@ void TestMOSyncThread::feedSpectrum(int16_t *buf, unsigned int bufSize)
         return;
     }
 
-    qDebug("TestMOSyncThread::feedSpectrum: bufSize: %u", bufSize);
     m_samplesVector.allocate(bufSize/2);
     Sample16 *s16Buf = (Sample16*) buf;
 
