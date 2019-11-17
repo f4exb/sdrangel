@@ -5,7 +5,7 @@ set(interferometer_SOURCES
     interferometer.cpp
     interferometercorr.cpp
     interferometersettings.cpp
-    interferometersink.cpp
+    interferometerbaseband.cpp
     interferometerstreamsink.cpp
     interferometerwebapiadapter.cpp
 )
@@ -15,7 +15,7 @@ set(interferometer_HEADERS
     interferometer.h
     interferometercorr.h
     interferometersettings.h
-    interferometersink.h
+    interferometerbaseband.h
     interferometerstreamsink.h
     interferometerwebapiadapter.h
 )

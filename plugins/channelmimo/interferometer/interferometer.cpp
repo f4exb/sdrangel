@@ -29,7 +29,7 @@
 
 #include "SWGChannelSettings.h"
 
-#include "interferometersink.h"
+#include "interferometerbaseband.h"
 #include "interferometer.h"
 
 MESSAGE_CLASS_DEFINITION(Interferometer::MsgConfigureInterferometer, Message)
@@ -51,7 +51,7 @@ Interferometer::Interferometer(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_thread = new QThread(this);
-    m_sink = new InterferometerSink(m_fftSize);
+    m_sink = new InterferometerBaseband(m_fftSize);
     m_sink->moveToThread(m_thread);
     m_deviceAPI->addMIMOChannel(this);
     m_deviceAPI->addMIMOChannelAPI(this);
@@ -126,14 +126,14 @@ void Interferometer::applySettings(const InterferometerSettings& settings, bool 
     if ((m_settings.m_log2Decim != settings.m_log2Decim)
      || (m_settings.m_filterChainHash != settings.m_filterChainHash) || force)
     {
-        InterferometerSink::MsgConfigureChannelizer *msg = InterferometerSink::MsgConfigureChannelizer::create(
+        InterferometerBaseband::MsgConfigureChannelizer *msg = InterferometerBaseband::MsgConfigureChannelizer::create(
             settings.m_log2Decim, settings.m_filterChainHash);
         m_sink->getInputMessageQueue()->push(msg);
     }
 
     if ((m_settings.m_correlationType != settings.m_correlationType) || force)
     {
-        InterferometerSink::MsgConfigureCorrelation *msg = InterferometerSink::MsgConfigureCorrelation::create(
+        InterferometerBaseband::MsgConfigureCorrelation *msg = InterferometerBaseband::MsgConfigureCorrelation::create(
             settings.m_correlationType);
         m_sink->getInputMessageQueue()->push(msg);
     }
@@ -183,14 +183,14 @@ bool Interferometer::handleMessage(const Message& cmd)
             calculateFrequencyOffset(); // This is when device sample rate changes
 
             // Notify sink of input sample rate change
-            InterferometerSink::MsgSignalNotification *sig = InterferometerSink::MsgSignalNotification::create(
+            InterferometerBaseband::MsgSignalNotification *sig = InterferometerBaseband::MsgSignalNotification::create(
                 m_deviceSampleRate, notif.getCenterFrequency(), notif.getIndex()
             );
             qDebug() << "Interferometer::handleMessage: DSPMIMOSignalNotification: push to sink";
             m_sink->getInputMessageQueue()->push(sig);
 
             // Redo the channelizer stuff with the new sample rate to re-synchronize everything
-            InterferometerSink::MsgConfigureChannelizer *msg = InterferometerSink::MsgConfigureChannelizer::create(
+            InterferometerBaseband::MsgConfigureChannelizer *msg = InterferometerBaseband::MsgConfigureChannelizer::create(
                 m_settings.m_log2Decim,
                 m_settings.m_filterChainHash);
             m_sink->getInputMessageQueue()->push(msg);
@@ -254,7 +254,7 @@ void Interferometer::calculateFrequencyOffset()
 
 void Interferometer::applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash)
 {
-    InterferometerSink::MsgConfigureChannelizer *msg = InterferometerSink::MsgConfigureChannelizer::create(log2Decim, filterChainHash);
+    InterferometerBaseband::MsgConfigureChannelizer *msg = InterferometerBaseband::MsgConfigureChannelizer::create(log2Decim, filterChainHash);
     m_sink->getInputMessageQueue()->push(msg);
 }
 

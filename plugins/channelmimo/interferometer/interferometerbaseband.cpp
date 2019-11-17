@@ -21,14 +21,14 @@
 #include "dsp/downchannelizer.h"
 #include "dsp/dspcommands.h"
 
-#include "interferometersink.h"
+#include "interferometerbaseband.h"
 
 
-MESSAGE_CLASS_DEFINITION(InterferometerSink::MsgConfigureChannelizer, Message)
-MESSAGE_CLASS_DEFINITION(InterferometerSink::MsgSignalNotification, Message)
-MESSAGE_CLASS_DEFINITION(InterferometerSink::MsgConfigureCorrelation, Message)
+MESSAGE_CLASS_DEFINITION(InterferometerBaseband::MsgConfigureChannelizer, Message)
+MESSAGE_CLASS_DEFINITION(InterferometerBaseband::MsgSignalNotification, Message)
+MESSAGE_CLASS_DEFINITION(InterferometerBaseband::MsgConfigureCorrelation, Message)
 
-InterferometerSink::InterferometerSink(int fftSize) :
+InterferometerBaseband::InterferometerBaseband(int fftSize) :
     m_correlator(fftSize),
     m_spectrumSink(nullptr),
     m_scopeSink(nullptr),
@@ -48,7 +48,7 @@ InterferometerSink::InterferometerSink(int fftSize) :
         &m_sampleMIFifo,
         &SampleMIFifo::dataSyncReady,
         this,
-        &InterferometerSink::handleData,
+        &InterferometerBaseband::handleData,
         Qt::QueuedConnection
     );
 
@@ -56,7 +56,7 @@ InterferometerSink::InterferometerSink(int fftSize) :
     m_lastStream = 0;
 }
 
-InterferometerSink::~InterferometerSink()
+InterferometerBaseband::~InterferometerBaseband()
 {
     for (int i = 0; i < 2; i++)
     {
@@ -64,7 +64,7 @@ InterferometerSink::~InterferometerSink()
     }
 }
 
-void InterferometerSink::reset()
+void InterferometerBaseband::reset()
 {
     QMutexLocker mutexLocker(&m_mutex);
     m_sampleMIFifo.reset();
@@ -74,14 +74,14 @@ void InterferometerSink::reset()
     }
 }
 
-void InterferometerSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int streamIndex)
+void InterferometerBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int streamIndex)
 {
     if (streamIndex > 1) {
         return;
     }
 
     if (streamIndex == m_lastStream) {
-        qWarning("InterferometerSink::feed: twice same stream in a row: %u", streamIndex);
+        qWarning("InterferometerBaseband::feed: twice same stream in a row: %u", streamIndex);
     }
 
     m_lastStream = streamIndex;
@@ -92,7 +92,7 @@ void InterferometerSink::feed(const SampleVector::const_iterator& begin, const S
     {
         if (m_sizes[0] != m_sizes[1])
         {
-            qWarning("InterferometerSink::feed: unequal sizes: [0]: %d [1]: %d", m_sizes[0], m_sizes[1]);
+            qWarning("InterferometerBaseband::feed: unequal sizes: [0]: %d [1]: %d", m_sizes[0], m_sizes[1]);
             m_sampleMIFifo.writeSync(m_vbegin, std::min(m_sizes[0], m_sizes[1]));
         }
         else
@@ -102,7 +102,7 @@ void InterferometerSink::feed(const SampleVector::const_iterator& begin, const S
     }
 }
 
-void InterferometerSink::handleData()
+void InterferometerBaseband::handleData()
 {
     QMutexLocker mutexLocker(&m_mutex);
 
@@ -127,7 +127,7 @@ void InterferometerSink::handleData()
     }
 }
 
-void InterferometerSink::processFifo(const std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend)
+void InterferometerBaseband::processFifo(const std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend)
 {
     for (unsigned int stream = 0; stream < 2; stream++) {
         m_channelizers[stream]->feed(data[stream].begin() + ibegin, data[stream].begin() + iend, false);
@@ -136,7 +136,7 @@ void InterferometerSink::processFifo(const std::vector<SampleVector>& data, unsi
     run();
 }
 
-void InterferometerSink::run()
+void InterferometerBaseband::run()
 {
     if (m_correlator.performCorr(m_sinks[0].getData(), m_sinks[0].getSize(), m_sinks[1].getData(), m_sinks[1].getSize()))
     {
@@ -172,9 +172,9 @@ void InterferometerSink::run()
     }
 }
 
-void InterferometerSink::handleInputMessages()
+void InterferometerBaseband::handleInputMessages()
 {
-    qDebug("InterferometerSink::handleInputMessage");
+    qDebug("InterferometerBaseband::handleInputMessage");
 	Message* message;
 
 	while ((message = m_inputMessageQueue.pop()) != 0)
@@ -185,7 +185,7 @@ void InterferometerSink::handleInputMessages()
 	}
 }
 
-bool InterferometerSink::handleMessage(const Message& cmd)
+bool InterferometerBaseband::handleMessage(const Message& cmd)
 {
     if (MsgConfigureChannelizer::match(cmd))
     {
@@ -194,7 +194,7 @@ bool InterferometerSink::handleMessage(const Message& cmd)
         int log2Decim = cfg.getLog2Decim();
         int filterChainHash = cfg.getFilterChainHash();
 
-        qDebug() << "InterferometerSink::handleMessage: MsgConfigureChannelizer:"
+        qDebug() << "InterferometerBaseband::handleMessage: MsgConfigureChannelizer:"
                 << " log2Decim: " << log2Decim
                 << " filterChainHash: " << filterChainHash;
 
@@ -215,7 +215,7 @@ bool InterferometerSink::handleMessage(const Message& cmd)
         qint64 centerFrequency = cfg.getCenterFrequency();
         int streamIndex = cfg.getStreamIndex();
 
-        qDebug() << "InterferometerSink::handleMessage: MsgSignalNotification:"
+        qDebug() << "InterferometerBaseband::handleMessage: MsgSignalNotification:"
                 << " inputSampleRate: " << inputSampleRate
                 << " centerFrequency: " << centerFrequency
                 << " streamIndex: " << streamIndex;
@@ -233,7 +233,7 @@ bool InterferometerSink::handleMessage(const Message& cmd)
         MsgConfigureCorrelation& cfg = (MsgConfigureCorrelation&) cmd;
         InterferometerSettings::CorrelationType correlationType = cfg.getCorrelationType();
 
-        qDebug() << "InterferometerSink::handleMessage: MsgConfigureCorrelation:"
+        qDebug() << "InterferometerBaseband::handleMessage: MsgConfigureCorrelation:"
                 << " correlationType: " << correlationType;
 
         m_correlator.setCorrType(correlationType);
@@ -242,7 +242,7 @@ bool InterferometerSink::handleMessage(const Message& cmd)
     }
     else
     {
-        qDebug("InterferometerSink::handleMessage: unhandled: %s", cmd.getIdentifier());
+        qDebug("InterferometerBaseband::handleMessage: unhandled: %s", cmd.getIdentifier());
         return false;
     }
 }
