@@ -86,8 +86,8 @@ public:
     static const unsigned int m_guardDivisor;
 
 signals:
-	void dataSyncRead();
-    void dataAsyncRead(int streamIndex);
+	void dataReadSync();
+    void dataReadAsync(int streamIndex);
 
 private:
     std::vector<SampleVector> m_data;
