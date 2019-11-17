@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_INTERFEROMETERSINK_H
-#define INCLUDE_INTERFEROMETERSINK_H
+#ifndef INCLUDE_INTERFEROMETERBASEBAND_H
+#define INCLUDE_INTERFEROMETERBASEBAND_H
 
 #include <QObject>
 #include <QMutex>
@@ -29,7 +29,7 @@
 class DownChannelizer;
 class BasebandSampleSink;
 
-class InterferometerSink : public QObject
+class InterferometerBaseband : public QObject
 {
     Q_OBJECT
 public:
@@ -98,8 +98,8 @@ public:
         { }
     };
 
-    InterferometerSink(int fftSize);
-    ~InterferometerSink();
+    InterferometerBaseband(int fftSize);
+    ~InterferometerBaseband();
     void reset();
 
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
@@ -132,4 +132,4 @@ private slots:
     void handleData(); //!< Handle data when samples have to be processed
 };
 
-#endif // INCLUDE_INTERFEROMETERSINK_H
+#endif // INCLUDE_INTERFEROMETERBASEBAND_H

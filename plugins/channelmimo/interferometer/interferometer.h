@@ -30,7 +30,7 @@
 
 class QThread;
 class DeviceAPI;
-class InterferometerSink;
+class InterferometerBaseband;
 class QNetworkReply;
 class QNetworkAccessManager;
 class BasebandSampleSink;
@@ -149,7 +149,7 @@ public:
 private:
     DeviceAPI *m_deviceAPI;
     QThread *m_thread;
-    InterferometerSink* m_sink;
+    InterferometerBaseband* m_sink;
     BasebandSampleSink* m_spectrumSink;
     BasebandSampleSink* m_scopeSink;
     InterferometerSettings m_settings;
