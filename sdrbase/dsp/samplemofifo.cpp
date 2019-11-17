@@ -22,7 +22,8 @@ const unsigned int SampleMOFifo::m_guardDivisor = 10;
 
 SampleMOFifo::SampleMOFifo(QObject *parent) :
     QObject(parent),
-    m_nbStreams(0)
+    m_nbStreams(0),
+    m_mutex(QMutex::Recursive)
 {}
 
 SampleMOFifo::SampleMOFifo(unsigned int nbStreams, unsigned int size, QObject *parent) :
