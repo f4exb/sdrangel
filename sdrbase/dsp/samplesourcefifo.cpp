@@ -62,7 +62,7 @@ void SampleSourceFifo::read(
 {
     QMutexLocker mutexLocker(&m_mutex);
     unsigned int spaceLeft = m_size - m_readHead;
-    m_readCount += amount;
+    m_readCount = m_readCount + amount < m_size ? m_readCount + amount : m_size; // cannot exceed FIFO size
 
     if (amount <= spaceLeft)
     {
@@ -125,7 +125,7 @@ void SampleSourceFifo::write(
         m_writeHead = remaining;
     }
 
-    m_readCount = amount < m_readCount ? m_readCount - amount : 0;
+    m_readCount = amount < m_readCount ? m_readCount - amount : 0; // cannot be less than 0
 }
 
 unsigned int SampleSourceFifo::getSizePolicy(unsigned int sampleRate)
