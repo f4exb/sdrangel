@@ -42,7 +42,7 @@ BeamSteeringCWModBaseband::BeamSteeringCWModBaseband() :
 
     QObject::connect(
         &m_sampleMOFifo,
-        &SampleMOFifo::dataSyncRead,
+        &SampleMOFifo::dataReadSync,
         this,
         &BeamSteeringCWModBaseband::handleData,
         Qt::QueuedConnection

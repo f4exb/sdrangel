@@ -89,6 +89,7 @@ private:
     void run();
     unsigned int getNbFifos();
     void callbackPart(qint16* buf, qint32 nSamples, int iBegin);
+    void callbackPart(std::vector<SampleVector>& data, unsigned int iBegin, unsigned int iEnd);
     void callback(qint16* buf, qint32 samplesPerChannel);
     void feedSpectrum(int16_t *buf, unsigned int bufSize);
 
