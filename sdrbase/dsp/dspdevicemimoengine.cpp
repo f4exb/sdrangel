@@ -439,64 +439,65 @@ void DSPDeviceMIMOEngine::workSamplesSource(SampleVector& data, unsigned int iBe
     unsigned int nbSamples = iEnd - iBegin;
     SampleVector::iterator begin = data.begin() + iBegin;
 
-    m_sourceZeroBuffers[streamIndex].allocate(nbSamples, Sample{16384,0});
-    std::copy(
-        m_sourceZeroBuffers[streamIndex].m_vector.begin(),
-        m_sourceZeroBuffers[streamIndex].m_vector.begin() + nbSamples,
-        begin
-    );
-
-    m_spectrumSink->feed(begin, begin + nbSamples, false);
-    qDebug("DSPDeviceMIMOEngine::workSamplesSource: nbSamples: %u streamIndex: %u", nbSamples, streamIndex);
-
-    return;
-
-    if (m_basebandSampleSources[streamIndex].size() == 0)
-    {
-        m_sourceZeroBuffers[streamIndex].allocate(nbSamples, Sample{0,0});
-        std::copy(
-            m_sourceZeroBuffers[streamIndex].m_vector.begin(),
-            m_sourceZeroBuffers[streamIndex].m_vector.begin() + nbSamples,
-            begin
-        );
-    }
-    else if (m_basebandSampleSources[streamIndex].size() == 1)
-    {
-        BasebandSampleSource *sampleSource = m_basebandSampleSources[streamIndex].front();
-        sampleSource->pull(begin, nbSamples);
-    }
-    else
-    {
-        m_sourceSampleBuffers[streamIndex].allocate(nbSamples);
-        BasebandSampleSources::const_iterator srcIt = m_basebandSampleSources[streamIndex].begin();
-        BasebandSampleSource *sampleSource = *srcIt;
-        sampleSource->pull(begin, nbSamples);
-        ++srcIt;
-
-        for (; srcIt != m_basebandSampleSources[streamIndex].end(); ++srcIt)
-        {
-            sampleSource = *srcIt;
-            SampleVector::iterator aBegin = m_sourceSampleBuffers[streamIndex].m_vector.begin();
-            sampleSource->pull(aBegin, nbSamples);
-            std::transform(
-                aBegin,
-                aBegin + nbSamples,
-                begin,
-                begin,
-                [](Sample& a, const Sample& b) -> Sample { // TODO: scale by number of sources
-                    return Sample{a.real()+b.real(), a.imag()+b.imag()};
-                }
-            );
-        }
-
-        begin = m_sourceSampleBuffers[streamIndex].m_vector.begin();
-    }
-
     // pull data from MIMO channels
+
     for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it)
     {
-        //qDebug("DSPDeviceMIMOEngine::workSamplesSource: nbSamples: %u stream: %u", nbSamples, streamIndex);
+        qDebug("DSPDeviceMIMOEngine::workSamplesSource: %s: nbSamples: %u stream: %u",
+            qPrintable((*it)->objectName()), nbSamples, streamIndex);
         (*it)->pull(begin, nbSamples, streamIndex);
+    }
+
+    if (m_mimoChannels.size() == 0) // Process single stream channels only if there are no MIMO channels
+    {
+        if (m_basebandSampleSources[streamIndex].size() == 0)
+        {
+            m_sourceZeroBuffers[streamIndex].allocate(nbSamples, Sample{0,0});
+            std::copy(
+                m_sourceZeroBuffers[streamIndex].m_vector.begin(),
+                m_sourceZeroBuffers[streamIndex].m_vector.begin() + nbSamples,
+                begin
+            );
+        }
+        else if (m_basebandSampleSources[streamIndex].size() == 1)
+        {
+            BasebandSampleSource *sampleSource = m_basebandSampleSources[streamIndex].front();
+            qDebug("DSPDeviceMIMOEngine::workSamplesSource: %s: nbSamples: %u stream: %u",
+                qPrintable(sampleSource->objectName()), nbSamples, streamIndex);
+            sampleSource->pull(begin, nbSamples);
+        }
+        else
+        {
+            m_sourceSampleBuffers[streamIndex].allocate(nbSamples);
+            BasebandSampleSources::const_iterator srcIt = m_basebandSampleSources[streamIndex].begin();
+            BasebandSampleSource *sampleSource = *srcIt;
+            sampleSource->pull(begin, nbSamples);
+            ++srcIt;
+            m_sumIndex = 1;
+
+            for (; srcIt != m_basebandSampleSources[streamIndex].end(); ++srcIt, m_sumIndex++)
+            {
+                sampleSource = *srcIt;
+                SampleVector::iterator aBegin = m_sourceSampleBuffers[streamIndex].m_vector.begin();
+                sampleSource->pull(aBegin, nbSamples);
+                std::transform(
+                    aBegin,
+                    aBegin + nbSamples,
+                    begin,
+                    begin,
+                    [this](Sample& a, const Sample& b) -> Sample {
+                        int den = m_sumIndex + 1; // at each stage scale sum by n/n+1 and input by 1/n+1
+                        int nom = m_sumIndex;     // so that final sum is scaled by N (number of channels)
+                        return Sample{
+                            a.real()/den + nom*(b.real()/den),
+                            a.imag()/den + nom*(b.imag()/den)
+                        };
+                    }
+                );
+            }
+
+            begin = m_sourceSampleBuffers[streamIndex].m_vector.begin();
+        }
     }
 
     // possibly feed data to spectrum sink
@@ -903,7 +904,7 @@ void DSPDeviceMIMOEngine::handleSetMIMO(DeviceSampleMIMO* mimo)
         );
         QObject::connect(
             m_deviceSampleMIMO->getSampleMOFifo(),
-            &SampleMOFifo::dataSyncRead,
+            &SampleMOFifo::dataReadSync,
             this,
             &DSPDeviceMIMOEngine::handleDataTxSync,
             Qt::QueuedConnection
@@ -924,7 +925,7 @@ void DSPDeviceMIMOEngine::handleSetMIMO(DeviceSampleMIMO* mimo)
             );
             QObject::connect(
                 m_deviceSampleMIMO->getSampleMOFifo(),
-                &SampleMOFifo::dataAsyncRead,
+                &SampleMOFifo::dataReadAsync,
                 this,
                 &DSPDeviceMIMOEngine::handleDataTxAsync,
                 Qt::QueuedConnection

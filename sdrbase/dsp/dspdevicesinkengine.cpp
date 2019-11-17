@@ -37,8 +37,7 @@ DSPDeviceSinkEngine::DSPDeviceSinkEngine(uint32_t uid, QObject* parent) :
 	m_basebandSampleSources(),
 	m_spectrumSink(nullptr),
 	m_sampleRate(0),
-	m_centerFrequency(0),
-	m_multipleSourcesDivisionFactor(1)
+	m_centerFrequency(0)
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 	connect(&m_syncMessenger, SIGNAL(messageSent()), this, SLOT(handleSynchronousMessages()), Qt::QueuedConnection);

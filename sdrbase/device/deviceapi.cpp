@@ -109,23 +109,19 @@ void DeviceAPI::removeChannelSink(ThreadedBasebandSampleSink* sink, int streamIn
 
 void DeviceAPI::addChannelSource(BasebandSampleSource* source, int streamIndex)
 {
-    (void) streamIndex;
-
     if (m_deviceSinkEngine) {
         m_deviceSinkEngine->addChannelSource(source);
     } else if (m_deviceMIMOEngine) {
-        m_deviceMIMOEngine->addChannelSource(source);
+        m_deviceMIMOEngine->addChannelSource(source, streamIndex);
     }
 }
 
 void DeviceAPI::removeChannelSource(BasebandSampleSource* source, int streamIndex)
 {
-    (void) streamIndex;
-
     if (m_deviceSinkEngine) {
         m_deviceSinkEngine->removeChannelSource(source);
     } else if (m_deviceMIMOEngine) {
-        m_deviceMIMOEngine->removeChannelSource(source);
+        m_deviceMIMOEngine->removeChannelSource(source, streamIndex);
     }
 }
 

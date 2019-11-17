@@ -103,7 +103,6 @@ private:
 
 	uint32_t m_sampleRate;
 	quint64 m_centerFrequency;
-	uint32_t m_multipleSourcesDivisionFactor;
     unsigned int m_sumIndex; //!< channel index when summing channels
 
 	void run();
