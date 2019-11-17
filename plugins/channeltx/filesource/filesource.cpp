@@ -323,6 +323,9 @@ void FileSource::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("gainDB")) {
         settings.m_gainDB = response.getFileSourceSettings()->getGainDb();
     }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getFileSourceSettings()->getStreamIndex();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getFileSourceSettings()->getUseReverseApi() != 0;
     }
@@ -442,6 +445,9 @@ void FileSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, 
     if (channelSettingsKeys.contains("title") || force) {
         swgFileSourceSettings->setTitle(new QString(settings.m_title));
     }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgFileSourceSettings->setStreamIndex(settings.m_streamIndex);
+    }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
             .arg(settings.m_reverseAPIAddress)
@@ -497,4 +503,9 @@ void FileSource::propagateMessageQueueToGUI()
 double FileSource::getMagSq() const
 {
     return m_basebandSource->getMagSq();
+}
+
+uint32_t FileSource::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSinkStreams();
 }

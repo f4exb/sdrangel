@@ -80,6 +80,7 @@ private:
     void applySettings(bool force = false);
     void displaySettings();
     void displayRateAndShift();
+    void displayStreamIndex();
     void updateLocalDevices();
 
     void leaveEvent(QEvent*);

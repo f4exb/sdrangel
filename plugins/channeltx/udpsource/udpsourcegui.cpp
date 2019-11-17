@@ -23,6 +23,7 @@
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "gui/devicestreamselectiondialog.h"
 #include "plugin/pluginapi.h"
 #include "mainwindow.h"
 
@@ -218,6 +219,7 @@ void UDPSourceGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     this->setWindowTitle(m_channelMarker.getTitle());
+    displayStreamIndex();
 
     blockApplySettings(true);
 
@@ -258,6 +260,15 @@ void UDPSourceGUI::displaySettings()
     ui->applyBtn->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
 
     blockApplySettings(false);
+}
+
+void UDPSourceGUI::displayStreamIndex()
+{
+    if (m_deviceUISet->m_deviceMIMOEngine) {
+        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
+    } else {
+        setStreamIndicator("S"); // single channel indicator
+    }
 }
 
 void UDPSourceGUI::channelMarkerChangedByCursor()
@@ -495,6 +506,20 @@ void UDPSourceGUI::onMenuDialogCalled(const QPoint &p)
         setWindowTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
+        applySettings();
+    }
+    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
+    {
+        DeviceStreamSelectionDialog dialog(this);
+        dialog.setNumberOfStreams(m_udpSource->getNumberOfDeviceStreams());
+        dialog.setStreamIndex(m_settings.m_streamIndex);
+        dialog.move(p);
+        dialog.exec();
+
+        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+        m_channelMarker.clearStreamIndexes();
+        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+        displayStreamIndex();
         applySettings();
     }
 

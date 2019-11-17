@@ -63,6 +63,7 @@ void NFMModSettings::resetToDefaults()
     m_feedbackAudioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_feedbackVolumeFactor = 0.5f;
     m_feedbackAudioEnable = false;
+    m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -105,6 +106,7 @@ QByteArray NFMModSettings::serialize() const
     s.writeString(20, m_feedbackAudioDeviceName);
     s.writeReal(21, m_feedbackVolumeFactor);
     s.writeBool(22, m_feedbackAudioEnable);
+    s.writeS32(23, m_streamIndex);
 
     return s.final();
 }
@@ -177,6 +179,7 @@ bool NFMModSettings::deserialize(const QByteArray& data)
         d.readString(20, &m_feedbackAudioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readReal(21, &m_feedbackVolumeFactor, 1.0);
         d.readBool(22, &m_feedbackAudioEnable, false);
+        d.readS32(23, &m_streamIndex, 0);
 
         return true;
     }

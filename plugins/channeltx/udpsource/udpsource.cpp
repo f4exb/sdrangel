@@ -363,6 +363,9 @@ void UDPSource::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getUdpSourceSettings()->getTitle();
     }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getUdpSourceSettings()->getStreamIndex();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getUdpSourceSettings()->getUseReverseApi() != 0;
     }
@@ -515,6 +518,9 @@ void UDPSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     if (channelSettingsKeys.contains("title") || force) {
         swgUDPSourceSettings->setTitle(new QString(settings.m_title));
     }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgUDPSourceSettings->setStreamIndex(settings.m_streamIndex);
+    }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
             .arg(settings.m_reverseAPIAddress)
@@ -579,4 +585,9 @@ int32_t UDPSource::getBufferGauge() const
 bool UDPSource::getSquelchOpen() const
 {
     return m_basebandSource->getSquelchOpen();
+}
+
+uint32_t UDPSource::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSinkStreams();
 }

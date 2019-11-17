@@ -30,6 +30,7 @@
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "gui/devicestreamselectiondialog.h"
 #include "mainwindow.h"
 
 #include "ui_nfmmodgui.h"
@@ -335,6 +336,20 @@ void NFMModGUI::onMenuDialogCalled(const QPoint &p)
 
         applySettings();
     }
+    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
+    {
+        DeviceStreamSelectionDialog dialog(this);
+        dialog.setNumberOfStreams(m_nfmMod->getNumberOfDeviceStreams());
+        dialog.setStreamIndex(m_settings.m_streamIndex);
+        dialog.move(p);
+        dialog.exec();
+
+        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+        m_channelMarker.clearStreamIndexes();
+        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+        displayStreamIndex();
+        applySettings();
+    }
 
     resetContextMenuType();
 }
@@ -456,6 +471,7 @@ void NFMModGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    displayStreamIndex();
 
     blockApplySettings(true);
 
@@ -498,6 +514,14 @@ void NFMModGUI::displaySettings()
     blockApplySettings(false);
 }
 
+void NFMModGUI::displayStreamIndex()
+{
+    if (m_deviceUISet->m_deviceMIMOEngine) {
+        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
+    } else {
+        setStreamIndicator("S"); // single channel indicator
+    }
+}
 
 void NFMModGUI::leaveEvent(QEvent*)
 {

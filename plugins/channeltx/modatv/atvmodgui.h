@@ -85,6 +85,7 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
+    void displayStreamIndex();
     void updateWithStreamData();
     void updateWithStreamTime();
     void setRFFiltersSlidersRange(int sampleRate);

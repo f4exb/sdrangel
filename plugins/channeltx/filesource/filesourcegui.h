@@ -92,6 +92,7 @@ private:
 	void updateWithStreamTime();
     void displaySettings();
     void displayRateAndShift();
+    void displayStreamIndex();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

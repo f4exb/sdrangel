@@ -51,6 +51,7 @@ void UDPSourceSettings::resetToDefaults()
     m_udpPort = 9998;
     m_rgbColor = QColor(225, 25, 99).rgb();
     m_title = "UDP Sample Source";
+    m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -90,6 +91,7 @@ QByteArray UDPSourceSettings::serialize() const
     s.writeU32(23, m_reverseAPIPort);
     s.writeU32(24, m_reverseAPIDeviceIndex);
     s.writeU32(25, m_reverseAPIChannelIndex);
+    s.writeS32(26, m_streamIndex);
 
     return s.final();
 }
@@ -181,6 +183,7 @@ bool UDPSourceSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = u32tmp > 99 ? 99 : u32tmp;
         d.readU32(25, &u32tmp, 0);
         m_reverseAPIChannelIndex = u32tmp > 99 ? 99 : u32tmp;
+        d.readS32(26, &m_streamIndex, 0);
 
         return true;
     }

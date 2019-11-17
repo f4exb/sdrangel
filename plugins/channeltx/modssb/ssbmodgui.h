@@ -90,6 +90,7 @@ private:
     void applySettings(bool force = false);
     void applyBandwidths(int spanLog2, bool force = false);
     void displaySettings();
+    void displayStreamIndex();
     void updateWithStreamData();
     void updateWithStreamTime();
     void channelMarkerUpdate();

@@ -470,6 +470,9 @@ void ATVMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getAtvModSettings()->getTitle();
     }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getAtvModSettings()->getStreamIndex();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getAtvModSettings()->getUseReverseApi() != 0;
     }
@@ -638,6 +641,9 @@ void ATVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
     }
     if (channelSettingsKeys.contains("title") || force) {
         swgATVModSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgATVModSettings->setStreamIndex(settings.m_streamIndex);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")

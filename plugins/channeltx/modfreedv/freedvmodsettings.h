@@ -59,6 +59,7 @@ struct FreeDVModSettings
     QString m_audioDeviceName;
     FreeDVMode m_freeDVMode;
     bool m_gaugeInputElseModem; //!< Volume gauge shows speech input level else modem level
+    int m_streamIndex;
 
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;

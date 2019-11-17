@@ -20,6 +20,7 @@
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "gui/devicestreamselectiondialog.h"
 #include "mainwindow.h"
 
 #include "remotesource.h"
@@ -241,11 +242,21 @@ void RemoteSourceGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    displayStreamIndex();
 
     blockApplySettings(true);
     ui->dataAddress->setText(m_settings.m_dataAddress);
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
     blockApplySettings(false);
+}
+
+void RemoteSourceGUI::displayStreamIndex()
+{
+    if (m_deviceUISet->m_deviceMIMOEngine) {
+        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
+    } else {
+        setStreamIndicator("S"); // single channel indicator
+    }
 }
 
 void RemoteSourceGUI::leaveEvent(QEvent*)
@@ -302,6 +313,20 @@ void RemoteSourceGUI::onMenuDialogCalled(const QPoint &p)
         setWindowTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
+        applySettings();
+    }
+    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
+    {
+        DeviceStreamSelectionDialog dialog(this);
+        dialog.setNumberOfStreams(m_remoteSrc->getNumberOfDeviceStreams());
+        dialog.setStreamIndex(m_settings.m_streamIndex);
+        dialog.move(p);
+        dialog.exec();
+
+        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+        m_channelMarker.clearStreamIndexes();
+        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+        displayStreamIndex();
         applySettings();
     }
 

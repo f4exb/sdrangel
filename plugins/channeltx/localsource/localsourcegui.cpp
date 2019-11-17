@@ -19,6 +19,7 @@
 
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "gui/devicestreamselectiondialog.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "mainwindow.h"
 
@@ -179,6 +180,7 @@ void LocalSourceGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    displayStreamIndex();
 
     blockApplySettings(true);
     ui->interpolationFactor->setCurrentIndex(m_settings.m_log2Interp);
@@ -195,6 +197,15 @@ void LocalSourceGUI::displayRateAndShift()
     ui->channelRateText->setText(tr("%1k").arg(QString::number(channelSampleRate / 1000.0, 'g', 5)));
     m_channelMarker.setCenterFrequency(shift);
     m_channelMarker.setBandwidth(channelSampleRate);
+}
+
+void LocalSourceGUI::displayStreamIndex()
+{
+    if (m_deviceUISet->m_deviceMIMOEngine) {
+        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
+    } else {
+        setStreamIndicator("S"); // single channel indicator
+    }
 }
 
 void LocalSourceGUI::updateLocalDevices()
@@ -263,6 +274,20 @@ void LocalSourceGUI::onMenuDialogCalled(const QPoint &p)
         setWindowTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
+        applySettings();
+    }
+    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
+    {
+        DeviceStreamSelectionDialog dialog(this);
+        dialog.setNumberOfStreams(m_localSource->getNumberOfDeviceStreams());
+        dialog.setStreamIndex(m_settings.m_streamIndex);
+        dialog.move(p);
+        dialog.exec();
+
+        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+        m_channelMarker.clearStreamIndexes();
+        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+        displayStreamIndex();
         applySettings();
     }
 

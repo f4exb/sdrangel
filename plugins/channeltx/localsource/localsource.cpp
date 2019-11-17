@@ -391,6 +391,9 @@ void LocalSource::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getLocalSourceSettings()->getReverseApiChannelIndex();
     }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getLocalSourceSettings()->getStreamIndex();
+    }
 }
 
 void LocalSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const LocalSourceSettings& settings)
@@ -446,6 +449,9 @@ void LocalSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys,
     if (channelSettingsKeys.contains("filterChainHash") || force) {
         swgLocalSourceSettings->setFilterChainHash(settings.m_filterChainHash);
     }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgLocalSourceSettings->setRgbColor(settings.m_streamIndex);
+    }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
             .arg(settings.m_reverseAPIAddress)
@@ -486,4 +492,9 @@ void LocalSource::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+uint32_t LocalSource::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSinkStreams();
 }

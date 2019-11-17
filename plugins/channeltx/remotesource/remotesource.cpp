@@ -252,6 +252,9 @@ void RemoteSource::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getRemoteSourceSettings()->getTitle();
     }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getRemoteSourceSettings()->getStreamIndex();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getRemoteSourceSettings()->getUseReverseApi() != 0;
     }
@@ -355,6 +358,9 @@ void RemoteSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys
     if (channelSettingsKeys.contains("title") || force) {
         swgRemoteSourceSettings->setTitle(new QString(settings.m_title));
     }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgRemoteSourceSettings->setStreamIndex(settings.m_streamIndex);
+    }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
             .arg(settings.m_reverseAPIAddress)
@@ -395,4 +401,9 @@ void RemoteSource::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+uint32_t RemoteSource::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSinkStreams();
 }

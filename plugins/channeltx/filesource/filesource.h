@@ -243,6 +243,7 @@ public:
     double getMagSq() const;
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) const;
     void propagateMessageQueueToGUI();
+    uint32_t getNumberOfDeviceStreams() const;
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

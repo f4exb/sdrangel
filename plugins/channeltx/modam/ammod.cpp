@@ -466,6 +466,9 @@ void AMMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("modFactor")) {
         settings.m_modFactor = response.getAmModSettings()->getModFactor();
     }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getAmModSettings()->getStreamIndex();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getAmModSettings()->getUseReverseApi() != 0;
     }
@@ -587,6 +590,9 @@ void AMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const
     }
     if (channelSettingsKeys.contains("modFactor") || force) {
         swgAMModSettings->setModFactor(settings.m_modFactor);
+    }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgAMModSettings->setStreamIndex(settings.m_streamIndex);
     }
 
     if (force)

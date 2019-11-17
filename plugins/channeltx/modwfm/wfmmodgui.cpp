@@ -30,6 +30,7 @@
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "gui/devicestreamselectiondialog.h"
 #include "mainwindow.h"
 
 #include "ui_wfmmodgui.h"
@@ -310,6 +311,20 @@ void WFMModGUI::onMenuDialogCalled(const QPoint &p)
 
         applySettings();
     }
+    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
+    {
+        DeviceStreamSelectionDialog dialog(this);
+        dialog.setNumberOfStreams(m_wfmMod->getNumberOfDeviceStreams());
+        dialog.setStreamIndex(m_settings.m_streamIndex);
+        dialog.move(p);
+        dialog.exec();
+
+        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+        m_channelMarker.clearStreamIndexes();
+        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+        displayStreamIndex();
+        applySettings();
+    }
 
     resetContextMenuType();
 }
@@ -428,6 +443,7 @@ void WFMModGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    displayStreamIndex();
 
     blockApplySettings(true);
 
@@ -461,6 +477,15 @@ void WFMModGUI::displaySettings()
     ui->morseKeyer->setChecked(m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputCWTone);
 
     blockApplySettings(false);
+}
+
+void WFMModGUI::displayStreamIndex()
+{
+    if (m_deviceUISet->m_deviceMIMOEngine) {
+        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
+    } else {
+        setStreamIndicator("S"); // single channel indicator
+    }
 }
 
 void WFMModGUI::leaveEvent(QEvent*)

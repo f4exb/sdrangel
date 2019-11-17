@@ -88,6 +88,7 @@ private:
     void applyBandwidths(int spanLog2, bool force = false);
     void displayBandwidths(int spanLog2);
     void displaySettings();
+    void displayStreamIndex();
     void updateWithStreamData();
     void updateWithStreamTime();
     void channelMarkerUpdate();

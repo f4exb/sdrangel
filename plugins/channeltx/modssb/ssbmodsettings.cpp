@@ -66,6 +66,7 @@ void SSBModSettings::resetToDefaults()
     m_feedbackAudioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_feedbackVolumeFactor = 0.5f;
     m_feedbackAudioEnable = false;
+    m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -115,6 +116,7 @@ QByteArray SSBModSettings::serialize() const
     s.writeString(27, m_feedbackAudioDeviceName);
     s.writeReal(28, m_feedbackVolumeFactor);
     s.writeBool(29, m_feedbackAudioEnable);
+    s.writeS32(30, m_streamIndex);
 
     return s.final();
 }
@@ -201,6 +203,7 @@ bool SSBModSettings::deserialize(const QByteArray& data)
         d.readString(27, &m_feedbackAudioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readReal(28, &m_feedbackVolumeFactor, 1.0);
         d.readBool(29, &m_feedbackAudioEnable, false);
+        d.readS32(30, &m_streamIndex, 0);
 
         return true;
     }

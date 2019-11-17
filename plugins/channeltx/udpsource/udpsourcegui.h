@@ -81,6 +81,7 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
+    void displayStreamIndex();
     void setSampleFormat(int index);
     void setSampleFormatIndex(const UDPSourceSettings::SampleFormat& sampleFormat);
 

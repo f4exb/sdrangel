@@ -257,6 +257,7 @@ public:
     void setLevelMeter(QObject *levelMeter);
     unsigned int getAudioSampleRate() const;
     void setSpectrumSink(BasebandSampleSink *sampleSink);
+    uint32_t getNumberOfDeviceStreams() const;
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

@@ -51,6 +51,7 @@ void ATVModSettings::resetToDefaults()
     m_overlayText = "ATV";
     m_rgbColor = QColor(255, 255, 255).rgb();
     m_title = "ATV Modulator";
+    m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -89,6 +90,7 @@ QByteArray ATVModSettings::serialize() const
     s.writeU32(21, m_reverseAPIChannelIndex);
     s.writeString(22, m_imageFileName);
     s.writeString(23, m_videoFileName);
+    s.writeS32(24, m_streamIndex);
 
     return s.final();
 }
@@ -154,6 +156,7 @@ bool ATVModSettings::deserialize(const QByteArray& data)
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readString(22, &m_imageFileName);
         d.readString(23, &m_videoFileName);
+        d.readS32(24, &m_streamIndex, 0);
 
         return true;
     }

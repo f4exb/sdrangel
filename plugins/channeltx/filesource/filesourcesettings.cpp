@@ -38,6 +38,7 @@ void FileSourceSettings::resetToDefaults()
     m_rgbColor = QColor(140, 4, 4).rgb();
     m_title = "File source";
     m_channelMarker = nullptr;
+    m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -60,6 +61,7 @@ QByteArray FileSourceSettings::serialize() const
     s.writeU32(10, m_reverseAPIPort);
     s.writeU32(11, m_reverseAPIDeviceIndex);
     s.writeU32(12, m_reverseAPIChannelIndex);
+    s.writeS32(13, m_streamIndex);
 
     return s.final();
 }
@@ -87,11 +89,11 @@ bool FileSourceSettings::deserialize(const QByteArray& data)
         d.readU32(4, &m_filterChainHash, 0);
         d.readS32(5, &itmp, 20);
         m_gainDB = itmp < -10 ? -10 : itmp > 50 ? 50 : itmp;
-        d.readU32(5, &m_rgbColor, QColor(140, 4, 4).rgb());
-        d.readString(6, &m_title, "File source");
-        d.readBool(7, &m_useReverseAPI, false);
-        d.readString(8, &m_reverseAPIAddress, "127.0.0.1");
-        d.readU32(9, &tmp, 0);
+        d.readU32(6, &m_rgbColor, QColor(140, 4, 4).rgb());
+        d.readString(7, &m_title, "File source");
+        d.readBool(8, &m_useReverseAPI, false);
+        d.readString(9, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(10, &tmp, 0);
 
         if ((tmp > 1023) && (tmp < 65535)) {
             m_reverseAPIPort = tmp;
@@ -99,10 +101,11 @@ bool FileSourceSettings::deserialize(const QByteArray& data)
             m_reverseAPIPort = 8888;
         }
 
-        d.readU32(10, &tmp, 0);
-        m_reverseAPIDeviceIndex = tmp > 99 ? 99 : tmp;
         d.readU32(11, &tmp, 0);
+        m_reverseAPIDeviceIndex = tmp > 99 ? 99 : tmp;
+        d.readU32(12, &tmp, 0);
         m_reverseAPIChannelIndex = tmp > 99 ? 99 : tmp;
+        d.readS32(13, &m_streamIndex, 0);
 
         return true;
     }

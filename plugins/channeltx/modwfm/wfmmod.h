@@ -254,6 +254,7 @@ public:
     double getMagSq() const;
     CWKeyer *getCWKeyer();
     void setLevelMeter(QObject *levelMeter);
+    uint32_t getNumberOfDeviceStreams() const;
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

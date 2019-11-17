@@ -50,6 +50,7 @@ struct WFMModSettings
     QString m_title;
     WFMModInputAF m_modAFInput;
     QString m_audioDeviceName;         //!< This is the audio device you get the audio samples from
+    int m_streamIndex;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

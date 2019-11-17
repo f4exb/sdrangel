@@ -428,6 +428,9 @@ void FreeDVMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("audioDeviceName")) {
         settings.m_audioDeviceName = *response.getFreeDvModSettings()->getAudioDeviceName();
     }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getFreeDvModSettings()->getStreamIndex();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getFreeDvModSettings()->getUseReverseApi() != 0;
     }
@@ -554,6 +557,9 @@ void FreeDVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
         swgFreeDVModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgFreeDVModSettings->setStreamIndex(settings.m_streamIndex);
+    }
 
     if (force)
     {
@@ -674,4 +680,9 @@ CWKeyer *FreeDVMod::getCWKeyer()
 void FreeDVMod::setLevelMeter(QObject *levelMeter)
 {
     connect(m_basebandSource, SIGNAL(levelChanged(qreal, qreal, int)), levelMeter, SLOT(levelChanged(qreal, qreal, int)));
+}
+
+uint32_t FreeDVMod::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSinkStreams();
 }

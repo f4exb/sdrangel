@@ -58,6 +58,7 @@ struct UDPSourceSettings
     uint16_t m_udpPort;
 
     QString m_title;
+    int m_streamIndex;
 
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;

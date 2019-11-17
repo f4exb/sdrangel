@@ -427,6 +427,9 @@ void WFMMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("fmDeviation")) {
         settings.m_fmDeviation = response.getWfmModSettings()->getFmDeviation();
     }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getWfmModSettings()->getStreamIndex();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getWfmModSettings()->getUseReverseApi() != 0;
     }
@@ -550,6 +553,9 @@ void WFMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
     if (channelSettingsKeys.contains("fmDeviation")) {
         swgWFMModSettings->setFmDeviation(settings.m_fmDeviation);
     }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        swgWFMModSettings->setStreamIndex(settings.m_streamIndex);
+    }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
         swgWFMModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
@@ -648,4 +654,9 @@ CWKeyer *WFMMod::getCWKeyer()
 void WFMMod::setLevelMeter(QObject *levelMeter)
 {
     connect(m_basebandSource, SIGNAL(levelChanged(qreal, qreal, int)), levelMeter, SLOT(levelChanged(qreal, qreal, int)));
+}
+
+uint32_t WFMMod::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSinkStreams();
 }

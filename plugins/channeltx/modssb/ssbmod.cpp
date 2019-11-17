@@ -475,6 +475,9 @@ void SSBMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("audioDeviceName")) {
         settings.m_audioDeviceName = *response.getSsbModSettings()->getAudioDeviceName();
     }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getSsbModSettings()->getStreamIndex();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getSsbModSettings()->getUseReverseApi() != 0;
     }
@@ -621,6 +624,9 @@ void SSBMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
         swgSSBModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgSSBModSettings->setStreamIndex(settings.m_streamIndex);
+    }
 
     if (force)
     {
@@ -726,4 +732,9 @@ unsigned int SSBMod::getAudioSampleRate() const
 void SSBMod::setSpectrumSink(BasebandSampleSink *sampleSink)
 {
     m_basebandSource->setSpectrumSink(sampleSink);
+}
+
+uint32_t SSBMod::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSinkStreams();
 }

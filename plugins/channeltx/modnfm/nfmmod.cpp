@@ -508,6 +508,9 @@ void NFMMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("volumeFactor")) {
         settings.m_volumeFactor = response.getNfmModSettings()->getVolumeFactor();
     }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getNfmModSettings()->getStreamIndex();
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getNfmModSettings()->getUseReverseApi() != 0;
     }
@@ -642,6 +645,9 @@ void NFMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
     if (channelSettingsKeys.contains("ctcssIndex") || force) {
         swgNFMModSettings->setCtcssIndex(settings.m_ctcssIndex);
     }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgNFMModSettings->setStreamIndex(settings.m_streamIndex);
+    }
 
     if (force)
     {
@@ -737,4 +743,9 @@ CWKeyer *NFMMod::getCWKeyer()
 void NFMMod::setLevelMeter(QObject *levelMeter)
 {
     connect(m_basebandSource, SIGNAL(levelChanged(qreal, qreal, int)), levelMeter, SLOT(levelChanged(qreal, qreal, int)));
+}
+
+uint32_t NFMMod::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSinkStreams();
 }

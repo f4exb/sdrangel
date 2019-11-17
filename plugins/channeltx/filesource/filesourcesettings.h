@@ -32,6 +32,7 @@ struct FileSourceSettings
     int m_gainDB;
     quint32 m_rgbColor;
     QString m_title;
+    int m_streamIndex;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

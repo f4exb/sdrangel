@@ -149,6 +149,7 @@ public:
     void setSpectrum(bool enabled);
     void resetReadIndex();
     void setLevelMeter(QObject *levelMeter);
+    uint32_t getNumberOfDeviceStreams() const;
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

@@ -31,6 +31,7 @@ struct LocalSourceSettings
     uint32_t m_log2Interp;
     uint32_t m_filterChainHash;
     bool m_play;
+    int m_streamIndex;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
