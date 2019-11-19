@@ -294,6 +294,19 @@ void ATVMod::applySettings(const ATVModSettings& settings, bool force)
         reverseAPIKeys.append("overlayText");
     }
 
+    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    {
+        if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
+        {
+            m_deviceAPI->removeChannelSourceAPI(this, m_settings.m_streamIndex);
+            m_deviceAPI->removeChannelSource(this, m_settings.m_streamIndex);
+            m_deviceAPI->addChannelSource(this, settings.m_streamIndex);
+            m_deviceAPI->addChannelSourceAPI(this, settings.m_streamIndex);
+        }
+
+        reverseAPIKeys.append("streamIndex");
+    }
+
     ATVModBaseband::MsgConfigureATVModBaseband *msg = ATVModBaseband::MsgConfigureATVModBaseband::create(settings, force);
     m_basebandSource->getInputMessageQueue()->push(msg);
 

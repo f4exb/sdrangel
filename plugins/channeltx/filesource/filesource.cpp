@@ -230,6 +230,19 @@ void FileSource::applySettings(const FileSourceSettings& settings, bool force)
         reverseAPIKeys.append("gainDB");
     }
 
+    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    {
+        if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
+        {
+            m_deviceAPI->removeChannelSourceAPI(this, m_settings.m_streamIndex);
+            m_deviceAPI->removeChannelSource(this, m_settings.m_streamIndex);
+            m_deviceAPI->addChannelSource(this, settings.m_streamIndex);
+            m_deviceAPI->addChannelSourceAPI(this, settings.m_streamIndex);
+        }
+
+        reverseAPIKeys.append("streamIndex");
+    }
+
     FileSourceBaseband::MsgConfigureFileSourceBaseband *msg = FileSourceBaseband::MsgConfigureFileSourceBaseband::create(settings, force);
     m_basebandSource->getInputMessageQueue()->push(msg);
 
