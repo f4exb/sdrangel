@@ -24,7 +24,6 @@
 #include "ssbmodbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(SSBModBaseband::MsgConfigureSSBModBaseband, Message)
-MESSAGE_CLASS_DEFINITION(SSBModBaseband::MsgConfigureChannelizer, Message)
 
 SSBModBaseband::SSBModBaseband() :
     m_mutex(QMutex::Recursive)
@@ -141,50 +140,13 @@ void SSBModBaseband::handleInputMessages()
 
 bool SSBModBaseband::handleMessage(const Message& cmd)
 {
-    if (DSPConfigureAudio::match(cmd))
-    {
-        DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
-        uint32_t sampleRate = cfg.getSampleRate();
-        DSPConfigureAudio::AudioType audioType = cfg.getAudioType();
-
-        qDebug() << "SSBModBaseband::handleMessage: DSPConfigureAudio:"
-                << " sampleRate: " << sampleRate
-                << " audioType: " << audioType;
-
-        if (audioType == DSPConfigureAudio::AudioInput)
-        {
-            if (sampleRate != m_source.getAudioSampleRate()) {
-                m_source.applyAudioSampleRate(sampleRate);
-            }
-        }
-        else if (audioType == DSPConfigureAudio::AudioOutput)
-        {
-            if (sampleRate != m_source.getFeedbackAudioSampleRate()) {
-                m_source.applyFeedbackAudioSampleRate(sampleRate);
-            }
-        }
-
-        return true;
-    }
-    else if (MsgConfigureSSBModBaseband::match(cmd))
+    if (MsgConfigureSSBModBaseband::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureSSBModBaseband& cfg = (MsgConfigureSSBModBaseband&) cmd;
         qDebug() << "SSBModBaseband::handleMessage: MsgConfigureSSBModBaseband";
 
         applySettings(cfg.getSettings(), cfg.getForce());
-
-        return true;
-    }
-    else if (MsgConfigureChannelizer::match(cmd))
-    {
-        QMutexLocker mutexLocker(&m_mutex);
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        qDebug() << "SSBModBaseband::handleMessage: MsgConfigureChannelizer"
-            << "(requested) sourceSampleRate: " << cfg.getSourceSampleRate()
-            << "(requested) sourceCenterFrequency: " << cfg.getSourceCenterFrequency();
-        m_channelizer->setChannelization(cfg.getSourceSampleRate(), cfg.getSourceCenterFrequency());
-        m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 
         return true;
     }
@@ -217,6 +179,39 @@ bool SSBModBaseband::handleMessage(const Message& cmd)
 
 void SSBModBaseband::applySettings(const SSBModSettings& settings, bool force)
 {
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    {
+        m_channelizer->setChannelization(m_source.getAudioSampleRate(), settings.m_inputFrequencyOffset);
+        m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+    }
+
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
+        audioDeviceManager->addAudioSource(getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
+        uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
+
+        if (getAudioSampleRate() != audioSampleRate)
+        {
+            m_source.applyAudioSampleRate(audioSampleRate);
+            m_channelizer->setChannelization(audioSampleRate, m_settings.m_inputFrequencyOffset);
+            m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        }
+    }
+
+    if ((settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_feedbackAudioDeviceName);
+        audioDeviceManager->addAudioSink(getFeedbackAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
+        uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
+
+        if (getFeedbackAudioSampleRate() != audioSampleRate) {
+            m_source.applyFeedbackAudioSampleRate(audioSampleRate);
+        }
+    }
+
     m_source.applySettings(settings, force);
     m_settings = settings;
 }

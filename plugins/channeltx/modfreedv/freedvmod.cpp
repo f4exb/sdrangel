@@ -40,7 +40,6 @@
 #include "freedvmod.h"
 
 MESSAGE_CLASS_DEFINITION(FreeDVMod::MsgConfigureFreeDVMod, Message)
-MESSAGE_CLASS_DEFINITION(FreeDVMod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(FreeDVMod::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(FreeDVMod::MsgConfigureFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(FreeDVMod::MsgConfigureFileSourceStreamTiming, Message)
@@ -105,20 +104,7 @@ void FreeDVMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
 
 bool FreeDVMod::handleMessage(const Message& cmd)
 {
-    if (MsgConfigureChannelizer::match(cmd))
-    {
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        qDebug() << "FreeDVMod::handleMessage: MsgConfigureChannelizer:"
-                << " getSourceSampleRate: " << cfg.getSourceSampleRate()
-                << " getSourceCenterFrequency: " << cfg.getSourceCenterFrequency();
-
-        FreeDVModBaseband::MsgConfigureChannelizer *msg
-            = FreeDVModBaseband::MsgConfigureChannelizer::create(cfg.getSourceSampleRate(), cfg.getSourceCenterFrequency());
-        m_basebandSource->getInputMessageQueue()->push(msg);
-
-        return true;
-    }
-    else if (MsgConfigureFreeDVMod::match(cmd))
+    if (MsgConfigureFreeDVMod::match(cmd))
     {
         MsgConfigureFreeDVMod& cfg = (MsgConfigureFreeDVMod&) cmd;
         qDebug() << "FreeDVMod::handleMessage: MsgConfigureFreeDVMod";
@@ -270,20 +256,8 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
     if ((m_settings.m_freeDVMode != settings.m_freeDVMode) || force) {
         reverseAPIKeys.append("freeDVMode");
     }
-
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
-    {
-        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
-        int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
-        audioDeviceManager->addAudioSource(m_basebandSource->getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
-        uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
-
-        if (m_basebandSource->getAudioSampleRate() != audioSampleRate)
-        {
-            reverseAPIKeys.append("audioSampleRate");
-            DSPConfigureAudio *msg = new DSPConfigureAudio(audioSampleRate, DSPConfigureAudio::AudioInput);
-            m_basebandSource->getInputMessageQueue()->push(msg);
-        }
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
+        reverseAPIKeys.append("audioDeviceName");
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -377,13 +351,6 @@ int FreeDVMod::webapiSettingsPutPatch(
             CWKeyer::MsgConfigureCWKeyer *msgCwKeyerToGUI = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
             m_guiMessageQueue->push(msgCwKeyerToGUI);
         }
-    }
-
-    if (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)
-    {
-        FreeDVMod::MsgConfigureChannelizer *msgChan = FreeDVMod::MsgConfigureChannelizer::create(
-                m_basebandSource->getAudioSampleRate(), settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(msgChan);
     }
 
     MsgConfigureFreeDVMod *msg = MsgConfigureFreeDVMod::create(settings, force);

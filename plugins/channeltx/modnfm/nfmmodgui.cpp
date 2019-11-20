@@ -451,10 +451,6 @@ void NFMModGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-		NFMMod::MsgConfigureChannelizer *msgChan = NFMMod::MsgConfigureChannelizer::create(
-		        48000, m_channelMarker.getCenterFrequency());
-		m_nfmMod->getInputMessageQueue()->push(msgChan);
-
 		NFMMod::MsgConfigureNFMMod *msg = NFMMod::MsgConfigureNFMMod::create(m_settings, force);
 		m_nfmMod->getInputMessageQueue()->push(msg);
 	}

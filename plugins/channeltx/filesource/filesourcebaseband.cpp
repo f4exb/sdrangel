@@ -24,7 +24,6 @@
 #include "filesourcebaseband.h"
 
 MESSAGE_CLASS_DEFINITION(FileSourceBaseband::MsgConfigureFileSourceBaseband, Message)
-MESSAGE_CLASS_DEFINITION(FileSourceBaseband::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceBaseband::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceBaseband::MsgConfigureFileSourceWork, Message)
 MESSAGE_CLASS_DEFINITION(FileSourceBaseband::MsgConfigureFileSourceSeek, Message)
@@ -144,20 +143,6 @@ bool FileSourceBaseband::handleMessage(const Message& cmd)
         qDebug() << "FileSourceBaseband::handleMessage: MsgConfigureFileSourceBaseband";
 
         applySettings(cfg.getSettings(), cfg.getForce());
-
-        return true;
-    }
-    else if (MsgConfigureChannelizer::match(cmd))
-    {
-        QMutexLocker mutexLocker(&m_mutex);
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        m_settings.m_log2Interp = cfg.getLog2Interp();
-        m_settings.m_filterChainHash =  cfg.getFilterChainHash();
-
-        qDebug() << "FileSourceBaseband::handleMessage: MsgConfigureChannelizer:"
-                << " log2Interp: " << m_settings.m_log2Interp
-                << " filterChainHash: " << m_settings.m_filterChainHash;
-        m_channelizer->setInterpolation(m_settings.m_log2Interp, m_settings.m_filterChainHash);
 
         return true;
     }

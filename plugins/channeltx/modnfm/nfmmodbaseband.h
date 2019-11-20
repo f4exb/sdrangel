@@ -56,29 +56,6 @@ public:
         { }
     };
 
-    class MsgConfigureChannelizer : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getSourceSampleRate() const { return m_sourceSampleRate; }
-        int getSourceCenterFrequency() const { return m_sourceCenterFrequency; }
-
-        static MsgConfigureChannelizer* create(int sourceSampleRate, int sourceCenterFrequency)
-        {
-            return new MsgConfigureChannelizer(sourceSampleRate, sourceCenterFrequency);
-        }
-
-    private:
-        int m_sourceSampleRate;
-        int m_sourceCenterFrequency;
-
-        MsgConfigureChannelizer(int sourceSampleRate, int sourceCenterFrequency) :
-            Message(),
-            m_sourceSampleRate(sourceSampleRate),
-            m_sourceCenterFrequency(sourceCenterFrequency)
-        { }
-    };
-
     NFMModBaseband();
     ~NFMModBaseband();
     void reset();

@@ -41,7 +41,6 @@
 #include "ammod.h"
 
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureAMMod, Message)
-MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceStreamTiming, Message)
@@ -111,20 +110,7 @@ void AMMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
 
 bool AMMod::handleMessage(const Message& cmd)
 {
-    if (MsgConfigureChannelizer::match(cmd))
-    {
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        qDebug() << "AMMod::handleMessage: MsgConfigureChannelizer:"
-                << " getSourceSampleRate: " << cfg.getSourceSampleRate()
-                << " getSourceCenterFrequency: " << cfg.getSourceCenterFrequency();
-
-        AMModBaseband::MsgConfigureChannelizer *msg
-            = AMModBaseband::MsgConfigureChannelizer::create(cfg.getSourceSampleRate(), cfg.getSourceCenterFrequency());
-        m_basebandSource->getInputMessageQueue()->push(msg);
-
-        return true;
-    }
-    else if (MsgConfigureAMMod::match(cmd))
+    if (MsgConfigureAMMod::match(cmd))
     {
         MsgConfigureAMMod& cfg = (MsgConfigureAMMod&) cmd;
         qDebug() << "AMMod::handleMessage: MsgConfigureAMMod";
@@ -281,37 +267,11 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
     if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
         reverseAPIKeys.append("toneFrequency");
     }
-
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
-    {
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
         reverseAPIKeys.append("audioDeviceName");
-        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
-        int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
-        audioDeviceManager->addAudioSource(m_basebandSource->getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
-        uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
-
-        if (m_basebandSource->getAudioSampleRate() != audioSampleRate)
-        {
-            reverseAPIKeys.append("audioSampleRate");
-            DSPConfigureAudio *msg = new DSPConfigureAudio(audioSampleRate, DSPConfigureAudio::AudioInput);
-            m_basebandSource->getInputMessageQueue()->push(msg);
-        }
     }
-
-    if ((settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName) || force)
-    {
+    if ((settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName) || force) {
         reverseAPIKeys.append("feedbackAudioDeviceName");
-        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
-        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_feedbackAudioDeviceName);
-        audioDeviceManager->addAudioSink(m_basebandSource->getFeedbackAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
-        uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
-
-        if (m_basebandSource->getFeedbackAudioSampleRate() != audioSampleRate)
-        {
-            reverseAPIKeys.append("feedbackAudioSampleRate");
-            DSPConfigureAudio *msg = new DSPConfigureAudio(audioSampleRate, DSPConfigureAudio::AudioOutput);
-            m_basebandSource->getInputMessageQueue()->push(msg);
-        }
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -405,13 +365,6 @@ int AMMod::webapiSettingsPutPatch(
             CWKeyer::MsgConfigureCWKeyer *msgCwKeyerToGUI = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
             m_guiMessageQueue->push(msgCwKeyerToGUI);
         }
-    }
-
-    if (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)
-    {
-        AMModBaseband::MsgConfigureChannelizer *msgChan = AMModBaseband::MsgConfigureChannelizer::create(
-                m_basebandSource->getAudioSampleRate(), settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(msgChan);
     }
 
     MsgConfigureAMMod *msg = MsgConfigureAMMod::create(settings, force);

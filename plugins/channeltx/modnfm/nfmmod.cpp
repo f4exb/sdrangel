@@ -42,7 +42,6 @@
 #include "nfmmod.h"
 
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureNFMMod, Message)
-MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureFileSourceStreamTiming, Message)
@@ -107,20 +106,7 @@ void NFMMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
 
 bool NFMMod::handleMessage(const Message& cmd)
 {
-    if (MsgConfigureChannelizer::match(cmd))
-    {
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        qDebug() << "NFMMod::handleMessage: MsgConfigureChannelizer:"
-                << " getSourceSampleRate: " << cfg.getSourceSampleRate()
-                << " getSourceCenterFrequency: " << cfg.getSourceCenterFrequency();
-
-        NFMModBaseband::MsgConfigureChannelizer *msg
-            = NFMModBaseband::MsgConfigureChannelizer::create(cfg.getSourceSampleRate(), cfg.getSourceCenterFrequency());
-        m_basebandSource->getInputMessageQueue()->push(msg);
-
-        return true;
-    }
-    else if (MsgConfigureNFMMod::match(cmd))
+    if (MsgConfigureNFMMod::match(cmd))
     {
         MsgConfigureNFMMod& cfg = (MsgConfigureNFMMod&) cmd;
         qDebug() << "NFMMod::handleMessage: MsgConfigureNFMMod";
@@ -327,37 +313,11 @@ void NFMMod::applySettings(const NFMModSettings& settings, bool force)
     if ((settings.m_ctcssIndex != m_settings.m_ctcssIndex) || force) {
         reverseAPIKeys.append("ctcssIndex");
     }
-
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
-    {
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
         reverseAPIKeys.append("audioDeviceName");
-        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
-        int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
-        audioDeviceManager->addAudioSource(m_basebandSource->getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
-        uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
-
-        if (m_basebandSource->getAudioSampleRate() != audioSampleRate)
-        {
-            reverseAPIKeys.append("audioSampleRate");
-            DSPConfigureAudio *msg = new DSPConfigureAudio(audioSampleRate, DSPConfigureAudio::AudioInput);
-            m_basebandSource->getInputMessageQueue()->push(msg);
-        }
     }
-
-    if ((settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName) || force)
-    {
+    if ((settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName) || force) {
         reverseAPIKeys.append("feedbackAudioDeviceName");
-        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
-        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_feedbackAudioDeviceName);
-        audioDeviceManager->addAudioSink(m_basebandSource->getFeedbackAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
-        uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
-
-        if (m_basebandSource->getFeedbackAudioSampleRate() != audioSampleRate)
-        {
-            reverseAPIKeys.append("feedbackAudioSampleRate");
-            DSPConfigureAudio *msg = new DSPConfigureAudio(audioSampleRate, DSPConfigureAudio::AudioOutput);
-            m_basebandSource->getInputMessageQueue()->push(msg);
-        }
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -403,10 +363,6 @@ bool NFMMod::deserialize(const QByteArray& data)
         m_settings.resetToDefaults();
         success = false;
     }
-
-    MsgConfigureChannelizer *msgChan = MsgConfigureChannelizer::create(
-            48000, m_settings.m_inputFrequencyOffset);
-    m_inputMessageQueue.push(msgChan);
 
     MsgConfigureNFMMod *msg = MsgConfigureNFMMod::create(m_settings, true);
     m_inputMessageQueue.push(msg);
@@ -454,13 +410,6 @@ int NFMMod::webapiSettingsPutPatch(
             CWKeyer::MsgConfigureCWKeyer *msgCwKeyerToGUI = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
             m_guiMessageQueue->push(msgCwKeyerToGUI);
         }
-    }
-
-    if (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)
-    {
-        NFMModBaseband::MsgConfigureChannelizer *msgChan = NFMModBaseband::MsgConfigureChannelizer::create(
-                m_basebandSource->getAudioSampleRate(), settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(msgChan);
     }
 
     MsgConfigureNFMMod *msg = MsgConfigureNFMMod::create(settings, force);

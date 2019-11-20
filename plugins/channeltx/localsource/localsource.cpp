@@ -257,7 +257,6 @@ void LocalSource::applySettings(const LocalSourceSettings& settings, bool force)
     if ((settings.m_localDeviceIndex != m_settings.m_localDeviceIndex) || force)
     {
         reverseAPIKeys.append("localDeviceIndex");
-        calculateFrequencyOffset(settings.m_log2Interp, settings.m_filterChainHash);
         propagateSampleRateAndFrequency(settings.m_localDeviceIndex, settings.m_log2Interp);
         DeviceSampleSink *deviceSampleSink = getLocalDevice(settings.m_localDeviceIndex);
         LocalSourceBaseband::MsgConfigureLocalDeviceSampleSink *msg =
@@ -270,11 +269,6 @@ void LocalSource::applySettings(const LocalSourceSettings& settings, bool force)
     {
         calculateFrequencyOffset(settings.m_log2Interp, settings.m_filterChainHash);
         propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex, settings.m_log2Interp);
-        LocalSourceBaseband::MsgConfigureChannelizer *msg = LocalSourceBaseband::MsgConfigureChannelizer::create(
-            settings.m_log2Interp,
-            settings.m_filterChainHash
-        );
-        m_basebandSource->getInputMessageQueue()->push(msg);
     }
 
     if ((settings.m_play != m_settings.m_play) || force)

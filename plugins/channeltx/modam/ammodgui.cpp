@@ -419,11 +419,6 @@ void AMModGUI::applySettings(bool force)
 	if (m_doApplySettings)
 	{
 		setTitleColor(m_channelMarker.getColor());
-
-		AMMod::MsgConfigureChannelizer *msgConfigure = AMMod::MsgConfigureChannelizer::create(
-		        48000, m_channelMarker.getCenterFrequency());
-        m_amMod->getInputMessageQueue()->push(msgConfigure);
-
         AMMod::MsgConfigureAMMod* message = AMMod::MsgConfigureAMMod::create( m_settings, force);
         m_amMod->getInputMessageQueue()->push(message);
 	}

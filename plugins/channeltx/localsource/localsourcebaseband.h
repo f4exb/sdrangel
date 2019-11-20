@@ -57,28 +57,6 @@ public:
         { }
     };
 
-    class MsgConfigureChannelizer : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getLog2Interp() const { return m_log2Interp; }
-        int getFilterChainHash() const { return m_filterChainHash; }
-
-        static MsgConfigureChannelizer* create(unsigned int m_log2Interp, unsigned int m_filterChainHash) {
-            return new MsgConfigureChannelizer(m_log2Interp, m_filterChainHash);
-        }
-
-    private:
-        unsigned int m_log2Interp;
-        unsigned int m_filterChainHash;
-
-        MsgConfigureChannelizer(unsigned int log2Interp, unsigned int filterChainHash) :
-            Message(),
-            m_log2Interp(log2Interp),
-            m_filterChainHash(filterChainHash)
-        { }
-    };
-
 	class MsgConfigureLocalSourceWork : public Message {
 		MESSAGE_CLASS_DECLARATION
 

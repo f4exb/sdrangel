@@ -78,14 +78,20 @@ void WFMModSource::pullOne(Sample& sample)
 	if ((m_settings.m_modAFInput == WFMModSettings::WFMModInputFile)
 	   || (m_settings.m_modAFInput == WFMModSettings::WFMModInputAudio))
 	{
-	    if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ri))
-	    {
-	        pullAF(t);
-	        calculateLevel(t);
-            m_modSample.real(t);
-            m_modSample.imag(0.0f);
-	        m_audioBufferFill++;
-	    }
+        if (m_interpolatorDistance > 1.0f) // decimate
+        {
+            modulateAudio();
+
+            while (!m_interpolator.decimate(&m_interpolatorDistanceRemain, m_modSample, &ri)) {
+                modulateAudio();
+            }
+        }
+        else // interpolate
+        {
+            if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ri)) {
+                modulateAudio();
+            }
+        }
 
         t = ri.real();
 	    m_interpolatorDistanceRemain += m_interpolatorDistance;
@@ -126,6 +132,15 @@ void WFMModSource::pullOne(Sample& sample)
 
 	sample.m_real = (FixReal) ci.real();
 	sample.m_imag = (FixReal) ci.imag();
+}
+
+void WFMModSource::modulateAudio()
+{
+    Real t;
+    pullAF(t);
+    calculateLevel(t);
+    m_modSample.real(t);
+    m_modSample.imag(0.0f);
 }
 
 void WFMModSource::prefetch(unsigned int nbSamples)
@@ -183,7 +198,17 @@ void WFMModSource::pullAF(Real& sample)
         break;
     case WFMModSettings::WFMModInputAudio:
         {
-            sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_settings.m_volumeFactor;
+            if (m_audioBufferFill < m_audioBuffer.size())
+            {
+                sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_settings.m_volumeFactor;
+                m_audioBufferFill++;
+            }
+            else
+            {
+                unsigned int size = m_audioBuffer.size();
+                qDebug("WFMModSource::pullAF: starve audio samples: size: %u", size);
+                sample = ((m_audioBuffer[size-1].l + m_audioBuffer[size-1].r) / 65536.0f) * m_settings.m_volumeFactor;
+            }
         }
         break;
     case WFMModSettings::WFMModInputCWTone:
@@ -256,8 +281,8 @@ void WFMModSource::applySettings(const WFMModSettings& settings, bool force)
 
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
-        Real lowCut = -(settings.m_rfBandwidth / 2.0) / m_channelSampleRate;
-        Real hiCut  = (settings.m_rfBandwidth / 2.0) / m_channelSampleRate;
+        Real lowCut = -(settings.m_rfBandwidth / 2.2) / m_channelSampleRate;
+        Real hiCut  = (settings.m_rfBandwidth / 2.2) / m_channelSampleRate;
         m_rfFilter->create_filter(lowCut, hiCut);
     }
 

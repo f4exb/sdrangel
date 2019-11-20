@@ -41,7 +41,6 @@
 #include "ssbmod.h"
 
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureSSBMod, Message)
-MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureFileSourceStreamTiming, Message)
@@ -106,20 +105,7 @@ void SSBMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
 
 bool SSBMod::handleMessage(const Message& cmd)
 {
-    if (MsgConfigureChannelizer::match(cmd))
-    {
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        qDebug() << "SSBMod::handleMessage: MsgConfigureChannelizer:"
-                << " getSourceSampleRate: " << cfg.getSourceSampleRate()
-                << " getSourceCenterFrequency: " << cfg.getSourceCenterFrequency();
-
-        SSBModBaseband::MsgConfigureChannelizer *msg
-            = SSBModBaseband::MsgConfigureChannelizer::create(cfg.getSourceSampleRate(), cfg.getSourceCenterFrequency());
-        m_basebandSource->getInputMessageQueue()->push(msg);
-
-        return true;
-    }
-    else if (MsgConfigureSSBMod::match(cmd))
+    if (MsgConfigureSSBMod::match(cmd))
     {
         MsgConfigureSSBMod& cfg = (MsgConfigureSSBMod&) cmd;
         qDebug() << "NFMMod::handleMessage: MsgConfigureSSBMod";
@@ -284,35 +270,11 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
         reverseAPIKeys.append("audioDeviceName");
     }
-
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
-    {
-        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
-        int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
-        audioDeviceManager->addAudioSource(m_basebandSource->getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
-        uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
-
-        if (m_basebandSource->getAudioSampleRate() != audioSampleRate)
-        {
-            reverseAPIKeys.append("audioSampleRate");
-            DSPConfigureAudio *msg = new DSPConfigureAudio(audioSampleRate, DSPConfigureAudio::AudioInput);
-            m_basebandSource->getInputMessageQueue()->push(msg);
-        }
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
+        reverseAPIKeys.append("audioDeviceName");
     }
-
-    if ((settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName) || force)
-    {
+    if ((settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName) || force) {
         reverseAPIKeys.append("feedbackAudioDeviceName");
-        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
-        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_feedbackAudioDeviceName);
-        audioDeviceManager->addAudioSink(m_basebandSource->getFeedbackAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
-        uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
-
-        if (m_basebandSource->getFeedbackAudioSampleRate() != audioSampleRate) {
-            reverseAPIKeys.append("feedbackAudioSampleRate");
-            DSPConfigureAudio *msg = new DSPConfigureAudio(audioSampleRate, DSPConfigureAudio::AudioOutput);
-            m_basebandSource->getInputMessageQueue()->push(msg);
-        }
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -409,13 +371,6 @@ int SSBMod::webapiSettingsPutPatch(
             CWKeyer::MsgConfigureCWKeyer *msgCwKeyerToGUI = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
             m_guiMessageQueue->push(msgCwKeyerToGUI);
         }
-    }
-
-    if (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)
-    {
-        SSBMod::MsgConfigureChannelizer *msgChan = SSBMod::MsgConfigureChannelizer::create(
-                m_basebandSource->getAudioSampleRate(), settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(msgChan);
     }
 
     MsgConfigureSSBMod *msg = MsgConfigureSSBMod::create(settings, force);

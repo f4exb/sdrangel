@@ -40,7 +40,6 @@
 #include "wfmmod.h"
 
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureWFMMod, Message)
-MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureFileSourceStreamTiming, Message)
@@ -105,20 +104,7 @@ void WFMMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
 
 bool WFMMod::handleMessage(const Message& cmd)
 {
-    if (MsgConfigureChannelizer::match(cmd))
-    {
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        qDebug() << "WFMMod::handleMessage: MsgConfigureChannelizer:"
-                << " getSourceSampleRate: " << cfg.getSourceSampleRate()
-                << " getSourceCenterFrequency: " << cfg.getSourceCenterFrequency();
-
-        WFMModBaseband::MsgConfigureChannelizer *msg
-            = WFMModBaseband::MsgConfigureChannelizer::create(cfg.getSourceSampleRate(), cfg.getSourceCenterFrequency());
-        m_basebandSource->getInputMessageQueue()->push(msg);
-
-        return true;
-    }
-    else if (MsgConfigureWFMMod::match(cmd))
+    if (MsgConfigureWFMMod::match(cmd))
     {
         MsgConfigureWFMMod& cfg = (MsgConfigureWFMMod&) cmd;
         qDebug() << "WFMMod::handleMessage: MsgConfigureWFMMod";
@@ -270,21 +256,8 @@ void WFMMod::applySettings(const WFMModSettings& settings, bool force)
     if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
         reverseAPIKeys.append("toneFrequency");
     }
-
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
-    {
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
         reverseAPIKeys.append("audioDeviceName");
-        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
-        int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
-        audioDeviceManager->addAudioSource(m_basebandSource->getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
-        uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
-
-        if (m_basebandSource->getAudioSampleRate() != audioSampleRate)
-        {
-            reverseAPIKeys.append("audioSampleRate");
-            DSPConfigureAudio *msg = new DSPConfigureAudio(audioSampleRate, DSPConfigureAudio::AudioInput);
-            m_basebandSource->getInputMessageQueue()->push(msg);
-        }
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -378,14 +351,6 @@ int WFMMod::webapiSettingsPutPatch(
             CWKeyer::MsgConfigureCWKeyer *msgCwKeyerToGUI = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
             m_guiMessageQueue->push(msgCwKeyerToGUI);
         }
-    }
-
-    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)
-      ||(m_settings.m_rfBandwidth != settings.m_rfBandwidth))
-    {
-        WFMMod::MsgConfigureChannelizer *msgChan = WFMMod::MsgConfigureChannelizer::create(
-                settings.m_rfBandwidth, settings.m_inputFrequencyOffset);
-        m_inputMessageQueue.push(msgChan);
     }
 
     MsgConfigureWFMMod *msg = MsgConfigureWFMMod::create(settings, force);

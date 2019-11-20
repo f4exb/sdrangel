@@ -128,8 +128,8 @@ private:
         {}
     };
 
-    int m_outputSampleRate;
-    int m_inputFrequencyOffset;
+    int m_channelSampleRate;
+    int m_channelFrequencyOffset;
     ATVModSettings m_settings;
 
     NCO m_carrierNco;

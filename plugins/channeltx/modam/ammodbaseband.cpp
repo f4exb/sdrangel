@@ -24,7 +24,6 @@
 #include "ammodbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(AMModBaseband::MsgConfigureAMModBaseband, Message)
-MESSAGE_CLASS_DEFINITION(AMModBaseband::MsgConfigureChannelizer, Message)
 
 AMModBaseband::AMModBaseband() :
     m_mutex(QMutex::Recursive)
@@ -141,51 +140,13 @@ void AMModBaseband::handleInputMessages()
 
 bool AMModBaseband::handleMessage(const Message& cmd)
 {
-    if (DSPConfigureAudio::match(cmd))
-    {
-        QMutexLocker mutexLocker(&m_mutex);
-        DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
-        uint32_t sampleRate = cfg.getSampleRate();
-        DSPConfigureAudio::AudioType audioType = cfg.getAudioType();
-
-        qDebug() << "AMModBaseband::handleMessage: DSPConfigureAudio:"
-                << " sampleRate: " << sampleRate
-                << " audioType: " << audioType;
-
-        if (audioType == DSPConfigureAudio::AudioInput)
-        {
-            if (sampleRate != m_source.getAudioSampleRate()) {
-                m_source.applyAudioSampleRate(sampleRate);
-            }
-        }
-        else if (audioType == DSPConfigureAudio::AudioOutput)
-        {
-            if (sampleRate != m_source.getFeedbackAudioSampleRate()) {
-                m_source.applyFeedbackAudioSampleRate(sampleRate);
-            }
-        }
-
-        return true;
-    }
-    else if (MsgConfigureAMModBaseband::match(cmd))
+    if (MsgConfigureAMModBaseband::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureAMModBaseband& cfg = (MsgConfigureAMModBaseband&) cmd;
         qDebug() << "AMModBaseband::handleMessage: MsgConfigureAMModBaseband";
 
         applySettings(cfg.getSettings(), cfg.getForce());
-
-        return true;
-    }
-    else if (MsgConfigureChannelizer::match(cmd))
-    {
-        QMutexLocker mutexLocker(&m_mutex);
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        qDebug() << "AMModBaseband::handleMessage: MsgConfigureChannelizer"
-            << "(requested) sourceSampleRate: " << cfg.getSourceSampleRate()
-            << "(requested) sourceCenterFrequency: " << cfg.getSourceCenterFrequency();
-        m_channelizer->setChannelization(cfg.getSourceSampleRate(), cfg.getSourceCenterFrequency());
-        m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 
         return true;
     }
@@ -219,7 +180,38 @@ bool AMModBaseband::handleMessage(const Message& cmd)
 
 void AMModBaseband::applySettings(const AMModSettings& settings, bool force)
 {
+    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force)
+    {
+        m_channelizer->setChannelization(48000, settings.m_inputFrequencyOffset);
+        m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+    }
+
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
+        audioDeviceManager->addAudioSource(getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
+        uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
+
+        if (getAudioSampleRate() != audioSampleRate) {
+            m_source.applyAudioSampleRate(audioSampleRate);
+        }
+    }
+
+    if ((settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_feedbackAudioDeviceName);
+        audioDeviceManager->addAudioSink(getFeedbackAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
+        uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
+
+        if (getFeedbackAudioSampleRate() != audioSampleRate) {
+            m_source.applyFeedbackAudioSampleRate(audioSampleRate);
+        }
+    }
+
     m_source.applySettings(settings, force);
+
     m_settings = settings;
 }
 

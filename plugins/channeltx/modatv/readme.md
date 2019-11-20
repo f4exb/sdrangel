@@ -2,7 +2,7 @@
 
 <h1>Introduction</h1>
 
-This plugin can be used to generate an analog TV signal mostly used in amateur radio. It is limited to black and white images as only the luminance (256 levels) is supported. 
+This plugin can be used to generate an analog TV signal mostly used in amateur radio. It is limited to black and white images as only the luminance (256 levels) is supported.
 
 There is no sound either. You could imagine using any of the plugins supporting audio to create a mixed signal. This is not working well however for various reasons. It is better to use two physical transmitters and two physical receivers.
 
@@ -20,24 +20,33 @@ Use the wheels to adjust the frequency shift in Hz from the center frequency of 
 
 The left button can be used to force the rational decimator even when the source and channel sample rates agree. This allows to use the FIR filter of the decimator in any case.
 
-The middle figure is the sample rate in kS/s used in the channel which may differ of the source plugin output sample rate if the rational decimator is engaged. This sample rate is calculated as the closest 10 S/s multiple to the source sample rate to fit an integer number of line points. The number of line points is the full line including synchronization. This number is the sample rate divided by the line frequency. The line frequency is calculated as the nominal number of lines multiplied by the FPS.  
+The middle figure is the sample rate in kS/s used by the source which may differ from the channel sample rate which is also the baseband sample rate. If they do not agree the rational interpolator is automatically engaged. This sample rate is calculated as the closest 10 S/s multiple to the channel sample rate to fit an integer number of (virtual) line points. The number of line points accounts for the full line including synchronization. This number is the source sample rate divided by the line frequency. The line frequency is calculated as the nominal number of lines multiplied by the FPS.
 
-The right figure is the corresponding number of points and therefore also samples per full line including line synchronization. 
+S = L&times;F&times;n such as B&divide;10 &ge; S&divide;10 > (B&divide;10)&minus;1 where:
+  - B is the baseband or channel sample rate (they are made the same)
+  - S is the source sample rate
+  - L is the number of lines
+  - F is the number of frames per second
+  - n is the integer that we call the "number of points"
 
-Let's take an example with a 405 lines and 20 FPS video signal and a 3000 kS/s sink input sample rate: 
+The right figure is the corresponding number of points and therefore also samples per full line including line synchronization.
+
+Let's take an example with a 405 lines and 20 FPS video signal and a 3000 kS/s sink input sample rate:
 
   - the line frequency is 405 &#215; 25 = 10125 Hz
   - 2400 kS/s fit 237.037037037 points per line and therefore is not an integer number
   - closest 10 S/s multiple sample rate to fit an integer number of points is 236 &#215; 10125 = 2389.5 kS/s
   - therefore decimated sample rate is 2389.5 kS/s and the number of points per line is 236
-  
+
 The example taken in the screenshot is from a 405 lines &#215; 20 FPS video signal:
 
   - source sample rate is 3000 kS/s
   - line frequency is 8100 Hz
   - 371 points fit in 8100 &#215; 371 = 3005.1 kS/s
   - 370 points fit in 8100 &#215; 370 = 2997 kS/s
-  - therefore the closest sample rate is 2997 kS/s for 370 points per line 
+  - therefore the closest sample rate is 2997 kS/s for 370 points per line
+
+&#9758; For a proper rendering of the image one should aim at having twice the number of points per line relative to the number of lines. This number may be lowered for closeups needing less details like a portrait scene. The less the number of points the less bandwidth the signal takes so as one would expect there is a balance between spectrum efficiency and image quality.
 
 <h2>4: Channel power</h2>
 
@@ -56,27 +65,27 @@ Use this button to toggle mute for this channel. The radio waves on the icon are
 The video signal can modulate the carrier in the following modes:
 
   - AM: Amplitude modulation. Modulation index is 90%.
-  - FM: Frequency modulation. Excursion is a percentage of the bandwidth available given the channel sample rate. This percentage is controlled by button (2). e.g. at 25% for 4 MS/s sample rate this is 1 MHz (&#177;0.5 MHz) 
+  - FM: Frequency modulation. Excursion is a percentage of the bandwidth available given the channel sample rate. This percentage is controlled by button (2). e.g. at 25% for 4 MS/s sample rate this is 1 MHz (&#177;0.5 MHz)
   - USB: SSB upper side band: video signal is transposed only in positive frequencies including DC component
   - LSB: SSB lower side band: video signal is transposed only in negative frequencies excluding DC component
   - VUSB: SSB upper sideband with vestigial lower sideband. The cutoff frequency of the lower sideband is controlled by slider (3)
   - VLSB: SSB lower sideband with vestigial upper sideband. The cutoff frequency of the upper sideband is controlled by slider (3)
-  
+
 <h3>A.2: FM deviation percentage of total bandwidth</h3>
 
 Use this button to control FM deviation in FM modulation mode. This is a percentage of total available channel bandwidth. e.g for the sample rate of 2997 kS/s of the screenshot and a percentage of 19% this yields a full deviation of 2997 &#215; 0.19 = 569.43 kHz that is &#177;284.715 kHz
 
 &#9758; You can adjust this value and see the result for yourself. A good starting point is half of the signal bandwidth.
-  
+
 <h3>A.3: Opposite sideband FFT filter cutoff</h3>
 
 This slider is effective only on SSB and vestigial modes (USB, LSB, VUSB, VLSB). This slider controls the cutoff frequency of the FFT filter in the opposite sideband to the main in band sideband. That is:
 
   - for LSB and VLSB: this is the upper sideband
   - for USB and VUSB: this is the lower sideband
-  
+
 The cutoff frequency in kHz is displayed on the left of the slider
-  
+
 <h3>A.4: In band filter cutoff</h3>
 
 This slider acts on both the FFT filter in SSB modes and the rational decimator FIR filter in other modes.
@@ -89,7 +98,7 @@ This slider acts on both the FFT filter in SSB modes and the rational decimator 
 The cutoff frequency in kHz is displayed on the right of the slider
 
 <h3>A.5: Modulated signal level before filtering stages</h3>
-  
+
 This button controls the scaling from the +1/-1 modulated signal level to the -32768/+32768 2 bytes samples. This is useful to control the saturation of the FFT or FIR filters. Looking at the output spectrum you can precisely control the limit above which distortion appears.
 
 <h3>A.6: Video signal level meter</h3>
@@ -179,7 +188,7 @@ This controls the frame synchronization scheme and number of black lines:
         <td>HSkip</td>
     </tr>
 </table>
-  
+
 <h2>A.10: Input source</h2>
 
 This combo box lets you choose between various inputs for the video signal:
@@ -196,9 +205,9 @@ This combo box lets you choose between various inputs for the video signal:
 
 <h2>A.11: Video inversion toggle</h2>
 
-Use this checkbox to toggle video signal inversion before modulation. 
-  
-<h2>A.12. Luminance level</h2> 
+Use this checkbox to toggle video signal inversion before modulation.
+
+<h2>A.12. Luminance level</h2>
 
 This button lets you adjust the luminance level of the "blank" screens displays, the lighter squares on the chessboard and the overlay text.
 
@@ -210,11 +219,11 @@ The text area lets you type a text up to 12 characters.
 
 <h2>6. Still picture file select</h2>
 
-Clicking on this button will open a file dialog to let you choose an image file for still image display. When the dialog is closed and the choice is validated the name of the file will appear on the space at the right of the button. 
+Clicking on this button will open a file dialog to let you choose an image file for still image display. When the dialog is closed and the choice is validated the name of the file will appear on the space at the right of the button.
 
 <h2>7. Video file select</h2>
 
-Clicking on this button will open a file dialog to let you choose a video file for video play. When the dialog is closed and the choice is validated the name of the file will appear on the space at the right of the button. 
+Clicking on this button will open a file dialog to let you choose a video file for video play. When the dialog is closed and the choice is validated the name of the file will appear on the space at the right of the button.
 
 <h2>8. Play loop video</h2>
 
@@ -222,7 +231,7 @@ Use this button to toggle on/off playing the video file in a loop
 
 <h2>9. Play/Pause video</h2>
 
-Use this button to toggle on/off the video file play. When play stops the current image is displayed as a still image. When video is stopped the button is dark and a play (&#9658;) icon is displayed on the button. When video runs the button is lit and a pause (&#9611;&#9611;) icon is displayed on the button. 
+Use this button to toggle on/off the video file play. When play stops the current image is displayed as a still image. When video is stopped the button is dark and a play (&#9658;) icon is displayed on the button. When video runs the button is lit and a pause (&#9611;&#9611;) icon is displayed on the button.
 
 <h2>10. Current video position</h2>
 
@@ -238,13 +247,13 @@ This slider can be used to randomly set the current position in the file when fi
 
 <h2>23. Play/Pause camera</h2>
 
-Use this button to toggle on/off the camera play. When play stops the current image is displayed as a still image. When camera is stopped the button is dark and a play (&#9658;) icon is displayed on the button. When camera runs the button is lit and a pause (&#9611;&#9611;) icon is displayed on the button. 
+Use this button to toggle on/off the camera play. When play stops the current image is displayed as a still image. When camera is stopped the button is dark and a play (&#9658;) icon is displayed on the button. When camera runs the button is lit and a pause (&#9611;&#9611;) icon is displayed on the button.
 
 On Linux systems when the play button is engaged for the first time the FPS of the camera is scanned which can take some time (100 frames are read). A message box appears while the operation is running.
 
 <h2>14. Camera select</h2>
 
-Use this combo to select the camera source when more than one is available. the number corresponds to the index of the camera during the camera scan at the startup of the plugin instance. A maximum of 4 cameras are scanned in whichever order presented by the system.  
+Use this combo to select the camera source when more than one is available. the number corresponds to the index of the camera during the camera scan at the startup of the plugin instance. A maximum of 4 cameras are scanned in whichever order presented by the system.
 
 <h2>15. Camera device number</h2>
 

@@ -24,7 +24,6 @@
 #include "freedvmodbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(FreeDVModBaseband::MsgConfigureFreeDVModBaseband, Message)
-MESSAGE_CLASS_DEFINITION(FreeDVModBaseband::MsgConfigureChannelizer, Message)
 
 FreeDVModBaseband::FreeDVModBaseband() :
     m_mutex(QMutex::Recursive)
@@ -137,45 +136,13 @@ void FreeDVModBaseband::handleInputMessages()
 
 bool FreeDVModBaseband::handleMessage(const Message& cmd)
 {
-    if (DSPConfigureAudio::match(cmd))
-    {
-        QMutexLocker mutexLocker(&m_mutex);
-        DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
-        uint32_t sampleRate = cfg.getSampleRate();
-        DSPConfigureAudio::AudioType audioType = cfg.getAudioType();
-
-        qDebug() << "FreeDVModBaseband::handleMessage: DSPConfigureAudio:"
-                << " sampleRate: " << sampleRate
-                << " audioType: " << audioType;
-
-        if (audioType == DSPConfigureAudio::AudioInput)
-        {
-            if (sampleRate != m_source.getAudioSampleRate()) {
-                m_source.applyAudioSampleRate(sampleRate);
-            }
-        }
-
-        return true;
-    }
-    else if (MsgConfigureFreeDVModBaseband::match(cmd))
+    if (MsgConfigureFreeDVModBaseband::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureFreeDVModBaseband& cfg = (MsgConfigureFreeDVModBaseband&) cmd;
         qDebug() << "FreeDVModBaseband::handleMessage: MsgConfigureFreeDVModBaseband";
 
         applySettings(cfg.getSettings(), cfg.getForce());
-
-        return true;
-    }
-    else if (MsgConfigureChannelizer::match(cmd))
-    {
-        QMutexLocker mutexLocker(&m_mutex);
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        qDebug() << "FreeDVModBaseband::handleMessage: MsgConfigureChannelizer"
-            << "(requested) sourceSampleRate: " << cfg.getSourceSampleRate()
-            << "(requested) sourceCenterFrequency: " << cfg.getSourceCenterFrequency();
-        m_channelizer->setChannelization(cfg.getSourceSampleRate(), cfg.getSourceCenterFrequency());
-        m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 
         return true;
     }
@@ -208,7 +175,34 @@ bool FreeDVModBaseband::handleMessage(const Message& cmd)
 
 void FreeDVModBaseband::applySettings(const FreeDVModSettings& settings, bool force)
 {
+    if ((settings.m_freeDVMode != m_settings.m_freeDVMode) || force)
+    {
+        int modemSampleRate = FreeDVModSettings::getModSampleRate(settings.m_freeDVMode);
+        m_source.applyFreeDVMode(settings.m_freeDVMode);
+        m_channelizer->setChannelization(modemSampleRate, m_settings.m_inputFrequencyOffset); //  use possibly old frequency offset (changed next)
+        m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+    }
+
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    {
+        m_channelizer->setChannelization(m_source.getModemSampleRate(), settings.m_inputFrequencyOffset);
+        m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+    }
+
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
+        audioDeviceManager->addAudioSource(getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
+        uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
+
+        if (getAudioSampleRate() != audioSampleRate) {
+            m_source.applyAudioSampleRate(audioSampleRate);
+        }
+    }
+
     m_source.applySettings(settings, force);
+
     m_settings = settings;
 }
 

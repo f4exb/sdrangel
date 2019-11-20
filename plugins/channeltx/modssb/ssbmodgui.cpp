@@ -501,15 +501,15 @@ void SSBModGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-		SSBMod::MsgConfigureChannelizer *msgChan = SSBMod::MsgConfigureChannelizer::create(
-		        48000, m_settings.m_inputFrequencyOffset);
-        m_ssbMod->getInputMessageQueue()->push(msgChan);
-
         SSBModSettings mod_settings; // different USB/LSB convention between modulator and GUI
         mod_settings = m_settings;
-        if (mod_settings.m_bandwidth > 0) {
+
+        if (mod_settings.m_bandwidth > 0)
+        {
             mod_settings.m_usb = true;
-        } else {
+        }
+        else
+        {
             mod_settings.m_bandwidth = -mod_settings.m_bandwidth;
             mod_settings.m_lowCutoff = -mod_settings.m_lowCutoff;
             mod_settings.m_usb = false;

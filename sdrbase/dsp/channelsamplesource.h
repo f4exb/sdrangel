@@ -24,8 +24,6 @@
 #include "export.h"
 #include "dsptypes.h"
 
-class Message;
-
 class SDRBASE_API ChannelSampleSource {
 public:
 	ChannelSampleSource();

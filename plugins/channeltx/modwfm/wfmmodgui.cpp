@@ -419,14 +419,7 @@ void WFMModGUI::applySettings(bool force)
 	if (m_doApplySettings)
 	{
 		setTitleColor(m_channelMarker.getColor());
-
-		WFMMod::MsgConfigureChannelizer *msgChan = WFMMod::MsgConfigureChannelizer::create(
-		        requiredBW(WFMModSettings::getRFBW(ui->rfBW->currentIndex())),
-                m_channelMarker.getCenterFrequency());
-        m_wfmMod->getInputMessageQueue()->push(msgChan);
-
 		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-
 		WFMMod::MsgConfigureWFMMod *msgConf = WFMMod::MsgConfigureWFMMod::create(m_settings, force);
 		m_wfmMod->getInputMessageQueue()->push(msgConf);
 	}

@@ -103,6 +103,7 @@ private:
     void pullAF(Real& sample);
     void pullAudio(unsigned int nbSamples);
     void calculateLevel(const Real& sample);
+    void modulateAudio();
 };
 
 #endif // INCLUDE_WFMMODSOURCE_H

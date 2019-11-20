@@ -24,7 +24,6 @@
 #include "wfmmodbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(WFMModBaseband::MsgConfigureWFMModBaseband, Message)
-MESSAGE_CLASS_DEFINITION(WFMModBaseband::MsgConfigureChannelizer, Message)
 
 WFMModBaseband::WFMModBaseband() :
     m_mutex(QMutex::Recursive)
@@ -137,45 +136,13 @@ void WFMModBaseband::handleInputMessages()
 
 bool WFMModBaseband::handleMessage(const Message& cmd)
 {
-    if (DSPConfigureAudio::match(cmd))
-    {
-        QMutexLocker mutexLocker(&m_mutex);
-        DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
-        uint32_t sampleRate = cfg.getSampleRate();
-        DSPConfigureAudio::AudioType audioType = cfg.getAudioType();
-
-        qDebug() << "WFMModBaseband::handleMessage: DSPConfigureAudio:"
-                << " sampleRate: " << sampleRate
-                << " audioType: " << audioType;
-
-        if (audioType == DSPConfigureAudio::AudioInput)
-        {
-            if (sampleRate != m_source.getAudioSampleRate()) {
-                m_source.applyAudioSampleRate(sampleRate);
-            }
-        }
-
-        return true;
-    }
-    else if (MsgConfigureWFMModBaseband::match(cmd))
+    if (MsgConfigureWFMModBaseband::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureWFMModBaseband& cfg = (MsgConfigureWFMModBaseband&) cmd;
         qDebug() << "WFMModBaseband::handleMessage: MsgConfigureWFMModBaseband";
 
         applySettings(cfg.getSettings(), cfg.getForce());
-
-        return true;
-    }
-    else if (MsgConfigureChannelizer::match(cmd))
-    {
-        QMutexLocker mutexLocker(&m_mutex);
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        qDebug() << "WFMModBaseband::handleMessage: MsgConfigureChannelizer"
-            << "(requested) sourceSampleRate: " << cfg.getSourceSampleRate()
-            << "(requested) sourceCenterFrequency: " << cfg.getSourceCenterFrequency();
-        m_channelizer->setChannelization(cfg.getSourceSampleRate(), cfg.getSourceCenterFrequency());
-        m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 
         return true;
     }
@@ -208,7 +175,27 @@ bool WFMModBaseband::handleMessage(const Message& cmd)
 
 void WFMModBaseband::applySettings(const WFMModSettings& settings, bool force)
 {
+    if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth)
+     || (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force)
+    {
+        m_channelizer->setChannelization(settings.m_rfBandwidth, settings.m_inputFrequencyOffset);
+        m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+    }
+
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
+        audioDeviceManager->addAudioSource(getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
+        uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
+
+        if (getAudioSampleRate() != audioSampleRate) {
+            m_source.applyAudioSampleRate(audioSampleRate);
+        }
+    }
+
     m_source.applySettings(settings, force);
+
     m_settings = settings;
 }
 

@@ -24,7 +24,6 @@
 #include "localsourcebaseband.h"
 
 MESSAGE_CLASS_DEFINITION(LocalSourceBaseband::MsgConfigureLocalSourceBaseband, Message)
-MESSAGE_CLASS_DEFINITION(LocalSourceBaseband::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(LocalSourceBaseband::MsgConfigureLocalSourceWork, Message)
 MESSAGE_CLASS_DEFINITION(LocalSourceBaseband::MsgBasebandSampleRateNotification, Message)
 MESSAGE_CLASS_DEFINITION(LocalSourceBaseband::MsgConfigureLocalDeviceSampleSink, Message)
@@ -143,20 +142,6 @@ bool LocalSourceBaseband::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgConfigureChannelizer::match(cmd))
-    {
-        QMutexLocker mutexLocker(&m_mutex);
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        m_settings.m_log2Interp = cfg.getLog2Interp();
-        m_settings.m_filterChainHash =  cfg.getFilterChainHash();
-
-        qDebug() << "LocalSourceBaseband::handleMessage: MsgConfigureChannelizer:"
-                << " log2Interp: " << m_settings.m_log2Interp
-                << " filterChainHash: " << m_settings.m_filterChainHash;
-        m_channelizer->setInterpolation(m_settings.m_log2Interp, m_settings.m_filterChainHash);
-
-        return true;
-    }
     else if (MsgBasebandSampleRateNotification::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
@@ -208,6 +193,12 @@ void LocalSourceBaseband::applySettings(const LocalSourceSettings& settings, boo
         << "m_filterChainHash:" << settings.m_filterChainHash
         << "m_play:" << settings.m_play
         << " force: " << force;
+
+    if ((settings.m_log2Interp != m_settings.m_log2Interp)
+     || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
+    {
+        m_channelizer->setInterpolation(m_settings.m_log2Interp, m_settings.m_filterChainHash);
+    }
 
     //m_source.applySettings(settings, force);
     m_settings = settings;

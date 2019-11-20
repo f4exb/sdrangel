@@ -517,9 +517,5 @@ void FreeDVModSource::applySettings(const FreeDVModSettings& settings, bool forc
         m_toneNco.setFreq(settings.m_toneFrequency, m_channelSampleRate);
     }
 
-    if ((m_settings.m_freeDVMode != settings.m_freeDVMode) || force) {
-        applyFreeDVMode(settings.m_freeDVMode);
-    }
-
     m_settings = settings;
 }

@@ -434,10 +434,6 @@ void FreeDVModGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-		FreeDVMod::MsgConfigureChannelizer *msgChan = FreeDVMod::MsgConfigureChannelizer::create(
-		        48000, m_settings.m_inputFrequencyOffset);
-        m_freeDVMod->getInputMessageQueue()->push(msgChan);
-
 		FreeDVMod::MsgConfigureFreeDVMod *msg = FreeDVMod::MsgConfigureFreeDVMod::create(m_settings, force);
 		m_freeDVMod->getInputMessageQueue()->push(msg);
 	}
