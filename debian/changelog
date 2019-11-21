@@ -1,3 +1,13 @@
+sdrangel (4.12.1-1) unstable; urgency=medium
+
+  * Tx plugins: further refactoring and fixes
+  * Scope: added DOA projections and updated ChannelAnalzyer
+  * Upgraded codec2 library to v0.9.2
+  * NFM demod: fixed audio FIFO fill
+  * Various changes to base classes for MIMO
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 19 Nov 2019 22:14:22 +0100
+
 sdrangel (4.12.0-1) unstable; urgency=medium
 
   * Refactoring of Tx part with new FIFO and code reorganization
