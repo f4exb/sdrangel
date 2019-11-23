@@ -262,6 +262,8 @@ public:
 
 	void addChannelSource(BasebandSampleSource* source, int index = 0);            //!< Add a channel source
 	void removeChannelSource(BasebandSampleSource* source, int index = 0);         //!< Remove a channel source
+	void addChannelSink(BasebandSampleSink* sink, int index = 0);                  //!< Add a channel sink
+	void removeChannelSink(BasebandSampleSink* sink, int index = 0);               //!< Remove a channel sink
 	void addChannelSink(ThreadedBasebandSampleSink* sink, int index = 0);          //!< Add a channel sink that will run on its own thread
 	void removeChannelSink(ThreadedBasebandSampleSink* sink, int index = 0);       //!< Remove a channel sink that runs on its own thread
     void addMIMOChannel(MIMOChannel *channel);                                     //!< Add a MIMO channel

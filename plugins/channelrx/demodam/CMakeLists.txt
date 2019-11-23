@@ -2,14 +2,18 @@ project(am)
 
 set(am_SOURCES
 	amdemod.cpp
-	amdemodsettings.cpp
+    amdemodsettings.cpp
+    amdemodbaseband.cpp
+    amdemodsink.cpp
     amdemodplugin.cpp
     amdemodwebapiadapter.cpp
 )
 
 set(am_HEADERS
 	amdemod.h
-	amdemodsettings.h
+    amdemodsettings.h
+    amdemodbaseband.h
+    amdemodsink.h
     amdemodplugin.h
     amdemodwebapiadapter.h
 )
@@ -24,13 +28,12 @@ if(NOT SERVER_MODE)
         ${am_SOURCES}
         amdemodgui.cpp
         amdemodssbdialog.cpp
-
         amdemodgui.ui
         amdemodssb.ui
     )
     set(am_HEADERS
         ${am_HEADERS}
-	amdemodgui.h
+	    amdemodgui.h
         amdemodssbdialog.h
     )
 
@@ -50,8 +53,8 @@ add_library(${TARGET_NAME} SHARED
 )
 
 target_link_libraries(${TARGET_NAME}
-        Qt5::Core
-        ${TARGET_LIB}
+    Qt5::Core
+    ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
 )

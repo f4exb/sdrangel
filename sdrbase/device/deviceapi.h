@@ -73,6 +73,8 @@ public:
 
     void addChannelSink(ThreadedBasebandSampleSink* sink, int streamIndex = 0);        //!< Add a channel sink (Rx)
     void removeChannelSink(ThreadedBasebandSampleSink* sink, int streamIndex = 0);     //!< Remove a channel sink (Rx)
+    void addChannelSink(BasebandSampleSink* sink, int streamIndex = 0);                //!< Add a channel sink (Rx)
+    void removeChannelSink(BasebandSampleSink* sink, int streamIndex = 0);             //!< Remove a channel sink (Rx)
     void addChannelSource(BasebandSampleSource* sink, int streamIndex = 0);            //!< Add a channel source (Tx)
     void removeChannelSource(BasebandSampleSource* sink, int streamIndex = 0);         //!< Remove a channel source (Tx)
     void addMIMOChannel(MIMOChannel* channel);   //!< Add a MIMO channel (n Rx and m Tx combination)

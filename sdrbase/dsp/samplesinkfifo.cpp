@@ -31,6 +31,14 @@ void SampleSinkFifo::create(unsigned int s)
 	m_size = m_data.size();
 }
 
+void SampleSinkFifo::reset()
+{
+	m_suppressed = -1;
+	m_fill = 0;
+	m_head = 0;
+	m_tail = 0;
+}
+
 SampleSinkFifo::SampleSinkFifo(QObject* parent) :
 	QObject(parent),
 	m_data()
@@ -273,4 +281,9 @@ unsigned int SampleSinkFifo::readCommit(unsigned int count)
 	m_fill -= count;
 
 	return count;
+}
+
+unsigned int SampleSinkFifo::getSizePolicy(unsigned int sampleRate)
+{
+    return (sampleRate/100)*64; // .64s
 }

@@ -191,6 +191,26 @@ void DSPDeviceMIMOEngine::removeChannelSink(ThreadedBasebandSampleSink* sink, in
 	m_syncMessenger.sendWait(cmd);
 }
 
+void DSPDeviceMIMOEngine::addChannelSink(BasebandSampleSink* sink, int index)
+{
+	qDebug() << "DSPDeviceMIMOEngine::addChannelSink: "
+        << sink->objectName().toStdString().c_str()
+        << " at: "
+        << index;
+	AddBasebandSampleSink cmd(sink, index);
+	m_syncMessenger.sendWait(cmd);
+}
+
+void DSPDeviceMIMOEngine::removeChannelSink(BasebandSampleSink* sink, int index)
+{
+	qDebug() << "DSPDeviceMIMOEngine::removeChannelSink: "
+        << sink->objectName().toStdString().c_str()
+        << " at: "
+        << index;
+	RemoveBasebandSampleSink cmd(sink, index);
+	m_syncMessenger.sendWait(cmd);
+}
+
 void DSPDeviceMIMOEngine::addMIMOChannel(MIMOChannel *channel)
 {
 	qDebug() << "DSPDeviceMIMOEngine::addMIMOChannel: "

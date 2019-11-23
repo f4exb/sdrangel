@@ -417,7 +417,7 @@ void DSDDemodGUI::updateMyPosition()
 
     if ((m_myLatitude != latitude) || (m_myLongitude != longitude))
     {
-        m_dsdDemod->configureMyPosition(m_dsdDemod->getInputMessageQueue(), latitude, longitude);
+        m_dsdDemod->configureMyPosition(latitude, longitude);
         m_myLatitude = latitude;
         m_myLongitude = longitude;
     }
@@ -499,10 +499,6 @@ void DSDDemodGUI::applySettings(bool force)
 	if (m_doApplySettings)
 	{
 		qDebug() << "DSDDemodGUI::applySettings";
-
-        DSDDemod::MsgConfigureChannelizer* channelConfigMsg = DSDDemod::MsgConfigureChannelizer::create(
-                48000, m_channelMarker.getCenterFrequency());
-        m_dsdDemod->getInputMessageQueue()->push(channelConfigMsg);
 
         DSDDemod::MsgConfigureDSDDemod* message = DSDDemod::MsgConfigureDSDDemod::create( m_settings, force);
         m_dsdDemod->getInputMessageQueue()->push(message);

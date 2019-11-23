@@ -5,6 +5,8 @@ set(dsddemod_SOURCES
     dsddemodplugin.cpp
     dsddemodbaudrates.cpp
     dsddemodsettings.cpp
+    dsddemodsink.cpp
+    dsddemodbaseband.cpp
     dsddemodwebapiadapter.cpp
     dsddecoder.cpp
 )
@@ -14,6 +16,8 @@ set(dsddemod_HEADERS
     dsddemodplugin.h
     dsddemodbaudrates.h
     dsddemodsettings.h
+    dsddemodsink.h
+    dsddemodbaseband.h
     dsddemodwebapiadapter.h
     dsddecoder.h
 )
@@ -29,7 +33,6 @@ if(NOT SERVER_MODE)
         ${dsddemod_SOURCES}
         dsddemodgui.cpp
         dsdstatustextdialog.cpp
-
         dsddemodgui.ui
         dsdstatustextdialog.ui
     )
@@ -59,12 +62,12 @@ if(ENABLE_EXTERNAL_LIBRARIES)
 endif()
 
 target_link_libraries(${TARGET_NAME}
-        Qt5::Core
-        ${TARGET_LIB}
+    Qt5::Core
+    ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
-        ${LIBDSDCC_LIBRARIES}
-        ${LIBMBE_LIBRARY}
+    ${LIBDSDCC_LIBRARIES}
+    ${LIBMBE_LIBRARY}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

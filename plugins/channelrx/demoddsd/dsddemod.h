@@ -21,31 +21,20 @@
 
 #include <vector>
 
-#include <QMutex>
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
-#include "dsp/phasediscri.h"
-#include "dsp/nco.h"
-#include "dsp/interpolator.h"
-#include "dsp/lowpass.h"
-#include "dsp/bandpass.h"
-#include "dsp/afsquelch.h"
-#include "util/movingaverage.h"
-#include "dsp/afsquelch.h"
-#include "audio/audiofifo.h"
 #include "util/message.h"
-#include "util/doublebufferfifo.h"
 
 #include "dsddemodsettings.h"
 #include "dsddecoder.h"
+#include "dsddemodbaseband.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class DeviceAPI;
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
+class QThread;
+class DownSampleChannelizer;
 
 class DSDDemod : public BasebandSampleSink, public ChannelAPI {
     Q_OBJECT
@@ -73,35 +62,9 @@ public:
         { }
     };
 
-    class MsgConfigureChannelizer : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getSampleRate() const { return m_sampleRate; }
-        int getCenterFrequency() const { return m_centerFrequency; }
-
-        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
-        {
-            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
-        }
-
-    private:
-        int m_sampleRate;
-        int  m_centerFrequency;
-
-        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
-            Message(),
-            m_sampleRate(sampleRate),
-            m_centerFrequency(centerFrequency)
-        { }
-    };
-
     DSDDemod(DeviceAPI *deviceAPI);
 	~DSDDemod();
 	virtual void destroy() { delete this; }
-	void setScopeXYSink(BasebandSampleSink* sampleSink) { m_scopeXY = sampleSink; }
-
-	void configureMyPosition(MessageQueue* messageQueue, float myLatitude, float myLongitude);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
@@ -124,31 +87,6 @@ public:
         (void) sinkElseSource;
         return m_settings.m_inputFrequencyOffset;
     }
-
-	double getMagSq() { return m_magsq; }
-	bool getSquelchOpen() const { return m_squelchOpen; }
-
-	const DSDDecoder& getDecoder() const { return m_dsdDecoder; }
-
-    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
-    {
-        if (m_magsqCount > 0)
-        {
-            m_magsq = m_magsqSum / m_magsqCount;
-            m_magSqLevelStore.m_magsq = m_magsq;
-            m_magSqLevelStore.m_magsqPeak = m_magsqPeak;
-        }
-
-        avg = m_magSqLevelStore.m_magsq;
-        peak = m_magSqLevelStore.m_magsqPeak;
-        nbSamples = m_magsqCount == 0 ? 1 : m_magsqCount;
-
-        m_magsqSum = 0.0f;
-        m_magsqPeak = 0.0f;
-        m_magsqCount = 0;
-    }
-
-    const char *updateAndGetStatusText();
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
@@ -174,115 +112,30 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     uint32_t getNumberOfDeviceStreams() const;
+	void setScopeXYSink(BasebandSampleSink* sampleSink) { m_basebandSink->setScopeXYSink(sampleSink); }
+	void configureMyPosition(float myLatitude, float myLongitude) { m_basebandSink->configureMyPosition(myLatitude, myLongitude); }
+	double getMagSq() { return m_basebandSink->getMagSq(); }
+	bool getSquelchOpen() const { return m_basebandSink->getSquelchOpen(); }
+	const DSDDecoder& getDecoder() const { return m_basebandSink->getDecoder(); }
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
+    const char *updateAndGetStatusText() { return m_basebandSink->updateAndGetStatusText(); }
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
 private:
-    struct MagSqLevelsStore
-    {
-        MagSqLevelsStore() :
-            m_magsq(1e-12),
-            m_magsqPeak(1e-12)
-        {}
-        double m_magsq;
-        double m_magsqPeak;
-    };
-
-    typedef enum
-    {
-        signalFormatNone,
-        signalFormatDMR,
-        signalFormatDStar,
-        signalFormatDPMR,
-        signalFormatYSF,
-        signalFormatNXDN
-    } SignalFormat; //!< Used for status text formatting
-
-	class MsgConfigureMyPosition : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		float getMyLatitude() const { return m_myLatitude; }
-		float getMyLongitude() const { return m_myLongitude; }
-
-		static MsgConfigureMyPosition* create(float myLatitude, float myLongitude)
-		{
-			return new MsgConfigureMyPosition(myLatitude, myLongitude);
-		}
-
-	private:
-		float m_myLatitude;
-		float m_myLongitude;
-
-		MsgConfigureMyPosition(float myLatitude, float myLongitude) :
-			m_myLatitude(myLatitude),
-			m_myLongitude(myLongitude)
-		{}
-	};
-
-	enum RateState {
-		RSInitialFill,
-		RSRunning
-	};
-
 	DeviceAPI *m_deviceAPI;
-    ThreadedBasebandSampleSink* m_threadedChannelizer;
-    DownChannelizer* m_channelizer;
-
-    int m_inputSampleRate;
-	int m_inputFrequencyOffset;
+    QThread *m_thread;
+    DSDDemodBaseband *m_basebandSink;
 	DSDDemodSettings m_settings;
-    quint32 m_audioSampleRate;
-
-	NCO m_nco;
-	Interpolator m_interpolator;
-	Real m_interpolatorDistance;
-	Real m_interpolatorDistanceRemain;
-	int m_sampleCount;
-	int m_squelchCount;
-	int m_squelchGate;
-	double m_squelchLevel;
-	bool m_squelchOpen;
-    DoubleBufferFIFO<Real> m_squelchDelayLine;
-
-    MovingAverageUtil<Real, double, 16> m_movingAverage;
-    double m_magsq;
-    double m_magsqSum;
-    double m_magsqPeak;
-    int  m_magsqCount;
-    MagSqLevelsStore m_magSqLevelStore;
-
-	SampleVector m_scopeSampleBuffer;
-	AudioVector m_audioBuffer;
-	uint m_audioBufferFill;
-	FixReal *m_sampleBuffer; //!< samples ring buffer
-	int m_sampleBufferIndex;
-	int m_scaleFromShort;
-
-	AudioFifo m_audioFifo1;
-    AudioFifo m_audioFifo2;
-	BasebandSampleSink* m_scopeXY;
-	bool m_scopeEnabled;
-
-	DSDDecoder m_dsdDecoder;
-
-	char m_formatStatusText[82+1]; //!< Fixed signal format dependent status text
-    SignalFormat m_signalFormat;   //!< Used to keep formatting during successive calls for the same standard type
-    PhaseDiscriminators m_phaseDiscri;
+    int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    QMutex m_settingsMutex;
-
     static const int m_udpBlockSize;
 
-    void applyAudioSampleRate(int sampleRate);
-    void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
-	void applySettings(const DSDDemodSettings& settings, bool force = false);
-	void formatStatusText();
-
+    void applySettings(const DSDDemodSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DSDDemodSettings& settings, bool force);
 

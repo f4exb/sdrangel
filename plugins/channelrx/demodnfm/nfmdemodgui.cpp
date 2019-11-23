@@ -1,5 +1,3 @@
-#include "nfmdemodgui.h"
-
 #include "device/deviceuiset.h"
 #include <QDockWidget>
 #include <QMainWindow>
@@ -15,7 +13,10 @@
 #include "gui/audioselectdialog.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
+
+#include "nfmdemodreport.h"
 #include "nfmdemod.h"
+#include "nfmdemodgui.h"
 
 NFMDemodGUI* NFMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
@@ -75,12 +76,10 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 
 bool NFMDemodGUI::handleMessage(const Message& message)
 {
-    if (NFMDemod::MsgReportCTCSSFreq::match(message))
+    if (NFMDemodReport::MsgReportCTCSSFreq::match(message))
     {
-        //qDebug("NFMDemodGUI::handleMessage: NFMDemod::MsgReportCTCSSFreq");
-        NFMDemod::MsgReportCTCSSFreq& report = (NFMDemod::MsgReportCTCSSFreq&) message;
+        NFMDemodReport::MsgReportCTCSSFreq& report = (NFMDemodReport::MsgReportCTCSSFreq&) message;
         setCtcssFreq(report.getFrequency());
-        //qDebug("NFMDemodGUI::handleMessage: MsgReportCTCSSFreq: %f", report.getFrequency());
         return true;
     }
     else if (NFMDemod::MsgConfigureNFMDemod::match(message))
@@ -365,10 +364,6 @@ void NFMDemodGUI::applySettings(bool force)
 	if (m_doApplySettings)
 	{
 		qDebug() << "NFMDemodGUI::applySettings";
-
-        NFMDemod::MsgConfigureChannelizer* channelConfigMsg = NFMDemod::MsgConfigureChannelizer::create(
-                48000, m_channelMarker.getCenterFrequency());
-        m_nfmDemod->getInputMessageQueue()->push(channelConfigMsg);
 
         NFMDemod::MsgConfigureNFMDemod* message = NFMDemod::MsgConfigureNFMDemod::create( m_settings, force);
         m_nfmDemod->getInputMessageQueue()->push(message);

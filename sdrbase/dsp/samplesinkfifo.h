@@ -49,6 +49,7 @@ public:
 	~SampleSinkFifo();
 
 	bool setSize(int size);
+    void reset();
 	inline unsigned int size() const { return m_size; }
 	inline unsigned int fill() { QMutexLocker mutexLocker(&m_mutex); unsigned int fill = m_fill; return fill; }
 
@@ -61,6 +62,7 @@ public:
 		SampleVector::iterator* part1Begin, SampleVector::iterator* part1End,
 		SampleVector::iterator* part2Begin, SampleVector::iterator* part2End);
 	unsigned int readCommit(unsigned int count);
+    static unsigned int getSizePolicy(unsigned int sampleRate);
 
 signals:
 	void dataReady();

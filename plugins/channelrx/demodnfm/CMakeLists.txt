@@ -4,14 +4,20 @@ set(nfm_SOURCES
 	nfmdemod.cpp
     nfmdemodsettings.cpp
     nfmdemodwebapiadapter.cpp
-	nfmplugin.cpp
+    nfmplugin.cpp
+    nfmdemodreport.cpp
+    nfmdemodsink.cpp
+    nfmdemodbaseband.cpp
 )
 
 set(nfm_HEADERS
 	nfmdemod.h
     nfmdemodsettings.h
     nfmdemodwebapiadapter.h
-	nfmplugin.h
+    nfmplugin.h
+    nfmdemodreport.h
+    nfmdemodsink.h
+    nfmdemodbaseband.h
 )
 
 include_directories(

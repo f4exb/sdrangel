@@ -325,11 +325,6 @@ void AMDemodGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-		AMDemod::MsgConfigureChannelizer* channelConfigMsg = AMDemod::MsgConfigureChannelizer::create(
-		        m_amDemod->getAudioSampleRate(), m_channelMarker.getCenterFrequency());
-		m_amDemod->getInputMessageQueue()->push(channelConfigMsg);
-
-
 	    AMDemod::MsgConfigureAMDemod* message = AMDemod::MsgConfigureAMDemod::create( m_settings, force);
 	    m_amDemod->getInputMessageQueue()->push(message);
 	}
