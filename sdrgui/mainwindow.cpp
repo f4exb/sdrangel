@@ -1510,10 +1510,10 @@ void MainWindow::on_presetImport_clicked()
 {
 	QTreeWidgetItem* item = ui->presetTree->currentItem();
 
+	QString group;
+
 	if(item != 0)
 	{
-		QString group;
-
 		if (item->type() == PGroup)	{
 			group = item->text(0);
 		} else if (item->type() == PItem) {
@@ -1521,31 +1521,31 @@ void MainWindow::on_presetImport_clicked()
 		} else {
 			return;
 		}
+  }
 
-		QString fileName = QFileDialog::getOpenFileName(this,
-		    tr("Open preset export file"), ".", tr("Preset export files (*.prex)"), 0, QFileDialog::DontUseNativeDialog);
+	QString fileName = QFileDialog::getOpenFileName(this,
+	    tr("Open preset export file"), ".", tr("Preset export files (*.prex)"), 0, QFileDialog::DontUseNativeDialog);
 
-		if (fileName != "")
+	if (fileName != "")
+	{
+		QFile exportFile(fileName);
+
+		if (exportFile.open(QIODevice::ReadOnly | QIODevice::Text))
 		{
-			QFile exportFile(fileName);
+			QByteArray base64Str;
+			QTextStream instream(&exportFile);
+			instream >> base64Str;
+			exportFile.close();
 
-			if (exportFile.open(QIODevice::ReadOnly | QIODevice::Text))
-			{
-				QByteArray base64Str;
-				QTextStream instream(&exportFile);
-				instream >> base64Str;
-				exportFile.close();
+			Preset* preset = m_settings.newPreset("", "");
+			preset->deserialize(QByteArray::fromBase64(base64Str));
+			preset->setGroup(group); // override with current group
 
-				Preset* preset = m_settings.newPreset("", "");
-				preset->deserialize(QByteArray::fromBase64(base64Str));
-				preset->setGroup(group); // override with current group
-
-				ui->presetTree->setCurrentItem(addPresetToTree(preset));
-			}
-			else
-			{
-				QMessageBox::information(this, tr("Message"), tr("Cannot open file for reading"));
-			}
+			ui->presetTree->setCurrentItem(addPresetToTree(preset));
+		}
+		else
+		{
+			QMessageBox::information(this, tr("Message"), tr("Cannot open file for reading"));
 		}
 	}
 }
