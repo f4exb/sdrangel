@@ -61,6 +61,9 @@ DSDDemod::DSDDemod(DeviceAPI *deviceAPI) :
 
     applySettings(m_settings, true);
 
+    m_deviceAPI->addChannelSink(this);
+    m_deviceAPI->addChannelSinkAPI(this);
+
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }

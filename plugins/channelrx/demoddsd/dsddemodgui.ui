@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>613</width>
+    <width>650</width>
     <height>392</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>610</width>
+    <width>650</width>
     <height>0</height>
    </size>
   </property>
@@ -39,7 +39,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>608</width>
+     <width>648</width>
      <height>172</height>
     </rect>
    </property>
@@ -51,7 +51,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>608</width>
+     <width>648</width>
      <height>0</height>
     </size>
    </property>
@@ -556,19 +556,6 @@
          <string>A123456789B123456789C123456789D123456789E123456789F123456789G123456789H123456789I12</string>
         </property>
        </widget>
-      </item>
-      <item>
-       <spacer name="formatStatusSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </item>
