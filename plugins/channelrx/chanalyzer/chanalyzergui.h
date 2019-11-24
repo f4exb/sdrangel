@@ -68,7 +68,7 @@ private:
 	ChannelMarker m_channelMarker;
 	ChannelAnalyzerSettings m_settings;
 	bool m_doApplySettings;
-	int m_rate; //!< sample rate after final in-channel decimation (spanlog2)
+	int m_basebandSampleRate; //!< sample rate after final in-channel decimation (spanlog2)
 	MovingAverageUtil<double, double, 40> m_channelPowerAvg;
 
 	ChannelAnalyzer* m_channelAnalyzer;
@@ -80,8 +80,8 @@ private:
 	explicit ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~ChannelAnalyzerGUI();
 
-	int  getRequestedChannelSampleRate();
-	void setNewFinalRate(); //!< set sample rate after final in-channel decimation
+	int  getSinkSampleRate(); //!< get actual sink sample rate from GUI settings
+	void setSinkSampleRate(); //!< set sample rate after full decimation chain
 	void setFiltersUIBoundaries();
 
 	void blockApplySettings(bool block);
@@ -95,7 +95,7 @@ private:
 
 private slots:
 	void on_deltaFrequency_changed(qint64 value);
-    void on_channelSampleRate_changed(quint64 value);
+    void on_rationalDownSamplerRate_changed(quint64 value);
     void on_pll_toggled(bool checked);
     void on_pllPskOrder_currentIndexChanged(int index);
     void on_useRationalDownsampler_toggled(bool checked);
@@ -104,7 +104,7 @@ private slots:
     void on_rrcRolloff_valueChanged(int value);
 	void on_BW_valueChanged(int value);
 	void on_lowCut_valueChanged(int value);
-	void on_spanLog2_currentIndexChanged(int index);
+	void on_log2Decim_currentIndexChanged(int index);
 	void on_ssb_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);

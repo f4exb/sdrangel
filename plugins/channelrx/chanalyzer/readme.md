@@ -46,13 +46,39 @@ Note 2: the spectrum view (Channel spectrum) is not presented here.
 
 Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
-<h3>2: Locked loop</h3>
+<h3>2: Decimation by a power of two</h3>
+
+This combo can select half-band decimation from baseband sample rate by a power of two.
+
+<h3>3: Toggle the rational downsampler</h3>
+
+The channel sample rate is given by the baseband sample rate possibly decimated by a power of two with the control above. This sample rate can be optionally further downsampled to any value between 1.0 and 0.5 using a rational downsampler. Thus the final sample rate available to the analyzer (sink sample rate) can take any value between consecutive half-band decimator values. In conjunction with the decimator this permits a precise control of the timings independently of the baseband sample rate. Some devices are flexible on their sample rate some like the Airspy are not.
+
+<h3>4: Rational downsampler output rate</h3>
+
+Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. The minimum value is 2000 S/s and the maximum value is the source plugin output sample rate. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
+
+<h3>5: Analyzer (sink) sample rate</h3>
+
+This is the resulting sample rate after decimation and possible rational downsampler that is used by the spectrum and scope visualizations
+
+<h3>6: signal selection</h3>
+
+Use this combo to select which (complex) signal to use as the display source:
+
+  - Sig: the main signal possibly mixed with PLL/FLL output (see 2 and 3)
+  - Lock: the output signal (NCO) from PLL or FLL
+  - ACorr: Auto-correlation of the main signal. It is a fixed 4096 point auto-correlation using FFT technique thus spanning the length of 4096 samples. The trace may show more samples in which case you will see the successive auto-correlation results.
+
+&#9758; Auto-correlation hint: because there is always a peak of magnitude at t=0 triggering on the magnitude will make sure the trace starts at t=0
+
+<h3>7: Locked loop</h3>
 
 Locks a PLL or FLL (depends on control 3) on the signal and mixes its NCO with the input signal. This is mostly useful for carrier recovery on PSK modulations (PLL is used). This effectively de-rotates the signal and symbol points (constellation) can be seen in XY mode with real part as X and imagiary part as Y.
 
 When the PLL is locked the icon lights up in green. The frequency shift from carrier appears in the tooltip. Locking indicator is pretty sharp with about +/- 100 Hz range. The FLL has no indicator.
 
-<h3>3: Locked loop mode</h3>
+<h3>8: Locked loop mode</h3>
 
 Use this combo to control the locked loop type:
 
@@ -62,32 +88,6 @@ Use this combo to control the locked loop type:
   - 8: PLL for 8-PSK modulation (octo-phase). Locks to a 8-PSK transmission
   - 16: PLL for 16-PSK modulation (16-phase). Locks to a 16-PSK transmission
   - F: FLL. Actually a frequency follower. This effectively implements an AFC for FM modulations.
-
-<h3>4: Toggle the rational downsampler</h3>
-
-The input channel sample rate is given by the source device sample rate possibly downsampled by a power of two in the source device plugin. This input sample rate can be optionally downsampled to any value using a rational downsampler. This allows a precise control of the timings independently of the source plugin sample rate. Some devices are flexible on their sample rate some like the Airspy are not.
-
-<h3>5: Rational downsampler output rate</h3>
-
-Use the wheels to adjust the sample rate that will be used in the rest of the signal processing in the channel. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. The minimum value is 2000 S/s and the maximum value is the source plugin output sample rate. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
-
-<h3>6: Downsampler by a power of two</h3>
-
-This combo can select a further downsampling by a power of two. This downsampling applies on the signal coming either directly from the source plugin when the rational downsampler is disabled or from the output of the rational downsampler if it is engaged.
-
-<h3>7: Processing sample rate</h3>
-
-This is the resulting sample rate that will be used by the spectrum and scope visualizations
-
-<h3>8: signal selection</h3>
-
-Use this combo to select which (complex) signal to use as the display source:
-
-  - Sig: the main signal possibly mixed with PLL/FLL output (see 2 and 3)
-  - Lock: the output signal (NCO) from PLL or FLL
-  - ACorr: Auto-correlation of the main signal. It is a fixed 4096 point auto-correlation using FFT technique thus spanning the length of 4096 samples. The trace may show more samples in which case you will see the successive auto-correlation results.
-
-&#9758; Auto-correlation hint: because there is always a peak of magnitude at t=0 triggering on the magnitude will make sure the trace starts at t=0
 
 <h3>9. Channel power</h3>
 
@@ -107,27 +107,23 @@ In SSB mode this filter is a complex filter that can lowpass on either side of t
 
 In normal (DSB) mode this filter is a real filter that lowpass on both sides of the zero (center) frequency symmetrically. Therefore it acts as a bandpass filter centered on the zero frequency and therefore it is labeled as "BP". The value displayed in (9) is the full bandwidth of the filter.
 
-<h3>13. Lowpass filter cut-off frequency</h3>
+The bandwidth value display depends on SSB/DSB selection:
+  - in SSB mode this is the complex cut-off frequency and is negative for LSB.
+  - in normal (DSB) mode this is the full bandwidth of the real lowpass filter centered around zero frequency.
 
-In SSB mode this is the complex cut-off frequency and is negative for LSB.
-
-In normal (DSB) mode this is the full bandwidth of the real lowpass filter centered around zero frequency.
-
-<h3>14. SSB filtering</h3>
+<h3>13. SSB filtering</h3>
 
 When this toggle is engaged the signal is filtered either above (USB) or below (LSB) the channel center frequency. The sideband is selected according to the sign of the lowpass filter cut-off frequency (8): if positive the USB is selected else the LSB. In LSB mode the spectrum is reversed.
 
 When SSB is off the lowpass filter is actually a bandpass filter around the channel center frequency.
 
-<h3>15. Select highpass filter cut-off frequency</h3>
+<h3>14. Select highpass filter cut-off frequency</h3>
 
 In SSB mode this controls the cut-off frequency of the complex highpass filter which is the filter closest to the zero frequency. This cut-off frequency is always at least 0.1 kHz in absolute value below the lowpass filter cut-off frequency (8).
 
 In normal (DSB) mode this filter is not active.
 
-<h3>16. Highpass filter cut-off frequency</h3>
-
-This is the cut-off frequency of the highpass filter in kHz. It is zero or negative in LSB mode.
+The value displayed is the cut-off frequency of the highpass filter in kHz. It is zero or negative in LSB mode.
 
 <h2>D. Scope global controls line</h2>
 

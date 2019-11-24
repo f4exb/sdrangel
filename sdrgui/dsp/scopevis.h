@@ -156,7 +156,6 @@ public:
     virtual ~ScopeVis();
 
     void setLiveRate(int sampleRate);
-    void setLiveRateLog2Decim(int log2Decim);
     void configure(uint32_t traceSize, uint32_t timeBase, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun);
     void addTrace(const TraceData& traceData);
     void changeTrace(const TraceData& traceData, uint32_t traceIndex);
@@ -1148,7 +1147,6 @@ private:
     int m_triggerLocation;                         //!< Trigger location from end point
     int m_sampleRate;                              //!< Actual sample rate being used
     int m_liveSampleRate;                          //!< Sample rate in live mode
-    int m_liveLog2Decim;                           //!< Sample rate decimation log2 in live mode
     TraceBackDiscreteMemory m_traceDiscreteMemory; //!< Complex trace memory for triggered states TODO: vectorize when more than on input is allowed
     bool m_freeRun;                                //!< True if free running (trigger globally disabled)
     int m_maxTraceDelay;                           //!< Maximum trace delay

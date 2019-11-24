@@ -180,6 +180,144 @@
       <item>
        <layout class="QHBoxLayout" name="ChannelSamplingLayout">
         <item>
+         <widget class="QComboBox" name="log2Decim">
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Channel decimation</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>4</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>8</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>16</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>32</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>64</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="ButtonSwitch" name="useRationalDownsampler">
+          <property name="toolTip">
+           <string>Use rational downsampler</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/arrow_down.png</normaloff>:/arrow_down.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ValueDial" name="rationalDownSamplerRate" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>32</width>
+            <height>16</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Liberation Mono</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+          <property name="toolTip">
+           <string>Rational downsampler output rate</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="channelSampleRateUnits">
+          <property name="text">
+           <string>S/s</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="sinkSampleRateText">
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Analyzer (sink) sample rate</string>
+          </property>
+          <property name="text">
+           <string>00000.0 kS/s</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="signalSelect">
+          <property name="toolTip">
+           <string>Select input signal</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Sig</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Lock</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ACorr</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
          <widget class="QToolButton" name="pll">
           <property name="toolTip">
            <string>PLL lock</string>
@@ -236,144 +374,6 @@
           <item>
            <property name="text">
             <string>F</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item>
-         <widget class="ButtonSwitch" name="useRationalDownsampler">
-          <property name="toolTip">
-           <string>Use rational downsampler</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="../../../sdrgui/resources/res.qrc">
-            <normaloff>:/arrow_down.png</normaloff>:/arrow_down.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="ValueDial" name="channelSampleRate" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>32</width>
-            <height>16</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <family>Liberation Mono</family>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="cursor">
-           <cursorShape>PointingHandCursor</cursorShape>
-          </property>
-          <property name="toolTip">
-           <string>Rational downsampler output rate</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="channelSampleRateUnits">
-          <property name="text">
-           <string>S/s</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="spanLog2">
-          <property name="maximumSize">
-           <size>
-            <width>50</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Channel decimation</string>
-          </property>
-          <item>
-           <property name="text">
-            <string>1</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>2</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>4</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>8</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>16</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>32</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>64</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="spanText">
-          <property name="minimumSize">
-           <size>
-            <width>80</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Channel final sample rate</string>
-          </property>
-          <property name="text">
-           <string>00000.0 kS/s</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="signalSelect">
-          <property name="toolTip">
-           <string>Select input signal</string>
-          </property>
-          <item>
-           <property name="text">
-            <string>Sig</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Lock</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>ACorr</string>
            </property>
           </item>
          </widget>

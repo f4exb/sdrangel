@@ -4,7 +4,9 @@ set(chanalyzer_SOURCES
 	chanalyzer.cpp
 	chanalyzergui.cpp
 	chanalyzerplugin.cpp
-	chanalyzersettings.cpp
+    chanalyzersettings.cpp
+    chanalyzersink.cpp
+    chanalyzerbaseband.cpp
 	chanalyzerwebapiadapter.cpp
 	chanalyzergui.ui
 )
@@ -13,7 +15,9 @@ set(chanalyzer_HEADERS
 	chanalyzer.h
 	chanalyzergui.h
 	chanalyzerplugin.h
-	chanalyzersettings.h
+    chanalyzersettings.h
+    chanalyzersink.h
+    chanalyzerbaseband.h
 	chanalyzerwebapiadapter.h
 )
 

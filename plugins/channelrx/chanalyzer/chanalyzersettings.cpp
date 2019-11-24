@@ -33,12 +33,12 @@ ChannelAnalyzerSettings::ChannelAnalyzerSettings() :
 
 void ChannelAnalyzerSettings::resetToDefaults()
 {
-    m_frequency = 0;
-    m_downSample = false;
-    m_downSampleRate = 0;
+    m_inputFrequencyOffset = 0;
+    m_rationalDownSample = false;
+    m_rationalDownSamplerRate = 0;
     m_bandwidth = 5000;
     m_lowCutoff = 300;
-    m_spanLog2 = 0;
+    m_log2Decim = 0;
     m_ssb = false;
     m_pll = false;
     m_fll = false;
@@ -54,16 +54,16 @@ QByteArray ChannelAnalyzerSettings::serialize() const
 {
     SimpleSerializer s(1);
 
-    s.writeS32(1, m_frequency);
+    s.writeS32(1, m_inputFrequencyOffset);
     s.writeS32(2, m_bandwidth);
     s.writeBlob(3, m_spectrumGUI->serialize());
     s.writeU32(4, m_rgbColor);
     s.writeS32(5, m_lowCutoff);
-    s.writeS32(6, m_spanLog2);
+    s.writeS32(6, m_log2Decim);
     s.writeBool(7, m_ssb);
     s.writeBlob(8, m_scopeGUI->serialize());
-    s.writeBool(9, m_downSample);
-    s.writeU32(10, m_downSampleRate);
+    s.writeBool(9, m_rationalDownSample);
+    s.writeU32(10, m_rationalDownSamplerRate);
     s.writeBool(11, m_pll);
     s.writeBool(12, m_fll);
     s.writeU32(13, m_pllPskOrder);
@@ -90,7 +90,7 @@ bool ChannelAnalyzerSettings::deserialize(const QByteArray& data)
         QByteArray bytetmp;
         int tmp;
 
-        d.readS32(1, &m_frequency, 0);
+        d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readS32(2, &m_bandwidth, 5000);
 
         if (m_spectrumGUI) {
@@ -100,7 +100,7 @@ bool ChannelAnalyzerSettings::deserialize(const QByteArray& data)
 
         d.readU32(4, &m_rgbColor);
         d.readS32(5, &m_lowCutoff, 3);
-        d.readS32(6, &m_spanLog2, 0);
+        d.readS32(6, &m_log2Decim, 0);
         d.readBool(7, &m_ssb, false);
 
         if (m_scopeGUI) {
@@ -108,8 +108,8 @@ bool ChannelAnalyzerSettings::deserialize(const QByteArray& data)
             m_scopeGUI->deserialize(bytetmp);
         }
 
-        d.readBool(9, &m_downSample, false);
-        d.readU32(10, &m_downSampleRate, 2000U);
+        d.readBool(9, &m_rationalDownSample, false);
+        d.readU32(10, &m_rationalDownSamplerRate, 2000U);
         d.readBool(11, &m_pll, false);
         d.readBool(12, &m_fll, false);
         d.readU32(13, &m_pllPskOrder, 1);

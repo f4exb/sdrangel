@@ -58,7 +58,6 @@ ScopeVis::ScopeVis(GLScope* glScope) :
     m_triggerLocation(0),
     m_sampleRate(0),
     m_liveSampleRate(0),
-    m_liveLog2Decim(0),
     m_traceDiscreteMemory(m_nbTraceMemories),
     m_freeRun(true),
     m_maxTraceDelay(0),
@@ -86,14 +85,8 @@ void ScopeVis::setLiveRate(int sampleRate)
     m_liveSampleRate = sampleRate;
 
     if (m_currentTraceMemoryIndex == 0) { // update only in live mode
-        setSampleRate(m_liveSampleRate/(1<<m_liveLog2Decim));
+        setSampleRate(m_liveSampleRate);
     }
-}
-
-void ScopeVis::setLiveRateLog2Decim(int log2Decim)
-{
-    m_liveLog2Decim = log2Decim;
-    setLiveRate(m_liveSampleRate);
 }
 
 void ScopeVis::setSampleRate(int sampleRate)

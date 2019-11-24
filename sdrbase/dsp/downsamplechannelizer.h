@@ -40,7 +40,8 @@ public:
     void setDecimation(unsigned int log2Decim, unsigned int filterChainHash);         //!< Define channelizer with decimation factor and filter chain definition
     void setChannelization(int requestedSampleRate, qint64 requestedCenterFrequency); //!< Define channelizer with requested sample rate and center frequency (shift in the baseband)
     void setBasebandSampleRate(int basebandSampleRate, bool decim = false);           //!< decim: true => use direct decimation false => use channel configuration
-	int getChannelSampleRate() const { return m_channelSampleRate; }
+	int getBasebandSampleRate() const { return m_basebandSampleRate; }
+    int getChannelSampleRate() const { return m_channelSampleRate; }
 	int getChannelFrequencyOffset() const { return m_channelFrequencyOffset; }
 
 protected:

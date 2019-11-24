@@ -46,12 +46,12 @@ void ChannelAnalyzerWebAPIAdapter::webapiFormatChannelSettings(
         const GLScopeSettings& scopeSettings,
         const GLSpectrumSettings& spectrumSettings)
 {
-    response.getChannelAnalyzerSettings()->setFrequency(settings.m_frequency);
-    response.getChannelAnalyzerSettings()->setDownSample(settings.m_downSample ? 1 : 0);
-    response.getChannelAnalyzerSettings()->setDownSampleRate(settings.m_downSampleRate);
+    response.getChannelAnalyzerSettings()->setFrequency(settings.m_inputFrequencyOffset);
+    response.getChannelAnalyzerSettings()->setDownSample(settings.m_rationalDownSample ? 1 : 0);
+    response.getChannelAnalyzerSettings()->setDownSampleRate(settings.m_rationalDownSamplerRate);
     response.getChannelAnalyzerSettings()->setBandwidth(settings.m_bandwidth);
     response.getChannelAnalyzerSettings()->setLowCutoff(settings.m_lowCutoff);
-    response.getChannelAnalyzerSettings()->setSpanLog2(settings.m_spanLog2);
+    response.getChannelAnalyzerSettings()->setSpanLog2(settings.m_log2Decim);
     response.getChannelAnalyzerSettings()->setSsb(settings.m_ssb ? 1 : 0);
     response.getChannelAnalyzerSettings()->setPll(settings.m_pll ? 1 : 0);
     response.getChannelAnalyzerSettings()->setFll(settings.m_fll ? 1 : 0);
@@ -169,16 +169,16 @@ void ChannelAnalyzerWebAPIAdapter::webapiUpdateChannelSettings(
         settings.m_bandwidth = response.getChannelAnalyzerSettings()->getBandwidth();
     }
     if (channelSettingsKeys.contains("downSample")) {
-        settings.m_downSample = response.getChannelAnalyzerSettings()->getDownSample() != 0;
+        settings.m_rationalDownSample = response.getChannelAnalyzerSettings()->getDownSample() != 0;
     }
     if (channelSettingsKeys.contains("downSampleRate")) {
-        settings.m_downSampleRate = response.getChannelAnalyzerSettings()->getDownSampleRate();
+        settings.m_rationalDownSamplerRate = response.getChannelAnalyzerSettings()->getDownSampleRate();
     }
     if (channelSettingsKeys.contains("fll")) {
         settings.m_fll = response.getChannelAnalyzerSettings()->getFll() != 0;
     }
     if (channelSettingsKeys.contains("frequency")) {
-        settings.m_frequency = response.getChannelAnalyzerSettings()->getFrequency();
+        settings.m_inputFrequencyOffset = response.getChannelAnalyzerSettings()->getFrequency();
     }
     if (channelSettingsKeys.contains("inputType")) {
         settings.m_inputType = (ChannelAnalyzerSettings::InputType) response.getChannelAnalyzerSettings()->getInputType();
@@ -202,7 +202,7 @@ void ChannelAnalyzerWebAPIAdapter::webapiUpdateChannelSettings(
         settings.m_rrcRolloff = response.getChannelAnalyzerSettings()->getRrcRolloff();
     }
     if (channelSettingsKeys.contains("spanLog2")) {
-        settings.m_spanLog2 = response.getChannelAnalyzerSettings()->getSpanLog2();
+        settings.m_log2Decim = response.getChannelAnalyzerSettings()->getSpanLog2();
     }
     if (channelSettingsKeys.contains("ssb")) {
         settings.m_ssb = response.getChannelAnalyzerSettings()->getSsb() != 0;

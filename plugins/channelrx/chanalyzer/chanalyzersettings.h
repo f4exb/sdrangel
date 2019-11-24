@@ -31,12 +31,12 @@ struct ChannelAnalyzerSettings
         InputAutoCorr
     };
 
-    int m_frequency;
-    bool m_downSample;
-    quint32 m_downSampleRate;
+    int m_inputFrequencyOffset;
+    bool m_rationalDownSample;
+    quint32 m_rationalDownSamplerRate;
     int m_bandwidth;
     int m_lowCutoff;
-    int m_spanLog2;
+    int m_log2Decim;
     bool m_ssb;
     bool m_pll;
     bool m_fll;
