@@ -65,6 +65,8 @@ void NFMDemodBaseband::feed(const SampleVector::const_iterator& begin, const Sam
 
 void NFMDemodBaseband::handleData()
 {
+    QMutexLocker mutexLocker(&m_mutex);
+
     while ((m_sampleFifo.fill() > 0) && (m_inputMessageQueue.size() == 0))
     {
 		SampleVector::iterator part1begin;
@@ -167,4 +169,5 @@ int NFMDemodBaseband::getChannelSampleRate() const
 void NFMDemodBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_channelizer->setBasebandSampleRate(sampleRate);
+    m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 }

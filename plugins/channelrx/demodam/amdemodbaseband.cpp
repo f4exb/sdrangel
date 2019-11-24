@@ -61,12 +61,13 @@ void AMDemodBaseband::reset()
 
 void AMDemodBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
-    QMutexLocker mutexLocker(&m_mutex);
     m_sampleFifo.write(begin, end);
 }
 
 void AMDemodBaseband::handleData()
 {
+    QMutexLocker mutexLocker(&m_mutex);
+
     while ((m_sampleFifo.fill() > 0) && (m_inputMessageQueue.size() == 0))
     {
 		SampleVector::iterator part1begin;
@@ -169,4 +170,5 @@ int AMDemodBaseband::getChannelSampleRate() const
 void AMDemodBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_channelizer->setBasebandSampleRate(sampleRate);
+    m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 }

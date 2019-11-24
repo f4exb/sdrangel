@@ -68,6 +68,8 @@ void DSDDemodBaseband::feed(const SampleVector::const_iterator& begin, const Sam
 
 void DSDDemodBaseband::handleData()
 {
+    QMutexLocker mutexLocker(&m_mutex);
+
     while ((m_sampleFifo.fill() > 0) && (m_inputMessageQueue.size() == 0))
     {
 		SampleVector::iterator part1begin;
@@ -171,4 +173,5 @@ int DSDDemodBaseband::getChannelSampleRate() const
 void DSDDemodBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_channelizer->setBasebandSampleRate(sampleRate);
+    m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 }
