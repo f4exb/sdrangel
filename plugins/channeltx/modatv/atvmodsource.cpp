@@ -178,9 +178,9 @@ void ATVModSource::modulateSample()
     switch (m_settings.m_atvModulation)
     {
     case ATVModSettings::ATVModulationFM: // FM half bandwidth deviation
-    	m_modPhasor += (t - 0.5f) * m_settings.m_fmExcursion * 2.0f * M_PI;
-    	if (m_modPhasor > 2.0f * M_PI) m_modPhasor -= 2.0f * M_PI; // limit growth
-    	if (m_modPhasor < 2.0f * M_PI) m_modPhasor += 2.0f * M_PI; // limit growth
+    	m_modPhasor += (t - 0.5f) * m_settings.m_fmExcursion * M_PI;
+    	if (m_modPhasor > 2.0f * M_PI)  m_modPhasor -= 2.0f * M_PI;  // limit growth
+    	if (m_modPhasor < 0) m_modPhasor += 2.0f * M_PI;             // limit growth
     	m_modSample.real(cos(m_modPhasor) * m_settings.m_rfScalingFactor); // -1 dB
     	m_modSample.imag(sin(m_modPhasor) * m_settings.m_rfScalingFactor);
     	break;
