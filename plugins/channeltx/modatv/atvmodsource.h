@@ -230,7 +230,7 @@ private:
     void modulateSample();
     Complex& modulateSSB(Real& sample);
     Complex& modulateVestigialSSB(Real& sample);
-    void applyStandard();
+    void applyStandard(const ATVModSettings& settings);
     void resizeImage();
     void calculateVideoSizes();
     void resizeVideo();

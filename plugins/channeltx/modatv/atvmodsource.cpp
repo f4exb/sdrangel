@@ -519,7 +519,7 @@ float ATVModSource::getRFBandwidthDivisor(ATVModSettings::ATVModulation modulati
     }
 }
 
-void ATVModSource::applyStandard()
+void ATVModSource::applyStandard(const ATVModSettings& settings)
 {
     m_pointsPerSync  = (uint32_t) ((4.7f / 64.0f) * m_pointsPerLine);
     m_pointsPerBP    = (uint32_t) ((4.7f / 64.0f) * m_pointsPerLine);
@@ -533,9 +533,9 @@ void ATVModSource::applyStandard()
     m_hBarIncrement    = m_spanLevel / (float) m_nbBars;
     m_vBarIncrement    = m_spanLevel / (float) m_nbBars;
 
-    m_nbLines          = m_settings.m_nbLines;
+    m_nbLines          = settings.m_nbLines;
     m_nbLines2         = m_nbLines / 2;
-    m_fps              = m_settings.m_fps * 1.0f;
+    m_fps              = settings.m_fps * 1.0f;
 
 //    qDebug() << "ATVMod::applyStandard: "
 //            << " m_nbLines: " << m_config.m_nbLines
@@ -545,7 +545,7 @@ void ATVModSource::applyStandard()
 //            << " m_tvSampleRate: " << m_tvSampleRate
 //            << " m_pointsPerTU: " << m_pointsPerTU;
 
-    switch(m_settings.m_atvStd)
+    switch(settings.m_atvStd)
     {
     case ATVModSettings::ATVStdHSkip:
         m_nbImageLines     = m_nbLines; // lines less the total number of sync lines
@@ -913,7 +913,7 @@ void ATVModSource::applyChannelSettings(int channelSampleRate, int channelFreque
         memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
         m_SSBFilterBufferIndex = 0;
 
-        applyStandard(); // set all timings
+        applyStandard(m_settings); // set all timings
         m_settingsMutex.unlock();
 
         if (getMessageQueueToGUI())
@@ -976,7 +976,7 @@ void ATVModSource::applySettings(const ATVModSettings& settings, bool force)
         memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
         m_SSBFilterBufferIndex = 0;
 
-        applyStandard(); // set all timings
+        applyStandard(settings); // set all timings
         m_settingsMutex.unlock();
 
         if (getMessageQueueToGUI())
