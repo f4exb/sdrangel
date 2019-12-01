@@ -45,7 +45,6 @@ ATVModSource::ATVModSource() :
 	m_modPhasor(0.0f),
     m_tvSampleRate(1000000),
     m_evenImage(true),
-    m_settingsMutex(QMutex::Recursive),
     m_horizontalCount(0),
     m_lineCount(0),
 	m_imageOK(false),
@@ -121,8 +120,6 @@ void ATVModSource::pullOne(Sample& sample)
 
     Complex ci;
 
-    m_settingsMutex.lock();
-
     if ((m_tvSampleRate == m_channelSampleRate) && (!m_settings.m_forceDecimator)) // no interpolation nor decimation
     {
         modulateSample();
@@ -155,8 +152,6 @@ void ATVModSource::pullOne(Sample& sample)
 void ATVModSource::pullFinalize(Complex& ci, Sample& sample)
 {
     ci *= m_carrierNco.nextIQ(); // shift to carrier frequency
-
-    m_settingsMutex.unlock();
 
     double magsq = ci.real() * ci.real() + ci.imag() * ci.imag();
     magsq /= (SDR_TX_SCALED*SDR_TX_SCALED);
@@ -776,8 +771,6 @@ void ATVModSource::resizeCamera()
 
 void ATVModSource::seekVideoFileStream(int seekPercentage)
 {
-    QMutexLocker mutexLocker(&m_settingsMutex);
-
     if ((m_videoOK) && m_video.isOpened())
     {
         int seekPoint = ((m_videoLength * seekPercentage) / 100);
@@ -884,16 +877,12 @@ void ATVModSource::applyChannelSettings(int channelSampleRate, int channelFreque
     if ((channelFrequencyOffset != m_channelFrequencyOffset) ||
         (channelSampleRate != m_channelSampleRate) || force)
     {
-        m_settingsMutex.lock();
         m_carrierNco.setFreq(channelFrequencyOffset, channelSampleRate);
-        m_settingsMutex.unlock();
     }
 
     if ((channelSampleRate != m_channelSampleRate) || force)
     {
         getBaseValues(channelSampleRate, m_settings.m_nbLines * m_settings.m_fps, m_tvSampleRate, m_pointsPerLine);
-
-        m_settingsMutex.lock();
 
         if (m_tvSampleRate > 0)
         {
@@ -921,7 +910,6 @@ void ATVModSource::applyChannelSettings(int channelSampleRate, int channelFreque
         m_DSBFilterBufferIndex = 0;
 
         applyStandard(m_settings); // set all timings
-        m_settingsMutex.unlock();
 
         if (getMessageQueueToGUI())
         {
@@ -967,8 +955,6 @@ void ATVModSource::applySettings(const ATVModSettings& settings, bool force)
     {
         getBaseValues(m_channelSampleRate, settings.m_nbLines * settings.m_fps, m_tvSampleRate, m_pointsPerLine);
 
-        m_settingsMutex.lock();
-
         if (m_tvSampleRate > 0)
         {
             m_interpolatorDistanceRemain = 0;
@@ -984,7 +970,6 @@ void ATVModSource::applySettings(const ATVModSettings& settings, bool force)
         m_SSBFilterBufferIndex = 0;
 
         applyStandard(settings); // set all timings
-        m_settingsMutex.unlock();
 
         if (getMessageQueueToGUI())
         {
@@ -1000,16 +985,12 @@ void ATVModSource::applySettings(const ATVModSettings& settings, bool force)
         || (settings.m_fps != m_settings.m_fps)         //
         || force)
     {
-        m_settingsMutex.lock();
-
         m_DSBFilter->create_asym_filter(
             settings.m_rfOppBandwidth / (float) m_tvSampleRate,
             settings.m_rfBandwidth / (float) m_tvSampleRate
         );
         std::fill(m_DSBFilterBuffer, m_DSBFilterBuffer + m_ssbFftLen, Complex{0.0, 0.0});
         m_DSBFilterBufferIndex = 0;
-
-        m_settingsMutex.unlock();
     }
 
     if ((settings.m_showOverlayText != m_settings.m_showOverlayText) || force)

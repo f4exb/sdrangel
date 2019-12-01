@@ -166,7 +166,6 @@ private:
     float    m_vBarIncrement;    //!< video level increment at each vertical bar increment
     bool     m_interleaved;      //!< true if image is interlaced (2 half frames per frame)
     bool     m_evenImage;        //!< in interlaced mode true if this is an even image
-    QMutex   m_settingsMutex;
     int      m_horizontalCount;  //!< current point index on line
     int      m_lineCount;        //!< current line index in frame
     float    m_fps;              //!< resulting frames per second
