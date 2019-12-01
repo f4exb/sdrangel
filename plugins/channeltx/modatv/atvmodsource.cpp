@@ -66,11 +66,11 @@ ATVModSource::ATVModSource() :
 {
     scanCameras();
 
-    m_SSBFilter = new fftfilt(0, m_settings.m_rfBandwidth / m_channelSampleRate, m_ssbFftLen);
-    m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
+    m_SSBFilter = new fftfilt(0, m_settings.m_rfBandwidth / (float) m_channelSampleRate, m_ssbFftLen); // arbitrary cutoff
+    m_SSBFilterBuffer = new Complex[m_ssbFftLen/2]; // filter returns data exactly half of its size
     memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
 
-    m_DSBFilter = new fftfilt((2.0f * m_settings.m_rfBandwidth) / m_channelSampleRate, 2 * m_ssbFftLen);
+    m_DSBFilter = new fftfilt((2.0f * m_settings.m_rfBandwidth) / (float) m_channelSampleRate, 2*m_ssbFftLen); // arbitrary cutoff
     m_DSBFilterBuffer = new Complex[m_ssbFftLen];
     memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
 
@@ -211,7 +211,7 @@ Complex& ATVModSource::modulateSSB(Real& sample)
 
     if (n_out > 0)
     {
-        memcpy((void *) m_SSBFilterBuffer, (const void *) filtered, n_out*sizeof(Complex));
+        std::copy(filtered, filtered + n_out, m_SSBFilterBuffer);
         m_SSBFilterBufferIndex = 0;
     }
 
@@ -230,7 +230,7 @@ Complex& ATVModSource::modulateVestigialSSB(Real& sample)
 
     if (n_out > 0)
     {
-        memcpy((void *) m_DSBFilterBuffer, (const void *) filtered, n_out*sizeof(Complex));
+        std::copy(filtered, filtered + n_out, m_DSBFilterBuffer);
         m_DSBFilterBufferIndex = 0;
     }
 
@@ -909,9 +909,16 @@ void ATVModSource::applyChannelSettings(int channelSampleRate, int channelFreque
             m_tvSampleRate = channelSampleRate;
         }
 
-        m_SSBFilter->create_filter(0, m_settings.m_rfBandwidth / m_tvSampleRate);
-        memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
+        m_SSBFilter->create_filter(0, m_settings.m_rfBandwidth / (float) m_tvSampleRate);
+        std::fill(m_SSBFilterBuffer, m_SSBFilterBuffer + (m_ssbFftLen/2), Complex{0.0, 0.0});
         m_SSBFilterBufferIndex = 0;
+
+        m_DSBFilter->create_asym_filter(
+            m_settings.m_rfOppBandwidth / (float) m_tvSampleRate,
+            m_settings.m_rfBandwidth / (float) m_tvSampleRate
+        );
+        std::fill(m_DSBFilterBuffer, m_DSBFilterBuffer + m_ssbFftLen, Complex{0.0, 0.0});
+        m_DSBFilterBufferIndex = 0;
 
         applyStandard(m_settings); // set all timings
         m_settingsMutex.unlock();
@@ -972,8 +979,8 @@ void ATVModSource::applySettings(const ATVModSettings& settings, bool force)
                     3.0);
         }
 
-        m_SSBFilter->create_filter(0, settings.m_rfBandwidth / m_tvSampleRate);
-        memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
+        m_SSBFilter->create_filter(0, settings.m_rfBandwidth / (float) m_tvSampleRate);
+        std::fill(m_SSBFilterBuffer, m_SSBFilterBuffer + (m_ssbFftLen/2), Complex{0.0, 0.0});
         m_SSBFilterBufferIndex = 0;
 
         applyStandard(settings); // set all timings
@@ -995,8 +1002,11 @@ void ATVModSource::applySettings(const ATVModSettings& settings, bool force)
     {
         m_settingsMutex.lock();
 
-        m_DSBFilter->create_asym_filter(settings.m_rfOppBandwidth / m_tvSampleRate, settings.m_rfBandwidth / m_tvSampleRate);
-        memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
+        m_DSBFilter->create_asym_filter(
+            settings.m_rfOppBandwidth / (float) m_tvSampleRate,
+            settings.m_rfBandwidth / (float) m_tvSampleRate
+        );
+        std::fill(m_DSBFilterBuffer, m_DSBFilterBuffer + m_ssbFftLen, Complex{0.0, 0.0});
         m_DSBFilterBufferIndex = 0;
 
         m_settingsMutex.unlock();

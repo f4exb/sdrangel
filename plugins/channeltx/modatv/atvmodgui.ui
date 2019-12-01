@@ -234,12 +234,6 @@
      <layout class="QHBoxLayout" name="rfBandwidthLayout">
       <item>
        <widget class="QComboBox" name="modulation">
-        <property name="maximumSize">
-         <size>
-          <width>60</width>
-          <height>16777215</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Modulation type</string>
         </property>
