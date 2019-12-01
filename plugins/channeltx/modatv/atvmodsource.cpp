@@ -530,7 +530,7 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
     m_nbHorizPoints    = m_pointsPerLine;
 
     m_pointsPerHBar    = m_pointsPerImgLine / m_nbBars;
-    m_hBarIncrement    = m_spanLevel / (float) m_nbBars;
+    m_hBarIncrement    = m_spanLevel / (float) (m_nbBars-1);
     m_vBarIncrement    = m_spanLevel / (float) m_nbBars;
 
     m_nbLines          = settings.m_nbLines;
