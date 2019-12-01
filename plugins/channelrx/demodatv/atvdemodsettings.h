@@ -45,50 +45,36 @@ struct ATVDemodSettings
         ATVStdHSkip
     };
 
-    // Added fields that correspond directly to UI inputs
-    int m_lineTimeFactor;     //!< added: +/- 100 something
-    int m_topTimeFactor;      //!< added: +/-  30 something
-    int m_fpsIndex;           //!< added: FPS list index
-    bool m_halfImage;         //!< added: true => m_fltRatioOfRowsToDisplay = 0.5, false => m_fltRatioOfRowsToDisplay = 1.0
-    int m_RFBandwidthFactor;  //!< added: [1:100]
-    int m_OppBandwidthFactor; //!< added: [0:100]
-    int m_nbLinesIndex;       //!< added: #lines list index
+    // RF settings
+    qint64        m_inputFrequencyOffset; //!< Offset from baseband center frequency
+    bool          m_forceDecimator;       //!< Force use of rational decimator when channel sample rate matches TV sample rate
+    int           m_bfoFrequency;         //!< BFO frequency (Hz)
+    ATVModulation m_atvModulation;        //!< RF modulation type
+    float         m_fmDeviation;          //!< Expected FM deviation
+    bool          m_fftFiltering;         //!< Toggle FFT filter
+    unsigned int  m_fftOppBandwidth;      //!< FFT filter lower frequency cutoff (Hz)
+    unsigned int  m_fftBandwidth;         //!< FFT filter high frequency cutoff (Hz)
 
-    // Former RF
-    int           m_intFrequencyOffset;
-    ATVModulation m_enmModulation;
-    float         m_fltRFBandwidth;
-    float         m_fltRFOppBandwidth;
-    bool          m_blnFFTFiltering;
-    bool          m_blndecimatorEnable;
-    float         m_fltBFOFrequency;
-    float         m_fmDeviation;
+    // ATV settings
+    int           m_nbLines;              //!< Number of lines per full frame
+    int           m_fps;                  //!< Number of frames per second
+    ATVStd        m_atvStd;               //!< Standard
+    bool          m_hSync;                //!< Enable/disable horizontal sybchronization
+    bool          m_vSync;                //!< Enable/disable vertical synchronization
+    bool          m_invertVideo;          //!< Toggle invert video
+    bool          m_halfFrames;           //!< Toggle half frames processing
+    float         m_levelSynchroTop;      //!< Horizontal synchronization top level (0.0 to 1.0 scale)
+    float         m_levelBlack;           //!< Black level (0.0 to 1.0 scale)
+    int           m_lineTimeFactor;       //!< added: +/- 100 something
+    int           m_topTimeFactor;        //!< added: +/-  30 something
 
-    // Former <none>
-    int m_intSampleRate;
-    ATVStd m_enmATVStandard;
-    int m_intNumberOfLines;
-    float m_fltLineDuration;
-    float m_fltTopDuration;
-    float m_fltFramePerS;
-    float m_fltRatioOfRowsToDisplay;
-    float m_fltVoltLevelSynchroTop;
-    float m_fltVoltLevelSynchroBlack;
-    bool m_blnHSync;
-    bool m_blnVSync;
-    bool m_blnInvertVideo;
-    int m_intVideoTabIndex;
-
-    // Former private
-    int m_intTVSampleRate;
-    int m_intNumberSamplePerLine;
-
-    // new
+    // common channel settings
     quint32 m_rgbColor;
     QString m_title;
     QString m_udpAddress;
     uint16_t m_udpPort;
     Serializable *m_channelMarker;
+    int m_streamIndex;
 
     ATVDemodSettings();
     void resetToDefaults();
@@ -96,31 +82,25 @@ struct ATVDemodSettings
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 
-    int getEffectiveSampleRate();
-    float getLineTime();
-    int getLineTimeFactor();
-    float getTopTime();
-    int getTopTimeFactor();
-    int getRFSliderDivisor();
+    float getLineTime(unsigned int sampleRate);
+    float getTopTime(unsigned int sampleRate);
+    int getRFSliderDivisor(unsigned int sampleRate);
 
-    void convertFromUIValues();
-    void convertToUIValues();
-
-    static float getFps(int fpsIndex);
+    static int getFps(int fpsIndex);
+    static int getFpsIndex(int fps);
     static int getNumberOfLines(int nbLinesIndex);
-    static int getFpsIndex(float fps);
     static int getNumberOfLinesIndex(int nbLines);
-    static float getNominalLineTime(int nbLinesIndex, int fpsIndex);
+    static float getNominalLineTime(int nbLines, int fps);
+    static float getRFBandwidthDivisor(ATVModulation modulation);
+    static void getBaseValues(int sampleRate, int linesPerSecond, int& tvSampleRate, uint32_t& nbPointsPerLine);
 
 private:
-    void lineTimeUpdate();
-    void topTimeUpdate();
+    void lineTimeUpdate(unsigned int sampleRate);
+    void topTimeUpdate(unsigned int sampleRate);
 
     float m_fltLineTimeMultiplier;
     float m_fltTopTimeMultiplier;
     int m_rfSliderDivisor;
 };
-
-
 
 #endif /* PLUGINS_CHANNELRX_DEMODATV_ATVDEMODSETTINGS_H_ */

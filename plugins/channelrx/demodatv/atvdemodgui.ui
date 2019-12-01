@@ -132,7 +132,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="channelSampleRateText">
+       <widget class="QLabel" name="tvSampleRateText">
         <property name="minimumSize">
          <size>
           <width>66</width>
@@ -140,7 +140,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Effective channel sample rate (kS/s)</string>
+         <string>TV line based sample rate (kS/s)</string>
         </property>
         <property name="text">
          <string> 00000.00k</string>
@@ -666,12 +666,6 @@
       </item>
       <item>
        <widget class="QComboBox" name="standard">
-        <property name="maximumSize">
-         <size>
-          <width>70</width>
-          <height>16777215</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>TV standard scheme</string>
         </property>
@@ -692,12 +686,12 @@
         </item>
         <item>
          <property name="text">
-          <string>ShI</string>
+          <string>ShortI</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>ShNI</string>
+          <string>ShortNI</string>
          </property>
         </item>
         <item>

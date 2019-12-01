@@ -16,6 +16,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#ifndef INCLUDE_SDRBASE_DSP_PHASELOCK
+#define INCLUDE_SDRBASE_DSP_PHASELOCK
+
 #include <vector>
 #include "dsp/dsptypes.h"
 #include "export.h"
@@ -180,3 +183,5 @@ protected:
         samples_out[3] = m_phase; // Pilot phase
     }
 };
+
+#endif // INCLUDE_SDRBASE_DSP_PHASELOCK

@@ -1,8 +1,11 @@
 project(atv)
 
 set(atv_SOURCES
-	atvdemod.cpp
+    atvdemod.cpp
+    atvdemodbaseband.cpp
+    atvdemodsink.cpp
     atvdemodsettings.cpp
+    atvdemodreport.cpp
     atvdemodwebapiadapter.cpp
 	atvdemodgui.cpp
 	atvdemodplugin.cpp
@@ -10,8 +13,11 @@ set(atv_SOURCES
 )
 
 set(atv_HEADERS
-	atvdemod.h
+    atvdemod.h
+    atvdemodbaseband.h
+    atvdemodsink.h
     atvdemodsettings.h
+    atvdemodreport.h
     atvdemodwebapiadapter.h
 	atvdemodgui.h
 	atvdemodplugin.h

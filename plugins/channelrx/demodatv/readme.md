@@ -4,7 +4,7 @@
 
 This plugin can be used to view amateur analog television transmissions a.k.a ATV. The transmitted video signal can be black and white or color (PAL, NTSC) but only the black and white level (luminance) is retained and hence image is black and white. There is no provision to demodulate the audio subcarrier either. The modulation can be either AM or FM (SSB with carrier is only experimental). A plugin supporting audio can be used in the same passband to demodulate an audio carrier but this does not work for a subcarrier which excludes FM.
 
-An optional rational downsampler with lowpass filtering can be used but its ratio is always 1.0 so in fact only the filter functionality is retained. This is a provision for future developments. When this downsampler is not engaged (button A.3) the source feeds the channel directly. A standard image quality for broadcast standard modes requires a sample rate of at least 4 MS/s. The Airspy Mini 3 MS/s mode may still be acceptable. 
+An optional rational downsampler with lowpass filtering can be used but its ratio is always 1.0 so in fact only the filter functionality is retained. This is a provision for future developments. When this downsampler is not engaged (button A.3) the source feeds the channel directly. A standard image quality for broadcast standard modes requires a sample rate of at least 4 MS/s. The Airspy Mini 3 MS/s mode may still be acceptable.
 
 Experimental modes with smaller number of lines and FPS values can be used in conjunction with the [ATV Modulator plugin](https://github.com/f4exb/sdrangel/tree/master/plugins/channeltx/modatv) to reduce sample rate and occupied bandwidth. Very low line frequencies and thus small bandwidths are reachable with degraded image quality. This is known as NBTV see: [Wikipedia article](https://en.wikipedia.org/wiki/Narrow-bandwidth_television) and [NBTV.org](http://www.nbtv.org/)
 
@@ -28,21 +28,27 @@ Each part is detailed next
 
 Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows.Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
-<h3>3: Rational downsampler toggle</h3>
+<h3>3: Force use of the rational downsampler</h3>
 
-Use this toggle button to enable or disable the rational downsampler and its FIR filter. Without downsampling the source plugin feeds the channel directly. 
+Use this toggle button to enable the rational downsampler and its FIR filter even when TV and baseband sample rate match (see next 4). The expected effect is then to engage the FIR filter so that the signal is lowpass filtered and the cutoff frequency can be adjusted with the in band filter cutoff slider (13).
 
-When the downsampler is engaged the signal is lowpass filtered and the cutoff frequency can be adjusted with the in band filter cutoff slider (13).
+<h3>4: TV sample rate</h3>
 
-<h3>4: Channel sample rate</h3>
+This is the nominal sample rate in kS/s derived from the line frequency so that an integer number of points can fit exactly into one line. This number of (virtual) points is chosen so that the resulting sample rate is the closest 10 S/s multiple to the baseband frequency.
 
-This is the channel sample rate in kS/s. For good horizontal synchronization you should aim at a sample rate (given by the source) that yields an integer number of points per line. Sample rate (S), number of lines (l) and frames per second (F) should yield an integer number of points (N) using this formula:
+&#9888; In practice you should adjust the baseband frequency with the device controls so that baseband and TV sample rates are equal. The rational interpolator does not work very well with video signals for which exact timings are critical.
 
-N = S / (l &#215; F)
+Sb - 10 < St <= Sb
+St = n &#215; l &#215; F
+
+Where:
+  - Sb is the baseband sample rate
+  - St is the TV sample rate
+  - n is the number of (virtual) points
+  - l is the number of lines
+  - F is the frame rate in frames/second
 
 &#9758; The number of points should be a bit larger than the number of lines up to 240 lines then it can be a bit smaller to give an acceptable image quality.
-
-When the rational downsampler is engaged (3) the resulting sample rate is calculated as the closest 10 S/s multiple to the source sample rate to fit an integer number of line points.
 
 The example taken in the screenshot is from a 405 lines × 20 FPS video signal:
 
@@ -50,11 +56,11 @@ The example taken in the screenshot is from a 405 lines × 20 FPS video signal:
   - line frequency is 8100 Hz
   - 186 points fit in 8100 × 186 = 1506.6 kS/s
   - 185 points fit in 8100 × 185 = 1498.5 kS/s
-  - therefore the closest sample rate is 1498.5 kS/s for 185 points per line 
+  - therefore the closest sample rate is 1498.5 kS/s for 185 points per line
 
-<h3>5: Number of points (or samples) per line</h3>
+<h3>5: Number of virtual points or samples per line</h3>
 
-This is the number of points or samples per complete line including sync and padding. This is derived from the sample rate and line frequency as the ratio of the two. For example with a 625 lines &#215; 25 FPS signal the line frequency is 15625 Hz. If the channel sample rate is 1500 kS/s this yields 1500000/15625 = 96 points. If the ratio is not an integer then the integer part is taken.
+This is the number of (virtual) points or samples per complete line including sync and padding. Calculation of this number is explained above (4)
 
 <h3>6: BFO PLL lock indicator</h3>
 
@@ -76,16 +82,18 @@ Average total power in dB relative to a &#177;1.0 amplitude signal generated in 
 
 <h3>9: Modulation</h3>
 
-  - FM1: this is Frequency Modulation with approximative demodulation algorithm not using atan2
-  - FM2: this is Frequency Modulation with less approximative demodulation algorithm still not using atan2
-  - FM3: this is Frequency Modulation with atan2 approximation for phase calculation and then a discrete differentiation is applied
-  - AM: this is Amplitude Modulation
-  - USB: &#9888; USB demodulation synchronous to the carrier (experimental)
-  - LSB: &#9888; LSB demodulation synchronous to the carrier (experimental)
-  
-For FM choose the algorithm that best suits your conditions. 
+  - **FM1**: this is Frequency Modulation with approximative demodulation algorithm not using atan2
+  - **FM2**: this is Frequency Modulation with less approximative demodulation algorithm still not using atan2
+  - **FM3**: this is Frequency Modulation with atan2 approximation for phase calculation and then a discrete differentiation is applied
+  - **AM**: this is Amplitude Modulation. It can be used for vestigial sideband transmissions in conjunction with the asymetrical filter (11, 12, 13)
+  - **USB**: &#9888; USB demodulation synchronous to the carrier (experimental)
+  - **LSB**: &#9888; LSB demodulation synchronous to the carrier (experimental)
+
+For FM choose the algorithm that best suits your conditions.
 
 &#9758; only FM3 is accurate with regard to FM deviation (see 10).
+
+&#9888; in AM modes (also USB and LSB) there is an automatic amplitude scaling so that the video signal fits in the 0.0 to 1.0 range. For synchronziation standards other than HSkip (see B.3) it may be difficult for the system to find the appropriate level when the standard changes or the signal power changes abruptly. In this case you have to select HSkip (B.3) until the video signal reaches the 0.0 to 1.0 range approximately (use scope tab see C) before returning to the desired standard.
 
 &#9888; USB and LSB modes are experimental and do not show good results for sample rates greater than 1 MS/s. Adjusting the BFO can be picky and unstable.
 
@@ -93,11 +101,11 @@ For FM choose the algorithm that best suits your conditions.
 
 Using this button you can adjust the nominal FM deviation as a percentage of the channel bandwidth that is displayed on the right of the button. When a signal with this deviation is received the demodulated signal is in the range -0.5/+0.5 which is shifted to a 0/1 range video signal.
 
-&#9758; The value is accurate only with the atan2 differential demodulator i.e. FM3. With FM1 and FM2 you will have to adjust it for best image results. You can use the scope as an aid to try to fit the video signal in the 0/1 range.   
+&#9758; The value is accurate only with the atan2 differential demodulator i.e. FM3. With FM1 and FM2 you will have to adjust it for best image results. You can use the scope as an aid to try to fit the video signal in the 0/1 range.
 
 <h3>11: FFT asymmetrical filter toggle</h3>
 
-Use this button to enable/disable the FFT asymmetrical filter. Use this filter when you want to optimize the reception of vestigial sideband AM signals. 
+Use this button to enable/disable the FFT asymmetrical filter. Use this filter when you want to optimize the reception of vestigial sideband AM signals.
 
 <h3>12: FFT asymmetrical filter opposite band cutoff frequency</h3>
 
@@ -133,12 +141,12 @@ This combo lets you chose between a 30, 25, 20, 16, 12, 10, 8, 5, 2 and 1 FPS. T
 
 This combo lets you set the TV standard type. This sets the number of lines per complete image, frame synchronization parameters and number of blank (black) lines. Choice is between:
 
-  - PAL625: this is based on the classical 625 lines PAL system. It uses 7 or 8 synchronization lines depending on the half frame (field). It has also 17 black lines on the top of each half frame.
-  - PAL525: the only difference with PAL625 is the number of black lines which is down to 15
-  - PAL405: this is not the British standard. It just follows the same scheme as the two above but with only 7 black lines per half frame
-  - ShI: this is an experimental mode that uses the least possible vertical sync lines as possible. That is one line for a long synchronization pulse and one line at a higher level (0.7) to reset the vertical sync condition. Thus only 2 lines are consumed for vertical sync and the rest is left to the image. In this mode the frames are interleaved
-  - ShNI: this is the same as above but with non interleaved frames.
-  - HSkip: this is the horizontal sync skip technique for vertical synchronization. This has been in use in the first TV experiments with a small number of lines. This method just skips one horizontal synchronization pulse to mark the last or the first line (here it is the last). This method does not use any full line for vertical sync and all lines can be used for the image thus it suits the modes with a small number of lines. With more lines however the risk of missing pulses gets higher in adverse conditions because the pulses get shorter and may get swallowed by a stray pulse or a stray pulse can be taken for a valid one. In this case two images might get out of sync instead of just two lines. In practice this is suitable up to 90~120 lines.
+  - **PAL625**: this is based on the classical 625 lines PAL system. It uses 7 or 8 synchronization lines depending on the half frame (field). It has also 17 black lines on the top of each half frame.
+  - **PAL525**: the only difference with PAL625 is the number of black lines which is down to 15
+  - **PAL405**: this is not the British standard. It just follows the same scheme as the two above but with only 7 black lines per half frame
+  - **ShortI**: this is an experimental mode that uses the least possible vertical sync lines as possible. That is one line for a long synchronization pulse and one line at a higher level (0.7) to reset the vertical sync condition. Thus only 2 lines are consumed for vertical sync and the rest is left to the image. In this mode the frames are interleaved
+  - **ShortNI**: this is the same as above but with non interleaved frames.
+  - **HSkip**: this is the horizontal sync skip technique for vertical synchronization. This has been in use in the first TV experiments with a small number of lines. This method just skips one horizontal synchronization pulse to mark the last or the first line (here it is the last). This method does not use any full line for vertical sync and all lines can be used for the image thus it suits the modes with a small number of lines. With more lines however the risk of missing pulses gets higher in adverse conditions because the pulses get shorter and may get swallowed by a stray pulse or a stray pulse can be taken for a valid one. In this case two images might get out of sync instead of just two lines. In practice this is suitable up to 90~120 lines.
 
 When the standard chosen matches the standard of transmission the image should appear in full size and proper aspect ratio.
 
@@ -153,7 +161,7 @@ When the standard chosen matches the standard of transmission the image should a
     </tr>
     <tr>
         <td>640</td>
-        <td>ShNI</td>
+        <td>ShortNI</td>
     </tr>
     <tr>
         <td>625</td>
@@ -165,35 +173,35 @@ When the standard chosen matches the standard of transmission the image should a
     </tr>
     <tr>
         <td>480</td>
-        <td>ShNI</td>
+        <td>ShortNI</td>
     </tr>
     <tr>
         <td>405</td>
-        <td>PAL405, ShI, ShNI</td>
+        <td>PAL405, ShortI, ShortNI</td>
     </tr>
     <tr>
         <td>360</td>
-        <td>ShNI</td>
+        <td>ShortNI</td>
     </tr>
     <tr>
         <td>343</td>
-        <td>ShI, ShNI</td>
+        <td>ShortI, ShortNI</td>
     </tr>
     <tr>
         <td>240</td>
-        <td>ShNI</td>
+        <td>ShortNI</td>
     </tr>
     <tr>
         <td>180</td>
-        <td>ShNI</td>
+        <td>ShortNI</td>
     </tr>
     <tr>
         <td>120</td>
-        <td>ShNI, HSkip</td>
+        <td>ShortNI, HSkip</td>
     </tr>
     <tr>
         <td>90</td>
-        <td>ShNI, HSkip</td>
+        <td>ShortNI, HSkip</td>
     </tr>
     <tr>
         <td>60</td>
@@ -236,18 +244,20 @@ Use this push button to reset values to a standard setting:
   - 310 mV black level
   - 64 microsecond line length (middle)
   - 4.7 microsecond sync pulse length (middle)
-  
+
 <h3>9: Synchronization level</h3>
 
-Use this slider to adjust the top level of the synchronization pulse on a 0 to 1V scale. The value in mV appears on the right of the slider. Nominal value: 100 mV.
+Use this slider to adjust the trigger level of the synchronization pulse on a 0 to 1V scale. The value in mV appears on the right of the slider. Nominal value: 100 mV.
 
 <h3>10: Black level</h3>
 
-Use this slider to adjust the black level of the video signal on a 0 to 1V scale. The value in mV appears on the right of the slider. Nominal value: 310 mV.
+Use this slider to adjust the black level of the video signal on a 0 to 1V scale. This also triggers the end of horizontal synchronization pulse. The value in mV appears on the right of the slider. Nominal value: 310 mV.
 
 <h3>11: Line length</h3>
 
-This is the line length in time units. The value appears on the right of the slider. Nominal value depends on the nominal line frequency. For example with 405 lines and 20 FPS. The line frequency is 405 &#215; 20 = 8100 Hz thus the nominal line time is the inverse of this value that is &#8776;123.45 &mu;s 
+&#9888; Do not change the default setting (no adjustment or 0) in most cases. This is to be used only with signals that do not have any horizontal synchronization so is highly experimental.
+
+This is the line length in time units. The value appears on the right of the slider. Nominal value depends on the nominal line frequency. For example with 405 lines and 20 FPS. The line frequency is 405 &#215; 20 = 8100 Hz thus the nominal line time is the inverse of this value that is &#8776;123.45 &mu;s
 
 The slider step is set to a sample period in order to ensure that the adjustment is done with the best possible precision. For example at 1500 kS/s sample rate this will be the inverse of this value that is &#8776;666.67 ns. The middle position of the slider sets the nominal value and the slider step appears in the tooltip.
 
@@ -257,7 +267,7 @@ This is the length in time units of a horizontal or line synchronization pulse. 
 
 Similarly to the line length slider the slider step is set to a sample period in order to ensure that the adjustment is done with the best possible precision. The middle position of the slider sets the nominal value and the slider step appears in the tooltip.
 
-&#9758; You can move this control back and forth in case you have synchronizing issues as it can help the synchronization system to get back into pace.
+&#9758; You can move this control back and forth in case you have synchronizing issues as it can help the synchronization system to get back into pace. In practice the value should always be negative (shorter pulse than nominal).
 
 <h2>C: Image</h2>
 
@@ -267,7 +277,7 @@ Select monitor with the monitor tab on the left side.
 
 ![ATV Demodulator plugin GUI Video monitor](../../../doc/img/ATVDemod_pluginC_monitor.png)
 
-This is where the TV image appears. Yes on the screenshot this is the famous [Lenna](https://en.wikipedia.org/wiki/Lenna). The original image is 512 &#215; 512 pixels so it has been cropped to fit the 4:3 format. The screen geometry ratio is fixed to 4:3 format. You will have to choose the standard (B.3) matching the transmission to ensure that the transmitted image fits perfectly. 
+This is where the TV image appears. Yes on the screenshot this is the famous [Lenna](https://en.wikipedia.org/wiki/Lenna). The original image is 512 &#215; 512 pixels so it has been cropped to fit the 4:3 format. The screen geometry ratio is fixed to 4:3 format. You will have to choose the standard (B.3) matching the transmission to ensure that the transmitted image fits perfectly.
 
 <h3>Scope</h3>
 

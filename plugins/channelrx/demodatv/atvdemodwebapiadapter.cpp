@@ -51,35 +51,26 @@ void ATVDemodWebAPIAdapter::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings& response,
         const ATVDemodSettings& settings)
 {
-    response.getAtvDemodSettings()->setBlndecimatorEnable(settings.m_blndecimatorEnable ? 1 : 0);
-    response.getAtvDemodSettings()->setBlnFftFiltering(settings.m_blnFFTFiltering ? 1 : 0);
-    response.getAtvDemodSettings()->setBlnHSync(settings.m_blnHSync ? 1 : 0);
-    response.getAtvDemodSettings()->setBlnInvertVideo(settings.m_blnInvertVideo ? 1 : 0);
-    response.getAtvDemodSettings()->setBlnVSync(settings.m_blnVSync ? 1 : 0);
-    response.getAtvDemodSettings()->setEnmAtvStandard((int) settings.m_enmATVStandard);
-    response.getAtvDemodSettings()->setEnmModulation((int) settings.m_enmModulation);
-    response.getAtvDemodSettings()->setFltBfoFrequency(settings.m_fltBFOFrequency);
-    response.getAtvDemodSettings()->setFltFramePerS(settings.m_fltFramePerS);
-    response.getAtvDemodSettings()->setFltLineDuration(settings.m_fltLineDuration);
-    response.getAtvDemodSettings()->setFltRatioOfRowsToDisplay(settings.m_fltRatioOfRowsToDisplay);
-    response.getAtvDemodSettings()->setFltRfBandwidth(settings.m_fltRFBandwidth);
-    response.getAtvDemodSettings()->setFltRfOppBandwidth(settings.m_fltRFOppBandwidth);
-    response.getAtvDemodSettings()->setFltTopDuration(settings.m_fltTopDuration);
-    response.getAtvDemodSettings()->setFltVoltLevelSynchroBlack(settings.m_fltVoltLevelSynchroBlack);
-    response.getAtvDemodSettings()->setFltVoltLevelSynchroTop(settings.m_fltVoltLevelSynchroTop);
+    response.getAtvDemodSettings()->setBlndecimatorEnable(settings.m_forceDecimator ? 1 : 0);
+    response.getAtvDemodSettings()->setBlnFftFiltering(settings.m_fftFiltering ? 1 : 0);
+    response.getAtvDemodSettings()->setBlnHSync(settings.m_hSync ? 1 : 0);
+    response.getAtvDemodSettings()->setBlnInvertVideo(settings.m_invertVideo ? 1 : 0);
+    response.getAtvDemodSettings()->setBlnVSync(settings.m_vSync ? 1 : 0);
+    response.getAtvDemodSettings()->setEnmAtvStandard((int) settings.m_atvStd);
+    response.getAtvDemodSettings()->setEnmModulation((int) settings.m_atvModulation);
+    response.getAtvDemodSettings()->setFltBfoFrequency(settings.m_bfoFrequency);
+    response.getAtvDemodSettings()->setFltFramePerS(settings.m_fps);
+    response.getAtvDemodSettings()->setFltRfBandwidth(settings.m_fftBandwidth);
+    response.getAtvDemodSettings()->setFltRfOppBandwidth(settings.m_fftOppBandwidth);
+    response.getAtvDemodSettings()->setFltVoltLevelSynchroBlack(settings.m_levelBlack);
+    response.getAtvDemodSettings()->setFltVoltLevelSynchroTop(settings.m_levelSynchroTop);
     response.getAtvDemodSettings()->setFmDeviation(settings.m_fmDeviation);
-    response.getAtvDemodSettings()->setFpsIndex(settings.m_fpsIndex);
-    response.getAtvDemodSettings()->setHalfImage(settings.m_halfImage ? 1 : 0);
-    response.getAtvDemodSettings()->setIntFrequencyOffset(settings.m_intFrequencyOffset);
-    response.getAtvDemodSettings()->setIntNumberOfLines(settings.m_intNumberOfLines);
-    response.getAtvDemodSettings()->setIntNumberSamplePerLine(settings.m_intNumberSamplePerLine);
-    response.getAtvDemodSettings()->setIntSampleRate(settings.m_intSampleRate);
-    response.getAtvDemodSettings()->setIntTvSampleRate(settings.m_intTVSampleRate);
-    response.getAtvDemodSettings()->setIntVideoTabIndex(settings.m_intVideoTabIndex);
+    response.getAtvDemodSettings()->setFpsIndex(ATVDemodSettings::getFpsIndex(settings.m_fps));
+    response.getAtvDemodSettings()->setHalfImage(settings.m_halfFrames ? 1 : 0);
+    response.getAtvDemodSettings()->setIntFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getAtvDemodSettings()->setIntNumberOfLines(settings.m_nbLines);
     response.getAtvDemodSettings()->setLineTimeFactor(settings.m_lineTimeFactor);
-    response.getAtvDemodSettings()->setNbLinesIndex(settings.m_nbLinesIndex);
-    response.getAtvDemodSettings()->setOppBandwidthFactor(settings.m_OppBandwidthFactor);
-    response.getAtvDemodSettings()->setRfBandwidthFactor(settings.m_RFBandwidthFactor);
+    response.getAtvDemodSettings()->setNbLinesIndex(ATVDemodSettings::getNumberOfLinesIndex(settings.m_nbLines));
     response.getAtvDemodSettings()->setRgbColor(settings.m_rgbColor);
     response.getAtvDemodSettings()->setTitle(new QString(settings.m_title));
     response.getAtvDemodSettings()->setTopTimeFactor(settings.m_topTimeFactor);
@@ -93,91 +84,58 @@ void ATVDemodWebAPIAdapter::webapiUpdateChannelSettings(
         SWGSDRangel::SWGChannelSettings& response)
 {
     if (channelSettingsKeys.contains("blndecimatorEnable")) {
-        settings.m_blndecimatorEnable = response.getAtvDemodSettings()->getBlndecimatorEnable() != 0;
+        settings.m_forceDecimator = response.getAtvDemodSettings()->getBlndecimatorEnable() != 0;
     }
     if (channelSettingsKeys.contains("blnFFTFiltering")) {
-        settings.m_blnFFTFiltering = response.getAtvDemodSettings()->getBlnFftFiltering() != 0;
+        settings.m_fftFiltering = response.getAtvDemodSettings()->getBlnFftFiltering() != 0;
     }
     if (channelSettingsKeys.contains("blnHSync")) {
-        settings.m_blnHSync = response.getAtvDemodSettings()->getBlnHSync() != 0;
+        settings.m_hSync = response.getAtvDemodSettings()->getBlnHSync() != 0;
     }
     if (channelSettingsKeys.contains("blnInvertVideo")) {
-        settings.m_blnInvertVideo = response.getAtvDemodSettings()->getBlnInvertVideo() != 0;
+        settings.m_invertVideo = response.getAtvDemodSettings()->getBlnInvertVideo() != 0;
     }
     if (channelSettingsKeys.contains("blnVSync")) {
-        settings.m_blnVSync = response.getAtvDemodSettings()->getBlnVSync() != 0;
+        settings.m_vSync = response.getAtvDemodSettings()->getBlnVSync() != 0;
     }
     if (channelSettingsKeys.contains("enmATVStandard")) {
-        settings.m_enmATVStandard = (ATVDemodSettings::ATVStd) response.getAtvDemodSettings()->getEnmAtvStandard();
+        settings.m_atvStd = (ATVDemodSettings::ATVStd) response.getAtvDemodSettings()->getEnmAtvStandard();
     }
     if (channelSettingsKeys.contains("enmModulation")) {
-        settings.m_enmModulation = (ATVDemodSettings::ATVModulation) response.getAtvDemodSettings()->getEnmModulation();
+        settings.m_atvModulation = (ATVDemodSettings::ATVModulation) response.getAtvDemodSettings()->getEnmModulation();
     }
     if (channelSettingsKeys.contains("fltBFOFrequency")) {
-        settings.m_fltBFOFrequency = response.getAtvDemodSettings()->getFltBfoFrequency();
+        settings.m_bfoFrequency = response.getAtvDemodSettings()->getFltBfoFrequency();
     }
     if (channelSettingsKeys.contains("fltFramePerS")) {
-        settings.m_fltFramePerS = response.getAtvDemodSettings()->getFltFramePerS();
-    }
-    if (channelSettingsKeys.contains("fltLineDuration")) {
-        settings.m_fltLineDuration = response.getAtvDemodSettings()->getFltLineDuration();
-    }
-    if (channelSettingsKeys.contains("fltRatioOfRowsToDisplay")) {
-        settings.m_fltRatioOfRowsToDisplay = response.getAtvDemodSettings()->getFltRatioOfRowsToDisplay();
+        settings.m_fps = response.getAtvDemodSettings()->getFltFramePerS();
     }
     if (channelSettingsKeys.contains("fltRFBandwidth")) {
-        settings.m_fltRFBandwidth = response.getAtvDemodSettings()->getFltRfBandwidth();
+        settings.m_fftBandwidth = response.getAtvDemodSettings()->getFltRfBandwidth();
     }
     if (channelSettingsKeys.contains("fltRFOppBandwidth")) {
-        settings.m_fltRFOppBandwidth = response.getAtvDemodSettings()->getFltRfOppBandwidth();
-    }
-    if (channelSettingsKeys.contains("fltTopDuration")) {
-        settings.m_fltTopDuration = response.getAtvDemodSettings()->getFltTopDuration();
+        settings.m_fftOppBandwidth = response.getAtvDemodSettings()->getFltRfOppBandwidth();
     }
     if (channelSettingsKeys.contains("fltVoltLevelSynchroBlack")) {
-        settings.m_fltVoltLevelSynchroBlack = response.getAtvDemodSettings()->getFltVoltLevelSynchroBlack();
+        settings.m_levelBlack = response.getAtvDemodSettings()->getFltVoltLevelSynchroBlack();
     }
     if (channelSettingsKeys.contains("fltVoltLevelSynchroTop")) {
-        settings.m_fltVoltLevelSynchroTop = response.getAtvDemodSettings()->getFltVoltLevelSynchroTop();
+        settings.m_levelSynchroTop = response.getAtvDemodSettings()->getFltVoltLevelSynchroTop();
     }
     if (channelSettingsKeys.contains("fmDeviation")) {
         settings.m_fmDeviation = response.getAtvDemodSettings()->getFmDeviation();
     }
-    if (channelSettingsKeys.contains("fpsIndex")) {
-        settings.m_fpsIndex = response.getAtvDemodSettings()->getFpsIndex();
-    }
     if (channelSettingsKeys.contains("halfImage")) {
-        settings.m_halfImage = response.getAtvDemodSettings()->getHalfImage() != 0;
+        settings.m_halfFrames = response.getAtvDemodSettings()->getHalfImage() != 0;
     }
     if (channelSettingsKeys.contains("intFrequencyOffset")) {
-        settings.m_intFrequencyOffset = response.getAtvDemodSettings()->getIntFrequencyOffset();
+        settings.m_inputFrequencyOffset = response.getAtvDemodSettings()->getIntFrequencyOffset();
     }
     if (channelSettingsKeys.contains("intNumberOfLines")) {
-        settings.m_intNumberOfLines = response.getAtvDemodSettings()->getIntNumberOfLines();
-    }
-    if (channelSettingsKeys.contains("intNumberSamplePerLine")) {
-        settings.m_intNumberSamplePerLine = response.getAtvDemodSettings()->getIntNumberSamplePerLine();
-    }
-    if (channelSettingsKeys.contains("intSampleRate")) {
-        settings.m_intSampleRate = response.getAtvDemodSettings()->getIntSampleRate();
-    }
-    if (channelSettingsKeys.contains("intTVSampleRate")) {
-        settings.m_intTVSampleRate = response.getAtvDemodSettings()->getIntTvSampleRate();
-    }
-    if (channelSettingsKeys.contains("intVideoTabIndex")) {
-        settings.m_intVideoTabIndex = response.getAtvDemodSettings()->getIntVideoTabIndex();
+        settings.m_nbLines = response.getAtvDemodSettings()->getIntNumberOfLines();
     }
     if (channelSettingsKeys.contains("lineTimeFactor")) {
         settings.m_lineTimeFactor = response.getAtvDemodSettings()->getLineTimeFactor();
-    }
-    if (channelSettingsKeys.contains("nbLinesIndex")) {
-        settings.m_nbLinesIndex = response.getAtvDemodSettings()->getNbLinesIndex();
-    }
-    if (channelSettingsKeys.contains("OppBandwidthFactor")) {
-        settings.m_OppBandwidthFactor = response.getAtvDemodSettings()->getOppBandwidthFactor();
-    }
-    if (channelSettingsKeys.contains("RFBandwidthFactor")) {
-        settings.m_RFBandwidthFactor = response.getAtvDemodSettings()->getRfBandwidthFactor();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getAtvDemodSettings()->getRgbColor();

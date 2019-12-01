@@ -25,6 +25,8 @@
 #include "util/movingaverage.h"
 #include "util/messagequeue.h"
 
+#include "atvdemodsettings.h"
+
 class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
@@ -65,6 +67,7 @@ private:
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     ATVDemod* m_atvDemod;
+    ATVDemodSettings m_settings;
 
     bool m_blnDoApplySettings;
 
@@ -76,22 +79,23 @@ private:
     float m_fltLineTimeMultiplier;
     float m_fltTopTimeMultiplier;
     int m_rfSliderDivisor;
-    int m_inputSampleRate;
+    int m_basebandSampleRate;
+    int m_tvSampleRate;
     MessageQueue m_inputMessageQueue;
 
     explicit ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent = 0);
 	virtual ~ATVDemodGUI();
 
     void blockApplySettings(bool blnBlock);
-	void applySettings();
-    void applyRFSettings();
+	void applySettings(bool force = false);
+    void displaySettings();
+    void displayStreamIndex();
+    void displayRFBandwidths();
+    void applyTVSampleRate();
     void setChannelMarkerBandwidth();
     void setRFFiltersSlidersRange(int sampleRate);
     void lineTimeUpdate();
     void topTimeUpdate();
-    static float getFps(int fpsIndex);
-    static float getNominalLineTime(int nbLinesIndex, int fpsIndex);
-    static int getNumberOfLines(int nbLinesIndex);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
