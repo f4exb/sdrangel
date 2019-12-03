@@ -24,35 +24,13 @@ class DeviceAPI;
 class ThreadedBasebandSampleSink;
 class DownChannelizer;
 
-#include "datvconstellation.h"
-#include "datvdvbs2constellation.h"
-#include "datvvideoplayer.h"
-#include "datvideostream.h"
-#include "datvudpstream.h"
-#include "datvideorender.h"
-#include "datvdemodsettings.h"
-
 #include "channel/channelapi.h"
 #include "dsp/basebandsamplesink.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/dspcommands.h"
-#include "dsp/downchannelizer.h"
-#include "dsp/fftfilt.h"
-#include "dsp/nco.h"
-#include "dsp/interpolator.h"
-#include "dsp/movingaverage.h"
-#include "dsp/agc.h"
-#include "audio/audiofifo.h"
 #include "util/message.h"
-#include "util/movingaverage.h"
-
-#include <QMutex>
 
 #include "datvdemodbaseband.h"
-
-// enum DATVModulation { BPSK, QPSK, PSK8, APSK16, APSK32, APSK64E, QAM16, QAM64, QAM256 };
-// enum dvb_version { DVB_S, DVB_S2 };
-// enum dvb_sampler { SAMP_NEAREST, SAMP_LINEAR, SAMP_RRC };
 
 
 class DATVDemod : public BasebandSampleSink, public ChannelAPI
@@ -135,7 +113,6 @@ private:
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
 
     void applySettings(const DATVDemodSettings& settings, bool force = false);
-	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 };
 
 #endif // INCLUDE_DATVDEMOD_H

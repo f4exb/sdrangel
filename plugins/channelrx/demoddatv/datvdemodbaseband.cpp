@@ -151,6 +151,13 @@ void DATVDemodBaseband::applySettings(const DATVDemodSettings& settings, bool fo
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
+        audioDeviceManager->addAudioSink(m_sink.getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
+    }
+
     m_sink.applySettings(settings, force);
     m_settings = settings;
 }

@@ -35,28 +35,47 @@
 #include "datvideorender.h"
 #include "datvdemodsettings.h"
 
-#include "channel/channelapi.h"
 #include "dsp/channelsamplesink.h"
-#include "dsp/basebandsamplesink.h"
-#include "dsp/devicesamplesource.h"
-#include "dsp/dspcommands.h"
-#include "dsp/downchannelizer.h"
 #include "dsp/fftfilt.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
 #include "audio/audiofifo.h"
-#include "util/message.h"
+#include "util/messagequeue.h"
 #include "util/movingaverage.h"
-
-#include <QMutex>
 
 class TVScreen;
 class DATVideoRender;
 
 class DATVDemodSink : public ChannelSampleSink {
 public:
+    DATVDemodSink();
+	~DATVDemodSink();
+
+	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
+
+    bool setTVScreen(TVScreen *objScreen);
+    DATVideostream * SetVideoRender(DATVideoRender *objScreen);
+    bool audioActive();
+    bool audioDecodeOK();
+    bool videoActive();
+    bool videoDecodeOK();
+
+    bool PlayVideo(bool blnStartStop);
+
+    int GetSampleRate();
+    double getMagSq() const { return m_objMagSqAverage; } //!< Beware this is scaled to 2^30
+    int getModcodModulation() const { return m_modcodModulation; }
+    int getModcodCodeRate() const { return m_modcodCodeRate; }
+    bool isCstlnSetByModcod() const { return m_cstlnSetByModcod; }
+    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
+    AudioFifo *getAudioFifo() { return &m_audioFifo; }
+
+    void applySettings(const DATVDemodSettings& settings, bool force = false);
+	void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
+
+private:
     struct config
     {
         DATVDemodSettings::dvb_version standard;
@@ -114,40 +133,16 @@ public:
         }
     };
 
-    DATVDemodSink();
-	~DATVDemodSink();
-
-	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
-
-    bool setTVScreen(TVScreen *objScreen);
-    DATVideostream * SetVideoRender(DATVideoRender *objScreen);
-    bool audioActive();
-    bool audioDecodeOK();
-    bool videoActive();
-    bool videoDecodeOK();
-
-    bool PlayVideo(bool blnStartStop);
-
-    int GetSampleRate();
-    double getMagSq() const { return m_objMagSqAverage; } //!< Beware this is scaled to 2^30
-    int getModcodModulation() const { return m_modcodModulation; }
-    int getModcodCodeRate() const { return m_modcodCodeRate; }
-    bool isCstlnSetByModcod() const { return m_cstlnSetByModcod; }
-    static DATVDemodSettings::DATVCodeRate getCodeRateFromLeanDVBCode(int leanDVBCodeRate);
-    static DATVDemodSettings::DATVModulation getModulationFromLeanDVBCode(int leanDVBModulation);
-    static int getLeanDVBCodeRateFromDATV(DATVDemodSettings::DATVCodeRate datvCodeRate);
-    static int getLeanDVBModulationFromDATV(DATVDemodSettings::DATVModulation datvModulation);
-    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
-
-    void applySettings(const DATVDemodSettings& settings, bool force = false);
-	void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-
-private:
     inline int decimation(float Fin, float Fout) { int d = Fin / Fout; return std::max(d, 1); }
 
     void CleanUpDATVFramework(bool blnRelease);
     void InitDATVFramework();
     void InitDATVS2Framework();
+
+    static int getLeanDVBCodeRateFromDATV(DATVDemodSettings::DATVCodeRate datvCodeRate);
+    static int getLeanDVBModulationFromDATV(DATVDemodSettings::DATVModulation datvModulation);
+
+    MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
 
     unsigned long m_lngExpectedReadIQ;
     long m_lngReadIQ;
@@ -308,9 +303,6 @@ private:
     MessageQueue *m_messageQueueToGUI;
 
     static const unsigned int m_rfFilterFftLength;
-
-    MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
-
 };
 
 #endif // INCLUDE_DATVDEMODSINK_H

@@ -15,22 +15,20 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "datvdemodreport.h"
 #include "datvdemodsink.h"
 
 #include "leansdr/dvbs2.h"
 
-#include <QTime>
 #include <QDebug>
 #include <QObject>
-#include <stdio.h>
-#include <complex.h>
+
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
-
 #include "dsp/downchannelizer.h"
 #include "dsp/threadedbasebandsamplesink.h"
 #include "device/deviceapi.h"
+
+#include "datvdemodreport.h"
 
 const unsigned int DATVDemodSink::m_rfFilterFftLength = 1024;
 
@@ -1174,7 +1172,7 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
 
         if (m_blnNeedConfigUpdate)
         {
-            qDebug("DATVDemod::feed: Settings applied. Standard : %d...", m_settings.m_standard);
+            qDebug("DATVDemodSink::feed: Settings applied. Standard : %d...", m_settings.m_standard);
             m_blnNeedConfigUpdate=false;
 
             if(m_settings.m_standard==DATVDemodSettings::DVB_S2)
@@ -1238,7 +1236,7 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
 
         if (objDemodulatorDVBS2->cstln->m_setByModcod && !m_cstlnSetByModcod)
         {
-            qDebug("DATVDemod::feed: change by MODCOD detected");
+            qDebug("DATVDemodSink::feed: change by MODCOD detected");
 
             if (r_scope_symbols_dvbs2) {
                 r_scope_symbols_dvbs2->calculate_cstln_points();
@@ -1247,8 +1245,8 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
             if (getMessageQueueToGUI())
             {
                 DATVDemodReport::MsgReportModcodCstlnChange *msg = DATVDemodReport::MsgReportModcodCstlnChange::create(
-                    getModulationFromLeanDVBCode(objDemodulatorDVBS2->cstln->m_typeCode),
-                    getCodeRateFromLeanDVBCode(objDemodulatorDVBS2->cstln->m_rateCode)
+                    DATVDemodSettings::getModulationFromLeanDVBCode(objDemodulatorDVBS2->cstln->m_typeCode),
+                    DATVDemodSettings::getCodeRateFromLeanDVBCode(objDemodulatorDVBS2->cstln->m_rateCode)
                 );
 
                 getMessageQueueToGUI()->push(msg);
@@ -1273,7 +1271,7 @@ void DATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequ
         (m_channelSampleRate != channelSampleRate) || force)
     {
         m_objNCO.setFreq(-(float) channelFrequencyOffset, (float) channelSampleRate);
-        qDebug("DATVDemod::applyChannelSettings: NCO: IF: %d <> TF: %d ISR: %d",
+        qDebug("DATVDemodSink::applyChannelSettings: NCO: IF: %d <> TF: %d ISR: %d",
             channelFrequencyOffset, m_settings.m_centerFrequency, channelSampleRate);
         callApplySettings = true;
     }
@@ -1360,64 +1358,6 @@ void DATVDemodSink::applySettings(const DATVDemodSettings& settings, bool force)
     }
 
     m_settings = settings;
-}
-
-DATVDemodSettings::DATVCodeRate DATVDemodSink::getCodeRateFromLeanDVBCode(int leanDVBCodeRate)
-{
-    if (leanDVBCodeRate == leansdr::code_rate::FEC12) {
-        return DATVDemodSettings::DATVCodeRate::FEC12;
-    } else if (leanDVBCodeRate == leansdr::code_rate::FEC13) {
-        return DATVDemodSettings::DATVCodeRate::FEC13;
-    } else if (leanDVBCodeRate == leansdr::code_rate::FEC14) {
-        return DATVDemodSettings::DATVCodeRate::FEC14;
-    } else if (leanDVBCodeRate == leansdr::code_rate::FEC23) {
-        return DATVDemodSettings::DATVCodeRate::FEC23;
-    } else if (leanDVBCodeRate == leansdr::code_rate::FEC25) {
-        return DATVDemodSettings::DATVCodeRate::FEC25;
-    } else if (leanDVBCodeRate == leansdr::code_rate::FEC34) {
-        return DATVDemodSettings::DATVCodeRate::FEC34;
-    } else if (leanDVBCodeRate == leansdr::code_rate::FEC35) {
-        return DATVDemodSettings::DATVCodeRate::FEC35;
-    } else if (leanDVBCodeRate == leansdr::code_rate::FEC45) {
-        return DATVDemodSettings::DATVCodeRate::FEC45;
-    } else if (leanDVBCodeRate == leansdr::code_rate::FEC46) {
-        return DATVDemodSettings::DATVCodeRate::FEC46;
-    } else if (leanDVBCodeRate == leansdr::code_rate::FEC56) {
-        return DATVDemodSettings::DATVCodeRate::FEC56;
-    } else if (leanDVBCodeRate == leansdr::code_rate::FEC78) {
-        return DATVDemodSettings::DATVCodeRate::FEC78;
-    } else if (leanDVBCodeRate == leansdr::code_rate::FEC89) {
-        return DATVDemodSettings::DATVCodeRate::FEC89;
-    } else if (leanDVBCodeRate == leansdr::code_rate::FEC910) {
-        return DATVDemodSettings::DATVCodeRate::FEC910;
-    } else {
-        return DATVDemodSettings::DATVCodeRate::RATE_UNSET;
-    }
-}
-
-DATVDemodSettings::DATVModulation DATVDemodSink::getModulationFromLeanDVBCode(int leanDVBModulation)
-{
-    if (leanDVBModulation == leansdr::cstln_base::predef::APSK16) {
-        return DATVDemodSettings::DATVModulation::APSK16;
-    } else if (leanDVBModulation == leansdr::cstln_base::predef::APSK32) {
-        return DATVDemodSettings::DATVModulation::APSK32;
-    } else if (leanDVBModulation == leansdr::cstln_base::predef::APSK64E) {
-        return DATVDemodSettings::DATVModulation::APSK64E;
-    } else if (leanDVBModulation == leansdr::cstln_base::predef::BPSK) {
-        return DATVDemodSettings::DATVModulation::BPSK;
-    } else if (leanDVBModulation == leansdr::cstln_base::predef::PSK8) {
-        return DATVDemodSettings::DATVModulation::PSK8;
-    } else if (leanDVBModulation == leansdr::cstln_base::predef::QAM16) {
-        return DATVDemodSettings::DATVModulation::QAM16;
-    } else if (leanDVBModulation == leansdr::cstln_base::predef::QAM64) {
-        return DATVDemodSettings::DATVModulation::QAM64;
-    } else if (leanDVBModulation == leansdr::cstln_base::predef::QAM256) {
-        return DATVDemodSettings::DATVModulation::QAM256;
-    } else if (leanDVBModulation == leansdr::cstln_base::predef::QPSK) {
-        return DATVDemodSettings::DATVModulation::QPSK;
-    } else {
-        return DATVDemodSettings::DATVModulation::MOD_UNSET;
-    }
 }
 
 int DATVDemodSink::getLeanDVBCodeRateFromDATV(DATVDemodSettings::DATVCodeRate datvCodeRate)

@@ -21,20 +21,20 @@
 #include <QMainWindow>
 #include <QMediaMetaData>
 
-#include "datvdemodgui.h"
-
 #include "device/deviceuiset.h"
 #include "dsp/downchannelizer.h"
-
 #include "dsp/threadedbasebandsamplesink.h"
-#include "ui_datvdemodgui.h"
+#include "dsp/dspengine.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
-#include "dsp/dspengine.h"
+#include "ui_datvdemodgui.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "mainwindow.h"
+
+#include "datvdemodreport.h"
+#include "datvdemodgui.h"
 
 const QString DATVDemodGUI::m_strChannelID = "sdrangel.channel.demoddatv";
 
@@ -101,9 +101,9 @@ bool DATVDemodGUI::deserialize(const QByteArray& arrData)
 
 bool DATVDemodGUI::handleMessage(const Message& message)
 {
-    if (DATVDemod::MsgReportModcodCstlnChange::match(message))
+    if (DATVDemodReport::MsgReportModcodCstlnChange::match(message))
     {
-        DATVDemod::MsgReportModcodCstlnChange& notif = (DATVDemod::MsgReportModcodCstlnChange&) message;
+        DATVDemodReport::MsgReportModcodCstlnChange& notif = (DATVDemodReport::MsgReportModcodCstlnChange&) message;
         m_settings.m_fec = notif.getCodeRate();
         m_settings.m_modulation = notif.getModulation();
         m_settings.validateSystemConfiguration();
@@ -351,9 +351,6 @@ void DATVDemodGUI::applySettings(bool force)
     {
         qDebug("DATVDemodGUI::applySettings");
 
-        DATVDemod::MsgConfigureChannelizer *msgChan = DATVDemod::MsgConfigureChannelizer::create(m_objChannelMarker.getCenterFrequency());
-        m_objDATVDemod->getInputMessageQueue()->push(msgChan);
-
         setTitleColor(m_objChannelMarker.getColor());
 
         QString msg = tr("DATVDemodGUI::applySettings: force: %1").arg(force ? "true" : "false");
@@ -403,8 +400,8 @@ void DATVDemodGUI::tick()
         {
             m_modcodModulationIndex = m_objDATVDemod->getModcodModulation();
             m_modcodCodeRateIndex = m_objDATVDemod->getModcodCodeRate();
-            DATVDemodSettings::DATVModulation modulation = DATVDemod::getModulationFromLeanDVBCode(m_modcodModulationIndex);
-            DATVDemodSettings::DATVCodeRate rate = DATVDemod::getCodeRateFromLeanDVBCode(m_modcodCodeRateIndex);
+            DATVDemodSettings::DATVModulation modulation = DATVDemodSettings::getModulationFromLeanDVBCode(m_modcodModulationIndex);
+            DATVDemodSettings::DATVCodeRate rate = DATVDemodSettings::getCodeRateFromLeanDVBCode(m_modcodCodeRateIndex);
             QString modcodModulationStr = DATVDemodSettings::getStrFromModulation(modulation);
             QString modcodCodeRateStr = DATVDemodSettings::getStrFromCodeRate(rate);
             ui->statusText->setText(tr("MCOD %1 %2").arg(modcodModulationStr).arg(modcodCodeRateStr));

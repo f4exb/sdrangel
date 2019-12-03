@@ -112,6 +112,8 @@ struct DATVDemodSettings
     static QString getStrFromCodeRate(const DATVCodeRate codeRate);
     static void getAvailableModulations(dvb_version dvbStandard, std::vector<DATVModulation>& modulations);
     static void getAvailableCodeRates(dvb_version dvbStandard, DATVModulation modulation, std::vector<DATVCodeRate>& codeRates);
+    static DATVDemodSettings::DATVCodeRate getCodeRateFromLeanDVBCode(int leanDVBCodeRate);
+    static DATVDemodSettings::DATVModulation getModulationFromLeanDVBCode(int leanDVBModulation);
 };
 
 #endif // PLUGINS_CHANNELRX_DEMODATV_DATVDEMODSETTINGS_H_
