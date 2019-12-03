@@ -41,6 +41,7 @@
 #include "gui/audioselectdialog.h"
 #include "mainwindow.h"
 
+#include "bfmdemodreport.h"
 #include "bfmdemodsettings.h"
 #include "bfmdemod.h"
 #include "rdstmc.h"
@@ -111,11 +112,11 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 
 bool BFMDemodGUI::handleMessage(const Message& message)
 {
-    if (BFMDemod::MsgReportChannelSampleRateChanged::match(message))
+    if (BFMDemodReport::MsgReportChannelSampleRateChanged::match(message))
     {
-        BFMDemod::MsgReportChannelSampleRateChanged& report = (BFMDemod::MsgReportChannelSampleRateChanged&) message;
+        BFMDemodReport::MsgReportChannelSampleRateChanged& report = (BFMDemodReport::MsgReportChannelSampleRateChanged&) message;
         m_rate = report.getSampleRate();
-        qDebug("BFMDemodGUI::handleMessage: MsgReportChannelSampleRateChanged: %d S/s", m_rate);
+        qDebug("BFMDemodGUI::handleMessage: BFMDemodReport::MsgReportChannelSampleRateChanged: %d S/s", m_rate);
         ui->glSpectrum->setCenterFrequency(m_rate / 4);
         ui->glSpectrum->setSampleRate(m_rate / 2);
         return true;
@@ -389,7 +390,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF, ui->glSpectrum);
 	m_bfmDemod = (BFMDemod*) rxChannel; //new BFMDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_bfmDemod->setMessageQueueToGUI(getInputMessageQueue());
-	m_bfmDemod->setSampleSink(m_spectrumVis);
+	m_bfmDemod->setSpectrumSink(m_spectrumVis);
 
 	ui->glSpectrum->setCenterFrequency(m_rate / 4);
 	ui->glSpectrum->setSampleRate(m_rate / 2);
@@ -455,11 +456,6 @@ void BFMDemodGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-	    BFMDemod::MsgConfigureChannelizer *msgChan = BFMDemod::MsgConfigureChannelizer::create(
-	            BFMDemod::requiredBW(m_settings.m_rfBandwidth),
-	            m_settings.m_inputFrequencyOffset);
-	    m_bfmDemod->getInputMessageQueue()->push(msgChan);
-
         BFMDemod::MsgConfigureBFMDemod* msgConfig = BFMDemod::MsgConfigureBFMDemod::create( m_settings, force);
         m_bfmDemod->getInputMessageQueue()->push(msgConfig);
 	}

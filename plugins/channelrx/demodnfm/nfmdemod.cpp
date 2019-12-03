@@ -220,7 +220,6 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-
     NFMDemodBaseband::MsgConfigureNFMDemodBaseband *msg = NFMDemodBaseband::MsgConfigureNFMDemodBaseband::create(settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 

@@ -219,11 +219,13 @@ void SSBDemodGUI::on_audioMute_toggled(bool checked)
 
 void SSBDemodGUI::on_spanLog2_valueChanged(int value)
 {
-    if ((value < 0) || (value > 4)) {
+    unsigned int s2max = spanLog2Max();
+
+    if ((value < 0) || (value > s2max-1)) {
         return;
     }
 
-    applyBandwidths(5 - ui->spanLog2->value());
+    applyBandwidths(s2max - ui->spanLog2->value());
 }
 
 void SSBDemodGUI::on_flipSidebands_clicked(bool checked)
@@ -308,7 +310,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF, ui->glSpectrum);
 	m_ssbDemod = (SSBDemod*) rxChannel; //new SSBDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_ssbDemod->setMessageQueueToGUI(getInputMessageQueue());
-	m_ssbDemod->setSampleSink(m_spectrumVis);
+    m_ssbDemod->propagateMessageQueueToGUI();
+	m_ssbDemod->setSpectrumSink(m_spectrumVis);
 
     CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
     connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
@@ -378,34 +381,30 @@ void SSBDemodGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-        SSBDemod::MsgConfigureChannelizer* channelConfigMsg = SSBDemod::MsgConfigureChannelizer::create(
-                m_ssbDemod->getAudioSampleRate(), m_channelMarker.getCenterFrequency());
-        m_ssbDemod->getInputMessageQueue()->push(channelConfigMsg);
-
         SSBDemod::MsgConfigureSSBDemod* message = SSBDemod::MsgConfigureSSBDemod::create( m_settings, force);
         m_ssbDemod->getInputMessageQueue()->push(message);
 	}
 }
 
-int SSBDemodGUI::spanLog2Limit(int spanLog2)
+unsigned int SSBDemodGUI::spanLog2Max()
 {
-    while (((m_ssbDemod->getAudioSampleRate() / (1<<spanLog2)) > m_ssbDemod->getInputSampleRate()) && (spanLog2 < 4)) {
-        spanLog2++;
-    }
-
-    return spanLog2;
+    unsigned int spanLog2 = 0;
+    for (; m_ssbDemod->getAudioSampleRate() / (1<<spanLog2) >= 1000; spanLog2++);
+    return spanLog2 == 0 ? 0 : spanLog2-1;
 }
 
-void SSBDemodGUI::applyBandwidths(int spanLog2, bool force)
+void SSBDemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
 {
-    spanLog2 = spanLog2Limit(spanLog2);
-    ui->spanLog2->setMaximum(5 - spanLog2Limit(1));
+    unsigned int s2max = spanLog2Max();
+    spanLog2 = spanLog2 > s2max ? s2max : spanLog2;
+    unsigned int limit = s2max < 1 ? 0 : s2max - 1;
+    ui->spanLog2->setMaximum(limit);
     bool dsb = ui->dsb->isChecked();
     //int spanLog2 = ui->spanLog2->value();
     m_spectrumRate = m_ssbDemod->getAudioSampleRate() / (1<<spanLog2);
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
-    int bwMax = std::min(m_ssbDemod->getAudioSampleRate() / (100*(1<<spanLog2)), m_ssbDemod->getInputSampleRate()/100);
+    int bwMax = m_ssbDemod->getAudioSampleRate() / (100*(1<<spanLog2));
     int tickInterval = m_spectrumRate / 1200;
     tickInterval = tickInterval == 0 ? 1 : tickInterval;
 

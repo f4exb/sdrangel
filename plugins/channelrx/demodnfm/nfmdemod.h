@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_NFMTESTDEMOD_H
-#define INCLUDE_NFMTESTDEMOD_H
+#ifndef INCLUDE_NFMDEMOD_H
+#define INCLUDE_NFMDEMOD_H
 
 #include <vector>
 
@@ -122,11 +122,6 @@ public:
     static const QString m_channelId;
 
 private:
-    enum RateState {
-        RSInitialFill,
-        RSRunning
-    };
-
     DeviceAPI* m_deviceAPI;
     QThread *m_thread;
     NFMDemodBaseband* m_basebandSink;

@@ -165,12 +165,6 @@ void LoRaDemodGUI::applySettings(bool force)
 	if (m_doApplySettings)
 	{
         setTitleColor(m_channelMarker.getColor());
-
-        LoRaDemod::MsgConfigureChannelizer* channelConfigMsg = LoRaDemod::MsgConfigureChannelizer::create(
-                LoRaDemodSettings::bandwidths[m_settings.m_bandwidthIndex],
-                m_channelMarker.getCenterFrequency());
-        m_LoRaDemod->getInputMessageQueue()->push(channelConfigMsg);
-
         LoRaDemod::MsgConfigureLoRaDemod* message = LoRaDemod::MsgConfigureLoRaDemod::create( m_settings, force);
         m_LoRaDemod->getInputMessageQueue()->push(message);
 	}

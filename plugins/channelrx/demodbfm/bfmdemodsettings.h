@@ -58,6 +58,15 @@ struct BFMDemodSettings
 
     static int getRFBW(int index);
     static int getRFBWIndex(int rfbw);
+
+    static int requiredBW(int rfBW)
+    {
+        if (rfBW <= 48000) {
+            return 48000;
+        } else {
+            return (3*rfBW)/2;
+        }
+    }
 };
 
 

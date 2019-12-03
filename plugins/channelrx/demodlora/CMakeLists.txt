@@ -4,8 +4,9 @@ set(lora_SOURCES
 	lorademod.cpp
 	lorademodgui.cpp
 	lorademodsettings.cpp
+	lorademodsink.cpp
+	lorademodbaseband.cpp
 	loraplugin.cpp
-
 	lorademodgui.ui
 )
 
@@ -13,6 +14,8 @@ set(lora_HEADERS
 	lorademod.h
 	lorademodgui.h
 	lorademodsettings.h
+	lorademodsink.h
+	lorademodbaseband.h
 	loraplugin.h
 )
 
@@ -24,8 +27,8 @@ add_library(demodlora SHARED
 )
 
 target_link_libraries(demodlora
-        Qt5::Core
-        Qt5::Widgets
+    Qt5::Core
+    Qt5::Widgets
 	sdrbase
 	sdrgui
 )

@@ -1,7 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 F4HKW                                                      //
-// for F4EXB / SDRAngel                                                          //
-// using LeanSDR Framework (C) 2016 F4DAV                                        //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -17,12 +15,14 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "datvdemod.h"
+#include "datvdemodreport.h"
+#include "datvdemodsink.h"
 
 #include "leansdr/dvbs2.h"
 
 #include <QTime>
 #include <QDebug>
+#include <QObject>
 #include <stdio.h>
 #include <complex.h>
 #include "audio/audiooutput.h"
@@ -32,17 +32,10 @@
 #include "dsp/threadedbasebandsamplesink.h"
 #include "device/deviceapi.h"
 
-const QString DATVDemod::m_channelIdURI = "sdrangel.channel.demoddatv";
-const QString DATVDemod::m_channelId = "DATVDemod";
+const unsigned int DATVDemodSink::m_rfFilterFftLength = 1024;
 
-MESSAGE_CLASS_DEFINITION(DATVDemod::MsgConfigureDATVDemod, Message)
-MESSAGE_CLASS_DEFINITION(DATVDemod::MsgConfigureChannelizer, Message)
-MESSAGE_CLASS_DEFINITION(DATVDemod::MsgReportModcodCstlnChange, Message)
-
-DATVDemod::DATVDemod(DeviceAPI *deviceAPI) :
-    ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
+DATVDemodSink::DATVDemodSink() :
     m_blnNeedConfigUpdate(false),
-    m_deviceAPI(deviceAPI),
     m_objRegisteredTVScreen(0),
     m_objRegisteredVideoRender(0),
     m_objVideoStream(nullptr),
@@ -55,46 +48,32 @@ DATVDemod::DATVDemod(DeviceAPI *deviceAPI) :
     m_modcodModulation(-1),
     m_modcodCodeRate(-1),
     m_enmModulation(DATVDemodSettings::BPSK /*DATV_FM1*/),
-    m_channelSampleRate(1024000),
-    m_objSettingsMutex(QMutex::NonRecursive)
+    m_channelSampleRate(1024000)
 {
-    setObjectName("DATVDemod");
-
-	DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifo, getInputMessageQueue());
-	//m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
-
     //*************** DATV PARAMETERS  ***************
     m_blnInitialized=false;
     CleanUpDATVFramework(false);
-
     m_objVideoStream = new DATVideostream();
-
-    m_objRFFilter = new fftfilt(-256000.0 / 1024000.0, 256000.0 / 1024000.0, rfFilterFftLength);
-
-    m_channelizer = new DownChannelizer(this);
-    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addChannelSink(m_threadedChannelizer);
-    m_deviceAPI->addChannelSinkAPI(this);
+    m_objRFFilter = new fftfilt(-256000.0 / 1024000.0, 256000.0 / 1024000.0, m_rfFilterFftLength);
 }
 
-DATVDemod::~DATVDemod()
+DATVDemodSink::~DATVDemodSink()
 {
     m_blnInitialized=false;
 
-    if(m_objVideoStream!=nullptr)
+    if (m_objVideoStream)
     {
         //Immediately exit from DATVideoStream if waiting for data before killing thread
-        m_objVideoStream->ThreadTimeOut=0;
+        m_objVideoStream->ThreadTimeOut = 0;
+        m_objVideoStream->deleteLater();
     }
 
-    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifo);
-
-    if(m_objRenderThread!=nullptr)
+    if (m_objRenderThread)
     {
-        if(m_objRenderThread->isRunning())
+        if (m_objRenderThread->isRunning())
         {
-           m_objRenderThread->stopRendering();
-           m_objRenderThread->quit();
+            m_objRenderThread->stopRendering();
+            m_objRenderThread->quit();
         }
 
         m_objRenderThread->wait(2000);
@@ -102,20 +81,16 @@ DATVDemod::~DATVDemod()
 
     CleanUpDATVFramework(true);
 
-    m_deviceAPI->removeChannelSinkAPI(this);
-    m_deviceAPI->removeChannelSink(m_threadedChannelizer);
-    delete m_threadedChannelizer;
-    delete m_channelizer;
     delete m_objRFFilter;
 }
 
-bool DATVDemod::SetTVScreen(TVScreen *objScreen)
+bool DATVDemodSink::setTVScreen(TVScreen *objScreen)
 {
     m_objRegisteredTVScreen = objScreen;
     return true;
 }
 
-DATVideostream *DATVDemod::SetVideoRender(DATVideoRender *objScreen)
+DATVideostream *DATVDemodSink::SetVideoRender(DATVideoRender *objScreen)
 {
     m_objRegisteredVideoRender = objScreen;
     m_objRegisteredVideoRender->setAudioFIFO(&m_audioFifo);
@@ -123,7 +98,7 @@ DATVideostream *DATVDemod::SetVideoRender(DATVideoRender *objScreen)
     return m_objVideoStream;
 }
 
-bool DATVDemod::audioActive()
+bool DATVDemodSink::audioActive()
 {
     if (m_objRegisteredVideoRender) {
         return m_objRegisteredVideoRender->getAudioStreamIndex() >= 0;
@@ -132,7 +107,7 @@ bool DATVDemod::audioActive()
     }
 }
 
-bool DATVDemod::videoActive()
+bool DATVDemodSink::videoActive()
 {
     if (m_objRegisteredVideoRender) {
         return m_objRegisteredVideoRender->getVideoStreamIndex() >= 0;
@@ -141,7 +116,7 @@ bool DATVDemod::videoActive()
     }
 }
 
-bool DATVDemod::audioDecodeOK()
+bool DATVDemodSink::audioDecodeOK()
 {
     if (m_objRegisteredVideoRender) {
         return m_objRegisteredVideoRender->getAudioDecodeOK();
@@ -150,7 +125,7 @@ bool DATVDemod::audioDecodeOK()
     }
 }
 
-bool DATVDemod::videoDecodeOK()
+bool DATVDemodSink::videoDecodeOK()
 {
     if (m_objRegisteredVideoRender) {
         return m_objRegisteredVideoRender->getVideoDecodeOK();
@@ -159,7 +134,7 @@ bool DATVDemod::videoDecodeOK()
     }
 }
 
-bool DATVDemod::PlayVideo(bool blnStartStop)
+bool DATVDemodSink::PlayVideo(bool blnStartStop)
 {
 
     if (m_objVideoStream == nullptr) {
@@ -202,7 +177,7 @@ bool DATVDemod::PlayVideo(bool blnStartStop)
     return true;
 }
 
-void DATVDemod::CleanUpDATVFramework(bool blnRelease)
+void DATVDemodSink::CleanUpDATVFramework(bool blnRelease)
 {
     if (blnRelease == true)
     {
@@ -538,13 +513,13 @@ void DATVDemod::CleanUpDATVFramework(bool blnRelease)
     r_scope_symbols_dvbs2 = nullptr;
 }
 
-void DATVDemod::InitDATVFramework()
+void DATVDemodSink::InitDATVFramework()
 {
     m_blnDVBInitialized = false;
     m_lngReadIQ = 0;
     CleanUpDATVFramework(false);
 
-    qDebug()  << "DATVDemod::InitDATVFramework:"
+    qDebug()  << "DATVDemodSink::InitDATVFramework:"
         <<  " Standard: " << m_settings.m_standard
         <<  " Symbol Rate: " << m_settings.m_symbolRate
         <<  " Modulation: " << m_settings.m_modulation
@@ -719,7 +694,7 @@ void DATVDemod::InitDATVFramework()
           break;
         }
         default:
-          qCritical("DATVDemod::InitDATVFramework: Interpolator not implemented");
+          qCritical("DATVDemodSink::InitDATVFramework: Interpolator not implemented");
           return;
     }
 
@@ -738,7 +713,7 @@ void DATVDemod::InitDATVFramework()
         if ( m_objCfg.constellation != leansdr::cstln_lut<leansdr::eucl_ss, 256>::QPSK
             && m_objCfg.constellation != leansdr::cstln_lut<leansdr::eucl_ss, 256>::BPSK )
         {
-            qWarning("DATVDemod::InitDATVFramework: non-standard constellation for DVB-S");
+            qWarning("DATVDemodSink::InitDATVFramework: non-standard constellation for DVB-S");
         }
     }
 
@@ -746,7 +721,7 @@ void DATVDemod::InitDATVFramework()
     {
         // For DVB-S2 testing only.
         // Constellation should be determined from PL signalling.
-        qDebug("DATVDemod::InitDATVFramework: DVB-S2: Testing symbol sampler only.");
+        qDebug("DATVDemodSink::InitDATVFramework: DVB-S2: Testing symbol sampler only.");
     }
 
     m_objDemodulator->cstln = make_dvbs_constellation(m_objCfg.constellation, m_objCfg.fec);
@@ -785,7 +760,7 @@ void DATVDemod::InitDATVFramework()
 
     if (m_objRegisteredTVScreen)
     {
-        qDebug("DATVDemod::InitDATVFramework: Register DVBSTVSCREEN");
+        qDebug("DATVDemodSink::InitDATVFramework: Register DVBSTVSCREEN");
 
         m_objRegisteredTVScreen->resizeTVScreen(256,256);
         r_scope_symbols = new leansdr::datvconstellation<leansdr::f32>(m_objScheduler, *p_sampled, -128,128, nullptr, m_objRegisteredTVScreen);
@@ -866,7 +841,7 @@ void DATVDemod::InitDATVFramework()
 }
 
 //************ DVB-S2 Decoder ************
-void DATVDemod::InitDATVS2Framework()
+void DATVDemodSink::InitDATVS2Framework()
 {
     leansdr::s2_frame_receiver<leansdr::f32, leansdr::llr_ss> * objDemodulatorDVBS2;
 
@@ -874,7 +849,7 @@ void DATVDemod::InitDATVS2Framework()
     m_lngReadIQ = 0;
     CleanUpDATVFramework(false);
 
-    qDebug()  << "DATVDemod::InitDATVS2Framework:"
+    qDebug()  << "DATVDemodSink::InitDATVS2Framework:"
         <<  " Standard: " << m_settings.m_standard
         <<  " Symbol Rate: " << m_settings.m_symbolRate
         <<  " Modulation: " << m_settings.m_modulation
@@ -1041,7 +1016,7 @@ void DATVDemod::InitDATVS2Framework()
           break;
         }
         default:
-          qCritical("DATVDemod::InitDATVS2Framework: Interpolator not implemented");
+          qCritical("DATVDemodSink::InitDATVS2Framework: Interpolator not implemented");
           return;
     }
 
@@ -1091,7 +1066,7 @@ void DATVDemod::InitDATVS2Framework()
 
     if (m_objRegisteredTVScreen)
     {
-        qDebug("DATVDemod::InitDATVS2Framework: Register DVBS 2 TVSCREEN");
+        qDebug("DATVDemodSink::InitDATVS2Framework: Register DVBS 2 TVSCREEN");
 
         m_objRegisteredTVScreen->resizeTVScreen(256,256);
         r_scope_symbols_dvbs2 = new leansdr::datvdvbs2constellation<leansdr::f32>(m_objScheduler, *p_cstln /* *p_sampled */ /* *p_cstln */, -128,128, nullptr, m_objRegisteredTVScreen);
@@ -1150,10 +1125,8 @@ void DATVDemod::InitDATVS2Framework()
     m_blnDVBInitialized = true;
 }
 
-
-void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
+void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
-    (void) firstOfBurst;
     float fltI;
     float fltQ;
     leansdr::cf32 objIQ;
@@ -1202,7 +1175,6 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
         if (m_blnNeedConfigUpdate)
         {
             qDebug("DATVDemod::feed: Settings applied. Standard : %d...", m_settings.m_standard);
-            m_objSettingsMutex.lock();
             m_blnNeedConfigUpdate=false;
 
             if(m_settings.m_standard==DATVDemodSettings::DVB_S2)
@@ -1215,8 +1187,6 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
                 printf("SWITCHING TO DVBS\r\n");
                 InitDATVFramework();
             }
-
-            m_objSettingsMutex.unlock();
         }
 
 
@@ -1276,7 +1246,7 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
 
             if (getMessageQueueToGUI())
             {
-                MsgReportModcodCstlnChange *msg = MsgReportModcodCstlnChange::create(
+                DATVDemodReport::MsgReportModcodCstlnChange *msg = DATVDemodReport::MsgReportModcodCstlnChange::create(
                     getModulationFromLeanDVBCode(objDemodulatorDVBS2->cstln->m_typeCode),
                     getCodeRateFromLeanDVBCode(objDemodulatorDVBS2->cstln->m_rateCode)
                 );
@@ -1291,122 +1261,48 @@ void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVect
     }
 }
 
-void DATVDemod::start()
+void DATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
 {
-    m_audioFifo.clear();
-}
-
-void DATVDemod::stop()
-{
-}
-
-bool DATVDemod::handleMessage(const Message& cmd)
-{
-    if (DownChannelizer::MsgChannelizerNotification::match(cmd))
-    {
-        DownChannelizer::MsgChannelizerNotification& objNotif = (DownChannelizer::MsgChannelizerNotification&) cmd;
-
-        qDebug() << "DATVDemod::handleMessage: MsgChannelizerNotification:"
-            << " m_intSampleRate: " << objNotif.getSampleRate()
-            << " m_intFrequencyOffset: " << objNotif.getFrequencyOffset();
-
-        m_channelFrequencyOffset = objNotif.getFrequencyOffset();
-        applyChannelSettings(m_channelSampleRate /*objNotif.getSampleRate()*/, m_channelFrequencyOffset);
-
-        return true;
-    }
-    else if (MsgConfigureChannelizer::match(cmd))
-    {
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-
-        m_channelizer->configure(m_channelizer->getInputMessageQueue(),
-                m_channelizer->getInputSampleRate(), // do not change sample rate
-                cfg.getCenterFrequency());
-
-        qDebug() << "DATVDemod::handleMessage: MsgConfigureChannelizer: sampleRate: " << m_channelizer->getInputSampleRate()
-            << " centerFrequency: " << cfg.getCenterFrequency();
-
-        m_channelSampleRate = m_channelizer->getInputSampleRate();
-        applyChannelSettings(m_channelSampleRate /*objNotif.getSampleRate()*/, m_channelFrequencyOffset);
-
-        return true;
-    }
-    else if (MsgConfigureDATVDemod::match(cmd))
-	{
-        MsgConfigureDATVDemod& objCfg = (MsgConfigureDATVDemod&) cmd;
-        qDebug() << "DATVDemod::handleMessage: MsgConfigureDATVDemod";
-        applySettings(objCfg.getSettings(), objCfg.getForce());
-
-        return true;
-	}
-    else if(DSPSignalNotification::match(cmd))
-    {
-        m_channelSampleRate = m_channelizer->getInputSampleRate();
-        qDebug("DATVDemod::handleMessage: DSPSignalNotification: sent sample rate: %d", m_channelSampleRate);
-        applyChannelSettings(m_channelSampleRate /*objNotif.getSampleRate()*/, m_channelFrequencyOffset);
-
-        return true;
-    }
-	else
-	{
-		return false;
-	}
-}
-
-void DATVDemod::applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force)
-{
-    qDebug() << "DATVDemod::applyChannelSettings:"
-            << " inputSampleRate: " << inputSampleRate
-            << " inputFrequencyOffset: " << inputFrequencyOffset;
+    qDebug() << "DATVDemodSink::applyChannelSettings:"
+            << " channelSampleRate: " << channelSampleRate
+            << " channelFrequencyOffset: " << channelFrequencyOffset;
 
     bool callApplySettings = false;
 
-    if ((m_settings.m_centerFrequency != inputFrequencyOffset) ||
-        (m_channelSampleRate != inputSampleRate) || force)
+    if ((m_settings.m_centerFrequency != channelFrequencyOffset) ||
+        (m_channelSampleRate != channelSampleRate) || force)
     {
-        m_objNCO.setFreq(-(float) inputFrequencyOffset, (float) inputSampleRate);
+        m_objNCO.setFreq(-(float) channelFrequencyOffset, (float) channelSampleRate);
         qDebug("DATVDemod::applyChannelSettings: NCO: IF: %d <> TF: %d ISR: %d",
-            inputFrequencyOffset, m_settings.m_centerFrequency, inputSampleRate);
+            channelFrequencyOffset, m_settings.m_centerFrequency, channelSampleRate);
         callApplySettings = true;
     }
 
-    if ((m_channelSampleRate != inputSampleRate) || force)
+    if ((m_channelSampleRate != channelSampleRate) || force)
     {
         //Bandpass filter shaping
-        Real fltLowCut = -((float) m_settings.m_rfBandwidth / 2.0) / (float) inputSampleRate;
-        Real fltHiCut  = ((float) m_settings.m_rfBandwidth / 2.0) / (float) inputSampleRate;
+        Real fltLowCut = -((float) m_settings.m_rfBandwidth / 2.0) / (float) channelSampleRate;
+        Real fltHiCut  = ((float) m_settings.m_rfBandwidth / 2.0) / (float) channelSampleRate;
         m_objRFFilter->create_filter(fltLowCut, fltHiCut);
     }
 
-    m_channelSampleRate = inputSampleRate;
-    m_settings.m_centerFrequency = inputFrequencyOffset;
+    m_channelSampleRate = channelSampleRate;
+    m_settings.m_centerFrequency = channelFrequencyOffset;
 
     if (callApplySettings) {
         applySettings(m_settings, true);
     }
 }
 
-void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
+void DATVDemodSink::applySettings(const DATVDemodSettings& settings, bool force)
 {
-    QString msg = tr("DATVDemod::applySettings: force: %1").arg(force);
+    QString msg = QObject::tr("DATVDemodSink::applySettings: force: %1").arg(force);
     settings.debug(msg);
 
-    qDebug("DATVDemod::applySettings: m_channelSampleRate: %d", m_channelSampleRate);
+    qDebug("DATVDemodSink::applySettings: m_channelSampleRate: %d", m_channelSampleRate);
 
     if (m_channelSampleRate == 0) {
         return;
-    }
-
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
-    {
-        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
-        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
-        audioDeviceManager->addAudioSink(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex); // removes from current if necessary
-        // uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
-
-        // if (m_audioSampleRate != audioSampleRate) {
-        //     applyAudioSampleRate(audioSampleRate);
-        // }
     }
 
     if ((settings.m_audioVolume) != (m_settings.m_audioVolume) || force)
@@ -1466,12 +1362,7 @@ void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
     m_settings = settings;
 }
 
-int DATVDemod::GetSampleRate()
-{
-    return m_channelSampleRate;
-}
-
-DATVDemodSettings::DATVCodeRate DATVDemod::getCodeRateFromLeanDVBCode(int leanDVBCodeRate)
+DATVDemodSettings::DATVCodeRate DATVDemodSink::getCodeRateFromLeanDVBCode(int leanDVBCodeRate)
 {
     if (leanDVBCodeRate == leansdr::code_rate::FEC12) {
         return DATVDemodSettings::DATVCodeRate::FEC12;
@@ -1504,7 +1395,7 @@ DATVDemodSettings::DATVCodeRate DATVDemod::getCodeRateFromLeanDVBCode(int leanDV
     }
 }
 
-DATVDemodSettings::DATVModulation DATVDemod::getModulationFromLeanDVBCode(int leanDVBModulation)
+DATVDemodSettings::DATVModulation DATVDemodSink::getModulationFromLeanDVBCode(int leanDVBModulation)
 {
     if (leanDVBModulation == leansdr::cstln_base::predef::APSK16) {
         return DATVDemodSettings::DATVModulation::APSK16;
@@ -1529,7 +1420,7 @@ DATVDemodSettings::DATVModulation DATVDemod::getModulationFromLeanDVBCode(int le
     }
 }
 
-int DATVDemod::getLeanDVBCodeRateFromDATV(DATVDemodSettings::DATVCodeRate datvCodeRate)
+int DATVDemodSink::getLeanDVBCodeRateFromDATV(DATVDemodSettings::DATVCodeRate datvCodeRate)
 {
     if (datvCodeRate == DATVDemodSettings::DATVCodeRate::FEC12) {
         return (int)  leansdr::code_rate::FEC12;
@@ -1562,7 +1453,7 @@ int DATVDemod::getLeanDVBCodeRateFromDATV(DATVDemodSettings::DATVCodeRate datvCo
     }
 }
 
-int DATVDemod::getLeanDVBModulationFromDATV(DATVDemodSettings::DATVModulation datvModulation)
+int DATVDemodSink::getLeanDVBModulationFromDATV(DATVDemodSettings::DATVModulation datvModulation)
 {
     if (datvModulation == DATVDemodSettings::DATVModulation::APSK16) {
         return (int) leansdr::cstln_base::predef::APSK16;
@@ -1586,3 +1477,4 @@ int DATVDemod::getLeanDVBModulationFromDATV(DATVDemodSettings::DATVModulation da
         return -1;
     }
 }
+

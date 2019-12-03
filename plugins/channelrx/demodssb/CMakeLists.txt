@@ -3,6 +3,8 @@ project(ssb)
 set(ssb_SOURCES
 	ssbdemod.cpp
     ssbdemodsettings.cpp
+    ssbdemodsink.cpp
+    ssbdemodbaseband.cpp
     ssbdemodwebapiadapter.cpp
 	ssbplugin.cpp
 )
@@ -10,6 +12,8 @@ set(ssb_SOURCES
 set(ssb_HEADERS
 	ssbdemod.h
     ssbdemodsettings.h
+    ssbdemodsink.h
+    ssbdemodbaseband.h
     ssbdemodwebapiadapter.h
 	ssbplugin.h
 )
@@ -22,14 +26,12 @@ if(NOT SERVER_MODE)
     set(ssb_SOURCES
         ${ssb_SOURCES}
         ssbdemodgui.cpp
-
         ssbdemodgui.ui
     )
     set(ssb_HEADERS
         ${ssb_HEADERS}
         ssbdemodgui.h
     )
-
     set(TARGET_NAME demodssb)
     set(TARGET_LIB "Qt5::Widgets")
     set(TARGET_LIB_GUI "sdrgui")
@@ -46,11 +48,11 @@ add_library(${TARGET_NAME} SHARED
 )
 
 target_link_libraries(${TARGET_NAME}
-        Qt5::Core
-        ${TARGET_LIB}
+    Qt5::Core
+    ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
-        swagger
+    swagger
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

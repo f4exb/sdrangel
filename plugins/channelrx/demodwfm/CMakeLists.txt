@@ -3,6 +3,8 @@ project(wfm)
 set(wfm_SOURCES
 	wfmdemod.cpp
     wfmdemodsettings.cpp
+    wfmdemodsink.cpp
+    wfmdemodbaseband.cpp
     wfmdemodwebapiadapter.cpp
 	wfmplugin.cpp
 )
@@ -10,6 +12,8 @@ set(wfm_SOURCES
 set(wfm_HEADERS
 	wfmdemod.h
     wfmdemodsettings.h
+    wfmdemodsink.h
+    wfmdemodbaseband.h
     wfmdemodwebapiadapter.h
 	wfmplugin.h
 )
@@ -22,8 +26,7 @@ if(NOT SERVER_MODE)
     set(wfm_SOURCES
         ${wfm_SOURCES}
         wfmdemodgui.cpp
-
-	wfmdemodgui.ui
+	    wfmdemodgui.ui
     )
     set(wfm_HEADERS
         ${wfm_HEADERS}
@@ -46,8 +49,8 @@ add_library(${TARGET_NAME} SHARED
 )
 
 target_link_libraries(${TARGET_NAME}
-        Qt5::Core
-        ${TARGET_LIB}
+    Qt5::Core
+    ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
 )

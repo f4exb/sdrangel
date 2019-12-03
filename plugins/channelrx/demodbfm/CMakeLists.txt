@@ -3,6 +3,9 @@ project(bfm)
 set(bfm_SOURCES
 	bfmdemod.cpp
     bfmdemodsettings.cpp
+    bfmdemodsink.cpp
+    bfmdemodbaseband.cpp
+    bfmdemodreport.cpp
     bfmdemodwebapiadapter.cpp
 	bfmplugin.cpp
 	rdsdemod.cpp
@@ -14,6 +17,9 @@ set(bfm_SOURCES
 set(bfm_HEADERS
 	bfmdemod.h
     bfmdemodsettings.h
+    bfmdemodsink.h
+    bfmdemodbaseband.h
+    bfmdemodreport.h
     bfmdemodwebapiadapter.h
 	bfmplugin.h
 	rdsdemod.h
@@ -23,16 +29,15 @@ set(bfm_HEADERS
 )
 
 include_directories(
-        ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-        ${Boost_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${Boost_INCLUDE_DIRS}
 )
 
 if(NOT SERVER_MODE)
     set(bfm_SOURCES
         ${bfm_SOURCES}
-	bfmdemodgui.cpp
-
-	bfmdemodgui.ui
+        bfmdemodgui.cpp
+        bfmdemodgui.ui
     )
     set(bfm_HEADERS
         ${bfm_HEADERS}
@@ -55,10 +60,10 @@ add_library(${TARGET_NAME} SHARED
 )
 
 target_link_libraries(${TARGET_NAME}
-        Qt5::Core
-        ${TARGET_LIB}
+    Qt5::Core
+    ${TARGET_LIB}
 	sdrbase
-        ${TARGET_LIB_GUI}
+    ${TARGET_LIB_GUI}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

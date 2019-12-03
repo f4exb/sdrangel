@@ -26,27 +26,15 @@
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
-#include "dsp/nco.h"
-#include "dsp/interpolator.h"
-#include "dsp/lowpass.h"
-#include "dsp/movingaverage.h"
-#include "dsp/fftfilt.h"
-#include "dsp/phaselock.h"
-#include "dsp/filterrc.h"
-#include "dsp/phasediscri.h"
-#include "audio/audiofifo.h"
 #include "util/message.h"
 
-#include "rdsparser.h"
-#include "rdsdecoder.h"
-#include "rdsdemod.h"
+#include "bfmdemodbaseband.h"
 #include "bfmdemodsettings.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 class DeviceAPI;
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 
 namespace SWGSDRangel {
     class SWGRDSReport;
@@ -78,55 +66,12 @@ public:
         { }
     };
 
-    class MsgConfigureChannelizer : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getSampleRate() const { return m_sampleRate; }
-        int getCenterFrequency() const { return m_centerFrequency; }
-
-        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
-        {
-            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
-        }
-
-    private:
-        int m_sampleRate;
-        int m_centerFrequency;
-
-        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
-            Message(),
-            m_sampleRate(sampleRate),
-            m_centerFrequency(centerFrequency)
-        { }
-    };
-
-    class MsgReportChannelSampleRateChanged : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getSampleRate() const { return m_sampleRate; }
-
-        static MsgReportChannelSampleRateChanged* create(int sampleRate)
-        {
-            return new MsgReportChannelSampleRateChanged(sampleRate);
-        }
-
-    private:
-        int m_sampleRate;
-
-        MsgReportChannelSampleRateChanged(int sampleRate) :
-            Message(),
-            m_sampleRate(sampleRate)
-        { }
-    };
-
 	BFMDemod(DeviceAPI *deviceAPI);
 	virtual ~BFMDemod();
     virtual void destroy() { delete this; }
-	void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
+	void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_basebandSink->setSpectrumSink(spectrumSink); }
+    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_basebandSink->setMessageQueueToGUI(messageQueue); }
 
-	int getSampleRate() const { return m_inputSampleRate; }
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
 	virtual void stop();
@@ -149,36 +94,20 @@ public:
         return m_settings.m_inputFrequencyOffset;
     }
 
-	double getMagSq() const { return m_magsq; }
+	double getMagSq() const { return m_basebandSink->getMagSq(); }
 
-	bool getPilotLock() const { return m_pilotPLL.locked(); }
-	Real getPilotLevel() const { return m_pilotPLL.get_pilot_level(); }
+	bool getPilotLock() const { return m_basebandSink->getPilotLock(); }
+	Real getPilotLevel() const { return m_basebandSink->getPilotLevel(); }
 
-	Real getDecoderQua() const { return m_rdsDecoder.m_qua; }
-	bool getDecoderSynced() const { return m_rdsDecoder.synced(); }
-	Real getDemodAcc() const { return m_rdsDemod.m_report.acc; }
-	Real getDemodQua() const { return m_rdsDemod.m_report.qua; }
-	Real getDemodFclk() const { return m_rdsDemod.m_report.fclk; }
+	Real getDecoderQua() const { return m_basebandSink->getDecoderQua(); }
+	bool getDecoderSynced() const { return m_basebandSink->getDecoderSynced(); }
+	Real getDemodAcc() const { return m_basebandSink->getDemodAcc(); }
+	Real getDemodQua() const { return m_basebandSink->getDemodQua(); }
+	Real getDemodFclk() const { return m_basebandSink->getDemodFclk(); }
 
-    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
-    {
-        if (m_magsqCount > 0)
-        {
-            m_magsq = m_magsqSum / m_magsqCount;
-            m_magSqLevelStore.m_magsq = m_magsq;
-            m_magSqLevelStore.m_magsqPeak = m_magsqPeak;
-        }
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
 
-        avg = m_magSqLevelStore.m_magsq;
-        peak = m_magSqLevelStore.m_magsqPeak;
-        nbSamples = m_magsqCount == 0 ? 1 : m_magsqCount;
-
-        m_magsqSum = 0.0f;
-        m_magsqPeak = 0.0f;
-        m_magsqCount = 0;
-    }
-
-    RDSParser& getRDSParser() { return m_rdsParser; }
+    RDSParser& getRDSParser() { return m_basebandSink->getRDSParser(); }
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
@@ -203,104 +132,23 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-    static int requiredBW(int rfBW)
-    {
-        if (rfBW <= 48000) {
-            return 48000;
-        } else {
-            return (3*rfBW)/2;
-        }
-    }
-
     uint32_t getNumberOfDeviceStreams() const;
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
 private:
-    struct MagSqLevelsStore
-    {
-        MagSqLevelsStore() :
-            m_magsq(1e-12),
-            m_magsqPeak(1e-12)
-        {}
-        double m_magsq;
-        double m_magsqPeak;
-    };
-
-	enum RateState {
-		RSInitialFill,
-		RSRunning
-	};
-
 	DeviceAPI *m_deviceAPI;
-    ThreadedBasebandSampleSink* m_threadedChannelizer;
-    DownChannelizer* m_channelizer;
-
-    int m_inputSampleRate;
-    int m_inputFrequencyOffset;
-    BFMDemodSettings m_settings;
-    quint32 m_audioSampleRate;
-
-	NCO m_nco;
-	Interpolator m_interpolator; //!< Interpolator between fixed demod bandwidth and audio bandwidth (rational)
-	Real m_interpolatorDistance;
-	Real m_interpolatorDistanceRemain;
-
-	Interpolator m_interpolatorStereo; //!< Twin Interpolator for stereo subcarrier
-	Real m_interpolatorStereoDistance;
-	Real m_interpolatorStereoDistanceRemain;
-
-	Interpolator m_interpolatorRDS; //!< Twin Interpolator for stereo subcarrier
-	Real m_interpolatorRDSDistance;
-	Real m_interpolatorRDSDistanceRemain;
-
-	Lowpass<Real> m_lowpass;
-	fftfilt* m_rfFilter;
-	static const int filtFftLen = 1024;
-
-	Real m_squelchLevel;
-	int m_squelchState;
-
-	Real m_m1Arg; //!> x^-1 real sample
-
-    double m_magsq;
-    double m_magsqSum;
-    double m_magsqPeak;
-    int    m_magsqCount;
-    MagSqLevelsStore m_magSqLevelStore;
-
-	AudioVector m_audioBuffer;
-	uint m_audioBufferFill;
-
-	BasebandSampleSink* m_sampleSink;
-	AudioFifo m_audioFifo;
-	SampleVector m_sampleBuffer;
-	QMutex m_settingsMutex;
-
-	RDSPhaseLock m_pilotPLL;
-	Real m_pilotPLLSamples[4];
-
-	RDSDemod m_rdsDemod;
-	RDSDecoder m_rdsDecoder;
-	RDSParser m_rdsParser;
-
-	LowPassFilterRC m_deemphasisFilterX;
-	LowPassFilterRC m_deemphasisFilterY;
-    static const Real default_deemphasis;
-
-	Real m_fmExcursion;
-	static const int default_excursion = 750000; // +/- 75 kHz
-
-	PhaseDiscriminators m_phaseDiscri;
+    QThread *m_thread;
+    BFMDemodBaseband* m_basebandSink;
+	BFMDemodSettings m_settings;
+    int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
 
     static const int m_udpBlockSize;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-	void applyAudioSampleRate(int sampleRate);
-    void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const BFMDemodSettings& settings, bool force = false);
 
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);

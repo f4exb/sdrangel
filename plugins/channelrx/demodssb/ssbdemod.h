@@ -26,24 +26,15 @@
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
-#include "dsp/ncof.h"
-#include "dsp/interpolator.h"
-#include "dsp/fftfilt.h"
-#include "dsp/agc.h"
-#include "audio/audiofifo.h"
 #include "util/message.h"
-#include "util/doublebufferfifo.h"
 
 #include "ssbdemodsettings.h"
-
-#define ssbFftLen 1024
-#define agcTarget 3276.8 // -10 dB amplitude => -20 dB power: center of normal signal
+#include "ssbdemodbaseband.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 class DeviceAPI;
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 
 class SSBDemod : public BasebandSampleSink, public ChannelAPI {
 	Q_OBJECT
@@ -71,48 +62,10 @@ public:
         { }
     };
 
-    class MsgConfigureChannelizer : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getSampleRate() const { return m_sampleRate; }
-        int getCenterFrequency() const { return m_centerFrequency; }
-
-        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
-        {
-            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
-        }
-
-    private:
-        int m_sampleRate;
-        int  m_centerFrequency;
-
-        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
-            Message(),
-            m_sampleRate(sampleRate),
-            m_centerFrequency(centerFrequency)
-        { }
-    };
-
 	SSBDemod(DeviceAPI *deviceAPI);
 	virtual ~SSBDemod();
 	virtual void destroy() { delete this; }
-	void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
-
-	void configure(MessageQueue* messageQueue,
-			Real Bandwidth,
-			Real LowCutoff,
-			Real volume,
-			int spanLog2,
-			bool audioBinaural,
-			bool audioFlipChannels,
-			bool dsb,
-			bool audioMute,
-			bool agc,
-			bool agcClamping,
-			int agcTimeLog2,
-			int agcPowerThreshold,
-			int agcThresholdGate);
+	void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_basebandSink->setSpectrumSink(spectrumSink); }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -136,28 +89,13 @@ public:
         return m_settings.m_inputFrequencyOffset;
     }
 
-    uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
-    uint32_t getInputSampleRate() const { return m_inputSampleRate; }
-    double getMagSq() const { return m_magsq; }
-	bool getAudioActive() const { return m_audioActive; }
+    void propagateMessageQueueToGUI() { m_basebandSink->setMessageQueueToGUI(getMessageQueueToGUI()); }
+    uint32_t getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
+    uint32_t getChannelSampleRate() const { return m_basebandSink->getChannelSampleRate(); }
+    double getMagSq() const { return m_basebandSink->getMagSq(); }
+	bool getAudioActive() const { return m_basebandSink->getAudioActive(); }
 
-    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
-    {
-        if (m_magsqCount > 0)
-        {
-            m_magsq = m_magsqSum / m_magsqCount;
-            m_magSqLevelStore.m_magsq = m_magsq;
-            m_magSqLevelStore.m_magsqPeak = m_magsqPeak;
-        }
-
-        avg = m_magSqLevelStore.m_magsq;
-        peak = m_magSqLevelStore.m_magsqPeak;
-        nbSamples = m_magsqCount == 0 ? 1 : m_magsqCount;
-
-        m_magsqSum = 0.0f;
-        m_magsqPeak = 0.0f;
-        m_magsqCount = 0;
-    }
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
@@ -188,168 +126,18 @@ public:
     static const QString m_channelId;
 
 private:
-    struct MagSqLevelsStore
-    {
-        MagSqLevelsStore() :
-            m_magsq(1e-12),
-            m_magsqPeak(1e-12)
-        {}
-        double m_magsq;
-        double m_magsqPeak;
-    };
-
-	class MsgConfigureSSBDemodPrivate : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		Real getBandwidth() const { return m_Bandwidth; }
-		Real getLoCutoff() const { return m_LowCutoff; }
-		Real getVolume() const { return m_volume; }
-		int  getSpanLog2() const { return m_spanLog2; }
-		bool getAudioBinaural() const { return m_audioBinaural; }
-		bool getAudioFlipChannels() const { return m_audioFlipChannels; }
-		bool getDSB() const { return m_dsb; }
-		bool getAudioMute() const { return m_audioMute; }
-		bool getAGC() const { return m_agc; }
-		bool getAGCClamping() const { return m_agcClamping; }
-		int  getAGCTimeLog2() const { return m_agcTimeLog2; }
-		int  getAGCPowerThershold() const { return m_agcPowerThreshold; }
-        int  getAGCThersholdGate() const { return m_agcThresholdGate; }
-
-		static MsgConfigureSSBDemodPrivate* create(Real Bandwidth,
-				Real LowCutoff,
-				Real volume,
-				int spanLog2,
-				bool audioBinaural,
-				bool audioFlipChannels,
-				bool dsb,
-				bool audioMute,
-                bool agc,
-                bool agcClamping,
-                int  agcTimeLog2,
-                int  agcPowerThreshold,
-                int  agcThresholdGate)
-		{
-			return new MsgConfigureSSBDemodPrivate(
-			        Bandwidth,
-			        LowCutoff,
-			        volume,
-			        spanLog2,
-			        audioBinaural,
-			        audioFlipChannels,
-			        dsb,
-			        audioMute,
-			        agc,
-			        agcClamping,
-			        agcTimeLog2,
-			        agcPowerThreshold,
-			        agcThresholdGate);
-		}
-
-	private:
-		Real m_Bandwidth;
-		Real m_LowCutoff;
-		Real m_volume;
-		int  m_spanLog2;
-		bool m_audioBinaural;
-		bool m_audioFlipChannels;
-		bool m_dsb;
-		bool m_audioMute;
-		bool m_agc;
-		bool m_agcClamping;
-		int  m_agcTimeLog2;
-		int  m_agcPowerThreshold;
-		int  m_agcThresholdGate;
-
-		MsgConfigureSSBDemodPrivate(Real Bandwidth,
-				Real LowCutoff,
-				Real volume,
-				int spanLog2,
-				bool audioBinaural,
-				bool audioFlipChannels,
-				bool dsb,
-				bool audioMute,
-				bool agc,
-				bool agcClamping,
-				int  agcTimeLog2,
-				int  agcPowerThreshold,
-				int  agcThresholdGate) :
-			Message(),
-			m_Bandwidth(Bandwidth),
-			m_LowCutoff(LowCutoff),
-			m_volume(volume),
-			m_spanLog2(spanLog2),
-			m_audioBinaural(audioBinaural),
-			m_audioFlipChannels(audioFlipChannels),
-			m_dsb(dsb),
-			m_audioMute(audioMute),
-			m_agc(agc),
-			m_agcClamping(agcClamping),
-			m_agcTimeLog2(agcTimeLog2),
-			m_agcPowerThreshold(agcPowerThreshold),
-			m_agcThresholdGate(agcThresholdGate)
-		{ }
-	};
-
 	DeviceAPI *m_deviceAPI;
-    ThreadedBasebandSampleSink* m_threadedChannelizer;
-    DownChannelizer* m_channelizer;
+    QThread *m_thread;
+    SSBDemodBaseband* m_basebandSink;
     SSBDemodSettings m_settings;
-
-	Real m_Bandwidth;
-	Real m_LowCutoff;
-	Real m_volume;
-	int m_spanLog2;
-	fftfilt::cmplx m_sum;
-	int m_undersampleCount;
-	int m_inputSampleRate;
-	int m_inputFrequencyOffset;
-	bool m_audioBinaual;
-	bool m_audioFlipChannels;
-	bool m_usb;
-	bool m_dsb;
-	bool m_audioMute;
-	double m_magsq;
-	double m_magsqSum;
-	double m_magsqPeak;
-    int  m_magsqCount;
-    MagSqLevelsStore m_magSqLevelStore;
-    MagAGC m_agc;
-    bool m_agcActive;
-    bool m_agcClamping;
-    int m_agcNbSamples;         //!< number of audio (48 kHz) samples for AGC averaging
-    double m_agcPowerThreshold; //!< AGC power threshold (linear)
-    int m_agcThresholdGate;     //!< Gate length in number of samples befor threshold triggers
-    DoubleBufferFIFO<fftfilt::cmplx> m_squelchDelayLine;
-    bool m_audioActive;         //!< True if an audio signal is produced (no AGC or AGC and above threshold)
-
-	NCOF m_nco;
-    Interpolator m_interpolator;
-    Real m_interpolatorDistance;
-    Real m_interpolatorDistanceRemain;
-	fftfilt* SSBFilter;
-	fftfilt* DSBFilter;
-
-	BasebandSampleSink* m_sampleSink;
-	SampleVector m_sampleBuffer;
-
-	AudioVector m_audioBuffer;
-	uint m_audioBufferFill;
-	AudioFifo m_audioFifo;
-	quint32 m_audioSampleRate;
+    int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-	QMutex m_settingsMutex;
-
-	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const SSBDemodSettings& settings, bool force = false);
-    void applyAudioSampleRate(int sampleRate);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SSBDemodSettings& settings, bool force);
-
-    void processOneSample(Complex &ci);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
