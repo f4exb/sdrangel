@@ -92,7 +92,6 @@ public:
     double getMagSq() const { return m_basebandSink->getMagSq(); } //!< Beware this is scaled to 2^30
     bool getBFOLocked() { return m_basebandSink->getBFOLocked(); }
     void setVideoTabIndex(int videoTabIndex) { m_basebandSink->setVideoTabIndex(videoTabIndex); }
-    void propagateMessageQueueToGUI() { m_basebandSink->setMessageQueueToGUI(getMessageQueueToGUI()); }
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

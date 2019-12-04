@@ -47,7 +47,6 @@ public:
     void setTVScreen(TVScreen *tvScreen) { m_registeredTVScreen = tvScreen; } //!< set by the GUI
     double getMagSq() const { return m_objMagSqAverage; } //!< Beware this is scaled to 2^30
     bool getBFOLocked();
-    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
     void setVideoTabIndex(int videoTabIndex) { m_videoTabIndex = videoTabIndex; }
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
@@ -181,9 +180,6 @@ private:
 
     //QElapsedTimer m_objTimer;
 
-    MessageQueue *m_messageQueueToGUI;
-
-    MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
     void demod(Complex& c);
     void applyStandard(int sampleRate, const ATVDemodSettings& settings, float lineDuration);
 

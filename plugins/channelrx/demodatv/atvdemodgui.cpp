@@ -33,7 +33,6 @@
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 
-#include "atvdemodreport.h"
 #include "atvdemod.h"
 
 ATVDemodGUI* ATVDemodGUI::create(PluginAPI* objPluginAPI,
@@ -248,7 +247,6 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     m_scopeVis = new ScopeVis(ui->glScope);
     m_atvDemod = (ATVDemod*) rxChannel; //new ATVDemod(m_deviceUISet->m_deviceSourceAPI);
     m_atvDemod->setMessageQueueToGUI(getInputMessageQueue());
-    m_atvDemod->propagateMessageQueueToGUI();
     m_atvDemod->setScopeSink(m_scopeVis);
     m_atvDemod->setTVScreen(ui->screenTV);
 

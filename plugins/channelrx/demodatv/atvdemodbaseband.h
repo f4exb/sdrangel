@@ -89,7 +89,6 @@ public:
     void setTVScreen(TVScreen *tvScreen) { m_sink.setTVScreen(tvScreen); }
     bool getBFOLocked() { return m_sink.getBFOLocked(); }
     void setVideoTabIndex(int videoTabIndex) { m_sink.setVideoTabIndex(videoTabIndex); }
-    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_sink.setMessageQueueToGUI(messageQueue); }
     void setBasebandSampleRate(int sampleRate); //!< To be used when supporting thread is stopped
 
 private:

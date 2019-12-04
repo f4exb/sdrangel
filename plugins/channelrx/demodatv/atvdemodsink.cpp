@@ -60,8 +60,7 @@ ATVDemodSink::ATVDemodSink() :
     m_interpolatorDistanceRemain(0.0f),
     m_DSBFilter(nullptr),
     m_DSBFilterBuffer(nullptr),
-    m_DSBFilterBufferIndex(0),
-    m_messageQueueToGUI(nullptr)
+    m_DSBFilterBufferIndex(0)
 {
     qDebug("ATVDemodSink::ATVDemodSink");
     //*************** ATV PARAMETERS  ***************

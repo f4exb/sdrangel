@@ -5,7 +5,6 @@ set(atv_SOURCES
     atvdemodbaseband.cpp
     atvdemodsink.cpp
     atvdemodsettings.cpp
-    atvdemodreport.cpp
     atvdemodwebapiadapter.cpp
 	atvdemodgui.cpp
 	atvdemodplugin.cpp
@@ -17,7 +16,6 @@ set(atv_HEADERS
     atvdemodbaseband.h
     atvdemodsink.h
     atvdemodsettings.h
-    atvdemodreport.h
     atvdemodwebapiadapter.h
 	atvdemodgui.h
 	atvdemodplugin.h
