@@ -37,6 +37,7 @@
 #include "gui/audioselectdialog.h"
 
 #include "freqtracker.h"
+#include "freqtrackerreport.h"
 
 FreqTrackerGUI* FreqTrackerGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
@@ -105,13 +106,13 @@ bool FreqTrackerGUI::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
-    else if (FreqTracker::MsgSampleRateNotification::match(message))
+    else if (FreqTrackerReport::MsgNotificationToGUI::match(message))
     {
         if (!m_settings.m_tracking) {
-            qDebug("FreqTrackerGUI::handleMessage: FreqTracker::MsgSampleRateNotification");
+            qDebug("FreqTrackerGUI::handleMessage: FreqTrackerReport::MsgNotificationToGUI");
         }
-        const FreqTracker::MsgSampleRateNotification& cfg = (FreqTracker::MsgSampleRateNotification&) message;
-        m_channelSampleRate = cfg.getSampleRate();
+        const FreqTrackerReport::MsgNotificationToGUI& cfg = (FreqTrackerReport::MsgNotificationToGUI&) message;
+        m_channelSampleRate = cfg.getSinkSampleRate();
         ui->channelSampleRateText->setText(tr("%1k").arg(QString::number(m_channelSampleRate / 1000.0f, 'g', 5)));
         blockApplySettings(true);
         ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
@@ -306,6 +307,7 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
 	m_freqTracker = reinterpret_cast<FreqTracker*>(rxChannel); //new FreqTracker(m_deviceUISet->m_deviceSourceAPI);
 	m_freqTracker->setMessageQueueToGUI(getInputMessageQueue());
+    m_freqTracker->propagateMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 

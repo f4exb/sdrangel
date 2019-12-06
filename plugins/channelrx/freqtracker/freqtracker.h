@@ -25,26 +25,13 @@
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
-#include "dsp/ncof.h"
-#include "dsp/interpolator.h"
-#include "util/movingaverage.h"
-#include "dsp/agc.h"
-#include "dsp/bandpass.h"
-#include "dsp/lowpass.h"
-#include "dsp/phaselockcomplex.h"
-#include "dsp/freqlockcomplex.h"
 #include "util/message.h"
-#include "util/doublebufferfifo.h"
 
-#include "freqtrackersettings.h"
+#include "freqtrackerbaseband.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
-class DownChannelizer;
-class ThreadedBasebandSampleSink;
-class QTimer;
-class fftfilt;
 
 class FreqTracker : public BasebandSampleSink, public ChannelAPI {
 	Q_OBJECT
@@ -70,51 +57,6 @@ public:
             m_settings(settings),
             m_force(force)
         { }
-    };
-
-    class MsgConfigureChannelizer : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getSampleRate() const { return m_sampleRate; }
-        int getCenterFrequency() const { return m_centerFrequency; }
-
-        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
-        {
-            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
-        }
-
-    private:
-        int m_sampleRate;
-        int  m_centerFrequency;
-
-        MsgConfigureChannelizer(int sampleRate, int centerFrequency) :
-            Message(),
-            m_sampleRate(sampleRate),
-            m_centerFrequency(centerFrequency)
-        { }
-    };
-
-    class MsgSampleRateNotification : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        static MsgSampleRateNotification* create(int sampleRate, int frequencyOffset) {
-            return new MsgSampleRateNotification(sampleRate, frequencyOffset);
-        }
-
-        int getSampleRate() const { return m_sampleRate; }
-        int getFrequencyOffset() const { return m_frequencyOffset; }
-
-    private:
-        MsgSampleRateNotification(int sampleRate, int frequencyOffset) :
-            Message(),
-            m_sampleRate(sampleRate),
-            m_frequencyOffset(frequencyOffset)
-        { }
-
-        int m_sampleRate;
-        int m_frequencyOffset;
     };
 
     FreqTracker(DeviceAPI *deviceAPI);
@@ -166,29 +108,20 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-    uint32_t getSampleRate() const { return m_channelSampleRate; }
-	double getMagSq() const { return m_magsq; }
-	bool getSquelchOpen() const { return m_squelchOpen; }
-	bool getPllLocked() const { return (m_settings.m_trackerType == FreqTrackerSettings::TrackerPLL) && m_pll.locked(); }
-	Real getFrequency() const;
-    Real getAvgDeltaFreq() const { return m_avgDeltaFreq; }
+    uint32_t getSampleRate() const { return m_basebandSink->getSampleRate(); }
+	double getMagSq() const { return m_basebandSink->getMagSq(); }
+	bool getSquelchOpen() const { return m_basebandSink->getSquelchOpen(); }
+	bool getPllLocked() const { return m_basebandSink->getPllLocked(); }
+	Real getFrequency() const { return m_basebandSink->getFrequency(); };
+    Real getAvgDeltaFreq() const { return m_basebandSink->getAvgDeltaFreq(); }
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
 
-    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
-    {
-        if (m_magsqCount > 0)
-        {
-            m_magsq = m_magsqSum / m_magsqCount;
-            m_magSqLevelStore.m_magsq = m_magsq;
-            m_magSqLevelStore.m_magsqPeak = m_magsqPeak;
-        }
+    void propagateMessageQueue(MessageQueue *messageQueueToInput) {
+        m_basebandSink->setMessageQueueToInput(messageQueueToInput);
+    }
 
-        avg = m_magSqLevelStore.m_magsq;
-        peak = m_magSqLevelStore.m_magsqPeak;
-        nbSamples = m_magsqCount == 0 ? 1 : m_magsqCount;
-
-        m_magsqSum = 0.0f;
-        m_magsqPeak = 0.0f;
-        m_magsqCount = 0;
+    void propagateMessageQueueToGUI(MessageQueue *messageQueueToGUI) {
+        m_basebandSink->setMessageQueueToGUI(messageQueueToGUI);
     }
 
     uint32_t getNumberOfDeviceStreams() const;
@@ -197,78 +130,21 @@ public:
     static const QString m_channelId;
 
 private:
-    struct MagSqLevelsStore
-    {
-        MagSqLevelsStore() :
-            m_magsq(1e-12),
-            m_magsqPeak(1e-12)
-        {}
-        double m_magsq;
-        double m_magsqPeak;
-    };
-
-	enum RateState {
-		RSInitialFill,
-		RSRunning
-	};
-
-	DeviceAPI *m_deviceAPI;
-    ThreadedBasebandSampleSink* m_threadedChannelizer;
-    DownChannelizer* m_channelizer;
+    DeviceAPI* m_deviceAPI;
+    QThread *m_thread;
+    FreqTrackerBaseband* m_basebandSink;
     FreqTrackerSettings m_settings;
-
-    uint32_t m_deviceSampleRate;
-    int m_inputSampleRate;
-    int m_inputFrequencyOffset;
-    uint32_t m_channelSampleRate;
-    bool m_running;
-
-	NCOF m_nco;
-    PhaseLockComplex m_pll;
-    FreqLockComplex m_fll;
-	Interpolator m_interpolator;
-	Real m_interpolatorDistance;
-	Real m_interpolatorDistanceRemain;
-
-	fftfilt* m_rrcFilter;
-
-	Real m_squelchLevel;
-	uint32_t m_squelchCount;
-	bool m_squelchOpen;
-    uint32_t m_squelchGate; //!< Squelch gate in samples
-	double m_magsq;
-	double m_magsqSum;
-	double m_magsqPeak;
-	int  m_magsqCount;
-	MagSqLevelsStore m_magSqLevelStore;
-
-	MovingAverageUtil<Real, double, 16> m_movingAverage;
-
+    int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     static const int m_udpBlockSize;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    const QTimer *m_timer;
-    bool m_timerConnected;
-    uint32_t m_tickCount;
-    int m_lastCorrAbs;
-    Real m_avgDeltaFreq;
-	QMutex m_settingsMutex;
-
     void applySettings(const FreqTrackerSettings& settings, bool force = false);
-    void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
-    void setInterpolator();
-    void configureChannelizer();
-    void connectTimer();
-    void disconnectTimer();
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreqTrackerSettings& settings, bool force);
 
-    void processOneSample(Complex &ci);
-
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-	void tick();
 };
 
 #endif // INCLUDE_FREQTRACKER_H
