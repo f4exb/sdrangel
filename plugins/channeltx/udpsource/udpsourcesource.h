@@ -55,10 +55,10 @@ public:
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void applySettings(const UDPSourceSettings& settings, bool force = false);
 
-    void getLevels(Real& rmsLevel, Real& peakLevel, Real& numSamples) const
+    void getLevels(qreal& rmsLevel, qreal& peakLevel, int& numSamples) const
     {
         rmsLevel = m_rmsLevel;
-        peakLevel = m_peakLevel;
+        peakLevel = m_peakLevelOut;
         numSamples = m_levelNbSamples;
     }
 
@@ -96,8 +96,8 @@ private:
     int m_sampleRateAvgCounter;
 
     int m_levelCalcCount;
-    Real m_rmsLevel;
-    Real m_peakLevelOut;
+    qreal m_rmsLevel;
+    qreal m_peakLevelOut;
     Real m_peakLevel;
     double m_levelSum;
     int m_levelNbSamples;

@@ -55,10 +55,10 @@ public:
     void getCameraNumbers(std::vector<int>& numbers);
 
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
-    void getLevels(Real& rmsLevel, Real& peakLevel, Real& numSamples) const
+    void getLevels(qreal& rmsLevel, qreal& peakLevel, int& numSamples) const
     {
         rmsLevel = m_rmsLevel;
-        peakLevel = m_peakLevel;
+        peakLevel = m_peakLevelOut;
         numSamples = m_levelNbSamples;
     }
 
@@ -172,8 +172,8 @@ private:
 
     MovingAverageUtil<double, double, 16> m_movingAverage;
     quint32 m_levelCalcCount;
-    Real m_rmsLevel;
-    Real m_peakLevelOut;
+    qreal m_rmsLevel;
+    qreal m_peakLevelOut;
     Real m_peakLevel;
     Real m_levelSum;
 

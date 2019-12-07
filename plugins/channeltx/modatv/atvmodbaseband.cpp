@@ -96,7 +96,8 @@ void ATVModBaseband::handleData()
     unsigned int ipart1end;
     unsigned int ipart2begin;
     unsigned int ipart2end;
-    Real rmsLevel, peakLevel, numSamples;
+    qreal rmsLevel, peakLevel;
+    int numSamples;
 
     unsigned int remainder = m_sampleFifo.remainder();
 

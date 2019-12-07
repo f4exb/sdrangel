@@ -52,10 +52,10 @@ public:
     void applyAudioSampleRate(unsigned int sampleRate);
     CWKeyer& getCWKeyer() { return m_cwKeyer; }
     double getMagSq() const { return m_magsq; }
-    void getLevels(Real& rmsLevel, Real& peakLevel, Real& numSamples) const
+    void getLevels(qreal& rmsLevel, qreal& peakLevel, int& numSamples) const
     {
         rmsLevel = m_rmsLevel;
-        peakLevel = m_peakLevel;
+        peakLevel = m_peakLevelOut;
         numSamples = m_levelNbSamples;
     }
     unsigned int getAudioSampleRate() const { return m_audioSampleRate; }
@@ -106,8 +106,8 @@ private:
     AudioFifo m_audioFifo;
 
     quint32 m_levelCalcCount;
-    Real m_rmsLevel;
-    Real m_peakLevelOut;
+    qreal m_rmsLevel;
+    qreal m_peakLevelOut;
     Real m_peakLevel;
     Real m_levelSum;
 

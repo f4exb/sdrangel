@@ -274,7 +274,7 @@ void NFMModSource::calculateLevel(Real& sample)
     }
     else
     {
-        qreal rmsLevel = sqrt(m_levelSum / m_levelNbSamples);
+        m_rmsLevel = sqrt(m_levelSum / m_levelNbSamples);
         m_peakLevelOut = m_peakLevel;
         m_peakLevel = 0.0f;
         m_levelSum = 0.0f;
