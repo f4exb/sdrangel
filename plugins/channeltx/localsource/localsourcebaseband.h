@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FILESOURCEBASEBAND_H
-#define INCLUDE_FILESOURCEBASEBAND_H
+#ifndef INCLUDE_LOCALSOURCEBASEBAND_H
+#define INCLUDE_LOCALSOURCEBASEBAND_H
 
 #include <QObject>
 #include <QMutex>
@@ -145,4 +145,4 @@ private slots:
 };
 
 
-#endif // INCLUDE_FILESOURCEBASEBAND_H
+#endif // INCLUDE_LOCALSOURCEBASEBAND_H

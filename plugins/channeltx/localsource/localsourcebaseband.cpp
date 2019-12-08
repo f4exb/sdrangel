@@ -35,7 +35,7 @@ LocalSourceBaseband::LocalSourceBaseband() :
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
     m_channelizer = new UpChannelizer(&m_source);
 
-    qDebug("FileSourceBaseband::FileSourceBaseband");
+    qDebug("LocalSourceBaseband::LocalSourceBaseband");
     QObject::connect(
         &m_sampleFifo,
         &SampleSourceFifo::dataRead,

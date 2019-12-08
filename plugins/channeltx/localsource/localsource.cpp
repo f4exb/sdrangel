@@ -45,8 +45,7 @@ LocalSource::LocalSource(DeviceAPI *deviceAPI) :
         m_deviceAPI(deviceAPI),
         m_centerFrequency(0),
         m_frequencyOffset(0),
-        m_basebandSampleRate(48000),
-        m_settingsMutex(QMutex::Recursive)
+        m_basebandSampleRate(48000)
 {
     setObjectName(m_channelId);
 

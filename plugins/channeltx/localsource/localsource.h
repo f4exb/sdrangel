@@ -19,7 +19,6 @@
 #define INCLUDE_LOCALSOURCE_H_
 
 #include <QObject>
-#include <QMutex>
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesource.h"
@@ -144,8 +143,6 @@ private:
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
-
-    QMutex m_settingsMutex;
 
     void applySettings(const LocalSourceSettings& settings, bool force = false);
     void propagateSampleRateAndFrequency(uint32_t index, uint32_t log2Interp);
