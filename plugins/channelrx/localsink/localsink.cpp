@@ -15,7 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "localsink.h"
 
 #include <boost/crc.hpp>
 #include <boost/cstdint.hpp>
@@ -37,11 +36,11 @@
 #include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
 
-#include "localsinkthread.h"
+#include "localsinkbaseband.h"
+#include "localsink.h"
 
 MESSAGE_CLASS_DEFINITION(LocalSink::MsgConfigureLocalSink, Message)
-MESSAGE_CLASS_DEFINITION(LocalSink::MsgSampleRateNotification, Message)
-MESSAGE_CLASS_DEFINITION(LocalSink::MsgConfigureChannelizer, Message)
+MESSAGE_CLASS_DEFINITION(LocalSink::MsgBasebandSampleRateNotification, Message)
 
 const QString LocalSink::m_channelIdURI = "sdrangel.channel.localsink";
 const QString LocalSink::m_channelId = "LocalSink";
@@ -49,18 +48,19 @@ const QString LocalSink::m_channelId = "LocalSink";
 LocalSink::LocalSink(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
-        m_running(false),
-        m_sinkThread(0),
         m_centerFrequency(0),
         m_frequencyOffset(0),
-        m_sampleRate(48000),
-        m_deviceSampleRate(48000)
+        m_basebandSampleRate(48000)
 {
     setObjectName(m_channelId);
 
-    m_channelizer = new DownChannelizer(this);
-    m_threadedChannelizer = new ThreadedBasebandSampleSink(m_channelizer, this);
-    m_deviceAPI->addChannelSink(m_threadedChannelizer);
+    m_thread = new QThread(this);
+    m_basebandSink = new LocalSinkBaseband();
+    m_basebandSink->moveToThread(m_thread);
+
+    applySettings(m_settings, true);
+
+    m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
@@ -72,9 +72,9 @@ LocalSink::~LocalSink()
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
     m_deviceAPI->removeChannelSinkAPI(this);
-    m_deviceAPI->removeChannelSink(m_threadedChannelizer);
-    delete m_threadedChannelizer;
-    delete m_channelizer;
+    m_deviceAPI->removeChannelSink(this);
+    delete m_basebandSink;
+    delete m_thread;
 }
 
 uint32_t LocalSink::getNumberOfDeviceStreams() const
@@ -85,71 +85,26 @@ uint32_t LocalSink::getNumberOfDeviceStreams() const
 void LocalSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
     (void) firstOfBurst;
-    emit samplesAvailable((const quint8*) &(*begin), (end-begin)*sizeof(Sample));
+    m_basebandSink->feed(begin, end);
 }
 
 void LocalSink::start()
 {
-    qDebug("LocalSink::start");
-
-    if (m_running) {
-        stop();
-    }
-
-    m_sinkThread = new LocalSinkThread();
-    DeviceSampleSource *deviceSource = getLocalDevice(m_settings.m_localDeviceIndex);
-
-    if (deviceSource) {
-        m_sinkThread->setSampleFifo(deviceSource->getSampleFifo());
-    }
-
-    connect(this,
-            SIGNAL(samplesAvailable(const quint8*, uint)),
-            m_sinkThread,
-            SLOT(processSamples(const quint8*, uint)),
-            Qt::QueuedConnection);
-
-    m_sinkThread->startStop(true);
-    m_running = true;
+	qDebug("LocalSink::start");
+    m_basebandSink->reset();
+    m_thread->start();
 }
 
 void LocalSink::stop()
 {
     qDebug("LocalSink::stop");
-
-    disconnect(this,
-            SIGNAL(samplesAvailable(const quint8*, uint)),
-            m_sinkThread,
-            SLOT(processSamples(const quint8*, uint)));
-
-    if (m_sinkThread != 0)
-    {
-        m_sinkThread->startStop(false);
-        m_sinkThread->deleteLater();
-        m_sinkThread = 0;
-    }
-
-    m_running = false;
+	m_thread->exit();
+	m_thread->wait();
 }
 
 bool LocalSink::handleMessage(const Message& cmd)
 {
-	if (DownChannelizer::MsgChannelizerNotification::match(cmd))
-	{
-		DownChannelizer::MsgChannelizerNotification& notif = (DownChannelizer::MsgChannelizerNotification&) cmd;
-
-        qDebug() << "LocalSink::handleMessage: MsgChannelizerNotification:"
-                << " channelSampleRate: " << notif.getSampleRate()
-                << " offsetFrequency: " << notif.getFrequencyOffset();
-
-        if (notif.getSampleRate() > 0)
-        {
-            setSampleRate(notif.getSampleRate());
-        }
-
-		return true;
-	}
-    else if (DSPSignalNotification::match(cmd))
+    if (DSPSignalNotification::match(cmd))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
 
@@ -157,20 +112,19 @@ bool LocalSink::handleMessage(const Message& cmd)
                 << " inputSampleRate: " << notif.getSampleRate()
                 << " centerFrequency: " << notif.getCenterFrequency();
 
-        setCenterFrequency(notif.getCenterFrequency());
-        m_deviceSampleRate = notif.getSampleRate();
-        calculateFrequencyOffset(); // This is when device sample rate changes
-        propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex);
+        m_basebandSampleRate = notif.getSampleRate();
+        m_centerFrequency = notif.getCenterFrequency();
 
-        // Redo the channelizer stuff with the new sample rate to re-synchronize everything
-        m_channelizer->set(m_channelizer->getInputMessageQueue(),
-            m_settings.m_log2Decim,
-            m_settings.m_filterChainHash);
+        calculateFrequencyOffset(m_settings.m_log2Decim, m_settings.m_filterChainHash); // This is when device sample rate changes
+        propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex, m_settings.m_log2Decim);
 
-        if (m_guiMessageQueue)
+        MsgBasebandSampleRateNotification *msg = MsgBasebandSampleRateNotification::create(notif.getSampleRate());
+        m_basebandSink->getInputMessageQueue()->push(msg);
+
+        if (getMessageQueueToGUI())
         {
-            MsgSampleRateNotification *msg = MsgSampleRateNotification::create(notif.getSampleRate());
-            m_guiMessageQueue->push(msg);
+            MsgBasebandSampleRateNotification *msg = MsgBasebandSampleRateNotification::create(notif.getSampleRate());
+            getMessageQueueToGUI()->push(msg);
         }
 
         return true;
@@ -180,25 +134,6 @@ bool LocalSink::handleMessage(const Message& cmd)
         MsgConfigureLocalSink& cfg = (MsgConfigureLocalSink&) cmd;
         qDebug() << "LocalSink::handleMessage: MsgConfigureLocalSink";
         applySettings(cfg.getSettings(), cfg.getForce());
-
-        return true;
-    }
-    else if (MsgConfigureChannelizer::match(cmd))
-    {
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        m_settings.m_log2Decim = cfg.getLog2Decim();
-        m_settings.m_filterChainHash =  cfg.getFilterChainHash();
-
-        qDebug() << "LocalSink::handleMessage: MsgConfigureChannelizer:"
-                << " log2Decim: " << m_settings.m_log2Decim
-                << " filterChainHash: " << m_settings.m_filterChainHash;
-
-        m_channelizer->set(m_channelizer->getInputMessageQueue(),
-            m_settings.m_log2Decim,
-            m_settings.m_filterChainHash);
-
-        calculateFrequencyOffset(); // This is when decimation or filter chain changes
-        propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex);
 
         return true;
     }
@@ -279,43 +214,68 @@ DeviceSampleSource *LocalSink::getLocalDevice(uint32_t index)
     return nullptr;
 }
 
-void LocalSink::propagateSampleRateAndFrequency(uint32_t index)
+void LocalSink::propagateSampleRateAndFrequency(uint32_t index, uint32_t log2Decim)
 {
+    qDebug() << "LocalSink::propagateSampleRateAndFrequency:"
+        << " index: " << index
+        << " baseband_freq: " << m_basebandSampleRate
+        << " log2Decim: " <<  log2Decim
+        << " frequency: " << m_centerFrequency + m_frequencyOffset;
+
     DeviceSampleSource *deviceSource = getLocalDevice(index);
 
     if (deviceSource)
     {
-        deviceSource->setSampleRate(m_deviceSampleRate / (1<<m_settings.m_log2Decim));
+        deviceSource->setSampleRate(m_basebandSampleRate / (1 << log2Decim));
         deviceSource->setCenterFrequency(m_centerFrequency + m_frequencyOffset);
+    }
+    else
+    {
+        qDebug("LocalSink::propagateSampleRateAndFrequency: no suitable device at index %u", index);
     }
 }
 
 void LocalSink::applySettings(const LocalSinkSettings& settings, bool force)
 {
     qDebug() << "LocalSink::applySettings:"
-            << " m_localDeviceIndex: " << settings.m_localDeviceIndex
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " force: " << force;
+            << "m_localDeviceIndex: " << settings.m_localDeviceIndex
+            << "m_streamIndex: " << settings.m_streamIndex
+            << "m_play:" << settings.m_play
+            << "force: " << force;
 
     QList<QString> reverseAPIKeys;
+
+    if ((settings.m_log2Decim != m_settings.m_log2Decim) || force) {
+        reverseAPIKeys.append("log2Decim");
+    }
+    if ((settings.m_filterChainHash != m_settings.m_filterChainHash) || force) {
+        reverseAPIKeys.append("filterChainHash");
+    }
 
     if ((settings.m_localDeviceIndex != m_settings.m_localDeviceIndex) || force)
     {
         reverseAPIKeys.append("localDeviceIndex");
+        propagateSampleRateAndFrequency(settings.m_localDeviceIndex, settings.m_log2Decim);
         DeviceSampleSource *deviceSource = getLocalDevice(settings.m_localDeviceIndex);
+        LocalSinkBaseband::MsgConfigureLocalDeviceSampleSource *msg =
+            LocalSinkBaseband::MsgConfigureLocalDeviceSampleSource::create(deviceSource);
+        m_basebandSink->getInputMessageQueue()->push(msg);
+    }
 
-        if (deviceSource)
-        {
-            if (m_sinkThread) {
-                m_sinkThread->setSampleFifo(deviceSource->getSampleFifo());
-            }
+    if ((settings.m_log2Decim != m_settings.m_log2Decim)
+     || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
+    {
+        calculateFrequencyOffset(settings.m_log2Decim, settings.m_filterChainHash);
+        propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex, settings.m_log2Decim);
+    }
 
-            propagateSampleRateAndFrequency(settings.m_localDeviceIndex);
-        }
-        else
-        {
-            qWarning("LocalSink::applySettings: invalid local device for index %u", settings.m_localDeviceIndex);
-        }
+    if ((settings.m_play != m_settings.m_play) || force)
+    {
+        reverseAPIKeys.append("play");
+        LocalSinkBaseband::MsgConfigureLocalSinkWork *msg = LocalSinkBaseband::MsgConfigureLocalSinkWork::create(
+            settings.m_play
+        );
+        m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -323,15 +283,16 @@ void LocalSink::applySettings(const LocalSinkSettings& settings, bool force)
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
             m_deviceAPI->removeChannelSinkAPI(this, m_settings.m_streamIndex);
-            m_deviceAPI->removeChannelSink(m_threadedChannelizer, m_settings.m_streamIndex);
-            m_deviceAPI->addChannelSink(m_threadedChannelizer, settings.m_streamIndex);
+            m_deviceAPI->removeChannelSink(this, m_settings.m_streamIndex);
             m_deviceAPI->addChannelSinkAPI(this, settings.m_streamIndex);
-            // apply stream sample rate to itself
-            //applyChannelSettings(m_deviceAPI->getSampleMIMO()->getSourceSampleRate(settings.m_streamIndex), m_inputFrequencyOffset);
+            m_deviceAPI->addChannelSinkAPI(this, settings.m_streamIndex);
         }
 
         reverseAPIKeys.append("streamIndex");
     }
+
+    LocalSinkBaseband::MsgConfigureLocalSinkBaseband *msg = LocalSinkBaseband::MsgConfigureLocalSinkBaseband::create(settings, force);
+    m_basebandSink->getInputMessageQueue()->push(msg);
 
     if ((settings.m_useReverseAPI) && (reverseAPIKeys.size() != 0))
     {
@@ -357,10 +318,10 @@ void LocalSink::validateFilterChainHash(LocalSinkSettings& settings)
     settings.m_filterChainHash = settings.m_filterChainHash >= s ? s-1 : settings.m_filterChainHash;
 }
 
-void LocalSink::calculateFrequencyOffset()
+void LocalSink::calculateFrequencyOffset(uint32_t log2Decim, uint32_t filterChainHash)
 {
-    double shiftFactor = HBFilterChainConverter::getShiftFactor(m_settings.m_log2Decim, m_settings.m_filterChainHash);
-    m_frequencyOffset = m_deviceSampleRate * shiftFactor;
+    double shiftFactor = HBFilterChainConverter::getShiftFactor(log2Decim, filterChainHash);
+    m_frequencyOffset = m_basebandSampleRate * shiftFactor;
 }
 
 int LocalSink::webapiSettingsGet(
@@ -386,12 +347,6 @@ int LocalSink::webapiSettingsPutPatch(
 
     MsgConfigureLocalSink *msg = MsgConfigureLocalSink::create(settings, force);
     m_inputMessageQueue.push(msg);
-
-    if ((settings.m_log2Decim != m_settings.m_log2Decim) || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
-    {
-        MsgConfigureChannelizer *msg = MsgConfigureChannelizer::create(settings.m_log2Decim, settings.m_filterChainHash);
-        m_inputMessageQueue.push(msg);
-    }
 
     qDebug("LocalSink::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any

@@ -33,7 +33,6 @@
 class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
-class DownChannelizer;
 
 namespace Ui
 {
@@ -104,8 +103,6 @@ private:
     DeviceUISet* m_deviceUISet;
 
     ChannelMarker m_objChannelMarker;
-    ThreadedBasebandSampleSink* m_objThreadedChannelizer;
-    DownChannelizer* m_objChannelizer;
     DATVDemod* m_objDATVDemod;
     MessageQueue m_inputMessageQueue;
     int m_intCenterFrequency;

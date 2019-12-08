@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,36 +15,44 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_LOCALSINKSETTINGS_H_
-#define INCLUDE_LOCALSINKSETTINGS_H_
+#ifndef INCLUDE_LOCALSINKSINK_H_
+#define INCLUDE_LOCALSINKSINK_H_
 
-#include <QByteArray>
-#include <QString>
+#include <QObject>
 
-class Serializable;
+#include "dsp/channelsamplesink.h"
 
-struct LocalSinkSettings
-{
-    uint32_t m_localDeviceIndex;
-    quint32 m_rgbColor;
-    QString m_title;
-    uint32_t m_log2Decim;
-    uint32_t m_filterChainHash;
-    bool m_play;
-    int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
-    bool m_useReverseAPI;
-    QString m_reverseAPIAddress;
-    uint16_t m_reverseAPIPort;
-    uint16_t m_reverseAPIDeviceIndex;
-    uint16_t m_reverseAPIChannelIndex;
+#include "localsinksettings.h"
 
-    Serializable *m_channelMarker;
+class DeviceSampleSource;
+class LocalSinkThread;
 
-    LocalSinkSettings();
-    void resetToDefaults();
-    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+class LocalSinkSink : public QObject, public ChannelSampleSink {
+    Q_OBJECT
+public:
+    LocalSinkSink();
+	~LocalSinkSink();
+
+	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
+
+    void applySettings(const LocalSinkSettings& settings, bool force = false);
+    void start(DeviceSampleSource *deviceSource);
+    void stop();
+    bool isRunning() const { return m_running; }
+
+signals:
+    void samplesAvailable(const quint8* data, uint count);
+
+private:
+    LocalSinkSettings m_settings;
+    LocalSinkThread *m_sinkThread;
+    bool m_running;
+
+    uint64_t m_centerFrequency;
+    int64_t m_frequencyOffset;
+    uint32_t m_sampleRate;
+    uint32_t m_deviceSampleRate;
+
 };
 
-#endif /* INCLUDE_LOCALSINKSETTINGS_H_ */
+#endif // INCLUDE_LOCALSINKSINK_H_

@@ -299,6 +299,21 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="localDevicePlay">
+        <property name="toolTip">
+         <string>Start/Stop sink</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/play.png</normaloff>
+          <normalon>:/pause.png</normalon>:/play.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -322,6 +337,11 @@
    <extends>QWidget</extends>
    <header>gui/rollupwidget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources>

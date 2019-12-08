@@ -36,6 +36,7 @@ void LocalSinkSettings::resetToDefaults()
     m_log2Decim = 0;
     m_filterChainHash = 0;
     m_channelMarker = nullptr;
+    m_play = false;
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";

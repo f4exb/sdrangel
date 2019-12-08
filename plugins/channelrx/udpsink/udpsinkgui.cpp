@@ -91,9 +91,9 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
 
 bool UDPSinkGUI::handleMessage(const Message& message )
 {
-    if (UDPSink::MsgConfigureUDPSource::match(message))
+    if (UDPSink::MsgConfigureUDPSink::match(message))
     {
-        const UDPSink::MsgConfigureUDPSource& cfg = (UDPSink::MsgConfigureUDPSource&) message;
+        const UDPSink::MsgConfigureUDPSink& cfg = (UDPSink::MsgConfigureUDPSink&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
@@ -403,7 +403,7 @@ void UDPSinkGUI::applySettingsImmediate(bool force)
 {
 	if (m_doApplySettings)
 	{
-        UDPSink::MsgConfigureUDPSource* message = UDPSink::MsgConfigureUDPSource::create( m_settings, force);
+        UDPSink::MsgConfigureUDPSink* message = UDPSink::MsgConfigureUDPSink::create( m_settings, force);
         m_udpSink->getInputMessageQueue()->push(message);
 	}
 }
@@ -412,11 +412,7 @@ void UDPSinkGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-        UDPSink::MsgConfigureChannelizer* channelConfigMsg = UDPSink::MsgConfigureChannelizer::create(
-                m_settings.m_outputSampleRate, m_channelMarker.getCenterFrequency());
-        m_udpSink->getInputMessageQueue()->push(channelConfigMsg);
-
-        UDPSink::MsgConfigureUDPSource* message = UDPSink::MsgConfigureUDPSource::create( m_settings, force);
+        UDPSink::MsgConfigureUDPSink* message = UDPSink::MsgConfigureUDPSink::create( m_settings, force);
         m_udpSink->getInputMessageQueue()->push(message);
 
 		ui->applyBtn->setEnabled(false);
@@ -618,9 +614,8 @@ void UDPSinkGUI::on_squelchGate_valueChanged(int value)
 
 void UDPSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
-	if ((widget == ui->spectrumBox) && (m_udpSink != 0))
-	{
-		m_udpSink->setSpectrum(m_udpSink->getInputMessageQueue(), rollDown);
+	if ((widget == ui->spectrumBox) && (m_udpSink)) {
+        m_udpSink->enableSpectrum(rollDown);
 	}
 }
 

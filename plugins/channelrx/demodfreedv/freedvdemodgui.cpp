@@ -279,6 +279,7 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 	m_freeDVDemod = (FreeDVDemod*) rxChannel;
 	m_freeDVDemod->setSampleSink(m_spectrumVis);
 	m_freeDVDemod->setMessageQueueToGUI(getInputMessageQueue());
+    m_freeDVDemod->propagateMessageQueueToGUI();
 
 	resetToDefaults();
 
@@ -314,7 +315,7 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-	connect(m_freeDVDemod, SIGNAL(levelInChanged(qreal, qreal, int)), ui->volumeInMeter, SLOT(levelChanged(qreal, qreal, int)));
+    m_freeDVDemod->setLevelMeter(ui->volumeInMeter);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, ui->glSpectrum);
 
@@ -346,10 +347,6 @@ void FreeDVDemodGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-        FreeDVDemod::MsgConfigureChannelizer* channelConfigMsg = FreeDVDemod::MsgConfigureChannelizer::create(
-                m_freeDVDemod->getAudioSampleRate(), m_channelMarker.getCenterFrequency());
-        m_freeDVDemod->getInputMessageQueue()->push(channelConfigMsg);
-
         FreeDVDemod::MsgConfigureFreeDVDemod* message = FreeDVDemod::MsgConfigureFreeDVDemod::create( m_settings, force);
         m_freeDVDemod->getInputMessageQueue()->push(message);
 	}

@@ -1,14 +1,18 @@
 project(udpsink)
 
 set(udpsink_SOURCES
-	udpsink.cpp
+    udpsink.cpp
+    udpsinksink.cpp
+    udpsinkbaseband.cpp
 	udpsinkplugin.cpp
     udpsinksettings.cpp
     udpsinkwebapiadapter.cpp
 )
 
 set(udpsink_HEADERS
-	udpsink.h
+    udpsink.h
+    udpsinksink.h
+    udpsinkbaseband.h
 	udpsinkplugin.h
     udpsinksettings.h
     udpsinkwebapiadapter.h

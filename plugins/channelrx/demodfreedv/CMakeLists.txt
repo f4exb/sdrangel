@@ -1,7 +1,9 @@
 project(demodfreedv)
 
 set(freedv_SOURCES
-	freedvdemod.cpp
+    freedvdemod.cpp
+    freedvdemodbaseband.cpp
+    freedvdemodsink.cpp
     freedvdemodsettings.cpp
     freedvdemodwebapiadapter.cpp
 	freedvplugin.cpp
@@ -9,6 +11,8 @@ set(freedv_SOURCES
 
 set(freedv_HEADERS
 	freedvdemod.h
+    freedvdemodbaseband.h
+    freedvdemodsink.h
     freedvdemodsettings.h
     freedvdemodwebapiadapter.h
 	freedvplugin.h

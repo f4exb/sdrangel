@@ -26,13 +26,13 @@
 #include "channel/channelapi.h"
 #include "localsinksettings.h"
 
-class DeviceAPI;
-class DeviceSampleSource;
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
-class LocalSinkThread;
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
+
+class DeviceAPI;
+class DeviceSampleSource;
+class LocalSinkBaseband;
 
 class LocalSink : public BasebandSampleSink, public ChannelAPI {
     Q_OBJECT
@@ -60,46 +60,24 @@ public:
         { }
     };
 
-    class MsgSampleRateNotification : public Message {
+    class MsgBasebandSampleRateNotification : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgSampleRateNotification* create(int sampleRate) {
-            return new MsgSampleRateNotification(sampleRate);
+        static MsgBasebandSampleRateNotification* create(int sampleRate) {
+            return new MsgBasebandSampleRateNotification(sampleRate);
         }
 
         int getSampleRate() const { return m_sampleRate; }
 
     private:
 
-        MsgSampleRateNotification(int sampleRate) :
+        MsgBasebandSampleRateNotification(int sampleRate) :
             Message(),
             m_sampleRate(sampleRate)
         { }
 
         int m_sampleRate;
-    };
-
-    class MsgConfigureChannelizer : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getLog2Decim() const { return m_log2Decim; }
-        int getFilterChainHash() const { return m_filterChainHash; }
-
-        static MsgConfigureChannelizer* create(unsigned int log2Decim, unsigned int filterChainHash) {
-            return new MsgConfigureChannelizer(log2Decim, filterChainHash);
-        }
-
-    private:
-        unsigned int m_log2Decim;
-        unsigned int m_filterChainHash;
-
-        MsgConfigureChannelizer(unsigned int log2Decim, unsigned int filterChainHash) :
-            Message(),
-            m_log2Decim(log2Decim),
-            m_filterChainHash(filterChainHash)
-        { }
     };
 
     LocalSink(DeviceAPI *deviceAPI);
@@ -147,44 +125,31 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-    /** Set center frequency given in Hz */
-    void setCenterFrequency(uint64_t centerFrequency) { m_centerFrequency = centerFrequency; }
-
-    /** Set sample rate given in Hz */
-    void setSampleRate(uint32_t sampleRate) { m_sampleRate = sampleRate; }
-
-    void setChannelizer(unsigned int log2Decim, unsigned int filterChainHash);
     void getLocalDevices(std::vector<uint32_t>& indexes);
     uint32_t getNumberOfDeviceStreams() const;
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
-signals:
-    void samplesAvailable(const quint8* data, uint count);
-
 private:
     DeviceAPI *m_deviceAPI;
-    ThreadedBasebandSampleSink* m_threadedChannelizer;
-    DownChannelizer* m_channelizer;
-    bool m_running;
-
+    QThread *m_thread;
+    LocalSinkBaseband *m_basebandSink;
     LocalSinkSettings m_settings;
-    LocalSinkThread *m_sinkThread;
 
     uint64_t m_centerFrequency;
     int64_t m_frequencyOffset;
-    uint32_t m_sampleRate;
-    uint32_t m_deviceSampleRate;
+    uint32_t m_basebandSampleRate;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
     void applySettings(const LocalSinkSettings& settings, bool force = false);
-    DeviceSampleSource *getLocalDevice(uint32_t index);
-    void propagateSampleRateAndFrequency(uint32_t index);
+    void propagateSampleRateAndFrequency(uint32_t index, uint32_t log2Decim);
     static void validateFilterChainHash(LocalSinkSettings& settings);
-    void calculateFrequencyOffset();
+    void calculateFrequencyOffset(uint32_t log2Decim, uint32_t filterChainHash);
+    DeviceSampleSource *getLocalDevice(uint32_t index);
+
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const LocalSinkSettings& settings, bool force);
 
 private slots:

@@ -21,8 +21,6 @@
 #define INCLUDE_DATVDEMOD_H
 
 class DeviceAPI;
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
 
 #include "channel/channelapi.h"
 #include "dsp/basebandsamplesink.h"
