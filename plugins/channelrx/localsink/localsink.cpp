@@ -429,6 +429,9 @@ void LocalSink::webapiUpdateChannelSettings(
         validateFilterChainHash(settings);
     }
 
+    if (channelSettingsKeys.contains("play")) {
+        settings.m_play = response.getLocalSinkSettings()->getPlay() != 0;
+    }
     if (channelSettingsKeys.contains("streamIndex")) {
         settings.m_streamIndex = response.getLocalSinkSettings()->getStreamIndex();
     }
@@ -462,6 +465,7 @@ void LocalSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
 
     response.getLocalSinkSettings()->setLog2Decim(settings.m_log2Decim);
     response.getLocalSinkSettings()->setFilterChainHash(settings.m_filterChainHash);
+    response.getLocalSinkSettings()->setPlay(settings.m_play ? 1 : 0);
     response.getLocalSinkSettings()->setStreamIndex(settings.m_streamIndex);
     response.getLocalSinkSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -502,6 +506,9 @@ void LocalSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     }
     if (channelSettingsKeys.contains("filterChainHash") || force) {
         swgLocalSinkSettings->setFilterChainHash(settings.m_filterChainHash);
+    }
+    if (channelSettingsKeys.contains("play") || force) {
+        swgLocalSinkSettings->setPlay(settings.m_play ? 1 : 0);
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgLocalSinkSettings->setStreamIndex(settings.m_streamIndex);

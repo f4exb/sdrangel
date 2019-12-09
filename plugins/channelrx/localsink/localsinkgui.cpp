@@ -193,6 +193,13 @@ void LocalSinkGUI::displaySettings()
     setWindowTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
+    int index = getLocalDeviceIndexInCombo(m_settings.m_localDeviceIndex);
+
+    if (index >= 0) {
+        ui->localDevice->setCurrentIndex(index);
+    }
+
+    ui->localDevicePlay->setChecked(m_settings.m_play);
     ui->decimationFactor->setCurrentIndex(m_settings.m_log2Decim);
     applyDecimation();
     displayStreamIndex();
