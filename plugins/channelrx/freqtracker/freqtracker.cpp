@@ -54,21 +54,7 @@ const int FreqTracker::m_udpBlockSize = 512;
 FreqTracker::FreqTracker(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
-        m_deviceSampleRate(48000),
-        m_inputSampleRate(48000),
-        m_inputFrequencyOffset(0),
-        m_channelSampleRate(48000),
-        m_running(false),
-        m_squelchOpen(false),
-        m_squelchGate(0),
-        m_magsqSum(0.0f),
-        m_magsqPeak(0.0f),
-        m_magsqCount(0),
-        m_timerConnected(false),
-        m_tickCount(0),
-        m_lastCorrAbs(0),
-        m_avgDeltaFreq(0.0),
-        m_settingsMutex(QMutex::Recursive)
+        m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
 

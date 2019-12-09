@@ -114,9 +114,7 @@ bool FreqTrackerGUI::handleMessage(const Message& message)
         m_channelSampleRate = cfg.getSampleRate();
         ui->channelSampleRateText->setText(tr("%1k").arg(QString::number(m_channelSampleRate / 1000.0f, 'g', 5)));
         blockApplySettings(true);
-        m_settings.m_inputFrequencyOffset = cfg.getFrequencyOffset();
         ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
-        m_channelMarker.setCenterFrequency(cfg.getFrequencyOffset());
         blockApplySettings(false);
 
         if (m_channelSampleRate > 1000) {
@@ -320,7 +318,7 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 	m_channelMarker.setColor(Qt::yellow);
 	m_channelMarker.setBandwidth(5000);
 	m_channelMarker.setCenterFrequency(0);
-    m_channelMarker.setTitle("AM Demodulator");
+    m_channelMarker.setTitle("Frequency Tracker");
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
