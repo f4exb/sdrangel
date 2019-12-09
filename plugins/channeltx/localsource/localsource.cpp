@@ -386,6 +386,9 @@ void LocalSource::webapiUpdateChannelSettings(
         validateFilterChainHash(settings);
     }
 
+    if (channelSettingsKeys.contains("play")) {
+        settings.m_play = response.getLocalSourceSettings()->getPlay() != 0;
+    }
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getLocalSourceSettings()->getUseReverseApi() != 0;
     }
@@ -419,6 +422,7 @@ void LocalSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
 
     response.getLocalSourceSettings()->setLog2Interp(settings.m_log2Interp);
     response.getLocalSourceSettings()->setFilterChainHash(settings.m_filterChainHash);
+    response.getLocalSourceSettings()->setPlay(settings.m_play ? 1 : 0);
     response.getLocalSourceSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getLocalSourceSettings()->getReverseApiAddress()) {
@@ -458,6 +462,9 @@ void LocalSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys,
     }
     if (channelSettingsKeys.contains("filterChainHash") || force) {
         swgLocalSourceSettings->setFilterChainHash(settings.m_filterChainHash);
+    }
+    if (channelSettingsKeys.contains("play") || force) {
+        swgLocalSourceSettings->setPlay(settings.m_play ? 1 : 0);
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgLocalSourceSettings->setRgbColor(settings.m_streamIndex);

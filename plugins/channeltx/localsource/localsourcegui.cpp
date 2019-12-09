@@ -184,6 +184,7 @@ void LocalSourceGUI::displaySettings()
 
     blockApplySettings(true);
     ui->interpolationFactor->setCurrentIndex(m_settings.m_log2Interp);
+    ui->localDevicePlay->setChecked(m_settings.m_play);
     applyInterpolation();
     blockApplySettings(false);
 }
