@@ -57,6 +57,9 @@ public:
     qint32 getFilterChainHash();
     void setFilterChainHash(qint32 filter_chain_hash);
 
+    qint32 getPlay();
+    void setPlay(qint32 play);
+
     qint32 getStreamIndex();
     void setStreamIndex(qint32 stream_index);
 
@@ -93,6 +96,9 @@ private:
 
     qint32 filter_chain_hash;
     bool m_filter_chain_hash_isSet;
+
+    qint32 play;
+    bool m_play_isSet;
 
     qint32 stream_index;
     bool m_stream_index_isSet;

@@ -38,6 +38,8 @@ SWGLocalSourceSettings::SWGLocalSourceSettings() {
     m_log2_interp_isSet = false;
     filter_chain_hash = 0;
     m_filter_chain_hash_isSet = false;
+    play = 0;
+    m_play_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -68,6 +70,8 @@ SWGLocalSourceSettings::init() {
     m_log2_interp_isSet = false;
     filter_chain_hash = 0;
     m_filter_chain_hash_isSet = false;
+    play = 0;
+    m_play_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -89,6 +93,7 @@ SWGLocalSourceSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
 
 
 
@@ -121,6 +126,8 @@ SWGLocalSourceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&log2_interp, pJson["log2Interp"], "qint32", "");
     
     ::SWGSDRangel::setValue(&filter_chain_hash, pJson["filterChainHash"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&play, pJson["play"], "qint32", "");
     
     ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
@@ -164,6 +171,9 @@ SWGLocalSourceSettings::asJsonObject() {
     }
     if(m_filter_chain_hash_isSet){
         obj->insert("filterChainHash", QJsonValue(filter_chain_hash));
+    }
+    if(m_play_isSet){
+        obj->insert("play", QJsonValue(play));
     }
     if(m_stream_index_isSet){
         obj->insert("streamIndex", QJsonValue(stream_index));
@@ -235,6 +245,16 @@ void
 SWGLocalSourceSettings::setFilterChainHash(qint32 filter_chain_hash) {
     this->filter_chain_hash = filter_chain_hash;
     this->m_filter_chain_hash_isSet = true;
+}
+
+qint32
+SWGLocalSourceSettings::getPlay() {
+    return play;
+}
+void
+SWGLocalSourceSettings::setPlay(qint32 play) {
+    this->play = play;
+    this->m_play_isSet = true;
 }
 
 qint32
@@ -315,6 +335,9 @@ SWGLocalSourceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_filter_chain_hash_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_play_isSet){
             isObjectUpdated = true; break;
         }
         if(m_stream_index_isSet){

@@ -12,6 +12,9 @@ LocalSourceSettings:
       type: integer
     filterChainHash:
       type: integer
+    play:
+      description: boolean (1 to play, 0 to stop)
+      type: integer
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
