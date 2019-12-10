@@ -113,8 +113,10 @@ bool FreqTrackerGUI::handleMessage(const Message& message)
         }
         const FreqTrackerReport::MsgNotificationToGUI& cfg = (FreqTrackerReport::MsgNotificationToGUI&) message;
         m_channelSampleRate = cfg.getSinkSampleRate();
+        m_settings.m_inputFrequencyOffset = cfg.getSinkFrequencyOffset();
         ui->channelSampleRateText->setText(tr("%1k").arg(QString::number(m_channelSampleRate / 1000.0f, 'g', 5)));
         blockApplySettings(true);
+        m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
         ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
         blockApplySettings(false);
 
