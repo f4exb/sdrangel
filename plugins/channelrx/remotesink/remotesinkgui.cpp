@@ -83,11 +83,11 @@ bool RemoteSinkGUI::deserialize(const QByteArray& data)
 
 bool RemoteSinkGUI::handleMessage(const Message& message)
 {
-    if (RemoteSink::MsgSampleRateNotification::match(message))
+    if (RemoteSink::MsgBasebandSampleRateNotification::match(message))
     {
-        RemoteSink::MsgSampleRateNotification& notif = (RemoteSink::MsgSampleRateNotification&) message;
+        RemoteSink::MsgBasebandSampleRateNotification& notif = (RemoteSink::MsgBasebandSampleRateNotification&) message;
         //m_channelMarker.setBandwidth(notif.getSampleRate());
-        m_sampleRate = notif.getSampleRate();
+        m_sampleRate = notif.getBasebandSampleRate();
         updateTxDelayTime();
         displayRateAndShift();
         return true;
@@ -165,17 +165,6 @@ void RemoteSinkGUI::applySettings(bool force)
 
         RemoteSink::MsgConfigureRemoteSink* message = RemoteSink::MsgConfigureRemoteSink::create(m_settings, force);
         m_remoteSink->getInputMessageQueue()->push(message);
-    }
-}
-
-void RemoteSinkGUI::applyChannelSettings()
-{
-    if (m_doApplySettings)
-    {
-        RemoteSink::MsgConfigureChannelizer *msgChan = RemoteSink::MsgConfigureChannelizer::create(
-                m_settings.m_log2Decim,
-                m_settings.m_filterChainHash);
-        m_remoteSink->getInputMessageQueue()->push(msgChan);
     }
 }
 
@@ -403,7 +392,7 @@ void RemoteSinkGUI::applyPosition()
     ui->filterChainText->setText(s);
 
     displayRateAndShift();
-    applyChannelSettings();
+    applySettings();
 }
 
 void RemoteSinkGUI::tick()

@@ -24,21 +24,16 @@
 #ifndef INCLUDE_REMOTESINK_H_
 #define INCLUDE_REMOTESINK_H_
 
-#include <channel/remotedatablock.h>
 #include <QObject>
-#include <QMutex>
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
-#include "remotesinksettings.h"
+#include "remotesinkbaseband.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
-class ThreadedBasebandSampleSink;
-class DownChannelizer;
-class RemoteSinkThread;
 
 class RemoteSink : public BasebandSampleSink, public ChannelAPI {
     Q_OBJECT
@@ -66,47 +61,24 @@ public:
         { }
     };
 
-    class MsgSampleRateNotification : public Message {
+    class MsgBasebandSampleRateNotification : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgSampleRateNotification* create(int sampleRate) {
-            return new MsgSampleRateNotification(sampleRate);
+        static MsgBasebandSampleRateNotification* create(int sampleRate) {
+            return new MsgBasebandSampleRateNotification(sampleRate);
         }
 
-        int getSampleRate() const { return m_sampleRate; }
+        int getBasebandSampleRate() const { return m_basebandSampleRate; }
 
     private:
 
-        MsgSampleRateNotification(int sampleRate) :
+        MsgBasebandSampleRateNotification(int sampleRate) :
             Message(),
-            m_sampleRate(sampleRate)
+            m_basebandSampleRate(sampleRate)
         { }
 
-        int m_sampleRate;
-    };
-
-    class MsgConfigureChannelizer : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getLog2Decim() const { return m_log2Decim; }
-        int getFilterChainHash() const { return m_filterChainHash; }
-
-        static MsgConfigureChannelizer* create(int sampleRate, int centerFrequency)
-        {
-            return new MsgConfigureChannelizer(sampleRate, centerFrequency);
-        }
-
-    private:
-        unsigned int m_log2Decim;
-        unsigned int m_filterChainHash;
-
-        MsgConfigureChannelizer(unsigned int log2Decim, int filterChainHash) :
-            Message(),
-            m_log2Decim(log2Decim),
-            m_filterChainHash(filterChainHash)
-        { }
+        int m_basebandSampleRate;
     };
 
     RemoteSink(DeviceAPI *deviceAPI);
@@ -154,18 +126,6 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-    /** Set center frequency given in Hz */
-    void setCenterFrequency(uint64_t centerFrequency) { m_centerFrequency = centerFrequency; }
-
-    /** Set sample rate given in Hz */
-    void setSampleRate(uint32_t sampleRate) { m_sampleRate = sampleRate; }
-
-    void setNbBlocksFEC(int nbBlocksFEC);
-    void setTxDelay(int txDelay, int nbBlocksFEC);
-    void setDataAddress(const QString& address) { m_dataAddress = address; }
-    void setDataPort(uint16_t port) { m_dataPort = port; }
-    void setChannelizer(unsigned int log2Decim, unsigned int filterChainHash);
-
     uint32_t getNumberOfDeviceStreams() const;
 
     static const QString m_channelIdURI;
@@ -176,29 +136,14 @@ signals:
 
 private:
     DeviceAPI *m_deviceAPI;
-    ThreadedBasebandSampleSink* m_threadedChannelizer;
-    DownChannelizer* m_channelizer;
-    bool m_running;
-
+    QThread *m_thread;
+    RemoteSinkBaseband *m_basebandSink;
     RemoteSinkSettings m_settings;
-    RemoteSinkThread *m_sinkThread;
-
-    int m_txBlockIndex;                  //!< Current index in blocks to transmit in the Tx row
-    uint16_t m_frameCount;               //!< transmission frame count
-    int m_sampleIndex;                   //!< Current sample index in protected block data
-    RemoteSuperBlock m_superBlock;
-    RemoteMetaDataFEC m_currentMetaFEC;
-    RemoteDataBlock *m_dataBlock;
-    QMutex m_dataBlockMutex;
 
     uint64_t m_centerFrequency;
     int64_t m_frequencyOffset;
-    uint32_t m_sampleRate;
-    uint32_t m_deviceSampleRate;
-    int m_nbBlocksFEC;
-    int m_txDelay;
-    QString m_dataAddress;
-    uint16_t m_dataPort;
+    int m_basebandSampleRate;
+
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 

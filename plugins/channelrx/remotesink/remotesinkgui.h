@@ -78,7 +78,6 @@ private:
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
-    void applyChannelSettings();
     void displaySettings();
     void displayStreamIndex();
     void displayRateAndShift();

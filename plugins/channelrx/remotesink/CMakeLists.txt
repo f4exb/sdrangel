@@ -10,7 +10,9 @@ else()
 endif()
 
 set(remotesink_SOURCES
-	remotesink.cpp
+    remotesink.cpp
+    remotesinkbaseband.cpp
+    remotesinksink.cpp
     remotesinksettings.cpp
     remotesinkwebapiadapter.cpp
 	remotesinkthread.cpp
@@ -19,6 +21,8 @@ set(remotesink_SOURCES
 
 set(remotesink_HEADERS
 	remotesink.h
+    remotesinkbaseband.h
+    remotesinksink.h
     remotesinksettings.h
     remotesinkwebapiadapter.h
 	remotesinkthread.h
@@ -36,14 +40,12 @@ if(NOT SERVER_MODE)
     set(remotesink_SOURCES
         ${remotesink_SOURCES}
         remotesinkgui.cpp
-
-	remotesinkgui.ui
+	    remotesinkgui.ui
     )
     set(remotesink_HEADERS
         ${remotesink_HEADERS}
         remotesinkgui.h
     )
-
     set(TARGET_NAME remotesink)
     set(TARGET_LIB "Qt5::Widgets")
     set(TARGET_LIB_GUI "sdrgui")
@@ -64,12 +66,12 @@ if(ENABLE_EXTERNAL_LIBRARIES)
 endif()
 
 target_link_libraries(${TARGET_NAME}
-        Qt5::Core
-        ${TARGET_LIB}
+    Qt5::Core
+    ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
-        ${CM256CC_LIBRARIES}
-        swagger
+    ${CM256CC_LIBRARIES}
+    swagger
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
