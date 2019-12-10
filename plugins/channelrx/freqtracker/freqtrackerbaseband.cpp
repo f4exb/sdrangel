@@ -27,8 +27,7 @@
 MESSAGE_CLASS_DEFINITION(FreqTrackerBaseband::MsgConfigureFreqTrackerBaseband, Message)
 
 FreqTrackerBaseband::FreqTrackerBaseband() :
-    m_mutex(QMutex::Recursive),
-    m_messageQueueToGUI(nullptr)
+    m_mutex(QMutex::Recursive)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownSampleChannelizer(&m_sink);
@@ -127,15 +126,6 @@ bool FreqTrackerBaseband::handleMessage(const Message& cmd)
             m_channelizer->getChannelFrequencyOffset()
         );
 
-        if (getMessageQueueToGUI())
-        {
-            FreqTrackerReport::MsgNotificationToGUI *msg = FreqTrackerReport::MsgNotificationToGUI::create(
-                m_basebandSampleRate / (1<<m_settings.m_log2Decim),
-                m_settings.m_inputFrequencyOffset
-            );
-            getMessageQueueToGUI()->push(msg);
-        }
-
 		return true;
     }
     else
@@ -155,15 +145,6 @@ void FreqTrackerBaseband::applySettings(const FreqTrackerSettings& settings, boo
             m_channelizer->getChannelSampleRate(),
             m_channelizer->getChannelFrequencyOffset()
         );
-
-        if (getMessageQueueToGUI())
-        {
-            FreqTrackerReport::MsgNotificationToGUI *msg = FreqTrackerReport::MsgNotificationToGUI::create(
-                m_basebandSampleRate / (1<<settings.m_log2Decim),
-                settings.m_inputFrequencyOffset
-            );
-            getMessageQueueToGUI()->push(msg);
-        }
     }
 
     m_sink.applySettings(settings, force);

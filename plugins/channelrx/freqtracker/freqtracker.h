@@ -120,10 +120,6 @@ public:
         m_basebandSink->setMessageQueueToInput(messageQueueToInput);
     }
 
-    void propagateMessageQueueToGUI(MessageQueue *messageQueueToGUI) {
-        m_basebandSink->setMessageQueueToGUI(messageQueueToGUI);
-    }
-
     uint32_t getNumberOfDeviceStreams() const;
 
     static const QString m_channelIdURI;

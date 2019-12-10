@@ -24,7 +24,7 @@
 #include "device/deviceuiset.h"
 #include "dsp/downchannelizer.h"
 #include "dsp/dspengine.h"
-#include "dsp/threadedbasebandsamplesink.h"
+#include "dsp/dspcommands.h"
 #include "ui_freqtrackergui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -106,23 +106,28 @@ bool FreqTrackerGUI::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
-    else if (FreqTrackerReport::MsgNotificationToGUI::match(message))
+    else if (DSPSignalNotification::match(message))
+    {
+        DSPSignalNotification& cfg = (DSPSignalNotification&) message;
+        m_basebandSampleRate = cfg.getSampleRate();
+        int sinkSampleRate = m_basebandSampleRate / (1<<m_settings.m_log2Decim);
+        ui->channelSampleRateText->setText(tr("%1k").arg(QString::number(sinkSampleRate / 1000.0f, 'g', 5)));
+
+        if (sinkSampleRate > 1000) {
+            ui->rfBW->setMaximum(sinkSampleRate/100);
+        }
+
+        return true;
+    }
+    else if (FreqTrackerReport::MsgSinkFrequencyOffsetNotification::match(message))
     {
         if (!m_settings.m_tracking) {
-            qDebug("FreqTrackerGUI::handleMessage: FreqTrackerReport::MsgNotificationToGUI");
+            qDebug("FreqTrackerGUI::handleMessage: FreqTrackerReport::MsgSinkFrequencyOffsetNotification");
         }
-        const FreqTrackerReport::MsgNotificationToGUI& cfg = (FreqTrackerReport::MsgNotificationToGUI&) message;
-        m_channelSampleRate = cfg.getSinkSampleRate();
-        m_settings.m_inputFrequencyOffset = cfg.getSinkFrequencyOffset();
-        ui->channelSampleRateText->setText(tr("%1k").arg(QString::number(m_channelSampleRate / 1000.0f, 'g', 5)));
-        blockApplySettings(true);
+        const FreqTrackerReport::MsgSinkFrequencyOffsetNotification& cfg = (FreqTrackerReport::MsgSinkFrequencyOffsetNotification&) message;
+        m_settings.m_inputFrequencyOffset = cfg.getFrequencyOffset();
         m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
         ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
-        blockApplySettings(false);
-
-        if (m_channelSampleRate > 1000) {
-            ui->rfBW->setMaximum(m_channelSampleRate/100);
-        }
 
         return true;
     }
@@ -165,6 +170,13 @@ void FreqTrackerGUI::on_deltaFrequency_changed(qint64 value)
 void FreqTrackerGUI::on_log2Decim_currentIndexChanged(int index)
 {
     m_settings.m_log2Decim = index < 0 ? 0 : index > 6 ? 6 : index;
+    int sinkSampleRate = m_basebandSampleRate / (1<<m_settings.m_log2Decim);
+    ui->channelSampleRateText->setText(tr("%1k").arg(QString::number(sinkSampleRate / 1000.0f, 'g', 5)));
+
+    if (sinkSampleRate > 1000) {
+        ui->rfBW->setMaximum(sinkSampleRate/100);
+    }
+
     applySettings();
 }
 
@@ -297,7 +309,7 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
-    m_channelSampleRate(0),
+    m_basebandSampleRate(0),
 	m_doApplySettings(true),
 	m_squelchOpen(false),
 	m_tickCount(0)
@@ -309,7 +321,6 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
 	m_freqTracker = reinterpret_cast<FreqTracker*>(rxChannel); //new FreqTracker(m_deviceUISet->m_deviceSourceAPI);
 	m_freqTracker->setMessageQueueToGUI(getInputMessageQueue());
-    m_freqTracker->propagateMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 

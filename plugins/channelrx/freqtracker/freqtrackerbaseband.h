@@ -64,7 +64,6 @@ public:
     int getChannelSampleRate() const;
     void setBasebandSampleRate(int sampleRate);
     void setMessageQueueToInput(MessageQueue *messageQueue) { m_sink.setMessageQueueToInput(messageQueue); }
-    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
 
 	double getMagSq() const { return m_sink.getMagSq(); }
     bool getSquelchOpen() const { return m_sink.getSquelchOpen(); }
@@ -83,9 +82,6 @@ private:
     unsigned int m_basebandSampleRate;
     QMutex m_mutex;
 
-    MessageQueue *m_messageQueueToGUI;
-
-    MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
     bool handleMessage(const Message& cmd);
     void applySettings(const FreqTrackerSettings& settings, bool force = false);
 

@@ -125,6 +125,12 @@ bool FreqTracker::handleMessage(const Message& cmd)
         qDebug() << "FreqTracker::handleMessage: DSPSignalNotification";
         m_basebandSink->getInputMessageQueue()->push(rep);
 
+        if (getMessageQueueToGUI())
+        {
+            DSPSignalNotification *msg = new DSPSignalNotification(notif);
+            getMessageQueueToGUI()->push(msg);
+        }
+
         return true;
     }
 	else if (MsgConfigureFreqTracker::match(cmd))
@@ -141,6 +147,12 @@ bool FreqTracker::handleMessage(const Message& cmd)
         FreqTrackerSettings settings = m_settings;
         settings.m_inputFrequencyOffset = cfg.getFrequencyOffset();
         applySettings(settings, false);
+
+        if (getMessageQueueToGUI())
+        {
+            FreqTrackerReport::MsgSinkFrequencyOffsetNotification *msg = new FreqTrackerReport::MsgSinkFrequencyOffsetNotification(cfg);
+            getMessageQueueToGUI()->push(msg);
+        }
 
         return true;
     }

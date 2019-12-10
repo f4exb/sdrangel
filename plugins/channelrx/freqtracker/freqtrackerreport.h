@@ -23,28 +23,6 @@
 class FreqTrackerReport
 {
 public:
-    class MsgNotificationToGUI : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        static MsgNotificationToGUI* create(int sinkSampleRate, int sinkFrequencyOffset) {
-            return new MsgNotificationToGUI(sinkSampleRate, sinkFrequencyOffset);
-        }
-
-        int getSinkSampleRate() const { return m_sinkSampleRate; }
-        int getSinkFrequencyOffset() const { return m_sinkFrequencyOffset; }
-
-    private:
-        MsgNotificationToGUI(int sinkSampleRate, int sinkFrequencyOffset) :
-            Message(),
-            m_sinkSampleRate(sinkSampleRate),
-            m_sinkFrequencyOffset(sinkFrequencyOffset)
-        { }
-
-        int m_sinkSampleRate;
-        int m_sinkFrequencyOffset;
-    };
-
     class MsgConfigureChannelizer : public Message {
         MESSAGE_CLASS_DECLARATION
 

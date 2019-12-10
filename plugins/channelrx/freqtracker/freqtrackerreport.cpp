@@ -17,7 +17,6 @@
 
 #include "freqtrackerreport.h"
 
-MESSAGE_CLASS_DEFINITION(FreqTrackerReport::MsgNotificationToGUI, Message)
 MESSAGE_CLASS_DEFINITION(FreqTrackerReport::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(FreqTrackerReport::MsgSinkFrequencyOffsetNotification, Message)
 

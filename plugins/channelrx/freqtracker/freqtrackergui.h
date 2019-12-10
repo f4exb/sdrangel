@@ -65,7 +65,7 @@ private:
 	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
 	FreqTrackerSettings m_settings;
-    int m_channelSampleRate;
+	int m_basebandSampleRate;
 	bool m_doApplySettings;
 
 	FreqTracker* m_freqTracker;
