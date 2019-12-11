@@ -296,6 +296,7 @@ void RemoteSinkGUI::onMenuDialogCalled(const QPoint &p)
 void RemoteSinkGUI::on_decimationFactor_currentIndexChanged(int index)
 {
     m_settings.m_log2Decim = index;
+    updateTxDelayTime();
     applyDecimation();
 }
 
@@ -368,7 +369,8 @@ void RemoteSinkGUI::updateTxDelayTime()
 {
     double txDelayRatio = m_settings.m_txDelay / 100.0;
     int samplesPerBlock = RemoteNbBytesPerBlock / sizeof(Sample);
-    double delay = m_basebandSampleRate == 0 ? 0.0 : (127*samplesPerBlock*txDelayRatio) / m_basebandSampleRate;
+    int channelSampleRate = m_basebandSampleRate / (1<<m_settings.m_log2Decim);
+    double delay = channelSampleRate == 0 ? 0.0 : (127*samplesPerBlock*txDelayRatio) / channelSampleRate;
     delay /= 128 + m_settings.m_nbFECBlocks;
     ui->txDelayTime->setText(tr("%1µs").arg(QString::number(delay*1e6, 'f', 0)));
 }

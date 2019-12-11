@@ -19,7 +19,6 @@
 #define INCLUDE_REMOTESINKSINK_H_
 
 #include <QObject>
-#include <QMutex>
 
 #include "dsp/channelsamplesink.h"
 #include "channel/remotedatablock.h"
@@ -28,7 +27,8 @@
 #include "remotesinksettings.h"
 
 class DeviceSampleSource;
-class RemoteSinkThread;
+class RemoteSinkSender;
+class QThread;
 
 class RemoteSinkSink : public QObject, public ChannelSampleSink {
     Q_OBJECT
@@ -38,29 +38,26 @@ public:
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
-    void applySettings(const RemoteSinkSettings& settings, bool force = false);
-    void applySampleRate(uint32_t sampleRate);
-    void start();
-    void stop();
-    bool isRunning() const { return m_running; }
+    void startSender();
+    void stopSender();
 
-    /** Set center frequency given in Hz */
-    void setCenterFrequency(uint64_t centerFrequency) { m_centerFrequency = centerFrequency; }
+    void applySettings(const RemoteSinkSettings& settings, bool force = false);
+    void applyBasebandSampleRate(uint32_t sampleRate);
+
+    /** Set device center frequency given in Hz */
+    void setDeviceCenterFrequency(uint64_t centerFrequency) { m_deviceCenterFrequency = centerFrequency; }
 
     /** Set sample rate given in Hz */
 
     void setNbBlocksFEC(int nbBlocksFEC);
-    void setTxDelay(int txDelay, int nbBlocksFEC);
+    void setTxDelay(int txDelay, int nbBlocksFEC, int log2Decim);
     void setDataAddress(const QString& address) { m_dataAddress = address; }
     void setDataPort(uint16_t port) { m_dataPort = port; }
 
-signals:
-    void dataBlockAvailable(RemoteDataBlock *dataBlock);
-
 private:
     RemoteSinkSettings m_settings;
-    RemoteSinkThread *m_remoteSinkThread;
-    bool m_running;
+    QThread *m_senderThread;
+    RemoteSinkSender *m_remoteSinkSender;
 
     int m_txBlockIndex;                  //!< Current index in blocks to transmit in the Tx row
     uint16_t m_frameCount;               //!< transmission frame count
@@ -68,11 +65,10 @@ private:
     RemoteSuperBlock m_superBlock;
     RemoteMetaDataFEC m_currentMetaFEC;
     RemoteDataBlock *m_dataBlock;
-    QMutex m_dataBlockMutex;
 
-    uint64_t m_centerFrequency;
+    uint64_t m_deviceCenterFrequency;
     int64_t m_frequencyOffset;
-    uint32_t m_sampleRate;
+    uint32_t m_basebandSampleRate;
     int m_nbBlocksFEC;
     int m_txDelay;
     QString m_dataAddress;

@@ -34,6 +34,7 @@
 #include "dsp/dspcommands.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/devicesamplemimo.h"
+#include "dsp/dspdevicesourceengine.h"
 #include "device/deviceapi.h"
 
 #include "remotesinkbaseband.h"
@@ -95,13 +96,13 @@ void RemoteSink::start()
     }
 
     m_thread->start();
-    m_basebandSink->startSink();
+    m_basebandSink->startSender();
 }
 
 void RemoteSink::stop()
 {
     qDebug("RemoteSink::stop");
-    m_basebandSink->stopSink();
+    m_basebandSink->stopSender();
 	m_thread->exit();
 	m_thread->wait();
 }
@@ -130,7 +131,7 @@ bool RemoteSink::handleMessage(const Message& cmd)
         if (getMessageQueueToGUI())
         {
             DSPSignalNotification* msgToGUI = new DSPSignalNotification(notif); // make a copy
-            getMessageQueueToGUI()->push(msgToBaseband);
+            getMessageQueueToGUI()->push(msgToGUI);
         }
 
 	    return true;

@@ -21,10 +21,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELRX_REMOTESINK_REMOTESINKTHREAD_H_
-#define PLUGINS_CHANNELRX_REMOTESINK_REMOTESINKTHREAD_H_
+#ifndef PLUGINS_CHANNELRX_REMOTESINK_REMOTESINKSENDER_H_
+#define PLUGINS_CHANNELRX_REMOTESINK_REMOTESINKSENDER_H_
 
-#include <QThread>
+#include <QObject>
 #include <QMutex>
 #include <QWaitCondition>
 #include <QHostAddress>
@@ -34,63 +34,34 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 
+#include "remotesinkfifo.h"
+
 class RemoteDataBlock;
 class CM256;
 class QUdpSocket;
 
-class RemoteSinkThread : public QThread {
+class RemoteSinkSender : public QObject {
     Q_OBJECT
 
 public:
-    class MsgStartStop : public Message {
-        MESSAGE_CLASS_DECLARATION
+    RemoteSinkSender();
+    ~RemoteSinkSender();
 
-    public:
-        bool getStartStop() const { return m_startStop; }
-
-        static MsgStartStop* create(bool startStop) {
-            return new MsgStartStop(startStop);
-        }
-
-    protected:
-        bool m_startStop;
-
-        MsgStartStop(bool startStop) :
-            Message(),
-            m_startStop(startStop)
-        { }
-    };
-
-    RemoteSinkThread(QObject* parent = 0);
-    ~RemoteSinkThread();
-
-    void startStop(bool start);
-
-public slots:
-    void processDataBlock(RemoteDataBlock *dataBlock);
+    RemoteDataBlock *getDataBlock();
 
 private:
-	QMutex m_startWaitMutex;
-	QWaitCondition m_startWaiter;
-	volatile bool m_running;
-
+    RemoteSinkFifo m_fifo;
     CM256 m_cm256;
     CM256 *m_cm256p;
 
     QHostAddress m_address;
     QUdpSocket *m_socket;
 
-    MessageQueue m_inputMessageQueue;
-
-    void startWork();
-    void stopWork();
-
-    void run();
-    void handleDataBlock(RemoteDataBlock& dataBlock);
+    void sendDataBlock(RemoteDataBlock *dataBlock);
 
 private slots:
-    void handleInputMessages();
+    void handleData();
 };
 
-#endif // PLUGINS_CHANNELRX_REMOTESINK_REMOTESINKTHREAD_H_
+#endif // PLUGINS_CHANNELRX_REMOTESINK_REMOTESINKSENDER_H_
 

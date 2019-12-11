@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QMutexLocker>
+#include <QThread>
 
 #include <boost/crc.hpp>
 #include <boost/cstdint.hpp>
@@ -23,47 +24,64 @@
 #include "dsp/hbfilterchainconverter.h"
 #include "util/timeutil.h"
 
-#include "remotesinkthread.h"
+#include "remotesinksender.h"
 #include "remotesinksink.h"
 
 RemoteSinkSink::RemoteSinkSink() :
-        m_running(false),
-        m_remoteSinkThread(nullptr),
         m_txBlockIndex(0),
         m_frameCount(0),
         m_sampleIndex(0),
         m_dataBlock(nullptr),
-        m_centerFrequency(0),
+        m_deviceCenterFrequency(0),
         m_frequencyOffset(0),
-        m_sampleRate(48000),
+        m_basebandSampleRate(48000),
         m_nbBlocksFEC(0),
         m_txDelay(35),
         m_dataAddress("127.0.0.1"),
         m_dataPort(9090)
 {
+    qDebug("RemoteSinkSink::RemoteSinkSink");
+
+    m_senderThread = new QThread(this);
+    m_remoteSinkSender = new RemoteSinkSender();
+    m_remoteSinkSender->moveToThread(m_senderThread);
+
     applySettings(m_settings, true);
 }
 
 RemoteSinkSink::~RemoteSinkSink()
 {
-    QMutexLocker mutexLocker(&m_dataBlockMutex);
+    qDebug("RemoteSinkSink::~RemoteSinkSink");
 
-    if (m_dataBlock && !m_dataBlock->m_txControlBlock.m_complete) {
-        delete m_dataBlock;
-    }
+    delete m_remoteSinkSender;
+    delete m_senderThread;
 }
 
-void RemoteSinkSink::setTxDelay(int txDelay, int nbBlocksFEC)
+void RemoteSinkSink::startSender()
+{
+    qDebug("RemoteSinkSink::startSender");
+    m_senderThread->start();
+}
+
+void RemoteSinkSink::stopSender()
+{
+    qDebug("RemoteSinkSink::stopSender");
+	m_senderThread->exit();
+	m_senderThread->wait();
+}
+
+void RemoteSinkSink::setTxDelay(int txDelay, int nbBlocksFEC, int log2Decim)
 {
     double txDelayRatio = txDelay / 100.0;
     int samplesPerBlock = RemoteNbBytesPerBlock / sizeof(Sample);
-    double delay = m_sampleRate == 0 ? 1.0 : (127*samplesPerBlock*txDelayRatio) / m_sampleRate;
+    int sampleRate = m_basebandSampleRate / (1<<log2Decim);
+    double delay = sampleRate == 0 ? 1.0 : (127*samplesPerBlock*txDelayRatio) / sampleRate;
     delay /= 128 + nbBlocksFEC;
     m_txDelay = roundf(delay*1e6); // microseconds
     qDebug() << "RemoteSinkSink::setTxDelay:"
         << "txDelay:" << txDelay << "%"
         << "m_txDelay:" << m_txDelay << "us"
-        << "m_sampleRate: " << m_sampleRate << "S/s";
+        << "sampleRate: " << sampleRate << "S/s";
 }
 
 void RemoteSinkSink::setNbBlocksFEC(int nbBlocksFEC)
@@ -88,8 +106,8 @@ void RemoteSinkSink::feed(const SampleVector::const_iterator& begin, const Sampl
             uint64_t nowus = TimeUtil::nowus();
             // gettimeofday(&tv, 0);
 
-            metaData.m_centerFrequency = m_centerFrequency + m_frequencyOffset;
-            metaData.m_sampleRate = m_sampleRate;
+            metaData.m_centerFrequency = m_deviceCenterFrequency + m_frequencyOffset;
+            metaData.m_sampleRate = m_basebandSampleRate / (1<<m_settings.m_log2Decim);
             metaData.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
             metaData.m_sampleBits = SDR_RX_SAMP_SZ;
             metaData.m_nbOriginalBlocks = RemoteNbOrginalBlocks;
@@ -98,7 +116,7 @@ void RemoteSinkSink::feed(const SampleVector::const_iterator& begin, const Sampl
             metaData.m_tv_usec = nowus % 1000000UL; // tv.tv_usec;
 
             if (!m_dataBlock) { // on the very first cycle there is no data block allocated
-                m_dataBlock = new RemoteDataBlock();
+                m_dataBlock = m_remoteSinkSender->getDataBlock(); // ask a new block to sender
             }
 
             boost::crc_32_type crc32;
@@ -158,7 +176,6 @@ void RemoteSinkSink::feed(const SampleVector::const_iterator& begin, const Sampl
 
             if (m_txBlockIndex == RemoteNbOrginalBlocks - 1) // frame complete
             {
-                m_dataBlockMutex.lock();
                 m_dataBlock->m_txControlBlock.m_frameIndex = m_frameCount;
                 m_dataBlock->m_txControlBlock.m_processed = false;
                 m_dataBlock->m_txControlBlock.m_complete = true;
@@ -167,9 +184,7 @@ void RemoteSinkSink::feed(const SampleVector::const_iterator& begin, const Sampl
                 m_dataBlock->m_txControlBlock.m_dataAddress = m_dataAddress;
                 m_dataBlock->m_txControlBlock.m_dataPort = m_dataPort;
 
-                emit dataBlockAvailable(m_dataBlock);
-                m_dataBlock = new RemoteDataBlock(); // create a new one immediately
-                m_dataBlockMutex.unlock();
+                m_dataBlock = m_remoteSinkSender->getDataBlock(); // ask a new block to sender
 
                 m_txBlockIndex = 0;
                 m_frameCount++;
@@ -182,39 +197,6 @@ void RemoteSinkSink::feed(const SampleVector::const_iterator& begin, const Sampl
     }
 }
 
-void RemoteSinkSink::start()
-{
-    qDebug("RemoteSinkSink::start");
-
-    memset((void *) &m_currentMetaFEC, 0, sizeof(RemoteMetaDataFEC));
-
-    if (m_running) {
-        stop();
-    }
-
-    m_remoteSinkThread = new RemoteSinkThread();
-    connect(this,
-            SIGNAL(dataBlockAvailable(RemoteDataBlock *)),
-            m_remoteSinkThread,
-            SLOT(processDataBlock(RemoteDataBlock *)),
-            Qt::QueuedConnection);
-    m_remoteSinkThread->startStop(true);
-    m_running = true;
-}
-
-void RemoteSinkSink::stop()
-{
-    qDebug("RemoteSinkSink::stop");
-
-    if (m_remoteSinkThread)
-    {
-        m_remoteSinkThread->startStop(false);
-        m_remoteSinkThread->deleteLater();
-    }
-
-    m_running = false;
-}
-
 void RemoteSinkSink::applySettings(const RemoteSinkSettings& settings, bool force)
 {
     qDebug() << "RemoteSinkSink::applySettings:"
@@ -225,16 +207,6 @@ void RemoteSinkSink::applySettings(const RemoteSinkSettings& settings, bool forc
             << " m_streamIndex: " << settings.m_streamIndex
             << " force: " << force;
 
-    if ((m_settings.m_nbFECBlocks != settings.m_nbFECBlocks) || force)
-    {
-        setNbBlocksFEC(settings.m_nbFECBlocks);
-        setTxDelay(settings.m_txDelay, settings.m_nbFECBlocks);
-    }
-
-    if ((m_settings.m_txDelay != settings.m_txDelay) || force) {
-        setTxDelay(settings.m_txDelay, settings.m_nbFECBlocks);
-    }
-
     if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
         m_dataAddress = settings.m_dataAddress;
     }
@@ -243,11 +215,24 @@ void RemoteSinkSink::applySettings(const RemoteSinkSettings& settings, bool forc
         m_dataPort = settings.m_dataPort;
     }
 
+    if ((m_settings.m_log2Decim != settings.m_log2Decim)
+     || (m_settings.m_filterChainHash != settings.m_filterChainHash)
+     || (m_settings.m_nbFECBlocks != settings.m_nbFECBlocks)
+     || (m_settings.m_txDelay != settings.m_txDelay) || force)
+    {
+        double shiftFactor = HBFilterChainConverter::getShiftFactor(settings.m_log2Decim, settings.m_filterChainHash);
+        m_frequencyOffset = round(shiftFactor*m_basebandSampleRate);
+        setNbBlocksFEC(settings.m_nbFECBlocks);
+        setTxDelay(settings.m_txDelay, settings.m_nbFECBlocks, settings.m_log2Decim);
+    }
+
     m_settings = settings;
 }
 
-void RemoteSinkSink::applySampleRate(uint32_t sampleRate)
+void RemoteSinkSink::applyBasebandSampleRate(uint32_t sampleRate)
 {
-    m_sampleRate = sampleRate;
-    setTxDelay(m_settings.m_txDelay, m_settings.m_nbFECBlocks);
+    m_basebandSampleRate = sampleRate;
+    double shiftFactor = HBFilterChainConverter::getShiftFactor(m_settings.m_log2Decim, m_settings.m_filterChainHash);
+    m_frequencyOffset = round(shiftFactor*m_basebandSampleRate);
+    setTxDelay(m_settings.m_txDelay, m_settings.m_nbFECBlocks, m_settings.m_log2Decim);
 }

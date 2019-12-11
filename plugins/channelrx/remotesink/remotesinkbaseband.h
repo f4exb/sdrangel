@@ -59,13 +59,15 @@ public:
 
     RemoteSinkBaseband();
     ~RemoteSinkBaseband();
+
     void reset();
 	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
+    void startSender() { m_sink.startSender(); }
+    void stopSender() { m_sink.stopSender(); }
+
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
     void setBasebandSampleRate(int sampleRate);
-    void startSink() { m_sink.start(); }
-    void stopSink() { m_sink.stop(); }
 
 private:
     SampleSinkFifo m_sampleFifo;

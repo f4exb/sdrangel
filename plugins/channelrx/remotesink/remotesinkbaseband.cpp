@@ -116,7 +116,8 @@ bool RemoteSinkBaseband::handleMessage(const Message& cmd)
         m_basebandSampleRate = notif.getSampleRate();
         qDebug() << "RemoteSinkBaseband::handleMessage: DSPSignalNotification: basebandSampleRate:" << m_basebandSampleRate;
         m_channelizer->setBasebandSampleRate(m_basebandSampleRate);
-        m_sink.applySampleRate(m_basebandSampleRate/ (1<<m_settings.m_log2Decim));
+        m_sink.applyBasebandSampleRate(m_basebandSampleRate);
+        m_sink.setDeviceCenterFrequency(notif.getCenterFrequency());
 
         return true;
     }
@@ -137,7 +138,6 @@ void RemoteSinkBaseband::applySettings(const RemoteSinkSettings& settings, bool 
      || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
     {
         m_channelizer->setDecimation(settings.m_log2Decim, settings.m_filterChainHash);
-        m_sink.applySampleRate(m_basebandSampleRate/ (1<<settings.m_log2Decim));
     }
 
     m_sink.applySettings(settings, force);
@@ -153,5 +153,5 @@ void RemoteSinkBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_basebandSampleRate = sampleRate;
     m_channelizer->setBasebandSampleRate(m_basebandSampleRate);
-    m_sink.applySampleRate(m_basebandSampleRate/ (1<<m_settings.m_log2Decim));
+    m_sink.applyBasebandSampleRate(m_basebandSampleRate);
 }

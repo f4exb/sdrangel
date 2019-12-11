@@ -15,7 +15,8 @@ set(remotesink_SOURCES
     remotesinksink.cpp
     remotesinksettings.cpp
     remotesinkwebapiadapter.cpp
-	remotesinkthread.cpp
+    remotesinksender.cpp
+    remotesinkfifo.cpp
 	remotesinkplugin.cpp
 )
 
@@ -25,7 +26,8 @@ set(remotesink_HEADERS
     remotesinksink.h
     remotesinksettings.h
     remotesinkwebapiadapter.h
-	remotesinkthread.h
+    remotesinksender.h
+    remotesinkfifo.h
 	remotesinkplugin.h
 )
 
