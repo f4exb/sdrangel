@@ -114,7 +114,7 @@ void RemoteSinkThread::handleDataBlock(RemoteDataBlock& dataBlock)
             {
                 // send block via UDP
                 m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) RemoteUdpSize, m_address, dataPort);
-                usleep(txDelay);
+                //usleep(txDelay);
             }
         }
     }
@@ -159,7 +159,7 @@ void RemoteSinkThread::handleDataBlock(RemoteDataBlock& dataBlock)
             {
                 // send block via UDP
                 m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) RemoteUdpSize, m_address, dataPort);
-                usleep(txDelay);
+                //usleep(txDelay);
             }
         }
     }

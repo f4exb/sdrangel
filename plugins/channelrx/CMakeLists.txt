@@ -13,9 +13,9 @@ if(LIBDSDCC_FOUND AND LIBMBE_FOUND)
     add_subdirectory(demoddsd)
 endif(LIBDSDCC_FOUND AND LIBMBE_FOUND)
 
-if(CM256CC_FOUND)
-    add_subdirectory(remotesink)
-endif(CM256CC_FOUND)
+# if(CM256CC_FOUND)
+#     add_subdirectory(remotesink)
+# endif(CM256CC_FOUND)
 
 if (CODEC2_FOUND)
     add_subdirectory(demodfreedv)

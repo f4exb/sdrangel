@@ -57,42 +57,23 @@ public:
         { }
     };
 
-    class MsgBasebandSampleRateNotification : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        static MsgBasebandSampleRateNotification* create(int sampleRate) {
-            return new MsgBasebandSampleRateNotification(sampleRate);
-        }
-
-        int getBasebandSampleRate() const { return m_basebandSampleRate; }
-
-    private:
-
-        MsgBasebandSampleRateNotification(int sampleRate) :
-            Message(),
-            m_basebandSampleRate(sampleRate)
-        { }
-
-        int m_basebandSampleRate;
-    };
-
     RemoteSinkBaseband();
     ~RemoteSinkBaseband();
     void reset();
 	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
+    void setBasebandSampleRate(int sampleRate);
     void startSink() { m_sink.start(); }
     void stopSink() { m_sink.stop(); }
 
 private:
     SampleSinkFifo m_sampleFifo;
     DownSampleChannelizer *m_channelizer;
+    int m_basebandSampleRate;
     RemoteSinkSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     RemoteSinkSettings m_settings;
-    DeviceSampleSource *m_localSampleSource;
     QMutex m_mutex;
 
     bool handleMessage(const Message& cmd);

@@ -61,9 +61,9 @@ void RemoteSinkSink::setTxDelay(int txDelay, int nbBlocksFEC)
     delay /= 128 + nbBlocksFEC;
     m_txDelay = roundf(delay*1e6); // microseconds
     qDebug() << "RemoteSinkSink::setTxDelay:"
-            << " " << txDelay
-            << "% m_txDelay: " << m_txDelay << "us"
-            << " m_sampleRate: " << m_sampleRate << "S/s";
+        << "txDelay:" << txDelay << "%"
+        << "m_txDelay:" << m_txDelay << "us"
+        << "m_sampleRate: " << m_sampleRate << "S/s";
 }
 
 void RemoteSinkSink::setNbBlocksFEC(int nbBlocksFEC)
@@ -210,7 +210,6 @@ void RemoteSinkSink::stop()
     {
         m_remoteSinkThread->startStop(false);
         m_remoteSinkThread->deleteLater();
-        m_remoteSinkThread = nullptr;
     }
 
     m_running = false;

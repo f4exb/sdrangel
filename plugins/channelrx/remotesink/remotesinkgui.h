@@ -62,7 +62,7 @@ private:
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     RemoteSinkSettings m_settings;
-    int m_sampleRate;
+    int m_basebandSampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     double m_shiftFrequencyFactor; //!< Channel frequency shift factor
     bool m_doApplySettings;

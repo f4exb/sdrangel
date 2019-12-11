@@ -24,10 +24,8 @@
 #include "remotesinkbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband, Message)
-MESSAGE_CLASS_DEFINITION(RemoteSinkBaseband::MsgBasebandSampleRateNotification, Message)
 
 RemoteSinkBaseband::RemoteSinkBaseband() :
-    m_localSampleSource(nullptr),
     m_mutex(QMutex::Recursive)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
@@ -112,16 +110,15 @@ bool RemoteSinkBaseband::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgBasebandSampleRateNotification::match(cmd))
+    else if (DSPSignalNotification::match(cmd))
     {
-        QMutexLocker mutexLocker(&m_mutex);
-        MsgBasebandSampleRateNotification& notif = (MsgBasebandSampleRateNotification&) cmd;
-        qDebug() << "RemoteSinkBaseband::handleMessage: MsgBasebandSampleRateNotification: basebandSampleRate: " << notif.getBasebandSampleRate();
-        m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getBasebandSampleRate()));
-        m_channelizer->setBasebandSampleRate(notif.getBasebandSampleRate());
-        m_sink.applySampleRate(m_channelizer->getChannelSampleRate());
+        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        m_basebandSampleRate = notif.getSampleRate();
+        qDebug() << "RemoteSinkBaseband::handleMessage: DSPSignalNotification: basebandSampleRate:" << m_basebandSampleRate;
+        m_channelizer->setBasebandSampleRate(m_basebandSampleRate);
+        m_sink.applySampleRate(m_basebandSampleRate/ (1<<m_settings.m_log2Decim));
 
-		return true;
+        return true;
     }
     else
     {
@@ -140,14 +137,21 @@ void RemoteSinkBaseband::applySettings(const RemoteSinkSettings& settings, bool 
      || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
     {
         m_channelizer->setDecimation(settings.m_log2Decim, settings.m_filterChainHash);
-        m_sink.applySampleRate(m_channelizer->getChannelSampleRate());
+        m_sink.applySampleRate(m_basebandSampleRate/ (1<<settings.m_log2Decim));
     }
 
-    //m_source.applySettings(settings, force);
+    m_sink.applySettings(settings, force);
     m_settings = settings;
 }
 
 int RemoteSinkBaseband::getChannelSampleRate() const
 {
     return m_channelizer->getChannelSampleRate();
+}
+
+void RemoteSinkBaseband::setBasebandSampleRate(int sampleRate)
+{
+    m_basebandSampleRate = sampleRate;
+    m_channelizer->setBasebandSampleRate(m_basebandSampleRate);
+    m_sink.applySampleRate(m_basebandSampleRate/ (1<<m_settings.m_log2Decim));
 }

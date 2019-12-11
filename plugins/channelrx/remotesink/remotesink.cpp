@@ -39,7 +39,6 @@
 #include "remotesinkbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(RemoteSink::MsgConfigureRemoteSink, Message)
-MESSAGE_CLASS_DEFINITION(RemoteSink::MsgBasebandSampleRateNotification, Message)
 
 const QString RemoteSink::m_channelIdURI = "sdrangel.channel.remotesink";
 const QString RemoteSink::m_channelId = "RemoteSink";
@@ -48,7 +47,7 @@ RemoteSink::RemoteSink(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_frequencyOffset(0),
-        m_basebandSampleRate(48000)
+        m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
 
@@ -88,8 +87,13 @@ void RemoteSink::feed(const SampleVector::const_iterator& begin, const SampleVec
 
 void RemoteSink::start()
 {
-    qDebug("RemoteSink::start");
+    qDebug("RemoteSink::start: m_basebandSampleRate: %d", m_basebandSampleRate);
     m_basebandSink->reset();
+
+    if (m_basebandSampleRate != 0) {
+        m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
+    }
+
     m_thread->start();
     m_basebandSink->startSink();
 }
@@ -104,39 +108,32 @@ void RemoteSink::stop()
 
 bool RemoteSink::handleMessage(const Message& cmd)
 {
-    (void) cmd;
-    if (DSPSignalNotification::match(cmd))
-    {
-        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
-
-        qDebug() << "RemoteSink::handleMessage: DSPSignalNotification:"
-                << " inputSampleRate: " << notif.getSampleRate()
-                << " centerFrequency: " << notif.getCenterFrequency();
-
-        m_basebandSampleRate = notif.getSampleRate();
-        m_centerFrequency = notif.getCenterFrequency();
-
-        calculateFrequencyOffset(); // This is when device sample rate changes
-        //propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex, m_settings.m_log2Decim);
-
-        MsgBasebandSampleRateNotification *msg = MsgBasebandSampleRateNotification::create(m_basebandSampleRate);
-        m_basebandSink->getInputMessageQueue()->push(msg);
-
-        if (m_guiMessageQueue)
-        {
-            MsgBasebandSampleRateNotification *msg = MsgBasebandSampleRateNotification::create(m_basebandSampleRate);
-            m_guiMessageQueue->push(msg);
-        }
-
-        return true;
-    }
-    else if (MsgConfigureRemoteSink::match(cmd))
+    if (MsgConfigureRemoteSink::match(cmd))
     {
         MsgConfigureRemoteSink& cfg = (MsgConfigureRemoteSink&) cmd;
         qDebug() << "RemoteSink::handleMessage: MsgConfigureRemoteSink";
         applySettings(cfg.getSettings(), cfg.getForce());
 
         return true;
+    }
+    else if (DSPSignalNotification::match(cmd))
+    {
+        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        m_basebandSampleRate = notif.getSampleRate();
+        qDebug() << "RemoteSink::handleMessage: DSPSignalNotification: m_basebandSampleRate:" << m_basebandSampleRate;
+
+        // Forward to the sink
+        DSPSignalNotification* msgToBaseband = new DSPSignalNotification(notif); // make a copy
+        m_basebandSink->getInputMessageQueue()->push(msgToBaseband);
+
+        // Forward to the GUI
+        if (getMessageQueueToGUI())
+        {
+            DSPSignalNotification* msgToGUI = new DSPSignalNotification(notif); // make a copy
+            getMessageQueueToGUI()->push(msgToBaseband);
+        }
+
+	    return true;
     }
     else
     {
