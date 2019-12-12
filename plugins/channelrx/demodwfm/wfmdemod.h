@@ -26,6 +26,7 @@
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
+#include "util/message.h"
 
 #include "wfmdemodsettings.h"
 #include "wfmdemodbaseband.h"

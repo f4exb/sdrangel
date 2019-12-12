@@ -23,7 +23,6 @@
 
 #include "device/deviceapi.h"
 #include "dsp/downchannelizer.h"
-#include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/dspcommands.h"
 
