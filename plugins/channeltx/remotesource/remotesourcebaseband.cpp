@@ -58,7 +58,7 @@ void RemoteSourceBaseband::reset()
 
 void RemoteSourceBaseband::pull(const SampleVector::iterator& begin, unsigned int nbSamples)
 {
-    qDebug("RemoteSourceBaseband::pull: %u", nbSamples);
+    //qDebug("RemoteSourceBaseband::pull: %u", nbSamples);
     unsigned int part1Begin, part1End, part2Begin, part2End;
     m_sampleFifo.read(nbSamples, part1Begin, part1End, part2Begin, part2End);
     SampleVector& data = m_sampleFifo.getData();

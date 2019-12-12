@@ -406,10 +406,10 @@ void TestSourceThread::tick()
         if (m_histoCounter < 49) {
             m_histoCounter++;
         } else {
-            qDebug("TestSourceThread::tick: -----------");
-            for (std::map<int,int>::iterator it = m_timerHistogram.begin(); it != m_timerHistogram.end(); ++it) {
-                qDebug("TestSourceThread::tick: %d: %d", it->first, it->second);
-            }
+            // qDebug("TestSourceThread::tick: -----------");
+            // for (std::map<int,int>::iterator it = m_timerHistogram.begin(); it != m_timerHistogram.end(); ++it) {
+            //     qDebug("TestSourceThread::tick: %d: %d", it->first, it->second);
+            // }
             m_histoCounter = 0;
         }
 
