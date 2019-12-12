@@ -29,7 +29,8 @@
 #include "dsp/dsptypes.h"
 #include "util/CRC64.h"
 
-class UDPSinkFECWorker;
+class QThread;
+class RemoteOutputSender;
 
 class UDPSinkFEC : public QObject
 {
@@ -46,8 +47,8 @@ public:
     /** Destroy UDP sink */
     ~UDPSinkFEC();
 
-    void start();
-    void stop();
+    void startSender();
+    void stopSender();
 
     /**
      * Write IQ samples
@@ -80,25 +81,22 @@ private:
 
     uint32_t     m_sampleRate;        //!< sample rate in Hz
     uint32_t     m_nbSamples;         //!< total number of samples sent int the last frame
-
     QHostAddress m_ownAddress;
 
     CRC64        m_crc64;
-    uint8_t*     m_bufMeta;
-    uint8_t*     m_buf;
-
     RemoteMetaDataFEC m_currentMetaFEC;  //!< Meta data for current frame
     uint32_t m_nbBlocksFEC;                 //!< Variable number of FEC blocks
     float m_txDelayRatio;                   //!< Delay in ratio of nominal frame period
     uint32_t m_txDelay;                     //!< Delay in microseconds (usleep) between each sending of an UDP datagram
-    RemoteSuperBlock m_txBlocks[4][256]; //!< UDP blocks to send with original data + FEC
+    RemoteDataBlock *m_dataBlock;
     RemoteSuperBlock m_superBlock;       //!< current super block being built
     int m_txBlockIndex;                     //!< Current index in blocks to transmit in the Tx row
     int m_txBlocksIndex;                    //!< Current index of Tx blocks row
     uint16_t m_frameCount;                  //!< transmission frame count
     int m_sampleIndex;                      //!< Current sample index in protected block data
 
-    UDPSinkFECWorker *m_udpWorker;
+    RemoteOutputSender *m_remoteOutputSender;
+    QThread *m_senderThread;
     QString m_remoteAddress;
     uint16_t m_remotePort;
 };

@@ -49,7 +49,7 @@ RemoteOutputThread::~RemoteOutputThread()
 void RemoteOutputThread::startWork()
 {
 	qDebug() << "RemoteOutputThread::startWork: ";
-	m_udpSinkFEC.start();
+	m_udpSinkFEC.startSender();
     m_maxThrottlems = 0;
     m_startWaitMutex.lock();
     m_elapsedTimer.start();
@@ -64,7 +64,7 @@ void RemoteOutputThread::stopWork()
 	qDebug() << "RemoteOutputThread::stopWork";
 	m_running = false;
 	wait();
-	m_udpSinkFEC.stop();
+	m_udpSinkFEC.stopSender();
 }
 
 void RemoteOutputThread::setSamplerate(int samplerate)

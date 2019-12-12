@@ -16,7 +16,8 @@ set(remoteoutput_SOURCES
     remoteoutputwebapiadapter.cpp
 	remoteoutputthread.cpp
     udpsinkfec.cpp
-    udpsinkfecworker.cpp
+    remoteoutputsender.cpp
+    remoteoutputfifo.cpp
 )
 
 set(remoteoutput_HEADERS
@@ -26,28 +27,27 @@ set(remoteoutput_HEADERS
     remoteoutputwebapiadapter.h
 	remoteoutputthread.h
     udpsinkfec.h
-    udpsinkfecworker.h
+    remoteoutputsender.h
+    remoteoutputfifo.h
 )
 
 include_directories(
-        ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 	${CMAKE_SOURCE_DIR}/devices
-        ${Boost_INCLUDE_DIRS}
-        ${CM256CC_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIRS}
+    ${CM256CC_INCLUDE_DIR}
 )
 
 if(NOT SERVER_MODE)
     set(remoteoutput_SOURCES
         ${remoteoutput_SOURCES}
         remoteoutputgui.cpp
-
         remoteoutputgui.ui
     )
     set(remoteoutput_HEADERS
         ${remoteoutput_HEADERS}
         remoteoutputgui.h
     )
-
     set(TARGET_NAME outputremote)
     set(TARGET_LIB "Qt5::Widgets")
     set(TARGET_LIB_GUI "sdrgui")
@@ -68,12 +68,12 @@ if(ENABLE_EXTERNAL_LIBRARIES)
 endif()
 
 target_link_libraries(${TARGET_NAME}
-        Qt5::Core
-        ${TARGET_LIB}
+    Qt5::Core
+    ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
-        swagger
-        ${CM256CC_LIBRARIES}
+    swagger
+    ${CM256CC_LIBRARIES}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
