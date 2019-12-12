@@ -44,16 +44,6 @@ public:
     void applySettings(const RemoteSinkSettings& settings, bool force = false);
     void applyBasebandSampleRate(uint32_t sampleRate);
 
-    /** Set device center frequency given in Hz */
-    void setDeviceCenterFrequency(uint64_t centerFrequency) { m_deviceCenterFrequency = centerFrequency; }
-
-    /** Set sample rate given in Hz */
-
-    void setNbBlocksFEC(int nbBlocksFEC);
-    void setTxDelay(int txDelay, int nbBlocksFEC, int log2Decim);
-    void setDataAddress(const QString& address) { m_dataAddress = address; }
-    void setDataPort(uint16_t port) { m_dataPort = port; }
-
 private:
     RemoteSinkSettings m_settings;
     QThread *m_senderThread;
@@ -73,6 +63,9 @@ private:
     int m_txDelay;
     QString m_dataAddress;
     uint16_t m_dataPort;
+
+    void setNbBlocksFEC(int nbBlocksFEC);
+    void setTxDelay(int txDelay, int nbBlocksFEC, int log2Decim);
 };
 
 #endif // INCLUDE_REMOTESINKSINK_H_
