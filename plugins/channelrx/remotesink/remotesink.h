@@ -107,6 +107,7 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     uint32_t getNumberOfDeviceStreams() const;
+    int getBasebandSampleRate() const { return m_basebandSampleRate; }
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

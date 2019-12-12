@@ -125,6 +125,7 @@ RemoteSinkGUI::RemoteSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
     m_remoteSink = (RemoteSink*) channelrx;
     m_remoteSink->setMessageQueueToGUI(getInputMessageQueue());
+    m_basebandSampleRate = m_remoteSink->getBasebandSampleRate();
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.setColor(m_settings.m_rgbColor);

@@ -122,6 +122,7 @@ bool RemoteSink::handleMessage(const Message& cmd)
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
         qDebug() << "RemoteSink::handleMessage: DSPSignalNotification: m_basebandSampleRate:" << m_basebandSampleRate;
+        calculateFrequencyOffset();
 
         // Forward to the sink
         DSPSignalNotification* msgToBaseband = new DSPSignalNotification(notif); // make a copy
@@ -176,6 +177,7 @@ void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
+    bool frequencyOffsetChange = false;
 
     if ((m_settings.m_nbFECBlocks != settings.m_nbFECBlocks) || force) {
         reverseAPIKeys.append("nbFECBlocks");
@@ -188,6 +190,24 @@ void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
     }
     if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
         reverseAPIKeys.append("dataPort");
+    }
+    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
+        reverseAPIKeys.append("rgbColor");
+    }
+    if ((m_settings.m_title != settings.m_title) || force) {
+        reverseAPIKeys.append("title");
+    }
+
+    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    {
+        reverseAPIKeys.append("log2Decim");
+        frequencyOffsetChange = true;
+    }
+
+    if ((m_settings.m_filterChainHash != settings.m_filterChainHash) || force)
+    {
+        reverseAPIKeys.append("filterChainHash");
+        frequencyOffsetChange = true;
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -217,6 +237,10 @@ void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
     }
 
     m_settings = settings;
+
+    if (frequencyOffsetChange) {
+        calculateFrequencyOffset();
+    }
 }
 
 void RemoteSink::validateFilterChainHash(RemoteSinkSettings& settings)
