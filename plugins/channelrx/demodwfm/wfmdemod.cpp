@@ -32,7 +32,6 @@
 #include "SWGChannelReport.h"
 #include "SWGWFMDemodReport.h"
 
-#include <dsp/downchannelizer.h>
 #include "device/deviceapi.h"
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"

@@ -23,7 +23,6 @@
 
 #include "device/deviceapi.h"
 #include "audio/audiooutput.h"
-#include "dsp/downchannelizer.h"
 #include "dsp/dspcommands.h"
 #include "chanalyzer.h"
 

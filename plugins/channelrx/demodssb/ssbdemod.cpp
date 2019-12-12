@@ -33,7 +33,6 @@
 #include "SWGSSBDemodReport.h"
 
 #include "dsp/dspengine.h"
-#include "dsp/downchannelizer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"

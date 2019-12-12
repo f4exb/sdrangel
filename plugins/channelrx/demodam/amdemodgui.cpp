@@ -23,7 +23,6 @@
 #include "amdemodssbdialog.h"
 
 #include "device/deviceuiset.h"
-#include "dsp/downchannelizer.h"
 #include "dsp/dspengine.h"
 #include "ui_amdemodgui.h"
 #include "plugin/pluginapi.h"

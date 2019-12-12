@@ -24,7 +24,6 @@
 #include <complex.h>
 
 #include "dsp/dspengine.h"
-#include "dsp/downchannelizer.h"
 #include "device/deviceapi.h"
 
 #include "atvdemod.h"

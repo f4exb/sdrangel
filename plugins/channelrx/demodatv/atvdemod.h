@@ -26,7 +26,6 @@
 #include "channel/channelapi.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/dspcommands.h"
-#include "dsp/downchannelizer.h"
 #include "util/message.h"
 
 #include "atvdemodbaseband.h"

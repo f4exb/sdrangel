@@ -19,7 +19,6 @@
 #include "bfmdemodgui.h"
 
 #include "device/deviceuiset.h"
-#include <dsp/downchannelizer.h>
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>

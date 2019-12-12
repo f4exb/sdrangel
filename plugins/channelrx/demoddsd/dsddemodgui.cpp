@@ -19,7 +19,6 @@
 #include "dsddemodgui.h"
 
 #include "device/deviceuiset.h"
-#include "dsp/downchannelizer.h"
 
 #include "ui_dsddemodgui.h"
 #include "dsp/scopevisxy.h"

@@ -22,7 +22,6 @@
 #include "freqtrackergui.h"
 
 #include "device/deviceuiset.h"
-#include "dsp/downchannelizer.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "ui_freqtrackergui.h"

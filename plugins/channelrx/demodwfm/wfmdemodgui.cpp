@@ -1,7 +1,6 @@
 #include "wfmdemodgui.h"
 
 #include "device/deviceuiset.h"
-#include "dsp/downchannelizer.h"
 
 #include <QDockWidget>
 #include <QMainWindow>

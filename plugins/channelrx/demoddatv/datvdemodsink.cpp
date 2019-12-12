@@ -24,7 +24,6 @@
 
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
-#include "dsp/downchannelizer.h"
 #include "device/deviceapi.h"
 
 #include "datvdemodreport.h"
