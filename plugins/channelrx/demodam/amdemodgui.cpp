@@ -25,7 +25,6 @@
 #include "device/deviceuiset.h"
 #include "dsp/downchannelizer.h"
 #include "dsp/dspengine.h"
-#include "dsp/threadedbasebandsamplesink.h"
 #include "ui_amdemodgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"

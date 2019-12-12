@@ -26,7 +26,6 @@
 #include "SWGChannelSettings.h"
 
 #include "util/simpleserializer.h"
-#include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/downchannelizer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspdevicesourceengine.h"

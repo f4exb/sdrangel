@@ -36,7 +36,6 @@
 #include "dsp/downchannelizer.h"
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
-#include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/dspcommands.h"
 #include "dsp/fftfilt.h"
 #include "dsp/devicesamplemimo.h"

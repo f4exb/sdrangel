@@ -30,7 +30,6 @@
 #include "export.h"
 
 class DeviceSampleMIMO;
-class ThreadedBasebandSampleSink;
 class BasebandSampleSink;
 class MIMOChannel;
 
@@ -75,36 +74,6 @@ public:
         unsigned int getIndex() const { return m_index; }
     private:
         BasebandSampleSource* m_sampleSource;
-        unsigned int m_index;
-    };
-
-    class AddThreadedBasebandSampleSink : public Message {
-        MESSAGE_CLASS_DECLARATION
-    public:
-        AddThreadedBasebandSampleSink(ThreadedBasebandSampleSink* threadedSampleSink, unsigned int index) :
-            Message(),
-            m_threadedSampleSink(threadedSampleSink),
-            m_index(index)
-        { }
-        ThreadedBasebandSampleSink* getThreadedSampleSink() const { return m_threadedSampleSink; }
-        unsigned int getIndex() const { return m_index; }
-    private:
-        ThreadedBasebandSampleSink* m_threadedSampleSink;
-        unsigned int m_index;
-    };
-
-    class RemoveThreadedBasebandSampleSink : public Message {
-        MESSAGE_CLASS_DECLARATION
-    public:
-        RemoveThreadedBasebandSampleSink(ThreadedBasebandSampleSink* threadedSampleSink, unsigned int index) :
-            Message(),
-            m_threadedSampleSink(threadedSampleSink),
-            m_index(index)
-        { }
-        ThreadedBasebandSampleSink* getThreadedSampleSink() const { return m_threadedSampleSink; }
-        unsigned int getIndex() const { return m_index; }
-    private:
-        ThreadedBasebandSampleSink* m_threadedSampleSink;
         unsigned int m_index;
     };
 
@@ -264,8 +233,6 @@ public:
 	void removeChannelSource(BasebandSampleSource* source, int index = 0);         //!< Remove a channel source
 	void addChannelSink(BasebandSampleSink* sink, int index = 0);                  //!< Add a channel sink
 	void removeChannelSink(BasebandSampleSink* sink, int index = 0);               //!< Remove a channel sink
-	void addChannelSink(ThreadedBasebandSampleSink* sink, int index = 0);          //!< Add a channel sink that will run on its own thread
-	void removeChannelSink(ThreadedBasebandSampleSink* sink, int index = 0);       //!< Remove a channel sink that runs on its own thread
     void addMIMOChannel(MIMOChannel *channel);                                     //!< Add a MIMO channel
     void removeMIMOChannel(MIMOChannel *channel);                                  //!< Remove a MIMO channel
 
@@ -359,9 +326,6 @@ private:
 
 	typedef std::list<BasebandSampleSink*> BasebandSampleSinks;
 	std::vector<BasebandSampleSinks> m_basebandSampleSinks; //!< ancillary sample sinks on main thread (per input stream)
-	typedef std::list<ThreadedBasebandSampleSink*> ThreadedBasebandSampleSinks;
-	std::vector<ThreadedBasebandSampleSinks> m_threadedBasebandSampleSinks; //!< channel sample sinks on their own thread (per input stream)
-
 	typedef std::list<BasebandSampleSource*> BasebandSampleSources;
 	std::vector<BasebandSampleSources> m_basebandSampleSources; //!< channel sample sources (per output stream)
     std::vector<IncrementalVector<Sample>> m_sourceSampleBuffers;

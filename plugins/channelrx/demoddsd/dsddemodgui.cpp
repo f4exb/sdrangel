@@ -21,7 +21,6 @@
 #include "device/deviceuiset.h"
 #include "dsp/downchannelizer.h"
 
-#include "dsp/threadedbasebandsamplesink.h"
 #include "ui_dsddemodgui.h"
 #include "dsp/scopevisxy.h"
 #include "plugin/pluginapi.h"

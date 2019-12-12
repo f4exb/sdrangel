@@ -20,7 +20,6 @@
 
 #include "device/deviceuiset.h"
 #include "dsp/downchannelizer.h"
-#include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/spectrumscopecombovis.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"

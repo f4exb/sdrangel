@@ -28,7 +28,6 @@
 #include <iostream>
 #include <iomanip>
 
-#include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"

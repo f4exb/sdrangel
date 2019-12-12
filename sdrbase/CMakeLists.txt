@@ -108,7 +108,6 @@ set(sdrbase_SOURCES
     dsp/basebandsamplesource.cpp
     dsp/nullsink.cpp
     dsp/recursivefilters.cpp
-    dsp/threadedbasebandsamplesink.cpp
     dsp/wfir.cpp
     dsp/devicesamplesource.cpp
     dsp/devicesamplesink.cpp
@@ -248,7 +247,6 @@ set(sdrbase_HEADERS
     dsp/basebandsamplesink.h
     dsp/basebandsamplesource.h
     dsp/nullsink.h
-    dsp/threadedbasebandsamplesink.h
     dsp/wfir.h
     dsp/devicesamplesource.h
     dsp/devicesamplesink.h

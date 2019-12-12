@@ -25,7 +25,6 @@
 #include "export.h"
 
 class BasebandSampleSink;
-class ThreadedBasebandSampleSink;
 class BasebandSampleSource;
 class MIMOChannel;
 class ChannelAPI;
@@ -71,8 +70,6 @@ public:
     void removeAncillarySink(BasebandSampleSink* sink, unsigned int index = 0);    //!< Removes it
     void setSpectrumSinkInput(bool sourceElseSink = true, unsigned int index = 0); //!< Used in the MIMO case to select which stream is used as input to main spectrum
 
-    void addChannelSink(ThreadedBasebandSampleSink* sink, int streamIndex = 0);        //!< Add a channel sink (Rx)
-    void removeChannelSink(ThreadedBasebandSampleSink* sink, int streamIndex = 0);     //!< Remove a channel sink (Rx)
     void addChannelSink(BasebandSampleSink* sink, int streamIndex = 0);                //!< Add a channel sink (Rx)
     void removeChannelSink(BasebandSampleSink* sink, int streamIndex = 0);             //!< Remove a channel sink (Rx)
     void addChannelSource(BasebandSampleSource* sink, int streamIndex = 0);            //!< Add a channel source (Tx)

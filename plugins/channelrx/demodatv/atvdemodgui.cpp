@@ -24,7 +24,6 @@
 #include "device/deviceuiset.h"
 #include "dsp/downchannelizer.h"
 
-#include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/scopevis.h"
 #include "ui_atvdemodgui.h"
 #include "plugin/pluginapi.h"

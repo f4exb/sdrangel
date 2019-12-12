@@ -24,7 +24,6 @@
 #include <QThread>
 
 #include "dsp/downchannelizer.h"
-#include "dsp/threadedbasebandsamplesink.h"
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
 

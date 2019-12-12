@@ -26,7 +26,6 @@
 
 class DeviceSampleSource;
 class BasebandSampleSink;
-class ThreadedBasebandSampleSink;
 class DeviceSampleSink;
 class BasebandSampleSource;
 class AudioFifo;
@@ -182,30 +181,6 @@ public:
 
 private:
 	BasebandSampleSource* m_sampleSource;
-};
-
-class SDRBASE_API DSPAddThreadedBasebandSampleSink : public Message {
-	MESSAGE_CLASS_DECLARATION
-
-public:
-	DSPAddThreadedBasebandSampleSink(ThreadedBasebandSampleSink* threadedSampleSink) : Message(), m_threadedSampleSink(threadedSampleSink) { }
-
-	ThreadedBasebandSampleSink* getThreadedSampleSink() const { return m_threadedSampleSink; }
-
-private:
-	ThreadedBasebandSampleSink* m_threadedSampleSink;
-};
-
-class SDRBASE_API DSPRemoveThreadedBasebandSampleSink : public Message {
-	MESSAGE_CLASS_DECLARATION
-
-public:
-	DSPRemoveThreadedBasebandSampleSink(ThreadedBasebandSampleSink* threadedSampleSink) : Message(), m_threadedSampleSink(threadedSampleSink) { }
-
-	ThreadedBasebandSampleSink* getThreadedSampleSink() const { return m_threadedSampleSink; }
-
-private:
-	ThreadedBasebandSampleSink* m_threadedSampleSink;
 };
 
 class SDRBASE_API DSPAddAudioSink : public Message {

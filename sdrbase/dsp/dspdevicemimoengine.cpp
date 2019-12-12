@@ -19,7 +19,7 @@
 #include <QDebug>
 
 #include "dspcommands.h"
-#include "threadedbasebandsamplesink.h"
+#include "basebandsamplesink.h"
 #include "basebandsamplesource.h"
 #include "devicesamplemimo.h"
 #include "mimochannel.h"
@@ -29,8 +29,6 @@
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::SetSampleMIMO, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddBasebandSampleSource, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::RemoveBasebandSampleSource, Message)
-MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddThreadedBasebandSampleSink, Message)
-MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::RemoveThreadedBasebandSampleSink, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddMIMOChannel, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::RemoveMIMOChannel, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::AddBasebandSampleSink, Message)
@@ -168,26 +166,6 @@ void DSPDeviceMIMOEngine::removeChannelSource(BasebandSampleSource* source, int 
         << " at: "
         << index;
 	RemoveBasebandSampleSource cmd(source, index);
-	m_syncMessenger.sendWait(cmd);
-}
-
-void DSPDeviceMIMOEngine::addChannelSink(ThreadedBasebandSampleSink* sink, int index)
-{
-	qDebug() << "DSPDeviceMIMOEngine::addThreadedSink: "
-        << sink->objectName().toStdString().c_str()
-        << " at: "
-        << index;
-	AddThreadedBasebandSampleSink cmd(sink, index);
-	m_syncMessenger.sendWait(cmd);
-}
-
-void DSPDeviceMIMOEngine::removeChannelSink(ThreadedBasebandSampleSink* sink, int index)
-{
-	qDebug() << "DSPDeviceMIMOEngine::removeThreadedSink: "
-        << sink->objectName().toStdString().c_str()
-        << " at: "
-        << index;
-	RemoveThreadedBasebandSampleSink cmd(sink, index);
 	m_syncMessenger.sendWait(cmd);
 }
 
@@ -442,12 +420,6 @@ void DSPDeviceMIMOEngine::workSamplesSink(const SampleVector::const_iterator& vb
         m_spectrumSink->feed(vbegin, vend, positiveOnly);
     }
 
-    // feed data to threaded sinks
-    for (ThreadedBasebandSampleSinks::const_iterator it = m_threadedBasebandSampleSinks[streamIndex].begin(); it != m_threadedBasebandSampleSinks[streamIndex].end(); ++it)
-    {
-        (*it)->feed(vbegin, vend, positiveOnly);
-    }
-
     // feed data to MIMO channels
     for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it) {
         (*it)->feed(vbegin, vend, streamIndex);
@@ -559,17 +531,6 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoIdle(int subsystemIndex)
             }
         }
 
-        std::vector<ThreadedBasebandSampleSinks>::const_iterator vtSinkIt = m_threadedBasebandSampleSinks.begin();
-
-        for (; vtSinkIt != m_threadedBasebandSampleSinks.end(); vtSinkIt++)
-        {
-            for (ThreadedBasebandSampleSinks::const_iterator it = vtSinkIt->begin(); it != vtSinkIt->end(); ++it)
-            {
-                qDebug() << "DSPDeviceMIMOEngine::gotoIdle: stopping ThreadedBasebandSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
-                (*it)->stop();
-            }
-        }
-
         for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it)
         {
             qDebug() << "DSPDeviceMIMOEngine::gotoIdle: stopping MIMOChannel sinks: " << (*it)->objectName().toStdString().c_str();
@@ -676,15 +637,6 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoInit(int subsystemIndex)
                     (*it)->handleMessage(notif);
                 }
             }
-
-            if (isource < m_threadedBasebandSampleSinks.size())
-            {
-                for (ThreadedBasebandSampleSinks::const_iterator it = m_threadedBasebandSampleSinks[isource].begin(); it != m_threadedBasebandSampleSinks[isource].end(); ++it)
-                {
-                    qDebug() << "DSPDeviceMIMOEngine::gotoInit: initializing ThreadedSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
-                    (*it)->handleSinkMessage(notif);
-                }
-            }
         }
     }
     else if (subsystemIndex == 1) // Tx
@@ -767,17 +719,6 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoRunning(int subsystemIndex)
             for (BasebandSampleSinks::const_iterator it = vbit->begin(); it != vbit->end(); ++it)
             {
                 qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting BasebandSampleSink: " << (*it)->objectName().toStdString().c_str();
-                (*it)->start();
-            }
-        }
-
-        std::vector<ThreadedBasebandSampleSinks>::const_iterator vtSinkIt = m_threadedBasebandSampleSinks.begin();
-
-        for (; vtSinkIt != m_threadedBasebandSampleSinks.end(); vtSinkIt++)
-        {
-            for (ThreadedBasebandSampleSinks::const_iterator it = vtSinkIt->begin(); it != vtSinkIt->end(); ++it)
-            {
-                qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting ThreadedBasebandSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
                 (*it)->start();
             }
         }
@@ -893,7 +834,6 @@ void DSPDeviceMIMOEngine::handleSetMIMO(DeviceSampleMIMO* mimo)
     for (int i = 0; i < m_deviceSampleMIMO->getNbSinkFifos(); i++)
     {
         m_basebandSampleSinks.push_back(BasebandSampleSinks());
-        m_threadedBasebandSampleSinks.push_back(ThreadedBasebandSampleSinks());
         m_sourcesCorrections.push_back(SourceCorrection());
     }
 
@@ -1058,38 +998,6 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
             }
 
 		    m_basebandSampleSinks[isource].remove(sink);
-        }
-	}
-	else if (AddThreadedBasebandSampleSink::match(*message))
-	{
-        const AddThreadedBasebandSampleSink *msg = (AddThreadedBasebandSampleSink *) message;
-		ThreadedBasebandSampleSink *threadedSink = msg->getThreadedSampleSink();
-        unsigned int isource = msg->getIndex();
-
-        if (isource < m_threadedBasebandSampleSinks.size())
-        {
-		    m_threadedBasebandSampleSinks[isource].push_back(threadedSink);
-            // initialize sample rate and center frequency in the sink:
-            int sourceStreamSampleRate = m_deviceSampleMIMO->getSourceSampleRate(isource);
-            quint64 sourceCenterFrequency = m_deviceSampleMIMO->getSourceCenterFrequency(isource);
-            DSPSignalNotification msg(sourceStreamSampleRate, sourceCenterFrequency);
-            threadedSink->handleSinkMessage(msg);
-            // start the sink:
-            if (m_stateRx == StRunning) {
-                threadedSink->start();
-            }
-        }
-	}
-	else if (RemoveThreadedBasebandSampleSink::match(*message))
-	{
-        const RemoveThreadedBasebandSampleSink *msg = (RemoveThreadedBasebandSampleSink *) message;
-		ThreadedBasebandSampleSink* threadedSink = msg->getThreadedSampleSink();
-        unsigned int isource = msg->getIndex();
-
-        if (isource < m_threadedBasebandSampleSinks.size())
-        {
-            threadedSink->stop();
-            m_threadedBasebandSampleSinks[isource].remove(threadedSink);
         }
 	}
 	else if (AddBasebandSampleSource::match(*message))
@@ -1310,16 +1218,6 @@ void DSPDeviceMIMOEngine::handleInputMessages()
                         {
                             qDebug() << "DSPDeviceMIMOEngine::handleInputMessages: starting " << (*it)->objectName().toStdString().c_str();
                             (*it)->handleMessage(*message);
-                        }
-                    }
-
-                    // forward source changes to channel sinks with immediate execution (no queuing)
-                    if (istream < m_threadedBasebandSampleSinks.size())
-                    {
-                        for (ThreadedBasebandSampleSinks::const_iterator it = m_threadedBasebandSampleSinks[istream].begin(); it != m_threadedBasebandSampleSinks[istream].end(); ++it)
-                        {
-                            qDebug() << "DSPDeviceMIMOEngine::handleSourceMessages: forward message to ThreadedSampleSink(" << (*it)->getSampleSinkObjectName().toStdString().c_str() << ")";
-                            (*it)->handleSinkMessage(*message);
                         }
                     }
 
