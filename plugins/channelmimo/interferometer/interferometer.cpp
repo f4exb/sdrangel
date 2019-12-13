@@ -22,7 +22,6 @@
 #include <QNetworkReply>
 
 #include "device/deviceapi.h"
-#include "dsp/downchannelizer.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/dspcommands.h"
 
@@ -181,25 +180,19 @@ bool Interferometer::handleMessage(const Message& cmd)
             m_deviceSampleRate = notif.getSampleRate();
             calculateFrequencyOffset(); // This is when device sample rate changes
 
-            // Notify sink of input sample rate change
+            // Notify baseband sink of input sample rate change
             InterferometerBaseband::MsgSignalNotification *sig = InterferometerBaseband::MsgSignalNotification::create(
                 m_deviceSampleRate, notif.getCenterFrequency(), notif.getIndex()
             );
             qDebug() << "Interferometer::handleMessage: DSPMIMOSignalNotification: push to sink";
             m_basbandSink->getInputMessageQueue()->push(sig);
 
-            // Redo the channelizer stuff with the new sample rate to re-synchronize everything
-            InterferometerBaseband::MsgConfigureChannelizer *msg = InterferometerBaseband::MsgConfigureChannelizer::create(
-                m_settings.m_log2Decim,
-                m_settings.m_filterChainHash);
-            m_basbandSink->getInputMessageQueue()->push(msg);
-
-            if (m_guiMessageQueue)
+            if (getMessageQueueToGUI())
             {
                 qDebug() << "Interferometer::handleMessage: DSPMIMOSignalNotification: push to GUI";
                 MsgBasebandNotification *msg = MsgBasebandNotification::create(
                     notif.getSampleRate(), notif.getCenterFrequency());
-                m_guiMessageQueue->push(msg);
+                getMessageQueueToGUI()->push(msg);
             }
         }
 

@@ -18,7 +18,8 @@
 #include <QMutexLocker>
 #include <QDebug>
 
-#include "dsp/downchannelizer.h"
+#include "dsp/downsamplechannelizer.h"
+#include "dsp/basebandsamplesink.h"
 #include "dsp/dspcommands.h"
 
 #include "interferometerbaseband.h"
@@ -40,7 +41,7 @@ InterferometerBaseband::InterferometerBaseband(int fftSize) :
     for (int i = 0; i < 2; i++)
     {
         m_sinks[i].setStreamIndex(i);
-        m_channelizers[i] = new DownChannelizer(&m_sinks[i]);
+        m_channelizers[i] = new DownSampleChannelizer(&m_sinks[i]);
         m_sizes[i] = 0;
     }
 
@@ -130,7 +131,7 @@ void InterferometerBaseband::handleData()
 void InterferometerBaseband::processFifo(const std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend)
 {
     for (unsigned int stream = 0; stream < 2; stream++) {
-        m_channelizers[stream]->feed(data[stream].begin() + ibegin, data[stream].begin() + iend, false);
+        m_channelizers[stream]->feed(data[stream].begin() + ibegin, data[stream].begin() + iend);
     }
 
     run();
@@ -200,9 +201,7 @@ bool InterferometerBaseband::handleMessage(const Message& cmd)
 
         for (int i = 0; i < 2; i++)
         {
-            m_channelizers[i]->set(m_channelizers[i]->getInputMessageQueue(),
-                log2Decim,
-                filterChainHash);
+            m_channelizers[i]->setDecimation(log2Decim, filterChainHash);
             m_sinks[i].reset();
         }
 
@@ -210,6 +209,7 @@ bool InterferometerBaseband::handleMessage(const Message& cmd)
     }
     else if (MsgSignalNotification::match(cmd))
     {
+        QMutexLocker mutexLocker(&m_mutex);
         MsgSignalNotification& cfg = (MsgSignalNotification&) cmd;
         int inputSampleRate = cfg.getInputSampleRate();
         qint64 centerFrequency = cfg.getCenterFrequency();
@@ -222,14 +222,15 @@ bool InterferometerBaseband::handleMessage(const Message& cmd)
 
         if (streamIndex < 2)
         {
-            DSPSignalNotification *notif = new DSPSignalNotification(inputSampleRate, centerFrequency);
-            m_channelizers[streamIndex]->getInputMessageQueue()->push(notif);
+            m_channelizers[streamIndex]->setBasebandSampleRate(inputSampleRate);
+            m_sinks[streamIndex].reset();
         }
 
         return true;
     }
     else if (MsgConfigureCorrelation::match(cmd))
     {
+        QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureCorrelation& cfg = (MsgConfigureCorrelation&) cmd;
         InterferometerSettings::CorrelationType correlationType = cfg.getCorrelationType();
 
