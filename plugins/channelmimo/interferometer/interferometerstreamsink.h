@@ -18,21 +18,16 @@
 #ifndef SDRBASE_INTERFEROMETERSTREAMSINK_H_
 #define SDRBASE_INTERFEROMETERSTREAMSINK_H_
 
-#include <QMutex>
-
-#include "dsp/basebandsamplesink.h"
+#include "dsp/channelsamplesink.h"
 
 
-class InterferometerStreamSink : public BasebandSampleSink
+class InterferometerStreamSink : public ChannelSampleSink
 {
 public:
     InterferometerStreamSink();
     virtual ~InterferometerStreamSink();
 
-	virtual void start();
-	virtual void stop();
-	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
-	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
+	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
     void reset();
     unsigned int getStreamIndex() const { return m_streamIndex; }
@@ -48,10 +43,8 @@ private:
     int m_bufferSize;
     int m_dataStart;
 
-    int m_sampleRate;
     uint32_t m_log2Decim;
     uint32_t m_filterChainHash;
-    QMutex m_settingsMutex;
 };
 
 

@@ -21,12 +21,12 @@
 #include <QObject>
 #include <QMutex>
 
-//#include "dsp/samplesinkvector.h"
 #include "dsp/samplemififo.h"
+#include "util/messagequeue.h"
 #include "interferometerstreamsink.h"
 #include "interferometercorr.h"
 
-class DownChannelizer;
+class DownSampleChannelizer;
 class BasebandSampleSink;
 
 class InterferometerBaseband : public QObject
@@ -120,7 +120,7 @@ private:
     std::vector<SampleVector::const_iterator> m_vbegin;
     int m_sizes[2];
     InterferometerStreamSink m_sinks[2];
-    DownChannelizer *m_channelizers[2];
+    DownSampleChannelizer *m_channelizers[2];
     BasebandSampleSink *m_spectrumSink;
     BasebandSampleSink *m_scopeSink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
