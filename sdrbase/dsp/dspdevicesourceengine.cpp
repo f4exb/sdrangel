@@ -20,7 +20,6 @@
 
 #include <dsp/basebandsamplesink.h>
 #include <dsp/devicesamplesource.h>
-#include <dsp/downchannelizer.h>
 #include <stdio.h>
 #include <QDebug>
 #include "dsp/dspcommands.h"
