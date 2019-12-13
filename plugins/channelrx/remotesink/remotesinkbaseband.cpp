@@ -117,6 +117,7 @@ bool RemoteSinkBaseband::handleMessage(const Message& cmd)
         qDebug() << "RemoteSinkBaseband::handleMessage: DSPSignalNotification: basebandSampleRate:" << m_basebandSampleRate;
         m_channelizer->setBasebandSampleRate(m_basebandSampleRate);
         m_sink.applyBasebandSampleRate(m_basebandSampleRate);
+        m_sink.setDeviceCenterFrequency(notif.getCenterFrequency());
 
         return true;
     }

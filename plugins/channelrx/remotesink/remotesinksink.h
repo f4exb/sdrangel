@@ -43,6 +43,7 @@ public:
 
     void applySettings(const RemoteSinkSettings& settings, bool force = false);
     void applyBasebandSampleRate(uint32_t sampleRate);
+    void setDeviceCenterFrequency(uint64_t frequency) { m_deviceCenterFrequency = frequency; }
 
 private:
     RemoteSinkSettings m_settings;
