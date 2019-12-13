@@ -27,7 +27,7 @@
 
 #include "datvdemodsink.h"
 
-class DownSampleChannelizer;
+class DownChannelizer;
 
 class DATVDemodBaseband : public QObject
 {
@@ -101,7 +101,7 @@ public:
 
 private:
     SampleSinkFifo m_sampleFifo;
-    DownSampleChannelizer *m_channelizer;
+    DownChannelizer *m_channelizer;
     DATVDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     DATVDemodSettings m_settings;

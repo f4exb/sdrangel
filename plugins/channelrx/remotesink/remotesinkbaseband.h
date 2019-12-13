@@ -28,7 +28,7 @@
 #include "remotesinksink.h"
 #include "remotesinksettings.h"
 
-class DownSampleChannelizer;
+class DownChannelizer;
 
 class RemoteSinkBaseband : public QObject
 {
@@ -71,7 +71,7 @@ public:
 
 private:
     SampleSinkFifo m_sampleFifo;
-    DownSampleChannelizer *m_channelizer;
+    DownChannelizer *m_channelizer;
     int m_basebandSampleRate;
     RemoteSinkSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication

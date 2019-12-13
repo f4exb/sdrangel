@@ -27,7 +27,7 @@
 
 #include "amdemodsink.h"
 
-class DownSampleChannelizer;
+class DownChannelizer;
 
 class AMDemodBaseband : public QObject
 {
@@ -72,7 +72,7 @@ public:
 
 private:
     SampleSinkFifo m_sampleFifo;
-    DownSampleChannelizer *m_channelizer;
+    DownChannelizer *m_channelizer;
     AMDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     AMDemodSettings m_settings;

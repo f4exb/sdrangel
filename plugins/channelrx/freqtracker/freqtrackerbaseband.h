@@ -27,7 +27,7 @@
 
 #include "freqtrackersink.h"
 
-class DownSampleChannelizer;
+class DownChannelizer;
 
 class FreqTrackerBaseband : public QObject
 {
@@ -75,7 +75,7 @@ public:
 
 private:
     SampleSinkFifo m_sampleFifo;
-    DownSampleChannelizer *m_channelizer;
+    DownChannelizer *m_channelizer;
     FreqTrackerSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     FreqTrackerSettings m_settings;

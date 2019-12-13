@@ -27,7 +27,7 @@
 
 #include "chanalyzersink.h"
 
-class DownSampleChannelizer;
+class DownChannelizer;
 
 class ChannelAnalyzerBaseband : public QObject
 {
@@ -73,7 +73,7 @@ public:
 
 private:
     SampleSinkFifo m_sampleFifo;
-    DownSampleChannelizer *m_channelizer;
+    DownChannelizer *m_channelizer;
     ChannelAnalyzerSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     ChannelAnalyzerSettings m_settings;

@@ -28,7 +28,7 @@
 #include "localsinksink.h"
 #include "localsinksettings.h"
 
-class DownSampleChannelizer;
+class DownChannelizer;
 
 class LocalSinkBaseband : public QObject
 {
@@ -128,7 +128,7 @@ public:
 
 private:
     SampleSinkFifo m_sampleFifo;
-    DownSampleChannelizer *m_channelizer;
+    DownChannelizer *m_channelizer;
     LocalSinkSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     LocalSinkSettings m_settings;

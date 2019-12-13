@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_DSP_DOWNSAMPLECHANNELIZER_H
-#define SDRBASE_DSP_DOWNSAMPLECHANNELIZER_H
+#ifndef SDRBASE_DSP_DOWNCHANNELIZER_H
+#define SDRBASE_DSP_DOWNCHANNELIZER_H
 
 #include <list>
 #include <vector>
@@ -30,10 +30,10 @@
 
 #define DOWNCHANNELIZER_HB_FILTER_ORDER 48
 
-class SDRBASE_API DownSampleChannelizer : public ChannelSampleSink {
+class SDRBASE_API DownChannelizer : public ChannelSampleSink {
 public:
-	DownSampleChannelizer(ChannelSampleSink* sampleSink);
-	virtual ~DownSampleChannelizer();
+	DownChannelizer(ChannelSampleSink* sampleSink);
+	virtual ~DownChannelizer();
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 

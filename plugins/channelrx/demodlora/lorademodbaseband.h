@@ -27,7 +27,7 @@
 
 #include "lorademodsink.h"
 
-class DownSampleChannelizer;
+class DownChannelizer;
 
 class LoRaDemodBaseband : public QObject
 {
@@ -67,7 +67,7 @@ public:
 
 private:
     SampleSinkFifo m_sampleFifo;
-    DownSampleChannelizer *m_channelizer;
+    DownChannelizer *m_channelizer;
     LoRaDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     LoRaDemodSettings m_settings;

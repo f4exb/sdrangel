@@ -27,7 +27,7 @@
 
 #include "freedvdemodsink.h"
 
-class DownSampleChannelizer;
+class DownChannelizer;
 
 class FreeDVDemodBaseband : public QObject
 {
@@ -101,7 +101,7 @@ signals:
 
 private:
     SampleSinkFifo m_sampleFifo;
-    DownSampleChannelizer *m_channelizer;
+    DownChannelizer *m_channelizer;
     FreeDVDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     FreeDVDemodSettings m_settings;

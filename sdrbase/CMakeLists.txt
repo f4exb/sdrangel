@@ -62,7 +62,7 @@ set(sdrbase_SOURCES
 
     dsp/afsquelch.cpp
     dsp/agc.cpp
-    dsp/downsamplechannelizer.cpp
+    dsp/downchannelizer.cpp
     dsp/upchannelizer.cpp
     dsp/channelmarker.cpp
     dsp/ctcssdetector.cpp
@@ -177,7 +177,7 @@ set(sdrbase_HEADERS
 
     dsp/afsquelch.h
     dsp/autocorrector.h
-    dsp/downsamplechannelizer.h
+    dsp/downchannelizer.h
     dsp/upchannelizer.h
     dsp/channelmarker.h
     dsp/channelsamplesink.h

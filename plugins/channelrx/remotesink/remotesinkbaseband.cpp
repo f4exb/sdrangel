@@ -17,7 +17,7 @@
 
 #include <QDebug>
 
-#include "dsp/downsamplechannelizer.h"
+#include "dsp/downchannelizer.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 
@@ -29,7 +29,7 @@ RemoteSinkBaseband::RemoteSinkBaseband() :
     m_mutex(QMutex::Recursive)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
-    m_channelizer = new DownSampleChannelizer(&m_sink);
+    m_channelizer = new DownChannelizer(&m_sink);
 
     qDebug("RemoteSinkBaseband::RemoteSinkBaseband");
     QObject::connect(

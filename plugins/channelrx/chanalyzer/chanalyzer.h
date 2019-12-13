@@ -29,7 +29,7 @@
 #include "chanalyzerbaseband.h"
 
 class QThread;
-class DownSampleChannelizer;
+class DownChannelizer;
 
 class ChannelAnalyzer : public BasebandSampleSink, public ChannelAPI {
 public:

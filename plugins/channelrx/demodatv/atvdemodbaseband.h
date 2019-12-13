@@ -27,7 +27,7 @@
 
 #include "atvdemodsink.h"
 
-class DownSampleChannelizer;
+class DownChannelizer;
 
 class ATVDemodBaseband : public QObject
 {
@@ -93,7 +93,7 @@ public:
 
 private:
     SampleSinkFifo m_sampleFifo;
-    DownSampleChannelizer *m_channelizer;
+    DownChannelizer *m_channelizer;
     ATVDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     ATVDemodSettings m_settings;

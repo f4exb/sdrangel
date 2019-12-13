@@ -27,7 +27,7 @@
 
 #include "dsddemodsink.h"
 
-class DownSampleChannelizer;
+class DownChannelizer;
 
 class DSDDemodBaseband : public QObject
 {
@@ -74,7 +74,7 @@ public:
 
 private:
     SampleSinkFifo m_sampleFifo;
-    DownSampleChannelizer *m_channelizer;
+    DownChannelizer *m_channelizer;
     DSDDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     DSDDemodSettings m_settings;

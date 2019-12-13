@@ -27,7 +27,7 @@
 
 #include "bfmdemodsink.h"
 
-class DownSampleChannelizer;
+class DownChannelizer;
 
 class BFMDemodBaseband : public QObject
 {
@@ -81,7 +81,7 @@ public:
 
 private:
     SampleSinkFifo m_sampleFifo;
-    DownSampleChannelizer *m_channelizer;
+    DownChannelizer *m_channelizer;
     BFMDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     BFMDemodSettings m_settings;

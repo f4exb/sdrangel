@@ -34,7 +34,7 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class QThread;
-class DownSampleChannelizer;
+class DownChannelizer;
 
 class DSDDemod : public BasebandSampleSink, public ChannelAPI {
     Q_OBJECT

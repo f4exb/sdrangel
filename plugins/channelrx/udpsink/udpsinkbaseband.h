@@ -27,7 +27,7 @@
 
 #include "udpsinksink.h"
 
-class DownSampleChannelizer;
+class DownChannelizer;
 
 class UDPSinkBaseband : public QObject
 {
@@ -91,7 +91,7 @@ public:
 
 private:
     SampleSinkFifo m_sampleFifo;
-    DownSampleChannelizer *m_channelizer;
+    DownChannelizer *m_channelizer;
     UDPSinkSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     UDPSinkSettings m_settings;

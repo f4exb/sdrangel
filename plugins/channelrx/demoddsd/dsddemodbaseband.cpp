@@ -19,7 +19,7 @@
 
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-#include "dsp/downsamplechannelizer.h"
+#include "dsp/downchannelizer.h"
 
 #include "dsddemodbaseband.h"
 
@@ -30,7 +30,7 @@ DSDDemodBaseband::DSDDemodBaseband() :
 {
     qDebug("DSDDemodBaseband::DSDDemodBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
-    m_channelizer = new DownSampleChannelizer(&m_sink);
+    m_channelizer = new DownChannelizer(&m_sink);
 
     QObject::connect(
         &m_sampleFifo,

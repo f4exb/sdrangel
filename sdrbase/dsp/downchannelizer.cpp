@@ -22,9 +22,9 @@
 #include "dsp/inthalfbandfilter.h"
 #include "dsp/dspcommands.h"
 #include "dsp/hbfilterchainconverter.h"
-#include "downsamplechannelizer.h"
+#include "downchannelizer.h"
 
-DownSampleChannelizer::DownSampleChannelizer(ChannelSampleSink* sampleSink) :
+DownChannelizer::DownChannelizer(ChannelSampleSink* sampleSink) :
     m_filterChainSetMode(false),
 	m_sampleSink(sampleSink),
 	m_basebandSampleRate(0),
@@ -37,12 +37,12 @@ DownSampleChannelizer::DownSampleChannelizer(ChannelSampleSink* sampleSink) :
 {
 }
 
-DownSampleChannelizer::~DownSampleChannelizer()
+DownChannelizer::~DownChannelizer()
 {
 	freeFilterChain();
 }
 
-void DownSampleChannelizer::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
+void DownChannelizer::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
 	if (m_sampleSink == 0)
     {
@@ -87,14 +87,14 @@ void DownSampleChannelizer::feed(const SampleVector::const_iterator& begin, cons
 	}
 }
 
-void DownSampleChannelizer::setChannelization(int requestedSampleRate, qint64 requestedCenterFrequency)
+void DownChannelizer::setChannelization(int requestedSampleRate, qint64 requestedCenterFrequency)
 {
     m_requestedOutputSampleRate = requestedSampleRate;
     m_requestedCenterFrequency = requestedCenterFrequency;
     applyChannelization();
 }
 
-void DownSampleChannelizer::setBasebandSampleRate(int basebandSampleRate, bool decim)
+void DownChannelizer::setBasebandSampleRate(int basebandSampleRate, bool decim)
 {
     m_basebandSampleRate = basebandSampleRate;
 
@@ -105,13 +105,13 @@ void DownSampleChannelizer::setBasebandSampleRate(int basebandSampleRate, bool d
     }
 }
 
-void DownSampleChannelizer::applyChannelization()
+void DownChannelizer::applyChannelization()
 {
     m_filterChainSetMode = false;
 
 	if (m_basebandSampleRate == 0)
 	{
-		qDebug() << "DownSampleChannelizer::applyChannelization: aborting (in=0)"
+		qDebug() << "DownChannelizer::applyChannelization: aborting (in=0)"
             << " in (baseband):" << m_basebandSampleRate
             << " req:" << m_requestedOutputSampleRate
             << " out (channel):" << m_channelSampleRate
@@ -127,21 +127,21 @@ void DownSampleChannelizer::applyChannelization()
 
 	m_channelSampleRate = m_basebandSampleRate / (1 << m_filterStages.size());
 
-	qDebug() << "DownSampleChannelizer::applyChannelization done:"
+	qDebug() << "DownChannelizer::applyChannelization done:"
         << " in (baseband):" << m_basebandSampleRate
 		<< " req:" << m_requestedOutputSampleRate
 		<< " out (channel):" << m_channelSampleRate
 		<< " fc:" << m_channelFrequencyOffset;
 }
 
-void DownSampleChannelizer::setDecimation(unsigned int log2Decim, unsigned int filterChainHash)
+void DownChannelizer::setDecimation(unsigned int log2Decim, unsigned int filterChainHash)
 {
     m_log2Decim = log2Decim;
     m_filterChainHash = filterChainHash;
     applyDecimation();
 }
 
-void DownSampleChannelizer::applyDecimation()
+void DownChannelizer::applyDecimation()
 {
     m_filterChainSetMode = true;
     std::vector<unsigned int> stageIndexes;
@@ -163,7 +163,7 @@ void DownSampleChannelizer::applyDecimation()
 }
 
 #ifdef SDR_RX_SAMPLE_24BIT
-DownSampleChannelizer::FilterStage::FilterStage(Mode mode) :
+DownChannelizer::FilterStage::FilterStage(Mode mode) :
     m_filter(new IntHalfbandFilterEO<qint64, qint64, DOWNCHANNELIZER_HB_FILTER_ORDER>),
     m_workFunction(0),
     m_mode(mode),
@@ -184,7 +184,7 @@ DownSampleChannelizer::FilterStage::FilterStage(Mode mode) :
     }
 }
 #else
-DownSampleChannelizer::FilterStage::FilterStage(Mode mode) :
+DownChannelizer::FilterStage::FilterStage(Mode mode) :
     m_filter(new IntHalfbandFilterEO<qint32, qint32, DOWNCHANNELIZER_HB_FILTER_ORDER>),
     m_workFunction(0),
     m_mode(mode),
@@ -206,12 +206,12 @@ DownSampleChannelizer::FilterStage::FilterStage(Mode mode) :
 }
 #endif
 
-DownSampleChannelizer::FilterStage::~FilterStage()
+DownChannelizer::FilterStage::~FilterStage()
 {
 	delete m_filter;
 }
 
-bool DownSampleChannelizer::signalContainsChannel(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd) const
+bool DownChannelizer::signalContainsChannel(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd) const
 {
 	//qDebug("   testing signal [%f, %f], channel [%f, %f]", sigStart, sigEnd, chanStart, chanEnd);
 	if(sigEnd <= sigStart)
@@ -221,17 +221,17 @@ bool DownSampleChannelizer::signalContainsChannel(Real sigStart, Real sigEnd, Re
 	return (sigStart <= chanStart) && (sigEnd >= chanEnd);
 }
 
-Real DownSampleChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd)
+Real DownChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd)
 {
 	Real sigBw = sigEnd - sigStart;
 	Real rot = sigBw / 4;
 
-	//qDebug("DownSampleChannelizer::createFilterChain: Signal [%.1f, %.1f] (BW %.1f), Channel [%.1f, %.1f], Rot %.1f", sigStart, sigEnd, sigBw, chanStart, chanEnd, rot);
+	//qDebug("DownChannelizer::createFilterChain: Signal [%.1f, %.1f] (BW %.1f), Channel [%.1f, %.1f], Rot %.1f", sigStart, sigEnd, sigBw, chanStart, chanEnd, rot);
 
 	// check if it fits into the left half
 	if(signalContainsChannel(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd))
     {
-		//qDebug("DownSampleChannelizer::createFilterChain: -> take left half (rotate by +1/4 and decimate by 2)");
+		//qDebug("DownChannelizer::createFilterChain: -> take left half (rotate by +1/4 and decimate by 2)");
 		m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
 		return createFilterChain(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd);
 	}
@@ -239,7 +239,7 @@ Real DownSampleChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real c
 	// check if it fits into the right half
 	if(signalContainsChannel(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd))
     {
-		//qDebug("DownSampleChannelizer::createFilterChain: -> take right half (rotate by -1/4 and decimate by 2)");
+		//qDebug("DownChannelizer::createFilterChain: -> take right half (rotate by -1/4 and decimate by 2)");
 		m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
 		return createFilterChain(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd);
 	}
@@ -247,17 +247,17 @@ Real DownSampleChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real c
 	// check if it fits into the center
 	if(signalContainsChannel(sigStart + rot, sigEnd - rot, chanStart, chanEnd))
     {
-		//qDebug("DownSampleChannelizer::createFilterChain: -> take center half (decimate by 2)");
+		//qDebug("DownChannelizer::createFilterChain: -> take center half (decimate by 2)");
 		m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
 		return createFilterChain(sigStart + rot, sigEnd - rot, chanStart, chanEnd);
 	}
 
 	Real ofs = ((chanEnd - chanStart) / 2.0 + chanStart) - ((sigEnd - sigStart) / 2.0 + sigStart);
-	//qDebug("DownSampleChannelizer::createFilterChain: -> complete (final BW %.1f, frequency offset %.1f)", sigBw, ofs);
+	//qDebug("DownChannelizer::createFilterChain: -> complete (final BW %.1f, frequency offset %.1f)", sigBw, ofs);
 	return ofs;
 }
 
-double DownSampleChannelizer::setFilterChain(const std::vector<unsigned int>& stageIndexes)
+double DownChannelizer::setFilterChain(const std::vector<unsigned int>& stageIndexes)
 {
     // filters are described from lower to upper level but the chain is constructed the other way round
     std::vector<unsigned int>::const_reverse_iterator rit = stageIndexes.rbegin();
@@ -272,50 +272,50 @@ double DownSampleChannelizer::setFilterChain(const std::vector<unsigned int>& st
         {
             m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
             ofs -= ofs_stage;
-            qDebug("DownSampleChannelizer::setFilterChain: lower half: ofs: %f", ofs);
+            qDebug("DownChannelizer::setFilterChain: lower half: ofs: %f", ofs);
         }
         else if (*rit == 1)
         {
             m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
-            qDebug("DownSampleChannelizer::setFilterChain: center: ofs: %f", ofs);
+            qDebug("DownChannelizer::setFilterChain: center: ofs: %f", ofs);
         }
         else if (*rit == 2)
         {
             m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
             ofs += ofs_stage;
-            qDebug("DownSampleChannelizer::setFilterChain: upper half: ofs: %f", ofs);
+            qDebug("DownChannelizer::setFilterChain: upper half: ofs: %f", ofs);
         }
     }
 
     return ofs;
 }
 
-void DownSampleChannelizer::freeFilterChain()
+void DownChannelizer::freeFilterChain()
 {
 	for(FilterStages::iterator it = m_filterStages.begin(); it != m_filterStages.end(); ++it)
 		delete *it;
 	m_filterStages.clear();
 }
 
-void DownSampleChannelizer::debugFilterChain()
+void DownChannelizer::debugFilterChain()
 {
-    qDebug("DownSampleChannelizer::debugFilterChain: %lu stages", m_filterStages.size());
+    qDebug("DownChannelizer::debugFilterChain: %lu stages", m_filterStages.size());
 
     for(FilterStages::iterator it = m_filterStages.begin(); it != m_filterStages.end(); ++it)
     {
         switch ((*it)->m_mode)
         {
         case FilterStage::ModeCenter:
-            qDebug("DownSampleChannelizer::debugFilterChain: center %s", (*it)->m_sse ? "sse" : "no_sse");
+            qDebug("DownChannelizer::debugFilterChain: center %s", (*it)->m_sse ? "sse" : "no_sse");
             break;
         case FilterStage::ModeLowerHalf:
-            qDebug("DownSampleChannelizer::debugFilterChain: lower %s", (*it)->m_sse ? "sse" : "no_sse");
+            qDebug("DownChannelizer::debugFilterChain: lower %s", (*it)->m_sse ? "sse" : "no_sse");
             break;
         case FilterStage::ModeUpperHalf:
-            qDebug("DownSampleChannelizer::debugFilterChain: upper %s", (*it)->m_sse ? "sse" : "no_sse");
+            qDebug("DownChannelizer::debugFilterChain: upper %s", (*it)->m_sse ? "sse" : "no_sse");
             break;
         default:
-            qDebug("DownSampleChannelizer::debugFilterChain: none %s", (*it)->m_sse ? "sse" : "no_sse");
+            qDebug("DownChannelizer::debugFilterChain: none %s", (*it)->m_sse ? "sse" : "no_sse");
             break;
         }
     }
