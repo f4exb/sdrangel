@@ -18,7 +18,7 @@
 #include <QMutexLocker>
 #include <QDebug>
 
-#include "dsp/downsamplechannelizer.h"
+#include "dsp/downchannelizer.h"
 #include "dsp/basebandsamplesink.h"
 #include "dsp/dspcommands.h"
 
@@ -41,7 +41,7 @@ InterferometerBaseband::InterferometerBaseband(int fftSize) :
     for (int i = 0; i < 2; i++)
     {
         m_sinks[i].setStreamIndex(i);
-        m_channelizers[i] = new DownSampleChannelizer(&m_sinks[i]);
+        m_channelizers[i] = new DownChannelizer(&m_sinks[i]);
         m_sizes[i] = 0;
     }
 

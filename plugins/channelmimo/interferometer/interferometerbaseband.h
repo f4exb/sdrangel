@@ -26,7 +26,7 @@
 #include "interferometerstreamsink.h"
 #include "interferometercorr.h"
 
-class DownSampleChannelizer;
+class DownChannelizer;
 class BasebandSampleSink;
 
 class InterferometerBaseband : public QObject
@@ -120,7 +120,7 @@ private:
     std::vector<SampleVector::const_iterator> m_vbegin;
     int m_sizes[2];
     InterferometerStreamSink m_sinks[2];
-    DownSampleChannelizer *m_channelizers[2];
+    DownChannelizer *m_channelizers[2];
     BasebandSampleSink *m_spectrumSink;
     BasebandSampleSink *m_scopeSink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
