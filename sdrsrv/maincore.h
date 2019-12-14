@@ -61,6 +61,7 @@ public:
 
     void addSourceDevice();
     void addSinkDevice();
+    void addMIMODevice();
     void removeLastDevice();
     void changeSampleSource(int deviceSetIndex, int selectedDeviceIndex);
     void changeSampleSink(int deviceSetIndex, int selectedDeviceIndex);
