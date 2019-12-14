@@ -63,14 +63,14 @@ public:
         return m_settings.m_centerFrequency;
     }
 
-    bool SetTVScreen(TVScreen *objScreen) { m_basebandSink->setTVScreen(objScreen); }
+    void SetTVScreen(TVScreen *objScreen) { m_basebandSink->setTVScreen(objScreen); }
     DATVideostream *SetVideoRender(DATVideoRender *objScreen) { return m_basebandSink->SetVideoRender(objScreen); }
     bool audioActive() { return m_basebandSink->audioActive(); }
     bool audioDecodeOK() { return m_basebandSink->audioDecodeOK(); }
     bool videoActive() { return m_basebandSink->videoActive(); }
     bool videoDecodeOK() { return m_basebandSink->videoDecodeOK(); }
 
-    bool PlayVideo(bool blnStartStop) { m_basebandSink->PlayVideo(blnStartStop); }
+    bool PlayVideo(bool blnStartStop) { return m_basebandSink->PlayVideo(blnStartStop); }
 
     double getMagSq() const { return m_basebandSink->getMagSq(); } //!< Beware this is scaled to 2^30
     int getModcodModulation() const { return m_basebandSink->getModcodModulation(); }
