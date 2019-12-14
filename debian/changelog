@@ -1,3 +1,13 @@
+sdrangel (4.12.2-1) unstable; urgency=medium
+
+  * Refactoring of Rx channels code with better separation of concerns
+  * ATV demod: complete refactoring
+  * Channel Analyzer: refactoring of classes and downsampling chain reorganization
+  * Remote Sink and Remote Output: refactoring of UDP blocks handling
+  * NFMDemod: fixed setSelectedCtcssIndex method
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 14 Dec 2019 06:14:22 +0100
+
 sdrangel (4.12.1-1) unstable; urgency=medium
 
   * Tx plugins: further refactoring and fixes
