@@ -122,9 +122,6 @@ public:
     static const QString m_channelId;
 	static const int udpBlockSize = 512; // UDP block size in number of bytes
 
-public slots:
-    void audioReadyRead();
-
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
 

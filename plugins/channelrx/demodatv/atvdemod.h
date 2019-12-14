@@ -95,9 +95,6 @@ public:
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
-private slots:
-    void channelSampleRateChanged();
-
 private:
     DeviceAPI* m_deviceAPI;
     QThread *m_thread;
