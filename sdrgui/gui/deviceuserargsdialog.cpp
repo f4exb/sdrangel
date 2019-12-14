@@ -28,7 +28,8 @@ DeviceUserArgsDialog::DeviceUserArgsDialog(
 	ui(new Ui::DeviceUserArgsDialog),
 	m_deviceEnumerator(deviceEnumerator),
 	m_hardwareDeviceUserArgs(hardwareDeviceUserArgs),
-    m_deviceUserArgsCopy(hardwareDeviceUserArgs)
+    m_deviceUserArgsCopy(hardwareDeviceUserArgs),
+    m_xDeviceSequence(0)
 {
 	ui->setupUi(this);
 
@@ -57,6 +58,9 @@ DeviceUserArgsDialog::DeviceUserArgsDialog(
     ui->deviceTree->resizeColumnToContents(2);
 
     displayArgsByDevice();
+
+    ui->addDeviceHwIDEdit->setText(m_xDeviceHardwareId);
+    ui->addDeviceSeqEdit->setText(tr("%1").arg(m_xDeviceSequence));
 }
 
 DeviceUserArgsDialog::~DeviceUserArgsDialog()
@@ -75,14 +79,16 @@ void DeviceUserArgsDialog::displayArgsByDevice()
     for (; it != m_deviceUserArgsCopy.getArgsByDevice().end(); ++it)
 	{
 		QTreeWidgetItem *treeItem = new QTreeWidgetItem(ui->argsTree);
-		treeItem->setText(0, it->m_id);
-		treeItem->setText(1, tr("%1").arg(it->m_sequence));
-		treeItem->setText(2, it->m_args);
+        treeItem->setText(0, it->m_nonDiscoverable ? "ND" : "  ");
+		treeItem->setText(1, it->m_id);
+		treeItem->setText(2, tr("%1").arg(it->m_sequence));
+		treeItem->setText(3, it->m_args);
 	}
 
     ui->argsTree->resizeColumnToContents(0);
     ui->argsTree->resizeColumnToContents(1);
     ui->argsTree->resizeColumnToContents(2);
+    ui->argsTree->resizeColumnToContents(3);
 	ui->argsTree->blockSignals(false);
 }
 
@@ -128,7 +134,7 @@ void DeviceUserArgsDialog::on_importDevice_clicked(bool checked)
     {
         bool ok;
         int sequence = deviceItem->text(1).toInt(&ok);
-        m_deviceUserArgsCopy.addDeviceArgs(deviceItem->text(0), sequence, "");
+        m_deviceUserArgsCopy.addDeviceArgs(deviceItem->text(0), sequence, "", false);
         displayArgsByDevice();
     }
 }
@@ -141,8 +147,8 @@ void DeviceUserArgsDialog::on_deleteArgs_clicked(bool checked)
     if (deviceItem)
     {
         bool ok;
-        int sequence = deviceItem->text(1).toInt(&ok);
-        m_deviceUserArgsCopy.deleteDeviceArgs(deviceItem->text(0), sequence);
+        int sequence = deviceItem->text(2).toInt(&ok);
+        m_deviceUserArgsCopy.deleteDeviceArgs(deviceItem->text(1), sequence);
         displayArgsByDevice();
     }
 }
@@ -150,7 +156,7 @@ void DeviceUserArgsDialog::on_deleteArgs_clicked(bool checked)
 void DeviceUserArgsDialog::on_argsTree_currentItemChanged(QTreeWidgetItem* currentItem, QTreeWidgetItem* previousItem)
 {
 	(void) previousItem;
-	ui->argStringEdit->setText(currentItem->text(2));
+	ui->argStringEdit->setText(currentItem->text(3));
 }
 
 void DeviceUserArgsDialog::on_argStringEdit_editingFinished()
@@ -160,8 +166,30 @@ void DeviceUserArgsDialog::on_argStringEdit_editingFinished()
     if (deviceItem)
     {
         bool ok;
-        int sequence = deviceItem->text(1).toInt(&ok);
-        m_deviceUserArgsCopy.updateDeviceArgs(deviceItem->text(0), sequence, ui->argStringEdit->text());
+        int sequence = deviceItem->text(2).toInt(&ok);
+        bool nonDiscoverable = deviceItem->text(0) == "ND";
+        m_deviceUserArgsCopy.updateDeviceArgs(deviceItem->text(1), sequence, ui->argStringEdit->text(), nonDiscoverable);
         displayArgsByDevice();
     }
+}
+
+void DeviceUserArgsDialog::on_addDeviceHwIDEdit_editingFinished()
+{
+    m_xDeviceHardwareId = ui->addDeviceHwIDEdit->text();
+}
+
+void DeviceUserArgsDialog::on_addDeviceSeqEdit_editingFinished()
+{
+    bool ok;
+    int sequence = ui->addDeviceSeqEdit->text().toInt(&ok);
+
+    if (ok) {
+        m_xDeviceSequence = sequence;
+    }
+}
+
+void DeviceUserArgsDialog::on_addDevice_clicked(bool checked)
+{
+    m_deviceUserArgsCopy.addDeviceArgs(m_xDeviceHardwareId, m_xDeviceSequence, "", true);
+    displayArgsByDevice();
 }

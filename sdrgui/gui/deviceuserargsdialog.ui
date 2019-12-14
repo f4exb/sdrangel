@@ -118,6 +118,76 @@
         </property>
        </widget>
       </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="addDeviceHwIDLabel">
+        <property name="text">
+         <string>HwID</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="addDeviceHwIDEdit">
+        <property name="toolTip">
+         <string>Hardware Id of non discoverable device</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="addDeviceSeqLabel">
+        <property name="text">
+         <string>Seq</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="addDeviceSeqEdit">
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Sequence of non discoverable device</string>
+        </property>
+        <property name="inputMask">
+         <string>00</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="addDevice">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Add non discoverable device </string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../resources/res.qrc">
+          <normaloff>:/plusw.png</normaloff>:/plusw.png</iconset>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
     <widget class="QWidget" name="horizontalLayoutWidget_5">
@@ -186,17 +256,34 @@
      </property>
      <column>
       <property name="text">
+       <string>ND</string>
+      </property>
+      <property name="toolTip">
+       <string>Non discoverable</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
        <string>HwID</string>
+      </property>
+      <property name="toolTip">
+       <string>Hardware ID</string>
       </property>
      </column>
      <column>
       <property name="text">
        <string>Seq</string>
       </property>
+      <property name="toolTip">
+       <string>Sequence</string>
+      </property>
      </column>
      <column>
       <property name="text">
        <string>Arg string</string>
+      </property>
+      <property name="toolTip">
+       <string>Argument string</string>
       </property>
      </column>
     </widget>

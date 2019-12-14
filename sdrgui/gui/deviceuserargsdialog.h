@@ -58,6 +58,8 @@ private:
     DeviceUserArgs& m_hardwareDeviceUserArgs;
     std::vector<HWDeviceReference> m_availableHWDevices;
     DeviceUserArgs m_deviceUserArgsCopy;
+    QString m_xDeviceHardwareId;
+    unsigned int m_xDeviceSequence;
 
     void pushHWDeviceReference(const PluginInterface::SamplingDevice *samplingDevice);
     void displayArgsByDevice();
@@ -69,6 +71,9 @@ private slots:
     void on_deleteArgs_clicked(bool checked);
     void on_argsTree_currentItemChanged(QTreeWidgetItem* currentItem, QTreeWidgetItem* previousItem);
     void on_argStringEdit_editingFinished();
+    void on_addDeviceHwIDEdit_editingFinished();
+    void on_addDeviceSeqEdit_editingFinished();
+    void on_addDevice_clicked(bool checked);
 };
 
 #endif // SDRGUI_GUI_DEVICEUSERARGSDIALOG_H
