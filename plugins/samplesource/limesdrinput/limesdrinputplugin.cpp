@@ -33,8 +33,9 @@
 #include "limesdrinputwebapiadapter.h"
 
 const PluginDescriptor LimeSDRInputPlugin::m_pluginDescriptor = {
+    QString("LimeSDR"),
     QString("LimeSDR Input"),
-    QString("4.11.10"),
+    QString("4.12.3"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,

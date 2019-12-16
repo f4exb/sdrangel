@@ -29,8 +29,9 @@
 #include "localoutputwebapiadapter.h"
 
 const PluginDescriptor LocalOutputPlugin::m_pluginDescriptor = {
+    QString("LocalOutput"),
 	QString("Local device output"),
-	QString("4.12.0"),
+	QString("4.12.3"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

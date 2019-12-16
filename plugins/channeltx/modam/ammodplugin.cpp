@@ -26,8 +26,9 @@
 #include "ammodplugin.h"
 
 const PluginDescriptor AMModPlugin::m_pluginDescriptor = {
+    AMMod::m_channelId,
     QString("AM Modulator"),
-    QString("4.12.2"),
+    QString("4.12.3"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,

@@ -6,6 +6,8 @@ This output sample sink plugin sends its samples to a [PlutoSDR device](https://
 
 &#9758; PlutoSDR is physically implemented as a 1x1 SISO device although the AD9363 chip does have a second Rx and a second Tx channel. Revision C of the board claims to have pads to allow hackers connecting the second ports externally however for now only the first Tx channel is supported by this plugin.
 
+&#9758; When running the Pluto on Ethernet interface you have to create a non discoverable device reference in the [user arguments dialog](https://github.com/f4exb/sdrangel/blob/master/sdrgui/deviceuserargs.md) from the main window Preferences &gt; Devices menu. You must use the `PlutoSDR` hardware ID then specify the device address with a `uri` parameter in the user arguments for example: `uri=ip:192.168.1.10`. Note that this will become effective once SDRangel is restarted.
+
 <h2>Build</h2>
 
 The plugin will be built only if libiio is installed in your system. To build and install libiio from source do:

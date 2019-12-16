@@ -18,6 +18,8 @@
 #include <QGlobalStatic>
 
 #include "plugin/pluginmanager.h"
+#include "device/deviceuserargs.h"
+
 #include "deviceenumerator.h"
 
 Q_GLOBAL_STATIC(DeviceEnumerator, deviceEnumerator)
@@ -31,6 +33,154 @@ DeviceEnumerator::DeviceEnumerator()
 
 DeviceEnumerator::~DeviceEnumerator()
 {}
+
+void DeviceEnumerator::addNonDiscoverableDevices(PluginManager *pluginManager, const DeviceUserArgs& deviceUserArgs)
+{
+    qDebug("DeviceEnumerator::addNonDiscoverableDevices: start");
+    const QList<DeviceUserArgs::Args>& args = deviceUserArgs.getArgsByDevice();
+    QList<DeviceUserArgs::Args>::const_iterator argsIt = args.begin();
+    unsigned int rxIndex = m_rxEnumeration.size();
+    unsigned int txIndex = m_txEnumeration.size();
+    unsigned int mimoIndex = m_mimoEnumeration.size();
+
+    for (; argsIt != args.end(); ++argsIt)
+    {
+        if (!argsIt->m_nonDiscoverable) { // this process is for non discoverable devices only
+            continue;
+        }
+
+        QString serial = QString("%1-%2").arg(argsIt->m_id).arg(argsIt->m_sequence);
+
+        PluginInterface *rxPlugin = getRxRegisteredPlugin(pluginManager, argsIt->m_id);
+
+        if (rxPlugin && !isRxEnumerated(argsIt->m_id, argsIt->m_sequence))
+        {
+            int deviceNbItems = rxPlugin->getDefaultRxNbItems();
+            QString deviceId = rxPlugin->getDeviceTypeId();
+
+            for (int deviceIndex = 0; deviceIndex < deviceNbItems; deviceIndex++)
+            {
+                QString description = QString("%1[%2:%3] user defined").arg(argsIt->m_id).arg(argsIt->m_sequence).arg(deviceIndex);
+                qDebug("DeviceEnumerator::addNonDiscoverableDevices: Rx: %s", qPrintable(description));
+                PluginInterface::SamplingDevice ndDevice(
+                    description,
+                    argsIt->m_id,
+                    deviceId, // id
+                    serial,
+                    argsIt->m_sequence,
+                    rxPlugin->getSamplingDeviceType(),
+                    PluginInterface::SamplingDevice::StreamSingleRx,
+                    deviceNbItems, // deviceNbItems
+                    deviceIndex    // deviceItemIndex
+                );
+                m_rxEnumeration.push_back(
+                    DeviceEnumeration(
+                        ndDevice,
+                        rxPlugin,
+                        rxIndex
+                    )
+                );
+                rxIndex++;
+            }
+        }
+
+        PluginInterface *txPlugin = getTxRegisteredPlugin(pluginManager, argsIt->m_id);
+
+        if (txPlugin && !isTxEnumerated(argsIt->m_id, argsIt->m_sequence))
+        {
+            int deviceNbItems = txPlugin->getDefaultTxNbItems();
+            QString deviceId = txPlugin->getDeviceTypeId();
+
+            for (int deviceIndex = 0; deviceIndex < deviceNbItems; deviceIndex++)
+            {
+                QString description = QString("%1[%2:%3] user defined").arg(argsIt->m_id).arg(argsIt->m_sequence).arg(deviceIndex);
+                qDebug("DeviceEnumerator::addNonDiscoverableDevices: Tx: %s", qPrintable(description));
+                PluginInterface::SamplingDevice ndDevice(
+                    description,
+                    argsIt->m_id,
+                    deviceId, // id
+                    serial,
+                    argsIt->m_sequence,
+                    rxPlugin->getSamplingDeviceType(),
+                    PluginInterface::SamplingDevice::StreamSingleTx,
+                    deviceNbItems, // deviceNbItems
+                    deviceIndex    // deviceItemIndex
+                );
+                m_txEnumeration.push_back(
+                    DeviceEnumeration(
+                        ndDevice,
+                        txPlugin,
+                        txIndex
+                    )
+                );
+                txIndex++;
+            }
+        }
+    } // loop through user args
+}
+
+PluginInterface *DeviceEnumerator::getRxRegisteredPlugin(PluginManager *pluginManager, const QString& deviceHwId)
+{
+    PluginAPI::SamplingDeviceRegistrations& rxDeviceRegistrations = pluginManager->getSourceDeviceRegistrations();
+    PluginInterface *rxPlugin = nullptr;
+
+    for (int i = 0; i < rxDeviceRegistrations.count(); i++)
+    {
+
+        if (deviceHwId == rxDeviceRegistrations[i].m_deviceHardwareId)
+        {
+            rxPlugin = rxDeviceRegistrations[i].m_plugin;
+            break;
+        }
+    }
+
+    return rxPlugin;
+}
+
+bool DeviceEnumerator::isRxEnumerated(const QString& deviceHwId, int deviceSequence)
+{
+    std::vector<DeviceEnumeration>::const_iterator rxIt = m_rxEnumeration.begin();
+
+    for (; rxIt != m_rxEnumeration.end(); ++rxIt)
+    {
+        if ((rxIt->m_samplingDevice.hardwareId == deviceHwId) && (rxIt->m_samplingDevice.sequence == deviceSequence)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+PluginInterface *DeviceEnumerator::getTxRegisteredPlugin(PluginManager *pluginManager, const QString& deviceHwId)
+{
+    PluginAPI::SamplingDeviceRegistrations& txDeviceRegistrations = pluginManager->getSinkDeviceRegistrations();
+    PluginInterface *txPlugin = nullptr;
+
+    for (int i = 0; i < txDeviceRegistrations.count(); i++)
+    {
+        if (deviceHwId == txDeviceRegistrations[i].m_deviceHardwareId)
+        {
+            txPlugin = txDeviceRegistrations[i].m_plugin;
+            break;
+        }
+    }
+
+    return txPlugin;
+}
+
+bool DeviceEnumerator::isTxEnumerated(const QString& deviceHwId, int deviceSequence)
+{
+    std::vector<DeviceEnumeration>::const_iterator txIt = m_txEnumeration.begin();
+
+    for (; txIt != m_txEnumeration.end(); ++txIt)
+    {
+        if ((txIt->m_samplingDevice.hardwareId == deviceHwId) && (txIt->m_samplingDevice.sequence == deviceSequence)) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 void DeviceEnumerator::enumerateRxDevices(PluginManager *pluginManager)
 {

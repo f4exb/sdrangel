@@ -19,9 +19,11 @@ class SDRBASE_API PluginAPI : public QObject {
 public:
     struct SamplingDeviceRegistration //!< This is the device registration
     {
+        QString m_deviceHardwareId;
         QString m_deviceId;
         PluginInterface* m_plugin;
-        SamplingDeviceRegistration(const QString& deviceId, PluginInterface* plugin) :
+        SamplingDeviceRegistration(const QString& hardwareId, const QString& deviceId, PluginInterface* plugin) :
+            m_deviceHardwareId(hardwareId),
             m_deviceId(deviceId),
             m_plugin(plugin)
         { }

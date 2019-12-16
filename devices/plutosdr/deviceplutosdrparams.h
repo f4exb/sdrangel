@@ -38,6 +38,7 @@ public:
     ~DevicePlutoSDRParams();
 
     bool open(const std::string& serial);
+    bool openURI(const std::string& uri);
     void close();
 
     DevicePlutoSDRBox *getBox() { return m_box; }

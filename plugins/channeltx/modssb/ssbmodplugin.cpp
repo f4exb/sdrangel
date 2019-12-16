@@ -26,8 +26,9 @@
 #include "ssbmodplugin.h"
 
 const PluginDescriptor SSBModPlugin::m_pluginDescriptor = {
+    SSBMod::m_channelId,
     QString("SSB Modulator"),
-    QString("4.12.2"),
+    QString("4.12.3"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,

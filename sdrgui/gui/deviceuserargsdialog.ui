@@ -76,14 +76,23 @@
       <property name="text">
        <string>HwID</string>
       </property>
+      <property name="toolTip">
+       <string>Hardware ID</string>
+      </property>
      </column>
      <column>
       <property name="text">
        <string>Seq</string>
       </property>
+      <property name="toolTip">
+       <string>Sequence</string>
+      </property>
      </column>
      <column>
       <property name="text">
+       <string>Description</string>
+      </property>
+      <property name="toolTip">
        <string>Description</string>
       </property>
      </column>

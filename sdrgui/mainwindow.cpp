@@ -193,6 +193,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
     m_pluginManager = new PluginManager(this);
     m_pluginManager->loadPlugins(QString("plugins"));
+    m_pluginManager->loadPluginsNonDiscoverable(m_settings.getDeviceUserArgs());
 
     splash->showStatusMessage("load file input...", Qt::white);
     qDebug() << "MainWindow::MainWindow: select SampleSource from settings or default (file input)...";
@@ -1693,7 +1694,7 @@ void MainWindow::sampleSourceChanged()
         deviceUI->m_deviceAPI->stopDeviceEngine();
 
         // deletes old UI and input object
-        deviceUI->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(0); // have source stop sending messages to the GUI
+        deviceUI->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(nullptr); // have source stop sending messages to the GUI
         deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
                 deviceUI->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
         deviceUI->m_deviceAPI->resetSamplingDeviceId();

@@ -29,6 +29,7 @@
 #include "fcdtraits.h"
 
 const PluginDescriptor FCDProPlusPlugin::m_pluginDescriptor = {
+    QString("FCDProPlus"),
 	QString(fcd_traits<ProPlus>::pluginDisplayedName),
 	QString(fcd_traits<ProPlus>::pluginVersion),
 	QString("(c) Edouard Griffiths, F4EXB"),

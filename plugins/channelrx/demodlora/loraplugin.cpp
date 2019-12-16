@@ -6,8 +6,9 @@
 #include "lorademod.h"
 
 const PluginDescriptor LoRaPlugin::m_pluginDescriptor = {
+    LoRaDemod::m_channelId,
 	QString("LoRa Demodulator"),
-	QString("4.12.2"),
+	QString("4.12.3"),
 	QString("(c) 2015 John Greb"),
 	QString("http://www.maintech.de"),
 	true,

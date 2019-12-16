@@ -34,6 +34,7 @@ class Preset;
 class Message;
 class MessageQueue;
 class DeviceAPI;
+class DeviceUserArgs;
 
 class SDRBASE_API PluginManager : public QObject {
 	Q_OBJECT
@@ -59,6 +60,7 @@ public:
 	void loadPlugins(const QString& pluginsSubDir);
 	void loadPluginsPart(const QString& pluginsSubDir);
 	void loadPluginsFinal();
+    void loadPluginsNonDiscoverable(const DeviceUserArgs& deviceUserArgs);
 	const Plugins& getPlugins() const { return m_plugins; }
 
 	// Callbacks from the plugins

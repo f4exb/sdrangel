@@ -24,6 +24,7 @@
 #include "export.h"
 
 class PluginManager;
+class DeviceUserArgs;
 
 class SDRBASE_API DeviceEnumerator
 {
@@ -36,6 +37,7 @@ public:
     void enumerateRxDevices(PluginManager *pluginManager);
     void enumerateTxDevices(PluginManager *pluginManager);
     void enumerateMIMODevices(PluginManager *pluginManager);
+    void addNonDiscoverableDevices(PluginManager *pluginManager, const DeviceUserArgs& deviceUserArgs);
     void listRxDeviceNames(QList<QString>& list, std::vector<int>& indexes) const;
     void listTxDeviceNames(QList<QString>& list, std::vector<int>& indexes) const;
     void listMIMODeviceNames(QList<QString>& list, std::vector<int>& indexes) const;
@@ -82,6 +84,11 @@ private:
     DevicesEnumeration m_mimoEnumeration;
     PluginInterface::OriginDevices m_originDevices;
     QStringList m_originDevicesHwIds;
+
+    PluginInterface *getRxRegisteredPlugin(PluginManager *pluginManager, const QString& deviceHwId);
+    PluginInterface *getTxRegisteredPlugin(PluginManager *pluginManager, const QString& deviceHwId);
+    bool isRxEnumerated(const QString& deviceHwId, int deviceSequence);
+    bool isTxEnumerated(const QString& deviceHwId, int deviceSequence);
 };
 
 #endif /* SDRBASE_DEVICE_DEVICEENUMERATOR_H_ */

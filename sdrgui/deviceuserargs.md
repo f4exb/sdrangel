@@ -18,28 +18,43 @@ This is the list of available devices reported by the initial enumeration. There
 
 <h2>2 Import device button</h2>
 
-Use this button to import the selected device in the panel above (1) to the panel below (3) that lists the user arguments by device and sequence. You can only import a device which hardware ID and sequence is not already in the panel below.
+Use this button to import the selected device in the panel above (1) to the panel below (6) that lists the user arguments by device and sequence. You can only import a device which hardware ID and sequence is not already in the panel below.
 
-<h2>3 User arguments</h2>
+<h2>3 Non discoverable device hardware ID</h2>
 
-This is the list of arguments given by the user and attached to a specific device given its hardware ID and sequence. There are 3 columns:
+Some devices cannot be discovered automatically. This is the case for networked devices in particular the PlutoSDR. In conjuctions with (4) and (5) you can define devices that can be added to the list of available devices for selection. Note that you will need to restart SDRangel for this to be effective.
 
+Once the device is defined user arguments like the IP address can be specified for it.
+
+<h2>4 Non discoverable device sequence</h2>
+
+In case more than one device with the same hardware ID is used in the system you can differentiate the, with an arbitrary sequence number.
+
+<h2>5 Add non discoverable device definition</h2>
+
+Once defined with controls (3) and (4) use this button to add the device to the list of available devices. This will make it appear immediately in the
+
+<h2>6 User arguments</h2>
+
+This is the list of arguments given by the user and attached to a specific device given its hardware ID and sequence. There are 4 columns:
+
+  - **ND**: This is the non discoverable device indicator. When tagged with "ND" it means that the line refers to a non discoverable device specified by the user
   - **HwID**: This is the "hardware ID". It represents a type of device like `HackRF` or `TestSource`
   - **Seq**: The device sequence in enumeration starting at 0. You may have more that one device of the same type in the system
   - **Arg string**: The user argument string. It can be of any form and not necessarily in the `key1=value1, key2=value2` form. It is up to the corresponding plugin to interpret the string and to make use of its information.
 
-<h2>4 Delete button</h2>
+<h2>7 Delete button</h2>
 
-Use this button to delete the arguments currently selected in the above panel (3)
+Use this button to delete the arguments currently selected in the above panel (6)
 
-<h2>5 Edit arguments</h2>
+<h2>8 Edit arguments</h2>
 
-Use this line editor to change the arguments currently selected in the above panel (3). The text will be committed when the focus is lost.
+Use this line editor to change the arguments currently selected in the above panel (6). The text will be committed when the focus is lost.
 
-<h2>6 Cancel button</h2>
+<h2>9 Cancel button</h2>
 
 The changes made to the argument list are temporary. You can use this button to dismiss the changes and close the dialog.
 
-<h2>7 OK (confirmation) button</h2>
+<h2>10 OK (confirmation) button</h2>
 
 The changes made to the argument list are only temporary. You can use this button to commit the changes and close the dialog.

@@ -31,11 +31,17 @@ DevicePlutoSDRParams::~DevicePlutoSDRParams()
 bool DevicePlutoSDRParams::open(const std::string& serial)
 {
     m_box = DevicePlutoSDR::instance().getDeviceFromSerial(serial);
-    return m_box != 0;
+    return m_box != nullptr;
+}
+
+bool DevicePlutoSDRParams::openURI(const std::string& uri)
+{
+    m_box = DevicePlutoSDR::instance().getDeviceFromURI(uri);
+    return m_box != nullptr;
 }
 
 void DevicePlutoSDRParams::close()
 {
     delete m_box;
-    m_box = 0;
+    m_box = nullptr;
 }

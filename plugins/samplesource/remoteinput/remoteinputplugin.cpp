@@ -29,8 +29,9 @@
 #include "remoteinputwebapiadapter.h"
 
 const PluginDescriptor RemoteInputPlugin::m_pluginDescriptor = {
+    QString("RemoteInput"),
 	QString("Remote device input"),
-	QString("4.11.10"),
+	QString("4.12.3"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

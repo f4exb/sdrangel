@@ -29,8 +29,9 @@
 #include "udpsourceplugin.h"
 
 const PluginDescriptor UDPSourcePlugin::m_pluginDescriptor = {
+    UDPSource::m_channelId,
 	QString("UDP Channel Source"),
-	QString("4.12.2"),
+	QString("4.12.3"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

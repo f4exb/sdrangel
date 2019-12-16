@@ -7,6 +7,7 @@
 #include "export.h"
 
 struct SDRBASE_API PluginDescriptor {
+    const QString hardwareId;
 	// general plugin description
 	const QString displayedName;
 	const QString version;
@@ -202,6 +203,14 @@ public:
         (void) originDevices;
     }
 
+    virtual SamplingDevice::SamplingDeviceType getSamplingDeviceType() const {
+        return SamplingDevice::SamplingDeviceType::PhysicalDevice;
+    }
+
+    virtual QString getDeviceTypeId() const {
+        return QString("");
+    }
+
     // device source plugins only
 
 	virtual SamplingDevices enumSampleSources(const OriginDevices& originDevices)
@@ -231,6 +240,10 @@ public:
     }
 	virtual void deleteSampleSourcePluginInstanceGUI(PluginInstanceGUI *ui);
 	virtual void deleteSampleSourcePluginInstanceInput(DeviceSampleSource *source);
+
+    virtual int getDefaultRxNbItems() const {
+        return 1;
+    }
 
 	// device sink plugins only
 
@@ -262,6 +275,10 @@ public:
 
     virtual void deleteSampleSinkPluginInstanceGUI(PluginInstanceGUI *ui);
     virtual void deleteSampleSinkPluginInstanceOutput(DeviceSampleSink *sink);
+
+    virtual int getDefaultTxNbItems() const {
+        return 1;
+    }
 
     // device MIMO plugins only
 

@@ -30,8 +30,9 @@
 #endif
 
 const PluginDescriptor Bladerf1OutputPlugin::m_pluginDescriptor = {
+    QString("BladeRF1"),
 	QString("BladeRF1 Output"),
-	QString("4.12.0"),
+	QString("4.12.3"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

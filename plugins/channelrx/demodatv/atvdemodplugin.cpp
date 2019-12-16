@@ -28,8 +28,9 @@
 
 const PluginDescriptor ATVDemodPlugin::m_ptrPluginDescriptor =
 {
+    ATVDemod::m_channelId,
 	QString("ATV Demodulator"),
-	QString("4.12.2"),
+	QString("4.12.3"),
     QString("(c) F4HKW for F4EXB / SDRAngel"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

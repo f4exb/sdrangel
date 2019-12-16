@@ -1,3 +1,10 @@
+sdrangel (4.12.3-1) unstable; urgency=medium
+
+  * Added possibility to specify devices that cannot be discovered automatically
+  * Server: fixed sink device set creation and added MIMO creation
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 15 Dec 2019 23:14:22 +0100
+
 sdrangel (4.12.2-1) unstable; urgency=medium
 
   * Refactoring of Rx channels code with better separation of concerns

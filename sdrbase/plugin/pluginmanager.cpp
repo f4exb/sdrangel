@@ -117,6 +117,11 @@ void PluginManager::loadPluginsFinal()
     DeviceEnumerator::instance()->enumerateMIMODevices(this);
 }
 
+void PluginManager::loadPluginsNonDiscoverable(const DeviceUserArgs& deviceUserArgs)
+{
+    DeviceEnumerator::instance()->addNonDiscoverableDevices(this, deviceUserArgs);
+}
+
 void PluginManager::registerRxChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin)
 {
     qDebug() << "PluginManager::registerRxChannel "
@@ -148,27 +153,42 @@ void PluginManager::registerSampleSource(const QString& sourceName, PluginInterf
 {
 	qDebug() << "PluginManager::registerSampleSource "
 			<< plugin->getPluginDescriptor().displayedName.toStdString().c_str()
-			<< " with source name " << sourceName.toStdString().c_str();
+			<< " with source name " << sourceName.toStdString().c_str()
+            << " and hardware id " << plugin->getPluginDescriptor().hardwareId;
 
-	m_sampleSourceRegistrations.append(PluginAPI::SamplingDeviceRegistration(sourceName, plugin));
+	m_sampleSourceRegistrations.append(PluginAPI::SamplingDeviceRegistration(
+        plugin->getPluginDescriptor().hardwareId,
+        sourceName,
+        plugin
+    ));
 }
 
 void PluginManager::registerSampleSink(const QString& sinkName, PluginInterface* plugin)
 {
 	qDebug() << "PluginManager::registerSampleSink "
 			<< plugin->getPluginDescriptor().displayedName.toStdString().c_str()
-			<< " with sink name " << sinkName.toStdString().c_str();
+			<< " with sink name " << sinkName.toStdString().c_str()
+            << " and hardware id " << plugin->getPluginDescriptor().hardwareId;
 
-	m_sampleSinkRegistrations.append(PluginAPI::SamplingDeviceRegistration(sinkName, plugin));
+	m_sampleSinkRegistrations.append(PluginAPI::SamplingDeviceRegistration(
+        plugin->getPluginDescriptor().hardwareId,
+        sinkName,
+        plugin
+    ));
 }
 
 void PluginManager::registerSampleMIMO(const QString& mimoName, PluginInterface* plugin)
 {
 	qDebug() << "PluginManager::registerSampleMIMO "
 			<< plugin->getPluginDescriptor().displayedName.toStdString().c_str()
-			<< " with MIMO name " << mimoName.toStdString().c_str();
+			<< " with MIMO name " << mimoName.toStdString().c_str()
+            << " and hardware id " << plugin->getPluginDescriptor().hardwareId;
 
-	m_sampleMIMORegistrations.append(PluginAPI::SamplingDeviceRegistration(mimoName, plugin));
+	m_sampleMIMORegistrations.append(PluginAPI::SamplingDeviceRegistration(
+        plugin->getPluginDescriptor().hardwareId,
+        mimoName,
+        plugin
+    ));
 }
 
 void PluginManager::loadPluginsDir(const QDir& dir)

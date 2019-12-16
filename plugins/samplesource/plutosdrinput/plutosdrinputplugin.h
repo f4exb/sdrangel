@@ -45,6 +45,8 @@ public:
 	virtual DeviceSampleSource* createSampleSourcePluginInstance(const QString& sourceId, DeviceAPI *deviceAPI);
     virtual DeviceWebAPIAdapter* createDeviceWebAPIAdapter() const;
 
+    virtual QString getDeviceTypeId() const { return m_deviceTypeID; }
+
 	static const QString m_hardwareID;
     static const QString m_deviceTypeID;
 

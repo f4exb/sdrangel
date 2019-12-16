@@ -29,8 +29,9 @@
 #include "bfmplugin.h"
 
 const PluginDescriptor BFMPlugin::m_pluginDescriptor = {
+    BFMDemod::m_channelId,
 	QString("Broadcast FM Demodulator"),
-	QString("4.12.2"),
+	QString("4.12.3"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

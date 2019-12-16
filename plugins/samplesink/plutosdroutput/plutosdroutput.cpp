@@ -259,11 +259,31 @@ bool PlutoSDROutput::openDevice()
     else
     {
         qDebug("PlutoSDROutput::openDevice: open device here");
-
         m_deviceShared.m_deviceParams = new DevicePlutoSDRParams();
-        char serial[256];
-        strcpy(serial, qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
-        m_deviceShared.m_deviceParams->open(serial);
+
+        if (m_deviceAPI->getHardwareUserArguments().size() != 0)
+        {
+            QStringList kv = m_deviceAPI->getHardwareUserArguments().split('='); // expecting "uri=xxx"
+
+            if (kv.size() > 1)
+            {
+                if (kv.at(0) == "uri") {
+                     m_deviceShared.m_deviceParams->openURI(kv.at(1).toStdString());
+                } else {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            char serial[256];
+            strcpy(serial, qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
+            m_deviceShared.m_deviceParams->open(serial);
+        }
     }
 
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API

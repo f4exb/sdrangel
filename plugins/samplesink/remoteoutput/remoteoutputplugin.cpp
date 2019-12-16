@@ -29,8 +29,9 @@
 #include "remoteoutputwebapiadapter.h"
 
 const PluginDescriptor RemoteOutputPlugin::m_pluginDescriptor = {
+    QString("RemoteOutput"),
 	QString("Remote device output"),
-	QString("4.12.2"),
+	QString("4.12.3"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
