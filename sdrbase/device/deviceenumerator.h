@@ -21,10 +21,10 @@
 #include <vector>
 
 #include "plugin/plugininterface.h"
+#include "device/deviceuserargs.h"
 #include "export.h"
 
 class PluginManager;
-class DeviceUserArgs;
 
 class SDRBASE_API DeviceEnumerator
 {

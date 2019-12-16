@@ -18,7 +18,6 @@
 #include <QGlobalStatic>
 
 #include "plugin/pluginmanager.h"
-#include "device/deviceuserargs.h"
 
 #include "deviceenumerator.h"
 
