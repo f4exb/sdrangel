@@ -28,6 +28,7 @@
 #include "bladerf2mimowebapiadapter.h"
 
 const PluginDescriptor BladeRF2MIMOPlugin::m_pluginDescriptor = {
+    QString("BladeRF2"),
 	QString("BladeRF2 MIMO"),
 	QString("5.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),

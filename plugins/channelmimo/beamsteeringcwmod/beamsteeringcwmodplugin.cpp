@@ -27,6 +27,7 @@
 #include "beamsteeringcwmodplugin.h"
 
 const PluginDescriptor BeamSteeringCWModPlugin::m_pluginDescriptor = {
+    QString(BeamSteeringCWMod::m_channelId),
     QString("BeamSteeringCWMod"),
     QString("5.0.0"),
     QString("(c) Edouard Griffiths, F4EXB"),

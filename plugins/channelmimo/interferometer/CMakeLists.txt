@@ -1,22 +1,22 @@
 project(interferometer)
 
 set(interferometer_SOURCES
-    interferometerplugin.cpp
     interferometer.cpp
     interferometercorr.cpp
     interferometersettings.cpp
     interferometerbaseband.cpp
     interferometerstreamsink.cpp
+    interferometerplugin.cpp
     interferometerwebapiadapter.cpp
 )
 
 set(interferometer_HEADERS
-    interferometerplugin.h
     interferometer.h
     interferometercorr.h
     interferometersettings.h
     interferometerbaseband.h
     interferometerstreamsink.h
+    interferometerplugin.h
     interferometerwebapiadapter.h
 )
 
