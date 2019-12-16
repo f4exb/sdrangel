@@ -27,6 +27,7 @@
 #include "testmosyncplugin.h"
 
 const PluginDescriptor TestMOSyncPlugin::m_pluginDescriptor = {
+    QString("TestMOSync"),
 	QString("Test Synchronous Multiple Output"),
 	QString("5.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),

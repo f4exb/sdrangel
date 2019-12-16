@@ -28,6 +28,7 @@
 #include "interferometerplugin.h"
 
 const PluginDescriptor InterferometerPlugin::m_pluginDescriptor = {
+    QString(Interferometer::m_channelId),
     QString("Interferometer"),
     QString("5.0.0"),
     QString("(c) Edouard Griffiths, F4EXB"),

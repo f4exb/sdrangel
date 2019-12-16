@@ -1,20 +1,20 @@
 project(beamsteeringcwmod)
 
 set(beamsteeringcwmod_SOURCES
-    beamsteeringcwmodplugin.cpp
     beamsteeringcwmod.cpp
     beamsteeringcwmodsettings.cpp
     beamsteeringcwmodbaseband.cpp
     beamsteeringcwmodstreamsource.cpp
+    beamsteeringcwmodplugin.cpp
     beamsteeringcwmodwebapiadapter.cpp
 )
 
 set(beamsteeringcwmod_HEADERS
-    beamsteeringcwmodplugin.h
     beamsteeringcwmod.h
     beamsteeringcwmodsettings.h
     beamsteeringcwmodbaseband.h
     beamsteeringcwmodstreamsource.h
+    beamsteeringcwmodplugin.h
     beamsteeringcwmodwebapiadapter.h
 )
 
