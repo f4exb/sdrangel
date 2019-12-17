@@ -20,7 +20,7 @@ set(AIRSPYHF_TAG "1.1.5")
 set(PERSEUS_TAG afefa23e3140ac79d845acb68cf0beeb86d09028)
 
 set(PTHREADS4W_TAG "Version-2-11-0-release")
-set(RTLSDR_TAG f68bb2fa772ad94f58c59babd78353667570630b)
+set(RTLSDR_TAG be1d1206bfb6e6c41f7d91b20b77e20f929fa6a7)
 set(RTLSDR_UDEV OFF)
 set(SOAPYSDR_TAG "soapy-sdr-0.7.1")
 set(SOAPYSDR_SDRPLAY_TAG "soapy-sdrplay-0.2.0")
@@ -368,6 +368,20 @@ if (LINUX)
     set(LIBPERSEUS_FOUND ON CACHE INTERNAL "")
     set(LIBPERSEUS_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/perseus/src/perseus" CACHE INTERNAL "")
     set(LIBPERSEUS_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libperseus-sdr.so" CACHE INTERNAL "")
+
+    # apt install librtlsdr-dev
+    # needs pkgconfig and libusb
+    ExternalProject_Add(rtlsdr
+        GIT_REPOSITORY https://github.com/osmocom/rtl-sdr.git
+        GIT_TAG ${RTLSDR_TAG}
+        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/rtlsdr"
+        CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES} -DINSTALL_UDEV_RULES=${RTLSDR_UDEV}
+        INSTALL_COMMAND ""
+        TEST_COMMAND ""
+    )
+    set(LIBRTLSDR_FOUND ON CACHE INTERNAL "")
+    set(LIBRTLSDR_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/rtlsdr/src/rtlsdr/include" CACHE INTERNAL "")
+    set(LIBRTLSDR_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/librtlsdr.so" CACHE INTERNAL "")
 endif(LINUX)
 
 if(WIN32 OR APPLE)

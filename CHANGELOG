@@ -1,3 +1,9 @@
+sdrangel (4.12.4-1) unstable; urgency=medium
+
+  * Debian build: moved librtlsdr to external libraries
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 17 Dec 2019 19:14:22 +0100
+
 sdrangel (4.12.3-1) unstable; urgency=medium
 
   * Added possibility to specify devices that cannot be discovered automatically
