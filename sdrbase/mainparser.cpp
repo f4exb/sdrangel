@@ -30,13 +30,11 @@ MainParser::MainParser() :
     m_serverPortOption(QStringList() << "p" << "api-port",
         "Web API server port.",
         "port",
-        "8091"),
-    m_mimoOption("mimo", "Activate MIMO functionality")
+        "8091")
 {
     m_serverAddress = "127.0.0.1";
     m_serverPort = 8091;
     m_mimoSupport = false;
-    m_mimoOption.setFlags(QCommandLineOption::HiddenFromHelp);
 
     m_parser.setApplicationDescription("Software Defined Radio application");
     m_parser.addHelpOption();
@@ -44,7 +42,6 @@ MainParser::MainParser() :
 
     m_parser.addOption(m_serverAddressOption);
     m_parser.addOption(m_serverPortOption);
-    m_parser.addOption(m_mimoOption);
 }
 
 MainParser::~MainParser()
@@ -85,7 +82,18 @@ void MainParser::parse(const QCoreApplication& app)
         qWarning() << "MainParser::parse: server port invalid. Defaulting to " << m_serverPort;
     }
 
-    // MIMO
+    // MIMO - from version
 
-    m_mimoSupport = m_parser.isSet(m_mimoOption);
+    QStringList versionParts = app.applicationVersion().split(".");
+
+    if (versionParts.size() > 0)
+    {
+        bool ok;
+        int maj = versionParts.at(0).toInt(&ok);
+        m_mimoSupport = ok && (maj > 4);
+    }
+    else
+    {
+        m_mimoSupport = false;
+    }
 }

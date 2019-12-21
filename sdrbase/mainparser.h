@@ -39,12 +39,11 @@ public:
 private:
     QString  m_serverAddress;
     uint16_t m_serverPort;
-    bool m_mimoSupport;
+    bool m_mimoSupport; //!< obtained from major version
 
     QCommandLineParser m_parser;
     QCommandLineOption m_serverAddressOption;
     QCommandLineOption m_serverPortOption;
-    QCommandLineOption m_mimoOption;
 };
 
 

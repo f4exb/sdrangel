@@ -239,6 +239,14 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
     m_dspEngine->setMIMOSupport(parser.getMIMOSupport());
 
+    if (!parser.getMIMOSupport()) {
+        ui->menu_Devices->removeAction(ui->action_addMIMODevice);
+    }
+
+#ifdef __APPLE__
+    ui->menuPreferences->removeAction(ui->action_AMBE);
+#endif
+
     delete splash;
 
     qDebug() << "MainWindow::MainWindow: end";
@@ -1982,7 +1990,7 @@ void MainWindow::on_action_addMIMODevice_triggered()
     if (m_dspEngine->getMIMOSupport()) {
         addMIMODevice();
     } else {
-        QMessageBox::information(this, tr("Message"), tr("MIMO operation not supported yet"));
+        QMessageBox::information(this, tr("Message"), tr("MIMO not supported in this version"));
     }
 }
 
