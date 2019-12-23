@@ -234,10 +234,10 @@ void FileSource::applySettings(const FileSourceSettings& settings, bool force)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
-            m_deviceAPI->removeChannelSourceAPI(this, m_settings.m_streamIndex);
+            m_deviceAPI->removeChannelSourceAPI(this);
             m_deviceAPI->removeChannelSource(this, m_settings.m_streamIndex);
             m_deviceAPI->addChannelSource(this, settings.m_streamIndex);
-            m_deviceAPI->addChannelSourceAPI(this, settings.m_streamIndex);
+            m_deviceAPI->addChannelSourceAPI(this);
         }
 
         reverseAPIKeys.append("streamIndex");

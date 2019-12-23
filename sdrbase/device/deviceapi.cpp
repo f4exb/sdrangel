@@ -137,17 +137,14 @@ void DeviceAPI::removeMIMOChannel(MIMOChannel* channel)
     }
 }
 
-void DeviceAPI::addChannelSinkAPI(ChannelAPI* channelAPI, int streamIndex)
+void DeviceAPI::addChannelSinkAPI(ChannelAPI* channelAPI)
 {
-    (void) streamIndex;
     m_channelSinkAPIs.append(channelAPI);
     renumerateChannels();
 }
 
-void DeviceAPI::removeChannelSinkAPI(ChannelAPI* channelAPI, int streamIndex)
+void DeviceAPI::removeChannelSinkAPI(ChannelAPI* channelAPI)
 {
-    (void) streamIndex;
-
     if (m_channelSinkAPIs.removeOne(channelAPI)) {
         renumerateChannels();
     }
@@ -155,17 +152,14 @@ void DeviceAPI::removeChannelSinkAPI(ChannelAPI* channelAPI, int streamIndex)
     channelAPI->setIndexInDeviceSet(-1);
 }
 
-void DeviceAPI::addChannelSourceAPI(ChannelAPI* channelAPI, int streamIndex)
+void DeviceAPI::addChannelSourceAPI(ChannelAPI* channelAPI)
 {
-    (void) streamIndex;
     m_channelSourceAPIs.append(channelAPI);
     renumerateChannels();
 }
 
-void DeviceAPI::removeChannelSourceAPI(ChannelAPI* channelAPI, int streamIndex)
+void DeviceAPI::removeChannelSourceAPI(ChannelAPI* channelAPI)
 {
-    (void) streamIndex;
-
     if (m_channelSourceAPIs.removeOne(channelAPI)) {
         renumerateChannels();
     }

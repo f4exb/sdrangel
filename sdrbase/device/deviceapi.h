@@ -77,10 +77,10 @@ public:
     void addMIMOChannel(MIMOChannel* channel);   //!< Add a MIMO channel (n Rx and m Tx combination)
     void removeMIMOChannel(MIMOChannel* channe); //!< Remove a MIMO channel (n Rx and m Tx combination)
 
-    void addChannelSinkAPI(ChannelAPI* channelAPI, int streamIndex = 0);
-    void removeChannelSinkAPI(ChannelAPI* channelAPI, int streamIndex = 0);
-    void addChannelSourceAPI(ChannelAPI* channelAPI, int streamIndex = 0);
-    void removeChannelSourceAPI(ChannelAPI* channelAPI, int streamIndex = 0);
+    void addChannelSinkAPI(ChannelAPI* channelAPI);
+    void removeChannelSinkAPI(ChannelAPI* channelAPI);
+    void addChannelSourceAPI(ChannelAPI* channelAPI);
+    void removeChannelSourceAPI(ChannelAPI* channelAPI);
     void addMIMOChannelAPI(ChannelAPI* channelAPI);
     void removeMIMOChannelAPI(ChannelAPI* channelAPI);
 

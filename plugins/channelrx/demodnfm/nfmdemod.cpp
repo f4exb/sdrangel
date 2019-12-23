@@ -211,10 +211,10 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
-            m_deviceAPI->removeChannelSinkAPI(this, m_settings.m_streamIndex);
+            m_deviceAPI->removeChannelSinkAPI(this);
             m_deviceAPI->removeChannelSink(this, m_settings.m_streamIndex);
             m_deviceAPI->addChannelSink(this, settings.m_streamIndex);
-            m_deviceAPI->addChannelSinkAPI(this, settings.m_streamIndex);
+            m_deviceAPI->addChannelSinkAPI(this);
         }
 
         reverseAPIKeys.append("streamIndex");
