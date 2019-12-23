@@ -28,6 +28,8 @@ SWGChannel::SWGChannel(QString* json) {
 }
 
 SWGChannel::SWGChannel() {
+    direction = 0;
+    m_direction_isSet = false;
     index = 0;
     m_index_isSet = false;
     id = nullptr;
@@ -48,6 +50,8 @@ SWGChannel::~SWGChannel() {
 
 void
 SWGChannel::init() {
+    direction = 0;
+    m_direction_isSet = false;
     index = 0;
     m_index_isSet = false;
     id = new QString("");
@@ -64,6 +68,7 @@ SWGChannel::init() {
 
 void
 SWGChannel::cleanup() {
+
 
     if(id != nullptr) { 
         delete id;
@@ -89,6 +94,8 @@ SWGChannel::fromJson(QString &json) {
 
 void
 SWGChannel::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&direction, pJson["direction"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&index, pJson["index"], "qint32", "");
     
     ::SWGSDRangel::setValue(&id, pJson["id"], "QString", "QString");
@@ -117,6 +124,9 @@ SWGChannel::asJson ()
 QJsonObject*
 SWGChannel::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(m_direction_isSet){
+        obj->insert("direction", QJsonValue(direction));
+    }
     if(m_index_isSet){
         obj->insert("index", QJsonValue(index));
     }
@@ -137,6 +147,16 @@ SWGChannel::asJsonObject() {
     }
 
     return obj;
+}
+
+qint32
+SWGChannel::getDirection() {
+    return direction;
+}
+void
+SWGChannel::setDirection(qint32 direction) {
+    this->direction = direction;
+    this->m_direction_isSet = true;
 }
 
 qint32
@@ -204,6 +224,9 @@ bool
 SWGChannel::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(m_direction_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_index_isSet){
             isObjectUpdated = true; break;
         }

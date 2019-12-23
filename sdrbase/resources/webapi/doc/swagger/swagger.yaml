@@ -1596,7 +1596,6 @@ definitions:
       - serial
       - centerFrequency
       - bandwidth
-      - state
     properties:
       index:
         description: "Index in the list of device sets opened in this instance"
@@ -1627,7 +1626,13 @@ definitions:
         description: "Bandwidth in Hz or complex S/s of baseband"
         type: integer
       state:
-        description: "State: notStarted, idle, ready, running, error"
+        description: "Single subsystem state: notStarted, idle, ready, running, error"
+        type: string
+      stateRx:
+        description: "Rx subsystem state (MIMO): notStarted, idle, ready, running, error"
+        type: string
+      stateTx:
+        description: "Tx subsystem state (MIMO): notStarted, idle, ready, running, error"
         type: string
 
   Channel:
@@ -1639,6 +1644,9 @@ definitions:
       - title
       - deltaFrequency
     properties:
+      direction:
+        description: 0 for Rx only, 1 for Tx only or 2 for any direction (MIMO)
+        type: integer
       index:
         description: "Index in the list of channels"
         type: integer

@@ -48,6 +48,10 @@ SWGSamplingDevice::SWGSamplingDevice() {
     m_bandwidth_isSet = false;
     state = nullptr;
     m_state_isSet = false;
+    state_rx = nullptr;
+    m_state_rx_isSet = false;
+    state_tx = nullptr;
+    m_state_tx_isSet = false;
 }
 
 SWGSamplingDevice::~SWGSamplingDevice() {
@@ -76,6 +80,10 @@ SWGSamplingDevice::init() {
     m_bandwidth_isSet = false;
     state = new QString("");
     m_state_isSet = false;
+    state_rx = new QString("");
+    m_state_rx_isSet = false;
+    state_tx = new QString("");
+    m_state_tx_isSet = false;
 }
 
 void
@@ -95,6 +103,12 @@ SWGSamplingDevice::cleanup() {
 
     if(state != nullptr) { 
         delete state;
+    }
+    if(state_rx != nullptr) { 
+        delete state_rx;
+    }
+    if(state_tx != nullptr) { 
+        delete state_tx;
     }
 }
 
@@ -128,6 +142,10 @@ SWGSamplingDevice::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&bandwidth, pJson["bandwidth"], "qint32", "");
     
     ::SWGSDRangel::setValue(&state, pJson["state"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&state_rx, pJson["stateRx"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&state_tx, pJson["stateTx"], "QString", "QString");
     
 }
 
@@ -174,6 +192,12 @@ SWGSamplingDevice::asJsonObject() {
     }
     if(state != nullptr && *state != QString("")){
         toJsonValue(QString("state"), state, obj, QString("QString"));
+    }
+    if(state_rx != nullptr && *state_rx != QString("")){
+        toJsonValue(QString("stateRx"), state_rx, obj, QString("QString"));
+    }
+    if(state_tx != nullptr && *state_tx != QString("")){
+        toJsonValue(QString("stateTx"), state_tx, obj, QString("QString"));
     }
 
     return obj;
@@ -279,6 +303,26 @@ SWGSamplingDevice::setState(QString* state) {
     this->m_state_isSet = true;
 }
 
+QString*
+SWGSamplingDevice::getStateRx() {
+    return state_rx;
+}
+void
+SWGSamplingDevice::setStateRx(QString* state_rx) {
+    this->state_rx = state_rx;
+    this->m_state_rx_isSet = true;
+}
+
+QString*
+SWGSamplingDevice::getStateTx() {
+    return state_tx;
+}
+void
+SWGSamplingDevice::setStateTx(QString* state_tx) {
+    this->state_tx = state_tx;
+    this->m_state_tx_isSet = true;
+}
+
 
 bool
 SWGSamplingDevice::isSet(){
@@ -312,6 +356,12 @@ SWGSamplingDevice::isSet(){
             isObjectUpdated = true; break;
         }
         if(state && *state != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(state_rx && *state_rx != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(state_tx && *state_tx != QString("")){
             isObjectUpdated = true; break;
         }
     }while(false);

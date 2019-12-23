@@ -382,7 +382,7 @@ void DeviceAPI::setSamplingDevicePluginInstanceGUI(PluginInstanceGUI *gui)
     m_samplingDevicePluginInstanceUI = gui;
 }
 
-void DeviceAPI::getDeviceEngineStateStr(QString& state)
+void DeviceAPI::getDeviceEngineStateStr(QString& state, int subsystemIndex)
 {
     if (m_deviceSourceEngine)
     {
@@ -432,44 +432,59 @@ void DeviceAPI::getDeviceEngineStateStr(QString& state)
             break;
         }
     }
+    else if (m_deviceMIMOEngine)
+    {
+        switch(m_deviceMIMOEngine->state(subsystemIndex))
+        {
+        case DSPDeviceSinkEngine::StNotStarted:
+            state = "notStarted";
+            break;
+        case DSPDeviceSinkEngine::StIdle:
+            state = "idle";
+            break;
+        case DSPDeviceSinkEngine::StReady:
+            state = "ready";
+            break;
+        case DSPDeviceSinkEngine::StRunning:
+            state = "running";
+            break;
+        case DSPDeviceSinkEngine::StError:
+            state = "error";
+            break;
+        default:
+            state = "notStarted";
+            break;
+        }
+    }
     else
     {
         state = "notStarted";
     }
 }
 
-ChannelAPI *DeviceAPI::getChanelSinkAPIAt(int index, int streamIndex)
+ChannelAPI *DeviceAPI::getChanelSinkAPIAt(int index)
 {
-    (void) streamIndex;
-
-    if (m_streamType == StreamSingleRx)
-    {
-        if (index < m_channelSinkAPIs.size()) {
-            return m_channelSinkAPIs.at(index);
-        } else {
-            return nullptr;
-        }
-    }
-    else // TODO: not implemented
-    {
+    if (index < m_channelSinkAPIs.size()) {
+        return m_channelSinkAPIs.at(index);
+    } else {
         return nullptr;
     }
 }
 
-ChannelAPI *DeviceAPI::getChanelSourceAPIAt(int index, int streamIndex)
+ChannelAPI *DeviceAPI::getChanelSourceAPIAt(int index)
 {
-    (void) streamIndex;
-
-     if (m_streamType == StreamSingleTx)
-    {
-        if (index < m_channelSourceAPIs.size()) {
-            return m_channelSourceAPIs.at(index);
-        } else {
-            return nullptr;
-        }
+    if (index < m_channelSourceAPIs.size()) {
+        return m_channelSourceAPIs.at(index);
+    } else {
+        return nullptr;
     }
-    else // TODO: not implemented
-    {
+}
+
+ChannelAPI *DeviceAPI::getMIMOChannelAPIAt(int index)
+{
+    if (index < m_mimoChannelAPIs.size()) {
+        return m_mimoChannelAPIs.at(index);
+    } else {
         return nullptr;
     }
 }

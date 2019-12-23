@@ -133,13 +133,15 @@ public:
     // PluginInstanceGUI *getSampleSourcePluginInstanceGUI() { return m_sampleSourcePluginInstanceUI; }
     // PluginInstanceGUI *getSampleSinkPluginInstanceGUI() { return m_sampleSinkPluginInstanceUI; }
 
-    void getDeviceEngineStateStr(QString& state);
+    void getDeviceEngineStateStr(QString& state, int subsystemIndex = 0);
 
-    ChannelAPI *getChanelSinkAPIAt(int index, int streamIndex = 0);
-    ChannelAPI *getChanelSourceAPIAt(int index, int streamIndex = 0);
+    ChannelAPI *getChanelSinkAPIAt(int index);
+    ChannelAPI *getChanelSourceAPIAt(int index);
+    ChannelAPI *getMIMOChannelAPIAt(int index);
 
     int getNbSourceChannels() const { return m_channelSourceAPIs.size(); }
     int getNbSinkChannels() const { return m_channelSinkAPIs.size(); }
+    int getNbMIMOChannels() const { return m_mimoChannelAPIs.size(); }
 
     void loadSamplingDeviceSettings(const Preset* preset);
     // void loadSourceSettings(const Preset* preset);

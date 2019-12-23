@@ -77,6 +77,7 @@ public:
     virtual void setSourceCenterFrequency(qint64 centerFrequency, int index) = 0;
 
     virtual quint64 getMIMOCenterFrequency() const = 0; //!< Unique center frequency for preset identification or any unique reference
+    virtual unsigned int getMIMOSampleRate() const = 0; //!< Unique sample rate for any unique reference
 
 	virtual bool handleMessage(const Message& message) = 0;
 

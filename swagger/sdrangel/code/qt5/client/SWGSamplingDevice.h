@@ -72,6 +72,12 @@ public:
     QString* getState();
     void setState(QString* state);
 
+    QString* getStateRx();
+    void setStateRx(QString* state_rx);
+
+    QString* getStateTx();
+    void setStateTx(QString* state_tx);
+
 
     virtual bool isSet() override;
 
@@ -105,6 +111,12 @@ private:
 
     QString* state;
     bool m_state_isSet;
+
+    QString* state_rx;
+    bool m_state_rx_isSet;
+
+    QString* state_tx;
+    bool m_state_tx_isSet;
 
 };
 

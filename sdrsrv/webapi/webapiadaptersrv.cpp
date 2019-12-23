@@ -2028,6 +2028,7 @@ void WebAPIAdapterSrv::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, con
             channels->back()->init();
             ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSourceAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
+            channels->back()->setDirection(1);
             channels->back()->setIndex(channel->getIndexInDeviceSet());
             channels->back()->setUid(channel->getUID());
             channel->getIdentifier(*channels->back()->getId());
@@ -2060,6 +2061,72 @@ void WebAPIAdapterSrv::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, con
             channels->back()->init();
             ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSinkAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
+            channels->back()->setDirection(0);
+            channels->back()->setIndex(channel->getIndexInDeviceSet());
+            channels->back()->setUid(channel->getUID());
+            channel->getIdentifier(*channels->back()->getId());
+            channel->getTitle(*channels->back()->getTitle());
+        }
+    }
+
+    if (deviceSet->m_deviceMIMOEngine) // MIMO data
+    {
+        samplingDevice->setDirection(2);
+        *samplingDevice->getHwType() = deviceSet->m_deviceAPI->getHardwareId();
+        *samplingDevice->getSerial() = deviceSet->m_deviceAPI->getSamplingDeviceSerial();
+        samplingDevice->setSequence(deviceSet->m_deviceAPI->getSamplingDeviceSequence());
+        samplingDevice->setDeviceNbStreams(deviceSet->m_deviceAPI->getDeviceNbItems());
+        samplingDevice->setDeviceStreamIndex(deviceSet->m_deviceAPI->getDeviceItemIndex());
+        samplingDevice->setState(new QString("notStarted"));
+        deviceSet->m_deviceAPI->getDeviceEngineStateStr(*samplingDevice->getStateRx(), 0);
+        deviceSet->m_deviceAPI->getDeviceEngineStateStr(*samplingDevice->getStateTx(), 1);
+        DeviceSampleMIMO *sampleMIMO = deviceSet->m_deviceMIMOEngine->getMIMO();
+
+        if (sampleMIMO)
+        {
+            samplingDevice->setCenterFrequency(sampleMIMO->getMIMOCenterFrequency());
+            samplingDevice->setBandwidth(sampleMIMO->getMIMOSampleRate());
+        }
+
+        int nbSinkChannels = deviceSet->m_deviceAPI->getNbSinkChannels();
+        int nbSourceChannels = deviceSet->m_deviceAPI->getNbSourceChannels();
+        int nbMIMOChannels = deviceSet->m_deviceAPI->getNbMIMOChannels();
+        swgDeviceSet->setChannelcount(nbSinkChannels + nbSourceChannels + nbMIMOChannels);
+        QList<SWGSDRangel::SWGChannel*> *channels = swgDeviceSet->getChannels();
+
+        for (int i = 0; i < nbSinkChannels; i++)
+        {
+            channels->append(new SWGSDRangel::SWGChannel);
+            channels->back()->init();
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSinkAPIAt(i);
+            channels->back()->setDeltaFrequency(channel->getCenterFrequency());
+            channels->back()->setDirection(0);
+            channels->back()->setIndex(channel->getIndexInDeviceSet());
+            channels->back()->setUid(channel->getUID());
+            channel->getIdentifier(*channels->back()->getId());
+            channel->getTitle(*channels->back()->getTitle());
+        }
+
+        for (int i = 0; i < nbSourceChannels; i++)
+        {
+            channels->append(new SWGSDRangel::SWGChannel);
+            channels->back()->init();
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSourceAPIAt(i);
+            channels->back()->setDeltaFrequency(channel->getCenterFrequency());
+            channels->back()->setDirection(1);
+            channels->back()->setIndex(channel->getIndexInDeviceSet());
+            channels->back()->setUid(channel->getUID());
+            channel->getIdentifier(*channels->back()->getId());
+            channel->getTitle(*channels->back()->getTitle());
+        }
+
+        for (int i = 0; i < nbMIMOChannels; i++)
+        {
+            channels->append(new SWGSDRangel::SWGChannel);
+            channels->back()->init();
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getMIMOChannelAPIAt(i);
+            channels->back()->setDeltaFrequency(channel->getCenterFrequency());
+            channels->back()->setDirection(2);
             channels->back()->setIndex(channel->getIndexInDeviceSet());
             channels->back()->setUid(channel->getUID());
             channel->getIdentifier(*channels->back()->getId());
@@ -2085,6 +2152,7 @@ void WebAPIAdapterSrv::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channel
             channels->back()->init();
             ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSourceAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
+            channels->back()->setDirection(1);
             channels->back()->setIndex(channel->getIndexInDeviceSet());
             channels->back()->setUid(channel->getUID());
             channel->getIdentifier(*channels->back()->getId());
@@ -2111,6 +2179,79 @@ void WebAPIAdapterSrv::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channel
             channels->back()->init();
             ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSinkAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
+            channels->back()->setDirection(0);
+            channels->back()->setIndex(channel->getIndexInDeviceSet());
+            channels->back()->setUid(channel->getUID());
+            channel->getIdentifier(*channels->back()->getId());
+            channel->getTitle(*channels->back()->getTitle());
+
+            channelReport = new SWGSDRangel::SWGChannelReport();
+
+            if (channel->webapiReportGet(*channelReport, channelReportError) != 501) {
+                channels->back()->setReport(channelReport);
+            } else {
+                delete channelReport;
+            }
+        }
+    }
+
+    if (deviceSet->m_deviceMIMOEngine) // MIMO data
+    {
+        int nbSinkChannels = deviceSet->m_deviceAPI->getNbSinkChannels();
+        int nbSourceChannels = deviceSet->m_deviceAPI->getNbSourceChannels();
+        int nbMIMOChannels = deviceSet->m_deviceAPI->getNbMIMOChannels();
+        QList<SWGSDRangel::SWGChannel*> *channels = channelsDetail->getChannels();
+        channelsDetail->setChannelcount(nbSinkChannels + nbSourceChannels + nbMIMOChannels);
+
+        for (int i = 0; i < nbSinkChannels; i++)
+        {
+            channels->append(new SWGSDRangel::SWGChannel);
+            channels->back()->init();
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSinkAPIAt(i);
+            channels->back()->setDeltaFrequency(channel->getCenterFrequency());
+            channels->back()->setDirection(0);
+            channels->back()->setIndex(channel->getIndexInDeviceSet());
+            channels->back()->setUid(channel->getUID());
+            channel->getIdentifier(*channels->back()->getId());
+            channel->getTitle(*channels->back()->getTitle());
+
+            channelReport = new SWGSDRangel::SWGChannelReport();
+
+            if (channel->webapiReportGet(*channelReport, channelReportError) != 501) {
+                channels->back()->setReport(channelReport);
+            } else {
+                delete channelReport;
+            }
+        }
+
+        for (int i = 0; i <  nbSourceChannels; i++)
+        {
+            channels->append(new SWGSDRangel::SWGChannel);
+            channels->back()->init();
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSourceAPIAt(i);
+            channels->back()->setDeltaFrequency(channel->getCenterFrequency());
+            channels->back()->setDirection(1);
+            channels->back()->setIndex(channel->getIndexInDeviceSet());
+            channels->back()->setUid(channel->getUID());
+            channel->getIdentifier(*channels->back()->getId());
+            channel->getTitle(*channels->back()->getTitle());
+
+            channelReport = new SWGSDRangel::SWGChannelReport();
+
+            if (channel->webapiReportGet(*channelReport, channelReportError) != 501) {
+                channels->back()->setReport(channelReport);
+            } else {
+                delete channelReport;
+            }
+        }
+
+        for (int i = 0; i <  nbMIMOChannels; i++)
+        {
+            channels->append(new SWGSDRangel::SWGChannel);
+            channels->back()->init();
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getMIMOChannelAPIAt(i);
+            channels->back()->setDeltaFrequency(channel->getCenterFrequency());
+            channels->back()->setDirection(2);
             channels->back()->setIndex(channel->getIndexInDeviceSet());
             channels->back()->setUid(channel->getUID());
             channel->getIdentifier(*channels->back()->getId());

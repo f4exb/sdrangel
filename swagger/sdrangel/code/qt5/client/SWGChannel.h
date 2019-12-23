@@ -43,6 +43,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGChannel* fromJson(QString &jsonString) override;
 
+    qint32 getDirection();
+    void setDirection(qint32 direction);
+
     qint32 getIndex();
     void setIndex(qint32 index);
 
@@ -65,6 +68,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    qint32 direction;
+    bool m_direction_isSet;
+
     qint32 index;
     bool m_index_isSet;
 
