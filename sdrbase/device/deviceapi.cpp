@@ -857,11 +857,27 @@ void DeviceAPI::renumerateChannels()
     }
     else if (m_streamType == StreamMIMO)
     {
-        for (int i = 0; i < m_mimoChannelAPIs.size(); ++i)
+        int index = 0;
+
+        for (; index < m_channelSinkAPIs.size(); ++index)
         {
-            m_mimoChannelAPIs.at(i)->setIndexInDeviceSet(i);
-            m_mimoChannelAPIs.at(i)->setDeviceSetIndex(m_deviceTabIndex);
-            m_mimoChannelAPIs.at(i)->setDeviceAPI(this);
+            m_channelSinkAPIs.at(index)->setIndexInDeviceSet(index);
+            m_channelSinkAPIs.at(index)->setDeviceSetIndex(m_deviceTabIndex);
+            m_channelSinkAPIs.at(index)->setDeviceAPI(this);
+        }
+
+        for (; index < m_channelSourceAPIs.size() + m_channelSinkAPIs.size(); ++index)
+        {
+            m_channelSourceAPIs.at(index)->setIndexInDeviceSet(index);
+            m_channelSourceAPIs.at(index)->setDeviceSetIndex(m_deviceTabIndex);
+            m_channelSourceAPIs.at(index)->setDeviceAPI(this);
+        }
+
+        for (; index < m_mimoChannelAPIs.size() + m_channelSourceAPIs.size() + m_channelSinkAPIs.size(); ++index)
+        {
+            m_mimoChannelAPIs.at(index)->setIndexInDeviceSet(index);
+            m_mimoChannelAPIs.at(index)->setDeviceSetIndex(m_deviceTabIndex);
+            m_mimoChannelAPIs.at(index)->setDeviceAPI(this);
         }
     }
 }

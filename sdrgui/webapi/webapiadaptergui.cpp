@@ -268,6 +268,11 @@ int WebAPIAdapterGUI::instanceChannels(
         channelRegistrations = m_mainWindow.m_pluginManager->getTxChannelRegistrations();
         nbChannelDevices = channelRegistrations->size();
     }
+    else if (direction == 2) // MIMO channel
+    {
+        channelRegistrations = m_mainWindow.m_pluginManager->getMIMOChannelRegistrations();
+        nbChannelDevices = channelRegistrations->size();
+    }
     else // not supported
     {
         channelRegistrations = nullptr;
@@ -1839,6 +1844,46 @@ int WebAPIAdapterGUI::devicesetChannelSettingsGet(
                 return channelAPI->webapiSettingsGet(response, *error.getMessage());
             }
         }
+        else if (deviceSet->m_deviceMIMOEngine) // MIMO
+        {
+            int nbSinkChannels = deviceSet->m_deviceAPI->getNbSinkChannels();
+            int nbSourceChannels = deviceSet->m_deviceAPI->getNbSourceChannels();
+            int nbMIMOChannels = deviceSet->m_deviceAPI->getNbMIMOChannels();
+            ChannelAPI *channelAPI = nullptr;
+
+            if (channelIndex < nbSinkChannels)
+            {
+                channelAPI = deviceSet->m_deviceAPI->getChanelSinkAPIAt(channelIndex);
+                response.setDirection(0);
+            }
+            else if (channelIndex < nbSinkChannels + nbSourceChannels)
+            {
+                channelAPI = deviceSet->m_deviceAPI->getChanelSourceAPIAt(channelIndex - nbSinkChannels);
+                response.setDirection(1);
+            }
+            else if (channelIndex < nbSinkChannels + nbSourceChannels + nbMIMOChannels)
+            {
+                channelAPI = deviceSet->m_deviceAPI->getMIMOChannelAPIAt(channelIndex - nbSinkChannels - nbSourceChannels);
+                response.setDirection(2);
+            }
+            else
+            {
+                *error.getMessage() = QString("Ther is no channel with index %1").arg(channelIndex);
+                return 404;
+            }
+
+            if (channelAPI)
+            {
+                response.setChannelType(new QString());
+                channelAPI->getIdentifier(*response.getChannelType());
+                return channelAPI->webapiSettingsGet(response, *error.getMessage());
+            }
+            else
+            {
+                *error.getMessage() = QString("Ther is no channel with index %1").arg(channelIndex);
+                return 404;
+            }
+        }
         else
         {
             *error.getMessage() = QString("DeviceSet error");
@@ -1897,6 +1942,46 @@ int WebAPIAdapterGUI::devicesetChannelReportGet(
                 channelAPI->getIdentifier(*response.getChannelType());
                 response.setDirection(1);
                 return channelAPI->webapiReportGet(response, *error.getMessage());
+            }
+        }
+        else if (deviceSet->m_deviceMIMOEngine) // MIMO
+        {
+            int nbSinkChannels = deviceSet->m_deviceAPI->getNbSinkChannels();
+            int nbSourceChannels = deviceSet->m_deviceAPI->getNbSourceChannels();
+            int nbMIMOChannels = deviceSet->m_deviceAPI->getNbMIMOChannels();
+            ChannelAPI *channelAPI = nullptr;
+
+            if (channelIndex < nbSinkChannels)
+            {
+                channelAPI = deviceSet->m_deviceAPI->getChanelSinkAPIAt(channelIndex);
+                response.setDirection(0);
+            }
+            else if (channelIndex < nbSinkChannels + nbSourceChannels)
+            {
+                channelAPI = deviceSet->m_deviceAPI->getChanelSourceAPIAt(channelIndex - nbSinkChannels);
+                response.setDirection(1);
+            }
+            else if (channelIndex < nbSinkChannels + nbSourceChannels + nbMIMOChannels)
+            {
+                channelAPI = deviceSet->m_deviceAPI->getMIMOChannelAPIAt(channelIndex - nbSinkChannels - nbSourceChannels);
+                response.setDirection(2);
+            }
+            else
+            {
+                *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
+                return 404;
+            }
+
+            if (channelAPI)
+            {
+                response.setChannelType(new QString());
+                channelAPI->getIdentifier(*response.getChannelType());
+                return channelAPI->webapiReportGet(response, *error.getMessage());
+            }
+            else
+            {
+                *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
+                return 404;
             }
         }
         else
@@ -1980,6 +2065,58 @@ int WebAPIAdapterGUI::devicesetChannelSettingsPutPatch(
                             .arg(channelType);
                     return 404;
                 }
+            }
+        }
+        else if (deviceSet->m_deviceMIMOEngine) // MIMO
+        {
+            int nbSinkChannels = deviceSet->m_deviceAPI->getNbSinkChannels();
+            int nbSourceChannels = deviceSet->m_deviceAPI->getNbSourceChannels();
+            int nbMIMOChannels = deviceSet->m_deviceAPI->getNbMIMOChannels();
+            ChannelAPI *channelAPI = nullptr;
+
+            if (channelIndex < nbSinkChannels)
+            {
+                channelAPI = deviceSet->m_deviceAPI->getChanelSinkAPIAt(channelIndex);
+                response.setDirection(0);
+            }
+            else if (channelIndex < nbSinkChannels + nbSourceChannels)
+            {
+                channelAPI = deviceSet->m_deviceAPI->getChanelSourceAPIAt(channelIndex - nbSinkChannels);
+                response.setDirection(1);
+            }
+            else if (channelIndex < nbSinkChannels + nbSourceChannels + nbMIMOChannels)
+            {
+                channelAPI = deviceSet->m_deviceAPI->getMIMOChannelAPIAt(channelIndex - nbSinkChannels - nbSourceChannels);
+                response.setDirection(2);
+            }
+            else
+            {
+                *error.getMessage() = QString("here is no channel with index %1").arg(channelIndex);
+                return 404;
+            }
+
+            if (channelAPI)
+            {
+                QString channelType;
+                channelAPI->getIdentifier(channelType);
+
+                if (channelType == *response.getChannelType())
+                {
+                    return channelAPI->webapiSettingsPutPatch(force, channelSettingsKeys, response, *error.getMessage());
+                }
+                else
+                {
+                    *error.getMessage() = QString("There is no channel type %1 at index %2. Found %3.")
+                            .arg(*response.getChannelType())
+                            .arg(channelIndex)
+                            .arg(channelType);
+                    return 404;
+                }
+            }
+            else
+            {
+                *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
+                return 404;
             }
         }
         else
