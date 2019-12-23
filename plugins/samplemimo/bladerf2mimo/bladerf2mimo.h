@@ -170,6 +170,7 @@ public:
     virtual void setSinkCenterFrequency(qint64 centerFrequency, int index);
 
     virtual quint64 getMIMOCenterFrequency() const { return getSourceCenterFrequency(0); }
+    virtual unsigned int getMIMOSampleRate() const { return getSourceSampleRate(0); }
 
 	virtual bool handleMessage(const Message& message);
 

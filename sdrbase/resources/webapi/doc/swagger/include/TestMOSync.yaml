@@ -1,0 +1,14 @@
+TestMOSyncSettings:
+  description: TestMOSync
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    sampleRate:
+      type: integer
+      format: int64
+    log2Interp:
+      type: integer
+    fcPosTx:
+      description: See BladeRF2MIMO::fcPos_t
+      type: integer
