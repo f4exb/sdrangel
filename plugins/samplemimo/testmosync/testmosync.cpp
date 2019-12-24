@@ -302,29 +302,49 @@ bool TestMOSync::applySettings(const TestMOSyncSettings& settings, bool force)
 }
 
 int TestMOSync::webapiRunGet(
+        int subsystemIndex,
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
 {
     (void) errorMessage;
-    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    if (subsystemIndex == 1)
+    {
+        m_deviceAPI->getDeviceEngineStateStr(*response.getState(), 1); // Tx only
+        return 200;
+    }
+    else
+    {
+        errorMessage = QString("Subsystem index invalid: expect 1 (Tx) only");
+        return 404;
+    }
+
+    response.setState(new QString("N/A"));
     return 200;
 }
 
 int TestMOSync::webapiRun(
         bool run,
+        int subsystemIndex,
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
 {
-    (void) errorMessage;
-    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
-    MsgStartStop *message = MsgStartStop::create(run, true); // TODO: Tx support
-    m_inputMessageQueue.push(message);
-
-    if (m_guiMessageQueue) // forward to GUI if any
+    if (subsystemIndex == 1)
     {
-        MsgStartStop *msgToGUI = MsgStartStop::create(run, true); // TODO: Tx support
-        m_guiMessageQueue->push(msgToGUI);
-    }
+        m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+        MsgStartStop *message = MsgStartStop::create(run, true); // Tx only
+        m_inputMessageQueue.push(message);
 
-    return 200;
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            MsgStartStop *msgToGUI = MsgStartStop::create(run, true); // Tx only
+            m_guiMessageQueue->push(msgToGUI);
+        }
+
+        return 200;
+    }
+    else
+    {
+        errorMessage = QString("Subsystem index invalid: expect 1 (Tx) only");
+        return 404;
+    }
 }

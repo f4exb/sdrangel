@@ -185,11 +185,13 @@ public:
                 QString& errorMessage);
 
     virtual int webapiRunGet(
+            int subsystemIndex,
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
     virtual int webapiRun(
             bool run,
+            int subsystemIndex,
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 

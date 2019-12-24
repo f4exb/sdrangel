@@ -1164,44 +1164,61 @@ void BladeRF2MIMO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
         response.getBladeRf2MimoSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
-    response.getBladeRf2OutputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getBladeRf2MimoSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getBladeRf2OutputSettings()->getReverseApiAddress()) {
-        *response.getBladeRf2OutputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getBladeRf2MimoSettings()->getReverseApiAddress()) {
+        *response.getBladeRf2MimoSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getBladeRf2OutputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getBladeRf2MimoSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getBladeRf2OutputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getBladeRf2OutputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getBladeRf2MimoSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getBladeRf2MimoSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 int BladeRF2MIMO::webapiRunGet(
+        int subsystemIndex,
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
 {
-    (void) errorMessage;
-    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
-    return 200;
+    if ((subsystemIndex == 0) || (subsystemIndex == 1))
+    {
+        m_deviceAPI->getDeviceEngineStateStr(*response.getState(), subsystemIndex);
+        return 200;
+    }
+    else
+    {
+        errorMessage = QString("Subsystem invalid: must be 0 (Rx) or 1 (Tx)");
+        return 404;
+    }
+
 }
 
 int BladeRF2MIMO::webapiRun(
         bool run,
+        int subsystemIndex,
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
 {
-    (void) errorMessage;
-    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
-    MsgStartStop *message = MsgStartStop::create(run, true); // TODO: Tx support
-    m_inputMessageQueue.push(message);
-
-    if (m_guiMessageQueue) // forward to GUI if any
+    if ((subsystemIndex == 0) || (subsystemIndex == 1))
     {
-        MsgStartStop *msgToGUI = MsgStartStop::create(run, true); // TODO: Tx support
-        m_guiMessageQueue->push(msgToGUI);
-    }
+        m_deviceAPI->getDeviceEngineStateStr(*response.getState(), subsystemIndex);
+        MsgStartStop *message = MsgStartStop::create(run, subsystemIndex == 0);
+        m_inputMessageQueue.push(message);
 
-    return 200;
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            MsgStartStop *msgToGUI = MsgStartStop::create(run, subsystemIndex == 0);
+            m_guiMessageQueue->push(msgToGUI);
+        }
+
+        return 200;
+    }
+    else
+    {
+        errorMessage = QString("Subsystem invalid: must be 0 (Rx) or 1 (Tx)");
+        return 404;
+    }
 }
 
 void BladeRF2MIMO::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const BladeRF2MIMOSettings& settings, bool force)
