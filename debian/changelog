@@ -1,3 +1,9 @@
+sdrangel (5.0.0-1) unstable; urgency=medium
+
+  * MIMO support first release
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 24 Dec 2019 19:14:22 +0100
+
 sdrangel (4.12.4-1) unstable; urgency=medium
 
   * Debian build: moved librtlsdr to external libraries
