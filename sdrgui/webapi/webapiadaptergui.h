@@ -219,6 +219,24 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetDeviceSubsystemRunGet(
+            int deviceSetIndex,
+            int subsystemIndex,
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetDeviceSubsystemRunPost(
+            int deviceSetIndex,
+            int subsystemIndex,
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetDeviceSubsystemRunDelete(
+            int deviceSetIndex,
+            int subsystemIndex,
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int devicesetDeviceReportGet(
             int deviceSetIndex,
             SWGSDRangel::SWGDeviceReport& response,

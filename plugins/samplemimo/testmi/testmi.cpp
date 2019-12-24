@@ -531,31 +531,48 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
 }
 
 int TestMI::webapiRunGet(
+        int subsystemIndex,
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
 {
-    (void) errorMessage;
-    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
-    return 200;
+    if (subsystemIndex == 0)
+    {
+        m_deviceAPI->getDeviceEngineStateStr(*response.getState()); // Rx only
+        return 200;
+    }
+    else
+    {
+        errorMessage = QString("Subsystem index invalid: expect 0 (Rx) only");
+        return 404;
+    }
 }
 
 int TestMI::webapiRun(
         bool run,
+        int subsystemIndex,
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
 {
-    (void) errorMessage;
-    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
-    MsgStartStop *message = MsgStartStop::create(run);
-    m_inputMessageQueue.push(message);
-
-    if (m_guiMessageQueue) // forward to GUI if any
+    if (subsystemIndex == 0)
     {
-        MsgStartStop *msgToGUI = MsgStartStop::create(run);
-        m_guiMessageQueue->push(msgToGUI);
+        m_deviceAPI->getDeviceEngineStateStr(*response.getState()); // Rx only
+        MsgStartStop *message = MsgStartStop::create(run);
+        m_inputMessageQueue.push(message);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            MsgStartStop *msgToGUI = MsgStartStop::create(run);
+            m_guiMessageQueue->push(msgToGUI);
+        }
+
+        return 200;
+    }
+    else
+    {
+        errorMessage = QString("Subsystem index invalid: expect 0 (Rx) only");
+        return 404;
     }
 
-    return 200;
 }
 
 int TestMI::webapiSettingsGet(

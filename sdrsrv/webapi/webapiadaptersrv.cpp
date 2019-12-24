@@ -212,6 +212,8 @@ int WebAPIAdapterSrv::instanceDevices(
         nbSamplingDevices = DeviceEnumerator::instance()->getNbRxSamplingDevices();
     } else if (direction == 1) { // Single Tx stream device
         nbSamplingDevices = DeviceEnumerator::instance()->getNbTxSamplingDevices();
+    } else if (direction == 2) { // MIMO device
+        nbSamplingDevices = DeviceEnumerator::instance()->getNbMIMOSamplingDevices();
     } else { // not supported
         nbSamplingDevices = 0;
     }
@@ -228,6 +230,8 @@ int WebAPIAdapterSrv::instanceDevices(
             samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(i);
         } else if (direction == 1) {
             samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(i);
+        } else if (direction == 2) {
+            samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(i);
         } else {
             continue;
         }
@@ -1545,11 +1549,36 @@ int WebAPIAdapterSrv::devicesetDeviceRunGet(
             response.init();
             return sink->webapiRunGet(response, *error.getMessage());
         }
-        else if (deviceSet->m_deviceMIMOEngine) // MIMO
+        else
+        {
+            *error.getMessage() = QString("DeviceSet error");
+            return 500;
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapterSrv::devicesetDeviceSubsystemRunGet(
+        int deviceSetIndex,
+        int subsystemIndex,
+        SWGSDRangel::SWGDeviceState& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore.m_deviceSets.size()))
+    {
+        DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
+
+        if (deviceSet->m_deviceMIMOEngine) // MIMO
         {
             DeviceSampleMIMO *mimo = deviceSet->m_deviceAPI->getSampleMIMO();
             response.init();
-            return mimo->webapiRunGet(response, *error.getMessage());
+            return mimo->webapiRunGet(subsystemIndex, response, *error.getMessage());
         }
         else
         {
@@ -1587,11 +1616,36 @@ int WebAPIAdapterSrv::devicesetDeviceRunPost(
             response.init();
             return sink->webapiRun(true, response, *error.getMessage());
         }
-        else if (deviceSet->m_deviceMIMOEngine) // MIMO
+        else
+        {
+            *error.getMessage() = QString("DeviceSet error");
+            return 500;
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapterSrv::devicesetDeviceSubsystemRunPost(
+        int deviceSetIndex,
+        int subsystemIndex,
+        SWGSDRangel::SWGDeviceState& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore.m_deviceSets.size()))
+    {
+        DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
+
+        if (deviceSet->m_deviceMIMOEngine) // MIMO
         {
             DeviceSampleMIMO *mimo = deviceSet->m_deviceAPI->getSampleMIMO();
             response.init();
-            return mimo->webapiRun(true, response, *error.getMessage());
+            return mimo->webapiRun(true, subsystemIndex, response, *error.getMessage());
         }
         else
         {
@@ -1629,11 +1683,36 @@ int WebAPIAdapterSrv::devicesetDeviceRunDelete(
             response.init();
             return sink->webapiRun(false, response, *error.getMessage());
         }
-        else if (deviceSet->m_deviceMIMOEngine) // MIMO
+        else
+        {
+            *error.getMessage() = QString("DeviceSet error");
+            return 500;
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapterSrv::devicesetDeviceSubsystemRunDelete(
+        int deviceSetIndex,
+        int subsystemIndex,
+        SWGSDRangel::SWGDeviceState& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore.m_deviceSets.size()))
+    {
+        DeviceSet *deviceSet = m_mainCore.m_deviceSets[deviceSetIndex];
+
+        if (deviceSet->m_deviceMIMOEngine) // MIMO
         {
             DeviceSampleMIMO *mimo = deviceSet->m_deviceAPI->getSampleMIMO();
             response.init();
-            return mimo->webapiRun(false, response, *error.getMessage());
+            return mimo->webapiRun(false, subsystemIndex, response, *error.getMessage());
         }
         else
         {

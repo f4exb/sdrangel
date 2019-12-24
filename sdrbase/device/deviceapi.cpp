@@ -170,6 +170,7 @@ void DeviceAPI::removeChannelSourceAPI(ChannelAPI* channelAPI)
 void DeviceAPI::addMIMOChannelAPI(ChannelAPI* channelAPI)
 {
     m_mimoChannelAPIs.append(channelAPI);
+    renumerateChannels();
 }
 
 void DeviceAPI::removeMIMOChannelAPI(ChannelAPI *channelAPI)
@@ -177,6 +178,8 @@ void DeviceAPI::removeMIMOChannelAPI(ChannelAPI *channelAPI)
     if (m_mimoChannelAPIs.removeOne(channelAPI)) {
         renumerateChannels();
     }
+
+    channelAPI->setIndexInDeviceSet(-1);
 }
 
 void DeviceAPI::setSampleSource(DeviceSampleSource* source)

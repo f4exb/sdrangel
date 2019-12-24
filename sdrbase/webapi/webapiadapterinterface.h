@@ -678,6 +678,24 @@ public:
     }
 
     /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/subdevice/{subsystemIndex}/run (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetDeviceSubsystemRunGet(
+            int deviceSetIndex,
+            int subsystemIndex,
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) subsystemIndex;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
      * Handler of /sdrangel/deviceset/{devicesetIndex}/device/run (POST) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
@@ -694,6 +712,24 @@ public:
     }
 
     /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/subdevice/{subsystemIndex}/run (POST) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetDeviceSubsystemRunPost(
+            int deviceSetIndex,
+            int subsystemIndex,
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) subsystemIndex;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
      * Handler of /sdrangel/deviceset/{devicesetIndex}/device/run (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
@@ -703,6 +739,24 @@ public:
             SWGSDRangel::SWGErrorResponse& error)
     {
         (void) deviceSetIndex;
+        (void) response;
+        error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/subdevice/{subsystemIndex}/run (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetDeviceSubsystemRunDelete(
+            int deviceSetIndex,
+            int subsystemIndex,
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) subsystemIndex;
         (void) response;
         error.init();
     	*error.getMessage() = QString("Function not implemented");
@@ -860,6 +914,7 @@ public:
     static std::regex devicesetDeviceURLRe;
     static std::regex devicesetDeviceSettingsURLRe;
     static std::regex devicesetDeviceRunURLRe;
+    static std::regex devicesetDeviceSubsystemRunURLRe;
     static std::regex devicesetDeviceReportURLRe;
     static std::regex devicesetChannelURLRe;
     static std::regex devicesetChannelIndexURLRe;

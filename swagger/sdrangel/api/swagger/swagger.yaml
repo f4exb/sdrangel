@@ -987,7 +987,7 @@ paths:
   /sdrangel/deviceset/{deviceSetIndex}/device/run:
     x-swagger-router-controller: deviceset
     get:
-      description: get device rune status
+      description: get device run status for a single subsystem device (Rx or Tx)
       operationId: devicesetDeviceRunGet
       tags:
         - DeviceSet
@@ -1015,7 +1015,7 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
     post:
-      description: start device
+      description: start device for a single subsystem device (Rx or Tx)
       operationId: devicesetDeviceRunPost
       tags:
         - DeviceSet
@@ -1049,7 +1049,7 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
     delete:
-      description: stop device
+      description: stop device for a single subsystem device (Rx or Tx)
       operationId: devicesetDeviceRunDelete
       tags:
         - DeviceSet
@@ -1076,6 +1076,120 @@ paths:
             $ref: "#/definitions/ErrorResponse"
         "404":
           description: Device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/deviceset/{deviceSetIndex}/subdevice/{subsystemIndex}/run:
+    x-swagger-router-controller: deviceset
+    get:
+      description: get device run status for a multi-subsystem device (Rx/Tx combination i.e. MIMO)
+      operationId: devicesetDeviceSubsystemRunGet
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - in: path
+          name: subsystemIndex
+          type: integer
+          required: true
+          description: Index of subsystem (0 for Rx, 1 for Tx)
+      responses:
+        "200":
+          description: On success return current state
+          schema:
+            $ref: "#/definitions/DeviceState"
+        "400":
+          description: Invalid device set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device or subsystem not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    post:
+      description: start device for a multi-subsystem device (Rx/Tx combination i.e. MIMO)
+      operationId: devicesetDeviceSubsystemRunPost
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - in: path
+          name: subsystemIndex
+          type: integer
+          required: true
+          description: Index of subsystem (0 for Rx, 1 for Tx)
+        - name: body
+          in: body
+          description: Originator information in the reverse API case
+          required: false
+          schema:
+            $ref: "http://localhost:8081/api/swagger/include/DeviceSettings.yaml#/DeviceSettings"
+      responses:
+        "200":
+          description: On success return state before change
+          schema:
+            $ref: "#/definitions/DeviceState"
+        "400":
+          description: Invalid device set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device or subsystem not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    delete:
+      description: stop device for a multi-subsystem device (Rx/Tx combination i.e. MIMO)
+      operationId: devicesetDeviceSubsystemRunDelete
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - in: path
+          name: subsystemIndex
+          type: integer
+          required: true
+          description: Index of subsystem (0 for Rx, 1 for Tx)
+        - name: body
+          in: body
+          description: Originator information in the reverse API case
+          required: false
+          schema:
+            $ref: "http://localhost:8081/api/swagger/include/DeviceSettings.yaml#/DeviceSettings"
+      responses:
+        "200":
+          description: On success return state before change
+          schema:
+            $ref: "#/definitions/DeviceState"
+        "400":
+          description: Invalid device set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device or subsystem not found
           schema:
             $ref: "#/definitions/ErrorResponse"
         "500":
@@ -1579,11 +1693,9 @@ definitions:
 
   DeviceState:
     description: "Device running state"
-    required:
-      - state
     properties:
       state:
-        description: "State: notStarted, idle, ready, running, error"
+        description: "Unique state: notStarted, idle, ready, running, error"
         type: string
 
   SamplingDevice:

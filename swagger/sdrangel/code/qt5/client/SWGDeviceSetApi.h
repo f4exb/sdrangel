@@ -57,6 +57,9 @@ public:
     void devicesetDeviceSettingsGet(qint32 device_set_index);
     void devicesetDeviceSettingsPatch(qint32 device_set_index, SWGDeviceSettings& body);
     void devicesetDeviceSettingsPut(qint32 device_set_index, SWGDeviceSettings& body);
+    void devicesetDeviceSubsystemRunDelete(qint32 device_set_index, qint32 subsystem_index, SWGDeviceSettings& body);
+    void devicesetDeviceSubsystemRunGet(qint32 device_set_index, qint32 subsystem_index);
+    void devicesetDeviceSubsystemRunPost(qint32 device_set_index, qint32 subsystem_index, SWGDeviceSettings& body);
     void devicesetFocusPatch(qint32 device_set_index);
     void devicesetGet(qint32 device_set_index);
     void instanceDeviceSetDelete();
@@ -78,6 +81,9 @@ private:
     void devicesetDeviceSettingsGetCallback (SWGHttpRequestWorker * worker);
     void devicesetDeviceSettingsPatchCallback (SWGHttpRequestWorker * worker);
     void devicesetDeviceSettingsPutCallback (SWGHttpRequestWorker * worker);
+    void devicesetDeviceSubsystemRunDeleteCallback (SWGHttpRequestWorker * worker);
+    void devicesetDeviceSubsystemRunGetCallback (SWGHttpRequestWorker * worker);
+    void devicesetDeviceSubsystemRunPostCallback (SWGHttpRequestWorker * worker);
     void devicesetFocusPatchCallback (SWGHttpRequestWorker * worker);
     void devicesetGetCallback (SWGHttpRequestWorker * worker);
     void instanceDeviceSetDeleteCallback (SWGHttpRequestWorker * worker);
@@ -99,6 +105,9 @@ signals:
     void devicesetDeviceSettingsGetSignal(SWGDeviceSettings* summary);
     void devicesetDeviceSettingsPatchSignal(SWGDeviceSettings* summary);
     void devicesetDeviceSettingsPutSignal(SWGDeviceSettings* summary);
+    void devicesetDeviceSubsystemRunDeleteSignal(SWGDeviceState* summary);
+    void devicesetDeviceSubsystemRunGetSignal(SWGDeviceState* summary);
+    void devicesetDeviceSubsystemRunPostSignal(SWGDeviceState* summary);
     void devicesetFocusPatchSignal(SWGSuccessResponse* summary);
     void devicesetGetSignal(SWGDeviceSet* summary);
     void instanceDeviceSetDeleteSignal(SWGSuccessResponse* summary);
@@ -119,6 +128,9 @@ signals:
     void devicesetDeviceSettingsGetSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceSettingsPatchSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceSettingsPutSignalE(SWGDeviceSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceSubsystemRunDeleteSignalE(SWGDeviceState* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceSubsystemRunGetSignalE(SWGDeviceState* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceSubsystemRunPostSignalE(SWGDeviceState* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetFocusPatchSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetGetSignalE(SWGDeviceSet* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetDeleteSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -139,6 +151,9 @@ signals:
     void devicesetDeviceSettingsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceSettingsPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceSettingsPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceSubsystemRunDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceSubsystemRunGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetDeviceSubsystemRunPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetFocusPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
