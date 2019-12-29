@@ -120,8 +120,8 @@ const QMap<QString, QString> WebAPIRequestMapper::m_deviceIdToSettingsKey = {
     {"sdrangel.samplesource.testsource", "testSourceSettings"},
     {"sdrangel.samplemimo.testmi", "testMISettings"},
     {"sdrangel.samplemimo.testmosync", "testMOSyncSettings"},
-    {"sdrangel.samplesource.xtrx", "XtrxInputSettings"},
-    {"sdrangel.samplesink.xtrx", "XtrxOutputSettings"}
+    {"sdrangel.samplesource.xtrx", "xtrxInputSettings"},
+    {"sdrangel.samplesink.xtrx", "xtrxOutputSettings"}
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
@@ -170,7 +170,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToSettingsKe
     {"SDRplay1", "sdrPlaySettings"},
     {"SoapySDR", "soapySDRInputSettings"},
     {"TestSource", "testSourceSettings"},
-    {"XTRX", "XtrxInputSettings"}
+    {"XTRX", "xtrxInputSettings"}
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_sinkDeviceHwIdToSettingsKey = {
@@ -182,13 +182,13 @@ const QMap<QString, QString> WebAPIRequestMapper::m_sinkDeviceHwIdToSettingsKey 
     {"PlutoSDR", "plutoSdrOutputSettings"},
     {"RemoteOutput", "remoteOutputSettings"},
     {"SoapySDR", "soapySDROutputSettings"},
-    {"XTRX", "XtrxOutputSettings"}
+    {"XTRX", "xtrxOutputSettings"}
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_mimoDeviceHwIdToSettingsKey= {
-    {"BladeRF2", "BladeRF2MIMOSettings"},
+    {"BladeRF2", "bladeRF2MIMOSettings"},
     {"TestMI", "testMISettings"},
-    {"TestMOSync", "TestMOSyncSettings"}
+    {"TestMOSync", "testMOSyncSettings"}
 };
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
@@ -2839,7 +2839,7 @@ bool WebAPIRequestMapper::getDevice(
             deviceSettings->setTestSourceSettings(new SWGSDRangel::SWGTestSourceSettings());
             deviceSettings->getTestSourceSettings()->fromJsonObject(settingsJsonObject);
         }
-        else if (deviceSettingsKey == "TestMISettings")
+        else if (deviceSettingsKey == "testMISettings")
         {
             if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
                 appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
@@ -2848,7 +2848,7 @@ bool WebAPIRequestMapper::getDevice(
             deviceSettings->setTestMiSettings(new SWGSDRangel::SWGTestMISettings());
             deviceSettings->getTestMiSettings()->fromJsonObject(settingsJsonObject);
         }
-        else if (deviceSettingsKey == "TestMOSyncSettings")
+        else if (deviceSettingsKey == "testMOSyncSettings")
         {
             if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
                 appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
@@ -2857,12 +2857,12 @@ bool WebAPIRequestMapper::getDevice(
             deviceSettings->setTestMoSyncSettings(new SWGSDRangel::SWGTestMOSyncSettings());
             deviceSettings->getTestMoSyncSettings()->fromJsonObject(settingsJsonObject);
         }
-        else if (deviceSettingsKey == "XtrxInputSettings")
+        else if (deviceSettingsKey == "xtrxInputSettings")
         {
             deviceSettings->setXtrxInputSettings(new SWGSDRangel::SWGXtrxInputSettings());
             deviceSettings->getXtrxInputSettings()->fromJsonObject(settingsJsonObject);
         }
-        else if (deviceSettingsKey == "XtrxOutputSettings")
+        else if (deviceSettingsKey == "xtrxOutputSettings")
         {
             deviceSettings->setXtrxOutputSettings(new SWGSDRangel::SWGXtrxOutputSettings());
             deviceSettings->getXtrxOutputSettings()->fromJsonObject(settingsJsonObject);

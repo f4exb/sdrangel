@@ -111,6 +111,16 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
     virtual int webapiRunGet(
             int subsystemIndex,
             SWGSDRangel::SWGDeviceState& response,
@@ -121,6 +131,15 @@ public:
             int subsystemIndex,
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
+
+    static void webapiFormatDeviceSettings(
+            SWGSDRangel::SWGDeviceSettings& response,
+            const TestMOSyncSettings& settings);
+
+    static void webapiUpdateDeviceSettings(
+            TestMOSyncSettings& settings,
+            const QStringList& deviceSettingsKeys,
+            SWGSDRangel::SWGDeviceSettings& response);
 
     bool getRxRunning() const { return false; }
     bool getTxRunning() const { return m_runningTx; }

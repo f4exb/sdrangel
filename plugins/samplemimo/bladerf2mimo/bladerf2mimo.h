@@ -115,34 +115,6 @@ public:
         int m_value;
     };
 
-    class MsgReportGainRange : public Message {
-    MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getMin() const { return m_min; }
-        int getMax() const { return m_max; }
-        int getStep() const { return m_step; }
-        bool getRxElseTx() const { return m_rxElseTx; }
-
-        static MsgReportGainRange* create(int min, int max, int step, bool rxElseTx) {
-            return new MsgReportGainRange(min, max, step, rxElseTx);
-        }
-
-    protected:
-        int m_min;
-        int m_max;
-        int m_step;
-        bool m_rxElseTx;
-
-        MsgReportGainRange(int min, int max, int step, bool rxElseTx) :
-            Message(),
-            m_min(min),
-            m_max(max),
-            m_step(step),
-            m_rxElseTx(rxElseTx)
-        {}
-    };
-
     BladeRF2MIMO(DeviceAPI *deviceAPI);
 	virtual ~BladeRF2MIMO();
 	virtual void destroy();

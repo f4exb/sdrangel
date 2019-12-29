@@ -344,6 +344,14 @@ bool BladeRF2MIMOGui::handleMessage(const Message& message)
 
         return true;
     }
+    else if (BladeRF2MIMO::MsgConfigureBladeRF2MIMO::match(message))
+    {
+        const BladeRF2MIMO::MsgConfigureBladeRF2MIMO& notif = (const BladeRF2MIMO::MsgConfigureBladeRF2MIMO&) message;
+        m_settings = notif.getSettings();
+        displaySettings();
+
+        return true;
+    }
 
     return false;
 }

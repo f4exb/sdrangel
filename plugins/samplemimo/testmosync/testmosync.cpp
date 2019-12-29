@@ -348,3 +348,66 @@ int TestMOSync::webapiRun(
         return 404;
     }
 }
+
+int TestMOSync::webapiSettingsGet(
+        SWGSDRangel::SWGDeviceSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setTestMoSyncSettings(new SWGSDRangel::SWGTestMOSyncSettings());
+    response.getTestMoSyncSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int TestMOSync::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response, // query + response
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    TestMOSyncSettings settings = m_settings;
+    webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
+
+    MsgConfigureTestMOSync *msg = MsgConfigureTestMOSync::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureTestMOSync *msgToGUI = MsgConfigureTestMOSync::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+void TestMOSync::webapiFormatDeviceSettings(
+        SWGSDRangel::SWGDeviceSettings& response,
+        const TestMOSyncSettings& settings)
+{
+    response.getTestMoSyncSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getTestMoSyncSettings()->setFcPosTx((int) settings.m_fcPosTx);
+    response.getTestMoSyncSettings()->setLog2Interp(settings.m_log2Interp);
+    response.getTestMoSyncSettings()->setSampleRate(settings.m_sampleRate);
+}
+
+void TestMOSync::webapiUpdateDeviceSettings(
+        TestMOSyncSettings& settings,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response)
+{
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getTestMoSyncSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("fcPosTx")) {
+        settings.m_fcPosTx = (TestMOSyncSettings::fcPos_t) response.getTestMoSyncSettings()->getFcPosTx();
+    }
+    if (deviceSettingsKeys.contains("log2Interp")) {
+        settings.m_log2Interp = response.getTestMoSyncSettings()->getLog2Interp();
+    }
+    if (deviceSettingsKeys.contains("sampleRate")) {
+        settings.m_sampleRate = response.getTestMoSyncSettings()->getSampleRate();
+    }
+}

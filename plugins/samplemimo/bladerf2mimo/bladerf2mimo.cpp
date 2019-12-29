@@ -43,7 +43,6 @@
 MESSAGE_CLASS_DEFINITION(BladeRF2MIMO::MsgConfigureBladeRF2MIMO, Message)
 MESSAGE_CLASS_DEFINITION(BladeRF2MIMO::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(BladeRF2MIMO::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(BladeRF2MIMO::MsgReportGainRange, Message)
 
 BladeRF2MIMO::BladeRF2MIMO(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -598,28 +597,17 @@ bool BladeRF2MIMO::applySettings(const BladeRF2MIMOSettings& settings, bool forc
         || (m_settings.m_fcPosRx != settings.m_fcPosRx)
         || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
-        qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
-                rxXlatedDeviceCenterFrequency,
-                0,
-                settings.m_log2Decim,
-                (DeviceSampleSource::fcPos_t) settings.m_fcPosRx,
-                settings.m_devSampleRate,
-                DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
-                false);
-
         if (dev)
         {
-            if (setRxDeviceCenterFrequency(dev, deviceCenterFrequency, settings.m_LOppmTenths))
-            {
-                if (getMessageQueueToGUI())
-                {
-                    int min, max, step;
-                    getRxGlobalGainRange(min, max, step);
-                    MsgReportGainRange *msg = MsgReportGainRange::create(min, max, step, true);
-                    getMessageQueueToGUI()->push(msg);
-                }
-
-            }
+            qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+                    rxXlatedDeviceCenterFrequency,
+                    0,
+                    settings.m_log2Decim,
+                    (DeviceSampleSource::fcPos_t) settings.m_fcPosRx,
+                    settings.m_devSampleRate,
+                    DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
+                    false);
+            setRxDeviceCenterFrequency(dev, deviceCenterFrequency, settings.m_LOppmTenths);
         }
 
         forwardChangeRxDSP = true;
@@ -736,17 +724,7 @@ bool BladeRF2MIMO::applySettings(const BladeRF2MIMOSettings& settings, bool forc
                 (DeviceSampleSink::fcPos_t) settings.m_fcPosTx,
                 settings.m_devSampleRate,
                 settings.m_txTransverterMode);
-
-            if (setTxDeviceCenterFrequency(dev, deviceCenterFrequency, settings.m_LOppmTenths))
-            {
-                if (getMessageQueueToGUI())
-                {
-                    int min, max, step;
-                    getTxGlobalGainRange(min, max, step);
-                    MsgReportGainRange *msg = MsgReportGainRange::create(min, max, step, false);
-                    getMessageQueueToGUI()->push(msg);
-                }
-            }
+            setTxDeviceCenterFrequency(dev, deviceCenterFrequency, settings.m_LOppmTenths);
         }
 
         forwardChangeTxDSP = true;
@@ -1116,16 +1094,16 @@ void BladeRF2MIMO::webapiUpdateDeviceSettings(
         settings.m_fileRecordName = *response.getBladeRf2MimoSettings()->getFileRecordName();
     }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getBladeRf2OutputSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getBladeRf2MimoSettings()->getUseReverseApi() != 0;
     }
     if (deviceSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getBladeRf2OutputSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getBladeRf2MimoSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getBladeRf2OutputSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getBladeRf2MimoSettings()->getReverseApiPort();
     }
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getBladeRf2OutputSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getBladeRf2MimoSettings()->getReverseApiDeviceIndex();
     }
 }
 
