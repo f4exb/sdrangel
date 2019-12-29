@@ -94,6 +94,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_deviceIdToSettingsKey = {
     {"sdrangel.samplesource.bladerf2input", "bladeRF2InputSettings"},
     {"sdrangel.samplesink.bladerf2output", "bladeRF2OutputSettings"},
     {"sdrangel.samplesource.bladerf2output", "bladeRF2OutputSettings"}, // remap
+    {"sdrangel.samplemimo.bladerf2mimo", "bladeRF2MIMOSettings"},
     {"sdrangel.samplesource.fcdpro", "fcdProSettings"},
     {"sdrangel.samplesource.fcdproplus", "fcdProPlusSettings"},
     {"sdrangel.samplesource.fileinput", "fileInputSettings"},
@@ -118,6 +119,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_deviceIdToSettingsKey = {
     {"sdrangel.samplesink.soapysdroutput", "soapySDROutputSettings"},
     {"sdrangel.samplesource.testsource", "testSourceSettings"},
     {"sdrangel.samplemimo.testmi", "testMISettings"},
+    {"sdrangel.samplemimo.testmosync", "testMOSyncSettings"},
     {"sdrangel.samplesource.xtrx", "XtrxInputSettings"},
     {"sdrangel.samplesink.xtrx", "XtrxOutputSettings"}
 };
@@ -184,7 +186,9 @@ const QMap<QString, QString> WebAPIRequestMapper::m_sinkDeviceHwIdToSettingsKey 
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_mimoDeviceHwIdToSettingsKey= {
-    {"TestMI", "testMISettings"}
+    {"BladeRF2", "BladeRF2MIMOSettings"},
+    {"TestMI", "testMISettings"},
+    {"TestMOSync", "TestMOSyncSettings"}
 };
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
@@ -2737,10 +2741,19 @@ bool WebAPIRequestMapper::getDevice(
             deviceSettings->setBladeRf2InputSettings(new SWGSDRangel::SWGBladeRF2InputSettings());
             deviceSettings->getBladeRf2InputSettings()->fromJsonObject(settingsJsonObject);
         }
-        else if (deviceSettingsKey == "bladeRF2InputSettings")
+        else if (deviceSettingsKey == "bladeRF2OutputSettings")
         {
             deviceSettings->setBladeRf2OutputSettings(new SWGSDRangel::SWGBladeRF2OutputSettings());
             deviceSettings->getBladeRf2OutputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "bladeRF2MIMOSettings")
+        {
+            if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
+                appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
+            }
+
+            deviceSettings->setBladeRf2MimoSettings(new SWGSDRangel::SWGBladeRF2MIMOSettings());
+            deviceSettings->getBladeRf2MimoSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (deviceSettingsKey == "fcdProSettings")
         {
@@ -2834,6 +2847,15 @@ bool WebAPIRequestMapper::getDevice(
 
             deviceSettings->setTestMiSettings(new SWGSDRangel::SWGTestMISettings());
             deviceSettings->getTestMiSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "TestMOSyncSettings")
+        {
+            if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
+                appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
+            }
+
+            deviceSettings->setTestMoSyncSettings(new SWGSDRangel::SWGTestMOSyncSettings());
+            deviceSettings->getTestMoSyncSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (deviceSettingsKey == "XtrxInputSettings")
         {

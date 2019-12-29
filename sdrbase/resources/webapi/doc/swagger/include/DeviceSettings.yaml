@@ -70,6 +70,8 @@ DeviceSettings:
       $ref: "/doc/swagger/include/TestSource.yaml#/TestSourceSettings"
     testMISettings:
       $ref: "/doc/swagger/include/TestMI.yaml#/TestMISettings"
+    testMOSyncSettings:
+      $ref: "/doc/swagger/include/TestMOSync.yaml#/TestMOSyncSettings"
     xtrxInputSettings:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxInputSettings"
     xtrxOutputSettings:
