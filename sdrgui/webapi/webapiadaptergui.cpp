@@ -1242,26 +1242,15 @@ int WebAPIAdapterGUI::devicesetDevicePut(
 
         for (int i = 0; i < nbSamplingDevices; i++)
         {
-            int direction;
             const PluginInterface::SamplingDevice *samplingDevice;
 
-            if (query.getDirection() == 0)
-            {
-                direction = 0;
+            if (query.getDirection() == 0) {
                 samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(i);
-            }
-            else if (query.getDirection() == 1)
-            {
-                direction = 1;
+            } else if (query.getDirection() == 1) {
                 samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(i);
-            }
-            else if (query.getDirection() == 2)
-            {
-                direction = 2;
+            } else if (query.getDirection() == 2) {
                 samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(i);
-            }
-            else
-            {
+            } else {
                 continue; // device not supported
             }
 
@@ -1293,7 +1282,7 @@ int WebAPIAdapterGUI::devicesetDevicePut(
             *response.getHwType() = samplingDevice->hardwareId;
             *response.getSerial() = samplingDevice->serial;
             response.setSequence(samplingDevice->sequence);
-            response.setDirection(direction);
+            response.setDirection(query.getDirection());
             response.setDeviceNbStreams(samplingDevice->deviceNbItems);
             response.setDeviceStreamIndex(samplingDevice->deviceItemIndex);
             response.setDeviceSetIndex(deviceSetIndex);

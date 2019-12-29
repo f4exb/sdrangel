@@ -65,6 +65,7 @@ public:
     void removeLastDevice();
     void changeSampleSource(int deviceSetIndex, int selectedDeviceIndex);
     void changeSampleSink(int deviceSetIndex, int selectedDeviceIndex);
+    void changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex);
     void addChannel(int deviceSetIndex, int selectedChannelIndex);
     void deleteChannel(int deviceSetIndex, int channelIndex);
 

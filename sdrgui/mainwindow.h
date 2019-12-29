@@ -200,9 +200,9 @@ private:
         int getDeviceIndex() const { return m_deviceIndex; }
         int getDeviceType() const { return m_deviceType; }
 
-        static MsgSetDevice* create(int deviceSetIndex, int deviceIndex, bool tx)
+        static MsgSetDevice* create(int deviceSetIndex, int deviceIndex, int deviceType)
         {
-            return new MsgSetDevice(deviceSetIndex, deviceIndex, tx);
+            return new MsgSetDevice(deviceSetIndex, deviceIndex, deviceType);
         }
 
     private:
